@@ -364,6 +364,25 @@ pub(crate) fn Sidebar(context: Context) -> Element {
                     }
                 }
             }
+            // The system's own names, hidden until the reader types. An index
+            // over pages alone answers "where is the colour page" and not "what
+            // is --noctua-space-gap", which is the question a developer with a
+            // half-remembered token name actually has.
+            //
+            // Built from the token crate and the theme model, so a token added
+            // to spec/ is searchable without this list being edited.
+            div { class: "nd-found", "data-nd-found": "", hidden: true,
+                p { class: "nd-found-label", "{context.t(Key::SearchLabel)}" }
+                for entry in crate::index::all() {
+                    a {
+                        class: "nd-found-entry",
+                        href: "{entry.page}",
+                        "data-nd-index": "{entry.name}",
+                        hidden: true,
+                        "{entry.name}"
+                    }
+                }
+            }
             p { class: "nd-search-empty", "data-nd-search-empty": "", hidden: true,
                 "{context.t(Key::SearchEmpty)}"
             }

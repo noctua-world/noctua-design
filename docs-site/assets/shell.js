@@ -248,16 +248,34 @@ document.querySelector("[data-nd-search]")?.closest(".nd-nav")
 // `data-nd-index`, computed at build time by the same function that sorted the
 // list, so the search matches what the reader sees rather than the slug.
 const search = document.querySelector("[data-nd-search]");
+const found = document.querySelector("[data-nd-found]");
+
 search?.addEventListener("input", () => {
   const needle = search.value.trim().toLowerCase();
-  let shown = 0;
+  let pages = 0;
+  let names = 0;
+
   for (const link of document.querySelectorAll("[data-nd-index]")) {
-    const hit = needle === "" || link.dataset.ndIndex.includes(needle);
-    link.parentElement.hidden = !hit;
-    if (hit) shown += 1;
+    const hit = link.dataset.ndIndex.toLowerCase().includes(needle);
+    const isPage = link.classList.contains("nd-nav-link");
+
+    if (isPage) {
+      // A page row hides its <li>; an empty query shows every page, because the
+      // sidebar with nothing typed in it is the navigation.
+      link.parentElement.hidden = !(needle === "" || hit);
+      if (needle === "" || hit) pages += 1;
+    } else {
+      // A name row is hidden until something is typed. Showing thirty-nine
+      // palettes and every token under an empty search box would bury the
+      // navigation the sidebar exists for.
+      link.hidden = needle === "" || !hit;
+      if (needle !== "" && hit) names += 1;
+    }
   }
+
+  if (found) found.hidden = names === 0;
   const empty = document.querySelector("[data-nd-search-empty]");
-  if (empty) empty.hidden = shown > 0;
+  if (empty) empty.hidden = pages + names > 0;
 });
 
 // --- Themed scopes ---------------------------------------------------------
@@ -352,6 +370,107 @@ document.addEventListener("click", (event) => {
   resolveScopes();
 });
 
+// --- The React path, fetched on demand -------------------------------------
+
+// The bundle is 190 KB. It is not requested on a page view, and it IS requested
+// the first time a reader switches an example to React — which is the whole
+// point of a lazy path: the cost lands on the person who asked for it.
+//
+// `import()` rather than a <script> tag, so the browser deduplicates the fetch,
+// the module gets its own scope, and a failure is a rejected promise this file
+// can report rather than a silent no-op.
+let reactModule = null;
+
+async function loadReact() {
+  if (reactModule === null) {
+    reactModule = import("./example-react.js");
+  }
+  return reactModule;
+}
+
+/** Reads a scope element's attributes back into the request that built it. */
+function requestFrom(element) {
+  const request = {};
+  for (const name of ["mode", "palette", "font", "glass", "radius"]) {
+    const value = element.getAttribute(model[name].attribute);
+    if (value != null) request[name] = value;
+  }
+  return request;
+}
+
+async function showReact(frame, button) {
+  const stage = frame.querySelector("[data-nd-frame-stage]");
+  const original = stage.querySelector(`[${scopeAttribute}]`);
+  if (!original) return;
+
+  const label = button.textContent;
+  button.textContent = button.dataset.ndLoading ?? label;
+  let module;
+  try {
+    module = await loadReact();
+  } catch (error) {
+    // A failed lazy import must not leave a dead button. Put the label back and
+    // let the reader stay on the implementation that is already working.
+    button.textContent = label;
+    console.error("[noctua] the React example failed to load", error);
+    return;
+  }
+  button.textContent = label;
+
+  const request = requestFrom(original);
+  const text = {
+    heading: original.querySelector(".nd-sample-heading")?.textContent ?? "",
+    body: original.querySelector(".nd-prose")?.firstChild?.textContent ?? "",
+    link: original.querySelector(".nd-link")?.textContent ?? "",
+    action: original.querySelector(".nd-button")?.textContent ?? "",
+    quiet: original.querySelector(".nd-button--quiet")?.textContent ?? "",
+  };
+
+  let slot = frame.querySelector("[data-nd-react-slot]");
+  if (!slot) {
+    slot = document.createElement("div");
+    slot.dataset.ndReactSlot = "";
+    stage.appendChild(slot);
+  }
+  original.hidden = true;
+  slot.hidden = false;
+  module.mount(slot, request, text);
+}
+
+function showDioxus(frame) {
+  const stage = frame.querySelector("[data-nd-frame-stage]");
+  const original = stage.querySelector(`[${scopeAttribute}]`);
+  const slot = frame.querySelector("[data-nd-react-slot]");
+  if (original) original.hidden = false;
+  if (slot) {
+    slot.hidden = true;
+    // Unmounted rather than merely hidden: a live React root behind a hidden
+    // div keeps its state and its effects, and the next switch would show a
+    // component that had been running the whole time.
+    reactModule?.then((module) => module.unmount(slot)).catch(() => {});
+  }
+}
+
+document.addEventListener("click", (event) => {
+  const button = event.target.closest?.("[data-nd-impl]");
+  if (!button) return;
+  const frame = button.closest("[data-nd-frame]");
+  const language = button.dataset.ndImpl;
+
+  for (const other of frame.querySelectorAll("[data-nd-impl]")) {
+    other.setAttribute("aria-checked", String(other === button));
+  }
+  for (const source of frame.querySelectorAll("[data-nd-impl-source]")) {
+    source.hidden = source.dataset.ndImplSource !== language;
+  }
+
+  if (language === "React") {
+    void showReact(frame, button);
+  } else {
+    showDioxus(frame);
+  }
+});
+
 // --- The example frame -----------------------------------------------------
 
 document.addEventListener("click", (event) => {
@@ -376,9 +495,14 @@ document.addEventListener("click", (event) => {
         String(button.dataset.ndFrameWidth === "full"),
       );
     }
-    // A scope inside the frame goes back to the theme it was built with.
+    // A scope inside the frame goes back to the theme it was built with, and
+    // the React example goes away with it.
     for (const element of frame.querySelectorAll(`[${scopeAttribute}]`)) {
       requests.set(element, {});
+    }
+    showDioxus(frame);
+    for (const impl of frame.querySelectorAll("[data-nd-impl]")) {
+      impl.setAttribute("aria-checked", String(impl.dataset.ndImpl === "Dioxus"));
     }
     resolveScopes();
   }

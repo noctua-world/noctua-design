@@ -160,7 +160,10 @@ fn Overview(context: Context) -> Element {
                 }
             }
         }
-        Frame { context, caption: Key::PageScopedThemesTitle,
+        Frame {
+            context,
+            caption: Key::PageScopedThemesTitle,
+            code: snippet(&[("palette", "jade-balanced")]),
             ThemeScope { class: "nd-scope nd-glass", palette: Palette::JadeBalanced,
                 Sample { context }
             }
@@ -258,13 +261,53 @@ fn Effects(context: Context) -> Element {
     }
 }
 
+/// The component page template.
+///
+/// Every row in the table below is read from the generated theme model, never
+/// typed here: the props of `ThemeScope` **are** the scopable settings, so the
+/// documented surface and the implemented surface are the same list. Add a
+/// setting to `spec/theme.toml` and it appears here, with its type, its values
+/// and its default, without this file changing.
+///
+/// That is the shape every component page will take once `spec/components/*.toml`
+/// exists — generated wherever the spec knows the answer, so a documented prop
+/// cannot disagree with the implemented one.
 #[component]
 fn Components(context: Context) -> Element {
+    let request = [("palette", "violet-vivid"), ("mode", "dark")];
     rsx! {
         p { class: "nd-prose", "{context.t(Key::ProvisionalBody)}" }
-        Frame { context, caption: Key::PageComponentsTitle,
-            ThemeScope { class: "nd-scope nd-glass", palette: Palette::VioletVivid, mode: Mode::Dark,
+
+        h2 { class: "nd-scope-title", "ThemeScope" }
+        PropTable { context }
+
+        Frame {
+            context,
+            caption: Key::PageComponentsTitle,
+            code: snippet(&request),
+            ThemeScope {
+                class: "nd-scope nd-glass",
+                palette: Palette::VioletVivid,
+                mode: Mode::Dark,
                 Sample { context }
+            }
+        }
+    }
+}
+
+/// The prop surface, straight out of the model.
+#[component]
+fn PropTable(context: Context) -> Element {
+    let _ = context;
+    rsx! {
+        div { class: "nd-props",
+            for prop in crate::props::SCOPABLE {
+                div { class: "nd-prop",
+                    code { class: "nd-prop-name", "{prop.name}" }
+                    code { class: "nd-prop-type", "Option<" "{prop.type_name}" ">" }
+                    p { class: "nd-prop-values", "{prop.values}" }
+                    p { class: "nd-prop-default", "default " code { "{prop.default}" } }
+                }
             }
         }
     }
@@ -279,8 +322,21 @@ fn Components(context: Context) -> Element {
 ///
 /// The width control resizes the mount point and nothing else, so an example can
 /// be judged at 320 px without the reader resizing the browser.
+///
+/// # The code shown is derived from the example shown
+///
+/// `code` is not a string somebody typed next to the example. It is produced by
+/// [`snippet`] from the very `ScopeRequest` that built the component above it,
+/// in both languages. A hand-written snippet drifts from the component it
+/// documents on the first edit, and the reader has no way to tell which one
+/// lied.
 #[component]
-fn Frame(context: Context, caption: Key, children: Element) -> Element {
+fn Frame(
+    context: Context,
+    caption: Key,
+    #[props(default)] code: Vec<(&'static str, String)>,
+    children: Element,
+) -> Element {
     rsx! {
         figure { class: "nd-frame", "data-nd-frame": "",
             div { class: "nd-frame-bar",
@@ -306,7 +362,95 @@ fn Frame(context: Context, caption: Key, children: Element) -> Element {
                 }
             }
             div { class: "nd-frame-stage", "data-nd-frame-stage": "", {children} }
+            if !code.is_empty() {
+                details { class: "nd-code",
+                    summary { class: "nd-code-summary",
+                        span { class: "nd-code-show", "{context.t(Key::ExampleCodeShow)}" }
+                        span { class: "nd-code-hide", "{context.t(Key::ExampleCodeHide)}" }
+                    }
+                    div { class: "nd-code-body",
+                        div { class: "nd-options", role: "radiogroup",
+                            "aria-label": context.t(Key::ExampleImplLabel),
+                            for (index, (language, _)) in code.iter().enumerate() {
+                                button {
+                                    class: "nd-option",
+                                    r#type: "button",
+                                    role: "radio",
+                                    "aria-checked": if index == 0 { "true" } else { "false" },
+                                    "data-nd-impl": "{language}",
+                                    "data-nd-loading": context.t(Key::ExampleImplLoading),
+                                    "{language}"
+                                }
+                            }
+                        }
+                        for (index, (language, source)) in code.iter().enumerate() {
+                            pre {
+                                class: "nd-code-source",
+                                "data-nd-impl-source": "{language}",
+                                hidden: index != 0,
+                                code { "{source}" }
+                            }
+                        }
+                    }
+                }
+            }
             figcaption { class: "nd-frame-caption", "{context.t(caption)}" }
         }
     }
+}
+
+/// The same scope, written in both languages.
+///
+/// Generated from the request rather than transcribed, so the two snippets agree
+/// with each other and with the component the reader is looking at. Prop names
+/// are the ones the generated components declare — `identifier` in Rust,
+/// `camelCase` in JavaScript — which is why adding a scopable setting to
+/// `spec/theme.toml` reaches this without anyone editing it.
+fn snippet(request: &[(&str, &str)]) -> Vec<(&'static str, String)> {
+    use std::fmt::Write as _;
+
+    let mut rust = String::new();
+    let mut react = String::new();
+    for (name, value) in request {
+        let _ = writeln!(rust, "    {name}: {},", rust_variant(name, value));
+        let _ = writeln!(react, "  {}={{\"{value}\"}}", camel(name));
+    }
+
+    vec![
+        (
+            "Dioxus",
+            format!("rsx! {{\n  ThemeScope {{\n{rust}    // …\n  }}\n}}"),
+        ),
+        (
+            "React",
+            format!("<ThemeScope\n{react}>\n  {{/* … */}}\n</ThemeScope>"),
+        ),
+    ]
+}
+
+/// `palette`, `azure-vivid` → `Palette::AzureVivid`.
+fn rust_variant(setting: &str, value: &str) -> String {
+    let type_name = pascal(setting);
+    let variant = pascal(value);
+    format!("{type_name}::{variant}")
+}
+
+fn pascal(name: &str) -> String {
+    name.split(['-', '_'])
+        .filter(|word| !word.is_empty())
+        .map(|word| {
+            let mut chars = word.chars();
+            chars.next().map_or_else(String::new, |first| {
+                first.to_uppercase().chain(chars).collect()
+            })
+        })
+        .collect()
+}
+
+fn camel(name: &str) -> String {
+    let pascal = pascal(name);
+    let mut chars = pascal.chars();
+    chars.next().map_or_else(String::new, |first| {
+        first.to_lowercase().chain(chars).collect()
+    })
 }

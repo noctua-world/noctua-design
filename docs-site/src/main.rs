@@ -10,7 +10,9 @@
 //! What ships is HTML that is correct before any script runs. The script adds
 //! the settings; it does not construct the page.
 
+mod index;
 mod pages;
+mod props;
 mod shell;
 mod site;
 
@@ -231,6 +233,19 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
         &root.join("packages/tokens/theme.js"),
         &out.join("assets/theme.js"),
     )?;
+    // The React example, bundled by esbuild. Optional on purpose: the site must
+    // build on a machine that has never run `pnpm install`, because the Rust
+    // half of this repository owes nothing to Node (`NOCTUA.md §9.11`). Without
+    // it the implementation switch reports a failed load and the Dioxus example
+    // — which is server-rendered and already on the page — keeps working.
+    let react = root.join("docs-site/assets/example-react.js");
+    if react.exists() {
+        count += copy(&react, &out.join("assets/example-react.js"))?;
+    } else {
+        println!(
+            "  note: docs-site/assets/example-react.js is absent — run `pnpm run build:example`"
+        );
+    }
 
     Ok(count)
 }
@@ -341,9 +356,13 @@ mod tests {
             .find(|p| p.slug == "scoped-themes")
             .expect("the page");
         let html = document(Locale::En, page);
-        // Two scope elements, each with its palette and its mode on the same
+        // Two scope ELEMENTS, each with its palette and its mode on the same
         // element — which is the whole contract in one assertion.
-        assert_eq!(html.matches("data-noctua-scope").count(), 2, "{html}");
+        //
+        // Matched with the `=""` rather than on the bare name: the attribute is
+        // also one of the searchable names in the sidebar, and counting the
+        // string alone made this test fail the moment search learned about it.
+        assert_eq!(html.matches("data-noctua-scope=\"\"").count(), 2, "{html}");
         assert!(html.contains("data-palette=\"azure-vivid\""));
         assert!(html.contains("data-palette=\"rose-sober\""));
     }

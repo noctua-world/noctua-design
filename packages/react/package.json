@@ -3,12 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "The Noctua design system, as React components. No component exists yet — see AGENTS.md.",
+  "description": "The Noctua design system, as React components. ThemeScope is generated from spec/theme.toml.",
   "license": "MIT OR Apache-2.0",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "sideEffects": false,
   "engines": {
     "node": ">=20"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "dependencies": {
+    "@noctua-world/design-tokens": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./theme.js": "./src/theme.js"
   }
 }

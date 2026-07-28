@@ -1,0 +1,18 @@
+{
+  "name": "@noctua-world/design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The Noctua design tokens, generated from spec/. Not published from this repository yet.",
+  "license": "MIT OR Apache-2.0",
+  "sideEffects": false,
+  "exports": {
+    ".": "./index.js",
+    "./theme.js": "./theme.js",
+    "./i18n.js": "./i18n.js",
+    "./vendor/*": "./vendor/*"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

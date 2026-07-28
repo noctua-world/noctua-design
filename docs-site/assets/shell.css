@@ -33,8 +33,23 @@
      block and the two edges meet by construction. */
   --nd-drawer-w: min(var(--noctua-space-64), 78%);
   --nd-header-h: var(--noctua-space-16);
-  --nd-edge: var(--noctua-border-hairline) solid var(--nc-color-border);
 }
+
+/* THERE IS NO EDGE SHORTHAND, and there cannot be one.
+ *
+ * The obvious convenience is to name the whole border once at the root:
+ *
+ *     :root { --nd-edge: <hairline> solid var(--nc-color-border); }
+ *
+ * That is a bug, and it was in this file until a gate caught it. A var()
+ * resolves where it is DECLARED, so the colour freezes to the ROOT's palette:
+ * every border inside a ThemeScope would then be drawn in the page's colour
+ * rather than its own. Nothing errors, every token still resolves to something,
+ * and the result merely looks slightly off in a way nobody can name.
+ *
+ * So every border names its colour where it is used, where the palette is
+ * already correct. The repetition is the point, and `frozen_colour_indirection`
+ * in xtask/src/gates.rs keeps it that way. */
 
 /* --- Reset, and the page's own typography -------------------------------- */
 
@@ -132,7 +147,7 @@ a {
   z-index: var(--noctua-layer-toast);
   padding: var(--noctua-space-inset);
   background: var(--nc-color-surface);
-  border: var(--nd-edge);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
   border-radius: var(--noctua-radius-control);
   transform: translateY(-200%);
 }
@@ -152,7 +167,7 @@ a {
   gap: var(--noctua-space-2);
   block-size: var(--nd-header-h);
   padding-inline: var(--noctua-space-4);
-  border-block-end: var(--nd-edge);
+  border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
   background: color-mix(
     in oklab,
     var(--nc-color-surface) var(--noctua-glass-opacity),
@@ -294,7 +309,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: var(--noctua-space-4);
-  border-block: var(--nd-edge);
+  border-block: var(--noctua-border-hairline) solid var(--nc-color-border);
   background: color-mix(
     in oklab,
     var(--nc-color-surface) var(--noctua-glass-opacity),
@@ -316,7 +331,7 @@ a {
       calc(var(--noctua-space-64) + var(--noctua-space-16)),
       calc(100vw - var(--noctua-space-4))
     );
-    border: var(--nd-edge);
+    border: var(--noctua-border-hairline) solid var(--nc-color-border);
     border-radius: var(--noctua-radius-surface);
   }
 }
@@ -358,7 +373,7 @@ a {
   font-size: var(--noctua-size-caption);
   color: var(--nc-color-fg-muted);
   background: none;
-  border: var(--nd-edge);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
   border-radius: var(--noctua-radius-control);
   cursor: pointer;
 }
@@ -422,7 +437,7 @@ a {
   block-size: 0;
   margin: 0;
   border: 0;
-  border-block-start: var(--nd-edge);
+  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
 }
 
 .nd-reset {
@@ -431,7 +446,7 @@ a {
   font-size: var(--noctua-size-caption);
   color: var(--nc-color-fg-muted);
   background: none;
-  border: var(--nd-edge);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
   border-radius: var(--noctua-radius-control);
   cursor: pointer;
 }
@@ -459,7 +474,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: var(--noctua-space-4);
-  border-inline-end: var(--nd-edge);
+  border-inline-end: var(--noctua-border-hairline) solid var(--nc-color-border);
   background: color-mix(
     in oklab,
     var(--nc-color-surface) var(--noctua-glass-opacity),
@@ -554,7 +569,7 @@ a {
   font-size: var(--noctua-size-small);
   color: var(--nc-color-fg);
   background: var(--nc-color-surface-subtle);
-  border: var(--nd-edge);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
   border-radius: var(--noctua-radius-control);
 }
 
@@ -604,7 +619,7 @@ a {
 .nd-nav-foot {
   margin-block-start: auto;
   padding-block-start: var(--noctua-space-4);
-  border-block-start: var(--nd-edge);
+  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
 }
 
 .nd-visually-hidden {
@@ -675,7 +690,7 @@ a {
 .nd-foot {
   margin-block-start: var(--noctua-space-16);
   padding-block-start: var(--noctua-space-4);
-  border-block-start: var(--nd-edge);
+  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
   font-size: var(--noctua-size-caption);
   color: var(--nc-color-fg-muted);
 }
@@ -690,7 +705,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: var(--noctua-space-paragraph);
-  border: var(--nd-edge);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
   border-radius: var(--noctua-radius-surface);
   color: var(--nc-color-fg);
 }
@@ -751,7 +766,7 @@ a {
   flex-direction: column;
   gap: var(--noctua-space-3);
   padding-block-start: var(--noctua-space-3);
-  border-block-start: var(--nd-edge);
+  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
 }
 
 .nd-sample-heading {
@@ -796,7 +811,7 @@ a {
 
 .nd-frame {
   margin: 0;
-  border: var(--nd-edge);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
   border-radius: var(--noctua-radius-surface);
   overflow: hidden;
 }
@@ -807,7 +822,7 @@ a {
   gap: var(--noctua-space-3);
   flex-wrap: wrap;
   padding: var(--noctua-space-2) var(--noctua-space-3);
-  border-block-end: var(--nd-edge);
+  border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
   background: var(--nc-color-surface-subtle);
 }
 
@@ -844,7 +859,7 @@ a {
 
 .nd-frame-caption {
   padding: var(--noctua-space-2) var(--noctua-space-3);
-  border-block-start: var(--nd-edge);
+  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
   font-size: var(--noctua-size-caption);
   color: var(--nc-color-fg-muted);
 }
@@ -863,7 +878,7 @@ a {
   gap: var(--noctua-space-4);
   flex-wrap: wrap;
   padding-block-end: var(--noctua-space-2);
-  border-block-end: var(--nd-edge);
+  border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
 }
 
 .nd-scale-name,
@@ -942,3 +957,132 @@ a {
  * dist/tokens.css, so every transition above honours the preference by reading
  * the token. Repeating the media query here would be a second place for the
  * rule to live and a second place for it to be forgotten. */
+
+/* --- The code panel ------------------------------------------------------ */
+
+.nd-code {
+  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+.nd-code-summary {
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+  cursor: pointer;
+  list-style: none;
+}
+
+.nd-code-summary::-webkit-details-marker {
+  display: none;
+}
+
+.nd-code-summary:hover {
+  color: var(--nc-color-fg);
+}
+
+/* One label, two states, and neither is built by a script: `<details>` already
+   knows whether it is open, so the correct word is a CSS question rather than a
+   listener that has to be kept in sync with the element's own state. */
+.nd-code-hide,
+.nd-code[open] .nd-code-show {
+  display: none;
+}
+
+.nd-code[open] .nd-code-hide {
+  display: inline;
+}
+
+.nd-code-body {
+  padding: var(--noctua-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-3);
+  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
+  background: var(--nc-color-surface-subtle);
+}
+
+.nd-code-source {
+  margin: 0;
+  overflow-x: auto;
+  font-family: var(--noctua-font-mono);
+  font-size: var(--noctua-size-caption);
+  line-height: var(--noctua-leading-body);
+  color: var(--nc-color-fg);
+}
+
+/* --- The prop table ------------------------------------------------------ */
+
+.nd-props {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-3);
+}
+
+.nd-prop {
+  display: grid;
+  gap: var(--noctua-space-1);
+  padding-block-end: var(--noctua-space-3);
+  border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+@media (min-width: 48rem) {
+  .nd-prop {
+    grid-template-columns: var(--noctua-space-32) var(--noctua-space-32) 1fr;
+    align-items: baseline;
+    column-gap: var(--noctua-space-4);
+  }
+}
+
+.nd-prop-name {
+  font-family: var(--noctua-font-mono);
+  font-weight: var(--noctua-weight-semibold);
+  color: var(--nc-color-accent);
+}
+
+.nd-prop-type {
+  font-family: var(--noctua-font-mono);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-prop-values,
+.nd-prop-default {
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-prop-default code {
+  font-family: var(--noctua-font-mono);
+  color: var(--nc-color-fg);
+}
+
+/* --- Search over the system's own names ---------------------------------- */
+
+.nd-found {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+  padding-block-start: var(--noctua-space-3);
+  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+.nd-found-label {
+  font-size: var(--noctua-size-caption);
+  letter-spacing: var(--noctua-tracking-caps);
+  text-transform: uppercase;
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-found a {
+  font-family: var(--noctua-font-mono);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+  text-decoration: none;
+  padding-block: var(--noctua-space-1);
+  display: block;
+}
+
+.nd-found a:hover {
+  color: var(--nc-color-fg);
+  text-decoration: underline;
+}

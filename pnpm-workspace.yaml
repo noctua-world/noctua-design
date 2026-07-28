@@ -6,3 +6,10 @@
 # `cargo xtask check` proves rather than assumes.
 packages:
   - "packages/*"
+  # The documentation site's one JavaScript module. It is here so the React
+  # example imports `@noctua-world/design-react` by its published name, exactly
+  # as a consumer would — an example that reached into the source tree with
+  # `../../packages/react/src` would be demonstrating something no user can do.
+  - "docs-site"
+allowBuilds:
+  esbuild: set this to true or false

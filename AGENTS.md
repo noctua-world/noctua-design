@@ -196,11 +196,22 @@ because a convention nothing enforces is a convention that decays.
    not fall back correctly. `NOCTUA.md §7.4`.
 4. **No Tailwind arbitrary value.** `p-[13px]` is a token literal wearing a
    different hat.
-5. **Generated files are never hand-edited.** Change `spec/` and rebuild.
-6. **The Rust side builds and tests with no Node installed.** `check` proves it
+5. **No colour token inside a custom property.** `--x: … var(--nc-…)` freezes to
+   the palette of the element it is declared on, so anything reading it inside a
+   `ThemeScope` paints the page's colours. Write the colour at the point of use.
+   See Trap 0.2 — this one was live in this repository.
+6. **No colour read back out of the DOM.** `getComputedStyle(…).color` returns
+   whatever the engine chose to serialise; comparing two of those strings proves
+   nothing about the pixels. Paint into a 1×1 canvas and read `getImageData`.
+   Reading a *length* that way is fine.
+7. **No translated sentence built from fragments.** Word order, gender and
+   agreement differ between languages. One sentence is one key, with a
+   `{placeholder}` where a value goes. `NOCTUA.md §9.9` rule 1.
+8. **Generated files are never hand-edited.** Change `spec/` and rebuild.
+9. **The Rust side builds and tests with no Node installed.** `check` proves it
    rather than assuming it. Tailwind runs from its standalone binary so a
    Rust-only contributor never installs a JavaScript toolchain.
-7. **Both implementations change together.** A component is four things — the
+10. **Both implementations change together.** A component is four things — the
    spec, the Dioxus implementation, the React implementation, and the shared
    cases — and editing one implementation only is a compile error or a failing
    conformance test, by design. `NOCTUA.md §9.3`.
@@ -282,6 +293,21 @@ The default level is therefore also declared at `:where(:root)`, at zero
 specificity so an explicit `off` still wins. A test asserts it. **Any scopable
 setting whose tokens are read by a property that can be invalid needs the same
 thing.**
+
+### Trap 0.2 — never name a border once at the root
+
+This is the same `var()` rule as above, and it is worth its own heading because
+it is the shape the mistake actually takes:
+
+```css
+:root { --nd-edge: 1px solid var(--nc-color-border); }   /* WRONG */
+```
+
+Convenient, readable, and it paints every border inside every `ThemeScope` in the
+**page's** colour. It was in this repository's own shell stylesheet, below a
+comment explaining the rule it broke. `frozen_colour_indirection` now fails the
+build on any custom property whose value contains `var(--nc-…)`. Name the colour
+where you use it; the repetition is the point.
 
 ### Trap 0.5 — media queries are minimum-width, and the gate now says so
 

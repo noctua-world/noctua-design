@@ -147,6 +147,20 @@ fn walk(
             .unwrap_or(&path)
             .to_string_lossy()
             .replace('\\', "/");
+        // Anchored entries are matched from the repository root; the three
+        // bare directory names are matched at ANY depth.
+        //
+        // The depth part is not defensive tidiness: the moment a second package
+        // joined the pnpm workspace, `docs-site/node_modules` appeared, did not
+        // match the root-anchored `node_modules`, and the gates began walking
+        // the vendored colour output through a symlink — reporting hundreds of
+        // findings in a file this repository is forbidden to edit.
+        if relative
+            .split('/')
+            .any(|part| matches!(part, ".git" | "target" | "node_modules"))
+        {
+            continue;
+        }
         if SKIP
             .iter()
             .any(|skip| relative == *skip || relative.starts_with(&format!("{skip}/")))
@@ -238,7 +252,158 @@ fn inspect(file: &str, text: &str, breakpoints: &[String], findings: &mut Vec<Fi
                 message,
             });
         }
+        if let Some(message) = frozen_colour_indirection(&code) {
+            findings.push(Finding {
+                file: file.to_owned(),
+                line: number,
+                message,
+            });
+        }
+        if let Some(message) = colour_read_from_dom(&code) {
+            findings.push(Finding {
+                file: file.to_owned(),
+                line: number,
+                message,
+            });
+        }
+        if let Some(message) = translated_fragment(&code) {
+            findings.push(Finding {
+                file: file.to_owned(),
+                line: number,
+                message,
+            });
+        }
     }
+}
+
+/// A custom property must not bake a colour token into its value.
+///
+/// # The single most expensive mistake this system can make
+///
+/// A `var()` resolves **where it is declared**, not where it is read. So
+///
+/// ```css
+/// :root { --nd-edge: 1px solid var(--nc-color-border); }
+/// ```
+///
+/// freezes to the *root's* palette. Every element that later reads `--nd-edge`
+/// — including one inside a `ThemeScope` on a different palette in a different
+/// mode — draws the page's border colour. Nothing errors. Every token still
+/// resolves to something. It simply looks slightly wrong in a way nobody can
+/// name, and it survives review because the declaration reads perfectly.
+///
+/// This gate found exactly that bug in this repository's own shell stylesheet,
+/// which had been reviewed twice by the person who wrote the rule.
+///
+/// **The fix is always the same**: move the `var(--nc-…)` to the point of use,
+/// where the palette is already correct. Keep the dimensionless part in the
+/// custom property if it is worth naming.
+///
+/// `dist/scope.css` is the one legitimate exception, and it is generated — so it
+/// never reaches this gate.
+fn frozen_colour_indirection(code: &str) -> Option<String> {
+    let trimmed = code.trim_start();
+    if !trimmed.starts_with("--") {
+        return None;
+    }
+    let (name, value) = trimmed.split_once(':')?;
+    if !value.contains("var(--nc-") {
+        return None;
+    }
+    Some(format!(
+        "`{}` bakes a colour token into a custom property. A var() resolves where it \
+         is DECLARED, so this freezes to the palette of whatever element carries it — \
+         a themed component reading it would paint the page's colours. Move the \
+         var(--nc-…) to the point of use",
+        name.trim()
+    ))
+}
+
+/// Never read a colour back out of the DOM.
+///
+/// `getComputedStyle(el).color` returns whatever the engine felt like
+/// serialising, in whatever colour space it chose, with whatever precision. Two
+/// of those strings comparing equal proves nothing about the pixels, and two
+/// comparing unequal proves nothing either — which makes a test written this way
+/// pass on a colour it never actually checked.
+///
+/// Paint into a 1×1 canvas and read the pixel:
+///
+/// ```js
+/// const c = document.createElement("canvas");
+/// c.width = c.height = 1;
+/// const ctx = c.getContext("2d");
+/// ctx.fillStyle = whateverTheElementResolvedTo;
+/// ctx.fillRect(0, 0, 1, 1);
+/// const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+/// ```
+///
+/// Reading a *length* that way is fine, and this gate does not touch it.
+fn colour_read_from_dom(code: &str) -> Option<String> {
+    if !code.contains("getComputedStyle") {
+        return None;
+    }
+    for property in [
+        ".color",
+        ".backgroundColor",
+        ".borderColor",
+        ".fill",
+        ".stroke",
+    ] {
+        if code.contains(property) {
+            return Some(format!(
+                "`getComputedStyle(…){property}` reads a colour out of the DOM. The engine \
+                 serialises in whatever space and precision it likes, so comparing two of \
+                 those strings proves nothing about the pixels. Paint into a 1×1 canvas \
+                 and read getImageData instead"
+            ));
+        }
+    }
+    None
+}
+
+/// A sentence is one message, never two joined at run time.
+///
+/// `NOCTUA.md §9.9` rule 1. Word order, grammatical gender and agreement all
+/// differ between languages: `t(Key::Delete) + " " + t(Key::Item)` reads
+/// correctly in English and is ungrammatical in Portuguese, and no translator
+/// can fix it because neither half is a sentence they can move.
+///
+/// A whole sentence with a `{placeholder}` hole in it survives translation.
+/// Two halves do not. `noctua_design_i18n::fill` is the sanctioned way.
+fn translated_fragment(code: &str) -> Option<String> {
+    // A lookup joined to anything with `+`, in either language's spelling.
+    for lookup in [".message(", "t(Key::", "t(locale,"] {
+        let Some(at) = code.find(lookup) else {
+            continue;
+        };
+        let after = &code[at..];
+        // Find the end of the call, then see whether it is being concatenated.
+        let mut depth = 0i32;
+        for (index, ch) in after.char_indices() {
+            match ch {
+                '(' => depth += 1,
+                ')' => {
+                    depth -= 1;
+                    if depth == 0 {
+                        let tail = after[index + 1..].trim_start();
+                        if tail.starts_with('+') {
+                            return Some(
+                                "a translated message is being concatenated. Word order, \
+                                 gender and agreement differ between languages, so a \
+                                 sentence assembled from fragments cannot be translated. \
+                                 Make it one message with a {placeholder} and use `fill`"
+                                    .to_owned(),
+                            );
+                        }
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    None
 }
 
 /// Whether the line leaves us inside a `/* … */` block.
@@ -489,6 +654,52 @@ mod tests {
 
     fn fires(text: &str) -> bool {
         !findings_for(text).is_empty()
+    }
+
+    /// The gate that found a real bug in this repository's own stylesheet, on
+    /// the line that declared the rule it broke.
+    #[test]
+    fn a_custom_property_may_not_bake_in_a_colour_token() {
+        assert!(fires(
+            "  --nd-edge: var(--noctua-border-hairline) solid var(--nc-color-border);"
+        ));
+        assert!(fires(
+            "--x: color-mix(in oklab, var(--nc-color-fg) 4%, transparent);"
+        ));
+    }
+
+    /// The point of use is the whole answer, so it must not fire there.
+    #[test]
+    fn a_colour_token_at_the_point_of_use_is_correct() {
+        assert!(!fires(
+            "  border: var(--noctua-border-hairline) solid var(--nc-color-border);"
+        ));
+        assert!(!fires("  background: var(--nc-color-surface);"));
+        // And a custom property carrying no colour is exactly what should be named.
+        assert!(!fires("  --nd-drawer-w: min(var(--noctua-space-64), 78%);"));
+    }
+
+    #[test]
+    fn a_colour_may_not_be_read_back_out_of_the_dom() {
+        assert!(fires("const c = getComputedStyle(el).color;"));
+        assert!(fires(
+            "expect(getComputedStyle(box).backgroundColor).toBe(x);"
+        ));
+        // A length is fine, and is how the scrim geometry is measured.
+        assert!(!fires("const w = getComputedStyle(nav).inlineSize;"));
+        assert!(!fires(
+            "getComputedStyle(el).getPropertyValue('--nc-color-surface')"
+        ));
+    }
+
+    #[test]
+    fn a_translated_message_may_not_be_concatenated() {
+        assert!(fires("let s = locale.message(Key::Delete) + \" \" + name;"));
+        assert!(fires("const s = t(locale, \"a.b\") + suffix;"));
+        // One whole sentence with a hole in it is the sanctioned form.
+        assert!(!fires(
+            "let s = fill(locale.message(Key::SearchResults), &[(\"count\", &n)]);"
+        ));
     }
 
     #[test]

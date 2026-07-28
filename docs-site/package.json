@@ -1,0 +1,22 @@
+{
+  "name": "@noctua-world/docs-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The documentation site's client-side module. The pages themselves are pre-rendered by the Rust binary in src/.",
+  "license": "MIT OR Apache-2.0",
+  "dependencies": {
+    "@noctua-world/design-react": "workspace:*",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build:example": "esbuild js/example-react.js --bundle --format=esm --minify --outfile=assets/example-react.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1"
+  }
+}
