@@ -109,17 +109,163 @@ fn main() -> ExitCode {
 fn dev(root: &Path, spec: &Path, port: u16) -> Result<(), String> {
     build::run(root, spec)?;
     ui::gap();
-    ui::warn("there is no documentation site yet — NOCTUA-PLAN.md Stage 5 owns it");
-    ui::detail(&format!(
-        "when it exists this watches spec/ and serves it on :{port} with live reload"
-    ));
+    docs(root, false)?;
+
+    ui::gap();
+    ui::heading("serving");
+    let dist = root.join("docs-site/dist");
+    ui::ok(&format!("http://127.0.0.1:{port}/"));
+    ui::detail("rebuilds when spec/, docs-site/src/ or docs-site/assets/ changes");
+    ui::detail("Ctrl-C to stop");
+
+    let watch_root = root.to_path_buf();
+    let watch_spec = spec.to_path_buf();
+    std::thread::spawn(move || watch(&watch_root, &watch_spec));
+
+    serve(&dist, port)
+}
+
+/// Rebuilds whenever a source file's modification time moves.
+///
+/// Polling rather than an inotify crate, and that is a real tradeoff taken
+/// deliberately: the watched set is a few dozen files, a poll costs one `stat`
+/// each, and the alternative is a dependency with a platform backend for each
+/// operating system — inherited by everyone who builds this repository, to save
+/// a quarter-second of latency on a developer's own machine.
+fn watch(root: &Path, spec: &Path) {
+    let watched = [
+        root.join("spec"),
+        root.join("docs-site/src"),
+        root.join("docs-site/assets"),
+    ];
+    let mut last = fingerprint(&watched);
+
+    loop {
+        std::thread::sleep(std::time::Duration::from_millis(400));
+        let current = fingerprint(&watched);
+        if current == last {
+            continue;
+        }
+        last = current;
+
+        ui::gap();
+        ui::heading("rebuilding");
+        // A failed rebuild must not kill the server: a spec with a typo in it is
+        // the normal state of a file being edited, and losing the site every
+        // time would mean restarting after every mistake.
+        match build::run(root, spec).and_then(|_| docs(root, false)) {
+            Ok(()) => ui::ok("reload the page"),
+            Err(error) => ui::warn(&error),
+        }
+    }
+}
+
+/// The modification times of everything under the watched directories.
+fn fingerprint(
+    directories: &[std::path::PathBuf],
+) -> Vec<(std::path::PathBuf, std::time::SystemTime)> {
+    let mut out = Vec::new();
+    for directory in directories {
+        collect(directory, &mut out);
+    }
+    out.sort();
+    out
+}
+
+fn collect(path: &Path, into: &mut Vec<(std::path::PathBuf, std::time::SystemTime)>) {
+    let Ok(entries) = std::fs::read_dir(path) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            collect(&path, into);
+        } else if let Ok(modified) = entry.metadata().and_then(|m| m.modified()) {
+            into.push((path, modified));
+        }
+    }
+}
+
+/// A static file server, in the standard library and nothing else.
+///
+/// The site is static files by design, so serving them needs no framework — and
+/// taking an HTTP dependency for `cargo xtask dev` would put it in the lockfile
+/// of every consumer of this repository, to run a command none of them run.
+fn serve(dist: &Path, port: u16) -> Result<(), String> {
+    use std::io::{Read as _, Write as _};
+
+    let listener = std::net::TcpListener::bind(("127.0.0.1", port))
+        .map_err(|error| format!("could not listen on :{port}: {error}"))?;
+
+    for stream in listener.incoming() {
+        let Ok(mut stream) = stream else { continue };
+        let mut buffer = [0_u8; 2048];
+        let Ok(read) = stream.read(&mut buffer) else {
+            continue;
+        };
+
+        let request = String::from_utf8_lossy(&buffer[..read]);
+        let target = request
+            .split_whitespace()
+            .nth(1)
+            .unwrap_or("/")
+            .split('?')
+            .next()
+            .unwrap_or("/");
+
+        let (status, body, mime) = match resolve(dist, target) {
+            Some((body, mime)) => ("200 OK", body, mime),
+            None => (
+                "404 Not Found",
+                b"not found".to_vec(),
+                "text/plain; charset=utf-8",
+            ),
+        };
+
+        let header = format!(
+            "HTTP/1.1 {status}\r\n\
+             Content-Type: {mime}\r\n\
+             Content-Length: {}\r\n\
+             Cache-Control: no-store\r\n\
+             Connection: close\r\n\r\n",
+            body.len()
+        );
+        let _ = stream.write_all(header.as_bytes());
+        let _ = stream.write_all(&body);
+    }
     Ok(())
 }
 
-/// `docs` — likewise Stage 5.
-///
-/// Returns nothing rather than `Result`: there is nothing here that can fail
-/// yet, and a `Result` that is always `Ok` teaches a reader to stop checking.
+/// Maps a request path to a file, refusing anything that escapes the site.
+fn resolve(dist: &Path, target: &str) -> Option<(Vec<u8>, &'static str)> {
+    // `..` in a request path is how a static server hands out /etc/passwd. The
+    // whole segment is rejected rather than normalised, because normalising is
+    // where the subtle bypasses live.
+    if target.split('/').any(|segment| segment == "..") {
+        return None;
+    }
+
+    let relative = target.trim_start_matches('/');
+    let mut path = dist.join(relative);
+    if path.is_dir() || relative.is_empty() {
+        path = path.join("index.html");
+    }
+    if !path.starts_with(dist) {
+        return None;
+    }
+
+    let mime = match path.extension().and_then(|e| e.to_str()) {
+        Some("html") => "text/html; charset=utf-8",
+        Some("css") => "text/css; charset=utf-8",
+        Some("js") => "text/javascript; charset=utf-8",
+        Some("json") => "application/json",
+        Some("woff2") => "font/woff2",
+        Some("svg") => "image/svg+xml",
+        _ => "application/octet-stream",
+    };
+    std::fs::read(&path).ok().map(|body| (body, mime))
+}
+
 /// `docs` — pre-renders the documentation site, one build per locale.
 ///
 /// The verb was reserved with no behaviour so that the stage which built the
