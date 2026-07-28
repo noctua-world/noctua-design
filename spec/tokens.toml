@@ -210,3 +210,115 @@ width = "2px"
 # The gap between the control and its ring, so the ring reads as separate from
 # the border rather than as a thicker border.
 offset = "2px"
+
+
+# --- Borders --------------------------------------------------------------
+#
+# The only widths this system draws. One hairline, shared by every rule, every
+# input outline and the pattern layer's mesh — a system whose separators
+# disagree about their weight reads as unfinished.
+
+[border]
+hairline = "1px"
+strong = "2px"
+
+
+# --- Glass ----------------------------------------------------------------
+#
+# The frosted surface. Two dimensionless numbers, and NOT a pre-mixed colour.
+#
+# That distinction is load-bearing. A `--noctua-glass-surface:
+# color-mix(in oklab, var(--nc-color-surface) 88%, transparent)` declared at
+# :root would freeze to the PAGE's palette, exactly as --nc-color-surface
+# itself does, and a themed component would show the page's frost. The
+# color-mix has to be written where the token is used, where the palette is
+# already correct. A source gate enforces it.
+
+[glass.blur]
+subtle = "8px"
+full = "16px"
+
+# The percentage of the surface colour that survives. Lower is more
+# transparent; below about 70 the text over it starts fighting whatever is
+# behind, which is why "full" is 82 and not 60.
+[glass.opacity]
+subtle = 92
+full = 82
+
+
+# --- Background effects ---------------------------------------------------
+#
+# Alpha ceilings, not values. Each is the most ink an effect may put over the
+# page, and each is what makes "patterns never hurt readability" a bounded,
+# measurable claim rather than a promise.
+
+[effect.alpha]
+# The worst case for a glyph is a background pixel moved 4% toward the text
+# colour. That bound is what the contrast test measures against.
+pattern = 4
+glow = 18
+grain = 6
+
+[effect.blur]
+# The aurora's stops are soft enough not to read as shapes.
+glow = "64px"
+
+# Ambient durations, in SECONDS, and deliberately NOT in [motion.duration].
+#
+# A duration there carries a reduced-motion collapse, and for a transition that
+# is exactly right. For an INFINITE animation it is a lie: `animation-duration:
+# 0ms` with `iteration-count: infinite` is not "no motion" — it completes and
+# restarts every frame, and engines disagree about what renders. Driving the
+# aurora off a collapsing token would produce undefined behaviour, silently, in
+# precisely the population the token exists to protect.
+#
+# Reduced motion is handled by one explicit `animation: none`, and every
+# animated layer has a designed static end-state so that stopping it yields an
+# appearance somebody chose.
+[effect.duration]
+drift = "42s"
+breathe = "18s"
+
+
+# --- Radius presets -------------------------------------------------------
+#
+# The reader-facing corner setting. Named presets, not a multiplier on
+# [radius]: `9999px * 0.5` is still a pill, and a multiplier produces
+# fractional radii nobody designed and that anti-alias badly at small sizes.
+#
+# Token NAMES never change, so no component is touched by this feature.
+#
+# Emitted as `[data-noctua-radius="x"]` — a bare attribute selector, not
+# `:root[data-noctua-radius]` — which is what lets a themed component carry its
+# own corners by plain custom-property inheritance, with no JavaScript at all.
+#
+# A top-level table rather than `[radius.preset]`: TOML would then make
+# `[radius]` a mixed table of values and sub-tables, and the parser cannot both
+# flatten the values and reject unknown keys — which is a guarantee worth more
+# than the nesting.
+
+[preset.radius.square]
+none = "0"
+control = "0"
+surface = "0"
+pill = "0"
+
+# Must equal [radius] exactly. A test asserts it, so "the default preset" and
+# "no preset" can never drift into meaning different things.
+[preset.radius.soft]
+none = "0"
+control = "0.5rem"
+surface = "0.75rem"
+pill = "9999px"
+
+[preset.radius.round]
+none = "0"
+control = "0.875rem"
+surface = "1.25rem"
+pill = "9999px"
+
+[preset.radius.circular]
+none = "0"
+control = "9999px"
+surface = "1.5rem"
+pill = "9999px"

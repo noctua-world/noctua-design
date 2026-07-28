@@ -15,11 +15,14 @@
 //! either would rewrite every generated file whenever anything changed, burying
 //! a one-token diff in hundreds of lines of churn.
 
-use noctua_design_spec::{Fonts, Spec};
+use noctua_design_spec::{Fonts, Spec, Theme, Vendor};
 
+pub mod appearance;
 pub mod css;
 pub mod fonts;
 pub mod rust;
+pub mod scope;
+pub mod theme;
 pub mod typescript;
 
 /// One file an emitter produced.
@@ -51,14 +54,45 @@ pub const SPEC: &str = "spec/tokens.toml";
 /// The font specification path, likewise.
 pub const FONT_SPEC: &str = "spec/fonts.toml";
 
+/// The theme specification path, likewise.
+pub const THEME_SPEC: &str = "spec/theme.toml";
+
+/// Everything the emitters read.
+///
+/// A bundle rather than a growing parameter list: the number of inputs is
+/// going up — tokens, fonts, the vendored colour output, and later the theme
+/// model and the message catalogue — and threading each one through every
+/// signature makes adding a target a refactor rather than a line.
+#[derive(Debug, Clone, Copy)]
+pub struct Inputs<'a> {
+    /// The non-colour token spec.
+    pub spec: &'a Spec,
+    /// The font layer.
+    pub fonts: &'a Fonts,
+    /// The validated `noctua-colors` output this repository vendors.
+    pub vendor: &'a Vendor,
+    /// The theme model.
+    pub theme: &'a Theme,
+}
+
 /// Runs every emitter, returning all files sorted by path.
 #[must_use]
-pub fn emit_all(spec: &Spec, font_layer: &Fonts) -> Vec<EmittedFile> {
+pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
+    let Inputs {
+        spec,
+        fonts: font_layer,
+        vendor,
+        theme,
+    } = inputs;
+
     let mut files = Vec::new();
+    files.extend(appearance::emit(spec));
     files.extend(css::emit(spec));
     files.extend(fonts::emit(spec, font_layer));
     files.push(fonts::preload_fragment(font_layer));
     files.extend(rust::emit(spec));
+    files.extend(scope::emit(vendor));
+    files.extend(theme::emit(theme, vendor));
     files.extend(typescript::emit(spec));
     files.sort_by(|a, b| a.path.cmp(&b.path));
     files
@@ -149,18 +183,32 @@ pub fn camel(name: &str) -> String {
 mod tests {
     use super::*;
 
-    fn shipped() -> (Spec, Fonts) {
-        let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
+    fn shipped() -> (Spec, Fonts, Vendor, Theme) {
+        let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+        let vendor = noctua_design_spec::vendor::load(&root).expect("vendor");
+        let theme =
+            noctua_design_spec::load_theme(root.join("spec/theme.toml"), &vendor).expect("theme");
         (
-            noctua_design_spec::load(format!("{root}/spec/tokens.toml")).expect("tokens"),
-            noctua_design_spec::load_fonts(format!("{root}/spec/fonts.toml")).expect("fonts"),
+            noctua_design_spec::load(root.join("spec/tokens.toml")).expect("tokens"),
+            noctua_design_spec::load_fonts(root.join("spec/fonts.toml")).expect("fonts"),
+            vendor,
+            theme,
         )
+    }
+
+    fn inputs(bundle: &(Spec, Fonts, Vendor, Theme)) -> Inputs<'_> {
+        Inputs {
+            spec: &bundle.0,
+            fonts: &bundle.1,
+            vendor: &bundle.2,
+            theme: &bundle.3,
+        }
     }
 
     #[test]
     fn every_file_carries_a_generated_header() {
-        let (spec, fonts) = shipped();
-        for file in emit_all(&spec, &fonts) {
+        let bundle = shipped();
+        for file in emit_all(inputs(&bundle)) {
             assert!(
                 file.contents.contains("do not edit"),
                 "{} has no generated header",
@@ -170,8 +218,10 @@ mod tests {
             // Each file names the spec it came from — the token spec or the
             // font spec. Asserting one would make the other's header wrong.
             assert!(
-                file.contents.contains(SPEC) || file.contents.contains(FONT_SPEC),
-                "{} names neither specification",
+                [SPEC, FONT_SPEC, THEME_SPEC]
+                    .iter()
+                    .any(|spec| file.contents.contains(spec)),
+                "{} names no specification, so a reader cannot find what generated it",
                 file.path
             );
         }
@@ -190,17 +240,20 @@ mod tests {
     /// output cannot be drift-checked.
     #[test]
     fn output_is_deterministic() {
-        let (spec, fonts) = shipped();
-        assert_eq!(emit_all(&spec, &fonts), emit_all(&spec, &fonts));
+        let bundle = shipped();
+        assert_eq!(emit_all(inputs(&bundle)), emit_all(inputs(&bundle)));
     }
 
     /// Every emitter must produce something, or a target is silently dead.
     #[test]
     fn every_target_emits_at_least_one_file() {
-        let (spec, font_layer) = shipped();
+        let (spec, font_layer, vendor, theme_model) = shipped();
+        assert!(!appearance::emit(&spec).is_empty(), "appearance");
         assert!(!css::emit(&spec).is_empty(), "css");
         assert!(!fonts::emit(&spec, &font_layer).is_empty(), "fonts");
         assert!(!rust::emit(&spec).is_empty(), "rust");
+        assert!(!scope::emit(&vendor).is_empty(), "scope");
+        assert!(!theme::emit(&theme_model, &vendor).is_empty(), "theme");
         assert!(!typescript::emit(&spec).is_empty(), "typescript");
     }
 

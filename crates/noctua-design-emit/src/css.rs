@@ -143,6 +143,11 @@ fn write_motion_and_layers(out: &mut String, spec: &Spec, prefix: &str) {
         writeln!(out, "  --{prefix}-layer-{name}: {value};").expect("string write");
     }
 
+    section(out, "Border widths");
+    for (name, value) in &spec.border {
+        writeln!(out, "  --{prefix}-border-{name}: {value};").expect("string write");
+    }
+
     section(out, "Focus ring geometry");
     for (name, value) in &spec.focus {
         writeln!(out, "  --{prefix}-focus-{name}: {value};").expect("string write");

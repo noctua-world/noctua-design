@@ -49,7 +49,35 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
         fonts.stack.len()
     ));
 
-    let mut files = noctua_design_emit::emit_all(&spec, &fonts);
+    let vendor = noctua_design_spec::vendor::load(root)
+        .map_err(|error| format!("{:?}", miette::Report::new(error)))?;
+    ui::ok("read the vendored noctua-colors output");
+    ui::detail(&format!(
+        "{} semantic names, {} palettes ({} accents × {} saturations), default {}",
+        vendor.contract.len(),
+        vendor.themes.len(),
+        vendor.accents.len(),
+        vendor.saturations.len(),
+        vendor.default_theme
+    ));
+
+    let theme_path = root.join("spec/theme.toml");
+    let theme = noctua_design_spec::load_theme(&theme_path, &vendor)
+        .map_err(|error| format!("{:?}", miette::Report::new(error)))?;
+    ui::ok(&format!("compiled {}", relative_to(root, &theme_path)));
+    ui::detail(&format!(
+        "{} settings, {} scopable, {} global",
+        theme.setting.len(),
+        theme.scopable().count(),
+        theme.global().count()
+    ));
+
+    let mut files = noctua_design_emit::emit_all(noctua_design_emit::Inputs {
+        spec: &spec,
+        fonts: &fonts,
+        vendor: &vendor,
+        theme: &theme,
+    });
 
     // Generated Rust goes through rustfmt before anyone compares it.
     //

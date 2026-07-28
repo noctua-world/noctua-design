@@ -3108,7 +3108,7 @@ export const palette = {
     ]
   },
   "axes": {
-    "specHash": "blake3:9aea4f2b85211c040c8ea58f35341ce6",
+    "specHash": "blake3:1bdbfe56dd1c7cf4a96daf87a8e0e727",
     "accents": [
       "ochre",
       "amber",

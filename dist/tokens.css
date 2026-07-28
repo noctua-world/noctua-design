@@ -96,6 +96,10 @@
   --noctua-layer-toast: 600;
   --noctua-layer-tooltip: 700;
 
+  /* Border widths. */
+  --noctua-border-hairline: 1px;
+  --noctua-border-strong: 2px;
+
   /* Focus ring geometry. */
   --noctua-focus-width: 2px;
   --noctua-focus-offset: 2px;

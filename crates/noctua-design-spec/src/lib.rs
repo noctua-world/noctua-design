@@ -27,12 +27,17 @@
 pub mod error;
 pub mod fonts;
 pub mod model;
+pub mod theme;
 mod validate;
 mod validate_fonts;
+mod validate_theme;
+pub mod vendor;
 
 pub use error::{Problem, SpecError};
 pub use fonts::{Face, Fonts};
 pub use model::{Duration, Meta, Motion, Space, Spec, Typography};
+pub use theme::{Setting, Theme};
+pub use vendor::Vendor;
 
 /// Parses and validates a token specification.
 ///
@@ -130,6 +135,54 @@ pub fn load_fonts(path: impl AsRef<std::path::Path>) -> Result<Fonts, SpecError>
         )
     })?;
     parse_fonts(&display, &text)
+}
+
+/// Parses and validates the theme model against the vendored axes.
+///
+/// # Errors
+///
+/// Returns every problem found, in one diagnostic.
+pub fn parse_theme(path: &str, text: &str, vendor: &Vendor) -> Result<Theme, SpecError> {
+    let theme: Theme = match toml::from_str(text) {
+        Ok(theme) => theme,
+        Err(error) => {
+            let problem = match error.span() {
+                Some(span) => Problem::at(span, error.message().to_owned())
+                    .labelled("invalid here")
+                    .fix(explain(error.message())),
+                None => Problem::whole_file(error.message().to_owned()),
+            };
+            return Err(SpecError::new(path, text.to_owned(), vec![problem]));
+        }
+    };
+
+    let problems = validate_theme::check(&theme, vendor);
+    if problems.is_empty() {
+        Ok(theme)
+    } else {
+        Err(SpecError::new(path, text.to_owned(), problems))
+    }
+}
+
+/// Reads and parses the theme model from disk.
+///
+/// # Errors
+///
+/// Returns a diagnostic if the file cannot be read, or if it is invalid.
+pub fn load_theme(path: impl AsRef<std::path::Path>, vendor: &Vendor) -> Result<Theme, SpecError> {
+    let path = path.as_ref();
+    let display = path.display().to_string();
+    let text = std::fs::read_to_string(path).map_err(|error| {
+        SpecError::new(
+            &display,
+            String::new(),
+            vec![
+                Problem::whole_file(format!("could not read {display}: {error}"))
+                    .fix("check the path, or run `cargo xtask build` from the repository root"),
+            ],
+        )
+    })?;
+    parse_theme(&display, &text, vendor)
 }
 
 /// Reads and parses a token specification from disk.

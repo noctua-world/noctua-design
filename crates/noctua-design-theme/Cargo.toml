@@ -1,0 +1,11 @@
+[package]
+name = "noctua-design-theme"
+description = "The theme model. GENERATED from spec/theme.toml — do not edit src/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true

@@ -1,0 +1,148 @@
+# noctua-design — the theme model.
+#
+# One table per setting. Everything downstream is generated from this file: the
+# Rust enums, the TypeScript unions, the storage keys, the DOM attributes, the
+# CSS that reacts to them, and the inline bootstrap that stamps them before the
+# first paint.
+#
+# That single source is what makes prop-surface parity (NOCTUA.md §9.3 Leg 2)
+# mechanical rather than reviewed — the two packages cannot disagree about a
+# value, a default or a key name, because neither writes them down.
+#
+# The colour axes are NOT here. Accents, saturations and palette names are read
+# from packages/tokens/vendor/json/axes.json, so a palette added upstream is
+# picked up on the next export rather than forgotten here (NOCTUA.md §8.7).
+
+[meta]
+# The attribute a ThemeScope stamps. Its presence is what makes the semantic
+# contract resolve again at that element — see dist/scope.css.
+scope_attribute = "data-noctua-scope"
+
+# Where the palette stylesheets are served from, relative to the page. The
+# bootstrap and the runtime switcher both build their href from this, so they
+# cannot spell it differently.
+stylesheet_base = "tokens/css"
+
+
+# --- Scopable settings ----------------------------------------------------
+#
+# `scope = true` means the setting may be applied to a subtree. Its CSS is
+# emitted with a bare attribute selector, so it reaches any element.
+
+[setting.mode]
+values = ["light", "dark", "system"]
+default = "system"
+scope = true
+key = "noctua-mode"
+attribute = "data-theme"
+# `system` is the ABSENCE of the attribute, not a value of it.
+#
+# The vendored CSS resolves the system preference in the cascade, where the
+# answer exists before anything is painted. Stamping data-theme="system" would
+# be a value no stylesheet understands, and the page would fall back to light
+# while the OS asked for dark (NOCTUA.md §9.6 lesson 4).
+omit_when = "system"
+
+[setting.accent]
+values_from = "axes.accents"
+default = "ochre"
+scope = true
+key = "noctua-accent"
+
+[setting.saturation]
+values_from = "axes.saturations"
+default = "balanced"
+scope = true
+key = "noctua-saturation"
+
+[setting.palette]
+values_from = "axes.themes"
+default = "ochre-balanced"
+scope = true
+key = "noctua-palette"
+attribute = "data-palette"
+derived_from = ["accent", "saturation"]
+# Stored RESOLVED, not derived at read time.
+#
+# The bootstrap runs before any JavaScript module and cannot look up the
+# accent × saturation grid. It needs the answer, not the inputs. `noctua-colors`
+# lost a milestone to the same omission from the other side: the write sat
+# inside a branch that never ran, so the bootstrap always found nothing.
+
+[setting.font]
+values = ["sans", "mono"]
+default = "sans"
+scope = true
+key = "noctua-font"
+attribute = "data-noctua-font"
+# The interface-font toggle of NOCTUA.md §7.7. Scopable because a single
+# component may legitimately want the monospaced face while the page does not.
+
+[setting.glass]
+values = ["off", "subtle", "full"]
+default = "subtle"
+scope = true
+key = "noctua-glass"
+attribute = "data-noctua-glass"
+# Three levels rather than a boolean: "off" has to exist for
+# prefers-reduced-transparency, and once there are two there is no reason for
+# the difference between a hint of frost and a real one to be unreachable.
+
+[setting.radius]
+values = ["square", "soft", "round", "circular"]
+default = "soft"
+scope = true
+key = "noctua-radius"
+attribute = "data-noctua-radius"
+# Named presets, not a multiplier. `9999px × 0.5` is still a pill, and a
+# multiplier produces fractional radii nobody designed. See [radius.preset] in
+# spec/tokens.toml.
+
+
+# --- Global settings ------------------------------------------------------
+#
+# `scope = false` is enforced by the SELECTOR, not by discipline: the CSS is
+# emitted as `:root[data-noctua-blackout="on"]`, so putting the attribute on a
+# <div> does nothing at all. The setting cannot be scoped by accident.
+
+[setting.blackout]
+values = ["off", "on"]
+default = "off"
+scope = false
+key = "noctua-blackout"
+attribute = "data-noctua-blackout"
+# Pure black page background in dark mode. It changes ONE variable that only
+# the document background reads, so --nc-color-surface is untouched and no
+# contrast pair the colour system measured moves.
+
+[setting.pattern]
+values = ["none", "dots", "mesh", "checks", "diagonals"]
+default = "none"
+scope = false
+key = "noctua-pattern"
+attribute = "data-noctua-pattern"
+
+[setting.glow]
+values = ["off", "on"]
+default = "off"
+scope = false
+key = "noctua-glow"
+attribute = "data-noctua-glow"
+
+[setting.grain]
+values = ["off", "on"]
+default = "off"
+scope = false
+key = "noctua-grain"
+attribute = "data-noctua-grain"
+
+[setting.animate]
+values = ["off", "on"]
+default = "off"
+scope = false
+key = "noctua-animate"
+attribute = "data-noctua-animate"
+# Ambient motion, and it may only ever be *disabled* by the reader.
+# `prefers-reduced-motion: reduce` forces it off in CSS regardless of this
+# value: a page setting must never re-enable motion for someone whose system
+# asked for none.

@@ -28,6 +28,22 @@ pub struct Spec {
     #[serde(default)]
     pub radius: IndexMap<String, String>,
 
+    /// Named presets a reader chooses between.
+    #[serde(default)]
+    pub preset: Presets,
+
+    /// Border widths.
+    #[serde(default)]
+    pub border: IndexMap<String, String>,
+
+    /// The frosted-surface dimensions.
+    #[serde(default)]
+    pub glass: Glass,
+
+    /// Background pattern and effect limits.
+    #[serde(default)]
+    pub effect: Effect,
+
     /// Everything typographic.
     #[serde(default)]
     pub r#type: Typography,
@@ -47,6 +63,63 @@ pub struct Spec {
     /// Focus-ring geometry.
     #[serde(default)]
     pub focus: IndexMap<String, String>,
+}
+
+/// The named presets a reader chooses between.
+///
+/// A preset overrides a whole group of tokens at once, keyed on an attribute,
+/// so choosing one is a single DOM change and no component is involved.
+///
+/// Presets rather than a multiplier: `9999px * 0.5` is still a pill, and a
+/// multiplier produces fractional radii nobody designed and that anti-alias
+/// badly at small sizes. Token *names* never change either way, which is what
+/// keeps every component out of it.
+#[derive(Debug, Clone, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+pub struct Presets {
+    /// Corner-radius presets, keyed by preset name then by radius name.
+    #[serde(default)]
+    pub radius: IndexMap<String, IndexMap<String, String>>,
+}
+
+/// The frosted surface.
+///
+/// Dimensionless numbers only. A pre-mixed `color-mix(…var(--nc-color-surface)…)`
+/// declared at `:root` would freeze to the page's palette exactly as
+/// `--nc-color-surface` itself does, and a themed component would show the
+/// page's frost. The mix belongs where the token is used.
+#[derive(Debug, Clone, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+pub struct Glass {
+    /// Blur radius per level.
+    #[serde(default)]
+    pub blur: IndexMap<String, String>,
+    /// How much of the surface colour survives, as a percentage.
+    #[serde(default)]
+    pub opacity: IndexMap<String, u32>,
+}
+
+/// Background patterns and ambient effects.
+#[derive(Debug, Clone, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+pub struct Effect {
+    /// Alpha ceilings — the most ink each effect may put over the page.
+    ///
+    /// Ceilings rather than values: they are what makes "a pattern never hurts
+    /// readability" a bounded claim a test can measure.
+    #[serde(default)]
+    pub alpha: IndexMap<String, u32>,
+    /// Blur radii.
+    #[serde(default)]
+    pub blur: IndexMap<String, String>,
+    /// Ambient durations, in seconds.
+    ///
+    /// Deliberately not in `[motion.duration]`: those carry a reduced-motion
+    /// collapse, and `animation-duration: 0ms` on an infinite animation is not
+    /// "no motion" — it restarts every frame, and engines disagree about what
+    /// renders. Reduced motion is handled by an explicit `animation: none`.
+    #[serde(default)]
+    pub duration: IndexMap<String, String>,
 }
 
 /// Emit-wide settings.

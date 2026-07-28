@@ -176,6 +176,24 @@ fn check_units(spec: &Spec, problems: &mut Vec<Problem>) {
     let mut lengths: Vec<(String, &String)> = Vec::new();
     lengths.push(("space.base".to_owned(), &spec.space.base));
     lengths.extend(spec.radius.iter().map(|(k, v)| (format!("radius.{k}"), v)));
+
+    // Every preset's values are lengths too, and a preset with a unitless
+    // number produces a declaration the browser drops without a word.
+    for (preset, radii) in &spec.preset.radius {
+        lengths.extend(
+            radii
+                .iter()
+                .map(|(k, v)| (format!("preset.radius.{preset}.{k}"), v)),
+        );
+    }
+
+    lengths.extend(spec.border.iter().map(|(k, v)| (format!("border.{k}"), v)));
+    lengths.extend(
+        spec.glass
+            .blur
+            .iter()
+            .map(|(k, v)| (format!("glass.blur.{k}"), v)),
+    );
     lengths.extend(
         spec.r#type
             .size
