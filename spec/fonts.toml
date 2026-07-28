@@ -363,53 +363,23 @@ range = "mongolian"
 display = "swap"
 preload = false
 
-[[face]]
-family = "Noto Sans JP"
-file = "NotoSansJP.woff2"
-style = "normal"
-axes = ["wght"]
-range = "japanese"
-# `swap`, not `optional`, and never preloaded.
-#
-# `optional` uses a face only if it is ready by the first paint, so an
-# unpreloaded `optional` face essentially never renders — which for a script
-# face means permanent tofu. Preloading eleven of them would put megabytes on
-# every page to serve the few that need one. `swap` accepts a small reflow on
-# exactly the pages that render this script, which is the right trade for a
-# face fetched on demand.
-display = "swap"
-preload = false
-
-[[face]]
-family = "Noto Sans KR"
-file = "NotoSansKR.woff2"
-style = "normal"
-axes = ["wght"]
-range = "korean"
-# `swap`, not `optional`, and never preloaded.
-#
-# `optional` uses a face only if it is ready by the first paint, so an
-# unpreloaded `optional` face essentially never renders — which for a script
-# face means permanent tofu. Preloading eleven of them would put megabytes on
-# every page to serve the few that need one. `swap` accepts a small reflow on
-# exactly the pages that render this script, which is the right trade for a
-# face fetched on demand.
-display = "swap"
-preload = false
-
-[[face]]
+[[sliced]]
 family = "Noto Sans SC"
-file = "NotoSansSC.woff2"
-style = "normal"
+manifest = "NotoSansSC.json"
 axes = ["wght"]
-range = "chinese"
-# `swap`, not `optional`, and never preloaded.
-#
-# `optional` uses a face only if it is ready by the first paint, so an
-# unpreloaded `optional` face essentially never renders — which for a script
-# face means permanent tofu. Preloading eleven of them would put megabytes on
-# every page to serve the few that need one. `swap` accepts a small reflow on
-# exactly the pages that render this script, which is the right trade for a
-# face fetched on demand.
 display = "swap"
-preload = false
+reason = "7.1 MB whole; the unified ideographs plus Extension A."
+
+[[sliced]]
+family = "Noto Sans JP"
+manifest = "NotoSansJP.json"
+axes = ["wght"]
+display = "swap"
+reason = "3.4 MB whole; kana, CJK punctuation and the unified ideographs."
+
+[[sliced]]
+family = "Noto Sans KR"
+manifest = "NotoSansKR.json"
+axes = ["wght"]
+display = "swap"
+reason = "0.9 MB whole; Hangul jamo and the composed syllable block."

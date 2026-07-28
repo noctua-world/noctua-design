@@ -36,7 +36,15 @@ fn fonts() -> noctua_design_spec::Fonts {
 /// declaration with no file is a 404 the browser reports and the build does not.
 #[test]
 fn the_directory_and_the_spec_agree() {
-    let declared: BTreeSet<String> = fonts().face.iter().map(|f| f.file.clone()).collect();
+    let fonts = fonts();
+    // A sliced family declares its files in a manifest rather than one by one,
+    // so both sources have to be read — otherwise 134 slices look like dead
+    // payload to this test and it fails on files the spec does declare.
+    let mut declared: BTreeSet<String> = fonts.face.iter().map(|f| f.file.clone()).collect();
+    for family in &fonts.sliced {
+        let manifest = family.load(&assets()).expect("a declared manifest");
+        declared.extend(manifest.slices.iter().map(|s| s.file.clone()));
+    }
 
     let on_disk: BTreeSet<String> = std::fs::read_dir(assets())
         .expect("assets/fonts")
@@ -85,7 +93,13 @@ fn every_copied_family_has_its_licence_and_no_others() {
         ("Symbols Nerd Font", "LICENSE-NerdFontsSymbolsOnly.txt"),
     ];
 
-    let families: BTreeSet<String> = fonts().face.iter().map(|f| f.family.clone()).collect();
+    let fonts = fonts();
+    let families: BTreeSet<String> = fonts
+        .face
+        .iter()
+        .map(|f| f.family.clone())
+        .chain(fonts.sliced.iter().map(|s| s.family.clone()))
+        .collect();
 
     let required: BTreeSet<&str> = OBLIGATIONS
         .iter()
@@ -152,7 +166,14 @@ fn every_stack_entry_is_shipped_or_is_a_real_fallback() {
     const GENERIC: [&str; 3] = ["serif", "monospace", "cursive"];
 
     let fonts = fonts();
-    let shipped: BTreeSet<String> = fonts.face.iter().map(|f| f.family.clone()).collect();
+    let shipped: BTreeSet<String> = fonts
+        .face
+        .iter()
+        .map(|f| f.family.clone())
+        // A sliced family is shipped in every sense that matters here: it has
+        // faces, they are ours, and a stack naming it resolves.
+        .chain(fonts.sliced.iter().map(|s| s.family.clone()))
+        .collect();
 
     for (role, stack) in &fonts.stack {
         // `ui` is an indirection onto another stack, not a family list.
@@ -221,6 +242,18 @@ fn the_attribution_is_reproducible() {
 #[test]
 fn no_cjk_face_is_preloaded() {
     let fonts = fonts();
+    // The three CJK families are sliced now, and a sliced family is never
+    // preloadable by construction — there is no `preload` field to set. What
+    // still has to hold is `swap`: an unpreloaded `optional` face essentially
+    // never renders, which for a script face means permanent tofu.
+    for family in &fonts.sliced {
+        assert_eq!(
+            family.display, "swap",
+            "{} is `{}`, not `swap`",
+            family.family, family.display
+        );
+    }
+
     for face in &fonts.face {
         let cjk = ["JP", "KR", "SC", "TC"]
             .iter()
@@ -278,7 +311,7 @@ fn the_attribution_says_these_are_not_build_output() {
 fn the_emitted_paths_resolve() {
     let css = {
         let spec = noctua_design_spec::load(root().join("spec/tokens.toml")).expect("tokens");
-        noctua_design_emit::fonts::emit(&spec, &fonts())
+        noctua_design_emit::fonts::emit(&spec, &fonts(), &[])
             .remove(0)
             .contents
     };

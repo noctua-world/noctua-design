@@ -37,7 +37,7 @@ pub mod vendor;
 
 pub use component::Component;
 pub use error::{Problem, SpecError};
-pub use fonts::{Face, Fonts};
+pub use fonts::{Face, Fonts, Manifest, Slice, Sliced};
 pub use i18n::{Catalogue, Locale};
 pub use model::{Duration, Meta, Motion, Space, Spec, Typography};
 pub use theme::{Setting, Theme};

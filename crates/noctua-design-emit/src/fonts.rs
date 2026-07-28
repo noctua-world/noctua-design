@@ -27,7 +27,16 @@ const ASSETS: &str = "../assets/fonts";
 
 /// Emits `dist/fonts.css`.
 #[must_use]
-pub fn emit(spec: &Spec, fonts: &Fonts) -> Vec<EmittedFile> {
+/// # Panics
+///
+/// If a manifest is passed for a family the spec does not declare as sliced.
+/// The build loads manifests *from* those declarations, so the two cannot
+/// disagree unless a caller assembles them by hand.
+pub fn emit(
+    spec: &Spec,
+    fonts: &Fonts,
+    sliced: &[noctua_design_spec::Manifest],
+) -> Vec<EmittedFile> {
     let prefix = &spec.meta.prefix;
     let mut out = header(CommentStyle::Block);
 
@@ -71,6 +80,51 @@ pub fn emit(spec: &Spec, fonts: &Fonts) -> Vec<EmittedFile> {
             writeln!(out, "  unicode-range: {range};").expect("write");
         }
         writeln!(out, "}}\n").expect("write");
+    }
+
+    // The sliced families. One `@font-face` per slice, each with the range the
+    // subsetting computed from the file itself.
+    //
+    // Emitted after the whole faces so that a codepoint covered by both — the
+    // unified ideographs, which Japanese and Chinese share — resolves through
+    // the stack's order rather than through where a rule happened to land.
+    for manifest in sliced {
+        let declaration = fonts
+            .sliced
+            .iter()
+            .find(|s| s.family == manifest.family)
+            .expect("a manifest is only loaded for a declared family");
+
+        writeln!(
+            out,
+            "/* {} — {} slices. {} */",
+            manifest.family,
+            manifest.slices.len(),
+            declaration.reason
+        )
+        .expect("write");
+
+        for slice in &manifest.slices {
+            writeln!(out, "@font-face {{").expect("write");
+            writeln!(out, "  font-family: \"{}\";", manifest.family).expect("write");
+            writeln!(
+                out,
+                "  src: url(\"{ASSETS}/{}\") format(\"woff2\");",
+                slice.file
+            )
+            .expect("write");
+            writeln!(out, "  font-style: normal;").expect("write");
+            if declaration.axes.iter().any(|a| a == "wght") {
+                writeln!(out, "  font-weight: 100 900;").expect("write");
+            } else {
+                writeln!(out, "  font-weight: 400;").expect("write");
+            }
+            writeln!(out, "  font-display: {};", declaration.display).expect("write");
+            // Never absent. A slice with no range is fetched on every page,
+            // which is the one thing slicing exists to prevent.
+            writeln!(out, "  unicode-range: {};", slice.range).expect("write");
+            writeln!(out, "}}\n").expect("write");
+        }
     }
 
     writeln!(
@@ -136,9 +190,20 @@ mod tests {
         )
     }
 
+    /// Every sliced family's manifest, read from beside its slices.
+    fn manifests() -> Vec<noctua_design_spec::Manifest> {
+        let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+        let fonts = noctua_design_spec::load_fonts(root.join("spec/fonts.toml")).expect("fonts");
+        fonts
+            .sliced
+            .iter()
+            .map(|family| family.load(&root.join("assets/fonts")).expect("manifest"))
+            .collect()
+    }
+
     fn css() -> String {
         let (spec, fonts) = shipped();
-        emit(&spec, &fonts).remove(0).contents
+        emit(&spec, &fonts, &manifests()).remove(0).contents
     }
 
     /// One block per face, so a face's declarations can be read together.
@@ -156,7 +221,14 @@ mod tests {
         let (_, fonts) = shipped();
         let css = css();
         let blocks = blocks(&css);
-        assert_eq!(blocks.len(), fonts.face.len(), "one block per face");
+        // The whole faces come first, then the slices — so zipping against
+        // `fonts.face` reads exactly the blocks this test is about.
+        let slices: usize = manifests().iter().map(|m| m.slices.len()).sum();
+        assert_eq!(
+            blocks.len(),
+            fonts.face.len() + slices,
+            "one block per face and per slice"
+        );
 
         for (face, block) in fonts.face.iter().zip(&blocks) {
             if face.is_variable_weight() {
@@ -222,6 +294,61 @@ mod tests {
         for face in &fonts.face {
             let path = std::path::Path::new(assets).join(&face.file);
             assert!(path.exists(), "{} does not exist", face.file);
+        }
+        // And every slice. A manifest listing a file that is not there is the
+        // easy way to lose a range: the CSS declares it, the browser 404s, and
+        // the codepoints in that range render as tofu.
+        for manifest in manifests() {
+            for slice in &manifest.slices {
+                let path = std::path::Path::new(assets).join(&slice.file);
+                assert!(path.exists(), "{} does not exist", slice.file);
+            }
+        }
+    }
+
+    /// A slice with no range is fetched on every page, which is the one thing
+    /// slicing exists to prevent.
+    #[test]
+    fn every_slice_declares_a_range() {
+        for manifest in manifests() {
+            assert!(!manifest.slices.is_empty(), "{} has none", manifest.family);
+            for slice in &manifest.slices {
+                assert!(
+                    slice.range.starts_with("U+"),
+                    "{} has no unicode-range",
+                    slice.file
+                );
+                assert!(slice.bytes > 0, "{} is empty", slice.file);
+            }
+        }
+    }
+
+    /// No two slices of one family may claim the same codepoint.
+    ///
+    /// They are cut on codepoint order, so an overlap would mean the cutting
+    /// went wrong — and two files answering one codepoint is two downloads for
+    /// one glyph.
+    #[test]
+    fn a_family_slices_without_overlapping_itself() {
+        for manifest in manifests() {
+            let mut seen: Vec<(u32, u32)> = Vec::new();
+            for slice in &manifest.slices {
+                for part in slice.range.split(',') {
+                    let part = part.trim().trim_start_matches("U+");
+                    let (lo, hi) = part.split_once('-').unwrap_or((part, part));
+                    let lo = u32::from_str_radix(lo, 16).expect("hex");
+                    let hi = u32::from_str_radix(hi, 16).expect("hex");
+                    for (a, b) in &seen {
+                        assert!(
+                            hi < *a || lo > *b,
+                            "{} overlaps an earlier slice of {}",
+                            slice.file,
+                            manifest.family
+                        );
+                    }
+                    seen.push((lo, hi));
+                }
+            }
         }
     }
 

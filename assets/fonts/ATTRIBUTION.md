@@ -261,3 +261,25 @@ pyftsubset "NotoSansSC.otf" --output-file="NotoSansSC.woff2" \
 Each `[range]` in `spec/fonts.toml` must match the `--unicodes` its face was
 subset with. A range wider than the file promises glyphs it does not have, the
 browser stops falling through to the next family, and the reader gets tofu.
+
+### Slicing the CJK families
+
+Whole, the three CJK families were 13.6 MB, and every reader of a page with one
+Japanese character waited for all of it. Sliced, each file declares a narrow
+`unicode-range` and the browser fetches only the slices holding codepoints
+actually on the page.
+
+```sh
+# 400 codepoints per slice, cut on CODEPOINT ORDER rather than frequency.
+# Frequency-ordered slices fetch marginally less for one page, but they make
+# each range a scattered list — and a range that cannot be written as a handful
+# of intervals is a range nobody can check against the file it describes.
+python3 slice.py NotoSansSC.woff2 "Noto Sans SC" NotoSansSC slices/ 400
+```
+
+The script writes `<family>.json` beside the slices, recording each file's
+`unicode-range` **computed from the file itself**. `spec/fonts.toml` declares
+the family once with `[[sliced]]` and points at that manifest; the emitter
+expands it into one `@font-face` per slice. Writing 134 ranges by hand is how
+one ends up describing a file it does not match, and a codepoint inside a range
+its file lacks renders as tofu with the right font sitting beside it.

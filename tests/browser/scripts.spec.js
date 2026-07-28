@@ -153,6 +153,38 @@ test("with Iosevka selected, no component renders a line in two typefaces", asyn
   expect(rows.length).toBe(14);
 });
 
+test("a CJK page fetches a handful of slices, not the whole family", async ({ page }) => {
+  const fetched = [];
+  page.on("response", async (response) => {
+    const name = response.url().split("/").pop();
+    if (!name?.endsWith(".woff2")) return;
+    const length = Number(response.headers()["content-length"] ?? 0);
+    fetched.push({ name, bytes: length });
+  });
+
+  await page.goto("/en/typography.html");
+  await page.waitForLoadState("networkidle");
+
+  const cjk = fetched.filter((f) => /NotoSans(JP|KR|SC)-/.test(f.name));
+  const bytes = cjk.reduce((sum, f) => sum + f.bytes, 0);
+
+  expect(cjk.length, "no CJK slice was fetched at all").toBeGreaterThan(0);
+
+  // BYTES, not slice count. Three lines of CJK draw characters scattered right
+  // across the ideograph block, so they legitimately touch dozens of the 134
+  // slices — counting files makes that look like a failure when it is the
+  // mechanism working. What matters is the weight: whole, the three families
+  // were 13.6 MB every reader of this page waited for.
+  expect(
+    bytes,
+    `fetched ${(bytes / 1_000_000).toFixed(1)} MB across ${cjk.length} slices, against 13.6 MB whole`,
+  ).toBeLessThan(4_000_000);
+
+  // And no monolithic file survived the change.
+  const whole = fetched.filter((f) => /^NotoSans(JP|KR|SC)\.woff2$/.test(f.name));
+  expect(whole, "an unsliced CJK family is still being served").toEqual([]);
+});
+
 test("a Latin page loads no non-Latin face", async ({ page }) => {
   const fonts = [];
   page.on("request", (request) => {
@@ -167,6 +199,8 @@ test("a Latin page loads no non-Latin face", async ({ page }) => {
   // page must fetch none of them — which is the whole point of pairing
   // `unicode-range` with `preload = false`, and is now actually testable
   // because the files exist to be wrongly fetched.
+  // Including every one of the 134 slices: a slice with a wrong range would
+  // be fetched here, and this is what catches it.
   const nonLatin = fonts.filter((f) =>
     /JP|KR|SC|TC|Arabic|Hebrew|Devanagari|Thai|Ethiopic|Georgian|Armenian|Mongolian/i.test(f),
   );

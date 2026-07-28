@@ -35,12 +35,13 @@ it, in both locales. What they are not yet is *reference* documentation — ther
 is no per-component page, no prop-by-prop table beyond `ThemeScope`, and no
 guidance on when to reach for one component over another.
 
-**CJK is shipped whole, not sliced.** Noto Sans SC alone is 7.1 MB. It is never
-preloaded and its `unicode-range` means a Latin page fetches none of it, which a
-test asserts — but a reader who opens the typography page in a poor connection
-waits for it. Google Fonts solves this by slicing each CJK family into about a
-hundred range-limited files. Doing the same here is a change to the face table's
-shape, not to any component, and is worth doing before this ships publicly.
+**Slice size is not tuned.** The three CJK families are sliced at 400 codepoints
+each, which was a first guess. The typography page shows one line of each script
+and touches 34 of the 134 slices for 2.8 MB — better than the 13.6 MB it used to
+cost, and clearly improvable: characters scattered across the ideograph block hit
+many slices, and smaller slices would fetch less. Cutting on frequency rather
+than codepoint order would help more still, at the cost of ranges nobody can
+check by eye against the file they describe.
 
 **The component page template — half of it.** `/components` generates its prop
 table from the theme model, so a documented prop cannot disagree with the
@@ -130,7 +131,8 @@ What it covers:
 | Every glass surface has **no filtered ancestor**, and a frosted panel samples | ✓ |
 | The colours page paints **39 distinct** palettes, not 39 copies of one | ✓ |
 | All **fourteen scripts** render with a loaded face, none as tofu | ✓ |
-| A Latin page fetches **none** of the eleven script faces (14.5 MB unused) | ✓ |
+| A Latin page fetches **none** of the eleven script faces | ✓ |
+| A CJK page fetches **2.8 MB of 13.6**, and no monolithic family survives | ✓ |
 | The React bundle: **0 requests** on a page view, **1** on the first toggle | ✓ |
 | React's `ThemeScope` stamps the same attributes Dioxus server-rendered | ✓ |
 | Each border sits one step from **its own** surface, measured in canvas pixels | ✓ |

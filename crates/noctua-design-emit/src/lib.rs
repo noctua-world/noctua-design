@@ -15,7 +15,7 @@
 //! either would rewrite every generated file whenever anything changed, burying
 //! a one-token diff in hundreds of lines of churn.
 
-use noctua_design_spec::{Catalogue, Component, Fonts, Spec, Theme, Vendor};
+use noctua_design_spec::{Catalogue, Component, Fonts, Manifest, Spec, Theme, Vendor};
 
 pub mod appearance;
 pub mod component;
@@ -86,6 +86,8 @@ pub struct Inputs<'a> {
     pub catalogue: &'a Catalogue,
     /// Every component's contract.
     pub components: &'a [Component],
+    /// Each sliced family's manifest, read from beside its slices.
+    pub sliced: &'a [Manifest],
 }
 
 /// Runs every emitter, returning all files sorted by path.
@@ -98,13 +100,14 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
         theme,
         catalogue,
         components,
+        sliced,
     } = inputs;
 
     let mut files = Vec::new();
     files.extend(appearance::emit(spec, theme));
     files.extend(component::emit(theme));
     files.extend(css::emit(spec));
-    files.extend(fonts::emit(spec, font_layer));
+    files.extend(fonts::emit(spec, font_layer, sliced));
     files.extend(i18n::emit(catalogue));
     files.extend(props::emit(components));
     files.push(fonts::preload_fragment(font_layer));
@@ -211,6 +214,16 @@ pub fn camel(name: &str) -> String {
 mod tests {
     use super::*;
 
+    fn bundle_sliced() -> Vec<Manifest> {
+        let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+        let fonts = noctua_design_spec::load_fonts(root.join("spec/fonts.toml")).expect("fonts");
+        fonts
+            .sliced
+            .iter()
+            .map(|s| s.load(&root.join("assets/fonts")).expect("manifest"))
+            .collect()
+    }
+
     fn shipped() -> (Spec, Fonts, Vendor, Theme, Catalogue, Vec<Component>) {
         let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
         let vendor = noctua_design_spec::vendor::load(&root).expect("vendor");
@@ -235,6 +248,7 @@ mod tests {
             theme: &bundle.3,
             catalogue: &bundle.4,
             components: &bundle.5,
+            sliced: &[],
         }
     }
 
@@ -287,7 +301,10 @@ mod tests {
         );
         assert!(!component::emit(&theme_model).is_empty(), "component");
         assert!(!css::emit(&spec).is_empty(), "css");
-        assert!(!fonts::emit(&spec, &font_layer).is_empty(), "fonts");
+        assert!(
+            !fonts::emit(&spec, &font_layer, &bundle_sliced()).is_empty(),
+            "fonts"
+        );
         assert!(!i18n::emit(&catalogue).is_empty(), "i18n");
         assert!(!props::emit(&components).is_empty(), "props");
         assert!(!rust::emit(&spec).is_empty(), "rust");

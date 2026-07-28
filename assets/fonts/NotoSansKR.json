@@ -1,0 +1,155 @@
+{
+ "family": "Noto Sans KR",
+ "slices": [
+  {
+   "file": "NotoSansKR-000.woff2",
+   "range": "U+1100-11FF, U+3000-303F, U+3131-3180",
+   "bytes": 93672
+  },
+  {
+   "file": "NotoSansKR-001.woff2",
+   "range": "U+3181-318E, U+A960-A97C, U+AC00-AD64",
+   "bytes": 34708
+  },
+  {
+   "file": "NotoSansKR-002.woff2",
+   "range": "U+AD65-AEF4",
+   "bytes": 41168
+  },
+  {
+   "file": "NotoSansKR-003.woff2",
+   "range": "U+AEF5-B084",
+   "bytes": 46940
+  },
+  {
+   "file": "NotoSansKR-004.woff2",
+   "range": "U+B085-B214",
+   "bytes": 37328
+  },
+  {
+   "file": "NotoSansKR-005.woff2",
+   "range": "U+B215-B3A4",
+   "bytes": 38104
+  },
+  {
+   "file": "NotoSansKR-006.woff2",
+   "range": "U+B3A5-B534",
+   "bytes": 38840
+  },
+  {
+   "file": "NotoSansKR-007.woff2",
+   "range": "U+B535-B6C4",
+   "bytes": 37104
+  },
+  {
+   "file": "NotoSansKR-008.woff2",
+   "range": "U+B6C5-B854",
+   "bytes": 41396
+  },
+  {
+   "file": "NotoSansKR-009.woff2",
+   "range": "U+B855-B9E4",
+   "bytes": 38508
+  },
+  {
+   "file": "NotoSansKR-010.woff2",
+   "range": "U+B9E5-BB74",
+   "bytes": 35308
+  },
+  {
+   "file": "NotoSansKR-011.woff2",
+   "range": "U+BB75-BD04",
+   "bytes": 34916
+  },
+  {
+   "file": "NotoSansKR-012.woff2",
+   "range": "U+BD05-BE94",
+   "bytes": 39236
+  },
+  {
+   "file": "NotoSansKR-013.woff2",
+   "range": "U+BE95-C024",
+   "bytes": 38176
+  },
+  {
+   "file": "NotoSansKR-014.woff2",
+   "range": "U+C025-C1B4",
+   "bytes": 38152
+  },
+  {
+   "file": "NotoSansKR-015.woff2",
+   "range": "U+C1B5-C344",
+   "bytes": 45572
+  },
+  {
+   "file": "NotoSansKR-016.woff2",
+   "range": "U+C345-C4D4",
+   "bytes": 42120
+  },
+  {
+   "file": "NotoSansKR-017.woff2",
+   "range": "U+C4D5-C664",
+   "bytes": 39820
+  },
+  {
+   "file": "NotoSansKR-018.woff2",
+   "range": "U+C665-C7F4",
+   "bytes": 43060
+  },
+  {
+   "file": "NotoSansKR-019.woff2",
+   "range": "U+C7F5-C984",
+   "bytes": 43976
+  },
+  {
+   "file": "NotoSansKR-020.woff2",
+   "range": "U+C985-CB14",
+   "bytes": 40536
+  },
+  {
+   "file": "NotoSansKR-021.woff2",
+   "range": "U+CB15-CCA4",
+   "bytes": 40828
+  },
+  {
+   "file": "NotoSansKR-022.woff2",
+   "range": "U+CCA5-CE34",
+   "bytes": 39940
+  },
+  {
+   "file": "NotoSansKR-023.woff2",
+   "range": "U+CE35-CFC4",
+   "bytes": 40108
+  },
+  {
+   "file": "NotoSansKR-024.woff2",
+   "range": "U+CFC5-D154",
+   "bytes": 40648
+  },
+  {
+   "file": "NotoSansKR-025.woff2",
+   "range": "U+D155-D2E4",
+   "bytes": 38988
+  },
+  {
+   "file": "NotoSansKR-026.woff2",
+   "range": "U+D2E5-D474",
+   "bytes": 35424
+  },
+  {
+   "file": "NotoSansKR-027.woff2",
+   "range": "U+D475-D604",
+   "bytes": 39940
+  },
+  {
+   "file": "NotoSansKR-028.woff2",
+   "range": "U+D605-D794",
+   "bytes": 45888
+  },
+  {
+   "file": "NotoSansKR-029.woff2",
+   "range": "U+D795-D7A3, U+FF01-FFBE, U+FFC2-FFC7, U+FFCA-FFCF, U+FFD2-FFD7, U+FFDA-FFDC, U+FFE0-FFE6, U+FFE8-FFEE",
+   "bytes": 27364
+  }
+ ]
+}

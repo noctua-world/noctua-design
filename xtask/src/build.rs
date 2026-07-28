@@ -49,6 +49,8 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
         fonts.stack.len()
     ));
 
+    let sliced = load_slices(root, &fonts)?;
+
     let vendor = noctua_design_spec::vendor::load(root)
         .map_err(|error| format!("{:?}", miette::Report::new(error)))?;
     ui::ok("read the vendored noctua-colors output");
@@ -105,6 +107,7 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
         theme: &theme,
         catalogue: &catalogue,
         components: &components,
+        sliced: &sliced,
     });
 
     // Generated Rust goes through rustfmt before anyone compares it.
@@ -129,6 +132,37 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
     }
 
     Ok((spec, files))
+}
+
+/// Reads every sliced family's manifest and reports the total.
+///
+/// Separate from [`artifacts`] because a build step that is one `map` and one
+/// `println` does not need to sit inside a function already near the length
+/// limit — and because the reporting is the only part anyone reads.
+fn load_slices(
+    root: &Path,
+    fonts: &noctua_design_spec::Fonts,
+) -> Result<Vec<noctua_design_spec::Manifest>, String> {
+    let manifests: Vec<_> = fonts
+        .sliced
+        .iter()
+        .map(|family| family.load(&root.join("assets/fonts")))
+        .collect::<Result<_, _>>()?;
+
+    if !manifests.is_empty() {
+        let slices: usize = manifests.iter().map(|m| m.slices.len()).sum();
+        let bytes: u64 = manifests
+            .iter()
+            .flat_map(|m| &m.slices)
+            .map(|s| s.bytes)
+            .sum();
+        ui::detail(&format!(
+            "{} sliced families, {slices} slices, {} MB served on demand",
+            manifests.len(),
+            bytes / 1_000_000
+        ));
+    }
+    Ok(manifests)
 }
 
 /// Runs `rustfmt` over a string, returning the formatted text.
