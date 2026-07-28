@@ -30,9 +30,17 @@ catalogue, and anything that overflows only fitted because English is short.
 
 ## What is a placeholder
 
-**The prose.** Every page but `/scoped-themes` is a heading, a summary and a
-demonstration of the thing it names. None of them explains anything yet. The
-`provisional.*` messages in `spec/i18n/` exist for exactly this.
+**Depth of prose.** Every page now explains what it documents and demonstrates
+it, in both locales. What they are not yet is *reference* documentation — there
+is no per-component page, no prop-by-prop table beyond `ThemeScope`, and no
+guidance on when to reach for one component over another.
+
+**CJK is shipped whole, not sliced.** Noto Sans SC alone is 7.1 MB. It is never
+preloaded and its `unicode-range` means a Latin page fetches none of it, which a
+test asserts — but a reader who opens the typography page in a poor connection
+waits for it. Google Fonts solves this by slicing each CJK family into about a
+hundred range-limited files. Doing the same here is a change to the face table's
+shape, not to any component, and is worth doing before this ships publicly.
 
 **The component page template — half of it.** `/components` generates its prop
 table from the theme model, so a documented prop cannot disagree with the
@@ -121,6 +129,8 @@ What it covers:
 | pt-BR orders the sidebar in Portuguese, not in English | ✓ |
 | Every glass surface has **no filtered ancestor**, and a frosted panel samples | ✓ |
 | The colours page paints **39 distinct** palettes, not 39 copies of one | ✓ |
+| All **fourteen scripts** render with a loaded face, none as tofu | ✓ |
+| A Latin page fetches **none** of the eleven script faces (14.5 MB unused) | ✓ |
 | The React bundle: **0 requests** on a page view, **1** on the first toggle | ✓ |
 | React's `ThemeScope` stamps the same attributes Dioxus server-rendered | ✓ |
 | Each border sits one step from **its own** surface, measured in canvas pixels | ✓ |

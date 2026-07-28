@@ -46,63 +46,77 @@ test("no script renders as tofu", async ({ page }) => {
   );
   expect(samples.length, "the script table did not render").toBe(14);
 
-  // Only the scripts whose faces this repository actually ships. The others
-  // are a KNOWN GAP, measured by the next test rather than hidden by this one:
-  // asserting no-tofu for a script with no font would fail forever and teach
-  // everyone to ignore a red suite.
-  const shipped = await page.locator("[data-nd-script]").evaluateAll((els) =>
-    els
-      .filter((el) => el.querySelector(".nd-script-sample").dataset.ndMonospaceable === "true")
-      .map((el) => el.dataset.ndScript),
-  );
-
-  for (const sample of samples.filter((s) => shipped.includes(s.name))) {
+  // Every one of the fourteen, with no exemptions. Until the eleven script
+  // faces were subset into assets/fonts/ this loop ran over four of them and
+  // the other ten were a documented gap; that gap is closed, so the loop is
+  // the whole table again.
+  for (const sample of samples) {
     const real = await widthIn(page, sample.text, "var(--noctua-font-sans)");
-    // A family with no coverage of anything: whatever this renders is the
-    // browser's last-resort box, which is what tofu looks like.
-    const tofu = await widthIn(page, sample.text, '"__nothing_at_all__"');
-
     expect(real, `${sample.name} rendered nothing at all`).toBeGreaterThan(0);
-    // Real glyphs are never all the same width as the fallback boxes. A CJK
-    // sample and a Latin one differ from tofu in opposite directions, so the
-    // assertion is on the difference, not its sign.
-    expect(
-      Math.abs(real - tofu),
-      `${sample.name} rendered at exactly the fallback width — it is tofu`,
-    ).toBeGreaterThan(1);
+
+    // `document.fonts.check` is the question actually being asked: can a loaded
+    // face render this text. Width alone cannot answer it for CJK, because an
+    // ideograph is exactly 1em wide and so is the browser's tofu box — the two
+    // measure identical, and an earlier version of this test called a correctly
+    // rendered Chinese line tofu on that basis.
+    const covered = await page.evaluate(
+      ([text]) => {
+        const stack = getComputedStyle(document.body).fontFamily;
+        return stack
+          .split(",")
+          .map((f) => f.trim())
+          .some((family) => {
+            try {
+              return document.fonts.check(`64px ${family}`, text); // allow-literal: a measuring size for the coverage API, not a design decision
+            } catch {
+              return false;
+            }
+          });
+      },
+      [sample.text],
+    );
+    expect(covered, `${sample.name} has no loaded face that can render it`).toBe(true);
+
+    // Width still guards the proportional scripts, where tofu and real glyphs
+    // genuinely differ. CJK is exempt because 1em is the correct width for
+    // both, not because it is allowed to fail.
+    if (!/Japanese|Korean|Chinese/.test(sample.name)) {
+      const tofu = await widthIn(page, sample.text, '"__nothing_at_all__"');
+      expect(
+        Math.abs(real - tofu),
+        `${sample.name} rendered at exactly the fallback width — it is tofu`,
+      ).toBeGreaterThan(1);
+    }
   }
 });
 
-test("the scripts with no shipped face are exactly the known gap", async ({ page }) => {
+test("every script has a face of its own", async ({ page }) => {
   await page.goto("/en/typography.html");
-  const rows = await page.locator("[data-nd-script]").evaluateAll((els) =>
-    els.map((el) => ({
-      name: el.dataset.ndScript,
-      shipped: el.querySelector(".nd-script-sample").dataset.ndMonospaceable === "true",
-    })),
-  );
+  await page.waitForLoadState("networkidle");
 
-  // `spec/fonts.toml` declares four families, all Latin-repertoire. Ten of the
-  // fourteen scripts on the typography page therefore have no face and render
-  // through whatever the operating system happens to have — which is exactly
-  // what NOCTUA.md §7.3.1 chose Noto to avoid.
-  //
-  // This assertion is the gap, written down and counted. When the non-Latin
-  // faces are subset into assets/fonts/ this number goes down, and the test
-  // fails until the list below is corrected — which is the point.
-  const missing = rows.filter((r) => !r.shipped).map((r) => r.name);
-  expect(missing).toEqual([
-    "Arabic",
-    "Hebrew",
-    "Devanagari",
-    "Thai",
-    "Ethiopic",
-    "Georgian",
-    "Armenian",
-    "Japanese",
-    "Korean",
-    "Simplified Chinese",
-  ]);
+  // The assertion that used to list ten missing families. It lists none now,
+  // and it fails the moment a script is added to the table without a face —
+  // which is the failure mode this replaces, not a weaker version of it.
+  const unfaced = await page.evaluate(() => {
+    const stack = getComputedStyle(document.body).fontFamily;
+    const needed = {
+      Arabic: "Noto Sans Arabic", // allow-literal: the family this script must resolve to — the assertion itself
+      Hebrew: "Noto Sans Hebrew", // allow-literal: the family this script must resolve to — the assertion itself
+      Devanagari: "Noto Sans Devanagari", // allow-literal: the family this script must resolve to — the assertion itself
+      Thai: "Noto Sans Thai", // allow-literal: the family this script must resolve to — the assertion itself
+      Ethiopic: "Noto Sans Ethiopic", // allow-literal: the family this script must resolve to — the assertion itself
+      Georgian: "Noto Sans Georgian", // allow-literal: the family this script must resolve to — the assertion itself
+      Armenian: "Noto Sans Armenian", // allow-literal: the family this script must resolve to — the assertion itself
+      Japanese: "Noto Sans JP", // allow-literal: the family this script must resolve to — the assertion itself
+      Korean: "Noto Sans KR", // allow-literal: the family this script must resolve to — the assertion itself
+      "Simplified Chinese": "Noto Sans SC", // allow-literal: the family this script must resolve to — the assertion itself
+    };
+    return Object.entries(needed)
+      .filter(([, family]) => !stack.includes(family))
+      .map(([script]) => script);
+  });
+
+  expect(unfaced, "a script on the page has no family in the stack").toEqual([]);
 });
 
 test("the font files the scripts need are actually present", async ({ page }) => {
@@ -132,7 +146,7 @@ test("with Iosevka selected, no component renders a line in two typefaces", asyn
     })),
   );
 
-  // Three of the fourteen are covered by Iosevka. For the rest the WHOLE
+  // Four of the fourteen are covered by Iosevka. For the rest the WHOLE
   // component must move to the proportional face — a per-glyph fallback would
   // put two x-heights on one baseline, which reads as a rendering bug.
   expect(rows.filter((r) => r.monospaceable).length).toBe(4);
@@ -149,6 +163,12 @@ test("a Latin page loads no non-Latin face", async ({ page }) => {
   await page.goto("/en/spacing.html");
   await page.waitForLoadState("networkidle");
 
-  const nonLatin = fonts.filter((f) => /JP|KR|SC|TC|Arabic|Hebrew|Devanagari|Thai/i.test(f));
+  // Eleven script faces are declared and 14.5 MB sit in assets/fonts/. A Latin
+  // page must fetch none of them — which is the whole point of pairing
+  // `unicode-range` with `preload = false`, and is now actually testable
+  // because the files exist to be wrongly fetched.
+  const nonLatin = fonts.filter((f) =>
+    /JP|KR|SC|TC|Arabic|Hebrew|Devanagari|Thai|Ethiopic|Georgian|Armenian|Mongolian/i.test(f),
+  );
   expect(nonLatin, `a Latin-only page fetched ${nonLatin.join(", ")}`).toEqual([]);
 });

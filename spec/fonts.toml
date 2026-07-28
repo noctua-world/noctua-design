@@ -31,10 +31,10 @@
 # the proportional one goes everywhere else, where it is not.
 
 [stack]
-sans = '"Noto Sans", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Symbols Nerd Font", sans-serif'
+sans = '"Noto Sans", "Noto Sans Arabic", "Noto Sans Hebrew", "Noto Sans Devanagari", "Noto Sans Thai", "Noto Sans Ethiopic", "Noto Sans Georgian", "Noto Sans Armenian", "Noto Sans Mongolian", "Noto Sans SC", "Noto Sans JP", "Noto Sans KR", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Symbols Nerd Font", sans-serif'
 serif = '"Noto Serif", ui-serif, Georgia, "Times New Roman", "Symbols Nerd Font", serif'
 display = '"Noto Sans Display", var(--noctua-font-sans)'
-mono = '"Noctua Iosevka", ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, "Liberation Mono", "Symbols Nerd Font Mono", monospace'
+mono = '"Noctua Iosevka", "Noto Sans Arabic", "Noto Sans Hebrew", "Noto Sans Devanagari", "Noto Sans Thai", "Noto Sans Ethiopic", "Noto Sans Georgian", "Noto Sans Armenian", "Noto Sans Mongolian", "Noto Sans SC", "Noto Sans JP", "Noto Sans KR", ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, "Liberation Mono", "Symbols Nerd Font Mono", monospace'
 
 # The interface font. Rebound to --noctua-font-mono when the reader turns on
 # "use Noctua Iosevka for the whole interface" (NOCTUA.md §7.7). Nothing else
@@ -55,6 +55,39 @@ ui = "var(--noctua-font-sans)"
 
 [range]
 latin = "U+0020-007E, U+00A0-00FF, U+0100-017F, U+2010-2027, U+2030-205E, U+2070-209F, U+20A0-20BF, U+2122, U+2190-2199, U+21D0-21D2, U+2206, U+2212, U+2248, U+2260, U+2264-2265, U+25A0, U+25CF, U+2713, U+2717, U+FEFF, U+FFFD"
+
+# One range per script, and each MUST match what its face was subset to.
+#
+# This is the mechanism `NOCTUA.md §7.3.1` chose Noto for, made automatic: the
+# browser fetches a face only when a codepoint inside its range is actually
+# rendered, so a Latin page pays nothing for the eleven below and a Japanese
+# page pays for exactly one of them.
+#
+# A range WIDER than the subset is the failure to avoid: it promises glyphs the
+# file does not contain, the browser stops falling through to the next family,
+# and the reader gets tofu instead of a working fallback.
+arabic = "U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF"
+hebrew = "U+0590-05FF, U+FB1D-FB4F"
+devanagari = "U+0900-097F, U+A8E0-A8FF, U+1CD0-1CFF"
+thai = "U+0E00-0E7F"
+ethiopic = "U+1200-139F, U+2D80-2DDF"
+georgian = "U+10A0-10FF, U+1C90-1CBF, U+2D00-2D2F"
+armenian = "U+0530-058F, U+FB13-FB17"
+mongolian = "U+1800-18AF, U+180B-180E"
+# Japanese and Chinese BOTH declare the unified ideograph block, and the overlap
+# is deliberate.
+#
+# The two scripts share the block but not the glyph set: a simplified form like
+# 语 is in the block and is not in the Japanese subset. Giving Chinese only
+# Extension A — which is what shipped first — meant the browser resolved every
+# common ideograph through the Japanese face, found nothing for the simplified
+# forms, and rendered tofu on a page that had the right font sitting beside it.
+#
+# With both declaring the block, order in the stack decides which is tried
+# first and the other still answers what it misses.
+japanese = "U+3000-303F, U+3040-309F, U+30A0-30FF, U+31F0-31FF, U+FF00-FFEF, U+4E00-9FFF"
+korean = "U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3"
+chinese = "U+3000-303F, U+FF00-FFEF, U+4E00-9FFF, U+3400-4DBF"
 
 # The Nerd Fonts private-use areas plus the handful of ranges it fills in the
 # standard planes. Icons only — no letters — so this face can never win a
@@ -181,5 +214,202 @@ file = "SymbolsNerdFontMono-Regular.woff2"
 style = "normal"
 weight = 400
 range = "icons"
+display = "swap"
+preload = false
+
+
+# --- Script faces ----------------------------------------------------------
+#
+# Fetched on demand, never preloaded. Each carries the whole repertoire of its
+# script, so nothing it claims to cover is missing.
+
+[[face]]
+family = "Noto Sans Arabic"
+file = "NotoSansArabic.woff2"
+style = "normal"
+axes = ["wght"]
+range = "arabic"
+# `swap`, not `optional`, and never preloaded.
+#
+# `optional` uses a face only if it is ready by the first paint, so an
+# unpreloaded `optional` face essentially never renders — which for a script
+# face means permanent tofu. Preloading eleven of them would put megabytes on
+# every page to serve the few that need one. `swap` accepts a small reflow on
+# exactly the pages that render this script, which is the right trade for a
+# face fetched on demand.
+display = "swap"
+preload = false
+
+[[face]]
+family = "Noto Sans Hebrew"
+file = "NotoSansHebrew.woff2"
+style = "normal"
+axes = ["wght"]
+range = "hebrew"
+# `swap`, not `optional`, and never preloaded.
+#
+# `optional` uses a face only if it is ready by the first paint, so an
+# unpreloaded `optional` face essentially never renders — which for a script
+# face means permanent tofu. Preloading eleven of them would put megabytes on
+# every page to serve the few that need one. `swap` accepts a small reflow on
+# exactly the pages that render this script, which is the right trade for a
+# face fetched on demand.
+display = "swap"
+preload = false
+
+[[face]]
+family = "Noto Sans Devanagari"
+file = "NotoSansDevanagari.woff2"
+style = "normal"
+axes = ["wght"]
+range = "devanagari"
+# `swap`, not `optional`, and never preloaded.
+#
+# `optional` uses a face only if it is ready by the first paint, so an
+# unpreloaded `optional` face essentially never renders — which for a script
+# face means permanent tofu. Preloading eleven of them would put megabytes on
+# every page to serve the few that need one. `swap` accepts a small reflow on
+# exactly the pages that render this script, which is the right trade for a
+# face fetched on demand.
+display = "swap"
+preload = false
+
+[[face]]
+family = "Noto Sans Thai"
+file = "NotoSansThai.woff2"
+style = "normal"
+axes = ["wght"]
+range = "thai"
+# `swap`, not `optional`, and never preloaded.
+#
+# `optional` uses a face only if it is ready by the first paint, so an
+# unpreloaded `optional` face essentially never renders — which for a script
+# face means permanent tofu. Preloading eleven of them would put megabytes on
+# every page to serve the few that need one. `swap` accepts a small reflow on
+# exactly the pages that render this script, which is the right trade for a
+# face fetched on demand.
+display = "swap"
+preload = false
+
+[[face]]
+family = "Noto Sans Ethiopic"
+file = "NotoSansEthiopic.woff2"
+style = "normal"
+axes = ["wght"]
+range = "ethiopic"
+# `swap`, not `optional`, and never preloaded.
+#
+# `optional` uses a face only if it is ready by the first paint, so an
+# unpreloaded `optional` face essentially never renders — which for a script
+# face means permanent tofu. Preloading eleven of them would put megabytes on
+# every page to serve the few that need one. `swap` accepts a small reflow on
+# exactly the pages that render this script, which is the right trade for a
+# face fetched on demand.
+display = "swap"
+preload = false
+
+[[face]]
+family = "Noto Sans Georgian"
+file = "NotoSansGeorgian.woff2"
+style = "normal"
+axes = ["wght"]
+range = "georgian"
+# `swap`, not `optional`, and never preloaded.
+#
+# `optional` uses a face only if it is ready by the first paint, so an
+# unpreloaded `optional` face essentially never renders — which for a script
+# face means permanent tofu. Preloading eleven of them would put megabytes on
+# every page to serve the few that need one. `swap` accepts a small reflow on
+# exactly the pages that render this script, which is the right trade for a
+# face fetched on demand.
+display = "swap"
+preload = false
+
+[[face]]
+family = "Noto Sans Armenian"
+file = "NotoSansArmenian.woff2"
+style = "normal"
+axes = ["wght"]
+range = "armenian"
+# `swap`, not `optional`, and never preloaded.
+#
+# `optional` uses a face only if it is ready by the first paint, so an
+# unpreloaded `optional` face essentially never renders — which for a script
+# face means permanent tofu. Preloading eleven of them would put megabytes on
+# every page to serve the few that need one. `swap` accepts a small reflow on
+# exactly the pages that render this script, which is the right trade for a
+# face fetched on demand.
+display = "swap"
+preload = false
+
+[[face]]
+family = "Noto Sans Mongolian"
+file = "NotoSansMongolian.woff2"
+style = "normal"
+axes = []
+# Static, so the weight has to be stated: without it the browser uses the
+# file's default instance, and the validator caught this before it shipped
+# (`NOCTUA.md §7.6`, trap 1).
+weight = 400
+range = "mongolian"
+# `swap`, not `optional`, and never preloaded.
+#
+# `optional` uses a face only if it is ready by the first paint, so an
+# unpreloaded `optional` face essentially never renders — which for a script
+# face means permanent tofu. Preloading eleven of them would put megabytes on
+# every page to serve the few that need one. `swap` accepts a small reflow on
+# exactly the pages that render this script, which is the right trade for a
+# face fetched on demand.
+display = "swap"
+preload = false
+
+[[face]]
+family = "Noto Sans JP"
+file = "NotoSansJP.woff2"
+style = "normal"
+axes = ["wght"]
+range = "japanese"
+# `swap`, not `optional`, and never preloaded.
+#
+# `optional` uses a face only if it is ready by the first paint, so an
+# unpreloaded `optional` face essentially never renders — which for a script
+# face means permanent tofu. Preloading eleven of them would put megabytes on
+# every page to serve the few that need one. `swap` accepts a small reflow on
+# exactly the pages that render this script, which is the right trade for a
+# face fetched on demand.
+display = "swap"
+preload = false
+
+[[face]]
+family = "Noto Sans KR"
+file = "NotoSansKR.woff2"
+style = "normal"
+axes = ["wght"]
+range = "korean"
+# `swap`, not `optional`, and never preloaded.
+#
+# `optional` uses a face only if it is ready by the first paint, so an
+# unpreloaded `optional` face essentially never renders — which for a script
+# face means permanent tofu. Preloading eleven of them would put megabytes on
+# every page to serve the few that need one. `swap` accepts a small reflow on
+# exactly the pages that render this script, which is the right trade for a
+# face fetched on demand.
+display = "swap"
+preload = false
+
+[[face]]
+family = "Noto Sans SC"
+file = "NotoSansSC.woff2"
+style = "normal"
+axes = ["wght"]
+range = "chinese"
+# `swap`, not `optional`, and never preloaded.
+#
+# `optional` uses a face only if it is ready by the first paint, so an
+# unpreloaded `optional` face essentially never renders — which for a script
+# face means permanent tofu. Preloading eleven of them would put megabytes on
+# every page to serve the few that need one. `swap` accepts a small reflow on
+# exactly the pages that render this script, which is the right trade for a
+# face fetched on demand.
 display = "swap"
 preload = false

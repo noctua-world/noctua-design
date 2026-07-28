@@ -111,6 +111,105 @@
   unicode-range: U+2300-23FF, U+E000-F8FF, U+F0000-FFFFD;
 }
 
+@font-face {
+  font-family: "Noto Sans Arabic";
+  src: url("../assets/fonts/NotoSansArabic.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+@font-face {
+  font-family: "Noto Sans Hebrew";
+  src: url("../assets/fonts/NotoSansHebrew.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0590-05FF, U+FB1D-FB4F;
+}
+
+@font-face {
+  font-family: "Noto Sans Devanagari";
+  src: url("../assets/fonts/NotoSansDevanagari.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0900-097F, U+A8E0-A8FF, U+1CD0-1CFF;
+}
+
+@font-face {
+  font-family: "Noto Sans Thai";
+  src: url("../assets/fonts/NotoSansThai.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0E00-0E7F;
+}
+
+@font-face {
+  font-family: "Noto Sans Ethiopic";
+  src: url("../assets/fonts/NotoSansEthiopic.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+1200-139F, U+2D80-2DDF;
+}
+
+@font-face {
+  font-family: "Noto Sans Georgian";
+  src: url("../assets/fonts/NotoSansGeorgian.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+10A0-10FF, U+1C90-1CBF, U+2D00-2D2F;
+}
+
+@font-face {
+  font-family: "Noto Sans Armenian";
+  src: url("../assets/fonts/NotoSansArmenian.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0530-058F, U+FB13-FB17;
+}
+
+@font-face {
+  font-family: "Noto Sans Mongolian";
+  src: url("../assets/fonts/NotoSansMongolian.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+1800-18AF, U+180B-180E;
+}
+
+@font-face {
+  font-family: "Noto Sans JP";
+  src: url("../assets/fonts/NotoSansJP.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+3000-303F, U+3040-309F, U+30A0-30FF, U+31F0-31FF, U+FF00-FFEF, U+4E00-9FFF;
+}
+
+@font-face {
+  font-family: "Noto Sans KR";
+  src: url("../assets/fonts/NotoSansKR.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7A3;
+}
+
+@font-face {
+  font-family: "Noto Sans SC";
+  src: url("../assets/fonts/NotoSansSC.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+3000-303F, U+FF00-FFEF, U+4E00-9FFF, U+3400-4DBF;
+}
+
 /* The stacks. Every fallback named here ships with some major operating
    system, so the interface is fully usable before our faces load and if
    they never arrive at all.
@@ -119,9 +218,9 @@
    letters, so it can only ever supply an icon glyph nothing before it
    had. */
 :root {
-  --noctua-font-sans: "Noto Sans", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Symbols Nerd Font", sans-serif;
+  --noctua-font-sans: "Noto Sans", "Noto Sans Arabic", "Noto Sans Hebrew", "Noto Sans Devanagari", "Noto Sans Thai", "Noto Sans Ethiopic", "Noto Sans Georgian", "Noto Sans Armenian", "Noto Sans Mongolian", "Noto Sans SC", "Noto Sans JP", "Noto Sans KR", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Symbols Nerd Font", sans-serif;
   --noctua-font-serif: "Noto Serif", ui-serif, Georgia, "Times New Roman", "Symbols Nerd Font", serif;
   --noctua-font-display: "Noto Sans Display", var(--noctua-font-sans);
-  --noctua-font-mono: "Noctua Iosevka", ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, "Liberation Mono", "Symbols Nerd Font Mono", monospace;
+  --noctua-font-mono: "Noctua Iosevka", "Noto Sans Arabic", "Noto Sans Hebrew", "Noto Sans Devanagari", "Noto Sans Thai", "Noto Sans Ethiopic", "Noto Sans Georgian", "Noto Sans Armenian", "Noto Sans Mongolian", "Noto Sans SC", "Noto Sans JP", "Noto Sans KR", ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, "Liberation Mono", "Symbols Nerd Font Mono", monospace;
   --noctua-font-ui: var(--noctua-font-sans);
 }

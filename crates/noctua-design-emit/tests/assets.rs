@@ -61,10 +61,26 @@ fn the_directory_and_the_spec_agree() {
 #[test]
 fn every_copied_family_has_its_licence_and_no_others() {
     // The licence file each family's presence obliges.
-    const OBLIGATIONS: [(&str, &str); 5] = [
-        ("Noto Sans", "OFL-Noto_Sans.txt"),
-        ("Noto Serif", "OFL-Noto_Serif.txt"),
+    // Every Noto script face is released under the same SIL Open Font License
+    // 1.1 as the Latin ones, and the text is byte-identical between them — so
+    // one file covers all eleven rather than eleven copies of one licence.
+    // The families are still listed individually here, because the obligation
+    // is per family and a family added without its licence is a real problem.
+    const OBLIGATIONS: [(&str, &str); 16] = [
+        ("Noto Sans Arabic", "OFL-Noto_Sans_scripts.txt"),
+        ("Noto Sans Hebrew", "OFL-Noto_Sans_scripts.txt"),
+        ("Noto Sans Devanagari", "OFL-Noto_Sans_scripts.txt"),
+        ("Noto Sans Thai", "OFL-Noto_Sans_scripts.txt"),
+        ("Noto Sans Ethiopic", "OFL-Noto_Sans_scripts.txt"),
+        ("Noto Sans Georgian", "OFL-Noto_Sans_scripts.txt"),
+        ("Noto Sans Armenian", "OFL-Noto_Sans_scripts.txt"),
+        ("Noto Sans Mongolian", "OFL-Noto_Sans_scripts.txt"),
+        ("Noto Sans JP", "OFL-Noto_Sans_scripts.txt"),
+        ("Noto Sans KR", "OFL-Noto_Sans_scripts.txt"),
+        ("Noto Sans SC", "OFL-Noto_Sans_scripts.txt"),
         ("Noto Sans Display", "OFL-Noto_Sans_Display.txt"),
+        ("Noto Serif", "OFL-Noto_Serif.txt"),
+        ("Noto Sans", "OFL-Noto_Sans.txt"),
         ("Noctua Iosevka", "OFL-Iosevka.txt"),
         ("Symbols Nerd Font", "LICENSE-NerdFontsSymbolsOnly.txt"),
     ];
@@ -191,24 +207,58 @@ fn the_attribution_is_reproducible() {
     }
 }
 
-/// No CJK face may be here at all at this stage.
+/// A CJK face may be here, and may never be preloaded.
 ///
-/// `NOCTUA-PLAN.md` Stage 3 says to copy only what is needed, and Group B is
-/// 15.15 MiB of fonts nothing in this repository renders.
+/// Stage 3 banned them outright, because nothing rendered CJK and Group B was
+/// 15 MiB of fonts for no reader. Stage 6 renders fourteen scripts, so the ban
+/// is gone — but the reason behind it is not. These three faces are 11.3 MiB
+/// between them, and preloading even one would put it on every page in the
+/// system to serve the few that show a single Japanese character.
+///
+/// `font-display: swap` plus `preload = false` plus a `unicode-range` is what
+/// makes that safe: the browser fetches the file only when a codepoint inside
+/// its range is actually rendered.
 #[test]
-fn no_cjk_face_was_copied() {
-    for entry in std::fs::read_dir(assets()).expect("assets/fonts") {
-        let name = entry
-            .expect("entry")
-            .file_name()
-            .to_string_lossy()
-            .into_owned();
-        for cjk in ["JP", "KR", "SC", "TC", "CJK"] {
-            assert!(
-                !(has_extension(&name, "woff2") && name.contains(cjk)),
-                "{name} is a CJK face. They arrive with content that renders them"
-            );
+fn no_cjk_face_is_preloaded() {
+    let fonts = fonts();
+    for face in &fonts.face {
+        let cjk = ["JP", "KR", "SC", "TC"]
+            .iter()
+            .any(|tag| face.family.ends_with(tag));
+        if !cjk {
+            continue;
         }
+        assert!(
+            !face.preload,
+            "{} is preloaded. It is megabytes, and every page would pay for it",
+            face.file
+        );
+        assert_eq!(
+            face.display, "swap",
+            "{} is not `swap`. An unpreloaded `optional` face essentially never \
+             renders, which for a script face means permanent tofu",
+            face.file
+        );
+    }
+}
+
+/// Every on-demand script face carries a range, or it is fetched on every page.
+///
+/// A face with no `unicode-range` has no condition to wait for, so the browser
+/// treats it as part of the default payload — which is exactly what the
+/// eleven script faces must never be.
+#[test]
+fn every_script_face_is_ranged() {
+    let fonts = fonts();
+    for face in &fonts.face {
+        if face.preload {
+            continue;
+        }
+        assert!(
+            !face.range.is_empty(),
+            "{} is not preloaded and has no range, so it loads unconditionally",
+            face.file
+        );
     }
 }
 

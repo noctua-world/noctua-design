@@ -225,3 +225,39 @@ must travel wherever the fonts do. `NOCTUA.md §7.8`.
   fonts on their own.
 - **MIT** — Symbols Nerd Font. Requires the copyright notice and permission
   notice to travel with it.
+
+## The script faces
+
+Eleven families covering the scripts the platform must render — Arabic, Hebrew,
+Devanagari, Thai, Ethiopic, Georgian, Armenian, Mongolian, Japanese, Korean and
+Simplified Chinese. All are Noto, all are SIL Open Font License 1.1, and the
+licence text is byte-identical across them, so one copy covers all eleven
+(`OFL-Noto_Sans_scripts.txt`).
+
+**None is preloaded and every one carries a `unicode-range`.** Together they are
+about 14 MB; a Latin page fetches none of them, and a Japanese page fetches one.
+A test asserts both.
+
+Sources: the variable fonts from `notofonts/notofonts.github.io` and
+`google/fonts`, and the subset variable OTFs from `notofonts/noto-cjk`.
+
+```sh
+# The width axis is pinned before subsetting: a face that keeps `wdth` gets
+# `font-stretch`, and a browser asked to synthesise a width the file does not
+# have produces something worse than not asking (NOCTUA.md §7.6, trap 2).
+FLAGS="--flavor=woff2 --layout-features=kern,ccmp,mark,mkmk,liga,rlig,init,medi,fina,isol,locl,akhn,rphf,blwf,half,pres,abvs,blws,psts --desubroutinize --no-hinting --drop-tables+=DSIG"
+
+fonttools varLib.instancer "NotoSansArabic.ttf" wdth=100 -o "/tmp/pinned.ttf"
+pyftsubset "/tmp/pinned.ttf" --output-file="NotoSansArabic.woff2" \
+  --unicodes="U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF,U+200C-200F" $FLAGS
+
+# CJK needs no instancing — the subset OTFs vary on weight only — and a
+# narrower feature set, since none of the Indic shaping features applies.
+CJK_FLAGS="--flavor=woff2 --layout-features=kern,ccmp,mark,locl,vert --desubroutinize --no-hinting --drop-tables+=DSIG"
+pyftsubset "NotoSansSC.otf" --output-file="NotoSansSC.woff2" \
+  --unicodes="U+3000-303F,U+FF00-FFEF,U+4E00-9FFF,U+3400-4DBF" $CJK_FLAGS
+```
+
+Each `[range]` in `spec/fonts.toml` must match the `--unicodes` its face was
+subset with. A range wider than the file promises glyphs it does not have, the
+browser stops falling through to the next family, and the reader gets tofu.
