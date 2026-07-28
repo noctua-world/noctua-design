@@ -524,7 +524,14 @@ a {
      would visibly fail. */
   border-radius: 0;
   transform: translateX(-100%);
-  transition: transform var(--noctua-duration-base) var(--noctua-easing-out);
+  /* Off-screen is not closed. A drawer that is only translated keeps every link
+     in it focusable, so a keyboard user tabbing out of the header lands in an
+     invisible menu. `visibility` is delayed by the transition so the slide is
+     still visible on the way out. */
+  visibility: hidden;
+  transition:
+    transform var(--noctua-duration-base) var(--noctua-easing-out),
+    visibility 0s linear var(--noctua-duration-base);
 }
 
 [dir="rtl"] .nd-nav {
@@ -533,6 +540,8 @@ a {
 
 :root[data-nd-nav="open"] .nd-nav {
   transform: none;
+  visibility: visible;
+  transition-delay: 0s;
 }
 
 /* The scrim covers everything the drawer does not, and stops exactly where the
@@ -579,6 +588,8 @@ a {
     block-size: calc(100vh - var(--nd-header-h));
     z-index: var(--noctua-layer-base);
     transform: none;
+    /* Docked, so it is always available to the keyboard. */
+    visibility: visible;
     background: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -1331,4 +1342,109 @@ a {
   display: flex;
   flex-direction: column;
   gap: var(--noctua-space-1);
+}
+
+/* --- Pattern swatches ----------------------------------------------------- */
+
+.nd-pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--noctua-space-48), 1fr));
+  gap: var(--noctua-space-4);
+}
+
+.nd-pattern { margin: 0; display: flex; flex-direction: column; gap: var(--noctua-space-2); }
+
+/* The swatch shows the SHIPPED geometry, not a copy of it: `.noctua-fx` is the
+   colour layer's own class, and `dist/theme.css` binds the pattern to it. A
+   hand-drawn approximation here would drift from the real thing on the first
+   change to either. */
+.nd-pattern-swatch {
+  position: relative;
+  block-size: var(--noctua-space-32);
+  overflow: hidden;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-surface);
+  background: var(--nc-color-surface);
+}
+
+/* Contained rather than fixed: inside a swatch the layer has to fill its box,
+   not the viewport. */
+.nd-pattern-fx { position: absolute; inset: 0; }
+
+/* --- The component gallery ------------------------------------------------ */
+
+.nd-gallery { display: flex; flex-direction: column; }
+
+.nd-gallery-row {
+  display: grid;
+  gap: var(--noctua-space-2);
+  padding-block: var(--noctua-space-3);
+  border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+@media (min-width: 48rem) {
+  .nd-gallery-row {
+    grid-template-columns: var(--noctua-space-32) 1fr;
+    align-items: baseline;
+    column-gap: var(--noctua-space-6);
+  }
+}
+
+.nd-gallery-name { justify-self: start; }
+.nd-gallery-demo { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--noctua-space-2); }
+.nd-gallery-gap { margin-inline-start: var(--noctua-space-2); }
+
+/* --- Spacing bars --------------------------------------------------------- */
+
+/* Square-ended and thin. The pill radius made `space-1` render taller than it
+   was long and `space-2` render as a circle — the three smallest steps of a
+   spacing scale were the ones the shape destroyed. */
+.nd-bar {
+  display: inline-block;
+  block-size: var(--noctua-space-2);
+  min-inline-size: var(--noctua-border-hairline);
+  background: var(--nc-color-accent);
+  border-radius: 0;
+}
+
+/* The token name needs room for `--noctua-space-paragraph`, which is 26
+   monospaced characters. At 6rem it wrapped over four lines beside one line of
+   sample text. */
+.nd-scale-name {
+  inline-size: var(--noctua-space-48);
+  flex: none;
+  white-space: nowrap;
+}
+
+.nd-scale-row { gap: var(--noctua-space-3); }
+
+/* --- The search field ----------------------------------------------------- */
+
+/* "Search the documentation" needs 199px and the field had 183, so the
+   placeholder clipped mid-word. The drawer is 16rem; the field now uses the
+   width the drawer's padding leaves rather than a guess. */
+.nd-search { inline-size: 100%; }
+
+.nd-search-input {
+  font-size: var(--noctua-size-caption);
+  min-inline-size: 0;
+}
+
+/* --- Option rows ---------------------------------------------------------- */
+
+/* "Match the system" and "Circular" dropped onto their own lines, leaving
+   ragged two-line groups. A grid gives every option in a group the same width
+   and wraps predictably. */
+.nd-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--noctua-space-24), 1fr));
+  gap: var(--noctua-space-1);
+}
+
+.nd-option { text-align: center; }
+
+/* Reset is not a fourth choice, so it does not look like one. */
+.nd-frame-controls [data-nd-frame-reset],
+[data-nd-scope-reset] {
+  border-style: dashed;
 }

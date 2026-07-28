@@ -10,6 +10,7 @@
 //! What ships is HTML that is correct before any script runs. The script adds
 //! the settings; it does not construct the page.
 
+mod defaults;
 mod index;
 mod pages;
 mod props;

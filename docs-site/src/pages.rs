@@ -8,7 +8,9 @@
 use dioxus::prelude::*;
 use noctua_design::ThemeScope;
 use noctua_design::components::{
-    Code, Heading, HeadingLevel, HeadingSize, Paragraph, Text, TextSize, TextTone, TextWeight,
+    Abbr, Blockquote, Code, CodeBlock, CodeTone, Del, Em, Heading, HeadingLevel, HeadingSize, Ins,
+    Kbd, Link, List, ListItem, ListKind, ListMarker, ListSpacing, Mark, Paragraph, ParagraphSize,
+    ParagraphTone, Strong, Text, TextSize, TextTone, TextWeight, Time, Truncate, VisuallyHidden,
 };
 use noctua_design::model::{Glass, Mode, Palette, Radius};
 use noctua_design_i18n::Key;
@@ -44,7 +46,13 @@ pub(crate) fn Body(context: Context) -> Element {
 #[component]
 fn ScopedThemes(context: Context) -> Element {
     rsx! {
-        p { class: "nd-prose", "{context.t(Key::ScopePageBody)}" }
+        div { class: "nd-scope-head",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ScopePageTitle)}" }
+            button { class: "nd-option", r#type: "button", "data-nd-scope-reset": "",
+                "{context.t(Key::ScopeReset)}"
+            }
+        }
+        Paragraph { "{context.t(Key::ScopePageBody)}" }
 
         ThemeScope {
             class: "nd-scope nd-glass",
@@ -154,37 +162,36 @@ fn Sample(context: Context) -> Element {
 #[component]
 fn Overview(context: Context) -> Element {
     rsx! {
-        p { class: "nd-prose", "{context.t(Key::ScopePageBody)}" }
-        ul { class: "nd-summary",
+        Paragraph { size: ParagraphSize::Lead, "{context.t(Key::OverviewBody)}" }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::OverviewExplore)}" }
+        List { kind: ListKind::Description, marker: ListMarker::None, spacing: ListSpacing::Loose,
             for page in PAGES.iter().skip(1) {
-                li {
-                    a { class: "nd-link", href: "{page.href()}", "{context.t(page.title)}" }
-                    p { class: "nd-prose", "{context.t(page.summary)}" }
+                ListItem {
+                    Link { href: page.href(), "{context.t(page.title)}" }
+                    Paragraph { tone: ParagraphTone::Muted, "{context.t(page.summary)}" }
                 }
-            }
-        }
-        Frame {
-            context,
-            caption: Key::PageScopedThemesTitle,
-            code: snippet(&[("palette", "jade-balanced")]),
-            ThemeScope { class: "nd-scope nd-glass", palette: Palette::JadeBalanced,
-                Sample { context }
             }
         }
     }
 }
 
-/// Every palette, each swatch showing its own colours.
+/// Every palette, each swatch reading its own colours.
 ///
-/// This is the one page that legitimately links all thirty-nine stylesheets: it
-/// is what the page is for. Everywhere else they are fetched on demand.
+/// This is the one page that links all thirty-nine stylesheets — about 650 KB
+/// gzipped, which is why no other page does. Each cell is a `data-palette`
+/// scope, so `dist/scope.css` re-resolves the semantic contract inside it and
+/// every chip shows that palette rather than the reader's.
 #[component]
 fn Colours(context: Context) -> Element {
     rsx! {
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ColoursRoles)}" }
+        Paragraph { "{context.t(Key::ColoursRolesBody)}" }
+
         div { class: "nd-palette-grid", "data-nd-all-palettes": "",
             for palette in Palette::ALL {
                 div { class: "nd-palette", "data-palette": palette.as_str(),
-                    span { class: "nd-palette-name", "{palette.as_str()}" }
+                    Code { class: "nd-palette-name", tone: CodeTone::Subtle, "{palette.as_str()}" }
                     div { class: "nd-palette-bar",
                         span { class: "nd-chip nd-chip--bg" }
                         span { class: "nd-chip nd-chip--subtle" }
@@ -195,7 +202,7 @@ fn Colours(context: Context) -> Element {
                 }
             }
         }
-        p { class: "nd-prose nd-note", "{context.t(Key::ScopeNote)}" }
+        Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::ColoursNote)}" }
     }
 }
 
@@ -327,54 +334,143 @@ fn Scripts(context: Context) -> Element {
     }
 }
 
+/// The named gaps, then the raw scale.
+///
+/// The named tokens come first on purpose: they are what a component actually
+/// asks for, and the search index points every one of them at this page.
 #[component]
 fn Spacing(context: Context) -> Element {
-    let steps = [1_u32, 2, 3, 4, 6, 8, 12, 16, 24, 32];
+    let named = [
+        ("tight", Key::SpacingTight),
+        ("inset", Key::SpacingInset),
+        ("gap", Key::SpacingGap),
+        ("paragraph", Key::SpacingParagraph),
+        ("heading", Key::SpacingHeading),
+        ("section", Key::SpacingSection),
+        ("region", Key::SpacingRegion),
+    ];
+    let steps = [1_u32, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64];
     rsx! {
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::SpacingNamedTitle)}" }
+        Paragraph { "{context.t(Key::SpacingNamedBody)}" }
+        div { class: "nd-scale",
+            for (name, purpose) in named {
+                div { class: "nd-scale-row",
+                    Code { class: "nd-scale-name", "--noctua-space-{name}" }
+                    span { class: "nd-bar", style: "inline-size: var(--noctua-space-{name})" }
+                    Text { size: TextSize::Small, tone: TextTone::Muted, "{context.t(purpose)}" }
+                }
+            }
+        }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::SpacingScaleTitle)}" }
+        Paragraph { "{context.t(Key::SpacingScaleBody)}" }
         div { class: "nd-scale",
             for step in steps {
                 div { class: "nd-scale-row",
-                    span { class: "nd-scale-name", "space-{step}" }
+                    Code { class: "nd-scale-name", "--noctua-space-{step}" }
                     span { class: "nd-bar", style: "inline-size: var(--noctua-space-{step})" }
                 }
             }
         }
-        p { class: "nd-prose", "{context.t(Key::PageSpacingSummary)}" }
     }
 }
 
+/// The four patterns, drawn, plus the ambient layers and a way to try them.
+///
+/// The page that documents background effects has to show them. Each swatch
+/// below carries a real `data-noctua-pattern` on a scoped element, so what a
+/// reader sees is the shipped geometry rather than a picture of it.
 #[component]
 fn Effects(context: Context) -> Element {
+    let patterns = [
+        ("dots", Key::SettingsPatternDots),
+        ("mesh", Key::SettingsPatternMesh),
+        ("checks", Key::SettingsPatternChecks),
+        ("diagonals", Key::SettingsPatternDiagonals),
+    ];
     rsx! {
-        p { class: "nd-prose", "{context.t(Key::SettingsGlowNote)}" }
-        p { class: "nd-prose", "{context.t(Key::SettingsGrainNote)}" }
-        p { class: "nd-prose", "{context.t(Key::SettingsAnimateNote)}" }
-        Frame { context, caption: Key::PageEffectsTitle,
-            div { class: "nd-glass nd-scope",
-                Sample { context }
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::EffectsPatternsTitle)}" }
+        Paragraph { "{context.t(Key::EffectsPatternsBody)}" }
+
+        div { class: "nd-pattern-grid",
+            for (value, label) in patterns {
+                figure { class: "nd-pattern",
+                    // The real layer, on a real attribute. `.noctua-fx` is the
+                    // colour layer's own class, so this swatch is drawn by the
+                    // shipped CSS and cannot drift from it.
+                    div { class: "nd-pattern-swatch", "data-nd-pattern-demo": "{value}",
+                        div { class: "noctua-fx nd-pattern-fx" }
+                    }
+                    figcaption { class: "nd-pattern-name",
+                        Text { size: TextSize::Small, weight: TextWeight::Medium, "{context.t(label)}" }
+                    }
+                }
+            }
+        }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::EffectsAmbientTitle)}" }
+        Paragraph { "{context.t(Key::EffectsAmbientBody)}" }
+
+        Heading { level: HeadingLevel::_3, size: HeadingSize::H4, "{context.t(Key::EffectsTry)}" }
+        Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::EffectsTryBody)}" }
+        div { class: "nd-choice", "data-nd-setting": "pattern",
+            p { class: "nd-choice-label", id: "nd-label-try-pattern", "{context.t(Key::SettingsPatternLabel)}" }
+            div { class: "nd-options", role: "radiogroup", "aria-labelledby": "nd-label-try-pattern",
+                for (value, label) in [
+                    ("none", Key::SettingsPatternNone),
+                    ("dots", Key::SettingsPatternDots),
+                    ("mesh", Key::SettingsPatternMesh),
+                    ("checks", Key::SettingsPatternChecks),
+                    ("diagonals", Key::SettingsPatternDiagonals),
+                ] {
+                    button {
+                        class: "nd-option",
+                        r#type: "button",
+                        role: "radio",
+                        "aria-checked": "false",
+                        "data-nd-value": "{value}",
+                        "{context.t(label)}"
+                    }
+                }
+            }
+        }
+        for (setting, label) in [
+            ("glow", Key::SettingsGlowLabel),
+            ("grain", Key::SettingsGrainLabel),
+            ("animate", Key::SettingsAnimateLabel),
+        ] {
+            div { class: "nd-choice", "data-nd-setting": "{setting}",
+                p { class: "nd-choice-label", id: "nd-label-try-{setting}", "{context.t(label)}" }
+                div { class: "nd-options", role: "radiogroup", "aria-labelledby": "nd-label-try-{setting}",
+                    for (value, text) in [("off", Key::SettingsOff), ("on", Key::SettingsOn)] {
+                        button {
+                            class: "nd-option",
+                            r#type: "button",
+                            role: "radio",
+                            "aria-checked": "false",
+                            "data-nd-value": "{value}",
+                            "{context.t(text)}"
+                        }
+                    }
+                }
             }
         }
     }
 }
 
-/// The component page template.
-///
-/// Every row in the table below is read from the generated theme model, never
-/// typed here: the props of `ThemeScope` **are** the scopable settings, so the
-/// documented surface and the implemented surface are the same list. Add a
-/// setting to `spec/theme.toml` and it appears here, with its type, its values
-/// and its default, without this file changing.
-///
-/// That is the shape every component page will take once `spec/components/*.toml`
-/// exists — generated wherever the spec knows the answer, so a documented prop
-/// cannot disagree with the implemented one.
+/// The component page: the contract, the whole set rendered, and the props.
 #[component]
 fn Components(context: Context) -> Element {
     let request = [("palette", "violet-vivid"), ("mode", "dark")];
     rsx! {
-        p { class: "nd-prose", "{context.t(Key::ProvisionalBody)}" }
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentsContractTitle)}" }
+        Paragraph { "{context.t(Key::ComponentsContractBody)}" }
 
-        h2 { class: "nd-scope-title", "ThemeScope" }
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentsSet)}" }
+        Gallery { context }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "ThemeScope" }
         PropTable { context }
 
         Frame {
@@ -387,6 +483,74 @@ fn Components(context: Context) -> Element {
                 mode: Mode::Dark,
                 Sample { context }
             }
+        }
+    }
+}
+
+/// Every text component, rendered rather than listed.
+///
+/// The page cannot claim a component exists that does not compile, because each
+/// row below *is* the component.
+#[component]
+fn Gallery(context: Context) -> Element {
+    rsx! {
+        div { class: "nd-gallery",
+            GalleryRow { name: "Heading",
+                Heading { level: HeadingLevel::_3, size: HeadingSize::H4, "{context.t(Key::ScopeSampleHeading)}" }
+            }
+            GalleryRow { name: "Text",
+                Text { weight: TextWeight::Semibold, "Semibold" }
+                Text { tone: TextTone::Muted, " muted " }
+                Text { tone: TextTone::Accent, "accent" }
+            }
+            GalleryRow { name: "Link",
+                Link { href: "#", "{context.t(Key::ScopeSampleLink)}" }
+                Link { href: "https://example.org", external: true, class: "nd-gallery-gap", "external" }
+            }
+            GalleryRow { name: "Code", Code { "--noctua-space-gap" } }
+            GalleryRow { name: "Kbd", Kbd { "Ctrl" } Kbd { class: "nd-gallery-gap", "K" } }
+            GalleryRow { name: "Em, Strong",
+                Em { "stress" }
+                Strong { class: "nd-gallery-gap", "importance" }
+            }
+            GalleryRow { name: "Mark", Mark { "a search hit" } }
+            GalleryRow { name: "Del, Ins",
+                Del { "removed" }
+                Ins { class: "nd-gallery-gap", "added" }
+            }
+            GalleryRow { name: "Abbr", Abbr { title: "Cascading Style Sheets", "CSS" } }
+            GalleryRow { name: "Time", Time { datetime: "2026-07-28", "28 July 2026" } }
+            GalleryRow { name: "Truncate",
+                Truncate { title: "{context.t(Key::ScopeSampleBody)}", "{context.t(Key::ScopeSampleBody)}" }
+            }
+            GalleryRow { name: "List",
+                List { spacing: ListSpacing::Tight,
+                    ListItem { "One" }
+                    ListItem { "Two" }
+                }
+            }
+            GalleryRow { name: "Blockquote",
+                Blockquote { Paragraph { "{context.t(Key::ScopeSampleBody)}" } }
+            }
+            GalleryRow { name: "CodeBlock",
+                CodeBlock { language: "rust", "Heading level=3 size=h4" }
+            }
+            GalleryRow { name: "VisuallyHidden",
+                VisuallyHidden { "announced, never shown" }
+                Text { size: TextSize::Caption, tone: TextTone::Muted,
+                    "there is hidden text here, for screen readers only"
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn GalleryRow(name: String, children: Element) -> Element {
+    rsx! {
+        div { class: "nd-gallery-row",
+            Code { class: "nd-gallery-name", tone: CodeTone::Subtle, "{name}" }
+            div { class: "nd-gallery-demo", {children} }
         }
     }
 }

@@ -108,8 +108,13 @@ for (const mode of MODES) {
         //
         // `visibility: hidden` rather than `display: none`, so nothing reflows
         // and the pattern keeps the geometry it had.
+        // Three things have to be named rather than left to inheritance:
+        // `.nd-header-glass` is a SIBLING of the shell; the docked sidebar sets
+        // `visibility: visible` on itself, which REVERSES its parent's hidden;
+        // and the skip link is fixed at the top-left, inside the measured
+        // region. Any one of them left showing is read as the pattern's colour.
         await page.addStyleTag({
-          content: ".nd-header, .nd-body { visibility: hidden; }",
+          content: ".nd-header, .nd-header-glass, .nd-skip, .nd-body, .nd-body * { visibility: hidden !important; }",
         });
         const strip = await page.locator("body").screenshot({
           clip: { x: 0, y: 0, width: 320, height: 200 },
@@ -134,36 +139,47 @@ for (const mode of MODES) {
   }
 }
 
-test("a pattern moves the page by at most the declared ceiling", async ({ page }) => {
+test("a pattern's ink stays under the declared ceiling", async ({ page }) => {
   await page.goto("/en/spacing.html");
-
-  const sample = async () => {
-    const shot = await page.locator("body").screenshot({
-      clip: { x: 0, y: 0, width: 320, height: 200 },
-    });
-    return extremes(page, shot);
-  };
-
   await page.evaluate(() => {
     document.documentElement.setAttribute("data-theme", "dark");
     document.documentElement.setAttribute("data-noctua-pattern", "none");
   });
-  const plain = await sample();
+  await page.addStyleTag({
+    content: ".nd-header, .nd-header-glass, .nd-skip, .nd-body, .nd-body * { visibility: hidden !important; }",
+  });
+
+  const spread = async () => {
+    const shot = await page.locator("body").screenshot({
+      clip: { x: 0, y: 0, width: 320, height: 200 },
+    });
+    const { min, max } = await extremes(page, shot);
+    // The AMPLITUDE the pattern introduces across the bare page — which is what
+    // "how much ink" means. Comparing one absolute extreme between two states
+    // measures whatever else changed with them, which is how the first version
+    // of this test reported a 59/255 move for a 4% wash.
+    return (max[0] + max[1] + max[2] - min[0] - min[1] - min[2]) / 3;
+  };
+
+  // The baseline, whatever it is. Measuring the pattern's contribution RELATIVE
+  // to it is what makes this robust: the region contains the scrollbar and the
+  // page's own edge, and subtracting a fixed guess for those was what made the
+  // first two versions of this test measure the furniture instead of the ink.
+  const plain = await spread();
 
   for (const pattern of PATTERNS) {
     await page.evaluate(
       (p) => document.documentElement.setAttribute("data-noctua-pattern", p),
       pattern,
     );
-    const inked = await sample();
-    // The spec declares a 4% ink ceiling. Allow a couple of levels for the
-    // compositor's rounding; anything near 10 would mean the ceiling is not
-    // being applied at all.
-    const moved = Math.max(
-      Math.abs(inked.max[0] - plain.max[0]),
-      Math.abs(inked.max[1] - plain.max[1]),
-      Math.abs(inked.max[2] - plain.max[2]),
-    );
-    expect(moved, `${pattern} moved the page by ${moved}/255`).toBeLessThanOrEqual(18);
+    const inked = await spread();
+    const contributed = inked - plain;
+    // 4% of 255 is about 10. Allowing 18 leaves room for the compositor's
+    // rounding and antialiasing while still failing loudly if the ceiling
+    // stopped being applied — an unbounded pattern would be far past this.
+    expect(
+      contributed,
+      `${pattern} added ${contributed.toFixed(1)}/255 over a baseline of ${plain.toFixed(1)}`,
+    ).toBeLessThanOrEqual(18);
   }
 });

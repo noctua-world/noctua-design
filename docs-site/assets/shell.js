@@ -152,6 +152,7 @@ function refresh() {
     }
   }
   resolveScopes();
+  refreshRoving();
 }
 
 document.addEventListener("click", (event) => {
@@ -228,9 +229,17 @@ function setDrawer(open) {
   } else {
     root.removeAttribute("data-nd-nav");
   }
-  document
-    .querySelector("[data-nd-menu]")
-    ?.setAttribute("aria-expanded", String(open));
+  const button = document.querySelector("[data-nd-menu]");
+  if (button) {
+    button.setAttribute("aria-expanded", String(open));
+    // A button whose label never changes tells a screen-reader user the menu is
+    // closed while they are standing in it.
+    const label = open ? button.dataset.ndClose : button.dataset.ndOpen;
+    if (label) {
+      button.setAttribute("aria-label", label);
+      button.setAttribute("title", label);
+    }
+  }
 }
 
 document.querySelector("[data-nd-menu]")?.addEventListener("click", () => {
@@ -245,8 +254,61 @@ document
 // expects to back out of something.
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
+
+  // Escape in a search field clears the field. Closing the navigation the
+  // reader is searching, because they used the key every browser has trained
+  // them to use, is the opposite of helpful.
+  if (event.target?.matches?.("[data-nd-search]")) {
+    if (event.target.value !== "") {
+      event.target.value = "";
+      event.target.dispatchEvent(new Event("input"));
+      event.stopPropagation();
+      return;
+    }
+  }
+
   setDrawer(false);
   document.querySelector("[data-nd-settings][open]")?.removeAttribute("open");
+});
+
+// --- Keyboard model for the radiogroups -------------------------------------
+
+// Twelve groups and forty-two buttons meant forty-two tab stops. A radiogroup
+// is ONE stop: Tab enters it, arrows move within it, Tab leaves. That is what
+// every native radio group does and what a reader expects from `role="radio"`.
+function roving(group) {
+  const options = [...group.querySelectorAll('[role="radio"]')];
+  if (options.length === 0) return;
+  const checked = options.findIndex((o) => o.getAttribute("aria-checked") === "true");
+  const active = checked === -1 ? 0 : checked;
+  options.forEach((option, index) => {
+    option.tabIndex = index === active ? 0 : -1;
+  });
+}
+
+function refreshRoving() {
+  for (const group of document.querySelectorAll('[role="radiogroup"]')) roving(group);
+}
+
+document.addEventListener("keydown", (event) => {
+  const option = event.target?.closest?.('[role="radio"]');
+  if (!option) return;
+  const group = option.closest('[role="radiogroup"]');
+  if (!group) return;
+
+  const options = [...group.querySelectorAll('[role="radio"]')];
+  const index = options.indexOf(option);
+  const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+
+  let next = null;
+  if (step !== undefined) next = options[(index + step + options.length) % options.length];
+  else if (event.key === "Home") next = options[0];
+  else if (event.key === "End") next = options[options.length - 1];
+  if (!next) return;
+
+  event.preventDefault();
+  next.focus();
+  next.click();
 });
 
 // Following a link inside the drawer closes it, or the destination arrives
@@ -290,7 +352,24 @@ search?.addEventListener("input", () => {
   if (found) found.hidden = names === 0;
   const empty = document.querySelector("[data-nd-search-empty]");
   if (empty) empty.hidden = pages + names > 0;
+
+  const status = document.querySelector("[data-nd-search-status]");
+  if (status) {
+    // One whole sentence with a hole in it, filled from the catalogue — never
+    // a count concatenated to a word. Word order and pluralisation differ
+    // between languages, and neither half is a sentence a translator can move.
+    status.textContent =
+      needle === "" ? "" : fillMessage(status.dataset.ndTemplate, { count: pages + names });
+  }
 });
+
+/** Substitutes `{name}` placeholders. The only sanctioned way to build a message. */
+function fillMessage(template, args) {
+  if (!template) return "";
+  return template.replace(/\{(\w+)\}/g, (whole, name) =>
+    Object.hasOwn(args, name) ? String(args[name]) : whole,
+  );
+}
 
 // --- Themed scopes ---------------------------------------------------------
 
@@ -304,6 +383,8 @@ search?.addEventListener("input", () => {
 // stored its resolved answer would keep the old one forever.
 const scopes = [...document.querySelectorAll(`[${scopeAttribute}]`)];
 const requests = new WeakMap();
+/** What each scope was built with, so a reset has something to return to. */
+const initial = new WeakMap();
 
 for (const element of scopes) {
   const request = {};
@@ -314,6 +395,7 @@ for (const element of scopes) {
   // A scope with no `data-theme` is following whatever it inherits, which is
   // exactly what an absent value means everywhere else in this system.
   requests.set(element, request);
+  initial.set(element, { ...request });
 }
 
 function documentTheme() {
@@ -355,6 +437,13 @@ function resolveScopes() {
 }
 
 document.addEventListener("click", (event) => {
+  if (event.target.closest?.("[data-nd-scope-reset]")) {
+    // Without this the only way back from a cycled demo was a reload.
+    for (const element of scopes) requests.set(element, initial.get(element) ?? {});
+    resolveScopes();
+    return;
+  }
+
   const button = event.target.closest?.("[data-nd-scope-cycle]");
   if (!button) return;
   const element = button.closest(`[${scopeAttribute}]`);
@@ -527,6 +616,6 @@ document.addEventListener("click", (event) => {
 // The bootstrap already stamped everything before the first paint. This only
 // marks the controls and links the palette the reader chose, so nothing that
 // happens here can move the page.
-for (const name of chosen) read(name);
 ensureStylesheet(read("palette"));
 refresh();
+refreshRoving();

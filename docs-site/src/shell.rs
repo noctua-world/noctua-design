@@ -63,6 +63,8 @@ pub(crate) fn Header(context: Context) -> Element {
                 "aria-controls": "nd-nav",
                 "aria-label": context.t(Key::NavOpen),
                 "data-nd-menu": "",
+                "data-nd-open": context.t(Key::NavOpen),
+                "data-nd-close": context.t(Key::NavClose),
                 Icon { name: "menu" }
             }
             a { class: "nd-wordmark", href: "{home}", "{context.t(Key::AppName)}" }
@@ -74,6 +76,14 @@ pub(crate) fn Header(context: Context) -> Element {
                     "aria-label": context.t(Key::ThemeModeLabel),
                     title: "{context.t(Key::ThemeModeLabel)}",
                     Icon { name: "mode" }
+                }
+                a {
+                    class: "nd-icon",
+                    href: "https://github.com/noctua-world/noctua-design",
+                    rel: "noreferrer",
+                    "aria-label": context.t(Key::AppRepository),
+                    title: "{context.t(Key::AppRepository)}",
+                    Icon { name: "repository" }
                 }
                 LocaleSwitch { context }
                 Settings { context }
@@ -137,7 +147,7 @@ fn Settings(context: Context) -> Element {
                 Icon { name: "settings" }
             }
             div { class: "nd-panel",
-                p { class: "nd-panel-title", "{context.t(Key::SettingsTitle)}" }
+                p { class: "nd-panel-title", "{context.t(Key::SettingsLabel)}" }
 
                 Choice {
                     context,
@@ -256,6 +266,7 @@ fn Choice(
     #[props(default)] note: Option<Key>,
     options: Vec<(&'static str, Key)>,
 ) -> Element {
+    let default = crate::defaults::of(&setting);
     rsx! {
         div { class: "nd-choice", "data-nd-setting": "{setting}",
             p { class: "nd-choice-label", id: "nd-label-{setting}", "{context.t(label)}" }
@@ -268,7 +279,10 @@ fn Choice(
                         class: "nd-option",
                         r#type: "button",
                         role: "radio",
-                        "aria-checked": "false",
+                        // Rendered from the default rather than left false and
+                        // corrected by script: with JavaScript off, every
+                        // radio in the panel announced itself as unchecked.
+                        "aria-checked": if value == default { "true" } else { "false" },
                         "data-nd-value": "{value}",
                         "{context.t(text)}"
                     }
@@ -390,6 +404,15 @@ pub(crate) fn Sidebar(context: Context) -> Element {
             p { class: "nd-search-empty", "data-nd-search-empty": "", hidden: true,
                 "{context.t(Key::SearchEmpty)}"
             }
+            // Announced, not merely shown. Without a live region a screen-reader
+            // user types into the box and is told nothing at all.
+            p {
+                class: "nd-visually-hidden",
+                "data-nd-search-status": "",
+                "data-nd-template": context.t(Key::SearchResults),
+                role: "status",
+                "aria-live": "polite",
+            }
             div { class: "nd-nav-foot",
                 p { "{context.t(Key::AppTagline)}" }
             }
@@ -400,15 +423,17 @@ pub(crate) fn Sidebar(context: Context) -> Element {
 /// The dimming layer, which stops exactly where the drawer starts.
 ///
 /// A plain `<button>`: it is a control that closes the menu, and making it one
-/// means a keyboard reaches it, a screen reader announces it, and `Enter` works
-/// — none of which is true of a `<div>` with a click handler.
+/// means a keyboard reaches it, a screen reader announces it, and `Enter`
+/// works — none of which is true of a `<div>` with a click handler.
+///
+/// It carried `tabindex="-1"`, which took all three away again while the
+/// comment went on claiming them. It does not any more.
 #[component]
 pub(crate) fn Scrim(context: Context) -> Element {
     rsx! {
         button {
             class: "nd-scrim",
             r#type: "button",
-            tabindex: "-1",
             "aria-label": context.t(Key::NavDismiss),
             "data-nd-scrim": "",
         }

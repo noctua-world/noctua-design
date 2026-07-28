@@ -346,11 +346,63 @@ pub enum Key {
     TypeScriptsBody,
     /// `type.specimen.line`
     TypeSpecimenLine,
+    /// `overview.body`
+    OverviewBody,
+    /// `overview.explore`
+    OverviewExplore,
+    /// `colours.note`
+    ColoursNote,
+    /// `colours.roles`
+    ColoursRoles,
+    /// `colours.roles.body`
+    ColoursRolesBody,
+    /// `spacing.named.title`
+    SpacingNamedTitle,
+    /// `spacing.named.body`
+    SpacingNamedBody,
+    /// `spacing.scale.title`
+    SpacingScaleTitle,
+    /// `spacing.scale.body`
+    SpacingScaleBody,
+    /// `spacing.tight`
+    SpacingTight,
+    /// `spacing.inset`
+    SpacingInset,
+    /// `spacing.gap`
+    SpacingGap,
+    /// `spacing.paragraph`
+    SpacingParagraph,
+    /// `spacing.heading`
+    SpacingHeading,
+    /// `spacing.section`
+    SpacingSection,
+    /// `spacing.region`
+    SpacingRegion,
+    /// `effects.patterns.title`
+    EffectsPatternsTitle,
+    /// `effects.patterns.body`
+    EffectsPatternsBody,
+    /// `effects.ambient.title`
+    EffectsAmbientTitle,
+    /// `effects.ambient.body`
+    EffectsAmbientBody,
+    /// `effects.try`
+    EffectsTry,
+    /// `effects.try.body`
+    EffectsTryBody,
+    /// `components.contract.title`
+    ComponentsContractTitle,
+    /// `components.contract.body`
+    ComponentsContractBody,
+    /// `components.set`
+    ComponentsSet,
+    /// `scope.reset`
+    ScopeReset,
 }
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 113] = [
+    pub const ALL: [Self; 139] = [
         Self::AppName,
         Self::AppTagline,
         Self::AppSkip,
@@ -464,6 +516,32 @@ impl Key {
         Self::TypeScriptsTitle,
         Self::TypeScriptsBody,
         Self::TypeSpecimenLine,
+        Self::OverviewBody,
+        Self::OverviewExplore,
+        Self::ColoursNote,
+        Self::ColoursRoles,
+        Self::ColoursRolesBody,
+        Self::SpacingNamedTitle,
+        Self::SpacingNamedBody,
+        Self::SpacingScaleTitle,
+        Self::SpacingScaleBody,
+        Self::SpacingTight,
+        Self::SpacingInset,
+        Self::SpacingGap,
+        Self::SpacingParagraph,
+        Self::SpacingHeading,
+        Self::SpacingSection,
+        Self::SpacingRegion,
+        Self::EffectsPatternsTitle,
+        Self::EffectsPatternsBody,
+        Self::EffectsAmbientTitle,
+        Self::EffectsAmbientBody,
+        Self::EffectsTry,
+        Self::EffectsTryBody,
+        Self::ComponentsContractTitle,
+        Self::ComponentsContractBody,
+        Self::ComponentsSet,
+        Self::ScopeReset,
     ];
 
     /// The dotted name, for diagnostics and for the search index.
@@ -583,6 +661,32 @@ impl Key {
             Self::TypeScriptsTitle => "type.scripts.title",
             Self::TypeScriptsBody => "type.scripts.body",
             Self::TypeSpecimenLine => "type.specimen.line",
+            Self::OverviewBody => "overview.body",
+            Self::OverviewExplore => "overview.explore",
+            Self::ColoursNote => "colours.note",
+            Self::ColoursRoles => "colours.roles",
+            Self::ColoursRolesBody => "colours.roles.body",
+            Self::SpacingNamedTitle => "spacing.named.title",
+            Self::SpacingNamedBody => "spacing.named.body",
+            Self::SpacingScaleTitle => "spacing.scale.title",
+            Self::SpacingScaleBody => "spacing.scale.body",
+            Self::SpacingTight => "spacing.tight",
+            Self::SpacingInset => "spacing.inset",
+            Self::SpacingGap => "spacing.gap",
+            Self::SpacingParagraph => "spacing.paragraph",
+            Self::SpacingHeading => "spacing.heading",
+            Self::SpacingSection => "spacing.section",
+            Self::SpacingRegion => "spacing.region",
+            Self::EffectsPatternsTitle => "effects.patterns.title",
+            Self::EffectsPatternsBody => "effects.patterns.body",
+            Self::EffectsAmbientTitle => "effects.ambient.title",
+            Self::EffectsAmbientBody => "effects.ambient.body",
+            Self::EffectsTry => "effects.try",
+            Self::EffectsTryBody => "effects.try.body",
+            Self::ComponentsContractTitle => "components.contract.title",
+            Self::ComponentsContractBody => "components.contract.body",
+            Self::ComponentsSet => "components.set",
+            Self::ScopeReset => "scope.reset",
         }
     }
 }
@@ -742,6 +846,50 @@ impl Locale {
                     "This is why Noto was chosen. Each line below is real text, not a placeholder — a script's shaping only shows in words somebody would actually write."
                 }
                 Key::TypeSpecimenLine => "Sphinx of black quartz, judge my vow",
+                Key::OverviewBody => {
+                    "One idea runs through all of it: a value is chosen once, in a specification, and everything that needs it is generated. No colour, no size and no message is written down twice."
+                }
+                Key::OverviewExplore => "Where to look",
+                Key::ColoursNote => {
+                    "Every swatch below is a real palette, not a picture of one. Each cell carries the palette as an attribute and reads its own colours through it — the same mechanism a themed component uses."
+                }
+                Key::ColoursRoles => "The roles",
+                Key::ColoursRolesBody => {
+                    "Each cell shows five of the roles a palette defines: the page, a subtle surface, a border, the accent, and the text."
+                }
+                Key::SpacingNamedTitle => "The gaps a reader feels",
+                Key::SpacingNamedBody => {
+                    "A component asks for a purpose, not a number. Changing what the gap between paragraphs means is one line in the specification rather than a search across every component."
+                }
+                Key::SpacingScaleTitle => "The scale",
+                Key::SpacingScaleBody => {
+                    "Every step is a multiple of one base, so the whole scale moves together and nothing can land between two steps."
+                }
+                Key::SpacingTight => "Between a label and the control it labels",
+                Key::SpacingInset => "Inside a control — the padding of a button or an input",
+                Key::SpacingGap => "Between sibling controls in a row",
+                Key::SpacingParagraph => "Between paragraphs",
+                Key::SpacingHeading => "Between a heading and the text under it",
+                Key::SpacingSection => "Between sections of a page",
+                Key::SpacingRegion => "Between major regions of a layout",
+                Key::EffectsPatternsTitle => "Patterns",
+                Key::EffectsPatternsBody => {
+                    "Four geometries, each drawn in the text colour at four percent. That ceiling is what makes the readability claim measurable rather than hopeful — and a test measures it, on every pattern, in both modes."
+                }
+                Key::EffectsAmbientTitle => "Ambient",
+                Key::EffectsAmbientBody => {
+                    "The aurora follows the accent, so it changes with the palette without naming a colour. The grain sits always behind the text, because noise over glyphs costs far more legibility than a flat wash."
+                }
+                Key::EffectsTry => "Try it",
+                Key::EffectsTryBody => {
+                    "Each button turns the effect on for the whole page, exactly as the settings panel does. They are the same setting."
+                }
+                Key::ComponentsContractTitle => "The contract",
+                Key::ComponentsContractBody => {
+                    "A component is four things that change together: its specification, its Dioxus implementation, its React implementation, and the behavioural cases both are run against. Three of the four are generated from the first, so the two implementations cannot declare different props."
+                }
+                Key::ComponentsSet => "The set",
+                Key::ScopeReset => "Reset both",
             },
             Self::PtBr => match key {
                 Key::AppName => "Noctua",
@@ -895,6 +1043,50 @@ impl Locale {
                     "É por isto que o Noto foi escolhido. Cada linha abaixo é texto real, não um espaço reservado — a modelagem de uma escrita só aparece em palavras que alguém de fato escreveria."
                 }
                 Key::TypeSpecimenLine => "Um pequeno jabuti xereta viu dez cegonhas felizes",
+                Key::OverviewBody => {
+                    "Uma ideia percorre tudo: um valor é escolhido uma vez, numa especificação, e tudo que precisa dele é gerado. Nenhuma cor, nenhum tamanho e nenhuma mensagem é escrita duas vezes."
+                }
+                Key::OverviewExplore => "Por onde começar",
+                Key::ColoursNote => {
+                    "Cada amostra abaixo é uma paleta de verdade, não uma imagem de uma. Cada célula carrega a paleta como atributo e lê as próprias cores através dele — o mesmo mecanismo que um componente com tema usa."
+                }
+                Key::ColoursRoles => "Os papéis",
+                Key::ColoursRolesBody => {
+                    "Cada célula mostra cinco dos papéis que uma paleta define: a página, uma superfície sutil, uma borda, o destaque e o texto."
+                }
+                Key::SpacingNamedTitle => "Os espaços que o leitor sente",
+                Key::SpacingNamedBody => {
+                    "Um componente pede um propósito, não um número. Mudar o que significa o espaço entre parágrafos é uma linha na especificação, e não uma busca por todos os componentes."
+                }
+                Key::SpacingScaleTitle => "A escala",
+                Key::SpacingScaleBody => {
+                    "Cada passo é um múltiplo de uma base, então a escala inteira se move junto e nada pode cair entre dois passos."
+                }
+                Key::SpacingTight => "Entre um rótulo e o controle que ele nomeia",
+                Key::SpacingInset => "Dentro de um controle — o preenchimento de um botão ou campo",
+                Key::SpacingGap => "Entre controles irmãos numa linha",
+                Key::SpacingParagraph => "Entre parágrafos",
+                Key::SpacingHeading => "Entre um título e o texto abaixo dele",
+                Key::SpacingSection => "Entre seções de uma página",
+                Key::SpacingRegion => "Entre regiões maiores de um layout",
+                Key::EffectsPatternsTitle => "Padrões",
+                Key::EffectsPatternsBody => {
+                    "Quatro geometrias, cada uma desenhada na cor do texto a quatro por cento. Esse teto é o que torna a promessa de legibilidade mensurável em vez de otimista — e um teste a mede, em cada padrão, nos dois modos."
+                }
+                Key::EffectsAmbientTitle => "Ambiente",
+                Key::EffectsAmbientBody => {
+                    "A aurora segue a cor de destaque, então muda com a paleta sem nomear uma cor. O granulado fica sempre atrás do texto, porque ruído sobre glifos custa muito mais legibilidade que um véu uniforme."
+                }
+                Key::EffectsTry => "Experimente",
+                Key::EffectsTryBody => {
+                    "Cada botão liga o efeito para a página inteira, exatamente como o painel de configurações faz. É a mesma configuração."
+                }
+                Key::ComponentsContractTitle => "O contrato",
+                Key::ComponentsContractBody => {
+                    "Um componente é quatro coisas que mudam juntas: sua especificação, sua implementação em Dioxus, sua implementação em React, e os casos de comportamento contra os quais as duas são executadas. Três das quatro são geradas a partir da primeira, então as duas implementações não podem declarar props diferentes."
+                }
+                Key::ComponentsSet => "O conjunto",
+                Key::ScopeReset => "Restaurar ambos",
             },
             Self::Qps => match key {
                 Key::AppName => "⟦Nooctuuaa⟧",
@@ -1052,6 +1244,52 @@ impl Locale {
                     "⟦Thiis iis why Nootoo waas chooseen. EEaach liinee beeloow iis reeaal teext, noot aa plaaceehooldeer — aa scriipt's shaapiing oonly shoows iin woords soomeeboody woouuld aactuuaally wriitee.⟧"
                 }
                 Key::TypeSpecimenLine => "⟦Sphiinx oof blaack quuaartz, juudgee my voow⟧",
+                Key::OverviewBody => {
+                    "⟦OOnee iideeaa ruuns throouugh aall oof iit: aa vaaluuee iis chooseen ooncee, iin aa speeciifiicaatiioon, aand eeveerythiing thaat neeeeds iit iis geeneeraateed. Noo cooloouur, noo siizee aand noo meessaagee iis wriitteen doown twiicee.⟧"
+                }
+                Key::OverviewExplore => "⟦Wheeree too looook⟧",
+                Key::ColoursNote => {
+                    "⟦EEveery swaatch beeloow iis aa reeaal paaleettee, noot aa piictuuree oof oonee. EEaach ceell caarriiees thee paaleettee aas aan aattriibuutee aand reeaads iits oown cooloouurs throouugh iit — thee saamee meechaaniism aa theemeed coompooneent uusees.⟧"
+                }
+                Key::ColoursRoles => "⟦Thee roolees⟧",
+                Key::ColoursRolesBody => {
+                    "⟦EEaach ceell shoows fiivee oof thee roolees aa paaleettee deefiinees: thee paagee, aa suubtlee suurfaacee, aa boordeer, thee aacceent, aand thee teext.⟧"
+                }
+                Key::SpacingNamedTitle => "⟦Thee gaaps aa reeaadeer feeeels⟧",
+                Key::SpacingNamedBody => {
+                    "⟦AA coompooneent aasks foor aa puurpoosee, noot aa nuumbeer. Chaangiing whaat thee gaap beetweeeen paaraagraaphs meeaans iis oonee liinee iin thee speeciifiicaatiioon raatheer thaan aa seeaarch aacrooss eeveery coompooneent.⟧"
+                }
+                Key::SpacingScaleTitle => "⟦Thee scaalee⟧",
+                Key::SpacingScaleBody => {
+                    "⟦EEveery steep iis aa muultiiplee oof oonee baasee, soo thee whoolee scaalee moovees toogeetheer aand noothiing caan laand beetweeeen twoo steeps.⟧"
+                }
+                Key::SpacingTight => "⟦Beetweeeen aa laabeel aand thee coontrool iit laabeels⟧",
+                Key::SpacingInset => {
+                    "⟦IInsiidee aa coontrool — thee paaddiing oof aa buuttoon oor aan iinpuut⟧"
+                }
+                Key::SpacingGap => "⟦Beetweeeen siibliing coontrools iin aa roow⟧",
+                Key::SpacingParagraph => "⟦Beetweeeen paaraagraaphs⟧",
+                Key::SpacingHeading => "⟦Beetweeeen aa heeaadiing aand thee teext uundeer iit⟧",
+                Key::SpacingSection => "⟦Beetweeeen seectiioons oof aa paagee⟧",
+                Key::SpacingRegion => "⟦Beetweeeen maajoor reegiioons oof aa laayoouut⟧",
+                Key::EffectsPatternsTitle => "⟦Paatteerns⟧",
+                Key::EffectsPatternsBody => {
+                    "⟦Foouur geeoomeetriiees, eeaach draawn iin thee teext cooloouur aat foouur peerceent. Thaat ceeiiliing iis whaat maakees thee reeaadaabiiliity claaiim meeaasuuraablee raatheer thaan hoopeefuul — aand aa teest meeaasuurees iit, oon eeveery paatteern, iin booth moodees.⟧"
+                }
+                Key::EffectsAmbientTitle => "⟦AAmbiieent⟧",
+                Key::EffectsAmbientBody => {
+                    "⟦Thee aauurooraa foolloows thee aacceent, soo iit chaangees wiith thee paaleettee wiithoouut naamiing aa cooloouur. Thee graaiin siits aalwaays beehiind thee teext, beecaauusee nooiisee ooveer glyphs coosts faar mooree leegiibiiliity thaan aa flaat waash.⟧"
+                }
+                Key::EffectsTry => "⟦Try iit⟧",
+                Key::EffectsTryBody => {
+                    "⟦EEaach buuttoon tuurns thee eeffeect oon foor thee whoolee paagee, eexaactly aas thee seettiings paaneel dooees. Theey aaree thee saamee seettiing.⟧"
+                }
+                Key::ComponentsContractTitle => "⟦Thee coontraact⟧",
+                Key::ComponentsContractBody => {
+                    "⟦AA coompooneent iis foouur thiings thaat chaangee toogeetheer: iits speeciifiicaatiioon, iits Diiooxuus iimpleemeentaatiioon, iits Reeaact iimpleemeentaatiioon, aand thee beehaaviioouuraal caasees booth aaree ruun aagaaiinst. Threeee oof thee foouur aaree geeneeraateed froom thee fiirst, soo thee twoo iimpleemeentaatiioons caannoot deeclaaree diiffeereent proops.⟧"
+                }
+                Key::ComponentsSet => "⟦Thee seet⟧",
+                Key::ScopeReset => "⟦Reeseet booth⟧",
             },
         }
     }
