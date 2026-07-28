@@ -367,6 +367,17 @@ mod tests {
         assert!(html.contains("data-palette=\"rose-sober\""));
     }
 
+    /// The site must be reproducible, or "it works on my machine" becomes a
+    /// property of the documentation as well as of the build.
+    #[test]
+    fn the_same_inputs_produce_the_same_page() {
+        for locale in Locale::ALL {
+            for page in site::PAGES {
+                assert_eq!(document(locale, page), document(locale, page));
+            }
+        }
+    }
+
     #[test]
     fn the_language_control_points_at_the_same_page() {
         for page in site::PAGES {

@@ -170,6 +170,7 @@ cargo xtask build     # compile spec/ into tokens, icons, props types and dist/
 cargo xtask check     # THE gate: spec, source gates, drift, fmt, clippy, tests
 cargo xtask dev       # watch spec/ and components, rebuild, serve the docs site
 cargo xtask docs      # pre-render the site into docs-site/dist/, one build per locale
+cargo xtask docs --verify   # …and run the 49-spec browser suite against it
 cargo xtask release   # prepare a version
 ```
 

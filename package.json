@@ -9,8 +9,12 @@
     "node": ">=20"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.0",
     "esbuild": "^0.28.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
+  },
+  "scripts": {
+    "test:browser": "playwright test"
   }
 }

@@ -59,6 +59,22 @@
   box-sizing: border-box;
 }
 
+/* `hidden` has to win, and this is the one `!important` in the file.
+ *
+ * The browser's own `[hidden] { display: none }` is a USER-AGENT rule, so any
+ * author rule beats it — including `display: flex` on a class that happens to
+ * also carry the attribute. Every `hidden` in this shell then does nothing:
+ * the React example stays visible behind its replacement, the search results
+ * show before anything is typed, and the markup reads as though it were
+ * working. Two browser tests failed on exactly this and the JavaScript setting
+ * the attribute was correct in both.
+ *
+ * `display: revert` would leave the same hole open one layer down; the whole
+ * point is that `hidden` outranks whatever the element's class says. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   color: var(--nc-color-fg);

@@ -25,3 +25,7 @@ node_modules/
 # `cargo xtask docs` notes its absence and carries on, so a Rust-only clone still
 # builds the whole site; only the implementation switch is inert.
 /docs-site/assets/example-react.js
+
+# Playwright's own output.
+/test-results/
+/playwright-report/

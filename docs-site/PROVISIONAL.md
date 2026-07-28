@@ -86,7 +86,25 @@ to a complete page; it never constructs one.
 
 ## Verified, in a real browser
 
-Not asserted — measured. The numbers below are from the built site.
+**49 Playwright specs**, run against the built site by
+`cargo xtask docs --verify`. Not a list of things somebody once checked: a suite
+that fails the build.
+
+```sh
+cargo xtask docs --verify     # build the site, then run all 49
+pnpm run test:browser         # the suite alone
+```
+
+It uses the system's Chrome (`NOCTUA_CHROME` overrides the path) rather than
+Playwright's download, which cannot find its libraries on a Nix system and exits
+before Playwright can say why.
+
+Every colour in the suite is read from **screenshot pixels** decoded in a canvas,
+never from `getComputedStyle` — the same rule the `colour_read_from_dom` gate
+imposes on the shell. The two places that read a serialised colour do so only to
+paint it, and carry an `allow-literal` saying so.
+
+What it covers:
 
 | | |
 |---|---|
@@ -103,10 +121,25 @@ Not asserted — measured. The numbers below are from the built site.
 | The React bundle: **0 requests** on a page view, **1** on the first toggle | ✓ |
 | React's `ThemeScope` stamps the same attributes Dioxus server-rendered | ✓ |
 | Each border sits one step from **its own** surface, measured in canvas pixels | ✓ |
+| 4 patterns × 2 modes × blackout on/off all clear **4.5:1** against real glyphs | ✓ |
+| No layout shift across mode, glass, radius, pattern, aurora and blackout | ✓ |
+| A stored palette links with `blocking="render"`, so nothing flashes | ✓ |
+| Reduced motion leaves `getAnimations()` empty even with every effect on | ✓ |
+| With JavaScript off the page is whole and follows the OS dark preference | ✓ |
+| Widening past `lg` releases drawer, scrim and scroll lock with no script | ✓ |
+| Switching back from React **unmounts** it rather than hiding it | ✓ |
 
-## Four bugs this stage found and fixed
+## Five bugs this stage found and fixed
 
-All four were silent, which is why they are written down.
+All five were silent, which is why they are written down.
+
+**`hidden` hid nothing.** The browser's `[hidden] { display: none }` is a
+*user-agent* rule, so any author rule outranks it — including `.nd-scope
+{ display: flex }` and `.nd-found a { display: block }`. Every `hidden` in the
+shell was inert: the React example stayed visible behind its replacement and the
+search results showed before anything was typed. The JavaScript setting the
+attribute was correct in both cases. One `[hidden] { display: none !important }`
+fixes it, and it is the only `!important` in the stylesheet.
 
 **Every border inside a themed component was the page's colour.** The shell
 declared `--nd-edge: <hairline> solid var(--nc-color-border)` at `:root` — the

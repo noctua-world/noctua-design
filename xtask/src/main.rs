@@ -57,7 +57,16 @@ enum Command {
     },
 
     /// Build the documentation site for both locales.
-    Docs,
+    Docs {
+        /// Also run the browser suite against the built site.
+        ///
+        /// Behind `docs` rather than a sixth verb, and opt-in rather than part
+        /// of `check`, because it is the one thing here that needs a browser —
+        /// and `NOCTUA.md §9.11` promises the Rust half builds and tests with
+        /// no Node installed. CI runs `cargo xtask docs --verify`.
+        #[arg(long)]
+        verify: bool,
+    },
 
     /// Prepare a version. Writes it; committing is left to a human.
     Release {
@@ -79,7 +88,7 @@ fn main() -> ExitCode {
         Command::Build => build::run(&root, &spec).map(|_| ()),
         Command::Check { spec_only } => check::run(&root, &spec, spec_only),
         Command::Dev { port } => dev(&root, &spec, port),
-        Command::Docs => docs(&root),
+        Command::Docs { verify } => docs(&root, verify),
         Command::Release { version, dry_run } => release(&version, dry_run),
     };
 
@@ -121,7 +130,7 @@ fn dev(root: &Path, spec: &Path, port: u16) -> Result<(), String> {
 /// deliberate: `xtask` would otherwise take a dependency on Dioxus, and a
 /// `cargo xtask check` on a machine that only wanted to validate the spec would
 /// compile a UI framework to do it.
-fn docs(root: &Path) -> Result<(), String> {
+fn docs(root: &Path, verify: bool) -> Result<(), String> {
     ui::heading("documentation site");
 
     let output = std::process::Command::new(env!("CARGO"))
@@ -145,6 +154,26 @@ fn docs(root: &Path) -> Result<(), String> {
         }
     }
     ui::detail("open docs-site/dist/index.html, or serve that directory");
+
+    if verify {
+        ui::gap();
+        ui::heading("browser suite");
+        let status = std::process::Command::new("pnpm")
+            .args(["run", "test:browser"])
+            .current_dir(root)
+            .status()
+            .map_err(|error| {
+                format!(
+                    "could not run the browser suite: {error}. It needs `pnpm install` \
+                     and a Chrome; see docs-site/PROVISIONAL.md"
+                )
+            })?;
+        if !status.success() {
+            return Err("the browser suite failed".to_owned());
+        }
+        ui::ok("the browser suite passed");
+    }
+
     Ok(())
 }
 
