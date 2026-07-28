@@ -321,6 +321,27 @@ breakpoints are minimum-width only.
 `min-width` to equal a breakpoint declared in `spec/tokens.toml`. Write the
 narrow case unconditionally and override it upward.
 
+### Trap 0.7 — a render-blocking stylesheet that 404s blocks nothing
+
+The bootstrap injected the stored palette's sheet with a **bare relative href**.
+Every page lives below the site root, so it resolved one directory too deep and
+404ed on every load. `blocking="render"` was set correctly and bought nothing: a
+sheet that never loads delays no paint. The page painted the default palette and
+the deferred module snapped it over *after* first paint — the exact flash the
+bootstrap exists to prevent, on every reload and every internal link.
+
+Anything the bootstrap builds a URL from must resolve against
+**`data-noctua-base`**, the attribute the document declares and `shell.js`
+already reads. Hardcoding depth in an emitter is hardcoding the URL scheme.
+
+**And the reason it survived a review and a test suite:** the only test asserted
+that `blocking="render"` was set before insertion — reading back a property the
+code under test had just set on an element it had just created. It never
+resolved the URL and never looked at a colour. *Assert the outcome.* The
+replacements load the page with `shell.js` aborted and check `link.sheet !== null`
+and that the painted accent differs from the default, plus one spec that fails on
+any response ≥ 400 across every page in every locale.
+
 **Trap 1 — Noto JP, KR, SC and Hebrew default to weight 100, not 400.**
 `fc-query` reports `Thin,Regular` as their first face. Anything rendering the
 default instance without pinning the axis gets **hairline text**, and the browser

@@ -159,26 +159,97 @@ test("reduced motion leaves nothing animating", async ({ page }) => {
   expect(running).toBe(0);
 });
 
-test("the stored palette blocks render, so nothing flashes", async ({ page }) => {
-  await page.addInitScript(() => {
-    localStorage.setItem("noctua-palette", "jade-vivid");
-    localStorage.setItem("noctua-accent", "jade");
-    localStorage.setItem("noctua-saturation", "vivid");
+// --- The flash -------------------------------------------------------------
+//
+// These three replace a test that asserted the injected stylesheet carried
+// `blocking="render"`. It passed for as long as the href was wrong, because it
+// read back a property the code under test had just set on an element it had
+// just created. It never resolved the URL and never looked at a colour, so the
+// page flashed the default palette on every single load with the suite green.
+//
+// A stored palette reaches the reader through TWO things: an attribute, and a
+// stylesheet that defines what the attribute means. Only the first was tested.
+
+/** Seeds a stored palette, applied before anything on the page runs. */
+const storePalette = (page, palette) =>
+  page.addInitScript((p) => localStorage.setItem("noctua-palette", p), palette);
+
+test("no page asks for a file that is not there", async ({ page }) => {
+  const missing = [];
+  page.on("response", (r) => {
+    // The browser asks for /favicon.ico unprompted and the site ships none, so
+    // it is excluded by name rather than by a status range — narrow the
+    // exclusion and it stops hiding anything else. Shipping one is a real gap;
+    // it waits for the icon set.
+    if (r.status() >= 400 && !r.url().endsWith("/favicon.ico")) {
+      missing.push(`${r.status()} ${r.url()}`);
+    }
   });
+  // A non-default palette, so the on-demand stylesheet is exercised too.
+  await storePalette(page, "jade-vivid");
+
+  for (const locale of ["en", "pt-BR", "qps"]) {
+    await page.goto(`/${locale}/index.html`);
+    // Taken from the sidebar rather than hardcoded: a page this misses is a
+    // page nothing links to.
+    const hrefs = await page.evaluate(() =>
+      [...document.querySelectorAll(".nd-nav-link")].map((a) => a.getAttribute("href")),
+    );
+    expect(hrefs.length, `${locale} has no navigation`).toBeGreaterThan(0);
+    for (const href of hrefs) await page.goto(`/${locale}/${href}`);
+  }
+
+  // Silence is how this fails: a stylesheet that 404s reports nothing, paints
+  // nothing, and leaves the page looking merely wrong.
+  expect(missing, "requests that 404ed").toEqual([]);
+});
+
+test("the palette stylesheet the bootstrap injects actually loads", async ({ page }) => {
+  // The deferred module links the palette too, correctly. Blocking it is what
+  // makes this a test of the bootstrap rather than of the corrector.
+  await page.route("**/shell.js", (route) => route.abort());
+  await storePalette(page, "jade-vivid");
   await page.goto("/en/index.html");
 
-  const status = await page.evaluate(() => {
-    const link = [...document.querySelectorAll("link[rel=stylesheet]")].find((l) =>
-      l.href.includes("theme-jade-vivid"),
-    );
-    return link ? { present: true, blocking: link.getAttribute("blocking") } : { present: false };
+  const sheet = await page.evaluate(() => {
+    const link = document.getElementById("noctua-palette-sheet");
+    if (!link) return null;
+    return {
+      href: link.href,
+      blocking: link.getAttribute("blocking"),
+      // `null` for a sheet that failed to load. This is the assertion the old
+      // test was missing, and the whole defect fits in it.
+      loaded: link.sheet !== null,
+      rules: link.sheet ? link.sheet.cssRules.length : 0,
+    };
   });
-  // `blocking="render"` has to be set BEFORE insertion: a script-inserted
-  // stylesheet is not render-blocking by default, and the page would paint in
-  // the old palette and snap over when the file lands — on every reload.
-  expect(status.present, "the stored palette was never linked").toBe(true);
-  expect(status.blocking).toBe("render");
-  expect(await page.locator("html").getAttribute("data-palette")).toBe("jade-vivid");
+
+  expect(sheet, "the bootstrap linked no palette stylesheet").not.toBeNull();
+  expect(sheet.loaded, `the injected stylesheet did not load: ${sheet.href}`).toBe(true);
+  expect(sheet.rules, "the stylesheet loaded but defines nothing").toBeGreaterThan(0);
+  // Still necessary, and still not sufficient: a sheet that never loads blocks
+  // no paint, whatever this attribute says.
+  expect(sheet.blocking).toBe("render");
+});
+
+test("first paint already carries the stored palette, with no script to fix it", async ({ page }) => {
+  await page.route("**/shell.js", (route) => route.abort());
+
+  await page.goto("/en/index.html");
+  const html = page.locator("html");
+  const fallback = await paint(page, await custom(html, "--nc-color-accent"));
+
+  await storePalette(page, "jade-vivid");
+  await page.goto("/en/index.html");
+  const stored = await paint(page, await custom(html, "--nc-color-accent"));
+
+  expect(await html.getAttribute("data-palette")).toBe("jade-vivid");
+  // Measured against the default rather than against a literal, so the test
+  // states the claim — "the reader's choice is what painted" — and not a colour
+  // that would have to be updated whenever the default changes.
+  expect(stored, "the attribute was stamped on a page still painted in the default").not.toEqual(
+    fallback,
+  );
 });
 
 test("changing a setting causes no layout shift", async ({ page }) => {

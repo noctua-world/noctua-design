@@ -751,6 +751,13 @@ fn bootstrap(theme: &Theme, vendor: &Vendor) -> String {
 
     writeln!(out, "(function () {{").expect("write");
     writeln!(out, "  var r = document.documentElement;").expect("write");
+    // Read outside the try: an attribute lookup cannot throw, and the palette
+    // href below is useless without it.
+    writeln!(
+        out,
+        "  var siteBase = r.getAttribute('data-noctua-base') || '';"
+    )
+    .expect("write");
     writeln!(out, "  try {{").expect("write");
 
     for (name, setting) in &theme.setting {
@@ -796,32 +803,7 @@ fn bootstrap(theme: &Theme, vendor: &Vendor) -> String {
         writeln!(out, "    }}").expect("write");
 
         if name == "palette" {
-            out.push_str(
-                "\n    // Stamping the attribute is not enough: the stylesheet that\n\
-                 \x20   // DEFINES this palette is a separate file. Without injecting it the\n\
-                 \x20   // page paints in the default and snaps over when the right file\n\
-                 \x20   // arrives — on every reload.\n\
-                 \x20   //\n\
-                 \x20   // `blocking=\"render\"` is load-bearing and must be set BEFORE\n\
-                 \x20   // insertion: a stylesheet inserted by script is not render-blocking\n\
-                 \x20   // by default. Appended last, which is also what wins the (0,3,0) tie.\n",
-            );
-            writeln!(
-                out,
-                "    if (palette && palette !== '{default}' && [{list}].indexOf(palette) !== -1) {{"
-            )
-            .expect("write");
-            writeln!(out, "      var sheet = document.createElement('link');").expect("write");
-            writeln!(out, "      sheet.rel = 'stylesheet';").expect("write");
-            writeln!(out, "      sheet.id = 'noctua-palette-sheet';").expect("write");
-            writeln!(out, "      sheet.setAttribute('blocking', 'render');").expect("write");
-            writeln!(
-                out,
-                "      sheet.href = '{base}/theme-' + palette + '.css';"
-            )
-            .expect("write");
-            writeln!(out, "      document.head.appendChild(sheet);").expect("write");
-            writeln!(out, "    }}").expect("write");
+            palette_sheet(&mut out, base, default, &list);
         }
     }
 
@@ -838,6 +820,46 @@ fn bootstrap(theme: &Theme, vendor: &Vendor) -> String {
     );
 
     out
+}
+
+/// The palette branch of the bootstrap: the one setting whose value names a
+/// file rather than only an attribute.
+fn palette_sheet(out: &mut String, base: &str, default: &str, list: &str) {
+    out.push_str(
+        "\n    // Stamping the attribute is not enough: the stylesheet that\n\
+         \x20   // DEFINES this palette is a separate file. Without injecting it the\n\
+         \x20   // page paints in the default and snaps over when the right file\n\
+         \x20   // arrives — on every reload.\n\
+         \x20   //\n\
+         \x20   // `blocking=\"render\"` is load-bearing and must be set BEFORE\n\
+         \x20   // insertion: a stylesheet inserted by script is not render-blocking\n\
+         \x20   // by default. Appended last, which is also what wins the (0,3,0) tie.\n\
+         \x20   //\n\
+         \x20   // The href is resolved against `data-noctua-base`, the same attribute\n\
+         \x20   // the runtime reads, because a document sits at whatever depth the\n\
+         \x20   // site's URL scheme puts it. A bare relative href here 404s SILENTLY —\n\
+         \x20   // render-blocking or not, a sheet that never loads blocks nothing — and\n\
+         \x20   // the page paints the default palette until a deferred script snaps it\n\
+         \x20   // over. That is the exact flash this script exists to prevent, and it\n\
+         \x20   // shipped, because the only test here read back the `blocking`\n\
+         \x20   // attribute instead of resolving the URL.\n",
+    );
+    writeln!(
+        out,
+        "    if (palette && palette !== '{default}' && [{list}].indexOf(palette) !== -1) {{"
+    )
+    .expect("write");
+    writeln!(out, "      var sheet = document.createElement('link');").expect("write");
+    writeln!(out, "      sheet.rel = 'stylesheet';").expect("write");
+    writeln!(out, "      sheet.id = 'noctua-palette-sheet';").expect("write");
+    writeln!(out, "      sheet.setAttribute('blocking', 'render');").expect("write");
+    writeln!(
+        out,
+        "      sheet.href = siteBase + '{base}/theme-' + palette + '.css';"
+    )
+    .expect("write");
+    writeln!(out, "      document.head.appendChild(sheet);").expect("write");
+    writeln!(out, "    }}").expect("write");
 }
 
 fn bootstrap_fragment(theme: &Theme, vendor: &Vendor) -> String {
@@ -962,7 +984,8 @@ mod tests {
         );
     }
 
-    /// The injected sheet must be render-blocking, or the flash returns.
+    /// The injected sheet must be render-blocking. Necessary, and **not**
+    /// sufficient — see the test below, which is the one that matters.
     #[test]
     fn the_injected_stylesheet_is_render_blocking() {
         let bootstrap = file("dist/bootstrap.js");
@@ -971,6 +994,27 @@ mod tests {
         let set = bootstrap.find("setAttribute('blocking'").expect("present");
         let append = bootstrap.find("appendChild(sheet)").expect("present");
         assert!(set < append, "blocking is set after the sheet is inserted");
+    }
+
+    /// The palette href must resolve from whatever depth the page sits at.
+    ///
+    /// `blocking="render"` guarantees nothing on its own: a sheet that 404s
+    /// blocks no paint. This repository shipped a bare `'tokens/css/theme-…'`
+    /// href — correct only from the site root, wrong on every real page — for
+    /// exactly as long as the only test here looked at the `blocking`
+    /// attribute. A test that reads back a property the code under test just
+    /// set is not a test.
+    #[test]
+    fn the_injected_stylesheet_resolves_against_the_document_base() {
+        let bootstrap = file("dist/bootstrap.js");
+        assert!(
+            bootstrap.contains("getAttribute('data-noctua-base')"),
+            "the bootstrap does not read the base the document declares"
+        );
+        assert!(
+            bootstrap.contains("sheet.href = siteBase +"),
+            "the palette href is not rebased, so it 404s on any page below the site root"
+        );
     }
 
     /// A stored value reaches an attribute and an `href`. It is never trusted.

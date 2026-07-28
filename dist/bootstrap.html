@@ -8,6 +8,7 @@
 <script>
 (function () {
   var r = document.documentElement;
+  var siteBase = r.getAttribute('data-noctua-base') || '';
   try {
 
     // mode
@@ -30,12 +31,21 @@
     // `blocking="render"` is load-bearing and must be set BEFORE
     // insertion: a stylesheet inserted by script is not render-blocking
     // by default. Appended last, which is also what wins the (0,3,0) tie.
+    //
+    // The href is resolved against `data-noctua-base`, the same attribute
+    // the runtime reads, because a document sits at whatever depth the
+    // site's URL scheme puts it. A bare relative href here 404s SILENTLY —
+    // render-blocking or not, a sheet that never loads blocks nothing — and
+    // the page paints the default palette until a deferred script snaps it
+    // over. That is the exact flash this script exists to prevent, and it
+    // shipped, because the only test here read back the `blocking`
+    // attribute instead of resolving the URL.
     if (palette && palette !== 'ochre-balanced' && ['ochre-balanced','ochre-vivid','ochre-sober','amber-balanced','amber-vivid','amber-sober','lime-balanced','lime-vivid','lime-sober','jade-balanced','jade-vivid','jade-sober','teal-balanced','teal-vivid','teal-sober','azure-balanced','azure-vivid','azure-sober','blue-balanced','blue-vivid','blue-sober','indigo-balanced','indigo-vivid','indigo-sober','violet-balanced','violet-vivid','violet-sober','magenta-balanced','magenta-vivid','magenta-sober','rose-balanced','rose-vivid','rose-sober','clay-balanced','clay-vivid','clay-sober','umber-balanced','umber-vivid','umber-sober'].indexOf(palette) !== -1) {
       var sheet = document.createElement('link');
       sheet.rel = 'stylesheet';
       sheet.id = 'noctua-palette-sheet';
       sheet.setAttribute('blocking', 'render');
-      sheet.href = 'tokens/css/theme-' + palette + '.css';
+      sheet.href = siteBase + 'tokens/css/theme-' + palette + '.css';
       document.head.appendChild(sheet);
     }
 

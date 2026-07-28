@@ -163,8 +163,37 @@ fn document_tree(props: DocumentProps) -> Element {
 ///
 /// The alternative — every page at the root — would mean three locales sharing
 /// one namespace, and `colours.html` could belong to only one of them.
+///
+/// Only **document-relative** hrefs move. A blind replace turns `https://…`
+/// into `../https://…` and `/x` into `..//x`, which works right up until a base
+/// link points off-site — and then fails silently, because a stylesheet that
+/// 404s produces no error a reader can see.
 fn rebase(html: &str) -> String {
-    html.replace("href=\"", "href=\"../")
+    const MARK: &str = "href=\"";
+    let mut out = String::with_capacity(html.len() + 64);
+    let mut rest = html;
+    while let Some(at) = rest.find(MARK) {
+        out.push_str(&rest[..at + MARK.len()]);
+        rest = &rest[at + MARK.len()..];
+        if is_document_relative(rest) {
+            out.push_str("../");
+        }
+    }
+    out.push_str(rest);
+    out
+}
+
+/// True when an href resolves against the document rather than against a host,
+/// the site root, or the page itself — the only kind that has to move when the
+/// document moves.
+fn is_document_relative(href: &str) -> bool {
+    if href.starts_with('/') || href.starts_with('#') {
+        return false;
+    }
+    let scheme = href
+        .find(|c: char| !c.is_ascii_alphanumeric() && !matches!(c, '+' | '-' | '.'))
+        .unwrap_or(href.len());
+    !(scheme > 0 && href[scheme..].starts_with(':'))
 }
 
 /// The root document, which sends a reader to the default locale.
@@ -337,6 +366,41 @@ mod tests {
             BASE_LINKS.matches("href=\"").count()
         );
         assert!(!head.contains("href=\"../../"), "an href moved twice");
+    }
+
+    /// An href that does not resolve against the document must not move.
+    #[test]
+    fn rebasing_leaves_absolute_hrefs_alone() {
+        let input = "<a href=\"https://example.invalid/x\"><a href=\"/root\">\
+                     <a href=\"#frag\"><a href=\"mailto:a@b.c\"><link href=\"tokens.css\">";
+        let out = rebase(input);
+        assert!(out.contains("href=\"https://example.invalid/x\""));
+        assert!(out.contains("href=\"/root\""));
+        assert!(out.contains("href=\"#frag\""));
+        assert!(out.contains("href=\"mailto:a@b.c\""));
+        assert!(out.contains("href=\"../tokens.css\""), "{out}");
+    }
+
+    /// The stored palette's stylesheet is injected by the bootstrap, from a
+    /// page one directory down. If that href is not rebased it 404s, the page
+    /// paints the default palette, and a deferred script snaps it over after
+    /// first paint — the flash the bootstrap exists to prevent.
+    #[test]
+    fn the_bootstrap_resolves_the_palette_against_the_declared_base() {
+        let html = document(Locale::PtBr, site::PAGES[0]);
+        let base = html
+            .split("data-noctua-base=\"")
+            .nth(1)
+            .and_then(|rest| rest.split('"').next())
+            .expect("the document declares a base");
+        assert!(
+            html.contains("getAttribute('data-noctua-base')"),
+            "the bootstrap ignores the base the document declares"
+        );
+        assert!(
+            html.contains("sheet.href = siteBase +"),
+            "the palette href is not rebased and will 404 from {base}"
+        );
     }
 
     /// A page with the script blocked must still be a complete page.
