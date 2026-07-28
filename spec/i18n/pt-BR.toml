@@ -23,7 +23,6 @@ dir = "ltr"
 # --- A estrutura da página ------------------------------------------------
 
 "app.name" = "Noctua"
-"app.tagline" = "Um sistema de design construído sobre um espaço de cor perceptual."
 "app.skip" = "Ir para o conteúdo"
 "app.repository" = "Código-fonte"
 
@@ -39,8 +38,6 @@ dir = "ltr"
 
 # --- Páginas --------------------------------------------------------------
 
-"page.overview.title" = "Visão geral"
-"page.overview.summary" = "O que é este sistema e a única ideia da qual todo o resto decorre."
 "page.colours.title" = "Cores"
 "page.colours.summary" = "Trinta e nove paletas, cada uma ancorada em contraste medido em vez de ajustada a olho."
 "page.typography.title" = "Tipografia"
@@ -118,8 +115,6 @@ dir = "ltr"
 "settings.glow.note" = "Um véu suave da cor de destaque atrás da página."
 "settings.grain.label" = "Granulado"
 "settings.grain.note" = "Granulação fina de filme, sempre atrás do texto."
-"settings.animate.label" = "Movimento ambiente"
-"settings.animate.note" = "Deriva lenta. A preferência de movimento reduzido do seu sistema sempre prevalece."
 
 "locale.label" = "Idioma"
 
@@ -154,7 +149,6 @@ dir = "ltr"
 
 # --- Diversos -------------------------------------------------------------
 
-"footer.generated" = "Cada página daqui é gerada a partir da mesma especificação que o sistema."
 "provisional.title" = "Provisório"
 "provisional.body" = "Esta página é um espaço reservado. Ela existe para que a estrutura possa ser avaliada por inteiro, e será substituída por documentação real."
 
@@ -170,8 +164,6 @@ dir = "ltr"
 
 # --- Conteúdo das páginas -------------------------------------------------
 
-"overview.body" = "Uma ideia percorre tudo: um valor é escolhido uma vez, numa especificação, e tudo que precisa dele é gerado. Nenhuma cor, nenhum tamanho e nenhuma mensagem é escrita duas vezes."
-"overview.explore" = "Por onde começar"
 "colours.note" = "Cada amostra abaixo é uma paleta de verdade, não uma imagem de uma. Cada célula carrega a paleta como atributo e lê as próprias cores através dele — o mesmo mecanismo que um componente com tema usa."
 "colours.roles" = "Os papéis"
 "colours.roles.body" = "Cada célula mostra cinco dos papéis que uma paleta define: a página, uma superfície sutil, uma borda, o destaque e o texto."

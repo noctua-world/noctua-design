@@ -5,6 +5,7 @@
 // declared. Every test here is that claim or that hazard.
 
 import { test, expect } from "@playwright/test";
+import { ANY, LOCALES, PAGE, url } from "./pages.js";
 
 /** A colour, read as PIXELS. Never `getComputedStyle(…).color`. */
 async function paint(page, value) {
@@ -67,10 +68,20 @@ test("every attribute a scope stamps is on one element", async ({ page }) => {
 
 test("a border inside a scope is the scope's, not the page's", async ({ page }) => {
   await page.goto("/en/scoped-themes.html");
-  const border = (loc) => loc.evaluate((el) => getComputedStyle(el).borderTopColor);
-
-  const pageBorder = await paint(page, await border(page.locator(".nd-foot")));
-  const scopeBorder = await paint(page, await border(page.locator("[data-noctua-scope]").first()));
+  // The header's rule, which is painted from the PAGE's palette, against a
+  // scope's own border. Any two borders would do; these two are the pair the
+  // bug actually collapsed.
+  const pageBorder = await paint(
+    page,
+    await page.locator(".nd-header").evaluate((el) => getComputedStyle(el).borderBlockEndColor),
+  );
+  const scopeBorder = await paint(
+    page,
+    await page
+      .locator("[data-noctua-scope]")
+      .first()
+      .evaluate((el) => getComputedStyle(el).borderTopColor),
+  );
 
   // A `--nd-edge: … var(--nc-color-border)` at :root made these identical, and
   // nothing errored. This is the assertion that catches it coming back.
@@ -78,7 +89,7 @@ test("a border inside a scope is the scope's, not the page's", async ({ page }) 
 });
 
 test("blackout changes the page and nothing else", async ({ page }) => {
-  await page.goto("/en/index.html");
+  await page.goto(url(ANY));
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
 
   const before = await custom(page.locator("html"), "--nc-color-surface");
@@ -147,11 +158,13 @@ test("a nested scope keeps its parent's palette when only its mode changes", asy
 
 test("reduced motion leaves nothing animating", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/en/index.html");
+  await page.goto("/en/colours.html");
+  // Motion belongs to the effect. There is no separate `animate` switch any
+  // more: it only ever appeared ANDed with these two, both of which default to
+  // off, so from a default page it changed an attribute that matched nothing.
   await page.evaluate(() => {
     document.documentElement.setAttribute("data-noctua-glow", "on");
     document.documentElement.setAttribute("data-noctua-grain", "on");
-    document.documentElement.setAttribute("data-noctua-animate", "on");
   });
   // A page setting may only ever DISABLE motion. Someone whose system asked for
   // none must never have it re-enabled by a page.
@@ -189,7 +202,7 @@ test("no page asks for a file that is not there", async ({ page }) => {
   await storePalette(page, "jade-vivid");
 
   for (const locale of ["en", "pt-BR", "qps"]) {
-    await page.goto(`/${locale}/index.html`);
+    await page.goto(url(ANY, locale));
     // Taken from the sidebar rather than hardcoded: a page this misses is a
     // page nothing links to.
     const hrefs = await page.evaluate(() =>
@@ -209,7 +222,7 @@ test("the palette stylesheet the bootstrap injects actually loads", async ({ pag
   // makes this a test of the bootstrap rather than of the corrector.
   await page.route("**/shell.js", (route) => route.abort());
   await storePalette(page, "jade-vivid");
-  await page.goto("/en/index.html");
+  await page.goto(url(ANY));
 
   const sheet = await page.evaluate(() => {
     const link = document.getElementById("noctua-palette-sheet");
@@ -235,12 +248,12 @@ test("the palette stylesheet the bootstrap injects actually loads", async ({ pag
 test("first paint already carries the stored palette, with no script to fix it", async ({ page }) => {
   await page.route("**/shell.js", (route) => route.abort());
 
-  await page.goto("/en/index.html");
+  await page.goto(url(ANY));
   const html = page.locator("html");
   const fallback = await paint(page, await custom(html, "--nc-color-accent"));
 
   await storePalette(page, "jade-vivid");
-  await page.goto("/en/index.html");
+  await page.goto(url(ANY));
   const stored = await paint(page, await custom(html, "--nc-color-accent"));
 
   expect(await html.getAttribute("data-palette")).toBe("jade-vivid");
@@ -253,7 +266,7 @@ test("first paint already carries the stored palette, with no script to fix it",
 });
 
 test("changing a setting causes no layout shift", async ({ page }) => {
-  await page.goto("/en/index.html");
+  await page.goto(url(ANY));
   await page.evaluate(() => {
     window.__shift = 0;
     new PerformanceObserver((list) => {
@@ -286,7 +299,7 @@ test("changing a setting causes no layout shift", async ({ page }) => {
 test("with no script the page is complete and follows the system", async ({ page, browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false, colorScheme: "dark" });
   const noScript = await context.newPage();
-  await noScript.goto("http://127.0.0.1:8731/en/index.html");
+  await noScript.goto(`http://127.0.0.1:8731${url(ANY)}`);
 
   // Nothing is hidden by markup and unhidden by script, so the navigation and
   // the content are both there.

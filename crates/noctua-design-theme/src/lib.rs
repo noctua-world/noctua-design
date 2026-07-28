@@ -898,60 +898,6 @@ impl Default for Grain {
     }
 }
 
-/// The `animate` setting.
-///
-/// Stored under `noctua-animate`, stamped as `data-noctua-animate`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Animate {
-    /// `off`.
-    Off,
-    /// `on`.
-    On,
-}
-
-impl Animate {
-    /// Every value, in declaration order.
-    pub const ALL: [Self; 2] = [Self::Off, Self::On];
-
-    /// The value in force when nothing is stored.
-    pub const DEFAULT: Self = Self::Off;
-
-    /// The `localStorage` key.
-    pub const KEY: &'static str = "noctua-animate";
-
-    /// The DOM attribute this is stamped as.
-    pub const ATTRIBUTE: &'static str = "data-noctua-animate";
-
-    /// The value as it appears in storage and the DOM.
-    #[must_use]
-    pub const fn as_str(self) -> &'static str {
-        match self {
-            Self::Off => "off",
-            Self::On => "on",
-        }
-    }
-
-    /// Parses a stored value, rejecting anything unrecognised.
-    ///
-    /// A stored value reaches an `href` and a DOM attribute, so it is
-    /// never trusted — a corrupt or hostile entry must degrade to the
-    /// default rather than be stamped.
-    #[must_use]
-    pub fn parse(value: &str) -> Option<Self> {
-        match value {
-            "off" => Some(Self::Off),
-            "on" => Some(Self::On),
-            _ => None,
-        }
-    }
-}
-
-impl Default for Animate {
-    fn default() -> Self {
-        Self::DEFAULT
-    }
-}
-
 /// The attribute a themed subtree carries.
 ///
 /// Its presence is what makes the semantic contract resolve again at

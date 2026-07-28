@@ -9,14 +9,13 @@ use dioxus::prelude::*;
 use noctua_design::ThemeScope;
 use noctua_design::components::{
     Abbr, Blockquote, Code, CodeBlock, CodeTone, Del, Em, Heading, HeadingLevel, HeadingSize, Ins,
-    Kbd, Link, List, ListItem, ListKind, ListMarker, ListSpacing, Mark, Paragraph, ParagraphSize,
-    ParagraphTone, Strong, Text, TextSize, TextTone, TextWeight, Time, Truncate, VisuallyHidden,
+    Kbd, Link, List, ListItem, ListSpacing, Mark, Paragraph, ParagraphTone, Strong, Text, TextSize,
+    TextTone, TextWeight, Time, Truncate, VisuallyHidden,
 };
 use noctua_design::model::{Glass, Mode, Palette, Radius};
 use noctua_design_i18n::Key;
 
 use crate::shell::Context;
-use crate::site::PAGES;
 
 /// Dispatches to the body for this page.
 #[component]
@@ -31,7 +30,11 @@ pub(crate) fn Body(context: Context) -> Element {
             "spacing" => rsx! { Spacing { context } },
             "effects" => rsx! { Effects { context } },
             "components" => rsx! { Components { context } },
-            _ => rsx! { Overview { context } },
+            // No catch-all body. A page in `site::PAGES` with nothing to render
+            // is a build failure, not a page that quietly shows something else:
+            // the site is generated, so this panics during the build and never
+            // reaches a reader.
+            slug => unreachable!("no body for the page `{slug}`"),
         }
     }
 }
@@ -158,23 +161,6 @@ fn Sample(context: Context) -> Element {
 }
 
 // --- The rest ---------------------------------------------------------------
-
-#[component]
-fn Overview(context: Context) -> Element {
-    rsx! {
-        Paragraph { size: ParagraphSize::Lead, "{context.t(Key::OverviewBody)}" }
-
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::OverviewExplore)}" }
-        List { kind: ListKind::Description, marker: ListMarker::None, spacing: ListSpacing::Loose,
-            for page in PAGES.iter().skip(1) {
-                ListItem {
-                    Link { href: page.href(), "{context.t(page.title)}" }
-                    Paragraph { tone: ParagraphTone::Muted, "{context.t(page.summary)}" }
-                }
-            }
-        }
-    }
-}
 
 /// Every palette, each swatch reading its own colours.
 ///
@@ -438,7 +424,6 @@ fn Effects(context: Context) -> Element {
         for (setting, label) in [
             ("glow", Key::SettingsGlowLabel),
             ("grain", Key::SettingsGrainLabel),
-            ("animate", Key::SettingsAnimateLabel),
         ] {
             div { class: "nd-choice", "data-nd-setting": "{setting}",
                 p { class: "nd-choice-label", id: "nd-label-try-{setting}", "{context.t(label)}" }

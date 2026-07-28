@@ -31,7 +31,6 @@ pub(crate) fn of(setting: &str) -> &'static str {
         "pattern" => theme::Pattern::DEFAULT.as_str(),
         "glow" => theme::Glow::DEFAULT.as_str(),
         "grain" => theme::Grain::DEFAULT.as_str(),
-        "animate" => theme::Animate::DEFAULT.as_str(),
         _ => "",
     }
 }
@@ -55,7 +54,6 @@ mod tests {
             "pattern",
             "glow",
             "grain",
-            "animate",
         ] {
             assert!(!of(setting).is_empty(), "{setting} has no default here");
         }

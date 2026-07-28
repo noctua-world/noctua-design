@@ -657,16 +657,9 @@ a {
   text-decoration-color: currentColor;
 }
 
-.nd-search-empty,
-.nd-nav-foot {
+.nd-search-empty {
   font-size: var(--noctua-size-caption);
   color: var(--nc-color-fg-muted);
-}
-
-.nd-nav-foot {
-  margin-block-start: auto;
-  padding-block-start: var(--noctua-space-4);
-  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
 }
 
 .nd-visually-hidden {
@@ -732,14 +725,6 @@ a {
   display: flex;
   flex-direction: column;
   gap: var(--noctua-space-heading);
-}
-
-.nd-foot {
-  margin-block-start: var(--noctua-space-16);
-  padding-block-start: var(--noctua-space-4);
-  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
-  font-size: var(--noctua-size-caption);
-  color: var(--nc-color-fg-muted);
 }
 
 /* --- Floating surface 4 of 4: a themed scope ----------------------------- */

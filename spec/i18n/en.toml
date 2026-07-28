@@ -27,7 +27,6 @@ dir = "ltr"
 # --- The shell ------------------------------------------------------------
 
 "app.name" = "Noctua"
-"app.tagline" = "A design system built on a perceptual colour space."
 "app.skip" = "Skip to content"
 "app.repository" = "Source code"
 
@@ -43,8 +42,6 @@ dir = "ltr"
 
 # --- Pages ----------------------------------------------------------------
 
-"page.overview.title" = "Overview"
-"page.overview.summary" = "What this system is, and the one idea the rest of it follows from."
 "page.colours.title" = "Colours"
 "page.colours.summary" = "Thirty-nine palettes, every one of them contrast-anchored rather than eyeballed."
 "page.typography.title" = "Typography"
@@ -122,8 +119,6 @@ dir = "ltr"
 "settings.glow.note" = "A soft wash of the accent colour behind the page."
 "settings.grain.label" = "Grain"
 "settings.grain.note" = "Fine film grain, always behind the text."
-"settings.animate.label" = "Ambient motion"
-"settings.animate.note" = "Slow drift. Your system's reduced-motion setting always wins."
 
 "locale.label" = "Language"
 
@@ -158,7 +153,6 @@ dir = "ltr"
 
 # --- Odds and ends --------------------------------------------------------
 
-"footer.generated" = "Every page here is generated from the same specification the system is."
 "provisional.title" = "Provisional"
 "provisional.body" = "This page is a placeholder. It is here so the shell can be judged whole, and it will be replaced by real documentation."
 
@@ -174,8 +168,6 @@ dir = "ltr"
 
 # --- Page content ---------------------------------------------------------
 
-"overview.body" = "One idea runs through all of it: a value is chosen once, in a specification, and everything that needs it is generated. No colour, no size and no message is written down twice."
-"overview.explore" = "Where to look"
 "colours.note" = "Every swatch below is a real palette, not a picture of one. Each cell carries the palette as an attribute and reads its own colours through it — the same mechanism a themed component uses."
 "colours.roles" = "The roles"
 "colours.roles.body" = "Each cell shows five of the roles a palette defines: the page, a subtle surface, a border, the accent, and the text."

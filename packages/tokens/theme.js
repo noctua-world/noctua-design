@@ -106,15 +106,6 @@ export const grainValues = {
   scope: false,
 };
 
-export const animateValues = {
-  values: ["off", "on"],
-  default: "off",
-  key: "noctua-animate",
-  attribute: "data-noctua-animate",
-  omitWhen: null,
-  scope: false,
-};
-
 export const scopeAttribute = "data-noctua-scope";
 export const stylesheetBase = "tokens/css";
 
@@ -187,5 +178,4 @@ const model_ = {
   pattern: patternValues,
   glow: glowValues,
   grain: grainValues,
-  animate: animateValues,
 };

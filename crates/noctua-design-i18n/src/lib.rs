@@ -122,8 +122,6 @@ impl Default for Locale {
 pub enum Key {
     /// `app.name`
     AppName,
-    /// `app.tagline`
-    AppTagline,
     /// `app.skip`
     AppSkip,
     /// `app.repository`
@@ -144,10 +142,6 @@ pub enum Key {
     SearchEmpty,
     /// `search.results`
     SearchResults,
-    /// `page.overview.title`
-    PageOverviewTitle,
-    /// `page.overview.summary`
-    PageOverviewSummary,
     /// `page.colours.title`
     PageColoursTitle,
     /// `page.colours.summary`
@@ -274,10 +268,6 @@ pub enum Key {
     SettingsGrainLabel,
     /// `settings.grain.note`
     SettingsGrainNote,
-    /// `settings.animate.label`
-    SettingsAnimateLabel,
-    /// `settings.animate.note`
-    SettingsAnimateNote,
     /// `locale.label`
     LocaleLabel,
     /// `scope.page.title`
@@ -326,8 +316,6 @@ pub enum Key {
     ExampleImplReact,
     /// `example.impl.loading`
     ExampleImplLoading,
-    /// `footer.generated`
-    FooterGenerated,
     /// `provisional.title`
     ProvisionalTitle,
     /// `provisional.body`
@@ -346,10 +334,6 @@ pub enum Key {
     TypeScriptsBody,
     /// `type.specimen.line`
     TypeSpecimenLine,
-    /// `overview.body`
-    OverviewBody,
-    /// `overview.explore`
-    OverviewExplore,
     /// `colours.note`
     ColoursNote,
     /// `colours.roles`
@@ -402,9 +386,8 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 139] = [
+    pub const ALL: [Self; 131] = [
         Self::AppName,
-        Self::AppTagline,
         Self::AppSkip,
         Self::AppRepository,
         Self::NavLabel,
@@ -415,8 +398,6 @@ impl Key {
         Self::SearchPlaceholder,
         Self::SearchEmpty,
         Self::SearchResults,
-        Self::PageOverviewTitle,
-        Self::PageOverviewSummary,
         Self::PageColoursTitle,
         Self::PageColoursSummary,
         Self::PageTypographyTitle,
@@ -480,8 +461,6 @@ impl Key {
         Self::SettingsGlowNote,
         Self::SettingsGrainLabel,
         Self::SettingsGrainNote,
-        Self::SettingsAnimateLabel,
-        Self::SettingsAnimateNote,
         Self::LocaleLabel,
         Self::ScopePageTitle,
         Self::ScopePageBody,
@@ -506,7 +485,6 @@ impl Key {
         Self::ExampleImplDioxus,
         Self::ExampleImplReact,
         Self::ExampleImplLoading,
-        Self::FooterGenerated,
         Self::ProvisionalTitle,
         Self::ProvisionalBody,
         Self::TypeScaleTitle,
@@ -516,8 +494,6 @@ impl Key {
         Self::TypeScriptsTitle,
         Self::TypeScriptsBody,
         Self::TypeSpecimenLine,
-        Self::OverviewBody,
-        Self::OverviewExplore,
         Self::ColoursNote,
         Self::ColoursRoles,
         Self::ColoursRolesBody,
@@ -549,7 +525,6 @@ impl Key {
     pub const fn id(self) -> &'static str {
         match self {
             Self::AppName => "app.name",
-            Self::AppTagline => "app.tagline",
             Self::AppSkip => "app.skip",
             Self::AppRepository => "app.repository",
             Self::NavLabel => "nav.label",
@@ -560,8 +535,6 @@ impl Key {
             Self::SearchPlaceholder => "search.placeholder",
             Self::SearchEmpty => "search.empty",
             Self::SearchResults => "search.results",
-            Self::PageOverviewTitle => "page.overview.title",
-            Self::PageOverviewSummary => "page.overview.summary",
             Self::PageColoursTitle => "page.colours.title",
             Self::PageColoursSummary => "page.colours.summary",
             Self::PageTypographyTitle => "page.typography.title",
@@ -625,8 +598,6 @@ impl Key {
             Self::SettingsGlowNote => "settings.glow.note",
             Self::SettingsGrainLabel => "settings.grain.label",
             Self::SettingsGrainNote => "settings.grain.note",
-            Self::SettingsAnimateLabel => "settings.animate.label",
-            Self::SettingsAnimateNote => "settings.animate.note",
             Self::LocaleLabel => "locale.label",
             Self::ScopePageTitle => "scope.page.title",
             Self::ScopePageBody => "scope.page.body",
@@ -651,7 +622,6 @@ impl Key {
             Self::ExampleImplDioxus => "example.impl.dioxus",
             Self::ExampleImplReact => "example.impl.react",
             Self::ExampleImplLoading => "example.impl.loading",
-            Self::FooterGenerated => "footer.generated",
             Self::ProvisionalTitle => "provisional.title",
             Self::ProvisionalBody => "provisional.body",
             Self::TypeScaleTitle => "type.scale.title",
@@ -661,8 +631,6 @@ impl Key {
             Self::TypeScriptsTitle => "type.scripts.title",
             Self::TypeScriptsBody => "type.scripts.body",
             Self::TypeSpecimenLine => "type.specimen.line",
-            Self::OverviewBody => "overview.body",
-            Self::OverviewExplore => "overview.explore",
             Self::ColoursNote => "colours.note",
             Self::ColoursRoles => "colours.roles",
             Self::ColoursRolesBody => "colours.roles.body",
@@ -698,7 +666,6 @@ impl Locale {
         match self {
             Self::En => match key {
                 Key::AppName => "Noctua",
-                Key::AppTagline => "A design system built on a perceptual colour space.",
                 Key::AppSkip => "Skip to content",
                 Key::AppRepository => "Source code",
                 Key::NavLabel => "Documentation",
@@ -709,10 +676,6 @@ impl Locale {
                 Key::SearchPlaceholder => "Search the documentation",
                 Key::SearchEmpty => "Nothing matches that.",
                 Key::SearchResults => "{count} results",
-                Key::PageOverviewTitle => "Overview",
-                Key::PageOverviewSummary => {
-                    "What this system is, and the one idea the rest of it follows from."
-                }
                 Key::PageColoursTitle => "Colours",
                 Key::PageColoursSummary => {
                     "Thirty-nine palettes, every one of them contrast-anchored rather than eyeballed."
@@ -788,10 +751,6 @@ impl Locale {
                 Key::SettingsGlowNote => "A soft wash of the accent colour behind the page.",
                 Key::SettingsGrainLabel => "Grain",
                 Key::SettingsGrainNote => "Fine film grain, always behind the text.",
-                Key::SettingsAnimateLabel => "Ambient motion",
-                Key::SettingsAnimateNote => {
-                    "Slow drift. Your system's reduced-motion setting always wins."
-                }
                 Key::LocaleLabel => "Language",
                 Key::ScopePageTitle => "The page",
                 Key::ScopePageBody => {
@@ -826,9 +785,6 @@ impl Locale {
                 Key::ExampleImplDioxus => "Dioxus",
                 Key::ExampleImplReact => "React",
                 Key::ExampleImplLoading => "Loading the React example…",
-                Key::FooterGenerated => {
-                    "Every page here is generated from the same specification the system is."
-                }
                 Key::ProvisionalTitle => "Provisional",
                 Key::ProvisionalBody => {
                     "This page is a placeholder. It is here so the shell can be judged whole, and it will be replaced by real documentation."
@@ -846,10 +802,6 @@ impl Locale {
                     "This is why Noto was chosen. Each line below is real text, not a placeholder — a script's shaping only shows in words somebody would actually write."
                 }
                 Key::TypeSpecimenLine => "Sphinx of black quartz, judge my vow",
-                Key::OverviewBody => {
-                    "One idea runs through all of it: a value is chosen once, in a specification, and everything that needs it is generated. No colour, no size and no message is written down twice."
-                }
-                Key::OverviewExplore => "Where to look",
                 Key::ColoursNote => {
                     "Every swatch below is a real palette, not a picture of one. Each cell carries the palette as an attribute and reads its own colours through it — the same mechanism a themed component uses."
                 }
@@ -893,9 +845,6 @@ impl Locale {
             },
             Self::PtBr => match key {
                 Key::AppName => "Noctua",
-                Key::AppTagline => {
-                    "Um sistema de design construído sobre um espaço de cor perceptual."
-                }
                 Key::AppSkip => "Ir para o conteúdo",
                 Key::AppRepository => "Código-fonte",
                 Key::NavLabel => "Documentação",
@@ -906,10 +855,6 @@ impl Locale {
                 Key::SearchPlaceholder => "Buscar na documentação",
                 Key::SearchEmpty => "Nada corresponde a isso.",
                 Key::SearchResults => "{count} resultados",
-                Key::PageOverviewTitle => "Visão geral",
-                Key::PageOverviewSummary => {
-                    "O que é este sistema e a única ideia da qual todo o resto decorre."
-                }
                 Key::PageColoursTitle => "Cores",
                 Key::PageColoursSummary => {
                     "Trinta e nove paletas, cada uma ancorada em contraste medido em vez de ajustada a olho."
@@ -985,10 +930,6 @@ impl Locale {
                 Key::SettingsGlowNote => "Um véu suave da cor de destaque atrás da página.",
                 Key::SettingsGrainLabel => "Granulado",
                 Key::SettingsGrainNote => "Granulação fina de filme, sempre atrás do texto.",
-                Key::SettingsAnimateLabel => "Movimento ambiente",
-                Key::SettingsAnimateNote => {
-                    "Deriva lenta. A preferência de movimento reduzido do seu sistema sempre prevalece."
-                }
                 Key::LocaleLabel => "Idioma",
                 Key::ScopePageTitle => "A página",
                 Key::ScopePageBody => {
@@ -1023,9 +964,6 @@ impl Locale {
                 Key::ExampleImplDioxus => "Dioxus",
                 Key::ExampleImplReact => "React",
                 Key::ExampleImplLoading => "Carregando o exemplo em React…",
-                Key::FooterGenerated => {
-                    "Cada página daqui é gerada a partir da mesma especificação que o sistema."
-                }
                 Key::ProvisionalTitle => "Provisório",
                 Key::ProvisionalBody => {
                     "Esta página é um espaço reservado. Ela existe para que a estrutura possa ser avaliada por inteiro, e será substituída por documentação real."
@@ -1043,10 +981,6 @@ impl Locale {
                     "É por isto que o Noto foi escolhido. Cada linha abaixo é texto real, não um espaço reservado — a modelagem de uma escrita só aparece em palavras que alguém de fato escreveria."
                 }
                 Key::TypeSpecimenLine => "Um pequeno jabuti xereta viu dez cegonhas felizes",
-                Key::OverviewBody => {
-                    "Uma ideia percorre tudo: um valor é escolhido uma vez, numa especificação, e tudo que precisa dele é gerado. Nenhuma cor, nenhum tamanho e nenhuma mensagem é escrita duas vezes."
-                }
-                Key::OverviewExplore => "Por onde começar",
                 Key::ColoursNote => {
                     "Cada amostra abaixo é uma paleta de verdade, não uma imagem de uma. Cada célula carrega a paleta como atributo e lê as próprias cores através dele — o mesmo mecanismo que um componente com tema usa."
                 }
@@ -1090,9 +1024,6 @@ impl Locale {
             },
             Self::Qps => match key {
                 Key::AppName => "⟦Nooctuuaa⟧",
-                Key::AppTagline => {
-                    "⟦AA deesiign systeem buuiilt oon aa peerceeptuuaal cooloouur spaacee.⟧"
-                }
                 Key::AppSkip => "⟦Skiip too coonteent⟧",
                 Key::AppRepository => "⟦Soouurcee coodee⟧",
                 Key::NavLabel => "⟦Doocuumeentaatiioon⟧",
@@ -1103,10 +1034,6 @@ impl Locale {
                 Key::SearchPlaceholder => "⟦Seeaarch thee doocuumeentaatiioon⟧",
                 Key::SearchEmpty => "⟦Noothiing maatchees thaat.⟧",
                 Key::SearchResults => "⟦{count} reesuults⟧",
-                Key::PageOverviewTitle => "⟦OOveerviieew⟧",
-                Key::PageOverviewSummary => {
-                    "⟦Whaat thiis systeem iis, aand thee oonee iideeaa thee reest oof iit foolloows froom.⟧"
-                }
                 Key::PageColoursTitle => "⟦Cooloouurs⟧",
                 Key::PageColoursSummary => {
                     "⟦Thiirty-niinee paaleettees, eeveery oonee oof theem coontraast-aanchooreed raatheer thaan eeyeebaalleed.⟧"
@@ -1186,10 +1113,6 @@ impl Locale {
                 }
                 Key::SettingsGrainLabel => "⟦Graaiin⟧",
                 Key::SettingsGrainNote => "⟦Fiinee fiilm graaiin, aalwaays beehiind thee teext.⟧",
-                Key::SettingsAnimateLabel => "⟦AAmbiieent mootiioon⟧",
-                Key::SettingsAnimateNote => {
-                    "⟦Sloow driift. Yoouur systeem's reeduuceed-mootiioon seettiing aalwaays wiins.⟧"
-                }
                 Key::LocaleLabel => "⟦Laanguuaagee⟧",
                 Key::ScopePageTitle => "⟦Thee paagee⟧",
                 Key::ScopePageBody => {
@@ -1224,9 +1147,6 @@ impl Locale {
                 Key::ExampleImplDioxus => "⟦Diiooxuus⟧",
                 Key::ExampleImplReact => "⟦Reeaact⟧",
                 Key::ExampleImplLoading => "⟦Looaadiing thee Reeaact eexaamplee…⟧",
-                Key::FooterGenerated => {
-                    "⟦EEveery paagee heeree iis geeneeraateed froom thee saamee speeciifiicaatiioon thee systeem iis.⟧"
-                }
                 Key::ProvisionalTitle => "⟦Prooviisiioonaal⟧",
                 Key::ProvisionalBody => {
                     "⟦Thiis paagee iis aa plaaceehooldeer. IIt iis heeree soo thee sheell caan bee juudgeed whoolee, aand iit wiill bee reeplaaceed by reeaal doocuumeentaatiioon.⟧"
@@ -1244,10 +1164,6 @@ impl Locale {
                     "⟦Thiis iis why Nootoo waas chooseen. EEaach liinee beeloow iis reeaal teext, noot aa plaaceehooldeer — aa scriipt's shaapiing oonly shoows iin woords soomeeboody woouuld aactuuaally wriitee.⟧"
                 }
                 Key::TypeSpecimenLine => "⟦Sphiinx oof blaack quuaartz, juudgee my voow⟧",
-                Key::OverviewBody => {
-                    "⟦OOnee iideeaa ruuns throouugh aall oof iit: aa vaaluuee iis chooseen ooncee, iin aa speeciifiicaatiioon, aand eeveerythiing thaat neeeeds iit iis geeneeraateed. Noo cooloouur, noo siizee aand noo meessaagee iis wriitteen doown twiicee.⟧"
-                }
-                Key::OverviewExplore => "⟦Wheeree too looook⟧",
                 Key::ColoursNote => {
                     "⟦EEveery swaatch beeloow iis aa reeaal paaleettee, noot aa piictuuree oof oonee. EEaach ceell caarriiees thee paaleettee aas aan aattriibuutee aand reeaads iits oown cooloouurs throouugh iit — thee saamee meechaaniism aa theemeed coompooneent uusees.⟧"
                 }

@@ -15,7 +15,6 @@ export type Blackout = "off" | "on";
 export type Pattern = "none" | "dots" | "mesh" | "checks" | "diagonals";
 export type Glow = "off" | "on";
 export type Grain = "off" | "on";
-export type Animate = "off" | "on";
 
 export declare const modeValues: {
   readonly values: readonly Mode[];
@@ -105,14 +104,6 @@ export declare const grainValues: {
   readonly omitWhen: Grain | null;
   readonly scope: boolean;
 };
-export declare const animateValues: {
-  readonly values: readonly Animate[];
-  readonly default: Animate;
-  readonly key: string;
-  readonly attribute: string | null;
-  readonly omitWhen: Animate | null;
-  readonly scope: boolean;
-};
 
 export declare const scopeAttribute: string;
 export declare const stylesheetBase: string;
@@ -139,7 +130,6 @@ export interface Settings {
   pattern: Pattern;
   glow: Glow;
   grain: Grain;
-  animate: Animate;
 }
 
 export interface ScopeSettings {

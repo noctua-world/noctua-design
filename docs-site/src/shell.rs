@@ -49,7 +49,10 @@ impl Context {
 /// one panel, so there is exactly one floating surface here instead of five.
 #[component]
 pub(crate) fn Header(context: Context) -> Element {
-    let home = site::PAGES[0].href();
+    // The first entry in THIS locale's sidebar, not a fixed page: the order is
+    // the reader's alphabet, so the front door differs by locale and reading it
+    // from the same function the sidebar uses is what keeps the two agreeing.
+    let home = site::first(context.locale).href();
     rsx! {
         // The header's frost, as a SIBLING painted behind it. Inside the header
         // it would be an ancestor of the settings panel, and a nested
@@ -233,13 +236,6 @@ fn Settings(context: Context) -> Element {
                     note: Key::SettingsGrainNote,
                     options: vec![("off", Key::SettingsOff), ("on", Key::SettingsOn)],
                 }
-                Choice {
-                    context,
-                    setting: "animate",
-                    label: Key::SettingsAnimateLabel,
-                    note: Key::SettingsAnimateNote,
-                    options: vec![("off", Key::SettingsOff), ("on", Key::SettingsOn)],
-                }
 
                 button { class: "nd-reset", r#type: "button", "data-nd-reset": "",
                     "{context.t(Key::SettingsReset)}"
@@ -413,9 +409,9 @@ pub(crate) fn Sidebar(context: Context) -> Element {
                 role: "status",
                 "aria-live": "polite",
             }
-            div { class: "nd-nav-foot",
-                p { "{context.t(Key::AppTagline)}" }
-            }
+            // No tagline. A sentence describing the system to a reader already
+            // inside its documentation, repeated at the foot of every page, is
+            // decoration — and `NOCTUA.md §9.7` says nothing decorative.
         }
     }
 }

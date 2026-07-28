@@ -5,7 +5,7 @@ use noctua_design_i18n::{Key, Locale};
 /// One documentation page.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct Page {
-    /// The URL segment. `overview` is special-cased to `index.html`.
+    /// The URL segment.
     pub slug: &'static str,
     /// Its title in the sidebar and the `<title>`.
     pub title: Key,
@@ -17,11 +17,7 @@ impl Page {
     /// The file name this page is written to, within its locale directory.
     #[must_use]
     pub(crate) fn file(self) -> String {
-        if self.slug == "overview" {
-            "index.html".to_owned()
-        } else {
-            format!("{}.html", self.slug)
-        }
+        format!("{}.html", self.slug)
     }
 
     /// The href another page in the same locale uses to reach this one.
@@ -33,12 +29,13 @@ impl Page {
 
 /// Every page, in **declaration** order — which is not the order they are shown
 /// in. See [`sorted`].
-pub(crate) const PAGES: [Page; 7] = [
-    Page {
-        slug: "overview",
-        title: Key::PageOverviewTitle,
-        summary: Key::PageOverviewSummary,
-    },
+///
+/// There is no landing page. An "overview" existed and was deleted: a
+/// documentation site's front door is its first real page, and a page whose
+/// content is a description of the other pages is a table of contents the
+/// sidebar already is. `<locale>/index.html` is a redirect document, not a
+/// page — see `main::locale_redirect`.
+pub(crate) const PAGES: [Page; 6] = [
     Page {
         slug: "colours",
         title: Key::PageColoursTitle,
@@ -98,6 +95,16 @@ pub(crate) fn sorted(locale: Locale) -> Vec<Page> {
     pages
 }
 
+/// Where a reader who asked for nothing in particular lands.
+///
+/// The first entry in this locale's sidebar, so the front door and the top of
+/// the navigation are the same place by construction rather than by a constant
+/// somebody has to remember to update.
+#[must_use]
+pub(crate) fn first(locale: Locale) -> Page {
+    *sorted(locale).first().expect("the site has pages")
+}
+
 /// A sort key that ignores case and diacritics.
 #[must_use]
 pub(crate) fn collate(text: &str) -> String {
@@ -139,10 +146,21 @@ mod tests {
         assert_eq!(slugs.len(), count);
     }
 
+    /// `index.html` is a redirect document, never a page. A page that claimed
+    /// the name would be a landing page by the back door.
     #[test]
-    fn the_overview_is_the_index() {
-        let overview = PAGES.iter().find(|p| p.slug == "overview").expect("one");
-        assert_eq!(overview.file(), "index.html");
+    fn no_page_claims_the_index() {
+        for page in PAGES {
+            assert_ne!(page.file(), "index.html", "{}", page.slug);
+        }
+    }
+
+    /// The front door is the top of the sidebar, in every locale.
+    #[test]
+    fn the_first_page_is_the_first_in_the_sidebar() {
+        for locale in Locale::ALL {
+            assert_eq!(first(locale), sorted(locale)[0], "{}", locale.tag());
+        }
     }
 
     /// The point of sorting by title: two locales legitimately disagree about

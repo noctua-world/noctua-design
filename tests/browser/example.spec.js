@@ -7,6 +7,7 @@
 // what they put in the DOM.
 
 import { test, expect } from "@playwright/test";
+import { ANY, LOCALES, PAGE, url } from "./pages.js";
 
 const requests = (page) =>
   page.evaluate(() =>
@@ -91,7 +92,7 @@ test("the width control resizes the stage and nothing else", async ({ page }) =>
 });
 
 test("search finds the system's own names, and only when asked", async ({ page }) => {
-  await page.goto("/en/index.html");
+  await page.goto(url(ANY));
   const names = page.locator(".nd-found-entry:visible");
   // Thirty-nine palettes under an empty search box would bury the navigation.
   expect(await names.count()).toBe(0);
@@ -116,5 +117,8 @@ test("every locale ships the same page and switches between them", async ({ page
   // The sidebar is alphabetical in the reader's language, not in English.
   const order = await page.locator(".nd-nav-text").allTextContents();
   expect(order[0]).toBe("Componentes");
-  expect(order.at(-1)).toBe("Visão geral");
+  expect(order.at(-1)).toBe("Tipografia");
+  // The property behind it: `Efeitos` before `Espaçamento` folds `ç`, and the
+  // English order (`Effects`, `Spacing`) puts them nowhere near each other.
+  expect(order.indexOf("Efeitos")).toBeLessThan(order.indexOf("Espaçamento"));
 });

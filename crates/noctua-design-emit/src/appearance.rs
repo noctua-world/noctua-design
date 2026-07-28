@@ -353,17 +353,25 @@ fn write_ambient(out: &mut String, spec: &Spec, prefix: &str) {
         \x20  silently, in exactly the population the token exists to protect.\n\
         \x20\n\
         \x20  So reduced motion is one explicit `animation: none`, and every animated\n\
-        \x20  layer has a designed static end-state. */\n\
+        \x20  layer has a designed static end-state.\n\
+        \x20\n\
+        \x20  Motion belongs to the effect that has it, and there is no separate\n\
+        \x20  switch for it. There used to be: `data-{prefix}-animate`, which only\n\
+        \x20  ever appeared ANDed with glow or grain. Both default to off, so on a\n\
+        \x20  default page the control changed an attribute that matched no selector\n\
+        \x20  and did visibly nothing — which is worse than a missing control,\n\
+        \x20  because it teaches the reader that the panel lies. An aurora drifts\n\
+        \x20  because it is an aurora. */\n\
         @keyframes {prefix}-drift {{\n\
         \x20 from {{ transform: translate3d(0, 0, 0); }}\n\
         \x20 50%  {{ transform: translate3d(2%, -1.5%, 0); }}\n\
         \x20 to   {{ transform: translate3d(0, 0, 0); }}\n\
         }}\n\n\
-        :root[data-{prefix}-animate=\"on\"][data-{prefix}-glow=\"on\"] .{prefix}-fx::before {{\n\
+        :root[data-{prefix}-glow=\"on\"] .{prefix}-fx::before {{\n\
         \x20 animation: {prefix}-drift {drift} ease-in-out infinite;\n\
         \x20 will-change: transform;\n\
         }}\n\n\
-        :root[data-{prefix}-animate=\"on\"][data-{prefix}-grain=\"on\"] .{prefix}-grain {{\n\
+        :root[data-{prefix}-grain=\"on\"] .{prefix}-grain {{\n\
         \x20 animation: {prefix}-drift {breathe} steps(6) infinite;\n\
         }}\n\n\
         /* A page setting may only ever DISABLE motion. Someone whose system asked\n\
@@ -406,7 +414,7 @@ mod tests {
     #[test]
     fn global_settings_are_root_only() {
         let css = css();
-        for global in ["blackout", "pattern", "glow", "grain", "animate"] {
+        for global in ["blackout", "pattern", "glow", "grain"] {
             let bare = format!("\n[data-noctua-{global}");
             assert!(
                 !css.contains(&bare),

@@ -54,6 +54,16 @@ fn main() -> Result<(), String> {
             write(&path, &document(locale, page))?;
             written += 1;
         }
+        // `/<locale>/` is the URL people paste, so it has to resolve — but it
+        // is a door, not a room. It sends the reader to the first entry in
+        // their sidebar and carries no title, no prose and no sidebar entry of
+        // its own.
+        let first = site::first(locale);
+        write(
+            &out.join(locale.tag()).join("index.html"),
+            &redirect_to(locale, &first.file()),
+        )?;
+        written += 1;
     }
 
     // The site root redirects to the default locale. A meta refresh rather than
@@ -148,12 +158,11 @@ fn document_tree(props: DocumentProps) -> Element {
         div { class: "nd-body",
             shell::Sidebar { context }
             shell::Scrim { context }
-            main { id: "nd-main", class: "nd-main",
-                pages::Body { context }
-                footer { class: "nd-foot",
-                    p { "{context.t(Key::FooterGenerated)}" }
-                }
-            }
+            // No footer. The one that was here said the same sentence on every
+            // page — that the site is generated from the same specification the
+            // system is — which is a fact about the build, not something a
+            // reader came for.
+            main { id: "nd-main", class: "nd-main", pages::Body { context } }
         }
     }
 }
@@ -198,7 +207,19 @@ fn is_document_relative(href: &str) -> bool {
 
 /// The root document, which sends a reader to the default locale.
 fn redirect() -> String {
-    let target = format!("{}/index.html", Locale::DEFAULT.tag());
+    let locale = Locale::DEFAULT;
+    redirect_to(
+        locale,
+        &format!("{}/{}", locale.tag(), site::first(locale).file()),
+    )
+}
+
+/// A door: no title beyond the site's name, no content, no sidebar entry.
+///
+/// Deliberately not a page. The site had a landing page whose entire content
+/// described the other pages — which is what the sidebar is — so it was
+/// deleted rather than rewritten.
+fn redirect_to(locale: Locale, target: &str) -> String {
     format!(
         "<!doctype html>\n\
          <html lang=\"{lang}\">\n\
@@ -210,8 +231,8 @@ fn redirect() -> String {
          </head>\n\
          <body><a href=\"{target}\">{name}</a></body>\n\
          </html>\n",
-        lang = Locale::DEFAULT.bcp47(),
-        name = Locale::DEFAULT.message(Key::AppName),
+        lang = locale.bcp47(),
+        name = locale.message(Key::AppName),
     )
 }
 

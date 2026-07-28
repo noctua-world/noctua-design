@@ -90,14 +90,6 @@
       "attribute": "data-noctua-grain",
       "omitWhen": null,
       "scope": false
-    },
-    "animate": {
-      "values": ["off", "on"],
-      "default": "off",
-      "key": "noctua-animate",
-      "attribute": "data-noctua-animate",
-      "omitWhen": null,
-      "scope": false
     }
   }
 }

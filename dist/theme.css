@@ -187,19 +187,27 @@ html {
    silently, in exactly the population the token exists to protect.
  
    So reduced motion is one explicit `animation: none`, and every animated
-   layer has a designed static end-state. */
+   layer has a designed static end-state.
+ 
+   Motion belongs to the effect that has it, and there is no separate
+   switch for it. There used to be: `data-noctua-animate`, which only
+   ever appeared ANDed with glow or grain. Both default to off, so on a
+   default page the control changed an attribute that matched no selector
+   and did visibly nothing — which is worse than a missing control,
+   because it teaches the reader that the panel lies. An aurora drifts
+   because it is an aurora. */
 @keyframes noctua-drift {
   from { transform: translate3d(0, 0, 0); }
   50%  { transform: translate3d(2%, -1.5%, 0); }
   to   { transform: translate3d(0, 0, 0); }
 }
 
-:root[data-noctua-animate="on"][data-noctua-glow="on"] .noctua-fx::before {
+:root[data-noctua-glow="on"] .noctua-fx::before {
   animation: noctua-drift 42s ease-in-out infinite;
   will-change: transform;
 }
 
-:root[data-noctua-animate="on"][data-noctua-grain="on"] .noctua-grain {
+:root[data-noctua-grain="on"] .noctua-grain {
   animation: noctua-drift 18s steps(6) infinite;
 }
 

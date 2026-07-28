@@ -91,12 +91,6 @@
       r.setAttribute('data-noctua-grain', grain);
     }
 
-    // animate
-    var animate = localStorage.getItem('noctua-animate');
-    if (['off','on'].indexOf(animate) !== -1) {
-      r.setAttribute('data-noctua-animate', animate);
-    }
-
     // The page is now correct before anything paints. Remove the
     // no-script marker last, so a stylesheet keyed on it never applies to
     // an already-corrected document.

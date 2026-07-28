@@ -5,6 +5,7 @@
 // measurement that was true once.
 
 import { test, expect } from "@playwright/test";
+import { ANY, LOCALES, PAGE, url } from "./pages.js";
 
 const MOBILE = { width: 390, height: 844 };
 const DESKTOP = { width: 1440, height: 900 };
@@ -13,7 +14,7 @@ test.describe("the mobile drawer and its partial scrim", () => {
   test.use({ viewport: MOBILE });
 
   test("the scrim stops exactly where the drawer starts", async ({ page }) => {
-    await page.goto("/en/index.html");
+    await page.goto(url(ANY));
     await page.locator("[data-nd-menu]").click();
     // Both transitions are 180ms; disabling them makes the geometry final
     // rather than sampled somewhere along an animation.
@@ -34,7 +35,7 @@ test.describe("the mobile drawer and its partial scrim", () => {
   });
 
   test("a point inside the drawer never hits the scrim", async ({ page }) => {
-    await page.goto("/en/index.html");
+    await page.goto(url(ANY));
     await page.locator("[data-nd-menu]").click();
     // Without this the drawer is still sliding: 180ms of transition, and a
     // point measured mid-flight lands where the drawer is not yet. The first
@@ -50,7 +51,7 @@ test.describe("the mobile drawer and its partial scrim", () => {
   });
 
   test("the drawer ignores the reader's corner preset", async ({ page }) => {
-    await page.goto("/en/index.html");
+    await page.goto(url(ANY));
     // Circular is the most extreme preset; if any radius survives, it is this.
     await page.evaluate(() =>
       document.documentElement.setAttribute("data-noctua-radius", "circular"),
@@ -64,7 +65,7 @@ test.describe("the mobile drawer and its partial scrim", () => {
   });
 
   test("growing the viewport releases everything, with no script", async ({ page }) => {
-    await page.goto("/en/index.html");
+    await page.goto(url(ANY));
     await page.locator("[data-nd-menu]").click();
     expect(await page.locator("html").getAttribute("data-nd-nav")).toBe("open");
 
@@ -80,7 +81,7 @@ test.describe("the mobile drawer and its partial scrim", () => {
   });
 
   test("nothing in the shell is modal", async ({ page }) => {
-    await page.goto("/en/index.html");
+    await page.goto(url(ANY));
     await page.locator("[data-nd-menu]").click();
     expect(await page.locator("[aria-modal]").count()).toBe(0);
     expect(await page.locator("[inert]").count()).toBe(0);
@@ -91,7 +92,7 @@ test.describe("the header", () => {
   for (const width of [320, 390, 768, 1440]) {
     test(`fits on one line at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
-      await page.goto("/en/index.html");
+      await page.goto(url(ANY));
 
       for (const open of [false, true]) {
         if (open) await page.locator(".nd-settings > summary").click();
@@ -148,7 +149,7 @@ test.describe("§9.7, enforced", () => {
 
   test("the measure holds however wide the page gets", async ({ page }) => {
     await page.setViewportSize({ width: 2560, height: 900 });
-    await page.goto("/en/index.html");
+    await page.goto(url(ANY));
     const widths = await page.locator(".nd-prose").evaluateAll((els) =>
       els.map((el) => el.getBoundingClientRect().width),
     );
@@ -159,7 +160,7 @@ test.describe("§9.7, enforced", () => {
   });
 
   test("a sidebar row never grows a background or reflows", async ({ page }) => {
-    await page.goto("/en/index.html");
+    await page.goto(url(ANY));
     const link = page.locator(".nd-nav-link").first();
     const before = await link.evaluate((el) => ({
       bg: getComputedStyle(el).backgroundColor, // allow-literal: compared for EQUALITY against another serialisation of the same computation, never for its value

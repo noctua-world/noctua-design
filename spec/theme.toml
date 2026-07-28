@@ -136,13 +136,10 @@ scope = false
 key = "noctua-grain"
 attribute = "data-noctua-grain"
 
-[setting.animate]
-values = ["off", "on"]
-default = "off"
-scope = false
-key = "noctua-animate"
-attribute = "data-noctua-animate"
-# Ambient motion, and it may only ever be *disabled* by the reader.
-# `prefers-reduced-motion: reduce` forces it off in CSS regardless of this
-# value: a page setting must never re-enable motion for someone whose system
-# asked for none.
+# There was a `setting.animate` here — "ambient motion". It was removed rather
+# than fixed, because it was never a setting: the only two rules that read it
+# also required `glow` or `grain`, both of which default to off, so from a
+# default page turning it on changed an attribute that matched no selector. A
+# control that does nothing is worse than a missing one — it teaches the reader
+# that the panel lies. Motion now belongs to the effect that has it: aurora and
+# grain drift when they are on, and `prefers-reduced-motion` still wins.

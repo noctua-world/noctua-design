@@ -30,7 +30,6 @@ import {
   patternValues,
   glowValues,
   grainValues,
-  animateValues,
   resolveScope,
   scopeAttributes,
   stylesheetHref,
@@ -53,7 +52,6 @@ const model = {
   pattern: patternValues,
   glow: glowValues,
   grain: grainValues,
-  animate: animateValues,
 };
 
 /** The settings a reader picks directly. `palette` is derived from two of them. */
