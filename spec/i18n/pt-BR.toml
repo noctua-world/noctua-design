@@ -157,3 +157,13 @@ dir = "ltr"
 "footer.generated" = "Cada página daqui é gerada a partir da mesma especificação que o sistema."
 "provisional.title" = "Provisório"
 "provisional.body" = "Esta página é um espaço reservado. Ela existe para que a estrutura possa ser avaliada por inteiro, e será substituída por documentação real."
+
+# --- Tipografia -----------------------------------------------------------
+
+"type.scale.title" = "A escala"
+"type.scale.body" = "Uma âncora no tamanho do corpo, e todo o resto declarado de forma absoluta em vez de como multiplicador — assim você lê o valor sem fazer conta."
+"type.families.title" = "As famílias"
+"type.families.body" = "Quatro famílias, cada uma em todos os pesos e estilos que são embarcados. Nada além disso é carregado."
+"type.scripts.title" = "Todos os sistemas de escrita que este sistema renderiza"
+"type.scripts.body" = "É por isto que o Noto foi escolhido. Cada linha abaixo é texto real, não um espaço reservado — a modelagem de uma escrita só aparece em palavras que alguém de fato escreveria."
+"type.specimen.line" = "Um pequeno jabuti xereta viu dez cegonhas felizes"

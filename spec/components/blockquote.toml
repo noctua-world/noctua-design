@@ -1,0 +1,21 @@
+[meta]
+name = "Blockquote"
+element = "blockquote"
+class = "nd-blockquote"
+summary = "A quotation set apart from the text around it."
+
+[prop.cite]
+type = "text"
+attribute = "cite"
+doc = "A URL for the source. Machine-readable; it is not shown."
+
+[prop.tone]
+type = "enum"
+values = ["default", "accent"]
+default = "default"
+attribute = "data-nd-tone"
+doc = "Whether the rule beside it takes the accent colour."
+
+[prop.children]
+type = "children"
+doc = "The quotation, and its attribution if it has one."

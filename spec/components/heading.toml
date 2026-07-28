@@ -1,0 +1,40 @@
+# A heading, with its semantic level decoupled from its visual size.
+#
+# The two are separate props because they answer different questions: the level
+# is document structure, which assistive technology navigates by, and the size
+# is typography. Tying them together forces a choice between a correct outline
+# and a correct-looking page, and the page usually wins.
+[meta]
+name = "Heading"
+element = "h2"
+class = "nd-heading"
+summary = "A heading whose outline level and visual size are set independently."
+
+[prop.level]
+type = "enum"
+values = ["1", "2", "3", "4", "5", "6"]
+default = "2"
+doc = "The outline level. This is document structure, not appearance."
+
+[prop.size]
+type = "enum"
+values = ["display", "h1", "h2", "h3", "h4", "lead"]
+default = "h2"
+attribute = "data-nd-size"
+doc = "The visual size, from the type scale. Independent of the level."
+
+[prop.balance]
+type = "bool"
+default = "false"
+attribute = "data-nd-balance"
+doc = "Balance the line lengths, for headings that wrap."
+
+[prop.children]
+type = "children"
+doc = "The heading text."
+
+[a11y]
+notes = """
+The level must not skip: an h2 followed by an h4 leaves a hole in the outline
+that a screen-reader user navigating by heading falls straight through. Choose
+the level from the document and the size from the design."""

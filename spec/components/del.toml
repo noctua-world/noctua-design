@@ -1,0 +1,25 @@
+[meta]
+name = "Del"
+element = "del"
+class = "nd-del"
+summary = "Text removed from the document."
+
+[prop.cite]
+type = "text"
+attribute = "cite"
+doc = "A URL explaining the change."
+
+[prop.datetime]
+type = "text"
+attribute = "datetime"
+doc = "When it was removed, as a machine-readable timestamp."
+
+[prop.children]
+type = "children"
+doc = "The removed text."
+
+[a11y]
+notes = """
+A strikethrough is not announced by most screen readers, so deleted text is
+read as though it were current. The component carries a visually-hidden label
+saying so."""

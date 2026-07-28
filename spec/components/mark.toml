@@ -1,0 +1,15 @@
+[meta]
+name = "Mark"
+element = "mark"
+class = "nd-mark"
+summary = "Text highlighted for the reader's current purpose, such as a search hit."
+
+[prop.children]
+type = "children"
+doc = "The highlighted text."
+
+[a11y]
+notes = """
+A highlight that carries meaning needs more than a background colour: colour
+alone is invisible to a reader who cannot distinguish it, so this also changes
+the text weight."""

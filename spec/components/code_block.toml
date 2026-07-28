@@ -1,0 +1,38 @@
+[meta]
+name = "CodeBlock"
+element = "pre"
+class = "nd-codeblock"
+summary = "A block of code, in the monospaced face, with a copy control."
+[prop.language]
+type = "text"
+attribute = "data-nd-language"
+doc = "The language, shown as a label and used by the copy announcement."
+
+[prop.numbered]
+type = "bool"
+default = "false"
+attribute = "data-nd-numbered"
+doc = "Show line numbers."
+
+[prop.wrap]
+type = "bool"
+default = "false"
+attribute = "data-nd-wrap"
+doc = "Wrap long lines instead of scrolling them."
+
+[prop.copy]
+type = "bool"
+default = "true"
+attribute = "data-nd-copy"
+doc = "Offer a copy control."
+
+[prop.children]
+type = "children"
+doc = "The code."
+
+[a11y]
+notes = """
+A scrollable code block must be reachable by keyboard, or its content is
+unreadable without a mouse — so the scroll container is focusable when it
+overflows. The copy control announces its result; a button that silently
+succeeds is a button a screen-reader user cannot trust."""

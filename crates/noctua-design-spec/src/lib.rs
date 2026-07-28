@@ -24,6 +24,7 @@
 //!
 //! This crate knows nothing about output formats. That is `noctua-design-emit`.
 
+pub mod component;
 pub mod error;
 pub mod fonts;
 pub mod i18n;
@@ -34,6 +35,7 @@ mod validate_fonts;
 mod validate_theme;
 pub mod vendor;
 
+pub use component::Component;
 pub use error::{Problem, SpecError};
 pub use fonts::{Face, Fonts};
 pub use i18n::{Catalogue, Locale};

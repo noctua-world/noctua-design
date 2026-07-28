@@ -51,6 +51,10 @@ impl Context {
 pub(crate) fn Header(context: Context) -> Element {
     let home = site::PAGES[0].href();
     rsx! {
+        // The header's frost, as a SIBLING painted behind it. Inside the header
+        // it would be an ancestor of the settings panel, and a nested
+        // `backdrop-filter` stops sampling — see shell.css.
+        div { class: "nd-header-glass", "aria-hidden": "true" }
         header { class: "nd-header",
             button {
                 class: "nd-icon nd-menu",

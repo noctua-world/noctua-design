@@ -1,0 +1,36 @@
+[meta]
+name = "List"
+element = "ul"
+class = "nd-list"
+summary = "An ordered, unordered or description list, nestable."
+
+[prop.kind]
+type = "enum"
+values = ["unordered", "ordered", "description"]
+default = "unordered"
+attribute = "data-nd-kind"
+doc = "Which kind of list. Changes the element, not only the marker."
+
+[prop.marker]
+type = "enum"
+values = ["default", "none"]
+default = "default"
+attribute = "data-nd-marker"
+doc = "`none` removes the marker without removing the list semantics."
+
+[prop.spacing]
+type = "enum"
+values = ["tight", "default", "loose"]
+default = "default"
+attribute = "data-nd-spacing"
+doc = "The gap between items."
+
+[prop.children]
+type = "children"
+doc = "The items."
+
+[a11y]
+notes = """
+`marker: none` removes the visual marker only. Some browsers drop the list
+semantics entirely when list-style is none, so the role is restated explicitly —
+otherwise a styled list stops announcing how many items it has."""

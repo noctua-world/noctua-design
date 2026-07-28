@@ -1,0 +1,28 @@
+[meta]
+name = "Truncate"
+element = "span"
+class = "nd-truncate"
+summary = "Text clipped to a line count, with the full value still available."
+
+[prop.lines]
+type = "enum"
+values = ["1", "2", "3", "4"]
+default = "1"
+attribute = "data-nd-lines"
+doc = "How many lines to show before clipping."
+
+[prop.title]
+type = "text"
+attribute = "title"
+doc = "The full text. Shown on hover and announced in full."
+
+[prop.children]
+type = "children"
+doc = "The text."
+
+[a11y]
+needs_name = true
+notes = """
+Clipping is visual only: the full text stays in the accessible tree, so a
+screen reader reads the whole value. Truncation that also truncates the
+announcement hides content from exactly the readers who cannot see the ellipsis."""

@@ -15,13 +15,14 @@
 //! either would rewrite every generated file whenever anything changed, burying
 //! a one-token diff in hundreds of lines of churn.
 
-use noctua_design_spec::{Catalogue, Fonts, Spec, Theme, Vendor};
+use noctua_design_spec::{Catalogue, Component, Fonts, Spec, Theme, Vendor};
 
 pub mod appearance;
 pub mod component;
 pub mod css;
 pub mod fonts;
 pub mod i18n;
+pub mod props;
 pub mod rust;
 pub mod scope;
 pub mod theme;
@@ -62,6 +63,9 @@ pub const THEME_SPEC: &str = "spec/theme.toml";
 /// The message catalogue directory, likewise.
 pub const MESSAGE_SPEC: &str = "spec/i18n/";
 
+/// The component directory, likewise.
+pub const COMPONENT_SPEC: &str = "spec/components/";
+
 /// Everything the emitters read.
 ///
 /// A bundle rather than a growing parameter list: the number of inputs is
@@ -80,6 +84,8 @@ pub struct Inputs<'a> {
     pub theme: &'a Theme,
     /// Every locale's messages.
     pub catalogue: &'a Catalogue,
+    /// Every component's contract.
+    pub components: &'a [Component],
 }
 
 /// Runs every emitter, returning all files sorted by path.
@@ -91,6 +97,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
         vendor,
         theme,
         catalogue,
+        components,
     } = inputs;
 
     let mut files = Vec::new();
@@ -99,6 +106,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
     files.extend(css::emit(spec));
     files.extend(fonts::emit(spec, font_layer));
     files.extend(i18n::emit(catalogue));
+    files.extend(props::emit(components));
     files.push(fonts::preload_fragment(font_layer));
     files.extend(rust::emit(spec));
     files.extend(scope::emit(vendor));
@@ -203,7 +211,7 @@ pub fn camel(name: &str) -> String {
 mod tests {
     use super::*;
 
-    fn shipped() -> (Spec, Fonts, Vendor, Theme, Catalogue) {
+    fn shipped() -> (Spec, Fonts, Vendor, Theme, Catalogue, Vec<Component>) {
         let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
         let vendor = noctua_design_spec::vendor::load(&root).expect("vendor");
         let theme =
@@ -214,16 +222,19 @@ mod tests {
             vendor,
             theme,
             noctua_design_spec::i18n::load(root.join("spec/i18n")).expect("catalogue"),
+            noctua_design_spec::component::load_all(root.join("spec/components"))
+                .expect("components"),
         )
     }
 
-    fn inputs(bundle: &(Spec, Fonts, Vendor, Theme, Catalogue)) -> Inputs<'_> {
+    fn inputs(bundle: &(Spec, Fonts, Vendor, Theme, Catalogue, Vec<Component>)) -> Inputs<'_> {
         Inputs {
             spec: &bundle.0,
             fonts: &bundle.1,
             vendor: &bundle.2,
             theme: &bundle.3,
             catalogue: &bundle.4,
+            components: &bundle.5,
         }
     }
 
@@ -240,7 +251,7 @@ mod tests {
             // Each file names the spec it came from — the token spec or the
             // font spec. Asserting one would make the other's header wrong.
             assert!(
-                [SPEC, FONT_SPEC, THEME_SPEC, MESSAGE_SPEC]
+                [SPEC, FONT_SPEC, THEME_SPEC, MESSAGE_SPEC, COMPONENT_SPEC]
                     .iter()
                     .any(|spec| file.contents.contains(spec)),
                 "{} names no specification, so a reader cannot find what generated it",
@@ -269,7 +280,7 @@ mod tests {
     /// Every emitter must produce something, or a target is silently dead.
     #[test]
     fn every_target_emits_at_least_one_file() {
-        let (spec, font_layer, vendor, theme_model, catalogue) = shipped();
+        let (spec, font_layer, vendor, theme_model, catalogue, components) = shipped();
         assert!(
             !appearance::emit(&spec, &theme_model).is_empty(),
             "appearance"
@@ -278,6 +289,7 @@ mod tests {
         assert!(!css::emit(&spec).is_empty(), "css");
         assert!(!fonts::emit(&spec, &font_layer).is_empty(), "fonts");
         assert!(!i18n::emit(&catalogue).is_empty(), "i18n");
+        assert!(!props::emit(&components).is_empty(), "props");
         assert!(!rust::emit(&spec).is_empty(), "rust");
         assert!(!scope::emit(&vendor).is_empty(), "scope");
         assert!(!theme::emit(&theme_model, &vendor).is_empty(), "theme");

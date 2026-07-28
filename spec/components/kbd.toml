@@ -1,0 +1,16 @@
+[meta]
+name = "Kbd"
+element = "kbd"
+class = "nd-kbd"
+summary = "A key or chord, as printed on a keyboard."
+
+[prop.size]
+type = "enum"
+values = ["small", "body"]
+default = "small"
+attribute = "data-nd-size"
+doc = "The size."
+
+[prop.children]
+type = "children"
+doc = "The key name."

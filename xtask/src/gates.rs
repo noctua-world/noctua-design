@@ -235,17 +235,21 @@ fn inspect(file: &str, text: &str, breakpoints: &[String], findings: &mut Vec<Fi
                 message,
             });
         }
-        // These two read the raw line: a font family and a Tailwind class both
-        // live *inside* a string, which is precisely where they are invisible
-        // to a check that strips strings first.
-        if let Some(message) = font_family(line) {
+        // These two read the line with only its COMMENT stripped, not its
+        // strings: a font family and a Tailwind class both live inside a
+        // string, which is precisely where they are invisible to a check that
+        // strips strings first. But prose explaining *why* a family must not be
+        // named is not a violation — and this file's own doc comments name
+        // every family in the system.
+        let uncommented = strip_comments(line);
+        if let Some(message) = font_family(&uncommented) {
             findings.push(Finding {
                 file: file.to_owned(),
                 line: number,
                 message,
             });
         }
-        if let Some(message) = arbitrary_value(line) {
+        if let Some(message) = arbitrary_value(&uncommented) {
             findings.push(Finding {
                 file: file.to_owned(),
                 line: number,
@@ -465,6 +469,23 @@ fn media_prelude(code: &str, breakpoints: &[String]) -> Option<String> {
         }
     }
     None
+}
+
+/// Removes a line comment, keeping the string literals before it.
+///
+/// Different from [`strip_strings_and_comments`], which also blanks strings:
+/// the font and Tailwind gates have to see inside strings, because that is
+/// where a hardcoded family or class lives.
+fn strip_comments(line: &str) -> String {
+    for marker in ["//!", "///", "//", "/*", "*", "#"] {
+        let trimmed = line.trim_start();
+        if trimmed.starts_with(marker) {
+            return String::new();
+        }
+    }
+    line.split_once("//")
+        .map_or(line, |(code, _)| code)
+        .to_owned()
 }
 
 /// Blanks out comment text so a gate does not fire on prose.

@@ -1,0 +1,9 @@
+[meta]
+name = "ListItem"
+element = "li"
+class = "nd-list-item"
+summary = "One item in a list."
+
+[prop.children]
+type = "children"
+doc = "The item."

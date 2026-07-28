@@ -1,0 +1,19 @@
+[meta]
+name = "Time"
+element = "time"
+class = "nd-time"
+summary = "A date or time, machine-readable and human-readable at once."
+
+[prop.datetime]
+type = "text"
+attribute = "datetime"
+doc = "The machine-readable value, in ISO 8601."
+
+[prop.children]
+type = "children"
+doc = "How it is written for a reader, in their locale."
+
+[a11y]
+notes = """
+The visible text is what is announced, so it must be a real date in the
+reader's language — not an ISO string. `datetime` is for machines only."""

@@ -88,12 +88,23 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
             .join(", ")
     ));
 
+    let components_path = root.join("spec/components");
+    let components = noctua_design_spec::component::load_all(&components_path)
+        .map_err(|error| format!("{:?}", miette::Report::new(error)))?;
+    ui::ok(&format!("compiled {}", relative_to(root, &components_path)));
+    ui::detail(&format!(
+        "{} components, {} props in total",
+        components.len(),
+        components.iter().map(|c| c.prop.len()).sum::<usize>()
+    ));
+
     let mut files = noctua_design_emit::emit_all(noctua_design_emit::Inputs {
         spec: &spec,
         fonts: &fonts,
         vendor: &vendor,
         theme: &theme,
         catalogue: &catalogue,
+        components: &components,
     });
 
     // Generated Rust goes through rustfmt before anyone compares it.

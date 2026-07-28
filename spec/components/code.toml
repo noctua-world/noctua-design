@@ -1,0 +1,16 @@
+[meta]
+name = "Code"
+element = "code"
+class = "nd-code-inline"
+summary = "A fragment of code inside a sentence."
+
+[prop.tone]
+type = "enum"
+values = ["default", "subtle"]
+default = "default"
+attribute = "data-nd-tone"
+doc = "How much the fragment should stand out from the prose around it."
+
+[prop.children]
+type = "children"
+doc = "The code."

@@ -13,6 +13,7 @@
 mod index;
 mod pages;
 mod props;
+mod scripts;
 mod shell;
 mod site;
 

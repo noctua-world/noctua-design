@@ -1,0 +1,23 @@
+[meta]
+name = "Paragraph"
+element = "p"
+class = "nd-paragraph"
+summary = "A paragraph of prose."
+
+[prop.size]
+type = "enum"
+values = ["small", "body", "lead"]
+default = "body"
+attribute = "data-nd-size"
+doc = "The size, from the type scale."
+
+[prop.tone]
+type = "enum"
+values = ["default", "muted"]
+default = "default"
+attribute = "data-nd-tone"
+doc = "How much the paragraph should assert itself."
+
+[prop.children]
+type = "children"
+doc = "The text."

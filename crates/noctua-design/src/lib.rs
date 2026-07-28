@@ -1,15 +1,12 @@
 //! The Noctua design system — the Dioxus half.
 //!
-//! # There is exactly one component here, and it is not a widget
+//! # Every component here is generated
 //!
-//! [`ThemeScope`] is the whole surface. Not a Button, not a Card — Stage 6 adds
-//! those, and `NOCTUA-PLAN.md` Stage 3 is explicit that a component built before
-//! the machine that builds components gets rebuilt.
-//!
-//! `ThemeScope` is here anyway because it is not a widget: it is how a theme
-//! reaches a subtree at all, and every component Stage 6 adds will be rendered
-//! inside one. It is also **generated** from `spec/theme.toml` rather than
-//! written, so it is a product of the machine rather than an exception to it.
+//! [`ThemeScope`] comes from `spec/theme.toml`; every text component comes from
+//! its own `spec/components/<name>.toml`. Nothing in this crate is written by
+//! hand, and that is the parity mechanism rather than a convenience: the React
+//! package is generated from the same files, so the two cannot declare
+//! different props, different defaults or different values.
 //!
 //! What else exists is everything a component will need: the token layer
 //! ([`noctua_design_tokens`]), the theme model ([`noctua_design_theme`]), the
@@ -25,8 +22,10 @@
 //! Editing one implementation alone is a compile error or a failing conformance
 //! test, by design. `NOCTUA.md §9.3`.
 
-// GENERATED from spec/theme.toml by `cargo xtask build`. Do not edit
-// src/theme.rs; edit the setting table and rebuild.
+// GENERATED. Do not edit src/theme.rs or src/components/; edit the spec and
+// rebuild. `cargo xtask check` fails if either drifts.
+pub mod components;
+pub mod script;
 pub mod theme;
 
 // Re-exported so a consumer takes one dependency rather than two, and so the
@@ -34,4 +33,6 @@ pub mod theme;
 pub use noctua_design_theme as model;
 pub use noctua_design_tokens as tokens;
 
+pub use components::*;
+pub use script::{Script, dominant_script, font_override};
 pub use theme::{ThemeScope, use_theme};

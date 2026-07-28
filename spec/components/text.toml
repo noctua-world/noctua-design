@@ -1,0 +1,36 @@
+[meta]
+name = "Text"
+element = "span"
+class = "nd-text"
+summary = "A run of text, with the size, weight and tone of the type scale."
+
+[prop.size]
+type = "enum"
+values = ["caption", "small", "body", "lead"]
+default = "body"
+attribute = "data-nd-size"
+doc = "The size, from the type scale."
+
+[prop.weight]
+type = "enum"
+values = ["regular", "medium", "semibold", "bold"]
+default = "regular"
+attribute = "data-nd-weight"
+doc = "The weight."
+
+[prop.tone]
+type = "enum"
+values = ["default", "muted", "accent"]
+default = "default"
+attribute = "data-nd-tone"
+doc = "How much the text should assert itself."
+
+[prop.numeric]
+type = "bool"
+default = "false"
+attribute = "data-nd-numeric"
+doc = "Tabular figures, so digits line up in a column."
+
+[prop.children]
+type = "children"
+doc = "The text."

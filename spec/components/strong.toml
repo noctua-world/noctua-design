@@ -1,0 +1,9 @@
+[meta]
+name = "Strong"
+element = "strong"
+class = "nd-strong"
+summary = "Importance, seriousness or urgency — not merely bold text."
+
+[prop.children]
+type = "children"
+doc = "The important text."

@@ -1,0 +1,19 @@
+[meta]
+name = "Ins"
+element = "ins"
+class = "nd-ins"
+summary = "Text added to the document."
+
+[prop.cite]
+type = "text"
+attribute = "cite"
+doc = "A URL explaining the change."
+
+[prop.datetime]
+type = "text"
+attribute = "datetime"
+doc = "When it was added, as a machine-readable timestamp."
+
+[prop.children]
+type = "children"
+doc = "The added text."

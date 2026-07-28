@@ -114,6 +114,13 @@ export type MessageKey =
   | "footer.generated"
   | "provisional.title"
   | "provisional.body"
+  | "type.scale.title"
+  | "type.scale.body"
+  | "type.families.title"
+  | "type.families.body"
+  | "type.scripts.title"
+  | "type.scripts.body"
+  | "type.specimen.line"
   ;
 
 export declare const messages: Record<LocaleTag, Record<MessageKey, string>>;

@@ -1,0 +1,21 @@
+[meta]
+name = "Abbr"
+element = "abbr"
+class = "nd-abbr"
+summary = "An abbreviation, with its expansion."
+
+[prop.title]
+type = "text"
+attribute = "title"
+doc = "The expansion. Required — an abbr without one is just small text."
+
+[prop.children]
+type = "children"
+doc = "The abbreviation."
+
+[a11y]
+needs_name = true
+notes = """
+`title` is invisible on touch, where there is no hover. The expansion is
+therefore also available in the text on first use; the attribute is a
+convenience for pointer users, never the only route to the meaning."""

@@ -332,11 +332,25 @@ pub enum Key {
     ProvisionalTitle,
     /// `provisional.body`
     ProvisionalBody,
+    /// `type.scale.title`
+    TypeScaleTitle,
+    /// `type.scale.body`
+    TypeScaleBody,
+    /// `type.families.title`
+    TypeFamiliesTitle,
+    /// `type.families.body`
+    TypeFamiliesBody,
+    /// `type.scripts.title`
+    TypeScriptsTitle,
+    /// `type.scripts.body`
+    TypeScriptsBody,
+    /// `type.specimen.line`
+    TypeSpecimenLine,
 }
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 106] = [
+    pub const ALL: [Self; 113] = [
         Self::AppName,
         Self::AppTagline,
         Self::AppSkip,
@@ -443,6 +457,13 @@ impl Key {
         Self::FooterGenerated,
         Self::ProvisionalTitle,
         Self::ProvisionalBody,
+        Self::TypeScaleTitle,
+        Self::TypeScaleBody,
+        Self::TypeFamiliesTitle,
+        Self::TypeFamiliesBody,
+        Self::TypeScriptsTitle,
+        Self::TypeScriptsBody,
+        Self::TypeSpecimenLine,
     ];
 
     /// The dotted name, for diagnostics and for the search index.
@@ -555,6 +576,13 @@ impl Key {
             Self::FooterGenerated => "footer.generated",
             Self::ProvisionalTitle => "provisional.title",
             Self::ProvisionalBody => "provisional.body",
+            Self::TypeScaleTitle => "type.scale.title",
+            Self::TypeScaleBody => "type.scale.body",
+            Self::TypeFamiliesTitle => "type.families.title",
+            Self::TypeFamiliesBody => "type.families.body",
+            Self::TypeScriptsTitle => "type.scripts.title",
+            Self::TypeScriptsBody => "type.scripts.body",
+            Self::TypeSpecimenLine => "type.specimen.line",
         }
     }
 }
@@ -701,6 +729,19 @@ impl Locale {
                 Key::ProvisionalBody => {
                     "This page is a placeholder. It is here so the shell can be judged whole, and it will be replaced by real documentation."
                 }
+                Key::TypeScaleTitle => "The scale",
+                Key::TypeScaleBody => {
+                    "One anchor at body size, and everything else stated absolutely rather than as a multiplier — so you can read the value without doing arithmetic."
+                }
+                Key::TypeFamiliesTitle => "The families",
+                Key::TypeFamiliesBody => {
+                    "Four families, each at every weight and style that ships. Nothing else is loaded."
+                }
+                Key::TypeScriptsTitle => "Every script this system renders",
+                Key::TypeScriptsBody => {
+                    "This is why Noto was chosen. Each line below is real text, not a placeholder — a script's shaping only shows in words somebody would actually write."
+                }
+                Key::TypeSpecimenLine => "Sphinx of black quartz, judge my vow",
             },
             Self::PtBr => match key {
                 Key::AppName => "Noctua",
@@ -841,6 +882,19 @@ impl Locale {
                 Key::ProvisionalBody => {
                     "Esta página é um espaço reservado. Ela existe para que a estrutura possa ser avaliada por inteiro, e será substituída por documentação real."
                 }
+                Key::TypeScaleTitle => "A escala",
+                Key::TypeScaleBody => {
+                    "Uma âncora no tamanho do corpo, e todo o resto declarado de forma absoluta em vez de como multiplicador — assim você lê o valor sem fazer conta."
+                }
+                Key::TypeFamiliesTitle => "As famílias",
+                Key::TypeFamiliesBody => {
+                    "Quatro famílias, cada uma em todos os pesos e estilos que são embarcados. Nada além disso é carregado."
+                }
+                Key::TypeScriptsTitle => "Todos os sistemas de escrita que este sistema renderiza",
+                Key::TypeScriptsBody => {
+                    "É por isto que o Noto foi escolhido. Cada linha abaixo é texto real, não um espaço reservado — a modelagem de uma escrita só aparece em palavras que alguém de fato escreveria."
+                }
+                Key::TypeSpecimenLine => "Um pequeno jabuti xereta viu dez cegonhas felizes",
             },
             Self::Qps => match key {
                 Key::AppName => "⟦Nooctuuaa⟧",
@@ -985,6 +1039,19 @@ impl Locale {
                 Key::ProvisionalBody => {
                     "⟦Thiis paagee iis aa plaaceehooldeer. IIt iis heeree soo thee sheell caan bee juudgeed whoolee, aand iit wiill bee reeplaaceed by reeaal doocuumeentaatiioon.⟧"
                 }
+                Key::TypeScaleTitle => "⟦Thee scaalee⟧",
+                Key::TypeScaleBody => {
+                    "⟦OOnee aanchoor aat boody siizee, aand eeveerythiing eelsee staateed aabsooluuteely raatheer thaan aas aa muultiipliieer — soo yoouu caan reeaad thee vaaluuee wiithoouut dooiing aariithmeetiic.⟧"
+                }
+                Key::TypeFamiliesTitle => "⟦Thee faamiiliiees⟧",
+                Key::TypeFamiliesBody => {
+                    "⟦Foouur faamiiliiees, eeaach aat eeveery weeiight aand stylee thaat shiips. Noothiing eelsee iis looaadeed.⟧"
+                }
+                Key::TypeScriptsTitle => "⟦EEveery scriipt thiis systeem reendeers⟧",
+                Key::TypeScriptsBody => {
+                    "⟦Thiis iis why Nootoo waas chooseen. EEaach liinee beeloow iis reeaal teext, noot aa plaaceehooldeer — aa scriipt's shaapiing oonly shoows iin woords soomeeboody woouuld aactuuaally wriitee.⟧"
+                }
+                Key::TypeSpecimenLine => "⟦Sphiinx oof blaack quuaartz, juudgee my voow⟧",
             },
         }
     }

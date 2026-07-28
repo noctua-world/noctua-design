@@ -11,7 +11,8 @@ Read it before adding a page.
 
 **The shell.** Header, sidebar, mobile drawer, the partial scrim, the settings
 panel, the effect layers, search. All of it is measured rather than asserted —
-see "Verified" below.
+see "Verified" below, including that each frosted surface actually *samples*
+rather than merely declaring `backdrop-filter`.
 
 **The theme runtime.** All thirty-nine palettes, three modes, two typefaces,
 three glass levels, four corner presets, four background patterns, the aurora,
@@ -118,6 +119,8 @@ What it covers:
 | No `box-shadow` on any element in the shell | ✓ |
 | Every accent swatch shows its own accent, from its own `data-palette` scope | ✓ |
 | pt-BR orders the sidebar in Portuguese, not in English | ✓ |
+| Every glass surface has **no filtered ancestor**, and a frosted panel samples | ✓ |
+| The colours page paints **39 distinct** palettes, not 39 copies of one | ✓ |
 | The React bundle: **0 requests** on a page view, **1** on the first toggle | ✓ |
 | React's `ThemeScope` stamps the same attributes Dioxus server-rendered | ✓ |
 | Each border sits one step from **its own** surface, measured in canvas pixels | ✓ |

@@ -114,7 +114,12 @@ test("glass is on before anyone touches a setting", async ({ page }) => {
   // scopable — and which meant that on a first visit NOTHING matched, the
   // tokens were undefined, and `blur(var(--undefined))` computed to `none`.
   // Every frosted surface rendered flat, silently.
-  const header = await page.locator(".nd-header").evaluate((el) => getComputedStyle(el).backdropFilter);
+  // `.nd-header-glass`, not `.nd-header`: the frost is a sibling painted behind
+  // the header so that nothing in the header's subtree — the settings panel
+  // above all — has a filtered ancestor.
+  const header = await page
+    .locator(".nd-header-glass")
+    .evaluate((el) => getComputedStyle(el).backdropFilter);
   expect(header, "the default glass level is not declared unscoped").toContain("blur");
   expect(header).not.toBe("none");
 });
@@ -123,7 +128,9 @@ test("glass is scopable and radius is scopable", async ({ page }) => {
   await page.goto("/en/scoped-themes.html");
   const outer = page.locator("[data-noctua-scope]").first();
   const blur = await outer.evaluate((el) => getComputedStyle(el).backdropFilter);
-  const pageBlur = await page.locator(".nd-header").evaluate((el) => getComputedStyle(el).backdropFilter);
+  const pageBlur = await page
+    .locator(".nd-header-glass")
+    .evaluate((el) => getComputedStyle(el).backdropFilter);
   expect(blur).not.toBe(pageBlur);
 
   const radius = await outer.evaluate((el) => getComputedStyle(el).borderRadius);

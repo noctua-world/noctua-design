@@ -1,13 +1,13 @@
 // The Noctua design system — the React half.
 //
-// There is deliberately nothing here. This package exports no component, for
-// the same reason its Dioxus counterpart does not: NOCTUA-PLAN.md Stage 3
-// builds the machine that builds components, and a component built before the
-// machine gets rebuilt. Stage 6 adds the first ones.
+// Every component here is GENERATED from spec/components/<name>.toml, the same
+// file crates/noctua-design is generated from. That is what makes this package
+// and its Dioxus counterpart behaviourally identical (NOCTUA.md §9.3) by
+// construction rather than by review: neither names a prop, a default or a
+// value, so neither can disagree with the other about one.
 //
-// When they arrive, this package and crates/noctua-design must stay
-// BEHAVIOURALLY IDENTICAL. One contract, two implementations, one shared set of
-// behavioural cases run against both — NOCTUA.md §9.3. Adding a component here
-// without adding it there is a failing conformance test, by design.
+// Do not edit src/components/ or src/theme.js. Edit the spec and rebuild;
+// `cargo xtask check` fails if either has drifted.
 
-export {};
+export * from "./components/index.js";
+export { ThemeScope, useTheme } from "./theme.js";

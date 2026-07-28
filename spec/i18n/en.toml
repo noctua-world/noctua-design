@@ -161,3 +161,13 @@ dir = "ltr"
 "footer.generated" = "Every page here is generated from the same specification the system is."
 "provisional.title" = "Provisional"
 "provisional.body" = "This page is a placeholder. It is here so the shell can be judged whole, and it will be replaced by real documentation."
+
+# --- Typography -----------------------------------------------------------
+
+"type.scale.title" = "The scale"
+"type.scale.body" = "One anchor at body size, and everything else stated absolutely rather than as a multiplier — so you can read the value without doing arithmetic."
+"type.families.title" = "The families"
+"type.families.body" = "Four families, each at every weight and style that ships. Nothing else is loaded."
+"type.scripts.title" = "Every script this system renders"
+"type.scripts.body" = "This is why Noto was chosen. Each line below is real text, not a placeholder — a script's shaping only shows in words somebody would actually write."
+"type.specimen.line" = "Sphinx of black quartz, judge my vow"

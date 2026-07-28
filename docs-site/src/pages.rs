@@ -7,6 +7,9 @@
 
 use dioxus::prelude::*;
 use noctua_design::ThemeScope;
+use noctua_design::components::{
+    Code, Heading, HeadingLevel, HeadingSize, Paragraph, Text, TextSize, TextTone, TextWeight,
+};
 use noctua_design::model::{Glass, Mode, Palette, Radius};
 use noctua_design_i18n::Key;
 
@@ -196,13 +199,31 @@ fn Colours(context: Context) -> Element {
     }
 }
 
+/// The type scale, the four families, and the fourteen scripts.
+///
+/// The scripts are not decoration: `NOCTUA.md §7.3.1` is the reason Noto was
+/// chosen over any other family, and this page is where that reason is either
+/// visible or false. A browser spec asserts every one renders with no tofu.
 #[component]
 fn Typography(context: Context) -> Element {
-    // The token *references*, taken from the generated crate rather than a list
-    // typed out here. A second list would carry the literal values — `3rem`,
-    // `1.125rem` — which are exactly the numbers that go stale the first time
-    // the scale moves, and which a developer copying from this page does not
-    // want anyway: what they want is the name.
+    rsx! {
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H2, "{context.t(Key::TypeScaleTitle)}" }
+        Paragraph { class: "nd-prose", "{context.t(Key::TypeScaleBody)}" }
+        Scale { context }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H2, "{context.t(Key::TypeFamiliesTitle)}" }
+        Paragraph { class: "nd-prose", "{context.t(Key::TypeFamiliesBody)}" }
+        Families { context }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H2, "{context.t(Key::TypeScriptsTitle)}" }
+        Paragraph { class: "nd-prose", "{context.t(Key::TypeScriptsBody)}" }
+        Scripts { context }
+    }
+}
+
+/// Every size, at its real size, with its token name.
+#[component]
+fn Scale(context: Context) -> Element {
     use noctua_design_tokens::size;
     let sizes = [
         ("display", size::DISPLAY),
@@ -219,15 +240,90 @@ fn Typography(context: Context) -> Element {
         div { class: "nd-scale",
             for (name, reference) in sizes {
                 div { class: "nd-scale-row",
-                    span { class: "nd-scale-name", "{name}" }
-                    span { class: "nd-scale-value", "{reference}" }
+                    Code { class: "nd-scale-name", "{name}" }
                     p { class: "nd-scale-sample", style: "font-size: {reference}",
-                        "{context.t(Key::ScopeSampleHeading)}"
+                        "{context.t(Key::TypeSpecimenLine)}"
                     }
                 }
             }
         }
-        p { class: "nd-prose nd-lead-measure", "{context.t(Key::ScopeSampleBody)}" }
+    }
+}
+
+/// One specimen per family, across the weights and styles that ship.
+#[component]
+fn Families(context: Context) -> Element {
+    // The family NAMES are labels a reader reads, not font bindings — every
+    // specimen below is set with the token beside it. A specimen page that
+    // could not name the family it is showing would be useless.
+    let families = [
+        ("Noto Sans", "var(--noctua-font-sans)"), // allow-literal: a label, not a binding
+        ("Noto Serif", "var(--noctua-font-serif)"), // allow-literal: as above
+        ("Noto Sans Display", "var(--noctua-font-display)"), // allow-literal: as above
+        ("Noctua Iosevka", "var(--noctua-font-mono)"), // allow-literal: as above
+    ];
+    let weights = [
+        ("regular", "400"),
+        ("medium", "500"),
+        ("semibold", "600"),
+        ("bold", "700"),
+    ];
+    rsx! {
+        div { class: "nd-specimens",
+            for (family, stack) in families {
+                div { class: "nd-specimen",
+                    Text { class: "nd-specimen-name", weight: TextWeight::Semibold, "{family}" }
+                    for (label, weight) in weights {
+                        p {
+                            class: "nd-specimen-line",
+                            style: "font-family: {stack}; font-weight: {weight}", // allow-literal: `stack` is one of the four font tokens in the table above — the gate cannot see through an interpolation, and a specimen page must set the family it is showing
+                            Text { class: "nd-specimen-weight", size: TextSize::Caption,
+                                tone: TextTone::Muted, "{label}"
+                            }
+                            "{context.t(Key::TypeSpecimenLine)}"
+                        }
+                    }
+                    p {
+                        class: "nd-specimen-line",
+                        style: "font-family: {stack}; font-style: italic", // allow-literal: as above, the italic specimen
+                        Text { class: "nd-specimen-weight", size: TextSize::Caption,
+                            tone: TextTone::Muted, "italic"
+                        }
+                        "{context.t(Key::TypeSpecimenLine)}"
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// The fourteen scripts, each with what it proves.
+///
+/// Every row carries `lang` and `dir`, because a browser shapes Arabic
+/// correctly only when it is told the text is Arabic — and because a test that
+/// rendered the right glyphs from the wrong language tag would be proving
+/// something other than what it claims.
+#[component]
+fn Scripts(context: Context) -> Element {
+    let _ = context;
+    rsx! {
+        div { class: "nd-scripts", "data-nd-scripts": "",
+            for sample in crate::scripts::SAMPLES {
+                div { class: "nd-script", "data-nd-script": "{sample.name}",
+                    div { class: "nd-script-meta",
+                        Text { class: "nd-script-name", weight: TextWeight::Semibold, "{sample.name}" }
+                        Text { size: TextSize::Caption, tone: TextTone::Muted, "{sample.proves}" }
+                    }
+                    p {
+                        class: "nd-script-sample",
+                        lang: "{sample.lang}",
+                        dir: "{sample.dir}",
+                        "data-nd-monospaceable": "{sample.monospaceable}",
+                        "{sample.text}"
+                    }
+                }
+            }
+        }
     }
 }
 

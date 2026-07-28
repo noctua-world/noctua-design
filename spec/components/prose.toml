@@ -1,0 +1,21 @@
+# The long-form container, and the only thing that owns the measure.
+#
+# NOCTUA.md §9.7: the page may be as wide as the screen, the LINE may not. The
+# cap belongs on the reading column rather than on a layout container, which is
+# what leaves the rest of the width free for anything that is not prose.
+[meta]
+name = "Prose"
+element = "div"
+class = "nd-prose-block"
+summary = "A long-form reading column that caps its own line length."
+
+[prop.measure]
+type = "enum"
+values = ["default", "lead", "none"]
+default = "default"
+attribute = "data-nd-measure"
+doc = "Which line-length cap to apply. `none` is for prose inside a narrow column that already constrains it."
+
+[prop.children]
+type = "children"
+doc = "The content."

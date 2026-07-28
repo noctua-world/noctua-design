@@ -206,6 +206,20 @@ document.querySelector("[data-nd-settings]")?.addEventListener("toggle", (event)
   }
 });
 
+// The colours page shows every palette at once, so it is the one page that
+// legitimately links all thirty-nine stylesheets — about 650 KB gzipped, which
+// is why no other page does.
+//
+// Each cell is a `data-palette` scope, so `dist/scope.css` re-resolves the whole
+// semantic contract inside it and every chip shows THAT palette's colours. But a
+// scope can only resolve what has been loaded: without these links the grid
+// renders thirty-nine cells that all paint the reader's own palette, which is
+// exactly what it did until this was written. The markup was right, the CSS was
+// right, and nothing connected them.
+if (document.querySelector("[data-nd-all-palettes]")) {
+  for (const palette of paletteValues.values) ensureStylesheet(palette);
+}
+
 // --- The drawer ------------------------------------------------------------
 
 function setDrawer(open) {
