@@ -1,0 +1,163 @@
+# noctua-design — the English message catalogue.
+#
+# English is the SOURCE locale: a key exists because it was added here first.
+# Every other locale is checked against this one in both directions, so a key
+# added here and forgotten elsewhere fails the build with the key named, and a
+# key deleted here but left elsewhere fails too (NOCTUA.md §9.9).
+#
+# Keys are dotted and quoted, so TOML treats them as literal strings rather than
+# nesting. That keeps the file a flat list a translator can read top to bottom
+# without tracking which table they are inside.
+#
+# THE RULE THAT MATTERS MOST: a sentence is one key. Never assemble a message
+# from fragments — word order, gender and agreement differ between languages,
+# and a fragment that reads correctly in English can be ungrammatical or
+# meaningless once translated. A source gate enforces it.
+
+[meta]
+# The name of this locale, written in this locale.
+name = "English"
+# The BCP 47 tag for `<html lang>`.
+bcp47 = "en"
+# Writing direction, for `<html dir>`.
+dir = "ltr"
+
+[message]
+
+# --- The shell ------------------------------------------------------------
+
+"app.name" = "Noctua"
+"app.tagline" = "A design system built on a perceptual colour space."
+"app.skip" = "Skip to content"
+"app.repository" = "Source code"
+
+"nav.label" = "Documentation"
+"nav.open" = "Open the menu"
+"nav.close" = "Close the menu"
+"nav.dismiss" = "Close the menu"
+
+"search.label" = "Search"
+"search.placeholder" = "Search the documentation"
+"search.empty" = "Nothing matches that."
+"search.results" = "{count} results"
+
+# --- Pages ----------------------------------------------------------------
+
+"page.overview.title" = "Overview"
+"page.overview.summary" = "What this system is, and the one idea the rest of it follows from."
+"page.colours.title" = "Colours"
+"page.colours.summary" = "Thirty-nine palettes, every one of them contrast-anchored rather than eyeballed."
+"page.typography.title" = "Typography"
+"page.typography.summary" = "A modular scale, large by default, and a line length that never depends on the width of the screen."
+"page.spacing.title" = "Spacing"
+"page.spacing.summary" = "One base step, and everything spaced from it."
+"page.effects.title" = "Effects"
+"page.effects.summary" = "Background patterns and ambient motion, each bounded so it cannot cost you a word of text."
+"page.scoped-themes.title" = "Scoped themes"
+"page.scoped-themes.summary" = "A theme is not only a property of the page. It belongs to whatever you put it on."
+"page.components.title" = "Components"
+"page.components.summary" = "The contract every component keeps, and the one component that already exists."
+
+# --- Theme controls -------------------------------------------------------
+
+"theme.mode.label" = "Appearance"
+"theme.mode.light" = "Light"
+"theme.mode.dark" = "Dark"
+"theme.mode.system" = "Match the system"
+
+"theme.accent.label" = "Accent"
+"theme.accent.ochre" = "Ochre"
+"theme.accent.amber" = "Amber"
+"theme.accent.lime" = "Lime"
+"theme.accent.jade" = "Jade"
+"theme.accent.teal" = "Teal"
+"theme.accent.azure" = "Azure"
+"theme.accent.blue" = "Blue"
+"theme.accent.indigo" = "Indigo"
+"theme.accent.violet" = "Violet"
+"theme.accent.magenta" = "Magenta"
+"theme.accent.rose" = "Rose"
+"theme.accent.clay" = "Clay"
+"theme.accent.umber" = "Umber"
+
+"theme.saturation.label" = "Saturation"
+"theme.saturation.balanced" = "Balanced"
+"theme.saturation.vivid" = "Vivid"
+"theme.saturation.sober" = "Sober"
+
+"theme.font.label" = "Typeface"
+"theme.font.sans" = "Sans"
+"theme.font.mono" = "Mono"
+
+"theme.glass.label" = "Glass"
+"theme.glass.off" = "Off"
+"theme.glass.subtle" = "Subtle"
+"theme.glass.full" = "Full"
+
+"theme.radius.label" = "Corners"
+"theme.radius.square" = "Square"
+"theme.radius.soft" = "Soft"
+"theme.radius.round" = "Round"
+"theme.radius.circular" = "Circular"
+
+# --- The settings panel ---------------------------------------------------
+
+"settings.label" = "Appearance settings"
+"settings.title" = "Appearance"
+"settings.reset" = "Reset everything"
+"settings.on" = "On"
+"settings.off" = "Off"
+
+"settings.blackout.label" = "Blackout"
+"settings.blackout.note" = "Pure black page background. Takes effect in dark mode."
+
+"settings.pattern.label" = "Pattern"
+"settings.pattern.none" = "None"
+"settings.pattern.dots" = "Dots"
+"settings.pattern.mesh" = "Mesh"
+"settings.pattern.checks" = "Checks"
+"settings.pattern.diagonals" = "Diagonals"
+
+"settings.glow.label" = "Aurora"
+"settings.glow.note" = "A soft wash of the accent colour behind the page."
+"settings.grain.label" = "Grain"
+"settings.grain.note" = "Fine film grain, always behind the text."
+"settings.animate.label" = "Ambient motion"
+"settings.animate.note" = "Slow drift. Your system's reduced-motion setting always wins."
+
+"locale.label" = "Language"
+
+# --- The scoped-theme demonstration ---------------------------------------
+
+"scope.page.title" = "The page"
+"scope.page.body" = "These controls are the ones in the header. They theme the document, and everything on it that has not been given a theme of its own."
+"scope.component.title" = "This component"
+"scope.component.body" = "These controls theme only the box they are inside. The page around it does not move, and neither does any other component."
+"scope.nested.title" = "And this one, inside it"
+"scope.nested.body" = "A nested scope resolves against the scope around it, not against the page. Change only the mode here and it keeps the palette its parent chose."
+"scope.sample.heading" = "A heading"
+"scope.sample.body" = "Body text, a link, and a control — every one of them painted from the theme of whichever box it is in."
+"scope.sample.link" = "A link"
+"scope.sample.action" = "An action"
+"scope.sample.quiet" = "Something quieter"
+"scope.note" = "Nothing here is a screenshot. Every box is the same component, reading the theme that reaches it."
+
+# --- The example frame ----------------------------------------------------
+
+"example.label" = "Example"
+"example.reset" = "Reset"
+"example.code.show" = "Show the code"
+"example.code.hide" = "Hide the code"
+"example.width.narrow" = "Narrow"
+"example.width.medium" = "Medium"
+"example.width.full" = "Full width"
+"example.impl.label" = "Implementation"
+"example.impl.dioxus" = "Dioxus"
+"example.impl.react" = "React"
+"example.impl.loading" = "Loading the React example…"
+
+# --- Odds and ends --------------------------------------------------------
+
+"footer.generated" = "Every page here is generated from the same specification the system is."
+"provisional.title" = "Provisional"
+"provisional.body" = "This page is a placeholder. It is here so the shell can be judged whole, and it will be replaced by real documentation."

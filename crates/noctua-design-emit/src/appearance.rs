@@ -26,13 +26,13 @@
 
 use std::fmt::Write as _;
 
-use noctua_design_spec::Spec;
+use noctua_design_spec::{Spec, Theme};
 
 use crate::{CommentStyle, EmittedFile, header};
 
 /// Emits `dist/theme.css`.
 #[must_use]
-pub fn emit(spec: &Spec) -> Vec<EmittedFile> {
+pub fn emit(spec: &Spec, theme: &Theme) -> Vec<EmittedFile> {
     let prefix = &spec.meta.prefix;
     let mut out = header(CommentStyle::Block);
 
@@ -51,7 +51,7 @@ pub fn emit(spec: &Spec) -> Vec<EmittedFile> {
     .expect("write");
 
     radius_presets(&mut out, spec, prefix);
-    glass(&mut out, spec, prefix);
+    glass(&mut out, spec, theme, prefix);
     blackout(&mut out, prefix);
     effects(&mut out, spec, prefix);
 
@@ -82,7 +82,7 @@ fn radius_presets(out: &mut String, spec: &Spec, prefix: &str) {
 }
 
 /// The frosted surface, as dimensions only.
-fn glass(out: &mut String, spec: &Spec, prefix: &str) {
+fn glass(out: &mut String, spec: &Spec, theme: &Theme, prefix: &str) {
     if spec.glass.blur.is_empty() {
         return;
     }
@@ -101,6 +101,31 @@ fn glass(out: &mut String, spec: &Spec, prefix: &str) {
         \x20      backdrop-filter: blur(var(--{prefix}-glass-blur)); */\n"
     )
     .expect("write");
+
+    // THE DEFAULT LEVEL IS ALSO DECLARED AT THE ROOT, and leaving it out is a
+    // bug this shipped once.
+    //
+    // Every other block here is a bare attribute selector, which is what makes
+    // glass scopable. But nothing stamps `data-noctua-glass` until a reader
+    // changes it — `system`-style absence is the normal state — so on a first
+    // visit no block matched and the two tokens were simply *undefined*. A
+    // `backdrop-filter: blur(var(--noctua-glass-blur))` with an undefined
+    // custom property is invalid at computed-value time, so it becomes `none`:
+    // every frosted surface in the system silently rendered flat, and nothing
+    // reported anything.
+    //
+    // `:where()` keeps it at zero specificity, so `[data-noctua-glass="off"]`
+    // on the root still wins.
+    if let Some(setting) = theme.setting.get("glass") {
+        let level = &setting.default;
+        if let Some(blur) = spec.glass.blur.get(level) {
+            let opacity = spec.glass.opacity.get(level).copied().unwrap_or(100);
+            writeln!(out, ":where(:root) {{").expect("write");
+            writeln!(out, "  --{prefix}-glass-blur: {blur};").expect("write");
+            writeln!(out, "  --{prefix}-glass-opacity: {opacity}%;").expect("write");
+            writeln!(out, "}}\n").expect("write");
+        }
+    }
 
     // `off` is the absence of the tokens, so a surface that asks for them
     // falls back to opaque rather than to a half-applied frost.
@@ -363,8 +388,14 @@ mod tests {
         noctua_design_spec::load(path).expect("the shipped spec")
     }
 
+    fn model() -> Theme {
+        let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+        let vendor = noctua_design_spec::vendor::load(&root).expect("vendor");
+        noctua_design_spec::load_theme(root.join("spec/theme.toml"), &vendor).expect("theme")
+    }
+
     fn css() -> String {
-        emit(&shipped()).remove(0).contents
+        emit(&shipped(), &model()).remove(0).contents
     }
 
     /// A global setting must be unreachable from a subtree.
@@ -409,6 +440,30 @@ mod tests {
     /// A `color-mix` on a `--nc-` token declared at `:root` freezes to the
     /// page's palette, so a themed component would show the page's frost. This
     /// is the general form of the bug `dist/scope.css` exists to fix.
+    /// The bug this caught: every glass block was a bare attribute selector, so
+    /// until a reader changed the setting nothing matched, the two tokens were
+    /// undefined, and `blur(var(--noctua-glass-blur))` was invalid at
+    /// computed-value time — which resolves to `none`. Every frosted surface in
+    /// the system rendered flat on a first visit, silently.
+    #[test]
+    fn the_default_glass_level_is_declared_without_an_attribute() {
+        let css = css();
+        let theme = model();
+        let level = &theme.setting["glass"].default;
+        let spec = shipped();
+        let blur = &spec.glass.blur[level];
+
+        let root = css
+            .split(":where(:root) {")
+            .nth(1)
+            .and_then(|rest| rest.split('}').next())
+            .expect("glass has no unscoped default, so a page with nothing stored has no glass");
+        assert!(
+            root.contains(&format!("--noctua-glass-blur: {blur}")),
+            "the unscoped default is not the default level: {root}"
+        );
+    }
+
     #[test]
     fn glass_emits_no_pre_mixed_surface() {
         let css = css();

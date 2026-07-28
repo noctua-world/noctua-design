@@ -72,11 +72,28 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
         theme.global().count()
     ));
 
+    let messages = root.join("spec/i18n");
+    let catalogue = noctua_design_spec::i18n::load(&messages)
+        .map_err(|error| format!("{:?}", miette::Report::new(error)))?;
+    ui::ok(&format!("compiled {}", relative_to(root, &messages)));
+    ui::detail(&format!(
+        "{} messages × {} locales ({}, one of them generated)",
+        catalogue.keys.len(),
+        catalogue.locales.len(),
+        catalogue
+            .locales
+            .iter()
+            .map(|locale| locale.tag.clone())
+            .collect::<Vec<_>>()
+            .join(", ")
+    ));
+
     let mut files = noctua_design_emit::emit_all(noctua_design_emit::Inputs {
         spec: &spec,
         fonts: &fonts,
         vendor: &vendor,
         theme: &theme,
+        catalogue: &catalogue,
     });
 
     // Generated Rust goes through rustfmt before anyone compares it.

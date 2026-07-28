@@ -8,7 +8,15 @@ license.workspace = true
 publish = false
 
 [dependencies]
+dioxus.workspace = true
+noctua-design-theme.workspace = true
 noctua-design-tokens.workspace = true
+
+[dev-dependencies]
+# Renders a component to an HTML string so the tests can assert on the markup a
+# scope actually produces. Not a runtime dependency: choosing a renderer stays
+# the application's decision.
+dioxus-ssr.workspace = true
 
 [lints]
 workspace = true

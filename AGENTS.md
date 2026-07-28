@@ -118,13 +118,20 @@ trusting it.
 
 ## Status
 
-**Stage 3 — the repository base.** The machine that builds components exists;
-**no component does yet, and that is deliberate.** A component built before the
-machine gets rebuilt. `NOCTUA-PLAN.md` Stage 3, "Must NOT be touched".
+**Stages 4 and 5 — the theme runtime, the language layer and the site.**
 
-What exists: the token compiler, the font layer, the source gates, the two empty
-packages, and `cargo xtask check` as the single gate. Stage 4 adds the theme and
-language runtime; Stage 6 adds the first components.
+What exists: the token compiler, the font layer, the source gates, the theme
+model, the message catalogue, `ThemeScope` in both packages, and a documentation
+site pre-rendered in three locales. `cargo xtask check` is still the single gate,
+and `cargo xtask docs` builds the site.
+
+**There is exactly one component, and it is not a widget.** `ThemeScope` is how
+a theme reaches a subtree at all, and it is **generated** from `spec/theme.toml`
+rather than written — a product of the machine rather than an exception to it.
+Stage 6 adds the first real components; a Button built now would be rebuilt.
+
+The site's own scope and limits are in `docs-site/PROVISIONAL.md`. Read that
+before adding a page.
 
 ## Repository map
 
@@ -134,16 +141,19 @@ spec/                   the only files a developer edits
   i18n/{en,pt-BR}.toml  every UI message, both locales
   components/           <name>.toml (contract) + <name>.cases.toml (behaviour)
 crates/
-  noctua-design/        the Dioxus package
+  noctua-design/        the Dioxus package. src/theme.rs is GENERATED
   noctua-design-tokens/ GENERATED from spec/tokens.toml. COMMITTED
+  noctua-design-theme/  GENERATED from spec/theme.toml. COMMITTED
+  noctua-design-i18n/   GENERATED from spec/i18n/. COMMITTED
   noctua-design-icons/  GENERATED. COMMITTED
 packages/
-  react/                the React package
+  react/                the React package. src/theme.js is GENERATED
   tokens/               GENERATED (TypeScript). COMMITTED
   tokens/vendor/        the colour tokens, vendored from noctua-colors
 assets/fonts/           copied from .TEMP/, + ATTRIBUTION.md + licences
 dist/                   GENERATED, COMMITTED: noctua-design.css and manifests
-docs-site/              the Dioxus docs app. public/ is build output, gitignored
+docs-site/              the docs app. src/ and assets/ are written; dist/ is
+                        build output and is gitignored. Read PROVISIONAL.md
 tests/conformance/      one case set, run against both implementations
 xtask/                  the five verbs
 .TEMP/                  staging area. Copy OUT of it; never modify it
@@ -159,7 +169,7 @@ one drifts from `spec/`.
 cargo xtask build     # compile spec/ into tokens, icons, props types and dist/
 cargo xtask check     # THE gate: spec, source gates, drift, fmt, clippy, tests
 cargo xtask dev       # watch spec/ and components, rebuild, serve the docs site
-cargo xtask docs      # build the documentation site for both locales
+cargo xtask docs      # pre-render the site into docs-site/dist/, one build per locale
 cargo xtask release   # prepare a version
 ```
 
@@ -218,6 +228,71 @@ From `NOCTUA.md §9.7`, and they bind every component and every page:
 - **No layout shift, no flickering.**
 
 ## Gotchas
+
+### Themes are scopable, and that is what shaped this repository
+
+**A `var()` resolves where it is DECLARED, not where it is read.** The colour
+system emits its whole semantic contract — `--nc-color-surface`, `-fg`,
+`-border`, 1,767 names — once, at `:where(:root)`. Give a subtree
+`data-palette="amber-vivid"` and it gets amber's `--nc-neutral-*`, but
+`--nc-color-surface` still holds the **root's** value, because that is the
+element the indirection was declared on. A themed component painted from the
+semantic contract silently shows the page's colours, and every token still
+resolves to something so nothing looks broken.
+
+`dist/scope.css` is the fix: the same contract, re-emitted under
+`:where(:root), [data-noctua-scope], [data-palette]:not(:root),
+[data-theme]:not(:root)`. It **replaces** the vendored `contexts.css` in the base
+link set — linking both doubles the cost for nothing.
+
+**Every theme attribute goes on ONE element.** A theme file's forced-mode rule is
+compound and same-element:
+
+```css
+[data-palette="blue-vivid"][data-theme="dark"] { … }
+```
+
+Split the palette onto a wrapper and the mode onto a child and that selector
+matches nothing: the child falls through to the *default* palette's unanchored
+`[data-theme="dark"]`. Which is why `scope_attributes` always emits the palette
+when it emits anything, even when the palette did not change.
+
+**`system` is the absence of `data-theme`, never a value of it.** The cascade
+resolves the system preference before anything paints; the word is something no
+stylesheet understands.
+
+**The generalisation, and it is now a rule.** *Any* custom property whose value
+contains `var(--nc-…)` freezes to the palette of the element it is declared on.
+So the glass tokens are dimensionless numbers, and the `color-mix()` that turns
+them into a surface is written **where the token is used**. A
+`--noctua-glass-surface: color-mix(…var(--nc-color-surface)…)` at `:root` would
+hand every themed component the page's frost.
+
+### Trap 0 — a scopable setting still needs an unscoped default
+
+Every glass block is a bare attribute selector, which is what makes glass reach a
+subtree. But nothing stamps `data-noctua-glass` until a reader changes it, so on
+a first visit **no block matched**, `--noctua-glass-blur` was undefined, and
+`backdrop-filter: blur(var(--noctua-glass-blur))` was invalid at computed-value
+time — which resolves to `none`. Every frosted surface in the system rendered
+flat, silently, and the settings panel appeared to "turn glass on" when it was
+only defining the tokens for the first time.
+
+The default level is therefore also declared at `:where(:root)`, at zero
+specificity so an explicit `off` still wins. A test asserts it. **Any scopable
+setting whose tokens are read by a property that can be invalid needs the same
+thing.**
+
+### Trap 0.5 — media queries are minimum-width, and the gate now says so
+
+A media query cannot read a custom property, so the token gate could never apply
+to a prelude and preludes were simply unchecked. That hole let three `max-width`
+queries into the shell's own stylesheet — written directly under a header saying
+breakpoints are minimum-width only.
+
+`gates::media_prelude` now rejects `max-width` outright and requires every
+`min-width` to equal a breakpoint declared in `spec/tokens.toml`. Write the
+narrow case unconditionally and override it upward.
 
 **Trap 1 — Noto JP, KR, SC and Hebrew default to weight 100, not 400.**
 `fc-query` reports `Thin,Regular` as their first face. Anything rendering the

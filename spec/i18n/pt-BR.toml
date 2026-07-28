@@ -1,0 +1,159 @@
+# noctua-design — o catálogo de mensagens em português do Brasil.
+#
+# Este é o único arquivo do repositório escrito em outro idioma, e é assim por
+# construção: um catálogo de tradução em inglês não seria uma tradução. Toda
+# prosa, todo comentário e todo nome de identificador em qualquer outro arquivo
+# permanecem em inglês (`NOCTUA.md §1`).
+#
+# As chaves são idênticas às de `en.toml`, nos dois sentidos: uma chave que
+# exista lá e falte aqui interrompe a compilação nomeando a chave, e o mesmo
+# vale no sentido contrário.
+#
+# A REGRA MAIS IMPORTANTE: uma frase é uma chave. Nunca monte uma mensagem a
+# partir de fragmentos — ordem das palavras, gênero e concordância mudam entre
+# os idiomas, e um fragmento correto em inglês pode virar algo agramatical aqui.
+
+[meta]
+name = "Português"
+bcp47 = "pt-BR"
+dir = "ltr"
+
+[message]
+
+# --- A estrutura da página ------------------------------------------------
+
+"app.name" = "Noctua"
+"app.tagline" = "Um sistema de design construído sobre um espaço de cor perceptual."
+"app.skip" = "Ir para o conteúdo"
+"app.repository" = "Código-fonte"
+
+"nav.label" = "Documentação"
+"nav.open" = "Abrir o menu"
+"nav.close" = "Fechar o menu"
+"nav.dismiss" = "Fechar o menu"
+
+"search.label" = "Buscar"
+"search.placeholder" = "Buscar na documentação"
+"search.empty" = "Nada corresponde a isso."
+"search.results" = "{count} resultados"
+
+# --- Páginas --------------------------------------------------------------
+
+"page.overview.title" = "Visão geral"
+"page.overview.summary" = "O que é este sistema e a única ideia da qual todo o resto decorre."
+"page.colours.title" = "Cores"
+"page.colours.summary" = "Trinta e nove paletas, cada uma ancorada em contraste medido em vez de ajustada a olho."
+"page.typography.title" = "Tipografia"
+"page.typography.summary" = "Uma escala modular, grande por padrão, e uma medida de linha que nunca depende da largura da tela."
+"page.spacing.title" = "Espaçamento"
+"page.spacing.summary" = "Um passo base, e todo o resto espaçado a partir dele."
+"page.effects.title" = "Efeitos"
+"page.effects.summary" = "Padrões de fundo e movimento ambiente, cada um limitado para que não custe uma palavra de texto."
+"page.scoped-themes.title" = "Temas com escopo"
+"page.scoped-themes.summary" = "Um tema não é apenas uma propriedade da página. Ele pertence àquilo em que você o aplica."
+"page.components.title" = "Componentes"
+"page.components.summary" = "O contrato que todo componente cumpre, e o único componente que já existe."
+
+# --- Controles de tema ----------------------------------------------------
+
+"theme.mode.label" = "Aparência"
+"theme.mode.light" = "Claro"
+"theme.mode.dark" = "Escuro"
+"theme.mode.system" = "Acompanhar o sistema"
+
+"theme.accent.label" = "Cor de destaque"
+"theme.accent.ochre" = "Ocre"
+"theme.accent.amber" = "Âmbar"
+"theme.accent.lime" = "Lima"
+"theme.accent.jade" = "Jade"
+"theme.accent.teal" = "Verde-azulado"
+"theme.accent.azure" = "Azul-celeste"
+"theme.accent.blue" = "Azul"
+"theme.accent.indigo" = "Índigo"
+"theme.accent.violet" = "Violeta"
+"theme.accent.magenta" = "Magenta"
+"theme.accent.rose" = "Rosa"
+"theme.accent.clay" = "Argila"
+"theme.accent.umber" = "Umbra"
+
+"theme.saturation.label" = "Saturação"
+"theme.saturation.balanced" = "Equilibrada"
+"theme.saturation.vivid" = "Viva"
+"theme.saturation.sober" = "Sóbria"
+
+"theme.font.label" = "Tipografia"
+"theme.font.sans" = "Sem serifa"
+"theme.font.mono" = "Monoespaçada"
+
+"theme.glass.label" = "Vidro"
+"theme.glass.off" = "Desligado"
+"theme.glass.subtle" = "Sutil"
+"theme.glass.full" = "Pleno"
+
+"theme.radius.label" = "Cantos"
+"theme.radius.square" = "Retos"
+"theme.radius.soft" = "Suaves"
+"theme.radius.round" = "Arredondados"
+"theme.radius.circular" = "Circulares"
+
+# --- O painel de configurações --------------------------------------------
+
+"settings.label" = "Configurações de aparência"
+"settings.title" = "Aparência"
+"settings.reset" = "Restaurar tudo"
+"settings.on" = "Ligado"
+"settings.off" = "Desligado"
+
+"settings.blackout.label" = "Preto absoluto"
+"settings.blackout.note" = "Fundo da página em preto puro. Só tem efeito no modo escuro."
+
+"settings.pattern.label" = "Padrão"
+"settings.pattern.none" = "Nenhum"
+"settings.pattern.dots" = "Pontos"
+"settings.pattern.mesh" = "Malha"
+"settings.pattern.checks" = "Xadrez"
+"settings.pattern.diagonals" = "Diagonais"
+
+"settings.glow.label" = "Aurora"
+"settings.glow.note" = "Um véu suave da cor de destaque atrás da página."
+"settings.grain.label" = "Granulado"
+"settings.grain.note" = "Granulação fina de filme, sempre atrás do texto."
+"settings.animate.label" = "Movimento ambiente"
+"settings.animate.note" = "Deriva lenta. A preferência de movimento reduzido do seu sistema sempre prevalece."
+
+"locale.label" = "Idioma"
+
+# --- A demonstração de temas com escopo -----------------------------------
+
+"scope.page.title" = "A página"
+"scope.page.body" = "Estes controles são os mesmos do cabeçalho. Eles aplicam o tema ao documento e a tudo nele que não tenha recebido um tema próprio."
+"scope.component.title" = "Este componente"
+"scope.component.body" = "Estes controles aplicam o tema apenas à caixa em que estão. A página ao redor não muda, e nenhum outro componente muda."
+"scope.nested.title" = "E este aqui, dentro dele"
+"scope.nested.body" = "Um escopo aninhado se resolve em relação ao escopo que o envolve, não em relação à página. Mude apenas o modo aqui e ele mantém a paleta que o escopo pai escolheu."
+"scope.sample.heading" = "Um título"
+"scope.sample.body" = "Texto corrido, um link e um controle — todos pintados a partir do tema da caixa em que estão."
+"scope.sample.link" = "Um link"
+"scope.sample.action" = "Uma ação"
+"scope.sample.quiet" = "Algo mais discreto"
+"scope.note" = "Nada aqui é uma captura de tela. Cada caixa é o mesmo componente, lendo o tema que chega até ela."
+
+# --- O quadro de exemplos -------------------------------------------------
+
+"example.label" = "Exemplo"
+"example.reset" = "Restaurar"
+"example.code.show" = "Mostrar o código"
+"example.code.hide" = "Ocultar o código"
+"example.width.narrow" = "Estreito"
+"example.width.medium" = "Médio"
+"example.width.full" = "Largura total"
+"example.impl.label" = "Implementação"
+"example.impl.dioxus" = "Dioxus"
+"example.impl.react" = "React"
+"example.impl.loading" = "Carregando o exemplo em React…"
+
+# --- Diversos -------------------------------------------------------------
+
+"footer.generated" = "Cada página daqui é gerada a partir da mesma especificação que o sistema."
+"provisional.title" = "Provisório"
+"provisional.body" = "Esta página é um espaço reservado. Ela existe para que a estrutura possa ser avaliada por inteiro, e será substituída por documentação real."

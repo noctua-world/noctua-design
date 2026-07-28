@@ -59,6 +59,11 @@
                              var(--noctua-glass-opacity), transparent);
        backdrop-filter: blur(var(--noctua-glass-blur)); */
 
+:where(:root) {
+  --noctua-glass-blur: 8px;
+  --noctua-glass-opacity: 92%;
+}
+
 [data-noctua-glass="off"] {
   --noctua-glass-blur: 0;
   --noctua-glass-opacity: 100%;

@@ -26,6 +26,7 @@
 
 pub mod error;
 pub mod fonts;
+pub mod i18n;
 pub mod model;
 pub mod theme;
 mod validate;
@@ -35,6 +36,7 @@ pub mod vendor;
 
 pub use error::{Problem, SpecError};
 pub use fonts::{Face, Fonts};
+pub use i18n::{Catalogue, Locale};
 pub use model::{Duration, Meta, Motion, Space, Spec, Typography};
 pub use theme::{Setting, Theme};
 pub use vendor::Vendor;

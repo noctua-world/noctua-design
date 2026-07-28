@@ -1,0 +1,19 @@
+[package]
+name = "docs-site"
+description = "The Noctua design system documentation site. Pre-rendered to static HTML, one build per locale."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+dioxus.workspace = true
+dioxus-ssr.workspace = true
+noctua-design.workspace = true
+noctua-design-i18n.workspace = true
+noctua-design-theme.workspace = true
+noctua-design-tokens.workspace = true
+
+[lints]
+workspace = true

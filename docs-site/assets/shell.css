@@ -1,0 +1,944 @@
+/* The documentation shell.
+ *
+ * Hand-written, and the only hand-written CSS in this repository. Every value
+ * it uses is a token: no length, no colour and no duration is spelled out
+ * here, because a shell that invented its own numbers would be a second design
+ * system sitting on top of the first.
+ *
+ * FOUR RULES THIS FILE KEEPS, each because breaking it fails silently:
+ *
+ * 1. No `box-shadow`, anywhere. NOCTUA.md §9.7 forbids elevated surfaces, and
+ *    a shadow is how one sneaks back in. Separation is a hairline border.
+ *
+ * 2. No `opacity`, `filter` or `mask` on any ANCESTOR of a frosted surface.
+ *    `backdrop-filter` stops sampling the moment one appears above it in the
+ *    tree, and every glass surface on the page silently becomes a flat fill.
+ *    The effect layers are therefore siblings of the shell, never wrappers.
+ *
+ * 3. The scrim is anchored by two insets, never given a width. Its inline
+ *    start edge IS the drawer's inline end edge — same property, same
+ *    containing block, so the browser solves for the gap and there is nothing
+ *    to round. A `calc(100vw - …)` width leaves a one-pixel dim line under the
+ *    drawer's edge, which is exactly the artefact that ruins glass.
+ *
+ * 4. Breakpoints are minimum-width only. Never `calc(64rem - 1px)`: that is
+ *    how a layout gets a dead zone nobody tests at.
+ */
+
+/* --- The one layout variable both the drawer and the scrim read ----------- */
+
+:root {
+  /* Read by the drawer as its width and by the scrim as its start inset. Both
+     are `position: fixed`, so both resolve it against the same containing
+     block and the two edges meet by construction. */
+  --nd-drawer-w: min(var(--noctua-space-64), 78%);
+  --nd-header-h: var(--noctua-space-16);
+  --nd-edge: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+/* --- Reset, and the page's own typography -------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--nc-color-fg);
+  font-family: var(--noctua-font-sans);
+  font-size: var(--noctua-size-body);
+  line-height: var(--noctua-leading-body);
+  /* No background: `html` carries it, which is what lets blackout change one
+     variable and reach the whole page. */
+}
+
+:root[data-noctua-font="mono"] body {
+  font-family: var(--noctua-font-mono);
+}
+
+h1, h2, h3, h4, p, ul, figure {
+  margin: 0;
+}
+
+a {
+  color: var(--nc-color-accent);
+}
+
+:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-accent);
+  outline-offset: var(--noctua-focus-offset);
+  border-radius: var(--noctua-radius-control);
+}
+
+/* --- Glass, mixed where it is used --------------------------------------- */
+
+/* The mix is written HERE rather than declared as a token at :root, and that
+   is load-bearing. `--nc-color-surface` freezes to the palette of the element
+   it is declared on, so a `--noctua-glass-surface` at the root would hand a
+   themed component the PAGE's frost. Written at the point of use, it resolves
+   against whatever theme reached this element. */
+.nd-glass {
+  background: color-mix(
+    in oklab,
+    var(--nc-color-surface) var(--noctua-glass-opacity),
+    transparent
+  );
+  backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
+}
+
+/* --- The effect layers: siblings of everything --------------------------- */
+
+.nd-effects {
+  position: fixed;
+  inset: 0;
+  z-index: var(--noctua-layer-base);
+  pointer-events: none;
+  /* No opacity here. The grain layer carries its own, and it is a leaf. */
+}
+
+.noctua-fx,
+.noctua-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Readability guarantee (b): the pattern fades to nothing behind the reading
+   column, over about one measure so there is no hard edge that would read as a
+   card. Guarantee (a) — the 4% ink ceiling — holds whether this is on or off,
+   which is why they are independent. Below `sm` the prose fills the viewport,
+   so the mask would erase the whole layer; there it is simply not applied. */
+@media (min-width: 30rem) {
+  .noctua-fx {
+    mask-image: linear-gradient(
+      to right,
+      rgb(0 0 0 / 100%) 0, /* allow-literal: a mask reads only the alpha channel, so this is opacity rather than a colour and no palette can supply it */
+      transparent 18%,
+      transparent 62%,
+      rgb(0 0 0 / 100%) 92% /* allow-literal: as above, the other end of the ramp */
+    );
+  }
+}
+
+/* --- Skip link ----------------------------------------------------------- */
+
+.nd-skip {
+  position: fixed;
+  inset-block-start: var(--noctua-space-2);
+  inset-inline-start: var(--noctua-space-2);
+  z-index: var(--noctua-layer-toast);
+  padding: var(--noctua-space-inset);
+  background: var(--nc-color-surface);
+  border: var(--nd-edge);
+  border-radius: var(--noctua-radius-control);
+  transform: translateY(-200%);
+}
+
+.nd-skip:focus {
+  transform: none;
+}
+
+/* --- Floating surface 1 of 4: the header --------------------------------- */
+
+.nd-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--noctua-layer-sticky);
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  block-size: var(--nd-header-h);
+  padding-inline: var(--noctua-space-4);
+  border-block-end: var(--nd-edge);
+  background: color-mix(
+    in oklab,
+    var(--nc-color-surface) var(--noctua-glass-opacity),
+    transparent
+  );
+  backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
+}
+
+.nd-header-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-1);
+  margin-inline-start: auto;
+}
+
+/* The header's width budget at 320px, measured rather than assumed:
+     32 padding + 3 controls at 48 + a 30px language tag + 4 gaps at 4
+     = 222 <= 320.
+   It only fits because the wordmark moves into the sidebar and the language
+   control shortens to its tag. Both are `display: none`, never `visibility` —
+   a hidden element that still occupies its box would defeat the whole budget. */
+.nd-wordmark,
+.nd-locale-full {
+  display: none;
+}
+
+@media (min-width: 30rem) {
+  .nd-wordmark {
+    display: inline;
+  }
+
+  .nd-locale-full {
+    display: inline;
+  }
+
+  .nd-nav-wordmark,
+  .nd-locale-short {
+    display: none;
+  }
+}
+
+.nd-nav-wordmark {
+  font-size: var(--noctua-size-h3);
+  font-weight: var(--noctua-weight-semibold);
+  letter-spacing: var(--noctua-tracking-tight);
+  color: var(--nc-color-fg);
+  text-decoration: none;
+}
+
+.nd-wordmark {
+  font-size: var(--noctua-size-h4);
+  font-weight: var(--noctua-weight-semibold);
+  letter-spacing: var(--noctua-tracking-tight);
+  color: var(--nc-color-fg);
+  text-decoration: none;
+}
+
+/* A control is 2.75rem square, which clears WCAG 2.5.8's 24px minimum with
+   room to spare and meets the 44px enhanced target from `sm` up. At 320px the
+   header holds the menu button, the wordmark, three controls and their gaps in
+   well under the available width — which is the whole reason every appearance
+   setting lives in one panel instead of five menus. */
+.nd-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--noctua-space-12);
+  block-size: var(--noctua-space-12);
+  padding: 0;
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+  list-style: none;
+}
+
+.nd-icon:hover {
+  color: var(--nc-color-fg);
+  background: var(--nc-color-subtle-bg);
+}
+
+.nd-icon--small {
+  inline-size: var(--noctua-space-8);
+  block-size: var(--noctua-space-8);
+}
+
+.nd-glyph {
+  inline-size: var(--noctua-space-6);
+  block-size: var(--noctua-space-6);
+}
+
+.nd-locale {
+  padding-inline: var(--noctua-space-2);
+  block-size: var(--noctua-space-12);
+  display: inline-flex;
+  align-items: center;
+  color: var(--nc-color-fg-muted);
+  font-size: var(--noctua-size-small);
+  text-decoration: none;
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-locale:hover {
+  color: var(--nc-color-fg);
+  text-decoration: underline;
+}
+
+/* --- Floating surface 2 of 4: the appearance panel ----------------------- */
+
+.nd-settings {
+  position: relative;
+}
+
+.nd-settings > summary::-webkit-details-marker {
+  display: none;
+}
+
+.nd-settings[open] > summary {
+  color: var(--nc-color-fg);
+  background: var(--nc-color-subtle-bg);
+}
+
+/* Full-bleed is the BASE, and floating is the override — mobile-first, like
+   every other rule here. A rounded panel a few pixels from the edge of a narrow
+   screen reads as a card, which §9.7 forbids; and writing the narrow case as a
+   `max-width` exception is how a layout grows a dead zone nobody tests at. */
+.nd-panel {
+  position: fixed;
+  inset-block-start: var(--nd-header-h);
+  inset-inline: 0;
+  z-index: var(--noctua-layer-popover);
+  border-inline: 0;
+  border-radius: 0;
+  max-block-size: calc(100vh - var(--nd-header-h) - var(--noctua-space-8));
+  overflow-y: auto;
+  padding: var(--noctua-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-4);
+  border-block: var(--nd-edge);
+  background: color-mix(
+    in oklab,
+    var(--nc-color-surface) var(--noctua-glass-opacity),
+    transparent
+  );
+  backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
+}
+
+@media (min-width: 30rem) {
+  .nd-panel {
+    position: absolute;
+    inset-block-start: calc(100% + var(--noctua-space-2));
+    inset-inline: auto 0;
+    /* 20rem, composed rather than spelled: the settings panel is the drawer's
+       width plus one region step, which is what keeps the accent grid to two
+       columns instead of an awkward one-and-a-half. */
+    inline-size: min(
+      calc(var(--noctua-space-64) + var(--noctua-space-16)),
+      calc(100vw - var(--noctua-space-4))
+    );
+    border: var(--nd-edge);
+    border-radius: var(--noctua-radius-surface);
+  }
+}
+
+.nd-panel-title {
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-semibold);
+  letter-spacing: var(--noctua-tracking-caps);
+  text-transform: uppercase;
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-choice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+}
+
+.nd-choice-label {
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-medium);
+}
+
+.nd-choice-note {
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+  max-inline-size: var(--noctua-measure);
+}
+
+.nd-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--noctua-space-1);
+}
+
+.nd-option {
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  font: inherit;
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: var(--nd-edge);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-option:hover {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
+.nd-option[aria-checked="true"] {
+  color: var(--nc-color-on-accent);
+  background: var(--nc-color-accent);
+  border-color: var(--nc-color-accent);
+}
+
+.nd-accents {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--noctua-space-24), 1fr));
+  gap: var(--noctua-space-1);
+}
+
+.nd-accent {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  padding: var(--noctua-space-1) var(--noctua-space-2);
+  font: inherit;
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: var(--noctua-border-hairline) solid transparent;
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+  text-align: start;
+}
+
+.nd-accent:hover {
+  color: var(--nc-color-fg);
+}
+
+.nd-accent[aria-checked="true"] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
+/* The swatch reads `--nc-accent-solid` from inside its own `data-palette`
+   scope, which is the same mechanism ThemeScope uses — so each one shows its
+   own accent rather than the page's. The stylesheets those scopes need are
+   fetched when the panel is first opened, and never on a page view that does
+   not open it. */
+.nd-swatch {
+  inline-size: var(--noctua-space-4);
+  block-size: var(--noctua-space-4);
+  flex: none;
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-accent-solid, var(--nc-color-accent));
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+.nd-rule {
+  block-size: 0;
+  margin: 0;
+  border: 0;
+  border-block-start: var(--nd-edge);
+}
+
+.nd-reset {
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  font: inherit;
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: var(--nd-edge);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-reset:hover {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
+/* --- Floating surface 3 of 4: the drawer --------------------------------- */
+
+.nd-body {
+  position: relative;
+  z-index: var(--noctua-layer-raised);
+}
+
+.nd-nav {
+  position: fixed;
+  inset-block: var(--nd-header-h) 0;
+  inset-inline-start: 0;
+  z-index: var(--noctua-layer-overlay);
+  inline-size: var(--nd-drawer-w);
+  overflow-y: auto;
+  padding: var(--noctua-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-4);
+  border-inline-end: var(--nd-edge);
+  background: color-mix(
+    in oklab,
+    var(--nc-color-surface) var(--noctua-glass-opacity),
+    transparent
+  );
+  backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
+  /* NO border-radius, and the drawer ignores the reader's corner preset.
+     A rounded corner would cut a notch out of the drawer and let the scrim
+     show through it as a dark wedge — the one place "never under the sidebar"
+     would visibly fail. */
+  border-radius: 0;
+  transform: translateX(-100%);
+  transition: transform var(--noctua-duration-base) var(--noctua-easing-out);
+}
+
+[dir="rtl"] .nd-nav {
+  transform: translateX(100%);
+}
+
+:root[data-nd-nav="open"] .nd-nav {
+  transform: none;
+}
+
+/* The scrim covers everything the drawer does not, and stops exactly where the
+   drawer starts. Two insets, no width — see rule 3 at the top of this file. */
+.nd-scrim {
+  position: fixed;
+  inset-block: var(--nd-header-h) 0;
+  inset-inline-end: 0;
+  inset-inline-start: var(--nd-drawer-w);
+  z-index: var(--noctua-layer-overlay);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: color-mix(in oklab, var(--nc-gray-1) 55%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition: opacity var(--noctua-duration-base) var(--noctua-easing-out);
+}
+
+:root[data-nd-nav="open"] .nd-scrim {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* The scroll lock, and its release. Both are CSS, so widening the window
+   undoes the whole open state with no listener involved. */
+:root[data-nd-nav="open"] {
+  overflow: hidden;
+}
+
+/* --- Docked, from `lg` up ------------------------------------------------ */
+
+@media (min-width: 64rem) {
+  .nd-body {
+    display: grid;
+    grid-template-columns: var(--nd-drawer-w) 1fr;
+    align-items: start;
+  }
+
+  .nd-nav {
+    position: sticky;
+    inset-block-start: var(--nd-header-h);
+    block-size: calc(100vh - var(--nd-header-h));
+    z-index: var(--noctua-layer-base);
+    transform: none;
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  /* Gone entirely, not merely transparent: an invisible element that still
+     answers `elementFromPoint` is a click target nobody can see. */
+  .nd-scrim,
+  .nd-menu {
+    display: none;
+  }
+
+  :root[data-nd-nav="open"] {
+    overflow: visible;
+  }
+}
+
+/* --- The sidebar's contents ---------------------------------------------- */
+
+.nd-search-input {
+  inline-size: 100%;
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface-subtle);
+  border: var(--nd-edge);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-nav-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+}
+
+/* The hover effect targets the inner span, which makes a row background
+   structurally impossible rather than merely discouraged. Only `color` and
+   `text-decoration` change — never `font-weight`, which reflows the line under
+   the pointer and makes the list jitter as the cursor crosses it. */
+.nd-nav-link {
+  display: block;
+  padding: var(--noctua-space-2) 0;
+  color: var(--nc-color-fg-muted);
+  text-decoration: none;
+}
+
+.nd-nav-text {
+  text-decoration-color: transparent;
+  text-decoration-line: underline;
+  text-decoration-thickness: var(--noctua-border-hairline);
+  text-underline-offset: var(--noctua-space-1);
+  transition: color var(--noctua-duration-fast) var(--noctua-easing-out);
+}
+
+.nd-nav-link:hover .nd-nav-text {
+  color: var(--nc-color-fg);
+  text-decoration-color: currentColor;
+}
+
+.nd-nav-link--current .nd-nav-text {
+  color: var(--nc-color-accent);
+  text-decoration-color: currentColor;
+}
+
+.nd-search-empty,
+.nd-nav-foot {
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-nav-foot {
+  margin-block-start: auto;
+  padding-block-start: var(--noctua-space-4);
+  border-block-start: var(--nd-edge);
+}
+
+.nd-visually-hidden {
+  position: absolute;
+  inline-size: var(--noctua-border-hairline);
+  block-size: var(--noctua-border-hairline);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- The page ------------------------------------------------------------ */
+
+.nd-main {
+  padding: var(--noctua-space-8) var(--noctua-space-4) var(--noctua-space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-paragraph);
+}
+
+@media (min-width: 48rem) {
+  .nd-main {
+    padding-inline: var(--noctua-space-8);
+  }
+}
+
+/* The measure is on the prose, never on `main`. The page is as wide as the
+   screen and the LINE is not — which is also what leaves the empty column the
+   effect layers show through. */
+.nd-prose,
+.nd-lead,
+.nd-summary p {
+  max-inline-size: var(--noctua-measure);
+}
+
+.nd-lead,
+.nd-lead-measure {
+  font-size: var(--noctua-size-lead);
+  color: var(--nc-color-fg-muted);
+  max-inline-size: var(--noctua-measure-lead);
+}
+
+.nd-title {
+  font-size: var(--noctua-size-h1);
+  line-height: var(--noctua-leading-tight);
+  letter-spacing: var(--noctua-tracking-tight);
+  max-inline-size: var(--noctua-measure-lead);
+}
+
+.nd-note {
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-link {
+  color: var(--nc-color-accent);
+  text-underline-offset: var(--noctua-space-1);
+}
+
+.nd-summary {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-heading);
+}
+
+.nd-foot {
+  margin-block-start: var(--noctua-space-16);
+  padding-block-start: var(--noctua-space-4);
+  border-block-start: var(--nd-edge);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+/* --- Floating surface 4 of 4: a themed scope ----------------------------- */
+
+/* A scope MUST paint its own background. A light island inside a dark page
+   with no background of its own is unreadable, which is exactly the case
+   §9.7 says an opaque surface has to be justified by. */
+.nd-scope {
+  padding: var(--noctua-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-paragraph);
+  border: var(--nd-edge);
+  border-radius: var(--noctua-radius-surface);
+  color: var(--nc-color-fg);
+}
+
+.nd-scope--nested {
+  margin-block-start: var(--noctua-space-2);
+}
+
+.nd-scope-head {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-3);
+  flex-wrap: wrap;
+}
+
+.nd-scope-title {
+  font-size: var(--noctua-size-h3);
+  line-height: var(--noctua-leading-heading);
+  letter-spacing: var(--noctua-tracking-tight);
+}
+
+.nd-scope-controls {
+  display: flex;
+  gap: var(--noctua-space-1);
+  margin-inline-start: auto;
+}
+
+.nd-swatch--live,
+.nd-radius-mark,
+.nd-glass-mark {
+  inline-size: var(--noctua-space-4);
+  block-size: var(--noctua-space-4);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border-strong);
+}
+
+.nd-swatch--live {
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-accent);
+}
+
+.nd-radius-mark {
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-glass-mark {
+  border-radius: var(--noctua-radius-control);
+  background: color-mix(
+    in oklab,
+    var(--nc-color-fg) var(--noctua-glass-opacity),
+    transparent
+  );
+}
+
+/* --- The sample every scope contains ------------------------------------- */
+
+.nd-sample {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-3);
+  padding-block-start: var(--noctua-space-3);
+  border-block-start: var(--nd-edge);
+}
+
+.nd-sample-heading {
+  font-size: var(--noctua-size-h4);
+  line-height: var(--noctua-leading-heading);
+}
+
+.nd-sample-actions {
+  display: flex;
+  gap: var(--noctua-space-2);
+  flex-wrap: wrap;
+}
+
+.nd-button {
+  padding: var(--noctua-space-3) var(--noctua-space-4);
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-on-accent);
+  background: var(--nc-color-accent);
+  border: var(--noctua-border-hairline) solid var(--nc-color-accent);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-button:hover {
+  background: var(--nc-color-accent-hover);
+  border-color: var(--nc-color-accent-hover);
+}
+
+.nd-button--quiet {
+  color: var(--nc-color-fg);
+  background: none;
+  border-color: var(--nc-color-border-strong);
+}
+
+.nd-button--quiet:hover {
+  background: var(--nc-color-subtle-bg);
+  border-color: var(--nc-color-fg-muted);
+}
+
+/* --- The example frame --------------------------------------------------- */
+
+.nd-frame {
+  margin: 0;
+  border: var(--nd-edge);
+  border-radius: var(--noctua-radius-surface);
+  overflow: hidden;
+}
+
+.nd-frame-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-3);
+  flex-wrap: wrap;
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  border-block-end: var(--nd-edge);
+  background: var(--nc-color-surface-subtle);
+}
+
+.nd-frame-label {
+  font-size: var(--noctua-size-caption);
+  letter-spacing: var(--noctua-tracking-caps);
+  text-transform: uppercase;
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-frame-controls {
+  display: flex;
+  gap: var(--noctua-space-1);
+  margin-inline-start: auto;
+  flex-wrap: wrap;
+}
+
+/* The width control resizes the stage and nothing else, so an example can be
+   judged at 320px without the reader resizing the browser. */
+.nd-frame-stage {
+  padding: var(--noctua-space-4);
+  margin-inline: auto;
+  inline-size: 100%;
+  transition: inline-size var(--noctua-duration-base) var(--noctua-easing-out);
+}
+
+.nd-frame-stage[data-nd-width="narrow"] {
+  inline-size: min(100%, calc(var(--noctua-space-64) + var(--noctua-space-16)));
+}
+
+.nd-frame-stage[data-nd-width="medium"] {
+  inline-size: min(100%, calc(var(--noctua-space-64) * 3));
+}
+
+.nd-frame-caption {
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  border-block-start: var(--nd-edge);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+/* --- Scales -------------------------------------------------------------- */
+
+.nd-scale {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-3);
+}
+
+.nd-scale-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--noctua-space-4);
+  flex-wrap: wrap;
+  padding-block-end: var(--noctua-space-2);
+  border-block-end: var(--nd-edge);
+}
+
+.nd-scale-name,
+.nd-scale-value {
+  font-family: var(--noctua-font-mono);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+  inline-size: var(--noctua-space-24);
+  flex: none;
+}
+
+.nd-scale-sample {
+  line-height: var(--noctua-leading-tight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nd-bar {
+  display: inline-block;
+  block-size: var(--noctua-space-3);
+  background: var(--nc-color-accent);
+  border-radius: var(--noctua-radius-pill);
+}
+
+/* --- The palette grid ---------------------------------------------------- */
+
+.nd-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--noctua-space-48), 1fr));
+  gap: var(--noctua-space-4);
+}
+
+/* Each cell is a `data-palette` scope, so every chip inside it reads that
+   palette's semantic contract — the same mechanism ThemeScope uses, applied
+   thirty-nine times on one page. */
+.nd-palette {
+  padding: var(--noctua-space-3);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-surface);
+  background: var(--nc-color-surface);
+  color: var(--nc-color-fg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+}
+
+.nd-palette-name {
+  font-family: var(--noctua-font-mono);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-palette-bar {
+  display: flex;
+  block-size: var(--noctua-space-8);
+  border-radius: var(--noctua-radius-control);
+  overflow: hidden;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+.nd-chip {
+  flex: 1;
+}
+
+.nd-chip--bg { background: var(--nc-color-surface); }
+.nd-chip--subtle { background: var(--nc-color-surface-subtle); }
+.nd-chip--border { background: var(--nc-color-border-strong); }
+.nd-chip--accent { background: var(--nc-color-accent); }
+.nd-chip--fg { background: var(--nc-color-fg); }
+
+/* --- Reduced motion ------------------------------------------------------
+ *
+ * There is deliberately nothing here. `--noctua-duration-base` already
+ * collapses to 0ms under `prefers-reduced-motion: reduce`, declared once in
+ * dist/tokens.css, so every transition above honours the preference by reading
+ * the token. Repeating the media query here would be a second place for the
+ * rule to live and a second place for it to be forgotten. */

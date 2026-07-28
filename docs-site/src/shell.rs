@@ -1,0 +1,449 @@
+//! The frame every page sits in: header, sidebar, scrim, settings, effects.
+//!
+//! # Three structural rules, each from something that breaks silently
+//!
+//! **The effect layers are siblings of the shell, never ancestors.**
+//! `backdrop-filter` stops sampling the moment any *ancestor* has `filter`,
+//! `opacity` below 1, `mask` or a `backdrop-filter` of its own. Wrapping the
+//! shell in a faded layer would switch every frosted surface on the page to a
+//! flat fill, with no error and no obvious cause.
+//!
+//! **The scrim never covers the drawer.** It is anchored by two insets rather
+//! than given a width, so its inline start edge *is* the drawer's inline end
+//! edge — the same custom property, resolved against the same containing block.
+//! A `calc(100vw - …)` width rounds independently and leaves a one-pixel dim
+//! line along the drawer's edge, which is exactly the artefact that ruins glass.
+//!
+//! **Nothing here is modal.** No focus trap, no `inert`, no `aria-modal`.
+//! Widening the viewport past `lg` docks the sidebar, hides the scrim and
+//! releases the scroll lock in CSS alone — there is no listener to miss and no
+//! state to unwind.
+
+use dioxus::prelude::*;
+use noctua_design_i18n::{Key, Locale};
+
+use crate::site::{self, Page};
+
+/// Everything a page needs to know about where it sits.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct Context {
+    /// The locale being built.
+    pub locale: Locale,
+    /// The page being built.
+    pub page: Page,
+}
+
+impl Context {
+    /// This locale's text for a message.
+    #[must_use]
+    pub(crate) fn t(self, key: Key) -> &'static str {
+        self.locale.message(key)
+    }
+}
+
+/// The sticky header. One line at 320 px, and the budget is written down.
+///
+/// Four controls at 2.75 rem plus the wordmark plus the gaps comes to well under
+/// 320 px, which is what leaves room for the language control to be a word
+/// rather than a globe nobody can read. Every appearance setting lives in the
+/// one panel, so there is exactly one floating surface here instead of five.
+#[component]
+pub(crate) fn Header(context: Context) -> Element {
+    let home = site::PAGES[0].href();
+    rsx! {
+        header { class: "nd-header",
+            button {
+                class: "nd-icon nd-menu",
+                r#type: "button",
+                "aria-expanded": "false",
+                "aria-controls": "nd-nav",
+                "aria-label": context.t(Key::NavOpen),
+                "data-nd-menu": "",
+                Icon { name: "menu" }
+            }
+            a { class: "nd-wordmark", href: "{home}", "{context.t(Key::AppName)}" }
+            div { class: "nd-header-controls",
+                button {
+                    class: "nd-icon",
+                    r#type: "button",
+                    "data-nd-cycle": "mode",
+                    "aria-label": context.t(Key::ThemeModeLabel),
+                    title: "{context.t(Key::ThemeModeLabel)}",
+                    Icon { name: "mode" }
+                }
+                LocaleSwitch { context }
+                Settings { context }
+            }
+        }
+    }
+}
+
+/// The language control.
+///
+/// A link rather than a menu: with two locales offered, a control that toggles
+/// is one tap instead of two, and it needs no floating surface. It is also a
+/// real `<a href>`, so it works with JavaScript off — the whole site is static
+/// files, and there is nothing here a script has to reconstruct.
+#[component]
+fn LocaleSwitch(context: Context) -> Element {
+    let other = theme_other_locale(context.locale);
+    let href = format!("../{}/{}", other.tag(), context.page.file());
+    rsx! {
+        a {
+            class: "nd-locale",
+            href: "{href}",
+            lang: "{other.bcp47()}",
+            "aria-label": context.t(Key::LocaleLabel),
+            title: "{context.t(Key::LocaleLabel)}",
+            // Two spellings, one shown at a time. Below `sm` the header's width
+            // budget does not stretch to "Português", and a truncated language
+            // name is worse than a tag: the reader cannot tell what they would
+            // be switching to.
+            span { class: "nd-locale-full", "{other.name()}" }
+            span { class: "nd-locale-short", "{other.tag().to_uppercase()}" }
+        }
+    }
+}
+
+/// The next locale a reader would switch to.
+fn theme_other_locale(current: Locale) -> Locale {
+    let offered = Locale::OFFERED;
+    let index = offered.iter().position(|l| *l == current).unwrap_or(0);
+    offered[(index + 1) % offered.len()]
+}
+
+/// The appearance panel: a disclosure, not a dialog.
+///
+/// `<details>`/`<summary>` rather than the `popover` attribute, because the top
+/// layer is always `position: fixed` and cannot anchor to a sticky header
+/// without being repositioned on every scroll frame. Focus is not moved on open
+/// and nothing is trapped — a reader who tabs past it simply carries on into the
+/// page, which is the correct behaviour for something that is not a dialog.
+///
+/// Its open state is deliberately never stored. Restoring it open would reflow
+/// the top of the page on every single load.
+#[component]
+fn Settings(context: Context) -> Element {
+    rsx! {
+        details { class: "nd-settings", "data-nd-settings": "",
+            summary {
+                class: "nd-icon",
+                "aria-label": context.t(Key::SettingsLabel),
+                title: "{context.t(Key::SettingsLabel)}",
+                Icon { name: "settings" }
+            }
+            div { class: "nd-panel",
+                p { class: "nd-panel-title", "{context.t(Key::SettingsTitle)}" }
+
+                Choice {
+                    context,
+                    setting: "mode",
+                    label: Key::ThemeModeLabel,
+                    options: vec![
+                        ("light", Key::ThemeModeLight),
+                        ("dark", Key::ThemeModeDark),
+                        ("system", Key::ThemeModeSystem),
+                    ],
+                }
+                Accents { context }
+                Choice {
+                    context,
+                    setting: "saturation",
+                    label: Key::ThemeSaturationLabel,
+                    options: vec![
+                        ("balanced", Key::ThemeSaturationBalanced),
+                        ("vivid", Key::ThemeSaturationVivid),
+                        ("sober", Key::ThemeSaturationSober),
+                    ],
+                }
+                Choice {
+                    context,
+                    setting: "font",
+                    label: Key::ThemeFontLabel,
+                    options: vec![("sans", Key::ThemeFontSans), ("mono", Key::ThemeFontMono)],
+                }
+                Choice {
+                    context,
+                    setting: "glass",
+                    label: Key::ThemeGlassLabel,
+                    options: vec![
+                        ("off", Key::ThemeGlassOff),
+                        ("subtle", Key::ThemeGlassSubtle),
+                        ("full", Key::ThemeGlassFull),
+                    ],
+                }
+                Choice {
+                    context,
+                    setting: "radius",
+                    label: Key::ThemeRadiusLabel,
+                    options: vec![
+                        ("square", Key::ThemeRadiusSquare),
+                        ("soft", Key::ThemeRadiusSoft),
+                        ("round", Key::ThemeRadiusRound),
+                        ("circular", Key::ThemeRadiusCircular),
+                    ],
+                }
+
+                hr { class: "nd-rule" }
+
+                Choice {
+                    context,
+                    setting: "blackout",
+                    label: Key::SettingsBlackoutLabel,
+                    note: Key::SettingsBlackoutNote,
+                    options: vec![("off", Key::SettingsOff), ("on", Key::SettingsOn)],
+                }
+                Choice {
+                    context,
+                    setting: "pattern",
+                    label: Key::SettingsPatternLabel,
+                    options: vec![
+                        ("none", Key::SettingsPatternNone),
+                        ("dots", Key::SettingsPatternDots),
+                        ("mesh", Key::SettingsPatternMesh),
+                        ("checks", Key::SettingsPatternChecks),
+                        ("diagonals", Key::SettingsPatternDiagonals),
+                    ],
+                }
+                Choice {
+                    context,
+                    setting: "glow",
+                    label: Key::SettingsGlowLabel,
+                    note: Key::SettingsGlowNote,
+                    options: vec![("off", Key::SettingsOff), ("on", Key::SettingsOn)],
+                }
+                Choice {
+                    context,
+                    setting: "grain",
+                    label: Key::SettingsGrainLabel,
+                    note: Key::SettingsGrainNote,
+                    options: vec![("off", Key::SettingsOff), ("on", Key::SettingsOn)],
+                }
+                Choice {
+                    context,
+                    setting: "animate",
+                    label: Key::SettingsAnimateLabel,
+                    note: Key::SettingsAnimateNote,
+                    options: vec![("off", Key::SettingsOff), ("on", Key::SettingsOn)],
+                }
+
+                button { class: "nd-reset", r#type: "button", "data-nd-reset": "",
+                    "{context.t(Key::SettingsReset)}"
+                }
+            }
+        }
+    }
+}
+
+/// One setting, as a row of buttons.
+///
+/// `role="radiogroup"` rather than real radios: the value is stored in
+/// `localStorage` and applied as a DOM attribute, so there is no form to submit
+/// and a `<fieldset>` of inputs would only add a name nothing reads.
+///
+/// `data-nd-setting` and `data-nd-value` are what the script binds to, so all
+/// twelve settings are handled by one listener that knows nothing about any of
+/// them beyond the generated model.
+#[component]
+fn Choice(
+    context: Context,
+    setting: String,
+    label: Key,
+    #[props(default)] note: Option<Key>,
+    options: Vec<(&'static str, Key)>,
+) -> Element {
+    rsx! {
+        div { class: "nd-choice", "data-nd-setting": "{setting}",
+            p { class: "nd-choice-label", id: "nd-label-{setting}", "{context.t(label)}" }
+            if let Some(note) = note {
+                p { class: "nd-choice-note", "{context.t(note)}" }
+            }
+            div { class: "nd-options", role: "radiogroup", "aria-labelledby": "nd-label-{setting}",
+                for (value, text) in options {
+                    button {
+                        class: "nd-option",
+                        r#type: "button",
+                        role: "radio",
+                        "aria-checked": "false",
+                        "data-nd-value": "{value}",
+                        "{context.t(text)}"
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// The accent row, with a real swatch of each accent's solid colour.
+///
+/// The swatch is painted by `--nc-accent-solid` read **inside a `data-palette`
+/// scope**, which is the same mechanism `ThemeScope` uses: `dist/scope.css`
+/// re-resolves the semantic contract on any element carrying the attribute, so a
+/// swatch shows its own accent rather than the page's.
+///
+/// The stylesheets those scopes need are fetched by the script the first time
+/// this panel is opened, and never on a page view that does not open it.
+#[component]
+fn Accents(context: Context) -> Element {
+    let accents = [
+        ("ochre", Key::ThemeAccentOchre),
+        ("amber", Key::ThemeAccentAmber),
+        ("lime", Key::ThemeAccentLime),
+        ("jade", Key::ThemeAccentJade),
+        ("teal", Key::ThemeAccentTeal),
+        ("azure", Key::ThemeAccentAzure),
+        ("blue", Key::ThemeAccentBlue),
+        ("indigo", Key::ThemeAccentIndigo),
+        ("violet", Key::ThemeAccentViolet),
+        ("magenta", Key::ThemeAccentMagenta),
+        ("rose", Key::ThemeAccentRose),
+        ("clay", Key::ThemeAccentClay),
+        ("umber", Key::ThemeAccentUmber),
+    ];
+    rsx! {
+        div { class: "nd-choice", "data-nd-setting": "accent",
+            p { class: "nd-choice-label", id: "nd-label-accent", "{context.t(Key::ThemeAccentLabel)}" }
+            div { class: "nd-accents", role: "radiogroup", "aria-labelledby": "nd-label-accent",
+                for (value, text) in accents {
+                    button {
+                        class: "nd-accent",
+                        r#type: "button",
+                        role: "radio",
+                        "aria-checked": "false",
+                        "data-nd-value": "{value}",
+                        title: "{context.t(text)}",
+                        span { class: "nd-swatch", "data-nd-swatch": "{value}", "aria-hidden": "true" }
+                        span { class: "nd-accent-name", "{context.t(text)}" }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// The sidebar, and the search that filters it.
+///
+/// Alphabetical by the **translated** title (see [`site::sorted`]), no
+/// categories and no icons. The hover effect targets an inner `<span>` rather
+/// than the row, which makes a row background structurally impossible rather
+/// than merely discouraged, and only `color` and `text-decoration` change —
+/// never `font-weight`, which reflows the line under the pointer.
+#[component]
+pub(crate) fn Sidebar(context: Context) -> Element {
+    rsx! {
+        nav { id: "nd-nav", class: "nd-nav", "aria-label": context.t(Key::NavLabel),
+            // The wordmark lives here below `sm`, where the header cannot afford
+            // it. It is not a duplicate: exactly one of the two is ever shown.
+            a { class: "nd-nav-wordmark", href: "{site::PAGES[0].href()}",
+                "{context.t(Key::AppName)}"
+            }
+            div { class: "nd-search",
+                label { class: "nd-visually-hidden", r#for: "nd-search-input",
+                    "{context.t(Key::SearchLabel)}"
+                }
+                input {
+                    id: "nd-search-input",
+                    class: "nd-search-input",
+                    r#type: "search",
+                    autocomplete: "off",
+                    spellcheck: "false",
+                    placeholder: "{context.t(Key::SearchPlaceholder)}",
+                    "data-nd-search": "",
+                }
+            }
+            ul { class: "nd-nav-list",
+                for page in site::sorted(context.locale) {
+                    li {
+                        a {
+                            class: if page == context.page { "nd-nav-link nd-nav-link--current" } else { "nd-nav-link" },
+                            href: "{page.href()}",
+                            "aria-current": if page == context.page { "page" },
+                            "data-nd-index": "{site::collate(context.t(page.title))}",
+                            span { class: "nd-nav-text", "{context.t(page.title)}" }
+                        }
+                    }
+                }
+            }
+            p { class: "nd-search-empty", "data-nd-search-empty": "", hidden: true,
+                "{context.t(Key::SearchEmpty)}"
+            }
+            div { class: "nd-nav-foot",
+                p { "{context.t(Key::AppTagline)}" }
+            }
+        }
+    }
+}
+
+/// The dimming layer, which stops exactly where the drawer starts.
+///
+/// A plain `<button>`: it is a control that closes the menu, and making it one
+/// means a keyboard reaches it, a screen reader announces it, and `Enter` works
+/// — none of which is true of a `<div>` with a click handler.
+#[component]
+pub(crate) fn Scrim(context: Context) -> Element {
+    rsx! {
+        button {
+            class: "nd-scrim",
+            r#type: "button",
+            tabindex: "-1",
+            "aria-label": context.t(Key::NavDismiss),
+            "data-nd-scrim": "",
+        }
+    }
+}
+
+/// The pattern, aurora and grain layers.
+///
+/// Siblings of everything, ancestors of nothing. Each is a fixed, inert box
+/// that paints and takes no part in layout, which is what lets a frosted
+/// surface above it keep sampling.
+///
+/// The class names are the colour layer's, not this site's: `dist/theme.css`
+/// binds every pattern to `.noctua-fx` and the grain to `.noctua-grain`. Any
+/// application gets the same effects by putting these two elements on the page
+/// — there is nothing site-specific about them.
+#[component]
+pub(crate) fn Effects() -> Element {
+    rsx! {
+        div { class: "nd-effects", "aria-hidden": "true",
+            div { class: "noctua-fx" }
+            div { class: "noctua-grain" }
+        }
+    }
+}
+
+/// One of the handful of glyphs the shell uses.
+///
+/// Inline SVG rather than an icon font: a font would be another payload to
+/// budget, another failure mode before it loads, and a glyph that shifts when it
+/// arrives. `currentColor` means an icon is never a colour decision.
+#[component]
+pub(crate) fn Icon(name: String) -> Element {
+    let path = match name.as_str() {
+        "menu" => "M4 7h16M4 12h16M4 17h16",
+        "settings" => {
+            "M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5v.2a2 2 0 11-4 0v-.1a1.6 1.6 0 00-1-1.5 1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H3a2 2 0 110-4h.1a1.6 1.6 0 001.5-1 1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V3a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1h.2a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z"
+        }
+        // The mode glyph is a half-filled circle, which reads as "light or
+        // dark" without committing to either — the button cycles through
+        // three states and no single sun or moon is honest about that.
+        "mode" => "M12 3a9 9 0 000 18 9 9 0 000-18zm0 0v18",
+        _ => "",
+    };
+    rsx! {
+        svg {
+            class: "nd-glyph",
+            width: "24",
+            height: "24",
+            view_box: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            "stroke-width": "1.7",
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round",
+            "aria-hidden": "true",
+            "focusable": "false",
+            path { d: "{path}" }
+        }
+    }
+}

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/*", "xtask"]
+members = ["crates/*", "docs-site", "xtask"]
 
 [workspace.package]
 version = "0.1.0"
@@ -12,8 +12,29 @@ license = "MIT OR Apache-2.0"
 # --- Workspace-internal ---
 noctua-design-tokens = { path = "crates/noctua-design-tokens", version = "0.1.0" }
 noctua-design-icons = { path = "crates/noctua-design-icons", version = "0.1.0" }
+noctua-design-theme = { path = "crates/noctua-design-theme", version = "0.1.0" }
+noctua-design-i18n = { path = "crates/noctua-design-i18n", version = "0.1.0" }
+noctua-design = { path = "crates/noctua-design", version = "0.1.0" }
 
 # --- Third party ---
+# The Rust UI framework (`NOCTUA.md §4`), taken with `default-features = false`.
+#
+# The default `lib` feature pulls the asset pipeline, the CLI config reader and
+# the devtools client — three things a component library never uses and that a
+# consumer would inherit. What is left is the renderer-agnostic half: the `rsx!`
+# macro, the HTML element set, signals and hooks. Choosing a renderer stays the
+# application's decision, which is what lets the same components be pre-rendered
+# to static HTML here and hydrated in a browser later.
+dioxus = { version = "0.7", default-features = false, features = [
+    "macro",
+    "html",
+    "signals",
+    "hooks",
+] }
+# Renders `rsx!` to an HTML string in an ordinary native binary — no `dx`, no
+# wasm toolchain, no JavaScript runtime. That is what makes the documentation
+# site buildable by `cargo xtask` alone.
+dioxus-ssr = "0.7"
 # Pinned as minor-compatible. `cargo xtask check` fails on a dirty lockfile, so
 # an upgrade is always a deliberate, reviewed change rather than something that
 # happens to a machine that ran `cargo update`.

@@ -79,10 +79,7 @@ fn main() -> ExitCode {
         Command::Build => build::run(&root, &spec).map(|_| ()),
         Command::Check { spec_only } => check::run(&root, &spec, spec_only),
         Command::Dev { port } => dev(&root, &spec, port),
-        Command::Docs => {
-            docs();
-            Ok(())
-        }
+        Command::Docs => docs(&root),
         Command::Release { version, dry_run } => release(&version, dry_run),
     };
 
@@ -114,9 +111,41 @@ fn dev(root: &Path, spec: &Path, port: u16) -> Result<(), String> {
 ///
 /// Returns nothing rather than `Result`: there is nothing here that can fail
 /// yet, and a `Result` that is always `Ok` teaches a reader to stop checking.
-fn docs() {
-    ui::warn("there is no documentation site yet — NOCTUA-PLAN.md Stage 5 owns it");
-    ui::detail("the verb exists now so that stage adds behaviour rather than a sixth verb");
+/// `docs` — pre-renders the documentation site, one build per locale.
+///
+/// The verb was reserved with no behaviour so that the stage which built the
+/// site would add behaviour rather than a sixth verb (`NOCTUA.md §2.2`). This is
+/// that stage, and the surface is still five.
+///
+/// It shells out to the `docs-site` binary rather than linking it, and that is
+/// deliberate: `xtask` would otherwise take a dependency on Dioxus, and a
+/// `cargo xtask check` on a machine that only wanted to validate the spec would
+/// compile a UI framework to do it.
+fn docs(root: &Path) -> Result<(), String> {
+    ui::heading("documentation site");
+
+    let output = std::process::Command::new(env!("CARGO"))
+        .args(["run", "--quiet", "--package", "docs-site"])
+        .current_dir(root)
+        .output()
+        .map_err(|error| format!("could not run the site build: {error}"))?;
+
+    if !output.status.success() {
+        return Err(format!(
+            "the site build failed:\n{}",
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+
+    for line in String::from_utf8_lossy(&output.stdout).lines() {
+        if let Some(detail) = line.strip_prefix("  ") {
+            ui::detail(detail);
+        } else {
+            ui::ok(line);
+        }
+    }
+    ui::detail("open docs-site/dist/index.html, or serve that directory");
+    Ok(())
 }
 
 /// `release` — deliberately refuses until there is something to release.

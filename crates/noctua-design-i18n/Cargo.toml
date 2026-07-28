@@ -1,0 +1,11 @@
+[package]
+name = "noctua-design-i18n"
+description = "The message catalogue. GENERATED from spec/i18n/ — do not edit src/."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lints]
+workspace = true

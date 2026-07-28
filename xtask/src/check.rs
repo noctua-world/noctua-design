@@ -30,11 +30,11 @@ pub(crate) fn run(root: &Path, spec_path: &Path, spec_only: bool) -> Result<(), 
     let mut failures: Vec<String> = Vec::new();
 
     ui::heading("specification");
-    let (_spec, files) = build::artifacts(root, spec_path)?;
+    let (spec, files) = build::artifacts(root, spec_path)?;
 
     ui::gap();
     ui::heading("source gates");
-    let findings = gates::run(root)?;
+    let findings = gates::run(root, &spec)?;
     if findings.is_empty() {
         ui::ok("no colour, token, font or arbitrary-value literal in source");
     } else {
