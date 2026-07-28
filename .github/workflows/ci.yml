@@ -1,0 +1,80 @@
+# The gate, and a determinism check.
+#
+# `cargo xtask check` is the whole first job. Not a reimplementation of the step
+# list in YAML — that is precisely how the two drift until "passes locally,
+# fails in CI" becomes a normal sentence, and it is why `NOCTUA.md §19.4` makes
+# this a rule rather than a preference.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Read-only by default; each job asks for what it needs.
+permissions: {}
+
+jobs:
+  check:
+    name: cargo xtask check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # rust-toolchain.toml decides the version, the components and the
+      # wasm target. Nothing is pinned twice.
+      - name: Install the pinned toolchain
+        run: rustup show
+
+      - uses: Swatinem/rust-cache@v2
+
+      # Deliberately no Node. The Rust half of this repository must build and
+      # test without it (NOCTUA.md §9.11), and the surest way to keep that true
+      # is for the job that proves it never to have Node available. `check`
+      # also asserts it structurally, so the promise is covered twice.
+      - run: cargo xtask check
+
+  determinism:
+    name: Two builds, byte-identical
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install the pinned toolchain
+        run: rustup show
+
+      - uses: Swatinem/rust-cache@v2
+
+      # Generated output is committed, so a build that is not reproducible
+      # makes every diff untrustworthy: a reviewer cannot tell a real change
+      # from build noise. `NOCTUA.md §16.4`.
+      #
+      # Two full builds rather than a build and a `git diff`, because the second
+      # catches a generator that depends on what was already on disk — which a
+      # single build against a clean checkout cannot.
+      - name: Build twice and compare
+        run: |
+          cargo xtask build
+          cp -r dist /tmp/dist-first
+          cp crates/noctua-design-tokens/src/lib.rs /tmp/tokens-first.rs
+          cp -r packages/tokens /tmp/tokens-first
+
+          cargo xtask build
+          diff -r /tmp/dist-first dist
+          diff /tmp/tokens-first.rs crates/noctua-design-tokens/src/lib.rs
+          diff -r /tmp/tokens-first packages/tokens
+
+      # And the committed output must equal what a build produces, or the
+      # repository ships something no spec describes.
+      - name: The committed output matches the spec
+        run: |
+          if ! git diff --exit-code; then
+            echo "::error::the generated output is out of sync — run \`cargo xtask build\`"
+            exit 1
+          fi

@@ -1,0 +1,8 @@
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy"]
+# Dioxus targets the browser, so the design system's components have to compile
+# to WebAssembly. Declared here so `rustup show` installs the target with the
+# toolchain, and a fresh clone needs nothing but rustup.
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"

@@ -1,0 +1,21 @@
+# Build output.
+/target
+/docs-site/public
+
+# Node. The Rust half of this repository builds and tests without any of it
+# (NOCTUA.md §9.11), so this directory is optional by design.
+node_modules/
+
+# The developer's private, machine-specific notes. Never committed.
+AGENTS.local.md
+
+# The staging area's contents. The directory itself is tracked via .gitkeep so
+# the convention survives a fresh clone (NOCTUA.md §3.7).
+/.TEMP/*
+!/.TEMP/.gitkeep
+
+# NOTE: /dist, /crates/noctua-design-tokens/src, /crates/noctua-design-icons/src
+# and /packages/tokens are GENERATED and deliberately NOT ignored. They are
+# committed so every consumer works with no build step, exactly as
+# `noctua-colors` commits `system/`. `cargo xtask check` fails if one of them
+# drifts from `spec/`.

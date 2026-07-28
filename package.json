@@ -1,0 +1,11 @@
+{
+  "name": "@noctua-world/design-workspace",
+  "private": true,
+  "type": "module",
+  "description": "Workspace root for the Noctua design system. Not published; the packages under packages/ are.",
+  "license": "MIT OR Apache-2.0",
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=20"
+  }
+}

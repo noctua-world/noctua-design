@@ -1,0 +1,22 @@
+[package]
+name = "noctua-design-spec"
+description = "Parses and validates spec/tokens.toml into a checked model."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+# This crate is the compiler's front end, not a deliverable. Consumers of the
+# design system depend on the generated `noctua-design-tokens` crate under
+# crates/, never on this one.
+
+[dependencies]
+indexmap.workspace = true
+miette.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+toml.workspace = true
+
+[lints]
+workspace = true

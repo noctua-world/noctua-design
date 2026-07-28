@@ -1,0 +1,58 @@
+[workspace]
+resolver = "3"
+members = ["crates/*", "xtask"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+# --- Workspace-internal ---
+noctua-design-tokens = { path = "crates/noctua-design-tokens", version = "0.1.0" }
+noctua-design-icons = { path = "crates/noctua-design-icons", version = "0.1.0" }
+
+# --- Third party ---
+# Pinned as minor-compatible. `cargo xtask check` fails on a dirty lockfile, so
+# an upgrade is always a deliberate, reviewed change rather than something that
+# happens to a machine that ran `cargo update`.
+#
+# The list is short on purpose (`NOCTUA.md §2.3`): a dependency here is a
+# dependency every consumer of the design system inherits.
+clap = { version = "4.6", features = ["derive"] }
+indexmap = { version = "2.14", features = ["serde"] }
+miette = "7.6"
+serde = { version = "1.0", features = ["derive"] }
+# `preserve_order` keeps emitted JSON in the order it was authored rather than
+# alphabetical: deterministic either way, but only one of them is readable.
+serde_json = { version = "1.0", features = ["preserve_order"] }
+thiserror = "2.0"
+# `preserve_order` again, and for a sharper reason: the token scales are
+# *ordered* — `space-1` through `space-12` are a sequence, not a set. An
+# alphabetical parse would hand them over as 1, 10, 11, 12, 2, … and the
+# generated output would be unreadable while remaining perfectly deterministic.
+toml = { version = "1.1", features = ["preserve_order"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+unreachable_pub = "warn"
+missing_debug_implementations = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+# This workspace has no numeric core, so it takes none of the numeric allows
+# `noctua-colors` needs. Every allow here must carry a written reason; an allow
+# without one is a defect (`NOCTUA.md §2.1`).
+#
+# `must_use_candidate` fires on almost every getter in a token crate whose
+# entire surface is getters, and `#[must_use]` on a `const` colour or a spacing
+# value communicates nothing a reader did not already know.
+must_use_candidate = "allow"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1

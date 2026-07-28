@@ -1,0 +1,8 @@
+# The React package and the generated TypeScript tokens.
+#
+# Node's role here is bounded and deliberate (NOCTUA.md §9.11): pnpm for the
+# React package, Playwright for the conformance runner, and nothing else. The
+# Rust half of this repository builds and tests with none of it installed, which
+# `cargo xtask check` proves rather than assumes.
+packages:
+  - "packages/*"

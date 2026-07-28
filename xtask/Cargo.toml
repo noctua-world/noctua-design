@@ -1,0 +1,19 @@
+[package]
+name = "xtask"
+description = "The five verbs. Not published; this is the repository's build tool."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+anstream = "0.6"
+anstyle = "1.0"
+clap.workspace = true
+miette.workspace = true
+noctua-design-spec = { path = "../crates/noctua-design-spec" }
+noctua-design-emit = { path = "../crates/noctua-design-emit" }
+
+[lints]
+workspace = true

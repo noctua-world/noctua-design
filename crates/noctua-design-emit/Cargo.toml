@@ -1,0 +1,19 @@
+[package]
+name = "noctua-design-emit"
+description = "Formats a validated token spec into CSS, Rust and TypeScript."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+# Like `noctua-colors`' emit crate, this one performs no computation. It
+# formats values that arrive already validated. A target that computed one
+# would let the checked model and the shipped output disagree.
+
+[dependencies]
+noctua-design-spec = { path = "../noctua-design-spec" }
+indexmap.workspace = true
+
+[lints]
+workspace = true

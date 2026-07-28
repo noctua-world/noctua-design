@@ -1,0 +1,14 @@
+{
+  "name": "@noctua-world/design-react",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The Noctua design system, as React components. No component exists yet — see AGENTS.md.",
+  "license": "MIT OR Apache-2.0",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  }
+}

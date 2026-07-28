@@ -1,0 +1,185 @@
+# noctua-design — the font layer.
+#
+# `dist/fonts.css` is generated from this file. Nothing about @font-face is
+# written by hand, and that is the point: two of the three traps in
+# NOCTUA.md §7.6 are properties of a declaration that is easy to write wrongly
+# and impossible to notice afterwards.
+#
+#   * A variable face without `font-weight: 100 900` renders at its DEFAULT
+#     instance. For Noto JP, KR, SC and Hebrew that default is Thin, so the
+#     text comes out hairline and the browser fabricates a fake bold on top.
+#   * `font-stretch` on a face with no `wdth` axis makes the browser
+#     synthesize a width, which is worse than not asking.
+#
+# Both are derived here from `axes`, and a test asserts the derivation. Neither
+# is something anyone has to remember.
+#
+# The files themselves are copied and subset from `.TEMP/` by hand — see
+# assets/fonts/ATTRIBUTION.md for the exact, reproducible invocation. They are
+# NOT build output and `cargo xtask build` never rewrites them.
+
+# --- The stack -------------------------------------------------------------
+#
+# One variable per role, defined once and consumed everywhere. A component
+# never names a family directly: a hardcoded "Noto Sans" cannot honour the
+# interface-font setting and loses the fallback chain. A source gate enforces
+# it. NOCTUA.md §7.4.
+#
+# `Symbols Nerd Font` is always last, and safely so: it holds no letters, so it
+# can only ever supply an icon glyph nothing before it had. Its Mono variant
+# goes in the mono stack, where every glyph being exactly one em is right;
+# the proportional one goes everywhere else, where it is not.
+
+[stack]
+sans = '"Noto Sans", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Symbols Nerd Font", sans-serif'
+serif = '"Noto Serif", ui-serif, Georgia, "Times New Roman", "Symbols Nerd Font", serif'
+display = '"Noto Sans Display", var(--noctua-font-sans)'
+mono = '"Noctua Iosevka", ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, "Liberation Mono", "Symbols Nerd Font Mono", monospace'
+
+# The interface font. Rebound to --noctua-font-mono when the reader turns on
+# "use Noctua Iosevka for the whole interface" (NOCTUA.md §7.7). Nothing else
+# changes, which is what makes that setting one line rather than a theme.
+ui = "var(--noctua-font-sans)"
+
+
+# --- Unicode ranges --------------------------------------------------------
+#
+# The mechanism that makes load-on-demand automatic rather than a feature
+# someone has to remember to call: the browser fetches a face only when a
+# codepoint in its range is actually rendered.
+#
+# `latin` is the repertoire the default faces were subset to. It must match
+# ATTRIBUTION.md's invocation — a range wider than the subset promises glyphs
+# the file does not have, and the browser renders tofu rather than falling
+# through to the next family.
+
+[range]
+latin = "U+0020-007E, U+00A0-00FF, U+0100-017F, U+2010-2027, U+2030-205E, U+2070-209F, U+20A0-20BF, U+2122, U+2190-2199, U+21D0-21D2, U+2206, U+2212, U+2248, U+2260, U+2264-2265, U+25A0, U+25CF, U+2713, U+2717, U+FEFF, U+FFFD"
+
+# The Nerd Fonts private-use areas plus the handful of ranges it fills in the
+# standard planes. Icons only — no letters — so this face can never win a
+# codepoint a text font should have rendered.
+icons = "U+2300-23FF, U+E000-F8FF, U+F0000-FFFFD"
+
+
+# --- Faces -----------------------------------------------------------------
+#
+# `axes` is what drives the two traps above. A face listing `wght` gets
+# `font-weight: 100 900`; a face listing `wdth` gets `font-stretch`. A static
+# face lists nothing and gets a single weight.
+#
+# `preload` marks the default payload. It exists because `font-display:
+# optional` — which is the only value that avoids a reflow rather than merely
+# avoiding a block — uses a face ONLY if it is ready by the first paint. An
+# `optional` face that is not preloaded is a face that will essentially never
+# render. So the two fields move together, and a test asserts it.
+#
+# The preloaded set is 162.8 KB, against a budget of 200 KB. Serif and Display
+# are deliberately outside it: both fall back to a preloaded family with close
+# metrics, so their `swap` costs a small reflow rather than a page-wide one,
+# and including them would put the budget at 393.5 KB.
+
+[[face]]
+family = "Noto Sans"
+file = "NotoSans.woff2"
+style = "normal"
+axes = ["wght"]
+range = "latin"
+display = "optional"
+preload = true
+
+[[face]]
+family = "Noto Sans"
+file = "NotoSans-Italic.woff2"
+style = "italic"
+axes = ["wght"]
+range = "latin"
+display = "optional"
+preload = true
+
+[[face]]
+family = "Noto Serif"
+file = "NotoSerif.woff2"
+style = "normal"
+axes = ["wght"]
+range = "latin"
+display = "swap"
+preload = false
+
+[[face]]
+family = "Noto Serif"
+file = "NotoSerif-Italic.woff2"
+style = "italic"
+axes = ["wght"]
+range = "latin"
+display = "swap"
+preload = false
+
+[[face]]
+family = "Noto Sans Display"
+file = "NotoSansDisplay.woff2"
+style = "normal"
+axes = ["wght"]
+range = "latin"
+display = "swap"
+preload = false
+
+[[face]]
+family = "Noto Sans Display"
+file = "NotoSansDisplay-Italic.woff2"
+style = "italic"
+axes = ["wght"]
+range = "latin"
+display = "swap"
+preload = false
+
+# Iosevka is static, not variable — no `fvar`. Each weight is its own file, and
+# a synthesised bold on a monospaced face looks broken, so Bold is not
+# optional.
+[[face]]
+family = "Noctua Iosevka"
+file = "NoctuaIosevka-Regular.woff2"
+style = "normal"
+weight = 400
+range = "latin"
+display = "optional"
+preload = true
+
+[[face]]
+family = "Noctua Iosevka"
+file = "NoctuaIosevka-Bold.woff2"
+style = "normal"
+weight = 700
+range = "latin"
+display = "optional"
+preload = true
+
+[[face]]
+family = "Noctua Iosevka"
+file = "NoctuaIosevka-Italic.woff2"
+style = "italic"
+weight = 400
+range = "latin"
+display = "optional"
+preload = true
+
+# Icons, fetched only when an icon codepoint renders. `swap` rather than
+# `optional`: there is no first paint to be ready for, and a fallback box
+# glyph where an icon should be is worse than a reflow.
+[[face]]
+family = "Symbols Nerd Font"
+file = "SymbolsNerdFont-Regular.woff2"
+style = "normal"
+weight = 400
+range = "icons"
+display = "swap"
+preload = false
+
+[[face]]
+family = "Symbols Nerd Font Mono"
+file = "SymbolsNerdFontMono-Regular.woff2"
+style = "normal"
+weight = 400
+range = "icons"
+display = "swap"
+preload = false
