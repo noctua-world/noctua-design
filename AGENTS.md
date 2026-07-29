@@ -351,6 +351,41 @@ Two consequences worth knowing before you fight them:
 locale's sidebar. It is a door, not a page: no title, no prose, no sidebar
 entry, and `site::first` is what both it and the wordmark read.
 
+### Icons are declared, not drawn
+
+`spec/icons.toml` names them; `assets/icons/` holds the upstream SVGs vendored
+at a pinned tag beside their licences; everything else is generated — the
+`IconName` enum, both `Icon` implementations, `dist/icons.json`, the attribution
+and the documentation page. Adding one is a table and a drawing; there is no
+list anywhere to keep in step, including the page that shows them.
+
+**Why an enum.** The shell hand-wrote an `Icon` that matched a `&str` against
+three arms with `_ => ""`. `Icon { name: "repository" }` compiled and rendered
+`<path d="">` — a 44×44 clickable void in the header of every page, in every
+locale. A name that is a string cannot distinguish "this icon" from "no icon".
+Two gates keep it that way: **`hand_drawn_icon`** (an `<svg>` or `<path>` in any
+source outside the generated module) and the drawing validator, which refuses
+`id`, `class`, `style`, `fill`, `stroke`, `mask`, `clip-path` and an empty path.
+
+**A drawing may carry only geometry.** An `id` collides the second time the same
+icon is inlined; a `fill` refuses `currentColor` and paints a fixed colour
+inside a themed subtree — the frozen-colour trap wearing a different hat.
+
+### Trap 0.8 — a token that does not exist fails silently, both ways
+
+`var(--noctua-space-40)` is valid CSS. There is no such token, so the whole
+declaration is invalid at computed-value time and the browser **drops it** with
+no error: `grid-template-columns: repeat(auto-fill, minmax(var(--nope), 1fr))`
+does not fail, the grid just becomes one column, and it looks like a decision
+somebody made. This was written into this repository while adding a gate for a
+different silent failure, and nothing caught it.
+
+`gates::unknown_token` now collects every `--name:` declared anywhere — sources
+plus the generated stylesheets — and reports any `var()` that names something
+outside that set. `--nc-*` is exempt (1,767 vendored names, guarded elsewhere),
+and a name ending in `-` is skipped because it is one an `rsx!` interpolation
+was cut out of.
+
 ### Trap 0.7 — a render-blocking stylesheet that 404s blocks nothing
 
 The bootstrap injected the stored palette's sheet with a **bare relative href**.

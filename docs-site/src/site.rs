@@ -77,6 +77,11 @@ pub(crate) const SPACING: Page = Page {
     title: Key::PageSpacingTitle,
     summary: Key::PageSpacingSummary,
 };
+pub(crate) const ICONS: Page = Page {
+    slug: "icons",
+    title: Key::PageIconsTitle,
+    summary: Key::PageIconsSummary,
+};
 pub(crate) const EFFECTS: Page = Page {
     slug: "effects",
     title: Key::PageEffectsTitle,
@@ -93,10 +98,11 @@ pub(crate) const COMPONENTS: Page = Page {
     summary: Key::PageComponentsSummary,
 };
 
-pub(crate) const PAGES: [Page; 6] = [
+pub(crate) const PAGES: [Page; 7] = [
     COLOURS,
     TYPOGRAPHY,
     SPACING,
+    ICONS,
     EFFECTS,
     SCOPED_THEMES,
     COMPONENTS,

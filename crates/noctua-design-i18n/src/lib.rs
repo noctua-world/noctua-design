@@ -154,6 +154,10 @@ pub enum Key {
     PageSpacingTitle,
     /// `page.spacing.summary`
     PageSpacingSummary,
+    /// `page.icons.title`
+    PageIconsTitle,
+    /// `page.icons.summary`
+    PageIconsSummary,
     /// `page.effects.title`
     PageEffectsTitle,
     /// `page.effects.summary`
@@ -334,6 +338,12 @@ pub enum Key {
     TypeScriptsBody,
     /// `type.specimen.line`
     TypeSpecimenLine,
+    /// `icons.body`
+    IconsBody,
+    /// `icons.count`
+    IconsCount,
+    /// `icons.source`
+    IconsSource,
     /// `colours.note`
     ColoursNote,
     /// `colours.roles`
@@ -386,7 +396,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 131] = [
+    pub const ALL: [Self; 136] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -404,6 +414,8 @@ impl Key {
         Self::PageTypographySummary,
         Self::PageSpacingTitle,
         Self::PageSpacingSummary,
+        Self::PageIconsTitle,
+        Self::PageIconsSummary,
         Self::PageEffectsTitle,
         Self::PageEffectsSummary,
         Self::PageScopedThemesTitle,
@@ -494,6 +506,9 @@ impl Key {
         Self::TypeScriptsTitle,
         Self::TypeScriptsBody,
         Self::TypeSpecimenLine,
+        Self::IconsBody,
+        Self::IconsCount,
+        Self::IconsSource,
         Self::ColoursNote,
         Self::ColoursRoles,
         Self::ColoursRolesBody,
@@ -541,6 +556,8 @@ impl Key {
             Self::PageTypographySummary => "page.typography.summary",
             Self::PageSpacingTitle => "page.spacing.title",
             Self::PageSpacingSummary => "page.spacing.summary",
+            Self::PageIconsTitle => "page.icons.title",
+            Self::PageIconsSummary => "page.icons.summary",
             Self::PageEffectsTitle => "page.effects.title",
             Self::PageEffectsSummary => "page.effects.summary",
             Self::PageScopedThemesTitle => "page.scoped-themes.title",
@@ -631,6 +648,9 @@ impl Key {
             Self::TypeScriptsTitle => "type.scripts.title",
             Self::TypeScriptsBody => "type.scripts.body",
             Self::TypeSpecimenLine => "type.specimen.line",
+            Self::IconsBody => "icons.body",
+            Self::IconsCount => "icons.count",
+            Self::IconsSource => "icons.source",
             Self::ColoursNote => "colours.note",
             Self::ColoursRoles => "colours.roles",
             Self::ColoursRolesBody => "colours.roles.body",
@@ -686,6 +706,10 @@ impl Locale {
                 }
                 Key::PageSpacingTitle => "Spacing",
                 Key::PageSpacingSummary => "One base step, and everything spaced from it.",
+                Key::PageIconsTitle => "Icons",
+                Key::PageIconsSummary => {
+                    "Every icon the interface uses, and how one more is added."
+                }
                 Key::PageEffectsTitle => "Effects",
                 Key::PageEffectsSummary => {
                     "Background patterns and ambient motion, each bounded so it cannot cost you a word of text."
@@ -802,6 +826,11 @@ impl Locale {
                     "This is why Noto was chosen. Each line below is real text, not a placeholder — a script's shaping only shows in words somebody would actually write."
                 }
                 Key::TypeSpecimenLine => "Sphinx of black quartz, judge my vow",
+                Key::IconsBody => {
+                    "The set is declared once and everything else follows: the enum, both implementations, the manifest and this page. Adding an icon is a table in the specification and a drawing beside it — there is no list here to keep in step."
+                }
+                Key::IconsCount => "{count} icons",
+                Key::IconsSource => "Drawn by",
                 Key::ColoursNote => {
                     "Every swatch below is a real palette, not a picture of one. Each cell carries the palette as an attribute and reads its own colours through it — the same mechanism a themed component uses."
                 }
@@ -865,6 +894,10 @@ impl Locale {
                 }
                 Key::PageSpacingTitle => "Espaçamento",
                 Key::PageSpacingSummary => "Um passo base, e todo o resto espaçado a partir dele.",
+                Key::PageIconsTitle => "Ícones",
+                Key::PageIconsSummary => {
+                    "Todos os ícones que a interface usa, e como se acrescenta mais um."
+                }
                 Key::PageEffectsTitle => "Efeitos",
                 Key::PageEffectsSummary => {
                     "Padrões de fundo e movimento ambiente, cada um limitado para que não custe uma palavra de texto."
@@ -981,6 +1014,11 @@ impl Locale {
                     "É por isto que o Noto foi escolhido. Cada linha abaixo é texto real, não um espaço reservado — a modelagem de uma escrita só aparece em palavras que alguém de fato escreveria."
                 }
                 Key::TypeSpecimenLine => "Um pequeno jabuti xereta viu dez cegonhas felizes",
+                Key::IconsBody => {
+                    "O conjunto é declarado uma vez e todo o resto decorre dele: o enum, as duas implementações, o manifesto e esta página. Acrescentar um ícone é uma tabela na especificação e um desenho ao lado dela — não há lista nenhuma aqui para manter em dia."
+                }
+                Key::IconsCount => "{count} ícones",
+                Key::IconsSource => "Desenhado por",
                 Key::ColoursNote => {
                     "Cada amostra abaixo é uma paleta de verdade, não uma imagem de uma. Cada célula carrega a paleta como atributo e lê as próprias cores através dele — o mesmo mecanismo que um componente com tema usa."
                 }
@@ -1045,6 +1083,10 @@ impl Locale {
                 Key::PageSpacingTitle => "⟦Spaaciing⟧",
                 Key::PageSpacingSummary => {
                     "⟦OOnee baasee steep, aand eeveerythiing spaaceed froom iit.⟧"
+                }
+                Key::PageIconsTitle => "⟦IIcoons⟧",
+                Key::PageIconsSummary => {
+                    "⟦EEveery iicoon thee iinteerfaacee uusees, aand hoow oonee mooree iis aaddeed.⟧"
                 }
                 Key::PageEffectsTitle => "⟦EEffeects⟧",
                 Key::PageEffectsSummary => {
@@ -1164,6 +1206,11 @@ impl Locale {
                     "⟦Thiis iis why Nootoo waas chooseen. EEaach liinee beeloow iis reeaal teext, noot aa plaaceehooldeer — aa scriipt's shaapiing oonly shoows iin woords soomeeboody woouuld aactuuaally wriitee.⟧"
                 }
                 Key::TypeSpecimenLine => "⟦Sphiinx oof blaack quuaartz, juudgee my voow⟧",
+                Key::IconsBody => {
+                    "⟦Thee seet iis deeclaareed ooncee aand eeveerythiing eelsee foolloows: thee eenuum, booth iimpleemeentaatiioons, thee maaniifeest aand thiis paagee. AAddiing aan iicoon iis aa taablee iin thee speeciifiicaatiioon aand aa draawiing beesiidee iit — theeree iis noo liist heeree too keeeep iin steep.⟧"
+                }
+                Key::IconsCount => "⟦{count} iicoons⟧",
+                Key::IconsSource => "⟦Draawn by⟧",
                 Key::ColoursNote => {
                     "⟦EEveery swaatch beeloow iis aa reeaal paaleettee, noot aa piictuuree oof oonee. EEaach ceell caarriiees thee paaleettee aas aan aattriibuutee aand reeaads iits oown cooloouurs throouugh iit — thee saamee meechaaniism aa theemeed coompooneent uusees.⟧"
                 }

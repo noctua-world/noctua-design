@@ -25,14 +25,17 @@
 // GENERATED. Do not edit src/theme.rs or src/components/; edit the spec and
 // rebuild. `cargo xtask check` fails if either drifts.
 pub mod components;
+pub mod icon;
 pub mod script;
 pub mod theme;
 
 // Re-exported so a consumer takes one dependency rather than two, and so the
 // token crate's version can never disagree with the components that use it.
+pub use noctua_design_icons as icons;
 pub use noctua_design_theme as model;
 pub use noctua_design_tokens as tokens;
 
 pub use components::*;
+pub use icon::{Icon, IconName, IconSize};
 pub use script::{Script, dominant_script, font_override};
 pub use theme::{ThemeScope, use_theme};

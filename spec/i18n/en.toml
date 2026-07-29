@@ -48,6 +48,8 @@ dir = "ltr"
 "page.typography.summary" = "A modular scale, large by default, and a line length that never depends on the width of the screen."
 "page.spacing.title" = "Spacing"
 "page.spacing.summary" = "One base step, and everything spaced from it."
+"page.icons.title" = "Icons"
+"page.icons.summary" = "Every icon the interface uses, and how one more is added."
 "page.effects.title" = "Effects"
 "page.effects.summary" = "Background patterns and ambient motion, each bounded so it cannot cost you a word of text."
 "page.scoped-themes.title" = "Scoped themes"
@@ -168,6 +170,9 @@ dir = "ltr"
 
 # --- Page content ---------------------------------------------------------
 
+"icons.body" = "The set is declared once and everything else follows: the enum, both implementations, the manifest and this page. Adding an icon is a table in the specification and a drawing beside it — there is no list here to keep in step."
+"icons.count" = "{count} icons"
+"icons.source" = "Drawn by"
 "colours.note" = "Every swatch below is a real palette, not a picture of one. Each cell carries the palette as an attribute and reads its own colours through it — the same mechanism a themed component uses."
 "colours.roles" = "The roles"
 "colours.roles.body" = "Each cell shows five of the roles a palette defines: the page, a subtle surface, a border, the accent, and the text."

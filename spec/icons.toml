@@ -1,0 +1,111 @@
+# Every icon the interface uses, and nothing else.
+#
+# `NOCTUA.md §9.5` is explicit about the second half of that sentence:
+# "Initially implement only the icons needed to build the interfaces. All
+# remaining icons come in a much later stage — do not bulk-import them to 'get
+# it over with'; an unused icon is payload and review surface." A declared icon
+# with no vendored file, and a vendored file no icon declares, are both errors.
+#
+# The drawings are vendored under `assets/icons/`, byte for byte, beside their
+# licences — the same shape as `assets/fonts/`. The build reads them from there,
+# so it needs no network and no Node.
+#
+# To add one: fetch the upstream SVG at the pinned tag into `assets/icons/`,
+# add a table here, and run `cargo xtask build`. The Rust enum, the TypeScript
+# union, both `Icon` implementations, the manifest, the attribution and the
+# documentation page all follow. There is nothing else to edit.
+
+[meta]
+# The rendered box, in CSS pixels, for every size the component offers.
+size_small = "1rem"
+size_medium = "1.5rem"
+size_large = "2rem"
+# Lucide draws on a 24-unit grid at stroke width 2. Ours is slightly lighter:
+# the interface's type is large and low-contrast, and a 2-unit stroke next to it
+# reads as heavier than the text it labels.
+stroke_width = "1.75"
+
+# --- Lucide ----------------------------------------------------------------
+
+[source.lucide]
+project = "Lucide"
+repository = "https://github.com/lucide-icons/lucide"
+tag = "v0.265.0"
+licence = "ISC"
+licence_file = "LICENSE-lucide-ISC.txt"
+
+[icon.menu]
+source = "lucide"
+file = "menu.svg"
+doc = "Opens the navigation drawer."
+
+[icon.close]
+source = "lucide"
+file = "x.svg"
+doc = "Dismisses the drawer or a floating surface."
+
+[icon.sun]
+source = "lucide"
+file = "sun.svg"
+doc = "The light appearance mode."
+
+[icon.moon]
+source = "lucide"
+file = "moon.svg"
+doc = "The dark appearance mode."
+
+[icon.monitor]
+source = "lucide"
+file = "monitor.svg"
+doc = "The appearance mode the operating system asked for."
+
+[icon.settings]
+source = "lucide"
+file = "settings.svg"
+doc = "Opens the appearance settings."
+
+[icon.search]
+source = "lucide"
+file = "search.svg"
+doc = "Marks the search field."
+
+[icon.external-link]
+source = "lucide"
+file = "external-link.svg"
+doc = "Marks a link that leaves the site. Replaces a bare `↗` character, which is text pretending to be an icon."
+
+[icon.chevron-down]
+source = "lucide"
+file = "chevron-down.svg"
+doc = "The disclosure marker on a `<details>` summary."
+
+[icon.copy]
+source = "lucide"
+file = "copy.svg"
+doc = "Copies a code block to the clipboard."
+
+[icon.check]
+source = "lucide"
+file = "check.svg"
+doc = "Confirms an action, and marks the option in force."
+
+# --- Brand marks -----------------------------------------------------------
+#
+# A logo is not a Lucide icon and must not be drawn as one. Lucide's `github`
+# existed at the pinned tag and was deprecated upstream, so a tag bump would
+# silently replace the repository link's icon with nothing — which is very
+# close to the bug this whole file exists to make impossible. It comes from
+# GitHub's own set instead, filled rather than stroked, on its own 16-unit grid.
+
+[source.octicons]
+project = "Octicons"
+repository = "https://github.com/primer/octicons"
+tag = "main"
+licence = "MIT"
+licence_file = "LICENSE-octicons-MIT.txt"
+
+[icon.github]
+source = "octicons"
+file = "mark-github.svg"
+paint = "fill"
+doc = "The repository this system is built in the open in."

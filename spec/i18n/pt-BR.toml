@@ -44,6 +44,8 @@ dir = "ltr"
 "page.typography.summary" = "Uma escala modular, grande por padrão, e uma medida de linha que nunca depende da largura da tela."
 "page.spacing.title" = "Espaçamento"
 "page.spacing.summary" = "Um passo base, e todo o resto espaçado a partir dele."
+"page.icons.title" = "Ícones"
+"page.icons.summary" = "Todos os ícones que a interface usa, e como se acrescenta mais um."
 "page.effects.title" = "Efeitos"
 "page.effects.summary" = "Padrões de fundo e movimento ambiente, cada um limitado para que não custe uma palavra de texto."
 "page.scoped-themes.title" = "Temas com escopo"
@@ -164,6 +166,9 @@ dir = "ltr"
 
 # --- Conteúdo das páginas -------------------------------------------------
 
+"icons.body" = "O conjunto é declarado uma vez e todo o resto decorre dele: o enum, as duas implementações, o manifesto e esta página. Acrescentar um ícone é uma tabela na especificação e um desenho ao lado dela — não há lista nenhuma aqui para manter em dia."
+"icons.count" = "{count} ícones"
+"icons.source" = "Desenhado por"
 "colours.note" = "Cada amostra abaixo é uma paleta de verdade, não uma imagem de uma. Cada célula carrega a paleta como atributo e lê as próprias cores através dele — o mesmo mecanismo que um componente com tema usa."
 "colours.roles" = "Os papéis"
 "colours.roles.body" = "Cada célula mostra cinco dos papéis que uma paleta define: a página, uma superfície sutil, uma borda, o destaque e o texto."

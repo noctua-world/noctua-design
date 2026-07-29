@@ -100,6 +100,16 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
         components.iter().map(|c| c.prop.len()).sum::<usize>()
     ));
 
+    let icons_path = root.join("spec/icons.toml");
+    let (icons, drawings) = noctua_design_spec::icons::load(&icons_path, root.join("assets/icons"))
+        .map_err(|error| format!("{:?}", miette::Report::new(error)))?;
+    ui::ok(&format!("compiled {}", relative_to(root, &icons_path)));
+    ui::detail(&format!(
+        "{} icons from {} source(s), vendored at a pinned tag",
+        drawings.len(),
+        icons.source.len()
+    ));
+
     let mut files = noctua_design_emit::emit_all(noctua_design_emit::Inputs {
         spec: &spec,
         fonts: &fonts,
@@ -108,6 +118,8 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
         catalogue: &catalogue,
         components: &components,
         sliced: &sliced,
+        icons: &icons,
+        drawings: &drawings,
     });
 
     // Generated Rust goes through rustfmt before anyone compares it.

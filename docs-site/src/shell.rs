@@ -20,6 +20,7 @@
 //! state to unwind.
 
 use dioxus::prelude::*;
+use noctua_design::{Icon, IconName};
 use noctua_design_i18n::{Key, Locale};
 
 use crate::site::{self, Page};
@@ -43,10 +44,12 @@ impl Context {
 
 /// The sticky header. One line at 320 px, and the budget is written down.
 ///
-/// Four controls at 2.75 rem plus the wordmark plus the gaps comes to well under
-/// 320 px, which is what leaves room for the language control to be a word
-/// rather than a globe nobody can read. Every appearance setting lives in the
-/// one panel, so there is exactly one floating surface here instead of five.
+/// The mode control is three icons, not one that cycles. A cycling button has
+/// to show the *current* state to be usable, and this one showed a single
+/// static glyph that never changed — so a reader could not tell which of three
+/// modes was in force, and one of the three transitions (dark → system on a
+/// dark system) changes nothing on the page at all. Three radios always move
+/// the indicator, whatever the pixels behind them do.
 #[component]
 pub(crate) fn Header(context: Context) -> Element {
     // The first entry in THIS locale's sidebar, not a fixed page: the order is
@@ -68,28 +71,59 @@ pub(crate) fn Header(context: Context) -> Element {
                 "data-nd-menu": "",
                 "data-nd-open": context.t(Key::NavOpen),
                 "data-nd-close": context.t(Key::NavClose),
-                Icon { name: "menu" }
+                Icon { icon: IconName::Menu }
             }
             a { class: "nd-wordmark", href: "{home}", "{context.t(Key::AppName)}" }
             div { class: "nd-header-controls",
-                button {
-                    class: "nd-icon",
-                    r#type: "button",
-                    "data-nd-cycle": "mode",
-                    "aria-label": context.t(Key::ThemeModeLabel),
-                    title: "{context.t(Key::ThemeModeLabel)}",
-                    Icon { name: "mode" }
-                }
+                ModeControl { context }
                 a {
                     class: "nd-icon",
                     href: "https://github.com/noctua-world/noctua-design",
                     rel: "noreferrer",
                     "aria-label": context.t(Key::AppRepository),
                     title: "{context.t(Key::AppRepository)}",
-                    Icon { name: "repository" }
+                    Icon { icon: IconName::Github }
                 }
                 LocaleSwitch { context }
                 Settings { context }
+            }
+        }
+    }
+}
+
+/// Light, dark and system, side by side, one of them chosen.
+///
+/// A `role="radiogroup"` with the same `data-nd-setting` hook the settings
+/// panel uses, so the existing roving-tabindex handling and the existing
+/// persistence apply with no new script: one tab stop, arrows move within.
+#[component]
+fn ModeControl(context: Context) -> Element {
+    let options = [
+        ("light", IconName::Sun, Key::ThemeModeLight),
+        ("dark", IconName::Moon, Key::ThemeModeDark),
+        ("system", IconName::Monitor, Key::ThemeModeSystem),
+    ];
+    rsx! {
+        div {
+            class: "nd-segmented",
+            "data-nd-setting": "mode",
+            role: "radiogroup",
+            "aria-label": context.t(Key::ThemeModeLabel),
+            for (value, icon, label) in options {
+                button {
+                    class: "nd-segment",
+                    r#type: "button",
+                    role: "radio",
+                    // Server-rendered from the known default, so the control is
+                    // not announcing that none of three is selected before the
+                    // script runs.
+                    "aria-checked": if crate::defaults::of("mode") == value { "true" } else { "false" },
+                    "data-nd-value": "{value}",
+                    // The icon is decoration; the button carries the name.
+                    "aria-label": context.t(label),
+                    title: "{context.t(label)}",
+                    Icon { icon }
+                }
             }
         }
     }
@@ -147,7 +181,7 @@ fn Settings(context: Context) -> Element {
                 class: "nd-icon",
                 "aria-label": context.t(Key::SettingsLabel),
                 title: "{context.t(Key::SettingsLabel)}",
-                Icon { name: "settings" }
+                Icon { icon: IconName::Settings }
             }
             div { class: "nd-panel",
                 p { class: "nd-panel-title", "{context.t(Key::SettingsLabel)}" }
@@ -452,42 +486,6 @@ pub(crate) fn Effects() -> Element {
         div { class: "nd-effects", "aria-hidden": "true",
             div { class: "noctua-fx" }
             div { class: "noctua-grain" }
-        }
-    }
-}
-
-/// One of the handful of glyphs the shell uses.
-///
-/// Inline SVG rather than an icon font: a font would be another payload to
-/// budget, another failure mode before it loads, and a glyph that shifts when it
-/// arrives. `currentColor` means an icon is never a colour decision.
-#[component]
-pub(crate) fn Icon(name: String) -> Element {
-    let path = match name.as_str() {
-        "menu" => "M4 7h16M4 12h16M4 17h16",
-        "settings" => {
-            "M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5v.2a2 2 0 11-4 0v-.1a1.6 1.6 0 00-1-1.5 1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H3a2 2 0 110-4h.1a1.6 1.6 0 001.5-1 1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V3a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1h.2a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z"
-        }
-        // The mode glyph is a half-filled circle, which reads as "light or
-        // dark" without committing to either — the button cycles through
-        // three states and no single sun or moon is honest about that.
-        "mode" => "M12 3a9 9 0 000 18 9 9 0 000-18zm0 0v18",
-        _ => "",
-    };
-    rsx! {
-        svg {
-            class: "nd-glyph",
-            width: "24",
-            height: "24",
-            view_box: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            "stroke-width": "1.7",
-            "stroke-linecap": "round",
-            "stroke-linejoin": "round",
-            "aria-hidden": "true",
-            "focusable": "false",
-            path { d: "{path}" }
         }
     }
 }

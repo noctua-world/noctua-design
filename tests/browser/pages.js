@@ -21,6 +21,7 @@ export const PAGE = {
   colours: "colours/",
   components: "components/",
   effects: "effects/",
+  icons: "icons/",
   scoped: "scoped-themes/",
   spacing: "spacing/",
   typography: "typography/",

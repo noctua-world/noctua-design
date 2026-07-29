@@ -15,6 +15,7 @@
 //! either would rewrite every generated file whenever anything changed, burying
 //! a one-token diff in hundreds of lines of churn.
 
+use noctua_design_spec::icons::{Icons, Resolved as Icon};
 use noctua_design_spec::{Catalogue, Component, Fonts, Manifest, Spec, Theme, Vendor};
 
 pub mod appearance;
@@ -22,6 +23,7 @@ pub mod component;
 pub mod css;
 pub mod fonts;
 pub mod i18n;
+pub mod icons;
 pub mod props;
 pub mod rust;
 pub mod scope;
@@ -88,6 +90,10 @@ pub struct Inputs<'a> {
     pub components: &'a [Component],
     /// Each sliced family's manifest, read from beside its slices.
     pub sliced: &'a [Manifest],
+    /// The icon set's declaration.
+    pub icons: &'a Icons,
+    /// Every icon, with its drawing read and checked.
+    pub drawings: &'a [Icon],
 }
 
 /// Runs every emitter, returning all files sorted by path.
@@ -101,6 +107,8 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
         catalogue,
         components,
         sliced,
+        icons,
+        drawings,
     } = inputs;
 
     let mut files = Vec::new();
@@ -109,6 +117,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
     files.extend(css::emit(spec));
     files.extend(fonts::emit(spec, font_layer, sliced));
     files.extend(i18n::emit(catalogue));
+    files.extend(icons::emit(icons, drawings));
     files.extend(props::emit(components));
     files.push(fonts::preload_fragment(font_layer));
     files.extend(rust::emit(spec));
@@ -224,7 +233,7 @@ mod tests {
             .collect()
     }
 
-    fn shipped() -> (Spec, Fonts, Vendor, Theme, Catalogue, Vec<Component>) {
+    fn shipped() -> Bundle {
         let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
         let vendor = noctua_design_spec::vendor::load(&root).expect("vendor");
         let theme =
@@ -237,10 +246,25 @@ mod tests {
             noctua_design_spec::i18n::load(root.join("spec/i18n")).expect("catalogue"),
             noctua_design_spec::component::load_all(root.join("spec/components"))
                 .expect("components"),
+            noctua_design_spec::icons::load(
+                root.join("spec/icons.toml"),
+                root.join("assets/icons"),
+            )
+            .expect("icons"),
         )
     }
 
-    fn inputs(bundle: &(Spec, Fonts, Vendor, Theme, Catalogue, Vec<Component>)) -> Inputs<'_> {
+    type Bundle = (
+        Spec,
+        Fonts,
+        Vendor,
+        Theme,
+        Catalogue,
+        Vec<Component>,
+        (Icons, Vec<Icon>),
+    );
+
+    fn inputs(bundle: &Bundle) -> Inputs<'_> {
         Inputs {
             spec: &bundle.0,
             fonts: &bundle.1,
@@ -249,6 +273,8 @@ mod tests {
             catalogue: &bundle.4,
             components: &bundle.5,
             sliced: &[],
+            icons: &bundle.6.0,
+            drawings: &bundle.6.1,
         }
     }
 
@@ -265,9 +291,16 @@ mod tests {
             // Each file names the spec it came from — the token spec or the
             // font spec. Asserting one would make the other's header wrong.
             assert!(
-                [SPEC, FONT_SPEC, THEME_SPEC, MESSAGE_SPEC, COMPONENT_SPEC]
-                    .iter()
-                    .any(|spec| file.contents.contains(spec)),
+                [
+                    SPEC,
+                    FONT_SPEC,
+                    THEME_SPEC,
+                    MESSAGE_SPEC,
+                    COMPONENT_SPEC,
+                    icons::ICON_SPEC,
+                ]
+                .iter()
+                .any(|spec| file.contents.contains(spec)),
                 "{} names no specification, so a reader cannot find what generated it",
                 file.path
             );
@@ -294,12 +327,14 @@ mod tests {
     /// Every emitter must produce something, or a target is silently dead.
     #[test]
     fn every_target_emits_at_least_one_file() {
-        let (spec, font_layer, vendor, theme_model, catalogue, components) = shipped();
+        let (spec, font_layer, vendor, theme_model, catalogue, components, (icons, drawings)) =
+            shipped();
         assert!(
             !appearance::emit(&spec, &theme_model).is_empty(),
             "appearance"
         );
         assert!(!component::emit(&theme_model).is_empty(), "component");
+        assert!(!icons::emit(&icons, &drawings).is_empty(), "icons");
         assert!(!css::emit(&spec).is_empty(), "css");
         assert!(
             !fonts::emit(&spec, &font_layer, &bundle_sliced()).is_empty(),

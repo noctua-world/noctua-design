@@ -13,6 +13,7 @@ use noctua_design::components::{
     TextTone, TextWeight, Time, Truncate, VisuallyHidden,
 };
 use noctua_design::model::{Glass, Mode, Palette, Radius};
+use noctua_design::{Icon, IconName, IconSize};
 use noctua_design_i18n::Key;
 
 use crate::shell::Context;
@@ -29,6 +30,7 @@ pub(crate) fn Body(context: Context) -> Element {
             "typography" => rsx! { Typography { context } },
             "spacing" => rsx! { Spacing { context } },
             "effects" => rsx! { Effects { context } },
+            "icons" => rsx! { Icons { context } },
             "components" => rsx! { Components { context } },
             // No catch-all body. A page in `site::PAGES` with nothing to render
             // is a build failure, not a page that quietly shows something else:
@@ -105,7 +107,7 @@ fn ScopeControls(context: Context) -> Element {
                 "data-nd-scope-cycle": "mode",
                 "aria-label": context.t(Key::ThemeModeLabel),
                 title: "{context.t(Key::ThemeModeLabel)}",
-                crate::shell::Icon { name: "mode" }
+                noctua_design::Icon { icon: noctua_design::IconName::Monitor }
             }
             button {
                 class: "nd-icon nd-icon--small",
@@ -161,6 +163,39 @@ fn Sample(context: Context) -> Element {
 }
 
 // --- The rest ---------------------------------------------------------------
+
+/// Every icon in the system, listed by the system itself.
+///
+/// The page loops `IconName::ALL`, so adding an icon to `spec/icons.toml`
+/// documents it with no edit here. That is the user-facing half of the reason
+/// the set is generated: a hand-maintained gallery is a list that goes stale,
+/// and a stale gallery of icons is indistinguishable from a missing icon —
+/// which is exactly the failure this whole layer replaced.
+#[component]
+fn Icons(context: Context) -> Element {
+    // Filled here rather than inside `rsx!`: the placeholder is literally
+    // `{count}`, and the macro would read it as an interpolation of its own.
+    let counted = context
+        .t(Key::IconsCount)
+        .replace("{count}", &IconName::ALL.len().to_string());
+    rsx! {
+        Paragraph { "{context.t(Key::IconsBody)}" }
+
+        p { class: "nd-note nd-prose", "{counted}" }
+
+        ul { class: "nd-icon-grid",
+            for icon in IconName::ALL {
+                li { class: "nd-icon-cell",
+                    // Unlabelled: the name beside it is the accessible name, and
+                    // an icon that repeats the text next to it is noise to a
+                    // screen reader rather than help.
+                    Icon { icon, size: IconSize::Large }
+                    Code { "{icon.as_str()}" }
+                }
+            }
+        }
+    }
+}
 
 /// Every palette, each swatch reading its own colours.
 ///
