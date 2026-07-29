@@ -400,15 +400,25 @@ pub(crate) fn Sidebar(context: Context) -> Element {
                     "data-nd-search": "",
                 }
             }
+            // Foundations at the top as a short block, then every component,
+            // alphabetically and with nothing between them — which is what
+            // `NOCTUA.md §9.10` closes on. A rule separates the two; it is not a
+            // category heading, because a category heading among the components
+            // is the thing that rule forbids.
             ul { class: "nd-nav-list",
                 for page in site::sorted(context.locale) {
                     li {
+                        class: if page.kind == site::Kind::Component && page == site::first_component(context.locale) {
+                            "nd-nav-item nd-nav-item--group"
+                        } else {
+                            "nd-nav-item"
+                        },
                         a {
                             class: if page == context.page { "nd-nav-link nd-nav-link--current" } else { "nd-nav-link" },
                             href: "{page.href()}",
                             "aria-current": if page == context.page { "page" },
-                            "data-nd-index": "{site::collate(context.t(page.title))}",
-                            span { class: "nd-nav-text", "{context.t(page.title)}" }
+                            "data-nd-index": "{site::collate(page.title(context.locale))}",
+                            span { class: "nd-nav-text", "{page.title(context.locale)}" }
                         }
                     }
                 }

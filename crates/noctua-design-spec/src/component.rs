@@ -32,6 +32,40 @@ pub struct Component {
     /// What the component promises assistive technology.
     #[serde(default)]
     pub a11y: A11y,
+
+    /// The states it can be in that are not props — what the DOM shows, and
+    /// what a reader is meant to understand by it.
+    ///
+    /// A *variant* needs no table of its own: a variant IS an enum prop
+    /// carrying an `attribute`, and inventing a second way to say that would
+    /// give two places to look for the same fact.
+    #[serde(default)]
+    pub state: IndexMap<String, State>,
+
+    /// What each key does, when the component answers the keyboard.
+    ///
+    /// `NOCTUA.md §9.3` Leg 2 requires this to be declared rather than
+    /// described: a keyboard contract in prose is a hope, and the conformance
+    /// suite cannot assert a hope.
+    #[serde(default)]
+    pub keyboard: IndexMap<String, String>,
+
+    /// When to reach for it, and when not to — one paragraph, in English.
+    ///
+    /// Developer-facing reference about an API, like `meta.summary`. The
+    /// reader-facing lead on the page around it is translated.
+    #[serde(default)]
+    pub guidance: String,
+}
+
+/// One state a component can be in.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct State {
+    /// The DOM attribute that carries it.
+    pub attribute: String,
+    /// What it means, and what a reader sees.
+    pub doc: String,
 }
 
 impl Component {
@@ -92,6 +126,15 @@ pub struct Prop {
     /// The DOM attribute this prop becomes, when it becomes one.
     #[serde(default)]
     pub attribute: Option<String>,
+
+    /// Whether a caller must supply it.
+    ///
+    /// The point is `IconButton`: its label is required, so a control made of
+    /// nothing but an icon and carrying no accessible name is not something a
+    /// caller can construct. A rule the type system holds beats a rule a
+    /// reviewer holds.
+    #[serde(default)]
+    pub required: bool,
 
     /// What it is for. Becomes the doc comment in both languages.
     pub doc: String,
@@ -169,6 +212,46 @@ pub fn parse(path: &str, text: &str) -> Result<Component, SpecError> {
         );
     }
 
+    check_props(&component, &mut problems);
+
+    for (name, state) in &component.state {
+        if !state.attribute.starts_with("data-") && !state.attribute.starts_with("aria-") {
+            problems.push(
+                Problem::whole_file(format!(
+                    "the state `{name}` is carried by `{}`",
+                    state.attribute
+                ))
+                .fix(
+                    "A state a test can assert is a `data-` or `aria-` attribute. A class \
+                     is styling, and styling is not a contract.",
+                ),
+            );
+        }
+    }
+
+    for (key, action) in &component.keyboard {
+        if action.trim().is_empty() {
+            problems.push(
+                Problem::whole_file(format!("`{key}` is listed with no action")).fix(
+                    "Say what the key does. A key in the contract that does nothing is \
+                     worse than one that is missing.",
+                ),
+            );
+        }
+    }
+
+    if problems.is_empty() {
+        Ok(component)
+    } else {
+        Err(SpecError::new(path, text.to_owned(), problems))
+    }
+}
+
+/// Everything that can be wrong with one prop.
+///
+/// Its own function because `parse` is a list of checks and a list that grows
+/// is a function that stops being readable — not because these belong apart.
+fn check_props(component: &Component, problems: &mut Vec<Problem>) {
     for (name, prop) in &component.prop {
         if prop.kind == Kind::Enum && prop.values.is_empty() {
             problems.push(
@@ -195,18 +278,31 @@ pub fn parse(path: &str, text: &str) -> Result<Component, SpecError> {
             }
         }
 
+        if prop.required && prop.default.is_some() {
+            problems.push(
+                Problem::whole_file(format!("`{name}` is required and also has a default")).fix(
+                    "A default is what makes a prop optional — the component applies it, so \
+                     the caller never has to. Required means the caller must decide.",
+                ),
+            );
+        }
+
+        if prop.required && prop.kind == Kind::Children {
+            problems.push(
+                Problem::whole_file(format!("`{name}` is `children` and marked required")).fix(
+                    "Content is required by the element taking it, not by a flag. Both \
+                     languages already refuse a component with no children where one is \
+                     needed.",
+                ),
+            );
+        }
+
         if name.chars().next().is_some_and(|c| c.is_ascii_digit()) {
             problems.push(
                 Problem::whole_file(format!("`{name}` starts with a digit"))
                     .fix("A prop name becomes an identifier in two languages."),
             );
         }
-    }
-
-    if problems.is_empty() {
-        Ok(component)
-    } else {
-        Err(SpecError::new(path, text.to_owned(), problems))
     }
 }
 
@@ -308,5 +404,251 @@ doc = "The text."
         let text = "[meta]\nname=\"X\"\nelement=\"p\"\nsummary=\"x\"\n[prop.a]\ntype=\"children\"\ndoc=\"a\"\n[prop.b]\ntype=\"children\"\ndoc=\"b\"\n";
         let error = parse("t.toml", text).expect_err("rejected");
         assert!(error.problems()[0].message().contains("more than one"));
+    }
+}
+
+// --- Behavioural cases and rendered examples --------------------------------
+
+/// The contents of `spec/components/<name>.cases.toml`.
+///
+/// **One file, two consumers.** The conformance runner reads `[[case]]` and
+/// runs it against both implementations; the documentation page reads
+/// `[[example]]` and renders it. Keeping them in one file is what stops the
+/// examples on the page from drifting away from the behaviour under test —
+/// they are the same component, described once.
+#[derive(Debug, Clone, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
+pub struct Cases {
+    /// Behaviour both implementations must agree on.
+    #[serde(default)]
+    pub case: Vec<Case>,
+
+    /// What the documentation page shows.
+    #[serde(default)]
+    pub example: Vec<Example>,
+}
+
+/// One behaviour, asserted against both implementations.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Case {
+    /// What is being asserted.
+    pub name: String,
+    /// The props to render with.
+    #[serde(default)]
+    pub props: IndexMap<String, String>,
+    /// The content, if any.
+    #[serde(default)]
+    pub children: Option<String>,
+    /// A CSS selector the rendered markup must match.
+    #[serde(default)]
+    pub matches: Option<String>,
+}
+
+/// One example, rendered on the component's page beside its code.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Example {
+    /// A short title, in English — it names an API shape, not a sentence.
+    pub name: String,
+
+    /// The props to render with, as the spec spells their values.
+    #[serde(default)]
+    pub props: IndexMap<String, String>,
+
+    /// Literal content. Use it for code, names and anything a translation
+    /// would make less clear.
+    #[serde(default)]
+    pub children: Option<String>,
+
+    /// A message key, for content a reader is meant to read.
+    ///
+    /// `NOCTUA.md §9.10` requires a component's page to show the pt-BR and
+    /// English rendering of any text it contains, and a literal cannot do
+    /// that. Mutually exclusive with `children`.
+    #[serde(default)]
+    pub children_key: Option<String>,
+
+    /// One line about what the example is showing, if it needs one.
+    #[serde(default)]
+    pub note: String,
+}
+
+/// Parses one `<name>.cases.toml`.
+///
+/// # Errors
+///
+/// A file that does not parse, an example that declares both kinds of content,
+/// or an example that declares neither for a component that takes children.
+pub fn parse_cases(path: &str, text: &str, component: &Component) -> Result<Cases, SpecError> {
+    let cases: Cases = toml::from_str(text).map_err(|error| {
+        SpecError::new(
+            path,
+            text.to_owned(),
+            vec![Problem::whole_file(error.message().to_owned()).fix(
+                "Cases are `[[case]]` tables and examples are `[[example]]` tables, each \
+                 with a `name` and optional `props`.",
+            )],
+        )
+    })?;
+
+    let mut problems = Vec::new();
+    for example in &cases.example {
+        if example.children.is_some() && example.children_key.is_some() {
+            problems.push(
+                Problem::whole_file(format!(
+                    "the example `{}` declares both `children` and `children_key`",
+                    example.name
+                ))
+                .fix("One or the other. A literal is for code and names; a key is for prose."),
+            );
+        }
+        if component.takes_children()
+            && example.children.is_none()
+            && example.children_key.is_none()
+        {
+            problems.push(
+                Problem::whole_file(format!(
+                    "the example `{}` renders {} with no content",
+                    example.name, component.meta.name
+                ))
+                .fix("A component that takes children needs some, or the example is an empty box."),
+            );
+        }
+        for prop in example.props.keys() {
+            if !component.prop.contains_key(prop) {
+                problems.push(
+                    Problem::whole_file(format!(
+                        "the example `{}` sets `{prop}`, which {} does not have",
+                        example.name, component.meta.name
+                    ))
+                    .fix("Check the prop names in the component's own spec file."),
+                );
+            }
+        }
+    }
+
+    if problems.is_empty() {
+        Ok(cases)
+    } else {
+        Err(SpecError::new(path, text.to_owned(), problems))
+    }
+}
+
+/// Loads the cases beside a component, or an empty set if there are none yet.
+///
+/// # Errors
+///
+/// Anything [`parse_cases`] refuses.
+pub fn load_cases(
+    directory: impl AsRef<std::path::Path>,
+    component: &Component,
+) -> Result<Cases, SpecError> {
+    let stem = file_stem(&component.meta.name);
+    let path = directory.as_ref().join(format!("{stem}.cases.toml"));
+    let Ok(text) = std::fs::read_to_string(&path) else {
+        return Ok(Cases::default());
+    };
+    parse_cases(&path.display().to_string(), &text, component)
+}
+
+/// `CodeBlock` → `code_block`, matching the file it came from.
+#[must_use]
+pub fn file_stem(name: &str) -> String {
+    let mut out = String::with_capacity(name.len() + 2);
+    for (index, ch) in name.char_indices() {
+        if ch.is_ascii_uppercase() && index > 0 {
+            out.push('_');
+        }
+        out.extend(ch.to_lowercase());
+    }
+    out
+}
+
+#[cfg(test)]
+mod grown_schema_tests {
+    use super::*;
+
+    const BASE: &str = r#"
+[meta]
+name = "Thing"
+element = "div"
+summary = "A thing."
+[prop.children]
+type = "children"
+doc = "The content."
+"#;
+
+    fn parse_with(extra: &str) -> Result<Component, SpecError> {
+        parse("t.toml", &format!("{BASE}{extra}"))
+    }
+
+    /// The twenty components that predate these tables must keep parsing, or
+    /// growing the schema is a migration rather than an addition.
+    #[test]
+    fn the_shipped_components_still_parse() {
+        let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../../spec/components");
+        let components = load_all(root).expect("the shipped components");
+        assert!(components.len() >= 20, "{}", components.len());
+    }
+
+    #[test]
+    fn a_required_prop_with_a_default_is_rejected() {
+        let error = parse_with(
+            "[prop.label]\ntype = \"text\"\nrequired = true\ndefault = \"x\"\ndoc = \"A label.\"\n",
+        )
+        .unwrap_err();
+        assert!(format!("{error:?}").contains("required and also has a default"));
+    }
+
+    #[test]
+    fn a_state_carried_by_a_class_is_rejected() {
+        let error =
+            parse_with("[state.open]\nattribute = \"is-open\"\ndoc = \"Open.\"\n").unwrap_err();
+        assert!(format!("{error:?}").contains("is-open"));
+    }
+
+    #[test]
+    fn a_state_on_a_data_attribute_is_fine() {
+        let component = parse_with("[state.open]\nattribute = \"data-nd-open\"\ndoc = \"Open.\"\n")
+            .expect("ok");
+        assert_eq!(component.state.len(), 1);
+    }
+
+    #[test]
+    fn a_key_with_no_action_is_rejected() {
+        let error = parse_with("[keyboard]\nEnter = \"\"\n").unwrap_err();
+        assert!(format!("{error:?}").contains("no action"));
+    }
+
+    #[test]
+    fn an_example_may_not_declare_two_kinds_of_content() {
+        let component = parse_with("").expect("ok");
+        let error = parse_cases(
+            "t.cases.toml",
+            "[[example]]\nname = \"One\"\nchildren = \"a\"\nchildren_key = \"b\"\n",
+            &component,
+        )
+        .unwrap_err();
+        assert!(format!("{error:?}").contains("both"));
+    }
+
+    #[test]
+    fn an_example_setting_an_unknown_prop_is_rejected() {
+        let component = parse_with("").expect("ok");
+        let error = parse_cases(
+            "t.cases.toml",
+            "[[example]]\nname = \"One\"\nchildren = \"a\"\nprops = { nope = \"1\" }\n",
+            &component,
+        )
+        .unwrap_err();
+        assert!(format!("{error:?}").contains("nope"));
+    }
+
+    #[test]
+    fn a_component_name_becomes_its_file_stem() {
+        assert_eq!(file_stem("CodeBlock"), "code_block");
+        assert_eq!(file_stem("Kbd"), "kbd");
+        assert_eq!(file_stem("VisuallyHidden"), "visually_hidden");
     }
 }

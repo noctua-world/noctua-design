@@ -21,6 +21,7 @@ use noctua_design_spec::{Catalogue, Component, Fonts, Manifest, Spec, Theme, Ven
 pub mod appearance;
 pub mod component;
 pub mod css;
+pub mod docs;
 pub mod fonts;
 pub mod i18n;
 pub mod icons;
@@ -115,6 +116,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
     files.extend(appearance::emit(spec, theme));
     files.extend(component::emit(theme));
     files.extend(css::emit(spec));
+    files.extend(docs::emit(components));
     files.extend(fonts::emit(spec, font_layer, sliced));
     files.extend(i18n::emit(catalogue));
     files.extend(icons::emit(icons, drawings));

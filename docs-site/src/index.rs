@@ -94,11 +94,11 @@ pub(crate) const ENTRIES: &[Entry] = &[
     },
     Entry {
         name: "--noctua-radius-control",
-        page: site::COMPONENTS,
+        page: site::SCOPED_THEMES,
     },
     Entry {
         name: "--noctua-radius-surface",
-        page: site::COMPONENTS,
+        page: site::SCOPED_THEMES,
     },
     Entry {
         name: "--noctua-glass-blur",
@@ -138,11 +138,11 @@ pub(crate) const ENTRIES: &[Entry] = &[
     },
     Entry {
         name: "ThemeScope",
-        page: site::COMPONENTS,
+        page: site::SCOPED_THEMES,
     },
     Entry {
         name: "useTheme",
-        page: site::COMPONENTS,
+        page: site::SCOPED_THEMES,
     },
     Entry {
         name: "data-noctua-scope",
@@ -164,8 +164,28 @@ pub(crate) fn all() -> Vec<Entry> {
     for prop in crate::props::SCOPABLE {
         entries.push(Entry {
             name: prop.name,
-            page: site::COMPONENTS,
+            page: site::SCOPED_THEMES,
         });
+    }
+    // Every component, and every prop it has. A developer with a half-remembered
+    // name — `truncate`, `lines`, `ListMarker` — lands on the page that explains
+    // it. Generated, so a component added to the spec is searchable with no edit
+    // here; the thirty hand-written entries below are the token layer, which has
+    // no catalogue of its own.
+    for page in site::pages() {
+        let Some(component) = page.component else {
+            continue;
+        };
+        entries.push(Entry {
+            name: component.name,
+            page,
+        });
+        for prop in component.props {
+            entries.push(Entry {
+                name: prop.name,
+                page,
+            });
+        }
     }
     for palette in theme::Palette::ALL {
         entries.push(Entry {
@@ -188,7 +208,7 @@ mod tests {
     fn every_entry_points_at_a_real_page() {
         for entry in all() {
             assert!(
-                site::PAGES.contains(&entry.page),
+                site::pages().contains(&entry.page),
                 "{} points at {}, which is not a page",
                 entry.name,
                 entry.page.slug

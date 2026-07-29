@@ -11,6 +11,7 @@
 //! the settings; it does not construct the page.
 
 mod defaults;
+mod generated;
 mod index;
 mod pages;
 mod props;
@@ -49,7 +50,7 @@ fn main() -> Result<(), String> {
 
     let mut written = 0usize;
     for locale in Locale::ALL {
-        for page in site::PAGES {
+        for page in site::pages() {
             let path = out.join(locale.tag()).join(page.file());
             write(&path, &document(locale, page))?;
             written += 1;
@@ -83,7 +84,7 @@ fn main() -> Result<(), String> {
     println!("built {written} files into docs-site/dist");
     println!(
         "  {} pages × {} locales, plus assets",
-        site::PAGES.len(),
+        site::pages().len(),
         Locale::ALL.len()
     );
     Ok(())
@@ -92,11 +93,7 @@ fn main() -> Result<(), String> {
 /// One complete HTML document.
 fn document(locale: Locale, page: Page) -> String {
     let context = Context { locale, page };
-    let title = format!(
-        "{} — {}",
-        locale.message(page.title),
-        locale.message(Key::AppName)
-    );
+    let title = format!("{} — {}", page.title(locale), locale.message(Key::AppName));
 
     let mut html = String::with_capacity(64 * 1024);
     html.push_str("<!doctype html>\n");
@@ -363,7 +360,7 @@ mod tests {
     #[test]
     fn every_page_builds_in_every_locale() {
         for locale in Locale::ALL {
-            for page in site::PAGES {
+            for page in site::pages() {
                 let html = document(locale, page);
                 assert!(html.starts_with("<!doctype html>"), "{}", page.slug);
                 assert!(html.contains("</html>"), "{}", page.slug);
@@ -430,7 +427,7 @@ mod tests {
     /// first paint — the flash the bootstrap exists to prevent.
     #[test]
     fn the_bootstrap_resolves_the_palette_against_the_declared_base() {
-        let html = document(Locale::PtBr, site::PAGES[0]);
+        let html = document(Locale::PtBr, site::first(Locale::En));
         let base = html
             .split("data-noctua-base=\"")
             .nth(1)
@@ -449,7 +446,7 @@ mod tests {
     /// A page with the script blocked must still be a complete page.
     #[test]
     fn the_navigation_is_in_the_markup() {
-        let html = document(Locale::En, site::PAGES[0]);
+        let html = document(Locale::En, site::first(Locale::En));
         let body = html.split("<body>").nth(1).expect("a body");
         assert!(
             body.contains("nd-nav-link"),
@@ -460,10 +457,7 @@ mod tests {
 
     #[test]
     fn the_scoped_theme_page_carries_a_real_nested_scope() {
-        let page = *site::PAGES
-            .iter()
-            .find(|p| p.slug == "scoped-themes")
-            .expect("the page");
+        let page = site::SCOPED_THEMES;
         let html = document(Locale::En, page);
         // Two scope ELEMENTS, each with its palette and its mode on the same
         // element — which is the whole contract in one assertion.
@@ -481,7 +475,7 @@ mod tests {
     #[test]
     fn the_same_inputs_produce_the_same_page() {
         for locale in Locale::ALL {
-            for page in site::PAGES {
+            for page in site::pages() {
                 assert_eq!(document(locale, page), document(locale, page));
             }
         }
@@ -489,7 +483,7 @@ mod tests {
 
     #[test]
     fn the_language_control_points_at_the_same_page() {
-        for page in site::PAGES {
+        for page in site::pages() {
             let html = document(Locale::En, page);
             assert!(
                 html.contains(&page.locale_href(Locale::PtBr)),
@@ -526,14 +520,14 @@ mod tests {
         // What the build writes, in the same shape a resolved href produces.
         let mut written: Vec<String> = Vec::new();
         for locale in Locale::ALL {
-            for page in site::PAGES {
+            for page in site::pages() {
                 written.push(format!("{}/{}", locale.tag(), page.dir()));
             }
             written.push(format!("{}/", locale.tag()));
         }
 
         for locale in Locale::ALL {
-            for page in site::PAGES {
+            for page in site::pages() {
                 let dir = format!("{}/{}", locale.tag(), page.slug);
                 for href in hrefs(&document(locale, page)) {
                     // Off-site, in-page and root-absolute links resolve against

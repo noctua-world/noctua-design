@@ -392,11 +392,93 @@ pub enum Key {
     ComponentsSet,
     /// `scope.reset`
     ScopeReset,
+    /// `component.abbr.summary`
+    ComponentAbbrSummary,
+    /// `component.blockquote.summary`
+    ComponentBlockquoteSummary,
+    /// `component.code.summary`
+    ComponentCodeSummary,
+    /// `component.code-block.summary`
+    ComponentCodeBlockSummary,
+    /// `component.del.summary`
+    ComponentDelSummary,
+    /// `component.em.summary`
+    ComponentEmSummary,
+    /// `component.heading.summary`
+    ComponentHeadingSummary,
+    /// `component.ins.summary`
+    ComponentInsSummary,
+    /// `component.kbd.summary`
+    ComponentKbdSummary,
+    /// `component.link.summary`
+    ComponentLinkSummary,
+    /// `component.list.summary`
+    ComponentListSummary,
+    /// `component.list-item.summary`
+    ComponentListItemSummary,
+    /// `component.mark.summary`
+    ComponentMarkSummary,
+    /// `component.paragraph.summary`
+    ComponentParagraphSummary,
+    /// `component.prose.summary`
+    ComponentProseSummary,
+    /// `component.strong.summary`
+    ComponentStrongSummary,
+    /// `component.text.summary`
+    ComponentTextSummary,
+    /// `component.time.summary`
+    ComponentTimeSummary,
+    /// `component.truncate.summary`
+    ComponentTruncateSummary,
+    /// `component.visually-hidden.summary`
+    ComponentVisuallyHiddenSummary,
+    /// `component.examples`
+    ComponentExamples,
+    /// `component.props`
+    ComponentProps,
+    /// `component.states`
+    ComponentStates,
+    /// `component.keyboard`
+    ComponentKeyboard,
+    /// `component.keyboard.none`
+    ComponentKeyboardNone,
+    /// `component.a11y`
+    ComponentA11y,
+    /// `component.a11y.role`
+    ComponentA11yRole,
+    /// `component.a11y.name`
+    ComponentA11yName,
+    /// `component.a11y.plain`
+    ComponentA11yPlain,
+    /// `component.source`
+    ComponentSource,
+    /// `component.source.spec`
+    ComponentSourceSpec,
+    /// `component.source.dioxus`
+    ComponentSourceDioxus,
+    /// `component.source.react`
+    ComponentSourceReact,
+    /// `component.column.name`
+    ComponentColumnName,
+    /// `component.column.type`
+    ComponentColumnType,
+    /// `component.column.default`
+    ComponentColumnDefault,
+    /// `component.column.effect`
+    ComponentColumnEffect,
+    /// `component.column.attribute`
+    ComponentColumnAttribute,
+    /// `component.required`
+    ComponentRequired,
+    /// `component.no-default`
+    ComponentNoDefault,
+    /// `component.states.none`
+    ComponentStatesNone,
 }
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 136] = [
+    pub const ALL: [Self; 177] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -533,6 +615,47 @@ impl Key {
         Self::ComponentsContractBody,
         Self::ComponentsSet,
         Self::ScopeReset,
+        Self::ComponentAbbrSummary,
+        Self::ComponentBlockquoteSummary,
+        Self::ComponentCodeSummary,
+        Self::ComponentCodeBlockSummary,
+        Self::ComponentDelSummary,
+        Self::ComponentEmSummary,
+        Self::ComponentHeadingSummary,
+        Self::ComponentInsSummary,
+        Self::ComponentKbdSummary,
+        Self::ComponentLinkSummary,
+        Self::ComponentListSummary,
+        Self::ComponentListItemSummary,
+        Self::ComponentMarkSummary,
+        Self::ComponentParagraphSummary,
+        Self::ComponentProseSummary,
+        Self::ComponentStrongSummary,
+        Self::ComponentTextSummary,
+        Self::ComponentTimeSummary,
+        Self::ComponentTruncateSummary,
+        Self::ComponentVisuallyHiddenSummary,
+        Self::ComponentExamples,
+        Self::ComponentProps,
+        Self::ComponentStates,
+        Self::ComponentKeyboard,
+        Self::ComponentKeyboardNone,
+        Self::ComponentA11y,
+        Self::ComponentA11yRole,
+        Self::ComponentA11yName,
+        Self::ComponentA11yPlain,
+        Self::ComponentSource,
+        Self::ComponentSourceSpec,
+        Self::ComponentSourceDioxus,
+        Self::ComponentSourceReact,
+        Self::ComponentColumnName,
+        Self::ComponentColumnType,
+        Self::ComponentColumnDefault,
+        Self::ComponentColumnEffect,
+        Self::ComponentColumnAttribute,
+        Self::ComponentRequired,
+        Self::ComponentNoDefault,
+        Self::ComponentStatesNone,
     ];
 
     /// The dotted name, for diagnostics and for the search index.
@@ -675,6 +798,47 @@ impl Key {
             Self::ComponentsContractBody => "components.contract.body",
             Self::ComponentsSet => "components.set",
             Self::ScopeReset => "scope.reset",
+            Self::ComponentAbbrSummary => "component.abbr.summary",
+            Self::ComponentBlockquoteSummary => "component.blockquote.summary",
+            Self::ComponentCodeSummary => "component.code.summary",
+            Self::ComponentCodeBlockSummary => "component.code-block.summary",
+            Self::ComponentDelSummary => "component.del.summary",
+            Self::ComponentEmSummary => "component.em.summary",
+            Self::ComponentHeadingSummary => "component.heading.summary",
+            Self::ComponentInsSummary => "component.ins.summary",
+            Self::ComponentKbdSummary => "component.kbd.summary",
+            Self::ComponentLinkSummary => "component.link.summary",
+            Self::ComponentListSummary => "component.list.summary",
+            Self::ComponentListItemSummary => "component.list-item.summary",
+            Self::ComponentMarkSummary => "component.mark.summary",
+            Self::ComponentParagraphSummary => "component.paragraph.summary",
+            Self::ComponentProseSummary => "component.prose.summary",
+            Self::ComponentStrongSummary => "component.strong.summary",
+            Self::ComponentTextSummary => "component.text.summary",
+            Self::ComponentTimeSummary => "component.time.summary",
+            Self::ComponentTruncateSummary => "component.truncate.summary",
+            Self::ComponentVisuallyHiddenSummary => "component.visually-hidden.summary",
+            Self::ComponentExamples => "component.examples",
+            Self::ComponentProps => "component.props",
+            Self::ComponentStates => "component.states",
+            Self::ComponentKeyboard => "component.keyboard",
+            Self::ComponentKeyboardNone => "component.keyboard.none",
+            Self::ComponentA11y => "component.a11y",
+            Self::ComponentA11yRole => "component.a11y.role",
+            Self::ComponentA11yName => "component.a11y.name",
+            Self::ComponentA11yPlain => "component.a11y.plain",
+            Self::ComponentSource => "component.source",
+            Self::ComponentSourceSpec => "component.source.spec",
+            Self::ComponentSourceDioxus => "component.source.dioxus",
+            Self::ComponentSourceReact => "component.source.react",
+            Self::ComponentColumnName => "component.column.name",
+            Self::ComponentColumnType => "component.column.type",
+            Self::ComponentColumnDefault => "component.column.default",
+            Self::ComponentColumnEffect => "component.column.effect",
+            Self::ComponentColumnAttribute => "component.column.attribute",
+            Self::ComponentRequired => "component.required",
+            Self::ComponentNoDefault => "component.no-default",
+            Self::ComponentStatesNone => "component.states.none",
         }
     }
 }
@@ -871,6 +1035,69 @@ impl Locale {
                 }
                 Key::ComponentsSet => "The set",
                 Key::ScopeReset => "Reset both",
+                Key::ComponentAbbrSummary => "An abbreviation, with its expansion.",
+                Key::ComponentBlockquoteSummary => "A quotation set apart from the text around it.",
+                Key::ComponentCodeSummary => "A fragment of code inside a sentence.",
+                Key::ComponentCodeBlockSummary => {
+                    "A block of code, in the monospaced face, with a copy control."
+                }
+                Key::ComponentDelSummary => "Text removed from the document.",
+                Key::ComponentEmSummary => {
+                    "Stress emphasis — the word a reader would lean on when speaking."
+                }
+                Key::ComponentHeadingSummary => {
+                    "A heading whose outline level and visual size are set independently."
+                }
+                Key::ComponentInsSummary => "Text added to the document.",
+                Key::ComponentKbdSummary => "A key or chord, as printed on a keyboard.",
+                Key::ComponentLinkSummary => {
+                    "A link, with the affordance an external destination needs."
+                }
+                Key::ComponentListSummary => "An ordered, unordered or description list, nestable.",
+                Key::ComponentListItemSummary => "One item in a list.",
+                Key::ComponentMarkSummary => {
+                    "Text highlighted for the reader's current purpose, such as a search hit."
+                }
+                Key::ComponentParagraphSummary => "A paragraph of prose.",
+                Key::ComponentProseSummary => {
+                    "A long-form reading column that caps its own line length."
+                }
+                Key::ComponentStrongSummary => {
+                    "Importance, seriousness or urgency — not merely bold text."
+                }
+                Key::ComponentTextSummary => {
+                    "A run of text, with the size, weight and tone of the type scale."
+                }
+                Key::ComponentTimeSummary => {
+                    "A date or time, machine-readable and human-readable at once."
+                }
+                Key::ComponentTruncateSummary => {
+                    "Text clipped to a line count, with the full value still available."
+                }
+                Key::ComponentVisuallyHiddenSummary => {
+                    "Content for assistive technology only, removed from the visual page."
+                }
+                Key::ComponentExamples => "Every variant",
+                Key::ComponentProps => "Props",
+                Key::ComponentStates => "States",
+                Key::ComponentKeyboard => "Keyboard",
+                Key::ComponentKeyboardNone => "This component answers no keys of its own.",
+                Key::ComponentA11y => "Accessibility",
+                Key::ComponentA11yRole => "Its root carries the role",
+                Key::ComponentA11yName => "It must have an accessible name.",
+                Key::ComponentA11yPlain => "It needs nothing beyond the element it renders.",
+                Key::ComponentSource => "Where it comes from",
+                Key::ComponentSourceSpec => "The contract",
+                Key::ComponentSourceDioxus => "The Dioxus implementation",
+                Key::ComponentSourceReact => "The React implementation",
+                Key::ComponentColumnName => "Name",
+                Key::ComponentColumnType => "Type",
+                Key::ComponentColumnDefault => "Default",
+                Key::ComponentColumnEffect => "Effect",
+                Key::ComponentColumnAttribute => "Attribute",
+                Key::ComponentRequired => "required",
+                Key::ComponentNoDefault => "—",
+                Key::ComponentStatesNone => "It has no states beyond its props.",
             },
             Self::PtBr => match key {
                 Key::AppName => "Noctua",
@@ -1059,6 +1286,77 @@ impl Locale {
                 }
                 Key::ComponentsSet => "O conjunto",
                 Key::ScopeReset => "Restaurar ambos",
+                Key::ComponentAbbrSummary => {
+                    "Uma abreviatura, com o que ela significa por extenso."
+                }
+                Key::ComponentBlockquoteSummary => "Uma citação destacada do texto ao redor dela.",
+                Key::ComponentCodeSummary => "Um trecho de código dentro de uma frase.",
+                Key::ComponentCodeBlockSummary => {
+                    "Um bloco de código, na fonte monoespaçada, com um controle de cópia."
+                }
+                Key::ComponentDelSummary => "Texto removido do documento.",
+                Key::ComponentEmSummary => {
+                    "Ênfase de entonação — a palavra em que o leitor apoiaria a voz."
+                }
+                Key::ComponentHeadingSummary => {
+                    "Um título cujo nível na estrutura e cujo tamanho visual são escolhidos separadamente."
+                }
+                Key::ComponentInsSummary => "Texto acrescentado ao documento.",
+                Key::ComponentKbdSummary => {
+                    "Uma tecla ou combinação, como vem impressa no teclado."
+                }
+                Key::ComponentLinkSummary => "Um link, com o sinal que um destino externo exige.",
+                Key::ComponentListSummary => {
+                    "Uma lista ordenada, não ordenada ou de descrição, aninhável."
+                }
+                Key::ComponentListItemSummary => "Um item de uma lista.",
+                Key::ComponentMarkSummary => {
+                    "Texto realçado para o que o leitor está fazendo agora, como um resultado de busca."
+                }
+                Key::ComponentParagraphSummary => "Um parágrafo de prosa.",
+                Key::ComponentProseSummary => {
+                    "Uma coluna de leitura longa que limita o próprio comprimento de linha."
+                }
+                Key::ComponentStrongSummary => {
+                    "Importância, gravidade ou urgência — não apenas texto em negrito."
+                }
+                Key::ComponentTextSummary => {
+                    "Um trecho de texto, com o tamanho, o peso e o tom da escala tipográfica."
+                }
+                Key::ComponentTimeSummary => {
+                    "Uma data ou hora, legível por máquina e por pessoa ao mesmo tempo."
+                }
+                Key::ComponentTruncateSummary => {
+                    "Texto cortado a um número de linhas, com o valor inteiro ainda disponível."
+                }
+                Key::ComponentVisuallyHiddenSummary => {
+                    "Conteúdo só para tecnologia assistiva, retirado da página visual."
+                }
+                Key::ComponentExamples => "Todas as variações",
+                Key::ComponentProps => "Props",
+                Key::ComponentStates => "Estados",
+                Key::ComponentKeyboard => "Teclado",
+                Key::ComponentKeyboardNone => {
+                    "Este componente não responde a tecla nenhuma por conta própria."
+                }
+                Key::ComponentA11y => "Acessibilidade",
+                Key::ComponentA11yRole => "A raiz dele carrega o papel",
+                Key::ComponentA11yName => "Ele precisa ter um nome acessível.",
+                Key::ComponentA11yPlain => {
+                    "Ele não precisa de nada além do elemento que renderiza."
+                }
+                Key::ComponentSource => "De onde ele vem",
+                Key::ComponentSourceSpec => "O contrato",
+                Key::ComponentSourceDioxus => "A implementação em Dioxus",
+                Key::ComponentSourceReact => "A implementação em React",
+                Key::ComponentColumnName => "Nome",
+                Key::ComponentColumnType => "Tipo",
+                Key::ComponentColumnDefault => "Padrão",
+                Key::ComponentColumnEffect => "Efeito",
+                Key::ComponentColumnAttribute => "Atributo",
+                Key::ComponentRequired => "obrigatório",
+                Key::ComponentNoDefault => "—",
+                Key::ComponentStatesNone => "Ele não tem estados além dos props.",
             },
             Self::Qps => match key {
                 Key::AppName => "⟦Nooctuuaa⟧",
@@ -1253,6 +1551,79 @@ impl Locale {
                 }
                 Key::ComponentsSet => "⟦Thee seet⟧",
                 Key::ScopeReset => "⟦Reeseet booth⟧",
+                Key::ComponentAbbrSummary => "⟦AAn aabbreeviiaatiioon, wiith iits eexpaansiioon.⟧",
+                Key::ComponentBlockquoteSummary => {
+                    "⟦AA quuootaatiioon seet aapaart froom thee teext aaroouund iit.⟧"
+                }
+                Key::ComponentCodeSummary => "⟦AA fraagmeent oof coodee iinsiidee aa seenteencee.⟧",
+                Key::ComponentCodeBlockSummary => {
+                    "⟦AA bloock oof coodee, iin thee moonoospaaceed faacee, wiith aa coopy coontrool.⟧"
+                }
+                Key::ComponentDelSummary => "⟦Teext reemooveed froom thee doocuumeent.⟧",
+                Key::ComponentEmSummary => {
+                    "⟦Streess eemphaasiis — thee woord aa reeaadeer woouuld leeaan oon wheen speeaakiing.⟧"
+                }
+                Key::ComponentHeadingSummary => {
+                    "⟦AA heeaadiing whoosee oouutliinee leeveel aand viisuuaal siizee aaree seet iindeepeendeently.⟧"
+                }
+                Key::ComponentInsSummary => "⟦Teext aaddeed too thee doocuumeent.⟧",
+                Key::ComponentKbdSummary => {
+                    "⟦AA keey oor choord, aas priinteed oon aa keeybooaard.⟧"
+                }
+                Key::ComponentLinkSummary => {
+                    "⟦AA liink, wiith thee aaffoordaancee aan eexteernaal deestiinaatiioon neeeeds.⟧"
+                }
+                Key::ComponentListSummary => {
+                    "⟦AAn oordeereed, uunoordeereed oor deescriiptiioon liist, neestaablee.⟧"
+                }
+                Key::ComponentListItemSummary => "⟦OOnee iiteem iin aa liist.⟧",
+                Key::ComponentMarkSummary => {
+                    "⟦Teext hiighliighteed foor thee reeaadeer's cuurreent puurpoosee, suuch aas aa seeaarch hiit.⟧"
+                }
+                Key::ComponentParagraphSummary => "⟦AA paaraagraaph oof proosee.⟧",
+                Key::ComponentProseSummary => {
+                    "⟦AA loong-foorm reeaadiing cooluumn thaat caaps iits oown liinee leength.⟧"
+                }
+                Key::ComponentStrongSummary => {
+                    "⟦IImpoortaancee, seeriioouusneess oor uurgeency — noot meereely boold teext.⟧"
+                }
+                Key::ComponentTextSummary => {
+                    "⟦AA ruun oof teext, wiith thee siizee, weeiight aand toonee oof thee typee scaalee.⟧"
+                }
+                Key::ComponentTimeSummary => {
+                    "⟦AA daatee oor tiimee, maachiinee-reeaadaablee aand huumaan-reeaadaablee aat ooncee.⟧"
+                }
+                Key::ComponentTruncateSummary => {
+                    "⟦Teext cliippeed too aa liinee coouunt, wiith thee fuull vaaluuee stiill aavaaiilaablee.⟧"
+                }
+                Key::ComponentVisuallyHiddenSummary => {
+                    "⟦Coonteent foor aassiistiivee teechnooloogy oonly, reemooveed froom thee viisuuaal paagee.⟧"
+                }
+                Key::ComponentExamples => "⟦EEveery vaariiaant⟧",
+                Key::ComponentProps => "⟦Proops⟧",
+                Key::ComponentStates => "⟦Staatees⟧",
+                Key::ComponentKeyboard => "⟦Keeybooaard⟧",
+                Key::ComponentKeyboardNone => {
+                    "⟦Thiis coompooneent aansweers noo keeys oof iits oown.⟧"
+                }
+                Key::ComponentA11y => "⟦AAcceessiibiiliity⟧",
+                Key::ComponentA11yRole => "⟦IIts roooot caarriiees thee roolee⟧",
+                Key::ComponentA11yName => "⟦IIt muust haavee aan aacceessiiblee naamee.⟧",
+                Key::ComponentA11yPlain => {
+                    "⟦IIt neeeeds noothiing beeyoond thee eeleemeent iit reendeers.⟧"
+                }
+                Key::ComponentSource => "⟦Wheeree iit coomees froom⟧",
+                Key::ComponentSourceSpec => "⟦Thee coontraact⟧",
+                Key::ComponentSourceDioxus => "⟦Thee Diiooxuus iimpleemeentaatiioon⟧",
+                Key::ComponentSourceReact => "⟦Thee Reeaact iimpleemeentaatiioon⟧",
+                Key::ComponentColumnName => "⟦Naamee⟧",
+                Key::ComponentColumnType => "⟦Typee⟧",
+                Key::ComponentColumnDefault => "⟦Deefaauult⟧",
+                Key::ComponentColumnEffect => "⟦EEffeect⟧",
+                Key::ComponentColumnAttribute => "⟦AAttriibuutee⟧",
+                Key::ComponentRequired => "⟦reequuiireed⟧",
+                Key::ComponentNoDefault => "⟦—⟧",
+                Key::ComponentStatesNone => "⟦IIt haas noo staatees beeyoond iits proops.⟧",
             },
         }
     }

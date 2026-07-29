@@ -125,10 +125,23 @@ model, the message catalogue, `ThemeScope` in both packages, and a documentation
 site pre-rendered in three locales. `cargo xtask check` is still the single gate,
 and `cargo xtask docs` builds the site.
 
-**There is exactly one component, and it is not a widget.** `ThemeScope` is how
-a theme reaches a subtree at all, and it is **generated** from `spec/theme.toml`
-rather than written — a product of the machine rather than an exception to it.
-Stage 6 adds the first real components; a Button built now would be rebuilt.
+**Twenty text components, plus `ThemeScope` and `Icon`.** Every one of them is
+generated from `spec/`, which is the parity mechanism rather than a
+convenience.
+
+**One page per component, generated.** `crates/noctua-design-emit/src/docs.rs`
+compiles `spec/components/*.toml` into `docs-site/src/generated/catalogue.rs`,
+and the site builds its pages, its sidebar and its search index from that.
+Adding a component to `spec/` adds its page, its entry and its search terms
+with nothing else to edit — which the page it replaced could not say: it was
+one page called "Components", with a hand-written gallery that went stale the
+day it was written.
+
+The variants on a component's page are the DOM the component produces, built
+from its element, its class and the attribute each prop becomes. `props.rs`
+generates the component's body from the same three facts, so the page cannot
+show something the component does not. Every value of every enum prop appears
+by construction; there is no example to author and none to forget.
 
 The site's own scope and limits are in `docs-site/PROVISIONAL.md`. Read that
 before adding a page.

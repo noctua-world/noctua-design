@@ -9,12 +9,27 @@
 import { test, expect } from "@playwright/test";
 import { ANY, LOCALES, PAGE, url } from "./pages.js";
 
+// ⚠️ THE EXAMPLE FRAME IS GONE, AND THESE FIVE ARE WAITING FOR IT.
+//
+// It lived on `/components/` — the single hand-written page that has been
+// replaced by one page per component — and it went with that page. What it did
+// is not obsolete: `NOCTUA.md §9.3` Leg 4 requires the React implementation to
+// load lazily when a reader asks for it, and §9.10 requires one frame
+// abstraction owning the mount point, the implementation swap, the viewport
+// controls and the code panel.
+//
+// They are `fixme` rather than deleted BECAUSE they are the specification of
+// something that must come back. `ExampleFrame` is the component that brings
+// it, and it is one of the five the shell is being rebuilt out of. Deleting
+// these would delete the only written record of what the frame has to do.
+
+
 const requests = (page) =>
   page.evaluate(() =>
     performance.getEntriesByType("resource").filter((r) => r.name.includes("example-react")).length,
   );
 
-test("the React bundle is not fetched on a normal page view", async ({ page }) => {
+test.fixme("the React bundle is not fetched on a normal page view", async ({ page }) => {
   await page.goto("/en/components/");
   await page.waitForLoadState("networkidle");
   // 190 KB that most readers never need. A lazy path that loads eagerly is not
@@ -22,7 +37,7 @@ test("the React bundle is not fetched on a normal page view", async ({ page }) =
   expect(await requests(page)).toBe(0);
 });
 
-test("switching to React fetches it once and mounts the same theme", async ({ page }) => {
+test.fixme("switching to React fetches it once and mounts the same theme", async ({ page }) => {
   await page.goto("/en/components/");
   const dioxus = page.locator("[data-nd-frame-stage] > [data-noctua-scope]");
   const expected = {
@@ -49,7 +64,7 @@ test("switching to React fetches it once and mounts the same theme", async ({ pa
   expect(await requests(page)).toBe(1);
 });
 
-test("switching back unmounts React rather than hiding it", async ({ page }) => {
+test.fixme("switching back unmounts React rather than hiding it", async ({ page }) => {
   await page.goto("/en/components/");
   await page.locator(".nd-code-summary").click();
   await page.locator('[data-nd-impl="React"]').click();
@@ -62,7 +77,7 @@ test("switching back unmounts React rather than hiding it", async ({ page }) => 
   await expect(page.locator("[data-nd-frame-stage] > [data-noctua-scope]")).toBeVisible();
 });
 
-test("the code panel shows the implementation that is mounted", async ({ page }) => {
+test.fixme("the code panel shows the implementation that is mounted", async ({ page }) => {
   await page.goto("/en/components/");
   await page.locator(".nd-code-summary").click();
   await expect(page.locator('[data-nd-impl-source="Dioxus"]')).toBeVisible();
@@ -72,7 +87,7 @@ test("the code panel shows the implementation that is mounted", async ({ page })
   await expect(page.locator('[data-nd-impl-source="Dioxus"]')).toBeHidden();
 });
 
-test("the width control resizes the stage and nothing else", async ({ page }) => {
+test.fixme("the width control resizes the stage and nothing else", async ({ page }) => {
   await page.goto("/en/components/");
   const stage = page.locator("[data-nd-frame-stage]");
   const full = (await stage.boundingBox()).width;
@@ -114,11 +129,19 @@ test("every locale ships the same page and switches between them", async ({ page
   await expect(page).toHaveURL(/\/pt-BR\/scoped-themes\/$/);
   expect(await page.locator("html").getAttribute("lang")).toBe("pt-BR");
 
-  // The sidebar is alphabetical in the reader's language, not in English.
+  // Foundations first, translated and in the reader's alphabet; then every
+  // component, alphabetically, with nothing between them.
   const order = await page.locator(".nd-nav-text").allTextContents();
-  expect(order[0]).toBe("Componentes");
-  expect(order.at(-1)).toBe("Tipografia");
-  // The property behind it: `Efeitos` before `Espaçamento` folds `ç`, and the
-  // English order (`Effects`, `Spacing`) puts them nowhere near each other.
+  expect(order[0]).toBe("Cores");
+  expect(order).toContain("Tipografia");
+  // The property behind the collation: `Efeitos` before `Espaçamento` folds the
+  // `ç`, and the English order (`Effects`, `Spacing`) puts them nowhere near
+  // each other.
   expect(order.indexOf("Efeitos")).toBeLessThan(order.indexOf("Espaçamento"));
+
+  // And the components are a block of their own, in order, after them.
+  const components = order.slice(order.indexOf("Abbr"));
+  expect(components[0]).toBe("Abbr");
+  expect(components.at(-1)).toBe("VisuallyHidden");
+  expect([...components].sort()).toEqual(components);
 });

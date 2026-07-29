@@ -8,9 +8,8 @@
 use dioxus::prelude::*;
 use noctua_design::ThemeScope;
 use noctua_design::components::{
-    Abbr, Blockquote, Code, CodeBlock, CodeTone, Del, Em, Heading, HeadingLevel, HeadingSize, Ins,
-    Kbd, Link, List, ListItem, ListSpacing, Mark, Paragraph, ParagraphTone, Strong, Text, TextSize,
-    TextTone, TextWeight, Time, Truncate, VisuallyHidden,
+    Code, CodeTone, Heading, HeadingLevel, HeadingSize, Kbd, List, ListItem, ListKind, ListSpacing,
+    Paragraph, ParagraphTone, Text, TextSize, TextTone, TextWeight, VisuallyHidden,
 };
 use noctua_design::model::{Glass, Mode, Palette, Radius};
 use noctua_design::{Icon, IconName, IconSize};
@@ -22,7 +21,7 @@ use crate::shell::Context;
 #[component]
 pub(crate) fn Body(context: Context) -> Element {
     rsx! {
-        h1 { class: "nd-title", "{context.t(context.page.title)}" }
+        h1 { class: "nd-title", "{context.page.title(context.locale)}" }
         p { class: "nd-lead", "{context.t(context.page.summary)}" }
         match context.page.slug {
             "scoped-themes" => rsx! { ScopedThemes { context } },
@@ -31,11 +30,12 @@ pub(crate) fn Body(context: Context) -> Element {
             "spacing" => rsx! { Spacing { context } },
             "effects" => rsx! { Effects { context } },
             "icons" => rsx! { Icons { context } },
-            "components" => rsx! { Components { context } },
-            // No catch-all body. A page in `site::PAGES` with nothing to render
-            // is a build failure, not a page that quietly shows something else:
-            // the site is generated, so this panics during the build and never
-            // reaches a reader.
+            // Every component, from its contract. Not a `match` arm each: the
+            // page that listed components by hand is what this replaced.
+            _ if context.page.component.is_some() => rsx! { ComponentPage { context } },
+            // No catch-all body. A page with nothing to render is a build
+            // failure, not a page that quietly shows something else: the site is
+            // generated, so this stops the build and never reaches a reader.
             slug => unreachable!("no body for the page `{slug}`"),
         }
     }
@@ -89,6 +89,32 @@ fn ScopedThemes(context: Context) -> Element {
         }
 
         p { class: "nd-prose nd-note", "{context.t(Key::ScopeNote)}" }
+
+        // `ThemeScope` is the one component with no `spec/components/*.toml`:
+        // its props ARE `spec/theme.toml`'s scopable settings, and a second
+        // file could disagree with the first. So its table lives here, on the
+        // page about scoping, rather than on a page of its own.
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentProps)}" }
+        table { class: "nd-table",
+            thead {
+                tr {
+                    th { "{context.t(Key::ComponentColumnName)}" }
+                    th { "{context.t(Key::ComponentColumnType)}" }
+                    th { "{context.t(Key::ComponentColumnDefault)}" }
+                    th { "{context.t(Key::ComponentColumnEffect)}" }
+                }
+            }
+            tbody {
+                for prop in crate::props::SCOPABLE {
+                    tr {
+                        td { Code { "{prop.name}" } }
+                        td { Code { class: "nd-type", "{prop.type_name}" } }
+                        td { Code { "{prop.default}" } }
+                        td { "{prop.values}" }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -160,6 +186,233 @@ fn Sample(context: Context) -> Element {
             }
         }
     }
+}
+
+// --- One page per component, from the contract ------------------------------
+
+/// A component's page: what it is, every variant of it rendered live, every
+/// prop, every state, its keyboard contract and its accessibility contract.
+///
+/// # Why the examples are markup and not the component
+///
+/// The page renders the DOM the component produces — its element, its class and
+/// the attribute each prop becomes — rather than calling the Dioxus component.
+/// That is not a shortcut: `props.rs` GENERATES the component's body from
+/// exactly those three facts, so the two cannot disagree. What it buys is that
+/// every value of every enum prop is shown by construction, with no example to
+/// author and none to forget when a variant is added.
+#[component]
+fn ComponentPage(context: Context) -> Element {
+    let component = context.page.component.expect("a component page");
+    rsx! {
+        if !component.guidance.is_empty() {
+            Paragraph { "{component.guidance}" }
+        }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentExamples)}" }
+        for prop in component.props.iter().filter(|prop| prop.kind == "enum") {
+            div { class: "nd-variant",
+                Code { "{prop.name}" }
+                div { class: "nd-variant-row",
+                    for value in prop.values {
+                        Specimen { component, prop: *prop, value: (*value).to_string() }
+                    }
+                }
+            }
+        }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentProps)}" }
+        table { class: "nd-table",
+            thead {
+                tr {
+                    th { "{context.t(Key::ComponentColumnName)}" }
+                    th { "{context.t(Key::ComponentColumnType)}" }
+                    th { "{context.t(Key::ComponentColumnDefault)}" }
+                    th { "{context.t(Key::ComponentColumnEffect)}" }
+                }
+            }
+            tbody {
+                for prop in component.props {
+                    tr {
+                        td { Code { "{prop.name}" } }
+                        td {
+                            if prop.values.is_empty() {
+                                Code { class: "nd-type", "{prop.kind}" }
+                            } else {
+                                for value in prop.values {
+                                    Code { class: "nd-type", "{value}" }
+                                }
+                            }
+                        }
+                        td {
+                            if prop.required {
+                                Text { tone: TextTone::Accent, "{context.t(Key::ComponentRequired)}" }
+                            } else if let Some(default) = prop.default {
+                                Code { "{default}" }
+                            } else {
+                                "{context.t(Key::ComponentNoDefault)}"
+                            }
+                        }
+                        td { "{prop.doc}" }
+                    }
+                }
+            }
+        }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentStates)}" }
+        if component.states.is_empty() {
+            Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::ComponentStatesNone)}" }
+        } else {
+            table { class: "nd-table",
+                thead {
+                    tr {
+                        th { "{context.t(Key::ComponentColumnName)}" }
+                        th { "{context.t(Key::ComponentColumnAttribute)}" }
+                        th { "{context.t(Key::ComponentColumnEffect)}" }
+                    }
+                }
+                tbody {
+                    for state in component.states {
+                        tr {
+                            td { Code { "{state.name}" } }
+                            td { Code { "{state.attribute}" } }
+                            td { "{state.doc}" }
+                        }
+                    }
+                }
+            }
+        }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentKeyboard)}" }
+        if component.keyboard.is_empty() {
+            Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::ComponentKeyboardNone)}" }
+        } else {
+            table { class: "nd-table",
+                tbody {
+                    for key in component.keyboard {
+                        tr {
+                            td { Kbd { "{key.key}" } }
+                            td { "{key.action}" }
+                        }
+                    }
+                }
+            }
+        }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentA11y)}" }
+        if let Some(role) = component.role {
+            Paragraph {
+                "{context.t(Key::ComponentA11yRole)} "
+                Code { "{role}" }
+            }
+        }
+        if component.needs_name {
+            Paragraph { "{context.t(Key::ComponentA11yName)}" }
+        }
+        if !component.a11y_notes.is_empty() {
+            Paragraph { "{component.a11y_notes}" }
+        }
+        if component.role.is_none() && !component.needs_name && component.a11y_notes.is_empty() {
+            Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::ComponentA11yPlain)}" }
+        }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentSource)}" }
+        List { kind: ListKind::Unordered, spacing: ListSpacing::Tight,
+            for (label, path) in source_paths(component.name) {
+                ListItem {
+                    "{context.t(label)} — "
+                    Code { "{path}" }
+                }
+            }
+        }
+    }
+}
+
+/// One rendering of a component, with one enum prop set to one value.
+///
+/// The markup is built from the contract: the element, the root class, and the
+/// attribute the prop becomes. `props.rs` generates the component's body from
+/// the same three facts, so this shows what the component shows.
+#[component]
+fn Specimen(
+    component: crate::generated::catalogue::DocComponent,
+    prop: crate::generated::catalogue::DocProp,
+    value: String,
+) -> Element {
+    let class = component.class.unwrap_or_default();
+    let attribute = prop.attribute.unwrap_or(prop.name);
+    rsx! {
+        figure { class: "nd-variant-item",
+            div {
+                class: "nd-variant-stage",
+                dangerous_inner_html: specimen_markup(component, attribute, &value),
+            }
+            figcaption { class: "nd-variant-label",
+                Code { "{value}" }
+                if class.is_empty() {
+                    VisuallyHidden { "{component.element}" }
+                }
+            }
+        }
+    }
+}
+
+/// The element the component renders, carrying one attribute and some content.
+fn specimen_markup(
+    component: crate::generated::catalogue::DocComponent,
+    attribute: &str,
+    value: &str,
+) -> String {
+    // Block-level components read better with a sentence; an inline one reads
+    // better with its own name, which is also what a reader is looking for.
+    let block = matches!(
+        component.element,
+        "p" | "div" | "blockquote" | "ul" | "ol" | "dl" | "h1" | "h2" | "h3" | "h4" | "pre"
+    );
+    let content = if block { SPECIMEN } else { component.name };
+    let class = component
+        .class
+        .map(|class| format!(" class=\"{class}\""))
+        .unwrap_or_default();
+    format!(
+        "<{element}{class} data-nd-{attribute}=\"{value}\">{content}</{element}>",
+        element = component.element,
+    )
+}
+
+/// The specimen sentence. English on purpose: it is a pangram, and translating
+/// a pangram gives a sentence that is no longer one.
+const SPECIMEN: &str = "Sphinx of black quartz, judge my vow";
+
+/// Where a component's four files live, for a reader who wants the truth.
+fn source_paths(name: &str) -> [(Key, String); 3] {
+    let stem = file_stem(name);
+    [
+        (
+            Key::ComponentSourceSpec,
+            format!("spec/components/{stem}.toml"),
+        ),
+        (
+            Key::ComponentSourceDioxus,
+            format!("crates/noctua-design/src/components/{stem}.rs"),
+        ),
+        (
+            Key::ComponentSourceReact,
+            format!("packages/react/src/components/{stem}.js"),
+        ),
+    ]
+}
+
+/// `CodeBlock` → `code_block`, the file the component came from.
+fn file_stem(name: &str) -> String {
+    let mut out = String::with_capacity(name.len() + 2);
+    for (index, ch) in name.char_indices() {
+        if ch.is_ascii_uppercase() && index > 0 {
+            out.push('_');
+        }
+        out.extend(ch.to_lowercase());
+    }
+    out
 }
 
 // --- The rest ---------------------------------------------------------------
@@ -299,7 +552,7 @@ fn Families(context: Context) -> Element {
     rsx! {
         div { class: "nd-specimens",
             for (family, stack) in families {
-                div { class: "nd-specimen",
+                div { class: "nd-variant-item",
                     Text { class: "nd-specimen-name", weight: TextWeight::Semibold, "{family}" }
                     for (label, weight) in weights {
                         p {
@@ -477,260 +730,4 @@ fn Effects(context: Context) -> Element {
             }
         }
     }
-}
-
-/// The component page: the contract, the whole set rendered, and the props.
-#[component]
-fn Components(context: Context) -> Element {
-    let request = [("palette", "violet-vivid"), ("mode", "dark")];
-    rsx! {
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentsContractTitle)}" }
-        Paragraph { "{context.t(Key::ComponentsContractBody)}" }
-
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentsSet)}" }
-        Gallery { context }
-
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "ThemeScope" }
-        PropTable { context }
-
-        Frame {
-            context,
-            caption: Key::PageComponentsTitle,
-            code: snippet(&request),
-            ThemeScope {
-                class: "nd-scope",
-                palette: Palette::VioletVivid,
-                mode: Mode::Dark,
-                Sample { context }
-            }
-        }
-    }
-}
-
-/// Every text component, rendered rather than listed.
-///
-/// The page cannot claim a component exists that does not compile, because each
-/// row below *is* the component.
-#[component]
-fn Gallery(context: Context) -> Element {
-    rsx! {
-        div { class: "nd-gallery",
-            GalleryRow { name: "Heading",
-                Heading { level: HeadingLevel::_3, size: HeadingSize::H4, "{context.t(Key::ScopeSampleHeading)}" }
-            }
-            GalleryRow { name: "Text",
-                Text { weight: TextWeight::Semibold, "Semibold" }
-                Text { tone: TextTone::Muted, " muted " }
-                Text { tone: TextTone::Accent, "accent" }
-            }
-            GalleryRow { name: "Link",
-                Link { href: "#", "{context.t(Key::ScopeSampleLink)}" }
-                Link { href: "https://example.org", external: true, class: "nd-gallery-gap", "external" }
-            }
-            GalleryRow { name: "Code", Code { "--noctua-space-gap" } }
-            GalleryRow { name: "Kbd", Kbd { "Ctrl" } Kbd { class: "nd-gallery-gap", "K" } }
-            GalleryRow { name: "Em, Strong",
-                Em { "stress" }
-                Strong { class: "nd-gallery-gap", "importance" }
-            }
-            GalleryRow { name: "Mark", Mark { "a search hit" } }
-            GalleryRow { name: "Del, Ins",
-                Del { "removed" }
-                Ins { class: "nd-gallery-gap", "added" }
-            }
-            GalleryRow { name: "Abbr", Abbr { title: "Cascading Style Sheets", "CSS" } }
-            GalleryRow { name: "Time", Time { datetime: "2026-07-28", "28 July 2026" } }
-            GalleryRow { name: "Truncate",
-                Truncate { title: "{context.t(Key::ScopeSampleBody)}", "{context.t(Key::ScopeSampleBody)}" }
-            }
-            GalleryRow { name: "List",
-                List { spacing: ListSpacing::Tight,
-                    ListItem { "One" }
-                    ListItem { "Two" }
-                }
-            }
-            GalleryRow { name: "Blockquote",
-                Blockquote { Paragraph { "{context.t(Key::ScopeSampleBody)}" } }
-            }
-            GalleryRow { name: "CodeBlock",
-                CodeBlock { language: "rust", "Heading level=3 size=h4" }
-            }
-            GalleryRow { name: "VisuallyHidden",
-                VisuallyHidden { "announced, never shown" }
-                Text { size: TextSize::Caption, tone: TextTone::Muted,
-                    "there is hidden text here, for screen readers only"
-                }
-            }
-        }
-    }
-}
-
-#[component]
-fn GalleryRow(name: String, children: Element) -> Element {
-    rsx! {
-        div { class: "nd-gallery-row",
-            Code { class: "nd-gallery-name", tone: CodeTone::Subtle, "{name}" }
-            div { class: "nd-gallery-demo", {children} }
-        }
-    }
-}
-
-/// The prop surface, straight out of the model.
-#[component]
-fn PropTable(context: Context) -> Element {
-    let _ = context;
-    rsx! {
-        div { class: "nd-props",
-            for prop in crate::props::SCOPABLE {
-                div { class: "nd-prop",
-                    code { class: "nd-prop-name", "{prop.name}" }
-                    code { class: "nd-prop-type", "Option<" "{prop.type_name}" ">" }
-                    p { class: "nd-prop-values", "{prop.values}" }
-                    p { class: "nd-prop-default", "default " code { "{prop.default}" } }
-                }
-            }
-        }
-    }
-}
-
-// --- The example frame ------------------------------------------------------
-
-/// The container every example is shown in.
-///
-/// Viewport width, a code panel and a reset, built once so that a future example
-/// — a 3D scene, a data grid — is a *use* of this rather than a new thing.
-///
-/// The width control resizes the mount point and nothing else, so an example can
-/// be judged at 320 px without the reader resizing the browser.
-///
-/// # The code shown is derived from the example shown
-///
-/// `code` is not a string somebody typed next to the example. It is produced by
-/// [`snippet`] from the very `ScopeRequest` that built the component above it,
-/// in both languages. A hand-written snippet drifts from the component it
-/// documents on the first edit, and the reader has no way to tell which one
-/// lied.
-#[component]
-fn Frame(
-    context: Context,
-    caption: Key,
-    #[props(default)] code: Vec<(&'static str, String)>,
-    children: Element,
-) -> Element {
-    rsx! {
-        figure { class: "nd-frame", "data-nd-frame": "",
-            div { class: "nd-frame-bar",
-                span { class: "nd-frame-label", "{context.t(Key::ExampleLabel)}" }
-                div { class: "nd-frame-controls",
-                    for (value, key) in [
-                        ("narrow", Key::ExampleWidthNarrow),
-                        ("medium", Key::ExampleWidthMedium),
-                        ("full", Key::ExampleWidthFull),
-                    ] {
-                        button {
-                            class: "nd-option",
-                            r#type: "button",
-                            role: "radio",
-                            "aria-checked": if value == "full" { "true" } else { "false" },
-                            "data-nd-frame-width": "{value}",
-                            "{context.t(key)}"
-                        }
-                    }
-                    button { class: "nd-option", r#type: "button", "data-nd-frame-reset": "",
-                        "{context.t(Key::ExampleReset)}"
-                    }
-                }
-            }
-            div { class: "nd-frame-stage", "data-nd-frame-stage": "", {children} }
-            if !code.is_empty() {
-                details { class: "nd-code",
-                    summary { class: "nd-code-summary",
-                        span { class: "nd-code-show", "{context.t(Key::ExampleCodeShow)}" }
-                        span { class: "nd-code-hide", "{context.t(Key::ExampleCodeHide)}" }
-                    }
-                    div { class: "nd-code-body",
-                        div { class: "nd-options", role: "radiogroup",
-                            "aria-label": context.t(Key::ExampleImplLabel),
-                            for (index, (language, _)) in code.iter().enumerate() {
-                                button {
-                                    class: "nd-option",
-                                    r#type: "button",
-                                    role: "radio",
-                                    "aria-checked": if index == 0 { "true" } else { "false" },
-                                    "data-nd-impl": "{language}",
-                                    "data-nd-loading": context.t(Key::ExampleImplLoading),
-                                    "{language}"
-                                }
-                            }
-                        }
-                        for (index, (language, source)) in code.iter().enumerate() {
-                            pre {
-                                class: "nd-code-source",
-                                "data-nd-impl-source": "{language}",
-                                hidden: index != 0,
-                                code { "{source}" }
-                            }
-                        }
-                    }
-                }
-            }
-            figcaption { class: "nd-frame-caption", "{context.t(caption)}" }
-        }
-    }
-}
-
-/// The same scope, written in both languages.
-///
-/// Generated from the request rather than transcribed, so the two snippets agree
-/// with each other and with the component the reader is looking at. Prop names
-/// are the ones the generated components declare — `identifier` in Rust,
-/// `camelCase` in JavaScript — which is why adding a scopable setting to
-/// `spec/theme.toml` reaches this without anyone editing it.
-fn snippet(request: &[(&str, &str)]) -> Vec<(&'static str, String)> {
-    use std::fmt::Write as _;
-
-    let mut rust = String::new();
-    let mut react = String::new();
-    for (name, value) in request {
-        let _ = writeln!(rust, "    {name}: {},", rust_variant(name, value));
-        let _ = writeln!(react, "  {}={{\"{value}\"}}", camel(name));
-    }
-
-    vec![
-        (
-            "Dioxus",
-            format!("rsx! {{\n  ThemeScope {{\n{rust}    // …\n  }}\n}}"),
-        ),
-        (
-            "React",
-            format!("<ThemeScope\n{react}>\n  {{/* … */}}\n</ThemeScope>"),
-        ),
-    ]
-}
-
-/// `palette`, `azure-vivid` → `Palette::AzureVivid`.
-fn rust_variant(setting: &str, value: &str) -> String {
-    let type_name = pascal(setting);
-    let variant = pascal(value);
-    format!("{type_name}::{variant}")
-}
-
-fn pascal(name: &str) -> String {
-    name.split(['-', '_'])
-        .filter(|word| !word.is_empty())
-        .map(|word| {
-            let mut chars = word.chars();
-            chars.next().map_or_else(String::new, |first| {
-                first.to_uppercase().chain(chars).collect()
-            })
-        })
-        .collect()
-}
-
-fn camel(name: &str) -> String {
-    let pascal = pascal(name);
-    let mut chars = pascal.chars();
-    chars.next().map_or_else(String::new, |first| {
-        first.to_lowercase().chain(chars).collect()
-    })
 }

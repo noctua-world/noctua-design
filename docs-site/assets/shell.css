@@ -1537,3 +1537,90 @@ a {
   padding-block: var(--noctua-space-4);
   color: var(--nc-color-fg);
 }
+
+/* The rule between the foundations block and the component list.
+   
+   A separator, not a heading: §9.10 closes on "all components in alphabetical
+   order, with no categories", and a label above them would be a category. What
+   is above the rule is not a component, which is the only thing being said. */
+.nd-nav-item--group {
+  margin-block-start: var(--noctua-space-4);
+  padding-block-start: var(--noctua-space-4);
+  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+/* --- A component's page: every variant, and the contract ----------------- */
+
+.nd-variant {
+  margin-block-start: var(--noctua-space-section);
+}
+
+/* Wraps rather than scrolls: a row of variants that runs off the side is a row
+   whose last variant nobody sees. */
+.nd-variant-row {
+  margin-block-start: var(--noctua-space-gap);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--noctua-space-8);
+}
+
+.nd-variant-item {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-tight);
+  /* The stage is as wide as it needs to be, and no wider: two variants that
+     differ only in size have to be comparable side by side. */
+  flex: 0 1 auto;
+  min-inline-size: 0;
+}
+
+.nd-variant-stage > * {
+  margin: 0;
+}
+
+.nd-variant-label {
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+/* --- The contract tables ------------------------------------------------- */
+
+.nd-table {
+  margin-block-start: var(--noctua-space-gap);
+  inline-size: 100%;
+  border-collapse: collapse;
+  text-align: start;
+  /* The only element on a page that legitimately overflows sideways. It scrolls
+     in its own box rather than making the page scroll, which is the rule the
+     whole site keeps: the body never scrolls horizontally. */
+  display: block;
+  overflow-x: auto;
+}
+
+.nd-table th,
+.nd-table td {
+  padding: var(--noctua-space-2) var(--noctua-space-3) var(--noctua-space-2) 0;
+  border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
+  vertical-align: baseline;
+  text-align: start;
+}
+
+.nd-table th {
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-semibold);
+  letter-spacing: var(--noctua-tracking-caps);
+  text-transform: uppercase;
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-table td {
+  font-size: var(--noctua-size-small);
+}
+
+/* Values sit in a row and wrap; a column of one-word cells reads as a list of
+   unrelated things rather than as one prop's alternatives. */
+.nd-type {
+  margin-inline-end: var(--noctua-space-1);
+}
