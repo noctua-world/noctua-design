@@ -9,19 +9,11 @@
 import { test, expect } from "@playwright/test";
 import { ANY, LOCALES, PAGE, url } from "./pages.js";
 
-// ⚠️ THE EXAMPLE FRAME IS GONE, AND THESE FIVE ARE WAITING FOR IT.
-//
-// It lived on `/components/` — the single hand-written page that has been
-// replaced by one page per component — and it went with that page. What it did
-// is not obsolete: `NOCTUA.md §9.3` Leg 4 requires the React implementation to
-// load lazily when a reader asks for it, and §9.10 requires one frame
-// abstraction owning the mount point, the implementation swap, the viewport
-// controls and the code panel.
-//
-// They are `fixme` rather than deleted BECAUSE they are the specification of
-// something that must come back. `ExampleFrame` is the component that brings
-// it, and it is one of the five the shell is being rebuilt out of. Deleting
-// these would delete the only written record of what the frame has to do.
+// The frame lives on the scoped-themes page now, which is where `ThemeScope`
+// is documented and where the React module has always mounted it. It went away
+// for one commit with the single "Components" page it used to sit on; these
+// five were `fixme` rather than deleted in the meantime, because they were the
+// only written record of what it has to do.
 
 
 const requests = (page) =>
@@ -29,24 +21,24 @@ const requests = (page) =>
     performance.getEntriesByType("resource").filter((r) => r.name.includes("example-react")).length,
   );
 
-test.fixme("the React bundle is not fetched on a normal page view", async ({ page }) => {
-  await page.goto("/en/components/");
+test("the React bundle is not fetched on a normal page view", async ({ page }) => {
+  await page.goto("/en/scoped-themes/");
   await page.waitForLoadState("networkidle");
   // 190 KB that most readers never need. A lazy path that loads eagerly is not
   // a lazy path; it is a lazy path with a bug nobody notices.
   expect(await requests(page)).toBe(0);
 });
 
-test.fixme("switching to React fetches it once and mounts the same theme", async ({ page }) => {
-  await page.goto("/en/components/");
+test("switching to React fetches it once and mounts the same theme", async ({ page }) => {
+  await page.goto("/en/scoped-themes/");
   const dioxus = page.locator("[data-nd-frame-stage] > [data-noctua-scope]");
   const expected = {
     palette: await dioxus.getAttribute("data-palette"),
     theme: await dioxus.getAttribute("data-theme"),
   };
 
-  await page.locator(".nd-code-summary").click();
-  await page.locator('[data-nd-impl="React"]').click();
+  await page.locator(".nd-code .nd-disclosure-summary").click();
+  await page.locator('[data-nd-setting="frame-impl"] [data-nd-value="React"]').click();
   await expect(page.locator("[data-nd-react-slot] [data-noctua-scope]")).toBeVisible();
 
   expect(await requests(page)).toBe(1);
@@ -59,40 +51,40 @@ test.fixme("switching to React fetches it once and mounts the same theme", async
   await expect(dioxus).toBeHidden();
 
   // And switching again does not fetch it a second time.
-  await page.locator('[data-nd-impl="Dioxus"]').click();
-  await page.locator('[data-nd-impl="React"]').click();
+  await page.locator('[data-nd-setting="frame-impl"] [data-nd-value="Dioxus"]').click();
+  await page.locator('[data-nd-setting="frame-impl"] [data-nd-value="React"]').click();
   expect(await requests(page)).toBe(1);
 });
 
-test.fixme("switching back unmounts React rather than hiding it", async ({ page }) => {
-  await page.goto("/en/components/");
-  await page.locator(".nd-code-summary").click();
-  await page.locator('[data-nd-impl="React"]').click();
+test("switching back unmounts React rather than hiding it", async ({ page }) => {
+  await page.goto("/en/scoped-themes/");
+  await page.locator(".nd-code .nd-disclosure-summary").click();
+  await page.locator('[data-nd-setting="frame-impl"] [data-nd-value="React"]').click();
   await expect(page.locator("[data-nd-react-slot] [data-noctua-scope]")).toBeVisible();
 
-  await page.locator('[data-nd-impl="Dioxus"]').click();
+  await page.locator('[data-nd-setting="frame-impl"] [data-nd-value="Dioxus"]').click();
   // A live React root behind a hidden div keeps its state and its effects, and
   // the next switch would show a component that had been running all along.
   await expect(page.locator("[data-nd-react-slot] [data-noctua-scope]")).toHaveCount(0);
   await expect(page.locator("[data-nd-frame-stage] > [data-noctua-scope]")).toBeVisible();
 });
 
-test.fixme("the code panel shows the implementation that is mounted", async ({ page }) => {
-  await page.goto("/en/components/");
-  await page.locator(".nd-code-summary").click();
+test("the code panel shows the implementation that is mounted", async ({ page }) => {
+  await page.goto("/en/scoped-themes/");
+  await page.locator(".nd-code .nd-disclosure-summary").click();
   await expect(page.locator('[data-nd-impl-source="Dioxus"]')).toBeVisible();
 
-  await page.locator('[data-nd-impl="React"]').click();
+  await page.locator('[data-nd-setting="frame-impl"] [data-nd-value="React"]').click();
   await expect(page.locator('[data-nd-impl-source="React"]')).toBeVisible();
   await expect(page.locator('[data-nd-impl-source="Dioxus"]')).toBeHidden();
 });
 
-test.fixme("the width control resizes the stage and nothing else", async ({ page }) => {
-  await page.goto("/en/components/");
+test("the width control resizes the stage and nothing else", async ({ page }) => {
+  await page.goto("/en/scoped-themes/");
   const stage = page.locator("[data-nd-frame-stage]");
   const full = (await stage.boundingBox()).width;
 
-  await page.locator('[data-nd-frame-width="narrow"]').click();
+  await page.locator('[data-nd-setting="frame-width"] [data-nd-value="narrow"]').click();
   await page.waitForTimeout(250);
   const narrow = (await stage.boundingBox()).width;
   expect(narrow).toBeLessThan(full);

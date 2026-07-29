@@ -8,8 +8,9 @@
 use dioxus::prelude::*;
 use noctua_design::ThemeScope;
 use noctua_design::components::{
-    Code, CodeTone, Heading, HeadingLevel, HeadingSize, Kbd, List, ListItem, ListKind, ListSpacing,
-    Paragraph, ParagraphTone, Text, TextSize, TextTone, TextWeight, VisuallyHidden,
+    Choice, ChoiceOption, Code, CodeBlock, CodeTone, Disclosure, Heading, HeadingLevel,
+    HeadingSize, Kbd, List, ListItem, ListKind, ListSpacing, Paragraph, ParagraphTone, Text,
+    TextSize, TextTone, TextWeight, VisuallyHidden,
 };
 use noctua_design::model::{Glass, Mode, Palette, Radius};
 use noctua_design::{Icon, IconName, IconSize};
@@ -40,6 +41,123 @@ pub(crate) fn Body(context: Context) -> Element {
         }
     }
 }
+
+// --- The example frame ------------------------------------------------------
+
+/// One frame, hosting one example, in either implementation.
+///
+/// # Why it is the site's and not the design system's
+///
+/// `NOCTUA.md §9.10` calls it "one abstraction" owning the mount point, the
+/// implementation swap, the viewport controls and the code panel. Every one of
+/// those is documentation apparatus: lazily importing a React bundle to prove
+/// two packages agree is a thing a docs site does, not a thing a design system
+/// ships to its consumers. What it is BUILT from is components — `Choice` for
+/// both control groups, `Disclosure` for the code panel — which is the part
+/// that mattered.
+///
+/// # What it proves
+///
+/// `NOCTUA.md §9.3` Leg 4: the two implementations are generated from one
+/// table, so their prop surfaces agree by construction — but "the same props"
+/// is not "the same behaviour", and the only way to show the second is to mount
+/// both and compare what they put in the DOM. The React half is never fetched
+/// on a normal page view; `shell.js` imports it the first time a reader asks.
+#[component]
+fn ExampleFrame(context: Context, children: Element) -> Element {
+    let widths = [
+        ("narrow", Key::ExampleWidthNarrow),
+        ("medium", Key::ExampleWidthMedium),
+        ("full", Key::ExampleWidthFull),
+    ];
+    let implementations = [
+        ("Dioxus", Key::ExampleImplDioxus),
+        ("React", Key::ExampleImplReact),
+    ];
+    rsx! {
+        figure {
+            class: "nd-frame",
+            "data-nd-frame": "",
+            // The loading message lives on the frame rather than on each
+            // option: `ChoiceOption` takes the props its contract declares and
+            // no others, which is the point of it having a contract.
+            "data-nd-loading": context.t(Key::ExampleImplLoading),
+            div { class: "nd-frame-bar",
+                Choice {
+                    class: "nd-frame-widths",
+                    name: "frame-width",
+                    label: context.t(Key::ExampleLabel),
+                    for (value, label) in widths {
+                        ChoiceOption {
+                            class: "nd-option",
+                            value,
+                            label: context.t(label),
+                            selected: value == "full",
+                        }
+                    }
+                }
+                Choice {
+                    class: "nd-frame-impls",
+                    name: "frame-impl",
+                    label: context.t(Key::ExampleImplLabel),
+                    for (value, label) in implementations {
+                        ChoiceOption {
+                            class: "nd-option",
+                            value,
+                            label: context.t(label),
+                            selected: value == "Dioxus",
+                        }
+                    }
+                }
+                button { class: "nd-option", r#type: "button", "data-nd-frame-reset": "",
+                    "{context.t(Key::ExampleReset)}"
+                }
+            }
+            div { class: "nd-frame-stage", "data-nd-frame-stage": "", "data-nd-width": "full",
+                {children}
+            }
+            Disclosure {
+                class: "nd-code",
+                summary: context.t(Key::ExampleCodeShow),
+                div { class: "nd-code-body",
+                    for (implementation, source) in [
+                        ("Dioxus", DIOXUS_SOURCE),
+                        ("React", REACT_SOURCE),
+                    ] {
+                        div {
+                            "data-nd-impl-source": "{implementation}",
+                            hidden: implementation != "Dioxus",
+                            CodeBlock { "{source}" }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// The Dioxus call that produced what the frame is showing.
+///
+/// A literal, and deliberately: it is the source a reader would copy, and
+/// deriving it from the props would produce something that renders the same
+/// thing and reads like nothing anybody would write.
+const DIOXUS_SOURCE: &str = r"ThemeScope {
+    palette: Palette::AzureVivid,
+    mode: Mode::Light,
+    glass: Glass::Full,
+    radius: Radius::Round,
+    Sample {}
+}";
+
+/// The React call, which is the same call.
+const REACT_SOURCE: &str = r#"<ThemeScope
+  palette="azure-vivid"
+  mode="light"
+  glass="full"
+  radius="round"
+>
+  <Sample />
+</ThemeScope>"#;
 
 // --- The page the whole design is for --------------------------------------
 
@@ -89,6 +207,23 @@ fn ScopedThemes(context: Context) -> Element {
         }
 
         p { class: "nd-prose nd-note", "{context.t(Key::ScopeNote)}" }
+
+        // The same scope again, in a frame that can mount it in EITHER
+        // implementation. Two packages generated from one table have identical
+        // prop surfaces by construction; that they behave identically is a
+        // different claim, and this is the only place it is shown rather than
+        // asserted (`NOCTUA.md §9.3` Leg 4).
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ExampleLabel)}" }
+        ExampleFrame { context,
+            ThemeScope {
+                class: "nd-scope",
+                palette: Palette::AzureVivid,
+                mode: Mode::Light,
+                glass: Glass::Full,
+                radius: Radius::Round,
+                Sample { context }
+            }
+        }
 
         // `ThemeScope` is the one component with no `spec/components/*.toml`:
         // its props ARE `spec/theme.toml`'s scopable settings, and a second

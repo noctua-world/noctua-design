@@ -156,6 +156,12 @@ generates the component's body from the same three facts, so the page cannot
 show something the component does not. Every value of every enum prop appears
 by construction; there is no example to author and none to forget.
 
+**The example frame is the site's, not the system's.** It composes `Choice`
+and `Disclosure`, and what it does — lazily importing a React bundle to prove
+two packages agree — is documentation apparatus rather than something a design
+system ships to its consumers. It lives on the scoped-themes page, where
+`ThemeScope` is documented and where the React module has always mounted it.
+
 The site's own scope and limits are in `docs-site/PROVISIONAL.md`. Read that
 before adding a page.
 

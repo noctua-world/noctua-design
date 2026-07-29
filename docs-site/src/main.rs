@@ -473,7 +473,10 @@ mod tests {
         // Matched with the `=""` rather than on the bare name: the attribute is
         // also one of the searchable names in the sidebar, and counting the
         // string alone made this test fail the moment search learned about it.
-        assert_eq!(html.matches("data-noctua-scope=\"\"").count(), 2, "{html}");
+        // Three now: the demo scope, the scope nested inside it, and the one
+        // in the example frame — which is the same scope again, in a frame that
+        // can mount it in either implementation.
+        assert_eq!(html.matches("data-noctua-scope=\"\"").count(), 3, "{html}");
         assert!(html.contains("data-palette=\"azure-vivid\""));
         assert!(html.contains("data-palette=\"rose-sober\""));
     }

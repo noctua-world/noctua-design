@@ -84,7 +84,11 @@ function store(name, value) {
 
 /** Applies one setting to `<html>` and remembers it. */
 function apply(name, value) {
-  if (!model[name].values.includes(value)) return;
+  // A `Choice` the theme model knows nothing about is not this handler's
+  // business — the example frame has two, and they are page state rather than
+  // a stored preference. Without this guard `model[name]` is `undefined` and
+  // every click on one throws.
+  if (!model[name]?.values.includes(value)) return;
   store(name, value);
   stamp(root, name, value);
 
@@ -505,7 +509,7 @@ async function showReact(frame, button) {
   if (!original) return;
 
   const label = button.textContent;
-  button.textContent = button.dataset.ndLoading ?? label;
+  button.textContent = frame.dataset.ndLoading ?? label;
   let module;
   try {
     module = await loadReact();
@@ -553,12 +557,12 @@ function showDioxus(frame) {
 }
 
 document.addEventListener("click", (event) => {
-  const button = event.target.closest?.("[data-nd-impl]");
+  const button = event.target.closest?.('[data-nd-setting="frame-impl"] [data-nd-value]');
   if (!button) return;
   const frame = button.closest("[data-nd-frame]");
-  const language = button.dataset.ndImpl;
+  const language = button.dataset.ndValue;
 
-  for (const other of frame.querySelectorAll("[data-nd-impl]")) {
+  for (const other of frame.querySelectorAll('[data-nd-setting="frame-impl"] [data-nd-value]')) {
     other.setAttribute("aria-checked", String(other === button));
   }
   for (const source of frame.querySelectorAll("[data-nd-impl-source]")) {
@@ -575,12 +579,12 @@ document.addEventListener("click", (event) => {
 // --- The example frame -----------------------------------------------------
 
 document.addEventListener("click", (event) => {
-  const width = event.target.closest?.("[data-nd-frame-width]");
+  const width = event.target.closest?.('[data-nd-setting="frame-width"] [data-nd-value]');
   if (width) {
     const frame = width.closest("[data-nd-frame]");
     frame.querySelector("[data-nd-frame-stage]").dataset.ndWidth =
-      width.dataset.ndFrameWidth;
-    for (const button of frame.querySelectorAll("[data-nd-frame-width]")) {
+      width.dataset.ndValue;
+    for (const button of frame.querySelectorAll('[data-nd-setting="frame-width"] [data-nd-value]')) {
       button.setAttribute("aria-checked", String(button === width));
     }
     return;
@@ -590,10 +594,10 @@ document.addEventListener("click", (event) => {
   if (reset) {
     const frame = reset.closest("[data-nd-frame]");
     frame.querySelector("[data-nd-frame-stage]").dataset.ndWidth = "full";
-    for (const button of frame.querySelectorAll("[data-nd-frame-width]")) {
+    for (const button of frame.querySelectorAll('[data-nd-setting="frame-width"] [data-nd-value]')) {
       button.setAttribute(
         "aria-checked",
-        String(button.dataset.ndFrameWidth === "full"),
+        String(button.dataset.ndValue === "full"),
       );
     }
     // A scope inside the frame goes back to the theme it was built with, and
@@ -602,8 +606,8 @@ document.addEventListener("click", (event) => {
       requests.set(element, {});
     }
     showDioxus(frame);
-    for (const impl of frame.querySelectorAll("[data-nd-impl]")) {
-      impl.setAttribute("aria-checked", String(impl.dataset.ndImpl === "Dioxus"));
+    for (const impl of frame.querySelectorAll('[data-nd-setting="frame-impl"] [data-nd-value]')) {
+      impl.setAttribute("aria-checked", String(impl.dataset.ndValue === "Dioxus"));
     }
     resolveScopes();
   }
