@@ -151,6 +151,7 @@ export type MessageKey =
   | "component.del.summary"
   | "component.em.summary"
   | "component.heading.summary"
+  | "component.icon-button.summary"
   | "component.ins.summary"
   | "component.kbd.summary"
   | "component.link.summary"

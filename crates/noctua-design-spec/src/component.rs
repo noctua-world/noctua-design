@@ -95,6 +95,14 @@ pub struct Meta {
     #[serde(default)]
     pub class: Option<String>,
 
+    /// What a component's page puts inside it, when a pangram would be wrong.
+    ///
+    /// A button holding "Sphinx of black quartz, judge my vow" demonstrates
+    /// nothing about the button. Blank means the page picks: a sentence for
+    /// block elements, the component's own name for inline ones.
+    #[serde(default)]
+    pub specimen: Option<String>,
+
     /// One sentence for the documentation page, in English.
     ///
     /// Not an i18n key: this is developer-facing reference text about an API,

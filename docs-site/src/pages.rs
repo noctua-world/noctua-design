@@ -369,11 +369,39 @@ fn specimen_markup(
         component.element,
         "p" | "div" | "blockquote" | "ul" | "ol" | "dl" | "h1" | "h2" | "h3" | "h4" | "pre"
     );
-    let content = if block { SPECIMEN } else { component.name };
+    // A specimen that names an icon becomes that icon. `IconName::parse` exists
+    // for exactly this — the documentation page and the tests — which is why it
+    // is not `FromStr`: nothing in an interface reaches an icon by name.
+    let icon = component.specimen.and_then(IconName::parse);
+    let content = component
+        .specimen
+        .unwrap_or(if block { SPECIMEN } else { component.name });
     let class = component
         .class
         .map(|class| format!(" class=\"{class}\""))
         .unwrap_or_default();
+    if let Some(icon) = icon {
+        return format!(
+            "<{element}{class} data-nd-{attribute}=\"{value}\">\
+             <svg class=\"nd-icon-glyph\" viewBox=\"{view_box}\" width=\"1em\" height=\"1em\" \
+             fill=\"{fill}\" stroke=\"{stroke}\" stroke-width=\"1.75\" stroke-linecap=\"round\" \
+             stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\">{body}</svg>\
+             </{element}>",
+            element = component.element,
+            view_box = icon.view_box(),
+            fill = if icon.filled() {
+                "currentColor"
+            } else {
+                "none"
+            },
+            stroke = if icon.filled() {
+                "none"
+            } else {
+                "currentColor"
+            },
+            body = icon.body(),
+        );
+    }
     format!(
         "<{element}{class} data-nd-{attribute}=\"{value}\">{content}</{element}>",
         element = component.element,

@@ -66,6 +66,8 @@ pub(crate) struct DocComponent {
     pub class: Option<&'static str>,
     /// When to reach for it, in English — API reference, like a doc comment.
     pub guidance: &'static str,
+    /// What a variant shows inside it, when the page's own choice is wrong.
+    pub specimen: Option<&'static str>,
     /// Every prop, in declaration order.
     pub props: &'static [DocProp],
     /// Every state.
@@ -81,7 +83,7 @@ pub(crate) struct DocComponent {
 }
 
 /// Every component, in the order `spec/components/` is read.
-pub(crate) const COMPONENTS: [DocComponent; 20] = [
+pub(crate) const COMPONENTS: [DocComponent; 21] = [
     DocComponent {
         name: "Abbr",
         slug: "abbr",
@@ -89,6 +91,7 @@ pub(crate) const COMPONENTS: [DocComponent; 20] = [
         element: "abbr",
         class: Some("nd-abbr"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "title",
@@ -124,6 +127,7 @@ convenience for pointer users, never the only route to the meaning.",
         element: "blockquote",
         class: Some("nd-blockquote"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "cite",
@@ -166,6 +170,7 @@ convenience for pointer users, never the only route to the meaning.",
         element: "code",
         class: Some("nd-code-inline"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "tone",
@@ -199,6 +204,7 @@ convenience for pointer users, never the only route to the meaning.",
         element: "pre",
         class: Some("nd-codeblock"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "language",
@@ -262,6 +268,7 @@ succeeds is a button a screen-reader user cannot trust.",
         element: "del",
         class: Some("nd-del"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "cite",
@@ -306,6 +313,7 @@ saying so.",
         element: "em",
         class: Some("nd-em"),
         guidance: "",
+        specimen: None,
         props: &[DocProp {
             name: "children",
             kind: "children",
@@ -330,6 +338,7 @@ the other's meaning misreads the sentence.",
         element: "h2",
         class: Some("nd-heading"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "level",
@@ -377,12 +386,128 @@ that a screen-reader user navigating by heading falls straight through. Choose
 the level from the document and the size from the design.",
     },
     DocComponent {
+        name: "IconButton",
+        slug: "icon-button",
+        summary: Key::ComponentIconButtonSummary,
+        element: "button",
+        class: Some("nd-icon-button"),
+        guidance: "",
+        specimen: Some("settings"),
+        props: &[
+            DocProp {
+                name: "icon",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: None,
+                required: true,
+                doc: "Which icon. An `IconName` in Rust and the icon-name union in TypeScript, so a name that is not an icon does not compile.",
+            },
+            DocProp {
+                name: "label",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: None,
+                required: true,
+                doc: "Its accessible name. REQUIRED, and that is the whole point of this component existing: an icon-only control with no name announces nothing but its role, and the site shipped one.",
+            },
+            DocProp {
+                name: "size",
+                kind: "enum",
+                values: &["medium", "large"],
+                default: Some("medium"),
+                attribute: Some("data-nd-size"),
+                required: false,
+                doc: "The control's box. Both clear WCAG 2.5.8's 24px minimum; `large` meets the 44px enhanced target.",
+            },
+            DocProp {
+                name: "tone",
+                kind: "enum",
+                values: &["quiet", "plain"],
+                default: Some("quiet"),
+                attribute: Some("data-nd-tone"),
+                required: false,
+                doc: "How much the control asks for. `quiet` fills on hover; `plain` never does.",
+            },
+            DocProp {
+                name: "href",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: None,
+                required: false,
+                doc: "Renders an `<a>` instead of a `<button>`. A control that navigates is a link, whatever it looks like — and a link is what the middle mouse button, the context menu and a screen reader's link list all expect.",
+            },
+            DocProp {
+                name: "rel",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: Some("rel"),
+                required: false,
+                doc: "The link relationship, for the `href` form. `noreferrer` on anything leaving the site.",
+            },
+            DocProp {
+                name: "pressed",
+                kind: "bool",
+                values: &[],
+                default: None,
+                attribute: Some("aria-pressed"),
+                required: false,
+                doc: "For a toggle. Sets `aria-pressed`, which is what makes it a toggle rather than a button that happens to look different afterwards.",
+            },
+            DocProp {
+                name: "expanded",
+                kind: "bool",
+                values: &[],
+                default: None,
+                attribute: Some("aria-expanded"),
+                required: false,
+                doc: "For a disclosure trigger. Pair it with `controls`.",
+            },
+            DocProp {
+                name: "controls",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: Some("aria-controls"),
+                required: false,
+                doc: "The id of what this control opens or governs.",
+            },
+            DocProp {
+                name: "disabled",
+                kind: "bool",
+                values: &[],
+                default: None,
+                attribute: Some("disabled"),
+                required: false,
+                doc: "Refuses interaction. Never used on the `href` form: a disabled link is not a thing, and the correct shape is to not render the link.",
+            },
+        ],
+        states: &[],
+        keyboard: &[
+            DocKey {
+                key: "Enter",
+                action: "Activates it.",
+            },
+            DocKey {
+                key: "Space",
+                action: "Activates it. A `<button>` answers both; the `href` form answers Enter only, which is what a link does.",
+            },
+        ],
+        role: None,
+        needs_name: true,
+        a11y_notes: "`label` is required, so this component cannot be constructed without an accessible name. The icon inside is `aria-hidden`: it repeats the label, and a screen reader announcing both says the same thing twice.",
+    },
+    DocComponent {
         name: "Ins",
         slug: "ins",
         summary: Key::ComponentInsSummary,
         element: "ins",
         class: Some("nd-ins"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "cite",
@@ -425,6 +550,7 @@ the level from the document and the size from the design.",
         element: "kbd",
         class: Some("nd-kbd"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "size",
@@ -458,6 +584,7 @@ the level from the document and the size from the design.",
         element: "a",
         class: Some("nd-a"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "href",
@@ -512,6 +639,7 @@ decorative and the destination is announced.",
         element: "ul",
         class: Some("nd-list"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "kind",
@@ -565,6 +693,7 @@ otherwise a styled list stops announcing how many items it has.",
         element: "li",
         class: Some("nd-list-item"),
         guidance: "",
+        specimen: None,
         props: &[DocProp {
             name: "children",
             kind: "children",
@@ -587,6 +716,7 @@ otherwise a styled list stops announcing how many items it has.",
         element: "mark",
         class: Some("nd-mark"),
         guidance: "",
+        specimen: None,
         props: &[DocProp {
             name: "children",
             kind: "children",
@@ -611,6 +741,7 @@ the text weight.",
         element: "p",
         class: Some("nd-paragraph"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "size",
@@ -653,6 +784,7 @@ the text weight.",
         element: "div",
         class: Some("nd-prose-block"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "measure",
@@ -686,6 +818,7 @@ the text weight.",
         element: "strong",
         class: Some("nd-strong"),
         guidance: "",
+        specimen: None,
         props: &[DocProp {
             name: "children",
             kind: "children",
@@ -708,6 +841,7 @@ the text weight.",
         element: "span",
         class: Some("nd-text"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "size",
@@ -768,6 +902,7 @@ the text weight.",
         element: "time",
         class: Some("nd-time"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "datetime",
@@ -802,6 +937,7 @@ reader's language — not an ISO string. `datetime` is for machines only.",
         element: "span",
         class: Some("nd-truncate"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "lines",
@@ -846,6 +982,7 @@ announcement hides content from exactly the readers who cannot see the ellipsis.
         element: "span",
         class: Some("nd-visually-hidden"),
         guidance: "",
+        specimen: None,
         props: &[
             DocProp {
                 name: "focusable",

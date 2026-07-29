@@ -20,6 +20,7 @@ use noctua_design_spec::{Catalogue, Component, Fonts, Manifest, Spec, Theme, Ven
 
 pub mod appearance;
 pub mod component;
+pub mod controls;
 pub mod css;
 pub mod docs;
 pub mod fonts;

@@ -1,0 +1,75 @@
+[meta]
+name = "IconButton"
+element = "button"
+class = "nd-icon-button"
+summary = "A control whose only content is an icon, and which therefore must be named."
+specimen = "settings"
+
+# The prop surface is generated from this file like every other component's, so
+# the two implementations cannot disagree about it. The BODY is written in
+# `crates/noctua-design-emit/src/controls.rs`, because a control that renders an
+# `Icon`, switches between `<button>` and `<a>`, and wires four ARIA attributes
+# is not a thing `meta.element` plus attributes can say — the same reason
+# `ThemeScope` and `Icon` have emitters of their own rather than an entry in a
+# generic one.
+
+[prop.icon]
+type = "text"
+required = true
+doc = "Which icon. An `IconName` in Rust and the icon-name union in TypeScript, so a name that is not an icon does not compile."
+
+[prop.label]
+type = "text"
+required = true
+doc = "Its accessible name. REQUIRED, and that is the whole point of this component existing: an icon-only control with no name announces nothing but its role, and the site shipped one."
+
+[prop.size]
+type = "enum"
+values = ["medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The control's box. Both clear WCAG 2.5.8's 24px minimum; `large` meets the 44px enhanced target."
+
+[prop.tone]
+type = "enum"
+values = ["quiet", "plain"]
+default = "quiet"
+attribute = "data-nd-tone"
+doc = "How much the control asks for. `quiet` fills on hover; `plain` never does."
+
+[prop.href]
+type = "text"
+doc = "Renders an `<a>` instead of a `<button>`. A control that navigates is a link, whatever it looks like — and a link is what the middle mouse button, the context menu and a screen reader's link list all expect."
+
+[prop.rel]
+type = "text"
+attribute = "rel"
+doc = "The link relationship, for the `href` form. `noreferrer` on anything leaving the site."
+
+[prop.pressed]
+type = "bool"
+attribute = "aria-pressed"
+doc = "For a toggle. Sets `aria-pressed`, which is what makes it a toggle rather than a button that happens to look different afterwards."
+
+[prop.expanded]
+type = "bool"
+attribute = "aria-expanded"
+doc = "For a disclosure trigger. Pair it with `controls`."
+
+[prop.controls]
+type = "text"
+attribute = "aria-controls"
+doc = "The id of what this control opens or governs."
+
+[prop.disabled]
+type = "bool"
+attribute = "disabled"
+doc = "Refuses interaction. Never used on the `href` form: a disabled link is not a thing, and the correct shape is to not render the link."
+
+[a11y]
+needs_name = true
+notes = "`label` is required, so this component cannot be constructed without an accessible name. The icon inside is `aria-hidden`: it repeats the label, and a screen reader announcing both says the same thing twice."
+
+[keyboard]
+Enter = "Activates it."
+Space = "Activates it. A `<button>` answers both; the `href` form answers Enter only, which is what a link does."

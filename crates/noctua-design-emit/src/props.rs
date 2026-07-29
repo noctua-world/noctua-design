@@ -18,6 +18,7 @@ use std::fmt::Write as _;
 
 use noctua_design_spec::component::{Component, Kind, Prop};
 
+use crate::controls;
 use crate::{COMPONENT_SPEC, CommentStyle, EmittedFile, camel, header_from, identifier};
 
 /// Emits every component in both languages, plus each package's module index.
@@ -56,7 +57,9 @@ fn dioxus(component: &Component) -> String {
     let mut out = header_from(CommentStyle::Line("//!"), COMPONENT_SPEC);
     let name = &component.meta.name;
     writeln!(out, "//!\n//! {}\n", component.meta.summary).expect("write");
-    out.push_str("use dioxus::prelude::*;\n\n");
+    out.push_str("use dioxus::prelude::*;\n");
+    out.push_str(&controls::dioxus_imports(component));
+    out.push('\n');
 
     for (prop_name, prop) in component.attributes() {
         if prop.kind == Kind::Enum {
@@ -76,7 +79,8 @@ fn dioxus(component: &Component) -> String {
 
     for (prop_name, prop) in component.attributes() {
         writeln!(out, "    /// {}", prop.doc).expect("write");
-        let ty = rust_type(name, prop_name, prop);
+        let ty = controls::dioxus_type(component, prop_name)
+            .map_or_else(|| rust_type(name, prop_name, prop), str::to_owned);
         if prop.default.is_some() || prop.kind == Kind::Bool {
             writeln!(
                 out,
@@ -84,6 +88,11 @@ fn dioxus(component: &Component) -> String {
                 identifier(prop_name)
             )
             .expect("write");
+        } else if prop.required {
+            // Not `Option`. A required prop is the point of `required`: an
+            // `IconButton` with no label must not be a thing a caller can
+            // construct, and the site shipped one that was.
+            writeln!(out, "    {}: {ty},", identifier(prop_name)).expect("write");
         } else {
             writeln!(out, "    {}: Option<{ty}>,", identifier(prop_name)).expect("write");
         }
@@ -97,7 +106,12 @@ fn dioxus(component: &Component) -> String {
     }
     out.push_str(") -> Element {\n");
 
-    rust_body(&mut out, component);
+    if controls::is_custom(component) {
+        controls::dioxus_body(&mut out, component);
+        out.push_str("}\n");
+    } else {
+        rust_body(&mut out, component);
+    }
     out
 }
 
@@ -262,6 +276,12 @@ fn react(component: &Component) -> String {
     )
     .expect("write");
 
+    if controls::is_custom(component) {
+        controls::react_body(&mut out, component);
+        out.push_str("}\n");
+        return out;
+    }
+
     for (prop_name, prop) in component.attributes() {
         if let Some(default) = &prop.default {
             writeln!(
@@ -317,7 +337,9 @@ fn react(component: &Component) -> String {
 fn react_types(component: &Component) -> String {
     let mut out = header_from(CommentStyle::Line("//"), COMPONENT_SPEC);
     let name = &component.meta.name;
-    out.push_str("\nimport type { ReactNode } from \"react\";\n\n");
+    out.push_str("\nimport type { ReactNode } from \"react\";\n");
+    out.push_str(&controls::typescript_imports(component));
+    out.push('\n');
 
     for (prop_name, prop) in component.attributes() {
         if prop.kind != Kind::Enum {
@@ -339,12 +361,18 @@ fn react_types(component: &Component) -> String {
     writeln!(out, "\nexport interface {name}Props {{").expect("write");
     for (prop_name, prop) in component.attributes() {
         writeln!(out, "  /** {} */", prop.doc).expect("write");
-        let ty = match prop.kind {
-            Kind::Enum => format!("{name}{}", pascal(prop_name)),
-            Kind::Bool => "boolean".to_owned(),
-            _ => "string".to_owned(),
-        };
-        writeln!(out, "  {}?: {ty};", camel(prop_name)).expect("write");
+        let ty = controls::typescript_type(component, prop_name).map_or_else(
+            || match prop.kind {
+                Kind::Enum => format!("{name}{}", pascal(prop_name)),
+                Kind::Bool => "boolean".to_owned(),
+                _ => "string".to_owned(),
+            },
+            str::to_owned,
+        );
+        // A required prop is not optional in TypeScript either, or the two
+        // languages disagree about whether it can be left out.
+        let optional = if prop.required { "" } else { "?" };
+        writeln!(out, "  {}{optional}: {ty};", camel(prop_name)).expect("write");
     }
     out.push_str("  className?: string;\n");
     if component.takes_children() {

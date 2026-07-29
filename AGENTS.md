@@ -125,7 +125,20 @@ model, the message catalogue, `ThemeScope` in both packages, and a documentation
 site pre-rendered in three locales. `cargo xtask check` is still the single gate,
 and `cargo xtask docs` builds the site.
 
-**Twenty text components, plus `ThemeScope` and `Icon`.** Every one of them is
+**A component whose body the contract cannot describe gets its own emitter.**
+`props.rs` derives a body from three facts — the element, the root class, and
+the attribute each prop becomes — which covers every text component. A control
+that renders another component inside itself, switches its own element, or
+wires ARIA that is not a one-to-one mapping of a prop does not fit, and
+`crates/noctua-design-emit/src/controls.rs` writes its body instead. The PROP
+SURFACE is still generated from the spec, and both bodies are written in one
+file side by side, so the two implementations still cannot drift.
+
+`required` on a prop is not documentation. It removes the `Option` in Rust and
+the `?` in TypeScript, which is how `IconButton` cannot be built without an
+accessible name — the defect it exists to make unrepresentable.
+
+**Twenty-one components, plus `ThemeScope` and `Icon`.** Every one of them is
 generated from `spec/`, which is the parity mechanism rather than a
 convenience.
 

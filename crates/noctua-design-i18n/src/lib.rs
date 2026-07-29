@@ -406,6 +406,8 @@ pub enum Key {
     ComponentEmSummary,
     /// `component.heading.summary`
     ComponentHeadingSummary,
+    /// `component.icon-button.summary`
+    ComponentIconButtonSummary,
     /// `component.ins.summary`
     ComponentInsSummary,
     /// `component.kbd.summary`
@@ -478,7 +480,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 177] = [
+    pub const ALL: [Self; 178] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -622,6 +624,7 @@ impl Key {
         Self::ComponentDelSummary,
         Self::ComponentEmSummary,
         Self::ComponentHeadingSummary,
+        Self::ComponentIconButtonSummary,
         Self::ComponentInsSummary,
         Self::ComponentKbdSummary,
         Self::ComponentLinkSummary,
@@ -805,6 +808,7 @@ impl Key {
             Self::ComponentDelSummary => "component.del.summary",
             Self::ComponentEmSummary => "component.em.summary",
             Self::ComponentHeadingSummary => "component.heading.summary",
+            Self::ComponentIconButtonSummary => "component.icon-button.summary",
             Self::ComponentInsSummary => "component.ins.summary",
             Self::ComponentKbdSummary => "component.kbd.summary",
             Self::ComponentLinkSummary => "component.link.summary",
@@ -1047,6 +1051,9 @@ impl Locale {
                 }
                 Key::ComponentHeadingSummary => {
                     "A heading whose outline level and visual size are set independently."
+                }
+                Key::ComponentIconButtonSummary => {
+                    "A control whose only content is an icon, and which therefore must be named."
                 }
                 Key::ComponentInsSummary => "Text added to the document.",
                 Key::ComponentKbdSummary => "A key or chord, as printed on a keyboard.",
@@ -1300,6 +1307,9 @@ impl Locale {
                 }
                 Key::ComponentHeadingSummary => {
                     "Um título cujo nível na estrutura e cujo tamanho visual são escolhidos separadamente."
+                }
+                Key::ComponentIconButtonSummary => {
+                    "Um controle cujo único conteúdo é um ícone, e que por isso precisa ter um nome."
                 }
                 Key::ComponentInsSummary => "Texto acrescentado ao documento.",
                 Key::ComponentKbdSummary => {
@@ -1565,6 +1575,9 @@ impl Locale {
                 }
                 Key::ComponentHeadingSummary => {
                     "⟦AA heeaadiing whoosee oouutliinee leeveel aand viisuuaal siizee aaree seet iindeepeendeently.⟧"
+                }
+                Key::ComponentIconButtonSummary => {
+                    "⟦AA coontrool whoosee oonly coonteent iis aan iicoon, aand whiich theereefooree muust bee naameed.⟧"
                 }
                 Key::ComponentInsSummary => "⟦Teext aaddeed too thee doocuumeent.⟧",
                 Key::ComponentKbdSummary => {

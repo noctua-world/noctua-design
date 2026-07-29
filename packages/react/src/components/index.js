@@ -13,6 +13,7 @@ export { CodeBlock } from "./code_block.js";
 export { Del } from "./del.js";
 export { Em } from "./em.js";
 export { Heading } from "./heading.js";
+export { IconButton } from "./icon_button.js";
 export { Ins } from "./ins.js";
 export { Kbd } from "./kbd.js";
 export { Link } from "./link.js";

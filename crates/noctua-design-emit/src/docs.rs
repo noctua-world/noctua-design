@@ -149,6 +149,8 @@ pub(crate) struct DocComponent {
     pub class: Option<&'static str>,
     /// When to reach for it, in English — API reference, like a doc comment.
     pub guidance: &'static str,
+    /// What a variant shows inside it, when the page's own choice is wrong.
+    pub specimen: Option<&'static str>,
     /// Every prop, in declaration order.
     pub props: &'static [DocProp],
     /// Every state.
@@ -182,6 +184,11 @@ fn write_component(out: &mut String, component: &Component) {
         out,
         "        guidance: \"{}\",",
         escape(&component.guidance)
+    );
+    let _ = writeln!(
+        out,
+        "        specimen: {},",
+        option(component.meta.specimen.as_deref())
     );
 
     out.push_str("        props: &[\n");

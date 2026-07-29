@@ -20,7 +20,7 @@
 //! state to unwind.
 
 use dioxus::prelude::*;
-use noctua_design::{Icon, IconName};
+use noctua_design::{Icon, IconButton, IconName};
 use noctua_design_i18n::{Key, Locale};
 
 use crate::site::{self, Page};
@@ -62,6 +62,12 @@ pub(crate) fn Header(context: Context) -> Element {
         // `backdrop-filter` stops sampling — see shell.css.
         div { class: "nd-header-glass noctua-glass", "aria-hidden": "true" }
         header { class: "nd-header",
+            // Not an `IconButton` yet, and the reason is precise: this is a
+            // disclosure TRIGGER — it swaps its own label between two messages
+            // as the drawer opens and closes, through three script hooks. That
+            // is `Disclosure`'s contract, not `IconButton`'s, and giving
+            // `IconButton` an arbitrary-attribute escape hatch to fake it would
+            // hand every component one.
             button {
                 class: "nd-icon nd-menu",
                 r#type: "button",
@@ -76,13 +82,11 @@ pub(crate) fn Header(context: Context) -> Element {
             a { class: "nd-wordmark", href: "{home}", "{context.t(Key::AppName)}" }
             div { class: "nd-header-controls",
                 ModeControl { context }
-                a {
-                    class: "nd-icon",
+                IconButton {
+                    icon: IconName::Github,
+                    label: context.t(Key::AppRepository),
                     href: "https://github.com/noctua-world/noctua-design",
                     rel: "noreferrer",
-                    "aria-label": context.t(Key::AppRepository),
-                    title: "{context.t(Key::AppRepository)}",
-                    Icon { icon: IconName::Github }
                 }
                 LocaleSwitch { context }
                 Settings { context }
