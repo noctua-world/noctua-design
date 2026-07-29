@@ -8,6 +8,8 @@
 
 export { Abbr } from "./abbr.js";
 export { Blockquote } from "./blockquote.js";
+export { Choice } from "./choice.js";
+export { ChoiceOption } from "./choice_option.js";
 export { Code } from "./code.js";
 export { CodeBlock } from "./code_block.js";
 export { Del } from "./del.js";

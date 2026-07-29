@@ -301,6 +301,9 @@ a {
 /* Segments share one border rather than each carrying their own, so the group
    reads as one control. §9.7: siblings agree on padding and radius, and a row
    that disagrees reads as broken. */
+/* `Choice` carries `.nd-choice-group`; these are the site's own additions on
+   top of it. The component owns the role, the roving tab stop and the arrow
+   keys; the shell owns what it looks like here. */
 .nd-segmented {
   display: inline-flex;
   align-items: center;
@@ -309,7 +312,7 @@ a {
   overflow: hidden;
 }
 
-.nd-segment {
+.nd-segmented .nd-choice-option {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -323,11 +326,11 @@ a {
   cursor: pointer;
 }
 
-.nd-segment + .nd-segment {
+.nd-segment + .nd-segmented .nd-choice-option {
   border-inline-start: var(--noctua-border-hairline) solid var(--nc-color-border);
 }
 
-.nd-segment:hover {
+.nd-segmented .nd-choice-option:hover {
   color: var(--nc-color-fg);
 }
 
@@ -336,7 +339,7 @@ a {
    so the CONTROL has to be what moves. A wash and full-contrast ink rather
    than a solid accent block — a solid one reads as a button that is about to
    do something. */
-.nd-segment[aria-checked="true"] {
+.nd-segmented .nd-choice-option[aria-checked="true"] {
   color: var(--nc-color-fg);
   background: color-mix(in oklab, var(--nc-color-accent) 14%, transparent);
 }

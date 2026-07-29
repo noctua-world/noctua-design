@@ -138,7 +138,7 @@ file side by side, so the two implementations still cannot drift.
 the `?` in TypeScript, which is how `IconButton` cannot be built without an
 accessible name — the defect it exists to make unrepresentable.
 
-**Twenty-one components, plus `ThemeScope` and `Icon`.** Every one of them is
+**Twenty-three components, plus `ThemeScope` and `Icon`.** Every one of them is
 generated from `spec/`, which is the parity mechanism rather than a
 convenience.
 

@@ -146,6 +146,8 @@ export type MessageKey =
   | "scope.reset"
   | "component.abbr.summary"
   | "component.blockquote.summary"
+  | "component.choice.summary"
+  | "component.choice-option.summary"
   | "component.code.summary"
   | "component.code-block.summary"
   | "component.del.summary"

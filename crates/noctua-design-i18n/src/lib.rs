@@ -396,6 +396,10 @@ pub enum Key {
     ComponentAbbrSummary,
     /// `component.blockquote.summary`
     ComponentBlockquoteSummary,
+    /// `component.choice.summary`
+    ComponentChoiceSummary,
+    /// `component.choice-option.summary`
+    ComponentChoiceOptionSummary,
     /// `component.code.summary`
     ComponentCodeSummary,
     /// `component.code-block.summary`
@@ -480,7 +484,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 178] = [
+    pub const ALL: [Self; 180] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -619,6 +623,8 @@ impl Key {
         Self::ScopeReset,
         Self::ComponentAbbrSummary,
         Self::ComponentBlockquoteSummary,
+        Self::ComponentChoiceSummary,
+        Self::ComponentChoiceOptionSummary,
         Self::ComponentCodeSummary,
         Self::ComponentCodeBlockSummary,
         Self::ComponentDelSummary,
@@ -803,6 +809,8 @@ impl Key {
             Self::ScopeReset => "scope.reset",
             Self::ComponentAbbrSummary => "component.abbr.summary",
             Self::ComponentBlockquoteSummary => "component.blockquote.summary",
+            Self::ComponentChoiceSummary => "component.choice.summary",
+            Self::ComponentChoiceOptionSummary => "component.choice-option.summary",
             Self::ComponentCodeSummary => "component.code.summary",
             Self::ComponentCodeBlockSummary => "component.code-block.summary",
             Self::ComponentDelSummary => "component.del.summary",
@@ -1041,6 +1049,10 @@ impl Locale {
                 Key::ScopeReset => "Reset both",
                 Key::ComponentAbbrSummary => "An abbreviation, with its expansion.",
                 Key::ComponentBlockquoteSummary => "A quotation set apart from the text around it.",
+                Key::ComponentChoiceSummary => {
+                    "One setting, as a row of options with exactly one of them chosen."
+                }
+                Key::ComponentChoiceOptionSummary => "One option inside a Choice.",
                 Key::ComponentCodeSummary => "A fragment of code inside a sentence.",
                 Key::ComponentCodeBlockSummary => {
                     "A block of code, in the monospaced face, with a copy control."
@@ -1297,6 +1309,10 @@ impl Locale {
                     "Uma abreviatura, com o que ela significa por extenso."
                 }
                 Key::ComponentBlockquoteSummary => "Uma citação destacada do texto ao redor dela.",
+                Key::ComponentChoiceSummary => {
+                    "Uma configuração, como uma fileira de opções com exatamente uma escolhida."
+                }
+                Key::ComponentChoiceOptionSummary => "Uma opção dentro de um Choice.",
                 Key::ComponentCodeSummary => "Um trecho de código dentro de uma frase.",
                 Key::ComponentCodeBlockSummary => {
                     "Um bloco de código, na fonte monoespaçada, com um controle de cópia."
@@ -1565,6 +1581,10 @@ impl Locale {
                 Key::ComponentBlockquoteSummary => {
                     "⟦AA quuootaatiioon seet aapaart froom thee teext aaroouund iit.⟧"
                 }
+                Key::ComponentChoiceSummary => {
+                    "⟦OOnee seettiing, aas aa roow oof ooptiioons wiith eexaactly oonee oof theem chooseen.⟧"
+                }
+                Key::ComponentChoiceOptionSummary => "⟦OOnee ooptiioon iinsiidee aa Chooiicee.⟧",
                 Key::ComponentCodeSummary => "⟦AA fraagmeent oof coodee iinsiidee aa seenteencee.⟧",
                 Key::ComponentCodeBlockSummary => {
                     "⟦AA bloock oof coodee, iin thee moonoospaaceed faacee, wiith aa coopy coontrool.⟧"

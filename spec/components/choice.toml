@@ -1,0 +1,63 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Reach for it when a value is one of a short, fixed list and the reader should see every alternative at once. For a long list, or one that grows, this is the wrong shape — a row of fourteen options is a row nobody reads."
+
+[meta]
+name = "Choice"
+element = "div"
+class = "nd-choice-group"
+summary = "One setting, as a row of options with exactly one of them chosen."
+
+# Its options are `ChoiceOption` children rather than a prop, because a prop
+# cannot be a list of records in either language and a stringly-encoded one
+# would be a second syntax to learn. Composition is the shape both frameworks
+# already have.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-setting"
+doc = "What is being chosen. The script binds to it, and every option in the group repeats it."
+
+[prop.label]
+type = "text"
+doc = "The group's accessible name. Required unless `labelledby` names an element that carries it — a radiogroup with neither announces nothing but its role."
+
+[prop.labelledby]
+type = "text"
+attribute = "aria-labelledby"
+doc = "The id of the element that names this group, when the name is already visible on the page."
+
+[prop.size]
+type = "enum"
+values = ["medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The option box. Both clear WCAG 2.5.8's 24px minimum."
+
+[prop.orientation]
+type = "enum"
+values = ["horizontal", "vertical"]
+default = "horizontal"
+attribute = "aria-orientation"
+doc = "Which way the options run, and therefore which arrow keys move between them."
+
+[prop.children]
+type = "children"
+doc = "The options."
+
+[a11y]
+role = "radiogroup"
+needs_name = true
+notes = """
+A `role="radiogroup"` of `role="radio"` buttons rather than real `<input>`s:
+the value is stored and applied as a DOM attribute, so there is no form to
+submit and a fieldset of inputs would add a name nothing reads. What it does
+owe is the radio group's keyboard contract, and that is below."""
+
+[keyboard]
+Tab = "Enters the group once, at the chosen option — not once per option. Twelve groups of three used to be forty-two tab stops."
+"Arrow keys" = "Move to the next or previous option AND choose it, which is what a radio group does. Horizontal groups answer Left and Right; vertical ones answer Up and Down."
+Home = "The first option."
+End = "The last option."
+"Space or Enter" = "Chooses the focused option, for a reader who moved with Tab rather than with arrows."

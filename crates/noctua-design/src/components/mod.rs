@@ -11,6 +11,8 @@
 
 mod abbr;
 mod blockquote;
+mod choice;
+mod choice_option;
 mod code;
 mod code_block;
 mod del;
@@ -33,6 +35,8 @@ mod visually_hidden;
 
 pub use abbr::Abbr;
 pub use blockquote::{Blockquote, BlockquoteTone};
+pub use choice::{Choice, ChoiceOrientation, ChoiceSize};
+pub use choice_option::ChoiceOption;
 pub use code::{Code, CodeTone};
 pub use code_block::CodeBlock;
 pub use del::Del;

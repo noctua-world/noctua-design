@@ -22,7 +22,10 @@ use noctua_design_spec::component::Component;
 /// Whether this component's body is written here rather than derived.
 #[must_use]
 pub fn is_custom(component: &Component) -> bool {
-    matches!(component.meta.name.as_str(), "IconButton" | "Link")
+    matches!(
+        component.meta.name.as_str(),
+        "IconButton" | "Link" | "Choice" | "ChoiceOption"
+    )
 }
 
 /// The Dioxus body, from `let root = …` to the closing brace of `rsx!`.
@@ -30,6 +33,8 @@ pub fn dioxus_body(out: &mut String, component: &Component) {
     match component.meta.name.as_str() {
         "IconButton" => icon_button_dioxus(out),
         "Link" => link_dioxus(out),
+        "Choice" => choice_dioxus(out),
+        "ChoiceOption" => choice_option_dioxus(out),
         other => unreachable!("no custom body for `{other}`"),
     }
 }
@@ -39,6 +44,8 @@ pub fn react_body(out: &mut String, component: &Component) {
     match component.meta.name.as_str() {
         "IconButton" => icon_button_react(out),
         "Link" => link_react(out),
+        "Choice" => choice_react(out),
+        "ChoiceOption" => choice_option_react(out),
         other => unreachable!("no custom body for `{other}`"),
     }
 }
@@ -90,6 +97,121 @@ fn link_react(out: &mut String) {
          \x20   },\n\
          \x20   children,\n\
          \x20   external ? h(Icon, { icon: \"external-link\", size: \"small\" }) : null,\n\
+         \x20 );\n",
+    );
+}
+
+// --- Choice -----------------------------------------------------------------
+
+/// A radiogroup, and the keyboard contract that makes it one.
+///
+/// The site had twelve of these written as raw markup, and they were forty-two
+/// tab stops: every option was focusable, so a reader crossing the settings
+/// panel with Tab pressed it forty-two times. A radio group is ONE tab stop,
+/// and the arrows move within it — which is not a nicety, it is what the role
+/// promises the moment the markup claims it.
+///
+/// The behaviour lives in `shell.js`, keyed on `[role="radiogroup"]`, because
+/// this package ships no runtime. What the component owes is the markup that
+/// behaviour binds to, and the contract in the spec that says what it must do.
+fn choice_dioxus(out: &mut String) {
+    out.push_str(
+        "    let root = format!(\"nd-choice-group {class}\");\n\
+         \x20   let root = root.trim().to_owned();\n\
+         \n\
+         \x20   rsx! {\n\
+         \x20       div {\n\
+         \x20           class: \"{root}\",\n\
+         \x20           role: \"radiogroup\",\n\
+         \x20           \"data-nd-setting\": \"{name}\",\n\
+         \x20           \"data-nd-size\": size.as_str(),\n\
+         \x20           \"aria-orientation\": orientation.as_str(),\n\
+         \x20           // One or the other names the group. A radiogroup with\n\
+         \x20           // neither announces its role and nothing else.\n\
+         \x20           \"aria-label\": label,\n\
+         \x20           \"aria-labelledby\": labelledby,\n\
+         \x20           {children}\n\
+         \x20       }\n\
+         \x20   }\n",
+    );
+}
+
+fn choice_react(out: &mut String) {
+    out.push_str(
+        "  const size_ = size ?? \"medium\";\n\
+         \x20 const orientation_ = orientation ?? \"horizontal\";\n\
+         \x20 const root = [\"nd-choice-group\", className].filter(Boolean).join(\" \");\n\
+         \x20 return h(\n\
+         \x20   \"div\",\n\
+         \x20   {\n\
+         \x20     className: root,\n\
+         \x20     role: \"radiogroup\",\n\
+         \x20     \"data-nd-setting\": name,\n\
+         \x20     \"data-nd-size\": size_,\n\
+         \x20     \"aria-orientation\": orientation_,\n\
+         \x20     \"aria-label\": label,\n\
+         \x20     \"aria-labelledby\": labelledby,\n\
+         \x20     ...rest,\n\
+         \x20   },\n\
+         \x20   children,\n\
+         \x20 );\n",
+    );
+}
+
+/// One option.
+///
+/// `aria-checked` is written whatever its value, unlike `aria-pressed` on a
+/// button where absence is meaningful: a radio that omits it is a radio whose
+/// state is unknown, and a group of those announces nothing chosen.
+///
+/// The `tabindex` is the roving one — `0` on the chosen option, `-1` on the
+/// rest — server-rendered rather than applied by script, so the group is one
+/// tab stop before anything runs and does not become forty-two if the script
+/// never does.
+fn choice_option_dioxus(out: &mut String) {
+    out.push_str(
+        "    let root = format!(\"nd-choice-option {class}\");\n\
+         \x20   let root = root.trim().to_owned();\n\
+         \n\
+         \x20   rsx! {\n\
+         \x20       button {\n\
+         \x20           class: \"{root}\",\n\
+         \x20           r#type: \"button\",\n\
+         \x20           role: \"radio\",\n\
+         \x20           \"data-nd-value\": \"{value}\",\n\
+         \x20           \"aria-checked\": if selected { \"true\" } else { \"false\" },\n\
+         \x20           tabindex: if selected { \"0\" } else { \"-1\" },\n\
+         \x20           if let Some(icon) = icon {\n\
+         \x20               // The label is the accessible name and the icon is\n\
+         \x20               // decoration: an icon-only option that also announced\n\
+         \x20               // its icon would say the same thing twice.\n\
+         \x20               span { class: \"nd-visually-hidden\", \"{label}\" }\n\
+         \x20               Icon { icon }\n\
+         \x20           } else {\n\
+         \x20               \"{label}\"\n\
+         \x20           }\n\
+         \x20       }\n\
+         \x20   }\n",
+    );
+}
+
+fn choice_option_react(out: &mut String) {
+    out.push_str(
+        "  const root = [\"nd-choice-option\", className].filter(Boolean).join(\" \");\n\
+         \x20 return h(\n\
+         \x20   \"button\",\n\
+         \x20   {\n\
+         \x20     className: root,\n\
+         \x20     type: \"button\",\n\
+         \x20     role: \"radio\",\n\
+         \x20     \"data-nd-value\": value,\n\
+         \x20     // Always written. A radio with no `aria-checked` has no state.\n\
+         \x20     \"aria-checked\": selected ? \"true\" : \"false\",\n\
+         \x20     tabIndex: selected ? 0 : -1,\n\
+         \x20     ...rest,\n\
+         \x20   },\n\
+         \x20   icon ? h(\"span\", { className: \"nd-visually-hidden\" }, label) : label,\n\
+         \x20   icon ? h(Icon, { icon }) : null,\n\
          \x20 );\n",
     );
 }
@@ -192,7 +314,7 @@ fn icon_button_react(out: &mut String) {
 #[must_use]
 pub fn dioxus_imports(component: &Component) -> String {
     match component.meta.name.as_str() {
-        "IconButton" | "Link" => "use crate::icon::{Icon, IconName};\n".to_owned(),
+        "IconButton" | "Link" | "ChoiceOption" => "use crate::icon::{Icon, IconName};\n".to_owned(),
         _ => String::new(),
     }
 }
@@ -201,7 +323,9 @@ pub fn dioxus_imports(component: &Component) -> String {
 #[must_use]
 pub fn react_imports(component: &Component) -> String {
     match component.meta.name.as_str() {
-        "IconButton" | "Link" => "import { Icon } from \"../icon.js\";\n".to_owned(),
+        "IconButton" | "Link" | "ChoiceOption" => {
+            "import { Icon } from \"../icon.js\";\n".to_owned()
+        }
         _ => String::new(),
     }
 }
@@ -213,7 +337,9 @@ pub fn react_imports(component: &Component) -> String {
 #[must_use]
 pub fn dioxus_type(component: &Component, prop: &str) -> Option<&'static str> {
     match (component.meta.name.as_str(), prop) {
-        ("IconButton", "icon") => Some("IconName"),
+        // `Option<IconName>` on `ChoiceOption`, because the prop is optional
+        // there and the generator wraps whatever this returns.
+        ("IconButton" | "ChoiceOption", "icon") => Some("IconName"),
         _ => None,
     }
 }
@@ -222,7 +348,7 @@ pub fn dioxus_type(component: &Component, prop: &str) -> Option<&'static str> {
 #[must_use]
 pub fn typescript_type(component: &Component, prop: &str) -> Option<&'static str> {
     match (component.meta.name.as_str(), prop) {
-        ("IconButton", "icon") => Some("IconName"),
+        ("IconButton" | "ChoiceOption", "icon") => Some("IconName"),
         _ => None,
     }
 }
@@ -231,7 +357,9 @@ pub fn typescript_type(component: &Component, prop: &str) -> Option<&'static str
 #[must_use]
 pub fn typescript_imports(component: &Component) -> String {
     match component.meta.name.as_str() {
-        "IconButton" => "import type { IconName } from \"@noctua/tokens/icons.js\";\n".to_owned(),
+        "IconButton" | "ChoiceOption" => {
+            "import type { IconName } from \"@noctua/tokens/icons.js\";\n".to_owned()
+        }
         _ => String::new(),
     }
 }

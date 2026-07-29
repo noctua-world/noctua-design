@@ -20,6 +20,7 @@
 //! state to unwind.
 
 use dioxus::prelude::*;
+use noctua_design::components::{Choice, ChoiceOption};
 use noctua_design::{Icon, IconButton, IconName};
 use noctua_design_i18n::{Key, Locale};
 
@@ -108,25 +109,19 @@ fn ModeControl(context: Context) -> Element {
         ("system", IconName::Monitor, Key::ThemeModeSystem),
     ];
     rsx! {
-        div {
+        Choice {
             class: "nd-segmented",
-            "data-nd-setting": "mode",
-            role: "radiogroup",
-            "aria-label": context.t(Key::ThemeModeLabel),
+            name: "mode",
+            label: context.t(Key::ThemeModeLabel),
             for (value, icon, label) in options {
-                button {
-                    class: "nd-segment",
-                    r#type: "button",
-                    role: "radio",
-                    // Server-rendered from the known default, so the control is
-                    // not announcing that none of three is selected before the
-                    // script runs.
-                    "aria-checked": if crate::defaults::of("mode") == value { "true" } else { "false" },
-                    "data-nd-value": "{value}",
-                    // The icon is decoration; the button carries the name.
-                    "aria-label": context.t(label),
-                    title: "{context.t(label)}",
-                    Icon { icon }
+                ChoiceOption {
+                    value,
+                    icon,
+                    label: context.t(label),
+                    // Server-rendered from the known default, so the group is
+                    // not announcing that none of three is chosen — and is one
+                    // tab stop rather than three — before the script runs.
+                    selected: crate::defaults::of("mode") == value,
                 }
             }
         }
@@ -190,7 +185,7 @@ fn Settings(context: Context) -> Element {
             div { class: "nd-panel noctua-glass",
               div { class: "nd-panel-body",
 
-                Choice {
+                Setting {
                     context,
                     setting: "mode",
                     label: Key::ThemeModeLabel,
@@ -201,7 +196,7 @@ fn Settings(context: Context) -> Element {
                     ],
                 }
                 Accents { context }
-                Choice {
+                Setting {
                     context,
                     setting: "saturation",
                     label: Key::ThemeSaturationLabel,
@@ -211,13 +206,13 @@ fn Settings(context: Context) -> Element {
                         ("sober", Key::ThemeSaturationSober),
                     ],
                 }
-                Choice {
+                Setting {
                     context,
                     setting: "font",
                     label: Key::ThemeFontLabel,
                     options: vec![("sans", Key::ThemeFontSans), ("mono", Key::ThemeFontMono)],
                 }
-                Choice {
+                Setting {
                     context,
                     setting: "glass",
                     label: Key::ThemeGlassLabel,
@@ -227,7 +222,7 @@ fn Settings(context: Context) -> Element {
                         ("full", Key::ThemeGlassFull),
                     ],
                 }
-                Choice {
+                Setting {
                     context,
                     setting: "radius",
                     label: Key::ThemeRadiusLabel,
@@ -241,14 +236,14 @@ fn Settings(context: Context) -> Element {
 
                 hr { class: "nd-rule" }
 
-                Choice {
+                Setting {
                     context,
                     setting: "blackout",
                     label: Key::SettingsBlackoutLabel,
                     note: Key::SettingsBlackoutNote,
                     options: vec![("off", Key::SettingsOff), ("on", Key::SettingsOn)],
                 }
-                Choice {
+                Setting {
                     context,
                     setting: "pattern",
                     label: Key::SettingsPatternLabel,
@@ -260,14 +255,14 @@ fn Settings(context: Context) -> Element {
                         ("diagonals", Key::SettingsPatternDiagonals),
                     ],
                 }
-                Choice {
+                Setting {
                     context,
                     setting: "glow",
                     label: Key::SettingsGlowLabel,
                     note: Key::SettingsGlowNote,
                     options: vec![("off", Key::SettingsOff), ("on", Key::SettingsOn)],
                 }
-                Choice {
+                Setting {
                     context,
                     setting: "grain",
                     label: Key::SettingsGrainLabel,
@@ -284,17 +279,16 @@ fn Settings(context: Context) -> Element {
     }
 }
 
-/// One setting, as a row of buttons.
+/// One row of the settings panel: a visible label, an optional note, and a
+/// `Choice`.
 ///
-/// `role="radiogroup"` rather than real radios: the value is stored in
-/// `localStorage` and applied as a DOM attribute, so there is no form to submit
-/// and a `<fieldset>` of inputs would only add a name nothing reads.
-///
-/// `data-nd-setting` and `data-nd-value` are what the script binds to, so all
-/// twelve settings are handled by one listener that knows nothing about any of
-/// them beyond the generated model.
+/// The label and the note are this site's, not the component's — a `Choice` in
+/// a header has no visible label at all. What the component owns is the group:
+/// the role, the roving tab stop, the arrow keys and the `aria-checked` on
+/// every option, which is what twelve hand-written copies of this markup did
+/// not have.
 #[component]
-fn Choice(
+fn Setting(
     context: Context,
     setting: String,
     label: Key,
@@ -302,24 +296,26 @@ fn Choice(
     options: Vec<(&'static str, Key)>,
 ) -> Element {
     let default = crate::defaults::of(&setting);
+    let label_id = format!("nd-label-{setting}");
     rsx! {
-        div { class: "nd-choice", "data-nd-setting": "{setting}",
-            p { class: "nd-choice-label", id: "nd-label-{setting}", "{context.t(label)}" }
+        div { class: "nd-choice",
+            p { class: "nd-choice-label", id: "{label_id}", "{context.t(label)}" }
             if let Some(note) = note {
                 p { class: "nd-choice-note", "{context.t(note)}" }
             }
-            div { class: "nd-options", role: "radiogroup", "aria-labelledby": "nd-label-{setting}",
+            Choice {
+                class: "nd-options",
+                name: "{setting}",
+                labelledby: "{label_id}",
                 for (value, text) in options {
-                    button {
+                    ChoiceOption {
                         class: "nd-option",
-                        r#type: "button",
-                        role: "radio",
+                        value,
+                        label: context.t(text),
                         // Rendered from the default rather than left false and
-                        // corrected by script: with JavaScript off, every
-                        // radio in the panel announced itself as unchecked.
-                        "aria-checked": if value == default { "true" } else { "false" },
-                        "data-nd-value": "{value}",
-                        "{context.t(text)}"
+                        // corrected by script: with JavaScript off, every radio
+                        // in the panel announced itself as unchecked.
+                        selected: value == default,
                     }
                 }
             }

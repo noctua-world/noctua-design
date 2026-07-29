@@ -91,7 +91,10 @@ test("the repository link has a visible icon", async ({ page }) => {
 
 test("the mode control is three radios, and choosing one always moves it", async ({ page }) => {
   await page.goto(url(ANY));
-  const group = page.locator('.nd-header [role="radiogroup"][data-nd-setting="mode"]');
+  // `.nd-segmented`, not "the mode group in the header": the settings panel is
+  // inside the header too and carries a mode group of its own, so the broader
+  // selector matches two and Playwright's strict mode refuses both.
+  const group = page.locator(".nd-segmented");
   const options = group.locator('[role="radio"]');
   await expect(options).toHaveCount(3);
 

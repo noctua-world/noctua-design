@@ -205,6 +205,8 @@ dir = "ltr"
 
 "component.abbr.summary" = "An abbreviation, with its expansion."
 "component.blockquote.summary" = "A quotation set apart from the text around it."
+"component.choice.summary" = "One setting, as a row of options with exactly one of them chosen."
+"component.choice-option.summary" = "One option inside a Choice."
 "component.code.summary" = "A fragment of code inside a sentence."
 "component.code-block.summary" = "A block of code, in the monospaced face, with a copy control."
 "component.del.summary" = "Text removed from the document."

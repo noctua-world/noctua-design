@@ -83,7 +83,7 @@ pub(crate) struct DocComponent {
 }
 
 /// Every component, in the order `spec/components/` is read.
-pub(crate) const COMPONENTS: [DocComponent; 21] = [
+pub(crate) const COMPONENTS: [DocComponent; 23] = [
     DocComponent {
         name: "Abbr",
         slug: "abbr",
@@ -162,6 +162,155 @@ convenience for pointer users, never the only route to the meaning.",
         role: None,
         needs_name: false,
         a11y_notes: "",
+    },
+    DocComponent {
+        name: "Choice",
+        slug: "choice",
+        summary: Key::ComponentChoiceSummary,
+        element: "div",
+        class: Some("nd-choice-group"),
+        guidance: "Reach for it when a value is one of a short, fixed list and the reader should see every alternative at once. For a long list, or one that grows, this is the wrong shape — a row of fourteen options is a row nobody reads.",
+        specimen: None,
+        props: &[
+            DocProp {
+                name: "name",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: Some("data-nd-setting"),
+                required: true,
+                doc: "What is being chosen. The script binds to it, and every option in the group repeats it.",
+            },
+            DocProp {
+                name: "label",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: None,
+                required: false,
+                doc: "The group's accessible name. Required unless `labelledby` names an element that carries it — a radiogroup with neither announces nothing but its role.",
+            },
+            DocProp {
+                name: "labelledby",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: Some("aria-labelledby"),
+                required: false,
+                doc: "The id of the element that names this group, when the name is already visible on the page.",
+            },
+            DocProp {
+                name: "size",
+                kind: "enum",
+                values: &["medium", "large"],
+                default: Some("medium"),
+                attribute: Some("data-nd-size"),
+                required: false,
+                doc: "The option box. Both clear WCAG 2.5.8's 24px minimum.",
+            },
+            DocProp {
+                name: "orientation",
+                kind: "enum",
+                values: &["horizontal", "vertical"],
+                default: Some("horizontal"),
+                attribute: Some("aria-orientation"),
+                required: false,
+                doc: "Which way the options run, and therefore which arrow keys move between them.",
+            },
+            DocProp {
+                name: "children",
+                kind: "children",
+                values: &[],
+                default: None,
+                attribute: None,
+                required: false,
+                doc: "The options.",
+            },
+        ],
+        states: &[],
+        keyboard: &[
+            DocKey {
+                key: "Tab",
+                action: "Enters the group once, at the chosen option — not once per option. Twelve groups of three used to be forty-two tab stops.",
+            },
+            DocKey {
+                key: "Arrow keys",
+                action: "Move to the next or previous option AND choose it, which is what a radio group does. Horizontal groups answer Left and Right; vertical ones answer Up and Down.",
+            },
+            DocKey {
+                key: "Home",
+                action: "The first option.",
+            },
+            DocKey {
+                key: "End",
+                action: "The last option.",
+            },
+            DocKey {
+                key: "Space or Enter",
+                action: "Chooses the focused option, for a reader who moved with Tab rather than with arrows.",
+            },
+        ],
+        role: Some("radiogroup"),
+        needs_name: true,
+        a11y_notes:
+            "A `role=\"radiogroup\"` of `role=\"radio\"` buttons rather than real `<input>`s:
+the value is stored and applied as a DOM attribute, so there is no form to
+submit and a fieldset of inputs would add a name nothing reads. What it does
+owe is the radio group's keyboard contract, and that is below.",
+    },
+    DocComponent {
+        name: "ChoiceOption",
+        slug: "choice-option",
+        summary: Key::ComponentChoiceOptionSummary,
+        element: "button",
+        class: Some("nd-choice-option"),
+        guidance: "Never on its own. Outside a `Choice` it is a `role=\"radio\"` with no group, which announces a control that is part of a set that does not exist.",
+        specimen: None,
+        props: &[
+            DocProp {
+                name: "value",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: Some("data-nd-value"),
+                required: true,
+                doc: "What choosing it means. The script reads this and nothing else.",
+            },
+            DocProp {
+                name: "selected",
+                kind: "bool",
+                values: &[],
+                default: Some("false"),
+                attribute: Some("aria-checked"),
+                required: false,
+                doc: "Whether this is the one in force. Server-rendered from the known default, so the group does not announce that none of its options is chosen before the script runs.",
+            },
+            DocProp {
+                name: "icon",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: None,
+                required: false,
+                doc: "An icon instead of a label. The label is still required and becomes the accessible name — an icon-only option with no name is the same defect as an icon-only button with no name.",
+            },
+            DocProp {
+                name: "label",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: None,
+                required: true,
+                doc: "What choosing it means, in the reader's language.",
+            },
+        ],
+        states: &[],
+        keyboard: &[],
+        role: Some("radio"),
+        needs_name: true,
+        a11y_notes: "`aria-checked` is always present, `true` or `false` — unlike `aria-pressed` on
+a button, where absence is meaningful. A radio that omits it is a radio whose
+state is unknown, and a group of them announces nothing chosen.",
     },
     DocComponent {
         name: "Code",
