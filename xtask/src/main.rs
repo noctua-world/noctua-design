@@ -116,6 +116,7 @@ fn dev(root: &Path, spec: &Path, port: u16) -> Result<(), String> {
     let dist = root.join("docs-site/dist");
     ui::ok(&format!("http://127.0.0.1:{port}/"));
     ui::detail("rebuilds when spec/, docs-site/src/ or docs-site/assets/ changes");
+    ui::detail("stops rebuilding if an emitter changes — restart it then");
     ui::detail("Ctrl-C to stop");
 
     let watch_root = root.to_path_buf();
@@ -138,10 +139,36 @@ fn watch(root: &Path, spec: &Path) {
         root.join("docs-site/src"),
         root.join("docs-site/assets"),
     ];
+    // THIS PROCESS IS THE CODE IT STARTED WITH, and that is the trap.
+    //
+    // A long-running `target/debug/xtask` keeps the emitters it was compiled
+    // with. Edit one, touch `spec/`, and this thread cheerfully regenerates
+    // every committed artefact from the OLD compiler — silently reverting a fix
+    // that was already made, already tested and already committed, and leaving
+    // `cargo xtask check` reporting files out of sync with nothing to explain
+    // it. That happened three times while this repository was being rebuilt.
+    //
+    // So the emitters are watched too, and a change to one stops the rebuilding
+    // rather than doing it wrong. Refusing loudly is the whole feature.
+    let emitters = [root.join("crates"), root.join("xtask/src")];
+    let started_with = fingerprint(&emitters);
     let mut last = fingerprint(&watched);
 
     loop {
         std::thread::sleep(std::time::Duration::from_millis(400));
+
+        if fingerprint(&emitters) != started_with {
+            ui::gap();
+            ui::heading("stale");
+            ui::warn(
+                "an emitter changed, and this process is still running the old one. \
+                 Regenerating now would overwrite committed output with what the \
+                 PREVIOUS build would have produced.",
+            );
+            ui::detail("nothing was rebuilt; stop this and run `cargo xtask dev` again");
+            return;
+        }
+
         let current = fingerprint(&watched);
         if current == last {
             continue;

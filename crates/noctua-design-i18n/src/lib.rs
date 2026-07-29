@@ -406,6 +406,10 @@ pub enum Key {
     ComponentCodeBlockSummary,
     /// `component.del.summary`
     ComponentDelSummary,
+    /// `component.disclosure.summary`
+    ComponentDisclosureSummary,
+    /// `component.search-field.summary`
+    ComponentSearchFieldSummary,
     /// `component.em.summary`
     ComponentEmSummary,
     /// `component.heading.summary`
@@ -484,7 +488,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 180] = [
+    pub const ALL: [Self; 182] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -628,6 +632,8 @@ impl Key {
         Self::ComponentCodeSummary,
         Self::ComponentCodeBlockSummary,
         Self::ComponentDelSummary,
+        Self::ComponentDisclosureSummary,
+        Self::ComponentSearchFieldSummary,
         Self::ComponentEmSummary,
         Self::ComponentHeadingSummary,
         Self::ComponentIconButtonSummary,
@@ -814,6 +820,8 @@ impl Key {
             Self::ComponentCodeSummary => "component.code.summary",
             Self::ComponentCodeBlockSummary => "component.code-block.summary",
             Self::ComponentDelSummary => "component.del.summary",
+            Self::ComponentDisclosureSummary => "component.disclosure.summary",
+            Self::ComponentSearchFieldSummary => "component.search-field.summary",
             Self::ComponentEmSummary => "component.em.summary",
             Self::ComponentHeadingSummary => "component.heading.summary",
             Self::ComponentIconButtonSummary => "component.icon-button.summary",
@@ -1058,6 +1066,10 @@ impl Locale {
                     "A block of code, in the monospaced face, with a copy control."
                 }
                 Key::ComponentDelSummary => "Text removed from the document.",
+                Key::ComponentDisclosureSummary => "Content folded away behind its own control.",
+                Key::ComponentSearchFieldSummary => {
+                    "A box for filtering what is on the page, with the live region a filter owes a screen reader."
+                }
                 Key::ComponentEmSummary => {
                     "Stress emphasis — the word a reader would lean on when speaking."
                 }
@@ -1318,6 +1330,10 @@ impl Locale {
                     "Um bloco de código, na fonte monoespaçada, com um controle de cópia."
                 }
                 Key::ComponentDelSummary => "Texto removido do documento.",
+                Key::ComponentDisclosureSummary => "Conteúdo dobrado atrás do próprio controle.",
+                Key::ComponentSearchFieldSummary => {
+                    "Uma caixa para filtrar o que está na página, com a região viva que um filtro deve a um leitor de tela."
+                }
                 Key::ComponentEmSummary => {
                     "Ênfase de entonação — a palavra em que o leitor apoiaria a voz."
                 }
@@ -1590,6 +1606,12 @@ impl Locale {
                     "⟦AA bloock oof coodee, iin thee moonoospaaceed faacee, wiith aa coopy coontrool.⟧"
                 }
                 Key::ComponentDelSummary => "⟦Teext reemooveed froom thee doocuumeent.⟧",
+                Key::ComponentDisclosureSummary => {
+                    "⟦Coonteent fooldeed aawaay beehiind iits oown coontrool.⟧"
+                }
+                Key::ComponentSearchFieldSummary => {
+                    "⟦AA boox foor fiilteeriing whaat iis oon thee paagee, wiith thee liivee reegiioon aa fiilteer oowees aa screeeen reeaadeer.⟧"
+                }
                 Key::ComponentEmSummary => {
                     "⟦Streess eemphaasiis — thee woord aa reeaadeer woouuld leeaan oon wheen speeaakiing.⟧"
                 }

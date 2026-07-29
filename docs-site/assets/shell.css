@@ -1669,3 +1669,28 @@ a {
   cursor: not-allowed;
   opacity: 0.5; /* allow-literal: a disabled control is dimmed, and there is no colour token for "the same colour, less of it" */
 }
+
+/* --- Disclosure and SearchField, now components -------------------------- */
+
+/* The default triangle goes; the component draws a chevron, or an icon. */
+.nd-disclosure-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--noctua-space-tight);
+  cursor: pointer;
+  list-style: none;
+}
+
+.nd-disclosure-summary::-webkit-details-marker {
+  display: none;
+}
+
+/* The chevron turns to point at what it opened. Not a rotation of the whole
+   summary: an icon beside a word must not drag the word with it. */
+.nd-disclosure[open] > .nd-disclosure-summary > .nd-icon-glyph:last-child {
+  transform: rotate(180deg);
+}
+
+.nd-search-field {
+  inline-size: 100%;
+}

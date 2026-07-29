@@ -83,7 +83,7 @@ pub(crate) struct DocComponent {
 }
 
 /// Every component, in the order `spec/components/` is read.
-pub(crate) const COMPONENTS: [DocComponent; 23] = [
+pub(crate) const COMPONENTS: [DocComponent; 25] = [
     DocComponent {
         name: "Abbr",
         slug: "abbr",
@@ -454,6 +454,74 @@ succeeds is a button a screen-reader user cannot trust.",
         a11y_notes: "A strikethrough is not announced by most screen readers, so deleted text is
 read as though it were current. The component carries a visually-hidden label
 saying so.",
+    },
+    DocComponent {
+        name: "Disclosure",
+        slug: "disclosure",
+        summary: Key::ComponentDisclosureSummary,
+        element: "details",
+        class: Some("nd-disclosure"),
+        guidance: "For content that is present but folded away. Not for a dialog, and not for a drawer: this is `<details>`, so the content is a child of the control and moves with it. A drawer whose panel is elsewhere in the document is a button with `aria-expanded`, which is `IconButton`.",
+        specimen: None,
+        props: &[
+            DocProp {
+                name: "summary",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: None,
+                required: true,
+                doc: "What the control says, and its accessible name.",
+            },
+            DocProp {
+                name: "icon",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: None,
+                required: false,
+                doc: "An icon instead of the summary text. The summary is still required and becomes the accessible name.",
+            },
+            DocProp {
+                name: "open",
+                kind: "bool",
+                values: &[],
+                default: Some("false"),
+                attribute: Some("open"),
+                required: false,
+                doc: "Whether it starts open. Rendered, not applied by script — a disclosure that opens after the page paints reflows what is under it.",
+            },
+            DocProp {
+                name: "marker",
+                kind: "bool",
+                values: &[],
+                default: Some("true"),
+                attribute: None,
+                required: false,
+                doc: "Whether to draw the chevron. Off for a control that is already an icon.",
+            },
+            DocProp {
+                name: "children",
+                kind: "children",
+                values: &[],
+                default: None,
+                attribute: None,
+                required: false,
+                doc: "The content.",
+            },
+        ],
+        states: &[],
+        keyboard: &[DocKey {
+            key: "Space or Enter",
+            action: "Opens and closes it, on the summary. The browser's, not ours.",
+        }],
+        role: None,
+        needs_name: true,
+        a11y_notes: "`<details>`/`<summary>` rather than the `popover` attribute or a hand-built
+pair: the browser gives the role, the state and the keyboard for free, and
+gets them right in every engine. Nothing here moves focus on open and nothing
+is trapped — a reader who tabs past an open disclosure carries on into the
+page, which is correct for something that is not a dialog.",
     },
     DocComponent {
         name: "Em",
@@ -959,6 +1027,70 @@ the text weight.",
         role: None,
         needs_name: false,
         a11y_notes: "",
+    },
+    DocComponent {
+        name: "SearchField",
+        slug: "search-field",
+        summary: Key::ComponentSearchFieldSummary,
+        element: "input",
+        class: Some("nd-search-field"),
+        guidance: "For filtering something already on the page. It carries no submit and no form: a search that navigates is a form, and a form needs an action this component does not have.",
+        specimen: None,
+        props: &[
+            DocProp {
+                name: "label",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: None,
+                required: true,
+                doc: "Its accessible name. Visually hidden by default — a placeholder is not a label: it disappears the moment somebody types, and it is not read as one.",
+            },
+            DocProp {
+                name: "placeholder",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: None,
+                required: false,
+                doc: "The hint inside the box. Never the only name it has.",
+            },
+            DocProp {
+                name: "value",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: Some("value"),
+                required: false,
+                doc: "The current text.",
+            },
+            DocProp {
+                name: "name",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: Some("data-nd-search"),
+                required: false,
+                doc: "What the script binds to.",
+            },
+            DocProp {
+                name: "status",
+                kind: "text",
+                values: &[],
+                default: None,
+                attribute: None,
+                required: false,
+                doc: "A message template for the result count, with a `{count}` placeholder. Announced through `role=\"status\"`, because a reader who cannot see the list shrink is told nothing at all by it changing.",
+            },
+        ],
+        states: &[],
+        keyboard: &[],
+        role: None,
+        needs_name: true,
+        a11y_notes: "`type=\"search\"`, so the browser offers its own clear control and a screen
+reader announces it as a search box rather than as text. The result count goes
+through an `aria-live=\"polite\"` region: filtering changes the page silently,
+and silence is the failure.",
     },
     DocComponent {
         name: "Strong",

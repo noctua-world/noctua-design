@@ -200,12 +200,18 @@ cargo xtask docs --verify   # …and run the 49-spec browser suite against it
 cargo xtask release   # prepare a version
 ```
 
-> ⚠️ **Stop `cargo xtask dev` before editing an emitter.** It is a long-running
-> `target/debug/xtask`, so it keeps the code it was *started* with. Touch
-> `spec/` and it regenerates `dist/` from that stale binary — silently reverting
-> a fix you just made and committed, and leaving `check` reporting files out of
-> sync with no clue why. `pgrep -af "target/debug/xtask"` before you debug
-> anything that "changed back on its own".
+> ⚠️ **`cargo xtask dev` is the code it started with.** It is a long-running
+> `target/debug/xtask`, so editing an emitter does not change the emitter it
+> uses. It used to regenerate `dist/` from that stale binary — silently
+> reverting a fix already made, tested and committed, and leaving `check`
+> reporting files out of sync with nothing to explain it. It happened three
+> times while this repository was being rebuilt.
+>
+> It now watches `crates/` and `xtask/src` too, and **stops rebuilding** with a
+> loud message rather than rebuilding wrongly. Restart it and it picks up the
+> new emitter. If you ever see something "change back on its own", check
+> `pgrep -af "target/debug/xtask"` anyway — an older binary predating this will
+> still do it.
 
 **Five verbs, and the surface does not grow.** New capability goes behind an
 existing verb or it does not ship. `cargo xtask check` is exactly what CI runs —

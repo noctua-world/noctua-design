@@ -20,7 +20,7 @@
 //! state to unwind.
 
 use dioxus::prelude::*;
-use noctua_design::components::{Choice, ChoiceOption};
+use noctua_design::components::{Choice, ChoiceOption, Disclosure, SearchField};
 use noctua_design::{Icon, IconButton, IconName};
 use noctua_design_i18n::{Key, Locale};
 
@@ -175,13 +175,10 @@ fn theme_other_locale(current: Locale) -> Locale {
 #[component]
 fn Settings(context: Context) -> Element {
     rsx! {
-        details { class: "nd-settings", "data-nd-settings": "",
-            summary {
-                class: "nd-icon",
-                "aria-label": context.t(Key::SettingsLabel),
-                title: "{context.t(Key::SettingsLabel)}",
-                Icon { icon: IconName::Settings }
-            }
+        Disclosure {
+            class: "nd-settings",
+            icon: IconName::Settings,
+            summary: context.t(Key::SettingsLabel),
             div { class: "nd-panel noctua-glass",
               div { class: "nd-panel-body",
 
@@ -386,19 +383,15 @@ pub(crate) fn Sidebar(context: Context) -> Element {
             a { class: "nd-nav-wordmark", href: "{site::first(context.locale).href()}",
                 "{context.t(Key::AppName)}"
             }
-            div { class: "nd-search",
-                label { class: "nd-visually-hidden", r#for: "nd-search-input",
-                    "{context.t(Key::SearchLabel)}"
-                }
-                input {
-                    id: "nd-search-input",
-                    class: "nd-search-input",
-                    r#type: "search",
-                    autocomplete: "off",
-                    spellcheck: "false",
-                    placeholder: "{context.t(Key::SearchPlaceholder)}",
-                    "data-nd-search": "",
-                }
+            SearchField {
+                class: "nd-search-input",
+                // The script binds to `[data-nd-search]`, which the component
+                // writes from this. Leaving it out is a search box the script
+                // never finds — and nothing errors, it simply does not filter.
+                name: "docs",
+                label: context.t(Key::SearchLabel),
+                placeholder: context.t(Key::SearchPlaceholder),
+                status: context.t(Key::SearchResults),
             }
             // Foundations at the top as a short block, then every component,
             // alphabetically and with nothing between them — which is what
@@ -445,15 +438,9 @@ pub(crate) fn Sidebar(context: Context) -> Element {
             p { class: "nd-search-empty", "data-nd-search-empty": "", hidden: true,
                 "{context.t(Key::SearchEmpty)}"
             }
-            // Announced, not merely shown. Without a live region a screen-reader
-            // user types into the box and is told nothing at all.
-            p {
-                class: "nd-visually-hidden",
-                "data-nd-search-status": "",
-                "data-nd-template": context.t(Key::SearchResults),
-                role: "status",
-                "aria-live": "polite",
-            }
+            // The live region moved into `SearchField`: a filter that changes
+            // the page silently is the failure, so the component that owns the
+            // box owns the announcement too.
             // No tagline. A sentence describing the system to a reader already
             // inside its documentation, repeated at the foot of every page, is
             // decoration — and `NOCTUA.md §9.7` says nothing decorative.

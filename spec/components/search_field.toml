@@ -1,0 +1,40 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "For filtering something already on the page. It carries no submit and no form: a search that navigates is a form, and a form needs an action this component does not have."
+
+[meta]
+name = "SearchField"
+element = "input"
+class = "nd-search-field"
+summary = "A box for filtering what is on the page, with the live region a filter owes a screen reader."
+
+[prop.label]
+type = "text"
+required = true
+doc = "Its accessible name. Visually hidden by default — a placeholder is not a label: it disappears the moment somebody types, and it is not read as one."
+
+[prop.placeholder]
+type = "text"
+doc = "The hint inside the box. Never the only name it has."
+
+[prop.value]
+type = "text"
+attribute = "value"
+doc = "The current text."
+
+[prop.name]
+type = "text"
+attribute = "data-nd-search"
+doc = "What the script binds to."
+
+[prop.status]
+type = "text"
+doc = "A message template for the result count, with a `{count}` placeholder. Announced through `role=\"status\"`, because a reader who cannot see the list shrink is told nothing at all by it changing."
+
+[a11y]
+needs_name = true
+notes = """
+`type=\"search\"`, so the browser offers its own clear control and a screen
+reader announces it as a search box rather than as text. The result count goes
+through an `aria-live=\"polite\"` region: filtering changes the page silently,
+and silence is the failure."""

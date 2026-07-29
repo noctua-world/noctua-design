@@ -24,7 +24,7 @@ use noctua_design_spec::component::Component;
 pub fn is_custom(component: &Component) -> bool {
     matches!(
         component.meta.name.as_str(),
-        "IconButton" | "Link" | "Choice" | "ChoiceOption"
+        "IconButton" | "Link" | "Choice" | "ChoiceOption" | "Disclosure" | "SearchField"
     )
 }
 
@@ -35,6 +35,8 @@ pub fn dioxus_body(out: &mut String, component: &Component) {
         "Link" => link_dioxus(out),
         "Choice" => choice_dioxus(out),
         "ChoiceOption" => choice_option_dioxus(out),
+        "Disclosure" => disclosure_dioxus(out),
+        "SearchField" => search_field_dioxus(out),
         other => unreachable!("no custom body for `{other}`"),
     }
 }
@@ -46,6 +48,8 @@ pub fn react_body(out: &mut String, component: &Component) {
         "Link" => link_react(out),
         "Choice" => choice_react(out),
         "ChoiceOption" => choice_option_react(out),
+        "Disclosure" => disclosure_react(out),
+        "SearchField" => search_field_react(out),
         other => unreachable!("no custom body for `{other}`"),
     }
 }
@@ -216,6 +220,152 @@ fn choice_option_react(out: &mut String) {
     );
 }
 
+// --- Disclosure -------------------------------------------------------------
+
+/// `<details>`/`<summary>`, and not a hand-built pair.
+///
+/// The browser gives the role, the state and the keyboard for free and gets
+/// them right in every engine. It is also not the `popover` attribute: the top
+/// layer is always `position: fixed`, so a popover cannot anchor to a sticky
+/// header without being repositioned on every scroll frame.
+///
+/// Nothing here moves focus on open and nothing is trapped. A reader who tabs
+/// past an open disclosure carries on into the page, which is correct for
+/// something that is not a dialog.
+fn disclosure_dioxus(out: &mut String) {
+    out.push_str(
+        "    let root = format!(\"nd-disclosure {class}\");\n\
+         \x20   let root = root.trim().to_owned();\n\
+         \n\
+         \x20   rsx! {\n\
+         \x20       details { class: \"{root}\", open,\n\
+         \x20           summary {\n\
+         \x20               class: \"nd-disclosure-summary\",\n\
+         \x20               // The summary is the accessible name whether it is\n\
+         \x20               // shown or replaced by an icon, so an icon-only\n\
+         \x20               // disclosure is still named.\n\
+         \x20               \"aria-label\": if icon.is_some() { Some(summary.clone()) } else { None },\n\
+         \x20               title: if icon.is_some() { Some(summary.clone()) } else { None },\n\
+         \x20               if let Some(icon) = icon {\n\
+         \x20                   Icon { icon }\n\
+         \x20               } else {\n\
+         \x20                   span { class: \"nd-disclosure-text\", \"{summary}\" }\n\
+         \x20                   if marker {\n\
+         \x20                       Icon { icon: IconName::ChevronDown, size: crate::icon::IconSize::Small }\n\
+         \x20                   }\n\
+         \x20               }\n\
+         \x20           }\n\
+         \x20           {children}\n\
+         \x20       }\n\
+         \x20   }\n",
+    );
+}
+
+fn disclosure_react(out: &mut String) {
+    out.push_str(
+        "  const marker_ = marker ?? true;\n\
+         \x20 const root = [\"nd-disclosure\", className].filter(Boolean).join(\" \");\n\
+         \x20 return h(\n\
+         \x20   \"details\",\n\
+         \x20   { className: root, open: open || undefined, ...rest },\n\
+         \x20   h(\n\
+         \x20     \"summary\",\n\
+         \x20     {\n\
+         \x20       className: \"nd-disclosure-summary\",\n\
+         \x20       \"aria-label\": icon ? summary : undefined,\n\
+         \x20       title: icon ? summary : undefined,\n\
+         \x20     },\n\
+         \x20     icon\n\
+         \x20       ? h(Icon, { icon })\n\
+         \x20       : [\n\
+         \x20           h(\"span\", { key: \"t\", className: \"nd-disclosure-text\" }, summary),\n\
+         \x20           marker_ ? h(Icon, { key: \"m\", icon: \"chevron-down\", size: \"small\" }) : null,\n\
+         \x20         ],\n\
+         \x20   ),\n\
+         \x20   children,\n\
+         \x20 );\n",
+    );
+}
+
+// --- SearchField ------------------------------------------------------------
+
+/// A filter box, and the live region a filter owes a screen reader.
+///
+/// A placeholder is not a label. It disappears the moment somebody types, it is
+/// not announced as a name, and a box with only one is a box a screen-reader
+/// user meets with no idea what it filters. The label is required and visually
+/// hidden by default.
+///
+/// The status region is the other half, and the one that is usually missing:
+/// filtering changes the page silently, so a reader who cannot see the list
+/// shrink is told nothing at all.
+fn search_field_dioxus(out: &mut String) {
+    out.push_str(
+        "    let root = format!(\"nd-search-field {class}\");\n\
+         \x20   let root = root.trim().to_owned();\n\
+         \x20   let id = format!(\"nd-search-{}\", name.clone().unwrap_or_default());\n\
+         \n\
+         \x20   rsx! {\n\
+         \x20       div { class: \"nd-search\",\n\
+         \x20           label { class: \"nd-visually-hidden\", r#for: \"{id}\", \"{label}\" }\n\
+         \x20           input {\n\
+         \x20               id: \"{id}\",\n\
+         \x20               class: \"{root}\",\n\
+         \x20               r#type: \"search\",\n\
+         \x20               autocomplete: \"off\",\n\
+         \x20               spellcheck: \"false\",\n\
+         \x20               placeholder,\n\
+         \x20               value,\n\
+         \x20               \"data-nd-search\": name,\n\
+         \x20           }\n\
+         \x20           // Announced, not merely shown. Without this a reader types\n\
+         \x20           // into the box and is told nothing at all.\n\
+         \x20           if let Some(status) = status {\n\
+         \x20               p {\n\
+         \x20                   class: \"nd-visually-hidden\",\n\
+         \x20                   \"data-nd-search-status\": \"\",\n\
+         \x20                   \"data-nd-template\": \"{status}\",\n\
+         \x20                   role: \"status\",\n\
+         \x20                   \"aria-live\": \"polite\",\n\
+         \x20               }\n\
+         \x20           }\n\
+         \x20       }\n\
+         \x20   }\n",
+    );
+}
+
+fn search_field_react(out: &mut String) {
+    out.push_str(
+        "  const root = [\"nd-search-field\", className].filter(Boolean).join(\" \");\n\
+         \x20 const id = `nd-search-${name ?? \"\"}`;\n\
+         \x20 return h(\n\
+         \x20   \"div\",\n\
+         \x20   { className: \"nd-search\" },\n\
+         \x20   h(\"label\", { className: \"nd-visually-hidden\", htmlFor: id }, label),\n\
+         \x20   h(\"input\", {\n\
+         \x20     id,\n\
+         \x20     className: root,\n\
+         \x20     type: \"search\",\n\
+         \x20     autoComplete: \"off\",\n\
+         \x20     spellCheck: \"false\",\n\
+         \x20     placeholder,\n\
+         \x20     defaultValue: value,\n\
+         \x20     \"data-nd-search\": name,\n\
+         \x20     ...rest,\n\
+         \x20   }),\n\
+         \x20   status\n\
+         \x20     ? h(\"p\", {\n\
+         \x20         className: \"nd-visually-hidden\",\n\
+         \x20         \"data-nd-search-status\": \"\",\n\
+         \x20         \"data-nd-template\": status,\n\
+         \x20         role: \"status\",\n\
+         \x20         \"aria-live\": \"polite\",\n\
+         \x20       })\n\
+         \x20     : null,\n\
+         \x20 );\n",
+    );
+}
+
 // --- IconButton -------------------------------------------------------------
 
 /// A control whose only content is an icon.
@@ -314,7 +464,9 @@ fn icon_button_react(out: &mut String) {
 #[must_use]
 pub fn dioxus_imports(component: &Component) -> String {
     match component.meta.name.as_str() {
-        "IconButton" | "Link" | "ChoiceOption" => "use crate::icon::{Icon, IconName};\n".to_owned(),
+        "IconButton" | "Link" | "ChoiceOption" | "Disclosure" => {
+            "use crate::icon::{Icon, IconName};\n".to_owned()
+        }
         _ => String::new(),
     }
 }
@@ -323,7 +475,7 @@ pub fn dioxus_imports(component: &Component) -> String {
 #[must_use]
 pub fn react_imports(component: &Component) -> String {
     match component.meta.name.as_str() {
-        "IconButton" | "Link" | "ChoiceOption" => {
+        "IconButton" | "Link" | "ChoiceOption" | "Disclosure" => {
             "import { Icon } from \"../icon.js\";\n".to_owned()
         }
         _ => String::new(),
@@ -339,7 +491,7 @@ pub fn dioxus_type(component: &Component, prop: &str) -> Option<&'static str> {
     match (component.meta.name.as_str(), prop) {
         // `Option<IconName>` on `ChoiceOption`, because the prop is optional
         // there and the generator wraps whatever this returns.
-        ("IconButton" | "ChoiceOption", "icon") => Some("IconName"),
+        ("IconButton" | "ChoiceOption" | "Disclosure", "icon") => Some("IconName"),
         _ => None,
     }
 }
@@ -348,7 +500,7 @@ pub fn dioxus_type(component: &Component, prop: &str) -> Option<&'static str> {
 #[must_use]
 pub fn typescript_type(component: &Component, prop: &str) -> Option<&'static str> {
     match (component.meta.name.as_str(), prop) {
-        ("IconButton" | "ChoiceOption", "icon") => Some("IconName"),
+        ("IconButton" | "ChoiceOption" | "Disclosure", "icon") => Some("IconName"),
         _ => None,
     }
 }
@@ -357,7 +509,7 @@ pub fn typescript_type(component: &Component, prop: &str) -> Option<&'static str
 #[must_use]
 pub fn typescript_imports(component: &Component) -> String {
     match component.meta.name.as_str() {
-        "IconButton" | "ChoiceOption" => {
+        "IconButton" | "ChoiceOption" | "Disclosure" => {
             "import type { IconName } from \"@noctua/tokens/icons.js\";\n".to_owned()
         }
         _ => String::new(),

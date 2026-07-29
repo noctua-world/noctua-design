@@ -1,0 +1,45 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "For content that is present but folded away. Not for a dialog, and not for a drawer: this is `<details>`, so the content is a child of the control and moves with it. A drawer whose panel is elsewhere in the document is a button with `aria-expanded`, which is `IconButton`."
+
+[meta]
+name = "Disclosure"
+element = "details"
+class = "nd-disclosure"
+summary = "Content folded away behind its own control."
+
+[prop.summary]
+type = "text"
+required = true
+doc = "What the control says, and its accessible name."
+
+[prop.icon]
+type = "text"
+doc = "An icon instead of the summary text. The summary is still required and becomes the accessible name."
+
+[prop.open]
+type = "bool"
+default = "false"
+attribute = "open"
+doc = "Whether it starts open. Rendered, not applied by script — a disclosure that opens after the page paints reflows what is under it."
+
+[prop.marker]
+type = "bool"
+default = "true"
+doc = "Whether to draw the chevron. Off for a control that is already an icon."
+
+[prop.children]
+type = "children"
+doc = "The content."
+
+[a11y]
+needs_name = true
+notes = """
+`<details>`/`<summary>` rather than the `popover` attribute or a hand-built
+pair: the browser gives the role, the state and the keyboard for free, and
+gets them right in every engine. Nothing here moves focus on open and nothing
+is trapped — a reader who tabs past an open disclosure carries on into the
+page, which is correct for something that is not a dialog."""
+
+[keyboard]
+"Space or Enter" = "Opens and closes it, on the summary. The browser's, not ours."
