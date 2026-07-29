@@ -61,7 +61,7 @@ fn main() -> Result<(), String> {
         let first = site::first(locale);
         write(
             &out.join(locale.tag()).join("index.html"),
-            &redirect_to(locale, &first.file()),
+            &redirect_to(locale, &first.dir()),
         )?;
         written += 1;
     }
@@ -70,6 +70,12 @@ fn main() -> Result<(), String> {
     // a server rule, because the whole point of this build is a directory that
     // can be served by anything at all.
     write(&out.join("index.html"), &redirect())?;
+    written += 1;
+
+    // GitHub Pages runs Jekyll unless told not to, and Jekyll drops any path
+    // beginning with an underscore. Nothing here has one today; the marker
+    // costs a byte and removes the need to remember that on the day one does.
+    write(&out.join(".nojekyll"), "")?;
     written += 1;
 
     written += copy_assets(&root, &out)?;
@@ -99,9 +105,10 @@ fn document(locale: Locale, page: Page) -> String {
     // complete rather than blank (`NOCTUA.md §9.6` lesson 4).
     let _ = writeln!(
         html,
-        "<html lang=\"{}\" dir=\"{}\" class=\"no-js\" data-noctua-base=\"../\">",
+        "<html lang=\"{}\" dir=\"{}\" class=\"no-js\" data-noctua-base=\"{}\">",
         locale.bcp47(),
-        locale.dir()
+        locale.dir(),
+        site::BASE
     );
     html.push_str("<head>\n<meta charset=\"utf-8\">\n");
     html.push_str("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
@@ -113,12 +120,20 @@ fn document(locale: Locale, page: Page) -> String {
     );
 
     html.push_str(&rebase(BASE_LINKS));
-    html.push_str("<link rel=\"stylesheet\" href=\"../assets/shell.css\">\n");
+    let _ = writeln!(
+        html,
+        "<link rel=\"stylesheet\" href=\"{}assets/shell.css\">",
+        site::BASE
+    );
     html.push_str(BOOTSTRAP);
     html.push_str("\n</head>\n<body>\n");
 
     html.push_str(&render(context));
-    html.push_str("<script type=\"module\" src=\"../assets/shell.js\"></script>\n");
+    let _ = writeln!(
+        html,
+        "<script type=\"module\" src=\"{}assets/shell.js\"></script>",
+        site::BASE
+    );
     html.push_str("</body>\n</html>\n");
     html
 }
@@ -167,11 +182,11 @@ fn document_tree(props: DocumentProps) -> Element {
     }
 }
 
-/// Rewrites the generated base links so they resolve from a page one directory
-/// below the site root.
+/// Rewrites the generated base links so they resolve from a page at
+/// [`site::BASE`] — `<locale>/<slug>/index.html`, two levels down.
 ///
 /// The alternative — every page at the root — would mean three locales sharing
-/// one namespace, and `colours.html` could belong to only one of them.
+/// one namespace, and `colours` could belong to only one of them.
 ///
 /// Only **document-relative** hrefs move. A blind replace turns `https://…`
 /// into `../https://…` and `/x` into `..//x`, which works right up until a base
@@ -185,7 +200,7 @@ fn rebase(html: &str) -> String {
         out.push_str(&rest[..at + MARK.len()]);
         rest = &rest[at + MARK.len()..];
         if is_document_relative(rest) {
-            out.push_str("../");
+            out.push_str(site::BASE);
         }
     }
     out.push_str(rest);
@@ -377,16 +392,20 @@ mod tests {
         assert!(default < tokens, "the palette must precede the tokens");
     }
 
-    /// Every href has to move exactly one level, or the assets 404 from a page
-    /// inside a locale directory.
+    /// Every href has to move to the base exactly once, or the assets 404 from
+    /// a page inside its own directory.
     #[test]
     fn rebasing_moves_every_href_and_nothing_else() {
         let head = rebase(BASE_LINKS);
+        let marker = format!("href=\"{}", site::BASE);
         assert_eq!(
-            head.matches("href=\"../").count(),
+            head.matches(marker.as_str()).count(),
             BASE_LINKS.matches("href=\"").count()
         );
-        assert!(!head.contains("href=\"../../"), "an href moved twice");
+        assert!(
+            !head.contains(&format!("href=\"{}{}", site::BASE, site::BASE)),
+            "an href moved twice"
+        );
     }
 
     /// An href that does not resolve against the document must not move.
@@ -399,7 +418,10 @@ mod tests {
         assert!(out.contains("href=\"/root\""));
         assert!(out.contains("href=\"#frag\""));
         assert!(out.contains("href=\"mailto:a@b.c\""));
-        assert!(out.contains("href=\"../tokens.css\""), "{out}");
+        assert!(
+            out.contains(&format!("href=\"{}tokens.css\"", site::BASE)),
+            "{out}"
+        );
     }
 
     /// The stored palette's stylesheet is injected by the bootstrap, from a
@@ -470,10 +492,83 @@ mod tests {
         for page in site::PAGES {
             let html = document(Locale::En, page);
             assert!(
-                html.contains(&format!("../{}/{}", Locale::PtBr.tag(), page.file())),
+                html.contains(&page.locale_href(Locale::PtBr)),
                 "{} does not link to its translation",
                 page.slug
             );
         }
+    }
+
+    /// Resolves an href against the directory the document sits in, collapsing
+    /// `..`. Returns `None` if it climbs above the site root.
+    fn resolve_from(dir: &str, href: &str) -> Option<String> {
+        let mut parts: Vec<&str> = dir.split('/').filter(|s| !s.is_empty()).collect();
+        for segment in href.split('/') {
+            match segment {
+                "" | "." => {}
+                ".." => {
+                    parts.pop()?;
+                }
+                other => parts.push(other),
+            }
+        }
+        Some(parts.join("/"))
+    }
+
+    /// Every internal link, resolved the way a browser would.
+    ///
+    /// The suite that existed typed URLs into `page.goto` instead of following
+    /// the site's own links, so nothing ever exercised an href — which is how
+    /// `index.html` stayed in every URL and how a palette stylesheet 404ed on
+    /// every load. This one costs no browser and no built directory.
+    #[test]
+    fn every_internal_link_resolves_to_something_the_build_writes() {
+        // What the build writes, in the same shape a resolved href produces.
+        let mut written: Vec<String> = Vec::new();
+        for locale in Locale::ALL {
+            for page in site::PAGES {
+                written.push(format!("{}/{}", locale.tag(), page.dir()));
+            }
+            written.push(format!("{}/", locale.tag()));
+        }
+
+        for locale in Locale::ALL {
+            for page in site::PAGES {
+                let dir = format!("{}/{}", locale.tag(), page.slug);
+                for href in hrefs(&document(locale, page)) {
+                    // Off-site, in-page and root-absolute links resolve against
+                    // something other than this document; `rebase` leaves them
+                    // alone and so does this.
+                    if !is_document_relative(&href) {
+                        continue;
+                    }
+                    assert!(
+                        !href.contains(".html"),
+                        "{dir} links to {href}, and a reader should never see a file name"
+                    );
+                    let resolved = resolve_from(&dir, &href)
+                        .unwrap_or_else(|| panic!("{dir} links to {href}, which escapes the site"));
+                    // Asset paths are covered by the browser suite's "no
+                    // response ≥ 400" spec, which runs against the real files.
+                    // What this asserts is the part that has no file on disk to
+                    // check against: a link to a PAGE.
+                    if href.ends_with('/') {
+                        assert!(
+                            written.contains(&format!("{resolved}/")),
+                            "{dir} links to {href}, which is not a page the build writes"
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    /// Every `href="…"` in a document, in order.
+    fn hrefs(html: &str) -> Vec<String> {
+        html.split("href=\"")
+            .skip(1)
+            .filter_map(|rest| rest.split('"').next())
+            .map(str::to_owned)
+            .collect()
     }
 }

@@ -50,7 +50,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "python3 -m http.server 8731 --directory docs-site/dist",
-    url: "http://127.0.0.1:8731/en/index.html",
+    url: "http://127.0.0.1:8731/en/colours/",
     reuseExistingServer: true,
     timeout: 30_000,
   },

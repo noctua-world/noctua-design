@@ -23,7 +23,7 @@ const custom = (locator, name) =>
   locator.evaluate((el, n) => getComputedStyle(el).getPropertyValue(n).trim(), name);
 
 test("a scope resolves the semantic contract against ITSELF", async ({ page }) => {
-  await page.goto("/en/scoped-themes.html");
+  await page.goto("/en/scoped-themes/");
   const scopes = page.locator("[data-noctua-scope]");
 
   for (const index of [0, 1]) {
@@ -48,7 +48,7 @@ test("a scope resolves the semantic contract against ITSELF", async ({ page }) =
 });
 
 test("every attribute a scope stamps is on one element", async ({ page }) => {
-  await page.goto("/en/scoped-themes.html");
+  await page.goto("/en/scoped-themes/");
   // The colour system's forced-mode rule is compound and same-element. Split
   // the palette from the mode and it matches nothing — the child falls through
   // to the DEFAULT palette's unanchored [data-theme="dark"].
@@ -67,7 +67,7 @@ test("every attribute a scope stamps is on one element", async ({ page }) => {
 });
 
 test("a border inside a scope is the scope's, not the page's", async ({ page }) => {
-  await page.goto("/en/scoped-themes.html");
+  await page.goto("/en/scoped-themes/");
   // The header's rule, which is painted from the PAGE's palette, against a
   // scope's own border. Any two borders would do; these two are the pair the
   // bug actually collapsed.
@@ -104,7 +104,7 @@ test("blackout changes the page and nothing else", async ({ page }) => {
 });
 
 test("blackout is refused to a component", async ({ page }) => {
-  await page.goto("/en/scoped-themes.html");
+  await page.goto("/en/scoped-themes/");
   const scope = page.locator("[data-noctua-scope]").first();
   await page.evaluate(() => {
     document.documentElement.setAttribute("data-theme", "dark");
@@ -120,7 +120,7 @@ test("blackout is refused to a component", async ({ page }) => {
 });
 
 test("glass is on before anyone touches a setting", async ({ page }) => {
-  await page.goto("/en/scoped-themes.html");
+  await page.goto("/en/scoped-themes/");
   // Every glass block is a bare attribute selector, which is what makes glass
   // scopable — and which meant that on a first visit NOTHING matched, the
   // tokens were undefined, and `blur(var(--undefined))` computed to `none`.
@@ -136,7 +136,7 @@ test("glass is on before anyone touches a setting", async ({ page }) => {
 });
 
 test("glass is scopable and radius is scopable", async ({ page }) => {
-  await page.goto("/en/scoped-themes.html");
+  await page.goto("/en/scoped-themes/");
   const outer = page.locator("[data-noctua-scope]").first();
   const blur = await outer.evaluate((el) => getComputedStyle(el).backdropFilter);
   const pageBlur = await page
@@ -149,7 +149,7 @@ test("glass is scopable and radius is scopable", async ({ page }) => {
 });
 
 test("a nested scope keeps its parent's palette when only its mode changes", async ({ page }) => {
-  await page.goto("/en/scoped-themes.html");
+  await page.goto("/en/scoped-themes/");
   const nested = page.locator("[data-noctua-scope]").nth(1);
   const before = await nested.getAttribute("data-palette");
   await nested.locator('[data-nd-scope-cycle="mode"]').click();
@@ -158,7 +158,7 @@ test("a nested scope keeps its parent's palette when only its mode changes", asy
 
 test("reduced motion leaves nothing animating", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/en/colours.html");
+  await page.goto("/en/colours/");
   // Motion belongs to the effect. There is no separate `animate` switch any
   // more: it only ever appeared ANDed with these two, both of which default to
   // off, so from a default page it changed an attribute that matched nothing.
@@ -201,15 +201,20 @@ test("no page asks for a file that is not there", async ({ page }) => {
   // A non-default palette, so the on-demand stylesheet is exercised too.
   await storePalette(page, "jade-vivid");
 
-  for (const locale of ["en", "pt-BR", "qps"]) {
+  for (const locale of LOCALES) {
     await page.goto(url(ANY, locale));
-    // Taken from the sidebar rather than hardcoded: a page this misses is a
-    // page nothing links to.
-    const hrefs = await page.evaluate(() =>
-      [...document.querySelectorAll(".nd-nav-link")].map((a) => a.getAttribute("href")),
+    // Taken from the sidebar rather than hardcoded — a page this misses is a
+    // page nothing links to — and resolved the way the BROWSER resolves it,
+    // via `.href`, not by joining strings here. Joining them here would test
+    // my arithmetic; `.href` tests the site's.
+    const targets = await page.evaluate(() =>
+      [...document.querySelectorAll(".nd-nav-link")].map((a) => a.href),
     );
-    expect(hrefs.length, `${locale} has no navigation`).toBeGreaterThan(0);
-    for (const href of hrefs) await page.goto(`/${locale}/${href}`);
+    expect(targets.length, `${locale} has no navigation`).toBeGreaterThan(0);
+    for (const target of targets) {
+      expect(target, "a link a reader can see shows a file name").not.toContain(".html");
+      await page.goto(target);
+    }
   }
 
   // Silence is how this fails: a stylesheet that 404s reports nothing, paints

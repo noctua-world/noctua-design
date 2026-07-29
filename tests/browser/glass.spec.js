@@ -50,7 +50,7 @@ async function filteredAncestors(page, selector) {
 }
 
 test("the settings panel's glass has no filtered ancestor", async ({ page }) => {
-  await page.goto("/en/spacing.html");
+  await page.goto("/en/spacing/");
   await page.locator(".nd-settings > summary").click();
   // The header used to be exactly this: a `backdrop-filter` ancestor of the
   // panel, which silently turned the panel's own into a flat fill.
@@ -59,7 +59,7 @@ test("the settings panel's glass has no filtered ancestor", async ({ page }) => 
 
 test("every glass surface has no filtered ancestor", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/en/scoped-themes.html");
+  await page.goto("/en/scoped-themes/");
   await page.locator("[data-nd-menu]").click();
   await page.locator(".nd-settings > summary").click();
 
@@ -69,7 +69,7 @@ test("every glass surface has no filtered ancestor", async ({ page }) => {
 });
 
 test("a frosted surface sees what is behind it", async ({ page }) => {
-  await page.goto("/en/spacing.html");
+  await page.goto("/en/spacing/");
   // A hard-edged pattern behind the page. Through real glass it survives as a
   // blurred gradient with measurable variance; through a flat fill it does not
   // survive at all.
@@ -92,7 +92,7 @@ test("a frosted surface sees what is behind it", async ({ page }) => {
 });
 
 test("the colours page paints thirty-nine distinct palettes", async ({ page }) => {
-  await page.goto("/en/colours.html");
+  await page.goto("/en/colours/");
   await page.waitForLoadState("networkidle");
 
   const distinct = await page.evaluate(() => {

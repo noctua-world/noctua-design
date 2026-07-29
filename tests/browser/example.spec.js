@@ -15,7 +15,7 @@ const requests = (page) =>
   );
 
 test("the React bundle is not fetched on a normal page view", async ({ page }) => {
-  await page.goto("/en/components.html");
+  await page.goto("/en/components/");
   await page.waitForLoadState("networkidle");
   // 190 KB that most readers never need. A lazy path that loads eagerly is not
   // a lazy path; it is a lazy path with a bug nobody notices.
@@ -23,7 +23,7 @@ test("the React bundle is not fetched on a normal page view", async ({ page }) =
 });
 
 test("switching to React fetches it once and mounts the same theme", async ({ page }) => {
-  await page.goto("/en/components.html");
+  await page.goto("/en/components/");
   const dioxus = page.locator("[data-nd-frame-stage] > [data-noctua-scope]");
   const expected = {
     palette: await dioxus.getAttribute("data-palette"),
@@ -50,7 +50,7 @@ test("switching to React fetches it once and mounts the same theme", async ({ pa
 });
 
 test("switching back unmounts React rather than hiding it", async ({ page }) => {
-  await page.goto("/en/components.html");
+  await page.goto("/en/components/");
   await page.locator(".nd-code-summary").click();
   await page.locator('[data-nd-impl="React"]').click();
   await expect(page.locator("[data-nd-react-slot] [data-noctua-scope]")).toBeVisible();
@@ -63,7 +63,7 @@ test("switching back unmounts React rather than hiding it", async ({ page }) => 
 });
 
 test("the code panel shows the implementation that is mounted", async ({ page }) => {
-  await page.goto("/en/components.html");
+  await page.goto("/en/components/");
   await page.locator(".nd-code-summary").click();
   await expect(page.locator('[data-nd-impl-source="Dioxus"]')).toBeVisible();
 
@@ -73,7 +73,7 @@ test("the code panel shows the implementation that is mounted", async ({ page })
 });
 
 test("the width control resizes the stage and nothing else", async ({ page }) => {
-  await page.goto("/en/components.html");
+  await page.goto("/en/components/");
   const stage = page.locator("[data-nd-frame-stage]");
   const full = (await stage.boundingBox()).width;
 
@@ -109,9 +109,9 @@ test("search finds the system's own names, and only when asked", async ({ page }
 });
 
 test("every locale ships the same page and switches between them", async ({ page }) => {
-  await page.goto("/en/scoped-themes.html");
+  await page.goto("/en/scoped-themes/");
   await page.locator(".nd-locale").click();
-  await expect(page).toHaveURL(/\/pt-BR\/scoped-themes\.html$/);
+  await expect(page).toHaveURL(/\/pt-BR\/scoped-themes\/$/);
   expect(await page.locator("html").getAttribute("lang")).toBe("pt-BR");
 
   // The sidebar is alphabetical in the reader's language, not in English.

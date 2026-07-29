@@ -11,13 +11,19 @@
 
 use noctua_design_theme as theme;
 
+use crate::site::{self, Page};
+
 /// One searchable name and where it is documented.
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Entry {
     /// The name as a developer would type it.
     pub name: &'static str,
-    /// The page that explains it, relative to the locale directory.
-    pub page: &'static str,
+    /// The page that explains it.
+    ///
+    /// A `Page`, not a path. A search result that leads to a 404 used to be a
+    /// typo away, guarded by a test that compared strings; now it does not
+    /// compile.
+    pub page: Page,
 }
 
 /// Every name worth finding.
@@ -28,123 +34,123 @@ pub(crate) struct Entry {
 pub(crate) const ENTRIES: &[Entry] = &[
     Entry {
         name: "--noctua-space-base",
-        page: "spacing.html",
+        page: site::SPACING,
     },
     Entry {
         name: "--noctua-space-tight",
-        page: "spacing.html",
+        page: site::SPACING,
     },
     Entry {
         name: "--noctua-space-inset",
-        page: "spacing.html",
+        page: site::SPACING,
     },
     Entry {
         name: "--noctua-space-gap",
-        page: "spacing.html",
+        page: site::SPACING,
     },
     Entry {
         name: "--noctua-space-paragraph",
-        page: "spacing.html",
+        page: site::SPACING,
     },
     Entry {
         name: "--noctua-space-heading",
-        page: "spacing.html",
+        page: site::SPACING,
     },
     Entry {
         name: "--noctua-space-section",
-        page: "spacing.html",
+        page: site::SPACING,
     },
     Entry {
         name: "--noctua-space-region",
-        page: "spacing.html",
+        page: site::SPACING,
     },
     Entry {
         name: "--noctua-measure",
-        page: "typography.html",
+        page: site::TYPOGRAPHY,
     },
     Entry {
         name: "--noctua-measure-lead",
-        page: "typography.html",
+        page: site::TYPOGRAPHY,
     },
     Entry {
         name: "--noctua-size-body",
-        page: "typography.html",
+        page: site::TYPOGRAPHY,
     },
     Entry {
         name: "--noctua-size-h1",
-        page: "typography.html",
+        page: site::TYPOGRAPHY,
     },
     Entry {
         name: "--noctua-size-display",
-        page: "typography.html",
+        page: site::TYPOGRAPHY,
     },
     Entry {
         name: "--noctua-leading-body",
-        page: "typography.html",
+        page: site::TYPOGRAPHY,
     },
     Entry {
         name: "--noctua-weight-semibold",
-        page: "typography.html",
+        page: site::TYPOGRAPHY,
     },
     Entry {
         name: "--noctua-radius-control",
-        page: "components.html",
+        page: site::COMPONENTS,
     },
     Entry {
         name: "--noctua-radius-surface",
-        page: "components.html",
+        page: site::COMPONENTS,
     },
     Entry {
         name: "--noctua-glass-blur",
-        page: "effects.html",
+        page: site::EFFECTS,
     },
     Entry {
         name: "--noctua-glass-opacity",
-        page: "effects.html",
+        page: site::EFFECTS,
     },
     Entry {
         name: "--noctua-pattern-ink",
-        page: "effects.html",
+        page: site::EFFECTS,
     },
     Entry {
         name: "--noctua-glow-ink",
-        page: "effects.html",
+        page: site::EFFECTS,
     },
     Entry {
         name: "--nc-color-surface",
-        page: "colours.html",
+        page: site::COLOURS,
     },
     Entry {
         name: "--nc-color-fg",
-        page: "colours.html",
+        page: site::COLOURS,
     },
     Entry {
         name: "--nc-color-border",
-        page: "colours.html",
+        page: site::COLOURS,
     },
     Entry {
         name: "--nc-color-accent",
-        page: "colours.html",
+        page: site::COLOURS,
     },
     Entry {
         name: "--nc-color-on-accent",
-        page: "colours.html",
+        page: site::COLOURS,
     },
     Entry {
         name: "ThemeScope",
-        page: "components.html",
+        page: site::COMPONENTS,
     },
     Entry {
         name: "useTheme",
-        page: "components.html",
+        page: site::COMPONENTS,
     },
     Entry {
         name: "data-noctua-scope",
-        page: "scoped-themes.html",
+        page: site::SCOPED_THEMES,
     },
     Entry {
         name: "data-palette",
-        page: "scoped-themes.html",
+        page: site::SCOPED_THEMES,
     },
 ];
 
@@ -158,13 +164,13 @@ pub(crate) fn all() -> Vec<Entry> {
     for prop in crate::props::SCOPABLE {
         entries.push(Entry {
             name: prop.name,
-            page: "components.html",
+            page: site::COMPONENTS,
         });
     }
     for palette in theme::Palette::ALL {
         entries.push(Entry {
             name: palette.as_str(),
-            page: "colours.html",
+            page: site::COLOURS,
         });
     }
     entries
@@ -175,15 +181,17 @@ mod tests {
     use super::*;
 
     /// A search result that leads nowhere is worse than no result.
+    ///
+    /// Now a type invariant rather than a comparison — kept as a tripwire in
+    /// case `Entry.page` ever loosens back into a string.
     #[test]
     fn every_entry_points_at_a_real_page() {
-        let pages: Vec<String> = crate::site::PAGES.iter().map(|page| page.file()).collect();
         for entry in all() {
             assert!(
-                pages.iter().any(|page| page == entry.page),
+                site::PAGES.contains(&entry.page),
                 "{} points at {}, which is not a page",
                 entry.name,
-                entry.page
+                entry.page.slug
             );
         }
     }

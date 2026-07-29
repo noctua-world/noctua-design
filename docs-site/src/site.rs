@@ -13,17 +13,44 @@ pub(crate) struct Page {
     pub summary: Key,
 }
 
+/// How far a page is from the site root: `<locale>/<slug>/index.html`.
+///
+/// Uniform on purpose. Every document sits at exactly this depth — foundation
+/// pages, component pages, all of them — so the base, the asset links and the
+/// locale switch are one constant rather than a computation that has to agree
+/// with the directory layout in four places.
+pub(crate) const BASE: &str = "../../";
+
 impl Page {
-    /// The file name this page is written to, within its locale directory.
+    /// The path this page is written to, within its locale directory.
+    ///
+    /// A directory with an `index.html` inside, so the URL is `/en/colours/`
+    /// and no reader ever sees `.html` — least of all `index.html`, which is
+    /// the file name for "this page has no name of its own".
     #[must_use]
     pub(crate) fn file(self) -> String {
-        format!("{}.html", self.slug)
+        format!("{}/index.html", self.slug)
+    }
+
+    /// The URL directory, relative to the locale root: `colours/`.
+    #[must_use]
+    pub(crate) fn dir(self) -> String {
+        format!("{}/", self.slug)
     }
 
     /// The href another page in the same locale uses to reach this one.
+    ///
+    /// Up out of this page's own directory, then down into the other's — which
+    /// is what a sibling directory costs, and the reason the depth is uniform.
     #[must_use]
     pub(crate) fn href(self) -> String {
-        self.file()
+        format!("../{}/", self.slug)
+    }
+
+    /// The href this page uses to reach its translation.
+    #[must_use]
+    pub(crate) fn locale_href(self, other: Locale) -> String {
+        format!("{BASE}{}/{}", other.tag(), self.dir())
     }
 }
 
@@ -34,38 +61,45 @@ impl Page {
 /// documentation site's front door is its first real page, and a page whose
 /// content is a description of the other pages is a table of contents the
 /// sidebar already is. `<locale>/index.html` is a redirect document, not a
-/// page — see `main::locale_redirect`.
+/// page — see `main::redirect_to`.
+pub(crate) const COLOURS: Page = Page {
+    slug: "colours",
+    title: Key::PageColoursTitle,
+    summary: Key::PageColoursSummary,
+};
+pub(crate) const TYPOGRAPHY: Page = Page {
+    slug: "typography",
+    title: Key::PageTypographyTitle,
+    summary: Key::PageTypographySummary,
+};
+pub(crate) const SPACING: Page = Page {
+    slug: "spacing",
+    title: Key::PageSpacingTitle,
+    summary: Key::PageSpacingSummary,
+};
+pub(crate) const EFFECTS: Page = Page {
+    slug: "effects",
+    title: Key::PageEffectsTitle,
+    summary: Key::PageEffectsSummary,
+};
+pub(crate) const SCOPED_THEMES: Page = Page {
+    slug: "scoped-themes",
+    title: Key::PageScopedThemesTitle,
+    summary: Key::PageScopedThemesSummary,
+};
+pub(crate) const COMPONENTS: Page = Page {
+    slug: "components",
+    title: Key::PageComponentsTitle,
+    summary: Key::PageComponentsSummary,
+};
+
 pub(crate) const PAGES: [Page; 6] = [
-    Page {
-        slug: "colours",
-        title: Key::PageColoursTitle,
-        summary: Key::PageColoursSummary,
-    },
-    Page {
-        slug: "typography",
-        title: Key::PageTypographyTitle,
-        summary: Key::PageTypographySummary,
-    },
-    Page {
-        slug: "spacing",
-        title: Key::PageSpacingTitle,
-        summary: Key::PageSpacingSummary,
-    },
-    Page {
-        slug: "effects",
-        title: Key::PageEffectsTitle,
-        summary: Key::PageEffectsSummary,
-    },
-    Page {
-        slug: "scoped-themes",
-        title: Key::PageScopedThemesTitle,
-        summary: Key::PageScopedThemesSummary,
-    },
-    Page {
-        slug: "components",
-        title: Key::PageComponentsTitle,
-        summary: Key::PageComponentsSummary,
-    },
+    COLOURS,
+    TYPOGRAPHY,
+    SPACING,
+    EFFECTS,
+    SCOPED_THEMES,
+    COMPONENTS,
 ];
 
 /// The pages in the order this locale reads them.
@@ -146,12 +180,36 @@ mod tests {
         assert_eq!(slugs.len(), count);
     }
 
-    /// `index.html` is a redirect document, never a page. A page that claimed
-    /// the name would be a landing page by the back door.
+    /// `<locale>/index.html` is a redirect document, never a page. A page that
+    /// claimed the name would be a landing page by the back door.
     #[test]
-    fn no_page_claims_the_index() {
+    fn no_page_claims_the_locale_index() {
         for page in PAGES {
             assert_ne!(page.file(), "index.html", "{}", page.slug);
+        }
+    }
+
+    /// No URL a reader can see ends in `.html`, and none of them says `index`.
+    #[test]
+    fn no_href_shows_a_file_name() {
+        for page in PAGES {
+            for href in [page.href(), page.dir(), page.locale_href(Locale::En)] {
+                assert!(!href.contains(".html"), "{href}");
+                assert!(
+                    href.ends_with('/'),
+                    "a directory URL needs its slash: {href}"
+                );
+            }
+        }
+    }
+
+    /// Every document is at the same depth, which is what makes [`BASE`] a
+    /// constant instead of a calculation.
+    #[test]
+    fn every_page_is_two_levels_below_the_root() {
+        for page in PAGES {
+            assert_eq!(page.file().matches('/').count(), 1, "{}", page.slug);
+            assert_eq!(BASE, "../../");
         }
     }
 

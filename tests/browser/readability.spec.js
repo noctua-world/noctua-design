@@ -77,7 +77,7 @@ for (const mode of MODES) {
       test(`${pattern} on ${mode}${blackout === "on" ? " + blackout" : ""} keeps text readable`, async ({
         page,
       }) => {
-        await page.goto("/en/spacing.html");
+        await page.goto("/en/spacing/");
         await page.evaluate(
           ([mode, blackout, pattern]) => {
             const r = document.documentElement;
@@ -140,7 +140,7 @@ for (const mode of MODES) {
 }
 
 test("a pattern's ink stays under the declared ceiling", async ({ page }) => {
-  await page.goto("/en/spacing.html");
+  await page.goto("/en/spacing/");
   await page.evaluate(() => {
     document.documentElement.setAttribute("data-theme", "dark");
     document.documentElement.setAttribute("data-noctua-pattern", "none");

@@ -35,7 +35,7 @@ async function widthIn(page, text, family) {
 }
 
 test("no script renders as tofu", async ({ page }) => {
-  await page.goto("/en/typography.html");
+  await page.goto("/en/typography/");
   await page.waitForLoadState("networkidle");
 
   const samples = await page.locator("[data-nd-script]").evaluateAll((els) =>
@@ -91,7 +91,7 @@ test("no script renders as tofu", async ({ page }) => {
 });
 
 test("every script has a face of its own", async ({ page }) => {
-  await page.goto("/en/typography.html");
+  await page.goto("/en/typography/");
   await page.waitForLoadState("networkidle");
 
   // The assertion that used to list ten missing families. It lists none now,
@@ -129,13 +129,13 @@ test("the font files the scripts need are actually present", async ({ page }) =>
       failures.push(`${response.status()} ${response.url()}`);
     }
   });
-  await page.goto("/en/typography.html");
+  await page.goto("/en/typography/");
   await page.waitForLoadState("networkidle");
   expect(failures, "a font file 404ed").toEqual([]);
 });
 
 test("with Iosevka selected, no component renders a line in two typefaces", async ({ page }) => {
-  await page.goto("/en/typography.html");
+  await page.goto("/en/typography/");
   await page.evaluate(() => document.documentElement.setAttribute("data-noctua-font", "mono"));
   await page.waitForLoadState("networkidle");
 
@@ -162,7 +162,7 @@ test("a CJK page fetches a handful of slices, not the whole family", async ({ pa
     fetched.push({ name, bytes: length });
   });
 
-  await page.goto("/en/typography.html");
+  await page.goto("/en/typography/");
   await page.waitForLoadState("networkidle");
 
   const cjk = fetched.filter((f) => /NotoSans(JP|KR|SC)-/.test(f.name));
@@ -192,7 +192,7 @@ test("a Latin page loads no non-Latin face", async ({ page }) => {
   });
   // The spacing page is Latin only. Loading a CJK face for it would be tens of
   // megabytes nobody on that page needs.
-  await page.goto("/en/spacing.html");
+  await page.goto("/en/spacing/");
   await page.waitForLoadState("networkidle");
 
   // Eleven script faces are declared and 14.5 MB sit in assets/fonts/. A Latin

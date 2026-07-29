@@ -104,7 +104,7 @@ pub(crate) fn Header(context: Context) -> Element {
 #[component]
 fn LocaleSwitch(context: Context) -> Element {
     let other = theme_other_locale(context.locale);
-    let href = format!("../{}/{}", other.tag(), context.page.file());
+    let href = context.page.locale_href(other);
     rsx! {
         a {
             class: "nd-locale",
@@ -390,7 +390,7 @@ pub(crate) fn Sidebar(context: Context) -> Element {
                 for entry in crate::index::all() {
                     a {
                         class: "nd-found-entry",
-                        href: "{entry.page}",
+                        href: "{entry.page.href()}",
                         "data-nd-index": "{entry.name}",
                         hidden: true,
                         "{entry.name}"

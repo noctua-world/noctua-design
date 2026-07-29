@@ -213,6 +213,24 @@ fn serve(dist: &Path, port: u16) -> Result<(), String> {
             .next()
             .unwrap_or("/");
 
+        // A directory asked for without its trailing slash has to REDIRECT, not
+        // simply serve its index: every href on the page is document-relative,
+        // so at `/en/colours` they all resolve one level too high and the page
+        // arrives with no stylesheet and no working links. GitHub Pages and
+        // `python3 -m http.server` both send this 301; a dev server that
+        // quietly serves the file instead is a dev server that disagrees with
+        // what ships, in the direction that hides the bug.
+        if is_directory(dist, target) && !target.ends_with('/') {
+            let header = format!(
+                "HTTP/1.1 301 Moved Permanently\r\n\
+                 Location: {target}/\r\n\
+                 Content-Length: 0\r\n\
+                 Connection: close\r\n\r\n"
+            );
+            let _ = stream.write_all(header.as_bytes());
+            continue;
+        }
+
         let (status, body, mime) = match resolve(dist, target) {
             Some((body, mime)) => ("200 OK", body, mime),
             None => (
@@ -234,6 +252,18 @@ fn serve(dist: &Path, port: u16) -> Result<(), String> {
         let _ = stream.write_all(&body);
     }
     Ok(())
+}
+
+/// Whether a request names a directory inside the site.
+///
+/// Same traversal refusal as [`resolve`]: a path that escapes `dist` is not a
+/// directory as far as this server is concerned, whatever the filesystem says.
+fn is_directory(dist: &Path, target: &str) -> bool {
+    if target.split('/').any(|segment| segment == "..") {
+        return false;
+    }
+    let path = dist.join(target.trim_start_matches('/'));
+    path.starts_with(dist) && path.is_dir()
 }
 
 /// Maps a request path to a file, refusing anything that escapes the site.
@@ -299,7 +329,10 @@ fn docs(root: &Path, verify: bool) -> Result<(), String> {
             ui::ok(line);
         }
     }
-    ui::detail("open docs-site/dist/index.html, or serve that directory");
+    // Not "open the file": every URL is a directory now, and `file://` does not
+    // serve a directory's index. `cargo xtask dev` is the way to look at it,
+    // and it is the same static directory any host would serve.
+    ui::detail("`cargo xtask dev` to look at it, or serve docs-site/dist");
 
     if verify {
         ui::gap();

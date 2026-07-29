@@ -18,12 +18,12 @@ export const OFFERED = ["en", "pt-BR"];
 
 /** Every real page, by the name a spec wants to say. */
 export const PAGE = {
-  colours: "colours.html",
-  components: "components.html",
-  effects: "effects.html",
-  scoped: "scoped-themes.html",
-  spacing: "spacing.html",
-  typography: "typography.html",
+  colours: "colours/",
+  components: "components/",
+  effects: "effects/",
+  scoped: "scoped-themes/",
+  spacing: "spacing/",
+  typography: "typography/",
 };
 
 /** The URL of a page in a locale. */

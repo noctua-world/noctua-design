@@ -328,6 +328,29 @@ breakpoints are minimum-width only.
 `min-width` to equal a breakpoint declared in `spec/tokens.toml`. Write the
 narrow case unconditionally and override it upward.
 
+### The URL scheme is a directory per page, and the depth is uniform
+
+`dist/<locale>/<slug>/index.html`, for every page — foundations and components
+alike. So `site::BASE` is the constant `../../` rather than a calculation, and
+every href a reader can see is a directory ending in `/`. Nothing shows `.html`,
+least of all `index.html`, which is the file name for *"this page has no name of
+its own"* and was in every URL on the site.
+
+Two consequences worth knowing before you fight them:
+
+- **`file://` no longer works.** A browser will not serve a directory's
+  `index.html` off the filesystem. `cargo xtask dev` is the way to look at the
+  site, and it is the same static directory any host would serve.
+- **A directory without its trailing slash must 301**, or every
+  document-relative href on the page resolves one level too high. The dev
+  server sends it, because GitHub Pages and `python3 -m http.server` both do,
+  and a dev server that disagrees with production hides exactly the bugs it
+  exists to surface.
+
+`<locale>/index.html` is a redirect document to the first entry in that
+locale's sidebar. It is a door, not a page: no title, no prose, no sidebar
+entry, and `site::first` is what both it and the wordmark read.
+
 ### Trap 0.7 — a render-blocking stylesheet that 404s blocks nothing
 
 The bootstrap injected the stored palette's sheet with a **bare relative href**.

@@ -112,7 +112,7 @@ test.describe("the header", () => {
 
 test.describe("§9.7, enforced", () => {
   test("no element in the shell casts a shadow", async ({ page }) => {
-    await page.goto("/en/scoped-themes.html");
+    await page.goto("/en/scoped-themes/");
     const shadows = await page.evaluate(() =>
       [...document.querySelectorAll("*")]
         .filter((el) => getComputedStyle(el).boxShadow !== "none")
@@ -123,7 +123,7 @@ test.describe("§9.7, enforced", () => {
 
   test("exactly four kinds of floating surface exist", async ({ page }) => {
     await page.setViewportSize(MOBILE);
-    await page.goto("/en/scoped-themes.html");
+    await page.goto("/en/scoped-themes/");
     await page.locator("[data-nd-menu]").click();
     await page.locator(".nd-settings > summary").click();
 
