@@ -338,7 +338,41 @@ fn inspect(
                 message,
             });
         }
+        if let Some(message) = hand_written_glass(&code) {
+            findings.push(Finding {
+                file: file.to_owned(),
+                line: number,
+                message,
+            });
+        }
     }
+}
+
+/// There is one glass recipe, and it is emitted.
+///
+/// # What four copies cost
+///
+/// The shell wrote `backdrop-filter` four times — a utility, the header's
+/// backdrop, the settings panel and the drawer — each repeating the same blur
+/// over the same `color-mix`. They drifted: the drawer switched its glass off
+/// above `lg`, so on every desktop viewport the sidebar and the settings panel
+/// were different materials on the same page.
+///
+/// And a `backdrop-filter` whose ancestor has one is **inert** — it samples
+/// nothing and reports nothing. Both failures are invisible to a compiler and
+/// obvious to a reader, which is the worst combination there is.
+///
+/// The recipe lives in `dist/theme.css` as `.noctua-glass`, emitted from
+/// `spec/tokens.toml`. Generated files are exempt by the header check at the
+/// top of [`inspect`].
+fn hand_written_glass(code: &str) -> Option<String> {
+    code.contains("backdrop-filter").then(|| {
+        "a second glass recipe. There is one, `.noctua-glass`, emitted from \
+         spec/tokens.toml — apply the class instead. Four hand-written copies \
+         drifted into two materials on one page, and a nested backdrop-filter is \
+         inert with nothing to report"
+            .to_owned()
+    })
 }
 
 /// No `var()` may name a custom property nothing declares.

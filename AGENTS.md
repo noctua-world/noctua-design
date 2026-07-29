@@ -386,6 +386,43 @@ outside that set. `--nc-*` is exempt (1,767 vendored names, guarded elsewhere),
 and a name ending in `-` is skipped because it is one an `rsx!` interpolation
 was cut out of.
 
+### One glass recipe, and three things that switch it off silently
+
+`.noctua-glass` is emitted from `spec/tokens.toml` into `dist/theme.css`, and
+`gates::hand_written_glass` fails the build on a `backdrop-filter` written
+anywhere under `docs-site` or `assets`. There were four hand-written copies;
+they drifted, and the drawer switched its glass off above `lg` — so the sidebar
+and the settings panel were different materials on every desktop viewport.
+
+Three ways a `backdrop-filter` does nothing, none of which reports anything:
+
+1. **An ancestor has one.** It is then inert. This is why the header's frost is
+   a *sibling* painted behind it, and why a scope is not glass: the nested
+   scope's blur sampled its parent's and was switched off entirely.
+2. **The element already has an opaque background.** There is nothing behind it
+   left to sample.
+3. **Its tokens are undefined**, which computes to `none` — see Trap 0.
+
+Opacity is 78/58, not 92/82. At 92% there is nothing to see through: the blur
+had nothing to do and the effect read as a tinted panel, which is precisely the
+complaint. The floor is readability, measured by `readability.spec.js`.
+
+### A scrollable element never carries a radius
+
+And a radius element never scrolls. There is no source gate for it yet;
+`material.spec.js` asserts it in the browser, over every element on the page.
+
+A radius on a scroller has nothing to clip the bar against, so a classic
+scrollbar paints square straight through the rounded corner. That is what a
+reader sees the moment corners are set to `circular`. The fix is structural:
+an outer element with the radius and `overflow: hidden`, an inner one with
+`overflow-y: auto`. `.nd-panel` + `.nd-panel-body` is the shape.
+
+**`scrollbar-width` is not inherited.** Set on `:root` it styles the page's own
+bar and nothing else — every panel and code block keeps the browser's default,
+which is the bar a reader is actually looking at. The emitted rule uses
+`:where(*)`.
+
 ### Trap 0.7 — a render-blocking stylesheet that 404s blocks nothing
 
 The bootstrap injected the stored palette's sheet with a **bare relative href**.

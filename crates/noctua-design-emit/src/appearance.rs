@@ -51,6 +51,7 @@ pub fn emit(spec: &Spec, theme: &Theme) -> Vec<EmittedFile> {
     .expect("write");
 
     radius_presets(&mut out, spec, prefix);
+    scrollbars(&mut out, prefix);
     glass(&mut out, spec, theme, prefix);
     blackout(&mut out, prefix);
     effects(&mut out, spec, prefix);
@@ -79,6 +80,49 @@ fn radius_presets(out: &mut String, spec: &Spec, prefix: &str) {
         }
         writeln!(out, "}}\n").expect("write");
     }
+}
+
+/// The scrollbar, once, for everything.
+///
+/// A browser's default scrollbar is a piece of somebody else's design system
+/// sitting inside this one, and on a dark page a light one is the brightest
+/// thing on screen. Two declarations cover every engine: the standard
+/// properties, and the `WebKit` pseudo-elements for the classic bar.
+///
+/// The thumb is mixed from the foreground colour at the point of use, so a
+/// scroller inside a themed subtree gets that theme's thumb rather than the
+/// page's.
+fn scrollbars(out: &mut String, prefix: &str) {
+    writeln!(
+        out,
+        "/* One scrollbar treatment, for every scroller in the system.\n\
+        \x20\n\
+        \x20  `:where(*)` and not `:where(:root)`, because `scrollbar-width` is NOT an\n\
+        \x20  inherited property. Set on the root alone it styles the page's own bar and\n\
+        \x20  nothing else — every panel, drawer and code block keeps the browser's\n\
+        \x20  default, which is the one a reader actually complains about. Zero\n\
+        \x20  specificity, so any surface can still opt out. */\n\
+        :where(*) {{\n\
+        \x20 scrollbar-width: thin;\n\
+        \x20 scrollbar-color: color-mix(in oklab, var(--nc-color-fg) 24%, transparent)\n\
+        \x20                  transparent;\n\
+        }}\n\n\
+        ::-webkit-scrollbar {{\n\
+        \x20 inline-size: var(--{prefix}-space-2);\n\
+        \x20 block-size: var(--{prefix}-space-2);\n\
+        }}\n\n\
+        ::-webkit-scrollbar-track {{\n\
+        \x20 background: transparent;\n\
+        }}\n\n\
+        ::-webkit-scrollbar-thumb {{\n\
+        \x20 background: color-mix(in oklab, var(--nc-color-fg) 24%, transparent);\n\
+        \x20 border-radius: var(--{prefix}-radius-pill);\n\
+        }}\n\n\
+        ::-webkit-scrollbar-thumb:hover {{\n\
+        \x20 background: color-mix(in oklab, var(--nc-color-fg) 38%, transparent);\n\
+        }}\n"
+    )
+    .expect("write");
 }
 
 /// The frosted surface, as dimensions only.
@@ -118,11 +162,9 @@ fn glass(out: &mut String, spec: &Spec, theme: &Theme, prefix: &str) {
     // on the root still wins.
     if let Some(setting) = theme.setting.get("glass") {
         let level = &setting.default;
-        if let Some(blur) = spec.glass.blur.get(level) {
-            let opacity = spec.glass.opacity.get(level).copied().unwrap_or(100);
+        if spec.glass.blur.contains_key(level) {
             writeln!(out, ":where(:root) {{").expect("write");
-            writeln!(out, "  --{prefix}-glass-blur: {blur};").expect("write");
-            writeln!(out, "  --{prefix}-glass-opacity: {opacity}%;").expect("write");
+            level_tokens(out, spec, prefix, level);
             writeln!(out, "}}\n").expect("write");
         }
     }
@@ -130,17 +172,25 @@ fn glass(out: &mut String, spec: &Spec, theme: &Theme, prefix: &str) {
     // `off` is the absence of the tokens, so a surface that asks for them
     // falls back to opaque rather than to a half-applied frost.
     writeln!(out, "[data-{prefix}-glass=\"off\"] {{").expect("write");
-    writeln!(out, "  --{prefix}-glass-blur: 0;").expect("write");
-    writeln!(out, "  --{prefix}-glass-opacity: 100%;").expect("write");
+    for (name, value) in [
+        ("blur", "0"),
+        ("opacity", "100%"),
+        ("saturate", "1"),
+        ("brightness", "1"),
+        ("edge", "0%"),
+        ("sheen", "0%"),
+    ] {
+        writeln!(out, "  --{prefix}-glass-{name}: {value};").expect("write");
+    }
     writeln!(out, "}}\n").expect("write");
 
-    for (level, blur) in &spec.glass.blur {
-        let opacity = spec.glass.opacity.get(level).copied().unwrap_or(100);
+    for level in spec.glass.blur.keys() {
         writeln!(out, "[data-{prefix}-glass=\"{level}\"] {{").expect("write");
-        writeln!(out, "  --{prefix}-glass-blur: {blur};").expect("write");
-        writeln!(out, "  --{prefix}-glass-opacity: {opacity}%;").expect("write");
+        level_tokens(out, spec, prefix, level);
         writeln!(out, "}}\n").expect("write");
     }
+
+    surface(out, prefix);
 
     // Transparency is an accessibility preference, exactly as motion is.
     writeln!(
@@ -151,7 +201,94 @@ fn glass(out: &mut String, spec: &Spec, theme: &Theme, prefix: &str) {
         \x20 :root {{\n\
         \x20   --{prefix}-glass-blur: 0;\n\
         \x20   --{prefix}-glass-opacity: 100%;\n\
+        \x20   --{prefix}-glass-saturate: 1;\n\
+        \x20   --{prefix}-glass-brightness: 1;\n\
+        \x20   --{prefix}-glass-edge: 0%;\n\
+        \x20   --{prefix}-glass-sheen: 0%;\n\
         \x20 }}\n\
+        }}\n"
+    )
+    .expect("write");
+}
+
+/// Every dimension of one glass level.
+fn level_tokens(out: &mut String, spec: &Spec, prefix: &str, level: &str) {
+    let blur = spec.glass.blur.get(level).cloned().unwrap_or_default();
+    let opacity = spec.glass.opacity.get(level).copied().unwrap_or(100);
+    let saturate = spec
+        .glass
+        .saturate
+        .get(level)
+        .cloned()
+        .unwrap_or_else(|| "1".to_owned());
+    let brightness = spec
+        .glass
+        .brightness
+        .get(level)
+        .cloned()
+        .unwrap_or_else(|| "1".to_owned());
+    let edge = spec.glass.edge.get(level).copied().unwrap_or(0);
+    let sheen = spec.glass.sheen.get(level).copied().unwrap_or(0);
+
+    writeln!(out, "  --{prefix}-glass-blur: {blur};").expect("write");
+    writeln!(out, "  --{prefix}-glass-opacity: {opacity}%;").expect("write");
+    writeln!(out, "  --{prefix}-glass-saturate: {saturate};").expect("write");
+    writeln!(out, "  --{prefix}-glass-brightness: {brightness};").expect("write");
+    writeln!(out, "  --{prefix}-glass-edge: {edge}%;").expect("write");
+    writeln!(out, "  --{prefix}-glass-sheen: {sheen}%;").expect("write");
+}
+
+/// The one glass recipe. Every frosted surface in the system takes this class.
+///
+/// # Why it is emitted here rather than written in a stylesheet
+///
+/// It was written by hand, four times: the header's backdrop, the drawer, the
+/// settings panel and an unused utility, each repeating the same literal
+/// `blur(…) saturate(1.4)` over the same `color-mix`. They drifted — the drawer
+/// dropped its glass entirely above `lg` — and the sidebar and the panel ended
+/// up looking like different materials on the same page, which is what a reader
+/// notices first. One definition, and a source gate that forbids a second.
+///
+/// # Why the `color-mix` is inside a class and not a token
+///
+/// `var()` resolves where it is DECLARED. A `--noctua-glass-surface` at `:root`
+/// would freeze to the page's palette and hand every themed component the
+/// page's frost. Inside `.{prefix}-glass` it resolves on the element that
+/// carries the class, which is where the palette is already correct.
+fn surface(out: &mut String, prefix: &str) {
+    writeln!(
+        out,
+        "/* The one glass recipe. Adding a second `backdrop-filter` anywhere is a\n\
+        \x20  source-gate finding: four hand-written copies drifted into two materials\n\
+        \x20  on one page, and a nested one is inert with nothing to report. */\n\
+        .{prefix}-glass {{\n\
+        \x20 background: color-mix(in oklab, var(--nc-color-surface)\n\
+        \x20                       var(--{prefix}-glass-opacity), transparent);\n\
+        \x20 backdrop-filter: blur(var(--{prefix}-glass-blur))\n\
+        \x20                  saturate(var(--{prefix}-glass-saturate))\n\
+        \x20                  brightness(var(--{prefix}-glass-brightness));\n\
+        \x20 -webkit-backdrop-filter: blur(var(--{prefix}-glass-blur))\n\
+        \x20                          saturate(var(--{prefix}-glass-saturate))\n\
+        \x20                          brightness(var(--{prefix}-glass-brightness));\n\
+        \x20 /* The lit edge. A border rather than a shadow: §9.7 forbids elevated\n\
+        \x20    surfaces, and a browser test asserts nothing in the shell casts one. */\n\
+        \x20 border-block-start: var(--{prefix}-border-hairline) solid\n\
+        \x20   color-mix(in oklab, var(--nc-color-surface-raised)\n\
+        \x20             var(--{prefix}-glass-edge), transparent);\n\
+        \x20 position: relative;\n\
+        }}\n\n\
+        /* The sheen, as a DESCENDANT. A pseudo-element is not an ancestor, so it\n\
+        \x20  cannot stop its own parent's backdrop from sampling. */\n\
+        .{prefix}-glass::after {{\n\
+        \x20 content: \"\";\n\
+        \x20 position: absolute;\n\
+        \x20 inset: 0;\n\
+        \x20 border-radius: inherit;\n\
+        \x20 pointer-events: none;\n\
+        \x20 background: linear-gradient(to bottom,\n\
+        \x20   color-mix(in oklab, var(--nc-color-surface-raised)\n\
+        \x20             var(--{prefix}-glass-sheen), transparent) 0,\n\
+        \x20   transparent var(--{prefix}-space-8));\n\
         }}\n"
     )
     .expect("write");
@@ -461,10 +598,15 @@ mod tests {
         let spec = shipped();
         let blur = &spec.glass.blur[level];
 
+        // Found by CONTENT, not by position. There is more than one
+        // `:where(:root)` block now — the scrollbar treatment is another — and
+        // a test that took the first one would break for a reason that has
+        // nothing to do with what it is checking.
         let root = css
             .split(":where(:root) {")
-            .nth(1)
-            .and_then(|rest| rest.split('}').next())
+            .skip(1)
+            .filter_map(|rest| rest.split('}').next())
+            .find(|block| block.contains("--noctua-glass-blur"))
             .expect("glass has no unscoped default, so a page with nothing stored has no glass");
         assert!(
             root.contains(&format!("--noctua-glass-blur: {blur}")),

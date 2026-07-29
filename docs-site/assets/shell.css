@@ -33,6 +33,13 @@
      block and the two edges meet by construction. */
   --nd-drawer-w: min(var(--noctua-space-64), 78%);
   --nd-header-h: var(--noctua-space-16);
+  /* How much of a content surface survives, so the background pattern reads
+     THROUGH it. Content sitting on an opaque sheet was the other half of why
+     the patterns were invisible; §9.7 already says text sits directly on the
+     background and cards are not used. Code keeps a heavier veil — a pattern
+     behind monospace is noise, and `readability.spec.js` is the guard. */
+  --nd-veil: 72%;
+  --nd-veil-code: 90%;
 }
 
 /* THERE IS NO EDGE SHORTHAND, and there cannot be one.
@@ -105,20 +112,17 @@ a {
 
 /* --- Glass, mixed where it is used --------------------------------------- */
 
-/* The mix is written HERE rather than declared as a token at :root, and that
-   is load-bearing. `--nc-color-surface` freezes to the palette of the element
-   it is declared on, so a `--noctua-glass-surface` at the root would hand a
-   themed component the PAGE's frost. Written at the point of use, it resolves
-   against whatever theme reached this element. */
-.nd-glass {
-  background: color-mix(
-    in oklab,
-    var(--nc-color-surface) var(--noctua-glass-opacity),
-    transparent
-  );
-  backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
-  -webkit-backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
-}
+/* THERE IS NO GLASS HERE ANY MORE, and there must never be again.
+ *
+ * There were four copies of the recipe in this file — a utility, the header's
+ * backdrop, the settings panel and the drawer — each repeating the same
+ * literal blur and the same color-mix. They drifted: the drawer dropped its
+ * glass entirely above `lg`, so on any desktop viewport the sidebar and the
+ * settings panel were visibly different materials on the same page.
+ *
+ * The recipe is now emitted once, as `.noctua-glass` in dist/theme.css, and
+ * `gates::nested_backdrop_filter` fails the build on a `backdrop-filter`
+ * written anywhere under docs-site or assets. Surfaces take the class. */
 
 /* --- The effect layers: siblings of everything --------------------------- */
 
@@ -137,22 +141,13 @@ a {
   pointer-events: none;
 }
 
-/* Readability guarantee (b): the pattern fades to nothing behind the reading
-   column, over about one measure so there is no hard edge that would read as a
-   card. Guarantee (a) — the 4% ink ceiling — holds whether this is on or off,
-   which is why they are independent. Below `sm` the prose fills the viewport,
-   so the mask would erase the whole layer; there it is simply not applied. */
-@media (min-width: 30rem) {
-  .noctua-fx {
-    mask-image: linear-gradient(
-      to right,
-      rgb(0 0 0 / 100%) 0, /* allow-literal: a mask reads only the alpha channel, so this is opacity rather than a colour and no palette can supply it */
-      transparent 18%,
-      transparent 62%,
-      rgb(0 0 0 / 100%) 92% /* allow-literal: as above, the other end of the ramp */
-    );
-  }
-}
+/* THERE IS NO MASK. There was one, and it erased the pattern across 18%–62% of
+   the viewport — 44% of the feature, over exactly the part of the page a reader
+   is looking at. It was a second readability guarantee on top of a sufficient
+   first: the 4% ink ceiling in spec/tokens.toml bounds how much the pattern can
+   move any background pixel, and `readability.spec.js` measures it. Two
+   guarantees where one is measurable is one guarantee and one thing that
+   silently removes a feature. */
 
 /* --- Skip link ----------------------------------------------------------- */
 
@@ -204,13 +199,7 @@ a {
   block-size: var(--nd-header-h);
   z-index: var(--noctua-layer-sticky);
   pointer-events: none;
-  background: color-mix(
-    in oklab,
-    var(--nc-color-surface) var(--noctua-glass-opacity),
-    transparent
-  );
-  backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
-  -webkit-backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
+  /* The material is `.noctua-glass`, applied in the markup. */
 }
 
 .nd-header-controls {
@@ -284,7 +273,7 @@ a {
 
 .nd-icon:hover {
   color: var(--nc-color-fg);
-  background: var(--nc-color-subtle-bg);
+  background: color-mix(in oklab, var(--nc-color-subtle-bg) var(--nd-veil), transparent);
 }
 
 .nd-icon--small {
@@ -380,13 +369,24 @@ a {
 
 .nd-settings[open] > summary {
   color: var(--nc-color-fg);
-  background: var(--nc-color-subtle-bg);
+  background: color-mix(in oklab, var(--nc-color-subtle-bg) var(--nd-veil), transparent);
 }
 
 /* Full-bleed is the BASE, and floating is the override — mobile-first, like
    every other rule here. A rounded panel a few pixels from the edge of a narrow
    screen reads as a card, which §9.7 forbids; and writing the narrow case as a
    `max-width` exception is how a layout grows a dead zone nobody tests at. */
+/* A SCROLLABLE ELEMENT NEVER CARRIES A RADIUS, AND A RADIUS ELEMENT NEVER
+ * SCROLLS. That rule is the whole reason this is two elements.
+ *
+ * The panel used to be one: `overflow-y: auto` in the base rule and a
+ * `border-radius` added at `sm`, with no clipping context between them. A
+ * classic scrollbar then paints square straight through the rounded corner —
+ * which is exactly what a reader sees the moment corners are set to
+ * "circular". Padding it, insetting it or hiding it are all patches on the
+ * same missing structure.
+ *
+ * `gates::scrollable_radius` fails the build on any rule that declares both. */
 .nd-panel {
   position: fixed;
   inset-block-start: var(--nd-header-h);
@@ -395,19 +395,22 @@ a {
   border-inline: 0;
   border-radius: 0;
   max-block-size: calc(100vh - var(--nd-header-h) - var(--noctua-space-8));
+  /* The clipping context. Not `auto`: this element must never scroll. */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-block: var(--noctua-border-hairline) solid var(--nc-color-border);
+  /* The material is `.noctua-glass`, applied in the markup. */
+}
+
+.nd-panel-body {
   overflow-y: auto;
+  /* Reaching the end of the panel must not start scrolling the page behind it. */
+  overscroll-behavior: contain;
   padding: var(--noctua-space-4);
   display: flex;
   flex-direction: column;
   gap: var(--noctua-space-4);
-  border-block: var(--noctua-border-hairline) solid var(--nc-color-border);
-  background: color-mix(
-    in oklab,
-    var(--nc-color-surface) var(--noctua-glass-opacity),
-    transparent
-  );
-  backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
-  -webkit-backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
 }
 
 @media (min-width: 30rem) {
@@ -566,13 +569,7 @@ a {
   flex-direction: column;
   gap: var(--noctua-space-4);
   border-inline-end: var(--noctua-border-hairline) solid var(--nc-color-border);
-  background: color-mix(
-    in oklab,
-    var(--nc-color-surface) var(--noctua-glass-opacity),
-    transparent
-  );
-  backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
-  -webkit-backdrop-filter: blur(var(--noctua-glass-blur)) saturate(1.4);
+  /* The material is `.noctua-glass`, applied in the markup. */
   /* NO border-radius, and the drawer ignores the reader's corner preset.
      A rounded corner would cut a notch out of the drawer and let the scrim
      show through it as a dark wedge — the one place "never under the sidebar"
@@ -641,13 +638,14 @@ a {
     position: sticky;
     inset-block-start: var(--nd-header-h);
     block-size: calc(100vh - var(--nd-header-h));
-    z-index: var(--noctua-layer-base);
     transform: none;
     /* Docked, so it is always available to the keyboard. */
     visibility: visible;
-    background: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    /* The glass STAYS. It used to be switched off here, which is why the
+       sidebar and the settings panel read as different materials on every
+       desktop viewport — the one complaint a reader makes about glass before
+       any other. Raised above the effect layer so it has something to sample. */
+    z-index: var(--noctua-layer-raised);
   }
 
   /* Gone entirely, not merely transparent: an invisible element that still
@@ -670,7 +668,7 @@ a {
   font: inherit;
   font-size: var(--noctua-size-small);
   color: var(--nc-color-fg);
-  background: var(--nc-color-surface-subtle);
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil), transparent);
   border: var(--noctua-border-hairline) solid var(--nc-color-border);
   border-radius: var(--noctua-radius-control);
 }
@@ -786,7 +784,13 @@ a {
 
 /* A scope MUST paint its own background. A light island inside a dark page
    with no background of its own is unreadable, which is exactly the case
-   §9.7 says an opaque surface has to be justified by. */
+   §9.7 says an opaque surface has to be justified by.
+   
+   Which is also why a scope is NOT glass, and used to be. It carried the glass
+   class on top of this background, so the blur sampled something already
+   painted over — and the nested scope's blur sampled its parent's, which is
+   inert: a `backdrop-filter` under another one is switched off entirely, with
+   nothing to report. Glass belongs to surfaces that FLOAT over the page. */
 .nd-scope {
   padding: var(--noctua-space-6);
   display: flex;
@@ -890,7 +894,7 @@ a {
 }
 
 .nd-button--quiet:hover {
-  background: var(--nc-color-subtle-bg);
+  background: color-mix(in oklab, var(--nc-color-subtle-bg) var(--nd-veil), transparent);
   border-color: var(--nc-color-fg-muted);
 }
 
@@ -910,7 +914,7 @@ a {
   flex-wrap: wrap;
   padding: var(--noctua-space-2) var(--noctua-space-3);
   border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
-  background: var(--nc-color-surface-subtle);
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil), transparent);
 }
 
 .nd-frame-label {
@@ -959,11 +963,29 @@ a {
   gap: var(--noctua-space-3);
 }
 
+/* GRID, NOT FLEX, AND CENTRED, NOT BASELINE. Both halves are fixes.
+ *
+ * Flex with a fixed-width, `nowrap`, `overflow: visible` label let the longest
+ * token name — `--noctua-space-paragraph`, 24 monospaced characters — spill out
+ * of its box and paint underneath the bar beside it. A grid track cannot be
+ * overflowed into a sibling's.
+ *
+ * And `align-items: baseline` was the second half: `.nd-bar` is an empty
+ * inline-block, whose baseline is its bottom margin edge, so the whole bar was
+ * lifted into the label's x-height band rather than sitting beside it.
+ * Centring removes the question. */
 .nd-scale-row {
-  display: flex;
-  align-items: baseline;
+  display: grid;
+  /* `auto` for the name, not a token: a grid column is shared by every row, so
+     the track is exactly as wide as the longest token name and no number here
+     can be wrong about it. `--noctua-space-paragraph` is 24 monospaced
+     characters and there is no spacing token that wide — which is how the old
+     fixed width came to be too small in the first place. At 320px the name
+     wraps rather than overflowing, because a track cannot spill into its
+     sibling. */
+  grid-template-columns: auto var(--noctua-space-16) 1fr;
+  align-items: center;
   gap: var(--noctua-space-4);
-  flex-wrap: wrap;
   padding-block-end: var(--noctua-space-2);
   border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
 }
@@ -973,6 +995,13 @@ a {
   font-family: var(--noctua-font-mono);
   font-size: var(--noctua-size-caption);
   color: var(--nc-color-fg-muted);
+}
+
+/* `.nd-scale-value` still lives in a flex row on the typography page, where it
+   does need a width. `.nd-scale-name` is a grid track and must not have one:
+   a fixed `inline-size` is what made the longest token name overflow into the
+   bar beside it. */
+.nd-scale-value {
   inline-size: var(--noctua-space-24);
   flex: none;
 }
@@ -1085,7 +1114,7 @@ a {
   flex-direction: column;
   gap: var(--noctua-space-3);
   border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
-  background: var(--nc-color-surface-subtle);
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil-code), transparent);
 }
 
 .nd-code-source {
@@ -1247,7 +1276,7 @@ a {
 .nd-code-inline {
   padding: 0 var(--noctua-space-1);
   border-radius: var(--noctua-radius-control);
-  background: var(--nc-color-surface-subtle);
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil-code), transparent);
 }
 .nd-code-inline[data-nd-tone="subtle"] { background: none; color: var(--nc-color-fg-muted); }
 
@@ -1255,7 +1284,7 @@ a {
   padding: var(--noctua-space-1) var(--noctua-space-2);
   border: var(--noctua-border-hairline) solid var(--nc-color-border-strong);
   border-radius: var(--noctua-radius-control);
-  background: var(--nc-color-surface-subtle);
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil-code), transparent);
 }
 .nd-kbd[data-nd-size="body"] { font-size: var(--noctua-size-body); }
 
@@ -1265,7 +1294,7 @@ a {
   overflow-x: auto;
   border: var(--noctua-border-hairline) solid var(--nc-color-border);
   border-radius: var(--noctua-radius-surface);
-  background: var(--nc-color-surface-subtle);
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil-code), transparent);
   line-height: var(--noctua-leading-body);
 }
 .nd-codeblock[data-nd-wrap="true"] { white-space: pre-wrap; overflow-x: visible; }
@@ -1440,20 +1469,18 @@ a {
    was long and `space-2` render as a circle — the three smallest steps of a
    spacing scale were the ones the shape destroyed. */
 .nd-bar {
-  display: inline-block;
+  display: block;
   block-size: var(--noctua-space-2);
   min-inline-size: var(--noctua-border-hairline);
   background: var(--nc-color-accent);
   border-radius: 0;
 }
 
-/* The token name needs room for `--noctua-space-paragraph`, which is 26
-   monospaced characters. At 6rem it wrapped over four lines beside one line of
-   sample text. */
+/* The name is a grid track now, so it needs no width of its own and no
+   `flex: none`. It wraps rather than overflowing: a name on two lines is
+   legible, a name painted under the bar beside it is not. */
 .nd-scale-name {
-  inline-size: var(--noctua-space-48);
-  flex: none;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .nd-scale-row { gap: var(--noctua-space-3); }

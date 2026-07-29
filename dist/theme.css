@@ -48,6 +48,37 @@
   --noctua-radius-pill: 9999px;
 }
 
+/* One scrollbar treatment, for every scroller in the system.
+ 
+   `:where(*)` and not `:where(:root)`, because `scrollbar-width` is NOT an
+   inherited property. Set on the root alone it styles the page's own bar and
+   nothing else — every panel, drawer and code block keeps the browser's
+   default, which is the one a reader actually complains about. Zero
+   specificity, so any surface can still opt out. */
+:where(*) {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--nc-color-fg) 24%, transparent)
+                   transparent;
+}
+
+::-webkit-scrollbar {
+  inline-size: var(--noctua-space-2);
+  block-size: var(--noctua-space-2);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--nc-color-fg) 24%, transparent);
+  border-radius: var(--noctua-radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--nc-color-fg) 38%, transparent);
+}
+
 /* Glass. Dimensions only — the colour is mixed at the point of use, where
    the palette is already correct. A pre-mixed surface declared here would
    freeze to the page's palette and a themed component would show the
@@ -60,23 +91,73 @@
        backdrop-filter: blur(var(--noctua-glass-blur)); */
 
 :where(:root) {
-  --noctua-glass-blur: 8px;
-  --noctua-glass-opacity: 92%;
+  --noctua-glass-blur: 10px;
+  --noctua-glass-opacity: 78%;
+  --noctua-glass-saturate: 1.4;
+  --noctua-glass-brightness: 1.02;
+  --noctua-glass-edge: 34%;
+  --noctua-glass-sheen: 12%;
 }
 
 [data-noctua-glass="off"] {
   --noctua-glass-blur: 0;
   --noctua-glass-opacity: 100%;
+  --noctua-glass-saturate: 1;
+  --noctua-glass-brightness: 1;
+  --noctua-glass-edge: 0%;
+  --noctua-glass-sheen: 0%;
 }
 
 [data-noctua-glass="subtle"] {
-  --noctua-glass-blur: 8px;
-  --noctua-glass-opacity: 92%;
+  --noctua-glass-blur: 10px;
+  --noctua-glass-opacity: 78%;
+  --noctua-glass-saturate: 1.4;
+  --noctua-glass-brightness: 1.02;
+  --noctua-glass-edge: 34%;
+  --noctua-glass-sheen: 12%;
 }
 
 [data-noctua-glass="full"] {
-  --noctua-glass-blur: 16px;
-  --noctua-glass-opacity: 82%;
+  --noctua-glass-blur: 20px;
+  --noctua-glass-opacity: 58%;
+  --noctua-glass-saturate: 1.8;
+  --noctua-glass-brightness: 1.06;
+  --noctua-glass-edge: 52%;
+  --noctua-glass-sheen: 20%;
+}
+
+/* The one glass recipe. Adding a second `backdrop-filter` anywhere is a
+   source-gate finding: four hand-written copies drifted into two materials
+   on one page, and a nested one is inert with nothing to report. */
+.noctua-glass {
+  background: color-mix(in oklab, var(--nc-color-surface)
+                        var(--noctua-glass-opacity), transparent);
+  backdrop-filter: blur(var(--noctua-glass-blur))
+                   saturate(var(--noctua-glass-saturate))
+                   brightness(var(--noctua-glass-brightness));
+  -webkit-backdrop-filter: blur(var(--noctua-glass-blur))
+                           saturate(var(--noctua-glass-saturate))
+                           brightness(var(--noctua-glass-brightness));
+  /* The lit edge. A border rather than a shadow: §9.7 forbids elevated
+     surfaces, and a browser test asserts nothing in the shell casts one. */
+  border-block-start: var(--noctua-border-hairline) solid
+    color-mix(in oklab, var(--nc-color-surface-raised)
+              var(--noctua-glass-edge), transparent);
+  position: relative;
+}
+
+/* The sheen, as a DESCENDANT. A pseudo-element is not an ancestor, so it
+   cannot stop its own parent's backdrop from sampling. */
+.noctua-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+    color-mix(in oklab, var(--nc-color-surface-raised)
+              var(--noctua-glass-sheen), transparent) 0,
+    transparent var(--noctua-space-8));
 }
 
 /* Honoured for the same reason durations carry a reduced pair: a reader who
@@ -85,6 +166,10 @@
   :root {
     --noctua-glass-blur: 0;
     --noctua-glass-opacity: 100%;
+    --noctua-glass-saturate: 1;
+    --noctua-glass-brightness: 1;
+    --noctua-glass-edge: 0%;
+    --noctua-glass-sheen: 0%;
   }
 }
 

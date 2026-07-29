@@ -60,7 +60,7 @@ pub(crate) fn Header(context: Context) -> Element {
         // The header's frost, as a SIBLING painted behind it. Inside the header
         // it would be an ancestor of the settings panel, and a nested
         // `backdrop-filter` stops sampling — see shell.css.
-        div { class: "nd-header-glass", "aria-hidden": "true" }
+        div { class: "nd-header-glass noctua-glass", "aria-hidden": "true" }
         header { class: "nd-header",
             button {
                 class: "nd-icon nd-menu",
@@ -183,8 +183,8 @@ fn Settings(context: Context) -> Element {
                 title: "{context.t(Key::SettingsLabel)}",
                 Icon { icon: IconName::Settings }
             }
-            div { class: "nd-panel",
-                p { class: "nd-panel-title", "{context.t(Key::SettingsLabel)}" }
+            div { class: "nd-panel noctua-glass",
+              div { class: "nd-panel-body",
 
                 Choice {
                     context,
@@ -274,6 +274,7 @@ fn Settings(context: Context) -> Element {
                 button { class: "nd-reset", r#type: "button", "data-nd-reset": "",
                     "{context.t(Key::SettingsReset)}"
                 }
+              }
             }
         }
     }
@@ -379,10 +380,10 @@ fn Accents(context: Context) -> Element {
 #[component]
 pub(crate) fn Sidebar(context: Context) -> Element {
     rsx! {
-        nav { id: "nd-nav", class: "nd-nav", "aria-label": context.t(Key::NavLabel),
+        nav { id: "nd-nav", class: "nd-nav noctua-glass", "aria-label": context.t(Key::NavLabel),
             // The wordmark lives here below `sm`, where the header cannot afford
             // it. It is not a duplicate: exactly one of the two is ever shown.
-            a { class: "nd-nav-wordmark", href: "{site::PAGES[0].href()}",
+            a { class: "nd-nav-wordmark", href: "{site::first(context.locale).href()}",
                 "{context.t(Key::AppName)}"
             }
             div { class: "nd-search",

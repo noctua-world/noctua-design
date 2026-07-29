@@ -235,15 +235,50 @@ strong = "2px"
 # already correct. A source gate enforces it.
 
 [glass.blur]
-subtle = "8px"
-full = "16px"
+subtle = "10px"
+full = "20px"
 
 # The percentage of the surface colour that survives. Lower is more
-# transparent; below about 70 the text over it starts fighting whatever is
-# behind, which is why "full" is 82 and not 60.
+# transparent.
+#
+# These were 92 and 82, which is why the "glass" read as a solid panel: at 92%
+# there is nothing to see through, so the blur behind it had nothing to do and
+# the effect was a tint with extra cost. Real glass is mostly what is behind it.
+#
+# The floor is set by readability rather than by taste: below about 55 the text
+# over it starts fighting the page, and `readability.spec.js` measures it.
 [glass.opacity]
-subtle = 92
-full = 82
+subtle = 78
+full = 58
+
+# Saturation and brightness of what shows THROUGH.
+#
+# This is most of what separates glass from a translucent rectangle. Real glass
+# concentrates the colour behind it and lifts it slightly; without these the
+# blur alone reads as a smudge. Dimensionless, so they multiply the sampled
+# backdrop rather than naming a colour.
+[glass.saturate]
+subtle = "1.4"
+full = "1.8"
+
+[glass.brightness]
+subtle = "1.02"
+full = "1.06"
+
+# The lit edge, as a percentage of the raised-surface colour.
+#
+# A pane catches light along its top edge and nowhere else. One hairline, one
+# gradient — never a `box-shadow`, which §9.7 forbids and which a browser test
+# asserts the absence of.
+[glass.edge]
+subtle = 34
+full = 52
+
+# The inner sheen: how strongly the top of the surface picks up that light,
+# falling off over one spacing step.
+[glass.sheen]
+subtle = 12
+full = 20
 
 
 # --- Background effects ---------------------------------------------------

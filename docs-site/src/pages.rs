@@ -60,7 +60,7 @@ fn ScopedThemes(context: Context) -> Element {
         Paragraph { "{context.t(Key::ScopePageBody)}" }
 
         ThemeScope {
-            class: "nd-scope nd-glass",
+            class: "nd-scope",
             palette: Palette::AzureVivid,
             mode: Mode::Light,
             glass: Glass::Full,
@@ -74,7 +74,7 @@ fn ScopedThemes(context: Context) -> Element {
             Sample { context }
 
             ThemeScope {
-                class: "nd-scope nd-scope--nested nd-glass",
+                class: "nd-scope nd-scope--nested",
                 palette: Palette::RoseSober,
                 mode: Mode::Dark,
                 radius: Radius::Circular,
@@ -498,7 +498,7 @@ fn Components(context: Context) -> Element {
             caption: Key::PageComponentsTitle,
             code: snippet(&request),
             ThemeScope {
-                class: "nd-scope nd-glass",
+                class: "nd-scope",
                 palette: Palette::VioletVivid,
                 mode: Mode::Dark,
                 Sample { context }

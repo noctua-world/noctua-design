@@ -97,6 +97,18 @@ pub struct Glass {
     /// How much of the surface colour survives, as a percentage.
     #[serde(default)]
     pub opacity: IndexMap<String, u32>,
+    /// How much the backdrop's colour is concentrated. Dimensionless.
+    #[serde(default)]
+    pub saturate: IndexMap<String, String>,
+    /// How much the backdrop is lifted. Dimensionless.
+    #[serde(default)]
+    pub brightness: IndexMap<String, String>,
+    /// The lit top edge, as a percentage of the raised-surface colour.
+    #[serde(default)]
+    pub edge: IndexMap<String, u32>,
+    /// The inner sheen below that edge, likewise a percentage.
+    #[serde(default)]
+    pub sheen: IndexMap<String, u32>,
 }
 
 /// Background patterns and ambient effects.
