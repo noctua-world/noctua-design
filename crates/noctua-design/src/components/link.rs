@@ -6,6 +6,7 @@
 //!
 //! A link, with the affordance an external destination needs.
 
+use crate::icon::{Icon, IconName};
 use dioxus::prelude::*;
 
 /// `inherit` is for a link inside a run of coloured text that must not break the line's colour.
@@ -62,10 +63,13 @@ pub fn Link(
     rsx! {
         a {
             class: "{root}",
-            "href": href,
+            href,
             "data-nd-external": if external { "true" } else { "false" },
             "data-nd-tone": tone.as_str(),
             {children}
+            if external {
+                Icon { icon: IconName::ExternalLink, size: crate::icon::IconSize::Small }
+            }
         }
     }
 }

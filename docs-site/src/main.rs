@@ -116,6 +116,14 @@ fn document(locale: Locale, page: Page) -> String {
         escape(locale.message(page.summary))
     );
 
+    // Declared, so the browser stops asking for /favicon.ico and getting a 404
+    // on every single page load. An SVG: one file for every size, and it
+    // follows the reader's system between light and dark.
+    let _ = writeln!(
+        html,
+        "<link rel=\"icon\" href=\"{}favicon.svg\" type=\"image/svg+xml\">",
+        site::BASE
+    );
     html.push_str(&rebase(BASE_LINKS));
     let _ = writeln!(
         html,
@@ -254,7 +262,7 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
 
     // The generated stylesheets, at the site root, which is where the base
     // links (rebased above) look for them.
-    for name in ["tokens.css", "theme.css", "scope.css"] {
+    for name in ["tokens.css", "theme.css", "scope.css", "favicon.svg"] {
         count += copy(&root.join("dist").join(name), &out.join(name))?;
     }
 

@@ -189,14 +189,11 @@ const storePalette = (page, palette) =>
 
 test("no page asks for a file that is not there", async ({ page }) => {
   const missing = [];
+  // No exclusions. There was one — /favicon.ico, which the browser asks for
+  // unprompted and the site did not have — and it is gone because the site has
+  // a favicon now. An exclusion is a 404 somebody decided to stop looking at.
   page.on("response", (r) => {
-    // The browser asks for /favicon.ico unprompted and the site ships none, so
-    // it is excluded by name rather than by a status range — narrow the
-    // exclusion and it stops hiding anything else. Shipping one is a real gap;
-    // it waits for the icon set.
-    if (r.status() >= 400 && !r.url().endsWith("/favicon.ico")) {
-      missing.push(`${r.status()} ${r.url()}`);
-    }
+    if (r.status() >= 400) missing.push(`${r.status()} ${r.url()}`);
   });
   // A non-default palette, so the on-demand stylesheet is exercised too.
   await storePalette(page, "jade-vivid");

@@ -22,13 +22,14 @@ use noctua_design_spec::component::Component;
 /// Whether this component's body is written here rather than derived.
 #[must_use]
 pub fn is_custom(component: &Component) -> bool {
-    matches!(component.meta.name.as_str(), "IconButton")
+    matches!(component.meta.name.as_str(), "IconButton" | "Link")
 }
 
 /// The Dioxus body, from `let root = …` to the closing brace of `rsx!`.
 pub fn dioxus_body(out: &mut String, component: &Component) {
     match component.meta.name.as_str() {
         "IconButton" => icon_button_dioxus(out),
+        "Link" => link_dioxus(out),
         other => unreachable!("no custom body for `{other}`"),
     }
 }
@@ -37,8 +38,60 @@ pub fn dioxus_body(out: &mut String, component: &Component) {
 pub fn react_body(out: &mut String, component: &Component) {
     match component.meta.name.as_str() {
         "IconButton" => icon_button_react(out),
+        "Link" => link_react(out),
         other => unreachable!("no custom body for `{other}`"),
     }
+}
+
+// --- Link -------------------------------------------------------------------
+
+/// A link, and the mark an external destination needs.
+///
+/// The affordance was `content: "↗"` — a text character standing in for an
+/// icon. It is not one: it takes the reader's font rather than the system's, it
+/// is absent from most monospaced faces, and it cannot be found by the gate
+/// that keeps every other icon in one place. `NOCTUA.md §9.5` is explicit that
+/// a glyph is not an icon.
+///
+/// The icon is `aria-hidden`: "opens in a new place" belongs to the link's
+/// text, not to a decoration a screen reader would read out as a word.
+fn link_dioxus(out: &mut String) {
+    out.push_str(
+        "    let root = format!(\"nd-a {class}\");\n\
+         \x20   let root = root.trim().to_owned();\n\
+         \n\
+         \x20   rsx! {\n\
+         \x20       a {\n\
+         \x20           class: \"{root}\",\n\
+         \x20           href,\n\
+         \x20           \"data-nd-external\": if external { \"true\" } else { \"false\" },\n\
+         \x20           \"data-nd-tone\": tone.as_str(),\n\
+         \x20           {children}\n\
+         \x20           if external {\n\
+         \x20               Icon { icon: IconName::ExternalLink, size: crate::icon::IconSize::Small }\n\
+         \x20           }\n\
+         \x20       }\n\
+         \x20   }\n",
+    );
+}
+
+fn link_react(out: &mut String) {
+    out.push_str(
+        "  const tone_ = tone ?? \"accent\";\n\
+         \x20 const root = [\"nd-a\", className].filter(Boolean).join(\" \");\n\
+         \x20 return h(\n\
+         \x20   \"a\",\n\
+         \x20   {\n\
+         \x20     className: root,\n\
+         \x20     href,\n\
+         \x20     \"data-nd-external\": external ? \"true\" : \"false\",\n\
+         \x20     \"data-nd-tone\": tone_,\n\
+         \x20     ...rest,\n\
+         \x20   },\n\
+         \x20   children,\n\
+         \x20   external ? h(Icon, { icon: \"external-link\", size: \"small\" }) : null,\n\
+         \x20 );\n",
+    );
 }
 
 // --- IconButton -------------------------------------------------------------
@@ -139,7 +192,7 @@ fn icon_button_react(out: &mut String) {
 #[must_use]
 pub fn dioxus_imports(component: &Component) -> String {
     match component.meta.name.as_str() {
-        "IconButton" => "use crate::icon::{Icon, IconName};\n".to_owned(),
+        "IconButton" | "Link" => "use crate::icon::{Icon, IconName};\n".to_owned(),
         _ => String::new(),
     }
 }
@@ -148,7 +201,7 @@ pub fn dioxus_imports(component: &Component) -> String {
 #[must_use]
 pub fn react_imports(component: &Component) -> String {
     match component.meta.name.as_str() {
-        "IconButton" => "import { Icon } from \"../icon.js\";\n".to_owned(),
+        "IconButton" | "Link" => "import { Icon } from \"../icon.js\";\n".to_owned(),
         _ => String::new(),
     }
 }

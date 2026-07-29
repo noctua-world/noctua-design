@@ -56,7 +56,56 @@ pub fn emit(spec: &Spec, theme: &Theme) -> Vec<EmittedFile> {
     blackout(&mut out, prefix);
     effects(&mut out, spec, prefix);
 
-    vec![EmittedFile::new("dist/theme.css", out)]
+    vec![
+        EmittedFile::new("dist/theme.css", out),
+        EmittedFile::new("dist/favicon.svg", favicon()),
+    ]
+}
+
+/// The tab icon.
+///
+/// # Why it is here at all
+///
+/// The site shipped without one, so every page load asked for `/favicon.ico`
+/// and got a 404. The browser asks unprompted; there is no way to decline
+/// except by answering.
+///
+/// # Why it is monochrome
+///
+/// A favicon is a static file: it cannot read a custom property, so it cannot
+/// follow the reader's palette, and picking one accent would make ochre the
+/// system's brand colour by accident. Two neutrals and
+/// `prefers-color-scheme` instead — which is also the only pair that reads at
+/// 16 px against both a light and a dark browser chrome.
+///
+/// **This is a placeholder that behaves correctly, not a mark.** An aperture:
+/// a ring and a pupil, which is as far as "noctua" should be taken without
+/// somebody deciding to.
+fn favicon() -> String {
+    // An SVG has no line-comment form the gate reads, so the header is an XML
+    // comment — and it is what exempts the two neutrals below from the colour
+    // gate, exactly as it exempts every other generated file.
+    let mut out = String::from("<!--\n");
+    for line in header(CommentStyle::Line("")).lines() {
+        let _ = writeln!(out, "{}", line.trim_start());
+    }
+    out.push_str("-->\n");
+    out.push_str(
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n\
+        \x20 <style>\n\
+        \x20   :root { color-scheme: light dark }\n\
+        \x20   .ink { fill: none; stroke: #1a1a1a; stroke-width: 2.5 }\n\
+        \x20   .pupil { fill: #1a1a1a; stroke: none }\n\
+        \x20   @media (prefers-color-scheme: dark) {\n\
+        \x20     .ink { stroke: #f2f2f2 }\n\
+        \x20     .pupil { fill: #f2f2f2 }\n\
+        \x20   }\n\
+        \x20 </style>\n\
+        \x20 <circle class=\"ink\" cx=\"16\" cy=\"16\" r=\"12\"/>\n\
+        \x20 <circle class=\"pupil\" cx=\"16\" cy=\"16\" r=\"4.5\"/>\n\
+        </svg>\n",
+    );
+    out
 }
 
 /// The corner presets, as attribute-scoped overrides of the base radii.

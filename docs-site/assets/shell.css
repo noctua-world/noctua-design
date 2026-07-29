@@ -1258,12 +1258,15 @@ a {
 .nd-a { color: var(--nc-color-accent); text-underline-offset: var(--noctua-space-1); }
 .nd-a[data-nd-tone="inherit"] { color: inherit; }
 /* The external affordance is a mark, not only a colour: colour alone is
-   invisible to a reader who cannot distinguish it. */
-.nd-a[data-nd-external="true"]::after {
-  content: "↗";
-  display: inline-block;
+   invisible to a reader who cannot distinguish it.
+   
+   It used to be `content: "↗"` — a text character standing in for an icon. It
+   takes the reader's font rather than the system's, most monospaced faces do
+   not have it, and no gate could find it. The component renders the real
+   `external-link` icon now; this only spaces it. */
+.nd-a[data-nd-external="true"] .nd-icon-glyph {
   margin-inline-start: var(--noctua-space-1);
-  font-size: var(--noctua-size-caption);
+  vertical-align: baseline;
 }
 
 .nd-code-inline,

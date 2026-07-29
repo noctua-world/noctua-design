@@ -19,12 +19,18 @@ const defaults = {
 };
 
 export function Link({ href, external, tone, className, children, ...rest }) {
-  const external_ = external ?? "false";
   const tone_ = tone ?? "accent";
   const root = ["nd-a", className].filter(Boolean).join(" ");
-  const props = { className: root, ...rest };
-  if (href !== undefined) props["href"] = String(href);
-  if (external_ !== undefined) props["data-nd-external"] = String(external_);
-  if (tone_ !== undefined) props["data-nd-tone"] = String(tone_);
-  return h("a", props, children);
+  return h(
+    "a",
+    {
+      className: root,
+      href,
+      "data-nd-external": external ? "true" : "false",
+      "data-nd-tone": tone_,
+      ...rest,
+    },
+    children,
+    external ? h(Icon, { icon: "external-link", size: "small" }) : null,
+  );
 }
