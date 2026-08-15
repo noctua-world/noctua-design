@@ -20,6 +20,7 @@
   "exports": {
     ".": "./src/index.js",
     "./theme.js": "./src/theme.js",
-    "./components/index.js": "./src/components/index.js"
+    "./components/index.js": "./src/components/index.js",
+    "./components/*.js": "./src/components/*.js"
   }
 }

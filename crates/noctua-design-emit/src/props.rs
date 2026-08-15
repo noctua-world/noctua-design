@@ -661,7 +661,7 @@ fn js_index(components: &[Component]) -> String {
 // --- Shared ----------------------------------------------------------------
 
 /// `CodeBlock` → `code_block`; the file name in both packages.
-fn file_stem(name: &str) -> String {
+pub(crate) fn file_stem(name: &str) -> String {
     let mut out = String::with_capacity(name.len() + 2);
     for (index, ch) in name.char_indices() {
         if ch.is_uppercase() && index > 0 {
@@ -674,7 +674,7 @@ fn file_stem(name: &str) -> String {
 
 /// `line-numbers` → `LineNumbers`; `2` → `_2`, because a Rust variant cannot
 /// start with a digit and a heading level legitimately is one.
-fn pascal(name: &str) -> String {
+pub(crate) fn pascal(name: &str) -> String {
     let mut out = String::with_capacity(name.len());
     if name.chars().next().is_some_and(|c| c.is_ascii_digit()) {
         out.push('_');

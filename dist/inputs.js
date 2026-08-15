@@ -55,7 +55,7 @@ function clamp(value, low, high) {
 
 // --- Input ---------------------------------------------------------------
 
-function enhanceInput(root) {
+function enhanceInput(root, signal) {
   const at = reader(root);
   const box = root.querySelector("[data-nd-input-box]");
   if (!box) return;
@@ -80,7 +80,7 @@ function enhanceInput(root) {
       );
     };
     show();
-    box.addEventListener("input", show);
+    box.addEventListener("input", show, { signal });
     clear.addEventListener("click", () => {
       box.value = "";
       box.dispatchEvent(new Event("input", { bubbles: true }));
@@ -88,14 +88,14 @@ function enhanceInput(root) {
       // reader does in order to type in it.
       box.focus();
       show();
-    });
+    }, { signal });
     box.addEventListener("keydown", (event) => {
       // Nothing at all when there is nothing to clear, rather than swallowing
       // a key another control may want.
       if (event.key !== "Escape" || box.value.length === 0) return;
       event.preventDefault();
       clear.click();
-    });
+    }, { signal });
   }
 
   if (reveal) {
@@ -116,10 +116,10 @@ function enhanceInput(root) {
         reveal.setAttribute("title", name);
       }
       box.focus();
-    });
+    }, { signal });
   }
 
-  if (counter) countFor(box, counter, at("counter-label"));
+  if (counter) countFor(box, counter, at("counter-label"), signal);
 }
 
 /**
@@ -129,7 +129,7 @@ function enhanceInput(root) {
  * reader turns off, and the number is only worth hearing once they have
  * stopped to look at it.
  */
-function countFor(box, region, sentence) {
+function countFor(box, region, sentence, signal) {
   const max = number(box.getAttribute("maxlength"));
   let waiting = null;
   const draw = () => {
@@ -147,14 +147,15 @@ function countFor(box, region, sentence) {
     draw();
     clearTimeout(waiting);
     waiting = setTimeout(() => region.setAttribute("aria-live", "polite"), SETTLE);
-  });
+  }, { signal });
+  signal?.addEventListener("abort", () => clearTimeout(waiting));
 }
 
 // --- Textarea ----------------------------------------------------------------
 
-function enhanceTextarea(root) {
+function enhanceTextarea(root, signal) {
   const counter = root.parentElement?.querySelector("[data-nd-textarea-counter]");
-  if (counter) countFor(root, counter, root.getAttribute("data-nd-counter-label"));
+  if (counter) countFor(root, counter, root.getAttribute("data-nd-counter-label"), signal);
   if (root.getAttribute("data-nd-autosize") !== "true") return;
 
   const maxRows = number(root.getAttribute("data-nd-max-rows"));
@@ -171,15 +172,21 @@ function enhanceTextarea(root) {
     root.style.overflowY = wanted > ceiling ? "auto" : "hidden";
   };
   grow();
-  root.addEventListener("input", grow);
+  root.addEventListener("input", grow, { signal });
   // A box that was hidden when the page loaded measures as zero, so it is
   // measured again the first time it is shown.
-  new ResizeObserver(grow).observe(root);
+  //
+  // THE DISCONNECT IS WRITTEN BESIDE THE OBSERVE, on the same signal the
+  // listeners take. A second registry of observers to shut down is a second
+  // list that stops agreeing with the first.
+  const watch = new ResizeObserver(grow);
+  watch.observe(root);
+  signal.addEventListener("abort", () => watch.disconnect());
 }
 
 // --- NumberInput -------------------------------------------------------------
 
-function enhanceNumberInput(root) {
+function enhanceNumberInput(root, signal) {
   const at = reader(root);
   const box = root.querySelector("[data-nd-number-input-box]");
   if (!box) return;
@@ -311,7 +318,7 @@ function enhanceNumberInput(root) {
       if (box.disabled || box.readOnly) return;
       move(stepper.dataset.ndNumberInputStep === "up" ? step : -step);
       box.focus();
-    });
+    }, { signal });
   }
 
   // SHOWN ONLY NOW. They ship `hidden`, like `Input`'s clear control, because
@@ -341,13 +348,13 @@ function enhanceNumberInput(root) {
       event.preventDefault();
       settled(max);
     }
-  });
+  }, { signal });
 
   // THE WHEEL IS REFUSED. A reader scrolling the page with the pointer resting
   // here would otherwise change an answer they had already given, silently,
   // and find out at submission. `passive: false` because refusing needs the
   // default prevented and a passive listener may not.
-  box.addEventListener("wheel", (event) => event.preventDefault(), { passive: false });
+  box.addEventListener("wheel", (event) => event.preventDefault(), { passive: false, signal });
 
   // Grouping is drawn on blur and taken away on focus, so a separator never
   // appears under the caret as a character the reader has to delete. THAT IS
@@ -357,7 +364,7 @@ function enhanceNumberInput(root) {
     if (!grouped) return;
     const value = reading();
     if (value !== null) show(value);
-  });
+  }, { signal });
   box.addEventListener("blur", () => {
     if (box.value.trim() === "") {
       mark(false);
@@ -389,7 +396,7 @@ function enhanceNumberInput(root) {
     mark(false);
     announce(null);
     settle();
-  });
+  }, { signal });
 
   // NEVER SUBMITTED, which is what `group` promises. The separators are a
   // drawing, so the entry the form posts is rewritten to the plain number
@@ -400,7 +407,7 @@ function enhanceNumberInput(root) {
       // exactly as the reader typed it.
       const value = reading();
       if (value !== null) event.formData.set(box.name, value.toFixed(digits));
-    });
+    }, { signal });
   }
 
   // AT REST, NOT ONLY ONCE TOUCHED. `group` draws its separators from here,
@@ -410,7 +417,7 @@ function enhanceNumberInput(root) {
 
 // --- Slider ------------------------------------------------------------------
 
-function enhanceSlider(root) {
+function enhanceSlider(root, signal) {
   const at = reader(root);
   const thumbs = [...root.querySelectorAll("[data-nd-slider-thumb]")];
   if (thumbs.length === 0) return;
@@ -454,7 +461,7 @@ function enhanceSlider(root) {
   // The moved thumb is carried in, because `paint` cannot ask the document:
   // a drag fires `input` while the focus is still wherever the reader left it.
   for (const thumb of thumbs) {
-    thumb.addEventListener("input", () => paint(thumb));
+    thumb.addEventListener("input", () => paint(thumb), { signal });
   }
   paint();
 
@@ -482,7 +489,7 @@ function readableSize(bytes, locale) {
   return `${shown.format(value)} ${units[unit]}`;
 }
 
-function enhanceFileInput(root) {
+function enhanceFileInput(root, signal) {
   const at = reader(root);
   const native = root.querySelector("[data-nd-file-input-native]");
   const area = root.querySelector("[data-nd-file-input-area]");
@@ -591,7 +598,7 @@ function enhanceFileInput(root) {
     // first rather than replacing it — which is what `multiple` means.
     native.value = "";
     add(chosen);
-  });
+  }, { signal });
 
   root.addEventListener("click", (event) => {
     const remove = event.target.closest?.('[data-nd-action="file-input-remove"]');
@@ -608,7 +615,7 @@ function enhanceFileInput(root) {
     const rows = list.querySelectorAll("[data-nd-index]");
     const next = rows[Math.min(index, rows.length - 1)];
     (next?.querySelector('[data-nd-action="file-input-remove"]') ?? native).focus();
-  });
+  }, { signal });
 
   // Delete on a focused row, which is the gesture a reader tries first.
   root.addEventListener("keydown", (event) => {
@@ -617,25 +624,25 @@ function enhanceFileInput(root) {
     if (!remove) return;
     event.preventDefault();
     remove.click();
-  });
+  }, { signal });
 
   if (at("drop") === "true" && area) {
     for (const kind of ["dragenter", "dragover"]) {
       area.addEventListener(kind, (event) => {
         event.preventDefault();
         root.setAttribute("data-nd-dragging", "");
-      });
+      }, { signal });
     }
     for (const kind of ["dragleave", "dragend"]) {
       // CLEARED ON LEAVING AS WELL AS ON DROPPING: an area that stays lit is
       // an area that looks stuck.
-      area.addEventListener(kind, () => root.removeAttribute("data-nd-dragging"));
+      area.addEventListener(kind, () => root.removeAttribute("data-nd-dragging"), { signal });
     }
     area.addEventListener("drop", (event) => {
       event.preventDefault();
       root.removeAttribute("data-nd-dragging");
       add(event.dataTransfer?.files ?? []);
-    });
+    }, { signal });
   }
 
   draw();
@@ -662,6 +669,7 @@ function enhanceFileInput(root) {
  *   whole value rather than as one box's worth
  * @param {(box: HTMLInputElement, text: string) => void} [options.write]
  * @param {() => void} [options.changed] after anything this moved
+ * @param {AbortSignal} [options.signal] takes all three gestures back off
  */
 export function segmentWalk(boxes, options = {}) {
   const {
@@ -672,6 +680,7 @@ export function segmentWalk(boxes, options = {}) {
       box.value = text;
     },
     changed = () => {},
+    signal = undefined,
   } = options;
 
   const at = (box) => boxes.indexOf(box);
@@ -688,7 +697,7 @@ export function segmentWalk(boxes, options = {}) {
       const previous = boxes[index - 1];
       previous.focus();
       previous.setSelectionRange(previous.value.length, previous.value.length);
-    });
+    }, { signal });
 
     box.addEventListener("input", () => {
       box.value = box.value.replace(strip, "").slice(0, size);
@@ -698,7 +707,7 @@ export function segmentWalk(boxes, options = {}) {
         next?.select();
       }
       changed();
-    });
+    }, { signal });
 
     box.addEventListener("paste", (event) => {
       const text = (event.clipboardData?.getData("text") ?? "").replace(strip, "");
@@ -714,7 +723,7 @@ export function segmentWalk(boxes, options = {}) {
       const last = boxes[Math.min(boxes.length - 1, from + Math.ceil(text.length / size) - 1)];
       last?.focus();
       changed();
-    });
+    }, { signal });
   }
 }
 
@@ -729,7 +738,7 @@ function twelveHour(locale) {
   }
 }
 
-function enhanceTimeInput(root) {
+function enhanceTimeInput(root, signal) {
   const at = reader(root);
   const segments = [...root.querySelectorAll("[data-nd-time-input-segment]")];
   if (segments.length === 0) return;
@@ -788,7 +797,7 @@ function enhanceTimeInput(root) {
           other.tabIndex = on ? 0 : -1;
         }
         commit();
-      });
+      }, { signal });
       group.append(button);
     }
     meridiem.append(group);
@@ -891,6 +900,7 @@ function enhanceTimeInput(root) {
       one.value = pad ? piece.padStart(2, "0") : piece;
     },
     changed: commit,
+    signal,
   });
 
   /**
@@ -955,14 +965,14 @@ function enhanceTimeInput(root) {
       const next = (((from + move - low) % span) + span) % span + low;
       segment.value = pad ? String(next).padStart(2, "0") : String(next);
       commit();
-    });
+    }, { signal });
 
     segment.addEventListener("blur", () => {
       // Padded on leaving and never while the caret is in it, where a leading
       // zero is a character the reader has to delete.
       if (pad && segment.value.length === 1) segment.value = segment.value.padStart(2, "0");
       commit();
-    });
+    }, { signal });
   }
 
   // REVEALED ONLY NOW, because reading the clock is this file's and nothing
@@ -991,7 +1001,7 @@ function enhanceTimeInput(root) {
       button.tabIndex = on ? 0 : -1;
     }
     commit();
-  });
+  }, { signal });
 
   commit();
 }
@@ -1006,7 +1016,7 @@ function enhanceTimeInput(root) {
  * rather than appended to, the arrows and Home and End walk the row, and the
  * refusal is said when the field is LEFT rather than between two boxes.
  */
-function enhanceOtpField(root) {
+function enhanceOtpField(root, signal) {
   const at = reader(root);
   const boxes = [...root.querySelectorAll("[data-nd-otp-field-segment]")];
   if (boxes.length === 0) return;
@@ -1034,6 +1044,7 @@ function enhanceOtpField(root) {
     // than a single keystroke is the code rather than one box's worth.
     minPaste: 2,
     changed: () => root.setAttribute("data-nd-value", read()),
+    signal,
   });
 
   for (const box of boxes) {
@@ -1043,8 +1054,8 @@ function enhanceOtpField(root) {
     box.addEventListener("beforeinput", (event) => {
       if (event.inputType !== "insertText") return;
       if (box.value.length === 1 && box.selectionStart === box.selectionEnd) box.select();
-    });
-    box.addEventListener("focus", () => box.select());
+    }, { signal });
+    box.addEventListener("focus", () => box.select(), { signal });
     box.addEventListener("keydown", (event) => {
       const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
       const index = boxes.indexOf(box);
@@ -1056,7 +1067,7 @@ function enhanceOtpField(root) {
       event.preventDefault();
       next.focus();
       next.select();
-    });
+    }, { signal });
   }
 
   // LEAVING THE FIELD, not leaving a box. A `blur` fires between two boxes of
@@ -1065,13 +1076,16 @@ function enhanceOtpField(root) {
   root.addEventListener("focusout", (event) => {
     if (root.contains(event.relatedTarget)) return;
     judge();
-  });
-  root.closest("form")?.addEventListener("submit", judge);
+  }, { signal });
+  root.closest("form")?.addEventListener("submit", judge, { signal });
 }
 
 // --- Wiring ------------------------------------------------------------------
 
 /** Every control this module owns, by the hook its own `name` prop writes. */
+/** Every enhanced control's teardown, so a subtree can be released. */
+const bindings = new WeakMap();
+
 const CONTROLS = [
   ["[data-nd-input]", enhanceInput],
   ["[data-nd-textarea]", enhanceTextarea],
@@ -1093,7 +1107,37 @@ export function enhanceInputs(root = document) {
     for (const element of root.querySelectorAll(selector)) {
       if (element.dataset.ndEnhanced) continue;
       element.dataset.ndEnhanced = "input";
-      enhance(element);
+      const binding = new AbortController();
+      bindings.set(element, binding);
+      enhance(element, binding.signal);
+    }
+  }
+}
+
+/**
+ * Takes the behaviour back off every input control under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. Two of the seven controls reach OUTSIDE the element they
+ * were given: a `NumberInput` in a form listens for `formdata` on that form,
+ * and a `TimeInput` listens for `submit` on it. The form outlives the control,
+ * so both listeners outlive it too, and each one holds the whole detached
+ * subtree alive through its closure.
+ *
+ * A `Textarea` adds a third: it observes itself for resizes, and an observer
+ * with a live observation keeps its target alive whether or not the target is
+ * still in the document.
+ *
+ * It is the exact mirror of `enhanceInputs`, selector list included, so a
+ * control one reaches is a control the other reaches.
+ */
+export function releaseInputs(root = document) {
+  for (const [selector] of CONTROLS) {
+    for (const element of root.querySelectorAll(selector)) {
+      if (element.dataset.ndEnhanced !== "input") continue;
+      bindings.get(element)?.abort();
+      bindings.delete(element);
+      delete element.dataset.ndEnhanced;
     }
   }
 }

@@ -12577,3 +12577,27 @@ figure.nd-image {
   min-block-size: var(--noctua-space-64);
   inline-size: 100%;
 }
+
+/* --- The example, in the other implementation ---------------------------- */
+
+/* WHICH HALF IS SHOWING, SAID ONCE ON THE STAGE.
+ *
+ * The alternative is hiding each of the stage's own children and unhiding them
+ * again, which means script owning `hidden` on markup it did not render — and
+ * an example whose own body sets `hidden` on something would come back wrong.
+ * One attribute on the stage, one rule here, and the Dioxus half is untouched
+ * throughout.
+ *
+ * `display: none` rather than `visibility` or a clip: the two halves are the
+ * same components at the same size, so leaving the first one taking up room
+ * would double the height of every stage a reader switched. */
+.nd-example-stage[data-nd-showing="react"] > :not([data-nd-react-slot]) {
+  display: none;
+}
+
+/* Nothing at all until React is in it. A slot that laid out while empty would
+ * add a line to every stage on the page, on every page, for a control most
+ * readers never press. */
+[data-nd-react-slot]:empty {
+  display: none;
+}

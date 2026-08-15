@@ -3179,3 +3179,61 @@ every locale.
     an empty page, a test that skips what is hidden says nothing about a fold,
     and a title is not an assertion.
 
+
+105. **Every example is data, and React renders all of them.**
+
+    The components keep `NOCTUA.md §9.3` by construction, because both halves are
+    generated from one spec. The examples did not: all 499 were Rust closures
+    returning `rsx!`, which only Dioxus can run, so the React package this system
+    ships was rendered nowhere on the site that documents it. Entry 104 is what
+    that cost — six React modules broken, two of them not even parsing, under a
+    green suite.
+
+    **An example is a tree now.** `docs-site/src/tree.rs` holds the shape,
+    derived from a census of all 499 before anything moved: no hooks, no event
+    handlers, no branching, no closures in any body, and three dynamic inputs
+    between them. Six node shapes and nine value shapes cover it.
+    `docs-site/src/generated/interpreter.rs` turns a tree back into the real
+    typed components, generated from `spec/components/` because that is the only
+    place that knows every prop's kind, default and whether it is required. The
+    prop type surface is closed: `Option<String>` 389, `String` 202, `bool` 182,
+    `Element` 59, enum 133, `Option<enum>` 5, `IconName` 14, and no fourth thing.
+
+    **The net was tested before it was trusted.**
+    `every_tree_draws_what_its_closure_drew` renders both halves with
+    `dioxus_ssr` and compares them byte for byte in all three locales — a message
+    key transcribed as the wrong key is identical in English often enough to
+    matter, and never in Portuguese. It was run against three deliberate lies
+    first: a wrong enum value, a wrong key, a flipped bool. All three failed it.
+    Final state: **1,497 renderings, no difference.**
+
+    **A gate caught itself.**
+    `every_shape_the_ir_declares_is_one_a_tree_uses` shipped with two of the ten
+    value shapes missing from its own list, so it passed while proving nothing
+    about them — the vacuous-assertion class entry 104 was written about, one
+    entry later. Fixed, and it then condemned `Value::Fill`: predicted by the
+    census, needed by no example. Deleted.
+
+    **Weight, measured rather than estimated.** The first switch on any page
+    costs 85.3 KB gzip for all 83 components, against 62.1 KB for the one
+    hardcoded example it replaces. `CodeBlock` and `Lineage` are separate chunks,
+    fetched only by the two pages that name them, because the syntax grammars and
+    the layout engine are 107 KB nobody else should pay for. Every tree on the
+    site is 7.8 KB, in one file beside the search index and for the reason
+    written there. A build assertion over the esbuild metafile holds the 1.2 MB
+    message catalogue out of the bundle for ever. Nothing is fetched on a page
+    view, and that is asserted rather than believed.
+
+    **What the migration found in the examples.** About twenty defects, none
+    repaired here. The dominant class is a caption naming a prop its body never
+    sets — `TableColumn.width: Wide`, `TableRow.selected`, `hide_label` on both
+    `Radio` and `Checkbox`, `Field.kind: Group` in a hero that calls no `Field`.
+    Two are worse: a `TreeItem` labelled with the Typography page title submits
+    the value `tag`, and the `tables` hero draws invoice `INV-0046` as paid for
+    R$ 4.900,00 while every other table on that page draws it as refunded for
+    R$ 320,00.
+
+    **What is owed.** The React `ThemeScope` is now rendered nowhere: it comes
+    from `spec/theme.toml` rather than `spec/components/`, so the interpreter has
+    no arm for it and its example has no tree. That is precisely the condition
+    that let the other six modules rot, and it is the first thing to fix.

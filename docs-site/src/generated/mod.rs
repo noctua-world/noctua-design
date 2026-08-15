@@ -2,3 +2,5 @@
 //! `cargo xtask check` regenerates every file here and fails on a difference.
 
 pub(crate) mod catalogue;
+pub(crate) mod interpreter;
+pub(crate) mod specimens;

@@ -37,15 +37,46 @@
 /** The attribute a stylesheet outside the surface can act on. */
 const OPEN = "data-nd-open";
 
+/** Every enhanced dialog's teardown, so a subtree can be released. */
+const dialogs = new WeakMap();
+
 export function enhanceDialogs(root = document) {
   for (const element of root.querySelectorAll("[data-nd-dialog]")) {
     if (element.dataset.ndEnhanced) continue;
     element.dataset.ndEnhanced = "dialog";
-    enhance(element);
+    const binding = new AbortController();
+    dialogs.set(element, binding);
+    enhance(element, binding.signal);
   }
 }
 
-function enhance(root) {
+/**
+ * Takes the behaviour back off every dialog under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. This file binds nothing outside the element it was given,
+ * so what it leaks is smaller than its neighbours: the listeners go with the
+ * subtree. What does NOT go is a modal surface left open. `showModal()` marks
+ * the rest of the document inert, so a dialog unmounted while open leaves a
+ * page a reader cannot touch and cannot see the reason for.
+ */
+export function releaseDialogs(root = document) {
+  for (const element of root.querySelectorAll("[data-nd-dialog]")) {
+    if (element.dataset.ndEnhanced !== "dialog") continue;
+    const surface = element.querySelector(".nd-dialog-surface");
+    if (surface?.open) surface.close();
+    element.removeAttribute(OPEN);
+    // The trigger goes back to hidden, which is what the markup ships. A
+    // control that opens nothing is the defect this file exists to avoid.
+    const trigger = element.querySelector(".nd-dialog-open");
+    if (trigger) trigger.hidden = true;
+    dialogs.get(element)?.abort();
+    dialogs.delete(element);
+    delete element.dataset.ndEnhanced;
+  }
+}
+
+function enhance(root, signal) {
   const trigger = root.querySelector(".nd-dialog-open");
   const surface = root.querySelector(".nd-dialog-surface");
   if (!trigger || !surface) return;
@@ -71,15 +102,15 @@ function enhance(root) {
     if (surface.open) surface.close();
   }
 
-  trigger.addEventListener("click", open);
-  root.querySelector("[data-nd-dialog-close]")?.addEventListener("click", close);
+  trigger.addEventListener("click", open, { signal });
+  root.querySelector("[data-nd-dialog-close]")?.addEventListener("click", close, { signal });
 
   // THE BACKDROP IS THE `<dialog>` ITSELF, which is where a press on it lands.
   // Only for a modal surface: a non-modal one has no backdrop at all, so the
   // same test would close it on a press against its own padding.
   surface.addEventListener("click", (event) => {
     if (modal && event.target === surface) close();
-  });
+  }, { signal });
 
   // ESCAPE, FOR THE HALF THE PLATFORM LEAVES OUT. `showModal()` answers it and
   // fires `cancel`; `show()` answers nothing, so a non-modal surface would be a
@@ -99,7 +130,7 @@ function enhance(root) {
     if (modal || event.key !== "Escape" || !surface.open) return;
     event.stopPropagation();
     close();
-  });
+  }, { signal });
 
   surface.addEventListener("close", () => {
     root.removeAttribute(OPEN);
@@ -108,5 +139,5 @@ function enhance(root) {
     // next Tab restarts at the top of the document — which is the one thing
     // this file exists to prevent everywhere else.
     if (!modal && document.activeElement === document.body) trigger.focus();
-  });
+  }, { signal });
 }

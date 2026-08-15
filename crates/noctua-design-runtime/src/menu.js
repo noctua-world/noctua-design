@@ -31,8 +31,16 @@ const ROOM = 220;
 /** How long a run of keystrokes counts as one word, in milliseconds. */
 const TYPING = 700;
 
-/** The menu that is open, so opening a second closes the first. */
+// THE MENU THAT IS OPEN, SO OPENING A SECOND CLOSES THE FIRST.
+//
+// IT CARRIES ITS BUTTON, WHICH IS WHAT A RELEASE NEEDS. Holding the closure
+// alone meant nothing could ask which button a menu belonged to. So a menu open
+// when its subtree went away left this pointing at a dead button for ever, and
+// the next menu opened anywhere on the page called it.
 let showing = null;
+
+/** Every enhanced button's teardown, so a subtree can be released. */
+const menus = new WeakMap();
 
 export function enhanceMenus(root = document) {
   for (const button of root.querySelectorAll('[aria-haspopup="menu"][aria-controls]')) {
@@ -44,11 +52,50 @@ export function enhanceMenus(root = document) {
     // markup was right, so the evidence is still there for anyone reading it.
     if (!menu || !menu.classList.contains("nd-menu")) continue;
     button.dataset.ndEnhanced = "menu";
-    enhance(button, menu);
+    const binding = new AbortController();
+    menus.set(button, binding);
+    enhance(button, menu, binding.signal);
   }
 }
 
-function enhance(button, menu) {
+/**
+ * Takes the behaviour back off every menu under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. It is not a gap in one framework's story. `enhance`
+ * registers a `pointerdown` listener on the DOCUMENT, which outlives the button
+ * it closes: route away and back ten times and the document carries ten of
+ * them, each holding a detached subtree nothing can ever collect.
+ *
+ * It is the exact mirror of `enhanceMenus`, selector included, so a menu the
+ * one reached is a menu the other reaches.
+ */
+export function releaseMenus(root = document) {
+  for (const button of root.querySelectorAll('[aria-haspopup="menu"][aria-controls]')) {
+    if (button.dataset.ndEnhanced !== "menu") continue;
+    // The open menu is forgotten BEFORE the listeners go. Left set, the next
+    // menu opened anywhere calls a closure over a button nobody can see.
+    if (showing?.button === button) showing = null;
+    // AND THE SURFACE GOES BACK TO WHAT THE MARKUP SHIPS. An open menu whose
+    // listeners have been taken off is worse than a closed one: Escape answers
+    // nothing, a press outside answers nothing, and the reader is left with a
+    // panel over the page that has no way out. The button goes back to hidden
+    // for the reason this file opens with, which is that a control announcing a
+    // menu nothing can open is a control that lies.
+    const menu = document.getElementById(button.getAttribute("aria-controls"));
+    if (menu) {
+      releaseAnchor(menu);
+      menu.hidden = true;
+    }
+    button.setAttribute("aria-expanded", "false");
+    button.hidden = true;
+    menus.get(button)?.abort();
+    menus.delete(button);
+    delete button.dataset.ndEnhanced;
+  }
+}
+
+function enhance(button, menu, signal) {
   // REVEALED, NEVER BUILT, which is `Dialog`'s line and `Popover`'s. The
   // component renders the button hidden, so a page with no script carries no
   // control announcing a menu nothing can open — which is the defect named at
@@ -63,11 +110,11 @@ function enhance(button, menu) {
   let typedAt = 0;
 
   function open() {
-    if (showing && showing !== close) showing();
+    if (showing && showing.close !== close) showing.close();
     menu.hidden = false;
     button.setAttribute("aria-expanded", "true");
     keepAnchored(menu, button, { room: ROOM }, () => close(false));
-    showing = close;
+    showing = { button, close };
     // AN OPEN MENU IS A TAB STOP, WHOEVER OPENED IT.
     //
     // Every item ships `tabindex="-1"` and only `move` ever wrote a `0` — and
@@ -89,7 +136,7 @@ function enhance(button, menu) {
     releaseAnchor(menu);
     menu.hidden = true;
     button.setAttribute("aria-expanded", "false");
-    if (showing === close) showing = null;
+    if (showing?.close === close) showing = null;
     if (returnFocus) button.focus();
   }
 
@@ -126,7 +173,7 @@ function enhance(button, menu) {
   button.addEventListener("click", () => {
     if (menu.hidden) open();
     else close(true);
-  });
+  }, { signal });
 
   button.addEventListener("keydown", (event) => {
     // DOWN OPENS ONTO THE FIRST ITEM AND UP ONTO THE LAST, which is the one
@@ -135,7 +182,7 @@ function enhance(button, menu) {
     event.preventDefault();
     open();
     move(event.key === "ArrowDown" ? 0 : items().length - 1);
-  });
+  }, { signal });
 
   menu.addEventListener("keydown", (event) => {
     const all = items();
@@ -184,7 +231,7 @@ function enhance(button, menu) {
         return;
       }
     }
-  });
+  }, { signal });
 
   menu.addEventListener("click", (event) => {
     const item = event.target.closest?.('[role="menuitem"]');
@@ -200,17 +247,17 @@ function enhance(button, menu) {
     // Closed before whatever the caller bound to it runs, so an item that opens
     // a dialog does not leave a menu hanging behind it.
     close(true);
-  });
+  }, { signal });
 
   // TAB OUT AND IT CLOSES. A menu left open behind a reader who has moved on is
   // a surface floating over content it is not about.
   menu.addEventListener("focusout", (event) => {
     if (menu.contains(event.relatedTarget) || event.relatedTarget === button) return;
     close(false);
-  });
+  }, { signal });
 
   document.addEventListener("pointerdown", (event) => {
     if (menu.hidden || menu.contains(event.target) || button.contains(event.target)) return;
     close(false);
-  });
+  }, { signal });
 }

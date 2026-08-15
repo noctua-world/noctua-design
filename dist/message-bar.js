@@ -42,6 +42,33 @@ const DISMISSED = "data-nd-dismissed";
  * Idempotent, like every other `enhance*` here: a page that re-renders part of
  * itself calls this again, and a bar already wired is left alone.
  */
+/** Every enhanced bar's teardown, so a subtree can be released. */
+const bars = new WeakMap();
+
+/**
+ * Takes the behaviour back off every bar under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. This bar binds one listener to its own control, so what
+ * it leaks is small. It is here anyway, because the barrel that releases a
+ * subtree may not have a hole in it: a list with one name missing is a list a
+ * reader has to check rather than read.
+ *
+ * The control goes back to hidden, which is the state the markup ships. A
+ * control revealed by a script that is no longer running is a control that
+ * closes nothing.
+ */
+export function releaseMessageBars(root = document) {
+  for (const element of root.querySelectorAll(".nd-message-bar[data-nd-dismissible='true']")) {
+    if (element.dataset.ndEnhanced !== "message-bar") continue;
+    const control = element.querySelector("[data-nd-dismiss]");
+    if (control) control.hidden = true;
+    bars.get(element)?.abort();
+    bars.delete(element);
+    delete element.dataset.ndEnhanced;
+  }
+}
+
 export function enhanceMessageBars(root = document) {
   // THE CLASS IS PART OF THE SELECTOR, and it had to become part of it.
   //
@@ -54,11 +81,13 @@ export function enhanceMessageBars(root = document) {
   for (const element of root.querySelectorAll(".nd-message-bar[data-nd-dismissible='true']")) {
     if (element.dataset.ndEnhanced) continue;
     element.dataset.ndEnhanced = "message-bar";
-    enhance(element);
+    const binding = new AbortController();
+    bars.set(element, binding);
+    enhance(element, binding.signal);
   }
 }
 
-function enhance(bar) {
+function enhance(bar, signal) {
   const control = bar.querySelector("[data-nd-dismiss]");
   if (!control) return;
 
@@ -80,7 +109,7 @@ function enhance(bar) {
     if (anchor && !anchor.hasAttribute("tabindex")) anchor.setAttribute("tabindex", "-1");
     bar.setAttribute(DISMISSED, "");
     anchor?.focus({ preventScroll: true });
-  });
+  }, { signal });
 
   // Both keys, because the control is a real `<button>` and the platform
   // already answers both. Nothing is added here, and that is the claim the

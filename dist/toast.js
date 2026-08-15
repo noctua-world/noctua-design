@@ -41,15 +41,41 @@ const PAUSED = "data-nd-paused";
 /** How long after the page settles a live region starts speaking. */
 const SETTLE = 500;
 
+/** Every enhanced toast's teardown, so a subtree can be released. */
+const toasts = new WeakMap();
+
 export function enhanceToasts(root = document) {
   for (const element of root.querySelectorAll("[data-nd-toast]")) {
     if (element.dataset.ndEnhanced) continue;
     element.dataset.ndEnhanced = "toast";
-    enhance(element);
+    const binding = new AbortController();
+    toasts.set(element, binding);
+    enhance(element, binding.signal);
   }
 }
 
-function enhance(toast) {
+/**
+ * Takes the behaviour back off every toast under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. What this one leaks is a TIMER: `duration` arms a
+ * `setTimeout` that dismisses the message, and a message unmounted before it
+ * fires leaves the callback holding the whole detached subtree until it runs.
+ */
+export function releaseToasts(root = document) {
+  for (const element of root.querySelectorAll("[data-nd-toast]")) {
+    if (element.dataset.ndEnhanced !== "toast") continue;
+    // The dismiss control goes back to hidden, which is what the markup ships.
+    // A control that closes nothing is worse than no control at all.
+    const control = element.querySelector("[data-nd-dismiss]");
+    if (control) control.hidden = true;
+    toasts.get(element)?.abort();
+    toasts.delete(element);
+    delete element.dataset.ndEnhanced;
+  }
+}
+
+function enhance(toast, signal) {
   const body = toast.querySelector("[data-nd-toast-body]");
   announce(toast, body);
 
@@ -59,7 +85,7 @@ function enhance(toast) {
     // carries no control that closes nothing. `Info` established it and
     // `MessageBar` is the other component that follows it.
     control.hidden = false;
-    control.addEventListener("click", () => dismiss(toast));
+    control.addEventListener("click", () => dismiss(toast), { signal });
   }
 
   const every = Number.parseInt(toast.getAttribute("data-nd-duration") ?? "", 10);
@@ -101,18 +127,20 @@ function enhance(toast) {
   // released nothing, so the timer stopped for good on any message holding
   // more than one focusable thing, which is exactly the message `children`
   // exists to allow.
-  toast.addEventListener("pointerenter", hold);
-  toast.addEventListener("pointerleave", release);
+  toast.addEventListener("pointerenter", hold, { signal });
+  toast.addEventListener("pointerleave", release, { signal });
   toast.addEventListener("focusin", (event) => {
     if (toast.contains(event.relatedTarget)) return;
     hold();
-  });
+  }, { signal });
   toast.addEventListener("focusout", (event) => {
     if (toast.contains(event.relatedTarget)) return;
     release();
-  });
+  }, { signal });
 
   run();
+  // The wait goes with the listeners that hold and release it.
+  signal.addEventListener("abort", () => clearTimeout(waiting));
 }
 
 /**

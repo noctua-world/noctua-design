@@ -434,15 +434,57 @@ async function paintGrid(state, ui) {
  * Idempotent: a picker already enhanced is skipped, so a page that adds one
  * later can call this again with nothing to undo.
  */
+/** Every enhanced picker's teardown, so a subtree can be released. */
+const bindings = new WeakMap();
+
 export function enhancePickers(root = document) {
   for (const element of root.querySelectorAll("[data-nd-color-picker]")) {
     if (element.dataset.ndEnhanced === "color-picker") continue;
     element.dataset.ndEnhanced = "color-picker";
-    enhance(element);
+    const binding = new AbortController();
+    bindings.set(element, binding);
+    enhance(element, binding.signal);
   }
 }
 
-function enhance(element) {
+/**
+ * Takes the behaviour back off every picker under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. `enhance` registers a `pointerdown` listener on the
+ * DOCUMENT, because the panel is `position: fixed` and a press beside it is a
+ * press on something else entirely. That listener has no reason to stop when
+ * the picker leaves the page, and nothing was taking it off.
+ *
+ * The panel is closed on the way out, which is what evicts it from `anchor.js`.
+ * A panel left anchored is measured on every scroll frame for ever.
+ */
+export function releasePickers(root = document) {
+  for (const element of root.querySelectorAll("[data-nd-color-picker]")) {
+    if (element.dataset.ndEnhanced !== "color-picker") continue;
+    // AND THE CONTROLS GO BACK TO WHAT THE MARKUP SHIPS: the natives visible
+    // and the trigger hidden. `enhance` swaps them in that order and states
+    // why, so the release swaps them back rather than leaving a reader with a
+    // trigger that opens a panel nothing listens to.
+    const panel = element.querySelector("[data-nd-color-picker-panel]");
+    if (panel) {
+      releaseAnchor(panel);
+      panel.hidden = true;
+    }
+    const trigger = element.querySelector("[data-nd-color-picker-trigger]");
+    if (trigger) {
+      trigger.setAttribute("aria-expanded", "false");
+      trigger.hidden = true;
+    }
+    const values = element.querySelector("[data-nd-color-picker-values]");
+    if (values) values.hidden = false;
+    bindings.get(element)?.abort();
+    bindings.delete(element);
+    delete element.dataset.ndEnhanced;
+  }
+}
+
+function enhance(element, signal) {
   const state = read(element);
   const ui = parts(element);
   if (!ui.trigger || !ui.panel || !ui.values) return;
@@ -475,7 +517,7 @@ function enhance(element) {
     element.querySelector('[data-nd-action="color-picker-eyedropper"]')?.remove();
   }
 
-  ui.trigger.addEventListener("click", () => toggle(state, ui, !state.open));
+  ui.trigger.addEventListener("click", () => toggle(state, ui, !state.open), { signal });
 
   element.addEventListener("click", (event) => {
     const action = event.target.closest?.("[data-nd-action]")?.dataset.ndAction;
@@ -526,15 +568,15 @@ function enhance(element) {
     // documentation shell and the bare one in a consumer's page both work.
     const tab = event.target.closest?.("[data-nd-value]");
     if (tab && ui.tabs?.contains(tab)) showTab(state, ui, tab.dataset.ndValue);
-  });
+  }, { signal });
 
   ui.area?.addEventListener("pointerdown", (event) => {
     ui.area.setPointerCapture(event.pointerId);
     pointTo(state, ui, event);
-  });
+  }, { signal });
   ui.area?.addEventListener("pointermove", (event) => {
     if (ui.area.hasPointerCapture(event.pointerId)) pointTo(state, ui, event);
-  });
+  }, { signal });
 
   for (const [axis, key] of [
     [ui.saturation, "s"],
@@ -544,18 +586,18 @@ function enhance(element) {
       state.draft = { ...state.draft, [key]: Number(axis.value) };
       state.token = null;
       paint(state, ui);
-    });
+    }, { signal });
   }
   ui.hue?.addEventListener("input", () => {
     state.draft = { ...state.draft, h: Number(ui.hue.value) };
     state.token = null;
     paint(state, ui);
-  });
+  }, { signal });
   ui.alpha?.addEventListener("input", () => {
     state.draft = { ...state.draft, a: Number(ui.alpha.value) / 100 };
     state.token = null;
     paint(state, ui);
-  });
+  }, { signal });
 
   // TEN AT A TIME, BECAUSE THE PLATFORM GIVES NO MODIFIER FOR IT. Sixteen
   // million colours behind a one-step arrow is a control a keyboard cannot
@@ -569,23 +611,23 @@ function enhance(element) {
       const next = Number(track.value) + step * COARSE;
       track.value = String(Math.min(Math.max(next, Number(track.min)), Number(track.max)));
       track.dispatchEvent(new Event("input", { bubbles: true }));
-    });
+    }, { signal });
   }
 
-  ui.entry?.addEventListener("change", () => accept(state, ui, ui.entry.value));
+  ui.entry?.addEventListener("change", () => accept(state, ui, ui.entry.value), { signal });
   ui.entry?.addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
     // A picker inside a form must not send it because a reader pressed Enter
     // in the box they were correcting.
     event.preventDefault();
     accept(state, ui, ui.entry.value);
-  });
+  }, { signal });
 
   element.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || !state.open) return;
     toggle(state, ui, false);
     ui.trigger.focus();
-  });
+  }, { signal });
 
   // Outside, on the document, because a panel is `position: fixed` and a click
   // beside it is a click on something else entirely.
@@ -593,7 +635,7 @@ function enhance(element) {
     if (!state.open) return;
     if (element.contains(event.target)) return;
     toggle(state, ui, false);
-  });
+  }, { signal });
 
   paintRecent(state, ui);
   paint(state, ui);

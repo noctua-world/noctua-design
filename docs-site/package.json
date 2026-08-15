@@ -14,7 +14,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build:example": "esbuild js/example-react.js --bundle --format=esm --minify --outfile=assets/example-react.js"
+    "build:example": "esbuild js/example-react.js --bundle --format=esm --minify --splitting --outdir=assets/react --entry-names=[name] --chunk-names=[name]-[hash] --define:process.env.NODE_ENV=\\\"production\\\" --metafile=assets/react/meta.json"
   },
   "devDependencies": {
     "esbuild": "^0.28.1"

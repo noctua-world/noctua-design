@@ -17,9 +17,12 @@ mod index;
 mod pages;
 mod props;
 mod scripts;
+mod serialise;
 mod shell;
 mod site;
 mod theme_menu;
+mod tree;
+mod trees;
 
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
@@ -85,6 +88,19 @@ fn main() -> Result<(), String> {
             &index::json(locale),
         )?;
         written += 1;
+
+        // EVERY EXAMPLE, AS DATA, FOR THE READER WHO ASKS FOR REACT.
+        //
+        // Beside the search index and for the same reason: a file the browser
+        // caches for the visit, rather than a copy inside every document for a
+        // feature most readers never invoke. `docs-site/src/serialise.rs` is
+        // the argument in full.
+        write(
+            &out.join("assets")
+                .join(format!("examples-{}.json", locale.tag())),
+            &serialise::json(locale),
+        )?;
+        written += 1;
     }
 
     // The site root redirects to the default locale. A meta refresh rather than
@@ -110,6 +126,27 @@ fn main() -> Result<(), String> {
     Ok(())
 }
 
+/// Whether the React bundle exists on this machine.
+///
+/// # Why the page asks, rather than the script finding out
+///
+/// `NOCTUA.md §9.11` says the Rust half of this repository owes nothing to
+/// Node, so the site has to build on a machine that has never run `pnpm
+/// install`. It does — and until now the implementation control was rendered
+/// anyway, and failed once for every reader who pressed it.
+///
+/// A control offered where it does nothing is a control that lies, which is a
+/// rule this codebase states in three other places. So the build asks once, and
+/// a site built without the bundle carries no switch at all.
+pub(crate) fn react_available() -> bool {
+    static KNOWN: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *KNOWN.get_or_init(|| {
+        PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/.."))
+            .join("docs-site/assets/react/example-react.js")
+            .exists()
+    })
+}
+
 /// One complete HTML document.
 fn document(locale: Locale, page: Page) -> String {
     let context = Context { locale, page };
@@ -131,12 +168,18 @@ fn document(locale: Locale, page: Page) -> String {
         //
         // `data-noctua-locales` is the offered set, read by `shell.js` so a
         // locale added to `spec/i18n/` needs no edit there.
+        // `data-noctua-locale` is the tag this document was BUILT for, which is
+        // not the same string as `lang`: `lang` is BCP 47 for the browser, and
+        // the tag is what names this locale's own files. The example trees are
+        // one of those files, so reading `lang` would ask for the wrong one the
+        // day the two spellings differ.
         "<html lang=\"{}\" dir=\"{}\" class=\"no-js\" data-noctua-base=\"{}\" \
-         data-palette=\"{}\" data-noctua-locales=\"{}\">",
+         data-palette=\"{}\" data-noctua-locale=\"{}\" data-noctua-locales=\"{}\">",
         locale.bcp47(),
         locale.dir(),
         site::BASE,
         noctua_design_theme::Palette::DEFAULT.as_str(),
+        locale.tag(),
         Locale::OFFERED
             .into_iter()
             .map(Locale::tag)
@@ -528,6 +571,14 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
         &root.join("docs-site/assets/shell.js"),
         &out.join("assets/shell.js"),
     )?;
+    // The implementation switch. A file of its own because it runs only for a
+    // reader who asks for it, and because everything it owns — a stored
+    // preference, a lazy import, an observer and a failure mode — is easier to
+    // reason about, and to switch off, in one place.
+    count += copy(
+        &root.join("docs-site/assets/implementation.js"),
+        &out.join("assets/implementation.js"),
+    )?;
     // The model stage: any glTF, file and parameters as inputs — the seed of
     // the upload feature, and the reason it must know nothing about owls.
     count += copy(
@@ -607,17 +658,20 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
         &out.join("assets/portraits"),
         "svg",
     )?;
-    // The React example, bundled by esbuild. Optional on purpose: the site must
-    // build on a machine that has never run `pnpm install`, because the Rust
-    // half of this repository owes nothing to Node (`NOCTUA.md §9.11`). Without
-    // it the implementation switch reports a failed load and the Dioxus example
-    // — which is server-rendered and already on the page — keeps working.
-    let react = root.join("docs-site/assets/example-react.js");
-    if react.exists() {
-        count += copy(&react, &out.join("assets/example-react.js"))?;
+    // The React examples, bundled by esbuild: one entry, two shared chunks, and
+    // two more fetched only by the pages that name a code block or a lineage.
+    //
+    // Optional on purpose: the site must build on a machine that has never run
+    // `pnpm install`, because the Rust half of this repository owes nothing to
+    // Node (`NOCTUA.md §9.11`). Without it the page renders no implementation
+    // control at all rather than one that fails once per reader — see
+    // `react_is_available`, which is what `document` reads to decide.
+    let react = root.join("docs-site/assets/react");
+    if react.is_dir() {
+        count += copy_dir(&react, &out.join("assets/react"), "js")?;
     } else {
         println!(
-            "  note: docs-site/assets/example-react.js is absent — run \
+            "  note: docs-site/assets/react is absent — run \
              `pnpm --filter @noctua-world/docs-site run build:example`"
         );
     }

@@ -73,15 +73,41 @@ function slotFor(control) {
   return field?.querySelector("[data-nd-field-error]") ?? null;
 }
 
+/** Every enhanced summary's teardown, so a subtree can be released. */
+const summaries = new WeakMap();
+
 export function enhanceErrorSummaries(root = document) {
   for (const element of root.querySelectorAll("[data-nd-error-summary]")) {
     if (element.dataset.ndEnhanced) continue;
     element.dataset.ndEnhanced = "error-summary";
-    enhance(element);
+    const binding = new AbortController();
+    summaries.set(element, binding);
+    enhance(element, binding.signal);
   }
 }
 
-function enhance(root) {
+/**
+ * Takes the behaviour back off every summary under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER, and this file reaches further outside itself than any
+ * other. With `collect` it binds `invalid`, `input`, `change` and `submit` to
+ * the FORM, which is an ancestor and outlives the summary by design. It also
+ * writes the DOCUMENT's title. Neither was ever taken back.
+ *
+ * The title is restored here rather than left as it was, because a tab reading
+ * "3 errors" over a page with no form on it is the page lying about itself.
+ */
+export function releaseErrorSummaries(root = document) {
+  for (const element of root.querySelectorAll("[data-nd-error-summary]")) {
+    if (element.dataset.ndEnhanced !== "error-summary") continue;
+    summaries.get(element)?.abort();
+    summaries.delete(element);
+    delete element.dataset.ndEnhanced;
+  }
+}
+
+function enhance(root, signal) {
   const list = root.querySelector("[data-nd-error-summary-list]");
   const template = root.querySelector("[data-nd-error-summary-template]");
   const collect = root.getAttribute("data-nd-collect") === "true";
@@ -105,7 +131,7 @@ function enhance(root) {
     // animation does not.
     control.scrollIntoView({ block: "center", behavior: "auto" });
     control.focus({ preventScroll: true });
-  });
+  }, { signal });
 
   /**
    * Whether it has anything to say, and the document's title with it.
@@ -194,7 +220,7 @@ function enhance(root) {
           arrive();
         }, 0);
       },
-      true,
+      true, { signal },
     );
 
     // Whatever was said stops being true the moment the answer does.
@@ -209,7 +235,7 @@ function enhance(root) {
           build();
           settle();
         },
-        true,
+        true, { signal },
       );
     }
 
@@ -217,13 +243,19 @@ function enhance(root) {
     form.addEventListener("submit", () => {
       list?.replaceChildren();
       settle();
-    });
+    }, { signal });
 
     build();
     settle();
     // A server that rendered sentences into the fields has already said what
     // is wrong, and this is then the same arrival as any other.
     if (!empty && takesFocus) root.focus({ preventScroll: false });
+    // AND THE TITLE GOES BACK. It is the DOCUMENT's, so it is the one thing
+    // here that a vanished subtree could still be seen to be holding.
+    signal.addEventListener("abort", () => {
+      clearTimeout(pending);
+      if (prefix && empty === false) document.title = original;
+    });
   } else {
     arrive();
   }

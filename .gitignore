@@ -12,19 +12,19 @@
 # Node, for the React package and the conformance runner.
 node_modules/
 
-# The bundled React example.
+# The bundled React examples.
 #
 # Not committed, unlike the generated token output. That output IS this
 # repository's spec compiled, and committing it is what lets a consumer take a
-# dependency with no build step. This is 190 KB of minified third-party React
-# with a thin wrapper inside it — nobody reviews that in a diff, and one command
+# dependency with no build step. This is 270 KB of minified third-party React
+# with an interpreter inside it — nobody reviews that in a diff, and one command
 # reproduces it:
 #
 #     pnpm --filter @noctua-world/docs-site run build:example
 #
 # `cargo xtask docs` notes its absence and carries on, so a Rust-only clone still
 # builds the whole site; only the implementation switch is inert.
-/docs-site/assets/example-react.js
+/docs-site/assets/react/
 
 # Playwright's own output.
 /test-results/

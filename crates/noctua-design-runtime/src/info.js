@@ -26,18 +26,62 @@ import { keepAnchored, releaseAnchor } from "./anchor.js";
 /** How much room a note wants below the marker before it flips above. */
 const ROOM = 200;
 
-/** The note that is open, so opening a second closes the first. */
+// THE NOTE THAT IS OPEN, SO OPENING A SECOND CLOSES THE FIRST.
+//
+// IT CARRIES ITS OWN ROOT, WHICH IS WHAT A RELEASE NEEDS. Holding the closure
+// alone meant nothing could ask which marker a note belonged to. A note open
+// when its subtree went away left this pointing at a dead marker for ever, and
+// the next note opened anywhere on the page called it.
 let showing = null;
+
+/** Every enhanced note's teardown, so a subtree can be released. */
+const infos = new WeakMap();
 
 export function enhanceInfos(root = document) {
   for (const element of root.querySelectorAll("[data-nd-info]")) {
     if (element.dataset.ndEnhanced) continue;
     element.dataset.ndEnhanced = "info";
-    enhance(element);
+    const binding = new AbortController();
+    infos.set(element, binding);
+    enhance(element, binding.signal);
   }
 }
 
-function enhance(root) {
+/**
+ * Takes the behaviour back off every note under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. `enhance` registers a `pointerdown` listener on the
+ * DOCUMENT, and that listener outlives the marker it closes: every visit to the
+ * route adds another one, holding a detached subtree nothing can collect.
+ *
+ * The close control this file DREW is taken away again, because a second pass
+ * over the same markup would otherwise draw a second one beside it.
+ */
+export function releaseInfos(root = document) {
+  for (const element of root.querySelectorAll("[data-nd-info]")) {
+    if (element.dataset.ndEnhanced !== "info") continue;
+    if (showing?.root === element) showing = null;
+    // AND THE NOTE GOES BACK TO WHAT THE MARKUP SHIPS. One left open with its
+    // listeners gone is a bubble over the page that Escape cannot dismiss.
+    const note = element.querySelector(".nd-info-note");
+    if (note) {
+      releaseAnchor(note);
+      note.hidden = true;
+    }
+    const marker = element.querySelector(".nd-info-marker");
+    if (marker) {
+      marker.setAttribute("aria-expanded", "false");
+      marker.hidden = true;
+    }
+    element.querySelector(".nd-info-close")?.remove();
+    infos.get(element)?.abort();
+    infos.delete(element);
+    delete element.dataset.ndEnhanced;
+  }
+}
+
+function enhance(root, signal) {
   const marker = root.querySelector(".nd-info-marker");
   const note = root.querySelector(".nd-info-note");
   if (!marker || !note) return;
@@ -55,16 +99,16 @@ function enhance(root) {
     close.className = "nd-info-close";
     close.setAttribute("aria-label", closeLabel);
     close.title = closeLabel;
-    close.addEventListener("click", () => hide(true));
+    close.addEventListener("click", () => hide(true), { signal });
     note.append(close);
   }
 
   function show() {
-    if (showing && showing !== hide) showing();
+    if (showing && showing.close !== hide) showing.close();
     note.hidden = false;
     marker.setAttribute("aria-expanded", "true");
     keepAnchored(note, marker, { room: ROOM }, () => hide(false));
-    showing = hide;
+    showing = { root, close: hide };
   }
 
   /** Closes it, and puts focus back only when the reader asked it to close. */
@@ -73,14 +117,14 @@ function enhance(root) {
     releaseAnchor(note);
     note.hidden = true;
     marker.setAttribute("aria-expanded", "false");
-    if (showing === hide) showing = null;
+    if (showing?.close === hide) showing = null;
     if (returnFocus) marker.focus();
   }
 
   marker.addEventListener("click", () => {
     if (note.hidden) show();
     else hide(true);
-  });
+  }, { signal });
 
   root.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || note.hidden) return;
@@ -88,17 +132,17 @@ function enhance(root) {
     // than taking the dialog down with it.
     event.stopPropagation();
     hide(true);
-  });
+  }, { signal });
 
   // TAB OUT AND IT CLOSES. A note that stays open behind a reader who has moved
   // on is a note floating over content it is not about.
   root.addEventListener("focusout", (event) => {
     if (root.contains(event.relatedTarget)) return;
     hide(false);
-  });
+  }, { signal });
 
   document.addEventListener("pointerdown", (event) => {
     if (note.hidden || root.contains(event.target)) return;
     hide(false);
-  });
+  }, { signal });
 }

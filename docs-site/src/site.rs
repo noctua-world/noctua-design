@@ -564,6 +564,18 @@ pub(crate) fn pages() -> Vec<Page> {
     pages
 }
 
+/// The page with this slug, if the site has one.
+///
+/// An example that links to another page names it by slug and shows its title
+/// in the reader's language, which is a lookup the site did not have: the
+/// closures reached the `const`s by their Rust names, and a tree carries a
+/// string. Built from [`pages`] rather than from a second list, so a page this
+/// cannot find is a page that does not exist.
+#[must_use]
+pub(crate) fn by_slug(slug: &str) -> Option<Page> {
+    pages().into_iter().find(|page| page.slug == slug)
+}
+
 /// Every component documented on one collection page, in READING order.
 ///
 /// The order is the collection's own `parts`, not the catalogue's — see

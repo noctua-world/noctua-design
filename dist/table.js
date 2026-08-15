@@ -84,11 +84,36 @@ export function enhanceTables(root = document) {
   for (const element of root.querySelectorAll("[data-nd-table]")) {
     if (element.dataset.ndEnhanced) continue;
     element.dataset.ndEnhanced = "table";
-    enhance(element);
+    enhance(element, new AbortController());
   }
 }
 
-function enhance(table) {
+/**
+ * Takes the behaviour back off every table under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER, and this file has the loudest example in the system.
+ * `wireMore` puts an `IntersectionObserver` on the holder at the foot of the
+ * table, and that observer FETCHES MORE ROWS when the holder scrolls into view.
+ * A table taken out of the document keeps the observer, so a page nobody is
+ * looking at can still ask a server for data. That is network traffic no reader
+ * asked for, charged to a subtree that no longer exists.
+ *
+ * The `ResizeObserver` beside it is quieter and just as permanent: an
+ * observation keeps its target alive whether or not the target is in the
+ * document.
+ */
+export function releaseTables(root = document) {
+  for (const element of root.querySelectorAll("[data-nd-table]")) {
+    if (element.dataset.ndEnhanced !== "table") continue;
+    tables.get(element)?.binding?.abort();
+    tables.delete(element);
+    delete element.dataset.ndEnhanced;
+  }
+}
+
+function enhance(table, binding) {
+  const signal = binding.signal;
   const at = reader(table);
   const frame = table.closest(".nd-table-frame");
   const scroll = table.closest(".nd-table-scroll");
@@ -172,6 +197,11 @@ function enhance(table) {
     at,
     sorted: null,
     direction: null,
+    // CARRIED ON THE STATE, because every `wire*` function below already takes
+    // it. A parallel argument threaded through nine call sites is nine places
+    // for one of them to be forgotten.
+    binding,
+    signal,
   };
   tables.set(table, state);
 
@@ -215,7 +245,12 @@ function enhance(table) {
   applyFilters(state, false);
   measure(state);
   recount(state);
-  new ResizeObserver(() => measure(state)).observe(scroll ?? table);
+  // THE DISCONNECT IS WRITTEN BESIDE THE OBSERVE, on the signal the listeners
+  // take. A second registry of observers is a second list that stops agreeing
+  // with the first.
+  const watch = new ResizeObserver(() => measure(state));
+  watch.observe(scroll ?? table);
+  signal.addEventListener("abort", () => watch.disconnect());
   if (tools && tools.querySelector("details, button")) tools.hidden = false;
 }
 
@@ -369,7 +404,7 @@ function drawSort(state, column, heading, holder, words) {
   glyph.setAttribute("aria-hidden", "true");
   button.append(glyph);
   holder.prepend(button);
-  button.addEventListener("click", () => sortBy(state, column));
+  button.addEventListener("click", () => sortBy(state, column), { signal: state.signal });
 }
 
 function drawResize(state, column, heading, holder) {
@@ -415,7 +450,7 @@ function drawResize(state, column, heading, holder) {
     event.preventDefault();
     event.stopPropagation();
     resize(width() + by * (event.shiftKey ? COARSE : 1));
-  });
+  }, { signal: state.signal });
 
   handle.addEventListener("pointerdown", (event) => {
     event.preventDefault();
@@ -430,8 +465,8 @@ function drawResize(state, column, heading, holder) {
       handle.removeEventListener("pointermove", move);
       handle.removeEventListener("pointerup", done);
     };
-    handle.addEventListener("pointermove", move);
-    handle.addEventListener("pointerup", done);
+    handle.addEventListener("pointermove", move, { signal: state.signal });
+    handle.addEventListener("pointerup", done, { signal: state.signal });
   });
 }
 
@@ -737,7 +772,7 @@ function wireDetails(state) {
     button.setAttribute("aria-expanded", String(open));
     detail.hidden = !open;
     paintZebra(state);
-  });
+  }, { signal: state.signal });
   for (const button of state.table.querySelectorAll(".nd-table-expand-button")) {
     button.setAttribute("aria-expanded", "false");
   }
@@ -782,7 +817,7 @@ function wireSearch(state, tools) {
     state.query = "";
     applyFilters(state, true);
     show(false);
-  });
+  }, { signal: state.signal });
 
   let pending = null;
   box.addEventListener("input", () => {
@@ -793,7 +828,7 @@ function wireSearch(state, tools) {
       state.query = box.value.trim().toLocaleLowerCase(language());
       applyFilters(state, true);
     }, SETTLE);
-  });
+  }, { signal: state.signal });
 
   box.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
@@ -803,7 +838,10 @@ function wireSearch(state, tools) {
     applyFilters(state, true);
     show(false);
     open.focus();
-  });
+  }, { signal: state.signal });
+
+  // The pause the filter waits out, dropped with the box that armed it.
+  state.signal.addEventListener("abort", () => clearTimeout(pending));
 }
 
 // --- Groups that fold -------------------------------------------------------
@@ -853,7 +891,7 @@ function wireGroups(state) {
       for (const row of rows) row.hidden = !open;
       paintZebra(state);
       recount(state);
-    });
+    }, { signal: state.signal });
   }
 }
 
@@ -899,7 +937,7 @@ function wireSelection(state) {
       box.checked = all.checked;
     }
     paint();
-  });
+  }, { signal: state.signal });
 
   for (const box of boxes) {
     box.addEventListener("click", (event) => {
@@ -914,8 +952,8 @@ function wireSelection(state) {
       }
       anchor = box;
       paint();
-    });
-    box.addEventListener("change", () => paint());
+    }, { signal: state.signal });
+    box.addEventListener("change", () => paint(), { signal: state.signal });
   }
 
   // The select-all box submits nothing: it is a control over the others, and a
@@ -963,7 +1001,7 @@ function wireCopy(state, tools) {
   const button = tools?.querySelector(".nd-table-copy");
   if (!button || state.at("copy") !== "true") return;
   button.hidden = false;
-  button.addEventListener("click", () => copy(state));
+  button.addEventListener("click", () => copy(state), { signal: state.signal });
   state.copy = () => copy(state);
 }
 
@@ -1042,7 +1080,7 @@ function wireExport(state, tools) {
             );
       // Nothing at all when it failed, which is the clipboard's rule.
       if (written) say(state.status, plural(state.at("exported-label"), count));
-    });
+    }, { signal: state.signal });
   }
 }
 
@@ -1072,7 +1110,7 @@ function wireColumnsMenu(state, tools, template) {
           column: column.words ?? column.name,
         }),
       );
-    });
+    }, { signal: state.signal });
     list.append(row);
   }
 }
@@ -1148,10 +1186,15 @@ function wireMore(state, frame) {
     }
   }
 
-  button.addEventListener("click", more);
-  new IntersectionObserver((entries) => {
+  button.addEventListener("click", more, { signal: state.signal });
+  // AND THIS ONE FETCHES. An observer left running on a detached holder asks a
+  // server for rows nobody will ever see, once per intersection, for as long as
+  // the tab is open.
+  const watch = new IntersectionObserver((entries) => {
     if (entries.some((entry) => entry.isIntersecting)) more();
-  }).observe(holder);
+  });
+  watch.observe(holder);
+  state.signal.addEventListener("abort", () => watch.disconnect());
 }
 
 // --- The grid ----------------------------------------------------------------
@@ -1192,7 +1235,7 @@ function wireGrid(state) {
   table.addEventListener("focusin", (event) => {
     const cell = event.target.closest?.("td, th");
     if (cell && cell.closest(".nd-table") === table) place(cell);
-  });
+  }, { signal: state.signal });
 
   table.addEventListener("keydown", (event) => {
     if (event.key === "c" && (event.metaKey || event.ctrlKey) && state.copy) {
@@ -1273,7 +1316,7 @@ function wireGrid(state) {
     event.preventDefault();
     place(wanted);
     wanted.focus();
-  });
+  }, { signal: state.signal });
 }
 
 // --- Measurement -------------------------------------------------------------

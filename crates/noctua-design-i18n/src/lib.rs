@@ -464,6 +464,12 @@ pub enum Key {
     ExampleImplReact,
     /// `example.impl.loading`
     ExampleImplLoading,
+    /// `example.impl.page-react`
+    ExampleImplPageReact,
+    /// `example.impl.page-dioxus`
+    ExampleImplPageDioxus,
+    /// `example.impl.failed`
+    ExampleImplFailed,
     /// `component.example-frame.summary`
     ComponentExampleFrameSummary,
     /// `frame.page.body`
@@ -5630,7 +5636,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2753] = [
+    pub const ALL: [Self; 2756] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -5803,6 +5809,9 @@ impl Key {
         Self::ExampleImplDioxus,
         Self::ExampleImplReact,
         Self::ExampleImplLoading,
+        Self::ExampleImplPageReact,
+        Self::ExampleImplPageDioxus,
+        Self::ExampleImplFailed,
         Self::ComponentExampleFrameSummary,
         Self::FramePageBody,
         Self::FramePropsTitle,
@@ -8562,6 +8571,9 @@ impl Key {
             Self::ExampleImplDioxus => "example.impl.dioxus",
             Self::ExampleImplReact => "example.impl.react",
             Self::ExampleImplLoading => "example.impl.loading",
+            Self::ExampleImplPageReact => "example.impl.page-react",
+            Self::ExampleImplPageDioxus => "example.impl.page-dioxus",
+            Self::ExampleImplFailed => "example.impl.failed",
             Self::ComponentExampleFrameSummary => "component.example-frame.summary",
             Self::FramePageBody => "frame.page.body",
             Self::FramePropsTitle => "frame.props.title",
@@ -11837,6 +11849,11 @@ impl Locale {
                 Key::ExampleImplDioxus => "Dioxus",
                 Key::ExampleImplReact => "React",
                 Key::ExampleImplLoading => "Loading the React example…",
+                Key::ExampleImplPageReact => "Show every example in React",
+                Key::ExampleImplPageDioxus => "Show every example in Dioxus",
+                Key::ExampleImplFailed => {
+                    "The React examples could not be loaded. Everything here is still the Dioxus version."
+                }
                 Key::ComponentExampleFrameSummary => {
                     "Show an example at any width, in any theme, without changing the page."
                 }
@@ -18054,6 +18071,11 @@ impl Locale {
                 Key::ExampleImplDioxus => "Dioxus",
                 Key::ExampleImplReact => "React",
                 Key::ExampleImplLoading => "Carregando o exemplo em React…",
+                Key::ExampleImplPageReact => "Mostrar todos os exemplos em React",
+                Key::ExampleImplPageDioxus => "Mostrar todos os exemplos em Dioxus",
+                Key::ExampleImplFailed => {
+                    "Não foi possível carregar os exemplos em React. Tudo aqui continua sendo a versão Dioxus."
+                }
                 Key::ComponentExampleFrameSummary => {
                     "Mostre um exemplo em qualquer largura e em qualquer tema, sem mexer na página."
                 }
@@ -24325,6 +24347,11 @@ impl Locale {
                 Key::ExampleImplDioxus => "⟦Diiooxuus⟧",
                 Key::ExampleImplReact => "⟦Reeaact⟧",
                 Key::ExampleImplLoading => "⟦Looaadiing thee Reeaact eexaamplee…⟧",
+                Key::ExampleImplPageReact => "⟦Shoow eeveery eexaamplee iin Reeaact⟧",
+                Key::ExampleImplPageDioxus => "⟦Shoow eeveery eexaamplee iin Diiooxuus⟧",
+                Key::ExampleImplFailed => {
+                    "⟦Thee Reeaact eexaamplees coouuld noot bee looaadeed. EEveerythiing heeree iis stiill thee Diiooxuus veersiioon.⟧"
+                }
                 Key::ComponentExampleFrameSummary => {
                     "⟦Shoow aan eexaamplee aat aany wiidth, iin aany theemee, wiithoouut chaangiing thee paagee.⟧"
                 }

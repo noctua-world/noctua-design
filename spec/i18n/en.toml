@@ -234,6 +234,14 @@ dir = "ltr"
 "example.impl.react" = "React"
 "example.impl.loading" = "Loading the React example…"
 
+# The page-wide switch, in the header beside the language and the theme.
+#
+# A toggle rather than a two-stop strip: the header holds one line at 320 px and
+# already carries three controls, so a fourth has to be an icon like the rest.
+"example.impl.page-react" = "Show every example in React"
+"example.impl.page-dioxus" = "Show every example in Dioxus"
+"example.impl.failed" = "The React examples could not be loaded. Everything here is still the Dioxus version."
+
 # --- The example frame's own page -------------------------------------------
 
 "component.example-frame.summary" = "Show an example at any width, in any theme, without changing the page."

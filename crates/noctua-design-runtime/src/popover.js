@@ -31,18 +31,58 @@ import { keepAnchored, releaseAnchor } from "./anchor.js";
 /** How much room a surface wants below its trigger before it flips above. */
 const ROOM = 240;
 
-/** The surface that is open, so opening a second closes the first. */
+// THE SURFACE THAT IS OPEN, SO OPENING A SECOND CLOSES THE FIRST.
+//
+// IT CARRIES ITS OWN ROOT, WHICH IS WHAT A RELEASE NEEDS. Holding the closure
+// alone meant nothing could ask which trigger a surface belonged to. One open
+// when its subtree went away left this pointing at a dead trigger for ever, and
+// the next surface opened anywhere on the page called it.
 let showing = null;
+
+/** Every enhanced surface's teardown, so a subtree can be released. */
+const popovers = new WeakMap();
 
 export function enhancePopovers(root = document) {
   for (const element of root.querySelectorAll("[data-nd-popover]")) {
     if (element.dataset.ndEnhanced) continue;
     element.dataset.ndEnhanced = "popover";
-    enhance(element);
+    const binding = new AbortController();
+    popovers.set(element, binding);
+    enhance(element, binding.signal);
   }
 }
 
-function enhance(root) {
+/**
+ * Takes the behaviour back off every surface under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. `enhance` registers a `pointerdown` listener on the
+ * DOCUMENT, and that listener outlives the trigger it closes: every visit adds
+ * another one, holding a detached subtree nothing can collect.
+ */
+export function releasePopovers(root = document) {
+  for (const element of root.querySelectorAll("[data-nd-popover]")) {
+    if (element.dataset.ndEnhanced !== "popover") continue;
+    if (showing?.root === element) showing = null;
+    // AND THE SURFACE GOES BACK TO WHAT THE MARKUP SHIPS. A `role="dialog"`
+    // left open with nothing listening is a surface a keyboard cannot leave.
+    const panel = element.querySelector(".nd-popover-panel");
+    if (panel) {
+      releaseAnchor(panel);
+      panel.hidden = true;
+    }
+    const trigger = element.querySelector(".nd-popover-trigger");
+    if (trigger) {
+      trigger.setAttribute("aria-expanded", "false");
+      trigger.hidden = true;
+    }
+    popovers.get(element)?.abort();
+    popovers.delete(element);
+    delete element.dataset.ndEnhanced;
+  }
+}
+
+function enhance(root, signal) {
   const trigger = root.querySelector(".nd-popover-trigger");
   const panel = root.querySelector(".nd-popover-panel");
   if (!trigger || !panel) return;
@@ -53,11 +93,11 @@ function enhance(root) {
   trigger.hidden = false;
 
   function show() {
-    if (showing && showing !== hide) showing();
+    if (showing && showing.close !== hide) showing.close();
     panel.hidden = false;
     trigger.setAttribute("aria-expanded", "true");
     keepAnchored(panel, trigger, { room: ROOM }, () => hide(false));
-    showing = hide;
+    showing = { root, close: hide };
   }
 
   /** Closes it, and puts focus back only when the reader asked it to close. */
@@ -66,16 +106,16 @@ function enhance(root) {
     releaseAnchor(panel);
     panel.hidden = true;
     trigger.setAttribute("aria-expanded", "false");
-    if (showing === hide) showing = null;
+    if (showing?.close === hide) showing = null;
     if (returnFocus) trigger.focus();
   }
 
   trigger.addEventListener("click", () => {
     if (panel.hidden) show();
     else hide(true);
-  });
+  }, { signal });
 
-  panel.querySelector("[data-nd-popover-close]")?.addEventListener("click", () => hide(true));
+  panel.querySelector("[data-nd-popover-close]")?.addEventListener("click", () => hide(true), { signal });
 
   root.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || panel.hidden) return;
@@ -83,17 +123,17 @@ function enhance(root) {
     // taking the dialog down with it.
     event.stopPropagation();
     hide(true);
-  });
+  }, { signal });
 
   // TAB OUT AND IT CLOSES. A surface left open behind a reader who has moved on
   // is a surface floating over content it is not about.
   root.addEventListener("focusout", (event) => {
     if (root.contains(event.relatedTarget)) return;
     hide(false);
-  });
+  }, { signal });
 
   document.addEventListener("pointerdown", (event) => {
     if (panel.hidden || root.contains(event.target)) return;
     hide(false);
-  });
+  }, { signal });
 }

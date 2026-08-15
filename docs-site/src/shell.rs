@@ -101,6 +101,40 @@ pub(crate) fn Header(context: Context) -> Element {
             }
             a { class: "nd-wordmark", href: "{home}", "{context.t(Key::AppName)}" }
             div { class: "nd-header-controls",
+                // THE IMPLEMENTATION SWITCH, FOR THE WHOLE PAGE AT ONCE.
+                //
+                // It is here rather than in the theme menu because that panel
+                // is titled *Theme* and holds the appearance of the page — its
+                // mode, its accent, its corners. Which of two packages renders
+                // the examples is not an appearance, and a row for it there
+                // would be the one hand-written exception in a panel generated
+                // from the theme model.
+                //
+                // An icon, like the three beside it, because the header's
+                // budget is one line at 320 px and a two-stop strip reading
+                // `Dioxus | React` does not fit in it. A toggle carries both
+                // names, and `aria-pressed` says which one is showing.
+                //
+                // Absent entirely where the bundle was never built. See
+                // `main::react_available`.
+                if crate::react_available() {
+                    Button {
+                        class: "nd-impl-toggle",
+                        action: "impl",
+                        variant: ButtonVariant::Transparent,
+                        tone: ButtonTone::Neutral,
+                        hide_label: true,
+                        icon: IconName::Code,
+                        label: context.t(Key::ExampleImplPageReact),
+                        label_alt: context.t(Key::ExampleImplPageDioxus),
+                        // Server-rendered as not pressed, and that is honest
+                        // rather than a guess: at the moment this markup is
+                        // written, Dioxus IS what is rendered. The script moves
+                        // it if the reader has asked for React before, which is
+                        // a state change and not the correction of a lie.
+                        pressed: false,
+                    }
+                }
                 Button {
                     variant: ButtonVariant::Transparent,
                     tone: ButtonTone::Neutral,

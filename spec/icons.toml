@@ -96,6 +96,11 @@ source = "lucide"
 file = "copy.svg"
 doc = "Copies a code block to the clipboard."
 
+[icon.code]
+source = "lucide"
+file = "code.svg"
+doc = "Switches the examples between the two implementations this system ships."
+
 [icon.download]
 source = "lucide"
 file = "download.svg"

@@ -29,12 +29,14 @@ pub mod fonts;
 pub mod grammar;
 pub mod i18n;
 pub mod icons;
+pub mod interpreter;
 pub mod javascript;
 pub mod lineage;
 pub mod props;
 pub mod runtime;
 pub mod rust;
 pub mod scope;
+pub mod specimens;
 pub mod syntax;
 pub mod theme;
 pub mod tones;
@@ -160,6 +162,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
     files.extend(grammar::emit(grammars, scanner));
     files.extend(i18n::emit(catalogue));
     files.extend(icons::emit(icons, drawings));
+    files.extend(interpreter::emit(components));
     files.extend(lineage::emit(
         lineage_cases,
         layout,
@@ -175,6 +178,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
     files.push(fonts::preload_fragment(font_layer));
     files.extend(rust::emit(spec));
     files.extend(scope::emit(vendor));
+    files.extend(specimens::emit(components));
     files.extend(syntax::emit(syntax_layer));
     files.extend(theme::emit(theme, vendor));
     files.extend(tones::emit(vendor));
@@ -498,9 +502,11 @@ mod tests {
             "fonts"
         );
         assert!(!i18n::emit(&catalogue).is_empty(), "i18n");
+        assert!(!interpreter::emit(&components).is_empty(), "interpreter");
         assert!(!props::emit(&components).is_empty(), "props");
         assert!(!rust::emit(&spec).is_empty(), "rust");
         assert!(!scope::emit(&vendor).is_empty(), "scope");
+        assert!(!specimens::emit(&components).is_empty(), "specimens");
         assert!(!syntax::emit(&syntax_layer).is_empty(), "syntax");
         assert!(!theme::emit(&theme_model, &vendor).is_empty(), "theme");
         assert!(!typescript::emit(&spec).is_empty(), "typescript");

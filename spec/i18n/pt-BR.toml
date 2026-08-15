@@ -224,6 +224,15 @@ dir = "ltr"
 "example.impl.react" = "React"
 "example.impl.loading" = "Carregando o exemplo em React…"
 
+# O interruptor da página inteira, no cabeçalho ao lado do idioma e do tema.
+#
+# Um botão de alternância e não uma faixa de duas opções: o cabeçalho cabe em
+# uma linha a 320 px e já carrega três controles, então o quarto precisa ser um
+# ícone como os outros.
+"example.impl.page-react" = "Mostrar todos os exemplos em React"
+"example.impl.page-dioxus" = "Mostrar todos os exemplos em Dioxus"
+"example.impl.failed" = "Não foi possível carregar os exemplos em React. Tudo aqui continua sendo a versão Dioxus."
+
 # --- A página do próprio quadro de exemplos ---------------------------------
 
 "component.example-frame.summary" = "Mostre um exemplo em qualquer largura e em qualquer tema, sem mexer na página."

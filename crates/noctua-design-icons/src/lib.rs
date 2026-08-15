@@ -49,6 +49,8 @@ pub enum IconName {
     ChevronDown,
     /// Copies a code block to the clipboard.
     Copy,
+    /// Switches the examples between the two implementations this system ships.
+    Code,
     /// Opens the menu that takes a table away as a file.
     Download,
     /// Opens the note explaining what a heading or a value means.
@@ -107,7 +109,7 @@ pub enum IconName {
 
 impl IconName {
     /// Every icon, in the order the spec declares them.
-    pub const ALL: [Self; 39] = [
+    pub const ALL: [Self; 40] = [
         Self::Menu,
         Self::Close,
         Self::Sun,
@@ -120,6 +122,7 @@ impl IconName {
         Self::ExternalLink,
         Self::ChevronDown,
         Self::Copy,
+        Self::Code,
         Self::Download,
         Self::Info,
         Self::Columns,
@@ -165,6 +168,7 @@ impl IconName {
             Self::ExternalLink => "external-link",
             Self::ChevronDown => "chevron-down",
             Self::Copy => "copy",
+            Self::Code => "code",
             Self::Download => "download",
             Self::Info => "info",
             Self::Columns => "columns",
@@ -226,6 +230,9 @@ impl IconName {
             Self::ChevronDown => r#"<path d="m6 9 6 6 6-6"/>"#,
             Self::Copy => {
                 r#"<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>"#
+            }
+            Self::Code => {
+                r#"<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>"#
             }
             Self::Download => {
                 r#"<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>"#
@@ -313,6 +320,7 @@ impl IconName {
             Self::ExternalLink => "0 0 24 24",
             Self::ChevronDown => "0 0 24 24",
             Self::Copy => "0 0 24 24",
+            Self::Code => "0 0 24 24",
             Self::Download => "0 0 24 24",
             Self::Info => "0 0 24 24",
             Self::Columns => "0 0 24 24",
@@ -365,6 +373,7 @@ impl IconName {
             Self::ExternalLink => false,
             Self::ChevronDown => false,
             Self::Copy => false,
+            Self::Code => false,
             Self::Download => false,
             Self::Info => false,
             Self::Columns => false,
@@ -419,6 +428,9 @@ impl IconName {
             }
             Self::ChevronDown => "The disclosure marker on a `<details>` summary.",
             Self::Copy => "Copies a code block to the clipboard.",
+            Self::Code => {
+                "Switches the examples between the two implementations this system ships."
+            }
             Self::Download => "Opens the menu that takes a table away as a file.",
             Self::Info => "Opens the note explaining what a heading or a value means.",
             Self::Columns => {

@@ -31,54 +31,100 @@ test("the React bundle is not fetched on a normal page view", async ({ page }) =
   expect(await requests(page)).toBe(0);
 });
 
-test("switching to React fetches it once and mounts the same theme", async ({ page }) => {
-  await page.goto(url(SCOPED));
-  await showParts(page);
-  const dioxus = page.locator("[data-nd-mountable] > [data-noctua-scope]");
-  const expected = {
-    palette: await dioxus.getAttribute("data-palette"),
-    theme: await dioxus.getAttribute("data-theme"),
-  };
+test("switching to React fetches it once and draws what Dioxus drew", async ({ page }) => {
+  // THE WHOLE MECHANISM, ON A REAL COMPONENT PAGE.
+  //
+  // This used to be one hand-written example on the ThemeScope page, and one
+  // example is what let six modules of the React package ship broken. Every
+  // example is data now, so this asserts the thing that matters: the two
+  // implementations put the SAME elements, classes and attributes in the DOM.
+  await page.goto(url(PAGE.button));
 
-  await page.locator('[data-nd-group="frame-impl"] [data-nd-value="React"]').click();
-  await expect(page.locator("[data-nd-react-slot] [data-noctua-scope]")).toBeVisible();
+  const shape = (root) =>
+    [...root.querySelectorAll("*")].map((el) =>
+      [
+        el.tagName,
+        [...el.classList].sort().join("."),
+        [...el.attributes]
+          .filter((a) => /^(data-nd|aria|role)/.test(a.name))
+          .map((a) => `${a.name}=${a.value}`)
+          .sort()
+          .join(","),
+      ].join("|"),
+    );
+
+  const stage = '[data-nd-example="button-1"]';
+  const before = await page.evaluate(
+    ([sel, fn]) => eval(`(${fn})`)(document.querySelector(sel)),
+    [stage, shape.toString()],
+  );
+
+  await page.locator('[data-nd-action="impl"]').click();
+  // A frame is drawn when it comes into reach, so it has to be brought into
+  // reach. That laziness is the whole reason a page with forty-seven examples
+  // stays answerable, and it is asserted separately.
+  await page.locator(stage).scrollIntoViewIfNeeded();
+  await page.waitForFunction(
+    (sel) => document.querySelector(sel)?.dataset.ndShowing === "react",
+    stage,
+    { timeout: 20000 },
+  );
 
   expect(await requests(page)).toBe(1);
 
-  const react = page.locator("[data-nd-react-slot] [data-noctua-scope]");
-  // Byte-identical attributes from two independent implementations. This is
-  // prop-surface parity demonstrated rather than asserted.
-  expect(await react.getAttribute("data-palette")).toBe(expected.palette);
-  expect(await react.getAttribute("data-theme")).toBe(expected.theme);
-  await expect(dioxus).toBeHidden();
+  const after = await page.evaluate(
+    ([sel, fn]) => eval(`(${fn})`)(document.querySelector(`${sel} [data-nd-react-slot]`)),
+    [stage, shape.toString()],
+  );
+  expect(after, "React drew something else").toEqual(before);
+  expect(before.length, "the comparison compared nothing").toBeGreaterThan(4);
 
-  // And switching again does not fetch it a second time.
-  await page.locator('[data-nd-group="frame-impl"] [data-nd-value="Dioxus"]').click();
-  await page.locator('[data-nd-group="frame-impl"] [data-nd-value="React"]').click();
+  // And switching twice more does not fetch it again.
+  await page.locator('[data-nd-action="impl"]').click();
+  await page.locator('[data-nd-action="impl"]').click();
   expect(await requests(page)).toBe(1);
 });
 
 test("switching back unmounts React rather than hiding it", async ({ page }) => {
-  await page.goto(url(SCOPED));
-  await showParts(page);
-  await page.locator('[data-nd-group="frame-impl"] [data-nd-value="React"]').click();
-  await expect(page.locator("[data-nd-react-slot] [data-noctua-scope]")).toBeVisible();
+  await page.goto(url(PAGE.button));
+  const stage = '[data-nd-example="button-1"]';
 
-  await page.locator('[data-nd-group="frame-impl"] [data-nd-value="Dioxus"]').click();
+  await page.locator('[data-nd-action="impl"]').click();
+  await page.locator(stage).scrollIntoViewIfNeeded();
+  await page.waitForFunction(
+    (sel) => document.querySelector(sel)?.dataset.ndShowing === "react",
+    stage,
+    { timeout: 20000 },
+  );
+
+  await page.locator('[data-nd-action="impl"]').click();
   // A live React root behind a hidden div keeps its state and its effects, and
   // the next switch would show a component that had been running all along.
-  await expect(page.locator("[data-nd-react-slot] [data-noctua-scope]")).toHaveCount(0);
-  await expect(page.locator("[data-nd-mountable] > [data-noctua-scope]")).toBeVisible();
+  await expect(page.locator(`${stage} [data-nd-react-slot] > *`)).toHaveCount(0);
+  await expect(page.locator(`${stage} > *:not([data-nd-react-slot])`).first()).toBeVisible();
 });
 
 test("the code panel shows the implementation that is mounted", async ({ page }) => {
-  await page.goto(url(SCOPED));
-  await showParts(page);
-  await expect(page.locator('[data-nd-impl-source="Dioxus"]')).toBeVisible();
+  // On a component page rather than `/theme-scope/`. That frame was the one
+  // that could mount React, and it was the one because every other example was
+  // a closure. They are all trees now, and `ThemeScope` is the one component
+  // left out — it comes from `spec/theme.toml`, so the generated interpreter
+  // has no arm for it. That is recorded as work owed.
+  await page.goto(url(PAGE.button));
+  const frame = '[data-nd-example="button-1"]';
+  await expect(page.locator('[data-nd-impl-source="Dioxus"]').first()).toBeVisible();
 
-  await page.locator('[data-nd-group="frame-impl"] [data-nd-value="React"]').click();
-  await expect(page.locator('[data-nd-impl-source="React"]')).toBeVisible();
-  await expect(page.locator('[data-nd-impl-source="Dioxus"]')).toBeHidden();
+  await page.locator('[data-nd-action="impl"]').click();
+  await page.locator(frame).scrollIntoViewIfNeeded();
+  await page.waitForFunction(
+    (sel) => document.querySelector(sel)?.dataset.ndShowing === "react",
+    frame,
+    { timeout: 20000 },
+  );
+
+  const band = page.locator(`${frame}`).locator("xpath=../figcaption");
+  await expect(band.locator('[data-nd-impl-source="React"]')).toBeVisible();
+  await expect(band.locator('[data-nd-impl-source="Dioxus"]')).toBeHidden();
 });
 
 test("the width control resizes the stage and nothing else", async ({ page }) => {

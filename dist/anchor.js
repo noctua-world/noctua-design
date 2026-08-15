@@ -104,7 +104,14 @@ function anchorPanel(control, panel, { room = GLASS_PANEL_ROOM, width = null } =
   return { flipped, offScreen: false };
 }
 
-/** Every open floating panel, and what to do when its control leaves. */
+// EVERY OPEN FLOATING PANEL, AND WHAT TO DO WHEN ITS CONTROL LEAVES.
+//
+// THIS MAP IS STRONG, AND THAT IS WHY `releaseAnchorsIn` EXISTS. A panel left
+// open when its subtree is taken out of the document stays in here for ever,
+// and `reanchor` then measures it on every scroll frame. A detached element
+// reports all zeros, which passes the `offScreen` test below, so nothing ever
+// evicted it. One leaked panel is quiet. A client-side router leaks one per
+// visit.
 const anchored = new Map();
 
 export function keepAnchored(panel, control, options, close) {
@@ -127,11 +134,37 @@ export function releaseAnchor(panel) {
   anchored.delete(panel);
 }
 
+/**
+ * Forgets every panel anchored inside `root`, and every panel already gone.
+ *
+ * The caller a release path wants. A panel whose subtree was unmounted while it
+ * was open is unreachable to the reader and invisible to the close paths that
+ * would normally evict it, so the sweep is the only thing that can.
+ *
+ * A panel is `position: fixed` and may have been appended somewhere else
+ * entirely, so the CONTROL is asked as well. Either one inside `root` means
+ * this pair belongs to the subtree going away.
+ */
+export function releaseAnchorsIn(root = document) {
+  for (const [panel, entry] of [...anchored]) {
+    const mine = root === document || root.contains(panel) || root.contains(entry.control);
+    if (mine || !panel.isConnected || !entry.control.isConnected) releaseAnchor(panel);
+  }
+}
+
 // One pass, one listener, however many kinds of panel this file grows.
 // Passive: it only reads geometry and writes custom properties, so it must
 // never be a reason a scroll janks.
 function reanchor() {
-  for (const [panel, entry] of anchored) {
+  for (const [panel, entry] of [...anchored]) {
+    // A PAIR THAT HAS LEFT THE DOCUMENT IS DROPPED HERE TOO, so a consumer who
+    // never calls a release path still stops paying for it. Asked before the
+    // measurement, because a detached element measures as a zero-sized box at
+    // the origin and that reads as perfectly on screen.
+    if (!panel.isConnected || !entry.control.isConnected) {
+      releaseAnchor(panel);
+      continue;
+    }
     if (anchorPanel(entry.control, panel, entry.options).offScreen) entry.close();
   }
 }

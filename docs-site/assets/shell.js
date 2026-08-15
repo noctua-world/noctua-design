@@ -45,43 +45,43 @@ import { prepare, rank } from "./search-match.js";
 // file rather than one of this site's, because a navigation component whose
 // consumer cannot navigate is a control that lies — and it fetches three.js
 // itself, on the first interaction rather than on load.
-import { enhanceLineages } from "./lineage.js";
+import { enhanceLineages, releaseLineages } from "./lineage.js";
 // Putting a fixed panel under the control it belongs to, and closing it when
 // that control scrolls away. A `dist/` file for the same reason: `ColorPicker`
 // ships its behaviour and its panel floats, so the rule cannot live here.
-import { keepAnchored, releaseAnchor } from "./anchor.js";
+import { keepAnchored, releaseAnchor, releaseAnchorsIn } from "./anchor.js";
 // Where a field's refusal goes. `Field` renders a visually hidden word in
 // front of the sentence, so nothing may write the paragraph's `textContent`.
 import { saySentence } from "./messages.js";
 // The picker's whole behaviour, and a `dist/` file for the same reason: a
 // colour picker that only picks colours inside this site is not one.
-import { enhancePickers } from "./color-picker.js";
+import { enhancePickers, releasePickers } from "./color-picker.js";
 // The six input controls, and a `dist/` file for the same reason: a text box
 // that only accepts text inside this site is not a text box.
-import { enhanceInputs } from "./inputs.js";
+import { enhanceInputs, releaseInputs } from "./inputs.js";
 // The carousel: the two controls, the dots, the count, and the four rules
 // autoplay carries. A `dist/` file for the same reason as the rest.
-import { enhanceCarousels } from "./carousel.js";
+import { enhanceCarousels, releaseCarousels } from "./carousel.js";
 // The summary at the top of a refused form: the focus, the jump to the
 // control, and the list a client-side refusal makes.
-import { enhanceErrorSummaries } from "./error-summary.js";
-import { enhanceTables } from "./table.js";
-import { enhanceInfos } from "./info.js";
-import { enhanceMenus } from "./menu.js";
+import { enhanceErrorSummaries, releaseErrorSummaries } from "./error-summary.js";
+import { enhanceTables, releaseTables } from "./table.js";
+import { enhanceInfos, releaseInfos } from "./info.js";
+import { enhanceMenus, releaseMenus } from "./menu.js";
 // The one thing a message bar does with a script: reveal the control that
 // takes it away, and take it away.
-import { enhanceMessageBars } from "./message-bar.js";
+import { enhanceMessageBars, releaseMessageBars } from "./message-bar.js";
 // The four floating surfaces, and `dist/` files for the reason the rest are:
 // a `<dialog>` opens from a script and from nothing else, a popover and a
 // tooltip both hang off `anchor.js`, and a toast is a timer plus a live region.
-import { enhanceDialogs } from "./dialog.js";
-import { enhancePopovers } from "./popover.js";
-import { enhanceTooltips } from "./tooltip.js";
-import { enhanceToasts } from "./toast.js";
+import { enhanceDialogs, releaseDialogs } from "./dialog.js";
+import { enhancePopovers, releasePopovers } from "./popover.js";
+import { enhanceTooltips, releaseTooltips } from "./tooltip.js";
+import { enhanceToasts, releaseToasts } from "./toast.js";
 // These two are THIS SITE'S, never `dist/`'s: the modelled owl and the
 // model stage are examples of what a consumer may put inside a figure, and
 // a consumer of the packages never fetches a byte of either.
-import { enhanceModels } from "./model.js";
+import { enhanceModels, releaseModels } from "./model.js";
 
 const root = document.documentElement;
 const base = root.getAttribute("data-noctua-base") || "";
@@ -632,11 +632,17 @@ document.addEventListener("click", (event) => {
   }
 });
 
-// The cap itself, applied once at load. It is a class of enhancement this file
-// is otherwise full of: read what the markup declared, and add the behaviour it
-// described.
-function collapseBlocks() {
-  for (const figure of document.querySelectorAll('[data-nd-collapsible="true"]')) {
+// The cap itself. It is a class of enhancement this file is otherwise full of:
+// read what the markup declared, and add the behaviour it described.
+//
+// IT TAKES A ROOT LIKE EVERY OTHER ENHANCER, AND THAT FIXES A DEFECT OF ITS
+// OWN. Applying it per element is idempotent, but running it over the whole
+// page a second time RE-COLLAPSES a block the reader had already expanded. The
+// reader's answer to the control is undone by an enhancement pass somewhere
+// else on the page. Scoping it to the subtree that changed means only that
+// subtree is judged again.
+function collapseBlocks(root = document) {
+  for (const figure of root.querySelectorAll('[data-nd-collapsible="true"]')) {
     const block = figure.querySelector(".nd-codeblock");
     const button = figure.querySelector("[data-nd-expand]");
     if (!block || !button) continue;
@@ -807,12 +813,35 @@ function releaseOpenPanel(close) {
 /** How long a run of typed letters counts as one word, with no filter box. */
 const TYPE_AHEAD = 700;
 
-function enhanceSelects() {
-  for (const field of document.querySelectorAll(SELECT_FIELD)) enhanceSelect(field);
+function enhanceSelects(root = document) {
+  for (const field of root.querySelectorAll(SELECT_FIELD)) enhanceSelect(field);
+}
+
+/**
+ * Takes the behaviour back off every enhanced field under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. What a `Select` leaves behind is not a listener on the
+ * document, because the outside press is one delegated listener for the whole
+ * page. It is three module-level references to a field no longer on it:
+ * `openSelect`, the `openPanels` registry, and `anchor.js`'s own map.
+ */
+function releaseSelects(root = document) {
+  for (const field of root.querySelectorAll(SELECT_FIELD)) {
+    const state = selects.get(field);
+    if (!state) continue;
+    if (openSelect === state) openSelect = null;
+    if (state.close) releaseOpenPanel(state.close);
+    releaseAnchor(state.panel);
+    state.binding.abort();
+    selects.delete(field);
+  }
 }
 
 function enhanceSelect(field) {
   if (selects.has(field)) return;
+  const binding = new AbortController();
+  const signal = binding.signal;
   const native = field.querySelector(".nd-select-native");
   const box = field.querySelector(".nd-select-field");
   // `Field` draws the question now, so it is a sibling of `.nd-select` rather
@@ -913,6 +942,11 @@ function enhanceSelect(field) {
   box.dataset.ndEnhanced = "true";
 
   const state = {
+    // CARRIED ON THE STATE, because every helper below already takes it. A
+    // parallel argument threaded through a dozen call sites is a dozen places
+    // for one of them to be forgotten.
+    binding,
+    signal,
     field,
     native,
     box,
@@ -935,26 +969,26 @@ function enhanceSelect(field) {
   };
   selects.set(field, state);
 
-  control.addEventListener("click", () => (state.panel.hidden ? openList(state) : closeList(state)));
-  control.addEventListener("keydown", (event) => onSelectKey(state, event));
+  control.addEventListener("click", () => (state.panel.hidden ? openList(state) : closeList(state)), { signal });
+  control.addEventListener("keydown", (event) => onSelectKey(state, event), { signal });
   if (search) {
-    search.addEventListener("keydown", (event) => onSelectKey(state, event));
+    search.addEventListener("keydown", (event) => onSelectKey(state, event), { signal });
     search.addEventListener("input", () => {
       applyFilter(state);
       moveTo(state, firstVisible(state));
-    });
+    }, { signal });
   }
   list.addEventListener("click", (event) => {
     const item = event.target.closest?.(".nd-select-item");
     if (!item || item.getAttribute("aria-disabled") === "true") return;
     takeOption(state, state.rows.findIndex((row) => row.item === item));
-  });
+  }, { signal });
   // A pointer moving over the list moves the highlight with it, so the keyboard
   // and the mouse never disagree about which option Enter would take.
   list.addEventListener("pointermove", (event) => {
     const item = event.target.closest?.(".nd-select-item");
     if (item) moveTo(state, state.rows.findIndex((row) => row.item === item), false);
-  });
+  }, { signal });
   const clear = box.querySelector("[data-nd-select-clear]");
   if (clear) {
     clear.addEventListener("click", () => {
@@ -965,10 +999,10 @@ function enhanceSelect(field) {
       announce(state);
       paint(state);
       state.control.focus();
-    });
+    }, { signal });
   }
   // Something else changed the answer — a second control, a test.
-  native.addEventListener("change", () => paint(state));
+  native.addEventListener("change", () => paint(state), { signal });
   wireForm(state);
 
   rebuild(state);
@@ -1009,7 +1043,7 @@ function wireForm(state) {
       rebuild(state);
       paint(state);
     }, 0);
-  });
+  }, { signal: state.signal });
 
   // `invalid` does not bubble, so it is caught on the way down.
   form.addEventListener(
@@ -1039,14 +1073,14 @@ function wireForm(state) {
       // repair is about.
       setTimeout(() => state.control.focus(), 0);
     },
-    true,
+    true, { signal: state.signal },
   );
 
   // Whatever is said stops being true the moment the answer changes.
   state.native.addEventListener("change", () => {
     if (state.native.checkValidity()) clearComplaint(state);
-  });
-  form.addEventListener("reset", () => setTimeout(() => clearComplaint(state), 0));
+  }, { signal: state.signal });
+  form.addEventListener("reset", () => setTimeout(() => clearComplaint(state), 0), { signal: state.signal });
 }
 
 /**
@@ -1531,15 +1565,36 @@ const ANNOUNCE_AFTER = 400;
 /** How many recent queries are kept, whatever the reader typed. */
 const RECENT_KEEP = 6;
 
-function enhanceSearches() {
-  for (const root_ of document.querySelectorAll("[data-nd-search]")) {
+function enhanceSearches(root = document) {
+  for (const root_ of root.querySelectorAll("[data-nd-search]")) {
     if (searches.has(root_)) continue;
     const state = buildSearch(root_);
     if (state) searches.set(root_, state);
   }
 }
 
+/**
+ * Takes the behaviour back off every enhanced search under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER, and this one holds its state in a STRONG `Map` keyed by
+ * the element. Every search ever enhanced stays reachable from that map for the
+ * life of the page, with its rows, its pool and its recent queries. A `WeakMap`
+ * would not have fixed it either, because the state points back at the element.
+ */
+function releaseSearches(root = document) {
+  for (const element of root.querySelectorAll("[data-nd-search]")) {
+    const state = searches.get(element);
+    if (!state) continue;
+    releaseAnchor(state.panel);
+    state.binding.abort();
+    searches.delete(element);
+  }
+}
+
 function buildSearch(root_) {
+  const binding = new AbortController();
+  const signal = binding.signal;
   const box = root_.querySelector("[data-nd-search-input]");
   const panel = root_.querySelector("[data-nd-search-panel]");
   const list = root_.querySelector("[data-nd-search-results]");
@@ -1548,6 +1603,11 @@ function buildSearch(root_) {
   const name = root_.dataset.ndSearch;
   const id = `nd-search-${name}`;
   const state = {
+    // CARRIED ON THE STATE, because every helper below already takes it. A
+    // parallel argument threaded through a dozen call sites is a dozen places
+    // for one of them to be forgotten.
+    binding,
+    signal,
     root: root_,
     name,
     id,
@@ -1617,25 +1677,25 @@ function buildSearch(root_) {
     state.candidates = childCandidates(state);
   }
 
-  box.addEventListener("input", () => runQuery(state));
-  box.addEventListener("keydown", (event) => onSearchKey(state, event));
+  box.addEventListener("input", () => runQuery(state), { signal });
+  box.addEventListener("keydown", (event) => onSearchKey(state, event), { signal });
   box.addEventListener("focus", () => {
     if (state.mode === "popover" && (state.box.value || recentQueries(state).length)) {
       openSearch(state);
     }
-  });
-  state.clear?.addEventListener("click", () => clearQuery(state));
-  state.trigger?.addEventListener("click", () => openSearch(state));
+  }, { signal });
+  state.clear?.addEventListener("click", () => clearQuery(state), { signal });
+  state.trigger?.addEventListener("click", () => openSearch(state), { signal });
   root_.querySelector("[data-nd-search-forget]")?.addEventListener("click", () => {
     forgetQueries(state);
     showRecent(state);
-  });
+  }, { signal });
 
   // Choosing a result is what makes it recent, and it is the only thing that
   // does: a query somebody typed and abandoned is not one they meant.
   list.addEventListener("click", (event) => {
     if (event.target.closest("a")) rememberQuery(state);
-  });
+  }, { signal });
 
   if (state.dialog) {
     // A trigger that opens a modal nothing can fill is a button that does
@@ -1649,22 +1709,22 @@ function buildSearch(root_) {
         event.preventDefault();
         clearQuery(state);
       }
-    });
+    }, { signal });
     state.dialog.addEventListener("close", () => {
       state.root.removeAttribute("data-nd-open");
       // A stale "twelve results" read out after the panel is gone is a lie.
       note(state, "");
-    });
+    }, { signal });
     // The backdrop is the dialog element itself, which is where a click on it
     // lands.
     state.dialog.addEventListener("click", (event) => {
       if (event.target === state.dialog) state.dialog.close();
-    });
+    }, { signal });
     // And the one exit a reader can see. Escape and the backdrop are the other
     // two, and neither of them is visible on a touch screen.
     state.root
       .querySelector("[data-nd-search-close]")
-      ?.addEventListener("click", () => state.dialog.close());
+      ?.addEventListener("click", () => state.dialog.close(), { signal });
   }
 
   root_.dataset.ndEnhanced = "true";
@@ -2294,7 +2354,7 @@ function showRecent(state) {
       state.box.value = query;
       state.box.focus();
       runQuery(state);
-    });
+    }, { signal: state.signal });
     item.append(button);
     state.recentList.append(item);
   }
@@ -2325,15 +2385,37 @@ function showRecent(state) {
 const PICKER = "[data-nd-tag-picker]";
 const pickers = new WeakMap();
 
-function enhanceTagPickers() {
-  for (const root_ of document.querySelectorAll(PICKER)) {
+function enhanceTagPickers(root = document) {
+  for (const root_ of root.querySelectorAll(PICKER)) {
     if (pickers.has(root_)) continue;
     const state = buildPicker(root_);
     if (state) pickers.set(root_, state);
   }
 }
 
+/**
+ * Takes the behaviour back off every enhanced picker under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. `buildPicker` registers a `pointerdown` on the DOCUMENT
+ * per picker, so a page that mounts the same picker ten times carries ten of
+ * them, each holding a detached composer alive through its closure.
+ */
+function releaseTagPickers(root = document) {
+  for (const element of root.querySelectorAll(PICKER)) {
+    const state = pickers.get(element);
+    if (!state) continue;
+    if (state.close) releaseOpenPanel(state.close);
+    releaseAnchor(state.panel);
+    state.binding.abort();
+    pickers.delete(element);
+    delete element.dataset.ndEnhanced;
+  }
+}
+
 function buildPicker(root_) {
+  const binding = new AbortController();
+  const signal = binding.signal;
   const native = root_.querySelector("[data-nd-tag-picker-native]");
   const box = root_.querySelector("[data-nd-tag-picker-input]");
   const list = root_.querySelector("[data-nd-tag-picker-tags]");
@@ -2343,6 +2425,11 @@ function buildPicker(root_) {
   const name = root_.dataset.ndTagPicker;
   const id = `nd-tag-picker-${name}`;
   const state = {
+    // CARRIED ON THE STATE, because every helper below already takes it. A
+    // parallel argument threaded through a dozen call sites is a dozen places
+    // for one of them to be forgotten.
+    binding,
+    signal,
     root: root_,
     native,
     box,
@@ -2417,14 +2504,14 @@ function buildPicker(root_) {
   box.addEventListener("input", () => {
     filterPicker(state);
     openPicker(state);
-  });
-  box.addEventListener("keydown", (event) => onPickerKey(state, event));
-  box.addEventListener("paste", (event) => onPickerPaste(state, event));
+  }, { signal });
+  box.addEventListener("keydown", (event) => onPickerKey(state, event), { signal });
+  box.addEventListener("paste", (event) => onPickerPaste(state, event), { signal });
   // Whatever is half-typed when the form goes is a value the reader meant.
   // This is the single most-complained-about bug in every token input ever
   // shipped, and it costs two lines.
-  box.addEventListener("blur", () => commit(state, box.value, { quiet: true }));
-  native.form?.addEventListener("submit", () => commit(state, box.value, { quiet: true }));
+  box.addEventListener("blur", () => commit(state, box.value, { quiet: true }), { signal });
+  native.form?.addEventListener("submit", () => commit(state, box.value, { quiet: true }), { signal });
   native.form?.addEventListener("reset", () => {
     setTimeout(() => {
       for (const option of [...native.options]) {
@@ -2432,21 +2519,21 @@ function buildPicker(root_) {
       }
       paintTags(state);
     }, 0);
-  });
+  }, { signal });
 
   state.clear?.addEventListener("click", () => {
     for (const option of native.selectedOptions) option.selected = false;
     announcePicker(state);
     paintTags(state);
     box.focus();
-  });
+  }, { signal });
 
   // Not `blur`: a click on the panel's own scrollbar blurs the composer, and a
   // list that closed when you reached for its scrollbar would be unusable.
   document.addEventListener("pointerdown", (event) => {
     if (!event.target.closest?.(PICKER)) closePicker(state);
     else if (event.target.closest(PICKER) !== root_) closePicker(state);
-  });
+  }, { signal });
 
   root_.dataset.ndEnhanced = "true";
   rebuildPicker(state);
@@ -2474,7 +2561,7 @@ function rebuildPicker(state) {
       // Before the composer can blur, so the click is not a race.
       event.preventDefault();
       commit(state, option.value);
-    });
+    }, { signal: state.signal });
     state.list_.append(item);
     state.rows.push({ item, option });
     index += 1;
@@ -2504,7 +2591,7 @@ function filterPicker(state) {
     item.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       commit(state, term);
-    });
+    }, { signal: state.signal });
     state.list_.append(item);
     state.rows.push({ item, option: null });
   }
@@ -2628,7 +2715,7 @@ function paintTags(state) {
       // NOT A TAB STOP. Forty tags would be forty presses between the composer
       // and the next control; the list is one stop and the arrows walk it.
       cross.tabIndex = -1;
-      cross.addEventListener("click", () => remove(state, option, at));
+      cross.addEventListener("click", () => remove(state, option, at), { signal: state.signal });
     }
     const item = document.createElement("li");
     item.append(tag);
@@ -2860,16 +2947,40 @@ function placeRoving(list, active) {
   });
 }
 
-function enhanceTrees() {
-  for (const root_ of document.querySelectorAll(TREE)) {
+function enhanceTrees(root = document) {
+  for (const root_ of root.querySelectorAll(TREE)) {
     if (trees.has(root_)) continue;
     const state = buildTree(root_);
     if (state) trees.set(root_, state);
   }
 }
 
+/**
+ * Takes the behaviour back off every enhanced tree under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. A tree binds only to its own elements, so what this
+ * mostly buys is the right to enhance the same markup again: the guard is the
+ * `trees` map, and an entry nothing removes is a tree that can never be rebuilt.
+ */
+function releaseTrees(root = document) {
+  for (const element of root.querySelectorAll(TREE)) {
+    const state = trees.get(element);
+    if (!state) continue;
+    state.binding.abort();
+    trees.delete(element);
+  }
+}
+
 function buildTree(root_) {
+  const binding = new AbortController();
+  const signal = binding.signal;
   const state = {
+    // CARRIED ON THE STATE, because every helper below already takes it. A
+    // parallel argument threaded through a dozen call sites is a dozen places
+    // for one of them to be forgotten.
+    binding,
+    signal,
     root: root_,
     name: root_.dataset.ndTree,
     selection: root_.dataset.ndSelection ?? "none",
@@ -2945,7 +3056,7 @@ function buildTree(root_) {
           event.stopPropagation();
           setOpen(state, node, node.getAttribute("aria-expanded") !== "true");
           focusNode(state, node);
-        });
+        }, { signal });
       }
       // The link inside the row is untouched except for this: the tree is one
       // tab stop, so everything inside it is reached with the arrows.
@@ -2960,7 +3071,7 @@ function buildTree(root_) {
     }
   }
 
-  root_.addEventListener("keydown", (event) => onTreeKey(state, event));
+  root_.addEventListener("keydown", (event) => onTreeKey(state, event), { signal });
   root_.addEventListener("pointerdown", (event) => {
     const node = event.target.closest?.(".nd-tree-item");
     if (!node || !root_.contains(node)) return;
@@ -2969,7 +3080,7 @@ function buildTree(root_) {
     if (state.selection !== "none") {
       chooseNode(state, node, { add: event.ctrlKey || event.metaKey, range: event.shiftKey });
     }
-  });
+  }, { signal });
 
   root_.dataset.ndEnhanced = "true";
   placeRoving(visibleNodes(state), 0);
@@ -3562,7 +3673,31 @@ function fillMessage(template, args, count = null) {
 //
 // Visiting a stage costs a `scopeAttributes` call that returns null for one
 // that has stated nothing, which stamps and removes nothing.
+//
+// AND IT IS A STRONG ARRAY THAT ONLY GROWS. `themeScope` and the frame both
+// push into it, and nothing ever took anything out, so a stage rendered into
+// the page and then taken away again stayed here for ever with the whole
+// subtree hanging off it. `resolveScopes` walks the array on every theme
+// change, so each leaked stage is also work done for nobody. `forgetScopes`
+// below is the eviction.
 const scopes = [...document.querySelectorAll(`[${scopeAttribute}], [data-nd-frame-stage]`)];
+
+/**
+ * Drops every registered scope that has left the document.
+ *
+ * ASKED OF THE DOCUMENT, NOT OF THE ROOT BEING RELEASED. A stage still on the
+ * page is still a scope, whoever released the behaviours inside it, and nothing
+ * in `enhanceAll` re-registers one: the frame and `themeScope` do, at moments
+ * of their own. Evicting a live stage would silently stop it resolving.
+ *
+ * A stage React unmounted IS disconnected, which is exactly the case this is
+ * for and the only one it claims.
+ */
+function forgetScopes() {
+  for (let at = scopes.length - 1; at >= 0; at -= 1) {
+    if (!scopes[at].isConnected) scopes.splice(at, 1);
+  }
+}
 const requests = new WeakMap();
 /** What each scope was built with, so a reset has something to return to. */
 const initial = new WeakMap();
@@ -4296,11 +4431,55 @@ function dateWorded(iso) {
   );
 }
 
-function enhanceDateInputs() {
-  for (const root of document.querySelectorAll(DATE_FIELD)) enhanceDateInput(root);
+/** Every enhanced date field's teardown, and the guard against a second pass. */
+const dates = new WeakMap();
+
+function enhanceDateInputs(root = document) {
+  for (const field of root.querySelectorAll(DATE_FIELD)) {
+    // THE GUARD THE OTHER FOUR HAD AND THIS ONE DID NOT.
+    //
+    // `enhanceDateInput` binds a keydown, a paste and two blurs per box, a
+    // focusout on the field and a submit on the FORM, and it DRAWS a suggest
+    // button into the row. None of that was guarded, so a second pass over the
+    // same field bound every listener twice and appended a second button
+    // beside the first. One press of the up arrow then stepped the day twice,
+    // and the row grew a control per pass.
+    //
+    // It was latent only because this was called exactly once, at load. It is
+    // a live defect the moment anything re-enhances a subtree, whether that is
+    // a router or a framework remounting an example.
+    if (dates.has(field)) continue;
+    const binding = new AbortController();
+    dates.set(field, binding);
+    enhanceDateInput(field, binding.signal);
+  }
 }
 
-function enhanceDateInput(root) {
+/**
+ * Takes the behaviour back off every date field under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER, and this field reaches outside itself twice. It binds
+ * `submit` to the FORM, which is an ancestor and outlives the field, and it
+ * DRAWS a suggest button and a panel into the row. The drawn parts are removed
+ * here so a later pass draws one of each rather than a second of each.
+ */
+function releaseDateInputs(root = document) {
+  for (const field of root.querySelectorAll(DATE_FIELD)) {
+    const binding = dates.get(field);
+    if (!binding) continue;
+    binding.abort();
+    dates.delete(field);
+    field.querySelector(".nd-date-input-suggest-button")?.remove();
+    const panel = field.querySelector(".nd-date-input-panel");
+    if (panel) {
+      releaseAnchor(panel);
+      panel.remove();
+    }
+  }
+}
+
+function enhanceDateInput(root, signal) {
   const row = root.querySelector(".nd-date-input-row");
   const slot = root.closest(".nd-field")?.querySelector("[data-nd-field-error]");
   if (!row || !slot) return;
@@ -4453,12 +4632,12 @@ function enhanceDateInput(root) {
         .find((one) => wrong.includes(one.closest("[data-nd-part]").dataset.ndPart))
         ?.focus();
     }
-  });
+  }, { signal });
   root.addEventListener("focusout", (event) => {
     if (root.contains(event.relatedTarget)) return;
     const filled = [boxes.day, boxes.month, boxes.year].every((one) => one.value.trim() !== "");
     if (filled) judge();
-  });
+  }, { signal });
 
   // --- The typing aids, on leaving a box only ------------------------------
 
@@ -4468,7 +4647,7 @@ function enhanceDateInput(root) {
     boxes[part].addEventListener("blur", () => {
       const value = boxes[part].value.trim().normalize("NFKC");
       if (padded && /^[0-9]$/.test(value)) boxes[part].value = value.padStart(2, "0");
-    });
+    }, { signal });
   }
   boxes.year.addEventListener("blur", () => {
     const value = boxes.year.value.trim().normalize("NFKC");
@@ -4484,7 +4663,7 @@ function enhanceDateInput(root) {
     const chosen =
       allowed.length === 1 ? allowed[0] : 2000 + two <= now + 10 ? 2000 + two : 1900 + two;
     boxes.year.value = String(chosen);
-  });
+  }, { signal });
 
   // --- Stepping, and the paste that fills all three ------------------------
 
@@ -4540,7 +4719,7 @@ function enhanceDateInput(root) {
         event.preventDefault();
         step(part, -1);
       }
-    });
+    }, { signal });
     boxes[part].addEventListener("paste", (event) => {
       const text = (event.clipboardData?.getData("text") ?? "").trim();
       let year;
@@ -4566,7 +4745,7 @@ function enhanceDateInput(root) {
       event.preventDefault();
       fillAll(year, month, day);
       inOrder().at(-1)?.focus();
-    });
+    }, { signal });
   }
 
   // --- The suggestions panel -----------------------------------------------
@@ -4626,7 +4805,7 @@ function enhanceDateInput(root) {
         rowEl.setAttribute("role", "option");
         rowEl.dataset.ndValue = pick.getAttribute("datetime");
         rowEl.textContent = pick.textContent;
-        rowEl.addEventListener("click", () => take(rowEl.dataset.ndValue));
+        rowEl.addEventListener("click", () => take(rowEl.dataset.ndValue), { signal });
         list.append(rowEl);
       });
       button.setAttribute("aria-controls", list.id);
@@ -4657,7 +4836,7 @@ function enhanceDateInput(root) {
           event.preventDefault();
           close();
         }
-      });
+      }, { signal });
       list.reset = () => highlight(0);
       panel.append(list);
     }
@@ -4756,7 +4935,7 @@ function enhanceDateInput(root) {
           day.tabIndex = iso === focusDay ? 0 : -1;
           day.addEventListener("click", () => {
             if (day.getAttribute("aria-disabled") !== "true") take(iso);
-          });
+          }, { signal });
           rowEl.append(day);
         }
         return days.querySelector('[tabindex="0"]');
@@ -4817,7 +4996,7 @@ function enhanceDateInput(root) {
           event.preventDefault();
           close();
         }
-      });
+      }, { signal });
 
       grid.reset = () => {
         const year = dateNumber(boxes.year.value);
@@ -4836,6 +5015,9 @@ function enhanceDateInput(root) {
     }
 
     root.append(panel);
+    // The registry of open floating panels is module-level and holds this
+    // closure, so it has to be told when the field goes.
+    signal.addEventListener("abort", () => releaseOpenPanel(close));
 
     openPanel = () => {
       if (!panel.hidden) return;
@@ -4858,7 +5040,7 @@ function enhanceDateInput(root) {
     button.addEventListener("click", () => {
       if (panel.hidden) openPanel();
       else close();
-    });
+    }, { signal });
     panel.addEventListener("focusout", (event) => {
       if (panel.contains(event.relatedTarget) || event.relatedTarget === button) return;
       // Focus flickers to null while the grid rebuilds under it — a month
@@ -4869,7 +5051,7 @@ function enhanceDateInput(root) {
           close();
         }
       });
-    });
+    }, { signal });
   }
 }
 
@@ -4911,12 +5093,41 @@ function revealTarget() {
 // radio group and now a tab list, because the walk is the same walk and a third
 // copy of Home, End and an orientation is a third place to get them wrong.
 
+/** Every enhanced strip's teardown, so a subtree can be released. */
+const tabStrips = new WeakMap();
+
+/**
+ * Takes the roles and the walk back off every strip under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. The roles go back with the listeners, because a strip
+ * still claiming `role="tablist"` with nothing answering its arrow keys is the
+ * exact defect this file refuses everywhere else: a promise the markup makes
+ * and nothing keeps.
+ */
+function releaseTabs(root = document) {
+  for (const strip of root.querySelectorAll("[data-nd-tabs]")) {
+    if (strip.dataset.ndEnhanced !== "tabs") continue;
+    tabStrips.get(strip)?.abort();
+    tabStrips.delete(strip);
+    strip.removeAttribute("role");
+    for (const tab of strip.querySelectorAll(".nd-tab")) {
+      tab.removeAttribute("role");
+      document.getElementById(tab.getAttribute("aria-controls"))?.removeAttribute("role");
+    }
+    delete strip.dataset.ndEnhanced;
+  }
+}
+
 function enhanceTabs(root = document) {
   for (const strip of root.querySelectorAll("[data-nd-tabs]")) {
     if (strip.dataset.ndEnhanced) continue;
     const tabs = [...strip.querySelectorAll(".nd-tab")];
     if (tabs.length === 0) continue;
     strip.dataset.ndEnhanced = "tabs";
+    const binding = new AbortController();
+    tabStrips.set(strip, binding);
+    const signal = binding.signal;
 
     // THE PANELS ARE SIBLINGS OF THE STRIP, NEVER CHILDREN: a tab list may hold
     // tabs and nothing else. Each is found by the id its own tab already points
@@ -4950,11 +5161,11 @@ function enhanceTabs(root = document) {
         show(index);
         roving(strip);
       };
-      tab.addEventListener("click", choose);
+      tab.addEventListener("click", choose, { signal });
       tab.addEventListener("keydown", (event) => {
         if (event.key !== " " && event.key !== "Enter") return;
         choose(event);
-      });
+      }, { signal });
     });
 
     const chosen = tabs.findIndex((tab) => tab.dataset.ndSelected === "true");
@@ -4964,27 +5175,106 @@ function enhanceTabs(root = document) {
 
 addEventListener("hashchange", revealTarget);
 
-enhanceSelects();
-enhanceSearches();
-enhanceTagPickers();
-enhanceTrees();
-collapseBlocks();
-enhanceDateInputs();
-enhancePickers();
-enhanceInputs();
-enhanceCarousels();
-enhanceErrorSummaries();
-enhanceTables();
-enhanceInfos();
-enhanceMenus();
-enhanceMessageBars();
-enhanceDialogs();
-enhancePopovers();
-enhanceTooltips();
-enhanceToasts();
-enhanceTabs();
-enhanceLineages();
-enhanceModels();
+// --- The one list ------------------------------------------------------------
+
+/**
+ * Gives every behaviour in the system to everything under `root`.
+ *
+ * THERE IS ONE LIST OF ENHANCERS AND THIS IS IT. It used to be a bare block of
+ * twenty-one calls at the foot of this file, which was correct while the page
+ * was enhanced exactly once. Anything that renders part of the page a second
+ * time needs the same twenty-one calls over a subtree, and a second block
+ * spelling them out is a copy that stops agreeing with the first the day a
+ * behaviour is added to one of them.
+ *
+ * `enhanceModels` IS IN IT, and it is the one that had to be argued. It is this
+ * site's own furniture with no component behind it, so it can match nothing
+ * inside a rendered example and costs one selector query that finds nothing.
+ * That is cheaper than the alternative, which is a second call site beside this
+ * one that somebody has to remember to keep in step. The rule this file keeps
+ * everywhere is that a list is written once.
+ *
+ * THE ORDER IS NOT ALPHABETICAL AND IT IS NOT ARBITRARY. The controls that own
+ * a floating panel come before the surfaces that may contain one, and
+ * `enhanceMessageBars` has to run after the three components that carry
+ * `data-nd-dismissible` for the reason its own file records.
+ */
+export function enhanceAll(root = document) {
+  enhanceSelects(root);
+  enhanceSearches(root);
+  enhanceTagPickers(root);
+  enhanceTrees(root);
+  collapseBlocks(root);
+  enhanceDateInputs(root);
+  enhancePickers(root);
+  enhanceInputs(root);
+  enhanceCarousels(root);
+  enhanceErrorSummaries(root);
+  enhanceTables(root);
+  enhanceInfos(root);
+  enhanceMenus(root);
+  enhanceMessageBars(root);
+  enhanceDialogs(root);
+  enhancePopovers(root);
+  enhanceTooltips(root);
+  enhanceToasts(root);
+  enhanceTabs(root);
+  enhanceLineages(root);
+  enhanceModels(root);
+}
+
+/**
+ * Takes every one of them back off again.
+ *
+ * A BEHAVIOUR THAT CAN BE APPLIED AND NOT TAKEN BACK OFF IS A DEFECT, and it is
+ * a defect for every consumer with a client-side router rather than for one
+ * framework. The enhancers register listeners on the DOCUMENT, observe elements
+ * for resize and intersection, arm timers, and hold open panels in module-level
+ * registries. None of that stops when the markup leaves the page, so a route
+ * visited ten times carries ten copies of it, each pinning a detached subtree
+ * that can never be collected. One of the observers FETCHES ROWS.
+ *
+ * IN THE REVERSE ORDER, for the reason a teardown always is: a surface is
+ * released before the controls inside it, so nothing is torn down underneath
+ * something still holding a reference to it.
+ *
+ * `releaseAnchorsIn` runs LAST and is the net under the rest. Each release
+ * above evicts its own panel, and this catches a panel none of them owns,
+ * including one whose control has already left the document.
+ */
+export function releaseAll(root = document) {
+  releaseModels(root);
+  releaseLineages(root);
+  releaseTabs(root);
+  releaseToasts(root);
+  releaseTooltips(root);
+  releasePopovers(root);
+  releaseDialogs(root);
+  releaseMessageBars(root);
+  releaseMenus(root);
+  releaseInfos(root);
+  releaseTables(root);
+  releaseErrorSummaries(root);
+  releaseCarousels(root);
+  releaseInputs(root);
+  releasePickers(root);
+  releaseDateInputs(root);
+  // `collapseBlocks` has no release and needs none. It binds nothing and holds
+  // nothing: it reads the declared cap and writes one attribute on the block,
+  // which goes when the block does. The gap is named here rather than filled
+  // with an empty function, so the two lists still read against each other.
+  releaseTrees(root);
+  releaseTagPickers(root);
+  releaseSearches(root);
+  releaseSelects(root);
+  releaseAnchorsIn(root);
+  // And the theme registry, which is this file's own strong list rather than an
+  // enhancer's. It is asked about the document rather than about `root`, so it
+  // is written outside the reversed list above.
+  forgetScopes();
+}
+
+enhanceAll();
 /**
  * The example rail's axis, kept true at both widths.
  *
@@ -5019,3 +5309,16 @@ function railAxis() {
 
 railAxis();
 revealTarget();
+
+// --- The implementation switch -------------------------------------------
+//
+// In its own module, because it runs only for a reader who asks for it and it
+// owns four things this file should not: a stored preference, a lazy import, an
+// observer and a failure mode. See `implementation.js`.
+//
+// The behaviours are passed in rather than imported there. They are 208 KB this
+// page has already loaded, and importing them from the React bundle would make
+// esbuild inline a second copy of every one of them.
+import { install as installExamples } from "./implementation.js";
+
+installExamples({ enhance: enhanceAll, release: releaseAll });

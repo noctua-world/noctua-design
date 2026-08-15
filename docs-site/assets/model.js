@@ -46,8 +46,8 @@
 /** How much of the distance to the gaze target is covered per frame. */
 const EASE = 0.12;
 
-/** The stages this module has already built. */
-const built = new WeakSet();
+/** The stages this module has already built, and each one's teardown. */
+const built = new WeakMap();
 
 /**
  * Gives every `[data-nd-model]` element on the page its model.
@@ -60,19 +60,44 @@ export function enhanceModels(root = document) {
     (stage) => !built.has(stage),
   );
   if (stages.length === 0) return;
-  for (const stage of stages) built.add(stage);
+  for (const stage of stages) built.set(stage, new AbortController());
 
   const watch = new IntersectionObserver((entries) => {
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;
       watch.unobserve(entry.target);
-      mount(entry.target).catch(() => {
+      const binding = built.get(entry.target);
+      if (!binding || binding.signal.aborted) continue;
+      mount(entry.target, binding.signal).catch(() => {
         // A blocked module, no WebGL, a missing file. The flat content that
         // is already in the element stays, which is why it is there.
       });
     }
   });
   for (const stage of stages) watch.observe(stage);
+  // The waiting observer goes when the first stage under this root is
+  // released, because it holds every stage it is still watching.
+  for (const stage of stages) {
+    built.get(stage).signal.addEventListener("abort", () => watch.unobserve(stage));
+  }
+}
+
+/**
+ * Takes the model back off every stage under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER, and this module is the most expensive one on the site to
+ * leave running. A mounted stage holds a WebGL context and asks for an
+ * animation frame for ever, so a stage taken out of the document keeps a core
+ * busy drawing a canvas nobody can see.
+ */
+export function releaseModels(root = document) {
+  for (const stage of root.querySelectorAll("[data-nd-model]")) {
+    const binding = built.get(stage);
+    if (!binding) continue;
+    binding.abort();
+    built.delete(stage);
+  }
 }
 
 /** A numeric parameter, with its default. */
@@ -81,7 +106,7 @@ function setting(stage, name, fallback) {
   return Number.isFinite(value) ? value : fallback;
 }
 
-async function mount(stage) {
+async function mount(stage, signal) {
   const base = document.documentElement.getAttribute("data-noctua-base") || "";
   const three = await import(`${base}assets/vendor/three-webgl.js`);
 
@@ -258,7 +283,7 @@ async function mount(stage) {
         () => {
           calm = false;
         },
-        { capture: true, once: true, passive: true },
+        { capture: true, once: true, passive: true, signal },
       );
     }
   }
@@ -283,10 +308,18 @@ async function mount(stage) {
     if (under > 0) room.style.setProperty("--nd-model-air-under", `${wornUnder + under}px`);
   };
   breathe();
-  new ResizeObserver(() => {
+  const watch = new ResizeObserver(() => {
     size();
     breathe();
-  }).observe(stage);
+  });
+  watch.observe(stage);
+  signal.addEventListener("abort", () => {
+    watch.disconnect();
+    // The context is given back rather than left to the collector: a browser
+    // allows a small number of them, and a route visited enough times runs
+    // out and loses the oldest canvas on the page.
+    renderer.dispose();
+  });
 
   // Where the pointer is, as a fraction of the window either side of the stage.
   let wantX = 0;
@@ -301,7 +334,7 @@ async function mount(stage) {
       wantX = Math.max(-1, Math.min(1, (event.clientX - cx) / (window.innerWidth / 2)));
       wantY = Math.max(-1, Math.min(1, (event.clientY - cy) / (window.innerHeight / 2)));
     },
-    { passive: true },
+    { passive: true, signal },
   );
 
   // The enclosing scene's camera, read fresh every frame — the billboard's
@@ -322,6 +355,10 @@ async function mount(stage) {
   let gazeX = 0;
   let gazeY = 0;
   const draw = (now) => {
+    // THE LOOP ASKS WHETHER IT IS STILL WANTED. Cancelling the pending frame
+    // instead would mean threading the handle out of a closure that re-arms it
+    // every frame, and one missed re-arm is a loop that never stops.
+    if (signal.aborted) return;
     frames += 1;
     // The clip advances by real elapsed time, so it runs at its authored
     // speed on every display — clamped, so the first frame after a

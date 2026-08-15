@@ -32,12 +32,18 @@ test("every control in the header is one box on one centre line", async ({ page 
       }),
     );
 
-  // Three: the repository link and the two `<details>` — the language menu and
-  // the theme menu. It was four, and the fourth was a mode control the theme
-  // menu already had a row for.
-  expect(boxes.length, "the header lost a control").toBe(3);
+  // Four: the implementation toggle, the repository link, and the two
+  // `<details>` — the language menu and the theme menu.
+  //
+  // It was three, and it was three because a fourth had been removed: a mode
+  // control the theme menu already had a row for. This fourth is not that. It
+  // is the one control here that is not an appearance, and the theme panel is
+  // titled *Theme*, so a row for it there would be a category error in a panel
+  // generated from the theme model. An icon, like the rest, because the budget
+  // is one line at 320 px.
+  expect(boxes.length, "the header lost a control").toBe(4);
 
-  // Three controls, three elements — an anchor and two `<details>` — and each
+  // Four controls, four elements — two buttons and two `<details>` — and each
   // used to size itself. `align-items: center` then faithfully centred three
   // different heights, which is what "slightly off" looks like.
   const heights = new Set(boxes.map((b) => Math.round(b.height)));

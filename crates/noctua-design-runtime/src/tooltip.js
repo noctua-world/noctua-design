@@ -43,11 +43,46 @@ const ROOM = 120;
 /** What a tooltip is about, in the order a browser would reach it. */
 const CONTROL = "a[href], button, input, select, textarea, summary, [tabindex]";
 
+/** Every enhanced tooltip's teardown, so a subtree can be released. */
+const tooltips = new WeakMap();
+
 export function enhanceTooltips(root = document) {
   for (const element of root.querySelectorAll("[data-nd-tooltip]")) {
     if (element.dataset.ndEnhanced) continue;
     element.dataset.ndEnhanced = "tooltip";
-    enhance(element);
+    const binding = new AbortController();
+    tooltips.set(element, binding);
+    enhance(element, binding.signal);
+  }
+}
+
+/**
+ * Takes the behaviour back off every tooltip under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. A bubble open at that moment stays in `anchor.js`, which
+ * measures it on every scroll frame for ever, and the wait a resting pointer
+ * armed still fires into a control nobody can see.
+ */
+export function releaseTooltips(root = document) {
+  for (const element of root.querySelectorAll("[data-nd-tooltip]")) {
+    if (element.dataset.ndEnhanced !== "tooltip") continue;
+    const bubble = element.querySelector(".nd-tooltip-bubble");
+    if (bubble) {
+      releaseAnchor(bubble);
+      bubble.hidden = true;
+    }
+    element.removeAttribute("data-nd-shown");
+    // THE DESCRIPTION IS TAKEN BACK ONLY IF THIS FILE WROTE IT. A control that
+    // arrived with an `aria-describedby` of its own keeps it, which is the same
+    // rule `enhance` applies in the other direction.
+    const control = element.querySelector(CONTROL);
+    if (bubble && control?.getAttribute("aria-describedby") === bubble.id) {
+      control.removeAttribute("aria-describedby");
+    }
+    tooltips.get(element)?.abort();
+    tooltips.delete(element);
+    delete element.dataset.ndEnhanced;
   }
 }
 
@@ -64,7 +99,7 @@ function waitFor(root) {
   return Number.isFinite(ms) ? ms : 0;
 }
 
-function enhance(root) {
+function enhance(root, signal) {
   const bubble = root.querySelector(".nd-tooltip-bubble");
   const control = root.querySelector(CONTROL);
   if (!bubble || !control || !bubble.id) return;
@@ -115,28 +150,32 @@ function enhance(root) {
     // held-press path below is the touch answer instead.
     if (event.pointerType === "touch") return;
     open(waitFor(root));
-  });
-  control.addEventListener("pointerleave", leave);
+  }, { signal });
+  control.addEventListener("pointerleave", leave, { signal });
 
   control.addEventListener("pointerdown", (event) => {
     // HELD ON A TOUCH SCREEN, and gone the moment the reader has acted with a
     // pointer that can hover. Both are the same sentence about the same press.
     if (event.pointerType === "touch") open(0);
     else hide();
-  });
+  }, { signal });
   for (const done of ["pointerup", "pointercancel"]) {
     control.addEventListener(done, (event) => {
       if (event.pointerType === "touch") hide();
-    });
+    }, { signal });
   }
 
   // `focusin` rather than `focus`, so a control the caller wrapped in something
   // reaches this from whatever inside it actually took the focus.
-  root.addEventListener("focusin", () => open(0));
+  root.addEventListener("focusin", () => open(0), { signal });
   root.addEventListener("focusout", (event) => {
     if (root.contains(event.relatedTarget)) return;
     leave();
-  });
+  }, { signal });
+
+  // The pending wait goes with the listeners that arm it, or a bubble opens
+  // over a control whose subtree has already gone.
+  signal.addEventListener("abort", () => clearTimeout(waiting));
 
   root.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || bubble.hidden) return;
@@ -146,5 +185,5 @@ function enhance(root) {
     event.stopPropagation();
     refused = true;
     hide();
-  });
+  }, { signal });
 }

@@ -44,15 +44,39 @@ function behavior() {
   return stillness() ? "auto" : "smooth";
 }
 
+/** Every enhanced carousel's teardown, so a subtree can be released. */
+const carousels = new WeakMap();
+
 export function enhanceCarousels(root = document) {
   for (const element of root.querySelectorAll("[data-nd-carousel]")) {
     if (element.dataset.ndEnhanced) continue;
     element.dataset.ndEnhanced = "carousel";
-    enhance(element);
+    const binding = new AbortController();
+    carousels.set(element, binding);
+    enhance(element, binding.signal);
   }
 }
 
-function enhance(root) {
+/**
+ * Takes the behaviour back off every carousel under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER, and this file has three reasons of its own. It listens
+ * for `visibilitychange` on the DOCUMENT, it observes the track for resizes,
+ * and autoplay is a `setTimeout` that arms the next one. None of the three
+ * stops when the element leaves the page, so a rotation nobody can see keeps
+ * scrolling a detached track for as long as the tab is open.
+ */
+export function releaseCarousels(root = document) {
+  for (const element of root.querySelectorAll("[data-nd-carousel]")) {
+    if (element.dataset.ndEnhanced !== "carousel") continue;
+    carousels.get(element)?.abort();
+    carousels.delete(element);
+    delete element.dataset.ndEnhanced;
+  }
+}
+
+function enhance(root, signal) {
   const at = reader(root);
   const track = root.querySelector("[data-nd-carousel-track]");
   if (!track) return;
@@ -214,7 +238,7 @@ function enhance(root) {
       dot.addEventListener("click", () => {
         stop();
         goTo(index);
-      });
+      }, { signal });
       dots.append(dot);
     });
     dots.hidden = false;
@@ -225,7 +249,7 @@ function enhance(root) {
     control.addEventListener("click", () => {
       stop();
       step(control.dataset.ndCarouselStep === "previous" ? -1 : 1);
-    });
+    }, { signal });
   }
   if (counter) counter.hidden = false;
 
@@ -246,7 +270,7 @@ function enhance(root) {
         }
       }, SETTLE);
     },
-    { passive: true },
+    { passive: true, signal },
   );
 
   // --- Autoplay, and the four rules it carries -------------------------------
@@ -323,22 +347,26 @@ function enhance(root) {
       } else {
         stop();
       }
-    });
+    }, { signal });
     // Paused while a pointer is over it, while focus is inside it, and while
     // the tab is away — three ways a reader is doing something else.
-    root.addEventListener("pointerenter", hold);
-    root.addEventListener("pointerleave", () => start());
-    root.addEventListener("focusin", hold);
+    root.addEventListener("pointerenter", hold, { signal });
+    root.addEventListener("pointerleave", () => start(), { signal });
+    root.addEventListener("focusin", hold, { signal });
     root.addEventListener("focusout", (event) => {
       if (!root.contains(event.relatedTarget)) start();
-    });
-    document.addEventListener("visibilitychange", () =>
-      document.hidden ? hold() : start(),
+    }, { signal });
+    // ON THE DOCUMENT, so it outlives the element unless something takes it
+    // off. That is the listener `releaseCarousels` exists for.
+    document.addEventListener(
+      "visibilitychange",
+      () => (document.hidden ? hold() : start()),
+      { signal },
     );
     // And it stops the moment a reader scrolls it themselves.
-    track.addEventListener("pointerdown", stop, { passive: true });
-    track.addEventListener("wheel", stop, { passive: true });
-    track.addEventListener("keydown", stop);
+    track.addEventListener("pointerdown", stop, { passive: true, signal });
+    track.addEventListener("wheel", stop, { passive: true, signal });
+    track.addEventListener("keydown", stop, { signal });
     start();
   } else if (rotation) {
     // Asked for and refused: the control would be a button that toggles a
@@ -349,5 +377,14 @@ function enhance(root) {
   paint();
   // A track that was hidden when the page loaded measures as nothing, so the
   // ends are measured again the first time it has a size.
-  new ResizeObserver(() => paint()).observe(track);
+  const watch = new ResizeObserver(() => paint());
+  watch.observe(track);
+  // THE TEARDOWN IS WRITTEN BESIDE WHAT IT UNDOES, on the same signal the
+  // listeners take. A second registry of things to disconnect is a second list
+  // that stops agreeing with the first.
+  signal.addEventListener("abort", () => {
+    watch.disconnect();
+    clearTimeout(timer);
+    clearTimeout(settling);
+  });
 }

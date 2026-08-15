@@ -97,12 +97,30 @@ const scenes = new WeakMap();
 export function enhanceLineages(root = document) {
   for (const field of root.querySelectorAll("[data-nd-lineage] [data-nd-lineage-field]")) {
     if (scenes.has(field)) continue;
-    const scene = build(field);
+    const scene = build(field, new AbortController());
     if (scene) scenes.set(field, scene);
   }
 }
 
-function build(field) {
+/**
+ * Takes the camera back off every scene under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. Two of the things `listen` registers reach past the
+ * scene: a `resize` on the WINDOW, and a `MutationObserver` on the scene's own
+ * root. Both outlive a scene taken out of the document, and the resize handler
+ * then projects a three.js camera into a field that is not on the screen.
+ */
+export function releaseLineages(root = document) {
+  for (const field of root.querySelectorAll("[data-nd-lineage] [data-nd-lineage-field]")) {
+    const scene = scenes.get(field);
+    if (!scene) continue;
+    scene.binding.abort();
+    scenes.delete(field);
+  }
+}
+
+function build(field, binding) {
   const root = field.closest("[data-nd-lineage]");
   const space = field.querySelector("[data-nd-lineage-space]");
   if (!root || !space) return null;
@@ -142,6 +160,11 @@ function build(field) {
     lens: 0,
     pieces: [...space.querySelectorAll(".nd-lineage-piece")],
     at: 0,
+    // CARRIED ON THE SCENE, because every function below already takes it. A
+    // parallel argument threaded through five call sites is five places for
+    // one of them to be forgotten.
+    binding,
+    signal: binding.signal,
   };
   scene.rest = { yaw: scene.yaw, pitch: scene.pitch, zoom: 1, panX: 0, panY: 0 };
 
@@ -282,7 +305,7 @@ function controls(scene) {
     // header; a camera control that had to invent one would be a control with
     // an empty box in it.
     button.textContent = word;
-    button.addEventListener("click", act);
+    button.addEventListener("click", act, { signal: scene.signal });
     bar.append(button);
   }
   scene.root.append(bar);
@@ -641,7 +664,7 @@ function listen(scene) {
   field.addEventListener("contextmenu", (event) => {
     if (theirs(event)) return;
     event.preventDefault();
-  });
+  }, { signal: scene.signal });
 
   field.addEventListener("pointerdown", (event) => {
     // ANY press is an act: the module mounts even when the press belongs to a
@@ -681,7 +704,7 @@ function listen(scene) {
     scene.root.dataset.ndDragging = "";
     capture(field, event.pointerId);
     wake();
-  });
+  }, { signal: scene.signal });
 
   field.addEventListener("pointermove", (event) => {
     if (scene.root.dataset.ndParallax === "true" && !motionless()) {
@@ -737,7 +760,7 @@ function listen(scene) {
     // every scale — and after the fit there are many more scales than three.
     if (dragging.pan) pan(scene, dx / dragging.cell.x, dy / dragging.cell.y);
     else orbit(scene, dx * SWEEP, -dy * SWEEP);
-  });
+  }, { signal: scene.signal });
 
   const release = (event) => {
     if (touches.has(event.pointerId)) {
@@ -760,12 +783,12 @@ function listen(scene) {
     dragging = null;
     delete scene.root.dataset.ndDragging;
   };
-  field.addEventListener("pointerup", release);
-  field.addEventListener("pointercancel", release);
+  field.addEventListener("pointerup", release, { signal: scene.signal });
+  field.addEventListener("pointercancel", release, { signal: scene.signal });
   field.addEventListener("pointerleave", () => {
     scene.root.style.setProperty("--nd-pointer-x", "0");
     scene.root.style.setProperty("--nd-pointer-y", "0");
-  });
+  }, { signal: scene.signal });
 
   // THE WHEEL ZOOMS AN ENGAGED SCENE, AND ONLY AN ENGAGED ONE. Before the
   // reader has taken the camera, a wheel over a scene still scrolls the page —
@@ -782,7 +805,7 @@ function listen(scene) {
       zoom(scene, 1 - event.deltaY * WHEEL);
       wake();
     },
-    { passive: false },
+    { passive: false, signal: scene.signal },
   );
 
   // A STATE NOTHING WRITES IS A STATE THAT DOES NOTHING. `:checked` is what
@@ -795,27 +818,33 @@ function listen(scene) {
     if (!box) return;
     const owner = box.closest(".nd-lineage-bond, .nd-lineage-piece");
     if (owner) owner.toggleAttribute("data-nd-picked", box.checked);
-  });
+  }, { signal: scene.signal });
 
   // ON AN ACT, NEVER ON A GLANCE. Mounting on `pointerenter` meant hovering
   // an example changed it, which was reported twice. A press, a key or focus
   // is a reader engaging; passing a pointer over the page is not.
-  field.addEventListener("keydown", (event) => onKey(scene, event, wake));
-  field.addEventListener("focusin", wake, { once: true });
+  field.addEventListener("keydown", (event) => onKey(scene, event, wake), { signal: scene.signal });
+  field.addEventListener("focusin", wake, { once: true, signal: scene.signal });
 
   for (const switcher of scene.root.querySelectorAll("[data-nd-swaps]")) {
-    switcher.addEventListener("click", () => swap(scene, switcher.dataset.ndSwaps ?? ""));
+    switcher.addEventListener("click", () => swap(scene, switcher.dataset.ndSwaps ?? ""), { signal: scene.signal });
   }
 
   // A CONSUMER SETS THE FILTER; THIS ANSWERS IT. There is no filter control
   // here because a scene does not own the box somebody types in — it owns what
   // the answer looks like.
-  new MutationObserver(() => announce(scene)).observe(scene.root, {
+  const watch = new MutationObserver(() => announce(scene));
+  watch.observe(scene.root, {
     attributes: true,
     attributeFilter: ["data-nd-filter", "data-nd-sets", "data-nd-occasion"],
   });
+  scene.signal.addEventListener("abort", () => watch.disconnect());
 
-  window.addEventListener("resize", () => scene.three && project(scene), { passive: true });
+  // ON THE WINDOW, so it outlives the scene unless something takes it off.
+  window.addEventListener("resize", () => scene.three && project(scene), {
+    passive: true,
+    signal: scene.signal,
+  });
 }
 
 /**

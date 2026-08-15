@@ -5,8 +5,6 @@
 //! *line* is not (`NOCTUA.md §9.7`), which is also what leaves the empty column
 //! the effect layers show through.
 
-use core::fmt::Write as _;
-
 use dioxus::prelude::*;
 use noctua_design::ThemeScope;
 use noctua_design::components::{
@@ -17,7 +15,7 @@ use noctua_design::components::{
     SegmentedItem, SegmentedOrientation, SegmentedSize, Strong, Table, TableCell, TableCellAlign,
     TableColumn, TableColumnWidth, TableHeaderCell, TableHeaderCellAlign, TableHeaderCellScope,
     TableHeaderCellWrap, TableRow, TableSection, TableSectionKind, Text, TextSize, TextTone,
-    TextWeight, Time, Toolbar, ToolbarDensity, Truncate, TruncateLines, VisuallyHidden,
+    TextWeight, Time, Toolbar, ToolbarDensity, Truncate, TruncateLines,
 };
 use noctua_design::model::{Glass, Mode, Palette, Radius};
 use noctua_design::{Icon, IconName, IconSize};
@@ -27,6 +25,7 @@ use noctua_design_tokens as tokens;
 use crate::shell::Context;
 use crate::site;
 use crate::theme_menu::{Reach, ThemeMenu};
+use crate::tree::Node;
 
 /// Dispatches to the body for this page.
 ///
@@ -128,17 +127,19 @@ fn DocHead(context: Context) -> Element {
             p { class: "nd-lead", "{context.t(context.page.summary)}" }
             if let Some(example) = overview {
                 div { class: "nd-doc-hero",
-                    ExampleFrame {
+                    {framed(
                         context,
-                        name: "{context.page.slug}-overview",
-                        label: Key::ComponentOverview,
-                        Example {
-                            context,
-                            source: example.source,
-                            note: example.note,
-                            {(example.render)(context)}
-                        }
-                    }
+                        &format!("{}-overview", context.page.slug),
+                        Key::ComponentOverview,
+                        // A hero shows the page's own subject, so the React
+                        // caption names the component the page is about. Where
+                        // the page groups several, the first in the tree is the
+                        // one the caption names, which is the same rule the
+                        // hand-written Dioxus caption follows.
+                        context.page.component.map_or("", |component| component.name),
+                        &example,
+                        crate::trees::for_page(context.page.slug).map_or(&[], |(_, _, nodes)| nodes),
+                    )}
                 }
             }
         }
@@ -335,9 +336,15 @@ fn ExampleFrame(
     label: Key,
     /// Whether the React bundle can mount what is inside this frame.
     ///
-    /// Only `ThemeScope` can today, and offering the switch on a frame that
-    /// cannot honour it is a control that lies. `NOCTUA.md §9.3` Leg 4 is the
-    /// claim it exists to demonstrate, and it is demonstrated in one place.
+    /// It used to be true of one frame in the whole site, and offering the
+    /// switch where it does nothing is a control that lies. `NOCTUA.md §9.3`
+    /// Leg 4 was therefore demonstrated in one place — which is exactly how six
+    /// modules of the React package came to be broken unnoticed.
+    ///
+    /// Every example carries a tree now, so this is true wherever there is one
+    /// to mount and the bundle was built. `framed` computes it; nothing sets it
+    /// by hand except the `ThemeScope` frame, whose component is in the theme
+    /// model rather than in `spec/components/`.
     #[props(default)]
     mountable: bool,
     children: Element,
@@ -565,12 +572,48 @@ fn ExampleFrame(
     }
 }
 
+/// One example inside its own frame.
+///
+/// A function rather than three lines of `rsx!`, because a frame now needs two
+/// things computed from the same pair of facts — whether there is a tree, and
+/// what its key is — and `rsx!` has nowhere to put a `let`.
+///
+/// **The tree is what decides whether the switch is offered.** Not a prop set
+/// by hand, not a list: a frame whose example has no tree cannot be mounted, so
+/// it shows no control. That is the rule this file already states twice, kept
+/// by construction rather than by remembering.
+fn framed(
+    context: Context,
+    key: &str,
+    label: Key,
+    subject: &str,
+    example: &crate::examples::Example,
+    nodes: &'static [Node],
+) -> Element {
+    let switchable = crate::react_available() && !nodes.is_empty();
+    rsx! {
+        ExampleFrame { context, name: "{key}", label, mountable: switchable,
+            Example {
+                context,
+                source: example.source,
+                note: example.note,
+                tree: switchable.then(|| key.to_owned()),
+                react: switchable
+                    .then(|| crate::serialise::jsx(nodes, subject, context))
+                    .flatten(),
+                {crate::trees::draw(example, nodes, context)}
+            }
+        }
+    }
+}
+
 /// One example inside the frame: the call, the render, and a note.
 ///
 /// The call is also the caption. `Blockquote { tone: Accent, … }` says what an
 /// example shows more precisely than a sentence would, in every language at
 /// once, and it is the thing a reader came to copy — so it is `<figcaption>`,
 /// first in the DOM as well as first on the page.
+
 #[component]
 fn Example(
     context: Context,
@@ -585,9 +628,20 @@ fn Example(
     title: Option<Key>,
     /// The Dioxus call that produced it.
     source: String,
-    /// The React call, for the one example the React bundle can mount.
+    /// The React call.
+    ///
+    /// Hand-written for `ThemeScope`, which is not in `spec/components/`, and
+    /// derived from the tree for everything else — see `serialise::jsx`.
     #[props(default)]
     react: Option<String>,
+    /// Which example this is, as the browser asks for it.
+    ///
+    /// The key into `assets/examples-<locale>.json`, and the same string the
+    /// frame uses for its own ids. Present exactly when there is a tree to
+    /// mount, so the presence of the attribute IS the answer to whether this
+    /// example can be shown in React. Nothing else has to be kept in step.
+    #[props(default)]
+    tree: Option<String>,
     /// A sentence, for the few examples the call does not explain by itself.
     #[props(default)]
     note: Option<Key>,
@@ -632,6 +686,8 @@ fn Example(
                 // wrong one. The example that HAS a React call is the one that
                 // can be mounted; nothing else needs to be known.
                 "data-nd-mountable": react_hook,
+                // WHICH tree draws it, for the browser to look up.
+                "data-nd-example": tree,
                 {children}
             }
             if let Some(note) = note {
@@ -661,16 +717,6 @@ const DIOXUS_SOURCE: &str = r"ThemeScope {
     radius: Radius::Round,
     Sample {}
 }";
-
-/// The React call, which is the same call.
-const REACT_SOURCE: &str = r#"<ThemeScope
-  palette="azure-vivid"
-  mode="light"
-  glass="full"
-  radius="round"
->
-  <Sample />
-</ThemeScope>"#;
 
 // --- One message, with its identifiers set in code --------------------------
 
@@ -821,7 +867,27 @@ fn ThemeScopePage(context: Context) -> Element {
         Heading { level: HeadingLevel::_2, size: HeadingSize::H2,
             "{context.t(Key::ComponentExamples)}"
         }
-        ExampleFrame { context, name: "scope", label: Key::ScopePageTitle, mountable: true,
+        ExampleFrame {
+            context,
+            name: "scope",
+            label: Key::ScopePageTitle,
+            // The one hand-written switch left. `ThemeScope` comes from
+            // `spec/theme.toml`, so it has no tree and no derived caption.
+            // NO SWITCH HERE ANY MORE, AND THAT IS A LOSS WORTH NAMING.
+            //
+            // This frame was the one place on the site that mounted React, and
+            // it did it from a hand-written mirror of one example. Every
+            // example is data now and every frame can mount, so the claim this
+            // frame existed to demonstrate is demonstrated 596 times instead of
+            // once — but `ThemeScope` comes from `spec/theme.toml` rather than
+            // from `spec/components/`, so the generated interpreter has no arm
+            // for it and this example has no tree.
+            //
+            // The consequence, said plainly: the React `ThemeScope` is now
+            // rendered nowhere, which is the exact condition that let six other
+            // React modules rot. It needs an arm in the interpreter and a tree
+            // of its own, and until then it is on the list.
+            mountable: false,
             Example {
                 context,
                 title: Key::ScopeComponentTitle,
@@ -864,7 +930,6 @@ fn ThemeScopePage(context: Context) -> Element {
             Example {
                 context,
                 source: DIOXUS_SOURCE,
-                react: REACT_SOURCE,
                 ThemeScope {
                     class: "nd-scope",
                     palette: Palette::AzureVivid,
@@ -1651,14 +1716,14 @@ fn lineage_frames(
     let all = crate::examples::for_component(name);
     rsx! {
         for index in range {
-            ExampleFrame { context, name: "{slug}-{index}", label: Key::ComponentExamples,
-                Example {
-                    context,
-                    source: all[index].source,
-                    note: all[index].note,
-                    {(all[index].render)(context)}
-                }
-            }
+            {framed(
+                context,
+                &format!("{slug}-{index}"),
+                Key::ComponentExamples,
+                name,
+                &all[index],
+                crate::trees::nodes(name, index),
+            )}
         }
     }
 }
@@ -1786,8 +1851,17 @@ fn LineagePage(context: Context) -> Element {
             Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::PageLineageSectionVariants)}" }
             for component in [scene, figure] {
                 for prop in component.props.iter().filter(|prop| drawn(prop)) {
-                    ExampleFrame { context, name: "{component.slug}-{prop.name}", label: Key::ComponentExamples,
-                        Example { context, source: "{prop.name}",
+                    ExampleFrame {
+                        context,
+                        name: "{component.slug}-{prop.name}",
+                        label: Key::ComponentExamples,
+                        // A grid is a tree now, so it can be mounted like any other.
+                        mountable: crate::react_available(),
+                        Example {
+                            context,
+                            source: "{prop.name}",
+                            tree: crate::react_available()
+                                .then(|| format!("{}-{}", component.slug, prop.name)),
                             div { class: "nd-variant-row",
                                 for value in prop.values {
                                     Specimen { context, component, prop: *prop, value: (*value).to_string() }
@@ -2052,14 +2126,14 @@ fn ComponentSections(
                 "{context.t(Key::ComponentExamples)}"
             }
             for (index, example) in crate::examples::for_component(component.name).iter().enumerate() {
-                ExampleFrame { context, name: "{component.slug}-{index}", label: Key::ComponentExamples,
-                    Example {
-                        context,
-                        source: example.source,
-                        note: example.note,
-                        {(example.render)(context)}
-                    }
-                }
+                {framed(
+                    context,
+                    &format!("{}-{index}", component.slug),
+                    Key::ComponentExamples,
+                    component.name,
+                    example,
+                    crate::trees::nodes(component.name, index),
+                )}
             }
         }
 
@@ -2092,8 +2166,17 @@ fn ComponentSections(
                     heading: depth.section_fold(),
                     summary: context.t(Key::ComponentVariants).to_owned(),
                     for prop in component.props.iter().filter(|prop| drawn(prop)) {
-                        ExampleFrame { context, name: "{component.slug}-{prop.name}", label: Key::ComponentVariants,
-                            Example { context, source: "{prop.name}",
+                        ExampleFrame {
+                            context,
+                            name: "{component.slug}-{prop.name}",
+                            label: Key::ComponentVariants,
+                            // A grid is a tree now, so it can be mounted like any other.
+                            mountable: crate::react_available(),
+                            Example {
+                                context,
+                                source: "{prop.name}",
+                                tree: crate::react_available()
+                                    .then(|| format!("{}-{}", component.slug, prop.name)),
                                 div { class: "nd-variant-row",
                                     for value in prop.values {
                                         Specimen { context, component, prop: *prop, value: (*value).to_string() }
@@ -2134,15 +2217,30 @@ fn ComponentPage(context: Context) -> Element {
 /// where `submit` went on drawing three identical buttons under `button`,
 /// `submit` and `reset` after the contract had said not to. A rule enforced in
 /// one of three call sites is not a rule.
-fn drawn(prop: &crate::generated::catalogue::DocProp) -> bool {
+///
+/// `serialise::json` is the fourth reader, for the same reason: a grid it wrote
+/// and no page draws is a tree the browser would mount over nothing.
+pub(crate) fn drawn(prop: &crate::generated::catalogue::DocProp) -> bool {
     prop.kind == "enum" && prop.variants
 }
 
 /// One rendering of a component, with one enum prop set to one value.
 ///
-/// The markup is built from the contract: the element, the root class, and the
-/// attribute the prop becomes. `props.rs` generates the component's body from
-/// the same three facts, so this shows what the component shows.
+/// # Why this draws a tree rather than markup
+///
+/// It used to build an HTML **string** out of the contract: the element, the
+/// root class, the prop's attribute, and every other enum prop at its default.
+/// That made every grid on the site a picture of what a string builder believed
+/// the component would render, and the two could disagree with nothing to
+/// report it. `data-nd-data-nd-size` on fourteen pages, four tones drawn as four
+/// untouched grey buttons, and `data-nd-kind="ordered"` on a `<ul>` all shipped
+/// that way. Each was a grid faithfully documenting a bug in the grid.
+///
+/// The tree is generated from the same contract by
+/// `crates/noctua-design-emit/src/specimens.rs` and rendered through the
+/// interpreter, so the attributes are the component's own. Where a contract
+/// carries a `specimen` that is a drawing, the tree carries that drawing, and
+/// the generated file names every component in that position.
 #[component]
 fn Specimen(
     context: Context,
@@ -2150,362 +2248,10 @@ fn Specimen(
     prop: crate::generated::catalogue::DocProp,
     value: String,
 ) -> Element {
-    let class = component.class.unwrap_or_default();
-    let element = specimen_element(component, prop, &value);
-    // THE CAPTION IS THE SPECIMEN'S ACCESSIBLE NAME.
-    //
-    // A specimen of a component that `needs_name` is a control with no name:
-    // the grid renders the ELEMENT, and the only content it has is the
-    // `specimen` icon. `IconButton`'s page shipped six of them and nothing
-    // caught it, because the browser suite's all-pages loop covers `heading`
-    // and not the pages whose specimen is a control.
-    //
-    // Naming it after the caption rather than inventing a string is the whole
-    // fix: the caption already says which value this is, in the one word that
-    // is the same in every locale, and `aria-labelledby` cannot drift from it.
-    let caption = format!("nd-variant-{}-{}-{value}", component.slug, prop.name);
+    let nodes = crate::generated::specimens::nodes(component.name, prop.name, &value);
     rsx! {
-        figure { class: "nd-variant-item",
-            div {
-                class: "nd-variant-stage",
-                // WHICH PROP THIS IS A PICTURE OF. Two callers want it: the
-                // stylesheet, for the rare prop whose sentence assumes a box
-                // the stage does not give it, and the browser sweep that fails
-                // when two values of ONE prop draw the same thing — which
-                // needs to know where one prop's row ends and the next begins.
-                "data-nd-prop": "{prop.name}",
-                // And which component's prop. A collection page carries several
-                // components' grids in one flow, and two of them may declare the
-                // same name — `align` belongs to both `TableCell` and
-                // `TableHeaderCell` — which is two grids and not one.
-                "data-nd-slug": "{component.slug}",
-                dangerous_inner_html: specimen_markup(context, component, prop, &value, &caption),
-            }
-            figcaption { class: "nd-variant-label", id: "{caption}",
-                Code { class: "nd-identifier", "{value}" }
-                // The element, said out loud when the class does not say it —
-                // and for a prop that CHOOSES the element, said always, because
-                // that is the whole point of the variant.
-                if class.is_empty() || !prop.elements.is_empty() {
-                    VisuallyHidden { class: "nd-identifier", "{element}" }
-                }
-            }
-        }
+        {crate::tree::render(nodes, crate::tree::Scope::new(context))}
     }
-}
-
-/// The element this variant renders.
-///
-/// A prop carrying `elements` picks it; everything else gets the component's
-/// default. Reading it from the contract is what stops the page showing
-/// `data-nd-kind="ordered"` on a `<ul>` — which is what it showed while the
-/// prop was inert, faithfully documenting the bug.
-fn specimen_element(
-    component: crate::generated::catalogue::DocComponent,
-    prop: crate::generated::catalogue::DocProp,
-    value: &str,
-) -> &'static str {
-    prop.values
-        .iter()
-        .position(|candidate| *candidate == value)
-        .and_then(|at| prop.elements.get(at))
-        .copied()
-        .unwrap_or(component.element)
-}
-
-/// The element the component renders, carrying one attribute and some content.
-fn specimen_markup(
-    context: Context,
-    component: crate::generated::catalogue::DocComponent,
-    prop: crate::generated::catalogue::DocProp,
-    value: &str,
-    caption: &str,
-) -> String {
-    let element = specimen_element(component, prop, value);
-    // A specimen of a control is a control, and one whose only content is an
-    // icon has no name of its own. The caption beside it already says which
-    // value this is, so it is the name — pointed at rather than copied, which
-    // is the only version of this that cannot go stale.
-    let named = if component.needs_name {
-        format!(" aria-labelledby=\"{caption}\"")
-    } else {
-        String::new()
-    };
-    // An unset `type` inside a form is `submit`. Nothing on this page is inside
-    // a form today, and "today" is exactly the word that makes it worth
-    // writing: the grid ships raw markup, and raw markup gets copied.
-    let kind = if element == "button" && prop.attribute != Some("type") && prop.name != "type" {
-        " type=\"button\"".to_owned() // allow-literal: an HTML attribute value, not a token — the default this element should always carry
-    } else {
-        String::new()
-    };
-    // THE ATTRIBUTE, NOT `data-nd-` PLUS THE ATTRIBUTE.
-    //
-    // This wrote `data-nd-{attribute}` where the attribute already was
-    // `data-nd-size`, so every page shipped `data-nd-data-nd-size` — an
-    // attribute no stylesheet matches. Fourteen component pages rendered every
-    // variant of every enum prop identically, and each one looked like a
-    // component whose variants did nothing rather than like a page with a typo
-    // in it. A prop that chooses the element carries no attribute at all.
-    let attribute = if prop.elements.is_empty() {
-        format!(" {}=\"{value}\"", prop.attribute.unwrap_or(prop.name))
-    } else {
-        String::new()
-    };
-    // AND EVERY OTHER ENUM PROP AT ITS DEFAULT, WHICH IS THE COMPONENT.
-    //
-    // This wrote one attribute and nothing else, and half the stylesheet is
-    // compound: `.nd-button[data-nd-variant="solid"][data-nd-tone="danger"]` is
-    // the shape every tone in the system is painted with. A specimen carrying
-    // `data-nd-tone` alone matched no rule at all, so the four tones were four
-    // untouched `<button>` elements showing the browser's own grey — a prop
-    // that looked like it did nothing. The same held for
-    // `.nd-select-field[…][…]`, `.nd-table[layout][density]`,
-    // `.nd-table[layout][rules]` and `.nd-lineage-piece[piece][kind]`.
-    //
-    // ENUMS ONLY, and the exclusion is the interesting half: `pressed`,
-    // `expanded` and `current` are bools whose absence is MEANINGFUL —
-    // `button.toml` says `aria-pressed="false"` turns a plain button into a
-    // toggle that is off — so writing a bool at its default would make the
-    // specimen state the opposite of the contract it is illustrating.
-    let mut defaults = String::new();
-    for other in component.props {
-        if other.name == prop.name || other.kind != "enum" || !other.elements.is_empty() {
-            continue;
-        }
-        let Some(default) = other.default else {
-            continue;
-        };
-        let name = other.attribute.unwrap_or(other.name);
-        // `type` is already written above, with the reason a specimen of a
-        // control has to carry it at all.
-        if name == "type" && !kind.is_empty() {
-            continue;
-        }
-        // AND NEVER AN ARIA ATTRIBUTE. The defaults are here so compound CSS
-        // rules match, and no rule in this system is written against an
-        // `aria-*` name that a specimen would otherwise have to invent. What
-        // it did invent was `aria-sort="none"` on eight `TableHeaderCell`
-        // pictures — a still `<th>` announcing itself as a column somebody can
-        // sort by, which is the exact claim that prop stopped making.
-        if name.starts_with("aria-") {
-            continue;
-        }
-        let _ = write!(defaults, " {name}=\"{default}\"");
-    }
-    // Block-level components read better with a sentence; an inline one reads
-    // better with its own name, which is also what a reader is looking for.
-    let block = matches!(
-        element,
-        "p" | "div"
-            | "blockquote"
-            | "ul"
-            | "ol"
-            | "dl"
-            | "h1"
-            | "h2"
-            | "h3"
-            | "h4"
-            | "h5"
-            | "h6"
-            | "pre"
-    );
-    // A specimen that names an icon becomes that icon. `IconName::parse` exists
-    // for exactly this — the documentation page and the tests — which is why it
-    // is not `FromStr`: nothing in an interface reaches an icon by name.
-    // THE PROP'S OWN SPECIMEN WINS HERE TOO. This read the COMPONENT's, so a
-    // prop that declared one was overruled by an icon name it had asked to
-    // replace — `Button.justify` shipped its three values as one centred glyph
-    // three times, because a single icon has nothing to be pushed apart from.
-    let icon = prop
-        .specimen
-        .or(component.specimen)
-        .and_then(IconName::parse);
-    // The pangram is a MESSAGE, not a constant. It was
-    // `"Sphinx of black quartz, judge my vow"` in a `const`, printed verbatim
-    // on every Portuguese page — and the catalogue has carried a Portuguese
-    // pangram all along, for the typography page, which is the same sentence
-    // doing the same job.
-    // The PROP's own specimen wins: one component has one specimen, and two
-    // props can want opposite things from it.
-    let inside = prop.specimen.or(component.specimen).unwrap_or(if block {
-        context.t(Key::TypeSpecimenLine)
-    } else {
-        component.name
-    });
-    // A specimen with no content of its own shows the component's NAME, which
-    // is an identifier — so the element says so, and the pseudo-locale test
-    // reads it as one rather than as a sentence nobody translated.
-    let identifier = prop.specimen.is_none() && component.specimen.is_none() && !block;
-    let class = match (component.class, identifier) {
-        (Some(class), true) => format!(" class=\"{class} nd-identifier\""),
-        (Some(class), false) => format!(" class=\"{class}\""),
-        (None, true) => " class=\"nd-identifier\"".to_owned(),
-        (None, false) => String::new(),
-    };
-    // A CELL'S CONTENT SITS IN THE BOX THE COMPONENT PUTS IT IN. `TableCell`
-    // wraps its children in `.nd-table-value`, and every rule that acts on the
-    // value rather than on the cell — `truncate` is the whole of it — selects
-    // that box. Without it the `truncate` specimen wrapped like `wrap` and the
-    // grid documented three values with two pictures.
-    let inside = if matches!(element, "td" | "th") {
-        format!("<div class=\"nd-table-value\">{inside}</div>")
-    } else {
-        inside.to_owned()
-    };
-    // A VOID ELEMENT CANNOT HOLD ITS OWN PICTURE, and half the form controls are
-    // one. `<input class="nd-input">figure</input>` is not what the parser
-    // does with that: `<input>` closes itself, the figure lands BESIDE it, and
-    // every rule shaped `.nd-input[data-nd-size="small"] .nd-input-box`
-    // — which is how `size` and `tone` are painted on every one of these —
-    // matches nothing, because the box is a sibling rather than a descendant.
-    // Six controls documented `size` with three identical boxes for that reason.
-    //
-    // So a void element with something to show becomes a `<span>` carrying the
-    // same class and the same attributes. Nothing is lost: the real control
-    // draws nothing here anyway — these specimens are figures precisely because
-    // a live `<input>` in a grid is a control a reader can type into by mistake.
-    // `<meter>` AND `<progress>` ARE HERE FOR A NEIGHBOURING REASON. They are not
-    // void, but they are REPLACED: an engine that supports them draws its own
-    // shadow tree and never renders the fallback content, so a specimen putting
-    // `.nd-meter-bar` inside one puts it somewhere nothing paints — and `size`,
-    // which is the bar's block size, had nowhere to land.
-    // `<textarea>` IS THE THIRD CASE AND THE LOUDEST. Its content is not
-    // children, it is the VALUE — so a specimen's markup was rendered as the
-    // text a reader is looking at, and all three values of `resize` showed
-    // `<span class="nd-textarea-figure">…` wrapped over three lines inside the
-    // box. Markup shown to a reader as prose is the worst way this can fail:
-    // it does not look like a bug in the grid, it looks like a bug in the
-    // component.
-    let element = if matches!(
-        element,
-        "input" | "img" | "br" | "hr" | "col" | "embed" | "meter" | "progress" | "textarea"
-    ) && !inside.is_empty()
-    {
-        "span"
-    } else {
-        element
-    };
-    // A COMPONENT WHOSE OWN ELEMENT *IS* THE DRAWING IS NOT WRAPPED IN ONE.
-    //
-    // `Icon` renders the `<svg>` itself, so the general form below would put
-    // one inside another and hang `data-nd-size` on the outer box. The glyph
-    // inside carries `.nd-icon-glyph` too, and that class sets its own
-    // `font-size` — so the inner drawing would re-set the size the outer one
-    // was there to change, and all three values of `size` would draw one
-    // picture. That is exactly what `variants.spec.js` fails on.
-    let markup = match (icon, element) {
-        (Some(icon), "svg") => icon_markup(icon, &format!("{kind}{named}{defaults}{attribute}")),
-        (Some(icon), _) => format!(
-            "{}{class}{kind}{named}{defaults}{attribute}>{}</{element}>",
-            open_tag(element),
-            icon_markup(icon, "")
-        ),
-        (None, _) => {
-            format!("<{element}{class}{kind}{named}{defaults}{attribute}>{inside}</{element}>")
-        }
-    };
-    in_table(element, markup)
-}
-
-/// A table part, put back inside a table.
-///
-/// # Why a specimen of a `<td>` is otherwise invisible
-///
-/// `Specimen` hands its markup to `dangerous_inner_html` on a `<div>`, so the
-/// browser parses it in the **"in body" insertion mode** — where a `<caption>`,
-/// `<colgroup>`, `<thead>`, `<tbody>`, `<tfoot>`, `<tr>`, `<td>` or `<th>` start
-/// tag is a *parse error that is ignored*. Every variant of every table part
-/// would render nothing at all.
-///
-/// And it would render nothing on a page that otherwise looks finished: the
-/// caption under the empty box still names the value, so the grid reads as a
-/// component whose variants do nothing rather than as markup the parser threw
-/// away. That is the same shape as `data-nd-data-nd-size`, which documented
-/// fourteen pages of identical variants without anybody noticing — the page
-/// renders, it is simply empty exactly where the answer was.
-///
-/// Every other element is returned untouched, so this costs nothing anywhere
-/// else and cannot be forgotten for a sixth table part: the `match` is the list.
-/// The build number the column specimen shows.
-const BUILD: &str = "#4213"; // allow-literal: a build number in a specimen, not a colour
-
-fn in_table(element: &str, markup: String) -> String {
-    match element {
-        // A `Table` always renders inside its scroller, so a specimen of one
-        // has to as well: `height` caps the SCROLLER, and a variant grid whose
-        // four heights were four identical boxes would be documenting a prop
-        // that does nothing.
-        "table" => format!("<div class=\"nd-table-scroll\">{markup}</div>"),
-        // A COLUMN NEEDS A ROW TO PAINT. A `<colgroup>` alone in a table with
-        // no rows is a declaration about nothing, and the variant grid drew
-        // five blank boxes for `width` and three for `sort_as` — a prop
-        // documented by empty space. The row is the same two identifiers every
-        // other specimen in this family uses.
-        // The gate reads four digits after a hash as a colour, and a string
-        // continuation cannot carry a comment — so the number is a name with a
-        // line of its own.
-        "colgroup" => format!(
-            "<table class=\"nd-table\">{markup}<tbody>\
-             <tr class=\"nd-table-row\">\
-             <th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">{BUILD}</th>\
-             <td class=\"nd-table-cell nd-identifier\">51s</td>\
-             </tr></tbody></table>"
-        ),
-        "caption" | "thead" | "tbody" | "tfoot" => {
-            format!("<table class=\"nd-table\">{markup}</table>")
-        }
-        "tr" => format!("<table class=\"nd-table\"><tbody>{markup}</tbody></table>"),
-        // A cell needs BOTH ancestors. `<td>` inside a bare `<table>` is the
-        // same ignored start tag — the parser's "in table" mode drops it too,
-        // and only "in row" accepts one.
-        // A CELL NEEDS ROOM TO ALIGN IN. Wrapped in a table sized to its own
-        // content, `start`, `center` and `end` are three identical pictures —
-        // there is no space for a value to sit at one end of. The class gives
-        // the wrapper a width; the stylesheet decides how much.
-        "td" | "th" => format!(
-            "<table class=\"nd-table nd-table-specimen\"><tbody><tr>{markup}</tr></tbody></table>"
-        ),
-        _ => markup,
-    }
-}
-
-/// `<button`, ready for a class and an attribute.
-///
-/// Its own function so the tag opener is one literal on one line, which is
-/// where a gate exemption has to live: `rustfmt` may move a comment above a
-/// statement, so a marker on the line above excuses nothing.
-fn open_tag(element: &str) -> String {
-    format!("<{element}") // allow-literal: an element name, not a drawing — this is the opener of whatever the contract says the component renders
-}
-
-/// The `<svg>` the generated `Icon` emits, as a string.
-///
-/// `Specimen` builds markup rather than components — one string, one element,
-/// one attribute — so the one component whose specimen is an icon has to inline
-/// what `Icon` would have rendered. The geometry, the view box, the paint and
-/// the stroke weight are all read from the generated icon module; only the
-/// wrapper is written here, which is why this is not an icon drawn by hand.
-///
-/// `extra` is whatever the specimen wants on that same element. `Icon`'s own
-/// grid is the caller that needs it: the component IS this `<svg>`, so its
-/// `data-nd-size` belongs here rather than on a box around it.
-fn icon_markup(icon: IconName, extra: &str) -> String {
-    let open = "<svg"; // allow-literal: the wrapper `Icon` puts around a generated drawing, not a drawing
-    let box_size = r#"width="1em" height="1em""#; // allow-literal: `Icon`'s own box, in `em`, so the glyph takes its size from whatever contains it — the same string the generated component emits
-    let (fill, stroke) = if icon.filled() {
-        ("currentColor", "none")
-    } else {
-        ("none", "currentColor")
-    };
-    format!(
-        "{open} class=\"nd-icon-glyph\"{extra} viewBox=\"{}\" {box_size} \
-         fill=\"{fill}\" stroke=\"{stroke}\" stroke-width=\"{}\" stroke-linecap=\"round\" \
-         stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\">{}</svg>",
-        icon.view_box(),
-        noctua_design::icons::STROKE_WIDTH,
-        icon.body(),
-    )
 }
 
 // --- The rest ---------------------------------------------------------------
@@ -2917,47 +2663,88 @@ fn Scripts(context: Context) -> Element {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::generated::catalogue::COMPONENTS;
+    use crate::tree::Node;
+
+    /// The picture a stage holds, whatever wrapping it needed.
+    ///
+    /// A specimen is a figure, the stage inside it and the picture inside that,
+    /// so a test about the picture has to walk two levels first.
+    fn drawing(nodes: &'static [Node]) -> Option<&'static Node> {
+        let [Node::Element { children, .. }] = nodes else {
+            return None;
+        };
+        let [Node::Element { children, .. }, _] = children else {
+            return None;
+        };
+        children.first()
+    }
+
+    /// Every value of every drawn prop has a picture.
+    ///
+    /// The lookup answers an unknown name with an empty tree, which draws an
+    /// empty figure under a caption that still names the value. That reads as a
+    /// component whose variants do nothing, which is the failure this whole
+    /// layer exists under, so a missing specimen fails here instead.
+    #[test]
+    fn every_value_of_every_drawn_prop_is_drawn() {
+        let mut found = 0usize;
+        for component in COMPONENTS {
+            for prop in component.props.iter().filter(|prop| drawn(prop)) {
+                for value in prop.values {
+                    found += 1;
+                    let nodes =
+                        crate::generated::specimens::nodes(component.name, prop.name, value);
+                    assert!(
+                        drawing(nodes).is_some(),
+                        "{}.{} at {value} draws an empty figure",
+                        component.name,
+                        prop.name
+                    );
+                }
+            }
+        }
+        // A walk that found nothing would pass for ever and prove nothing.
+        assert!(found > 100, "only {found} specimens were read");
+    }
 
     /// A specimen of a table part has to arrive inside a table.
     ///
-    /// The variant grid injects its markup with `dangerous_inner_html` on a
-    /// `<div>`, and the HTML parser **discards** every table-only start tag it
-    /// meets outside a table. Without the wrapper, `Table`'s five parts would
-    /// document eleven enum props with empty boxes — on a page that otherwise
-    /// looks finished, which is why nothing would have caught it.
+    /// The browser parses a stage's content in the "in body" insertion mode,
+    /// where every table-only start tag is a parse error that is ignored. Left
+    /// bare, `Table`'s five parts would document eleven enum props with empty
+    /// boxes — on a page that otherwise looks finished, which is why nothing
+    /// would have caught it.
     #[test]
-    fn every_table_part_is_wrapped_in_a_table() {
-        for element in [
-            "caption", "colgroup", "thead", "tbody", "tfoot", "tr", "td", "th",
-        ] {
-            let wrapped = in_table(element, format!("<{element}>x</{element}>"));
-            assert!(
-                wrapped.starts_with("<table"),
-                "{element} would be thrown away by the parser: {wrapped}"
-            );
+    fn every_specimen_of_a_table_part_is_drawn_inside_a_table() {
+        let mut found = 0usize;
+        for component in COMPONENTS {
+            // A `Table` arrives inside its scroller instead, because `height`
+            // caps the SCROLLER and four heights would otherwise be four
+            // identical boxes.
+            let wrapper = match component.element {
+                "table" => "div",
+                "caption" | "colgroup" | "thead" | "tbody" | "tfoot" | "tr" | "td" | "th" => {
+                    "table"
+                }
+                _ => continue,
+            };
+            for prop in component.props.iter().filter(|prop| drawn(prop)) {
+                for value in prop.values {
+                    found += 1;
+                    let nodes =
+                        crate::generated::specimens::nodes(component.name, prop.name, value);
+                    let Some(Node::Element { tag, .. }) = drawing(nodes) else {
+                        panic!("{}.{} at {value} draws nothing", component.name, prop.name);
+                    };
+                    assert_eq!(
+                        *tag, wrapper,
+                        "{}.{} at {value} would be thrown away by the parser",
+                        component.name, prop.name
+                    );
+                }
+            }
         }
-        // A cell needs a row as well: "in table" drops a `<td>` just as "in
-        // body" does, and only "in row" accepts one.
-        for cell in ["td", "th"] {
-            assert!(
-                in_table(cell, String::new()).contains("<tr>"),
-                "a {cell} was given a table with no row in it"
-            );
-        }
-        // And a `Table` arrives inside its scroller, because `height` caps the
-        // scroller and would otherwise document four identical boxes.
-        assert!(in_table("table", String::new()).contains("nd-table-scroll"));
-    }
-
-    /// And nothing else is touched, so the wrapper costs the other thirty-odd
-    /// components exactly nothing.
-    #[test]
-    fn nothing_but_a_table_part_is_wrapped() {
-        for element in [
-            "div", "span", "button", "p", "li", "input", "select", "option",
-        ] {
-            let markup = format!("<{element}>x</{element}>");
-            assert_eq!(in_table(element, markup.clone()), markup);
-        }
+        assert!(found > 0, "no table part was read");
     }
 }

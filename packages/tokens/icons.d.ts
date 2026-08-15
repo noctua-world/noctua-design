@@ -18,6 +18,7 @@ export type IconName =
   | "external-link"
   | "chevron-down"
   | "copy"
+  | "code"
   | "download"
   | "info"
   | "columns"

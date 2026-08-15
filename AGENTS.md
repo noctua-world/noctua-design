@@ -516,9 +516,10 @@ and `IconName` comes from `noctua_design_icons`, where the drawings are.
 
 What the icon emitter still owns is what is about the DRAWINGS rather than the
 component: `IconName`, `dist/icons.json`, the attribution, `packages/tokens`,
-and `STROKE_WIDTH` — read by both bodies and by `pages::icon_markup`, so
-`spec/icons.toml` still decides the one number all three draw. `/icons/`
-remains the gallery of drawings; `/icon/` is the component that draws them.
+and `STROKE_WIDTH` — read by both bodies, so `spec/icons.toml` decides the one
+number either of them draws. A variant grid draws its icons through `Icon`
+itself now, so there is no third reader to keep in step. `/icons/` remains the
+gallery of drawings; `/icon/` is the component that draws them.
 
 **Its three size fields went with it, because they decided nothing.**
 `size_small`, `size_medium` and `size_large` reached one doc comment and no
@@ -730,18 +731,45 @@ follow from that and are easy to get wrong:
   `Button`'s write-it-only-when-true rule.
 * **A `text` icon prop draws nothing when the name does not parse.** `x.svg` is
   the file; `close` is the icon's name. A test reads every icon an example names.
-* **A specimen carries every enum prop at its default**, then the prop under
-  test. One attribute alone matches no compound rule, and compound is how every
-  tone in this system is painted. **Never an `aria-*` one, though**: the
-  defaults are there so compound CSS matches, no rule in this system selects on
-  ARIA, and what a specimen invented was `aria-sort="none"` on eight still
-  `<th>` pictures — each announcing itself as a column somebody can sort by.
-* **A void or replaced element becomes a `<span>` in a specimen.** An `<input>`
+* **A SPECIMEN IS A GENERATED TREE, AND IT RENDERS THE REAL COMPONENT.** It was
+  an HTML string `pages.rs` assembled from the contract, which made every grid a
+  picture of what a string builder believed the component would render.
+  `data-nd-data-nd-size`, four tones drawn as four grey buttons and
+  `data-nd-kind="ordered"` on a `<ul>` all shipped that way, each one a grid
+  faithfully documenting a bug in the grid.
+  `crates/noctua-design-emit/src/specimens.rs` writes one tree per component,
+  prop and value into `docs-site/src/generated/specimens.rs`, and both the page
+  and the React mount draw it. The component writes its own attributes, its own
+  defaults and its own bools.
+* **A `specimen` that is MARKUP is still markup, and the generated file says
+  which components those are.** About thirty contracts carry a drawing rather
+  than a use of the component, because a live `<input>` in a grid is a control a
+  reader can type into by mistake. Those grids are the contract's element
+  carrying the contract's attributes with that markup inside, so rendering one
+  shows the markup matches in both languages and nothing more. **A picture
+  carries every other enum prop at its default**, because one attribute alone
+  matches no compound rule and compound is how every tone here is painted.
+  **Never an `aria-*` one, though**: no rule in this system selects on ARIA, and
+  what a specimen invented was `aria-sort="none"` on eight still `<th>`
+  pictures — each announcing itself as a column somebody can sort by.
+* **A SPECIMEN STILL HAS A NAME, AND THE COMPONENT GIVES IT.** A picture points
+  at its own caption with `aria-labelledby`, and a component call is passed the
+  prop its contract requires for the purpose — filled with the component's own
+  name, which is the same string for every value in the row. That last part is
+  load-bearing: a row whose words change with the prop under test is a row where
+  two values painted alike still measure apart, and `variants.spec.js` reads
+  exactly that measurement. `every_specimen_of_a_named_control_has_a_name` is
+  the gate, and `IconButton` shipping six nameless controls is why it exists.
+* **A void or replaced element becomes a `<span>` in a picture.** An `<input>`
   cannot contain its own figure and a `<meter>` never renders fallback content,
-  so `.nd-x[data-nd-size] .nd-x-part` matched nothing on six controls.
-* **`variants = false` is asked by `fn drawn`, in all three grid renderers.** It
-  used to be enforced on collection pages only, so the declaration silently did
-  nothing on every single-component page.
+  so `.nd-x[data-nd-size] .nd-x-part` matched nothing on six controls. A
+  component CALL is exempt, because the component renders whatever it renders:
+  `Divider`'s grid is a real `<hr>` again, self-closed and carrying the
+  `role="separator"` the string never wrote.
+* **`variants = false` is asked by `fn drawn`, and by everything that walks a
+  grid.** Three renderers and the serialiser read it, and the emitter asks the
+  same question of the spec. It used to be enforced on collection pages only, so
+  the declaration silently did nothing on every single-component page.
 * **A prop's own `specimen` beats the component's**, including when the
   component's is an icon name.
 * **`variants.spec.js` asks every component page whether two values of one prop
@@ -1305,8 +1333,8 @@ Where a still picture genuinely cannot show the difference, say so with
 is about a note that is not open; `Heading.level` is document structure.
 
 `<textarea>`, like `<input>`, `<meter>` and `<progress>`, is handled as a
-replaced element in `specimen_markup`: its content is the **value**, so injected
-markup is rendered to the reader as prose.
+replaced element by the specimen emitter: its content is the **value**, so
+injected markup is rendered to the reader as prose.
 
 ## Maintaining this file
 
