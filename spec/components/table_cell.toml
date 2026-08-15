@@ -43,9 +43,10 @@ type = "text"
 attribute = "rowspan"
 doc = "How many rows this cell covers, as a real `rowspan`. Named `rows` rather than `rowspan` so it reads beside `span`. Use it sparingly, because a cell spanning rows makes the stacked layout ambiguous."
 
+# NO ATTRIBUTE. The word is drawn into the stacked layout's own span and
+# hidden from a screen reader that already has the column from its heading.
 [prop.label]
 type = "text"
-attribute = "data-nd-label"
 doc = "The column's name, repeated for the stacked layout. A stacked table has no heading row left, so each value carries its own. It is drawn as real text and marked `aria-hidden`, because a screen reader gets the column from the heading."
 
 [prop.column]

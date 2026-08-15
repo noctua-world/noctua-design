@@ -111,3 +111,36 @@ test("a close control exists only where a caller named one", async ({ page }) =>
   // Drawn by the script, so it exists only where the words for it do.
   await expect(named(page, "deadline").locator(".nd-info-close")).toHaveCount(0);
 });
+
+test("auto reads the measurement and start ignores it", async ({ page }) => {
+  // `start` WAS BYTE-IDENTICAL TO `auto`. Only an `="end"` rule existed and
+  // nothing read the attribute, so two of the three values drew the same note
+  // and a caller choosing between them was choosing nothing. `anchor.js`
+  // writes the edge a measurement picks, and only `auto` reads it: a stated
+  // edge is a decision, not a guess.
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto(url(PAGE.info));
+  await showParts(page);
+
+  const root = named(page, "deadline");
+  await root.locator(".nd-info-marker").click();
+  const note = root.locator(".nd-info-note");
+  await expect(note).toBeVisible();
+  // The measurement is written, which it never was.
+  expect(await note.getAttribute("data-nd-anchor")).toMatch(/^(start|end)$/);
+
+  const at = (placement, anchor) =>
+    root.evaluate(
+      (el, [where, edge]) => {
+        el.setAttribute("data-nd-placement", where);
+        el.querySelector(".nd-info-note").setAttribute("data-nd-anchor", edge);
+        return Math.round(el.querySelector(".nd-info-note").getBoundingClientRect().left);
+      },
+      [placement, anchor],
+    );
+
+  // Under `auto` the note hangs from whichever edge the measurement named.
+  expect(await at("auto", "start")).not.toBe(await at("auto", "end"));
+  // Under `start` it hangs from the leading edge whatever the measurement says.
+  expect(await at("start", "start")).toBe(await at("start", "end"));
+});

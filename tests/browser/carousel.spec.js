@@ -285,3 +285,120 @@ test("no id appears twice on the page, in any locale", async ({ page }) => {
     expect(twice, locale).toEqual([]);
   }
 });
+
+// --- What a width and a snap owe with no script ------------------------------
+
+test("per_view is a width the component renders, not one a script arrives with", async ({
+  browser,
+}) => {
+  // `carousel.js` used to set `--nd-carousel-per-view` on the track, which made
+  // a WIDTH depend on a script: with JavaScript blocked a `per_view: "3"`
+  // carousel showed one slide, under a contract that opens by promising the
+  // slides "scroll and snap before any script runs". The property is rendered
+  // now, and `auto` is still matched on `data-nd-per-view` alone.
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(url(PAGE.carousel));
+  await showParts(page);
+
+  const across = async (root) =>
+    page.locator(root).evaluate((el) => {
+      const track = el.querySelector("[data-nd-carousel-track]");
+      const slide = el.querySelector("[data-nd-carousel-slide]");
+      return track.getBoundingClientRect().width / slide.getBoundingClientRect().width;
+    });
+
+  // Three across is three across, with nothing running.
+  expect(await across(LOOPING), "a three-across carousel showed one slide").toBeGreaterThan(2.5);
+  expect(await across(COUNTED), "a two-across carousel showed one slide").toBeGreaterThan(1.7);
+  // And one across is still one, so the fallback in the stylesheet is intact.
+  expect(await across(GALLERY)).toBeLessThan(1.2);
+  await context.close();
+});
+
+test("snap: none turns the controls into a scroll by one screen", async ({ page }) => {
+  // The value's own doc has always said it "turns the two controls into a
+  // scroll by one screen rather than to a slide". `carousel.js` never read
+  // `data-nd-snap`, so `step` went slide by slide whatever the caller asked
+  // for — the one behaviour the value exists to refuse.
+  await page.goto(url(PAGE.carousel));
+  await showParts(page);
+
+  const root = page.locator(LOOPING);
+  expect(await root.getAttribute("data-nd-snap")).toBe("none");
+  const track = page.locator(`${LOOPING} [data-nd-carousel-track]`);
+  const screen = await track.evaluate((el) => el.clientWidth);
+  const slide = await page
+    .locator(`${LOOPING} [data-nd-carousel-slide]`)
+    .first()
+    .evaluate((el) => el.getBoundingClientRect().width);
+  // The two have to differ, or the assertion below cannot tell them apart.
+  expect(screen, "a screen and a slide are the same width here").toBeGreaterThan(slide * 2);
+
+  await page.locator(`${LOOPING} [data-nd-carousel-step="next"]`).click();
+  await expect
+    .poll(() => track.evaluate((el) => Math.abs(el.scrollLeft)))
+    .toBeGreaterThan(slide * 1.5);
+});
+
+test("a snapping carousel still moves one slide at a time", async ({ page }) => {
+  // The other half of the same question: `snap: none` must not become the
+  // behaviour of every carousel.
+  await page.goto(url(PAGE.carousel));
+  await showParts(page);
+  const track = page.locator(`${COUNTED} [data-nd-carousel-track]`);
+  const slide = await page
+    .locator(`${COUNTED} [data-nd-carousel-slide]`)
+    .first()
+    .evaluate((el) => el.getBoundingClientRect().width);
+  await page.locator(`${COUNTED} [data-nd-carousel-step="next"]`).click();
+  await expect
+    .poll(() => track.evaluate((el) => Math.abs(el.scrollLeft)))
+    .toBeGreaterThan(slide * 0.5);
+  const moved = await track.evaluate((el) => Math.abs(el.scrollLeft));
+  expect(moved, "a snapping carousel scrolled by a whole screen").toBeLessThan(slide * 1.6);
+});
+
+// --- What a group may say, and what it must not stay -------------------------
+
+test("a group claims no axis, because ARIA gives a group none", async ({ page }) => {
+  await page.goto(url(PAGE.carousel));
+  await showParts(page);
+  // `aria-orientation` is not supported on `role="group"` in ARIA 1.2, so it
+  // was an attribute an engine may drop under a sentence promising a reader
+  // would hear it. The axis is drawn, and `Divider` already spells it this way.
+  const roots = await page.evaluate(() =>
+    [...document.querySelectorAll(".nd-carousel")].map((one) => ({
+      name: one.dataset.ndCarousel,
+      announced: one.hasAttribute("aria-orientation"),
+      drawn: one.getAttribute("data-nd-orientation"),
+    })),
+  );
+  expect(roots.length).toBeGreaterThan(0);
+  for (const root of roots) {
+    expect(root.announced, `${root.name} claims an axis a group has not got`).toBe(false);
+    expect(root.drawn).toMatch(/^(horizontal|vertical)$/);
+  }
+});
+
+test("a track that will never rotate is polite, not silent", async ({ browser }) => {
+  // UNDER REDUCED MOTION THE ROTATION NEVER STARTS, and only `start` and
+  // `hold` ever moved `aria-live` back — so the track a reader is driving by
+  // hand stayed `off` for ever, for exactly the reader who asked for less
+  // movement.
+  const context = await browser.newContext({ reducedMotion: "reduce" });
+  const page = await context.newPage();
+  await page.goto(url(PAGE.carousel));
+  await showParts(page);
+  const tracks = await page.evaluate(() =>
+    [...document.querySelectorAll("[data-nd-carousel-track]")].map((track) => ({
+      name: track.closest(".nd-carousel")?.dataset.ndCarousel,
+      live: track.getAttribute("aria-live"),
+    })),
+  );
+  expect(tracks.length).toBeGreaterThan(0);
+  for (const track of tracks) {
+    expect(track.live, `${track.name} is silent for ever`).toBe("polite");
+  }
+  await context.close();
+});

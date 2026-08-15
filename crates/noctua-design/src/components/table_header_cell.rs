@@ -95,7 +95,7 @@ impl TableHeaderCellWrap {
     }
 }
 
-/// Which way the rows are already sorted by this column. It writes the real `aria-sort` on the server, so a sorted table states it before any script runs. **Only one heading in a table may be anything but `none`**.
+/// Which way the rows are already sorted by this column. `none` writes no attribute, because a heading with no sort control must not claim one. **Only one heading in a table may be anything else**.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TableHeaderCellSort {
     #[default]
@@ -126,7 +126,7 @@ impl TableHeaderCellSort {
 ///
 /// # Accessibility
 ///
-/// The role is `columnheader` or `rowheader`, following `scope` and written in the markup rather than left implicit. The sort control is a real button inside the heading, which keeps the `aria-sort`.
+/// The role is `columnheader` or `rowheader`, following `scope` and written in the markup rather than left implicit. The sort control is a real button inside the heading, and only a heading with one carries `aria-sort`.
 #[component]
 pub fn TableHeaderCell(
     /// Which `TableColumn` this heading names. It tells the script which column the sort control here sorts, rather than leaving it to count cells. A `scope = "row"` heading names a record and needs none.
@@ -146,7 +146,7 @@ pub fn TableHeaderCell(
     span: Option<String>,
     /// How many rows this heading covers, with `scope = "rowgroup"`. For a table with two rows of headings, where one of them stands over both.
     rows: Option<String>,
-    /// Which way the rows are already sorted by this column. It writes the real `aria-sort` on the server, so a sorted table states it before any script runs. **Only one heading in a table may be anything but `none`**.
+    /// Which way the rows are already sorted by this column. `none` writes no attribute, because a heading with no sort control must not claim one. **Only one heading in a table may be anything else**.
     #[props(default)]
     sort: TableHeaderCellSort,
     /// Extra classes for the root element.
@@ -157,11 +157,20 @@ pub fn TableHeaderCell(
 ) -> Element {
     let root = format!("nd-table-header-cell {class}");
     let root = root.trim().to_owned();
+    // A DIRECTION, OR NOTHING. `None` here means "say nothing", not
+    // `aria-sort="none"` — see the emitter's note above.
     let sorted = match sort {
-        TableHeaderCellSort::None => "none",
-        TableHeaderCellSort::Ascending => "ascending",
-        TableHeaderCellSort::Descending => "descending",
+        TableHeaderCellSort::None => None,
+        TableHeaderCellSort::Ascending => Some("ascending"),
+        TableHeaderCellSort::Descending => Some("descending"),
     };
+    // A heading that names a record or a band of rows is not a column, so no
+    // direction it was given can be true of it.
+    let row_scope = matches!(
+        scope,
+        TableHeaderCellScope::Row | TableHeaderCellScope::Rowgroup
+    );
+    let sorted = if row_scope { None } else { sorted };
 
     rsx! {
         th {

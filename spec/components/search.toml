@@ -6,7 +6,11 @@ element = "div"
 class = "nd-search"
 # The three are only ever used together, which is what a collection page is for.
 page = "search"
-specimen = "<div class=\"nd-search-field\"><input class=\"nd-search-input\" type=\"search\" placeholder=\"Search\"></div>"
+# A DRAWN BOX, NOT A LIVE `<input>`. It was a real search box with no `name`,
+# no `id`, no label and no `aria-label`, three times over in the size grid —
+# the defect `Select` and `TagPicker` each record, on a third component that
+# needs a name. A `<span>` wearing the same class draws the same picture.
+specimen = "<div class=\"nd-search-field\"><span class=\"nd-search-input\"></span></div>"
 summary = "Let users find one thing among many, with the results under the box or in a panel."
 
 # `<div role="search">`, AND IT WANTED TO BE `<search>`.
@@ -148,19 +152,19 @@ type = "text"
 attribute = "data-nd-cap-label"
 doc = "The sentence saying the list was cut, with `{shown}` and `{total}` placeholders. Without it a capped search shows ten answers where there were three hundred and says nothing about the rest."
 
+# NO ATTRIBUTE, BECAUSE NO BODY WRITES ONE. The words below reach the DOM as
+# a control's name or as its text, which is why the component works and why
+# nothing reported the declaration. `attribute` is a claim about the markup.
 [prop.clear_label]
 type = "text"
-attribute = "data-nd-clear-label"
 doc = "The name of the control that empties the box. It is a glyph, so this is the only name it has."
 
 [prop.recent_label]
 type = "text"
-attribute = "data-nd-recent-label"
 doc = "The heading over the queries a reader made before. Supply it with `recent`, because a list of words with no heading is indistinguishable from a list of results."
 
 [prop.forget_label]
 type = "text"
-attribute = "data-nd-forget-label"
 doc = "The name of the control that empties that history. Anything a component keeps about a reader needs a way for the reader to clear it, in the same place they see it."
 
 [prop.close_label]

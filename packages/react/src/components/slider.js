@@ -22,6 +22,24 @@ export function Slider({ name, label, value, end, range, min, max, step, marks, 
   const trackClass = ["nd-slider", className].filter(Boolean).join(" ");
   // See the Dioxus half: a range is two named controls under one legend.
   const startId = range ? `${id}-start` : id;
+  // See the Dioxus half: the value and the scale are drawn by the component,
+  // because an empty `<output>` is the one thing `output` promises not to be.
+  const shown = (number) =>
+    outputLabel ? String(outputLabel).split("{value}").join(String(number)) : String(number);
+  const read = (text, fallback) => {
+    const number = Number(text);
+    return String(text ?? "").trim() === "" || !Number.isFinite(number) ? fallback : number;
+  };
+  const low = read(min, 0);
+  const high = read(max, 100);
+  const middle = low + (high - low) / 2;
+  const startValue = value ?? String(middle);
+  const endValue = end ?? String(middle);
+  const reading = range ? `${shown(startValue)} – ${shown(endValue)}` : shown(startValue);
+  const ticks = String(marks ?? "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((tick, index) => String(markLabels ?? "").split("|")[index]?.trim() || tick);
 
   return h(
     Field,
@@ -88,21 +106,31 @@ export function Slider({ name, label, value, end, range, min, max, step, marks, 
             })
           : null,
         marks
-          ? h("span", {
-              key: "m",
-              className: "nd-slider-marks",
-              "aria-hidden": "true",
-              "data-nd-slider-marks": "",
-            })
+          ? h(
+              "span",
+              {
+                key: "m",
+                className: "nd-slider-marks",
+                "aria-hidden": "true",
+                "data-nd-slider-marks": "",
+              },
+              ticks.map((word, index) =>
+                h("span", { key: `t${index}`, className: "nd-slider-mark" }, word),
+              ),
+            )
           : null,
       ),
       (output ?? true)
-        ? h("output", {
-            key: "o",
-            className: "nd-slider-output",
-            htmlFor: startId,
-            "data-nd-slider-output": "",
-          })
+        ? h(
+            "output",
+            {
+              key: "o",
+              className: "nd-slider-output",
+              htmlFor: startId,
+              "data-nd-slider-output": "",
+            },
+            reading,
+          )
         : null,
     ),
   );

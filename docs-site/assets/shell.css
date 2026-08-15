@@ -463,9 +463,34 @@ a {
   border-color: var(--nc-color-accent-hover);
 }
 
+/* THE BOX, AND IT USED TO BE ONLY THE WORDS.
+ *
+ * `size`'s doc says "the size of the control's box", and the one rule keyed on
+ * it set a font size and a row height: the track and the knob were the same
+ * 48x24 at both values, so a reader looking at the two pictures side by side
+ * saw one control twice. The three declarations below are the box. */
 .nd-switch[data-nd-size="small"] {
   font-size: var(--noctua-size-caption);
   min-block-size: var(--noctua-space-6);
+}
+
+.nd-switch[data-nd-size="small"] > .nd-switch-track {
+  inline-size: var(--noctua-space-8);
+  block-size: var(--noctua-space-4);
+}
+
+.nd-switch[data-nd-size="small"] > .nd-switch-track::after {
+  inline-size: var(--noctua-space-3);
+  block-size: var(--noctua-space-3);
+}
+
+/* The same sum as the medium track's, in this track's own tokens, so neither
+   has to be recomputed when the scale moves. */
+.nd-switch[data-nd-size="small"][aria-checked="true"] > .nd-switch-track::after {
+  transform: translate(
+      calc(var(--noctua-space-8) - var(--noctua-space-3) - var(--noctua-space-2)),
+      -50%
+    );
 }
 
 .nd-switch[aria-disabled="true"] {
@@ -2272,6 +2297,15 @@ a {
 
 /* --- The sidebar's contents ---------------------------------------------- */
 
+/* THE SPECIMEN'S DRAWN BOX. `Search`'s picture is a `<span>` wearing this
+   class rather than a live nameless `<input>`, and a span has no height of its
+   own — the real control takes one from its content. Element and class
+   together, so nothing here can reach the control it is a picture of. */
+span.nd-search-input {
+  display: block;
+  block-size: var(--noctua-space-6);
+}
+
 .nd-search-input {
   inline-size: 100%;
   padding: var(--noctua-space-2) var(--noctua-space-3);
@@ -3834,6 +3868,19 @@ a {
   display: none;
 }
 
+/* AND WHERE THE CALLER GAVE A WORD FOR IT, THE GAP IS EXPLAINED. `empty_label`
+   is the sentence; this is the row it sits in. Muted and italic, because it is
+   the tree talking about itself rather than one more thing to open. */
+.nd-tree-empty {
+  min-block-size: var(--nd-tree-row);
+  display: flex;
+  align-items: center;
+  padding-inline-start: var(--noctua-space-6);
+  font-size: var(--noctua-size-small);
+  font-style: italic;
+  color: var(--nc-color-fg-muted);
+}
+
 .nd-tree-row {
   display: flex;
   align-items: center;
@@ -4903,8 +4950,18 @@ a {
   margin-inline-end: auto;
 }
 
+/* NEITHER OF THEM DRAWS UNTIL SOMETHING CAN ANSWER FOR IT.
+ *
+ * The bar's two buttons are `shell.js`'s: the copy writes to the clipboard and
+ * the wrap toggle moves an attribute, and with the script blocked both shipped
+ * visible, focusable and completely dead — a control that does nothing is
+ * worse than a missing one. The expand button beside them was already gated
+ * this way, and so are `.nd-lineage-camera`, `.nd-dialog` and `.nd-popover`.
+ *
+ * `display: none` and not `visibility`, because a dead button must leave the
+ * tab order as well as the page. */
 .nd-codeblock-control {
-  display: inline-flex;
+  display: none;
   align-items: center;
   justify-content: center;
   inline-size: var(--noctua-space-8);
@@ -4916,6 +4973,12 @@ a {
   border-radius: var(--noctua-radius-control);
   cursor: pointer;
 }
+/* `data-nd-scripting` is stamped by the inline head script, before the first
+   paint, so the bar is drawn once and the buttons never arrive late. */
+:root[data-nd-scripting] .nd-codeblock-control {
+  display: inline-flex;
+}
+
 @media (hover: hover) {
   .nd-codeblock-control:hover {
     color: var(--nc-color-fg);
@@ -5740,6 +5803,13 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   inset-inline: auto var(--nd-anchor-inline);
 }
 
+/* AND `auto` MEASURES, which is the whole of the difference between it and
+   `start`. `anchor.js` writes `data-nd-anchor` with the edge a measurement
+   picks, and only `auto` reads it: a stated edge is a decision, not a guess. */
+.nd-menu[data-nd-placement="auto"][data-nd-anchor="end"] {
+  inset-inline: auto var(--nd-anchor-inline);
+}
+
 /* A stage for the `end` example: the button has to be near the trailing edge,
    or `start` and `end` hang the menu in the same place and the example is two
    pictures of one thing. */
@@ -5861,6 +5931,13 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 /* `end` is the five-panel behaviour: the note's trailing edge on the marker's,
    which is what a marker at the right edge of a table wants. */
 .nd-info[data-nd-placement="end"] .nd-info-note {
+  inset-inline: auto var(--nd-anchor-inline);
+}
+
+/* AND `auto` MEASURES, which is the whole of the difference between it and
+   `start`. `anchor.js` writes `data-nd-anchor` with the edge a measurement
+   picks, and only `auto` reads it: a stated edge is a decision, not a guess. */
+.nd-info[data-nd-placement="auto"] .nd-info-note[data-nd-anchor="end"] {
   inset-inline: auto var(--nd-anchor-inline);
 }
 
@@ -7686,8 +7763,12 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 }
 
 /* The chevron turns to point at what it opened. Not a rotation of the whole
-   summary: an icon beside a word must not drag the word with it. */
-.nd-disclosure[open] > .nd-disclosure-summary > .nd-icon-glyph:last-child {
+   summary: an icon beside a word must not drag the word with it.
+
+   AND IT ASKS FOR THE CHEVRON BY NAME. This said `.nd-icon-glyph:last-child`,
+   and in the icon-only form the caller's own icon IS the last glyph — so
+   opening a `Disclosure { icon: "settings" }` turned the gear upside down. */
+.nd-disclosure[open] > .nd-disclosure-summary > .nd-disclosure-marker {
   transform: rotate(180deg);
 }
 
@@ -9259,6 +9340,31 @@ a.nd-lineage-card:focus-visible {
   border-color: var(--nc-color-accent-border);
 }
 
+/* A PICKED FIGURE, AND PICKING ONE USED TO CHANGE NOTHING AT ALL.
+ *
+ * Every `:checked` rule in this file targeted a bond, and `data-nd-picked`
+ * appeared in no rule anywhere — while `[keyboard] "Space"` and
+ * `[state.picked]` both promised a figure could be singled out. So a reader
+ * could pick a person, the checkbox would be checked, the form would post it,
+ * and the scene looked exactly as it had.
+ *
+ * The cue is the edge and the weight, the same pair a picked connection gains,
+ * and never colour alone: forced colours keep a border width and drop a border
+ * colour. `:checked` rather than `data-nd-picked`, so it holds with no script,
+ * which is the whole reason a pick is a real checkbox. */
+.nd-lineage-pick:checked ~ .nd-lineage-card,
+.nd-lineage-pick:checked ~ * .nd-lineage-card {
+  border-color: var(--nc-color-accent);
+  border-width: var(--noctua-border-strong);
+  font-weight: var(--noctua-weight-semibold);
+}
+
+/* The solid's own faces follow the card, or a picked figure reads as a picked
+   front with an unpicked box behind it. */
+.nd-lineage-pick:checked ~ .nd-lineage-body > i {
+  border-color: var(--nc-color-accent);
+}
+
 /* The cut marker: a dashed ring with a number in it — the drawing convention
  * for "there is more here", and nothing a reader could mistake for a person. */
 .nd-lineage-piece[data-nd-piece="elided"] .nd-lineage-card {
@@ -10252,7 +10358,10 @@ button.nd-lineage-figure {
    complaint has somewhere to go — and empty, a `role="alert"` over nothing
    announces nothing and a paragraph over nothing is a gap in the layout.
    `Select` and `DateInput` each carried this rule; it is one now. */
-.nd-field-error:empty {
+/* IT ASKS THE MESSAGE, NOT THE PARAGRAPH. The paragraph now always holds the
+   visually hidden `error_label`, so `:empty` stopped being the question — the
+   sentence has an element of its own and that is the one with nothing in it. */
+.nd-field-error:has([data-nd-field-message]:empty) {
   display: none;
 }
 
@@ -10311,11 +10420,20 @@ button.nd-lineage-figure {
   border-radius: var(--noctua-radius-control);
 }
 
+/* THE FILE AREA IS MATCHED WITH `:has()`, NOT WITH `+`.
+ *
+ * The clipped `<input>` is the only focusable part of a `FileInput`, and the
+ * ring belongs on the area beside it. This was
+ * `.nd-file-input-native:focus-visible + .nd-file-input-area` — but the body
+ * renders the label BEFORE the input, so the sibling combinator was aimed
+ * backwards and matched nothing, ever. The one focusable thing in the control
+ * showed no focus at all, which is WCAG 2.4.7 failed in silence by a rule that
+ * looked right. `:has()` asks the question the markup can answer. */
 .nd-input:focus-within,
 .nd-number-input:focus-within,
 .nd-textarea:focus-visible,
 .nd-time-input-segment:focus-visible,
-.nd-file-input-native:focus-visible + .nd-file-input-area {
+.nd-file-input:has(> .nd-file-input-native:focus-visible) > .nd-file-input-area {
   border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -10397,6 +10515,18 @@ button.nd-lineage-figure {
 /* Both drawings are rendered and the state picks one, exactly as `CodeBlock`
    and `ColorPicker` do: swapping a glyph from script is shipping a drawing to
    the script. */
+/* IT KEEPS ITS SPACE, AND THE CONTRACT SAYS WHY.
+ *
+ * `clearable`'s doc ends by naming the failure it used to cause: a control
+ * that appears only when there is text moves the layout as they type. The
+ * script hid it with `hidden`, which is `display: none`, so the box did reflow
+ * on the first keystroke and again on the last. `visibility` keeps the space,
+ * and keeps the control out of the tab order and the accessible tree while
+ * there is nothing to clear. */
+[data-nd-input-clear][data-nd-empty] {
+  visibility: hidden;
+}
+
 [data-nd-input-reveal] [data-nd-icon="eye-off"],
 .nd-input[data-nd-revealed] [data-nd-input-reveal] [data-nd-icon="eye"] {
   display: none;
@@ -10738,6 +10868,19 @@ button.nd-lineage-figure {
   display: none;
 }
 
+/* THE SLOT THE *NOW* CONTROL IS REVEALED FROM. The button inside it is a
+   `Button`, and a component cannot be handed `hidden`, so the span carries it
+   and `inputs.js` takes it off. `display: contents` so the row lays out
+   exactly as it did when the button was its own child, and the second rule
+   because an author declaration beats the browser's `[hidden]` rule. */
+.nd-time-input-now {
+  display: contents;
+}
+
+.nd-time-input-now[hidden] {
+  display: none;
+}
+
 /* --- What every one of them does when refused or wrong --------------------- */
 
 /* THE CONTROL IS OUTLINED, NOT TINTED. Two pixels of the solid danger colour
@@ -10766,7 +10909,9 @@ button.nd-lineage-figure {
 .nd-textarea:disabled,
 .nd-time-input-segment:disabled,
 .nd-slider-track:disabled,
-.nd-file-input-native:disabled + .nd-file-input-area {
+/* See the focus rule above: the label comes first in the markup, so this is a
+   question about the box that holds both and never about a next sibling. */
+.nd-file-input:has(> .nd-file-input-native:disabled) > .nd-file-input-area {
   opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
   cursor: not-allowed;
 }
@@ -10777,6 +10922,7 @@ button.nd-lineage-figure {
 .nd-input-figure .nd-input-box,
 .nd-number-input-figure .nd-number-input-box,
 .nd-select-figure .nd-select-box,
+.nd-tag-picker-figure .nd-tag-picker-box,
 .nd-textarea-figure .nd-textarea-box,
 .nd-file-input-figure .nd-file-input-area,
 .nd-slider-figure .nd-slider-rail {
@@ -10802,6 +10948,7 @@ button.nd-lineage-figure {
 .nd-input[data-nd-size="small"] .nd-input-box,
 .nd-number-input[data-nd-size="small"] .nd-number-input-box,
 .nd-select[data-nd-size="small"] .nd-select-box,
+.nd-tag-picker[data-nd-size="small"] .nd-tag-picker-box,
 .nd-textarea[data-nd-size="small"] .nd-textarea-box {
   block-size: var(--noctua-space-8);
 }
@@ -10809,6 +10956,7 @@ button.nd-lineage-figure {
 .nd-input[data-nd-size="medium"] .nd-input-box,
 .nd-number-input[data-nd-size="medium"] .nd-number-input-box,
 .nd-select[data-nd-size="medium"] .nd-select-box,
+.nd-tag-picker[data-nd-size="medium"] .nd-tag-picker-box,
 .nd-textarea[data-nd-size="medium"] .nd-textarea-box {
   block-size: var(--noctua-space-12);
 }
@@ -10816,6 +10964,7 @@ button.nd-lineage-figure {
 .nd-input[data-nd-size="large"] .nd-input-box,
 .nd-number-input[data-nd-size="large"] .nd-number-input-box,
 .nd-select[data-nd-size="large"] .nd-select-box,
+.nd-tag-picker[data-nd-size="large"] .nd-tag-picker-box,
 .nd-textarea[data-nd-size="large"] .nd-textarea-box {
   block-size: var(--noctua-space-16);
 }
@@ -10866,6 +11015,7 @@ button.nd-lineage-figure {
 .nd-number-input-figure,
 .nd-input-figure,
 .nd-select-figure,
+.nd-tag-picker-figure,
 .nd-time-input-figure {
   display: flex;
   align-items: center;
@@ -10877,7 +11027,8 @@ button.nd-lineage-figure {
    column that fills its column up to the `sm` breakpoint. In a variant stage
    that made three 30rem-wide boxes where every other component draws something
    a reader can hold beside its neighbour, which is what the row exists for. */
-.nd-variant-stage .nd-select {
+.nd-variant-stage .nd-select,
+.nd-variant-stage .nd-tag-picker {
   inline-size: max-content;
 }
 
@@ -10901,10 +11052,12 @@ button.nd-lineage-figure {
 }
 
 .nd-carousel-track {
-  /* WRITTEN BY THE SCRIPT FROM `per_view`, DECLARED HERE. A `var()` naming a
+  /* WRITTEN BY THE COMPONENT FROM `per_view`, DECLARED HERE. A `var()` naming a
      property nothing declares is dropped at computed-value time with no error,
      so every slide would fall back to one-across and look almost right —
-     `gates::unknown_token` exists for exactly that. */
+     `gates::unknown_token` exists for exactly that. It used to be written by
+     `carousel.js`, which made a width depend on a script: with JavaScript
+     blocked every carousel showed one slide whatever `per_view` said. */
   --nd-carousel-per-view: 1;
   display: flex;
   gap: var(--noctua-space-3);
@@ -10920,7 +11073,7 @@ button.nd-lineage-figure {
   border-radius: 0;
 }
 
-.nd-carousel[aria-orientation="vertical"] .nd-carousel-track {
+.nd-carousel[data-nd-orientation="vertical"] .nd-carousel-track {
   flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
@@ -10955,7 +11108,7 @@ button.nd-lineage-figure {
   inline-size: auto;
 }
 
-.nd-carousel[aria-orientation="vertical"] .nd-carousel-slide {
+.nd-carousel[data-nd-orientation="vertical"] .nd-carousel-slide {
   inline-size: auto;
 }
 
@@ -10999,7 +11152,7 @@ button.nd-lineage-figure {
 /* Mirrored where the language runs the other way: *previous* is the other
    direction there, and this is the one place a transform is the right answer
    — the two drawings are one pair rather than two meanings. */
-[dir="rtl"] .nd-carousel:not([aria-orientation="vertical"]) .nd-carousel-control [data-nd-icon^="chevron-"] {
+[dir="rtl"] .nd-carousel:not([data-nd-orientation="vertical"]) .nd-carousel-control [data-nd-icon^="chevron-"] {
   scale: -1 1;
 }
 
@@ -11014,7 +11167,7 @@ button.nd-lineage-figure {
  *
  * Not the sort arrows: an arrow in this system marks the direction a column is
  * SORTED, and `spec/icons.toml` says so where those are declared. */
-.nd-carousel[aria-orientation="vertical"] .nd-carousel-control [data-nd-icon^="chevron-"] {
+.nd-carousel[data-nd-orientation="vertical"] .nd-carousel-control [data-nd-icon^="chevron-"] {
   rotate: 90deg;
 }
 
@@ -12186,6 +12339,13 @@ figure.nd-image {
   inset-inline: auto var(--nd-anchor-inline);
 }
 
+/* AND `auto` MEASURES, which is the whole of the difference between it and
+   `start`. `anchor.js` writes `data-nd-anchor` with the edge a measurement
+   picks, and only `auto` reads it: a stated edge is a decision, not a guess. */
+.nd-popover[data-nd-placement="auto"] .nd-popover-panel[data-nd-anchor="end"] {
+  inset-inline: auto var(--nd-anchor-inline);
+}
+
 .nd-popover-head {
   display: flex;
   align-items: start;
@@ -12302,6 +12462,13 @@ figure.nd-image {
   inset-inline: auto var(--nd-anchor-inline);
 }
 
+/* AND `auto` MEASURES, which is the whole of the difference between it and
+   `start`. `anchor.js` writes `data-nd-anchor` with the edge a measurement
+   picks, and only `auto` reads it: a stated edge is a decision, not a guess. */
+.nd-tooltip[data-nd-placement="auto"] .nd-tooltip-bubble[data-nd-anchor="end"] {
+  inset-inline: auto var(--nd-anchor-inline);
+}
+
 /* --- Toast ----------------------------------------------------------------
  *
  * A corner of the window, and the tone paints an EDGE rather than a fill: three
@@ -12309,8 +12476,20 @@ figure.nd-image {
  * on, and a filled panel at the toast layer is the card §9.7 forbids wearing a
  * different name. */
 
+/* IT FLOATS ONLY WHERE SOMETHING CAN TAKE IT AWAY.
+ *
+ * The dismiss control ships hidden and `dist/toast.js` reveals it, so with the
+ * script blocked there is nothing that closes this — and it was still
+ * `position: fixed`, which made it the one floating surface in the system that
+ * draws a panel over the page with no way out of it. `.nd-dialog` and
+ * `.nd-popover` never open at all without a script and `Menu` does not render;
+ * this one had no such rule.
+ *
+ * The words stay either way. Out of flow the message covers the page it is
+ * about; in flow it is a message in the page, which is what a reader with no
+ * script can be given honestly. */
 .nd-toast {
-  position: fixed;
+  position: static;
   z-index: var(--noctua-layer-toast);
   display: flex;
   align-items: start;
@@ -12326,6 +12505,13 @@ figure.nd-image {
   border-radius: var(--noctua-radius-surface);
   font-size: var(--noctua-size-small);
   color: var(--nc-color-fg);
+}
+
+/* `data-nd-scripting` is stamped by the inline head script, before the first
+   paint, so a page that will have a dismiss control gets the floating message
+   from the beginning and one that will not never gets it at all. */
+:root[data-nd-scripting] .nd-toast {
+  position: fixed;
 }
 
 .nd-toast[data-nd-tone] {

@@ -49,7 +49,7 @@ pub fn MessageBar(
     /// A short line above the message, such as *Payment refused*. Absent is the common case, because one sentence needs no heading. It is a `<strong>` rather than a heading, so it adds nothing to the outline.
     title: Option<String>,
     /// A drawing before the words, named from `spec/icons.toml`. It carries `aria-hidden`, because it says what the words say. Choose one that means what the tone means, so colour is never alone.
-    icon: Option<String>,
+    icon: Option<IconName>,
     /// Whether the bar interrupts. Off by default, and off is almost always right: `role="alert"` stops a screen reader mid-sentence. Turn it on where a reader has to act before carrying on.
     #[props(default = false)]
     alert: bool,
@@ -78,10 +78,9 @@ pub fn MessageBar(
             // the role's own value, which is the right one both times.
             "aria-live": live.map(MessageBarLive::as_str),
             "data-nd-tone": tone,
-            "data-nd-alert": if alert { "true" } else { "false" },
             "data-nd-dismissible": if dismissible { "true" } else { "false" },
 
-            if let Some(icon) = icon.as_deref().and_then(IconName::parse) {
+            if let Some(icon) = icon {
                 // `aria-hidden`, because it says what the words say. It is a
                 // second signal for a reader who can see it, never the first.
                 span { class: "nd-message-bar-icon", "aria-hidden": "true",

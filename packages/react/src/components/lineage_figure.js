@@ -13,16 +13,26 @@ import { createElement as h } from "react";
 
 import { nameable, setParts } from "@noctua-world/design-tokens/lineage.js";
 export function LineageFigure({ scene, at, label, shape, tone, parallax, occasion, set, action, swaps, href, className, children, ...rest }) {
+  const shape_ = shape ?? "card";
+  const tone_ = tone ?? "neutral";
+  const parallax_ = parallax ?? "none";
+  const root = ["nd-lineage-figure", className].filter(Boolean).join(" ");
+  // The place comes from the scene, through three custom properties, and the
+  // visibility through a fourth — see the Dioxus half for what has been
+  // through `nameable` before it reaches a property name.
   const anchor = nameable(at) ? at : "";
-  let style =
-    `--nd-x:var(--nd-at-${anchor}-x,0);--nd-y:var(--nd-at-${anchor}-y,0);` +
-    `--nd-z:var(--nd-at-${anchor}-z,0);--nd-span:var(--nd-at-${anchor}-span,1);`;
+  const style = {
+    "--nd-x": `var(--nd-at-${anchor}-x,0)`,
+    "--nd-y": `var(--nd-at-${anchor}-y,0)`,
+    "--nd-z": `var(--nd-at-${anchor}-z,0)`,
+    "--nd-span": `var(--nd-at-${anchor}-span,1)`,
+  };
   // One visibility variable, and the occasion wins — see the Dioxus half.
   if (nameable(occasion)) {
-    style += `--nd-shown:var(--nd-on-${occasion},none);`;
+    style["--nd-shown"] = `var(--nd-on-${occasion},none)`;
   } else {
     const parts = setParts(set);
-    if (parts) style += `--nd-shown:var(--nd-set-${parts[0]}-${parts[1]},none);`;
+    if (parts) style["--nd-shown"] = `var(--nd-set-${parts[0]}-${parts[1]},none)`;
   }
 
   // A link or a button or neither, never two.

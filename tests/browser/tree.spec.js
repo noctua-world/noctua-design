@@ -195,10 +195,16 @@ test("selection is stored once, in a real checkbox", async ({ page }) => {
   await rows.nth(3).click({ modifiers: ["Shift"] });
 
   // `Table`'s ruling: selection is a real checkbox, whose state the browser
-  // announces without being asked and which survives a form post with no
-  // script. `aria-selected` is written FROM it at the one place selection
-  // changes, so the two cannot come apart — the "two facts kept in step" trap
-  // `TableRow` warns about, avoided by having one fact.
+  // announces without being asked. `aria-selected` is written FROM it at the
+  // one place selection changes, so the two cannot come apart — the "two facts
+  // kept in step" trap `TableRow` warns about, avoided by having one fact.
+  //
+  // EVERYTHING HERE IS ABOUT A PAGE THE SCRIPT REACHED. This comment used to
+  // claim the state "survives a form post with no script". It then measured a
+  // page with the script running, which is the one arrangement that cannot
+  // settle it. `shell.js` builds these boxes, so with no script there are none
+  // and there is no selection either. That half runs with JavaScript off, in
+  // "with no script a tree posts nothing", below.
   const both = await page.evaluate((selector) => {
     const tree = document.querySelector(selector);
     const nodes = [...tree.querySelectorAll(".nd-tree-item")];
@@ -209,6 +215,11 @@ test("selection is stored once, in a real checkbox", async ({ page }) => {
   }, CHOSEN);
   expect(both.filter((pair) => pair === "true/true").length).toBe(3);
   expect(both.some((pair) => pair === "true/false" || pair === "false/true")).toBe(false);
+
+  // A real control the reader never sees, rather than a drawing of one.
+  const boxes = page.locator(`${CHOSEN} input[type="checkbox"]`);
+  expect(await boxes.count(), "the script built no checkbox at all").toBeGreaterThan(3);
+  await expect(boxes.first(), "a checkbox a reader can press twice").toBeHidden();
 
   // And a form gets the values, not the labels.
   const arrived = await page.evaluate((selector) => {
@@ -258,5 +269,86 @@ test("no id appears twice on the tree page, in any locale", async ({ page }) => 
       return out;
     });
     expect(twice, locale).toEqual([]);
+  }
+});
+
+test("with no script a tree posts nothing, and the contract says so", async ({ browser }) => {
+  // WHAT `form` USED TO PROMISE, AND WHY THE SENTENCE CHANGED.
+  //
+  // `Tree.form` said its presence "puts a real hidden checkbox inside every
+  // selectable node, so the state survives a form post with no script", and
+  // `TreeItem.selected` repeated it. No body rendered one — `shell.js` builds
+  // them — and no body can: a node is a child, and a parent cannot write on
+  // its children in either language, so `TreeItem` never sees the name.
+  //
+  // The deeper reason the code was not changed to match: this component claims
+  // no roles, no `aria-selected` and no keyboard until a script writes them, so
+  // with no script there IS no selection. A checkbox posting a chosen node
+  // would post a choice no reader could have made, seen or undone. That is a
+  // second lie, not a repair of the first.
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(url(PAGE.tree));
+  await showParts(page);
+
+  // The form is real and the tree is inside it, which is what made the promise
+  // look plausible.
+  const inside = await page.locator(CHOSEN).evaluate((el) => Boolean(el.closest("form")));
+  expect(inside, "the selectable tree is not in a form at all").toBe(true);
+
+  // And it carries no checkbox and no selection, which is what the corrected
+  // sentence now says.
+  await expect(page.locator(`${CHOSEN} input[type="checkbox"]`)).toHaveCount(0);
+  await expect(page.locator(`${CHOSEN} [aria-selected]`)).toHaveCount(0);
+  const posted = await page.locator(CHOSEN).evaluate((el) => [...new FormData(el.closest("form"))]);
+  expect(posted, "a tree posted a selection nobody could have made").toEqual([]);
+  await context.close();
+});
+
+test("Space does nothing rather than scrolling, on a tree with no selection", async ({ page }) => {
+  // `tree.toml` says exactly that, and `onTreeKey` returned BEFORE
+  // `preventDefault` — so the browser's own default ran and the page jumped a
+  // screen under a reader whose focus was on a row. Doing nothing is a thing
+  // that has to be done.
+  await page.goto(url(PAGE.tree));
+  await showParts(page);
+  await enter(page);
+  expect(await page.locator(T).getAttribute("data-nd-selection")).toBe("none");
+
+  // Somewhere with room to scroll, or the assertion cannot fail.
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const room = await page.evaluate(
+    () => document.documentElement.scrollHeight > window.innerHeight + 100,
+  );
+  expect(room, "the page is too short for this to prove anything").toBe(true);
+
+  const before = await page.evaluate(() => window.scrollY);
+  await page.keyboard.press("Space");
+  await page.waitForTimeout(100);
+  expect(await page.evaluate(() => window.scrollY), "Space scrolled the page").toBe(before);
+  // And it chose nothing either, which is the other half of the sentence.
+  await expect(page.locator(`${T} [aria-selected="true"]`)).toHaveCount(0);
+});
+
+test("a branch that opens onto a gap says why", async ({ page }) => {
+  await page.goto(url(PAGE.tree));
+  await showParts(page);
+  // `empty_label` reached `state.words.empty` and stopped there: no element,
+  // no rule, nothing on the page — under a contract telling a caller to set it
+  // so exactly this row is explained, and an example that does set it.
+  const trees = await page.evaluate(() =>
+    [...document.querySelectorAll('[role="tree"][data-nd-empty-label]')].map((tree) => ({
+      name: tree.dataset.ndTree,
+      claimed: tree.querySelectorAll('[data-nd-branch="true"]:not(:has(.nd-tree-item))').length,
+      explained: tree.querySelectorAll("[data-nd-tree-empty]").length,
+      words: [...tree.querySelectorAll("[data-nd-tree-empty]")].map((one) =>
+        one.textContent.trim(),
+      ),
+    })),
+  );
+  expect(trees.length).toBeGreaterThan(0);
+  for (const tree of trees) {
+    expect(tree.explained, `${tree.name} leaves its gap unexplained`).toBe(tree.claimed);
+    for (const words of tree.words) expect(words).not.toBe("");
   }
 });

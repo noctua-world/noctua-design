@@ -61,14 +61,19 @@ values = ["none", "ascending", "descending"]
 variants = false
 default = "none"
 attribute = "aria-sort"
-doc = "Which way the rows are already sorted by this column. It writes the real `aria-sort` on the server, so a sorted table states it before any script runs. **Only one heading in a table may be anything but `none`**."
+# `none` WRITES NOTHING, AND THAT IS THE POINT. `aria-sort` describes a column
+# a reader can sort by, and sortability is declared on the `TableColumn` this
+# heading names. Writing the attribute on every heading announced 403 sortable
+# columns on one page where 13 were, 214 of them on row headings naming a
+# record. The runtime adds `none` to a column as it draws that column's control.
+doc = "Which way the rows are already sorted by this column. `none` writes no attribute, because a heading with no sort control must not claim one. **Only one heading in a table may be anything else**."
 
 [prop.children]
 type = "children"
 doc = "The words of the heading. Every announcement about this column fills its `{column}` hole from here, so the column is named once, in the reader's language."
 
 [a11y]
-notes = "The role is `columnheader` or `rowheader`, following `scope` and written in the markup rather than left implicit. The sort control is a real button inside the heading, which keeps the `aria-sort`."
+notes = "The role is `columnheader` or `rowheader`, following `scope` and written in the markup rather than left implicit. The sort control is a real button inside the heading, and only a heading with one carries `aria-sort`."
 
 [keyboard]
 "Enter or Space" = "Sorts by this column when its `TableColumn` allows: ascending, then descending, then the document order."

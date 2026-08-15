@@ -16,15 +16,15 @@ use crate::components::Icon;
 /// # Accessibility
 ///
 /// `aria-checked` is always present, `true` or `false`, because a radio that omits
-/// it has an unknown state. It uses `aria-disabled` rather than `disabled`, so the
-/// item keeps its place in the roving order.
+/// it has an unknown state. `aria-disabled` rather than `disabled` keeps the item
+/// in the roving order. The group carries the tab stop.
 #[component]
 pub fn SegmentedItem(
     /// What choosing this item means, as an identifier. The script reads this and nothing else, so it is never translated.
     value: String,
     /// What choosing this item means, in the reader's language. **Required**. It stays the accessible name even when `hide_label` takes the text off the screen.
     label: String,
-    /// Whether this is the value in force. Off by default. Render it from the known default on the server, so the group has a chosen item and one tab stop before the script runs.
+    /// Whether this is the value in force. Off by default. Render it from the known default on the server, so a reader arrives at a group that already states its answer.
     #[props(default = false)]
     selected: bool,
     /// A second, smaller line under the label, such as the unit under a number. It is part of the accessible name, because a reader who cannot see the stack has the first line alone.
@@ -60,9 +60,15 @@ pub fn SegmentedItem(
             "aria-checked": if selected { "true" } else { "false" },
             "aria-disabled": if disabled { "true" } else { "false" },
             "data-nd-hide-label": if hide_label { "true" } else { "false" },
-            // The roving tab stop, RENDERED: one stop for the group
-            // before any script runs, and still one if none ever does.
-            tabindex: if selected { "0" } else { "-1" },
+            // NEVER A STOP OF ITS OWN BEFORE A SCRIPT RUNS. This used
+            // to rove on the item, which is one stop for a group
+            // that has an answer and ZERO for one that
+            // does not — a radiogroup no keyboard could reach at all
+            // with the script blocked, under a contract promising one
+            // stop, server-rendered. The group carries it instead,
+            // because the group is the only element that can see
+            // whether anything inside it is chosen.
+            tabindex: "-1",
             // The one thing an icon cannot be, and the label still names
             // the item: a colour.
             {children}

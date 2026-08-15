@@ -90,7 +90,7 @@ impl ListSpacing {
 ///
 /// # Accessibility
 ///
-/// `marker: none` removes the visual marker only. Some browsers drop the list semantics when `list-style` is none. The role is restated explicitly, so the list keeps announcing how many items it has.
+/// `marker: none` removes the visual marker only. A flex list and a marker-less one each lose their semantics in some engines, so `list` and `listitem` are restated. A description list keeps its own mapping.
 #[component]
 pub fn List(
     /// Which kind of list to render: `unordered` is a `<ul>`, `ordered` an `<ol>`, `description` a `<dl>`. It changes the element and not only the marker, so a screen reader is told the right thing.
@@ -111,13 +111,14 @@ pub fn List(
     let root = format!("nd-list {class}");
     let root = root.trim().to_owned();
 
-    // One arm per value: `rsx!` takes a literal element name, and this
-    // prop chooses the element rather than an attribute.
+    // One arm per value: `rsx!` takes a literal element name, and
+    // this prop chooses the element rather than an attribute.
     rsx! {
         match kind {
             ListKind::Unordered => rsx! {
                 ul {
                     class: "{root}",
+                    role: "list",
                     "data-nd-marker": marker.as_str(),
                     "data-nd-spacing": spacing.as_str(),
                     {children}
@@ -126,11 +127,13 @@ pub fn List(
             ListKind::Ordered => rsx! {
                 ol {
                     class: "{root}",
+                    role: "list",
                     "data-nd-marker": marker.as_str(),
                     "data-nd-spacing": spacing.as_str(),
                     {children}
                 }
             },
+            // A description list keeps the element's own mapping.
             ListKind::Description => rsx! {
                 dl {
                     class: "{root}",

@@ -206,8 +206,6 @@ pub fn Rating(
                     "data-nd-readonly": "false",
                     "data-nd-max": "{max}",
                     "data-nd-value": value,
-                    "data-nd-value-label": value_label,
-                    "data-nd-item-label": item_label,
 
                     div { class: "nd-rating-row",
                         for (number, named, count, chosen) in scale {

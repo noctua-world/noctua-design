@@ -23,5 +23,7 @@ export function ListItem({ term, className, children, ...rest }) {
       h("dd", { key: "d", className: root, ...rest }, children),
     );
   }
-  return h("li", { className: root, ...rest }, children);
+  // See the Dioxus half: the role is restated, because the rules
+  // that take the list's role away take its items' with it.
+  return h("li", { className: root, role: "listitem", ...rest }, children);
 }

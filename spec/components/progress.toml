@@ -37,14 +37,14 @@ type = "text"
 attribute = "max"
 doc = "The value that counts as finished. Absent means one, so a `value` of `0.58` on its own is 58%. A caller counting files writes `max = \"12\"` and does not divide."
 
+# THEY BECOME `aria-valuetext`, NOT `data-nd-*`. See `Meter`: this component
+# ships no script, so an attribute here would be markup with no reader.
 [prop.value_label]
 type = "text"
-attribute = "data-nd-value-label"
 doc = "The sentence beside the bar, with `{value}`, `{max}` and `{percent}` holes: *{value} of {max} files*. It becomes the element's `aria-valuetext`, so a screen reader reads what is on the screen. Leave it out for an indeterminate bar."
 
 [prop.busy_label]
 type = "text"
-attribute = "data-nd-busy-label"
 doc = "What is read out while there is no value at all, such as *Working out how big it is*. Set it on an indeterminate bar, because without it a screen reader gives the busy state and nothing about the task."
 
 [prop.tone]

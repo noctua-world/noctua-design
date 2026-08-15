@@ -9,7 +9,7 @@
 use crate::components::{Label, LabelKind, LabelSize};
 use dioxus::prelude::*;
 
-/// Whether this labels one control or several. `single` renders a `<div>` with a `<label>`. `group` renders a `<fieldset>` with a `<legend>`, which is the only arrangement that names a set of controls. `DateInput` and `Fieldset` use `group`.
+/// Whether this labels one control or several. `single` renders a `<div>` with a `<label>`. `group` renders a `<fieldset>` with a `<legend>`, which is the only arrangement that names a set of controls.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum FieldKind {
     #[default]
@@ -71,7 +71,7 @@ pub fn Field(
     control: String,
     /// The question, in the reader's language. It renders as a real `<label for>`, or as a `<legend>` when `kind` is `group`. Never use a placeholder instead, because a placeholder disappears as soon as a reader types.
     label: String,
-    /// Whether this labels one control or several. `single` renders a `<div>` with a `<label>`. `group` renders a `<fieldset>` with a `<legend>`, which is the only arrangement that names a set of controls. `DateInput` and `Fieldset` use `group`.
+    /// Whether this labels one control or several. `single` renders a `<div>` with a `<label>`. `group` renders a `<fieldset>` with a `<legend>`, which is the only arrangement that names a set of controls.
     #[props(default)]
     kind: FieldKind,
     /// What a reader needs before answering, such as *For example, 27 3 2007*. It rides the control's `aria-describedby`, so it is read with the control.
@@ -146,12 +146,22 @@ pub fn Field(
                 id: "{error_id}",
                 role: "alert",
                 "data-nd-field-error": "",
-                if error.is_some() {
-                    if let Some(error_label) = error_label {
-                        span { class: "nd-visually-hidden", "{error_label} " }
-                    }
+                // THE WORD IS ALWAYS THERE, AND IT USED TO ARRIVE ONLY WITH A
+                // CALLER'S OWN SENTENCE. The case this slot exists for is the
+                // other one: `error_slot` with no `error`, where a script puts
+                // the browser's own complaint here. That case never got its
+                // prefix, and `Select { required }` always takes it.
+                if let Some(error_label) = error_label {
+                    span { class: "nd-visually-hidden", "{error_label} " }
                 }
-                if let Some(error) = error { "{error}" }
+                // AND THE SENTENCE HAS AN ELEMENT OF ITS OWN, so a script can
+                // replace what it says without deleting the word in front of
+                // it. `messages.js` is the only thing that finds it, and the
+                // stylesheet asks this element whether the slot has anything
+                // to show.
+                span { "data-nd-field-message": "",
+                    if let Some(error) = error { "{error}" }
+                }
             }
         }
         {children}

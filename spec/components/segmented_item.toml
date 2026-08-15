@@ -24,7 +24,7 @@ doc = "What choosing this item means, in the reader's language. **Required**. It
 type = "bool"
 default = "false"
 attribute = "aria-checked"
-doc = "Whether this is the value in force. Off by default. Render it from the known default on the server, so the group has a chosen item and one tab stop before the script runs."
+doc = "Whether this is the value in force. Off by default. Render it from the known default on the server, so a reader arrives at a group that already states its answer."
 
 [prop.detail]
 type = "text"
@@ -55,8 +55,8 @@ role = "radio"
 needs_name = true
 notes = """
 `aria-checked` is always present, `true` or `false`, because a radio that omits
-it has an unknown state. It uses `aria-disabled` rather than `disabled`, so the
-item keeps its place in the roving order."""
+it has an unknown state. `aria-disabled` rather than `disabled` keeps the item
+in the roving order. The group carries the tab stop."""
 
 [prop.glass]
 type = "bool"

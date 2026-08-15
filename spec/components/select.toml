@@ -93,7 +93,12 @@ type = "enum"
 values = ["small", "medium", "large"]
 default = "medium"
 attribute = "data-nd-size"
-doc = "The size of the control: `small`, `medium` or `large`, which is 32, 48 and 64 pixels, matching `Button` step for step. `medium` by default."
+# NO NUMBERS. It said 32, 48 and 64, and `tests/browser/select.spec.js`
+# records that those constants were wrong and the stylesheet was right: a small
+# control is 34, because its padding and border are more than the minimum the
+# rule declares. A doc that names a measurement is a doc that goes stale every
+# time the type scale moves, so it names the control it matches instead.
+doc = "The size of the control: `small`, `medium` or `large`, matching `Button` step for step. `medium` by default."
 
 [prop.searchable]
 type = "bool"
@@ -117,7 +122,10 @@ doc = "Whether the options are still on their way. The list says so instead of s
 type = "bool"
 default = "false"
 attribute = "data-nd-creatable"
-doc = "Whether typing something the list does not have offers to add it. The new option is appended to the real `<select>`, so what is created is submitted like anything else."
+# IT NEEDS `searchable`. The offer is a row inside the filtered list and the
+# creation reads the filter box, so without one this attribute reached nothing
+# at all — and would have thrown if it had.
+doc = "Whether typing something the list does not have offers to add it. Turn it on with `searchable`, which is the box a reader types into. The new option is appended to the real `<select>`."
 
 [prop.search_label]
 type = "text"
@@ -139,9 +147,11 @@ type = "text"
 attribute = "data-nd-create-label"
 doc = "The offer to add what was typed, with a `{term}` placeholder for it. One sentence with a hole rather than two fragments joined, because word order is not the same in every language."
 
+# NO ATTRIBUTE. `data-nd-clear-label` was written on the root and read by
+# nothing. The name reaches the control the only way it can matter, as the
+# `aria-label` on the clear button itself.
 [prop.clear_label]
 type = "text"
-attribute = "data-nd-clear-label"
 doc = "The name of the control that empties the field. It is an icon, so this is the only name it has."
 
 [prop.selected_label]
@@ -167,8 +177,8 @@ notes = "A real `<select>` with a real `<label for>`, so the popup, the type-ahe
 
 [keyboard]
 "Down or Up" = "Opens the list, then moves through it. Moving does not choose, so the answer is left alone."
-"Enter" = "Chooses the option the list is on and closes. With `creatable`, it adds what was typed."
-"Space" = "Chooses without closing when several may be chosen, which is how to pick a second one without reopening."
-"Home or End" = "Jumps to the first or the last option, past however many are between."
+"Enter" = "Chooses the option the list is on. It closes unless several may be chosen. With `creatable`, it adds what was typed."
+"Space" = "Chooses without closing, on a list with no filter box. Where there is one, Enter is the way to a second value."
+"Home or End" = "Jumps to the first or the last option. With something typed in the filter box they are the caret's."
 "Escape" = "Closes the list, discards the filter and puts focus back on the control. It never changes the answer."
 "Tab" = "Closes the list and leaves. What was highlighted is not chosen by leaving."

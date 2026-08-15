@@ -125,7 +125,6 @@ pub fn Label(
                 id,
                 r#for: for_control,
                 "data-nd-size": size.as_str(),
-                "data-nd-required": if required { "true" } else { "false" },
                 {content}
             }
         },
@@ -136,7 +135,6 @@ pub fn Label(
                 class: "{root}",
                 id,
                 "data-nd-size": size.as_str(),
-                "data-nd-required": if required { "true" } else { "false" },
                 {content}
             }
         },
@@ -149,7 +147,6 @@ pub fn Label(
                 class: "{root}",
                 id,
                 "data-nd-size": size.as_str(),
-                "data-nd-required": if required { "true" } else { "false" },
                 {content}
             }
         },

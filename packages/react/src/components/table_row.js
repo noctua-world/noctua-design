@@ -38,6 +38,8 @@ export function TableRow({ name, tone, select, emphasis, selected, selectLabel, 
       "data-nd-selected": String(selected ?? false),
       "data-nd-disabled": String(disabled ?? false),
       "data-nd-detail-for": detailFor,
+      // See the Dioxus half: `table.js` reads this to derive `role="grid"`.
+      "data-nd-expandable": String(expandable ?? false),
       "data-nd-empty": String(empty ?? false),
       ...rest,
     },

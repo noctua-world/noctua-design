@@ -31,6 +31,9 @@ export function Segmented({ name, label, labelledby, appearance, size, shape, or
       "data-nd-shape": shape_,
       "data-nd-fill": fill_,
       "aria-orientation": orientation_,
+      // See the Dioxus half: the group holds the one stop until a
+      // script places it on a radio.
+      tabIndex: 0,
       "aria-label": label,
       "aria-labelledby": labelledby,
       ...rest,

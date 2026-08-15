@@ -107,16 +107,27 @@ export function TimeInput({ name, legend, hourLabel, minuteLabel, secondLabel, m
             : null,
         ),
         nowLabel
-          ? h(Button, {
-              key: "n",
-              label: nowLabel,
-              icon: "clock",
-              hideLabel: true,
-              variant: "outline",
-              size: "small",
-              action: "time-input-now",
-              disabled,
-            })
+          ? h(
+              "span",
+              {
+                key: "n",
+                className: "nd-time-input-now",
+                hidden: true,
+                "data-nd-time-input-now": "",
+              },
+              // See the Dioxus half: revealed by `inputs.js`, never built, and
+              // the wrapper carries `hidden` because a component cannot.
+              h(Button, {
+                key: "b",
+                label: nowLabel,
+                icon: "clock",
+                hideLabel: true,
+                variant: "outline",
+                size: "small",
+                action: "time-input-now",
+                disabled,
+              }),
+            )
           : null,
       ),
       h("p", {

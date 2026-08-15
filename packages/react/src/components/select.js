@@ -11,6 +11,8 @@
 
 import { createElement as h } from "react";
 
+import { Field } from "./field.js";
+
 import { Icon } from "./icon.js";
 export function Select({ name, label, hint, error, errorLabel, placeholder, required, multiple, disabled, size, searchable, clearable, loading, creatable, searchLabel, emptyLabel, loadingLabel, createLabel, clearLabel, selectedLabel, className, children, ...rest }) {
   const size_ = size ?? "medium";
@@ -55,7 +57,6 @@ export function Select({ name, label, hint, error, errorLabel, placeholder, requ
       "data-nd-empty-label": emptyLabel,
       "data-nd-loading-label": loadingLabel,
       "data-nd-create-label": createLabel,
-      "data-nd-clear-label": clearLabel,
       "data-nd-selected-label": selectedLabel,
     },
 

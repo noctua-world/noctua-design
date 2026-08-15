@@ -8,7 +8,7 @@
 
 use dioxus::prelude::*;
 
-/// The size of the control's box. Both values clear WCAG 2.5.8's 24px minimum target.
+/// The size of the control's box, the track and the knob with it. Both values clear WCAG 2.5.8's 24px minimum target.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum SwitchSize {
     /// `small`
@@ -41,7 +41,7 @@ impl SwitchSize {
 /// `false`, and `aria-disabled` keeps a disabled switch in the tab order.
 #[component]
 pub fn Switch(
-    /// The name of the setting being switched. The script binds to it in the same way it binds to a `Segmented`, so one handler serves both.
+    /// The name of the setting being switched. The script routes it as it routes a `Segmented`, and a name the settings model does not hold is marked on the control alone.
     name: String,
     /// What the switch turns on, in the reader's language. It is the accessible name and the visible text beside the control.
     label: String,
@@ -54,7 +54,7 @@ pub fn Switch(
     checked: bool,
     /// The id of the sentence explaining what the switch does. It is linked with `aria-describedby`, so a screen reader reads it after the name.
     describedby: Option<String>,
-    /// The size of the control's box. Both values clear WCAG 2.5.8's 24px minimum target.
+    /// The size of the control's box, the track and the knob with it. Both values clear WCAG 2.5.8's 24px minimum target.
     #[props(default)]
     size: SwitchSize,
     /// Stops users changing the setting. It uses `aria-disabled`, so the switch stays reachable and users can find that the setting exists.

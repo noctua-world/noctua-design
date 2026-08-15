@@ -502,6 +502,160 @@ mod tests {
         assert!(stretched.contains('⟦') && stretched.contains('⟧'));
     }
 
+    /// Every locale whose terms this crate knows, and what each term renders.
+    ///
+    /// # Why a list of words and not a rule
+    ///
+    /// The defects this catalogue actually ships are not missing keys. They are
+    /// one Portuguese word quietly taking a second English meaning. `dica` was
+    /// the standing translation of the `hint` prop **and** of `Tooltip`, so
+    /// `Use uma dica para uma explicação curta do controle` read as advice
+    /// about `hint`. `padrão` had already done it to `default` and `pattern`.
+    /// Neither is a missing key, neither is a length, and neither is visible to
+    /// anything that reads one locale on its own.
+    ///
+    /// A term earns a row here when it has exactly one English source. The
+    /// check is one-directional: wherever the Portuguese term appears, the
+    /// English it translates has to carry the English term. The reverse is not
+    /// checked, because a translation is allowed to say the same thing in other
+    /// words.
+    ///
+    /// WHAT IS DELIBERATELY ABSENT. `padrão` is `default`, and also *standard*
+    /// and the *combobox pattern*. `obrigatório` is `required`, and also *has
+    /// to be*. `ponteiro` is `pointer`, and also *hover*. A word with two
+    /// honest English sources cannot be checked this way, and a row for it
+    /// would buy one caught defect at the price of an alarm on every rewording.
+    const GLOSSARY: [(&str, &[(&str, &str)]); 1] = [(
+        "pt-BR",
+        &[
+            ("balão", "tooltip"),
+            ("bolha", "bubble"),
+            ("desabilitad", "disabled"),
+            ("dica", "hint"),
+            ("estampa", "pattern"),
+            ("locale", "locale"),
+            ("rótulo", "label"),
+            ("string", "string"),
+        ],
+    )];
+
+    /// Whether `term` starts a word in `text`, both already lowercased.
+    ///
+    /// A bare `contains` finds `dica` inside `indicador` and `reivindica`,
+    /// which are two ordinary words rather than the term. The END of the word
+    /// is left open on purpose, so one row covers `desabilitado`,
+    /// `desabilitada` and `desabilitados`.
+    fn holds_term(text: &str, term: &str) -> bool {
+        let mut from = 0;
+        while let Some(at) = text[from..].find(term) {
+            let start = from + at;
+            if text[..start]
+                .chars()
+                .next_back()
+                .is_none_or(|c| !c.is_alphabetic())
+            {
+                return true;
+            }
+            from = start + term.len();
+        }
+        false
+    }
+
+    /// One English sentence is translated one way.
+    ///
+    /// The cross-locale check above asserts a key is PRESENT, never that two
+    /// keys saying the same thing in English say the same thing here. They
+    /// drifted: *in the reader's language* was `na língua de quem lê` in
+    /// thirty-nine places and `no idioma do leitor` in twenty-one, colliding on
+    /// one sentence fifteen lines apart.
+    ///
+    /// PROSE KEYS ONLY. A label is not a sentence, and a label legitimately
+    /// differs: `Dark` is `Escuro` for a mode and `Escura` for an appearance,
+    /// because Portuguese agrees with the noun the English label never names.
+    /// `prose::kind_of` is the same list the register gate holds to.
+    #[test]
+    fn one_source_sentence_is_translated_one_way() {
+        let catalogue = shipped();
+        let source = catalogue.source();
+
+        for locale in &catalogue.locales {
+            if locale.tag == SOURCE || locale.tag == PSEUDO {
+                continue;
+            }
+            let mut first: std::collections::BTreeMap<&str, (&str, &str)> =
+                std::collections::BTreeMap::new();
+            let mut apart = Vec::new();
+
+            for key in &catalogue.keys {
+                if crate::prose::kind_of(key).is_none() {
+                    continue;
+                }
+                let english = source.message[key].as_str();
+                let ours = locale.message[key].as_str();
+                match first.get(english) {
+                    None => {
+                        first.insert(english, (key.as_str(), ours));
+                    }
+                    Some((seen, theirs)) if *theirs != ours => apart.push(format!(
+                        "\n  {english}\n    {seen}\n      {theirs}\n    {key}\n      {ours}"
+                    )),
+                    Some(_) => {}
+                }
+            }
+
+            assert!(
+                apart.is_empty(),
+                "{} English sentence(s) are translated two ways in {}:{}",
+                apart.len(),
+                locale.tag,
+                apart.join("")
+            );
+        }
+    }
+
+    /// A translated term is not reused for a second English one.
+    #[test]
+    fn a_term_translates_one_english_word() {
+        let catalogue = shipped();
+        let source = catalogue.source();
+        let mut found = Vec::new();
+
+        for (tag, terms) in GLOSSARY {
+            let Some(locale) = catalogue.locales.iter().find(|locale| locale.tag == tag) else {
+                continue;
+            };
+            for key in &catalogue.keys {
+                let ours = locale.message[key].to_lowercase();
+                let english = source.message[key].to_lowercase();
+                for (term, means) in terms {
+                    if holds_term(&ours, term) && !english.contains(means) {
+                        found.push(format!(
+                            "\n  {key}\n    {tag} says `{term}`, which translates `{means}`\
+                             \n      en: {}\n      {tag}: {}",
+                            source.message[key], locale.message[key]
+                        ));
+                    }
+                }
+            }
+        }
+
+        assert!(
+            found.is_empty(),
+            "{} message(s) use a term for something it does not translate:{}",
+            found.len(),
+            found.join("")
+        );
+    }
+
+    #[test]
+    fn a_term_is_found_only_where_it_starts_a_word() {
+        assert!(holds_term("uma dica curta", "dica"));
+        assert!(holds_term("dica", "dica"));
+        assert!(!holds_term("um indicador sempre atual", "dica"));
+        assert!(!holds_term("nunca reivindica um popup", "dica"));
+        assert!(holds_term("uma caixa desabilitada", "desabilitad"));
+    }
+
     #[test]
     fn a_missing_key_is_named() {
         let source = Locale {

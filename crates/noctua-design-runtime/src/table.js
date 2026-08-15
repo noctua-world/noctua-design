@@ -31,6 +31,12 @@ const SETTLE = 160;
 /** How much of the table's width one resize step is. */
 const STEP = 2;
 
+/** The Shift multiplier on a resize, which both contracts call ten steps. */
+// IT WAS 5, UNDER TWO SENTENCES SAYING TEN. Named rather than written into the
+// handler, the way `color-picker.js` names the same idea, so the number and the
+// sentence have one place to disagree instead of three.
+const COARSE = 10;
+
 /** Per-table state, so nothing is recomputed on every keystroke. */
 const tables = new WeakMap();
 
@@ -336,6 +342,11 @@ function wireHeadings(state) {
 }
 
 function drawSort(state, column, heading, holder, words) {
+  // THE ATTRIBUTE ARRIVES WITH THE CONTROL. The server writes `aria-sort` only
+  // where the caller stated a direction, because a component cannot see its
+  // column's declaration. Here the column is known to be sortable, so an
+  // unsorted one gains its `none` at the moment it gains something to press.
+  if (!heading.hasAttribute("aria-sort")) heading.setAttribute("aria-sort", "none");
   const button = document.createElement("button");
   button.type = "button";
   button.className = "nd-table-sort";
@@ -393,7 +404,7 @@ function drawResize(state, column, heading, holder) {
     if (by === undefined || !event.altKey) return;
     event.preventDefault();
     event.stopPropagation();
-    resize(width() + by * (event.shiftKey ? 5 : 1));
+    resize(width() + by * (event.shiftKey ? COARSE : 1));
   });
 
   handle.addEventListener("pointerdown", (event) => {
@@ -474,7 +485,11 @@ function sortBy(state, column) {
   const next =
     state.sorted !== column ? "ascending" : state.direction === "ascending" ? "descending" : null;
 
-  for (const heading of state.table.querySelectorAll("thead .nd-table-header-cell")) {
+  // ONLY THE HEADINGS THAT CARRY ONE. `aria-sort` describes a column a reader
+  // can sort by, so a heading without it is one nobody can — including every
+  // `scope="row"` heading naming a record. Writing `none` over the whole head
+  // put the attribute on all of them.
+  for (const heading of state.table.querySelectorAll("thead .nd-table-header-cell[aria-sort]")) {
     heading.setAttribute("aria-sort", "none");
   }
 
@@ -847,7 +862,12 @@ function wireSelection(state) {
   if (boxes.length === 0 && !all) return;
   let anchor = null;
 
-  const paint = () => {
+  // A CHANGE, NOT AN ARRIVAL. `paint` ends by saying how many rows are chosen,
+  // and it runs once at wiring time to draw what the markup already says — so
+  // a table with a pre-selected row announced "1 person chosen." to a reader
+  // who had done nothing. The contract says the label is what is announced
+  // when the chosen rows CHANGE, and the first pass changes nothing.
+  const paint = (announce = true) => {
     for (const box of boxes) {
       const row = box.closest(".nd-table-row");
       if (row) row.setAttribute("data-nd-selected", String(box.checked));
@@ -858,6 +878,7 @@ function wireSelection(state) {
       all.indeterminate = chosen > 0 && chosen < boxes.length;
       all.checked = chosen === boxes.length && chosen > 0;
     }
+    if (!announce) return;
     say(state.status, plural(state.at("selected-label"), boxes.filter((box) => box.checked).length));
   };
   state.paintSelection = paint;
@@ -884,13 +905,14 @@ function wireSelection(state) {
       anchor = box;
       paint();
     });
-    box.addEventListener("change", paint);
+    box.addEventListener("change", () => paint());
   }
 
   // The select-all box submits nothing: it is a control over the others, and a
   // form that posted it would post a row that does not exist.
   all?.removeAttribute("name");
-  paint();
+  // Draws what the markup already says, and says nothing about it.
+  paint(false);
 }
 
 // --- Copying -----------------------------------------------------------------
@@ -1125,6 +1147,11 @@ function wireMore(state, frame) {
 // --- The grid ----------------------------------------------------------------
 
 /** Every cell a reader can walk, row by row, skipping what is hidden. */
+/** The control that chooses the row a cell is in, if the row has one. */
+function chooserIn(cell) {
+  return cell.closest(".nd-table-row")?.querySelector(".nd-table-select input") ?? null;
+}
+
 function gridOf(table) {
   return [...table.querySelectorAll(".nd-table-row")]
     .filter((row) => !row.hidden)
@@ -1180,8 +1207,11 @@ function wireGrid(state) {
     if (!cell || cell.closest(".nd-table") !== table) return;
     if (event.altKey) return;
 
-    if (event.key === " " && event.target === cell) {
-      const box = cell.closest(".nd-table-row")?.querySelector(".nd-table-select input");
+    // ENTER AS WELL AS SPACE. The contract has always named both, and only
+    // Space was read — so a reader who pressed the key the rest of the page
+    // answers got nothing, on the one control where choosing is the point.
+    if ((event.key === " " || event.key === "Enter") && event.target === cell) {
+      const box = chooserIn(cell);
       if (box && !box.disabled) {
         event.preventDefault();
         box.checked = !box.checked;
@@ -1217,6 +1247,19 @@ function wireGrid(state) {
       wanted = (event.ctrlKey || event.metaKey ? cells.at(-1) : cells[row]).at(-1);
     }
     if (!wanted) return;
+    // SHIFT EXTENDS, AND IT NEVER DID. `shiftKey` was read in the resize handle
+    // and in a pointer click and nowhere else, so the one row of the contract
+    // about choosing several rows from the keyboard reached no code at all.
+    // Only up and down extend: a sideways move stays in the row it is in.
+    if (step && step[0] !== 0 && event.shiftKey) {
+      for (const box of [chooserIn(cell), chooserIn(wanted)]) {
+        // A CHECKBOX ONLY. `select: one` draws a radio, and a range of radios
+        // is a contradiction rather than a selection.
+        if (!box || box.type !== "checkbox" || box.disabled || box.checked) continue;
+        box.checked = true;
+        box.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    }
     event.preventDefault();
     place(wanted);
     wanted.focus();

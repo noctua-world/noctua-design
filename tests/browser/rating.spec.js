@@ -145,13 +145,22 @@ test("the arrow keys move between options because the platform says so", async (
 
 test("every star clears the minimum target size", async ({ page }) => {
   await ratings(page);
-  const small = await page.evaluate(() =>
-    [...document.querySelectorAll("label.nd-rating-star")]
-      .filter((el) => el.offsetParent !== null)
-      .map((el) => el.getBoundingClientRect())
-      .filter((box) => box.width < 24 || box.height < 24).length,
-  );
+  const stars = await page.evaluate(() => {
+    const drawn = [...document.querySelectorAll("label.nd-rating-star")].filter(
+      (el) => el.offsetParent !== null,
+    );
+    return {
+      count: drawn.length,
+      small: drawn
+        .map((el) => el.getBoundingClientRect())
+        .filter((box) => box.width < 24 || box.height < 24).length,
+    };
+  });
+  // THE FLOOR, FIRST. A page with no stars on it has none that are too small,
+  // so this passed on a renamed class and on a fold nobody opened. The examples
+  // are four groups of five, and two groups is a floor none of them falls under.
+  expect(stars.count, "the page drew no star to measure").toBeGreaterThan(9);
   // WCAG 2.5.8 asks for 24px, and a star is the target here because the radio
   // beside it is clipped to nothing.
-  expect(small, "a star smaller than the minimum target").toBe(0);
+  expect(stars.small, "a star smaller than the minimum target").toBe(0);
 });

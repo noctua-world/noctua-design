@@ -1879,22 +1879,25 @@ Menu { name: "overview-menu-actions", label: "…",
     (
         "meter",
         example!(
-            r#"Meter { name: "overview-storage", label: "…", value: "41.2", max: "50", unit: "GB", low: "25", high: "40", optimum: "0", value_label: "…" }
+            r#"Meter { name: "overview-storage", label: "…", value: "212", max: "256", unit: "GB", low: "128", high: "204", optimum: "0", value_label: "…" }
 Meter { name: "overview-seats", label: "…", value: "16", max: "20", value_label: "…" }"#,
             |context| rsx! {
                 div { class: "nd-example-stack",
-                    // A DISK AT 82%, PAST ITS OWN HIGH THRESHOLD. `optimum`
+                    // A DISK AT 83%, PAST ITS OWN HIGH THRESHOLD. `optimum`
                     // sits under `low` because empty is the good end of a
                     // disk, so the platform paints this reading as trouble
                     // with nobody writing a condition.
+                    //
+                    // A DIFFERENT DISK FROM THE ONE THE EXAMPLES BELOW USE,
+                    // so no two meters on this page are one reading twice.
                     Meter {
                         name: "overview-storage",
                         label: context.t(Key::ExampleMeterStorage),
-                        value: "41.2",
-                        max: "50",
+                        value: "212",
+                        max: "256",
                         unit: "GB",
-                        low: "25",
-                        high: "40",
+                        low: "128",
+                        high: "204",
                         optimum: "0",
                         value_label: context.t(Key::ExampleMeterStorageValue),
                     }
@@ -2614,7 +2617,7 @@ Button { menu: true, hide_label: true, icon: "chevron-down", controls: "overview
     (
         "file-input",
         example!(
-            r#"FileInput { name, label, hint, browse_label, drop: true, drop_label, multiple: true, max: "3", max_label, accept: ".pdf,image/*", accept_label, max_size, max_size_label, remove_label, empty_label, added_label, removed_label, status }"#,
+            r#"FileInput { name, label, hint, browse_label, drop_label, multiple: true, max: "3", max_label, accept: ".pdf,image/*", accept_label, max_size, max_size_label, remove_label, empty_label, added_label, removed_label, status }"#,
             |context| rsx! {
                 form { class: "nd-example-form", method: "get", action: "#", novalidate: true,
                     FileInput {
@@ -2622,7 +2625,6 @@ Button { menu: true, hide_label: true, icon: "chevron-down", controls: "overview
                         label: context.t(Key::ExampleInputFilesLabel),
                         hint: context.t(Key::ExampleInputFilesHint),
                         browse_label: context.t(Key::ExampleInputBrowse),
-                        drop: true,
                         drop_label: context.t(Key::ExampleInputDrop),
                         multiple: true,
                         max: "3",
@@ -3172,11 +3174,11 @@ Label { kind: Name, for_control } / Segmented { labelledby }",
     (
         "message-bar",
         example!(
-            r#"MessageBar { tone: "warning", icon: "warning", title, dismissible: true }"#,
+            r#"MessageBar { tone: "warning", icon: IconName::Warning, title, dismissible: true }"#,
             |context| rsx! {
                 MessageBar {
                     tone: "warning",
-                    icon: "warning",
+                    icon: IconName::Warning,
                     title: context.t(Key::ExampleOverviewMessageBarTitle),
                     dismissible: true,
                     dismiss_label: context.t(Key::ExampleMessageBarDismiss),
@@ -3327,7 +3329,7 @@ Label { kind: Name, for_control } / Segmented { labelledby }",
     (
         "otp-field",
         example!(
-            r"OtpField { name, legend, box_label, length, hint, autocomplete: true, invalid_label }",
+            r"OtpField { name, legend, box_label, length, hint, invalid_label }",
             |context| rsx! {
                 OtpField {
                     name: "overview-otp",
@@ -3498,13 +3500,15 @@ const ICON: &[Example] = &[
     // THE ONE THAT NEEDS A NAME. Nothing beside it says what it means, so the
     // drawing becomes a `role="img"` carrying the caller's words.
     example!(
-        r#"Icon { icon: "star", label: "…", size: Medium }"#,
+        r#"Icon { icon: "star", label: "…" }"#,
         Key::ExampleIconNoteNamed,
         |context| rsx! {
+            // NO `size: Medium`. It is the default, so the example that
+            // teaches the accessible name also carried a prop doing nothing.
+            // The three sizes are the example below.
             Icon {
                 icon: IconName::Star,
                 label: context.t(Key::ExampleIconFavourite),
-                size: IconSize::Medium,
             }
         }
     ),
@@ -3577,7 +3581,7 @@ const RATING: &[Example] = &[
         }
     ),
     example!(
-        r#"Rating { size: Small | Medium | Large, tone: "warning" }"#,
+        r#"Rating { name, label, readonly: true, value: "4", tone: "warning", size: Small | Medium | Large, value_label }"#,
         Key::ExampleRatingNoteSize,
         |context| rsx! {
             div { class: "nd-example-stack",
@@ -3603,7 +3607,8 @@ const RATING: &[Example] = &[
     // A REFUSED ANSWER MARKS EVERY STAR, because the score is one value. And a
     // rating nobody may change any more takes no focus at all.
     example!(
-        r"Rating { error, … } / Rating { disabled: true, … }",
+        r"Rating { name, label, value_label, item_label, error }
+Rating { name, label, value, value_label, item_label, hint, disabled: true }",
         Key::ExampleRatingNoteRefused,
         |context| rsx! {
             div { class: "nd-example-stack",
@@ -3634,7 +3639,7 @@ const OTP_FIELD: &[Example] = &[
     // SIX BOXES, ONE VALUE. Every box posts under the same name, so the code
     // reaches a server whether or not the script arrived.
     example!(
-        r"OtpField { name, legend, box_label, hint, autocomplete: true, invalid_label, required, required_label }",
+        r"OtpField { name, legend, box_label, hint, invalid_label, required, required_label }",
         Key::ExampleOtpFieldNoteCode,
         |context| rsx! {
             OtpField {
@@ -3685,7 +3690,8 @@ const OTP_FIELD: &[Example] = &[
         }
     ),
     example!(
-        r"OtpField { error, … } / OtpField { disabled: true, … }",
+        r"OtpField { name, legend, box_label, length, value, error }
+OtpField { name, legend, box_label, length, autocomplete: false, disabled: true }",
         Key::ExampleOtpFieldNoteRefused,
         |context| rsx! {
             div { class: "nd-example-stack",
@@ -4093,28 +4099,32 @@ const TAB_PANEL: &[Example] = &[
         }
     ),
     example!(
-        r"Every TabPanel is visible with no script",
-        Key::ExampleTabPanelNoteVisible,
+        // THE PANEL SHOWN IS THE ONE THE `value` NAMES, not the first one
+        // written. This example used to be example 1 again with a different
+        // `name`, under a caption claiming every panel is visible with no
+        // script — which the rendered page, where the script runs, disproves
+        // four inches below the sentence.
+        r#"Tab { value: "delivery", selected: true } / TabPanel { name, value } three times"#,
+        Key::ExampleTabPanelNoteChosen,
         |context| rsx! {
             div { class: "nd-example-stack",
-                Tabs { name: "panel-open", label: context.t(Key::ExampleTabsLabel),
-                    Tab {
-                        name: "panel-open",
-                        value: "summary",
-                        label: context.t(Key::ExampleTabPanelSummary),
-                        selected: true,
-                    }
-                    Tab {
-                        name: "panel-open",
-                        value: "detail",
-                        label: context.t(Key::ExampleTabPanelDetail),
+                Tabs { name: "panel-chosen", label: context.t(Key::ExampleTabsLabel),
+                    for (value, label, selected) in [
+                        ("items", Key::ExampleTabsItems, false),
+                        ("delivery", Key::ExampleTabsDelivery, true),
+                        ("payment", Key::ExampleTabsPayment, false),
+                    ] {
+                        Tab { key: "{value}", name: "panel-chosen", value, label: context.t(label), selected }
                     }
                 }
-                TabPanel { name: "panel-open", value: "summary",
-                    Paragraph { "{context.t(Key::ExampleTabPanelSummaryBody)}" }
-                }
-                TabPanel { name: "panel-open", value: "detail",
-                    Paragraph { "{context.t(Key::ExampleTabPanelDetailBody)}" }
+                for (value, body) in [
+                    ("items", Key::ExampleTabsItemsBody),
+                    ("delivery", Key::ExampleTabsDeliveryBody),
+                    ("payment", Key::ExampleTabsPaymentBody),
+                ] {
+                    TabPanel { key: "{value}", name: "panel-chosen", value,
+                        Paragraph { "{context.t(body)}" }
+                    }
                 }
             }
         }
@@ -4168,7 +4178,10 @@ const DIVIDER: &[Example] = &[
     // reached the same arrangement from the other direction, and its own
     // comment in `shell.css` is the argument.
     example!(
-        r"Divider { spacing: Loose, weight: Hairline }",
+        // The caption named `weight: Hairline`, which the body never set and
+        // which is the default in any case, so it claimed two props where one
+        // was passed. `weight` is shown at a value that differs below.
+        r"Divider { spacing: DividerSpacing::Loose }",
         Key::ExampleDividerNoteNamed,
         |context| rsx! {
             div {
@@ -4389,7 +4402,7 @@ const IMAGE: &[Example] = &[
     // and `height` are the file's own numbers, handed to the browser before any
     // stylesheet has loaded.
     example!(
-        r"Image { src, alt, ratio, width, height, loading, fit }",
+        r"Image { src, alt, ratio, width, height }",
         Key::ExampleImageNoteBox,
         |context| rsx! {
             div { class: "nd-example-picture",
@@ -4397,7 +4410,10 @@ const IMAGE: &[Example] = &[
                     src: format!("{}assets/portraits/ada.svg", crate::site::BASE),
                     alt: context.t(Key::ExampleImageAlt),
                     ratio: ImageRatio::Landscape,
-                    fit: ImageFit::Cover,
+                    // NO `fit: Cover` AND NO `loading`. `cover` is the default
+                    // and `loading` was named in the caption without ever
+                    // being passed. Both are shown further down at a value
+                    // that differs.
                     width: "480",
                     height: "360",
                 }
@@ -4483,12 +4499,12 @@ const MESSAGE_BAR: &[Example] = &[
     // THE DEFAULT, AND THE QUIET ONE. A status waits for a pause instead of
     // cutting a screen reader off, which is right about something that worked.
     example!(
-        r#"MessageBar { tone: "success", icon: "check", title, … }"#,
+        r#"MessageBar { tone: "success", icon: IconName::Check, title, … }"#,
         Key::ExampleMessageBarNoteStatus,
         |context| rsx! {
             MessageBar {
                 tone: "success",
-                icon: "check",
+                icon: IconName::Check,
                 title: context.t(Key::ExampleMessageBarSavedTitle),
                 "{context.t(Key::ExampleMessageBarSaved)}"
             }
@@ -4497,12 +4513,12 @@ const MESSAGE_BAR: &[Example] = &[
     // THE RUDE ONE, OPTED INTO. `alert` cuts in, and `live` says how loudly,
     // which is the one case worth overruling the role for.
     example!(
-        r#"MessageBar { alert: true, live: Assertive, tone: "danger", icon: "alert" }"#,
+        r#"MessageBar { alert: true, live: Assertive, tone: "danger", icon: IconName::Alert }"#,
         Key::ExampleMessageBarNoteAlert,
         |context| rsx! {
             MessageBar {
                 tone: "danger",
-                icon: "alert",
+                icon: IconName::Alert,
                 alert: true,
                 live: MessageBarLive::Assertive,
                 title: context.t(Key::ExampleMessageBarRefusedTitle),
@@ -4514,12 +4530,12 @@ const MESSAGE_BAR: &[Example] = &[
     // reveals it, so a page with no script carries no button that closes
     // nothing.
     example!(
-        r#"MessageBar { dismissible: true, dismiss_label, tone: "warning", icon: "warning" }"#,
+        r#"MessageBar { dismissible: true, dismiss_label, tone: "warning", icon: IconName::Warning }"#,
         Key::ExampleMessageBarNoteDismiss,
         |context| rsx! {
             MessageBar {
                 tone: "warning",
-                icon: "warning",
+                icon: IconName::Warning,
                 dismissible: true,
                 dismiss_label: context.t(Key::ExampleMessageBarDismiss),
                 title: context.t(Key::ExampleMessageBarExpiringTitle),
@@ -4533,7 +4549,7 @@ const MESSAGE_BAR: &[Example] = &[
         r"MessageBar { … }",
         Key::ExampleMessageBarNotePlain,
         |context| rsx! {
-            MessageBar { icon: "info", "{context.t(Key::ExampleMessageBarPlain)}" }
+            MessageBar { icon: IconName::Info, "{context.t(Key::ExampleMessageBarPlain)}" }
         }
     ),
 ];
@@ -4840,6 +4856,29 @@ const TOAST: &[Example] = &[
                     title: context.t(Key::ExampleToastFailedTitle),
                     dismiss_label: context.t(Key::ExampleToastDismiss),
                     "{context.t(Key::ExampleToastFailed)}"
+                }
+            }
+        }
+    ),
+    // A MESSAGE WITH SOMETHING TO DO IN IT, which `children`'s own contract
+    // allows in as many words: "it may hold a `Link` to whatever a reader has
+    // to do about it". Nothing demonstrated it, and two defects lived in that
+    // gap — `toast.js` flattened the body to text on the one path that matters
+    // and deleted the link, and its pause counter could never come back to
+    // zero once a message held more than one focusable thing.
+    example!(
+        r#"Toast { tone: "danger", duration: "6000", … } — with a Link in it"#,
+        Key::ExampleToastNoteAction,
+        |context| rsx! {
+            div { class: "nd-example-toasts",
+                Toast {
+                    name: "toast-review",
+                    tone: "danger",
+                    duration: "6000",
+                    title: context.t(Key::ExampleToastReviewTitle),
+                    dismiss_label: context.t(Key::ExampleToastDismiss),
+                    "{context.t(Key::ExampleToastReview)} "
+                    Link { href: "#nd-main", "{context.t(Key::ExampleToastReviewLink)}" }
                 }
             }
         }
@@ -5341,8 +5380,16 @@ const BUTTON_GROUP: &[Example] = &[
                         label: context.t(Key::ExampleButtonMore),
                     }
                 }
-                div { id: "example-split-menu", hidden: true,
-                    Paragraph { "{context.t(Key::ExampleDisclosureBody)}" }
+                // A REAL `Menu`, AND IT USED TO BE A HIDDEN `<div>`. The
+                // second half of a split button announced `aria-haspopup` at a
+                // paragraph, so `menu.js` skipped it and the control opened
+                // nothing — the exact defect that page documents, demonstrated
+                // on the page documenting it.
+                Menu {
+                    name: "example-split-menu",
+                    label: context.t(Key::ExampleMenuLabel),
+                    MenuItem { label: context.t(Key::ExampleMenuDuplicate) }
+                    MenuItem { label: context.t(Key::ExampleMenuRename) }
                 }
             }
         }
@@ -5447,20 +5494,32 @@ const SEGMENTED: &[Example] = &[
         }
     ),
     example!(
-        r"Segmented { fill: SegmentedFill::Equal, … }",
+        r"Segmented { name, label, fill: SegmentedFill::Equal }
+Segmented { name, label, fill: SegmentedFill::Stretch }",
         Key::ExampleSegmentedEqual,
         |context| rsx! {
-            div { class: "nd-example-narrow",
-                Segmented {
-                    name: "example-fill",
-                    label: context.t(Key::SettingsPatternLabel),
-                    fill: SegmentedFill::Stretch,
-                    for (value, label, selected) in [
-                        ("none", Key::SettingsPatternNone, true),
-                        ("dots", Key::SettingsPatternDots, false),
-                        ("mesh", Key::SettingsPatternMesh, false),
-                    ] {
-                        SegmentedItem { value, label: context.t(label), selected }
+            // BOTH VALUES, SIDE BY SIDE. The caption used to say `Equal` while
+            // the body wrote `Stretch`, so the one value a reader came to see
+            // was demonstrated nowhere on the site. `equal` gives every item
+            // the width of the widest and `stretch` then takes the container,
+            // which only shows when the two sit one above the other.
+            div { class: "nd-example-narrow nd-example-stack",
+                for (name, fill) in [
+                    ("example-fill-equal", SegmentedFill::Equal),
+                    ("example-fill-stretch", SegmentedFill::Stretch),
+                ] {
+                    Segmented {
+                        key: "{name}",
+                        name,
+                        label: context.t(Key::SettingsPatternLabel),
+                        fill,
+                        for (value, label, selected) in [
+                            ("none", Key::SettingsPatternNone, true),
+                            ("dots", Key::SettingsPatternDots, false),
+                            ("mesh", Key::SettingsPatternMesh, false),
+                        ] {
+                            SegmentedItem { value, label: context.t(label), selected }
+                        }
                     }
                 }
             }
@@ -5532,8 +5591,16 @@ const SEGMENTED_ITEM: &[Example] = &[
     example!(
         r#"SegmentedItem { value: "…", label: "…" }"#,
         |context| rsx! {
+            // ONE ITEM STATES THE ANSWER. A radiogroup with nothing chosen is a
+            // legal state and the group is still one tab stop, but the first
+            // picture of this component should show what a radio group looks
+            // like when it has been answered.
             Segmented { name: "example-item", label: context.t(Key::ThemeSaturationLabel),
-                SegmentedItem { value: "balanced", label: context.t(Key::ThemeSaturationBalanced) }
+                SegmentedItem {
+                    value: "balanced",
+                    label: context.t(Key::ThemeSaturationBalanced),
+                    selected: true,
+                }
                 SegmentedItem { value: "vivid", label: context.t(Key::ThemeSaturationVivid) }
             }
         }
@@ -5863,11 +5930,16 @@ const TOOLBAR: &[Example] = &[
 
 const TOOLBAR_GROUP: &[Example] = &[
     example!(
-        r"ToolbarGroup { align: ToolbarGroupAlign::End, … }",
+        r"ToolbarGroup { … }
+ToolbarGroup { align: ToolbarGroupAlign::End, … }",
         Key::ExampleToolbarAlign,
         |context| rsx! {
+            // NO `align: Start` ON THE FIRST GROUP. `start` is the default, so
+            // writing it showed the prop doing nothing while the caption
+            // claimed `End`. The value that does the work is on the group it
+            // moves.
             Toolbar { label: context.t(Key::ExampleToolbarLabel),
-                ToolbarGroup { align: ToolbarGroupAlign::Start,
+                ToolbarGroup {
                     {toolbar_controls!(context)}
                 }
                 ToolbarGroup { align: ToolbarGroupAlign::End,
@@ -5890,59 +5962,110 @@ const TOOLBAR_GROUP: &[Example] = &[
             }
         }
     }),
-    example!(r"Two groups, one bar", |context| rsx! {
-        Toolbar { label: context.t(Key::ExampleToolbarLabel),
-            ToolbarGroup {
-                Button {
-                    variant: ButtonVariant::Outline,
-                    tone: ButtonTone::Neutral,
-                    size: ButtonSize::Small,
-                    label: context.t(Key::ExampleGroupPrevious),
-                }
-            }
-            ToolbarGroup { align: ToolbarGroupAlign::End,
-                Button {
-                    variant: ButtonVariant::Outline,
-                    tone: ButtonTone::Neutral,
-                    size: ButtonSize::Small,
-                    label: context.t(Key::ExampleGroupNext),
-                }
-            }
-        }
-    }),
-];
-
-// --- Swatch -----------------------------------------------------------------
-
-const SWATCH: &[Example] = &[
-    example!(r"Swatch { }", Key::ExampleSwatchLive, |_| rsx! {
-        Swatch {}
-    }),
+    // THREE GROUPS, AND ONE `align` PLACES TWO OF THEM. Example 1 is two
+    // groups at the two ends and this used to be the identical arrangement
+    // with different buttons in it. The claim worth its own example is the
+    // rest of the sentence in the contract: `end` moves this group **and
+    // everything after it**.
     example!(
-        r#"Swatch { palette: "rose-vivid" }"#,
-        Key::ExampleSwatchNamed,
-        |_| rsx! {
-            div { class: "nd-example-row",
-                for palette in ["rose-vivid", "jade-balanced", "indigo-sober"] {
-                    Swatch { palette }
+        r"ToolbarGroup { … } × 3, with align: ToolbarGroupAlign::End on the second",
+        Key::ExampleToolbarAlignRest,
+        |context| rsx! {
+            Toolbar { label: context.t(Key::ExampleToolbarLabel),
+                ToolbarGroup {
+                    Button {
+                        variant: ButtonVariant::Outline,
+                        tone: ButtonTone::Neutral,
+                        size: ButtonSize::Small,
+                        label: context.t(Key::ExampleGroupPrevious),
+                    }
+                }
+                ToolbarGroup { align: ToolbarGroupAlign::End,
+                    Button {
+                        variant: ButtonVariant::Outline,
+                        tone: ButtonTone::Neutral,
+                        size: ButtonSize::Small,
+                        label: context.t(Key::ExampleGroupNext),
+                    }
+                }
+                ToolbarGroup {
+                    {toolbar_controls!(context)}
                 }
             }
         }
     ),
-    example!(r"Swatch { size: SwatchSize::… }", |_| rsx! {
-        div { class: "nd-example-row",
-            for size in SwatchSize::ALL {
-                Swatch { size, palette: "amber-vivid" }
+];
+
+// --- Swatch -----------------------------------------------------------------
+
+// --- Swatch: never on its own ------------------------------------------------
+//
+// THE CHIP IS ALWAYS `aria-hidden`, so a bare one is a stage that is empty to a
+// screen reader. The contract says so in writing: *never use it on its own,
+// because the chip has no accessible name of its own.* Every example here
+// therefore puts the chip beside the word that names it, which is also the
+// only arrangement worth copying.
+
+const SWATCH: &[Example] = &[
+    example!(
+        r#"Swatch { }  ·  Text { "…" }"#,
+        Key::ExampleSwatchLive,
+        |context| rsx! {
+            span { class: "nd-example-byline",
+                Swatch {}
+                Text { "{context.t(Key::ExampleSwatchInForce)}" }
             }
         }
-    }),
-    example!(r"Swatch { shape: SwatchShape::… }", |_| rsx! {
-        div { class: "nd-example-row",
-            for shape in SwatchShape::ALL {
-                Swatch { shape, size: SwatchSize::Large, palette: "teal-balanced" }
+    ),
+    example!(
+        r#"Tag { swatch: "rose-vivid", label: "…" }"#,
+        Key::ExampleSwatchNamed,
+        |context| rsx! {
+            div { class: "nd-example-row",
+                // `Tag` draws a real `Swatch` before the text, which is the
+                // shortest correct way to use one: the word is the name and
+                // the chip is the colour of it.
+                for (palette, label) in [
+                    ("rose-vivid", Key::ThemeAccentRose),
+                    ("jade-balanced", Key::ThemeAccentJade),
+                    ("indigo-sober", Key::ThemeAccentIndigo),
+                ] {
+                    Tag {
+                        key: "{palette}",
+                        swatch: palette,
+                        variant: TagVariant::Outline,
+                        label: context.t(label),
+                    }
+                }
             }
         }
-    }),
+    ),
+    example!(
+        r#"Swatch { size: SwatchSize::…, palette: "amber-vivid" }  ·  Code { "…" }"#,
+        |_| rsx! {
+            div { class: "nd-example-row",
+                for size in SwatchSize::ALL {
+                    span { key: "{size.as_str()}", class: "nd-example-byline",
+                        Swatch { size, palette: "amber-vivid" }
+                        Code { class: "nd-identifier", "{size.as_str()}" }
+                    }
+                }
+            }
+        }
+    ),
+    example!(
+        r#"Swatch { shape: SwatchShape::…, size: SwatchSize::Large, palette: "teal-balanced" }  ·  Code { "…" }"#,
+        |_| rsx! {
+            div { class: "nd-example-row",
+                for shape in SwatchShape::ALL {
+                    span { key: "{shape.as_str()}", class: "nd-example-byline",
+                        Swatch { shape, size: SwatchSize::Large, palette: "teal-balanced" }
+                        Code { class: "nd-identifier", "{shape.as_str()}" }
+                    }
+                }
+            }
+        }
+    ),
 ];
 
 // --- Checkbox, Radio and Fieldset -------------------------------------------
@@ -6114,16 +6237,20 @@ const CHECKBOX: &[Example] = &[
         r"Checkbox { size: CheckboxSize::Large | Medium | Small }",
         Key::ExampleFormsNoteSizes,
         |context| rsx! {
+            // THE VALUE IS THE ANSWER, NEVER THE SIZE. Two boxes posting
+            // `large` and `medium` beside a third posting `care` is a paste
+            // slip, and it teaches that `value` has something to do with the
+            // prop this example is about.
             Fieldset { name: "apply-sizes", legend: context.t(Key::ExampleFormsApplyLegend),
                 Checkbox {
                     name: "apply-sizes",
-                    value: "large",
+                    value: "study",
                     label: context.t(Key::ExampleFormsApplyStudy),
                     size: CheckboxSize::Large,
                 }
                 Checkbox {
                     name: "apply-sizes",
-                    value: "medium",
+                    value: "work",
                     label: context.t(Key::ExampleFormsApplyWork),
                     size: CheckboxSize::Medium,
                 }
@@ -6275,16 +6402,17 @@ const RADIO: &[Example] = &[
         r"Radio { size: RadioSize::Large | Medium | Small }",
         Key::ExampleFormsNoteSizes,
         |context| rsx! {
+            // THE VALUE IS THE ANSWER, NEVER THE SIZE. See `Checkbox` above.
             Fieldset { name: "contact-sizes", legend: context.t(Key::ExampleFormsContactLegend),
                 Radio {
                     name: "contact-sizes",
-                    value: "large",
+                    value: "email",
                     label: context.t(Key::ExampleFormsContactEmail),
                     size: RadioSize::Large,
                 }
                 Radio {
                     name: "contact-sizes",
-                    value: "medium",
+                    value: "phone",
                     label: context.t(Key::ExampleFormsContactPhone),
                     size: RadioSize::Medium,
                 }
@@ -6570,18 +6698,26 @@ const METER: &[Example] = &[
         }
     ),
     example!(
-        r"Meter { low, high, optimum } — the platform paints the verdict",
+        r"Meter { name, label, value, max, low, high, optimum, value_label }",
         Key::ExampleMeterTokensNote,
         |context| rsx! {
             div { class: "nd-example-stack",
                 // ONE READING PER BAND, which is the only way three thresholds
                 // can be seen to do anything: under `low`, between the two, and
                 // over `high`.
-                for (name, value) in [("tokens-low", "48"), ("tokens-warn", "121"), ("tokens-over", "194")] {
+                //
+                // AND ONE LABEL PER BAR. Three bars under one name is three
+                // bars nobody can use, because a reader hearing the same
+                // sentence three times has no way to tell them apart.
+                for (name, value, label) in [
+                    ("tokens-low", "48", Key::ExampleMeterTokensAtlas),
+                    ("tokens-warn", "121", Key::ExampleMeterTokensBeacon),
+                    ("tokens-over", "194", Key::ExampleMeterTokensCorvus),
+                ] {
                     Meter {
                         key: "{name}",
                         name,
-                        label: context.t(Key::ExampleMeterTokens),
+                        label: context.t(label),
                         value,
                         max: "200",
                         // Low is good on a quota, so `optimum` sits under
@@ -6596,32 +6732,42 @@ const METER: &[Example] = &[
         }
     ),
     example!(
-        r"Meter { min, size: MeterSize::Small } — no thresholds, no verdict",
-        Key::ExampleMeterSeatsNote,
+        r"Meter { name, label, value, min, max, unit, size, value_label }",
+        Key::ExampleMeterFreezerNote,
         |context| rsx! {
+            // A SCALE THAT STARTS BELOW ZERO, which is the only thing `min`
+            // is for. `min: "0"` is what absence already means, so a meter
+            // declaring it shows the prop doing nothing.
             Meter {
-                name: "seats",
-                label: context.t(Key::ExampleMeterSeats),
-                value: "16",
-                min: "0",
-                max: "20",
+                name: "freezer",
+                label: context.t(Key::ExampleMeterFreezer),
+                value: "-4",
+                min: "-20",
+                max: "10",
+                unit: "°C",
                 size: MeterSize::Small,
-                value_label: context.t(Key::ExampleMeterSeatsValue),
+                value_label: context.t(Key::ExampleMeterFreezerValue),
             }
         }
     ),
     example!(
-        r#"Meter { tone: "…", size: MeterSize::Large }"#,
+        r#"Meter { name, label, value, tone: "…", size: MeterSize::Large, value_label }"#,
         Key::ExampleMeterShareNote,
         |context| rsx! {
             div { class: "nd-example-stack",
                 // THREE CATEGORIES, THREE NAMES, THREE TONES A READER CAN TELL
                 // APART. Three bars with one label is three bars nobody can
                 // use, and two blues is one colour.
+                //
+                // AND THREE TONES THAT NAME A CATEGORY. `info`, `success` and
+                // `warning` are verdicts, so painting a share of a disk with
+                // them says one slice is good and another is trouble. These
+                // three name what the bytes ARE, which is the whole point of a
+                // tone on a bar with no good end.
                 for (name, value, tone, label) in [
-                    ("share-infra", "0.42", "info", Key::ExampleMeterShareInfra),
-                    ("share-people", "0.35", "success", Key::ExampleMeterSharePeople),
-                    ("share-travel", "0.23", "warning", Key::ExampleMeterShareTravel),
+                    ("share-cached", "0.42", "cached", Key::ExampleMeterShareCached),
+                    ("share-archived", "0.35", "archived", Key::ExampleMeterShareArchived),
+                    ("share-shared", "0.23", "shared", Key::ExampleMeterShareShared),
                 ] {
                     Meter {
                         key: "{name}",
@@ -6637,13 +6783,16 @@ const METER: &[Example] = &[
         }
     ),
     example!(
-        r"Meter { hide_label: true, show_value: false }",
+        r"Meter { name, label, value, max, unit, hide_label: true, show_value: false, size, value_label }",
         Key::ExampleMeterHiddenNote,
         |context| rsx! {
+            // A READING OF ITS OWN. Two bars showing the same number is two
+            // pictures of one thing, and a reader comparing this page's
+            // examples has no way to tell which one they are hearing.
             Meter {
                 name: "bare",
                 label: context.t(Key::ExampleMeterStorage),
-                value: "41.2",
+                value: "8.6",
                 max: "50",
                 unit: "GB",
                 hide_label: true,
@@ -6694,7 +6843,8 @@ const PROGRESS: &[Example] = &[
         }
     ),
     example!(
-        r"Progress { size: ProgressSize::Small, hide_label: true }",
+        r"Progress { name, label, value, max, size: Large, value_label }
+Progress { name, label, value, max, size: Small, hide_label: true, value_label }",
         Key::ExampleProgressStepsNote,
         |context| rsx! {
             div { class: "nd-example-stack",
@@ -6730,15 +6880,23 @@ const PAGE_HREF: &str = "#page-{page}";
 
 const PAGINATION: &[Example] = &[
     example!(
-        r"Pagination { name, label, page, pages, href, page_label, current_label }",
+        r"Pagination { name, label, page, pages, href, previous_label, next_label, page_label, current_label }",
         Key::ExamplePaginationNoteLinks,
         |context| rsx! {
             Pagination {
                 name: "palettes",
                 label: context.t(Key::ExamplePaginationLabel),
+                // THIRTY-NINE PALETTES, TEN A PAGE, FOUR PAGES. The overview
+                // and the last example on this page count the same set, so a
+                // reader moving between them is reading one story.
                 page: "1",
-                pages: "9",
+                pages: "4",
                 href: PAGE_HREF,
+                // BOTH WORDS ARE PASSED AND ONLY ONE CONTROL IS DRAWN, which
+                // is the claim. Without `previous_label` the missing backward
+                // link proves nothing, because a control with no name is not
+                // rendered whatever page it sits on.
+                previous_label: context.t(Key::ExamplePaginationPrevious),
                 next_label: context.t(Key::ExamplePaginationNext),
                 page_label: context.t(Key::ExamplePaginationPage),
                 current_label: context.t(Key::ExamplePaginationCurrent),
@@ -6788,15 +6946,18 @@ const PAGINATION: &[Example] = &[
             Pagination {
                 name: "palettes-last",
                 label: context.t(Key::ExamplePaginationLabel),
-                page: "9",
-                pages: "9",
+                // A CONTROL WHOSE NUMBERS DISAGREE WITH ITS OWN SENTENCE IS
+                // ONE NOBODY TRUSTS. Page 9 of 9 under *showing 21 to 30 of
+                // 39* is arithmetic a reader can do and the page cannot.
+                page: "4",
+                pages: "4",
                 href: PAGE_HREF,
                 size: PaginationSize::Large,
                 previous_label: context.t(Key::ExamplePaginationPrevious),
                 next_label: context.t(Key::ExamplePaginationNext),
                 page_label: context.t(Key::ExamplePaginationPage),
                 current_label: context.t(Key::ExamplePaginationCurrent),
-                summary: context.t(Key::ExamplePaginationSummary),
+                summary: context.t(Key::ExamplePaginationSummaryLast),
             }
         }
     ),
@@ -6935,11 +7096,15 @@ macro_rules! deploy {
 macro_rules! deploy_columns {
     () => {
         rsx! {
-            TableColumn { name: "build", width: TableColumnWidth::Fit, filterable: true }
-            TableColumn { name: "branch", filterable: true }
-            TableColumn { name: "where", width: TableColumnWidth::Fit, filterable: true }
+            // NO `filterable` HERE. It says which columns the search box
+            // reads, and **the box is what `Table { search_label }` adds**.
+            // None of the seven tables built from these columns passes one,
+            // so the flag reached nothing at all on any of them.
+            TableColumn { name: "build", width: TableColumnWidth::Fit }
+            TableColumn { name: "branch" }
+            TableColumn { name: "where", width: TableColumnWidth::Fit }
             TableColumn { name: "took", width: TableColumnWidth::Fit }
-            TableColumn { name: "result", width: TableColumnWidth::Fit, filterable: true }
+            TableColumn { name: "result", width: TableColumnWidth::Fit }
         }
     };
 }
@@ -7272,10 +7437,12 @@ const TABLE_SECTION: &[Example] = &[
                         (Key::ExampleTableColAmount, "R$ 1.240,00"),
                     ] {
                         TableRow { key: "{value}",
+                            // NO `wrap`. `nowrap` is the default on a
+                            // heading, so the value wrote what absence
+                            // already writes.
                             TableHeaderCell {
                                 scope: TableHeaderCellScope::Row,
                                 column: "field",
-                                wrap: TableHeaderCellWrap::Nowrap,
                                 {context.t(field)}
                             }
                             TableCell { column: "value", class: "nd-identifier", "{value}" }
@@ -7388,7 +7555,8 @@ const TABLE: &[Example] = &[
         }
     ),
     example!(
-        r"TableRow { emphasis } and TableCell { aggregate } — subtotal, tax, total",
+        r"Table { name, caption, search_label, search_placeholder, filtered_label }
+TableRow { emphasis } and TableCell { aggregate }: subtotal, tax, total",
         Key::ExampleTableNoteTotals,
         |context| rsx! {
             Table {
@@ -7397,7 +7565,7 @@ const TABLE: &[Example] = &[
                 search_label: context.t(Key::ExampleTableSearch),
                 search_placeholder: context.t(Key::ExampleTableSearchPlaceholder),
                 filtered_label: context.t(Key::ExampleTableFiltered),
-                                TableColumn { name: "invoice", width: TableColumnWidth::Fit, filterable: true }
+                TableColumn { name: "invoice", width: TableColumnWidth::Fit, filterable: true }
                 TableColumn { name: "client", filterable: true }
                 TableColumn { name: "due", width: TableColumnWidth::Fit }
                 TableColumn { name: "status", width: TableColumnWidth::Fit, filterable: true }
@@ -7586,7 +7754,7 @@ const TABLE: &[Example] = &[
                 search_placeholder: context.t(Key::ExampleTableSearchPlaceholder),
                 filtered_label: context.t(Key::ExampleTableFiltered),
                 summary_label: context.t(Key::ExampleTableSummary),
-                                TableColumn { name: "invoice", width: TableColumnWidth::Fit, filterable: true }
+                TableColumn { name: "invoice", width: TableColumnWidth::Fit, filterable: true }
                 TableColumn { name: "client", filterable: true }
                 TableColumn { name: "due", width: TableColumnWidth::Fit }
                 TableColumn { name: "status", width: TableColumnWidth::Fit, filterable: true }
@@ -7622,7 +7790,8 @@ const TABLE: &[Example] = &[
                 copied_label: context.t(Key::ExampleTableCopied),
                 selected_label: context.t(Key::ExampleTableChosen),
                 TableColumn { name: "choose", width: TableColumnWidth::Fit }
-                TableColumn { name: "person", filterable: true }
+                // No `filterable`: this table draws no search box either.
+                TableColumn { name: "person" }
                 TableColumn { name: "role", width: TableColumnWidth::Fit }
                 TableColumn { name: "access", width: TableColumnWidth::Fit }
                 TableSection { kind: TableSectionKind::Head,
@@ -8091,7 +8260,8 @@ const TABLE_ROW: &[Example] = &[
         }
     ),
     example!(
-        r"TableRow { empty: true } — the caller's own sentence",
+        r"Table { name, caption, search_label, search_placeholder, filtered_label }
+TableRow { empty: true }: the caller's own sentence",
         Key::ExampleTableNoteEmpty,
         |context| rsx! {
             Table {
@@ -8100,7 +8270,7 @@ const TABLE_ROW: &[Example] = &[
                 search_label: context.t(Key::ExampleTableSearch),
                 search_placeholder: context.t(Key::ExampleTableSearchPlaceholder),
                 filtered_label: context.t(Key::ExampleTableFiltered),
-                                TableColumn { name: "invoice", width: TableColumnWidth::Fit, filterable: true }
+                TableColumn { name: "invoice", width: TableColumnWidth::Fit, filterable: true }
                 TableColumn { name: "client", filterable: true }
                 TableColumn { name: "due", width: TableColumnWidth::Fit }
                 TableColumn { name: "status", width: TableColumnWidth::Fit, filterable: true }
@@ -8295,7 +8465,8 @@ const TABLE_CELL: &[Example] = &[
         }
     ),
     example!(
-        r"TableCell { aggregate, aggregate_over } — a total that recounts",
+        r"Table { name, caption, search_label, search_placeholder, filtered_label }
+TableCell { aggregate, aggregate_over }: a total that recounts",
         Key::ExampleTableNoteCellAggregate,
         |context| rsx! {
             Table {
@@ -8304,7 +8475,7 @@ const TABLE_CELL: &[Example] = &[
                 search_label: context.t(Key::ExampleTableSearch),
                 search_placeholder: context.t(Key::ExampleTableSearchPlaceholder),
                 filtered_label: context.t(Key::ExampleTableFiltered),
-                                TableColumn { name: "invoice", width: TableColumnWidth::Fit, filterable: true }
+                TableColumn { name: "invoice", width: TableColumnWidth::Fit, filterable: true }
                 TableColumn { name: "client", filterable: true }
                 TableColumn { name: "due", width: TableColumnWidth::Fit }
                 TableColumn { name: "status", width: TableColumnWidth::Fit, filterable: true }
@@ -8407,10 +8578,13 @@ const TABLE_HEADER_CELL: &[Example] = &[
                     TableRow {
                         // The same words over two columns of the same numbers,
                         // and only one of them lines up.
+                        // `wrap`, WHICH IS NOT THE DEFAULT. A heading is
+                        // `nowrap` unless it says otherwise, so `nowrap` here
+                        // showed the prop doing nothing at all.
                         TableHeaderCell {
                             column: "right",
                             align: TableHeaderCellAlign::Numeric,
-                            wrap: TableHeaderCellWrap::Nowrap,
+                            wrap: TableHeaderCellWrap::Wrap,
                             {context.t(Key::ExampleTableColAmount)}
                         }
                         TableHeaderCell {
@@ -8554,18 +8728,42 @@ const MENU: &[Example] = &[
         }
     ),
     example!(
-        r"Menu { children } — every key a menu owes",
+        // A MENU LONG ENOUGH FOR THE WALK TO BE WORTH ANYTHING. This example
+        // used to be example 1 with a fourth item, under a caption promising
+        // *every key a menu owes* and markup showing none of them. Thirteen
+        // items with thirteen different first letters is where Home, End and
+        // the letter jump stop being claims and start being visible.
+        r"Menu { name, label } with thirteen MenuItem { label }",
         Key::ExampleMenuNoteKeys,
         |context| rsx! {
             div {
-                {menu_button!(context, "example-menu-keys")}
+                Button {
+                    menu: true,
+                    controls: "example-menu-keys",
+                    variant: ButtonVariant::Outline,
+                    tone: ButtonTone::Neutral,
+                    label: context.t(Key::ExampleMenuAccentOpen),
+                }
                 Menu {
                     name: "example-menu-keys",
-                    label: context.t(Key::ExampleMenuLabel),
-                    MenuItem { label: context.t(Key::ExampleMenuDuplicate) }
-                    MenuItem { label: context.t(Key::ExampleMenuRename) }
-                    MenuItem { label: context.t(Key::ExampleMenuArchive) }
-                    MenuItem { label: context.t(Key::ExampleMenuDelete) }
+                    label: context.t(Key::ExampleMenuAccentLabel),
+                    for accent in [
+                        Key::ThemeAccentOchre,
+                        Key::ThemeAccentAmber,
+                        Key::ThemeAccentLime,
+                        Key::ThemeAccentJade,
+                        Key::ThemeAccentTeal,
+                        Key::ThemeAccentAzure,
+                        Key::ThemeAccentBlue,
+                        Key::ThemeAccentIndigo,
+                        Key::ThemeAccentViolet,
+                        Key::ThemeAccentMagenta,
+                        Key::ThemeAccentRose,
+                        Key::ThemeAccentClay,
+                        Key::ThemeAccentUmber,
+                    ] {
+                        MenuItem { key: "{accent.id()}", label: context.t(accent) }
+                    }
                 }
             }
         }
@@ -8777,6 +8975,11 @@ const SELECT: &[Example] = &[
                 placeholder: context.t(Key::ExampleSelectPalettePlaceholder),
                 multiple: true,
                 required: true,
+                // THE WORD IN FRONT OF A SENTENCE NOBODY HAS WRITTEN YET. This
+                // field has no `error`: the sentence comes from the browser
+                // when a reader submits without answering, and `Field` draws
+                // this in front of whatever lands in the slot.
+                error_label: context.t(Key::ExampleFormsErrorWord),
                 searchable: true,
                 search_label: context.t(Key::ExampleSelectSearchLabel),
                 empty_label: context.t(Key::ExampleSelectEmptyLabel),
@@ -9097,33 +9300,30 @@ const CODE_BLOCK: &[Example] = &[
         }
     ),
     example!(
-        r"CodeBlock { theme: CodeBlockTheme::Spectrum, … }",
+        r#"CodeBlock { code: "…", language: "rust", theme: CodeBlockTheme::… }"#,
         Key::ExampleCodeBlockThemes,
         |_| rsx! {
+            // NO `filename` HERE, AND THAT IS THE REPAIR. These four carried
+            // `spectrum`, `duotone`, `muted` and `mono`, which are theme names
+            // and not files. `filename` is also the accessible name of the
+            // scrollable region, so a wrong one is a wrong name announced.
+            // With it absent the name falls back on the language, which is
+            // what the contract promises.
             div { class: "nd-example-stack",
-                CodeBlock {
-                    code: SAMPLE_RUST,
-                    language: "rust",
-                    theme: CodeBlockTheme::Spectrum,
-                    filename: "spectrum",
-                }
-                CodeBlock {
-                    code: SAMPLE_RUST,
-                    language: "rust",
-                    theme: CodeBlockTheme::Duotone,
-                    filename: "duotone",
-                }
-                CodeBlock {
-                    code: SAMPLE_RUST,
-                    language: "rust",
-                    theme: CodeBlockTheme::Muted,
-                    filename: "muted",
-                }
-                CodeBlock {
-                    code: SAMPLE_RUST,
-                    language: "rust",
-                    theme: CodeBlockTheme::Mono,
-                    filename: "mono",
+                // The four that override, and not `auto`, which is the
+                // default and would show the prop doing nothing.
+                for theme in [
+                    CodeBlockTheme::Spectrum,
+                    CodeBlockTheme::Duotone,
+                    CodeBlockTheme::Muted,
+                    CodeBlockTheme::Mono,
+                ] {
+                    CodeBlock {
+                        key: "{theme.as_str()}",
+                        code: SAMPLE_RUST,
+                        language: "rust",
+                        theme,
+                    }
                 }
             }
         }
@@ -9372,13 +9572,24 @@ const INS: &[Example] = &[
             }
         }
     ),
-    example!(r"Ins beside Del", Key::ExampleEditPair, |context| rsx! {
-        Paragraph {
-            Del { label: context.t(Key::ExampleEditRemoved), "{context.t(Key::ExampleEditOld)}" }
-            " "
-            Ins { label: context.t(Key::ExampleEditAdded), "{context.t(Key::ExampleEditNew)}" }
+    // NOT `Del` BESIDE `Ins` AGAIN. That example is on `Del`'s own table with
+    // the same note key, and one question asked twice on one page is one of
+    // the two examples doing nothing. This one is `Ins` around a whole item.
+    example!(
+        r"List { ListItem { Ins { label, … } } }",
+        Key::ExampleEditBlock,
+        |context| rsx! {
+            List { kind: ListKind::Unordered, spacing: ListSpacing::Tight,
+                ListItem { "{context.t(Key::ExampleListOne)}" }
+                ListItem {
+                    Ins {
+                        label: context.t(Key::ExampleEditAdded),
+                        "{context.t(Key::ExampleListTwo)}"
+                    }
+                }
+            }
         }
-    }),
+    ),
 ];
 
 // --- Disclosure -------------------------------------------------------------
@@ -9496,13 +9707,17 @@ const STRONG: &[Example] = &[
             "."
         }
     }),
+    // NOT `Strong { Em { … } }` AGAIN. `Em`'s own table asks that question,
+    // under this very note key. The question `Strong` alone can answer is what
+    // a second `Strong` inside the first one means.
     example!(
-        r"Strong { Em { … } }",
-        Key::ExampleEmNested,
+        r"Strong { … Strong { … } }",
+        Key::ExampleStrongDegrees,
         |context| rsx! {
             Paragraph {
                 Strong {
-                    Em { "{context.t(Key::ExampleStrongWord)}" }
+                    "{context.t(Key::ExampleStrongLead)} "
+                    Strong { "{context.t(Key::ExampleStrongWord)}" }
                 }
             }
         }
@@ -9516,13 +9731,19 @@ const STRONG: &[Example] = &[
             ListItem { "{context.t(Key::ExampleListTwo)}" }
         }
     }),
-    example!(r"Strong beside Em", Key::ExampleEmVersus, |context| rsx! {
-        Paragraph {
-            Strong { "{context.t(Key::ExampleStrongWord)}" }
-            " · "
-            Em { "{context.t(Key::ExampleEmWord)}" }
+    // `Em` beside `Strong` is on `Em`'s table already. What belongs here is
+    // the case the element exists for: the part of a sentence that matters
+    // most, which is usually the word a warning opens on.
+    example!(
+        r"Strong opening a warning",
+        Key::ExampleStrongWarning,
+        |context| rsx! {
+            Paragraph {
+                Strong { "{context.t(Key::ExampleStrongWarningWord)}" }
+                " {context.t(Key::ExampleStrongWarningBody)}"
+            }
         }
-    }),
+    ),
 ];
 
 // --- Heading ----------------------------------------------------------------
@@ -9646,7 +9867,10 @@ const LINK: &[Example] = &[
 // --- List and ListItem ------------------------------------------------------
 
 const LIST: &[Example] = &[
-    example!(r"List { kind: ListKind::Unordered, … }", |context| rsx! {
+    // NO `kind` IN THE CALL AND NONE IN THE CAPTION. `unordered` is the
+    // default, so the caption named a prop the body never passed. The two
+    // examples below pass the two values that change the element.
+    example!(r"List { ListItem { … } × 3 }", |context| rsx! {
         List {
             ListItem { "{context.t(Key::ExampleListOne)}" }
             ListItem { "{context.t(Key::ExampleListTwo)}" }
@@ -9982,13 +10206,16 @@ const SEARCH: &[Example] = &[
         }
     ),
     example!(
-        r#"Search { action: "…", query: "q" }"#,
+        r#"Search { name, action: "…", query: "term", label, placeholder, clear_label }"#,
         Key::ExampleSearchForm,
         |context| rsx! {
             Search {
                 name: "form",
                 action: "../search/",
-                query: "q",
+                // NOT `q`, WHICH IS THE DEFAULT. A field posting the name it
+                // would have posted anyway is an example of nothing, and this
+                // is the one prop on the page a server has to agree with.
+                query: "term",
                 label: context.t(Key::SearchLabel),
                 placeholder: context.t(Key::SearchPlaceholder),
                 clear_label: context.t(Key::SearchClear),
@@ -10269,22 +10496,24 @@ const SEARCH_RESULT: &[Example] = &[
 
 const COLOR_PICKER: &[Example] = &[
     example!(
-        r"ColorPicker { name, label, value, size, shape, trigger_label, area_label, hue_label, entry_label, entry_invalid_label, codes_label, formats, copy_label, copied_label, close_label }",
+        r"ColorPicker { name, label, value, trigger_label, area_label, hue_label, entry_label, entry_invalid_label, codes_label, copy_label, copied_label, close_label }",
         Key::ExampleColorPickerPlainNote,
         |context| rsx! {
             ColorPicker {
                 name: "label-colour",
                 label: context.t(Key::ExampleColorPickerLabel),
                 value: "#7c3aed",
-                size: ColorPickerSize::Medium,
-                shape: ColorPickerShape::Rounded,
+                // NO `size`, NO `shape`, NO `formats`. All three were set to
+                // their own declared default here, so the plainest example on
+                // the page carried three props a reader could delete without
+                // changing a pixel. Each is shown at a value that differs
+                // further down.
                 trigger_label: context.t(Key::ExampleColorPickerTrigger),
                 area_label: context.t(Key::ExampleColorPickerArea),
                 hue_label: context.t(Key::ExampleColorPickerHue),
                 entry_label: context.t(Key::ExampleColorPickerEntry),
                 entry_invalid_label: context.t(Key::ExampleColorPickerEntryInvalid),
                 codes_label: context.t(Key::ExampleColorPickerCodes),
-                formats: "hex rgb hsl oklch",
                 copy_label: context.t(Key::ExampleColorPickerCopy),
                 copied_label: context.t(Key::ExampleColorPickerCopied),
                 close_label: context.t(Key::ExampleColorPickerClose),
@@ -10292,7 +10521,7 @@ const COLOR_PICKER: &[Example] = &[
         }
     ),
     example!(
-        r"ColorPicker { alpha: true, alpha_label, eyedropper: true, eyedropper_label, recent, recent_label, forget_label }",
+        r"ColorPicker { size: Large, shape: Pill, alpha: true, alpha_label, eyedropper: true, eyedropper_label, recent, recent_label, forget_label }",
         Key::ExampleColorPickerExtrasNote,
         |context| rsx! {
             ColorPicker {
@@ -10473,11 +10702,15 @@ const FIELD: &[Example] = &[
                 // at needing one, which is why `Field` has it: a control whose
                 // real element the script hides cannot be reported by the browser,
                 // so this is where its own complaint goes.
+                // `error_label` IS THE WORD ANNOUNCED BEFORE AN ERROR, so it
+                // is *Error:* and never *required*. Setting it to the word
+                // that marks a compulsory question makes every complaint on
+                // the field announce as the field being obligatory.
                 Select {
                     name: "field-slot",
                     label: context.t(Key::ExampleInputNameLabel),
                     required: true,
-                    error_label: context.t(Key::ExampleInputRequired),
+                    error_label: context.t(Key::ExampleFormsErrorWord),
                     SelectOption { value: "one", label: "1" }
                 }
                 Input {
@@ -10554,7 +10787,15 @@ const INPUT: &[Example] = &[
                     placeholder: "ada@example.org",
                     autocomplete: "email",
                     pattern: ".+@.+\\..+",
-                    spellcheck: false,
+                }
+                // THE ONE BOX HERE THAT HOLDS WORDS, and the only one where
+                // `spellcheck` has anything to say. It is **off** by default
+                // on an `Input`, which is the opposite of the platform, so
+                // `false` on the address above showed the prop doing nothing.
+                Input {
+                    name: "title",
+                    label: context.t(Key::ExampleInputTitleLabel),
+                    spellcheck: true,
                 }
                 Input {
                     name: "phone",
@@ -10634,7 +10875,9 @@ const INPUT: &[Example] = &[
     // the state makes sense on. The error sits on the address that was refused,
     // not on a reference number nobody can edit.
     example!(
-        r"Input { error } / Input { readonly } / Input { disabled, glass }",
+        r"Input { name, label, kind: Email, value, error, autocomplete }
+Input { name, label, value, readonly }
+Input { name, label, kind: Password, reveal_label, conceal_label, disabled, glass }",
         Key::ExampleInputNoteRefused,
         |context| rsx! {
             div { class: "nd-example-stack",
@@ -10688,28 +10931,35 @@ const TEXTAREA: &[Example] = &[
         }
     ),
     example!(
-        r"Textarea { maxlength, counter, counter_label, spellcheck }",
+        r"Textarea { name, label, rows, maxlength, counter, counter_label, spellcheck: false }",
         |context| rsx! {
+            // A LIST OF ADDRESSES, NOT PROSE, which is the one case where
+            // turning the underlining off is right. `spellcheck` is **on** by
+            // default on a `Textarea`, so `true` here showed nothing.
             Textarea {
-                name: "bio",
-                label: context.t(Key::ExampleInputNoteLabel),
+                name: "recipients",
+                label: context.t(Key::ExampleTextareaRecipients),
                 rows: "3",
                 maxlength: "400",
                 counter: true,
                 counter_label: context.t(Key::ExampleInputCounter),
-                spellcheck: true,
+                spellcheck: false,
             }
         }
     ),
     example!(
-        r"Textarea { resize, value, size, glass, error }",
+        r"Textarea { name, label, value, rows, resize: None, autosize, size, glass, error }",
         |context| rsx! {
+            // `resize: None` WANTS `autosize` ON, and the contract says so in
+            // writing: a box a reader can neither drag nor have grown for them
+            // is a box whose text runs out of sight.
             Textarea {
                 name: "fixed",
                 label: context.t(Key::ExampleInputNoteLabel),
                 value: context.t(Key::ExampleInputFixedNote),
                 rows: "2",
                 resize: TextareaResize::None,
+                autosize: true,
                 size: TextareaSize::Small,
                 glass: true,
                 error: context.t(Key::ExampleInputError),
@@ -10894,7 +11144,7 @@ NumberInput { name, label, disabled, glass, increment_label, decrement_label }",
 
 const SLIDER: &[Example] = &[
     example!(
-        r"Slider { name, label, value, min, max, step, output_label, hint, required, required_label, size }",
+        r"Slider { name, label, value, min, max, step, output_label, hint, required, required_label }",
         Key::ExampleSliderNote,
         |context| rsx! {
             form { class: "nd-example-form", method: "get", action: "#", novalidate: true,
@@ -10909,7 +11159,6 @@ const SLIDER: &[Example] = &[
                     hint: context.t(Key::ExampleInputHint),
                     required: true,
                     required_label: context.t(Key::ExampleInputRequired),
-                    size: SliderSize::Medium,
                 }
                 Button { submit: ButtonSubmit::Submit, label: context.t(Key::ExampleInputSend) }
             }
@@ -10926,7 +11175,7 @@ const SLIDER: &[Example] = &[
         }
     }),
     example!(
-        r"Slider { range, end, tone, size } — two named controls under one question",
+        r"Slider { name, label, range, value, end, min, max, step, output_label, tone, size }",
         |context| rsx! {
             Slider {
                 name: "budget",
@@ -10944,7 +11193,8 @@ const SLIDER: &[Example] = &[
         }
     ),
     example!(
-        r"Slider { output: false, glass, error } / Slider { disabled }",
+        r"Slider { name, label, value, output: false, tone, size, glass, error }
+Slider { name, label, value, tone, disabled }",
         |context| rsx! {
             div { class: "nd-example-stack",
                 Slider {
@@ -10971,15 +11221,16 @@ const SLIDER: &[Example] = &[
 
 const FILE_INPUT: &[Example] = &[
     example!(
-        r"FileInput { name, label, browse_label, drop, drop_label, empty_label, status, hint, required, required_label }",
+        r"FileInput { name, label, browse_label, drop_label, empty_label, status, hint, required, required_label }",
         Key::ExampleFileInputNote,
         |context| rsx! {
+            // NO `drop: true` HERE. It is the default, so it showed nothing.
+            // The example that turns it off is the last one on this page.
             form { class: "nd-example-form", method: "get", action: "#", novalidate: true,
                 FileInput {
                     name: "one-attachment",
                     label: context.t(Key::ExampleInputFilesLabel),
                     browse_label: context.t(Key::ExampleInputBrowse),
-                    drop: true,
                     drop_label: context.t(Key::ExampleInputDrop),
                     empty_label: context.t(Key::ExampleInputFileEmpty),
                     status: context.t(Key::ExampleInputFileStatus),
@@ -11029,7 +11280,8 @@ const FILE_INPUT: &[Example] = &[
         }
     ),
     example!(
-        r"FileInput { drop: false, size, glass, error } / FileInput { disabled }",
+        r"FileInput { name, label, browse_label, drop: false, size, glass, error }
+FileInput { name, label, browse_label, disabled, size }",
         |context| rsx! {
             div { class: "nd-example-stack",
                 FileInput {
@@ -11073,25 +11325,27 @@ const TIME_INPUT: &[Example] = &[
         }
     ),
     example!(
-        r"TimeInput { clock, meridiem_label, am_label, pm_label, now_label, pad }",
+        r"TimeInput { name, legend, hour_label, minute_label, clock: _12, meridiem_label, am_label, pm_label, now_label, value }",
         |context| rsx! {
             TimeInput {
                 name: "meeting",
                 legend: context.t(Key::ExampleInputTimeLegend),
                 hour_label: context.t(Key::ExampleInputHour),
                 minute_label: context.t(Key::ExampleInputMinute),
-                clock: TimeInputClock::Auto,
+                // `_12`, NOT `Auto`. `auto` is the default, so the example
+                // asked for what it would have got anyway, and the four
+                // meridiem strings under it had no clock to appear on.
+                clock: TimeInputClock::_12,
                 meridiem_label: context.t(Key::ExampleInputMeridiem),
                 am_label: context.t(Key::ExampleInputAm),
                 pm_label: context.t(Key::ExampleInputPm),
                 now_label: context.t(Key::ExampleInputNow),
-                pad: true,
                 value: "14:05",
             }
         }
     ),
     example!(
-        r"TimeInput { min, max, step, required, required_label, missing_label, invalid_label, min_label, max_label }",
+        r"TimeInput { min, max, step, pad: false, required, required_label, missing_label, invalid_label, min_label, max_label }",
         |context| rsx! {
             TimeInput {
                 name: "booking",
@@ -11101,6 +11355,10 @@ const TIME_INPUT: &[Example] = &[
                 min: "08:00",
                 max: "18:00",
                 step: "15",
+                // `pad` is ON by default, so `false` is the only value that
+                // shows it doing anything: leave a box holding `9` and it
+                // stays `9` rather than becoming `09`.
+                pad: false,
                 required: true,
                 required_label: context.t(Key::ExampleInputTimeNeeded),
                 missing_label: context.t(Key::ExampleInputTimeMissing),
@@ -11174,15 +11432,17 @@ macro_rules! slides {
 
 const CAROUSEL: &[Example] = &[
     example!(
-        r"Carousel { name, label, per_view, controls, previous_label, next_label, announce_label }",
+        r"Carousel { name, label, snap: Center, previous_label, next_label, announce_label }",
         Key::ExampleCarouselGalleryNote,
         |context| rsx! {
             Carousel {
                 name: "gallery",
                 label: context.t(Key::ExampleCarouselLabel),
-                per_view: "1",
+                // NO `per_view: "1"` AND NO `controls: true`. Both are the
+                // declared default, so the first example on the page opened
+                // on two props a reader could delete without changing
+                // anything. Each is shown at a value that differs below.
                 snap: CarouselSnap::Center,
-                controls: true,
                 previous_label: context.t(Key::ExampleCarouselPrevious),
                 next_label: context.t(Key::ExampleCarouselNext),
                 announce_label: context.t(Key::ExampleCarouselAnnounce),
@@ -11244,7 +11504,8 @@ const CAROUSEL: &[Example] = &[
         }
     ),
     example!(
-        r"Carousel { wrap, snap: None } / Carousel { orientation: Vertical }",
+        r"Carousel { per_view, wrap, snap: None, counter, counter_label }
+Carousel { orientation: Vertical, controls: false }",
         Key::ExampleCarouselWrapNote,
         |context| rsx! {
             div { class: "nd-example-stack",
@@ -11261,12 +11522,15 @@ const CAROUSEL: &[Example] = &[
                     announce_label: context.t(Key::ExampleCarouselAnnounce),
                     {slides!(context)}
                 }
+                // THE ONE CAROUSEL THAT CAN DO WITHOUT THE ARROWS. The
+                // contract draws them because a mouse with no horizontal
+                // wheel cannot move a sideways track. This track runs
+                // downwards, where every wheel already works.
                 Carousel {
                     name: "downwards",
                     label: context.t(Key::ExampleCarouselLabel),
                     orientation: CarouselOrientation::Vertical,
-                    previous_label: context.t(Key::ExampleCarouselPrevious),
-                    next_label: context.t(Key::ExampleCarouselNext),
+                    controls: false,
                     announce_label: context.t(Key::ExampleCarouselAnnounce),
                     {slides!(context)}
                 }
@@ -11681,13 +11945,22 @@ const TAG: &[Example] = &[
         Key::ExampleGlassBehind,
         |context| rsx! {
             div { class: "nd-example-row",
-                for tone in ["accent", "neutral", "danger", "shipped"] {
+                // THE WORD AND THE COLOUR SAY THE SAME THING. Four pills
+                // reading *In review* with one painted `danger` and one
+                // `shipped` is the page teaching the opposite of the rule two
+                // examples above it.
+                for (tone, label) in [
+                    ("accent", Key::ExampleTagReview),
+                    ("neutral", Key::ExampleTagDraft),
+                    ("danger", Key::ExampleTagBlocked),
+                    ("shipped", Key::ExampleTagShipped),
+                ] {
                     Tag {
                         key: "{tone}",
                         tone,
                         glass: true,
                         variant: TagVariant::Outline,
-                        label: context.t(Key::ExampleTagReview),
+                        label: context.t(label),
                     }
                 }
             }
@@ -11710,7 +11983,11 @@ const BADGE: &[Example] = &[
                         label: context.t(Key::ExampleBadgeInbox),
                     }
                 }
-                Badge { count: "128", max: "99", label: context.t(Key::ExampleBadgeUnread),
+                // THE LABEL IS THE COUNT THE BADGE STANDS FOR, NOT THE ONE IT
+                // DRAWS. `max` caps the digits at `99+`; it does not cap what
+                // happened, and a reader who cannot see the corner is owed the
+                // real number.
+                Badge { count: "128", max: "99", label: context.t(Key::ExampleBadgeUnread128),
                     Button {
                         variant: ButtonVariant::Outline,
                         tone: ButtonTone::Neutral,
@@ -11734,7 +12011,7 @@ const BADGE: &[Example] = &[
                         label: context.t(Key::SettingsLabel),
                     }
                 }
-                Badge { count: "0", label: context.t(Key::ExampleBadgeUnread),
+                Badge { count: "0", label: context.t(Key::ExampleBadgeUnread0),
                     Button {
                         variant: ButtonVariant::Outline,
                         tone: ButtonTone::Neutral,
@@ -11743,7 +12020,7 @@ const BADGE: &[Example] = &[
                         label: context.t(Key::SettingsLabel),
                     }
                 }
-                Badge { count: "0", show_zero: true, label: context.t(Key::ExampleBadgeUnread),
+                Badge { count: "0", show_zero: true, label: context.t(Key::ExampleBadgeUnread0),
                     Button {
                         variant: ButtonVariant::Outline,
                         tone: ButtonTone::Neutral,
@@ -11767,7 +12044,7 @@ const BADGE: &[Example] = &[
                         key: "{tone}",
                         tone,
                         count: "9",
-                        label: context.t(Key::ExampleBadgeUnread),
+                        label: context.t(Key::ExampleBadgeUnread9),
                         Button {
                             variant: ButtonVariant::Outline,
                             tone: ButtonTone::Neutral,
@@ -11779,7 +12056,7 @@ const BADGE: &[Example] = &[
         }
     ),
     example!(
-        r"Badge { placement: BadgePlacement::…, overlap: BadgeOverlap::Circle }",
+        r"Badge { placement: BadgePlacement::… } / Badge { overlap: BadgeOverlap::… }",
         Key::ExampleBadgePlacement,
         |context| rsx! {
             // A ROOMIER ROW, and the reason is the component: a badge draws
@@ -11793,7 +12070,7 @@ const BADGE: &[Example] = &[
                         placement,
                         count: "2",
                         tone: "accent",
-                        label: context.t(Key::ExampleBadgeUnread),
+                        label: context.t(Key::ExampleBadgeUnread2),
                         Button {
                             variant: ButtonVariant::Outline,
                             tone: ButtonTone::Neutral,
@@ -11808,7 +12085,7 @@ const BADGE: &[Example] = &[
                         key: "{overlap.as_str()}",
                         overlap,
                         count: "2",
-                        label: context.t(Key::ExampleBadgeUnread),
+                        label: context.t(Key::ExampleBadgeUnread2),
                         Tag {
                             shape: if overlap == BadgeOverlap::Circle { TagShape::Pill } else { TagShape::Square },
                             variant: TagVariant::Outline,
@@ -11849,7 +12126,7 @@ macro_rules! people {
 
 const AVATAR: &[Example] = &[
     example!(
-        r#"Avatar { label: "…", src: "…" } / { initials: "…" } / { icon: IconName::User }"#,
+        r#"Avatar { label: "…", src: "…" } / { initials: "…" } / { icon: IconName::Monitor }"#,
         Key::ExampleAvatarLayers,
         |context| rsx! {
             div { class: "nd-example-row",
@@ -11859,7 +12136,10 @@ const AVATAR: &[Example] = &[
                     src: format!("{}favicon.svg", crate::site::BASE),
                 }
                 Avatar { label: context.t(Key::ExampleAvatarBruno), initials: "BS" }
-                Avatar { label: context.t(Key::ExampleAvatarPending), icon: IconName::User }
+                // NOT `user`, WHICH IS WHAT ABSENCE ALREADY DRAWS. An example
+                // setting a prop to its own default shows the prop doing
+                // nothing. This account is a machine, so it gets a machine.
+                Avatar { label: context.t(Key::ExampleAvatarDeployBot), icon: IconName::Monitor }
             }
         }
     ),
@@ -11894,17 +12174,20 @@ const AVATAR: &[Example] = &[
         Key::ExampleAvatarTone,
         |context| rsx! {
             div { class: "nd-example-row",
-                for (tone, initials) in [
-                    (AvatarTone::Neutral, "AL"),
-                    (AvatarTone::Accent, "BS"),
-                    (AvatarTone::Success, "CM"),
-                    (AvatarTone::Danger, "DR"),
+                // FOUR SETS OF INITIALS ARE FOUR PEOPLE, so each carries its
+                // own name. One name over four faces makes three of them
+                // announce somebody who is not there.
+                for (tone, initials, name) in [
+                    (AvatarTone::Neutral, "AL", Key::ExampleAvatarAna),
+                    (AvatarTone::Accent, "BS", Key::ExampleAvatarBruno),
+                    (AvatarTone::Success, "CM", Key::ExampleAvatarCarla),
+                    (AvatarTone::Danger, "DR", Key::ExampleAvatarDiego),
                 ] {
                     Avatar {
                         key: "{tone.as_str()}",
                         tone,
                         initials,
-                        label: context.t(Key::ExampleAvatarCarla),
+                        label: context.t(name),
                     }
                 }
             }
@@ -12076,24 +12359,42 @@ const TAG_PICKER: &[Example] = &[
         }
     ),
     example!(
-        r#"TagPicker { pattern: "…", invalid_label: "…", paste: true, duplicates: false, clearable: true, clear_label: "…" }"#,
+        r#"TagPicker { pattern: "…", invalid_label: "…", clearable: true, clear_label: "…" }
+TagPicker { paste: false, duplicates: true, … }"#,
         Key::ExamplePickerRefusing,
         |context| rsx! {
-            TagPicker {
-                name: "addresses",
-                // The platform's own `pattern`, not an invention here.
-                pattern: r"[^@\s]+@[^@\s]+\.[^@\s]+",
-                invalid_label: context.t(Key::ExamplePickerInvalid),
-                paste: true,
-                duplicates: false,
-                clearable: true,
-                clear_label: context.t(Key::ExamplePickerClear),
-                label: context.t(Key::ExamplePickerPeopleLabel),
-                placeholder: context.t(Key::ExamplePickerPeoplePlaceholder),
-                hint: context.t(Key::ExamplePickerPeopleHint),
-                create_label: context.t(Key::ExamplePickerCreate),
-                remove_label: context.t(Key::ExamplePickerRemove),
-                status: context.t(Key::ExamplePickerStatus),
+            div { class: "nd-example-stack nd-example-stack-wide",
+                // NO `paste: true` AND NO `duplicates: false` HERE. Those are
+                // the defaults, so both showed the prop doing nothing, on the
+                // one page a reader comes to to find out what they change.
+                TagPicker {
+                    name: "addresses",
+                    // The platform's own `pattern`, not an invention here.
+                    pattern: r"[^@\s]+@[^@\s]+\.[^@\s]+",
+                    invalid_label: context.t(Key::ExamplePickerInvalid),
+                    clearable: true,
+                    clear_label: context.t(Key::ExamplePickerClear),
+                    label: context.t(Key::ExamplePickerPeopleLabel),
+                    placeholder: context.t(Key::ExamplePickerPeoplePlaceholder),
+                    hint: context.t(Key::ExamplePickerPeopleHint),
+                    create_label: context.t(Key::ExamplePickerCreate),
+                    remove_label: context.t(Key::ExamplePickerRemove),
+                    status: context.t(Key::ExamplePickerStatus),
+                }
+                // THE TWO VALUES THAT ARE NOT THE DEFAULT, on a picker where
+                // both are right: a written name may contain the separator,
+                // and two guests may share a name.
+                TagPicker {
+                    name: "guests",
+                    paste: false,
+                    duplicates: true,
+                    label: context.t(Key::ExamplePickerNamesLabel),
+                    placeholder: context.t(Key::ExamplePickerNamesPlaceholder),
+                    hint: context.t(Key::ExamplePickerNamesHint),
+                    create_label: context.t(Key::ExamplePickerCreate),
+                    remove_label: context.t(Key::ExamplePickerRemove),
+                    status: context.t(Key::ExamplePickerStatus),
+                }
             }
         }
     ),

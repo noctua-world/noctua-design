@@ -29,6 +29,7 @@ pub mod fonts;
 pub mod grammar;
 pub mod i18n;
 pub mod icons;
+pub mod javascript;
 pub mod lineage;
 pub mod props;
 pub mod runtime;
@@ -503,6 +504,45 @@ mod tests {
         assert!(!syntax::emit(&syntax_layer).is_empty(), "syntax");
         assert!(!theme::emit(&theme_model, &vendor).is_empty(), "theme");
         assert!(!typescript::emit(&spec).is_empty(), "typescript");
+    }
+
+    /// EVERY EMITTED `.js` IS JAVASCRIPT.
+    ///
+    /// Two of them were not, for an unknown length of time, with
+    /// `cargo xtask check` green throughout: `table.js` bound a parameter named
+    /// `export` and `lineage.js` declared `const filter` beside its own
+    /// `filter` parameter. Both are early errors, so both files failed to load
+    /// *entirely* — not a wrong attribute on one component, a `SyntaxError` for
+    /// anybody who imported the package.
+    ///
+    /// Nothing caught it because nothing in this repository had ever read an
+    /// emitted `.js` as code. The browser suite fetches a pre-built bundle, and
+    /// the parity tests in `props.rs` compare the prop *surface*, which both
+    /// files had exactly right.
+    ///
+    /// Read here rather than by `node --check`, because `NOCTUA.md §9.11`
+    /// promises the Rust half tests with no Node installed — see
+    /// [`crate::javascript`], which is the reader.
+    #[test]
+    fn every_emitted_javascript_parses() {
+        let bundle = shipped();
+        let mut read = 0usize;
+        for file in emit_all(inputs(&bundle)) {
+            // `dist/vendor/` is somebody else's minified bundle, copied byte
+            // for byte and asserted to be a copy above. Reading it would be
+            // this repository having an opinion about three.js.
+            let javascript = std::path::Path::new(&file.path)
+                .extension()
+                .is_some_and(|kind| kind.eq_ignore_ascii_case("js"));
+            if !file.path.starts_with("packages/") || !javascript {
+                continue;
+            }
+            read += 1;
+            if let Err(problem) = javascript::check(&file.contents) {
+                panic!("{} is not JavaScript — {problem}", file.path);
+            }
+        }
+        assert!(read > 0, "no JavaScript was read, so this proves nothing");
     }
 
     #[test]

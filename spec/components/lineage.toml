@@ -184,9 +184,11 @@ type = "text"
 attribute = "data-nd-fit-label"
 doc = "The name of the control that puts the whole scene back on the screen. `0` does the same, and it is the way out of any camera position a reader has got lost in."
 
+# NO ATTRIBUTE, BECAUSE NO BODY WRITES ONE. The words below reach the DOM as
+# a control's name or as its text, which is why the component works and why
+# nothing reported the declaration. `attribute` is a claim about the markup.
 [prop.elided_label]
 type = "text"
-attribute = "data-nd-elided-label"
 doc = "The name of a cut marker, with a `{count}` hole. `isolate` leaves one marker where each removed group was, carrying how many figures are behind it. This is what a screen reader reads over that number."
 
 [prop.matches_label]
@@ -200,7 +202,11 @@ doc = "`LineageFigure`s, for the pieces whose content is more than a name. A fig
 
 [state.picked]
 attribute = "data-nd-picked"
-doc = "Set on a connection or a figure a reader has singled out. **Stamped by the runtime**, while the picking itself is not: a pick is a real checkbox, so `:checked` draws the connection heavier with nothing running."
+# AND A PICKED FIGURE IS DRAWN NOW. Every `:checked` rule in the stylesheet
+# targeted a bond and `data-nd-picked` appeared in no rule at all, so picking a
+# figure checked a box, posted a value and changed nothing a reader could see —
+# under this sentence and under `[keyboard] "Space"`.
+doc = "Set on a connection or a figure a reader has singled out. **Stamped by the runtime**, while the picking itself is not: a pick is a real checkbox, so `:checked` draws it with nothing running."
 
 [state.match]
 attribute = "data-nd-match"

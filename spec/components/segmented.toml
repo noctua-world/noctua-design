@@ -76,6 +76,12 @@ type = "enum"
 values = ["hug", "equal", "stretch"]
 default = "hug"
 attribute = "data-nd-fill"
+# A STILL PICTURE CANNOT SHOW THIS, and `ToolbarGroup.align` records the same
+# reason: a variant stage shrink-wraps its specimen, so a control that takes
+# the whole container looks exactly like one that gives every item the width of
+# the widest. `equal` and `stretch` drew the same picture, and a grid that says
+# a prop does nothing is worse than no grid.
+variants = false
 doc = "`hug` lets each item be as wide as its label. `equal` gives every item the width of the widest, so the group does not re-flow when one word is translated. `stretch` does that and takes the whole container."
 
 [prop.children]
@@ -85,10 +91,15 @@ doc = "The items."
 [a11y]
 role = "radiogroup"
 needs_name = true
+# ONE STOP, AND THE GROUP IS WHERE IT STARTS. This used to say the rendered `0`
+# sat on the chosen item, which is one stop for a group with an answer and none
+# at all for a group without one — and an item cannot see its siblings, so no
+# item can know which case it is in. The group carries it and the script moves
+# it onto a radio, so the count is one whether or not a script ever runs.
 notes = """
-One tab stop for the whole group: a roving `tabindex` puts `0` on the chosen
-item and `-1` on the rest, server-rendered. Selection follows focus, and every
-item carries `aria-checked`."""
+One tab stop for the whole group. The group carries it in the markup and the
+script moves it onto the chosen item, so a group with nothing chosen is
+reachable too. Selection follows focus, and every item carries `aria-checked`."""
 
 [prop.glass]
 type = "bool"

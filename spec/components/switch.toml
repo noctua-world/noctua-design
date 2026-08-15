@@ -27,7 +27,7 @@ summary = "Let users turn one setting on or off, with effect as soon as it is pr
 type = "text"
 required = true
 attribute = "data-nd-group"
-doc = "The name of the setting being switched. The script binds to it in the same way it binds to a `Segmented`, so one handler serves both."
+doc = "The name of the setting being switched. The script routes it as it routes a `Segmented`, and a name the settings model does not hold is marked on the control alone."
 
 [prop.label]
 type = "text"
@@ -62,7 +62,7 @@ type = "enum"
 values = ["small", "medium"]
 default = "medium"
 attribute = "data-nd-size"
-doc = "The size of the control's box. Both values clear WCAG 2.5.8's 24px minimum target."
+doc = "The size of the control's box, the track and the knob with it. Both values clear WCAG 2.5.8's 24px minimum target."
 
 [prop.disabled]
 type = "bool"

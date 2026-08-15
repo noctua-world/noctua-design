@@ -170,19 +170,19 @@ type = "text"
 attribute = "data-nd-export-label"
 doc = "The name of that menu. Wanted in practice by `export`."
 
+# NO ATTRIBUTE, BECAUSE NO BODY WRITES ONE. The words below reach the DOM as
+# a control's name or as its text, which is why the component works and why
+# nothing reported the declaration. `attribute` is a claim about the markup.
 [prop.csv_label]
 type = "text"
-attribute = "data-nd-csv-label"
 doc = "The name of the entry that downloads a `.csv`. The file opens in a spreadsheet and is named after the table."
 
 [prop.json_label]
 type = "text"
-attribute = "data-nd-json-label"
 doc = "The name of the entry that downloads a `.json`, keyed by each `TableColumn`'s `name`. For a reader who processes the table with code."
 
 [prop.print_label]
 type = "text"
-attribute = "data-nd-print-label"
 doc = "The name of the entry that prints. The print stylesheet drops the toolbar, unfolds the scroller so nothing is cut off, and repeats the heading row on each sheet."
 
 [prop.exported_label]
@@ -237,7 +237,11 @@ doc = "The `TableColumn` declarations first, then the `TableSection` bands. Colu
 
 [state.scrollable]
 attribute = "data-nd-scrollable"
-doc = """Set when the table is wider than its box. The script writes it from a measurement, and it turns the box into a `role="region"` a keyboard can reach. It is removed again when the table fits."""
+# SUBTRACTION ONLY, AND THIS USED TO SAY THE OPPOSITE. The `role="region"` and
+# the tab stop are server-rendered and the script only ever removes them, which
+# is the safe direction: a scrolling box nobody can reach by keyboard is a
+# defect, and a script that never runs must not be able to cause one.
+doc = """Set when the table is wider than its box. The `role="region"` and the tab stop are rendered, and the script takes them off a table that fits. An enhancement may remove a way in, never add one."""
 
 [state.sorted]
 attribute = "data-nd-sorted"
@@ -261,7 +265,7 @@ notes = "Every part writes its role in the markup, because the stacked layout ch
 "Home / End" = "Moves to the first or last cell of the row. With Ctrl, the first or last cell of the table."
 "Page Up / Page Down" = "Moves a screenful of rows up or down, staying in the same column."
 "Enter / Space" = "On a column heading, sorts by it: up, down, then back to document order. On a row, chooses it."
-"Shift + arrow keys" = "Extends the chosen rows, when `select` is `multiple`. Shift and a click does the same with a pointer."
-"Ctrl/Cmd + A" = "Chooses every row, when `select` is `multiple` and focus is inside the grid."
+"Shift + arrow keys" = "Extends the chosen rows, when `select` is `many`. Shift and a click does the same with a pointer."
+"Ctrl/Cmd + A" = "Chooses every row, when `select` is `many` and focus is inside the grid."
 "Ctrl/Cmd + C" = "Copies the chosen rows, or the visible rows when none are chosen, as tab-separated text, when `copy` is on."
 "Alt + Left / Alt + Right" = "On a resizable column's heading, makes it narrower or wider by one step. With Shift, by ten steps."

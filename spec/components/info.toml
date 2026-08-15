@@ -36,7 +36,7 @@ attribute = "data-nd-placement"
 # Where the NOTE opens, and a still picture has no open note in it. The
 # three values drew the same closed marker three times.
 variants = false
-doc = "Where the note opens. `auto` measures the room below and flips above when there is not enough. `start` and `end` pin the note's leading or trailing edge to the control, for a marker at the edge of a table."
+doc = "Where the note opens. `auto` measures the room, flipping above and hanging from whichever edge fits. `start` and `end` pin the note's leading or trailing edge whatever the room, for a marker at the edge of a table."
 
 [prop.children]
 type = "children"

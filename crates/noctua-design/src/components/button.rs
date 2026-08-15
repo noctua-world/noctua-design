@@ -405,6 +405,20 @@ pub fn Button(
             "aria-controls": controls,
             "aria-current": current.then_some("page"),
             disabled,
+            // A MENU BUTTON IS REVEALED, NEVER BUILT, which is
+            // `Dialog`'s and `Popover`'s arrangement and what
+            // `menu.toml` has always claimed: "neither the menu
+            // nor its button renders without a script". Only the
+            // menu was hidden. The button shipped visible,
+            // focusable and carrying `aria-haspopup="menu"` with
+            // `aria-expanded="false"` beside it — announced to a
+            // screen reader as a menu button that nothing in the
+            // page could open. `dist/menu.js` reveals it, and
+            // only once it has found the menu it names.
+            //
+            // A false bool is omitted, so every other button is
+            // untouched.
+            hidden: menu,
             {content}
         }
     }

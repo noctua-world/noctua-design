@@ -26,6 +26,19 @@ summary = "Group controls into one bar that is a single tab stop, walked with th
 # does anyway. That is the arrangement the ARIA practices describe, and it is
 # the reason the two components share one implementation of roving focus rather
 # than having one each that disagree at the boundary.
+#
+# WHY THIS CONTRACT WAS CORRECTED RATHER THAN THE MARKUP.
+#
+# It used to state, as a fact about what is emitted, that exactly one control
+# carries `tabindex="0"` and the rest carry `-1`. Nothing emitted any of it.
+# `SegmentedItem` renders its own roving stop because `selected` tells it which
+# one it is, and a toolbar has no such answer available: it receives arbitrary
+# controls as opaque children, so neither body can reach one to write on it, in
+# either language. The choices were a prop repeated on every control in every
+# bar, or saying what is true. `role="toolbar"` does not require a roving stop
+# — the ARIA practices recommend one — and with no script every control is
+# reachable in source order, which is the correct degradation and not a trap.
+# So the sentence now describes the two states the markup really has.
 
 [prop.label]
 type = "text"
@@ -65,9 +78,9 @@ doc = "The groups of controls."
 role = "toolbar"
 needs_name = true
 notes = """
-One tab stop for the whole bar, walked with the arrow keys. Exactly one control
-inside carries `tabindex="0"` and the rest carry `-1`, so returning to the bar
-lands where users left off."""
+One tab stop for the whole bar, walked with the arrow keys, once the script has
+placed the roving `tabindex`. A bar takes its controls as children and cannot
+write on them, so with no script each control is its own tab stop."""
 
 [prop.glass]
 type = "bool"
@@ -76,7 +89,7 @@ attribute = "data-nd-glass"
 doc = "Frosts the bar. Use it for a bar that scrolls over the content it controls, which is what shows through."
 
 [keyboard]
-Tab = "Moves into the bar once, at the control last used, rather than stopping on each control."
+Tab = "Moves into the bar at the control last used, once a script places the roving stop. Otherwise it stops on each one."
 "Arrow keys" = "Moves to the next or previous control, choosing it if it is a radio. Left and Right, or Up and Down when vertical."
 Home = "Moves to the first control."
 End = "Moves to the last control."

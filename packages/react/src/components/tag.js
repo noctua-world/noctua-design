@@ -16,7 +16,6 @@ import { Swatch } from "./swatch.js";
 
 import { Icon } from "./icon.js";
 export function Tag({ label, value, href, pressed, tone, variant, size, shape, icon, swatch, image, removeLabel, removeName, disabled, glass, className, ...rest }) {
-  const tone_ = tone ?? "neutral";
   const variant_ = variant ?? "soft";
   const size_ = size ?? "medium";
   const shape_ = shape ?? "pill";

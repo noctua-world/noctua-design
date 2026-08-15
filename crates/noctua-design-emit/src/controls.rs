@@ -67,6 +67,7 @@ pub fn is_custom(component: &Component) -> bool {
             | "SearchGroup"
             | "SearchResult"
             | "CodeBlock"
+            | "List"
             | "ListItem"
             | "Blockquote"
             | "Del"
@@ -145,6 +146,7 @@ pub fn dioxus_body(out: &mut String, component: &Component) {
         "SearchGroup" => out.push_str(SEARCH_GROUP_DIOXUS),
         "SearchResult" => out.push_str(SEARCH_RESULT_DIOXUS),
         "CodeBlock" => out.push_str(CODE_BLOCK_DIOXUS),
+        "List" => list_dioxus(out),
         "ListItem" => list_item_dioxus(out),
         "Blockquote" => blockquote_dioxus(out),
         "Del" => edit_dioxus(out, "del", "nd-del"),
@@ -221,6 +223,7 @@ pub fn react_body(out: &mut String, component: &Component) {
         "SearchGroup" => out.push_str(SEARCH_GROUP_REACT),
         "SearchResult" => out.push_str(SEARCH_RESULT_REACT),
         "CodeBlock" => out.push_str(CODE_BLOCK_REACT),
+        "List" => list_react(out),
         "ListItem" => list_item_react(out),
         "Blockquote" => blockquote_react(out),
         "Del" => edit_react(out, "del", "nd-del"),
@@ -455,6 +458,20 @@ fn button_dioxus_elements(out: &mut String) {
          \x20           \"aria-controls\": controls,\n\
          \x20           \"aria-current\": current.then_some(\"page\"),\n\
          \x20           disabled,\n\
+         \x20           // A MENU BUTTON IS REVEALED, NEVER BUILT, which is\n\
+         \x20           // `Dialog`'s and `Popover`'s arrangement and what\n\
+         \x20           // `menu.toml` has always claimed: \"neither the menu\n\
+         \x20           // nor its button renders without a script\". Only the\n\
+         \x20           // menu was hidden. The button shipped visible,\n\
+         \x20           // focusable and carrying `aria-haspopup=\"menu\"` with\n\
+         \x20           // `aria-expanded=\"false\"` beside it — announced to a\n\
+         \x20           // screen reader as a menu button that nothing in the\n\
+         \x20           // page could open. `dist/menu.js` reveals it, and\n\
+         \x20           // only once it has found the menu it names.\n\
+         \x20           //\n\
+         \x20           // A false bool is omitted, so every other button is\n\
+         \x20           // untouched.\n\
+         \x20           hidden: menu,\n\
          \x20           {content}\n\
          \x20       }\n\
          \x20   }\n",
@@ -553,6 +570,11 @@ fn button_react(out: &mut String) {
          \x20     value,\n\
          \x20     \"aria-pressed\": pressed ? \"true\" : undefined,\n\
          \x20     disabled: disabled || undefined,\n\
+         \x20     // See the Dioxus half: a menu button is revealed by\n\
+         \x20     // `dist/menu.js`, never built, because a control announcing\n\
+         \x20     // `aria-haspopup=\"menu\"` over nothing that can open is worse\n\
+         \x20     // than no control at all.\n\
+         \x20     hidden: menu || undefined,\n\
          \x20   },\n\
          \x20   content,\n\
          \x20 );\n",
@@ -605,11 +627,93 @@ fn swatch_react(out: &mut String) {
 
 // --- ListItem ---------------------------------------------------------------
 
+/// The three list elements, each restating the role it is about to lose.
+///
+/// # Why a role is written on an element that already has one
+///
+/// An engine computes a list's role from the layout object, so a `<ul>` that is
+/// `display: flex` is not a list any more, and neither is one whose
+/// `list-style` is `none`. This stylesheet does both — every list is a flex
+/// column and `marker: none` takes the marker off — so a reader was told
+/// "three items" by the markup and nothing by the browser. The contract has
+/// always said the role is restated; this is the line that restates it.
+///
+/// A `<dl>` is left alone. `list` is the role of a `<ul>` and an `<ol>`, and a
+/// description list is a different structure with a different mapping.
+/// `ListItem` restates `listitem` on the `<li>` for the same reason, because a
+/// list whose items lost their role announces a length of zero.
+fn list_dioxus(out: &mut String) {
+    out.push_str(
+        "    let root = format!(\"nd-list {class}\");\n\
+         \x20   let root = root.trim().to_owned();\n\
+         \n\
+         \x20   // One arm per value: `rsx!` takes a literal element name, and\n\
+         \x20   // this prop chooses the element rather than an attribute.\n\
+         \x20   rsx! {\n\
+         \x20       match kind {\n\
+         \x20           ListKind::Unordered => rsx! {\n\
+         \x20               ul {\n\
+         \x20                   class: \"{root}\",\n\
+         \x20                   role: \"list\",\n\
+         \x20                   \"data-nd-marker\": marker.as_str(),\n\
+         \x20                   \"data-nd-spacing\": spacing.as_str(),\n\
+         \x20                   {children}\n\
+         \x20               }\n\
+         \x20           },\n\
+         \x20           ListKind::Ordered => rsx! {\n\
+         \x20               ol {\n\
+         \x20                   class: \"{root}\",\n\
+         \x20                   role: \"list\",\n\
+         \x20                   \"data-nd-marker\": marker.as_str(),\n\
+         \x20                   \"data-nd-spacing\": spacing.as_str(),\n\
+         \x20                   {children}\n\
+         \x20               }\n\
+         \x20           },\n\
+         \x20           // A description list keeps the element's own mapping.\n\
+         \x20           ListKind::Description => rsx! {\n\
+         \x20               dl {\n\
+         \x20                   class: \"{root}\",\n\
+         \x20                   \"data-nd-marker\": marker.as_str(),\n\
+         \x20                   \"data-nd-spacing\": spacing.as_str(),\n\
+         \x20                   {children}\n\
+         \x20               }\n\
+         \x20           },\n\
+         \x20       }\n\
+         \x20   }\n",
+    );
+}
+
+fn list_react(out: &mut String) {
+    out.push_str(
+        "  const kind_ = kind ?? \"unordered\";\n\
+         \x20 const root = [\"nd-list\", className].filter(Boolean).join(\" \");\n\
+         \x20 // This prop chooses the element rather than an attribute.\n\
+         \x20 const element = { unordered: \"ul\", ordered: \"ol\", description: \"dl\" }[kind_] ?? \"ul\";\n\
+         \x20 return h(\n\
+         \x20   element,\n\
+         \x20   {\n\
+         \x20     className: root,\n\
+         \x20     // See the Dioxus half: flex and `list-style: none` each take\n\
+         \x20     // the role away, and a `<dl>` never had this one.\n\
+         \x20     role: element === \"dl\" ? undefined : \"list\",\n\
+         \x20     \"data-nd-marker\": marker ?? \"default\",\n\
+         \x20     \"data-nd-spacing\": spacing ?? \"default\",\n\
+         \x20     ...rest,\n\
+         \x20   },\n\
+         \x20   children,\n\
+         \x20 );\n",
+    );
+}
+
 /// One item, or one term and its description.
 ///
 /// Two sibling elements rather than a wrapper, because a `<dt>` and its `<dd>`
 /// have to be direct children of the `<dl>`: anything between them breaks the
 /// association a screen reader reads.
+///
+/// The `<li>` restates `listitem`, because the rules that take a list's role
+/// away take its items' role with it. A `<dd>` is left alone: it is not a
+/// `listitem` and never was.
 fn list_item_dioxus(out: &mut String) {
     out.push_str(
         "    let root = format!(\"nd-list-item {class}\");\n\
@@ -620,7 +724,7 @@ fn list_item_dioxus(out: &mut String) {
          \x20           dt { class: \"nd-list-term\", \"{term}\" }\n\
          \x20           dd { class: \"{root}\", {children} }\n\
          \x20       } else {\n\
-         \x20           li { class: \"{root}\", {children} }\n\
+         \x20           li { class: \"{root}\", role: \"listitem\", {children} }\n\
          \x20       }\n\
          \x20   }\n",
     );
@@ -638,7 +742,9 @@ fn list_item_react(out: &mut String) {
          \x20     h(\"dd\", { key: \"d\", className: root, ...rest }, children),\n\
          \x20   );\n\
          \x20 }\n\
-         \x20 return h(\"li\", { className: root, ...rest }, children);\n",
+         \x20 // See the Dioxus half: the role is restated, because the rules\n\
+         \x20 // that take the list's role away take its items' with it.\n\
+         \x20 return h(\"li\", { className: root, role: \"listitem\", ...rest }, children);\n",
     );
 }
 
@@ -895,6 +1001,21 @@ fn switch_react(out: &mut String) {
 /// one stop with the script blocked, and it does not become forty-two if the
 /// script never runs at all.
 ///
+/// # Why the rendered stop is on the GROUP and not on the chosen item
+///
+/// It was on the item — `tabindex="0"` when `selected` and `-1` otherwise — and
+/// that is one stop for a group with an answer and **zero** for a group without
+/// one. A radiogroup nothing has chosen yet was unreachable by keyboard with
+/// the script blocked, which is the opposite of what this contract promises,
+/// and the first `SegmentedItem` example on the site was exactly that shape.
+///
+/// An item cannot fix it, because an item cannot see its siblings: whether the
+/// group has an answer is a fact about the group, and no amount of rendering
+/// order lets the first item know that the fourth is chosen. So the group
+/// carries the stop, unconditionally, and `shell.js` takes it away the moment
+/// it has placed a real one on a radio. One stop either way, and the count
+/// never depends on whether a script ran.
+///
 /// # What lives here and what lives in the site's script
 ///
 /// This package ships no runtime. The component owes the role, the state on
@@ -920,6 +1041,11 @@ fn segmented_dioxus(out: &mut String) {
          \x20           // Announced as well as drawn: a reader needs to know which\n\
          \x20           // arrows move before pressing one.\n\
          \x20           \"aria-orientation\": orientation.as_str(),\n\
+         \x20           // ONE TAB STOP, AND THE GROUP IS WHAT HOLDS IT UNTIL A\n\
+         \x20           // SCRIPT MOVES IT. See the emitter note above for why\n\
+         \x20           // it cannot be an item: an item cannot see its siblings,\n\
+         \x20           // so no item can know whether the group has an answer.\n\
+         \x20           tabindex: \"0\",\n\
          \x20           // One or the other names the group. A radiogroup with\n\
          \x20           // neither announces its role and nothing else.\n\
          \x20           \"aria-label\": label,\n\
@@ -951,6 +1077,9 @@ fn segmented_react(out: &mut String) {
          \x20     \"data-nd-shape\": shape_,\n\
          \x20     \"data-nd-fill\": fill_,\n\
          \x20     \"aria-orientation\": orientation_,\n\
+         \x20     // See the Dioxus half: the group holds the one stop until a\n\
+         \x20     // script places it on a radio.\n\
+         \x20     tabIndex: 0,\n\
          \x20     \"aria-label\": label,\n\
          \x20     \"aria-labelledby\": labelledby,\n\
          \x20     ...rest,\n\
@@ -986,9 +1115,15 @@ fn segmented_item_dioxus(out: &mut String) {
          \x20           \"aria-checked\": if selected { \"true\" } else { \"false\" },\n\
          \x20           \"aria-disabled\": if disabled { \"true\" } else { \"false\" },\n\
          \x20           \"data-nd-hide-label\": if hide_label { \"true\" } else { \"false\" },\n\
-         \x20           // The roving tab stop, RENDERED: one stop for the group\n\
-         \x20           // before any script runs, and still one if none ever does.\n\
-         \x20           tabindex: if selected { \"0\" } else { \"-1\" },\n\
+         \x20           // NEVER A STOP OF ITS OWN BEFORE A SCRIPT RUNS. This used\n\
+         \x20           // to rove on the item, which is one stop for a group\n\
+         \x20           // that has an answer and ZERO for one that\n\
+         \x20           // does not — a radiogroup no keyboard could reach at all\n\
+         \x20           // with the script blocked, under a contract promising one\n\
+         \x20           // stop, server-rendered. The group carries it instead,\n\
+         \x20           // because the group is the only element that can see\n\
+         \x20           // whether anything inside it is chosen.\n\
+         \x20           tabindex: \"-1\",\n\
          \x20           // The one thing an icon cannot be, and the label still names\n\
          \x20           // the item: a colour.\n\
          \x20           {children}\n\
@@ -1033,7 +1168,9 @@ fn segmented_item_react(out: &mut String) {
          \x20     \"aria-checked\": String(selected_),\n\
          \x20     \"aria-disabled\": String(disabled_),\n\
          \x20     \"data-nd-hide-label\": String(hideLabel_),\n\
-         \x20     tabIndex: selected_ ? 0 : -1,\n\
+         \x20     // See the Dioxus half: the group holds the stop until `roving`\n\
+         \x20     // moves it onto a radio.\n\
+         \x20     tabIndex: -1,\n\
          \x20     ...rest,\n\
          \x20   },\n\
          \x20   children,\n\
@@ -1096,8 +1233,17 @@ fn disclosure_dioxus(out: &mut String) {
          \x20                       DisclosureHeading::H4 => rsx! { h4 { class: \"nd-disclosure-text\", \"{summary}\" } },\n\
          \x20                       DisclosureHeading::None => rsx! { span { class: \"nd-disclosure-text\", \"{summary}\" } },\n\
          \x20                   }\n\
+         \x20                   // NAMED, BECAUSE THE RULE THAT TURNS IT USED TO\n\
+         \x20                   // ASK FOR THE LAST GLYPH. In the icon-only form\n\
+         \x20                   // the caller\'s own icon is the last glyph, so\n\
+         \x20                   // opening a `Disclosure { icon: \"settings\" }`\n\
+         \x20                   // turned the gear upside down.\n\
          \x20                   if marker {\n\
-         \x20                       Icon { icon: IconName::ChevronDown, size: crate::components::IconSize::Small }\n\
+         \x20                       Icon {\n\
+         \x20                           icon: IconName::ChevronDown,\n\
+         \x20                           size: crate::components::IconSize::Small,\n\
+         \x20                           class: \"nd-disclosure-marker\",\n\
+         \x20                       }\n\
          \x20                   }\n\
          \x20               }\n\
          \x20           }\n\
@@ -1110,10 +1256,11 @@ fn disclosure_dioxus(out: &mut String) {
 fn disclosure_react(out: &mut String) {
     out.push_str(
         "  const marker_ = marker ?? true;\n\
+         \x20 const heading_ = heading ?? \"none\";\n\
          \x20 // The summary's own tag: a real heading when this disclosure is a\n\
          \x20 // section of the page, because folded away its title is all that is\n\
          \x20 // left and a `<span>` leaves the section out of the outline.\n\
-         \x20 const tag_ = heading && heading !== \"none\" ? heading : \"span\";\n\
+         \x20 const tag_ = heading_ === \"none\" ? \"span\" : heading_;\n\
          \x20 const root = [\"nd-disclosure\", className].filter(Boolean).join(\" \");\n\
          \x20 return h(\n\
          \x20   \"details\",\n\
@@ -1135,7 +1282,16 @@ fn disclosure_react(out: &mut String) {
          \x20       ? h(Icon, { icon })\n\
          \x20       : [\n\
          \x20           h(tag_, { key: \"t\", className: \"nd-disclosure-text\" }, summary),\n\
-         \x20           marker_ ? h(Icon, { key: \"m\", icon: \"chevron-down\", size: \"small\" }) : null,\n\
+         \x20           // See the Dioxus half: named, because the rule that turns\n\
+         \x20           // it used to ask for the last glyph in the summary.\n\
+         \x20           marker_\n\
+         \x20             ? h(Icon, {\n\
+         \x20                 key: \"m\",\n\
+         \x20                 icon: \"chevron-down\",\n\
+         \x20                 size: \"small\",\n\
+         \x20                 className: \"nd-disclosure-marker\",\n\
+         \x20               })\n\
+         \x20             : null,\n\
          \x20         ],\n\
          \x20   ),\n\
          \x20   children,\n\
@@ -1582,7 +1738,6 @@ const SELECT_DIOXUS: &str = r#"    let root = format!("nd-select {class}");
             "data-nd-empty-label": empty_label,
             "data-nd-loading-label": loading_label,
             "data-nd-create-label": create_label,
-            "data-nd-clear-label": clear_label,
             "data-nd-selected-label": selected_label,
             // The control and the mark over it, in a box of their own: the
             // chevron is positioned against THIS rather than against the field,
@@ -1691,7 +1846,6 @@ const SELECT_REACT: &str = r#"  const size_ = size ?? "medium";
       "data-nd-empty-label": emptyLabel,
       "data-nd-loading-label": loadingLabel,
       "data-nd-create-label": createLabel,
-      "data-nd-clear-label": clearLabel,
       "data-nd-selected-label": selectedLabel,
     },
 
@@ -2141,6 +2295,11 @@ const TABLE_REACT: &str = r#"  const density_ = density ?? "default";
   const width_ = width ?? "full";
   const layout_ = layout ?? "auto";
   const height_ = height ?? "auto";
+  // `export` IS A KEYWORD, so the generator binds this prop to `_export` — see
+  // `props.rs`. The prop a caller writes is still `export`; only the local
+  // identifier moved, and this is it under the spelling the rest of the file
+  // uses for a resolved value.
+  const export_ = _export ?? false;
   const root = ["nd-table", className].filter(Boolean).join(" ");
   const captionId = `nd-table-${name}-caption`;
   const noteId = `nd-table-${name}-note`;
@@ -2297,7 +2456,7 @@ const TABLE_REACT: &str = r#"  const density_ = density ?? "default";
           "data-nd-height": height_,
           "data-nd-caption-hidden": String(hideCaption ?? false),
           "data-nd-copy": String(copy ?? false),
-          "data-nd-export": String(export_ ?? false),
+          "data-nd-export": String(export_),
           "data-nd-search-label": searchLabel,
           "data-nd-search-placeholder": searchPlaceholder,
           "data-nd-export-label": exportLabel,
@@ -2479,6 +2638,11 @@ const TABLE_ROW_DIOXUS: &str = r#"    let root = format!("nd-table-row {class}")
             "data-nd-selected": if selected { "true" } else { "false" },
             "data-nd-disabled": if disabled { "true" } else { "false" },
             "data-nd-detail-for": detail_for,
+            // AND IT IS READ. `table.js` asks the table whether any row opens
+            // — which is half of what makes the table a `role="grid"` — with
+            // `[data-nd-expandable='true']`, and nothing wrote it. Every table
+            // of expandable rows on the site was a plain table.
+            "data-nd-expandable": if expandable { "true" } else { "false" },
             "data-nd-empty": if empty { "true" } else { "false" },
             // THE CHOICE CELL, which is a `<td>` in the body and a `<th>` in
             // the head. The row cannot see which section it is in, so the value
@@ -2566,6 +2730,8 @@ const TABLE_ROW_REACT: &str = r#"  const tone_ = tone ?? "default";
       "data-nd-selected": String(selected ?? false),
       "data-nd-disabled": String(disabled ?? false),
       "data-nd-detail-for": detailFor,
+      // See the Dioxus half: `table.js` reads this to derive `role="grid"`.
+      "data-nd-expandable": String(expandable ?? false),
       "data-nd-empty": String(empty ?? false),
       ...rest,
     },
@@ -2699,13 +2865,34 @@ const TABLE_CELL_REACT: &str = r#"  const align_ = align ?? "start";
 /// and answers no key. The filter box and the resize handle are added by the
 /// script, because a control that cannot work without one should not be in the
 /// markup claiming it can.
+///
+/// # Why `aria-sort` is absent rather than `"none"`
+///
+/// `aria-sort` describes a column a reader can sort by. Written on every
+/// heading it says that of the record names down the leading edge as well —
+/// 403 of them on one page for 13 sortable columns, 214 on `scope="row"`
+/// headings that name a record and can never be sorted by. Sortability is
+/// declared on the `TableColumn`, which this component cannot see, so the
+/// server writes the attribute for the one case it does know: a heading the
+/// caller stated a direction on, which is a column somebody sorted. The
+/// runtime adds `aria-sort="none"` to the rest as it draws each sort control,
+/// so the attribute and the control arrive together.
 const TABLE_HEADER_CELL_DIOXUS: &str = r#"    let root = format!("nd-table-header-cell {class}");
     let root = root.trim().to_owned();
+    // A DIRECTION, OR NOTHING. `None` here means "say nothing", not
+    // `aria-sort="none"` — see the emitter's note above.
     let sorted = match sort {
-        TableHeaderCellSort::None => "none",
-        TableHeaderCellSort::Ascending => "ascending",
-        TableHeaderCellSort::Descending => "descending",
+        TableHeaderCellSort::None => None,
+        TableHeaderCellSort::Ascending => Some("ascending"),
+        TableHeaderCellSort::Descending => Some("descending"),
     };
+    // A heading that names a record or a band of rows is not a column, so no
+    // direction it was given can be true of it.
+    let row_scope = matches!(
+        scope,
+        TableHeaderCellScope::Row | TableHeaderCellScope::Rowgroup
+    );
+    let sorted = if row_scope { None } else { sorted };
 
     rsx! {
         th {
@@ -2730,8 +2917,16 @@ const TABLE_HEADER_CELL_DIOXUS: &str = r#"    let root = format!("nd-table-heade
 
 const TABLE_HEADER_CELL_REACT: &str = r#"  const scope_ = scope ?? "col";
   const align_ = align ?? "start";
-  const wrap_ = wrap ?? "wrap";
+  // `nowrap`, THE OPPOSITE OF A CELL'S DEFAULT, which is the whole point of the
+  // prop's doc: the head stays one line tall. This said `wrap`, so every column
+  // heading in a React table wrapped where a Dioxus one did not.
+  const wrap_ = wrap ?? "nowrap";
+  // See the Dioxus half: a direction, or nothing. `undefined` is how React
+  // leaves an attribute off, and `aria-sort="none"` on a heading nobody can
+  // sort by announces a control that is not there.
   const sort_ = sort ?? "none";
+  const sorted =
+    scope_ === "row" || scope_ === "rowgroup" || sort_ === "none" ? undefined : sort_;
   const root = ["nd-table-header-cell", className].filter(Boolean).join(" ");
   return h(
     "th",
@@ -2742,7 +2937,7 @@ const TABLE_HEADER_CELL_REACT: &str = r#"  const scope_ = scope ?? "col";
       scope: scope_,
       colSpan: span,
       rowSpan: rows,
-      "aria-sort": sort_,
+      "aria-sort": sorted,
       "data-nd-column": column,
       "data-nd-align": align_,
       "data-nd-tone": tone,
@@ -3752,9 +3947,9 @@ pub fn react_imports(component: &Component) -> String {
         // Everything whose body draws an icon and nothing else. The Dioxus half
         // splits these across several arms because `IconName` and `IconSize`
         // are imported unevenly there; in JavaScript an icon is an icon.
-        "Button" | "Link" | "SegmentedItem" | "Disclosure" | "Select" | "Search"
-        | "SearchResult" | "Avatar" | "DateInput" | "Carousel" | "Info" | "MenuItem"
-        | "MessageBar" | "Tab" | "Dialog" | "Popover" | "Toast" => REACT_ICON.to_owned(),
+        "Button" | "Link" | "SegmentedItem" | "Disclosure" | "Search" | "SearchResult"
+        | "Avatar" | "Carousel" | "Info" | "MenuItem" | "MessageBar" | "Tab" | "Dialog"
+        | "Popover" | "Toast" => REACT_ICON.to_owned(),
         // The chip is a `Swatch` and the remove control is a `Button`; see the
         // Dioxus half.
         "Tag" => concat!(
@@ -3795,7 +3990,14 @@ pub fn react_imports(component: &Component) -> String {
         .to_owned(),
         // The same arrangement in the other language — see the Dioxus halves.
         // The same two groupings as the Dioxus half, and for its reasons.
-        "Input" | "NumberInput" => concat!(
+        //
+        // `DateInput` AND `Select` ARE HERE BECAUSE THEIR BODIES RENDER A
+        // `Field`, and both were one arm up with the icon-only components — so
+        // `date_input.js` and `select.js` shipped `h(Field, …)` with no `Field`
+        // in scope and threw on first render. Found by the guard in `props.rs`
+        // that asks what each body names, rather than by the older one that
+        // asks about a fixed list of six names.
+        "Input" | "NumberInput" | "DateInput" | "Select" => concat!(
             "import { Field } from \"./field.js\";\n",
             "\n",
             "import { Icon } from \"./icon.js\";\n"
@@ -3866,46 +4068,59 @@ pub fn react_imports(component: &Component) -> String {
     }
 }
 
+/// Every component whose `icon`-shaped props are a drawing rather than a word.
+///
+/// A LIST RATHER THAN THREE LISTS. The Rust type, the TypeScript type and the
+/// `.d.ts` import all have to name the same set, and they were three separate
+/// match arms with the same contents — which is how `MessageBar` came to be the
+/// one component whose `icon` crossed as an unparsed string. Dioxus ran it
+/// through `IconName::parse` and rendered nothing for a name nothing declares;
+/// React handed the string to `Icon`, which throws. One list, so a component
+/// cannot be in two of the three.
+const TYPED_ICONS: [&str; 11] = [
+    "Button",
+    "SegmentedItem",
+    "Disclosure",
+    "SelectOption",
+    "Tag",
+    "Avatar",
+    "TreeItem",
+    "Input",
+    "Icon",
+    "Tab",
+    "MessageBar",
+];
+
+/// Whether this prop of this component is one of those drawings.
+fn typed_icon(component: &Component, prop: &str) -> bool {
+    TYPED_ICONS.contains(&component.meta.name.as_str())
+        && matches!(prop, "icon" | "icon_end" | "icon_alt" | "icon_expanded")
+}
+
 /// The Rust type a `text` prop takes, when it is not a `String`.
 ///
 /// `icon` is an `IconName`, which is the whole reason a name that is not an
 /// icon does not compile.
 #[must_use]
 pub fn dioxus_type(component: &Component, prop: &str) -> Option<&'static str> {
-    match (component.meta.name.as_str(), prop) {
-        // `Option<IconName>` where the prop is optional: the generator wraps
-        // whatever this returns.
-        (
-            "Button" | "SegmentedItem" | "Disclosure" | "SelectOption" | "Tag" | "Avatar"
-            | "TreeItem" | "Input" | "Icon" | "Tab",
-            "icon" | "icon_end" | "icon_alt" | "icon_expanded",
-        ) => Some("IconName"),
-        _ => None,
-    }
+    // `Option<IconName>` where the prop is optional: the generator wraps
+    // whatever this returns.
+    typed_icon(component, prop).then_some("IconName")
 }
 
 /// The same, for the TypeScript declaration.
 #[must_use]
 pub fn typescript_type(component: &Component, prop: &str) -> Option<&'static str> {
-    match (component.meta.name.as_str(), prop) {
-        (
-            "Button" | "SegmentedItem" | "Disclosure" | "SelectOption" | "Tag" | "Avatar"
-            | "TreeItem" | "Input" | "Icon" | "Tab",
-            "icon" | "icon_end" | "icon_alt" | "icon_expanded",
-        ) => Some("IconName"),
-        _ => None,
-    }
+    typed_icon(component, prop).then_some("IconName")
 }
 
 /// Extra imports a `.d.ts` needs.
 #[must_use]
 pub fn typescript_imports(component: &Component) -> String {
-    match component.meta.name.as_str() {
-        "Button" | "SegmentedItem" | "Disclosure" | "SelectOption" | "Tag" | "Avatar"
-        | "TreeItem" | "Input" | "Icon" | "Tab" => {
-            "import type { IconName } from \"@noctua-world/design-tokens/icons.js\";\n".to_owned()
-        }
-        _ => String::new(),
+    if TYPED_ICONS.contains(&component.meta.name.as_str()) {
+        "import type { IconName } from \"@noctua-world/design-tokens/icons.js\";\n".to_owned()
+    } else {
+        String::new()
     }
 }
 
@@ -4020,8 +4235,7 @@ const TAG_DIOXUS: &str = r#"    let root = format!("nd-tag {class}");
 "#;
 
 /// The same tag, in React.
-const TAG_REACT: &str = r#"  const tone_ = tone ?? "neutral";
-  const variant_ = variant ?? "soft";
+const TAG_REACT: &str = r#"  const variant_ = variant ?? "soft";
   const size_ = size ?? "medium";
   const shape_ = shape ?? "pill";
   const root = ["nd-tag", className].filter(Boolean).join(" ");
@@ -4166,8 +4380,7 @@ const BADGE_DIOXUS: &str = r#"    let root = format!("nd-badge {class}");
 "#;
 
 /// The same badge, in React.
-const BADGE_REACT: &str = r#"  const tone_ = tone ?? "danger";
-  const placement_ = placement ?? "top-end";
+const BADGE_REACT: &str = r#"  const placement_ = placement ?? "top-end";
   const overlap_ = overlap ?? "rectangle";
   const dot_ = dot ?? false;
   const root = ["nd-badge", className].filter(Boolean).join(" ");
@@ -4822,12 +5035,22 @@ const FIELD_DIOXUS: &str = r#"    let root = format!("nd-field {class}");
                 id: "{error_id}",
                 role: "alert",
                 "data-nd-field-error": "",
-                if error.is_some() {
-                    if let Some(error_label) = error_label {
-                        span { class: "nd-visually-hidden", "{error_label} " }
-                    }
+                // THE WORD IS ALWAYS THERE, AND IT USED TO ARRIVE ONLY WITH A
+                // CALLER'S OWN SENTENCE. The case this slot exists for is the
+                // other one: `error_slot` with no `error`, where a script puts
+                // the browser's own complaint here. That case never got its
+                // prefix, and `Select { required }` always takes it.
+                if let Some(error_label) = error_label {
+                    span { class: "nd-visually-hidden", "{error_label} " }
                 }
-                if let Some(error) = error { "{error}" }
+                // AND THE SENTENCE HAS AN ELEMENT OF ITS OWN, so a script can
+                // replace what it says without deleting the word in front of
+                // it. `messages.js` is the only thing that finds it, and the
+                // stylesheet asks this element whether the slot has anything
+                // to show.
+                span { "data-nd-field-message": "",
+                    if let Some(error) = error { "{error}" }
+                }
             }
         }
         {children}
@@ -4929,10 +5152,12 @@ const FIELD_REACT: &str = r#"  const kind_ = kind ?? "single";
             role: "alert",
             "data-nd-field-error": "",
           },
-          error && errorLabel
+          // See the Dioxus half: the word is always there, and the sentence
+          // has an element of its own so a script can replace it alone.
+          errorLabel
             ? h("span", { key: "w", className: "nd-visually-hidden" }, `${errorLabel} `)
             : null,
-          error ?? null,
+          h("span", { key: "m", "data-nd-field-message": "" }, error ?? null),
         )
       : null,
     children,
@@ -5372,9 +5597,15 @@ const COLOR_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
   const formats_ = formats ?? "hex rgb hsl oklch";
   const root = ["nd-color-picker", className].filter(Boolean).join(" ");
   const id = `nd-color-picker-${name}`;
-  const labelId = `${id}-label`;
-  const hintId = `${id}-hint`;
-  const errorId = `${id}-error`;
+  // THE SQUARE IS WHAT THE QUESTION NAMES — see the Dioxus half. It is a real
+  // `<button>`, so `Field` points a real `<label for>` at it, and the label,
+  // the hint and the error all derive from THAT id rather than from `id`:
+  // `Field` and `Label` build theirs from the control they were handed, so a
+  // description built from anything else points at nothing.
+  const control = `${id}-trigger`;
+  const labelId = `${control}-label`;
+  const hintId = `${control}-hint`;
+  const errorId = `${control}-error`;
   const panelId = `${id}-panel`;
   const entryId = `${id}-entry`;
   const described = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ");
@@ -5779,6 +6010,41 @@ const INPUT_DIOXUS: &str = r#"    let id = format!("nd-input-{name}");
     let box_class = box_class.trim().to_owned();
     let clear = clear_label.clone();
     let reveal = reveal_label.clone();
+    // WHAT THE COUNTER SAYS BEFORE ANY SCRIPT RUNS.
+    //
+    // The `<p>` shipped empty and `aria-describedby` pointed at it, so a box
+    // with `maxlength` stopped taking characters with nothing on the page
+    // saying why. That is the exact failure `counter`'s own doc exists to
+    // prevent, committed by the component the doc is about.
+    //
+    // `other` IS THE FORM RENDERED. Which form a count needs is a question
+    // about the reader's language — Portuguese and Polish do not agree with
+    // English or with each other — and a component that ships no runtime and
+    // is handed no locale cannot answer it. `other` is the one category every
+    // language has, and `inputs.js` writes the exact form as soon as it runs,
+    // with the region silenced first so nothing is said twice.
+    let counted = if counter {
+        let shape = counter_label.clone().unwrap_or_default();
+        let form = if shape.contains(':') {
+            shape
+                .split('|')
+                .filter_map(|part| part.split_once(':'))
+                .find(|(name, _)| name.trim() == "other")
+                .map_or(String::new(), |(_, text)| text.to_owned())
+        } else {
+            shape
+        };
+        let start = value
+            .as_deref()
+            .unwrap_or_default()
+            .chars()
+            .count()
+            .to_string();
+        form.replace("{count}", &start)
+            .replace("{max}", maxlength.as_deref().unwrap_or_default())
+    } else {
+        String::new()
+    };
 
     rsx! {
         Field {
@@ -5883,6 +6149,8 @@ const INPUT_DIOXUS: &str = r#"    let id = format!("nd-input-{name}");
                     role: "status",
                     "aria-live": "polite",
                     "data-nd-input-counter": "",
+                    // See above: the sentence, rendered rather than waited for.
+                    "{counted}"
                 }
             }
         }
@@ -5902,6 +6170,25 @@ const INPUT_REACT: &str = r#"  const kind_ = kind ?? "text";
     .join(" ");
   const password = kind_ === "password";
   const boxClass = ["nd-input", className].filter(Boolean).join(" ");
+  // See the Dioxus half: the counter says its sentence before any script runs,
+  // and `other` is the form a component handed no locale may choose.
+  let counted = "";
+  if (counter) {
+    const shape = String(counterLabel ?? "");
+    let form = shape;
+    if (shape.includes(":")) {
+      form = "";
+      for (const part of shape.split("|")) {
+        const at = part.indexOf(":");
+        if (at >= 0 && part.slice(0, at).trim() === "other") form = part.slice(at + 1);
+      }
+    }
+    counted = form
+      .split("{count}")
+      .join(String(String(value ?? "").length))
+      .split("{max}")
+      .join(String(maxlength ?? ""));
+  }
 
   return h(
     Field,
@@ -5997,14 +6284,18 @@ const INPUT_REACT: &str = r#"  const kind_ = kind ?? "text";
         : null,
     ),
     counter
-      ? h("p", {
-          key: "n",
-          className: "nd-input-counter",
-          id: counterId,
-          role: "status",
-          "aria-live": "polite",
-          "data-nd-input-counter": "",
-        })
+      ? h(
+          "p",
+          {
+            key: "n",
+            className: "nd-input-counter",
+            id: counterId,
+            role: "status",
+            "aria-live": "polite",
+            "data-nd-input-counter": "",
+          },
+          counted,
+        )
       : null,
   );
 "#;
@@ -6023,6 +6314,32 @@ const TEXTAREA_DIOXUS: &str = r#"    let id = format!("nd-textarea-{name}");
     let invalid = error.is_some().then_some("true");
     let box_class = format!("nd-textarea {class}");
     let box_class = box_class.trim().to_owned();
+    // See `INPUT_DIOXUS`: the sentence is rendered rather than waited for, and
+    // `other` is the form a component handed no locale may choose. Repeated
+    // rather than shared for the reason at the head of this section — one
+    // component cannot reach into another's markup to write on it.
+    let counted = if counter {
+        let shape = counter_label.clone().unwrap_or_default();
+        let form = if shape.contains(':') {
+            shape
+                .split('|')
+                .filter_map(|part| part.split_once(':'))
+                .find(|(name, _)| name.trim() == "other")
+                .map_or(String::new(), |(_, text)| text.to_owned())
+        } else {
+            shape
+        };
+        let start = value
+            .as_deref()
+            .unwrap_or_default()
+            .chars()
+            .count()
+            .to_string();
+        form.replace("{count}", &start)
+            .replace("{max}", maxlength.as_deref().unwrap_or_default())
+    } else {
+        String::new()
+    };
 
     rsx! {
         Field {
@@ -6076,6 +6393,8 @@ const TEXTAREA_DIOXUS: &str = r#"    let id = format!("nd-textarea-{name}");
                     role: "status",
                     "aria-live": "polite",
                     "data-nd-textarea-counter": "",
+                    // See above: the sentence, rendered rather than waited for.
+                    "{counted}"
                 }
             }
         }
@@ -6094,6 +6413,25 @@ const TEXTAREA_REACT: &str = r#"  const size_ = size ?? "medium";
     .filter(Boolean)
     .join(" ");
   const boxClass = ["nd-textarea", className].filter(Boolean).join(" ");
+  // See the Dioxus half, and `INPUT_REACT`: the sentence is rendered, and
+  // `other` is the form a component handed no locale may choose.
+  let counted = "";
+  if (counter) {
+    const shape = String(counterLabel ?? "");
+    let form = shape;
+    if (shape.includes(":")) {
+      form = "";
+      for (const part of shape.split("|")) {
+        const at = part.indexOf(":");
+        if (at >= 0 && part.slice(0, at).trim() === "other") form = part.slice(at + 1);
+      }
+    }
+    counted = form
+      .split("{count}")
+      .join(String(String(value ?? "").length))
+      .split("{max}")
+      .join(String(maxlength ?? ""));
+  }
 
   return h(
     Field,
@@ -6136,14 +6474,18 @@ const TEXTAREA_REACT: &str = r#"  const size_ = size ?? "medium";
       ...rest,
     }),
     counter
-      ? h("p", {
-          key: "n",
-          className: "nd-textarea-counter",
-          id: counterId,
-          role: "status",
-          "aria-live": "polite",
-          "data-nd-textarea-counter": "",
-        })
+      ? h(
+          "p",
+          {
+            key: "n",
+            className: "nd-textarea-counter",
+            id: counterId,
+            role: "status",
+            "aria-live": "polite",
+            "data-nd-textarea-counter": "",
+          },
+          counted,
+        )
       : null,
   );
 "#;
@@ -6427,6 +6769,65 @@ const SLIDER_DIOXUS: &str = r#"    let id = format!("nd-slider-{name}");
     let (min_end, max_end, step_end) = (min.clone(), max.clone(), step.clone());
     let described_end = described.clone();
 
+    // THE VALUE AND THE SCALE ARE DRAWN BY THE COMPONENT NOW.
+    //
+    // Both shipped as empty boxes that `inputs.js` filled. `output`'s own doc
+    // says it is on by default "so users can read the value they have set",
+    // and with the script blocked it was an empty `<output>` saying nothing at
+    // all — the prop's single promise, unkept. The marks were the same: five
+    // ticks the caller asked for and no ticks on the screen.
+    //
+    // The runtime still writes both on every move. What changes is that the
+    // first state is rendered rather than waited for, so nothing arrives late
+    // and nothing is missing when nothing arrives.
+    let shape = output_label.clone();
+    let shown = |number: &str| match shape.as_deref() {
+        Some(text) if !text.is_empty() => text.replace("{value}", number),
+        _ => number.to_owned(),
+    };
+    let read = |text: Option<&str>, fallback: f64| {
+        text.and_then(|value| value.trim().parse::<f64>().ok())
+            .unwrap_or(fallback)
+    };
+    // THE PLATFORM'S OWN DEFAULTS, because they are what the browser will put
+    // in the box: a `<input type="range">` with no value sits in the middle of
+    // a range that runs from zero to a hundred unless told otherwise.
+    let low = read(min.as_deref(), 0.0);
+    let high = read(max.as_deref(), 100.0);
+    let middle = low + (high - low) / 2.0;
+    let tidy = |number: f64| {
+        if number.fract() == 0.0 {
+            format!("{number:.0}")
+        } else {
+            format!("{number}")
+        }
+    };
+    let start_value = value.clone().unwrap_or_else(|| tidy(middle));
+    let end_value = end.clone().unwrap_or_else(|| tidy(middle));
+    let reading = if range {
+        format!("{} – {}", shown(&start_value), shown(&end_value))
+    } else {
+        shown(&start_value)
+    };
+    // The words, read position by position against the values, which is
+    // exactly what `inputs.js` does with the same two props.
+    let words = mark_labels.clone().unwrap_or_default();
+    let ticks: Vec<String> = marks
+        .as_deref()
+        .unwrap_or_default()
+        .split_whitespace()
+        .enumerate()
+        .map(|(index, tick)| {
+            words
+                .split('|')
+                .nth(index)
+                .map(str::trim)
+                .filter(|word| !word.is_empty())
+                .unwrap_or(tick)
+                .to_owned()
+        })
+        .collect();
+
     rsx! {
         Field {
             control: "{start_id}",
@@ -6490,14 +6891,18 @@ const SLIDER_DIOXUS: &str = r#"    let id = format!("nd-slider-{name}");
                     // scale is already announced by the range's own min and
                     // max — five tick numbers before every value is noise.
                     if marks.is_some() {
-                        span { class: "nd-slider-marks", "aria-hidden": "true", "data-nd-slider-marks": "" }
+                        span { class: "nd-slider-marks", "aria-hidden": "true", "data-nd-slider-marks": "",
+                            for word in ticks {
+                                span { class: "nd-slider-mark", "{word}" }
+                            }
+                        }
                     }
                 }
                 if output {
                     // NOT A LIVE REGION. The range announces its own value on
                     // every change; a second announcement is the same number
                     // said twice.
-                    output { class: "nd-slider-output", "for": "{start_id}", "data-nd-slider-output": "" }
+                    output { class: "nd-slider-output", "for": "{start_id}", "data-nd-slider-output": "", "{reading}" }
                 }
             }
         }
@@ -6513,6 +6918,24 @@ const SLIDER_REACT: &str = r#"  const size_ = size ?? "medium";
   const trackClass = ["nd-slider", className].filter(Boolean).join(" ");
   // See the Dioxus half: a range is two named controls under one legend.
   const startId = range ? `${id}-start` : id;
+  // See the Dioxus half: the value and the scale are drawn by the component,
+  // because an empty `<output>` is the one thing `output` promises not to be.
+  const shown = (number) =>
+    outputLabel ? String(outputLabel).split("{value}").join(String(number)) : String(number);
+  const read = (text, fallback) => {
+    const number = Number(text);
+    return String(text ?? "").trim() === "" || !Number.isFinite(number) ? fallback : number;
+  };
+  const low = read(min, 0);
+  const high = read(max, 100);
+  const middle = low + (high - low) / 2;
+  const startValue = value ?? String(middle);
+  const endValue = end ?? String(middle);
+  const reading = range ? `${shown(startValue)} – ${shown(endValue)}` : shown(startValue);
+  const ticks = String(marks ?? "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((tick, index) => String(markLabels ?? "").split("|")[index]?.trim() || tick);
 
   return h(
     Field,
@@ -6579,21 +7002,31 @@ const SLIDER_REACT: &str = r#"  const size_ = size ?? "medium";
             })
           : null,
         marks
-          ? h("span", {
-              key: "m",
-              className: "nd-slider-marks",
-              "aria-hidden": "true",
-              "data-nd-slider-marks": "",
-            })
+          ? h(
+              "span",
+              {
+                key: "m",
+                className: "nd-slider-marks",
+                "aria-hidden": "true",
+                "data-nd-slider-marks": "",
+              },
+              ticks.map((word, index) =>
+                h("span", { key: `t${index}`, className: "nd-slider-mark" }, word),
+              ),
+            )
           : null,
       ),
       (output ?? true)
-        ? h("output", {
-            key: "o",
-            className: "nd-slider-output",
-            htmlFor: startId,
-            "data-nd-slider-output": "",
-          })
+        ? h(
+            "output",
+            {
+              key: "o",
+              className: "nd-slider-output",
+              htmlFor: startId,
+              "data-nd-slider-output": "",
+            },
+            reading,
+          )
         : null,
     ),
   );
@@ -6936,14 +7369,31 @@ const TIME_INPUT_DIOXUS: &str = r#"    let id = format!("nd-time-input-{name}");
                         })}
                     }
                     if let Some(now) = now {
-                        Button {
-                            label: now,
-                            icon: IconName::Clock,
-                            hide_label: true,
-                            variant: ButtonVariant::Outline,
-                            size: ButtonSize::Small,
-                            action: "time-input-now",
-                            disabled,
+                        // HIDDEN UNTIL THE SCRIPT CAN HONOUR IT, exactly as
+                        // `NumberInput`'s steppers and `Input`'s clear and
+                        // reveal controls are. This one shipped visible and
+                        // inert: reading the clock is `inputs.js`'s and
+                        // nothing else's, so with no script it was a named,
+                        // focusable button that filled nothing.
+                        //
+                        // The WRAPPER carries `hidden`, because a component is
+                        // not an element and cannot be given the attribute.
+                        // That is the steppers' arrangement, and the
+                        // stylesheet gives this span `display: contents` so
+                        // the row lays out as though it were not here.
+                        span {
+                            class: "nd-time-input-now",
+                            hidden: true,
+                            "data-nd-time-input-now": "",
+                            Button {
+                                label: now,
+                                icon: IconName::Clock,
+                                hide_label: true,
+                                variant: ButtonVariant::Outline,
+                                size: ButtonSize::Small,
+                                action: "time-input-now",
+                                disabled,
+                            }
                         }
                     }
                 }
@@ -7053,16 +7503,27 @@ const TIME_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
             : null,
         ),
         nowLabel
-          ? h(Button, {
-              key: "n",
-              label: nowLabel,
-              icon: "clock",
-              hideLabel: true,
-              variant: "outline",
-              size: "small",
-              action: "time-input-now",
-              disabled,
-            })
+          ? h(
+              "span",
+              {
+                key: "n",
+                className: "nd-time-input-now",
+                hidden: true,
+                "data-nd-time-input-now": "",
+              },
+              // See the Dioxus half: revealed by `inputs.js`, never built, and
+              // the wrapper carries `hidden` because a component cannot.
+              h(Button, {
+                key: "b",
+                label: nowLabel,
+                icon: "clock",
+                hideLabel: true,
+                variant: "outline",
+                size: "small",
+                action: "time-input-now",
+                disabled,
+              }),
+            )
           : null,
       ),
       h("p", {
@@ -7110,6 +7571,16 @@ const CAROUSEL_DIOXUS: &str = r#"    let root = format!("nd-carousel {class}");
     let previous = previous_label.clone();
     let next = next_label.clone();
     let pause = pause_label.clone();
+    // A WIDTH IS A PROP, SO THE COMPONENT WRITES IT. `carousel.js` used to set
+    // this custom property, which made `per_view` a thing that needed a script:
+    // with JavaScript blocked a `per_view: "3"` carousel showed one slide,
+    // under a contract that opens by promising the slides "scroll and snap
+    // before any script runs". The stylesheet divides the track by it and
+    // declares `1` as the fallback, so this is the only value that has to
+    // arrive. `auto` is matched on `data-nd-per-view` instead and wants no
+    // property at all.
+    let per_view_width =
+        (per_view != "auto").then(|| format!("--nd-carousel-per-view:{per_view}"));
 
     rsx! {
         section {
@@ -7122,7 +7593,9 @@ const CAROUSEL_DIOXUS: &str = r#"    let root = format!("nd-carousel {class}");
             role: "group",
             "aria-roledescription": "carousel",
             "aria-label": "{label}",
-            "aria-orientation": orientation.as_str(),
+            // DRAWN, NOT ANNOUNCED. ARIA 1.2 gives `role="group"` no axis, so
+            // `aria-orientation` here was an attribute an engine may drop.
+            "data-nd-orientation": orientation.as_str(),
             "data-nd-per-view": "{per_view}",
             "data-nd-snap": snap.as_str(),
             "data-nd-glass": if glass { "true" } else { "false" },
@@ -7146,6 +7619,8 @@ const CAROUSEL_DIOXUS: &str = r#"    let root = format!("nd-carousel {class}");
                 class: "nd-carousel-track",
                 id: "{track_id}",
                 "data-nd-carousel-track": "",
+                // See above: the share of the track one slide takes, rendered.
+                style: per_view_width,
                 // Polite while a reader is driving; the runtime turns it off
                 // while autoplay is, because a region that speaks every four
                 // seconds unasked makes the rest of the page unusable.
@@ -7240,6 +7715,10 @@ const CAROUSEL_REACT: &str = r#"  const perView_ = perView ?? "1";
   const trackId = `${id}-track`;
   // See the Dioxus half: no name, no control, and no rotation either.
   const rotates = Boolean(autoplay && pauseLabel);
+  // See the Dioxus half: a width is a prop, so the component writes it rather
+  // than the runtime, and `auto` wants no property at all.
+  const perViewWidth =
+    perView_ === "auto" ? undefined : { "--nd-carousel-per-view": perView_ };
 
   return h(
     "section",
@@ -7250,7 +7729,8 @@ const CAROUSEL_REACT: &str = r#"  const perView_ = perView ?? "1";
       role: "group",
       "aria-roledescription": "carousel",
       "aria-label": label,
-      "aria-orientation": orientation_,
+      // See the Dioxus half: a group has no axis in ARIA, so the axis is drawn.
+      "data-nd-orientation": orientation_,
       "data-nd-per-view": perView_,
       "data-nd-snap": snap_,
       "data-nd-glass": String(glass ?? false),
@@ -7275,6 +7755,7 @@ const CAROUSEL_REACT: &str = r#"  const perView_ = perView ?? "1";
         className: "nd-carousel-track",
         id: trackId,
         "data-nd-carousel-track": "",
+        style: perViewWidth,
         "aria-live": rotates ? "off" : "polite",
       },
       children,
@@ -7652,9 +8133,6 @@ const DATE_INPUT_DIOXUS: &str = r#"    let root = format!("nd-date-input {class}
         _ => (day_item, month_item, year_item),
     };
     let has_suggest = suggest_label.is_some();
-    // One binding per use: `rsx!` moves a value into the nested block before
-    // the root's attributes are read. `TagPicker` learned this first.
-    let error_word = error_label.clone();
 
     rsx! {
         // THE GROUP IS THE FIELD NOW. `Field { kind: Group }` renders the
@@ -7693,7 +8171,6 @@ const DATE_INPUT_DIOXUS: &str = r#"    let root = format!("nd-date-input {class}
             "data-nd-glass": if glass { "true" } else { "false" },
             "data-nd-min": min,
             "data-nd-max": max,
-            "data-nd-error-label": error_word,
             "data-nd-suggest-label": suggest_label,
             "data-nd-previous-label": previous_label,
             "data-nd-next-label": next_label,
@@ -7801,7 +8278,6 @@ const DATE_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
       "data-nd-glass": String(glass ?? false),
       "data-nd-min": min,
       "data-nd-max": max,
-      "data-nd-error-label": errorLabel,
       "data-nd-suggest-label": suggestLabel,
       "data-nd-previous-label": previousLabel,
       "data-nd-next-label": nextLabel,
@@ -8373,32 +8849,72 @@ const LINEAGE_DIOXUS: &str = r##"    let root = format!("nd-lineage {class}");
 "##;
 
 /// The same scene, in React.
-const LINEAGE_REACT: &str = r#"  const filter = filter_ ?? "";
-  const sets = sets_ ?? "";
-  const occasion = occasion_ ?? "";
-  const form = form_ ?? "";
-  const elidedLabel = elided_label ?? "";
-  const drawing = draw(graph, { view: view_, route: route_, isolate: filter_mode_ === "isolate", shy: reach_ === "shy" }, filter, sets);
+///
+/// # Every name here is one this file declares
+///
+/// This body was written against a naming convention the generator does not
+/// use — `filter_`, `sets_`, `view_`, `root` and a dozen more arrived from
+/// nowhere, and `const filter = filter_` redeclared a name that was already the
+/// parameter. `lineage.js` did not parse, and had not for an unknown length of
+/// time. The generator emits the camel-cased prop, and a body resolves its own
+/// defaults into `x_`; both halves of that are asserted now.
+///
+/// # And `style` is an object
+///
+/// React's `style` prop takes a map, not a CSS string — a string throws on the
+/// first render. Custom properties go in it by name, which is what publishes
+/// every piece's position for a `LineageFigure` to stand at.
+const LINEAGE_REACT: &str = r#"  const view_ = view ?? "flat";
+  const route_ = route ?? "elbow";
+  const reach_ = reach ?? "touch";
+  const lettering_ = lettering ?? "flat";
+  const size_ = size ?? "medium";
+  const tilt_ = tilt ?? "level";
+  const thickness_ = thickness ?? "slab";
+  const filterMode_ = filterMode ?? "highlight";
+  const pick_ = pick ?? "none";
+  const height_ = height ?? "tall";
+  const parallax_ = parallax ?? false;
+  const root = ["nd-lineage", className].filter(Boolean).join(" ");
+  // The five the Dioxus half unwraps into a plain string before it goes near
+  // the engine. An `undefined` reaching `draw` is a filter nothing matches.
+  const filter_ = filter ?? "";
+  const sets_ = sets ?? "";
+  const occasion_ = occasion ?? "";
+  const form_ = form ?? "";
+  const elidedLabel_ = elidedLabel ?? "";
+  const drawing = draw(
+    graph,
+    { view: view_, route: route_, isolate: filterMode_ === "isolate", shy: reach_ === "shy" },
+    filter_,
+    sets_,
+  );
 
   // The place of every piece, published as three custom properties — see the
   // Dioxus half for why, and for what has been through `nameable` before it
-  // reaches a property name.
-  let style = `--nd-w:${drawing.width};--nd-h:${drawing.height};--nd-d:${drawing.depth};`;
+  // reaches a property name. An OBJECT, because that is what React's `style`
+  // takes; a string throws.
+  const style = {
+    "--nd-w": drawing.width,
+    "--nd-h": drawing.height,
+    "--nd-d": drawing.depth,
+  };
   for (const piece of drawing.pieces) {
-    style +=
-      `--nd-at-${piece.id}-x:${piece.x};--nd-at-${piece.id}-y:${piece.y};` +
-      `--nd-at-${piece.id}-z:${piece.z};--nd-at-${piece.id}-span:${piece.span};`;
+    style[`--nd-at-${piece.id}-x`] = piece.x;
+    style[`--nd-at-${piece.id}-y`] = piece.y;
+    style[`--nd-at-${piece.id}-z`] = piece.z;
+    style[`--nd-at-${piece.id}-span`] = piece.span;
   }
-  if (nameable(occasion)) style += `--nd-on-${occasion}:grid;`;
-  for (const entry of sets.split(/\s+/u)) {
+  if (nameable(occasion_)) style[`--nd-on-${occasion_}`] = "grid";
+  for (const entry of sets_.split(/\s+/u)) {
     const parts = setParts(entry);
-    if (parts) style += `--nd-set-${parts[0]}-${parts[1]}:grid;`;
+    if (parts) style[`--nd-set-${parts[0]}-${parts[1]}`] = "grid";
   }
 
   const stem = `nd-${name}`;
   // Unset, `line` follows `thickness` — see the Dioxus half.
   const line_ = line ?? (thickness_ === "none" ? "ribbon" : "beam");
-  const filtering = filter !== "";
+  const filtering = filter_ !== "";
   const picksBonds = pick_ === "bond" || pick_ === "both";
   const picksFigures = pick_ === "figure" || pick_ === "both";
   const flag = (yes) => (filtering ? (yes ? "yes" : "no") : undefined);
@@ -8436,7 +8952,7 @@ const LINEAGE_REACT: &str = r#"  const filter = filter_ ?? "";
           className: "nd-lineage-pick",
           type: "checkbox",
           id: `${stem}-b${bond.index}`,
-          name: some(form),
+          name: some(form_),
           value: `${bond.from} ${bond.to}`,
         }),
       );
@@ -8487,7 +9003,7 @@ const LINEAGE_REACT: &str = r#"  const filter = filter_ ?? "";
           className: "nd-lineage-pick",
           type: "checkbox",
           id: `${stem}-p${piece.id}`,
-          name: some(form),
+          name: some(form_),
           value: piece.id,
         }),
       );
@@ -8506,35 +9022,57 @@ const LINEAGE_REACT: &str = r#"  const filter = filter_ ?? "";
     }
     if (!piece.slot) {
       const face = [];
-      if (piece.image !== "") {
-        face.push(
-          h("img", { key: "portrait", className: "nd-lineage-portrait", src: piece.image, alt: "" }),
-        );
-      }
-      // Solid lettering is stacked plies — see the Dioxus half.
-      const plies = (text) =>
-        lettering_ === "solid"
-          ? [1, 2, 3, 4, 5].map((ply) =>
-              h("i", { key: `ply${ply}`, "data-nd-ply": String(ply), "aria-hidden": "true" }, text),
-            )
-          : [];
-      face.push(
-        h(
-          "span",
-          { key: "name", className: "nd-lineage-name nd-identifier" },
-          piece.label,
-          ...plies(piece.label),
-        ),
-      );
-      if (piece.meta !== "") {
+      if (piece.elided > 0) {
+        // A NUMERAL IS THE SAME WORD IN EVERY LANGUAGE — see the Dioxus half.
+        // The marker carries the count and no sentence; the words that go with
+        // it are the scene's `elided_label`, on the `aria-label` below.
         face.push(
           h(
             "span",
-            { key: "meta", className: "nd-lineage-meta nd-identifier" },
-            piece.meta,
-            ...plies(piece.meta),
+            { key: "count", className: "nd-lineage-count nd-identifier" },
+            String(piece.elided),
           ),
         );
+      } else {
+        if (piece.image !== "") {
+          face.push(
+            h("img", {
+              key: "portrait",
+              className: "nd-lineage-portrait",
+              src: piece.image,
+              alt: "",
+            }),
+          );
+        }
+        // Solid lettering is stacked plies — see the Dioxus half.
+        const plies = (text) =>
+          lettering_ === "solid"
+            ? [1, 2, 3, 4, 5].map((ply) =>
+                h(
+                  "i",
+                  { key: `ply${ply}`, "data-nd-ply": String(ply), "aria-hidden": "true" },
+                  text,
+                ),
+              )
+            : [];
+        face.push(
+          h(
+            "span",
+            { key: "name", className: "nd-lineage-name nd-identifier" },
+            piece.label,
+            ...plies(piece.label),
+          ),
+        );
+        if (piece.meta !== "") {
+          face.push(
+            h(
+              "span",
+              { key: "meta", className: "nd-lineage-meta nd-identifier" },
+              piece.meta,
+              ...plies(piece.meta),
+            ),
+          );
+        }
       }
       // One content in three elements: a link, a pick target, or neither.
       if (piece.href !== "") {
@@ -8605,8 +9143,8 @@ const LINEAGE_REACT: &str = r#"  const filter = filter_ ?? "";
         "data-nd-id": piece.id,
         "data-nd-piece": piece.elided > 0 ? "elided" : piece.mark ? "mark" : "figure",
       "aria-label":
-        piece.elided > 0 && elidedLabel !== ""
-          ? elidedLabel.replace("{count}", String(piece.elided))
+        piece.elided > 0 && elidedLabel_ !== ""
+          ? elidedLabel_.replace("{count}", String(piece.elided))
           : undefined,
         "data-nd-slot": piece.slot ? "true" : undefined,
         "data-nd-kind": some(piece.kind),
@@ -8639,10 +9177,10 @@ const LINEAGE_REACT: &str = r#"  const filter = filter_ ?? "";
       "data-nd-pick": pick_,
       "data-nd-filter-mode": filterMode_,
       "data-nd-parallax": parallax_ ? "true" : "false",
-      "data-nd-filter": some(filter),
-      "data-nd-occasion": some(occasion),
-      "data-nd-sets": some(sets),
-      "data-nd-form": some(form),
+      "data-nd-filter": some(filter_),
+      "data-nd-occasion": some(occasion_),
+      "data-nd-sets": some(sets_),
+      "data-nd-form": some(form_),
       "data-nd-empty-label": emptyLabel,
       "data-nd-camera-label": cameraLabel,
       "data-nd-zoom-in-label": zoomInLabel,
@@ -8772,16 +9310,33 @@ const LINEAGE_FIGURE_DIOXUS: &str = r#"    let root = format!("nd-lineage-figure
 "#;
 
 /// The same figure, in React.
-const LINEAGE_FIGURE_REACT: &str = r#"  const anchor = nameable(at) ? at : "";
-  let style =
-    `--nd-x:var(--nd-at-${anchor}-x,0);--nd-y:var(--nd-at-${anchor}-y,0);` +
-    `--nd-z:var(--nd-at-${anchor}-z,0);--nd-span:var(--nd-at-${anchor}-span,1);`;
+///
+/// Its defaults and its root class are resolved here, the way every other
+/// React body in this file resolves them — this one named `root`, `shape_`,
+/// `tone_` and `parallax_` without declaring any of them, so the component
+/// threw a `ReferenceError` on its first render. And `style` is an object,
+/// because that is what React's `style` prop takes; the CSS string this used
+/// to build threw on the same render.
+const LINEAGE_FIGURE_REACT: &str = r#"  const shape_ = shape ?? "card";
+  const tone_ = tone ?? "neutral";
+  const parallax_ = parallax ?? "none";
+  const root = ["nd-lineage-figure", className].filter(Boolean).join(" ");
+  // The place comes from the scene, through three custom properties, and the
+  // visibility through a fourth — see the Dioxus half for what has been
+  // through `nameable` before it reaches a property name.
+  const anchor = nameable(at) ? at : "";
+  const style = {
+    "--nd-x": `var(--nd-at-${anchor}-x,0)`,
+    "--nd-y": `var(--nd-at-${anchor}-y,0)`,
+    "--nd-z": `var(--nd-at-${anchor}-z,0)`,
+    "--nd-span": `var(--nd-at-${anchor}-span,1)`,
+  };
   // One visibility variable, and the occasion wins — see the Dioxus half.
   if (nameable(occasion)) {
-    style += `--nd-shown:var(--nd-on-${occasion},none);`;
+    style["--nd-shown"] = `var(--nd-on-${occasion},none)`;
   } else {
     const parts = setParts(set);
-    if (parts) style += `--nd-shown:var(--nd-set-${parts[0]}-${parts[1]},none);`;
+    if (parts) style["--nd-shown"] = `var(--nd-set-${parts[0]}-${parts[1]},none)`;
   }
 
   // A link or a button or neither, never two.
@@ -9825,7 +10380,12 @@ const DIVIDER_REACT: &str = r#"  const orientation_ = orientation ?? "horizontal
     ...rest,
   };
 
-  if (!label) return h("hr", shared);
+  // GIVEN OR NOT GIVEN, NOT TRUTHY OR FALSY. The Dioxus half branches on
+  // `Option`, so `label = Some("")` is a labelled divider there — a `<div
+  // role="separator">` with an empty word in it. `!label` made the same call
+  // render an `<hr>`, which is a different element with a different role from
+  // the same props, and that is exactly the drift `NOCTUA.md §9.3` forbids.
+  if (label === undefined || label === null) return h("hr", shared);
   return h(
     "div",
     {
@@ -9892,7 +10452,6 @@ const LABEL_DIOXUS: &str = r#"    let root = format!("nd-label {class}");
                 id,
                 r#for: for_control,
                 "data-nd-size": size.as_str(),
-                "data-nd-required": if required { "true" } else { "false" },
                 {content}
             }
         },
@@ -9903,7 +10462,6 @@ const LABEL_DIOXUS: &str = r#"    let root = format!("nd-label {class}");
                 class: "{root}",
                 id,
                 "data-nd-size": size.as_str(),
-                "data-nd-required": if required { "true" } else { "false" },
                 {content}
             }
         },
@@ -9916,7 +10474,6 @@ const LABEL_DIOXUS: &str = r#"    let root = format!("nd-label {class}");
                 class: "{root}",
                 id,
                 "data-nd-size": size.as_str(),
-                "data-nd-required": if required { "true" } else { "false" },
                 {content}
             }
         },
@@ -9941,7 +10498,6 @@ const LABEL_REACT: &str = r#"  const kind_ = kind ?? "label";
       // Only a `<label>` may carry it, and only a labelable element answers it.
       htmlFor: kind_ === "label" ? forControl : undefined,
       "data-nd-size": size_,
-      "data-nd-required": String(required_),
       ...rest,
     },
     text,
@@ -10068,6 +10624,14 @@ const IMAGE_REACT: &str = r#"  const fit_ = fit ?? "cover";
 /// The words, the title and the icon are what carry the meaning (`§8.8.6`),
 /// which is why `icon` is the caller's choice rather than a map from the tone
 /// name: this system has 351 tones and no opinion about what most of them mean.
+///
+/// # And the icon is a drawing, not a word
+///
+/// It is an `IconName`, as `Input`'s and `Tab`'s are. It was a `String` run
+/// through `IconName::parse` here and handed straight to `Icon` in React — so a
+/// name nothing declares rendered *nothing* in Dioxus and *threw* in React,
+/// which is the one behaviour `NOCTUA.md §9.3` says the two may not have.
+/// Typed, neither language can be given a name that is not an icon.
 const MESSAGE_BAR_DIOXUS: &str = r#"    let root = format!("nd-message-bar {class}");
     let root = root.trim().to_owned();
 
@@ -10080,10 +10644,9 @@ const MESSAGE_BAR_DIOXUS: &str = r#"    let root = format!("nd-message-bar {clas
             // the role's own value, which is the right one both times.
             "aria-live": live.map(MessageBarLive::as_str),
             "data-nd-tone": tone,
-            "data-nd-alert": if alert { "true" } else { "false" },
             "data-nd-dismissible": if dismissible { "true" } else { "false" },
 
-            if let Some(icon) = icon.as_deref().and_then(IconName::parse) {
+            if let Some(icon) = icon {
                 // `aria-hidden`, because it says what the words say. It is a
                 // second signal for a reader who can see it, never the first.
                 span { class: "nd-message-bar-icon", "aria-hidden": "true",
@@ -10133,7 +10696,6 @@ const MESSAGE_BAR_REACT: &str = r#"  const alert_ = alert ?? false;
       role: alert_ ? "alert" : "status",
       "aria-live": live,
       "data-nd-tone": tone,
-      "data-nd-alert": String(alert_),
       "data-nd-dismissible": String(dismissible_),
       ...rest,
     },
@@ -10393,9 +10955,7 @@ const RATING_DIOXUS: &str = r#"    let root = format!("nd-rating {class}");
                     "data-nd-readonly": "false",
                     "data-nd-max": "{max}",
                     "data-nd-value": value,
-                    "data-nd-value-label": value_label,
-                    "data-nd-item-label": item_label,
-
+                
                     div { class: "nd-rating-row",
                         for (number, named, count, chosen) in scale {
                             // THREE SIBLINGS PER STEP, AND THE ORDER IS
@@ -10445,7 +11005,15 @@ const RATING_REACT: &str = r#"  const size_ = size ?? "medium";
   // See the Dioxus half: one sentence with holes, filled here.
   const filled = (words, number) =>
     words.split("{value}").join(number).split("{max}").join(max_);
-  const sentence = value && valueLabel ? filled(valueLabel, value) : undefined;
+  // GIVEN OR NOT GIVEN, NOT TRUTHY OR FALSY. The Dioxus half zips two
+  // `Option`s, so `value = Some("")` reads the sentence out with an empty
+  // number in it; `value && valueLabel` dropped the sentence entirely, and a
+  // reading a sighted reader can see is one a screen reader was not given.
+  const given = value !== undefined && value !== null;
+  const sentence =
+    given && valueLabel !== undefined && valueLabel !== null
+      ? filled(valueLabel, value)
+      : undefined;
   const scale = Array.from({ length: steps }, (_, at) => {
     const number = String(at + 1);
     return {
@@ -10488,7 +11056,9 @@ const RATING_REACT: &str = r#"  const size_ = size ?? "medium";
           stars("l"),
         ),
       ),
-      sentence ? h("span", { key: "v", className: "nd-rating-value" }, sentence) : null,
+      sentence === undefined
+        ? null
+        : h("span", { key: "v", className: "nd-rating-value" }, sentence),
     );
 
   return h(
@@ -10515,9 +11085,7 @@ const RATING_REACT: &str = r#"  const size_ = size ?? "medium";
         "data-nd-readonly": "false",
         "data-nd-max": max_,
         "data-nd-value": value,
-        "data-nd-value-label": valueLabel,
-        "data-nd-item-label": itemLabel,
-        ...rest,
+            ...rest,
       },
       h(
         "div",
@@ -11028,8 +11596,7 @@ const DIALOG_DIOXUS: &str = r#"    let root = format!("nd-dialog {class}");
                 id: "{id}",
                 r#type: "button",
                 "aria-haspopup": "dialog",
-                "data-nd-dialog-open": "",
-                hidden: true,
+                    hidden: true,
                 "{trigger_label}"
             }
 
@@ -11096,8 +11663,7 @@ const DIALOG_REACT: &str = r#"  const modal_ = modal ?? true;
         id,
         type: "button",
         "aria-haspopup": "dialog",
-        "data-nd-dialog-open": "",
-        // See the Dioxus half: revealed by the script.
+          // See the Dioxus half: revealed by the script.
         hidden: true,
       },
       triggerLabel,
@@ -11554,10 +12120,43 @@ mod tests {
             "{rust}"
         );
         assert!(js.contains("String(selected_)"), "{js}");
-        // And the roving stop is rendered, not applied by a script that may
-        // never run: one tab stop for the group with JavaScript blocked.
-        assert!(rust.contains("tabindex: if selected"), "{rust}");
-        assert!(js.contains("tabIndex: selected_ ? 0 : -1"), "{js}");
+    }
+
+    /// A radio group is ONE tab stop, whether or not it has been answered.
+    ///
+    /// THIS ASSERTS THE GUARANTEE, NOT THE MECHANISM. It used to read
+    /// `rust.contains("tabindex: if selected")` — the mechanism, and the
+    /// mechanism was the defect: `0` on the chosen item and `-1` on the rest is
+    /// one stop for a group with an answer and **zero** for a group without
+    /// one, so a `Segmented` nothing had chosen was unreachable by keyboard
+    /// with the script blocked. The test passed the whole time, because it was
+    /// checking that the code said what it said.
+    ///
+    /// What is asserted instead is the count: exactly one element in the
+    /// rendered group carries a `0`, in both languages and in both cases.
+    #[test]
+    fn a_segmented_group_is_one_tab_stop_answered_or_not() {
+        let group = shipped("Segmented");
+        let item = shipped("SegmentedItem");
+        let (mut group_rust, mut group_js) = (String::new(), String::new());
+        dioxus_body(&mut group_rust, &group);
+        react_body(&mut group_js, &group);
+        let (mut item_rust, mut item_js) = (String::new(), String::new());
+        dioxus_body(&mut item_rust, &item);
+        react_body(&mut item_js, &item);
+
+        // The group holds it, unconditionally — no `if` anywhere near it.
+        assert!(group_rust.contains("tabindex: \"0\","), "{group_rust}");
+        assert!(group_js.contains("tabIndex: 0,"), "{group_js}");
+        // And no item is ever a second one, whatever `selected` says.
+        assert!(item_rust.contains("tabindex: \"-1\","), "{item_rust}");
+        assert!(item_js.contains("tabIndex: -1,"), "{item_js}");
+        for body in [&item_rust, &item_js] {
+            assert!(
+                !body.contains("selected { \"0\"") && !body.contains("selected_ ? 0"),
+                "an item that is a stop of its own makes the count depend on the answer: {body}"
+            );
+        }
     }
 
     /// A refused item stays reachable.

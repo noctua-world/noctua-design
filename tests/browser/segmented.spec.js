@@ -7,7 +7,7 @@
 // moment it says `role="radiogroup"`.
 
 import { test, expect } from "@playwright/test";
-import { ANY, modeControl, url } from "./pages.js";
+import { ANY, PAGE, modeControl, showParts, url } from "./pages.js";
 
 const openSettings = (page) =>
   page.evaluate(() => {
@@ -95,4 +95,74 @@ test("a group has a name, visible or not", async ({ page }) => {
   );
   // A radiogroup with neither announces its role and nothing else.
   expect(nameless, "a radiogroup with no accessible name").toEqual([]);
+});
+
+// --- One stop, answered or not -----------------------------------------------
+
+test("a group with nothing chosen is still one tab stop, with no script", async ({ browser }) => {
+  // THE GUARANTEE, MEASURED WHERE IT USED TO FAIL. The stop was rendered on
+  // the chosen item — `0` when `selected` and `-1` otherwise — which is one
+  // stop for a group that has an answer and ZERO for one that does not. A
+  // `Segmented` nothing had chosen was unreachable by keyboard, and the first
+  // example on `/segmented-item/` was exactly that shape. An item cannot fix
+  // it, because an item cannot see its siblings, so the group holds the stop.
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+
+  let unanswered = 0;
+  // THE THIRD PAGE IS WHERE THE CASE LIVES. `/theme-scope/`'s scope controls
+  // are three groups a reader has not answered — the state a scope is in comes
+  // from above it until they choose — so it is the page that would have shown
+  // zero tab stops.
+  for (const target of [PAGE.segmented, PAGE.segmentedItem, PAGE.themeScope]) {
+    await page.goto(url(target));
+    await showParts(page);
+    const groups = await page.evaluate(() =>
+      // NOT THE VARIANT GRID. A specimen is raw markup drawn to be looked at
+      // rather than a component, and its buttons are focusable because a
+      // `<button>` is — which is a question about specimens, not about this.
+      [...document.querySelectorAll('[role="radiogroup"]')]
+        .filter((group) => !group.closest(".nd-variant-stage"))
+        .map((group) => ({
+          name: group.dataset.ndGroup,
+          chosen: group.querySelectorAll('[role="radio"][aria-checked="true"]').length,
+          // Every element in or at the group that a keyboard can land on.
+          stops: [group, ...group.querySelectorAll("*")].filter((el) => el.tabIndex === 0).length,
+        })),
+    );
+    expect(groups.length, `no radiogroup on ${target}`).toBeGreaterThan(0);
+    for (const group of groups) {
+      expect(group.stops, `${group.name} is ${group.stops} tab stops`).toBe(1);
+    }
+    unanswered += groups.filter((group) => group.chosen === 0).length;
+  }
+  // And the pages really do carry the case this is about, or the count
+  // above proves only that a group with an answer has one stop.
+  expect(unanswered, "no group on either page has nothing chosen").toBeGreaterThan(0);
+  await context.close();
+});
+
+test("the script moves the stop onto a radio and leaves the group alone", async ({ page }) => {
+  await page.goto(url(PAGE.segmented));
+  await showParts(page);
+  const groups = await page.evaluate(() =>
+    // A GROUP INSIDE A TOOLBAR DOES NOT OWN ITS STOPS: the bar's list already
+    // holds these radios, so the bar places one stop across the whole of it
+    // and a group within it may legitimately hold none.
+    [...document.querySelectorAll('[role="radiogroup"]')]
+      .filter((group) => !group.closest('[role="toolbar"], .nd-variant-stage'))
+      .map((group) => ({
+        name: group.dataset.ndGroup,
+        // The markup's fallback stop is the script's to take away: a group
+        // that kept it would be a second stop, and inside a toolbar it would
+        // join the bar's own walk through `[tabindex]`.
+        onGroup: group.hasAttribute("tabindex"),
+        onRadios: [...group.querySelectorAll('[role="radio"]')].filter((el) => el.tabIndex === 0)
+          .length,
+      })),
+  );
+  for (const group of groups) {
+    expect(group.onGroup, `${group.name} kept the markup's own stop`).toBe(false);
+    expect(group.onRadios, `${group.name} has ${group.onRadios} stops`).toBe(1);
+  }
 });

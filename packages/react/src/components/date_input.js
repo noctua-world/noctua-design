@@ -11,6 +11,8 @@
 
 import { createElement as h } from "react";
 
+import { Field } from "./field.js";
+
 import { Icon } from "./icon.js";
 export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint, error, errorLabel, value, min, max, required, disabled, size, order, bday, pad, expand, calendar, suggestLabel, previousLabel, nextLabel, requiredLabel, missingLabel, numberLabel, yearDigitsLabel, invalidLabel, minLabel, maxLabel, glass, className, children, ...rest }) {
   const size_ = size ?? "medium";
@@ -81,7 +83,6 @@ export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint,
       "data-nd-glass": String(glass ?? false),
       "data-nd-min": min,
       "data-nd-max": max,
-      "data-nd-error-label": errorLabel,
       "data-nd-suggest-label": suggestLabel,
       "data-nd-previous-label": previousLabel,
       "data-nd-next-label": nextLabel,

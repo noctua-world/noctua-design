@@ -52,10 +52,11 @@ default = "medium"
 attribute = "data-nd-size"
 doc = "The type scale of the name: `small`, `medium` or `large`. Match it to the control it names, so a large box is not answered by a small question."
 
+# NO ATTRIBUTE. `data-nd-required` was written on all three elements and read
+# by no stylesheet and no script: the marker is drawn from the prop itself.
 [prop.required]
 type = "bool"
 default = "false"
-attribute = "data-nd-required"
 doc = "Whether to mark what this names as an answer that has to be given. **The mark is all this does.** The real `required` attribute belongs on the real control, because only that stops a form submitting."
 
 [prop.required_label]

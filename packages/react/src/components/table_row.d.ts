@@ -16,7 +16,7 @@ export interface TableRowProps {
   tone?: string;
   /** Whether this row can be chosen. `one` draws a real radio, `many` a real checkbox. `all` goes in the heading row and marks or clears every row under it, with a third state for *some, not all*. Each is a real control. */
   select?: TableRowSelect;
-  /** How much weight this row carries against the rows around it. `subtle` is a light rule above the row. `strong` is a heavy rule and bold text. **It says how a row is drawn, not what it means.** What the row contains is the caller's. */
+  /** How much weight this row carries against the rows around it. `subtle` is a light rule above the row. `strong` is a heavy rule and bold text. **Either one takes the row out of the totals and out of the row count.** */
   emphasis?: TableRowEmphasis;
   /** Whether this row starts chosen. Rendered by the server, so a form that came back still shows what the reader picked. It is drawn from the real control's own state rather than from `aria-selected`. */
   selected?: boolean;

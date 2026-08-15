@@ -12,7 +12,6 @@
 import { createElement as h } from "react";
 
 export function Badge({ label, count, max, dot, showZero, tone, placement, overlap, className, children, ...rest }) {
-  const tone_ = tone ?? "danger";
   const placement_ = placement ?? "top-end";
   const overlap_ = overlap ?? "rectangle";
   const dot_ = dot ?? false;

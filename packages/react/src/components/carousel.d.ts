@@ -18,7 +18,7 @@ export interface CarouselProps {
   perView?: string;
   /** Where a slide comes to rest. `start` lines its leading edge up with the track's, which suits a shelf, and `center` suits a gallery of one. `none` leaves a plain scroller, and turns the two controls into a scroll by one screen rather than to a slide. */
   snap?: CarouselSnap;
-  /** Which way the track runs. Defaults to `horizontal`, and it is announced as well as drawn, so a reader knows which arrow keys move it. It is written with logical properties, so it reverses in a right-to-left locale. */
+  /** Which way the track runs. Defaults to `horizontal`. It is drawn rather than announced, because a group has no axis in ARIA. It is written with logical properties, so it reverses in a right-to-left locale. */
   orientation?: CarouselOrientation;
   /** Whether the previous and next controls appear. **On by default**, because a mouse with no horizontal wheel cannot move a scroll container without them. They render hidden and the script reveals them once the track is measured. */
   controls?: boolean;

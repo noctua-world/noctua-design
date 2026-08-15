@@ -14,7 +14,7 @@ export interface FieldProps {
   control: string;
   /** The question, in the reader's language. It renders as a real `<label for>`, or as a `<legend>` when `kind` is `group`. Never use a placeholder instead, because a placeholder disappears as soon as a reader types. */
   label: string;
-  /** Whether this labels one control or several. `single` renders a `<div>` with a `<label>`. `group` renders a `<fieldset>` with a `<legend>`, which is the only arrangement that names a set of controls. `DateInput` and `Fieldset` use `group`. */
+  /** Whether this labels one control or several. `single` renders a `<div>` with a `<label>`. `group` renders a `<fieldset>` with a `<legend>`, which is the only arrangement that names a set of controls. */
   kind?: FieldKind;
   /** What a reader needs before answering, such as *For example, 27 3 2007*. It rides the control's `aria-describedby`, so it is read with the control. */
   hint?: string;

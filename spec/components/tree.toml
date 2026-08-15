@@ -34,10 +34,20 @@ default = "none"
 attribute = "data-nd-selection"
 doc = "Whether nodes can be chosen, and how many. `none` is the default and makes the tree navigation only. `multiple` also writes `aria-multiselectable`. **A selectable node should not be a link**, and carries `TreeItem { value }` instead."
 
+# WHY THIS SAYS "THE SCRIPT PUTS" RATHER THAN "ITS PRESENCE PUTS".
+#
+# It used to promise a hidden checkbox in the markup, surviving a form post
+# with no script. Nothing rendered one. Two things stop it being rendered, and
+# the second is the one that decides: `TreeItem` cannot see this name, because
+# a node is a child and a parent cannot write on its children in either
+# language, and a tree HAS no selection with no script at all. This component
+# claims no roles, no `aria-selected` and no keyboard until `shell.js` writes
+# them, so a checkbox posting a chosen node would post a choice no reader could
+# have made, seen or undone. That is a second lie, not a repair of the first.
 [prop.form]
 type = "text"
 attribute = "data-nd-form"
-doc = "The field the chosen nodes are submitted under. Its presence puts a real hidden checkbox inside every selectable node, so the state survives a form post with no script. Absent, the selection is only on the screen."
+doc = "The field the chosen nodes are submitted under. The script puts a real hidden checkbox inside every selectable node, so a form posts what is chosen. With no script a tree has no selection at all."
 
 [prop.size]
 type = "enum"

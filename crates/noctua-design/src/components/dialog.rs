@@ -122,8 +122,7 @@ pub fn Dialog(
                 id: "{id}",
                 r#type: "button",
                 "aria-haspopup": "dialog",
-                "data-nd-dialog-open": "",
-                hidden: true,
+                    hidden: true,
                 "{trigger_label}"
             }
 

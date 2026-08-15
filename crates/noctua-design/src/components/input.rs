@@ -121,7 +121,7 @@ pub fn Input(
     prefix: Option<String>,
     /// A fixed word or symbol after the value, such as `.com`, `kg` or `%`. Same rule: drawn, never submitted.
     suffix: Option<String>,
-    /// Whether a control appears for emptying the box. Off by default. Emptying a field costs a reader one gesture they already know. A control that appears only when there is text moves the layout as they type.
+    /// Whether a control appears for emptying the box. Off by default. Emptying a field costs a reader one gesture they already know. It keeps its space while the box is empty, so nothing moves as they type.
     #[props(default = false)]
     clearable: bool,
     /// The name of that control. It is a glyph, so this is the only name it has.
@@ -170,6 +170,41 @@ pub fn Input(
     let box_class = box_class.trim().to_owned();
     let clear = clear_label.clone();
     let reveal = reveal_label.clone();
+    // WHAT THE COUNTER SAYS BEFORE ANY SCRIPT RUNS.
+    //
+    // The `<p>` shipped empty and `aria-describedby` pointed at it, so a box
+    // with `maxlength` stopped taking characters with nothing on the page
+    // saying why. That is the exact failure `counter`'s own doc exists to
+    // prevent, committed by the component the doc is about.
+    //
+    // `other` IS THE FORM RENDERED. Which form a count needs is a question
+    // about the reader's language — Portuguese and Polish do not agree with
+    // English or with each other — and a component that ships no runtime and
+    // is handed no locale cannot answer it. `other` is the one category every
+    // language has, and `inputs.js` writes the exact form as soon as it runs,
+    // with the region silenced first so nothing is said twice.
+    let counted = if counter {
+        let shape = counter_label.clone().unwrap_or_default();
+        let form = if shape.contains(':') {
+            shape
+                .split('|')
+                .filter_map(|part| part.split_once(':'))
+                .find(|(name, _)| name.trim() == "other")
+                .map_or(String::new(), |(_, text)| text.to_owned())
+        } else {
+            shape
+        };
+        let start = value
+            .as_deref()
+            .unwrap_or_default()
+            .chars()
+            .count()
+            .to_string();
+        form.replace("{count}", &start)
+            .replace("{max}", maxlength.as_deref().unwrap_or_default())
+    } else {
+        String::new()
+    };
 
     rsx! {
         Field {
@@ -274,6 +309,8 @@ pub fn Input(
                     role: "status",
                     "aria-live": "polite",
                     "data-nd-input-counter": "",
+                    // See above: the sentence, rendered rather than waited for.
+                    "{counted}"
                 }
             }
         }

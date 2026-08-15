@@ -67,6 +67,11 @@ const FINGERPRINT = `(root) => {
         style.flexDirection,
         style.borderColor,
         style.borderRadius,
+        // A BEVEL IS A CUT, NOT A RADIUS. A square shape and a bevelled one
+        // both set the radius to none and differ only here, so without this
+        // the fingerprint read them as one picture. No backticks in this
+        // block: it is the body of a template literal.
+        style.clipPath,
         style.borderStyle,
         style.borderWidth,
         style.backgroundColor,

@@ -50,6 +50,9 @@ import { enhanceLineages } from "./lineage.js";
 // that control scrolls away. A `dist/` file for the same reason: `ColorPicker`
 // ships its behaviour and its panel floats, so the rule cannot live here.
 import { keepAnchored, releaseAnchor } from "./anchor.js";
+// Where a field's refusal goes. `Field` renders a visually hidden word in
+// front of the sentence, so nothing may write the paragraph's `textContent`.
+import { saySentence } from "./messages.js";
 // The picker's whole behaviour, and a `dist/` file for the same reason: a
 // colour picker that only picks colours inside this site is not one.
 import { enhancePickers } from "./color-picker.js";
@@ -402,7 +405,19 @@ document.addEventListener("click", (event) => {
   if (flip) {
     if (flip.getAttribute("aria-disabled") === "true") return;
     const on = flip.getAttribute("aria-checked") === "true";
-    route(flip, flip.dataset.ndGroup, on ? flip.dataset.ndOff : flip.dataset.ndOn);
+    const name = flip.dataset.ndGroup;
+    // THE FOURTH ANSWER, WHICH THE SWITCH DID NOT HAVE. `route` sends a
+    // setting somewhere; a switch the model knows nothing about has nowhere to
+    // send it, so `themeScope` returned early, `apply` returned early and
+    // `refresh` skipped it. Every one of the eight switches on the switch's
+    // own page moved nothing at all, which is a control on a page about
+    // controls that does not work. The `Segmented` below has had this branch
+    // since it was written, for exactly the same reason.
+    if (model[name]) {
+      route(flip, name, on ? flip.dataset.ndOff : flip.dataset.ndOn);
+    } else {
+      flip.setAttribute("aria-checked", String(!on));
+    }
     return;
   }
 
@@ -542,6 +557,13 @@ for (const menu of document.querySelectorAll(FRAME_MENU)) {
 // The last is why the cap is applied here rather than in the stylesheet — a CSS
 // `max-block-size` would hide the tail of every long block on a page whose
 // script was blocked, and nothing would say so.
+//
+// THE FIRST TWO ARE KEPT BY THE STYLESHEET, AND FOR A LONG TIME WERE NOT. Only
+// the expand button was gated on `:root[data-nd-scripting]`; the copy and the
+// wrap toggle shipped visible and focusable on every page, doing nothing, while
+// this paragraph said otherwise. `.nd-codeblock-control` carries the gate now,
+// which is the same one `.nd-lineage-camera`, `.nd-dialog` and `.nd-popover`
+// use. A sentence about degradation is not a mechanism.
 
 document.addEventListener("click", async (event) => {
   const button = event.target.closest?.("[data-nd-copy]");
@@ -801,6 +823,11 @@ function enhanceSelect(field) {
 
   const id = native.id;
   const searchable = field.dataset.ndSearchable === "true";
+  // `creatable` NEEDS A FILTER BOX, AND USED TO ACCEPT ONE WITHOUT. The offer
+  // to add is a row inside the filtered list and `create()` reads the box, so
+  // without one the attribute reached nothing and would have thrown if it had.
+  // Read here rather than at each use, so the dependency is stated once.
+  const creatable = searchable && field.dataset.ndCreatable === "true";
   label.id = `${id}-label`;
 
   // THE NATIVE CONTROL IS HIDDEN, NOT `aria-hidden`.
@@ -830,6 +857,13 @@ function enhanceSelect(field) {
   // focus moves into the input and the input carries the role — a `combobox`
   // that does not have focus cannot own `aria-activedescendant`.
   if (!searchable) control.setAttribute("role", "combobox");
+  // AN ANSWER IS COMPULSORY, AND THE ENHANCED CONTROL NEVER SAID SO. The
+  // native `<select>` carries the real `required` and is `hidden`, so the only
+  // thing a reader can reach was a plain button with nothing on it — the
+  // string `aria-required` did not exist anywhere in this repository, under a
+  // contract promising it follows from the prop. `required` is not an
+  // attribute a `<button>` has, so this is the one way to state the fact.
+  if (native.required) control.setAttribute("aria-required", "true");
   const value = document.createElement("span");
   value.className = "nd-select-value";
   control.append(value);
@@ -855,6 +889,9 @@ function enhanceSelect(field) {
     search.autocomplete = "off";
     search.spellcheck = false;
     if (field.dataset.ndSearchLabel) search.setAttribute("aria-label", field.dataset.ndSearchLabel);
+    // The filter box is the combobox when there is one, so the fact moves with
+    // the role rather than being stated on the element beside it.
+    if (native.required) search.setAttribute("aria-required", "true");
     panel.append(search);
   }
 
@@ -885,6 +922,7 @@ function enhanceSelect(field) {
     list,
     note,
     search,
+    creatable,
     id,
     rows: [],
     active: -1,
@@ -986,7 +1024,7 @@ function wireForm(state) {
       event.preventDefault();
       if (state.saidByCaller) return;
       const slot = state.field.closest(".nd-field")?.querySelector("[data-nd-field-error]");
-      if (slot) slot.textContent = state.native.validationMessage;
+      saySentence(slot, state.native.validationMessage);
       state.field.dataset.ndInvalid = "true";
       state.control.setAttribute("aria-invalid", "true");
       // And focus lands on the control the reader can see, which is the whole
@@ -1021,7 +1059,7 @@ function wireForm(state) {
 function clearComplaint(state) {
   if (state.saidByCaller) return;
   const slot = state.field.closest(".nd-field")?.querySelector("[data-nd-field-error]");
-  if (slot) slot.textContent = "";
+  saySentence(slot, "");
   state.field.dataset.ndInvalid = "false";
   state.control.removeAttribute("aria-invalid");
 }
@@ -1188,7 +1226,8 @@ function applyFilter(state) {
   for (const group of state.list.querySelectorAll(".nd-select-group-row")) {
     group.hidden = ![...group.querySelectorAll(".nd-select-item")].some((item) => !item.hidden);
   }
-  const creatable = state.field.dataset.ndCreatable === "true";
+  // See `enhanceSelect`: a filter box is what makes this mean anything.
+  const creatable = state.creatable;
   // BY VALUE AS WELL AS BY LABEL, AND THE VALUE IS THE ONE THAT MATTERS.
   //
   // This compared `textContent` only, while `create()` writes the term into
@@ -1360,10 +1399,12 @@ function onSelectKey(state, event) {
     case "Home":
     case "End": {
       if (!open) return;
-      // With a filter box these are the caret's, not the list's — a reader
+      // With something TYPED these are the caret's, not the list's: a reader
       // fixing a typo at the start of what they typed is not asking for the
-      // first option.
-      if (state.search) return;
+      // first option. With the box empty there is no typo and no caret worth
+      // keeping, so the keys reach the list — which is what the contract
+      // promises and what an empty filter box used to swallow.
+      if (state.search && state.search.value !== "") return;
       event.preventDefault();
       const rows = visibleRows(state);
       if (rows.length) moveTo(state, state.rows.indexOf(event.key === "Home" ? rows[0] : rows.at(-1)));
@@ -1379,8 +1420,11 @@ function onSelectKey(state, event) {
       takeOption(state, state.active);
       return;
     case " ":
-      // A filter box needs its spaces. Without one, Space is the second key a
-      // reader may arrive expecting, exactly as on a `Switch`.
+      // A FILTER BOX NEEDS ITS SPACES, AND THAT IS NOT NEGOTIABLE. Which
+      // leaves a `multiple` searchable select with no Space, so Enter is what
+      // chooses without closing there — `takeOption` keeps the list open
+      // whenever several may be chosen, whichever key opened it. The keyboard
+      // table says so now rather than promising a key this branch refuses.
       if (state.search) return;
       event.preventDefault();
       if (!open) openList(state);
@@ -2313,6 +2357,10 @@ function buildPicker(root_) {
     duplicates: root_.dataset.ndDuplicates === "true",
     max: Number.parseInt(root_.dataset.ndMax ?? "", 10) || 0,
     pattern: root_.dataset.ndPattern ?? "",
+    // Read from the composer, which is where the component puts it, and read
+    // ONCE — `paintTags` writes the same property and would otherwise be
+    // asking a question it had already answered.
+    required: box.required,
     words: {
       create: root_.dataset.ndCreateLabel ?? "",
       max: root_.dataset.ndMaxLabel ?? "",
@@ -2587,6 +2635,16 @@ function paintTags(state) {
     state.list.append(item);
   });
   state.list.tabIndex = chosen.length > 0 ? 0 : -1;
+  // AND THE COMPOSER STOPS BEING COMPULSORY ONCE THERE IS AN ANSWER.
+  //
+  // `required` sits on the composer, because the browser has to focus an
+  // invalid control to anchor its bubble and the real `<select>` is hidden.
+  // Every commit clears the composer and nothing took the attribute off, so a
+  // reader who entered three tags met "please fill in this field" pointing at
+  // an empty box they had deliberately emptied — the field was unsubmittable
+  // exactly when it had been answered. The requirement is about the field, so
+  // it follows the tags rather than the box.
+  if (state.required) state.box.required = chosen.length === 0;
   state.root.toggleAttribute("data-nd-filled", chosen.length > 0);
   if (state.clear) state.clear.hidden = chosen.length === 0;
   // The standing sentence. `commit` and `remove` say something more specific
@@ -2846,9 +2904,31 @@ function buildTree(root_) {
     node.dataset.ndLeaf = String(!branch);
     if (group) {
       group.setAttribute("role", "group");
-      // A branch that claims children it was not given has an empty group, and
-      // an empty `role="group"` is a container announcing nothing.
-      if (!kids) group.removeAttribute("role");
+      // A BRANCH THAT OPENS ONTO A GAP SAYS SO, AND IT USED TO SAY NOTHING.
+      //
+      // `empty_label` reached `state.words.empty` and stopped there: no
+      // element, no rule, nothing on the page — under a contract telling a
+      // caller to set it so exactly this row is explained. With the word the
+      // group holds one row that carries it; without one the group is empty,
+      // and an empty `role="group"` is a container announcing nothing.
+      // A BRANCH THAT CLAIMED CHILDREN, NOT A LEAF. Every node renders a
+      // group, so `!kids` alone is true of every leaf on the tree — and a leaf
+      // is not a row opening onto a gap, it is a row with nothing under it by
+      // design. `data-nd-branch` is the claim this explains.
+      if (!kids) {
+        if (branch && state.words.empty) {
+          const note = document.createElement("li");
+          note.className = "nd-tree-empty";
+          note.dataset.ndTreeEmpty = "";
+          // Not a `treeitem`: it is the group explaining itself, not a row a
+          // reader can walk to, choose or open.
+          note.setAttribute("role", "none");
+          note.textContent = state.words.empty;
+          group.append(note);
+        } else {
+          group.removeAttribute("role");
+        }
+      }
     }
 
     const toggle = node.querySelector(":scope > .nd-tree-row > [data-nd-tree-toggle]");
@@ -3071,8 +3151,13 @@ function onTreeKey(state, event) {
       return;
     }
     case " ":
-      if (state.selection === "none") return;
+      // REFUSED BEFORE IT IS ANSWERED. `tree.toml` promises that on a tree
+      // with no selection Space "does nothing rather than scrolling", and this
+      // returned before `preventDefault` — so the browser's own default ran
+      // and the page jumped a screen under a reader whose focus was on a row.
+      // Doing nothing is a thing that has to be done.
       event.preventDefault();
+      if (state.selection === "none") return;
       chooseNode(state, node, { add: true });
       return;
     case "a":
@@ -3309,6 +3394,17 @@ function roving(container) {
 }
 
 function refreshRoving() {
+  // THE GROUP'S OWN STOP IS THE MARKUP'S, AND IT ENDS HERE.
+  //
+  // `Segmented` renders `tabindex="0"` on the group, because with no script a
+  // group whose items all say `-1` is a radiogroup no keyboard can reach — and
+  // an item cannot know whether any of its siblings is chosen. Once this pass
+  // has run a real radio holds the stop, so a group that kept its own would be
+  // a second one. Inside a toolbar it would be worse: `stops()` collects
+  // `[tabindex]`, so the group itself would join the bar's walk.
+  for (const group of document.querySelectorAll('[role="radiogroup"][tabindex]')) {
+    group.removeAttribute("tabindex");
+  }
   // Toolbars first, then the radiogroups that are NOT inside one: a group
   // within a toolbar has already had its radios placed by the toolbar's pass,
   // and running the group's own pass afterwards would put a second `0` on the
@@ -4251,15 +4347,10 @@ function enhanceDateInput(root) {
   // --- The sentences -------------------------------------------------------
 
   const say = (sentence, wrong) => {
-    slot.replaceChildren();
-    const prefix = root.dataset.ndErrorLabel;
-    if (prefix) {
-      const word = document.createElement("span");
-      word.className = "nd-visually-hidden";
-      word.textContent = `${prefix} `;
-      slot.append(word);
-    }
-    slot.append(document.createTextNode(sentence));
+    // THE WORD IN FRONT IS `Field`'S NOW. This built its own copy from
+    // `data-nd-error-label` and replaced the whole paragraph to place it,
+    // which is the same prefix drawn twice from one prop.
+    saySentence(slot, sentence);
     root.dataset.ndInvalid = "true";
     for (const part of ["day", "month", "year"]) {
       if (wrong.includes(part)) boxes[part].setAttribute("aria-invalid", "true");
@@ -4269,7 +4360,7 @@ function enhanceDateInput(root) {
 
   const settle = () => {
     if (saidByCaller) return;
-    slot.replaceChildren();
+    saySentence(slot, "");
     root.dataset.ndInvalid = "false";
     for (const part of ["day", "month", "year"]) boxes[part].removeAttribute("aria-invalid");
   };

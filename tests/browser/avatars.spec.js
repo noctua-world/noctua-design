@@ -139,10 +139,14 @@ test("every face in a group keeps a strip a pointer can reach", async ({ page })
     // What each face leaves uncovered by the one after it.
     return boxes.map((box, at) => (at + 1 < boxes.length ? boxes[at + 1].left - box.left : box.width));
   });
-  // The tightest overlap this component offers still leaves something to aim
-  // at. `none` is what the contract points at when the faces are links and
-  // WCAG 2.5.8's twenty-four pixels have to be cleared.
-  for (const strip of strips) expect(strip).toBeGreaterThan(0);
+  // TWENTY-FOUR PIXELS, WHICH IS THE NUMBER THIS COMMENT ALWAYS NAMED. The
+  // assertion under it read `> 0`, so a crescent one pixel wide passed a test
+  // about a target a pointer can hit. WCAG 2.5.8 asks for 24, and the tightest
+  // overlap this component offers still clears it at every size on the page.
+  expect(strips.length, "the group this is about lost its faces").toBeGreaterThan(2);
+  for (const strip of strips) {
+    expect(strip, `a face leaves ${Math.round(strip)}px to aim at`).toBeGreaterThanOrEqual(24);
+  }
 });
 
 test.describe("with the script blocked", () => {

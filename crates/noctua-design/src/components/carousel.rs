@@ -38,7 +38,7 @@ impl CarouselSnap {
     }
 }
 
-/// Which way the track runs. Defaults to `horizontal`, and it is announced as well as drawn, so a reader knows which arrow keys move it. It is written with logical properties, so it reverses in a right-to-left locale.
+/// Which way the track runs. Defaults to `horizontal`. It is drawn rather than announced, because a group has no axis in ARIA. It is written with logical properties, so it reverses in a right-to-left locale.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum CarouselOrientation {
     #[default]
@@ -81,7 +81,7 @@ pub fn Carousel(
     /// Where a slide comes to rest. `start` lines its leading edge up with the track's, which suits a shelf, and `center` suits a gallery of one. `none` leaves a plain scroller, and turns the two controls into a scroll by one screen rather than to a slide.
     #[props(default)]
     snap: CarouselSnap,
-    /// Which way the track runs. Defaults to `horizontal`, and it is announced as well as drawn, so a reader knows which arrow keys move it. It is written with logical properties, so it reverses in a right-to-left locale.
+    /// Which way the track runs. Defaults to `horizontal`. It is drawn rather than announced, because a group has no axis in ARIA. It is written with logical properties, so it reverses in a right-to-left locale.
     #[props(default)]
     orientation: CarouselOrientation,
     /// Whether the previous and next controls appear. **On by default**, because a mouse with no horizontal wheel cannot move a scroll container without them. They render hidden and the script reveals them once the track is measured.
@@ -129,6 +129,15 @@ pub fn Carousel(
     let previous = previous_label.clone();
     let next = next_label.clone();
     let pause = pause_label.clone();
+    // A WIDTH IS A PROP, SO THE COMPONENT WRITES IT. `carousel.js` used to set
+    // this custom property, which made `per_view` a thing that needed a script:
+    // with JavaScript blocked a `per_view: "3"` carousel showed one slide,
+    // under a contract that opens by promising the slides "scroll and snap
+    // before any script runs". The stylesheet divides the track by it and
+    // declares `1` as the fallback, so this is the only value that has to
+    // arrive. `auto` is matched on `data-nd-per-view` instead and wants no
+    // property at all.
+    let per_view_width = (per_view != "auto").then(|| format!("--nd-carousel-per-view:{per_view}"));
 
     rsx! {
         section {
@@ -141,7 +150,9 @@ pub fn Carousel(
             role: "group",
             "aria-roledescription": "carousel",
             "aria-label": "{label}",
-            "aria-orientation": orientation.as_str(),
+            // DRAWN, NOT ANNOUNCED. ARIA 1.2 gives `role="group"` no axis, so
+            // `aria-orientation` here was an attribute an engine may drop.
+            "data-nd-orientation": orientation.as_str(),
             "data-nd-per-view": "{per_view}",
             "data-nd-snap": snap.as_str(),
             "data-nd-glass": if glass { "true" } else { "false" },
@@ -165,6 +176,8 @@ pub fn Carousel(
                 class: "nd-carousel-track",
                 id: "{track_id}",
                 "data-nd-carousel-track": "",
+                // See above: the share of the track one slide takes, rendered.
+                style: per_view_width,
                 // Polite while a reader is driving; the runtime turns it off
                 // while autoplay is, because a region that speaks every four
                 // seconds unasked makes the rest of the page unusable.

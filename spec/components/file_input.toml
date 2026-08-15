@@ -31,9 +31,11 @@ default = "true"
 attribute = "data-nd-drop"
 doc = "Whether files can be dragged onto the area. **On by default, and never the only way in.** The area is the `<label>` of the real input, so a press, a Tab and an Enter do the same as a drop."
 
+# DRAWN, NOT DECLARED. This said `data-nd-drop-label` and no body wrote one:
+# the words are the text of the drop area itself. See `ColorPicker` for the
+# eleven siblings that had the same fiction.
 [prop.drop_label]
 type = "text"
-attribute = "data-nd-drop-label"
 doc = "The sentence beside the control, such as *or drop them here*. Supply it with `drop`, because an affordance users are not told about goes unused."
 
 [prop.accept]
@@ -145,8 +147,8 @@ doc = "Whether a file is over the area. The border and the ground change so a re
 
 [a11y]
 needs_name = true
-notes = "The drop area is the `<label>` of a real file input, so it is focusable, pressable and announced. The input is clipped rather than `display: none`, which would take it out of the accessible tree."
+notes = "The drop area is the `<label>` of a real file input, so it is pressable and announced. The input itself is the focusable part, clipped rather than hidden, and the area draws its focus ring."
 
 [keyboard]
-"Enter or Space" = "Opens the file picker from the area. The browser's own behaviour, because the area is a `<label>`."
+"Enter or Space" = "Opens the file picker. The browser's own behaviour on the focused input, which the area names and shows the focus of."
 "Delete or Backspace" = "Removes the file whose remove control has focus."

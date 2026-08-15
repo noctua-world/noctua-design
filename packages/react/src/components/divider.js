@@ -30,7 +30,12 @@ export function Divider({ orientation, label, spacing, weight, decorative, class
     ...rest,
   };
 
-  if (!label) return h("hr", shared);
+  // GIVEN OR NOT GIVEN, NOT TRUTHY OR FALSY. The Dioxus half branches on
+  // `Option`, so `label = Some("")` is a labelled divider there — a `<div
+  // role="separator">` with an empty word in it. `!label` made the same call
+  // render an `<hr>`, which is a different element with a different role from
+  // the same props, and that is exactly the drift `NOCTUA.md §9.3` forbids.
+  if (label === undefined || label === null) return h("hr", shared);
   return h(
     "div",
     {

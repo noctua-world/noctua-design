@@ -747,3 +747,31 @@ test.describe("what it refuses to do", () => {
     expect(Number(skipped)).toBeGreaterThan(0);
   });
 });
+
+test("picking a figure changes what a reader sees", async ({ page }) => {
+  await page.goto(url(PAGE.lineage));
+  await showParts(page);
+  // EVERY `:checked` RULE TARGETED A BOND, and `data-nd-picked` appeared in no
+  // rule at all — while `[keyboard] "Space"` and `[state.picked]` both promised
+  // a figure could be singled out. So a reader could pick a person, the box
+  // would be checked, the form would post it, and the scene looked unchanged.
+  const pick = page.locator(".nd-lineage-piece .nd-lineage-pick").first();
+  await expect(pick).toHaveCount(1);
+  const card = page
+    .locator(".nd-lineage-piece:has(.nd-lineage-pick)")
+    .first()
+    .locator(".nd-lineage-card")
+    .first();
+  const drawn = () =>
+    card.evaluate((el) => {
+      const style = getComputedStyle(el);
+      return `${style.borderTopWidth} ${style.fontWeight}`;
+    });
+
+  const before = await drawn();
+  await pick.evaluate((el) => {
+    el.checked = true;
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  expect(await drawn()).not.toBe(before);
+});

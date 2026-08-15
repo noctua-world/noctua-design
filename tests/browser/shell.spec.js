@@ -5,7 +5,7 @@
 // measurement that was true once.
 
 import { test, expect } from "@playwright/test";
-import { ANY, LOCALES, PAGE, SCOPED, url } from "./pages.js";
+import { ANY, LOCALES, PAGE, SCOPED, url, showParts } from "./pages.js";
 
 const MOBILE = { width: 390, height: 844 };
 const DESKTOP = { width: 1440, height: 900 };
@@ -122,11 +122,6 @@ test.describe("§9.7, enforced", () => {
   });
 
   test("exactly four kinds of floating surface exist", async ({ page }) => {
-    await page.setViewportSize(MOBILE);
-    await page.goto(url(SCOPED));
-    await page.locator('[data-nd-action="menu"]').click();
-    await page.locator(".nd-settings > summary").click();
-
     // `nd-frame-bar` is listed and no longer floats: it was sticky under the
     // header so that the controls of a frame several screens tall stayed in
     // reach, and it is `relative` now — it stays at the top of its own frame.
@@ -182,39 +177,103 @@ test.describe("§9.7, enforced", () => {
       // pointer and the control it is about.
       "nd-tooltip",
       // `nd-toast`: a message pinned to a corner of the window, and the ONLY
-      // entry on this list that is visible with nothing pressed. That matters
-      // here, because this sweep only sees elements whose `offsetParent` is not
-      // null — a surface that opens on an interaction is invisible to it and
-      // this one is not. It floats because it reports something that happened
-      // somewhere else on the page, and it is bounded by `contain: layout` on
-      // the documentation site so four of them do not stack in one corner.
+      // entry on this list that is visible with nothing pressed. It floats
+      // because it reports something that happened somewhere else on the page,
+      // and it is bounded by `contain: layout` on the documentation site so
+      // four of them do not stack in one corner.
       "nd-toast",
     ];
-    const floating = await page.evaluate((allowed) => {
-      return [...document.querySelectorAll("*")]
+
+    // WHAT COUNTS AS A FLOATING SURFACE, written once because this runs on five
+    // pages now rather than on one.
+    //
+    // `checkVisibility()` RATHER THAN `offsetParent`. A positioned element that
+    // is `fixed` always reports `offsetParent` as null, by definition, so the
+    // old filter threw away the surfaces this test exists to find. Ten of the
+    // entries above were names in a list nothing had ever looked at, including
+    // all four components below the line.
+    const sweep = () =>
+      [...document.querySelectorAll("*")]
         .filter((el) => {
           const s = getComputedStyle(el);
           return (
             ["fixed", "sticky", "absolute"].includes(s.position) &&
             s.backgroundColor !== "rgba(0, 0, 0, 0)" && // allow-literal: the CSS keyword for "no background", not a color this system could take from a token
-            el.offsetParent !== null
+            el.checkVisibility()
           );
         })
-        .map((el) => el.className)
-        .filter((name) => !allowed.some((ok) => String(name).includes(ok)));
-    }, allowed);
+        .map((el) => String(el.className));
+
+    const seen = [];
+    await page.setViewportSize(MOBILE);
+    await page.goto(url(SCOPED));
+    await page.locator('[data-nd-action="menu"]').click();
+    await page.locator(".nd-settings > summary").click();
+    seen.push(...(await page.evaluate(sweep)));
+
+    // AND THE FOUR COMPONENT SURFACES ARE ON FOUR OTHER PAGES. None of them is
+    // drawn until something opens it, so the sweep opens each one and then
+    // looks. The shell page alone can never reach any of the four.
+    const components = [
+      {
+        path: PAGE.dialog,
+        open: (p) => p.locator('[data-nd-dialog="dialog-remove"] .nd-dialog-open').click(),
+      },
+      {
+        path: PAGE.popover,
+        open: (p) => p.locator('[data-nd-popover="popover-filter"] .nd-popover-trigger').click(),
+      },
+      {
+        path: PAGE.tooltip,
+        // The bubble answers the focus with no delay, so this is the way in
+        // that waits for nothing.
+        open: (p) => p.locator('[data-nd-tooltip="tooltip-copy"] button').first().focus(),
+      },
+      {
+        path: PAGE.toast,
+        // Already on the screen with nothing pressed, which is what makes it
+        // the odd entry on the list above.
+        open: async () => {},
+      },
+    ];
+    for (const one of components) {
+      await page.goto(url(one.path));
+      await showParts(page);
+      await one.open(page);
+      seen.push(...(await page.evaluate(sweep)));
+    }
 
     // A fifth floating surface has to be named and justified here before it can
     // ship. That is the whole mechanism.
-    expect(floating, "an unlisted floating surface appeared").toEqual([]);
+    const unlisted = seen.filter((name) => !allowed.some((ok) => name.includes(ok)));
+    expect(unlisted, "an unlisted floating surface appeared").toEqual([]);
+
+    // THE FLOOR. The check above is a filter down to failures, so it also holds
+    // for a sweep that examined nothing, which is what the `offsetParent`
+    // filter had quietly made this. Five pages draw more than thirty surfaces
+    // between them.
+    expect(seen.length, "the sweep looked at almost nothing").toBeGreaterThan(30);
+    // And the four that were never once reached are now named one by one, so
+    // losing a page from the walk above fails here rather than passing.
+    for (const kind of ["nd-dialog", "nd-popover", "nd-tooltip", "nd-toast"]) {
+      expect(seen.some((name) => name.includes(kind)), `${kind} was never examined`).toBe(true);
+    }
   });
 
   test("the measure holds however wide the page gets", async ({ page }) => {
     await page.setViewportSize({ width: 2560, height: 900 });
     await page.goto(url(ANY));
-    const widths = await page.locator(".nd-prose").evaluateAll((els) =>
-      els.map((el) => el.getBoundingClientRect().width),
-    );
+    // THE READING COLUMN, UNDER EVERY NAME IT HAS. The measure sits on
+    // `.nd-prose`, on `.nd-lead`, and on the children of a prose block rather
+    // than on the block. This asked for `.nd-prose` alone, which the
+    // introduction carries none of, so it measured nothing at all.
+    const widths = await page
+      .locator(".nd-prose, .nd-lead, .nd-prose-block > *")
+      .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().width));
+    // THE FLOOR. Every check below holds for an empty list, so the loop proved
+    // nothing for as long as the selector named a class this page has none of.
+    // The introduction draws a lead and a paragraph, which is two.
+    expect(widths.length, "the introduction drew no reading column").toBeGreaterThan(1);
     // The page is as wide as the screen; the LINE is not.
     for (const width of widths) expect(width).toBeLessThan(900);
     const main = await page.locator(".nd-main").boundingBox();

@@ -143,11 +143,20 @@ test("the alphanumeric row takes letters and the numeric one does not", async ({
 test("every box clears the minimum target size", async ({ page }) => {
   await page.goto(url(PAGE.otpField));
   await showParts(page);
-  const small = await page.evaluate(() =>
-    [...document.querySelectorAll("input.nd-otp-field-input")]
-      .filter((el) => el.offsetParent !== null)
-      .map((el) => el.getBoundingClientRect())
-      .filter((box) => box.width < 24 || box.height < 24).length,
-  );
-  expect(small, "a box smaller than the minimum target").toBe(0);
+  const boxes = await page.evaluate(() => {
+    const drawn = [...document.querySelectorAll("input.nd-otp-field-input")].filter(
+      (el) => el.offsetParent !== null,
+    );
+    return {
+      count: drawn.length,
+      small: drawn
+        .map((el) => el.getBoundingClientRect())
+        .filter((box) => box.width < 24 || box.height < 24).length,
+    };
+  });
+  // THE FLOOR, FIRST. Nothing measured is nothing found too small, so this
+  // passed on a page with no row on it at all. The page draws six rows of six,
+  // and the test above needs two of those rows to exist.
+  expect(boxes.count, "the page drew no box to measure").toBeGreaterThan(11);
+  expect(boxes.small, "a box smaller than the minimum target").toBe(0);
 });

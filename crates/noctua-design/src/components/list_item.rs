@@ -14,7 +14,7 @@ use dioxus::prelude::*;
 ///
 /// A `<dt>` and its `<dd>` must be direct children of the `<dl>`, so this
 /// renders two siblings rather than wrapping them. A wrapper breaks the
-/// association a screen reader reads.
+/// association a screen reader reads. The `<li>` restates `listitem`.
 #[component]
 pub fn ListItem(
     /// The thing being described. Its presence switches the item from an `<li>` to a `<dt>` and a `<dd>`, which is what a description list is made of.
@@ -33,7 +33,7 @@ pub fn ListItem(
             dt { class: "nd-list-term", "{term}" }
             dd { class: "{root}", {children} }
         } else {
-            li { class: "{root}", {children} }
+            li { class: "{root}", role: "listitem", {children} }
         }
     }
 }

@@ -103,6 +103,11 @@ export function Button({ label, detail, variant, tone, size, shape, icon, iconEn
       value,
       "aria-pressed": pressed ? "true" : undefined,
       disabled: disabled || undefined,
+      // See the Dioxus half: a menu button is revealed by
+      // `dist/menu.js`, never built, because a control announcing
+      // `aria-haspopup="menu"` over nothing that can open is worse
+      // than no control at all.
+      hidden: menu || undefined,
     },
     content,
   );

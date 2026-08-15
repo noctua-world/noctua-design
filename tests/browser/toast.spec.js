@@ -48,7 +48,9 @@ test("a message is a status, and its region is armed after the page settles", as
   expect(live.some((one) => one === "assertive"), "the loud one is not demonstrated").toBe(true);
 });
 
-test("with the script blocked the message is whole and closes nothing", async ({ browser }) => {
+test("with the script blocked the message is whole, closes nothing, and covers nothing", async ({
+  browser,
+}) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto(url(PAGE.toast));
@@ -57,7 +59,46 @@ test("with the script blocked the message is whole and closes nothing", async ({
   // what happened. The control is not, because it would close nothing.
   await expect(named(page, "toast-saved").locator(".nd-toast-body")).toBeVisible();
   await expect(named(page, "toast-saved").locator(".nd-toast-dismiss")).toBeHidden();
+
+  // AND IT DOES NOT FLOAT, WHICH THIS TEST USED TO ASSERT THE OPPOSITE OF.
+  //
+  // A dismiss control that ships hidden and a `position: fixed` panel are two
+  // correct decisions that together make one defect: the only floating surface
+  // in the system that draws a panel over the page with no way out of it.
+  // `.nd-dialog` and `.nd-popover` never open at all without a script and a
+  // `Menu` does not render, and this had no such rule. In flow it is a message
+  // IN the page rather than over it, and nothing is lost — the words are the
+  // same words.
+  const laid = await named(page, "toast-saved").evaluate((el) => getComputedStyle(el).position);
+  expect(laid, "a message with no way out is laid over the page").not.toBe("fixed");
+
+  // Nothing underneath it is covered: the message contributes its own height
+  // to the stage it sits in, which an out-of-flow box cannot do. Scrolled to
+  // first, because the question is asked in viewport coordinates.
+  await named(page, "toast-saved").scrollIntoViewIfNeeded();
+  const laidOut = await page.evaluate(() => {
+    const toast = document.querySelector('[data-nd-toast="toast-saved"]');
+    const box = toast.getBoundingClientRect();
+    const at = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+    const stage = toast.parentElement.getBoundingClientRect();
+    return {
+      own: toast.contains(at),
+      inside: box.height > 0 && stage.height >= box.height,
+    };
+  });
+  expect(laidOut.own, "something is sitting over a message nothing can close").toBe(true);
+  expect(laidOut.inside, "the message is not where the layout put it").toBe(true);
   await context.close();
+});
+
+test("the script puts it back in its corner", async ({ page }) => {
+  // The other half: with a script there IS a way out, so the message may float
+  // again. `data-nd-scripting` is stamped by the inline head script before the
+  // first paint, so the corner is its first position and not a second one.
+  const all = await toasts(page);
+  expect(await all.count()).toBeGreaterThan(0);
+  const laid = await named(page, "toast-saved").evaluate((el) => getComputedStyle(el).position);
+  expect(laid).toBe("fixed");
 });
 
 test("the script reveals the control, and pressing it takes the message away", async ({ page }) => {
@@ -179,4 +220,72 @@ test("a floating message stays inside the page it is documented on", async ({ pa
       .map((el) => el.dataset.ndToast);
   });
   expect(outside, "a message escaped the column it belongs to").toEqual([]);
+});
+
+// --- A message with something to do in it ------------------------------------
+
+const REVIEW = "toast-review";
+
+test("the message keeps its link when the region is armed", async ({ page }) => {
+  // WHAT WENT WRONG. `announce()` took the body's `textContent`, emptied the
+  // body and wrote the string back through `say`, which assigns `textContent`.
+  // That flattens the message: `children`'s contract says it "may hold a
+  // `Link` to whatever a reader has to do about it", and that link was deleted
+  // on the one path that matters — a message that ARRIVED, after the page had
+  // finished loading, which is the only kind a toast is really for.
+  //
+  // The nodes are moved out and back now, so nothing is ever copied as text.
+  await toasts(page);
+  await page.waitForLoadState("load");
+
+  const survived = await page.evaluate(async () => {
+    const original = document.querySelector('[data-nd-toast="toast-review"]');
+    const arriving = original.cloneNode(true);
+    arriving.dataset.ndToast = "toast-arrived";
+    delete arriving.dataset.ndEnhanced;
+    original.parentElement.append(arriving);
+
+    const { enhanceToasts } = await import("/assets/toast.js");
+    enhanceToasts(arriving.parentElement);
+    await new Promise((settle) => requestAnimationFrame(() => requestAnimationFrame(settle)));
+
+    const body = arriving.querySelector("[data-nd-toast-body]");
+    return {
+      links: body.querySelectorAll("a[href]").length,
+      words: body.textContent.trim().length,
+    };
+  });
+  expect(survived.links, "the message's own link was deleted on arrival").toBe(1);
+  expect(survived.words, "the message lost its words as well").toBeGreaterThan(10);
+});
+
+test("the wait comes back when the focus leaves a message holding two controls", async ({
+  page,
+}) => {
+  // THE COUNTER COULD NEVER RETURN TO ZERO. `focusin` raised it on every
+  // arrival and `focusout` lowered it only when the focus had left the
+  // message, so moving from the link to the dismiss control — one Tab, inside
+  // one message — raised it twice and lowered it once. The timer then stopped
+  // for good on exactly the message `children` exists to allow.
+  await toasts(page);
+  const toast = named(page, REVIEW);
+  await expect(toast).toBeVisible();
+  const link = toast.locator("a[href]");
+  const control = toast.locator(".nd-toast-dismiss");
+
+  await link.focus();
+  await expect(toast).toHaveAttribute("data-nd-paused", "");
+  // One Tab inside the message: from the link to the control it ships with.
+  await control.focus();
+  await expect(toast, "the message let go while the focus was still in it").toHaveAttribute(
+    "data-nd-paused",
+    "",
+  );
+
+  // And out again, which has to release it exactly once.
+  await page.locator("h1").click();
+  await expect(toast, "the wait never came back after two focusables").not.toHaveAttribute(
+    "data-nd-paused",
+    "",
+  );
 });

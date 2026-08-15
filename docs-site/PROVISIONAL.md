@@ -3096,3 +3096,86 @@ every locale.
     what that list is for. `Toast` is the first entry on it that is visible with
     nothing pressed.
 
+104. **All 86 components audited, because two of them had been wrong the same
+    way.** The developer read the `TextInput` and `NumberInput` repairs and drew
+    the right inference: those two were written the way the other 84 were, so
+    the defects were a sampling result rather than two accidents. Six read-only
+    agents audited disjoint slices in parallel, hunting seven classes each taken
+    from a defect already confirmed here. Five sequential passes repaired what
+    they found. The suite went from 1,532 to 1,653.
+
+    **The worst of it was that the React half did not run.** `table.js` and
+    `lineage.js` had not parsed for an unknown length of time — `export` cannot
+    be a binding identifier, and `const filter` cannot redeclare the parameter
+    `filter` — while `cargo xtask check` was green throughout. `lineage_figure.js`
+    and `color_picker.js` parsed and threw on first render, naming variables
+    nothing declared. `select.js` and `date_input.js` rendered `Field` without
+    importing it. **Six of the package's two published implementations were
+    broken and every test passed**, because the parity tests checked the prop
+    surface and nothing checked that the output was JavaScript.
+
+    Three guards answer that now, all of them in Rust with no Node: a lexer and
+    structural reader that every emitted `.js` must survive, a check that every
+    declared default reaches **both** languages, and a check that no React body
+    names an identifier it does not have. Each was verified by reintroducing the
+    defect it was written for. Replayed against the pre-fix files, they report
+    all four originals.
+
+    **The second family was the control that lies.** Every `Switch` on
+    `/switch/` was inert — the handler routed unconditionally into the theme
+    model and returned early for any name not in it, while the `Segmented`
+    branch three lines below had exactly the fallback it lacked, under the
+    comment *"A control on a page about controls has to work."* `Menu`'s button
+    shipped visible and announced with nothing able to open it. `Toolbar`
+    claimed a roving tab stop it did not emit. `Tree.form` promised a hidden
+    checkbox that no body rendered. `Carousel` needed a script to show more than
+    one slide while its guidance promised otherwise. `Toast` was a panel laid
+    over the page with no way out. Where the code was right and the sentence was
+    wrong, the sentence was corrected and the reason recorded beside it — twice,
+    for `Tree` and `Toolbar`, because a parent cannot write on children it
+    cannot see.
+
+    **The third family was the declaration that reaches nothing.** A build-time
+    guard reading the emitted source found **31** props declaring a `data-nd-*`
+    attribute no body writes, against the 18 the audit had named — and one of
+    the opposite kind: `TableRow.expandable` was read by the runtime to decide
+    `role="grid"` and written by neither body, so every table of expandable rows
+    had been a plain table.
+
+    **`aria-sort` was on 403 header cells** for 13 sortable columns, 214 of them
+    on row headers naming a record, while `shell.js` asserted the opposite as
+    settled fact three lines from the code that did it. `aria-required` did not
+    exist anywhere in the repository, so an enhanced `Select { required }` never
+    told anybody the answer was compulsory.
+
+    **And the tests.** Twenty were vacuous. The floating-surface sweep admitted
+    `position: fixed` and then filtered on `offsetParent !== null`, which is
+    *always* null for a fixed element — ten of its fifteen allow-list entries,
+    including all four surfaces the list had just been extended for, were
+    unreachable by it. `pagination.spec.js` asserted the absence of
+    `[data-nd-pagination-step="previous"]`, **an attribute the component has
+    never emitted**; both assertions were vacuously true and would have passed
+    with both links rendered. Four more passed on an empty selector with no
+    floor. And `audit.spec.js`'s whole-site sweep never looked inside a fold:
+    measured after the repair, it sees **702** stages with the folds opened
+    against **341** as shipped, so half the site had been outside the clipped,
+    overflowing and small-target checks at every width.
+
+    **The Portuguese needed reading, again.** `de zero a cinco` for a scale that
+    starts at one, `no ponteiro` for *on hover*, `fora do trabalho` for *clear of
+    the work*, a lock turned into a submission, four dropped clauses, the only
+    *tu* form in 2,753 keys, and two collisions of the `padrão` shape: `dica`
+    naming both the `hint` prop and the `Tooltip` component, and *in the reader's
+    language* rendering two ways sixty times. Two guards followed — one English
+    sentence to one Portuguese sentence, restricted to prose keys because labels
+    legitimately disagree, and an eight-term glossary checked one way.
+    `padrão`, `obrigatório` and `ponteiro` were deliberately left out, each with
+    two honest English sources.
+
+    **What the exercise says about the suite.** Every defect above sat under a
+    green run. The repairs are worth less than the guards, and the guards are the
+    reason to write the whole thing down: a parity test that checks a prop
+    surface says nothing about the body, a sweep with no floor says nothing about
+    an empty page, a test that skips what is hidden says nothing about a fold,
+    and a title is not an assertion.
+

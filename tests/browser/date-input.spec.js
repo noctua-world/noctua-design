@@ -90,7 +90,7 @@ test("an empty required submit is named, and focus lands on the first box", asyn
   await page.goto(url(PAGE.dateInput));
   await page.focus(box(BIRTH, "year"));
   await page.keyboard.press("Enter");
-  const slot = page.locator(`.nd-field:has(${BIRTH}) [data-nd-field-error]`);
+  const slot = page.locator(`.nd-field:has(${BIRTH}) [data-nd-field-error] [data-nd-field-message]`);
   await expect(slot).toContainText("Enter your date of birth");
   await expect(page.locator(BIRTH)).toHaveAttribute("data-nd-invalid", "true");
   // The first box in VISUAL order — month, on this page.
@@ -103,7 +103,7 @@ test("one empty box is named as itself, and only it is marked", async ({ page })
   await page.fill(box(BIRTH, "year"), "2007");
   await page.focus(box(BIRTH, "year"));
   await page.keyboard.press("Enter");
-  await expect(page.locator(`.nd-field:has(${BIRTH}) [data-nd-field-error]`)).toContainText(
+  await expect(page.locator(`.nd-field:has(${BIRTH}) [data-nd-field-error] [data-nd-field-message]`)).toContainText(
     "must include a Month",
   );
   await expect(page.locator(box(BIRTH, "month"))).toHaveAttribute("aria-invalid", "true");
@@ -121,15 +121,15 @@ test("the 31st of April and an off-leap 29th of February are refused; a leap one
     await page.locator("h1").click();
   };
   await fill("31", "4", "2001");
-  await expect(page.locator(`.nd-field:has(${BIRTH}) [data-nd-field-error]`)).toContainText(
+  await expect(page.locator(`.nd-field:has(${BIRTH}) [data-nd-field-error] [data-nd-field-message]`)).toContainText(
     "a date that exists",
   );
   await fill("29", "2", "2026");
-  await expect(page.locator(`.nd-field:has(${BIRTH}) [data-nd-field-error]`)).toContainText(
+  await expect(page.locator(`.nd-field:has(${BIRTH}) [data-nd-field-error] [data-nd-field-message]`)).toContainText(
     "a date that exists",
   );
   await fill("29", "2", "2024");
-  await expect(page.locator(`.nd-field:has(${BIRTH}) [data-nd-field-error]`)).toHaveText("");
+  await expect(page.locator(`.nd-field:has(${BIRTH}) [data-nd-field-error] [data-nd-field-message]`)).toHaveText("");
   await expect(page.locator(BIRTH)).toHaveAttribute("data-nd-invalid", "false");
 });
 
@@ -139,14 +139,14 @@ test("a bound is spoken in the reader's words, never the wire format", async ({ 
   await page.fill(box(VISIT, "month"), "1");
   await page.fill(box(VISIT, "year"), "2020");
   await page.locator("h1").click();
-  const said = await page.locator(`.nd-field:has(${VISIT}) [data-nd-field-error]`).textContent();
+  const said = await page.locator(`.nd-field:has(${VISIT}) [data-nd-field-error] [data-nd-field-message]`).textContent();
   expect(said).not.toContain("2026-01-01");
   expect(said).toContain("2026");
 });
 
 test("a caller's sentence is not the script's to clear", async ({ page }) => {
   await page.goto(url(PAGE.dateInput));
-  const slot = page.locator(`.nd-field:has(${BOOKED}) [data-nd-field-error]`);
+  const slot = page.locator(`.nd-field:has(${BOOKED}) [data-nd-field-error] [data-nd-field-message]`);
   await expect(slot).toContainText("has to be booked");
   // The prefilled value is a real date; leaving the field must not settle
   // the caller's complaint.

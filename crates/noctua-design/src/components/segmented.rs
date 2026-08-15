@@ -168,9 +168,9 @@ impl SegmentedSelection {
 ///
 /// # Accessibility
 ///
-/// One tab stop for the whole group: a roving `tabindex` puts `0` on the chosen
-/// item and `-1` on the rest, server-rendered. Selection follows focus, and every
-/// item carries `aria-checked`.
+/// One tab stop for the whole group. The group carries it in the markup and the
+/// script moves it onto the chosen item, so a group with nothing chosen is
+/// reachable too. Selection follows focus, and every item carries `aria-checked`.
 #[component]
 pub fn Segmented(
     /// What is being chosen. The script binds to it, and every item in the group repeats the same word.
@@ -223,6 +223,11 @@ pub fn Segmented(
             // Announced as well as drawn: a reader needs to know which
             // arrows move before pressing one.
             "aria-orientation": orientation.as_str(),
+            // ONE TAB STOP, AND THE GROUP IS WHAT HOLDS IT UNTIL A
+            // SCRIPT MOVES IT. See the emitter note above for why
+            // it cannot be an item: an item cannot see its siblings,
+            // so no item can know whether the group has an answer.
+            tabindex: "0",
             // One or the other names the group. A radiogroup with
             // neither announces its role and nothing else.
             "aria-label": label,

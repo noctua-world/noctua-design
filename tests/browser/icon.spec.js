@@ -21,20 +21,28 @@ async function iconPage(page) {
 
 test("an unlabelled icon is out of the accessibility tree entirely", async ({ page }) => {
   await iconPage(page);
-  // The three go together. An element that is hidden and named is claiming two
-  // opposite things about itself.
+  // EVERY DRAWING WITH NO NAME, not only the ones already saying they are
+  // hidden. The old sweep asked for `aria-hidden="true"` first. That filter
+  // threw away the one icon this test exists to find. An unnamed drawing left
+  // in the tree is announced as *graphic* in the middle of a sentence.
+  //
+  // The three attributes go together. Out of the tree, no role to claim from
+  // inside it, and out of the tab order in the engines that put SVG in it.
   const wrong = await page.evaluate(() =>
-    [...document.querySelectorAll("svg.nd-icon-glyph")]
-      .filter((el) => el.getAttribute("aria-hidden") === "true")
+    [...document.querySelectorAll("svg:not([aria-label])")]
       .filter(
         (el) =>
-          el.hasAttribute("aria-label") ||
+          el.getAttribute("aria-hidden") !== "true" ||
           el.getAttribute("role") !== null ||
           el.getAttribute("focusable") !== "false",
       )
-      .map((el) => el.getAttribute("data-nd-icon")),
+      .map((el) => el.getAttribute("data-nd-icon") ?? el.getAttribute("class")),
   );
-  expect(wrong, "a hidden icon carrying a role or a name").toEqual([]);
+  expect(wrong, "an unnamed icon a screen reader can still reach").toEqual([]);
+  // A FLOOR, because an empty selection satisfies every filter above. The
+  // header alone draws more drawings than this.
+  const counted = await page.locator("svg:not([aria-label])").count();
+  expect(counted, "no unlabelled icon was measured at all").toBeGreaterThan(5);
 });
 
 test("a labelled icon is a role=img with that name and no aria-hidden", async ({ page }) => {

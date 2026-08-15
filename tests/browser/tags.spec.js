@@ -149,13 +149,47 @@ test("a picture that is not there keeps its place and draws nothing", async ({ p
 test("the digits are decoration and the sentence is the message", async ({ page }) => {
   await page.goto(url(PAGE.badge));
   await showParts(page);
-  const badge = page.locator(".nd-badge").first();
-  await expect(badge.locator(".nd-badge-mark")).toHaveAttribute("aria-hidden", "true");
-  // A reader hears the control's own name and then the sentence: *Inbox, 3
-  // unread messages*. Announcing `3` after a button's name is a page that has
-  // said a number and nothing else.
-  const said = await badge.locator(".nd-visually-hidden").textContent();
-  expect(said.trim().length, "the badge announces nothing but digits").toBeGreaterThan(3);
+  await expect(page.locator(".nd-badge-mark").first()).toHaveAttribute("aria-hidden", "true");
+
+  // THE SENTENCE HAS TO BE ABOUT THE NUMBER, and that is what this used to
+  // stop short of. It asserted the announcement was longer than three
+  // characters and nothing else, so fourteen of the seventeen badges on this
+  // page could announce *3 unread messages* while drawing `0`, `2`, `9` and
+  // `99+`, and did. A length is not a relation.
+  //
+  // `data-nd-count` is the number the badge stands for. `max` caps what is
+  // DRAWN and not what happened, so the sentence names the count rather than
+  // the digits: `128` behind `99+`.
+  const badges = await page.evaluate(() =>
+    [...document.querySelectorAll('.nd-badge[data-nd-count][data-nd-marked="true"]')].map(
+      (badge) => ({
+        count: badge.dataset.ndCount,
+        drawn: badge.querySelector(".nd-badge-mark")?.textContent?.trim() ?? "",
+        said: badge.querySelector(".nd-visually-hidden")?.textContent?.trim() ?? "",
+      }),
+    ),
+  );
+
+  // THE FLOOR. Every assertion below is inside a loop, and a loop over nothing
+  // is a test that proves nothing. This is the pattern `variants.spec.js` sets.
+  expect(badges.length, "the page drew no counted badge at all").toBeGreaterThan(12);
+
+  const wrong = badges.filter(({ count, said }) => {
+    // The count as a whole number, so `2` does not satisfy a sentence about
+    // `128` and `9` does not satisfy one about `99`.
+    const names = new RegExp(`(^|\\D)${count}(\\D|$)`).test(said);
+    // And the sentence is a sentence, not the number read back.
+    return !names || said.replace(/\D/g, "") === said;
+  });
+  expect(wrong, "a badge announces a number it is not showing").toEqual([]);
+
+  // The capped one is the case the relation exists for: what is drawn and what
+  // is said differ on purpose, and the sentence carries the truth.
+  const capped = badges.find((one) => one.drawn.endsWith("+"));
+  expect(capped, "no badge on the page is over its own ceiling").toBeTruthy();
+  expect(capped.said, "the capped badge announces the ceiling rather than the count").toContain(
+    capped.count,
+  );
 });
 
 test("a count over the ceiling says so rather than growing", async ({ page }) => {

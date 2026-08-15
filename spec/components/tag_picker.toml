@@ -9,7 +9,11 @@ name = "TagPicker"
 element = "div"
 class = "nd-tag-picker"
 summary = "Let users enter several values, each one a tag they can take off again."
-specimen = "<div class=\"nd-tag-picker-field\"><input class=\"nd-tag-picker-input\" placeholder=\"Add\"></div>"
+# A DRAWN BOX, NOT A LIVE COMPOSER. This was a real `<input>`, so the variant
+# grid shipped three focusable text boxes with no `name`, no `id`, no label and
+# no `aria-label` — the only nameless live control in the system, on the page
+# of a component that needs a name. `Select` records the whole argument.
+specimen = "<span class=\"nd-tag-picker-figure\"><span class=\"nd-tag-picker-box\"></span></span>"
 
 # EVERY ID DERIVES FROM `name`, AND A CALLER WRITES NONE OF THEM.
 #
@@ -155,6 +159,10 @@ doc = "Disables the whole control. It writes the real `disabled` attribute on th
 [prop.required]
 type = "bool"
 default = "false"
+# AND THE SCRIPT TAKES IT OFF ONCE THERE IS AN ANSWER. Every commit clears the
+# composer, so a `required` left on it refused the submission of a field that
+# had just been answered — three tags in the list and an empty box the browser
+# was pointing at. The requirement is about the field, so it follows the tags.
 doc = "Whether at least one value is needed. It goes on the **composer** rather than on the hidden `<select>`, because the browser has to focus an invalid control to anchor its bubble."
 
 [prop.glass]
@@ -176,6 +184,11 @@ doc = "The suggestions, as `SelectOption` and `SelectGroup`, which render as rea
 "Tab" = "Leaves the field. Tags are **not** tab stops, and are reached with the arrow keys from an empty composer."
 
 [a11y]
+# IT NEEDS A NAME, AND THE CATALOGUE USED TO RECORD `false`. `label` is
+# required and becomes a real `<label for>` on the composer, so the fact was
+# always true of the component and only the declaration was missing — which is
+# what let its specimen render a live control nothing named.
+needs_name = true
 notes = """
 The composer is the combobox and the tags are a list beside it, each with its
 own role. Removing the last tag moves focus to the next remove control or to

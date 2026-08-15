@@ -53,7 +53,7 @@ doc = "Says there are children that were **not** passed, for the lazily-loaded c
 type = "bool"
 default = "false"
 attribute = "data-nd-selected"
-doc = "Whether this node starts chosen. Where the tree has a `form`, it is the hidden checkbox's `checked` and what a server receives with no script. Where it has none, the script writes `aria-selected` from it."
+doc = "Whether this node starts chosen. The script reads it once and writes `aria-selected` from it. Where the tree has a `form`, it is also the checkbox the script adds."
 
 [prop.disabled]
 type = "bool"

@@ -92,9 +92,14 @@ type = "text"
 attribute = "data-nd-max-label"
 doc = "The message shown at that limit, with a `{max}` hole. Set it wherever `max` is set."
 
+# THE ELEVEN SENTENCES BELOW ARE NOT ATTRIBUTES, AND ELEVEN OF THEM SAID THEY
+# WERE. Each declared a `data-nd-*` no body writes and no script reads: the
+# words reach the DOM as an `aria-label`, a tab's label or the text of a
+# control, which is why the picker works and why nothing ever reported it. The
+# nine the runtime does read still declare theirs. `attribute` is a claim about
+# the markup, so a prop that is not one says nothing.
 [prop.add_label]
 type = "text"
-attribute = "data-nd-add-label"
 doc = "The accessible name of the control that adds the current colour to the list. Set it whenever `multiple` is on, because that control is the only way a colour joins the list."
 
 [prop.remove_label]
@@ -121,17 +126,14 @@ doc = "How many colours there are, with a `{count}` hole. It may carry one form 
 
 [prop.spectrum_label]
 type = "text"
-attribute = "data-nd-spectrum-label"
 doc = "The name of the free-choice tab. It is shown only when `palette` adds a second tab, because a single tab is a heading rather than a tab."
 
 [prop.area_label]
 type = "text"
-attribute = "data-nd-area-label"
 doc = "The name of the saturation and value field, which is the square users drag in. It is two sliders in one box, named once, with each axis carrying its own value."
 
 [prop.hue_label]
 type = "text"
-attribute = "data-nd-hue-label"
 doc = """The name of the hue track. It is a real `<input type="range">`, which provides the keyboard, the thumb and the value."""
 
 [prop.alpha]
@@ -142,7 +144,6 @@ doc = "Whether the colour can be transparent. Off by default. On, the codes gain
 
 [prop.alpha_label]
 type = "text"
-attribute = "data-nd-alpha-label"
 doc = "The name of the transparency track. Set it whenever `alpha` is on."
 
 # --- The system's own colours -----------------------------------------------
@@ -155,7 +156,6 @@ doc = "Whether the Noctua ramps are offered beside the spectrum. Off by default.
 
 [prop.palette_label]
 type = "text"
-attribute = "data-nd-palette-label"
 doc = "The name of that tab. Set it whenever `palette` is on."
 
 # --- Typing a colour --------------------------------------------------------
@@ -168,7 +168,6 @@ doc = "Whether users can type or paste a colour. **On by default**. It accepts h
 
 [prop.entry_label]
 type = "text"
-attribute = "data-nd-entry-label"
 doc = "The name of that field. It is a real label rather than a placeholder, which would disappear as soon as users type."
 
 [prop.entry_invalid_label]
@@ -186,7 +185,6 @@ doc = "Whether a control appears for picking a colour off the screen. Off by def
 
 [prop.eyedropper_label]
 type = "text"
-attribute = "data-nd-eyedropper-label"
 doc = "The name of that control. It is a glyph, so this is the only name it has."
 
 # --- The colours already used -----------------------------------------------
@@ -198,19 +196,16 @@ doc = "The storage key the last few colours are kept under. **Without it there i
 
 [prop.recent_label]
 type = "text"
-attribute = "data-nd-recent-label"
 doc = "The heading over that row. Set it whenever `recent` is set."
 
 [prop.forget_label]
 type = "text"
-attribute = "data-nd-forget-label"
 doc = "The name of the control that empties the recent row. Set it whenever `recent` is set, so users can clear what was stored."
 
 # --- The codes --------------------------------------------------------------
 
 [prop.codes_label]
 type = "text"
-attribute = "data-nd-codes-label"
 doc = "The summary on the folded panel of notations, such as *Codes*. It is a `Disclosure`, so the panel starts closed and the colour stays on screen."
 
 [prop.formats]
@@ -231,9 +226,11 @@ doc = "The message the live region carries once a copy has succeeded. Without it
 
 # --- The platform -----------------------------------------------------------
 
+# NO ATTRIBUTE, BECAUSE NO BODY WRITES ONE. The words below reach the DOM as
+# a control's name or as its text, which is why the component works and why
+# nothing reported the declaration. `attribute` is a claim about the markup.
 [prop.close_label]
 type = "text"
-attribute = "data-nd-close-label"
 doc = "The name of the control that closes the panel. Escape closes it too, and a pointer-only user has no Escape."
 
 [prop.disabled]

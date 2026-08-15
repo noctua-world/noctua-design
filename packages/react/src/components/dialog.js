@@ -40,8 +40,7 @@ export function Dialog({ name, triggerLabel, heading, label, description, modal,
         id,
         type: "button",
         "aria-haspopup": "dialog",
-        "data-nd-dialog-open": "",
-        // See the Dioxus half: revealed by the script.
+          // See the Dioxus half: revealed by the script.
         hidden: true,
       },
       triggerLabel,

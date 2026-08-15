@@ -14,10 +14,11 @@ import { createElement as h } from "react";
 import { Icon } from "./icon.js";
 export function Disclosure({ summary, name, icon, open, marker, heading, glass, className, children, ...rest }) {
   const marker_ = marker ?? true;
+  const heading_ = heading ?? "none";
   // The summary's own tag: a real heading when this disclosure is a
   // section of the page, because folded away its title is all that is
   // left and a `<span>` leaves the section out of the outline.
-  const tag_ = heading && heading !== "none" ? heading : "span";
+  const tag_ = heading_ === "none" ? "span" : heading_;
   const root = ["nd-disclosure", className].filter(Boolean).join(" ");
   return h(
     "details",
@@ -39,7 +40,16 @@ export function Disclosure({ summary, name, icon, open, marker, heading, glass, 
         ? h(Icon, { icon })
         : [
             h(tag_, { key: "t", className: "nd-disclosure-text" }, summary),
-            marker_ ? h(Icon, { key: "m", icon: "chevron-down", size: "small" }) : null,
+            // See the Dioxus half: named, because the rule that turns
+            // it used to ask for the last glyph in the summary.
+            marker_
+              ? h(Icon, {
+                  key: "m",
+                  icon: "chevron-down",
+                  size: "small",
+                  className: "nd-disclosure-marker",
+                })
+              : null,
           ],
     ),
     children,

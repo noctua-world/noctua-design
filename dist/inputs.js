@@ -28,7 +28,7 @@
 // 3. Rewrites what a reader typed. Out of range, not a number, not a time —
 //    each is refused with the caller's own sentence, and the value stays.
 
-import { fill, plural, say } from "./messages.js";
+import { fill, plural, say, saySentence } from "./messages.js";
 
 /** How long after the last keystroke a counter speaks. */
 const SETTLE = 500;
@@ -68,7 +68,16 @@ function enhanceInput(root) {
     // for it. Shown and hidden with the content rather than always: a control
     // that is there when the box is empty is a control that does nothing.
     const show = () => {
-      clear.hidden = box.value.length === 0 || box.disabled || box.readOnly;
+      // IT KEEPS ITS SPACE ONCE IT EXISTS. `hidden` is `display: none`, so the
+      // box grew on the first keystroke and shrank on the last — the reflow
+      // `clearable`'s own doc names as the thing to avoid. It ships `hidden`,
+      // because with no script there is no control at all and no space owed
+      // to one; from here the stylesheet hides it by `visibility` instead.
+      clear.hidden = false;
+      clear.toggleAttribute(
+        "data-nd-empty",
+        box.value.length === 0 || box.disabled || box.readOnly,
+      );
     };
     show();
     box.addEventListener("input", show);
@@ -229,10 +238,10 @@ function enhanceNumberInput(root) {
   const announce = (sentence) => {
     if (!status) return;
     if (sentence) {
-      status.textContent = sentence;
+      saySentence(status, sentence);
       status.setAttribute("data-nd-said", "");
     } else if (status.hasAttribute("data-nd-said")) {
-      status.textContent = "";
+      saySentence(status, "");
       status.removeAttribute("data-nd-said");
     }
   };
@@ -268,7 +277,18 @@ function enhanceNumberInput(root) {
   /** Draws what the box already holds, at load and after an accepted blur. */
   const settle = () => {
     const value = reading();
-    if (value === null) return;
+    // AN EMPTY BOX IS STILL A SPINBUTTON, AND IT USED TO KEEP THE LAST NUMBER.
+    // The role is written unconditionally and this returned before touching
+    // the value, so a field that arrived empty announced nothing at all and a
+    // field a reader cleared went on announcing what they had just deleted.
+    // Absent is the honest answer for a spinbutton with no value.
+    if (value === null) {
+      held = null;
+      drawnText = null;
+      box.removeAttribute("aria-valuenow");
+      box.removeAttribute("aria-valuetext");
+      return;
+    }
     digits = carried(box.value);
     show(value);
   };
@@ -342,6 +362,10 @@ function enhanceNumberInput(root) {
     if (box.value.trim() === "") {
       mark(false);
       announce(null);
+      // AND THE SPINBUTTON LETS GO OF THE NUMBER. A field a reader emptied
+      // went on announcing what they had just deleted, because nothing here
+      // touched `aria-valuenow` and `settle` was not reached.
+      settle();
       return;
     }
     const value = reading();
@@ -397,14 +421,21 @@ function enhanceSlider(root) {
 
   const text = (value) => (shape ? fill(shape, { value }) : String(value));
 
-  const paint = () => {
+  const paint = (moved) => {
     const [start, end] = thumbs;
     // NEITHER MAY CROSS THE OTHER. Clamped on input rather than prevented, so
     // a reader dragging past the other thumb stops at it instead of finding
     // the drag refused.
-    if (range && end) {
-      if (Number(start.value) > Number(end.value)) start.value = end.value;
-      if (Number(end.value) < Number(start.value)) end.value = start.value;
+    //
+    // THE THUMB THAT MOVED IS THE THUMB THAT STOPS, and the two lines here used
+    // to be one test written twice: `start > end` and `end < start` are the
+    // same question, so both branches fired and the second could not undo the
+    // first. Pulling the END below the start dragged the START down with it
+    // and threw away a lower bound the reader had chosen, in silence, in the
+    // one direction the test never tried.
+    if (range && end && Number(start.value) > Number(end.value)) {
+      if (moved === end) end.value = start.value;
+      else start.value = end.value;
     }
     const low = Number(thumbs[0].min || 0);
     const high = Number(thumbs[0].max || 100);
@@ -420,25 +451,20 @@ function enhanceSlider(root) {
     }
   };
 
-  for (const thumb of thumbs) thumb.addEventListener("input", paint);
+  // The moved thumb is carried in, because `paint` cannot ask the document:
+  // a drag fires `input` while the focus is still wherever the reader left it.
+  for (const thumb of thumbs) {
+    thumb.addEventListener("input", () => paint(thumb));
+  }
   paint();
 
-  const marks = at("marks");
-  const holder = root.querySelector("[data-nd-slider-marks]");
-  if (!marks || !holder) return;
-  // The words, read position by position against the values — and `aria-hidden`
-  // on the holder already, because the scale is announced by the range itself.
-  const words = (at("mark-labels") ?? "").split("|");
-  holder.replaceChildren();
-  marks
-    .split(/\s+/)
-    .filter(Boolean)
-    .forEach((value, index) => {
-      const mark = document.createElement("span");
-      mark.className = "nd-slider-mark";
-      mark.textContent = words[index]?.trim() || value;
-      holder.append(mark);
-    });
+  // THE MARKS ARE NOT DRAWN HERE ANY MORE, and this file's own first rule is
+  // why: it never builds markup. It used to build the whole scale from `marks`
+  // and `mark-labels`, which meant a slider asking for five ticks showed none
+  // of them until this ran — a drawing that needs a script, under a prop whose
+  // doc calls the ticks decoration. The component renders them from the same
+  // two props, so they are there from the first paint and there is one place
+  // that knows what a tick looks like.
 }
 
 // --- FileInput ---------------------------------------------------------------
@@ -525,7 +551,12 @@ function enhanceFileInput(root) {
       list.append(row);
     });
     native.files = keep.files;
-    say(status, plural(at("status"), keep.files.length), { quiet: true });
+    // ONLY WHERE THERE IS A SENTENCE TO SAY. `say` clears a region it is given
+    // nothing for, which is what `TimeInput` and `OtpField` need of it, so a
+    // caller who wrote no `status` message would have this line wipe the
+    // refusal `add` had just put there — a file rejected in silence.
+    const counted = at("status");
+    if (counted) say(status, plural(counted, keep.files.length), { quiet: true });
   };
 
   const add = (files) => {
@@ -773,8 +804,25 @@ function enhanceTimeInput(root) {
     }
     bounds.hour = [1, 12];
     if (row && meridiem) row.append(meridiem);
+    // INSIDE THE BRANCH, WHERE THE RE-LAYING HAPPENS. This was written
+    // unconditionally, so the one state that exists to tell a re-laid clock
+    // from a served one was true of every time field on every page.
+    root.setAttribute("data-nd-resolved", "true");
   }
-  root.setAttribute("data-nd-resolved", "true");
+
+  /**
+   * Marks the boxes, and the fieldset around them.
+   *
+   * `aria-invalid` ON EACH BOX, WHICH IS WHAT THE STYLESHEET ASKS FOR. The
+   * contract declares the state as `aria-invalid` and the rule that paints a
+   * refused box is `.nd-time-input-segment[aria-invalid="true"]` — and only
+   * `data-nd-invalid` on the wrapper was ever written. So a refused time said
+   * its sentence and every box stayed its ordinary colour.
+   */
+  function flag(wrong) {
+    root.setAttribute("data-nd-invalid", String(wrong));
+    for (const segment of segments) segment.setAttribute("aria-invalid", String(wrong));
+  }
 
   /** What the boxes currently say, on a twenty-four hour clock, or `null`. */
   function readAll() {
@@ -803,12 +851,12 @@ function enhanceTimeInput(root) {
       // platform has nothing to say about.
       const empty = segments.every((one) => one.value.trim() === "");
       say(status, empty ? at("required-label") : fill(at("missing-label"), { part: read.missing }));
-      root.setAttribute("data-nd-invalid", String(!empty));
+      flag(!empty);
       return;
     }
     if (read.invalid !== undefined) {
       say(status, fill(at("invalid-label"), { value: read.invalid }));
-      root.setAttribute("data-nd-invalid", "true");
+      flag(true);
       return;
     }
     const spelled = ["hour", "minute", "second"]
@@ -824,10 +872,10 @@ function enhanceTimeInput(root) {
         : (!low || spelled >= low) && (!high || spelled <= high);
     if (!inside) {
       say(status, spelled < (low ?? "") ? fill(at("min-label"), { min: low }) : fill(at("max-label"), { max: high }));
-      root.setAttribute("data-nd-invalid", "true");
+      flag(true);
       return;
     }
-    root.setAttribute("data-nd-invalid", "false");
+    flag(false);
     root.setAttribute("data-nd-value", spelled);
     say(status, "");
   }
@@ -845,11 +893,57 @@ function enhanceTimeInput(root) {
     changed: commit,
   });
 
+  /**
+   * Moves to the box beside this one.
+   *
+   * `replace` is what tells a separator from an arrow. Typing `9:30` has to
+   * put `30` into the minute box, so the separator selects what is there and
+   * the next keystroke overwrites it — which is what `segmentWalk` already
+   * does when a box fills. An arrow is a reader navigating, so it places the
+   * caret and touches nothing.
+   */
+  const hop = (segment, step, { replace = false } = {}) => {
+    const next = segments[segments.indexOf(segment) + step];
+    if (!next) return false;
+    next.focus();
+    if (replace) {
+      next.select();
+      return true;
+    }
+    // Entering from the left lands at the start and from the right at the end,
+    // so the caret carries on in the direction it was going.
+    const at = step > 0 ? 0 : next.value.length;
+    next.setSelectionRange(at, at);
+    return true;
+  };
+
   for (const segment of segments) {
     const part = segment.dataset.ndTimeInputSegment;
     const [low, high] = bounds[part];
 
     segment.addEventListener("keydown", (event) => {
+      // A SEPARATOR MOVES ON, AND IT NEVER DID. `segmentWalk` strips every
+      // non-digit before the input handler can see one, so a typed `:`
+      // disappeared and only a second digit ever left the hour box — under a
+      // contract promising `9:30` fills both boxes with nothing in between.
+      // Caught as a keystroke, because by input time it is already gone.
+      if (event.key === ":" || event.key === "." || event.key === ",") {
+        event.preventDefault();
+        if (segment.value !== "") hop(segment, 1, { replace: true });
+        return;
+      }
+      // AND THE ARROWS WALK THE ROW. `OtpField` binds these and a time did
+      // not, so one of the four rows of this component's keyboard table
+      // reached no code. At the ends of what is typed only: inside a number
+      // the arrows are the caret's, which is what the contract says.
+      const across = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+      if (across !== undefined) {
+        const caret = segment.selectionStart ?? 0;
+        const spread = segment.selectionEnd !== segment.selectionStart;
+        const edge = across < 0 ? caret === 0 : caret === segment.value.length;
+        if (!spread && edge && hop(segment, across)) event.preventDefault();
+        return;
+      }
       const by = { ArrowUp: 1, ArrowDown: -1 }[event.key];
       if (by === undefined) return;
       event.preventDefault();
@@ -870,6 +964,14 @@ function enhanceTimeInput(root) {
       commit();
     });
   }
+
+  // REVEALED ONLY NOW, because reading the clock is this file's and nothing
+  // else's. The control shipped visible and did nothing at all with the script
+  // blocked, which is what `NumberInput`'s steppers and `Input`'s clear and
+  // reveal controls are gated to prevent. The component wraps it in the span
+  // this uncovers, since a component cannot be handed `hidden` itself.
+  const nowSlot = root.querySelector("[data-nd-time-input-now]");
+  if (nowSlot) nowSlot.hidden = false;
 
   const now = root.querySelector('[data-nd-action="time-input-now"]');
   now?.addEventListener("click", () => {

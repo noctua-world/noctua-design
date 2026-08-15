@@ -21,6 +21,10 @@ export function Carousel({ name, label, perView, snap, orientation, controls, pr
   const trackId = `${id}-track`;
   // See the Dioxus half: no name, no control, and no rotation either.
   const rotates = Boolean(autoplay && pauseLabel);
+  // See the Dioxus half: a width is a prop, so the component writes it rather
+  // than the runtime, and `auto` wants no property at all.
+  const perViewWidth =
+    perView_ === "auto" ? undefined : { "--nd-carousel-per-view": perView_ };
 
   return h(
     "section",
@@ -31,7 +35,8 @@ export function Carousel({ name, label, perView, snap, orientation, controls, pr
       role: "group",
       "aria-roledescription": "carousel",
       "aria-label": label,
-      "aria-orientation": orientation_,
+      // See the Dioxus half: a group has no axis in ARIA, so the axis is drawn.
+      "data-nd-orientation": orientation_,
       "data-nd-per-view": perView_,
       "data-nd-snap": snap_,
       "data-nd-glass": String(glass ?? false),
@@ -56,6 +61,7 @@ export function Carousel({ name, label, perView, snap, orientation, controls, pr
         className: "nd-carousel-track",
         id: trackId,
         "data-nd-carousel-track": "",
+        style: perViewWidth,
         "aria-live": rotates ? "off" : "polite",
       },
       children,

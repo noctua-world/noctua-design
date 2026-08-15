@@ -620,6 +620,27 @@ than from `dist/`, and that is a recorded gap**, not a decision: the walk it
 needs lives in `shell.js`, and a consumer taking `dist/tabs.js` alone would get
 the roles without the keyboard they oblige.
 
+**AND THE RENDERED STOP IS ON THE GROUP, NOT ON THE CHOSEN ITEM.** It was on the
+item — `tabindex="0"` when `selected` and `-1` otherwise — which is one stop for
+a radio group that has an answer and **zero** for one that does not. Every
+`Segmented` nothing had chosen was unreachable by keyboard with the script
+blocked, including three on `/theme-scope/` and the first example on
+`/segmented-item/`. An item cannot fix it: whether the group has an answer is a
+fact about the group, and no rendering order lets the first item know that the
+fourth is chosen. So `Segmented` writes `tabindex="0"` on itself, every
+`SegmentedItem` writes `-1`, and `refreshRoving()` strips the group's own stop
+before it places a real one — which it must, because `stops()` collects
+`[tabindex]` and a group inside a toolbar would otherwise join the bar's walk.
+
+**A DECLARED `attribute` IS A CLAIM ABOUT THE MARKUP, AND `rust_element` KEEPS
+IT ONLY FOR A DERIVED BODY.** A component written by hand in `controls.rs`
+never reaches that function, so thirty-one props across eleven components
+declared a `data-nd-*` no body wrote and no script read — while the site's
+generated markup snippet printed each one as though it were there. Nothing
+reported it, because the values do reach the DOM: as labels, as tab names, as
+text. `every_declared_attribute_is_written_by_both_bodies` in `props.rs` is the
+gate now, and it reads the emitted source so it covers both kinds of body.
+
 **A RATING WRITES ITS NUMBER OUT, AND SHIPS NO SCRIPT AT ALL.** The interactive
 form is real radios in a `<fieldset>`, so the group, the arrows and the
 announcement are the platform's. The number beside the stars follows a reader's
@@ -711,7 +732,10 @@ follow from that and are easy to get wrong:
   the file; `close` is the icon's name. A test reads every icon an example names.
 * **A specimen carries every enum prop at its default**, then the prop under
   test. One attribute alone matches no compound rule, and compound is how every
-  tone in this system is painted.
+  tone in this system is painted. **Never an `aria-*` one, though**: the
+  defaults are there so compound CSS matches, no rule in this system selects on
+  ARIA, and what a specimen invented was `aria-sort="none"` on eight still
+  `<th>` pictures — each announcing itself as a column somebody can sort by.
 * **A void or replaced element becomes a `<span>` in a specimen.** An `<input>`
   cannot contain its own figure and a `<meter>` never renders fallback content,
   so `.nd-x[data-nd-size] .nd-x-part` matched nothing on six controls.

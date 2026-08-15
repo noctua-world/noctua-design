@@ -38,7 +38,11 @@ type = "enum"
 values = ["single", "group"]
 elements = ["div", "fieldset"]
 default = "single"
-doc = "Whether this labels one control or several. `single` renders a `<div>` with a `<label>`. `group` renders a `<fieldset>` with a `<legend>`, which is the only arrangement that names a set of controls. `DateInput` and `Fieldset` use `group`."
+# WHICH COMPONENTS PASS `group`: `TimeInput`, `DateInput`, `OtpField`,
+# `Rating` and `Slider { range }`. This used to name `Fieldset`, which does not
+# compose `Field` at all — a caller reading the doc for an example would have
+# found none.
+doc = "Whether this labels one control or several. `single` renders a `<div>` with a `<label>`. `group` renders a `<fieldset>` with a `<legend>`, which is the only arrangement that names a set of controls."
 
 [prop.hint]
 type = "text"
@@ -54,20 +58,21 @@ default = "false"
 attribute = "data-nd-required"
 doc = "Whether to mark the question as one that must be answered. **The mark is all this does.** The real `required` attribute belongs on the real control, because only that stops a form submitting."
 
+# THREE PROPS, NO ATTRIBUTES. Each declared a `data-nd-*` this component does
+# not write: `required_label` is handed to `Label`, `error_slot` decides
+# whether the paragraph is rendered at all, and `error_label` is the hidden
+# word inside it. All three work, and none of them is markup a script finds.
 [prop.required_label]
 type = "text"
-attribute = "data-nd-required-label"
 doc = "The word that marks the question, in the reader's language, such as *required*. Wanted in practice by `required`. A word rather than an asterisk, which is invisible to a reader who cannot see it."
 
 [prop.error_slot]
 type = "bool"
 default = "false"
-attribute = "data-nd-error-slot"
 doc = "Whether the error paragraph is rendered **even when there is no error**, empty, for a script to write into. Off by default, because an empty paragraph is a landmark a screen reader announces. On for a control whose real element a script hides."
 
 [prop.error_label]
 type = "text"
-attribute = "data-nd-error-label"
 doc = "A word announced before the sentence, such as *Error*. Visually hidden, because the danger tone and the position already carry it for a reader who can see them. Wanted in practice by `error`."
 
 [prop.size]

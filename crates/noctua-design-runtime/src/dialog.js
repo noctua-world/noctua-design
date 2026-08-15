@@ -75,10 +75,18 @@ function enhance(root) {
   // fires `cancel`; `show()` answers nothing, so a non-modal surface would be a
   // dialog a keyboard reader can only leave by finding the close control.
   //
-  // Stopped, so a `Menu` or an `Info` inside the surface closes itself first
-  // rather than taking the dialog down with it.
-  surface.addEventListener("keydown", (event) => {
-    if (modal || event.key !== "Escape") return;
+  // ON THE ROOT, NOT ON THE SURFACE, which is where `popover.js` binds it and
+  // why that file has no hole here. The contract lets Tab walk out of an open
+  // non-modal dialog and leave it open, and the first place Tab lands on the
+  // way out is the trigger — outside the surface, inside the root. Bound to
+  // the surface, Escape answered nothing from there, so a reader who tabbed
+  // one stop past the close control had no key left that shut it.
+  //
+  // Only while it is open, or a shut dialog would swallow the Escape meant for
+  // something around it. Stopped, so a `Menu` or an `Info` inside the surface
+  // closes itself first rather than taking the dialog down with it.
+  root.addEventListener("keydown", (event) => {
+    if (modal || event.key !== "Escape" || !surface.open) return;
     event.stopPropagation();
     close();
   });

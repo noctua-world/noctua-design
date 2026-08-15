@@ -13,13 +13,20 @@ import { createElement as h } from "react";
 
 export function List({ kind, marker, spacing, className, children, ...rest }) {
   const kind_ = kind ?? "unordered";
-  const marker_ = marker ?? "default";
-  const spacing_ = spacing ?? "default";
   const root = ["nd-list", className].filter(Boolean).join(" ");
-  const props = { className: root, ...rest };
-  if (marker_ !== undefined) props["data-nd-marker"] = String(marker_);
-  if (spacing_ !== undefined) props["data-nd-spacing"] = String(spacing_);
   // This prop chooses the element rather than an attribute.
-  const element = { "unordered": "ul", "ordered": "ol", "description": "dl" }[kind_] ?? "ul";
-  return h(element, props, children);
+  const element = { unordered: "ul", ordered: "ol", description: "dl" }[kind_] ?? "ul";
+  return h(
+    element,
+    {
+      className: root,
+      // See the Dioxus half: flex and `list-style: none` each take
+      // the role away, and a `<dl>` never had this one.
+      role: element === "dl" ? undefined : "list",
+      "data-nd-marker": marker ?? "default",
+      "data-nd-spacing": spacing ?? "default",
+      ...rest,
+    },
+    children,
+  );
 }

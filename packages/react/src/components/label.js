@@ -29,7 +29,6 @@ export function Label({ text, forControl, kind, size, required, requiredLabel, o
       // Only a `<label>` may carry it, and only a labelable element answers it.
       htmlFor: kind_ === "label" ? forControl : undefined,
       "data-nd-size": size_,
-      "data-nd-required": String(required_),
       ...rest,
     },
     text,

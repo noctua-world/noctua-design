@@ -25,7 +25,7 @@ export interface TreeItemProps {
   expanded?: boolean;
   /** Says there are children that were **not** passed, for the lazily-loaded case. The node gets `aria-expanded="false"` and a control, nothing is hidden, and the row's link is where the rest lives. */
   branch?: boolean;
-  /** Whether this node starts chosen. Where the tree has a `form`, it is the hidden checkbox's `checked` and what a server receives with no script. Where it has none, the script writes `aria-selected` from it. */
+  /** Whether this node starts chosen. The script reads it once and writes `aria-selected` from it. Where the tree has a `form`, it is also the checkbox the script adds. */
   selected?: boolean;
   /** Stops the node being chosen or followed. It writes `aria-disabled` rather than removing the node from the walk, so users can still reach the row and be told it is disabled. */
   disabled?: boolean;

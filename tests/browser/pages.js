@@ -188,6 +188,24 @@ export const PAGE = {
   popover: "popover/",
   tooltip: "tooltip/",
   toast: "toast/",
+  // The switch. On this list because every switch on it is a control the
+  // settings model has never heard of, which is the one arrangement where
+  // `shell.js` has to answer for a control it cannot route — and it did not,
+  // so all eight of them moved nothing.
+  switchControl: "switch/",
+  // The bar of controls. On this list because it is the only place where a
+  // roving tab stop is claimed over children the component never sees, so it
+  // is where the claim and the markup can be held against each other.
+  toolbar: "toolbar/",
+  // THE RADIO GROUP AND ITS ITEMS, AND THEY WERE MISSING. Five whole-site
+  // sweeps — the width x locale walk, the radius sweep, the no-shadow sweep,
+  // the 320px audit and the floating-surface check — only ever open the pages
+  // named here, so a page absent from this list is a page they have never
+  // looked at. These two are the one place a roving tab stop is server
+  // rendered, which is exactly the claim a sweep with the script blocked can
+  // settle and nothing else on the list can.
+  segmented: "segmented/",
+  segmentedItem: "segmented-item/",
 };
 
 /**

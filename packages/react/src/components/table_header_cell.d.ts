@@ -26,7 +26,7 @@ export interface TableHeaderCellProps {
   span?: string;
   /** How many rows this heading covers, with `scope = "rowgroup"`. For a table with two rows of headings, where one of them stands over both. */
   rows?: string;
-  /** Which way the rows are already sorted by this column. It writes the real `aria-sort` on the server, so a sorted table states it before any script runs. **Only one heading in a table may be anything but `none`**. */
+  /** Which way the rows are already sorted by this column. `none` writes no attribute, because a heading with no sort control must not claim one. **Only one heading in a table may be anything else**. */
   sort?: TableHeaderCellSort;
   className?: string;
   children?: ReactNode;

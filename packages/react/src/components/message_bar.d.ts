@@ -5,6 +5,7 @@
 // Edits to this file will be overwritten. Change the spec instead.
 
 import type { ReactNode } from "react";
+import type { IconName } from "@noctua-world/design-tokens/icons.js";
 
 export type MessageBarLive = "polite" | "assertive" | "off";
 
@@ -14,7 +15,7 @@ export interface MessageBarProps {
   /** A short line above the message, such as *Payment refused*. Absent is the common case, because one sentence needs no heading. It is a `<strong>` rather than a heading, so it adds nothing to the outline. */
   title?: string;
   /** A drawing before the words, named from `spec/icons.toml`. It carries `aria-hidden`, because it says what the words say. Choose one that means what the tone means, so colour is never alone. */
-  icon?: string;
+  icon?: IconName;
   /** Whether the bar interrupts. Off by default, and off is almost always right: `role="alert"` stops a screen reader mid-sentence. Turn it on where a reader has to act before carrying on. */
   alert?: boolean;
   /** How the bar is announced when it arrives after the page has loaded. Absent lets the role decide, which is right almost always. Use `off` for a bar that shipped with the page. */

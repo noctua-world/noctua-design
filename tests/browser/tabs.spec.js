@@ -170,16 +170,36 @@ test("a vertical strip is walked with the other pair of arrows", async ({ page }
 });
 
 test("a refused tab keeps its place and shows nothing", async ({ page }) => {
-  await page.goto(url(PAGE.tabs));
-  await showParts(page);
-  const refused = page.locator('.nd-tab[aria-disabled="true"]').first();
+  const set = await strip(page, '[data-nd-tabs]:has(.nd-tab[aria-disabled="true"])');
+  const refused = set.locator('.nd-tab[aria-disabled="true"]').first();
   await expect(refused).toBeVisible();
   // It stays in the strip and in the walk: a tab a reader cannot find is a
   // panel they conclude does not exist.
   expect(await refused.getAttribute("role")).toBe("tab");
-  const before = await refused.getAttribute("aria-selected");
+  // NOT VACUOUS. Both of these are written by the script. A comparison below
+  // is then a statement about a state that exists, rather than about two
+  // absent attributes. The check before this one passed on a page where
+  // nothing had run at all.
+  expect(await refused.getAttribute("aria-selected"), "the script wrote no state").toBe("false");
+  const panel = page.locator(`#${await refused.getAttribute("aria-controls")}`);
+  await expect(panel, "a refused tab points at no panel").toBeAttached();
+  await expect(panel).toBeHidden();
+
+  /** Where it sits in the strip, and how long the strip is. */
+  const place = () =>
+    set.evaluate((el) => {
+      const tabs = [...el.querySelectorAll(".nd-tab")];
+      const at = tabs.findIndex((tab) => tab.getAttribute("aria-disabled") === "true");
+      return `${at} of ${tabs.length}`;
+    });
+  const before = await place();
+
+  // `force`, because Playwright reads `aria-disabled` as unactionable, which
+  // is the point of the attribute rather than a reason to skip the press.
   await refused.click({ force: true });
-  expect(await refused.getAttribute("aria-selected")).toBe(before);
+  expect(await place(), "a refused tab moved or left the strip").toBe(before);
+  expect(await refused.getAttribute("aria-selected"), "a refused tab chose itself").toBe("false");
+  await expect(panel, "a refused tab showed its panel").toBeHidden();
 });
 
 test("the chosen tab is marked by more than a colour", async ({ page }) => {
@@ -188,19 +208,33 @@ test("the chosen tab is marked by more than a colour", async ({ page }) => {
     const tabs = [...el.querySelectorAll('[role="tab"]')];
     const on = tabs.find((tab) => tab.getAttribute("aria-selected") === "true");
     const off = tabs.find((tab) => tab.getAttribute("aria-selected") !== "true");
+    if (!on || !off) return null;
     const read = (node) => {
       const style = getComputedStyle(node);
       return {
-        weight: style.fontWeight,
+        weight: Number.parseFloat(style.fontWeight),
         edge: style.borderBottomColor,
         edgeWidth: Number.parseFloat(style.borderBottomWidth),
         inline: style.borderInlineEndColor,
+        inlineWidth: Number.parseFloat(style.borderInlineEndWidth),
       };
     };
     return { on: read(on), off: read(off) };
   });
-  // A second signal beside the colour, per `NOCTUA.md §8.8.6`: the weight, and
-  // a rule that is drawn on one and transparent on the other.
-  expect(marked.on.weight).not.toBe(marked.off.weight);
+  expect(marked, "the strip has no chosen tab, or nothing to compare it with").not.toBeNull();
+
+  // THE SIGNAL THAT IS NOT A COLOUR, per `NOCTUA.md §8.8.6`, and the one the
+  // check before this one measured and then never asserted. The chosen tab is
+  // heavier than the rest, so a reader who cannot tell two hues apart still
+  // knows which tab they are on.
+  expect(marked.on.weight, "the chosen tab is no heavier than the rest").toBeGreaterThan(
+    marked.off.weight,
+  );
+  // And the mark under it is a rule with real thickness. A rule of no width
+  // leaves the colour doing all of the work again, which is the defect this
+  // title names.
+  const rule = Math.max(marked.on.edgeWidth, marked.on.inlineWidth);
+  expect(rule, "the mark under the chosen tab has no thickness").toBeGreaterThan(0);
+  // The colour is the second signal rather than the only one.
   expect(marked.on.edge === marked.off.edge && marked.on.inline === marked.off.inline).toBe(false);
 });

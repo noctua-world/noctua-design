@@ -8,7 +8,7 @@
 
 use dioxus::prelude::*;
 
-/// Where it hangs off its button: `auto`, `start` or `end`. Defaults to `auto`, which measures the room below and flips above when there is not enough. `start` and `end` pin the menu's leading or trailing edge to the button.
+/// Where it hangs off its button: `auto`, `start` or `end`. `auto` measures the room, flipping above and hanging from whichever edge fits. `start` and `end` pin one edge whatever the room.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum MenuPlacement {
     #[default]
@@ -48,7 +48,7 @@ pub fn Menu(
     name: String,
     /// The menu's own name, in the reader's language, such as *Actions for this invoice*. **Required**, because a screen reader announces the menu when focus enters it. Name what the actions are about.
     label: String,
-    /// Where it hangs off its button: `auto`, `start` or `end`. Defaults to `auto`, which measures the room below and flips above when there is not enough. `start` and `end` pin the menu's leading or trailing edge to the button.
+    /// Where it hangs off its button: `auto`, `start` or `end`. `auto` measures the room, flipping above and hanging from whichever edge fits. `start` and `end` pin one edge whatever the room.
     #[props(default)]
     placement: MenuPlacement,
     /// Extra classes for the root element.

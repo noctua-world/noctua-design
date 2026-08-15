@@ -23,15 +23,18 @@ test("a bar is a status until a caller asks for the rude one", async ({ page }) 
   const all = await bars(page);
   expect(await all.count()).toBeGreaterThan(0);
 
-  const roles = await all.evaluateAll((els) =>
-    els.map((el) => ({ alert: el.dataset.ndAlert, role: el.getAttribute("role") })),
-  );
-  for (const one of roles) {
-    expect(one.role).toBe(one.alert === "true" ? "alert" : "status");
+  // THE ROLE IS THE WHOLE OF WHAT `alert` DECIDES, and it is what assistive
+  // technology acts on. This used to read the prop back out of a
+  // `data-nd-alert` attribute that both bodies wrote and nothing else read —
+  // so the assertion compared the component's output with the component's
+  // output, and would have passed with the role wired to nothing.
+  const roles = await all.evaluateAll((els) => els.map((el) => el.getAttribute("role")));
+  for (const role of roles) {
+    expect(role, "a bar with neither role announces nothing").toMatch(/^(status|alert)$/);
   }
   // Both are demonstrated, or the claim is untested on this page.
-  expect(roles.some((one) => one.role === "status")).toBe(true);
-  expect(roles.some((one) => one.role === "alert")).toBe(true);
+  expect(roles.includes("status")).toBe(true);
+  expect(roles.includes("alert")).toBe(true);
 });
 
 test("aria-live is absent unless a caller wrote it", async ({ page }) => {

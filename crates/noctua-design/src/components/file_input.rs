@@ -42,7 +42,7 @@ impl FileInputSize {
 ///
 /// # Accessibility
 ///
-/// The drop area is the `<label>` of a real file input, so it is focusable, pressable and announced. The input is clipped rather than `display: none`, which would take it out of the accessible tree.
+/// The drop area is the `<label>` of a real file input, so it is pressable and announced. The input itself is the focusable part, clipped rather than hidden, and the area draws its focus ring.
 #[component]
 pub fn FileInput(
     /// The field the files are submitted under, and the root of every id here. **Required**, because an id derived from an optional name is an id every copy on a page shares.

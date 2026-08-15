@@ -137,6 +137,32 @@ pub fn Textarea(
     let invalid = error.is_some().then_some("true");
     let box_class = format!("nd-textarea {class}");
     let box_class = box_class.trim().to_owned();
+    // See `INPUT_DIOXUS`: the sentence is rendered rather than waited for, and
+    // `other` is the form a component handed no locale may choose. Repeated
+    // rather than shared for the reason at the head of this section — one
+    // component cannot reach into another's markup to write on it.
+    let counted = if counter {
+        let shape = counter_label.clone().unwrap_or_default();
+        let form = if shape.contains(':') {
+            shape
+                .split('|')
+                .filter_map(|part| part.split_once(':'))
+                .find(|(name, _)| name.trim() == "other")
+                .map_or(String::new(), |(_, text)| text.to_owned())
+        } else {
+            shape
+        };
+        let start = value
+            .as_deref()
+            .unwrap_or_default()
+            .chars()
+            .count()
+            .to_string();
+        form.replace("{count}", &start)
+            .replace("{max}", maxlength.as_deref().unwrap_or_default())
+    } else {
+        String::new()
+    };
 
     rsx! {
         Field {
@@ -190,6 +216,8 @@ pub fn Textarea(
                     role: "status",
                     "aria-live": "polite",
                     "data-nd-textarea-counter": "",
+                    // See above: the sentence, rendered rather than waited for.
+                    "{counted}"
                 }
             }
         }

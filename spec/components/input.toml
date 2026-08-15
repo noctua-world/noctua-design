@@ -107,7 +107,7 @@ doc = "A fixed word or symbol after the value, such as `.com`, `kg` or `%`. Same
 type = "bool"
 default = "false"
 attribute = "data-nd-clearable"
-doc = "Whether a control appears for emptying the box. Off by default. Emptying a field costs a reader one gesture they already know. A control that appears only when there is text moves the layout as they type."
+doc = "Whether a control appears for emptying the box. Off by default. Emptying a field costs a reader one gesture they already know. It keeps its space while the box is empty, so nothing moves as they type."
 
 [prop.clear_label]
 type = "text"

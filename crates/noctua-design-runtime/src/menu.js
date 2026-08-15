@@ -38,9 +38,10 @@ export function enhanceMenus(root = document) {
   for (const button of root.querySelectorAll('[aria-haspopup="menu"][aria-controls]')) {
     if (button.dataset.ndEnhanced) continue;
     const menu = document.getElementById(button.getAttribute("aria-controls"));
-    // A button pointing at nothing is left exactly as it is. It is already
-    // announcing a menu that does not exist, and hiding that by silently
-    // dropping the attributes would remove the evidence rather than the defect.
+    // A button pointing at nothing is left exactly as it is, which now means
+    // left hidden: the component renders a menu button with `hidden` and this
+    // file takes it off. Nothing anywhere drops the attributes and pretends the
+    // markup was right, so the evidence is still there for anyone reading it.
     if (!menu || !menu.classList.contains("nd-menu")) continue;
     button.dataset.ndEnhanced = "menu";
     enhance(button, menu);
@@ -48,22 +49,38 @@ export function enhanceMenus(root = document) {
 }
 
 function enhance(button, menu) {
+  // REVEALED, NEVER BUILT, which is `Dialog`'s line and `Popover`'s. The
+  // component renders the button hidden, so a page with no script carries no
+  // control announcing a menu nothing can open — which is the defect named at
+  // the top of this file, and which the button itself committed for as long as
+  // only the menu was hidden.
+  button.hidden = false;
+
   /** Every item the arrows may land on — refused ones included. */
   const items = () => [...menu.querySelectorAll('[role="menuitem"]')];
 
   let typed = "";
   let typedAt = 0;
 
-  function open(focus) {
+  function open() {
     if (showing && showing !== close) showing();
     menu.hidden = false;
     button.setAttribute("aria-expanded", "true");
     keepAnchored(menu, button, { room: ROOM }, () => close(false));
     showing = close;
-    // OPENING WITH THE KEYBOARD LANDS ON AN ITEM; opening with a pointer does
-    // not. A reader who pressed a key is walking, and one who clicked is
-    // reading — moving the focus for the second is taking their place from them.
-    if (focus) move(0, 1);
+    // AN OPEN MENU IS A TAB STOP, WHOEVER OPENED IT.
+    //
+    // Every item ships `tabindex="-1"` and only `move` ever wrote a `0` — and
+    // the pointer path never called it. So a menu opened with a click had no
+    // stop of its own: Tab walked straight past the whole surface, `focusout`
+    // never fired, and the menu stayed open behind a reader who had moved on.
+    // The stop is placed and the focus is NOT: a reader who pressed a key is
+    // walking, and one who clicked is reading.
+    //
+    // This replaces a `focus` parameter nothing ever passed as true. A branch
+    // no call site takes is not a decision, and the keyboard path hand-rolled
+    // its own `move` around it.
+    seed(0);
   }
 
   /** Closes it, and puts focus back only when the reader asked it to close. */
@@ -77,27 +94,37 @@ function enhance(button, menu) {
   }
 
   /**
-   * Puts focus on one item and takes it off the rest.
+   * Puts the one tab stop on one item and takes it off the rest.
    *
    * THE ROVING `tabindex`, which is the same one `Tree` and the data grid use:
    * the menu is one tab stop, and within it the arrows move. Wrapping at both
    * ends is what a menu does and a listbox does not.
+   *
+   * It moves no focus, which is what lets `open` call it: placing the stop and
+   * taking the reader's place are two decisions, and only one of them belongs
+   * to a pointer.
    */
-  function move(from, step) {
+  function seed(from) {
     const all = items();
-    if (all.length === 0) return;
-    const at = ((from % all.length) + all.length) % all.length;
+    if (all.length === 0) return -1;
+    const index = ((from % all.length) + all.length) % all.length;
     for (const item of all) item.tabIndex = -1;
-    all[at].tabIndex = 0;
-    all[at].focus();
-    return step;
+    all[index].tabIndex = 0;
+    return index;
+  }
+
+  /** The same, and the focus goes with it. */
+  function move(from) {
+    const all = items();
+    const index = seed(from);
+    if (index >= 0) all[index].focus();
   }
 
   /** Where the focus is now, or the first item. */
   const at = () => Math.max(0, items().indexOf(document.activeElement));
 
   button.addEventListener("click", () => {
-    if (menu.hidden) open(false);
+    if (menu.hidden) open();
     else close(true);
   });
 
@@ -106,8 +133,8 @@ function enhance(button, menu) {
     // keyboard convention a menu button has that an ordinary button does not.
     if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
     event.preventDefault();
-    open(false);
-    move(event.key === "ArrowDown" ? 0 : items().length - 1, 1);
+    open();
+    move(event.key === "ArrowDown" ? 0 : items().length - 1);
   });
 
   menu.addEventListener("keydown", (event) => {
@@ -115,19 +142,19 @@ function enhance(button, menu) {
     switch (event.key) {
       case "ArrowDown":
         event.preventDefault();
-        move(at() + 1, 1);
+        move(at() + 1);
         return;
       case "ArrowUp":
         event.preventDefault();
-        move(at() - 1, -1);
+        move(at() - 1);
         return;
       case "Home":
         event.preventDefault();
-        move(0, 1);
+        move(0);
         return;
       case "End":
         event.preventDefault();
-        move(all.length - 1, -1);
+        move(all.length - 1);
         return;
       case "Escape":
         // Stopped, so a menu inside a dialog closes itself first rather than
@@ -153,7 +180,7 @@ function enhance(button, menu) {
     for (let step = 0; step < all.length; step += 1) {
       const index = (from + step) % all.length;
       if (all[index].textContent.trim().toLowerCase().startsWith(word)) {
-        move(index, 1);
+        move(index);
         return;
       }
     }

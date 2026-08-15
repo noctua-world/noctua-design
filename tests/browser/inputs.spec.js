@@ -5,7 +5,7 @@
 
 import { expect, test } from "@playwright/test";
 
-import { LOCALES, PAGE, url } from "./pages.js";
+import { LOCALES, PAGE, showParts, url } from "./pages.js";
 import { extremes } from "./pixels.js";
 
 /** Every page a control of this family is documented on.
@@ -109,19 +109,35 @@ test("with the script blocked it is an input that posts a value", async ({ brows
   // are not there at all.
   await expect(page.locator("[data-nd-input-clear]").first()).toBeHidden();
   await expect(page.locator("[data-nd-input-reveal]").first()).toBeHidden();
+
+  // AND IT POSTS, WHICH IS THE HALF THE TITLE NAMES AND NOTHING ASKED. Every
+  // line above reads an attribute off the markup, so a box the form could not
+  // carry passed. The example is a real `get` form, so it is submitted here.
+  // The value is read back out of the address the browser went to.
+  await box.fill("Grace Hopper");
+  await page.locator('form:has([data-nd-input="who"]) button[type="submit"]').click();
+  await page.waitForURL(/\?/);
+  expect(new URL(page.url()).searchParams.get("who")).toBe("Grace Hopper");
   await context.close();
 });
 
-test("the clear control appears with the text and empties the box", async ({ page }) => {
+test("the clear control appears with the text and moves nothing", async ({ page }) => {
   await page.goto(url(PAGE.input));
   const box = page.locator('[data-nd-input="handle"] .nd-input-box');
   const clear = page.locator('[data-nd-input="handle"] [data-nd-input-clear]');
   // A control that is there when the box is empty is a control that does
-  // nothing, and one that appears as a reader types is one that moves the
-  // layout under their hand — so it appears with the text and nowhere else.
+  // nothing, so it appears with the text and nowhere else.
   await expect(clear).toBeHidden();
+  // AND THE BOX DOES NOT MOVE. This test used to repeat `clearable`'s own
+  // self-contradicting sentence — "a control that appears as a reader types is
+  // one that moves the layout under their hand" — while asserting exactly that
+  // arrangement. The control was `display: none`, so the box widened on the
+  // first keystroke. Both widths are read, and they are the same width.
+  const width = () => box.evaluate((el) => Math.round(el.getBoundingClientRect().width));
+  const empty = await width();
   await box.fill("ada");
   await expect(clear).toBeVisible();
+  expect(await width()).toBe(empty);
   await clear.click();
   expect(await box.inputValue()).toBe("");
   // Focus goes back to the box, because emptying a field is something a reader
@@ -351,7 +367,7 @@ test("a value out of range is refused with a sentence, and not rewritten", async
   await page.goto(url(PAGE.numberInput));
   const root = '[data-nd-number-input="boxes"]';
   const box = page.locator(`${root} .nd-number-input-box`);
-  const said = page.locator(`.nd-field:has(${root}) [data-nd-field-error]`);
+  const said = page.locator(`.nd-field:has(${root}) [data-nd-field-error] [data-nd-field-message]`);
   await box.fill("40");
   await box.blur();
   // REFUSED AND EXPLAINED, NEVER REWRITTEN — a control that changes a reader's
@@ -445,11 +461,20 @@ test("a range is two named controls, and neither crosses the other", async ({ pa
   const names = await thumbs.evaluateAll((all) => all.map((one) => one.name));
   expect(names).toEqual(["budget-start", "budget-end"]);
 
+  const reading = () => thumbs.evaluateAll((all) => all.map((one) => Number(one.value)));
+  const [was, ceiling] = await reading();
+
   const start = thumbs.first();
   await start.focus();
   for (let press = 0; press < 30; press += 1) await page.keyboard.press("ArrowRight");
-  const [low, high] = await thumbs.evaluateAll((all) => all.map((one) => Number(one.value)));
-  expect(low).toBeLessThanOrEqual(high);
+  const [low, high] = await reading();
+  // WALKED, AND STOPPED AT THE OTHER THUMB. This asserted `low <= high`, which
+  // was already true before a key was pressed. It stayed true of a thumb that
+  // never moved, of a thumb nothing could focus, and of a thumb that shoved the
+  // other one up the scale. All three are named below.
+  expect(low, "the start thumb did not move at all").toBeGreaterThan(was);
+  expect(low, "the start thumb walked past the end thumb").toBe(ceiling);
+  expect(high, "the start thumb pushed the end thumb up the scale").toBe(ceiling);
 });
 
 // --- FileInput ---------------------------------------------------------------
@@ -465,6 +490,19 @@ test("the drop area is the label of a real file input", async ({ page }) => {
   // And the input is clipped rather than `display: none`, which would take it
   // out of the accessibility tree and out of the tab order.
   expect(await native.evaluate((el) => getComputedStyle(el).display)).not.toBe("none");
+
+  // FOCUSED, RATHER THAN CALLED FOCUSABLE. Nothing here ever took the focus, so
+  // the sentence above it was a claim no line under it made. The pairing is
+  // read from the platform's own `labels` as well. Two strings that match are
+  // not proof that the browser joined the two elements.
+  await native.focus();
+  expect(await native.evaluate((el) => el === document.activeElement)).toBe(true);
+  expect(
+    await native.evaluate((el) =>
+      [...el.labels].some((one) => one.matches("[data-nd-file-input-area]")),
+    ),
+    "the browser does not read the area as this input's label",
+  ).toBe(true);
 });
 
 test("what was chosen is listed, named, and can be taken off", async ({ page }) => {
@@ -501,13 +539,45 @@ test("a file of the wrong kind is refused with a sentence", async ({ page }) => 
 
 // --- TimeInput ---------------------------------------------------------------
 
-test("it is served on a twenty-four hour clock and re-laid to the reader's", async ({ page }) => {
+test("it is served on a twenty-four hour clock and re-laid to the reader's", async ({
+  browser,
+  page,
+}) => {
+  // THE FIELD THAT TELLS THE TWO CLOCKS APART. This read `starts`, whose
+  // `09:30` is `09:30` on either clock, and an attribute the runtime used to
+  // write for every field on the page. Neither line could fail. An afternoon
+  // reading can: it is 14 where the server keeps it and 02 with PM where the
+  // reader was shown it.
+  const root = '[data-nd-time-input="meeting"]';
+
+  // What ships, with nothing running: the reading the server sent, whole, and
+  // no meridiem control at all.
+  const bare = await browser.newContext({ javaScriptEnabled: false });
+  const still = await bare.newPage();
+  await still.goto(url(PAGE.timeInput));
+  const served = await still.locator(root).getAttribute("data-nd-value");
+  const [hours, minutes] = served.split(":");
+  expect(Number(hours), "no example is served an afternoon reading any more").toBeGreaterThan(12);
+  await expect(still.locator(`${root} [data-nd-time-input-meridiem]`)).toBeHidden();
+  await bare.close();
+
+  // And what a reader on a twelve-hour clock is given.
   await page.goto(url(PAGE.timeInput));
-  const root = '[data-nd-time-input="starts"]';
   await expect(page.locator(root)).toHaveAttribute("data-nd-resolved", "true");
-  const hour = page.locator(`${root} [data-nd-time-input-segment="hour"]`);
-  // Whatever clock the reader was shown, `09:30` is `09:30`.
-  expect(await hour.inputValue()).toBe("09");
+  expect(
+    await page.locator(`${root} [data-nd-time-input-segment="hour"]`).inputValue(),
+    "the hour box was left on the clock the server keeps",
+  ).toBe(String(Number(hours) - 12).padStart(2, "0"));
+  expect(await page.locator(`${root} [data-nd-time-input-segment="minute"]`).inputValue()).toBe(
+    minutes,
+  );
+  // The half of the reading the boxes no longer carry is a control of its own,
+  // with the right end of it chosen.
+  const chosen = page.locator(`${root} .nd-time-input-meridiem-group [aria-checked="true"]`);
+  await expect(chosen).toHaveCount(1);
+  expect(await chosen.getAttribute("data-nd-value"), "the afternoon went missing").toBe("pm");
+  // And the reading the server keeps is untouched by any of it.
+  expect(await page.locator(root).getAttribute("data-nd-value")).toBe(served);
 });
 
 test("the boxes step, wrap, and carry the reader on", async ({ page }) => {
@@ -634,4 +704,253 @@ test("a control the script refuses gets the mark too, not just a rendered error"
   await expect
     .poll(() => field.evaluate((el) => getComputedStyle(el).borderInlineStartWidth))
     .toBe(rule);
+});
+
+// --- What the seven owe with no script at all -------------------------------
+
+test("the slider draws its value and its scale before any script runs", async ({ browser }) => {
+  // `output`'s own doc says it is on by default "so users can read the value
+  // they have set", and the `<output>` shipped EMPTY: the single promise the
+  // prop makes was the one thing it did not do without a script. The marks
+  // were the same — five ticks a caller asked for, none of them drawn, under a
+  // prop whose doc calls them decoration. Both are rendered now, and
+  // `inputs.js` still rewrites the value on every move.
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(url(PAGE.slider));
+
+  await expect(page.locator('[data-nd-slider="volume"] [data-nd-slider-output]')).toHaveText("35%");
+  const marks = page.locator('[data-nd-slider="marked"] .nd-slider-mark');
+  expect(await marks.count(), "a slider asked for ticks and drew none").toBeGreaterThan(1);
+  // The words the caller supplied, position by position against the values.
+  expect((await marks.first().textContent()).trim().length).toBeGreaterThan(0);
+
+  // A range says both ends, because half an answer is not the answer.
+  const span = await page
+    .locator('[data-nd-slider="budget"] [data-nd-slider-output]')
+    .textContent();
+  expect(span, "a range showed one bound or none").toMatch(/\d.*\d/);
+  await context.close();
+});
+
+test("the counter says how much room is left before any script runs", async ({ browser }) => {
+  // `maxlength` stops accepting characters in silence, and this sentence is
+  // the only thing that says why. The `<p>` was rendered, put into
+  // `aria-describedby`, and left blank — which is the exact failure the
+  // `counter` prop's own doc exists to prevent.
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+
+  for (const [slug, hook] of [
+    [PAGE.input, "[data-nd-input-counter]"],
+    [PAGE.textarea, "[data-nd-textarea-counter]"],
+  ]) {
+    await page.goto(url(slug));
+    const counter = page.locator(hook).first();
+    await expect(counter).toBeAttached();
+    const said = (await counter.textContent()).trim();
+    expect(said.length, `${slug} rendered a counter with nothing in it`).toBeGreaterThan(0);
+    // The limit is the half a reader cannot work out for themselves.
+    const limit = await page
+      .locator(`${hook.replace("-counter", "")}`)
+      .first()
+      .evaluate((el) => el.closest(".nd-field")?.querySelector("[maxlength]")?.maxLength ?? 0);
+    if (limit > 0) expect(said, `${slug} does not say the limit`).toContain(String(limit));
+  }
+  await context.close();
+});
+
+test("the script keeps the counter right, and the sentence agrees with itself", async ({
+  page,
+}) => {
+  // The other half: what is rendered is a starting point the script owns from
+  // the first keystroke, and the plural form is the reader's language's.
+  await page.goto(url(PAGE.input));
+  const box = page.locator('[data-nd-input="handle"] [data-nd-input-box]');
+  const counter = page.locator("[data-nd-input-counter]").first();
+  const before = (await counter.textContent()).trim();
+  await box.fill("ada");
+  await expect(counter).not.toHaveText(before);
+  expect((await counter.textContent()).trim()).toContain("3");
+});
+
+test("the now control is hidden until something can read the clock", async ({ browser }) => {
+  // `NumberInput`'s steppers and `Input`'s clear and reveal controls are all
+  // rendered hidden and revealed by `inputs.js`, and the comments beside them
+  // cite the rule. This one shipped visible and inert: reading the clock is
+  // the script's and nothing else's.
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(url(PAGE.timeInput));
+  const now = page.locator('[data-nd-action="time-input-now"]').first();
+  await expect(now).toBeAttached();
+  await expect(now, "a control that fills nothing is on the page").toBeHidden();
+  await context.close();
+});
+
+test("the script reveals the now control, and it fills the boxes", async ({ page }) => {
+  await page.goto(url(PAGE.timeInput));
+  const root = '[data-nd-time-input="meeting"]';
+  const now = page.locator(`${root} [data-nd-action="time-input-now"]`);
+  await expect(now).toBeVisible();
+  await now.click();
+  const hour = page.locator(`${root} [data-nd-time-input-segment="hour"]`);
+  expect((await hour.inputValue()).length, "the now control filled nothing").toBeGreaterThan(0);
+});
+
+// --- The two directions of a range, and the one that was never tried --------
+
+test("pulling the end thumb below the start stops it, and keeps the lower bound", async ({
+  page,
+}) => {
+  // THE DIRECTION THE OLD TEST NEVER PRESSED. `paint` clamped with two lines
+  // that asked the same question — `start > end` and `end < start` — so the
+  // first always fired: dragging the END down dragged the START down with it
+  // and threw away a bound the reader had chosen, in silence. Both the comment
+  // beside it and `slider.toml` say neither thumb may cross the other, and
+  // neither says the other one moves.
+  await page.goto(url(PAGE.slider));
+  const root = '[data-nd-slider="budget"]';
+  const thumbs = page.locator(`${root} [data-nd-slider-thumb]`);
+  const [low] = await thumbs.evaluateAll((all) => all.map((one) => Number(one.value)));
+
+  await thumbs.nth(1).focus();
+  for (let press = 0; press < 40; press += 1) await page.keyboard.press("ArrowLeft");
+
+  const [after, end] = await thumbs.evaluateAll((all) => all.map((one) => Number(one.value)));
+  expect(after, "the end thumb dragged the start thumb down with it").toBe(low);
+  expect(end, "the end thumb crossed the start thumb").toBe(low);
+});
+
+// --- The one focusable part of a file field ---------------------------------
+
+test("the file field shows its focus, and a refused one is dimmed", async ({ page }) => {
+  // The rule was `.nd-file-input-native:focus-visible + .nd-file-input-area`,
+  // and the body renders the LABEL first — so the sibling combinator was aimed
+  // backwards and matched nothing, ever. The only focusable part of the
+  // control showed no focus at all, which is WCAG 2.4.7 failed in silence by a
+  // rule that looked right.
+  await page.goto(url(PAGE.fileInput));
+  const root = '[data-nd-file-input="one-attachment"]';
+  const area = page.locator(`${root} [data-nd-file-input-area]`);
+
+  // THE STYLE, NOT THE WIDTH. `outline-width` computes to its declared value
+  // even where `outline-style` is `none`, so a width comparison would have
+  // passed against a ring nobody can see.
+  const ring = () => area.evaluate((el) => getComputedStyle(el).outlineStyle);
+  expect(await ring(), "a file field is outlined before anything focuses it").toBe("none");
+  await page.locator(`${root} [data-nd-file-input-native]`).focus();
+  expect(await ring(), "the one focusable part of a file field shows no focus").not.toBe("none");
+
+  // And a refused one is dimmed, which was the same selector and the same miss.
+  const refused = page.locator(".nd-file-input:has([data-nd-file-input-native]:disabled)").first();
+  if ((await refused.count()) > 0) {
+    const dim = await refused
+      .locator("[data-nd-file-input-area]")
+      .evaluate((el) => Number.parseFloat(getComputedStyle(el).opacity));
+    expect(dim, "a refused file field is drawn as though it were not").toBeLessThan(1);
+  }
+});
+
+// --- A refusal that has been answered has to go away ------------------------
+
+test("a refusal is cleared once the value is right again", async ({ page }) => {
+  // `say` returned early on an empty sentence, so `say(status, "")` — which is
+  // what `TimeInput` and `OtpField` both call on their valid paths — did
+  // nothing at all. A reader who corrected their answer was left looking at
+  // the complaint about the answer before it.
+  await page.goto(url(PAGE.timeInput));
+  const root = '[data-nd-time-input="booking"]';
+  const hour = page.locator(`${root} [data-nd-time-input-segment="hour"]`);
+  const minute = page.locator(`${root} [data-nd-time-input-segment="minute"]`);
+  const status = page.locator(`${root} [data-nd-time-input-status]`);
+
+  await hour.fill("09");
+  await minute.fill("");
+  await minute.blur();
+  await expect(status).toContainText("minute");
+
+  await minute.fill("30");
+  await minute.blur();
+  await expect(status, "a stale refusal stayed beside a control that is now right").toHaveText("");
+});
+
+// --- The time field's own keyboard, and the boxes it refuses -----------------
+
+test("the arrows walk the boxes and a separator moves on", async ({ page }) => {
+  await page.goto(url(PAGE.timeInput));
+  await showParts(page);
+  const hour = page.locator('[data-nd-time-input] [data-nd-time-input-segment="hour"]').first();
+  const minute = page
+    .locator('[data-nd-time-input] [data-nd-time-input-segment="minute"]')
+    .first();
+
+  // A SEPARATOR MOVES ON, AND IT NEVER DID. `segmentWalk` strips every
+  // non-digit before the input handler sees one, so a typed `:` disappeared
+  // and only a second digit ever left the hour box — under a contract saying
+  // `9:30` fills both boxes with no keystroke in between.
+  await hour.click();
+  await hour.fill("");
+  await page.keyboard.type("9:30");
+  await expect(hour).toHaveValue(/^0?9$/);
+  await expect(minute).toHaveValue("30");
+
+  // AND THE ARROWS WALK THE ROW, which `OtpField` binds and a time did not.
+  await minute.click();
+  await page.keyboard.press("Home");
+  await page.keyboard.press("ArrowLeft");
+  await expect(hour).toBeFocused();
+  await page.keyboard.press("End");
+  await page.keyboard.press("ArrowRight");
+  await expect(minute).toBeFocused();
+});
+
+test("a refused time marks the boxes, not only the fieldset", async ({ page }) => {
+  await page.goto(url(PAGE.timeInput));
+  await showParts(page);
+  const hour = page.locator('[data-nd-time-input] [data-nd-time-input-segment="hour"]').first();
+  await hour.click();
+  await hour.fill("99");
+  await hour.blur();
+  // `[state.invalid]` declares `aria-invalid` and the rule that paints a
+  // refused box is `.nd-time-input-segment[aria-invalid="true"]` — and only
+  // `data-nd-invalid` on the wrapper was ever written, so a refused time said
+  // its sentence and every box stayed its ordinary colour.
+  await expect(hour).toHaveAttribute("aria-invalid", "true");
+});
+
+test("only a clock the script re-laid says it was resolved", async ({ page }) => {
+  await page.goto(url(PAGE.timeInput));
+  await showParts(page);
+  // The state exists to tell a re-laid clock from a served one. It was written
+  // outside the twelve-hour branch, so it was true of every field on the page.
+  const fields = await page.evaluate(() =>
+    [...document.querySelectorAll("[data-nd-time-input]")].map((root) => ({
+      name: root.dataset.ndTimeInput,
+      resolved: root.hasAttribute("data-nd-resolved"),
+      twelve: root.querySelector(".nd-time-input-meridiem-group") !== null,
+    })),
+  );
+  expect(fields.length).toBeGreaterThan(0);
+  for (const field of fields) {
+    expect(field.resolved, `${field.name} claims a clock it never re-laid`).toBe(field.twelve);
+  }
+});
+
+test("an empty number field is a spinbutton with no value, not a stale one", async ({ page }) => {
+  await page.goto(url(PAGE.numberInput));
+  await showParts(page);
+  const box = page.locator('[data-nd-number-input] .nd-number-input-box').first();
+  await box.click();
+  await box.fill("42");
+  await box.blur();
+  // The drawn precision is the field's, so the number is compared and not the
+  // string: a currency field says `42.00`.
+  expect(Number(await box.getAttribute("aria-valuenow"))).toBe(42);
+  // `settle()` returned before touching the value when there was no reading,
+  // so a field a reader emptied went on announcing what they had just deleted.
+  await box.click();
+  await box.fill("");
+  await box.blur();
+  expect(await box.getAttribute("aria-valuenow")).toBeNull();
 });

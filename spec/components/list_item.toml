@@ -18,5 +18,5 @@ doc = "The item, or the description of the term."
 notes = """
 A `<dt>` and its `<dd>` must be direct children of the `<dl>`, so this
 renders two siblings rather than wrapping them. A wrapper breaks the
-association a screen reader reads.
+association a screen reader reads. The `<li>` restates `listitem`.
 """

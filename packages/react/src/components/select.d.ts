@@ -27,7 +27,7 @@ export interface SelectProps {
   multiple?: boolean;
   /** Stops users answering. The real attribute rather than `aria-disabled`, because only the real one keeps the value out of the submission. */
   disabled?: boolean;
-  /** The size of the control: `small`, `medium` or `large`, which is 32, 48 and 64 pixels, matching `Button` step for step. `medium` by default. */
+  /** The size of the control: `small`, `medium` or `large`, matching `Button` step for step. `medium` by default. */
   size?: SelectSize;
   /** Whether the enhanced list can be filtered by typing. Turn it on for thirty-nine palettes and leave it off for six, where a filter box promises more than is there. */
   searchable?: boolean;
@@ -35,7 +35,7 @@ export interface SelectProps {
   clearable?: boolean;
   /** Whether the options are still on their way. The list says so instead of showing an empty one, because an empty list and a list that has not arrived mean opposite things. */
   loading?: boolean;
-  /** Whether typing something the list does not have offers to add it. The new option is appended to the real `<select>`, so what is created is submitted like anything else. */
+  /** Whether typing something the list does not have offers to add it. Turn it on with `searchable`, which is the box a reader types into. The new option is appended to the real `<select>`. */
   creatable?: boolean;
   /** The filter box's accessible name, in the reader's language. Supply it with `searchable`. It is a prop because this package ships no words. */
   searchLabel?: string;

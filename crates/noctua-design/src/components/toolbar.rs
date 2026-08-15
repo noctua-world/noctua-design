@@ -60,9 +60,9 @@ impl ToolbarDensity {
 ///
 /// # Accessibility
 ///
-/// One tab stop for the whole bar, walked with the arrow keys. Exactly one control
-/// inside carries `tabindex="0"` and the rest carry `-1`, so returning to the bar
-/// lands where users left off.
+/// One tab stop for the whole bar, walked with the arrow keys, once the script has
+/// placed the roving `tabindex`. A bar takes its controls as children and cannot
+/// write on them, so with no script each control is its own tab stop.
 #[component]
 pub fn Toolbar(
     /// The toolbar's accessible name, saying what the bar of controls is for. Required unless `labelledby` names it instead, because a `role="toolbar"` with no name gives a screen reader only the word `toolbar`.

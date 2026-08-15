@@ -29,7 +29,15 @@ export function Rating({ name, label, value, max, readonly, valueLabel, itemLabe
   // See the Dioxus half: one sentence with holes, filled here.
   const filled = (words, number) =>
     words.split("{value}").join(number).split("{max}").join(max_);
-  const sentence = value && valueLabel ? filled(valueLabel, value) : undefined;
+  // GIVEN OR NOT GIVEN, NOT TRUTHY OR FALSY. The Dioxus half zips two
+  // `Option`s, so `value = Some("")` reads the sentence out with an empty
+  // number in it; `value && valueLabel` dropped the sentence entirely, and a
+  // reading a sighted reader can see is one a screen reader was not given.
+  const given = value !== undefined && value !== null;
+  const sentence =
+    given && valueLabel !== undefined && valueLabel !== null
+      ? filled(valueLabel, value)
+      : undefined;
   const scale = Array.from({ length: steps }, (_, at) => {
     const number = String(at + 1);
     return {
@@ -72,7 +80,9 @@ export function Rating({ name, label, value, max, readonly, valueLabel, itemLabe
           stars("l"),
         ),
       ),
-      sentence ? h("span", { key: "v", className: "nd-rating-value" }, sentence) : null,
+      sentence === undefined
+        ? null
+        : h("span", { key: "v", className: "nd-rating-value" }, sentence),
     );
 
   return h(
@@ -99,9 +109,7 @@ export function Rating({ name, label, value, max, readonly, valueLabel, itemLabe
         "data-nd-readonly": "false",
         "data-nd-max": max_,
         "data-nd-value": value,
-        "data-nd-value-label": valueLabel,
-        "data-nd-item-label": itemLabel,
-        ...rest,
+            ...rest,
       },
       h(
         "div",

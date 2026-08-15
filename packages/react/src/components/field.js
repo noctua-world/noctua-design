@@ -58,10 +58,12 @@ export function Field({ control, label, kind, hint, error, required, requiredLab
             role: "alert",
             "data-nd-field-error": "",
           },
-          error && errorLabel
+          // See the Dioxus half: the word is always there, and the sentence
+          // has an element of its own so a script can replace it alone.
+          errorLabel
             ? h("span", { key: "w", className: "nd-visually-hidden" }, `${errorLabel} `)
             : null,
-          error ?? null,
+          h("span", { key: "m", "data-nd-field-message": "" }, error ?? null),
         )
       : null,
     children,

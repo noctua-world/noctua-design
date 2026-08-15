@@ -152,7 +152,7 @@ test("the browser's refusal fills the fields, the list and the document title", 
 
   // The same sentence beside the answer, where a reader who has arrived needs
   // it, and the field marked wrong with it.
-  await expect(page.locator(`${FORM} [data-nd-field-error]`).first()).toHaveText(platform[0]);
+  await expect(page.locator(`${FORM} [data-nd-field-error] [data-nd-field-message]`).first()).toHaveText(platform[0]);
   expect(
     await page.locator(`${FORM} .nd-field`).first().getAttribute("data-nd-invalid"),
   ).toBe("true");
@@ -194,7 +194,7 @@ test("answering takes the sentence back, and the title with it", async ({ page }
   // Nothing left to say, so it stops saying it — in the box, in the field, and
   // in the tab.
   await expect(page.locator(COLLECTED)).toBeHidden();
-  await expect(page.locator(`${FORM} [data-nd-field-error]`).first()).toHaveText("");
+  await expect(page.locator(`${FORM} [data-nd-field-error] [data-nd-field-message]`).first()).toHaveText("");
   expect(await page.title()).toBe(before);
 });
 

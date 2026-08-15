@@ -899,7 +899,19 @@ mod tests {
             // split into. `pages::Message` sets identifiers inside a sentence
             // as code, which cuts the sentence at every backtick — and the
             // pseudo-locale's brackets are only on the first and last piece.
-            if !closing && !void && skipping.is_none() && tag.contains("nd-message") {
+            //
+            // `.nd-slider-marks` IS THE SAME SHAPE FROM THE OTHER END.
+            // `Slider.mark_labels` is one message the caller writes as
+            // `Quiet|Loud`, and the component draws a tick per part — so the
+            // brackets again land on the first and the last. It used to be the
+            // runtime that split it, which is precisely the defect: the scale
+            // a caller asked for was drawn by nobody until a script ran, and
+            // this scanner passed because there was nothing on the page.
+            if !closing
+                && !void
+                && skipping.is_none()
+                && (tag.contains("nd-message") || tag.contains("nd-slider-marks"))
+            {
                 let (inside, after) = subtree(rest, &name);
                 rest = after;
                 let joined = strip_tags(inside);

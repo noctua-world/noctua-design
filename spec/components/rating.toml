@@ -85,9 +85,11 @@ stars beside it and no form control at all. Off, it is a `<fieldset>` of real
 radios that submits with no script.
 """
 
+# WRITTEN AS SENTENCES, NEVER AS ATTRIBUTES. Both declared a `data-nd-*` that
+# both bodies wrote and nothing read, because this component ships no script
+# at all. The words are filled once per step and revealed by the stylesheet.
 [prop.value_label]
 type = "text"
-attribute = "data-nd-value-label"
 doc = """
 The sentence beside the stars, with `{value}` and `{max}` holes, such as
 *{value} out of {max}*. **Without it a reader has to estimate from a shape.**
@@ -96,7 +98,6 @@ One sentence with holes, never words joined together.
 
 [prop.item_label]
 type = "text"
-attribute = "data-nd-item-label"
 doc = """
 The name of one option, with the same two holes, such as *Give {value} of {max}*.
 Wanted in practice by the interactive form: a star is a drawing, so this is the

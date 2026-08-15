@@ -43,7 +43,7 @@ impl TableRowSelect {
     }
 }
 
-/// How much weight this row carries against the rows around it. `subtle` is a light rule above the row. `strong` is a heavy rule and bold text. **It says how a row is drawn, not what it means.** What the row contains is the caller's.
+/// How much weight this row carries against the rows around it. `subtle` is a light rule above the row. `strong` is a heavy rule and bold text. **Either one takes the row out of the totals and out of the row count.**
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TableRowEmphasis {
     #[default]
@@ -84,7 +84,7 @@ pub fn TableRow(
     /// Whether this row can be chosen. `one` draws a real radio, `many` a real checkbox. `all` goes in the heading row and marks or clears every row under it, with a third state for *some, not all*. Each is a real control.
     #[props(default)]
     select: TableRowSelect,
-    /// How much weight this row carries against the rows around it. `subtle` is a light rule above the row. `strong` is a heavy rule and bold text. **It says how a row is drawn, not what it means.** What the row contains is the caller's.
+    /// How much weight this row carries against the rows around it. `subtle` is a light rule above the row. `strong` is a heavy rule and bold text. **Either one takes the row out of the totals and out of the row count.**
     #[props(default)]
     emphasis: TableRowEmphasis,
     /// Whether this row starts chosen. Rendered by the server, so a form that came back still shows what the reader picked. It is drawn from the real control's own state rather than from `aria-selected`.
@@ -138,6 +138,11 @@ pub fn TableRow(
             "data-nd-selected": if selected { "true" } else { "false" },
             "data-nd-disabled": if disabled { "true" } else { "false" },
             "data-nd-detail-for": detail_for,
+            // AND IT IS READ. `table.js` asks the table whether any row opens
+            // — which is half of what makes the table a `role="grid"` — with
+            // `[data-nd-expandable='true']`, and nothing wrote it. Every table
+            // of expandable rows on the site was a plain table.
+            "data-nd-expandable": if expandable { "true" } else { "false" },
             "data-nd-empty": if empty { "true" } else { "false" },
             // THE CHOICE CELL, which is a `<td>` in the body and a `<th>` in
             // the head. The row cannot see which section it is in, so the value

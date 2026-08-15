@@ -34,4 +34,9 @@ type = "children"
 doc = "The list items."
 
 [a11y]
-notes = "`marker: none` removes the visual marker only. Some browsers drop the list semantics when `list-style` is none. The role is restated explicitly, so the list keeps announcing how many items it has."
+# THE ROLE IS WRITTEN NOW, AND THIS SENTENCE USED TO BE THE ONLY PLACE IT
+# EXISTED. Nothing emitted `role="list"`, while the stylesheet did both things
+# that take the role away: every list is a flex column and `marker: none`
+# removes the marker. A `<dl>` is left alone, because `list` is the role of a
+# `<ul>` and an `<ol>` and a description list maps differently.
+notes = "`marker: none` removes the visual marker only. A flex list and a marker-less one each lose their semantics in some engines, so `list` and `listitem` are restated. A description list keeps its own mapping."

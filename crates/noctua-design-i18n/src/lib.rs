@@ -976,6 +976,8 @@ pub enum Key {
     ExampleSwitchPattern,
     /// `example.swatch.live`
     ExampleSwatchLive,
+    /// `example.swatch.in-force`
+    ExampleSwatchInForce,
     /// `example.swatch.named`
     ExampleSwatchNamed,
     /// `example.segmented.tab-stop`
@@ -1062,6 +1064,8 @@ pub enum Key {
     ExampleEditLabel,
     /// `example.edit.pair`
     ExampleEditPair,
+    /// `example.edit.block`
+    ExampleEditBlock,
     /// `example.em.lead`
     ExampleEmLead,
     /// `example.em.word`
@@ -1074,6 +1078,14 @@ pub enum Key {
     ExampleStrongLead,
     /// `example.strong.word`
     ExampleStrongWord,
+    /// `example.strong.degrees`
+    ExampleStrongDegrees,
+    /// `example.strong.warning`
+    ExampleStrongWarning,
+    /// `example.strong.warning-word`
+    ExampleStrongWarningWord,
+    /// `example.strong.warning-body`
+    ExampleStrongWarningBody,
     /// `example.heading.section`
     ExampleHeadingSection,
     /// `example.heading.sub`
@@ -1160,6 +1172,8 @@ pub enum Key {
     ExampleToolbarStops,
     /// `example.toolbar.align`
     ExampleToolbarAlign,
+    /// `example.toolbar.align-rest`
+    ExampleToolbarAlignRest,
     /// `example.toolbar.vertical`
     ExampleToolbarVertical,
     /// `example.toolbar.density`
@@ -1182,6 +1196,10 @@ pub enum Key {
     ExampleMenuDelete,
     /// `example.menu.delete-detail`
     ExampleMenuDeleteDetail,
+    /// `example.menu.accent-open`
+    ExampleMenuAccentOpen,
+    /// `example.menu.accent-label`
+    ExampleMenuAccentLabel,
     /// `example.menu.locked`
     ExampleMenuLocked,
     /// `example.menu.docs`
@@ -1346,14 +1364,14 @@ pub enum Key {
     ExamplePaginationCurrent,
     /// `example.pagination.summary`
     ExamplePaginationSummary,
+    /// `example.pagination.summary-last`
+    ExamplePaginationSummaryLast,
     /// `example.pagination.note-links`
     ExamplePaginationNoteLinks,
     /// `example.pagination.note-window`
     ExamplePaginationNoteWindow,
     /// `example.pagination.note-ends`
     ExamplePaginationNoteEnds,
-    /// `example.pagination.note-summary`
-    ExamplePaginationNoteSummary,
     /// `example.search.children`
     ExampleSearchChildren,
     /// `example.search.popover`
@@ -1442,6 +1460,10 @@ pub enum Key {
     ExampleAvatarBruno,
     /// `example.avatar.carla`
     ExampleAvatarCarla,
+    /// `example.avatar.diego`
+    ExampleAvatarDiego,
+    /// `example.avatar.deploy-bot`
+    ExampleAvatarDeployBot,
     /// `example.avatar.pending`
     ExampleAvatarPending,
     /// `example.avatar.reviewers`
@@ -1466,6 +1488,14 @@ pub enum Key {
     ExampleBadgePlacement,
     /// `example.badge.unread`
     ExampleBadgeUnread,
+    /// `example.badge.unread-0`
+    ExampleBadgeUnread0,
+    /// `example.badge.unread-2`
+    ExampleBadgeUnread2,
+    /// `example.badge.unread-9`
+    ExampleBadgeUnread9,
+    /// `example.badge.unread-128`
+    ExampleBadgeUnread128,
     /// `example.badge.changed`
     ExampleBadgeChanged,
     /// `example.badge.inbox`
@@ -1512,6 +1542,12 @@ pub enum Key {
     ExamplePickerPeoplePlaceholder,
     /// `example.picker.people-hint`
     ExamplePickerPeopleHint,
+    /// `example.picker.names-label`
+    ExamplePickerNamesLabel,
+    /// `example.picker.names-placeholder`
+    ExamplePickerNamesPlaceholder,
+    /// `example.picker.names-hint`
+    ExamplePickerNamesHint,
     /// `example.picker.writing`
     ExamplePickerWriting,
     /// `example.picker.building`
@@ -1744,6 +1780,10 @@ pub enum Key {
     ExampleInputEmailLabel,
     /// `example.input.site-label`
     ExampleInputSiteLabel,
+    /// `example.input.title-label`
+    ExampleInputTitleLabel,
+    /// `example.textarea.recipients`
+    ExampleTextareaRecipients,
     /// `example.input.password-label`
     ExampleInputPasswordLabel,
     /// `example.input.clear`
@@ -2020,8 +2060,12 @@ pub enum Key {
     ExampleMeterStorageValue,
     /// `example.meter.storage-note`
     ExampleMeterStorageNote,
-    /// `example.meter.tokens`
-    ExampleMeterTokens,
+    /// `example.meter.tokens-atlas`
+    ExampleMeterTokensAtlas,
+    /// `example.meter.tokens-beacon`
+    ExampleMeterTokensBeacon,
+    /// `example.meter.tokens-corvus`
+    ExampleMeterTokensCorvus,
     /// `example.meter.tokens-value`
     ExampleMeterTokensValue,
     /// `example.meter.tokens-note`
@@ -2030,10 +2074,12 @@ pub enum Key {
     ExampleMeterSeats,
     /// `example.meter.seats-value`
     ExampleMeterSeatsValue,
-    /// `example.meter.seats-note`
-    ExampleMeterSeatsNote,
-    /// `example.meter.share`
-    ExampleMeterShare,
+    /// `example.meter.freezer`
+    ExampleMeterFreezer,
+    /// `example.meter.freezer-value`
+    ExampleMeterFreezerValue,
+    /// `example.meter.freezer-note`
+    ExampleMeterFreezerNote,
     /// `example.meter.share-value`
     ExampleMeterShareValue,
     /// `example.meter.share-note`
@@ -2064,12 +2110,12 @@ pub enum Key {
     ExampleProgressStepsValue,
     /// `example.progress.steps-note`
     ExampleProgressStepsNote,
-    /// `example.meter.share-infra`
-    ExampleMeterShareInfra,
-    /// `example.meter.share-people`
-    ExampleMeterSharePeople,
-    /// `example.meter.share-travel`
-    ExampleMeterShareTravel,
+    /// `example.meter.share-cached`
+    ExampleMeterShareCached,
+    /// `example.meter.share-archived`
+    ExampleMeterShareArchived,
+    /// `example.meter.share-shared`
+    ExampleMeterShareShared,
     /// `component.info.summary`
     ComponentInfoSummary,
     /// `example.info.deadline`
@@ -2670,8 +2716,8 @@ pub enum Key {
     ExampleTabPanelNoteAfter,
     /// `example.tab-panel.note-rich`
     ExampleTabPanelNoteRich,
-    /// `example.tab-panel.note-visible`
-    ExampleTabPanelNoteVisible,
+    /// `example.tab-panel.note-chosen`
+    ExampleTabPanelNoteChosen,
     /// `example.tab-panel.note-nested`
     ExampleTabPanelNoteNested,
     /// `example.overview.icon.status`
@@ -2816,6 +2862,14 @@ pub enum Key {
     ExampleToastNoteLoud,
     /// `example.toast.note-fixed`
     ExampleToastNoteFixed,
+    /// `example.toast.review-title`
+    ExampleToastReviewTitle,
+    /// `example.toast.review`
+    ExampleToastReview,
+    /// `example.toast.review-link`
+    ExampleToastReviewLink,
+    /// `example.toast.note-action`
+    ExampleToastNoteAction,
     /// `example.overview.dialog.open`
     ExampleOverviewDialogOpen,
     /// `example.overview.dialog.heading`
@@ -5576,7 +5630,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2726] = [
+    pub const ALL: [Self; 2753] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -6005,6 +6059,7 @@ impl Key {
         Self::ExampleSwitchGrain,
         Self::ExampleSwitchPattern,
         Self::ExampleSwatchLive,
+        Self::ExampleSwatchInForce,
         Self::ExampleSwatchNamed,
         Self::ExampleSegmentedTabStop,
         Self::ExampleSegmentedSpread,
@@ -6048,12 +6103,17 @@ impl Key {
         Self::ExampleEditAdded,
         Self::ExampleEditLabel,
         Self::ExampleEditPair,
+        Self::ExampleEditBlock,
         Self::ExampleEmLead,
         Self::ExampleEmWord,
         Self::ExampleEmNested,
         Self::ExampleEmVersus,
         Self::ExampleStrongLead,
         Self::ExampleStrongWord,
+        Self::ExampleStrongDegrees,
+        Self::ExampleStrongWarning,
+        Self::ExampleStrongWarningWord,
+        Self::ExampleStrongWarningBody,
         Self::ExampleHeadingSection,
         Self::ExampleHeadingSub,
         Self::ExampleHeadingDetail,
@@ -6097,6 +6157,7 @@ impl Key {
         Self::ExampleToolbarView,
         Self::ExampleToolbarStops,
         Self::ExampleToolbarAlign,
+        Self::ExampleToolbarAlignRest,
         Self::ExampleToolbarVertical,
         Self::ExampleToolbarDensity,
         Self::ExampleTimeMachine,
@@ -6108,6 +6169,8 @@ impl Key {
         Self::ExampleMenuArchive,
         Self::ExampleMenuDelete,
         Self::ExampleMenuDeleteDetail,
+        Self::ExampleMenuAccentOpen,
+        Self::ExampleMenuAccentLabel,
         Self::ExampleMenuLocked,
         Self::ExampleMenuDocs,
         Self::ExampleMenuRepo,
@@ -6190,10 +6253,10 @@ impl Key {
         Self::ExamplePaginationPage,
         Self::ExamplePaginationCurrent,
         Self::ExamplePaginationSummary,
+        Self::ExamplePaginationSummaryLast,
         Self::ExamplePaginationNoteLinks,
         Self::ExamplePaginationNoteWindow,
         Self::ExamplePaginationNoteEnds,
-        Self::ExamplePaginationNoteSummary,
         Self::ExampleSearchChildren,
         Self::ExampleSearchPopover,
         Self::ExampleSearchDialog,
@@ -6238,6 +6301,8 @@ impl Key {
         Self::ExampleAvatarAna,
         Self::ExampleAvatarBruno,
         Self::ExampleAvatarCarla,
+        Self::ExampleAvatarDiego,
+        Self::ExampleAvatarDeployBot,
         Self::ExampleAvatarPending,
         Self::ExampleAvatarReviewers,
         Self::ExampleAvatarMore,
@@ -6250,6 +6315,10 @@ impl Key {
         Self::ExampleBadgeTones,
         Self::ExampleBadgePlacement,
         Self::ExampleBadgeUnread,
+        Self::ExampleBadgeUnread0,
+        Self::ExampleBadgeUnread2,
+        Self::ExampleBadgeUnread9,
+        Self::ExampleBadgeUnread128,
         Self::ExampleBadgeChanged,
         Self::ExampleBadgeInbox,
         Self::ExamplePickerFree,
@@ -6273,6 +6342,9 @@ impl Key {
         Self::ExamplePickerPeopleLabel,
         Self::ExamplePickerPeoplePlaceholder,
         Self::ExamplePickerPeopleHint,
+        Self::ExamplePickerNamesLabel,
+        Self::ExamplePickerNamesPlaceholder,
+        Self::ExamplePickerNamesHint,
         Self::ExamplePickerWriting,
         Self::ExamplePickerBuilding,
         Self::ExampleSelectNoteForm,
@@ -6389,6 +6461,8 @@ impl Key {
         Self::ExampleInputNameLabel,
         Self::ExampleInputEmailLabel,
         Self::ExampleInputSiteLabel,
+        Self::ExampleInputTitleLabel,
+        Self::ExampleTextareaRecipients,
         Self::ExampleInputPasswordLabel,
         Self::ExampleInputClear,
         Self::ExampleInputReveal,
@@ -6527,13 +6601,16 @@ impl Key {
         Self::ExampleMeterStorage,
         Self::ExampleMeterStorageValue,
         Self::ExampleMeterStorageNote,
-        Self::ExampleMeterTokens,
+        Self::ExampleMeterTokensAtlas,
+        Self::ExampleMeterTokensBeacon,
+        Self::ExampleMeterTokensCorvus,
         Self::ExampleMeterTokensValue,
         Self::ExampleMeterTokensNote,
         Self::ExampleMeterSeats,
         Self::ExampleMeterSeatsValue,
-        Self::ExampleMeterSeatsNote,
-        Self::ExampleMeterShare,
+        Self::ExampleMeterFreezer,
+        Self::ExampleMeterFreezerValue,
+        Self::ExampleMeterFreezerNote,
         Self::ExampleMeterShareValue,
         Self::ExampleMeterShareNote,
         Self::ExampleMeterHiddenNote,
@@ -6549,9 +6626,9 @@ impl Key {
         Self::ExampleProgressSteps,
         Self::ExampleProgressStepsValue,
         Self::ExampleProgressStepsNote,
-        Self::ExampleMeterShareInfra,
-        Self::ExampleMeterSharePeople,
-        Self::ExampleMeterShareTravel,
+        Self::ExampleMeterShareCached,
+        Self::ExampleMeterShareArchived,
+        Self::ExampleMeterShareShared,
         Self::ComponentInfoSummary,
         Self::ExampleInfoDeadline,
         Self::ExampleInfoDeadlineLabel,
@@ -6852,7 +6929,7 @@ impl Key {
         Self::ExampleTabPanelDetailBody,
         Self::ExampleTabPanelNoteAfter,
         Self::ExampleTabPanelNoteRich,
-        Self::ExampleTabPanelNoteVisible,
+        Self::ExampleTabPanelNoteChosen,
         Self::ExampleTabPanelNoteNested,
         Self::ExampleOverviewIconStatus,
         Self::ExampleOverviewIconNote,
@@ -6925,6 +7002,10 @@ impl Key {
         Self::ExampleToastNoteTimer,
         Self::ExampleToastNoteLoud,
         Self::ExampleToastNoteFixed,
+        Self::ExampleToastReviewTitle,
+        Self::ExampleToastReview,
+        Self::ExampleToastReviewLink,
+        Self::ExampleToastNoteAction,
         Self::ExampleOverviewDialogOpen,
         Self::ExampleOverviewDialogHeading,
         Self::ExampleOverviewDialogBody,
@@ -8737,6 +8818,7 @@ impl Key {
             Self::ExampleSwitchGrain => "example.switch.grain",
             Self::ExampleSwitchPattern => "example.switch.pattern",
             Self::ExampleSwatchLive => "example.swatch.live",
+            Self::ExampleSwatchInForce => "example.swatch.in-force",
             Self::ExampleSwatchNamed => "example.swatch.named",
             Self::ExampleSegmentedTabStop => "example.segmented.tab-stop",
             Self::ExampleSegmentedSpread => "example.segmented.spread",
@@ -8780,12 +8862,17 @@ impl Key {
             Self::ExampleEditAdded => "example.edit.added",
             Self::ExampleEditLabel => "example.edit.label",
             Self::ExampleEditPair => "example.edit.pair",
+            Self::ExampleEditBlock => "example.edit.block",
             Self::ExampleEmLead => "example.em.lead",
             Self::ExampleEmWord => "example.em.word",
             Self::ExampleEmNested => "example.em.nested",
             Self::ExampleEmVersus => "example.em.versus",
             Self::ExampleStrongLead => "example.strong.lead",
             Self::ExampleStrongWord => "example.strong.word",
+            Self::ExampleStrongDegrees => "example.strong.degrees",
+            Self::ExampleStrongWarning => "example.strong.warning",
+            Self::ExampleStrongWarningWord => "example.strong.warning-word",
+            Self::ExampleStrongWarningBody => "example.strong.warning-body",
             Self::ExampleHeadingSection => "example.heading.section",
             Self::ExampleHeadingSub => "example.heading.sub",
             Self::ExampleHeadingDetail => "example.heading.detail",
@@ -8829,6 +8916,7 @@ impl Key {
             Self::ExampleToolbarView => "example.toolbar.view",
             Self::ExampleToolbarStops => "example.toolbar.stops",
             Self::ExampleToolbarAlign => "example.toolbar.align",
+            Self::ExampleToolbarAlignRest => "example.toolbar.align-rest",
             Self::ExampleToolbarVertical => "example.toolbar.vertical",
             Self::ExampleToolbarDensity => "example.toolbar.density",
             Self::ExampleTimeMachine => "example.time.machine",
@@ -8840,6 +8928,8 @@ impl Key {
             Self::ExampleMenuArchive => "example.menu.archive",
             Self::ExampleMenuDelete => "example.menu.delete",
             Self::ExampleMenuDeleteDetail => "example.menu.delete-detail",
+            Self::ExampleMenuAccentOpen => "example.menu.accent-open",
+            Self::ExampleMenuAccentLabel => "example.menu.accent-label",
             Self::ExampleMenuLocked => "example.menu.locked",
             Self::ExampleMenuDocs => "example.menu.docs",
             Self::ExampleMenuRepo => "example.menu.repo",
@@ -8922,10 +9012,10 @@ impl Key {
             Self::ExamplePaginationPage => "example.pagination.page",
             Self::ExamplePaginationCurrent => "example.pagination.current",
             Self::ExamplePaginationSummary => "example.pagination.summary",
+            Self::ExamplePaginationSummaryLast => "example.pagination.summary-last",
             Self::ExamplePaginationNoteLinks => "example.pagination.note-links",
             Self::ExamplePaginationNoteWindow => "example.pagination.note-window",
             Self::ExamplePaginationNoteEnds => "example.pagination.note-ends",
-            Self::ExamplePaginationNoteSummary => "example.pagination.note-summary",
             Self::ExampleSearchChildren => "example.search.children",
             Self::ExampleSearchPopover => "example.search.popover",
             Self::ExampleSearchDialog => "example.search.dialog",
@@ -8970,6 +9060,8 @@ impl Key {
             Self::ExampleAvatarAna => "example.avatar.ana",
             Self::ExampleAvatarBruno => "example.avatar.bruno",
             Self::ExampleAvatarCarla => "example.avatar.carla",
+            Self::ExampleAvatarDiego => "example.avatar.diego",
+            Self::ExampleAvatarDeployBot => "example.avatar.deploy-bot",
             Self::ExampleAvatarPending => "example.avatar.pending",
             Self::ExampleAvatarReviewers => "example.avatar.reviewers",
             Self::ExampleAvatarMore => "example.avatar.more",
@@ -8982,6 +9074,10 @@ impl Key {
             Self::ExampleBadgeTones => "example.badge.tones",
             Self::ExampleBadgePlacement => "example.badge.placement",
             Self::ExampleBadgeUnread => "example.badge.unread",
+            Self::ExampleBadgeUnread0 => "example.badge.unread-0",
+            Self::ExampleBadgeUnread2 => "example.badge.unread-2",
+            Self::ExampleBadgeUnread9 => "example.badge.unread-9",
+            Self::ExampleBadgeUnread128 => "example.badge.unread-128",
             Self::ExampleBadgeChanged => "example.badge.changed",
             Self::ExampleBadgeInbox => "example.badge.inbox",
             Self::ExamplePickerFree => "example.picker.free",
@@ -9005,6 +9101,9 @@ impl Key {
             Self::ExamplePickerPeopleLabel => "example.picker.people-label",
             Self::ExamplePickerPeoplePlaceholder => "example.picker.people-placeholder",
             Self::ExamplePickerPeopleHint => "example.picker.people-hint",
+            Self::ExamplePickerNamesLabel => "example.picker.names-label",
+            Self::ExamplePickerNamesPlaceholder => "example.picker.names-placeholder",
+            Self::ExamplePickerNamesHint => "example.picker.names-hint",
             Self::ExamplePickerWriting => "example.picker.writing",
             Self::ExamplePickerBuilding => "example.picker.building",
             Self::ExampleSelectNoteForm => "example.select.note-form",
@@ -9121,6 +9220,8 @@ impl Key {
             Self::ExampleInputNameLabel => "example.input.name-label",
             Self::ExampleInputEmailLabel => "example.input.email-label",
             Self::ExampleInputSiteLabel => "example.input.site-label",
+            Self::ExampleInputTitleLabel => "example.input.title-label",
+            Self::ExampleTextareaRecipients => "example.textarea.recipients",
             Self::ExampleInputPasswordLabel => "example.input.password-label",
             Self::ExampleInputClear => "example.input.clear",
             Self::ExampleInputReveal => "example.input.reveal",
@@ -9259,13 +9360,16 @@ impl Key {
             Self::ExampleMeterStorage => "example.meter.storage",
             Self::ExampleMeterStorageValue => "example.meter.storage-value",
             Self::ExampleMeterStorageNote => "example.meter.storage-note",
-            Self::ExampleMeterTokens => "example.meter.tokens",
+            Self::ExampleMeterTokensAtlas => "example.meter.tokens-atlas",
+            Self::ExampleMeterTokensBeacon => "example.meter.tokens-beacon",
+            Self::ExampleMeterTokensCorvus => "example.meter.tokens-corvus",
             Self::ExampleMeterTokensValue => "example.meter.tokens-value",
             Self::ExampleMeterTokensNote => "example.meter.tokens-note",
             Self::ExampleMeterSeats => "example.meter.seats",
             Self::ExampleMeterSeatsValue => "example.meter.seats-value",
-            Self::ExampleMeterSeatsNote => "example.meter.seats-note",
-            Self::ExampleMeterShare => "example.meter.share",
+            Self::ExampleMeterFreezer => "example.meter.freezer",
+            Self::ExampleMeterFreezerValue => "example.meter.freezer-value",
+            Self::ExampleMeterFreezerNote => "example.meter.freezer-note",
             Self::ExampleMeterShareValue => "example.meter.share-value",
             Self::ExampleMeterShareNote => "example.meter.share-note",
             Self::ExampleMeterHiddenNote => "example.meter.hidden-note",
@@ -9281,9 +9385,9 @@ impl Key {
             Self::ExampleProgressSteps => "example.progress.steps",
             Self::ExampleProgressStepsValue => "example.progress.steps-value",
             Self::ExampleProgressStepsNote => "example.progress.steps-note",
-            Self::ExampleMeterShareInfra => "example.meter.share-infra",
-            Self::ExampleMeterSharePeople => "example.meter.share-people",
-            Self::ExampleMeterShareTravel => "example.meter.share-travel",
+            Self::ExampleMeterShareCached => "example.meter.share-cached",
+            Self::ExampleMeterShareArchived => "example.meter.share-archived",
+            Self::ExampleMeterShareShared => "example.meter.share-shared",
             Self::ComponentInfoSummary => "component.info.summary",
             Self::ExampleInfoDeadline => "example.info.deadline",
             Self::ExampleInfoDeadlineLabel => "example.info.deadline-label",
@@ -9586,7 +9690,7 @@ impl Key {
             Self::ExampleTabPanelDetailBody => "example.tab-panel.detail-body",
             Self::ExampleTabPanelNoteAfter => "example.tab-panel.note-after",
             Self::ExampleTabPanelNoteRich => "example.tab-panel.note-rich",
-            Self::ExampleTabPanelNoteVisible => "example.tab-panel.note-visible",
+            Self::ExampleTabPanelNoteChosen => "example.tab-panel.note-chosen",
             Self::ExampleTabPanelNoteNested => "example.tab-panel.note-nested",
             Self::ExampleOverviewIconStatus => "example.overview.icon.status",
             Self::ExampleOverviewIconNote => "example.overview.icon.note",
@@ -9659,6 +9763,10 @@ impl Key {
             Self::ExampleToastNoteTimer => "example.toast.note-timer",
             Self::ExampleToastNoteLoud => "example.toast.note-loud",
             Self::ExampleToastNoteFixed => "example.toast.note-fixed",
+            Self::ExampleToastReviewTitle => "example.toast.review-title",
+            Self::ExampleToastReview => "example.toast.review",
+            Self::ExampleToastReviewLink => "example.toast.review-link",
+            Self::ExampleToastNoteAction => "example.toast.note-action",
             Self::ExampleOverviewDialogOpen => "example.overview.dialog.open",
             Self::ExampleOverviewDialogHeading => "example.overview.dialog.heading",
             Self::ExampleOverviewDialogBody => "example.overview.dialog.body",
@@ -11561,9 +11669,7 @@ impl Locale {
                 Key::PageSearchBody => {
                     "A search box, the results under it, and one result. Children are real links that work with the script blocked. An index at a URL is fetched on the first search and cached. The match is a ranked subsequence, with the matched letters marked."
                 }
-                Key::PageTablesSummary => {
-                    "Build a table from its parts, and page through a long one."
-                }
+                Key::PageTablesSummary => "Build a table out of the six parts it is made of.",
                 Key::PageTablesBody => {
                     "Rows and columns, and the parts one table is made of. On a narrow screen it scrolls sideways where there is room, and stacks into label-and-value pairs where there is not. Every part writes its own ARIA role, which stacking would otherwise drop."
                 }
@@ -12231,8 +12337,9 @@ impl Locale {
                 Key::ExampleSwatchLive => {
                     "Change the accent in the settings panel to see this swatch follow it."
                 }
+                Key::ExampleSwatchInForce => "Accent in force",
                 Key::ExampleSwatchNamed => {
-                    "`palette` names the family a chip resolves inside its own scope, so no colour is written here."
+                    "`Tag` draws a real `Swatch` before the word, so the chip is never on its own and the colour still has a name."
                 }
                 Key::ExampleSegmentedTabStop => {
                     "The whole group is one tab stop, and the arrow keys both move between items and choose one."
@@ -12334,6 +12441,9 @@ impl Locale {
                 Key::ExampleEditPair => {
                     "`Del` beside `Ins` shows a change as what the text was and what it became."
                 }
+                Key::ExampleEditBlock => {
+                    "`Ins` may wrap a whole item rather than a word. The element is valid around a block."
+                }
                 Key::ExampleEmLead => "Read this one as",
                 Key::ExampleEmWord => "stressed",
                 Key::ExampleEmNested => {
@@ -12344,6 +12454,16 @@ impl Locale {
                 }
                 Key::ExampleStrongLead => "This part is",
                 Key::ExampleStrongWord => "important",
+                Key::ExampleStrongDegrees => {
+                    "A second `Strong` inside the first raises the importance again. The inner words matter more than the sentence holding them."
+                }
+                Key::ExampleStrongWarning => {
+                    "Use `Strong` for the part of a sentence that matters most, such as the word a warning opens on."
+                }
+                Key::ExampleStrongWarningWord => "Warning:",
+                Key::ExampleStrongWarningBody => {
+                    "deleting a palette removes it from every theme that names it."
+                }
                 Key::ExampleHeadingSection => "A section of the page",
                 Key::ExampleHeadingSub => "Something inside it",
                 Key::ExampleHeadingDetail => "And a detail of that",
@@ -12439,6 +12559,9 @@ impl Locale {
                 Key::ExampleToolbarAlign => {
                     "`align: ToolbarGroupAlign::End` pushes a group and everything after it to the far side, with no spacer element."
                 }
+                Key::ExampleToolbarAlignRest => {
+                    "One `end` places two groups. The third group has no `align` and still sits at the far side, because it comes after."
+                }
                 Key::ExampleToolbarVertical => {
                     "`orientation` goes into the markup as well as the drawing, so a reader knows which arrows to press."
                 }
@@ -12458,6 +12581,8 @@ impl Locale {
                 Key::ExampleMenuArchive => "Archive",
                 Key::ExampleMenuDelete => "Delete",
                 Key::ExampleMenuDeleteDetail => "This cannot be undone",
+                Key::ExampleMenuAccentOpen => "Accent",
+                Key::ExampleMenuAccentLabel => "Choose an accent",
                 Key::ExampleMenuLocked => "Send a reminder",
                 Key::ExampleMenuDocs => "Documentation",
                 Key::ExampleMenuRepo => "Source code",
@@ -12606,6 +12731,7 @@ impl Locale {
                 Key::ExamplePaginationPage => "Page {page}",
                 Key::ExamplePaginationCurrent => "Page {page}, the one you are reading",
                 Key::ExamplePaginationSummary => "Showing 21 to 30 of 39 palettes.",
+                Key::ExamplePaginationSummaryLast => "Showing 31 to 39 of 39 palettes.",
                 Key::ExamplePaginationNoteLinks => {
                     "Every page is a real `<a href>`, so it opens in a new tab and lands in the browser history."
                 }
@@ -12614,9 +12740,6 @@ impl Locale {
                 }
                 Key::ExamplePaginationNoteEnds => {
                     "On the last page the forward link is left out rather than disabled. `summary` adds the line that counts the pages."
-                }
-                Key::ExamplePaginationNoteSummary => {
-                    "The sentence under the control is in a live region, because after a page turns it is the only thing that says the set did not change under the reader."
                 }
                 Key::ExampleSearchChildren => {
                     "The results are a `<ul>` of real links in the document, so the list still reads with the script blocked."
@@ -12708,6 +12831,8 @@ impl Locale {
                 Key::ExampleAvatarAna => "Ana Lima",
                 Key::ExampleAvatarBruno => "Bruno Salles",
                 Key::ExampleAvatarCarla => "Carla Mendes",
+                Key::ExampleAvatarDiego => "Diego Rocha",
+                Key::ExampleAvatarDeployBot => "Deploy bot",
                 Key::ExampleAvatarPending => "Invitation not yet accepted",
                 Key::ExampleAvatarReviewers => "Reviewers",
                 Key::ExampleAvatarMore => "5 more reviewers",
@@ -12734,6 +12859,10 @@ impl Locale {
                     "Placement uses logical corners, so the badge moves on a right-to-left page. `overlap` matches the shape underneath."
                 }
                 Key::ExampleBadgeUnread => "3 unread messages",
+                Key::ExampleBadgeUnread0 => "0 unread messages",
+                Key::ExampleBadgeUnread2 => "2 unread messages",
+                Key::ExampleBadgeUnread9 => "9 unread messages",
+                Key::ExampleBadgeUnread128 => "128 unread messages",
                 Key::ExampleBadgeChanged => "Settings changed since you last looked",
                 Key::ExampleBadgeInbox => "Inbox",
                 Key::ExamplePickerFree => {
@@ -12743,7 +12872,7 @@ impl Locale {
                     "The first picker takes only the listed options. The second commits a value on comma or semicolon, and stops at three tags."
                 }
                 Key::ExamplePickerRefusing => {
-                    "Paste a delimited list to commit every value at once. `pattern` rejects a value that is not an address."
+                    "`pattern` rejects a value that is not an address. The guests picker turns `paste` off and allows repeats."
                 }
                 Key::ExamplePickerForm => {
                     "Press Send with nothing chosen to see the browser's own validation. `required` sits on the composer, not on the hidden `<select>`."
@@ -12770,6 +12899,11 @@ impl Locale {
                 Key::ExamplePickerPeoplePlaceholder => "Add an address",
                 Key::ExamplePickerPeopleHint => {
                     "Paste a list and every address in it becomes a tag."
+                }
+                Key::ExamplePickerNamesLabel => "Guest names",
+                Key::ExamplePickerNamesPlaceholder => "Add a name",
+                Key::ExamplePickerNamesHint => {
+                    "A pasted name stays one tag, commas and all. Two guests may share a name."
                 }
                 Key::ExamplePickerWriting => "Writing",
                 Key::ExamplePickerBuilding => "Building",
@@ -12963,6 +13097,8 @@ impl Locale {
                 Key::ExampleInputNameLabel => "Full name",
                 Key::ExampleInputEmailLabel => "Email address",
                 Key::ExampleInputSiteLabel => "Website",
+                Key::ExampleInputTitleLabel => "Post title",
+                Key::ExampleTextareaRecipients => "Recipients, one address a line",
                 Key::ExampleInputPasswordLabel => "New password",
                 Key::ExampleInputClear => "Clear what is typed",
                 Key::ExampleInputReveal => "Show the password",
@@ -13199,17 +13335,20 @@ impl Locale {
                 Key::ExampleMeterStorageNote => {
                     "The number is written out beside the bar, so the reading does not have to be estimated from a shape."
                 }
-                Key::ExampleMeterTokens => "Tokens this month",
-                Key::ExampleMeterTokensValue => "{value}k of {max}k — {percent}",
+                Key::ExampleMeterTokensAtlas => "Tokens this month on Atlas",
+                Key::ExampleMeterTokensBeacon => "Tokens this month on Beacon",
+                Key::ExampleMeterTokensCorvus => "Tokens this month on Corvus",
+                Key::ExampleMeterTokensValue => "{value}k of {max}k, or {percent}",
                 Key::ExampleMeterTokensNote => {
                     "`low`, `high` and `optimum` tell the browser which end is good, and the browser paints the colour."
                 }
                 Key::ExampleMeterSeats => "Seats",
                 Key::ExampleMeterSeatsValue => "{value} of {max} taken",
-                Key::ExampleMeterSeatsNote => {
-                    "`size: Small` is the bar for a table cell, where the row height is the budget."
+                Key::ExampleMeterFreezer => "Freezer temperature",
+                Key::ExampleMeterFreezerValue => "{value} {unit} right now",
+                Key::ExampleMeterFreezerNote => {
+                    "Declare `min` only for a scale that starts below zero. Absent already means zero."
                 }
-                Key::ExampleMeterShare => "Share of the month's spend",
                 Key::ExampleMeterShareValue => "{percent} of the total",
                 Key::ExampleMeterShareNote => {
                     "Use `tone` for a meter with no good or bad end, where the colour marks a category rather than a verdict."
@@ -13237,9 +13376,9 @@ impl Locale {
                 Key::ExampleProgressStepsNote => {
                     "`size` sets the height of the bar. `hide_label` drops the label, for a bar in a cell where the column heading names it."
                 }
-                Key::ExampleMeterShareInfra => "Infrastructure",
-                Key::ExampleMeterSharePeople => "Salaries",
-                Key::ExampleMeterShareTravel => "Travel",
+                Key::ExampleMeterShareCached => "Cached",
+                Key::ExampleMeterShareArchived => "Archived",
+                Key::ExampleMeterShareShared => "Shared",
                 Key::ComponentInfoSummary => {
                     "Explain a word with one sentence, opened by a small `i` beside it."
                 }
@@ -13778,8 +13917,8 @@ impl Locale {
                 Key::ExampleTabPanelNoteRich => {
                     "A panel holds anything, including a table or a form. It is a region of the page rather than a line of text."
                 }
-                Key::ExampleTabPanelNoteVisible => {
-                    "With the script blocked every panel is on the page. Nothing is hidden behind a control that cannot yet work."
+                Key::ExampleTabPanelNoteChosen => {
+                    "The panel shown is the one whose `value` matches the chosen tab, not the first one written."
                 }
                 Key::ExampleTabPanelNoteNested => {
                     "A set inside a panel works because the ids come from a `name`, and this one differs from the set around it."
@@ -13910,6 +14049,12 @@ impl Locale {
                 }
                 Key::ExampleToastNoteFixed => {
                     "No control and no timer, for a message that is true until the state behind it changes. The page has to say it as well."
+                }
+                Key::ExampleToastReviewTitle => "Payment declined",
+                Key::ExampleToastReview => "Your card was refused. Nothing has been charged.",
+                Key::ExampleToastReviewLink => "Update your card",
+                Key::ExampleToastNoteAction => {
+                    "A message may hold a link to whatever a reader has to do about it. The wait holds while the focus is anywhere inside."
                 }
                 Key::ExampleOverviewDialogOpen => "Publish this page",
                 Key::ExampleOverviewDialogHeading => "Publish this page?",
@@ -14178,7 +14323,7 @@ impl Locale {
                     "Where a slide comes to rest. `start` lines its leading edge up with the track's, which suits a shelf, and `center` suits a gallery of one. `none` leaves a plain scroller, and turns the two controls into a scroll by one screen rather than to a slide."
                 }
                 Key::ComponentCarouselPropOrientationDoc => {
-                    "Which way the track runs. Defaults to `horizontal`, and it is announced as well as drawn, so a reader knows which arrow keys move it. It is written with logical properties, so it reverses in a right-to-left locale."
+                    "Which way the track runs. Defaults to `horizontal`. It is drawn rather than announced, because a group has no axis in ARIA. It is written with logical properties, so it reverses in a right-to-left locale."
                 }
                 Key::ComponentCarouselPropControlsDoc => {
                     "Whether the previous and next controls appear. **On by default**, because a mouse with no horizontal wheel cannot move a scroll container without them. They render hidden and the script reveals them once the track is measured."
@@ -14551,7 +14696,7 @@ impl Locale {
                     "What is wrong with the date, in the caller's own words. Its presence marks the field invalid, so the red edge and the message always appear together. A sentence from the caller is never cleared by the script."
                 }
                 Key::ComponentDateInputPropErrorLabelDoc => {
-                    "The word read out before the message, such as `Error:`. It is visually hidden, because the message is already marked as an error on the screen. It is on an attribute too, so the validator prefixes its own sentences with it."
+                    "The word read out before the message, such as `Error:`. It is visually hidden, because the message is already marked as an error on the screen. `Field` draws it in front of every sentence, the caller's and the validator's alike."
                 }
                 Key::ComponentDateInputPropValueDoc => {
                     "The date already known, in the year-month-day wire format (`2026-08-07`). It is split into the three boxes at render, and the row's order decides how users see it."
@@ -14859,7 +15004,7 @@ impl Locale {
                     "The question, in the reader's language. It renders as a real `<label for>`, or as a `<legend>` when `kind` is `group`. Never use a placeholder instead, because a placeholder disappears as soon as a reader types."
                 }
                 Key::ComponentFieldPropKindDoc => {
-                    "Whether this labels one control or several. `single` renders a `<div>` with a `<label>`. `group` renders a `<fieldset>` with a `<legend>`, which is the only arrangement that names a set of controls. `DateInput` and `Fieldset` use `group`."
+                    "Whether this labels one control or several. `single` renders a `<div>` with a `<label>`. `group` renders a `<fieldset>` with a `<legend>`, which is the only arrangement that names a set of controls."
                 }
                 Key::ComponentFieldPropHintDoc => {
                     "What a reader needs before answering, such as *For example, 27 3 2007*. It rides the control's `aria-describedby`, so it is read with the control."
@@ -14934,7 +15079,7 @@ impl Locale {
                     "Use a file input when users choose files: a photograph, a document, an import. What was chosen is always listed, by name and size, with a control to take each one off. `accept` and `max_size` are not security checks."
                 }
                 Key::ComponentFileInputA11yNotes => {
-                    "The drop area is the `<label>` of a real file input, so it is focusable, pressable and announced. The input is clipped rather than `display: none`, which would take it out of the accessible tree."
+                    "The drop area is the `<label>` of a real file input, so it is pressable and announced. The input itself is the focusable part, clipped rather than hidden, and the area draws its focus ring."
                 }
                 Key::ComponentFileInputPropNameDoc => {
                     "The field the files are submitted under, and the root of every id here. **Required**, because an id derived from an optional name is an id every copy on a page shares."
@@ -15016,7 +15161,7 @@ impl Locale {
                 }
                 Key::ComponentFileInputKeyEnterOrSpaceName => "Enter or Space",
                 Key::ComponentFileInputKeyEnterOrSpaceAction => {
-                    "Opens the file picker from the area. The browser's own behaviour, because the area is a `<label>`."
+                    "Opens the file picker. The browser's own behaviour on the focused input, which the area names and shows the focus of."
                 }
                 Key::ComponentFileInputKeyDeleteOrBackspaceName => "Delete or Backspace",
                 Key::ComponentFileInputKeyDeleteOrBackspaceAction => {
@@ -15105,7 +15250,7 @@ impl Locale {
                     "The name of the control that closes the note. Wanted in practice, because Escape and a click outside also close it and neither is discoverable on a touch screen."
                 }
                 Key::ComponentInfoPropPlacementDoc => {
-                    "Where the note opens. `auto` measures the room below and flips above when there is not enough. `start` and `end` pin the note's leading or trailing edge to the control, for a marker at the edge of a table."
+                    "Where the note opens. `auto` measures the room, flipping above and hanging from whichever edge fits. `start` and `end` pin the note's leading or trailing edge whatever the room, for a marker at the edge of a table."
                 }
                 Key::ComponentInfoPropChildrenDoc => {
                     "The explanation, as one or two sentences. It may hold a `Link`, and a reader can select and copy it, which the browser's own tooltip does not allow."
@@ -15175,7 +15320,7 @@ impl Locale {
                     "A fixed word or symbol after the value, such as `.com`, `kg` or `%`. Same rule: drawn, never submitted."
                 }
                 Key::ComponentInputPropClearableDoc => {
-                    "Whether a control appears for emptying the box. Off by default. Emptying a field costs a reader one gesture they already know. A control that appears only when there is text moves the layout as they type."
+                    "Whether a control appears for emptying the box. Off by default. Emptying a field costs a reader one gesture they already know. It keeps its space while the box is empty, so nothing moves as they type."
                 }
                 Key::ComponentInputPropClearLabelDoc => {
                     "The name of that control. It is a glyph, so this is the only name it has."
@@ -15345,7 +15490,7 @@ impl Locale {
                     "`LineageFigure`s, for the pieces whose content is more than a name. A figure marked `slot` in the graph draws nothing of its own and waits for one, and any figure can have one placed over it. Anything else here sits at the scene's origin."
                 }
                 Key::ComponentLineageStatePickedDoc => {
-                    "Set on a connection or a figure a reader has singled out. **Stamped by the runtime**, while the picking itself is not: a pick is a real checkbox, so `:checked` draws the connection heavier with nothing running."
+                    "Set on a connection or a figure a reader has singled out. **Stamped by the runtime**, while the picking itself is not: a pick is a real checkbox, so `:checked` draws it with nothing running."
                 }
                 Key::ComponentLineageStateMatchDoc => {
                     "Whether a piece answers the current filter. Absent when there is no filter, so no filter and everything matching are one state rather than two."
@@ -15446,7 +15591,7 @@ impl Locale {
                 }
                 Key::ComponentLinkPropChildrenDoc => "The link text.",
                 Key::ComponentListA11yNotes => {
-                    "`marker: none` removes the visual marker only. Some browsers drop the list semantics when `list-style` is none. The role is restated explicitly, so the list keeps announcing how many items it has."
+                    "`marker: none` removes the visual marker only. A flex list and a marker-less one each lose their semantics in some engines, so `list` and `listitem` are restated. A description list keeps its own mapping."
                 }
                 Key::ComponentListPropKindDoc => {
                     "Which kind of list to render: `unordered` is a `<ul>`, `ordered` an `<ol>`, `description` a `<dl>`. It changes the element and not only the marker, so a screen reader is told the right thing."
@@ -15462,7 +15607,7 @@ impl Locale {
                     "Use it for one item of a `List`. Give it a `term` when the list is a description list, and leave it off for any other kind of list."
                 }
                 Key::ComponentListItemA11yNotes => {
-                    "A `<dt>` and its `<dd>` must be direct children of the `<dl>`, so this renders two siblings rather than wrapping them. A wrapper breaks the association a screen reader reads."
+                    "A `<dt>` and its `<dd>` must be direct children of the `<dl>`, so this renders two siblings rather than wrapping them. A wrapper breaks the association a screen reader reads. The `<li>` restates `listitem`."
                 }
                 Key::ComponentListItemPropTermDoc => {
                     "The thing being described. Its presence switches the item from an `<li>` to a `<dt>` and a `<dd>`, which is what a description list is made of."
@@ -15487,7 +15632,7 @@ impl Locale {
                     "The menu's own name, in the reader's language, such as *Actions for this invoice*. **Required**, because a screen reader announces the menu when focus enters it. Name what the actions are about."
                 }
                 Key::ComponentMenuPropPlacementDoc => {
-                    "Where it hangs off its button: `auto`, `start` or `end`. Defaults to `auto`, which measures the room below and flips above when there is not enough. `start` and `end` pin the menu's leading or trailing edge to the button."
+                    "Where it hangs off its button: `auto`, `start` or `end`. `auto` measures the room, flipping above and hanging from whichever edge fits. `start` and `end` pin one edge whatever the room."
                 }
                 Key::ComponentMenuPropChildrenDoc => {
                     "The items, as `MenuItem`. Nothing else belongs here. A heading, a paragraph or a form control inside a `role=\"menu\"` cannot be reached, because the menu's keyboard moves between items and nowhere else."
@@ -15497,7 +15642,7 @@ impl Locale {
                 }
                 Key::ComponentMenuKeyDownOrUpName => "Down or Up",
                 Key::ComponentMenuKeyDownOrUpAction => {
-                    "Moves to the next or previous item, and wraps at either end. Opening with the keyboard focuses the first item."
+                    "Moves to the next or previous item, wrapping at either end. Down opens onto the first item and Up onto the last."
                 }
                 Key::ComponentMenuKeyHomeOrEndName => "Home or End",
                 Key::ComponentMenuKeyHomeOrEndAction => "Moves to the first item or the last.",
@@ -15881,7 +16026,7 @@ impl Locale {
                     "The surface's accessible name, for one with no visible title. A `role=\"dialog\"` with no name gives a screen reader its role and nothing else. Ignored when `heading` is set."
                 }
                 Key::ComponentPopoverPropPlacementDoc => {
-                    "Where it opens. `auto` measures the room under the control and flips above when there is not enough. `start` and `end` pin the surface's leading or trailing edge to the control, for a control near the edge of the window."
+                    "Where it opens. `auto` measures the room, flipping above and hanging from whichever edge fits. `start` and `end` pin the surface's leading or trailing edge whatever the room, for a control near the edge of the window."
                 }
                 Key::ComponentPopoverPropDismissibleDoc => {
                     "Whether a control that closes it is drawn. On by default: Escape, a Tab out and a press outside are the other three ways. None of those three is visible on a touch screen."
@@ -16222,7 +16367,7 @@ impl Locale {
                     "Use a segmented control to choose one **value** out of a short, fixed set, all visible at once. To reveal a **panel** rather than answer a question, use `Tabs`. For buttons with no chosen member, use `ButtonGroup`."
                 }
                 Key::ComponentSegmentedA11yNotes => {
-                    "One tab stop for the whole group: a roving `tabindex` puts `0` on the chosen item and `-1` on the rest, server-rendered. Selection follows focus, and every item carries `aria-checked`."
+                    "One tab stop for the whole group. The group carries it in the markup and the script moves it onto the chosen item, so a group with nothing chosen is reachable too. Selection follows focus, and every item carries `aria-checked`."
                 }
                 Key::ComponentSegmentedPropNameDoc => {
                     "What is being chosen. The script binds to it, and every item in the group repeats the same word."
@@ -16275,7 +16420,7 @@ impl Locale {
                     "Use it only inside a `Segmented`. Outside one it is a `role=\"radio\"` with no group, which announces a control belonging to a set that does not exist."
                 }
                 Key::ComponentSegmentedItemA11yNotes => {
-                    "`aria-checked` is always present, `true` or `false`, because a radio that omits it has an unknown state. It uses `aria-disabled` rather than `disabled`, so the item keeps its place in the roving order."
+                    "`aria-checked` is always present, `true` or `false`, because a radio that omits it has an unknown state. `aria-disabled` rather than `disabled` keeps the item in the roving order. The group carries the tab stop."
                 }
                 Key::ComponentSegmentedItemPropValueDoc => {
                     "What choosing this item means, as an identifier. The script reads this and nothing else, so it is never translated."
@@ -16284,7 +16429,7 @@ impl Locale {
                     "What choosing this item means, in the reader's language. **Required**. It stays the accessible name even when `hide_label` takes the text off the screen."
                 }
                 Key::ComponentSegmentedItemPropSelectedDoc => {
-                    "Whether this is the value in force. Off by default. Render it from the known default on the server, so the group has a chosen item and one tab stop before the script runs."
+                    "Whether this is the value in force. Off by default. Render it from the known default on the server, so a reader arrives at a group that already states its answer."
                 }
                 Key::ComponentSegmentedItemPropDetailDoc => {
                     "A second, smaller line under the label, such as the unit under a number. It is part of the accessible name, because a reader who cannot see the stack has the first line alone."
@@ -16338,7 +16483,7 @@ impl Locale {
                     "Stops users answering. The real attribute rather than `aria-disabled`, because only the real one keeps the value out of the submission."
                 }
                 Key::ComponentSelectPropSizeDoc => {
-                    "The size of the control: `small`, `medium` or `large`, which is 32, 48 and 64 pixels, matching `Button` step for step. `medium` by default."
+                    "The size of the control: `small`, `medium` or `large`, matching `Button` step for step. `medium` by default."
                 }
                 Key::ComponentSelectPropSearchableDoc => {
                     "Whether the enhanced list can be filtered by typing. Turn it on for thirty-nine palettes and leave it off for six, where a filter box promises more than is there."
@@ -16350,7 +16495,7 @@ impl Locale {
                     "Whether the options are still on their way. The list says so instead of showing an empty one, because an empty list and a list that has not arrived mean opposite things."
                 }
                 Key::ComponentSelectPropCreatableDoc => {
-                    "Whether typing something the list does not have offers to add it. The new option is appended to the real `<select>`, so what is created is submitted like anything else."
+                    "Whether typing something the list does not have offers to add it. Turn it on with `searchable`, which is the box a reader types into. The new option is appended to the real `<select>`."
                 }
                 Key::ComponentSelectPropSearchLabelDoc => {
                     "The filter box's accessible name, in the reader's language. Supply it with `searchable`. It is a prop because this package ships no words."
@@ -16385,15 +16530,15 @@ impl Locale {
                 }
                 Key::ComponentSelectKeyEnterName => "Enter",
                 Key::ComponentSelectKeyEnterAction => {
-                    "Chooses the option the list is on and closes. With `creatable`, it adds what was typed."
+                    "Chooses the option the list is on. It closes unless several may be chosen. With `creatable`, it adds what was typed."
                 }
                 Key::ComponentSelectKeySpaceName => "Space",
                 Key::ComponentSelectKeySpaceAction => {
-                    "Chooses without closing when several may be chosen, which is how to pick a second one without reopening."
+                    "Chooses without closing, on a list with no filter box. Where there is one, Enter is the way to a second value."
                 }
                 Key::ComponentSelectKeyHomeOrEndName => "Home or End",
                 Key::ComponentSelectKeyHomeOrEndAction => {
-                    "Jumps to the first or the last option, past however many are between."
+                    "Jumps to the first or the last option. With something typed in the filter box they are the caret's."
                 }
                 Key::ComponentSelectKeyEscapeName => "Escape",
                 Key::ComponentSelectKeyEscapeAction => {
@@ -16547,7 +16692,7 @@ impl Locale {
                     "The control carries `role=\"switch\"` rather than a checkbox role, which is for a value that will be submitted. `aria-checked` is always written, `true` or `false`, and `aria-disabled` keeps a disabled switch in the tab order."
                 }
                 Key::ComponentSwitchPropNameDoc => {
-                    "The name of the setting being switched. The script binds to it in the same way it binds to a `Segmented`, so one handler serves both."
+                    "The name of the setting being switched. The script routes it as it routes a `Segmented`, and a name the settings model does not hold is marked on the control alone."
                 }
                 Key::ComponentSwitchPropLabelDoc => {
                     "What the switch turns on, in the reader's language. It is the accessible name and the visible text beside the control."
@@ -16565,7 +16710,7 @@ impl Locale {
                     "The id of the sentence explaining what the switch does. It is linked with `aria-describedby`, so a screen reader reads it after the name."
                 }
                 Key::ComponentSwitchPropSizeDoc => {
-                    "The size of the control's box. Both values clear WCAG 2.5.8's 24px minimum target."
+                    "The size of the control's box, the track and the knob with it. Both values clear WCAG 2.5.8's 24px minimum target."
                 }
                 Key::ComponentSwitchPropDisabledDoc => {
                     "Stops users changing the setting. It uses `aria-disabled`, so the switch stays reachable and users can find that the setting exists."
@@ -16739,7 +16884,7 @@ impl Locale {
                     "The `TableColumn` declarations first, then the `TableSection` bands. Columns come before rows because that is the order `<table>` requires."
                 }
                 Key::ComponentTableStateScrollableDoc => {
-                    "Set when the table is wider than its box. The script writes it from a measurement, and it turns the box into a `role=\"region\"` a keyboard can reach. It is removed again when the table fits."
+                    "Set when the table is wider than its box. The `role=\"region\"` and the tab stop are rendered, and the script takes them off a table that fits. An enhancement may remove a way in, never add one."
                 }
                 Key::ComponentTableStateSortedDoc => {
                     "Which column the rows are ordered by, or absent in document order. Written on the table rather than on the heading, so the stylesheet can mark the whole column."
@@ -16772,11 +16917,11 @@ impl Locale {
                 }
                 Key::ComponentTableKeyShiftArrowKeysName => "Shift + arrow keys",
                 Key::ComponentTableKeyShiftArrowKeysAction => {
-                    "Extends the chosen rows, when `select` is `multiple`. Shift and a click does the same with a pointer."
+                    "Extends the chosen rows, when `select` is `many`. Shift and a click does the same with a pointer."
                 }
                 Key::ComponentTableKeyCtrlCmdAName => "Ctrl/Cmd + A",
                 Key::ComponentTableKeyCtrlCmdAAction => {
-                    "Chooses every row, when `select` is `multiple` and focus is inside the grid."
+                    "Chooses every row, when `select` is `many` and focus is inside the grid."
                 }
                 Key::ComponentTableKeyCtrlCmdCName => "Ctrl/Cmd + C",
                 Key::ComponentTableKeyCtrlCmdCAction => {
@@ -16875,7 +17020,7 @@ impl Locale {
                     "Use a table header cell to name a column, with `scope = \"col\"`, or a record, with `scope = \"row\"`. The heading holds the words. What a column can do is set on its `TableColumn`."
                 }
                 Key::ComponentTableHeaderCellA11yNotes => {
-                    "The role is `columnheader` or `rowheader`, following `scope` and written in the markup rather than left implicit. The sort control is a real button inside the heading, which keeps the `aria-sort`."
+                    "The role is `columnheader` or `rowheader`, following `scope` and written in the markup rather than left implicit. The sort control is a real button inside the heading, and only a heading with one carries `aria-sort`."
                 }
                 Key::ComponentTableHeaderCellPropColumnDoc => {
                     "Which `TableColumn` this heading names. It tells the script which column the sort control here sorts, rather than leaving it to count cells. A `scope = \"row\"` heading names a record and needs none."
@@ -16899,7 +17044,7 @@ impl Locale {
                     "How many rows this heading covers, with `scope = \"rowgroup\"`. For a table with two rows of headings, where one of them stands over both."
                 }
                 Key::ComponentTableHeaderCellPropSortDoc => {
-                    "Which way the rows are already sorted by this column. It writes the real `aria-sort` on the server, so a sorted table states it before any script runs. **Only one heading in a table may be anything but `none`**."
+                    "Which way the rows are already sorted by this column. `none` writes no attribute, because a heading with no sort control must not claim one. **Only one heading in a table may be anything else**."
                 }
                 Key::ComponentTableHeaderCellPropChildrenDoc => {
                     "The words of the heading. Every announcement about this column fills its `{column}` hole from here, so the column is named once, in the reader's language."
@@ -16928,7 +17073,7 @@ impl Locale {
                     "Whether this row can be chosen. `one` draws a real radio, `many` a real checkbox. `all` goes in the heading row and marks or clears every row under it, with a third state for *some, not all*. Each is a real control."
                 }
                 Key::ComponentTableRowPropEmphasisDoc => {
-                    "How much weight this row carries against the rows around it. `subtle` is a light rule above the row. `strong` is a heavy rule and bold text. **It says how a row is drawn, not what it means.** What the row contains is the caller's."
+                    "How much weight this row carries against the rows around it. `subtle` is a light rule above the row. `strong` is a heavy rule and bold text. **Either one takes the row out of the totals and out of the row count.**"
                 }
                 Key::ComponentTableRowPropSelectedDoc => {
                     "Whether this row starts chosen. Rendered by the server, so a form that came back still shows what the reader picked. It is drawn from the real control's own state rather than from `aria-selected`."
@@ -17456,7 +17601,7 @@ impl Locale {
                     "Use a toolbar for a bar of controls that belong to one thing, such as the actions on a panel. It is one tab stop walked with the arrow keys. For a row of links, use `nav`. For buttons that are one decision, use `ButtonGroup`."
                 }
                 Key::ComponentToolbarA11yNotes => {
-                    "One tab stop for the whole bar, walked with the arrow keys. Exactly one control inside carries `tabindex=\"0\"` and the rest carry `-1`, so returning to the bar lands where users left off."
+                    "One tab stop for the whole bar, walked with the arrow keys, once the script has placed the roving `tabindex`. A bar takes its controls as children and cannot write on them, so with no script each control is its own tab stop."
                 }
                 Key::ComponentToolbarPropLabelDoc => {
                     "The toolbar's accessible name, saying what the bar of controls is for. Required unless `labelledby` names it instead, because a `role=\"toolbar\"` with no name gives a screen reader only the word `toolbar`."
@@ -17479,7 +17624,7 @@ impl Locale {
                 }
                 Key::ComponentToolbarKeyTabName => "Tab",
                 Key::ComponentToolbarKeyTabAction => {
-                    "Moves into the bar once, at the control last used, rather than stopping on each control."
+                    "Moves into the bar at the control last used, once a script places the roving stop. Otherwise it stops on each one."
                 }
                 Key::ComponentToolbarKeyArrowKeysName => "Arrow keys",
                 Key::ComponentToolbarKeyArrowKeysAction => {
@@ -17515,7 +17660,7 @@ impl Locale {
                     "The hint, as one short line. **Required**: a tooltip with nothing in it is a control that gained an `aria-describedby` pointing at empty space."
                 }
                 Key::ComponentTooltipPropPlacementDoc => {
-                    "Where the bubble opens. `auto` measures the room under the control and flips above when there is not enough. `start` and `end` pin its leading or trailing edge to the control."
+                    "Where the bubble opens. `auto` measures the room, flipping above and hanging from whichever edge fits. `start` and `end` pin its leading or trailing edge whatever the room."
                 }
                 Key::ComponentTooltipPropDelayDoc => {
                     "How long a pointer rests before the bubble opens. Focus ignores it. Both waits collapse to the same value under `prefers-reduced-motion`, so `long` is never the quicker of the two."
@@ -17550,7 +17695,7 @@ impl Locale {
                     "Whether nodes can be chosen, and how many. `none` is the default and makes the tree navigation only. `multiple` also writes `aria-multiselectable`. **A selectable node should not be a link**, and carries `TreeItem { value }` instead."
                 }
                 Key::ComponentTreePropFormDoc => {
-                    "The field the chosen nodes are submitted under. Its presence puts a real hidden checkbox inside every selectable node, so the state survives a form post with no script. Absent, the selection is only on the screen."
+                    "The field the chosen nodes are submitted under. The script puts a real hidden checkbox inside every selectable node, so a form posts what is chosen. With no script a tree has no selection at all."
                 }
                 Key::ComponentTreePropSizeDoc => {
                     "The height of a row and the step each level is indented by. Rows are targets, so all three values clear WCAG 2.5.8's 24px minimum."
@@ -17643,7 +17788,7 @@ impl Locale {
                     "Says there are children that were **not** passed, for the lazily-loaded case. The node gets `aria-expanded=\"false\"` and a control, nothing is hidden, and the row's link is where the rest lives."
                 }
                 Key::ComponentTreeItemPropSelectedDoc => {
-                    "Whether this node starts chosen. Where the tree has a `form`, it is the hidden checkbox's `checked` and what a server receives with no script. Where it has none, the script writes `aria-selected` from it."
+                    "Whether this node starts chosen. The script reads it once and writes `aria-selected` from it. Where the tree has a `form`, it is also the checkbox the script adds."
                 }
                 Key::ComponentTreeItemPropDisabledDoc => {
                     "Stops the node being chosen or followed. It writes `aria-disabled` rather than removing the node from the walk, so users can still reach the row and be told it is disabled."
@@ -17739,9 +17884,7 @@ impl Locale {
                 Key::PageSearchBody => {
                     "Uma caixa de busca, os resultados abaixo dela e um resultado. Os filhos são links de verdade e funcionam sem script. Um índice numa URL é buscado na primeira busca e fica em cache. A busca casa por subsequência, ordena e marca as letras que casaram."
                 }
-                Key::PageTablesSummary => {
-                    "Monte uma tabela com as partes dela, e pagine uma tabela longa."
-                }
+                Key::PageTablesSummary => "Monte uma tabela com as seis partes de que ela é feita.",
                 Key::PageTablesBody => {
                     "Linhas e colunas, e as partes de que uma tabela é feita. Numa tela estreita ela rola de lado onde há espaço, e empilha em pares de rótulo e valor onde não há. Cada parte escreve o próprio papel ARIA, que o empilhamento tiraria."
                 }
@@ -18101,13 +18244,13 @@ impl Locale {
                     "Ponha um nó numa árvore: o nome dele, para onde leva, e o que está embaixo."
                 }
                 Key::ComponentDividerSummary => {
-                    "Separe dois blocos com nome usando uma linha, e nomeie o limite quando ele precisar."
+                    "Separe dois blocos com nome usando uma linha, e dê nome ao limite quando ele precisar de um."
                 }
                 Key::ComponentLabelSummary => {
-                    "Nomeie um controle, um grupo de controles ou uma região, no idioma do leitor."
+                    "Nomeie um controle, um grupo de controles ou uma região, na língua de quem lê."
                 }
                 Key::ComponentImageSummary => {
-                    "Mostre uma figura numa caixa reservada antes de ela chegar, com legenda quando precisar."
+                    "Mostre uma figura numa caixa reservada antes de ela chegar, com legenda onde for preciso."
                 }
                 Key::ComponentMessageBarSummary => {
                     "Conte à pessoa o que aconteceu, numa barra que fica onde a coisa aconteceu."
@@ -18116,7 +18259,7 @@ impl Locale {
                     "Desenhe um dos ícones declarados, no tamanho do texto ao lado do qual ele fica."
                 }
                 Key::ComponentRatingSummary => {
-                    "Mostre ou peça uma nota de zero a cinco, com o número escrito ao lado."
+                    "Mostre ou peça uma nota numa escala de cinco, com o número escrito ao lado."
                 }
                 Key::ComponentOtpFieldSummary => {
                     "Peça um código curto, numa fila de caixas que enchem e avançam conforme se digita."
@@ -18128,7 +18271,7 @@ impl Locale {
                     "Nomeie um painel numa tira de abas, e mostre esse painel quando a pessoa escolher."
                 }
                 Key::ComponentTabPanelSummary => {
-                    "Guarde o conteúdo que uma aba nomeia, e mostre quando essa aba for escolhida."
+                    "Guarde o conteúdo que uma aba nomeia, e mostre-o quando essa aba for escolhida."
                 }
                 Key::ComponentDialogSummary => {
                     "Peça uma coisa numa janela sobre a página, e devolva o foco depois."
@@ -18137,10 +18280,10 @@ impl Locale {
                     "Pendure uma superfície pequena num controle, com texto sobre o qual a pessoa pode agir."
                 }
                 Key::ComponentTooltipSummary => {
-                    "Explique um controle com uma dica curta, mostrada no ponteiro e no foco."
+                    "Explique um controle com uma dica curta, mostrada ao passar o ponteiro e ao focar."
                 }
                 Key::ComponentToastSummary => {
-                    "Relate o que acabou de acontecer numa mensagem curta que flutua fora do trabalho."
+                    "Relate o que acabou de acontecer numa mensagem curta que flutua sem cobrir o trabalho."
                 }
                 Key::PageLineageSummary => {
                     "Desenhe figuras e as relações entre elas em espaço tridimensional."
@@ -18419,12 +18562,13 @@ impl Locale {
                     "Aqui `disabled` escreve `aria-disabled` e não `disabled`, então o switch mantém o lugar na ordem de tabulação."
                 }
                 Key::ExampleSwitchGrain => "Granulado",
-                Key::ExampleSwitchPattern => "Padrão",
+                Key::ExampleSwitchPattern => "Estampa",
                 Key::ExampleSwatchLive => {
                     "Troque a cor de destaque no painel de configurações para ver esta amostra acompanhar."
                 }
+                Key::ExampleSwatchInForce => "Cor de destaque em uso",
                 Key::ExampleSwatchNamed => {
-                    "`palette` nomeia a família que a amostra resolve no próprio escopo, então nenhuma cor é escrita aqui."
+                    "O `Tag` desenha um `Swatch` de verdade antes da palavra, então a amostra nunca fica sozinha e a cor tem nome."
                 }
                 Key::ExampleSegmentedTabStop => {
                     "O grupo inteiro é uma única parada de tabulação, e as setas tanto movem o foco entre os itens quanto escolhem um."
@@ -18526,6 +18670,9 @@ impl Locale {
                 Key::ExampleEditPair => {
                     "`Del` ao lado de `Ins` mostra uma mudança como o que o texto era e no que virou."
                 }
+                Key::ExampleEditBlock => {
+                    "O `Ins` pode envolver um item inteiro, e não só uma palavra. O elemento é válido em volta de um bloco."
+                }
                 Key::ExampleEmLead => "Leia esta aqui como",
                 Key::ExampleEmWord => "enfatizada",
                 Key::ExampleEmNested => {
@@ -18536,6 +18683,16 @@ impl Locale {
                 }
                 Key::ExampleStrongLead => "Esta parte é",
                 Key::ExampleStrongWord => "importante",
+                Key::ExampleStrongDegrees => {
+                    "Um segundo `Strong` dentro do primeiro aumenta de novo a importância. As palavras de dentro pesam mais que a frase em volta."
+                }
+                Key::ExampleStrongWarning => {
+                    "Use `Strong` na parte da frase que mais importa, como a palavra com que um aviso começa."
+                }
+                Key::ExampleStrongWarningWord => "Aviso:",
+                Key::ExampleStrongWarningBody => {
+                    "apagar uma paleta a remove de todo tema que a nomeia."
+                }
                 Key::ExampleHeadingSection => "Uma seção da página",
                 Key::ExampleHeadingSub => "Algo dentro dela",
                 Key::ExampleHeadingDetail => "E um detalhe disso",
@@ -18629,6 +18786,9 @@ impl Locale {
                 Key::ExampleToolbarAlign => {
                     "`align: ToolbarGroupAlign::End` empurra um grupo e tudo depois dele para a ponta oposta, sem elemento espaçador."
                 }
+                Key::ExampleToolbarAlignRest => {
+                    "Um `end` posiciona dois grupos. O terceiro grupo não tem `align` e mesmo assim fica na ponta, porque vem depois."
+                }
                 Key::ExampleToolbarVertical => {
                     "`orientation` vai para a marcação além do desenho, então a pessoa sabe quais setas apertar."
                 }
@@ -18648,6 +18808,8 @@ impl Locale {
                 Key::ExampleMenuArchive => "Arquivar",
                 Key::ExampleMenuDelete => "Excluir",
                 Key::ExampleMenuDeleteDetail => "Isto não pode ser desfeito",
+                Key::ExampleMenuAccentOpen => "Destaque",
+                Key::ExampleMenuAccentLabel => "Escolha uma cor de destaque",
                 Key::ExampleMenuLocked => "Enviar um lembrete",
                 Key::ExampleMenuDocs => "Documentação",
                 Key::ExampleMenuRepo => "Código-fonte",
@@ -18800,6 +18962,7 @@ impl Locale {
                 Key::ExamplePaginationPage => "Página {page}",
                 Key::ExamplePaginationCurrent => "Página {page}, a que você está lendo",
                 Key::ExamplePaginationSummary => "Mostrando 21 a 30 de 39 paletas.",
+                Key::ExamplePaginationSummaryLast => "Mostrando 31 a 39 de 39 paletas.",
                 Key::ExamplePaginationNoteLinks => {
                     "Cada página é um `<a href>` de verdade, então abre em aba nova e entra no histórico do navegador."
                 }
@@ -18808,9 +18971,6 @@ impl Locale {
                 }
                 Key::ExamplePaginationNoteEnds => {
                     "Na última página o link para a frente é omitido em vez de desabilitado. `summary` acrescenta a linha que conta as páginas."
-                }
-                Key::ExamplePaginationNoteSummary => {
-                    "A frase embaixo do controle fica numa região dinâmica. Depois que a página vira, é a única coisa que diz que o conjunto não mudou."
                 }
                 Key::ExampleSearchChildren => {
                     "Os resultados são um `<ul>` de links de verdade no documento, então a lista ainda funciona com o script bloqueado."
@@ -18900,6 +19060,8 @@ impl Locale {
                 Key::ExampleAvatarAna => "Ana Lima",
                 Key::ExampleAvatarBruno => "Bruno Salles",
                 Key::ExampleAvatarCarla => "Carla Mendes",
+                Key::ExampleAvatarDiego => "Diego Rocha",
+                Key::ExampleAvatarDeployBot => "Robô de publicação",
                 Key::ExampleAvatarPending => "Convite ainda não aceito",
                 Key::ExampleAvatarReviewers => "Revisores",
                 Key::ExampleAvatarMore => "Mais 5 revisores",
@@ -18926,6 +19088,10 @@ impl Locale {
                     "A posição usa cantos lógicos, então o selo muda de lado numa página da direita para a esquerda. `overlap` acompanha a forma de baixo."
                 }
                 Key::ExampleBadgeUnread => "3 mensagens não lidas",
+                Key::ExampleBadgeUnread0 => "0 mensagens não lidas",
+                Key::ExampleBadgeUnread2 => "2 mensagens não lidas",
+                Key::ExampleBadgeUnread9 => "9 mensagens não lidas",
+                Key::ExampleBadgeUnread128 => "128 mensagens não lidas",
                 Key::ExampleBadgeChanged => {
                     "Configurações alteradas desde a última vez que você olhou"
                 }
@@ -18937,7 +19103,7 @@ impl Locale {
                     "O primeiro campo aceita só as opções listadas. O segundo confirma um valor na vírgula ou no ponto e vírgula, e para em três tags."
                 }
                 Key::ExamplePickerRefusing => {
-                    "Cole uma lista delimitada para confirmar todos os valores de uma vez. `pattern` rejeita um valor que não seja um endereço."
+                    "`pattern` rejeita um valor que não seja um endereço. O seletor de convidados desliga `paste` e aceita repetidos."
                 }
                 Key::ExamplePickerForm => {
                     "Aperte Enviar sem escolher nada para ver a validação do próprio navegador. `required` fica na caixa de texto, não no `<select>` escondido."
@@ -18965,6 +19131,11 @@ impl Locale {
                 Key::ExamplePickerPeopleLabel => "Enviar para",
                 Key::ExamplePickerPeoplePlaceholder => "Adicionar um endereço",
                 Key::ExamplePickerPeopleHint => "Cole uma lista e cada endereço nela vira uma tag.",
+                Key::ExamplePickerNamesLabel => "Nomes dos convidados",
+                Key::ExamplePickerNamesPlaceholder => "Adicione um nome",
+                Key::ExamplePickerNamesHint => {
+                    "Um nome colado continua uma tag só, vírgulas e tudo. Dois convidados podem ter o mesmo nome."
+                }
                 Key::ExamplePickerWriting => "Escrita",
                 Key::ExamplePickerBuilding => "Construção",
                 Key::ExampleSelectNoteForm => {
@@ -19151,12 +19322,14 @@ impl Locale {
                     "Com o script bloqueado, cada seletor é um `<input type=\"color\">` de verdade que envia o valor com o formulário."
                 }
                 Key::ExampleInputRequired => "obrigatório",
-                Key::ExampleInputHint => "Só usamos para mandar o recibo.",
+                Key::ExampleInputHint => "Só usamos para enviar o recibo.",
                 Key::ExampleInputError => "Esse endereço foi recusado pelo servidor de e-mail.",
                 Key::ExampleInputSend => "Salvar",
                 Key::ExampleInputNameLabel => "Nome completo",
                 Key::ExampleInputEmailLabel => "Endereço de e-mail",
                 Key::ExampleInputSiteLabel => "Site",
+                Key::ExampleInputTitleLabel => "Título do post",
+                Key::ExampleTextareaRecipients => "Destinatários, um endereço por linha",
                 Key::ExampleInputPasswordLabel => "Nova senha",
                 Key::ExampleInputClear => "Limpar o que foi digitado",
                 Key::ExampleInputReveal => "Mostrar a senha",
@@ -19230,10 +19403,10 @@ impl Locale {
                     "`suffix` desenha a unidade dentro da caixa. O leitor de tela a ouve junto com o valor, e ela nunca faz parte do que é enviado."
                 }
                 Key::ExampleNumberInputNoteLarge => {
-                    "Desligue os botões de passo onde os números são grandes demais para eles. As setas e o Page Up continuam movendo o valor."
+                    "Desligue os botões de passo onde os números são grandes demais para se chegar de passo em passo. As setas e o Page Up ainda movem o valor."
                 }
                 Key::ExampleNumberInputNoteStates => {
-                    "Um valor travado continua sendo enviado, e os botões de passo vão junto. Um valor recusado mantém a frase de quem chama sob a pergunta."
+                    "Um valor travado continua sendo enviado, e os botões de passo travam junto. Um valor recusado mantém a frase de quem chama sob a pergunta."
                 }
                 Key::ExampleNumberInputTicketsLabel => "Quantos ingressos",
                 Key::ExampleNumberInputTicketsHint => "Vinte é o máximo que vendemos por pessoa.",
@@ -19399,17 +19572,20 @@ impl Locale {
                 Key::ExampleMeterStorageNote => {
                     "O número é escrito ao lado da barra, então a leitura não precisa ser estimada a partir de uma forma."
                 }
-                Key::ExampleMeterTokens => "Tokens deste mês",
-                Key::ExampleMeterTokensValue => "{value}k de {max}k — {percent}",
+                Key::ExampleMeterTokensAtlas => "Tokens deste mês no Atlas",
+                Key::ExampleMeterTokensBeacon => "Tokens deste mês no Beacon",
+                Key::ExampleMeterTokensCorvus => "Tokens deste mês no Corvus",
+                Key::ExampleMeterTokensValue => "{value}k de {max}k, ou {percent}",
                 Key::ExampleMeterTokensNote => {
                     "`low`, `high` e `optimum` dizem ao navegador qual ponta é a boa, e o navegador pinta a cor."
                 }
                 Key::ExampleMeterSeats => "Assentos",
                 Key::ExampleMeterSeatsValue => "{value} de {max} ocupados",
-                Key::ExampleMeterSeatsNote => {
-                    "`size: Small` é a barra para célula de tabela, onde a altura da linha é o limite."
+                Key::ExampleMeterFreezer => "Temperatura do freezer",
+                Key::ExampleMeterFreezerValue => "{value} {unit} agora",
+                Key::ExampleMeterFreezerNote => {
+                    "Declare `min` só para uma escala que começa abaixo de zero. A ausência já significa zero."
                 }
-                Key::ExampleMeterShare => "Fatia do gasto do mês",
                 Key::ExampleMeterShareValue => "{percent} do total",
                 Key::ExampleMeterShareNote => {
                     "Use `tone` para um medidor sem ponta boa ou ruim, onde a cor marca uma categoria e não um veredito."
@@ -19437,9 +19613,9 @@ impl Locale {
                 Key::ExampleProgressStepsNote => {
                     "`size` define a altura da barra. `hide_label` remove o rótulo, para uma barra numa célula onde o cabeçalho da coluna já a nomeia."
                 }
-                Key::ExampleMeterShareInfra => "Infraestrutura",
-                Key::ExampleMeterSharePeople => "Salários",
-                Key::ExampleMeterShareTravel => "Viagens",
+                Key::ExampleMeterShareCached => "Em cache",
+                Key::ExampleMeterShareArchived => "Arquivados",
+                Key::ExampleMeterShareShared => "Compartilhados",
                 Key::ComponentInfoSummary => {
                     "Explique uma palavra com uma frase, aberta por um pequeno `i` ao lado dela."
                 }
@@ -19770,7 +19946,7 @@ impl Locale {
                 }
                 Key::ExampleDividerOr => "ou",
                 Key::ExampleDividerPassword => "Entrar com uma senha",
-                Key::ExampleDividerLink => "Prefiro receber um link por e-mail",
+                Key::ExampleDividerLink => "Receber um link por e-mail",
                 Key::ExampleDividerNoteNamed => {
                     "Uma linha entre dois blocos que têm nome. Entre irmãos do mesmo tipo, mais espaço diz isso e uma linha não."
                 }
@@ -19787,7 +19963,7 @@ impl Locale {
                     "Fora da árvore de acessibilidade. Use assim onde a linha repete um limite que o título acima dela já desenha."
                 }
                 Key::ExampleLabelOptional => "opcional",
-                Key::ExampleLabelNewsletter => "O que podemos te enviar",
+                Key::ExampleLabelNewsletter => "O que podemos enviar para você",
                 Key::ExampleLabelOffers => "Ofertas de vez em quando",
                 Key::ExampleLabelUpdates => "Novidades do produto",
                 Key::ExampleLabelDensity => "Altura da linha",
@@ -19820,7 +19996,7 @@ impl Locale {
                 }
                 Key::ExampleImageBeside => "Ada Lovelace entrou para o time em março.",
                 Key::ExampleImageNoteBox => {
-                    "A caixa fica reservada antes de o arquivo chegar, então nada embaixo dela se mexe quando a figura cai."
+                    "A caixa fica reservada antes de o arquivo chegar, então nada embaixo dela se mexe quando a figura aparece."
                 }
                 Key::ExampleImageNoteFigure => {
                     "Uma legenda transforma isto num `<figure>`, então as palavras ficam presas à figura em vez de só estarem embaixo."
@@ -19836,7 +20012,7 @@ impl Locale {
                 }
                 Key::ExampleMessageBarSavedTitle => "Salvo",
                 Key::ExampleMessageBarSaved => {
-                    "Suas mudanças estão no ar. Pode levar um minuto até todo o resto do time ver."
+                    "Suas mudanças estão no ar. Pode levar um minuto até as outras pessoas verem."
                 }
                 Key::ExampleMessageBarRefusedTitle => "Pagamento recusado",
                 Key::ExampleMessageBarRefused => {
@@ -19902,7 +20078,7 @@ impl Locale {
                 Key::ExampleRatingProduct => "Nota de quem comprou",
                 Key::ExampleRatingClosed => "As notas deste pedido estão fechadas.",
                 Key::ExampleRatingNoteReading => {
-                    "Uma leitura, e o número está escrito. A quinta estrela é preenchida três décimos do caminho em vez de arredondada."
+                    "Uma leitura, e o número está escrito. A quinta estrela é preenchida três décimos do caminho em vez de arredondada para quatro ou cinco."
                 }
                 Key::ExampleRatingNoteAsk => {
                     "Rádios de verdade num fieldset de verdade. Envia sem script, e o número ao lado das estrelas segue a escolha da pessoa."
@@ -19911,7 +20087,7 @@ impl Locale {
                     "Três tamanhos, e cada um passa do alvo mínimo de 24px. O tom pinta as estrelas cheias e nunca carrega a leitura."
                 }
                 Key::ExampleRatingNoteRefused => {
-                    "Uma resposta recusada marca cada estrela, porque a nota é um valor só. Uma nota desligada não envia nada nem recebe foco."
+                    "Uma resposta recusada marca cada estrela, porque a nota é um valor só. Uma nota desabilitada não envia nada nem recebe foco."
                 }
                 Key::ExampleOtpFieldLegend => "Digite o código que enviamos",
                 Key::ExampleOtpFieldBox => "Dígito {index} de {length}",
@@ -19922,7 +20098,7 @@ impl Locale {
                 Key::ExampleOtpFieldLetters => "Digite seu código de convite",
                 Key::ExampleOtpFieldLettersBox => "Caractere {index} de {length}",
                 Key::ExampleOtpFieldNoteCode => {
-                    "Seis caixas, um valor. Digitar preenche uma após a outra, e colar o código inteiro divide o texto pela fila."
+                    "Seis caixas, um valor. Digitar preenche uma após a outra, e colar o código inteiro o divide entre as caixas."
                 }
                 Key::ExampleOtpFieldNoteLetters => {
                     "Letras além de dígitos, numa fila menor. As caixas são mais largas para elas e o teclado é o comum."
@@ -19986,8 +20162,8 @@ impl Locale {
                 Key::ExampleTabPanelNoteRich => {
                     "Um painel guarda qualquer coisa, inclusive uma tabela ou um formulário. Ele é uma região da página e não uma linha de texto."
                 }
-                Key::ExampleTabPanelNoteVisible => {
-                    "Com o script bloqueado todo painel está na página. Nada fica escondido atrás de um controle que ainda não funciona."
+                Key::ExampleTabPanelNoteChosen => {
+                    "O painel mostrado é aquele cujo `value` corresponde à aba escolhida, e não o primeiro que foi escrito."
                 }
                 Key::ExampleTabPanelNoteNested => {
                     "Um conjunto dentro de um painel funciona porque os ids vêm de um `name`, e este difere do conjunto em volta."
@@ -20097,7 +20273,7 @@ impl Locale {
                 }
                 Key::ExampleToastSavedTitle => "Salvo",
                 Key::ExampleToastSaved => {
-                    "Suas mudanças estão no ar. O resto do time vai ver dentro de um minuto."
+                    "Suas mudanças estão no ar. O resto do seu time vai ver dentro de um minuto."
                 }
                 Key::ExampleToastDismiss => "Dispensar esta mensagem",
                 Key::ExampleToastSentTitle => "Convite enviado",
@@ -20120,6 +20296,12 @@ impl Locale {
                 }
                 Key::ExampleToastNoteFixed => {
                     "Sem controle e sem cronômetro, para uma mensagem verdadeira até o estado atrás dela mudar. A página também precisa dizer."
+                }
+                Key::ExampleToastReviewTitle => "Pagamento recusado",
+                Key::ExampleToastReview => "Seu cartão foi recusado. Nada foi cobrado.",
+                Key::ExampleToastReviewLink => "Atualize seu cartão",
+                Key::ExampleToastNoteAction => {
+                    "Uma mensagem pode ter um link para o que a pessoa precisa fazer. A espera segura enquanto o foco está dentro dela."
                 }
                 Key::ExampleOverviewDialogOpen => "Publicar esta página",
                 Key::ExampleOverviewDialogHeading => "Publicar esta página?",
@@ -20382,7 +20564,7 @@ impl Locale {
                     "Onde um slide para. `start` alinha a borda inicial dele com a da trilha, o que serve a uma prateleira, e `center` serve a uma galeria de um. `none` deixa uma rolagem simples, e faz os controles rolarem uma tela em vez de ir a um slide."
                 }
                 Key::ComponentCarouselPropOrientationDoc => {
-                    "Para que lado a trilha corre. Padrão `horizontal`, e é anunciado além de desenhado, para quem lê saber quais setas movem. É escrito com propriedades lógicas, então se inverte em um idioma da direita para a esquerda."
+                    "Para que lado a trilha corre. Padrão `horizontal`. É desenhado, não anunciado, porque um grupo não tem eixo em ARIA. É escrito com propriedades lógicas, então se inverte em um idioma da direita para a esquerda."
                 }
                 Key::ComponentCarouselPropControlsDoc => {
                     "Se os controles de anterior e próximo aparecem. **Ligado por padrão**, porque um mouse sem roda horizontal não move um contêiner de rolagem sem eles. São renderizados escondidos e o script os revela depois de medir a trilha."
@@ -20432,7 +20614,9 @@ impl Locale {
                 Key::ComponentCarouselStateEndsDoc => {
                     "Em que ponta a trilha está encostada: `start`, `end`, ou ausente no meio. O script escreve a partir da posição de rolagem e não de um índice, então um último slide parcialmente visível ainda conta como a ponta."
                 }
-                Key::ComponentCarouselKeyLeftArrowRightArrowName => "Seta esquerda / Seta direita",
+                Key::ComponentCarouselKeyLeftArrowRightArrowName => {
+                    "Seta para a esquerda / Seta para a direita"
+                }
                 Key::ComponentCarouselKeyLeftArrowRightArrowAction => {
                     "Rola a trilha, que é o comportamento próprio do navegador. Em um carrossel vertical as teclas são Cima e Baixo."
                 }
@@ -20755,7 +20939,7 @@ impl Locale {
                     "O que está errado com a data, nas palavras de quem chama. A presença dele marca o campo como inválido, então a borda vermelha e a mensagem sempre aparecem juntas. Uma frase de quem chama nunca é apagada pelo script."
                 }
                 Key::ComponentDateInputPropErrorLabelDoc => {
-                    "A palavra lida antes da mensagem, como `Erro:`. Fica escondida visualmente, porque a mensagem já está marcada como erro na tela. Está num atributo também, então o validador prefixa as próprias frases com ela."
+                    "A palavra lida antes da mensagem, como `Erro:`. Fica escondida visualmente, porque a mensagem já está marcada como erro na tela. O `Field` a desenha antes de toda frase, a de quem chama e a do validador."
                 }
                 Key::ComponentDateInputPropValueDoc => {
                     "A data já conhecida, no formato ano-mês-dia (`2026-08-07`). É dividida nas três caixas na renderização, e a ordem da fileira decide como a pessoa a vê."
@@ -20899,7 +21083,7 @@ impl Locale {
                     "As palavras no controle que o abre. **Obrigatório**: uma superfície que só abre por script e não tem controle apontando para ela é uma superfície inalcançável."
                 }
                 Key::ComponentDialogPropHeadingDoc => {
-                    "Um título dentro da superfície. Ele nomeia o diálogo por `aria-labelledby`, então prefira-o a `label`. Um nome que a pessoa vê é um nome que ela pode conferir."
+                    "Um título dentro da superfície. Ele nomeia o diálogo por `aria-labelledby`, então prefira-o a `label`. Um nome que a pessoa vê é um nome que ela pode conferir com o que está sendo perguntado."
                 }
                 Key::ComponentDialogPropLabelDoc => {
                     "O nome acessível do diálogo, para uma superfície sem título visível. Ignorado quando `heading` está definido, porque um nome escrito duas vezes pode divergir de si mesmo."
@@ -21048,7 +21232,7 @@ impl Locale {
                     "O id do controle de que este item fala, o mesmo id que o `Field` dele recebeu. **Obrigatório**. Vira `href=\"#{control}\"`, então o link funciona com o script bloqueado."
                 }
                 Key::ComponentErrorSummaryItemPropChildrenDoc => {
-                    "A frase, no idioma do leitor. Use as mesmas palavras que o próprio campo mostra, para que quem segue o link ache a mensagem que leu aqui."
+                    "A frase, na língua de quem lê. Use as mesmas palavras que o próprio campo mostra, para que quem segue o link ache a mensagem que leu aqui."
                 }
                 Key::ComponentFieldGuidance => {
                     "Use um campo em volta de um controle que precisa de rótulo, dica ou mensagem de erro. Ele desenha os três e não renderiza controle nenhum. Para uma caixa de seleção ou um rádio, use `Checkbox` ou `Radio`, que desenham o próprio rótulo."
@@ -21060,10 +21244,10 @@ impl Locale {
                     "O id do controle que isto rotula. **Obrigatório**: um `<label>` sem alvo não nomeia nada. A dica e o erro tiram os ids dele, como `{control}-hint` e `{control}-error`, para onde o `aria-describedby` do controle precisa apontar."
                 }
                 Key::ComponentFieldPropLabelDoc => {
-                    "A pergunta, no idioma do leitor. É renderizada como um `<label for>` de verdade, ou como um `<legend>` quando `kind` é `group`. Nunca use um placeholder no lugar, porque ele some assim que a pessoa digita."
+                    "A pergunta, na língua de quem lê. É renderizada como um `<label for>` de verdade, ou como um `<legend>` quando `kind` é `group`. Nunca use um placeholder no lugar, porque ele some assim que a pessoa digita."
                 }
                 Key::ComponentFieldPropKindDoc => {
-                    "Se isto rotula um controle ou vários. `single` renderiza um `<div>` com um `<label>`. `group` renderiza um `<fieldset>` com um `<legend>`, o único arranjo que nomeia um conjunto de controles. `DateInput` e `Fieldset` usam `group`."
+                    "Se isto rotula um controle ou vários. `single` renderiza um `<div>` com um `<label>`. `group` renderiza um `<fieldset>` com um `<legend>`, o único arranjo que nomeia um conjunto de controles."
                 }
                 Key::ComponentFieldPropHintDoc => {
                     "O que a pessoa precisa saber antes de responder, como *Por exemplo, 27 3 2007*. Vai no `aria-describedby` do controle, então é lida junto com ele."
@@ -21075,7 +21259,7 @@ impl Locale {
                     "Se a pergunta é marcada como uma que precisa ser respondida. **A marca é tudo o que isto faz.** O atributo `required` de verdade fica no controle de verdade, porque só ele impede o envio."
                 }
                 Key::ComponentFieldPropRequiredLabelDoc => {
-                    "A palavra que marca a pergunta, no idioma do leitor, como *obrigatório*. Necessária na prática pelo `required`. Uma palavra em vez de um asterisco, que é invisível para quem não enxerga."
+                    "A palavra que marca a pergunta, na língua de quem lê, como *obrigatório*. Necessária na prática pelo `required`. Uma palavra em vez de um asterisco, que é invisível para quem não enxerga."
                 }
                 Key::ComponentFieldPropErrorSlotDoc => {
                     "Se o parágrafo de erro é renderizado **mesmo quando não há erro**, vazio, para um script escrever dentro. Desligado por padrão, porque um parágrafo vazio é um marco que o leitor de tela anuncia. Ligado para um controle que um script esconde."
@@ -21144,7 +21328,7 @@ impl Locale {
                     "O campo sob o qual os arquivos são enviados, e a raiz de todo id daqui. **Obrigatório**, porque um id derivado de um nome opcional é um id que toda cópia na página compartilha."
                 }
                 Key::ComponentFileInputPropLabelDoc => {
-                    "A pergunta, no idioma do leitor. O `Field` a desenha como um `<label for>` de verdade. Obrigatório."
+                    "A pergunta, na língua de quem lê. O `Field` a desenha como um `<label for>` de verdade. Obrigatório."
                 }
                 Key::ComponentFileInputPropBrowseLabelDoc => {
                     "O texto do controle que abre o seletor, como *Escolher um arquivo*. **Obrigatório**, porque é o único texto desse controle."
@@ -21249,7 +21433,7 @@ impl Locale {
                     "Um ícone sem rótulo é `aria-hidden` e `focusable=\"false\"`, então não chega a leitor de tela nenhum nem à ordem de tabulação. Um `label` o torna um `role=\"img\"` com esse nome, e os dois estados se excluem."
                 }
                 Key::ComponentIconPropIconDoc => {
-                    "Qual desenho, pelo nome que o `spec/icons.toml` dá a ele. **Obrigatório**, e um tipo de verdade nas duas linguagens em vez de um texto. Um nome que não é um ícone vira então erro de compilação e não uma caixa vazia na página."
+                    "Qual desenho, pelo nome que o `spec/icons.toml` dá a ele. **Obrigatório**, e um tipo de verdade nas duas linguagens em vez de uma string. Um nome que não é um ícone vira então erro de compilação e não uma caixa vazia na página."
                 }
                 Key::ComponentIconPropLabelDoc => {
                     "O nome acessível dele. Ausente é o caso comum e deixa o ícone `aria-hidden`, o que está certo ao lado de uma palavra que já diz aquilo. Dê um só onde o desenho carrega a mensagem inteira."
@@ -21270,7 +21454,7 @@ impl Locale {
                     "As palavras que ficam no lugar da figura. **Obrigatório**, e uma string vazia é uma resposta de verdade. Ela diz que a figura repete o que está ao lado, então o leitor de tela passa por ela."
                 }
                 Key::ComponentImagePropRatioDoc => {
-                    "O formato da caixa, mantido antes de a figura chegar. Ausente, deixa o arquivo decidir, e o arquivo chega depois do layout. Tudo abaixo dele então se move, o que este sistema proíbe."
+                    "O formato da caixa, mantido antes de a figura chegar. Ausente, deixa o arquivo decidir, e o arquivo chega depois do layout. Tudo abaixo da figura então se move, o que este sistema proíbe."
                 }
                 Key::ComponentImagePropFitDoc => {
                     "Como a figura preenche uma caixa de outro formato. `cover` corta até as bordas, e `contain` cabe inteira com espaço sobrando. Use `contain` onde as bordas carregam significado."
@@ -21279,7 +21463,7 @@ impl Locale {
                     "Quando o navegador busca o arquivo. `lazy` espera até a figura chegar perto da janela. Use `eager` para a primeira figura que a pessoa vê, onde esperar custa mais do que os bytes."
                 }
                 Key::ComponentImagePropCaptionDoc => {
-                    "Uma linha embaixo da figura, no idioma do leitor. A presença dela muda o elemento: uma imagem com legenda é um `<figure>` com um `<figcaption>`, que é o que prende as palavras à figura."
+                    "Uma linha embaixo da figura, na língua de quem lê. A presença dela muda o elemento: uma imagem com legenda é um `<figure>` com um `<figcaption>`, que é o que prende as palavras à figura."
                 }
                 Key::ComponentImagePropRoundedDoc => {
                     "Se os cantos são arredondados, a partir do raio de superfície. Desligado por padrão, porque o quadrado é a base deste sistema e o arredondado é a exceção (`NOCTUA.md §9.7`)."
@@ -21300,7 +21484,7 @@ impl Locale {
                     "O identificador desta nota, e a raiz dos dois ids daqui. **Obrigatório**, porque uma página pode ter muitos destes e ids derivados de um nome ausente colidiriam."
                 }
                 Key::ComponentInfoPropLabelDoc => {
-                    "O nome do controle, no idioma do leitor, como *Sobre o prazo*. **Obrigatório**: o controle é um glifo, então este é o único nome que ele tem. Nomeie o que é explicado, e não o ato de explicar."
+                    "O nome do controle, na língua de quem lê, como *Sobre o prazo*. **Obrigatório**: o controle é um glifo, então este é o único nome que ele tem. Nomeie o que é explicado, e não o ato de explicar."
                 }
                 Key::ComponentInfoPropHeadingDoc => {
                     "Um título dentro da nota, para a explicação que precisa de um, como um termo sendo definido. Ausente é o caso comum, porque uma frase não precisa de título."
@@ -21309,7 +21493,7 @@ impl Locale {
                     "O nome do controle que fecha a nota. Necessário na prática, porque o Escape e um clique fora também fecham e nenhum dos dois se descobre numa tela de toque."
                 }
                 Key::ComponentInfoPropPlacementDoc => {
-                    "Onde a nota abre. `auto` mede o espaço abaixo e vira para cima quando não cabe. `start` e `end` prendem a borda inicial ou final da nota ao controle, para um marcador na borda de uma tabela."
+                    "Onde a nota abre. `auto` mede o espaço, virando para cima e pendurando pela borda que couber. `start` e `end` prendem a borda inicial ou final da nota seja qual for o espaço, para um marcador na borda de uma tabela."
                 }
                 Key::ComponentInfoPropChildrenDoc => {
                     "A explicação, em uma ou duas frases. Ela pode conter um `Link`, e a pessoa pode selecionar e copiar o texto, o que o balão do próprio navegador não permite."
@@ -21352,7 +21536,7 @@ impl Locale {
                     "O que a pessoa precisa saber antes de responder. Desenhada por `Field` e apontada pelo `aria-describedby` desta caixa, então é lida com o controle e não encontrada depois."
                 }
                 Key::ComponentInputPropErrorDoc => {
-                    "O que está errado, depois de um envio, nas palavras de quem chama. É um `role=\"alert\"`. O balão da plataforma diz *Preencha este campo*, o que não diz o que o campo queria."
+                    "O que está errado, depois de um envio, nas palavras de quem chama. É um `role=\"alert\"`. A bolha da plataforma diz *Preencha este campo*, o que não diz o que o campo queria."
                 }
                 Key::ComponentInputPropRequiredDoc => {
                     "Se uma resposta é necessária. Desligado por padrão. É o atributo **real** na caixa **real**, então o navegador recusa o envio sem script nenhum. `Field` desenha a palavra ao lado da pergunta."
@@ -21379,10 +21563,10 @@ impl Locale {
                     "Uma palavra ou símbolo fixo depois do valor, como `.com`, `kg` ou `%`. Mesma regra: desenhado, nunca enviado."
                 }
                 Key::ComponentInputPropClearableDoc => {
-                    "Se aparece um controle para esvaziar a caixa. Desligado por padrão. Esvaziar um campo custa um gesto que quem lê já conhece. Um controle que só aparece quando há texto mexe o layout enquanto se digita."
+                    "Se aparece um controle para esvaziar a caixa. Desligado por padrão. Esvaziar um campo custa um gesto que quem lê já conhece. Ele guarda o espaço dele com a caixa vazia, então nada se mexe enquanto se digita."
                 }
                 Key::ComponentInputPropClearLabelDoc => {
-                    "O nome desse controle. Ele é um glifo, então este é o único nome que tem."
+                    "O nome desse controle. Ele é um glifo, então este é o único nome que ele tem."
                 }
                 Key::ComponentInputPropMaxlengthDoc => {
                     "O máximo de caracteres que a caixa aceita. É o atributo real, então o navegador para a tecla em vez de um script notar depois. Texto e não número, porque todo prop que cruza as duas linguagens é texto."
@@ -21441,7 +21625,7 @@ impl Locale {
                     "Um `<label for>` nomeia um controle rotulável, e um `<legend>` nomeia o `<fieldset>` que ele abre. Um `<p>` nomeia qualquer outra coisa por referência, então o grupo carrega `aria-labelledby` apontando para este id."
                 }
                 Key::ComponentLabelPropTextDoc => {
-                    "O nome, no idioma do leitor. **Obrigatório**, porque um rótulo sem palavras não nomeia nada. Nomeie o que está sendo perguntado, e não o ato de perguntar."
+                    "O nome, na língua de quem lê. **Obrigatório**, porque um rótulo sem palavras não nomeia nada. Nomeie o que está sendo perguntado, e não o ato de perguntar."
                 }
                 Key::ComponentLabelPropForControlDoc => {
                     "O id do que isto nomeia. Com `kind = \"label\"` ele vira um `for` de verdade, a única ligação que o navegador executa. O rótulo assume `{for_control}-label` como id próprio, para um grupo apontar."
@@ -21456,7 +21640,7 @@ impl Locale {
                     "Se o que isto nomeia é marcado como uma resposta que precisa ser dada. **A marca é tudo o que isto faz.** O atributo `required` de verdade fica no controle de verdade, porque só ele impede o envio."
                 }
                 Key::ComponentLabelPropRequiredLabelDoc => {
-                    "A palavra que marca, no idioma do leitor, como *obrigatório*. Necessária na prática pelo `required`. Uma palavra em vez de um asterisco, que não chega a quem não enxerga."
+                    "A palavra que marca, na língua de quem lê, como *obrigatório*. Necessária na prática pelo `required`. Uma palavra em vez de um asterisco, que não chega a quem não enxerga."
                 }
                 Key::ComponentLabelPropOptionalLabelDoc => {
                     "A palavra para uma pergunta que pode ficar em branco, como *opcional*. Escrita apenas enquanto `required` está desligado, porque uma pergunta é uma coisa ou a outra. Marque a mais rara das duas."
@@ -21549,7 +21733,7 @@ impl Locale {
                     "`LineageFigure`s, para as peças cujo conteúdo é mais que um nome. Uma figura marcada `slot` no grafo não desenha nada de si e espera por uma, e qualquer figura pode receber uma por cima. O resto fica na origem da cena."
                 }
                 Key::ComponentLineageStatePickedDoc => {
-                    "Marcado numa ligação ou numa figura que quem lê destacou. **Carimbado pelo runtime**, enquanto o destaque em si não é. Um destaque é uma caixa de seleção de verdade, então `:checked` desenha a ligação mais forte sem nada rodando."
+                    "Marcado numa ligação ou numa figura que quem lê destacou. **Carimbado pelo runtime**, enquanto o destaque em si não é. Um destaque é uma caixa de seleção de verdade, então `:checked` já o desenha sem nada rodando."
                 }
                 Key::ComponentLineageStateMatchDoc => {
                     "Se uma peça responde ao filtro atual. Ausente quando não há filtro, então sem filtro e tudo casando são um estado só e não dois."
@@ -21650,7 +21834,7 @@ impl Locale {
                 }
                 Key::ComponentLinkPropChildrenDoc => "O texto do link.",
                 Key::ComponentListA11yNotes => {
-                    "`marker: none` remove só o marcador visual. Alguns navegadores descartam a semântica de lista quando `list-style` é none. O papel é declarado de novo, então a lista continua anunciando quantos itens tem."
+                    "`marker: none` remove só o marcador visual. Uma lista em flex e uma sem marcador perdem a semântica em alguns motores, então `list` e `listitem` são declarados de novo. Uma lista de descrição mantém o mapeamento dela."
                 }
                 Key::ComponentListPropKindDoc => {
                     "Que tipo de lista renderizar: `unordered` é um `<ul>`, `ordered` um `<ol>`, `description` um `<dl>`. Muda o elemento e não só o marcador, então o leitor de tela anuncia a coisa certa."
@@ -21666,7 +21850,7 @@ impl Locale {
                     "Use para um item de uma `List`. Dê um `term` quando a lista for uma lista de descrição, e deixe de fora em qualquer outro tipo de lista."
                 }
                 Key::ComponentListItemA11yNotes => {
-                    "Um `<dt>` e o `<dd>` dele precisam ser filhos diretos do `<dl>`, então isto renderiza dois irmãos em vez de envolvê-los. Um invólucro quebra a associação que um leitor de tela lê."
+                    "Um `<dt>` e o `<dd>` dele precisam ser filhos diretos do `<dl>`, então isto renderiza dois irmãos em vez de envolvê-los. Um invólucro quebra a associação que um leitor de tela lê. O `<li>` declara `listitem` de novo."
                 }
                 Key::ComponentListItemPropTermDoc => {
                     "A coisa que está sendo descrita. A presença dele troca o item de `<li>` para um `<dt>` e um `<dd>`, que é do que uma lista de descrição é feita."
@@ -21689,7 +21873,7 @@ impl Locale {
                     "O nome do próprio menu, na língua de quem lê, como *Ações desta fatura*. **Obrigatório**, porque um leitor de tela anuncia o menu quando o foco entra nele. Nomeie sobre o que são as ações."
                 }
                 Key::ComponentMenuPropPlacementDoc => {
-                    "Onde ele fica pendurado no botão: `auto`, `start` ou `end`. Padrão `auto`, que mede o espaço abaixo e vira para cima quando não há o bastante. `start` e `end` fixam a borda inicial ou final do menu no botão."
+                    "Onde ele fica pendurado no botão: `auto`, `start` ou `end`. `auto` mede o espaço, virando para cima e pendurando pela borda que couber. `start` e `end` fixam uma borda seja qual for o espaço."
                 }
                 Key::ComponentMenuPropChildrenDoc => {
                     "Os itens, como `MenuItem`. Nada mais cabe aqui. Um título, um parágrafo ou um controle de formulário dentro de um `role=\"menu\"` não pode ser alcançado. O teclado do menu anda entre itens e mais nada."
@@ -21699,7 +21883,7 @@ impl Locale {
                 }
                 Key::ComponentMenuKeyDownOrUpName => "Seta para baixo ou para cima",
                 Key::ComponentMenuKeyDownOrUpAction => {
-                    "Vai para o item seguinte ou o anterior, e dá a volta nas pontas. Abrir pelo teclado põe o foco no primeiro item."
+                    "Vai ao item seguinte ou anterior, dando a volta nas pontas. Para baixo abre no primeiro item e para cima no último."
                 }
                 Key::ComponentMenuKeyHomeOrEndName => "Home ou End",
                 Key::ComponentMenuKeyHomeOrEndAction => {
@@ -21728,7 +21912,7 @@ impl Locale {
                     "`aria-disabled` em vez de `disabled`, então um item recusado fica no percurso das setas e é anunciado em vez de sumir. O `tabindex` dele é `-1`, porque o menu é uma parada de tabulação só."
                 }
                 Key::ComponentMenuItemPropLabelDoc => {
-                    "O texto do item, no idioma do leitor. É o texto visível **e** o nome acessível ao mesmo tempo, então os dois não podem divergir. Obrigatório."
+                    "O texto do item, na língua de quem lê. É o texto visível **e** o nome acessível ao mesmo tempo, então os dois não podem divergir. Obrigatório."
                 }
                 Key::ComponentMenuItemPropIconDoc => {
                     "Um ícone antes do rótulo, centrado opticamente no texto. É decoração e leva `aria-hidden`, porque repete o rótulo."
@@ -21859,7 +22043,7 @@ impl Locale {
                     "O campo sob o qual isto é enviado, e a raiz de todo id daqui. **Obrigatório**, porque um id derivado de um nome opcional é um id que toda cópia na página compartilha."
                 }
                 Key::ComponentNumberInputPropLabelDoc => {
-                    "A pergunta, no idioma do leitor. O `Field` a desenha como um `<label for>` de verdade. Obrigatório."
+                    "A pergunta, na língua de quem lê. O `Field` a desenha como um `<label for>` de verdade. Obrigatório."
                 }
                 Key::ComponentNumberInputPropValueDoc => {
                     "A quantidade inicial, como texto. Texto porque é isso que um formulário envia. Um valor que o componente não consegue interpretar é mostrado de volta em vez de ser trocado por nada."
@@ -21886,7 +22070,7 @@ impl Locale {
                     "O nome do controle que subtrai um passo, nos mesmos termos."
                 }
                 Key::ComponentNumberInputPropMinLabelDoc => {
-                    "O que o componente diz quando um valor digitado está abaixo de `min`, com um buraco `{min}`. O valor fica exatamente como foi digitado, para o leitor poder corrigir."
+                    "O que o componente diz quando um valor digitado está abaixo de `min`, com um buraco `{min}`. O valor fica exatamente como foi digitado, para a pessoa poder corrigir."
                 }
                 Key::ComponentNumberInputPropMaxLabelDoc => {
                     "O que o componente diz quando um valor digitado está acima de `max`, com um buraco `{max}`."
@@ -21895,7 +22079,7 @@ impl Locale {
                     "O que o componente diz quando o que foi digitado não é um número, com um buraco `{value}`. Informe, porque este campo aceita texto de propósito, onde um campo `type=\"number\"` ficaria vazio em silêncio."
                 }
                 Key::ComponentNumberInputPropGroupDoc => {
-                    "Se os separadores de milhar são desenhados enquanto o leitor não digita: `1.234.567` em português, `1,234,567` em inglês, a partir do locale da página. Nunca são enviados e nunca estão lá enquanto a caixa tem foco."
+                    "Se os separadores de milhar são desenhados enquanto a pessoa não digita: `1.234.567` em português, `1,234,567` em inglês, a partir do locale da página. Nunca são enviados e nunca estão lá enquanto a caixa tem foco."
                 }
                 Key::ComponentNumberInputPropPrefixDoc => {
                     "Um símbolo fixo antes do valor, dentro da caixa, como `R$` ou `£`. Desenhado, `aria-hidden`, e nunca parte do que é enviado."
@@ -21922,7 +22106,7 @@ impl Locale {
                     "Impede a edição do valor. Recusa a caixa e os botões de passo, e não envia nada."
                 }
                 Key::ComponentNumberInputPropReadonlyDoc => {
-                    "Se o valor é legível e copiável mas não editável. Continua sendo enviado, e os botões de passo vão junto, porque um valor que ainda pudesse ser incrementado seria editável."
+                    "Se o valor é legível e copiável mas não editável. Continua sendo enviado, e os botões de passo travam junto, porque um valor que ainda pudesse ser incrementado seria editável."
                 }
                 Key::ComponentNumberInputPropSizeDoc => {
                     "O tamanho da caixa e dos botões de passo: `small`, `medium` ou `large`. `medium` por padrão, acompanhando o resto do formulário."
@@ -21951,13 +22135,13 @@ impl Locale {
                     "Use um campo de código para um código curto que a pessoa copia de outro lugar, como os seis dígitos de uma mensagem. Para algo que ela redige, use `Input`. As caixas são um retrato do código, nunca uma forma obrigatória."
                 }
                 Key::ComponentOtpFieldA11yNotes => {
-                    "`Field { kind = \"group\" }` é o `<fieldset>`, então a dica e o erro são ouvidos uma vez na entrada. Cada caixa carrega o próprio `<label>`, escondido da tela e guardado para o leitor de tela."
+                    "`Field { kind = \"group\" }` é o `<fieldset>`, então a dica e o erro são ouvidos uma vez na entrada, não por caixa. Cada caixa carrega o próprio `<label>`, escondido da tela e guardado para o leitor de tela."
                 }
                 Key::ComponentOtpFieldPropNameDoc => {
                     "O nome do campo e a raiz de todo id dele. **Cada caixa é enviada sob ele**, então o código chega como `length` valores em ordem. **Obrigatório**, porque um id vindo de um nome opcional é um id que todo campo da página divide."
                 }
                 Key::ComponentOtpFieldPropLegendDoc => {
-                    "A pergunta, no idioma do leitor, desenhada pelo `Field` como um `<legend>` de verdade. **Obrigatório**, porque um fieldset sem legenda dá ao leitor de tela um grupo sem nome."
+                    "A pergunta, na língua de quem lê, desenhada pelo `Field` como um `<legend>` de verdade. **Obrigatório**, porque um fieldset sem legenda dá ao leitor de tela um grupo sem nome."
                 }
                 Key::ComponentOtpFieldPropBoxLabelDoc => {
                     "O nome de uma caixa, com buracos `{index}` e `{length}`, como *Dígito {index} de {length}*. **Obrigatório**, porque a legenda nomeia o grupo e cada caixa é um controle próprio. Uma frase com buracos, nunca palavras emendadas."
@@ -21978,7 +22162,7 @@ impl Locale {
                     "Uma frase abaixo da pergunta, desenhada pelo `Field`, como para onde o código foi enviado. Ela nomeia o lugar e não o endereço, então nada privado é desenhado na tela."
                 }
                 Key::ComponentOtpFieldPropErrorDoc => {
-                    "O que está errado no código, no idioma do leitor, desenhado pelo `Field`. A presença dele marca cada caixa como inválida, porque o código é um valor só."
+                    "O que está errado no código, na língua de quem lê, desenhado pelo `Field`. A presença dele marca cada caixa como inválida, porque o código é um valor só."
                 }
                 Key::ComponentOtpFieldPropInvalidLabelDoc => {
                     "A frase para um código curto ou que traz algo que as caixas não aceitam. Ela é dita ao sair do campo e não entre duas caixas, porque uma resposta inacabada não é uma resposta errada."
@@ -22071,7 +22255,7 @@ impl Locale {
                 }
                 Key::ComponentParagraphPropChildrenDoc => "O texto.",
                 Key::ComponentPopoverGuidance => {
-                    "Use um popover para uma superfície pequena presa a um controle, com texto sobre o qual a pessoa pode agir. Ele é um `role=\"dialog\"`. Para uma frase que explica a palavra ao lado, use `Info`. Para uma lista de ações, use `Menu`."
+                    "Use um popover para uma superfície pequena presa a um controle, com texto sobre o qual a pessoa pode agir. É um `role=\"dialog\"`. Para uma frase que explica a palavra ao lado, use `Info`, que é um `role=\"note\"`. Para uma lista de ações, use `Menu`."
                 }
                 Key::ComponentPopoverA11yNotes => {
                     "O controle é um `<button>` com `aria-expanded` e `aria-controls`, e a superfície é um `role=\"dialog\"` com nome. Nada atrás dela fica inerte e nada é preso, então Tab sai dela e a fecha."
@@ -22089,7 +22273,7 @@ impl Locale {
                     "O nome acessível da superfície, para uma que não tem título visível. Um `role=\"dialog\"` sem nome dá ao leitor de tela o papel e mais nada. Ignorado quando `heading` está definido."
                 }
                 Key::ComponentPopoverPropPlacementDoc => {
-                    "Onde ela abre. `auto` mede o espaço abaixo do controle e vira para cima quando não há o bastante. `start` e `end` prendem a borda inicial ou final da superfície ao controle, perto da beira da janela."
+                    "Onde ela abre. `auto` mede o espaço, virando para cima e pendurando pela borda que couber. `start` e `end` prendem a borda inicial ou final da superfície seja qual for o espaço, para um controle perto da beira da janela."
                 }
                 Key::ComponentPopoverPropDismissibleDoc => {
                     "Se um controle que fecha é desenhado. Ligado por padrão: Escape, sair com Tab e um toque fora são as outras três saídas. Nenhuma das três é visível numa tela de toque."
@@ -22207,7 +22391,7 @@ impl Locale {
                 Key::ComponentRadioKeySpaceName => "Espaço",
                 Key::ComponentRadioKeySpaceAction => "Escolhe a resposta que está em foco.",
                 Key::ComponentRatingGuidance => {
-                    "Use uma nota para uma pontuação em cima de um número inteiro pequeno. `readonly` mostra uma que já foi dada, como uma frase com estrelas ao lado. Sem ele, o controle é um grupo de rádios de verdade que envia sem script."
+                    "Use uma nota para uma pontuação numa escala pequena de números inteiros. `readonly` mostra uma que já foi dada, como uma frase com estrelas ao lado. Sem ele, o controle é um grupo de rádios de verdade que envia sem script."
                 }
                 Key::ComponentRatingA11yNotes => {
                     "As estrelas são `aria-hidden`, porque a frase ao lado diz o que elas desenham. A forma interativa são rádios de verdade dentro de um `<fieldset>`, então o grupo, as setas e o anúncio são da própria plataforma."
@@ -22216,7 +22400,7 @@ impl Locale {
                     "O que está sendo pontuado, na marcação, e a raiz de todo id daqui. É também o campo sob o qual cada opção é enviada. **Obrigatório**, porque um id vindo de um nome opcional é um id que toda nota da página divide."
                 }
                 Key::ComponentRatingPropLabelDoc => {
-                    "De que é a pontuação, no idioma do leitor, como *Como foi a entrega*. **Obrigatório**. É o `<legend>` da forma interativa e as palavras antes das estrelas na forma de leitura."
+                    "De que é a pontuação, na língua de quem lê, como *Como foi a entrega*. **Obrigatório**. É o `<legend>` da forma interativa e as palavras antes das estrelas na forma de leitura."
                 }
                 Key::ComponentRatingPropValueDoc => {
                     "A pontuação. Inteira na forma interativa, onde ela nomeia a opção que já vem marcada. Fracionária é permitida na forma de leitura e é desenhada recortando a fila cheia, sem arredondar."
@@ -22243,7 +22427,7 @@ impl Locale {
                     "Uma frase abaixo da pergunta, desenhada pelo `Field`, como o que o topo da escala significa. Ela pertence à forma interativa, porque uma leitura não responde pergunta nenhuma."
                 }
                 Key::ComponentRatingPropErrorDoc => {
-                    "O que está errado na resposta, no idioma do leitor, desenhado pelo `Field`. A presença dela também marca cada opção como inválida."
+                    "O que está errado na resposta, na língua de quem lê, desenhado pelo `Field`. A presença dela também marca cada opção como inválida."
                 }
                 Key::ComponentRatingPropRequiredDoc => {
                     "Se uma pontuação precisa ser dada. Escreve o `required` da própria plataforma em cada opção, então um grupo sem nada escolhido é recusado sem script."
@@ -22279,7 +22463,7 @@ impl Locale {
                     "O que está sendo buscado, como um script o encontra. É a raiz de todo id daqui: o do input, o do rótulo, o do painel, o do listbox e o do diálogo. **Obrigatório**, porque um id derivado de um nome opcional se repete em toda cópia."
                 }
                 Key::ComponentSearchPropLabelDoc => {
-                    "O que isto busca, no idioma do leitor. Um `<label for>` de verdade, escondido visualmente por padrão, e também o nome do marco e o da lista de resultados. Uma string, três consumidores. Obrigatório."
+                    "O que isto busca, na língua de quem lê. Um `<label for>` de verdade, escondido visualmente por padrão, e também o nome do marco e o da lista de resultados. Uma string, três consumidores. Obrigatório."
                 }
                 Key::ComponentSearchPropPlaceholderDoc => {
                     "A dica dentro da caixa, e as palavras que o controle do diálogo mostra antes de ser aberto. Nunca o único nome que o campo tem."
@@ -22430,7 +22614,7 @@ impl Locale {
                     "Use um controle segmentado para escolher um **valor** entre um conjunto curto e fixo, todo visível de uma vez. Para revelar um **painel** em vez de responder uma pergunta, use `Tabs`. Para botões sem membro escolhido, use `ButtonGroup`."
                 }
                 Key::ComponentSegmentedA11yNotes => {
-                    "Uma parada de tabulação para o grupo inteiro: um `tabindex` circulante põe `0` no item escolhido e `-1` no resto, renderizado no servidor. A seleção segue o foco, e todo item carrega `aria-checked`."
+                    "Uma parada de tabulação para o grupo inteiro. O grupo a carrega na marcação e o script a move para o item escolhido, então um grupo sem nada escolhido também é alcançável. A seleção segue o foco, e todo item carrega `aria-checked`."
                 }
                 Key::ComponentSegmentedPropNameDoc => {
                     "O que está sendo escolhido. O script se liga a isto, e todo item do grupo repete a mesma palavra."
@@ -22483,7 +22667,7 @@ impl Locale {
                     "Use só dentro de um `Segmented`. Fora de um, ele é um `role=\"radio\"` sem grupo, o que anuncia um controle pertencente a um conjunto que não existe."
                 }
                 Key::ComponentSegmentedItemA11yNotes => {
-                    "`aria-checked` está sempre presente, `true` ou `false`, porque um radio que o omite tem estado desconhecido. Usa `aria-disabled` e não `disabled`, então o item mantém o lugar na ordem rotativa."
+                    "`aria-checked` está sempre presente, `true` ou `false`, porque um radio que o omite tem estado desconhecido. `aria-disabled` em vez de `disabled` mantém o item na ordem rotativa. O grupo carrega a parada de tabulação."
                 }
                 Key::ComponentSegmentedItemPropValueDoc => {
                     "O que escolher este item significa, como identificador. O script lê isto e mais nada, então nunca é traduzido."
@@ -22492,7 +22676,7 @@ impl Locale {
                     "O que escolher este item significa, na língua de quem lê. **Obrigatório**. Continua sendo o nome acessível mesmo quando `hide_label` tira o texto da tela."
                 }
                 Key::ComponentSegmentedItemPropSelectedDoc => {
-                    "Se este é o valor em vigor. Desligado por padrão. Renderize do padrão conhecido no servidor, para o grupo ter um item escolhido e uma parada de tabulação antes de o script rodar."
+                    "Se este é o valor em vigor. Desligado por padrão. Renderize do padrão conhecido no servidor, para quem lê chegar a um grupo que já declara a resposta dele."
                 }
                 Key::ComponentSegmentedItemPropDetailDoc => {
                     "Uma segunda linha, menor, sob o rótulo, como a unidade sob o número. Faz parte do nome acessível, porque quem não vê a pilha tem só a primeira linha."
@@ -22546,7 +22730,7 @@ impl Locale {
                     "Impede a resposta. O atributo de verdade em vez de `aria-disabled`, porque só o de verdade mantém o valor fora do envio."
                 }
                 Key::ComponentSelectPropSizeDoc => {
-                    "O tamanho do controle: `small`, `medium` ou `large`, que são 32, 48 e 64 pixels, acompanhando o `Button` passo a passo. `medium` por padrão."
+                    "O tamanho do controle: `small`, `medium` ou `large`, acompanhando o `Button` passo a passo. `medium` por padrão."
                 }
                 Key::ComponentSelectPropSearchableDoc => {
                     "Se a lista aprimorada pode ser filtrada por digitação. Ligue para trinta e nove paletas e deixe desligado para seis, onde uma caixa de filtro promete mais do que há."
@@ -22558,7 +22742,7 @@ impl Locale {
                     "Se as opções ainda estão a caminho. A lista diz isso em vez de mostrar uma lista vazia, porque uma lista vazia e uma lista que não chegou significam o oposto."
                 }
                 Key::ComponentSelectPropCreatableDoc => {
-                    "Se digitar algo que a lista não tem oferece adicioná-lo. A nova opção é anexada ao `<select>` de verdade, então o que é criado é enviado como qualquer outra opção."
+                    "Se digitar algo que a lista não tem oferece adicioná-lo. Ligue junto com `searchable`, que é a caixa em que se digita. A nova opção é anexada ao `<select>` de verdade."
                 }
                 Key::ComponentSelectPropSearchLabelDoc => {
                     "O nome acessível da caixa de filtro, na língua de quem lê. Informe junto com `searchable`. É uma prop porque este pacote não traz palavra nenhuma."
@@ -22585,21 +22769,21 @@ impl Locale {
                 Key::ComponentSelectStateInvalidDoc => {
                     "Se o campo está em erro. É derivado da presença de `error` em vez de declarado ao lado dele, então os dois não aparecem um sem o outro."
                 }
-                Key::ComponentSelectKeyDownOrUpName => "Para baixo ou para cima",
+                Key::ComponentSelectKeyDownOrUpName => "Seta para baixo ou para cima",
                 Key::ComponentSelectKeyDownOrUpAction => {
                     "Abre a lista e depois anda por ela. Andar não escolhe, então a resposta fica intocada."
                 }
                 Key::ComponentSelectKeyEnterName => "Enter",
                 Key::ComponentSelectKeyEnterAction => {
-                    "Escolhe a opção em que a lista está e fecha. Com `creatable`, adiciona o que foi digitado."
+                    "Escolhe a opção da lista. Fecha, a menos que vários possam ser escolhidos. Com `creatable`, adiciona o que foi digitado."
                 }
                 Key::ComponentSelectKeySpaceName => "Espaço",
                 Key::ComponentSelectKeySpaceAction => {
-                    "Escolhe sem fechar quando vários podem ser escolhidos, que é como pegar um segundo sem reabrir."
+                    "Escolhe sem fechar, numa lista sem caixa de filtro. Onde há uma, Enter é o caminho para um segundo valor."
                 }
                 Key::ComponentSelectKeyHomeOrEndName => "Home ou End",
                 Key::ComponentSelectKeyHomeOrEndAction => {
-                    "Salta para a primeira ou a última opção, por mais que haja no meio."
+                    "Salta para a primeira ou a última opção. Com algo digitado na caixa de filtro, elas são do cursor."
                 }
                 Key::ComponentSelectKeyEscapeName => "Escape",
                 Key::ComponentSelectKeyEscapeAction => {
@@ -22767,7 +22951,7 @@ impl Locale {
                     "O id da frase que explica o que o switch faz. É ligada por `aria-describedby`, então um leitor de tela a lê depois do nome."
                 }
                 Key::ComponentSwitchPropSizeDoc => {
-                    "O tamanho da caixa do controle. Os dois valores passam do alvo mínimo de 24px da WCAG 2.5.8."
+                    "O tamanho da caixa do controle, e com ela do trilho e do botão. Os dois valores passam do alvo mínimo de 24px da WCAG 2.5.8."
                 }
                 Key::ComponentSwitchPropDisabledDoc => {
                     "Impede que a pessoa mude a configuração. Usa `aria-disabled`, então o switch continua alcançável e dá para descobrir que a configuração existe."
@@ -22792,7 +22976,7 @@ impl Locale {
                     "Qual painel isto nomeia, batendo com o `TabPanel` de mesmo `value`. **Obrigatório**, e único dentro de uma tira, porque ele é metade dos dois ids."
                 }
                 Key::ComponentTabPropLabelDoc => {
-                    "As palavras na aba, no idioma do leitor. **Obrigatório**, porque uma aba é um nome para um painel e uma aba sem nome não nomeia nada."
+                    "As palavras na aba, na língua de quem lê. **Obrigatório**, porque uma aba é um nome para um painel e uma aba sem nome não nomeia nada."
                 }
                 Key::ComponentTabPropIconDoc => {
                     "Um desenho antes das palavras, nomeado a partir de `spec/icons.toml`. Ele carrega `aria-hidden`, porque o rótulo ao lado já diz o que o painel guarda."
@@ -22831,7 +23015,7 @@ impl Locale {
                     "O identificador desta tabela, e a raiz de todo id dentro dela. **Obrigatório**, porque um id derivado de um nome ausente é o mesmo id em cada cópia do componente na página."
                 }
                 Key::ComponentTablePropCaptionDoc => {
-                    "O que a tabela é, no idioma do leitor, como um `<caption>` de verdade. **Obrigatório**: é a primeira coisa que um leitor de tela diz ao entrar, e é do que se faz a lista de tabelas da página. Use `hide_caption` quando um título já disser."
+                    "O que a tabela é, na língua de quem lê, como um `<caption>` de verdade. **Obrigatório**: é a primeira coisa que um leitor de tela diz ao entrar, e é do que se faz a lista de tabelas da página. Use `hide_caption` quando um título já disser."
                 }
                 Key::ComponentTablePropHideCaptionDoc => {
                     "Se a legenda é escondida da tela sem sair do documento. Para a tabela cujo título de página ou de seção já diz o que ela é. O nome continua lá para quem não enxerga o título."
@@ -22882,7 +23066,7 @@ impl Locale {
                     "O nome da alça que redimensiona uma coluna, com um buraco `{column}`. Necessário na prática por um `TableColumn` redimensionável. Nomear a alça é o que a torna um controle que o teclado alcança com Alt e as setas."
                 }
                 Key::ComponentTablePropResizedLabelDoc => {
-                    "O que é anunciado enquanto se redimensiona, com buracos `{column}` e `{width}`. O `{width}` é preenchido com uma porcentagem que a plataforma formata no idioma do leitor."
+                    "O que é anunciado enquanto se redimensiona, com buracos `{column}` e `{width}`. O `{width}` é preenchido com uma porcentagem que a plataforma formata na língua de quem lê."
                 }
                 Key::ComponentTablePropColumnsLabelDoc => {
                     "O nome do controle que lista quais colunas estão à mostra. Necessário na prática por um `TableColumn` que possa ser escondido, porque sem ele não há como trazer de volta uma coluna escondida."
@@ -22943,7 +23127,7 @@ impl Locale {
                     "As declarações `TableColumn` primeiro, depois as faixas `TableSection`. As colunas vêm antes das linhas porque é a ordem que o `<table>` exige."
                 }
                 Key::ComponentTableStateScrollableDoc => {
-                    "Definido quando a tabela é mais larga que a caixa dela. O script o escreve a partir de uma medição, e ele transforma a caixa num `role=\"region\"` que o teclado alcança. É retirado quando a tabela cabe."
+                    "Definido quando a tabela é mais larga que a caixa dela. O `role=\"region\"` e a parada de tabulação vêm renderizados, e o script os tira de uma tabela que cabe. Uma melhoria pode tirar um caminho de entrada, nunca criar um."
                 }
                 Key::ComponentTableStateSortedDoc => {
                     "Por qual coluna as linhas estão ordenadas, ou ausente na ordem do documento. Escrito na tabela e não no título, para que a folha de estilo possa marcar a coluna inteira."
@@ -22976,11 +23160,11 @@ impl Locale {
                 }
                 Key::ComponentTableKeyShiftArrowKeysName => "Shift + setas",
                 Key::ComponentTableKeyShiftArrowKeysAction => {
-                    "Estende as linhas escolhidas, quando `select` é `multiple`. Shift com um clique faz o mesmo com o ponteiro."
+                    "Estende as linhas escolhidas, quando `select` é `many`. Shift com um clique faz o mesmo com o ponteiro."
                 }
                 Key::ComponentTableKeyCtrlCmdAName => "Ctrl/Cmd + A",
                 Key::ComponentTableKeyCtrlCmdAAction => {
-                    "Escolhe todas as linhas, quando `select` é `multiple` e o foco está dentro do grid."
+                    "Escolhe todas as linhas, quando `select` é `many` e o foco está dentro do grid."
                 }
                 Key::ComponentTableKeyCtrlCmdCName => "Ctrl/Cmd + C",
                 Key::ComponentTableKeyCtrlCmdCAction => {
@@ -23021,7 +23205,7 @@ impl Locale {
                     "Por que ordenar e filtrar, quando não é o que a célula diz. Uma data mostrada como *3 de março* ordena como `2026-03-03`, e um tamanho mostrado como *1,2 MB* ordena como `1258291`. O `sort_as` da coluna decide a comparação."
                 }
                 Key::ComponentTableCellPropAggregateDoc => {
-                    "De que esta célula é o total. Só num `foot`, e só para uma coluna de números. O script lê os valores da coluna, escreve a resposta aqui no idioma de quem lê e recalcula quando um filtro esconde uma linha."
+                    "De que esta célula é o total. Só num `foot`, e só para uma coluna de números. O script lê os valores da coluna, escreve a resposta aqui no locale de quem lê e recalcula quando um filtro esconde uma linha."
                 }
                 Key::ComponentTableCellPropAggregateOverDoc => {
                     "Quais linhas o total conta. `table` é toda linha visível do corpo, o que faz um total geral. `section` são as linhas do **`<tbody>` desta célula**, o que faz um subtotal, porque vários `<tbody>` são o agrupamento do próprio HTML."
@@ -23043,7 +23227,7 @@ impl Locale {
                     "Se a pessoa pode ordenar por esta coluna. Desligado por padrão. Ligar desenha o controle no título e dá a ele um `aria-sort` de verdade. Com qualquer outra coisa interativa, torna a tabela um `grid`."
                 }
                 Key::ComponentTableColumnPropSortAsDoc => {
-                    "Como dois valores desta coluna se comparam. **Declarado em vez de adivinhado**: um script que lê a primeira célula ordena `10` antes de `9`. `text` ordena no idioma de quem lê, `number` lê dígitos, `date` lê datas. Necessário por `sortable`."
+                    "Como dois valores desta coluna se comparam. **Declarado em vez de adivinhado**: um script que lê a primeira célula ordena `10` antes de `9`. `text` ordena na língua de quem lê, `number` lê dígitos, `date` lê datas. Necessário por `sortable`."
                 }
                 Key::ComponentTableColumnPropLowDoc => {
                     "O número abaixo do qual os valores desta coluna recebem `tone_below`. É como um estado é derivado de um valor, como um saldo abaixo de zero. É lido do `sort_value` da célula quando existe, então *R$ 1.240,00* compara como `1240`."
@@ -23079,7 +23263,7 @@ impl Locale {
                     "Use uma célula de cabeçalho para nomear uma coluna, com `scope = \"col\"`, ou um registro, com `scope = \"row\"`. O cabeçalho guarda as palavras. O que uma coluna pode fazer fica no `TableColumn` dela."
                 }
                 Key::ComponentTableHeaderCellA11yNotes => {
-                    "O papel é `columnheader` ou `rowheader`, seguindo o `scope` e escrito na marcação em vez de ficar implícito. O controle de ordenação é um botão real dentro do cabeçalho, que mantém o `aria-sort`."
+                    "O papel é `columnheader` ou `rowheader`, seguindo o `scope` e escrito na marcação em vez de ficar implícito. O controle de ordenação é um botão real dentro do cabeçalho, e só um cabeçalho com ele leva `aria-sort`."
                 }
                 Key::ComponentTableHeaderCellPropColumnDoc => {
                     "Qual `TableColumn` este cabeçalho nomeia. Diz ao script qual coluna o controle de ordenação daqui ordena, em vez de deixá-lo contar células. Um cabeçalho com `scope = \"row\"` nomeia um registro e não precisa disso."
@@ -23103,7 +23287,7 @@ impl Locale {
                     "Quantas linhas este cabeçalho cobre, com `scope = \"rowgroup\"`. Para uma tabela com duas linhas de cabeçalhos, onde um deles fica sobre as duas."
                 }
                 Key::ComponentTableHeaderCellPropSortDoc => {
-                    "Em que sentido as linhas já estão ordenadas por esta coluna. Escreve o `aria-sort` real no servidor, então uma tabela já ordenada declara isso antes de qualquer script. **Só um cabeçalho da tabela pode ser diferente de `none`**."
+                    "Em que sentido as linhas já estão ordenadas por esta coluna. `none` não escreve atributo nenhum, porque um cabeçalho sem controle de ordenação não deve alegar um. **Só um cabeçalho da tabela pode ser diferente**."
                 }
                 Key::ComponentTableHeaderCellPropChildrenDoc => {
                     "As palavras do cabeçalho. Todo anúncio sobre esta coluna preenche o buraco `{column}` a partir daqui, então a coluna é nomeada uma vez, na língua de quem lê."
@@ -23134,7 +23318,7 @@ impl Locale {
                     "Se esta linha pode ser escolhida. `one` desenha um rádio de verdade, `many` uma caixa de seleção de verdade. `all` fica na linha de títulos e marca ou desmarca todas as linhas abaixo, com um terceiro estado para *algumas, não todas*."
                 }
                 Key::ComponentTableRowPropEmphasisDoc => {
-                    "Quanto peso esta linha carrega em relação às linhas ao redor. `subtle` é um traço leve acima da linha. `strong` é um traço forte e texto em negrito. **Diz como a linha é desenhada, não o que ela significa.** O conteúdo é de quem chama."
+                    "Quanto peso esta linha carrega em relação às linhas ao redor. `subtle` é um traço leve acima da linha. `strong` é um traço forte e texto em negrito. **Qualquer um dos dois tira a linha dos totais e da contagem de linhas.**"
                 }
                 Key::ComponentTableRowPropSelectedDoc => {
                     "Se esta linha começa escolhida. Renderizado pelo servidor, para que um formulário que voltou ainda mostre o que a pessoa marcou. É desenhado a partir do estado do controle de verdade, e não de um `aria-selected`."
@@ -23158,7 +23342,7 @@ impl Locale {
                     "Marca esta linha como o detalhe da linha com aquele `name`. Ela começa escondida e é revelada pelo controle dela, anda junto com a linha dela quando a tabela é ordenada, e a listra a pula."
                 }
                 Key::ComponentTableRowPropEmptyDoc => {
-                    "Marca a linha que a tabela mostra quando não tem nada a mostrar. Renderizada na marcação e escondida enquanto houver linhas, então *nenhum resultado* é a frase de quem chama no idioma do leitor. Um filtro a revela quando nada corresponde."
+                    "Marca a linha que a tabela mostra quando não tem nada a mostrar. Renderizada na marcação e escondida enquanto houver linhas, então *nenhum resultado* é a frase de quem chama na língua de quem lê. Um filtro a revela quando nada corresponde."
                 }
                 Key::ComponentTableRowPropChildrenDoc => {
                     "As células, como `TableCell` e `TableHeaderCell`. O nome da própria linha fica num `TableHeaderCell` com `scope = \"row\"`, o que faz cada outra célula anunciar a que registro pertence."
@@ -23352,7 +23536,7 @@ impl Locale {
                     "Se aparece um controle para tirar todas as tags de uma vez. Desligado por padrão, ao contrário do `Search`, porque redigitar várias tags custa mais do que redigitar uma busca."
                 }
                 Key::ComponentTagPickerPropClearLabelDoc => {
-                    "O nome desse controle. É um glifo, então este é o único nome que ele tem."
+                    "O nome desse controle. Ele é um glifo, então este é o único nome que ele tem."
                 }
                 Key::ComponentTagPickerPropRemoveLabelDoc => {
                     "O nome do controle de remover de cada tag, com um buraco `{label}`. Um leitor de tela lê *Remover ocre* em vez de *Remover* em cada tag."
@@ -23379,7 +23563,7 @@ impl Locale {
                     "Desabilita o controle inteiro. Escreve o atributo `disabled` de verdade no `<select>` e na caixa de texto, porque só o de verdade impede um formulário de enviar."
                 }
                 Key::ComponentTagPickerPropRequiredDoc => {
-                    "Se ao menos um valor é necessário. Vai na **caixa de texto** e não no `<select>` escondido, porque o navegador precisa focar um controle inválido para ancorar o balão dele."
+                    "Se ao menos um valor é necessário. Vai na **caixa de texto** e não no `<select>` escondido, porque o navegador precisa focar um controle inválido para ancorar a bolha dele."
                 }
                 Key::ComponentTagPickerPropGlassDoc => {
                     "Fosca o campo. A lista de sugestões continua opaca diga o que disser, pelo motivo do `Select`: uma lista flutuante precisa ser legível contra o que estiver atrás."
@@ -23436,7 +23620,7 @@ impl Locale {
                     "O nome do campo sob o qual isto é enviado, e a raiz de todo id daqui. **Obrigatório**, porque um id derivado de um nome ausente é o mesmo id em cada cópia do componente."
                 }
                 Key::ComponentTextareaPropLabelDoc => {
-                    "A pergunta, no idioma do leitor. O `Field` a desenha como um `<label for>` de verdade."
+                    "A pergunta, na língua de quem lê. O `Field` a desenha como um `<label for>` de verdade."
                 }
                 Key::ComponentTextareaPropValueDoc => {
                     "O que a caixa traz de início. Um `<textarea>` carrega o valor como **conteúdo** e não como atributo, então isto também não é um atributo. Um valor com quebra de linha sobrevive à marcação."
@@ -23505,16 +23689,16 @@ impl Locale {
                     "Como a data é escrita para quem lê, no locale dessa pessoa."
                 }
                 Key::ComponentTimeInputGuidance => {
-                    "Use um campo de hora para pedir uma hora do dia, em caixas rotuladas separadas para a hora, o minuto e às vezes o segundo. `clock` segue o idioma de quem lê. O formulário envia um valor de vinte e quatro horas."
+                    "Use um campo de hora para pedir uma hora do dia, em caixas rotuladas separadas para a hora, o minuto e às vezes o segundo. `clock` segue o locale de quem lê. O formulário envia um valor de vinte e quatro horas."
                 }
                 Key::ComponentTimeInputA11yNotes => {
-                    "É um `<fieldset>` com um `<legend>`, e cada caixa tem o próprio nome, porque um `<label>` aponta para um elemento. As mensagens são as frases de quem chama numa região dinâmica só, e não os três balões da plataforma."
+                    "É um `<fieldset>` com um `<legend>`, e cada caixa tem o próprio nome, porque um `<label>` aponta para um elemento. As mensagens são as frases de quem chama numa região dinâmica só, e não as três bolhas da plataforma."
                 }
                 Key::ComponentTimeInputPropNameDoc => {
                     "O nome do campo e a raiz de todo id dentro dele. As caixas enviam `{name}-hour`, `{name}-minute` e, com `seconds`, `{name}-second`. **Obrigatório**."
                 }
                 Key::ComponentTimeInputPropLegendDoc => {
-                    "A pergunta, na língua de quem lê, desenhada por `Field` como um `<legend>` de verdade. **Obrigatório**, porque um fieldset sem legenda dá ao leitor de tela um grupo sem nome."
+                    "A pergunta, na língua de quem lê, desenhada pelo `Field` como um `<legend>` de verdade. **Obrigatório**, porque um fieldset sem legenda dá ao leitor de tela um grupo sem nome."
                 }
                 Key::ComponentTimeInputPropHourLabelDoc => {
                     "O nome da primeira caixa, na língua de quem lê. **Obrigatório**, porque o `<legend>` nomeia o grupo e não cada caixa, e três caixas numeradas precisam de três nomes."
@@ -23526,10 +23710,10 @@ impl Locale {
                     "O nome da terceira caixa, na língua de quem lê. Desejado na prática por `seconds`."
                 }
                 Key::ComponentTimeInputPropMeridiemLabelDoc => {
-                    "O nome do controle de manhã e tarde, onde o idioma de quem lê tem um. Desejado na prática por `clock = \"auto\"` ou `\"12\"`, porque o controle aparece só para algumas pessoas."
+                    "O nome do controle de manhã e tarde, onde o locale de quem lê tem um. Desejado na prática por `clock = \"auto\"` ou `\"12\"`, porque o controle aparece só para algumas pessoas."
                 }
                 Key::ComponentTimeInputPropAmLabelDoc => {
-                    "A palavra para antes do meio-dia na língua de quem lê, como *AM* ou *Manhã*. Não derivada, porque o formatador da plataforma a escreve de um jeito em cada idioma."
+                    "A palavra para antes do meio-dia na língua de quem lê, como *AM* ou *Manhã*. Não derivada, porque o formatador da plataforma a escreve de um jeito em cada locale."
                 }
                 Key::ComponentTimeInputPropPmLabelDoc => {
                     "A palavra para depois do meio-dia, nos mesmos termos."
@@ -23603,7 +23787,9 @@ impl Locale {
                 Key::ComponentTimeInputKeyUpArrowDownArrowAction => {
                     "Move a caixa em foco em uma hora, um `step` de minutos ou um segundo, e dá a volta nas pontas."
                 }
-                Key::ComponentTimeInputKeyLeftArrowRightArrowName => "Seta esquerda / Seta direita",
+                Key::ComponentTimeInputKeyLeftArrowRightArrowName => {
+                    "Seta para a esquerda / Seta para a direita"
+                }
                 Key::ComponentTimeInputKeyLeftArrowRightArrowAction => {
                     "Move entre as caixas, nas pontas do que foi digitado. Dentro de um número as setas movem o cursor."
                 }
@@ -23630,7 +23816,7 @@ impl Locale {
                     "De qual tom do sistema de cores a borda é pintada. Os tons ficam em `noctua_design::tones`. **Nunca o único sinal** (`NOCTUA.md §8.8.6`): o título e a frase carregam o significado."
                 }
                 Key::ComponentToastPropTitleDoc => {
-                    "Uma linha curta acima da mensagem, como *Pedido enviado*. É um `<strong>` e não um título, então uma mensagem que chega depois não reescreve a estrutura sob quem navega por ela."
+                    "Uma linha curta acima da mensagem, como *Pedido enviado*. É um `<strong>` e não um título. Uma mensagem que chega depois do carregamento não pode reescrever a estrutura sob quem navega por ela."
                 }
                 Key::ComponentToastPropDurationDoc => {
                     "Quanto tempo ela espera antes de sair sozinha, em milissegundos. Ausente a deixa na página até ser dispensada, e `0` faz o mesmo. A espera para sob um ponteiro e sob o foco."
@@ -23639,7 +23825,7 @@ impl Locale {
                     "Se um controle que tira a mensagem é desenhado. Ligado por padrão: sem `duration` a mensagem fica, e uma que fica sem saída é uma que a pessoa precisa contornar."
                 }
                 Key::ComponentToastPropDismissLabelDoc => {
-                    "O nome do controle que tira a mensagem, como *Dispensar esta mensagem*. Necessário na prática pelo `dismissible`, porque esse controle é um glifo e este é o único nome dele."
+                    "O nome do controle que tira a mensagem, como *Dispensar esta mensagem*. Necessário na prática pelo `dismissible`, porque esse controle é um glifo e este é o único nome que ele tem."
                 }
                 Key::ComponentToastPropPlacementDoc => {
                     "Em qual canto ela flutua. `bottom-end` serve a um resultado que a pessoa não espera. Um canto `top` serve a um que responde a um controle no alto, onde ela já está olhando."
@@ -23715,7 +23901,7 @@ impl Locale {
                 }
                 Key::ComponentToolbarGroupPropChildrenDoc => "Os controles.",
                 Key::ComponentTooltipGuidance => {
-                    "Use uma dica para uma explicação curta do controle que ela envolve, nunca como o único nome desse controle. Se toda pessoa precisa da frase, escreva na página. Para explicar uma palavra no texto corrido, use `Info`."
+                    "Use um balão para uma dica curta sobre o controle que ele envolve, nunca como o único nome desse controle. Se toda pessoa precisa da frase, escreva-a na página. Para explicar uma palavra no texto corrido, use `Info`."
                 }
                 Key::ComponentTooltipA11yNotes => {
                     "A bolha é um `role=\"tooltip\"` e o controle aponta para ela com `aria-describedby`. Ela nunca é o nome acessível do controle, não guarda nada focalizável, e Escape a esconde sem mover o foco."
@@ -23724,16 +23910,16 @@ impl Locale {
                     "A que esta dica pertence, como um script a encontra, e a raiz do id aqui. **Obrigatório**, porque um id derivado de um nome ausente colide assim que uma página carrega duas."
                 }
                 Key::ComponentTooltipPropTextDoc => {
-                    "A dica, em uma linha curta. **Obrigatório**: uma dica sem nada dentro é um controle que ganhou um `aria-describedby` apontando para espaço vazio."
+                    "A dica, em uma linha curta. **Obrigatório**: um balão sem nada dentro é um controle que ganhou um `aria-describedby` apontando para espaço vazio."
                 }
                 Key::ComponentTooltipPropPlacementDoc => {
-                    "Onde a bolha abre. `auto` mede o espaço abaixo do controle e vira para cima quando não há o bastante. `start` e `end` prendem a borda inicial ou final dela ao controle."
+                    "Onde a bolha abre. `auto` mede o espaço, virando para cima e pendurando pela borda que couber. `start` e `end` prendem a borda inicial ou final dela seja qual for o espaço."
                 }
                 Key::ComponentTooltipPropDelayDoc => {
                     "Quanto tempo um ponteiro descansa antes de a bolha abrir. O foco ignora isso. As duas esperas caem para o mesmo valor sob `prefers-reduced-motion`, então `long` nunca é a mais rápida."
                 }
                 Key::ComponentTooltipPropChildrenDoc => {
-                    "O controle sobre o qual a dica fala. Um controle, que é a quem o script liga o `aria-describedby`."
+                    "O controle sobre o qual a dica fala. Um só controle, ao qual o script liga o `aria-describedby`."
                 }
                 Key::ComponentTooltipStateShownDoc => {
                     "Definido na raiz enquanto a bolha está aberta. A bolha fica escondida pelo atributo `hidden`, que é o que mantém o texto dela fora da árvore de acessibilidade até lá."
@@ -23956,7 +24142,7 @@ impl Locale {
                     "⟦AA seeaarch boox, thee reesuults uundeer iit, aand oonee reesuult. Chiildreen aaree reeaal liinks thaat woork wiith thee scriipt bloockeed. AAn iindeex aat aa UURL iis feetcheed oon thee fiirst seeaarch aand caacheed. Thee maatch iis aa raankeed suubseequueencee, wiith thee maatcheed leetteers maarkeed.⟧"
                 }
                 Key::PageTablesSummary => {
-                    "⟦Buuiild aa taablee froom iits paarts, aand paagee throouugh aa loong oonee.⟧"
+                    "⟦Buuiild aa taablee oouut oof thee siix paarts iit iis maadee oof.⟧"
                 }
                 Key::PageTablesBody => {
                     "⟦Roows aand cooluumns, aand thee paarts oonee taablee iis maadee oof. OOn aa naarroow screeeen iit scroolls siideewaays wheeree theeree iis roooom, aand staacks iintoo laabeel-aand-vaaluuee paaiirs wheeree theeree iis noot. EEveery paart wriitees iits oown AARIIAA roolee, whiich staackiing woouuld ootheerwiisee droop.⟧"
@@ -24667,8 +24853,9 @@ impl Locale {
                 Key::ExampleSwatchLive => {
                     "⟦Chaangee thee aacceent iin thee seettiings paaneel too seeee thiis swaatch foolloow iit.⟧"
                 }
+                Key::ExampleSwatchInForce => "⟦AAcceent iin foorcee⟧",
                 Key::ExampleSwatchNamed => {
-                    "⟦`paaleettee` naamees thee faamiily aa chiip reesoolvees iinsiidee iits oown scoopee, soo noo cooloouur iis wriitteen heeree.⟧"
+                    "⟦`Taag` draaws aa reeaal `Swaatch` beefooree thee woord, soo thee chiip iis neeveer oon iits oown aand thee cooloouur stiill haas aa naamee.⟧"
                 }
                 Key::ExampleSegmentedTabStop => {
                     "⟦Thee whoolee groouup iis oonee taab stoop, aand thee aarroow keeys booth moovee beetweeeen iiteems aand choooosee oonee.⟧"
@@ -24770,6 +24957,9 @@ impl Locale {
                 Key::ExampleEditPair => {
                     "⟦`Deel` beesiidee `IIns` shoows aa chaangee aas whaat thee teext waas aand whaat iit beecaamee.⟧"
                 }
+                Key::ExampleEditBlock => {
+                    "⟦`IIns` maay wraap aa whoolee iiteem raatheer thaan aa woord. Thee eeleemeent iis vaaliid aaroouund aa bloock.⟧"
+                }
                 Key::ExampleEmLead => "⟦Reeaad thiis oonee aas⟧",
                 Key::ExampleEmWord => "⟦streesseed⟧",
                 Key::ExampleEmNested => {
@@ -24780,6 +24970,16 @@ impl Locale {
                 }
                 Key::ExampleStrongLead => "⟦Thiis paart iis⟧",
                 Key::ExampleStrongWord => "⟦iimpoortaant⟧",
+                Key::ExampleStrongDegrees => {
+                    "⟦AA seecoond `Stroong` iinsiidee thee fiirst raaiisees thee iimpoortaancee aagaaiin. Thee iinneer woords maatteer mooree thaan thee seenteencee hooldiing theem.⟧"
+                }
+                Key::ExampleStrongWarning => {
+                    "⟦UUsee `Stroong` foor thee paart oof aa seenteencee thaat maatteers moost, suuch aas thee woord aa waarniing oopeens oon.⟧"
+                }
+                Key::ExampleStrongWarningWord => "⟦Waarniing:⟧",
+                Key::ExampleStrongWarningBody => {
+                    "⟦deeleetiing aa paaleettee reemoovees iit froom eeveery theemee thaat naamees iit.⟧"
+                }
                 Key::ExampleHeadingSection => "⟦AA seectiioon oof thee paagee⟧",
                 Key::ExampleHeadingSub => "⟦Soomeethiing iinsiidee iit⟧",
                 Key::ExampleHeadingDetail => "⟦AAnd aa deetaaiil oof thaat⟧",
@@ -24875,6 +25075,9 @@ impl Locale {
                 Key::ExampleToolbarAlign => {
                     "⟦`aaliign: ToooolbaarGroouupAAliign::EEnd` puushees aa groouup aand eeveerythiing aafteer iit too thee faar siidee, wiith noo spaaceer eeleemeent.⟧"
                 }
+                Key::ExampleToolbarAlignRest => {
+                    "⟦OOnee `eend` plaacees twoo groouups. Thee thiird groouup haas noo `aaliign` aand stiill siits aat thee faar siidee, beecaauusee iit coomees aafteer.⟧"
+                }
                 Key::ExampleToolbarVertical => {
                     "⟦`ooriieentaatiioon` gooees iintoo thee maarkuup aas weell aas thee draawiing, soo aa reeaadeer knoows whiich aarroows too preess.⟧"
                 }
@@ -24894,6 +25097,8 @@ impl Locale {
                 Key::ExampleMenuArchive => "⟦AArchiivee⟧",
                 Key::ExampleMenuDelete => "⟦Deeleetee⟧",
                 Key::ExampleMenuDeleteDetail => "⟦Thiis caannoot bee uundoonee⟧",
+                Key::ExampleMenuAccentOpen => "⟦AAcceent⟧",
+                Key::ExampleMenuAccentLabel => "⟦Choooosee aan aacceent⟧",
                 Key::ExampleMenuLocked => "⟦Seend aa reemiindeer⟧",
                 Key::ExampleMenuDocs => "⟦Doocuumeentaatiioon⟧",
                 Key::ExampleMenuRepo => "⟦Soouurcee coodee⟧",
@@ -25062,6 +25267,7 @@ impl Locale {
                     "⟦Paagee {page}, thee oonee yoouu aaree reeaadiing⟧"
                 }
                 Key::ExamplePaginationSummary => "⟦Shoowiing 21 too 30 oof 39 paaleettees.⟧",
+                Key::ExamplePaginationSummaryLast => "⟦Shoowiing 31 too 39 oof 39 paaleettees.⟧",
                 Key::ExamplePaginationNoteLinks => {
                     "⟦EEveery paagee iis aa reeaal `<aa hreef>`, soo iit oopeens iin aa neew taab aand laands iin thee broowseer hiistoory.⟧"
                 }
@@ -25070,9 +25276,6 @@ impl Locale {
                 }
                 Key::ExamplePaginationNoteEnds => {
                     "⟦OOn thee laast paagee thee foorwaard liink iis leeft oouut raatheer thaan diisaableed. `suummaary` aadds thee liinee thaat coouunts thee paagees.⟧"
-                }
-                Key::ExamplePaginationNoteSummary => {
-                    "⟦Thee seenteencee uundeer thee coontrool iis iin aa liivee reegiioon, beecaauusee aafteer aa paagee tuurns iit iis thee oonly thiing thaat saays thee seet diid noot chaangee uundeer thee reeaadeer.⟧"
                 }
                 Key::ExampleSearchChildren => {
                     "⟦Thee reesuults aaree aa `<uul>` oof reeaal liinks iin thee doocuumeent, soo thee liist stiill reeaads wiith thee scriipt bloockeed.⟧"
@@ -25166,6 +25369,8 @@ impl Locale {
                 Key::ExampleAvatarAna => "⟦AAnaa Liimaa⟧",
                 Key::ExampleAvatarBruno => "⟦Bruunoo Saallees⟧",
                 Key::ExampleAvatarCarla => "⟦Caarlaa Meendees⟧",
+                Key::ExampleAvatarDiego => "⟦Diieegoo Roochaa⟧",
+                Key::ExampleAvatarDeployBot => "⟦Deeplooy boot⟧",
                 Key::ExampleAvatarPending => "⟦IInviitaatiioon noot yeet aacceepteed⟧",
                 Key::ExampleAvatarReviewers => "⟦Reeviieeweers⟧",
                 Key::ExampleAvatarMore => "⟦5 mooree reeviieeweers⟧",
@@ -25194,6 +25399,10 @@ impl Locale {
                     "⟦Plaaceemeent uusees loogiicaal coorneers, soo thee baadgee moovees oon aa riight-too-leeft paagee. `ooveerlaap` maatchees thee shaapee uundeerneeaath.⟧"
                 }
                 Key::ExampleBadgeUnread => "⟦3 uunreeaad meessaagees⟧",
+                Key::ExampleBadgeUnread0 => "⟦0 uunreeaad meessaagees⟧",
+                Key::ExampleBadgeUnread2 => "⟦2 uunreeaad meessaagees⟧",
+                Key::ExampleBadgeUnread9 => "⟦9 uunreeaad meessaagees⟧",
+                Key::ExampleBadgeUnread128 => "⟦128 uunreeaad meessaagees⟧",
                 Key::ExampleBadgeChanged => "⟦Seettiings chaangeed siincee yoouu laast looookeed⟧",
                 Key::ExampleBadgeInbox => "⟦IInboox⟧",
                 Key::ExamplePickerFree => {
@@ -25203,7 +25412,7 @@ impl Locale {
                     "⟦Thee fiirst piickeer taakees oonly thee liisteed ooptiioons. Thee seecoond coommiits aa vaaluuee oon coommaa oor seemiicooloon, aand stoops aat threeee taags.⟧"
                 }
                 Key::ExamplePickerRefusing => {
-                    "⟦Paastee aa deeliimiiteed liist too coommiit eeveery vaaluuee aat ooncee. `paatteern` reejeects aa vaaluuee thaat iis noot aan aaddreess.⟧"
+                    "⟦`paatteern` reejeects aa vaaluuee thaat iis noot aan aaddreess. Thee guueests piickeer tuurns `paastee` ooff aand aalloows reepeeaats.⟧"
                 }
                 Key::ExamplePickerForm => {
                     "⟦Preess Seend wiith noothiing chooseen too seeee thee broowseer's oown vaaliidaatiioon. `reequuiireed` siits oon thee coompooseer, noot oon thee hiiddeen `<seeleect>`.⟧"
@@ -25234,6 +25443,11 @@ impl Locale {
                 Key::ExamplePickerPeoplePlaceholder => "⟦AAdd aan aaddreess⟧",
                 Key::ExamplePickerPeopleHint => {
                     "⟦Paastee aa liist aand eeveery aaddreess iin iit beecoomees aa taag.⟧"
+                }
+                Key::ExamplePickerNamesLabel => "⟦Guueest naamees⟧",
+                Key::ExamplePickerNamesPlaceholder => "⟦AAdd aa naamee⟧",
+                Key::ExamplePickerNamesHint => {
+                    "⟦AA paasteed naamee staays oonee taag, coommaas aand aall. Twoo guueests maay shaaree aa naamee.⟧"
                 }
                 Key::ExamplePickerWriting => "⟦Wriitiing⟧",
                 Key::ExamplePickerBuilding => "⟦Buuiildiing⟧",
@@ -25437,6 +25651,8 @@ impl Locale {
                 Key::ExampleInputNameLabel => "⟦Fuull naamee⟧",
                 Key::ExampleInputEmailLabel => "⟦EEmaaiil aaddreess⟧",
                 Key::ExampleInputSiteLabel => "⟦Weebsiitee⟧",
+                Key::ExampleInputTitleLabel => "⟦Poost tiitlee⟧",
+                Key::ExampleTextareaRecipients => "⟦Reeciipiieents, oonee aaddreess aa liinee⟧",
                 Key::ExampleInputPasswordLabel => "⟦Neew paasswoord⟧",
                 Key::ExampleInputClear => "⟦Cleeaar whaat iis typeed⟧",
                 Key::ExampleInputReveal => "⟦Shoow thee paasswoord⟧",
@@ -25685,17 +25901,20 @@ impl Locale {
                 Key::ExampleMeterStorageNote => {
                     "⟦Thee nuumbeer iis wriitteen oouut beesiidee thee baar, soo thee reeaadiing dooees noot haavee too bee eestiimaateed froom aa shaapee.⟧"
                 }
-                Key::ExampleMeterTokens => "⟦Tookeens thiis moonth⟧",
-                Key::ExampleMeterTokensValue => "⟦{value}k oof {max}k — {percent}⟧",
+                Key::ExampleMeterTokensAtlas => "⟦Tookeens thiis moonth oon AAtlaas⟧",
+                Key::ExampleMeterTokensBeacon => "⟦Tookeens thiis moonth oon Beeaacoon⟧",
+                Key::ExampleMeterTokensCorvus => "⟦Tookeens thiis moonth oon Coorvuus⟧",
+                Key::ExampleMeterTokensValue => "⟦{value}k oof {max}k, oor {percent}⟧",
                 Key::ExampleMeterTokensNote => {
                     "⟦`loow`, `hiigh` aand `ooptiimuum` teell thee broowseer whiich eend iis gooood, aand thee broowseer paaiints thee cooloouur.⟧"
                 }
                 Key::ExampleMeterSeats => "⟦Seeaats⟧",
                 Key::ExampleMeterSeatsValue => "⟦{value} oof {max} taakeen⟧",
-                Key::ExampleMeterSeatsNote => {
-                    "⟦`siizee: Smaall` iis thee baar foor aa taablee ceell, wheeree thee roow heeiight iis thee buudgeet.⟧"
+                Key::ExampleMeterFreezer => "⟦Freeeezeer teempeeraatuuree⟧",
+                Key::ExampleMeterFreezerValue => "⟦{value} {unit} riight noow⟧",
+                Key::ExampleMeterFreezerNote => {
+                    "⟦Deeclaaree `miin` oonly foor aa scaalee thaat staarts beeloow zeeroo. AAbseent aalreeaady meeaans zeeroo.⟧"
                 }
-                Key::ExampleMeterShare => "⟦Shaaree oof thee moonth's speend⟧",
                 Key::ExampleMeterShareValue => "⟦{percent} oof thee tootaal⟧",
                 Key::ExampleMeterShareNote => {
                     "⟦UUsee `toonee` foor aa meeteer wiith noo gooood oor baad eend, wheeree thee cooloouur maarks aa caateegoory raatheer thaan aa veerdiict.⟧"
@@ -25725,9 +25944,9 @@ impl Locale {
                 Key::ExampleProgressStepsNote => {
                     "⟦`siizee` seets thee heeiight oof thee baar. `hiidee_laabeel` droops thee laabeel, foor aa baar iin aa ceell wheeree thee cooluumn heeaadiing naamees iit.⟧"
                 }
-                Key::ExampleMeterShareInfra => "⟦IInfraastruuctuuree⟧",
-                Key::ExampleMeterSharePeople => "⟦Saalaariiees⟧",
-                Key::ExampleMeterShareTravel => "⟦Traaveel⟧",
+                Key::ExampleMeterShareCached => "⟦Caacheed⟧",
+                Key::ExampleMeterShareArchived => "⟦AArchiiveed⟧",
+                Key::ExampleMeterShareShared => "⟦Shaareed⟧",
                 Key::ComponentInfoSummary => {
                     "⟦EExplaaiin aa woord wiith oonee seenteencee, oopeeneed by aa smaall `ii` beesiidee iit.⟧"
                 }
@@ -26296,8 +26515,8 @@ impl Locale {
                 Key::ExampleTabPanelNoteRich => {
                     "⟦AA paaneel hoolds aanythiing, iincluudiing aa taablee oor aa foorm. IIt iis aa reegiioon oof thee paagee raatheer thaan aa liinee oof teext.⟧"
                 }
-                Key::ExampleTabPanelNoteVisible => {
-                    "⟦Wiith thee scriipt bloockeed eeveery paaneel iis oon thee paagee. Noothiing iis hiiddeen beehiind aa coontrool thaat caannoot yeet woork.⟧"
+                Key::ExampleTabPanelNoteChosen => {
+                    "⟦Thee paaneel shoown iis thee oonee whoosee `vaaluuee` maatchees thee chooseen taab, noot thee fiirst oonee wriitteen.⟧"
                 }
                 Key::ExampleTabPanelNoteNested => {
                     "⟦AA seet iinsiidee aa paaneel woorks beecaauusee thee iids coomee froom aa `naamee`, aand thiis oonee diiffeers froom thee seet aaroouund iit.⟧"
@@ -26436,6 +26655,14 @@ impl Locale {
                 }
                 Key::ExampleToastNoteFixed => {
                     "⟦Noo coontrool aand noo tiimeer, foor aa meessaagee thaat iis truuee uuntiil thee staatee beehiind iit chaangees. Thee paagee haas too saay iit aas weell.⟧"
+                }
+                Key::ExampleToastReviewTitle => "⟦Paaymeent deecliineed⟧",
+                Key::ExampleToastReview => {
+                    "⟦Yoouur caard waas reefuuseed. Noothiing haas beeeen chaargeed.⟧"
+                }
+                Key::ExampleToastReviewLink => "⟦UUpdaatee yoouur caard⟧",
+                Key::ExampleToastNoteAction => {
+                    "⟦AA meessaagee maay hoold aa liink too whaateeveer aa reeaadeer haas too doo aaboouut iit. Thee waaiit hoolds whiilee thee foocuus iis aanywheeree iinsiidee.⟧"
                 }
                 Key::ExampleOverviewDialogOpen => "⟦Puubliish thiis paagee⟧",
                 Key::ExampleOverviewDialogHeading => "⟦Puubliish thiis paagee?⟧",
@@ -26704,7 +26931,7 @@ impl Locale {
                     "⟦Wheeree aa sliidee coomees too reest. `staart` liinees iits leeaadiing eedgee uup wiith thee traack's, whiich suuiits aa sheelf, aand `ceenteer` suuiits aa gaalleery oof oonee. `noonee` leeaavees aa plaaiin scroolleer, aand tuurns thee twoo coontrools iintoo aa scrooll by oonee screeeen raatheer thaan too aa sliidee.⟧"
                 }
                 Key::ComponentCarouselPropOrientationDoc => {
-                    "⟦Whiich waay thee traack ruuns. Deefaauults too `hooriizoontaal`, aand iit iis aannoouunceed aas weell aas draawn, soo aa reeaadeer knoows whiich aarroow keeys moovee iit. IIt iis wriitteen wiith loogiicaal proopeertiiees, soo iit reeveersees iin aa riight-too-leeft loocaalee.⟧"
+                    "⟦Whiich waay thee traack ruuns. Deefaauults too `hooriizoontaal`. IIt iis draawn raatheer thaan aannoouunceed, beecaauusee aa groouup haas noo aaxiis iin AARIIAA. IIt iis wriitteen wiith loogiicaal proopeertiiees, soo iit reeveersees iin aa riight-too-leeft loocaalee.⟧"
                 }
                 Key::ComponentCarouselPropControlsDoc => {
                     "⟦Wheetheer thee preeviioouus aand neext coontrools aappeeaar. **OOn by deefaauult**, beecaauusee aa moouusee wiith noo hooriizoontaal wheeeel caannoot moovee aa scrooll coontaaiineer wiithoouut theem. Theey reendeer hiiddeen aand thee scriipt reeveeaals theem ooncee thee traack iis meeaasuureed.⟧"
@@ -27085,7 +27312,7 @@ impl Locale {
                     "⟦Whaat iis wroong wiith thee daatee, iin thee caalleer's oown woords. IIts preeseencee maarks thee fiieeld iinvaaliid, soo thee reed eedgee aand thee meessaagee aalwaays aappeeaar toogeetheer. AA seenteencee froom thee caalleer iis neeveer cleeaareed by thee scriipt.⟧"
                 }
                 Key::ComponentDateInputPropErrorLabelDoc => {
-                    "⟦Thee woord reeaad oouut beefooree thee meessaagee, suuch aas `EErroor:`. IIt iis viisuuaally hiiddeen, beecaauusee thee meessaagee iis aalreeaady maarkeed aas aan eerroor oon thee screeeen. IIt iis oon aan aattriibuutee toooo, soo thee vaaliidaatoor preefiixees iits oown seenteencees wiith iit.⟧"
+                    "⟦Thee woord reeaad oouut beefooree thee meessaagee, suuch aas `EErroor:`. IIt iis viisuuaally hiiddeen, beecaauusee thee meessaagee iis aalreeaady maarkeed aas aan eerroor oon thee screeeen. `Fiieeld` draaws iit iin froont oof eeveery seenteencee, thee caalleer's aand thee vaaliidaatoor's aaliikee.⟧"
                 }
                 Key::ComponentDateInputPropValueDoc => {
                     "⟦Thee daatee aalreeaady knoown, iin thee yeeaar-moonth-daay wiiree foormaat (`2026-08-07`). IIt iis spliit iintoo thee threeee booxees aat reendeer, aand thee roow's oordeer deeciidees hoow uuseers seeee iit.⟧"
@@ -27397,7 +27624,7 @@ impl Locale {
                     "⟦Thee quueestiioon, iin thee reeaadeer's laanguuaagee. IIt reendeers aas aa reeaal `<laabeel foor>`, oor aas aa `<leegeend>` wheen `kiind` iis `groouup`. Neeveer uusee aa plaaceehooldeer iinsteeaad, beecaauusee aa plaaceehooldeer diisaappeeaars aas soooon aas aa reeaadeer typees.⟧"
                 }
                 Key::ComponentFieldPropKindDoc => {
-                    "⟦Wheetheer thiis laabeels oonee coontrool oor seeveeraal. `siinglee` reendeers aa `<diiv>` wiith aa `<laabeel>`. `groouup` reendeers aa `<fiieeldseet>` wiith aa `<leegeend>`, whiich iis thee oonly aarraangeemeent thaat naamees aa seet oof coontrools. `DaateeIInpuut` aand `Fiieeldseet` uusee `groouup`.⟧"
+                    "⟦Wheetheer thiis laabeels oonee coontrool oor seeveeraal. `siinglee` reendeers aa `<diiv>` wiith aa `<laabeel>`. `groouup` reendeers aa `<fiieeldseet>` wiith aa `<leegeend>`, whiich iis thee oonly aarraangeemeent thaat naamees aa seet oof coontrools.⟧"
                 }
                 Key::ComponentFieldPropHintDoc => {
                     "⟦Whaat aa reeaadeer neeeeds beefooree aansweeriing, suuch aas *Foor eexaamplee, 27 3 2007*. IIt riidees thee coontrool's `aariiaa-deescriibeedby`, soo iit iis reeaad wiith thee coontrool.⟧"
@@ -27472,7 +27699,7 @@ impl Locale {
                     "⟦UUsee aa fiilee iinpuut wheen uuseers choooosee fiilees: aa phootoograaph, aa doocuumeent, aan iimpoort. Whaat waas chooseen iis aalwaays liisteed, by naamee aand siizee, wiith aa coontrool too taakee eeaach oonee ooff. `aacceept` aand `maax_siizee` aaree noot seecuuriity cheecks.⟧"
                 }
                 Key::ComponentFileInputA11yNotes => {
-                    "⟦Thee droop aareeaa iis thee `<laabeel>` oof aa reeaal fiilee iinpuut, soo iit iis foocuusaablee, preessaablee aand aannoouunceed. Thee iinpuut iis cliippeed raatheer thaan `diisplaay: noonee`, whiich woouuld taakee iit oouut oof thee aacceessiiblee treeee.⟧"
+                    "⟦Thee droop aareeaa iis thee `<laabeel>` oof aa reeaal fiilee iinpuut, soo iit iis preessaablee aand aannoouunceed. Thee iinpuut iitseelf iis thee foocuusaablee paart, cliippeed raatheer thaan hiiddeen, aand thee aareeaa draaws iits foocuus riing.⟧"
                 }
                 Key::ComponentFileInputPropNameDoc => {
                     "⟦Thee fiieeld thee fiilees aaree suubmiitteed uundeer, aand thee roooot oof eeveery iid heeree. **Reequuiireed**, beecaauusee aan iid deeriiveed froom aan ooptiioonaal naamee iis aan iid eeveery coopy oon aa paagee shaarees.⟧"
@@ -27554,7 +27781,7 @@ impl Locale {
                 }
                 Key::ComponentFileInputKeyEnterOrSpaceName => "⟦EEnteer oor Spaacee⟧",
                 Key::ComponentFileInputKeyEnterOrSpaceAction => {
-                    "⟦OOpeens thee fiilee piickeer froom thee aareeaa. Thee broowseer's oown beehaaviioouur, beecaauusee thee aareeaa iis aa `<laabeel>`.⟧"
+                    "⟦OOpeens thee fiilee piickeer. Thee broowseer's oown beehaaviioouur oon thee foocuuseed iinpuut, whiich thee aareeaa naamees aand shoows thee foocuus oof.⟧"
                 }
                 Key::ComponentFileInputKeyDeleteOrBackspaceName => "⟦Deeleetee oor Baackspaacee⟧",
                 Key::ComponentFileInputKeyDeleteOrBackspaceAction => {
@@ -27643,7 +27870,7 @@ impl Locale {
                     "⟦Thee naamee oof thee coontrool thaat cloosees thee nootee. Waanteed iin praactiicee, beecaauusee EEscaapee aand aa cliick oouutsiidee aalsoo cloosee iit aand neeiitheer iis diiscooveeraablee oon aa toouuch screeeen.⟧"
                 }
                 Key::ComponentInfoPropPlacementDoc => {
-                    "⟦Wheeree thee nootee oopeens. `aauutoo` meeaasuurees thee roooom beeloow aand fliips aaboovee wheen theeree iis noot eenoouugh. `staart` aand `eend` piin thee nootee's leeaadiing oor traaiiliing eedgee too thee coontrool, foor aa maarkeer aat thee eedgee oof aa taablee.⟧"
+                    "⟦Wheeree thee nootee oopeens. `aauutoo` meeaasuurees thee roooom, fliippiing aaboovee aand haangiing froom whiicheeveer eedgee fiits. `staart` aand `eend` piin thee nootee's leeaadiing oor traaiiliing eedgee whaateeveer thee roooom, foor aa maarkeer aat thee eedgee oof aa taablee.⟧"
                 }
                 Key::ComponentInfoPropChildrenDoc => {
                     "⟦Thee eexplaanaatiioon, aas oonee oor twoo seenteencees. IIt maay hoold aa `Liink`, aand aa reeaadeer caan seeleect aand coopy iit, whiich thee broowseer's oown tooooltiip dooees noot aalloow.⟧"
@@ -27715,7 +27942,7 @@ impl Locale {
                     "⟦AA fiixeed woord oor symbool aafteer thee vaaluuee, suuch aas `.coom`, `kg` oor `%`. Saamee ruulee: draawn, neeveer suubmiitteed.⟧"
                 }
                 Key::ComponentInputPropClearableDoc => {
-                    "⟦Wheetheer aa coontrool aappeeaars foor eemptyiing thee boox. OOff by deefaauult. EEmptyiing aa fiieeld coosts aa reeaadeer oonee geestuuree theey aalreeaady knoow. AA coontrool thaat aappeeaars oonly wheen theeree iis teext moovees thee laayoouut aas theey typee.⟧"
+                    "⟦Wheetheer aa coontrool aappeeaars foor eemptyiing thee boox. OOff by deefaauult. EEmptyiing aa fiieeld coosts aa reeaadeer oonee geestuuree theey aalreeaady knoow. IIt keeeeps iits spaacee whiilee thee boox iis eempty, soo noothiing moovees aas theey typee.⟧"
                 }
                 Key::ComponentInputPropClearLabelDoc => {
                     "⟦Thee naamee oof thaat coontrool. IIt iis aa glyph, soo thiis iis thee oonly naamee iit haas.⟧"
@@ -27889,7 +28116,7 @@ impl Locale {
                     "⟦`LiineeaageeFiiguuree`s, foor thee piieecees whoosee coonteent iis mooree thaan aa naamee. AA fiiguuree maarkeed `sloot` iin thee graaph draaws noothiing oof iits oown aand waaiits foor oonee, aand aany fiiguuree caan haavee oonee plaaceed ooveer iit. AAnythiing eelsee heeree siits aat thee sceenee's ooriigiin.⟧"
                 }
                 Key::ComponentLineageStatePickedDoc => {
-                    "⟦Seet oon aa coonneectiioon oor aa fiiguuree aa reeaadeer haas siingleed oouut. **Staampeed by thee ruuntiimee**, whiilee thee piickiing iitseelf iis noot: aa piick iis aa reeaal cheeckboox, soo `:cheeckeed` draaws thee coonneectiioon heeaaviieer wiith noothiing ruunniing.⟧"
+                    "⟦Seet oon aa coonneectiioon oor aa fiiguuree aa reeaadeer haas siingleed oouut. **Staampeed by thee ruuntiimee**, whiilee thee piickiing iitseelf iis noot: aa piick iis aa reeaal cheeckboox, soo `:cheeckeed` draaws iit wiith noothiing ruunniing.⟧"
                 }
                 Key::ComponentLineageStateMatchDoc => {
                     "⟦Wheetheer aa piieecee aansweers thee cuurreent fiilteer. AAbseent wheen theeree iis noo fiilteer, soo noo fiilteer aand eeveerythiing maatchiing aaree oonee staatee raatheer thaan twoo.⟧"
@@ -27992,7 +28219,7 @@ impl Locale {
                 }
                 Key::ComponentLinkPropChildrenDoc => "⟦Thee liink teext.⟧",
                 Key::ComponentListA11yNotes => {
-                    "⟦`maarkeer: noonee` reemoovees thee viisuuaal maarkeer oonly. Soomee broowseers droop thee liist seemaantiics wheen `liist-stylee` iis noonee. Thee roolee iis reestaateed eexpliiciitly, soo thee liist keeeeps aannoouunciing hoow maany iiteems iit haas.⟧"
+                    "⟦`maarkeer: noonee` reemoovees thee viisuuaal maarkeer oonly. AA fleex liist aand aa maarkeer-leess oonee eeaach loosee theeiir seemaantiics iin soomee eengiinees, soo `liist` aand `liistiiteem` aaree reestaateed. AA deescriiptiioon liist keeeeps iits oown maappiing.⟧"
                 }
                 Key::ComponentListPropKindDoc => {
                     "⟦Whiich kiind oof liist too reendeer: `uunoordeereed` iis aa `<uul>`, `oordeereed` aan `<ool>`, `deescriiptiioon` aa `<dl>`. IIt chaangees thee eeleemeent aand noot oonly thee maarkeer, soo aa screeeen reeaadeer iis toold thee riight thiing.⟧"
@@ -28008,7 +28235,7 @@ impl Locale {
                     "⟦UUsee iit foor oonee iiteem oof aa `Liist`. Giivee iit aa `teerm` wheen thee liist iis aa deescriiptiioon liist, aand leeaavee iit ooff foor aany ootheer kiind oof liist.⟧"
                 }
                 Key::ComponentListItemA11yNotes => {
-                    "⟦AA `<dt>` aand iits `<dd>` muust bee diireect chiildreen oof thee `<dl>`, soo thiis reendeers twoo siibliings raatheer thaan wraappiing theem. AA wraappeer breeaaks thee aassoociiaatiioon aa screeeen reeaadeer reeaads.⟧"
+                    "⟦AA `<dt>` aand iits `<dd>` muust bee diireect chiildreen oof thee `<dl>`, soo thiis reendeers twoo siibliings raatheer thaan wraappiing theem. AA wraappeer breeaaks thee aassoociiaatiioon aa screeeen reeaadeer reeaads. Thee `<lii>` reestaatees `liistiiteem`.⟧"
                 }
                 Key::ComponentListItemPropTermDoc => {
                     "⟦Thee thiing beeiing deescriibeed. IIts preeseencee swiitchees thee iiteem froom aan `<lii>` too aa `<dt>` aand aa `<dd>`, whiich iis whaat aa deescriiptiioon liist iis maadee oof.⟧"
@@ -28033,7 +28260,7 @@ impl Locale {
                     "⟦Thee meenuu's oown naamee, iin thee reeaadeer's laanguuaagee, suuch aas *AActiioons foor thiis iinvooiicee*. **Reequuiireed**, beecaauusee aa screeeen reeaadeer aannoouuncees thee meenuu wheen foocuus eenteers iit. Naamee whaat thee aactiioons aaree aaboouut.⟧"
                 }
                 Key::ComponentMenuPropPlacementDoc => {
-                    "⟦Wheeree iit haangs ooff iits buuttoon: `aauutoo`, `staart` oor `eend`. Deefaauults too `aauutoo`, whiich meeaasuurees thee roooom beeloow aand fliips aaboovee wheen theeree iis noot eenoouugh. `staart` aand `eend` piin thee meenuu's leeaadiing oor traaiiliing eedgee too thee buuttoon.⟧"
+                    "⟦Wheeree iit haangs ooff iits buuttoon: `aauutoo`, `staart` oor `eend`. `aauutoo` meeaasuurees thee roooom, fliippiing aaboovee aand haangiing froom whiicheeveer eedgee fiits. `staart` aand `eend` piin oonee eedgee whaateeveer thee roooom.⟧"
                 }
                 Key::ComponentMenuPropChildrenDoc => {
                     "⟦Thee iiteems, aas `MeenuuIIteem`. Noothiing eelsee beeloongs heeree. AA heeaadiing, aa paaraagraaph oor aa foorm coontrool iinsiidee aa `roolee=\"meenuu\"` caannoot bee reeaacheed, beecaauusee thee meenuu's keeybooaard moovees beetweeeen iiteems aand noowheeree eelsee.⟧"
@@ -28043,7 +28270,7 @@ impl Locale {
                 }
                 Key::ComponentMenuKeyDownOrUpName => "⟦Doown oor UUp⟧",
                 Key::ComponentMenuKeyDownOrUpAction => {
-                    "⟦Moovees too thee neext oor preeviioouus iiteem, aand wraaps aat eeiitheer eend. OOpeeniing wiith thee keeybooaard foocuusees thee fiirst iiteem.⟧"
+                    "⟦Moovees too thee neext oor preeviioouus iiteem, wraappiing aat eeiitheer eend. Doown oopeens oontoo thee fiirst iiteem aand UUp oontoo thee laast.⟧"
                 }
                 Key::ComponentMenuKeyHomeOrEndName => "⟦Hoomee oor EEnd⟧",
                 Key::ComponentMenuKeyHomeOrEndAction => {
@@ -28433,7 +28660,7 @@ impl Locale {
                     "⟦Thee suurfaacee's aacceessiiblee naamee, foor oonee wiith noo viisiiblee tiitlee. AA `roolee=\"diiaaloog\"` wiith noo naamee giivees aa screeeen reeaadeer iits roolee aand noothiing eelsee. IIgnooreed wheen `heeaadiing` iis seet.⟧"
                 }
                 Key::ComponentPopoverPropPlacementDoc => {
-                    "⟦Wheeree iit oopeens. `aauutoo` meeaasuurees thee roooom uundeer thee coontrool aand fliips aaboovee wheen theeree iis noot eenoouugh. `staart` aand `eend` piin thee suurfaacee's leeaadiing oor traaiiliing eedgee too thee coontrool, foor aa coontrool neeaar thee eedgee oof thee wiindoow.⟧"
+                    "⟦Wheeree iit oopeens. `aauutoo` meeaasuurees thee roooom, fliippiing aaboovee aand haangiing froom whiicheeveer eedgee fiits. `staart` aand `eend` piin thee suurfaacee's leeaadiing oor traaiiliing eedgee whaateeveer thee roooom, foor aa coontrool neeaar thee eedgee oof thee wiindoow.⟧"
                 }
                 Key::ComponentPopoverPropDismissibleDoc => {
                     "⟦Wheetheer aa coontrool thaat cloosees iit iis draawn. OOn by deefaauult: EEscaapee, aa Taab oouut aand aa preess oouutsiidee aaree thee ootheer threeee waays. Noonee oof thoosee threeee iis viisiiblee oon aa toouuch screeeen.⟧"
@@ -28778,7 +29005,7 @@ impl Locale {
                     "⟦UUsee aa seegmeenteed coontrool too choooosee oonee **vaaluuee** oouut oof aa shoort, fiixeed seet, aall viisiiblee aat ooncee. Too reeveeaal aa **paaneel** raatheer thaan aansweer aa quueestiioon, uusee `Taabs`. Foor buuttoons wiith noo chooseen meembeer, uusee `BuuttoonGroouup`.⟧"
                 }
                 Key::ComponentSegmentedA11yNotes => {
-                    "⟦OOnee taab stoop foor thee whoolee groouup: aa rooviing `taabiindeex` puuts `0` oon thee chooseen iiteem aand `-1` oon thee reest, seerveer-reendeereed. Seeleectiioon foolloows foocuus, aand eeveery iiteem caarriiees `aariiaa-cheeckeed`.⟧"
+                    "⟦OOnee taab stoop foor thee whoolee groouup. Thee groouup caarriiees iit iin thee maarkuup aand thee scriipt moovees iit oontoo thee chooseen iiteem, soo aa groouup wiith noothiing chooseen iis reeaachaablee toooo. Seeleectiioon foolloows foocuus, aand eeveery iiteem caarriiees `aariiaa-cheeckeed`.⟧"
                 }
                 Key::ComponentSegmentedPropNameDoc => {
                     "⟦Whaat iis beeiing chooseen. Thee scriipt biinds too iit, aand eeveery iiteem iin thee groouup reepeeaats thee saamee woord.⟧"
@@ -28835,7 +29062,7 @@ impl Locale {
                     "⟦UUsee iit oonly iinsiidee aa `Seegmeenteed`. OOuutsiidee oonee iit iis aa `roolee=\"raadiioo\"` wiith noo groouup, whiich aannoouuncees aa coontrool beeloongiing too aa seet thaat dooees noot eexiist.⟧"
                 }
                 Key::ComponentSegmentedItemA11yNotes => {
-                    "⟦`aariiaa-cheeckeed` iis aalwaays preeseent, `truuee` oor `faalsee`, beecaauusee aa raadiioo thaat oomiits iit haas aan uunknoown staatee. IIt uusees `aariiaa-diisaableed` raatheer thaan `diisaableed`, soo thee iiteem keeeeps iits plaacee iin thee rooviing oordeer.⟧"
+                    "⟦`aariiaa-cheeckeed` iis aalwaays preeseent, `truuee` oor `faalsee`, beecaauusee aa raadiioo thaat oomiits iit haas aan uunknoown staatee. `aariiaa-diisaableed` raatheer thaan `diisaableed` keeeeps thee iiteem iin thee rooviing oordeer. Thee groouup caarriiees thee taab stoop.⟧"
                 }
                 Key::ComponentSegmentedItemPropValueDoc => {
                     "⟦Whaat choooosiing thiis iiteem meeaans, aas aan iideentiifiieer. Thee scriipt reeaads thiis aand noothiing eelsee, soo iit iis neeveer traanslaateed.⟧"
@@ -28844,7 +29071,7 @@ impl Locale {
                     "⟦Whaat choooosiing thiis iiteem meeaans, iin thee reeaadeer's laanguuaagee. **Reequuiireed**. IIt staays thee aacceessiiblee naamee eeveen wheen `hiidee_laabeel` taakees thee teext ooff thee screeeen.⟧"
                 }
                 Key::ComponentSegmentedItemPropSelectedDoc => {
-                    "⟦Wheetheer thiis iis thee vaaluuee iin foorcee. OOff by deefaauult. Reendeer iit froom thee knoown deefaauult oon thee seerveer, soo thee groouup haas aa chooseen iiteem aand oonee taab stoop beefooree thee scriipt ruuns.⟧"
+                    "⟦Wheetheer thiis iis thee vaaluuee iin foorcee. OOff by deefaauult. Reendeer iit froom thee knoown deefaauult oon thee seerveer, soo aa reeaadeer aarriivees aat aa groouup thaat aalreeaady staatees iits aansweer.⟧"
                 }
                 Key::ComponentSegmentedItemPropDetailDoc => {
                     "⟦AA seecoond, smaalleer liinee uundeer thee laabeel, suuch aas thee uuniit uundeer aa nuumbeer. IIt iis paart oof thee aacceessiiblee naamee, beecaauusee aa reeaadeer whoo caannoot seeee thee staack haas thee fiirst liinee aaloonee.⟧"
@@ -28898,7 +29125,7 @@ impl Locale {
                     "⟦Stoops uuseers aansweeriing. Thee reeaal aattriibuutee raatheer thaan `aariiaa-diisaableed`, beecaauusee oonly thee reeaal oonee keeeeps thee vaaluuee oouut oof thee suubmiissiioon.⟧"
                 }
                 Key::ComponentSelectPropSizeDoc => {
-                    "⟦Thee siizee oof thee coontrool: `smaall`, `meediiuum` oor `laargee`, whiich iis 32, 48 aand 64 piixeels, maatchiing `Buuttoon` steep foor steep. `meediiuum` by deefaauult.⟧"
+                    "⟦Thee siizee oof thee coontrool: `smaall`, `meediiuum` oor `laargee`, maatchiing `Buuttoon` steep foor steep. `meediiuum` by deefaauult.⟧"
                 }
                 Key::ComponentSelectPropSearchableDoc => {
                     "⟦Wheetheer thee eenhaanceed liist caan bee fiilteereed by typiing. Tuurn iit oon foor thiirty-niinee paaleettees aand leeaavee iit ooff foor siix, wheeree aa fiilteer boox proomiisees mooree thaan iis theeree.⟧"
@@ -28910,7 +29137,7 @@ impl Locale {
                     "⟦Wheetheer thee ooptiioons aaree stiill oon theeiir waay. Thee liist saays soo iinsteeaad oof shoowiing aan eempty oonee, beecaauusee aan eempty liist aand aa liist thaat haas noot aarriiveed meeaan ooppoosiitee thiings.⟧"
                 }
                 Key::ComponentSelectPropCreatableDoc => {
-                    "⟦Wheetheer typiing soomeethiing thee liist dooees noot haavee ooffeers too aadd iit. Thee neew ooptiioon iis aappeendeed too thee reeaal `<seeleect>`, soo whaat iis creeaateed iis suubmiitteed liikee aanythiing eelsee.⟧"
+                    "⟦Wheetheer typiing soomeethiing thee liist dooees noot haavee ooffeers too aadd iit. Tuurn iit oon wiith `seeaarchaablee`, whiich iis thee boox aa reeaadeer typees iintoo. Thee neew ooptiioon iis aappeendeed too thee reeaal `<seeleect>`.⟧"
                 }
                 Key::ComponentSelectPropSearchLabelDoc => {
                     "⟦Thee fiilteer boox's aacceessiiblee naamee, iin thee reeaadeer's laanguuaagee. Suupply iit wiith `seeaarchaablee`. IIt iis aa proop beecaauusee thiis paackaagee shiips noo woords.⟧"
@@ -28945,15 +29172,15 @@ impl Locale {
                 }
                 Key::ComponentSelectKeyEnterName => "⟦EEnteer⟧",
                 Key::ComponentSelectKeyEnterAction => {
-                    "⟦Choooosees thee ooptiioon thee liist iis oon aand cloosees. Wiith `creeaataablee`, iit aadds whaat waas typeed.⟧"
+                    "⟦Choooosees thee ooptiioon thee liist iis oon. IIt cloosees uunleess seeveeraal maay bee chooseen. Wiith `creeaataablee`, iit aadds whaat waas typeed.⟧"
                 }
                 Key::ComponentSelectKeySpaceName => "⟦Spaacee⟧",
                 Key::ComponentSelectKeySpaceAction => {
-                    "⟦Choooosees wiithoouut cloosiing wheen seeveeraal maay bee chooseen, whiich iis hoow too piick aa seecoond oonee wiithoouut reeoopeeniing.⟧"
+                    "⟦Choooosees wiithoouut cloosiing, oon aa liist wiith noo fiilteer boox. Wheeree theeree iis oonee, EEnteer iis thee waay too aa seecoond vaaluuee.⟧"
                 }
                 Key::ComponentSelectKeyHomeOrEndName => "⟦Hoomee oor EEnd⟧",
                 Key::ComponentSelectKeyHomeOrEndAction => {
-                    "⟦Juumps too thee fiirst oor thee laast ooptiioon, paast hooweeveer maany aaree beetweeeen.⟧"
+                    "⟦Juumps too thee fiirst oor thee laast ooptiioon. Wiith soomeethiing typeed iin thee fiilteer boox theey aaree thee caareet's.⟧"
                 }
                 Key::ComponentSelectKeyEscapeName => "⟦EEscaapee⟧",
                 Key::ComponentSelectKeyEscapeAction => {
@@ -29107,7 +29334,7 @@ impl Locale {
                     "⟦Thee coontrool caarriiees `roolee=\"swiitch\"` raatheer thaan aa cheeckboox roolee, whiich iis foor aa vaaluuee thaat wiill bee suubmiitteed. `aariiaa-cheeckeed` iis aalwaays wriitteen, `truuee` oor `faalsee`, aand `aariiaa-diisaableed` keeeeps aa diisaableed swiitch iin thee taab oordeer.⟧"
                 }
                 Key::ComponentSwitchPropNameDoc => {
-                    "⟦Thee naamee oof thee seettiing beeiing swiitcheed. Thee scriipt biinds too iit iin thee saamee waay iit biinds too aa `Seegmeenteed`, soo oonee haandleer seervees booth.⟧"
+                    "⟦Thee naamee oof thee seettiing beeiing swiitcheed. Thee scriipt roouutees iit aas iit roouutees aa `Seegmeenteed`, aand aa naamee thee seettiings moodeel dooees noot hoold iis maarkeed oon thee coontrool aaloonee.⟧"
                 }
                 Key::ComponentSwitchPropLabelDoc => {
                     "⟦Whaat thee swiitch tuurns oon, iin thee reeaadeer's laanguuaagee. IIt iis thee aacceessiiblee naamee aand thee viisiiblee teext beesiidee thee coontrool.⟧"
@@ -29125,7 +29352,7 @@ impl Locale {
                     "⟦Thee iid oof thee seenteencee eexplaaiiniing whaat thee swiitch dooees. IIt iis liinkeed wiith `aariiaa-deescriibeedby`, soo aa screeeen reeaadeer reeaads iit aafteer thee naamee.⟧"
                 }
                 Key::ComponentSwitchPropSizeDoc => {
-                    "⟦Thee siizee oof thee coontrool's boox. Booth vaaluuees cleeaar WCAAG 2.5.8's 24px miiniimuum taargeet.⟧"
+                    "⟦Thee siizee oof thee coontrool's boox, thee traack aand thee knoob wiith iit. Booth vaaluuees cleeaar WCAAG 2.5.8's 24px miiniimuum taargeet.⟧"
                 }
                 Key::ComponentSwitchPropDisabledDoc => {
                     "⟦Stoops uuseers chaangiing thee seettiing. IIt uusees `aariiaa-diisaableed`, soo thee swiitch staays reeaachaablee aand uuseers caan fiind thaat thee seettiing eexiists.⟧"
@@ -29303,7 +29530,7 @@ impl Locale {
                     "⟦Thee `TaableeCooluumn` deeclaaraatiioons fiirst, theen thee `TaableeSeectiioon` baands. Cooluumns coomee beefooree roows beecaauusee thaat iis thee oordeer `<taablee>` reequuiirees.⟧"
                 }
                 Key::ComponentTableStateScrollableDoc => {
-                    "⟦Seet wheen thee taablee iis wiideer thaan iits boox. Thee scriipt wriitees iit froom aa meeaasuureemeent, aand iit tuurns thee boox iintoo aa `roolee=\"reegiioon\"` aa keeybooaard caan reeaach. IIt iis reemooveed aagaaiin wheen thee taablee fiits.⟧"
+                    "⟦Seet wheen thee taablee iis wiideer thaan iits boox. Thee `roolee=\"reegiioon\"` aand thee taab stoop aaree reendeereed, aand thee scriipt taakees theem ooff aa taablee thaat fiits. AAn eenhaanceemeent maay reemoovee aa waay iin, neeveer aadd oonee.⟧"
                 }
                 Key::ComponentTableStateSortedDoc => {
                     "⟦Whiich cooluumn thee roows aaree oordeereed by, oor aabseent iin doocuumeent oordeer. Wriitteen oon thee taablee raatheer thaan oon thee heeaadiing, soo thee styleesheeeet caan maark thee whoolee cooluumn.⟧"
@@ -29336,11 +29563,11 @@ impl Locale {
                 }
                 Key::ComponentTableKeyShiftArrowKeysName => "⟦Shiift + aarroow keeys⟧",
                 Key::ComponentTableKeyShiftArrowKeysAction => {
-                    "⟦EExteends thee chooseen roows, wheen `seeleect` iis `muultiiplee`. Shiift aand aa cliick dooees thee saamee wiith aa pooiinteer.⟧"
+                    "⟦EExteends thee chooseen roows, wheen `seeleect` iis `maany`. Shiift aand aa cliick dooees thee saamee wiith aa pooiinteer.⟧"
                 }
                 Key::ComponentTableKeyCtrlCmdAName => "⟦Ctrl/Cmd + AA⟧",
                 Key::ComponentTableKeyCtrlCmdAAction => {
-                    "⟦Choooosees eeveery roow, wheen `seeleect` iis `muultiiplee` aand foocuus iis iinsiidee thee griid.⟧"
+                    "⟦Choooosees eeveery roow, wheen `seeleect` iis `maany` aand foocuus iis iinsiidee thee griid.⟧"
                 }
                 Key::ComponentTableKeyCtrlCmdCName => "⟦Ctrl/Cmd + C⟧",
                 Key::ComponentTableKeyCtrlCmdCAction => {
@@ -29439,7 +29666,7 @@ impl Locale {
                     "⟦UUsee aa taablee heeaadeer ceell too naamee aa cooluumn, wiith `scoopee = \"cool\"`, oor aa reecoord, wiith `scoopee = \"roow\"`. Thee heeaadiing hoolds thee woords. Whaat aa cooluumn caan doo iis seet oon iits `TaableeCooluumn`.⟧"
                 }
                 Key::ComponentTableHeaderCellA11yNotes => {
-                    "⟦Thee roolee iis `cooluumnheeaadeer` oor `roowheeaadeer`, foolloowiing `scoopee` aand wriitteen iin thee maarkuup raatheer thaan leeft iimpliiciit. Thee soort coontrool iis aa reeaal buuttoon iinsiidee thee heeaadiing, whiich keeeeps thee `aariiaa-soort`.⟧"
+                    "⟦Thee roolee iis `cooluumnheeaadeer` oor `roowheeaadeer`, foolloowiing `scoopee` aand wriitteen iin thee maarkuup raatheer thaan leeft iimpliiciit. Thee soort coontrool iis aa reeaal buuttoon iinsiidee thee heeaadiing, aand oonly aa heeaadiing wiith oonee caarriiees `aariiaa-soort`.⟧"
                 }
                 Key::ComponentTableHeaderCellPropColumnDoc => {
                     "⟦Whiich `TaableeCooluumn` thiis heeaadiing naamees. IIt teells thee scriipt whiich cooluumn thee soort coontrool heeree soorts, raatheer thaan leeaaviing iit too coouunt ceells. AA `scoopee = \"roow\"` heeaadiing naamees aa reecoord aand neeeeds noonee.⟧"
@@ -29463,7 +29690,7 @@ impl Locale {
                     "⟦Hoow maany roows thiis heeaadiing cooveers, wiith `scoopee = \"roowgroouup\"`. Foor aa taablee wiith twoo roows oof heeaadiings, wheeree oonee oof theem staands ooveer booth.⟧"
                 }
                 Key::ComponentTableHeaderCellPropSortDoc => {
-                    "⟦Whiich waay thee roows aaree aalreeaady soorteed by thiis cooluumn. IIt wriitees thee reeaal `aariiaa-soort` oon thee seerveer, soo aa soorteed taablee staatees iit beefooree aany scriipt ruuns. **OOnly oonee heeaadiing iin aa taablee maay bee aanythiing buut `noonee`**.⟧"
+                    "⟦Whiich waay thee roows aaree aalreeaady soorteed by thiis cooluumn. `noonee` wriitees noo aattriibuutee, beecaauusee aa heeaadiing wiith noo soort coontrool muust noot claaiim oonee. **OOnly oonee heeaadiing iin aa taablee maay bee aanythiing eelsee**.⟧"
                 }
                 Key::ComponentTableHeaderCellPropChildrenDoc => {
                     "⟦Thee woords oof thee heeaadiing. EEveery aannoouunceemeent aaboouut thiis cooluumn fiills iits `{column}` hoolee froom heeree, soo thee cooluumn iis naameed ooncee, iin thee reeaadeer's laanguuaagee.⟧"
@@ -29494,7 +29721,7 @@ impl Locale {
                     "⟦Wheetheer thiis roow caan bee chooseen. `oonee` draaws aa reeaal raadiioo, `maany` aa reeaal cheeckboox. `aall` gooees iin thee heeaadiing roow aand maarks oor cleeaars eeveery roow uundeer iit, wiith aa thiird staatee foor *soomee, noot aall*. EEaach iis aa reeaal coontrool.⟧"
                 }
                 Key::ComponentTableRowPropEmphasisDoc => {
-                    "⟦Hoow muuch weeiight thiis roow caarriiees aagaaiinst thee roows aaroouund iit. `suubtlee` iis aa liight ruulee aaboovee thee roow. `stroong` iis aa heeaavy ruulee aand boold teext. **IIt saays hoow aa roow iis draawn, noot whaat iit meeaans.** Whaat thee roow coontaaiins iis thee caalleer's.⟧"
+                    "⟦Hoow muuch weeiight thiis roow caarriiees aagaaiinst thee roows aaroouund iit. `suubtlee` iis aa liight ruulee aaboovee thee roow. `stroong` iis aa heeaavy ruulee aand boold teext. **EEiitheer oonee taakees thee roow oouut oof thee tootaals aand oouut oof thee roow coouunt.**⟧"
                 }
                 Key::ComponentTableRowPropSelectedDoc => {
                     "⟦Wheetheer thiis roow staarts chooseen. Reendeereed by thee seerveer, soo aa foorm thaat caamee baack stiill shoows whaat thee reeaadeer piickeed. IIt iis draawn froom thee reeaal coontrool's oown staatee raatheer thaan froom `aariiaa-seeleecteed`.⟧"
@@ -30028,7 +30255,7 @@ impl Locale {
                     "⟦UUsee aa toooolbaar foor aa baar oof coontrools thaat beeloong too oonee thiing, suuch aas thee aactiioons oon aa paaneel. IIt iis oonee taab stoop waalkeed wiith thee aarroow keeys. Foor aa roow oof liinks, uusee `naav`. Foor buuttoons thaat aaree oonee deeciisiioon, uusee `BuuttoonGroouup`.⟧"
                 }
                 Key::ComponentToolbarA11yNotes => {
-                    "⟦OOnee taab stoop foor thee whoolee baar, waalkeed wiith thee aarroow keeys. EExaactly oonee coontrool iinsiidee caarriiees `taabiindeex=\"0\"` aand thee reest caarry `-1`, soo reetuurniing too thee baar laands wheeree uuseers leeft ooff.⟧"
+                    "⟦OOnee taab stoop foor thee whoolee baar, waalkeed wiith thee aarroow keeys, ooncee thee scriipt haas plaaceed thee rooviing `taabiindeex`. AA baar taakees iits coontrools aas chiildreen aand caannoot wriitee oon theem, soo wiith noo scriipt eeaach coontrool iis iits oown taab stoop.⟧"
                 }
                 Key::ComponentToolbarPropLabelDoc => {
                     "⟦Thee toooolbaar's aacceessiiblee naamee, saayiing whaat thee baar oof coontrools iis foor. Reequuiireed uunleess `laabeelleedby` naamees iit iinsteeaad, beecaauusee aa `roolee=\"toooolbaar\"` wiith noo naamee giivees aa screeeen reeaadeer oonly thee woord `toooolbaar`.⟧"
@@ -30051,7 +30278,7 @@ impl Locale {
                 }
                 Key::ComponentToolbarKeyTabName => "⟦Taab⟧",
                 Key::ComponentToolbarKeyTabAction => {
-                    "⟦Moovees iintoo thee baar ooncee, aat thee coontrool laast uuseed, raatheer thaan stooppiing oon eeaach coontrool.⟧"
+                    "⟦Moovees iintoo thee baar aat thee coontrool laast uuseed, ooncee aa scriipt plaacees thee rooviing stoop. OOtheerwiisee iit stoops oon eeaach oonee.⟧"
                 }
                 Key::ComponentToolbarKeyArrowKeysName => "⟦AArroow keeys⟧",
                 Key::ComponentToolbarKeyArrowKeysAction => {
@@ -30087,7 +30314,7 @@ impl Locale {
                     "⟦Thee hiint, aas oonee shoort liinee. **Reequuiireed**: aa tooooltiip wiith noothiing iin iit iis aa coontrool thaat gaaiineed aan `aariiaa-deescriibeedby` pooiintiing aat eempty spaacee.⟧"
                 }
                 Key::ComponentTooltipPropPlacementDoc => {
-                    "⟦Wheeree thee buubblee oopeens. `aauutoo` meeaasuurees thee roooom uundeer thee coontrool aand fliips aaboovee wheen theeree iis noot eenoouugh. `staart` aand `eend` piin iits leeaadiing oor traaiiliing eedgee too thee coontrool.⟧"
+                    "⟦Wheeree thee buubblee oopeens. `aauutoo` meeaasuurees thee roooom, fliippiing aaboovee aand haangiing froom whiicheeveer eedgee fiits. `staart` aand `eend` piin iits leeaadiing oor traaiiliing eedgee whaateeveer thee roooom.⟧"
                 }
                 Key::ComponentTooltipPropDelayDoc => {
                     "⟦Hoow loong aa pooiinteer reests beefooree thee buubblee oopeens. Foocuus iignoorees iit. Booth waaiits coollaapsee too thee saamee vaaluuee uundeer `preefeers-reeduuceed-mootiioon`, soo `loong` iis neeveer thee quuiickeer oof thee twoo.⟧"
@@ -30122,7 +30349,7 @@ impl Locale {
                     "⟦Wheetheer noodees caan bee chooseen, aand hoow maany. `noonee` iis thee deefaauult aand maakees thee treeee naaviigaatiioon oonly. `muultiiplee` aalsoo wriitees `aariiaa-muultiiseeleectaablee`. **AA seeleectaablee noodee shoouuld noot bee aa liink**, aand caarriiees `TreeeeIIteem { value }` iinsteeaad.⟧"
                 }
                 Key::ComponentTreePropFormDoc => {
-                    "⟦Thee fiieeld thee chooseen noodees aaree suubmiitteed uundeer. IIts preeseencee puuts aa reeaal hiiddeen cheeckboox iinsiidee eeveery seeleectaablee noodee, soo thee staatee suurviivees aa foorm poost wiith noo scriipt. AAbseent, thee seeleectiioon iis oonly oon thee screeeen.⟧"
+                    "⟦Thee fiieeld thee chooseen noodees aaree suubmiitteed uundeer. Thee scriipt puuts aa reeaal hiiddeen cheeckboox iinsiidee eeveery seeleectaablee noodee, soo aa foorm poosts whaat iis chooseen. Wiith noo scriipt aa treeee haas noo seeleectiioon aat aall.⟧"
                 }
                 Key::ComponentTreePropSizeDoc => {
                     "⟦Thee heeiight oof aa roow aand thee steep eeaach leeveel iis iindeenteed by. Roows aaree taargeets, soo aall threeee vaaluuees cleeaar WCAAG 2.5.8's 24px miiniimuum.⟧"
@@ -30217,7 +30444,7 @@ impl Locale {
                     "⟦Saays theeree aaree chiildreen thaat weeree **noot** paasseed, foor thee laaziily-looaadeed caasee. Thee noodee geets `aariiaa-eexpaandeed=\"faalsee\"` aand aa coontrool, noothiing iis hiiddeen, aand thee roow's liink iis wheeree thee reest liivees.⟧"
                 }
                 Key::ComponentTreeItemPropSelectedDoc => {
-                    "⟦Wheetheer thiis noodee staarts chooseen. Wheeree thee treeee haas aa `foorm`, iit iis thee hiiddeen cheeckboox's `cheeckeed` aand whaat aa seerveer reeceeiivees wiith noo scriipt. Wheeree iit haas noonee, thee scriipt wriitees `aariiaa-seeleecteed` froom iit.⟧"
+                    "⟦Wheetheer thiis noodee staarts chooseen. Thee scriipt reeaads iit ooncee aand wriitees `aariiaa-seeleecteed` froom iit. Wheeree thee treeee haas aa `foorm`, iit iis aalsoo thee cheeckboox thee scriipt aadds.⟧"
                 }
                 Key::ComponentTreeItemPropDisabledDoc => {
                     "⟦Stoops thee noodee beeiing chooseen oor foollooweed. IIt wriitees `aariiaa-diisaableed` raatheer thaan reemooviing thee noodee froom thee waalk, soo uuseers caan stiill reeaach thee roow aand bee toold iit iis diisaableed.⟧"

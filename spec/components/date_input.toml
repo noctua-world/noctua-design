@@ -58,10 +58,11 @@ doc = "What users need to know before answering, such as `For example, 27 3 2007
 type = "text"
 doc = "What is wrong with the date, in the caller's own words. Its presence marks the field invalid, so the red edge and the message always appear together. A sentence from the caller is never cleared by the script."
 
+# NO ATTRIBUTE. `Field` renders the word in front of the sentence now, from
+# the same prop, so the script no longer builds a second copy of it.
 [prop.error_label]
 type = "text"
-attribute = "data-nd-error-label"
-doc = "The word read out before the message, such as `Error:`. It is visually hidden, because the message is already marked as an error on the screen. It is on an attribute too, so the validator prefixes its own sentences with it."
+doc = "The word read out before the message, such as `Error:`. It is visually hidden, because the message is already marked as an error on the screen. `Field` draws it in front of every sentence, the caller's and the validator's alike."
 
 [prop.value]
 type = "text"

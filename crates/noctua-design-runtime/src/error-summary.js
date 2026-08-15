@@ -27,7 +27,7 @@
 // component renders is the announcement, and a second live region saying the
 // same thing is the same sentence twice.
 
-import { fill } from "./messages.js";
+import { fill, saySentence, sentenceOf } from "./messages.js";
 
 /** The controls a fragment may legitimately land on. */
 const FOCUSABLE =
@@ -124,7 +124,7 @@ function enhance(root) {
     if (!collect || !list || !template || !form) return;
     list.replaceChildren();
     for (const slot of form.querySelectorAll("[data-nd-field-error]")) {
-      const sentence = slot.textContent.trim();
+      const sentence = sentenceOf(slot);
       if (!sentence) continue;
       // The id the field derived its own error id from — one rule, stated in
       // `Field.control`'s documentation, read back here rather than guessed.
@@ -149,7 +149,7 @@ function enhance(root) {
       const slot = slotFor(control);
       if (slot?.dataset.ndSaid === undefined) return;
       delete slot.dataset.ndSaid;
-      slot.textContent = "";
+      saySentence(slot, "");
       slot.closest(".nd-field, .nd-fieldset")?.setAttribute("data-nd-invalid", "false");
       control.setAttribute("aria-invalid", "false");
     }
@@ -172,8 +172,8 @@ function enhance(root) {
         // in the two places a reader will actually look — beside the answer,
         // and at the top of the form.
         event.preventDefault();
-        if (!slot.textContent.trim()) {
-          slot.textContent = control.validationMessage;
+        if (!sentenceOf(slot)) {
+          saySentence(slot, control.validationMessage);
           slot.dataset.ndSaid = "";
         }
         slot.closest(".nd-field, .nd-fieldset")?.setAttribute("data-nd-invalid", "true");

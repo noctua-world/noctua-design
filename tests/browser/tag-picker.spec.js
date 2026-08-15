@@ -239,3 +239,21 @@ test("no id appears twice on the picker page, in any locale", async ({ page }) =
     expect(twice, locale).toEqual([]);
   }
 });
+
+test("a required picker with tags in it submits", async ({ page }) => {
+  await page.goto(url(PAGE.tagPicker));
+  // `required` SITS ON THE COMPOSER, because the browser has to focus an
+  // invalid control to anchor its bubble and the real `<select>` is hidden.
+  // Every commit clears the composer and nothing took the attribute off, so a
+  // reader who committed three tags was refused by the browser — the field was
+  // unsubmittable exactly when it had been answered.
+  const box = page.locator(`${FORM} .nd-tag-picker-input`);
+  expect(await box.getAttribute("required")).not.toBeNull();
+  await box.click();
+  await page.keyboard.type("ochre");
+  await page.keyboard.press("Enter");
+  expect(await box.getAttribute("required")).toBeNull();
+  expect(
+    await page.locator(`${FORM} select`).evaluate((el) => el.form?.checkValidity() ?? true),
+  ).toBe(true);
+});

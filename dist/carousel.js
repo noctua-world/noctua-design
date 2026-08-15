@@ -75,14 +75,21 @@ function enhance(root) {
   const rotation = root.querySelector("[data-nd-carousel-rotation]");
   const steps = [...root.querySelectorAll("[data-nd-carousel-step]")];
   const template = root.querySelector("[data-nd-dot-template]");
-  const vertical = root.getAttribute("aria-orientation") === "vertical";
+  const vertical = root.getAttribute("data-nd-orientation") === "vertical";
   const wraps = at("wrap") === "true";
-  const perView = at("per-view") ?? "1";
   const count = slides.length;
+  // Whether a slide is where the track comes to rest, which decides what the
+  // two controls do. See `step`.
+  const snaps = at("snap") !== "none";
+  /** Whether the track's inline axis runs the other way. */
+  const rightToLeft = () => getComputedStyle(track).direction === "rtl";
 
-  // The stylesheet divides the track by this. Written here because it is a
-  // prop, and read there because widths are the stylesheet's business.
-  if (perView !== "auto") track.style.setProperty("--nd-carousel-per-view", perView);
+  // `--nd-carousel-per-view` IS NOT WRITTEN HERE ANY MORE. It used to be, and
+  // that made a width depend on a script: a `per_view: "3"` carousel showed
+  // one slide with JavaScript blocked, under a contract promising the slides
+  // "scroll and snap before any script runs". The component renders the
+  // property on the track, where a prop belongs, and the stylesheet divides by
+  // it exactly as before.
 
   // EVERY SLIDE IS NAMED BY ITS POSITION, from the slides that are actually
   // here — a count a caller wrote goes wrong the first time one is added. A
@@ -146,6 +153,32 @@ function enhance(root) {
   }
 
   function step(by) {
+    // `snap: none` IS A PLAIN SCROLLER, AND THE TWO CONTROLS SAY SO. The
+    // contract has always read "turns the two controls into a scroll by one
+    // screen rather than to a slide", and this file never read the attribute
+    // at all — so a carousel a caller had deliberately unsnapped still jumped
+    // slide by slide, which is the one behaviour the value exists to refuse.
+    //
+    // Wrapping is the contract's business and not the snapping's, so a
+    // scroller that wraps still goes round at either end.
+    if (!snaps) {
+      const edge = ends();
+      if (wraps && ((by < 0 && edge.start) || (by > 0 && edge.end))) {
+        goTo(by < 0 ? count - 1 : 0);
+        return;
+      }
+      // ONE SCREEN OF THE TRACK, measured rather than assumed, and reversed in
+      // a right-to-left locale: `scrollBy` takes a physical offset, so *next*
+      // is a negative one wherever the inline axis runs the other way.
+      const screen = vertical ? track.clientHeight : track.clientWidth;
+      const away = screen * by * (!vertical && rightToLeft() ? -1 : 1);
+      track.scrollBy({
+        top: vertical ? away : 0,
+        left: vertical ? 0 : away,
+        behavior: behavior(),
+      });
+      return;
+    }
     const from = current();
     let next = from + by;
     if (next < 0) next = wraps ? count - 1 : 0;
@@ -240,6 +273,13 @@ function enhance(root) {
   let rotating = false;
   let timer = null;
   let stopped = !allowed;
+  // AND POLITENESS COMES BACK WHEN ROTATION IS REFUSED. The markup ships
+  // `aria-live="off"` on the track of a carousel that declares autoplay,
+  // because something speaking every few seconds unasked makes the rest of the
+  // page unusable. Only `start` and `hold` ever moved it back, and under
+  // `prefers-reduced-motion` neither runs — so the track stayed silent for
+  // ever, for exactly the reader who is driving it by hand.
+  if (!allowed) track.setAttribute("aria-live", "polite");
 
   function tick() {
     if (!rotating) return;

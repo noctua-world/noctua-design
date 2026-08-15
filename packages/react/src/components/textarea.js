@@ -25,6 +25,25 @@ export function Textarea({ name, label, value, placeholder, hint, error, require
     .filter(Boolean)
     .join(" ");
   const boxClass = ["nd-textarea", className].filter(Boolean).join(" ");
+  // See the Dioxus half, and `INPUT_REACT`: the sentence is rendered, and
+  // `other` is the form a component handed no locale may choose.
+  let counted = "";
+  if (counter) {
+    const shape = String(counterLabel ?? "");
+    let form = shape;
+    if (shape.includes(":")) {
+      form = "";
+      for (const part of shape.split("|")) {
+        const at = part.indexOf(":");
+        if (at >= 0 && part.slice(0, at).trim() === "other") form = part.slice(at + 1);
+      }
+    }
+    counted = form
+      .split("{count}")
+      .join(String(String(value ?? "").length))
+      .split("{max}")
+      .join(String(maxlength ?? ""));
+  }
 
   return h(
     Field,
@@ -67,14 +86,18 @@ export function Textarea({ name, label, value, placeholder, hint, error, require
       ...rest,
     }),
     counter
-      ? h("p", {
-          key: "n",
-          className: "nd-textarea-counter",
-          id: counterId,
-          role: "status",
-          "aria-live": "polite",
-          "data-nd-textarea-counter": "",
-        })
+      ? h(
+          "p",
+          {
+            key: "n",
+            className: "nd-textarea-counter",
+            id: counterId,
+            role: "status",
+            "aria-live": "polite",
+            "data-nd-textarea-counter": "",
+          },
+          counted,
+        )
       : null,
   );
 }

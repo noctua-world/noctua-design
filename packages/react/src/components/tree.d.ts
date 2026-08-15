@@ -16,7 +16,7 @@ export interface TreeProps {
   label: string;
   /** Whether nodes can be chosen, and how many. `none` is the default and makes the tree navigation only. `multiple` also writes `aria-multiselectable`. **A selectable node should not be a link**, and carries `TreeItem { value }` instead. */
   selection?: TreeSelection;
-  /** The field the chosen nodes are submitted under. Its presence puts a real hidden checkbox inside every selectable node, so the state survives a form post with no script. Absent, the selection is only on the screen. */
+  /** The field the chosen nodes are submitted under. The script puts a real hidden checkbox inside every selectable node, so a form posts what is chosen. With no script a tree has no selection at all. */
   form?: string;
   /** The height of a row and the step each level is indented by. Rows are targets, so all three values clear WCAG 2.5.8's 24px minimum. */
   size?: TreeSize;

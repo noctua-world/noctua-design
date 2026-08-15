@@ -354,14 +354,16 @@ pub(crate) const TABS: Page = Page {
     component: None,
 };
 
-/// Six components that make a table, and the control that pages through one.
+/// The six components that make a table, and nothing else.
 ///
-/// `Pagination` is on it because it is what goes under a table — and it is a
-/// component of its own rather than a prop, because paging is a question about
-/// a dataset and serves a list exactly as well.
+/// `Pagination` was on it once and has a page of its own now. Paging is a
+/// question about a dataset rather than about the table showing it, and a list
+/// of search results wants exactly the same control, so it was never a part of
+/// this family. The `parts` list sixty lines below is the authority, and this
+/// sentence used to disagree with it.
 ///
-/// Titled `Table`, for the reason `AVATARS` is titled `Avatar`. `Pagination`
-/// sharing the page does not make *Tables* a name; it makes the page's title
+/// Titled `Table`, for the reason `AVATARS` is titled `Avatar`. Six parts
+/// sharing one page does not make *Tables* a name. It makes the page's title
 /// the name of the component a reader came for.
 pub(crate) const TABLES: Page = Page {
     slug: "tables",

@@ -337,6 +337,110 @@ fn rust_index(components: &[Component]) -> String {
 
 // --- React -----------------------------------------------------------------
 
+/// Every word JavaScript refuses as a binding name inside a module.
+///
+/// A `.js` THIS EMITTER WRITES HAS TO PARSE, and `Table.export` is the prop
+/// that proved nothing was checking. `export function Table({ …, export, … })`
+/// is a `SyntaxError` on the destructure — `export` is a keyword, not an
+/// identifier — so the whole module failed to load, and it had failed for an
+/// unknown length of time with `cargo xtask check` green throughout.
+///
+/// The whole list rather than the one word that bit: the next spec to name a
+/// prop `class`, `default`, `new`, `static` or `interface` would land in
+/// exactly the same place, and a list of one is a list that gets extended one
+/// production incident at a time.
+///
+/// Everything reserved in a module, which is strict-mode code: the keywords,
+/// the future-reserved words strict mode adds, and `arguments` and `eval`,
+/// which strict mode refuses as binding targets specifically.
+const RESERVED: [&str; 48] = [
+    "arguments",
+    "await",
+    "break",
+    "case",
+    "catch",
+    "class",
+    "const",
+    "continue",
+    "debugger",
+    "default",
+    "delete",
+    "do",
+    "else",
+    "enum",
+    "eval",
+    "export",
+    "extends",
+    "false",
+    "finally",
+    "for",
+    "function",
+    "if",
+    "implements",
+    "import",
+    "in",
+    "instanceof",
+    "interface",
+    "let",
+    "new",
+    "null",
+    "package",
+    "private",
+    "protected",
+    "public",
+    "return",
+    "static",
+    "super",
+    "switch",
+    "this",
+    "throw",
+    "true",
+    "try",
+    "typeof",
+    "var",
+    "void",
+    "while",
+    "with",
+    "yield",
+];
+
+/// The identifier the generated function binds a prop to.
+///
+/// `camel` for every prop JavaScript will take as a name, and a leading
+/// underscore for the ones it will not — the same escape `pascal` already makes
+/// for a Rust variant that would otherwise start with a digit.
+///
+/// The PROP is not renamed, only the binding: a caller still writes
+/// `<Table export />`, because a keyword is a perfectly ordinary property name
+/// and only a *binding* is refused. Renaming the prop would have made the two
+/// packages declare different surfaces, which is the one thing this file exists
+/// to prevent.
+#[must_use]
+fn js_local(prop: &str) -> String {
+    let name = camel(prop);
+    if RESERVED.contains(&name.as_str()) {
+        format!("_{name}")
+    } else {
+        name
+    }
+}
+
+/// One entry in the destructuring parameter list.
+///
+/// `export: _export` where the prop's own name is a keyword, and the bare name
+/// everywhere else — so the object the caller passes is unchanged and only the
+/// local identifier moves.
+#[must_use]
+fn js_param(prop: &str) -> String {
+    let name = camel(prop);
+    let local = js_local(prop);
+    if local == name {
+        name
+    } else {
+        format!("{name}: {local}")
+    }
+}
+
 /// The expression React is handed as the tag, and any statement it needs first.
 ///
 /// A lookup rather than a switch: React takes the tag as a value, so the table
@@ -346,7 +450,7 @@ fn react_element(out: &mut String, component: &Component) -> String {
     let Some((prop_name, prop)) = component.element_switch() else {
         return format!("\"{}\"", component.meta.element);
     };
-    let field = camel(prop_name);
+    let field = js_local(prop_name);
     let table = prop
         .values
         .iter()
@@ -404,7 +508,7 @@ fn react(component: &Component) -> String {
 
     let params: Vec<String> = component
         .attributes()
-        .map(|(prop_name, _)| camel(prop_name))
+        .map(|(prop_name, _)| js_param(prop_name))
         .collect();
     let mut signature = params.clone();
     signature.push("className".to_owned());
@@ -431,7 +535,7 @@ fn react(component: &Component) -> String {
             writeln!(
                 out,
                 "  const {0}_ = {0} ?? \"{default}\";",
-                camel(prop_name)
+                js_local(prop_name)
             )
             .expect("write");
         }
@@ -453,9 +557,9 @@ fn react(component: &Component) -> String {
             continue;
         };
         let value = if prop.default.is_some() {
-            format!("{}_", camel(prop_name))
+            format!("{}_", js_local(prop_name))
         } else {
-            camel(prop_name)
+            js_local(prop_name)
         };
         writeln!(
             out,
@@ -778,6 +882,92 @@ mod tests {
         );
     }
 
+    /// A DECLARED DEFAULT REACHES REACT TOO, AND IT IS THE DECLARED ONE.
+    ///
+    /// [`a_declared_default_reaches_the_generated_rust`] asks the Rust half and
+    /// skips enums by design; [`a_bool_default_reaches_both_languages`] asserts
+    /// the camel name appears in the React source and never its value. So the
+    /// whole enum half of the React side was outside the net, and
+    /// `TableHeaderCell.wrap` shipped `?? "wrap"` against a spec that says
+    /// `nowrap` — every column heading in a React table wrapping where a Dioxus
+    /// one does not.
+    ///
+    /// The assertion is name-anchored: `<prop> ?? <default>`, quoted or not,
+    /// because a body writing `?? false` for a bool and `?? "medium"` for an
+    /// enum are the same statement in two types. Searching the file for the
+    /// value alone would be satisfied by a *different* prop's fallback.
+    ///
+    /// # The one exemption, and why it is not a hole
+    ///
+    /// A bool that defaults to `false` is exempt. React has no way to say
+    /// "absent" other than `undefined`, and `undefined` and `false` are the
+    /// same answer to every consumer of a bool: the attribute is not written,
+    /// the branch is not taken, the element is not disabled. A bool defaulting
+    /// to `true` is NOT exempt, because there absent and default differ — which
+    /// is the drift `Disclosure.marker` and `CodeBlock.copy` already shipped
+    /// once, in the other direction.
+    #[test]
+    fn every_declared_default_reaches_the_generated_react() {
+        let mut checked = 0usize;
+        for component in shipped() {
+            let source = react(&component);
+            for (prop_name, prop) in component.attributes() {
+                let Some(default) = prop.default.as_deref() else {
+                    continue;
+                };
+                if prop.kind == Kind::Bool && default == "false" {
+                    continue;
+                }
+                let name = js_local(prop_name);
+                let quoted = format!("{name} ?? \"{default}\"");
+                let bare = format!("{name} ?? {default}");
+                assert!(
+                    source.contains(&quoted) || source.contains(&bare),
+                    "{}.{prop_name} defaults to `{default}` in the spec, and the \
+                     generated React never says `{name} ?? {default}`",
+                    component.meta.name
+                );
+                checked += 1;
+            }
+        }
+        assert!(
+            checked > 0,
+            "no default was checked, so this proves nothing"
+        );
+    }
+
+    /// EVERY NAME A REACT BODY READS IS A NAME IT HAS.
+    ///
+    /// Three shipped components failed this and nothing noticed:
+    /// `lineage.js` named `filter_`, `sets_`, `view_`, `root` and a dozen more
+    /// that the generator does not emit; `lineage_figure.js` named `root`,
+    /// `shape_`, `tone_` and `parallax_`; `color_picker.js` used `control` as
+    /// an id and handed it to `Field`. Two of the three parsed perfectly — a
+    /// free variable is a runtime `ReferenceError`, not a syntax error — so
+    /// [`crate::lib::tests::every_emitted_javascript_parses`] would not have
+    /// found them either.
+    ///
+    /// A real scope check is hard; this is the cheap sufficient one. It gathers
+    /// what a file declares — its imports, its parameters, its `const`s and
+    /// `let`s, its arrow parameters — without regard to which block each is in,
+    /// and reports what is read and never among them. Flat scoping can only
+    /// miss a defect, never invent one, which is the direction a guard should
+    /// fail in.
+    #[test]
+    fn no_react_body_names_something_it_does_not_have() {
+        for component in shipped() {
+            let source = react(&component);
+            let missing = crate::javascript::undeclared(&source).unwrap_or_else(|problem| {
+                panic!("{} does not lex — {problem}", component.meta.name)
+            });
+            assert!(
+                missing.is_empty(),
+                "{}'s React body reads {missing:?}, and declares, takes or imports none of them",
+                component.meta.name
+            );
+        }
+    }
+
     #[test]
     fn every_component_reaches_both_indexes() {
         let components = shipped();
@@ -800,6 +990,91 @@ mod tests {
             );
             assert!(js.contains(&component.meta.name), "{}", component.meta.name);
         }
+    }
+
+    /// A DECLARED `attribute` IS A CLAIM ABOUT THE MARKUP, AND BOTH BODIES
+    /// HAVE TO KEEP IT.
+    ///
+    /// `rust_element` turns `attribute` into a real attribute, and it runs for
+    /// derived bodies only. A component whose body is hand-written in
+    /// `controls.rs` never reaches it, so its declarations were documentation
+    /// that documented nothing: eighteen props across `ColorPicker`,
+    /// `FileInput`, `Field`, `Meter` and `Progress` declared a `data-nd-*` no
+    /// body wrote and no script read, while the site's generated markup
+    /// snippet printed each one as though it were there. Nothing reported it,
+    /// because the values do reach the DOM — as labels, as tab names, as text.
+    ///
+    /// This asks the emitted source, so it covers both kinds of body and any
+    /// component added after it.
+    #[test]
+    fn every_declared_attribute_is_written_by_both_bodies() {
+        // The handful of HTML attributes React spells differently. Written out
+        // rather than derived, because the list is the DOM's and not a rule.
+        fn react_spelling(attribute: &str) -> &str {
+            match attribute {
+                "colspan" => "colSpan",
+                "rowspan" => "rowSpan",
+                "tabindex" => "tabIndex",
+                "maxlength" => "maxLength",
+                "minlength" => "minLength",
+                "readonly" => "readOnly",
+                "autocomplete" => "autoComplete",
+                "autofocus" => "autoFocus",
+                "spellcheck" => "spellCheck",
+                "novalidate" => "noValidate",
+                "datetime" => "dateTime",
+                "crossorigin" => "crossOrigin",
+                "inputmode" => "inputMode",
+                "for" => "htmlFor",
+                "class" => "className",
+                other => other,
+            }
+        }
+        // An attribute reaches the markup quoted (`"data-nd-size": …`), bare
+        // when it is already an identifier (`scope: …`), or as a shorthand
+        // where the value carries the same name (`src,`). All three count, and
+        // the name has to stand on its own — `size` must not be answered by
+        // `data-nd-size`.
+        fn written(source: &str, spelling: &str) -> bool {
+            if source.contains(&format!("\"{spelling}\"")) {
+                return true;
+            }
+            let bytes = source.as_bytes();
+            source.match_indices(spelling).any(|(at, _)| {
+                let before = at
+                    .checked_sub(1)
+                    .is_none_or(|i| !bytes[i].is_ascii_alphanumeric() && bytes[i] != b'_');
+                let after = bytes
+                    .get(at + spelling.len())
+                    .is_some_and(|byte| *byte == b':' || *byte == b',');
+                before && after
+            })
+        }
+
+        // COLLECTED, NOT ASSERTED ONE AT A TIME. The first version stopped at
+        // the first prop and the fix was eighteen rebuilds long.
+        let mut missing = Vec::new();
+        for component in shipped() {
+            let rust = dioxus(&component);
+            let js = react(&component);
+            for (name, prop) in component.attributes() {
+                let Some(attribute) = prop.attribute.as_deref() else {
+                    continue;
+                };
+                let owner = &component.meta.name;
+                if !written(&rust, attribute) {
+                    missing.push(format!(
+                        "{owner}.{name} declares `{attribute}`, Dioxus writes it nowhere"
+                    ));
+                }
+                if !written(&js, attribute) && !written(&js, react_spelling(attribute)) {
+                    missing.push(format!(
+                        "{owner}.{name} declares `{attribute}`, React writes it nowhere"
+                    ));
+                }
+            }
+        }
+        assert!(missing.is_empty(), "{}", missing.join("\n"));
     }
 
     #[test]

@@ -33,7 +33,7 @@ values = ["auto", "start", "end"]
 variants = false
 default = "auto"
 attribute = "data-nd-placement"
-doc = "Where it hangs off its button: `auto`, `start` or `end`. Defaults to `auto`, which measures the room below and flips above when there is not enough. `start` and `end` pin the menu's leading or trailing edge to the button."
+doc = "Where it hangs off its button: `auto`, `start` or `end`. `auto` measures the room, flipping above and hanging from whichever edge fits. `start` and `end` pin one edge whatever the room."
 
 [prop.children]
 type = "children"
@@ -52,7 +52,7 @@ the arrow keys between the items. Escape and choosing an item both return focus
 to the button that opened it."""
 
 [keyboard]
-"Down or Up" = "Moves to the next or previous item, and wraps at either end. Opening with the keyboard focuses the first item."
+"Down or Up" = "Moves to the next or previous item, wrapping at either end. Down opens onto the first item and Up onto the last."
 "Home or End" = "Moves to the first item or the last."
 "A printable key" = "Jumps to the next item whose label starts with that character."
 "Enter or Space" = "Runs the item under focus and closes the menu."

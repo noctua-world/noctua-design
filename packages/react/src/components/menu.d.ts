@@ -13,7 +13,7 @@ export interface MenuProps {
   name: string;
   /** The menu's own name, in the reader's language, such as *Actions for this invoice*. **Required**, because a screen reader announces the menu when focus enters it. Name what the actions are about. */
   label: string;
-  /** Where it hangs off its button: `auto`, `start` or `end`. Defaults to `auto`, which measures the room below and flips above when there is not enough. `start` and `end` pin the menu's leading or trailing edge to the button. */
+  /** Where it hangs off its button: `auto`, `start` or `end`. `auto` measures the room, flipping above and hanging from whichever edge fits. `start` and `end` pin one edge whatever the room. */
   placement?: MenuPlacement;
   className?: string;
   children?: ReactNode;

@@ -474,14 +474,52 @@ test("every part of every table carries its role", async ({ page }) => {
 });
 
 test("the stacked label is drawn and never announced", async ({ page }) => {
+  // NARROW ENOUGH FOR THE LAYOUT THIS IS ABOUT. `.nd-table-label` is
+  // `display: none` until a table stacks, and `auto` stacks on the CONTAINER
+  // rather than the window. At the width this ran at, every label it read was
+  // undrawn, so the half of the title about drawing could not fail.
+  await page.setViewportSize({ width: 390, height: 900 });
   await page.goto(url(PAGE.tables));
   await showParts(page);
-  const labels = await page
-    .locator(".nd-table-label")
-    .evaluateAll((all) => all.map((one) => one.getAttribute("aria-hidden")));
-  expect(labels.length).toBeGreaterThan(0);
-  // A screen reader already has the column from its heading.
-  for (const one of labels) expect(one).toBe("true");
+
+  const drawn = await page.locator(".nd-table-label").evaluateAll((all) =>
+    all
+      // A label in a column a reader has hidden is a label for nothing, and the
+      // page ships one example with a column already off.
+      .filter((one) => !one.closest("td, th")?.hidden)
+      .map((one) => {
+        const box = one.getBoundingClientRect();
+        return {
+          text: one.textContent.trim(),
+          display: getComputedStyle(one).display,
+          width: box.width,
+          height: box.height,
+          hidden: one.getAttribute("aria-hidden"),
+        };
+      }),
+  );
+  expect(drawn.length, "the page stacked nothing, so nothing was labelled").toBeGreaterThan(20);
+  for (const label of drawn) {
+    // DRAWN, AS A BOX A READER CAN SEE. A stacked value with no name over it is
+    // a column of figures nobody can read.
+    expect(label.display, `${label.text} is not drawn`).not.toBe("none");
+    expect(label.width, `${label.text} is ${label.width}px wide`).toBeGreaterThan(0);
+    expect(label.height, `${label.text} is ${label.height}px tall`).toBeGreaterThan(0);
+    expect(label.hidden, `${label.text} is offered to a screen reader`).toBe("true");
+  }
+
+  // AND OUT OF THE TREE, which is what `aria-hidden` only claims. Read from the
+  // browser's own accessibility tree rather than from the attribute, because
+  // the attribute is the recipe and this is the meal. A screen reader has the
+  // column from the row's heading, so a cell announcing both says it twice.
+  const cell = page
+    .locator(".nd-table-cell:has(.nd-table-label):has(.nd-table-value)")
+    .first();
+  const named = await cell.locator(".nd-table-label").evaluate((el) => el.textContent.trim());
+  const value = await cell.locator(".nd-table-value").evaluate((el) => el.textContent.trim());
+  const said = await cell.ariaSnapshot();
+  expect(said, "the cell announces nothing at all").toContain(value);
+  expect(said, `the cell says ${named} before every value in the column`).not.toContain(named);
 });
 
 test("no two examples on the page render the same thing", async ({ page }) => {
@@ -595,22 +633,86 @@ test("an aligned cell is really aligned, at every width", async ({ page }) => {
   // is a flex column that ends its own items: the words moved to the end, the
   // values under them did not, and a column of money read as one that had come
   // loose from its name.
+  //
+  // MEASURED, NOT READ. `text-align` is not what places a heading's words. The
+  // heading is a flex column, and a separate `align-items` rule ends its items.
+  // A test that read the property was asking a rule with no say over the thing
+  // it asserted. What is read below is where the drawn words sit.
   for (const width of [1440, 900]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto(url(PAGE.tables));
     await showParts(page);
-    const wrong = await page.evaluate(() =>
-      [...document.querySelectorAll('[data-nd-align="numeric"], [data-nd-align="end"]')]
-        .filter((cell) => {
-          // A stacked table really does flatten them: there is no column left
-          // to align to, and the label sits above the value.
-          const table = cell.closest(".nd-table");
-          return table && getComputedStyle(table).display === "table";
-        })
-        .filter((cell) => !["end", "right"].includes(getComputedStyle(cell).textAlign))
-        .map((cell) => `${cell.closest("[data-nd-table]")?.getAttribute("data-nd-table")}: ${cell.textContent.trim().slice(0, 20)}`),
-    );
-    expect(wrong).toEqual([]);
+    const cells = await page.evaluate(() => {
+      /** Where a cell's drawn content sits, against the cell's own content box. */
+      const placed = (cell) => {
+        const heading = cell.querySelector(".nd-table-heading");
+        const boxes = [];
+        if (heading) {
+          // The column's items, which is what `align-items` moves.
+          for (const item of heading.children) boxes.push(item.getBoundingClientRect());
+        } else {
+          // The runs of the cell's own text, which is what `text-align` moves.
+          // A range over a text node is the glyphs and nothing around them.
+          const walk = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT);
+          for (let node = walk.nextNode(); node; node = walk.nextNode()) {
+            if (!node.textContent.trim()) continue;
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            boxes.push(...range.getClientRects());
+          }
+        }
+        const real = boxes.filter((one) => one.width > 0);
+        if (real.length === 0) return null;
+        const style = getComputedStyle(cell);
+        const box = cell.getBoundingClientRect();
+        const from =
+          box.left + Number.parseFloat(style.borderLeftWidth) + Number.parseFloat(style.paddingLeft);
+        const to =
+          box.right -
+          Number.parseFloat(style.borderRightWidth) -
+          Number.parseFloat(style.paddingRight);
+        const left = Math.min(...real.map((one) => one.left));
+        const right = Math.max(...real.map((one) => one.right));
+        return { start: left - from, end: to - right, slack: to - from - (right - left) };
+      };
+
+      const measured = [];
+      for (const cell of document.querySelectorAll(
+        '[data-nd-align="numeric"], [data-nd-align="end"], [data-nd-align="center"]',
+      )) {
+        // A stacked table really does flatten them: there is no column left
+        // to align to, and the label sits above the value.
+        const table = cell.closest(".nd-table");
+        if (!table || getComputedStyle(table).display !== "table") continue;
+        const where = placed(cell);
+        // A cell its own words fill says nothing about where they were put.
+        if (!where || where.slack <= 4) continue;
+        measured.push({
+          align: cell.getAttribute("data-nd-align"),
+          where,
+          name: `${cell.closest("[data-nd-table]")?.getAttribute("data-nd-table")}: ${cell.textContent.trim().slice(0, 20)}`,
+        });
+      }
+      return measured;
+    });
+
+    const ends = cells.filter((cell) => cell.align !== "center");
+    const middles = cells.filter((cell) => cell.align === "center");
+    // The floor. A sweep that measured nothing would keep every claim under it.
+    expect(ends.length, `${width}px: no aligned cell has room to be aligned in`).toBeGreaterThan(20);
+    expect(middles.length, `${width}px: nothing on the page declares centre`).toBeGreaterThan(0);
+    for (const cell of ends) {
+      expect(
+        cell.where.end,
+        `${width}px: ${cell.name} stops ${Math.round(cell.where.end)}px short of the end`,
+      ).toBeLessThanOrEqual(1);
+    }
+    for (const cell of middles) {
+      expect(
+        Math.abs(cell.where.start - cell.where.end),
+        `${width}px: ${cell.name} sits ${Math.round(cell.where.start)}px in and ${Math.round(cell.where.end)}px out`,
+      ).toBeLessThanOrEqual(1);
+    }
   }
 });
 
@@ -653,4 +755,150 @@ test("no id appears twice on the tables page, in any locale", async ({ page }) =
     });
     expect(duplicates).toEqual([]);
   }
+});
+
+// --- What the head claims, and what the keyboard does ------------------------
+
+test("aria-sort names the columns a reader can sort by, and no others", async ({ page }) => {
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  const counted = await page.evaluate(() => {
+    const heads = [...document.querySelectorAll(".nd-table-header-cell")];
+    return {
+      // MEASURED: 403 of these for 13 sortable columns, 214 of them on row
+      // headings that name a record and can never be sorted by.
+      sorted: heads.filter((cell) => cell.hasAttribute("aria-sort")).length,
+      onRows: heads.filter(
+        (cell) => cell.hasAttribute("aria-sort") && cell.getAttribute("scope") !== "col",
+      ).length,
+      // `none` MEANS "SORTABLE, NOT SORTED", so it may only appear where the
+      // script drew a control. A stated direction may stand on its own: a
+      // table a server sorted says so whether or not a reader can re-sort it.
+      idleWithoutControl: heads.filter(
+        (cell) =>
+          cell.getAttribute("aria-sort") === "none" && !cell.querySelector(".nd-table-sort"),
+      ).length,
+      controls: document.querySelectorAll(".nd-table-sort").length,
+    };
+  });
+  expect(counted.onRows).toBe(0);
+  expect(counted.idleWithoutControl).toBe(0);
+  expect(counted.sorted).toBeGreaterThanOrEqual(counted.controls);
+  expect(counted.controls).toBeGreaterThan(0);
+});
+
+test("with the script blocked only a stated direction claims a sort", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  const said = await page.evaluate(() =>
+    [...document.querySelectorAll(".nd-table-header-cell[aria-sort]")].map((cell) =>
+      cell.getAttribute("aria-sort"),
+    ),
+  );
+  // The server writes it only where a caller stated a direction, because a
+  // component cannot see its column's declaration. So `none` never ships.
+  expect(said.includes("none")).toBe(false);
+  await context.close();
+});
+
+test("Enter chooses a row, and Shift with an arrow extends the choice", async ({ page }) => {
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  const table = named(page, "team");
+  const boxes = table.locator("tbody .nd-table-select input");
+  await expect(boxes.first()).toBeVisible();
+
+  // Focused rather than clicked: a click may land on the `<div>` inside the
+  // cell, and the grid's handler answers only a key pressed on the cell.
+  const cell = table.locator("tbody .nd-table-row").first().locator("th, td").nth(1);
+  await cell.evaluate((el) => el.focus());
+  // ENTER, WHICH THE CONTRACT HAS ALWAYS NAMED AND ONLY SPACE ANSWERED. The
+  // example arrives with a row already chosen, so what is asserted is the
+  // toggle rather than a state.
+  const first = await boxes.nth(0).isChecked();
+  await page.keyboard.press("Enter");
+  expect(await boxes.nth(0).isChecked()).toBe(!first);
+  await page.keyboard.press("Enter");
+  expect(await boxes.nth(0).isChecked()).toBe(first);
+
+  // AND SHIFT EXTENDS. `shiftKey` used to appear in the resize handle and in a
+  // pointer click and nowhere else, so the row of the keyboard table about
+  // choosing several rows from the keyboard reached no code at all.
+  await boxes.nth(1).uncheck();
+  await cell.evaluate((el) => el.focus());
+  await page.keyboard.press("Shift+ArrowDown");
+  expect(await boxes.nth(1).isChecked()).toBe(true);
+});
+
+test("a table with a chosen row says nothing until the choice changes", async ({ page }) => {
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  // `wireSelection` painted at wiring time and `paint` ended in `say`, so a
+  // table that arrived with a row chosen announced "1 person chosen." having
+  // changed nothing.
+  const spoken = await page
+    .locator("[data-nd-table-status]")
+    .evaluateAll((all) => all.map((one) => one.textContent.trim()).filter(Boolean));
+  expect(spoken).toEqual([]);
+});
+
+test("Shift on a resize moves ten steps, which is what both contracts say", async ({ page }) => {
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  const handle = page.locator(".nd-table-resize").first();
+  const width = () =>
+    handle.evaluate((el) => {
+      const column = el.closest(".nd-table-header-cell")?.dataset.ndColumn;
+      const box = el
+        .closest(".nd-table")
+        ?.querySelector(`.nd-table-column[data-nd-column="${column}"] col`);
+      return Number.parseFloat(box?.style.width ?? "0");
+    });
+
+  await handle.focus();
+  await page.keyboard.press("Alt+ArrowRight");
+  const one = await width();
+  await handle.focus();
+  await page.keyboard.press("Shift+Alt+ArrowRight");
+  const ten = await width();
+  // One step is 2% of the table, so ten of them is twenty. It was five.
+  expect(Math.round(ten - one)).toBe(20);
+});
+
+test("an emphasised row is not one of the records a total is taken over", async ({ page }) => {
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  // `emphasis` IS LOAD-BEARING, and its doc used to say in bold that it is
+  // not. A subtotal line must not be summed into the total above it and a
+  // group heading must not be counted as a row, so `recount` filters both out
+  // — which makes the prop decide what a row IS rather than how it looks.
+  const reckoned = await named(page, "row-emphasis").evaluate((table) => {
+    const number = (text) =>
+      Number.parseFloat(String(text).replace(/[^\d.,-]/g, "").replace(",", ".")) || 0;
+    const cell = table.querySelector('[data-nd-aggregate]:not([data-nd-aggregate="none"])');
+    if (!cell) return null;
+    const column = cell.getAttribute("data-nd-column");
+    // The scope the cell declares: its own section, or the whole table.
+    const scope =
+      cell.getAttribute("data-nd-aggregate-over") === "section"
+        ? cell.closest("tbody, tfoot")
+        : table;
+    const rows = [...scope.querySelectorAll("tbody .nd-table-row")].map((row) => ({
+      plain: (row.getAttribute("data-nd-emphasis") ?? "none") === "none",
+      value: number(row.querySelector(`[data-nd-column="${column}"] .nd-table-value`)?.textContent),
+    }));
+    const sum = (only) => rows.filter(only).reduce((total, row) => total + row.value, 0);
+    return {
+      said: number(cell.textContent),
+      plain: sum((row) => row.plain),
+      every: sum(() => true),
+      emphasised: rows.filter((row) => !row.plain).length,
+    };
+  });
+  expect(reckoned, "no aggregate on the table this is about").not.toBeNull();
+  expect(reckoned.emphasised, "no emphasised row to leave out").toBeGreaterThan(0);
+  expect(Math.round(reckoned.said)).toBe(Math.round(reckoned.plain));
+  expect(Math.round(reckoned.said)).not.toBe(Math.round(reckoned.every));
 });

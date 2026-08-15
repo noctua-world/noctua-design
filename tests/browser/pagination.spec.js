@@ -31,11 +31,50 @@ test("pagination is links, and the ends are absent rather than dead", async ({ p
   // The first page has no *previous* and the last has no *next*: a control that
   // goes nowhere is worse than no control, because a reader presses it before
   // learning that.
-  const first = page.locator('[data-nd-pagination="palettes"]');
-  expect(await first.getAttribute("data-nd-page")).toBe("1");
-  await expect(first.locator('[data-nd-pagination-step="previous"]')).toHaveCount(0);
+  //
+  // THE ATTRIBUTE THIS ASKED ABOUT HAS NEVER BEEN EMITTED. Both counts read
+  // `[data-nd-pagination-step="previous"]`, and what the component writes is a
+  // CLASS with a `rel`. Nothing matched either selector, on any page, in any
+  // state, so both claims were true of a page drawing every control there is.
+  const step = (nav, way) => nav.locator(`a.nd-pagination-step[rel="${way}"]`);
 
+  // The floor, and the reason this is a real claim now. A page in the middle
+  // draws both steps, so the selector finds something when there is something
+  // to find.
+  const middle = page.locator('[data-nd-pagination="palettes-compact"]');
+  await expect(step(middle, "prev"), "the selector matches nothing at all").toHaveCount(1);
+  await expect(step(middle, "next"), "the selector matches nothing at all").toHaveCount(1);
+
+  // The last page, which is the end that can be proved. It was given both
+  // words and drew one control: a *next* here is a link to a page that does
+  // not exist. The first page of the set comes from an example that never asked
+  // for a *previous*, so its absence there proves nothing.
   const last = page.locator('[data-nd-pagination="palettes-last"]');
   expect(await last.getAttribute("data-nd-page")).toBe(await last.getAttribute("data-nd-pages"));
-  await expect(last.locator('[data-nd-pagination-step="next"]')).toHaveCount(0);
+  await expect(step(last, "prev"), "the last page cannot go back").toHaveCount(1);
+  await expect(step(last, "next"), "the last page offers a page after it").toHaveCount(0);
+
+  // And the rule over every control of the kind on the page, from each one's
+  // own numbers rather than from a name written here.
+  const steps = await page.locator("a.nd-pagination-step").evaluateAll((all) =>
+    all.map((one) => {
+      const nav = one.closest("[data-nd-pagination]");
+      return {
+        way: one.getAttribute("rel"),
+        page: Number(nav.getAttribute("data-nd-page")),
+        pages: Number(nav.getAttribute("data-nd-pages")),
+        href: one.getAttribute("href"),
+        // Absent rather than dead is the whole claim, and a link that says it
+        // is disabled is the dead one wearing the live one's markup.
+        off: one.getAttribute("aria-disabled"),
+      };
+    }),
+  );
+  expect(steps.length, "the page draws no steps at all").toBeGreaterThan(4);
+  for (const one of steps) {
+    expect(one.href, `a ${one.way} step goes nowhere`).toBeTruthy();
+    expect(one.off, `a ${one.way} step is drawn dead`).toBeNull();
+    if (one.way === "prev") expect(one.page, "a first page offers a page before it").toBeGreaterThan(1);
+    if (one.way === "next") expect(one.page, "a last page offers a page after it").toBeLessThan(one.pages);
+  }
 });

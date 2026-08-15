@@ -28,6 +28,25 @@ export function Input({ name, label, kind, value, placeholder, hint, error, requ
     .join(" ");
   const password = kind_ === "password";
   const boxClass = ["nd-input", className].filter(Boolean).join(" ");
+  // See the Dioxus half: the counter says its sentence before any script runs,
+  // and `other` is the form a component handed no locale may choose.
+  let counted = "";
+  if (counter) {
+    const shape = String(counterLabel ?? "");
+    let form = shape;
+    if (shape.includes(":")) {
+      form = "";
+      for (const part of shape.split("|")) {
+        const at = part.indexOf(":");
+        if (at >= 0 && part.slice(0, at).trim() === "other") form = part.slice(at + 1);
+      }
+    }
+    counted = form
+      .split("{count}")
+      .join(String(String(value ?? "").length))
+      .split("{max}")
+      .join(String(maxlength ?? ""));
+  }
 
   return h(
     Field,
@@ -123,14 +142,18 @@ export function Input({ name, label, kind, value, placeholder, hint, error, requ
         : null,
     ),
     counter
-      ? h("p", {
-          key: "n",
-          className: "nd-input-counter",
-          id: counterId,
-          role: "status",
-          "aria-live": "polite",
-          "data-nd-input-counter": "",
-        })
+      ? h(
+          "p",
+          {
+            key: "n",
+            className: "nd-input-counter",
+            id: counterId,
+            role: "status",
+            "aria-live": "polite",
+            "data-nd-input-counter": "",
+          },
+          counted,
+        )
       : null,
   );
 }

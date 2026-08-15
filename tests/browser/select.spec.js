@@ -499,3 +499,98 @@ test("a reset takes back what the script added", async ({ page }) => {
   ).toBe(4);
   expect(await posted(page, "nd-select-palette-form")).toEqual(["palette-form="]);
 });
+
+// --- What the enhanced control says about the field --------------------------
+
+test("a required select says so on the control a reader can reach", async ({ page }) => {
+  await page.goto(url(PAGE.select));
+  // THE NATIVE CONTROL IS HIDDEN, SO ITS `required` IS UNREACHABLE. The string
+  // `aria-required` did not exist anywhere in this repository, under a contract
+  // saying it follows from the prop — so an enhanced compulsory field
+  // announced itself exactly like an optional one.
+  const compulsory = await page.evaluate(() =>
+    [...document.querySelectorAll(".nd-select-native[required]")].map((native) => {
+      const field = native.closest("[data-nd-select]");
+      const control = field.querySelector(".nd-select-control");
+      const search = field.querySelector(".nd-select-search");
+      return {
+        name: native.name,
+        control: control?.getAttribute("aria-required"),
+        search: search ? search.getAttribute("aria-required") : "true",
+      };
+    }),
+  );
+  expect(compulsory.length).toBeGreaterThan(0);
+  for (const field of compulsory) {
+    expect(field.control, `${field.name}'s button`).toBe("true");
+    expect(field.search, `${field.name}'s filter box`).toBe("true");
+  }
+});
+
+test("a creatable select always has the filter box creating depends on", async ({ page }) => {
+  await page.goto(url(PAGE.select));
+  // `creatable` is consumed inside `applyFilter`, which runs only where there
+  // is a box to filter with, and `create()` reads that box. Without one the
+  // attribute reached nothing at all.
+  const wrong = await page.evaluate(
+    () =>
+      document.querySelectorAll('[data-nd-creatable="true"]:not([data-nd-searchable="true"])')
+        .length,
+  );
+  expect(wrong).toBe(0);
+});
+
+test("the browser's own refusal arrives with the word that introduces it", async ({ page }) => {
+  await page.goto(url(PAGE.select));
+  // THE CASE `error_slot` EXISTS FOR. `Field` used to render `error_label`
+  // only beside a caller's own `error`, so the one path the slot was built
+  // for — a script writing the browser's `validationMessage` into an empty
+  // paragraph — never got its visually hidden prefix.
+  const said = await page.evaluate(() => {
+    const native = document.querySelector(
+      '[data-nd-select] .nd-select-native[required][name="palette-compare"]',
+    );
+    const field = native.closest(".nd-field");
+    const slot = field.querySelector("[data-nd-field-error]");
+    native.form?.requestSubmit?.();
+    return {
+      prefix: slot.querySelector(".nd-visually-hidden")?.textContent.trim() ?? "",
+      message: slot.querySelector("[data-nd-field-message]")?.textContent.trim() ?? "",
+    };
+  });
+  expect(said.prefix).not.toBe("");
+});
+
+test("Home and End reach the list once the filter box is empty", async ({ page }) => {
+  await page.goto(url(PAGE.select));
+  // BOTH USED TO BAIL OUT WHENEVER THERE WAS A FILTER BOX, and the only
+  // `multiple` select on the site is searchable — so the two ways of moving
+  // across a long list did not work anywhere it mattered. With something typed
+  // they are still the caret's, which is the case the bail-out was written for.
+  const field = page.locator('[data-nd-select]:has(#nd-select-palette-compare)');
+  await field.locator(".nd-select-control").click();
+  const search = field.locator(".nd-select-search");
+  await expect(search).toBeVisible();
+
+  await page.keyboard.press("End");
+  const last = await field.evaluate(
+    (el) => el.querySelector("[aria-activedescendant]")?.getAttribute("aria-activedescendant"),
+  );
+  await page.keyboard.press("Home");
+  const first = await field.evaluate(
+    (el) => el.querySelector("[aria-activedescendant]")?.getAttribute("aria-activedescendant"),
+  );
+  expect(first).not.toBe(last);
+  expect(first).toBeTruthy();
+
+  // And with something typed the caret keeps them.
+  await search.fill("a");
+  const before = await field.evaluate(
+    (el) => el.querySelector("[aria-activedescendant]")?.getAttribute("aria-activedescendant"),
+  );
+  await page.keyboard.press("End");
+  const after = await field.evaluate(
+    (el) => el.querySelector("[aria-activedescendant]")?.getAttribute("aria-activedescendant"),
+  );
+  expect(after).toBe(before);
+});

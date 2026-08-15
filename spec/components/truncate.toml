@@ -25,5 +25,10 @@ type = "children"
 doc = "The text to clip."
 
 [a11y]
-needs_name = true
+# NO NAME IS OWED, AND ASKING FOR ONE WAS THE DEFECT. This said `needs_name`
+# on a role-less `<span>` with no naming prop, so the reference printed a
+# requirement nothing here can satisfy, one line above the note saying the
+# clipping is visual. It also made the variant grid stamp `aria-labelledby` on
+# every specimen, which replaced the clipped text in the accessible tree with
+# the caption beside it — the one thing this component promises not to do.
 notes = "The clipping is visual only. The full text stays in the accessible tree, so a screen reader reads the whole value. Cutting the announcement too would hide content from readers who cannot see the ellipsis."

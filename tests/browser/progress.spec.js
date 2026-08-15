@@ -6,7 +6,7 @@
 
 import { expect, test } from "@playwright/test";
 
-import { PAGE, url } from "./pages.js";
+import { PAGE, url, showParts } from "./pages.js";
 
 const named = (page, name) => page.locator(`[data-nd-progress="${name}"]`);
 
@@ -58,13 +58,30 @@ test("the sweep moves, and stops when a reader asks for less movement", async ({
   await page.emulateMedia({ reducedMotion: null });
 });
 
-test("what is read and what is heard are the same sentence", async ({ page }) => {
+test("what is read and what is heard are the same sentence, or there is nothing to read", async ({
+  page,
+}) => {
   await page.goto(url(PAGE.progress));
+  // The folds first. A bar behind a shut one reads as a bar that draws
+  // nothing, and the busy half below would then pass on any page.
+  await showParts(page);
   for (const name of ["upload", "failed"]) {
-    const shown = await named(page, name).locator(".nd-progress-value").innerText();
+    const value = named(page, name).locator(".nd-progress-value");
+    await expect(value, `${name} draws no reading`).toBeVisible();
+    const shown = await value.innerText();
     const heard = await named(page, name).locator("progress").getAttribute("aria-valuetext");
     expect(heard).toBe(shown);
   }
+
+  // THE BUSY BAR IS THE ONE THAT DIFFERS, and the sweep used to skip it. It has
+  // no number to draw, so the page shows nothing and the sentence goes to a
+  // reader who is being read to. That is the whole case for `busy_label`, and
+  // the two bars above cannot make it: they say the same thing both ways.
+  const busy = named(page, "import");
+  const seen = await busy.locator(".nd-progress-value").isVisible();
+  expect(seen, "a busy bar drew a reading it does not have").toBe(false);
+  const heard = await busy.locator("progress").getAttribute("aria-valuetext");
+  expect(heard?.trim(), "a busy bar announced nothing at all").toBeTruthy();
 });
 
 test("size is a measurement, not a word", async ({ page }) => {

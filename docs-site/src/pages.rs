@@ -2282,6 +2282,15 @@ fn specimen_markup(
         if name == "type" && !kind.is_empty() {
             continue;
         }
+        // AND NEVER AN ARIA ATTRIBUTE. The defaults are here so compound CSS
+        // rules match, and no rule in this system is written against an
+        // `aria-*` name that a specimen would otherwise have to invent. What
+        // it did invent was `aria-sort="none"` on eight `TableHeaderCell`
+        // pictures — a still `<th>` announcing itself as a column somebody can
+        // sort by, which is the exact claim that prop stopped making.
+        if name.starts_with("aria-") {
+            continue;
+        }
         let _ = write!(defaults, " {name}=\"{default}\"");
     }
     // Block-level components read better with a sentence; an inline one reads

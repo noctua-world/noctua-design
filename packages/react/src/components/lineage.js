@@ -19,32 +19,57 @@ import {
   some,
 } from "@noctua-world/design-tokens/lineage.js";
 export function Lineage({ name, label, graph, view, route, line, reach, lettering, size, tilt, thickness, filter, filterMode, occasion, sets, parallax, pick, form, height, emptyLabel, cameraLabel, zoomInLabel, zoomOutLabel, fitLabel, elidedLabel, matchesLabel, className, children, ...rest }) {
-  const filter = filter_ ?? "";
-  const sets = sets_ ?? "";
-  const occasion = occasion_ ?? "";
-  const form = form_ ?? "";
-  const elidedLabel = elided_label ?? "";
-  const drawing = draw(graph, { view: view_, route: route_, isolate: filter_mode_ === "isolate", shy: reach_ === "shy" }, filter, sets);
+  const view_ = view ?? "flat";
+  const route_ = route ?? "elbow";
+  const reach_ = reach ?? "touch";
+  const lettering_ = lettering ?? "flat";
+  const size_ = size ?? "medium";
+  const tilt_ = tilt ?? "level";
+  const thickness_ = thickness ?? "slab";
+  const filterMode_ = filterMode ?? "highlight";
+  const pick_ = pick ?? "none";
+  const height_ = height ?? "tall";
+  const parallax_ = parallax ?? false;
+  const root = ["nd-lineage", className].filter(Boolean).join(" ");
+  // The five the Dioxus half unwraps into a plain string before it goes near
+  // the engine. An `undefined` reaching `draw` is a filter nothing matches.
+  const filter_ = filter ?? "";
+  const sets_ = sets ?? "";
+  const occasion_ = occasion ?? "";
+  const form_ = form ?? "";
+  const elidedLabel_ = elidedLabel ?? "";
+  const drawing = draw(
+    graph,
+    { view: view_, route: route_, isolate: filterMode_ === "isolate", shy: reach_ === "shy" },
+    filter_,
+    sets_,
+  );
 
   // The place of every piece, published as three custom properties — see the
   // Dioxus half for why, and for what has been through `nameable` before it
-  // reaches a property name.
-  let style = `--nd-w:${drawing.width};--nd-h:${drawing.height};--nd-d:${drawing.depth};`;
+  // reaches a property name. An OBJECT, because that is what React's `style`
+  // takes; a string throws.
+  const style = {
+    "--nd-w": drawing.width,
+    "--nd-h": drawing.height,
+    "--nd-d": drawing.depth,
+  };
   for (const piece of drawing.pieces) {
-    style +=
-      `--nd-at-${piece.id}-x:${piece.x};--nd-at-${piece.id}-y:${piece.y};` +
-      `--nd-at-${piece.id}-z:${piece.z};--nd-at-${piece.id}-span:${piece.span};`;
+    style[`--nd-at-${piece.id}-x`] = piece.x;
+    style[`--nd-at-${piece.id}-y`] = piece.y;
+    style[`--nd-at-${piece.id}-z`] = piece.z;
+    style[`--nd-at-${piece.id}-span`] = piece.span;
   }
-  if (nameable(occasion)) style += `--nd-on-${occasion}:grid;`;
-  for (const entry of sets.split(/\s+/u)) {
+  if (nameable(occasion_)) style[`--nd-on-${occasion_}`] = "grid";
+  for (const entry of sets_.split(/\s+/u)) {
     const parts = setParts(entry);
-    if (parts) style += `--nd-set-${parts[0]}-${parts[1]}:grid;`;
+    if (parts) style[`--nd-set-${parts[0]}-${parts[1]}`] = "grid";
   }
 
   const stem = `nd-${name}`;
   // Unset, `line` follows `thickness` — see the Dioxus half.
   const line_ = line ?? (thickness_ === "none" ? "ribbon" : "beam");
-  const filtering = filter !== "";
+  const filtering = filter_ !== "";
   const picksBonds = pick_ === "bond" || pick_ === "both";
   const picksFigures = pick_ === "figure" || pick_ === "both";
   const flag = (yes) => (filtering ? (yes ? "yes" : "no") : undefined);
@@ -82,7 +107,7 @@ export function Lineage({ name, label, graph, view, route, line, reach, letterin
           className: "nd-lineage-pick",
           type: "checkbox",
           id: `${stem}-b${bond.index}`,
-          name: some(form),
+          name: some(form_),
           value: `${bond.from} ${bond.to}`,
         }),
       );
@@ -133,7 +158,7 @@ export function Lineage({ name, label, graph, view, route, line, reach, letterin
           className: "nd-lineage-pick",
           type: "checkbox",
           id: `${stem}-p${piece.id}`,
-          name: some(form),
+          name: some(form_),
           value: piece.id,
         }),
       );
@@ -152,35 +177,57 @@ export function Lineage({ name, label, graph, view, route, line, reach, letterin
     }
     if (!piece.slot) {
       const face = [];
-      if (piece.image !== "") {
-        face.push(
-          h("img", { key: "portrait", className: "nd-lineage-portrait", src: piece.image, alt: "" }),
-        );
-      }
-      // Solid lettering is stacked plies — see the Dioxus half.
-      const plies = (text) =>
-        lettering_ === "solid"
-          ? [1, 2, 3, 4, 5].map((ply) =>
-              h("i", { key: `ply${ply}`, "data-nd-ply": String(ply), "aria-hidden": "true" }, text),
-            )
-          : [];
-      face.push(
-        h(
-          "span",
-          { key: "name", className: "nd-lineage-name nd-identifier" },
-          piece.label,
-          ...plies(piece.label),
-        ),
-      );
-      if (piece.meta !== "") {
+      if (piece.elided > 0) {
+        // A NUMERAL IS THE SAME WORD IN EVERY LANGUAGE — see the Dioxus half.
+        // The marker carries the count and no sentence; the words that go with
+        // it are the scene's `elided_label`, on the `aria-label` below.
         face.push(
           h(
             "span",
-            { key: "meta", className: "nd-lineage-meta nd-identifier" },
-            piece.meta,
-            ...plies(piece.meta),
+            { key: "count", className: "nd-lineage-count nd-identifier" },
+            String(piece.elided),
           ),
         );
+      } else {
+        if (piece.image !== "") {
+          face.push(
+            h("img", {
+              key: "portrait",
+              className: "nd-lineage-portrait",
+              src: piece.image,
+              alt: "",
+            }),
+          );
+        }
+        // Solid lettering is stacked plies — see the Dioxus half.
+        const plies = (text) =>
+          lettering_ === "solid"
+            ? [1, 2, 3, 4, 5].map((ply) =>
+                h(
+                  "i",
+                  { key: `ply${ply}`, "data-nd-ply": String(ply), "aria-hidden": "true" },
+                  text,
+                ),
+              )
+            : [];
+        face.push(
+          h(
+            "span",
+            { key: "name", className: "nd-lineage-name nd-identifier" },
+            piece.label,
+            ...plies(piece.label),
+          ),
+        );
+        if (piece.meta !== "") {
+          face.push(
+            h(
+              "span",
+              { key: "meta", className: "nd-lineage-meta nd-identifier" },
+              piece.meta,
+              ...plies(piece.meta),
+            ),
+          );
+        }
       }
       // One content in three elements: a link, a pick target, or neither.
       if (piece.href !== "") {
@@ -251,8 +298,8 @@ export function Lineage({ name, label, graph, view, route, line, reach, letterin
         "data-nd-id": piece.id,
         "data-nd-piece": piece.elided > 0 ? "elided" : piece.mark ? "mark" : "figure",
       "aria-label":
-        piece.elided > 0 && elidedLabel !== ""
-          ? elidedLabel.replace("{count}", String(piece.elided))
+        piece.elided > 0 && elidedLabel_ !== ""
+          ? elidedLabel_.replace("{count}", String(piece.elided))
           : undefined,
         "data-nd-slot": piece.slot ? "true" : undefined,
         "data-nd-kind": some(piece.kind),
@@ -285,10 +332,10 @@ export function Lineage({ name, label, graph, view, route, line, reach, letterin
       "data-nd-pick": pick_,
       "data-nd-filter-mode": filterMode_,
       "data-nd-parallax": parallax_ ? "true" : "false",
-      "data-nd-filter": some(filter),
-      "data-nd-occasion": some(occasion),
-      "data-nd-sets": some(sets),
-      "data-nd-form": some(form),
+      "data-nd-filter": some(filter_),
+      "data-nd-occasion": some(occasion_),
+      "data-nd-sets": some(sets_),
+      "data-nd-form": some(form_),
       "data-nd-empty-label": emptyLabel,
       "data-nd-camera-label": cameraLabel,
       "data-nd-zoom-in-label": zoomInLabel,

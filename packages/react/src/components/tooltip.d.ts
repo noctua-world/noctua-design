@@ -22,9 +22,9 @@ export interface TooltipProps {
    */
   text: string;
   /**
-   * Where the bubble opens. `auto` measures the room under the control and flips
-   * above when there is not enough. `start` and `end` pin its leading or trailing
-   * edge to the control.
+   * Where the bubble opens. `auto` measures the room, flipping above and hanging
+   * from whichever edge fits. `start` and `end` pin its leading or trailing edge
+   * whatever the room.
    */
   placement?: TooltipPlacement;
   /**

@@ -69,9 +69,10 @@ type = "text"
 attribute = "data-nd-swaps"
 doc = """What pressing this figure switches to, as `group:name`. The named branch replaces the one on show, and pressing again puts it back. The figure renders `aria-pressed="false"`, and the runtime keeps it matching the set on show."""
 
+# NO `data-nd-href`. The prop chooses the element: with it the figure is a
+# real `<a>` carrying a real `href`, which is the only place a link can be.
 [prop.href]
 type = "text"
-attribute = "data-nd-href"
 doc = "Makes this figure a link, rendered as an `<a>`. An `href` beside an `action` wins, and the action is dropped, so the figure is either a link or a button."
 
 [prop.children]

@@ -107,8 +107,17 @@ pub fn Disclosure(
                         DisclosureHeading::H4 => rsx! { h4 { class: "nd-disclosure-text", "{summary}" } },
                         DisclosureHeading::None => rsx! { span { class: "nd-disclosure-text", "{summary}" } },
                     }
+                    // NAMED, BECAUSE THE RULE THAT TURNS IT USED TO
+                    // ASK FOR THE LAST GLYPH. In the icon-only form
+                    // the caller's own icon is the last glyph, so
+                    // opening a `Disclosure { icon: "settings" }`
+                    // turned the gear upside down.
                     if marker {
-                        Icon { icon: IconName::ChevronDown, size: crate::components::IconSize::Small }
+                        Icon {
+                            icon: IconName::ChevronDown,
+                            size: crate::components::IconSize::Small,
+                            class: "nd-disclosure-marker",
+                        }
                     }
                 }
             }

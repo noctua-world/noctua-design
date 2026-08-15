@@ -91,7 +91,7 @@ pub fn DateInput(
     hint: Option<String>,
     /// What is wrong with the date, in the caller's own words. Its presence marks the field invalid, so the red edge and the message always appear together. A sentence from the caller is never cleared by the script.
     error: Option<String>,
-    /// The word read out before the message, such as `Error:`. It is visually hidden, because the message is already marked as an error on the screen. It is on an attribute too, so the validator prefixes its own sentences with it.
+    /// The word read out before the message, such as `Error:`. It is visually hidden, because the message is already marked as an error on the screen. `Field` draws it in front of every sentence, the caller's and the validator's alike.
     error_label: Option<String>,
     /// The date already known, in the year-month-day wire format (`2026-08-07`). It is split into the three boxes at render, and the row's order decides how users see it.
     value: Option<String>,
@@ -229,9 +229,6 @@ pub fn DateInput(
         _ => (day_item, month_item, year_item),
     };
     let has_suggest = suggest_label.is_some();
-    // One binding per use: `rsx!` moves a value into the nested block before
-    // the root's attributes are read. `TagPicker` learned this first.
-    let error_word = error_label.clone();
 
     rsx! {
         // THE GROUP IS THE FIELD NOW. `Field { kind: Group }` renders the
@@ -270,7 +267,6 @@ pub fn DateInput(
             "data-nd-glass": if glass { "true" } else { "false" },
             "data-nd-min": min,
             "data-nd-max": max,
-            "data-nd-error-label": error_word,
             "data-nd-suggest-label": suggest_label,
             "data-nd-previous-label": previous_label,
             "data-nd-next-label": next_label,

@@ -52,8 +52,13 @@ type = "enum"
 values = ["horizontal", "vertical"]
 variants = false
 default = "horizontal"
-attribute = "aria-orientation"
-doc = "Which way the track runs. Defaults to `horizontal`, and it is announced as well as drawn, so a reader knows which arrow keys move it. It is written with logical properties, so it reverses in a right-to-left locale."
+# DRAWN, NOT ANNOUNCED, AND THIS USED TO SAY THE OPPOSITE. It wrote
+# `aria-orientation`, which ARIA 1.2 does not support on `role="group"` — an
+# attribute an engine is free to drop, under a sentence promising a reader
+# would hear it. `Divider` already spells the drawn axis `data-nd-orientation`,
+# so this is the same word for the same fact.
+attribute = "data-nd-orientation"
+doc = "Which way the track runs. Defaults to `horizontal`. It is drawn rather than announced, because a group has no axis in ARIA. It is written with logical properties, so it reverses in a right-to-left locale."
 
 [prop.controls]
 type = "bool"

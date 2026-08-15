@@ -390,8 +390,45 @@ test("with no script the whole block is visible and nothing offers to expand it"
   const collapsed = await page.locator(".nd-codeblock[data-nd-collapsed]").count();
   expect(collapsed, "a block was capped with no script to uncap it").toBe(0);
 
+  // AND THE WHOLE BLOCK IS REALLY THERE, which the count above only says the
+  // script's way. The failure this comment names is a `max-block-size` in the
+  // stylesheet, and a block cut by one carries no attribute to count. So every
+  // block is measured: what it holds is as tall as the room it gives it.
+  const cut = await page.evaluate(() =>
+    [...document.querySelectorAll(".nd-codeblock")]
+      .filter((el) => el.scrollHeight > el.clientHeight + 1)
+      .map((el) => `${el.scrollHeight} tall in ${el.clientHeight}`),
+  );
+  expect(cut, "a block is taller than the room it is drawn in").toEqual([]);
+
   const offered = await page.locator(".nd-codeblock-expand:visible").count();
   expect(offered, "a control offered to expand a block that is already whole").toBe(0);
+
+  // AND THE OTHER TWO, WHICH THIS TEST USED TO IGNORE.
+  //
+  // `shell.js` claims all three degrade to something correct — "no copy button
+  // rather than a dead one, no wrap toggle rather than a stuck one" — and only
+  // the expand button was gated. The copy and the wrap toggle shipped visible,
+  // focusable and completely dead on every page, and this test counted the one
+  // control that already worked. Both carry the same `:root[data-nd-scripting]`
+  // gate now that `.nd-lineage-camera`, `.nd-dialog` and `.nd-popover` do.
+  const rendered = await page.locator(".nd-codeblock-control").count();
+  expect(rendered, "the page renders no code block controls at all").toBeGreaterThan(1);
+  for (const hook of ["[data-nd-copy]", "[data-nd-wrap-toggle]"]) {
+    expect(
+      await page.locator(`.nd-codeblock-control${hook}:visible`).count(),
+      `\`${hook}\` is on the page with no script to answer it`,
+    ).toBe(0);
+  }
+  // Not a tab stop either: a dead control a keyboard can reach is the same
+  // defect one press further in.
+  const reachable = await page.evaluate(
+    () =>
+      [...document.querySelectorAll(".nd-codeblock-control")].filter(
+        (el) => el.offsetParent !== null,
+      ).length,
+  );
+  expect(reachable, "a dead control is still in the tab order").toBe(0);
 
   // And the highlighting is still there, because it happens where the block
   // renders rather than in the script.

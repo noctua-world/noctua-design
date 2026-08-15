@@ -27,18 +27,44 @@ const parts = (page) => ({
   menu: page.locator(".nd-example-stage .nd-menu[id]").first(),
 });
 
-test("with the script blocked there is a menu nobody is invited to open", async ({ browser }) => {
-  // THE RULE THIS FAMILY IS BUILT ON. A marker that opens nothing is worse than
-  // no marker, so the menu ships hidden — and the button, which is a `Button`
-  // like any other, is left saying it opens something. The half that matters is
-  // that nothing is VISIBLE and nothing is reachable: a reader with no script
-  // sees a page with one dead control, not a page with a panel stuck open.
+test("with the script blocked neither the menu nor its button renders", async ({ browser }) => {
+  // THE RULE THIS FAMILY IS BUILT ON, AND THE HALF THAT USED TO BE MISSING.
+  //
+  // `menu.toml` has always opened with "neither the menu nor its button renders
+  // without a script". Only the menu was hidden. The button shipped visible and
+  // focusable, carrying `aria-haspopup="menu"` and `aria-expanded="false"` —
+  // announced to a screen reader as a menu button, over nothing that could
+  // open. That is the exact defect this component was written to remove,
+  // committed by the component itself, and the sentence at the top of
+  // `menu.js` names it.
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto(`http://127.0.0.1:8731${url(PAGE.menu)}`);
   await showParts(page);
   await expect(page.locator(".nd-menu[id]").first()).toBeHidden();
+
+  // Not one menu button anywhere on the page, in an example or in the site's
+  // own furniture. Every one of them opens a `Menu`, and there is no script to
+  // open it with.
+  const buttons = page.locator('[aria-haspopup="menu"]');
+  const count = await buttons.count();
+  expect(count, "the page carries no menu buttons at all").toBeGreaterThan(0);
+  for (let at = 0; at < count; at += 1) {
+    const button = buttons.nth(at);
+    await expect(button, `a menu button ${at} is on the page with nothing to open`).toBeHidden();
+  }
   await context.close();
+});
+
+test("the script reveals the button, and only once it has found the menu", async ({ page }) => {
+  await page.goto(url(PAGE.menu));
+  await showParts(page);
+  const { button } = parts(page);
+  await expect(button).toBeVisible();
+  // Revealed by `menu.js`, which marks what it enhanced. A button it skipped
+  // is a button that stays hidden, because it still opens nothing.
+  expect(await button.evaluate((el) => el.dataset.ndEnhanced)).toBe("menu");
+  expect(await button.getAttribute("aria-expanded")).toBe("false");
 });
 
 test("it opens on a press and closes on the next one", async ({ page }) => {
@@ -130,10 +156,28 @@ test("a refused item stays in the walk and does nothing", async ({ page }) => {
   // that is skipped is an action a reader concludes does not exist.
   const menu = page.locator('.nd-menu:has([aria-disabled="true"])').first();
   const button = page.locator(`[aria-controls="${await menu.getAttribute("id")}"]`);
-  await button.click();
+  const items = menu.locator('[role="menuitem"]');
   const refused = menu.locator('[aria-disabled="true"]').first();
-  await refused.focus();
-  await expect(refused).toBeFocused();
+  // Where it sits, so the walk below is counted rather than guessed.
+  const at = await menu.evaluate((root) =>
+    [...root.querySelectorAll('[role="menuitem"]')].findIndex(
+      (item) => item.getAttribute("aria-disabled") === "true",
+    ),
+  );
+  expect(at, "there is no refused item to walk to").toBeGreaterThan(0);
+
+  // THE ARROWS, PRESSED. The check before this one put the focus on the item
+  // itself, which proves the item can hold focus and says nothing about the
+  // walk. Down opens onto the first item, and one press per item after that
+  // has to arrive on the refused one.
+  await button.focus();
+  await page.keyboard.press("ArrowDown");
+  await expect(items.first()).toBeFocused();
+  for (let step = 0; step < at; step += 1) {
+    await page.keyboard.press("ArrowDown");
+  }
+  await expect(refused, "the arrows walked straight past the refused item").toBeFocused();
+
   // `force`, because Playwright reads `aria-disabled` as unactionable — which
   // is the whole point of the attribute, and not a reason to skip the check
   // that pressing it anyway does nothing.
@@ -194,4 +238,34 @@ test("no id appears twice on the menu page, in any locale", async ({ page }) => 
     });
     expect(twins, `duplicate ids in ${locale}`).toEqual([]);
   }
+});
+
+test("a menu opened with the pointer is a tab stop, and Tab closes it", async ({ page }) => {
+  await page.goto(url(PAGE.menu));
+  await showParts(page);
+  // OPENING BY POINTER CALLED `open(false)`, WHICH SET NO STOP. Every item
+  // ships `tabindex="-1"` and only `move` ever wrote a `0`, and the click path
+  // never called it: Tab skipped the whole menu, `focusout` never fired, and
+  // the menu stayed open behind a reader who had moved on. `open`'s `focus`
+  // parameter was dead — no call site ever passed `true`.
+  const button = page.locator('[aria-haspopup="menu"]').first();
+  await button.click();
+  const menu = page.locator('[role="menu"]:not([hidden])').first();
+  await expect(menu).toBeVisible();
+
+  const stops = await menu.evaluate(
+    (el) => [...el.querySelectorAll('[role="menuitem"]')].filter((one) => one.tabIndex === 0).length,
+  );
+  expect(stops).toBe(1);
+  // The focus stays where the reader put it: a pointer open is a reader
+  // reading, not a reader walking.
+  expect(await menu.evaluate((el) => el.contains(document.activeElement))).toBe(false);
+
+  // Tab reaches the menu, which is what the stop is for.
+  await page.keyboard.press("Tab");
+  expect(await menu.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+  // And leaving it closes it, which is what `focusout` never got the chance to
+  // do while nothing inside the menu could hold focus.
+  await page.keyboard.press("Tab");
+  await expect(page.locator('[role="menu"]:not([hidden])')).toHaveCount(0);
 });

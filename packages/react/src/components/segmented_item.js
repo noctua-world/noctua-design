@@ -29,7 +29,9 @@ export function SegmentedItem({ value, label, selected, detail, icon, hideLabel,
       "aria-checked": String(selected_),
       "aria-disabled": String(disabled_),
       "data-nd-hide-label": String(hideLabel_),
-      tabIndex: selected_ ? 0 : -1,
+      // See the Dioxus half: the group holds the stop until `roving`
+      // moves it onto a radio.
+      tabIndex: -1,
       ...rest,
     },
     children,

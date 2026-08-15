@@ -13,7 +13,7 @@ export interface SegmentedItemProps {
   value: string;
   /** What choosing this item means, in the reader's language. **Required**. It stays the accessible name even when `hide_label` takes the text off the screen. */
   label: string;
-  /** Whether this is the value in force. Off by default. Render it from the known default on the server, so the group has a chosen item and one tab stop before the script runs. */
+  /** Whether this is the value in force. Off by default. Render it from the known default on the server, so a reader arrives at a group that already states its answer. */
   selected?: boolean;
   /** A second, smaller line under the label, such as the unit under a number. It is part of the accessible name, because a reader who cannot see the stack has the first line alone. */
   detail?: string;

@@ -91,6 +91,15 @@ function anchorPanel(control, panel, { room = GLASS_PANEL_ROOM, width = null } =
   // caller had to change and none of them can disagree about the measurement.
   const start = Math.min(Math.max(0, box.left), Math.max(0, free));
   panel.style.setProperty("--nd-anchor-start", `${Math.round(start)}px`);
+  // AND WHICH EDGE A MEASUREMENT WOULD PICK, which is what makes `auto` a
+  // third value rather than a second spelling of `start`. The two were
+  // byte-identical on `Info`, `Popover`, `Tooltip` and `Menu`: only an `="end"`
+  // rule existed, so `auto` and `start` both hung from the leading edge and no
+  // caller could tell them apart. A panel that fits with its leading edge on
+  // the control's keeps it, and one that does not hangs from the trailing edge
+  // — where a stated `start` clamps against the window instead, which is the
+  // difference between "put it here" and "put it where it works".
+  panel.dataset.ndAnchor = box.left <= Math.max(0, free) ? "start" : "end";
   if (width) panel.style.setProperty(width, `${Math.round(box.width)}px`);
   return { flipped, offScreen: false };
 }

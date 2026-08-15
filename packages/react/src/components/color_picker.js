@@ -26,9 +26,15 @@ export function ColorPicker({ name, label, value, hint, error, size, shape, trig
   const formats_ = formats ?? "hex rgb hsl oklch";
   const root = ["nd-color-picker", className].filter(Boolean).join(" ");
   const id = `nd-color-picker-${name}`;
-  const labelId = `${id}-label`;
-  const hintId = `${id}-hint`;
-  const errorId = `${id}-error`;
+  // THE SQUARE IS WHAT THE QUESTION NAMES — see the Dioxus half. It is a real
+  // `<button>`, so `Field` points a real `<label for>` at it, and the label,
+  // the hint and the error all derive from THAT id rather than from `id`:
+  // `Field` and `Label` build theirs from the control they were handed, so a
+  // description built from anything else points at nothing.
+  const control = `${id}-trigger`;
+  const labelId = `${control}-label`;
+  const hintId = `${control}-hint`;
+  const errorId = `${control}-error`;
   const panelId = `${id}-panel`;
   const entryId = `${id}-entry`;
   const described = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(" ");

@@ -67,9 +67,11 @@ type = "text"
 attribute = "data-nd-unit"
 doc = "What the numbers are counted in, such as `GB`, `tokens` or `%`. It is not drawn on its own. `value_label` fills its `{unit}` hole with it, so the unit is written once."
 
+# IT BECOMES `aria-valuetext`, NOT A `data-nd-*`. The declaration named an
+# attribute nothing writes, under a component whose whole argument is that it
+# has no runtime.
 [prop.value_label]
 type = "text"
-attribute = "data-nd-value-label"
 doc = "The sentence beside the bar, with `{value}`, `{max}`, `{unit}` and `{percent}` holes, such as *{value} of {max} {unit} used*. **Without it a reader has to estimate from the bar.** It also becomes the element's `aria-valuetext`."
 
 [prop.tone]

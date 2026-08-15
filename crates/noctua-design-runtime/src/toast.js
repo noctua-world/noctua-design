@@ -22,8 +22,6 @@
 //    message is starting the sentence again, so the whole `duration` is served
 //    again rather than the remainder of it.
 
-import { say } from "./messages.js";
-
 /** What the stylesheet reads for a message that has gone. */
 const DISMISSED = "data-nd-dismissed";
 
@@ -85,9 +83,20 @@ function enhance(toast) {
   // pointer is on the message and whose focus is on its dismiss control has
   // held it twice, and leaving with one of the two must not restart the wait
   // under the other.
+  //
+  // AND THE TWO HALVES OF THE FOCUS ASK THE SAME QUESTION. `focusout` releases
+  // only when the focus LEFT the message, so `focusin` may only hold when it
+  // ARRIVED — it used to hold on every arrival, including a move from a link
+  // in the message to its own dismiss control. That move raised the count and
+  // released nothing, so the timer stopped for good on any message holding
+  // more than one focusable thing, which is exactly the message `children`
+  // exists to allow.
   toast.addEventListener("pointerenter", hold);
   toast.addEventListener("pointerleave", release);
-  toast.addEventListener("focusin", hold);
+  toast.addEventListener("focusin", (event) => {
+    if (toast.contains(event.relatedTarget)) return;
+    hold();
+  });
   toast.addEventListener("focusout", (event) => {
     if (toast.contains(event.relatedTarget)) return;
     release();
@@ -129,10 +138,15 @@ function dismiss(toast) {
  * `inputs.js` and `carousel.js` make the same switch for the same reason.
  *
  * A message enhanced after the page finished loading is one that ARRIVED, so
- * the region is emptied and the sentence is written back on the next frame
- * through `say()`. That is the region-first rule applied to markup that shipped
- * the other way round, and it costs nothing to look at: the toast is appearing
- * in that same frame.
+ * the region is emptied and its contents are put back on the next frame. That
+ * is the region-first rule applied to markup that shipped the other way round,
+ * and it costs nothing to look at: the toast is appearing in that same frame.
+ *
+ * THE NODES MOVE, THE WORDS ARE NEVER COPIED. This read `textContent` and
+ * wrote it back, which flattened the message into a string — and `children`'s
+ * own contract says the body may hold a `Link` to whatever a reader has to do
+ * about the message. That link was deleted on the one path that matters, the
+ * arriving message, and the words it was on stayed behind looking correct.
  *
  * The caller's own `aria-live` is restored either way, and its absence is
  * restored as an absence: `role="status"` already implies polite, so writing an
@@ -140,9 +154,11 @@ function dismiss(toast) {
  */
 function announce(toast, body) {
   if (document.readyState === "complete") {
-    const sentence = body?.textContent?.trim() ?? "";
-    if (body) body.textContent = "";
-    requestAnimationFrame(() => say(body, sentence));
+    const held = body ? [...body.childNodes] : [];
+    if (held.length > 0) {
+      body.replaceChildren();
+      requestAnimationFrame(() => body.replaceChildren(...held));
+    }
     return;
   }
   const asked = toast.getAttribute("aria-live");

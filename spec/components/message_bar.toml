@@ -37,10 +37,11 @@ doc = "A short line above the message, such as *Payment refused*. Absent is the 
 type = "text"
 doc = "A drawing before the words, named from `spec/icons.toml`. It carries `aria-hidden`, because it says what the words say. Choose one that means what the tone means, so colour is never alone."
 
+# NO ATTRIBUTE. `data-nd-alert` was written and read by nothing. What the prop
+# decides is the `role`, which is the fact assistive technology acts on.
 [prop.alert]
 type = "bool"
 default = "false"
-attribute = "data-nd-alert"
 doc = """Whether the bar interrupts. Off by default, and off is almost always right: `role="alert"` stops a screen reader mid-sentence. Turn it on where a reader has to act before carrying on."""
 
 [prop.live]

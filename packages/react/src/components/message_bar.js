@@ -26,7 +26,6 @@ export function MessageBar({ tone, title, icon, alert, live, dismissible, dismis
       role: alert_ ? "alert" : "status",
       "aria-live": live,
       "data-nd-tone": tone,
-      "data-nd-alert": String(alert_),
       "data-nd-dismissible": String(dismissible_),
       ...rest,
     },

@@ -14,8 +14,16 @@ import { createElement as h } from "react";
 export function TableHeaderCell({ column, scope, align, tone, wrap, span, rows, sort, className, children, ...rest }) {
   const scope_ = scope ?? "col";
   const align_ = align ?? "start";
-  const wrap_ = wrap ?? "wrap";
+  // `nowrap`, THE OPPOSITE OF A CELL'S DEFAULT, which is the whole point of the
+  // prop's doc: the head stays one line tall. This said `wrap`, so every column
+  // heading in a React table wrapped where a Dioxus one did not.
+  const wrap_ = wrap ?? "nowrap";
+  // See the Dioxus half: a direction, or nothing. `undefined` is how React
+  // leaves an attribute off, and `aria-sort="none"` on a heading nobody can
+  // sort by announces a control that is not there.
   const sort_ = sort ?? "none";
+  const sorted =
+    scope_ === "row" || scope_ === "rowgroup" || sort_ === "none" ? undefined : sort_;
   const root = ["nd-table-header-cell", className].filter(Boolean).join(" ");
   return h(
     "th",
@@ -26,7 +34,7 @@ export function TableHeaderCell({ column, scope, align, tone, wrap, span, rows, 
       scope: scope_,
       colSpan: span,
       rowSpan: rows,
-      "aria-sort": sort_,
+      "aria-sort": sorted,
       "data-nd-column": column,
       "data-nd-align": align_,
       "data-nd-tone": tone,

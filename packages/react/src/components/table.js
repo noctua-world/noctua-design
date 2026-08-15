@@ -14,12 +14,17 @@ import { createElement as h } from "react";
 import { Button } from "./button.js";
 
 import { Icon } from "./icon.js";
-export function Table({ name, caption, hideCaption, note, density, rules, zebra, hover, width, height, layout, stickyHeader, selectedLabel, sortAscendingLabel, sortDescendingLabel, sortClearedLabel, filteredLabel, resizeLabel, resizedLabel, columnsLabel, columnShownLabel, columnHiddenLabel, searchLabel, searchPlaceholder, export, exportLabel, csvLabel, jsonLabel, printLabel, exportedLabel, moreSrc, moreLabel, moreStatusLabel, total, copy, copyLabel, copiedLabel, summaryLabel, className, children, ...rest }) {
+export function Table({ name, caption, hideCaption, note, density, rules, zebra, hover, width, height, layout, stickyHeader, selectedLabel, sortAscendingLabel, sortDescendingLabel, sortClearedLabel, filteredLabel, resizeLabel, resizedLabel, columnsLabel, columnShownLabel, columnHiddenLabel, searchLabel, searchPlaceholder, export: _export, exportLabel, csvLabel, jsonLabel, printLabel, exportedLabel, moreSrc, moreLabel, moreStatusLabel, total, copy, copyLabel, copiedLabel, summaryLabel, className, children, ...rest }) {
   const density_ = density ?? "default";
   const rules_ = rules ?? "rows";
   const width_ = width ?? "full";
   const layout_ = layout ?? "auto";
   const height_ = height ?? "auto";
+  // `export` IS A KEYWORD, so the generator binds this prop to `_export` — see
+  // `props.rs`. The prop a caller writes is still `export`; only the local
+  // identifier moved, and this is it under the spelling the rest of the file
+  // uses for a resolved value.
+  const export_ = _export ?? false;
   const root = ["nd-table", className].filter(Boolean).join(" ");
   const captionId = `nd-table-${name}-caption`;
   const noteId = `nd-table-${name}-note`;
@@ -176,7 +181,7 @@ export function Table({ name, caption, hideCaption, note, density, rules, zebra,
           "data-nd-height": height_,
           "data-nd-caption-hidden": String(hideCaption ?? false),
           "data-nd-copy": String(copy ?? false),
-          "data-nd-export": String(export_ ?? false),
+          "data-nd-export": String(export_),
           "data-nd-search-label": searchLabel,
           "data-nd-search-placeholder": searchPlaceholder,
           "data-nd-export-label": exportLabel,

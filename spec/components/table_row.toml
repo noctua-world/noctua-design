@@ -35,7 +35,13 @@ type = "enum"
 values = ["none", "subtle", "strong"]
 default = "none"
 attribute = "data-nd-emphasis"
-doc = "How much weight this row carries against the rows around it. `subtle` is a light rule above the row. `strong` is a heavy rule and bold text. **It says how a row is drawn, not what it means.** What the row contains is the caller's."
+# IT IS LOAD-BEARING, AND THE DOC USED TO SAY IN BOLD THAT IT IS NOT.
+# `recount` in `table.js` filters an emphasised row out of the records, which
+# is right — a subtotal line must not be summed into the total above it, and a
+# group heading must not be counted as a row. So `emphasis` decides what a row
+# IS, and the sentence promising it decides only how a row looks was the one
+# thing a caller would have relied on.
+doc = "How much weight this row carries against the rows around it. `subtle` is a light rule above the row. `strong` is a heavy rule and bold text. **Either one takes the row out of the totals and out of the row count.**"
 
 [prop.selected]
 type = "bool"
@@ -43,14 +49,15 @@ default = "false"
 attribute = "data-nd-selected"
 doc = "Whether this row starts chosen. Rendered by the server, so a form that came back still shows what the reader picked. It is drawn from the real control's own state rather than from `aria-selected`."
 
+# NO ATTRIBUTE, BECAUSE NO BODY WRITES ONE. The words below reach the DOM as
+# a control's name or as its text, which is why the component works and why
+# nothing reported the declaration. `attribute` is a claim about the markup.
 [prop.select_label]
 type = "text"
-attribute = "data-nd-select-label"
 doc = "The name of this row's choice control, such as *Choose Ada Lovelace*. Wanted in practice by `select`: a column of controls with the same name is read as *checkbox, checkbox, checkbox*."
 
 [prop.select_name]
 type = "text"
-attribute = "data-nd-select-name"
 doc = "The form field the choice submits under. Every row in one table shares it, which is what makes them one answer with several values. It is a real `name` on a real control, so a form with no script still posts the choice."
 
 [prop.disabled]
@@ -67,7 +74,6 @@ doc = "Whether this row opens onto the detail row below it. It draws a real cont
 
 [prop.expand_label]
 type = "text"
-attribute = "data-nd-expand-label"
 doc = "The name of that control. Wanted in practice by `expandable`: it is a glyph, so this is its only name. It should say what opens, such as *Show the details of Ada Lovelace*."
 
 [prop.detail_for]

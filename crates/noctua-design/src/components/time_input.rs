@@ -249,14 +249,31 @@ pub fn TimeInput(
                         })}
                     }
                     if let Some(now) = now {
-                        Button {
-                            label: now,
-                            icon: IconName::Clock,
-                            hide_label: true,
-                            variant: ButtonVariant::Outline,
-                            size: ButtonSize::Small,
-                            action: "time-input-now",
-                            disabled,
+                        // HIDDEN UNTIL THE SCRIPT CAN HONOUR IT, exactly as
+                        // `NumberInput`'s steppers and `Input`'s clear and
+                        // reveal controls are. This one shipped visible and
+                        // inert: reading the clock is `inputs.js`'s and
+                        // nothing else's, so with no script it was a named,
+                        // focusable button that filled nothing.
+                        //
+                        // The WRAPPER carries `hidden`, because a component is
+                        // not an element and cannot be given the attribute.
+                        // That is the steppers' arrangement, and the
+                        // stylesheet gives this span `display: contents` so
+                        // the row lays out as though it were not here.
+                        span {
+                            class: "nd-time-input-now",
+                            hidden: true,
+                            "data-nd-time-input-now": "",
+                            Button {
+                                label: now,
+                                icon: IconName::Clock,
+                                hide_label: true,
+                                variant: ButtonVariant::Outline,
+                                size: ButtonSize::Small,
+                                action: "time-input-now",
+                                disabled,
+                            }
                         }
                     }
                 }

@@ -24,7 +24,7 @@ export interface DateInputProps {
   hint?: string;
   /** What is wrong with the date, in the caller's own words. Its presence marks the field invalid, so the red edge and the message always appear together. A sentence from the caller is never cleared by the script. */
   error?: string;
-  /** The word read out before the message, such as `Error:`. It is visually hidden, because the message is already marked as an error on the screen. It is on an attribute too, so the validator prefixes its own sentences with it. */
+  /** The word read out before the message, such as `Error:`. It is visually hidden, because the message is already marked as an error on the screen. `Field` draws it in front of every sentence, the caller's and the validator's alike. */
   errorLabel?: string;
   /** The date already known, in the year-month-day wire format (`2026-08-07`). It is split into the three boxes at render, and the row's order decides how users see it. */
   value?: string;

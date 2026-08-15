@@ -8,9 +8,9 @@
 
 use dioxus::prelude::*;
 
-/// Where the bubble opens. `auto` measures the room under the control and flips
-/// above when there is not enough. `start` and `end` pin its leading or trailing
-/// edge to the control.
+/// Where the bubble opens. `auto` measures the room, flipping above and hanging
+/// from whichever edge fits. `start` and `end` pin its leading or trailing edge
+/// whatever the room.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TooltipPlacement {
     #[default]
@@ -82,9 +82,9 @@ pub fn Tooltip(
     /// The hint, as one short line. **Required**: a tooltip with nothing in it is a
     /// control that gained an `aria-describedby` pointing at empty space.
     text: String,
-    /// Where the bubble opens. `auto` measures the room under the control and flips
-    /// above when there is not enough. `start` and `end` pin its leading or trailing
-    /// edge to the control.
+    /// Where the bubble opens. `auto` measures the room, flipping above and hanging
+    /// from whichever edge fits. `start` and `end` pin its leading or trailing edge
+    /// whatever the room.
     #[props(default)]
     placement: TooltipPlacement,
     /// How long a pointer rests before the bubble opens. Focus ignores it. Both waits

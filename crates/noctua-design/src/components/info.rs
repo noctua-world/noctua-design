@@ -11,7 +11,7 @@ use noctua_design_icons::IconName;
 
 use crate::components::{Icon, IconSize};
 
-/// Where the note opens. `auto` measures the room below and flips above when there is not enough. `start` and `end` pin the note's leading or trailing edge to the control, for a marker at the edge of a table.
+/// Where the note opens. `auto` measures the room, flipping above and hanging from whichever edge fits. `start` and `end` pin the note's leading or trailing edge whatever the room, for a marker at the edge of a table.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum InfoPlacement {
     #[default]
@@ -53,7 +53,7 @@ pub fn Info(
     heading: Option<String>,
     /// The name of the control that closes the note. Wanted in practice, because Escape and a click outside also close it and neither is discoverable on a touch screen.
     close_label: Option<String>,
-    /// Where the note opens. `auto` measures the room below and flips above when there is not enough. `start` and `end` pin the note's leading or trailing edge to the control, for a marker at the edge of a table.
+    /// Where the note opens. `auto` measures the room, flipping above and hanging from whichever edge fits. `start` and `end` pin the note's leading or trailing edge whatever the room, for a marker at the edge of a table.
     #[props(default)]
     placement: InfoPlacement,
     /// Extra classes for the root element.

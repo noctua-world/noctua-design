@@ -39,10 +39,16 @@ test("every dialog on the page ships shut", async ({ page }) => {
   // THE BUG THIS EXISTS FOR. `display: flex` on the class rather than on
   // `[open]` un-hides every closed dialog in the document, and each one then
   // draws its box over the page with nothing else anywhere saying so.
-  const open = await page
-    .locator(".nd-dialog-surface")
-    .evaluateAll((els) => els.filter((el) => el.open || el.checkVisibility()).length);
-  expect(open, "a closed dialog is being drawn over the page").toBe(0);
+  const surfaces = await page.locator(".nd-dialog-surface").evaluateAll((els) => ({
+    count: els.length,
+    open: els.filter((el) => el.open || el.checkVisibility()).length,
+  }));
+  // THE FLOOR, AND IT MATTERS MOST HERE. This is the only guard for the bug
+  // above, and a count of nothing has nothing open in it. A renamed surface
+  // class read as every dialog being shut. The page ships five of them, and
+  // three are named by the tests below.
+  expect(surfaces.count, "the page drew no dialog to check").toBeGreaterThan(2);
+  expect(surfaces.open, "a closed dialog is being drawn over the page").toBe(0);
 });
 
 test("the script reveals the trigger, and its box was there before it", async ({ page }) => {
@@ -88,9 +94,15 @@ test("a modal one takes the focus, marks the page inert and gives the focus back
 
   await page.keyboard.press("Escape");
   await expect(surface).toBeHidden();
-  expect(await root.getAttribute("data-nd-open")).toBeNull();
+  // POLLED, NOT READ ONCE. The browser hides the surface and dispatches
+  // `close` on a later task, and the state is taken off in that listener — so
+  // a single read between the two saw `data-nd-open=""` on a dialog that had
+  // shut. It failed about one run in three, which is the worst rate there is.
+  await expect(root).not.toHaveAttribute("data-nd-open");
   // Restored by `close`, which is the other half of what `showModal` buys.
-  expect(await page.evaluate(() => document.activeElement.className)).toContain("nd-dialog-open");
+  await expect
+    .poll(() => page.evaluate(() => document.activeElement.className))
+    .toContain("nd-dialog-open");
 });
 
 test("a non-modal one leaves the page reachable and still answers Escape", async ({ page }) => {
@@ -175,4 +187,51 @@ test("the surface clips and the body scrolls, and only one of them is round", as
   expect(shape.bodyRadius).toBe("0px");
   // And separation is a hairline plus a surface colour, never elevation.
   expect(shape.shadow, "a dialog is drawing an elevated surface").toBe("none");
+});
+
+test("a non-modal one still answers Escape after Tab has walked out of it", async ({ page }) => {
+  // THE HOLE THIS CLOSES. `keydown` was bound to the SURFACE, and `dialog.toml`
+  // says in as many words that Tab may walk out of a non-modal dialog and leave
+  // it open. The first place Tab lands on the way out is the trigger — outside
+  // the surface, inside the root — and from there Escape reached nothing at
+  // all, so the one key the contract offers a keyboard reader did nothing.
+  // `popover.js` binds on the root and has never had this hole.
+  await dialogs(page);
+  const root = named(page, "dialog-notes");
+  const surface = root.locator(".nd-dialog-surface");
+  await root.locator(".nd-dialog-open").click();
+  await expect(surface).toBeVisible();
+
+  // Focus moved deliberately out of the surface and onto the trigger, which is
+  // exactly where the reader's own Tab takes them.
+  await root.locator(".nd-dialog-open").focus();
+  const outside = await page.evaluate(() => {
+    const dialog = document.querySelector('[data-nd-dialog="dialog-notes"] .nd-dialog-surface');
+    return !dialog.contains(document.activeElement);
+  });
+  expect(outside, "the focus never left the surface, so this proves nothing").toBe(true);
+
+  await page.keyboard.press("Escape");
+  await expect(surface, "Escape did nothing once the focus had left the surface").toBeHidden();
+});
+
+test("Escape on a shut dialog is left for whatever else wants it", async ({ page }) => {
+  // The other half: the key is answered only while the surface is open, or a
+  // closed dialog would swallow the Escape meant for something around it.
+  await dialogs(page);
+  const root = named(page, "dialog-notes");
+  await expect(root.locator(".nd-dialog-surface")).toBeHidden();
+  const swallowed = await root.evaluate((el) => {
+    let reached = false;
+    const listen = () => {
+      reached = true;
+    };
+    document.addEventListener("keydown", listen);
+    el.querySelector(".nd-dialog-open").dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+    );
+    document.removeEventListener("keydown", listen);
+    return !reached;
+  });
+  expect(swallowed, "a shut dialog stopped an Escape that was not its own").toBe(false);
 });

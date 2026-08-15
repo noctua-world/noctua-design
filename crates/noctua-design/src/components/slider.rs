@@ -150,6 +150,65 @@ pub fn Slider(
     let (min_end, max_end, step_end) = (min.clone(), max.clone(), step.clone());
     let described_end = described.clone();
 
+    // THE VALUE AND THE SCALE ARE DRAWN BY THE COMPONENT NOW.
+    //
+    // Both shipped as empty boxes that `inputs.js` filled. `output`'s own doc
+    // says it is on by default "so users can read the value they have set",
+    // and with the script blocked it was an empty `<output>` saying nothing at
+    // all — the prop's single promise, unkept. The marks were the same: five
+    // ticks the caller asked for and no ticks on the screen.
+    //
+    // The runtime still writes both on every move. What changes is that the
+    // first state is rendered rather than waited for, so nothing arrives late
+    // and nothing is missing when nothing arrives.
+    let shape = output_label.clone();
+    let shown = |number: &str| match shape.as_deref() {
+        Some(text) if !text.is_empty() => text.replace("{value}", number),
+        _ => number.to_owned(),
+    };
+    let read = |text: Option<&str>, fallback: f64| {
+        text.and_then(|value| value.trim().parse::<f64>().ok())
+            .unwrap_or(fallback)
+    };
+    // THE PLATFORM'S OWN DEFAULTS, because they are what the browser will put
+    // in the box: a `<input type="range">` with no value sits in the middle of
+    // a range that runs from zero to a hundred unless told otherwise.
+    let low = read(min.as_deref(), 0.0);
+    let high = read(max.as_deref(), 100.0);
+    let middle = low + (high - low) / 2.0;
+    let tidy = |number: f64| {
+        if number.fract() == 0.0 {
+            format!("{number:.0}")
+        } else {
+            format!("{number}")
+        }
+    };
+    let start_value = value.clone().unwrap_or_else(|| tidy(middle));
+    let end_value = end.clone().unwrap_or_else(|| tidy(middle));
+    let reading = if range {
+        format!("{} – {}", shown(&start_value), shown(&end_value))
+    } else {
+        shown(&start_value)
+    };
+    // The words, read position by position against the values, which is
+    // exactly what `inputs.js` does with the same two props.
+    let words = mark_labels.clone().unwrap_or_default();
+    let ticks: Vec<String> = marks
+        .as_deref()
+        .unwrap_or_default()
+        .split_whitespace()
+        .enumerate()
+        .map(|(index, tick)| {
+            words
+                .split('|')
+                .nth(index)
+                .map(str::trim)
+                .filter(|word| !word.is_empty())
+                .unwrap_or(tick)
+                .to_owned()
+        })
+        .collect();
+
     rsx! {
         Field {
             control: "{start_id}",
@@ -213,14 +272,18 @@ pub fn Slider(
                     // scale is already announced by the range's own min and
                     // max — five tick numbers before every value is noise.
                     if marks.is_some() {
-                        span { class: "nd-slider-marks", "aria-hidden": "true", "data-nd-slider-marks": "" }
+                        span { class: "nd-slider-marks", "aria-hidden": "true", "data-nd-slider-marks": "",
+                            for word in ticks {
+                                span { class: "nd-slider-mark", "{word}" }
+                            }
+                        }
                     }
                 }
                 if output {
                     // NOT A LIVE REGION. The range announces its own value on
                     // every change; a second announcement is the same number
                     // said twice.
-                    output { class: "nd-slider-output", "for": "{start_id}", "data-nd-slider-output": "" }
+                    output { class: "nd-slider-output", "for": "{start_id}", "data-nd-slider-output": "", "{reading}" }
                 }
             }
         }

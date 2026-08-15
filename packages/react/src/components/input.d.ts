@@ -41,7 +41,7 @@ export interface InputProps {
   prefix?: string;
   /** A fixed word or symbol after the value, such as `.com`, `kg` or `%`. Same rule: drawn, never submitted. */
   suffix?: string;
-  /** Whether a control appears for emptying the box. Off by default. Emptying a field costs a reader one gesture they already know. A control that appears only when there is text moves the layout as they type. */
+  /** Whether a control appears for emptying the box. Off by default. Emptying a field costs a reader one gesture they already know. It keeps its space while the box is empty, so nothing moves as they type. */
   clearable?: boolean;
   /** The name of that control. It is a glyph, so this is the only name it has. */
   clearLabel?: string;

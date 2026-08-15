@@ -11,9 +11,9 @@ use noctua_design_icons::IconName;
 
 use crate::components::{Icon, IconSize};
 
-/// Where it opens. `auto` measures the room under the control and flips above when
-/// there is not enough. `start` and `end` pin the surface's leading or trailing
-/// edge to the control, for a control near the edge of the window.
+/// Where it opens. `auto` measures the room, flipping above and hanging from
+/// whichever edge fits. `start` and `end` pin the surface's leading or trailing
+/// edge whatever the room, for a control near the edge of the window.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum PopoverPlacement {
     #[default]
@@ -65,9 +65,9 @@ pub fn Popover(
     /// with no name gives a screen reader its role and nothing else. Ignored when
     /// `heading` is set.
     label: Option<String>,
-    /// Where it opens. `auto` measures the room under the control and flips above when
-    /// there is not enough. `start` and `end` pin the surface's leading or trailing
-    /// edge to the control, for a control near the edge of the window.
+    /// Where it opens. `auto` measures the room, flipping above and hanging from
+    /// whichever edge fits. `start` and `end` pin the surface's leading or trailing
+    /// edge whatever the room, for a control near the edge of the window.
     #[props(default)]
     placement: PopoverPlacement,
     /// Whether a control that closes it is drawn. On by default: Escape, a Tab out and

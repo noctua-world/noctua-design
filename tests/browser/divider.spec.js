@@ -107,15 +107,47 @@ test("a vertical divider takes its height from the row beside it", async ({ page
 
 test("it draws with a border and never with a colour of its own", async ({ page }) => {
   await dividers(page);
-  // A divider is a border and a gap. Anything else — a background, a shadow —
-  // would make it a surface, and `NOCTUA.md §9.7` has none.
-  const wrong = await page.evaluate(() =>
-    [...document.querySelectorAll(".nd-divider")]
-      .map((el) => {
-        const style = getComputedStyle(el);
-        return { shadow: style.boxShadow, background: style.backgroundImage };
-      })
-      .filter((one) => one.shadow !== "none" || one.background !== "none"),
+  // BOTH HALVES OF THE TITLE, because the sweep before this one asserted
+  // neither. It read the shadow and the background image. A rule with no
+  // border left to draw it passed, and so did one painted with a colour.
+  //
+  // A divider is a border and a gap. Anything else would make it a surface,
+  // and `NOCTUA.md §9.7` has none.
+  const drawn = await page.evaluate(() =>
+    [...document.querySelectorAll(".nd-divider")].flatMap((el) => {
+      // Whatever carries the border. A labelled divider draws two half-rules
+      // on the spans beside the word, so its root deliberately has none.
+      const parts = el.hasAttribute("data-nd-labelled")
+        ? [...el.querySelectorAll(".nd-divider-line")]
+        : [el];
+      return parts.map((part) => {
+        const style = getComputedStyle(part);
+        return {
+          name: `${el.dataset.ndOrientation} ${el.dataset.ndWeight}`,
+          // The drawing edge is block-start when the rule lies across the
+          // page, and inline-start when it stands beside a row. The reading is
+          // whichever edge is not zero.
+          edge: Math.max(
+            ...[
+              style.borderTopWidth,
+              style.borderBottomWidth,
+              style.borderLeftWidth,
+              style.borderRightWidth,
+            ].map(parseFloat),
+          ),
+          paint: style.backgroundColor, // allow-literal: read to ask whether anything is painted at all, never to compare one colour with another
+          image: style.backgroundImage,
+          shadow: style.boxShadow,
+        };
+      });
+    }),
   );
-  expect(wrong, "a divider is drawing a surface").toEqual([]);
+  // A floor, because an empty page passes every loop below.
+  expect(drawn.length, "no divider was measured at all").toBeGreaterThan(5);
+  for (const one of drawn) {
+    expect(one.edge, `${one.name} draws no border`).toBeGreaterThan(0);
+    expect(one.paint, `${one.name} paints a colour of its own`).toBe("rgba(0, 0, 0, 0)"); // allow-literal: the CSS keyword for "no background", not a colour this system could take from a token
+    expect(one.image, `${one.name} paints a gradient`).toBe("none");
+    expect(one.shadow, `${one.name} carries a shadow`).toBe("none");
+  }
 });
