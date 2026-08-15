@@ -4,18 +4,12 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// A long-form reading column that caps its own line length.
+// Holds long-form text in a column that caps its own line length.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
-
-/** Applied by the component, never by the caller — which is what keeps
- * the two implementations from disagreeing about a default. */
-const defaults = {
-  measure: "default",
-};
 
 export function Prose({ measure, className, children, ...rest }) {
   const measure_ = measure ?? "default";

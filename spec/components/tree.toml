@@ -1,0 +1,92 @@
+guidance = """
+Use a tree for a hierarchy users walk, such as a file tree or a table of
+contents. With no script it is a nested `<ul>` of links, because the runtime
+writes every role, state and `tabindex`.
+"""
+
+[meta]
+name = "Tree"
+element = "ul"
+class = "nd-tree"
+page = "tree"
+# A ROW, BECAUSE `size` IS THE ROW'S HEIGHT. It is declared as a custom
+# property the rows read, so a `<ul>` with nothing in it takes all three
+# values and draws the same empty box for each.
+specimen = "<li class=\"nd-tree-item\"><span class=\"nd-tree-row\"><span class=\"nd-identifier\">src</span></span></li>"
+summary = "Let users walk a hierarchy, opening, closing and choosing nodes in it."
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-tree"
+doc = "What this tree is of, as a script finds it, and the root of every id in it. **Required**, because an id derived from an optional name is shared by every tree on the page."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The name of the hierarchy. Required, because a `role=\"tree\"` with no name gives a screen reader only the word *tree*."
+
+[prop.selection]
+type = "enum"
+values = ["none", "single", "multiple"]
+variants = false
+default = "none"
+attribute = "data-nd-selection"
+doc = "Whether nodes can be chosen, and how many. `none` is the default and makes the tree navigation only. `multiple` also writes `aria-multiselectable`. **A selectable node should not be a link**, and carries `TreeItem { value }` instead."
+
+[prop.form]
+type = "text"
+attribute = "data-nd-form"
+doc = "The field the chosen nodes are submitted under. Its presence puts a real hidden checkbox inside every selectable node, so the state survives a form post with no script. Absent, the selection is only on the screen."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The height of a row and the step each level is indented by. Rows are targets, so all three values clear WCAG 2.5.8's 24px minimum."
+
+[prop.guides]
+type = "bool"
+default = "false"
+attribute = "data-nd-guides"
+doc = "Draws a rule down each level, so users can see which parent a deep row belongs to. Off by default, and most useful on a tree of several levels."
+
+[prop.expand_label]
+type = "text"
+attribute = "data-nd-expand-label"
+doc = "The name of the control that opens a branch, with a `{label}` hole for the branch's own name. The control is a chevron, so this is the only name it has."
+
+[prop.collapse_label]
+type = "text"
+attribute = "data-nd-collapse-label"
+doc = "The name of that control once the branch is open. Two names rather than one, because *Expand* on an open branch describes the state rather than what pressing it does."
+
+[prop.empty_label]
+type = "text"
+attribute = "data-nd-empty-label"
+doc = "What a branch with nothing in it says. Set it, so that a row opening onto a gap is explained."
+
+[prop.children]
+type = "children"
+doc = "The top-level `TreeItem`s. Nested ones are the children of the item they belong to. That real DOM containment is what lets the browser compute `aria-level`, `aria-setsize` and `aria-posinset`."
+
+[keyboard]
+"Down arrow / Up arrow" = "Moves to the next and previous **visible** node, across levels, which is not the next sibling once a branch is open."
+"Right arrow" = "Opens a closed branch, or moves to the first child of an open one. On a leaf it does nothing."
+"Left arrow" = "Closes an open branch, or moves to the parent from a closed branch or a leaf."
+"Home / End" = "Moves to the first and last visible node."
+"Asterisk" = "Opens every branch at the focused node's level. It does not open the branches under them."
+"Enter" = "Follows the node's link, honouring Command or Control for a new tab. On a branch with no link it opens or closes it."
+"Space" = "Chooses the node, on a tree with selection. On a tree with none it does nothing rather than scrolling."
+"Shift with an arrow" = "Extends the selection to the node moved to. Needs `multiple`."
+"Control with an arrow" = "Moves without choosing, so a distant node can then be added with Space. Needs `multiple`."
+"Control with A" = "Chooses every visible node. Needs `multiple`. On any other tree it stays the browser's own *select all*."
+"A printable character" = "Jumps to the next visible node whose name starts with the letters typed, within about a second of each other."
+
+[a11y]
+notes = """
+Every role and every state is written by the script, and with none this is a
+nested `<ul>` of links. `role="treeitem"` goes on the row and never on the
+link inside it, and the whole tree is one tab stop.
+"""

@@ -4,11 +4,11 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! Text clipped to a line count, with the full value still available.
+//! Clip text to a fixed number of lines and keep the full value available.
 
 use dioxus::prelude::*;
 
-/// How many lines to show before clipping.
+/// How many lines are shown before the text is clipped: 1, 2, 3 or 4. One line by default.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TruncateLines {
     #[default]
@@ -38,19 +38,17 @@ impl TruncateLines {
     }
 }
 
-/// Text clipped to a line count, with the full value still available.
+/// Clip text to a fixed number of lines and keep the full value available.
 ///
 /// # Accessibility
 ///
-/// Clipping is visual only: the full text stays in the accessible tree, so a
-/// screen reader reads the whole value. Truncation that also truncates the
-/// announcement hides content from exactly the readers who cannot see the ellipsis.
+/// The clipping is visual only. The full text stays in the accessible tree, so a screen reader reads the whole value. Cutting the announcement too would hide content from readers who cannot see the ellipsis.
 #[component]
 pub fn Truncate(
-    /// How many lines to show before clipping.
+    /// How many lines are shown before the text is clipped: 1, 2, 3 or 4. One line by default.
     #[props(default)]
     lines: TruncateLines,
-    /// The full text. Shown on hover and announced in full.
+    /// The full text, written into the `title` attribute. Pointer users see it on hover.
     title: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]

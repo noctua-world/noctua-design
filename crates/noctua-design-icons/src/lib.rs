@@ -11,6 +11,12 @@
 
 #![no_std]
 
+/// The weight a stroked icon is drawn at, from `spec/icons.toml`.
+///
+/// Read by both `Icon` implementations and by the documentation page's
+/// variant grid, so the declaration has exactly one value in it.
+pub const STROKE_WIDTH: &str = "1.75";
+
 /// Every icon in the system.
 ///
 /// A generated enum rather than a name, so an icon that does not exist is a
@@ -29,36 +35,117 @@ pub enum IconName {
     Moon,
     /// The appearance mode the operating system asked for.
     Monitor,
-    /// Opens the appearance settings.
+    /// Opens the theme menu. A palette rather than a gear: the menu is the appearance of the page — its mode, its accent, its corners — and a gear says "settings" about a product that has no other kind.
+    Palette,
+    /// Settings that are not the theme. `Disclosure` documents itself with it.
     Settings,
     /// Marks the search field.
     Search,
+    /// A person, where there is no picture of them. `Avatar`'s last fallback, after the initials.
+    User,
     /// Marks a link that leaves the site. Replaces a bare `↗` character, which is text pretending to be an icon.
     ExternalLink,
     /// The disclosure marker on a `<details>` summary.
     ChevronDown,
     /// Copies a code block to the clipboard.
     Copy,
+    /// Opens the menu that takes a table away as a file.
+    Download,
+    /// Opens the note explaining what a heading or a value means.
+    Info,
+    /// Opens the list of a table's columns, where a reader chooses which are shown.
+    Columns,
+    /// Marks a message about something that is about to go wrong. The triangle is the shape, and the sentence beside it is what says what is wrong.
+    Warning,
+    /// Marks a message about something that has already gone wrong, such as a refused payment. Paired with the danger tone, never standing in for it.
+    Alert,
     /// Confirms an action, and marks the option in force.
     Check,
+    /// Puts an example frame back the way it was found: its width, its appearance and its glass test all at once. An arrow that comes back round to where it started, which is the one gesture in this set that means *undo my changes* rather than *go back a step* — `chevron-left` is already the carousel's previous slide, and one drawing meaning two things is how a reader learns to distrust both.
+    RotateCcw,
+    /// Puts an example frame under a glass test: colour and edges behind it, blank space and a scrollbar, and the material on everything inside. A flask, because what the control is is a test rig — `layers` and `image` were both here first, and both described the backdrop rather than the thing being done with it.
+    FlaskConical,
+    /// A column sorted from the beginning of the alphabet, or the smallest number. Paired with `aria-sort="ascending"`, which is what a screen reader reads; the arrow is the half a reader can see.
+    ArrowUp,
+    /// The same, the other way. Two arrows rather than one rotated by the stylesheet: a transform is a thing a preset or a reduced-motion path can reach, and the direction of a sort is not something to leave to CSS.
+    ArrowDown,
+    /// A column that can be sorted and is not — the affordance. Without it a sortable heading looks exactly like a fixed one until somebody presses it, which is a feature nobody finds.
+    ChevronsUpDown,
+    /// Opens the language menu. Not a flag: a flag names a country and this names a language, and the two disagree for most languages anybody speaks.
+    Languages,
+    /// Opens a `DateInput`'s suggestions — the quick picks and the month grid. A calendar, because that is what the panel is; the button it sits on is icon-only and takes its name from `suggest_label`.
+    Calendar,
+    /// Toggles line wrapping in a code block.
+    WrapText,
+    /// Takes a colour off the screen, on a `ColorPicker` with `eyedropper`. Drawn rather than absent where the browser has no `EyeDropper`: the button is what the script removes, and an icon nothing renders is not payload.
+    Pipette,
+    /// Commits the colour under the cursor to a `ColorPicker { multiple }`'s list. A plus rather than a check: a check says *this one is chosen*, which is what the option rows already say, and this says *and one more*.
+    Plus,
+    /// Subtracts one step, on a `NumberInput`. A minus rather than a downward chevron: the control changes a quantity, and a chevron says *move* about a thing that is not moving.
+    Minus,
+    /// Shows a password, on a `Input { kind = "password" }`. A reader who cannot see what they typed cannot correct it, and the alternative they reach for is a shorter password.
+    Eye,
+    /// The other half of that toggle, on a password. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script.
+    EyeOff,
+    /// Marks a `FileInput`'s drop area. An arrow into a tray, which is what the gesture is; a paperclip would say *attachment*, which is what the result is called and not what the control does.
+    Upload,
+    /// Fills a `TimeInput` with the current time, on the control `now_label` names. A clock, because that is what the field is; the button it sits on is icon-only and takes its name from that prop.
+    Clock,
+    /// The previous slide, on a `Carousel`. A chevron rather than an arrow: an arrow in this system marks the direction a column is SORTED, and one drawing meaning two things is how a reader learns to distrust both.
+    ChevronLeft,
+    /// The next slide, on the same terms. The pair is mirrored by the stylesheet in a right-to-left locale, which is the one place a transform is the right answer — *previous* means the other way there.
+    ChevronRight,
+    /// Stops a `Carousel` rotating. WCAG 2.2.2 requires a way to stop anything that moves for more than five seconds, and this is it — the component refuses to start rotating without it.
+    Pause,
+    /// The other half of that toggle. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script.
+    Play,
+    /// One step of a `Rating`. The outline is the empty step and the stylesheet fills the same geometry for the full one, so a rating is one drawing rather than two that could drift apart.
+    Star,
     /// The repository this system is built in the open in.
     Github,
 }
 
 impl IconName {
     /// Every icon, in the order the spec declares them.
-    pub const ALL: [Self; 12] = [
+    pub const ALL: [Self; 39] = [
         Self::Menu,
         Self::Close,
         Self::Sun,
         Self::Moon,
         Self::Monitor,
+        Self::Palette,
         Self::Settings,
         Self::Search,
+        Self::User,
         Self::ExternalLink,
         Self::ChevronDown,
         Self::Copy,
+        Self::Download,
+        Self::Info,
+        Self::Columns,
+        Self::Warning,
+        Self::Alert,
         Self::Check,
+        Self::RotateCcw,
+        Self::FlaskConical,
+        Self::ArrowUp,
+        Self::ArrowDown,
+        Self::ChevronsUpDown,
+        Self::Languages,
+        Self::Calendar,
+        Self::WrapText,
+        Self::Pipette,
+        Self::Plus,
+        Self::Minus,
+        Self::Eye,
+        Self::EyeOff,
+        Self::Upload,
+        Self::Clock,
+        Self::ChevronLeft,
+        Self::ChevronRight,
+        Self::Pause,
+        Self::Play,
+        Self::Star,
         Self::Github,
     ];
 
@@ -71,12 +158,39 @@ impl IconName {
             Self::Sun => "sun",
             Self::Moon => "moon",
             Self::Monitor => "monitor",
+            Self::Palette => "palette",
             Self::Settings => "settings",
             Self::Search => "search",
+            Self::User => "user",
             Self::ExternalLink => "external-link",
             Self::ChevronDown => "chevron-down",
             Self::Copy => "copy",
+            Self::Download => "download",
+            Self::Info => "info",
+            Self::Columns => "columns",
+            Self::Warning => "warning",
+            Self::Alert => "alert",
             Self::Check => "check",
+            Self::RotateCcw => "rotate-ccw",
+            Self::FlaskConical => "flask-conical",
+            Self::ArrowUp => "arrow-up",
+            Self::ArrowDown => "arrow-down",
+            Self::ChevronsUpDown => "chevrons-up-down",
+            Self::Languages => "languages",
+            Self::Calendar => "calendar",
+            Self::WrapText => "wrap-text",
+            Self::Pipette => "pipette",
+            Self::Plus => "plus",
+            Self::Minus => "minus",
+            Self::Eye => "eye",
+            Self::EyeOff => "eye-off",
+            Self::Upload => "upload",
+            Self::Clock => "clock",
+            Self::ChevronLeft => "chevron-left",
+            Self::ChevronRight => "chevron-right",
+            Self::Pause => "pause",
+            Self::Play => "play",
+            Self::Star => "star",
             Self::Github => "github",
         }
     }
@@ -96,10 +210,16 @@ impl IconName {
             Self::Monitor => {
                 r#"<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>"#
             }
+            Self::Palette => {
+                r#"<circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>"#
+            }
             Self::Settings => {
                 r#"<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>"#
             }
             Self::Search => r#"<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>"#,
+            Self::User => {
+                r#"<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>"#
+            }
             Self::ExternalLink => {
                 r#"<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>"#
             }
@@ -107,7 +227,66 @@ impl IconName {
             Self::Copy => {
                 r#"<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>"#
             }
+            Self::Download => {
+                r#"<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>"#
+            }
+            Self::Info => {
+                r#"<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>"#
+            }
+            Self::Columns => {
+                r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="12" x2="12" y1="3" y2="21"/>"#
+            }
+            Self::Warning => {
+                r#"<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>"#
+            }
+            Self::Alert => {
+                r#"<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>"#
+            }
             Self::Check => r#"<polyline points="20 6 9 17 4 12"/>"#,
+            Self::RotateCcw => {
+                r#"<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>"#
+            }
+            Self::FlaskConical => {
+                r#"<path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/>"#
+            }
+            Self::ArrowUp => r#"<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>"#,
+            Self::ArrowDown => r#"<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>"#,
+            Self::ChevronsUpDown => r#"<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>"#,
+            Self::Languages => {
+                r#"<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>"#
+            }
+            Self::Calendar => {
+                r#"<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>"#
+            }
+            Self::WrapText => {
+                r#"<line x1="3" x2="21" y1="6" y2="6"/><path d="M3 12h15a3 3 0 1 1 0 6h-4"/><polyline points="16 16 14 18 16 20"/><line x1="3" x2="10" y1="18" y2="18"/>"#
+            }
+            Self::Pipette => {
+                r#"<path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"/>"#
+            }
+            Self::Plus => r#"<path d="M5 12h14"/><path d="M12 5v14"/>"#,
+            Self::Minus => r#"<path d="M5 12h14"/>"#,
+            Self::Eye => {
+                r#"<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>"#
+            }
+            Self::EyeOff => {
+                r#"<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>"#
+            }
+            Self::Upload => {
+                r#"<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>"#
+            }
+            Self::Clock => {
+                r#"<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>"#
+            }
+            Self::ChevronLeft => r#"<path d="m15 18-6-6 6-6"/>"#,
+            Self::ChevronRight => r#"<path d="m9 18 6-6-6-6"/>"#,
+            Self::Pause => {
+                r#"<rect width="4" height="16" x="6" y="4"/><rect width="4" height="16" x="14" y="4"/>"#
+            }
+            Self::Play => r#"<polygon points="5 3 19 12 5 21 5 3"/>"#,
+            Self::Star => {
+                r#"<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>"#
+            }
             Self::Github => {
                 r#"<path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/>"#
             }
@@ -127,12 +306,39 @@ impl IconName {
             Self::Sun => "0 0 24 24",
             Self::Moon => "0 0 24 24",
             Self::Monitor => "0 0 24 24",
+            Self::Palette => "0 0 24 24",
             Self::Settings => "0 0 24 24",
             Self::Search => "0 0 24 24",
+            Self::User => "0 0 24 24",
             Self::ExternalLink => "0 0 24 24",
             Self::ChevronDown => "0 0 24 24",
             Self::Copy => "0 0 24 24",
+            Self::Download => "0 0 24 24",
+            Self::Info => "0 0 24 24",
+            Self::Columns => "0 0 24 24",
+            Self::Warning => "0 0 24 24",
+            Self::Alert => "0 0 24 24",
             Self::Check => "0 0 24 24",
+            Self::RotateCcw => "0 0 24 24",
+            Self::FlaskConical => "0 0 24 24",
+            Self::ArrowUp => "0 0 24 24",
+            Self::ArrowDown => "0 0 24 24",
+            Self::ChevronsUpDown => "0 0 24 24",
+            Self::Languages => "0 0 24 24",
+            Self::Calendar => "0 0 24 24",
+            Self::WrapText => "0 0 24 24",
+            Self::Pipette => "0 0 24 24",
+            Self::Plus => "0 0 24 24",
+            Self::Minus => "0 0 24 24",
+            Self::Eye => "0 0 24 24",
+            Self::EyeOff => "0 0 24 24",
+            Self::Upload => "0 0 24 24",
+            Self::Clock => "0 0 24 24",
+            Self::ChevronLeft => "0 0 24 24",
+            Self::ChevronRight => "0 0 24 24",
+            Self::Pause => "0 0 24 24",
+            Self::Play => "0 0 24 24",
+            Self::Star => "0 0 24 24",
             Self::Github => "0 0 16 16",
         }
     }
@@ -152,12 +358,39 @@ impl IconName {
             Self::Sun => false,
             Self::Moon => false,
             Self::Monitor => false,
+            Self::Palette => false,
             Self::Settings => false,
             Self::Search => false,
+            Self::User => false,
             Self::ExternalLink => false,
             Self::ChevronDown => false,
             Self::Copy => false,
+            Self::Download => false,
+            Self::Info => false,
+            Self::Columns => false,
+            Self::Warning => false,
+            Self::Alert => false,
             Self::Check => false,
+            Self::RotateCcw => false,
+            Self::FlaskConical => false,
+            Self::ArrowUp => false,
+            Self::ArrowDown => false,
+            Self::ChevronsUpDown => false,
+            Self::Languages => false,
+            Self::Calendar => false,
+            Self::WrapText => false,
+            Self::Pipette => false,
+            Self::Plus => false,
+            Self::Minus => false,
+            Self::Eye => false,
+            Self::EyeOff => false,
+            Self::Upload => false,
+            Self::Clock => false,
+            Self::ChevronLeft => false,
+            Self::ChevronRight => false,
+            Self::Pause => false,
+            Self::Play => false,
+            Self::Star => false,
             Self::Github => true,
         }
     }
@@ -171,14 +404,91 @@ impl IconName {
             Self::Sun => "The light appearance mode.",
             Self::Moon => "The dark appearance mode.",
             Self::Monitor => "The appearance mode the operating system asked for.",
-            Self::Settings => "Opens the appearance settings.",
+            Self::Palette => {
+                "Opens the theme menu. A palette rather than a gear: the menu is the appearance of the page — its mode, its accent, its corners — and a gear says \"settings\" about a product that has no other kind."
+            }
+            Self::Settings => {
+                "Settings that are not the theme. `Disclosure` documents itself with it."
+            }
             Self::Search => "Marks the search field.",
+            Self::User => {
+                "A person, where there is no picture of them. `Avatar`'s last fallback, after the initials."
+            }
             Self::ExternalLink => {
                 "Marks a link that leaves the site. Replaces a bare `↗` character, which is text pretending to be an icon."
             }
             Self::ChevronDown => "The disclosure marker on a `<details>` summary.",
             Self::Copy => "Copies a code block to the clipboard.",
+            Self::Download => "Opens the menu that takes a table away as a file.",
+            Self::Info => "Opens the note explaining what a heading or a value means.",
+            Self::Columns => {
+                "Opens the list of a table's columns, where a reader chooses which are shown."
+            }
+            Self::Warning => {
+                "Marks a message about something that is about to go wrong. The triangle is the shape, and the sentence beside it is what says what is wrong."
+            }
+            Self::Alert => {
+                "Marks a message about something that has already gone wrong, such as a refused payment. Paired with the danger tone, never standing in for it."
+            }
             Self::Check => "Confirms an action, and marks the option in force.",
+            Self::RotateCcw => {
+                "Puts an example frame back the way it was found: its width, its appearance and its glass test all at once. An arrow that comes back round to where it started, which is the one gesture in this set that means *undo my changes* rather than *go back a step* — `chevron-left` is already the carousel's previous slide, and one drawing meaning two things is how a reader learns to distrust both."
+            }
+            Self::FlaskConical => {
+                "Puts an example frame under a glass test: colour and edges behind it, blank space and a scrollbar, and the material on everything inside. A flask, because what the control is is a test rig — `layers` and `image` were both here first, and both described the backdrop rather than the thing being done with it."
+            }
+            Self::ArrowUp => {
+                "A column sorted from the beginning of the alphabet, or the smallest number. Paired with `aria-sort=\"ascending\"`, which is what a screen reader reads; the arrow is the half a reader can see."
+            }
+            Self::ArrowDown => {
+                "The same, the other way. Two arrows rather than one rotated by the stylesheet: a transform is a thing a preset or a reduced-motion path can reach, and the direction of a sort is not something to leave to CSS."
+            }
+            Self::ChevronsUpDown => {
+                "A column that can be sorted and is not — the affordance. Without it a sortable heading looks exactly like a fixed one until somebody presses it, which is a feature nobody finds."
+            }
+            Self::Languages => {
+                "Opens the language menu. Not a flag: a flag names a country and this names a language, and the two disagree for most languages anybody speaks."
+            }
+            Self::Calendar => {
+                "Opens a `DateInput`'s suggestions — the quick picks and the month grid. A calendar, because that is what the panel is; the button it sits on is icon-only and takes its name from `suggest_label`."
+            }
+            Self::WrapText => "Toggles line wrapping in a code block.",
+            Self::Pipette => {
+                "Takes a colour off the screen, on a `ColorPicker` with `eyedropper`. Drawn rather than absent where the browser has no `EyeDropper`: the button is what the script removes, and an icon nothing renders is not payload."
+            }
+            Self::Plus => {
+                "Commits the colour under the cursor to a `ColorPicker { multiple }`'s list. A plus rather than a check: a check says *this one is chosen*, which is what the option rows already say, and this says *and one more*."
+            }
+            Self::Minus => {
+                "Subtracts one step, on a `NumberInput`. A minus rather than a downward chevron: the control changes a quantity, and a chevron says *move* about a thing that is not moving."
+            }
+            Self::Eye => {
+                "Shows a password, on a `Input { kind = \"password\" }`. A reader who cannot see what they typed cannot correct it, and the alternative they reach for is a shorter password."
+            }
+            Self::EyeOff => {
+                "The other half of that toggle, on a password. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script."
+            }
+            Self::Upload => {
+                "Marks a `FileInput`'s drop area. An arrow into a tray, which is what the gesture is; a paperclip would say *attachment*, which is what the result is called and not what the control does."
+            }
+            Self::Clock => {
+                "Fills a `TimeInput` with the current time, on the control `now_label` names. A clock, because that is what the field is; the button it sits on is icon-only and takes its name from that prop."
+            }
+            Self::ChevronLeft => {
+                "The previous slide, on a `Carousel`. A chevron rather than an arrow: an arrow in this system marks the direction a column is SORTED, and one drawing meaning two things is how a reader learns to distrust both."
+            }
+            Self::ChevronRight => {
+                "The next slide, on the same terms. The pair is mirrored by the stylesheet in a right-to-left locale, which is the one place a transform is the right answer — *previous* means the other way there."
+            }
+            Self::Pause => {
+                "Stops a `Carousel` rotating. WCAG 2.2.2 requires a way to stop anything that moves for more than five seconds, and this is it — the component refuses to start rotating without it."
+            }
+            Self::Play => {
+                "The other half of that toggle. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script."
+            }
+            Self::Star => {
+                "One step of a `Rating`. The outline is the empty step and the stylesheet fills the same geometry for the full one, so a rating is one drawing rather than two that could drift apart."
+            }
             Self::Github => "The repository this system is built in the open in.",
         }
     }

@@ -4,20 +4,18 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! An abbreviation, with its expansion.
+//! Show an abbreviation together with the words it stands for.
 
 use dioxus::prelude::*;
 
-/// An abbreviation, with its expansion.
+/// Show an abbreviation together with the words it stands for.
 ///
 /// # Accessibility
 ///
-/// `title` is invisible on touch, where there is no hover. The expansion is
-/// therefore also available in the text on first use; the attribute is a
-/// convenience for pointer users, never the only route to the meaning.
+/// `title` is not shown on a touch screen, where there is no hover. Spell the expansion out in the text on first use. The attribute helps pointer users and is never the only route to the meaning.
 #[component]
 pub fn Abbr(
-    /// The expansion. Required — an abbr without one is just small text.
+    /// The words the abbreviation stands for, written into the `title` attribute. Always supply it, because an abbreviation with no expansion is only small text.
     title: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]

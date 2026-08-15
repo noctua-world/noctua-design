@@ -4,32 +4,68 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! Content folded away behind its own control.
+//! Let users show and hide a block of content from its own control.
 
-use crate::icon::{Icon, IconName};
 use dioxus::prelude::*;
+use noctua_design_icons::IconName;
 
-/// Content folded away behind its own control.
+use crate::components::Icon;
+
+/// Makes the summary a real heading inside `<summary>`, at level 2, 3 or 4. Use it when the disclosure is a section of the page, so the section keeps its place in the outline a screen reader navigates by.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum DisclosureHeading {
+    #[default]
+    /// `none`
+    None,
+    /// `h2`
+    H2,
+    /// `h3`
+    H3,
+    /// `h4`
+    H4,
+}
+
+impl DisclosureHeading {
+    /// Every value, in the order the spec declares them.
+    pub const ALL: [Self; 4] = [Self::None, Self::H2, Self::H3, Self::H4];
+
+    /// The value as it appears in the DOM.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::None => "none",
+            Self::H2 => "h2",
+            Self::H3 => "h3",
+            Self::H4 => "h4",
+        }
+    }
+}
+
+/// Let users show and hide a block of content from its own control.
 ///
 /// # Accessibility
 ///
-/// `<details>`/`<summary>` rather than the `popover` attribute or a hand-built
-/// pair: the browser gives the role, the state and the keyboard for free, and
-/// gets them right in every engine. Nothing here moves focus on open and nothing
-/// is trapped — a reader who tabs past an open disclosure carries on into the
-/// page, which is correct for something that is not a dialog.
+/// The component renders `<details>` and `<summary>`, which provide the role, the state and the keyboard in every engine. Opening moves no focus and traps none.
 #[component]
 pub fn Disclosure(
-    /// What the control says, and its accessible name.
+    /// The text on the control, which is also its accessible name.
     summary: String,
-    /// An icon instead of the summary text. The summary is still required and becomes the accessible name.
+    /// The identifier a script uses to find this disclosure. It is written to `data-nd-disclosure`. A disclosure with no script behind it does not need one.
+    name: Option<String>,
+    /// An icon shown instead of the summary text. `summary` is still required and becomes the accessible name.
     icon: Option<IconName>,
-    /// Whether it starts open. Rendered, not applied by script — a disclosure that opens after the page paints reflows what is under it.
-    #[props(default)]
+    /// Whether the disclosure starts open. Rendered in the markup rather than applied by a script, because opening after the page has painted moves the content below it.
+    #[props(default = false)]
     open: bool,
-    /// Whether to draw the chevron. Off for a control that is already an icon.
-    #[props(default)]
+    /// Whether the chevron is drawn. Turn it off for a control that is already an icon.
+    #[props(default = true)]
     marker: bool,
+    /// Makes the summary a real heading inside `<summary>`, at level 2, 3 or 4. Use it when the disclosure is a section of the page, so the section keeps its place in the outline a screen reader navigates by.
+    #[props(default)]
+    heading: DisclosureHeading,
+    /// Whether the control is frosted. It applies to the summary and the panel together, so both carry the same material.
+    #[props(default = false)]
+    glass: bool,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -40,7 +76,15 @@ pub fn Disclosure(
     let root = root.trim().to_owned();
 
     rsx! {
-        details { class: "{root}", open,
+        details {
+            class: "{root}",
+            "data-nd-glass": if glass { "true" } else { "false" },
+            open,
+            // The hook a script binds to, written from a prop rather
+            // than left to the caller: an arbitrary-attribute escape
+            // hatch on one component is an escape hatch on all of
+            // them. `None` writes nothing at all.
+            "data-nd-disclosure": name,
             summary {
                 class: "nd-disclosure-summary",
                 // The summary is the accessible name whether it is
@@ -51,9 +95,20 @@ pub fn Disclosure(
                 if let Some(icon) = icon {
                     Icon { icon }
                 } else {
-                    span { class: "nd-disclosure-text", "{summary}" }
+                    // A REAL HEADING, INSIDE THE SUMMARY. The HTML
+                    // spec allows summary one heading, and a folded
+                    // section whose title is a `<span>` is a section
+                    // missing from the outline a screen reader
+                    // navigates by — which is the only thing left of
+                    // it while it is closed.
+                    match heading {
+                        DisclosureHeading::H2 => rsx! { h2 { class: "nd-disclosure-text", "{summary}" } },
+                        DisclosureHeading::H3 => rsx! { h3 { class: "nd-disclosure-text", "{summary}" } },
+                        DisclosureHeading::H4 => rsx! { h4 { class: "nd-disclosure-text", "{summary}" } },
+                        DisclosureHeading::None => rsx! { span { class: "nd-disclosure-text", "{summary}" } },
+                    }
                     if marker {
-                        Icon { icon: IconName::ChevronDown, size: crate::icon::IconSize::Small }
+                        Icon { icon: IconName::ChevronDown, size: crate::components::IconSize::Small }
                     }
                 }
             }

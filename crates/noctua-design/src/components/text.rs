@@ -4,11 +4,11 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! A run of text, with the size, weight and tone of the type scale.
+//! Set the size, weight and tone of a run of text, from the type scale.
 
 use dioxus::prelude::*;
 
-/// The size, from the type scale.
+/// The size, from the type scale: `caption`, `small`, `body` or `lead`. Defaults to `body`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TextSize {
     /// `caption`
@@ -38,7 +38,7 @@ impl TextSize {
     }
 }
 
-/// The weight.
+/// The weight: `regular`, `medium`, `semibold` or `bold`. Defaults to `regular`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TextWeight {
     #[default]
@@ -68,7 +68,7 @@ impl TextWeight {
     }
 }
 
-/// How much the text should assert itself.
+/// How much the text stands out: `default`, `muted` for secondary text, or `accent`. Defaults to `default`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TextTone {
     #[default]
@@ -95,20 +95,20 @@ impl TextTone {
     }
 }
 
-/// A run of text, with the size, weight and tone of the type scale.
+/// Set the size, weight and tone of a run of text, from the type scale.
 #[component]
 pub fn Text(
-    /// The size, from the type scale.
+    /// The size, from the type scale: `caption`, `small`, `body` or `lead`. Defaults to `body`.
     #[props(default)]
     size: TextSize,
-    /// The weight.
+    /// The weight: `regular`, `medium`, `semibold` or `bold`. Defaults to `regular`.
     #[props(default)]
     weight: TextWeight,
-    /// How much the text should assert itself.
+    /// How much the text stands out: `default`, `muted` for secondary text, or `accent`. Defaults to `default`.
     #[props(default)]
     tone: TextTone,
-    /// Tabular figures, so digits line up in a column.
-    #[props(default)]
+    /// Whether the figures are tabular, so digits line up in a column. Off by default.
+    #[props(default = false)]
     numeric: bool,
     /// Extra classes for the root element.
     #[props(default)]

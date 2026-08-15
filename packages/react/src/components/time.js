@@ -4,7 +4,7 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// A date or time, machine-readable and human-readable at once.
+// Mark up a date or time so that machines and people can both read it.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.

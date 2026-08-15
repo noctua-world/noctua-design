@@ -2,7 +2,7 @@
 name = "Link"
 element = "a"
 class = "nd-a"
-summary = "A link, with the affordance an external destination needs."
+summary = "Links to another page, and marks the links that leave the site."
 
 [prop.href]
 type = "text"
@@ -13,14 +13,19 @@ doc = "The destination."
 type = "bool"
 default = "false"
 attribute = "data-nd-external"
-doc = "Marks the link as leaving the site, which adds a visible affordance."
+doc = "Whether the link leaves the site. It draws a small external-link icon after the link text."
+
+[prop.rel]
+type = "text"
+attribute = "rel"
+doc = "The `rel` attribute of the link. Use `noreferrer` on anything that leaves the site."
 
 [prop.tone]
 type = "enum"
 values = ["accent", "inherit"]
 default = "accent"
 attribute = "data-nd-tone"
-doc = "`inherit` is for a link inside a run of coloured text that must not break the line's colour."
+doc = "The colour of the link text. `accent` is the link colour, and `inherit` takes the colour of the text around it, for a link inside a coloured run."
 
 [prop.children]
 type = "children"
@@ -29,7 +34,7 @@ doc = "The link text."
 [a11y]
 needs_name = true
 notes = """
-The text is the accessible name, so it has to make sense read out of context:
-a page full of links called "here" is a page a screen-reader user cannot
-navigate. An external link's affordance is visual AND textual — the icon is
-decorative and the destination is announced."""
+The link text is the accessible name, so it has to make sense out of context. A
+page of links all called *here* cannot be navigated with a screen reader. The
+external icon carries `aria-hidden`.
+"""

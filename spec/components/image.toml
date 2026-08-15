@@ -1,0 +1,89 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use an image for a picture that belongs to the content, together with the words
+that stand in for it. Give it a `ratio` so the box is held before the bytes
+arrive. For a picture of a person, use `Avatar`.
+"""
+
+[meta]
+name = "Image"
+element = "img"
+class = "nd-image"
+# A drawn box rather than a file: a specimen of a picture cannot be a picture,
+# because the one thing the grid documents here is the SHAPE the box holds
+# before anything arrives. `Avatar` reached the same place from the other side.
+specimen = "<span class=\"nd-image-media\"></span>"
+summary = "Show a picture in a box held before it arrives, with a caption where it needs one."
+
+# EVERYTHING HERE IS `Avatar`'S ARRANGEMENT, WIDENED.
+#
+# `loading="lazy"`, `decoding="async"`, and a box sized by the caller rather
+# than by the file — the three that avatar states in its own header, for the
+# reason it gives: nothing moves when the picture lands. What this adds is the
+# `ratio`, because an avatar is always a square and a photograph is not.
+#
+# There is no `<picture>` and no `srcset` here, and there is none anywhere else
+# in this repository either. Adding one is a change to both languages at once
+# or it is drift, so it waits until a caller needs it.
+
+[prop.src]
+type = "text"
+required = true
+attribute = "src"
+doc = "Where the picture is. **Required**, because an image with no source is a box that never fills. The box comes from `ratio` rather than from the file, so nothing moves when it lands."
+
+[prop.alt]
+type = "text"
+required = true
+attribute = "alt"
+doc = "The words that stand in for the picture. **Required**, and an empty string is a real answer: it says the picture repeats what is beside it, so a screen reader passes over it."
+
+[prop.ratio]
+type = "enum"
+values = ["square", "landscape", "portrait", "wide"]
+attribute = "data-nd-ratio"
+doc = "The shape of the box, held before the picture arrives. Absent lets the file decide, and the file arrives after the layout. Every element under it then moves, which this system forbids."
+
+[prop.fit]
+type = "enum"
+values = ["cover", "contain"]
+default = "cover"
+attribute = "data-nd-fit"
+# `object-fit` needs a real file inside a real box, and a specimen is a drawn
+# box with nothing in it. Two values, one picture, so the grid is off.
+variants = false
+doc = "How the picture fills a box of a different shape. `cover` crops it to the edges, and `contain` fits the whole of it with room left over. Use `contain` where the edges carry meaning."
+
+[prop.loading]
+type = "enum"
+values = ["lazy", "eager"]
+default = "lazy"
+attribute = "loading"
+# When the bytes are fetched. Nothing about it is visible in a still picture.
+variants = false
+doc = "When the browser fetches it. `lazy` waits until the picture is near the viewport. Use `eager` for the one picture a reader sees first, where waiting costs more than the bytes do."
+
+[prop.caption]
+type = "text"
+doc = "A line under the picture, in the reader's language. Its presence changes the element: a captioned image is a `<figure>` with a `<figcaption>`, which is what attaches the words to the picture."
+
+[prop.rounded]
+type = "bool"
+default = "false"
+attribute = "data-nd-rounded"
+doc = "Whether the corners are rounded, from the surface radius. Off by default, because square is this system's base and rounded is the override (`NOCTUA.md §9.7`)."
+
+[prop.width]
+type = "text"
+attribute = "width"
+doc = "The picture's own width, in pixels, as the file has it. Written together with `height` it hands the browser the ratio before any stylesheet loads, which is the platform's own answer to a moving page."
+
+[prop.height]
+type = "text"
+attribute = "height"
+doc = "The picture's own height, in pixels. It is the other half of `width` and does nothing alone. How large the box is drawn stays the stylesheet's business."
+
+[a11y]
+needs_name = true
+notes = """The picture carries a real `alt`, always, and an empty one is a decision rather than an omission. A captioned image is a `<figure>` with a `<figcaption>`, so the line under it is attached to it."""

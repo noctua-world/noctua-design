@@ -4,20 +4,12 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// An ordered, unordered or description list, nestable.
+// Group items as an ordered, unordered or description list, with nesting.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
-
-/** Applied by the component, never by the caller — which is what keeps
- * the two implementations from disagreeing about a default. */
-const defaults = {
-  kind: "unordered",
-  marker: "default",
-  spacing: "default",
-};
 
 export function List({ kind, marker, spacing, className, children, ...rest }) {
   const kind_ = kind ?? "unordered";
@@ -25,8 +17,9 @@ export function List({ kind, marker, spacing, className, children, ...rest }) {
   const spacing_ = spacing ?? "default";
   const root = ["nd-list", className].filter(Boolean).join(" ");
   const props = { className: root, ...rest };
-  if (kind_ !== undefined) props["data-nd-kind"] = String(kind_);
   if (marker_ !== undefined) props["data-nd-marker"] = String(marker_);
   if (spacing_ !== undefined) props["data-nd-spacing"] = String(spacing_);
-  return h("ul", props, children);
+  // This prop chooses the element rather than an attribute.
+  const element = { "unordered": "ul", "ordered": "ol", "description": "dl" }[kind_] ?? "ul";
+  return h(element, props, children);
 }

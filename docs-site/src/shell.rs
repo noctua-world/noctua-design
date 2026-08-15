@@ -20,11 +20,15 @@
 //! state to unwind.
 
 use dioxus::prelude::*;
-use noctua_design::components::{Choice, ChoiceOption, Disclosure, SearchField};
-use noctua_design::{Icon, IconButton, IconName};
+use noctua_design::IconName;
+use noctua_design::components::{
+    Button, ButtonTone, ButtonVariant, Disclosure, Label, LabelKind, LabelSize, Search,
+    SearchPresentation,
+};
 use noctua_design_i18n::{Key, Locale};
 
 use crate::site::{self, Page};
+use crate::theme_menu::ThemeMenu;
 
 /// Everything a page needs to know about where it sits.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -41,16 +45,26 @@ impl Context {
     pub(crate) fn t(self, key: Key) -> &'static str {
         self.locale.message(key)
     }
+
+    /// The same, with one `{placeholder}` filled in.
+    ///
+    /// A message with a value in it is still ONE message. Joining a number to
+    /// a translated word would put the number where English puts it and leave
+    /// it there in every other language, which is the concatenation
+    /// `a_translated_message_may_not_be_concatenated` refuses.
+    #[must_use]
+    pub(crate) fn fill(self, key: Key, name: &str, value: &str) -> String {
+        noctua_design_i18n::fill(self.t(key), &[(name, value)])
+    }
 }
 
 /// The sticky header. One line at 320 px, and the budget is written down.
 ///
-/// The mode control is three icons, not one that cycles. A cycling button has
-/// to show the *current* state to be usable, and this one showed a single
-/// static glyph that never changed — so a reader could not tell which of three
-/// modes was in force, and one of the three transitions (dark → system on a
-/// dark system) changes nothing on the page at all. Three radios always move
-/// the indicator, whatever the pixels behind them do.
+/// It used to carry a mode control of its own, beside a panel that had a mode
+/// row in it — two ways to do one thing, and a third of the 320px budget spent
+/// on the copy. There is one theme menu now, behind the palette, and the header
+/// holds the four controls that are not settings: the drawer, the repository,
+/// the language and the menu itself.
 #[component]
 pub(crate) fn Header(context: Context) -> Element {
     // The first entry in THIS locale's sidebar, not a fixed page: the order is
@@ -63,27 +77,34 @@ pub(crate) fn Header(context: Context) -> Element {
         // `backdrop-filter` stops sampling — see shell.css.
         div { class: "nd-header-glass noctua-glass", "aria-hidden": "true" }
         header { class: "nd-header",
-            // Not an `IconButton` yet, and the reason is precise: this is a
-            // disclosure TRIGGER — it swaps its own label between two messages
-            // as the drawer opens and closes, through three script hooks. That
-            // is `Disclosure`'s contract, not `IconButton`'s, and giving
-            // `IconButton` an arbitrary-attribute escape hatch to fake it would
-            // hand every component one.
-            button {
-                class: "nd-icon nd-menu",
-                r#type: "button",
-                "aria-expanded": "false",
-                "aria-controls": "nd-nav",
-                "aria-label": context.t(Key::NavOpen),
-                "data-nd-menu": "",
-                "data-nd-open": context.t(Key::NavOpen),
-                "data-nd-close": context.t(Key::NavClose),
-                Icon { icon: IconName::Menu }
+            // A `Button` now, and the three hooks it needed are three props.
+            // It used to be hand-written markup with `data-nd-menu`,
+            // `data-nd-open` and `data-nd-close` invented on the spot, because
+            // no component could say "this control swaps its own name as it
+            // opens". `action` and `label_alt` are that, said once, for every
+            // control that will ever need it.
+            Button {
+                // `nd-nav-toggle`, NOT `nd-menu`. That name belongs to the
+                // `Menu` component now, and a shell class sharing it would put
+                // a floating panel's rules on the header's hamburger.
+                class: "nd-nav-toggle",
+                action: "menu",
+                variant: ButtonVariant::Transparent,
+                tone: ButtonTone::Neutral,
+                hide_label: true,
+                icon: IconName::Menu,
+                icon_alt: IconName::Close,
+                label: context.t(Key::NavOpen),
+                label_alt: context.t(Key::NavClose),
+                expanded: false,
+                controls: "nd-nav",
             }
             a { class: "nd-wordmark", href: "{home}", "{context.t(Key::AppName)}" }
             div { class: "nd-header-controls",
-                ModeControl { context }
-                IconButton {
+                Button {
+                    variant: ButtonVariant::Transparent,
+                    tone: ButtonTone::Neutral,
+                    hide_label: true,
                     icon: IconName::Github,
                     label: context.t(Key::AppRepository),
                     href: "https://github.com/noctua-world/noctua-design",
@@ -96,70 +117,74 @@ pub(crate) fn Header(context: Context) -> Element {
     }
 }
 
-/// Light, dark and system, side by side, one of them chosen.
+/// The language control: an icon, and a menu of three.
 ///
-/// A `role="radiogroup"` with the same `data-nd-setting` hook the settings
-/// panel uses, so the existing roving-tabindex handling and the existing
-/// persistence apply with no new script: one tab stop, arrows move within.
+/// It was a link that toggled between two locales, showing the name of the one
+/// you were **not** reading. That works for exactly two languages and for
+/// nobody who wants the third answer — *whichever my browser asks for* — which
+/// is the answer a reader who never thinks about languages actually wants, and
+/// the one this site now defaults to.
+///
+/// Each locale is named **in its own language**: a switcher that lists
+/// languages in the language you are trying to leave is useless to the person
+/// who needs it.
+///
+/// Every entry is a real `<a href>` to this same page in that locale, so the
+/// control works with the script blocked — the whole site is static files and
+/// there is nothing here a script has to reconstruct. What the script adds is
+/// the storage and the automatic resolution. `aria-current` is server-rendered
+/// on the default, so nothing announces a wrong answer before it runs.
 #[component]
-fn ModeControl(context: Context) -> Element {
-    let options = [
-        ("light", IconName::Sun, Key::ThemeModeLight),
-        ("dark", IconName::Moon, Key::ThemeModeDark),
-        ("system", IconName::Monitor, Key::ThemeModeSystem),
-    ];
+fn LocaleSwitch(context: Context) -> Element {
+    let automatic = crate::defaults::AUTOMATIC_LOCALE;
     rsx! {
-        Choice {
-            class: "nd-segmented",
-            name: "mode",
-            label: context.t(Key::ThemeModeLabel),
-            for (value, icon, label) in options {
-                ChoiceOption {
-                    value,
-                    icon,
-                    label: context.t(label),
-                    // Server-rendered from the known default, so the group is
-                    // not announcing that none of three is chosen — and is one
-                    // tab stop rather than three — before the script runs.
-                    selected: crate::defaults::of("mode") == value,
+        Disclosure {
+            class: "nd-locale",
+            name: "locale",
+            icon: IconName::Languages,
+            summary: context.t(Key::LocaleLabel),
+            div { class: "nd-panel nd-panel--menu noctua-glass",
+                div { class: "nd-panel-body",
+                    // A `<ul>` is not labelable, so its name is a `<p>` it
+                    // points at. `Label` derives the id from `for_control`.
+                    Label {
+                        kind: LabelKind::Name,
+                        size: LabelSize::Small,
+                        for_control: "nd-locale",
+                        text: context.t(Key::LocaleLabel),
+                    }
+                    ul { class: "nd-locale-list", "aria-labelledby": "nd-locale-label",
+                        li {
+                            a {
+                                class: "nd-locale-option",
+                                // With no script there is no detection, so the
+                                // honest destination is the source locale.
+                                href: "{context.page.locale_href(Locale::DEFAULT)}",
+                                "data-nd-locale": "{automatic}",
+                                "aria-current": "true",
+                                span { class: "nd-locale-name", "{context.t(Key::LocaleAutomatic)}" }
+                                span { class: "nd-locale-note", "{context.t(Key::LocaleAutomaticNote)}" }
+                            }
+                        }
+                        for locale in Locale::OFFERED {
+                            li {
+                                a {
+                                    class: "nd-locale-option",
+                                    href: "{context.page.locale_href(locale)}",
+                                    lang: "{locale.bcp47()}",
+                                    "data-nd-locale": "{locale.tag()}",
+                                    // A language's own name is not a string to
+                                    // translate. `.nd-identifier` says so, and
+                                    // is what the pseudo-locale test skips.
+                                    span { class: "nd-locale-name nd-identifier", "{locale.name()}" }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
-}
-
-/// The language control.
-///
-/// A link rather than a menu: with two locales offered, a control that toggles
-/// is one tap instead of two, and it needs no floating surface. It is also a
-/// real `<a href>`, so it works with JavaScript off — the whole site is static
-/// files, and there is nothing here a script has to reconstruct.
-#[component]
-fn LocaleSwitch(context: Context) -> Element {
-    let other = theme_other_locale(context.locale);
-    let href = context.page.locale_href(other);
-    rsx! {
-        a {
-            class: "nd-locale",
-            href: "{href}",
-            lang: "{other.bcp47()}",
-            "aria-label": context.t(Key::LocaleLabel),
-            title: "{context.t(Key::LocaleLabel)}",
-            // Two spellings, one shown at a time. Below `sm` the header's width
-            // budget does not stretch to "Português", and a truncated language
-            // name is worse than a tag: the reader cannot tell what they would
-            // be switching to.
-            span { class: "nd-locale-full", "{other.name()}" }
-            span { class: "nd-locale-short", "{other.tag().to_uppercase()}" }
-        }
-    }
-}
-
-/// The next locale a reader would switch to.
-fn theme_other_locale(current: Locale) -> Locale {
-    let offered = Locale::OFFERED;
-    let index = offered.iter().position(|l| *l == current).unwrap_or(0);
-    offered[(index + 1) % offered.len()]
 }
 
 /// The appearance panel: a disclosure, not a dialog.
@@ -177,190 +202,22 @@ fn Settings(context: Context) -> Element {
     rsx! {
         Disclosure {
             class: "nd-settings",
-            icon: IconName::Settings,
+            // The hook `shell.js` binds to, for the lazy palette fetch behind
+            // the accent swatches and for closing on a click outside. It used
+            // to be a hand-written `data-nd-settings` on a hand-written
+            // `<details>`; when this became the generated `Disclosure` the
+            // attribute went with it, the script's `querySelector` returned
+            // `null`, and `?.` swallowed it. Every swatch then painted the
+            // page's accent and the panel would not close.
+            name: "settings",
+            // A palette, not a gear. The menu is the appearance of the page —
+            // its mode, its accent, its corners — and a gear says "settings"
+            // about a product that has no other kind.
+            icon: IconName::Palette,
             summary: context.t(Key::SettingsLabel),
             div { class: "nd-panel noctua-glass",
-              div { class: "nd-panel-body",
-
-                Setting {
-                    context,
-                    setting: "mode",
-                    label: Key::ThemeModeLabel,
-                    options: vec![
-                        ("light", Key::ThemeModeLight),
-                        ("dark", Key::ThemeModeDark),
-                        ("system", Key::ThemeModeSystem),
-                    ],
-                }
-                Accents { context }
-                Setting {
-                    context,
-                    setting: "saturation",
-                    label: Key::ThemeSaturationLabel,
-                    options: vec![
-                        ("balanced", Key::ThemeSaturationBalanced),
-                        ("vivid", Key::ThemeSaturationVivid),
-                        ("sober", Key::ThemeSaturationSober),
-                    ],
-                }
-                Setting {
-                    context,
-                    setting: "font",
-                    label: Key::ThemeFontLabel,
-                    options: vec![("sans", Key::ThemeFontSans), ("mono", Key::ThemeFontMono)],
-                }
-                Setting {
-                    context,
-                    setting: "glass",
-                    label: Key::ThemeGlassLabel,
-                    options: vec![
-                        ("off", Key::ThemeGlassOff),
-                        ("subtle", Key::ThemeGlassSubtle),
-                        ("full", Key::ThemeGlassFull),
-                    ],
-                }
-                Setting {
-                    context,
-                    setting: "radius",
-                    label: Key::ThemeRadiusLabel,
-                    options: vec![
-                        ("square", Key::ThemeRadiusSquare),
-                        ("soft", Key::ThemeRadiusSoft),
-                        ("round", Key::ThemeRadiusRound),
-                        ("circular", Key::ThemeRadiusCircular),
-                    ],
-                }
-
-                hr { class: "nd-rule" }
-
-                Setting {
-                    context,
-                    setting: "blackout",
-                    label: Key::SettingsBlackoutLabel,
-                    note: Key::SettingsBlackoutNote,
-                    options: vec![("off", Key::SettingsOff), ("on", Key::SettingsOn)],
-                }
-                Setting {
-                    context,
-                    setting: "pattern",
-                    label: Key::SettingsPatternLabel,
-                    options: vec![
-                        ("none", Key::SettingsPatternNone),
-                        ("dots", Key::SettingsPatternDots),
-                        ("mesh", Key::SettingsPatternMesh),
-                        ("checks", Key::SettingsPatternChecks),
-                        ("diagonals", Key::SettingsPatternDiagonals),
-                    ],
-                }
-                Setting {
-                    context,
-                    setting: "glow",
-                    label: Key::SettingsGlowLabel,
-                    note: Key::SettingsGlowNote,
-                    options: vec![("off", Key::SettingsOff), ("on", Key::SettingsOn)],
-                }
-                Setting {
-                    context,
-                    setting: "grain",
-                    label: Key::SettingsGrainLabel,
-                    note: Key::SettingsGrainNote,
-                    options: vec![("off", Key::SettingsOff), ("on", Key::SettingsOn)],
-                }
-
-                button { class: "nd-reset", r#type: "button", "data-nd-reset": "",
-                    "{context.t(Key::SettingsReset)}"
-                }
-              }
-            }
-        }
-    }
-}
-
-/// One row of the settings panel: a visible label, an optional note, and a
-/// `Choice`.
-///
-/// The label and the note are this site's, not the component's — a `Choice` in
-/// a header has no visible label at all. What the component owns is the group:
-/// the role, the roving tab stop, the arrow keys and the `aria-checked` on
-/// every option, which is what twelve hand-written copies of this markup did
-/// not have.
-#[component]
-fn Setting(
-    context: Context,
-    setting: String,
-    label: Key,
-    #[props(default)] note: Option<Key>,
-    options: Vec<(&'static str, Key)>,
-) -> Element {
-    let default = crate::defaults::of(&setting);
-    let label_id = format!("nd-label-{setting}");
-    rsx! {
-        div { class: "nd-choice",
-            p { class: "nd-choice-label", id: "{label_id}", "{context.t(label)}" }
-            if let Some(note) = note {
-                p { class: "nd-choice-note", "{context.t(note)}" }
-            }
-            Choice {
-                class: "nd-options",
-                name: "{setting}",
-                labelledby: "{label_id}",
-                for (value, text) in options {
-                    ChoiceOption {
-                        class: "nd-option",
-                        value,
-                        label: context.t(text),
-                        // Rendered from the default rather than left false and
-                        // corrected by script: with JavaScript off, every radio
-                        // in the panel announced itself as unchecked.
-                        selected: value == default,
-                    }
-                }
-            }
-        }
-    }
-}
-
-/// The accent row, with a real swatch of each accent's solid colour.
-///
-/// The swatch is painted by `--nc-accent-solid` read **inside a `data-palette`
-/// scope**, which is the same mechanism `ThemeScope` uses: `dist/scope.css`
-/// re-resolves the semantic contract on any element carrying the attribute, so a
-/// swatch shows its own accent rather than the page's.
-///
-/// The stylesheets those scopes need are fetched by the script the first time
-/// this panel is opened, and never on a page view that does not open it.
-#[component]
-fn Accents(context: Context) -> Element {
-    let accents = [
-        ("ochre", Key::ThemeAccentOchre),
-        ("amber", Key::ThemeAccentAmber),
-        ("lime", Key::ThemeAccentLime),
-        ("jade", Key::ThemeAccentJade),
-        ("teal", Key::ThemeAccentTeal),
-        ("azure", Key::ThemeAccentAzure),
-        ("blue", Key::ThemeAccentBlue),
-        ("indigo", Key::ThemeAccentIndigo),
-        ("violet", Key::ThemeAccentViolet),
-        ("magenta", Key::ThemeAccentMagenta),
-        ("rose", Key::ThemeAccentRose),
-        ("clay", Key::ThemeAccentClay),
-        ("umber", Key::ThemeAccentUmber),
-    ];
-    rsx! {
-        div { class: "nd-choice", "data-nd-setting": "accent",
-            p { class: "nd-choice-label", id: "nd-label-accent", "{context.t(Key::ThemeAccentLabel)}" }
-            div { class: "nd-accents", role: "radiogroup", "aria-labelledby": "nd-label-accent",
-                for (value, text) in accents {
-                    button {
-                        class: "nd-accent",
-                        r#type: "button",
-                        role: "radio",
-                        "aria-checked": "false",
-                        "data-nd-value": "{value}",
-                        title: "{context.t(text)}",
-                        span { class: "nd-swatch", "data-nd-swatch": "{value}", "aria-hidden": "true" }
-                        span { class: "nd-accent-name", "{context.t(text)}" }
-                    }
+                div { class: "nd-panel-body",
+                    ThemeMenu { context, name: "page" }
                 }
             }
         }
@@ -374,8 +231,59 @@ fn Accents(context: Context) -> Element {
 /// than the row, which makes a row background structurally impossible rather
 /// than merely discouraged, and only `color` and `text-decoration` change —
 /// never `font-weight`, which reflows the line under the pointer.
+/// The command palette: this site's own search, and the component's own dialog.
+///
+/// # Why the sidebar stopped being the search
+///
+/// It was a box that filtered the navigation and revealed three hundred and
+/// thirteen hidden links under it. Two problems, and the second is the one that
+/// decided this: filtering the navigation removes the rows a reader is
+/// navigating *by*, and a two-hundred-and-forty-pixel column cannot show a
+/// ranked result — its name, the letters that matched, and the page it leads
+/// to. A search whose results cannot say where they lead sends the reader back
+/// to the guess they started with.
+///
+/// # One dialog, one index, wherever it is opened from
+///
+/// The index is a file now (`index::json`), fetched the first time somebody
+/// searches and cached for the rest of the visit, rather than re-sent inside
+/// every document. That is also the honest half of `Search`'s contract: an
+/// index at a URL is the form that stops working with the script blocked, and
+/// the trigger ships hidden until the script reveals it — because a control
+/// that opens a modal nothing can fill is a button that does nothing.
+#[component]
+pub(crate) fn Palette(context: Context) -> Element {
+    rsx! {
+        Search {
+            name: "docs",
+            presentation: SearchPresentation::Dialog,
+            label: context.t(Key::SearchLabel),
+            placeholder: context.t(Key::SearchPlaceholder),
+            // Resolved by the browser against the document, which is why it is
+            // one path for every page rather than one per depth.
+            src: format!("{}assets/search-{}.json", site::BASE, context.locale.tag()),
+            hotkey: true,
+            cap: "12",
+            recent: "noctua.docs.recent",
+            status: context.t(Key::SearchResults),
+            empty_label: context.t(Key::SearchEmpty),
+            loading_label: context.t(Key::SearchLoading),
+            error_label: context.t(Key::SearchError),
+            cap_label: context.t(Key::SearchShowing),
+            clear_label: context.t(Key::SearchClear),
+            recent_label: context.t(Key::SearchRecent),
+            forget_label: context.t(Key::SearchForget),
+            close_label: context.t(Key::NavDismiss),
+        }
+    }
+}
+
 #[component]
 pub(crate) fn Sidebar(context: Context) -> Element {
+    // Sorted once. The rule between groups needs the row before this one, and
+    // asking for the whole ordering again per row is thirty-one sorts to draw
+    // thirty-one links.
+    let pages = site::sorted(context.locale);
     rsx! {
         nav { id: "nd-nav", class: "nd-nav noctua-glass", "aria-label": context.t(Key::NavLabel),
             // The wordmark lives here below `sm`, where the header cannot afford
@@ -383,25 +291,16 @@ pub(crate) fn Sidebar(context: Context) -> Element {
             a { class: "nd-nav-wordmark", href: "{site::first(context.locale).href()}",
                 "{context.t(Key::AppName)}"
             }
-            SearchField {
-                class: "nd-search-input",
-                // The script binds to `[data-nd-search]`, which the component
-                // writes from this. Leaving it out is a search box the script
-                // never finds — and nothing errors, it simply does not filter.
-                name: "docs",
-                label: context.t(Key::SearchLabel),
-                placeholder: context.t(Key::SearchPlaceholder),
-                status: context.t(Key::SearchResults),
-            }
-            // Foundations at the top as a short block, then every component,
-            // alphabetically and with nothing between them — which is what
-            // `NOCTUA.md §9.10` closes on. A rule separates the two; it is not a
-            // category heading, because a category heading among the components
-            // is the thing that rule forbids.
+            Palette { context }
+            // The introduction alone, then the foundations as a short block,
+            // then every component alphabetically with nothing between them —
+            // which is what `NOCTUA.md §9.10` closes on. A rule separates each
+            // group; it is not a category heading, because a category heading
+            // among the components is the thing that rule forbids.
             ul { class: "nd-nav-list",
-                for page in site::sorted(context.locale) {
+                for (index, page) in pages.iter().copied().enumerate() {
                     li {
-                        class: if page.kind == site::Kind::Component && page == site::first_component(context.locale) {
+                        class: if site::starts_a_group(&pages, index) {
                             "nd-nav-item nd-nav-item--group"
                         } else {
                             "nd-nav-item"
@@ -410,37 +309,29 @@ pub(crate) fn Sidebar(context: Context) -> Element {
                             class: if page == context.page { "nd-nav-link nd-nav-link--current" } else { "nd-nav-link" },
                             href: "{page.href()}",
                             "aria-current": if page == context.page { "page" },
-                            "data-nd-index": "{site::collate(page.title(context.locale))}",
-                            span { class: "nd-nav-text", "{page.title(context.locale)}" }
+                            span {
+                                // A component's title is its NAME, and a name
+                                // is the same word in every locale.
+                                class: if page.title_is_a_name() {
+                                    "nd-nav-text nd-identifier"
+                                } else {
+                                    "nd-nav-text"
+                                },
+                                "{page.title(context.locale)}"
+                            }
                         }
                     }
                 }
             }
-            // The system's own names, hidden until the reader types. An index
-            // over pages alone answers "where is the colour page" and not "what
-            // is --noctua-space-gap", which is the question a developer with a
-            // half-remembered token name actually has.
+            // WHAT IS LEFT HERE IS THE NAVIGATION, WHOLE.
             //
-            // Built from the token crate and the theme model, so a token added
-            // to spec/ is searchable without this list being edited.
-            div { class: "nd-found", "data-nd-found": "", hidden: true,
-                p { class: "nd-found-label", "{context.t(Key::SearchLabel)}" }
-                for entry in crate::index::all() {
-                    a {
-                        class: "nd-found-entry",
-                        href: "{entry.page.href()}",
-                        "data-nd-index": "{entry.name}",
-                        hidden: true,
-                        "{entry.name}"
-                    }
-                }
-            }
-            p { class: "nd-search-empty", "data-nd-search-empty": "", hidden: true,
-                "{context.t(Key::SearchEmpty)}"
-            }
-            // The live region moved into `SearchField`: a filter that changes
-            // the page silently is the failure, so the component that owns the
-            // box owns the announcement too.
+            // The index used to be three hundred and thirteen hidden links in
+            // every document of every locale, filtered by hiding the rows above
+            // as well — and a filter that hides the rows you are navigating
+            // destroys the navigation while you use it, which is why the old
+            // handler needed two special cases for the empty query. `Palette`
+            // shows results and leaves this alone.
+            //
             // No tagline. A sentence describing the system to a reader already
             // inside its documentation, repeated at the foot of every page, is
             // decoration — and `NOCTUA.md §9.7` says nothing decorative.
@@ -468,22 +359,19 @@ pub(crate) fn Scrim(context: Context) -> Element {
     }
 }
 
-/// The pattern, aurora and grain layers.
-///
-/// Siblings of everything, ancestors of nothing. Each is a fixed, inert box
-/// that paints and takes no part in layout, which is what lets a frosted
-/// surface above it keep sampling.
-///
-/// The class names are the colour layer's, not this site's: `dist/theme.css`
-/// binds every pattern to `.noctua-fx` and the grain to `.noctua-grain`. Any
-/// application gets the same effects by putting these two elements on the page
-/// — there is nothing site-specific about them.
-#[component]
-pub(crate) fn Effects() -> Element {
-    rsx! {
-        div { class: "nd-effects", "aria-hidden": "true",
-            div { class: "noctua-fx" }
-            div { class: "noctua-grain" }
-        }
-    }
-}
+// THERE IS NO `Effects` COMPONENT ANY MORE, and its absence is the point.
+//
+// The pattern and the grain used to be fixed, inert boxes
+// this site had to remember to render, because `dist/theme.css` bound each
+// effect to a class — `.noctua-fx`, `.noctua-grain`. That is what made the
+// three settings page-only: a payload on a descendant is settled by source
+// order rather than by proximity, so a frame could not have its own and could
+// not cancel the page's. It also made `ThemeScope { pattern }` a prop that
+// compiled, stamped an attribute and painted nothing for any consumer of the
+// package outside this repository.
+//
+// They are background layers on the element carrying the attribute now, so the
+// page paints them through the same rule an ExampleFrame does — and a
+// background is behind content by definition, which is why there is no
+// `z-index` here any more, no `isolation`, and none of the stacking-order
+// class of bug that cost the old layer three regressions.

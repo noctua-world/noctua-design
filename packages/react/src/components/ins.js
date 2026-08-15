@@ -4,17 +4,19 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// Text added to the document.
+// Mark text that was added to the document.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
 
-export function Ins({ cite, datetime, className, children, ...rest }) {
+export function Ins({ cite, datetime, label, className, children, ...rest }) {
   const root = ["nd-ins", className].filter(Boolean).join(" ");
-  const props = { className: root, ...rest };
-  if (cite !== undefined) props["cite"] = String(cite);
-  if (datetime !== undefined) props["datetime"] = String(datetime);
-  return h("ins", props, children);
+  return h(
+    "ins",
+    { className: root, cite, dateTime: datetime, ...rest },
+    label ? h("span", { key: "l", className: "nd-visually-hidden" }, `${label} `) : null,
+    children,
+  );
 }

@@ -1,0 +1,154 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """Use a number input for a quantity: how many, how much, how long. For a code that happens to be digits, use `Input` with an `inputmode`. The field is `type="text"` with a `pattern`, so a value it cannot parse is kept."""
+
+[meta]
+name = "NumberInput"
+element = "input"
+class = "nd-number-input"
+specimen = "<span class=\"nd-number-input-figure\"><span class=\"nd-number-input-box\"></span><span class=\"nd-number-input-steps\"></span></span>"
+summary = "Let users enter a quantity, with steppers and a numeric keyboard."
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-number-input"
+doc = "The field this is submitted under, and the root of every id here. **Required**, because an id derived from an optional name is an id every copy on a page shares."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The question, in the reader's language. `Field` draws it as a real `<label for>`. Required."
+
+[prop.value]
+type = "text"
+attribute = "value"
+doc = "The quantity to begin with, as text. Text because that is what a form posts. A value the component cannot parse survives being shown back rather than being replaced with nothing."
+
+[prop.min]
+type = "text"
+attribute = "data-nd-min"
+doc = "The smallest value allowed. The steppers stop here, and a typed value below it is refused with `min_label` rather than rewritten."
+
+[prop.max]
+type = "text"
+attribute = "data-nd-max"
+doc = "The largest value allowed, on the same terms as `min`."
+
+[prop.step]
+type = "text"
+attribute = "data-nd-step"
+doc = "How far one press of a stepper or one arrow key moves the value. One by default, and a price wants `0.01` where a dozen wants `12`. It also sets how many decimals the value is shown to, and which keyboard a phone opens."
+
+[prop.big_step]
+type = "text"
+attribute = "data-nd-big-step"
+doc = "How far Page Up and Page Down move the value. Ten steps by default, so a large range can be crossed from the keyboard. `ColorPicker` has a coarse step for the same reason."
+
+[prop.steppers]
+type = "bool"
+default = "true"
+attribute = "data-nd-steppers"
+doc = "Whether the two stepper controls appear. **On by default**, because they make a small adjustment one press instead of a select-all and a retype. Turn them off where the numbers are too large to step to."
+
+[prop.increment_label]
+type = "text"
+attribute = "data-nd-increment-label"
+doc = "The name of the control that adds a step. Supply it with `steppers`, because the controls are glyphs and this is the only name each has."
+
+[prop.decrement_label]
+type = "text"
+attribute = "data-nd-decrement-label"
+doc = "The name of the control that subtracts a step, on the same terms."
+
+[prop.min_label]
+type = "text"
+attribute = "data-nd-min-label"
+doc = "What the component says when a typed value is below `min`, with a `{min}` hole. The value is left exactly as typed, so a reader can correct it."
+
+[prop.max_label]
+type = "text"
+attribute = "data-nd-max-label"
+doc = "What the component says when a typed value is above `max`, with a `{max}` hole."
+
+[prop.invalid_label]
+type = "text"
+attribute = "data-nd-invalid-label"
+doc = """What the component says when what was typed is not a number at all, with a `{value}` hole. Supply it, because this field accepts text on purpose where a `type="number"` field would go quietly empty."""
+
+[prop.group]
+type = "bool"
+default = "false"
+attribute = "data-nd-group"
+doc = "Whether thousands separators are drawn while the reader is not typing: `1.234.567` in Portuguese, `1,234,567` in English, from the page's own locale. They are never submitted and never present while the box has focus."
+
+[prop.prefix]
+type = "text"
+attribute = "data-nd-prefix"
+doc = "A fixed symbol before the value, inside the box, such as `R$` or `£`. Drawn, `aria-hidden`, and never part of what is submitted."
+
+[prop.suffix]
+type = "text"
+attribute = "data-nd-suffix"
+doc = "A fixed symbol after the value, such as `kg`, `%` or `min`, on the same terms."
+
+[prop.placeholder]
+type = "text"
+attribute = "placeholder"
+doc = "An example quantity, shown inside the box while it is empty. Never the only name the field has."
+
+[prop.hint]
+type = "text"
+doc = "What a reader needs before answering. Drawn by `Field`."
+
+[prop.error]
+type = "text"
+doc = """What is wrong, after a submission. The caller's own sentence, in `role="alert"`."""
+
+[prop.required]
+type = "bool"
+default = "false"
+attribute = "required"
+doc = "Whether an answer is needed. The real attribute on the real box."
+
+[prop.required_label]
+type = "text"
+doc = "The word `Field` marks the question with. Supply it with `required`."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Stops users editing the value. It refuses the box and its steppers, and submits nothing."
+
+[prop.readonly]
+type = "bool"
+default = "false"
+attribute = "readonly"
+doc = "Whether the value is readable and copyable but not editable. It is still submitted, and the steppers go with it, because a value that can still be stepped is editable."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The size of the box and its steppers: `small`, `medium` or `large`. `medium` by default, matching the rest of the form."
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts the box, on a ground opaque enough to read digits against."
+
+[state.invalid]
+attribute = "aria-invalid"
+doc = "Set when an `error` was given, or the value is out of range or not a number. The border takes the danger tone and one of the caller's sentences appears under the question."
+
+[a11y]
+needs_name = true
+notes = """`role="spinbutton"`, its value attributes and the steppers are all written by the script, because with no script there is nothing to spin. The steppers are not tab stops, because the arrow keys already move the value."""
+
+[keyboard]
+"Up arrow / Down arrow" = "Moves the value by one `step`. The spinbutton contract, and the reason the steppers need not be tab stops."
+"Page Up / Page Down" = "Moves the value by one `big_step`, which is ten steps by default, so a large range can be crossed."
+"Home / End" = "Moves to `min` and to `max`, where those are declared."

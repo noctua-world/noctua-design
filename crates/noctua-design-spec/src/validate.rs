@@ -46,7 +46,7 @@ fn check_prefix(spec: &Spec, problems: &mut Vec<Problem>) {
 
     // `nc` is `noctua-colors`' namespace. Sharing it would make "which
     // repository owns this token" unanswerable, and would let a design token
-    // silently shadow a colour token of the same name.
+    // silently shadow a color token of the same name.
     if prefix == "nc" {
         problems.push(
             Problem::whole_file("`nc` is the namespace `noctua-colors` emits into")

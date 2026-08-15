@@ -79,6 +79,32 @@ impl Component {
     pub fn takes_children(&self) -> bool {
         self.prop.values().any(|p| p.kind == Kind::Children)
     }
+
+    /// The prop that chooses which element is rendered, if one does.
+    ///
+    /// At most one may: two props both claiming the element would have no
+    /// defined answer when they disagree, and `check_props` refuses it.
+    #[must_use]
+    pub fn element_switch(&self) -> Option<(&String, &Prop)> {
+        self.attributes().find(|(_, p)| !p.elements.is_empty())
+    }
+
+    /// The element a value of the switching prop renders.
+    ///
+    /// Falls back to `meta.element`, which is what a component with no
+    /// switching prop renders and what an unknown value would have rendered
+    /// before this existed.
+    #[must_use]
+    pub fn element_for(&self, value: &str) -> &str {
+        self.element_switch()
+            .and_then(|(_, prop)| {
+                prop.values
+                    .iter()
+                    .position(|candidate| candidate == value)
+                    .and_then(|at| prop.elements.get(at))
+            })
+            .map_or(self.meta.element.as_str(), String::as_str)
+    }
 }
 
 /// Identity and rendering defaults.
@@ -103,12 +129,31 @@ pub struct Meta {
     #[serde(default)]
     pub specimen: Option<String>,
 
+    /// The documentation page this component is described on.
+    ///
+    /// Absent means what it has always meant: a page of its own, at the
+    /// component's own slug. A value names a COLLECTION page — several
+    /// components documented together, because a reader comparing them opens
+    /// one page instead of six.
+    ///
+    /// It is in the contract rather than in a list beside the site for the
+    /// reason every list in this repository has eventually earned: a list of
+    /// which components moved is a second copy of a fact, and the two stop
+    /// agreeing. `site::pages` refuses a value it does not recognise.
+    #[serde(default)]
+    pub page: Option<String>,
+
     /// One sentence for the documentation page, in English.
     ///
     /// Not an i18n key: this is developer-facing reference text about an API,
     /// which `NOCTUA.md §1` keeps in English along with every other identifier
     /// and doc comment. Reader-facing prose on the page around it is translated.
     pub summary: String,
+}
+
+/// `serde`'s default for a `bool` is `false`, and `variants` is `true`.
+fn yes() -> bool {
+    true
 }
 
 /// One prop.
@@ -122,6 +167,52 @@ pub struct Prop {
     /// The values an `enum` prop accepts, in order.
     #[serde(default)]
     pub values: Vec<String>,
+
+    /// The element each value renders, when the prop chooses the element.
+    ///
+    /// # Why this is declared rather than written into an implementation
+    ///
+    /// Two props needed it and neither had it, so both were **inert**.
+    /// `Heading.level` documented itself as "the outline level" and rendered
+    /// `<h2>` whatever it was set to; `List.kind` said "changes the element,
+    /// not only the marker" and rendered `<ul data-nd-kind="ordered">`. Each
+    /// compiled, each rendered, and each was a prop a caller could set with no
+    /// effect whatsoever — the worst kind of defect, because the page looks
+    /// almost right.
+    ///
+    /// Declaring it here reaches all three places that need to agree at once:
+    /// both implementations switch on it, and the documentation page shows the
+    /// element it actually produces. Same length as `values`, position by
+    /// position; the validator refuses anything else.
+    #[serde(default)]
+    pub elements: Vec<String>,
+
+    /// Whether the variant grid draws a picture of each value.
+    ///
+    /// # Why a prop would say no
+    ///
+    /// Some enums have no appearance. A comparator (`TableColumn.sort_as`), a
+    /// band (`TableSection.kind` — a `<thead>` and a `<tbody>` look the same in
+    /// isolation), a scope, a total that a script computes: every value renders
+    /// the identical picture, and a grid of identical pictures under different
+    /// captions is worse than no grid. It reads as a component whose props do
+    /// nothing, which is exactly the report that produced this field.
+    ///
+    /// `true` by default: a prop that changes what a reader sees should be
+    /// shown, and opting out has to be a decision somebody wrote down.
+    #[serde(default = "yes")]
+    pub variants: bool,
+
+    /// What the variant grid renders for this prop, when the component's own
+    /// specimen cannot show it.
+    ///
+    /// One component has one specimen, and two props can want opposite things
+    /// from it: `TableCell.align` needs a value SHORT enough to leave room to
+    /// move in, and `TableCell.wrap` needs one LONG enough to break. With one
+    /// specimen for both, whichever prop lost was documented by four identical
+    /// pictures.
+    #[serde(default)]
+    pub specimen: Option<String>,
 
     /// The value in force when the prop is omitted.
     ///
@@ -183,6 +274,94 @@ pub struct A11y {
     pub notes: String,
 }
 
+/// `CodeBlock` → `code-block`. The URL segment, and the fragment every
+/// message derived from this component is named after.
+#[must_use]
+pub fn slug(name: &str) -> String {
+    let mut out = String::with_capacity(name.len() + 2);
+    for (index, ch) in name.char_indices() {
+        if ch.is_ascii_uppercase() && index > 0 {
+            out.push('-');
+        }
+        out.extend(ch.to_lowercase());
+    }
+    out
+}
+
+/// `Space or Enter` → `space-or-enter`, so a key name becomes a message key.
+///
+/// A keyboard contract is keyed by the chord a reader presses, and that chord
+/// is itself a phrase somebody has to translate. Slugging it gives a stable
+/// name for both halves without an index, which would renumber every
+/// translation the day a key is inserted in the middle.
+#[must_use]
+pub fn slugify(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut dash = false;
+    for ch in text.chars() {
+        if ch.is_ascii_alphanumeric() {
+            out.extend(ch.to_lowercase());
+            dash = false;
+        } else if !out.is_empty() && !dash {
+            out.push('-');
+            dash = true;
+        }
+    }
+    out.trim_end_matches('-').to_owned()
+}
+
+/// Every sentence a component's contract carries that a **reader** sees.
+///
+/// # Why these become messages
+///
+/// `spec/components/<name>.toml` holds prose in two roles at once. Some of it
+/// is developer-facing reference that becomes the doc comment in both
+/// languages — and the site renders exactly the same sentences on the page.
+/// The doc comment must be English (`NOCTUA.md §1`); the page must be the
+/// reader's language (§9.9). Both were the same string, so the page lost.
+///
+/// So the English is derived from here into the catalogue, where the
+/// cross-locale check demands a Portuguese answer for each one, and the
+/// catalogue is what the page reads. The spec still owns the words; it simply
+/// stops being the last word for a reader who does not speak them.
+#[must_use]
+pub fn derived_messages(components: &[Component]) -> Vec<(String, String)> {
+    let mut out = Vec::new();
+    for component in components {
+        let slug = slug(&component.meta.name);
+        let mut push = |suffix: String, text: &str| {
+            if !text.trim().is_empty() {
+                out.push((format!("component.{slug}.{suffix}"), collapse(text)));
+            }
+        };
+
+        push("guidance".to_owned(), &component.guidance);
+        push("a11y-notes".to_owned(), &component.a11y.notes);
+        for (prop, spec) in &component.prop {
+            push(format!("prop.{prop}.doc"), &spec.doc);
+        }
+        for (state, spec) in &component.state {
+            push(format!("state.{state}.doc"), &spec.doc);
+        }
+        for (chord, action) in &component.keyboard {
+            let name = slugify(chord);
+            push(format!("key.{name}.name"), chord);
+            push(format!("key.{name}.action"), action);
+        }
+    }
+    out
+}
+
+/// A block of prose as one line.
+///
+/// A `"""…"""` note in TOML keeps its newlines, and a message with a newline in
+/// it is a message that should have been two — the catalogue's own escaping
+/// says so. Paragraph breaks survive as a full stop and a space, which is what
+/// they already read as on the page.
+fn collapse(text: &str) -> String {
+    text.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
 /// Parses one component file.
 ///
 /// # Errors
@@ -216,6 +395,21 @@ pub fn parse(path: &str, text: &str) -> Result<Component, SpecError> {
             Problem::whole_file("more than one prop is declared as `children`").fix(
                 "A component has one slot for its content. Two would be ambiguous in \
                  both languages and impossible in `rsx!`.",
+            ),
+        );
+    }
+
+    if component
+        .prop
+        .values()
+        .filter(|p| !p.elements.is_empty())
+        .count()
+        > 1
+    {
+        problems.push(
+            Problem::whole_file("two props both choose the element").fix(
+                "Only one prop may. Two would have no defined answer the moment they \
+                 disagreed, and the generator would silently pick whichever it read first.",
             ),
         );
     }
@@ -260,12 +454,48 @@ pub fn parse(path: &str, text: &str) -> Result<Component, SpecError> {
 /// Its own function because `parse` is a list of checks and a list that grows
 /// is a function that stops being readable — not because these belong apart.
 fn check_props(component: &Component, problems: &mut Vec<Problem>) {
+    /// Words a prop may not be called, because Rust has them.
+    const KEYWORDS: [&str; 24] = [
+        "as", "box", "break", "const", "continue", "crate", "else", "enum", "fn", "for", "if",
+        "impl", "in", "let", "loop", "match", "mod", "move", "ref", "return", "static", "type",
+        "use", "where",
+    ];
+
     for (name, prop) in &component.prop {
         if prop.kind == Kind::Enum && prop.values.is_empty() {
             problems.push(
                 Problem::whole_file(format!("`{name}` is an enum with no values")).fix(
                     "List the values it accepts. An enum with none generates a type \
                      nothing can construct.",
+                ),
+            );
+        }
+
+        if !prop.elements.is_empty() && prop.elements.len() != prop.values.len() {
+            problems.push(
+                Problem::whole_file(format!(
+                    "`{name}` declares {} element(s) for {} value(s)",
+                    prop.elements.len(),
+                    prop.values.len()
+                ))
+                .fix(
+                    "`elements` is read position by position against `values`. A short \
+                     list would leave some values with no element and the generator \
+                     silently falling back to the default one — which is the inert prop \
+                     this field exists to make impossible.",
+                ),
+            );
+        }
+
+        if !prop.elements.is_empty() && prop.attribute.is_some() {
+            problems.push(
+                Problem::whole_file(format!(
+                    "`{name}` both switches the element and becomes an attribute"
+                ))
+                .fix(
+                    "Choose one. A prop that changes the element has already said what \
+                     it does; repeating it as a `data-` attribute gives a stylesheet a \
+                     second, redundant hook that can disagree with the first.",
                 ),
             );
         }
@@ -301,6 +531,22 @@ fn check_props(component: &Component, problems: &mut Vec<Problem>) {
                     "Content is required by the element taking it, not by a flag. Both \
                      languages already refuse a component with no children where one is \
                      needed.",
+                ),
+            );
+        }
+
+        // A RUST KEYWORD IS NOT A PROP NAME, and the failure without this
+        // check is a rustfmt diagnostic about a generated file nobody wrote:
+        // `loop` reached the generator and came back as *expected identifier,
+        // found keyword*, pointing at a line in `dist`. Escaping it to
+        // `r#loop` would work in Rust and be one prop with two spellings
+        // across the two packages, which is the thing they exist not to have.
+        if KEYWORDS.contains(&name.as_str()) {
+            problems.push(
+                Problem::whole_file(format!("`{name}` is a Rust keyword")).fix(
+                    "Pick another word. A prop a Rust consumer could only write as `r#name` \
+                     would be one prop with two spellings across the two packages — `loop` \
+                     became `wrap`, and `type` became `kind` before it.",
                 ),
             );
         }

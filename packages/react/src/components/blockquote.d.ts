@@ -9,13 +9,17 @@ import type { ReactNode } from "react";
 export type BlockquoteTone = "default" | "accent";
 
 export interface BlockquoteProps {
-  /** A URL for the source. Machine-readable; it is not shown. */
+  /** A URL for the source. It is read by machines and is not shown to users. */
   cite?: string;
-  /** Whether the rule beside it takes the accent colour. */
+  /** Whether the rule beside it takes the accent color. */
   tone?: BlockquoteTone;
+  /** Who said it, rendered as a `<footer>` with a `<cite>` inside. `cite` above is a URL for machines, and this is the line a reader sees. */
+  attribution?: string;
+  /** Frosts the quotation's own surface, leaving the rule beside it solid. */
+  glass?: boolean;
   className?: string;
   children?: ReactNode;
 }
 
-/** A quotation set apart from the text around it. */
+/** Show a quotation set apart from the text around it. */
 export declare function Blockquote(props: BlockquoteProps): JSX.Element;

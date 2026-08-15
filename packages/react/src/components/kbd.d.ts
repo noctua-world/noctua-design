@@ -9,11 +9,11 @@ import type { ReactNode } from "react";
 export type KbdSize = "small" | "body";
 
 export interface KbdProps {
-  /** The size. */
+  /** The size: `small` or `body`. Defaults to `small`. */
   size?: KbdSize;
   className?: string;
   children?: ReactNode;
 }
 
-/** A key or chord, as printed on a keyboard. */
+/** Show a key or a chord, as printed on a keyboard. */
 export declare function Kbd(props: KbdProps): JSX.Element;

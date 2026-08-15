@@ -4,21 +4,12 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// A run of text, with the size, weight and tone of the type scale.
+// Set the size, weight and tone of a run of text, from the type scale.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
-
-/** Applied by the component, never by the caller — which is what keeps
- * the two implementations from disagreeing about a default. */
-const defaults = {
-  size: "body",
-  weight: "regular",
-  tone: "default",
-  numeric: "false",
-};
 
 export function Text({ size, weight, tone, numeric, className, children, ...rest }) {
   const size_ = size ?? "body";

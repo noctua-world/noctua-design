@@ -1,0 +1,75 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """Use a table header cell to name a column, with `scope = "col"`, or a record, with `scope = "row"`. The heading holds the words. What a column can do is set on its `TableColumn`."""
+
+[meta]
+name = "TableHeaderCell"
+element = "th"
+class = "nd-table-header-cell"
+# A number, so the alignment and the sort control have something to sit beside.
+specimen = "<span class=\"nd-identifier\">#4213</span>"
+page = "tables"
+summary = "Name a column or a record, and sort by it where the column allows."
+
+[prop.column]
+type = "text"
+attribute = "data-nd-column"
+doc = """Which `TableColumn` this heading names. It tells the script which column the sort control here sorts, rather than leaving it to count cells. A `scope = "row"` heading names a record and needs none."""
+
+[prop.scope]
+type = "enum"
+values = ["col", "row", "colgroup", "rowgroup"]
+variants = false
+default = "col"
+attribute = "scope"
+doc = "What this heading names. `col` for a column and `row` for the record the row holds. `colgroup` and `rowgroup` are for a heading that spans several, and each needs a `span` or a `rows` to say how many."
+
+[prop.align]
+type = "enum"
+values = ["start", "center", "end", "numeric"]
+default = "start"
+attribute = "data-nd-align"
+specimen = "<span class=\"nd-identifier\">R$ 1.240</span>"
+doc = "Where the words sit in the cell. **Match the column below it**, and use `numeric` over a column of numbers so the heading lines up with the values."
+
+[prop.tone]
+type = "text"
+attribute = "data-nd-tone"
+doc = "Which of the colour system's tones the heading is painted from. The palette declares 349 semantic families, and a name none of them declares fails the build. Without it no attribute is written."
+
+[prop.wrap]
+type = "enum"
+values = ["wrap", "nowrap", "truncate"]
+default = "nowrap"
+attribute = "data-nd-wrap"
+specimen = "<span class=\"nd-identifier\">release/2026-03-candidate</span>"
+doc = "What a long heading does. `nowrap` by default, the opposite of a cell's default, so the head stays one line tall. Use `wrap` for a long heading over a narrow column."
+
+[prop.span]
+type = "text"
+attribute = "colspan"
+doc = """How many columns this heading covers. It writes the real `colspan`, and it needs `scope = "colgroup"` beside it so the span is stated in the markup."""
+
+[prop.rows]
+type = "text"
+attribute = "rowspan"
+doc = """How many rows this heading covers, with `scope = "rowgroup"`. For a table with two rows of headings, where one of them stands over both."""
+
+[prop.sort]
+type = "enum"
+values = ["none", "ascending", "descending"]
+variants = false
+default = "none"
+attribute = "aria-sort"
+doc = "Which way the rows are already sorted by this column. It writes the real `aria-sort` on the server, so a sorted table states it before any script runs. **Only one heading in a table may be anything but `none`**."
+
+[prop.children]
+type = "children"
+doc = "The words of the heading. Every announcement about this column fills its `{column}` hole from here, so the column is named once, in the reader's language."
+
+[a11y]
+notes = "The role is `columnheader` or `rowheader`, following `scope` and written in the markup rather than left implicit. The sort control is a real button inside the heading, which keeps the `aria-sort`."
+
+[keyboard]
+"Enter or Space" = "Sorts by this column when its `TableColumn` allows: ascending, then descending, then the document order."
+"Alt + Left / Alt + Right" = "Makes the column narrower or wider by one step when its `TableColumn` is resizable. With Shift, by ten steps."

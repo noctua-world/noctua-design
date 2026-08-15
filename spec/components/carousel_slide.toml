@@ -1,0 +1,22 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a carousel slide inside a `Carousel`, and only there. The script writes each slide's position into its accessible name, so *3 of 8* stays correct as slides are added. A `label` is added to that count rather than replacing it."
+
+[meta]
+name = "CarouselSlide"
+element = "li"
+class = "nd-carousel-slide"
+page = "carousel"
+specimen = "<span class=\"nd-carousel-figure\"><span class=\"nd-carousel-cell\"></span></span>"
+summary = "Show one slide of a carousel as a list item, with its position in the accessible name."
+
+[prop.label]
+type = "text"
+doc = "A description of this slide, such as *the kettle from above*. It is added to the position in the accessible name rather than replacing it. Without it the slide is named by its position alone."
+
+[prop.children]
+type = "children"
+doc = "The content of the slide, such as a picture, a card or a paragraph. Anything focusable inside stays focusable and stays in the tab order, including content scrolled off the edge."
+
+[a11y]
+notes = """The `<li>` carries `role="group"` and `aria-roledescription="slide"`, so assistive technology identifies it as a slide. Content scrolled off the edge keeps its place in the tab order."""

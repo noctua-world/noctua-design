@@ -51,7 +51,7 @@ const CONTRACT: &[&str] = &[
     "",
     "# Every attribute goes on ONE element",
     "",
-    "The colour system's forced-mode rule is compound and same-element:",
+    "The color system's forced-mode rule is compound and same-element:",
     "",
     // Fenced as `text`, and that is not cosmetic: an indented block in a Rust
     // doc comment is a *doctest*, and rustdoc would try to compile this CSS.
@@ -62,7 +62,7 @@ const CONTRACT: &[&str] = &[
     "Split the palette onto a wrapper and the mode onto a child and that",
     "selector matches nothing. The child falls through to the *default*",
     "palette's unanchored [data-theme=\"dark\"] and silently paints the wrong",
-    "colours — silently, because every token still resolves to something.",
+    "colors — silently, because every token still resolves to something.",
     "",
     "# A prop left unset inherits",
     "",

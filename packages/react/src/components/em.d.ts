@@ -12,5 +12,5 @@ export interface EmProps {
   children?: ReactNode;
 }
 
-/** Stress emphasis — the word a reader would lean on when speaking. */
+/** Mark stress emphasis on a word inside a sentence. */
 export declare function Em(props: EmProps): JSX.Element;

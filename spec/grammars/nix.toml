@@ -1,0 +1,59 @@
+# Nix.
+#
+# `identifier.extra` carries `-` because a Nix attribute name routinely has one
+# — `pkgs.hello-world` — and splitting it into three tokens would make every
+# package name in a flake read as arithmetic.
+
+[meta]
+name = "nix"
+display = "Nix"
+
+[identifier]
+extra = "_-'"
+
+[words]
+keyword = ["assert", "else", "if", "in", "inherit", "let", "or", "rec", "then", "with"]
+constant = ["false", "null", "true"]
+function = ["builtins", "derivation", "fetchGit", "import", "map", "toString"]
+
+[[comment]]
+open = "#"
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+[[string]]
+open = "''"
+close = "''"
+multiline = true
+interpolate_open = "${"
+interpolate_close = "}"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+interpolate_open = "${"
+interpolate_close = "}"
+
+[number]
+exponent = ""
+
+[symbols]
+operator = "+-*/=<>!&|"
+punctuation = "(){}[],;:.@?"
+
+[context]
+call_paren = true
+property_colon = "any"
+
+[[case]]
+name = "an attribute name keeps its hyphen"
+code = "{ hello-world = pkgs.hello; }"
+expect = ["plain hello-world", "plain pkgs", "plain hello"]
+
+[[case]]
+name = "an indented string interpolates"
+code = "let x = ''hi ${name}''; in x"
+expect = ["keyword let", "string ''hi ", "escape ${name}", "keyword in"]

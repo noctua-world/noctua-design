@@ -1,0 +1,58 @@
+# GraphQL.
+
+[meta]
+name = "graphql"
+display = "GraphQL"
+aliases = ["gql"]
+
+[words]
+keyword = [
+  "directive", "enum", "extend", "fragment", "implements", "input",
+  "interface", "mutation", "on", "query", "scalar", "schema", "subscription",
+  "type", "union",
+]
+type = ["Boolean", "Float", "ID", "Int", "String"]
+constant = ["true", "false", "null"]
+
+[[comment]]
+open = "#"
+
+[[string]]
+open = '"""'
+close = '"""'
+multiline = true
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[number]
+exponent = "eE"
+
+[symbols]
+operator = "=!|&"
+punctuation = "(){}[],:.@$"
+
+[[sigil]]
+open = "@"
+role = "attribute"
+
+[[sigil]]
+open = "$"
+role = "property"
+
+[context]
+name_after = { type = "type", interface = "type", enum = "type", input = "type", union = "type", scalar = "type", fragment = "function", query = "function", mutation = "function" }
+property_colon = "any"
+upper_type = true
+
+[[case]]
+name = "a type declaration, a field and a directive"
+code = "type User implements Node @key {\n  id: ID!\n  name: String\n}"
+expect = ["keyword type", "type User", "attribute @key", "property id", "type ID", "property name", "type String"]
+
+[[case]]
+name = "a variable is a variable"
+code = "query Find($id: ID!) { user(id: $id) { name } }"
+expect = ["keyword query", "function Find", "property $id", "property $id"]

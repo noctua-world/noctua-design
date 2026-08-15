@@ -4,15 +4,24 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// One item in a list.
+// Show one item of a list, or one term and its description.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
 
-export function ListItem({ className, children, ...rest }) {
+import { Fragment } from "react";
+export function ListItem({ term, className, children, ...rest }) {
   const root = ["nd-list-item", className].filter(Boolean).join(" ");
-  const props = { className: root, ...rest };
-  return h("li", props, children);
+  if (term) {
+    // A fragment, so the two land as siblings inside the <dl>.
+    return h(
+      Fragment,
+      null,
+      h("dt", { key: "t", className: "nd-list-term" }, term),
+      h("dd", { key: "d", className: root, ...rest }, children),
+    );
+  }
+  return h("li", { className: root, ...rest }, children);
 }

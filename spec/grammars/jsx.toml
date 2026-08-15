@@ -1,0 +1,86 @@
+# JSX.
+#
+# JavaScript's table, unchanged. THE ELEMENTS ARE NOT MARKED, and that is a
+# decision rather than an omission: `<` is a comparison, a generic argument and
+# an element opener, and the only thing that distinguishes them is what came
+# before — which needs a parser. A heuristic here would fail on `f(a)<b` and on
+# any attribute containing a bare `>`, and it would fail *loudly*, colouring a
+# stretch of ordinary code as markup.
+#
+# What happens instead is that `<div>` scans as an operator, an identifier and
+# an operator. Operators and plain identifiers are the same colour in every
+# theme, so the failure is invisible rather than wrong.
+
+[meta]
+name = "jsx"
+display = "JSX"
+
+[identifier]
+extra = "_$"
+
+[words]
+keyword = [
+  "as", "async", "await", "break", "case", "catch", "class", "const",
+  "continue", "default", "delete", "do", "else", "export", "extends",
+  "finally", "for", "from", "function", "get", "if", "import", "let", "new",
+  "of", "return", "set", "static", "super", "switch", "throw", "try", "var",
+  "while", "yield",
+]
+operator = ["in", "instanceof", "typeof", "void"]
+constant = ["false", "true", "null", "undefined", "this"]
+type = ["Array", "Date", "Error", "Map", "Object", "Promise", "Set", "String"]
+function = ["console", "document", "require", "useEffect", "useMemo", "useRef", "useState", "window"]
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+
+[[string]]
+open = "`"
+close = "`"
+escape = "\\"
+multiline = true
+interpolate_open = "${"
+interpolate_close = "}"
+
+[number]
+prefixes = ["0x", "0b", "0o"]
+separator = "_"
+exponent = "eE"
+suffix = true
+leading_dot = true
+
+[symbols]
+operator = "+-*/%=<>!&|^~?:"
+punctuation = "(){}[],;.@#"
+
+[context]
+name_after = { function = "function", class = "type", extends = "type", new = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+member_dot = true
+property_colon = "any"
+
+[[case]]
+name = "a component reads as code, and its markup reads as operators"
+code = 'export default function Card() { return <p className="a">hi</p>; }'
+expect = ["keyword export", "keyword function", "function Card", "keyword return", 'string "a"']
+
+[[case]]
+name = "a hook is a call and its state is not markup"
+code = "const [n, setN] = useState(0);"
+expect = ["keyword const", "function useState", "number 0"]

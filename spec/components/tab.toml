@@ -1,0 +1,79 @@
+guidance = """
+Use one `Tab` for each `TabPanel`, inside the `Tabs` strip, with the same `name`
+and `value` as the panel it shows. Both ids are derived from those two words, so
+there is nothing to wire and nothing to type.
+"""
+
+[meta]
+name = "Tab"
+element = "a"
+class = "nd-tab"
+page = "tabs"
+specimen = "<span class=\"nd-tab-text nd-identifier\">Aa</span>"
+summary = "Name one panel in a tab strip, and show it when a reader chooses it."
+
+# WHY IT IS A LINK AND NOT A BUTTON.
+#
+# With no script a button does nothing at all, and a control that does nothing
+# is worse than no control. A link to the panel below it works: every panel is
+# visible without a script, so the strip is a table of contents and pressing a
+# tab takes the reader to what it names.
+#
+# The script turns the same element into a `role="tab"` and stops the jump.
+# `Tree` renders links and gains `role="treeitem"` the same way, for the same
+# reason.
+
+[prop.name]
+type = "text"
+required = true
+doc = """
+The `Tabs` this belongs to. **Required**, and it must match the strip's own
+`name`. Both this tab's id and the panel it points at are derived from it, so a
+different word points at nothing.
+"""
+
+[prop.value]
+type = "text"
+required = true
+attribute = "data-nd-value"
+doc = "Which panel this names, matching the `TabPanel` of the same `value`. **Required**, and unique within one strip, because it is half of both ids."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The words on the tab, in the reader's language. **Required**, because a tab is a name for a panel and a tab with no name names nothing."
+
+[prop.icon]
+type = "text"
+doc = "A drawing before the words, named from `spec/icons.toml`. It carries `aria-hidden`, because the label beside it already says what the panel holds."
+
+[prop.count]
+type = "text"
+doc = "A number after the words, such as how many rows the panel holds. It is part of the tab's accessible name, so a reader who cannot see it is still told."
+
+[prop.selected]
+type = "bool"
+default = "false"
+attribute = "data-nd-selected"
+doc = """
+Whether this is the panel shown first. Exactly one tab in a strip carries it, and
+a strip with none opens on its first tab. It is **not** `aria-selected`: that
+attribute arrives with the role, and the role arrives with the script.
+"""
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "aria-disabled"
+doc = """
+Whether the panel refuses to be shown. `aria-disabled` rather than removing the
+tab, so it keeps its place and its name. A tab a reader cannot find is a panel
+they conclude does not exist.
+"""
+
+[a11y]
+notes = """
+It claims no role until the script gives it one. Until then it is a link to a
+panel that is already on the page. `count` is inside the tab rather than beside
+it, so it is read as part of the name.
+"""

@@ -1,0 +1,54 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a button group for two or more buttons that are one decision, such as a split button or a row of actions. For a value chosen from a list, use `Segmented`, which marks one member as chosen."
+
+[meta]
+name = "ButtonGroup"
+element = "div"
+class = "nd-button-group"
+# The still picture needs REAL CHILDREN. Without this the grid falls
+# back to the pangram placeholder, so every value of every enum prop
+# draws one identical line of text — which is what the reader saw.
+specimen = "<button class=\"nd-button\" type=\"button\" data-nd-variant=\"outline\" data-nd-tone=\"neutral\" data-nd-size=\"medium\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Aa</span></span></button><button class=\"nd-button\" type=\"button\" data-nd-variant=\"outline\" data-nd-tone=\"neutral\" data-nd-size=\"medium\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Bb</span></span></button>"
+summary = "Group buttons that belong together, joined into one control or spaced apart."
+
+[prop.label]
+type = "text"
+attribute = "aria-label"
+doc = "The group's accessible name, saying what the buttons are for. Required unless `labelledby` names it instead, because a `role=\"group\"` with no name gives a screen reader only the word `group`."
+
+[prop.labelledby]
+type = "text"
+attribute = "aria-labelledby"
+doc = "The id of the element that names this group, when the name is already visible on the page."
+
+[prop.attached]
+type = "bool"
+default = "true"
+attribute = "data-nd-attached"
+doc = "Whether the buttons share one outline, with the inner corners squared off. Off spaces them apart instead, for actions that are related but separate."
+
+[prop.orientation]
+type = "enum"
+values = ["horizontal", "vertical"]
+default = "horizontal"
+attribute = "aria-orientation"
+doc = "Which way the buttons run. Vertical stacks them and moves the shared edges to the top and bottom."
+
+[prop.fill]
+type = "bool"
+default = "false"
+attribute = "data-nd-fill"
+doc = "Stretches the group across its container and gives every button an equal share of it."
+
+[prop.children]
+type = "children"
+doc = "The buttons."
+
+[a11y]
+role = "group"
+needs_name = true
+notes = """
+The root carries `role="group"` rather than `toolbar`. A toolbar is one tab stop
+walked with the arrow keys, and these are ordinary buttons users tab through.
+Name it with `label` or with `labelledby`, never both."""

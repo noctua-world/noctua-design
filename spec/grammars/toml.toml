@@ -1,0 +1,67 @@
+# TOML.
+#
+# `property_equals` is the whole of its structure: a bare name before an `=` is
+# a key, and there is nothing else in the format that shape could be.
+
+[meta]
+name = "toml"
+display = "TOML"
+
+[identifier]
+extra = "_-"
+
+[words]
+constant = ["true", "false"]
+
+[[comment]]
+open = "#"
+
+[[string]]
+open = '"""'
+close = '"""'
+escape = "\\"
+multiline = true
+
+[[string]]
+open = "'''"
+close = "'''"
+multiline = true
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+
+[number]
+prefixes = ["0x", "0b", "0o"]
+separator = "_"
+exponent = "eE"
+
+[symbols]
+operator = "=+"
+punctuation = "{}[],.:"
+
+[context]
+property_equals = true
+
+[[case]]
+name = "a key is a property and its value is not"
+code = """
+name = \"noctua\"
+steps = [0, 1, 2]"""
+expect = ['property name', 'string "noctua"', "property steps", "number 0"]
+
+[[case]]
+name = "a literal string has no escapes"
+code = "path = 'C:\\temp'"
+expect = ["property path", "string 'C:\\temp'"]
+reject = ["escape \\t"]
+
+[[case]]
+name = "a comment sigil inside a string is not a comment"
+code = 'note = "a # b"'
+expect = ['string "a # b"']

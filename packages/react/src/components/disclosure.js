@@ -4,26 +4,30 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// Content folded away behind its own control.
+// Let users show and hide a block of content from its own control.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
 
-/** Applied by the component, never by the caller — which is what keeps
- * the two implementations from disagreeing about a default. */
-const defaults = {
-  open: "false",
-  marker: "true",
-};
-
-export function Disclosure({ summary, icon, open, marker, className, children, ...rest }) {
+import { Icon } from "./icon.js";
+export function Disclosure({ summary, name, icon, open, marker, heading, glass, className, children, ...rest }) {
   const marker_ = marker ?? true;
+  // The summary's own tag: a real heading when this disclosure is a
+  // section of the page, because folded away its title is all that is
+  // left and a `<span>` leaves the section out of the outline.
+  const tag_ = heading && heading !== "none" ? heading : "span";
   const root = ["nd-disclosure", className].filter(Boolean).join(" ");
   return h(
     "details",
-    { className: root, open: open || undefined, ...rest },
+    {
+      className: root,
+      "data-nd-glass": String(glass ?? false),
+      open: open || undefined,
+      "data-nd-disclosure": name,
+      ...rest,
+    },
     h(
       "summary",
       {
@@ -34,7 +38,7 @@ export function Disclosure({ summary, icon, open, marker, className, children, .
       icon
         ? h(Icon, { icon })
         : [
-            h("span", { key: "t", className: "nd-disclosure-text" }, summary),
+            h(tag_, { key: "t", className: "nd-disclosure-text" }, summary),
             marker_ ? h(Icon, { key: "m", icon: "chevron-down", size: "small" }) : null,
           ],
     ),

@@ -13,6 +13,7 @@
 import { createElement as h } from "react";
 import { createRoot } from "react-dom/client";
 import { ThemeScope } from "@noctua-world/design-react/theme.js";
+import { Button } from "@noctua-world/design-react/components/index.js";
 
 /**
  * Renders the same sample the Dioxus example renders, into the same slot.
@@ -29,12 +30,8 @@ function Sample({ text }) {
       h("a", { className: "nd-link", href: "#", key: "a" }, text.link),
     ]),
     h("div", { className: "nd-sample-actions", key: "b" }, [
-      h("button", { className: "nd-button", type: "button", key: "1" }, text.action),
-      h(
-        "button",
-        { className: "nd-button nd-button--quiet", type: "button", key: "2" },
-        text.quiet,
-      ),
+      h(Button, { key: "1", label: text.action }),
+      h(Button, { key: "2", variant: "outline", tone: "neutral", label: text.quiet }),
     ]),
   ]);
 }
@@ -58,7 +55,7 @@ export function mount(slot, scope, text) {
   root.render(
     h(
       ThemeScope,
-      { ...scope, className: "nd-scope nd-glass" },
+      { ...scope, className: "nd-scope" },
       h(Sample, { text }),
     ),
   );

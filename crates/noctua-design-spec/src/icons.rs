@@ -20,8 +20,8 @@
 //! wrapper is discarded and rebuilt by the component, and the drawing itself
 //! may carry only geometry: no `id` (which would collide the second time the
 //! same icon appears), no `class`, no `style`, and no `fill`/`stroke` of its
-//! own (which would refuse `currentColor` and paint the icon a fixed colour
-//! inside a themed subtree — the frozen-colour trap in a different costume).
+//! own (which would refuse `currentColor` and paint the icon a fixed color
+//! inside a themed subtree — the frozen-color trap in a different costume).
 
 use std::collections::BTreeSet;
 use std::path::Path;
@@ -46,16 +46,21 @@ pub struct Icons {
     pub icon: IndexMap<String, Icon>,
 }
 
-/// Sizes and stroke weight, shared by every icon.
+/// What every icon shares, whoever drew it.
+///
+/// # There were three size fields here and they decided nothing
+///
+/// `size_small`, `size_medium` and `size_large` were written into the generated
+/// `IconSize`'s doc comments and read by nothing else. What actually sizes an
+/// icon is `.nd-icon-glyph`'s `font-size`, from the type scale, and the two had
+/// already drifted: the spec claimed `1.5rem` for the medium box where the
+/// stylesheet gives it the body step. A declaration that documents a value
+/// nothing uses is worse than a missing one, so the sizes are stated where they
+/// are true — `spec/components/icon.toml`'s `size` doc — and this holds only
+/// what the drawings genuinely share.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Meta {
-    /// The rendered box for `IconSize::Small`.
-    pub size_small: String,
-    /// The rendered box for `IconSize::Medium`, the default.
-    pub size_medium: String,
-    /// The rendered box for `IconSize::Large`.
-    pub size_large: String,
     /// The stroke weight stroked icons are drawn at.
     pub stroke_width: String,
 }
@@ -63,9 +68,6 @@ pub struct Meta {
 impl Default for Meta {
     fn default() -> Self {
         Self {
-            size_small: "1rem".to_owned(),
-            size_medium: "1.5rem".to_owned(),
-            size_large: "2rem".to_owned(),
             stroke_width: "1.75".to_owned(),
         }
     }
@@ -481,7 +483,7 @@ mod tests {
         );
         // The wrapper's own fill and stroke are gone with it: the component
         // writes those, so an icon inside a themed scope paints the scope's
-        // colour rather than a colour baked in upstream.
+        // color rather than a color baked in upstream.
         assert!(!body.contains("fill="));
         assert!(!body.contains("stroke="));
     }
@@ -494,7 +496,7 @@ mod tests {
     }
 
     #[test]
-    fn a_fixed_colour_is_refused() {
+    fn a_fixed_color_is_refused() {
         let svg = r##"<svg viewBox="0 0 24 24"><path fill="#f00" d="M0 0h1"/></svg>"##;
         assert!(normalise(svg, Paint::Fill).is_err());
     }

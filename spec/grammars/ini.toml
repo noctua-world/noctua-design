@@ -1,0 +1,42 @@
+# INI.
+
+[meta]
+name = "ini"
+display = "INI"
+aliases = ["cfg", "conf", "properties", "editorconfig"]
+
+[identifier]
+extra = "_-."
+
+[words]
+constant = ["true", "false", "yes", "no", "on", "off"]
+
+[[comment]]
+open = ";"
+
+[[comment]]
+open = "#"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+
+[number]
+exponent = ""
+
+[symbols]
+operator = "="
+punctuation = "[],:"
+
+[context]
+property_equals = true
+
+[[case]]
+name = "a section, a key and two comment forms"
+code = "[core]\n; a note\n# another\nquotepath = false"
+expect = ["punctuation [", "plain core", "comment ; a note", "comment # another", "property quotepath", "constant false"]

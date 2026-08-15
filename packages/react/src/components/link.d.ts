@@ -11,13 +11,15 @@ export type LinkTone = "accent" | "inherit";
 export interface LinkProps {
   /** The destination. */
   href?: string;
-  /** Marks the link as leaving the site, which adds a visible affordance. */
+  /** Whether the link leaves the site. It draws a small external-link icon after the link text. */
   external?: boolean;
-  /** `inherit` is for a link inside a run of coloured text that must not break the line's colour. */
+  /** The `rel` attribute of the link. Use `noreferrer` on anything that leaves the site. */
+  rel?: string;
+  /** The colour of the link text. `accent` is the link colour, and `inherit` takes the colour of the text around it, for a link inside a coloured run. */
   tone?: LinkTone;
   className?: string;
   children?: ReactNode;
 }
 
-/** A link, with the affordance an external destination needs. */
+/** Links to another page, and marks the links that leave the site. */
 export declare function Link(props: LinkProps): JSX.Element;

@@ -10,6 +10,7 @@
 // and that a control made of nothing but a drawing still has a name.
 
 import { test, expect } from "@playwright/test";
+import { modeControl } from "./pages.js";
 import { ANY, LOCALES, PAGE, url } from "./pages.js";
 
 test("no icon anywhere is empty", async ({ page }) => {
@@ -91,10 +92,11 @@ test("the repository link has a visible icon", async ({ page }) => {
 
 test("the mode control is three radios, and choosing one always moves it", async ({ page }) => {
   await page.goto(url(ANY));
-  // `.nd-segmented`, not "the mode group in the header": the settings panel is
-  // inside the header too and carries a mode group of its own, so the broader
-  // selector matches two and Playwright's strict mode refuses both.
-  const group = page.locator(".nd-segmented");
+  // In the theme menu, which is the only place it is. The header carried a
+  // second copy of this control until the menu was made one component; a reader
+  // had two ways to change one setting and the header spent a third of its
+  // 320px budget on the duplicate.
+  const group = await modeControl(page);
   const options = group.locator('[role="radio"]');
   await expect(options).toHaveCount(3);
 

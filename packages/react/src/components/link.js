@@ -4,21 +4,15 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// A link, with the affordance an external destination needs.
+// Links to another page, and marks the links that leave the site.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
 
-/** Applied by the component, never by the caller — which is what keeps
- * the two implementations from disagreeing about a default. */
-const defaults = {
-  external: "false",
-  tone: "accent",
-};
-
-export function Link({ href, external, tone, className, children, ...rest }) {
+import { Icon } from "./icon.js";
+export function Link({ href, external, rel, tone, className, children, ...rest }) {
   const tone_ = tone ?? "accent";
   const root = ["nd-a", className].filter(Boolean).join(" ");
   return h(
@@ -26,6 +20,7 @@ export function Link({ href, external, tone, className, children, ...rest }) {
     {
       className: root,
       href,
+      rel,
       "data-nd-external": external ? "true" : "false",
       "data-nd-tone": tone_,
       ...rest,

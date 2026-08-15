@@ -8,11 +8,19 @@
 //! shows in real text. Arabic needs joined forms, Devanagari needs conjuncts,
 //! Thai needs the absence of spaces to matter.
 
+use noctua_design_i18n::Key;
+
 /// One script, its sample, and what it proves.
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Sample {
-    /// The script's English name.
-    pub name: &'static str,
+    /// A stable name for the DOM and for a test, in every locale.
+    ///
+    /// The markup used to carry the English name, so a spec selecting on it
+    /// passed in `/en/` and matched nothing in `/pt-BR/`.
+    pub id: &'static str,
+    /// The script's name, as a message. "Greek" is a word in English and
+    /// "Grego" is the same word in Portuguese; neither is an identifier.
+    pub name: Key,
     /// The BCP 47 tag for `lang`, so the browser shapes and hyphenates correctly.
     pub lang: &'static str,
     /// `rtl` where the script runs right to left.
@@ -20,124 +28,161 @@ pub(crate) struct Sample {
     /// A real sentence in the script.
     pub text: &'static str,
     /// What this particular sample exercises, for the reader of the page.
-    pub proves: &'static str,
+    pub proves: Key,
     /// Whether Noctua Iosevka can set it — the fallback must fire when it cannot.
     pub monospaceable: bool,
+
+    /// Whether its glyphs are one em wide, like the browser's tofu box.
+    ///
+    /// Declared rather than pattern-matched. The browser suite used to exempt
+    /// CJK from its width check with a regex over the script's ENGLISH NAME —
+    /// so the exemption evaporated the moment the name became a message, and
+    /// the suite called a correctly rendered Chinese line tofu. A property of
+    /// a writing system belongs in the table that describes it.
+    pub ideographic: bool,
 }
 
 /// Every script the platform must render.
 pub(crate) const SAMPLES: [Sample; 14] = [
     Sample {
-        name: "Latin",
+        id: "latin",
+        name: Key::TypeScriptLatinName,
         lang: "en",
         dir: "ltr",
         text: "The quick brown fox jumps over the lazy dog.",
-        proves: "the base case, and every letter of the alphabet",
+        proves: Key::TypeScriptLatinProves,
         monospaceable: true,
+        ideographic: false,
     },
     Sample {
-        name: "Latin, Portuguese",
+        id: "latin-portuguese",
+        name: Key::TypeScriptLatinPortugueseName,
         lang: "pt-BR",
         dir: "ltr",
         text: "Uma ação em português: coração, ambiguïdade, José até vovô.",
-        proves: "stacked diacritics — the tilde, cedilla, circumflex and acute this project needs",
+        proves: Key::TypeScriptLatinPortugueseProves,
         monospaceable: true,
+        ideographic: false,
     },
     Sample {
-        name: "Greek",
+        id: "greek",
+        name: Key::TypeScriptGreekName,
         lang: "el",
         dir: "ltr",
         text: "Η γρήγορη καφέ αλεπού πηδάει πάνω από το τεμπέλικο σκυλί.",
-        proves: "Greek, which Iosevka does cover — the fallback must NOT fire",
+        proves: Key::TypeScriptGreekProves,
         monospaceable: true,
+        ideographic: false,
     },
     Sample {
-        name: "Cyrillic",
+        id: "cyrillic",
+        name: Key::TypeScriptCyrillicName,
         lang: "ru",
         dir: "ltr",
         text: "Съешь же ещё этих мягких французских булок, да выпей чаю.",
-        proves: "Cyrillic, likewise covered — the fallback must not fire",
+        proves: Key::TypeScriptCyrillicProves,
         monospaceable: true,
+        ideographic: false,
     },
     Sample {
-        name: "Arabic",
+        id: "arabic",
+        name: Key::TypeScriptArabicName,
         lang: "ar",
         dir: "rtl",
         text: "نص حكيم له سر قاطع وذو شأن عظيم مكتوب على ثوب أخضر ومغلف بجلد أزرق.",
-        proves: "right-to-left shaping, and initial/medial/final letter forms",
+        proves: Key::TypeScriptArabicProves,
         monospaceable: false,
+        ideographic: false,
     },
     Sample {
-        name: "Hebrew",
+        id: "hebrew",
+        name: Key::TypeScriptHebrewName,
         lang: "he",
         dir: "rtl",
         text: "דג סקרן שט בים מאוכזב ולפתע מצא חברה.",
-        proves: "right-to-left without joining forms",
+        proves: Key::TypeScriptHebrewProves,
         monospaceable: false,
+        ideographic: false,
     },
     Sample {
-        name: "Devanagari",
+        id: "devanagari",
+        name: Key::TypeScriptDevanagariName,
         lang: "hi",
         dir: "ltr",
         text: "ऋषियों को सताने वाले दुष्ट राक्षसों के राजा रावण का सर्वनाश।",
-        proves: "conjunct consonants and marks above and below the baseline",
+        proves: Key::TypeScriptDevanagariProves,
         monospaceable: false,
+        ideographic: false,
     },
     Sample {
-        name: "Thai",
+        id: "thai",
+        name: Key::TypeScriptThaiName,
         lang: "th",
         dir: "ltr",
         text: "เป็นมนุษย์สุดประเสริฐเลิศคุณค่ากว่าบรรดาฝูงสัตว์เดรัจฉาน",
-        proves: "a script with no spaces, where line breaking is the font's problem",
+        proves: Key::TypeScriptThaiProves,
         monospaceable: false,
+        ideographic: false,
     },
     Sample {
-        name: "Ethiopic",
+        id: "ethiopic",
+        name: Key::TypeScriptEthiopicName,
         lang: "am",
         dir: "ltr",
         text: "ሰማይ አይታረስ ንጉሥ አይከሰስ።",
-        proves: "a syllabary with no case",
+        proves: Key::TypeScriptEthiopicProves,
         monospaceable: false,
+        ideographic: false,
     },
     Sample {
-        name: "Georgian",
+        id: "georgian",
+        name: Key::TypeScriptGeorgianName,
         lang: "ka",
         dir: "ltr",
         text: "ვეპხის ტყაოსანი შოთა რუსთაველის პოემაა.",
-        proves: "a unicameral alphabet with tall ascenders and deep descenders",
+        proves: Key::TypeScriptGeorgianProves,
         monospaceable: false,
+        ideographic: false,
     },
     Sample {
-        name: "Armenian",
+        id: "armenian",
+        name: Key::TypeScriptArmenianName,
         lang: "hy",
         dir: "ltr",
         text: "Բոլոր մարդիկ ծնվում են ազատ և հավասար իրենց արժանապատվությամբ։",
-        proves: "its own punctuation, which is not Latin punctuation",
+        proves: Key::TypeScriptArmenianProves,
         monospaceable: false,
+        ideographic: false,
     },
     Sample {
-        name: "Japanese",
+        id: "japanese",
+        name: Key::TypeScriptJapaneseName,
         lang: "ja",
         dir: "ltr",
         text: "いろはにほへと ちりぬるを 和歌 東京都は日本の首都です。",
-        proves: "three writing systems on one line — hiragana, katakana and kanji",
+        proves: Key::TypeScriptJapaneseProves,
         monospaceable: false,
+        ideographic: true,
     },
     Sample {
-        name: "Korean",
+        id: "korean",
+        name: Key::TypeScriptKoreanName,
         lang: "ko",
         dir: "ltr",
         text: "다람쥐 헌 쳇바퀴에 타고파. 한국어는 한글로 씁니다.",
-        proves: "composed syllable blocks",
+        proves: Key::TypeScriptKoreanProves,
         monospaceable: false,
+        ideographic: true,
     },
     Sample {
-        name: "Simplified Chinese",
+        id: "simplified-chinese",
+        name: Key::TypeScriptSimplifiedChineseName,
         lang: "zh-Hans",
         dir: "ltr",
         text: "天地玄黄，宇宙洪荒。中文是世界上使用人数最多的语言。",
-        proves: "dense ideographs, and full-width punctuation",
+        proves: Key::TypeScriptSimplifiedChineseProves,
         monospaceable: false,
+        ideographic: true,
     },
 ];
 
@@ -159,7 +204,7 @@ mod tests {
                 noctua_design::dominant_script(sample.text),
                 expected,
                 "{} is classified differently by the utility than by this table",
-                sample.name
+                sample.id
             );
         }
     }
@@ -176,7 +221,7 @@ mod tests {
     fn every_right_to_left_sample_says_so() {
         for sample in SAMPLES {
             let rtl = sample.lang == "ar" || sample.lang == "he";
-            assert_eq!(sample.dir == "rtl", rtl, "{}", sample.name);
+            assert_eq!(sample.dir == "rtl", rtl, "{}", sample.id);
         }
     }
 }

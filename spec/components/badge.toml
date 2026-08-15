@@ -1,0 +1,67 @@
+guidance = """
+Use a badge to put a count or a dot on the corner of another control, such as
+eleven unread messages or three failing builds. It wraps the control it marks,
+so it needs children, and `label` is required.
+"""
+
+[meta]
+name = "Badge"
+element = "span"
+class = "nd-badge"
+summary = "Marks a control with a count or a dot, and says what it counts."
+specimen = "<span class=\"nd-badge\" data-nd-tone=\"danger\"><span class=\"nd-badge-mark\">3</span></span>"
+
+[prop.label]
+type = "text"
+required = true
+doc = "What the count means, as a whole phrase: *3 unread messages*, not *3*. **Required**, because the digits carry `aria-hidden` and this is what a screen reader reads after the name of whatever is inside."
+
+[prop.count]
+type = "text"
+attribute = "data-nd-count"
+doc = "The number to draw. Text rather than a number, so `1.2k` is allowed and the prop crosses the two languages unchanged. Absent draws nothing unless `dot` asks for a mark."
+
+[prop.max]
+type = "text"
+doc = "The largest number worth drawing. Above it the mark reads `{max}+`, which keeps a four-digit badge from growing wider than the control it marks. The two are compared numerically when both are numbers, and ignored when either is not."
+
+[prop.dot]
+type = "bool"
+default = "false"
+attribute = "data-nd-dot"
+doc = "Whether to draw a dot rather than a number, saying that something changed without saying how much. Use it when the count is unknown or does not matter. `label` still has to say what changed."
+
+[prop.show_zero]
+type = "bool"
+default = "false"
+doc = "Whether a count of zero is drawn. Off by default, so nothing to report draws no badge at all. Turn it on for a dashboard, where a zero is a real answer and a missing badge would be read as a failure to load."
+
+[prop.tone]
+type = "text"
+attribute = "data-nd-tone"
+doc = "Which of the colour system's tones the badge is painted from, named rather than chosen from a closed list. A name no family declares fails the build. The 349 families are in `noctua_design::tones`, plus `neutral` and `muted`."
+
+[prop.placement]
+type = "enum"
+values = ["top-end", "top-start", "bottom-end", "bottom-start"]
+default = "top-end"
+attribute = "data-nd-placement"
+doc = "Which corner the mark sits on. The values are logical rather than left and right, so the mark moves to the other corner in a right-to-left page."
+
+[prop.overlap]
+type = "enum"
+values = ["rectangle", "circle"]
+default = "rectangle"
+attribute = "data-nd-overlap"
+doc = "The shape of whatever is underneath, which decides how far in to tuck the mark. A circle's corner is further from its edge than a rectangle's, so a badge set for one hangs wrong on the other."
+
+[prop.children]
+type = "children"
+doc = "The control being marked, such as a button, an avatar or an icon. Required in practice, because this component draws a corner and a corner needs something to sit on."
+
+[a11y]
+notes = """
+The mark carries `aria-hidden` and `label` is a visually hidden text node, so a
+screen reader reads *Notifications, 3 unread messages*. The wrapper adds no
+role, and this is not a live region.
+"""

@@ -13,6 +13,11 @@ publish = false
 
 [dependencies]
 noctua-design-spec = { path = "../noctua-design-spec" }
+# The shipped browser behaviour, as `include_str!` constants. A dependency
+# rather than a path `xtask` reads at build time — which is how `lineage`'s
+# twin arrives — because a file renamed out from under an emitter should be a
+# compile error naming the file, not an artifact that emits empty.
+noctua-design-runtime = { path = "../noctua-design-runtime" }
 indexmap.workspace = true
 
 [lints]

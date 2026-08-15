@@ -1,0 +1,60 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a menu for the actions a button opens, such as *Duplicate*, *Rename* and
+*Delete*. Each item runs an action and closes the menu. To choose a value from
+a list, use `Segmented` or `Select`. Neither the menu nor its button renders
+without a script.
+"""
+
+[meta]
+name = "Menu"
+element = "div"
+class = "nd-menu"
+# Two items, so it reads as a list of actions rather than as a box.
+specimen = "<button class=\"nd-menu-item\" type=\"button\" role=\"menuitem\"><span class=\"nd-menu-item-label nd-identifier\">Aa</span></button><button class=\"nd-menu-item\" type=\"button\" role=\"menuitem\"><span class=\"nd-menu-item-label nd-identifier\">Bb</span></button>"
+page = "menu"
+summary = "Let users choose an action from the list a button opens."
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-menu"
+doc = "What this menu is called in the markup, and the id its button points at with `controls`. **Required**, because an id derived from an optional name is an id every copy on the page shares."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The menu's own name, in the reader's language, such as *Actions for this invoice*. **Required**, because a screen reader announces the menu when focus enters it. Name what the actions are about."
+
+[prop.placement]
+type = "enum"
+values = ["auto", "start", "end"]
+variants = false
+default = "auto"
+attribute = "data-nd-placement"
+doc = "Where it hangs off its button: `auto`, `start` or `end`. Defaults to `auto`, which measures the room below and flips above when there is not enough. `start` and `end` pin the menu's leading or trailing edge to the button."
+
+[prop.children]
+type = "children"
+doc = "The items, as `MenuItem`. Nothing else belongs here. A heading, a paragraph or a form control inside a `role=\"menu\"` cannot be reached, because the menu's keyboard moves between items and nowhere else."
+
+[state.open]
+attribute = "aria-expanded"
+doc = "Whether the menu is showing. The attribute is on the button rather than here, because that is the element a reader presses. The menu itself is present or hidden, which is not a state a caller sets."
+
+[a11y]
+needs_name = true
+role = "menu"
+notes = """
+It is `role="menu"` with `role="menuitem"` children, which is one tab stop and
+the arrow keys between the items. Escape and choosing an item both return focus
+to the button that opened it."""
+
+[keyboard]
+"Down or Up" = "Moves to the next or previous item, and wraps at either end. Opening with the keyboard focuses the first item."
+"Home or End" = "Moves to the first item or the last."
+"A printable key" = "Jumps to the next item whose label starts with that character."
+"Enter or Space" = "Runs the item under focus and closes the menu."
+"Escape" = "Closes the menu and puts focus back on the button that opened it."
+"Tab" = "Leaves the menu, which closes it. The items are not tab stops, because a menu takes the arrow keys instead."

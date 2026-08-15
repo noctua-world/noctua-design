@@ -1,0 +1,162 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use this for a short code a reader copies from somewhere else, such as the six
+digits in a text message. For anything a reader composes, use `Input`. The boxes
+are a picture of the code and never a shape it has to be typed into.
+"""
+
+[meta]
+name = "OtpField"
+element = "fieldset"
+class = "nd-otp-field"
+# Drawn characters rather than live boxes: a specimen of a `needs_name`
+# component must not render a nameless control. `TimeInput` says the same.
+specimen = "<span class=\"nd-otp-field-figure\"><span class=\"nd-identifier\">4</span><span class=\"nd-identifier\">2</span><span class=\"nd-identifier\">1</span></span>"
+summary = "Ask for one short code, in a row of boxes that fill and move on as it is typed."
+
+# WHY THE BOXES ALL POST UNDER ONE NAME.
+#
+# The code is one value and the boxes are a picture of it. Giving each box a
+# name of its own (`code-1`, `code-2`) makes a server reassemble something it
+# never asked to be taken apart, and naming a hidden field instead makes a
+# control that posts nothing at all when the script does not run.
+#
+# So every box carries the same `name`, and the code arrives as that many values
+# under one field, in document order, for the server to join. `TagPicker` posts
+# under one name from two controls for the same reason: what a reader entered
+# has to reach the server whether or not a script arrived.
+#
+# AND THE WALK IS `TimeInput`'S, NOT A THIRD COPY.
+#
+# Auto-advance when a box fills, Backspace in an empty box going back, and a
+# paste splitting across the row are the same three gestures a time input needs.
+# `segmentWalk` in `crates/noctua-design-runtime/src/inputs.js` is the one
+# implementation, and both controls call it.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-otp-field"
+doc = """
+The field's name and the root of every id in it. **Every box posts under it**,
+so the code arrives as `length` values in order. **Required**, because an id
+derived from an optional name is one every field on the page shares.
+"""
+
+[prop.legend]
+type = "text"
+required = true
+doc = """
+The question, in the reader's language, drawn by `Field` as a real `<legend>`.
+**Required**, because a fieldset with no legend gives a screen reader a group
+with no name.
+"""
+
+[prop.box_label]
+type = "text"
+required = true
+attribute = "data-nd-box-label"
+doc = """
+The name of one box, with `{index}` and `{length}` holes, such as
+*Digit {index} of {length}*. **Required**, because the legend names the group
+and each box is a control of its own. One sentence with holes, never words
+joined together.
+"""
+
+[prop.length]
+type = "text"
+default = "6"
+attribute = "data-nd-length"
+doc = """
+How many boxes there are. Six by default, which is what most codes are. Match
+whatever sent the code: a row shorter than the code loses characters, and a
+longer one asks for something that was never sent.
+"""
+
+[prop.kind]
+type = "enum"
+values = ["numeric", "alphanumeric"]
+default = "numeric"
+attribute = "data-nd-kind"
+doc = """
+What a box accepts. `numeric` asks a phone for its number pad and drops anything
+else as it is typed. `alphanumeric` takes letters too, and the boxes are widened
+for them.
+"""
+
+[prop.value]
+type = "text"
+attribute = "data-nd-value"
+doc = "The code to start with, as one string. It is split across the boxes at render, so a code the server already has arrives filled in rather than empty."
+
+[prop.autocomplete]
+type = "bool"
+default = "true"
+attribute = "data-nd-autocomplete"
+doc = """
+Whether the platform may offer a code it has just seen. On by default, and it
+writes `autocomplete="one-time-code"` on the **first box only**. Repeating it on
+every box makes the platform offer the whole code to each of them.
+"""
+
+[prop.hint]
+type = "text"
+doc = "A sentence under the question, drawn by `Field`, such as where the code was sent. It names the place rather than the address, so nothing private is drawn on the screen."
+
+[prop.error]
+type = "text"
+doc = "What is wrong with the code, in the reader's language, drawn by `Field`. Its presence marks every box as invalid, because the code is one value."
+
+[prop.invalid_label]
+type = "text"
+attribute = "data-nd-invalid-label"
+doc = """
+The sentence for a code that is short or holds something the boxes do not
+accept. It is said when the field is left rather than between two boxes, because
+an unfinished answer is not a wrong one.
+"""
+
+[prop.required]
+type = "bool"
+default = "false"
+doc = "Whether a code has to be given. It reaches every box, so a form with an empty row is refused by the browser itself with no script running."
+
+[prop.required_label]
+type = "text"
+doc = "The word marking the question as one that has to be answered, such as *required*. Wanted in practice by `required`, and drawn by `Field` beside the legend."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "How big a box is. All three clear WCAG 2.5.8's 24px minimum target, and `large` also meets the 44px enhanced target."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+doc = "Whether the boxes refuse to be typed into. It reaches every box and the `<fieldset>` around them, so nothing inside is reachable or submitted."
+
+[state.invalid]
+attribute = "data-nd-invalid"
+doc = """
+Set on a row the script has refused, and on one the caller passed an `error` for.
+The stylesheet marks every box from it, because a code is one value and half of
+it cannot be wrong on its own.
+"""
+
+[a11y]
+needs_name = true
+notes = """
+`Field { kind = "group" }` is the `<fieldset>`, so the hint and the error are
+heard once on entering rather than once per box. Every box carries its own
+`<label>`, hidden from the screen and kept for a screen reader.
+"""
+
+[keyboard]
+"A character" = "Fills the box and moves to the next one. A box already full is replaced, so a reader correcting one digit types over it."
+Backspace = "Clears the box. In one that is already empty it moves back to the previous box, which is the gesture every reader tries."
+"Left arrow / Right arrow" = "Moves between the boxes without changing anything, so a reader can reach the one digit they want to correct."
+"Home / End" = "Moves to the first and last box."
+Paste = "Splits the whole code across the boxes, wherever the caret is. Anything the boxes refuse is dropped and not reported."

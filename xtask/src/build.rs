@@ -7,6 +7,31 @@ use noctua_design_spec::Spec;
 
 use crate::ui;
 
+/// A specification's problems, rendered so a person can act on them.
+///
+/// `format!("{:?}", miette::Report::new(error))` was here, and on a machine
+/// without miette's `fancy` feature — which nothing in this workspace enables,
+/// because it is a rendering dependency every consumer would inherit — it
+/// prints the struct and a note about installing the feature. The message and
+/// the fix, which the spec layer went to some trouble to produce, never reach
+/// anyone. This prints them.
+///
+/// The byte span is deliberately not turned back into a line and column: every
+/// problem the spec layer raises already names the thing that is wrong, and a
+/// second locator would be a second thing to keep correct.
+fn report(path: &str, error: &noctua_design_spec::SpecError) -> String {
+    use std::fmt::Write as _;
+
+    let mut out = format!("{path}: {} problem(s)", error.problems().len());
+    for problem in error.problems() {
+        let _ = write!(out, "\n  - {}", problem.message());
+        if !problem.help().is_empty() {
+            let _ = write!(out, "\n    fix: {}", problem.help());
+        }
+    }
+    out
+}
+
 /// Loads the spec and produces every artifact **in memory**, touching nothing.
 ///
 /// Separate from [`run`] for one important reason: `check` must **not** rewrite
@@ -19,14 +44,73 @@ use crate::ui;
 /// # Errors
 ///
 /// Any problem in `spec/tokens.toml`.
-pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<EmittedFile>), String> {
+/// The components, and the message catalogue that half depends on them.
+///
+/// Together because the order is load-bearing: a component's contract carries
+/// prose a reader sees — its guidance, every prop's documentation, the keyboard
+/// contract, the accessibility notes — and the site rendered exactly those
+/// strings on every page in every locale. Deriving them into the catalogue is
+/// what makes the cross-locale check demand a Portuguese answer for each one,
+/// and it cannot happen before the components are read.
+fn words(
+    root: &Path,
+) -> Result<
+    (
+        Vec<noctua_design_spec::component::Component>,
+        noctua_design_spec::i18n::Catalogue,
+    ),
+    String,
+> {
+    let components_path = root.join("spec/components");
+    let components = noctua_design_spec::component::load_all(&components_path)
+        .map_err(|error| report(&relative_to(root, &components_path), &error))?;
+    ui::ok(&format!("compiled {}", relative_to(root, &components_path)));
+    ui::detail(&format!(
+        "{} components, {} props in total",
+        components.len(),
+        components.iter().map(|c| c.prop.len()).sum::<usize>()
+    ));
+
+    let messages = root.join("spec/i18n");
+    let derived = noctua_design_spec::component::derived_messages(&components).len();
+    let catalogue = noctua_design_spec::i18n::load_for(&messages, &components)
+        .map_err(|error| report(&relative_to(root, &messages), &error))?;
+    ui::ok(&format!("compiled {}", relative_to(root, &messages)));
+    ui::detail(&format!(
+        "{} messages × {} locales ({}, one of them generated)",
+        catalogue.keys.len(),
+        catalogue.locales.len(),
+        catalogue
+            .locales
+            .iter()
+            .map(|locale| locale.tag.clone())
+            .collect::<Vec<_>>()
+            .join(", ")
+    ));
+    ui::detail(&format!(
+        "{derived} of them derived from spec/components, and translated like any other"
+    ));
+
+    Ok((components, catalogue))
+}
+
+// One long function on purpose: it is the list of what the build reads, in the
+// order dependency forces, and every entry is four lines of the same shape.
+// Splitting it would put half the list behind a call and teach a reader that
+// the other half lives somewhere else.
+#[allow(clippy::too_many_lines)]
+/// The spec, the vendored color output, and every file they emit.
+///
+/// The vendor comes back with them because `gates::unknown_token` needs the
+/// color names: it used to wave every `--nc-*` through, and a name that does
+/// not exist is dropped at computed-value time with no error anywhere.
+pub(crate) fn artifacts(
+    root: &Path,
+    spec_path: &Path,
+) -> Result<(Spec, noctua_design_spec::Vendor, Vec<EmittedFile>), String> {
     let relative = relative_to(root, spec_path);
 
-    let spec = noctua_design_spec::load(spec_path).map_err(|error| {
-        // The spec layer's diagnostics point at the exact byte range and end
-        // with a fix; rendering them any other way would throw that away.
-        format!("{:?}", miette::Report::new(error))
-    })?;
+    let spec = noctua_design_spec::load(spec_path).map_err(|error| report(&relative, &error))?;
 
     ui::ok(&format!("compiled {relative}"));
     ui::detail(&format!(
@@ -40,7 +124,7 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
 
     let fonts_path = root.join("spec/fonts.toml");
     let fonts = noctua_design_spec::load_fonts(&fonts_path)
-        .map_err(|error| format!("{:?}", miette::Report::new(error)))?;
+        .map_err(|error| report(&relative_to(root, &fonts_path), &error))?;
     ui::ok(&format!("compiled {}", relative_to(root, &fonts_path)));
     ui::detail(&format!(
         "{} faces, {} preloaded, {} stacks",
@@ -52,7 +136,7 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
     let sliced = load_slices(root, &fonts)?;
 
     let vendor = noctua_design_spec::vendor::load(root)
-        .map_err(|error| format!("{:?}", miette::Report::new(error)))?;
+        .map_err(|error| report("packages/tokens/vendor", &error))?;
     ui::ok("read the vendored noctua-colors output");
     ui::detail(&format!(
         "{} semantic names, {} palettes ({} accents × {} saturations), default {}",
@@ -65,7 +149,7 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
 
     let theme_path = root.join("spec/theme.toml");
     let theme = noctua_design_spec::load_theme(&theme_path, &vendor)
-        .map_err(|error| format!("{:?}", miette::Report::new(error)))?;
+        .map_err(|error| report(&relative_to(root, &theme_path), &error))?;
     ui::ok(&format!("compiled {}", relative_to(root, &theme_path)));
     ui::detail(&format!(
         "{} settings, {} scopable, {} global",
@@ -74,40 +158,81 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
         theme.global().count()
     ));
 
-    let messages = root.join("spec/i18n");
-    let catalogue = noctua_design_spec::i18n::load(&messages)
-        .map_err(|error| format!("{:?}", miette::Report::new(error)))?;
-    ui::ok(&format!("compiled {}", relative_to(root, &messages)));
-    ui::detail(&format!(
-        "{} messages × {} locales ({}, one of them generated)",
-        catalogue.keys.len(),
-        catalogue.locales.len(),
-        catalogue
-            .locales
-            .iter()
-            .map(|locale| locale.tag.clone())
-            .collect::<Vec<_>>()
-            .join(", ")
-    ));
-
-    let components_path = root.join("spec/components");
-    let components = noctua_design_spec::component::load_all(&components_path)
-        .map_err(|error| format!("{:?}", miette::Report::new(error)))?;
-    ui::ok(&format!("compiled {}", relative_to(root, &components_path)));
-    ui::detail(&format!(
-        "{} components, {} props in total",
-        components.len(),
-        components.iter().map(|c| c.prop.len()).sum::<usize>()
-    ));
+    let (components, catalogue) = words(root)?;
 
     let icons_path = root.join("spec/icons.toml");
     let (icons, drawings) = noctua_design_spec::icons::load(&icons_path, root.join("assets/icons"))
-        .map_err(|error| format!("{:?}", miette::Report::new(error)))?;
+        .map_err(|error| report(&relative_to(root, &icons_path), &error))?;
     ui::ok(&format!("compiled {}", relative_to(root, &icons_path)));
     ui::detail(&format!(
         "{} icons from {} source(s), vendored at a pinned tag",
         drawings.len(),
         icons.source.len()
+    ));
+
+    let syntax_path = root.join("spec/syntax.toml");
+    let syntax = noctua_design_spec::syntax::load(&syntax_path, &vendor)
+        .map_err(|error| report(&relative_to(root, &syntax_path), &error))?;
+    ui::ok(&format!("compiled {}", relative_to(root, &syntax_path)));
+    ui::detail(&format!(
+        "{} syntax themes over {} roles, every token checked against the vendored palettes",
+        syntax.theme.len(),
+        noctua_design_spec::grammar::Role::ALL.len()
+    ));
+
+    let grammars_path = root.join("spec/grammars");
+    let grammars = noctua_design_spec::grammar::load_all(&grammars_path)
+        .map_err(|error| report(&relative_to(root, &grammars_path), &error))?;
+    // THE JAVASCRIPT HALF IS VENDORED INPUT, read the way an icon's drawing is:
+    // it is hand-written beside the Rust half and copied into the package
+    // verbatim. An emitter that produced it would be a third implementation of
+    // the scanner, and three that must agree is worse than two.
+    let scanner_path = root.join("crates/noctua-design-grammars/src/scan.js");
+    let scanner = std::fs::read_to_string(&scanner_path).map_err(|error| {
+        format!(
+            "could not read {}: {error}",
+            relative_to(root, &scanner_path)
+        )
+    })?;
+    ui::ok(&format!("compiled {}", relative_to(root, &grammars_path)));
+    ui::detail(&format!(
+        "{} languages, {} cases, one scanner in two languages",
+        grammars.len(),
+        grammars.iter().map(|g| g.cases.len()).sum::<usize>()
+    ));
+
+    let lineage_path = root.join("spec/lineage/cases.toml");
+    let lineage = noctua_design_spec::lineage::load(&lineage_path)
+        .map_err(|error| report(&relative_to(root, &lineage_path), &error))?;
+    // The other vendored half, for the same reason the scanner is one.
+    let layout_path = root.join("crates/noctua-design-lineage/src/layout.js");
+    let layout = std::fs::read_to_string(&layout_path).map_err(|error| {
+        format!(
+            "could not read {}: {error}",
+            relative_to(root, &layout_path)
+        )
+    })?;
+    let runtime_path = root.join("crates/noctua-design-lineage/src/runtime.js");
+    let runtime = std::fs::read_to_string(&runtime_path).map_err(|error| {
+        format!(
+            "could not read {}: {error}",
+            relative_to(root, &runtime_path)
+        )
+    })?;
+    let three_path = root.join("assets/vendor/three/three-css3d.js");
+    let three = std::fs::read_to_string(&three_path)
+        .map_err(|error| format!("could not read {}: {error}", relative_to(root, &three_path)))?;
+    let licence_path = root.join("assets/vendor/three/LICENSE-three-MIT.txt");
+    let three_licence = std::fs::read_to_string(&licence_path).map_err(|error| {
+        format!(
+            "could not read {}: {error}",
+            relative_to(root, &licence_path)
+        )
+    })?;
+    ui::ok(&format!("compiled {}", relative_to(root, &lineage_path)));
+    ui::detail(&format!(
+        "{} blessed layouts, one engine in two languages",
+        lineage.case.len()
     ));
 
     let mut files = noctua_design_emit::emit_all(noctua_design_emit::Inputs {
@@ -120,6 +245,14 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
         sliced: &sliced,
         icons: &icons,
         drawings: &drawings,
+        grammars: &grammars,
+        syntax: &syntax,
+        scanner: &scanner,
+        lineage: &lineage,
+        layout: &layout,
+        runtime: &runtime,
+        three: &three,
+        three_licence: &three_licence,
     });
 
     // Generated Rust goes through rustfmt before anyone compares it.
@@ -143,7 +276,7 @@ pub(crate) fn artifacts(root: &Path, spec_path: &Path) -> Result<(Spec, Vec<Emit
         }
     }
 
-    Ok((spec, files))
+    Ok((spec, vendor, files))
 }
 
 /// Reads every sliced family's manifest and reports the total.
@@ -229,7 +362,7 @@ fn rustfmt(source: &str) -> Result<String, String> {
 /// Any spec problem or filesystem failure.
 pub(crate) fn run(root: &Path, spec_path: &Path) -> Result<Spec, String> {
     ui::heading("specification");
-    let (spec, files) = artifacts(root, spec_path)?;
+    let (spec, _vendor, files) = artifacts(root, spec_path)?;
 
     ui::gap();
     ui::heading("generated output");

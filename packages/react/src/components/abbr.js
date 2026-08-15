@@ -4,7 +4,7 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// An abbreviation, with its expansion.
+// Show an abbreviation together with the words it stands for.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.

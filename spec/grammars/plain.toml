@@ -1,0 +1,19 @@
+# Text nobody claimed a grammar for.
+#
+# `mode = "plain"` is one token for the whole input, and that is the point: a
+# `CodeBlock` with no language must render *something*, and the something has
+# to be the code, unmarked. The alternative — falling back to a real grammar —
+# means a shell transcript coloured as if it were C, which is worse than no
+# colour at all because it is confidently wrong.
+
+[meta]
+name = "plain"
+display = "Plain text"
+mode = "plain"
+aliases = ["text", "txt", "none"]
+
+[[case]]
+name = "everything is one run of plain text, whatever it looks like"
+code = "fn main() { /* not Rust here */ }"
+expect = ["plain fn main() { /* not Rust here */ }"]
+reject = ["keyword fn", "comment /* not Rust here */"]

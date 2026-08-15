@@ -8,11 +8,11 @@ import type { ReactNode } from "react";
 
 
 export interface VisuallyHiddenProps {
-  /** Reveal it when it receives focus, as a skip link does. */
+  /** Whether the content is revealed when it receives focus, as a skip link is. */
   focusable?: boolean;
   className?: string;
   children?: ReactNode;
 }
 
-/** Content for assistive technology only, removed from the visual page. */
+/** Hide content from the screen while keeping it for assistive technology. */
 export declare function VisuallyHidden(props: VisuallyHiddenProps): JSX.Element;

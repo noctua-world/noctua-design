@@ -31,9 +31,9 @@ pub fn emit(spec: &Spec) -> Vec<EmittedFile> {
 
     writeln!(
         out,
-        "\n/* Every non-colour token, as CSS custom properties.\n\
+        "\n/* Every non-color token, as CSS custom properties.\n\
         \x20\n\
-        \x20  Colours are NOT here. They come from noctua-colors as --nc-* and are\n\
+        \x20  Colors are NOT here. They come from noctua-colors as --nc-* and are\n\
         \x20  vendored separately; this file and that one never define the same\n\
         \x20  name. */\n"
     )
@@ -152,6 +152,28 @@ fn write_motion_and_layers(out: &mut String, spec: &Spec, prefix: &str) {
     for (name, value) in &spec.focus {
         writeln!(out, "  --{prefix}-focus-{name}: {value};").expect("string write");
     }
+
+    section(out, "The scene: what a Lineage cell is worth");
+    for (name, value) in &spec.scene {
+        writeln!(out, "  --{prefix}-scene-{name}: {value};").expect("string write");
+    }
+
+    // BREAKPOINTS AS LENGTHS, WHICH IS NOT THE SAME AS BREAKPOINTS AS QUERIES.
+    //
+    // A media query cannot read a custom property, and that is why the
+    // reference comment at the foot of this file exists and why the values are
+    // compiled into the Rust and TypeScript modules. It is not a reason to
+    // withhold them from CSS entirely: a viewport rig that resizes a box to
+    // `sm` needs the LENGTH, and the alternative is a component adding up
+    // spacing steps until they come to 30rem — which is a literal with extra
+    // arithmetic, and drifts silently the day a breakpoint moves.
+    section(
+        out,
+        "Breakpoints, as lengths — see the note at the foot of this file",
+    );
+    for (name, value) in &spec.breakpoint {
+        writeln!(out, "  --{prefix}-breakpoint-{name}: {value};").expect("string write");
+    }
 }
 
 /// The reduced-motion override layer.
@@ -165,7 +187,7 @@ fn write_reduced_motion(out: &mut String, spec: &Spec, prefix: &str) {
             \x20  is a property of the token rather than something every component has\n\
             \x20  to remember — and so forgetting it is impossible rather than silent.\n\
             \x20\n\
-            \x20  Not every collapse is 0ms: a colour or opacity change at zero reads as\n\
+            \x20  Not every collapse is 0ms: a color or opacity change at zero reads as\n\
             \x20  a glitch, while a movement at zero is exactly what was asked for. */"
         )
         .expect("string write");
@@ -182,15 +204,16 @@ fn write_reduced_motion(out: &mut String, spec: &Spec, prefix: &str) {
 
 /// Breakpoints, as a comment.
 fn write_breakpoint_reference(out: &mut String, spec: &Spec) {
-    // Breakpoints cannot be custom properties: a media query cannot read one.
-    // They are emitted as a comment so the values are discoverable in the same
-    // file as everything else, and consumed from the Rust and TS modules.
+    // A media query cannot read a custom property, so the values are ALSO
+    // compiled into the Rust and TypeScript modules and written out here for a
+    // reader. The custom properties above are for the other use — a length.
     if !spec.breakpoint.is_empty() {
         writeln!(
             out,
             "\n/* Breakpoints, for reference. A media query cannot read a custom\n\
-            \x20  property, so these are not emitted as ones — they are compiled into\n\
-            \x20  the generated Rust and TypeScript modules instead.\n\
+            \x20  property, so a QUERY cannot be written from the tokens above — they\n\
+            \x20  are compiled into the generated Rust and TypeScript modules instead,\n\
+            \x20  and the custom properties exist for the other use, as a length.\n\
             \x20\n\
             \x20  Mobile-first: every one is a MINIMUM width."
         )
@@ -307,16 +330,16 @@ mod tests {
         assert!(css().contains("--noctua-measure: 66ch;"));
     }
 
-    /// This repository defines no colour. If one appears in the generated CSS
+    /// This repository defines no color. If one appears in the generated CSS
     /// it came from the token spec, which is exactly what the source gate
     /// forbids — caught here too, because this file is what ships.
     #[test]
-    fn the_generated_css_defines_no_colour() {
+    fn the_generated_css_defines_no_color() {
         let css = css();
         for needle in ["#", "rgb(", "hsl(", "oklch("] {
             assert!(
                 !css.contains(needle),
-                "the generated token CSS contains {needle:?}, and colours belong to noctua-colors"
+                "the generated token CSS contains {needle:?}, and colors belong to noctua-colors"
             );
         }
     }

@@ -12,6 +12,8 @@ license = "MIT OR Apache-2.0"
 # --- Workspace-internal ---
 noctua-design-tokens = { path = "crates/noctua-design-tokens", version = "0.1.0" }
 noctua-design-icons = { path = "crates/noctua-design-icons", version = "0.1.0" }
+noctua-design-grammars = { path = "crates/noctua-design-grammars", version = "0.1.0" }
+noctua-design-lineage = { path = "crates/noctua-design-lineage", version = "0.1.0" }
 noctua-design-theme = { path = "crates/noctua-design-theme", version = "0.1.0" }
 noctua-design-i18n = { path = "crates/noctua-design-i18n", version = "0.1.0" }
 noctua-design = { path = "crates/noctua-design", version = "0.1.0" }
@@ -69,7 +71,7 @@ pedantic = { level = "warn", priority = -1 }
 # without one is a defect (`NOCTUA.md §2.1`).
 #
 # `must_use_candidate` fires on almost every getter in a token crate whose
-# entire surface is getters, and `#[must_use]` on a `const` colour or a spacing
+# entire surface is getters, and `#[must_use]` on a `const` color or a spacing
 # value communicates nothing a reader did not already know.
 must_use_candidate = "allow"
 

@@ -5,71 +5,343 @@
 //! *line* is not (`NOCTUA.md §9.7`), which is also what leaves the empty column
 //! the effect layers show through.
 
+use core::fmt::Write as _;
+
 use dioxus::prelude::*;
 use noctua_design::ThemeScope;
 use noctua_design::components::{
-    Choice, ChoiceOption, Code, CodeBlock, CodeTone, Disclosure, Heading, HeadingLevel,
-    HeadingSize, Kbd, List, ListItem, ListKind, ListSpacing, Paragraph, ParagraphTone, Text,
-    TextSize, TextTone, TextWeight, VisuallyHidden,
+    Abbr, Blockquote, BlockquoteTone, Button, ButtonGroup, ButtonSize, ButtonTone, ButtonVariant,
+    Code, CodeBlock, CodeTone, Del, Disclosure, DisclosureHeading, Em, Heading, HeadingLevel,
+    HeadingSize, Ins, Kbd, Label, LabelKind, LabelSize, Link, List, ListItem, ListKind, ListMarker,
+    ListSpacing, Mark, Menu, MenuItem, Paragraph, ParagraphSize, ParagraphTone, Prose, Segmented,
+    SegmentedItem, SegmentedOrientation, SegmentedSize, Strong, Table, TableCell, TableCellAlign,
+    TableColumn, TableColumnWidth, TableHeaderCell, TableHeaderCellAlign, TableHeaderCellScope,
+    TableHeaderCellWrap, TableRow, TableSection, TableSectionKind, Text, TextSize, TextTone,
+    TextWeight, Time, Toolbar, ToolbarDensity, Truncate, TruncateLines, VisuallyHidden,
 };
 use noctua_design::model::{Glass, Mode, Palette, Radius};
 use noctua_design::{Icon, IconName, IconSize};
 use noctua_design_i18n::Key;
+use noctua_design_tokens as tokens;
 
 use crate::shell::Context;
+use crate::site;
+use crate::theme_menu::{Reach, ThemeMenu};
 
 /// Dispatches to the body for this page.
+///
+/// # One shape, on every page
+///
+/// Fifty-six pages used to be four different pages. `ComponentBody` had two
+/// arms that were the same code with every heading pushed down one;
+/// `CollectionPage` stacked whole references end to end; `LineagePage` told its
+/// own story; and six foundation pages were each their own thing. A reader who
+/// learned where the props table lived on `/button/` learned nothing about
+/// `/tables/`, and `/tables/` was fifty-seven thousand pixels tall.
+///
+/// Everything below is now one skeleton — a head that opens with a complete
+/// working example, an index of what is on the page, and sections in the same
+/// order every time — and the pages differ in their CONTENT rather than in
+/// their shape.
 #[component]
 pub(crate) fn Body(context: Context) -> Element {
     rsx! {
-        h1 { class: "nd-title", "{context.page.title(context.locale)}" }
-        p { class: "nd-lead", "{context.t(context.page.summary)}" }
-        match context.page.slug {
-            "scoped-themes" => rsx! { ScopedThemes { context } },
-            "colours" => rsx! { Colours { context } },
-            "typography" => rsx! { Typography { context } },
-            "spacing" => rsx! { Spacing { context } },
-            "effects" => rsx! { Effects { context } },
-            "icons" => rsx! { Icons { context } },
-            // Every component, from its contract. Not a `match` arm each: the
-            // page that listed components by hand is what this replaced.
-            _ if context.page.component.is_some() => rsx! { ComponentPage { context } },
-            // No catch-all body. A page with nothing to render is a build
-            // failure, not a page that quietly shows something else: the site is
-            // generated, so this stops the build and never reaches a reader.
-            slug => unreachable!("no body for the page `{slug}`"),
+        article { class: "nd-doc",
+            DocHead { context }
+            match context.page.slug {
+                "intro" => rsx! {
+                    section { class: "nd-doc-section", id: "intro", Intro { context } }
+                },
+                "typography" => rsx! {
+                    section { class: "nd-doc-section", id: "typography", Typography { context } }
+                },
+                "icons" => rsx! {
+                    section { class: "nd-doc-section", id: "icons", Icons { context } }
+                },
+                "spacing" => rsx! {
+                    section { class: "nd-doc-section", id: "spacing", Spacing { context } }
+                },
+                // The one component whose page is written rather than derived: its
+                // props ARE the scopable settings, so it has no contract file and
+                // nothing to derive a page from.
+                "theme-scope" => rsx! {
+                    section { class: "nd-doc-section", id: "theme-scope", ThemeScopePage { context } }
+                },
+                // The site's own apparatus, documented like everything else on it
+                // — and the one page where a frame inside a frame is the subject
+                // rather than a mistake.
+                "example-frame" => rsx! {
+                    section { class: "nd-doc-section", id: "example-frame", ExampleFramePage { context } }
+                },
+                // The one collection whose page is TOLD rather than stacked. Two
+                // stacked references put the figure behind the scene's whole
+                // contract, and twenty-nine frames in declaration order read as
+                // repetition — the reader said so. The examples and the derived
+                // variants and both contracts are all still here, in an order a
+                // reader can follow.
+                "lineage" => rsx! { LineagePage { context } },
+                // A collection: several components documented together, because a
+                // reader comparing them should open one page and not six. Asked of
+                // the page rather than matched on its slug, so a third collection
+                // is one entry in `site::COLLECTIONS` and nothing here.
+                _ if site::collection(context.page).is_some() => rsx! { CollectionPage { context } },
+                // Every component, from its contract. Not a `match` arm each: the
+                // page that listed components by hand is what this replaced.
+                _ if context.page.component.is_some() => rsx! { ComponentPage { context } },
+                // No catch-all body. A page with nothing to render is a build
+                // failure, not a page that quietly shows something else: the site is
+                // generated, so this stops the build and never reaches a reader.
+                slug => unreachable!("no body for the page `{slug}`"),
+            }
         }
     }
 }
 
-// --- The example frame ------------------------------------------------------
+/// The first thing on every page: what it is, in a line, and one working model.
+///
+/// # The model comes before the explanation
+///
+/// The hero is a complete, real use of the component — several props at once,
+/// real content, and on a collection page the parts working together. It is
+/// deliberately the FIRST thing under the title, before the guidance and before
+/// the examples, because a reader who has seen the thing can read a sentence
+/// about it and a reader who has not cannot.
+///
+/// A page with no overview renders the title and the lead and nothing else
+/// here, which is what the foundation pages want: `/spacing/` documents a scale
+/// and has no component to model.
+#[component]
+fn DocHead(context: Context) -> Element {
+    let overview = crate::examples::overview_for_page(context.page.slug);
+    rsx! {
+        header { class: "nd-doc-head",
+            h1 {
+                // A component page is titled with the component's NAME, which is
+                // the same word in every locale.
+                class: if context.page.title_is_a_name() {
+                    "nd-title nd-identifier"
+                } else {
+                    "nd-title"
+                },
+                "{context.page.title(context.locale)}"
+            }
+            p { class: "nd-lead", "{context.t(context.page.summary)}" }
+            if let Some(example) = overview {
+                div { class: "nd-doc-hero",
+                    ExampleFrame {
+                        context,
+                        name: "{context.page.slug}-overview",
+                        label: Key::ComponentOverview,
+                        Example {
+                            context,
+                            source: example.source,
+                            note: example.note,
+                            {(example.render)(context)}
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
-/// One frame, hosting one example, in either implementation.
+/// Where a page can be jumped to, on every page rather than on eleven of them.
+///
+/// The shape the collection pages already had — a wrapping row of links under a
+/// label — pointed at whatever the page's own sections are. It is a plain
+/// `<nav>` in the flow and not a sticky rail: `shell.spec.js` allows exactly
+/// four kinds of floating surface on this site, and an outline that pins itself
+/// to the viewport would be a fifth asking to be justified.
+#[component]
+fn DocIndex(context: Context, marks: Vec<Jump>) -> Element {
+    if marks.is_empty() {
+        return rsx! {};
+    }
+    rsx! {
+        nav { class: "nd-doc-index", "aria-label": context.t(Key::ComponentOnThisPage),
+            // The name of a `<nav>`, which is not labelable — see `Label`.
+            Label {
+                kind: LabelKind::Name,
+                size: LabelSize::Small,
+                text: context.t(Key::ComponentOnThisPage),
+            }
+            ul { class: "nd-doc-index-list",
+                for mark in marks {
+                    li {
+                        Link {
+                            // A COMPONENT'S NAME IS THE SAME WORD IN EVERY
+                            // LANGUAGE, and the pseudo-locale test reads any
+                            // unmarked run as a sentence somebody forgot to
+                            // translate — which is exactly what it reported
+                            // the moment these links lost the class.
+                            class: if mark.name { "nd-identifier" } else { "" },
+                            href: "#{mark.id}",
+                            "{mark.label}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// One entry in a page's jump index.
+#[derive(Clone, PartialEq, Eq)]
+struct Jump {
+    /// The id it lands on.
+    id: String,
+    /// What the link says.
+    label: String,
+    /// Whether that label is a name rather than a sentence.
+    name: bool,
+}
+
+impl Jump {
+    /// A section of the page, named by a translated heading.
+    fn section(id: String, label: &str) -> Self {
+        Self {
+            id,
+            label: label.to_owned(),
+            name: false,
+        }
+    }
+
+    /// A component, named by the one word it is called in every language.
+    fn component(id: &str, label: &str) -> Self {
+        Self {
+            id: id.to_owned(),
+            label: label.to_owned(),
+            name: true,
+        }
+    }
+}
+
+// --- The parent every example sits in ---------------------------------------
+
+/// Every viewport the width control offers, and what each one is.
+///
+/// The values ARE the system's own breakpoints (`spec/tokens.toml`), so the
+/// control teaches the scale rather than inventing one beside it. `320` is not
+/// a breakpoint and is deliberately first: `tokens.toml` calls it "the
+/// narrowest screen still in real use and the floor every layout must
+/// survive", and a rig that could not show you the floor would be missing the
+/// one width that is not negotiable.
+/// Every viewport the width control offers, and the length each one names.
+///
+/// The lengths are READ FROM THE TOKEN MODULE, not written here. A label that
+/// said `30rem` beside a stylesheet that resized to `var(--noctua-breakpoint-sm)`
+/// would agree today and quietly stop agreeing the day the scale moved — and a
+/// viewport rig whose numbers lie is worse than one with no numbers at all.
+/// `320px` is the one that is not a breakpoint, and it is the floor
+/// `spec/tokens.toml` names in the same breath as saying so.
+fn viewports() -> [(&'static str, Option<&'static str>); 5] {
+    use noctua_design_tokens::breakpoint;
+    [
+        ("320", Some(FLOOR)),
+        ("sm", Some(breakpoint::SM)),
+        ("md", Some(breakpoint::MD)),
+        ("lg", Some(breakpoint::LG)),
+        ("full", None),
+    ]
+}
+
+/// The 320px floor, as the one length on this page that is not a token.
+///
+/// `spec/tokens.toml` states it and states why it is not a breakpoint: it is
+/// the default, the width every layout must survive, so there is nothing to
+/// query above it. There is no token for "the floor", and inventing one to
+/// avoid a literal here would put the same string in two files.
+const FLOOR: &str = "320px"; // allow-literal: the viewport floor `spec/tokens.toml` names in prose — a label a reader reads, and the stylesheet spells the same width from the spacing scale
+
+/// How many coloured shapes sit behind a stage under the glass test.
+///
+/// Twenty-four, because the material has to be judged against several colours
+/// at once, against the EDGES between them — blur is only visible where there
+/// is an edge to lose, and a single wash has none — and against several SIZES.
+/// Half of them are small on purpose: a 192px block reads the same at `subtle`
+/// as at `full`, because the blur radius is smaller than the shape and only its
+/// edge moves, while a 16px dot is the size the radius actually acts on.
+///
+/// The last six are anchored to the field's CENTRE rather than to an edge. On a
+/// narrow frame the edge-anchored ones overlap into one mass; on a wide one
+/// they separate into two clusters with a blank corridor down the middle, and a
+/// control parked in that corridor has nothing behind it to judge.
+///
+/// Each one takes its colour, its size and its place from `data-nd-shape`, in
+/// the stylesheet, from the semantic palette — no shape here knows a colour.
+const GLASS_SHAPES: usize = 30;
+
+/// The frame that hosts every example on this site.
+///
+/// # One abstraction, and now it really is one
+///
+/// `NOCTUA.md §9.10` calls for exactly this: *one abstraction hosts every
+/// example*, owning the mount point, the implementation swap, the viewport
+/// controls and the reset. It existed and hosted **one** example — the
+/// `ThemeScope` demonstration — while a hundred and ten component examples sat
+/// in bare `<figure>`s beside it. Then it held them all, and the controls
+/// themselves were still hand-assembled: two radio groups whose classes had no
+/// CSS anywhere, a reset whose one distinguishing rule matched nothing, and a
+/// bar that was a bare `<div>` claiming no role and taking three tab stops.
+///
+/// Now every part of it is a component. The bar is a `Toolbar`, so it is one
+/// tab stop and the arrows walk it; the viewport control is a `Segmented` in a
+/// `ToolbarGroup { align: End }`, so "on the right" is a contract rather than
+/// a stylesheet rule against a class nothing carried; the two controls beside
+/// it are `Button`s.
+///
+/// # Four controls, and what each one is for
+///
+/// **The viewport.** Five stops, from the 320px floor to full width, resizing
+/// the whole set at once — *show me all of this at 320 px* is a question about
+/// a component, not about one example of it. The caption reports the stage's
+/// real width as it changes, so the number is measured rather than promised.
+///
+/// **The appearance toggle.** It flips the mode *inside the frame only*, by
+/// stamping a scope on the stage: the examples under it obey, and the page
+/// around it does not move. It is a toggle rather than a cycle, and it carries
+/// both glyphs and both names so the state is visible before it is pressed —
+/// `shell.rs` argues that case at length about the header's mode control, and
+/// this is the same argument.
+///
+/// **The implementation switch**, on the one frame that can honour it. A
+/// control offered where it does nothing is a control that lies.
+///
+/// **The reset**, which puts all three back.
 ///
 /// # Why it is the site's and not the design system's
 ///
-/// `NOCTUA.md §9.10` calls it "one abstraction" owning the mount point, the
-/// implementation swap, the viewport controls and the code panel. Every one of
-/// those is documentation apparatus: lazily importing a React bundle to prove
-/// two packages agree is a thing a docs site does, not a thing a design system
-/// ships to its consumers. What it is BUILT from is components — `Choice` for
-/// both control groups, `Disclosure` for the code panel — which is the part
-/// that mattered.
-///
-/// # What it proves
-///
-/// `NOCTUA.md §9.3` Leg 4: the two implementations are generated from one
-/// table, so their prop surfaces agree by construction — but "the same props"
-/// is not "the same behaviour", and the only way to show the second is to mount
-/// both and compare what they put in the DOM. The React half is never fetched
-/// on a normal page view; `shell.js` imports it the first time a reader asks.
+/// Everything it owns is documentation apparatus. Lazily importing a React
+/// bundle to prove two packages agree is a thing a docs site does, not a thing
+/// a design system ships to its consumers. What it is BUILT from is components,
+/// and after this change that is *all* it is built from.
 #[component]
-fn ExampleFrame(context: Context, children: Element) -> Element {
-    let widths = [
-        ("narrow", Key::ExampleWidthNarrow),
-        ("medium", Key::ExampleWidthMedium),
-        ("full", Key::ExampleWidthFull),
-    ];
+fn ExampleFrame(
+    context: Context,
+    /// What this frame is, as an id root: the page it is on, or the component
+    /// it demonstrates.
+    ///
+    /// Required for the same reason `Search { name }` is. The theme menu inside
+    /// every frame built its label ids from the setting alone, so a page with
+    /// one frame declared each of them twice and `/tables`, with one frame per
+    /// component, declared each of them seven times — and every frame's
+    /// `aria-labelledby` resolved to the header's label rather than to its own.
+    name: String,
+    /// What this frame is showing, for the toolbar's accessible name.
+    ///
+    /// A `role="toolbar"` with no name announces the word `toolbar` and
+    /// nothing else, and a page with several frames would announce it several
+    /// times identically.
+    label: Key,
+    /// Whether the React bundle can mount what is inside this frame.
+    ///
+    /// Only `ThemeScope` can today, and offering the switch on a frame that
+    /// cannot honour it is a control that lies. `NOCTUA.md §9.3` Leg 4 is the
+    /// claim it exists to demonstrate, and it is demonstrated in one place.
+    #[props(default)]
+    mountable: bool,
+    children: Element,
+) -> Element {
     let implementations = [
         ("Dioxus", Key::ExampleImplDioxus),
         ("React", Key::ExampleImplReact),
@@ -78,65 +350,306 @@ fn ExampleFrame(context: Context, children: Element) -> Element {
         figure {
             class: "nd-frame",
             "data-nd-frame": "",
-            // The loading message lives on the frame rather than on each
-            // option: `ChoiceOption` takes the props its contract declares and
-            // no others, which is the point of it having a contract.
+            // The loading message lives on the frame rather than on a control:
+            // `Button` takes the props its contract declares and no others,
+            // which is the point of it having a contract.
             "data-nd-loading": context.t(Key::ExampleImplLoading),
-            div { class: "nd-frame-bar",
-                Choice {
-                    class: "nd-frame-widths",
-                    name: "frame-width",
-                    label: context.t(Key::ExampleLabel),
-                    for (value, label) in widths {
-                        ChoiceOption {
-                            class: "nd-option",
-                            value,
-                            label: context.t(label),
-                            selected: value == "full",
+            // THE FROST IS A LAYER, NOT THE FRAME.
+            //
+            // `backdrop-filter` on an element makes it the containing block for
+            // every `position: fixed` DESCENDANT — so frosting the frame itself
+            // re-anchored the theme menu inside it to the frame, which is
+            // `overflow: clip`, and the panel opened 1400px below the fold
+            // where nothing could see it. The header solves this the same way
+            // and for the same reason: `.nd-header-glass` exists so that the
+            // header carries no filter and its own panel can stay fixed.
+            //
+            // Inert until the rig stamps it: no attribute, no material, no
+            // cost, and the frame is the shape it always was.
+            div { class: "nd-frame-glass", "aria-hidden": "true" }
+            // THE CONTROLS ARE A RAIL DOWN THE FRAME'S TRAILING EDGE.
+            //
+            // They were a permanent horizontal bar, which cost more than it was
+            // worth: measured on the built page at 1120px, `/button/` spent
+            // 1,416px on twenty-two of those bars against 1,543px of actual
+            // example. Then they were folded behind a gear, and pressing a
+            // control to reveal the controls was worse than the bar had been.
+            //
+            // A frame is 900px wide and its widest example ends 487px in, so
+            // every frame on this site has between 413 and 815px of unused
+            // space on its right. The rail costs that space, which nothing was
+            // using, instead of height, which every frame is short of.
+            //
+            // IN FLOW, NOT PINNED. It is a grid item with `position: static`,
+            // so `shell.spec.js`'s floating-surface sweep — which only
+            // considers `fixed`, `sticky` and `absolute` — does not see it and
+            // needs no new entry. It is also why it cannot travel with the
+            // page, which `frame.spec.js` asserts and the bar learned the hard
+            // way.
+            Toolbar {
+                class: "nd-frame-bar",
+                // THE AXIS IS NOT FIXED, SO THE ATTRIBUTE CANNOT BE EITHER.
+                //
+                // This strip is a rail down the trailing edge on a wide screen
+                // and a row under the stage on a narrow one. `Toolbar` writes
+                // `aria-orientation` and `shell.js` reads it to decide which
+                // arrows walk the strip, so a value baked in here would be
+                // wrong at one of the two widths — announcing an axis a reader
+                // cannot walk is the thing this system refuses everywhere else.
+                //
+                // It ships `horizontal`, which is the ARIA default and is true
+                // below the breakpoint, and `shell.js` upgrades it to vertical
+                // when the stylesheet stands it up. With no script the layout
+                // is the narrow one and the attribute is already right.
+                density: ToolbarDensity::Compact,
+                label: context.t(label),
+                if mountable {
+                    Segmented {
+                        name: "frame-impl",
+                        orientation: SegmentedOrientation::Vertical,
+                        size: SegmentedSize::Small,
+                        label: context.t(Key::ExampleImplLabel),
+                        for (value, text) in implementations {
+                            SegmentedItem {
+                                value,
+                                label: context.t(text),
+                                selected: value == "Dioxus",
+                            }
                         }
                     }
                 }
-                Choice {
-                    class: "nd-frame-impls",
-                    name: "frame-impl",
-                    label: context.t(Key::ExampleImplLabel),
-                    for (value, label) in implementations {
-                        ChoiceOption {
-                            class: "nd-option",
+                // THE WIDTH, AS ONE CONTROL THAT OPENS THE LIST.
+                //
+                // It was five stops side by side, which is the better shape and
+                // does not fit: stacked they are 150px, and with the four icons
+                // under them the rail reaches 278px — taller than half the
+                // frames on this page.
+                //
+                // A `Menu` rather than a `Select` or a vertical `Segmented`,
+                // and `spec/components/menu.toml` says a menu is actions rather
+                // than values. That holds: pressing *320 px* resizes this
+                // stage. The width is the stage's state, not something the menu
+                // keeps, and no item carries a tick.
+                //
+                // THE TRIGGER SAYS THE WIDTH IN FORCE, in words rather than a
+                // glyph. There is no icon for *width* in `spec/icons.toml`, and
+                // reusing `columns` would give one drawing two meanings — which
+                // that file refuses in so many words. The token is also the
+                // thing a reader wants to see without opening anything.
+                Button {
+                    class: "nd-frame-width",
+                    menu: true,
+                    controls: "{name}-width",
+                    variant: ButtonVariant::Transparent,
+                    tone: ButtonTone::Neutral,
+                    size: ButtonSize::Small,
+                    label: context.t(Key::ExampleWidthFull),
+                }
+                Menu {
+                    name: "{name}-width",
+                    label: context.t(Key::ExampleWidthLabel),
+                    for (value, width) in viewports() {
+                        MenuItem {
                             value,
-                            label: context.t(label),
-                            selected: value == "Dioxus",
+                            action: "frame-width",
+                            // A LENGTH IS A NAME, NOT A SENTENCE. `320px` is the
+                            // same string in every language, and the
+                            // pseudo-locale scanner reads an unmarked run as
+                            // one somebody forgot to translate. `Max` is prose
+                            // and carries no mark, which is correct.
+                            class: if width.is_some() { "nd-identifier" } else { "" },
+                            label: match width {
+                                Some(width) => width.to_owned(),
+                                None => context.t(Key::ExampleWidthFull).to_owned(),
+                            },
                         }
                     }
                 }
-                button { class: "nd-option", r#type: "button", "data-nd-frame-reset": "",
-                    "{context.t(Key::ExampleReset)}"
+                // THE SAME THEME MENU THE HEADER OPENS, ON THE SAME SURFACE,
+                // THEMING THE STAGE.
+                //
+                // It shows only the settings a scope can carry. Blackout,
+                // pattern and grain are `scope = false`, so they are absent
+                // rather than present and dead.
+                Disclosure {
+                    class: "nd-frame-theme",
+                    name: "frame-theme",
+                    icon: IconName::Palette,
+                    summary: context.t(Key::SettingsLabel),
+                    // NOT `noctua-glass`: what would read through this one is
+                    // the examples it controls, in the appearance it has just
+                    // given them. The material is 78% surface, so 22% of a
+                    // stage the reader just turned dark would come through a
+                    // panel that is still light.
+                    div { class: "nd-panel",
+                        div { class: "nd-panel-body",
+                            ThemeMenu { context, name: "{name}", reach: Reach::Scope }
+                        }
+                    }
+                }
+                // THE GLASS TEST. The material is only visible as what is
+                // behind it, and "behind it" on a documentation page is a flat
+                // surface — so every glass example read as a tint and the five
+                // tokens that tune it were untestable by eye. Pressing this
+                // puts colour and hard edges behind the stage.
+                Button {
+                    action: "frame-glass",
+                    variant: ButtonVariant::Transparent,
+                    tone: ButtonTone::Neutral,
+                    size: ButtonSize::Small,
+                    hide_label: true,
+                    icon: IconName::FlaskConical,
+                    label: context.t(Key::ExampleGlassTest),
+                    label_alt: context.t(Key::ExampleGlassStop),
+                }
+                // The appearance toggle. Both glyphs and both names ship, and
+                // the state picks one — see `Button.icon_alt`.
+                Button {
+                    action: "frame-mode",
+                    variant: ButtonVariant::Transparent,
+                    tone: ButtonTone::Neutral,
+                    size: ButtonSize::Small,
+                    hide_label: true,
+                    icon: IconName::Moon,
+                    icon_alt: IconName::Sun,
+                    label: context.t(Key::ExampleModeInvert),
+                    label_alt: context.t(Key::ExampleModeRestore),
+                }
+                // IT HAS A GLYPH NOW, and the rail is half the width it was.
+                //
+                // This kept its word for one stage because `spec/icons.toml`
+                // declared nothing meaning *put it back*, and giving `close` or
+                // `chevron-left` a second meaning is what that file refuses. So
+                // the word set the rail's width — one 79px control among four
+                // 32px ones, which is what made the strip look ragged and wide.
+                // `rotate-ccw` was vendored for it: an arrow that comes back
+                // round to where it started, which is the gesture, and which no
+                // other icon in the set is already using.
+                Button {
+                    action: "frame-reset",
+                    variant: ButtonVariant::Transparent,
+                    tone: ButtonTone::Neutral,
+                    size: ButtonSize::Small,
+                    hide_label: true,
+                    icon: IconName::RotateCcw,
+                    label: context.t(Key::ExampleReset),
                 }
             }
-            div { class: "nd-frame-stage", "data-nd-frame-stage": "", "data-nd-width": "full",
+            div {
+                class: "nd-frame-stage",
+                "data-nd-frame-stage": "",
+                "data-nd-width": "full",
+                // THE COLOUR, AND IT DOES NOT SCROLL.
+                //
+                // It sits on the STAGE rather than inside the scroller, so the
+                // examples travel across it. A backdrop that scrolls with the
+                // content shows a reader nothing a still screenshot would not,
+                // and the whole question about glass is what happens while
+                // something moves behind it.
+                //
+                // Rendered always and `display: none` until asked. The site
+                // works with the script blocked, and a wrapper that is only
+                // sometimes in the markup is a layout that is only sometimes
+                // tested.
+                div { class: "nd-glass-field", "aria-hidden": "true",
+                    for shade in 0..GLASS_SHAPES {
+                        span { class: "nd-glass-shape", "data-nd-shape": "{shade}" }
+                    }
+                }
+                // `display: contents` at rest, so this is not a box until it
+                // has to be one: the stage keeps its own flex column, its own
+                // gap and its own padding exactly as before.
+                div { class: "nd-glass-scroll", {children} }
+            }
+        }
+    }
+}
+
+/// One example inside the frame: the call, the render, and a note.
+///
+/// The call is also the caption. `Blockquote { tone: Accent, … }` says what an
+/// example shows more precisely than a sentence would, in every language at
+/// once, and it is the thing a reader came to copy — so it is `<figcaption>`,
+/// first in the DOM as well as first on the page.
+#[component]
+fn Example(
+    context: Context,
+    /// A heading, for an example whose subject needs naming.
+    ///
+    /// Component examples do not have one and should not: the call above them
+    /// IS the name, and a heading per example would be sixteen headings in a
+    /// page's outline saying nothing the caption did not. The typography page
+    /// is the case that wants it — four demonstrations of four different
+    /// things, which a reader navigates rather than reads through.
+    #[props(default)]
+    title: Option<Key>,
+    /// The Dioxus call that produced it.
+    source: String,
+    /// The React call, for the one example the React bundle can mount.
+    #[props(default)]
+    react: Option<String>,
+    /// A sentence, for the few examples the call does not explain by itself.
+    #[props(default)]
+    note: Option<Key>,
+    children: Element,
+) -> Element {
+    let react_hook = react.as_ref().map(|_| String::new());
+    rsx! {
+        figure { class: "nd-example",
+            if let Some(title) = title {
+                Heading { level: HeadingLevel::_2, size: HeadingSize::H3, class: "nd-example-title",
+                    "{context.t(title)}"
+                }
+            }
+            figcaption { class: "nd-example-source",
+                // THE SWITCHABLE WRAPPER ONLY WHERE THERE IS SOMETHING TO
+                // SWITCH TO.
+                //
+                // Every example used to carry `data-nd-impl-source="Dioxus"`
+                // whether or not it had a React half — a hook on a hundred and
+                // thirty captions that meant something on one. It was invisible
+                // while a frame held one example and ambiguous the moment one
+                // held two.
+                if let Some(react) = react {
+                    div { "data-nd-impl-source": "Dioxus",
+                        Code { class: "nd-identifier", tone: CodeTone::Subtle, "{source}" }
+                    }
+                    div { "data-nd-impl-source": "React", hidden: true,
+                        Code { class: "nd-identifier", tone: CodeTone::Subtle, "{react}" }
+                    }
+                } else {
+                    Code { class: "nd-identifier", tone: CodeTone::Subtle, "{source}" }
+                }
+            }
+            div {
+                class: "nd-example-stage",
+                // WHICH example the React bundle replaces, said out loud.
+                //
+                // The mount used to take the first scope in the stage, which
+                // was unambiguous while the frame held one example. The
+                // ThemeScope page now holds two scoped ones and the first is
+                // the live demonstration — so React would have replaced the
+                // wrong one. The example that HAS a React call is the one that
+                // can be mounted; nothing else needs to be known.
+                "data-nd-mountable": react_hook,
                 {children}
             }
-            Disclosure {
-                class: "nd-code",
-                summary: context.t(Key::ExampleCodeShow),
-                div { class: "nd-code-body",
-                    for (implementation, source) in [
-                        ("Dioxus", DIOXUS_SOURCE),
-                        ("React", REACT_SOURCE),
-                    ] {
-                        div {
-                            "data-nd-impl-source": "{implementation}",
-                            hidden: implementation != "Dioxus",
-                            CodeBlock { "{source}" }
-                        }
-                    }
+            if let Some(note) = note {
+                p { class: "nd-example-note nd-prose",
+                    Message { context, message: note }
                 }
             }
         }
     }
 }
 
-/// The Dioxus call that produced what the frame is showing.
+/// The call that produced the live demonstration, nested scope and all.
+const NESTED_SOURCE: &str = r"ThemeScope {
+    palette: Palette::AzureVivid, mode: Mode::Light,
+    ThemeScope { palette: Palette::RoseSober, mode: Mode::Dark, … }
+}";
+
+/// The Dioxus call that produced the `ThemeScope` example.
 ///
 /// A literal, and deliberately: it is the source a reader would copy, and
 /// deriving it from the props would produce something that renders the same
@@ -159,93 +672,70 @@ const REACT_SOURCE: &str = r#"<ThemeScope
   <Sample />
 </ThemeScope>"#;
 
-// --- The page the whole design is for --------------------------------------
+// --- One message, with its identifiers set in code --------------------------
 
-/// A page themed three ways at once.
+/// Renders a message, with its inline marks turned into real components.
 ///
-/// The outer box and the box inside it each carry their own controls. Nothing
-/// about them is a screenshot: they are the same markup as the page around them,
-/// reading whichever theme reaches them.
+/// | In the catalogue | On the page |
+/// |---|---|
+/// | `` `name` `` | `Code`, and an identifier |
+/// | `**word**` | `Strong` |
+/// | `*word*` | `Em` |
+///
+/// # This is not assembling a sentence from fragments
+///
+/// `NOCTUA.md §9.9` rule 1 forbids building one sentence out of several
+/// lookups, because word order and agreement differ between languages. This is
+/// the opposite: **one** message, one key, one translation — split for
+/// rendering only, at marks the translator writes and controls.
+///
+/// Which is the whole argument for the marks existing. Where the emphasis falls
+/// in a sentence is part of the sentence, and it moves when the sentence is
+/// translated; a page that wrapped the third word in `Strong` because English
+/// puts the important word third would emphasise the wrong word in Portuguese.
+/// Handing the translator the marks hands them the decision.
+///
+/// A name inside backticks is an identifier, so it also gets `.nd-identifier`
+/// and the pseudo-locale test skips it — the bracketed text around it is what
+/// the test is looking at.
 #[component]
-fn ScopedThemes(context: Context) -> Element {
+pub(crate) fn Message(context: Context, message: Key) -> Element {
+    let text = context.t(message);
     rsx! {
-        div { class: "nd-scope-head",
-            Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ScopePageTitle)}" }
-            button { class: "nd-option", r#type: "button", "data-nd-scope-reset": "",
-                "{context.t(Key::ScopeReset)}"
-            }
-        }
-        Paragraph { "{context.t(Key::ScopePageBody)}" }
-
-        ThemeScope {
-            class: "nd-scope",
-            palette: Palette::AzureVivid,
-            mode: Mode::Light,
-            glass: Glass::Full,
-            radius: Radius::Round,
-
-            div { class: "nd-scope-head",
-                h2 { class: "nd-scope-title", "{context.t(Key::ScopeComponentTitle)}" }
-                ScopeControls { context }
-            }
-            p { class: "nd-prose", "{context.t(Key::ScopeComponentBody)}" }
-            Sample { context }
-
-            ThemeScope {
-                class: "nd-scope nd-scope--nested",
-                palette: Palette::RoseSober,
-                mode: Mode::Dark,
-                radius: Radius::Circular,
-
-                div { class: "nd-scope-head",
-                    h3 { class: "nd-scope-title", "{context.t(Key::ScopeNestedTitle)}" }
-                    ScopeControls { context }
-                }
-                p { class: "nd-prose", "{context.t(Key::ScopeNestedBody)}" }
-                Sample { context }
-            }
-        }
-
-        p { class: "nd-prose nd-note", "{context.t(Key::ScopeNote)}" }
-
-        // The same scope again, in a frame that can mount it in EITHER
-        // implementation. Two packages generated from one table have identical
-        // prop surfaces by construction; that they behave identically is a
-        // different claim, and this is the only place it is shown rather than
-        // asserted (`NOCTUA.md §9.3` Leg 4).
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ExampleLabel)}" }
-        ExampleFrame { context,
-            ThemeScope {
-                class: "nd-scope",
-                palette: Palette::AzureVivid,
-                mode: Mode::Light,
-                glass: Glass::Full,
-                radius: Radius::Round,
-                Sample { context }
-            }
-        }
-
-        // `ThemeScope` is the one component with no `spec/components/*.toml`:
-        // its props ARE `spec/theme.toml`'s scopable settings, and a second
-        // file could disagree with the first. So its table lives here, on the
-        // page about scoping, rather than on a page of its own.
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentProps)}" }
-        table { class: "nd-table",
-            thead {
-                tr {
-                    th { "{context.t(Key::ComponentColumnName)}" }
-                    th { "{context.t(Key::ComponentColumnType)}" }
-                    th { "{context.t(Key::ComponentColumnDefault)}" }
-                    th { "{context.t(Key::ComponentColumnEffect)}" }
+        // The wrapper is not decoration. Splitting at a mark leaves the
+        // pseudo-locale's `⟦` on the first run and its `⟧` on the last, so a
+        // run between two marks carries neither — and
+        // `every_sentence_on_every_page_is_translated` would read it as text
+        // that never went through the catalogue. This says *these runs are one
+        // message*, and the test reads the subtree as one.
+        span { class: "nd-message",
+            for (index, run) in text.split('`').enumerate() {
+                if index % 2 == 1 {
+                    Code { class: "nd-identifier", tone: CodeTone::Subtle, "{run}" }
+                } else {
+                    Emphasis { run: run.to_owned() }
                 }
             }
-            tbody {
-                for prop in crate::props::SCOPABLE {
-                    tr {
-                        td { Code { "{prop.name}" } }
-                        td { Code { class: "nd-type", "{prop.type_name}" } }
-                        td { Code { "{prop.default}" } }
-                        td { "{prop.values}" }
+        }
+    }
+}
+
+/// The `**` and `*` marks inside one run of a message.
+///
+/// Its own component because the two nest: `**` has to be found first, or the
+/// first two asterisks of a bold word read as an empty italic one.
+#[component]
+fn Emphasis(run: String) -> Element {
+    rsx! {
+        for (bold, part) in marks(&run, "**") {
+            if bold {
+                Strong { "{part}" }
+            } else {
+                for (italic, piece) in marks(&part, "*") {
+                    if italic {
+                        Em { "{piece}" }
+                    } else {
+                        "{piece}"
                     }
                 }
             }
@@ -253,46 +743,204 @@ fn ScopedThemes(context: Context) -> Element {
     }
 }
 
+/// Splits on a mark, saying of each piece whether it was inside one.
+///
+/// An unclosed mark leaves its text alone rather than swallowing the rest of
+/// the sentence: a translator who typed one asterisk gets one asterisk, which
+/// is visible and fixable, instead of a paragraph that silently went bold.
+fn marks(text: &str, mark: &str) -> Vec<(bool, String)> {
+    let parts: Vec<&str> = text.split(mark).collect();
+    if parts.len() % 2 == 0 {
+        return vec![(false, text.to_owned())];
+    }
+    parts
+        .into_iter()
+        .enumerate()
+        .filter(|(_, part)| !part.is_empty())
+        .map(|(index, part)| (index % 2 == 1, part.to_owned()))
+        .collect()
+}
+
+// --- The front door ---------------------------------------------------------
+
+/// The introduction, and the first entry in every locale's sidebar.
+///
+/// It is first because `Kind::Intro` sorts first, not because anything names
+/// it: `site::first` reads the top of the sidebar, and the wordmark and the
+/// root redirect both read `site::first`. So the front door and the top of the
+/// navigation cannot disagree.
+#[component]
+fn Intro(context: Context) -> Element {
+    rsx! {
+        Prose {
+            Paragraph { "{context.t(Key::PageIntroBody)}" }
+        }
+    }
+}
+
+// --- The one component whose page is written -------------------------------
+
+/// `ThemeScope`, demonstrated rather than described.
+///
+/// # Why this page is written and every other component page is derived
+///
+/// Every other component has a `spec/components/<name>.toml` its page is built
+/// from. This one cannot: its props **are** the scopable settings in
+/// `spec/theme.toml`, and a second file listing them could only disagree with
+/// the first. So the prop table is read from the theme model and the
+/// demonstration is written.
+///
+/// It is also the only page with a rendered scope on it, which makes it what
+/// the browser suite measures the whole theme layer against — a scope resolving
+/// the semantic contract against itself, a nested scope keeping its parent's
+/// palette, a border painting its own colour rather than the page's. Nothing
+/// here is a screenshot: every box is the same markup as the page around it,
+/// reading whichever theme reaches it.
+#[component]
+fn ThemeScopePage(context: Context) -> Element {
+    rsx! {
+        Paragraph { "{context.t(Key::ColorsScopeBody)}" }
+        Paragraph { "{context.t(Key::ScopePageBody)}" }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H2,
+            "{context.t(Key::ColorsScopeTrapTitle)}"
+        }
+        Paragraph { "{context.t(Key::ColorsScopeTrapBody)}" }
+
+        // ONE FRAME, NOT A BOX AND A FRAME SHOWING THE SAME THING.
+        //
+        // This page used to carry the demonstration twice: a hand-built
+        // `.nd-scope-head` box with its own reset button near the top, and the
+        // very same `azure-vivid / light / full / round` scope again in a real
+        // frame further down. A reader who changed one wondered why the other
+        // had not moved.
+        //
+        // It is one frame now, holding both examples — the live demonstration
+        // with its nested scope, and the mountable one beside it. The frame's
+        // own reset covers both, so the loose `scope-reset` button is gone too.
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H2,
+            "{context.t(Key::ComponentExamples)}"
+        }
+        ExampleFrame { context, name: "scope", label: Key::ScopePageTitle, mountable: true,
+            Example {
+                context,
+                title: Key::ScopeComponentTitle,
+                source: NESTED_SOURCE,
+                note: Key::ScopeNote,
+                ThemeScope {
+                    class: "nd-scope",
+                    palette: Palette::AzureVivid,
+                    mode: Mode::Light,
+                    glass: Glass::Full,
+                    radius: Radius::Round,
+
+                    div { class: "nd-scope-head",
+                        h3 { class: "nd-scope-title", "{context.t(Key::ScopeComponentTitle)}" }
+                        ScopeControls { context }
+                    }
+                    p { class: "nd-prose", "{context.t(Key::ScopeComponentBody)}" }
+                    Sample { context }
+
+                    ThemeScope {
+                        class: "nd-scope nd-scope--nested",
+                        palette: Palette::RoseSober,
+                        mode: Mode::Dark,
+                        radius: Radius::Circular,
+
+                        div { class: "nd-scope-head",
+                            h4 { class: "nd-scope-title", "{context.t(Key::ScopeNestedTitle)}" }
+                            ScopeControls { context }
+                        }
+                        p { class: "nd-prose", "{context.t(Key::ScopeNestedBody)}" }
+                        Sample { context }
+                    }
+                }
+            }
+            // The one example the React bundle can mount. Two packages
+            // generated from one table have identical prop surfaces by
+            // construction; that they BEHAVE identically is a different claim,
+            // and this is the only place it is shown rather than asserted
+            // (`NOCTUA.md §9.3` Leg 4).
+            Example {
+                context,
+                source: DIOXUS_SOURCE,
+                react: REACT_SOURCE,
+                ThemeScope {
+                    class: "nd-scope",
+                    palette: Palette::AzureVivid,
+                    mode: Mode::Light,
+                    glass: Glass::Full,
+                    radius: Radius::Round,
+                    Sample { context }
+                }
+            }
+        }
+
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H2,
+            "{context.t(Key::ComponentProps)}"
+        }
+        WrittenProps { context, name: "theme-scope", props: &crate::props::SCOPABLE }
+    }
+}
+
 /// The controls a scope carries, which look exactly like the page's.
 ///
 /// They are bound to the *scope element*, which the script finds by walking up
-/// from the button. So the same markup drives the page, a component and a
-/// component inside that one, with no per-instance wiring.
+/// from the control. So the same markup drives the page, a component and a
+/// component inside that one, with no per-instance wiring — and the rule it
+/// relies on is one sentence: **a group inside a themed scope themes that
+/// scope.** Nothing here says which scope; where it sits is the answer.
+///
+/// # These were four cycling buttons, and that was the bug
+///
+/// `shell.rs` argues at length, two hundred lines above the header, that a
+/// cycling control has to show the *current* state to be usable — and then
+/// this page carried four that showed a single static glyph each. A reader
+/// could not tell which mode, accent, corner or glass level a scope was in;
+/// pressing one moved it to the next value, whatever that was, with no way
+/// back except the reset. They are `Segmented` groups now, so the state is
+/// visible before anything is pressed, which is the whole reason the header
+/// control is three radios rather than one cycling icon.
 #[component]
 fn ScopeControls(context: Context) -> Element {
     rsx! {
         div { class: "nd-scope-controls",
-            button {
-                class: "nd-icon nd-icon--small",
-                r#type: "button",
-                "data-nd-scope-cycle": "mode",
-                "aria-label": context.t(Key::ThemeModeLabel),
-                title: "{context.t(Key::ThemeModeLabel)}",
-                noctua_design::Icon { icon: noctua_design::IconName::Monitor }
+            Segmented {
+                name: "mode",
+                size: SegmentedSize::Small,
+                label: context.t(Key::ThemeModeLabel),
+                for (value, icon, label) in [
+                    ("light", IconName::Sun, Key::ThemeModeLight),
+                    ("dark", IconName::Moon, Key::ThemeModeDark),
+                    ("system", IconName::Monitor, Key::ThemeModeSystem),
+                ] {
+                    SegmentedItem { value, icon, hide_label: true, label: context.t(label) }
+                }
             }
-            button {
-                class: "nd-icon nd-icon--small",
-                r#type: "button",
-                "data-nd-scope-cycle": "accent",
-                "aria-label": context.t(Key::ThemeAccentLabel),
-                title: "{context.t(Key::ThemeAccentLabel)}",
-                span { class: "nd-swatch nd-swatch--live", "aria-hidden": "true" }
+            Segmented {
+                name: "radius",
+                size: SegmentedSize::Small,
+                label: context.t(Key::ThemeRadiusLabel),
+                for (value, label) in [
+                    ("square", Key::ThemeRadiusSquare),
+                    ("soft", Key::ThemeRadiusSoft),
+                    ("round", Key::ThemeRadiusRound),
+                    ("circular", Key::ThemeRadiusCircular),
+                ] {
+                    SegmentedItem { value, label: context.t(label) }
+                }
             }
-            button {
-                class: "nd-icon nd-icon--small",
-                r#type: "button",
-                "data-nd-scope-cycle": "radius",
-                "aria-label": context.t(Key::ThemeRadiusLabel),
-                title: "{context.t(Key::ThemeRadiusLabel)}",
-                span { class: "nd-radius-mark", "aria-hidden": "true" }
-            }
-            button {
-                class: "nd-icon nd-icon--small",
-                r#type: "button",
-                "data-nd-scope-cycle": "glass",
-                "aria-label": context.t(Key::ThemeGlassLabel),
-                title: "{context.t(Key::ThemeGlassLabel)}",
-                span { class: "nd-glass-mark", "aria-hidden": "true" }
+            Segmented {
+                name: "glass",
+                size: SegmentedSize::Small,
+                label: context.t(Key::ThemeGlassLabel),
+                for (value, label) in [
+                    ("off", Key::ThemeGlassOff),
+                    ("subtle", Key::ThemeGlassSubtle),
+                    ("full", Key::ThemeGlassFull),
+                ] {
+                    SegmentedItem { value, label: context.t(label) }
+                }
             }
         }
     }
@@ -303,7 +951,7 @@ fn ScopeControls(context: Context) -> Element {
 /// Every one of them is painted from the semantic contract — `--nc-color-fg`,
 /// `--nc-color-accent`, `--nc-color-border` — so what it shows is whatever theme
 /// resolved at the box it happens to be in. That is the assertion the page makes
-/// visible: without `dist/scope.css` these would all be the page's colours.
+/// visible: without `dist/scope.css` these would all be the page's colors.
 #[component]
 fn Sample(context: Context) -> Element {
     rsx! {
@@ -314,63 +962,470 @@ fn Sample(context: Context) -> Element {
                 a { class: "nd-link", href: "#", "{context.t(Key::ScopeSampleLink)}" }
             }
             div { class: "nd-sample-actions",
-                button { class: "nd-button", r#type: "button", "{context.t(Key::ScopeSampleAction)}" }
-                button { class: "nd-button nd-button--quiet", r#type: "button",
-                    "{context.t(Key::ScopeSampleQuiet)}"
+                Button { label: context.t(Key::ScopeSampleAction) }
+                Button {
+                    variant: ButtonVariant::Outline,
+                    tone: ButtonTone::Neutral,
+                    label: context.t(Key::ScopeSampleQuiet),
                 }
             }
         }
     }
 }
 
-// --- One page per component, from the contract ------------------------------
+// --- The frame, documenting itself ------------------------------------------
 
-/// A component's page: what it is, every variant of it rendered live, every
-/// prop, every state, its keyboard contract and its accessibility contract.
+/// What the frame is, what it is made of, and what its four controls do.
 ///
-/// # Why the examples are markup and not the component
+/// Written rather than derived, like `ThemeScope`'s, and for the mirror-image
+/// reason: that component has no contract file because its props ARE the theme
+/// model, and this one has none because it is not a component the packages
+/// ship. `NOCTUA.md §9.10` is explicit that the frame belongs to the site.
 ///
-/// The page renders the DOM the component produces — its element, its class and
-/// the attribute each prop becomes — rather than calling the Dioxus component.
-/// That is not a shortcut: `props.rs` GENERATES the component's body from
-/// exactly those three facts, so the two cannot disagree. What it buys is that
-/// every value of every enum prop is shown by construction, with no example to
-/// author and none to forget when a variant is added.
+/// The demonstration is a real frame with a real example in it, so pressing
+/// the appearance toggle on this page inverts that frame and leaves the
+/// sentence above it alone — which is the claim, made rather than described.
 #[component]
-fn ComponentPage(context: Context) -> Element {
-    let component = context.page.component.expect("a component page");
+fn ExampleFramePage(context: Context) -> Element {
     rsx! {
-        if !component.guidance.is_empty() {
-            Paragraph { "{component.guidance}" }
+        // ONE PARAGRAPH. This page had four headings, a four-item list and
+        // three paragraphs explaining an apparatus a reader can simply press.
+        // The controls document themselves — they carry names — and the frame
+        // below is the demonstration.
+        Paragraph {
+            Message { context, message: Key::FramePageBody }
         }
 
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentExamples)}" }
-        for prop in component.props.iter().filter(|prop| prop.kind == "enum") {
-            div { class: "nd-variant",
-                Code { "{prop.name}" }
-                div { class: "nd-variant-row",
-                    for value in prop.values {
-                        Specimen { component, prop: *prop, value: (*value).to_string() }
+        // A FRAME INSIDE A FRAME, and the one page where that is the subject.
+        //
+        // The outer one belongs to this page like every other; the inner one is
+        // what the page is about. Pressing the outer toggle inverts both,
+        // because the inner frame is inside the outer stage — which is the
+        // isolation working, not failing.
+        ExampleFrame { context, name: "frame", label: Key::ComponentExamples,
+            Example { context, source: FRAME_SOURCE,
+                // The inner one is what this page is about, and it needs its
+                // own name for the same reason it needs its own everything.
+                ExampleFrame { context, name: "frame-inner", label: Key::ComponentExamples,
+                    Example { context, source: BUTTON_SOURCE,
+                        div { class: "nd-example-row",
+                            Button { label: context.t(Key::ExampleButtonSave) }
+                            Button {
+                                variant: ButtonVariant::Outline,
+                                tone: ButtonTone::Neutral,
+                                label: context.t(Key::ExampleButtonCancel),
+                            }
+                        }
                     }
                 }
             }
         }
 
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentProps)}" }
-        table { class: "nd-table",
-            thead {
-                tr {
-                    th { "{context.t(Key::ComponentColumnName)}" }
-                    th { "{context.t(Key::ComponentColumnType)}" }
-                    th { "{context.t(Key::ComponentColumnDefault)}" }
-                    th { "{context.t(Key::ComponentColumnEffect)}" }
+        Heading { level: HeadingLevel::_2, size: HeadingSize::H3,
+            "{context.t(Key::FramePropsTitle)}"
+        }
+        WrittenProps { context, name: "example-frame", props: &crate::props::FRAME }
+
+    }
+}
+
+/// The call inside the frame on this page.
+///
+/// A `const` rather than a literal in the `rsx!`, and that is not style: the
+/// macro reads a string literal as a FORMAT string, so `{ label: … }` inside
+/// one is an interpolation of a variable that does not exist.
+const BUTTON_SOURCE: &str = r#"Button { label: "…" }"#;
+
+/// The call that produced the frame on this page.
+const FRAME_SOURCE: &str = r#"ExampleFrame {
+    label: Key::ComponentExamples,
+    Example { source: "…", Button { … } }
+}"#;
+
+// --- Spacing ----------------------------------------------------------------
+
+/// The bar that shows a step, whose width IS the token it is labelled with.
+///
+/// `var(--noctua-space-{step})` rather than a computation that comes to the
+/// same number: what the reader is looking at has to be the token, or the page
+/// is a drawing of the scale rather than the scale. The interpolation is what
+/// `gates::unknown_token` exempts by name — a `var()` whose property is
+/// composed at runtime has nothing static to check, and its comment names this
+/// page as the case.
+#[component]
+fn SpaceBar(step: String) -> Element {
+    rsx! {
+        span {
+            class: "nd-bar",
+            style: "inline-size: var(--noctua-space-{step})",
+            "aria-hidden": "true",
+        }
+    }
+}
+
+/// One step's length, in the two units a reader needs.
+///
+/// Derived from `BASE` rather than written: the scale is stated once, in
+/// `spec/tokens.toml`, and a page that repeated `0.25` would go on saying it
+/// after somebody changed it. The pixel column assumes the browser's own
+/// default root size, which is what this site runs at — nothing here sets
+/// `font-size` on `html`, deliberately, so a reader who has enlarged their
+/// text gets a larger scale rather than a broken one.
+fn step_length(step: u32) -> (String, String) {
+    let base: f64 = tokens::space::BASE
+        .trim_end_matches("rem")
+        .parse()
+        .unwrap_or_default();
+    let rem = base * f64::from(step);
+    // Trailing zeros are noise in a column of numbers: `0.5rem`, not `0.50rem`.
+    let trimmed = format!("{rem}");
+    (format!("{trimmed}rem"), format!("{}", rem * ROOT_PX))
+}
+
+/// The root font size every browser ships with, and the one this site keeps.
+///
+/// A number rather than a token on purpose: it is a fact about browsers, not a
+/// value this system chose, and putting it in `spec/tokens.toml` would claim
+/// the opposite. It is only ever used to print a second column beside the rem
+/// one — nothing is laid out from it.
+const ROOT_PX: f64 = 16.0;
+
+/// The named gaps, the raw scale, the rhythm they make, and the two that are
+/// most often confused.
+///
+/// # Why the named gaps come first
+///
+/// They are what a component actually asks for. `space::GAP` says *between
+/// sibling controls*; `--noctua-space-4` says *four*, and a reader who reaches
+/// for the number has to decide what four means every time. The scale below
+/// them is the raw material, and it is second because it is the answer to a
+/// rarer question.
+#[component]
+fn Spacing(context: Context) -> Element {
+    rsx! {
+        // No component index. That belongs to the typography page, where it is
+        // "every component, set in the type"; here it would be a list of
+        // components on a page that is not about them.
+        ExampleFrame { context, name: "spacing", label: Key::PageSpacingTitle,
+            Example {
+                context,
+                title: Key::SpacingNamedTitle,
+                source: NAMED_SOURCE,
+                note: Key::SpacingNamedBody,
+                NamedGaps { context }
+            }
+            Example {
+                context,
+                title: Key::SpacingScaleTitle,
+                source: SCALE_STEP_SOURCE,
+                note: Key::SpacingScaleBody,
+                RawScale { context }
+            }
+            Example {
+                context,
+                title: Key::SpacingRhythmTitle,
+                source: RHYTHM_SOURCE,
+                note: Key::SpacingRhythmBody,
+                Rhythm { context }
+            }
+            Example {
+                context,
+                title: Key::SpacingInsetTitle,
+                source: INSET_SOURCE,
+                note: Key::SpacingInsetBody,
+                InsetAndGap { context }
+            }
+        }
+    }
+}
+
+/// The seven gaps a component asks for by purpose.
+#[component]
+fn NamedGaps(context: Context) -> Element {
+    rsx! {
+        Table {
+            name: "spacing-named",
+            caption: context.t(Key::SpacingNamedTitle),
+            hide_caption: true,
+            // THE WIDTHS ARE THE COLUMNS' OWN. `narrow` is what the largest
+            // named gap measures, so the bar never wraps; the sentence gets the
+            // rest. They were five `width` props on five headings before, which
+            // is the arrangement `TableColumn` exists to replace.
+            TableColumn { name: "token" }
+            TableColumn { name: "step", width: TableColumnWidth::Fit }
+            TableColumn { name: "rem", width: TableColumnWidth::Fit }
+            TableColumn { name: "size", width: TableColumnWidth::Narrow }
+            TableColumn { name: "for", width: TableColumnWidth::Wide }
+            TableSection { kind: TableSectionKind::Head,
+                TableRow {
+                    TableHeaderCell { "{context.t(Key::SpacingColumnToken)}" }
+                    TableHeaderCell {
+                        align: TableHeaderCellAlign::Numeric,
+                        "{context.t(Key::SpacingColumnStep)}"
+                    }
+                    TableHeaderCell {
+                        align: TableHeaderCellAlign::Numeric,
+                        "{context.t(Key::SpacingColumnRem)}"
+                    }
+                    TableHeaderCell { column: "size", "{context.t(Key::SpacingColumnSize)}" }
+                    TableHeaderCell { column: "for", "{context.t(Key::SpacingColumnFor)}" }
                 }
             }
-            tbody {
+            TableSection {
+                // READ FROM THE GENERATED SCALE, never listed here. The page
+                // this replaces carried its own copy of these seven names and
+                // of the twelve steps below, which is two second copies of
+                // `spec/tokens.toml`.
+                for (name, step) in tokens::space::NAMED {
+                    TableRow {
+                        TableHeaderCell {
+                            scope: TableHeaderCellScope::Row,
+                            wrap: TableHeaderCellWrap::Nowrap,
+                            Code { class: "nd-identifier", "--noctua-space-{name}" }
+                        }
+                        TableCell {
+                            align: TableCellAlign::Numeric,
+                            label: context.t(Key::SpacingColumnStep),
+                            Code { "{step}" }
+                        }
+                        TableCell {
+                            align: TableCellAlign::Numeric,
+                            label: context.t(Key::SpacingColumnRem),
+                            // A LENGTH IS A VALUE, so it is set as one. It is
+                            // also what keeps `0.5rem` out of the pseudo-locale
+                            // scan: `<code>` is a run of identifier, not a
+                            // sentence somebody forgot to translate.
+                            Code { "{step_length(step).0}" }
+                        }
+                        TableCell { label: context.t(Key::SpacingColumnSize),
+                            SpaceBar { step: name }
+                        }
+                        TableCell { label: context.t(Key::SpacingColumnFor),
+                            "{context.t(named_purpose(name))}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// What each named gap is for, in the reader's language.
+///
+/// The one thing about this scale a machine cannot derive: `spec/tokens.toml`
+/// carries the sentence as a comment beside each value, and a comment is not a
+/// message. The `match` is exhaustive against the generated list — a name added
+/// upstream with no sentence here is a panic at build time rather than a blank
+/// cell on the page.
+fn named_purpose(name: &str) -> Key {
+    match name {
+        "tight" => Key::SpacingTight,
+        "inset" => Key::SpacingInset,
+        "gap" => Key::SpacingGap,
+        "paragraph" => Key::SpacingParagraph,
+        "heading" => Key::SpacingHeading,
+        "section" => Key::SpacingSection,
+        "region" => Key::SpacingRegion,
+        other => unreachable!("the spacing scale grew a gap with no sentence: {other}"),
+    }
+}
+
+/// Every step, and what it comes to.
+#[component]
+fn RawScale(context: Context) -> Element {
+    rsx! {
+        Table {
+            name: "spacing-scale",
+            caption: context.t(Key::SpacingScaleTitle),
+            hide_caption: true,
+            TableColumn { name: "token" }
+            TableColumn { name: "rem", width: TableColumnWidth::Fit }
+            TableColumn { name: "pixels", width: TableColumnWidth::Fit }
+            TableColumn { name: "size", width: TableColumnWidth::Wide }
+            TableSection { kind: TableSectionKind::Head,
+                TableRow {
+                    TableHeaderCell { "{context.t(Key::SpacingColumnToken)}" }
+                    TableHeaderCell {
+                        align: TableHeaderCellAlign::Numeric,
+                        "{context.t(Key::SpacingColumnRem)}"
+                    }
+                    TableHeaderCell {
+                        align: TableHeaderCellAlign::Numeric,
+                        "{context.t(Key::SpacingColumnPixels)}"
+                    }
+                    TableHeaderCell { column: "size", "{context.t(Key::SpacingColumnSize)}" }
+                }
+            }
+            TableSection {
+                for step in tokens::space::STEPS {
+                    TableRow {
+                        TableHeaderCell {
+                            scope: TableHeaderCellScope::Row,
+                            wrap: TableHeaderCellWrap::Nowrap,
+                            Code { class: "nd-identifier", "--noctua-space-{step}" }
+                        }
+                        TableCell {
+                            align: TableCellAlign::Numeric,
+                            label: context.t(Key::SpacingColumnRem),
+                            // A LENGTH IS A VALUE, so it is set as one. It is
+                            // also what keeps `0.5rem` out of the pseudo-locale
+                            // scan: `<code>` is a run of identifier, not a
+                            // sentence somebody forgot to translate.
+                            Code { "{step_length(step).0}" }
+                        }
+                        TableCell {
+                            align: TableCellAlign::Numeric,
+                            label: context.t(Key::SpacingColumnPixels),
+                            Code { "{step_length(step).1}" }
+                        }
+                        TableCell { label: context.t(Key::SpacingColumnSize),
+                            SpaceBar { step: step.to_string() }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// The named gaps doing their job, with each one drawn where it falls.
+///
+/// A scale is a list of numbers until somebody stacks them. This is the page's
+/// only claim that cannot be made in a table: that the gaps are *different
+/// enough* to read as a hierarchy, and that a heading and its paragraph belong
+/// together while two sections do not.
+#[component]
+fn Rhythm(context: Context) -> Element {
+    rsx! {
+        div { class: "nd-rhythm",
+            div { class: "nd-rhythm-block",
+                Heading { level: HeadingLevel::_3, size: HeadingSize::H4,
+                    "{context.t(Key::SpacingRhythmHeading)}"
+                }
+                RhythmGap { name: "heading" }
+                Paragraph { size: ParagraphSize::Small, "{context.t(Key::SpacingRhythmFirst)}" }
+                RhythmGap { name: "paragraph" }
+                Paragraph { size: ParagraphSize::Small, "{context.t(Key::SpacingRhythmSecond)}" }
+            }
+            RhythmGap { name: "section" }
+            div { class: "nd-rhythm-block",
+                Heading { level: HeadingLevel::_3, size: HeadingSize::H4,
+                    "{context.t(Key::SpacingRhythmNext)}"
+                }
+                RhythmGap { name: "heading" }
+                Paragraph { size: ParagraphSize::Small, "{context.t(Key::SpacingRhythmThird)}" }
+            }
+        }
+    }
+}
+
+/// One gap in the rhythm, at its real height and wearing its own name.
+///
+/// The height is the token, so this is the gap rather than a picture of one —
+/// and the name beside it is the answer to the question the demonstration
+/// raises, which is *which one is that*.
+#[component]
+fn RhythmGap(name: String) -> Element {
+    rsx! {
+        div {
+            class: "nd-rhythm-gap",
+            style: "block-size: var(--noctua-space-{name})",
+            // A plain span rather than `Code`: the inline-code recipe carries
+            // padding, and this box is twenty-four pixels tall at its smallest.
+            // `nd-identifier` is what tells the pseudo-locale scan that a token
+            // name is a name rather than a sentence nobody translated.
+            span { class: "nd-rhythm-gap-name nd-identifier", "--noctua-space-{name}" }
+        }
+    }
+}
+
+/// `inset` and `gap`, which are the two most often confused.
+///
+/// One is the space *inside* a control and the other is the space *between*
+/// two, and the difference is invisible in a token list. Drawn on real
+/// `Button`s, so what is measured is the shipped padding rather than a box
+/// pretending to be one.
+#[component]
+fn InsetAndGap(context: Context) -> Element {
+    rsx! {
+        div { class: "nd-inset-demo",
+            // NOT attached, which is the group's default: this example is about
+            // the space BETWEEN two controls, and a joined pair has none.
+            ButtonGroup { label: context.t(Key::SpacingInsetTitle), attached: false,
+                Button { label: context.t(Key::SpacingInsetOne) }
+                Button {
+                    label: context.t(Key::SpacingInsetTwo),
+                    variant: ButtonVariant::Outline,
+                    tone: ButtonTone::Neutral,
+                }
+            }
+            List { kind: ListKind::Unordered, spacing: ListSpacing::Tight,
+                ListItem {
+                    Code { class: "nd-identifier", "--noctua-space-inset" }
+                    " — {context.t(Key::SpacingInset)}"
+                }
+                ListItem {
+                    Code { class: "nd-identifier", "--noctua-space-gap" }
+                    " — {context.t(Key::SpacingGap)}"
+                }
+            }
+        }
+    }
+}
+
+/// The calls the four spacing examples show, as `const`s.
+///
+/// A `const` rather than a literal in the `rsx!`, for the reason `BUTTON_SOURCE`
+/// is one: the macro reads a string literal as a format string, so a `{` inside
+/// it is an interpolation of a variable that does not exist.
+const NAMED_SOURCE: &str = "space::GAP";
+const SCALE_STEP_SOURCE: &str = "var(--noctua-space-8)";
+const RHYTHM_SOURCE: &str = "space::HEADING, space::PARAGRAPH, space::SECTION";
+const INSET_SOURCE: &str = "space::INSET, space::GAP";
+
+// --- The contract tables, which four pages used to write out by hand ---------
+
+// THIS IS THE COMPONENT'S FIRST CONSUMER, AND ITS REAL TEST.
+//
+// There were eight hand-written `<table class="nd-table">` blocks in this file
+// and only three shapes among them — props, states, keyboard — with the whole
+// triplet duplicated between `ComponentBody`'s two arms because a collection
+// page nests one heading deeper. They are three components now, used seven
+// times, and the site's own reference gains what it never had: a caption, a
+// `scope` on every heading, the ARIA roles a stacked table needs, and a 320px
+// reading that is a run of label-and-value pairs rather than a drag per row.
+
+/// Every prop of a component, from its contract.
+#[component]
+fn ContractProps(
+    context: Context,
+    component: crate::generated::catalogue::DocComponent,
+) -> Element {
+    rsx! {
+        Table {
+            name: "{component.slug}-props",
+            caption: context.t(Key::ComponentProps),
+            // The heading above already says the word; the caption is the
+            // table's NAME rather than a second copy of it.
+            hide_caption: true,
+            TableSection { kind: TableSectionKind::Head,
+                TableRow {
+                    TableHeaderCell { "{context.t(Key::ComponentColumnName)}" }
+                    TableHeaderCell { "{context.t(Key::ComponentColumnType)}" }
+                    TableHeaderCell { "{context.t(Key::ComponentColumnDefault)}" }
+                    TableHeaderCell { "{context.t(Key::ComponentColumnEffect)}" }
+                }
+            }
+            TableSection {
                 for prop in component.props {
-                    tr {
-                        td { Code { "{prop.name}" } }
-                        td {
+                    TableRow {
+                        // The prop's name heads its own row, which is what
+                        // makes each stacked record a titled run rather than
+                        // four unlabelled values.
+                        TableHeaderCell { scope: TableHeaderCellScope::Row,
+                            Code { "{prop.name}" }
+                        }
+                        TableCell { label: context.t(Key::ComponentColumnType),
                             if prop.values.is_empty() {
                                 Code { class: "nd-type", "{prop.kind}" }
                             } else {
@@ -379,7 +1434,7 @@ fn ComponentPage(context: Context) -> Element {
                                 }
                             }
                         }
-                        td {
+                        TableCell { label: context.t(Key::ComponentColumnDefault),
                             if prop.required {
                                 Text { tone: TextTone::Accent, "{context.t(Key::ComponentRequired)}" }
                             } else if let Some(default) = prop.default {
@@ -388,79 +1443,699 @@ fn ComponentPage(context: Context) -> Element {
                                 "{context.t(Key::ComponentNoDefault)}"
                             }
                         }
-                        td { "{prop.doc}" }
-                    }
-                }
-            }
-        }
-
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentStates)}" }
-        if component.states.is_empty() {
-            Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::ComponentStatesNone)}" }
-        } else {
-            table { class: "nd-table",
-                thead {
-                    tr {
-                        th { "{context.t(Key::ComponentColumnName)}" }
-                        th { "{context.t(Key::ComponentColumnAttribute)}" }
-                        th { "{context.t(Key::ComponentColumnEffect)}" }
-                    }
-                }
-                tbody {
-                    for state in component.states {
-                        tr {
-                            td { Code { "{state.name}" } }
-                            td { Code { "{state.attribute}" } }
-                            td { "{state.doc}" }
+                        TableCell { label: context.t(Key::ComponentColumnEffect),
+                            Message { context, message: prop.doc }
                         }
                     }
-                }
-            }
-        }
-
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentKeyboard)}" }
-        if component.keyboard.is_empty() {
-            Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::ComponentKeyboardNone)}" }
-        } else {
-            table { class: "nd-table",
-                tbody {
-                    for key in component.keyboard {
-                        tr {
-                            td { Kbd { "{key.key}" } }
-                            td { "{key.action}" }
-                        }
-                    }
-                }
-            }
-        }
-
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentA11y)}" }
-        if let Some(role) = component.role {
-            Paragraph {
-                "{context.t(Key::ComponentA11yRole)} "
-                Code { "{role}" }
-            }
-        }
-        if component.needs_name {
-            Paragraph { "{context.t(Key::ComponentA11yName)}" }
-        }
-        if !component.a11y_notes.is_empty() {
-            Paragraph { "{component.a11y_notes}" }
-        }
-        if component.role.is_none() && !component.needs_name && component.a11y_notes.is_empty() {
-            Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::ComponentA11yPlain)}" }
-        }
-
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ComponentSource)}" }
-        List { kind: ListKind::Unordered, spacing: ListSpacing::Tight,
-            for (label, path) in source_paths(component.name) {
-                ListItem {
-                    "{context.t(label)} — "
-                    Code { "{path}" }
                 }
             }
         }
     }
+}
+
+/// Every state a component can be in that is not a prop.
+#[component]
+fn ContractStates(
+    context: Context,
+    component: crate::generated::catalogue::DocComponent,
+) -> Element {
+    rsx! {
+        Table {
+            name: "{component.slug}-states",
+            caption: context.t(Key::ComponentStates),
+            hide_caption: true,
+            TableSection { kind: TableSectionKind::Head,
+                TableRow {
+                    TableHeaderCell { "{context.t(Key::ComponentColumnName)}" }
+                    TableHeaderCell { "{context.t(Key::ComponentColumnAttribute)}" }
+                    TableHeaderCell { "{context.t(Key::ComponentColumnEffect)}" }
+                }
+            }
+            TableSection {
+                for state in component.states {
+                    TableRow {
+                        TableHeaderCell { scope: TableHeaderCellScope::Row,
+                            Code { "{state.name}" }
+                        }
+                        TableCell { label: context.t(Key::ComponentColumnAttribute),
+                            Code { "{state.attribute}" }
+                        }
+                        TableCell { label: context.t(Key::ComponentColumnEffect),
+                            Message { context, message: state.doc }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// What each key does. The one contract table with no heading row: both cells
+/// are the answer, and a heading over `Enter` would be a word for the sake of
+/// having one.
+#[component]
+fn ContractKeyboard(
+    context: Context,
+    component: crate::generated::catalogue::DocComponent,
+) -> Element {
+    rsx! {
+        Table {
+            name: "{component.slug}-keyboard",
+            caption: context.t(Key::ComponentKeyboard),
+            hide_caption: true,
+            TableSection {
+                for key in component.keyboard {
+                    TableRow {
+                        TableHeaderCell {
+                            scope: TableHeaderCellScope::Row,
+                            wrap: TableHeaderCellWrap::Nowrap,
+                            Kbd { class: "nd-identifier", "{context.t(key.key)}" }
+                        }
+                        TableCell {
+                            Message { context, message: key.action }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// `ThemeScope`'s props and the example frame's, which are the same shape as
+/// each other and not the same shape as a contract's.
+#[component]
+fn WrittenProps(context: Context, name: String, props: &'static [crate::props::Prop]) -> Element {
+    rsx! {
+        Table {
+            name: "{name}-props",
+            caption: context.t(Key::ComponentProps),
+            hide_caption: true,
+            TableSection { kind: TableSectionKind::Head,
+                TableRow {
+                    TableHeaderCell { "{context.t(Key::ComponentColumnName)}" }
+                    TableHeaderCell { "{context.t(Key::ComponentColumnType)}" }
+                    TableHeaderCell { "{context.t(Key::ComponentColumnDefault)}" }
+                    TableHeaderCell { "{context.t(Key::ComponentColumnEffect)}" }
+                }
+            }
+            TableSection {
+                for prop in props {
+                    TableRow {
+                        TableHeaderCell { scope: TableHeaderCellScope::Row,
+                            Code { class: "nd-identifier", "{prop.name}" }
+                        }
+                        TableCell { label: context.t(Key::ComponentColumnType),
+                            Code { class: "nd-type nd-identifier", "{prop.type_name}" }
+                        }
+                        TableCell { label: context.t(Key::ComponentColumnDefault),
+                            Code { class: "nd-identifier", "{prop.default}" }
+                        }
+                        TableCell { label: context.t(Key::ComponentColumnEffect),
+                            "{context.t(prop.values)}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// --- One page per component, from the contract ------------------------------
+
+/// Every component documented on one page, with an index that jumps to them.
+///
+/// WHICH components those are is read from the catalogue — each contract says
+/// `page = "inline-text"` — so an eleventh mark added to `spec/components/`
+/// appears here, in the index and in the sidebar's count, with nothing here to
+/// edit.
+#[component]
+fn CollectionPage(context: Context) -> Element {
+    let components = site::documented_on(context.page);
+    // The lead and the index heading are the COLLECTION's, read from the same
+    // constant that says the page exists. A `match` on the slug here would be a
+    // second list of collections, and two lists of one thing disagree.
+    let collection = site::collection(context.page).expect("a collection page is a collection");
+    // THE INDEX IS THE PARTS, NOT THEIR SECTIONS. Six components each carrying
+    // four sections is twenty-four links under a heading called *On this page*,
+    // which is not an outline of the page — it is the page again, in small.
+    let marks: Vec<Jump> = components
+        .iter()
+        .map(|component| Jump::component(component.slug, component.name))
+        .collect();
+    rsx! {
+        DocIndex { context, marks }
+
+        Paragraph { class: "nd-prose",
+            Message { context, message: collection.body }
+        }
+
+        // ONE FOLD PER PART, CLOSED. `/tables/` was fifty-seven thousand pixels
+        // — sixty-three screens — because six whole references were stacked end
+        // to end, and a reader who came for `TableCell` scrolled past five
+        // other components' examples, grids and contracts to reach it. Folded,
+        // the page is its hero and a list of its six parts, and the reference a
+        // reader came for is one press away instead of forty scrolls.
+        for component in components {
+            section { class: "nd-doc-section", id: "{component.slug}",
+                Disclosure {
+                    class: "nd-doc-part",
+                    // An `<h2>` inside the summary: closed, the name is the
+                    // only thing left of this component, and a page whose
+                    // outline has six sections must still have six headings.
+                    heading: DisclosureHeading::H2,
+                    summary: noctua_design_i18n::fill(
+                        context.t(Key::ComponentPart),
+                        &[
+                            ("name", component.name),
+                            (
+                                "count",
+                                &crate::examples::for_component(component.name).len().to_string(),
+                            ),
+                        ],
+                    ),
+                    Paragraph { class: "nd-prose", tone: ParagraphTone::Muted,
+                        "{context.t(component.summary)}"
+                    }
+                    ComponentSections { context, component, depth: Depth::Part }
+                }
+            }
+        }
+    }
+}
+
+/// The page order of the lineage sections, and what each is called — one
+/// list, so the jump nav and the sections below it can never disagree.
+const LINEAGE_SECTIONS: &[(&str, Key)] = &[
+    ("lineage-bonds", Key::PageLineageSectionBonds),
+    ("lineage-space", Key::PageLineageSectionSpace),
+    ("lineage-acting", Key::PageLineageSectionActing),
+    ("lineage-live", Key::PageLineageSectionLive),
+    ("lineage-placed", Key::PageLineageSectionPlaced),
+    ("lineage-models", Key::PageLineageSectionModels),
+    ("lineage-variants", Key::PageLineageSectionVariants),
+    ("lineage-contracts", Key::PageLineageSectionContracts),
+];
+
+/// The frames for a RANGE of one component's examples.
+///
+/// The lineage page tells its examples in sections, so it pulls them by
+/// range — and the array order in `examples.rs` IS the page order, which the
+/// comment on each array states. The frame names keep the `{slug}-{index}`
+/// shape every other page uses.
+fn lineage_frames(
+    context: Context,
+    name: &'static str,
+    slug: &'static str,
+    range: std::ops::Range<usize>,
+) -> Element {
+    let all = crate::examples::for_component(name);
+    rsx! {
+        for index in range {
+            ExampleFrame { context, name: "{slug}-{index}", label: Key::ComponentExamples,
+                Example {
+                    context,
+                    source: all[index].source,
+                    note: all[index].note,
+                    {(all[index].render)(context)}
+                }
+            }
+        }
+    }
+}
+
+/// One component's contract — the tables without the examples, for the
+/// lineage page's closing section.
+///
+/// It is `ReferenceBlock` like every other page's contract now, rather than a
+/// third hand-written copy of the same four blocks. The name above it stays,
+/// because this section holds two contracts and the folds inside them would
+/// otherwise be eight controls in a row with nothing saying which is whose.
+fn lineage_contract(
+    context: Context,
+    component: crate::generated::catalogue::DocComponent,
+) -> Element {
+    rsx! {
+        Heading { level: HeadingLevel::_3, size: HeadingSize::H3, class: "nd-identifier", "{component.name}" }
+        ReferenceBlock { context, component, depth: Depth::Part }
+    }
+}
+
+/// The lineage collection, told as one story.
+///
+/// The generic collection page stacks two whole references, and here that
+/// meant the figure — the half a consumer touches first — stood behind the
+/// scene's twenty-three frames, eleven grids and its entire contract; and
+/// frames in declaration order put near-identical scenes side by side, which
+/// the reader called repetition. This page keeps every example, every derived
+/// variant and both contracts, and changes only the ORDER: the scene, then
+/// the figure while the first scene is still on screen, then the features in
+/// themed sections, with the reference tables at the end where a reader who
+/// wants tables looks for them.
+#[component]
+fn LineagePage(context: Context) -> Element {
+    let components = site::documented_on(context.page);
+    let scene = components[0];
+    let figure = components[1];
+    assert!(
+        scene.slug == "lineage" && figure.slug == "lineage-figure",
+        "the lineage page tells exactly these two components"
+    );
+    let collection = site::collection(context.page).expect("the lineage page is a collection");
+    // The told order, as the same jump index every other page carries.
+    let mut marks = vec![
+        Jump::component("lineage", "Lineage"),
+        Jump::component("lineage-figure", "LineageFigure"),
+    ];
+    marks.extend(
+        LINEAGE_SECTIONS
+            .iter()
+            .map(|(id, heading)| Jump::section((*id).to_owned(), context.t(*heading))),
+    );
+    rsx! {
+        DocIndex { context, marks }
+
+        Paragraph { class: "nd-prose",
+            Message { context, message: collection.body }
+        }
+
+        // The scene: a graph in, a drawing out — and what an empty graph says.
+        section { class: "nd-doc-section", id: "lineage",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H2, class: "nd-identifier", "Lineage" }
+            // No summary paragraph: the page lead above says it, and saying
+            // it twice in two inches was the wall the reader reported.
+            if let Some(guidance) = scene.guidance {
+                Paragraph {
+                    Message { context, message: guidance }
+                }
+            }
+            {lineage_frames(context, "Lineage", "lineage", 0..2)}
+        }
+
+        // The figure, while the first scene is still on screen — it is the
+        // half a consumer touches first, and it used to stand behind the
+        // scene's whole reference.
+        section { class: "nd-doc-section", id: "lineage-figure",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H2, class: "nd-identifier", "LineageFigure" }
+            // No summary paragraph here either — the guidance opens with the
+            // same sentence.
+            if let Some(guidance) = figure.guidance {
+                Paragraph {
+                    Message { context, message: guidance }
+                }
+            }
+            {lineage_frames(context, "LineageFigure", "lineage-figure", 0..4)}
+            // The founders close the section: figures at every slot, and the
+            // scene's own parallax over them.
+            {lineage_frames(context, "Lineage", "lineage", 2..3)}
+        }
+
+        section { class: "nd-doc-section", id: "lineage-bonds",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::PageLineageSectionBonds)}" }
+            {lineage_frames(context, "Lineage", "lineage", 3..5)}
+        }
+
+        section { class: "nd-doc-section", id: "lineage-space",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::PageLineageSectionSpace)}" }
+            {lineage_frames(context, "Lineage", "lineage", 5..9)}
+        }
+
+        section { class: "nd-doc-section", id: "lineage-acting",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::PageLineageSectionActing)}" }
+            {lineage_frames(context, "Lineage", "lineage", 9..11)}
+        }
+
+        section { class: "nd-doc-section", id: "lineage-live",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::PageLineageSectionLive)}" }
+            {lineage_frames(context, "Lineage", "lineage", 11..13)}
+        }
+
+        section { class: "nd-doc-section", id: "lineage-placed",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::PageLineageSectionPlaced)}" }
+            {lineage_frames(context, "Lineage", "lineage", 13..15)}
+        }
+
+        // The models: the two scenes the browser suite holds by name.
+        section { class: "nd-doc-section", id: "lineage-models",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::PageLineageSectionModels)}" }
+            {lineage_frames(context, "Lineage", "lineage", 15..17)}
+        }
+
+        // Every value of every enum prop, derived from both contracts — so a
+        // variant cannot be forgotten and cannot disagree with the component.
+        section { class: "nd-doc-section", id: "lineage-variants",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::PageLineageSectionVariants)}" }
+            for component in [scene, figure] {
+                for prop in component.props.iter().filter(|prop| drawn(prop)) {
+                    ExampleFrame { context, name: "{component.slug}-{prop.name}", label: Key::ComponentExamples,
+                        Example { context, source: "{prop.name}",
+                            div { class: "nd-variant-row",
+                                for value in prop.values {
+                                    Specimen { context, component, prop: *prop, value: (*value).to_string() }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        section { class: "nd-doc-section", id: "lineage-contracts",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::PageLineageSectionContracts)}" }
+            {lineage_contract(context, scene)}
+            {lineage_contract(context, figure)}
+        }
+    }
+}
+
+/// How deep a component's sections sit on the page that holds them.
+///
+/// This used to be a `bool` called `nested` and two copies of a hundred lines
+/// that differed only in their heading levels — so a change to the section
+/// order had to be made twice, and twice is how the two arms drifted apart.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Depth {
+    /// The component has the page to itself: its sections are the page's.
+    Page,
+    /// The component is one of several on a collection page, under its own name.
+    Part,
+}
+
+impl Depth {
+    /// The heading element a section title is.
+    const fn level(self) -> HeadingLevel {
+        match self {
+            Self::Page => HeadingLevel::_2,
+            Self::Part => HeadingLevel::_3,
+        }
+    }
+
+    /// How big that title is drawn.
+    const fn size(self) -> HeadingSize {
+        match self {
+            Self::Page => HeadingSize::H2,
+            Self::Part => HeadingSize::H3,
+        }
+    }
+
+    /// The heading a folded reference block carries, one step under a section.
+    const fn folded(self) -> DisclosureHeading {
+        match self {
+            Self::Page => DisclosureHeading::H3,
+            Self::Part => DisclosureHeading::H4,
+        }
+    }
+
+    /// The heading a whole folded SECTION carries, level with an open one.
+    ///
+    /// `folded()` is for the four reference blocks, which sit one step under
+    /// the section that holds them. The variant grid is not under anything: it
+    /// is a peer of *Examples* and *Reference*, and folding it must not move it
+    /// down the page's outline. A reader navigating by heading finds the same
+    /// three either way.
+    const fn section_fold(self) -> DisclosureHeading {
+        match self {
+            Self::Page => DisclosureHeading::H2,
+            Self::Part => DisclosureHeading::H3,
+        }
+    }
+}
+
+/// The id one of a component's sections answers to.
+///
+/// Bare on a page of its own, and prefixed with the component's slug on a
+/// collection page — where six components each have a section called
+/// `examples` and an id may appear once.
+fn section_id(
+    component: crate::generated::catalogue::DocComponent,
+    depth: Depth,
+    part: &str,
+) -> String {
+    match depth {
+        Depth::Page => part.to_owned(),
+        Depth::Part => format!("{}-{part}", component.slug),
+    }
+}
+
+/// Whether a component has any variant grid to show.
+fn has_variants(component: crate::generated::catalogue::DocComponent) -> bool {
+    component.props.iter().any(drawn)
+}
+
+/// What a component's own sections are called, for the page's jump index.
+fn component_marks(
+    context: Context,
+    component: crate::generated::catalogue::DocComponent,
+    depth: Depth,
+) -> Vec<Jump> {
+    let mut marks = Vec::new();
+    if component.guidance.is_some() {
+        marks.push(Jump::section(
+            section_id(component, depth, "when"),
+            context.t(Key::ComponentWhen),
+        ));
+    }
+    marks.push(Jump::section(
+        section_id(component, depth, "examples"),
+        context.t(Key::ComponentExamples),
+    ));
+    if has_variants(component) {
+        marks.push(Jump::section(
+            section_id(component, depth, "variants"),
+            context.t(Key::ComponentVariants),
+        ));
+    }
+    marks.push(Jump::section(
+        section_id(component, depth, "reference"),
+        context.t(Key::ComponentReference),
+    ));
+    marks
+}
+
+/// The contract, folded away: props, states, keyboard and accessibility.
+///
+/// # Why it is closed
+///
+/// These four tables were always open at the foot of every page, and on
+/// `/tables/` that was six props tables — the longest thing on the site under
+/// the least-read heading. A reader who came to look up a prop opens one fold;
+/// a reader who came to see the component never scrolls past four tables to
+/// leave. Each control says how many rows are behind it, because a fold that
+/// hides an unknown quantity is a fold nobody presses.
+///
+/// Each is a real heading inside its `<summary>` (`Disclosure { heading }`), so
+/// the page's outline still lists them while they are shut — closed, the title
+/// is the only thing left of a section, and a screen reader navigating by
+/// heading would otherwise find nothing here at all.
+#[component]
+fn ReferenceBlock(
+    context: Context,
+    component: crate::generated::catalogue::DocComponent,
+    depth: Depth,
+) -> Element {
+    let heading = depth.folded();
+    // The props a caller writes. `children` is not one of them: it is what goes
+    // inside the component, and counting it would promise a row that the table
+    // below does not have.
+    let props = component
+        .props
+        .iter()
+        .filter(|prop| prop.kind != "children")
+        .count();
+    rsx! {
+        Disclosure {
+            class: "nd-doc-fold",
+            heading,
+            summary: context.fill(Key::ComponentPropsCount, "count", &props.to_string()),
+            ContractProps { context, component }
+        }
+
+        Disclosure {
+            class: "nd-doc-fold",
+            heading,
+            summary: if component.states.is_empty() {
+                context.t(Key::ComponentStates).to_owned()
+            } else {
+                context.fill(
+                    Key::ComponentStatesCount,
+                    "count",
+                    &component.states.len().to_string(),
+                )
+            },
+            if component.states.is_empty() {
+                Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::ComponentStatesNone)}" }
+            } else {
+                ContractStates { context, component }
+            }
+        }
+
+        Disclosure {
+            class: "nd-doc-fold",
+            heading,
+            summary: if component.keyboard.is_empty() {
+                context.t(Key::ComponentKeyboard).to_owned()
+            } else {
+                context.fill(
+                    Key::ComponentKeyboardCount,
+                    "count",
+                    &component.keyboard.len().to_string(),
+                )
+            },
+            if component.keyboard.is_empty() {
+                Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::ComponentKeyboardNone)}" }
+            } else {
+                ContractKeyboard { context, component }
+            }
+        }
+
+        Disclosure {
+            class: "nd-doc-fold",
+            heading,
+            summary: context.t(Key::ComponentA11y).to_owned(),
+            if let Some(role) = component.role {
+                Paragraph {
+                    "{context.t(Key::ComponentA11yRole)} "
+                    Code { "{role}" }
+                }
+            }
+            if component.needs_name {
+                Paragraph { "{context.t(Key::ComponentA11yName)}" }
+            }
+            if let Some(notes) = component.a11y_notes {
+                Paragraph {
+                    Message { context, message: notes }
+                }
+            }
+            if component.role.is_none() && !component.needs_name && component.a11y_notes.is_none() {
+                Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::ComponentA11yPlain)}" }
+            }
+        }
+    }
+}
+
+/// One component's whole reference, at whatever depth the page reads it.
+///
+/// The same four sections either way — when to use it, the worked examples,
+/// every variant, and the folded contract — in the same order on all fifty-six
+/// pages. What a collection page changes is only how deep they sit, which is
+/// `Depth` and nothing else.
+#[component]
+fn ComponentSections(
+    context: Context,
+    component: crate::generated::catalogue::DocComponent,
+    depth: Depth,
+) -> Element {
+    let when_id = section_id(component, depth, "when");
+    let examples_id = section_id(component, depth, "examples");
+    let variants_id = section_id(component, depth, "variants");
+    let reference_id = section_id(component, depth, "reference");
+    rsx! {
+        if let Some(guidance) = component.guidance {
+            section { class: "nd-doc-section", id: "{when_id}",
+                Heading { level: depth.level(), size: depth.size(),
+                    "{context.t(Key::ComponentWhen)}"
+                }
+                Paragraph {
+                    Message { context, message: guidance }
+                }
+            }
+        }
+
+        // ONE FRAME PER EXAMPLE, AND THAT IS A CORRECTION.
+        //
+        // Every example on a page used to sit inside ONE frame, on the argument
+        // that its width control would then resize the whole set at once. What
+        // that built was one frame holding thirty unrelated things — and a
+        // frame is a viewport, so the question it answers is *does THIS survive
+        // a narrow column*, which is a question about one example at a time.
+        section { class: "nd-doc-section", id: "{examples_id}",
+            Heading { level: depth.level(), size: depth.size(),
+                "{context.t(Key::ComponentExamples)}"
+            }
+            for (index, example) in crate::examples::for_component(component.name).iter().enumerate() {
+                ExampleFrame { context, name: "{component.slug}-{index}", label: Key::ComponentExamples,
+                    Example {
+                        context,
+                        source: example.source,
+                        note: example.note,
+                        {(example.render)(context)}
+                    }
+                }
+            }
+        }
+
+        // Every value of every enum prop that HAS an appearance, derived from
+        // the contract — so a variant cannot be forgotten and cannot disagree
+        // with the component. It has a heading of its own again: the grids used
+        // to run on under `Examples` with nothing naming them, and the key that
+        // named them had been dead in the catalogue ever since.
+        //
+        // `variants = false` is how a prop says its values look identical: a
+        // comparator, a band, a scope, a total a script computes. A grid of
+        // three identical pictures under three different captions reads as a
+        // component whose props do nothing, and a reader is right to read it
+        // that way.
+        //
+        // IT SHIPS FOLDED. The examples above it already show every variant a
+        // reader needs to choose between, in use and in context. This grid is
+        // the exhaustive check — every value of every drawn prop, side by side
+        // — which is what somebody comparing two values comes for and what
+        // everybody else scrolls past. The fold keeps it one press away and
+        // keeps its heading in the page's outline while it is shut.
+        //
+        // The id stays on the `<section>` rather than moving to the `<details>`,
+        // so the jump index still lands on something a closed fold cannot hide,
+        // and `revealTarget()` in `shell.js` opens it on arrival.
+        if has_variants(component) {
+            section { class: "nd-doc-section", id: "{variants_id}",
+                Disclosure {
+                    class: "nd-doc-fold",
+                    heading: depth.section_fold(),
+                    summary: context.t(Key::ComponentVariants).to_owned(),
+                    for prop in component.props.iter().filter(|prop| drawn(prop)) {
+                        ExampleFrame { context, name: "{component.slug}-{prop.name}", label: Key::ComponentVariants,
+                            Example { context, source: "{prop.name}",
+                                div { class: "nd-variant-row",
+                                    for value in prop.values {
+                                        Specimen { context, component, prop: *prop, value: (*value).to_string() }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        section { class: "nd-doc-section", id: "{reference_id}",
+            Heading { level: depth.level(), size: depth.size(),
+                "{context.t(Key::ComponentReference)}"
+            }
+            ReferenceBlock { context, component, depth }
+        }
+    }
+}
+
+/// A component's own page: its reference, and nothing else on it.
+#[component]
+fn ComponentPage(context: Context) -> Element {
+    let component = context.page.component.expect("a component page");
+    let marks = component_marks(context, component, Depth::Page);
+    rsx! {
+        DocIndex { context, marks }
+        ComponentSections { context, component, depth: Depth::Page }
+    }
+}
+
+/// Whether this prop gets a grid of pictures, one per value.
+///
+/// THREE PLACES RENDER A VARIANT GRID — a component page, a collection page and
+/// the scene — and only one of them was asking this. So `variants = false` was
+/// a declaration that worked on `/tables/` and did nothing at all on `/button/`,
+/// where `submit` went on drawing three identical buttons under `button`,
+/// `submit` and `reset` after the contract had said not to. A rule enforced in
+/// one of three call sites is not a rule.
+fn drawn(prop: &crate::generated::catalogue::DocProp) -> bool {
+    prop.kind == "enum" && prop.variants
 }
 
 /// One rendering of a component, with one enum prop set to one value.
@@ -470,112 +2145,358 @@ fn ComponentPage(context: Context) -> Element {
 /// the same three facts, so this shows what the component shows.
 #[component]
 fn Specimen(
+    context: Context,
     component: crate::generated::catalogue::DocComponent,
     prop: crate::generated::catalogue::DocProp,
     value: String,
 ) -> Element {
     let class = component.class.unwrap_or_default();
-    let attribute = prop.attribute.unwrap_or(prop.name);
+    let element = specimen_element(component, prop, &value);
+    // THE CAPTION IS THE SPECIMEN'S ACCESSIBLE NAME.
+    //
+    // A specimen of a component that `needs_name` is a control with no name:
+    // the grid renders the ELEMENT, and the only content it has is the
+    // `specimen` icon. `IconButton`'s page shipped six of them and nothing
+    // caught it, because the browser suite's all-pages loop covers `heading`
+    // and not the pages whose specimen is a control.
+    //
+    // Naming it after the caption rather than inventing a string is the whole
+    // fix: the caption already says which value this is, in the one word that
+    // is the same in every locale, and `aria-labelledby` cannot drift from it.
+    let caption = format!("nd-variant-{}-{}-{value}", component.slug, prop.name);
     rsx! {
         figure { class: "nd-variant-item",
             div {
                 class: "nd-variant-stage",
-                dangerous_inner_html: specimen_markup(component, attribute, &value),
+                // WHICH PROP THIS IS A PICTURE OF. Two callers want it: the
+                // stylesheet, for the rare prop whose sentence assumes a box
+                // the stage does not give it, and the browser sweep that fails
+                // when two values of ONE prop draw the same thing — which
+                // needs to know where one prop's row ends and the next begins.
+                "data-nd-prop": "{prop.name}",
+                // And which component's prop. A collection page carries several
+                // components' grids in one flow, and two of them may declare the
+                // same name — `align` belongs to both `TableCell` and
+                // `TableHeaderCell` — which is two grids and not one.
+                "data-nd-slug": "{component.slug}",
+                dangerous_inner_html: specimen_markup(context, component, prop, &value, &caption),
             }
-            figcaption { class: "nd-variant-label",
-                Code { "{value}" }
-                if class.is_empty() {
-                    VisuallyHidden { "{component.element}" }
+            figcaption { class: "nd-variant-label", id: "{caption}",
+                Code { class: "nd-identifier", "{value}" }
+                // The element, said out loud when the class does not say it —
+                // and for a prop that CHOOSES the element, said always, because
+                // that is the whole point of the variant.
+                if class.is_empty() || !prop.elements.is_empty() {
+                    VisuallyHidden { class: "nd-identifier", "{element}" }
                 }
             }
         }
     }
 }
 
+/// The element this variant renders.
+///
+/// A prop carrying `elements` picks it; everything else gets the component's
+/// default. Reading it from the contract is what stops the page showing
+/// `data-nd-kind="ordered"` on a `<ul>` — which is what it showed while the
+/// prop was inert, faithfully documenting the bug.
+fn specimen_element(
+    component: crate::generated::catalogue::DocComponent,
+    prop: crate::generated::catalogue::DocProp,
+    value: &str,
+) -> &'static str {
+    prop.values
+        .iter()
+        .position(|candidate| *candidate == value)
+        .and_then(|at| prop.elements.get(at))
+        .copied()
+        .unwrap_or(component.element)
+}
+
 /// The element the component renders, carrying one attribute and some content.
 fn specimen_markup(
+    context: Context,
     component: crate::generated::catalogue::DocComponent,
-    attribute: &str,
+    prop: crate::generated::catalogue::DocProp,
     value: &str,
+    caption: &str,
 ) -> String {
+    let element = specimen_element(component, prop, value);
+    // A specimen of a control is a control, and one whose only content is an
+    // icon has no name of its own. The caption beside it already says which
+    // value this is, so it is the name — pointed at rather than copied, which
+    // is the only version of this that cannot go stale.
+    let named = if component.needs_name {
+        format!(" aria-labelledby=\"{caption}\"")
+    } else {
+        String::new()
+    };
+    // An unset `type` inside a form is `submit`. Nothing on this page is inside
+    // a form today, and "today" is exactly the word that makes it worth
+    // writing: the grid ships raw markup, and raw markup gets copied.
+    let kind = if element == "button" && prop.attribute != Some("type") && prop.name != "type" {
+        " type=\"button\"".to_owned() // allow-literal: an HTML attribute value, not a token — the default this element should always carry
+    } else {
+        String::new()
+    };
+    // THE ATTRIBUTE, NOT `data-nd-` PLUS THE ATTRIBUTE.
+    //
+    // This wrote `data-nd-{attribute}` where the attribute already was
+    // `data-nd-size`, so every page shipped `data-nd-data-nd-size` — an
+    // attribute no stylesheet matches. Fourteen component pages rendered every
+    // variant of every enum prop identically, and each one looked like a
+    // component whose variants did nothing rather than like a page with a typo
+    // in it. A prop that chooses the element carries no attribute at all.
+    let attribute = if prop.elements.is_empty() {
+        format!(" {}=\"{value}\"", prop.attribute.unwrap_or(prop.name))
+    } else {
+        String::new()
+    };
+    // AND EVERY OTHER ENUM PROP AT ITS DEFAULT, WHICH IS THE COMPONENT.
+    //
+    // This wrote one attribute and nothing else, and half the stylesheet is
+    // compound: `.nd-button[data-nd-variant="solid"][data-nd-tone="danger"]` is
+    // the shape every tone in the system is painted with. A specimen carrying
+    // `data-nd-tone` alone matched no rule at all, so the four tones were four
+    // untouched `<button>` elements showing the browser's own grey — a prop
+    // that looked like it did nothing. The same held for
+    // `.nd-select-field[…][…]`, `.nd-table[layout][density]`,
+    // `.nd-table[layout][rules]` and `.nd-lineage-piece[piece][kind]`.
+    //
+    // ENUMS ONLY, and the exclusion is the interesting half: `pressed`,
+    // `expanded` and `current` are bools whose absence is MEANINGFUL —
+    // `button.toml` says `aria-pressed="false"` turns a plain button into a
+    // toggle that is off — so writing a bool at its default would make the
+    // specimen state the opposite of the contract it is illustrating.
+    let mut defaults = String::new();
+    for other in component.props {
+        if other.name == prop.name || other.kind != "enum" || !other.elements.is_empty() {
+            continue;
+        }
+        let Some(default) = other.default else {
+            continue;
+        };
+        let name = other.attribute.unwrap_or(other.name);
+        // `type` is already written above, with the reason a specimen of a
+        // control has to carry it at all.
+        if name == "type" && !kind.is_empty() {
+            continue;
+        }
+        let _ = write!(defaults, " {name}=\"{default}\"");
+    }
     // Block-level components read better with a sentence; an inline one reads
     // better with its own name, which is also what a reader is looking for.
     let block = matches!(
-        component.element,
-        "p" | "div" | "blockquote" | "ul" | "ol" | "dl" | "h1" | "h2" | "h3" | "h4" | "pre"
+        element,
+        "p" | "div"
+            | "blockquote"
+            | "ul"
+            | "ol"
+            | "dl"
+            | "h1"
+            | "h2"
+            | "h3"
+            | "h4"
+            | "h5"
+            | "h6"
+            | "pre"
     );
     // A specimen that names an icon becomes that icon. `IconName::parse` exists
     // for exactly this — the documentation page and the tests — which is why it
     // is not `FromStr`: nothing in an interface reaches an icon by name.
-    let icon = component.specimen.and_then(IconName::parse);
-    let content = component
+    // THE PROP'S OWN SPECIMEN WINS HERE TOO. This read the COMPONENT's, so a
+    // prop that declared one was overruled by an icon name it had asked to
+    // replace — `Button.justify` shipped its three values as one centred glyph
+    // three times, because a single icon has nothing to be pushed apart from.
+    let icon = prop
         .specimen
-        .unwrap_or(if block { SPECIMEN } else { component.name });
-    let class = component
-        .class
-        .map(|class| format!(" class=\"{class}\""))
-        .unwrap_or_default();
-    if let Some(icon) = icon {
-        return format!(
-            "<{element}{class} data-nd-{attribute}=\"{value}\">\
-             <svg class=\"nd-icon-glyph\" viewBox=\"{view_box}\" width=\"1em\" height=\"1em\" \
-             fill=\"{fill}\" stroke=\"{stroke}\" stroke-width=\"1.75\" stroke-linecap=\"round\" \
-             stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\">{body}</svg>\
-             </{element}>",
-            element = component.element,
-            view_box = icon.view_box(),
-            fill = if icon.filled() {
-                "currentColor"
-            } else {
-                "none"
-            },
-            stroke = if icon.filled() {
-                "none"
-            } else {
-                "currentColor"
-            },
-            body = icon.body(),
-        );
-    }
-    format!(
-        "<{element}{class} data-nd-{attribute}=\"{value}\">{content}</{element}>",
-        element = component.element,
-    )
-}
-
-/// The specimen sentence. English on purpose: it is a pangram, and translating
-/// a pangram gives a sentence that is no longer one.
-const SPECIMEN: &str = "Sphinx of black quartz, judge my vow";
-
-/// Where a component's four files live, for a reader who wants the truth.
-fn source_paths(name: &str) -> [(Key, String); 3] {
-    let stem = file_stem(name);
-    [
-        (
-            Key::ComponentSourceSpec,
-            format!("spec/components/{stem}.toml"),
+        .or(component.specimen)
+        .and_then(IconName::parse);
+    // The pangram is a MESSAGE, not a constant. It was
+    // `"Sphinx of black quartz, judge my vow"` in a `const`, printed verbatim
+    // on every Portuguese page — and the catalogue has carried a Portuguese
+    // pangram all along, for the typography page, which is the same sentence
+    // doing the same job.
+    // The PROP's own specimen wins: one component has one specimen, and two
+    // props can want opposite things from it.
+    let inside = prop.specimen.or(component.specimen).unwrap_or(if block {
+        context.t(Key::TypeSpecimenLine)
+    } else {
+        component.name
+    });
+    // A specimen with no content of its own shows the component's NAME, which
+    // is an identifier — so the element says so, and the pseudo-locale test
+    // reads it as one rather than as a sentence nobody translated.
+    let identifier = prop.specimen.is_none() && component.specimen.is_none() && !block;
+    let class = match (component.class, identifier) {
+        (Some(class), true) => format!(" class=\"{class} nd-identifier\""),
+        (Some(class), false) => format!(" class=\"{class}\""),
+        (None, true) => " class=\"nd-identifier\"".to_owned(),
+        (None, false) => String::new(),
+    };
+    // A CELL'S CONTENT SITS IN THE BOX THE COMPONENT PUTS IT IN. `TableCell`
+    // wraps its children in `.nd-table-value`, and every rule that acts on the
+    // value rather than on the cell — `truncate` is the whole of it — selects
+    // that box. Without it the `truncate` specimen wrapped like `wrap` and the
+    // grid documented three values with two pictures.
+    let inside = if matches!(element, "td" | "th") {
+        format!("<div class=\"nd-table-value\">{inside}</div>")
+    } else {
+        inside.to_owned()
+    };
+    // A VOID ELEMENT CANNOT HOLD ITS OWN PICTURE, and half the form controls are
+    // one. `<input class="nd-input">figure</input>` is not what the parser
+    // does with that: `<input>` closes itself, the figure lands BESIDE it, and
+    // every rule shaped `.nd-input[data-nd-size="small"] .nd-input-box`
+    // — which is how `size` and `tone` are painted on every one of these —
+    // matches nothing, because the box is a sibling rather than a descendant.
+    // Six controls documented `size` with three identical boxes for that reason.
+    //
+    // So a void element with something to show becomes a `<span>` carrying the
+    // same class and the same attributes. Nothing is lost: the real control
+    // draws nothing here anyway — these specimens are figures precisely because
+    // a live `<input>` in a grid is a control a reader can type into by mistake.
+    // `<meter>` AND `<progress>` ARE HERE FOR A NEIGHBOURING REASON. They are not
+    // void, but they are REPLACED: an engine that supports them draws its own
+    // shadow tree and never renders the fallback content, so a specimen putting
+    // `.nd-meter-bar` inside one puts it somewhere nothing paints — and `size`,
+    // which is the bar's block size, had nowhere to land.
+    // `<textarea>` IS THE THIRD CASE AND THE LOUDEST. Its content is not
+    // children, it is the VALUE — so a specimen's markup was rendered as the
+    // text a reader is looking at, and all three values of `resize` showed
+    // `<span class="nd-textarea-figure">…` wrapped over three lines inside the
+    // box. Markup shown to a reader as prose is the worst way this can fail:
+    // it does not look like a bug in the grid, it looks like a bug in the
+    // component.
+    let element = if matches!(
+        element,
+        "input" | "img" | "br" | "hr" | "col" | "embed" | "meter" | "progress" | "textarea"
+    ) && !inside.is_empty()
+    {
+        "span"
+    } else {
+        element
+    };
+    // A COMPONENT WHOSE OWN ELEMENT *IS* THE DRAWING IS NOT WRAPPED IN ONE.
+    //
+    // `Icon` renders the `<svg>` itself, so the general form below would put
+    // one inside another and hang `data-nd-size` on the outer box. The glyph
+    // inside carries `.nd-icon-glyph` too, and that class sets its own
+    // `font-size` — so the inner drawing would re-set the size the outer one
+    // was there to change, and all three values of `size` would draw one
+    // picture. That is exactly what `variants.spec.js` fails on.
+    let markup = match (icon, element) {
+        (Some(icon), "svg") => icon_markup(icon, &format!("{kind}{named}{defaults}{attribute}")),
+        (Some(icon), _) => format!(
+            "{}{class}{kind}{named}{defaults}{attribute}>{}</{element}>",
+            open_tag(element),
+            icon_markup(icon, "")
         ),
-        (
-            Key::ComponentSourceDioxus,
-            format!("crates/noctua-design/src/components/{stem}.rs"),
-        ),
-        (
-            Key::ComponentSourceReact,
-            format!("packages/react/src/components/{stem}.js"),
-        ),
-    ]
-}
-
-/// `CodeBlock` → `code_block`, the file the component came from.
-fn file_stem(name: &str) -> String {
-    let mut out = String::with_capacity(name.len() + 2);
-    for (index, ch) in name.char_indices() {
-        if ch.is_ascii_uppercase() && index > 0 {
-            out.push('_');
+        (None, _) => {
+            format!("<{element}{class}{kind}{named}{defaults}{attribute}>{inside}</{element}>")
         }
-        out.extend(ch.to_lowercase());
+    };
+    in_table(element, markup)
+}
+
+/// A table part, put back inside a table.
+///
+/// # Why a specimen of a `<td>` is otherwise invisible
+///
+/// `Specimen` hands its markup to `dangerous_inner_html` on a `<div>`, so the
+/// browser parses it in the **"in body" insertion mode** — where a `<caption>`,
+/// `<colgroup>`, `<thead>`, `<tbody>`, `<tfoot>`, `<tr>`, `<td>` or `<th>` start
+/// tag is a *parse error that is ignored*. Every variant of every table part
+/// would render nothing at all.
+///
+/// And it would render nothing on a page that otherwise looks finished: the
+/// caption under the empty box still names the value, so the grid reads as a
+/// component whose variants do nothing rather than as markup the parser threw
+/// away. That is the same shape as `data-nd-data-nd-size`, which documented
+/// fourteen pages of identical variants without anybody noticing — the page
+/// renders, it is simply empty exactly where the answer was.
+///
+/// Every other element is returned untouched, so this costs nothing anywhere
+/// else and cannot be forgotten for a sixth table part: the `match` is the list.
+/// The build number the column specimen shows.
+const BUILD: &str = "#4213"; // allow-literal: a build number in a specimen, not a colour
+
+fn in_table(element: &str, markup: String) -> String {
+    match element {
+        // A `Table` always renders inside its scroller, so a specimen of one
+        // has to as well: `height` caps the SCROLLER, and a variant grid whose
+        // four heights were four identical boxes would be documenting a prop
+        // that does nothing.
+        "table" => format!("<div class=\"nd-table-scroll\">{markup}</div>"),
+        // A COLUMN NEEDS A ROW TO PAINT. A `<colgroup>` alone in a table with
+        // no rows is a declaration about nothing, and the variant grid drew
+        // five blank boxes for `width` and three for `sort_as` — a prop
+        // documented by empty space. The row is the same two identifiers every
+        // other specimen in this family uses.
+        // The gate reads four digits after a hash as a colour, and a string
+        // continuation cannot carry a comment — so the number is a name with a
+        // line of its own.
+        "colgroup" => format!(
+            "<table class=\"nd-table\">{markup}<tbody>\
+             <tr class=\"nd-table-row\">\
+             <th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">{BUILD}</th>\
+             <td class=\"nd-table-cell nd-identifier\">51s</td>\
+             </tr></tbody></table>"
+        ),
+        "caption" | "thead" | "tbody" | "tfoot" => {
+            format!("<table class=\"nd-table\">{markup}</table>")
+        }
+        "tr" => format!("<table class=\"nd-table\"><tbody>{markup}</tbody></table>"),
+        // A cell needs BOTH ancestors. `<td>` inside a bare `<table>` is the
+        // same ignored start tag — the parser's "in table" mode drops it too,
+        // and only "in row" accepts one.
+        // A CELL NEEDS ROOM TO ALIGN IN. Wrapped in a table sized to its own
+        // content, `start`, `center` and `end` are three identical pictures —
+        // there is no space for a value to sit at one end of. The class gives
+        // the wrapper a width; the stylesheet decides how much.
+        "td" | "th" => format!(
+            "<table class=\"nd-table nd-table-specimen\"><tbody><tr>{markup}</tr></tbody></table>"
+        ),
+        _ => markup,
     }
-    out
+}
+
+/// `<button`, ready for a class and an attribute.
+///
+/// Its own function so the tag opener is one literal on one line, which is
+/// where a gate exemption has to live: `rustfmt` may move a comment above a
+/// statement, so a marker on the line above excuses nothing.
+fn open_tag(element: &str) -> String {
+    format!("<{element}") // allow-literal: an element name, not a drawing — this is the opener of whatever the contract says the component renders
+}
+
+/// The `<svg>` the generated `Icon` emits, as a string.
+///
+/// `Specimen` builds markup rather than components — one string, one element,
+/// one attribute — so the one component whose specimen is an icon has to inline
+/// what `Icon` would have rendered. The geometry, the view box, the paint and
+/// the stroke weight are all read from the generated icon module; only the
+/// wrapper is written here, which is why this is not an icon drawn by hand.
+///
+/// `extra` is whatever the specimen wants on that same element. `Icon`'s own
+/// grid is the caller that needs it: the component IS this `<svg>`, so its
+/// `data-nd-size` belongs here rather than on a box around it.
+fn icon_markup(icon: IconName, extra: &str) -> String {
+    let open = "<svg"; // allow-literal: the wrapper `Icon` puts around a generated drawing, not a drawing
+    let box_size = r#"width="1em" height="1em""#; // allow-literal: `Icon`'s own box, in `em`, so the glyph takes its size from whatever contains it — the same string the generated component emits
+    let (fill, stroke) = if icon.filled() {
+        ("currentColor", "none")
+    } else {
+        ("none", "currentColor")
+    };
+    format!(
+        "{open} class=\"nd-icon-glyph\"{extra} viewBox=\"{}\" {box_size} \
+         fill=\"{fill}\" stroke=\"{stroke}\" stroke-width=\"{}\" stroke-linecap=\"round\" \
+         stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\">{}</svg>",
+        icon.view_box(),
+        noctua_design::icons::STROKE_WIDTH,
+        icon.body(),
+    )
 }
 
 // --- The rest ---------------------------------------------------------------
@@ -591,57 +2512,41 @@ fn file_stem(name: &str) -> String {
 fn Icons(context: Context) -> Element {
     // Filled here rather than inside `rsx!`: the placeholder is literally
     // `{count}`, and the macro would read it as an interpolation of its own.
-    let counted = context
-        .t(Key::IconsCount)
-        .replace("{count}", &IconName::ALL.len().to_string());
+    //
+    // Through `Context::fill`, which is the generated resolver, rather than a
+    // `str::replace` written on the spot — a message with a value in it is one
+    // message, and there is one function that knows how to finish one.
+    let counted = context.fill(Key::IconsCount, "count", &IconName::ALL.len().to_string());
     rsx! {
         Paragraph { "{context.t(Key::IconsBody)}" }
 
         p { class: "nd-note nd-prose", "{counted}" }
 
-        ul { class: "nd-icon-grid",
-            for icon in IconName::ALL {
-                li { class: "nd-icon-cell",
-                    // Unlabelled: the name beside it is the accessible name, and
-                    // an icon that repeats the text next to it is noise to a
-                    // screen reader rather than help.
-                    Icon { icon, size: IconSize::Large }
-                    Code { "{icon.as_str()}" }
-                }
-            }
-        }
-    }
-}
-
-/// Every palette, each swatch reading its own colours.
-///
-/// This is the one page that links all thirty-nine stylesheets — about 650 KB
-/// gzipped, which is why no other page does. Each cell is a `data-palette`
-/// scope, so `dist/scope.css` re-resolves the semantic contract inside it and
-/// every chip shows that palette rather than the reader's.
-#[component]
-fn Colours(context: Context) -> Element {
-    rsx! {
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::ColoursRoles)}" }
-        Paragraph { "{context.t(Key::ColoursRolesBody)}" }
-
-        div { class: "nd-palette-grid", "data-nd-all-palettes": "",
-            for palette in Palette::ALL {
-                div { class: "nd-palette", "data-palette": palette.as_str(),
-                    Code { class: "nd-palette-name", tone: CodeTone::Subtle, "{palette.as_str()}" }
-                    div { class: "nd-palette-bar",
-                        span { class: "nd-chip nd-chip--bg" }
-                        span { class: "nd-chip nd-chip--subtle" }
-                        span { class: "nd-chip nd-chip--border" }
-                        span { class: "nd-chip nd-chip--accent" }
-                        span { class: "nd-chip nd-chip--fg" }
+        // The gallery is an EXAMPLE, in the frame every example sits in. It was
+        // a bare `<ul>` — the last demonstration on the site with a container
+        // of its own — and it wanted the frame's controls more than most: a
+        // gallery of thirteen icons at 320px is the question "does this wrap
+        // sensibly on a phone", and there was no way to ask it.
+        ExampleFrame { context, name: "icons", label: Key::PageIconsTitle,
+            Example { context, source: ICONS_SOURCE,
+                ul { class: "nd-icon-grid",
+                    for icon in IconName::ALL {
+                        li { class: "nd-icon-cell",
+                            // Unlabelled: the name beside it is the accessible
+                            // name, and an icon that repeats the text next to it
+                            // is noise to a screen reader rather than help.
+                            Icon { icon, size: IconSize::Large }
+                            Code { "{icon.as_str()}" }
+                        }
                     }
                 }
             }
         }
-        Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::ColoursNote)}" }
     }
 }
+
+/// The call that produced the icon gallery.
+const ICONS_SOURCE: &str = "for icon in IconName::ALL { Icon { icon, size: IconSize::Large } }";
 
 /// The type scale, the four families, and the fourteen scripts.
 ///
@@ -651,17 +2556,225 @@ fn Colours(context: Context) -> Element {
 #[component]
 fn Typography(context: Context) -> Element {
     rsx! {
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H2, "{context.t(Key::TypeScaleTitle)}" }
-        Paragraph { class: "nd-prose", "{context.t(Key::TypeScaleBody)}" }
-        Scale { context }
+        ComponentIndex { context }
 
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H2, "{context.t(Key::TypeFamiliesTitle)}" }
-        Paragraph { class: "nd-prose", "{context.t(Key::TypeFamiliesBody)}" }
-        Families { context }
+        // FOUR DEMONSTRATIONS, ONE FRAME, like every other page on this site.
+        //
+        // These were four bespoke containers — a page-length specimen, a scale,
+        // a set of family samples and fourteen writing systems — each with its
+        // own spacing and none with a width control. The specimen in particular
+        // is the whole system laid out as a page, which is exactly the thing a
+        // reader wants to see at 320px, and there was no way to ask for it.
+        //
+        // The prose that introduced each one is now that example's note, which
+        // is where a sentence about an example belongs.
+        ExampleFrame { context, name: "typography", label: Key::PageTypographyTitle,
+            Example {
+                context,
+                title: Key::SpecimenTitle,
+                source: SPECIMEN_SOURCE,
+                note: Key::SpecimenLead,
+                WholePage { context }
+            }
+            Example {
+                context,
+                title: Key::TypeScaleTitle,
+                source: SCALE_SOURCE,
+                note: Key::TypeScaleBody,
+                Scale { context }
+            }
+            Example {
+                context,
+                title: Key::TypeFamiliesTitle,
+                source: FAMILIES_SOURCE,
+                note: Key::TypeFamiliesBody,
+                Families { context }
+            }
+            Example {
+                context,
+                title: Key::TypeScriptsTitle,
+                source: SCRIPTS_SOURCE,
+                note: Key::TypeScriptsBody,
+                Scripts { context }
+            }
+        }
+    }
+}
 
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H2, "{context.t(Key::TypeScriptsTitle)}" }
-        Paragraph { class: "nd-prose", "{context.t(Key::TypeScriptsBody)}" }
-        Scripts { context }
+/// The four calls the typography page's examples were produced by.
+const SPECIMEN_SOURCE: &str = "A page of everything, before any of it is taken apart";
+const SCALE_SOURCE: &str = "noctua_design_tokens::size::*";
+const FAMILIES_SOURCE: &str = "var(--noctua-font-sans | -serif | -display | -mono)";
+const SCRIPTS_SOURCE: &str = "Every writing system this system renders";
+
+/// One page of everything, before any of it is taken apart.
+///
+/// # Why this comes first
+///
+/// The page below it is a set of tables: the scale, the families, the scripts.
+/// Each answers a question somebody already knew to ask. What none of them
+/// answers is what the system LOOKS like when it is used — headings against the
+/// text under them, the spacing between blocks, a paragraph with the marks a
+/// paragraph really has in it, a quotation, two kinds of list, a block of code.
+/// Every one of those is a component with a page of its own, and a reader who
+/// has to open twelve of them to imagine one page is a reader who does not.
+///
+/// It is a real render, not a screenshot: every element here is the component,
+/// so it moves with the theme, the typeface and the corner preset like the rest
+/// of the page.
+#[component]
+fn WholePage(context: Context) -> Element {
+    rsx! {
+        div { class: "nd-specimen-page",
+            Prose {
+                Heading { level: HeadingLevel::_2, size: HeadingSize::Display, balance: true,
+                    "{context.t(Key::SpecimenTitle)}"
+                }
+                Paragraph { size: ParagraphSize::Lead, "{context.t(Key::SpecimenLead)}" }
+
+                Heading { level: HeadingLevel::_3, size: HeadingSize::H2,
+                    "{context.t(Key::SpecimenSectionTitle)}"
+                }
+                Paragraph {
+                    Message { context, message: Key::SpecimenBody }
+                }
+                Paragraph {
+                    Message { context, message: Key::SpecimenBodyTwo }
+                }
+
+                Blockquote { tone: BlockquoteTone::Accent, attribution: "Edsger W. Dijkstra",
+                    Paragraph { "{context.t(Key::ExampleQuote)}" }
+                }
+
+                Heading { level: HeadingLevel::_4, size: HeadingSize::H3,
+                    "{context.t(Key::SpecimenListsTitle)}"
+                }
+                Paragraph { "{context.t(Key::SpecimenListsBody)}" }
+                List {
+                    ListItem { "{context.t(Key::ExampleListOne)}" }
+                    ListItem { "{context.t(Key::ExampleListTwo)}" }
+                    ListItem { "{context.t(Key::ExampleListThree)}" }
+                }
+                List { kind: ListKind::Ordered,
+                    ListItem { "{context.t(Key::ExampleListOne)}" }
+                    ListItem { "{context.t(Key::ExampleListTwo)}" }
+                }
+
+                Heading { level: HeadingLevel::_4, size: HeadingSize::H3,
+                    "{context.t(Key::SpecimenMarksTitle)}"
+                }
+                Paragraph { "{context.t(Key::SpecimenMarksBody)}" }
+                // ONE COMPONENT PER ITEM, each wrapping ONE whole message.
+                //
+                // Not a paragraph with the components threaded through it: that
+                // is a sentence assembled from fragments, and where a mark
+                // falls in a sentence moves when the sentence is translated
+                // (`NOCTUA.md §9.9` rule 1). Each of these is a complete
+                // sentence a translator can rewrite freely.
+                List { marker: ListMarker::None, spacing: ListSpacing::Tight,
+                    ListItem {
+                        Link { href: "#", "{context.t(Key::SpecimenMarkLink)}" }
+                    }
+                    ListItem {
+                        Strong { "{context.t(Key::SpecimenMarkStrong)}" }
+                    }
+                    ListItem {
+                        Em { "{context.t(Key::SpecimenMarkEm)}" }
+                    }
+                    ListItem {
+                        Mark { "{context.t(Key::SpecimenMarkMark)}" }
+                    }
+                    ListItem {
+                        Abbr {
+                            title: context.t(Key::SpecimenMarkAbbrTitle),
+                            class: "nd-identifier",
+                            "WYSIWYG"
+                        }
+                    }
+                    ListItem {
+                        Kbd { class: "nd-identifier", "Ctrl" }
+                        " + "
+                        Kbd { class: "nd-identifier", "S" }
+                    }
+                    ListItem {
+                        Time { datetime: "2026-07-29", "{context.t(Key::ExampleTimeDate)}" }
+                    }
+                    ListItem {
+                        Del {
+                            label: context.t(Key::ExampleEditRemoved),
+                            "{context.t(Key::ExampleEditOld)}"
+                        }
+                        " "
+                        Ins {
+                            label: context.t(Key::ExampleEditAdded),
+                            "{context.t(Key::ExampleEditNew)}"
+                        }
+                    }
+                    ListItem {
+                        Code { class: "nd-identifier", "--noctua-measure" }
+                    }
+                    ListItem {
+                        Truncate {
+                            lines: TruncateLines::_1,
+                            title: context.t(Key::ExampleListLong),
+                            "{context.t(Key::ExampleListLong)}"
+                        }
+                    }
+                }
+
+                Heading { level: HeadingLevel::_4, size: HeadingSize::H3,
+                    "{context.t(Key::SpecimenCodeTitle)}"
+                }
+                Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::SpecimenCodeBody)}" }
+            }
+            CodeBlock {
+                code: SPECIMEN_CODE,
+                language: "rust",
+                filename: "page.rs",
+                copy: context.t(Key::ExampleCopy),
+                copied: context.t(Key::ExampleCopied),
+            }
+        }
+    }
+}
+
+/// The code in the specimen: the call that produced the page above it.
+const SPECIMEN_CODE: &str = r#"Prose {
+    Heading { level: HeadingLevel::_2, size: HeadingSize::Display, "A title" }
+    Paragraph { size: ParagraphSize::Lead, "The sentence under it." }
+    List {
+        ListItem { "One" }
+        ListItem { "Two" }
+    }
+}"#;
+
+/// Every component page, side by side.
+///
+/// Built from `site::sorted`, so a component added to `spec/components/`
+/// appears here with nothing edited — and in the reader's alphabet, because
+/// that is the order the sidebar is in and two orders for one list is one
+/// order that is wrong.
+#[component]
+fn ComponentIndex(context: Context) -> Element {
+    rsx! {
+        nav { class: "nd-doc-index", "aria-label": context.t(Key::SpecimenComponentsTitle),
+            Label {
+                kind: LabelKind::Name,
+                size: LabelSize::Small,
+                text: context.t(Key::SpecimenComponentsTitle),
+            }
+            ul { class: "nd-doc-index-list",
+                for page in site::sorted(context.locale) {
+                    if page.kind == site::Kind::Component {
+                        li {
+                            Link { class: "nd-identifier", href: "{page.href()}",
+                                "{page.title(context.locale)}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -715,13 +2828,21 @@ fn Families(context: Context) -> Element {
     rsx! {
         div { class: "nd-specimens",
             for (family, stack) in families {
-                div { class: "nd-variant-item",
-                    Text { class: "nd-specimen-name", weight: TextWeight::Semibold, "{family}" }
+                // `.nd-specimen`, not `.nd-variant-item`. This borrowed the
+                // frame's variant-grid class while sitting outside any grid,
+                // so the separator `.nd-specimen` draws between families never
+                // applied and the four ran together — a rule written, and a
+                // class never carried, which is this stylesheet's oldest bug.
+                div { class: "nd-specimen",
+                    // A family name is a proper noun, and a weight name is a token.
+                    Text { class: "nd-specimen-name nd-identifier", weight: TextWeight::Semibold,
+                        "{family}"
+                    }
                     for (label, weight) in weights {
                         p {
                             class: "nd-specimen-line",
                             style: "font-family: {stack}; font-weight: {weight}", // allow-literal: `stack` is one of the four font tokens in the table above — the gate cannot see through an interpolation, and a specimen page must set the family it is showing
-                            Text { class: "nd-specimen-weight", size: TextSize::Caption,
+                            Text { class: "nd-specimen-weight nd-identifier", size: TextSize::Caption,
                                 tone: TextTone::Muted, "{label}"
                             }
                             "{context.t(Key::TypeSpecimenLine)}"
@@ -730,7 +2851,7 @@ fn Families(context: Context) -> Element {
                     p {
                         class: "nd-specimen-line",
                         style: "font-family: {stack}; font-style: italic", // allow-literal: as above, the italic specimen
-                        Text { class: "nd-specimen-weight", size: TextSize::Caption,
+                        Text { class: "nd-specimen-weight nd-identifier", size: TextSize::Caption,
                             tone: TextTone::Muted, "italic"
                         }
                         "{context.t(Key::TypeSpecimenLine)}"
@@ -749,20 +2870,33 @@ fn Families(context: Context) -> Element {
 /// something other than what it claims.
 #[component]
 fn Scripts(context: Context) -> Element {
-    let _ = context;
     rsx! {
         div { class: "nd-scripts", "data-nd-scripts": "",
             for sample in crate::scripts::SAMPLES {
-                div { class: "nd-script", "data-nd-script": "{sample.name}",
+                // The hook a spec reads is the script's ID, not its name: a
+                // test that selected on a translated word would pass in one
+                // locale and fail in the next.
+                div { class: "nd-script", "data-nd-script": "{sample.id}",
                     div { class: "nd-script-meta",
-                        Text { class: "nd-script-name", weight: TextWeight::Semibold, "{sample.name}" }
-                        Text { size: TextSize::Caption, tone: TextTone::Muted, "{sample.proves}" }
+                        Text { class: "nd-script-name", weight: TextWeight::Semibold,
+                            "{context.t(sample.name)}"
+                        }
+                        Text { size: TextSize::Caption, tone: TextTone::Muted,
+                            "{context.t(sample.proves)}"
+                        }
                     }
+                    // Real text in that script. Translating a Devanagari
+                    // sample into Portuguese would stop it being a Devanagari
+                    // sample, which is the only thing it is here to be.
                     p {
-                        class: "nd-script-sample",
+                        class: "nd-script-sample nd-identifier",
                         lang: "{sample.lang}",
                         dir: "{sample.dir}",
                         "data-nd-monospaceable": "{sample.monospaceable}",
+                        // Declared rather than guessed from the name: a width
+                        // check cannot tell an ideograph from a tofu box, and
+                        // both are exactly one em.
+                        "data-nd-ideographic": "{sample.ideographic}",
                         "{sample.text}"
                     }
                 }
@@ -771,126 +2905,50 @@ fn Scripts(context: Context) -> Element {
     }
 }
 
-/// The named gaps, then the raw scale.
-///
-/// The named tokens come first on purpose: they are what a component actually
-/// asks for, and the search index points every one of them at this page.
-#[component]
-fn Spacing(context: Context) -> Element {
-    let named = [
-        ("tight", Key::SpacingTight),
-        ("inset", Key::SpacingInset),
-        ("gap", Key::SpacingGap),
-        ("paragraph", Key::SpacingParagraph),
-        ("heading", Key::SpacingHeading),
-        ("section", Key::SpacingSection),
-        ("region", Key::SpacingRegion),
-    ];
-    let steps = [1_u32, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64];
-    rsx! {
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::SpacingNamedTitle)}" }
-        Paragraph { "{context.t(Key::SpacingNamedBody)}" }
-        div { class: "nd-scale",
-            for (name, purpose) in named {
-                div { class: "nd-scale-row",
-                    Code { class: "nd-scale-name", "--noctua-space-{name}" }
-                    span { class: "nd-bar", style: "inline-size: var(--noctua-space-{name})" }
-                    Text { size: TextSize::Small, tone: TextTone::Muted, "{context.t(purpose)}" }
-                }
-            }
-        }
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::SpacingScaleTitle)}" }
-        Paragraph { "{context.t(Key::SpacingScaleBody)}" }
-        div { class: "nd-scale",
-            for step in steps {
-                div { class: "nd-scale-row",
-                    Code { class: "nd-scale-name", "--noctua-space-{step}" }
-                    span { class: "nd-bar", style: "inline-size: var(--noctua-space-{step})" }
-                }
-            }
-        }
-    }
-}
-
-/// The four patterns, drawn, plus the ambient layers and a way to try them.
-///
-/// The page that documents background effects has to show them. Each swatch
-/// below carries a real `data-noctua-pattern` on a scoped element, so what a
-/// reader sees is the shipped geometry rather than a picture of it.
-#[component]
-fn Effects(context: Context) -> Element {
-    let patterns = [
-        ("dots", Key::SettingsPatternDots),
-        ("mesh", Key::SettingsPatternMesh),
-        ("checks", Key::SettingsPatternChecks),
-        ("diagonals", Key::SettingsPatternDiagonals),
-    ];
-    rsx! {
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::EffectsPatternsTitle)}" }
-        Paragraph { "{context.t(Key::EffectsPatternsBody)}" }
-
-        div { class: "nd-pattern-grid",
-            for (value, label) in patterns {
-                figure { class: "nd-pattern",
-                    // The real layer, on a real attribute. `.noctua-fx` is the
-                    // colour layer's own class, so this swatch is drawn by the
-                    // shipped CSS and cannot drift from it.
-                    div { class: "nd-pattern-swatch", "data-nd-pattern-demo": "{value}",
-                        div { class: "noctua-fx nd-pattern-fx" }
-                    }
-                    figcaption { class: "nd-pattern-name",
-                        Text { size: TextSize::Small, weight: TextWeight::Medium, "{context.t(label)}" }
-                    }
-                }
-            }
-        }
-
-        Heading { level: HeadingLevel::_2, size: HeadingSize::H3, "{context.t(Key::EffectsAmbientTitle)}" }
-        Paragraph { "{context.t(Key::EffectsAmbientBody)}" }
-
-        Heading { level: HeadingLevel::_3, size: HeadingSize::H4, "{context.t(Key::EffectsTry)}" }
-        Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::EffectsTryBody)}" }
-        div { class: "nd-choice", "data-nd-setting": "pattern",
-            p { class: "nd-choice-label", id: "nd-label-try-pattern", "{context.t(Key::SettingsPatternLabel)}" }
-            div { class: "nd-options", role: "radiogroup", "aria-labelledby": "nd-label-try-pattern",
-                for (value, label) in [
-                    ("none", Key::SettingsPatternNone),
-                    ("dots", Key::SettingsPatternDots),
-                    ("mesh", Key::SettingsPatternMesh),
-                    ("checks", Key::SettingsPatternChecks),
-                    ("diagonals", Key::SettingsPatternDiagonals),
-                ] {
-                    button {
-                        class: "nd-option",
-                        r#type: "button",
-                        role: "radio",
-                        "aria-checked": "false",
-                        "data-nd-value": "{value}",
-                        "{context.t(label)}"
-                    }
-                }
-            }
-        }
-        for (setting, label) in [
-            ("glow", Key::SettingsGlowLabel),
-            ("grain", Key::SettingsGrainLabel),
+    /// A specimen of a table part has to arrive inside a table.
+    ///
+    /// The variant grid injects its markup with `dangerous_inner_html` on a
+    /// `<div>`, and the HTML parser **discards** every table-only start tag it
+    /// meets outside a table. Without the wrapper, `Table`'s five parts would
+    /// document eleven enum props with empty boxes — on a page that otherwise
+    /// looks finished, which is why nothing would have caught it.
+    #[test]
+    fn every_table_part_is_wrapped_in_a_table() {
+        for element in [
+            "caption", "colgroup", "thead", "tbody", "tfoot", "tr", "td", "th",
         ] {
-            div { class: "nd-choice", "data-nd-setting": "{setting}",
-                p { class: "nd-choice-label", id: "nd-label-try-{setting}", "{context.t(label)}" }
-                div { class: "nd-options", role: "radiogroup", "aria-labelledby": "nd-label-try-{setting}",
-                    for (value, text) in [("off", Key::SettingsOff), ("on", Key::SettingsOn)] {
-                        button {
-                            class: "nd-option",
-                            r#type: "button",
-                            role: "radio",
-                            "aria-checked": "false",
-                            "data-nd-value": "{value}",
-                            "{context.t(text)}"
-                        }
-                    }
-                }
-            }
+            let wrapped = in_table(element, format!("<{element}>x</{element}>"));
+            assert!(
+                wrapped.starts_with("<table"),
+                "{element} would be thrown away by the parser: {wrapped}"
+            );
+        }
+        // A cell needs a row as well: "in table" drops a `<td>` just as "in
+        // body" does, and only "in row" accepts one.
+        for cell in ["td", "th"] {
+            assert!(
+                in_table(cell, String::new()).contains("<tr>"),
+                "a {cell} was given a table with no row in it"
+            );
+        }
+        // And a `Table` arrives inside its scroller, because `height` caps the
+        // scroller and would otherwise document four identical boxes.
+        assert!(in_table("table", String::new()).contains("nd-table-scroll"));
+    }
+
+    /// And nothing else is touched, so the wrapper costs the other thirty-odd
+    /// components exactly nothing.
+    #[test]
+    fn nothing_but_a_table_part_is_wrapped() {
+        for element in [
+            "div", "span", "button", "p", "li", "input", "select", "option",
+        ] {
+            let markup = format!("<{element}>x</{element}>");
+            assert_eq!(in_table(element, markup.clone()), markup);
         }
     }
 }

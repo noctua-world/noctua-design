@@ -37,6 +37,30 @@ pub fn emit(theme: &Theme, vendor: &Vendor) -> Vec<EmittedFile> {
     ]
 }
 
+/// Every attribute a scope element can carry, marker first.
+///
+/// One function, read by both models, so "what a scope is made of" is one fact
+/// rather than two that agree today. The order is the marker and then the
+/// scopable settings in the order the spec declares them; a setting with no
+/// attribute of its own — `accent` and `saturation`, which reach the DOM
+/// through `palette` — contributes nothing.
+fn scope_attribute_names(theme: &Theme) -> Vec<String> {
+    let mut names = vec![theme.meta.scope_attribute.clone()];
+    names.extend(stamped(theme).filter_map(|(_, setting)| setting.attribute.clone()));
+    names
+}
+
+/// The scopable settings that actually reach the DOM, in the spec's order.
+///
+/// `scope_attribute_names` and the generated `ScopeAttributes` are the same
+/// list twice — the names a scope carries and the fields that hold them — so
+/// they read it from here rather than each filtering `scopable` themselves.
+fn stamped(theme: &Theme) -> impl Iterator<Item = (&String, &noctua_design_spec::Setting)> {
+    theme
+        .scopable()
+        .filter(|(_, setting)| setting.attribute.is_some())
+}
+
 // --- Rust ------------------------------------------------------------------
 
 fn rust_model(theme: &Theme, vendor: &Vendor) -> String {
@@ -314,11 +338,15 @@ fn rust_scope(out: &mut String, theme: &Theme) {
     }
     writeln!(out, "        }}\n    }}\n}}\n").expect("write");
 
-    rust_resolver(out, &scopable);
+    rust_resolver(out, theme, &scopable);
 }
 
 /// `resolve`, `is_noop`, and the attribute list they produce.
-fn rust_resolver(out: &mut String, scopable: &[(&String, &noctua_design_spec::Setting)]) {
+fn rust_resolver(
+    out: &mut String,
+    theme: &Theme,
+    scopable: &[(&String, &noctua_design_spec::Setting)],
+) {
     writeln!(out, "impl ScopeRequest {{").expect("write");
     writeln!(
         out,
@@ -357,13 +385,18 @@ fn rust_resolver(out: &mut String, scopable: &[(&String, &noctua_design_spec::Se
     )
     .expect("write");
 
+    rust_attributes(out, theme);
+}
+
+/// `scope_attributes` and the struct it returns, one field per stamped setting.
+fn rust_attributes(out: &mut String, theme: &Theme) {
     writeln!(
         out,
         "/// Every attribute a scope element must carry, as `(name, value)`.\n\
          ///\n\
          /// # All of them go on ONE element\n\
          ///\n\
-         /// The colour system's forced-mode selector is **compound and\n\
+         /// The color system's forced-mode selector is **compound and\n\
          /// same-element**:\n\
          ///\n\
          /// ```css\n\
@@ -389,33 +422,103 @@ fn rust_resolver(out: &mut String, scopable: &[(&String, &noctua_design_spec::Se
          \x20   }}\n\
          \x20   let r = request.resolve(inherited);\n\
          \x20   ::core::option::Option::Some(ScopeAttributes {{\n\
-         \x20       scope: SCOPE_ATTRIBUTE,\n\
-         \x20       palette: r.palette.as_str(),\n\
-         \x20       // `system` stamps nothing: the cascade resolves it, and an\n\
-         \x20       // attribute no stylesheet understands would be worse than none.\n\
-         \x20       mode: if r.mode.is_omitted() {{ ::core::option::Option::None }}\n\
-         \x20             else {{ ::core::option::Option::Some(r.mode.as_str()) }},\n\
-         \x20       font: r.font.as_str(),\n\
-         \x20       glass: r.glass.as_str(),\n\
-         \x20       radius: r.radius.as_str(),\n\
-         \x20   }})\n\
+         \x20       scope: SCOPE_ATTRIBUTE,"
+    )
+    .expect("write");
+    // ONE PASS PER STAMPED SETTING, FROM THE SPEC. The list used to be written
+    // out here, five names deep, while everything around it came from
+    // `scopable` — so a setting that became scopable compiled, stamped nothing,
+    // and left a scope that resolved the semantic contract for a value it
+    // never carried.
+    for (name, setting) in stamped(theme) {
+        let id = identifier(name);
+        match setting.omit_when.as_deref() {
+            // A value spelled as the ABSENCE of its attribute. Stamping the
+            // word would be worse than stamping nothing: no stylesheet
+            // understands it, and the cascade already answers.
+            Some(omit) => writeln!(
+                out,
+                "        // `{omit}` stamps nothing: the cascade resolves it, and an\n\
+                 \x20       // attribute no stylesheet understands would be worse than none.\n\
+                 \x20       {id}: if r.{id}.is_omitted() {{ ::core::option::Option::None }}\n\
+                 \x20             else {{ ::core::option::Option::Some(r.{id}.as_str()) }},"
+            ),
+            None => writeln!(out, "        {id}: r.{id}.as_str(),"),
+        }
+        .expect("write");
+    }
+    writeln!(
+        out,
+        "    }})\n\
          }}\n\n\
          /// The attributes, ready to be stamped on one element.\n\
          #[derive(Debug, Clone, Copy, PartialEq, Eq)]\n\
          pub struct ScopeAttributes {{\n\
          \x20   /// The marker that makes the semantic contract resolve here.\n\
-         \x20   pub scope: &'static str,\n\
-         \x20   /// `data-palette`.\n\
-         \x20   pub palette: &'static str,\n\
-         \x20   /// `data-theme`, or `None` when the scope follows the system.\n\
-         \x20   pub mode: ::core::option::Option<&'static str>,\n\
-         \x20   /// `data-noctua-font`.\n\
-         \x20   pub font: &'static str,\n\
-         \x20   /// `data-noctua-glass`.\n\
-         \x20   pub glass: &'static str,\n\
-         \x20   /// `data-noctua-radius`.\n\
-         \x20   pub radius: &'static str,\n\
-         }}"
+         \x20   pub scope: &'static str,"
+    )
+    .expect("write");
+    for (name, setting) in stamped(theme) {
+        let id = identifier(name);
+        let attribute = setting.attribute.as_deref().expect("stamped");
+        match setting.omit_when.as_deref() {
+            Some(omit) => writeln!(
+                out,
+                "    /// `{attribute}`, or `None` when the scope follows the {omit}.\n\
+                 \x20   pub {id}: ::core::option::Option<&'static str>,"
+            ),
+            None => writeln!(
+                out,
+                "    /// `{attribute}`.\n\
+                 \x20   pub {id}: &'static str,"
+            ),
+        }
+        .expect("write");
+    }
+    writeln!(out, "}}").expect("write");
+
+    // The same lists the JavaScript model publishes, from the same table. A
+    // consumer that stamps a scope at runtime needs to be able to un-stamp it,
+    // and reconstructing either set by hand is what went wrong.
+    name_const(
+        out,
+        "/// Every attribute a scope element can carry, including the marker.\n\
+         ///\n\
+         /// Removing all of them is how a scope is taken back off. A scope left\n\
+         /// half-removed keeps re-resolving the semantic contract at its own\n\
+         /// element — against the system preference rather than the page — which\n\
+         /// is worse than one that never resolved it at all.",
+        "SCOPE_ATTRIBUTES",
+        &scope_attribute_names(theme),
+    );
+    name_const(
+        out,
+        "/// Every setting a scope can carry, in the spec's own order.\n\
+         ///\n\
+         /// A setting absent here is `scope = false`: it is emitted at `:root`\n\
+         /// and no element below it can hold a different value. Sealing a\n\
+         /// subtree off from the page means carrying every one of these, so a\n\
+         /// consumer that reconstructs the list by hand stops sealing the day a\n\
+         /// setting is added.",
+        "SCOPABLE_SETTINGS",
+        &theme
+            .scopable()
+            .map(|(name, _)| name.clone())
+            .collect::<Vec<_>>(),
+    );
+}
+
+/// One `pub const NAME: [&str; N]`, documented.
+fn name_const(out: &mut String, doc: &str, name: &str, values: &[String]) {
+    let list = values
+        .iter()
+        .map(|value| format!("\"{value}\""))
+        .collect::<Vec<_>>()
+        .join(", ");
+    writeln!(
+        out,
+        "\n\n{doc}\npub const {name}: [&str; {}] = [{list}];",
+        values.len()
     )
     .expect("write");
 }
@@ -528,7 +631,7 @@ fn js_functions(out: &mut String, theme: &Theme) {
          \x20* Every attribute a scope element must carry, or null when the scope\n\
          \x20* changes nothing.\n\
          \x20*\n\
-         \x20* ALL OF THEM GO ON ONE ELEMENT. The colour system's forced-mode selector\n\
+         \x20* ALL OF THEM GO ON ONE ELEMENT. The color system's forced-mode selector\n\
          \x20* is compound and same-element — `[data-palette=\"x\"][data-theme=\"dark\"]`\n\
          \x20* — so splitting them across a wrapper and a child matches nothing, and\n\
          \x20* the child silently falls through to the default palette.\n\
@@ -557,9 +660,51 @@ fn js_functions(out: &mut String, theme: &Theme) {
     )
     .expect("write");
 
+    // EVERY ATTRIBUTE A SCOPE CAN CARRY, AS A LIST.
+    //
+    // `scopeAttributes` says which to SET. Nothing said which to remove, so a
+    // caller taking a scope back off had to reconstruct the set — and the one
+    // that did guessed two of six, leaving `data-palette` behind. A leftover
+    // `data-palette` is not inert: `dist/scope.css` matches
+    // `[data-palette]:not(:root)`, so the whole semantic contract went on
+    // resolving at that element, against the system preference rather than the
+    // page, and the subtree was stuck in one mode for ever.
+    //
+    // Derived from the same table as the function above, so the two cannot
+    // disagree about what a scope is, and asserted to cover every key the
+    // function can return.
     writeln!(
         out,
-        "const scopable_ = [{}];\n",
+        "/**\n\
+         \x20* Every attribute `scopeAttributes` can return, including the marker.\n\
+         \x20*\n\
+         \x20* Removing all of them is how a scope is taken back OFF — and a scope\n\
+         \x20* left half-removed keeps re-resolving the semantic contract at its own\n\
+         \x20* element, which is worse than one that never resolved it at all.\n\
+         \x20*/\n\
+         export const scopeAttributeNames = [{}];\n",
+        scope_attribute_names(theme)
+            .iter()
+            .map(|name| format!("\"{name}\""))
+            .collect::<Vec<_>>()
+            .join(", ")
+    )
+    .expect("write");
+
+    // EXPORTED, because the shell had two hand-written copies of it — one to
+    // read a scope's request off the DOM and one to build the document's
+    // theme — and a setting added to the spec appeared in neither. Isolating a
+    // frame from the page is exactly "carry every one of these", so the list
+    // being generated is what makes a NEW setting isolated without new code.
+    writeln!(
+        out,
+        "/**\n\
+         \x20* Every setting a scope can carry, in the spec's own order.\n\
+         \x20*\n\
+         \x20* A setting absent here is `scope = false`: it is emitted at\n\
+         \x20* `:root` and no element below it can hold a different value.\n\
+         \x20*/\n\
+         export const scopableSettings = [{}];\n",
         theme
             .scopable()
             .map(|(name, _)| format!("\"{name}\""))
@@ -567,6 +712,8 @@ fn js_functions(out: &mut String, theme: &Theme) {
             .join(", ")
     )
     .expect("write");
+
+    writeln!(out, "const scopable_ = scopableSettings;\n").expect("write");
 
     writeln!(out, "const model_ = {{").expect("write");
     for name in theme.setting.keys() {
@@ -635,7 +782,11 @@ fn dts_model(theme: &Theme, vendor: &Vendor) -> String {
          export declare function scopeAttributes(\n\
          \x20 request: Partial<ScopeSettings>,\n\
          \x20 inherited: ScopeSettings,\n\
-         ): Record<string, string> | null;"
+         ): Record<string, string> | null;\n\n\
+         /** Every attribute `scopeAttributes` can return, including the marker. */\n\
+         export declare const scopeAttributeNames: readonly string[];\n\n\
+         /** Every setting a scope can carry. Absent means `scope = false`. */\n\
+         export declare const scopableSettings: readonly (keyof ScopeSettings)[];"
     )
     .expect("write");
 
@@ -719,6 +870,23 @@ fn json_model(theme: &Theme, vendor: &Vendor) -> String {
                 .map_or_else(|| "null".to_owned(), |o| format!("\"{o}\""))
         )
         .expect("write");
+        // WHAT COMPUTES THIS ONE. Published because a reader of this file
+        // cannot otherwise tell `palette` — which no menu offers a control for,
+        // because `accent` and `saturation` are its inputs — from a scopable
+        // setting a menu simply forgot. A browser test asserts every scopable
+        // setting is offered on a frame, and without this it had to carry the
+        // one exception written out by hand.
+        writeln!(
+            out,
+            "      \"derivedFrom\": [{}],",
+            setting
+                .derived_from
+                .iter()
+                .map(|from| format!("\"{from}\""))
+                .collect::<Vec<_>>()
+                .join(", ")
+        )
+        .expect("write");
         writeln!(out, "      \"scope\": {}", setting.scope).expect("write");
         writeln!(out, "    }}{}", if index == last { "" } else { "," }).expect("write");
     }
@@ -733,7 +901,11 @@ fn json_model(theme: &Theme, vendor: &Vendor) -> String {
 fn bootstrap(theme: &Theme, vendor: &Vendor) -> String {
     let mut out = header_from(CommentStyle::Line("//"), THEME_SPEC);
     let base = &theme.meta.stylesheet_base;
-    let default = &vendor.default_theme;
+    // THIS system's default palette, which is not necessarily the color
+    // system's. It used to read `vendor.default_theme`, which is the one
+    // palette `noctua-colors` anchors at `:root` — correct only for as long as
+    // the two agreed, and silently wrong the moment they did not.
+    let default = default_palette(theme);
 
     out.push_str(
         "\n// Runs before the first paint, inline in <head>, AFTER the base links.\n\
@@ -803,6 +975,14 @@ fn bootstrap(theme: &Theme, vendor: &Vendor) -> String {
         writeln!(out, "    }}").expect("write");
 
         if name == "palette" {
+            // Stamped even when nothing is stored, because the base link set
+            // names a SCOPE-ANCHORED stylesheet (see `base_links`). Without the
+            // attribute that sheet matches nothing and the page has no palette:
+            // the failure is total, silent, and looks like a missing stylesheet
+            // rather than a missing attribute.
+            writeln!(out, "    else {{").expect("write");
+            writeln!(out, "      r.setAttribute('{attribute}', '{default}');").expect("write");
+            writeln!(out, "    }}").expect("write");
             palette_sheet(&mut out, base, default, &list);
         }
     }
@@ -882,9 +1062,45 @@ fn bootstrap_fragment(theme: &Theme, vendor: &Vendor) -> String {
     )
 }
 
+/// This system's default palette, from `spec/theme.toml`.
+///
+/// Falls back to the color system's own default only if the setting is absent
+/// entirely, which `validate_theme` does not allow — the fallback exists so
+/// this function has no `unwrap` in it, not because it can be reached.
+fn default_palette(theme: &Theme) -> &str {
+    theme
+        .setting
+        .get("palette")
+        .map_or("", |setting| setting.default.as_str())
+}
+
 /// The base links, in the one order that works.
 fn base_links(theme: &Theme, vendor: &Vendor) -> String {
     let base = &theme.meta.stylesheet_base;
+    let default = default_palette(theme);
+    // `noctua-colors` anchors exactly one palette at `:root` — its own default
+    // — and every other at `[data-palette="<name>"]`. So the sheet that carries
+    // OUR default is a different file depending on whether the two agree, and
+    // getting it wrong is a page with no colors rather than a page with the
+    // wrong ones.
+    let sheet = if default == vendor.default_theme {
+        default.to_owned()
+    } else {
+        format!("theme-{default}")
+    };
+    let note = if default == vendor.default_theme {
+        "\x20    The default palette below is the color system's own, so it is\n\
+        \x20    anchored at :root and applies with no attribute at all."
+    } else {
+        "\x20    THE DEFAULT PALETTE BELOW IS SCOPE-ANCHORED, so it applies only to an\n\
+        \x20    element carrying data-palette=\"<that name>\". That is not an\n\
+        \x20    optimisation to undo: the color system publishes a :root sheet for\n\
+        \x20    its OWN default and for nothing else, and this design system's\n\
+        \x20    default is a different palette.\n\n\
+        \x20    Which is why the bootstrap stamps data-palette even when nothing is\n\
+        \x20    stored. Link these files without running it, and without rendering\n\
+        \x20    the attribute yourself, and the page has no palette whatsoever."
+    };
     format!(
         "<!-- Generated by noctua-design — do not edit.\n\
         \x20    Source: spec/theme.toml\n\
@@ -896,16 +1112,18 @@ fn base_links(theme: &Theme, vendor: &Vendor) -> String {
         \x20      [data-palette=\"x\"]:not([data-theme=\"light\"]):not(.light)\n\
         \x20    are BOTH specificity (0,3,0). Only source order separates them. The\n\
         \x20    default must come first, so a theme sheet appended later wins.\n\n\
+        {note}\n\n\
         \x20    scope.css REPLACES the vendored contexts.css — it carries the same\n\
         \x20    declarations plus the selectors that make them resolve inside a\n\
         \x20    themed subtree. Linking both would double the cost for nothing. -->\n\
         <link rel=\"stylesheet\" href=\"{base}/ramp.css\">\n\
         <link rel=\"stylesheet\" href=\"scope.css\">\n\
-        <link rel=\"stylesheet\" href=\"{base}/{}.css\" id=\"noctua-base-palette\">\n\
+        <link rel=\"stylesheet\" href=\"{base}/{sheet}.css\" id=\"noctua-base-palette\">\n\
         <link rel=\"stylesheet\" href=\"tokens.css\">\n\
+        <link rel=\"stylesheet\" href=\"tones.css\">\n\
+        <link rel=\"stylesheet\" href=\"syntax.css\">\n\
         <link rel=\"stylesheet\" href=\"fonts.css\">\n\
-        <link rel=\"stylesheet\" href=\"theme.css\">\n",
-        vendor.default_theme
+        <link rel=\"stylesheet\" href=\"theme.css\">\n"
     )
 }
 
@@ -1030,7 +1248,11 @@ mod tests {
     /// The base link order is the one that works.
     #[test]
     fn the_base_links_put_the_default_palette_before_any_theme_sheet() {
-        let (_, vendor) = shipped();
+        let (theme, _) = shipped();
+        // THIS system's default, not the color system's. The test read
+        // `vendor.default_theme`, which is the palette `noctua-colors` anchors
+        // at `:root` — the same value only for as long as the two agreed.
+        let default = default_palette(&theme);
         let base = file("dist/base.html");
 
         // Only the <link> lines. The header comment explains the ordering and
@@ -1049,7 +1271,7 @@ mod tests {
 
         assert!(at("ramp.css") < at("scope.css"), "the ramp must come first");
         assert!(
-            at("scope.css") < at(&format!("{}.css", vendor.default_theme)),
+            at("scope.css") < at(&format!("{default}.css")),
             "the default palette must come after the contract, and before any theme \
              sheet the bootstrap appends — in system mode the two tie at (0,3,0) and \
              only source order separates them"
@@ -1057,6 +1279,33 @@ mod tests {
         assert!(
             !links.iter().any(|line| line.contains("contexts.css")),
             "scope.css replaces contexts.css; linking both doubles the cost"
+        );
+    }
+
+    /// A default that is not the color system's needs the attribute, and the
+    /// bootstrap is what writes it.
+    ///
+    /// `noctua-colors` anchors one palette at `:root` and every other at
+    /// `[data-palette="<name>"]`. So when this system's default is not that
+    /// one, the base sheet applies to nothing until something stamps the
+    /// attribute — and a page with no palette at all looks like a stylesheet
+    /// that failed to load, not like a missing attribute.
+    #[test]
+    fn the_bootstrap_stamps_the_default_palette_when_nothing_is_stored() {
+        let (theme, vendor) = shipped();
+        let default = default_palette(&theme);
+        let script = file("dist/bootstrap.html");
+
+        if default == vendor.default_theme {
+            return;
+        }
+        assert!(
+            script.contains(&format!("r.setAttribute('data-palette', '{default}');")),
+            "the base sheet is scope-anchored and nothing stamps the scope:\n{script}"
+        );
+        assert!(
+            file("dist/base.html").contains(&format!("theme-{default}.css")),
+            "the base link set does not name the scope-anchored default"
         );
     }
 
@@ -1074,6 +1323,78 @@ mod tests {
             }
             assert!(js.contains(&format!("default: \"{}\"", setting.default)));
         }
+    }
+
+    /// THE LIST MUST COVER EVERY ATTRIBUTE THE FUNCTION CAN SET.
+    ///
+    /// This is the invariant that was broken, and it was broken by hand rather
+    /// than by the generator: a caller taking a scope back off removed two of
+    /// the six attributes `scopeAttributes` stamps. The four left behind kept
+    /// `dist/scope.css` re-resolving the semantic contract at that element —
+    /// `[data-palette]:not(:root)` is enough on its own — so the subtree
+    /// resolved against the system preference instead of the page and could
+    /// never be un-themed.
+    #[test]
+    fn the_attribute_list_covers_everything_a_scope_can_stamp() {
+        let (theme, _) = shipped();
+        let names = scope_attribute_names(&theme);
+
+        assert!(
+            names.contains(&theme.meta.scope_attribute),
+            "the marker is an attribute a scope carries, and removing it is how \
+             the contract stops resolving there"
+        );
+        for (name, setting) in theme.scopable() {
+            let Some(attribute) = &setting.attribute else {
+                // `accent` and `saturation` reach the DOM through `palette`.
+                continue;
+            };
+            assert!(
+                names.contains(attribute),
+                "`{name}` is stamped as `{attribute}` and is not in the list, so \
+                 nothing that takes a scope off would remove it"
+            );
+        }
+        assert_eq!(
+            names.len(),
+            names
+                .iter()
+                .collect::<std::collections::BTreeSet<_>>()
+                .len(),
+            "a repeated attribute means one of them is being derived twice"
+        );
+    }
+
+    /// Both packages publish the same list, because it is one fact.
+    #[test]
+    fn both_languages_publish_the_same_scope_attributes() {
+        let (theme, _) = shipped();
+        let rust = file("crates/noctua-design-theme/src/lib.rs");
+        let js = file("packages/tokens/theme.js");
+        let dts = file("packages/tokens/theme.d.ts");
+
+        let names = scope_attribute_names(&theme);
+        let list = names
+            .iter()
+            .map(|name| format!("\"{name}\""))
+            .collect::<Vec<_>>()
+            .join(", ");
+
+        assert!(
+            rust.contains(&format!(
+                "SCOPE_ATTRIBUTES: [&str; {}] = [{list}]",
+                names.len()
+            )),
+            "the Rust model does not publish the list:\n{rust}"
+        );
+        assert!(
+            js.contains(&format!("export const scopeAttributeNames = [{list}];")),
+            "the JavaScript model does not publish the list:\n{js}"
+        );
+        assert!(
+            dts.contains("export declare const scopeAttributeNames"),
+            "a consumer in TypeScript cannot see the list"
+        );
     }
 
     /// A global setting must have no scope, in the model that both packages

@@ -7,13 +7,14 @@
 // what they put in the DOM.
 
 import { test, expect } from "@playwright/test";
-import { ANY, LOCALES, PAGE, url } from "./pages.js";
+import { ANY, LOCALES, PAGE, SCOPED, url, showParts, setFrameWidth } from "./pages.js";
 
-// The frame lives on the scoped-themes page now, which is where `ThemeScope`
-// is documented and where the React module has always mounted it. It went away
-// for one commit with the single "Components" page it used to sit on; these
-// five were `fixme` rather than deleted in the meantime, because they were the
-// only written record of what it has to do.
+// The frame is on every component page now, and `ThemeScope`'s is the one it
+// can mount in both implementations — so that is where these run.
+//
+// There is no code panel to open any more: each example carries its call as its
+// caption, always visible, because a reader who has to open a disclosure to see
+// the line they came to copy is a reader who copies the wrong thing.
 
 
 const requests = (page) =>
@@ -22,7 +23,8 @@ const requests = (page) =>
   );
 
 test("the React bundle is not fetched on a normal page view", async ({ page }) => {
-  await page.goto("/en/scoped-themes/");
+  await page.goto(url(SCOPED));
+  await showParts(page);
   await page.waitForLoadState("networkidle");
   // 190 KB that most readers never need. A lazy path that loads eagerly is not
   // a lazy path; it is a lazy path with a bug nobody notices.
@@ -30,15 +32,15 @@ test("the React bundle is not fetched on a normal page view", async ({ page }) =
 });
 
 test("switching to React fetches it once and mounts the same theme", async ({ page }) => {
-  await page.goto("/en/scoped-themes/");
-  const dioxus = page.locator("[data-nd-frame-stage] > [data-noctua-scope]");
+  await page.goto(url(SCOPED));
+  await showParts(page);
+  const dioxus = page.locator("[data-nd-mountable] > [data-noctua-scope]");
   const expected = {
     palette: await dioxus.getAttribute("data-palette"),
     theme: await dioxus.getAttribute("data-theme"),
   };
 
-  await page.locator(".nd-code .nd-disclosure-summary").click();
-  await page.locator('[data-nd-setting="frame-impl"] [data-nd-value="React"]').click();
+  await page.locator('[data-nd-group="frame-impl"] [data-nd-value="React"]').click();
   await expect(page.locator("[data-nd-react-slot] [data-noctua-scope]")).toBeVisible();
 
   expect(await requests(page)).toBe(1);
@@ -51,41 +53,41 @@ test("switching to React fetches it once and mounts the same theme", async ({ pa
   await expect(dioxus).toBeHidden();
 
   // And switching again does not fetch it a second time.
-  await page.locator('[data-nd-setting="frame-impl"] [data-nd-value="Dioxus"]').click();
-  await page.locator('[data-nd-setting="frame-impl"] [data-nd-value="React"]').click();
+  await page.locator('[data-nd-group="frame-impl"] [data-nd-value="Dioxus"]').click();
+  await page.locator('[data-nd-group="frame-impl"] [data-nd-value="React"]').click();
   expect(await requests(page)).toBe(1);
 });
 
 test("switching back unmounts React rather than hiding it", async ({ page }) => {
-  await page.goto("/en/scoped-themes/");
-  await page.locator(".nd-code .nd-disclosure-summary").click();
-  await page.locator('[data-nd-setting="frame-impl"] [data-nd-value="React"]').click();
+  await page.goto(url(SCOPED));
+  await showParts(page);
+  await page.locator('[data-nd-group="frame-impl"] [data-nd-value="React"]').click();
   await expect(page.locator("[data-nd-react-slot] [data-noctua-scope]")).toBeVisible();
 
-  await page.locator('[data-nd-setting="frame-impl"] [data-nd-value="Dioxus"]').click();
+  await page.locator('[data-nd-group="frame-impl"] [data-nd-value="Dioxus"]').click();
   // A live React root behind a hidden div keeps its state and its effects, and
   // the next switch would show a component that had been running all along.
   await expect(page.locator("[data-nd-react-slot] [data-noctua-scope]")).toHaveCount(0);
-  await expect(page.locator("[data-nd-frame-stage] > [data-noctua-scope]")).toBeVisible();
+  await expect(page.locator("[data-nd-mountable] > [data-noctua-scope]")).toBeVisible();
 });
 
 test("the code panel shows the implementation that is mounted", async ({ page }) => {
-  await page.goto("/en/scoped-themes/");
-  await page.locator(".nd-code .nd-disclosure-summary").click();
+  await page.goto(url(SCOPED));
+  await showParts(page);
   await expect(page.locator('[data-nd-impl-source="Dioxus"]')).toBeVisible();
 
-  await page.locator('[data-nd-setting="frame-impl"] [data-nd-value="React"]').click();
+  await page.locator('[data-nd-group="frame-impl"] [data-nd-value="React"]').click();
   await expect(page.locator('[data-nd-impl-source="React"]')).toBeVisible();
   await expect(page.locator('[data-nd-impl-source="Dioxus"]')).toBeHidden();
 });
 
 test("the width control resizes the stage and nothing else", async ({ page }) => {
-  await page.goto("/en/scoped-themes/");
+  await page.goto(url(SCOPED));
+  await showParts(page);
   const stage = page.locator("[data-nd-frame-stage]");
   const full = (await stage.boundingBox()).width;
 
-  await page.locator('[data-nd-setting="frame-width"] [data-nd-value="narrow"]').click();
-  await page.waitForTimeout(250);
+  await setFrameWidth(page, "320");
   const narrow = (await stage.boundingBox()).width;
   expect(narrow).toBeLessThan(full);
 
@@ -93,47 +95,325 @@ test("the width control resizes the stage and nothing else", async ({ page }) =>
   const main = await page.locator(".nd-main").boundingBox();
   expect(main.width).toBeGreaterThan(narrow);
 
-  await page.locator("[data-nd-frame-reset]").click();
+  await page.locator('[data-nd-action="frame-reset"]').click();
   await page.waitForTimeout(250);
   expect((await stage.boundingBox()).width).toBeCloseTo(full, 0);
 });
 
-test("search finds the system's own names, and only when asked", async ({ page }) => {
-  await page.goto(url(ANY));
-  const names = page.locator(".nd-found-entry:visible");
-  // Thirty-nine palettes under an empty search box would bury the navigation.
-  expect(await names.count()).toBe(0);
-
-  await page.locator("[data-nd-search]").fill("space-gap");
-  await expect(names).toHaveCount(1);
-  await expect(names.first()).toHaveText("--noctua-space-gap");
-
-  await page.locator("[data-nd-search]").fill("jade-vivid");
-  await expect(names.first()).toHaveText("jade-vivid");
-
-  await page.locator("[data-nd-search]").fill("zzzz");
-  await expect(page.locator("[data-nd-search-empty]")).toBeVisible();
-});
+// The test that was here — "search finds the system's own names, and only when
+// asked" — lives in `search.spec.js` now, rewritten around the palette. It was
+// written against 313 hidden anchors and a `.includes()`; both are gone, and
+// the three queries it made survive there as the ranking tests.
 
 test("every locale ships the same page and switches between them", async ({ page }) => {
-  await page.goto("/en/scoped-themes/");
-  await page.locator(".nd-locale").click();
-  await expect(page).toHaveURL(/\/pt-BR\/scoped-themes\/$/);
+  await page.goto(url(SCOPED));
+  await showParts(page);
+  // Read the English sidebar before leaving it: the component block is compared
+  // against it below, and a second navigation to fetch it would compare two
+  // page loads instead of one page in two languages.
+  const english = await page.locator(".nd-nav-text").allTextContents();
+  await page.locator(".nd-locale > summary").click();
+  await page.locator("[data-nd-locale='pt-BR']").click();
+  await expect(page).toHaveURL(new RegExp(`/pt-BR/${SCOPED}$`));
   expect(await page.locator("html").getAttribute("lang")).toBe("pt-BR");
 
-  // Foundations first, translated and in the reader's alphabet; then every
-  // component, alphabetically, with nothing between them.
+  // The introduction alone, then the foundations translated and in the
+  // reader's alphabet, then every component alphabetically with nothing
+  // between them.
   const order = await page.locator(".nd-nav-text").allTextContents();
-  expect(order[0]).toBe("Cores");
+  expect(order[0]).toBe("Introdução");
   expect(order).toContain("Tipografia");
-  // The property behind the collation: `Efeitos` before `Espaçamento` folds the
-  // `ç`, and the English order (`Effects`, `Spacing`) puts them nowhere near
-  // each other.
-  expect(order.indexOf("Efeitos")).toBeLessThan(order.indexOf("Espaçamento"));
+  // THE CLAIM IS THE COLLATION, NOT THE MEMBERSHIP.
+  //
+  // `Ícones` sorts by its base letter rather than after `z`, and `Espaçamento`
+  // before both — which is the reader's alphabet and not Rust's `str` ordering.
+  // This used to assert the exact list, so adding the spacing page failed a
+  // test about sorting for a reason that had nothing to do with sorting.
+  const foundations = order.slice(1, order.indexOf("Blockquote"));
+  expect(foundations).toContain("Ícones");
+  expect(foundations).toContain("Tipografia");
+  expect(foundations.indexOf("Espaçamento")).toBeLessThan(foundations.indexOf("Ícones"));
+  expect(foundations.indexOf("Ícones")).toBeLessThan(foundations.indexOf("Tipografia"));
 
   // And the components are a block of their own, in order, after them.
-  const components = order.slice(order.indexOf("Abbr"));
-  expect(components[0]).toBe("Abbr");
+  const components = order.slice(order.indexOf("Blockquote"));
+  expect(components[0]).toBe("Blockquote");
   expect(components.at(-1)).toBe("VisuallyHidden");
-  expect([...components].sort()).toEqual(components);
+  // `ThemeScope` among them, sorted by its title like the rest — it is a
+  // component, and the block has no exceptions in it. So is the one page in it
+  // whose title is a label rather than an identifier: the ten inline marks are
+  // documented together under `Inline text`, which is not translated either.
+  expect(components).toContain("ThemeScope");
+  expect(components).toContain("Inline text");
+
+  // THE BLOCK IS THE SAME WORD FOR WORD IN BOTH LANGUAGES.
+  //
+  // It was not. `/tree/` was `Árvore` here, `/search/` was `Busca` and
+  // `/avatars/` was `Avatares` — three rows naming components that exist under
+  // no such name in any file, any import or any search box. `site.rs` asserts
+  // the rule at its source; this asserts what a reader actually sees, in the
+  // one place both languages are on screen in one run.
+  expect(components).toEqual(english.slice(english.indexOf("Blockquote")));
+
+  // COLLATED, like the sidebar itself. A plain `.sort()` is codepoint order,
+  // which agrees with this block while every title in it is ASCII — so the
+  // claim it settles today is the foundations' (`Espaçamento` before `Ícones`
+  // before `Tipografia`, above). It stays here because the day a component
+  // block title stops being ASCII is the day it starts settling this one too.
+  const collated = [...components].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  expect(collated).toEqual(components);
+});
+
+test("the language menu offers automatic, and remembers what was chosen", async ({
+  page,
+}) => {
+  await page.goto(url(SCOPED));
+  await showParts(page);
+
+  // Three entries: the two locales, and the answer that is not a locale.
+  const options = page.locator("[data-nd-locale]");
+  await expect(options).toHaveCount(3);
+  expect(await options.evaluateAll((all) => all.map((a) => a.dataset.ndLocale))).toEqual([
+    "auto",
+    "en",
+    "pt-BR",
+  ]);
+
+  // Automatic is server-rendered as the one in force, so nothing announces a
+  // wrong answer before the script runs.
+  await expect(page.locator("[data-nd-locale='auto']")).toHaveAttribute(
+    "aria-current",
+    "true",
+  );
+
+  await page.locator(".nd-locale > summary").click();
+  await page.locator("[data-nd-locale='pt-BR']").click();
+  await expect(page).toHaveURL(new RegExp(`/pt-BR/${SCOPED}$`));
+  expect(await page.evaluate(() => localStorage.getItem("noctua-locale"))).toBe("pt-BR");
+  await expect(page.locator("[data-nd-locale='pt-BR']")).toHaveAttribute(
+    "aria-current",
+    "true",
+  );
+});
+
+test("an explicitly requested locale is never redirected away from", async ({ page }) => {
+  // Automatic, and a browser that asks for something this page is not in. A
+  // link somebody shared has to open in the language it was shared in, so a
+  // cold entry — no referrer inside the site — must not move.
+  await page.goto(url(ANY));
+  await showParts(page);
+  await page.evaluate(() => localStorage.setItem("noctua-locale", "auto"));
+
+  await page.goto(url(PAGE.typography, "pt-BR"));
+  await showParts(page);
+  await expect(page).toHaveURL(new RegExp(`/pt-BR/${PAGE.typography}$`));
+
+  // Following a link inside the site is the other case, and there the reader's
+  // browser wins: Playwright's Chromium asks for `en-US`.
+  await page.locator(`.nd-nav-link[href="../${PAGE.icons}"]`).click();
+  await expect(page).toHaveURL(new RegExp(`/en/${PAGE.icons}$`));
+});
+
+test("the ten inline marks are one page, and their own are gone", async ({ page }) => {
+  // `Em` was a page. `Strong` was a page. A reader asking which mark a
+  // keystroke takes opened three of them.
+  const MARKS = ["abbr", "code", "del", "em", "ins", "kbd", "mark", "strong", "text", "time"];
+
+  await page.goto(url("inline-text/"));
+  await showParts(page);
+  const sections = await page.evaluate(
+    (marks) =>
+      marks.map((slug) => {
+        const section = document.getElementById(slug);
+        return {
+          slug,
+          there: !!section,
+          // A merge that quietly dropped a component's props would look exactly
+          // like a merge that worked.
+          props: !!section?.querySelector("table.nd-table"),
+          heading: section?.querySelector("h2")?.textContent.trim() ?? null,
+        };
+      }),
+    MARKS,
+  );
+  for (const section of sections) {
+    expect(section.there, `${section.slug} is not on the page`).toBe(true);
+    expect(section.props, `${section.slug} lost its props table`).toBe(true);
+    expect(section.heading, `${section.slug} has no name of its own`).toBeTruthy();
+  }
+
+  // Every jump in the index lands on something.
+  const jumps = await page.evaluate(() =>
+    [...document.querySelectorAll(".nd-doc-index-list a")].map((a) => ({
+      href: a.getAttribute("href"),
+      lands: !!document.querySelector(a.getAttribute("href")),
+    })),
+  );
+  expect(jumps.length).toBe(MARKS.length);
+  expect(jumps.filter((jump) => !jump.lands)).toEqual([]);
+
+  // AND IT LANDS BELOW THE HEADER. The header is sticky, so a jump that only
+  // scrolls the section to y=0 puts the header on the section's own name.
+  await page.goto(url("inline-text/#kbd"));
+  await showParts(page);
+  const landed = await page.evaluate(() => ({
+    heading: document.querySelector("#kbd h2").getBoundingClientRect().top,
+    header: document.querySelector(".nd-header").getBoundingClientRect().bottom,
+  }));
+  expect(landed.heading, "the jump landed under the header").toBeGreaterThan(landed.header);
+
+  // And the pages they had are not written any more, in any locale.
+  for (const locale of LOCALES) {
+    for (const slug of MARKS) {
+      const response = await page.request.get(url(`${slug}/`, locale));
+      expect(response.status(), `/${locale}/${slug}/ is still being written`).toBe(404);
+    }
+  }
+});
+
+// --- The call's own header --------------------------------------------------
+//
+// The call and the example used to sit in one flex column, on one surface,
+// twelve pixels apart, and the reader's complaint was that the two ran
+// together. The caption is a band now: flush with the stage's edges, on the
+// same `surface-subtle` the rail carries, with a hairline under it.
+//
+// Everything below is written as GEOMETRY rather than as the properties that
+// produce it. The rail's two rounds taught that lesson twice: a declaration
+// that loses on specificity is indistinguishable from one that works, and
+// asserting `align-items` passes against a rule that never ran.
+
+/** One frame's caption, its stage and the boxes around them. */
+const band = (page, index = 0) =>
+  page.locator("[data-nd-frame]").nth(index).evaluate((frame) => {
+    const cap = frame.querySelector(".nd-example-source");
+    const stage = frame.querySelector(".nd-frame-stage");
+    const shown = frame.querySelector(".nd-example-stage");
+    const cs = getComputedStyle(cap);
+    const box = (el) => {
+      const r = el.getBoundingClientRect();
+      return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, w: r.width, h: r.height };
+    };
+    // The stage's CONTENT box, which is what the band has to reach: it is the
+    // padding moving off this element and onto the example's parts that lets
+    // the band be flush at all.
+    const ss = getComputedStyle(stage);
+    const s = box(stage);
+    return {
+      cap: box(cap),
+      stage: { ...s, padLeft: parseFloat(ss.paddingLeft), padRight: parseFloat(ss.paddingRight) },
+      shown: box(shown),
+      style: {
+        border: parseFloat(cs.borderBlockEndWidth),
+        bg: cs.backgroundColor,
+        stageBg: ss.backgroundColor,
+        shadow: cs.boxShadow,
+      },
+      frame: box(frame),
+      rail: box(frame.querySelector(".nd-frame-bar")),
+    };
+  });
+
+test("the call's band reaches both edges of its stage", async ({ page }) => {
+  await page.setViewportSize({ width: 1120, height: 900 });
+  for (const path of [PAGE.button, PAGE.spacing]) {
+    await page.goto(url(path));
+    const m = await band(page);
+    // Flush, to the pixel. A band inset by the stage's old padding is a chip,
+    // not a header — and that padding is exactly what moved to make room.
+    expect(Math.round(m.cap.left - m.stage.left - m.stage.padLeft), path).toBe(0);
+    expect(Math.round(m.stage.right - m.stage.padRight - m.cap.right), path).toBe(0);
+  }
+});
+
+test("every line of the call starts on the same column", async ({ page }) => {
+  // THE DEFECT: the first character of the first line looked like a space.
+  //
+  // `.nd-code-inline` is a pill — a tint with `0 var(--noctua-space-1)` around
+  // it — which is right for a token name inside a sentence. On the band the
+  // `subtle` tone already drops the tint, so all that survived was the padding,
+  // and under `pre-wrap` only the FIRST line is inside it. Every call on the
+  // site opened four pixels further in than its own second line.
+  //
+  // Measured on the rendered text rather than on the box, because the box was
+  // never wrong: the run began where it should and the glyphs did not.
+  await page.setViewportSize({ width: 1120, height: 1000 });
+  await page.goto(url(PAGE.exampleFrame));
+  const starts = await page.locator(".nd-example-source").first().evaluate((cap) => {
+    const code = cap.querySelector(".nd-code-inline");
+    const text = code.firstChild;
+    const range = document.createRange();
+    const seen = new Map();
+    for (let at = 0; at < text.length; at += 1) {
+      range.setStart(text, at);
+      range.setEnd(text, at + 1);
+      const box = range.getBoundingClientRect();
+      if (!box.width || !text.data[at].trim()) continue;
+      // The first painted glyph on each line, by the line's own top edge.
+      const line = Math.round(box.top);
+      if (!seen.has(line)) seen.set(line, Math.round(box.left - cap.getBoundingClientRect().left));
+    }
+    return [...seen.values()];
+  });
+  // `ExampleFrame {` and its closing `}` are the two unindented lines. They
+  // have to begin on the same column, and that column is the band's padding.
+  expect(starts.length, "the call is one line, so it cannot show this").toBeGreaterThan(2);
+  expect(Math.min(...starts), `lines began at ${starts.join("/")}`).toBe(starts.at(-1));
+});
+
+test("the band is separated by a line, and never by elevation", async ({ page }) => {
+  await page.goto(url(PAGE.button));
+  const m = await band(page);
+  expect(m.style.border, "nothing separates the band from the example").toBeGreaterThan(0);
+  // A surface, so the band and the rail read as one layer of chrome. Stated
+  // against the stage's own background rather than against a colour: naming one
+  // here would be the test asserting the stylesheet against itself, and the
+  // gate refuses a colour literal in source for exactly that reason. What is
+  // claimed is that a reader can tell the header from what it heads.
+  expect(m.style.bg).not.toBe(m.style.stageBg);
+  // §9.7. `shell.spec.js` sweeps this globally; it is repeated here because
+  // this is the newest painted surface on the site and the sweep is the kind of
+  // test that only fails once somebody has already shipped the mistake.
+  expect(m.style.shadow).toBe("none");
+});
+
+test("the example is under the band rather than inside it", async ({ page }) => {
+  // THE DEVELOPER'S ACTUAL COMPLAINT, stated as a measurement: *isso acaba se
+  // misturando ao conteúdo*.
+  await page.setViewportSize({ width: 1120, height: 900 });
+  await page.goto(url(PAGE.button));
+  const m = await band(page);
+  expect(Math.round(m.shown.top - m.cap.bottom), "the example overlaps its header").toBeGreaterThan(0);
+});
+
+test("the band costs the frame no height, and the rail still starts at the top", async ({ page }) => {
+  await page.setViewportSize({ width: 1120, height: 900 });
+  await page.goto(url(PAGE.button));
+  const m = await band(page, 1);
+  // The header spans the STAGE's column, not the frame's whole width. Spanning
+  // both would put the rail in a second grid row and add about 36px to every
+  // one of the site's frames — which is most of two rounds of compaction.
+  expect(Math.round(m.rail.top - m.frame.top), "the rail was pushed down a row").toBeLessThanOrEqual(2);
+  const heights = await page.evaluate(() =>
+    [...document.querySelectorAll("[data-nd-frame]")]
+      .map((f) => Math.round(f.getBoundingClientRect().height))
+      .sort((a, b) => a - b),
+  );
+  // The median frame was 189px before the band and has to stay there: the
+  // caption changed how it is drawn, not where in the column it lives.
+  expect(heights[Math.floor(heights.length / 2)]).toBeLessThanOrEqual(200);
+});
+
+test("the band survives the narrowest screen", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  for (const locale of LOCALES) {
+    await page.goto(url(PAGE.button, locale));
+    const m = await band(page);
+    expect(Math.round(m.cap.left - m.stage.left - m.stage.padLeft), locale).toBe(0);
+    expect(m.cap.h, `the band collapsed in ${locale}`).toBeGreaterThan(0);
+    const sideways = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(sideways, locale).toBe(0);
+  }
 });

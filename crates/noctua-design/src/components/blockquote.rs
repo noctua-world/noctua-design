@@ -4,11 +4,11 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! A quotation set apart from the text around it.
+//! Show a quotation set apart from the text around it.
 
 use dioxus::prelude::*;
 
-/// Whether the rule beside it takes the accent colour.
+/// Whether the rule beside it takes the accent color.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum BlockquoteTone {
     #[default]
@@ -32,14 +32,19 @@ impl BlockquoteTone {
     }
 }
 
-/// A quotation set apart from the text around it.
+/// Show a quotation set apart from the text around it.
 #[component]
 pub fn Blockquote(
-    /// A URL for the source. Machine-readable; it is not shown.
+    /// A URL for the source. It is read by machines and is not shown to users.
     cite: Option<String>,
-    /// Whether the rule beside it takes the accent colour.
+    /// Whether the rule beside it takes the accent color.
     #[props(default)]
     tone: BlockquoteTone,
+    /// Who said it, rendered as a `<footer>` with a `<cite>` inside. `cite` above is a URL for machines, and this is the line a reader sees.
+    attribution: Option<String>,
+    /// Frosts the quotation's own surface, leaving the rule beside it solid.
+    #[props(default = false)]
+    glass: bool,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -52,9 +57,15 @@ pub fn Blockquote(
     rsx! {
         blockquote {
             class: "{root}",
-            "cite": cite,
+            "data-nd-glass": if glass { "true" } else { "false" },
+            cite,
             "data-nd-tone": tone.as_str(),
             {children}
+            if let Some(attribution) = attribution {
+                footer { class: "nd-blockquote-attribution",
+                    cite { "{attribution}" }
+                }
+            }
         }
     }
 }

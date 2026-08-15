@@ -9,11 +9,11 @@ import type { ReactNode } from "react";
 export type CodeTone = "default" | "subtle";
 
 export interface CodeProps {
-  /** How much the fragment should stand out from the prose around it. */
+  /** How strongly the fragment stands out from the prose around it. `default` is the normal contrast and `subtle` is quieter. */
   tone?: CodeTone;
   className?: string;
   children?: ReactNode;
 }
 
-/** A fragment of code inside a sentence. */
+/** Mark a fragment of code inside a sentence. */
 export declare function Code(props: CodeProps): JSX.Element;

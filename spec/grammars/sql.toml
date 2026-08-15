@@ -1,0 +1,84 @@
+# SQL.
+#
+# The one grammar with `case_insensitive`, and it is not a convenience: `SELECT`,
+# `Select` and `select` are one word, and a table listing every casing anyone
+# writes would be three hundred entries that still missed `SeLeCt`.
+#
+# One keyword union across dialects, deliberately. A reader looking at a code
+# block does not know which dialect it is either, and colouring `RETURNING` in a
+# MySQL query is a smaller error than not colouring it in a Postgres one.
+
+[meta]
+name = "sql"
+display = "SQL"
+aliases = ["postgresql", "psql", "mysql", "sqlite"]
+
+[words]
+keyword = [
+  "add", "all", "alter", "and", "as", "asc", "begin", "between", "by",
+  "cascade", "case", "cast", "check", "column", "commit", "constraint",
+  "create", "cross", "database", "default", "delete", "desc", "distinct",
+  "drop", "else", "end", "except", "exists", "foreign", "from", "full",
+  "grant", "group", "having", "if", "in", "index", "inner", "insert",
+  "intersect", "into", "is", "join", "key", "left", "like", "limit", "not",
+  "offset", "on", "or", "order", "outer", "primary", "references", "returning",
+  "right", "rollback", "select", "set", "table", "then", "transaction",
+  "union", "unique", "update", "using", "values", "view", "when", "where",
+  "with",
+]
+type = [
+  "bigint", "boolean", "bytea", "char", "date", "decimal", "double", "float",
+  "int", "integer", "json", "jsonb", "numeric", "real", "serial", "smallint",
+  "text", "time", "timestamp", "uuid", "varchar",
+]
+constant = ["null", "true", "false", "current_timestamp", "current_date"]
+function = [
+  "avg", "coalesce", "concat", "count", "greatest", "least", "lower", "max",
+  "min", "now", "nullif", "round", "sum", "trim", "upper",
+]
+
+[[comment]]
+open = "--"
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+multiline = true
+
+# A double-quoted name is an identifier in standard SQL, not a string. Painting
+# it as a property is the closer reading: it is a column or a table.
+[[string]]
+open = '"'
+close = '"'
+
+[number]
+exponent = "eE"
+
+[symbols]
+operator = "+-*/%=<>!|"
+punctuation = "(){}[],;:."
+
+[context]
+call_paren = true
+member_dot = true
+case_insensitive = true
+
+[[case]]
+name = "a keyword is a keyword in any casing"
+code = "SELECT id FROM users WHERE name Like 'a%';"
+expect = ["keyword SELECT", "keyword FROM", "keyword WHERE", "keyword Like", "string 'a%'"]
+
+[[case]]
+name = "a line comment is two dashes, not one"
+code = "-- a note\nselect 1 - 2;"
+expect = ["comment -- a note", "keyword select", "number 1", "operator -", "number 2"]
+
+[[case]]
+name = "a type and an aggregate"
+code = "create table t (n integer); select count(*) from t;"
+expect = ["keyword create", "keyword table", "type integer", "function count"]

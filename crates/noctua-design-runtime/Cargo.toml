@@ -1,0 +1,22 @@
+[package]
+name = "noctua-design-runtime"
+description = "The browser behaviour this design system ships, and the paths it is read from."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+# ALMOST NO RUST, AND THAT IS THE POINT. What this crate holds is the
+# JavaScript a consumer of the packages actually receives — `dist/anchor.js`,
+# `dist/color.js`, `dist/color-picker.js` — beside the one fact Rust needs
+# about it: where each file is. `xtask` reads them from these paths and
+# `noctua-design-emit` writes the generated header from the same constants, so
+# a rename is one edit instead of two that can disagree.
+#
+# It is a crate rather than a loose directory because `xtask` already reads
+# `crates/noctua-design-lineage/src/layout.js` exactly this way, and a second
+# arrangement for the same job would be a second place to look.
+
+[lints]
+workspace = true

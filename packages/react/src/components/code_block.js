@@ -4,30 +4,167 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// A block of code, in the monospaced face, with a copy control.
+// Show a block of highlighted code, in any of thirty-four languages.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
 
-/** Applied by the component, never by the caller — which is what keeps
- * the two implementations from disagreeing about a default. */
-const defaults = {
-  numbered: "false",
-  wrap: "false",
-  copy: "true",
-};
+import { ALIASES, GRAMMARS, lines, scan } from "@noctua-world/design-tokens/grammars.js";
 
-export function CodeBlock({ language, numbered, wrap, copy, className, children, ...rest }) {
-  const numbered_ = numbered ?? "false";
-  const wrap_ = wrap ?? "false";
-  const copy_ = copy ?? "true";
+import { Icon } from "./icon.js";
+export function CodeBlock({ code, language, theme, filename, caption, numbered, startLine, markLines, focus, wrap, maxLines, expandLabel, collapseLabel, wrapLabel, copy, copied, glass, className, ...rest }) {
+  const numbered_ = numbered ?? false;
+  const wrap_ = wrap ?? false;
+  const focus_ = focus ?? false;
+  const glass_ = glass ?? false;
+  const theme_ = theme ?? "auto";
+  const grammar = GRAMMARS[language] ?? GRAMMARS[ALIASES[language]] ?? GRAMMARS.plain;
+  const named = grammar !== GRAMMARS.plain ? grammar : null;
+  const rows = lines(scan(grammar, code));
+  const trailing = code.endsWith("\n");
+  if (trailing && rows.length > 1) rows.pop();
+
+  // `3,7-9`. Anything unparseable is silently no mark rather than an error.
+  const marked = new Set();
+  for (const part of (markLines ?? "").split(",")) {
+    const [from, to] = part.trim().split("-");
+    const start = Number.parseInt(from, 10);
+    const end = to === undefined ? start : Number.parseInt(to, 10);
+    if (Number.isNaN(start) || Number.isNaN(end)) continue;
+    for (let line = start; line <= end; line += 1) marked.add(line);
+  }
+
+  const first = Number.parseInt(startLine ?? "", 10) || 1;
+  const isDiff = grammar.name === "diff";
+  const name = filename ?? named?.display ?? null;
+  const badge = named?.display ?? null;
+  const bar = Boolean(filename || copy || wrapLabel || badge);
+  const maximum = Number.parseInt(maxLines ?? "", 10);
+  const style = { counterReset: `nd-code-line ${Math.max(first - 1, 0)}` };
+  if (!Number.isNaN(maximum)) style["--nd-code-max"] = maximum;
+  const collapsible = Boolean(expandLabel && maxLines);
   const root = ["nd-codeblock", className].filter(Boolean).join(" ");
-  const props = { className: root, ...rest };
-  if (language !== undefined) props["data-nd-language"] = String(language);
-  if (numbered_ !== undefined) props["data-nd-numbered"] = String(numbered_);
-  if (wrap_ !== undefined) props["data-nd-wrap"] = String(wrap_);
-  if (copy_ !== undefined) props["data-nd-copy"] = String(copy_);
-  return h("pre", props, children);
+
+  const lineKind = (row) => {
+    if (!isDiff || row.length === 0) return undefined;
+    const role = row[0].role;
+    if (role === "inserted" || role === "deleted") return role;
+    if (role === "comment" || role === "attribute") return "meta";
+    return "context";
+  };
+
+  return h(
+    "figure",
+    { className: "nd-codeblock-figure", "data-nd-collapsible": collapsible ? "true" : undefined, ...rest },
+    bar
+      ? h(
+          "div",
+          { key: "bar", className: "nd-codeblock-bar" },
+          filename
+            ? h("span", { key: "n", className: "nd-codeblock-name nd-identifier" }, filename)
+            : null,
+          badge
+            ? h("span", { key: "l", className: "nd-codeblock-badge nd-identifier" }, badge)
+            : null,
+          wrapLabel
+            ? h(
+                "button",
+                {
+                  key: "w",
+                  className: "nd-codeblock-control",
+                  type: "button",
+                  "aria-label": wrapLabel,
+                  title: wrapLabel,
+                  "aria-pressed": String(wrap_),
+                  "data-nd-wrap-toggle": "",
+                },
+                h(Icon, { icon: "wrap-text" }),
+              )
+            : null,
+          copy
+            ? h(
+                "button",
+                {
+                  key: "c",
+                  className: "nd-codeblock-control",
+                  type: "button",
+                  "aria-label": copy,
+                  title: copy,
+                  "data-nd-copy": "",
+                  "data-nd-copied": copied,
+                },
+                h(Icon, { key: "i", icon: "copy" }),
+                h(Icon, { key: "k", icon: "check" }),
+              )
+            : null,
+          copy
+            ? h("span", {
+                key: "s",
+                className: "nd-visually-hidden",
+                role: "status",
+                "data-nd-copy-status": "",
+              })
+            : null,
+        )
+      : null,
+    h(
+      "pre",
+      {
+        key: "p",
+        className: root,
+        style,
+        "data-nd-code-theme": theme_,
+        "data-nd-language": language,
+        "data-nd-numbered": String(numbered_),
+        "data-nd-wrap": String(wrap_),
+        "data-nd-focus": String(focus_),
+        "data-nd-glass": String(glass_),
+      },
+      // The code is the focusable scroller, not the <pre>. See the Dioxus half.
+      h(
+        "code",
+        {
+          className: "nd-codeblock-code",
+          tabIndex: 0,
+          role: name ? "region" : undefined,
+          "aria-label": name ?? undefined,
+        },
+        // A REAL NEWLINE, BESIDE EACH LINE AND NOT INSIDE IT. See the Dioxus
+        // half: inside, it is a forced break at the end of a block box and
+        // every line gets an empty one after it.
+        rows.flatMap((row, index) => {
+          const line = h(
+            "span",
+            {
+              key: index,
+              className: "nd-codeblock-line",
+              "data-nd-mark": marked.has(first + index) ? "true" : undefined,
+              "data-nd-line": lineKind(row),
+            },
+            ...row.map((token, at) =>
+              h("span", { key: at, "data-nd-tok": token.role }, token.text),
+            ),
+          );
+          return index + 1 < rows.length || trailing ? [line, "\n"] : [line];
+        }),
+      ),
+    ),
+    collapsible
+      ? h(
+          "button",
+          {
+            key: "e",
+            className: "nd-codeblock-expand",
+            type: "button",
+            "aria-expanded": "false",
+            "data-nd-expand": "",
+            "data-nd-collapse-label": collapseLabel,
+          },
+          expandLabel,
+        )
+      : null,
+    caption ? h("figcaption", { key: "f", className: "nd-codeblock-caption" }, caption) : null,
+  );
 }

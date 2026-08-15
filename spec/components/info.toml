@@ -1,0 +1,56 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use an info marker for one sentence that explains a word beside it. It opens on a press rather than a hover, so it works on a touch screen and from a keyboard. If all readers need the sentence, write it into the page."
+
+[meta]
+name = "Info"
+element = "span"
+class = "nd-info"
+summary = "Explain a word with one sentence, opened by a small `i` beside it."
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-info"
+doc = "The identifier for this note, and the root of the two ids here. **Required**, because a page may carry many of these and ids derived from an absent name would collide."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The control's name, in the reader's language, such as *About the deadline*. **Required**: the control is a glyph, so this is its only name. Name what is explained rather than the act of explaining."
+
+[prop.heading]
+type = "text"
+doc = "A title inside the note, for an explanation that needs one, such as a term being defined. Absent is the common case, because one sentence needs no heading."
+
+[prop.close_label]
+type = "text"
+attribute = "data-nd-close-label"
+doc = "The name of the control that closes the note. Wanted in practice, because Escape and a click outside also close it and neither is discoverable on a touch screen."
+
+[prop.placement]
+type = "enum"
+values = ["auto", "start", "end"]
+default = "auto"
+attribute = "data-nd-placement"
+# Where the NOTE opens, and a still picture has no open note in it. The
+# three values drew the same closed marker three times.
+variants = false
+doc = "Where the note opens. `auto` measures the room below and flips above when there is not enough. `start` and `end` pin the note's leading or trailing edge to the control, for a marker at the edge of a table."
+
+[prop.children]
+type = "children"
+doc = "The explanation, as one or two sentences. It may hold a `Link`, and a reader can select and copy it, which the browser's own tooltip does not allow."
+
+[state.open]
+attribute = "aria-expanded"
+doc = "Whether the note is showing. Written on the control, which is the element a reader presses and the element a screen reader reads the state of."
+
+[a11y]
+needs_name = true
+notes = """The control is a `<button>` with `aria-expanded` and `aria-controls`, and the glyph is `aria-hidden`. The note is a `role="note"` rather than a dialog. Escape closes it and puts focus back on the button."""
+
+[keyboard]
+"Enter or Space" = "Opens the note, and closes it again."
+"Escape" = "Closes the note and puts the focus back on the control that opened it."
+"Tab" = "Walks into the note and out of it. Nothing is trapped, and leaving the note closes it."

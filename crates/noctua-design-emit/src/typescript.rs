@@ -32,7 +32,7 @@ fn index_js(spec: &Spec) -> String {
 
     writeln!(
         out,
-        "\n// Every non-colour token. Colours are not here — they come from\n\
+        "\n// Every non-color token. Colors are not here — they come from\n\
          // noctua-colors and are vendored under packages/tokens/vendor/.\n"
     )
     .expect("write");
@@ -50,6 +50,7 @@ fn index_js(spec: &Spec) -> String {
     writeln!(out, "}};\n").expect("write");
 
     var_object(&mut out, "radius", &spec.radius, prefix, "radius");
+    var_object(&mut out, "scene", &spec.scene, prefix, "scene");
     var_object(&mut out, "size", &spec.r#type.size, prefix, "size");
     var_object(
         &mut out,
@@ -139,6 +140,7 @@ fn index_d_ts(spec: &Spec) -> String {
     writeln!(out, "}};\n").expect("write");
 
     declare(&mut out, "radius", spec.radius.keys(), "string");
+    declare(&mut out, "scene", spec.scene.keys(), "string");
     declare(&mut out, "size", spec.r#type.size.keys(), "string");
     declare(&mut out, "tracking", spec.r#type.tracking.keys(), "string");
     declare(&mut out, "focus", spec.focus.keys(), "string");

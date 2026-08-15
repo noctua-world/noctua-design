@@ -1,0 +1,89 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a switch for a setting that is on or off and takes effect immediately. For a
+value out of three or more, use `Segmented`. For a field submitted with the rest
+of a form later, use `Checkbox`.
+"""
+
+[meta]
+name = "Switch"
+element = "button"
+class = "nd-switch"
+summary = "Let users turn one setting on or off, with effect as soon as it is pressed."
+
+# WHY A SWITCH AND NOT A TWO-OPTION `Segmented`.
+#
+# The settings panel had three booleans — blackout, aurora, grain — each drawn
+# as a radiogroup of two buttons reading "Off" and "On". It works, and it is
+# wrong in three ways at once: a screen reader announces "radio group, Off,
+# 1 of 2" where the reader asked a yes-or-no question, the two words take a
+# full-width row apiece, and `role="radio"` says *choose one of these* about a
+# control whose two states are one state and its absence.
+#
+# `role="switch"` says what this is, in one word, and takes a corner of a row.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-group"
+doc = "The name of the setting being switched. The script binds to it in the same way it binds to a `Segmented`, so one handler serves both."
+
+[prop.label]
+type = "text"
+required = true
+doc = "What the switch turns on, in the reader's language. It is the accessible name and the visible text beside the control."
+
+[prop.on]
+type = "text"
+required = true
+attribute = "data-nd-on"
+doc = "The value that means on. It is read from the model at the call site rather than assumed here, because a setting may spell its two values in any words."
+
+[prop.off]
+type = "text"
+required = true
+attribute = "data-nd-off"
+doc = "The value that means off. The script sends whichever of the two is not in force, so no value is composed anywhere."
+
+[prop.checked]
+type = "bool"
+default = "false"
+attribute = "aria-checked"
+doc = "Whether the switch is on. Always written, `true` or `false`, because a `role=\"switch\"` without it leaves the state unknown to assistive technology."
+
+[prop.describedby]
+type = "text"
+attribute = "aria-describedby"
+doc = "The id of the sentence explaining what the switch does. It is linked with `aria-describedby`, so a screen reader reads it after the name."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The size of the control's box. Both values clear WCAG 2.5.8's 24px minimum target."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "aria-disabled"
+doc = "Stops users changing the setting. It uses `aria-disabled`, so the switch stays reachable and users can find that the setting exists."
+
+[a11y]
+role = "switch"
+needs_name = true
+notes = """
+The control carries `role="switch"` rather than a checkbox role, which is for a
+value that will be submitted. `aria-checked` is always written, `true` or
+`false`, and `aria-disabled` keeps a disabled switch in the tab order.
+"""
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts the track. The knob stays solid, because its position is what carries the state."
+
+[keyboard]
+"Space or Enter" = "Turns the switch on or off. Both keys work, because the control is a `<button>`."

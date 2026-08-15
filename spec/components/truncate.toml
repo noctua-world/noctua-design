@@ -2,27 +2,28 @@
 name = "Truncate"
 element = "span"
 class = "nd-truncate"
-summary = "Text clipped to a line count, with the full value still available."
+# The still picture needs REAL CHILDREN. Without this the grid falls
+# back to the pangram placeholder, so every value of every enum prop
+# draws one identical line of text — which is what the reader saw.
+specimen = "<span class=\"nd-identifier\">Aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp</span>"
+summary = "Clip text to a fixed number of lines and keep the full value available."
 
 [prop.lines]
 type = "enum"
 values = ["1", "2", "3", "4"]
 default = "1"
 attribute = "data-nd-lines"
-doc = "How many lines to show before clipping."
+doc = "How many lines are shown before the text is clipped: 1, 2, 3 or 4. One line by default."
 
 [prop.title]
 type = "text"
 attribute = "title"
-doc = "The full text. Shown on hover and announced in full."
+doc = "The full text, written into the `title` attribute. Pointer users see it on hover."
 
 [prop.children]
 type = "children"
-doc = "The text."
+doc = "The text to clip."
 
 [a11y]
 needs_name = true
-notes = """
-Clipping is visual only: the full text stays in the accessible tree, so a
-screen reader reads the whole value. Truncation that also truncates the
-announcement hides content from exactly the readers who cannot see the ellipsis."""
+notes = "The clipping is visual only. The full text stays in the accessible tree, so a screen reader reads the whole value. Cutting the announcement too would hide content from readers who cannot see the ellipsis."

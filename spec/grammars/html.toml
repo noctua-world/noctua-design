@@ -1,0 +1,32 @@
+# HTML.
+#
+# The islands are somebody else's language: `<script>` holds JavaScript and
+# `<style>` holds CSS, and the markup scanner hands each to its own grammar
+# rather than mangling the first `<` in a comparison into a tag.
+
+[meta]
+name = "html"
+display = "HTML"
+mode = "markup"
+aliases = ["htm", "vue", "svelte"]
+
+[[case]]
+name = "the doctype, a tag, an attribute and a closing tag"
+code = '<!doctype html><a href="/en/" class="nd-a">Read</a>'
+expect = ["attribute <!doctype html>", "tag a", "attribute href", 'string "/en/"', "tag a"]
+
+[[case]]
+name = "a script island is scanned as JavaScript"
+code = "<script>const n = 1; // a note\n</script>"
+expect = ["tag script", "keyword const", "number 1", "comment // a note"]
+
+[[case]]
+name = "a style island is scanned as CSS"
+code = "<style>a { color: red; }</style>"
+expect = ["tag style", "property color"]
+
+[[case]]
+name = "a less-than inside a script is not a tag"
+code = "<script>if (a < b) {}</script>"
+expect = ["tag script", "keyword if", "operator <"]
+reject = ["tag b"]

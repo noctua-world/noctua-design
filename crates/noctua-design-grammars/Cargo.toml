@@ -1,0 +1,15 @@
+[package]
+name = "noctua-design-grammars"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+# NO DEPENDENCIES, like every other generated data crate here. A consumer of the
+# design system should not inherit a regex engine, a parser generator or a
+# grammar runtime in order to show a code block — which is also why the scanner
+# is written by hand against tables rather than compiled from a grammar format.
+
+[lints]
+workspace = true

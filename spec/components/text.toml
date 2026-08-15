@@ -2,34 +2,36 @@
 name = "Text"
 element = "span"
 class = "nd-text"
-summary = "A run of text, with the size, weight and tone of the type scale."
+# One of the marks that go inside a sentence, documented with the others.
+page = "inline-text"
+summary = "Set the size, weight and tone of a run of text, from the type scale."
 
 [prop.size]
 type = "enum"
 values = ["caption", "small", "body", "lead"]
 default = "body"
 attribute = "data-nd-size"
-doc = "The size, from the type scale."
+doc = "The size, from the type scale: `caption`, `small`, `body` or `lead`. Defaults to `body`."
 
 [prop.weight]
 type = "enum"
 values = ["regular", "medium", "semibold", "bold"]
 default = "regular"
 attribute = "data-nd-weight"
-doc = "The weight."
+doc = "The weight: `regular`, `medium`, `semibold` or `bold`. Defaults to `regular`."
 
 [prop.tone]
 type = "enum"
 values = ["default", "muted", "accent"]
 default = "default"
 attribute = "data-nd-tone"
-doc = "How much the text should assert itself."
+doc = "How much the text stands out: `default`, `muted` for secondary text, or `accent`. Defaults to `default`."
 
 [prop.numeric]
 type = "bool"
 default = "false"
 attribute = "data-nd-numeric"
-doc = "Tabular figures, so digits line up in a column."
+doc = "Whether the figures are tabular, so digits line up in a column. Off by default."
 
 [prop.children]
 type = "children"

@@ -1,0 +1,107 @@
+# Python.
+#
+# `upper_type` is on and `property_colon` is off, which is the pair that
+# matters here. An initial capital is a class often enough to be worth
+# colouring, so `Foo = 3` paints `Foo` as a type and that is a known miss. A
+# colon, though, is a slice, a dict, an annotation and the end of every block
+# header — promoting the name in front of one would paint half of every file.
+
+[meta]
+name = "python"
+display = "Python"
+aliases = ["py", "python3"]
+
+[words]
+keyword = [
+  "as", "assert", "async", "await", "break", "class", "continue", "def",
+  "del", "elif", "else", "except", "finally", "for", "from", "global", "if",
+  "import", "lambda", "match", "nonlocal", "pass", "raise", "return", "try",
+  "while", "with", "yield",
+]
+operator = ["and", "in", "is", "not", "or"]
+constant = ["False", "None", "True", "self", "cls", "Ellipsis", "NotImplemented"]
+type = [
+  "bool", "bytes", "complex", "dict", "float", "frozenset", "int", "list",
+  "object", "set", "str", "tuple", "type",
+]
+function = [
+  "abs", "all", "any", "enumerate", "filter", "format", "getattr", "hasattr",
+  "isinstance", "issubclass", "iter", "len", "map", "max", "min", "next",
+  "open", "print", "range", "repr", "reversed", "round", "sorted", "sum", "zip",
+]
+
+[[comment]]
+open = "#"
+
+# The triple-quoted forms first for a reader; the scanner sorts by opener
+# length, so they win over the single-quoted ones however this file is ordered.
+[[string]]
+open = '"""'
+close = '"""'
+escape = "\\"
+multiline = true
+
+[[string]]
+open = "'''"
+close = "'''"
+escape = "\\"
+multiline = true
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+
+[number]
+prefixes = ["0x", "0b", "0o"]
+separator = "_"
+exponent = "eE"
+suffix = true
+leading_dot = true
+
+[symbols]
+operator = "+-*/%=<>!&|^~"
+punctuation = "(){}[],;:.@"
+
+[[sigil]]
+open = "@"
+role = "attribute"
+line_start = true
+
+[context]
+name_after = { def = "function", class = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+member_dot = true
+string_prefix = "fFrRbBuU"
+
+[[case]]
+name = "an f-string is one string, prefix and all"
+code = 'name = f"hello {who}"'
+expect = ['string f"hello {who}"']
+reject = ["plain f"]
+
+[[case]]
+name = "a decorator at the start of a line, and a def after it"
+code = "@property\ndef width(self):\n    return self._w"
+expect = ["attribute @property", "keyword def", "function width", "constant self"]
+
+[[case]]
+name = "the word operators are operators, not identifiers"
+code = "if a is not None and b in c:"
+expect = ["keyword if", "operator is", "operator not", "constant None", "operator and", "operator in"]
+
+[[case]]
+name = "a docstring spans lines and stays one string"
+code = '''
+def f():
+    """Two
+    lines."""
+'''
+expect = ["string \"\"\"Two\n    lines.\"\"\""]

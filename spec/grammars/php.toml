@@ -1,0 +1,82 @@
+# PHP.
+#
+# The open tag is a sigil rather than a mode switch. What that costs is that
+# HTML around the islands scans as PHP — wrong for a whole template, right for
+# the excerpt a code block usually holds, and a mode that guessed would guess
+# wrong on the shorter one.
+
+[meta]
+name = "php"
+display = "PHP"
+
+[words]
+keyword = [
+  "abstract", "as", "break", "case", "catch", "class", "clone", "const",
+  "continue", "declare", "default", "do", "echo", "else", "elseif", "enum",
+  "extends", "final", "finally", "fn", "for", "foreach", "function", "global",
+  "goto", "if", "implements", "include", "include_once", "interface",
+  "instanceof", "match", "namespace", "new", "print", "private", "protected",
+  "public", "readonly", "require", "require_once", "return", "static",
+  "switch", "throw", "trait", "try", "use", "var", "while", "yield",
+]
+operator = ["and", "or", "xor"]
+constant = ["false", "true", "null", "this", "self", "parent"]
+type = ["array", "bool", "callable", "float", "int", "iterable", "mixed", "object", "string", "void"]
+function = ["array_map", "count", "die", "empty", "isset", "printf", "sprintf", "unset", "var_dump"]
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "#"
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+interpolate_open = "{$"
+interpolate_close = "}"
+interpolate_sigil = "$"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+
+[number]
+prefixes = ["0x", "0b", "0o"]
+separator = "_"
+exponent = "eE"
+
+[symbols]
+operator = "+-*/%=<>!&|^~?."
+punctuation = "(){}[],;:@"
+
+[[sigil]]
+open = "<?php"
+role = "attribute"
+
+[[sigil]]
+open = "$"
+role = "property"
+
+[context]
+name_after = { function = "function", class = "type", interface = "type", trait = "type", enum = "type", new = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+
+[[case]]
+name = "the open tag, a variable, and an interpolation in one line"
+code = '<?php $name = "world"; echo "hello $name";'
+expect = ["attribute <?php", "property $name", 'string "world"', "keyword echo", "escape $name"]
+
+[[case]]
+name = "a single-quoted string has no holes"
+code = "echo 'cost $5';"
+expect = ["string 'cost $5'"]
+reject = ["escape $5"]

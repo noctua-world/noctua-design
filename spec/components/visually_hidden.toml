@@ -2,20 +2,17 @@
 name = "VisuallyHidden"
 element = "span"
 class = "nd-visually-hidden"
-summary = "Content for assistive technology only, removed from the visual page."
+summary = "Hide content from the screen while keeping it for assistive technology."
 
 [prop.focusable]
 type = "bool"
 default = "false"
 attribute = "data-nd-focusable"
-doc = "Reveal it when it receives focus, as a skip link does."
+doc = "Whether the content is revealed when it receives focus, as a skip link is."
 
 [prop.children]
 type = "children"
 doc = "The content."
 
 [a11y]
-notes = """
-Not `display: none` and not `visibility: hidden` — both remove the content from
-the accessible tree as well, which is the opposite of the point. The clip-path
-technique keeps it announced while taking it out of the layout."""
+notes = "Not `display: none` and not `visibility: hidden`, because both remove the content from the accessibility tree. The clip-path keeps it announced and out of the layout."

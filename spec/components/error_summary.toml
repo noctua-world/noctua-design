@@ -1,0 +1,63 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use an error summary at the top of a form the server or the browser has refused. Each entry links to the control it is about. Render it only when there are entries."
+
+[meta]
+name = "ErrorSummary"
+element = "div"
+class = "nd-error-summary"
+page = "error-summary"
+summary = "Show users everything wrong with a form, at the top of it, with a link to each control."
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-error-summary"
+doc = "The identifier for this summary, and the root of every id in it. **Required**, because a page may carry one summary per form and ids derived from an absent name would collide."
+
+[prop.title]
+type = "text"
+required = true
+doc = "The heading above the list, such as *There is a problem*. **Required**. It names the box through `aria-labelledby`, so a reader arriving by focus hears what it is."
+
+[prop.description]
+type = "text"
+doc = "A sentence under the heading, before the list. Use it for what the list cannot say, such as *your booking is held for 10 more minutes*. Not for restating the count."
+
+[prop.focus]
+type = "bool"
+default = "true"
+attribute = "data-nd-focus"
+doc = "Whether the summary takes the focus when it appears. On by default, because after a refusal the reader is at the bottom of the form. Turn it off only where something else has a better claim to the focus."
+
+[prop.collect]
+type = "bool"
+default = "false"
+attribute = "data-nd-collect"
+doc = "Whether the script builds the list from the form's own fields rather than from `children`. Off by default, because a server that refused a submission renders the list with no script. On, each field's `validationMessage` is read into the list."
+
+[prop.form]
+type = "text"
+attribute = "data-nd-form"
+doc = "The id of the form to collect from. Absent means the nearest form containing this summary, which is right for the ordinary case and wrong for a summary that sits above its form."
+
+[prop.title_prefix]
+type = "text"
+attribute = "data-nd-title-prefix"
+doc = "A word put in front of the document's own `<title>` while the summary is showing, such as *Error:*. It marks the tab for a reader who has switched away. Absent leaves the title alone."
+
+[prop.children]
+type = "children"
+doc = "The entries, as `ErrorSummaryItem`. Ignored when `collect` is on, because two lists of what is wrong means one of them is out of date."
+
+[state.empty]
+attribute = "data-nd-empty"
+doc = "Set when the summary has nothing to list. It is a `data-` attribute rather than `hidden`, and the stylesheet takes the box out of the layout from there."
+
+[a11y]
+needs_name = true
+notes = """The box carries `tabindex="-1"`, so focus can be sent to it without making it a tab stop, and the content inside carries `role="alert"`. Every entry is a real link to a real id."""
+
+[keyboard]
+"Tab" = """Walks the entries, and out. The box is not a tab stop: `tabindex="-1"` only lets focus be sent to it."""
+"Enter" = "Follows an entry to its control, on the entry. Every entry is a real link, so this is the browser's own behaviour."

@@ -1,0 +1,156 @@
+# Rust.
+#
+# The first grammar written, and the one that shaped three fields of the format:
+#
+#   * `max` on a string form, because `'a` in `&'a str` opens the character
+#     literal and never closes it. Without a cap the scanner eats the rest of
+#     the line hunting a `'` that is not coming, and a lifetime-heavy signature
+#     turns into one long red streak. With the cap it gives up and `'` falls
+#     through to the sigil below, which paints a lifetime as a type — which is
+#     what it is.
+#
+#   * `nestable` on a block comment, because `/* /* */ */` is legal Rust and
+#     stopping at the first `*/` leaves the rest of the file coloured as code
+#     that is actually a comment.
+#
+#   * `string_prefix`, because `r"…"`, `b"…"` and `br"…"` are one string each
+#     and not an identifier followed by one.
+
+[meta]
+name = "rust"
+display = "Rust"
+aliases = ["rs"]
+
+[words]
+keyword = [
+  "as", "async", "await", "break", "const", "continue", "crate", "dyn", "else",
+  "enum", "extern", "fn", "for", "if", "impl", "in", "let", "loop", "match",
+  "mod", "move", "mut", "pub", "ref", "return", "static", "struct", "super",
+  "trait", "type", "union", "unsafe", "use", "where", "while", "yield",
+]
+type = [
+  "bool", "char", "f32", "f64", "i8", "i16", "i32", "i64", "i128", "isize",
+  "str", "u8", "u16", "u32", "u64", "u128", "usize",
+  "Box", "Option", "Result", "String", "Vec", "Self",
+]
+constant = ["false", "true", "None", "Some", "Ok", "Err", "self"]
+function = [
+  "assert", "assert_eq", "assert_ne", "format", "matches", "panic", "print",
+  "println", "eprint", "eprintln", "todo", "unimplemented", "unreachable",
+  "vec", "write", "writeln",
+]
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "/*"
+close = "*/"
+nestable = true
+
+# The raw forms come first for a reader; the scanner sorts by opener length, so
+# `r#"` wins over `"` however this file is ordered.
+[[string]]
+open = 'r#"'
+close = '"#'
+
+[[string]]
+open = 'r"'
+close = '"'
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+multiline = true
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+# Twelve is `'\u{10FFFF}'` with room to spare, and short enough that a lifetime
+# in a where-clause gives up long before the end of the line.
+max = 12
+
+[number]
+prefixes = ["0x", "0b", "0o"]
+separator = "_"
+exponent = "eE"
+suffix = true
+
+[symbols]
+operator = "+-*/%=<>!&|^~?@"
+punctuation = "(){}[],;:.#$"
+
+[[sigil]]
+open = "#!["
+role = "attribute"
+
+[[sigil]]
+open = "#["
+role = "attribute"
+
+# A lifetime, once the character literal has declined it.
+[[sigil]]
+open = "'"
+role = "type"
+
+[context]
+name_after = { fn = "function", macro_rules = "function", struct = "type", enum = "type", trait = "type", union = "type", mod = "type", impl = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+string_prefix = "rb"
+
+[[case]]
+name = "a lifetime is a type, not an unterminated character literal"
+code = "fn longest<'a>(x: &'a str, y: &'a str) -> &'a str { x }"
+expect = ["keyword fn", "function longest", "type 'a", "type str"]
+reject = ["invalid 'a>(x: &'a str, y: &'a str) -> &'a str { x }"]
+
+[[case]]
+name = "a character literal is still a string, and its escape is still an escape"
+code = "let c = '\\n';"
+expect = ["keyword let", "string '", "escape \\n", "string '"]
+
+[[case]]
+name = "a nested block comment ends where it really ends"
+code = "/* outer /* inner */ still */ let x = 1;"
+expect = ["comment /* outer /* inner */ still */", "keyword let", "number 1"]
+
+[[case]]
+name = "a raw string keeps its hashes and ignores the escape inside"
+code = 'let re = r#"a\d+"#;'
+expect = ['string r#"a\d+"#']
+reject = ["escape \\d"]
+
+[[case]]
+name = "a byte string is one token, not an identifier and a string"
+code = 'let raw = b"data";'
+expect = ['string b"data"']
+reject = ["plain b"]
+
+[[case]]
+name = "an attribute and the name after it read together"
+code = "#[derive(Debug)]\nstruct Point;"
+expect = ["attribute #[derive", "keyword struct", "type Point"]
+
+[[case]]
+name = "a suffixed, separated, radix literal is one number"
+code = "let mask = 0xFF_FFu32;"
+expect = ["number 0xFF_FFu32"]
+
+[[case]]
+name = "an escape inside a string is its own token"
+code = 'println!("a\tb");'
+expect = ['function println', 'string "a', 'escape \t', 'string b"']
+
+[[case]]
+name = "a screaming name is a constant and a capitalised one is a type"
+code = "const MAX_SIZE: usize = 8; let v: Vec<Point> = Vec::new();"
+expect = ["constant MAX_SIZE", "type usize", "type Vec", "type Point"]
+
+[[case]]
+name = "an unterminated string is invalid and stops at the end of the input"
+code = 'let s = "no close'
+expect = ['invalid "no close']

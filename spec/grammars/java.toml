@@ -1,0 +1,91 @@
+# Java.
+#
+# `upper_type` and `call_paren` together do most of the work, and the order
+# matters: `System.out.println(` paints `System` as a type and `println` as a
+# call, because the paren is checked first and only then the capital.
+
+[meta]
+name = "java"
+display = "Java"
+
+[words]
+keyword = [
+  "abstract", "assert", "break", "case", "catch", "class", "const",
+  "continue", "default", "do", "else", "enum", "extends", "final", "finally",
+  "for", "goto", "if", "implements", "import", "instanceof", "interface",
+  "native", "new", "package", "private", "protected", "public", "record",
+  "return", "sealed", "static", "strictfp", "super", "switch", "synchronized",
+  "this", "throw", "throws", "transient", "try", "var", "volatile", "while",
+  "yield",
+]
+type = [
+  "boolean", "byte", "char", "double", "float", "int", "long", "short",
+  "void", "String", "Object", "List", "Map", "Set", "Optional", "Integer",
+]
+constant = ["false", "true", "null"]
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+[[string]]
+open = '"""'
+close = '"""'
+escape = "\\"
+multiline = true
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+max = 12
+
+[number]
+prefixes = ["0x", "0b"]
+separator = "_"
+exponent = "eE"
+suffix = true
+
+[symbols]
+operator = "+-*/%=<>!&|^~?:"
+punctuation = "(){}[],;."
+
+[[sigil]]
+open = "@"
+role = "attribute"
+
+[context]
+name_after = { class = "type", interface = "type", enum = "type", record = "type", extends = "type", implements = "type", new = "type", package = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+member_dot = true
+
+[[case]]
+name = "an annotation reads with the name after it"
+code = "@Override\npublic String toString() { return name; }"
+expect = ["attribute @Override", "keyword public", "type String", "function toString"]
+
+[[case]]
+name = "a call beats a capital, and a bare capital is a type"
+code = 'System.out.println(new Buffer());'
+# `new Buffer()` paints `Buffer` as a TYPE rather than a call, because
+# `name_after` is checked before the paren: what follows `new` is the thing
+# being constructed, and that is the more useful of the two readings.
+expect = ["type System", "property out", "function println", "keyword new", "type Buffer"]
+
+[[case]]
+name = "a text block spans lines"
+code = """
+String s = \"\"\"
+hello
+\"\"\";"""
+expect = ["type String", "string \"\"\"\nhello\n\"\"\""]

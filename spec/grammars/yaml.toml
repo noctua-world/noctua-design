@@ -1,0 +1,54 @@
+# YAML.
+#
+# `property_colon = "any"` and nothing else, because that really is most of what
+# YAML is. Block scalars, anchors and flow mappings are approximated: `|` and
+# `>` scan as operators and their bodies as plain text, which is closer to right
+# than colouring them as whatever they happen to look like.
+
+[meta]
+name = "yaml"
+display = "YAML"
+aliases = ["yml"]
+
+[identifier]
+extra = "_-."
+
+[words]
+constant = ["true", "false", "null", "yes", "no", "on", "off", "True", "False", "Null"]
+
+[[comment]]
+open = "#"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+
+[number]
+exponent = "eE"
+
+[symbols]
+operator = "|>*&!%"
+punctuation = "{}[],:-?"
+
+[context]
+property_colon = "any"
+
+[[case]]
+name = "a key is a property and a scalar is not"
+code = "name: noctua\nsteps:\n  - 1\n  - 2"
+expect = ["property name", "plain noctua", "property steps", "number 1"]
+
+[[case]]
+name = "a quoted key is still a key"
+code = '"on": true'
+expect = ['property "on"', "constant true"]
+
+[[case]]
+name = "a comment is a comment and a hash in a value is not"
+code = "colour: '#fff' # the page"
+expect = ["property colour", "string '#fff'", "comment # the page"]

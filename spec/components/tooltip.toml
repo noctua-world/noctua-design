@@ -1,0 +1,112 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a tooltip for a short hint about the control it wraps, never for that
+control's only name. If every reader needs the sentence, write it into the page.
+For an explanation of a word in running text, use `Info`.
+"""
+
+[meta]
+name = "Tooltip"
+element = "span"
+class = "nd-tooltip"
+summary = "Explain a control with a short hint, shown on hover and on focus."
+
+# WHAT OPENS IT, AND WHY THIS COMPONENT ANSWERS THAT DIFFERENTLY FROM `Info`.
+#
+# `Info` opens on a PRESS and refuses hover outright, because its sentence is
+# content: a touch reader who cannot hover would lose it entirely. A tooltip is
+# the other case. Its sentence repeats or narrows something the control already
+# says, so a reader who never sees it has lost a convenience rather than a fact,
+# and the contract below is what keeps that true.
+#
+# So it opens three ways, and each one is a different reader:
+#
+# 1. ON HOVER, after `delay`. The wait is the guard against a pointer crossing a
+#    toolbar and lighting six bubbles on the way past.
+# 2. ON FOCUS, with no wait at all. A reader who tabbed onto the control has
+#    already chosen it, so there is nothing to guard against. This is also what
+#    serves a screen reader on a touch screen, where focus follows the reader's
+#    swipe and `aria-describedby` is conveyed while the bubble is showing.
+# 3. WHILE THE CONTROL IS HELD, on a screen with no hover at all. A press that
+#    is held shows the hint and releasing it takes the hint away, so a sighted
+#    touch reader has a way in that costs the control's own action nothing.
+#
+# TWO RULES THE DOCUMENTATION AND A BROWSER TEST BOTH HOLD.
+#
+# 1. IT IS NEVER THE CONTROL'S ONLY NAME. `aria-describedby` is a description,
+#    which assistive technology may read late, read after the name, or skip on a
+#    reader's own setting. A control named by its tooltip is a control with no
+#    name for anybody who has done that.
+# 2. IT HOLDS NOTHING INTERACTIVE. The bubble is not in the tab order and closes
+#    when the pointer leaves, so a link inside it is a link that cannot be
+#    reached. `Popover` is the component for a surface with controls in it.
+#
+# AND IT IS NOT `title`.
+#
+# The platform's own tooltip cannot be styled, cannot be selected or copied,
+# never appears from the keyboard, and is announced twice by several screen
+# readers. Nothing here writes one.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-tooltip"
+doc = """
+What this hint belongs to, as a script finds it, and the root of the id here.
+**Required**, because an id derived from an absent name collides the moment a
+page carries two.
+"""
+
+[prop.text]
+type = "text"
+required = true
+doc = """
+The hint, as one short line. **Required**: a tooltip with nothing in it is a
+control that gained an `aria-describedby` pointing at empty space.
+"""
+
+[prop.placement]
+type = "enum"
+values = ["auto", "start", "end"]
+default = "auto"
+attribute = "data-nd-placement"
+# Where the BUBBLE opens, and a still picture has no open bubble in it.
+variants = false
+doc = """
+Where the bubble opens. `auto` measures the room under the control and flips
+above when there is not enough. `start` and `end` pin its leading or trailing
+edge to the control.
+"""
+
+[prop.delay]
+type = "enum"
+values = ["none", "short", "long"]
+default = "short"
+attribute = "data-nd-delay"
+# A wait, which a still picture cannot show at all.
+variants = false
+doc = """
+How long a pointer rests before the bubble opens. Focus ignores it. Both waits
+collapse to the same value under `prefers-reduced-motion`, so `long` is never
+the quicker of the two.
+"""
+
+[prop.children]
+type = "children"
+doc = "The control the hint is about. One control, which is what the script attaches `aria-describedby` to."
+
+[state.shown]
+attribute = "data-nd-shown"
+doc = "Set on the root while the bubble is open. The bubble itself is hidden by the `hidden` attribute, which is what keeps its text out of the accessibility tree until then."
+
+[a11y]
+notes = """
+The bubble is a `role="tooltip"` and the control points at it with
+`aria-describedby`. It is never the control's accessible name, it holds nothing
+focusable, and Escape hides it without moving the focus.
+"""
+
+[keyboard]
+Tab = "Shows the hint on arriving at the control, with no wait, and hides it again on leaving."
+Escape = "Hides the hint and leaves the focus where it is, so the control can still be used."

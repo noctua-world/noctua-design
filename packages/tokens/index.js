@@ -4,7 +4,7 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// Every non-colour token. Colours are not here — they come from
+// Every non-color token. Colors are not here — they come from
 // noctua-colors and are vendored under packages/tokens/vendor/.
 
 export const prefix = "noctua";
@@ -26,6 +26,25 @@ export const radius = {
   control: "var(--noctua-radius-control)",
   surface: "var(--noctua-radius-surface)",
   pill: "var(--noctua-radius-pill)",
+};
+
+export const scene = {
+  cell: "var(--noctua-scene-cell)",
+  squeeze: "var(--noctua-scene-squeeze)",
+  scaleSmall: "var(--noctua-scene-scale-small)",
+  scaleLarge: "var(--noctua-scene-scale-large)",
+  row: "var(--noctua-scene-row)",
+  figure: "var(--noctua-scene-figure)",
+  card: "var(--noctua-scene-card)",
+  mark: "var(--noctua-scene-mark)",
+  face: "var(--noctua-scene-face)",
+  slab: "var(--noctua-scene-slab)",
+  line: "var(--noctua-scene-line)",
+  perspective: "var(--noctua-scene-perspective)",
+  tilt: "var(--noctua-scene-tilt)",
+  turn: "var(--noctua-scene-turn)",
+  turnDeep: "var(--noctua-scene-turn-deep)",
+  lift: "var(--noctua-scene-lift)",
 };
 
 export const size = {

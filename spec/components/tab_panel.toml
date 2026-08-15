@@ -1,0 +1,50 @@
+guidance = """
+Use one `TabPanel` for each `Tab`, after the `Tabs` strip rather than inside it,
+with the same `name` and `value`. With no script every panel is visible, which
+is what makes the strip above them a table of contents.
+"""
+
+[meta]
+name = "TabPanel"
+element = "div"
+class = "nd-tab-panel"
+page = "tabs"
+specimen = "<span class=\"nd-identifier\">Aa</span>"
+summary = "Hold the content one tab names, and show it when that tab is chosen."
+
+# WHY IT IS NOT INSIDE `Tabs`.
+#
+# A `role="tablist"` may hold tabs and nothing else, so a panel written inside
+# the strip would have to be moved out of it by a script before the role could
+# be claimed. It sits after the strip instead, which is where the markup wants
+# it anyway: the tabs are one row and the panels are the region under them.
+#
+# A Dioxus component cannot look inside its own children, so a `Tabs` taking
+# both could not have separated them at render either. `CodeBlock` hit the same
+# wall over line numbers, and `Lineage` over its graph.
+
+[prop.name]
+type = "text"
+required = true
+doc = """
+The `Tabs` this belongs to. **Required**, and it must match the strip's own
+`name`. This panel's id and the tab that names it both derive from it, so a
+different word leaves the panel unreachable.
+"""
+
+[prop.value]
+type = "text"
+required = true
+attribute = "data-nd-value"
+doc = "Which tab shows this, matching the `Tab` of the same `value`. **Required**, and unique within one set, because it is half of both ids."
+
+[prop.children]
+type = "children"
+doc = "The panel's content. It may be anything, including another set of tabs, since the ids are derived from a `name` that differs."
+
+[a11y]
+notes = """
+It claims no role until the script gives it one, and it carries
+`aria-labelledby` pointing at its tab from the first render. Every panel is
+visible with no script, so nothing is hidden behind a control that cannot work.
+"""

@@ -4,18 +4,12 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// Content for assistive technology only, removed from the visual page.
+// Hide content from the screen while keeping it for assistive technology.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
-
-/** Applied by the component, never by the caller — which is what keeps
- * the two implementations from disagreeing about a default. */
-const defaults = {
-  focusable: "false",
-};
 
 export function VisuallyHidden({ focusable, className, children, ...rest }) {
   const focusable_ = focusable ?? "false";

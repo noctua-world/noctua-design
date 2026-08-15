@@ -18,7 +18,7 @@ export const modeValues = {
 
 export const accentValues = {
   values: ["ochre", "amber", "lime", "jade", "teal", "azure", "blue", "indigo", "violet", "magenta", "rose", "clay", "umber"],
-  default: "ochre",
+  default: "blue",
   key: "noctua-accent",
   attribute: null,
   omitWhen: null,
@@ -36,7 +36,7 @@ export const saturationValues = {
 
 export const paletteValues = {
   values: ["ochre-balanced", "ochre-vivid", "ochre-sober", "amber-balanced", "amber-vivid", "amber-sober", "lime-balanced", "lime-vivid", "lime-sober", "jade-balanced", "jade-vivid", "jade-sober", "teal-balanced", "teal-vivid", "teal-sober", "azure-balanced", "azure-vivid", "azure-sober", "blue-balanced", "blue-vivid", "blue-sober", "indigo-balanced", "indigo-vivid", "indigo-sober", "violet-balanced", "violet-vivid", "violet-sober", "magenta-balanced", "magenta-vivid", "magenta-sober", "rose-balanced", "rose-vivid", "rose-sober", "clay-balanced", "clay-vivid", "clay-sober", "umber-balanced", "umber-vivid", "umber-sober"],
-  default: "ochre-balanced",
+  default: "blue-balanced",
   key: "noctua-palette",
   attribute: "data-palette",
   omitWhen: null,
@@ -70,13 +70,13 @@ export const radiusValues = {
   scope: true,
 };
 
-export const blackoutValues = {
-  values: ["off", "on"],
-  default: "off",
-  key: "noctua-blackout",
-  attribute: "data-noctua-blackout",
+export const backdropValues = {
+  values: ["plain", "cool", "black", "tinted", "soft", "softer"],
+  default: "plain",
+  key: "noctua-backdrop",
+  attribute: "data-noctua-backdrop",
   omitWhen: null,
-  scope: false,
+  scope: true,
 };
 
 export const patternValues = {
@@ -85,16 +85,7 @@ export const patternValues = {
   key: "noctua-pattern",
   attribute: "data-noctua-pattern",
   omitWhen: null,
-  scope: false,
-};
-
-export const glowValues = {
-  values: ["off", "on"],
-  default: "off",
-  key: "noctua-glow",
-  attribute: "data-noctua-glow",
-  omitWhen: null,
-  scope: false,
+  scope: true,
 };
 
 export const grainValues = {
@@ -102,6 +93,15 @@ export const grainValues = {
   default: "off",
   key: "noctua-grain",
   attribute: "data-noctua-grain",
+  omitWhen: null,
+  scope: true,
+};
+
+export const syntaxValues = {
+  values: ["auto", "spectrum", "duotone", "muted", "mono"],
+  default: "auto",
+  key: "noctua-syntax",
+  attribute: "data-noctua-code-theme",
   omitWhen: null,
   scope: false,
 };
@@ -137,7 +137,7 @@ export function resolveScope(request, inherited) {
  * Every attribute a scope element must carry, or null when the scope
  * changes nothing.
  *
- * ALL OF THEM GO ON ONE ELEMENT. The colour system's forced-mode selector
+ * ALL OF THEM GO ON ONE ELEMENT. The color system's forced-mode selector
  * is compound and same-element — `[data-palette="x"][data-theme="dark"]`
  * — so splitting them across a wrapper and a child matches nothing, and
  * the child silently falls through to the default palette.
@@ -164,7 +164,24 @@ export function scopeAttributes(request, inherited) {
   return out;
 }
 
-const scopable_ = ["mode", "accent", "saturation", "palette", "font", "glass", "radius"];
+/**
+ * Every attribute `scopeAttributes` can return, including the marker.
+ *
+ * Removing all of them is how a scope is taken back OFF — and a scope
+ * left half-removed keeps re-resolving the semantic contract at its own
+ * element, which is worse than one that never resolved it at all.
+ */
+export const scopeAttributeNames = ["data-noctua-scope", "data-theme", "data-palette", "data-noctua-font", "data-noctua-glass", "data-noctua-radius", "data-noctua-backdrop", "data-noctua-pattern", "data-noctua-grain"];
+
+/**
+ * Every setting a scope can carry, in the spec's own order.
+ *
+ * A setting absent here is `scope = false`: it is emitted at
+ * `:root` and no element below it can hold a different value.
+ */
+export const scopableSettings = ["mode", "accent", "saturation", "palette", "font", "glass", "radius", "backdrop", "pattern", "grain"];
+
+const scopable_ = scopableSettings;
 
 const model_ = {
   mode: modeValues,
@@ -174,8 +191,8 @@ const model_ = {
   font: fontValues,
   glass: glassValues,
   radius: radiusValues,
-  blackout: blackoutValues,
+  backdrop: backdropValues,
   pattern: patternValues,
-  glow: glowValues,
   grain: grainValues,
+  syntax: syntaxValues,
 };

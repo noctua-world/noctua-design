@@ -8,9 +8,11 @@ import type { ReactNode } from "react";
 
 
 export interface ListItemProps {
+  /** The thing being described. Its presence switches the item from an `<li>` to a `<dt>` and a `<dd>`, which is what a description list is made of. */
+  term?: string;
   className?: string;
   children?: ReactNode;
 }
 
-/** One item in a list. */
+/** Show one item of a list, or one term and its description. */
 export declare function ListItem(props: ListItemProps): JSX.Element;

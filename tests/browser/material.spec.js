@@ -8,7 +8,7 @@
 // last thing a compiler can.
 
 import { test, expect } from "@playwright/test";
-import { ANY, PAGE, url } from "./pages.js";
+import { ANY, PAGE, SCOPED, url } from "./pages.js";
 
 /** Opens the settings panel without depending on where its summary sits. */
 const openSettings = (page) =>
@@ -37,7 +37,7 @@ test("every frosted surface is the same material", async ({ page }) => {
 });
 
 test("no glass surface is inside another", async ({ page }) => {
-  await page.goto(url(PAGE.scoped));
+  await page.goto(url(SCOPED));
   await openSettings(page);
   // A `backdrop-filter` whose ancestor has one samples nothing at all. It is
   // inert, it reports nothing, and the surface simply renders as a flat fill —
@@ -76,6 +76,39 @@ test("a scrollable element never carries a radius", async ({ page }) => {
   expect(offenders, "a scrollbar will paint over these corners").toEqual([]);
 });
 
+test.describe("with the script blocked", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("a scrollable element never carries a radius there either", async ({ page }) => {
+    // THE SWEEP THAT FOUND THIS RAN WITHOUT A SCRIPT AND THIS SUITE DID NOT.
+    //
+    // `TagPicker`'s native `<select multiple>` is a four-row scrolling listbox
+    // and it is `hidden` the moment the script enhances the control — so every
+    // test asking this question saw nothing, and the one state a reader could
+    // actually meet it in was the one nobody looked at. Half of what a
+    // no-script page shows is a control some enhanced page hides.
+    for (const slug of Object.values(PAGE)) {
+      await page.goto(url(slug));
+      await page.evaluate(() =>
+        document.documentElement.setAttribute("data-noctua-radius", "circular"),
+      );
+      const offenders = await page.evaluate(() =>
+        [...document.querySelectorAll("*")]
+          .filter((el) => {
+            const style = getComputedStyle(el);
+            const scrolls =
+              (el.scrollHeight > el.clientHeight + 1 &&
+                ["auto", "scroll"].includes(style.overflowY)) ||
+              (el.scrollWidth > el.clientWidth + 1 && ["auto", "scroll"].includes(style.overflowX));
+            return scrolls && style.borderRadius !== "0px";
+          })
+          .map((el) => `${el.className || el.tagName}: ${getComputedStyle(el).borderRadius}`),
+      );
+      expect(offenders, `${slug}: a scrollbar will paint over these corners`).toEqual([]);
+    }
+  });
+});
+
 test("the settings panel clips its own scroller", async ({ page }) => {
   await page.goto(url(ANY));
   await page.evaluate(() => {
@@ -84,8 +117,8 @@ test("the settings panel clips its own scroller", async ({ page }) => {
   });
 
   const shape = await page.evaluate(() => {
-    const panel = document.querySelector(".nd-panel");
-    const body = document.querySelector(".nd-panel-body");
+    const panel = document.querySelector(".nd-settings .nd-panel");
+    const body = document.querySelector(".nd-settings .nd-panel-body");
     return {
       panelClips: getComputedStyle(panel).overflow,
       panelRadius: getComputedStyle(panel).borderRadius,
@@ -110,7 +143,7 @@ test("the settings panel clips its own scroller", async ({ page }) => {
 test("the spacing ruler never paints over its label", async ({ page }) => {
   for (const width of [320, 390, 1280]) {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto(url(PAGE.spacing));
+    await page.goto(url(PAGE.icons));
     const overlaps = await page.evaluate(() =>
       [...document.querySelectorAll(".nd-scale-row")]
         .map((row) => {
@@ -134,8 +167,17 @@ test("the background pattern survives across the whole viewport", async ({ page 
   // exactly the part of the page a reader looks at. The ink ceiling in
   // spec/tokens.toml is the readability guarantee; the mask was a second one
   // that removed the feature instead.
-  const masked = await page.evaluate(
-    () => getComputedStyle(document.querySelector(".noctua-fx")).maskImage,
-  );
-  expect(masked).toBe("none");
+  //
+  // ASKED OF THE ROOT, because there is no `.noctua-fx` any more: the three
+  // effects are background layers on whatever element carries the attribute,
+  // which is what made them scopable. This test used to name that element and
+  // would have gone on passing against `null` had it been left alone.
+  const root = await page.evaluate(() => {
+    const style = getComputedStyle(document.documentElement);
+    return { mask: style.maskImage, image: style.backgroundImage };
+  });
+  expect(root.mask).toBe("none");
+  // And it is genuinely painting — a mask of `none` over nothing is not a
+  // guarantee about a pattern.
+  expect(root.image, "the page paints no pattern at all").toContain("gradient");
 });

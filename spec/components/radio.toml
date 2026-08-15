@@ -1,0 +1,105 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a radio when users pick exactly one answer and every answer should stay on the page. For one option out of many, use `Select`. For switching a view, use `Segmented`."
+
+[meta]
+name = "Radio"
+# The row is the root, as it is for `Checkbox`: the input, the circle drawn
+# beside it, the label and the hint.
+element = "div"
+class = "nd-choice nd-radio"
+# The circle, at the three sizes and with nothing beside it to read. See
+# `Checkbox` for why the specimen of a compound control is the part the prop
+# changes rather than the whole of it.
+specimen = "<span class=\"nd-choice-box\"></span>"
+summary = "Let users pick exactly one answer out of several."
+
+# THE SAME SIZES AS `Checkbox`, AND THEY HAVE TO BE.
+#
+# Radios and checkboxes are drawn at one size: 40px, 24px at `small`, and the
+# touch target is
+# 44px for both — because the two appear in the same form, one under the other,
+# and two controls that ask the same kind of question at two sizes read as two
+# kinds of question.
+#
+# So both are `.nd-choice` and the sizes come from one place in the stylesheet.
+# What differs is the shape and the mark: a circle rather than a rounded square,
+# and a filled dot rather than a tick.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "name"
+doc = "The form field name. Every radio answering the same question uses the same name, which is what makes them one group in the browser. The component builds the label and input ids from it."
+
+[prop.value]
+type = "text"
+required = true
+attribute = "value"
+doc = "The value submitted when this radio is chosen. Required, because a radio with no value submits the string `on`."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The visible text for this answer. It renders as a `<label for>`, so pressing the words chooses the answer."
+
+[prop.hint]
+type = "text"
+doc = "Extra guidance shown under the label. It is linked with `aria-describedby`, so a screen reader reads it after the label."
+
+[prop.checked]
+type = "bool"
+default = "false"
+attribute = "checked"
+doc = "Whether this radio starts chosen. At most one radio in a group may set it, and a group where none does starts unanswered."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Stops users choosing this answer. Uses the real `disabled` attribute, which also keeps the value out of the submitted form."
+
+[prop.invalid]
+type = "bool"
+default = "false"
+attribute = "aria-invalid"
+doc = "Marks this single answer as invalid. To mark the whole question as invalid, use `Fieldset { error }` instead."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "large"
+attribute = "data-nd-size"
+doc = "The size of the drawn circle: 40, 32 or 24 pixels, matching `Checkbox`. The hit target stays 44 pixels at every size."
+
+[prop.hide_label]
+type = "bool"
+default = "false"
+attribute = "data-nd-hide-label"
+doc = "Hides the label visually and keeps it as the accessible name. Use it where the row around the radio already says what the answer is. `label` is still required."
+
+[prop.divider]
+type = "text"
+doc = "A word shown above this answer to separate it from the ones before, such as `or`. Supply it in the reader's language."
+
+[prop.reveal]
+type = "bool"
+default = "false"
+attribute = "data-nd-reveal"
+doc = "Whether choosing this answer reveals the block inside it. Set it explicitly so both implementations behave the same way."
+
+[prop.children]
+type = "children"
+doc = "The follow-up question revealed when this answer is chosen. It renders with or without a script."
+
+[state.expanded]
+attribute = "aria-expanded"
+doc = "Whether the revealed block is showing. The script writes it. Without a script the block is always visible and the attribute is absent."
+
+[a11y]
+needs_name = true
+notes = """The component renders a real `<input type="radio">` that shares a `name` with its group. That provides the grouping, the arrow keys and the single tab stop. A radio cannot be unchecked once it is checked."""
+
+[keyboard]
+"Arrow keys" = "Moves between the answers in the group and chooses as it goes. This is the browser's own behaviour."
+"Space" = "Chooses the answer that has focus."

@@ -1,0 +1,59 @@
+# Dockerfile.
+#
+# `case_insensitive`, because `FROM` and `from` are one instruction and the
+# convention is shouted rather than enforced.
+
+[meta]
+name = "dockerfile"
+display = "Dockerfile"
+aliases = ["docker", "containerfile"]
+
+[identifier]
+extra = "_-./"
+
+[words]
+keyword = [
+  "add", "arg", "cmd", "copy", "entrypoint", "env", "expose", "from",
+  "healthcheck", "label", "maintainer", "onbuild", "run", "shell",
+  "stopsignal", "user", "volume", "workdir",
+]
+operator = ["as"]
+
+[[comment]]
+open = "#"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+interpolate_open = "${"
+interpolate_close = "}"
+interpolate_sigil = "$"
+
+[[string]]
+open = "'"
+close = "'"
+
+[number]
+exponent = ""
+
+[symbols]
+operator = "=\\"
+punctuation = "[],:"
+
+[[sigil]]
+open = "$"
+role = "property"
+
+[context]
+case_insensitive = true
+
+[[case]]
+name = "an instruction is an instruction in any casing"
+code = "FROM rust:1.85 AS build\nrun cargo build\n# a note"
+expect = ["keyword FROM", "operator AS", "keyword run", "comment # a note"]
+
+[[case]]
+name = "a build argument is a variable"
+code = "ARG version\nENV PATH=$PATH:/opt"
+expect = ["keyword ARG", "keyword ENV", "property $PATH"]

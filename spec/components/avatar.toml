@@ -1,0 +1,68 @@
+guidance = """
+Use an avatar when a name alone does not identify a person, such as a row of
+reviewers or the author of a comment. For a thing rather than a person, use
+`Tag` with an `image`. It draws a picture over initials over an icon.
+"""
+
+[meta]
+name = "Avatar"
+element = "span"
+class = "nd-avatar"
+page = "avatars"
+summary = "Show who a person is, as a picture, as initials, or as an icon."
+specimen = "<span class=\"nd-avatar-initials nd-identifier\">NA</span>"
+
+[prop.label]
+type = "text"
+required = true
+doc = "Who this person is, in full. It is the accessible name of the whole component, not of the picture, which carries `alt=\"\"`. **Required**. For an avatar with no name, use `decorative` instead."
+
+[prop.initials]
+type = "text"
+doc = "The letters shown when there is no picture. **Written by the caller, never derived from the name**, because the derivation fails on some names and follows a different convention in every language. Absent falls through to the icon."
+
+[prop.src]
+type = "text"
+attribute = "src"
+doc = "The picture. It is laid **over** the initials rather than instead of them, so a URL that never answers shows the letters, with no script. Its box is the size below rather than the image's, so nothing moves when it arrives."
+
+[prop.icon]
+type = "text"
+doc = "The drawing behind everything else, for a person with neither a picture nor initials, such as a pending invitation. Absent draws `user`."
+
+[prop.href]
+type = "text"
+doc = "Where this person leads, such as their profile page. Its presence makes the avatar a real `<a>`, so the middle mouse button, the context menu and a screen reader's list of links all work."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The box size: `small`, `medium` or `large`. It matches `Button` step for step, so an avatar beside a control lines up. Inside an `AvatarGroup` the group's size wins."
+
+[prop.shape]
+type = "enum"
+values = ["circle", "rounded", "square"]
+default = "circle"
+attribute = "data-nd-shape"
+doc = "The corners: a circle, rounded corners or a square. Defaults to `circle`. Use a circle for a person and a square for an organisation or a thing."
+
+[prop.tone]
+type = "enum"
+values = ["neutral", "accent", "danger", "success"]
+default = "neutral"
+attribute = "data-nd-tone"
+doc = "Which semantic colour paints the fallback when the picture is absent. `neutral` by default. The letters are what tell two people apart, so the colour is a second signal rather than the only one."
+
+[prop.decorative]
+type = "bool"
+default = "false"
+doc = "Hides the whole component from a screen reader, for an avatar beside a name that is already on the screen. **A decorative avatar may not be interactive**, because a focusable element inside `aria-hidden` can be reached by keyboard and not described."
+
+[a11y]
+notes = """
+The accessible name is on the wrapper and the picture carries `alt=""`. The
+initials are `aria-hidden`, and that empty alt is what lets a broken picture
+fall through to them.
+"""

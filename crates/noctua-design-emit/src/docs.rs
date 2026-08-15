@@ -39,17 +39,11 @@ pub fn emit(components: &[Component]) -> Vec<EmittedFile> {
 }
 
 /// `CodeBlock` → `code-block`. The URL segment, and the i18n key fragment.
-#[must_use]
-pub fn slug(name: &str) -> String {
-    let mut out = String::with_capacity(name.len() + 2);
-    for (index, ch) in name.char_indices() {
-        if ch.is_ascii_uppercase() && index > 0 {
-            out.push('-');
-        }
-        out.extend(ch.to_lowercase());
-    }
-    out
-}
+///
+/// The spec crate's, because the same transformation names the derived messages
+/// it produces — and two spellings of one slug would be a page whose prose is
+/// looked up under a key nothing wrote.
+pub use noctua_design_spec::component::{slug, slugify};
 
 /// `code-block` → `ComponentCodeBlockSummary`, the generated message key.
 fn summary_key(slug: &str) -> String {
@@ -104,14 +98,30 @@ pub(crate) struct DocProp {
     pub kind: &'static str,
     /// The values an enum accepts, in order.
     pub values: &'static [&'static str],
+    /// The element each value renders, when the prop chooses the element.
+    ///
+    /// Empty for every other prop. A page that showed an ordered list as a
+    /// `<ul>` carrying a `data-nd-kind` attribute would be documenting the
+    /// defect rather than the component.
+    pub elements: &'static [&'static str],
     /// What the component applies when the caller says nothing.
     pub default: Option<&'static str>,
     /// The DOM attribute it becomes, when it becomes one.
     pub attribute: Option<&'static str>,
     /// Whether the caller must supply it.
     pub required: bool,
-    /// What it is for.
-    pub doc: &'static str,
+    /// Whether the variant grid draws a picture of each value.
+    ///
+    /// `false` for an enum with no appearance — a comparator, a band, a scope.
+    /// A grid of identical pictures under different captions reads as a
+    /// component whose props do nothing.
+    pub variants: bool,
+    /// What the grid renders for this prop, when the component's own specimen
+    /// cannot show it. Empty means the component's.
+    pub specimen: Option<&'static str>,
+    /// What it is for, as a message. A prop's documentation is prose a reader
+    /// reads, and this is the layer that stops it being English everywhere.
+    pub doc: Key,
 }
 
 /// One state, and what carries it.
@@ -121,17 +131,18 @@ pub(crate) struct DocState {
     pub name: &'static str,
     /// The `data-` or `aria-` attribute a test can assert.
     pub attribute: &'static str,
-    /// What it means.
-    pub doc: &'static str,
+    /// What it means, as a message.
+    pub doc: Key,
 }
 
 /// One key, and what it does.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct DocKey {
-    /// The key, as a reader would name it.
-    pub key: &'static str,
+    /// The key, as a reader would name it. A chord spelled out in words is a
+    /// phrase rather than an identifier, so it is a message too.
+    pub key: Key,
     /// What pressing it does.
-    pub action: &'static str,
+    pub action: Key,
 }
 
 /// One component's whole contract, flattened for rendering.
@@ -139,16 +150,18 @@ pub(crate) struct DocKey {
 pub(crate) struct DocComponent {
     /// Its name, which is an identifier and the same in every locale.
     pub name: &'static str,
-    /// Its URL segment.
+    /// Its URL segment, and its anchor on a collection page.
     pub slug: &'static str,
+    /// The collection page it is documented on, or none for a page of its own.
+    pub page: Option<&'static str>,
     /// The translated lead under the title.
     pub summary: Key,
     /// The element it renders by default.
     pub element: &'static str,
     /// The class its root carries.
     pub class: Option<&'static str>,
-    /// When to reach for it, in English — API reference, like a doc comment.
-    pub guidance: &'static str,
+    /// When to reach for it. Empty for a component whose spec says nothing.
+    pub guidance: Option<Key>,
     /// What a variant shows inside it, when the page's own choice is wrong.
     pub specimen: Option<&'static str>,
     /// Every prop, in declaration order.
@@ -162,7 +175,7 @@ pub(crate) struct DocComponent {
     /// Whether it must have an accessible name.
     pub needs_name: bool,
     /// Anything a reviewer has to know.
-    pub a11y_notes: &'static str,
+    pub a11y_notes: Option<Key>,
 }
 
 ";
@@ -173,6 +186,11 @@ fn write_component(out: &mut String, component: &Component) {
     let _ = writeln!(out, "    DocComponent {{");
     let _ = writeln!(out, "        name: \"{name}\",");
     let _ = writeln!(out, "        slug: \"{slug}\",");
+    let _ = writeln!(
+        out,
+        "        page: {},",
+        option(component.meta.page.as_deref())
+    );
     let _ = writeln!(out, "        summary: Key::{},", summary_key(&slug));
     let _ = writeln!(out, "        element: \"{}\",", component.meta.element);
     let _ = writeln!(
@@ -182,8 +200,8 @@ fn write_component(out: &mut String, component: &Component) {
     );
     let _ = writeln!(
         out,
-        "        guidance: \"{}\",",
-        escape(&component.guidance)
+        "        guidance: {},",
+        message(&slug, "guidance", &component.guidance)
     );
     let _ = writeln!(
         out,
@@ -205,14 +223,23 @@ fn write_component(out: &mut String, component: &Component) {
             .map(|value| format!("\"{value}\""))
             .collect::<Vec<_>>()
             .join(", ");
+        let elements = prop
+            .elements
+            .iter()
+            .map(|element| format!("\"{element}\""))
+            .collect::<Vec<_>>()
+            .join(", ");
         let _ = writeln!(
             out,
             "            DocProp {{ name: \"{prop_name}\", kind: \"{kind}\", values: &[{values}], \
-             default: {}, attribute: {}, required: {}, doc: \"{}\" }},",
+             elements: &[{elements}], default: {}, attribute: {}, required: {}, \
+             variants: {}, specimen: {}, doc: {} }},",
             option(prop.default.as_deref()),
             option(prop.attribute.as_deref()),
             prop.required,
-            escape(&prop.doc)
+            prop.variants,
+            option(prop.specimen.as_deref()),
+            required_message(&slug, &format!("prop.{prop_name}.doc"), &prop.doc)
         );
     }
     out.push_str("        ],\n");
@@ -221,19 +248,21 @@ fn write_component(out: &mut String, component: &Component) {
     for (state_name, state) in &component.state {
         let _ = writeln!(
             out,
-            "            DocState {{ name: \"{state_name}\", attribute: \"{}\", doc: \"{}\" }},",
+            "            DocState {{ name: \"{state_name}\", attribute: \"{}\", doc: {} }},",
             state.attribute,
-            escape(&state.doc)
+            required_message(&slug, &format!("state.{state_name}.doc"), &state.doc)
         );
     }
     out.push_str("        ],\n");
 
     out.push_str("        keyboard: &[\n");
     for (key, action) in &component.keyboard {
+        let name = slugify(key);
         let _ = writeln!(
             out,
-            "            DocKey {{ key: \"{key}\", action: \"{}\" }},",
-            escape(action)
+            "            DocKey {{ key: {}, action: {} }},",
+            required_message(&slug, &format!("key.{name}.name"), key),
+            required_message(&slug, &format!("key.{name}.action"), action)
         );
     }
     out.push_str("        ],\n");
@@ -246,10 +275,50 @@ fn write_component(out: &mut String, component: &Component) {
     let _ = writeln!(out, "        needs_name: {},", component.a11y.needs_name);
     let _ = writeln!(
         out,
-        "        a11y_notes: \"{}\",",
-        escape(&component.a11y.notes)
+        "        a11y_notes: {},",
+        message(&slug, "a11y-notes", &component.a11y.notes)
     );
     out.push_str("    },\n");
+}
+
+/// The `Key` variant a derived message becomes, or `None` when the spec is
+/// silent — which is what the page renders nothing for.
+fn message(slug: &str, suffix: &str, text: &str) -> String {
+    if text.trim().is_empty() {
+        return "None".to_owned();
+    }
+    format!("Some(Key::{})", key_variant(slug, suffix))
+}
+
+/// The same, for a field the page always renders and the spec always fills.
+fn required_message(slug: &str, suffix: &str, text: &str) -> String {
+    debug_assert!(
+        !text.trim().is_empty(),
+        "{slug}.{suffix} is empty; the spec validator should have refused it"
+    );
+    format!("Key::{}", key_variant(slug, suffix))
+}
+
+/// `heading` + `prop.level.doc` → `ComponentHeadingPropLevelDoc`.
+///
+/// The same transformation `i18n::variant` applies to an authored key, done
+/// here so the catalogue names exactly what `derived_messages` inserted. Two
+/// spellings of one key would be a compile error rather than a silent one,
+/// which is the only reason this duplication is safe.
+fn key_variant(slug: &str, suffix: &str) -> String {
+    let mut out = String::from("Component");
+    let mut upper = true;
+    for ch in format!("{slug}.{suffix}").chars() {
+        if ch == '.' || ch == '-' || ch == '_' {
+            upper = true;
+        } else if upper {
+            out.extend(ch.to_uppercase());
+            upper = false;
+        } else {
+            out.extend(ch.to_lowercase());
+        }
+    }
+    out
 }
 
 fn option(value: Option<&str>) -> String {

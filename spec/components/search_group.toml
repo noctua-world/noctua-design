@@ -1,0 +1,30 @@
+guidance = "Use a search group for a named run of results inside a `Search`, for an index that mixes kinds such as pages, tokens and commands. It tells a reader scanning the list which kind each result is."
+
+[meta]
+name = "SearchGroup"
+element = "li"
+class = "nd-search-group"
+page = "search"
+summary = "Group a run of results under a heading that names them."
+
+# AN `<li>` HOLDING A `<p>` AND A NESTED `<ul>`, WHICH IS THE ONLY SHAPE THAT
+# WORKS.
+#
+# An `<li>` cannot hold an `<li>`, so a named run inside a list of results has
+# to be one item whose content is a heading and a list. It is also the shape
+# that needs no ARIA at all with the script blocked: a screen reader reads the
+# outer item's own text before entering the nested list, so the run is named by
+# being written that way.
+#
+# Enhanced, the script adds `role="group"` and `aria-label` here and
+# `role="none"` on the inner list, because a `listbox` may hold groups and
+# options and nothing else.
+
+[prop.label]
+type = "text"
+required = true
+doc = "What this run is, in the reader's language. **Required**, because an unnamed run is a rule across the list with nothing to say why it is there."
+
+[prop.children]
+type = "children"
+doc = "The `SearchResult`s in it."

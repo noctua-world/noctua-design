@@ -1,0 +1,48 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a toolbar group inside a `Toolbar`, to say which controls belong together and which end of the bar they sit at. Use it nowhere else, because on its own it is a `role=\"group\"` with no toolbar around it."
+
+[meta]
+name = "ToolbarGroup"
+element = "div"
+class = "nd-toolbar-group"
+# The still picture needs REAL CHILDREN. Without this the grid falls
+# back to the pangram placeholder, so every value of every enum prop
+# draws one identical line of text — which is what the reader saw.
+specimen = "<button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Aa</span></span></button><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Bb</span></span></button>"
+summary = "Groups the controls that sit at one end of a toolbar."
+
+# ALIGNMENT IS A CONTRACT HERE, NOT A CLASS.
+#
+# "The viewport control is on the right" used to be `margin-inline-start: auto`
+# written into a docs-site stylesheet against a class the markup did not carry
+# — the rule existed, matched nothing, and nobody noticed because nothing
+# looked obviously wrong. Saying it in the contract means the two packages
+# agree about it, a test can assert it, and there is one place to change it.
+
+[prop.align]
+type = "enum"
+values = ["start", "end"]
+default = "start"
+attribute = "data-nd-align"
+# `end` is `margin-inline-start: auto`, which needs SIBLINGS in a flex
+# toolbar to push against. A picture of one group on its own is one group
+# on its own whichever value it carries.
+variants = false
+doc = "Which end of the bar this group sits at. `end` pushes it and everything after it to the far side, so one bar can hold two clusters with no spacer element between them."
+
+[prop.label]
+type = "text"
+attribute = "aria-label"
+doc = "What this cluster is for, when it needs a name separate from the bar's. Most do not, because a screen reader marks a group boundary at every named cluster on the way past."
+
+[prop.children]
+type = "children"
+doc = "The controls."
+
+[a11y]
+role = "group"
+notes = """
+`needs_name` is false here. The toolbar around it is already named. Naming
+every cluster as well makes a screen reader mark a group boundary twice on the
+way to each control."""

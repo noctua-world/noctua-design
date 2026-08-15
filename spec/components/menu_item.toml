@@ -1,0 +1,69 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a menu item for one action inside a `Menu`. It renders a real `<button>`, or a real `<a>` when `href` is given. For items that are values rather than actions, use `Segmented` or `Select`."
+
+[meta]
+name = "MenuItem"
+element = "button"
+class = "nd-menu-item"
+# A `<button>` outside a menu is still a button, so the specimen needs no
+# wrapper — unlike a `<td>`, which the parser drops.
+specimen = "<span class=\"nd-menu-item-label nd-identifier\">Aa</span>"
+page = "menu"
+summary = "Put one action in a menu, as a real button or a real link when it goes somewhere."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The item's text, in the reader's language. It is the visible text **and** the accessible name at once, so the two cannot disagree. Required."
+
+[prop.icon]
+type = "text"
+doc = "An icon before the label, optically centred on the text. It is decoration and is `aria-hidden`, because it repeats the label."
+
+[prop.detail]
+type = "text"
+doc = "A second, smaller line under the label, for an action whose consequence is worth spelling out. It is part of the accessible name, so a reader who cannot see it still hears it."
+
+[prop.value]
+type = "text"
+attribute = "data-nd-value"
+doc = "What this item applies its action to, as an identifier. The script reads it and nothing else, so it is never translated. `SegmentedItem` carries the same prop for the same reason."
+
+[prop.action]
+type = "text"
+attribute = "data-nd-action"
+doc = "A name a script can find this item by. The menu's own script closes the menu and returns the focus, and the caller's code does the rest. `Button` and `Disclosure` carry the same kind of hook."
+
+[prop.tone]
+type = "text"
+attribute = "data-nd-tone"
+doc = "Which of the colour system's tones the item is painted from. The tones live in `noctua_design::tones`. Use the danger tone for an item that destroys something. **Never the only signal** (`NOCTUA.md §8.8.6`): the word does the work."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "aria-disabled"
+doc = "Stops users running this item and **keeps it in the arrow walk**. It writes `aria-disabled` rather than `disabled`, so the item is announced as unavailable instead of missing. `Button.disabled` does the opposite."
+
+[prop.href]
+type = "text"
+doc = """Where the item goes. Given one, the component renders an `<a role="menuitem">` instead of a `<button>`. Never combine it with `disabled`, because a disabled link is not a thing the platform has."""
+
+[prop.rel]
+type = "text"
+attribute = "rel"
+doc = "The link relationship. Left unset alongside `target`, the component writes `noopener noreferrer` itself."
+
+[prop.target]
+type = "text"
+attribute = "target"
+doc = "Where the link opens. Opening a new window takes the decision away from the reader, so give it a reason."
+
+[a11y]
+needs_name = true
+role = "menuitem"
+notes = "`aria-disabled` rather than `disabled`, so a refused item stays in the arrow walk and is announced instead of missing. Its `tabindex` is `-1`, because the menu is one tab stop and the arrows move focus."
+
+[keyboard]
+"Enter or Space" = "Runs the item and closes the menu. The link form answers Enter alone."

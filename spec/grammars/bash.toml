@@ -1,0 +1,83 @@
+# Shell.
+#
+# `upper_type` is OFF, and it is the one language here where that is not a
+# simplification. An initial capital in shell means an environment variable —
+# `PATH`, `HOME`, `CI` — and painting those as types would be wrong on the most
+# common identifiers in the language. `screaming_constant` catches them instead,
+# which is what they are.
+
+[meta]
+name = "bash"
+display = "Shell"
+aliases = ["sh", "shell", "zsh", "console"]
+
+[words]
+keyword = [
+  "case", "do", "done", "elif", "else", "esac", "fi", "for", "function", "if",
+  "in", "return", "select", "then", "time", "until", "while",
+]
+constant = ["false", "true"]
+function = [
+  "awk", "cat", "cd", "chmod", "cp", "curl", "cut", "echo", "eval", "exec",
+  "exit", "export", "find", "git", "grep", "head", "kill", "local", "ls",
+  "mkdir", "mv", "printf", "read", "rm", "sed", "set", "sort", "source",
+  "tail", "test", "touch", "unset", "wc", "which",
+]
+
+[[comment]]
+open = "#"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+multiline = true
+interpolate_open = "${"
+interpolate_close = "}"
+interpolate_sigil = "$"
+
+# Single quotes in shell are literal all the way through — no escape, not even
+# for a quote. Declaring an escape here would swallow the closing quote of
+# `'it\'` and take the rest of the script with it.
+[[string]]
+open = "'"
+close = "'"
+multiline = true
+
+[number]
+exponent = ""
+
+[symbols]
+operator = "+-*/%=<>!&|"
+punctuation = "(){}[],;:.@?"
+
+[[sigil]]
+open = "$"
+role = "property"
+
+[context]
+name_after = { function = "function" }
+screaming_constant = true
+
+[[case]]
+name = "a variable is a variable wherever it appears"
+code = 'echo "$HOME/bin" > $LOG'
+expect = ["function echo", 'string "', "escape $HOME", 'string /bin"', "property $LOG"]
+
+[[case]]
+name = "a single-quoted string has no escapes and no holes"
+code = "grep 'a\\b' file"
+expect = ["function grep", "string 'a\\b'"]
+reject = ["escape \\b"]
+
+[[case]]
+name = "an environment variable is not a type"
+code = "if [ -n \"$CI\" ]; then exit 1; fi"
+expect = ["keyword if", "escape $CI", "keyword then", "function exit", "number 1", "keyword fi"]
+reject = ["type CI", "type PATH"]
+
+[[case]]
+name = "an environment variable outside a string is still not a type"
+code = "export PATH=$PATH:/opt/bin"
+expect = ["function export", "constant PATH", "property $PATH"]
+reject = ["type PATH"]

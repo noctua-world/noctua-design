@@ -1,0 +1,71 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a divider between two blocks that have names, where the rule draws the
+boundary a name claims. Between siblings of one kind, give them more space
+instead: one unexplained rule among equal blocks marks nothing.
+"""
+
+[meta]
+name = "Divider"
+element = "hr"
+class = "nd-divider"
+# A rule has no content, so its picture is the rule itself. The empty string is
+# load-bearing: a void element with something inside it is drawn as a `<span>`
+# by the variant grid, and a `<span>` is not what this component renders.
+specimen = ""
+summary = "Separate two named blocks with a rule, and name the boundary when it needs one."
+
+# WHY THIS EXISTS AFTER A RULE WAS DELETED FROM THIS SITE.
+#
+# The settings panel carried one `<hr>` in the middle of eleven equal blocks.
+# It separated the settings a component can carry from the ones only a page
+# can, and it said so nowhere. It was deleted, the eleven blocks were grouped
+# into named sections, and `.nd-rule` has a gravestone in `shell.css` saying
+# both halves of that.
+#
+# A rule came back with the sections, between blocks that now have names — see
+# `.nd-theme-section + .nd-theme-section`. That is the rule for reaching for
+# this component, and `guidance` above states it: a divider draws a boundary a
+# reader can already name. Where the name is missing, the fix is the name.
+
+[prop.orientation]
+type = "enum"
+values = ["horizontal", "vertical"]
+default = "horizontal"
+attribute = "data-nd-orientation"
+doc = "Which way the rule runs. `horizontal` separates one block from the next down the page. `vertical` separates two things sharing a line, such as two groups inside a `Toolbar`."
+
+[prop.label]
+type = "text"
+doc = """A word on the rule, such as *or*. Its presence changes the element: an `<hr>` holds no content, so a labelled divider is a `<div role="separator">` with the word inside it."""
+
+[prop.spacing]
+type = "enum"
+values = ["none", "tight", "default", "loose"]
+default = "default"
+attribute = "data-nd-spacing"
+# The gap is OUTSIDE the box, and a specimen stands alone in a stage with no
+# sibling to be spaced from. Four values, one picture, so the grid is off.
+variants = false
+doc = "How much room the rule takes around itself, from the spacing scale. Use `none` where the blocks already carry their own gap, and `loose` between the major regions of a page."
+
+[prop.weight]
+type = "enum"
+values = ["hairline", "strong", "rule"]
+default = "hairline"
+attribute = "data-nd-weight"
+doc = "How thick the rule is. `hairline` is the border every other edge in this system uses. `rule` is the wide one a `Field` draws down the edge of a refused answer."
+
+[prop.decorative]
+type = "bool"
+default = "false"
+doc = "Takes the rule out of the accessibility tree, for a line that is decoration and not a boundary. It writes `aria-hidden` and no role. With a `label` it hides the word too, so the two go together badly."
+
+[state.labelled]
+attribute = "data-nd-labelled"
+doc = "Set when a `label` was given, on the `<div>` that stands in for the `<hr>`. The stylesheet hangs the two half-rules and the gap around the word on it."
+
+[a11y]
+role = "separator"
+notes = """A separator's contents are presentational, so the word inside a labelled divider does not reach a screen reader on its own. That word is written again as `aria-label`, and `aria-orientation` carries the direction."""

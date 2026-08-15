@@ -5,7 +5,7 @@
 // measurement that was true once.
 
 import { test, expect } from "@playwright/test";
-import { ANY, LOCALES, PAGE, url } from "./pages.js";
+import { ANY, LOCALES, PAGE, SCOPED, url } from "./pages.js";
 
 const MOBILE = { width: 390, height: 844 };
 const DESKTOP = { width: 1440, height: 900 };
@@ -15,7 +15,7 @@ test.describe("the mobile drawer and its partial scrim", () => {
 
   test("the scrim stops exactly where the drawer starts", async ({ page }) => {
     await page.goto(url(ANY));
-    await page.locator("[data-nd-menu]").click();
+    await page.locator('[data-nd-action="menu"]').click();
     // Both transitions are 180ms; disabling them makes the geometry final
     // rather than sampled somewhere along an animation.
     await page.addStyleTag({ content: ".nd-nav, .nd-scrim { transition: none !important }" });
@@ -36,7 +36,7 @@ test.describe("the mobile drawer and its partial scrim", () => {
 
   test("a point inside the drawer never hits the scrim", async ({ page }) => {
     await page.goto(url(ANY));
-    await page.locator("[data-nd-menu]").click();
+    await page.locator('[data-nd-action="menu"]').click();
     // Without this the drawer is still sliding: 180ms of transition, and a
     // point measured mid-flight lands where the drawer is not yet. The first
     // run of this test failed for exactly that reason and the code was fine.
@@ -56,7 +56,7 @@ test.describe("the mobile drawer and its partial scrim", () => {
     await page.evaluate(() =>
       document.documentElement.setAttribute("data-noctua-radius", "circular"),
     );
-    await page.locator("[data-nd-menu]").click();
+    await page.locator('[data-nd-action="menu"]').click();
     // A rounded corner would cut a notch out of the drawer and show the scrim
     // through it as a dark wedge — the one place "never under the sidebar"
     // would visibly fail.
@@ -66,7 +66,7 @@ test.describe("the mobile drawer and its partial scrim", () => {
 
   test("growing the viewport releases everything, with no script", async ({ page }) => {
     await page.goto(url(ANY));
-    await page.locator("[data-nd-menu]").click();
+    await page.locator('[data-nd-action="menu"]').click();
     expect(await page.locator("html").getAttribute("data-nd-nav")).toBe("open");
 
     await page.setViewportSize(DESKTOP);
@@ -82,7 +82,7 @@ test.describe("the mobile drawer and its partial scrim", () => {
 
   test("nothing in the shell is modal", async ({ page }) => {
     await page.goto(url(ANY));
-    await page.locator("[data-nd-menu]").click();
+    await page.locator('[data-nd-action="menu"]').click();
     expect(await page.locator("[aria-modal]").count()).toBe(0);
     expect(await page.locator("[inert]").count()).toBe(0);
   });
@@ -112,7 +112,7 @@ test.describe("the header", () => {
 
 test.describe("§9.7, enforced", () => {
   test("no element in the shell casts a shadow", async ({ page }) => {
-    await page.goto("/en/scoped-themes/");
+    await page.goto(url(SCOPED));
     const shadows = await page.evaluate(() =>
       [...document.querySelectorAll("*")]
         .filter((el) => getComputedStyle(el).boxShadow !== "none")
@@ -123,18 +123,80 @@ test.describe("§9.7, enforced", () => {
 
   test("exactly four kinds of floating surface exist", async ({ page }) => {
     await page.setViewportSize(MOBILE);
-    await page.goto("/en/scoped-themes/");
-    await page.locator("[data-nd-menu]").click();
+    await page.goto(url(SCOPED));
+    await page.locator('[data-nd-action="menu"]').click();
     await page.locator(".nd-settings > summary").click();
 
-    const allowed = ["nd-header", "nd-nav", "nd-panel", "nd-scope", "nd-skip", "nd-scrim"];
+    // `nd-frame-bar` is listed and no longer floats: it was sticky under the
+    // header so that the controls of a frame several screens tall stayed in
+    // reach, and it is `relative` now — it stays at the top of its own frame.
+    // The entry stays because the list is what this test is for, and an
+    // allow-list that quietly loses an entry is one nobody notices growing.
+    const allowed = [
+      "nd-header",
+      "nd-nav",
+      "nd-panel",
+      "nd-scope",
+      "nd-skip",
+      "nd-scrim",
+      "nd-frame-bar",
+      // A SIXTH KIND, NAMED AND JUSTIFIED.
+      //
+      // `nd-frame-glass`: the material a frame is frosted with, on a layer of
+      // its own rather than on the frame. `backdrop-filter` makes an element
+      // the containing block for every `position: fixed` descendant, and a
+      // frame contains its own theme menu — frosting the frame itself moved
+      // that panel inside a box that clips and it opened where nobody could
+      // see it. It floats because it has to cover the frame it belongs to; it
+      // is `pointer-events: none`, so it is not in anybody's way; and it
+      // carries no shadow, like everything else here.
+      "nd-frame-glass",
+      // `nd-frame-theme-panel` used to be listed here — the theme menu as a
+      // band inside the frame. It was 457px tall against a frame that can be
+      // 172px, so it covered every example and `overflow: clip` cut off the
+      // rows it could not fit. The frame opens `nd-panel` now, already listed,
+      // which is the same surface the header opens.
+      //
+      // --- THE FOUR COMPONENTS THAT ARE FLOATING SURFACES ------------------
+      //
+      // Everything above this line belongs to the documentation shell. These
+      // four are components a consumer renders, and each one is named here
+      // because it cannot do its job in the flow of the page.
+      //
+      // `nd-dialog`: the surface a `<dialog>` draws, which covers both classes
+      // that carry it — `nd-dialog-surface` and the wrapper the trigger lives
+      // in. A modal one is in the browser's top layer, which is `fixed` by
+      // definition and cannot be anything else; a non-modal one is `absolute`
+      // against the control that opened it. It carries a hairline and the
+      // raised surface colour, and no shadow.
+      "nd-dialog",
+      // `nd-popover`: a `role="dialog"` anchored to its trigger. It is `fixed`
+      // for `anchor.js`'s reason, stated at the top of that file: a panel its
+      // own ancestor cannot clip is a panel CSS has nothing to hang it from,
+      // and `overflow` does not clip a fixed descendant. Eight surfaces before
+      // it float for exactly this and are already listed above.
+      "nd-popover",
+      // `nd-tooltip`: the hint bubble, at the tooltip layer so it stays legible
+      // over a control that is being used. Same anchoring, same reason, plus
+      // one of its own: it is `pointer-events: none`, so it is never between a
+      // pointer and the control it is about.
+      "nd-tooltip",
+      // `nd-toast`: a message pinned to a corner of the window, and the ONLY
+      // entry on this list that is visible with nothing pressed. That matters
+      // here, because this sweep only sees elements whose `offsetParent` is not
+      // null — a surface that opens on an interaction is invisible to it and
+      // this one is not. It floats because it reports something that happened
+      // somewhere else on the page, and it is bounded by `contain: layout` on
+      // the documentation site so four of them do not stack in one corner.
+      "nd-toast",
+    ];
     const floating = await page.evaluate((allowed) => {
       return [...document.querySelectorAll("*")]
         .filter((el) => {
           const s = getComputedStyle(el);
           return (
             ["fixed", "sticky", "absolute"].includes(s.position) &&
-            s.backgroundColor !== "rgba(0, 0, 0, 0)" && // allow-literal: the CSS keyword for "no background", not a colour this system could take from a token
+            s.backgroundColor !== "rgba(0, 0, 0, 0)" && // allow-literal: the CSS keyword for "no background", not a color this system could take from a token
             el.offsetParent !== null
           );
         })

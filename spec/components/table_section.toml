@@ -1,0 +1,57 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a table section for one band of a `Table`: the headings, the data or the totals. Every table needs a `head` and a `body`. A `foot` holds a row that sums the ones above it, and its cells are the only ones that may carry an `aggregate`."
+
+[meta]
+name = "TableSection"
+element = "tbody"
+class = "nd-table-section"
+# One row, so the band reads as a band. The specimen is wrapped in a `<table>`
+# by the variant grid — a `<tbody>` handed to the parser outside one is a start
+# tag it ignores, and the box would be empty.
+specimen = "<tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4211</th><td class=\"nd-table-cell nd-identifier\">12s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4209</th><td class=\"nd-table-cell nd-identifier\">48s</td></tr>"
+page = "tables"
+summary = "Groups table rows into a head, a body or a foot."
+
+# ONE COMPONENT, NOT THREE — AND THIS IS THE EASIER CASE THAN `List`.
+#
+# `List.kind` switches between `<ul>`, `<ol>` and `<dl>`, which have different
+# content models: a `<dl>` needs `<dt>`/`<dd>` pairs, which is the whole reason
+# `ListItem` has a `term` prop at all. `<thead>`, `<tbody>` and `<tfoot>` take
+# identical children and identical props and carry the identical ARIA role, so
+# three contracts would be three catalogue entries, three sets of examples and
+# three prop tables that all say the same nothing.
+
+[prop.kind]
+type = "enum"
+values = ["head", "body", "foot"]
+variants = false
+elements = ["thead", "tbody", "tfoot"]
+default = "body"
+doc = "Which band this is. It changes the element to `<thead>`, `<tbody>` or `<tfoot>` rather than a class. The script reads it too: `head` never sorts, `foot` never sorts or filters, and `body` is the only band whose rows move."
+
+[prop.name]
+type = "text"
+attribute = "data-nd-section"
+doc = "What this band is called in the markup, and the root of the ids a collapsible band needs. Several `<tbody>` elements in one table are HTML's own row grouping, such as a run of invoices per client, and this tells them apart."
+
+[prop.label]
+type = "text"
+doc = "The group's name, drawn as a row above its own rows. Wanted in practice by `collapsible`, because a fold with no name hides an unknown number of unknown things. It spans the table, so no column has to make room for it."
+
+[prop.collapsible]
+type = "bool"
+default = "false"
+attribute = "data-nd-collapsible"
+doc = "Whether the group's rows fold away behind their heading. **Several groups may be open at once**, so closing one never opens another. The rows render open and the script draws the control, so a fold nothing can undo never reaches the page."
+
+[prop.children]
+type = "children"
+doc = "The rows."
+
+[a11y]
+role = "rowgroup"
+notes = """
+The role is restated rather than left implicit. A table that stacks changes its
+`display`, and every engine drops the implicit table roles when it does. A
+`foot` stays put when the rows are sorted."""

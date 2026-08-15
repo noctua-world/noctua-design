@@ -4,7 +4,7 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// Stress emphasis — the word a reader would lean on when speaking.
+// Mark stress emphasis on a word inside a sentence.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.

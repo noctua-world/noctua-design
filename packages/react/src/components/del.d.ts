@@ -10,11 +10,13 @@ import type { ReactNode } from "react";
 export interface DelProps {
   /** A URL explaining the change. */
   cite?: string;
-  /** When it was removed, as a machine-readable timestamp. */
+  /** When the text was removed, as a machine-readable timestamp. */
   datetime?: string;
+  /** A word read out before the text to say that it was removed. Supply it in the reader's language, because this package ships no reader-facing words of its own. */
+  label?: string;
   className?: string;
   children?: ReactNode;
 }
 
-/** Text removed from the document. */
+/** Shows text that has been removed from the document. */
 export declare function Del(props: DelProps): JSX.Element;

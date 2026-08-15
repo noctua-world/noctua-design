@@ -1,0 +1,62 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a select option for one of the values a `Select` offers. A second line, an icon or a colour is carried on a `data-` attribute. The native control shows the label, and the enhanced list draws the rest."
+
+[meta]
+name = "SelectOption"
+element = "option"
+class = "nd-select-option"
+summary = "Add one value to a select, with an optional second line, icon or colour."
+
+# AN `<option>` HOLDS TEXT AND NOTHING ELSE.
+#
+# It is one of the few elements in HTML whose content model is a string, so an
+# icon or a swatch cannot be a child of it — and a library that renders one
+# anyway is a library that has stopped rendering a `<select>`.
+#
+# So the extra rides as data. The native control shows `label`, which is the
+# whole answer and is never a worse answer than the drawn one; the enhanced
+# listbox reads `data-nd-detail`, `data-nd-icon` and `data-nd-swatch` and draws
+# the richer row. One markup, two renderings, and the poorer of the two is
+# still correct on its own.
+
+[prop.value]
+type = "text"
+required = true
+attribute = "value"
+doc = "The value submitted when this option is chosen. Required rather than falling back to the label, because the label is translated and would submit a different string in every locale."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The visible text for this option. It is the `<option>`'s own text, so the native control and the enhanced list show the same words."
+
+[prop.detail]
+type = "text"
+attribute = "data-nd-detail"
+doc = "A quieter second line under the label, for what tells two similar options apart. Only the enhanced list draws it, where it is part of the option's accessible name."
+
+[prop.icon]
+type = "text"
+attribute = "data-nd-icon"
+doc = "A glyph shown beside the label, from the icon set. Never the only thing that distinguishes an option, because the native control shows only the text."
+
+[prop.swatch]
+type = "text"
+attribute = "data-nd-swatch"
+doc = "A palette name, drawn as a colour chip beside the label. It uses `Swatch`'s mechanism: the chip carries `data-palette` and takes its colour from that scope, so no colour is named here."
+
+[prop.selected]
+type = "bool"
+default = "false"
+attribute = "selected"
+doc = "Whether this option starts chosen. The attribute is omitted when false, because HTML reads its presence rather than its value."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Stops users choosing this option while leaving it in the list, so it is visible and unavailable rather than missing."
+
+[a11y]
+notes = "`data-nd-detail` becomes part of the drawn option's accessible name. `data-nd-icon` and `data-nd-swatch` are decorative and are hidden from assistive technology."

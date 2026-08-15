@@ -1,0 +1,97 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use pagination under anything showing one page of a longer set: a table, a list, a grid of results. It is a component of its own rather than a prop on `Table`, because a list of search results needs the same control."
+
+[meta]
+name = "Pagination"
+element = "nav"
+class = "nd-pagination"
+# Digits, for the reason `Table`'s specimen is digits: the variant grid ships
+# raw markup, which never passes through the message catalogue.
+specimen = "<ul class=\"nd-pagination-list\"><li><a class=\"nd-pagination-link\" href=\"#\">1</a></li><li><a class=\"nd-pagination-link\" href=\"#\" aria-current=\"page\">2</a></li><li><a class=\"nd-pagination-link\" href=\"#\">3</a></li></ul>"
+summary = "Move through a set of pages with real links and a window around the current one."
+
+# LINKS, NOT BUTTONS, AND THAT IS THE WHOLE DESIGN.
+#
+# A page is a URL. A reader must be able to open one in a new tab, bookmark it,
+# come back to it and find it in their history — none of which a `<button>` with
+# a handler can offer, and all of which they will try. So every page is an
+# `<a href>` built from one template, the current one carries `aria-current`,
+# and the control works with no script at all because there is nothing here for
+# a script to do.
+#
+# The window is the one piece of arithmetic any component in this system does,
+# and it is written once, in both languages side by side, in
+# `crates/noctua-design-emit/src/controls.rs`.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-pagination"
+doc = "What is being paged through. It names the control for anything binding to it, and it is what tells two paginations on one page apart. Required."
+
+[prop.label]
+type = "text"
+required = true
+attribute = "aria-label"
+doc = "What this navigation is for, in the reader's language, such as *search results*. It becomes `aria-label`, so two `<nav>` elements are not two identical landmarks. Required."
+
+[prop.page]
+type = "text"
+required = true
+attribute = "data-nd-page"
+doc = "The page in force, as text. Text because every prop that crosses the two languages is text, and it is clamped between one and `pages`. Required."
+
+[prop.pages]
+type = "text"
+required = true
+attribute = "data-nd-pages"
+doc = "How many pages there are in total. The last one is always reachable in one press, however far away it is. Required."
+
+[prop.href]
+type = "text"
+required = true
+doc = "The address of a page, with a `{page}` placeholder for its number. Required, because these are real links and a link with no destination is a button in the wrong element."
+
+[prop.spread]
+type = "enum"
+values = ["compact", "default", "wide"]
+variants = false
+default = "default"
+attribute = "data-nd-spread"
+doc = "How many pages are offered either side of the one in force: one, two or three. `compact` is for a control sharing a row with something else, and the two ends are always shown. `default` by default."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The size of the links: `small`, `medium` or `large`, matching `Button` step for step. `medium` and `large` clear the 44-pixel target. `small` is for a control beside a dense table."
+
+[prop.previous_label]
+type = "text"
+doc = "The name of the link to the page before, in the reader's language. Leave it out and no such link is drawn, which suits a control that only moves forward."
+
+[prop.next_label]
+type = "text"
+doc = "The name of the link to the page after, on the same terms."
+
+[prop.page_label]
+type = "text"
+doc = "The accessible name of a numbered link, with a `{page}` placeholder, such as *Page 4*. Without it a screen reader reads a column of bare numbers. One whole sentence with one hole, never a word joined to a number."
+
+[prop.current_label]
+type = "text"
+doc = "The accessible name of the page in force, which says so as well, such as *Page 4, current page*. `aria-current` carries the same fact, and this half survives an engine that does not announce the attribute."
+
+[prop.summary]
+type = "text"
+doc = "The sentence under the control: how many results there are, and which of them this page holds. It sits in a live region, so a reader is told the set did not change when a page turns."
+
+[state.current]
+attribute = "aria-current"
+doc = "Whether this link is the page being read. The value is `page` rather than `true`, which tells a screen reader this is a step in a sequence rather than a selected thing."
+
+[a11y]
+needs_name = true
+notes = "A named `<nav>` holding a list of links, so a screen reader says how many pages there are. The gap between two runs of numbers is `aria-hidden`, and every page is a real `<a href>` needing no script."

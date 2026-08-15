@@ -4,11 +4,11 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! Importance, seriousness or urgency — not merely bold text.
+//! Mark text as important, serious or urgent, rather than only bold.
 
 use dioxus::prelude::*;
 
-/// Importance, seriousness or urgency — not merely bold text.
+/// Mark text as important, serious or urgent, rather than only bold.
 #[component]
 pub fn Strong(
     /// Extra classes for the root element.

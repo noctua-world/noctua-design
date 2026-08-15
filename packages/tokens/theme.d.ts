@@ -11,10 +11,10 @@ export type Palette = "ochre-balanced" | "ochre-vivid" | "ochre-sober" | "amber-
 export type Font = "sans" | "mono";
 export type Glass = "off" | "subtle" | "full";
 export type Radius = "square" | "soft" | "round" | "circular";
-export type Blackout = "off" | "on";
+export type Backdrop = "plain" | "cool" | "black" | "tinted" | "soft" | "softer";
 export type Pattern = "none" | "dots" | "mesh" | "checks" | "diagonals";
-export type Glow = "off" | "on";
 export type Grain = "off" | "on";
+export type Syntax = "auto" | "spectrum" | "duotone" | "muted" | "mono";
 
 export declare const modeValues: {
   readonly values: readonly Mode[];
@@ -72,12 +72,12 @@ export declare const radiusValues: {
   readonly omitWhen: Radius | null;
   readonly scope: boolean;
 };
-export declare const blackoutValues: {
-  readonly values: readonly Blackout[];
-  readonly default: Blackout;
+export declare const backdropValues: {
+  readonly values: readonly Backdrop[];
+  readonly default: Backdrop;
   readonly key: string;
   readonly attribute: string | null;
-  readonly omitWhen: Blackout | null;
+  readonly omitWhen: Backdrop | null;
   readonly scope: boolean;
 };
 export declare const patternValues: {
@@ -88,20 +88,20 @@ export declare const patternValues: {
   readonly omitWhen: Pattern | null;
   readonly scope: boolean;
 };
-export declare const glowValues: {
-  readonly values: readonly Glow[];
-  readonly default: Glow;
-  readonly key: string;
-  readonly attribute: string | null;
-  readonly omitWhen: Glow | null;
-  readonly scope: boolean;
-};
 export declare const grainValues: {
   readonly values: readonly Grain[];
   readonly default: Grain;
   readonly key: string;
   readonly attribute: string | null;
   readonly omitWhen: Grain | null;
+  readonly scope: boolean;
+};
+export declare const syntaxValues: {
+  readonly values: readonly Syntax[];
+  readonly default: Syntax;
+  readonly key: string;
+  readonly attribute: string | null;
+  readonly omitWhen: Syntax | null;
   readonly scope: boolean;
 };
 
@@ -118,6 +118,12 @@ export declare function scopeAttributes(
   inherited: ScopeSettings,
 ): Record<string, string> | null;
 
+/** Every attribute `scopeAttributes` can return, including the marker. */
+export declare const scopeAttributeNames: readonly string[];
+
+/** Every setting a scope can carry. Absent means `scope = false`. */
+export declare const scopableSettings: readonly (keyof ScopeSettings)[];
+
 export interface Settings {
   mode: Mode;
   accent: Accent;
@@ -126,10 +132,10 @@ export interface Settings {
   font: Font;
   glass: Glass;
   radius: Radius;
-  blackout: Blackout;
+  backdrop: Backdrop;
   pattern: Pattern;
-  glow: Glow;
   grain: Grain;
+  syntax: Syntax;
 }
 
 export interface ScopeSettings {
@@ -140,4 +146,7 @@ export interface ScopeSettings {
   font: Font;
   glass: Glass;
   radius: Radius;
+  backdrop: Backdrop;
+  pattern: Pattern;
+  grain: Grain;
 }

@@ -4,13 +4,21 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! One item in a list.
+//! Show one item of a list, or one term and its description.
 
 use dioxus::prelude::*;
 
-/// One item in a list.
+/// Show one item of a list, or one term and its description.
+///
+/// # Accessibility
+///
+/// A `<dt>` and its `<dd>` must be direct children of the `<dl>`, so this
+/// renders two siblings rather than wrapping them. A wrapper breaks the
+/// association a screen reader reads.
 #[component]
 pub fn ListItem(
+    /// The thing being described. Its presence switches the item from an `<li>` to a `<dt>` and a `<dd>`, which is what a description list is made of.
+    term: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -21,9 +29,11 @@ pub fn ListItem(
     let root = root.trim().to_owned();
 
     rsx! {
-        li {
-            class: "{root}",
-            {children}
+        if let Some(term) = term {
+            dt { class: "nd-list-term", "{term}" }
+            dd { class: "{root}", {children} }
+        } else {
+            li { class: "{root}", {children} }
         }
     }
 }

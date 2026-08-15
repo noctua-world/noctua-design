@@ -11,17 +11,17 @@ export type TextWeight = "regular" | "medium" | "semibold" | "bold";
 export type TextTone = "default" | "muted" | "accent";
 
 export interface TextProps {
-  /** The size, from the type scale. */
+  /** The size, from the type scale: `caption`, `small`, `body` or `lead`. Defaults to `body`. */
   size?: TextSize;
-  /** The weight. */
+  /** The weight: `regular`, `medium`, `semibold` or `bold`. Defaults to `regular`. */
   weight?: TextWeight;
-  /** How much the text should assert itself. */
+  /** How much the text stands out: `default`, `muted` for secondary text, or `accent`. Defaults to `default`. */
   tone?: TextTone;
-  /** Tabular figures, so digits line up in a column. */
+  /** Whether the figures are tabular, so digits line up in a column. Off by default. */
   numeric?: boolean;
   className?: string;
   children?: ReactNode;
 }
 
-/** A run of text, with the size, weight and tone of the type scale. */
+/** Set the size, weight and tone of a run of text, from the type scale. */
 export declare function Text(props: TextProps): JSX.Element;

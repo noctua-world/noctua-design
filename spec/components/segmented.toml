@@ -1,0 +1,111 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a segmented control to choose one **value** out of a short, fixed set, all visible at once. To reveal a **panel** rather than answer a question, use `Tabs`. For buttons with no chosen member, use `ButtonGroup`."
+
+[meta]
+name = "Segmented"
+element = "div"
+class = "nd-segmented"
+# The still picture needs REAL CHILDREN. Without this the grid falls
+# back to the pangram placeholder, so every value of every enum prop
+# draws one identical line of text — which is what the reader saw.
+specimen = "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>"
+summary = "Let users pick one value from a short, fixed set, with every option visible."
+
+# WHY THIS IS A radiogroup OF BUTTONS AND NOT ANYTHING ELSE.
+#
+# `<select>` hides the alternatives, which is the one thing this shape exists
+# to avoid. `role="tablist"` promises panels that change, and there are none.
+# `role="group"` of toggle buttons announces several independent on/off
+# controls, so a screen reader would report "three buttons, one pressed"
+# instead of "one of three". And real `<input type="radio">`s bring a form
+# nothing submits: the value here is stored and applied as a DOM attribute, so
+# a fieldset of inputs would add a name nothing reads and a submission that
+# never happens.
+#
+# What the role does oblige is the radio group's keyboard contract, in full,
+# and that is what `[keyboard]` below is. A role claimed without its contract
+# is a promise to assistive technology that the markup does not keep.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-group"
+doc = "What is being chosen. The script binds to it, and every item in the group repeats the same word."
+
+[prop.label]
+type = "text"
+attribute = "aria-label"
+doc = "The group's accessible name. Required unless `labelledby` names it instead, because a radiogroup with no name gives a screen reader only its role."
+
+[prop.labelledby]
+type = "text"
+attribute = "aria-labelledby"
+doc = "The id of the element that names this group, when the name is already visible on the page. Prefer it to `label` in that case, because an `aria-label` beside a visible name can drift from it."
+
+[prop.appearance]
+type = "enum"
+values = ["joined", "spread"]
+default = "joined"
+attribute = "data-nd-appearance"
+doc = "`joined` draws one box with shared edges, which is the classic segmented control. `spread` gives each item its own box, which survives wrapping onto two lines where a joined one would break apart."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The size of the item box. All three clear WCAG 2.5.8's 24px minimum target, and `large` also meets the 44px enhanced target."
+
+[prop.shape]
+type = "enum"
+values = ["rounded", "pill", "square", "bevel"]
+default = "rounded"
+attribute = "data-nd-shape"
+doc = "The corners, in the same four words `Button` uses. Give the group the same shape as the other controls in the row."
+
+[prop.orientation]
+type = "enum"
+values = ["horizontal", "vertical"]
+default = "horizontal"
+attribute = "aria-orientation"
+doc = "Which way the items run, and therefore which arrow keys move between them. It is written to `aria-orientation`, so assistive technology reports the axis as well."
+
+[prop.fill]
+type = "enum"
+values = ["hug", "equal", "stretch"]
+default = "hug"
+attribute = "data-nd-fill"
+doc = "`hug` lets each item be as wide as its label. `equal` gives every item the width of the widest, so the group does not re-flow when one word is translated. `stretch` does that and takes the whole container."
+
+[prop.children]
+type = "children"
+doc = "The items."
+
+[a11y]
+role = "radiogroup"
+needs_name = true
+notes = """
+One tab stop for the whole group: a roving `tabindex` puts `0` on the chosen
+item and `-1` on the rest, server-rendered. Selection follows focus, and every
+item carries `aria-checked`."""
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts the group's own box rather than each option. Use it for a control that floats over content it must not hide."
+
+[prop.selection]
+type = "enum"
+values = ["accent", "quiet"]
+default = "accent"
+attribute = "data-nd-selection"
+doc = "How strongly the chosen value is marked. `accent` is the default and suits almost every group. `quiet` marks it with the surface and a stronger edge instead, for a group that sits in a bar beside other controls."
+
+[keyboard]
+Tab = "Moves into the group once, at the chosen item, rather than stopping on each item."
+"Arrow keys" = "Moves to the next or previous item and chooses it. Left and Right when horizontal, Up and Down when vertical."
+Home = "Moves to the first item and chooses it."
+End = "Moves to the last item and chooses it."
+"Space or Enter" = "Chooses the focused item, for users who arrived with Tab rather than the arrow keys."

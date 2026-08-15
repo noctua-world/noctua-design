@@ -2,21 +2,21 @@
 name = "Paragraph"
 element = "p"
 class = "nd-paragraph"
-summary = "A paragraph of prose."
+summary = "Render a paragraph of prose."
 
 [prop.size]
 type = "enum"
 values = ["small", "body", "lead"]
 default = "body"
 attribute = "data-nd-size"
-doc = "The size, from the type scale."
+doc = "The text size, from the type scale: `small`, `body` or `lead`. `body` is the default."
 
 [prop.tone]
 type = "enum"
 values = ["default", "muted"]
 default = "default"
 attribute = "data-nd-tone"
-doc = "How much the paragraph should assert itself."
+doc = "How strong the text colour is. `muted` is quieter than `default`, for text that supports the text around it."
 
 [prop.children]
 type = "children"

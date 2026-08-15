@@ -4,48 +4,276 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! A block of code, in the monospaced face, with a copy control.
+//! Show a block of highlighted code, in any of thirty-four languages.
 
 use dioxus::prelude::*;
+use noctua_design_grammars::{Language, Role, lines, scan};
+use noctua_design_icons::IconName;
 
-/// A block of code, in the monospaced face, with a copy control.
+use crate::components::Icon;
+
+/// Which syntax theme paints it. `auto` follows the reader's page setting, and resolves to `mono` under more contrast, a monochrome display, forced colours and print. Any other value overrides both. The attribute is always written.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum CodeBlockTheme {
+    #[default]
+    /// `auto`
+    Auto,
+    /// `spectrum`
+    Spectrum,
+    /// `duotone`
+    Duotone,
+    /// `muted`
+    Muted,
+    /// `mono`
+    Mono,
+}
+
+impl CodeBlockTheme {
+    /// Every value, in the order the spec declares them.
+    pub const ALL: [Self; 5] = [
+        Self::Auto,
+        Self::Spectrum,
+        Self::Duotone,
+        Self::Muted,
+        Self::Mono,
+    ];
+
+    /// The value as it appears in the DOM.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Auto => "auto",
+            Self::Spectrum => "spectrum",
+            Self::Duotone => "duotone",
+            Self::Muted => "muted",
+            Self::Mono => "mono",
+        }
+    }
+}
+
+/// Show a block of highlighted code, in any of thirty-four languages.
 ///
 /// # Accessibility
 ///
-/// A scrollable code block must be reachable by keyboard, or its content is
-/// unreadable without a mouse — so the scroll container is focusable when it
-/// overflows. The copy control announces its result; a button that silently
-/// succeeds is a button a screen-reader user cannot trust.
+/// Colour is never the only signal: a comment is italic, a keyword is bold, and a
+/// marked line carries a rule at its edge. The scrollable region is reachable by
+/// keyboard and named by `filename` or the language.
 #[component]
 pub fn CodeBlock(
-    /// The language, shown as a label and used by the copy announcement.
+    /// The code. Text rather than children, because a component that cannot read its own content cannot number a line, mark one or colour a token.
+    code: String,
+    /// Which language to read it as: `rust`, `ts`, `sh`, `diff`. An alias resolves to its language, and a name nothing recognises renders as plain text. Free text rather than an enum, because the list lives in `spec/grammars/`.
     language: Option<String>,
-    /// Show line numbers.
+    /// Which syntax theme paints it. `auto` follows the reader's page setting, and resolves to `mono` under more contrast, a monochrome display, forced colours and print. Any other value overrides both. The attribute is always written.
     #[props(default)]
+    theme: CodeBlockTheme,
+    /// The file this came from, shown in the bar above the block. It is also the accessible name of the scrollable region, which otherwise falls back on the language.
+    filename: Option<String>,
+    /// A sentence under the block, in the reader's language.
+    caption: Option<String>,
+    /// Whether every line is numbered. Off by default. The numbers are drawn by a CSS counter and are not selectable, so copying the block copies the code and not a column of digits.
+    #[props(default = false)]
     numbered: bool,
-    /// Wrap long lines instead of scrolling them.
-    #[props(default)]
+    /// What the first line is numbered, for an excerpt that starts partway into a file. Text, because a spec prop is text, an enum or a flag. It is parsed, and anything unparseable is 1.
+    start_line: Option<String>,
+    /// Lines to emphasise, as `3,7-9`. Each marked line gets a tint and a rule down its leading edge. A line singled out by colour alone cannot be found by a dichromat.
+    mark_lines: Option<String>,
+    /// Whether every line `mark_lines` did not name is dimmed. Off by default, and it does nothing without marks. It is a separate flag rather than a mode, so the marking and the dimming are set apart.
+    #[props(default = false)]
+    focus: bool,
+    /// Whether long lines wrap instead of scrolling. Off by default. Prefer wrapping where the line is prose-like and scrolling where it is structure.
+    #[props(default = false)]
     wrap: bool,
-    /// Offer a copy control.
-    #[props(default)]
-    copy: bool,
+    /// Collapses the block to this many lines behind a control. **With the script blocked the whole block is visible** and no control claims otherwise, because the collapse is an enhancement.
+    max_lines: Option<String>,
+    /// The name of the control that opens a collapsed block. Its presence is the opt-in: with no name there is no collapse, because this package cannot name a chevron in the reader's language.
+    expand_label: Option<String>,
+    /// The name that control takes once the block is open.
+    collapse_label: Option<String>,
+    /// The name of the control that toggles wrapping. Its presence is the opt-in, for the same reason.
+    wrap_label: Option<String>,
+    /// The accessible name of the copy control, and the opt-in for it: with no name there is no control. It copies the original text, never the markup and never the line numbers.
+    copy: Option<String>,
+    /// What the live region says once the copy succeeds. Without it the control still works and still swaps its glyph, but a screen reader user gets no confirmation.
+    copied: Option<String>,
+    /// Frosts the block. Off by default, and rarely right, because code is read for a long time and a moving backdrop under it makes that harder.
+    #[props(default = false)]
+    glass: bool,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
-    /// The content.
-    children: Element,
 ) -> Element {
+    let named = Language::parse(language.as_deref().unwrap_or_default());
+    let grammar = named.unwrap_or(Language::Plain).grammar();
+    let mut rows = lines(&scan(grammar, &code));
+    // A trailing newline makes a final empty group. Rendering it would put a
+    // blank line at the bottom of every block that ends the way a file does.
+    let trailing = code.ends_with('\n');
+    if trailing && rows.len() > 1 {
+        rows.pop();
+    }
+
+    // `3,7-9`. Anything unparseable is silently no mark rather than an error:
+    // this is a presentation hint, and a build that stopped over one would be
+    // stopping over the wrong thing.
+    let mut marked: Vec<usize> = Vec::new();
+    for part in mark_lines.as_deref().unwrap_or_default().split(',') {
+        let part = part.trim();
+        match part.split_once('-') {
+            Some((from, to)) => {
+                if let (Ok(from), Ok(to)) = (from.trim().parse(), to.trim().parse::<usize>()) {
+                    for line in from..=to {
+                        marked.push(line);
+                    }
+                }
+            }
+            None => {
+                if let Ok(line) = part.parse() {
+                    marked.push(line);
+                }
+            }
+        }
+    }
+
+    let first: usize = start_line
+        .as_deref()
+        .and_then(|value| value.trim().parse().ok())
+        .unwrap_or(1);
+    let is_diff = named == Some(Language::Diff);
+
+    // THE REGION IS NAMED OR IT IS NOT A REGION. An unnamed landmark is one a
+    // screen-reader user arrives inside with nothing telling them where they
+    // are, which is worse than no landmark at all.
+    let name = filename.clone().or_else(|| {
+        named
+            .filter(|l| *l != Language::Plain)
+            .map(|l| l.display().to_owned())
+    });
+    let region = name.as_ref().map(|_| "region");
+    let badge = named
+        .filter(|l| *l != Language::Plain)
+        .map(Language::display);
+    let bar = filename.is_some() || copy.is_some() || wrap_label.is_some() || badge.is_some();
+
+    let mut style = format!("counter-reset: nd-code-line {};", first.saturating_sub(1));
+    if let Some(max) = max_lines
+        .as_deref()
+        .and_then(|v| v.trim().parse::<usize>().ok())
+    {
+        style = format!("{style} --nd-code-max: {max};");
+    }
+    let collapsible = expand_label.is_some() && max_lines.is_some();
     let root = format!("nd-codeblock {class}");
     let root = root.trim().to_owned();
 
     rsx! {
-        pre {
-            class: "{root}",
-            "data-nd-language": language,
-            "data-nd-numbered": if numbered { "true" } else { "false" },
-            "data-nd-wrap": if wrap { "true" } else { "false" },
-            "data-nd-copy": if copy { "true" } else { "false" },
-            {children}
+        figure {
+            class: "nd-codeblock-figure",
+            "data-nd-collapsible": if collapsible { Some("true") } else { None },
+            if bar {
+                div { class: "nd-codeblock-bar",
+                    if let Some(filename) = filename.clone() {
+                        span { class: "nd-codeblock-name nd-identifier", "{filename}" }
+                    }
+                    if let Some(badge) = badge {
+                        span { class: "nd-codeblock-badge nd-identifier", "{badge}" }
+                    }
+                    if let Some(wrap_label) = wrap_label.clone() {
+                        button {
+                            class: "nd-codeblock-control",
+                            r#type: "button",
+                            "aria-label": "{wrap_label}",
+                            title: "{wrap_label}",
+                            "aria-pressed": if wrap { "true" } else { "false" },
+                            "data-nd-wrap-toggle": "",
+                            Icon { icon: IconName::WrapText }
+                        }
+                    }
+                    if let Some(copy) = copy.clone() {
+                        button {
+                            class: "nd-codeblock-control",
+                            r#type: "button",
+                            "aria-label": "{copy}",
+                            title: "{copy}",
+                            "data-nd-copy": "",
+                            "data-nd-copied": copied.clone(),
+                            Icon { icon: IconName::Copy }
+                            Icon { icon: IconName::Check }
+                        }
+                        // Empty until the copy succeeds: a live region that
+                        // already holds its text announces nothing when that
+                        // text is replaced by the same text.
+                        span {
+                            class: "nd-visually-hidden",
+                            role: "status",
+                            "data-nd-copy-status": "",
+                        }
+                    }
+                }
+            }
+            pre {
+                class: "{root}",
+                style: "{style}",
+                "data-nd-code-theme": theme.as_str(),
+                "data-nd-language": language.clone(),
+                "data-nd-numbered": if numbered { "true" } else { "false" },
+                "data-nd-wrap": if wrap { "true" } else { "false" },
+                "data-nd-focus": if focus { "true" } else { "false" },
+                "data-nd-glass": if glass { "true" } else { "false" },
+                // THE CODE IS THE FOCUSABLE SCROLLER, not the <pre>: the bar
+                // above holds buttons, and a reader tabbing in to READ should
+                // not have to tab through them first. And the <pre> keeps the
+                // radius while this keeps the overflow, because a scrollable
+                // element never carries a radius — a classic scrollbar paints
+                // square straight through a rounded corner.
+                code {
+                    class: "nd-codeblock-code",
+                    tabindex: "0",
+                    role: region,
+                    "aria-label": name.clone(),
+                    for (index, row) in rows.iter().enumerate() {
+                        span {
+                            class: "nd-codeblock-line",
+                            "data-nd-mark": if marked.contains(&(first + index)) { Some("true") } else { None },
+                            "data-nd-line": if is_diff { row.first().map(|t| match t.role {
+                                Role::Inserted => "inserted",
+                                Role::Deleted => "deleted",
+                                Role::Comment | Role::Attribute => "meta",
+                                _ => "context",
+                            }) } else { None },
+                            for token in row {
+                                span { "data-nd-tok": token.role.as_str(), "{token.text}" }
+                            }
+                        }
+                        // A REAL NEWLINE, BESIDE THE LINE AND NOT INSIDE IT.
+                        //
+                        // Inside, it would be a forced break at the end of a
+                        // block box and every line would be followed by an
+                        // empty one. Beside, it sits in the `<code>`, whose
+                        // `white-space` is `normal` — so it collapses to
+                        // nothing on screen and stays in `textContent`, which
+                        // is what the copy control reads. That is the whole
+                        // reason the line numbers are drawn by a counter
+                        // rather than written into the markup.
+                        if index + 1 < rows.len() || trailing {
+                            "\n"
+                        }
+                    }
+                }
+            }
+            if collapsible {
+                button {
+                    class: "nd-codeblock-expand",
+                    r#type: "button",
+                    "aria-expanded": "false",
+                    "data-nd-expand": "",
+                    "data-nd-collapse-label": collapse_label.clone(),
+                    "{expand_label.clone().unwrap_or_default()}"
+                }
+            }
+            if let Some(caption) = caption.clone() {
+                figcaption { class: "nd-codeblock-caption", "{caption}" }
+            }
         }
     }
 }

@@ -1,0 +1,267 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """Use a table for data with two dimensions: rows that are records, columns that are fields. It is a `role="table"` and leaves the arrow keys alone. It becomes a `role="grid"` when a column is sortable, filterable or selectable."""
+
+[meta]
+name = "Table"
+element = "table"
+class = "nd-table"
+# Two rows and two columns, so the density, the rules, the stripe and the
+# narrow-screen layout all have something to change. See `Checkbox` for why the
+# specimen of a compound component is markup rather than a word.
+# DIGITS, NOT WORDS. The variant grid ships raw markup, so anything in here
+# never passes through the message catalogue — and a word that does not is a
+# word `every_sentence_on_every_page_is_translated` refuses.
+specimen = "<tbody><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4211</th><td class=\"nd-table-cell nd-identifier\">12s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4209</th><td class=\"nd-table-cell nd-identifier\">48s</td></tr></tbody>"
+page = "tables"
+summary = "Show data in rows and columns, with sorting, filtering, selection and totals."
+
+# EVERY ID DERIVES FROM `name`, AND A CALLER WRITES NONE OF THEM.
+#
+# The caption, the note, the live region, the toolbar and every control in it.
+# `Search` was rebuilt because the version before it derived its id from an
+# OPTIONAL name, so four fields on one page all carried one id.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-table"
+doc = "The identifier for this table, and the root of every id in it. **Required**, because an id derived from an absent name is the same id on each copy of the component on a page."
+
+[prop.caption]
+type = "text"
+required = true
+doc = "What the table is, in the reader's language, as a real `<caption>`. **Required**: it is the first thing a screen reader says on entering, and it is what a list of the page's tables is made of. Use `hide_caption` when a heading already says it."
+
+[prop.hide_caption]
+type = "bool"
+default = "false"
+attribute = "data-nd-caption-hidden"
+doc = "Whether the caption is hidden from the screen while staying in the document. For a table whose page or section heading already says what it is. The name is still there for a reader who cannot see the heading."
+
+[prop.note]
+type = "text"
+doc = "A sentence under the caption: where the numbers came from, when they were counted, what a blank cell means. The table's `aria-describedby` points at it, so it is read with the table."
+
+[prop.density]
+type = "enum"
+values = ["compact", "default", "comfortable"]
+default = "default"
+attribute = "data-nd-density"
+doc = "How much room a row takes: `compact`, `default` or `comfortable`. `compact` fits more rows on a screen, for a table a reader scans. `comfortable` suits a table with wrapped sentences in it."
+
+[prop.rules]
+type = "enum"
+values = ["rows", "columns", "grid", "none"]
+default = "rows"
+attribute = "data-nd-rules"
+doc = "Which lines are drawn: `rows`, `columns`, `grid` or `none`. `rows` by default, for a table read across. `columns` for one read downward, and `grid` for one read both ways. Use `none` with `zebra`."
+
+[prop.zebra]
+type = "bool"
+default = "false"
+attribute = "data-nd-zebra"
+doc = """Whether alternate rows are shaded. An alternative to `rules = "rows"` rather than an addition. Useful past about ten columns, where a rule is far from the value a reader is tracking."""
+
+[prop.hover]
+type = "bool"
+default = "false"
+attribute = "data-nd-hover"
+doc = "Whether the row under the pointer is lit. For a wide table a reader tracks across. **Pointer only**, and it never replaces the focus ring, because it says nothing to a reader using a keyboard."
+
+[prop.width]
+type = "enum"
+values = ["full", "auto"]
+variants = false
+default = "full"
+attribute = "data-nd-width"
+doc = "Whether the table fills its container (`full`) or is as wide as its content (`auto`). `full` by default. `auto` suits a small table beside something else."
+
+[prop.height]
+type = "enum"
+values = ["auto", "short", "medium", "tall"]
+variants = false
+default = "auto"
+attribute = "data-nd-height"
+doc = "A cap on the height of the scrolling box, so a long table does not push the rest of the page down. **Required in practice by `sticky_header`**, which does nothing in a box that never scrolls."
+
+[prop.layout]
+type = "enum"
+values = ["auto", "scroll", "stack"]
+variants = false
+default = "auto"
+attribute = "data-nd-layout"
+doc = "The narrow-screen layout. `auto` scrolls sideways where there is room and stacks into label-and-value pairs where there is not. `scroll` and `stack` fix the choice. It is a container query, so a table in a narrow column stacks on a wide screen."
+
+[prop.sticky_header]
+type = "bool"
+default = "false"
+attribute = "data-nd-sticky-header"
+doc = "Whether the heading row is pinned to the top of the scrolling box. For a long table, where a row of numbers means nothing without the words above it. Wants a `height`, and does nothing in a stacked table."
+
+[prop.selected_label]
+type = "text"
+attribute = "data-nd-selected-label"
+doc = "What is announced when the chosen rows change, with a `{count}` hole. Nothing here moves focus when a row is chosen, so without this sentence choosing is silent. It may carry one form per plural category. The controls are `TableRow.select`'s."
+
+[prop.sort_ascending_label]
+type = "text"
+attribute = "data-nd-sort-ascending-label"
+doc = "What is announced after sorting up, with a `{column}` hole, such as *Sorted by {column}, smallest first*. The rows move for a reader who cannot see them move. Wanted in practice by a sortable `TableColumn`."
+
+[prop.sort_descending_label]
+type = "text"
+attribute = "data-nd-sort-descending-label"
+doc = "The same, for sorting down."
+
+[prop.sort_cleared_label]
+type = "text"
+attribute = "data-nd-sort-cleared-label"
+doc = "The same for the third press, which puts the rows back in the order the document had them. That third state is why sorting is not a toggle: a reader who sorted by accident has no other way back."
+
+[prop.filtered_label]
+type = "text"
+attribute = "data-nd-filtered-label"
+doc = "What is announced after filtering, with `{count}` and `{total}` holes. It also says that nothing matched when the count is zero. Without it, a table that drops ninety rows changes in silence."
+
+[prop.resize_label]
+type = "text"
+attribute = "data-nd-resize-label"
+doc = "The name of a column's resize handle, with a `{column}` hole. Wanted in practice by a resizable `TableColumn`. Naming the handle is what makes it a control a keyboard can reach with Alt and the arrow keys."
+
+[prop.resized_label]
+type = "text"
+attribute = "data-nd-resized-label"
+doc = "What is announced while resizing, with `{column}` and `{width}` holes. `{width}` is filled with a percentage the platform formats in the reader's own locale."
+
+[prop.columns_label]
+type = "text"
+attribute = "data-nd-columns-label"
+doc = "The name of the control that lists which columns are shown. Wanted in practice by a hideable `TableColumn`, because without it there is no way to bring a hidden column back."
+
+[prop.column_shown_label]
+type = "text"
+attribute = "data-nd-column-shown-label"
+doc = "What is announced when a column comes back, with a `{column}` hole. The table changes width and no focus moves, so the sentence is the only signal."
+
+[prop.column_hidden_label]
+type = "text"
+attribute = "data-nd-column-hidden-label"
+doc = "The same, for a column going away."
+
+[prop.search_label]
+type = "text"
+attribute = "data-nd-search-label"
+doc = "The name of the search field, and of the control that reveals it. **One box, behind a magnifying glass**, rather than one in every filterable heading. Wanted in practice by a filterable `TableColumn`."
+
+[prop.search_placeholder]
+type = "text"
+attribute = "data-nd-search-placeholder"
+doc = "The example inside the search box, such as *invoice, client, status*. **Never the only name it has**, because it vanishes on the first keystroke."
+
+[prop.export]
+type = "bool"
+default = "false"
+attribute = "data-nd-export"
+doc = "Whether the toolbar carries the menu that saves the table: a `.csv` file, a `.json` file, the clipboard, and the printer. It writes what is **showing**: the visible columns, the rows a filter left, and the chosen rows when there are any."
+
+[prop.export_label]
+type = "text"
+attribute = "data-nd-export-label"
+doc = "The name of that menu. Wanted in practice by `export`."
+
+[prop.csv_label]
+type = "text"
+attribute = "data-nd-csv-label"
+doc = "The name of the entry that downloads a `.csv`. The file opens in a spreadsheet and is named after the table."
+
+[prop.json_label]
+type = "text"
+attribute = "data-nd-json-label"
+doc = "The name of the entry that downloads a `.json`, keyed by each `TableColumn`'s `name`. For a reader who processes the table with code."
+
+[prop.print_label]
+type = "text"
+attribute = "data-nd-print-label"
+doc = "The name of the entry that prints. The print stylesheet drops the toolbar, unfolds the scroller so nothing is cut off, and repeats the heading row on each sheet."
+
+[prop.exported_label]
+type = "text"
+attribute = "data-nd-exported-label"
+doc = "What is said after a file is saved, with a `{count}` hole. A download that fails says **nothing** rather than naming a file that was never written."
+
+[prop.more_src]
+type = "text"
+attribute = "data-nd-more-src"
+doc = "Where the next rows come from. The address returns **`<tr>` markup** rather than JSON. The response may carry a `data-nd-more-src` of its own on its first row, and no attribute means there are no more rows. Nothing is fetched until a reader asks."
+
+[prop.more_label]
+type = "text"
+attribute = "data-nd-more-label"
+doc = "The name of the control that fetches them. **A real button, always**, which the script presses when it scrolls into view. Wanted in practice by `more_src`."
+
+[prop.more_status_label]
+type = "text"
+attribute = "data-nd-more-status-label"
+doc = "What is announced when rows arrive, with `{count}` and `{total}` holes. Rows appear without moving focus, so the sentence is the only signal that the table changed length."
+
+[prop.total]
+type = "text"
+attribute = "data-nd-total"
+doc = "How many rows there are altogether, when the rest of them are elsewhere. It is what `{total}` is filled from. Without it, twenty rows fetched from four hundred are announced as *20 of 20*."
+
+[prop.copy]
+type = "bool"
+default = "false"
+attribute = "data-nd-copy"
+doc = "Whether a control appears that copies the table, and whether Ctrl/Cmd+C does it from inside the grid. It writes **tab-separated** text and copies the chosen rows, or the visible rows when none are chosen. **The clipboard is written, never read.**"
+
+[prop.copy_label]
+type = "text"
+attribute = "data-nd-copy-label"
+doc = "The name of that control. Wanted in practice by `copy`."
+
+[prop.copied_label]
+type = "text"
+attribute = "data-nd-copied-label"
+doc = "What is said after a copy, with a `{count}` hole. A copy that fails says **nothing** rather than naming a copy that did not happen."
+
+[prop.summary_label]
+type = "text"
+attribute = "data-nd-summary-label"
+doc = "A sentence under the table saying how much of it is showing, with `{visible}` and `{total}` holes, such as *{visible} of {total} rows*. It is drawn only when the two differ."
+
+[prop.children]
+type = "children"
+doc = "The `TableColumn` declarations first, then the `TableSection` bands. Columns come before rows because that is the order `<table>` requires."
+
+[state.scrollable]
+attribute = "data-nd-scrollable"
+doc = """Set when the table is wider than its box. The script writes it from a measurement, and it turns the box into a `role="region"` a keyboard can reach. It is removed again when the table fits."""
+
+[state.sorted]
+attribute = "data-nd-sorted"
+doc = "Which column the rows are ordered by, or absent in document order. Written on the table rather than on the heading, so the stylesheet can mark the whole column."
+
+[state.filtered]
+attribute = "data-nd-filtered"
+doc = "Set when rows are hidden by a filter. Rows are hidden, never removed, so clearing the filter restores the table. Every total in the foot is recounted from what is left."
+
+[state.interactive]
+attribute = "data-nd-interactive"
+doc = "Set when the table is a `grid`, which happens when something in it is sortable, filterable, resizable, selectable or expandable. **Derived and never declared.**"
+
+[a11y]
+needs_name = true
+notes = "Every part writes its role in the markup, because the stacked layout changes `display` and an engine drops implicit table roles when it does. A grid is one tab stop with a roving `tabindex`."
+
+[keyboard]
+"Arrow keys" = "In a reading table, nothing: they scroll the box. In a grid, they walk cell to cell."
+"Tab" = "Moves into the grid and out the other side. The whole grid is **one** stop, held by a roving `tabindex`."
+"Home / End" = "Moves to the first or last cell of the row. With Ctrl, the first or last cell of the table."
+"Page Up / Page Down" = "Moves a screenful of rows up or down, staying in the same column."
+"Enter / Space" = "On a column heading, sorts by it: up, down, then back to document order. On a row, chooses it."
+"Shift + arrow keys" = "Extends the chosen rows, when `select` is `multiple`. Shift and a click does the same with a pointer."
+"Ctrl/Cmd + A" = "Chooses every row, when `select` is `multiple` and focus is inside the grid."
+"Ctrl/Cmd + C" = "Copies the chosen rows, or the visible rows when none are chosen, as tab-separated text, when `copy` is on."
+"Alt + Left / Alt + Right" = "On a resizable column's heading, makes it narrower or wider by one step. With Shift, by ten steps."

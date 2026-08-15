@@ -1,0 +1,122 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a popover for a small surface hanging off a control, holding text a reader
+can act on. It is a `role="dialog"`. For one sentence explaining a word beside
+it, use `Info`, which is a `role="note"`. For a list of actions, use `Menu`.
+"""
+
+[meta]
+name = "Popover"
+element = "div"
+class = "nd-popover"
+summary = "Hang a small surface off a control, holding text a reader can act on."
+
+# WHY THIS IS A DIALOG AND `Info` IS A NOTE.
+#
+# The two draw the same box and promise opposite things. `Info` is one sentence
+# about the word beside it: a `role="note"`, announced as an aside, and a reader
+# who ignores it has lost an explanation. This one holds controls a reader came
+# to use, so it is a `role="dialog"` with a name, and a screen reader enters it
+# as a surface rather than as a remark. `info.toml` says the other half of this
+# sentence.
+#
+# WHAT IT IS NOT: A MODAL.
+#
+# Nothing behind it is inert, the page keeps its scroll, and Tab walks out of it
+# and closes it on the way. `Dialog` is the component for a decision a reader has
+# to settle first. A `role="dialog"` that traps focus without being modal is the
+# worst of both, because the way out is the one key a reader did not press.
+#
+# THE ANCHORING IS NOT WRITTEN HERE.
+#
+# `crates/noctua-design-runtime/src/anchor.js` positions eight floating surfaces
+# already, flips them when there is no room below, and closes one whose control
+# has scrolled off the screen. This is the ninth caller rather than a ninth copy.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-popover"
+doc = """
+What this surface is, as a script finds it, and the root of the two ids here.
+**Required**, because ids derived from an absent name collide the moment a page
+carries two.
+"""
+
+[prop.trigger_label]
+type = "text"
+required = true
+doc = """
+The words on the control that opens it. **Required**: a surface with no control
+pointing at it is a surface a reader cannot reach, and this control ships with
+no other text.
+"""
+
+[prop.heading]
+type = "text"
+doc = """
+A title inside the surface. It names the popover through `aria-labelledby`, so
+prefer it to `label`. A name a reader can see is a name they can check against
+what is under it.
+"""
+
+[prop.label]
+type = "text"
+doc = """
+The surface's accessible name, for one with no visible title. A `role="dialog"`
+with no name gives a screen reader its role and nothing else. Ignored when
+`heading` is set.
+"""
+
+[prop.placement]
+type = "enum"
+values = ["auto", "start", "end"]
+default = "auto"
+attribute = "data-nd-placement"
+# Where the SURFACE opens, and a still picture has no open surface in it. The
+# three values drew the same closed control three times.
+variants = false
+doc = """
+Where it opens. `auto` measures the room under the control and flips above when
+there is not enough. `start` and `end` pin the surface's leading or trailing
+edge to the control, for a control near the edge of the window.
+"""
+
+[prop.dismissible]
+type = "bool"
+default = "true"
+attribute = "data-nd-dismissible"
+doc = """
+Whether a control that closes it is drawn. On by default: Escape, a Tab out and
+a press outside are the other three ways. None of those three is visible on a
+touch screen.
+"""
+
+[prop.close_label]
+type = "text"
+doc = """
+The name of the control that closes it. Wanted in practice by `dismissible`,
+because that control is a glyph and this is the only name it has.
+"""
+
+[prop.children]
+type = "children"
+doc = "What the surface holds. Controls are welcome here, unlike in a `Tooltip`, and this is the difference between the two."
+
+[state.open]
+attribute = "aria-expanded"
+doc = "Whether the surface is showing. Written on the control, which is the element a reader presses and the element a screen reader reads the state of."
+
+[a11y]
+needs_name = true
+notes = """
+The control is a `<button>` with `aria-expanded` and `aria-controls`, and the
+surface is a `role="dialog"` with a name. Nothing behind it is inert and nothing
+is trapped, so Tab walks out and closes it.
+"""
+
+[keyboard]
+"Enter or Space" = "Opens the surface, and closes it again."
+Escape = "Closes it and puts the focus back on the control that opened it."
+Tab = "Walks into the surface and out of it. Nothing is trapped, and leaving closes it."

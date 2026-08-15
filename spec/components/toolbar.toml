@@ -1,0 +1,82 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a toolbar for a bar of controls that belong to one thing, such as the actions on a panel. It is one tab stop walked with the arrow keys. For a row of links, use `nav`. For buttons that are one decision, use `ButtonGroup`."
+
+[meta]
+name = "Toolbar"
+element = "div"
+class = "nd-toolbar"
+# The still picture needs REAL CHILDREN. Without this the grid falls
+# back to the pangram placeholder, so every value of every enum prop
+# draws one identical line of text — which is what the reader saw.
+specimen = "<div class=\"nd-toolbar-group\" role=\"group\"><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Aa</span></span></button><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Bb</span></span></button></div>"
+summary = "Group controls into one bar that is a single tab stop, walked with the arrow keys."
+
+# THE ROLE IS A PROMISE ABOUT THE KEYBOARD, AND IT IS KEPT ELSEWHERE.
+#
+# `role="toolbar"` tells assistive technology that this is one stop and the
+# arrows move inside it. Markup that claims it and leaves every control
+# separately tabbable has lied — which is the same defect `Segmented` exists to
+# stop, one level up. Neither package ships a runtime, so the arrow handling is
+# `docs-site/assets/shell.js`, keyed on the role; what the component owes is the
+# role, the name, the axis and the layout the arrows follow.
+#
+# A `Segmented` inside a toolbar keeps working: its radios join the toolbar's
+# list of stops, and moving onto one chooses it, which is what a radio group
+# does anyway. That is the arrangement the ARIA practices describe, and it is
+# the reason the two components share one implementation of roving focus rather
+# than having one each that disagree at the boundary.
+
+[prop.label]
+type = "text"
+attribute = "aria-label"
+doc = "The toolbar's accessible name, saying what the bar of controls is for. Required unless `labelledby` names it instead, because a `role=\"toolbar\"` with no name gives a screen reader only the word `toolbar`."
+
+[prop.labelledby]
+type = "text"
+attribute = "aria-labelledby"
+doc = "The id of the element that names this toolbar, when the name is already visible on the page."
+
+[prop.orientation]
+type = "enum"
+values = ["horizontal", "vertical"]
+default = "horizontal"
+attribute = "aria-orientation"
+doc = "Which way the controls run, and therefore which arrow keys walk them. It is written to `aria-orientation`, so assistive technology reports the axis as well."
+
+[prop.wrap]
+type = "bool"
+default = "true"
+attribute = "data-nd-wrap"
+doc = "Whether the bar wraps onto more lines when it runs out of room. On by default, so that the last control is still reachable at 320px."
+
+[prop.density]
+type = "enum"
+values = ["comfortable", "compact"]
+default = "comfortable"
+attribute = "data-nd-density"
+doc = "The gap between its groups. `compact` is for a bar inside something else, where the surrounding padding already separates it."
+
+[prop.children]
+type = "children"
+doc = "The groups of controls."
+
+[a11y]
+role = "toolbar"
+needs_name = true
+notes = """
+One tab stop for the whole bar, walked with the arrow keys. Exactly one control
+inside carries `tabindex="0"` and the rest carry `-1`, so returning to the bar
+lands where users left off."""
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts the bar. Use it for a bar that scrolls over the content it controls, which is what shows through."
+
+[keyboard]
+Tab = "Moves into the bar once, at the control last used, rather than stopping on each control."
+"Arrow keys" = "Moves to the next or previous control, choosing it if it is a radio. Left and Right, or Up and Down when vertical."
+Home = "Moves to the first control."
+End = "Moves to the last control."

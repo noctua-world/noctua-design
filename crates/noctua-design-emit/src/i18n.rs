@@ -459,7 +459,12 @@ mod tests {
 
     fn shipped() -> Catalogue {
         let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
-        noctua_design_spec::i18n::load(root.join("spec/i18n")).expect("catalogue")
+        noctua_design_spec::i18n::load_for(
+            root.join("spec/i18n"),
+            &noctua_design_spec::component::load_all(root.join("spec/components"))
+                .expect("the shipped components"),
+        )
+        .expect("catalogue")
     }
 
     fn file(path: &str) -> String {

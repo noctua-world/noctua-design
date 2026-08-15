@@ -1,0 +1,116 @@
+guidance = "Use a tag for a value or a label about one, such as a keyword on a record or a status beside a title. For a control that does something, use `Button`. For a count on the corner of one, use `Badge`."
+
+[meta]
+name = "Tag"
+element = "span"
+class = "nd-tag"
+summary = "Show a value or a label in a pill that can also be a link, a toggle or removable."
+# The component's own name, marked as the identifier it is — the same escape
+# `Select`'s specimen uses, because the variant grid renders one per enum
+# value and a translated word there would be a sentence nobody wrote.
+specimen = "<span class=\"nd-tag-body\"><span class=\"nd-tag-label nd-identifier\">Tag</span></span>"
+
+# THE WORD IS A PROP, NOT CHILDREN, AND `TagPicker` IS WHY.
+#
+# A `TagPicker` draws a tag for every value a reader commits, by cloning a
+# `<template>` this component shipped and writing the word into it — which it
+# can only do to a string it can find and replace. Children would be an opaque
+# subtree with no defined place to put a word.
+#
+# It is also what lets the remove control be named. "Remove" is not a name; it
+# has to say what it removes, and it says it by filling `{label}` with this.
+# `SearchResult` made the same trade for the same reason: the script rewrites
+# its label into `<mark>` runs, and can only do that to a string.
+
+[prop.label]
+type = "text"
+required = true
+doc = "The visible text of the tag, in the reader's language. It is text rather than children because a `TagPicker` clones the tag and writes into it, and because the remove control is named from it."
+
+[prop.value]
+type = "text"
+attribute = "data-nd-value"
+doc = "The value a script or a form reads for this tag, when that is not the text on it. Without it the text is the value."
+
+[prop.href]
+type = "text"
+doc = "Where the tag leads. It makes the tag a real `<a>`, so the middle mouse button, the context menu and a screen reader's list of links all work."
+
+# AN ENUM AND NOT A FLAG, BECAUSE THERE ARE THREE ANSWERS.
+#
+# A tag can be no toggle at all, a toggle that is off, or a toggle that is on —
+# and a `bool` carries two. The generator gives every bool a default, so
+# `pressed: false` and no `pressed` at all would arrive here as the same value,
+# and a plain label would become a `<button aria-pressed="false">`: a control a
+# reader can tab to and press, which does nothing.
+[prop.pressed]
+type = "enum"
+values = ["off", "on"]
+variants = false
+attribute = "aria-pressed"
+doc = "Whether the tag is switched on, for the filter-chip shape. **Setting it at all** makes the tag a real `<button aria-pressed>`. Leaving it out leaves a label that is not a control."
+
+[prop.tone]
+type = "text"
+attribute = "data-nd-tone"
+doc = "Which of the colour system's tones the tag is painted from. The palette declares 349 semantic families, so `overdue` is as valid as `danger`. A name no family declares fails the build. Without it the tag is neutral."
+
+[prop.variant]
+type = "enum"
+values = ["soft", "solid", "outline"]
+default = "soft"
+attribute = "data-nd-variant"
+doc = "How strongly the tag is painted. `soft` is a tinted field, `solid` is the tone at full strength, and `outline` is a hairline with no fill. `soft` by default."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The size of the tag, matching `Button` step for step so a tag beside a button lines up. `large` clears WCAG 2.5.8's 44 pixel enhanced target."
+
+[prop.shape]
+type = "enum"
+values = ["pill", "rounded", "square"]
+default = "pill"
+attribute = "data-nd-shape"
+doc = "The tag's corners, from the radius preset in force: `pill`, `rounded` or `square`. `pill` by default."
+
+[prop.icon]
+type = "text"
+doc = "A glyph shown before the text. It is decorative, because the text beside it is the accessible name."
+
+[prop.swatch]
+type = "text"
+doc = "A palette name, drawn as a real `Swatch` before the text. The chip resolves the accent inside its own scope, which is the mechanism `ThemeScope` uses and the only one `NOCTUA.md §8.8` allows."
+
+[prop.image]
+type = "text"
+doc = "A picture shown before the text, such as a face or a favicon. Its alternative text is empty, because the text beside it is the name. Its box takes the tag's size, and a URL that fails draws nothing."
+
+[prop.remove_label]
+type = "text"
+doc = "The accessible name of the control that removes this tag, with a `{label}` hole for the text. **Setting it is what adds the control**, as `CodeBlock { copy }` does."
+
+[prop.remove_name]
+type = "text"
+doc = """The field the remove control submits under, in a form. With it the control is a real `<button type="submit" name value>` and works with no script. Without it it is a `<button type="button">`."""
+
+[prop.disabled]
+type = "bool"
+default = "false"
+doc = "Stops users pressing the tag's control, where it has one. It writes the real `disabled` attribute on the button, and nothing on the `<span>` form."
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts the tag. Use it for a tag over a photograph rather than in a row of tags."
+
+[keyboard]
+"Enter" = "Follows the tag when it is a link, or presses it when it is a toggle. This is the element's own behaviour."
+"Space" = "Presses the tag when it is a toggle. This is a `<button>`'s own behaviour."
+"Tab" = "Reaches the tag, then its remove control. They are two separate tab stops."
+
+[a11y]
+notes = "With no `href`, no `pressed` and no `remove_label` the tag is a `<span>` with no role and no tab stop. The remove control sits beside the text rather than wrapping it."

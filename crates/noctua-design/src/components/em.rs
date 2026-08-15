@@ -4,17 +4,16 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! Stress emphasis — the word a reader would lean on when speaking.
+//! Mark stress emphasis on a word inside a sentence.
 
 use dioxus::prelude::*;
 
-/// Stress emphasis — the word a reader would lean on when speaking.
+/// Mark stress emphasis on a word inside a sentence.
 ///
 /// # Accessibility
 ///
-/// `em` is stress emphasis and `strong` is importance. They are not
-/// interchangeable: a screen reader may voice them differently, and using one for
-/// the other's meaning misreads the sentence.
+/// `em` marks stress emphasis and `strong` marks importance. A screen reader may
+/// voice them differently, so use each one for its own meaning.
 #[component]
 pub fn Em(
     /// Extra classes for the root element.

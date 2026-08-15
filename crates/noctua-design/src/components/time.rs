@@ -4,19 +4,18 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! A date or time, machine-readable and human-readable at once.
+//! Mark up a date or time so that machines and people can both read it.
 
 use dioxus::prelude::*;
 
-/// A date or time, machine-readable and human-readable at once.
+/// Mark up a date or time so that machines and people can both read it.
 ///
 /// # Accessibility
 ///
-/// The visible text is what is announced, so it must be a real date in the
-/// reader's language — not an ISO string. `datetime` is for machines only.
+/// The visible text is what is announced, so it must be a real date in the reader's language rather than the machine-readable value. `datetime` is read by machines only.
 #[component]
 pub fn Time(
-    /// The machine-readable value, in ISO 8601.
+    /// The machine-readable value, in the `datetime` format the HTML specification defines, such as `2026-08-14` or `2026-08-14T09:30`.
     datetime: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]

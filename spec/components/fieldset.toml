@@ -1,0 +1,82 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a fieldset around a group of controls that answers one question, such as a
+set of radios or a set of checkboxes. Do not use it around a single field,
+which already has a label of its own. For a date, use `DateInput` instead.
+"""
+
+[meta]
+name = "Fieldset"
+element = "fieldset"
+class = "nd-fieldset"
+summary = "Group the controls that answer one question, with the hint and error for the group."
+
+# WHY THIS EXISTS RATHER THAN A `<div>` WITH A HEADING.
+#
+# A checkbox's label names the choice, never the question. Ten checkboxes under
+# an `<h2>` announce ten choices and no question at all — a screen reader
+# reading the group from the middle has no way back to *what is this asking*.
+# `<fieldset>` and `<legend>` are the one construct that attaches the question
+# to every control inside it, in every engine, with nothing to wire.
+#
+# It also owns the wiring a caller would otherwise get wrong: the hint is
+# `{name}-hint`, the error is `{name}-error`, and the group's `aria-describedby`
+# names whichever of them exist. Nobody writes an id, so nobody mistypes one.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-group"
+doc = "The question's name, and the root of the ids inside it. Use the same word the controls carry as their `name`, so the hint and the error belong to the group a reader is answering."
+
+[prop.legend]
+type = "text"
+required = true
+doc = "The question, in the reader's language. **Required**, because a fieldset with no legend announces a group without saying what the group is for."
+
+[prop.hint]
+type = "text"
+doc = "What a reader needs to know before answering, such as how many to choose. It sits under the legend and above the controls, so it is read before it is needed."
+
+[prop.error]
+type = "text"
+doc = "What is wrong with the answer, in the reader's language. Its presence marks the group invalid. There is no second flag to keep in step with it."
+
+[prop.error_label]
+type = "text"
+doc = "The word announced before the message, such as `Error:`. It is visually hidden, because the message is already marked as an error by everything a reader can see."
+
+[prop.heading]
+type = "bool"
+default = "false"
+attribute = "data-nd-heading"
+doc = "Whether the legend is also the page's heading, for a page that asks one question. Off by default. The legend stays a legend and is wrapped in the heading, so the question is still attached to the controls."
+
+[prop.inline]
+type = "bool"
+default = "false"
+attribute = "data-nd-inline"
+doc = "Whether the choices sit along one line instead of down the page. Off by default. Use it for two or three short answers, such as yes and no, and not for a list a reader has to scan."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Disables every control inside it at once. Off by default. `<fieldset disabled>` is the browser's own cascade, so nothing here walks the children and nothing can miss one."
+
+[prop.children]
+type = "children"
+doc = "The controls this question is answered with."
+
+[state.invalid]
+attribute = "data-nd-invalid"
+doc = "Whether the group is in error. It is derived from `error` being present rather than declared beside it, so the red line and the sentence cannot appear without each other."
+
+[a11y]
+needs_name = true
+notes = """
+A `<fieldset>` with a `<legend>`, rather than `role="group"` on a `<div>`, so
+the legend is read with every control in the group. `aria-describedby` names
+the hint and the error, which is a `role="alert"`.
+"""

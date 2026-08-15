@@ -5,9 +5,9 @@
 // declared. Every test here is that claim or that hazard.
 
 import { test, expect } from "@playwright/test";
-import { ANY, LOCALES, PAGE, url } from "./pages.js";
+import { ANY, LOCALES, PAGE, SCOPED, url } from "./pages.js";
 
-/** A colour, read as PIXELS. Never `getComputedStyle(…).color`. */
+/** A color, read as PIXELS. Never `getComputedStyle(…).color`. */
 async function paint(page, value) {
   return page.evaluate((v) => {
     const c = document.createElement("canvas");
@@ -23,7 +23,7 @@ const custom = (locator, name) =>
   locator.evaluate((el, n) => getComputedStyle(el).getPropertyValue(n).trim(), name);
 
 test("a scope resolves the semantic contract against ITSELF", async ({ page }) => {
-  await page.goto("/en/scoped-themes/");
+  await page.goto(url(SCOPED));
   const scopes = page.locator("[data-noctua-scope]");
 
   for (const index of [0, 1]) {
@@ -31,7 +31,7 @@ test("a scope resolves the semantic contract against ITSELF", async ({ page }) =
     // This is the entire design in one assertion. Without dist/scope.css the
     // scope's --nc-color-surface holds the ROOT's value, because that is the
     // element the indirection was declared on — and a themed component paints
-    // the page's colours with nothing to report.
+    // the page's colors with nothing to report.
     const surface = await paint(page, await custom(scope, "--nc-color-surface"));
     const own = await paint(page, await custom(scope, "--nc-neutral-bg-app"));
     expect(surface, `scope ${index} took its surface from the page`).toEqual(own);
@@ -39,7 +39,7 @@ test("a scope resolves the semantic contract against ITSELF", async ({ page }) =
 
   // And the light scope genuinely differs from a dark page. The page is forced
   // dark here on purpose: this project runs with colorScheme "light", where a
-  // light scope on a light page is legitimately the same colour and the
+  // light scope on a light page is legitimately the same color and the
   // comparison would prove nothing either way.
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
   const root = await paint(page, await custom(page.locator("html"), "--nc-color-surface"));
@@ -48,8 +48,8 @@ test("a scope resolves the semantic contract against ITSELF", async ({ page }) =
 });
 
 test("every attribute a scope stamps is on one element", async ({ page }) => {
-  await page.goto("/en/scoped-themes/");
-  // The colour system's forced-mode rule is compound and same-element. Split
+  await page.goto(url(SCOPED));
+  // The color system's forced-mode rule is compound and same-element. Split
   // the palette from the mode and it matches nothing — the child falls through
   // to the DEFAULT palette's unanchored [data-theme="dark"].
   const split = await page.evaluate(() =>
@@ -67,7 +67,7 @@ test("every attribute a scope stamps is on one element", async ({ page }) => {
 });
 
 test("a border inside a scope is the scope's, not the page's", async ({ page }) => {
-  await page.goto("/en/scoped-themes/");
+  await page.goto(url(SCOPED));
   // The header's rule, which is painted from the PAGE's palette, against a
   // scope's own border. Any two borders would do; these two are the pair the
   // bug actually collapsed.
@@ -88,39 +88,52 @@ test("a border inside a scope is the scope's, not the page's", async ({ page }) 
   expect(scopeBorder, "the scope's border came from the page's palette").not.toEqual(pageBorder);
 });
 
-test("blackout changes the page and nothing else", async ({ page }) => {
+test("a backdrop changes the page and nothing else", async ({ page }) => {
   await page.goto(url(ANY));
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
 
   const before = await custom(page.locator("html"), "--nc-color-surface");
   await page.evaluate(() =>
-    document.documentElement.setAttribute("data-noctua-blackout", "on"),
+    document.documentElement.setAttribute("data-noctua-backdrop", "black"),
   );
   const after = await custom(page.locator("html"), "--nc-color-surface");
 
-  expect(after, "blackout moved a measured contrast pair").toBe(before);
+  expect(after, "a backdrop moved a measured contrast pair").toBe(before);
   const bg = await page.locator("html").evaluate((el) => getComputedStyle(el).backgroundColor); // allow-literal: read only to be painted into a canvas on the next line, which is the recipe the gate itself prescribes
   expect(await paint(page, bg)).toEqual([0, 0, 0]);
 });
 
-test("blackout is refused to a component", async ({ page }) => {
-  await page.goto("/en/scoped-themes/");
+test("a backdrop answers where it is asked", async ({ page }) => {
+  await page.goto(url(SCOPED));
   const scope = page.locator("[data-noctua-scope]").first();
   await page.evaluate(() => {
     document.documentElement.setAttribute("data-theme", "dark");
-    document.documentElement.removeAttribute("data-noctua-blackout");
-    document.querySelector("[data-noctua-scope]").setAttribute("data-noctua-blackout", "on");
+    document.documentElement.removeAttribute("data-noctua-backdrop");
+    document.querySelector("[data-noctua-scope]").setAttribute("data-noctua-backdrop", "black");
   });
-  // The CSS is bound to :root, so the attribute on a div declares nothing. A
-  // black island inside a themed component is not a theme.
+
+  // THIS USED TO ASSERT THE OPPOSITE. The rule was `:root`-bound, so the
+  // attribute on a div declared nothing — "a black island inside a themed
+  // component is not a theme". That was right about black and wrong about the
+  // property: a `var()` resolves where it is DECLARED, so a `:root`-only page
+  // background is frozen to the root's palette, and a themed frame reading it
+  // painted the page's colour under its own dark. It answers per scope now, and
+  // whether an island should be black is the caller's question rather than a
+  // thing the cascade decides for them.
   const declared = await scope.evaluate((el) =>
-    el.style.getPropertyValue("--noctua-page-background"),
+    getComputedStyle(el).getPropertyValue("--noctua-backdrop").trim(),
   );
-  expect(declared).toBe("");
+  expect(declared, "a scope cannot state its own backdrop").not.toBe("");
+  expect(
+    await page.locator("html").evaluate((el) =>
+      getComputedStyle(el).getPropertyValue("--noctua-backdrop").trim(),
+    ),
+    "the scope's backdrop reached the page",
+  ).not.toBe(declared);
 });
 
 test("glass is on before anyone touches a setting", async ({ page }) => {
-  await page.goto("/en/scoped-themes/");
+  await page.goto(url(SCOPED));
   // Every glass block is a bare attribute selector, which is what makes glass
   // scopable — and which meant that on a first visit NOTHING matched, the
   // tokens were undefined, and `blur(var(--undefined))` computed to `none`.
@@ -136,7 +149,7 @@ test("glass is on before anyone touches a setting", async ({ page }) => {
 });
 
 test("glass is scopable and radius is scopable", async ({ page }) => {
-  await page.goto("/en/scoped-themes/");
+  await page.goto(url(SCOPED));
   const outer = page.locator("[data-noctua-scope]").first();
   const blur = await outer.evaluate((el) => getComputedStyle(el).backdropFilter);
   const pageBlur = await page
@@ -149,27 +162,50 @@ test("glass is scopable and radius is scopable", async ({ page }) => {
 });
 
 test("a nested scope keeps its parent's palette when only its mode changes", async ({ page }) => {
-  await page.goto("/en/scoped-themes/");
+  await page.goto(url(SCOPED));
   const nested = page.locator("[data-noctua-scope]").nth(1);
   const before = await nested.getAttribute("data-palette");
-  await nested.locator('[data-nd-scope-cycle="mode"]').click();
+  await nested.locator('[data-nd-group="mode"] [data-nd-value="light"]').click();
   expect(await nested.getAttribute("data-palette")).toBe(before);
 });
 
-test("reduced motion leaves nothing animating", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/en/colours/");
-  // Motion belongs to the effect. There is no separate `animate` switch any
-  // more: it only ever appeared ANDed with these two, both of which default to
-  // off, so from a default page it changed an attribute that matched nothing.
+test("nothing a page is painted with animates, reduced motion or not", async ({ page }) => {
+  // THE AURORA WAS THE ONLY THING HERE THAT MOVED, and it is gone. This test
+  // used to turn it on under `prefers-reduced-motion` and check the explicit
+  // stop; it now asks the stronger question, and asks it in both media states,
+  // because a page with nothing animating cannot answer it by accident.
+  for (const reducedMotion of ["reduce", "no-preference"]) {
+    await page.emulateMedia({ reducedMotion });
+    await page.goto(url(SCOPED));
+    await page.evaluate(() => {
+      document.documentElement.setAttribute("data-noctua-pattern", "dots");
+      document.documentElement.setAttribute("data-noctua-grain", "on");
+    });
+    const running = await page.evaluate(() => document.getAnimations().length);
+    expect(running, `something animates the page under ${reducedMotion}`).toBe(0);
+  }
+});
+
+test("forced colours leaves no ambient image, not even the grain", async ({ page }) => {
+  await page.emulateMedia({ forcedColors: "active" });
+  await page.goto(url(SCOPED));
   await page.evaluate(() => {
-    document.documentElement.setAttribute("data-noctua-glow", "on");
-    document.documentElement.setAttribute("data-noctua-grain", "on");
+    const root = document.documentElement;
+    root.setAttribute("data-noctua-pattern", "mesh");
+    root.setAttribute("data-noctua-grain", "on");
   });
-  // A page setting may only ever DISABLE motion. Someone whose system asked for
-  // none must never have it re-enabled by a page.
-  const running = await page.evaluate(() => document.getAnimations().length);
-  expect(running).toBe(0);
+
+  // FORCED COLOURS REPLACES THE PALETTE, and these are not part of it. The
+  // UA drops `background-image` for a gradient on its own, so the pattern
+  // would have gone quietly — but the grain is a data URI and
+  // survives, so a reader who asked their system for two colours would have
+  // got two colours and a film of noise over them. All three go together.
+  const images = await page.evaluate(() =>
+    [document.documentElement, ...document.querySelectorAll("[data-noctua-scope]")].map(
+      (el) => getComputedStyle(el).backgroundImage, // allow-literal: the question is whether an image is painted at all, which is not a colour
+    ),
+  );
+  expect(images.filter((image) => image !== "none")).toEqual([]);
 });
 
 // --- The flash -------------------------------------------------------------
@@ -177,7 +213,7 @@ test("reduced motion leaves nothing animating", async ({ page }) => {
 // These three replace a test that asserted the injected stylesheet carried
 // `blocking="render"`. It passed for as long as the href was wrong, because it
 // read back a property the code under test had just set on an element it had
-// just created. It never resolved the URL and never looked at a colour, so the
+// just created. It never resolved the URL and never looked at a color, so the
 // page flashed the default palette on every single load with the suite green.
 //
 // A stored palette reaches the reader through TWO things: an attribute, and a
@@ -260,7 +296,7 @@ test("first paint already carries the stored palette, with no script to fix it",
 
   expect(await html.getAttribute("data-palette")).toBe("jade-vivid");
   // Measured against the default rather than against a literal, so the test
-  // states the claim — "the reader's choice is what painted" — and not a colour
+  // states the claim — "the reader's choice is what painted" — and not a color
   // that would have to be updated whenever the default changes.
   expect(stored, "the attribute was stamped on a page still painted in the default").not.toEqual(
     fallback,
@@ -287,7 +323,7 @@ test("changing a setting causes no layout shift", async ({ page }) => {
     ["data-noctua-glass", "full"],
     ["data-noctua-radius", "circular"],
     ["data-noctua-pattern", "mesh"],
-    ["data-noctua-glow", "on"],
+    ["data-noctua-grain", "on"],
     ["data-noctua-blackout", "on"],
   ]) {
     await page.evaluate(([a, v]) => document.documentElement.setAttribute(a, v), [attribute, value]);
@@ -315,4 +351,75 @@ test("with no script the page is complete and follows the system", async ({ page
   const [r, g, b] = bg.match(/[\d.]+/g).map(Number);
   expect(r + g + b, "OS dark did not reach a scriptless page").toBeLessThan(200);
   await context.close();
+});
+
+test("the six backdrops are six different pages", async ({ page }) => {
+  // Five of them are tokens the colour system already solved per palette, so
+  // this is really asking whether the wiring reaches them — a value whose rule
+  // names a token that does not exist paints the one before it and says nothing.
+  await page.goto(url(ANY));
+  const painted = await page.evaluate(async (values) => {
+    const root = document.documentElement;
+    root.setAttribute("data-theme", "dark");
+    const seen = {};
+    for (const value of values) {
+      root.setAttribute("data-noctua-backdrop", value);
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 1;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = getComputedStyle(root).backgroundColor; // allow-literal: painted into the canvas on this line, the recipe the gate prescribes
+      ctx.fillRect(0, 0, 1, 1);
+      seen[value] = [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3).join(",");
+    }
+    return seen;
+  }, ["plain", "cool", "black", "tinted", "soft", "softer"]);
+
+  expect(new Set(Object.values(painted)).size, `two backdrops paint the same page: ${JSON.stringify(painted)}`).toBe(6);
+  expect(painted.black, "black is not black").toBe("0,0,0");
+});
+
+test("light is paper, and the contract did not move to make it so", async ({ page }) => {
+  await page.goto(url(ANY));
+  const light = await page.evaluate(() => {
+    const root = document.documentElement;
+    root.setAttribute("data-theme", "light");
+    root.removeAttribute("data-noctua-backdrop");
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = getComputedStyle(root).backgroundColor; // allow-literal: painted into the canvas on this line
+    ctx.fillRect(0, 0, 1, 1);
+    const page_ = [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3).join(",");
+    ctx.fillStyle = getComputedStyle(root).getPropertyValue("--nc-color-surface").trim(); // allow-literal: as above
+    ctx.fillRect(0, 0, 1, 1);
+    return { page: page_, surface: [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3).join(",") };
+  });
+  // The page is paper. The lightest step of the neutral ramp is not, and it
+  // must not have been dragged there — every pair the colour system measured
+  // is measured against `--nc-color-surface`, not against the page.
+  expect(light.page, "a light page is not pure white").toBe("255,255,255");
+  expect(light.surface, "the contract moved to make the page white").not.toBe("255,255,255");
+});
+
+test("black is the one backdrop with no light meaning", async ({ page }) => {
+  await page.goto(url(ANY));
+  const both = await page.evaluate(() => {
+    const root = document.documentElement;
+    const read = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 1;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = getComputedStyle(root).backgroundColor; // allow-literal: painted into the canvas on this line
+      ctx.fillRect(0, 0, 1, 1);
+      return [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3).join(",");
+    };
+    root.setAttribute("data-theme", "light");
+    root.removeAttribute("data-noctua-backdrop");
+    const plain = read();
+    root.setAttribute("data-noctua-backdrop", "black");
+    return { plain, black: read() };
+  });
+  // In light it falls back to the plain page, which is the pure white it would
+  // have wanted anyway.
+  expect(both.black, "black painted a light page black").toBe(both.plain);
 });

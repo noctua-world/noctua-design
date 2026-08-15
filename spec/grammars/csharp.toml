@@ -1,0 +1,123 @@
+# C#.
+#
+# The language where `call_paren` beating `upper_type` earns its keep: methods
+# are `PascalCase` here, so without the paren check every call in the language
+# would paint as a type.
+
+[meta]
+name = "csharp"
+display = "C#"
+aliases = ["cs", "c#", "dotnet"]
+
+[words]
+keyword = [
+  "abstract", "as", "async", "await", "base", "break", "case", "catch",
+  "checked", "class", "const", "continue", "default", "delegate", "do",
+  "else", "enum", "event", "explicit", "extern", "finally", "fixed", "for",
+  "foreach", "get", "goto", "if", "implicit", "in", "init", "interface",
+  "internal", "is", "lock", "namespace", "new", "operator", "out",
+  "override", "params", "private", "protected", "public", "readonly", "ref",
+  "return", "sealed", "set", "sizeof", "stackalloc", "static", "struct",
+  "switch", "this", "throw", "try", "typeof", "unchecked", "unsafe", "using",
+  "var", "virtual", "volatile", "when", "where", "while", "yield", "record",
+]
+type = [
+  "bool", "byte", "char", "decimal", "double", "dynamic", "float", "int",
+  "long", "object", "sbyte", "short", "string", "uint", "ulong", "ushort",
+  "void", "List", "Dictionary", "Task", "IEnumerable", "Span",
+]
+constant = ["false", "true", "null", "value"]
+
+[[comment]]
+open = "///"
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+# FOUR OPENERS, NOT ONE OPENER AND A PREFIX SET.
+#
+# `@"…"` is verbatim and `$"…"` interpolates, and those are different string
+# forms rather than the same one wearing a letter: a `string_prefix` would have
+# made `@"C:\temp"` carry an escape it does not have, which is how a Windows
+# path turns into a tab. The scanner matches the longest opener, so the two-
+# character forms win over the one-character one however this file is ordered.
+#
+# What none of them handle is `""` — a doubled quote inside a verbatim string,
+# which ends it early. Rare enough to name rather than to model.
+[[string]]
+open = '@$"'
+close = '"'
+multiline = true
+interpolate_open = "{"
+interpolate_close = "}"
+
+[[string]]
+open = '$@"'
+close = '"'
+multiline = true
+interpolate_open = "{"
+interpolate_close = "}"
+
+[[string]]
+open = '@"'
+close = '"'
+multiline = true
+
+[[string]]
+open = '$"'
+close = '"'
+escape = "\\"
+interpolate_open = "{"
+interpolate_close = "}"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+max = 12
+
+[number]
+prefixes = ["0x", "0b"]
+separator = "_"
+exponent = "eE"
+suffix = true
+
+[symbols]
+operator = "+-*/%=<>!&|^~?:"
+punctuation = "(){}[],;."
+
+[[sigil]]
+open = "#"
+role = "attribute"
+line_start = true
+
+[context]
+name_after = { class = "type", interface = "type", struct = "type", enum = "type", record = "type", namespace = "type", new = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+member_dot = true
+
+[[case]]
+name = "a PascalCase method is a call and its owner is a type"
+code = 'Console.WriteLine($"total {n}");'
+expect = ["type Console", "function WriteLine"]
+
+[[case]]
+name = "a verbatim string is one token, prefix and all"
+code = 'var path = @"C:\temp";'
+expect = ["keyword var", 'string @"C:\temp"']
+
+[[case]]
+name = "a documentation comment is longer than a comment and wins"
+code = "/// <summary>Adds.</summary>\npublic int Add(int a) => a;"
+expect = ["comment /// <summary>Adds.</summary>", "keyword public", "type int", "function Add"]

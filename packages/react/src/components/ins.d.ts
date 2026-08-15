@@ -12,9 +12,11 @@ export interface InsProps {
   cite?: string;
   /** When it was added, as a machine-readable timestamp. */
   datetime?: string;
+  /** A word read before the text to say that it was added. Supply it in the reader's language, as `Del` does. */
+  label?: string;
   className?: string;
   children?: ReactNode;
 }
 
-/** Text added to the document. */
+/** Mark text that was added to the document. */
 export declare function Ins(props: InsProps): JSX.Element;

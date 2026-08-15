@@ -1,0 +1,92 @@
+# CSS.
+#
+# `identifier.extra` carries `-`, which is the decision the whole file turns on.
+# Nearly every property and custom property in the language is hyphenated, so
+# without it `font-size` is three tokens and none of them is a property. What it
+# costs is `-5px`: the identifier rule claims the minus before the number rule
+# sees it, so a negative length reads as an identifier. Hyphenated properties
+# are on every line and negative lengths are not.
+#
+# Selectors are approximated. Attribute selectors, `:not(…)` interiors and
+# combinator chains lose detail; declarations do not, and declarations are what
+# people read.
+
+[meta]
+name = "css"
+display = "CSS"
+
+[identifier]
+extra = "_-"
+
+[words]
+keyword = ["and", "from", "important", "not", "only", "to"]
+constant = [
+  "auto", "block", "bold", "border-box", "center", "column", "currentColor",
+  "fixed", "flex", "grid", "hidden", "inherit", "initial", "inline",
+  "inline-block", "inline-flex", "italic", "none", "normal", "pointer",
+  "relative", "revert", "row", "solid", "sticky", "transparent", "unset",
+  "visible", "wrap",
+]
+function = [
+  "attr", "calc", "clamp", "color-mix", "counter", "cubic-bezier", "env",
+  "linear-gradient", "max", "min", "minmax", "oklab", "oklch", "repeat",
+  "rgb", "rotate", "scale", "translate", "url", "var",
+]
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+
+[number]
+exponent = "eE"
+suffix = true
+leading_dot = true
+
+[symbols]
+operator = "+*/=<>~^$|!"
+punctuation = "(){}[],;:.&>"
+
+# A custom property is one name including its leading dashes, which is why this
+# is a sigil rather than two operators and an identifier.
+[[sigil]]
+open = "--"
+role = "property"
+
+# `#fff` and `#main` are the same shape, and both are worth marking. A number
+# prefix would have split `#foo` into a hex run and an identifier.
+[[sigil]]
+open = "#"
+role = "constant"
+
+[[sigil]]
+open = "@"
+role = "keyword"
+
+[context]
+property_colon = "any"
+call_paren = true
+
+[[case]]
+name = "a hyphenated property is one name, and its value is not a property"
+code = ".nd-code { font-size: 1rem; }"
+expect = ["property font-size", "punctuation :", "number 1rem"]
+
+[[case]]
+name = "a custom property is one name, dashes and all"
+code = "a { color: var(--nc-color-fg); }"
+expect = ["property color", "function var", "property --nc-color-fg"]
+
+[[case]]
+name = "an at-rule and a hex colour"
+code = "@media (min-width: 30rem) { a { color: #f0f0f0; } }"
+expect = ["keyword @media", "property min-width", "number 30rem", "constant #f0f0f0"]

@@ -9,14 +9,16 @@
       "key": "noctua-mode",
       "attribute": "data-theme",
       "omitWhen": "system",
+      "derivedFrom": [],
       "scope": true
     },
     "accent": {
       "values": ["ochre", "amber", "lime", "jade", "teal", "azure", "blue", "indigo", "violet", "magenta", "rose", "clay", "umber"],
-      "default": "ochre",
+      "default": "blue",
       "key": "noctua-accent",
       "attribute": null,
       "omitWhen": null,
+      "derivedFrom": [],
       "scope": true
     },
     "saturation": {
@@ -25,14 +27,16 @@
       "key": "noctua-saturation",
       "attribute": null,
       "omitWhen": null,
+      "derivedFrom": [],
       "scope": true
     },
     "palette": {
       "values": ["ochre-balanced", "ochre-vivid", "ochre-sober", "amber-balanced", "amber-vivid", "amber-sober", "lime-balanced", "lime-vivid", "lime-sober", "jade-balanced", "jade-vivid", "jade-sober", "teal-balanced", "teal-vivid", "teal-sober", "azure-balanced", "azure-vivid", "azure-sober", "blue-balanced", "blue-vivid", "blue-sober", "indigo-balanced", "indigo-vivid", "indigo-sober", "violet-balanced", "violet-vivid", "violet-sober", "magenta-balanced", "magenta-vivid", "magenta-sober", "rose-balanced", "rose-vivid", "rose-sober", "clay-balanced", "clay-vivid", "clay-sober", "umber-balanced", "umber-vivid", "umber-sober"],
-      "default": "ochre-balanced",
+      "default": "blue-balanced",
       "key": "noctua-palette",
       "attribute": "data-palette",
       "omitWhen": null,
+      "derivedFrom": ["accent", "saturation"],
       "scope": true
     },
     "font": {
@@ -41,6 +45,7 @@
       "key": "noctua-font",
       "attribute": "data-noctua-font",
       "omitWhen": null,
+      "derivedFrom": [],
       "scope": true
     },
     "glass": {
@@ -49,6 +54,7 @@
       "key": "noctua-glass",
       "attribute": "data-noctua-glass",
       "omitWhen": null,
+      "derivedFrom": [],
       "scope": true
     },
     "radius": {
@@ -57,15 +63,17 @@
       "key": "noctua-radius",
       "attribute": "data-noctua-radius",
       "omitWhen": null,
+      "derivedFrom": [],
       "scope": true
     },
-    "blackout": {
-      "values": ["off", "on"],
-      "default": "off",
-      "key": "noctua-blackout",
-      "attribute": "data-noctua-blackout",
+    "backdrop": {
+      "values": ["plain", "cool", "black", "tinted", "soft", "softer"],
+      "default": "plain",
+      "key": "noctua-backdrop",
+      "attribute": "data-noctua-backdrop",
       "omitWhen": null,
-      "scope": false
+      "derivedFrom": [],
+      "scope": true
     },
     "pattern": {
       "values": ["none", "dots", "mesh", "checks", "diagonals"],
@@ -73,15 +81,8 @@
       "key": "noctua-pattern",
       "attribute": "data-noctua-pattern",
       "omitWhen": null,
-      "scope": false
-    },
-    "glow": {
-      "values": ["off", "on"],
-      "default": "off",
-      "key": "noctua-glow",
-      "attribute": "data-noctua-glow",
-      "omitWhen": null,
-      "scope": false
+      "derivedFrom": [],
+      "scope": true
     },
     "grain": {
       "values": ["off", "on"],
@@ -89,6 +90,16 @@
       "key": "noctua-grain",
       "attribute": "data-noctua-grain",
       "omitWhen": null,
+      "derivedFrom": [],
+      "scope": true
+    },
+    "syntax": {
+      "values": ["auto", "spectrum", "duotone", "muted", "mono"],
+      "default": "auto",
+      "key": "noctua-syntax",
+      "attribute": "data-noctua-code-theme",
+      "omitWhen": null,
+      "derivedFrom": [],
       "scope": false
     }
   }

@@ -25,9 +25,9 @@
 // GENERATED. Do not edit src/theme.rs or src/components/; edit the spec and
 // rebuild. `cargo xtask check` fails if either drifts.
 pub mod components;
-pub mod icon;
 pub mod script;
 pub mod theme;
+pub mod tones;
 
 // Re-exported so a consumer takes one dependency rather than two, and so the
 // token crate's version can never disagree with the components that use it.
@@ -35,7 +35,19 @@ pub use noctua_design_icons as icons;
 pub use noctua_design_theme as model;
 pub use noctua_design_tokens as tokens;
 
+// THERE IS NO `pub mod icon` ANY MORE, AND THAT IS THE POINT OF THE MOVE.
+//
+// `Icon` was generated into a module of its own by the icon emitter, outside
+// the catalogue, and re-exported here by name. Giving it a contract beside that
+// would have put a second `Icon` in `components`, which this line would then
+// have shadowed: `noctua_design::Icon` and `noctua_design::components::Icon`
+// would have been two different components with one name, and nothing would
+// have reported it. Not a compile error. A silent divergence.
+//
+// So the component is `spec/components/icon.toml` and arrives through the glob
+// below, exactly as every other one does. `IconName` stays with the drawings,
+// because it is a fact about the icon set rather than about the component.
 pub use components::*;
-pub use icon::{Icon, IconName, IconSize};
+pub use noctua_design_icons::IconName;
 pub use script::{Script, dominant_script, font_override};
 pub use theme::{ThemeScope, use_theme};

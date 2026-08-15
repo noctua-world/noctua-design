@@ -8,11 +8,11 @@ import type { ReactNode } from "react";
 
 
 export interface TimeProps {
-  /** The machine-readable value, in ISO 8601. */
+  /** The machine-readable value, in the `datetime` format the HTML specification defines, such as `2026-08-14` or `2026-08-14T09:30`. */
   datetime?: string;
   className?: string;
   children?: ReactNode;
 }
 
-/** A date or time, machine-readable and human-readable at once. */
+/** Mark up a date or time so that machines and people can both read it. */
 export declare function Time(props: TimeProps): JSX.Element;

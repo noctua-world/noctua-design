@@ -9,7 +9,9 @@ publish = false
 
 [dependencies]
 dioxus.workspace = true
+noctua-design-grammars.workspace = true
 noctua-design-icons.workspace = true
+noctua-design-lineage.workspace = true
 noctua-design-theme.workspace = true
 noctua-design-tokens.workspace = true
 

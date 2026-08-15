@@ -1,6 +1,6 @@
 //! What `noctua-colors` vendored into this repository, read and validated.
 //!
-//! This module exists because of one property of the colour system that is
+//! This module exists because of one property of the color system that is
 //! invisible until you try to theme a *subtree*.
 //!
 //! # The problem
@@ -28,10 +28,10 @@
 //!
 //! Everything below is therefore a **parser with opinions**. It refuses
 //! anything it does not recognise, because the alternative — quietly emitting
-//! whatever it found — would let a colour literal into a file this repository
-//! generates, and this repository defines no colours.
+//! whatever it found — would let a color literal into a file this repository
+//! generates, and this repository defines no colors.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 use crate::error::{Problem, SpecError};
@@ -62,6 +62,72 @@ pub struct Vendor {
 
     /// `accent/saturation` to palette name.
     pub grid: BTreeMap<String, String>,
+
+    /// Every `--nc-*` name that **every** palette declares, in **both** modes.
+    ///
+    /// # The hole this closes
+    ///
+    /// `gates::unknown_token` exempts `--nc-*` outright, on the stated grounds
+    /// that those names "come from the vendored color output … and are already
+    /// guarded by `color_literal` and the vendor check". [`contract`] is that
+    /// vendor check, and it only reads `contexts.css` — so it knows every
+    /// `--nc-color-*` and nothing at all about `--nc-danger-text-muted`.
+    ///
+    /// A `var()` naming a property nothing declares is not an error anywhere.
+    /// The declaration is dropped at computed-value time, the element inherits
+    /// whatever contained it, and the result is a token that looks like a role
+    /// nobody styled. `spec/syntax.toml` names forty of these, so the gap is
+    /// now load-bearing.
+    ///
+    /// **The intersection, not the union**, and that is the whole value of it:
+    /// a name present in one palette and missing from another is a token that
+    /// works until the reader changes their accent.
+    pub declared: BTreeSet<String>,
+
+    /// Every palette's steps, as `(token, hex)`, in both modes.
+    ///
+    /// # What needs the values and not just the names
+    ///
+    /// `ColorPicker { palette }` offers the system's own ramps beside the free
+    /// spectrum, and a reader who picks one gets a colour like any other: it
+    /// moves the saturation field, it fills the hue track, and every notation
+    /// in the codes panel is computed from it. None of that can be done from a
+    /// token name, and none of it may be done by reading a colour back out of
+    /// the DOM — `getComputedStyle` returns whatever the engine felt like
+    /// serialising, and a source gate refuses it besides.
+    ///
+    /// # Read by what each block SAYS it is, never by where it sits
+    ///
+    /// [`declared`] says in its own comment that the sheets' block structure is
+    /// not this repository's to depend on, and this obeys that: a block's mode
+    /// is its own `color-scheme` declaration, which the vendor writes on
+    /// purpose, and the value taken is the first **hex** one — the wide-gamut
+    /// passes that follow restate the same tokens in `oklch()` and are skipped
+    /// by that filter rather than by counting braces.
+    pub ramps: BTreeMap<String, Ramps>,
+}
+
+/// One palette's steps, in both appearances.
+///
+/// **Ordered, and that is load-bearing.** A ramp reads light to dark, and a map
+/// would hand it over alphabetically — `bg-app`, `bg-element`, `bg-element-active`,
+/// `bg-element-hover`, `bg-subtle` — which is a ramp with two of its steps
+/// transposed and no way for a reader to tell. The vendor writes them in the
+/// order they are meant to be seen; this keeps it.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Ramps {
+    /// `(--nc-neutral-bg-app, #fdfdfd)`, in the light appearance, in order.
+    pub light: Vec<(String, String)>,
+    /// The same names, in the dark one.
+    pub dark: Vec<(String, String)>,
+}
+
+impl Ramps {
+    /// The step names, for a check that does not care what order they are in.
+    #[must_use]
+    pub fn names(steps: &[(String, String)]) -> BTreeSet<&str> {
+        steps.iter().map(|(name, _)| name.as_str()).collect()
+    }
 }
 
 impl Vendor {
@@ -128,14 +194,19 @@ pub fn load(root: &Path) -> Result<Vendor, SpecError> {
         }
     }
 
+    let ramps = ramps(&vendor, &axes.themes, &mut problems);
+
     if problems.is_empty() {
+        let declared = declared(&vendor, &axes.themes);
         Ok(Vendor {
             contract,
             accents: axes.accents,
             saturations: axes.saturations,
             themes: axes.themes,
             default_theme: axes.default_theme,
+            declared,
             grid: axes.grid,
+            ramps,
         })
     } else {
         Err(SpecError::new(
@@ -144,6 +215,164 @@ pub fn load(root: &Path) -> Result<Vendor, SpecError> {
             problems,
         ))
     }
+}
+
+/// Every palette's steps, as `(token, hex)`, in both appearances.
+///
+/// A palette that yields nothing in either appearance is a problem rather than
+/// an empty map: the picker would show a tab with no colours on it and no
+/// reason why, which is the shape of failure this whole module is written to
+/// refuse.
+fn ramps(vendor: &Path, themes: &[String], problems: &mut Vec<Problem>) -> BTreeMap<String, Ramps> {
+    let mut out = BTreeMap::new();
+    for theme in themes {
+        let file = Vendor::scopable_stylesheet(theme);
+        let Ok(text) = std::fs::read_to_string(vendor.join("css").join(&file)) else {
+            // The missing-stylesheet check above already reported this one, and
+            // a second diagnostic for one fact is a reader reading it twice.
+            continue;
+        };
+
+        let mut ramps = Ramps::default();
+        let mut seen: BTreeSet<(bool, String)> = BTreeSet::new();
+        // Whichever block was last opened said what it was. `None` until one
+        // does, so a declaration outside every palette block — there are none
+        // today — is dropped rather than filed under a guess.
+        let mut mode: Option<bool> = None;
+        for line in text.lines() {
+            let trimmed = line.trim();
+            if let Some(scheme) = trimmed.strip_prefix("color-scheme:") {
+                let scheme = scheme.trim_end_matches(';').trim();
+                mode = match scheme {
+                    "light" => Some(true),
+                    "dark" => Some(false),
+                    // `light dark` and anything else says the block answers to
+                    // the reader rather than to one appearance, so it names
+                    // neither and this stops filing into the last one.
+                    _ => None,
+                };
+                continue;
+            }
+            let Some(light) = mode else { continue };
+            let Some((name, value)) = trimmed.split_once(':') else {
+                continue;
+            };
+            let name = name.trim();
+            if !name.starts_with("--nc-") {
+                continue;
+            }
+            let value = value.trim().trim_end_matches(';').trim();
+            // HEX ONLY, WHICH IS ALSO HOW THE WIDE-GAMUT PASSES ARE SKIPPED.
+            // The sheet restates every token in `oklch()` under a `color-gamut`
+            // query, and those are the same colours in a space this file has no
+            // reason to prefer — `entry` will take one of the two, and the
+            // first one written is the one every browser understands.
+            if !is_hex(value) {
+                continue;
+            }
+            // FIRST WINS, which is what makes the wide-gamut passes a no-op
+            // even where they are hex: the sRGB block is written first because
+            // it is the one every browser can paint.
+            if !seen.insert((light, name.to_owned())) {
+                continue;
+            }
+            let into = if light {
+                &mut ramps.light
+            } else {
+                &mut ramps.dark
+            };
+            into.push((name.to_owned(), value.to_owned()));
+        }
+
+        if ramps.light.is_empty() || ramps.dark.is_empty() {
+            problems.push(
+                Problem::whole_file(format!(
+                    "{file} yielded {} light and {} dark step(s)",
+                    ramps.light.len(),
+                    ramps.dark.len()
+                ))
+                .fix(
+                    "every palette declares its steps as hex in a block that says \
+                     `color-scheme: light` or `color-scheme: dark`. A vendor refresh that \
+                     changed either is a refresh this parser has to be taught about — \
+                     `ColorPicker { palette }` would otherwise show an empty tab",
+                ),
+            );
+        }
+        out.insert(theme.clone(), ramps);
+    }
+    out
+}
+
+/// `#rgb`, `#rgba`, `#rrggbb` or `#rrggbbaa` and nothing else.
+fn is_hex(value: &str) -> bool {
+    let Some(digits) = value.strip_prefix('#') else {
+        return false;
+    };
+    matches!(digits.len(), 3 | 4 | 6 | 8) && digits.chars().all(|c| c.is_ascii_hexdigit())
+}
+
+/// Every `--nc-*` name declared by every palette, in every mode block.
+///
+/// Read by intersection over the palette sheets rather than by parsing one of
+/// them: the sheets are generated by another repository and their block
+/// structure is not this repository's to depend on, so this asks the weaker and
+/// more durable question — *does every palette declare this name?* — and
+/// answers it by set intersection. A palette that failed to load contributes
+/// nothing rather than emptying the set, because an empty set here would turn
+/// the check that uses it into a check that rejects everything.
+fn declared(vendor: &Path, themes: &[String]) -> BTreeSet<String> {
+    let mut shared: Option<BTreeSet<String>> = None;
+    for theme in themes {
+        // BOTH SHEETS PER PALETTE, and the second is not optional. The
+        // scopable one carries the families; the self-contained one carries
+        // the dense gray ramps — `--nc-gray-1…24` live only there, so a set
+        // built from the first alone calls a real token unknown. `.nd-scrim`
+        // is painted with one, and the check that reads this set called it a
+        // typo the first time it was ever pointed at a `--nc-*` name.
+        let mut names = BTreeSet::new();
+        let sheets = [
+            vendor.join("css").join(Vendor::scopable_stylesheet(theme)),
+            vendor.join("css/palette").join(format!("{theme}.css")),
+        ];
+        let mut read_any = false;
+        for path in sheets {
+            let Ok(text) = std::fs::read_to_string(&path) else {
+                continue;
+            };
+            read_any = true;
+            for line in text.lines() {
+                let trimmed = line.trim();
+                if !trimmed.starts_with("--nc-") {
+                    continue;
+                }
+                if let Some((name, _)) = trimmed.split_once(':') {
+                    names.insert(name.trim().to_owned());
+                }
+            }
+        }
+        if !read_any {
+            continue;
+        }
+        shared = Some(match shared {
+            Some(found) => found.intersection(&names).cloned().collect(),
+            None => names,
+        });
+    }
+    // The contract's own names live in `contexts.css`, not in a palette sheet,
+    // and they are just as legitimate a thing to paint with.
+    let mut out = shared.unwrap_or_default();
+    if let Ok(text) = std::fs::read_to_string(vendor.join("css/contexts.css")) {
+        for line in text.lines() {
+            let trimmed = line.trim();
+            if trimmed.starts_with("--nc-")
+                && let Some((name, _)) = trimmed.split_once(':')
+            {
+                out.insert(name.trim().to_owned());
+            }
+        }
+    }
+    out
 }
 
 /// Extracts the semantic contract from the vendored `contexts.css`.
@@ -158,7 +387,7 @@ fn contract(vendor: &Path) -> Result<Vec<(String, String)>, Vec<Problem>> {
     let Ok(text) = std::fs::read_to_string(&path) else {
         return Err(vec![
             Problem::whole_file(format!("could not read {display}"))
-                .fix("run `cargo xtask export` in noctua-colors to vendor the colour tokens"),
+                .fix("run `cargo xtask export` in noctua-colors to vendor the color tokens"),
         ]);
     };
 
@@ -209,8 +438,8 @@ fn contract(vendor: &Path) -> Result<Vec<(String, String)>, Vec<Problem>> {
                 Problem::whole_file(format!("{display}:{number} is `{trimmed}`")).fix(
                     "every line of the semantic contract must be \
                      `--nc-color-<name>: var(--nc-<target>);`. A value that is not a var() \
-                     reference would put a literal colour into a file this repository \
-                     generates, and this repository defines no colours",
+                     reference would put a literal color into a file this repository \
+                     generates, and this repository defines no colors",
                 ),
             ),
         }
@@ -394,7 +623,7 @@ mod tests {
         assert_eq!(vendor.default_theme, "ochre-balanced");
     }
 
-    /// Every extracted value is a `var()` reference — so no colour literal can
+    /// Every extracted value is a `var()` reference — so no color literal can
     /// reach a file this repository generates by this path.
     #[test]
     fn every_extracted_value_is_a_var_reference() {
@@ -416,6 +645,73 @@ mod tests {
             let path = css.join(Vendor::scopable_stylesheet(theme));
             assert!(path.exists(), "{theme} cannot be applied to a subtree");
         }
+    }
+
+    /// EVERY PALETTE YIELDS THE SAME STEPS IN BOTH APPEARANCES.
+    ///
+    /// The check `load` cannot make on its own without turning one refresh
+    /// problem into thirty-nine diagnostics. A token present in light and
+    /// missing from dark is a swatch on the Noctua tab that vanishes when the
+    /// reader turns the lights off — and the parser reads each block by what it
+    /// says it is, so a vendor that stopped writing `color-scheme` would show
+    /// up here as an empty side rather than as a subtly short one.
+    #[test]
+    fn every_palette_ramps_the_same_names_in_both_appearances() {
+        let vendor = vendor();
+        assert_eq!(vendor.ramps.len(), vendor.themes.len());
+        for theme in &vendor.themes {
+            let ramps = vendor.ramps.get(theme).expect("every palette is read");
+            assert!(
+                ramps.light.len() > 100,
+                "{theme} light: {}",
+                ramps.light.len()
+            );
+            assert_eq!(
+                Ramps::names(&ramps.light),
+                Ramps::names(&ramps.dark),
+                "{theme} declares different steps in its two appearances"
+            );
+            // AND EACH SIDE NAMES EVERY STEP ONCE. The wide-gamut passes
+            // restate all of them, so a parser that appended rather than
+            // taking the first would double the tab and paint half of it in a
+            // notation older browsers drop.
+            assert_eq!(
+                Ramps::names(&ramps.light).len(),
+                ramps.light.len(),
+                "{theme} lists a light step twice"
+            );
+        }
+    }
+
+    /// And they really are colours, not the `oklch()` restatement beside them.
+    ///
+    /// The wide-gamut passes name the same tokens, so a parser that took the
+    /// last value rather than the first would fill the tab with a notation
+    /// half the browsers in use cannot paint.
+    #[test]
+    fn every_step_is_a_hex_a_browser_understands() {
+        let vendor = vendor();
+        let ramps = vendor
+            .ramps
+            .get(&vendor.default_theme)
+            .expect("the default");
+        for (mode, steps) in [("light", &ramps.light), ("dark", &ramps.dark)] {
+            for (token, value) in steps {
+                assert!(is_hex(value), "{mode} {token} is `{value}`");
+            }
+        }
+        // The first step is the one the ramp starts on, not the one the
+        // alphabet starts on: `bg-app` before `bg-element`, which a map would
+        // have reversed. The whole reason these are ordered.
+        assert!(
+            ramps.light[0].0.ends_with("-bg-app"),
+            "the light ramp starts at {}",
+            ramps.light[0].0
+        );
+        // The two appearances are genuinely different, which is the cheapest
+        // proof that the mode switch is being read at all: a parser that filed
+        // everything under one mode would make these identical.
+        assert_ne!(ramps.light, ramps.dark);
     }
 
     /// The contract must be emitted once and only at `:where(:root)`. If a

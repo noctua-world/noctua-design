@@ -16,13 +16,15 @@
 # documentation page all follow. There is nothing else to edit.
 
 [meta]
-# The rendered box, in CSS pixels, for every size the component offers.
-size_small = "1rem"
-size_medium = "1.5rem"
-size_large = "2rem"
 # Lucide draws on a 24-unit grid at stroke width 2. Ours is slightly lighter:
 # the interface's type is large and low-contrast, and a 2-unit stroke next to it
 # reads as heavier than the text it labels.
+#
+# The one value here, because it is the one thing every drawing shares. The
+# rendered box is NOT here any more: it is `font-size` on `.nd-icon-glyph`, from
+# the type scale, and the three fields that used to claim otherwise were read by
+# nothing but a doc comment they had already drifted from. `Icon { size }`
+# documents the three steps, in `spec/components/icon.toml`.
 stroke_width = "1.75"
 
 # --- Lucide ----------------------------------------------------------------
@@ -59,15 +61,25 @@ source = "lucide"
 file = "monitor.svg"
 doc = "The appearance mode the operating system asked for."
 
+[icon.palette]
+source = "lucide"
+file = "palette.svg"
+doc = "Opens the theme menu. A palette rather than a gear: the menu is the appearance of the page — its mode, its accent, its corners — and a gear says \"settings\" about a product that has no other kind."
+
 [icon.settings]
 source = "lucide"
 file = "settings.svg"
-doc = "Opens the appearance settings."
+doc = "Settings that are not the theme. `Disclosure` documents itself with it."
 
 [icon.search]
 source = "lucide"
 file = "search.svg"
 doc = "Marks the search field."
+
+[icon.user]
+source = "lucide"
+file = "user.svg"
+doc = "A person, where there is no picture of them. `Avatar`'s last fallback, after the initials."
 
 [icon.external-link]
 source = "lucide"
@@ -84,10 +96,165 @@ source = "lucide"
 file = "copy.svg"
 doc = "Copies a code block to the clipboard."
 
+[icon.download]
+source = "lucide"
+file = "download.svg"
+doc = "Opens the menu that takes a table away as a file."
+
+[icon.info]
+source = "lucide"
+file = "info.svg"
+doc = "Opens the note explaining what a heading or a value means."
+
+[icon.columns]
+source = "lucide"
+file = "columns.svg"
+doc = "Opens the list of a table's columns, where a reader chooses which are shown."
+
+# --- The two a `MessageBar` marks its tone with -----------------------------
+#
+# `info` was already here and covers the neutral and accent tones. What it
+# cannot do is tell a warning from a refusal: one drawing on three tones is a
+# glyph that says nothing the colour has not already said, and §8.8.6 asks for
+# a second signal rather than a repeated one.
+#
+# A triangle and a circle, because the shapes differ at a glance and at any
+# size. Neither is a substitute for the words.
+
+[icon.warning]
+source = "lucide"
+file = "alert-triangle.svg"
+doc = "Marks a message about something that is about to go wrong. The triangle is the shape, and the sentence beside it is what says what is wrong."
+
+[icon.alert]
+source = "lucide"
+file = "alert-circle.svg"
+doc = "Marks a message about something that has already gone wrong, such as a refused payment. Paired with the danger tone, never standing in for it."
+
 [icon.check]
 source = "lucide"
 file = "check.svg"
 doc = "Confirms an action, and marks the option in force."
+
+[icon.rotate-ccw]
+source = "lucide"
+file = "rotate-ccw.svg"
+doc = "Puts an example frame back the way it was found: its width, its appearance and its glass test all at once. An arrow that comes back round to where it started, which is the one gesture in this set that means *undo my changes* rather than *go back a step* — `chevron-left` is already the carousel's previous slide, and one drawing meaning two things is how a reader learns to distrust both."
+
+[icon.flask-conical]
+source = "lucide"
+file = "flask-conical.svg"
+doc = "Puts an example frame under a glass test: colour and edges behind it, blank space and a scrollbar, and the material on everything inside. A flask, because what the control is is a test rig — `layers` and `image` were both here first, and both described the backdrop rather than the thing being done with it."
+
+# --- The three states of a sortable column ---------------------------------
+#
+# Arrows for the two directions in force, and a pair of chevrons for the column
+# that could be sorted and is not. Arrows rather than a rotated `chevron-down`
+# because that glyph is already this system's *this opens* mark — on a
+# `Disclosure` and on a `Select` — and one drawing meaning two things is how a
+# reader learns to distrust both.
+
+[icon.arrow-up]
+source = "lucide"
+file = "arrow-up.svg"
+doc = "A column sorted from the beginning of the alphabet, or the smallest number. Paired with `aria-sort=\"ascending\"`, which is what a screen reader reads; the arrow is the half a reader can see."
+
+[icon.arrow-down]
+source = "lucide"
+file = "arrow-down.svg"
+doc = "The same, the other way. Two arrows rather than one rotated by the stylesheet: a transform is a thing a preset or a reduced-motion path can reach, and the direction of a sort is not something to leave to CSS."
+
+[icon.chevrons-up-down]
+source = "lucide"
+file = "chevrons-up-down.svg"
+doc = "A column that can be sorted and is not — the affordance. Without it a sortable heading looks exactly like a fixed one until somebody presses it, which is a feature nobody finds."
+
+[icon.languages]
+source = "lucide"
+file = "languages.svg"
+doc = "Opens the language menu. Not a flag: a flag names a country and this names a language, and the two disagree for most languages anybody speaks."
+
+[icon.calendar]
+source = "lucide"
+file = "calendar.svg"
+doc = "Opens a `DateInput`'s suggestions — the quick picks and the month grid. A calendar, because that is what the panel is; the button it sits on is icon-only and takes its name from `suggest_label`."
+
+[icon.wrap-text]
+source = "lucide"
+file = "wrap-text.svg"
+doc = "Toggles line wrapping in a code block."
+
+[icon.pipette]
+source = "lucide"
+file = "pipette.svg"
+doc = "Takes a colour off the screen, on a `ColorPicker` with `eyedropper`. Drawn rather than absent where the browser has no `EyeDropper`: the button is what the script removes, and an icon nothing renders is not payload."
+
+[icon.plus]
+source = "lucide"
+file = "plus.svg"
+doc = "Commits the colour under the cursor to a `ColorPicker { multiple }`'s list. A plus rather than a check: a check says *this one is chosen*, which is what the option rows already say, and this says *and one more*."
+
+[icon.minus]
+source = "lucide"
+file = "minus.svg"
+doc = "Subtracts one step, on a `NumberInput`. A minus rather than a downward chevron: the control changes a quantity, and a chevron says *move* about a thing that is not moving."
+
+[icon.eye]
+source = "lucide"
+file = "eye.svg"
+doc = "Shows a password, on a `Input { kind = \"password\" }`. A reader who cannot see what they typed cannot correct it, and the alternative they reach for is a shorter password."
+
+[icon.eye-off]
+source = "lucide"
+file = "eye-off.svg"
+doc = "The other half of that toggle, on a password. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script."
+
+[icon.upload]
+source = "lucide"
+file = "upload.svg"
+doc = "Marks a `FileInput`'s drop area. An arrow into a tray, which is what the gesture is; a paperclip would say *attachment*, which is what the result is called and not what the control does."
+
+[icon.clock]
+source = "lucide"
+file = "clock.svg"
+doc = "Fills a `TimeInput` with the current time, on the control `now_label` names. A clock, because that is what the field is; the button it sits on is icon-only and takes its name from that prop."
+
+[icon.chevron-left]
+source = "lucide"
+file = "chevron-left.svg"
+doc = "The previous slide, on a `Carousel`. A chevron rather than an arrow: an arrow in this system marks the direction a column is SORTED, and one drawing meaning two things is how a reader learns to distrust both."
+
+[icon.chevron-right]
+source = "lucide"
+file = "chevron-right.svg"
+doc = "The next slide, on the same terms. The pair is mirrored by the stylesheet in a right-to-left locale, which is the one place a transform is the right answer — *previous* means the other way there."
+
+[icon.pause]
+source = "lucide"
+file = "pause.svg"
+doc = "Stops a `Carousel` rotating. WCAG 2.2.2 requires a way to stop anything that moves for more than five seconds, and this is it — the component refuses to start rotating without it."
+
+[icon.play]
+source = "lucide"
+file = "play.svg"
+doc = "The other half of that toggle. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script."
+
+# --- The one shape a rating is made of --------------------------------------
+#
+# ONE DRAWING AND NOT TWO. A `Rating` needs an empty star and a full one, and
+# the obvious answer is a second file. It is not needed: the drawing is an
+# outline, and a `fill` in the stylesheet turns the same geometry into the solid
+# shape. A second file would be a second thing to keep in step with upstream for
+# a difference one declaration already makes.
+#
+# There is deliberately no `star-half` either. `Rating` draws a fraction by
+# clipping the filled layer, so half a star and four fifths of one are the same
+# mechanism, and the number beside the stars is what a reader actually reads.
+
+[icon.star]
+source = "lucide"
+file = "star.svg"
+doc = "One step of a `Rating`. The outline is the empty step and the stylesheet fills the same geometry for the full one, so a rating is one drawing rather than two that could drift apart."
 
 # --- Brand marks -----------------------------------------------------------
 #

@@ -9,11 +9,11 @@ import type { ReactNode } from "react";
 export type ProseMeasure = "default" | "lead" | "none";
 
 export interface ProseProps {
-  /** Which line-length cap to apply. `none` is for prose inside a narrow column that already constrains it. */
+  /** Which line-length cap to apply. `default` is the reading measure and `lead` is the narrower one for an opening paragraph. `none` is for prose inside a column that already constrains it. */
   measure?: ProseMeasure;
   className?: string;
   children?: ReactNode;
 }
 
-/** A long-form reading column that caps its own line length. */
+/** Holds long-form text in a column that caps its own line length. */
 export declare function Prose(props: ProseProps): JSX.Element;

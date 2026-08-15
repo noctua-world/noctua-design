@@ -4,18 +4,12 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// A key or chord, as printed on a keyboard.
+// Show a key or a chord, as printed on a keyboard.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
-
-/** Applied by the component, never by the caller — which is what keeps
- * the two implementations from disagreeing about a default. */
-const defaults = {
-  size: "small",
-};
 
 export function Kbd({ size, className, children, ...rest }) {
   const size_ = size ?? "small";

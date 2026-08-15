@@ -2,7 +2,9 @@
 name = "Del"
 element = "del"
 class = "nd-del"
-summary = "Text removed from the document."
+# One of the marks that go inside a sentence, documented with the others.
+page = "inline-text"
+summary = "Shows text that has been removed from the document."
 
 [prop.cite]
 type = "text"
@@ -12,7 +14,11 @@ doc = "A URL explaining the change."
 [prop.datetime]
 type = "text"
 attribute = "datetime"
-doc = "When it was removed, as a machine-readable timestamp."
+doc = "When the text was removed, as a machine-readable timestamp."
+
+[prop.label]
+type = "text"
+doc = "A word read out before the text to say that it was removed. Supply it in the reader's language, because this package ships no reader-facing words of its own."
 
 [prop.children]
 type = "children"
@@ -20,6 +26,6 @@ doc = "The removed text."
 
 [a11y]
 notes = """
-A strikethrough is not announced by most screen readers, so deleted text is
-read as though it were current. The component carries a visually-hidden label
-saying so."""
+Most screen readers do not report a strikethrough, so deleted text sounds the
+same as current text. `label` is the word that says it was removed, and it is
+needed when the deletion carries meaning."""

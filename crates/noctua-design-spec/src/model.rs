@@ -12,7 +12,7 @@
 use indexmap::IndexMap;
 use serde::Deserialize;
 
-/// A whole non-colour token set.
+/// A whole non-color token set.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Spec {
@@ -63,6 +63,16 @@ pub struct Spec {
     /// Focus-ring geometry.
     #[serde(default)]
     pub focus: IndexMap<String, String>,
+
+    /// The three-dimensional scene: how big a cell is, how far apart the rows
+    /// and the planes are, and where the camera rests.
+    ///
+    /// A plain map of lengths and angles, like [`Spec::radius`], because the
+    /// layout engine works in dimensionless cells and this is the one place
+    /// that decides what a cell is worth. Changing it rescales every scene at
+    /// once, which is the whole reason the engine never sees a length.
+    #[serde(default)]
+    pub scene: IndexMap<String, String>,
 }
 
 /// The named presets a reader chooses between.
@@ -94,16 +104,16 @@ pub struct Glass {
     /// Blur radius per level.
     #[serde(default)]
     pub blur: IndexMap<String, String>,
-    /// How much of the surface colour survives, as a percentage.
+    /// How much of the surface color survives, as a percentage.
     #[serde(default)]
     pub opacity: IndexMap<String, u32>,
-    /// How much the backdrop's colour is concentrated. Dimensionless.
+    /// How much the backdrop's color is concentrated. Dimensionless.
     #[serde(default)]
     pub saturate: IndexMap<String, String>,
     /// How much the backdrop is lifted. Dimensionless.
     #[serde(default)]
     pub brightness: IndexMap<String, String>,
-    /// The lit top edge, as a percentage of the raised-surface colour.
+    /// The lit top edge, as a percentage of the raised-surface color.
     #[serde(default)]
     pub edge: IndexMap<String, u32>,
     /// The inner sheen below that edge, likewise a percentage.
@@ -119,20 +129,18 @@ pub struct Effect {
     ///
     /// Ceilings rather than values: they are what makes "a pattern never hurts
     /// readability" a bounded claim a test can measure.
+    ///
+    /// Keyed by effect, plus `dots` — the one pattern VALUE with a ceiling of
+    /// its own, because it covers a fortieth of its tile where the other three
+    /// cover most of theirs and the ceiling is per-pixel.
     #[serde(default)]
     pub alpha: IndexMap<String, u32>,
-    /// Blur radii.
-    #[serde(default)]
-    pub blur: IndexMap<String, String>,
-    /// Ambient durations, in seconds.
-    ///
-    /// Deliberately not in `[motion.duration]`: those carry a reduced-motion
-    /// collapse, and `animation-duration: 0ms` on an infinite animation is not
-    /// "no motion" — it restarts every frame, and engines disagree about what
-    /// renders. Reduced motion is handled by an explicit `animation: none`.
-    #[serde(default)]
-    pub duration: IndexMap<String, String>,
 }
+
+// There were `blur` and `duration` maps here. Both existed for the aurora — a
+// 64px stop radius and an infinite drift — and the aurora is gone. Nothing on a
+// page animates a background any more, so there is no infinite duration left
+// that had to be kept out of `[motion.duration]`.
 
 /// Emit-wide settings.
 #[derive(Debug, Clone, Deserialize)]
@@ -256,7 +264,7 @@ pub struct Duration {
     pub normal: String,
     /// The value under `prefers-reduced-motion: reduce`.
     ///
-    /// Not always `0ms`: a colour change at zero reads as a glitch, while a
+    /// Not always `0ms`: a color change at zero reads as a glitch, while a
     /// *movement* at zero is exactly what a motion-sensitive reader asked for.
     pub reduced: String,
 }

@@ -1,0 +1,78 @@
+guidance = """
+Use a tree item for one node inside a `Tree`: its name, where it leads, and what
+is under it. **Its name is a prop and its children are the nodes under it**,
+because a `treeitem` computes its name from its content.
+"""
+
+[meta]
+name = "TreeItem"
+element = "li"
+class = "nd-tree-item"
+page = "tree"
+summary = "Place one node in a tree: its name, where it leads, and what is under it."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The node's name. A prop rather than children, because a `treeitem`'s accessible name is computed from its content. A name containing a subtree would take in every descendant."
+
+[prop.value]
+type = "text"
+attribute = "data-nd-value"
+doc = "What this node *is*, as a script or a form finds it, when that is not its name. A selectable node submits it, and it follows `SelectOption.value`'s rule, because a label is a sentence in the reader's language."
+
+[prop.href]
+type = "text"
+doc = "Where the node leads. Its presence makes the row's content a real `<a>`, inside the row and never instead of it. The role stays on the `<li>`, so *copy link address* keeps working."
+
+[prop.icon]
+type = "text"
+doc = "A drawing before the name, such as a folder or a file. It is decorative, and the name beside it is what a screen reader reads."
+
+[prop.icon_expanded]
+type = "text"
+doc = "The drawing to use while the branch is open, such as an open folder. Absent keeps `icon` whatever the state is, which suits anything that is not a container."
+
+[prop.badge]
+type = "text"
+doc = "A short word or count at the end of the row, such as how many nodes are inside. It renders as a real `Tag`."
+
+[prop.expanded]
+type = "bool"
+default = "false"
+attribute = "data-nd-expanded"
+doc = "Whether this branch starts open. It is honoured **before the first paint**, by a rule keyed on the attribute the bootstrap stamps. A half-closed tree does not shift when the script arrives."
+
+[prop.branch]
+type = "bool"
+default = "false"
+attribute = "data-nd-branch"
+doc = "Says there are children that were **not** passed, for the lazily-loaded case. The node gets `aria-expanded=\"false\"` and a control, nothing is hidden, and the row's link is where the rest lives."
+
+[prop.selected]
+type = "bool"
+default = "false"
+attribute = "data-nd-selected"
+doc = "Whether this node starts chosen. Where the tree has a `form`, it is the hidden checkbox's `checked` and what a server receives with no script. Where it has none, the script writes `aria-selected` from it."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "aria-disabled"
+doc = "Stops the node being chosen or followed. It writes `aria-disabled` rather than removing the node from the walk, so users can still reach the row and be told it is disabled."
+
+[prop.current]
+type = "bool"
+default = "false"
+doc = "Marks the node as the page the reader is on, with `aria-current=\"page\"`. That is a different claim from `selected`, and a tree used as navigation has exactly one current node."
+
+[prop.children]
+type = "children"
+doc = "The nodes under this one. Their presence is what makes this a branch rather than a leaf, and `branch` says so when they were not passed."
+
+[a11y]
+notes = """
+`role="treeitem"` goes on the `<li>` and the `<a>` inside it stays a link, so
+middle-click and *copy link address* keep working. `aria-expanded` is written
+only on a node that has children.
+"""

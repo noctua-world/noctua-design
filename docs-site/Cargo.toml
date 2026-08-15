@@ -11,6 +11,7 @@ publish = false
 dioxus.workspace = true
 dioxus-ssr.workspace = true
 noctua-design.workspace = true
+noctua-design-grammars.workspace = true
 noctua-design-i18n.workspace = true
 noctua-design-theme.workspace = true
 noctua-design-tokens.workspace = true

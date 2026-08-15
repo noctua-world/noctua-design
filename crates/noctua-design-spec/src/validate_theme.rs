@@ -2,13 +2,13 @@
 //!
 //! Every check corresponds to a failure that is silent at runtime: a default
 //! that is not a legal value, a key two settings share, an attribute that
-//! collides with one the colour system already owns.
+//! collides with one the color system already owns.
 
 use crate::Vendor;
 use crate::error::{Problem, did_you_mean};
 use crate::theme::Theme;
 
-/// Attributes the colour system defines. A setting claiming one of these would
+/// Attributes the color system defines. A setting claiming one of these would
 /// fight the vendored stylesheets for the same selector.
 const RESERVED: [&str; 2] = ["data-theme", "data-palette"];
 
@@ -76,7 +76,7 @@ pub(crate) fn check(theme: &Theme, vendor: &Vendor) -> Vec<Problem> {
             }
             attributes.push(attribute);
 
-            // `data-theme` and `data-palette` are the colour system's, and this
+            // `data-theme` and `data-palette` are the color system's, and this
             // model deliberately reuses them — but only from the settings that
             // mean exactly what the vendored CSS expects.
             let expected = match name.as_str() {
@@ -126,7 +126,7 @@ pub(crate) fn check(theme: &Theme, vendor: &Vendor) -> Vec<Problem> {
             ),
             None => problems.push(
                 Problem::whole_file(format!("there is no `{required}` setting"))
-                    .fix("the theme model needs one; it is what the colour system reads"),
+                    .fix("the theme model needs one; it is what the color system reads"),
             ),
         }
     }

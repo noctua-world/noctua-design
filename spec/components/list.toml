@@ -2,35 +2,36 @@
 name = "List"
 element = "ul"
 class = "nd-list"
-summary = "An ordered, unordered or description list, nestable."
+# The still picture needs REAL CHILDREN. Without this the grid falls
+# back to the pangram placeholder, so every value of every enum prop
+# draws one identical line of text — which is what the reader saw.
+specimen = "<li class=\"nd-list-item nd-identifier\">Aa</li><li class=\"nd-list-item nd-identifier\">Bb</li><li class=\"nd-list-item nd-identifier\">Cc</li>"
+summary = "Group items as an ordered, unordered or description list, with nesting."
 
 [prop.kind]
 type = "enum"
 values = ["unordered", "ordered", "description"]
+elements = ["ul", "ol", "dl"]
 default = "unordered"
-attribute = "data-nd-kind"
-doc = "Which kind of list. Changes the element, not only the marker."
+doc = "Which kind of list to render: `unordered` is a `<ul>`, `ordered` an `<ol>`, `description` a `<dl>`. It changes the element and not only the marker, so a screen reader is told the right thing."
 
 [prop.marker]
 type = "enum"
 values = ["default", "none"]
 default = "default"
 attribute = "data-nd-marker"
-doc = "`none` removes the marker without removing the list semantics."
+doc = "The marker on each item. `none` removes it and keeps the list semantics. `default` draws it, and is the default."
 
 [prop.spacing]
 type = "enum"
 values = ["tight", "default", "loose"]
 default = "default"
 attribute = "data-nd-spacing"
-doc = "The gap between items."
+doc = "The gap between items: `tight`, `default` or `loose`."
 
 [prop.children]
 type = "children"
-doc = "The items."
+doc = "The list items."
 
 [a11y]
-notes = """
-`marker: none` removes the visual marker only. Some browsers drop the list
-semantics entirely when list-style is none, so the role is restated explicitly —
-otherwise a styled list stops announcing how many items it has."""
+notes = "`marker: none` removes the visual marker only. Some browsers drop the list semantics when `list-style` is none. The role is restated explicitly, so the list keeps announcing how many items it has."

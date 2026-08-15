@@ -1,0 +1,82 @@
+# C++.
+#
+# C's table plus the words C++ added. Two known limits, both stated rather than
+# worked around: a template argument list scans as two comparisons, and a raw
+# string `R"delim(…)delim"` is not supported at all — its delimiter is an
+# arbitrary run chosen at the call site, which no fixed opener can express.
+
+[meta]
+name = "cpp"
+display = "C++"
+aliases = ["c++", "cc", "hpp", "cxx"]
+
+[words]
+keyword = [
+  "alignas", "alignof", "auto", "break", "case", "catch", "class", "concept",
+  "const", "consteval", "constexpr", "continue", "co_await", "co_return",
+  "co_yield", "decltype", "default", "delete", "do", "else", "enum",
+  "explicit", "export", "extern", "for", "friend", "goto", "if", "inline",
+  "mutable", "namespace", "new", "noexcept", "operator", "override",
+  "private", "protected", "public", "requires", "return", "sizeof", "static",
+  "static_assert", "struct", "switch", "template", "this", "throw", "try",
+  "typedef", "typename", "union", "using", "virtual", "volatile", "while",
+]
+type = [
+  "bool", "char", "char8_t", "char16_t", "char32_t", "double", "float", "int",
+  "long", "short", "signed", "size_t", "string", "unsigned", "void",
+  "wchar_t", "vector", "map", "set", "optional", "shared_ptr", "unique_ptr",
+]
+constant = ["false", "true", "nullptr", "NULL"]
+function = ["make_shared", "make_unique", "move", "printf", "static_cast", "dynamic_cast"]
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+max = 12
+
+[number]
+prefixes = ["0x", "0b"]
+separator = "'"
+exponent = "eEpP"
+suffix = true
+
+[symbols]
+operator = "+-*/%=<>!&|^~?"
+punctuation = "(){}[],;:.#"
+
+[[sigil]]
+open = "#"
+role = "attribute"
+line_start = true
+
+[context]
+name_after = { class = "type", struct = "type", enum = "type", namespace = "type", union = "type", typename = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+member_dot = true
+
+[[case]]
+name = "a class declaration and a member call"
+code = "class Buffer { void push(int n) { data.append(n); } };"
+expect = ["keyword class", "type Buffer", "type void", "function push", "type int", "function append"]
+
+[[case]]
+name = "an include is a directive and the header is not a string"
+code = """
+#include <vector>
+std::vector<int> v;"""
+expect = ["attribute #include", "type vector", "type int"]

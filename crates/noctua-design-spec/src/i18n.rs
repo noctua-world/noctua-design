@@ -112,6 +112,57 @@ fn problem(path: &str, text: &str, message: String, fix: &str) -> SpecError {
 /// and absent from another, or a message whose placeholders do not match the
 /// source's.
 pub fn load(directory: impl AsRef<Path>) -> Result<Catalogue, SpecError> {
+    load_with(directory, &[])
+}
+
+/// The catalogue this repository actually ships: authored **and** derived.
+///
+/// One call, because a caller who used [`load`] and forgot the derivation got a
+/// catalogue missing a hundred and thirty keys and a build failure with no clue
+/// in it. Every consumer takes the components anyway; taking them here removes
+/// the way to get it wrong.
+///
+/// # Errors
+///
+/// As [`load_with`].
+pub fn load_for(
+    directory: impl AsRef<Path>,
+    components: &[crate::component::Component],
+) -> Result<Catalogue, SpecError> {
+    load_with(directory, &crate::component::derived_messages(components))
+}
+
+/// The same, plus English messages **derived from another spec**.
+///
+/// # Why anything is derived rather than written here
+///
+/// A component's contract already carries prose a reader sees: what it is for,
+/// what each prop does, what each key does, what a reviewer has to know. That
+/// prose becomes the doc comment in both languages, so it has to live in
+/// `spec/components/<name>.toml` — and it was ALSO printed verbatim onto the
+/// Portuguese page, because the site had nowhere else to get it from. Every
+/// component page in pt-BR carried English prop documentation.
+///
+/// Copying it into `en.toml` would give two places to edit and one of them
+/// would rot. Deriving it means English is written once, where it also becomes
+/// the doc comment; Portuguese is written once, here, in `pt-BR.toml`; and the
+/// cross-locale check below fails the build naming any derived key a translator
+/// has not answered yet. Nothing else changes: a derived key is an ordinary key
+/// from the moment it is loaded.
+///
+/// # Errors
+///
+/// As [`load`], plus a derived key that collides with an authored one — which
+/// would mean the catalogue silently had two answers for one name.
+///
+/// # Panics
+///
+/// Never: the check above returns before the source locale is looked up, so it
+/// is always present by the time it is.
+pub fn load_with(
+    directory: impl AsRef<Path>,
+    derived: &[(String, String)],
+) -> Result<Catalogue, SpecError> {
     let directory = directory.as_ref();
     let mut paths = read_locale_paths(directory)?;
 
@@ -132,6 +183,25 @@ pub fn load(directory: impl AsRef<Path>) -> Result<Catalogue, SpecError> {
             "English is the source locale — every other one is checked against it, \
              in both directions — so it has to exist.",
         ));
+    }
+
+    let source_path = directory.join(format!("{SOURCE}.toml"));
+    let source = locales
+        .iter_mut()
+        .find(|locale| locale.tag == SOURCE)
+        .expect("the source locale is present");
+    for (key, message) in derived {
+        if source.message.contains_key(key) {
+            return Err(problem(
+                &source_path.display().to_string(),
+                "",
+                format!("`{key}` is both written here and derived from another spec"),
+                "A key has one answer. Delete the authored one: the derived text is the \
+                 same words the doc comment uses, and two copies of one sentence is one \
+                 copy that goes stale.",
+            ));
+        }
+        source.message.insert(key.clone(), message.clone());
     }
 
     let keys: Vec<String> = locales[0].message.keys().cloned().collect();
@@ -364,7 +434,12 @@ mod tests {
 
     fn shipped() -> Catalogue {
         let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
-        load(root.join("spec/i18n")).expect("the shipped catalogue")
+        // `load_for`, never `load`: the shipped catalogue is the authored keys
+        // plus the ones derived from the component contracts, and half of it
+        // does not exist without them.
+        let components = crate::component::load_all(root.join("spec/components"))
+            .expect("the shipped components");
+        load_for(root.join("spec/i18n"), &components).expect("the shipped catalogue")
     }
 
     #[test]

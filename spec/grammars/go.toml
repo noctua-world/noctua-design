@@ -1,0 +1,86 @@
+# Go.
+#
+# `upper_type` is doing something different here than anywhere else: in Go an
+# initial capital means **exported**, not "type". So `fmt.Println` paints
+# `Println` as a function (the paren wins, and the paren is checked first) while
+# a bare `Reader` paints as a type. That is the right answer more often than it
+# is the wrong one, and there is no second signal to consult.
+
+[meta]
+name = "go"
+display = "Go"
+aliases = ["golang"]
+
+[words]
+keyword = [
+  "break", "case", "chan", "const", "continue", "default", "defer", "else",
+  "fallthrough", "for", "func", "go", "goto", "if", "import", "interface",
+  "map", "package", "range", "return", "select", "struct", "switch", "type",
+  "var",
+]
+constant = ["false", "true", "nil", "iota"]
+type = [
+  "any", "bool", "byte", "complex64", "complex128", "error", "float32",
+  "float64", "int", "int8", "int16", "int32", "int64", "rune", "string",
+  "uint", "uint8", "uint16", "uint32", "uint64", "uintptr",
+]
+function = [
+  "append", "cap", "close", "copy", "delete", "len", "make", "new", "panic",
+  "print", "println", "recover",
+]
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+[[string]]
+open = "`"
+close = "`"
+multiline = true
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+max = 12
+
+[number]
+prefixes = ["0x", "0b", "0o"]
+separator = "_"
+exponent = "eE"
+suffix = true
+
+[symbols]
+operator = "+-*/%=<>!&|^~"
+punctuation = "(){}[],;:."
+
+[context]
+name_after = { func = "function", type = "type", package = "type", struct = "type", interface = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+member_dot = true
+
+[[case]]
+name = "a raw string ignores the escape inside it"
+code = 'var re = `a\d+`'
+expect = ["keyword var", 'string `a\d+`']
+reject = ["escape \\d"]
+
+[[case]]
+name = "a rune literal is a string and does not eat the line"
+code = "for _, c := range 'a' + s {"
+expect = ["keyword for", "keyword range", "string 'a'"]
+
+[[case]]
+name = "a func names itself and a call is a call"
+code = 'func main() { fmt.Println("hi") }'
+expect = ["keyword func", "function main", "function Println", 'string "hi"']

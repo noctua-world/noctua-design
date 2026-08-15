@@ -1,9 +1,22 @@
+guidance = "Use it for one item of a `List`. Give it a `term` when the list is a description list, and leave it off for any other kind of list."
+
 [meta]
 name = "ListItem"
 element = "li"
 class = "nd-list-item"
-summary = "One item in a list."
+summary = "Show one item of a list, or one term and its description."
+
+[prop.term]
+type = "text"
+doc = "The thing being described. Its presence switches the item from an `<li>` to a `<dt>` and a `<dd>`, which is what a description list is made of."
 
 [prop.children]
 type = "children"
-doc = "The item."
+doc = "The item, or the description of the term."
+
+[a11y]
+notes = """
+A `<dt>` and its `<dd>` must be direct children of the `<dl>`, so this
+renders two siblings rather than wrapping them. A wrapper breaks the
+association a screen reader reads.
+"""

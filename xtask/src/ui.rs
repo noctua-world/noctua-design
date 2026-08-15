@@ -1,7 +1,7 @@
 //! Terminal output.
 //!
 //! Kept in one place so every verb sounds like the same program, and so the
-//! decision about what deserves emphasis is made once. Colour goes through
+//! decision about what deserves emphasis is made once. Color goes through
 //! `anstream`, which strips it when output is not a terminal — a log file
 //! full of escape codes helps nobody.
 

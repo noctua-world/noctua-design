@@ -1,0 +1,45 @@
+# Markdown.
+#
+# A fenced block is handed to the grammar its info string names, which is the
+# one thing a reader is really looking at inside a markdown block. What is NOT
+# marked is emphasis: `*` is a bullet, a multiplication sign, and two kinds of
+# emphasis, and guessing wrong colours a whole paragraph. Reference links,
+# footnotes and setext headings are likewise plain.
+
+[meta]
+name = "markdown"
+display = "Markdown"
+mode = "markdown"
+aliases = ["md", "mdx", "mkd"]
+
+[[case]]
+name = "a fenced block is scanned in the language it names"
+code = """
+# A title
+
+```rust
+let x = 1; // a note
+```
+"""
+expect = ["keyword # A title\n", "attribute ```rust\n", "keyword let", "number 1", "comment // a note", "attribute ```\n"]
+
+[[case]]
+name = "a fence with no language stays plain"
+code = """
+```
+fn main() {}
+```
+"""
+expect = ["attribute ```\n", "plain fn main() {}\n"]
+reject = ["keyword fn"]
+
+[[case]]
+name = "a quote, a rule, a list marker, inline code and a link"
+code = """
+> a quotation
+
+---
+
+- an item with `code` and [a link](/en/)
+"""
+expect = ["comment > a quotation\n", "punctuation ---\n", "punctuation - ", "string `code`", "string (/en/)"]

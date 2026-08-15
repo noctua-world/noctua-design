@@ -11,12 +11,24 @@
      are BOTH specificity (0,3,0). Only source order separates them. The
      default must come first, so a theme sheet appended later wins.
 
+     THE DEFAULT PALETTE BELOW IS SCOPE-ANCHORED, so it applies only to an
+     element carrying data-palette="<that name>". That is not an
+     optimisation to undo: the color system publishes a :root sheet for
+     its OWN default and for nothing else, and this design system's
+     default is a different palette.
+
+     Which is why the bootstrap stamps data-palette even when nothing is
+     stored. Link these files without running it, and without rendering
+     the attribute yourself, and the page has no palette whatsoever.
+
      scope.css REPLACES the vendored contexts.css — it carries the same
      declarations plus the selectors that make them resolve inside a
      themed subtree. Linking both would double the cost for nothing. -->
 <link rel="stylesheet" href="tokens/css/ramp.css">
 <link rel="stylesheet" href="scope.css">
-<link rel="stylesheet" href="tokens/css/ochre-balanced.css" id="noctua-base-palette">
+<link rel="stylesheet" href="tokens/css/theme-blue-balanced.css" id="noctua-base-palette">
 <link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="tones.css">
+<link rel="stylesheet" href="syntax.css">
 <link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="theme.css">

@@ -1,0 +1,37 @@
+<!-- The next four rows of the `deploys` table, as `<tr>` markup.
+
+     NOT JSON, AND THAT IS THE POINT. Every component in the table family
+     renders its own row; a schema invented for this would be a second
+     description of a table the server already knows how to draw, and it would
+     go stale the first time a cell gained a `Tag`.
+
+     The first row carries `data-nd-more-src` when there are more rows after
+     these. There are not, so it does not — and the button takes itself away. -->
+<tr class="nd-table-row" role="row">
+  <th class="nd-table-header-cell nd-identifier" role="rowheader" scope="row" data-nd-column="build"><div class="nd-table-heading"><span class="nd-table-heading-words" data-nd-table-heading="">#4208</span></div></th>
+  <td class="nd-table-cell nd-identifier" role="cell" data-nd-column="branch" data-nd-wrap="nowrap"><div class="nd-table-value">main</div></td>
+  <td class="nd-table-cell" role="cell" data-nd-column="where"><div class="nd-table-value">Production</div></td>
+  <td class="nd-table-cell nd-identifier" role="cell" data-nd-column="took" data-nd-align="numeric"><div class="nd-table-value">44s</div></td>
+  <td class="nd-table-cell" role="cell" data-nd-column="result"><div class="nd-table-value"><span class="nd-tag" data-nd-tone="passing" data-nd-variant="soft" data-nd-size="small" data-nd-shape="pill"><span class="nd-tag-body"><span class="nd-tag-label">Passing</span></span></span></div></td>
+</tr>
+<tr class="nd-table-row" role="row">
+  <th class="nd-table-header-cell nd-identifier" role="rowheader" scope="row" data-nd-column="build"><div class="nd-table-heading"><span class="nd-table-heading-words" data-nd-table-heading="">#4207</span></div></th>
+  <td class="nd-table-cell nd-identifier" role="cell" data-nd-column="branch" data-nd-wrap="nowrap"><div class="nd-table-value">fix/anchor</div></td>
+  <td class="nd-table-cell" role="cell" data-nd-column="where"><div class="nd-table-value">Staging</div></td>
+  <td class="nd-table-cell nd-identifier" role="cell" data-nd-column="took" data-nd-align="numeric"><div class="nd-table-value">9s</div></td>
+  <td class="nd-table-cell" role="cell" data-nd-column="result"><div class="nd-table-value"><span class="nd-tag" data-nd-tone="failed" data-nd-variant="soft" data-nd-size="small" data-nd-shape="pill"><span class="nd-tag-body"><span class="nd-tag-label">Failed</span></span></span></div></td>
+</tr>
+<tr class="nd-table-row" role="row">
+  <th class="nd-table-header-cell nd-identifier" role="rowheader" scope="row" data-nd-column="build"><div class="nd-table-heading"><span class="nd-table-heading-words" data-nd-table-heading="">#4206</span></div></th>
+  <td class="nd-table-cell nd-identifier" role="cell" data-nd-column="branch" data-nd-wrap="nowrap"><div class="nd-table-value">main</div></td>
+  <td class="nd-table-cell" role="cell" data-nd-column="where"><div class="nd-table-value">Production</div></td>
+  <td class="nd-table-cell nd-identifier" role="cell" data-nd-column="took" data-nd-align="numeric"><div class="nd-table-value">1m 12s</div></td>
+  <td class="nd-table-cell" role="cell" data-nd-column="result"><div class="nd-table-value"><span class="nd-tag" data-nd-tone="canceled" data-nd-variant="soft" data-nd-size="small" data-nd-shape="pill"><span class="nd-tag-body"><span class="nd-tag-label">Canceled</span></span></span></div></td>
+</tr>
+<tr class="nd-table-row" role="row">
+  <th class="nd-table-header-cell nd-identifier" role="rowheader" scope="row" data-nd-column="build"><div class="nd-table-heading"><span class="nd-table-heading-words" data-nd-table-heading="">#4205</span></div></th>
+  <td class="nd-table-cell nd-identifier" role="cell" data-nd-column="branch" data-nd-wrap="nowrap"><div class="nd-table-value">main</div></td>
+  <td class="nd-table-cell" role="cell" data-nd-column="where"><div class="nd-table-value">Staging</div></td>
+  <td class="nd-table-cell nd-identifier" role="cell" data-nd-column="took" data-nd-align="numeric"><div class="nd-table-value">37s</div></td>
+  <td class="nd-table-cell" role="cell" data-nd-column="result"><div class="nd-table-value"><span class="nd-tag" data-nd-tone="passing" data-nd-variant="soft" data-nd-size="small" data-nd-shape="pill"><span class="nd-tag-body"><span class="nd-tag-label">Passing</span></span></span></div></td>
+</tr>

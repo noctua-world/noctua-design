@@ -1,0 +1,22 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use an error summary item for one thing wrong with a form, inside an `ErrorSummary` and nowhere else. Give it the same sentence the field itself shows, so both say the same words."
+
+[meta]
+name = "ErrorSummaryItem"
+element = "li"
+class = "nd-error-summary-item"
+page = "error-summary"
+summary = "Link one thing wrong with a form to the control it is about."
+
+[prop.control]
+type = "text"
+required = true
+doc = """The id of the control this entry is about, the same id its `Field` was given. **Required**. It becomes `href="#{control}"`, so the link works with the script blocked."""
+
+[prop.children]
+type = "children"
+doc = "The sentence, in the reader's language. Use the same words the field itself shows, so a reader who follows the link finds the message they read here."
+
+[a11y]
+notes = "A real `<a href>`, never a button, so it works with the script blocked and opens in a new tab when a reader asks. The link text is the whole sentence, so listing the page's links lists the complaints."

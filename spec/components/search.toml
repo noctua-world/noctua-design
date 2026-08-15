@@ -1,0 +1,189 @@
+guidance = "Use a search when users need to find one thing among many: pages, commands, records. For a list of six, use `Select` with `searchable`. Children are real links that work with the script blocked, and `src` is a JSON index that needs it."
+
+[meta]
+name = "Search"
+element = "div"
+class = "nd-search"
+# The three are only ever used together, which is what a collection page is for.
+page = "search"
+specimen = "<div class=\"nd-search-field\"><input class=\"nd-search-input\" type=\"search\" placeholder=\"Search\"></div>"
+summary = "Let users find one thing among many, with the results under the box or in a panel."
+
+# `<div role="search">`, AND IT WANTED TO BE `<search>`.
+#
+# `<search>` is the element for this and maps to exactly this role. It is not
+# used because `dioxus-html` 0.7.9 has no `search` in its element table, and
+# `NOCTUA.md §9.3` requires both implementations to render the same markup — so
+# React must not emit an element Dioxus cannot. The accessibility tree is
+# identical either way; when the element lands upstream this is one word in one
+# file.
+#
+# AND EVERY WORD IS A PROP. `NOCTUA.md §9.9` forbids this package from carrying
+# a sentence in any language, and a search has more to say than any other
+# control here: how many results, that there were none, that the index is still
+# coming, that it never came, that some were left out, what the clear control
+# does, what the recents are, how to forget them, and how to close the dialog.
+# `Select { search_label, empty_label, … }` is the precedent; each rides on a
+# `data-nd-*` attribute for the script to read.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-search"
+doc = "What is being searched, as a script finds it. It is the root of every id here: the input, the label, the panel, the listbox and the dialog. **Required**, because an id derived from an optional name is shared by every copy on a page."
+
+[prop.label]
+type = "text"
+required = true
+doc = "What this searches, in the reader's language. A real `<label for>`, visually hidden by default, and also the name of the landmark and of the result list. One string, three consumers. Required."
+
+[prop.placeholder]
+type = "text"
+attribute = "placeholder"
+doc = "The hint inside the box, and the words the dialog's own control shows before it is opened. Never the only name the field has."
+
+[prop.value]
+type = "text"
+attribute = "value"
+doc = "The text the box starts with. Use it for a query carried back from a results page, so a reader who arrived from one sees what they asked for."
+
+[prop.presentation]
+type = "enum"
+values = ["inline", "popover", "dialog"]
+variants = false
+default = "inline"
+attribute = "data-nd-presentation"
+doc = "Where the results appear: `inline` under the box, `popover` in a panel anchored to it, or `dialog` in a modal. `dialog` costs least, because the browser's own `showModal()` gives the focus trap, the inert background, Escape and the backdrop."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The size of the box: `small`, `medium` or `large`, matching `Button` step for step, so a search beside a button lines up. `medium` by default."
+
+[prop.src]
+type = "text"
+attribute = "data-nd-src"
+doc = """The address of a JSON index, `{"entries": [{"label", "href", "detail", "group", "badge", "keywords"}]}`, fetched the first time the search is opened. Use it for an index too large to put in every document."""
+
+[prop.action]
+type = "text"
+attribute = "action"
+doc = """Where the box submits when nothing is highlighted. It puts a real `<form method="get">` around the field, so Enter lands somewhere with the script blocked. A phone's keyboard offers *Search*, and the clear control can be a `<button type="reset">`."""
+
+[prop.query]
+type = "text"
+default = "q"
+doc = "The name the query is submitted under, inside that form. `q` by default, which is what almost every search on the web reads."
+
+[prop.cap]
+type = "text"
+attribute = "data-nd-cap"
+doc = "How many results are drawn at once, as text. Text because every prop that crosses the two languages is text. Leave it out for all of them, which suits a filter over thirty rows and not an index over three thousand."
+
+[prop.filter]
+type = "bool"
+default = "false"
+attribute = "data-nd-filter"
+doc = "Whether the search also hides what it did not match in the page around it, meaning every element carrying `data-nd-index` inside the same landmark. Off by default, because a control that reaches outside itself has to be asked for."
+
+[prop.hotkey]
+type = "bool"
+default = "false"
+attribute = "data-nd-hotkey"
+doc = "Whether this search answers the chord: Command-K on Apple hardware, Control-K elsewhere, and `/` when nothing else is being typed into. Both spellings are drawn and the stylesheet shows one. **One page, one chord**, the first in document order."
+
+[prop.clearable]
+type = "bool"
+default = "true"
+attribute = "data-nd-clearable"
+doc = "Whether a control appears for emptying the box. On by default, unlike `Select`, because an empty search is always a legal answer."
+
+[prop.loading]
+type = "bool"
+default = "false"
+attribute = "data-nd-loading"
+doc = "Whether what is searched is still on its way. The panel says so instead of showing nothing, because an empty result and a result that has not arrived mean opposite things."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Stops users typing in the box. The real attribute rather than `aria-disabled`, because only the real one keeps a refused field out of the submission."
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts the box and its panel together. One material, not two."
+
+[prop.recent]
+type = "text"
+attribute = "data-nd-recent"
+doc = "The key recent queries are kept under. Leave it out and nothing is stored, so keeping a reader's queries is a thing a caller asks for rather than a default."
+
+[prop.status]
+type = "text"
+attribute = "data-nd-status"
+doc = "How many results there are, with a `{count}` placeholder. One whole sentence with one hole, never a number glued to a word. It may carry one form per plural category, as `one:{count} result|other:{count} results`."
+
+[prop.empty_label]
+type = "text"
+attribute = "data-nd-empty-label"
+doc = "What the panel says when nothing matched. Without it the panel is silent, which is not an answer."
+
+[prop.loading_label]
+type = "text"
+attribute = "data-nd-loading-label"
+doc = "What the panel says while what is searched is still coming. A separate sentence from `empty_label`, because a slow search and an empty one are opposite facts."
+
+[prop.error_label]
+type = "text"
+attribute = "data-nd-error-label"
+doc = "What the panel says when the index at `src` never arrived. A third fact, separate from nothing matching and from nothing having come yet."
+
+[prop.cap_label]
+type = "text"
+attribute = "data-nd-cap-label"
+doc = "The sentence saying the list was cut, with `{shown}` and `{total}` placeholders. Without it a capped search shows ten answers where there were three hundred and says nothing about the rest."
+
+[prop.clear_label]
+type = "text"
+attribute = "data-nd-clear-label"
+doc = "The name of the control that empties the box. It is a glyph, so this is the only name it has."
+
+[prop.recent_label]
+type = "text"
+attribute = "data-nd-recent-label"
+doc = "The heading over the queries a reader made before. Supply it with `recent`, because a list of words with no heading is indistinguishable from a list of results."
+
+[prop.forget_label]
+type = "text"
+attribute = "data-nd-forget-label"
+doc = "The name of the control that empties that history. Anything a component keeps about a reader needs a way for the reader to clear it, in the same place they see it."
+
+[prop.close_label]
+type = "text"
+attribute = "data-nd-close-label"
+doc = "The name of the dialog's close control. Escape closes the dialog and so does a tap outside, and neither is visible on a touch screen."
+
+[prop.children]
+type = "children"
+doc = "The results: `SearchGroup`s, `SearchResult`s, or both. Real links, so a page with no script still has a list of links on it."
+
+[keyboard]
+"Down arrow" = "Moves to the next result, and opens the panel if it is closed. Focus stays in the box the whole time."
+"Up arrow" = "Moves to the previous result, and opens the panel if it is closed."
+"Home / End" = "Moves the caret to the start or the end of what was typed, not to the ends of the list."
+"Control or Command with Home / End" = "Moves to the first and the last result."
+"Page Up / Page Down" = "Moves one measured page of rows, clamped at the ends rather than wrapping."
+"Enter" = "Follows the highlighted result. Command or Control opens it in a new tab. With nothing highlighted it submits the form."
+"Escape" = "Clears what was typed. A second press closes the panel."
+"Tab" = "Leaves the search. Inside the dialog the browser cycles within it, which is the browser's own doing."
+"Command or Control with K" = "Puts focus in the box from anywhere, including from inside another text field. Needs `hotkey`."
+"Slash" = "Puts focus in the box, but never while something else is being typed into. Needs `hotkey`."
+
+[a11y]
+needs_name = true
+notes = """The script writes `role="combobox"`, `aria-expanded`, `aria-controls` and `aria-activedescendant`, and this markup writes none of them. `role="option"` goes on the row, never on the link inside it."""

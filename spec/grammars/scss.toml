@@ -1,0 +1,81 @@
+# SCSS.
+#
+# CSS's table plus `$variables`, `//` comments and the at-rules Sass adds.
+
+[meta]
+name = "scss"
+display = "SCSS"
+aliases = ["sass"]
+
+[identifier]
+extra = "_-"
+
+[words]
+keyword = ["and", "from", "important", "not", "only", "through", "to"]
+constant = [
+  "auto", "block", "bold", "center", "column", "flex", "grid", "hidden",
+  "inherit", "initial", "inline", "italic", "none", "normal", "relative",
+  "row", "solid", "sticky", "transparent", "unset", "visible", "wrap",
+]
+function = [
+  "calc", "clamp", "darken", "lighten", "map-get", "max", "min", "minmax",
+  "mix", "percentage", "repeat", "rgb", "url", "var",
+]
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+interpolate_open = "#{"
+interpolate_close = "}"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+
+[number]
+exponent = "eE"
+suffix = true
+leading_dot = true
+
+[symbols]
+operator = "+*/=<>~^!"
+punctuation = "(){}[],;:.&>"
+
+[[sigil]]
+open = "--"
+role = "property"
+
+[[sigil]]
+open = "#"
+role = "constant"
+
+[[sigil]]
+open = "$"
+role = "property"
+
+[[sigil]]
+open = "@"
+role = "keyword"
+
+[context]
+property_colon = "any"
+call_paren = true
+
+[[case]]
+name = "a variable, a mixin and a nested rule"
+code = "$gap: 1rem;\n@mixin pad { padding: $gap; }"
+expect = ["property $gap", "number 1rem", "keyword @mixin", "property padding", "property $gap"]
+
+[[case]]
+name = "a line comment exists here and does not in CSS"
+code = "// a note\na { color: red; }"
+expect = ["comment // a note", "property color"]

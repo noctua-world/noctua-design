@@ -11,15 +11,15 @@ export type ListMarker = "default" | "none";
 export type ListSpacing = "tight" | "default" | "loose";
 
 export interface ListProps {
-  /** Which kind of list. Changes the element, not only the marker. */
+  /** Which kind of list to render: `unordered` is a `<ul>`, `ordered` an `<ol>`, `description` a `<dl>`. It changes the element and not only the marker, so a screen reader is told the right thing. */
   kind?: ListKind;
-  /** `none` removes the marker without removing the list semantics. */
+  /** The marker on each item. `none` removes it and keeps the list semantics. `default` draws it, and is the default. */
   marker?: ListMarker;
-  /** The gap between items. */
+  /** The gap between items: `tight`, `default` or `loose`. */
   spacing?: ListSpacing;
   className?: string;
   children?: ReactNode;
 }
 
-/** An ordered, unordered or description list, nestable. */
+/** Group items as an ordered, unordered or description list, with nesting. */
 export declare function List(props: ListProps): JSX.Element;

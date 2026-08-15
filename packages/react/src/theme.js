@@ -22,6 +22,9 @@ import {
   fontValues,
   glassValues,
   radiusValues,
+  backdropValues,
+  patternValues,
+  grainValues,
 } from "@noctua-world/design-tokens/theme.js";
 
 /** The theme a subtree inherits when no scope encloses it. */
@@ -33,6 +36,9 @@ const documentTheme = {
   font: fontValues.default,
   glass: glassValues.default,
   radius: radiusValues.default,
+  backdrop: backdropValues.default,
+  pattern: patternValues.default,
+  grain: grainValues.default,
 };
 
 const ThemeContext = createContext(documentTheme);
@@ -51,7 +57,7 @@ export function useTheme() {
  *
  * # Every attribute goes on ONE element
  *
- * The colour system's forced-mode rule is compound and same-element:
+ * The color system's forced-mode rule is compound and same-element:
  *
  * ```text
  * [data-palette="blue-vivid"][data-theme="dark"] { … }
@@ -60,7 +66,7 @@ export function useTheme() {
  * Split the palette onto a wrapper and the mode onto a child and that
  * selector matches nothing. The child falls through to the *default*
  * palette's unanchored [data-theme="dark"] and silently paints the wrong
- * colours — silently, because every token still resolves to something.
+ * colors — silently, because every token still resolves to something.
  *
  * # A prop left unset inherits
  *
@@ -74,14 +80,14 @@ export function useTheme() {
  * is over 1,700 declarations, and re-resolving it for a subtree that asked
  * for the theme it already had is pure cost.
  */
-export function ThemeScope({ children, className, mode, accent, saturation, palette, font, glass, radius }) {
+export function ThemeScope({ children, className, mode, accent, saturation, palette, font, glass, radius, backdrop, pattern, grain }) {
   const inherited = useContext(ThemeContext);
-  const request = { mode, accent, saturation, palette, font, glass, radius };
+  const request = { mode, accent, saturation, palette, font, glass, radius, backdrop, pattern, grain };
   const resolved = useMemo(
     () => resolveScope(request, inherited),
     // Every prop, listed: a dependency array built from `request` would be a
     // new object on every render and memoize nothing.
-    [inherited, mode, accent, saturation, palette, font, glass, radius],
+    [inherited, mode, accent, saturation, palette, font, glass, radius, backdrop, pattern, grain],
   );
 
   const attributes = scopeAttributes(request, inherited);

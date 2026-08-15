@@ -1,0 +1,171 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a rating for a score out of a small whole number. `readonly` shows one that
+was already given, as a sentence with stars beside it. Without it the control is
+a real radio group that submits with no script.
+"""
+
+[meta]
+name = "Rating"
+element = "div"
+class = "nd-rating"
+# A NAME, WHICH THE VARIANT GRID TURNS INTO THAT DRAWING. `size` is the height
+# of a star, and a `<div>` with nothing in it is the same empty box three times.
+# `Icon`'s contract carries the same kind of specimen for the same reason.
+specimen = "star"
+summary = "Show or ask for a score out of five, with the number written out beside it."
+
+# WHY THE NUMBER IS ALWAYS WRITTEN OUT.
+#
+# `Meter` and `Progress` both record it: a shape a reader has to estimate from
+# is a value they have not been given. Four and a bit stars is 4.2 or 4.4 and
+# nobody counting pixels can say which. So the sentence beside the stars is not
+# optional decoration, and the stars carry `aria-hidden` because the sentence
+# already says what they draw.
+#
+# In the read-only form that sentence is `value_label`, filled once. In the
+# interactive form it is `value_label` filled ONCE PER STEP, with every copy
+# hidden but the one whose option is checked. That is what makes the number
+# follow a reader's own choice with no script running: `input:checked + label +
+# .nd-rating-count` is the whole mechanism.
+#
+# AND FRACTIONS ARE A READING, NEVER A CHOICE.
+#
+# A read-only `value` of `4.3` draws four whole stars and three tenths of the
+# fifth, by clipping a filled copy of the row. There is no `star-half` drawing
+# and there is no rounding. The interactive form refuses fractions outright: a
+# radio is a whole step, and half a star is a value no reader can aim at.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-rating"
+doc = """
+What is being scored, in the markup, and the root of every id here. It is also
+the field every option posts under. **Required**, because an id derived from an
+optional name is one every rating on the page shares.
+"""
+
+[prop.label]
+type = "text"
+required = true
+doc = """
+What the score is of, in the reader's language, such as *How was the delivery*.
+**Required**. It is the `<legend>` of the interactive form and the words before
+the stars in the read-only one.
+"""
+
+[prop.value]
+type = "text"
+attribute = "data-nd-value"
+doc = """
+The score. Whole in the interactive form, where it names the option that starts
+checked. Fractional is allowed in the read-only one and is drawn by clipping the
+filled row rather than by rounding.
+"""
+
+[prop.max]
+type = "text"
+default = "5"
+attribute = "data-nd-max"
+doc = """
+How many steps there are. Five by default, which is what a reader expects of a
+row of stars. Keep it small: every step is an option, and a row of ten is a
+choice no reader can make at a glance.
+"""
+
+[prop.readonly]
+type = "bool"
+default = "false"
+attribute = "data-nd-readonly"
+doc = """
+Whether this is a reading rather than a question. On, it renders a sentence with
+stars beside it and no form control at all. Off, it is a `<fieldset>` of real
+radios that submits with no script.
+"""
+
+[prop.value_label]
+type = "text"
+attribute = "data-nd-value-label"
+doc = """
+The sentence beside the stars, with `{value}` and `{max}` holes, such as
+*{value} out of {max}*. **Without it a reader has to estimate from a shape.**
+One sentence with holes, never words joined together.
+"""
+
+[prop.item_label]
+type = "text"
+attribute = "data-nd-item-label"
+doc = """
+The name of one option, with the same two holes, such as *Give {value} of {max}*.
+Wanted in practice by the interactive form: a star is a drawing, so this is the
+only name each radio has.
+"""
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = """
+How big a star is drawn. In the interactive form the star is also the target, so
+all three clear WCAG 2.5.8's 24px minimum and `large` also meets the 44px
+enhanced target.
+"""
+
+[prop.tone]
+type = "text"
+attribute = "data-nd-tone"
+doc = """
+Which of the colour system's tones the filled stars are painted from. The tones
+live in `noctua_design::tones`. **Never the only signal** (`NOCTUA.md §8.8.6`):
+the number beside them carries the reading.
+"""
+
+[prop.hint]
+type = "text"
+doc = """
+A sentence under the question, drawn by `Field`, such as what the top of the
+scale means. It belongs to the interactive form, because a reading answers no
+question.
+"""
+
+[prop.error]
+type = "text"
+doc = "What is wrong with the answer, in the reader's language, drawn by `Field`. Its presence also marks every option as invalid."
+
+[prop.required]
+type = "bool"
+default = "false"
+doc = "Whether a score has to be given. It writes the platform's own `required` on every option, so a group with none chosen is refused with no script."
+
+[prop.required_label]
+type = "text"
+doc = "The word marking the question as one that has to be answered, such as *required*. Wanted in practice by `required`, and drawn by `Field` beside the legend."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+doc = "Whether the options refuse to be chosen. It reaches every radio and the `<fieldset>` around them, so nothing inside is reachable or submitted."
+
+[state.level]
+attribute = "data-nd-level"
+doc = """
+How much of the row is filled, as a percentage, on the clipped copy of the
+stars. It is read from `value` and `max` at render, so a fraction is drawn
+rather than rounded away.
+"""
+
+[a11y]
+needs_name = true
+notes = """
+The stars are `aria-hidden`, because the sentence beside them says what they
+draw. The interactive form is real radios in a `<fieldset>`, so the group, the
+arrow keys and the announcement are the platform's own.
+"""
+
+[keyboard]
+Tab = "Moves into the group once, at the chosen option, rather than stopping on each star. It is the browser's own behaviour."
+"Arrow keys" = "Moves to the next or previous option and chooses it. Also the browser's own, so this component ships no script at all."
+"Space" = "Chooses the focused option, for a reader who arrived with Tab and found nothing chosen yet."

@@ -11,12 +11,39 @@ export type IconName =
   | "sun"
   | "moon"
   | "monitor"
+  | "palette"
   | "settings"
   | "search"
+  | "user"
   | "external-link"
   | "chevron-down"
   | "copy"
+  | "download"
+  | "info"
+  | "columns"
+  | "warning"
+  | "alert"
   | "check"
+  | "rotate-ccw"
+  | "flask-conical"
+  | "arrow-up"
+  | "arrow-down"
+  | "chevrons-up-down"
+  | "languages"
+  | "calendar"
+  | "wrap-text"
+  | "pipette"
+  | "plus"
+  | "minus"
+  | "eye"
+  | "eye-off"
+  | "upload"
+  | "clock"
+  | "chevron-left"
+  | "chevron-right"
+  | "pause"
+  | "play"
+  | "star"
   | "github";
 
 export interface IconDrawing {
@@ -27,3 +54,4 @@ export interface IconDrawing {
 
 export declare const ICONS: Record<IconName, IconDrawing>;
 export declare const ICON_NAMES: readonly IconName[];
+export declare const ICON_STROKE_WIDTH: string;

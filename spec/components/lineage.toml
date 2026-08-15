@@ -1,0 +1,230 @@
+guidance = """
+Use a lineage to draw figures and the relations between them, written in
+`graph`, a small text language. The layout is the same in Rust and in
+JavaScript, so both place a figure in the same cell. The scene is real elements
+rather than a canvas.
+"""
+
+[meta]
+name = "Lineage"
+element = "div"
+class = "nd-lineage"
+page = "lineage"
+# THE SPECIMEN IS A SMALL SCENE RATHER THAN AN EMPTY FIELD.
+#
+# The variant grid renders one of these for every value of every enum prop. On
+# TWO ATTRIBUTES BELOW ARE STAGECRAFT, AND THEY SAY SO IN THEIR NAMES:
+# `data-nd-sample-tip` marks which end of a run is the figure's, so the `shy`
+# sample can trim the right end, and `data-nd-sample-branch` marks the pieces
+# the `deep` sample sends into its fake plane. No real scene emits either —
+# real `shy` is trimmed numerically by the engine and real depth is a real
+# `z` — and only `.nd-lineage-sample`-scoped rules may consume them.
+#
+# the default specimen the grid renders the root and a sentence, which for this
+# component is an empty field five cells tall. This is a parent, two children
+# and the bracket between them, keyed off the same attributes the grid varies,
+# so `spacing`, `route`, `size`, `thickness`, `filter_mode`, `pick`, `height`,
+# `tilt` and `view` each show a real difference.
+#
+# TWO CHILDREN, NOT ONE, and that is the point of the second: `elbow` and `taut`
+# are two ways of reaching several children at once, and with one child they are
+# a straight line and a straight line. It also gives `filter_mode` something to
+# take out, and `isolate` something to leave a cut marker standing in.
+#
+# Both routings are in the markup and the stylesheet shows one. A specimen is a
+# still picture and the engine never runs for it, so a difference it cannot fake
+# is a difference the grid would draw twice and label differently — which is a
+# control that lies about its own effect, and which `lineage.spec.js` now fails
+# the build over.
+specimen = """<div class="nd-lineage-field nd-lineage-sample"><div class="nd-lineage-space" style="--nd-w:2;--nd-h:1"><div class="nd-lineage-bond nd-lineage-elbow"><span class="nd-lineage-grip"><i class="nd-lineage-run" data-nd-axis="y" data-nd-sample-tip="start" style="--nd-x:1;--nd-y:0;--nd-z:0;--nd-len:0.55"><i data-nd-face="back"></i><i data-nd-face="top"></i><i data-nd-face="bottom"></i></i><i class="nd-lineage-run" data-nd-axis="x" style="--nd-x:0.5;--nd-y:0.55;--nd-z:0;--nd-len:1"><i data-nd-face="back"></i><i data-nd-face="top"></i><i data-nd-face="bottom"></i></i><i class="nd-lineage-run" data-nd-axis="y" data-nd-sample-tip="end" style="--nd-x:0.5;--nd-y:0.55;--nd-z:0;--nd-len:0.45"><i data-nd-face="back"></i><i data-nd-face="top"></i><i data-nd-face="bottom"></i></i><i class="nd-lineage-run" data-nd-axis="y" data-nd-sample-branch="1" data-nd-sample-tip="end" style="--nd-x:1.5;--nd-y:0.55;--nd-z:0;--nd-len:0.45"><i data-nd-face="back"></i><i data-nd-face="top"></i><i data-nd-face="bottom"></i></i></span></div><div class="nd-lineage-bond nd-lineage-diagonal"><span class="nd-lineage-grip"><i class="nd-lineage-run" data-nd-axis="free" style="--nd-x:1;--nd-y:0;--nd-z:0;--nd-len:1.118;--nd-basis:rotate(117deg)"><i data-nd-face="back"></i><i data-nd-face="top"></i><i data-nd-face="bottom"></i></i><i class="nd-lineage-run" data-nd-axis="free" data-nd-sample-branch="1" style="--nd-x:1;--nd-y:0;--nd-z:0;--nd-len:1.118;--nd-basis:rotate(63deg)"><i data-nd-face="back"></i><i data-nd-face="top"></i><i data-nd-face="bottom"></i></i></span></div><div class="nd-lineage-piece" style="--nd-x:1;--nd-y:0;--nd-z:0;--nd-span:1"><span class="nd-lineage-body" aria-hidden="true"><i data-nd-face="back"></i><i data-nd-face="top"></i><i data-nd-face="bottom"></i><i data-nd-face="start"></i><i data-nd-face="end"></i></span><span class="nd-lineage-card"><span class="nd-lineage-name nd-identifier">Ada<i data-nd-ply="1" aria-hidden="true">Ada</i><i data-nd-ply="2" aria-hidden="true">Ada</i><i data-nd-ply="3" aria-hidden="true">Ada</i><i data-nd-ply="4" aria-hidden="true">Ada</i><i data-nd-ply="5" aria-hidden="true">Ada</i></span></span></div><div class="nd-lineage-piece" style="--nd-x:0.5;--nd-y:1;--nd-z:0;--nd-span:1"><span class="nd-lineage-body" aria-hidden="true"><i data-nd-face="back"></i><i data-nd-face="top"></i><i data-nd-face="bottom"></i><i data-nd-face="start"></i><i data-nd-face="end"></i></span><span class="nd-lineage-card"><span class="nd-lineage-name nd-identifier">Cara<i data-nd-ply="1" aria-hidden="true">Cara</i><i data-nd-ply="2" aria-hidden="true">Cara</i><i data-nd-ply="3" aria-hidden="true">Cara</i><i data-nd-ply="4" aria-hidden="true">Cara</i><i data-nd-ply="5" aria-hidden="true">Cara</i></span></span></div><div class="nd-lineage-piece" data-nd-match="no" data-nd-sample-branch="1" style="--nd-x:1.5;--nd-y:1;--nd-z:0;--nd-span:1"><span class="nd-lineage-body" aria-hidden="true"><i data-nd-face="back"></i><i data-nd-face="top"></i><i data-nd-face="bottom"></i><i data-nd-face="start"></i><i data-nd-face="end"></i></span><span class="nd-lineage-card"><span class="nd-lineage-name nd-identifier">Dan<i data-nd-ply="1" aria-hidden="true">Dan</i><i data-nd-ply="2" aria-hidden="true">Dan</i><i data-nd-ply="3" aria-hidden="true">Dan</i><i data-nd-ply="4" aria-hidden="true">Dan</i><i data-nd-ply="5" aria-hidden="true">Dan</i></span></span></div><div class="nd-lineage-piece" data-nd-piece="elided" style="--nd-x:1.5;--nd-y:1;--nd-z:0;--nd-span:1"><span class="nd-lineage-card"><span class="nd-lineage-count nd-identifier">1</span></span></div></div></div>"""
+summary = "Draws figures and the relations between them in three-dimensional space."
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-lineage"
+doc = "What this scene is called in the markup, and the root of every id in it. **Required**, because a page may render several scenes at once and ids built from an optional name would collide. `LineageFigure.scene` takes the same word."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The name of the scene. It names a region a reader can put focus into. A focusable region with no name leaves a screen reader nothing to say on arrival. `Tree` and `Toolbar` require one too."
+
+[prop.graph]
+type = "text"
+required = true
+doc = "The structure, in three statements: `figure <id>`, `mark <id>` and `bond <from> <to>`. Other words are attributes: `label`, `kind`, `tone`, `set`. A `kind` of `union` or `partner` shares a rank, `link` and `note` rank nothing, and the rest descends."
+
+[prop.view]
+type = "enum"
+values = ["flat", "deep"]
+default = "flat"
+attribute = "data-nd-view"
+doc = "How the branches are arranged. `flat` sets them side by side, the way a family tree is usually drawn, with the perspective and the thickness still there. `deep` stacks them into the scene so a branch becomes a plane."
+
+[prop.route]
+type = "enum"
+values = ["elbow", "taut"]
+default = "elbow"
+attribute = "data-nd-route"
+doc = "How a connection is drawn when the bond does not say. `elbow` is the bracket a family tree uses and `taut` is one straight run end to end. A union across generations goes around its block either way, and a descent across a rank gap elbows through."
+
+[prop.line]
+type = "enum"
+values = ["ribbon", "beam"]
+attribute = "data-nd-line"
+doc = "What a connection is made of. `ribbon` is a flat strip, which is all a flat view can show. `beam` gives every run a real square section. Unset, it follows `thickness`, so figures with volume get lines with volume."
+
+[prop.reach]
+type = "enum"
+values = ["touch", "shy"]
+variants = false
+default = "touch"
+attribute = "data-nd-reach"
+doc = "Where a connection ends. `touch` runs every line right up to the figure it joins. `shy` stops each line a third of a cell short. Use `shy` where the figures are not boxes (`shape=bare`) and a line would cross out a floating name."
+
+[prop.lettering]
+type = "enum"
+values = ["flat", "solid"]
+default = "flat"
+attribute = "data-nd-lettering"
+doc = "What the type is made of. `flat` is ordinary text. `solid` extrudes every name and date, giving each glyph real depth from stacked plies that turn with the scene. `thickness` and `line: beam` do the same for figures and lines."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The scale of the whole scene, covering a cell, a row, a plane and a figure together. It is one multiplier over the `[scene]` tokens rather than three sizes of card, so the proportions hold at every size."
+
+[prop.tilt]
+type = "enum"
+values = ["level", "resting", "raked"]
+variants = false
+default = "level"
+attribute = "data-nd-tilt"
+doc = "Where the camera rests before a reader moves it. **`level` is the default and looks straight on.** The depth is there either way, and the first drag shows it. `resting` opens with enough pitch to see the boxes, and `raked` looks down."
+
+[prop.thickness]
+type = "enum"
+values = ["none", "thin", "slab"]
+default = "slab"
+attribute = "data-nd-thickness"
+doc = "How thick a figure is. `none` draws it flat. `thin` and `slab` give the card a real edge. An orbit reveals that edge, which is what shows a reader the scene has depth rather than a picture of it."
+
+[prop.filter]
+type = "text"
+attribute = "data-nd-filter"
+doc = "The text to match. It searches a figure's label, its metadata and its declared `terms`, case-folded and diacritic-folded, so *reis* finds *Reis*. It is applied when the scene is rendered and re-applied by the runtime as a reader types."
+
+[prop.filter_mode]
+type = "enum"
+values = ["highlight", "isolate"]
+default = "highlight"
+attribute = "data-nd-filter-mode"
+doc = "What a filter does to everything else. `highlight` dims it and keeps it, so a reader sees where in the family the answer is. `isolate` takes it out of the drawing. **Neither re-runs the layout**, so the scene does not rearrange itself."
+
+[prop.occasion]
+type = "text"
+attribute = "data-nd-occasion"
+doc = "What today is, if anything. A `LineageFigure` declaring the same word is shown and one declaring another is not. It is a prop rather than a clock, because a component reading the date would disagree with a server that rendered yesterday."
+
+[prop.sets]
+type = "text"
+attribute = "data-nd-sets"
+doc = "Which swappable segments are showing, as `group:name`, separated by spaces. Anything carrying a `set=` from a group named here is drawn, and anything from another set in that group is not. **This component never fetches anything.**"
+
+[prop.parallax]
+type = "bool"
+default = "false"
+attribute = "data-nd-parallax"
+doc = "Whether the layers inside a figure follow the pointer, so a portrait turns toward the reader. It needs the runtime, is off by default, and is off entirely under reduced motion."
+
+[prop.pick]
+type = "enum"
+values = ["none", "bond", "figure", "both"]
+default = "none"
+attribute = "data-nd-pick"
+doc = "What a reader can single out. A picked connection is drawn heavier along its whole length, which shows where a line goes in a crowded scene. A pick is a real checkbox, so it survives a form post and works with no script."
+
+[prop.form]
+type = "text"
+attribute = "data-nd-form"
+doc = "The field the picked figures and connections are submitted under. Its presence gives every pickable thing a `name`, so a scene can be part of a form. Absent, a pick is a mark on the screen and nothing more."
+
+[prop.height]
+type = "enum"
+values = ["short", "tall", "full"]
+default = "tall"
+attribute = "data-nd-height"
+doc = "How much room the field takes, at most. The drawing is fitted to whatever room this leaves, so a taller window gives a larger scene rather than more of it. This is the size of the window, never of the graph."
+
+[prop.empty_label]
+type = "text"
+attribute = "data-nd-empty-label"
+doc = "What the scene says when it has nothing to draw. Without it, a field that opens onto nothing gives a reader no sign that the graph failed to parse."
+
+[prop.camera_label]
+type = "text"
+attribute = "data-nd-camera-label"
+doc = "The name of the camera controls, together. They are three buttons the runtime adds, and a group of unnamed buttons over a picture cannot be used without sight."
+
+[prop.zoom_in_label]
+type = "text"
+attribute = "data-nd-zoom-in-label"
+doc = "The name of the control that moves the camera closer."
+
+[prop.zoom_out_label]
+type = "text"
+attribute = "data-nd-zoom-out-label"
+doc = "The name of the control that moves the camera away."
+
+[prop.fit_label]
+type = "text"
+attribute = "data-nd-fit-label"
+doc = "The name of the control that puts the whole scene back on the screen. `0` does the same, and it is the way out of any camera position a reader has got lost in."
+
+[prop.elided_label]
+type = "text"
+attribute = "data-nd-elided-label"
+doc = "The name of a cut marker, with a `{count}` hole. `isolate` leaves one marker where each removed group was, carrying how many figures are behind it. This is what a screen reader reads over that number."
+
+[prop.matches_label]
+type = "text"
+attribute = "data-nd-matches-label"
+doc = "What the scene says when a filter changes, with a `{count}` hole, as `one:{count} match|other:{count} matches`. Both variants go in one message, because plural agreement cannot be assembled around a numeral."
+
+[prop.children]
+type = "children"
+doc = "`LineageFigure`s, for the pieces whose content is more than a name. A figure marked `slot` in the graph draws nothing of its own and waits for one, and any figure can have one placed over it. Anything else here sits at the scene's origin."
+
+[state.picked]
+attribute = "data-nd-picked"
+doc = "Set on a connection or a figure a reader has singled out. **Stamped by the runtime**, while the picking itself is not: a pick is a real checkbox, so `:checked` draws the connection heavier with nothing running."
+
+[state.match]
+attribute = "data-nd-match"
+doc = "Whether a piece answers the current filter. Absent when there is no filter, so no filter and everything matching are one state rather than two."
+
+[state.piece]
+attribute = "data-nd-piece"
+doc = "What a piece is: `figure`, `mark`, or `elided` for the cut markers `filter_mode: isolate` synthesizes. Server-rendered and never changed. It is contract because the runtime's match count and the stylesheet both key on it."
+
+[keyboard]
+"Tab" = "Reaches the field, then each pickable connection and each linked figure. The runtime replaces that with one stop."
+"Down arrow / Up arrow" = "Moves to a child and to a parent, down the generations and back up them. Without the runtime they scroll the page."
+"Left arrow / Right arrow" = "Moves between the figures on one row: siblings, and the partners either side of a union."
+"Shift with an arrow" = "Orbits the camera. Up and down pitch it, left and right turn it."
+"Plus / Minus" = "Moves the camera closer and further away."
+"Zero" = "Fits the whole scene on the screen, from any camera position."
+"Enter" = "Follows the figure's link where it has one, and otherwise picks the figure."
+"Space" = "Picks the focused figure or connection, where the scene allows picking."
+"Escape" = "Clears the picks and the filter, and puts the camera back where it rests."
+
+[a11y]
+needs_name = true
+notes = """
+The field is named and focusable, so a scene a pointer can turn is one a
+keyboard can reach. Each figure carries a visually hidden list of links to
+the figures it is joined to.
+"""

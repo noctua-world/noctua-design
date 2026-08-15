@@ -13,6 +13,7 @@
 // the same string in a font that definitely lacks the script separates the two.
 
 import { test, expect } from "@playwright/test";
+import { ANY, PAGE, url } from "./pages.js";
 
 /** The rendered width of a string in a given stack, in CSS pixels. */
 async function widthIn(page, text, family) {
@@ -35,12 +36,13 @@ async function widthIn(page, text, family) {
 }
 
 test("no script renders as tofu", async ({ page }) => {
-  await page.goto("/en/typography/");
+  await page.goto(url(PAGE.typography));
   await page.waitForLoadState("networkidle");
 
   const samples = await page.locator("[data-nd-script]").evaluateAll((els) =>
     els.map((el) => ({
-      name: el.dataset.ndScript,
+      id: el.dataset.ndScript,
+      ideographic: el.querySelector(".nd-script-sample").dataset.ndIdeographic === "true",
       text: el.querySelector(".nd-script-sample").textContent,
     })),
   );
@@ -52,7 +54,7 @@ test("no script renders as tofu", async ({ page }) => {
   // the whole table again.
   for (const sample of samples) {
     const real = await widthIn(page, sample.text, "var(--noctua-font-sans)");
-    expect(real, `${sample.name} rendered nothing at all`).toBeGreaterThan(0);
+    expect(real, `${sample.id} rendered nothing at all`).toBeGreaterThan(0);
 
     // `document.fonts.check` is the question actually being asked: can a loaded
     // face render this text. Width alone cannot answer it for CJK, because an
@@ -75,23 +77,28 @@ test("no script renders as tofu", async ({ page }) => {
       },
       [sample.text],
     );
-    expect(covered, `${sample.name} has no loaded face that can render it`).toBe(true);
+    expect(covered, `${sample.id} has no loaded face that can render it`).toBe(true);
 
     // Width still guards the proportional scripts, where tofu and real glyphs
-    // genuinely differ. CJK is exempt because 1em is the correct width for
-    // both, not because it is allowed to fail.
-    if (!/Japanese|Korean|Chinese/.test(sample.name)) {
+    // genuinely differ. An ideographic script is exempt because 1em is the
+    // correct width for both, not because it is allowed to fail.
+    //
+    // The exemption is READ FROM THE PAGE, not matched against a name. It used
+    // to be `/Japanese|Korean|Chinese/` over the script's English name, so it
+    // stopped applying the moment that name became a translated message — and
+    // the suite then called a correctly rendered Chinese line tofu.
+    if (!sample.ideographic) {
       const tofu = await widthIn(page, sample.text, '"__nothing_at_all__"');
       expect(
         Math.abs(real - tofu),
-        `${sample.name} rendered at exactly the fallback width — it is tofu`,
+        `${sample.id} rendered at exactly the fallback width — it is tofu`,
       ).toBeGreaterThan(1);
     }
   }
 });
 
 test("every script has a face of its own", async ({ page }) => {
-  await page.goto("/en/typography/");
+  await page.goto(url(PAGE.typography));
   await page.waitForLoadState("networkidle");
 
   // The assertion that used to list ten missing families. It lists none now,
@@ -129,13 +136,13 @@ test("the font files the scripts need are actually present", async ({ page }) =>
       failures.push(`${response.status()} ${response.url()}`);
     }
   });
-  await page.goto("/en/typography/");
+  await page.goto(url(PAGE.typography));
   await page.waitForLoadState("networkidle");
   expect(failures, "a font file 404ed").toEqual([]);
 });
 
 test("with Iosevka selected, no component renders a line in two typefaces", async ({ page }) => {
-  await page.goto("/en/typography/");
+  await page.goto(url(PAGE.typography));
   await page.evaluate(() => document.documentElement.setAttribute("data-noctua-font", "mono"));
   await page.waitForLoadState("networkidle");
 
@@ -162,7 +169,7 @@ test("a CJK page fetches a handful of slices, not the whole family", async ({ pa
     fetched.push({ name, bytes: length });
   });
 
-  await page.goto("/en/typography/");
+  await page.goto(url(PAGE.typography));
   await page.waitForLoadState("networkidle");
 
   const cjk = fetched.filter((f) => /NotoSans(JP|KR|SC)-/.test(f.name));
@@ -192,7 +199,7 @@ test("a Latin page loads no non-Latin face", async ({ page }) => {
   });
   // The spacing page is Latin only. Loading a CJK face for it would be tens of
   // megabytes nobody on that page needs.
-  await page.goto("/en/spacing/");
+  await page.goto(url(ANY));
   await page.waitForLoadState("networkidle");
 
   // Eleven script faces are declared and 14.5 MB sit in assets/fonts/. A Latin

@@ -17,7 +17,7 @@
 
 This repository lives inside **`noctua-workspace`**, and agents must be started at
 the workspace root — not here. From inside this repository the other repositories
-are invisible, so an agent cannot read the shared colour contract, edit a
+are invisible, so an agent cannot read the shared color contract, edit a
 design-system component, or consult the master technical reference.
 
 Run this **once, at the start of the session, before any other work.** Do not
@@ -57,7 +57,7 @@ fi
 ⛔ THIS AGENT WAS NOT STARTED FROM THE NOCTUA WORKSPACE. ⛔
 
 YOU ARE INSIDE A SINGLE REPOSITORY. FROM HERE I CANNOT SEE THE OTHER
-NOCTUA REPOSITORIES, SO I WILL NOT BE ABLE TO READ THE SHARED COLOUR
+NOCTUA REPOSITORIES, SO I WILL NOT BE ABLE TO READ THE SHARED COLOR
 TOKENS, EDIT A DESIGN-SYSTEM COMPONENT, OR CHECK THE MASTER TECHNICAL
 REFERENCE. I WILL GUESS, AND MY GUESSES WILL BE WRONG. 🙈
 
@@ -78,7 +78,7 @@ REFERENCE. I WILL GUESS, AND MY GUESSES WILL BE WRONG. 🙈
 
 I SEARCHED EVERY PARENT DIRECTORY AND FOUND NO `.noctua-workspace`
 MARKER. THIS CLONE IS SOMEWHERE IT SHOULD NOT BE, SO NOTHING SHARED —
-COLOUR TOKENS, THE DESIGN SYSTEM, THE MASTER TECHNICAL REFERENCE — IS
+COLOR TOKENS, THE DESIGN SYSTEM, THE MASTER TECHNICAL REFERENCE — IS
 REACHABLE FROM HERE. 🙈
 
 ✅ WHAT TO DO: STOP, AND RE-CLONE THIS REPOSITORY INSIDE:
@@ -110,9 +110,9 @@ It is the **only** place a Noctua component may live. `noctua-central` never
 writes a one-off component: if one is missing or inadequate, it is fixed here,
 properly, and every consumer gets the fix. `NOCTUA.md §9.2`.
 
-**It never defines a colour.** Not a hex, not an `oklch()`, not "just this one
-shade". Colours come from `noctua-colors`, vendored into
-`packages/tokens/vendor/`, and a missing colour is a one-line change *there*,
+**It never defines a color.** Not a hex, not an `oklch()`, not "just this one
+shade". Colors come from `noctua-colors`, vendored into
+`packages/tokens/vendor/`, and a missing color is a one-line change *there*,
 discussed first. `NOCTUA.md §8.8`. A source gate enforces this rather than
 trusting it.
 
@@ -121,9 +121,9 @@ trusting it.
 **Stages 4 and 5 — the theme runtime, the language layer and the site.**
 
 What exists: the token compiler, the font layer, the source gates, the theme
-model, the message catalogue, `ThemeScope` in both packages, and a documentation
-site pre-rendered in three locales. `cargo xtask check` is still the single gate,
-and `cargo xtask docs` builds the site.
+model, the message catalogue, twenty-five components in both packages, and a
+documentation site pre-rendered in three locales. `cargo xtask check` is still
+the single gate, and `cargo xtask docs` builds the site.
 
 **A component whose body the contract cannot describe gets its own emitter.**
 `props.rs` derives a body from three facts — the element, the root class, and
@@ -134,56 +134,127 @@ wires ARIA that is not a one-to-one mapping of a prop does not fit, and
 SURFACE is still generated from the spec, and both bodies are written in one
 file side by side, so the two implementations still cannot drift.
 
-`required` on a prop is not documentation. It removes the `Option` in Rust and
-the `?` in TypeScript, which is how `IconButton` cannot be built without an
+**A prop may choose the ELEMENT, and that is declared.** `elements = [...]`
+beside `values` in `spec/components/<name>.toml`, position by position. Two
+props needed it and neither had it, so both were inert: `Heading.level`
+rendered `<h2>` whatever it said, and `List.kind` rendered `<ul>` while its own
+documentation promised otherwise. Declaring it reaches both implementations and
+the documentation page at once. At most one prop per component may, and a prop
+that switches the element carries no attribute.
+
+**`required` on a prop is not documentation.** It removes the `Option` in Rust
+and the `?` in TypeScript, which is how `IconButton` cannot be built without an
 accessible name — the defect it exists to make unrepresentable.
 
-**Twenty-three components, plus `ThemeScope` and `Icon`.** Every one of them is
-generated from `spec/`, which is the parity mechanism rather than a
-convenience.
+**A `bool`'s default is a VALUE.** `#[props(default)]` is `false` however the
+spec spells it, and it was emitted for every bool while React read the same
+spec and wrote `marker ?? true`. `Disclosure`'s chevron was never drawn and
+every code block shipped `data-nd-copy="false"`. Drift the *generator*
+produced, which is why neither implementation could be reviewed into catching
+it; `a_bool_default_reaches_both_languages` is the guard.
 
-**One page per component, generated.** `crates/noctua-design-emit/src/docs.rs`
-compiles `spec/components/*.toml` into `docs-site/src/generated/catalogue.rs`,
-and the site builds its pages, its sidebar and its search index from that.
-Adding a component to `spec/` adds its page, its entry and its search terms
-with nothing else to edit — which the page it replaced could not say: it was
-one page called "Components", with a hand-written gallery that went stale the
-day it was written.
+**Every example on a page is inside ONE frame.** `NOCTUA.md §9.10` calls for
+one abstraction hosting every example; it existed and hosted exactly one on the
+whole site, while a hundred and ten component examples sat in bare figures
+beside it. A page has one frame now, and its width control resizes the whole
+set — which is the question a reader has. The implementation switch appears
+only on a frame that can honour it, which today is `ThemeScope`'s.
 
-The variants on a component's page are the DOM the component produces, built
-from its element, its class and the attribute each prop becomes. `props.rs`
-generates the component's body from the same three facts, so the page cannot
-show something the component does not. Every value of every enum prop appears
-by construction; there is no example to author and none to forget.
+**One page per component, generated — and every one has worked examples.**
+`crates/noctua-design-emit/src/docs.rs` compiles `spec/components/*.toml` into
+`docs-site/src/generated/catalogue.rs`, and the site builds its pages, its
+sidebar and its search index from that. The variant grid on each page is
+derived from the contract, so every value of every enum prop appears by
+construction. What a grid cannot show is a component *used* — thirteen
+components have no enum prop at all — so `docs-site/src/examples.rs` carries a
+hand-written table per component, rendering the real component with the call
+that produced it as its caption. `every_component_has_examples` and
+`the_examples_reach_every_prop` fail the build for a component or a prop that
+has none.
 
-**The example frame is the site's, not the system's.** It composes `Choice`
-and `Disclosure`, and what it does — lazily importing a React bundle to prove
-two packages agree — is documentation apparatus rather than something a design
-system ships to its consumers. It lives on the scoped-themes page, where
-`ThemeScope` is documented and where the React module has always mounted it.
+**`ThemeScope` has a page and no contract file.** Its props ARE
+`spec/theme.toml`'s scopable settings, so a `spec/components/theme-scope.toml`
+could only disagree with the theme model. Its page is therefore written rather
+than derived — the one exception — and it is in the component block of the
+sidebar with the rest, because it is a component. It is also the only page with
+a rendered scope on it, which makes it what the browser suite measures the
+theme layer against.
+
+**Reader-facing prose in a component's contract is DERIVED into the
+catalogue.** Its guidance, every prop's `doc`, every state's, the keyboard
+contract and the a11y notes are English in `spec/components/*.toml`, where they
+also become the doc comment — and the site used to print those same strings on
+the page in every locale. `component::derived_messages` turns them into
+messages, `i18n::load_for` merges them, and the cross-locale check then demands
+a Portuguese answer for each. English is written once; Portuguese is written
+once, in `spec/i18n/pt-BR.toml`.
 
 The site's own scope and limits are in `docs-site/PROVISIONAL.md`. Read that
 before adding a page.
+
+**One component is drawn in three dimensions, and one component ships its own
+behaviour.** `Lineage` places figures and the relationships between them in real
+space — perspective, a slab with a measurable thickness, planes that recede —
+out of **elements rather than a canvas**, which is what `NOCTUA.md §4` chose
+`CSS3DRenderer` for. Three things about it are worth carrying:
+
+* **Its structure is a text prop.** A Dioxus component cannot look inside its
+  own children, so a graph handed over as children could never be laid out —
+  the wall `CodeBlock` hit over line numbers. `crates/noctua-design-lineage`
+  parses it and places it, in Rust during pre-rendering and in `layout.js` for
+  React, and **neither half is checked against the other**: both answer to
+  `spec/lineage/cases.toml`, which is the first `.cases` file here.
+* **The grid is isotropic, and that is a constraint.** A taut connection is
+  drawn from a rotation computed in cell space; render that in a grid whose rows
+  are a different length from its columns and the line stops reaching the two
+  things it joins. One `--noctua-scene-cell` across, down and back.
+* **`overflow`, `opacity` and `backdrop-filter` flatten a 3D context.** All
+  three are kept off the scene and off a piece — the clipping is on the wrapper
+  above, the fog on the leaves below, the glass on the card. Getting it wrong
+  looks like a z-order bug and is not one.
+
+`dist/lineage.js` is the first behaviour this repository ships, beside the
+bootstrap it already shipped. three.js is **vendored** (`assets/vendor/three/`,
+235 KB, 53 KB gzipped, MIT, attributed) because CI runs `cargo xtask check` with
+no Node at all — and it is fetched on the first interaction rather than on load.
+
+**Every demonstration on the site is inside an `ExampleFrame`, one per page**,
+and the frame documents itself at `/example-frame/`. It is a docs-site
+component, deliberately: a viewport rig and a lazily-imported React bundle are
+documentation apparatus, not something a design system ships. What it is *built*
+from is the components above.
 
 ## Repository map
 
 ```
 spec/                   the only files a developer edits
-  tokens.toml           every non-colour token (Leg 1 of the parity mechanism)
+  tokens.toml           every non-color token (Leg 1 of the parity mechanism)
   i18n/{en,pt-BR}.toml  every UI message, both locales
-  components/           <name>.toml (contract) + <name>.cases.toml (behaviour)
+  lineage/cases.toml    the blessed layouts BOTH engines are checked against
+  components/           <name>.toml (contract). <name>.cases.toml — Leg 3 of the
+                        parity mechanism — is NOT written yet, and neither is
+                        tests/conformance/. What holds parity today is that both
+                        implementations are generated from one file
 crates/
   noctua-design/        the Dioxus package. src/theme.rs is GENERATED
   noctua-design-tokens/ GENERATED from spec/tokens.toml. COMMITTED
   noctua-design-theme/  GENERATED from spec/theme.toml. COMMITTED
   noctua-design-i18n/   GENERATED from spec/i18n/. COMMITTED
+  noctua-design-lineage/ the `Lineage` engine. HAND-WRITTEN, and `layout.js`
+                        beside `layout.rs` is the same algorithm again, with
+                        `runtime.js` — the camera — beside both
   noctua-design-icons/  GENERATED. COMMITTED
 packages/
   react/                the React package. src/theme.js is GENERATED
   tokens/               GENERATED (TypeScript). COMMITTED
-  tokens/vendor/        the colour tokens, vendored from noctua-colors
+  tokens/vendor/        the color tokens, vendored from noctua-colors
 assets/fonts/           copied from .TEMP/, + ATTRIBUTION.md + licences
-dist/                   GENERATED, COMMITTED: noctua-design.css and manifests
+dist/                   GENERATED, COMMITTED: the token layer, the font faces,
+                        the theme and appearance layers, the scoped semantic
+                        contract, and `lineage.js` + `vendor/` — the one
+                        behaviour this repository ships. NOT the component
+                        styles: those live in docs-site/assets/shell.css and
+                        ship nowhere yet
 docs-site/              the docs app. src/ and assets/ are written; dist/ is
                         build output and is gitignored. Read PROVISIONAL.md
 tests/conformance/      one case set, run against both implementations
@@ -195,6 +266,27 @@ xtask/                  the five verbs
 step, exactly as `noctua-colors` commits `system/`. `cargo xtask check` fails if
 one drifts from `spec/`.
 
+**`build` writes changed files; it does not delete stale ones.** Removing a
+component means deleting its generated `.rs`, `.js` and `.d.ts` by hand as well
+as its `spec/components/<name>.toml`. The drift check compares what the emitter
+produces against what is on disk and reports a file that is *missing* or
+*different* — it has nothing to say about a file nothing produces any more.
+
+**The controls are components, and there is one of each.** Every interactive
+thing on the documentation site is `Button`, `Segmented` (+ `SegmentedItem`),
+`Switch`, `Toolbar` (+ `ToolbarGroup`), `ButtonGroup`, `Swatch`, `Disclosure` or
+`Search` (+ `SearchGroup`, `SearchResult`). A boolean is a `Switch` — `role="switch"` — never a `Segmented`
+of "Off" and "On": a radio group asking a yes-or-no question tells a screen
+reader the wrong thing about what pressing it means. `Choice`, `ChoiceOption` and `IconButton` were deleted:
+`Button { hide_label }` is what `IconButton` existed for, and a second component
+for one control is the duplication this repository is against. If a page needs a
+control, the answer is never a `<button>` with a class on it.
+
+**A script hook is a prop.** `Button.action`, `Segmented.name`,
+`Disclosure.name` and `Search.name` are the only way markup gets an
+attribute a script can find. There is no arbitrary-attribute escape hatch,
+because an escape hatch on one component is an escape hatch on all of them.
+
 ## Commands
 
 ```bash
@@ -202,7 +294,7 @@ cargo xtask build     # compile spec/ into tokens, icons, props types and dist/
 cargo xtask check     # THE gate: spec, source gates, drift, fmt, clippy, tests
 cargo xtask dev       # build, serve on :8080, and rebuild on any change under spec/ or docs-site/
 cargo xtask docs      # pre-render the site into docs-site/dist/, one build per locale
-cargo xtask docs --verify   # …and run the 49-spec browser suite against it
+cargo xtask docs --verify   # …and run the browser suite against it
 cargo xtask release   # prepare a version
 ```
 
@@ -231,8 +323,8 @@ drift until "passes locally, fails in CI" becomes a normal sentence.
 Breaking any of these is a defect, not a tradeoff. Each is enforced by a gate,
 because a convention nothing enforces is a convention that decays.
 
-1. **No colour is defined here.** Every colour comes from a `--nc-*` token in the
-   vendored `noctua-colors` output. A hex, an `oklch()` or a named colour in this
+1. **No color is defined here.** Every color comes from a `--nc-*` token in the
+   vendored `noctua-colors` output. A hex, an `oklch()` or a named color in this
    repository's source fails `check`.
 2. **No token literal.** No raw `px`, `rem` or `ms` in component source. Spacing,
    radii, type sizes, durations and easings come from the token layer, so a
@@ -242,11 +334,11 @@ because a convention nothing enforces is a convention that decays.
    not fall back correctly. `NOCTUA.md §7.4`.
 4. **No Tailwind arbitrary value.** `p-[13px]` is a token literal wearing a
    different hat.
-5. **No colour token inside a custom property.** `--x: … var(--nc-…)` freezes to
+5. **No color token inside a custom property.** `--x: … var(--nc-…)` freezes to
    the palette of the element it is declared on, so anything reading it inside a
-   `ThemeScope` paints the page's colours. Write the colour at the point of use.
+   `ThemeScope` paints the page's colors. Write the color at the point of use.
    See Trap 0.2 — this one was live in this repository.
-6. **No colour read back out of the DOM.** `getComputedStyle(…).color` returns
+6. **No color read back out of the DOM.** `getComputedStyle(…).color` returns
    whatever the engine chose to serialise; comparing two of those strings proves
    nothing about the pixels. Paint into a 1×1 canvas and read `getImageData`.
    Reading a *length* that way is fine.
@@ -261,6 +353,26 @@ because a convention nothing enforces is a convention that decays.
    spec, the Dioxus implementation, the React implementation, and the shared
    cases — and editing one implementation only is a compile error or a failing
    conformance test, by design. `NOCTUA.md §9.3`.
+11. **No sentence reaches a reader untranslated.** Not a gate: a test. The
+   pseudo-locale brackets every message, so
+   `every_sentence_on_every_page_is_translated` renders each page in `qps` and
+   asserts every text run carries a bracket. Anything deliberately untranslated
+   — a token name, a component name, a language's own name, a line of
+   Devanagari — is marked `.nd-identifier` and skipped, which makes that class
+   the page saying *this is a name, not a sentence*.
+12. **Every component has worked examples.** `every_component_has_examples`
+   fails the build for one that does not, and `the_examples_reach_every_prop`
+   fails it for a prop no example sets. A page that documents a component
+   nobody has shown in use documents its prop table.
+13. **A prop that does nothing is a defect, not a stub.** Three shipped:
+   `Heading.level`, `List.kind` and `CodeBlock.numbered`, each accepted,
+   documented and dropped. Two are fixed by `elements` in the spec; the third
+   was deleted, because CSS cannot number the lines of a text node and a prop
+   that cannot work is worse than a missing one. `numbered` is back, and the
+   note it left behind is why: it said re-adding it needed a `code` **text**
+   prop first, "and that is a different component". The rewritten `CodeBlock`
+   is that component — it reads its own content, so it can split it into lines
+   and a counter has something to count.
 
 **The escape hatch.** Every gate honours `// allow-literal: <reason>` on the same
 line, and the reason has to be a real one. It exists so an exception lands in
@@ -288,13 +400,13 @@ From `NOCTUA.md §9.7`, and they bind every component and every page:
 
 ### Themes are scopable, and that is what shaped this repository
 
-**A `var()` resolves where it is DECLARED, not where it is read.** The colour
+**A `var()` resolves where it is DECLARED, not where it is read.** The color
 system emits its whole semantic contract — `--nc-color-surface`, `-fg`,
 `-border`, 1,767 names — once, at `:where(:root)`. Give a subtree
 `data-palette="amber-vivid"` and it gets amber's `--nc-neutral-*`, but
 `--nc-color-surface` still holds the **root's** value, because that is the
 element the indirection was declared on. A themed component painted from the
-semantic contract silently shows the page's colours, and every token still
+semantic contract silently shows the page's colors, and every token still
 resolves to something so nothing looks broken.
 
 `dist/scope.css` is the fix: the same contract, re-emitted under
@@ -317,6 +429,526 @@ when it emits anything, even when the palette did not change.
 **`system` is the absence of `data-theme`, never a value of it.** The cascade
 resolves the system preference before anything paints; the word is something no
 stylesheet understands.
+
+**Taking a scope OFF means removing every attribute, and the list is
+generated.** `scopeAttributeNames` (JavaScript) and `SCOPE_ATTRIBUTES` (Rust)
+publish it, from the same table `scopeAttributes` iterates. Removing a subset is
+not a partial un-theming — it is a different, worse bug: `dist/scope.css` matches
+`[data-palette]:not(:root)`, so a leftover `data-palette` **on its own** keeps
+the whole contract resolving at that element, now against the system preference
+rather than the page, and the subtree cannot be un-themed at all. That is
+exactly what a hand-written teardown of two attributes did to the example
+frame's appearance toggle.
+
+**A frame's parts are its own, and a nested frame is not part of its parent.**
+`docs-site/assets/shell.js` resolves every one of a frame's controls through the
+nearest `[data-nd-frame]`, because the frame's own documentation page puts one
+inside another. A `frame.querySelectorAll(…)` there reaches into the nested one
+— the outer frame owned ten width radios and two stages — and a control that
+marks a stop it did not set is a control that lies.
+
+**THE EXAMPLE FRAME'S CONTROLS ARE A RAIL, AND THEIR AXIS CHANGES.** They sit
+in a `Toolbar.nd-frame-bar` that is an ordinary **static** grid item in column
+two of `.nd-frame` — in flow, so the floating-surface allow-list does not apply
+to it — and below the `sm` step the grid collapses to one column and the rail
+lies down into a row under the stage. `Toolbar` writes `aria-orientation` and
+`shell.js` reads it to choose the arrow keys, so **the markup cannot name the
+axis**: it ships `horizontal`, the ARIA default and true at the narrow width a
+script-free reader is likeliest to be at, and `railAxis()` in `shell.js`
+upgrades it to `vertical` when the stylesheet stands the rail up. That function
+reads the breakpoint off `--noctua-breakpoint-sm` rather than writing `30rem` a
+second time. The frame's five width stops are one `Button { menu }` for the same
+reason: five stacked stops are 150px, taller than half the frames on `/button/`.
+
+**WRITE THE RAIL'S LAYOUT AS `.nd-toolbar.nd-frame-bar`, NOT `.nd-frame-bar`.**
+`.nd-toolbar[aria-orientation="vertical"]` and
+`.nd-toolbar[data-nd-density="compact"]` are each one class and one attribute,
+so a rule written against the single class loses to them — and loses silently.
+A `gap` and an `align-items` both did: the gap looked like it was working
+because the case being measured fitted anyway, and the alignment left every
+glyph hard against the rail's leading edge, which is the first thing a reader
+said about it. **A declaration that loses on specificity is indistinguishable
+from one that works, if the thing you measure would have passed regardless** —
+so assert the geometry (where the control's centre line is) rather than the
+property. And when a scripted edit changes a stylesheet, read the value back out
+of `docs-site/dist/assets/shell.css`: a `replace` with a count of one matches the
+first occurrence in the file, not the one you meant, and it moved a floating
+panel's padding here.
+
+**THE INSET INSIDE A FRAME IS ON `.nd-example`'S PARTS, NOT ON THE STAGE.**
+`.nd-frame-stage` is a scroll container, so nothing can be pulled out to its
+edges with a negative margin — content overflowing a scroller's start edge is
+clipped and unreachable. The caption's header band needs those edges, so the
+padding lives one level down, which works because `.nd-glass-scroll` is
+`display: contents` at rest and each example is already a direct flex item of
+the stage. **Under the glass rig that scroller becomes a real box**, and its own
+`padding-inline` used to double the inset there; it is zero now, and adding one
+back moves every example across the colour field.
+
+**A PIXEL TEST WHOSE RESULT DEPENDS ON WHERE SOMETHING LANDS reports the next
+unrelated layout change as a colour defect.** `glass.spec.js`'s "a frosted white
+control must stay white" was sampling a control that happened to sit in the
+rig's blank; the header band grew the content above it by a few pixels, nine
+coloured shapes moved behind it, and a geometry change was reported as paint.
+When the claim is about a control's own paint, take the backdrop out of the
+picture rather than hoping it stays where it was.
+
+**AN ICON IS FETCHED, NEVER DRAWN.** `spec/icons.toml` says to fetch the
+upstream SVG at the pinned tag; do that, with `curl`, and diff it against what
+is already vendored if you are replacing one. A glyph reproduced from memory is
+a file that claims a provenance it does not have — `image.svg` was one, and it
+was an older variant of the same drawing.
+
+**AND `Icon` IS A COMPONENT IN THE CATALOGUE NOW, NOT A MODULE BESIDE IT.** It
+was generated by `crates/noctua-design-emit/src/icons.rs` into
+`crates/noctua-design/src/icon.rs` and `packages/react/src/icon.js`, which put
+one component outside the catalogue: no props table, no variant grid, and
+absent from a site whose search is by prop. It is `spec/components/icon.toml`
+with its body in `controls.rs` now, and those two files are deleted.
+
+**It was MOVED and not copied, and that is the whole of it.** A contract added
+beside that emitter would have produced two components called `Icon` in one
+crate — `components::Icon` and `icon::Icon` — with `lib.rs`'s explicit
+re-export choosing one and nothing reporting the other. Not a compile error. A
+silent divergence. `lib.rs` therefore has no `pub mod icon` at all, `Icon` and
+`IconSize` arrive through `pub use components::*` like every other component,
+and `IconName` comes from `noctua_design_icons`, where the drawings are.
+
+What the icon emitter still owns is what is about the DRAWINGS rather than the
+component: `IconName`, `dist/icons.json`, the attribution, `packages/tokens`,
+and `STROKE_WIDTH` — read by both bodies and by `pages::icon_markup`, so
+`spec/icons.toml` still decides the one number all three draw. `/icons/`
+remains the gallery of drawings; `/icon/` is the component that draws them.
+
+**Its three size fields went with it, because they decided nothing.**
+`size_small`, `size_medium` and `size_large` reached one doc comment and no
+declaration, and had already drifted from the stylesheet, which sizes
+`.nd-icon-glyph` from the type scale. `spec/icons.toml [meta]` is `stroke_width`
+alone.
+
+**A POSITIONED ELEMENT PAINTS ABOVE A STATIC SIBLING**, and `.nd-frame-glass` is
+positioned. Anything a frame paints that must sit ON the frost — its bar, its
+stage — needs a position of its own, unconditionally. Three separate regressions
+came from giving it to one of them and not the other. And `relative` inherits
+whatever `inset-*` was written for `sticky`: cancel it.
+
+**FROST A LAYER, NEVER A BOX THAT CONTAINS A FLOATING PANEL.**
+`backdrop-filter` makes an element the containing block for every `position:
+fixed` descendant, so frosting a frame or a header re-anchors any menu inside it
+— and if that box also clips, the menu opens where nobody can see it.
+`.nd-header-glass` and `.nd-frame-glass` are layers for this reason and no
+other.
+
+**WHICH PAGE A COMPONENT IS DOCUMENTED ON IS IN ITS CONTRACT.** `[meta] page`
+names a collection — several components on one page — and absent means a page of
+its own. `site::pages` panics on a value no page declares, because the failure
+mode is silent: a component documented nowhere looks exactly like one that
+moved. Never keep a list of which components moved anywhere else.
+
+**A ROW OF BOXES HAS ONE WALK, AND IT IS `segmentWalk`.** Auto-advance when a
+box fills, Backspace in an empty box going back, and a paste splitting itself
+across the row are the same three gestures a `TimeInput` and an `OtpField`
+need. There is one implementation, in
+`crates/noctua-design-runtime/src/inputs.js`, and each control keeps only what
+is not shared: the arrow step and the zero padding are a time's, and replacing
+a full box is a code's.
+
+**AND AN OTP FIELD POSTS UNDER ONE NAME.** Every box carries the same `name`, so
+the code arrives as that many values in document order for a server to join. One
+name per box makes a server take apart something it never asked to be split, and
+a hidden field carrying the joined code posts nothing at all when the script does
+not run — which is the failure `TagPicker` already chose against.
+
+**THE BROWSER BEHAVIOUR THIS SYSTEM SHIPS LIVES IN
+`crates/noctua-design-runtime/`.** Hand-written files — `anchor.js`,
+`color.js`, `messages.js`, `color-picker.js`, `inputs.js`, `carousel.js`,
+`error-summary.js`, `table.js`, `info.js` — copied
+into `dist/` by
+`noctua-design-emit`'s `runtime.rs`, exactly as `lineage` copies the layout.
+They arrive there as `include_str!` constants rather than as a path `xtask`
+reads, so a file renamed out from under the emitter is a compile error naming
+the file instead of an artifact that emits empty. `shell.js` imports every one of them
+back from `assets/`; it does not carry a copy of any of them. **`anchor.js`
+moved out of `shell.js` and its three old call sites did not change** — a
+shipped panel cannot import from the documentation site, and a second copy of
+the off-screen test is what the note it carries warned about.
+
+**A SPINBUTTON CARRIES ITS VALUE AT REST, AND WHAT THE SCRIPT DREW CANNOT BE
+READ BACK OUT OF THE BOX.** `NumberInput` shipped with ten defects and five of
+them generalise to any control this runtime enhances:
+
+* **`aria-valuenow` belongs at enhance time**, not inside the move. Written
+  only on move it left every number field on the site a spinbutton with no
+  current value until a reader touched it. `aria-valuetext` goes beside it
+  wherever the drawing says more than the digits do: a currency, a unit, the
+  separators `group` writes.
+* **Formatting that runs on focus and blur alone does nothing at rest**, so a
+  grouped field rendered `1499.9` until somebody entered it.
+* **`Number("1.499,90")` is `NaN`.** A value the script formatted has to be
+  REMEMBERED, with the text it drew for it, and trusted only while the box
+  still shows that text. A stepper that re-parsed the box fell back to `min`.
+* **`step` sets the FEWEST decimals drawn, never the most.** Rounding to what
+  `step` implies is a rewrite: 7.5 in a field that steps by one is 7.5, and
+  the module's own header forbids changing what a reader typed.
+* **A control the script owns ships `hidden`**, and `readonly` refuses a
+  stepper exactly as `disabled` does — in the markup and in the handler, since
+  a value a press can still change is a value that is still editable.
+
+**`Tabs` REVEALS A PANEL AND `Segmented` CHOOSES A VALUE**, and both contracts
+say so. `Segmented` is a form control with a `name`, a `value` and
+`role="radiogroup"`; `Tabs` submits nothing and changes which region of the page
+is on screen. `segmented.toml` had already refused `role="tablist"` on the
+grounds that it promises panels that change and there were none — this is the
+other half of that sentence, and neither is a prop on the other.
+
+**And it claims no role until a script can keep one**, which is `Tree`'s rule
+applied a second time. With no script there is no `tablist`, no `tab` and no
+`tabpanel`, every panel is on the page, and each tab is a **link** down to the
+one it names — a working table of contents rather than a row of buttons that do
+nothing. The ids and `aria-controls`/`aria-labelledby` are rendered, because
+both come from `name` and `value` and cannot go stale.
+
+**THE ARROW WALK IS `stops()` AND `roving()`, AND NOW SERVES THREE ROLES.** A
+toolbar, a radio group and a tab list are one implementation in
+`docs-site/assets/shell.js`, with Home, End and the orientation written once.
+The only place a tab differs is that selection may not follow focus: `manual`
+moves and waits for Space or Enter, which is one branch in the handler rather
+than a second walk. Adding a fourth role is a selector and that branch.
+
+**`Tabs`, like `Segmented` and `Tree`, is enhanced from the site's script rather
+than from `dist/`, and that is a recorded gap**, not a decision: the walk it
+needs lives in `shell.js`, and a consumer taking `dist/tabs.js` alone would get
+the roles without the keyboard they oblige.
+
+**A RATING WRITES ITS NUMBER OUT, AND SHIPS NO SCRIPT AT ALL.** The interactive
+form is real radios in a `<fieldset>`, so the group, the arrows and the
+announcement are the platform's. The number beside the stars follows a reader's
+own choice with nothing running: `value_label` is filled once per step, every
+copy ships, and `input:checked + label + .nd-rating-count` reveals exactly one.
+A fraction in the read-only form is drawn by clipping a filled copy of the row,
+so there is no `star-half` file and no rounding — and the sentence is always
+there, because a shape a reader has to estimate from is the defect `Meter` and
+`Progress` both record.
+
+**A `tone` IS A NAME FROM `dist/tones.css`, NOT AN ENUM.** The emitter
+(`crates/noctua-design-emit/src/tones.rs`) reads the vendor's 349 semantic
+families and writes one indirection block each — `--nd-tone`, `--nd-tone-bg`,
+`--nd-tone-border`, `--nd-tone-on` — so a component's stylesheet is one rule
+rather than one per name. Three things follow:
+
+* **A `tone` prop is `text`.** A typo is no longer a compile error, so
+  `docs-site`'s `every_tone_this_file_writes_is_one_the_palette_declares` reads
+  `noctua_design::tones::ALL` and fails the build instead. Add a tone to an
+  example and it is checked; add one to a consumer's code and `tones::known`
+  is there for the same purpose.
+* **No tone is the ABSENCE of the attribute.** The palette declares a `default`
+  family and it is an info blue — a component whose untoned state named it would
+  tint every ordinary cell. `neutral` and `muted` are this repository's own two,
+  emitted from the structural tokens because the palette has neither.
+* **`gates.rs` reads `dist/tones.css`** for the `unknown_token` check, so a
+  `var(--nd-tone-*)` is a declared name.
+
+**`Meter` AND `Progress` HAVE NO RUNTIME, AND THAT IS THE ARGUMENT FOR THEM.**
+They are the real elements; the bar, the range, the thresholds and the
+announcement are the platform's. The stylesheet is the only cost, and it is a
+real one: `<meter>` and `<progress>` have separate shadow trees and no engine
+agrees with another about the pseudo-element names, so every selector is written
+out — one wrong name invalidates the whole list it is in. `appearance: none`
+takes the indeterminate animation away with the widget, so that sweep is drawn
+and its reduced-motion guard is this stylesheet's to keep.
+
+**A `Table` IS A `table` UNTIL A `TableColumn` GIVES IT SOMETHING TO DRIVE.**
+The family was deleted and rebuilt around `TableColumn` — one real `<colgroup>`
+per column, declared before the rows, carrying width, sortability and its
+comparator, filterability, resizability, hideability and pinning. Three things
+follow from that and are easy to get wrong:
+
+* **`role="grid"` is derived, never declared.** It is true exactly when a column
+  is sortable, filterable or resizable, or a row can be chosen or opened. There
+  is no prop, so it cannot be set on a table with nothing to drive.
+* **A `<colgroup>` counts positions, and a row draws its own leading cells.** A
+  choice control and an expand control are cells `TableRow` added, and the
+  declarations know nothing about them — so a table with either wants a leading
+  `TableColumn` declared for it. The runtime inserts the missing groups where a
+  caller did not, because the failure is silent and looks like a broken column
+  width rather than like a missing declaration.
+* **Never hide one thing two ways.** A column hidden by `visibility: collapse`
+  on its `<colgroup>` *and* by `hidden` on its cells made automatic table layout
+  take the next column away as well.
+* **A `<col>` width must not switch the table to `table-layout: fixed`.** Under
+  fixed layout every column with no declared width takes an equal share, so one
+  resize reset all the others and the values printed through each other. A width
+  is a preference, not a decree.
+* **A row draws its own leading cells and the heading row does not.** The
+  runtime inserts the missing `<th>`, and `table.spec.js` checks that every
+  heading on the page starts where its own cell starts.
+* **A variant stage disables three things** — `container-type` (which IS
+  `contain: inline-size`, so the intrinsic width is zero), the scroller's
+  overflow, and `.nd-table`'s `inline-size: 100%`. Any one left in place
+  collapses the specimen to nothing, which is how five `width` variants came to
+  be five empty boxes.
+* **`variants = false` is how a prop says its values look identical**, and a
+  prop may carry its own `specimen` where the component's cannot show it.
+* **No prop value may name a domain.** `emphasis` was `subtotal | total`; it is
+  `subtle | strong`, because a table of servers has no subtotal and the two
+  weights are *where a section ends* and *which line is the answer*.
+* **Count columns, not cells.** A `colspan` is one child and several columns —
+  the runtime and `table.spec.js` both read a two-level heading as a head one
+  cell short and inserted a blank `<th>` in front of it.
+* **The un-stacking container query must restore alignment.** The stacked rule
+  is one class and two attributes deep, so it outranked `[data-nd-align]` at
+  every width and `numeric` did nothing anywhere — invisible, because a heading
+  is a flex column that ends its own items and the words moved without the
+  values.
+* **`Menu` and `MenuItem` are the surface a button opens**, and `dist/menu.js` is
+  the tenth shipped runtime file — `info.js`'s shape plus the keyboard a menu
+  owes. `Button { menu: true }` had announced a menu with nothing behind it.
+* **`aria-disabled` on a menu item, `disabled` on a button.** An item that leaves
+  the arrow walk is an action a reader concludes does not exist.
+* **`aria-expanded="false"` is TRUE on a menu button** — the one exception to
+  `Button`'s write-it-only-when-true rule.
+* **A `text` icon prop draws nothing when the name does not parse.** `x.svg` is
+  the file; `close` is the icon's name. A test reads every icon an example names.
+* **A specimen carries every enum prop at its default**, then the prop under
+  test. One attribute alone matches no compound rule, and compound is how every
+  tone in this system is painted.
+* **A void or replaced element becomes a `<span>` in a specimen.** An `<input>`
+  cannot contain its own figure and a `<meter>` never renders fallback content,
+  so `.nd-x[data-nd-size] .nd-x-part` matched nothing on six controls.
+* **`variants = false` is asked by `fn drawn`, in all three grid renderers.** It
+  used to be enforced on collection pages only, so the declaration silently did
+  nothing on every single-component page.
+* **A prop's own `specimen` beats the component's**, including when the
+  component's is an icon name.
+* **`variants.spec.js` asks every component page whether two values of one prop
+  draw the same picture.** Its fingerprint reads the `::-webkit-*` parts too,
+  because `<meter>`, `<progress>` and a range `<input>` are painted there and
+  nowhere else.
+* **There is no `glow` and no aurora.** Removed on the developer's instruction,
+  and with it the last animation on any page: `[effect.blur]`,
+  `[effect.duration]`, the `drift` keyframes and the reduced-motion stop. An
+  emitter test now fails if anything in the appearance sheet animates again.
+* **`dots` has a ceiling of its own** (`[effect.alpha] dots = 10`). A ceiling is
+  per-pixel, and a pattern covering a fortieth of its tile buys a fortieth of
+  the texture at the same number — at 4% the dots were invisible on a light
+  page.
+* **An element screenshot ignores `clip`.** It returns the whole element, which
+  is how the pattern-ceiling test came to measure the entire page and pass by
+  reading furniture instead of ink.
+* **A specimen cell carries `.nd-table-value`**, or every rule that acts on the
+  value rather than the cell (`truncate`) does nothing in the grid.
+* **The narrow layout is a container query on `.nd-table-scroll`**, not a media
+  query. A props table inside a narrow example frame must stack on a wide
+  window, and that is the case a media query cannot see — and the corollary bit
+  once: a table left to shrink to its content inside a flex column became a box
+  under the breakpoint and stacked itself, taking its heading row and every sort
+  control with it. A table in a stack takes the width.
+* **Anything that measures inside a `ResizeObserver` must not write what it
+  measured back unchanged.** `paintPins` did, and the observer saw the style
+  change, and the pair never settled — a core spent, and every element on the
+  page permanently "unstable" to anything waiting for it.
+
+**`ErrorSummary` IS THE ONLY COMPONENT THAT TAKES THE FOCUS UNASKED, AND THE
+ONLY ONE THAT WRITES INTO ANOTHER COMPONENT.** With `collect` it catches the
+form's `invalid` on the way down, puts the browser's own `validationMessage`
+into the empty paragraph `Field.error_slot` leaves behind, marks the field, and
+reads the list back out of every `[data-nd-field-error]` in document order. Two
+rules make that safe and both are load-bearing: it **never overwrites a sentence
+a caller wrote**, and it takes back only what it wrote — the marker is
+`data-nd-said` on the slot. It invents no language of its own; every word comes
+from the platform or from the caller. Five of the six controls that take a
+`required` pass `error_slot: required` for it, which is why `Field.error_slot`'s
+documentation names two shapes rather than one.
+
+**A CONTROL WHOSE SENTENCES ARE ITS OWN PASSES `error_slot: true`, NOT
+`required`.** `NumberInput` and `DateInput` write their refusals into that
+paragraph themselves, so tying it to `required` means the slot is missing on
+exactly the fields a caller bounded but did not require: `min_label`,
+`max_label` and `invalid_label` were dead on every one of them, and the field
+still set `aria-invalid`. Marked wrong and silent is worse than either. The
+script marks its own sentence `data-nd-said`, as `ErrorSummary` does, so an
+accepted value takes back what the script wrote and never what the caller did.
+
+**`Field` DRAWS THE QUESTION, AND THE CONTROL OWNS THE `aria-describedby`.**
+One component for the label, the hint, the error and the `<fieldset>`/`<legend>`
+a *group* needs. It renders no control — the control is its children — so it
+cannot write an attribute on one, and both sides derive `{control}-hint` and
+`{control}-error` from the same prop. `every_describedby_points_at_something`
+in `tests/browser/inputs.spec.js` is what holds them to it, and it has already
+caught `TimeInput` pointing at ids the field never drew. **`Checkbox` and
+`Radio` are not this shape** and are deliberately not migrated: their label is
+in the row, beside the box.
+
+**A PROP MAY NOT BE NAMED AFTER A RUST KEYWORD, and the spec refuses one.**
+`loop` reached the generator and came back as *expected identifier, found
+keyword* pointing at a generated file nobody wrote. Escaping it to `r#loop`
+would work and would be one prop with two spellings across the two packages,
+which is the thing they exist not to have — so it is `wrap`, and
+`check_props` now names the offending word instead of leaving a rustfmt
+diagnostic to be decoded. A prop doc may carry paragraphs now too; before
+`autoplay` needed them, a newline in one produced a file that did not parse.
+
+**THE FOUR THAT PREDATE `Field` USE IT NOW.** `Select`, `TagPicker`,
+`DateInput` and `ColorPicker` drew their own label, hint and error with their
+own class names; twelve rules and four copies of one arrangement are gone.
+What the migration turned up is what `Field` gained doing it: **an
+`error_slot`**, because `Select` and `DateInput` had each invented the same
+thing — a paragraph rendered empty so the browser's own complaint has
+somewhere to go, since a control the script has hidden cannot be reported; and
+**a group that describes itself**, because `Field { kind = "group" }` IS the
+`<fieldset>`, so a reader entering one hears the hint once instead of once per
+box. `TimeInput` was written before that and is better for it.
+
+Three things move with the markup, and a spec that selects on any of them has
+to move too: the question is `.nd-field-label` and carries `{control}-label`,
+the sentence is `[data-nd-field-error]`, and both are **siblings** of the
+control's own root rather than children of it — `.nd-field:has(…)` is how a
+test says *the field this control is in*.
+
+**`Checkbox` and `Radio` are still not migrated, and still should not be.**
+
+**`ColorPicker` IS THE ONE PLACE A COLOUR LITERAL IS NOT A PALETTE DECISION.**
+A hue track and a saturation field declare no colour: they display sRGB so a
+reader can point at one part of it, and what comes out is the consumer's data.
+`NOCTUA.md §8.8` provides the marker and names tests explicitly; what this
+repository adds is *where* — one block per file, at the top, so a reviewer
+reads the exceptions once. Five lines in `shell.css`, one fixtures block in
+each of the two colour specs, and nothing else anywhere.
+
+**AND ITS ARITHMETIC IS CHECKED AGAINST `noctua-colors`, NOT AGAINST ITSELF.**
+There is one implementation of the conversions, so there is no twin to compare
+— and a thing compared to itself passes whenever it is wrong. The vendored
+output publishes the hex of every palette step *and* the OKLCH it computed that
+hex from, in another language, in another repository. `tests/browser/color.spec.js`
+converts the first and is held to the second, five thousand times over.
+
+**A COLLECTION PAGE'S TITLE IS A NAME, NEVER A MESSAGE.** `site::Title` has two
+variants and the sidebar's two blocks are exactly those: a foundation is a
+sentence a reader reads, a component page is an identifier a developer types.
+The collections shipped as messages and were translated — `/tree/` was *Árvore*,
+`/search/` *Busca*, `/avatars/` *Avatares*, `/tables/` *Tabelas* — so four rows
+named components that exist under no such name anywhere. Title a collection with
+the name at its head, or with an English label where its members share none
+(`Inline text`), and leave the slug alone: `/avatars/` and `/tables/` are URLs.
+`the_component_block_is_never_translated_and_the_foundations_always_are` is the
+gate, and `example.spec.js` compares the two rendered sidebars.
+
+**THE BACKDROP IS `--noctua-backdrop`, AND IT IS DECLARED WHEREVER A SCOPE CAN
+BE.** It was `--noctua-page-background`, declared at `:root` and read by `html`
+alone — and a `var()` resolves where it is DECLARED, so it was frozen to the
+root's palette and mode. A frame that went dark kept the page's white under it:
+dark ink on paper, inside a dark frame. It takes the same selector list
+`dist/scope.css` uses, for the same reason that file exists, and `dist/theme.css`
+paints it on `:root` and `[data-noctua-scope]` — the page, and every region that
+asked to be a page in miniature.
+
+What has not changed is why the backdrop is safe: it moves ONE variable, so
+`--nc-color-surface` is untouched and not one measured contrast pair moves with
+it. Five of the six name a token the colour system already solved in both modes,
+so their rules carry no mode condition — writing one would be a second answer to
+a question the token has already answered. Only `black` and the light default
+are literals.
+
+**A SCOPE RE-READS THE INK AS WELL AS THE CONTRACT.** `dist/scope.css`
+re-declares 1,767 `--nc-color-*` names so a subtree resolves them against its
+own palette, and that does nothing for the properties that CONSUME them.
+`body { color: var(--nc-color-fg) }` resolves at `<body>`, against the page's
+mode, and every descendant inherits the computed value — so a themed subtree
+painted its own surface and kept the page's ink. Measured: near-black text on a
+near-black surface, about 1.2:1. One zero-specificity rule at the end of
+`scope.css` fixes it, and `readability.spec.js` measures it. That test had to be
+written twice: a probe laid over a live page and screenshotted catches the
+page's own furniture rather than its glyphs, and the first version passed with
+the defect restored.
+
+**A FROSTED CONTROL KEEPS ITS COLOUR IF IT HAD ONE, AND GAINS NONE IF IT DID
+NOT.** The tint is for the variants that were FILLED — `solid` and `subtle` —
+and tinting the others turned a white `outline` button grey. It is mixed from
+the tone's solid step against the surface at `--nd-tint`, never the tone at
+partial alpha (that keeps an `--nc-color-on-*` ink solved against an OPAQUE
+fill, and measures 3.17:1 once a fifth of the backdrop shows through) and never
+the tone's `-bg` step (0.975 lightness at zero chroma in this palette — a tint
+nobody can see). The label is always `--nc-color-fg`; the tone's own colour as
+ink is the 3.17:1 pair that `outline` lives with on an opaque page and glass
+cannot. `glass.spec.js` measures every enabled frosted control from a
+screenshot and `pixels.js` is where the colour maths lives — a second copy of a
+contrast function is a second answer to the same question.
+
+**GLASS IS A PROP, THERE IS ONE RECIPE, AND AN OVERRIDE WINS ON SPECIFICITY.**
+A component that paints a fill declares `glass` (`data-nd-glass`), and the
+generated `.noctua-glass` selector carries `[data-nd-glass="true"]` alongside
+the class — a second `backdrop-filter` anywhere is a source-gate finding. The
+per-component rule that replaces the fill carries **one more attribute than the
+fill it replaces**; winning on source order is what put 32px over the settings
+panel's title. The tint is written at each point of use, never held in a custom
+property, because `--x: var(--nc-color-…)` freezes to the declaring element's
+palette. And a bool prop always writes its attribute, so `[data-nd-glass]` IS
+the set of controls that support it — never write that list down.
+
+**A FRAME OWNS WHAT IS INSIDE IT.** A setting a frame STATES owns its whole
+subtree — a nested frame, its bar, its border, its own menu panel. A setting
+nobody stated comes from OUTSIDE, which on an ordinary page is the page and
+inside another frame is that frame. Reset CLEARS the request; it does not state
+the page.
+
+**This replaces a rule that said the opposite**, and the opposite is why the
+defect kept coming back: a frame used to default its request to the page's whole
+theme, so the resolver stamped the page back on and cancelled the frame around
+it. Every patch to the symptom was reverted by this paragraph and by two tests
+named after it. `tests/browser/frame-isolation.spec.js` is named after the rule
+so the next version cannot lose it, and it records the two traps that spec has
+already fallen into.
+
+Four things that make this look done when it is not:
+
+* **A frame the resolver never visits cannot follow anything**, so every frame
+  is registered at load whether or not it has been themed.
+* **`inheritedAt` must walk REGISTERED scopes, not stamped ones.** Stamped means
+  resolution depends on which ancestors happen to have been visited in the
+  current pass — theme the inner frame first and it inherits the page.
+* **A value stamped as the ABSENCE of its attribute (`omit_when`) means "the
+  machine decides" AND "whatever is above me".** One spelling for two facts: a
+  reader who picks `system` inside a dark frame asked for the machine, so that
+  one value is written out concretely and nothing else is.
+* **A no-op scope carries no attributes at all**, so anything that selects
+  `[data-noctua-scope]` under a frame — a reset, an assertion — skips exactly the
+  frames that stated nothing. Never write `stage.getAttribute(…)` in a test; ask
+  the pixels, or ask what is in force.
+
+**GEOMETRY IS ASSERTED, NOT EYEBALLED — AND NOT EYEBALLED ONCE.** A control
+that overlaps the one beside it, a name wider than the box holding it, or a row
+of an open panel that hit-tests to something else is a failing test, not a
+matter of taste. `tests/browser/theme-menu.spec.js` holds the four, and they run
+across every locale because `qps` exists to make a fixed column overflow and
+only finds it if something asks. A panel is checked with a frame open INSIDE
+another frame, at 768px, in `pt-BR` — the combination that broke, and the one a
+single wide English screenshot cannot show.
+
+**A panel cannot outrank its own ancestor's stacking context.** `.nd-frame-bar`
+is `sticky` with a `z-index`, so a panel inside it paints at the BAR's layer
+whatever the panel asks for. Raise the bar, not the panel.
+
+**Where a settings value lands is decided by where the control SITS.** Inside a
+themed scope it themes that scope; inside an example frame it themes that
+frame's stage; a setting the model knows themes the document; anything else
+moves and no more. `docs-site/src/theme_menu.rs` is one component used by the
+header and by every frame, and that rule is why it needs no target prop.
+
+**A scoped control inverts what is in force WHERE IT SITS, not what the page
+is.** `settingAt(element, name)` walks every scope above the element and is the
+only correct answer once anything can nest.
+
+**A scope must paint its own background — and the rule that does it is
+generated.** Re-resolving the contract changes what the subtree's colours
+*mean*; it paints nothing. A scope that sets ink and borders and leaves the
+surface transparent shows the page through itself, which is a light island on a
+dark page. `.nd-scope` and `.nd-frame-stage` both learned this the same way, and
+each carried its own rule for a while — the docs site's, so it worked here and
+nowhere else. `dist/theme.css` paints `:root, [data-noctua-scope]` now, so any
+consumer of the package gets it and this site's copies are gone. The one in
+`shell.css` had to go for a second reason worth remembering: it used the
+`background` SHORTHAND, which resets `background-image`, so a frame that asked
+for a pattern would have got the colour and nothing else.
 
 **The generalisation, and it is now a rule.** *Any* custom property whose value
 contains `var(--nc-…)` freezes to the palette of the element it is declared on.
@@ -350,9 +982,9 @@ it is the shape the mistake actually takes:
 ```
 
 Convenient, readable, and it paints every border inside every `ThemeScope` in the
-**page's** colour. It was in this repository's own shell stylesheet, below a
-comment explaining the rule it broke. `frozen_colour_indirection` now fails the
-build on any custom property whose value contains `var(--nc-…)`. Name the colour
+**page's** color. It was in this repository's own shell stylesheet, below a
+comment explaining the rule it broke. `frozen_color_indirection` now fails the
+build on any custom property whose value contains `var(--nc-…)`. Name the color
 where you use it; the repetition is the point.
 
 ### Trap 0.5 — media queries are minimum-width, and the gate now says so
@@ -389,13 +1021,49 @@ Two consequences worth knowing before you fight them:
 locale's sidebar. It is a door, not a page: no title, no prose, no sidebar
 entry, and `site::first` is what both it and the wordmark read.
 
+### The language is resolved before the first paint, and never against the reader
+
+`spec/i18n/` gives three locales; the site is pre-rendered in all of them, so
+switching language is navigation rather than state. The control offers
+**Automatic**, which is the default and which follows `navigator.languages`.
+
+Two rules the inline resolver in `main::locale_script` keeps, and both matter:
+
+- **It never builds a URL.** Every destination is written into the script at
+  build time, one per locale; the script picks from that table. A stored value
+  that is neither `auto` nor an offered tag becomes `auto`, and an `auto` that
+  matches nothing means *stay where you are*. Both fail closed.
+- **It never overrides a locale the reader asked for.** Only a fresh
+  `navigate` with a same-origin referrer counts as *following a link inside the
+  site*. A reload sets the referrer to the page itself and `back_forward` sets
+  it to wherever the reader came from — treat either as internal and a reload
+  bounces the reader out of the language they chose, or Back redirects them
+  forward again and the button appears broken.
+
+### The default palette is not the color system's default, and that costs an attribute
+
+`noctua-colors` publishes exactly one palette anchored at `:root` — its own —
+and thirty-nine anchored at `[data-palette="<name>"]`. `spec/theme.toml`'s
+default is blue, so `dist/base.html` links `theme-blue-balanced.css` and the
+attribute is what makes it apply.
+
+Which is why the bootstrap stamps `data-palette` **even when nothing is
+stored**, and why the documentation site server-renders it on `<html>`. Link
+the base set without either and the page has no palette at all — not the wrong
+colors, none — and it looks like a stylesheet that failed to load.
+
 ### Icons are declared, not drawn
 
 `spec/icons.toml` names them; `assets/icons/` holds the upstream SVGs vendored
 at a pinned tag beside their licences; everything else is generated — the
-`IconName` enum, both `Icon` implementations, `dist/icons.json`, the attribution
-and the documentation page. Adding one is a table and a drawing; there is no
-list anywhere to keep in step, including the page that shows them.
+`IconName` enum, `STROKE_WIDTH`, `dist/icons.json`, the attribution and the
+documentation page. Adding one is a table and a drawing; there is no list
+anywhere to keep in step, including the page that shows them.
+
+**Both `Icon` implementations come from the catalogue now**, not from this
+emitter: `spec/components/icon.toml` and a body in `controls.rs`, exactly as
+every other authored component. See the promotion note above for why moving it
+was the only safe shape.
 
 **Why an enum.** The shell hand-wrote an `Icon` that matched a `&str` against
 three arms with `_ => ""`. `Icon { name: "repository" }` compiled and rendered
@@ -406,8 +1074,8 @@ source outside the generated module) and the drawing validator, which refuses
 `id`, `class`, `style`, `fill`, `stroke`, `mask`, `clip-path` and an empty path.
 
 **A drawing may carry only geometry.** An `id` collides the second time the same
-icon is inlined; a `fill` refuses `currentColor` and paints a fixed colour
-inside a themed subtree — the frozen-colour trap wearing a different hat.
+icon is inlined; a `fill` refuses `currentColor` and paints a fixed color
+inside a themed subtree — the frozen-color trap wearing a different hat.
 
 ### Trap 0.8 — a token that does not exist fails silently, both ways
 
@@ -454,7 +1122,13 @@ A radius on a scroller has nothing to clip the bar against, so a classic
 scrollbar paints square straight through the rounded corner. That is what a
 reader sees the moment corners are set to `circular`. The fix is structural:
 an outer element with the radius and `overflow: hidden`, an inner one with
-`overflow-y: auto`. `.nd-panel` + `.nd-panel-body` is the shape.
+`overflow-y: auto`. `.nd-panel` + `.nd-panel-body` is the shape, and so is
+`.nd-codeblock` + `.nd-codeblock-code`.
+
+**It happened twice.** The code block declared both on one rule and survived
+the browser assertion for a whole stage, because no page the suite looked at
+had a block wide enough to actually scroll. An assertion over "every element on
+the page" only covers the elements that are on it.
 
 **`scrollbar-width` is not inherited.** Set on `:root` it styles the page's own
 bar and nothing else — every panel and code block keeps the browser's default,
@@ -477,7 +1151,7 @@ already reads. Hardcoding depth in an emitter is hardcoding the URL scheme.
 **And the reason it survived a review and a test suite:** the only test asserted
 that `blocking="render"` was set before insertion — reading back a property the
 code under test had just set on an element it had just created. It never
-resolved the URL and never looked at a colour. *Assert the outcome.* The
+resolved the URL and never looked at a color. *Assert the outcome.* The
 replacements load the page with `shell.js` aborted and check `link.sheet !== null`
 and that the painted accent differs from the default, plus one spec that fails on
 any response ≥ 400 across every page in every locale.
@@ -504,6 +1178,111 @@ next, which reads as the typeface flickering. This cost real time in
 
 **Do not subset the on-demand script faces.** A user who needs Devanagari needs
 all of it. Subsetting applies to the Latin default payload only.
+
+### The Portuguese has a glossary, and nothing enforces it
+
+`spec/i18n/pt-BR.toml` is written by whoever changes the English, and a term
+translated two ways is the commonest defect in it. Settled: *a pessoa* for the
+person using the interface, *quem chama* for the developer, *leitor de tela*,
+*parada de tabulação*, *padrão* (never the English *default*), *linha* for a
+table row, *rótulo* for visible label and *nome acessível* for the accessible
+name, *traço* for a drawn rule, *alça* for a slider grip and *cursor* only for
+the text caret, *região dinâmica*, *resumo* for an error summary, *marcação*,
+*navegador*, *o build*.
+
+The register check measures length, punctuation and banned constructions in
+both languages. It cannot tell whether a sentence reads as Portuguese: *portão*
+for a build gate, *compositor* for a composer input and *sumário* for an error
+summary all passed it. That half is a reading, against the English, and it is
+worth doing whenever the Portuguese is written in bulk.
+
+### No other design system is named as a source
+
+`xtask/src/gates.rs::cited_sources` refuses it, and it is the one gate that
+reads the raw line rather than the line with its comments stripped, because
+that is where the citations were. Nothing in this repository was taken from
+another design system, so naming one is a claim about a relationship that does
+not exist.
+
+Keep the fact, drop the name: a WCAG number, a hit-target size, an accessibility
+technique are all facts and stay written down.
+
+This is not about vendored work. `assets/icons/ATTRIBUTION.md`,
+`assets/vendor/`, `assets/fonts/` and the palette under `packages/tokens` carry
+real licences, and those attributions are obligations.
+
+### Reader-facing prose is checked, not merely reviewed
+
+`crates/noctua-design-spec/src/prose.rs` holds the register and runs under
+`cargo xtask check`, over `[meta] summary`, `guidance`, `[a11y] notes`, every
+`doc`, every keyboard action, and both `spec/i18n/*.toml`. It refuses an em
+dash, a semicolon, a sentence over twenty-five words, capitals used as
+emphasis, a per-language list of banned constructions, and anything over the
+ceiling for its kind (summary 100, keyboard action 120, note 140, the rest 250).
+
+Say what the thing is and what it does. A summary opens on a verb and names
+what a reader can do. A reason belongs in a doc only when it changes what the
+caller writes.
+
+Two things the checker knows that are easy to get wrong when extending it: a
+backticked run is code, so `` `tones::ALL` `` is a name rather than a shout; and
+whether an `example.*` key is a note or the content inside a picture is decided
+by the macro in `docs-site/src/examples.rs`, which the test reads rather than
+guesses.
+
+To check one file while working, without a build:
+
+    python3 <scratch>/register.py spec/components/<name>.toml
+
+`spec/components/checkbox.toml` is the worked reference. Its Portuguese is in
+`spec/i18n/pt-BR.toml` under `component.checkbox.*`.
+
+### Every documentation page is one shape, and it is built once
+
+`pages::DocPage` is the only page body. A head (title, one-line lead, and one
+complete working example from `examples::OVERVIEWS`), a `DocIndex`, then the
+sections `ComponentSections` emits: **when · examples · variants · reference**.
+`Depth` is what a collection page changes and the only thing it changes — it
+used to be a `bool` and two copies of a hundred lines, which is how the two
+copies drifted apart. A page whose shape differs from this is a bug, and
+`tests/browser/audit.spec.js` asserts it on all fifty-six.
+
+### The folds ship closed, so a spec opens them first
+
+The four reference sections, and every component on a collection page, are
+`Disclosure`s rendered **without `name`** — `shell.js` closes any open
+`[data-nd-disclosure]` the pointer lands outside of, which is right for the
+header's panels and wrong for a section a reader opened on purpose.
+
+In a browser spec, call `showParts(page)` from `tests/browser/pages.js` after
+`goto` — a spec about what a component DOES is not a spec about the fold in
+front of it. That the folds are shut, keep their headings, and open when a link
+lands inside one is asserted on its own.
+
+**A TEST THAT SKIPS WHAT IS HIDDEN IS A TEST A FOLD SWITCHES OFF.** The example
+frame's controls were folded behind a gear for one stage, and two sweeps that
+had looked green the whole time were doing nothing: `shell.spec.js`'s
+floating-surface sweep skips on `offsetParent !== null` and `audit.spec.js`'s
+320px sweep skips on `display: none`, so no control inside that fold had ever
+been measured against 24x24, clipped text, or overflow. Before folding anything,
+check what stops looking at it.
+
+### A specimen with no children draws the pangram, and a grid of one picture
+
+A component that takes `children` and declares no `[meta] specimen` renders the
+placeholder line instead — so `Segmented`'s six grids were sixteen copies of one
+line of text. Give it a `specimen` of real child markup, and mark the words in
+it `.nd-identifier`: they are a picture, not prose, and the pseudo-locale test
+reads any unmarked run as a sentence somebody forgot to translate.
+
+Where a still picture genuinely cannot show the difference, say so with
+`variants = false` and a comment giving the reason. `ToolbarGroup.align` is
+`margin-inline-start: auto` and needs siblings to push against; `Info.placement`
+is about a note that is not open; `Heading.level` is document structure.
+
+`<textarea>`, like `<input>`, `<meter>` and `<progress>`, is handled as a
+replaced element in `specimen_markup`: its content is the **value**, so injected
+markup is rendered to the reader as prose.
 
 ## Maintaining this file
 

@@ -11,9 +11,12 @@
    Each rule is keyed on an attribute the inline bootstrap stamped before
    the first paint, so nothing here needs script and nothing flashes.
  
-   Scopable settings use a bare attribute selector and therefore reach any
-   element. Global ones use :root[...] — put one on a div and nothing
-   happens, which is the restriction being structural rather than
+   Every setting here uses a bare attribute selector and therefore reaches
+   any element: the attribute declares a custom property and one
+   unconditional rule reads it, so the nearest declaring ancestor wins by
+   construction and a subtree can cancel what is above it. The one
+   page-only setting, `syntax`, is in dist/syntax.css and anchored at
+   :root, which is the restriction being structural rather than
    documented. */
 
 /* Corner presets. Emitted AFTER :root in the base tokens, and as a bare
@@ -79,7 +82,7 @@
   background: color-mix(in oklab, var(--nc-color-fg) 38%, transparent);
 }
 
-/* Glass. Dimensions only — the colour is mixed at the point of use, where
+/* Glass. Dimensions only — the color is mixed at the point of use, where
    the palette is already correct. A pre-mixed surface declared here would
    freeze to the page's palette and a themed component would show the
    page's frost.
@@ -128,8 +131,15 @@
 
 /* The one glass recipe. Adding a second `backdrop-filter` anywhere is a
    source-gate finding: four hand-written copies drifted into two materials
-   on one page, and a nested one is inert with nothing to report. */
-.noctua-glass {
+   on one page, and a nested one is inert with nothing to report.
+ 
+   TWO SPELLINGS, ONE RECIPE. The class is what the site's own chrome
+   carries; `[data-nd-glass="true"]` is what a COMPONENT carries, from a
+   `glass` prop its contract declares. They are in one selector rather
+   than two rules for the reason the gate exists: a second copy is a
+   second material the day one of them is tuned. */
+.noctua-glass,
+[data-nd-glass="true"] {
   background: color-mix(in oklab, var(--nc-color-surface)
                         var(--noctua-glass-opacity), transparent);
   backdrop-filter: blur(var(--noctua-glass-blur))
@@ -148,7 +158,8 @@
 
 /* The sheen, as a DESCENDANT. A pseudo-element is not an ancestor, so it
    cannot stop its own parent's backdrop from sampling. */
-.noctua-glass::after {
+.noctua-glass::after,
+[data-nd-glass="true"]::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -173,31 +184,63 @@
   }
 }
 
-/* Blackout — the OLED setting.
+/* The backdrop — what the page is painted with.
  
    It changes ONE variable, and only the document background reads it.
-   --nc-color-surface is untouched, so every pair the colour system
+   --nc-color-surface is untouched, so every pair the color system
    measured still holds, and every raised surface simply becomes more
-   visible against a darker page, which is the right direction.
+   or less visible against it — which is the whole point.
  
-   :root[...] rather than [...]: this is a property of the page, and a
-   black island inside a themed component is not a theme. */
+   Five of the six are tokens the color system already solved in both
+   modes, so a value that means `a colder dark` in dark means `the
+   same neutral` in light without a second rule saying so.
+ 
+   DECLARED WHEREVER A SCOPE CAN BE, not only at :root. It used to be
+   :root-only, with the reasoning that a black island inside a themed
+   component is not a theme — which was right about black and wrong
+   about the property. A var() resolves where it is DECLARED, so a
+   :root-only page background is frozen to the root's palette and mode:
+   a themed frame reading it painted the page's colour under its own
+   dark, which is dark ink on white. The same list dist/scope.css uses,
+   for the same reason it uses it. */
 
-:root {
-  --noctua-page-background: var(--nc-color-surface);
+:where(:where(:root), [data-noctua-scope], [data-palette]:not(:root), [data-theme]:not(:root)) {
+  --noctua-backdrop: #fff; /* allow-literal: the page is paper; no ramp token is pure white, and this is the base every rule below overrides */
 }
 
-html {
-  background: var(--noctua-page-background);
-}
-
-:root[data-noctua-blackout="on"][data-theme="dark"] {
-  --noctua-page-background: #000; /* allow-literal: blackout is defined as pure black, no ramp token is, and only the document background reads this */
+:where(:where(:root), [data-noctua-scope], [data-palette]:not(:root), [data-theme]:not(:root)):where([data-theme="dark"]) {
+  --noctua-backdrop: var(--nc-color-surface);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root[data-noctua-blackout="on"]:not([data-theme="light"]) {
-    --noctua-page-background: #000; /* allow-literal: as above, the system-preference half */
+  :where(:where(:root), [data-noctua-scope], [data-palette]:not(:root), [data-theme]:not(:root)):where(:not([data-theme="light"])) {
+    --noctua-backdrop: var(--nc-color-surface);
+  }
+}
+
+[data-noctua-backdrop="cool"] {
+  --noctua-backdrop: var(--nc-color-surface-cool);
+}
+
+[data-noctua-backdrop="tinted"] {
+  --noctua-backdrop: var(--nc-color-accent-bg);
+}
+
+[data-noctua-backdrop="soft"] {
+  --noctua-backdrop: var(--nc-color-surface-subtle);
+}
+
+[data-noctua-backdrop="softer"] {
+  --noctua-backdrop: var(--nc-color-surface-raised);
+}
+
+[data-noctua-backdrop="black"][data-theme="dark"] {
+  --noctua-backdrop: #000; /* allow-literal: this value IS pure black, and no ramp token is — --nc-gray-1 is #030303, which still lights an OLED pixel */
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-noctua-backdrop="black"]:not([data-theme="light"]) {
+    --noctua-backdrop: #000; /* allow-literal: this value IS pure black, and no ramp token is — --nc-gray-1 is #030303, which still lights an OLED pixel */
   }
 }
 
@@ -206,103 +249,101 @@ html {
    Two guarantees keep them from hurting readability, and they are
    independent so either alone is still a real bound:
  
-   1. The ink is the FOREGROUND colour at 4%, so its polarity and its
+   1. The ink is the FOREGROUND color at 4%, so its polarity and its
       palette follow automatically, and the worst case for any glyph is a
-      background pixel moved 4% toward the text colour. That bound is
+      background pixel moved 4% toward the text color. That bound is
       measured by a test rather than asserted.
    2. The layer is masked to nothing behind the reading column.
  
    Geometry is percentages and spacing tokens, never raw lengths, so a
    pattern scales with the scale. */
 
-:root {
-  --noctua-pattern-ink: color-mix(in oklab, var(--nc-color-fg) 4%, transparent);
-  --noctua-glow-ink: color-mix(in oklab, var(--nc-color-accent) 18%, transparent);
-  --noctua-grain-opacity: 6%;
+:where(:where(:root), [data-noctua-scope], [data-palette]:not(:root), [data-theme]:not(:root)) {
+  --noctua-pattern-alpha: 4%;
 }
 
-:root[data-noctua-pattern="dots"] .noctua-fx {
-  background-image: radial-gradient(circle at 50% 50%, var(--noctua-pattern-ink) 0 9%, transparent 9%);
-  background-size: var(--noctua-space-6) var(--noctua-space-6);
+[data-noctua-pattern="dots"] {
+  --noctua-dots-alpha: 10%;
+  --noctua-pattern-image: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--nc-color-fg) var(--noctua-dots-alpha), transparent) 0 14%, transparent 14%);
+  --noctua-pattern-size: var(--noctua-space-6) var(--noctua-space-6);
 }
 
-:root[data-noctua-pattern="mesh"] .noctua-fx {
-  background-image:
-    repeating-linear-gradient(to right, var(--noctua-pattern-ink) 0 var(--noctua-border-hairline), transparent var(--noctua-border-hairline) var(--noctua-space-8)),
-    repeating-linear-gradient(to bottom, var(--noctua-pattern-ink) 0 var(--noctua-border-hairline), transparent var(--noctua-border-hairline) var(--noctua-space-8));
+[data-noctua-pattern="mesh"] {
+  --noctua-pattern-image:
+    repeating-linear-gradient(to right, color-mix(in oklab, var(--nc-color-fg) var(--noctua-pattern-alpha), transparent) 0 var(--noctua-border-hairline), transparent var(--noctua-border-hairline) var(--noctua-space-8)),
+    repeating-linear-gradient(to bottom, color-mix(in oklab, var(--nc-color-fg) var(--noctua-pattern-alpha), transparent) 0 var(--noctua-border-hairline), transparent var(--noctua-border-hairline) var(--noctua-space-8));
+  --noctua-pattern-size: auto;
 }
 
-:root[data-noctua-pattern="checks"] .noctua-fx {
-  background-image: conic-gradient(from 90deg at 50% 50%, var(--noctua-pattern-ink) 0 25%, transparent 0 50%, var(--noctua-pattern-ink) 0 75%, transparent 0);
-  background-size: var(--noctua-space-8) var(--noctua-space-8);
+[data-noctua-pattern="checks"] {
+  --noctua-pattern-image: conic-gradient(from 90deg at 50% 50%, color-mix(in oklab, var(--nc-color-fg) var(--noctua-pattern-alpha), transparent) 0 25%, transparent 0 50%, color-mix(in oklab, var(--nc-color-fg) var(--noctua-pattern-alpha), transparent) 0 75%, transparent 0);
+  --noctua-pattern-size: var(--noctua-space-8) var(--noctua-space-8);
 }
 
-:root[data-noctua-pattern="diagonals"] .noctua-fx {
-  background-image: repeating-linear-gradient(45deg, var(--noctua-pattern-ink) 0 var(--noctua-border-hairline), transparent var(--noctua-border-hairline) var(--noctua-space-3));
+[data-noctua-pattern="diagonals"] {
+  --noctua-pattern-image: repeating-linear-gradient(45deg, color-mix(in oklab, var(--nc-color-fg) var(--noctua-pattern-alpha), transparent) 0 var(--noctua-border-hairline), transparent var(--noctua-border-hairline) var(--noctua-space-3));
+  --noctua-pattern-size: auto;
 }
 
-/* The aurora. Derived from the accent, so it follows the palette without
-   naming a colour. */
-:root[data-noctua-glow="on"] .noctua-fx::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(60% 50% at 85% 12%, var(--noctua-glow-ink) 0, transparent 70%),
-    radial-gradient(50% 45% at 15% 88%, var(--noctua-glow-ink) 0, transparent 70%);
+[data-noctua-pattern="none"] {
+           --noctua-pattern-image: none;
+           --noctua-pattern-size: auto;
 }
 
 /* Film grain. One inline SVG turbulence, so it costs no request, tiled
    small rather than rasterized full-viewport — which is a real frame cost
    on a mid-range phone. Always BEHIND content: high-frequency noise over
-   glyphs damages legibility far more than a flat wash does. */
-:root[data-noctua-grain="on"] .noctua-grain {
-  opacity: var(--noctua-grain-opacity);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: var(--noctua-space-48) var(--noctua-space-48);
-}
-
-/* Ambient motion.
+   glyphs damages legibility far more than a flat wash does.
  
-   These durations are in seconds and carry NO reduced-motion pair, unlike
-   every other duration in this system. That is deliberate:
-   `animation-duration: 0ms` on an infinite animation is not "no motion" —
-   it completes and restarts every frame, and engines disagree about what
-   renders. Collapsing the token would produce undefined behaviour,
-   silently, in exactly the population the token exists to protect.
+   The 6% ceiling is spec/tokens.toml's [effect.alpha] grain, carried
+   in the picture because a background layer has no opacity of its own. */
+[data-noctua-grain="on"] {
+  --noctua-grain-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+}
+
+[data-noctua-grain="off"] {
+  --noctua-grain-image: none;
+}
+
+/* The page, and every region that asked to be a page in miniature.
  
-   So reduced motion is one explicit `animation: none`, and every animated
-   layer has a designed static end-state.
- 
-   Motion belongs to the effect that has it, and there is no separate
-   switch for it. There used to be: `data-noctua-animate`, which only
-   ever appeared ANDed with glow or grain. Both default to off, so on a
-   default page the control changed an attribute that matched no selector
-   and did visibly nothing — which is worse than a missing control,
-   because it teaches the reader that the panel lies. An aurora drifts
-   because it is an aurora. */
-@keyframes noctua-drift {
-  from { transform: translate3d(0, 0, 0); }
-  50%  { transform: translate3d(2%, -1.5%, 0); }
-  to   { transform: translate3d(0, 0, 0); }
+   `background-attachment: fixed` on the root keeps what the fixed
+   elements this replaced did: a texture anchored to the viewport
+   rather than to the top of a very long document. A scope keeps the
+   default, because a scope's texture belongs to the scope's own box. */
+:root,
+[data-noctua-scope] {
+  background-color: var(--noctua-backdrop);
+  background-image:
+    var(--noctua-grain-image, none),
+    var(--noctua-pattern-image, none);
+  background-size:
+    var(--noctua-space-48) var(--noctua-space-48),
+    var(--noctua-pattern-size, auto);
 }
 
-:root[data-noctua-glow="on"] .noctua-fx::before {
-  animation: noctua-drift 42s ease-in-out infinite;
-  will-change: transform;
+:root {
+  background-attachment: fixed;
 }
 
-:root[data-noctua-grain="on"] .noctua-grain {
-  animation: noctua-drift 18s steps(6) infinite;
-}
-
-/* A page setting may only ever DISABLE motion. Someone whose system asked
-   for none must never have it re-enabled by a page. */
-@media (prefers-reduced-motion: reduce) {
-  .noctua-fx,
-  .noctua-fx::before,
-  .noctua-grain {
-    animation: none !important;
+/* FORCED COLORS REPLACES THE PALETTE, AND THESE ARE NOT PART OF IT. The
+   UA drops `background-image` for a gradient, but the grain is a data
+   URI and survives — so a reader who asked their system for two colors
+   would get two colors and a film of noise. All three go together. */
+@media (forced-colors: active) {
+:root,
+[data-noctua-scope] {
+    background-image: none;
   }
 }
+
+/* NOTHING ON A PAGE MOVES ANY MORE, and that is the whole of what used
+   to be here. There was an `@keyframes noctua-drift` driving the
+   aurora's second background-position pair, a note explaining why its
+   duration could not live in `[motion.duration]` — an infinite
+   animation collapsed to `0ms` restarts every frame rather than
+   stopping — and a `prefers-reduced-motion` rule switching it off. The
+   aurora is gone, so all three went with it: a backdrop, a pattern and
+   a grain are three still layers, and reduced motion has nothing here
+   left to ask for. */
 

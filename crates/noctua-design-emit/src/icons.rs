@@ -1,15 +1,30 @@
-//! The icon set, in both languages, from one declaration and the drawings.
+//! The icon set: every name, every drawing, and the weight they are stroked at.
 //!
 //! | Output | For |
 //! |---|---|
-//! | `crates/noctua-design-icons/src/lib.rs` | the names and the drawings |
-//! | `crates/noctua-design/src/icon.rs` | the Dioxus `Icon` |
-//! | `packages/react/src/icon.js` + `.d.ts` | the React `Icon` |
-//! | `packages/tokens/icons.js` + `.d.ts` | the names, for consumers with no framework |
+//! | `crates/noctua-design-icons/src/lib.rs` | the names, the drawings and `STROKE_WIDTH` |
+//! | `packages/tokens/icons.js` + `.d.ts` | the same, for consumers with no framework |
 //! | `dist/icons.json` | the manifest the documentation page reads |
 //! | `assets/icons/ATTRIBUTION.md` | who drew them, and under what licence |
 //!
-//! # An enum, not a string, and that is the whole point
+//! # The `Icon` COMPONENT is not here any more
+//!
+//! It was, in `crates/noctua-design/src/icon.rs` and `packages/react/src/icon.js`,
+//! and that put one component outside the catalogue: no props table, no variant
+//! grid, absent from search-by-prop. It is `spec/components/icon.toml` now, with
+//! its body in `controls.rs` beside every other authored one.
+//!
+//! Moving it rather than adding a second contract is the whole of the fix. A
+//! `spec/components/icon.toml` beside this emitter would have produced two
+//! components called `Icon` in one crate — `components::Icon` and `icon::Icon` —
+//! with the explicit re-export in `lib.rs` picking one and nothing reporting the
+//! other. Not a compile error. A silent divergence.
+//!
+//! What stays here is what is about the DRAWINGS rather than about the
+//! component: the names, the geometry, the manifest, the attribution, and the
+//! stroke weight both bodies read from `noctua_design_icons::STROKE_WIDTH`.
+//!
+//! # An enum, not a string
 //!
 //! The site shipped `Icon { name: "repository" }` against a `match` with a
 //! `_ => ""` arm. It compiled, and it rendered `<path d="">` inside a 44×44
@@ -19,18 +34,10 @@
 //! Here the name is a generated enum in Rust and a generated union in
 //! TypeScript, so that call is a type error in both languages. `NOCTUA.md §9.5`
 //! asks for exactly this.
-//!
-//! # `aria-hidden` by default
-//!
-//! An icon is decoration until somebody says otherwise. `label: None` renders
-//! `aria-hidden="true" focusable="false"`, which is right for the common case —
-//! an icon beside a word. The case that needs a name is an icon-only control,
-//! and that is `IconButton`'s job: its label is **required**, so a control with
-//! no accessible name is not a thing a caller can construct.
 
 use std::fmt::Write as _;
 
-use noctua_design_spec::icons::{Icons, Paint, Resolved};
+use noctua_design_spec::icons::{Icons, Meta, Paint, Resolved};
 
 use crate::{CommentStyle, EmittedFile, header_from};
 
@@ -41,11 +48,11 @@ pub const ICON_SPEC: &str = "spec/icons.toml";
 #[must_use]
 pub fn emit(icons: &Icons, resolved: &[Resolved]) -> Vec<EmittedFile> {
     vec![
-        EmittedFile::new("crates/noctua-design-icons/src/lib.rs", names(resolved)),
-        EmittedFile::new("crates/noctua-design/src/icon.rs", dioxus(icons)),
-        EmittedFile::new("packages/react/src/icon.js", react(icons)),
-        EmittedFile::new("packages/react/src/icon.d.ts", react_types(resolved)),
-        EmittedFile::new("packages/tokens/icons.js", tokens_js(resolved)),
+        EmittedFile::new(
+            "crates/noctua-design-icons/src/lib.rs",
+            names(&icons.meta, resolved),
+        ),
+        EmittedFile::new("packages/tokens/icons.js", tokens_js(&icons.meta, resolved)),
         EmittedFile::new("packages/tokens/icons.d.ts", tokens_types(resolved)),
         EmittedFile::new("dist/icons.json", manifest(resolved)),
         EmittedFile::new("assets/icons/ATTRIBUTION.md", attribution(icons, resolved)),
@@ -54,7 +61,7 @@ pub fn emit(icons: &Icons, resolved: &[Resolved]) -> Vec<EmittedFile> {
 
 // --- The names and the drawings --------------------------------------------
 
-fn names(icons: &[Resolved]) -> String {
+fn names(meta: &Meta, icons: &[Resolved]) -> String {
     let mut out = header_from(CommentStyle::Line("//!"), ICON_SPEC);
     out.push_str(
         "//!\n\
@@ -63,6 +70,22 @@ fn names(icons: &[Resolved]) -> String {
          //! `no_std`: this is a table of string literals, and a consumer should not\n\
          //! take a standard library on to read one.\n\
          \n#![no_std]\n\n",
+    );
+
+    // THE WEIGHT IS DECLARED ONCE AND READ TWICE. Both `Icon` bodies write it
+    // on the `<svg>`, and the documentation page inlines the same wrapper for
+    // its variant grid. A literal in any of the three would be a stroke weight
+    // `spec/icons.toml` no longer decides.
+    out.push_str(
+        "/// The weight a stroked icon is drawn at, from `spec/icons.toml`.\n\
+         ///\n\
+         /// Read by both `Icon` implementations and by the documentation page's\n\
+         /// variant grid, so the declaration has exactly one value in it.\n",
+    );
+    let _ = writeln!(
+        out,
+        "pub const STROKE_WIDTH: &str = \"{}\";\n",
+        meta.stroke_width
     );
 
     out.push_str("/// Every icon in the system.\n");
@@ -194,155 +217,19 @@ fn shared_tables(out: &mut String, icons: &[Resolved]) {
     out.push_str("        }\n    }\n\n");
 }
 
-// --- Dioxus ----------------------------------------------------------------
-
-fn dioxus(icons: &Icons) -> String {
-    let mut out = header_from(CommentStyle::Line("//!"), ICON_SPEC);
-    let meta = &icons.meta;
-    let _ = write!(
-        out,
-        "//!\n\
-         //! The icon component.\n\
-         //!\n\
-         //! Generated from the same declaration as the React one, so the two cannot\n\
-         //! disagree about a name, a size or what an unlabelled icon promises\n\
-         //! assistive technology.\n\
-         \n\
-         use dioxus::prelude::*;\n\
-         pub use noctua_design_icons::IconName;\n\
-         \n\
-         /// The rendered box.\n\
-         #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]\n\
-         pub enum IconSize {{\n    \
-         /// `{small}`\n    Small,\n    \
-         #[default]\n    /// `{medium}`\n    Medium,\n    \
-         /// `{large}`\n    Large,\n\
-         }}\n\
-         \n\
-         impl IconSize {{\n    \
-         /// Every value, in the order the spec declares them.\n    \
-         pub const ALL: [Self; 3] = [Self::Small, Self::Medium, Self::Large];\n\
-         \n    /// The value as it appears in the DOM.\n    \
-         #[must_use]\n    pub const fn as_str(self) -> &'static str {{\n        \
-         match self {{\n            Self::Small => \"small\",\n            \
-         Self::Medium => \"medium\",\n            Self::Large => \"large\",\n        }}\n    }}\n\
-         }}\n\n",
-        small = meta.size_small,
-        medium = meta.size_medium,
-        large = meta.size_large,
-    );
-
-    let _ = write!(
-        out,
-        "/// An icon.\n\
-         ///\n\
-         /// `label` is what makes it available to a screen reader. Without one it is\n\
-         /// `aria-hidden`, which is correct for an icon beside a word and wrong for an\n\
-         /// icon on its own — so an icon-only control is `IconButton`, whose label is\n\
-         /// required and cannot be forgotten.\n\
-         #[component]\n\
-         pub fn Icon(\n    \
-         /// Which icon.\n    icon: IconName,\n    \
-         /// Its accessible name. `None` hides it from assistive technology.\n    \
-         #[props(default)]\n    label: Option<String>,\n    \
-         /// The rendered box.\n    #[props(default)]\n    size: IconSize,\n    \
-         /// Extra classes for the root element.\n    #[props(default)]\n    class: String,\n\
-         ) -> Element {{\n    \
-         let root = format!(\"nd-icon-glyph {{class}}\");\n    \
-         let root = root.trim().to_owned();\n    \
-         let named = label.is_some();\n\
-         \n    rsx! {{\n        svg {{\n            \
-         class: \"{{root}}\",\n            \
-         \"data-nd-icon\": icon.as_str(),\n            \
-         \"data-nd-size\": size.as_str(),\n            \
-         view_box: icon.view_box(),\n            \
-         width: \"1em\",\n            height: \"1em\",\n            \
-         fill: if icon.filled() {{ \"currentColor\" }} else {{ \"none\" }},\n            \
-         stroke: if icon.filled() {{ \"none\" }} else {{ \"currentColor\" }},\n            \
-         stroke_width: \"{stroke}\",\n            \
-         stroke_linecap: \"round\",\n            \
-         stroke_linejoin: \"round\",\n            \
-         // Quoted, not identifiers: `dioxus_elements::svg` has no typed\n            \
-         // `role`, `aria-*` or `focusable`, and an `Option` renders nothing\n            \
-         // when it is `None` — which is how an unlabelled icon carries\n            \
-         // `aria-hidden` and a labelled one carries a name instead.\n            \
-         \"role\": named.then_some(\"img\"),\n            \
-         \"aria-label\": label,\n            \
-         \"aria-hidden\": (!named).then_some(\"true\"),\n            \
-         \"focusable\": \"false\",\n            \
-         dangerous_inner_html: \"{{icon.body()}}\",\n        }}\n    }}\n}}\n",
-        stroke = meta.stroke_width,
-    );
-    out
-}
-
-// --- React -----------------------------------------------------------------
-
-fn react(icons: &Icons) -> String {
-    let mut out = header_from(CommentStyle::Line("//"), ICON_SPEC);
-    let meta = &icons.meta;
-    let _ = write!(
-        out,
-        "\n// The icon component.\n\
-         //\n\
-         // Generated from the same declaration as the Dioxus one, so the two cannot\n\
-         // disagree about a name, a size or what an unlabelled icon promises\n\
-         // assistive technology.\n\
-         \n\
-         import {{ createElement as h }} from \"react\";\n\
-         import {{ ICONS }} from \"@noctua/tokens/icons.js\";\n\
-         \n\
-         export function Icon({{ icon, label, size, className, ...rest }}) {{\n  \
-         const drawing = ICONS[icon];\n  \
-         // A name that is not an icon is a type error in TypeScript and a thrown\n  \
-         // error here. It is never an empty box: that is what shipped once.\n  \
-         if (!drawing) throw new Error(`no icon named ${{icon}}`);\n  \
-         const size_ = size ?? \"medium\";\n  \
-         const named = label !== undefined && label !== null;\n  \
-         const root = [\"nd-icon-glyph\", className].filter(Boolean).join(\" \");\n  \
-         return h(\"svg\", {{\n    \
-         className: root,\n    \
-         \"data-nd-icon\": icon,\n    \
-         \"data-nd-size\": size_,\n    \
-         viewBox: drawing.viewBox,\n    \
-         width: \"1em\",\n    height: \"1em\",\n    \
-         fill: drawing.filled ? \"currentColor\" : \"none\",\n    \
-         stroke: drawing.filled ? \"none\" : \"currentColor\",\n    \
-         strokeWidth: \"{stroke}\",\n    \
-         strokeLinecap: \"round\",\n    \
-         strokeLinejoin: \"round\",\n    \
-         role: named ? \"img\" : undefined,\n    \
-         \"aria-label\": named ? label : undefined,\n    \
-         \"aria-hidden\": named ? undefined : \"true\",\n    \
-         focusable: \"false\",\n    \
-         dangerouslySetInnerHTML: {{ __html: drawing.body }},\n    \
-         ...rest,\n  }});\n}}\n",
-        stroke = meta.stroke_width,
-    );
-    out
-}
-
-fn react_types(icons: &[Resolved]) -> String {
-    let mut out = header_from(CommentStyle::Line("//"), ICON_SPEC);
-    out.push_str("\nimport type { ReactElement } from \"react\";\n");
-    out.push_str("import type { IconName } from \"@noctua/tokens/icons.js\";\n\n");
-    out.push_str("export type IconSize = \"small\" | \"medium\" | \"large\";\n\n");
-    out.push_str("export interface IconProps {\n");
-    out.push_str("  /** Which icon. */\n  icon: IconName;\n");
-    out.push_str("  /** Its accessible name. Omit it and the icon is `aria-hidden`. */\n");
-    out.push_str("  label?: string;\n");
-    out.push_str("  /** The rendered box. */\n  size?: IconSize;\n");
-    out.push_str("  className?: string;\n}\n\n");
-    out.push_str("export declare function Icon(props: IconProps): ReactElement;\n");
-    let _ = icons;
-    out
-}
-
 // --- The names, framework-free ---------------------------------------------
 
-fn tokens_js(icons: &[Resolved]) -> String {
+fn tokens_js(meta: &Meta, icons: &[Resolved]) -> String {
     let mut out = header_from(CommentStyle::Line("//"), ICON_SPEC);
-    out.push_str("\n/** Every icon: its drawing, its box, and how it is painted. */\n");
+    // The React `Icon` reads it from here, as the Dioxus one reads
+    // `noctua_design_icons::STROKE_WIDTH`. One declaration, two languages.
+    out.push_str("\n/** The weight a stroked icon is drawn at. */\n");
+    let _ = writeln!(
+        out,
+        "export const ICON_STROKE_WIDTH = \"{}\";\n",
+        meta.stroke_width
+    );
+    out.push_str("/** Every icon: its drawing, its box, and how it is painted. */\n");
     out.push_str("export const ICONS = {\n");
     for icon in icons {
         let _ = writeln!(
@@ -376,6 +263,7 @@ fn tokens_types(icons: &[Resolved]) -> String {
     );
     out.push_str("export declare const ICONS: Record<IconName, IconDrawing>;\n");
     out.push_str("export declare const ICON_NAMES: readonly IconName[];\n");
+    out.push_str("export declare const ICON_STROKE_WIDTH: string;\n");
     out
 }
 
@@ -493,9 +381,9 @@ mod tests {
         }
     }
 
-    /// A drawing that names its own colour cannot follow a theme.
+    /// A drawing that names its own color cannot follow a theme.
     #[test]
-    fn no_drawing_carries_a_colour() {
+    fn no_drawing_carries_a_color() {
         let (_, resolved) = shipped();
         for icon in &resolved {
             assert!(!icon.body.contains("fill="), "{}", icon.name);
@@ -514,8 +402,8 @@ mod tests {
 
     #[test]
     fn the_enum_has_a_variant_for_every_icon() {
-        let (_, resolved) = shipped();
-        let rust = names(&resolved);
+        let (icons, resolved) = shipped();
+        let rust = names(&icons.meta, &resolved);
         for icon in &resolved {
             assert!(
                 rust.contains(&format!("Self::{} => \"{}\"", icon.variant, icon.name)),
@@ -529,9 +417,9 @@ mod tests {
     /// behaviour" is a claim nobody checks.
     #[test]
     fn both_languages_ship_the_same_names() {
-        let (_, resolved) = shipped();
+        let (icons, resolved) = shipped();
         let ts = tokens_types(&resolved);
-        let rust = names(&resolved);
+        let rust = names(&icons.meta, &resolved);
         for icon in &resolved {
             assert!(ts.contains(&format!("\"{}\"", icon.name)), "{}", icon.name);
             assert!(
@@ -545,12 +433,12 @@ mod tests {
     /// The header link that shipped invisible asked for this name.
     #[test]
     fn an_icon_that_does_not_exist_has_no_variant() {
-        let (_, resolved) = shipped();
+        let (icons, resolved) = shipped();
         assert!(
             !resolved.iter().any(|icon| icon.name == "repository"),
             "the test is stale"
         );
-        let rust = names(&resolved);
+        let rust = names(&icons.meta, &resolved);
         assert!(!rust.contains("Repository"));
     }
 }

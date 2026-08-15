@@ -6,19 +6,45 @@
 
 import type { ReactNode } from "react";
 
+export type CodeBlockTheme = "auto" | "spectrum" | "duotone" | "muted" | "mono";
 
 export interface CodeBlockProps {
-  /** The language, shown as a label and used by the copy announcement. */
+  /** The code. Text rather than children, because a component that cannot read its own content cannot number a line, mark one or colour a token. */
+  code: string;
+  /** Which language to read it as: `rust`, `ts`, `sh`, `diff`. An alias resolves to its language, and a name nothing recognises renders as plain text. Free text rather than an enum, because the list lives in `spec/grammars/`. */
   language?: string;
-  /** Show line numbers. */
+  /** Which syntax theme paints it. `auto` follows the reader's page setting, and resolves to `mono` under more contrast, a monochrome display, forced colours and print. Any other value overrides both. The attribute is always written. */
+  theme?: CodeBlockTheme;
+  /** The file this came from, shown in the bar above the block. It is also the accessible name of the scrollable region, which otherwise falls back on the language. */
+  filename?: string;
+  /** A sentence under the block, in the reader's language. */
+  caption?: string;
+  /** Whether every line is numbered. Off by default. The numbers are drawn by a CSS counter and are not selectable, so copying the block copies the code and not a column of digits. */
   numbered?: boolean;
-  /** Wrap long lines instead of scrolling them. */
+  /** What the first line is numbered, for an excerpt that starts partway into a file. Text, because a spec prop is text, an enum or a flag. It is parsed, and anything unparseable is 1. */
+  startLine?: string;
+  /** Lines to emphasise, as `3,7-9`. Each marked line gets a tint and a rule down its leading edge. A line singled out by colour alone cannot be found by a dichromat. */
+  markLines?: string;
+  /** Whether every line `mark_lines` did not name is dimmed. Off by default, and it does nothing without marks. It is a separate flag rather than a mode, so the marking and the dimming are set apart. */
+  focus?: boolean;
+  /** Whether long lines wrap instead of scrolling. Off by default. Prefer wrapping where the line is prose-like and scrolling where it is structure. */
   wrap?: boolean;
-  /** Offer a copy control. */
-  copy?: boolean;
+  /** Collapses the block to this many lines behind a control. **With the script blocked the whole block is visible** and no control claims otherwise, because the collapse is an enhancement. */
+  maxLines?: string;
+  /** The name of the control that opens a collapsed block. Its presence is the opt-in: with no name there is no collapse, because this package cannot name a chevron in the reader's language. */
+  expandLabel?: string;
+  /** The name that control takes once the block is open. */
+  collapseLabel?: string;
+  /** The name of the control that toggles wrapping. Its presence is the opt-in, for the same reason. */
+  wrapLabel?: string;
+  /** The accessible name of the copy control, and the opt-in for it: with no name there is no control. It copies the original text, never the markup and never the line numbers. */
+  copy?: string;
+  /** What the live region says once the copy succeeds. Without it the control still works and still swaps its glyph, but a screen reader user gets no confirmation. */
+  copied?: string;
+  /** Frosts the block. Off by default, and rarely right, because code is read for a long time and a moving backdrop under it makes that harder. */
+  glass?: boolean;
   className?: string;
-  children?: ReactNode;
 }
 
-/** A block of code, in the monospaced face, with a copy control. */
+/** Show a block of highlighted code, in any of thirty-four languages. */
 export declare function CodeBlock(props: CodeBlockProps): JSX.Element;

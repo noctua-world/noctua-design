@@ -4,7 +4,7 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// Importance, seriousness or urgency — not merely bold text.
+// Mark text as important, serious or urgent, rather than only bold.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.

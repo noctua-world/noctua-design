@@ -4,18 +4,12 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// A fragment of code inside a sentence.
+// Mark a fragment of code inside a sentence.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
-
-/** Applied by the component, never by the caller — which is what keeps
- * the two implementations from disagreeing about a default. */
-const defaults = {
-  tone: "default",
-};
 
 export function Code({ tone, className, children, ...rest }) {
   const tone_ = tone ?? "default";

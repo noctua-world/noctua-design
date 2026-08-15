@@ -9,13 +9,13 @@ import type { ReactNode } from "react";
 export type TruncateLines = "1" | "2" | "3" | "4";
 
 export interface TruncateProps {
-  /** How many lines to show before clipping. */
+  /** How many lines are shown before the text is clipped: 1, 2, 3 or 4. One line by default. */
   lines?: TruncateLines;
-  /** The full text. Shown on hover and announced in full. */
+  /** The full text, written into the `title` attribute. Pointer users see it on hover. */
   title?: string;
   className?: string;
   children?: ReactNode;
 }
 
-/** Text clipped to a line count, with the full value still available. */
+/** Clip text to a fixed number of lines and keep the full value available. */
 export declare function Truncate(props: TruncateProps): JSX.Element;

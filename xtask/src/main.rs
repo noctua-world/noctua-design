@@ -242,7 +242,7 @@ fn serve(dist: &Path, port: u16) -> Result<(), String> {
 
         // A directory asked for without its trailing slash has to REDIRECT, not
         // simply serve its index: every href on the page is document-relative,
-        // so at `/en/colours` they all resolve one level too high and the page
+        // so at `/en/colors` they all resolve one level too high and the page
         // arrives with no stylesheet and no working links. GitHub Pages and
         // `python3 -m http.server` both send this 301; a dev server that
         // quietly serves the file instead is a dev server that disagrees with

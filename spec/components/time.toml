@@ -2,18 +2,18 @@
 name = "Time"
 element = "time"
 class = "nd-time"
-summary = "A date or time, machine-readable and human-readable at once."
+# One of the marks that go inside a sentence, documented with the others.
+page = "inline-text"
+summary = "Mark up a date or time so that machines and people can both read it."
 
 [prop.datetime]
 type = "text"
 attribute = "datetime"
-doc = "The machine-readable value, in ISO 8601."
+doc = "The machine-readable value, in the `datetime` format the HTML specification defines, such as `2026-08-14` or `2026-08-14T09:30`."
 
 [prop.children]
 type = "children"
-doc = "How it is written for a reader, in their locale."
+doc = "How the date is written for a reader, in their locale."
 
 [a11y]
-notes = """
-The visible text is what is announced, so it must be a real date in the
-reader's language — not an ISO string. `datetime` is for machines only."""
+notes = "The visible text is what is announced, so it must be a real date in the reader's language rather than the machine-readable value. `datetime` is read by machines only."

@@ -2,14 +2,16 @@
 name = "Code"
 element = "code"
 class = "nd-code-inline"
-summary = "A fragment of code inside a sentence."
+# One of the marks that go inside a sentence, documented with the others.
+page = "inline-text"
+summary = "Mark a fragment of code inside a sentence."
 
 [prop.tone]
 type = "enum"
 values = ["default", "subtle"]
 default = "default"
 attribute = "data-nd-tone"
-doc = "How much the fragment should stand out from the prose around it."
+doc = "How strongly the fragment stands out from the prose around it. `default` is the normal contrast and `subtle` is quieter."
 
 [prop.children]
 type = "children"

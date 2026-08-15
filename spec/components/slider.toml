@@ -1,0 +1,131 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """Use a slider to set a value along a track, such as a volume, a zoom or a price ceiling. For a number users would rather type, pair it with a `NumberInput`. It renders a real `<input type="range">`, and a `range` renders two."""
+
+[meta]
+name = "Slider"
+element = "input"
+class = "nd-slider"
+specimen = "<span class=\"nd-slider-figure\"><span class=\"nd-slider-rail\"></span><span class=\"nd-slider-knob\"></span></span>"
+summary = "Let users set a value by moving a thumb along a track."
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-slider"
+doc = "The form field name, and the root of every id here. With `range` the two thumbs submit `{name}-start` and `{name}-end`, so a server reads two separate values."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The question this slider answers. It renders as a `<label for>` drawn by `Field`, or as a `<legend>` when `range` makes it two controls."
+
+[prop.value]
+type = "text"
+attribute = "value"
+doc = "The value the thumb starts at. With `range`, the value the **first** thumb starts at."
+
+[prop.end]
+type = "text"
+doc = "The value the second thumb starts at, with `range`. Ignored without it."
+
+[prop.range]
+type = "bool"
+default = "false"
+attribute = "data-nd-range"
+doc = "Whether the slider has two thumbs and the answer is a span. It renders two real inputs, so each thumb has its own role, keyboard and value. Neither thumb may cross the other."
+
+[prop.min]
+type = "text"
+attribute = "min"
+doc = "The value at the start of the track. Zero by default."
+
+[prop.max]
+type = "text"
+attribute = "max"
+doc = "The value at the end of the track. A hundred by default."
+
+[prop.step]
+type = "text"
+attribute = "step"
+doc = "The smallest movement the thumb can make. One by default. `any` makes the value continuous."
+
+[prop.marks]
+type = "text"
+attribute = "data-nd-marks"
+doc = "The values to draw a tick at, separated by spaces, such as `0 25 50 75 100`. Ticks are decoration and do **not** constrain the thumb. To constrain it, use `step`."
+
+[prop.mark_labels]
+type = "text"
+attribute = "data-nd-mark-labels"
+doc = "Words shown under the ticks, separated by `|` and matched position by position against `marks`, such as `Quiet|Loud`. Supply them in the reader's language."
+
+[prop.output]
+type = "bool"
+default = "true"
+attribute = "data-nd-output"
+doc = "Whether the current value is shown beside the track. **On by default**, so users can read the value they have set."
+
+[prop.output_label]
+type = "text"
+attribute = "data-nd-output-label"
+doc = "The pattern that number is shown in, with a `{value}` hole, such as *{value} px*. Without it the bare number is shown, so set it wherever the value has a unit."
+
+[prop.hint]
+type = "text"
+doc = "Extra guidance shown under the label. `Field` draws it."
+
+[prop.error]
+type = "text"
+doc = """The message shown when the answer is wrong, after a submission. It carries `role="alert"`, and nothing here writes over it."""
+
+[prop.required]
+type = "bool"
+default = "false"
+attribute = "required"
+doc = "Whether an answer is needed. A range control always has a value, so this mostly marks the field as required for assistive technology, as `ColorPicker.required` does."
+
+[prop.required_label]
+type = "text"
+doc = "The word `Field` marks the question with. Set it whenever `required` is on."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Stops users moving the thumb. Uses the real `disabled` attribute, which also keeps the value out of the submitted form."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+variants = false
+default = "medium"
+attribute = "data-nd-size"
+doc = "The size of the track and the thumb: `small`, `medium` or `large`. **The thumb stays at least 24 pixels at every size**, which is WCAG 2.5.8's minimum target."
+
+[prop.tone]
+type = "enum"
+values = ["accent", "neutral", "danger", "success"]
+variants = false
+default = "accent"
+attribute = "data-nd-tone"
+doc = "The colour family the filled part of the track takes. Never the only signal, because the number beside the track states the value."
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts the unfilled part of the track. The fill and the thumb stay solid, so the target stays visible."
+
+[state.invalid]
+attribute = "aria-invalid"
+doc = "Set when `error` is given. The track takes the danger tone and the message appears under the question. The number beside the thumb stays."
+
+[a11y]
+needs_name = true
+notes = """The component renders a real `<input type="range">`, which provides the role, `aria-valuenow`, the arrow keys and the drag. `aria-valuetext` follows `output_label`, so the value read out carries its unit."""
+
+[keyboard]
+"Arrow keys" = "Moves the thumb by one `step`. This is the browser's own behaviour."
+"Page Up / Page Down" = "Moves the thumb by a larger jump, which the browser chooses from the range. This is its own behaviour."
+"Home / End" = "Moves the thumb to `min` or `max`. This is the browser's own behaviour."

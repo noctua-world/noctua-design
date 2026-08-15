@@ -1,0 +1,151 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a carousel for a row of things a reader moves through sideways, such as
+photographs of one product. Readers rarely reach slide two, so use a grid when
+the content matters. The slides scroll and snap before any script runs.
+"""
+
+[meta]
+name = "Carousel"
+element = "section"
+class = "nd-carousel"
+# The head of its own collection, exactly as `Tree` is: without this it would
+# produce a second page at the slug the collection already has.
+page = "carousel"
+specimen = "<span class=\"nd-carousel-figure\"><span class=\"nd-carousel-cell\"></span><span class=\"nd-carousel-cell\"></span><span class=\"nd-carousel-cell\"></span></span>"
+summary = "Let readers move through a row of things sideways, in a real scroll container."
+
+# EVERY ID DERIVES FROM `name`, AND A CALLER WRITES NONE OF THEM.
+#
+# The track, the live region, the counter, every dot and every slide. `Search`
+# was rebuilt because the version before it derived its id from an OPTIONAL
+# name, so four fields on one page all carried one id.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-carousel"
+doc = "What this carousel is called in the markup, and the root of every id in it. **Required**, because an id derived from an optional name is an id every copy of the component on a page shares."
+
+[prop.label]
+type = "text"
+required = true
+doc = "What the row is, in the reader's language, such as *Photographs of the kettle*. **Required**, because the component announces itself as a carousel and that word alone does not say what is in it."
+
+[prop.per_view]
+type = "text"
+default = "1"
+attribute = "data-nd-per-view"
+doc = "How many slides fit at once: a number, or `auto` to let each slide keep its own width. Defaults to `1`, the gallery. `auto` is the shelf, and survives a narrow screen. Text rather than a number, like every prop crossing the two languages."
+
+[prop.snap]
+type = "enum"
+values = ["start", "center", "none"]
+variants = false
+default = "start"
+attribute = "data-nd-snap"
+doc = "Where a slide comes to rest. `start` lines its leading edge up with the track's, which suits a shelf, and `center` suits a gallery of one. `none` leaves a plain scroller, and turns the two controls into a scroll by one screen rather than to a slide."
+
+[prop.orientation]
+type = "enum"
+values = ["horizontal", "vertical"]
+variants = false
+default = "horizontal"
+attribute = "aria-orientation"
+doc = "Which way the track runs. Defaults to `horizontal`, and it is announced as well as drawn, so a reader knows which arrow keys move it. It is written with logical properties, so it reverses in a right-to-left locale."
+
+[prop.controls]
+type = "bool"
+default = "true"
+attribute = "data-nd-controls"
+doc = "Whether the previous and next controls appear. **On by default**, because a mouse with no horizontal wheel cannot move a scroll container without them. They render hidden and the script reveals them once the track is measured."
+
+[prop.previous_label]
+type = "text"
+attribute = "data-nd-previous-label"
+doc = "The name of the control that goes back. Needed whenever `controls` is on, because the control is a glyph and this is its only name. *Previous* alone gives four identical names on a page with four carousels."
+
+[prop.next_label]
+type = "text"
+attribute = "data-nd-next-label"
+doc = "The name of the control that goes forward, for the same reason."
+
+[prop.dots]
+type = "bool"
+default = "false"
+attribute = "data-nd-dots"
+doc = "Whether a row of controls appears, one per slide. Off by default, and **wrong past about eight slides**, where twenty dots are twenty targets a reader cannot tell apart. They are real buttons that move the track."
+
+[prop.dot_label]
+type = "text"
+attribute = "data-nd-dot-label"
+doc = "The name of each dot, with `{index}` and `{count}` holes, such as *Go to slide {index} of {count}*. Needed whenever `dots` is on, because an unnamed circle is announced only as *button*."
+
+[prop.counter]
+type = "bool"
+default = "false"
+attribute = "data-nd-counter"
+doc = "Whether the position is written out, such as *3 of 8*. Off by default. Use it instead of `dots` past a handful of slides, or beside them, because only a number gives the count."
+
+[prop.counter_label]
+type = "text"
+attribute = "data-nd-counter-label"
+doc = "What the counter says, with `{index}` and `{count}` holes. One whole sentence with two holes in it, never assembled from pieces."
+
+[prop.announce_label]
+type = "text"
+attribute = "data-nd-announce-label"
+doc = "What is announced when a slide arrives, with `{index}` and `{count}` holes. Focus does not move when the track scrolls, so without this sentence pressing *next* is silent to a screen reader."
+
+[prop.wrap]
+type = "bool"
+default = "false"
+attribute = "data-nd-wrap"
+doc = "Whether *next* on the last slide goes back to the first. Off by default, so a reader can feel where the row ends. Named `wrap` rather than `loop`, because `loop` is a Rust keyword. When on, the two controls are never disabled at the ends."
+
+[prop.autoplay]
+type = "text"
+attribute = "data-nd-autoplay"
+doc = """How many milliseconds each slide rests before the next arrives. **Absent means off.** It never starts under `prefers-reduced-motion: reduce` or without `pause_label`, which is WCAG 2.2.2. It pauses on hover or focus, and stops when a control is used."""
+
+[prop.pause_label]
+type = "text"
+attribute = "data-nd-pause-label"
+doc = "The name of the control that stops the rotation. **Required whenever `autoplay` is set, and enforced**: with no name there is no control, and with no control the rotation never starts. That is WCAG 2.2.2."
+
+[prop.play_label]
+type = "text"
+attribute = "data-nd-play-label"
+doc = "The name it takes once the rotation is stopped. A toggle that keeps one name announces the wrong state after the first press. No script may invent the other name in the reader's language."
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts the two controls and the dots. Off by default. The track is never frosted, because what is behind a slide is the page."
+
+[prop.children]
+type = "children"
+doc = "The slides, as `CarouselSlide`. Real list items in a real list, which is what a screen reader counts and what a reader with no script scrolls."
+
+[state.paused]
+attribute = "data-nd-paused"
+doc = "Whether the rotation is stopped, by the reader, by a pointer resting on it, by focus arriving inside it, or by the tab going away. It is on the root, so the control can swap its glyph and its name together."
+
+[state.ends]
+attribute = "data-nd-at"
+doc = "Which end the track is against: `start`, `end`, or absent in the middle. The script writes it from the scroll position rather than from a slide index, so a partly visible last slide still counts as the end."
+
+[a11y]
+needs_name = true
+notes = """
+`role="group"` with `aria-roledescription="carousel"` and the caller's `label`.
+Focus does not move when the track scrolls, so `announce_label` is how a reader
+is told which slide arrived.
+"""
+
+[keyboard]
+"Left arrow / Right arrow" = "Scrolls the track, which is the browser's own behaviour. In a vertical carousel the keys are Up and Down."
+"Home / End" = "Moves to the first or last slide. The two controls do the same at the ends when `wrap` is off."
+"Tab" = "Walks into the slides and out the other side. The track is a tab stop only when nothing inside it is focusable."

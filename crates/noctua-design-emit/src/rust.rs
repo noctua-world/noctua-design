@@ -36,9 +36,9 @@ fn lib_rs(spec: &Spec) -> String {
 
     out.push_str(
         "//!\n\
-         //! # Every non-colour token, as `const`\n\
+         //! # Every non-color token, as `const`\n\
          //!\n\
-         //! Colours are not here. They come from `noctua-colors`, and a component\n\
+         //! Colors are not here. They come from `noctua-colors`, and a component\n\
          //! reaches them through CSS custom properties rather than through Rust.\n\
          //!\n\
          //! Each value is exactly what the generated CSS emits for the same token,\n\
@@ -82,6 +82,53 @@ fn write_space(out: &mut String, spec: &Spec, prefix: &str) {
             )
             .expect("write");
 
+            // THE NAMED GAPS AS DATA, not only as seven constants.
+            //
+            // The documentation page draws each one beside the step it resolves
+            // to, and the search index lists every name this scale emits. Both
+            // were hand-written lists once — the deleted spacing page carried
+            // `[("tight", …), ("inset", …), …]` in full — and a second copy of
+            // `spec/tokens.toml` is a copy that stops agreeing.
+            writeln!(
+                out,
+                "    /// The named gaps, and the step each resolves to.\n    \
+                 pub const NAMED: [(&str, u32); {}] = [{}];\n",
+                spec.space.named.len(),
+                spec.space
+                    .named
+                    .iter()
+                    .map(|(name, step)| format!("(\"{name}\", {step})"))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            )
+            .expect("write");
+
+            // `base` is emitted as a custom property too, so a list that
+            // called itself "every one" and left it out would be a list a
+            // reader could be wrong about.
+            let names: Vec<String> = std::iter::once(format!("\"--{prefix}-space-base\""))
+                .chain(
+                    spec.space
+                        .steps
+                        .iter()
+                        .map(|step| format!("\"--{prefix}-space-{step}\"")),
+                )
+                .chain(
+                    spec.space
+                        .named
+                        .keys()
+                        .map(|name| format!("\"--{prefix}-space-{name}\"")),
+                )
+                .collect();
+            writeln!(
+                out,
+                "    /// Every custom property this scale emits: the base, the steps, the names.\n    \
+                 pub const NAMES: [&str; {}] = [{}];\n",
+                names.len(),
+                names.join(", ")
+            )
+            .expect("write");
+
             for (name, step) in &spec.space.named {
                 writeln!(out, "    /// `var(--{prefix}-space-{name})` — step {step}.")
                     .expect("write");
@@ -99,6 +146,14 @@ fn write_space(out: &mut String, spec: &Spec, prefix: &str) {
 /// Every module whose values are `var()` references to a custom property.
 fn write_value_modules(out: &mut String, spec: &Spec, prefix: &str) {
     string_module(out, spec, "radius", "Corner radii.", &spec.radius, prefix);
+    string_module(
+        out,
+        spec,
+        "scene",
+        "The three-dimensional scene: what a `Lineage` cell is worth.",
+        &spec.scene,
+        prefix,
+    );
     string_module(
         out,
         spec,

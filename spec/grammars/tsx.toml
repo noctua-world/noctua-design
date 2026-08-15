@@ -1,0 +1,88 @@
+# TSX.
+#
+# TypeScript's table. The elements are not marked, for the reason `jsx.toml`
+# gives at length: telling `<` apart from a comparison and a generic argument
+# needs a parser, and a heuristic fails loudly on ordinary code.
+
+[meta]
+name = "tsx"
+display = "TSX"
+
+[identifier]
+extra = "_$"
+
+[words]
+keyword = [
+  "abstract", "as", "async", "await", "break", "case", "catch", "class",
+  "const", "continue", "declare", "default", "delete", "do", "else", "enum",
+  "export", "extends", "finally", "for", "from", "function", "get",
+  "implements", "import", "interface", "let", "namespace", "new", "of",
+  "private", "protected", "public", "readonly", "return", "satisfies", "set",
+  "static", "super", "switch", "throw", "try", "type", "var", "while", "yield",
+]
+operator = ["in", "instanceof", "keyof", "typeof", "void"]
+constant = ["false", "true", "null", "undefined", "this"]
+type = [
+  "Array", "Date", "Error", "Map", "Omit", "Partial", "Pick", "Promise",
+  "Readonly", "Record", "Set", "any", "bigint", "boolean", "never", "number",
+  "object", "string", "symbol", "unknown",
+]
+function = ["console", "document", "useEffect", "useMemo", "useRef", "useState", "window"]
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+
+[[string]]
+open = "`"
+close = "`"
+escape = "\\"
+multiline = true
+interpolate_open = "${"
+interpolate_close = "}"
+
+[number]
+prefixes = ["0x", "0b", "0o"]
+separator = "_"
+exponent = "eE"
+suffix = true
+leading_dot = true
+
+[symbols]
+operator = "+-*/%=<>!&|^~?:"
+punctuation = "(){}[],;.@#"
+
+[[sigil]]
+open = "@"
+role = "attribute"
+
+[context]
+name_after = { function = "function", class = "type", interface = "type", enum = "type", type = "type", extends = "type", new = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+member_dot = true
+property_colon = "any"
+
+[[case]]
+name = "a typed component"
+code = "function Card({ title }: { title: string }) { return null; }"
+expect = ["keyword function", "function Card", "property title", "type string", "constant null"]
+
+[[case]]
+name = "a typed hook keeps its type argument"
+code = "const [n, setN] = useState<number>(0);"
+expect = ["function useState", "type number", "number 0"]

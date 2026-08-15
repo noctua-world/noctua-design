@@ -1,0 +1,76 @@
+# Lua.
+#
+# `--` opens a comment and `--[[` opens a block comment, and the scanner picks
+# the longer opener, so the two never race. `[[ ]]` is also a string, which is
+# why the block comment has to be listed at all rather than being `--` plus a
+# string.
+
+[meta]
+name = "lua"
+display = "Lua"
+
+[words]
+keyword = [
+  "break", "do", "else", "elseif", "end", "for", "function", "goto", "if",
+  "in", "local", "repeat", "return", "then", "until", "while",
+]
+operator = ["and", "not", "or"]
+constant = ["false", "nil", "true", "self"]
+function = [
+  "assert", "error", "ipairs", "next", "pairs", "pcall", "print", "rawget",
+  "rawset", "require", "select", "setmetatable", "tonumber", "tostring",
+  "type", "unpack",
+]
+
+[[comment]]
+open = "--[["
+close = "]]"
+
+[[comment]]
+open = "--"
+
+[[string]]
+open = "[["
+close = "]]"
+multiline = true
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+
+[number]
+prefixes = ["0x"]
+exponent = "eE"
+
+[symbols]
+operator = "+-*/%=<>~#"
+punctuation = "(){}[],;:."
+
+[context]
+name_after = { function = "function" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+member_dot = true
+
+[[case]]
+name = "a block comment beats a line comment because it is longer"
+code = "--[[ a\nb ]] local x = 1"
+expect = ["comment --[[ a\nb ]]", "keyword local", "number 1"]
+
+[[case]]
+name = "a long string is a string"
+code = "local s = [[raw \\n text]]"
+expect = ["string [[raw \\n text]]"]
+reject = ["escape \\n"]
+
+[[case]]
+name = "a function and a call"
+code = 'function greet(n) print("hi") end'
+expect = ["keyword function", "function greet", "function print", "keyword end"]

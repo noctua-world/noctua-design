@@ -1,4 +1,4 @@
-//! Output targets for the non-colour tokens.
+//! Output targets for the non-color tokens.
 //!
 //! Every emitter takes the same validated [`Spec`] and writes it in one format.
 //! Adding a target is one module and one line in [`emit_all`].
@@ -15,8 +15,10 @@
 //! either would rewrite every generated file whenever anything changed, burying
 //! a one-token diff in hundreds of lines of churn.
 
+use noctua_design_spec::grammar::Grammar;
 use noctua_design_spec::icons::{Icons, Resolved as Icon};
-use noctua_design_spec::{Catalogue, Component, Fonts, Manifest, Spec, Theme, Vendor};
+use noctua_design_spec::lineage::Cases;
+use noctua_design_spec::{Catalogue, Component, Fonts, Manifest, Spec, Syntax, Theme, Vendor};
 
 pub mod appearance;
 pub mod component;
@@ -24,12 +26,17 @@ pub mod controls;
 pub mod css;
 pub mod docs;
 pub mod fonts;
+pub mod grammar;
 pub mod i18n;
 pub mod icons;
+pub mod lineage;
 pub mod props;
+pub mod runtime;
 pub mod rust;
 pub mod scope;
+pub mod syntax;
 pub mod theme;
+pub mod tones;
 pub mod typescript;
 
 /// One file an emitter produced.
@@ -73,12 +80,12 @@ pub const COMPONENT_SPEC: &str = "spec/components/";
 /// Everything the emitters read.
 ///
 /// A bundle rather than a growing parameter list: the number of inputs is
-/// going up — tokens, fonts, the vendored colour output, and later the theme
+/// going up — tokens, fonts, the vendored color output, and later the theme
 /// model and the message catalogue — and threading each one through every
 /// signature makes adding a target a refactor rather than a line.
 #[derive(Debug, Clone, Copy)]
 pub struct Inputs<'a> {
-    /// The non-colour token spec.
+    /// The non-color token spec.
     pub spec: &'a Spec,
     /// The font layer.
     pub fonts: &'a Fonts,
@@ -96,6 +103,28 @@ pub struct Inputs<'a> {
     pub icons: &'a Icons,
     /// Every icon, with its drawing read and checked.
     pub drawings: &'a [Icon],
+    /// Every language a code block can be shown in.
+    pub grammars: &'a [Grammar],
+    /// What paints each token role, in every theme.
+    pub syntax: &'a Syntax,
+    /// The JavaScript half of the scanner, read from beside the Rust half.
+    ///
+    /// Vendored input rather than something this crate can produce: the two
+    /// halves are hand-written together, and an emitter that generated one of
+    /// them would be a third implementation to keep in step.
+    pub scanner: &'a str,
+    /// The expectation both `Lineage` layout engines are checked against.
+    pub lineage: &'a Cases,
+    /// The JavaScript half of the layout, read from beside the Rust half. Same
+    /// reasoning as `scanner`.
+    pub layout: &'a str,
+    /// The camera, the keyboard walk and the switches — everything a `Lineage`
+    /// gains when a script is running. Read from beside the layout.
+    pub runtime: &'a str,
+    /// The vendored three.js bundle, and its licence.
+    pub three: &'a str,
+    /// Likewise.
+    pub three_licence: &'a str,
 }
 
 /// Runs every emitter, returning all files sorted by path.
@@ -111,6 +140,14 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
         sliced,
         icons,
         drawings,
+        grammars,
+        syntax: syntax_layer,
+        scanner,
+        lineage: lineage_cases,
+        layout,
+        runtime,
+        three,
+        three_licence,
     } = inputs;
 
     let mut files = Vec::new();
@@ -119,13 +156,27 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
     files.extend(css::emit(spec));
     files.extend(docs::emit(components));
     files.extend(fonts::emit(spec, font_layer, sliced));
+    files.extend(grammar::emit(grammars, scanner));
     files.extend(i18n::emit(catalogue));
     files.extend(icons::emit(icons, drawings));
+    files.extend(lineage::emit(
+        lineage_cases,
+        layout,
+        runtime,
+        three,
+        three_licence,
+    ));
     files.extend(props::emit(components));
+    // `crate::` because `runtime` is also the local holding `Lineage`'s own
+    // runtime three lines up, and a reader should not have to know which
+    // namespace wins to read this line.
+    files.extend(crate::runtime::emit(vendor));
     files.push(fonts::preload_fragment(font_layer));
     files.extend(rust::emit(spec));
     files.extend(scope::emit(vendor));
+    files.extend(syntax::emit(syntax_layer));
     files.extend(theme::emit(theme, vendor));
+    files.extend(tones::emit(vendor));
     files.extend(typescript::emit(spec));
     files.sort_by(|a, b| a.path.cmp(&b.path));
     files
@@ -239,6 +290,7 @@ mod tests {
     fn shipped() -> Bundle {
         let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
         let vendor = noctua_design_spec::vendor::load(&root).expect("vendor");
+        let vendor2 = noctua_design_spec::vendor::load(&root).expect("vendor");
         let theme =
             noctua_design_spec::load_theme(root.join("spec/theme.toml"), &vendor).expect("theme");
         (
@@ -246,7 +298,12 @@ mod tests {
             noctua_design_spec::load_fonts(root.join("spec/fonts.toml")).expect("fonts"),
             vendor,
             theme,
-            noctua_design_spec::i18n::load(root.join("spec/i18n")).expect("catalogue"),
+            noctua_design_spec::i18n::load_for(
+                root.join("spec/i18n"),
+                &noctua_design_spec::component::load_all(root.join("spec/components"))
+                    .expect("the shipped components"),
+            )
+            .expect("catalogue"),
             noctua_design_spec::component::load_all(root.join("spec/components"))
                 .expect("components"),
             noctua_design_spec::icons::load(
@@ -254,6 +311,11 @@ mod tests {
                 root.join("assets/icons"),
             )
             .expect("icons"),
+            noctua_design_spec::grammar::load_all(root.join("spec/grammars")).expect("grammars"),
+            noctua_design_spec::syntax::load(root.join("spec/syntax.toml"), &vendor2)
+                .expect("syntax"),
+            noctua_design_spec::lineage::load(root.join("spec/lineage/cases.toml"))
+                .expect("lineage cases"),
         )
     }
 
@@ -265,6 +327,9 @@ mod tests {
         Catalogue,
         Vec<Component>,
         (Icons, Vec<Icon>),
+        Vec<Grammar>,
+        Syntax,
+        Cases,
     );
 
     fn inputs(bundle: &Bundle) -> Inputs<'_> {
@@ -278,13 +343,63 @@ mod tests {
             sliced: &[],
             icons: &bundle.6.0,
             drawings: &bundle.6.1,
+            grammars: &bundle.7,
+            syntax: &bundle.8,
+            scanner: SCANNER,
+            lineage: &bundle.9,
+            layout: LAYOUT,
+            runtime: RUNTIME,
+            three: THREE,
+            three_licence: THREE_LICENCE,
         }
+    }
+
+    /// The JavaScript half, read the way `xtask` reads it.
+    const SCANNER: &str = include_str!("../../noctua-design-grammars/src/scan.js");
+
+    /// The other JavaScript half, read the same way.
+    const LAYOUT: &str = include_str!("../../noctua-design-lineage/src/layout.js");
+
+    /// The runtime and the bundle it imports, read the same way.
+    const RUNTIME: &str = include_str!("../../noctua-design-lineage/src/runtime.js");
+    const THREE: &str = include_str!("../../../assets/vendor/three/three-css3d.js");
+    const THREE_LICENCE: &str = include_str!("../../../assets/vendor/three/LICENSE-three-MIT.txt");
+
+    /// Copied from upstream, byte for byte, so nothing may be prepended to it.
+    ///
+    /// A generated header on somebody else's MIT licence would be a modified
+    /// licence, and one on a minified bundle would be a bundle that no longer
+    /// matches the file `assets/vendor/three/ATTRIBUTION.md` says how to
+    /// rebuild. The claim these make instead is the stronger one, asserted
+    /// below: they are their source, unchanged.
+    const VENDORED: &str = "dist/vendor/";
+
+    #[test]
+    fn the_vendored_files_are_copies_and_nothing_else() {
+        let bundle = shipped();
+        let mut found = 0;
+        for file in emit_all(inputs(&bundle)) {
+            let Some(name) = file.path.strip_prefix(VENDORED) else {
+                continue;
+            };
+            found += 1;
+            let source = match name {
+                "three-css3d.js" => THREE,
+                "LICENSE-three-MIT.txt" => THREE_LICENCE,
+                other => panic!("{other} is vendored and nothing says where from"),
+            };
+            assert_eq!(file.contents, source, "{} was not copied", file.path);
+        }
+        assert_eq!(found, 2, "the vendored set changed without this test");
     }
 
     #[test]
     fn every_file_carries_a_generated_header() {
         let bundle = shipped();
         for file in emit_all(inputs(&bundle)) {
+            if file.path.starts_with(VENDORED) {
+                continue;
+            }
             assert!(
                 file.contents.contains("do not edit"),
                 "{} has no generated header",
@@ -301,6 +416,29 @@ mod tests {
                     MESSAGE_SPEC,
                     COMPONENT_SPEC,
                     icons::ICON_SPEC,
+                    grammar::GRAMMAR_SPEC,
+                    syntax::SYNTAX_SPEC,
+                    lineage::LINEAGE_SPEC,
+                    lineage::LINEAGE_SOURCE,
+                    // The shipped browser behaviour names the file it was
+                    // copied from, and the palettes name the vendored output
+                    // they are a projection of.
+                    noctua_design_runtime::ANCHOR_SOURCE,
+                    noctua_design_runtime::COLOR_SOURCE,
+                    noctua_design_runtime::PICKER_SOURCE,
+                    noctua_design_runtime::MESSAGES_SOURCE,
+                    noctua_design_runtime::INPUTS_SOURCE,
+                    noctua_design_runtime::CAROUSEL_SOURCE,
+                    noctua_design_runtime::SUMMARY_SOURCE,
+                    noctua_design_runtime::TABLE_SOURCE,
+                    noctua_design_runtime::INFO_SOURCE,
+                    noctua_design_runtime::MENU_SOURCE,
+                    noctua_design_runtime::MESSAGE_BAR_SOURCE,
+                    noctua_design_runtime::DIALOG_SOURCE,
+                    noctua_design_runtime::POPOVER_SOURCE,
+                    noctua_design_runtime::TOOLTIP_SOURCE,
+                    noctua_design_runtime::TOAST_SOURCE,
+                    noctua_design_spec::vendor::VENDOR,
                 ]
                 .iter()
                 .any(|spec| file.contents.contains(spec)),
@@ -330,14 +468,29 @@ mod tests {
     /// Every emitter must produce something, or a target is silently dead.
     #[test]
     fn every_target_emits_at_least_one_file() {
-        let (spec, font_layer, vendor, theme_model, catalogue, components, (icons, drawings)) =
-            shipped();
+        let (
+            spec,
+            font_layer,
+            vendor,
+            theme_model,
+            catalogue,
+            components,
+            (icons, drawings),
+            grammars,
+            syntax_layer,
+            lineage_cases,
+        ) = shipped();
         assert!(
             !appearance::emit(&spec, &theme_model).is_empty(),
             "appearance"
         );
         assert!(!component::emit(&theme_model).is_empty(), "component");
         assert!(!icons::emit(&icons, &drawings).is_empty(), "icons");
+        assert!(!grammar::emit(&grammars, SCANNER).is_empty(), "grammar");
+        assert!(
+            !lineage::emit(&lineage_cases, LAYOUT, RUNTIME, THREE, THREE_LICENCE).is_empty(),
+            "lineage"
+        );
         assert!(!css::emit(&spec).is_empty(), "css");
         assert!(
             !fonts::emit(&spec, &font_layer, &bundle_sliced()).is_empty(),
@@ -347,6 +500,7 @@ mod tests {
         assert!(!props::emit(&components).is_empty(), "props");
         assert!(!rust::emit(&spec).is_empty(), "rust");
         assert!(!scope::emit(&vendor).is_empty(), "scope");
+        assert!(!syntax::emit(&syntax_layer).is_empty(), "syntax");
         assert!(!theme::emit(&theme_model, &vendor).is_empty(), "theme");
         assert!(!typescript::emit(&spec).is_empty(), "typescript");
     }

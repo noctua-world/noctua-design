@@ -1,0 +1,127 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a textarea for an answer of several lines: a description, a note, a message, an address. For a single line, use `Input`. With `autosize` the box grows rather than scrolls."
+
+[meta]
+name = "Textarea"
+element = "textarea"
+class = "nd-textarea"
+specimen = "<span class=\"nd-textarea-figure\"><span class=\"nd-textarea-box\"></span></span>"
+summary = "Let users write an answer of several lines, in a box that can grow to fit it."
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-textarea"
+doc = "The form field name this is submitted under, and the root of every id here. **Required**, because an id derived from an absent name is the same id on each copy of the component."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The question, in the reader's language. `Field` draws it as a real `<label for>`."
+
+[prop.value]
+type = "text"
+doc = "What is in the box to begin with. A `<textarea>` carries its value as its **content** rather than as an attribute, so this is not an attribute either. A value with a newline in it survives the markup."
+
+[prop.placeholder]
+type = "text"
+attribute = "placeholder"
+doc = "An example of the shape of an answer, inside the box. Never the only name the box has, for `Input.placeholder`'s reasons."
+
+[prop.hint]
+type = "text"
+doc = "What a reader needs before answering. `Field` draws it, and the control's `aria-describedby` points at it."
+
+[prop.error]
+type = "text"
+doc = """What is wrong, after a submission. It carries `role="alert"`, and it is the caller's own sentence."""
+
+[prop.required]
+type = "bool"
+default = "false"
+attribute = "required"
+doc = "Whether an answer is needed. The real `required` attribute on the real box, so the browser refuses the submission with no script at all."
+
+[prop.required_label]
+type = "text"
+doc = "The word `Field` marks the question with. Wanted in practice by `required`."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Whether the control is disabled. A disabled box submits nothing, which is a different answer from an empty one."
+
+[prop.readonly]
+type = "bool"
+default = "false"
+attribute = "readonly"
+doc = "Whether the box is readable and copyable but not editable. Unlike `disabled`, a read-only box is still submitted."
+
+[prop.rows]
+type = "text"
+attribute = "rows"
+doc = "How many lines the box is, or the fewest it may be when `autosize` is on. Text rather than a number, because every prop crossing the two languages is text. The platform's default of two lines is worth overriding."
+
+[prop.autosize]
+type = "bool"
+default = "false"
+attribute = "data-nd-autosize"
+doc = "Whether the box grows to fit what is in it. Off by default, because a growing box moves everything under it. On, `rows` becomes a floor and the box never scrolls its own content."
+
+[prop.max_rows]
+type = "text"
+attribute = "data-nd-max-rows"
+doc = "How tall `autosize` may grow the box before it starts scrolling. Without one, a long pasted answer pushes the submit control off the screen."
+
+[prop.resize]
+type = "enum"
+values = ["none", "vertical", "both"]
+default = "vertical"
+attribute = "data-nd-resize"
+doc = "Whether the reader may drag the box larger, and in which directions: `none`, `vertical` or `both`. **Vertical by default and never horizontal alone**, because a box dragged wider than its column overlaps its neighbour. `none` wants `autosize` on."
+
+[prop.maxlength]
+type = "text"
+attribute = "maxlength"
+doc = "The most characters the box accepts, enforced by the browser rather than checked by a script afterwards."
+
+[prop.counter]
+type = "bool"
+default = "false"
+attribute = "data-nd-counter"
+doc = "Whether to show how much room is left. Wanted in practice by `maxlength`, because a box that stops accepting characters in silence gives the reader no reason for it."
+
+[prop.counter_label]
+type = "text"
+attribute = "data-nd-counter-label"
+doc = "What the count says, with `{count}` and `{max}` holes. One sentence with two holes, and it may carry one form per plural category."
+
+[prop.spellcheck]
+type = "bool"
+default = "true"
+attribute = "spellcheck"
+doc = "Whether the browser underlines what it takes to be mistakes. **On by default**, unlike `Input`, because this box holds prose."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+variants = false
+default = "medium"
+attribute = "data-nd-size"
+doc = "The box's padding and the type inside it: `small`, `medium` or `large`, matching the rest of the form."
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Whether the box is frosted. Use it on a ground opaque enough to read several lines against."
+
+[state.invalid]
+attribute = "aria-invalid"
+doc = "Set when an `error` was given, or when the platform refused the value. The border takes the danger tone and the sentence appears under the question."
+
+[a11y]
+needs_name = true
+notes = """The question is a real `<label for>`, drawn by `Field`. The counter is `role="status"` and polite, and it speaks when the typing pauses rather than once per character. Growing is not announced."""

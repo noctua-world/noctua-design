@@ -1,0 +1,154 @@
+// Everything a `Toast` does once a script is running.
+//
+// IT SHIPS, for `ColorPicker`'s reason: a component whose consumer cannot use
+// it is a component that lies. A message with a timer nothing runs is a message
+// that never leaves, and a dismiss control that closes nothing is worse than no
+// control at all.
+//
+// THE TIMER IS OPT-IN AND IT PAUSES. `toast.toml` argues it in full. A message
+// that removes itself is unreadable to a reader who reads slowly, so `duration`
+// is absent by default, and when it is set the wait holds under a pointer and
+// under focus and then starts again from the beginning.
+//
+// WHAT IT NEVER DOES:
+//
+// 1. It never removes the element. The toast is a live region, and a region
+//    taken out of the document announces nothing the next time it is written
+//    into. `data-nd-dismissed` is what the stylesheet acts on, which is
+//    `MessageBar`'s arrangement exactly.
+// 2. It never announces its own disappearance. A reader who dismissed it knows
+//    what they pressed, and a timer running out is not news.
+// 3. It never resumes a wait it interrupted. A reader who came back to the
+//    message is starting the sentence again, so the whole `duration` is served
+//    again rather than the remainder of it.
+
+import { say } from "./messages.js";
+
+/** What the stylesheet reads for a message that has gone. */
+const DISMISSED = "data-nd-dismissed";
+
+/** And for one whose timer is holding. */
+const PAUSED = "data-nd-paused";
+
+/** How long after the page settles a live region starts speaking. */
+const SETTLE = 500;
+
+export function enhanceToasts(root = document) {
+  for (const element of root.querySelectorAll("[data-nd-toast]")) {
+    if (element.dataset.ndEnhanced) continue;
+    element.dataset.ndEnhanced = "toast";
+    enhance(element);
+  }
+}
+
+function enhance(toast) {
+  const body = toast.querySelector("[data-nd-toast-body]");
+  announce(toast, body);
+
+  const control = toast.querySelector("[data-nd-dismiss]");
+  if (control) {
+    // REVEALED, NEVER BUILT. The markup ships hidden so a page with no script
+    // carries no control that closes nothing. `Info` established it and
+    // `MessageBar` is the other component that follows it.
+    control.hidden = false;
+    control.addEventListener("click", () => dismiss(toast));
+  }
+
+  const every = Number.parseInt(toast.getAttribute("data-nd-duration") ?? "", 10);
+  // Absent, unreadable and `0` are all the same answer: the message stays until
+  // a reader takes it away.
+  if (!Number.isFinite(every) || every <= 0) return;
+
+  let waiting = null;
+  /** How many things are holding it: a pointer, the focus, or both. */
+  let held = 0;
+
+  function run() {
+    clearTimeout(waiting);
+    waiting = setTimeout(() => dismiss(toast), every);
+  }
+
+  function hold() {
+    held += 1;
+    clearTimeout(waiting);
+    toast.setAttribute(PAUSED, "");
+  }
+
+  function release() {
+    held = Math.max(0, held - 1);
+    if (held > 0) return;
+    toast.removeAttribute(PAUSED);
+    run();
+  }
+
+  // A POINTER AND THE FOCUS ARE COUNTED RATHER THAN TESTED. A reader whose
+  // pointer is on the message and whose focus is on its dismiss control has
+  // held it twice, and leaving with one of the two must not restart the wait
+  // under the other.
+  toast.addEventListener("pointerenter", hold);
+  toast.addEventListener("pointerleave", release);
+  toast.addEventListener("focusin", hold);
+  toast.addEventListener("focusout", (event) => {
+    if (toast.contains(event.relatedTarget)) return;
+    release();
+  });
+
+  run();
+}
+
+/**
+ * Where focus goes, and what the message stops being.
+ *
+ * Decided BEFORE the message is hidden: the control a reader pressed is inside
+ * the thing they just dismissed, and an element the stylesheet has taken out of
+ * the layout cannot be focused. Leaving it alone means the browser sends focus
+ * to `<body>` and the next Tab restarts at the top of the document.
+ */
+function dismiss(toast) {
+  if (toast.hasAttribute(DISMISSED)) return;
+  const inside = toast.contains(document.activeElement);
+  const anchor = toast.parentElement;
+  if (inside && anchor && !anchor.hasAttribute("tabindex")) {
+    anchor.setAttribute("tabindex", "-1");
+  }
+  toast.setAttribute(DISMISSED, "");
+  toast.removeAttribute(PAUSED);
+  if (inside) anchor?.focus({ preventScroll: true });
+}
+
+/**
+ * Arms the live region, or fires it, depending on when the message arrived.
+ *
+ * A LIVE REGION INSERTED WITH ITS CONTENT ALREADY IN IT ANNOUNCES NOTHING in
+ * most engines: the region has to be in the document before it is written into.
+ * So the sentence ships in the markup, where a page with no script can still
+ * show it, and one of two things happens here.
+ *
+ * A message that came with the page has already been read by the time a reader
+ * reaches it, so the region goes quiet and is armed once the page has settled.
+ * `inputs.js` and `carousel.js` make the same switch for the same reason.
+ *
+ * A message enhanced after the page finished loading is one that ARRIVED, so
+ * the region is emptied and the sentence is written back on the next frame
+ * through `say()`. That is the region-first rule applied to markup that shipped
+ * the other way round, and it costs nothing to look at: the toast is appearing
+ * in that same frame.
+ *
+ * The caller's own `aria-live` is restored either way, and its absence is
+ * restored as an absence: `role="status"` already implies polite, so writing an
+ * attribute at that value would be this file overruling the role.
+ */
+function announce(toast, body) {
+  if (document.readyState === "complete") {
+    const sentence = body?.textContent?.trim() ?? "";
+    if (body) body.textContent = "";
+    requestAnimationFrame(() => say(body, sentence));
+    return;
+  }
+  const asked = toast.getAttribute("aria-live");
+  toast.setAttribute("aria-live", "off");
+  setTimeout(() => {
+    if (asked === null) toast.removeAttribute("aria-live");
+    else toast.setAttribute("aria-live", asked);
+  }, SETTLE);
+}

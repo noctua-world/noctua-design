@@ -21,7 +21,7 @@ fn render(app: fn() -> Element) -> String {
 /// The compound selector `[data-palette="x"][data-theme="dark"]` matches only
 /// when both halves are on the same element. A wrapper-plus-child split falls
 /// through to the default palette's unanchored `[data-theme="dark"]` and paints
-/// the wrong colours without erroring.
+/// the wrong colors without erroring.
 #[test]
 fn every_attribute_lands_on_one_element() {
     fn app() -> Element {

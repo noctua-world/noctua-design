@@ -2,14 +2,13 @@
 name = "Mark"
 element = "mark"
 class = "nd-mark"
-summary = "Text highlighted for the reader's current purpose, such as a search hit."
+# One of the marks that go inside a sentence, documented with the others.
+page = "inline-text"
+summary = "Highlight text for what the reader is doing now, such as a search hit."
 
 [prop.children]
 type = "children"
 doc = "The highlighted text."
 
 [a11y]
-notes = """
-A highlight that carries meaning needs more than a background colour: colour
-alone is invisible to a reader who cannot distinguish it, so this also changes
-the text weight."""
+notes = "A highlight that carries meaning needs more than a background colour. Colour alone is invisible to a reader who cannot distinguish it, so this also changes the text weight."

@@ -2,15 +2,17 @@
 name = "Kbd"
 element = "kbd"
 class = "nd-kbd"
-summary = "A key or chord, as printed on a keyboard."
+# One of the marks that go inside a sentence, documented with the others.
+page = "inline-text"
+summary = "Show a key or a chord, as printed on a keyboard."
 
 [prop.size]
 type = "enum"
 values = ["small", "body"]
 default = "small"
 attribute = "data-nd-size"
-doc = "The size."
+doc = "The size: `small` or `body`. Defaults to `small`."
 
 [prop.children]
 type = "children"
-doc = "The key name."
+doc = "The key name, such as `Ctrl` or `Esc`."

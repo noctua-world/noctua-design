@@ -19,7 +19,7 @@ fn page() -> Resolved {
 
 /// **Gotcha 1.** Every attribute belongs to one element.
 ///
-/// The colour system's forced-mode selector is compound and same-element:
+/// The color system's forced-mode selector is compound and same-element:
 /// `[data-palette="x"][data-theme="dark"]`. Split across a wrapper and a child
 /// it matches nothing, and the child falls through to the default palette's
 /// unanchored `[data-theme="dark"]` — silently painting the wrong palette.

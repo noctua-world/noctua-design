@@ -4,11 +4,11 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! A key or chord, as printed on a keyboard.
+//! Show a key or a chord, as printed on a keyboard.
 
 use dioxus::prelude::*;
 
-/// The size.
+/// The size: `small` or `body`. Defaults to `small`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum KbdSize {
     #[default]
@@ -32,10 +32,10 @@ impl KbdSize {
     }
 }
 
-/// A key or chord, as printed on a keyboard.
+/// Show a key or a chord, as printed on a keyboard.
 #[component]
 pub fn Kbd(
-    /// The size.
+    /// The size: `small` or `body`. Defaults to `small`.
     #[props(default)]
     size: KbdSize,
     /// Extra classes for the root element.

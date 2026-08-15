@@ -15,7 +15,7 @@ export default defineConfig({
   reporter: process.env.CI ? "github" : [["list"]],
   use: {
     baseURL: "http://127.0.0.1:8731",
-    // Colours are read from screenshots, never from getComputedStyle, so the
+    // Colors are read from screenshots, never from getComputedStyle, so the
     // rendering has to be deterministic across machines.
     deviceScaleFactor: 1,
     colorScheme: "light",
@@ -50,7 +50,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "python3 -m http.server 8731 --directory docs-site/dist",
-    url: "http://127.0.0.1:8731/en/colours/",
+    url: "http://127.0.0.1:8731/en/intro/",
     reuseExistingServer: true,
     timeout: 30_000,
   },

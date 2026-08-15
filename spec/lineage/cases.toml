@@ -1,0 +1,351 @@
+# The expectation BOTH layout engines are held to.
+#
+# `crates/noctua-design-lineage/src/layout.rs` runs during pre-rendering and
+# `layout.js` beside it runs in a browser for the React package. Neither is
+# checked against the other — two halves that agree with each other and
+# disagree with the specification is the failure that actually happens — so
+# both are checked against this file. `noctua-design-emit` also writes it out
+# as `dist/lineage.cases.json`, which is what the Playwright half reads.
+#
+# TO REGENERATE after a deliberate change to the algorithm:
+#
+#     cargo test -p noctua-design-lineage bless -- --ignored --nocapture
+#
+# It prints this file with every expectation recomputed. **Read the diff.** A
+# blessed file pasted without reading it is a change detector, not a
+# specification.
+#
+# Coordinates are in cells. Both checkers round to three decimals before
+# comparing, so no language's float formatting is part of the contract.
+
+[[case]]
+name = "a couple and their two children"
+note = "The bracket every family tree is drawn with, and the arrangement everything else is a variation of: partners either side of the union that carries their children."
+graph = """
+figure ada label="Ada"
+figure bob label="Bob"
+mark   u0 kind=union
+bond   ada u0 kind=union
+bond   bob u0 kind=union
+figure cara
+figure dan
+bond   u0 cara
+bond   u0 dan
+"""
+places = [
+  "ada 0.5 0 0",
+  "bob 2.5 0 0",
+  "u0 1.5 0 0",
+  "cara 0.5 1 0",
+  "dan 2.5 1 0",
+]
+segments = [
+  "0 0.5 0 0 1 x",
+  "1 1.5 0 0 1 x",
+  "2 1.5 0 0 0.55 y",
+  "2 0.5 0.55 0 1 x",
+  "2 0.5 0.55 0 0.45 y",
+  "3 1.5 0 0 0.55 y",
+  "3 1.5 0.55 0 1 x",
+  "3 2.5 0.55 0 0.45 y",
+]
+runs = 8
+crossings = 2
+
+[[case]]
+name = "several partners, each with children"
+note = "The user's first hard case. One person, two unions, children under each — and the two unions must not land on top of one another."
+graph = """
+figure ada
+figure bob
+figure eve
+mark   u0 kind=union
+mark   u1 kind=union
+bond   ada u0 kind=union
+bond   bob u0 kind=union
+bond   ada u1 kind=union
+bond   eve u1 kind=union
+figure cara
+figure dan
+figure fay
+bond   u0 cara
+bond   u0 dan
+bond   u1 fay
+"""
+places = [
+  "ada 2.5 0 0",
+  "bob 0.5 0 0",
+  "eve 5.5 0 0",
+  "u0 1.5 0 0",
+  "u1 4 0 0",
+  "cara 0.5 1 0",
+  "dan 2.5 1 0",
+  "fay 4.5 1 0",
+]
+runs = 13
+crossings = 7
+
+[[case]]
+name = "adopted beside biological"
+note = "Two children of one union, arriving by different routes. The kinds differ and nothing else does, which is what makes the drawing say it rather than the data."
+graph = """
+figure ada
+figure bob
+mark   u0 kind=union
+bond   ada u0 kind=union
+bond   bob u0 kind=union
+figure cara
+figure dan
+bond   u0 cara kind=descent
+bond   u0 dan kind=adoption
+"""
+places = [
+  "ada 0.5 0 0",
+  "bob 2.5 0 0",
+  "u0 1.5 0 0",
+  "cara 0.5 1 0",
+  "dan 2.5 1 0",
+]
+runs = 8
+crossings = 2
+
+[[case]]
+name = "a grandparent married to a grandchild"
+note = "THE ANCESTOR EXCEPTION. Pulling the shallower partner down to meet the deeper one is right for a spouse who married in and catastrophic here: it would push the grandchild down as well, and then again, forever. So nothing moves and the union spans two rows."
+graph = """
+figure gran
+figure ada
+figure cara
+bond   gran ada
+bond   ada cara
+mark   u0 kind=union
+bond   gran u0 kind=union
+bond   cara u0 kind=union
+figure kid
+bond   u0 kid
+"""
+places = [
+  "gran 1 0 0",
+  "ada 0.5 1 0",
+  "cara 0.5 2 0",
+  "u0 1.5 2 0",
+  "kid 1.5 3 0",
+]
+segments = [
+  "0 1 0 0 0.55 y",
+  "0 0.5 0.55 0 0.5 x",
+  "0 0.5 0.55 0 0.45 y",
+  "1 0.5 1 0 1 y",
+  "2 1 0 0 0.55 y",
+  "2 1 0.55 0 1.25 x",
+  "2 2.25 0.55 0 1 y",
+  "2 1.5 1.55 0 0.75 x",
+  "2 1.5 1.55 0 0.45 y",
+  "3 0.5 2 0 1 x",
+  "4 1.5 2 0 1 y",
+]
+runs = 11
+crossings = 0
+
+[[case]]
+name = "a spouse who married in stands beside their partner"
+note = "The other half of the same rule. Eve has no parents, so nothing ranks her — and a wedding drawn a row apart is a wedding nobody can read."
+graph = """
+figure gran
+figure ada
+bond   gran ada
+figure eve
+mark   u0 kind=union
+bond   ada u0 kind=union
+bond   eve u0 kind=union
+"""
+places = [
+  "gran 0.5 0 0",
+  "ada 0.5 1 0",
+  "eve 2.5 1 0",
+  "u0 1.5 1 0",
+]
+runs = 3
+crossings = 0
+
+[[case]]
+name = "four unrelated trees stand side by side"
+note = "Several families in one space, well apart and with nothing between them. Clusters are found from the connections, not declared."
+graph = """
+figure a1
+figure a2
+bond   a1 a2
+figure b1
+figure b2
+bond   b1 b2
+figure c1
+figure c2
+bond   c1 c2
+figure d1
+figure d2
+bond   d1 d2
+"""
+places = [
+  "a1 0.5 0 0",
+  "a2 0.5 1 0",
+  "b1 2.5 0 0",
+  "b2 2.5 1 0",
+  "c1 4.5 0 0",
+  "c2 4.5 1 0",
+  "d1 6.5 0 0",
+  "d2 6.5 1 0",
+]
+runs = 4
+crossings = 0
+
+[[case]]
+name = "an origin adopts whatever nobody gave a parent"
+note = "The top of the tree stays the top however much is added later. Bob is adopted because nobody declared a parent for him; Cara is not, because somebody did."
+graph = """
+figure noctua label="Noctua" origin shape=round
+figure ada
+figure bob
+figure cara
+bond   ada cara
+"""
+places = [
+  "noctua 1.5 0 0",
+  "ada 0.5 1 0",
+  "bob 2.5 1 0",
+  "cara 0.5 2 0",
+]
+runs = 7
+crossings = 0
+
+[[case]]
+name = "the deep view puts each branch on its own plane"
+note = "A branch is a plane: the same graph, laid out along x by the flat view and along z by this one. Each plane also steps one cell sideways as it recedes, because planes stacked exactly behind one another are one plane with things hidden behind it — and the camera turn that used to separate them opened every scene at an angle nobody asked for."
+view = "deep"
+graph = """
+figure root
+figure a
+figure b
+bond   root a
+bond   root b
+figure a1
+bond   a a1
+figure b1
+bond   b b1
+"""
+places = [
+  "root 0 0 0",
+  "a 0 1 1",
+  "b 0 1 2",
+  "a1 0 2 1",
+  "b1 0 2 2",
+]
+runs = 8
+crossings = 0
+
+[[case]]
+name = "a cycle keeps every figure and drops one bond"
+note = "An author who says X descends from Y descends from X has written something impossible. Every figure is still drawn; the bond that closed the loop is what goes, and the count says so."
+graph = """
+figure a
+figure b
+figure c
+bond   a b
+bond   b c
+bond   c a
+"""
+places = [
+  "a 0.5 0 0",
+  "b 0.5 1 0",
+  "c 0.5 2 0",
+]
+runs = 3
+crossings = 0
+broken = 1
+
+[[case]]
+name = "a graph of nonsense still draws what made sense"
+note = "Totality. A statement nobody recognises, an attribute nobody recognises and a bond to an id nobody declared are three counted skips — and the two figures that did parse are still placed."
+graph = """
+figure ada
+wobble
+figure bob labl="x"
+bond   ada ghost
+bond   ada bob
+"""
+places = [
+  "ada 0.5 0 0",
+  "bob 0.5 1 0",
+]
+runs = 1
+crossings = 0
+skipped = 3
+
+[[case]]
+name = "ordering removes the crossing that declaration order creates"
+note = "Declared so the connections cross; the median sweep must uncross them. The number this pins is the whole claim of the ordering pass, and an unmeasured claim stops being true without anybody noticing."
+graph = """
+figure p1
+figure p2
+figure c1
+figure c2
+bond   p1 c2
+bond   p2 c1
+"""
+places = [
+  "p1 0.5 0 0",
+  "p2 2.5 0 0",
+  "c1 2.5 1 0",
+  "c2 0.5 1 0",
+]
+runs = 2
+crossings = 0
+
+[[case]]
+name = "a taut run carries the rotation that turns it onto its direction"
+note = "The only floating-point arithmetic in the engine, pinned to the digit. Two runs leaving one figure for two others, so the rotations are real diagonals in opposite directions rather than the identity a straight-down run would produce. Built from a cross product and one square root — exactly rounded in both languages — because `atan2` is not required to agree between a Rust target and a JavaScript engine, and a disagreement there would be a sub-pixel difference nobody could reproduce."
+route = "taut"
+graph = """
+figure a
+figure b
+figure c
+bond   a b
+bond   a c
+"""
+places = [
+  "a 1.5 0 0",
+  "b 0.5 1 0",
+  "c 2.5 1 0",
+]
+segments = [
+  "0 1.5 0 0 1.414 free -0.707 0.707 0 -0.707 -0.707 0 0 0 1",
+  "1 1.5 0 0 1.414 free 0.707 0.707 0 -0.707 0.707 0 0 0 1",
+]
+runs = 2
+crossings = 0
+
+[[case]]
+name = "a shy scene stops short"
+note = "reach: shy trims every run end that lands on a figure — and only those: the union mark keeps its touch, because a line stopping short of its own dot reads as a break. One figure carries reach=0.5 of its own, which wins over the scene default — and a reach as long as the run itself would be refused rather than let it vanish."
+reach = "shy"
+graph = """
+figure a label="Ada" reach=0.5
+figure b label="Bob"
+mark   u kind=union
+bond   a u kind=union
+bond   b u kind=union
+figure c label="Cara"
+bond   u c
+"""
+places = [
+  "a 0.5 0 0",
+  "b 2.5 0 0",
+  "u 1.5 0 0",
+  "c 1.5 1 0",
+]
+segments = [
+  "0 1 0 0 0.5 x",
+  "1 1.5 0 0 0.65 x",
+  "2 1.5 0 0 0.65 y",
+]
+runs = 3
+crossings = 1

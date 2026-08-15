@@ -4,21 +4,19 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! Content for assistive technology only, removed from the visual page.
+//! Hide content from the screen while keeping it for assistive technology.
 
 use dioxus::prelude::*;
 
-/// Content for assistive technology only, removed from the visual page.
+/// Hide content from the screen while keeping it for assistive technology.
 ///
 /// # Accessibility
 ///
-/// Not `display: none` and not `visibility: hidden` — both remove the content from
-/// the accessible tree as well, which is the opposite of the point. The clip-path
-/// technique keeps it announced while taking it out of the layout.
+/// Not `display: none` and not `visibility: hidden`, because both remove the content from the accessibility tree. The clip-path keeps it announced and out of the layout.
 #[component]
 pub fn VisuallyHidden(
-    /// Reveal it when it receives focus, as a skip link does.
-    #[props(default)]
+    /// Whether the content is revealed when it receives focus, as a skip link is.
+    #[props(default = false)]
     focusable: bool,
     /// Extra classes for the root element.
     #[props(default)]

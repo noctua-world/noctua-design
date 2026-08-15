@@ -1,0 +1,86 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """Use a table cell for one field of one record. For the cell that names the record, use a `TableHeaderCell` with `scope = "row"` instead. That is what tells a screen reader which record the rest of the row belongs to."""
+
+[meta]
+name = "TableCell"
+element = "td"
+class = "nd-table-cell"
+# A number, so alignment has something to align. Wrapped in a row and a table
+# by the variant grid, because a `<td>` outside one is dropped by the parser.
+specimen = "<span class=\"nd-identifier\">51s</span>"
+page = "tables"
+summary = "Holds one value, with its alignment, tone and wrapping, or a total in a foot."
+
+[prop.align]
+type = "enum"
+values = ["start", "center", "end", "numeric"]
+default = "start"
+attribute = "data-nd-align"
+specimen = "<span class=\"nd-identifier\">R$ 1.240,00</span>"
+doc = "Where the value sits in the cell. `numeric` puts the digits against the end and switches on tabular figures, so a column of numbers lines up unit under unit. Use `start` for words, because centred text has a ragged left edge."
+
+[prop.tone]
+type = "text"
+attribute = "data-nd-tone"
+doc = "Which of the colour system's tones the cell is painted from, named rather than chosen from a closed list: `overdue`, `shipped`, `degraded`. A name no family declares fails the build. **Never the only signal** (`NOCTUA.md §8.8.6`)."
+
+[prop.wrap]
+type = "enum"
+values = ["wrap", "nowrap", "truncate"]
+default = "wrap"
+attribute = "data-nd-wrap"
+specimen = "<span class=\"nd-identifier\">release/2026-03-candidate-rollback</span>"
+doc = "What a long value does. `wrap` is the default. `nowrap` is for a value that means nothing broken across two lines, such as a date or a code. `truncate` cuts it with an ellipsis and **keeps the whole value in the markup**."
+
+[prop.span]
+type = "text"
+attribute = "colspan"
+doc = "How many columns this cell covers. It renders as a real `colspan`, which is what a screen reader counts and what the layout is built from. Text rather than a number, like every prop that crosses the two languages."
+
+[prop.rows]
+type = "text"
+attribute = "rowspan"
+doc = "How many rows this cell covers, as a real `rowspan`. Named `rows` rather than `rowspan` so it reads beside `span`. Use it sparingly, because a cell spanning rows makes the stacked layout ambiguous."
+
+[prop.label]
+type = "text"
+attribute = "data-nd-label"
+doc = "The column's name, repeated for the stacked layout. A stacked table has no heading row left, so each value carries its own. It is drawn as real text and marked `aria-hidden`, because a screen reader gets the column from the heading."
+
+[prop.column]
+type = "text"
+attribute = "data-nd-column"
+doc = "Which `TableColumn` this cell belongs to. Only needed where a `span` has made the position ambiguous. Without spans the script counts the cells, and with them the count can land on the wrong column."
+
+[prop.sort_value]
+type = "text"
+attribute = "data-nd-sort-value"
+doc = "What to sort and filter by, when that is not what the cell says. A date shown as *3 March* sorts as `2026-03-03`, and a size shown as *1.2 MB* sorts as `1258291`. The column's `sort_as` decides how two of these compare."
+
+[prop.aggregate]
+type = "enum"
+values = ["none", "sum", "average", "count", "min", "max"]
+variants = false
+default = "none"
+attribute = "data-nd-aggregate"
+doc = """What this cell is the total of. Only in a `foot`, and only for a column of numbers. The script reads the column's values, writes the answer here in the reader's locale, and recounts when a filter hides a row. Anything already here is the fallback."""
+
+[prop.aggregate_over]
+type = "enum"
+values = ["table", "section"]
+variants = false
+default = "table"
+attribute = "data-nd-aggregate-over"
+doc = "Which rows the total counts. `table` is every visible row in the body, which makes a grand total. `section` is the rows of **this cell's own `<tbody>`**, which makes a subtotal, because several `<tbody>` elements are HTML's own row grouping."
+
+[prop.children]
+type = "children"
+doc = "The value."
+
+[a11y]
+role = "cell"
+notes = """
+The role is restated because a stacked table changes its `display`, and every
+engine drops the implicit table roles when it does. `truncate` cuts the value in
+the stylesheet and never in the markup."""

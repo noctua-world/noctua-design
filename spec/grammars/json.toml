@@ -1,0 +1,56 @@
+# JSON.
+#
+# The one place `property_colon = "string"` is exactly right: a JSON key IS a
+# string, and the only thing that distinguishes it from a string *value* is the
+# colon after it. Nothing else in the format needs context at all.
+#
+# No comments, deliberately. JSONC and JSON5 are different formats, and a
+# grammar that quietly accepted `//` would paint a syntax error as a comment.
+
+[meta]
+name = "json"
+display = "JSON"
+
+[words]
+constant = ["true", "false", "null"]
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[number]
+exponent = "eE"
+leading_dot = false
+
+[symbols]
+# The leading `-` of a negative number is an operator rather than part of the
+# number, which is not what JSON's own grammar says — but the alternative is a
+# `sign` flag every other language would set to false, and the two paint the
+# same: `operator` and `plain` are one colour in every theme.
+operator = "-"
+punctuation = "{}[],:"
+
+[context]
+property_colon = "string"
+
+[[case]]
+name = "a key is a property and a value of the same shape is a string"
+code = '{"name": "noctua"}'
+expect = ['punctuation {', 'property "name"', 'punctuation :', 'string "noctua"']
+
+[[case]]
+name = "the three literals are constants, not identifiers"
+code = '{"a": true, "b": null, "c": false}'
+expect = ["constant true", "constant null", "constant false"]
+reject = ["plain true"]
+
+[[case]]
+name = "numbers keep their sign, exponent and fraction in one token"
+code = '{"n": -1.5e-3}'
+expect = ["number 1.5e-3"]
+
+[[case]]
+name = "an unterminated string is invalid rather than swallowing the rest"
+code = '{"a": "no close'
+expect = ["invalid \"no close"]

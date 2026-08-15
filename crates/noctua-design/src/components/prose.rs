@@ -4,11 +4,11 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! A long-form reading column that caps its own line length.
+//! Holds long-form text in a column that caps its own line length.
 
 use dioxus::prelude::*;
 
-/// Which line-length cap to apply. `none` is for prose inside a narrow column that already constrains it.
+/// Which line-length cap to apply. `default` is the reading measure and `lead` is the narrower one for an opening paragraph. `none` is for prose inside a column that already constrains it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ProseMeasure {
     #[default]
@@ -35,10 +35,10 @@ impl ProseMeasure {
     }
 }
 
-/// A long-form reading column that caps its own line length.
+/// Holds long-form text in a column that caps its own line length.
 #[component]
 pub fn Prose(
-    /// Which line-length cap to apply. `none` is for prose inside a narrow column that already constrains it.
+    /// Which line-length cap to apply. `default` is the reading measure and `lead` is the narrower one for an opening paragraph. `none` is for prose inside a column that already constrains it.
     #[props(default)]
     measure: ProseMeasure,
     /// Extra classes for the root element.

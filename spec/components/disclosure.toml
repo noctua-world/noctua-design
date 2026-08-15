@@ -1,32 +1,47 @@
 # When to reach for it, and when not to. Top-level rather than inside
 # [meta], because a bare key after a table header belongs to that table.
-guidance = "For content that is present but folded away. Not for a dialog, and not for a drawer: this is `<details>`, so the content is a child of the control and moves with it. A drawer whose panel is elsewhere in the document is a button with `aria-expanded`, which is `IconButton`."
+guidance = "Use a disclosure to fold content away behind a control that opens it. It renders `<details>`, so the content sits in the flow and opening it pushes the page down. For a surface that floats over the page, use `Menu`."
 
 [meta]
 name = "Disclosure"
 element = "details"
 class = "nd-disclosure"
-summary = "Content folded away behind its own control."
+summary = "Let users show and hide a block of content from its own control."
 
 [prop.summary]
 type = "text"
 required = true
-doc = "What the control says, and its accessible name."
+doc = "The text on the control, which is also its accessible name."
+
+[prop.name]
+type = "text"
+attribute = "data-nd-disclosure"
+doc = "The identifier a script uses to find this disclosure. It is written to `data-nd-disclosure`. A disclosure with no script behind it does not need one."
 
 [prop.icon]
 type = "text"
-doc = "An icon instead of the summary text. The summary is still required and becomes the accessible name."
+doc = "An icon shown instead of the summary text. `summary` is still required and becomes the accessible name."
 
 [prop.open]
 type = "bool"
 default = "false"
 attribute = "open"
-doc = "Whether it starts open. Rendered, not applied by script — a disclosure that opens after the page paints reflows what is under it."
+doc = "Whether the disclosure starts open. Rendered in the markup rather than applied by a script, because opening after the page has painted moves the content below it."
 
 [prop.marker]
 type = "bool"
 default = "true"
-doc = "Whether to draw the chevron. Off for a control that is already an icon."
+doc = "Whether the chevron is drawn. Turn it off for a control that is already an icon."
+
+[prop.heading]
+type = "enum"
+values = ["none", "h2", "h3", "h4"]
+# A specimen has no summary to put a heading in, so all four values would draw
+# one empty box. The difference this prop makes is to the page's OUTLINE, which
+# a picture cannot show.
+variants = false
+default = "none"
+doc = "Makes the summary a real heading inside `<summary>`, at level 2, 3 or 4. Use it when the disclosure is a section of the page, so the section keeps its place in the outline a screen reader navigates by."
 
 [prop.children]
 type = "children"
@@ -34,12 +49,13 @@ doc = "The content."
 
 [a11y]
 needs_name = true
-notes = """
-`<details>`/`<summary>` rather than the `popover` attribute or a hand-built
-pair: the browser gives the role, the state and the keyboard for free, and
-gets them right in every engine. Nothing here moves focus on open and nothing
-is trapped — a reader who tabs past an open disclosure carries on into the
-page, which is correct for something that is not a dialog."""
+notes = "The component renders `<details>` and `<summary>`, which provide the role, the state and the keyboard in every engine. Opening moves no focus and traps none."
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Whether the control is frosted. It applies to the summary and the panel together, so both carry the same material."
 
 [keyboard]
-"Space or Enter" = "Opens and closes it, on the summary. The browser's, not ours."
+"Space or Enter" = "Opens and closes the disclosure, on the summary. This is the browser's own behaviour."

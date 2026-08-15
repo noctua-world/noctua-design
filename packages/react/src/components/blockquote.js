@@ -4,24 +4,32 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// A quotation set apart from the text around it.
+// Show a quotation set apart from the text around it.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
 
-/** Applied by the component, never by the caller — which is what keeps
- * the two implementations from disagreeing about a default. */
-const defaults = {
-  tone: "default",
-};
-
-export function Blockquote({ cite, tone, className, children, ...rest }) {
+export function Blockquote({ cite, tone, attribution, glass, className, children, ...rest }) {
   const tone_ = tone ?? "default";
   const root = ["nd-blockquote", className].filter(Boolean).join(" ");
-  const props = { className: root, ...rest };
-  if (cite !== undefined) props["cite"] = String(cite);
-  if (tone_ !== undefined) props["data-nd-tone"] = String(tone_);
-  return h("blockquote", props, children);
+  return h(
+    "blockquote",
+    {
+      className: root,
+      cite,
+      "data-nd-tone": tone_,
+      "data-nd-glass": String(glass ?? false),
+      ...rest,
+    },
+    children,
+    attribution
+      ? h(
+          "footer",
+          { key: "a", className: "nd-blockquote-attribution" },
+          h("cite", null, attribution),
+        )
+      : null,
+  );
 }

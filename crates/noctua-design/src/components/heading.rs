@@ -4,11 +4,11 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! A heading whose outline level and visual size are set independently.
+//! Set a heading's outline level and its visual size independently.
 
 use dioxus::prelude::*;
 
-/// The outline level. This is document structure, not appearance.
+/// The outline level, from `1` to `6`, rendered as `<h1>` to `<h6>`. This is document structure rather than appearance.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum HeadingLevel {
     /// `1`
@@ -44,7 +44,7 @@ impl HeadingLevel {
     }
 }
 
-/// The visual size, from the type scale. Independent of the level.
+/// The visual size, from the type scale: `display`, `h1`, `h2`, `h3`, `h4` or `lead`. Independent of `level`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum HeadingSize {
     /// `display`
@@ -87,23 +87,51 @@ impl HeadingSize {
     }
 }
 
-/// A heading whose outline level and visual size are set independently.
+/// How much the heading stands out. `muted` suits a heading over supporting material, and `accent` suits a heading that is also a signal.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum HeadingTone {
+    #[default]
+    /// `default`
+    Default,
+    /// `muted`
+    Muted,
+    /// `accent`
+    Accent,
+}
+
+impl HeadingTone {
+    /// Every value, in the order the spec declares them.
+    pub const ALL: [Self; 3] = [Self::Default, Self::Muted, Self::Accent];
+
+    /// The value as it appears in the DOM.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Default => "default",
+            Self::Muted => "muted",
+            Self::Accent => "accent",
+        }
+    }
+}
+
+/// Set a heading's outline level and its visual size independently.
 ///
 /// # Accessibility
 ///
-/// The level must not skip: an h2 followed by an h4 leaves a hole in the outline
-/// that a screen-reader user navigating by heading falls straight through. Choose
-/// the level from the document and the size from the design.
+/// The level must not skip. An `<h2>` followed by an `<h4>` leaves a gap in the outline a screen reader navigates by. Choose the level from the document and the size from the design.
 #[component]
 pub fn Heading(
-    /// The outline level. This is document structure, not appearance.
+    /// The outline level, from `1` to `6`, rendered as `<h1>` to `<h6>`. This is document structure rather than appearance.
     #[props(default)]
     level: HeadingLevel,
-    /// The visual size, from the type scale. Independent of the level.
+    /// The visual size, from the type scale: `display`, `h1`, `h2`, `h3`, `h4` or `lead`. Independent of `level`.
     #[props(default)]
     size: HeadingSize,
-    /// Balance the line lengths, for headings that wrap.
+    /// How much the heading stands out. `muted` suits a heading over supporting material, and `accent` suits a heading that is also a signal.
     #[props(default)]
+    tone: HeadingTone,
+    /// Whether the line lengths are balanced. For a heading that wraps onto more than one line.
+    #[props(default = false)]
     balance: bool,
     /// Extra classes for the root element.
     #[props(default)]
@@ -114,12 +142,64 @@ pub fn Heading(
     let root = format!("nd-heading {class}");
     let root = root.trim().to_owned();
 
+    // One arm per value: `rsx!` takes a literal element name, and this
+    // prop chooses the element rather than an attribute.
     rsx! {
-        h2 {
-            class: "{root}",
-            "data-nd-size": size.as_str(),
-            "data-nd-balance": if balance { "true" } else { "false" },
-            {children}
+        match level {
+            HeadingLevel::_1 => rsx! {
+                h1 {
+                    class: "{root}",
+                    "data-nd-size": size.as_str(),
+                    "data-nd-tone": tone.as_str(),
+                    "data-nd-balance": if balance { "true" } else { "false" },
+                    {children}
+                }
+            },
+            HeadingLevel::_2 => rsx! {
+                h2 {
+                    class: "{root}",
+                    "data-nd-size": size.as_str(),
+                    "data-nd-tone": tone.as_str(),
+                    "data-nd-balance": if balance { "true" } else { "false" },
+                    {children}
+                }
+            },
+            HeadingLevel::_3 => rsx! {
+                h3 {
+                    class: "{root}",
+                    "data-nd-size": size.as_str(),
+                    "data-nd-tone": tone.as_str(),
+                    "data-nd-balance": if balance { "true" } else { "false" },
+                    {children}
+                }
+            },
+            HeadingLevel::_4 => rsx! {
+                h4 {
+                    class: "{root}",
+                    "data-nd-size": size.as_str(),
+                    "data-nd-tone": tone.as_str(),
+                    "data-nd-balance": if balance { "true" } else { "false" },
+                    {children}
+                }
+            },
+            HeadingLevel::_5 => rsx! {
+                h5 {
+                    class: "{root}",
+                    "data-nd-size": size.as_str(),
+                    "data-nd-tone": tone.as_str(),
+                    "data-nd-balance": if balance { "true" } else { "false" },
+                    {children}
+                }
+            },
+            HeadingLevel::_6 => rsx! {
+                h6 {
+                    class: "{root}",
+                    "data-nd-size": size.as_str(),
+                    "data-nd-tone": tone.as_str(),
+                    "data-nd-balance": if balance { "true" } else { "false" },
+                    {children}
+                }
+            },
         }
     }
 }

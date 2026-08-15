@@ -1,0 +1,65 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use it only inside a `Segmented`. Outside one it is a `role=\"radio\"` with no group, which announces a control belonging to a set that does not exist."
+
+[meta]
+name = "SegmentedItem"
+element = "button"
+class = "nd-segmented-item"
+
+summary = "Give a `Segmented` one of the values it chooses between."
+
+[prop.value]
+type = "text"
+required = true
+attribute = "data-nd-value"
+doc = "What choosing this item means, as an identifier. The script reads this and nothing else, so it is never translated."
+
+[prop.label]
+type = "text"
+required = true
+doc = "What choosing this item means, in the reader's language. **Required**. It stays the accessible name even when `hide_label` takes the text off the screen."
+
+[prop.selected]
+type = "bool"
+default = "false"
+attribute = "aria-checked"
+doc = "Whether this is the value in force. Off by default. Render it from the known default on the server, so the group has a chosen item and one tab stop before the script runs."
+
+[prop.detail]
+type = "text"
+doc = "A second, smaller line under the label, such as the unit under a number. It is part of the accessible name, because a reader who cannot see the stack has the first line alone."
+
+[prop.icon]
+type = "text"
+doc = "An icon beside the label, or instead of it with `hide_label`. It is `aria-hidden` either way, because it repeats the label and announcing both says the same thing twice."
+
+[prop.hide_label]
+type = "bool"
+default = "false"
+attribute = "data-nd-hide-label"
+doc = "Whether the text comes off the screen while the name stays. Off by default. Use it for a row of icons whose meaning is clear by sight and must still be announced by name."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "aria-disabled"
+doc = "Whether the choice is refused. Off by default. The item stays reachable, so a reader can find that it exists and is refused rather than meeting a gap where an option was."
+
+[prop.children]
+type = "children"
+doc = "Content shown before the label, for the one thing an icon cannot be: a colour. `Swatch` is what goes here. The label still names the item."
+
+[a11y]
+role = "radio"
+needs_name = true
+notes = """
+`aria-checked` is always present, `true` or `false`, because a radio that omits
+it has an unknown state. It uses `aria-disabled` rather than `disabled`, so the
+item keeps its place in the roving order."""
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts each option's box. Off by default. The chosen option keeps its wash on top of the frost, so a reader can still tell which value is in force."

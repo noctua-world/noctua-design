@@ -1,0 +1,109 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a meter for how much of a known total is used: 41 GB of a 50 GB disk, 68%
+of a budget. For a task that starts at nothing and finishes, use `Progress`.
+`low`, `high` and `optimum` colour the bar, and `value_label` is the sentence
+beside it.
+"""
+
+[meta]
+name = "Meter"
+element = "meter"
+class = "nd-meter"
+# A reading in the middle, so the fill has something to fill and the specimen
+# is not an empty box. `<meter>` renders its own bar, so the content is only
+# what a browser too old for the element would show.
+# THE BAR, because `size` is the bar's block size and a bare percentage has
+# none. `<meter>` accepts flow content as its fallback, so this is legal
+# markup and not a trick.
+specimen = "<span class=\"nd-meter-bar\"></span>"
+summary = "Show how much of a known total is used, as a real `<meter>`."
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-meter"
+doc = "What is being measured, in the markup, and the root of the ids here. **Required**, because an id derived from an optional name is an id every copy of the component on a page shares."
+
+[prop.label]
+type = "text"
+required = true
+doc = "What the reading is of, in the reader's language, such as *Storage* or *Tokens this month*. **Required**, because a bar with no name is a shape. It is a real `<label for>`, tied to the element it names."
+
+[prop.value]
+type = "text"
+required = true
+attribute = "value"
+doc = "The reading. **Required**, because a meter with no value is the indeterminate state, which belongs to `Progress`. Text rather than a number, because every prop that crosses the two languages is text."
+
+[prop.min]
+type = "text"
+attribute = "min"
+doc = "The bottom of the range. Absent is zero. Declare it for a scale that starts below zero, such as a temperature."
+
+[prop.max]
+type = "text"
+attribute = "max"
+doc = "The top of the range. Absent is one, so a bare `value` of `0.68` is 68% with nothing else declared. A caller measuring gigabytes writes both and never divides."
+
+[prop.low]
+type = "text"
+attribute = "low"
+doc = "Below this the reading counts as low. With `optimum` it makes the bar change colour on its own. A quota at 96% is then painted the same way in every browser."
+
+[prop.high]
+type = "text"
+attribute = "high"
+doc = "Above this the reading counts as high. On a disk that is the bad end and on a battery it is the good one, which is what `optimum` settles."
+
+[prop.optimum]
+type = "text"
+attribute = "optimum"
+doc = "Where in the range good is. Below `low` for a disk, where empty is good, and above `high` for a battery, where full is. It tells the platform which side of the range to paint as trouble."
+
+[prop.unit]
+type = "text"
+attribute = "data-nd-unit"
+doc = "What the numbers are counted in, such as `GB`, `tokens` or `%`. It is not drawn on its own. `value_label` fills its `{unit}` hole with it, so the unit is written once."
+
+[prop.value_label]
+type = "text"
+attribute = "data-nd-value-label"
+doc = "The sentence beside the bar, with `{value}`, `{max}`, `{unit}` and `{percent}` holes, such as *{value} of {max} {unit} used*. **Without it a reader has to estimate from the bar.** It also becomes the element's `aria-valuetext`."
+
+[prop.tone]
+type = "text"
+attribute = "data-nd-tone"
+doc = "A tone from the colour system, for a meter with **no natural good end**, such as a share of a total. Where there is a good end, use `low`, `high` and `optimum` instead."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "How thick the bar is: `small`, `medium` or `large`. Defaults to `medium`. `small` is for a bar inside a table cell, where the row's height is the budget, and `large` for one that is the main content."
+
+[prop.hide_label]
+type = "bool"
+default = "false"
+attribute = "data-nd-label-hidden"
+doc = "Whether the name is hidden from the screen and kept for a screen reader. Off by default. Use it for a bar in a table cell whose column heading already says what it is."
+
+[prop.show_value]
+type = "bool"
+default = "true"
+attribute = "data-nd-value-shown"
+doc = "Whether the sentence is drawn beside the bar. **On by default**, because a bar without its number can only be estimated. Turn it off only where the same number is already in the cell next to it."
+
+[state.level]
+attribute = "data-nd-level"
+doc = "Where in the range the reading sits: `low` under `low`, `high` over `high`, and `middle` between them or where no threshold was declared. **It says where, not whether it is good.** Which band is trouble depends on `optimum`."
+
+[a11y]
+needs_name = true
+notes = """
+It is a real `<meter>`, so the role, the range and the announcement are the
+platform's. The name is a real `<label for>`, and `value_label` becomes
+`aria-valuetext`.
+"""

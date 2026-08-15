@@ -426,6 +426,7 @@ dependencies = [
  "dioxus",
  "dioxus-ssr",
  "noctua-design",
+ "noctua-design-grammars",
  "noctua-design-i18n",
  "noctua-design-theme",
  "noctua-design-tokens",
@@ -698,7 +699,9 @@ version = "0.1.0"
 dependencies = [
  "dioxus",
  "dioxus-ssr",
+ "noctua-design-grammars",
  "noctua-design-icons",
+ "noctua-design-lineage",
  "noctua-design-theme",
  "noctua-design-tokens",
 ]
@@ -708,8 +711,13 @@ name = "noctua-design-emit"
 version = "0.1.0"
 dependencies = [
  "indexmap",
+ "noctua-design-runtime",
  "noctua-design-spec",
 ]
+
+[[package]]
+name = "noctua-design-grammars"
+version = "0.1.0"
 
 [[package]]
 name = "noctua-design-i18n"
@@ -717,6 +725,17 @@ version = "0.1.0"
 
 [[package]]
 name = "noctua-design-icons"
+version = "0.1.0"
+
+[[package]]
+name = "noctua-design-lineage"
+version = "0.1.0"
+dependencies = [
+ "noctua-design-spec",
+]
+
+[[package]]
+name = "noctua-design-runtime"
 version = "0.1.0"
 
 [[package]]

@@ -4,28 +4,24 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// A heading whose outline level and visual size are set independently.
+// Set a heading's outline level and its visual size independently.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
 
-/** Applied by the component, never by the caller — which is what keeps
- * the two implementations from disagreeing about a default. */
-const defaults = {
-  level: "2",
-  size: "h2",
-  balance: "false",
-};
-
-export function Heading({ level, size, balance, className, children, ...rest }) {
+export function Heading({ level, size, tone, balance, className, children, ...rest }) {
   const level_ = level ?? "2";
   const size_ = size ?? "h2";
+  const tone_ = tone ?? "default";
   const balance_ = balance ?? "false";
   const root = ["nd-heading", className].filter(Boolean).join(" ");
   const props = { className: root, ...rest };
   if (size_ !== undefined) props["data-nd-size"] = String(size_);
+  if (tone_ !== undefined) props["data-nd-tone"] = String(tone_);
   if (balance_ !== undefined) props["data-nd-balance"] = String(balance_);
-  return h("h2", props, children);
+  // This prop chooses the element rather than an attribute.
+  const element = { "1": "h1", "2": "h2", "3": "h3", "4": "h4", "5": "h5", "6": "h6" }[level_] ?? "h2";
+  return h(element, props, children);
 }

@@ -1,0 +1,216 @@
+# The syntax themes.
+#
+# A THEME HERE IS A MAPPING, NOT A PALETTE. Every conventional syntax theme is a
+# list of hexadecimal colours; a colour literal fails `gates::color_literal`, and
+# `NOCTUA.md §8.8` rule 1 says this repository consumes `noctua-colors` and never
+# redefines a colour. So each theme names tokens that already exist — which is
+# also why the default follows the page for free, across thirty-nine palettes
+# times two modes, inside a `ThemeScope` on a different palette, with no script.
+#
+# WHAT THE TOKENS HAD TO BE. Measured over all 39 palettes × 2 modes against the
+# code block's own surface:
+#
+#   * `--nc-<family>-text-muted` — worst case APCA Lc 71.2. The hue tier, and
+#     the foundation everything here rests on.
+#   * `--nc-<family>-solid` — worst case Lc 32 in dark. Those are fills, not
+#     text; a theme built on them is illegible in one mode by construction.
+#   * `--nc-chart-wide-*` — a mode-invariant LIGHTNESS RAMP. Index 1 measures
+#     Lc 0.0 against a dark surface and index 12 measures Lc 0.0 against a light
+#     one. It is a chart legend read against itself, never against a page.
+#
+# AND THE HUE SET HAD TO BE FIVE. Exhaustive search over the nine chromatic
+# families, worst pair over every palette and both modes: three hues reach
+# 0.0896, five reach 0.0362, six drop to 0.0369, seven to 0.0294. A
+# just-noticeable difference is about 0.02, so five is where a set stops being
+# separable and starts being a list.
+#
+# NOTHING HERE BRANCHES ON LIGHT AND DARK. Unnecessary — the token carries the
+# mode — and unwritable: a `ThemeScope` with `mode = "system"` stamps no
+# `data-theme` at all, and the palette sheet then decides the mode with a
+# compound, same-element selector. Any rule written here is ancestor-based, and
+# the two disagree for a `system` scope inside a `light` page.
+
+[meta]
+class = "nd-codeblock"
+attribute = "data-nd-code-theme"
+token_attribute = "data-nd-tok"
+page_attribute = "data-noctua-code-theme"
+resting = "spectrum"
+automatic = "auto"
+
+# --- The signals that are not colours ----------------------------------------
+#
+# `§8.8` rule 6 is measured: the best worst-case separation a six-family
+# semantic set reaches is 0.0163, under one JND, so colour alone cannot separate
+# categories under dichromacy — and `§9.8` requires a non-colour signal for
+# anything a colour is saying. The honest argument for a syntax theme is
+# upstream's own `labelled = true`: the token TEXT carries the meaning and the
+# colour reinforces it. These run the reinforcement the other way, and in `mono`
+# they are the only thing there is.
+#
+# No role is ever bold AND italic. `spec/fonts.toml` ships Iosevka Regular 400,
+# Bold 700 and Italic 400 — and no Bold Italic — so asking for both gets CSS
+# font matching (style before weight) → Italic 400 → a synthesised bold that
+# smears the stems, which `§7.6` trap 2 forbids. A validation refuses it.
+
+[signal.comment]
+style = "italic"
+
+[signal.keyword]
+weight = "bold"
+
+[signal.escape]
+weight = "bold"
+
+[signal.invalid]
+decoration = "underline wavy"
+
+# --- The three roles that are outside every theme -----------------------------
+#
+# These are where colour carries a MEANING rather than a category, so they are
+# not a choice a theme gets to make: a removed line is `danger` in every theme,
+# or the colour is lying. The `+` and `−` stay in the text and the gutter carries
+# a sign, which is the non-colour half `§8.8` rule 6 requires.
+
+[pinned]
+inserted = "--nc-success-text-muted"
+deleted = "--nc-danger-text-muted"
+invalid = "--nc-urgent-text-muted"
+
+# --- spectrum: all the colour there is ---------------------------------------
+#
+# The five families are the measured best five-subset. The assignment is an
+# exhaustive search over all 120 permutations against an adjacency graph
+# weighted by how often two paints sit side by side, and the heaviest edge is
+# `string`/`number` — because `escape` shares `number`'s paint and sits INSIDE a
+# string literal, which is the tightest adjacency any language has. Measured
+# worst case for that pair across every palette and both modes: 0.0427, with
+# bold on top of it.
+#
+# The family names are hues chosen for separation, not meanings. `function` on
+# `danger` reads oddly and is deliberate: nothing about a function call is
+# dangerous, and the alternative — assigning by name — puts `function` on
+# `accent`, which lands 0.0056 from `active` on an azure accent and 0.0271 from
+# `info` on a blue one. A theme broken on three of thirteen accents is worse
+# than one whose token names do not read as prose.
+
+[theme.spectrum]
+plain = "--nc-color-fg"
+operator = "--nc-color-fg"
+punctuation = "--nc-color-fg-muted"
+comment = "--nc-color-fg-muted"
+keyword = "--nc-success-text-muted"
+string = "--nc-active-text-muted"
+escape = "--nc-warning-text-muted"
+number = "--nc-warning-text-muted"
+constant = "--nc-warning-text-muted"
+type = "--nc-progress-text-muted"
+tag = "--nc-progress-text-muted"
+function = "--nc-danger-text-muted"
+property = "--nc-danger-text-muted"
+attribute = "--nc-danger-text-muted"
+
+# --- duotone: the literals and the names, and nothing else -------------------
+#
+# Two hues, and the widest measured pair of the five: success against danger at
+# 0.0895, four and a half JND. One colour for what the code SAYS (strings,
+# numbers, constants) and one for what it CALLS THINGS (keywords, types,
+# functions), which is the distinction a reader scanning unfamiliar code is
+# actually making.
+
+[theme.duotone]
+plain = "--nc-color-fg"
+operator = "--nc-color-fg"
+punctuation = "--nc-color-fg-muted"
+comment = "--nc-color-fg-muted"
+keyword = "--nc-danger-text-muted"
+string = "--nc-success-text-muted"
+escape = "--nc-success-text-muted"
+number = "--nc-success-text-muted"
+constant = "--nc-success-text-muted"
+type = "--nc-danger-text-muted"
+tag = "--nc-danger-text-muted"
+function = "--nc-danger-text-muted"
+property = "--nc-danger-text-muted"
+attribute = "--nc-danger-text-muted"
+
+# --- muted: only the literals are coloured -----------------------------------
+#
+# One hue, and it is the reader's own accent — which is the one place using
+# `--nc-accent-*` is safe, because nothing else here is chromatic and so nothing
+# can collide with it whichever of the thirteen accents they chose. Structure
+# stays on the foreground, which is what a reader who finds colour distracting
+# but still wants to see where a string ends is asking for.
+
+[theme.muted]
+plain = "--nc-color-fg"
+operator = "--nc-color-fg"
+punctuation = "--nc-color-fg-muted"
+comment = "--nc-color-fg-muted"
+keyword = "--nc-color-fg"
+string = "--nc-accent-text-muted"
+escape = "--nc-accent-text-muted"
+number = "--nc-accent-text-muted"
+constant = "--nc-accent-text-muted"
+type = "--nc-color-fg"
+tag = "--nc-color-fg"
+function = "--nc-color-fg"
+property = "--nc-color-fg"
+attribute = "--nc-color-fg"
+
+# --- mono: no hue at all ------------------------------------------------------
+#
+# Two neutral tiers, measured 0.2411 apart in light and 0.1253 in dark, plus the
+# weight and the italic above. It is what `auto` falls to when the reader's
+# system asks for more contrast, for monochrome, for forced colours or for
+# print — and it is the honest answer to `§8.8` rule 6, because it is the only
+# theme here that makes no claim colour has to carry.
+
+[theme.mono]
+plain = "--nc-color-fg"
+operator = "--nc-color-fg"
+punctuation = "--nc-color-fg-muted"
+comment = "--nc-color-fg-muted"
+keyword = "--nc-color-fg"
+string = "--nc-color-fg"
+escape = "--nc-color-fg"
+number = "--nc-color-fg"
+constant = "--nc-color-fg"
+type = "--nc-color-fg"
+tag = "--nc-color-fg"
+function = "--nc-color-fg"
+property = "--nc-color-fg"
+attribute = "--nc-color-fg"
+
+# --- what `auto` answers to ---------------------------------------------------
+#
+# CAPABILITY, NEVER APPEARANCE. Every entry is a media feature, so there is no
+# cascade ambiguity and no `ThemeScope` interaction at all — and none of them is
+# about the viewport, because a theme that changed with the width would change
+# while somebody was reading.
+#
+# What `auto` deliberately does NOT branch on: the mode (the token carries it,
+# and an ancestor-based rule cannot agree with the colour system's same-element
+# one), the glass level (glass changes the background, and the answer to that is
+# to measure the result), the backdrop (about one Lc between the six) and the
+# saturation (swept; nothing crosses a threshold).
+
+[[auto]]
+when = "(prefers-contrast: more)"
+theme = "mono"
+because = "the reader asked their system for more contrast, and the hue tier sits at Lc 71 where the neutral tiers sit at 71 and 95"
+
+[[auto]]
+when = "(monochrome)"
+theme = "mono"
+because = "the hue tier is isoluminant by construction, so a monochrome display collapses all five hues into one grey"
+
+[[auto]]
+when = "(forced-colors: active)"
+theme = "mono"
+because = "the user agent has already decided the colours; what survives is the weight, the italic and the underline, and those must not be competing with a scheme this file thinks it controls"
+
+[[auto]]
+when = "print"
+theme = "mono"
+because = "most printing is monochrome, and five isoluminant hues print as five identical greys"

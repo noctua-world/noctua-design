@@ -6,9 +6,9 @@
    * Edits to this file will be overwritten. Change the spec instead.
    */
 
-/* Every non-colour token, as CSS custom properties.
+/* Every non-color token, as CSS custom properties.
  
-   Colours are NOT here. They come from noctua-colors as --nc-* and are
+   Colors are NOT here. They come from noctua-colors as --nc-* and are
    vendored separately; this file and that one never define the same
    name. */
 
@@ -99,17 +99,42 @@
   /* Border widths. */
   --noctua-border-hairline: 1px;
   --noctua-border-strong: 2px;
+  --noctua-border-rule: 5px;
 
   /* Focus ring geometry. */
   --noctua-focus-width: 2px;
   --noctua-focus-offset: 2px;
+
+  /* The scene: what a Lineage cell is worth. */
+  --noctua-scene-cell: 9rem;
+  --noctua-scene-squeeze: 0.85;
+  --noctua-scene-scale-small: 0.85;
+  --noctua-scene-scale-large: 1.15;
+  --noctua-scene-row: 10rem;
+  --noctua-scene-figure: 0.86;
+  --noctua-scene-card: 7rem;
+  --noctua-scene-mark: 1.25rem;
+  --noctua-scene-face: 1.75rem;
+  --noctua-scene-slab: 0.625rem;
+  --noctua-scene-line: 0.1875rem;
+  --noctua-scene-perspective: 64rem;
+  --noctua-scene-tilt: 12deg;
+  --noctua-scene-turn: 0deg;
+  --noctua-scene-turn-deep: 26deg;
+  --noctua-scene-lift: 1.25rem;
+
+  /* Breakpoints, as lengths — see the note at the foot of this file. */
+  --noctua-breakpoint-sm: 30rem;
+  --noctua-breakpoint-md: 48rem;
+  --noctua-breakpoint-lg: 64rem;
+  --noctua-breakpoint-xl: 80rem;
 }
 
 /* Reduced motion. Declared once here so that honouring the preference
    is a property of the token rather than something every component has
    to remember — and so forgetting it is impossible rather than silent.
  
-   Not every collapse is 0ms: a colour or opacity change at zero reads as
+   Not every collapse is 0ms: a color or opacity change at zero reads as
    a glitch, while a movement at zero is exactly what was asked for. */
 @media (prefers-reduced-motion: reduce) {
   :root {
@@ -121,8 +146,9 @@
 }
 
 /* Breakpoints, for reference. A media query cannot read a custom
-   property, so these are not emitted as ones — they are compiled into
-   the generated Rust and TypeScript modules instead.
+   property, so a QUERY cannot be written from the tokens above — they
+   are compiled into the generated Rust and TypeScript modules instead,
+   and the custom properties exist for the other use, as a length.
  
    Mobile-first: every one is a MINIMUM width.
      sm: 30rem

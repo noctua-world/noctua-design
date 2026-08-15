@@ -1,0 +1,82 @@
+# C.
+#
+# The preprocessor is a `line_start` sigil: `#include` is a directive and `a # b`
+# is not, and the only thing that tells them apart is where on the line the `#`
+# sits. What that costs is `#include <stdio.h>` — the angle brackets scan as
+# operators, because a `<…>` string form would turn every comparison in the
+# language into a literal.
+
+[meta]
+name = "c"
+display = "C"
+aliases = ["h"]
+
+[words]
+keyword = [
+  "auto", "break", "case", "const", "continue", "default", "do", "else",
+  "enum", "extern", "for", "goto", "if", "inline", "register", "restrict",
+  "return", "sizeof", "static", "struct", "switch", "typedef", "union",
+  "volatile", "while",
+]
+type = [
+  "bool", "char", "double", "float", "int", "long", "short", "signed",
+  "size_t", "ssize_t", "uint8_t", "uint16_t", "uint32_t", "uint64_t",
+  "int8_t", "int16_t", "int32_t", "int64_t", "unsigned", "void",
+]
+constant = ["NULL", "false", "true"]
+function = ["free", "malloc", "memcpy", "memset", "printf", "realloc", "snprintf", "strlen"]
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+max = 12
+
+[number]
+prefixes = ["0x", "0b"]
+separator = "'"
+exponent = "eEpP"
+suffix = true
+
+[symbols]
+operator = "+-*/%=<>!&|^~?"
+punctuation = "(){}[],;:.#"
+
+[[sigil]]
+open = "#"
+role = "attribute"
+line_start = true
+
+[context]
+name_after = { struct = "type", enum = "type", union = "type", typedef = "type" }
+call_paren = true
+screaming_constant = true
+member_dot = true
+
+[[case]]
+name = "a directive is a directive only at the start of a line"
+code = "#define MAX 8\nint n = a # b;"
+expect = ["attribute #define", "constant MAX", "number 8", "type int"]
+reject = ["attribute #b"]
+
+[[case]]
+name = "a character literal does not eat the rest of the line"
+code = "if (c == 'x') return 1; else return 0;"
+expect = ["keyword if", "string 'x'", "keyword return", "number 1"]
+
+[[case]]
+name = "a digit separator and a hex float are each one number"
+code = "long big = 1'000'000; double d = 0x1p-3;"
+expect = ["number 1'000'000", "number 0x1p-3"]

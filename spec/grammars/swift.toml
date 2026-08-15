@@ -1,0 +1,80 @@
+# Swift.
+
+[meta]
+name = "swift"
+display = "Swift"
+
+[words]
+keyword = [
+  "actor", "any", "as", "associatedtype", "async", "await", "break", "case",
+  "catch", "class", "continue", "convenience", "default", "defer", "deinit",
+  "do", "else", "enum", "extension", "fallthrough", "fileprivate", "final",
+  "for", "func", "guard", "if", "import", "in", "indirect", "init", "inout",
+  "internal", "is", "lazy", "let", "mutating", "open", "operator", "private",
+  "protocol", "public", "repeat", "required", "rethrows", "return",
+  "some", "static", "struct", "subscript", "super", "switch", "throw",
+  "throws", "try", "typealias", "var", "weak", "where", "while",
+]
+type = [
+  "Any", "Array", "Bool", "Character", "Dictionary", "Double", "Error",
+  "Float", "Int", "Optional", "Result", "Set", "String", "UInt", "Void",
+]
+constant = ["false", "true", "nil", "self", "Self"]
+function = ["assert", "fatalError", "map", "precondition", "print", "zip"]
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "/*"
+close = "*/"
+nestable = true
+
+[[string]]
+open = '"""'
+close = '"""'
+escape = "\\"
+multiline = true
+interpolate_open = "\\("
+interpolate_close = ")"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+interpolate_open = "\\("
+interpolate_close = ")"
+
+[number]
+prefixes = ["0x", "0b", "0o"]
+separator = "_"
+exponent = "eEpP"
+
+[symbols]
+operator = "+-*/%=<>!&|^~?"
+punctuation = "(){}[],;:."
+
+[[sigil]]
+open = "@"
+role = "attribute"
+
+[[sigil]]
+open = "#"
+role = "attribute"
+
+[context]
+name_after = { func = "function", class = "type", struct = "type", enum = "type", protocol = "type", extension = "type", typealias = "type", actor = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+member_dot = true
+
+[[case]]
+name = "an attribute, a declaration and an interpolation"
+code = '@MainActor func show(_ n: Int) { print("n is \(n)") }'
+expect = ["attribute @MainActor", "keyword func", "function show", "type Int", "function print"]
+
+[[case]]
+name = "a nested comment does not leak"
+code = "/* a /* b */ c */ let x = 1"
+expect = ["comment /* a /* b */ c */", "keyword let", "number 1"]

@@ -136,7 +136,7 @@ impl Accent {
     ];
 
     /// The value in force when nothing is stored.
-    pub const DEFAULT: Self = Self::Ochre;
+    pub const DEFAULT: Self = Self::Blue;
 
     /// The `localStorage` key.
     pub const KEY: &'static str = "noctua-accent";
@@ -378,7 +378,7 @@ impl Palette {
     ];
 
     /// The value in force when nothing is stored.
-    pub const DEFAULT: Self = Self::OchreBalanced;
+    pub const DEFAULT: Self = Self::BlueBalanced;
 
     /// The `localStorage` key.
     pub const KEY: &'static str = "noctua-palette";
@@ -664,36 +664,55 @@ impl Default for Radius {
     }
 }
 
-/// The `blackout` setting.
+/// The `backdrop` setting.
 ///
-/// Stored under `noctua-blackout`, stamped as `data-noctua-blackout`.
+/// Stored under `noctua-backdrop`, stamped as `data-noctua-backdrop`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Blackout {
-    /// `off`.
-    Off,
-    /// `on`.
-    On,
+pub enum Backdrop {
+    /// `plain`.
+    Plain,
+    /// `cool`.
+    Cool,
+    /// `black`.
+    Black,
+    /// `tinted`.
+    Tinted,
+    /// `soft`.
+    Soft,
+    /// `softer`.
+    Softer,
 }
 
-impl Blackout {
+impl Backdrop {
     /// Every value, in declaration order.
-    pub const ALL: [Self; 2] = [Self::Off, Self::On];
+    pub const ALL: [Self; 6] = [
+        Self::Plain,
+        Self::Cool,
+        Self::Black,
+        Self::Tinted,
+        Self::Soft,
+        Self::Softer,
+    ];
 
     /// The value in force when nothing is stored.
-    pub const DEFAULT: Self = Self::Off;
+    pub const DEFAULT: Self = Self::Plain;
 
     /// The `localStorage` key.
-    pub const KEY: &'static str = "noctua-blackout";
+    pub const KEY: &'static str = "noctua-backdrop";
 
     /// The DOM attribute this is stamped as.
-    pub const ATTRIBUTE: &'static str = "data-noctua-blackout";
+    pub const ATTRIBUTE: &'static str = "data-noctua-backdrop";
 
     /// The value as it appears in storage and the DOM.
     #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
-            Self::Off => "off",
-            Self::On => "on",
+            Self::Plain => "plain",
+            Self::Cool => "cool",
+            Self::Black => "black",
+            Self::Tinted => "tinted",
+            Self::Soft => "soft",
+            Self::Softer => "softer",
         }
     }
 
@@ -705,14 +724,18 @@ impl Blackout {
     #[must_use]
     pub fn parse(value: &str) -> Option<Self> {
         match value {
-            "off" => Some(Self::Off),
-            "on" => Some(Self::On),
+            "plain" => Some(Self::Plain),
+            "cool" => Some(Self::Cool),
+            "black" => Some(Self::Black),
+            "tinted" => Some(Self::Tinted),
+            "soft" => Some(Self::Soft),
+            "softer" => Some(Self::Softer),
             _ => None,
         }
     }
 }
 
-impl Default for Blackout {
+impl Default for Backdrop {
     fn default() -> Self {
         Self::DEFAULT
     }
@@ -790,60 +813,6 @@ impl Default for Pattern {
     }
 }
 
-/// The `glow` setting.
-///
-/// Stored under `noctua-glow`, stamped as `data-noctua-glow`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Glow {
-    /// `off`.
-    Off,
-    /// `on`.
-    On,
-}
-
-impl Glow {
-    /// Every value, in declaration order.
-    pub const ALL: [Self; 2] = [Self::Off, Self::On];
-
-    /// The value in force when nothing is stored.
-    pub const DEFAULT: Self = Self::Off;
-
-    /// The `localStorage` key.
-    pub const KEY: &'static str = "noctua-glow";
-
-    /// The DOM attribute this is stamped as.
-    pub const ATTRIBUTE: &'static str = "data-noctua-glow";
-
-    /// The value as it appears in storage and the DOM.
-    #[must_use]
-    pub const fn as_str(self) -> &'static str {
-        match self {
-            Self::Off => "off",
-            Self::On => "on",
-        }
-    }
-
-    /// Parses a stored value, rejecting anything unrecognised.
-    ///
-    /// A stored value reaches an `href` and a DOM attribute, so it is
-    /// never trusted — a corrupt or hostile entry must degrade to the
-    /// default rather than be stamped.
-    #[must_use]
-    pub fn parse(value: &str) -> Option<Self> {
-        match value {
-            "off" => Some(Self::Off),
-            "on" => Some(Self::On),
-            _ => None,
-        }
-    }
-}
-
-impl Default for Glow {
-    fn default() -> Self {
-        Self::DEFAULT
-    }
-}
-
 /// The `grain` setting.
 ///
 /// Stored under `noctua-grain`, stamped as `data-noctua-grain`.
@@ -893,6 +862,78 @@ impl Grain {
 }
 
 impl Default for Grain {
+    fn default() -> Self {
+        Self::DEFAULT
+    }
+}
+
+/// The `syntax` setting.
+///
+/// Stored under `noctua-syntax`, stamped as `data-noctua-code-theme`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Syntax {
+    /// `auto`.
+    Auto,
+    /// `spectrum`.
+    Spectrum,
+    /// `duotone`.
+    Duotone,
+    /// `muted`.
+    Muted,
+    /// `mono`.
+    Mono,
+}
+
+impl Syntax {
+    /// Every value, in declaration order.
+    pub const ALL: [Self; 5] = [
+        Self::Auto,
+        Self::Spectrum,
+        Self::Duotone,
+        Self::Muted,
+        Self::Mono,
+    ];
+
+    /// The value in force when nothing is stored.
+    pub const DEFAULT: Self = Self::Auto;
+
+    /// The `localStorage` key.
+    pub const KEY: &'static str = "noctua-syntax";
+
+    /// The DOM attribute this is stamped as.
+    pub const ATTRIBUTE: &'static str = "data-noctua-code-theme";
+
+    /// The value as it appears in storage and the DOM.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Auto => "auto",
+            Self::Spectrum => "spectrum",
+            Self::Duotone => "duotone",
+            Self::Muted => "muted",
+            Self::Mono => "mono",
+        }
+    }
+
+    /// Parses a stored value, rejecting anything unrecognised.
+    ///
+    /// A stored value reaches an `href` and a DOM attribute, so it is
+    /// never trusted — a corrupt or hostile entry must degrade to the
+    /// default rather than be stamped.
+    #[must_use]
+    pub fn parse(value: &str) -> Option<Self> {
+        match value {
+            "auto" => Some(Self::Auto),
+            "spectrum" => Some(Self::Spectrum),
+            "duotone" => Some(Self::Duotone),
+            "muted" => Some(Self::Muted),
+            "mono" => Some(Self::Mono),
+            _ => None,
+        }
+    }
+}
+
+impl Default for Syntax {
     fn default() -> Self {
         Self::DEFAULT
     }
@@ -975,6 +1016,12 @@ pub struct ScopeRequest {
     pub glass: Option<Glass>,
     /// The `radius` this scope asks for.
     pub radius: Option<Radius>,
+    /// The `backdrop` this scope asks for.
+    pub backdrop: Option<Backdrop>,
+    /// The `pattern` this scope asks for.
+    pub pattern: Option<Pattern>,
+    /// The `grain` this scope asks for.
+    pub grain: Option<Grain>,
 }
 
 /// What the surrounding page or scope already resolved to.
@@ -994,6 +1041,12 @@ pub struct Resolved {
     pub glass: Glass,
     /// The inherited `radius`.
     pub radius: Radius,
+    /// The inherited `backdrop`.
+    pub backdrop: Backdrop,
+    /// The inherited `pattern`.
+    pub pattern: Pattern,
+    /// The inherited `grain`.
+    pub grain: Grain,
 }
 
 impl Default for Resolved {
@@ -1006,6 +1059,9 @@ impl Default for Resolved {
             font: Font::DEFAULT,
             glass: Glass::DEFAULT,
             radius: Radius::DEFAULT,
+            backdrop: Backdrop::DEFAULT,
+            pattern: Pattern::DEFAULT,
+            grain: Grain::DEFAULT,
         }
     }
 }
@@ -1043,6 +1099,18 @@ impl ScopeRequest {
                 Some(v) => v,
                 None => inherited.radius,
             },
+            backdrop: match self.backdrop {
+                Some(v) => v,
+                None => inherited.backdrop,
+            },
+            pattern: match self.pattern {
+                Some(v) => v,
+                None => inherited.pattern,
+            },
+            grain: match self.grain {
+                Some(v) => v,
+                None => inherited.grain,
+            },
         }
     }
 
@@ -1061,7 +1129,7 @@ impl ScopeRequest {
 ///
 /// # All of them go on ONE element
 ///
-/// The colour system's forced-mode selector is **compound and
+/// The color system's forced-mode selector is **compound and
 /// same-element**:
 ///
 /// ```css
@@ -1088,7 +1156,6 @@ pub fn scope_attributes(
     let r = request.resolve(inherited);
     ::core::option::Option::Some(ScopeAttributes {
         scope: SCOPE_ATTRIBUTE,
-        palette: r.palette.as_str(),
         // `system` stamps nothing: the cascade resolves it, and an
         // attribute no stylesheet understands would be worse than none.
         mode: if r.mode.is_omitted() {
@@ -1096,9 +1163,13 @@ pub fn scope_attributes(
         } else {
             ::core::option::Option::Some(r.mode.as_str())
         },
+        palette: r.palette.as_str(),
         font: r.font.as_str(),
         glass: r.glass.as_str(),
         radius: r.radius.as_str(),
+        backdrop: r.backdrop.as_str(),
+        pattern: r.pattern.as_str(),
+        grain: r.grain.as_str(),
     })
 }
 
@@ -1107,14 +1178,58 @@ pub fn scope_attributes(
 pub struct ScopeAttributes {
     /// The marker that makes the semantic contract resolve here.
     pub scope: &'static str,
-    /// `data-palette`.
-    pub palette: &'static str,
     /// `data-theme`, or `None` when the scope follows the system.
     pub mode: ::core::option::Option<&'static str>,
+    /// `data-palette`.
+    pub palette: &'static str,
     /// `data-noctua-font`.
     pub font: &'static str,
     /// `data-noctua-glass`.
     pub glass: &'static str,
     /// `data-noctua-radius`.
     pub radius: &'static str,
+    /// `data-noctua-backdrop`.
+    pub backdrop: &'static str,
+    /// `data-noctua-pattern`.
+    pub pattern: &'static str,
+    /// `data-noctua-grain`.
+    pub grain: &'static str,
 }
+
+/// Every attribute a scope element can carry, including the marker.
+///
+/// Removing all of them is how a scope is taken back off. A scope left
+/// half-removed keeps re-resolving the semantic contract at its own
+/// element — against the system preference rather than the page — which
+/// is worse than one that never resolved it at all.
+pub const SCOPE_ATTRIBUTES: [&str; 9] = [
+    "data-noctua-scope",
+    "data-theme",
+    "data-palette",
+    "data-noctua-font",
+    "data-noctua-glass",
+    "data-noctua-radius",
+    "data-noctua-backdrop",
+    "data-noctua-pattern",
+    "data-noctua-grain",
+];
+
+/// Every setting a scope can carry, in the spec's own order.
+///
+/// A setting absent here is `scope = false`: it is emitted at `:root`
+/// and no element below it can hold a different value. Sealing a
+/// subtree off from the page means carrying every one of these, so a
+/// consumer that reconstructs the list by hand stops sealing the day a
+/// setting is added.
+pub const SCOPABLE_SETTINGS: [&str; 10] = [
+    "mode",
+    "accent",
+    "saturation",
+    "palette",
+    "font",
+    "glass",
+    "radius",
+    "backdrop",
+    "pattern",
+    "grain",
+];

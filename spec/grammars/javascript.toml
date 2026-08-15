@@ -1,0 +1,100 @@
+# JavaScript.
+#
+# Two things this deliberately does not do, both for the same reason — the
+# scanner has one token of lookbehind and a regular expression needs a parser:
+#
+#   * A regex literal. `/` is division far more often than it opens a pattern,
+#     and telling them apart needs to know whether the previous token was a
+#     value or an operator, which needs to know what a value is.
+#   * JSX. See `jsx.toml`, which is this file with the `<` heuristic added and
+#     an honest note about where it fails.
+
+[meta]
+name = "javascript"
+display = "JavaScript"
+aliases = ["js", "mjs", "cjs", "node"]
+
+[identifier]
+extra = "_$"
+
+[words]
+keyword = [
+  "as", "async", "await", "break", "case", "catch", "class", "const",
+  "continue", "debugger", "default", "delete", "do", "else", "export",
+  "extends", "finally", "for", "from", "function", "get", "if", "import",
+  "let", "new", "of", "return", "set", "static", "super", "switch", "throw",
+  "try", "var", "while", "with", "yield",
+]
+operator = ["in", "instanceof", "typeof", "void"]
+constant = ["false", "true", "null", "undefined", "NaN", "Infinity", "this"]
+type = [
+  "Array", "BigInt", "Boolean", "Date", "Error", "Function", "Map", "Number",
+  "Object", "Promise", "Proxy", "RegExp", "Set", "String", "Symbol", "WeakMap",
+]
+function = ["console", "document", "globalThis", "require", "window"]
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+
+# The template literal, which is the only multiline string and the only one
+# with a hole in it.
+[[string]]
+open = "`"
+close = "`"
+escape = "\\"
+multiline = true
+interpolate_open = "${"
+interpolate_close = "}"
+
+[number]
+prefixes = ["0x", "0b", "0o"]
+separator = "_"
+exponent = "eE"
+suffix = true
+leading_dot = true
+
+[symbols]
+operator = "+-*/%=<>!&|^~?:"
+punctuation = "(){}[],;.@#"
+
+[context]
+name_after = { function = "function", class = "type", extends = "type", new = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+member_dot = true
+property_colon = "any"
+
+[[case]]
+name = "a template literal's hole is not literal text"
+code = "const greet = `hello ${name}, welcome`;"
+expect = ["keyword const", "string `hello ", "escape ${name}", "string , welcome`"]
+
+[[case]]
+name = "a declaration names its own kind"
+code = "function total(items) { return items.length; }"
+expect = ["keyword function", "function total", "keyword return", "property length"]
+
+[[case]]
+name = "an object key is a property and the same word elsewhere is not"
+code = "const o = { size: size };"
+expect = ["property size", "plain size"]
+
+[[case]]
+name = "a bigint and a separated number are each one token"
+code = "const big = 9_007_199_254_740_993n;"
+expect = ["number 9_007_199_254_740_993n"]

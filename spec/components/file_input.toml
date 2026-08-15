@@ -1,0 +1,152 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a file input when users choose files: a photograph, a document, an import. What was chosen is always listed, by name and size, with a control to take each one off. `accept` and `max_size` are not security checks."
+
+[meta]
+name = "FileInput"
+element = "input"
+class = "nd-file-input"
+specimen = "<span class=\"nd-file-input-figure\"><span class=\"nd-file-input-area\"></span></span>"
+summary = "Let users choose files, by picking or dropping them, and correct what they chose."
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-file-input"
+doc = "The field the files are submitted under, and the root of every id here. **Required**, because an id derived from an optional name is an id every copy on a page shares."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The question, in the reader's language. `Field` draws it as a real `<label for>`. Required."
+
+[prop.browse_label]
+type = "text"
+required = true
+doc = "The text on the control that opens the picker, such as *Choose a file*. **Required**, because it is the only text on that control."
+
+[prop.drop]
+type = "bool"
+default = "true"
+attribute = "data-nd-drop"
+doc = "Whether files can be dragged onto the area. **On by default, and never the only way in.** The area is the `<label>` of the real input, so a press, a Tab and an Enter do the same as a drop."
+
+[prop.drop_label]
+type = "text"
+attribute = "data-nd-drop-label"
+doc = "The sentence beside the control, such as *or drop them here*. Supply it with `drop`, because an affordance users are not told about goes unused."
+
+[prop.accept]
+type = "text"
+attribute = "accept"
+doc = "Which kinds of file the picker offers, such as `image/*` or `.pdf,.docx`. The real attribute, so the reader's own file dialog filters before they choose. **Not a security control**: it runs in a page the reader controls."
+
+[prop.accept_label]
+type = "text"
+attribute = "data-nd-accept-label"
+doc = "What the component says when a dropped file is not one of those, with a `{name}` hole. Supply it with `accept`, because a drop that does nothing gives no reason."
+
+[prop.multiple]
+type = "bool"
+default = "false"
+attribute = "multiple"
+doc = "Whether more than one file may be chosen. The real attribute, so the reader's own dialog allows it. Off, a second choice **replaces** the first rather than joining it."
+
+[prop.max]
+type = "text"
+attribute = "data-nd-max"
+doc = "How many files are allowed, with `multiple`. At the limit the rest are refused and the component says why rather than dropping them in silence."
+
+[prop.max_label]
+type = "text"
+attribute = "data-nd-max-label"
+doc = "What the component says at that limit, with a `{max}` hole."
+
+[prop.max_size]
+type = "text"
+attribute = "data-nd-max-size"
+doc = "The largest a single file may be, in bytes. Checked here to save an upload that was going to fail, **and never instead of the server**, which is where the check counts."
+
+[prop.max_size_label]
+type = "text"
+attribute = "data-nd-max-size-label"
+doc = "What the component says when a file is too big, with `{name}` and `{size}` holes. Supply it with `max_size`, because a file that vanishes on being chosen gives no reason."
+
+[prop.remove_label]
+type = "text"
+attribute = "data-nd-remove-label"
+doc = "The name of each listed file's own remove control, with a `{name}` hole. A reader hears *Remove report.pdf* rather than *Remove* six times down a list."
+
+[prop.empty_label]
+type = "text"
+attribute = "data-nd-empty-label"
+doc = "What the list says when nothing has been chosen, such as *No files chosen yet*. Without it the space where a list is about to appear is silent."
+
+[prop.status]
+type = "text"
+attribute = "data-nd-status"
+doc = "How many files there are, with a `{count}` hole. One whole sentence with one hole, and it may carry one form per plural category, which is what keeps *1 files* off the page."
+
+[prop.added_label]
+type = "text"
+attribute = "data-nd-added-label"
+doc = "What is announced when files arrive, with a `{count}` hole. A drop moves no focus and changes nothing that has it, so without this sentence dropping six files is silent to a screen reader."
+
+[prop.removed_label]
+type = "text"
+attribute = "data-nd-removed-label"
+doc = "What is announced when a file is taken off. The control that did it has just left the page and focus has had to move, so this is the sentence that reports it."
+
+[prop.hint]
+type = "text"
+doc = "What a reader needs before choosing, such as which formats and how big. Drawn by `Field`."
+
+[prop.error]
+type = "text"
+doc = """What is wrong, after a submission. The caller's own sentence, in `role="alert"`."""
+
+[prop.required]
+type = "bool"
+default = "false"
+attribute = "required"
+doc = "Whether a file is needed. The real attribute on the real input, so the browser refuses the submission with no script at all."
+
+[prop.required_label]
+type = "text"
+doc = "The word `Field` marks the question with. Supply it with `required`."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Stops users choosing files. It refuses the control, the area and every remove control, and submits nothing."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+variants = false
+default = "medium"
+attribute = "data-nd-size"
+doc = "The size of the area and the list: `small`, `medium` or `large`. `medium` by default, matching the rest of the form."
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts the area. The list of files stays opaque, because file names are what a reader is here to read."
+
+[state.invalid]
+attribute = "aria-invalid"
+doc = "Set when an `error` was given, or a file was refused for its type, its size or its count. The area takes the danger tone and the sentence that refused it appears, never colour alone."
+
+[state.dragging]
+attribute = "data-nd-dragging"
+doc = "Whether a file is over the area. The border and the ground change so a reader can see where the drop will land. It is cleared on leaving as well as on dropping."
+
+[a11y]
+needs_name = true
+notes = "The drop area is the `<label>` of a real file input, so it is focusable, pressable and announced. The input is clipped rather than `display: none`, which would take it out of the accessible tree."
+
+[keyboard]
+"Enter or Space" = "Opens the file picker from the area. The browser's own behaviour, because the area is a `<label>`."
+"Delete or Backspace" = "Removes the file whose remove control has focus."

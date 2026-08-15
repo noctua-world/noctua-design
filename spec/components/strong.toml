@@ -2,7 +2,9 @@
 name = "Strong"
 element = "strong"
 class = "nd-strong"
-summary = "Importance, seriousness or urgency — not merely bold text."
+# One of the marks that go inside a sentence, documented with the others.
+page = "inline-text"
+summary = "Mark text as important, serious or urgent, rather than only bold."
 
 [prop.children]
 type = "children"

@@ -4,17 +4,19 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// Text removed from the document.
+// Shows text that has been removed from the document.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
 
-export function Del({ cite, datetime, className, children, ...rest }) {
+export function Del({ cite, datetime, label, className, children, ...rest }) {
   const root = ["nd-del", className].filter(Boolean).join(" ");
-  const props = { className: root, ...rest };
-  if (cite !== undefined) props["cite"] = String(cite);
-  if (datetime !== undefined) props["datetime"] = String(datetime);
-  return h("del", props, children);
+  return h(
+    "del",
+    { className: root, cite, dateTime: datetime, ...rest },
+    label ? h("span", { key: "l", className: "nd-visually-hidden" }, `${label} `) : null,
+    children,
+  );
 }

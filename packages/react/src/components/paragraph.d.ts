@@ -10,13 +10,13 @@ export type ParagraphSize = "small" | "body" | "lead";
 export type ParagraphTone = "default" | "muted";
 
 export interface ParagraphProps {
-  /** The size, from the type scale. */
+  /** The text size, from the type scale: `small`, `body` or `lead`. `body` is the default. */
   size?: ParagraphSize;
-  /** How much the paragraph should assert itself. */
+  /** How strong the text colour is. `muted` is quieter than `default`, for text that supports the text around it. */
   tone?: ParagraphTone;
   className?: string;
   children?: ReactNode;
 }
 
-/** A paragraph of prose. */
+/** Render a paragraph of prose. */
 export declare function Paragraph(props: ParagraphProps): JSX.Element;

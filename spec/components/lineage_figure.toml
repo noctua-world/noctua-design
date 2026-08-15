@@ -1,0 +1,82 @@
+guidance = "Use a lineage figure to place content at a named point in a `Lineage`, such as a portrait, a card or a button. The scene publishes a position for each id, and a figure with that `at` value is drawn there."
+
+[meta]
+name = "LineageFigure"
+element = "div"
+class = "nd-lineage-figure"
+page = "lineage"
+# A name, so the grid shows the shape and the tone around something. Outside a
+# scene a figure is not placed — see the stylesheet, which positions one only
+# inside `.nd-lineage-space` — so these stand in the grid like any other box.
+specimen = """<span class="nd-identifier">Ada</span>"""
+summary = "Place any content at a named point in a lineage scene."
+
+[prop.scene]
+type = "text"
+required = true
+attribute = "data-nd-scene"
+doc = "The `name` of the `Lineage` this figure belongs to. **Required**, and stated rather than inherited from a parent, which `NOCTUA.md §9.3` forbids. It also keeps two scenes on one page from sharing an id."
+
+[prop.at]
+type = "text"
+required = true
+attribute = "data-nd-at"
+doc = "The id in the graph this figure stands at. The scene publishes each position as three custom properties, and the figure reads them. An `at` that names no id places the figure at the scene's origin."
+
+[prop.label]
+type = "text"
+doc = "The accessible name of the figure. Set it when the content is only a picture or a drawing. Leave it out when the content is already text, because the name replaces that text."
+
+[prop.shape]
+type = "enum"
+values = ["card", "round", "plaque", "bare"]
+default = "card"
+attribute = "data-nd-shape"
+doc = "The outline of the figure. `card` is a rectangle and `round` is a circle, for a mark on a connection. `plaque` is wider than it is tall, for a title, and `bare` has no surface at all. `card` is the default."
+
+[prop.tone]
+type = "enum"
+values = ["neutral", "accent", "success", "warning", "danger", "info"]
+default = "neutral"
+attribute = "data-nd-tone"
+doc = "Which colour family the edge and the text take. Six families cannot be told apart under dichromacy, so pair every tone with a word. `neutral` is the default."
+
+[prop.parallax]
+type = "enum"
+values = ["none", "subtle", "deep"]
+variants = false
+default = "none"
+attribute = "data-nd-parallax"
+doc = "How far the layers inside this figure lean toward the pointer. Every direct child is a layer, ordered back to front. It needs the scene's `parallax` and the runtime, and it stops under reduced motion."
+
+[prop.occasion]
+type = "text"
+attribute = "data-nd-occasion"
+doc = "The occasion this figure belongs to. It is drawn only while the scene's `occasion` is the same word, so two figures can share one place. The hiding uses a custom property the scene publishes, so it is correct before any script runs."
+
+[prop.set]
+type = "text"
+attribute = "data-nd-set"
+doc = "The swappable set this figure belongs to, as `group:name`. It is drawn only while the scene's `sets` names it. **A figure that declares an `occasion` ignores this**, because one custom property carries only one reason to hide."
+
+[prop.action]
+type = "text"
+attribute = "data-nd-action"
+doc = "Makes this figure a real `<button>` and names what pressing it means, for the application to listen for. The scene's own runtime does not act on it, and `swaps` is the prop that it does act on."
+
+[prop.swaps]
+type = "text"
+attribute = "data-nd-swaps"
+doc = """What pressing this figure switches to, as `group:name`. The named branch replaces the one on show, and pressing again puts it back. The figure renders `aria-pressed="false"`, and the runtime keeps it matching the set on show."""
+
+[prop.href]
+type = "text"
+attribute = "data-nd-href"
+doc = "Makes this figure a link, rendered as an `<a>`. An `href` beside an `action` wins, and the action is dropped, so the figure is either a link or a button."
+
+[prop.children]
+type = "children"
+doc = "The content of the figure, such as an `Avatar`, a `Badge`, a heading or a picture. Direct children are the parallax layers, ordered back to front."
+
+[a11y]
+notes = "`href` renders an `<a>`, `action` renders a `<button>`, and with both the link wins. `label` becomes `aria-label` and replaces the content, so leave it out when the content is already text."

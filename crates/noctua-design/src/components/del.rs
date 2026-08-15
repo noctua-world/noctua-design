@@ -4,23 +4,25 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! Text removed from the document.
+//! Shows text that has been removed from the document.
 
 use dioxus::prelude::*;
 
-/// Text removed from the document.
+/// Shows text that has been removed from the document.
 ///
 /// # Accessibility
 ///
-/// A strikethrough is not announced by most screen readers, so deleted text is
-/// read as though it were current. The component carries a visually-hidden label
-/// saying so.
+/// Most screen readers do not report a strikethrough, so deleted text sounds the
+/// same as current text. `label` is the word that says it was removed, and it is
+/// needed when the deletion carries meaning.
 #[component]
 pub fn Del(
     /// A URL explaining the change.
     cite: Option<String>,
-    /// When it was removed, as a machine-readable timestamp.
+    /// When the text was removed, as a machine-readable timestamp.
     datetime: Option<String>,
+    /// A word read out before the text to say that it was removed. Supply it in the reader's language, because this package ships no reader-facing words of its own.
+    label: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -33,8 +35,11 @@ pub fn Del(
     rsx! {
         del {
             class: "{root}",
-            "cite": cite,
-            "datetime": datetime,
+            cite,
+            datetime,
+            if let Some(label) = label {
+                span { class: "nd-visually-hidden", "{label} " }
+            }
             {children}
         }
     }

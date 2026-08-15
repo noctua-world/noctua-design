@@ -1792,3 +1792,15 @@
   --nc-color-moderator-border: var(--nc-accent-border-element);
   --nc-color-on-moderator: var(--nc-accent-bg-app);
 }
+
+/* The ink, re-read here. `color` is set once, high up, from
+   var(--nc-color-fg) — and a var() resolves where it is DECLARED, so
+   every descendant inherits the COMPUTED colour and a themed subtree
+   keeps the page's ink over its own surface. Measured before this rule
+   existed, on a dark scope inside a light page: near-black text on a
+   near-black surface, a contrast ratio of about 1.2.
+ 
+   Zero specificity, so any deliberate colour still wins. */
+:where(:where(:root), [data-noctua-scope], [data-palette]:not(:root), [data-theme]:not(:root)) {
+  color: var(--nc-color-fg);
+}

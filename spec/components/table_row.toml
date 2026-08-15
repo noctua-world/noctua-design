@@ -1,0 +1,94 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a table row for one record. Its cells are its fields, in the order the headings named them. `select` is declared here rather than on `Table`, because the choice control is a cell and a cell belongs to a row."
+
+[meta]
+name = "TableRow"
+element = "tr"
+class = "nd-table-row"
+# Two cells, so the row reads as a row. Wrapped in a `<table><tbody>` by the
+# variant grid, because a `<tr>` outside one is a start tag the parser drops.
+specimen = "<th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td>"
+page = "tables"
+summary = "Show one record, with a tone, a choice control and a detail row."
+
+[prop.name]
+type = "text"
+attribute = "data-nd-row"
+doc = "The identifier for this row, in the markup. The detail row and the choice control derive their ids from it, so a row that opens or can be chosen needs one."
+
+[prop.tone]
+type = "text"
+attribute = "data-nd-tone"
+doc = "Which of the colour system's tones this row is painted from. Any of the 349 semantic families, so `overdue` is as valid as `danger`, plus this system's own `neutral` and `muted`. A name no family declares fails the build. **Never colour alone.**"
+
+[prop.select]
+type = "enum"
+values = ["none", "one", "many", "all"]
+variants = false
+default = "none"
+attribute = "data-nd-select"
+doc = "Whether this row can be chosen. `one` draws a real radio, `many` a real checkbox. `all` goes in the heading row and marks or clears every row under it, with a third state for *some, not all*. Each is a real control."
+
+[prop.emphasis]
+type = "enum"
+values = ["none", "subtle", "strong"]
+default = "none"
+attribute = "data-nd-emphasis"
+doc = "How much weight this row carries against the rows around it. `subtle` is a light rule above the row. `strong` is a heavy rule and bold text. **It says how a row is drawn, not what it means.** What the row contains is the caller's."
+
+[prop.selected]
+type = "bool"
+default = "false"
+attribute = "data-nd-selected"
+doc = "Whether this row starts chosen. Rendered by the server, so a form that came back still shows what the reader picked. It is drawn from the real control's own state rather than from `aria-selected`."
+
+[prop.select_label]
+type = "text"
+attribute = "data-nd-select-label"
+doc = "The name of this row's choice control, such as *Choose Ada Lovelace*. Wanted in practice by `select`: a column of controls with the same name is read as *checkbox, checkbox, checkbox*."
+
+[prop.select_name]
+type = "text"
+attribute = "data-nd-select-name"
+doc = "The form field the choice submits under. Every row in one table shares it, which is what makes them one answer with several values. It is a real `name` on a real control, so a form with no script still posts the choice."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "data-nd-disabled"
+doc = "Whether the choice for this row alone is refused, for a record someone else has locked or a job already finished. The real attribute on the real control. The row is still read, still copied and still counted."
+
+[prop.expandable]
+type = "bool"
+default = "false"
+attribute = "data-nd-expandable"
+doc = "Whether this row opens onto the detail row below it. It draws a real control in the first cell with `aria-expanded`. The detail row is a real row in the same table, so it prints and keeps its place when the table is sorted."
+
+[prop.expand_label]
+type = "text"
+attribute = "data-nd-expand-label"
+doc = "The name of that control. Wanted in practice by `expandable`: it is a glyph, so this is its only name. It should say what opens, such as *Show the details of Ada Lovelace*."
+
+[prop.detail_for]
+type = "text"
+attribute = "data-nd-detail-for"
+doc = "Marks this row as the detail of the row with that `name`. It starts hidden and is revealed by its own control, it moves with its row when the table is sorted, and the stripe skips it."
+
+[prop.empty]
+type = "bool"
+default = "false"
+attribute = "data-nd-empty"
+doc = "Marks the row a table shows when it has nothing to show. Rendered in the markup and hidden while there are rows, so *no results* is the caller's own sentence in the reader's language. A filter reveals it when nothing matches."
+
+[prop.children]
+type = "children"
+doc = """The cells, as `TableCell` and `TableHeaderCell`. The row's own name belongs in a `TableHeaderCell` with `scope = "row"`, which makes every other cell announce which record it belongs to."""
+
+[state.expanded]
+attribute = "aria-expanded"
+doc = "Whether the detail row is showing. Written on the control rather than on the row. The control is the element a reader presses and the element a screen reader reads the state of."
+
+[a11y]
+role = "row"
+notes = "The role is written in the markup rather than left implicit, because a table that stacks on a narrow screen loses it. The choice is a real control named from the row's own words rather than `aria-selected`."

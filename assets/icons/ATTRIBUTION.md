@@ -25,12 +25,39 @@ Only icons the interface actually uses are here. `NOCTUA.md §9.5`: *"an unused 
 | `sun` | `lucide` | The light appearance mode. |
 | `moon` | `lucide` | The dark appearance mode. |
 | `monitor` | `lucide` | The appearance mode the operating system asked for. |
-| `settings` | `lucide` | Opens the appearance settings. |
+| `palette` | `lucide` | Opens the theme menu. A palette rather than a gear: the menu is the appearance of the page — its mode, its accent, its corners — and a gear says "settings" about a product that has no other kind. |
+| `settings` | `lucide` | Settings that are not the theme. `Disclosure` documents itself with it. |
 | `search` | `lucide` | Marks the search field. |
+| `user` | `lucide` | A person, where there is no picture of them. `Avatar`'s last fallback, after the initials. |
 | `external-link` | `lucide` | Marks a link that leaves the site. Replaces a bare `↗` character, which is text pretending to be an icon. |
 | `chevron-down` | `lucide` | The disclosure marker on a `<details>` summary. |
 | `copy` | `lucide` | Copies a code block to the clipboard. |
+| `download` | `lucide` | Opens the menu that takes a table away as a file. |
+| `info` | `lucide` | Opens the note explaining what a heading or a value means. |
+| `columns` | `lucide` | Opens the list of a table's columns, where a reader chooses which are shown. |
+| `warning` | `lucide` | Marks a message about something that is about to go wrong. The triangle is the shape, and the sentence beside it is what says what is wrong. |
+| `alert` | `lucide` | Marks a message about something that has already gone wrong, such as a refused payment. Paired with the danger tone, never standing in for it. |
 | `check` | `lucide` | Confirms an action, and marks the option in force. |
+| `rotate-ccw` | `lucide` | Puts an example frame back the way it was found: its width, its appearance and its glass test all at once. An arrow that comes back round to where it started, which is the one gesture in this set that means *undo my changes* rather than *go back a step* — `chevron-left` is already the carousel's previous slide, and one drawing meaning two things is how a reader learns to distrust both. |
+| `flask-conical` | `lucide` | Puts an example frame under a glass test: colour and edges behind it, blank space and a scrollbar, and the material on everything inside. A flask, because what the control is is a test rig — `layers` and `image` were both here first, and both described the backdrop rather than the thing being done with it. |
+| `arrow-up` | `lucide` | A column sorted from the beginning of the alphabet, or the smallest number. Paired with `aria-sort="ascending"`, which is what a screen reader reads; the arrow is the half a reader can see. |
+| `arrow-down` | `lucide` | The same, the other way. Two arrows rather than one rotated by the stylesheet: a transform is a thing a preset or a reduced-motion path can reach, and the direction of a sort is not something to leave to CSS. |
+| `chevrons-up-down` | `lucide` | A column that can be sorted and is not — the affordance. Without it a sortable heading looks exactly like a fixed one until somebody presses it, which is a feature nobody finds. |
+| `languages` | `lucide` | Opens the language menu. Not a flag: a flag names a country and this names a language, and the two disagree for most languages anybody speaks. |
+| `calendar` | `lucide` | Opens a `DateInput`'s suggestions — the quick picks and the month grid. A calendar, because that is what the panel is; the button it sits on is icon-only and takes its name from `suggest_label`. |
+| `wrap-text` | `lucide` | Toggles line wrapping in a code block. |
+| `pipette` | `lucide` | Takes a colour off the screen, on a `ColorPicker` with `eyedropper`. Drawn rather than absent where the browser has no `EyeDropper`: the button is what the script removes, and an icon nothing renders is not payload. |
+| `plus` | `lucide` | Commits the colour under the cursor to a `ColorPicker { multiple }`'s list. A plus rather than a check: a check says *this one is chosen*, which is what the option rows already say, and this says *and one more*. |
+| `minus` | `lucide` | Subtracts one step, on a `NumberInput`. A minus rather than a downward chevron: the control changes a quantity, and a chevron says *move* about a thing that is not moving. |
+| `eye` | `lucide` | Shows a password, on a `Input { kind = "password" }`. A reader who cannot see what they typed cannot correct it, and the alternative they reach for is a shorter password. |
+| `eye-off` | `lucide` | The other half of that toggle, on a password. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script. |
+| `upload` | `lucide` | Marks a `FileInput`'s drop area. An arrow into a tray, which is what the gesture is; a paperclip would say *attachment*, which is what the result is called and not what the control does. |
+| `clock` | `lucide` | Fills a `TimeInput` with the current time, on the control `now_label` names. A clock, because that is what the field is; the button it sits on is icon-only and takes its name from that prop. |
+| `chevron-left` | `lucide` | The previous slide, on a `Carousel`. A chevron rather than an arrow: an arrow in this system marks the direction a column is SORTED, and one drawing meaning two things is how a reader learns to distrust both. |
+| `chevron-right` | `lucide` | The next slide, on the same terms. The pair is mirrored by the stylesheet in a right-to-left locale, which is the one place a transform is the right answer — *previous* means the other way there. |
+| `pause` | `lucide` | Stops a `Carousel` rotating. WCAG 2.2.2 requires a way to stop anything that moves for more than five seconds, and this is it — the component refuses to start rotating without it. |
+| `play` | `lucide` | The other half of that toggle. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script. |
+| `star` | `lucide` | One step of a `Rating`. The outline is the empty step and the stylesheet fills the same geometry for the full one, so a rating is one drawing rather than two that could drift apart. |
 
 ## Octicons
 

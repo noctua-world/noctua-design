@@ -4,17 +4,23 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! Text added to the document.
+//! Mark text that was added to the document.
 
 use dioxus::prelude::*;
 
-/// Text added to the document.
+/// Mark text that was added to the document.
+///
+/// # Accessibility
+///
+/// Screen readers do not announce the underline, so inserted text is read like the text around it. Use `label` to state that it was added.
 #[component]
 pub fn Ins(
     /// A URL explaining the change.
     cite: Option<String>,
     /// When it was added, as a machine-readable timestamp.
     datetime: Option<String>,
+    /// A word read before the text to say that it was added. Supply it in the reader's language, as `Del` does.
+    label: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -27,8 +33,11 @@ pub fn Ins(
     rsx! {
         ins {
             class: "{root}",
-            "cite": cite,
-            "datetime": datetime,
+            cite,
+            datetime,
+            if let Some(label) = label {
+                span { class: "nd-visually-hidden", "{label} " }
+            }
             {children}
         }
     }

@@ -1,0 +1,70 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a label for the visible name of a control, a group of controls or a region.
+`Field` draws one already for the control it wraps. Reach for this where there
+is no field, beside a `Segmented` or over a `Toolbar`.
+"""
+
+[meta]
+name = "Label"
+element = "label"
+class = "nd-label"
+# Two letters rather than a word: `kind` renders three different elements, and
+# a specimen whose content changed with the element would document the content
+# instead of the element. `nd-identifier` because two letters cut from an
+# alphabet are the same two letters in every locale.
+specimen = "<span class=\"nd-identifier\">Aa</span>"
+summary = "Name a control, a group of controls or a region, in the reader's language."
+
+# THIS IS THE ONE LABEL IN THE SYSTEM.
+#
+# `Field` drew its own `<label>` and its own `<legend>`, with its own required
+# marker beside them, and the settings panel drew a third thing shaped like
+# both: a `<p class="nd-label">` whose id a `Segmented` pointed
+# `aria-labelledby` at. Three drawings of one thing is the duplication that got
+# `Choice` and `IconButton` deleted from this repository.
+#
+# So `.nd-label` is this component's class, and `kind` is what decides which
+# element carries it. `Field` renders this rather than repeating it, and the
+# panel's `<p>` is `kind = "name"` rather than a fourth spelling.
+
+[prop.text]
+type = "text"
+required = true
+doc = "The name, in the reader's language. **Required**, because a label with no words names nothing. Name what is being asked rather than the act of asking."
+
+[prop.for_control]
+type = "text"
+doc = """The id of what this names. With `kind = "label"` it becomes a real `for`, which is the only attachment a browser acts on. The label takes `{for_control}-label` as its own id, for a group to point at."""
+
+[prop.kind]
+type = "enum"
+values = ["label", "legend", "name"]
+elements = ["label", "legend", "p"]
+default = "label"
+doc = """Which element names it. `label` names one labelable control through `for`. `legend` names the `<fieldset>` it opens. `name` renders a `<p>` for a group that is neither, such as a `role="radiogroup"`."""
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The type scale of the name: `small`, `medium` or `large`. Match it to the control it names, so a large box is not answered by a small question."
+
+[prop.required]
+type = "bool"
+default = "false"
+attribute = "data-nd-required"
+doc = "Whether to mark what this names as an answer that has to be given. **The mark is all this does.** The real `required` attribute belongs on the real control, because only that stops a form submitting."
+
+[prop.required_label]
+type = "text"
+doc = "The word that marks it, in the reader's language, such as *required*. Wanted in practice by `required`. A word rather than an asterisk, which reaches no reader who cannot see it."
+
+[prop.optional_label]
+type = "text"
+doc = "The word for a question that may be left blank, such as *optional*. Written only while `required` is off, because a question is one or the other. Mark whichever of the two is rarer in the form."
+
+[a11y]
+notes = """A `<label for>` names one labelable control, and a `<legend>` names the `<fieldset>` it opens. A `<p>` names anything else by reference, so the group carries `aria-labelledby` pointing at this id."""

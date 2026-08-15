@@ -13,6 +13,9 @@ import type {
   Font,
   Glass,
   Radius,
+  Backdrop,
+  Pattern,
+  Grain,
   ScopeSettings,
 } from "@noctua-world/design-tokens/theme.js";
 
@@ -30,6 +33,9 @@ export interface ThemeScopeProps {
   font?: Font;
   glass?: Glass;
   radius?: Radius;
+  backdrop?: Backdrop;
+  pattern?: Pattern;
+  grain?: Grain;
 }
 
 /** A subtree with a theme of its own. See theme.js for the contract. */

@@ -1,0 +1,88 @@
+# Ruby.
+#
+# Two omissions worth naming, both the same shape — a construct whose meaning
+# needs to know what came before it, which this scanner does not:
+#
+#   * A regex literal. `/` divides far more often than it opens a pattern.
+#   * `%w[]` and friends, whose delimiter is chosen at the call site.
+#
+# And one that is not an omission: `def foo?` splits into `foo` and an operator,
+# because `?` cannot be an identifier character without breaking the ternary.
+
+[meta]
+name = "ruby"
+display = "Ruby"
+aliases = ["rb"]
+
+[words]
+keyword = [
+  "alias", "begin", "break", "case", "class", "def", "do", "else", "elsif",
+  "end", "ensure", "for", "if", "in", "module", "next", "redo", "rescue",
+  "retry", "return", "self", "super", "then", "undef", "unless", "until",
+  "when", "while", "yield",
+]
+operator = ["and", "defined", "not", "or"]
+constant = ["false", "nil", "true", "__FILE__", "__LINE__"]
+function = [
+  "attr_accessor", "attr_reader", "attr_writer", "include", "extend",
+  "lambda", "proc", "puts", "print", "raise", "require", "require_relative",
+]
+
+[[comment]]
+open = "#"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+interpolate_open = "#{"
+interpolate_close = "}"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+
+[number]
+prefixes = ["0x", "0b", "0o"]
+separator = "_"
+exponent = "eE"
+
+[symbols]
+operator = "+-*/%=<>!&|^~?"
+punctuation = "(){}[],;:."
+
+[[sigil]]
+open = "@@"
+role = "property"
+
+[[sigil]]
+open = "@"
+role = "property"
+
+[[sigil]]
+open = "$"
+role = "property"
+
+[context]
+name_after = { def = "function", class = "type", module = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+member_dot = true
+
+[[case]]
+name = "an instance variable is a property, and a class variable too"
+code = "def initialize(n)\n  @name = n\n  @@count = 0\nend"
+expect = ["keyword def", "function initialize", "property @name", "property @@count", "keyword end"]
+
+[[case]]
+name = "an interpolation inside a string is not literal text"
+code = 'puts "hello #{name}!"'
+expect = ["function puts", 'string "hello ', "escape #{name}", 'string !"']
+
+[[case]]
+name = "a comment sigil inside a string is not a comment"
+code = 'x = "a # b"'
+expect = ['string "a # b"']
+reject = ["comment # b\""]

@@ -8,33 +8,41 @@
 name = "Heading"
 element = "h2"
 class = "nd-heading"
-summary = "A heading whose outline level and visual size are set independently."
+summary = "Set a heading's outline level and its visual size independently."
 
 [prop.level]
 type = "enum"
 values = ["1", "2", "3", "4", "5", "6"]
+elements = ["h1", "h2", "h3", "h4", "h5", "h6"]
 default = "2"
-doc = "The outline level. This is document structure, not appearance."
+# Document structure, not appearance — the contract says so in the doc
+# below. Six values, one picture, by design.
+variants = false
+doc = "The outline level, from `1` to `6`, rendered as `<h1>` to `<h6>`. This is document structure rather than appearance."
 
 [prop.size]
 type = "enum"
 values = ["display", "h1", "h2", "h3", "h4", "lead"]
 default = "h2"
 attribute = "data-nd-size"
-doc = "The visual size, from the type scale. Independent of the level."
+doc = "The visual size, from the type scale: `display`, `h1`, `h2`, `h3`, `h4` or `lead`. Independent of `level`."
+
+[prop.tone]
+type = "enum"
+values = ["default", "muted", "accent"]
+default = "default"
+attribute = "data-nd-tone"
+doc = "How much the heading stands out. `muted` suits a heading over supporting material, and `accent` suits a heading that is also a signal."
 
 [prop.balance]
 type = "bool"
 default = "false"
 attribute = "data-nd-balance"
-doc = "Balance the line lengths, for headings that wrap."
+doc = "Whether the line lengths are balanced. For a heading that wraps onto more than one line."
 
 [prop.children]
 type = "children"
 doc = "The heading text."
 
 [a11y]
-notes = """
-The level must not skip: an h2 followed by an h4 leaves a hole in the outline
-that a screen-reader user navigating by heading falls straight through. Choose
-the level from the document and the size from the design."""
+notes = "The level must not skip. An `<h2>` followed by an `<h4>` leaves a gap in the outline a screen reader navigates by. Choose the level from the document and the size from the design."

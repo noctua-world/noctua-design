@@ -4,12 +4,14 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! A link, with the affordance an external destination needs.
+//! Links to another page, and marks the links that leave the site.
 
-use crate::icon::{Icon, IconName};
 use dioxus::prelude::*;
+use noctua_design_icons::IconName;
 
-/// `inherit` is for a link inside a run of coloured text that must not break the line's colour.
+use crate::components::Icon;
+
+/// The colour of the link text. `accent` is the link colour, and `inherit` takes the colour of the text around it, for a link inside a coloured run.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum LinkTone {
     #[default]
@@ -33,22 +35,23 @@ impl LinkTone {
     }
 }
 
-/// A link, with the affordance an external destination needs.
+/// Links to another page, and marks the links that leave the site.
 ///
 /// # Accessibility
 ///
-/// The text is the accessible name, so it has to make sense read out of context:
-/// a page full of links called "here" is a page a screen-reader user cannot
-/// navigate. An external link's affordance is visual AND textual — the icon is
-/// decorative and the destination is announced.
+/// The link text is the accessible name, so it has to make sense out of context. A
+/// page of links all called *here* cannot be navigated with a screen reader. The
+/// external icon carries `aria-hidden`.
 #[component]
 pub fn Link(
     /// The destination.
     href: Option<String>,
-    /// Marks the link as leaving the site, which adds a visible affordance.
-    #[props(default)]
+    /// Whether the link leaves the site. It draws a small external-link icon after the link text.
+    #[props(default = false)]
     external: bool,
-    /// `inherit` is for a link inside a run of coloured text that must not break the line's colour.
+    /// The `rel` attribute of the link. Use `noreferrer` on anything that leaves the site.
+    rel: Option<String>,
+    /// The colour of the link text. `accent` is the link colour, and `inherit` takes the colour of the text around it, for a link inside a coloured run.
     #[props(default)]
     tone: LinkTone,
     /// Extra classes for the root element.
@@ -64,11 +67,12 @@ pub fn Link(
         a {
             class: "{root}",
             href,
+            rel,
             "data-nd-external": if external { "true" } else { "false" },
             "data-nd-tone": tone.as_str(),
             {children}
             if external {
-                Icon { icon: IconName::ExternalLink, size: crate::icon::IconSize::Small }
+                Icon { icon: IconName::ExternalLink, size: crate::components::IconSize::Small }
             }
         }
     }

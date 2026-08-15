@@ -2,7 +2,9 @@
 name = "Ins"
 element = "ins"
 class = "nd-ins"
-summary = "Text added to the document."
+# One of the marks that go inside a sentence, documented with the others.
+page = "inline-text"
+summary = "Mark text that was added to the document."
 
 [prop.cite]
 type = "text"
@@ -14,6 +16,13 @@ type = "text"
 attribute = "datetime"
 doc = "When it was added, as a machine-readable timestamp."
 
+[prop.label]
+type = "text"
+doc = "A word read before the text to say that it was added. Supply it in the reader's language, as `Del` does."
+
 [prop.children]
 type = "children"
 doc = "The added text."
+
+[a11y]
+notes = "Screen readers do not announce the underline, so inserted text is read like the text around it. Use `label` to state that it was added."

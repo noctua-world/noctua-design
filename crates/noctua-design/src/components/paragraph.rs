@@ -4,11 +4,11 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! A paragraph of prose.
+//! Render a paragraph of prose.
 
 use dioxus::prelude::*;
 
-/// The size, from the type scale.
+/// The text size, from the type scale: `small`, `body` or `lead`. `body` is the default.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ParagraphSize {
     /// `small`
@@ -35,7 +35,7 @@ impl ParagraphSize {
     }
 }
 
-/// How much the paragraph should assert itself.
+/// How strong the text colour is. `muted` is quieter than `default`, for text that supports the text around it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ParagraphTone {
     #[default]
@@ -59,13 +59,13 @@ impl ParagraphTone {
     }
 }
 
-/// A paragraph of prose.
+/// Render a paragraph of prose.
 #[component]
 pub fn Paragraph(
-    /// The size, from the type scale.
+    /// The text size, from the type scale: `small`, `body` or `lead`. `body` is the default.
     #[props(default)]
     size: ParagraphSize,
-    /// How much the paragraph should assert itself.
+    /// How strong the text colour is. `muted` is quieter than `default`, for text that supports the text around it.
     #[props(default)]
     tone: ParagraphTone,
     /// Extra classes for the root element.

@@ -1,0 +1,42 @@
+# A unified diff.
+#
+# Line-oriented, and the only grammar whose tokens are lines. The newline
+# belongs to the line, so a run of added lines paints as one block rather than
+# as a ladder of stripes with gaps between them.
+#
+# `inserted` and `deleted` are the two roles where colour carries meaning rather
+# than category, so `spec/syntax.toml` pins them outside every theme: a removed
+# line is `danger` whichever theme is on, and the `+` and `−` stay in the text
+# because §8.8's rule 6 says colour alone cannot be the signal.
+
+[meta]
+name = "diff"
+display = "Diff"
+mode = "diff"
+aliases = ["patch", "udiff"]
+
+[[case]]
+name = "the file headers, the hunk and the two kinds of change"
+code = """
+--- a/spec/tokens.toml
++++ b/spec/tokens.toml
+@@ -1,3 +1,3 @@
+ steps = [
+-  0, 1, 2,
++  0, 1, 2, 3,
+ ]"""
+expect = [
+  "comment --- a/spec/tokens.toml\n",
+  "comment +++ b/spec/tokens.toml\n",
+  "attribute @@ -1,3 +1,3 @@\n",
+  "plain  steps = [\n",
+  "deleted -  0, 1, 2,\n",
+  "inserted +  0, 1, 2, 3,\n",
+  "plain  ]",
+]
+
+[[case]]
+name = "a line that changes nothing is not coloured"
+code = " context"
+expect = ["plain  context"]
+reject = ["inserted  context", "deleted  context"]

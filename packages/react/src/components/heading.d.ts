@@ -8,17 +8,20 @@ import type { ReactNode } from "react";
 
 export type HeadingLevel = "1" | "2" | "3" | "4" | "5" | "6";
 export type HeadingSize = "display" | "h1" | "h2" | "h3" | "h4" | "lead";
+export type HeadingTone = "default" | "muted" | "accent";
 
 export interface HeadingProps {
-  /** The outline level. This is document structure, not appearance. */
+  /** The outline level, from `1` to `6`, rendered as `<h1>` to `<h6>`. This is document structure rather than appearance. */
   level?: HeadingLevel;
-  /** The visual size, from the type scale. Independent of the level. */
+  /** The visual size, from the type scale: `display`, `h1`, `h2`, `h3`, `h4` or `lead`. Independent of `level`. */
   size?: HeadingSize;
-  /** Balance the line lengths, for headings that wrap. */
+  /** How much the heading stands out. `muted` suits a heading over supporting material, and `accent` suits a heading that is also a signal. */
+  tone?: HeadingTone;
+  /** Whether the line lengths are balanced. For a heading that wraps onto more than one line. */
   balance?: boolean;
   className?: string;
   children?: ReactNode;
 }
 
-/** A heading whose outline level and visual size are set independently. */
+/** Set a heading's outline level and its visual size independently. */
 export declare function Heading(props: HeadingProps): JSX.Element;

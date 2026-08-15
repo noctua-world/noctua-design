@@ -11,6 +11,7 @@
 //! the settings; it does not construct the page.
 
 mod defaults;
+mod examples;
 mod generated;
 mod index;
 mod pages;
@@ -18,6 +19,7 @@ mod props;
 mod scripts;
 mod shell;
 mod site;
+mod theme_menu;
 
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
@@ -62,7 +64,25 @@ fn main() -> Result<(), String> {
         let first = site::first(locale);
         write(
             &out.join(locale.tag()).join("index.html"),
-            &redirect_to(locale, &first.dir()),
+            &redirect_to(
+                locale,
+                &first.dir(),
+                &locale_script(locale.tag(), &door_targets("../"), true),
+            ),
+        )?;
+        written += 1;
+
+        // THE SEARCH INDEX, ONE FILE PER LOCALE, FETCHED ON FIRST USE.
+        //
+        // These entries used to ship as hidden `<a>` elements in the sidebar of
+        // every document — thirty-five kilobytes each, on every page load, for
+        // a list most readers never open. Here they are one file the browser
+        // caches for the whole visit, and the palette asks for it the first
+        // time somebody searches.
+        write(
+            &out.join("assets")
+                .join(format!("search-{}.json", locale.tag())),
+            &index::json(locale),
         )?;
         written += 1;
     }
@@ -102,10 +122,26 @@ fn document(locale: Locale, page: Page) -> String {
     // complete rather than blank (`NOCTUA.md §9.6` lesson 4).
     let _ = writeln!(
         html,
-        "<html lang=\"{}\" dir=\"{}\" class=\"no-js\" data-noctua-base=\"{}\">",
+        // `data-palette` is server-rendered rather than left to the bootstrap.
+        // The base link set names the DEFAULT palette's scope-anchored
+        // stylesheet — `theme-<default>.css`, the only shape `noctua-colors`
+        // publishes for anything but its own default — so the attribute is what
+        // makes it apply. Without it here, a reader with the script blocked
+        // would get a page with no palette at all.
+        //
+        // `data-noctua-locales` is the offered set, read by `shell.js` so a
+        // locale added to `spec/i18n/` needs no edit there.
+        "<html lang=\"{}\" dir=\"{}\" class=\"no-js\" data-noctua-base=\"{}\" \
+         data-palette=\"{}\" data-noctua-locales=\"{}\">",
         locale.bcp47(),
         locale.dir(),
-        site::BASE
+        site::BASE,
+        noctua_design_theme::Palette::DEFAULT.as_str(),
+        Locale::OFFERED
+            .into_iter()
+            .map(Locale::tag)
+            .collect::<Vec<_>>()
+            .join(" ")
     );
     html.push_str("<head>\n<meta charset=\"utf-8\">\n");
     html.push_str("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
@@ -130,6 +166,15 @@ fn document(locale: Locale, page: Page) -> String {
         "<link rel=\"stylesheet\" href=\"{}assets/shell.css\">",
         site::BASE
     );
+    // The language first: a redirect makes everything below it wasted work.
+    html.push_str(&locale_script(
+        locale.tag(),
+        &Locale::OFFERED
+            .iter()
+            .map(|other| (other.tag(), page.locale_href(*other)))
+            .collect::<Vec<_>>(),
+        false,
+    ));
     html.push_str(BOOTSTRAP);
     html.push_str("\n</head>\n<body>\n");
 
@@ -141,6 +186,124 @@ fn document(locale: Locale, page: Page) -> String {
     );
     html.push_str("</body>\n</html>\n");
     html
+}
+
+/// Resolves the reader's language before anything paints.
+///
+/// Inline, in `<head>`, and above the theme bootstrap — for the same reason the
+/// theme bootstrap is inline at all. A redirect that fires after first paint is
+/// a page the reader has already seen in the wrong language, which is worse
+/// than the flash it looks like.
+///
+/// # It never builds a URL out of anything a reader controls
+///
+/// The destinations are written **here**, at build time, one per offered
+/// locale. The script chooses one from that table; it never concatenates a
+/// stored value or a `navigator.languages` entry into a path. A stored value
+/// that is neither [`defaults::AUTOMATIC_LOCALE`] nor an offered tag becomes
+/// `auto`, and an `auto` that matches nothing means *stay where you are*. Both
+/// directions fail closed (`NOCTUA.md §2.4`).
+///
+/// # And it never overrides a locale the reader asked for
+///
+/// A URL that was not reached from inside this site names the language it
+/// names, and a link shared with somebody must open in the language it was
+/// shared in. `document.referrer` is the only thing that separates the two, and
+/// it is the whole discriminator: browsing the site follows the preference, a
+/// pasted or shared link does not move. A **door** — `/` and `/<locale>/`, both
+/// of which exist only to send a reader somewhere — is exempt, because sending
+/// a reader somewhere is the entire content of the document.
+///
+/// [`defaults::AUTOMATIC_LOCALE`]: crate::defaults::AUTOMATIC_LOCALE
+fn locale_script(here: &str, targets: &[(&str, String)], door: bool) -> String {
+    let table = targets
+        .iter()
+        .map(|(tag, href)| format!("\"{tag}\":\"{href}\""))
+        .collect::<Vec<_>>()
+        .join(",");
+    let offered = Locale::OFFERED
+        .iter()
+        .map(|locale| format!("\"{}\"", locale.tag()))
+        .collect::<Vec<_>>()
+        .join(",");
+    format!(
+        "<script>\n\
+         (function () {{\n\
+        \x20 // THE SCRIPT IS HERE, SAID BEFORE THE FIRST PAINT.\n\
+        \x20 //\n\
+        \x20 // One attribute, and it buys the one thing a deferred script\n\
+        \x20 // cannot: a control that only exists WITH a script can have its\n\
+        \x20 // space reserved by the stylesheet before anything is drawn. The\n\
+        \x20 // palette trigger ships `hidden` — correctly, since a button that\n\
+        \x20 // opens a modal nothing can fill is a button that does nothing —\n\
+        \x20 // and revealing it after paint dropped the navigation forty-eight\n\
+        \x20 // pixels on every page load. That is a layout shift, which\n\
+        \x20 // `NOCTUA.md \u{a7}9.6` forbids, and `theme.spec.js` measured it.\n\
+        \x20 //\n\
+        \x20 // It goes at the top of the file that already runs before paint\n\
+        \x20 // rather than in a second inline script: two of them is two things\n\
+        \x20 // that can be ordered wrongly.\n\
+        \x20 //\n\
+        \x20 // `scripting`, not `script`: `data-nd-script` is the typography\n\
+        \x20 // page's, one per writing system, and stamping it on the root made\n\
+        \x20 // `[data-nd-script]` resolve to fifteen elements instead of\n\
+        \x20 // fourteen. Two tests said so at once.\n\
+        \x20 document.documentElement.setAttribute('data-nd-scripting', '');\n\
+        \x20 var targets = {{{table}}};\n\
+        \x20 var offered = [{offered}];\n\
+        \x20 var here = \"{here}\";\n\
+        \x20 var door = {door};\n\
+        \x20 try {{\n\
+        \x20   var stored = localStorage.getItem('{key}');\n\
+        \x20   if (stored !== '{auto}' && offered.indexOf(stored) === -1) stored = '{auto}';\n\
+        \x20   var want = null;\n\
+        \x20   if (stored === '{auto}') {{\n\
+        \x20     var asked = navigator.languages || [navigator.language || ''];\n\
+        \x20     for (var i = 0; i < asked.length && want === null; i++) {{\n\
+        \x20       var tag = String(asked[i] || '').toLowerCase();\n\
+        \x20       for (var j = 0; j < offered.length; j++) {{\n\
+        \x20         if (offered[j].toLowerCase() === tag) want = offered[j];\n\
+        \x20       }}\n\
+        \x20       if (want !== null) break;\n\
+        \x20       // pt-PT asks for Portuguese, and pt-BR is the Portuguese\n\
+        \x20       // this site has. An exact tag wins first, across the whole\n\
+        \x20       // list, before any primary subtag is considered.\n\
+        \x20       var primary = tag.split('-')[0];\n\
+        \x20       for (var k = 0; k < offered.length; k++) {{\n\
+        \x20         if (want === null && offered[k].toLowerCase().split('-')[0] === primary) {{\n\
+        \x20           want = offered[k];\n\
+        \x20         }}\n\
+        \x20       }}\n\
+        \x20     }}\n\
+        \x20     // A URL the reader did not reach BY FOLLOWING A LINK inside\n\
+        \x20     // this site names the language it names.\n\
+        \x20     //\n\
+        \x20     // The referrer alone is not the test. A reload sets it to the\n\
+        \x20     // page itself, so reloading a page in a language you chose\n\
+        \x20     // would bounce you out of it; and `back_forward` sets it to\n\
+        \x20     // wherever you came from originally, so going back would\n\
+        \x20     // redirect you forward again and the button would appear\n\
+        \x20     // broken. Only a fresh `navigate` counts.\n\
+        \x20     var entry = performance.getEntriesByType('navigation')[0];\n\
+        \x20     var followed =\n\
+        \x20       (!entry || entry.type === 'navigate') &&\n\
+        \x20       document.referrer.indexOf(location.origin + '/') === 0;\n\
+        \x20     if (!door && !followed) want = null;\n\
+        \x20   }} else {{\n\
+        \x20     want = stored;\n\
+        \x20   }}\n\
+        \x20   if (want !== null && want !== here && targets[want]) {{\n\
+        \x20     location.replace(targets[want]);\n\
+        \x20   }}\n\
+        \x20 }} catch (e) {{\n\
+        \x20   // No storage. The served locale stands, which is the correct\n\
+        \x20   // degradation: this script only ever moves a reader who asked.\n\
+        \x20 }}\n\
+         }})();\n\
+         </script>\n",
+        key = defaults::LOCALE_KEY,
+        auto = defaults::AUTOMATIC_LOCALE,
+    )
 }
 
 /// Renders the whole body to HTML.
@@ -173,7 +336,6 @@ fn document_tree(props: DocumentProps) -> Element {
     let DocumentProps { context } = props;
     rsx! {
         a { class: "nd-skip", href: "#nd-main", "{context.t(Key::AppSkip)}" }
-        shell::Effects {}
         shell::Header { context }
         div { class: "nd-body",
             shell::Sidebar { context }
@@ -191,7 +353,7 @@ fn document_tree(props: DocumentProps) -> Element {
 /// [`site::BASE`] — `<locale>/<slug>/index.html`, two levels down.
 ///
 /// The alternative — every page at the root — would mean three locales sharing
-/// one namespace, and `colours` could belong to only one of them.
+/// one namespace, and `colors` could belong to only one of them.
 ///
 /// Only **document-relative** hrefs move. A blind replace turns `https://…`
 /// into `../https://…` and `/x` into `..//x`, which works right up until a base
@@ -225,13 +387,36 @@ fn is_document_relative(href: &str) -> bool {
     !(scheme > 0 && href[scheme..].starts_with(':'))
 }
 
-/// The root document, which sends a reader to the default locale.
+/// The root document, which sends a reader to their language.
+///
+/// The `<meta refresh>` still names the default locale, because that is the
+/// answer with no script; [`locale_script`] gets there first when there is one.
 fn redirect() -> String {
     let locale = Locale::DEFAULT;
     redirect_to(
         locale,
-        &format!("{}/{}", locale.tag(), site::first(locale).file()),
+        &format!("{}/{}", locale.tag(), site::first(locale).dir()),
+        // `here` is empty: the root belongs to no locale, so every resolved
+        // answer differs from it and the door always opens somewhere.
+        &locale_script("", &door_targets(""), true),
     )
+}
+
+/// Where each locale's front door leads, from a document `prefix` levels up.
+///
+/// The first entry in that locale's own sidebar, not a fixed page — the order
+/// is the reader's alphabet, so the front door differs by locale. Never
+/// `<locale>/` itself, which is this same door and would loop.
+fn door_targets(prefix: &str) -> Vec<(&'static str, String)> {
+    Locale::OFFERED
+        .iter()
+        .map(|locale| {
+            (
+                locale.tag(),
+                format!("{prefix}{}/{}", locale.tag(), site::first(*locale).dir()),
+            )
+        })
+        .collect()
 }
 
 /// A door: no title beyond the site's name, no content, no sidebar entry.
@@ -239,12 +424,13 @@ fn redirect() -> String {
 /// Deliberately not a page. The site had a landing page whose entire content
 /// described the other pages — which is what the sidebar is — so it was
 /// deleted rather than rewritten.
-fn redirect_to(locale: Locale, target: &str) -> String {
+fn redirect_to(locale: Locale, target: &str, script: &str) -> String {
     format!(
         "<!doctype html>\n\
          <html lang=\"{lang}\">\n\
          <head>\n\
          <meta charset=\"utf-8\">\n\
+         {script}\
          <meta http-equiv=\"refresh\" content=\"0; url={target}\">\n\
          <link rel=\"canonical\" href=\"{target}\">\n\
          <title>{name}</title>\n\
@@ -257,12 +443,53 @@ fn redirect_to(locale: Locale, target: &str) -> String {
 }
 
 /// Copies the generated stylesheets, the vendored palettes and the fonts.
+/// The shipped browser behaviour, whole.
+///
+/// Each of these is a `dist/` file because the component it belongs to ships —
+/// a colour picker that only picks colours inside this site is not a colour
+/// picker — and `shell.js` imports every one of them from beside itself rather
+/// than carrying a copy. Its own function so the list is one place and a
+/// seventh file is one line.
+fn copy_runtime(root: &Path, out: &Path) -> Result<usize, String> {
+    let mut count = 0;
+    for file in [
+        "anchor.js",
+        "color.js",
+        "messages.js",
+        "color-picker.js",
+        "inputs.js",
+        "carousel.js",
+        "error-summary.js",
+        "table.js",
+        "info.js",
+        "menu.js",
+        "message-bar.js",
+        "dialog.js",
+        "popover.js",
+        "tooltip.js",
+        "toast.js",
+    ] {
+        count += copy(
+            &root.join("dist").join(file),
+            &out.join("assets").join(file),
+        )?;
+    }
+    Ok(count)
+}
+
 fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
     let mut count = 0usize;
 
     // The generated stylesheets, at the site root, which is where the base
     // links (rebased above) look for them.
-    for name in ["tokens.css", "theme.css", "scope.css", "favicon.svg"] {
+    for name in [
+        "tokens.css",
+        "tones.css",
+        "theme.css",
+        "scope.css",
+        "syntax.css",
+        "favicon.svg",
+    ] {
         count += copy(&root.join("dist").join(name), &out.join(name))?;
     }
 
@@ -278,7 +505,7 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
     )?;
     count += 1;
 
-    // The vendored colour output, under the path `spec/theme.toml` declares.
+    // The vendored color output, under the path `spec/theme.toml` declares.
     count += copy_dir(
         &root.join("packages/tokens/vendor/css"),
         &out.join("tokens/css"),
@@ -291,7 +518,7 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
         "woff2",
     )?;
 
-    // The shell's own two files, and the generated modules the script imports
+    // The shell's own files, and the generated modules the script imports
     // rather than restates.
     count += copy(
         &root.join("docs-site/assets/shell.css"),
@@ -301,9 +528,84 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
         &root.join("docs-site/assets/shell.js"),
         &out.join("assets/shell.js"),
     )?;
+    // The model stage: any glTF, file and parameters as inputs — the seed of
+    // the upload feature, and the reason it must know nothing about owls.
+    count += copy(
+        &root.join("docs-site/assets/model.js"),
+        &out.join("assets/model.js"),
+    )?;
+    // The matcher, which `shell.js` imports. A file of its own because it
+    // touches no DOM and carries no word in any language — which is what will
+    // let it move into a behaviour package unchanged on the day there is one.
+    count += copy(
+        &root.join("docs-site/assets/search-match.js"),
+        &out.join("assets/search-match.js"),
+    )?;
+    // The rows the `deploys` example fetches when a reader asks for more. A
+    // real file at a real address, because a *load more* whose next rows are
+    // already in the page is a demonstration of nothing — and it is `<tr>`
+    // markup rather than JSON for the reason `Table.more_src` gives.
+    count += copy(
+        &root.join("docs-site/assets/deploys-2.html"),
+        &out.join("assets/deploys-2.html"),
+    )?;
     count += copy(
         &root.join("packages/tokens/theme.js"),
         &out.join("assets/theme.js"),
+    )?;
+    // The `Lineage` runtime, and the three.js bundle it fetches on the first
+    // interaction. Both are `dist/` files — this component's behaviour SHIPS —
+    // and they keep their relative layout here, because the runtime imports
+    // `./vendor/three-css3d.js` and that path has to mean the same thing in
+    // `dist/` and on the site.
+    count += copy(
+        &root.join("dist/lineage.js"),
+        &out.join("assets/lineage.js"),
+    )?;
+    count += copy(
+        &root.join("dist/vendor/three-css3d.js"),
+        &out.join("assets/vendor/three-css3d.js"),
+    )?;
+    count += copy_runtime(root, out)?;
+    // One file per palette, and the picker fetches the ONE in force. All of
+    // them together is 627 KB; the one a reader opened the Noctua tab to see is
+    // sixteen. `noctua-colors` split its own stylesheets the same way and
+    // recorded the same arithmetic.
+    count += copy_dir(
+        &root.join("dist/palettes"),
+        &out.join("assets/palettes"),
+        "json",
+    )?;
+    count += copy(
+        &root.join("dist/vendor/LICENSE-three-MIT.txt"),
+        &out.join("assets/vendor/LICENSE-three-MIT.txt"),
+    )?;
+    // AND THE WEBGL HALF, WHICH IS NOT A `dist/` FILE. The owl on the `Lineage`
+    // page is an example of what a consumer may put inside a figure, not part
+    // of the component — so it is copied from `assets/vendor/` straight to the
+    // site, and a consumer of `Lineage` never fetches it. See its attribution.
+    count += copy(
+        &root.join("assets/vendor/three/three-webgl.js"),
+        &out.join("assets/vendor/three-webgl.js"),
+    )?;
+    // The photographed owl the wild example loads — a scanned model, same
+    // rule as the renderer above: an example's asset, never `dist/`'s. Copied
+    // only when it exists, because the scan arrives from the reader (see
+    // `assets/vendor/owl/ATTRIBUTION.md`) and a site built before it lands
+    // simply keeps the flat portrait.
+    if root.join("assets/vendor/owl/owl.glb").exists() {
+        count += copy(
+            &root.join("assets/vendor/owl/owl.glb"),
+            &out.join("assets/vendor/owl.glb"),
+        )?;
+    }
+    // The portraits the `Lineage` examples stand at their figures, so the
+    // documentation shows a scene of people rather than a scene of initials.
+    // Placeholders rather than photographs of anybody — see their attribution.
+    count += copy_dir(
+        &root.join("docs-site/assets/portraits"),
+        &out.join("assets/portraits"),
+        "svg",
     )?;
     // The React example, bundled by esbuild. Optional on purpose: the site must
     // build on a machine that has never run `pnpm install`, because the Rust
@@ -315,7 +617,8 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
         count += copy(&react, &out.join("assets/example-react.js"))?;
     } else {
         println!(
-            "  note: docs-site/assets/example-react.js is absent — run `pnpm run build:example`"
+            "  note: docs-site/assets/example-react.js is absent — run \
+             `pnpm --filter @noctua-world/docs-site run build:example`"
         );
     }
 
@@ -388,13 +691,95 @@ mod tests {
     #[test]
     fn the_base_link_order_survives_rebasing() {
         let head = rebase(BASE_LINKS);
+        // Read from the theme model rather than spelled here: the file this
+        // names changes with the default palette, and a literal would keep
+        // passing against a sheet the build no longer links.
+        let palette = noctua_design_theme::Palette::DEFAULT.as_str();
         let default = head
-            .find("ochre-balanced.css")
-            .expect("the default palette");
+            .find(&format!("{palette}.css"))
+            .unwrap_or_else(|| panic!("the default palette, {palette}, is not linked:\n{head}"));
         let scope = head.find("scope.css").expect("the scoped contract");
         let tokens = head.find("tokens.css").expect("the design tokens");
         assert!(scope < default, "scope.css must precede the palette");
         assert!(default < tokens, "the palette must precede the tokens");
+    }
+
+    /// The default palette's sheet is scope-anchored, so the attribute that
+    /// makes it apply has to be in the markup.
+    ///
+    /// Without it every page has no palette at all — not the wrong colors, no
+    /// colors — and the failure looks like a missing stylesheet rather than a
+    /// missing attribute.
+    #[test]
+    fn every_page_carries_the_default_palette_attribute() {
+        let palette = noctua_design_theme::Palette::DEFAULT.as_str();
+        for locale in Locale::ALL {
+            for page in site::pages() {
+                let html = document(locale, page);
+                assert!(
+                    html.contains(&format!("data-palette=\"{palette}\"")),
+                    "{} in {} does not stamp the default palette",
+                    page.slug,
+                    locale.tag()
+                );
+            }
+        }
+    }
+
+    /// The language layer is a Rust constant and a JavaScript one, and they
+    /// have to be the same string.
+    ///
+    /// A storage key spelled two ways is a preference that is written and never
+    /// read back — which reports nothing, looks like the setting not sticking,
+    /// and is invisible in a review because neither file is wrong on its own.
+    #[test]
+    fn the_locale_layer_agrees_with_the_script() {
+        let script = include_str!("../assets/shell.js");
+        for (constant, value) in [
+            ("LOCALE_KEY", defaults::LOCALE_KEY),
+            ("AUTOMATIC_LOCALE", defaults::AUTOMATIC_LOCALE),
+        ] {
+            assert!(
+                script.contains(&format!("const {constant} = \"{value}\";")),
+                "shell.js does not declare {constant} as {value:?}"
+            );
+        }
+
+        // And the inline resolver in <head> reads the same key.
+        let html = document(Locale::DEFAULT, site::first(Locale::DEFAULT));
+        assert!(
+            html.contains(&format!("localStorage.getItem('{}')", defaults::LOCALE_KEY)),
+            "the inline locale resolver reads a different key"
+        );
+    }
+
+    /// The resolver may only ever reach a destination this build wrote.
+    ///
+    /// `NOCTUA.md §2.4`: nothing a reader controls — a stored value, a
+    /// `navigator.languages` entry — is concatenated into a path. The script
+    /// picks from a table written here, and this is the assertion that the
+    /// table is all it has.
+    #[test]
+    fn the_locale_resolver_builds_no_url_of_its_own() {
+        let html = document(Locale::En, site::first(Locale::En));
+        // Matched on the read, not on the key: `data-noctua-locales` on <html>
+        // contains `noctua-locale` as a substring, so a looser predicate finds
+        // the document's own head and passes without ever seeing the script.
+        let needle = format!("localStorage.getItem('{}')", defaults::LOCALE_KEY);
+        let script = html
+            .split("<script>")
+            .find(|part| part.contains(&needle))
+            .expect("the locale resolver");
+        assert!(
+            script.contains("targets[want]"),
+            "the resolver does not read its destination from the table"
+        );
+        for forbidden in ["location.href =", "'/' + want", "want + '/'"] {
+            assert!(
+                !script.contains(forbidden),
+                "the resolver builds a URL from a value it does not control: {forbidden}"
+            );
+        }
     }
 
     /// Every href has to move to the base exactly once, or the assets 404 from
@@ -411,6 +796,220 @@ mod tests {
             !head.contains(&format!("href=\"{}{}", site::BASE, site::BASE)),
             "an href moved twice"
         );
+    }
+
+    /// EVERY SENTENCE ON EVERY PAGE COMES FROM THE CATALOGUE.
+    ///
+    /// # What the pseudo-locale is for, made mechanical
+    ///
+    /// `qps` is English with every vowel doubled and the whole message wrapped
+    /// in `⟦…⟧`, generated from the source rather than written. Its purpose was
+    /// always this: **anything not bracketed never went through the
+    /// catalogue.** But checking it meant opening `/qps/` and reading, which
+    /// nobody does twice — and thirteen component pages shipped English prop
+    /// documentation in Portuguese for a whole stage.
+    ///
+    /// So the page is rendered and every text node is examined. What is skipped
+    /// is skipped for a stated reason, and each exemption is an element or a
+    /// class the markup carries deliberately:
+    ///
+    /// - `<code>`, `<pre>`, `<kbd>` and `<time>` — a token name, a fragment of
+    ///   source, a key cap and a machine-readable stamp are identifiers.
+    /// - `.nd-identifier` — the marker for everything else that is a name
+    ///   rather than a sentence: a language's own name, a font family, a line of
+    ///   Devanagari. If a page shows something untranslated, it says so here.
+    ///
+    /// A failure names the page and the text, because "something is not
+    /// translated" sends somebody hunting and the sentence itself does not.
+    #[test]
+    fn every_sentence_on_every_page_is_translated() {
+        let mut examined = 0usize;
+        for page in site::pages() {
+            let html = document(Locale::Qps, page);
+            for text in visible_text(&html) {
+                examined += 1;
+                assert!(
+                    text.contains('⟦'),
+                    "{} shows text that never went through the catalogue: {text:?}",
+                    page.slug
+                );
+            }
+        }
+        // A scanner that found nothing would pass this test on every page,
+        // for ever, and report a property it never checked.
+        assert!(
+            examined > 500,
+            "only {examined} runs of text were examined; the scanner is not reading the page"
+        );
+    }
+
+    /// Every run of reader-facing text in a document.
+    ///
+    /// Deliberately a small scanner rather than a parser: this walks tags to
+    /// find text between them, skips the subtrees named above, and drops
+    /// anything with no letters in it. A dependency to read HTML this build
+    /// wrote itself would be a dependency for one test (`NOCTUA.md §2.3`).
+    fn visible_text(html: &str) -> Vec<String> {
+        // Elements whose CONTENT is an identifier rather than a sentence: a
+        // token name, a fragment of source, a key cap, a machine-readable
+        // stamp, and the name of a work or a person.
+        const SKIP: [&str; 5] = ["code", "pre", "kbd", "time", "cite"];
+        // And the two whose content is not markup at all — see below.
+        const RAW: [&str; 2] = ["script", "style"];
+
+        let mut out = Vec::new();
+        let mut rest = html;
+        // The tag name of the subtree being skipped, and how deep we are in it.
+        let mut skipping: Option<(String, usize)> = None;
+
+        while let Some(open) = rest.find('<') {
+            let text = &rest[..open];
+            if skipping.is_none() && text.chars().any(char::is_alphabetic) {
+                out.push(text.trim().to_owned());
+            }
+            rest = &rest[open + 1..];
+
+            // A comment ends at `-->`, not at the first `>` — and the base
+            // links carry a long one explaining the palette ordering, which a
+            // naive scan reads as a tag and then as page text.
+            if let Some(body) = rest.strip_prefix("!--") {
+                rest = body.find("-->").map_or("", |at| &body[at + 3..]);
+                continue;
+            }
+
+            let Some(close) = rest.find('>') else { break };
+            let tag = &rest[..close];
+            rest = &rest[close + 1..];
+
+            let closing = tag.starts_with('/');
+            let name: String = tag
+                .trim_start_matches('/')
+                .chars()
+                .take_while(char::is_ascii_alphanumeric)
+                .flat_map(char::to_lowercase)
+                .collect();
+            if name.is_empty() {
+                continue;
+            }
+
+            // A void element closes itself, so it can never open a subtree.
+            let void = tag.ends_with('/') || matches!(name.as_str(), "br" | "hr" | "img" | "input");
+
+            // A `.nd-message` subtree is ONE message, however many runs it was
+            // split into. `pages::Message` sets identifiers inside a sentence
+            // as code, which cuts the sentence at every backtick — and the
+            // pseudo-locale's brackets are only on the first and last piece.
+            if !closing && !void && skipping.is_none() && tag.contains("nd-message") {
+                let (inside, after) = subtree(rest, &name);
+                rest = after;
+                let joined = strip_tags(inside);
+                if joined.chars().any(char::is_alphabetic) {
+                    out.push(joined);
+                }
+                continue;
+            }
+
+            // `<script>` AND `<style>` HOLD RAW TEXT, NOT MARKUP.
+            //
+            // Their content is skipped to the literal closing tag rather than
+            // scanned, because scanning it does not work and fails silently in
+            // the worst direction: `for (var i = 0; i < asked.length …` in the
+            // locale resolver reads as an opening tag, the scan for its `>`
+            // runs past `</script>`, and the skip never closes. Everything
+            // after the first inline script was then invisible to this test —
+            // which is to say, the whole page. The floor above is what caught
+            // it; without the floor it would have passed for ever.
+            if !closing && !void && RAW.contains(&name.as_str()) {
+                let end = format!("</{name}>");
+                rest = rest.find(&end).map_or("", |at| &rest[at + end.len()..]);
+                continue;
+            }
+
+            if let Some((open_name, depth)) = &mut skipping {
+                if &name == open_name && !void {
+                    if closing {
+                        *depth -= 1;
+                        if *depth == 0 {
+                            skipping = None;
+                        }
+                    } else {
+                        *depth += 1;
+                    }
+                }
+            } else {
+                let identifier = tag.contains("nd-identifier");
+                if !closing && !void && (SKIP.contains(&name.as_str()) || identifier) {
+                    skipping = Some((name, 1));
+                }
+            }
+        }
+        out
+    }
+
+    /// Everything up to the tag that closes an already-open `<name>`, and
+    /// whatever follows it.
+    fn subtree<'a>(rest: &'a str, name: &str) -> (&'a str, &'a str) {
+        let open = format!("<{name}");
+        let close = format!("</{name}>");
+        let mut depth = 1usize;
+        let mut at = 0usize;
+        while depth > 0 {
+            let next_open = rest[at..].find(&open).map(|i| at + i);
+            let Some(next_close) = rest[at..].find(&close).map(|i| at + i) else {
+                return (&rest[at..], "");
+            };
+            if next_open.is_some_and(|i| i < next_close) {
+                depth += 1;
+                at = next_open.expect("checked") + open.len();
+            } else {
+                depth -= 1;
+                at = next_close + close.len();
+                if depth == 0 {
+                    return (&rest[..next_close], &rest[at..]);
+                }
+            }
+        }
+        (rest, "")
+    }
+
+    /// The text of a fragment, with every tag taken out.
+    fn strip_tags(html: &str) -> String {
+        let mut out = String::with_capacity(html.len());
+        let mut rest = html;
+        while let Some(open) = rest.find('<') {
+            out.push_str(&rest[..open]);
+            rest = &rest[open + 1..];
+            match rest.find('>') {
+                Some(close) => rest = &rest[close + 1..],
+                None => break,
+            }
+        }
+        out.push_str(rest);
+        out.split_whitespace().collect::<Vec<_>>().join(" ")
+    }
+
+    /// The scanner has to be right, or the test above proves nothing.
+    #[test]
+    fn the_text_scanner_reads_a_split_message_as_one() {
+        let html = "<p><span class=\"nd-message\">⟦aa <code>x</code> bb⟧</span></p>";
+        assert_eq!(visible_text(html), vec!["⟦aa x bb⟧"]);
+    }
+
+    /// The scanner has to be right, or the test above proves nothing.
+    #[test]
+    fn the_text_scanner_skips_what_it_says_it_skips() {
+        let html = "<p>⟦sentence⟧ <code>--token</code> and \
+                    <span class=\"nd-identifier\">Português</span></p>\
+                    <pre><span>raw</span></pre><p>⟦another⟧</p>";
+        assert_eq!(visible_text(html), vec!["⟦sentence⟧", "and", "⟦another⟧"]);
+    }
+
+    /// And it must not lose a nested tag inside a skipped subtree, or the text
+    /// after that subtree is read as though it were inside it.
+    #[test]
+    fn the_text_scanner_closes_a_nested_subtree_once() {
+        let html = "<code><span>a</span><span>b</span></code><p>⟦after⟧</p>";
+        assert_eq!(visible_text(html), vec!["⟦after⟧"]);
     }
 
     /// An href that does not resolve against the document must not move.
@@ -465,7 +1064,7 @@ mod tests {
 
     #[test]
     fn the_scoped_theme_page_carries_a_real_nested_scope() {
-        let page = site::SCOPED_THEMES;
+        let page = site::THEME_SCOPE;
         let html = document(Locale::En, page);
         // Two scope ELEMENTS, each with its palette and its mode on the same
         // element — which is the whole contract in one assertion.
@@ -473,9 +1072,9 @@ mod tests {
         // Matched with the `=""` rather than on the bare name: the attribute is
         // also one of the searchable names in the sidebar, and counting the
         // string alone made this test fail the moment search learned about it.
-        // Three now: the demo scope, the scope nested inside it, and the one
-        // in the example frame — which is the same scope again, in a frame that
-        // can mount it in either implementation.
+        // Three: the demo scope, the scope nested inside it, and the one in
+        // the example frame — the same scope again, in a frame that can mount
+        // it in either implementation.
         assert_eq!(html.matches("data-noctua-scope=\"\"").count(), 3, "{html}");
         assert!(html.contains("data-palette=\"azure-vivid\""));
         assert!(html.contains("data-palette=\"rose-sober\""));

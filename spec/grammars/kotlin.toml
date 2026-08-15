@@ -1,0 +1,86 @@
+# Kotlin.
+
+[meta]
+name = "kotlin"
+display = "Kotlin"
+aliases = ["kt", "kts"]
+
+[words]
+keyword = [
+  "abstract", "actual", "annotation", "as", "break", "by", "catch", "class",
+  "companion", "const", "constructor", "continue", "crossinline", "data",
+  "do", "else", "enum", "expect", "external", "final", "finally", "for",
+  "fun", "get", "if", "import", "in", "infix", "init", "inline", "inner",
+  "interface", "internal", "is", "lateinit", "noinline", "object", "open",
+  "operator", "out", "override", "package", "private", "protected", "public",
+  "reified", "return", "sealed", "set", "super", "suspend", "tailrec",
+  "throw", "try", "typealias", "val", "var", "vararg", "when", "where",
+  "while",
+]
+type = [
+  "Any", "Array", "Boolean", "Byte", "Char", "Double", "Float", "Int", "List",
+  "Long", "Map", "Nothing", "Number", "Set", "Short", "String", "Unit",
+]
+constant = ["false", "true", "null", "it", "this"]
+function = ["arrayOf", "let", "listOf", "mapOf", "print", "println", "require", "run", "setOf", "with"]
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "/*"
+close = "*/"
+nestable = true
+
+[[string]]
+open = '"""'
+close = '"""'
+multiline = true
+interpolate_open = "${"
+interpolate_close = "}"
+interpolate_sigil = "$"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+interpolate_open = "${"
+interpolate_close = "}"
+interpolate_sigil = "$"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+max = 12
+
+[number]
+prefixes = ["0x", "0b"]
+separator = "_"
+exponent = "eE"
+suffix = true
+
+[symbols]
+operator = "+-*/%=<>!&|^~?:"
+punctuation = "(){}[],;."
+
+[[sigil]]
+open = "@"
+role = "attribute"
+
+[context]
+name_after = { fun = "function", class = "type", interface = "type", object = "type", typealias = "type", enum = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+member_dot = true
+
+[[case]]
+name = "a function declaration and a string with a hole in it"
+code = 'fun greet(name: String) = println("hi $name")'
+expect = ["keyword fun", "function greet", "type String", "function println", "escape $name"]
+
+[[case]]
+name = "a nested block comment ends where it really ends"
+code = "/* a /* b */ c */ val x = 1"
+expect = ["comment /* a /* b */ c */", "keyword val", "number 1"]

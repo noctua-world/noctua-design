@@ -5,21 +5,28 @@
 // Edits to this file will be overwritten. Change the spec instead.
 
 import type { ReactNode } from "react";
-import type { IconName } from "@noctua/tokens/icons.js";
+import type { IconName } from "@noctua-world/design-tokens/icons.js";
 
+export type DisclosureHeading = "none" | "h2" | "h3" | "h4";
 
 export interface DisclosureProps {
-  /** What the control says, and its accessible name. */
+  /** The text on the control, which is also its accessible name. */
   summary: string;
-  /** An icon instead of the summary text. The summary is still required and becomes the accessible name. */
+  /** The identifier a script uses to find this disclosure. It is written to `data-nd-disclosure`. A disclosure with no script behind it does not need one. */
+  name?: string;
+  /** An icon shown instead of the summary text. `summary` is still required and becomes the accessible name. */
   icon?: IconName;
-  /** Whether it starts open. Rendered, not applied by script — a disclosure that opens after the page paints reflows what is under it. */
+  /** Whether the disclosure starts open. Rendered in the markup rather than applied by a script, because opening after the page has painted moves the content below it. */
   open?: boolean;
-  /** Whether to draw the chevron. Off for a control that is already an icon. */
+  /** Whether the chevron is drawn. Turn it off for a control that is already an icon. */
   marker?: boolean;
+  /** Makes the summary a real heading inside `<summary>`, at level 2, 3 or 4. Use it when the disclosure is a section of the page, so the section keeps its place in the outline a screen reader navigates by. */
+  heading?: DisclosureHeading;
+  /** Whether the control is frosted. It applies to the summary and the panel together, so both carry the same material. */
+  glass?: boolean;
   className?: string;
   children?: ReactNode;
 }
 
-/** Content folded away behind its own control. */
+/** Let users show and hide a block of content from its own control. */
 export declare function Disclosure(props: DisclosureProps): JSX.Element;

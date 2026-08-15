@@ -12,5 +12,5 @@ export interface StrongProps {
   children?: ReactNode;
 }
 
-/** Importance, seriousness or urgency — not merely bold text. */
+/** Mark text as important, serious or urgent, rather than only bold. */
 export declare function Strong(props: StrongProps): JSX.Element;

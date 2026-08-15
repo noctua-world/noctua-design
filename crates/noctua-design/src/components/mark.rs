@@ -4,17 +4,15 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! Text highlighted for the reader's current purpose, such as a search hit.
+//! Highlight text for what the reader is doing now, such as a search hit.
 
 use dioxus::prelude::*;
 
-/// Text highlighted for the reader's current purpose, such as a search hit.
+/// Highlight text for what the reader is doing now, such as a search hit.
 ///
 /// # Accessibility
 ///
-/// A highlight that carries meaning needs more than a background colour: colour
-/// alone is invisible to a reader who cannot distinguish it, so this also changes
-/// the text weight.
+/// A highlight that carries meaning needs more than a background colour. Colour alone is invisible to a reader who cannot distinguish it, so this also changes the text weight.
 #[component]
 pub fn Mark(
     /// Extra classes for the root element.

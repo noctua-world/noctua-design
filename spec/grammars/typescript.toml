@@ -1,0 +1,97 @@
+# TypeScript.
+#
+# JavaScript's table plus the type-level words. `property_colon` stays `any`,
+# which means `function f(x: number)` paints `x` as a property — a parameter and
+# an object key really are the same shape here, and colouring one of them wrong
+# is the price of colouring object literals right, which is the far commoner
+# thing to be looking at.
+
+[meta]
+name = "typescript"
+display = "TypeScript"
+aliases = ["ts", "mts", "cts"]
+
+[identifier]
+extra = "_$"
+
+[words]
+keyword = [
+  "abstract", "as", "async", "await", "break", "case", "catch", "class",
+  "const", "continue", "declare", "default", "delete", "do", "else", "enum",
+  "export", "extends", "finally", "for", "from", "function", "get",
+  "implements", "import", "interface", "let", "namespace", "new", "of",
+  "override", "private", "protected", "public", "readonly", "return",
+  "satisfies", "set", "static", "super", "switch", "throw", "try", "type",
+  "var", "while", "yield",
+]
+operator = ["in", "infer", "instanceof", "is", "keyof", "typeof", "void"]
+constant = ["false", "true", "null", "undefined", "this"]
+type = [
+  "Array", "Awaited", "Date", "Error", "Map", "Omit", "Partial", "Pick",
+  "Promise", "Readonly", "Record", "Required", "Set", "any", "bigint",
+  "boolean", "never", "number", "object", "string", "symbol", "unknown",
+]
+function = ["console", "document", "require", "window"]
+
+[[comment]]
+open = "//"
+
+[[comment]]
+open = "/*"
+close = "*/"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+
+[[string]]
+open = "`"
+close = "`"
+escape = "\\"
+multiline = true
+interpolate_open = "${"
+interpolate_close = "}"
+
+[number]
+prefixes = ["0x", "0b", "0o"]
+separator = "_"
+exponent = "eE"
+suffix = true
+leading_dot = true
+
+[symbols]
+operator = "+-*/%=<>!&|^~?:"
+punctuation = "(){}[],;.@#"
+
+[[sigil]]
+open = "@"
+role = "attribute"
+
+[context]
+name_after = { function = "function", class = "type", interface = "type", enum = "type", type = "type", extends = "type", implements = "type", new = "type" }
+call_paren = true
+upper_type = true
+screaming_constant = true
+member_dot = true
+property_colon = "any"
+
+[[case]]
+name = "an interface and its members"
+code = "export interface Token { role: Role; text: string }"
+expect = ["keyword export", "keyword interface", "type Token", "property role", "type Role", "property text", "type string"]
+
+[[case]]
+name = "a decorator reads with the name after it"
+code = "@Component({})\nclass Panel {}"
+expect = ["attribute @Component", "keyword class", "type Panel"]
+
+[[case]]
+name = "a generic call is a call, and its argument is a type"
+code = "const list = new Map<string, Token>();"
+expect = ["keyword new", "type Map", "type string", "type Token"]

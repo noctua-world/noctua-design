@@ -1,0 +1,221 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a date input to ask for one date as a day, a month and a year in three
+labelled boxes. It suits a date users know outright, such as a birth date.
+`order` lays the row out for the reader's locale by moving the boxes in the
+document.
+"""
+
+[meta]
+name = "DateInput"
+element = "fieldset"
+class = "nd-date-input"
+# The part the enum props change: one segment box per size, three per order.
+# Drawn boxes with numerals rather than live inputs — a specimen of a
+# `needs_name` component must not render a nameless control.
+specimen = "<span class=\"nd-date-input-figure\"><span class=\"nd-identifier\">07</span><span class=\"nd-identifier\">08</span><span class=\"nd-identifier\">2026</span></span>"
+summary = "Ask for one date as three numbers, in the order the reader's language writes them."
+
+# WHY IT IS ITS OWN FIELDSET RATHER THAN CONTENT FOR `Fieldset`. The script
+# that validates writes into `{id}-error`, and the id it writes into must be
+# derived by the same component that carries the hook — an error slot on one
+# component filled by another's script is the cross-component id wiring this
+# system exists to forbid. `TagPicker` made the same call for the same
+# reason.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-date-input"
+doc = "The field's name and the root of every id in it (`nd-date-input-{name}`). The three boxes post `{name}-day`, `{name}-month` and `{name}-year`. Required, because an id derived from an optional name repeats on every copy of the field."
+
+[prop.legend]
+type = "text"
+required = true
+doc = "The question, in the reader's language. Required, because a fieldset with no legend gives a screen reader a group and nothing saying what the group is for."
+
+[prop.day_label]
+type = "text"
+required = true
+doc = "The day box's own visible label. Required, because three unlabelled boxes leave users guessing which is which."
+
+[prop.month_label]
+type = "text"
+required = true
+doc = "The month box's own visible label."
+
+[prop.year_label]
+type = "text"
+required = true
+doc = "The year box's own visible label."
+
+[prop.hint]
+type = "text"
+doc = "What users need to know before answering, such as `For example, 27 3 2007`. It rides the fieldset's `aria-describedby`, so it is read with the question."
+
+[prop.error]
+type = "text"
+doc = "What is wrong with the date, in the caller's own words. Its presence marks the field invalid, so the red edge and the message always appear together. A sentence from the caller is never cleared by the script."
+
+[prop.error_label]
+type = "text"
+attribute = "data-nd-error-label"
+doc = "The word read out before the message, such as `Error:`. It is visually hidden, because the message is already marked as an error on the screen. It is on an attribute too, so the validator prefixes its own sentences with it."
+
+[prop.value]
+type = "text"
+doc = "The date already known, in the year-month-day wire format (`2026-08-07`). It is split into the three boxes at render, and the row's order decides how users see it."
+
+[prop.min]
+type = "text"
+attribute = "data-nd-min"
+doc = "The earliest date accepted, in the same wire format as `value`. The script rejects earlier dates with `min_label`, and the calendar disables their days. It is not the platform's `min`, because these boxes are text."
+
+[prop.max]
+type = "text"
+attribute = "data-nd-max"
+doc = "The latest date accepted, in the same wire format, rejected with `max_label`."
+
+[prop.required]
+type = "bool"
+default = "false"
+attribute = "required"
+doc = "The real `required` attribute, on all three boxes, so the browser itself rejects an empty submit with no script running."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Disables the whole field at once. `<fieldset disabled>` is the browser's own cascade, so nothing here walks the children. Stepping, suggestions and the calendar all stop with it."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+variants = false
+default = "medium"
+attribute = "data-nd-size"
+doc = "The height of the boxes, matched to `Select`'s steps so a date and a select on one row sit level."
+
+[prop.order]
+type = "enum"
+values = ["auto", "dmy", "mdy", "ymd"]
+variants = false
+default = "auto"
+attribute = "data-nd-order"
+doc = "Which box comes first. `auto` serves day-month-year and lets the script lay the row out for the reader's locale. A named order is served as written and left alone. The order in force is readable from `data-nd-resolved`."
+
+[prop.bday]
+type = "bool"
+default = "false"
+attribute = "data-nd-bday"
+doc = "Marks the field as a birth date, which writes the platform's `autocomplete=\"bday-day\"`, `bday-month` and `bday-year` tokens on the boxes. The browser then fills all three, in whatever order they stand."
+
+[prop.pad]
+type = "bool"
+default = "false"
+attribute = "data-nd-pad"
+doc = "A typing aid, off by default: `7` becomes `07` when the day or month box is left. It happens on blur and never while typing."
+
+[prop.expand]
+type = "bool"
+default = "false"
+attribute = "data-nd-expand"
+doc = "A typing aid, off by default: a two-digit year becomes four when the box is left. The century is the one that lands inside `min` and `max` when exactly one does. Otherwise a year up to ten ahead takes this century and any other takes the last."
+
+[prop.calendar]
+type = "bool"
+default = "false"
+attribute = "data-nd-calendar"
+doc = "Adds a month grid to the suggestions panel, built by the script from the locale's own formatter: month names, weekday initials, the week's first day. Needs `suggest_label`, which names the control that opens it."
+
+[prop.suggest_label]
+type = "text"
+attribute = "data-nd-suggest-label"
+doc = "The name of the suggestions control and its panel. The script builds the button only when this is set, together with quick picks in the children or `calendar` set."
+
+[prop.previous_label]
+type = "text"
+attribute = "data-nd-previous-label"
+doc = "The name of the calendar's step-back-a-month control. Icon-only controls still need a name."
+
+[prop.next_label]
+type = "text"
+attribute = "data-nd-next-label"
+doc = "The name of the calendar's step-forward-a-month control."
+
+[prop.required_label]
+type = "text"
+attribute = "data-nd-required-label"
+doc = "The sentence for a required field submitted with all three boxes empty, such as `Enter your date of birth`."
+
+[prop.missing_label]
+type = "text"
+attribute = "data-nd-missing-label"
+doc = "The sentence for a date with an empty box, with `{field}` filled with that box's own label."
+
+[prop.number_label]
+type = "text"
+attribute = "data-nd-number-label"
+doc = "The sentence for a box holding something that is not a number, with `{field}` filled with its label. It is judged after Unicode normalisation, so fullwidth digits count as digits."
+
+[prop.year_digits_label]
+type = "text"
+attribute = "data-nd-year-digits-label"
+doc = "The sentence for a year of fewer than four digits, used when `expand` is off or the year has three digits, which never expand."
+
+[prop.invalid_label]
+type = "text"
+attribute = "data-nd-invalid-label"
+doc = "The sentence for three numbers that are not a date that exists. Examples are the 31st of April and the 29th of February outside a leap year."
+
+[prop.min_label]
+type = "text"
+attribute = "data-nd-min-label"
+doc = "The sentence for a date before `min`, with `{min}` filled with the bound written by the locale's own formatter rather than the wire format."
+
+[prop.max_label]
+type = "text"
+attribute = "data-nd-max-label"
+doc = "The sentence for a date after `max`, with `{max}` filled the same way."
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts the boxes. The suggestions panel stays opaque, for `Select`'s reason: a list seen through what is behind it is hard to read."
+
+[prop.children]
+type = "children"
+doc = "The quick picks, as `Time` elements, with the machine value on `datetime` and the reader's words as content. They are served inert and hidden, and the script builds the suggestion list from them."
+
+[state.invalid]
+attribute = "data-nd-invalid"
+doc = "Whether the field is in error. It is derived from the sentence in the error slot, the caller's at render and the validator's after. The red edge and the sentence always appear together."
+
+[state.resolved]
+attribute = "data-nd-resolved"
+doc = "The order actually in force, which is the document's order: `dmy`, `mdy` or `ymd`. It is served as the declared order, or `dmy` under `auto`, and re-stamped by the script after detection."
+
+[state.expanded]
+attribute = "aria-expanded"
+doc = "Whether the suggestions panel is open. It is written on the script-built button only, so a page with no script never claims a popup it cannot open."
+
+[keyboard]
+"Digits" = "Fill the focused box. Focus never advances on its own, so a box that is already complete can still be edited."
+"Tab / Shift+Tab" = "Moves between the boxes in visual order, which is always document order."
+"Up / Down arrow" = "Steps the focused box's number, wrapping at its own bounds. The box stays a text field and claims no spinbutton."
+"Alt with Down arrow" = "Opens the suggestions, when there are any. Plain Down is taken by stepping."
+"Down / Up arrow, list open" = "Moves the highlight through the quick picks, by `aria-activedescendant` rather than by moving focus."
+"Arrows, in the calendar" = "A day sideways, a week up or down. Page Up and Page Down turn the month, Shift the year, Home and End the week's ends."
+"Enter, in the panel" = "Takes the highlighted date into all three boxes, closes the panel, and returns focus to the control that opened it."
+"Enter, in a box" = "Submits the form, as any text field does, and the validator then runs."
+"Escape" = "Closes the panel and changes nothing already typed in the three boxes."
+"Paste" = "Splits a pasted date across all three boxes, by the order in force. A four-digit first number is always the year."
+
+[a11y]
+needs_name = true
+notes = """
+A `<fieldset>` and a `<legend>` name the question, and each box has its own
+`<label for>`. The locale re-lay moves the boxes in the document, so visual
+order is always document order."""

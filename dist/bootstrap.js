@@ -32,6 +32,9 @@
     if (['ochre-balanced','ochre-vivid','ochre-sober','amber-balanced','amber-vivid','amber-sober','lime-balanced','lime-vivid','lime-sober','jade-balanced','jade-vivid','jade-sober','teal-balanced','teal-vivid','teal-sober','azure-balanced','azure-vivid','azure-sober','blue-balanced','blue-vivid','blue-sober','indigo-balanced','indigo-vivid','indigo-sober','violet-balanced','violet-vivid','violet-sober','magenta-balanced','magenta-vivid','magenta-sober','rose-balanced','rose-vivid','rose-sober','clay-balanced','clay-vivid','clay-sober','umber-balanced','umber-vivid','umber-sober'].indexOf(palette) !== -1) {
       r.setAttribute('data-palette', palette);
     }
+    else {
+      r.setAttribute('data-palette', 'blue-balanced');
+    }
 
     // Stamping the attribute is not enough: the stylesheet that
     // DEFINES this palette is a separate file. Without injecting it the
@@ -50,7 +53,7 @@
     // over. That is the exact flash this script exists to prevent, and it
     // shipped, because the only test here read back the `blocking`
     // attribute instead of resolving the URL.
-    if (palette && palette !== 'ochre-balanced' && ['ochre-balanced','ochre-vivid','ochre-sober','amber-balanced','amber-vivid','amber-sober','lime-balanced','lime-vivid','lime-sober','jade-balanced','jade-vivid','jade-sober','teal-balanced','teal-vivid','teal-sober','azure-balanced','azure-vivid','azure-sober','blue-balanced','blue-vivid','blue-sober','indigo-balanced','indigo-vivid','indigo-sober','violet-balanced','violet-vivid','violet-sober','magenta-balanced','magenta-vivid','magenta-sober','rose-balanced','rose-vivid','rose-sober','clay-balanced','clay-vivid','clay-sober','umber-balanced','umber-vivid','umber-sober'].indexOf(palette) !== -1) {
+    if (palette && palette !== 'blue-balanced' && ['ochre-balanced','ochre-vivid','ochre-sober','amber-balanced','amber-vivid','amber-sober','lime-balanced','lime-vivid','lime-sober','jade-balanced','jade-vivid','jade-sober','teal-balanced','teal-vivid','teal-sober','azure-balanced','azure-vivid','azure-sober','blue-balanced','blue-vivid','blue-sober','indigo-balanced','indigo-vivid','indigo-sober','violet-balanced','violet-vivid','violet-sober','magenta-balanced','magenta-vivid','magenta-sober','rose-balanced','rose-vivid','rose-sober','clay-balanced','clay-vivid','clay-sober','umber-balanced','umber-vivid','umber-sober'].indexOf(palette) !== -1) {
       var sheet = document.createElement('link');
       sheet.rel = 'stylesheet';
       sheet.id = 'noctua-palette-sheet';
@@ -77,10 +80,10 @@
       r.setAttribute('data-noctua-radius', radius);
     }
 
-    // blackout
-    var blackout = localStorage.getItem('noctua-blackout');
-    if (['off','on'].indexOf(blackout) !== -1) {
-      r.setAttribute('data-noctua-blackout', blackout);
+    // backdrop
+    var backdrop = localStorage.getItem('noctua-backdrop');
+    if (['plain','cool','black','tinted','soft','softer'].indexOf(backdrop) !== -1) {
+      r.setAttribute('data-noctua-backdrop', backdrop);
     }
 
     // pattern
@@ -89,16 +92,16 @@
       r.setAttribute('data-noctua-pattern', pattern);
     }
 
-    // glow
-    var glow = localStorage.getItem('noctua-glow');
-    if (['off','on'].indexOf(glow) !== -1) {
-      r.setAttribute('data-noctua-glow', glow);
-    }
-
     // grain
     var grain = localStorage.getItem('noctua-grain');
     if (['off','on'].indexOf(grain) !== -1) {
       r.setAttribute('data-noctua-grain', grain);
+    }
+
+    // syntax
+    var syntax = localStorage.getItem('noctua-syntax');
+    if (['auto','spectrum','duotone','muted','mono'].indexOf(syntax) !== -1) {
+      r.setAttribute('data-noctua-code-theme', syntax);
     }
 
     // The page is now correct before anything paints. Remove the

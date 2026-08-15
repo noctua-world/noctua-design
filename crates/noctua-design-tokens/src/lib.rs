@@ -4,9 +4,9 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! # Every non-colour token, as `const`
+//! # Every non-color token, as `const`
 //!
-//! Colours are not here. They come from `noctua-colors`, and a component
+//! Colors are not here. They come from `noctua-colors`, and a component
 //! reaches them through CSS custom properties rather than through Rust.
 //!
 //! Each value is exactly what the generated CSS emits for the same token,
@@ -24,6 +24,42 @@ pub mod space {
 
     /// The scale, in ascending order.
     pub const STEPS: [u32; 13] = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64];
+
+    /// The named gaps, and the step each resolves to.
+    pub const NAMED: [(&str, u32); 7] = [
+        ("tight", 2),
+        ("inset", 3),
+        ("gap", 4),
+        ("paragraph", 6),
+        ("heading", 8),
+        ("section", 16),
+        ("region", 24),
+    ];
+
+    /// Every custom property this scale emits: the base, the steps, the names.
+    pub const NAMES: [&str; 21] = [
+        "--noctua-space-base",
+        "--noctua-space-0",
+        "--noctua-space-1",
+        "--noctua-space-2",
+        "--noctua-space-3",
+        "--noctua-space-4",
+        "--noctua-space-6",
+        "--noctua-space-8",
+        "--noctua-space-12",
+        "--noctua-space-16",
+        "--noctua-space-24",
+        "--noctua-space-32",
+        "--noctua-space-48",
+        "--noctua-space-64",
+        "--noctua-space-tight",
+        "--noctua-space-inset",
+        "--noctua-space-gap",
+        "--noctua-space-paragraph",
+        "--noctua-space-heading",
+        "--noctua-space-section",
+        "--noctua-space-region",
+    ];
 
     /// `var(--noctua-space-tight)` — step 2.
     pub const TIGHT: &str = "var(--noctua-space-tight)";
@@ -51,6 +87,42 @@ pub mod radius {
     pub const SURFACE: &str = "var(--noctua-radius-surface)";
     /// `9999px`.
     pub const PILL: &str = "var(--noctua-radius-pill)";
+}
+
+/// The three-dimensional scene: what a `Lineage` cell is worth.
+pub mod scene {
+    /// `9rem`.
+    pub const CELL: &str = "var(--noctua-scene-cell)";
+    /// `0.85`.
+    pub const SQUEEZE: &str = "var(--noctua-scene-squeeze)";
+    /// `0.85`.
+    pub const SCALE_SMALL: &str = "var(--noctua-scene-scale-small)";
+    /// `1.15`.
+    pub const SCALE_LARGE: &str = "var(--noctua-scene-scale-large)";
+    /// `10rem`.
+    pub const ROW: &str = "var(--noctua-scene-row)";
+    /// `0.86`.
+    pub const FIGURE: &str = "var(--noctua-scene-figure)";
+    /// `7rem`.
+    pub const CARD: &str = "var(--noctua-scene-card)";
+    /// `1.25rem`.
+    pub const MARK: &str = "var(--noctua-scene-mark)";
+    /// `1.75rem`.
+    pub const FACE: &str = "var(--noctua-scene-face)";
+    /// `0.625rem`.
+    pub const SLAB: &str = "var(--noctua-scene-slab)";
+    /// `0.1875rem`.
+    pub const LINE: &str = "var(--noctua-scene-line)";
+    /// `64rem`.
+    pub const PERSPECTIVE: &str = "var(--noctua-scene-perspective)";
+    /// `12deg`.
+    pub const TILT: &str = "var(--noctua-scene-tilt)";
+    /// `0deg`.
+    pub const TURN: &str = "var(--noctua-scene-turn)";
+    /// `26deg`.
+    pub const TURN_DEEP: &str = "var(--noctua-scene-turn-deep)";
+    /// `1.25rem`.
+    pub const LIFT: &str = "var(--noctua-scene-lift)";
 }
 
 /// Font sizes, smallest first.

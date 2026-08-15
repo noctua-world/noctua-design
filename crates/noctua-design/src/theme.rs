@@ -10,7 +10,8 @@
 use dioxus::prelude::*;
 
 pub use noctua_design_theme::{
-    Accent, Font, Glass, Mode, Palette, Radius, Resolved, Saturation, ScopeRequest,
+    Accent, Backdrop, Font, Glass, Grain, Mode, Palette, Pattern, Radius, Resolved, Saturation,
+    ScopeRequest,
 };
 
 /// The theme in force at this point in the tree.
@@ -40,7 +41,7 @@ pub fn use_theme() -> Resolved {
 ///
 /// # Every attribute goes on ONE element
 ///
-/// The colour system's forced-mode rule is compound and same-element:
+/// The color system's forced-mode rule is compound and same-element:
 ///
 /// ```text
 /// [data-palette="blue-vivid"][data-theme="dark"] { … }
@@ -49,7 +50,7 @@ pub fn use_theme() -> Resolved {
 /// Split the palette onto a wrapper and the mode onto a child and that
 /// selector matches nothing. The child falls through to the *default*
 /// palette's unanchored [data-theme="dark"] and silently paints the wrong
-/// colours — silently, because every token still resolves to something.
+/// colors — silently, because every token still resolves to something.
 ///
 /// # A prop left unset inherits
 ///
@@ -78,6 +79,12 @@ pub fn ThemeScope(
     glass: Option<Glass>,
     /// The `radius` this scope asks for. `None` inherits.
     radius: Option<Radius>,
+    /// The `backdrop` this scope asks for. `None` inherits.
+    backdrop: Option<Backdrop>,
+    /// The `pattern` this scope asks for. `None` inherits.
+    pattern: Option<Pattern>,
+    /// The `grain` this scope asks for. `None` inherits.
+    grain: Option<Grain>,
     /// Classes for the scope element. Ignored when the scope is a no-op,
     /// because then there is no element to put them on.
     #[props(default)]
@@ -94,6 +101,9 @@ pub fn ThemeScope(
         font,
         glass,
         radius,
+        backdrop,
+        pattern,
+        grain,
     };
     let resolved = request.resolve(inherited);
 
@@ -118,6 +128,9 @@ pub fn ThemeScope(
             "data-noctua-font": attributes.font,
             "data-noctua-glass": attributes.glass,
             "data-noctua-radius": attributes.radius,
+            "data-noctua-backdrop": attributes.backdrop,
+            "data-noctua-pattern": attributes.pattern,
+            "data-noctua-grain": attributes.grain,
             {children}
         }
     }

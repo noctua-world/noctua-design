@@ -2,7 +2,9 @@
 name = "Em"
 element = "em"
 class = "nd-em"
-summary = "Stress emphasis — the word a reader would lean on when speaking."
+# One of the marks that go inside a sentence, documented with the others.
+page = "inline-text"
+summary = "Mark stress emphasis on a word inside a sentence."
 
 [prop.children]
 type = "children"
@@ -10,6 +12,5 @@ doc = "The emphasised text."
 
 [a11y]
 notes = """
-`em` is stress emphasis and `strong` is importance. They are not
-interchangeable: a screen reader may voice them differently, and using one for
-the other's meaning misreads the sentence."""
+`em` marks stress emphasis and `strong` marks importance. A screen reader may
+voice them differently, so use each one for its own meaning."""

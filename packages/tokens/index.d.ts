@@ -25,6 +25,25 @@ export declare const radius: {
   readonly pill: string;
 };
 
+export declare const scene: {
+  readonly cell: string;
+  readonly squeeze: string;
+  readonly scaleSmall: string;
+  readonly scaleLarge: string;
+  readonly row: string;
+  readonly figure: string;
+  readonly card: string;
+  readonly mark: string;
+  readonly face: string;
+  readonly slab: string;
+  readonly line: string;
+  readonly perspective: string;
+  readonly tilt: string;
+  readonly turn: string;
+  readonly turnDeep: string;
+  readonly lift: string;
+};
+
 export declare const size: {
   readonly caption: string;
   readonly small: string;

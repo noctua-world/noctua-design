@@ -8,11 +8,11 @@ import type { ReactNode } from "react";
 
 
 export interface AbbrProps {
-  /** The expansion. Required — an abbr without one is just small text. */
+  /** The words the abbreviation stands for, written into the `title` attribute. Always supply it, because an abbreviation with no expansion is only small text. */
   title?: string;
   className?: string;
   children?: ReactNode;
 }
 
-/** An abbreviation, with its expansion. */
+/** Show an abbreviation together with the words it stands for. */
 export declare function Abbr(props: AbbrProps): JSX.Element;

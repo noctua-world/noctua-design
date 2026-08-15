@@ -1,0 +1,182 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a text input for one line of text a reader writes: a name, an address, a
+code, a password. For several lines use `Textarea`, for a quantity use
+`NumberInput`, and for several values use `TagPicker`. `kind` chooses the
+keyboard a phone opens.
+"""
+
+[meta]
+name = "Input"
+element = "input"
+class = "nd-input"
+# The part `size` and the tones change, drawn rather than live: a specimen of a
+# `needs_name` component must not render a nameless control.
+specimen = "<span class=\"nd-input-figure\"><span class=\"nd-input-box\"></span></span>"
+summary = "Let users write one line of text, with the keyboard their phone should open for it."
+
+# EVERY ID DERIVES FROM `name`, AND A CALLER WRITES NONE OF THEM.
+#
+# The box, the label's target, the hint, the error and the counter. `Search`
+# was rebuilt this year because the version before it derived its id from an
+# OPTIONAL name, so four fields on one page all carried `id="nd-search-"` and
+# four labels pointed at whichever the browser resolved first.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-input"
+doc = "The field this is submitted under, and the root of every id here. **Required**, because an id derived from an optional name is an id every copy of the component on a page shares."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The question, in the reader's language. **Required**. It is a real `<label for>` drawn by `Field`, never a placeholder, because a placeholder disappears the moment a reader types."
+
+[prop.kind]
+type = "enum"
+values = ["text", "email", "tel", "url", "password"]
+variants = false
+default = "text"
+attribute = "type"
+doc = "What is being asked for: `text`, `email`, `tel`, `url` or `password`. Defaults to `text`. It chooses the **keyboard a phone opens** and the validation the platform already has. `search` is absent, because that control is `Search`."
+
+[prop.value]
+type = "text"
+attribute = "value"
+doc = "What is in the box to begin with. Server-rendered, so a form that comes back with an error comes back with what the reader typed."
+
+[prop.placeholder]
+type = "text"
+attribute = "placeholder"
+doc = "An example of the shape of an answer, such as *ada@example.org*, inside the box. **Never the only name the field has.** It vanishes on the first keystroke, is low contrast in every engine, and is not announced as a label."
+
+[prop.hint]
+type = "text"
+doc = "What a reader needs before answering. Drawn by `Field` and pointed at by this box's `aria-describedby`, so it is read with the control rather than found afterwards."
+
+[prop.error]
+type = "text"
+doc = "What is wrong, after a submission, in the caller's own words. It is a `role=\"alert\"`. The platform's own bubble says *Please fill in this field*, which does not say what the field wanted."
+
+[prop.required]
+type = "bool"
+default = "false"
+attribute = "required"
+doc = "Whether an answer is needed. Off by default. It is the **real** attribute on the **real** box, so the browser refuses the submission with no script at all. `Field` draws the word beside the question."
+
+[prop.required_label]
+type = "text"
+doc = "The word `Field` marks the question with, such as *required*. Needed whenever `required` is set, because a mark alone says nothing to a reader meeting the form for the first time."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Whether the control is refused. Off by default. It is the real attribute, because only the real one stops a form submitting. A disabled field submits **nothing**, which is a different answer from an empty one."
+
+[prop.readonly]
+type = "bool"
+default = "false"
+attribute = "readonly"
+doc = "Whether the value can be read and copied but not changed. Off by default. Unlike `disabled`, it is still submitted, still focusable and still announced. Use it for a reference number a reader must be able to copy."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The box size: `small`, `medium` or `large`. Defaults to `medium`, and matches `Button` step for step, so a field and the control beside it sit on one line. The type inside never goes below the body size, so a phone does not zoom on focus."
+
+[prop.icon]
+type = "text"
+doc = "An icon inside the box, before the text. It says what kind of answer this is at a glance, and it is `aria-hidden`, because the question above it is the name."
+
+[prop.prefix]
+type = "text"
+attribute = "data-nd-prefix"
+doc = "A fixed word or symbol before the value, inside the box, such as `https://`, `R$` or `+55`. It is **not** part of the submitted value, and it is `aria-hidden`."
+
+[prop.suffix]
+type = "text"
+attribute = "data-nd-suffix"
+doc = "A fixed word or symbol after the value, such as `.com`, `kg` or `%`. Same rule: drawn, never submitted."
+
+[prop.clearable]
+type = "bool"
+default = "false"
+attribute = "data-nd-clearable"
+doc = "Whether a control appears for emptying the box. Off by default. Emptying a field costs a reader one gesture they already know. A control that appears only when there is text moves the layout as they type."
+
+[prop.clear_label]
+type = "text"
+attribute = "data-nd-clear-label"
+doc = "The name of that control. It is a glyph, so this is the only name it has."
+
+[prop.maxlength]
+type = "text"
+attribute = "maxlength"
+doc = "The most characters the box accepts. It is the real attribute, so the browser stops the keystroke rather than a script noticing afterwards. Text rather than a number, because every prop crossing the two languages is text."
+
+[prop.counter]
+type = "bool"
+default = "false"
+attribute = "data-nd-counter"
+doc = "Whether to show how much room is left. Off by default, and wanted whenever `maxlength` is set, because a box that silently stops accepting characters gives a reader no reason for it."
+
+[prop.counter_label]
+type = "text"
+attribute = "data-nd-counter-label"
+doc = "What the count says, with `{count}` and `{max}` holes, such as *{count} of {max}*. One whole sentence with two holes in it. It may carry one form per plural category, as `Search.status` does."
+
+[prop.reveal_label]
+type = "text"
+attribute = "data-nd-reveal-label"
+doc = "The name of the control that shows a password. Wanted whenever `kind` is `password`, because a reader who cannot see what they typed cannot correct it."
+
+[prop.conceal_label]
+type = "text"
+attribute = "data-nd-conceal-label"
+doc = "The name it takes once the password is showing. A toggle that keeps one name announces the wrong state after the first press. No script may invent the other name in the reader's language."
+
+[prop.autocomplete]
+type = "text"
+attribute = "autocomplete"
+doc = "What the browser should offer to fill in, such as `email`, `given-name` or `new-password`. **Worth writing every time**: it is what a password manager reads, and it turns a typed form into two taps. `off` is a decision rather than a default."
+
+[prop.pattern]
+type = "text"
+attribute = "pattern"
+doc = "A regular expression the value must match, using the platform's own attribute. Always pair it with a `hint` saying what the shape is. A field that refuses an answer without saying what it wanted leaves a reader guessing."
+
+[prop.spellcheck]
+type = "bool"
+default = "false"
+attribute = "spellcheck"
+doc = "Whether the browser underlines what it thinks are mistakes. **Off by default**, which is the opposite of the platform. A name, a code, an address and a password are all things a dictionary is wrong about."
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts the box. Off by default. The text inside stays on a ground opaque enough to read."
+
+[state.invalid]
+attribute = "aria-invalid"
+doc = "Whether an `error` was given or the platform refused the value. The border takes the danger tone and the sentence appears under the question, never colour alone (`NOCTUA.md §8.8.6`)."
+
+[state.revealed]
+attribute = "data-nd-revealed"
+doc = "Whether a password is showing. It is on the wrapper, so the control can swap its glyph and its name together, and it is never kept between page loads."
+
+[a11y]
+needs_name = true
+notes = """
+The question is a real `<label for>` drawn by `Field`, never an `aria-label` and
+never a placeholder. The hint and the error ride `aria-describedby`, in that
+order, so they are read on the control.
+"""
+
+[keyboard]
+"Escape" = "Empties the box, when it is `clearable` and has something in it. It does nothing when there is nothing to clear."

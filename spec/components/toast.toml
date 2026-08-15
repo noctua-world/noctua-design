@@ -1,0 +1,153 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a toast for a result that arrives after a reader acted, where the page has
+no room to say it in place. Never as the only record of that result. For a
+message that belongs where it happened, use `MessageBar`.
+"""
+
+[meta]
+name = "Toast"
+element = "div"
+class = "nd-toast"
+summary = "Report what just happened in a short message that floats clear of the work."
+
+# THE TIMER IS OPT-IN, AND THAT IS THE WHOLE OF THIS COMPONENT'S OPINION.
+#
+# A message that removes itself is unreadable to a reader who reads slowly, to
+# one using a screen magnifier who has not reached that corner yet, and to one
+# who looked away. So `duration` is absent by default and the message stays
+# until it is dismissed. A caller who sets it gets three guarantees:
+#
+# 1. THE WAIT PAUSES UNDER A POINTER AND UNDER FOCUS, and restarts when both
+#    have gone. A reader who moved onto the message is a reader still reading it.
+# 2. IT NEVER SHORTENS. `dist/toast.js` restarts the whole wait rather than
+#    resuming the remainder, because a reader who came back to it is starting the
+#    sentence again.
+# 3. IT IS NEVER THE ONLY RECORD. `NOCTUA.md §9.8`: a result a reader can miss
+#    is a result they were never told. The page underneath still has to say what
+#    happened.
+#
+# `role="status"` AND NOT `role="alert"`.
+#
+# `message_bar.toml` argues this at length and the argument does not change with
+# the placement: an alert cuts a screen reader off mid-sentence, and a component
+# whose default is the rude one gets the rude one everywhere. A caller who needs
+# to interrupt writes `live = "assertive"` and has said so out loud.
+#
+# WHY IT SITS AT LAYER 600 AND NOT ABOVE EVERYTHING.
+#
+# `spec/tokens.toml` puts toast under tooltip and over popover. A toast that
+# outranked a tooltip would cover the hint a reader is holding a pointer on, and
+# one under a popover would arrive behind the surface a reader is working in.
+#
+# AND IT CARRIES NO ICON.
+#
+# `MessageBar` takes one because a bar sits in the page and has room for it.
+# This is three lines in a corner, and the tone here paints an edge rather than
+# a fill, so the words are what carry the message (`NOCTUA.md §8.8.6`).
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-toast"
+doc = """
+What this message is about, as a script finds it. **Required**, because a page
+may raise several and the script has to tell one timer from another.
+"""
+
+[prop.tone]
+type = "text"
+attribute = "data-nd-tone"
+doc = """
+Which of the colour system's tones paints its edge. The tones live in
+`noctua_design::tones`. **Never the only signal** (`NOCTUA.md §8.8.6`): the
+title and the sentence carry the meaning.
+"""
+
+[prop.title]
+type = "text"
+doc = """
+A short line above the message, such as *Order sent*. It is a `<strong>` rather
+than a heading. A message arriving after the page has loaded must not rewrite
+the outline under a reader navigating by it.
+"""
+
+[prop.duration]
+type = "text"
+attribute = "data-nd-duration"
+doc = """
+How long it waits before taking itself away, in milliseconds. Absent leaves it
+on the page until it is dismissed, and so does `0`. The wait pauses under a
+pointer and under focus.
+"""
+
+[prop.dismissible]
+type = "bool"
+default = "true"
+attribute = "data-nd-dismissible"
+doc = """
+Whether a control that takes the message away is drawn. On by default: with no
+`duration` the message stays, and one that stays with no way out is one a reader
+has to work around.
+"""
+
+[prop.dismiss_label]
+type = "text"
+doc = """
+The name of the control that takes the message away, such as *Dismiss this
+message*. Wanted in practice by `dismissible`, because that control is a glyph
+and this is the only name it has.
+"""
+
+[prop.placement]
+type = "enum"
+values = ["top-start", "top-end", "bottom-start", "bottom-end"]
+default = "bottom-end"
+attribute = "data-nd-placement"
+# A corner of the window, which a picture inside a grid cell cannot show: the
+# four values would draw the same box four times.
+variants = false
+doc = """
+Which corner it floats in. `bottom-end` suits a result a reader is not waiting
+for. A `top` corner suits one that answers a control at the top of the page,
+where a reader is already looking.
+"""
+
+[prop.live]
+type = "enum"
+values = ["polite", "assertive", "off"]
+# NO DEFAULT, for `MessageBar`'s reason: `role="status"` already implies polite,
+# so writing the attribute at a default would be this component overruling the
+# role it just chose. Absent means the role decides.
+attribute = "aria-live"
+# How it is announced, which a still picture has nothing to say about.
+variants = false
+doc = """
+How it is announced when it arrives. Absent lets the role decide, which is right
+almost always. Use `assertive` for a result a reader has to act on, and `off`
+for one that shipped with the page.
+"""
+
+[prop.children]
+type = "children"
+doc = "The message, as one or two sentences. It may hold a `Link` to whatever a reader has to do about it."
+
+[state.dismissed]
+attribute = "data-nd-dismissed"
+doc = "Set on a message that has been taken away, by a reader or by its own timer. The stylesheet takes it out of the layout, so the element stays and its live region keeps working."
+
+[state.paused]
+attribute = "data-nd-paused"
+doc = "Set while a pointer or the focus is on the message and its timer is holding. Removed when both have left, at which point the whole wait starts again."
+
+[a11y]
+notes = """
+A `role="status"`, which waits for a pause instead of cutting in. The dismiss
+control is a real `<button>` with a name, and the timer stops while a reader is
+on the message.
+"""
+
+[keyboard]
+Tab = "Moves onto the control that dismisses it, which holds the timer for as long as the focus is there."
+"Enter or Space" = "Takes the message away, on the control that dismisses it. Both keys work, because that control is a `<button>`."

@@ -1,0 +1,17 @@
+# XML.
+
+[meta]
+name = "xml"
+display = "XML"
+mode = "markup"
+aliases = ["svg", "rss", "xsl", "plist"]
+
+[[case]]
+name = "a declaration, a tag, an attribute and an entity"
+code = '<?xml version="1.0"?><path d="M0 0" stroke="none"/>&amp;'
+expect = ['attribute <?xml version="1.0"?>', "tag path", "attribute d", 'string "M0 0"', "escape &amp;"]
+
+[[case]]
+name = "a comment is not a tag"
+code = "<!-- <p>not a tag</p> --><p>a tag</p>"
+expect = ["comment <!-- <p>not a tag</p> -->", "tag p"]

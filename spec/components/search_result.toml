@@ -1,0 +1,48 @@
+guidance = "Use a search result for one row in a list of results. It renders a real link, so a reader can middle-click it, bookmark it, and read it with the script blocked."
+
+[meta]
+name = "SearchResult"
+element = "li"
+class = "nd-search-result"
+page = "search"
+summary = "Shows one search result as a link, with a second line under its name."
+
+# THE ROW IS THE OPTION AND THE LINK IS THE LINK.
+#
+# Enhanced, `role="option"` lands on this `<li>` and the `<a>` inside is left
+# alone. Putting the role on the anchor would satisfy the same combobox
+# contract and cost middle-click, Command-click, "copy link address" and the
+# status-bar preview — four things a reader uses without thinking about them.
+#
+# `label` is a text prop rather than children, and that is load-bearing: the
+# script rewrites it into `<mark>` runs over the letters that matched, and it
+# can only do that safely on a string it can re-derive from.
+
+[prop.href]
+type = "text"
+required = true
+attribute = "href"
+doc = "Where the result goes. **Required**, because a result with no destination cannot be a link."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The name of the result, and what the search matches against with the most weight. Text rather than children, so the script can mark the matched letters without destroying anything the caller put here."
+
+[prop.detail]
+type = "text"
+doc = "The second line, saying what the result is or where it lives. It renders inside the link rather than beside it, so it joins the result's accessible name."
+
+[prop.badge]
+type = "text"
+doc = "A short word beside the name, such as *New* or *Deprecated*. Also inside the link, so a screen reader reads it with the name."
+
+[prop.keywords]
+type = "text"
+attribute = "data-nd-keywords"
+doc = "Other words this result answers to, separated by spaces. They are matched but never drawn. A row matched only on a keyword is left unhighlighted, because the matched letters are not on the screen."
+
+[prop.current]
+type = "bool"
+default = "false"
+doc = "Whether this result is the page the reader is already on. It draws a mark and writes `aria-current`, so the reader's own position is announced and not only shown."

@@ -1,0 +1,36 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a select group inside a `Select` when the options fall into named runs, such as countries by continent. A group with one option in it is a heading over a single line."
+
+[meta]
+name = "SelectGroup"
+element = "optgroup"
+class = "nd-select-group"
+summary = "Group the options inside a Select under a name."
+
+# `<optgroup>` AND NOTHING ELSE.
+#
+# The browser draws the heading, indents the run, refuses to let the heading be
+# chosen, and announces the group's name with the first option inside it — on
+# every engine, including the ones where the popup is a native sheet nothing on
+# this page can style. The enhanced listbox mirrors it with `role="group"`,
+# which is what the same fact looks like when it is drawn rather than native.
+
+[prop.label]
+type = "text"
+required = true
+attribute = "label"
+doc = "The run's name, in the reader's language. Required, because an `<optgroup>` without one is an indent with nothing above it."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Disables every option in the run at once, through the browser's own cascade. Nothing here walks the children."
+
+[prop.children]
+type = "children"
+doc = "The options in the run."
+
+[a11y]
+notes = "The name comes from the `label` attribute, which a screen reader reads before the first option in the run. It cannot be a `<label>` element, because `<optgroup>` takes no element children except `<option>`."

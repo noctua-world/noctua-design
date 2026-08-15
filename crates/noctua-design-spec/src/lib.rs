@@ -1,6 +1,6 @@
 //! The `noctua-design` token specification format.
 //!
-//! One TOML file describes every non-colour token. This crate turns it into a
+//! One TOML file describes every non-color token. This crate turns it into a
 //! validated [`Spec`], or into a diagnostic that says exactly where the file is
 //! wrong and what to do about it.
 //!
@@ -27,9 +27,13 @@
 pub mod component;
 pub mod error;
 pub mod fonts;
+pub mod grammar;
 pub mod i18n;
 pub mod icons;
+pub mod lineage;
 pub mod model;
+pub mod prose;
+pub mod syntax;
 pub mod theme;
 mod validate;
 mod validate_fonts;
@@ -39,9 +43,11 @@ pub mod vendor;
 pub use component::Component;
 pub use error::{Problem, SpecError};
 pub use fonts::{Face, Fonts, Manifest, Slice, Sliced};
+pub use grammar::{Grammar, Mode, Role};
 pub use i18n::{Catalogue, Locale};
 pub use icons::{Icons, Paint, Resolved as Icon};
 pub use model::{Duration, Meta, Motion, Space, Spec, Typography};
+pub use syntax::Syntax;
 pub use theme::{Setting, Theme};
 pub use vendor::Vendor;
 
@@ -289,9 +295,9 @@ mod tests {
     }
 
     /// Sharing `noctua-colors`' namespace would let a design token shadow a
-    /// colour token of the same name.
+    /// color token of the same name.
     #[test]
-    fn the_colours_namespace_is_refused() {
+    fn the_colors_namespace_is_refused() {
         let error = super::parse("t.toml", "[meta]\nprefix = \"nc\"\n").expect_err("must fail");
         assert!(error.problems()[0].message().contains("noctua-colors"));
     }

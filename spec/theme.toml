@@ -9,7 +9,7 @@
 # mechanical rather than reviewed — the two packages cannot disagree about a
 # value, a default or a key name, because neither writes them down.
 #
-# The colour axes are NOT here. Accents, saturations and palette names are read
+# The color axes are NOT here. Accents, saturations and palette names are read
 # from packages/tokens/vendor/json/axes.json, so a palette added upstream is
 # picked up on the next export rather than forgotten here (NOCTUA.md §8.7).
 
@@ -45,7 +45,7 @@ omit_when = "system"
 
 [setting.accent]
 values_from = "axes.accents"
-default = "ochre"
+default = "blue"
 scope = true
 key = "noctua-accent"
 
@@ -57,11 +57,23 @@ key = "noctua-saturation"
 
 [setting.palette]
 values_from = "axes.themes"
-default = "ochre-balanced"
+default = "blue-balanced"
 scope = true
 key = "noctua-palette"
 attribute = "data-palette"
 derived_from = ["accent", "saturation"]
+# THIS DEFAULT IS NOT `noctua-colors`' DEFAULT, AND THAT COSTS A LINK.
+#
+# The color system publishes exactly one palette anchored at `:root` — its own
+# default — and thirty-nine anchored at `[data-palette="<name>"]`. So a design
+# system whose default is a different palette cannot get it from a bare `:root`
+# sheet; `dist/base.html` links `theme-<this value>.css` and the attribute is
+# what makes it apply.
+#
+# Which is why the bootstrap stamps `data-palette` even when nothing is stored,
+# and why the documentation site server-renders it: without the attribute the
+# base sheet matches nothing and the page has no palette at all. Changing this
+# value changes both, from here, with nothing else to edit.
 # Stored RESOLVED, not derived at read time.
 #
 # The bootstrap runs before any JavaScript module and cannot look up the
@@ -99,47 +111,106 @@ attribute = "data-noctua-radius"
 # spec/tokens.toml.
 
 
-# --- Global settings ------------------------------------------------------
+# --- The ambient settings --------------------------------------------------
 #
-# `scope = false` is enforced by the SELECTOR, not by discipline: the CSS is
-# emitted as `:root[data-noctua-blackout="on"]`, so putting the attribute on a
-# <div> does nothing at all. The setting cannot be scoped by accident.
+# What a region is painted with, and what is painted over it. These four were
+# `scope = false` and are not any more, and the reason is worth writing down
+# because it was got wrong in the other direction first.
+#
+# THEY WERE UNSCOPABLE BECAUSE OF HOW THEY WERE EMITTED, not because of what
+# they are. Each one used to put its payload on a DESCENDANT — `:root[data-…]
+# .noctua-fx { background-image: … }` — and `syntax` below explains exactly why
+# that shape cannot be scoped: two bare rules of equal specificity both match,
+# and source order decides rather than proximity. `none` and `off` were the
+# ABSENCE of a rule, so a subtree could not cancel what was above it.
+#
+# They now have the shape `radius` and `glass` already had: the attribute
+# declares an inherited custom property, and one rule reads it at the scope
+# element itself. The nearest declaring ancestor wins by construction, `none`
+# is a real value, and there is no extra element and so no stacking order.
+#
+# What that buys is the rule an ExampleFrame lives by — a frame owns what is
+# inside it. A frame that goes dark used to keep the page's backdrop under it,
+# which is dark ink on white. And `ThemeScope { pattern }` now works for any
+# consumer of the package rather than only inside this site, which is the
+# difference between a prop and a prop that lies.
 
-[setting.blackout]
-values = ["off", "on"]
-default = "off"
-scope = false
-key = "noctua-blackout"
-attribute = "data-noctua-blackout"
-# Pure black page background in dark mode. It changes ONE variable that only
-# the document background reads, so --nc-color-surface is untouched and no
-# contrast pair the colour system measured moves.
+[setting.backdrop]
+values = ["plain", "cool", "black", "tinted", "soft", "softer"]
+default = "plain"
+scope = true
+key = "noctua-backdrop"
+attribute = "data-noctua-backdrop"
+# What the page is painted with. It was `blackout`, on or off — but blackout is
+# the name of one VALUE, not of the choice, and five of these six are not black.
+#
+# Every one of them is a colour noctua-colors already solved and checked, per
+# palette, in both modes: `plain` is the palette's page, `cool` a colder and
+# darker neutral, `tinted` the accent's own background step, and `soft`/`softer`
+# one and two steps toward the surfaces content sits on — lighter in dark, toned
+# down in light. Only `black` is a literal, and only in dark.
+#
+# It changes ONE variable, and only the rule that paints a page or a scope reads
+# it, so --nc-color-surface is untouched and no contrast pair the color system
+# measured moves.
 
 [setting.pattern]
 values = ["none", "dots", "mesh", "checks", "diagonals"]
 default = "none"
-scope = false
+scope = true
 key = "noctua-pattern"
 attribute = "data-noctua-pattern"
-
-[setting.glow]
-values = ["off", "on"]
-default = "off"
-scope = false
-key = "noctua-glow"
-attribute = "data-noctua-glow"
 
 [setting.grain]
 values = ["off", "on"]
 default = "off"
-scope = false
+scope = true
 key = "noctua-grain"
 attribute = "data-noctua-grain"
 
-# There was a `setting.animate` here — "ambient motion". It was removed rather
-# than fixed, because it was never a setting: the only two rules that read it
-# also required `glow` or `grain`, both of which default to off, so from a
-# default page turning it on changed an attribute that matched no selector. A
-# control that does nothing is worse than a missing one — it teaches the reader
-# that the panel lies. Motion now belongs to the effect that has it: aurora and
-# grain drift when they are on, and `prefers-reduced-motion` still wins.
+# --- Page-only settings ----------------------------------------------------
+
+[setting.syntax]
+values = ["auto", "spectrum", "duotone", "muted", "mono"]
+default = "auto"
+scope = false
+key = "noctua-syntax"
+attribute = "data-noctua-code-theme"
+# `scope = false`, AND THAT IS A CSS FACT RATHER THAN A PREFERENCE.
+#
+# A scopable setting is emitted as a BARE attribute selector, which reaches any
+# element — so two of them on one page both match a block between them.
+# `[data-noctua-code-theme="mono"] .nd-codeblock` and the `spectrum` one are
+# both (0,2,0), which means a block inside a `spectrum` scope on a `mono` page
+# is decided by SOURCE ORDER rather than by which ancestor is nearer.
+#
+# Every other scopable setting escapes this because its payload is a custom
+# property, which inherits and therefore resolves at the nearest declaring
+# ancestor by construction. This one's payload is `color` on a descendant, and
+# there is no such rule for it. What a subtree wants instead is the component's
+# own `theme` prop, which lands on the block and can only ever hold one value —
+# a better answer, not a lesser one, because it is the API a consumer writes
+# anyway.
+#
+# And there is no `omit_when`. `auto` here means "let the media queries decide",
+# which is a value CSS can match on; making it the ABSENCE of an attribute would
+# make "no attribute" mean both `auto` and "nothing stored yet", and the resting
+# rules in dist/syntax.css already cover the second.
+
+# There was a `setting.animate` here — "ambient motion" — and a `setting.glow`,
+# the aurora. Both are gone.
+#
+# `animate` was never a setting: the only two rules that read it also required
+# `glow` or `grain`, both of which defaulted to off, so from a default page
+# turning it on changed an attribute that matched no selector. A control that
+# does nothing is worse than a missing one — it teaches the reader that the
+# panel lies.
+#
+# `glow` went for a plainer reason: nobody wanted it. It was two soft washes of
+# the accent behind the page, the only ambient effect that MOVED, and the only
+# one carrying its own contrast ceiling, its own probe test and its own set of
+# geometry it could break at 320px. A background nobody chooses is a background
+# nobody should maintain — and with it went the last animation on the page, the
+# `drift` keyframes and the `[effect.blur] glow` token. What remains is what a
+# page is actually painted with: a backdrop, a pattern over it and a grain over
+# that, none of which move.

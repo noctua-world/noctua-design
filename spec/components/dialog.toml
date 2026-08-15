@@ -1,0 +1,150 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a dialog for one thing a reader has to settle before carrying on. For a
+message left where it happened, use `MessageBar`. For a note hanging off a
+control, use `Popover`. A surface that only shows something is a page section.
+"""
+
+[meta]
+name = "Dialog"
+element = "div"
+class = "nd-dialog"
+summary = "Ask for one thing in a window over the page, and hand the focus back after."
+
+# THE PLATFORM'S `<dialog>`, AND EVERY REASON THIS SYSTEM HAS TO WRITE ONE.
+#
+# `Search { presentation: dialog }` shipped the first one here and the two
+# lessons it paid for are the two this component is built on.
+#
+# 1. THE FOCUS TRAP IS NOT WRITTEN. Inside a `<dialog>` opened with
+#    `showModal()` the browser cycles focus within the top layer, marks the rest
+#    of the document inert, restores focus on close and answers Escape. Writing
+#    a trap around that is a second implementation of a thing the platform does
+#    correctly, and it is the half that goes wrong first.
+# 2. THE LAYOUT RULES ARE SCOPED TO `[open]`. A closed `<dialog>` is
+#    `display: none` by the user-agent stylesheet, so `display: flex` on the
+#    class un-hides every closed dialog in the document. `shell.css` records the
+#    measurement.
+#
+# WHY THE TRIGGER IS PART OF THE COMPONENT.
+#
+# A `<dialog>` opens from a script and from nothing else. Shipping the surface
+# without a control to open it hands every caller the same twelve lines of
+# wiring, and each copy is a place `showModal` is called on the wrong element.
+# The control ships hidden and `dist/dialog.js` reveals it, which is `Info`'s
+# arrangement: a page whose script never ran carries no button that opens
+# nothing. Its space is reserved before the first paint, because a control that
+# arrives after one moves the page under a reader (`NOCTUA.md §9.6`).
+#
+# WHY IT DOES NOT OUTRANK A POPOVER.
+#
+# `spec/tokens.toml` puts dialog at 400 and popover at 500. A `Select`, a
+# `Menu` or an `Info` inside a dialog has to open above the surface holding it,
+# and a dialog that outranked them would clip every list it contains.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-dialog"
+doc = """
+What this dialog is, as a script finds it, and the root of every id here.
+**Required**, because ids derived from an absent name collide the moment a page
+carries two.
+"""
+
+[prop.trigger_label]
+type = "text"
+required = true
+doc = """
+The words on the control that opens it. **Required**: a surface that opens from
+a script and has no control pointing at it is a surface a reader cannot reach.
+"""
+
+[prop.heading]
+type = "text"
+doc = """
+A title inside the surface. It names the dialog through `aria-labelledby`, so
+prefer it to `label`. A name a reader can see is a name they can check against
+what is being asked.
+"""
+
+[prop.label]
+type = "text"
+doc = """
+The dialog's accessible name, for a surface with no visible title. Ignored when
+`heading` is set, because a name written twice can drift from itself.
+"""
+
+[prop.description]
+type = "text"
+doc = """
+One sentence under the title, wired with `aria-describedby`. A screen reader
+reads it after the name, so it belongs to what the dialog is asking rather than
+to the content below.
+"""
+
+[prop.modal]
+type = "bool"
+default = "true"
+attribute = "data-nd-modal"
+# The difference is what the REST of the document is, and a still picture of a
+# closed dialog has nothing to say about it.
+variants = false
+doc = """
+Whether the page behind it goes inert. `showModal` puts the surface in the top
+layer and hides the rest of the document from assistive technology. `show`
+leaves the page reachable and the surface beside it.
+"""
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+# A closed dialog draws nothing, so three values would be three pictures of a
+# button. `Info` refused a grid for its placement on the same grounds.
+variants = false
+doc = """
+How wide the surface may grow. `small` suits a question with two answers,
+`medium` a short form, `large` a table a reader has to read. The window caps all
+three.
+"""
+
+[prop.dismissible]
+type = "bool"
+default = "true"
+attribute = "data-nd-dismissible"
+doc = """
+Whether a control that closes it is drawn. On by default, because Escape and a
+press on the backdrop are the other two ways out and neither is visible on a
+touch screen.
+"""
+
+[prop.close_label]
+type = "text"
+doc = """
+The name of the control that closes it. Wanted in practice by `dismissible`,
+because that control is a glyph and this is the only name it has.
+"""
+
+[prop.children]
+type = "children"
+doc = "What the dialog asks and the controls that answer it. A `Button` that acts on the answer belongs here, at the end."
+
+[state.open]
+attribute = "data-nd-open"
+doc = "Set on the root while the surface is showing. The `<dialog>` carries its own `open` attribute, and this is the one a stylesheet outside it can act on."
+
+[a11y]
+needs_name = true
+notes = """
+The `<dialog>` element carries the role, so none is written. `showModal` marks
+it modal and the document behind it inert, so no focus trap is written either.
+A non-modal one is a plain dialog beside the page.
+"""
+
+[keyboard]
+"Enter or Space" = "Opens the dialog, on the control that opens it. Both keys work, because that control is a `<button>`."
+Escape = "Closes it. The platform answers this for a modal surface, and `dist/dialog.js` answers it for a non-modal one."
+Tab = "Cycles inside a modal surface, which the browser does on its own. It walks out of a non-modal one and leaves it open."

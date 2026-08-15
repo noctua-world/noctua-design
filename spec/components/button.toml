@@ -1,0 +1,193 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a button for an action that happens on the page the reader is already on. For a control that changes the address, give it `href` and it renders as an `<a>`. For a value that stays chosen, use `Segmented` or `Select`."
+
+[meta]
+name = "Button"
+element = "button"
+class = "nd-button"
+summary = "Let users carry out an action with one press, in every shape an interface needs."
+specimen = "check"
+
+# THE CONTENT IS PROPS, NOT CHILDREN, AND THAT IS THE POINT.
+#
+# A button whose visible content and accessible name are written separately is
+# a button whose two names can disagree, and they do: the commonest defect in
+# every button component anybody ships is an icon-only variant whose `children`
+# were dropped and whose `aria-label` was forgotten. Here `label` is required
+# and is BOTH — so an unnamed button is not a thing a caller can construct, and
+# `hide_label` hides the text without touching the name.
+#
+# What that costs is rich content inside a button. It is very nearly always
+# wrong, and the two cases that are not — a second line, and an icon on either
+# side — are props below.
+
+[prop.label]
+type = "text"
+required = true
+doc = "The text on the control, in the reader's language. It is the visible text **and** the accessible name at once, so the two cannot disagree. Required."
+
+[prop.detail]
+type = "text"
+doc = "A second, smaller line under the label, for a choice whose consequence needs spelling out. It is part of the accessible name, so a reader who cannot see it still hears it."
+
+[prop.variant]
+type = "enum"
+values = ["solid", "outline", "subtle", "transparent", "link", "nav"]
+default = "solid"
+attribute = "data-nd-variant"
+doc = "How much of the page's attention the control asks for, from `solid` at the top to `link` and `nav` at the bottom. Use **one `solid` per view**. `nav` is the sidebar row, quieter than `transparent` and shaped like a row. `solid` by default."
+
+[prop.tone]
+type = "enum"
+values = ["accent", "neutral", "danger", "success"]
+default = "accent"
+attribute = "data-nd-tone"
+doc = "What kind of action it is: `accent` the ordinary one, `neutral` the quiet one, `danger` the destructive one, `success` the confirming one. Each tone has a readable foreground already solved against it. **Never the only signal** (`NOCTUA.md §8.8.6`)."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "How big the control is to hit: `small`, `medium` or `large`. All three clear the 24-pixel minimum target size in WCAG 2.5.8. `large` also clears the 44-pixel enhanced size, for a screen used with a thumb."
+
+[prop.shape]
+type = "enum"
+values = ["rounded", "pill", "square", "bevel"]
+default = "rounded"
+attribute = "data-nd-shape"
+doc = "The corners: `rounded`, `pill`, `square` or `bevel`. The first three follow whichever corner preset the reader has chosen. `bevel` cuts the corner at a fixed angle under every preset. Set one shape for a whole row of controls."
+
+[prop.icon]
+type = "text"
+doc = "An icon before the label. It is decoration and is hidden from screen readers, because it repeats the label. It is optically centred on the text, and on both lines together when there is a `detail`."
+
+[prop.icon_end]
+type = "text"
+doc = "An icon after the label, for a direction or a destination. Use one decorative icon rather than one on each side."
+
+[prop.icon_alt]
+type = "text"
+doc = "The icon a toggle shows while it is pressed. Both glyphs are rendered and the state picks one, so no script has to swap them. Use it with `icon`, which is the other half of the pair."
+
+[prop.label_alt]
+type = "text"
+attribute = "data-nd-label-alt"
+doc = "The name the control takes while it is pressed or expanded. Without it a toggle keeps one name and announces the wrong state from the first press onward."
+
+[prop.action]
+type = "text"
+attribute = "data-nd-action"
+doc = "A name a script can find this button by. Use it where the behaviour is the caller's own code, such as a toggle. A button that submits a form or follows a link needs no hook. `Disclosure`, `MenuItem` and `Search` spell it the same way."
+
+[prop.hide_label]
+type = "bool"
+default = "false"
+attribute = "data-nd-hide-label"
+doc = "Hides the label and renders the icon alone. `label` is still required and still names the control, because an icon-only button with no name announces only its role."
+
+[prop.justify]
+type = "enum"
+values = ["center", "start", "between"]
+default = "center"
+attribute = "data-nd-justify"
+# TWO THINGS AND ROOM BETWEEN THEM, or the three values are one picture. The
+# component's own specimen is a single icon: a button sized to its own content
+# has nothing to justify and nowhere to justify it, which is exactly what the
+# grid was showing. The stylesheet gives a justified specimen a width.
+specimen = "<span class=\"nd-button-text nd-identifier\">A</span><span class=\"nd-button-text nd-identifier\">Z</span>"
+doc = "Where the content sits when the button is wider than its content: `center`, `start` or `between`. That happens with `fill` or in a stretched row. `start` suits a compound button, and `between` pushes the trailing icon to the far edge."
+
+[prop.wrap]
+type = "bool"
+default = "false"
+attribute = "data-nd-wrap"
+doc = "Whether the label may run onto more than one line. Off by default, because a button that grows a line taller pushes everything under it down. A label long enough to wrap usually wants `detail`."
+
+[prop.fill]
+type = "bool"
+default = "false"
+attribute = "data-nd-fill"
+doc = "Stretches the control to the width of whatever contains it. Off by default."
+
+[prop.menu]
+type = "bool"
+default = "false"
+attribute = "aria-haspopup"
+doc = "Marks the button as the one that opens a `Menu`, and draws the chevron. **`controls` has to name that menu by id.** The press itself is `dist/menu.js`, which ships the opening, the arrow walk, Escape and the focus return."
+
+[prop.href]
+type = "text"
+doc = "Where the control goes. Given one, the component renders an `<a>` rather than a `<button>`, which is what a control that changes the address has to be. Never combine it with `disabled`, because a disabled link is not a thing the platform has."
+
+[prop.rel]
+type = "text"
+attribute = "rel"
+doc = "The link relationship. Left unset alongside `target`, the component writes `noopener noreferrer` itself."
+
+[prop.target]
+type = "text"
+attribute = "target"
+doc = "Where the link opens. Opening a new window takes the decision away from the reader, so give it a reason."
+
+[prop.pressed]
+type = "bool"
+default = "false"
+attribute = "aria-pressed"
+doc = """Whether this toggle is on. A toggle is a button whose state stays after the press, such as muted, pinned or subscribed. It is written only when true, because `aria-pressed="false"` marks an ordinary button as a toggle that is off."""
+
+[prop.expanded]
+type = "bool"
+default = "false"
+attribute = "aria-expanded"
+doc = "Whether the thing this control opens is showing. It is written only when true, for the same reason as `pressed`."
+
+[prop.controls]
+type = "text"
+attribute = "aria-controls"
+doc = "The id of what this control opens or governs."
+
+[prop.current]
+type = "bool"
+default = "false"
+attribute = "aria-current"
+doc = """Marks the one entry in a navigation that is the page being read. It is written as `aria-current="page"`, so it is announced as well as drawn."""
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Stops users pressing the control, and takes it out of the tab order with it. A keyboard user cannot land on it to find out why it is dead. Where the reason matters, render something that gives it. `MenuItem` makes the opposite choice."
+
+[prop.submit]
+type = "enum"
+values = ["button", "submit", "reset"]
+variants = false
+default = "button"
+attribute = "type"
+doc = "The `type` attribute: `button`, `submit` or `reset`. `button` by default, because an unset `type` inside a form is `submit`. There is no variant grid, because `type` has no appearance. The example below puts all three in a real form."
+
+[prop.name]
+type = "text"
+attribute = "name"
+doc = "The field this button posts under when it submits. It is how a form with several submit buttons records which one was pressed, **with no script at all**. Only a submitting button posts one."
+
+[prop.value]
+type = "text"
+attribute = "value"
+doc = "What that field is posted as. Give one alongside `name`, because a named button with no value posts the empty string. Never use the visible label, which is a different string in every locale."
+
+[a11y]
+needs_name = true
+notes = "`label` is required and is both the visible text and the accessible name, so no button here is nameless. `aria-pressed` and `aria-expanded` are written only when true. `disabled` drops the tab stop."
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts the control instead of filling it. The tone moves into the ink and the edge, and whatever is behind the control shows through. Use it only where there is something behind it."
+
+[keyboard]
+Enter = "Activates the control. Both the button form and the link form answer it."
+Space = "Activates the control. The `<button>` form only, because a link answers Enter alone."

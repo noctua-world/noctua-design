@@ -4,11 +4,11 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! A fragment of code inside a sentence.
+//! Mark a fragment of code inside a sentence.
 
 use dioxus::prelude::*;
 
-/// How much the fragment should stand out from the prose around it.
+/// How strongly the fragment stands out from the prose around it. `default` is the normal contrast and `subtle` is quieter.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum CodeTone {
     #[default]
@@ -32,10 +32,10 @@ impl CodeTone {
     }
 }
 
-/// A fragment of code inside a sentence.
+/// Mark a fragment of code inside a sentence.
 #[component]
 pub fn Code(
-    /// How much the fragment should stand out from the prose around it.
+    /// How strongly the fragment stands out from the prose around it. `default` is the normal contrast and `subtle` is quieter.
     #[props(default)]
     tone: CodeTone,
     /// Extra classes for the root element.

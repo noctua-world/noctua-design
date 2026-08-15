@@ -30,13 +30,13 @@ pub(crate) fn run(root: &Path, spec_path: &Path, spec_only: bool) -> Result<(), 
     let mut failures: Vec<String> = Vec::new();
 
     ui::heading("specification");
-    let (spec, files) = build::artifacts(root, spec_path)?;
+    let (spec, vendor, files) = build::artifacts(root, spec_path)?;
 
     ui::gap();
     ui::heading("source gates");
-    let findings = gates::run(root, &spec)?;
+    let findings = gates::run(root, &spec, &vendor)?;
     if findings.is_empty() {
-        ui::ok("no colour, token, font or arbitrary-value literal in source");
+        ui::ok("no color, token, font or arbitrary-value literal in source");
     } else {
         for finding in &findings {
             ui::failure(&format!(
@@ -158,6 +158,8 @@ fn rust_needs_no_node(root: &Path) -> Result<(), String> {
         "crates/noctua-design-emit/Cargo.toml",
         "crates/noctua-design-tokens/Cargo.toml",
         "crates/noctua-design-icons/Cargo.toml",
+        "crates/noctua-design-grammars/Cargo.toml",
+        "crates/noctua-design-lineage/Cargo.toml",
     ] {
         let path = root.join(manifest);
         let Ok(text) = std::fs::read_to_string(&path) else {

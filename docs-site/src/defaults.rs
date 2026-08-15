@@ -12,6 +12,23 @@
 
 use noctua_design_theme as theme;
 
+/// The stored language preference: the key, and the value that means *ask the
+/// browser*.
+///
+/// Not in the theme model, and deliberately: `spec/theme.toml` is the settings
+/// a `ThemeScope` can carry, and a language is a property of the document, not
+/// of a subtree. Routing between pre-rendered locales is this site's problem —
+/// a consumer of the design system routes its own way.
+pub(crate) const LOCALE_KEY: &str = "noctua-locale";
+
+/// The value that means "whichever language the browser asks for".
+///
+/// Not a locale tag, and it must never be mistaken for one: everything that
+/// turns a stored value into a URL checks against [`AUTOMATIC_LOCALE`] first
+/// and against the generated offered list second, so nothing else can reach a
+/// destination.
+pub(crate) const AUTOMATIC_LOCALE: &str = "auto";
+
 /// The default value for a setting, or `""` for one this page does not know.
 ///
 /// `""` never equals a real value, so an unknown setting renders every option
@@ -27,10 +44,10 @@ pub(crate) fn of(setting: &str) -> &'static str {
         "font" => theme::Font::DEFAULT.as_str(),
         "glass" => theme::Glass::DEFAULT.as_str(),
         "radius" => theme::Radius::DEFAULT.as_str(),
-        "blackout" => theme::Blackout::DEFAULT.as_str(),
+        "backdrop" => theme::Backdrop::DEFAULT.as_str(),
         "pattern" => theme::Pattern::DEFAULT.as_str(),
-        "glow" => theme::Glow::DEFAULT.as_str(),
         "grain" => theme::Grain::DEFAULT.as_str(),
+        "syntax" => theme::Syntax::DEFAULT.as_str(),
         _ => "",
     }
 }
@@ -50,10 +67,10 @@ mod tests {
             "font",
             "glass",
             "radius",
-            "blackout",
+            "backdrop",
             "pattern",
-            "glow",
             "grain",
+            "syntax",
         ] {
             assert!(!of(setting).is_empty(), "{setting} has no default here");
         }

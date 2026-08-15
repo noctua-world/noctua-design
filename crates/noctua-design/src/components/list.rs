@@ -4,11 +4,11 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! An ordered, unordered or description list, nestable.
+//! Group items as an ordered, unordered or description list, with nesting.
 
 use dioxus::prelude::*;
 
-/// Which kind of list. Changes the element, not only the marker.
+/// Which kind of list to render: `unordered` is a `<ul>`, `ordered` an `<ol>`, `description` a `<dl>`. It changes the element and not only the marker, so a screen reader is told the right thing.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ListKind {
     #[default]
@@ -35,7 +35,7 @@ impl ListKind {
     }
 }
 
-/// `none` removes the marker without removing the list semantics.
+/// The marker on each item. `none` removes it and keeps the list semantics. `default` draws it, and is the default.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ListMarker {
     #[default]
@@ -59,7 +59,7 @@ impl ListMarker {
     }
 }
 
-/// The gap between items.
+/// The gap between items: `tight`, `default` or `loose`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ListSpacing {
     /// `tight`
@@ -86,22 +86,20 @@ impl ListSpacing {
     }
 }
 
-/// An ordered, unordered or description list, nestable.
+/// Group items as an ordered, unordered or description list, with nesting.
 ///
 /// # Accessibility
 ///
-/// `marker: none` removes the visual marker only. Some browsers drop the list
-/// semantics entirely when list-style is none, so the role is restated explicitly —
-/// otherwise a styled list stops announcing how many items it has.
+/// `marker: none` removes the visual marker only. Some browsers drop the list semantics when `list-style` is none. The role is restated explicitly, so the list keeps announcing how many items it has.
 #[component]
 pub fn List(
-    /// Which kind of list. Changes the element, not only the marker.
+    /// Which kind of list to render: `unordered` is a `<ul>`, `ordered` an `<ol>`, `description` a `<dl>`. It changes the element and not only the marker, so a screen reader is told the right thing.
     #[props(default)]
     kind: ListKind,
-    /// `none` removes the marker without removing the list semantics.
+    /// The marker on each item. `none` removes it and keeps the list semantics. `default` draws it, and is the default.
     #[props(default)]
     marker: ListMarker,
-    /// The gap between items.
+    /// The gap between items: `tight`, `default` or `loose`.
     #[props(default)]
     spacing: ListSpacing,
     /// Extra classes for the root element.
@@ -113,13 +111,34 @@ pub fn List(
     let root = format!("nd-list {class}");
     let root = root.trim().to_owned();
 
+    // One arm per value: `rsx!` takes a literal element name, and this
+    // prop chooses the element rather than an attribute.
     rsx! {
-        ul {
-            class: "{root}",
-            "data-nd-kind": kind.as_str(),
-            "data-nd-marker": marker.as_str(),
-            "data-nd-spacing": spacing.as_str(),
-            {children}
+        match kind {
+            ListKind::Unordered => rsx! {
+                ul {
+                    class: "{root}",
+                    "data-nd-marker": marker.as_str(),
+                    "data-nd-spacing": spacing.as_str(),
+                    {children}
+                }
+            },
+            ListKind::Ordered => rsx! {
+                ol {
+                    class: "{root}",
+                    "data-nd-marker": marker.as_str(),
+                    "data-nd-spacing": spacing.as_str(),
+                    {children}
+                }
+            },
+            ListKind::Description => rsx! {
+                dl {
+                    class: "{root}",
+                    "data-nd-marker": marker.as_str(),
+                    "data-nd-spacing": spacing.as_str(),
+                    {children}
+                }
+            },
         }
     }
 }

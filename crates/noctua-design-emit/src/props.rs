@@ -78,10 +78,54 @@ fn dioxus(component: &Component) -> String {
     writeln!(out, "pub fn {name}(").expect("write");
 
     for (prop_name, prop) in component.attributes() {
-        writeln!(out, "    /// {}", prop.doc).expect("write");
+        // A PROP'S DOC MAY BE SEVERAL PARAGRAPHS, and one `///` in front of
+        // the first line of several is a file that does not parse. `autoplay`
+        // is the first prop long enough to need paragraphs; before it, this
+        // interpolated whatever was in the spec and a newline in it produced a
+        // generated file rustfmt rejected with a diagnostic about a backtick.
+        for line in doc_lines(&prop.doc) {
+            writeln!(out, "    ///{line}").expect("write");
+        }
         let ty = controls::dioxus_type(component, prop_name)
             .map_or_else(|| rust_type(name, prop_name, prop), str::to_owned);
-        if prop.default.is_some() || prop.kind == Kind::Bool {
+        if prop.kind == Kind::Bool {
+            // A BOOL'S DEFAULT IS A VALUE, NOT `Default::default()`.
+            //
+            // `#[props(default)]` is `false` whatever the spec declares, and it
+            // was emitted for every bool. React reads the same spec and writes
+            // `marker ?? true`, so the two packages disagreed about
+            // `Disclosure.marker` and `CodeBlock.copy` — the chevron was never
+            // drawn and every code block shipped `data-nd-copy="false"`.
+            //
+            // That is precisely the drift `NOCTUA.md §9.3` exists to make
+            // impossible, and it came from the generator rather than from
+            // either implementation, which is why neither could be reviewed
+            // into catching it.
+            let default = prop.default.as_deref().unwrap_or("false");
+            writeln!(
+                out,
+                "    #[props(default = {default})]\n    {}: {ty},",
+                identifier(prop_name)
+            )
+            .expect("write");
+        } else if prop.kind == Kind::Text && prop.default.is_some() {
+            // A TEXT PROP'S DEFAULT IS ALSO A VALUE. `#[props(default)]` on a
+            // `String` is the empty string whatever the spec declares — the
+            // same defect the bool branch above documents, one type along, and
+            // it survived because `Search.query` was the first text prop in the
+            // repository to declare one. React reads `query ?? "q"` from the
+            // same field, so the two packages would have disagreed about what
+            // a search submits under.
+            writeln!(
+                out,
+                "    #[props(default = {:?}.to_owned())]\n    {}: {ty},",
+                prop.default.as_deref().unwrap_or_default(),
+                identifier(prop_name)
+            )
+            .expect("write");
+        } else if prop.default.is_some() {
+            // An enum's default is the variant marked `#[default]`, written
+            // from the same spec field, so `Default::default()` is the answer.
             writeln!(
                 out,
                 "    #[props(default)]\n    {}: {ty},",
@@ -117,8 +161,26 @@ fn dioxus(component: &Component) -> String {
 
 fn rust_enum(out: &mut String, component: &str, prop: &str, spec: &Prop) {
     let ty = format!("{component}{}", pascal(prop));
-    writeln!(out, "/// {}", spec.doc).expect("write");
-    out.push_str("#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]\npub enum ");
+    // ONE LINE PER LINE, for the reason the struct field above learned first: a
+    // `doc` of more than one paragraph written as a single `///` puts the second
+    // paragraph into the source as code, and rustfmt rejects the whole file with
+    // an error about an em dash. `Table.layout` is the prop that found it here.
+    for line in doc_lines(&spec.doc) {
+        writeln!(out, "///{line}").expect("write");
+    }
+    // `Default` ONLY WHEN THE SPEC NAMES ONE, and it never had to be said until
+    // an enum prop declared no default: `#[derive(Default)]` on an enum with no
+    // `#[default]` variant does not compile, so `Tag { pressed }` — where the
+    // absence of the prop is itself an answer, and the prop is therefore
+    // `Option<TagPressed>` — failed the build with an error about the derive
+    // rather than about the spec. Every enum before it happened to have one.
+    let derives = if spec.default.is_some() {
+        "#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]\n"
+    } else {
+        "#[derive(Debug, Clone, Copy, PartialEq, Eq)]\n"
+    };
+    out.push_str(derives);
+    out.push_str("pub enum ");
     writeln!(out, "{ty} {{").expect("write");
     for value in &spec.values {
         if spec.default.as_ref() == Some(value) {
@@ -148,6 +210,22 @@ fn rust_enum(out: &mut String, component: &str, prop: &str, spec: &Prop) {
     out.push_str("        }\n    }\n}\n\n");
 }
 
+/// One doc comment's lines, each ready to sit behind a comment marker.
+///
+/// A leading space where there is text and nothing where there is not, because
+/// `/// ` with a trailing space on a blank line is what `fmt --check` objects
+/// to on the very next run.
+fn doc_lines(doc: &str) -> impl Iterator<Item = String> + '_ {
+    doc.trim().lines().map(|line| {
+        let line = line.trim_end();
+        if line.is_empty() {
+            String::new()
+        } else {
+            format!(" {line}")
+        }
+    })
+}
+
 fn rust_type(component: &str, prop: &str, spec: &Prop) -> String {
     match spec.kind {
         Kind::Enum => format!("{component}{}", pascal(prop)),
@@ -158,19 +236,51 @@ fn rust_type(component: &str, prop: &str, spec: &Prop) -> String {
 }
 
 fn rust_body(out: &mut String, component: &Component) {
-    let element = &component.meta.element;
     let class = component.meta.class.as_deref().unwrap_or("");
 
     writeln!(out, "    let root = format!(\"{class} {{class}}\");").expect("write");
-    out.push_str("    let root = root.trim().to_owned();\n\n    rsx! {\n");
-    writeln!(
-        out,
-        "        {element} {{\n            class: \"{{root}}\","
-    )
-    .expect("write");
+    out.push_str("    let root = root.trim().to_owned();\n\n");
+
+    let Some((prop_name, prop)) = component.element_switch() else {
+        out.push_str("    rsx! {\n");
+        rust_element(out, component, &component.meta.element, 2);
+        out.push_str("    }\n}\n");
+        return;
+    };
+
+    // ONE ARM PER VALUE, because `rsx!` needs a literal element name.
+    //
+    // It is repetitive, and that costs nothing: this file is generated. What it
+    // buys is a `level` prop that actually renders an `<h3>` — the alternative
+    // was the prop being accepted, documented, and silently ignored, which is
+    // what both props carrying `elements` used to do.
+    out.push_str(
+        "    // One arm per value: `rsx!` takes a literal element name, and this\n\
+         \x20   // prop chooses the element rather than an attribute.\n\
+         \x20   rsx! {\n",
+    );
+    writeln!(out, "        match {} {{", identifier(prop_name)).expect("write");
+    for (value, element) in prop.values.iter().zip(&prop.elements) {
+        writeln!(
+            out,
+            "            {}::{} => rsx! {{",
+            format_args!("{}{}", component.meta.name, pascal(prop_name)),
+            pascal(value)
+        )
+        .expect("write");
+        rust_element(out, component, element, 4);
+        out.push_str("            },\n");
+    }
+    out.push_str("        }\n    }\n}\n");
+}
+
+/// One element, with its class, its role and every attribute a prop becomes.
+fn rust_element(out: &mut String, component: &Component, element: &str, depth: usize) {
+    let pad = "    ".repeat(depth);
+    writeln!(out, "{pad}{element} {{\n{pad}    class: \"{{root}}\",").expect("write");
 
     if let Some(role) = &component.a11y.role {
-        writeln!(out, "            role: \"{role}\",").expect("write");
+        writeln!(out, "{pad}    role: \"{role}\",").expect("write");
     }
     for (prop_name, prop) in component.attributes() {
         let Some(attribute) = &prop.attribute else {
@@ -179,20 +289,20 @@ fn rust_body(out: &mut String, component: &Component) {
         let field = identifier(prop_name);
         match prop.kind {
             Kind::Enum => {
-                writeln!(out, "            \"{attribute}\": {field}.as_str(),").expect("write");
+                writeln!(out, "{pad}    \"{attribute}\": {field}.as_str(),").expect("write");
             }
             Kind::Bool => writeln!(
                 out,
-                "            \"{attribute}\": if {field} {{ \"true\" }} else {{ \"false\" }},"
+                "{pad}    \"{attribute}\": if {field} {{ \"true\" }} else {{ \"false\" }},"
             )
             .expect("write"),
-            _ => writeln!(out, "            \"{attribute}\": {field},").expect("write"),
+            _ => writeln!(out, "{pad}    \"{attribute}\": {field},").expect("write"),
         }
     }
     if component.takes_children() {
-        out.push_str("            {children}\n");
+        writeln!(out, "{pad}    {{children}}").expect("write");
     }
-    out.push_str("        }\n    }\n}\n");
+    writeln!(out, "{pad}}}").expect("write");
 }
 
 fn rust_index(components: &[Component]) -> String {
@@ -227,6 +337,36 @@ fn rust_index(components: &[Component]) -> String {
 
 // --- React -----------------------------------------------------------------
 
+/// The expression React is handed as the tag, and any statement it needs first.
+///
+/// A lookup rather than a switch: React takes the tag as a value, so the table
+/// IS the code. Returns `"div"` — quoted, ready to interpolate — when no prop
+/// chooses the element.
+fn react_element(out: &mut String, component: &Component) -> String {
+    let Some((prop_name, prop)) = component.element_switch() else {
+        return format!("\"{}\"", component.meta.element);
+    };
+    let field = camel(prop_name);
+    let table = prop
+        .values
+        .iter()
+        .zip(&prop.elements)
+        .map(|(value, element)| format!("\"{value}\": \"{element}\""))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let default = prop.default.as_deref().map_or_else(
+        || component.meta.element.clone(),
+        |value| component.element_for(value).to_owned(),
+    );
+    writeln!(
+        out,
+        "  // This prop chooses the element rather than an attribute.\n  \
+         const element = {{ {table} }}[{field}_] ?? \"{default}\";"
+    )
+    .expect("write");
+    "element".to_owned()
+}
+
 fn react(component: &Component) -> String {
     let mut out = header_from(CommentStyle::Line("//"), COMPONENT_SPEC);
     let name = &component.meta.name;
@@ -239,24 +379,28 @@ fn react(component: &Component) -> String {
     )
     .expect("write");
 
-    let defaults: Vec<String> = component
-        .attributes()
-        .filter_map(|(prop_name, prop)| {
-            prop.default
-                .as_ref()
-                .map(|d| format!("  {}: \"{d}\",", camel(prop_name)))
-        })
-        .collect();
-    if !defaults.is_empty() {
-        writeln!(
-            out,
-            "/** Applied by the component, never by the caller — which is what keeps\n\
-             \x20* the two implementations from disagreeing about a default. */\n\
-             const defaults = {{\n{}\n}};\n",
-            defaults.join("\n")
-        )
-        .expect("write");
-    }
+    // AND WHATEVER THE CUSTOM BODY NEEDS. `controls::react_imports` has existed
+    // since the first custom React body and was never called from anywhere —
+    // so `button.js`, `disclosure.js` and `select_option.js` all shipped
+    // `h(Icon, …)` with no `Icon` in scope. Nothing caught it because nothing
+    // in this repository had ever rendered a React component outside a browser
+    // page that fetched a pre-built bundle. `CodeBlock` is what finally did:
+    // it reads its grammar tables at render time, so an absent import is not a
+    // wrong icon, it is a `ReferenceError` on every block.
+    out.push_str(&controls::react_imports(component));
+
+    // NO `const defaults = {…}` OBJECT.
+    //
+    // One was emitted here for every component that had a default, and **not a
+    // single generated file ever read it**: the generic path writes
+    // `const x_ = x ?? "value"` from the same spec field, and a custom body in
+    // `controls.rs` writes its own. Sixteen shipped React components carried it
+    // as dead code, and — worse than dead — it was a second place one default
+    // was written, with nothing asserting the two agreed.
+    //
+    // The default reaches the caller through the `??` below and through the
+    // `.d.ts`. That is one place, which is the number this repository is built
+    // around.
 
     let params: Vec<String> = component
         .attributes()
@@ -320,15 +464,12 @@ fn react(component: &Component) -> String {
         .expect("write");
     }
 
+    let element = react_element(&mut out, component);
+
     if component.takes_children() {
-        writeln!(
-            out,
-            "  return h(\"{}\", props, children);",
-            component.meta.element
-        )
-        .expect("write");
+        writeln!(out, "  return h({element}, props, children);").expect("write");
     } else {
-        writeln!(out, "  return h(\"{}\", props);", component.meta.element).expect("write");
+        writeln!(out, "  return h({element}, props);").expect("write");
     }
     out.push_str("}\n");
     out
@@ -360,7 +501,17 @@ fn react_types(component: &Component) -> String {
 
     writeln!(out, "\nexport interface {name}Props {{").expect("write");
     for (prop_name, prop) in component.attributes() {
-        writeln!(out, "  /** {} */", prop.doc).expect("write");
+        // The same, in the other language's comment syntax.
+        let doc: Vec<String> = doc_lines(&prop.doc).collect();
+        if doc.len() == 1 {
+            writeln!(out, "  /** {} */", prop.doc.trim()).expect("write");
+        } else {
+            out.push_str("  /**\n");
+            for line in doc {
+                writeln!(out, "   *{line}").expect("write");
+            }
+            out.push_str("   */\n");
+        }
         let ty = controls::typescript_type(component, prop_name).map_or_else(
             || match prop.kind {
                 Kind::Enum => format!("{name}{}", pascal(prop_name)),
@@ -436,6 +587,111 @@ fn pascal(name: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    /// A DECLARED DEFAULT IS A VALUE, WHATEVER THE PROP'S TYPE IS.
+    ///
+    /// `#[props(default)]` is `Default::default()` — `false` for a bool and the
+    /// empty string for a text prop — and it was emitted for both. The bool
+    /// half of that shipped: `Disclosure.marker` and `CodeBlock.copy` disagreed
+    /// between the two packages, because React reads `marker ?? true` from the
+    /// same spec field. The text half survived until `Search.query` became the
+    /// first text prop in the repository to declare one.
+    ///
+    /// This asks the emitted source rather than the branch, so it holds for a
+    /// type nobody has added yet.
+    #[test]
+    fn a_declared_default_reaches_the_generated_rust() {
+        let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+        let components = noctua_design_spec::component::load_all(root.join("spec/components"))
+            .expect("the shipped components");
+
+        for component in &components {
+            let source = dioxus(component);
+            for (name, prop) in component.attributes() {
+                let Some(default) = prop.default.as_deref() else {
+                    continue;
+                };
+                if prop.kind == Kind::Enum {
+                    // An enum's default is the variant carrying `#[default]`,
+                    // which `Default::default()` genuinely resolves to.
+                    continue;
+                }
+                // THE WHOLE LINE, NOT A SUBSTRING OF ONE. This searched for
+                // `expanded: ` and found `icon_expanded: ` first, then read the
+                // attribute above THAT — so a component declaring both failed
+                // a test about a default it had written correctly. The same
+                // class of defect as an index guard that matched `rem` inside
+                // `remove_label`: a name is a whole token or it is a guess.
+                let field = format!("{}: ", identifier(name));
+                let at = source
+                    .lines()
+                    .scan(0usize, |offset, line| {
+                        let here = *offset;
+                        *offset += line.len() + 1;
+                        Some((here, line))
+                    })
+                    .find(|(_, line)| line.trim_start().starts_with(&field))
+                    .map(|(at, _)| at)
+                    .expect("the prop is declared");
+                let head = &source[..at];
+                let attribute = head.rfind("#[props(").map(|at| &head[at..]);
+                assert!(
+                    attribute.is_some_and(|text| text.contains(default)),
+                    "{}.{name} declares `{default}` and the generated Rust says `{}`",
+                    component.meta.name,
+                    attribute.unwrap_or("nothing").trim()
+                );
+            }
+        }
+    }
+
+    /// EVERY NAME A REACT BODY USES IS A NAME IT IMPORTS.
+    ///
+    /// `controls::react_imports` existed from the first custom React body and
+    /// was called from nowhere, so `button.js`, `disclosure.js` and
+    /// `select_option.js` all shipped `h(Icon, …)` with no `Icon` in scope.
+    /// Nothing caught it for three components and several milestones, because
+    /// nothing in this repository had ever rendered a React component outside a
+    /// browser page that fetched a pre-built bundle — and a bundler resolves
+    /// what it can see, which is the import that was not there.
+    ///
+    /// This asks the emitted text instead: if a file mentions one of the names
+    /// that can only arrive by import, it has to import it. A `ReferenceError`
+    /// on first render is not a thing to find in somebody else's application.
+    #[test]
+    fn every_react_body_imports_what_it_names() {
+        // Names that exist only because something imported them. A local
+        // `const` shadowing one of these would make this test lie, so each is
+        // a name no generated body ever declares.
+        const EXTERNAL: [&str; 6] = ["Icon", "GRAMMARS", "ALIASES", "scan(", "lines(", "Checkbox"];
+
+        let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+        let components = noctua_design_spec::component::load_all(root.join("spec/components"))
+            .expect("the shipped components");
+
+        for component in &components {
+            let source = react(component);
+            let head = source
+                .split("export function")
+                .next()
+                .expect("a file has a head");
+            for name in EXTERNAL {
+                // A component's own name is not an import. `Checkbox`'s body
+                // opens `export function Checkbox(` and would otherwise
+                // accuse itself.
+                if name.trim_end_matches('(') == component.meta.name {
+                    continue;
+                }
+                let used = source[head.len()..].contains(name);
+                let imported = head.contains(name.trim_end_matches('('));
+                assert!(
+                    !used || imported,
+                    "{}'s React body uses `{name}` and does not import it",
+                    component.meta.name
+                );
+            }
+        }
+    }
+
     use super::*;
 
     fn shipped() -> Vec<Component> {
@@ -473,6 +729,53 @@ mod tests {
                 );
             }
         }
+    }
+
+    /// A bool's declared default has to reach the code, in both languages.
+    ///
+    /// `#[props(default)]` is `false` however the spec spells it, so every bool
+    /// that defaults to `true` was silently `false` in Dioxus while React read
+    /// the same spec and got it right. `Disclosure`'s chevron and `CodeBlock`'s
+    /// copy control both shipped that way.
+    #[test]
+    fn a_bool_default_reaches_both_languages() {
+        let mut checked = 0usize;
+        for component in shipped() {
+            let files = emit(std::slice::from_ref(&component));
+            let stem = file_stem(&component.meta.name);
+            let rust = &files
+                .iter()
+                .find(|f| f.path.ends_with(&format!("{stem}.rs")))
+                .expect("rust")
+                .contents;
+            let js = &files
+                .iter()
+                .find(|f| f.path.ends_with(&format!("{stem}.js")))
+                .expect("js")
+                .contents;
+
+            for (prop_name, prop) in component.attributes() {
+                if prop.kind != Kind::Bool {
+                    continue;
+                }
+                let default = prop.default.as_deref().unwrap_or("false");
+                assert!(
+                    rust.contains(&format!("#[props(default = {default})]")),
+                    "{}.{prop_name} defaults to {default} in the spec, and Rust does not say so",
+                    component.meta.name
+                );
+                assert!(
+                    js.contains(&camel(prop_name)),
+                    "{}.{prop_name} is missing from React",
+                    component.meta.name
+                );
+                checked += 1;
+            }
+        }
+        assert!(
+            checked > 0,
+            "no bool prop was checked, so this proves nothing"
+        );
     }
 
     #[test]

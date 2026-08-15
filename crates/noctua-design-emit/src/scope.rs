@@ -72,10 +72,14 @@ pub const SCOPE_ATTRIBUTE: &str = "data-noctua-scope";
 
 /// The selector list, as one string, so the emitter and its tests cannot
 /// disagree about what was written.
-const SELECTOR: &str = ":where(:root),\n\
-                       [data-noctua-scope],\n\
-                       [data-palette]:not(:root),\n\
-                       [data-theme]:not(:root)";
+///
+/// `pub` because `appearance` needs it too: the backdrop is a property a scope
+/// declares, and two files spelling "where a scope can be" separately is two
+/// spellings that stop agreeing.
+pub const SELECTOR: &str = ":where(:root),\n\
+                           [data-noctua-scope],\n\
+                           [data-palette]:not(:root),\n\
+                           [data-theme]:not(:root)";
 
 /// Emits `dist/scope.css`.
 #[must_use]
@@ -107,7 +111,61 @@ pub fn emit(vendor: &Vendor) -> Vec<EmittedFile> {
     }
     writeln!(out, "}}").expect("write");
 
+    ink(&mut out);
+
     vec![EmittedFile::new("dist/scope.css", out)]
+}
+
+/// The ink, re-read at the scope — the same bug as the contract, one level up.
+///
+/// # What was wrong
+///
+/// Everything above re-declares `--nc-color-*` so a subtree resolves them
+/// against its own palette. It does nothing for the properties that CONSUME
+/// them, and `color` is the one that matters: an application writes
+/// `body { color: var(--nc-color-fg) }` once, that `var()` resolves at `<body>`
+/// against the PAGE's mode, and every descendant inherits the **computed
+/// value**. A scope below it re-resolves the contract, paints its own backdrop
+/// — and its text is still the page's ink.
+///
+/// Measured, on a dark scope inside a light page: near-black text on a
+/// near-black surface, a contrast ratio of about 1.2. Nothing reported it,
+/// because every component that sets its own colour looked right; only prose
+/// that inherited was wrong. `readability.spec.js` measures it now, and that
+/// test had to be written twice — the first version screenshotted a probe over
+/// a live page and caught the page's furniture rather than its own glyphs.
+///
+/// # Why here and not with the backdrop
+///
+/// This is the *semantic* half — the same sentence this file is named after,
+/// applied to the property rather than to the custom property — so it takes the
+/// same selector list. The backdrop is painted in `dist/theme.css` on `:root`
+/// and `[data-noctua-scope]` only, because painting a surface is a decision and
+/// re-resolving a colour is a correction.
+///
+/// # Why zero specificity
+///
+/// `:where()`, so anything at all can override it: a scope inside a callout
+/// that deliberately sets its own ink still wins, and this only ever answers
+/// where nothing else does. Inheritance loses to any matching rule, including a
+/// (0,0,0) one, which is what makes this enough.
+fn ink(out: &mut String) {
+    writeln!(
+        out,
+        "\n/* The ink, re-read here. `color` is set once, high up, from\n\
+        \x20  var(--nc-color-fg) — and a var() resolves where it is DECLARED, so\n\
+        \x20  every descendant inherits the COMPUTED colour and a themed subtree\n\
+        \x20  keeps the page's ink over its own surface. Measured before this rule\n\
+        \x20  existed, on a dark scope inside a light page: near-black text on a\n\
+        \x20  near-black surface, a contrast ratio of about 1.2.\n\
+        \x20\n\
+        \x20  Zero specificity, so any deliberate colour still wins. */\n\
+        :where({}) {{\n\
+        \x20 color: var(--nc-color-fg);\n\
+        }}",
+        SELECTOR.replace('\n', " ")
+    )
+    .expect("write");
 }
 
 #[cfg(test)]
@@ -150,16 +208,16 @@ mod tests {
         }
     }
 
-    /// No colour literal can reach this file. The vendor reader already
+    /// No color literal can reach this file. The vendor reader already
     /// rejects a non-`var()` value; this asserts the emitted result, which is
     /// what actually ships.
     #[test]
-    fn the_emitted_file_defines_no_colour() {
+    fn the_emitted_file_defines_no_color() {
         let css = css();
         for needle in ["#", "rgb(", "hsl(", "oklch(", "oklab("] {
             assert!(
                 !css.contains(needle),
-                "the scope stylesheet contains {needle:?}; this repository defines no colours"
+                "the scope stylesheet contains {needle:?}; this repository defines no colors"
             );
         }
     }
@@ -204,14 +262,32 @@ mod tests {
         );
     }
 
-    /// One rule, so the whole contract shares one selector and there is no
-    /// second copy to drift.
+    /// TWO RULES, AND ONLY TWO: the contract, and the ink that consumes it.
+    ///
+    /// The contract is one rule so it shares one selector and there is no
+    /// second copy to drift. The ink is the other, and it is separate because
+    /// it is the only declaration here that is not a `--nc-` name — a reader
+    /// diffing this file against the vendor's must be able to see the whole
+    /// contract as one block and the one addition as the other.
     #[test]
-    fn it_is_exactly_one_rule() {
+    fn it_is_the_contract_and_the_ink_and_nothing_else() {
         let css = css();
         assert_eq!(css.matches('{').count(), css.matches('}').count());
         let bodies = css.matches('{').count();
         // The generated header is a `/*! … */` comment and contributes none.
-        assert_eq!(bodies, 1, "expected one rule, found {bodies}");
+        assert_eq!(bodies, 2, "expected two rules, found {bodies}");
+
+        // And the second one is the ink, at zero specificity so anything
+        // deliberate still wins. A scope that could not be overridden would
+        // reach into every consumer who ever set a colour on a themed subtree.
+        let before = css.rsplit_once('{').expect("a second rule").0;
+        let head = before
+            .rsplit_once("*/")
+            .map_or(before, |(_, after)| after)
+            .trim();
+        assert!(
+            head.starts_with(":where("),
+            "the ink rule is not zero-specificity: {head}"
+        );
     }
 }

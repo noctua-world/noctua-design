@@ -1,0 +1,83 @@
+# Elixir.
+
+[meta]
+name = "elixir"
+display = "Elixir"
+aliases = ["ex", "exs"]
+
+[words]
+keyword = [
+  "after", "case", "catch", "cond", "def", "defdelegate", "defexception",
+  "defguard", "defimpl", "defmacro", "defmodule", "defp", "defprotocol",
+  "defstruct", "do", "else", "end", "fn", "for", "if", "import", "quote",
+  "raise", "receive", "require", "rescue", "throw", "try", "unless", "unquote",
+  "use", "when", "with",
+]
+operator = ["and", "in", "not", "or"]
+constant = ["false", "nil", "true", "__MODULE__"]
+function = ["inspect", "is_atom", "is_binary", "is_list", "is_map", "is_nil", "length", "to_string"]
+
+[[comment]]
+open = "#"
+
+[[string]]
+open = '"""'
+close = '"""'
+escape = "\\"
+multiline = true
+interpolate_open = "#{"
+interpolate_close = "}"
+
+[[string]]
+open = '"'
+close = '"'
+escape = "\\"
+interpolate_open = "#{"
+interpolate_close = "}"
+
+[[string]]
+open = "'"
+close = "'"
+escape = "\\"
+
+[number]
+prefixes = ["0x", "0b", "0o"]
+separator = "_"
+exponent = "eE"
+
+[symbols]
+operator = "+-*/=<>!&|^~"
+punctuation = "(){}[],;:.@%?"
+
+[[sigil]]
+open = "@"
+role = "property"
+
+[[sigil]]
+open = ":"
+role = "constant"
+
+[context]
+name_after = { def = "function", defp = "function", defmacro = "function", defmodule = "type", defprotocol = "type", defimpl = "type" }
+call_paren = true
+upper_type = true
+# `screaming_constant` is OFF, and it is the naming convention that decides.
+# Elixir's modules are `IO`, `URI`, `JSON` — all-capital names that are types,
+# not constants — while its actual constants are module attributes and atoms,
+# both of which are sigils above. A language whose acronyms are modules cannot
+# also read an acronym as a constant.
+screaming_constant = false
+
+[[case]]
+name = "a module attribute is a property and an atom is a constant"
+code = """
+defmodule App do
+  @greeting \"hi\"
+  def run, do: :ok
+end"""
+expect = ["keyword defmodule", "type App", "property @greeting", "keyword def", "function run", "constant :ok"]
+
+[[case]]
+name = "an interpolation is a hole rather than literal text"
+code = 'IO.puts("hello #{name}")'
+expect = ["type IO", "function puts", 'string "hello ', "escape #{name}"]

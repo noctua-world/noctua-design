@@ -1,0 +1,85 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a message bar for something that happened, shown in place and left on the
+page. For one refused field, use `Field`. For everything wrong in a form at
+once, use `ErrorSummary`.
+"""
+
+[meta]
+name = "MessageBar"
+element = "div"
+class = "nd-message-bar"
+summary = "Tell users what happened, in a bar that stays where the thing happened."
+
+# WHY `role="alert"` IS OPT-IN AND `role="status"` IS THE DEFAULT.
+#
+# An alert cuts a screen reader off mid-sentence. That is the correct thing to
+# do about a payment that failed while a reader was three fields further down,
+# and it is rude about a record that saved. A component whose default is the
+# rude one gets the rude one everywhere, because a default is what a caller
+# writes when they have not thought about it.
+#
+# `ErrorSummary` is the one place in this system that takes the focus without
+# being asked, and it earns that by being the top of a form the server
+# refused. This is the quieter half of the same job.
+
+[prop.tone]
+type = "text"
+attribute = "data-nd-tone"
+doc = "Which of the colour system's tones the bar is painted from. The tones live in `noctua_design::tones`. **Never the only signal** (`NOCTUA.md §8.8.6`): the words and the icon carry the meaning."
+
+[prop.title]
+type = "text"
+doc = "A short line above the message, such as *Payment refused*. Absent is the common case, because one sentence needs no heading. It is a `<strong>` rather than a heading, so it adds nothing to the outline."
+
+[prop.icon]
+type = "text"
+doc = "A drawing before the words, named from `spec/icons.toml`. It carries `aria-hidden`, because it says what the words say. Choose one that means what the tone means, so colour is never alone."
+
+[prop.alert]
+type = "bool"
+default = "false"
+attribute = "data-nd-alert"
+doc = """Whether the bar interrupts. Off by default, and off is almost always right: `role="alert"` stops a screen reader mid-sentence. Turn it on where a reader has to act before carrying on."""
+
+[prop.live]
+type = "enum"
+values = ["polite", "assertive", "off"]
+# NO DEFAULT, AND THAT IS THE WHOLE OF IT. `status` already implies polite and
+# `alert` already implies assertive, so writing the attribute at a default
+# would be the component overruling the role it just chose. Absent means the
+# role decides, which is the platform's own answer.
+attribute = "aria-live"
+# How it is announced, which a still picture has nothing to say about.
+variants = false
+doc = "How the bar is announced when it arrives after the page has loaded. Absent lets the role decide, which is right almost always. Use `off` for a bar that shipped with the page."
+
+[prop.dismissible]
+type = "bool"
+default = "false"
+attribute = "data-nd-dismissible"
+doc = "Whether a reader can take the bar away. Off by default, because a bar reporting the state of something must not be removable while that state holds."
+
+[prop.dismiss_label]
+type = "text"
+# NOT AN ATTRIBUTE. `Info` carries `data-nd-close-label` because its close
+# control is BUILT by the script and arrives nameless. This one is rendered
+# with its name already on it and only revealed, so a second copy of the word
+# in the markup would be a second copy to keep in step.
+doc = "The name of the control that takes the bar away, such as *Dismiss this message*. Wanted in practice by `dismissible`, because that control is a glyph and this is the only name it has."
+
+[prop.children]
+type = "children"
+doc = "The message, as one or two sentences. It may hold a `Link` to whatever a reader has to do about it."
+
+[state.dismissed]
+attribute = "data-nd-dismissed"
+doc = "Set on a bar a reader has taken away. The stylesheet takes it out of the layout from there, so the element stays in the document and its live region keeps working."
+
+[a11y]
+role = "status"
+notes = """The bar is a `role="status"` until `alert` is turned on, and a status waits for a pause instead of cutting in. The icon is `aria-hidden`, and the tone is never the only signal."""
+
+[keyboard]
+"Enter or Space" = "Takes the bar away, on the control that dismisses it. Both keys work, because that control is a `<button>`."

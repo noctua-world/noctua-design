@@ -1,0 +1,107 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a table column to declare one column of a `Table`, before any row is
+written. It says how the values sort and whether the column can be filtered,
+resized, hidden or frozen. Any of those turns the `Table` into a `grid`.
+"""
+
+[meta]
+name = "TableColumn"
+element = "colgroup"
+class = "nd-table-column"
+# A `<colgroup>` may only contain `<col>`, so the specimen is one — and the
+# variant grid wraps it in a table with a row in it, because a table with no
+# rows has no column to paint.
+specimen = "<col>"
+page = "tables"
+summary = "Declares one column of a table: its width, its sorting and what a reader may do to it."
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-column"
+doc = "What this column is called in the markup, such as `step` or `token`. **Required**, because a heading points at it with its own `column` and every message fills a `{column}` hole from it. It is an identifier and not a word a reader sees."
+
+[prop.width]
+type = "enum"
+values = ["auto", "narrow", "medium", "wide", "fit"]
+default = "auto"
+attribute = "data-nd-width"
+doc = "How wide the column rests. `auto` shares the space out, `narrow`, `medium` and `wide` are three fixed steps, and `fit` is as narrow as the content allows. **It works with no script**, because a `<colgroup>` is a box the stylesheet can size."
+
+[prop.sortable]
+type = "bool"
+default = "false"
+attribute = "data-nd-sortable"
+doc = "Whether a reader may sort by this column. Off by default. Turning it on draws the control in the heading and gives the heading a real `aria-sort`. With anything else interactive, it turns the table into a `grid`."
+
+[prop.sort_as]
+type = "enum"
+values = ["text", "number", "date"]
+variants = false
+default = "text"
+attribute = "data-nd-sort-as"
+doc = "How two values in this column compare. **Declared rather than guessed**: a script reading the first cell sorts `10` before `9`. `text` collates in the reader's language, `number` reads digits, `date` reads dates. Wanted in practice by `sortable`."
+
+[prop.low]
+type = "text"
+attribute = "data-nd-low"
+doc = "The number under which this column's values take `tone_below`. It is how a status is derived from a value, such as a balance under zero. It is read from a cell's `sort_value` where there is one, so a column showing *R$ 1.240,00* compares as `1240`."
+
+[prop.high]
+type = "text"
+attribute = "data-nd-high"
+doc = "The number over which this column's values take `tone_above`. With `low` it makes three bands out of one column. With neither declared, `tone_within` paints every value."
+
+[prop.tone_below]
+type = "text"
+attribute = "data-nd-tone-below"
+doc = "The tone for a value under `low`, from any of the colour system's names. **A cell's own `tone` always wins**, so a caller can switch the rule off for one row."
+
+[prop.tone_within]
+type = "text"
+attribute = "data-nd-tone-within"
+doc = "The tone for a value between the two thresholds. It paints the whole column when neither threshold is declared."
+
+[prop.tone_above]
+type = "text"
+attribute = "data-nd-tone-above"
+doc = "The tone for a value over `high`. **Recomputed when a filter hides a row or more rows arrive**, so the tones match the rows a reader is looking at."
+
+[prop.filterable]
+type = "bool"
+default = "false"
+attribute = "data-nd-filterable"
+doc = "Whether the table's search looks in this column. Off by default. **There is one box, in the toolbar, behind a magnifying glass.** What is typed hides every row that matches in no searched column, and those rows are hidden rather than removed."
+
+[prop.resizable]
+type = "bool"
+default = "false"
+attribute = "data-nd-resizable"
+doc = "Whether a reader may change how wide this column is. Off by default, and useful where the content is unpredictable, such as a name or a path. The handle is draggable and also answers Alt with the arrow keys, because it is four pixels wide."
+
+[prop.hideable]
+type = "bool"
+default = "false"
+attribute = "data-nd-hideable"
+doc = "Whether this column is offered in the table's own list of columns. Off by default, so a reader cannot empty the table. Turn it on for the columns that are detail rather than identity, and never for the one carrying the row's name."
+
+[prop.hidden]
+type = "bool"
+default = "false"
+attribute = "data-nd-hidden"
+doc = "Whether the column starts hidden. It is declared in the markup rather than restored by a script. The first paint is then right, and a reader with no script sees the columns the page meant to show. Wanted in practice by `hideable`."
+
+[prop.pinned]
+type = "bool"
+default = "false"
+attribute = "data-nd-pinned"
+doc = "Whether the column stays against the leading edge while the rest scrolls sideways. **Several columns may pin**, because a record is often identified by two of them. Pinned columns keep their order and a rule marks where they end."
+
+[a11y]
+notes = """
+A `<colgroup>` has no ARIA role and is never read out, because a screen reader
+walks cells rather than columns. Everything a reader hears about this column
+comes from its heading.
+"""

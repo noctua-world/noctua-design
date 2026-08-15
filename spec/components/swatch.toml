@@ -1,0 +1,42 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use a swatch to show a colour beside the word that names it. Never use it on its own, because the chip has no accessible name of its own."
+
+[meta]
+name = "Swatch"
+element = "span"
+class = "nd-swatch"
+summary = "Show one palette's accent as a colour chip."
+
+# IT READS ITS OWN SCOPE RATHER THAN TAKING A COLOUR.
+#
+# `palette` stamps `data-palette`, so the chip resolves `--nc-accent-solid`
+# inside its own scope and shows THAT palette — the same mechanism `ThemeScope`
+# uses, and the reason this component takes no colour at all. A prop that
+# accepted one would be a colour literal with extra steps, which
+# `NOCTUA.md §8.8` forbids for the whole repository.
+#
+# With no `palette` it shows whatever theme reaches it, which is what makes it
+# usable as a live indicator of the accent in force.
+
+[prop.palette]
+type = "text"
+attribute = "data-palette"
+doc = "Which palette's accent the chip shows. Without it the chip shows whatever theme reaches it, which makes it a live indicator of the accent in force."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The size of the chip: `small`, `medium` or `large`. `medium` by default."
+
+[prop.shape]
+type = "enum"
+values = ["pill", "rounded", "square"]
+default = "pill"
+attribute = "data-nd-shape"
+doc = "The chip's corners: `pill`, `rounded` or `square`. `pill` by default, and `square` suits a chip that stands for a whole theme rather than an accent."
+
+[a11y]
+notes = "The chip is always `aria-hidden` and has no accessible name. Whatever contains it supplies the name."

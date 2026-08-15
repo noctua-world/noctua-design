@@ -1,0 +1,183 @@
+guidance = """
+Use a tag picker for several values users write, such as keywords, recipients or
+labels on an issue. Each committed value is a removable `Tag` in the field. If
+the answers are a fixed list, use `Select { multiple, searchable }` instead.
+"""
+
+[meta]
+name = "TagPicker"
+element = "div"
+class = "nd-tag-picker"
+summary = "Let users enter several values, each one a tag they can take off again."
+specimen = "<div class=\"nd-tag-picker-field\"><input class=\"nd-tag-picker-input\" placeholder=\"Add\"></div>"
+
+# EVERY ID DERIVES FROM `name`, AND A CALLER WRITES NONE OF THEM.
+#
+# The listbox, the composer, the label, the tag list, the status line and every
+# option row. `Search` was rebuilt this year because the version before it
+# derived its id from an OPTIONAL name, so four fields on one page all carried
+# `id="nd-search-"` and four labels pointed at whichever the browser resolved
+# first. Required here, from the first line.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-tag-picker"
+doc = "The field these values are submitted under, and the root of every id here. **Required**, because an id derived from an optional name can be shared by several components on one page."
+
+[prop.label]
+type = "text"
+required = true
+doc = "What is being collected, in the reader's language. It is a real `<label for>` on the composer, and the accessible name of the list of tags as well."
+
+[prop.hint]
+type = "text"
+doc = "A sentence under the label, before anything has gone wrong. It is linked with `aria-describedby`, so a screen reader reads it with the composer."
+
+[prop.error]
+type = "text"
+doc = "What is wrong, after a submission. It carries `role=\"alert\"`, so a screen reader reads it when it appears. It is the caller's sentence, and nothing here overwrites or clears it."
+
+[prop.placeholder]
+type = "text"
+attribute = "placeholder"
+doc = "The hint inside the composer. It is never the only name the field has."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The size of the field and the tags in it, matching `Button` step for step. The field's height is what the tags make it, and it grows a row when the tags need one."
+
+[prop.creatable]
+type = "bool"
+default = "true"
+attribute = "data-nd-creatable"
+doc = "Whether what users type can become a value that was not offered. **On by default**, unlike `Select`. Off, the control works as a `Select { multiple }` that draws its answers differently."
+
+[prop.create_label]
+type = "text"
+attribute = "data-nd-create-label"
+doc = "The offer to add what was typed, with a `{term}` hole. Set it when `creatable` is on, so that users know the row can be pressed."
+
+[prop.separators]
+type = "text"
+default = ","
+attribute = "data-nd-separators"
+doc = "The characters that commit a value, besides Enter. A comma by default, and a prop because a list of email addresses may want a semicolon too. A separator is a keystroke here and never an encoding."
+
+[prop.paste]
+type = "bool"
+default = "true"
+attribute = "data-nd-paste"
+doc = "Whether pasting text containing a separator commits several values at once. On by default. Turn it off when the values may legitimately contain a separator."
+
+[prop.duplicates]
+type = "bool"
+default = "false"
+attribute = "data-nd-duplicates"
+doc = "Whether the same value may be committed twice. Off by default. The comparison ignores case and accent form, so `Ochre` and `ochre` are one answer, as are the two spellings of `é`."
+
+[prop.max]
+type = "text"
+attribute = "data-nd-max"
+doc = "How many values are allowed. Text rather than a number, because every prop that crosses the two languages is text. At the limit the composer refuses what is typed and says why."
+
+[prop.max_label]
+type = "text"
+attribute = "data-nd-max-label"
+doc = "What is said at that limit, with a `{max}` hole. Set it, so that a field which stops accepting values gives a reason."
+
+[prop.pattern]
+type = "text"
+attribute = "data-nd-pattern"
+doc = "A regular expression every value must match. It is the platform's own `pattern`, and it is how a picker of email addresses rejects a word."
+
+[prop.invalid_label]
+type = "text"
+attribute = "data-nd-invalid-label"
+doc = "What is said when a value does not match, with a `{term}` hole. Set it whenever `pattern` is set."
+
+[prop.clearable]
+type = "bool"
+default = "false"
+attribute = "data-nd-clearable"
+doc = "Whether a control appears for taking every tag off at once. Off by default, unlike `Search`, because retyping several tags costs more than retyping one search."
+
+[prop.clear_label]
+type = "text"
+attribute = "data-nd-clear-label"
+doc = "The name of that control. It is a glyph, so this is the only name it has."
+
+[prop.remove_label]
+type = "text"
+attribute = "data-nd-remove-label"
+doc = "The name of each tag's own remove control, with a `{label}` hole. A screen reader then reads *Remove ochre* rather than *Remove* on every tag."
+
+[prop.added_label]
+type = "text"
+attribute = "data-nd-added-label"
+doc = "What is read out when a value is committed, with a `{label}` hole. Committing changes nothing that has focus, so without this sentence pressing Enter is silent to a screen reader."
+
+[prop.removed_label]
+type = "text"
+attribute = "data-nd-removed-label"
+doc = "The same, for a value taken off. It matters more, because the control that removed it has left the page and focus has had to move."
+
+[prop.status]
+type = "text"
+attribute = "data-nd-status"
+doc = "How many values there are, with a `{count}` hole. One sentence with one hole, and it may carry one form per plural category (`one:…|other:…`), as `Search.status` does."
+
+[prop.empty_label]
+type = "text"
+attribute = "data-nd-empty-label"
+doc = "What the suggestion list says when nothing matches what is typed. Set it, so that the list gives an answer rather than showing nothing."
+
+[prop.loading]
+type = "bool"
+default = "false"
+attribute = "data-nd-loading"
+doc = "Whether the suggestions are still on their way. The list says so instead of showing nothing, because an empty list and a list that has not arrived mean opposite things."
+
+[prop.loading_label]
+type = "text"
+attribute = "data-nd-loading-label"
+doc = "What the list says while the suggestions are coming."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Disables the whole control. It writes the real `disabled` attribute on the `<select>` and on the composer, because only the real one stops a form submitting."
+
+[prop.required]
+type = "bool"
+default = "false"
+doc = "Whether at least one value is needed. It goes on the **composer** rather than on the hidden `<select>`, because the browser has to focus an invalid control to anchor its bubble."
+
+[prop.glass]
+type = "bool"
+default = "false"
+attribute = "data-nd-glass"
+doc = "Frosts the field. The suggestion list stays opaque whatever this says, for `Select`'s reason: a floating list has to be readable against whatever is behind it."
+
+[prop.children]
+type = "children"
+doc = "The suggestions, as `SelectOption` and `SelectGroup`, which render as real `<option>` and `<optgroup>` elements and work with no script. **Inside a picker their `value` must equal their label**."
+
+[keyboard]
+"Enter" = "Commits what is typed, or takes the highlighted suggestion. With the composer empty it does nothing."
+"A separator" = "Commits what is typed. A separator is a keystroke here and never part of a value."
+"Backspace" = "Removes the last tag, when the composer is empty."
+"Down arrow / Up arrow" = "Moves through the suggestions. Focus stays in the composer, so the highlight travels by `aria-activedescendant`."
+"Escape" = "Closes the suggestion list and keeps what is typed."
+"Tab" = "Leaves the field. Tags are **not** tab stops, and are reached with the arrow keys from an empty composer."
+
+[a11y]
+notes = """
+The composer is the combobox and the tags are a list beside it, each with its
+own role. Removing the last tag moves focus to the next remove control or to
+the composer, never to `<body>`.
+"""

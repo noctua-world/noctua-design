@@ -29,3 +29,11 @@ node_modules/
 # Playwright's own output.
 /test-results/
 /playwright-report/
+
+# Throwaway measuring scripts.
+#
+# A probe has to live inside the repository to resolve `@playwright/test`, and
+# every one written so far was dropped in the root and deleted by hand — which
+# is a step that gets forgotten and a stray `shot.mjs` that gets committed.
+# One ignored directory instead.
+/probe/

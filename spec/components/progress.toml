@@ -1,0 +1,78 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a progress bar for a task that is advancing, such as an upload, an import or
+a batch of records being checked. For a level inside a range known beforehand,
+use `Meter`. An absent `value` draws the indeterminate bar.
+"""
+
+[meta]
+name = "Progress"
+element = "progress"
+class = "nd-progress"
+# Part-way, so the fill has something to fill. `<progress>` draws its own bar;
+# the content is what a browser too old for the element would show.
+# The bar, for `Meter`'s reason: `size` is the bar's block size.
+specimen = "<span class=\"nd-progress-bar\"></span>"
+summary = "Show how far a task has got, or that it is running with no total known."
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-progress"
+doc = "The name of the task in the markup, and the root of the ids here. **Required**, because an id derived from an optional name is shared by every copy of the component on a page."
+
+[prop.label]
+type = "text"
+required = true
+doc = "What is happening, in the reader's language, such as *Uploading report.pdf*. Name the **thing** rather than the act, so that three bars are not all called *Uploading*. It renders as a real `<label for>`."
+
+[prop.value]
+type = "text"
+attribute = "value"
+doc = """How far the task has got. An absent value draws the indeterminate bar, which is the right state when the server did not send a total. Text rather than a number, because every prop that crosses the two languages is text."""
+
+[prop.max]
+type = "text"
+attribute = "max"
+doc = "The value that counts as finished. Absent means one, so a `value` of `0.58` on its own is 58%. A caller counting files writes `max = \"12\"` and does not divide."
+
+[prop.value_label]
+type = "text"
+attribute = "data-nd-value-label"
+doc = "The sentence beside the bar, with `{value}`, `{max}` and `{percent}` holes: *{value} of {max} files*. It becomes the element's `aria-valuetext`, so a screen reader reads what is on the screen. Leave it out for an indeterminate bar."
+
+[prop.busy_label]
+type = "text"
+attribute = "data-nd-busy-label"
+doc = "What is read out while there is no value at all, such as *Working out how big it is*. Set it on an indeterminate bar, because without it a screen reader gives the busy state and nothing about the task."
+
+[prop.tone]
+type = "text"
+attribute = "data-nd-tone"
+doc = "A tone from the colour system. The accent is the default and suits almost every task. Use `danger` for a failed upload left on the screen with its reason, and `success` for a completed one."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "How thick the bar is. `small` is for a bar inside a table cell, where the row's height is the budget. `large` is for a bar users watch on its own."
+
+[prop.hide_label]
+type = "bool"
+default = "false"
+attribute = "data-nd-label-hidden"
+doc = "Hides the name from the screen and keeps it for a screen reader. Use it for a bar in a table cell whose column heading already says what it is."
+
+[state.busy]
+attribute = "data-nd-busy"
+doc = "Set when there is no `value`: the task is running and how far along is not known. It is rendered from the absence of `value`, so the attribute and the bar cannot disagree. The stylesheet hangs the indeterminate sweep on it."
+
+[a11y]
+needs_name = true
+notes = """
+A real `<progress>` with a real `<label for>` provides the role, the value and
+the busy state. `aria-valuetext` carries `value_label`, and the sweep stops
+under `prefers-reduced-motion`.
+"""

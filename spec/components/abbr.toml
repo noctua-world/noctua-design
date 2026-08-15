@@ -2,20 +2,19 @@
 name = "Abbr"
 element = "abbr"
 class = "nd-abbr"
-summary = "An abbreviation, with its expansion."
+# One of the marks that go inside a sentence, documented with the others.
+page = "inline-text"
+summary = "Show an abbreviation together with the words it stands for."
 
 [prop.title]
 type = "text"
 attribute = "title"
-doc = "The expansion. Required — an abbr without one is just small text."
+doc = "The words the abbreviation stands for, written into the `title` attribute. Always supply it, because an abbreviation with no expansion is only small text."
 
 [prop.children]
 type = "children"
-doc = "The abbreviation."
+doc = "The abbreviation, as it appears in the sentence."
 
 [a11y]
 needs_name = true
-notes = """
-`title` is invisible on touch, where there is no hover. The expansion is
-therefore also available in the text on first use; the attribute is a
-convenience for pointer users, never the only route to the meaning."""
+notes = "`title` is not shown on a touch screen, where there is no hover. Spell the expansion out in the text on first use. The attribute helps pointer users and is never the only route to the meaning."
