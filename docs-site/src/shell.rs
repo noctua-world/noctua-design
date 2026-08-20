@@ -124,7 +124,12 @@ pub(crate) fn Header(context: Context) -> Element {
                         variant: ButtonVariant::Transparent,
                         tone: ButtonTone::Neutral,
                         hide_label: true,
-                        icon: IconName::Code,
+                        // The atom is React's own mark and the helix is
+                        // Dioxus's. The glyph is what pressing it does, so it
+                        // shows the half a reader would move to — see the
+                        // frame's own switch in `pages.rs`.
+                        icon: IconName::Atom,
+                        icon_alt: IconName::Dna,
                         label: context.t(Key::ExampleImplPageReact),
                         label_alt: context.t(Key::ExampleImplPageDioxus),
                         // Server-rendered as not pressed, and that is honest

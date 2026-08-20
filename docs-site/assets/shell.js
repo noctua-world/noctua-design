@@ -3921,135 +3921,13 @@ function themeScope(element, name, value) {
 // into nested frames with `region.contains`, which is the containment mistake
 // `own` exists to prevent.
 
-// --- The React path, fetched on demand -------------------------------------
-
-// The bundle is 190 KB. It is not requested on a page view, and it IS requested
-// the first time a reader switches an example to React — which is the whole
-// point of a lazy path: the cost lands on the person who asked for it.
+// --- The React path ---------------------------------------------------------
 //
-// `import()` rather than a <script> tag, so the browser deduplicates the fetch,
-// the module gets its own scope, and a failure is a rejected promise this file
-// can report rather than a silent no-op.
-let reactModule = null;
-
-async function loadReact() {
-  if (reactModule === null) {
-    reactModule = import("./example-react.js");
-  }
-  return reactModule;
-}
-
-/**
- * Reads a scope element's attributes back into the request that built it.
- *
- * Generated, not listed: a second hand-written copy of the scopable settings is
- * a copy that stops agreeing. It already would have — a frame themed with a
- * setting this list did not name would hand React a different request than
- * Dioxus rendered, on the one page that exists to demonstrate the two agree.
- */
-function requestFrom(element) {
-  const request = {};
-  for (const name of readableSettings) {
-    const value = element.getAttribute(model[name].attribute);
-    if (value != null) request[name] = value;
-  }
-  return request;
-}
-
-/**
- * The example's own scope inside a frame — never the frame's.
- *
- * The stage itself can carry the scope attribute now, because that is how the
- * appearance toggle isolates the frame. A bare `stage.querySelector` would
- * find the stage first and mount React over the whole set of examples.
- */
-function exampleScope(stage) {
-  // The example that CAN be mounted says so, and the frame may hold several.
-  // A bare `stage.querySelector` would find the frame's own scope first — that
-  // is how the appearance toggle works — and, failing that, whichever example
-  // happened to come first in the page.
-  const mountable = stage.querySelector("[data-nd-mountable]");
-  return mountable?.querySelector(`[${scopeAttribute}]`) ?? undefined;
-}
-
-async function showReact(frame, button) {
-  const stage = ownStage(frame);
-  const original = stage && exampleScope(stage);
-  if (!original) return;
-
-  const label = button.textContent;
-  button.textContent = frame.dataset.ndLoading ?? label;
-  let module;
-  try {
-    module = await loadReact();
-  } catch (error) {
-    // A failed lazy import must not leave a dead button. Put the label back and
-    // let the reader stay on the implementation that is already working.
-    button.textContent = label;
-    console.error("[noctua] the React example failed to load", error);
-    return;
-  }
-  button.textContent = label;
-
-  const request = requestFrom(original);
-  const text = {
-    heading: original.querySelector(".nd-sample-heading")?.textContent ?? "",
-    body: original.querySelector(".nd-prose")?.firstChild?.textContent ?? "",
-    link: original.querySelector(".nd-link")?.textContent ?? "",
-    // The two sample actions, told apart by their variant rather than by a
-    // modifier class. `.nd-button--quiet` is gone: quiet is a value of `variant`
-    // now, which is the whole point of `Button` being a component.
-    action:
-      original.querySelector('.nd-button[data-nd-variant="solid"]')?.textContent ?? "",
-    quiet:
-      original.querySelector('.nd-button[data-nd-variant="outline"]')?.textContent ?? "",
-  };
-
-  let slot = own(frame, "[data-nd-react-slot]")[0];
-  if (!slot) {
-    slot = document.createElement("div");
-    slot.dataset.ndReactSlot = "";
-    // Beside the element it replaces, so the React mount lands under the same
-    // caption the Dioxus one had rather than at the end of the frame. The
-    // frame holds every example on the page now; appending to it would put the
-    // React half below all of them.
-    (original.parentElement ?? stage).appendChild(slot);
-  }
-  original.hidden = true;
-  slot.hidden = false;
-  module.mount(slot, request, text);
-}
-
-function showDioxus(frame) {
-  const stage = ownStage(frame);
-  const original = stage && exampleScope(stage);
-  const slot = own(frame, "[data-nd-react-slot]")[0];
-  if (original) original.hidden = false;
-  if (slot) {
-    slot.hidden = true;
-    // Unmounted rather than merely hidden: a live React root behind a hidden
-    // div keeps its state and its effects, and the next switch would show a
-    // component that had been running the whole time.
-    reactModule?.then((module) => module.unmount(slot)).catch(() => {});
-  }
-}
-
-document.addEventListener("click", (event) => {
-  const button = event.target.closest?.('[data-nd-group="frame-impl"] [data-nd-value]');
-  if (!button) return;
-  const frame = button.closest("[data-nd-frame]");
-  const language = button.dataset.ndValue;
-
-  for (const source of own(frame, "[data-nd-impl-source]")) {
-    source.hidden = source.dataset.ndImplSource !== language;
-  }
-
-  if (language === "React") {
-    void showReact(frame, button);
-  } else {
-    showDioxus(frame);
-  }
-});
+// It moved to `implementation.js`. What was here mounted ONE example, from a
+// hand-written mirror of it, and called `mount(slot, request, text)` with the
+// theme scraped off the rendered DOM and five strings scraped out by CSS
+// selector. Every example is data now, so there is nothing to scrape and
+// nothing to mirror.
 
 // --- The example frame -----------------------------------------------------
 
@@ -4366,18 +4244,9 @@ document.addEventListener("click", (event) => {
     if (element.closest("[data-nd-frame]") !== frame) continue;
     requests.set(element, { ...(initial.get(element) ?? {}) });
   }
-  showDioxus(frame);
-  for (const impl of own(frame, '[data-nd-group="frame-impl"] [data-nd-value]')) {
-    impl.setAttribute("aria-checked", String(impl.dataset.ndValue === "Dioxus"));
-  }
-  // AND THE CAPTION GOES BACK TOO.
-  //
-  // The reset restored the render and the radio and left the `<figcaption>`
-  // showing the React source under a Dioxus example, because this was the only
-  // place `[data-nd-impl-source]` was never touched.
-  for (const source of own(frame, "[data-nd-impl-source]")) {
-    source.hidden = source.dataset.ndImplSource !== "Dioxus";
-  }
+  // THE IMPLEMENTATION GOES BACK TOO, and `implementation.js` does it — it
+  // owns the mount, the caption and the frame's own answer, and doing half of
+  // it here would be the second copy that stops agreeing.
   resolveScopes();
   refresh();
 });

@@ -96,10 +96,24 @@ source = "lucide"
 file = "copy.svg"
 doc = "Copies a code block to the clipboard."
 
-[icon.code]
+# THE TWO IMPLEMENTATIONS, EACH DRAWN AS ITSELF.
+#
+# A toggle shows what pressing it does, not what it is showing — so the control
+# carries the mark of the half a reader would move TO. React's is the atom it
+# has used since it was released; Dioxus's is the double helix in its own.
+#
+# Neither is a logo. Both are the plain lucide glyph at this system's stroke
+# weight, in `currentColor` like every other icon here, so they sit in a row
+# with the rest rather than as two pieces of somebody's branding.
+[icon.atom]
 source = "lucide"
-file = "code.svg"
-doc = "Switches the examples between the two implementations this system ships."
+file = "atom.svg"
+doc = "Moves an example to the React implementation."
+
+[icon.dna]
+source = "lucide"
+file = "dna.svg"
+doc = "Moves an example back to the Dioxus implementation."
 
 [icon.download]
 source = "lucide"

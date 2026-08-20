@@ -150,13 +150,34 @@ function caption(frame, language) {
   }
 }
 
-/// Marks a frame's own control, and the page's.
+/// Marks a frame's own control.
 function mark(frame, language) {
-  for (const stop of frame.querySelectorAll('[data-nd-group="frame-impl"] [data-nd-value]')) {
-    if (stop.closest("[data-nd-frame]") !== frame) continue;
-    const on = stop.dataset.ndValue.toLowerCase() === language;
-    stop.setAttribute("aria-checked", String(on));
-    stop.tabIndex = on ? 0 : -1;
+  for (const toggle of frame.querySelectorAll('[data-nd-action="frame-impl"]')) {
+    if (toggle.closest("[data-nd-frame]") !== frame) continue;
+    say(toggle, language === "react");
+  }
+}
+
+/// A toggle's state and its name, which change together.
+///
+/// `Button` writes the unpressed name into `aria-label` and the pressed one
+/// into `data-nd-label-alt`. Without swapping them a toggle keeps one name and
+/// announces the wrong state from the first press onward, which is the defect
+/// `label_alt` exists for.
+///
+/// The unpressed name is kept on first use rather than read from a second
+/// attribute: the markup already carries it, and a second copy is a second
+/// thing to keep in step.
+const named = new WeakMap();
+
+function say(toggle, on) {
+  if (!named.has(toggle)) named.set(toggle, toggle.getAttribute("aria-label") ?? "");
+  if (on) toggle.setAttribute("aria-pressed", "true");
+  else toggle.removeAttribute("aria-pressed");
+  const name = on ? toggle.dataset.ndLabelAlt : named.get(toggle);
+  if (name) {
+    toggle.setAttribute("aria-label", name);
+    toggle.setAttribute("title", name);
   }
 }
 
@@ -215,18 +236,49 @@ function queue(frame) {
 
 async function attempt(frame) {
   if (refused) return;
-  const control = frame.querySelector('[data-nd-group="frame-impl"] [data-nd-value="React"]');
-  const said = control?.textContent;
-  if (control && frame.dataset.ndLoading) control.textContent = frame.dataset.ndLoading;
+  // BUSY IS AN ATTRIBUTE, NOT A REPLACEMENT FOR THE CONTROL'S CONTENT.
+  //
+  // This wrote the loading message into `textContent`, which was harmless while
+  // the control was a stop with a word in it. On an icon it **destroyed both
+  // SVG glyphs**, and restoring the text afterwards put back a text node where
+  // two drawings had been: a pressed button with nothing in it.
+  //
+  // `aria-busy` says the same thing without touching the tree, and the message
+  // goes where an icon-only control keeps its words — its accessible name.
+  const control = frame.querySelector('[data-nd-action="frame-impl"]');
+  const said = control?.getAttribute("aria-label");
+  if (control) {
+    control.setAttribute("aria-busy", "true");
+    if (frame.dataset.ndLoading) {
+      control.setAttribute("aria-label", frame.dataset.ndLoading);
+      control.setAttribute("title", frame.dataset.ndLoading);
+    }
+  }
   try {
     await draw(frame);
-    // Only now. A preference written on the press would follow a reader whose
-    // bundle 404s once onto every page they visit afterwards, and fail on each.
-    remember("react");
+    // Only now, and only for a page-wide press. Two rules, both learned:
+    //
+    // A preference written on the press, before anything committed, would
+    // follow a reader whose bundle 404s once onto every page afterwards and
+    // fail on each.
+    //
+    // And a preference written by a SINGLE frame's press is not a preference.
+    // It made this frame's own Reset re-draw it in React instead of putting it
+    // back, because the page's answer had quietly become React underneath.
+    if (!chosen.has(frame)) remember("react");
   } catch (error) {
     refuse(error);
   } finally {
-    if (control && said !== undefined) control.textContent = said;
+    if (control) {
+      control.removeAttribute("aria-busy");
+      // `say` puts the right one of the two names back, so this only has to
+      // undo the loading message where the state did not change.
+      if (said) {
+        control.setAttribute("aria-label", said);
+        control.setAttribute("title", said);
+      }
+      mark(frame, wanted(frame));
+    }
   }
 }
 
@@ -240,8 +292,9 @@ function refuse(error) {
   refused = true;
   console.error("[noctua] the React examples could not be loaded", error);
   for (const frame of document.querySelectorAll("[data-nd-frame]")) undraw(frame);
-  for (const stop of document.querySelectorAll('[data-nd-group="frame-impl"] [data-nd-value="React"]')) {
-    stop.setAttribute("aria-disabled", "true");
+  for (const toggle of document.querySelectorAll('[data-nd-action="frame-impl"]')) {
+    toggle.setAttribute("aria-disabled", "true");
+    toggle.removeAttribute("aria-pressed");
   }
   const toggle = document.querySelector('[data-nd-action="impl"]');
   if (toggle) {
@@ -266,17 +319,10 @@ export function choose(language) {
   pressed(going === "react");
 }
 
-/// The page control's own state, said the way a toggle says it.
+/// The page control's own state, said the same way.
 function pressed(on) {
   const toggle = document.querySelector('[data-nd-action="impl"]');
-  if (!toggle) return;
-  if (on) toggle.setAttribute("aria-pressed", "true");
-  else toggle.removeAttribute("aria-pressed");
-  const name = on ? toggle.dataset.ndLabelAlt : toggle.dataset.ndLabel;
-  if (name) {
-    toggle.setAttribute("aria-label", name);
-    toggle.setAttribute("title", name);
-  }
+  if (toggle) say(toggle, on);
 }
 
 /// Frames near enough to be worth drawing.
@@ -321,10 +367,24 @@ export function install(hooks) {
       return;
     }
 
-    const stop = event.target.closest?.('[data-nd-group="frame-impl"] [data-nd-value]');
+    // Reset undoes this frame's own answer too, and hands it back to the
+    // page's. A frame that stayed in React after a reset would be a frame the
+    // reset button had lied about.
+    const reset = event.target.closest?.('[data-nd-action="frame-reset"]');
+    if (reset) {
+      const frame = reset.closest("[data-nd-frame]");
+      if (frame) {
+        chosen.delete(frame);
+        if (preference() === "react") queue(frame);
+        else undraw(frame);
+      }
+      return;
+    }
+
+    const stop = event.target.closest?.('[data-nd-action="frame-impl"]');
     if (!stop || stop.getAttribute("aria-disabled") === "true") return;
     const frame = stop.closest("[data-nd-frame]");
-    const language = stop.dataset.ndValue.toLowerCase();
+    const language = stop.getAttribute("aria-pressed") === "true" ? "dioxus" : "react";
     chosen.set(frame, language);
     if (language === "react") queue(frame);
     else undraw(frame);

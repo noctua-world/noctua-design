@@ -325,8 +325,15 @@ test("reset puts the width, the appearance and the source back", async ({ page }
 
   await setFrameWidth(page, "320");
   await page.locator('[data-nd-action="frame-mode"]').first().click();
-  await page.locator('[data-nd-group="frame-impl"] [data-nd-value="React"]').first().click();
-  await expect(page.locator('[data-nd-impl-source="React"]')).toBeVisible();
+  // The implementation switch is a toggle now, not a two-stop strip: a rail is
+  // a column, and a control with two rows in it cost 36px on every frame.
+  await page.locator('[data-nd-action="frame-impl"]').first().click();
+  await page.waitForFunction(
+    () => document.querySelector("[data-nd-example]")?.dataset.ndShowing === "react",
+    null,
+    { timeout: 20000 },
+  );
+  await expect(page.locator('[data-nd-impl-source="React"]').first()).toBeVisible();
 
   await page.locator('[data-nd-action="frame-reset"]').first().click();
   await page.waitForTimeout(300);
@@ -338,8 +345,10 @@ test("reset puts the width, the appearance and the source back", async ({ page }
   );
   // THE SOURCE, which reset never used to restore — so a reader who switched
   // to React and pressed Reset was reading React source under a Dioxus render.
-  await expect(page.locator('[data-nd-impl-source="Dioxus"]')).toBeVisible();
-  await expect(page.locator('[data-nd-impl-source="React"]')).toBeHidden();
+  await expect(page.locator('[data-nd-impl-source="Dioxus"]').first()).toBeVisible();
+  await expect(page.locator('[data-nd-impl-source="React"]').first()).toBeHidden();
+  // And the render came back with it, not only the caption.
+  await expect(page.locator('[data-nd-example][data-nd-showing="react"]')).toHaveCount(0);
 });
 
 test("reset returns an authored scope to what it was authored with", async ({ page }) => {
@@ -570,7 +579,19 @@ test("the bar's controls are in the order the reader meets them", async ({ page 
   // Width first, because it is the control a reader reaches for most. Then the
   // rig before the appearance toggle: turning the test on is the bigger move,
   // and the toggle is what a reader reaches for while it runs.
-  expect(order).toEqual(["width", "theme", "frame-glass", "frame-mode", "frame-reset"]);
+  //
+  // The implementation switch joins the rigs rather than leading the rail.
+  // Width and theme are about how THIS example is shown; glass, appearance and
+  // implementation each swap what is shown for something else; reset undoes all
+  // of it and stays last.
+  expect(order).toEqual([
+    "width",
+    "theme",
+    "frame-glass",
+    "frame-mode",
+    "frame-impl",
+    "frame-reset",
+  ]);
 });
 
 test("a floating panel stays inside the window, and flips when it must", async ({ page }) => {

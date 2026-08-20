@@ -229,6 +229,8 @@ dir = "ltr"
 # Um botão de alternância e não uma faixa de duas opções: o cabeçalho cabe em
 # uma linha a 320 px e já carrega três controles, então o quarto precisa ser um
 # ícone como os outros.
+"example.impl.frame-react" = "Mostrar este exemplo em React"
+"example.impl.frame-dioxus" = "Mostrar este exemplo em Dioxus"
 "example.impl.page-react" = "Mostrar todos os exemplos em React"
 "example.impl.page-dioxus" = "Mostrar todos os exemplos em Dioxus"
 "example.impl.failed" = "Não foi possível carregar os exemplos em React. Tudo aqui continua sendo a versão Dioxus."

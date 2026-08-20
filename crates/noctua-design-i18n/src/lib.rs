@@ -464,6 +464,10 @@ pub enum Key {
     ExampleImplReact,
     /// `example.impl.loading`
     ExampleImplLoading,
+    /// `example.impl.frame-react`
+    ExampleImplFrameReact,
+    /// `example.impl.frame-dioxus`
+    ExampleImplFrameDioxus,
     /// `example.impl.page-react`
     ExampleImplPageReact,
     /// `example.impl.page-dioxus`
@@ -5636,7 +5640,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2756] = [
+    pub const ALL: [Self; 2758] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -5809,6 +5813,8 @@ impl Key {
         Self::ExampleImplDioxus,
         Self::ExampleImplReact,
         Self::ExampleImplLoading,
+        Self::ExampleImplFrameReact,
+        Self::ExampleImplFrameDioxus,
         Self::ExampleImplPageReact,
         Self::ExampleImplPageDioxus,
         Self::ExampleImplFailed,
@@ -8571,6 +8577,8 @@ impl Key {
             Self::ExampleImplDioxus => "example.impl.dioxus",
             Self::ExampleImplReact => "example.impl.react",
             Self::ExampleImplLoading => "example.impl.loading",
+            Self::ExampleImplFrameReact => "example.impl.frame-react",
+            Self::ExampleImplFrameDioxus => "example.impl.frame-dioxus",
             Self::ExampleImplPageReact => "example.impl.page-react",
             Self::ExampleImplPageDioxus => "example.impl.page-dioxus",
             Self::ExampleImplFailed => "example.impl.failed",
@@ -11849,6 +11857,8 @@ impl Locale {
                 Key::ExampleImplDioxus => "Dioxus",
                 Key::ExampleImplReact => "React",
                 Key::ExampleImplLoading => "Loading the React example…",
+                Key::ExampleImplFrameReact => "Show this example in React",
+                Key::ExampleImplFrameDioxus => "Show this example in Dioxus",
                 Key::ExampleImplPageReact => "Show every example in React",
                 Key::ExampleImplPageDioxus => "Show every example in Dioxus",
                 Key::ExampleImplFailed => {
@@ -18071,6 +18081,8 @@ impl Locale {
                 Key::ExampleImplDioxus => "Dioxus",
                 Key::ExampleImplReact => "React",
                 Key::ExampleImplLoading => "Carregando o exemplo em React…",
+                Key::ExampleImplFrameReact => "Mostrar este exemplo em React",
+                Key::ExampleImplFrameDioxus => "Mostrar este exemplo em Dioxus",
                 Key::ExampleImplPageReact => "Mostrar todos os exemplos em React",
                 Key::ExampleImplPageDioxus => "Mostrar todos os exemplos em Dioxus",
                 Key::ExampleImplFailed => {
@@ -24347,6 +24359,8 @@ impl Locale {
                 Key::ExampleImplDioxus => "⟦Diiooxuus⟧",
                 Key::ExampleImplReact => "⟦Reeaact⟧",
                 Key::ExampleImplLoading => "⟦Looaadiing thee Reeaact eexaamplee…⟧",
+                Key::ExampleImplFrameReact => "⟦Shoow thiis eexaamplee iin Reeaact⟧",
+                Key::ExampleImplFrameDioxus => "⟦Shoow thiis eexaamplee iin Diiooxuus⟧",
                 Key::ExampleImplPageReact => "⟦Shoow eeveery eexaamplee iin Reeaact⟧",
                 Key::ExampleImplPageDioxus => "⟦Shoow eeveery eexaamplee iin Diiooxuus⟧",
                 Key::ExampleImplFailed => {

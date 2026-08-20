@@ -60,6 +60,18 @@ pub(crate) fn json(locale: Locale) -> String {
         }
     }
 
+    // The `ThemeScope` demonstration, which is not one of the 499.
+    entry(
+        &mut out,
+        &mut first,
+        "scope-0",
+        crate::trees::SCOPE,
+        Context {
+            locale,
+            page: crate::site::THEME_SCOPE,
+        },
+    );
+
     for component in COMPONENTS {
         let context = Context {
             locale,

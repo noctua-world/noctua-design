@@ -12,8 +12,8 @@ use noctua_design::components::{
     Code, CodeBlock, CodeTone, Del, Disclosure, DisclosureHeading, Em, Heading, HeadingLevel,
     HeadingSize, Ins, Kbd, Label, LabelKind, LabelSize, Link, List, ListItem, ListKind, ListMarker,
     ListSpacing, Mark, Menu, MenuItem, Paragraph, ParagraphSize, ParagraphTone, Prose, Segmented,
-    SegmentedItem, SegmentedOrientation, SegmentedSize, Strong, Table, TableCell, TableCellAlign,
-    TableColumn, TableColumnWidth, TableHeaderCell, TableHeaderCellAlign, TableHeaderCellScope,
+    SegmentedItem, SegmentedSize, Strong, Table, TableCell, TableCellAlign, TableColumn,
+    TableColumnWidth, TableHeaderCell, TableHeaderCellAlign, TableHeaderCellScope,
     TableHeaderCellWrap, TableRow, TableSection, TableSectionKind, Text, TextSize, TextTone,
     TextWeight, Time, Toolbar, ToolbarDensity, Truncate, TruncateLines,
 };
@@ -349,10 +349,6 @@ fn ExampleFrame(
     mountable: bool,
     children: Element,
 ) -> Element {
-    let implementations = [
-        ("Dioxus", Key::ExampleImplDioxus),
-        ("React", Key::ExampleImplReact),
-    ];
     rsx! {
         figure {
             class: "nd-frame",
@@ -410,21 +406,6 @@ fn ExampleFrame(
                 // is the narrow one and the attribute is already right.
                 density: ToolbarDensity::Compact,
                 label: context.t(label),
-                if mountable {
-                    Segmented {
-                        name: "frame-impl",
-                        orientation: SegmentedOrientation::Vertical,
-                        size: SegmentedSize::Small,
-                        label: context.t(Key::ExampleImplLabel),
-                        for (value, text) in implementations {
-                            SegmentedItem {
-                                value,
-                                label: context.t(text),
-                                selected: value == "Dioxus",
-                            }
-                        }
-                    }
-                }
                 // THE WIDTH, AS ONE CONTROL THAT OPENS THE LIST.
                 //
                 // It was five stops side by side, which is the better shape and
@@ -532,6 +513,44 @@ fn ExampleFrame(
                 // `rotate-ccw` was vendored for it: an arrow that comes back
                 // round to where it started, which is the gesture, and which no
                 // other icon in the set is already using.
+                if mountable {
+                    // AN ICON, NOT A TWO-STOP STRIP.
+                    //
+                    // It was a `Segmented` with `Dioxus` and `React` in it, and
+                    // measured on the built page that cost **70px of height on
+                    // every frame** — 260 against a median of 189. The rail
+                    // exists precisely so the controls spend the width no frame
+                    // was using rather than the height every frame is short of,
+                    // and a two-row control in it spends the wrong one.
+                    //
+                    // A toggle carries both names and `aria-pressed` says which
+                    // is showing, which is what the four buttons under it
+                    // already do and what the page-wide control in the header
+                    // does.
+                    Button {
+                        class: "nd-frame-impl",
+                        action: "frame-impl",
+                        variant: ButtonVariant::Transparent,
+                        tone: ButtonTone::Neutral,
+                        size: ButtonSize::Small,
+                        hide_label: true,
+                        // THE GLYPH IS THE DESTINATION, NOT THE STATE.
+                        //
+                        // A toggle that drew what it is showing would ask the
+                        // reader to work out what pressing it does. `Button`
+                        // ships both glyphs and lets the state pick one, so the
+                        // control reads as "go to React" and then "come back to
+                        // Dioxus" with no script involved.
+                        //
+                        // `frame-mode` beside it is the same shape, with a moon
+                        // and a sun.
+                        icon: IconName::Atom,
+                        icon_alt: IconName::Dna,
+                        label: context.t(Key::ExampleImplFrameReact),
+                        label_alt: context.t(Key::ExampleImplFrameDioxus),
+                        pressed: false,
+                    }
+                }
                 Button {
                     action: "frame-reset",
                     variant: ButtonVariant::Transparent,
@@ -601,7 +620,7 @@ fn framed(
                 react: switchable
                     .then(|| crate::serialise::jsx(nodes, subject, context))
                     .flatten(),
-                {crate::trees::draw(example, nodes, context)}
+                {crate::trees::draw(nodes, context)}
             }
         }
     }
@@ -873,21 +892,15 @@ fn ThemeScopePage(context: Context) -> Element {
             label: Key::ScopePageTitle,
             // The one hand-written switch left. `ThemeScope` comes from
             // `spec/theme.toml`, so it has no tree and no derived caption.
-            // NO SWITCH HERE ANY MORE, AND THAT IS A LOSS WORTH NAMING.
+            // THE ONE FRAME THAT MOUNTED REACT, AND NOW ONE OF 596.
             //
-            // This frame was the one place on the site that mounted React, and
-            // it did it from a hand-written mirror of one example. Every
-            // example is data now and every frame can mount, so the claim this
-            // frame existed to demonstrate is demonstrated 596 times instead of
-            // once — but `ThemeScope` comes from `spec/theme.toml` rather than
-            // from `spec/components/`, so the generated interpreter has no arm
-            // for it and this example has no tree.
-            //
-            // The consequence, said plainly: the React `ThemeScope` is now
-            // rendered nowhere, which is the exact condition that let six other
-            // React modules rot. It needs an arm in the interpreter and a tree
-            // of its own, and until then it is on the list.
-            mountable: false,
+            // `ThemeScope` comes from `spec/theme.toml` rather than
+            // `spec/components/`, so the generated interpreter has no arm for
+            // it and `tree::theme_scope` is written by hand. Without that this
+            // frame lost its switch, and the React `ThemeScope` was rendered
+            // nowhere — the exact condition that let six other React modules
+            // ship broken under a green suite.
+            mountable: crate::react_available(),
             Example {
                 context,
                 title: Key::ScopeComponentTitle,
@@ -930,14 +943,9 @@ fn ThemeScopePage(context: Context) -> Element {
             Example {
                 context,
                 source: DIOXUS_SOURCE,
-                ThemeScope {
-                    class: "nd-scope",
-                    palette: Palette::AzureVivid,
-                    mode: Mode::Light,
-                    glass: Glass::Full,
-                    radius: Radius::Round,
-                    Sample { context }
-                }
+                tree: crate::react_available().then(|| "scope-0".to_owned()),
+                react: crate::serialise::jsx(crate::trees::SCOPE, "ThemeScope", context),
+                {crate::tree::render(crate::trees::SCOPE, crate::tree::Scope::new(context))}
             }
         }
 

@@ -32,7 +32,8 @@ Only icons the interface actually uses are here. `NOCTUA.md §9.5`: *"an unused 
 | `external-link` | `lucide` | Marks a link that leaves the site. Replaces a bare `↗` character, which is text pretending to be an icon. |
 | `chevron-down` | `lucide` | The disclosure marker on a `<details>` summary. |
 | `copy` | `lucide` | Copies a code block to the clipboard. |
-| `code` | `lucide` | Switches the examples between the two implementations this system ships. |
+| `atom` | `lucide` | Moves an example to the React implementation. |
+| `dna` | `lucide` | Moves an example back to the Dioxus implementation. |
 | `download` | `lucide` | Opens the menu that takes a table away as a file. |
 | `info` | `lucide` | Opens the note explaining what a heading or a value means. |
 | `columns` | `lucide` | Opens the list of a table's columns, where a reader chooses which are shown. |

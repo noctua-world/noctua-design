@@ -78,6 +78,7 @@ mod progress;
 mod prose;
 mod radio;
 mod rating;
+mod scope;
 mod search;
 mod search_group;
 mod search_result;
@@ -241,6 +242,12 @@ pub(crate) fn for_page(slug: &str) -> Option<Hero> {
         .copied()
 }
 
+/// The `ThemeScope` demonstration on `/theme-scope/`.
+///
+/// Not an example out of `examples.rs`, so it is reached by name rather than
+/// by index. See `crate::trees::scope`.
+pub(crate) const SCOPE: &[Node] = scope::SAMPLE;
+
 /// The tree for one component example, or an empty slice if none is written.
 #[must_use]
 pub(crate) fn nodes(component: &str, index: usize) -> &'static [Node] {
@@ -250,130 +257,8 @@ pub(crate) fn nodes(component: &str, index: usize) -> &'static [Node] {
 }
 
 /// Draws an example.
-///
-/// From its tree where one is written, and from its closure where none is yet.
-/// **The tree is what ships**: an example drawn from its closure on the page
-/// and from its tree in the React panel would be two examples, and the reader
-/// would be comparing the wrong things. So the migration moves the page over
-/// one example at a time, and `every_tree_draws_what_its_closure_drew` is what
-/// says the page did not change when it did.
-pub(crate) fn draw(
-    example: &crate::examples::Example,
-    nodes: &'static [Node],
-    context: Context,
-) -> Element {
-    if nodes.is_empty() {
-        (example.render)(context)
-    } else {
-        crate::tree::render(nodes, Scope::new(context))
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use noctua_design_i18n::Locale;
-
-    use super::*;
-    use crate::generated::catalogue::COMPONENTS;
-    use crate::shell::Context;
-    use crate::site::Page;
-    use crate::tree::Scope;
-
-    /// The page a component is documented on.
-    ///
-    /// Most have one of their own; the rest are parts of a collection, and a
-    /// tree on a collection page has to be rendered with that page's context
-    /// because an example may name a page title in the reader's language.
-    fn page_for(component: &str, slug: &str, collection: Option<&str>) -> Page {
-        crate::site::by_slug(collection.unwrap_or(slug))
-            .unwrap_or_else(|| panic!("{component} is documented on no page"))
-    }
-
-    /// THE NET UNDER THE WHOLE MIGRATION.
-    ///
-    /// 499 examples had to be transcribed from a closure into data, and a
-    /// transcription is the kind of work that goes wrong quietly: a prop
-    /// dropped, a child in the wrong order, an enum value spelled the way the
-    /// caption spells it rather than the way the DOM does. None of that shows
-    /// up as a compile error, and most of it does not show up on a screenshot.
-    ///
-    /// So both halves are rendered and compared **byte for byte**, in every
-    /// locale — because a message key transcribed as the wrong key is identical
-    /// in English often enough to matter, and never in Portuguese.
-    ///
-    /// A tree that has not been written yet is empty and skipped. That is what
-    /// let the migration land one component at a time with the suite green
-    /// throughout; `every_example_has_a_tree` is what closes it at the end.
-    #[test]
-    fn every_tree_draws_what_its_closure_drew() {
-        let mut checked = 0usize;
-        for component in COMPONENTS {
-            let page = page_for(component.name, component.slug, component.page);
-            let examples = crate::examples::for_component(component.name);
-            let trees = for_component(component.name);
-            assert!(
-                trees.len() <= examples.len(),
-                "{} has {} trees and only {} examples",
-                component.name,
-                trees.len(),
-                examples.len()
-            );
-
-            for (index, (caption, nodes)) in trees.iter().enumerate() {
-                if nodes.is_empty() {
-                    continue;
-                }
-                let example = examples[index];
-                assert_eq!(
-                    example.source, *caption,
-                    "{} tree {index} carries a caption its example does not",
-                    component.name
-                );
-                for locale in Locale::ALL {
-                    let context = Context { locale, page };
-                    assert_eq!(
-                        dioxus_ssr::render_element((example.render)(context)),
-                        dioxus_ssr::render_element(crate::tree::render(nodes, Scope::new(context))),
-                        "{} example {index} draws differently from its tree in {}",
-                        component.name,
-                        locale.tag()
-                    );
-                    checked += 1;
-                }
-            }
-        }
-
-        for page in crate::site::pages() {
-            let (Some(example), Some((_, caption, nodes))) = (
-                crate::examples::overview_for_page(page.slug),
-                for_page(page.slug),
-            ) else {
-                continue;
-            };
-            assert_eq!(
-                example.source, caption,
-                "the hero tree for {} carries a caption its example does not",
-                page.slug
-            );
-            for locale in Locale::ALL {
-                let context = Context { locale, page };
-                assert_eq!(
-                    dioxus_ssr::render_element((example.render)(context)),
-                    dioxus_ssr::render_element(crate::tree::render(nodes, Scope::new(context))),
-                    "the hero on {} draws differently from its tree in {}",
-                    page.slug,
-                    locale.tag()
-                );
-                checked += 1;
-            }
-        }
-
-        // A comparison that compared nothing would pass on every example, for
-        // ever, and report a property it never checked. This is the floor that
-        // says so — it rises as the migration lands and is asserted against the
-        // full count once every tree is written.
-        println!("compared {checked} renderings");
-    }
+pub(crate) fn draw(nodes: &'static [Node], context: Context) -> Element {
+    crate::tree::render(nodes, Scope::new(context))
 }
 
 #[cfg(test)]
@@ -513,6 +398,69 @@ mod structure {
                         "a tree sets the bool `{name}.{prop}` to {value:?}"
                     );
                 }
+            }
+        }
+    }
+
+    /// An icon a tree names must be one the system draws.
+    ///
+    /// It replaces a test that read `examples.rs` as text looking for
+    /// `icon: "…"`. That worked while the examples were closures; with the
+    /// closures gone it would have scanned a file with no icon in it and
+    /// passed for ever, which is the vacuous-assertion shape this suite keeps
+    /// finding. A tree walk cannot go quiet that way.
+    #[test]
+    fn every_icon_a_tree_names_exists() {
+        let mut checked = 0usize;
+        for node in everything() {
+            let Node::Component { props, .. } = node else {
+                continue;
+            };
+            for (prop, value) in *props {
+                if !prop.contains("icon") {
+                    continue;
+                }
+                let Value::Text(name) = value else { continue };
+                assert!(
+                    noctua_design::IconName::parse(name).is_some(),
+                    "a tree names the icon `{name}`, which does not exist"
+                );
+                checked += 1;
+            }
+        }
+        assert!(checked > 20, "only {checked} icons were checked");
+    }
+
+    /// A tone a tree names must be one the palette declares.
+    ///
+    /// Only where `tone` is a **text** prop, which is the free-form kind that
+    /// takes any colour family the system has. Where it is an enum the contract
+    /// names its values, `inherit` among them, and
+    /// `every_enum_value_a_tree_sets_is_declared` already holds it — asking the
+    /// palette about `inherit` is asking the wrong question.
+    #[test]
+    fn every_tone_a_tree_names_is_one_the_palette_declares() {
+        for node in everything() {
+            let Node::Component { name, props, .. } = node else {
+                continue;
+            };
+            let Some(entry) = COMPONENTS.iter().find(|entry| entry.name == *name) else {
+                continue;
+            };
+            for (prop, value) in *props {
+                if *prop != "tone"
+                    || !entry
+                        .props
+                        .iter()
+                        .any(|declared| declared.name == "tone" && declared.kind == "text")
+                {
+                    continue;
+                }
+                let Value::Text(name) = value else { continue };
+                assert!(
+                    noctua_design::tones::known(name),
+                    "a tree names the tone `{name}`, which the palette does not declare"
+                );
             }
         }
     }

@@ -30,6 +30,7 @@
 
 use dioxus::prelude::*;
 use noctua_design::IconName;
+use noctua_design::ThemeScope;
 use noctua_design_grammars::Language;
 use noctua_design_i18n::Key;
 
@@ -345,6 +346,11 @@ fn one(node: &'static Node, scope: Scope) -> Element {
             name,
             props,
             children,
+        } if *name == "ThemeScope" => theme_scope(props, children, scope),
+        Node::Component {
+            name,
+            props,
+            children,
         } => crate::generated::interpreter::component(name, props, children, scope),
         Node::Element {
             tag,
@@ -368,6 +374,41 @@ fn one(node: &'static Node, scope: Scope) -> Element {
         // `element` below lifts it onto its parent, and a gate refuses it
         // anywhere else.
         Node::Raw(_) => rsx! {},
+    }
+}
+
+/// `ThemeScope`, which the generated interpreter cannot carry.
+///
+/// It is the one component a tree can name that is not in
+/// `spec/components/`: it comes from `spec/theme.toml`, which describes the
+/// settings a scope can ask for rather than a component's props. So the arm is
+/// written here, once, beside the shapes it uses.
+///
+/// Leaving it out is what took the React `ThemeScope` off the site entirely for
+/// a few hours, which is the condition that let six other React modules rot.
+fn theme_scope(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    use noctua_design::model::{
+        Accent, Backdrop, Font, Glass, Grain, Mode, Palette, Pattern, Radius, Saturation,
+    };
+    rsx! {
+        ThemeScope {
+            mode: scope.pick(props, "mode", &Mode::ALL, Mode::as_str),
+            accent: scope.pick(props, "accent", &Accent::ALL, Accent::as_str),
+            saturation: scope.pick(props, "saturation", &Saturation::ALL, Saturation::as_str),
+            palette: scope.pick(props, "palette", &Palette::ALL, Palette::as_str),
+            font: scope.pick(props, "font", &Font::ALL, Font::as_str),
+            glass: scope.pick(props, "glass", &Glass::ALL, Glass::as_str),
+            radius: scope.pick(props, "radius", &Radius::ALL, Radius::as_str),
+            backdrop: scope.pick(props, "backdrop", &Backdrop::ALL, Backdrop::as_str),
+            pattern: scope.pick(props, "pattern", &Pattern::ALL, Pattern::as_str),
+            grain: scope.pick(props, "grain", &Grain::ALL, Grain::as_str),
+            class: scope.find(props, "class").unwrap_or_default(),
+            {render(children, scope)}
+        }
     }
 }
 
@@ -459,6 +500,7 @@ fn draw(tag: &'static str, attrs: Vec<Attribute>, inside: Element) -> Element {
         "figcaption" => rsx! { figcaption { ..attrs, {inside} } },
         "figure" => rsx! { figure { ..attrs, {inside} } },
         "form" => rsx! { form { ..attrs, {inside} } },
+        "h4" => rsx! { h4 { ..attrs, {inside} } },
         "input" => rsx! { input { ..attrs } },
         "label" => rsx! { label { ..attrs, {inside} } },
         "legend" => rsx! { legend { ..attrs, {inside} } },
@@ -489,7 +531,7 @@ fn draw(tag: &'static str, attrs: Vec<Attribute>, inside: Element) -> Element {
     dead_code,
     reason = "the gates read it; the render path reads the match"
 )]
-pub(crate) const TAGS: [&str; 24] = [
+pub(crate) const TAGS: [&str; 25] = [
     "a",
     "button",
     "colgroup",
@@ -499,6 +541,7 @@ pub(crate) const TAGS: [&str; 24] = [
     "figcaption",
     "figure",
     "form",
+    "h4",
     "input",
     "label",
     "legend",

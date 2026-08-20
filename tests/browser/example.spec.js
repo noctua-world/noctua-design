@@ -85,6 +85,38 @@ test("switching to React fetches it once and draws what Dioxus drew", async ({ p
   expect(await requests(page)).toBe(1);
 });
 
+test("the switch draws the half it would move to, and keeps both glyphs", async ({ page }) => {
+  // THE GLYPH IS THE DESTINATION. An atom while Dioxus is showing, because
+  // pressing it goes to React; a helix while React is showing, to come back.
+  // `Button` ships both and the state picks one, so this works with no script.
+  await page.goto(url(PAGE.button));
+  const glyphs = () =>
+    page.evaluate(() =>
+      [...document.querySelector('[data-nd-action="frame-impl"]').querySelectorAll(".nd-icon-glyph")]
+        .map((g) => `${g.dataset.ndIcon}:${g.getBoundingClientRect().width > 2 ? "shown" : "hidden"}`),
+    );
+
+  expect(await glyphs()).toEqual(["atom:shown", "dna:hidden"]);
+
+  await page.locator('[data-nd-action="impl"]').click();
+  await page.waitForFunction(
+    () => document.querySelectorAll('[data-nd-showing="react"]').length > 0,
+    null,
+    { timeout: 20000 },
+  );
+
+  // BOTH ARE STILL THERE. The loading message used to be written into the
+  // control's `textContent`, which was harmless on a stop with a word in it and
+  // destroyed both SVGs on an icon — a pressed button with nothing inside it.
+  // It is `aria-busy` and the accessible name now, neither of which touches the
+  // tree.
+  expect(await glyphs()).toEqual(["atom:hidden", "dna:shown"]);
+  await expect(page.locator('[data-nd-action="frame-impl"]').first()).not.toHaveAttribute(
+    "aria-busy",
+    "true",
+  );
+});
+
 test("switching back unmounts React rather than hiding it", async ({ page }) => {
   await page.goto(url(PAGE.button));
   const stage = '[data-nd-example="button-1"]';
@@ -445,9 +477,20 @@ test("the band costs the frame no height, and the rail still starts at the top",
       .map((f) => Math.round(f.getBoundingClientRect().height))
       .sort((a, b) => a - b),
   );
-  // The median frame was 189px before the band and has to stay there: the
-  // caption changed how it is drawn, not where in the column it lives.
-  expect(heights[Math.floor(heights.length / 2)]).toBeLessThanOrEqual(200);
+  // 189px before the band, 225px now, and the 36px between them is one more
+  // control in the rail: the switch between the two implementations, which
+  // every frame carries because every example can be drawn by both.
+  //
+  // It was a two-stop `Segmented` first, and that measured 260 — the rail is a
+  // COLUMN, so a control with two rows in it costs twice what an icon does, and
+  // the rail exists precisely to spend the width no frame was using rather than
+  // the height every frame is short of. An icon toggle costs one row like the
+  // four under it.
+  //
+  // The ceiling is what stops the next control being free. The assertion above
+  // is the one that catches the real regression, a rail pushed into a second
+  // grid row, which costs 36px on every frame at once.
+  expect(heights[Math.floor(heights.length / 2)]).toBeLessThanOrEqual(230);
 });
 
 test("the band survives the narrowest screen", async ({ page }) => {

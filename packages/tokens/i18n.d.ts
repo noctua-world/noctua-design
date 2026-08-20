@@ -180,6 +180,8 @@ export type MessageKey =
   | "example.impl.dioxus"
   | "example.impl.react"
   | "example.impl.loading"
+  | "example.impl.frame-react"
+  | "example.impl.frame-dioxus"
   | "example.impl.page-react"
   | "example.impl.page-dioxus"
   | "example.impl.failed"

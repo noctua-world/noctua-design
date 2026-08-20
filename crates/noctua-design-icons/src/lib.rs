@@ -49,8 +49,10 @@ pub enum IconName {
     ChevronDown,
     /// Copies a code block to the clipboard.
     Copy,
-    /// Switches the examples between the two implementations this system ships.
-    Code,
+    /// Moves an example to the React implementation.
+    Atom,
+    /// Moves an example back to the Dioxus implementation.
+    Dna,
     /// Opens the menu that takes a table away as a file.
     Download,
     /// Opens the note explaining what a heading or a value means.
@@ -109,7 +111,7 @@ pub enum IconName {
 
 impl IconName {
     /// Every icon, in the order the spec declares them.
-    pub const ALL: [Self; 40] = [
+    pub const ALL: [Self; 41] = [
         Self::Menu,
         Self::Close,
         Self::Sun,
@@ -122,7 +124,8 @@ impl IconName {
         Self::ExternalLink,
         Self::ChevronDown,
         Self::Copy,
-        Self::Code,
+        Self::Atom,
+        Self::Dna,
         Self::Download,
         Self::Info,
         Self::Columns,
@@ -168,7 +171,8 @@ impl IconName {
             Self::ExternalLink => "external-link",
             Self::ChevronDown => "chevron-down",
             Self::Copy => "copy",
-            Self::Code => "code",
+            Self::Atom => "atom",
+            Self::Dna => "dna",
             Self::Download => "download",
             Self::Info => "info",
             Self::Columns => "columns",
@@ -231,8 +235,11 @@ impl IconName {
             Self::Copy => {
                 r#"<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>"#
             }
-            Self::Code => {
-                r#"<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>"#
+            Self::Atom => {
+                r#"<circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"/>"#
+            }
+            Self::Dna => {
+                r#"<path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="m17 6-2.5-2.5"/><path d="m14 8-1-1"/><path d="m7 18 2.5 2.5"/><path d="m3.5 14.5.5.5"/><path d="m20 9 .5.5"/><path d="m6.5 12.5 1 1"/><path d="m16.5 10.5 1 1"/><path d="m10 16 1.5 1.5"/>"#
             }
             Self::Download => {
                 r#"<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>"#
@@ -320,7 +327,8 @@ impl IconName {
             Self::ExternalLink => "0 0 24 24",
             Self::ChevronDown => "0 0 24 24",
             Self::Copy => "0 0 24 24",
-            Self::Code => "0 0 24 24",
+            Self::Atom => "0 0 24 24",
+            Self::Dna => "0 0 24 24",
             Self::Download => "0 0 24 24",
             Self::Info => "0 0 24 24",
             Self::Columns => "0 0 24 24",
@@ -373,7 +381,8 @@ impl IconName {
             Self::ExternalLink => false,
             Self::ChevronDown => false,
             Self::Copy => false,
-            Self::Code => false,
+            Self::Atom => false,
+            Self::Dna => false,
             Self::Download => false,
             Self::Info => false,
             Self::Columns => false,
@@ -428,9 +437,8 @@ impl IconName {
             }
             Self::ChevronDown => "The disclosure marker on a `<details>` summary.",
             Self::Copy => "Copies a code block to the clipboard.",
-            Self::Code => {
-                "Switches the examples between the two implementations this system ships."
-            }
+            Self::Atom => "Moves an example to the React implementation.",
+            Self::Dna => "Moves an example back to the Dioxus implementation.",
             Self::Download => "Opens the menu that takes a table away as a file.",
             Self::Info => "Opens the note explaining what a heading or a value means.",
             Self::Columns => {

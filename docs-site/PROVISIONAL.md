@@ -3233,7 +3233,26 @@ every locale.
     R$ 4.900,00 while every other table on that page draws it as refunded for
     R$ 320,00.
 
-    **What is owed.** The React `ThemeScope` is now rendered nowhere: it comes
-    from `spec/theme.toml` rather than `spec/components/`, so the interpreter has
-    no arm for it and its example has no tree. That is precisely the condition
-    that let the other six modules rot, and it is the first thing to fix.
+    **The closures are gone.** They were kept beside the trees for exactly as
+    long as it took to prove the transcription, and then `examples.rs` went from
+    **13,047 lines to 2,536**: the caption and the note, and nothing else. Two
+    descriptions of one example, only one of which ships, is the drift this
+    repository keeps finding.
+
+    The deletion carries its own proof. The site was built before and after, and
+    all **505 files are byte-identical** — the page had already been rendering
+    from the trees, so removing what it no longer read could not change it. Two
+    tests that read `examples.rs` as text, looking for `icon: "…"` and
+    `tone: "…"`, would have gone on passing while scanning a file with no icon
+    and no tone in it. They are tree walks now, which cannot go quiet that way.
+
+    **Three defects the tests found afterwards.** The frame's switch shipped as a
+    two-stop `Segmented`, and a rail is a **column**: it cost 70px of height on
+    every frame, against a rail that exists to spend the width no frame was
+    using. An icon toggle costs one row, like the four under it. A per-frame
+    press wrote the page-wide preference, so that frame's own Reset re-drew it in
+    React instead of putting it back. And the React `ThemeScope` was briefly
+    rendered nowhere, because it comes from `spec/theme.toml` rather than
+    `spec/components/` and the generated interpreter had no arm for it —
+    `tree::theme_scope` is that arm, and its sample markup is byte-identical to
+    what the hand-written component drew.
