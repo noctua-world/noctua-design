@@ -152,7 +152,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "span",
         class: Some("nd-avatar"),
         guidance: Some(Key::ComponentAvatarGuidance),
-        specimen: Some("<span class=\"nd-avatar-initials nd-identifier\">NA</span>"),
+        specimen: None,
         props: &[
             DocProp {
                 name: "label",
@@ -277,9 +277,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "ul",
         class: Some("nd-avatar-group"),
         guidance: Some(Key::ComponentAvatarGroupGuidance),
-        specimen: Some(
-            "<li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">AL</span></span></li><li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">BS</span></span></li><li class=\"nd-avatar-more\"><span class=\"nd-avatar-more-chip\"><span aria-hidden=\"true\">+3</span></span></li>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "label",
@@ -392,9 +390,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "span",
         class: Some("nd-badge"),
         guidance: Some(Key::ComponentBadgeGuidance),
-        specimen: Some(
-            "<span class=\"nd-badge\" data-nd-tone=\"danger\"><span class=\"nd-badge-mark\">3</span></span>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "label",
@@ -960,9 +956,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "div",
         class: Some("nd-button-group"),
         guidance: Some(Key::ComponentButtonGroupGuidance),
-        specimen: Some(
-            "<button class=\"nd-button\" type=\"button\" data-nd-variant=\"outline\" data-nd-tone=\"neutral\" data-nd-size=\"medium\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Aa</span></span></button><button class=\"nd-button\" type=\"button\" data-nd-variant=\"outline\" data-nd-tone=\"neutral\" data-nd-size=\"medium\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Bb</span></span></button>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "label",
@@ -1023,6 +1017,18 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
                 variants: true,
                 specimen: None,
                 doc: Key::ComponentButtonGroupPropFillDoc,
+            },
+            DocProp {
+                name: "justify",
+                kind: "enum",
+                values: &["center", "start", "between"],
+                elements: &[],
+                default: Some("center"),
+                attribute: Some("data-nd-justify"),
+                required: false,
+                variants: true,
+                specimen: None,
+                doc: Key::ComponentButtonGroupPropJustifyDoc,
             },
             DocProp {
                 name: "children",
@@ -1365,7 +1371,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "div",
         class: Some("nd-choice nd-checkbox"),
         guidance: Some(Key::ComponentCheckboxGuidance),
-        specimen: Some("<span class=\"nd-choice-box\"></span>"),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -1816,9 +1822,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "div",
         class: Some("nd-color-picker"),
         guidance: Some(Key::ComponentColorPickerGuidance),
-        specimen: Some(
-            "<span class=\"nd-color-picker-figure\"><span class=\"nd-color-picker-chip\"></span></span>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -3402,9 +3406,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "div",
         class: Some("nd-field"),
         guidance: Some(Key::ComponentFieldGuidance),
-        specimen: Some(
-            "<span class=\"nd-field-figure\"><span class=\"nd-label nd-identifier\">Aa</span><span class=\"nd-field-rule\"></span><span class=\"nd-field-box\"></span></span>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "control",
@@ -4162,7 +4164,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "img",
         class: Some("nd-image"),
         guidance: Some(Key::ComponentImageGuidance),
-        specimen: Some("<span class=\"nd-image-media\"></span>"),
+        specimen: None,
         props: &[
             DocProp {
                 name: "src",
@@ -4393,9 +4395,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "input",
         class: Some("nd-input"),
         guidance: Some(Key::ComponentInputGuidance),
-        specimen: Some(
-            "<span class=\"nd-input-figure\"><span class=\"nd-input-box\"></span></span>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -4844,7 +4844,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "label",
         class: Some("nd-label"),
         guidance: Some(Key::ComponentLabelGuidance),
-        specimen: Some("<span class=\"nd-identifier\">Aa</span>"),
+        specimen: None,
         props: &[
             DocProp {
                 name: "text",
@@ -4878,7 +4878,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
                 default: Some("label"),
                 attribute: None,
                 required: false,
-                variants: true,
+                variants: false,
                 specimen: None,
                 doc: Key::ComponentLabelPropKindDoc,
             },
@@ -5579,9 +5579,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "ul",
         class: Some("nd-list"),
         guidance: None,
-        specimen: Some(
-            "<li class=\"nd-list-item nd-identifier\">Aa</li><li class=\"nd-list-item nd-identifier\">Bb</li><li class=\"nd-list-item nd-identifier\">Cc</li>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "kind",
@@ -6082,7 +6080,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "meter",
         class: Some("nd-meter"),
         guidance: Some(Key::ComponentMeterGuidance),
-        specimen: Some("<span class=\"nd-meter-bar\"></span>"),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -6271,9 +6269,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "input",
         class: Some("nd-number-input"),
         guidance: Some(Key::ComponentNumberInputGuidance),
-        specimen: Some(
-            "<span class=\"nd-number-input-figure\"><span class=\"nd-number-input-box\"></span><span class=\"nd-number-input-steps\"></span></span>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -6619,9 +6615,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "fieldset",
         class: Some("nd-otp-field"),
         guidance: Some(Key::ComponentOtpFieldGuidance),
-        specimen: Some(
-            "<span class=\"nd-otp-field-figure\"><span class=\"nd-identifier\">4</span><span class=\"nd-identifier\">2</span><span class=\"nd-identifier\">1</span></span>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -6831,9 +6825,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "nav",
         class: Some("nd-pagination"),
         guidance: Some(Key::ComponentPaginationGuidance),
-        specimen: Some(
-            "<ul class=\"nd-pagination-list\"><li><a class=\"nd-pagination-link\" href=\"#\">1</a></li><li><a class=\"nd-pagination-link\" href=\"#\" aria-current=\"page\">2</a></li><li><a class=\"nd-pagination-link\" href=\"#\">3</a></li></ul>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -7193,7 +7185,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "progress",
         class: Some("nd-progress"),
         guidance: Some(Key::ComponentProgressGuidance),
-        specimen: Some("<span class=\"nd-progress-bar\"></span>"),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -7322,9 +7314,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "div",
         class: Some("nd-prose-block"),
         guidance: None,
-        specimen: Some(
-            "<h3 class=\"nd-heading nd-identifier\" data-nd-size=\"h3\">Aa bb cc</h3><p class=\"nd-paragraph nd-identifier\" data-nd-size=\"body\">Aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt</p>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "measure",
@@ -7365,7 +7355,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "div",
         class: Some("nd-choice nd-radio"),
         guidance: Some(Key::ComponentRadioGuidance),
-        specimen: Some("<span class=\"nd-choice-box\"></span>"),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -7539,7 +7529,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "div",
         class: Some("nd-rating"),
         guidance: Some(Key::ComponentRatingGuidance),
-        specimen: Some("star"),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -7741,9 +7731,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "div",
         class: Some("nd-search"),
         guidance: Some(Key::ComponentSearchGuidance),
-        specimen: Some(
-            "<div class=\"nd-search-field\"><span class=\"nd-search-input\"></span></div>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -8255,9 +8243,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "div",
         class: Some("nd-segmented"),
         guidance: Some(Key::ComponentSegmentedGuidance),
-        specimen: Some(
-            "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -8552,9 +8538,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "div",
         class: Some("nd-select"),
         guidance: Some(Key::ComponentSelectGuidance),
-        specimen: Some(
-            "<span class=\"nd-select-figure\"><span class=\"nd-select-box\"></span></span>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -9651,9 +9635,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "table",
         class: Some("nd-table"),
         guidance: Some(Key::ComponentTableGuidance),
-        specimen: Some(
-            "<tbody><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4211</th><td class=\"nd-table-cell nd-identifier\">12s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4209</th><td class=\"nd-table-cell nd-identifier\">48s</td></tr></tbody>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -10196,7 +10178,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "td",
         class: Some("nd-table-cell"),
         guidance: Some(Key::ComponentTableCellGuidance),
-        specimen: Some("<span class=\"nd-identifier\">51s</span>"),
+        specimen: None,
         props: &[
             DocProp {
                 name: "align",
@@ -10207,7 +10189,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
                 attribute: Some("data-nd-align"),
                 required: false,
                 variants: true,
-                specimen: Some("<span class=\"nd-identifier\">R$ 1.240,00</span>"),
+                specimen: None,
                 doc: Key::ComponentTableCellPropAlignDoc,
             },
             DocProp {
@@ -10231,9 +10213,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
                 attribute: Some("data-nd-wrap"),
                 required: false,
                 variants: true,
-                specimen: Some(
-                    "<span class=\"nd-identifier\">release/2026-03-candidate-rollback</span>",
-                ),
+                specimen: None,
                 doc: Key::ComponentTableCellPropWrapDoc,
             },
             DocProp {
@@ -10347,7 +10327,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "colgroup",
         class: Some("nd-table-column"),
         guidance: Some(Key::ComponentTableColumnGuidance),
-        specimen: Some("<col>"),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -10532,7 +10512,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "th",
         class: Some("nd-table-header-cell"),
         guidance: Some(Key::ComponentTableHeaderCellGuidance),
-        specimen: Some("<span class=\"nd-identifier\">#4213</span>"),
+        specimen: None,
         props: &[
             DocProp {
                 name: "column",
@@ -10567,7 +10547,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
                 attribute: Some("data-nd-align"),
                 required: false,
                 variants: true,
-                specimen: Some("<span class=\"nd-identifier\">R$ 1.240</span>"),
+                specimen: None,
                 doc: Key::ComponentTableHeaderCellPropAlignDoc,
             },
             DocProp {
@@ -10591,7 +10571,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
                 attribute: Some("data-nd-wrap"),
                 required: false,
                 variants: true,
-                specimen: Some("<span class=\"nd-identifier\">release/2026-03-candidate</span>"),
+                specimen: None,
                 doc: Key::ComponentTableHeaderCellPropWrapDoc,
             },
             DocProp {
@@ -10666,9 +10646,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "tr",
         class: Some("nd-table-row"),
         guidance: Some(Key::ComponentTableRowGuidance),
-        specimen: Some(
-            "<th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -10924,9 +10902,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "div",
         class: Some("nd-tabs"),
         guidance: Some(Key::ComponentTabsGuidance),
-        specimen: Some(
-            "<a class=\"nd-tab\" data-nd-selected=\"true\"><span class=\"nd-tab-text nd-identifier\">Aa</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Bbbb</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Cc</span></a>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -11068,9 +11044,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "span",
         class: Some("nd-tag"),
         guidance: Some(Key::ComponentTagGuidance),
-        specimen: Some(
-            "<span class=\"nd-tag-body\"><span class=\"nd-tag-label nd-identifier\">Tag</span></span>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "label",
@@ -11280,9 +11254,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "div",
         class: Some("nd-tag-picker"),
         guidance: Some(Key::ComponentTagPickerGuidance),
-        specimen: Some(
-            "<span class=\"nd-tag-picker-figure\"><span class=\"nd-tag-picker-box\"></span></span>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -11737,9 +11709,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "textarea",
         class: Some("nd-textarea"),
         guidance: Some(Key::ComponentTextareaGuidance),
-        specimen: Some(
-            "<span class=\"nd-textarea-figure\"><span class=\"nd-textarea-box\"></span></span>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -12557,9 +12527,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "div",
         class: Some("nd-toolbar"),
         guidance: Some(Key::ComponentToolbarGuidance),
-        specimen: Some(
-            "<div class=\"nd-toolbar-group\" role=\"group\"><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Aa</span></span></button><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Bb</span></span></button></div>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "label",
@@ -12822,9 +12790,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "ul",
         class: Some("nd-tree"),
         guidance: Some(Key::ComponentTreeGuidance),
-        specimen: Some(
-            "<li class=\"nd-tree-item\"><span class=\"nd-tree-row\"><span class=\"nd-identifier\">src</span></span></li>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "name",
@@ -13167,9 +13133,7 @@ pub(crate) const COMPONENTS: [DocComponent; 86] = [
         element: "span",
         class: Some("nd-truncate"),
         guidance: None,
-        specimen: Some(
-            "<span class=\"nd-identifier\">Aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp</span>",
-        ),
+        specimen: None,
         props: &[
             DocProp {
                 name: "lines",

@@ -55,6 +55,11 @@ AvatarGroup { label: "Reviewers", more: "+5", more_label: "…", more_href: "…
                         ("more_href", Value::Text("../avatars/")),
                     ],
                     children: &[
+                        // ONE PERSON, ONE PORTRAIT — Ana is `ada`, Bruno is
+                        // `bob`, Carla is `cara`, on this page and on
+                        // `/avatars/`. The reviewers used to be one face and
+                        // two sets of letters, which is not a picture of a
+                        // room with people in it.
                         Node::Element {
                             tag: "li",
                             attributes: &[],
@@ -63,6 +68,7 @@ AvatarGroup { label: "Reviewers", more: "+5", more_label: "…", more_href: "…
                                 props: &[
                                     ("label", Value::Message(Key::ExampleAvatarBruno)),
                                     ("initials", Value::Data("BS")),
+                                    ("src", Value::Asset("assets/portraits/bob.svg")),
                                     ("tone", Value::Text("accent")),
                                 ],
                                 children: &[],
@@ -76,6 +82,7 @@ AvatarGroup { label: "Reviewers", more: "+5", more_label: "…", more_href: "…
                                 props: &[
                                     ("label", Value::Message(Key::ExampleAvatarCarla)),
                                     ("initials", Value::Data("CM")),
+                                    ("src", Value::Asset("assets/portraits/cara.svg")),
                                     ("tone", Value::Text("success")),
                                 ],
                                 children: &[],

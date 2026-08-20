@@ -523,6 +523,8 @@ dir = "ltr"
 "example.group.next" = "Next"
 "example.group.split-label" = "Publishing"
 "example.group.attached" = """The shared edge is drawn once, so the inner rules are no heavier than the outer ones."""
+"example.group.vertical" = """A vertical group makes every button as wide as the widest, and the group centres what is inside them all."""
+"example.group.justify" = """Icons line up down a column only when every button starts its content at the same edge. That is what `start` is for."""
 "example.group.fill" = """`fill` gives every button an equal share of the width, so a translated label does not re-flow the row."""
 "example.group.split" = """A split button is two children: the action, and the control that opens the rest."""
 "example.switch.state" = """`checked` sets the switch on. `aria-checked` is written either way, on or off."""
@@ -930,6 +932,12 @@ dir = "ltr"
 # and `` `code` `` inside a message become real components — which is how a
 # translator decides where the emphasis falls, since that moves with the
 # sentence.
+
+# THE ONE SENTENCE A VARIANT GRID NEEDS. A `Meter` or a `Progress` with no
+# `value_label` is a shape a reader has to estimate from, which both contracts
+# call a defect — so the grids that draw them carry one, and it is generic
+# because the grid measures nothing in particular.
+"specimen.bar.value" = "{value} of {max} used"
 
 "specimen.title" = "Everything, on one page"
 "specimen.lead" = """A title, the sentence under it, the text under that, and the marks a paragraph carries. Every element here is the component itself rather than a picture of it."""

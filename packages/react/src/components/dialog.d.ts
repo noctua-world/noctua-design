@@ -40,7 +40,7 @@ export interface DialogProps {
   /**
    * Whether the page behind it goes inert. `showModal` puts the surface in the top
    * layer and hides the rest of the document from assistive technology. `show`
-   * leaves the page reachable and the surface beside it.
+   * leaves the page reachable and the surface in the page's flow.
    */
   modal?: boolean;
   /**

@@ -151,3 +151,117 @@ test("the grids are actually there to be checked", async ({ page }) => {
   );
   expect(stages, "the button page rendered no variant grid").toBeGreaterThan(10);
 });
+
+// A GRID EXISTS TO ANSWER FOUR QUESTIONS AND THE SWEEP ABOVE ASKS ONE OF THEM.
+// The other three are below, and each is a defect that has shipped here:
+// `TableColumn` drew five empty boxes, `data-nd-data-nd-size` said a value no
+// component ever wrote, and a table specimen squeezed to nothing lost half its
+// picture off the edge of the stage.
+
+test("every cell draws something", async ({ page }) => {
+  let drawn = 0;
+  for (const [name, path] of Object.entries(PAGE)) {
+    await page.goto(url(path));
+    await showParts(page);
+    const empty = await page.evaluate(() => {
+      const out = [];
+      for (const stage of document.querySelectorAll(".nd-variant-stage[data-nd-prop]")) {
+        const box = stage.getBoundingClientRect();
+        const value = stage.parentElement?.querySelector(".nd-variant-label")?.textContent?.trim();
+        const where = `${stage.dataset.ndSlug}.${stage.dataset.ndProp} at ${value}`;
+        // A specimen the parser threw away, a component that rendered nothing,
+        // or a box collapsed by the stage around it. All three look the same
+        // from outside — an empty rectangle under a caption that names a value
+        // — and all three have shipped.
+        if (!stage.firstElementChild) out.push(`${where}: nothing at all`);
+        else if (box.width < 2 || box.height < 2) out.push(`${where}: ${box.width}x${box.height}`);
+      }
+      return out;
+    });
+    expect(empty, name).toEqual([]);
+    drawn += await page.evaluate(
+      () => document.querySelectorAll(".nd-variant-stage[data-nd-prop]").length,
+    );
+  }
+  expect(drawn, "the sweep found almost no grid to read").toBeGreaterThan(200);
+});
+
+test("every cell carries the value its caption names", async ({ page }) => {
+  // THE CAPTION IS A CLAIM ABOUT THE MARKUP. A grid that draws the default
+  // under every caption is the `data-nd-tone` failure again from the other
+  // side: the picture is right and the label is a lie, or the other way round.
+  //
+  // Only where the prop HAS an attribute — `Field.kind` and `List.kind` choose
+  // the element instead, and `Tabs.orientation` writes `aria-orientation` —
+  // and only that SOME element in the cell carries it, because a cell holds
+  // whole components that carry attributes of their own.
+  let checked = 0;
+  for (const [name, path] of Object.entries(PAGE)) {
+    await page.goto(url(path));
+    await showParts(page);
+    const [wrong, seen] = await page.evaluate(() => {
+      const out = [];
+      let read = 0;
+      for (const item of document.querySelectorAll(".nd-variant-item")) {
+        const stage = item.querySelector(".nd-variant-stage[data-nd-prop]");
+        const value = item.querySelector(".nd-variant-label")?.textContent?.trim();
+        if (!stage || !value) continue;
+        const attribute = `data-nd-${stage.dataset.ndProp.replace(/_/g, "-")}`;
+        const carried = [stage, ...stage.querySelectorAll("*")]
+          .filter((el) => el.hasAttribute(attribute))
+          .map((el) => el.getAttribute(attribute));
+        if (!carried.length) continue;
+        read += 1;
+        if (!carried.includes(value)) {
+          out.push(`${stage.dataset.ndSlug}.${stage.dataset.ndProp}: says ${value}, draws ${carried.join("/")}`);
+        }
+      }
+      return [out, read];
+    });
+    expect(wrong, name).toEqual([]);
+    checked += seen;
+  }
+  expect(checked, "no cell in the whole site carried its own prop").toBeGreaterThan(150);
+});
+
+test("a grid is legible at the narrowest width, and stays in its frame", async ({ browser }) => {
+  // 320 IS THE WIDTH THE ROWS HAVE TO SURVIVE. A row wraps rather than
+  // scrolling, so the failure here is a cell wider than the stage holding it —
+  // which is a picture with its far side beyond where a reader can reach.
+  const context = await browser.newContext({ viewport: { width: 320, height: 900 } });
+  const page = await context.newPage();
+  let checked = 0;
+  for (const [name, path] of Object.entries(PAGE)) {
+    await page.goto(url(path));
+    await showParts(page);
+    const over = await page.evaluate(() => {
+      const out = [];
+      for (const stage of document.querySelectorAll(".nd-variant-stage[data-nd-prop]")) {
+        const frame = stage.closest(".nd-frame-stage");
+        if (!frame) continue;
+        // UNLESS A READER CAN REACH IT. Two pictures are wider than the frame
+        // on purpose — a table squeezed below its content loses a column off
+        // the edge, and a scene sample is a fixed drawing — and both sit in a
+        // frame stage that scrolls, which is where that width is meant to go.
+        // A cell overhanging a stage that does NOT scroll is the defect: its
+        // far side is beyond anything a reader can do.
+        const style = getComputedStyle(frame);
+        const scrolls =
+          ["auto", "scroll"].includes(style.overflowX) && frame.scrollWidth > frame.clientWidth + 1;
+        if (scrolls) continue;
+        const room = frame.getBoundingClientRect().width;
+        const wide = stage.getBoundingClientRect().width;
+        if (wide > room + 1) {
+          out.push(`${stage.dataset.ndSlug}.${stage.dataset.ndProp}: ${Math.round(wide)} in ${Math.round(room)}`);
+        }
+      }
+      return out;
+    });
+    expect(over, name).toEqual([]);
+    checked += await page.evaluate(
+      () => document.querySelectorAll(".nd-variant-stage[data-nd-prop]").length,
+    );
+  }
+  await context.close();
+  expect(checked, "the narrow sweep read no grid at all").toBeGreaterThan(200);
+});

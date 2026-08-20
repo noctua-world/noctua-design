@@ -9,7 +9,6 @@ name = "Badge"
 element = "span"
 class = "nd-badge"
 summary = "Marks a control with a count or a dot, and says what it counts."
-specimen = "<span class=\"nd-badge\" data-nd-tone=\"danger\"><span class=\"nd-badge-mark\">3</span></span>"
 
 [prop.label]
 type = "text"

@@ -464,20 +464,32 @@ a {
   inline-size: var(--nd-switch-knob);
   block-size: var(--nd-switch-knob);
   border-radius: var(--noctua-radius-pill);
-  background: var(--nc-color-fg-muted);
+  /* ONE OBJECT, ONE COLOUR, IN BOTH STATES.
+   *
+   * The knob used to be `fg-muted` off and `on-accent` on. Measured in dark:
+   * off was lightness 0.83 on a 0.21 track and on was 0.18 on a 0.67 track —
+   * a near-white circle in one state and a near-black one in the other. A
+   * light shape on a dark ground reads LARGER than a dark shape of the same
+   * size on a light one, so the two states looked like two knobs of different
+   * sizes, which is exactly what was reported. The geometry was never wrong.
+   *
+   * `fg` rather than `fg-muted` because it has to carry against both tracks:
+   * the off track is at either extreme of the mode and the on track is the
+   * accent, mid-lightness in both. */
+  background: var(--nc-color-fg);
   transform: translate(0, 0);
   transition: transform var(--noctua-duration-fast) var(--noctua-easing-out);
 }
 
 /* The two things that change between off and on, and there are no others:
-   which end the knob sits at, and what colour the track is. */
+   which end the knob sits at, and what colour the TRACK is. The knob's own
+   colour is not one of them — see the rule above. */
 .nd-switch[aria-checked="true"] > .nd-switch-track {
   background: var(--nc-color-accent);
   border-color: var(--nc-color-accent);
 }
 
 .nd-switch[aria-checked="true"] > .nd-switch-track::after {
-  background: var(--nc-color-on-accent);
   transform: translate(var(--nd-switch-travel), 0);
 }
 
@@ -618,14 +630,22 @@ a {
      `spec/icons.toml` lightened the stroke to 1.75 because an icon BESIDE a
      line of text reads heavier than the text it labels. A tick alone on a
      filled square is the opposite case: nothing sits beside it, the fill is
-     solid, and at 1.75 it was a hairline in a forty-pixel box. It is drawn at
-     the weight of the box's own edge and a hairline more, so the mark and the
-     border it sits inside are one drawing.
+     solid, and at 1.75 it was a hairline in a forty-pixel box.
+
+     TWICE THE BOX'S OWN EDGE AND A HAIRLINE MORE, which is the third weight
+     this mark has carried and the one a reader stopped calling thin. The two
+     before it were the icon's own 1.75 and the edge plus a hairline, and both
+     read as a line drawn on the fill rather than as a mark stamped into it.
+     The ceiling is the drawing's own geometry: the two limbs meet at a right
+     angle and the short one is seven units long, so past six the notch between
+     them closes and the tick becomes a wedge. Five is under that with room to
+     spare, at all three sizes.
 
      `stroke-width` is a geometry property, so a length in `px` here is one
      unit of the drawing's own 24-unit grid rather than a device pixel — which
-     is why the border tokens are the right scale to read it from. */
-  stroke-width: calc(var(--noctua-border-hairline) + var(--noctua-border-strong));
+     is why the border tokens are the right scale to read it from, and why one
+     number covers every size: the glyph scales and the grid does not. */
+  stroke-width: calc(var(--noctua-border-strong) * 2 + var(--noctua-border-hairline));
 }
 
 .nd-choice-dot {
@@ -3161,6 +3181,30 @@ span.nd-search-input {
   flex: 1 1 0;
 }
 
+/* WHERE THE CONTENT SITS IS THE GROUP'S ANSWER, NOT EACH BUTTON'S.
+   `align-items: stretch` is what makes a vertical group's buttons as wide as
+   the widest of them, so every button in one is wider than its own content and
+   `justify` stops being a refinement on one control and becomes a fact about
+   the set. Siblings share their arrangement (`NOCTUA.md §9.7`), and a prop
+   three children each had to repeat is a prop the third one gets wrong.
+
+   ONE CLASS DEEPER THAN `Button`'S OWN RULE, which is how the group wins when
+   both are stated — the same override `AvatarGroup.size` performs on each
+   `Avatar`, written the same way. The default is written out rather than left
+   as the absence of the attribute, because `Button` always writes its own
+   `data-nd-justify` and a group that said nothing would lose to it. */
+.nd-button-group[data-nd-justify="center"] > .nd-button {
+  justify-content: center;
+}
+
+.nd-button-group[data-nd-justify="start"] > .nd-button {
+  justify-content: flex-start;
+}
+
+.nd-button-group[data-nd-justify="between"] > .nd-button {
+  justify-content: space-between;
+}
+
 /* Attached: the shared edge is drawn once, by pulling each button back over
    its neighbour's border. Two hairlines meeting is two pixels, and a row whose
    inner rules are twice the weight of its outer ones reads as a mistake. */
@@ -4463,8 +4507,17 @@ span.nd-search-input {
   /* A SPECIMEN THAT CANNOT SHRINK MUST BE REACHABLE. The frame clips — that is
      deliberate and load-bearing — so an example wider than the frame was cut
      off with nothing to drag: at 320px the typography specimen stayed 799px
-     wide inside a 286px stage and two thirds of every line was gone. A
-     scroller here loses nothing and clips nothing. */
+     wide inside a 286px stage and two thirds of every line was gone.
+
+     IT IS A SCROLLER ON BOTH AXES, WHATEVER THIS LINE SAYS. CSS computes an
+     `overflow-y: visible` beside an `overflow-x: auto` to `auto`, so the stage
+     scrolls vertically too. Nothing IN THE FLOW is lost to that, because the
+     stage grows to its content and the two heights stay equal. Anything OUT of
+     the flow is: it adds scrollable overflow and no height, so the stage keeps
+     the rest below its own bottom edge, where a screenshot cannot tell it from
+     a panel that was drawn short. `Dialog { modal: false }` was `absolute` and
+     lost 95px of itself that way. `frame.spec.js` subtracts the two heights on
+     every stage of the dialog page, which is the only thing that reports it. */
   overflow-x: auto;
   /* THE PADDING IS ON THE EXAMPLE'S PARTS, NOT HERE, so the caption can be a
      band flush with the stage's edges.
@@ -5070,6 +5123,11 @@ span.nd-search-input {
 /* The measure lives here, on the reading column, and nowhere else. */
 .nd-prose-block[data-nd-measure="default"] > * { max-inline-size: var(--noctua-measure); }
 .nd-prose-block[data-nd-measure="lead"] > * { max-inline-size: var(--noctua-measure-lead); }
+/* AND `none` HAS TO SAY SO OUT LOUD, because a `Paragraph` caps itself (above)
+   and the absence of a rule leaves that cap in place. `measure: none` was
+   therefore inert around every paragraph on the site — the one arrangement it
+   exists for — and its own grid drew `default` and `none` as one picture. */
+.nd-prose-block[data-nd-measure="none"] > * { max-inline-size: none; }
 .nd-prose-block {
   display: flex;
   flex-direction: column;
@@ -5825,6 +5883,14 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   inline-size: var(--noctua-space-32);
 }
 
+/* AND A GROUP'S GRID HOLDS TWO OF THEM PER CELL, so the same width would make
+   each cell 256px and drop the row to one column at every width this site is
+   read at. Three quarters of it, which is still wider than the icon and the
+   word inside. */
+.nd-variant-stage[data-nd-prop="justify"] .nd-button-group > .nd-button {
+  inline-size: var(--noctua-space-24);
+}
+
 .nd-variant-stage .nd-table-specimen {
   inline-size: var(--noctua-space-48);
 }
@@ -5850,6 +5916,40 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 .nd-variant-item:has(.nd-table) {
   flex: 0 0 auto;
   min-inline-size: max-content;
+}
+
+/* A FORM CONTROL IN A GRID IS A PICTURE OF ONE, AND A PICTURE HAS A WIDTH.
+ *
+ * Every control that wraps itself in a `Field` is a flex column that fills the
+ * column it is given, so once the grids drew the real controls a variant stage
+ * held one full-width box per value and the row wrapped after two. Three sizes
+ * a reader cannot hold beside each other is the one thing a row exists not to
+ * be.
+ *
+ * `max-content` cannot answer it: the control inside the field is
+ * `inline-size: 100%`, and a percentage contributes nothing to an intrinsic
+ * width, so the field collapses to the width of its own label. One named width
+ * for every field in a grid is also what makes `small`, `medium` and `large`
+ * comparable — the box is the constant and the type scale is the variable. */
+.nd-variant-stage .nd-field {
+  inline-size: var(--noctua-space-48);
+}
+
+/* AND THE ONE FIELD WHOSE CONTENT IS A REAL LENGTH KEEPS IT. An OTP field's
+   boxes are sized in the token scale rather than as a fraction of the field, so
+   a large alphanumeric row is wider than the width above and wrapped onto two
+   lines — a picture of nothing `kind` or `size` does. `fit-content` is not the
+   answer for the rest: their control is `inline-size: 100%`, and a percentage
+   contributes nothing to an intrinsic width. */
+.nd-variant-stage[data-nd-slug="otp-field"] .nd-field {
+  inline-size: max-content;
+}
+
+/* AND A CLIPPED LINE NEEDS A COLUMN NARROW ENOUGH TO CLIP IN. `lines` drew one
+ * picture for `2`, `3` and `4` because the sentence fits in three lines across
+ * a whole frame, so the last two clipped nothing. */
+.nd-variant-stage[data-nd-slug="truncate"] {
+  inline-size: var(--noctua-space-32);
 }
 
 .nd-variant-stage > * {
@@ -11657,13 +11757,16 @@ button.nd-lineage-figure {
 }
 
 /* THE SPECIMEN IS AS WIDE AS THE PICTURE, NOT AS WIDE AS A FORM.
-   `.nd-select` is the FIELD — label, hint, error and control — so it is a flex
-   column that fills its column up to the `sm` breakpoint. In a variant stage
-   that made three 30rem-wide boxes where every other component draws something
-   a reader can hold beside its neighbour, which is what the row exists for. */
-.nd-variant-stage .nd-select,
-.nd-variant-stage .nd-tag-picker {
-  inline-size: max-content;
+   A control that fills its column is a 30rem box in a variant stage, where
+   every other component draws something a reader can hold beside its
+   neighbour — which is what the row exists for. One width for all of them, so
+   the box is the constant and the type scale is the variable.
+
+   `.nd-search` is here rather than with `.nd-field` above because a search
+   draws its own question: its label is visually hidden, so there is no field
+   around it to take the width. */
+.nd-variant-stage .nd-search {
+  inline-size: var(--noctua-space-48);
 }
 
 .nd-time-input-figure .nd-identifier {
@@ -12881,15 +12984,39 @@ figure.nd-image {
 }
 
 /* A NON-MODAL SURFACE IS NOT IN THE TOP LAYER, so it has no backdrop to be
-   centred against and nothing above the page to be centred on. It hangs off
-   the control that opened it, at the dialog layer, and the page behind it stays
-   reachable — which is the whole difference between `show()` and `showModal()`. */
+ * centred against and nothing above the page to be centred on. It is an
+ * ordinary box in an ordinary container, and the page beside it stays reachable
+ * — which is the whole difference between `show()` and `showModal()`, and what
+ * `dialog.toml` means by "leaves the page reachable and the surface beside it".
+ *
+ * IT WAS `absolute`, WHICH IS THE ONE POSITION THAT COULD NOT WORK. It hung off
+ * the trigger, out of flow — so no ancestor grew to hold it — and it was not
+ * `fixed` — so every ancestor's `overflow` still clipped it. Measured inside an
+ * example frame at 1120px: a 168px panel in a stage whose in-flow content was
+ * 171px tall, cut off 95px short with the last two lines of its own body
+ * unreachable, and 53px of blank frame below the cut because the stage is as
+ * tall as what is in its flow and no taller. At 320px the cut was 18px, which
+ * is worse: it looks like a rendering artefact rather than like a bug.
+ *
+ * In the flow the container grows instead — the stage, the frame and the page
+ * each make room — and there is no ancestor anywhere that can take it away
+ * again. That is a property of the component rather than of this site: a
+ * consumer's scroll container, fold or clipped panel cuts it off exactly as the
+ * frame did, and none of those is a place this stylesheet could reach.
+ *
+ * `relative` RATHER THAN `static`, because the surface has to stay the
+ * containing block for what is positioned inside it — the close control of a
+ * dialog with no heading, below, is. AND NO `z-index`: in the flow it overlaps
+ * nothing, and a layer here would raise a panel over the page's own header the
+ * moment a reader scrolled past it. */
 .nd-dialog[data-nd-modal="false"] .nd-dialog-surface[open] {
-  position: absolute;
-  inset-block-start: calc(100% + var(--noctua-space-2));
-  inset-inline-start: 0;
-  z-index: var(--noctua-layer-dialog);
-  margin: 0;
+  position: relative;
+  /* The user-agent stylesheet writes `inset-inline: 0` for the absolute box it
+     assumes this is. On a relative one that is an offset waiting to be read. */
+  inset: auto;
+  /* The gap under the trigger, which the offset used to carry. */
+  margin-block: var(--noctua-space-2) 0;
+  margin-inline: 0;
   max-block-size: min(var(--noctua-space-64), calc(100vh - var(--noctua-space-24)));
 }
 
@@ -12900,6 +13027,47 @@ figure.nd-image {
   gap: var(--noctua-space-3);
   padding: var(--noctua-space-4);
   padding-block-end: 0;
+}
+
+/* NO HEADING, NO ROW — AND THE WAY OUT STILL SITS IN THE CORNER A READER LOOKS
+ * IN.
+ *
+ * The head is rendered whenever there is a heading OR a close control, and it
+ * is a flex row at `space-between`. A row with ONE item in it puts that item at
+ * the START, so a dialog named by `label` rather than by a title drew the `×` at
+ * the top left with the whole width of the panel empty beside it — and spent a
+ * whole 48px line on it, in a 111px panel holding one sentence.
+ *
+ * Out of flow it lands exactly where it lands beside a heading, 16px in from the
+ * top and from the trailing edge, and costs no line at all. The surface is
+ * positioned in both shapes — `fixed` in the top layer while modal, `relative`
+ * above while not — so this resolves against the panel and never against the
+ * wrapper the trigger sits in.
+ *
+ * ASKED OF THE MARKUP RATHER THAN WRITTEN BY THE EMITTER. The two shapes differ
+ * by whether a title was rendered, which is one rule here against an attribute
+ * both implementations would have to remember to write. It is asked of the HEAD
+ * rather than of the surface, so the row has to exist for either rule to apply
+ * — a dialog with neither a heading nor a close control renders no head, and it
+ * has nothing to make room for. The relative selector is CHILD-DEEP, so a
+ * titled dialog inside a headless one cannot answer for its parent.
+ *
+ * AND NEITHER RULE DECLARES ANYTHING ON THE `<dialog>` ITSELF. A layout
+ * property on the class rather than on `[open]` un-hides every closed dialog in
+ * the document, which is the bug at the top of this section. */
+.nd-dialog-head:not(:has(> .nd-dialog-title)) {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+}
+
+/* AND THE CONTENT CLEARS IT, because nothing in the flow knows the control is
+   there. The gutter is the panel's own padding, plus the control, plus the gap
+   the head keeps between a title and the `×` — so a sentence stops where it
+   would have stopped beside a heading rather than running under the glyph. */
+.nd-dialog-head:not(:has(> .nd-dialog-title)) ~ .nd-dialog-note,
+.nd-dialog-head:not(:has(> .nd-dialog-title)) ~ .nd-dialog-body {
+  padding-inline-end: calc(var(--noctua-space-4) + var(--noctua-space-8) + var(--noctua-space-3));
 }
 
 .nd-dialog-title {

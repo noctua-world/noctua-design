@@ -13,17 +13,26 @@ use crate::trees::Tree;
 
 /// The people the avatar examples are about.
 ///
-/// Real names with real initials, and one of each shape the fallback takes: a
-/// picture that loads, letters, and nothing at all. The picture is a portrait
-/// the docs build already copies, so the URL answers on a published page and
-/// `theme.spec.js` has nothing to refuse. It used to be the site's own mark,
+/// Real names with real initials: three people who have a picture, and one
+/// seat nobody has taken yet. The pictures are portraits the docs build
+/// already copies, so the URLs answer on a published page and
+/// `theme.spec.js` has nothing to refuse. They used to be the site's own mark,
 /// which is a ring around a dot: every face carrying it drew a second circle
 /// inside the avatar's own.
 ///
-/// EACH FACE IS A DIFFERENT PERSON, SO EACH IS A DIFFERENT COLOUR. Four
-/// avatars at one tone are four identical grey discs, and a group whose whole
-/// purpose is the overlap cannot show which of four identical discs is in
-/// front. `pending` keeps the default, because nobody has taken that place yet.
+/// ONE PERSON, ONE PORTRAIT, AND THAT IS THE RULE THE WHOLE PAGE FOLLOWS. Ana
+/// is `ada`, Bruno is `bob`, Carla is `cara`, everywhere either of them
+/// appears. Three of these four faces used to be the same file, so a group
+/// whose whole subject is who is standing in front of whom was three copies of
+/// one stranger — and a reader cannot tell a stack of identical faces apart,
+/// which is what `overlap` and `shape` are for. Diego is the one person with no
+/// portrait, deliberately: he appears only where the subject is `tone`, and a
+/// picture there would cover the thing being shown.
+///
+/// EACH FACE ALSO CARRIES ITS OWN COLOUR, because a picture is a layer over
+/// letters rather than a branch away from them. Block the files and this is
+/// still four people rather than four identical grey discs. `pending` keeps
+/// the default, because nobody has taken that place yet.
 ///
 /// One fragment rather than four copies, for the reason the macro it replaces
 /// existed: three examples show the same group, and three copies stop agreeing.
@@ -49,6 +58,7 @@ const PEOPLE: &[Node] = &[
             props: &[
                 ("label", Value::Message(Key::ExampleAvatarBruno)),
                 ("initials", Value::Data("BS")),
+                ("src", Value::Asset("assets/portraits/bob.svg")),
                 ("tone", Value::Text("accent")),
             ],
             children: &[],
@@ -62,6 +72,7 @@ const PEOPLE: &[Node] = &[
             props: &[
                 ("label", Value::Message(Key::ExampleAvatarCarla)),
                 ("initials", Value::Data("CM")),
+                ("src", Value::Asset("assets/portraits/cara.svg")),
                 ("tone", Value::Text("success")),
             ],
             children: &[],
@@ -179,6 +190,9 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         children: &[],
                     }],
                 },
+                // Bruno's own face, not Ana's again. Two children of a group
+                // are two people, and the shortest example on the page is the
+                // one where a repeated portrait is hardest to miss.
                 Node::Element {
                     tag: "li",
                     attributes: &[],
@@ -187,6 +201,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         props: &[
                             ("label", Value::Message(Key::ExampleAvatarBruno)),
                             ("initials", Value::Data("BS")),
+                            ("src", Value::Asset("assets/portraits/bob.svg")),
                             ("tone", Value::Text("accent")),
                         ],
                         children: &[],

@@ -21,6 +21,7 @@ import {
   openFrameTheme,
   openTheme,
   setFrameWidth,
+  showParts,
   url,
 } from "./pages.js";
 
@@ -641,6 +642,51 @@ test("no control in the rail shouts", async ({ page }) => {
     .evaluate((el) => el.closest(".nd-segmented").dataset.ndSelection);
   expect(loud).toBe("accent");
   await closeTheme(page);
+});
+
+test("no stage holds anything below its own bottom edge", async ({ page }) => {
+  // THE STAGE IS A SCROLL CONTAINER ON BOTH AXES, AND ONLY ONE OF THEM WAS
+  // ASKED FOR. `.nd-frame-stage` declares `overflow-x: auto` so a specimen too
+  // wide to shrink stays reachable; CSS computes `overflow-y: visible` to
+  // `auto` beside it, so the stage silently scrolls vertically as well. That is
+  // harmless while everything in it is in the flow — the stage grows and the
+  // two heights stay equal — and it is invisible the moment something is not:
+  // an out-of-flow panel adds scrollable overflow without adding height, and
+  // the stage keeps the rest below its own bottom edge where a screenshot
+  // cannot tell it from a panel that was drawn short.
+  //
+  // `Dialog { modal: false }` shipped exactly that. This is the measurement
+  // from the frame's side, so the next example that overflows its stage fails
+  // here rather than being reported as a component that draws itself wrong.
+  //
+  // THE HEIGHTS, NOT `overflow`. Reading the property back says what was
+  // declared; subtracting the two says whether anything is actually being kept
+  // out of sight.
+  for (const width of [1120, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    // The dialog page, because it is the one page whose examples open a surface
+    // that used to hang out of its own stage. Every stage on it is swept, not
+    // only the one that broke.
+    await page.goto(url(PAGE.dialog));
+    await showParts(page);
+    for (const root of await page.locator("[data-nd-dialog]").all()) {
+      await root.locator(".nd-dialog-open").click();
+      // A modal one is in the top layer, where no stage can hold it, and it
+      // makes the page behind it inert — so it is put away before the next
+      // trigger is pressed. A non-modal one is left open, which is the case
+      // being measured.
+      if ((await root.getAttribute("data-nd-modal")) !== "false") {
+        await page.keyboard.press("Escape");
+        await expect(root.locator(".nd-dialog-surface")).toBeHidden();
+      }
+    }
+    const kept = await page.evaluate(() =>
+      [...document.querySelectorAll("[data-nd-frame-stage]")]
+        .map((stage, index) => ({ index, below: stage.scrollHeight - stage.clientHeight }))
+        .filter((one) => one.below > 1),
+    );
+    expect(kept, `a stage is keeping content out of sight at ${width}px`).toEqual([]);
+  }
 });
 
 test("the frame's bar does not travel with the page", async ({ page }) => {

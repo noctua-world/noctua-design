@@ -11,10 +11,11 @@
 
 import { createElement as h } from "react";
 
-export function ButtonGroup({ label, labelledby, attached, orientation, fill, className, children, ...rest }) {
+export function ButtonGroup({ label, labelledby, attached, orientation, fill, justify, className, children, ...rest }) {
   const attached_ = attached ?? "true";
   const orientation_ = orientation ?? "horizontal";
   const fill_ = fill ?? "false";
+  const justify_ = justify ?? "center";
   const root = ["nd-button-group", className].filter(Boolean).join(" ");
   const props = { className: root, ...rest };
   props.role = "group";
@@ -23,5 +24,6 @@ export function ButtonGroup({ label, labelledby, attached, orientation, fill, cl
   if (attached_ !== undefined) props["data-nd-attached"] = String(attached_);
   if (orientation_ !== undefined) props["aria-orientation"] = String(orientation_);
   if (fill_ !== undefined) props["data-nd-fill"] = String(fill_);
+  if (justify_ !== undefined) props["data-nd-justify"] = String(justify_);
   return h("div", props, children);
 }

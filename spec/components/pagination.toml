@@ -6,9 +6,6 @@ guidance = "Use pagination under anything showing one page of a longer set: a ta
 name = "Pagination"
 element = "nav"
 class = "nd-pagination"
-# Digits, for the reason `Table`'s specimen is digits: the variant grid ships
-# raw markup, which never passes through the message catalogue.
-specimen = "<ul class=\"nd-pagination-list\"><li><a class=\"nd-pagination-link\" href=\"#\">1</a></li><li><a class=\"nd-pagination-link\" href=\"#\" aria-current=\"page\">2</a></li><li><a class=\"nd-pagination-link\" href=\"#\">3</a></li></ul>"
 summary = "Move through a set of pages with real links and a window around the current one."
 
 # LINKS, NOT BUTTONS, AND THAT IS THE WHOLE DESIGN.

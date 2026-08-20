@@ -8,20 +8,6 @@ name = "Select"
 # three of them describe.
 element = "div"
 class = "nd-select"
-# The control itself, at each size. See `Checkbox` for why the specimen of a
-# compound component is the part the prop changes — `size` is the control, and
-# the label above it would be the same three times.
-#
-# A DRAWN BOX, NOT A LIVE `<select>`. It used to be the real control, and it was
-# the only form control on the site whose variant grid was: every other one
-# declares an inert `-figure`, and the stylesheet says why in as many words —
-# a specimen of a component that needs a name must not render a nameless one.
-# The live version was also focusable, openable, and painted in the platform's
-# own chrome rather than this system's, because the rules that give a `<select>`
-# its arrow are scoped to the `.nd-select-field` wrapper the specimen has no
-# way to carry. Three sizes of the browser's widget is not a picture of this
-# component at three sizes.
-specimen = "<span class=\"nd-select-figure\"><span class=\"nd-select-box\"></span></span>"
 page = "select"
 summary = "Let users choose one value, or several, out of more than a list can show."
 

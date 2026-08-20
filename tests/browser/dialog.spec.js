@@ -127,6 +127,149 @@ test("a non-modal one leaves the page reachable and still answers Escape", async
   expect(landed, "focus fell to the body when a non-modal dialog closed").toBe(true);
 });
 
+test("a non-modal one takes room in the flow, so nothing above it can cut it off", async ({
+  page,
+}) => {
+  // THE DEFECT THIS IS NAMED AFTER. The surface was `position: absolute`
+  // against the control that opened it, which is the one position that could
+  // not work: out of flow, so no ancestor grows to hold it, and not `fixed`,
+  // so every ancestor's `overflow` still clips it. Inside an example frame at
+  // 1120px that was a 168px panel in a stage 171px tall, cut off 95px short —
+  // its own heading, its close control and half a line of body, with the rest
+  // unreachable and 53px of blank frame below the cut.
+  //
+  // MEASURED, NOT READ. `getComputedStyle(…).position` would say `relative`
+  // for a panel that is still being cut in half by something above it, and it
+  // would say `absolute` for one that happens to fit. The claim is about where
+  // the edges land, so the edges are what this reads.
+  await dialogs(page);
+  const root = named(page, "dialog-notes");
+  const surface = root.locator(".nd-dialog-surface");
+  await root.locator(".nd-dialog-open").click();
+  await expect(surface).toBeVisible();
+
+  const seen = await root.evaluate((el) => {
+    const box = (node) => {
+      const r = node.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, height: r.height };
+    };
+    const stage = el.closest("[data-nd-frame-stage]");
+    return {
+      panel: box(el.querySelector(".nd-dialog-surface")),
+      trigger: box(el.querySelector(".nd-dialog-open")),
+      root: box(el),
+      stage: box(stage),
+      frame: box(el.closest(".nd-frame")),
+      // What the stage is holding below its own bottom edge. `overflow-x: auto`
+      // computes `overflow-y` to `auto` as well, so a container that cannot
+      // grow hides the rest behind a scrollbar rather than clipping it — and a
+      // screenshot of the two looks the same.
+      hidden: stage.scrollHeight - stage.clientHeight,
+    };
+  });
+
+  // THE FLOOR. A panel that drew nothing would satisfy every bound below it.
+  expect(seen.panel.height, "the non-modal surface drew almost nothing").toBeGreaterThan(60);
+  // It is under the control that opened it, and clear of it.
+  expect(seen.panel.top).toBeGreaterThanOrEqual(seen.trigger.bottom);
+  // THE COMPONENT GREW AROUND IT, which is what being in the flow means and
+  // what the old arrangement could not do at any size.
+  expect(seen.root.bottom, "the component did not grow to hold its own panel").toBeGreaterThanOrEqual(
+    seen.panel.bottom - 1,
+  );
+  // And so did everything above it.
+  expect(seen.panel.bottom, "the stage cut the panel off").toBeLessThanOrEqual(seen.stage.bottom + 1);
+  expect(seen.panel.bottom, "the frame cut the panel off").toBeLessThanOrEqual(seen.frame.bottom + 1);
+  expect(seen.hidden, "the stage is holding something below its own bottom edge").toBeLessThanOrEqual(
+    1,
+  );
+});
+
+test("with no heading the close control is still in the corner, and costs no line", async ({
+  page,
+}) => {
+  // THE DEFECT. `Dialog` draws its head row whenever there is a heading OR a
+  // close control, and that row is a flex line at `space-between` — where ONE
+  // item lands at the START. So a dialog named by `label` put the `×` at the
+  // top left with the whole width of the panel empty beside it, and spent a
+  // 48px line on it in a 111px panel holding a single sentence.
+  //
+  // BOTH SHAPES ARE MEASURED IN ONE TEST, because the claim is that they agree:
+  // the control a reader reaches for is in the same corner whether or not there
+  // is a title beside it.
+  await dialogs(page);
+
+  const read = async (name) => {
+    const root = named(page, name);
+    await root.locator(".nd-dialog-open").click();
+    await expect(root.locator(".nd-dialog-surface")).toBeVisible();
+    const seen = await root.evaluate((el) => {
+      const box = (node) => {
+        const r = node.getBoundingClientRect();
+        return { top: r.top, right: r.right, left: r.left, bottom: r.bottom };
+      };
+      const surface = el.querySelector(".nd-dialog-surface");
+      const close = surface.querySelector(".nd-dialog-close");
+      const body = surface.querySelector(".nd-dialog-body");
+      const first = body.firstElementChild;
+      return {
+        surface: box(surface),
+        close: box(close),
+        body: box(body),
+        first: first ? box(first) : null,
+        name: close.getAttribute("aria-label"),
+        named: surface.getAttribute("aria-label") || surface.getAttribute("aria-labelledby"),
+        titled: Boolean(surface.querySelector(".nd-dialog-title")),
+      };
+    });
+    await page.keyboard.press("Escape");
+    await expect(root.locator(".nd-dialog-surface")).toBeHidden();
+    return seen;
+  };
+
+  const titled = await read("dialog-remove");
+  const bare = await read("dialog-rename");
+  expect(titled.titled, "the titled dialog drew no title").toBe(true);
+  expect(bare.titled, "the headless dialog drew a title").toBe(false);
+
+  // ONE CORNER, TWO SHAPES. Measured from the panel's own edges, so the two are
+  // comparable across dialogs of different widths and sizes.
+  const fromEnd = (one) => Math.round(one.surface.right - one.close.right);
+  const fromTop = (one) => Math.round(one.close.top - one.surface.top);
+  expect(fromEnd(bare), "the close control is not at the panel's trailing edge").toBe(
+    fromEnd(titled),
+  );
+  expect(fromTop(bare)).toBe(fromTop(titled));
+  // AND THE TWO AGREEING IS NOT ENOUGH ON ITS OWN: both at the leading edge
+  // would satisfy it. Every locale built here is left to right, so the far side
+  // is the right one, and the control is nearer to it than to the near side.
+  expect(bare.close.left - bare.surface.left).toBeGreaterThan(bare.surface.right - bare.close.right);
+
+  // AND IT COSTS NO LINE. With a title the row is real content and the body
+  // begins under it; with none there is no row, so the body begins at the top
+  // of the panel and the sentence is the first thing in it.
+  const bodyStart = (one) => Math.round(one.body.top - one.surface.top);
+  expect(bodyStart(titled), "the titled dialog has no head row to compare against").toBeGreaterThan(
+    24,
+  );
+  expect(bodyStart(bare), "a headless dialog still reserves a line for its close control").toBeLessThan(
+    8,
+  );
+
+  // AND THE CONTENT DOES NOT RUN UNDER THE GLYPH. The control is out of flow,
+  // so nothing else knows it is there unless the gutter says so.
+  expect(bare.first, "the headless dialog drew no content").not.toBeNull();
+  expect(bare.first.right, "the first line runs under the close control").toBeLessThanOrEqual(
+    bare.close.left,
+  );
+
+  // THE NAMES SURVIVE BOTH SHAPES: the surface is named by its title in one and
+  // by `label` in the other, and the control is named in each.
+  expect(titled.named).toMatch(/\S/);
+  expect(bare.named).toMatch(/\S\s\S/);
+  expect(bare.name).toMatch(/\S\s\S/);
+});
+
 test("the close control has a name, and a caller may refuse one", async ({ page }) => {
   await dialogs(page);
   const close = named(page, "dialog-remove").locator(".nd-dialog-close");

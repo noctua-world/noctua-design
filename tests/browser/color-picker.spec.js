@@ -506,3 +506,61 @@ test("the field starts one gap under the row above it, not two", async ({ page }
     space.control + space.gap * 2 + 2,
   );
 });
+
+/** The chip beside the error message, which is the one a reader meets refused. */
+const REFUSED = `${PICKERS}[data-nd-color-picker="page-colour"]`;
+
+test("the chip under an error takes the corner preset, square included", async ({ page }) => {
+  // THE ONE SURFACE ON THE SITE THAT ANSWERED NOBODY. A reader who changes
+  // *Corners* moves `--noctua-radius-control` and every control in the system
+  // follows it — except this chip, which asked for `shape: square` in the
+  // example's own call and therefore resolved `--noctua-radius-none` under all
+  // four presets. Set the page to round corners and the trigger around it
+  // became a capsule with a hard square inside, which is what was reported.
+  //
+  // FOUR PRESETS, NOT ONE, because `square` is itself a preset and the chip
+  // has to follow that too. A chip that is square because somebody wrote
+  // `shape: square` and a chip that is square because the reader asked for
+  // square corners look identical, and only the sweep tells them apart.
+  //
+  // THE CORNER PIXEL, NOT THE RADIUS. `border-radius` is a length so reading
+  // it would be allowed, but it would prove the declaration is present and
+  // nothing about which rule won — and losing on specificity is exactly how
+  // this got here. What is asked instead is whether the chip painted its own
+  // top-left corner.
+  await page.goto(url(PAGE.colorPicker));
+  const chip = page.locator(`${REFUSED} .nd-color-picker-chip`).first();
+  await chip.scrollIntoViewIfNeeded();
+  const painted = async () => {
+    const shot = await chip.screenshot();
+    return page.evaluate(async (data) => {
+      const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
+      const bitmap = await createImageBitmap(blob);
+      const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(bitmap, 0, 0);
+      // One pixel in from the corner, and the middle of the same edge to
+      // compare it with. A rounded box has cut the first away and kept the
+      // second; a square one has both. The answer is how far apart they are
+      // rather than whether they match: a corner a single pixel from a curve
+      // is antialiased, and two colours one unit apart are the same colour.
+      const at = (x, y) => [...ctx.getImageData(x, y, 1, 1).data];
+      const corner = at(1, 1);
+      const edge = at(Math.floor(bitmap.width / 2), 1);
+      return Math.hypot(...corner.map((value, band) => value - edge[band]));
+    }, shot.toString("base64"));
+  };
+
+  for (const preset of ["square", "soft", "round", "circular"]) {
+    await page.evaluate(
+      (value) => document.documentElement.setAttribute("data-noctua-radius", value),
+      preset,
+    );
+    const apart = await painted();
+    if (preset === "square") {
+      expect(apart, "the square preset cut a corner off the chip").toBeLessThan(16);
+    } else {
+      expect(apart, `the chip kept its corner under the ${preset} preset`).toBeGreaterThan(60);
+    }
+  }
+});

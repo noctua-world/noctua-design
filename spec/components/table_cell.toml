@@ -6,9 +6,6 @@ guidance = """Use a table cell for one field of one record. For the cell that na
 name = "TableCell"
 element = "td"
 class = "nd-table-cell"
-# A number, so alignment has something to align. Wrapped in a row and a table
-# by the variant grid, because a `<td>` outside one is dropped by the parser.
-specimen = "<span class=\"nd-identifier\">51s</span>"
 page = "tables"
 summary = "Holds one value, with its alignment, tone and wrapping, or a total in a foot."
 
@@ -17,7 +14,6 @@ type = "enum"
 values = ["start", "center", "end", "numeric"]
 default = "start"
 attribute = "data-nd-align"
-specimen = "<span class=\"nd-identifier\">R$ 1.240,00</span>"
 doc = "Where the value sits in the cell. `numeric` puts the digits against the end and switches on tabular figures, so a column of numbers lines up unit under unit. Use `start` for words, because centred text has a ragged left edge."
 
 [prop.tone]
@@ -30,7 +26,6 @@ type = "enum"
 values = ["wrap", "nowrap", "truncate"]
 default = "wrap"
 attribute = "data-nd-wrap"
-specimen = "<span class=\"nd-identifier\">release/2026-03-candidate-rollback</span>"
 doc = "What a long value does. `wrap` is the default. `nowrap` is for a value that means nothing broken across two lines, such as a date or a code. `truncate` cuts it with an ellipsis and **keeps the whole value in the markup**."
 
 [prop.span]

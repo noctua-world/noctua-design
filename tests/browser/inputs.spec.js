@@ -483,10 +483,15 @@ test("no two number fields on the page ask the same question", async ({ page }) 
     // THREE OF FOUR EXAMPLES WERE CALLED "How many", including a weight in
     // kilograms. An example is a component used, and a set of fields with one
     // label between them shows a page rather than a use.
+    // THE EXAMPLES, NOT THE GRID. A variant grid asks the same question in
+    // every cell on purpose: the words have to be identical for two values
+    // painted alike to measure alike, which is the claim `variants.spec.js`
+    // makes about every row on the site. Reading the grid here would demand
+    // the opposite of that, on the same markup.
     const questions = await page.evaluate(() =>
-      [...document.querySelectorAll("[data-nd-number-input]")].map((one) =>
-        one.closest(".nd-field")?.querySelector(".nd-label")?.textContent?.trim(),
-      ),
+      [...document.querySelectorAll("[data-nd-number-input]")]
+        .filter((one) => !one.closest(".nd-variant-stage"))
+        .map((one) => one.closest(".nd-field")?.querySelector(".nd-label")?.textContent?.trim()),
     );
     expect(questions.length, locale).toBeGreaterThan(4);
     expect(questions.filter(Boolean).length, locale).toBe(questions.length);

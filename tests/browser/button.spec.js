@@ -185,3 +185,89 @@ test("an attached group keeps its outer corners and squares every shared edge", 
   // allowed to answer here.
   expect(wrong, "a corner on the wrong side of a shared edge").toEqual([]);
 });
+
+/** Where each member's content sits inside it, as a fraction of its own width. */
+function contentOffsets(group) {
+  return group.evaluate((el) =>
+    [...el.querySelectorAll(":scope > .nd-button")].map((button) => {
+      const box = button.getBoundingClientRect();
+      const parts = [...button.querySelectorAll(".nd-button-text, .nd-icon-glyph")].map((part) =>
+        part.getBoundingClientRect(),
+      );
+      const first = Math.min(...parts.map((part) => part.left));
+      const last = Math.max(...parts.map((part) => part.right));
+      return {
+        lead: first - box.left,
+        trail: box.right - last,
+        width: box.width,
+      };
+    }),
+  );
+}
+
+test("a vertical group centres what is inside every one of its buttons", async ({ page }) => {
+  // THE DEFECT A READER REPORTED, MEASURED. A vertical group is
+  // `align-items: stretch`, so every button is as wide as the widest of them
+  // and a short label had nowhere to sit but where `justify` put it. Each of
+  // these three used to say `start` on its own call, so *Save* and *Cancel*
+  // floated against the leading edge of a box the width of *Publish*.
+  //
+  // GEOMETRY, NOT THE PROPERTY. `justify-content: center` computing to
+  // `center` proves the declaration is there and nothing about whether it won:
+  // the group's rule and the button's own are one specificity step apart, and
+  // a rule that loses looks exactly like one that works. Where the words land
+  // is the claim.
+  await page.goto(url(GROUPS));
+  await showParts(page);
+  const group = page
+    .locator('.nd-button-group[aria-orientation="vertical"][data-nd-justify="center"]')
+    .first();
+  const members = await contentOffsets(group);
+  expect(members.length, "the vertical group lost its buttons").toBeGreaterThan(2);
+  expect(
+    new Set(members.map((member) => Math.round(member.width))).size,
+    "a vertical group whose buttons are not one width proves nothing here",
+  ).toBe(1);
+  for (const member of members) {
+    // Within a pixel of each other, which is what centred means and what a
+    // stretched row of different labels cannot fake.
+    expect(
+      Math.abs(member.lead - member.trail),
+      `a centred button leaves ${Math.round(member.lead)}px before and ${Math.round(member.trail)}px after`,
+    ).toBeLessThanOrEqual(1);
+  }
+});
+
+test("the group states where its buttons' content sits, and beats each button", async ({ page }) => {
+  // A PROP THREE CHILDREN EACH HAD TO REPEAT IS A PROP THE GROUP SHOULD OWN,
+  // and both halves of that are here. The first is that `justify` on the group
+  // reaches every member: the icons in the `start` example line up because
+  // each button begins its content at the same edge.
+  await page.goto(url(GROUPS));
+  await showParts(page);
+  const group = page
+    .locator('.nd-button-group[aria-orientation="vertical"][data-nd-justify="start"]')
+    .first();
+  const started = await contentOffsets(group);
+  expect(started.length, "the start example lost its buttons").toBeGreaterThan(2);
+  const leads = started.map((member) => Math.round(member.lead));
+  expect(new Set(leads).size, `the icons start at ${leads.join("/")}`).toBe(1);
+  expect(
+    Math.min(...started.map((member) => member.trail)),
+    "nothing was stretched, so `start` had nowhere to differ from `center`",
+  ).toBeGreaterThan(1);
+
+  // The second half: a member that states its own `justify` does not win.
+  // `AvatarGroup.size` overrules each `Avatar` the same way and for the same
+  // reason — siblings share their arrangement, and a row that disagrees about
+  // it reads as broken.
+  const before = await contentOffsets(group);
+  await group.evaluate((el) => {
+    el.querySelector(":scope > .nd-button").setAttribute("data-nd-justify", "between");
+  });
+  const after = await contentOffsets(group);
+  expect(
+    Math.round(after[0].lead),
+    "a button inside a group moved its own content out from under the group",
+  ).toBe(Math.round(before[0].lead));
+});

@@ -6,8 +6,6 @@ guidance = """Use a table header cell to name a column, with `scope = "col"`, or
 name = "TableHeaderCell"
 element = "th"
 class = "nd-table-header-cell"
-# A number, so the alignment and the sort control have something to sit beside.
-specimen = "<span class=\"nd-identifier\">#4213</span>"
 page = "tables"
 summary = "Name a column or a record, and sort by it where the column allows."
 
@@ -29,7 +27,6 @@ type = "enum"
 values = ["start", "center", "end", "numeric"]
 default = "start"
 attribute = "data-nd-align"
-specimen = "<span class=\"nd-identifier\">R$ 1.240</span>"
 doc = "Where the words sit in the cell. **Match the column below it**, and use `numeric` over a column of numbers so the heading lines up with the values."
 
 [prop.tone]
@@ -42,7 +39,6 @@ type = "enum"
 values = ["wrap", "nowrap", "truncate"]
 default = "nowrap"
 attribute = "data-nd-wrap"
-specimen = "<span class=\"nd-identifier\">release/2026-03-candidate</span>"
 doc = "What a long heading does. `nowrap` by default, the opposite of a cell's default, so the head stays one line tall. Use `wrap` for a long heading over a narrow column."
 
 [prop.span]

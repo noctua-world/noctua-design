@@ -2,10 +2,6 @@
 name = "Truncate"
 element = "span"
 class = "nd-truncate"
-# The still picture needs REAL CHILDREN. Without this the grid falls
-# back to the pangram placeholder, so every value of every enum prop
-# draws one identical line of text — which is what the reader saw.
-specimen = "<span class=\"nd-identifier\">Aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp</span>"
 summary = "Clip text to a fixed number of lines and keep the full value available."
 
 [prop.lines]

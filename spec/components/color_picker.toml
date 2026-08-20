@@ -6,12 +6,6 @@ guidance = "Use a colour picker when the colour is the user's own value, such as
 name = "ColorPicker"
 element = "div"
 class = "nd-color-picker"
-# The part the enum props change: the chip a reader clicks. A drawn span
-# rather than the real trigger, because the trigger is a control and a
-# specimen of a `needs_name` component must not render a nameless one. It
-# takes `--nc-accent-solid` from the scope it is in, exactly as `Swatch` does,
-# so the variant grid needs no colour of its own.
-specimen = "<span class=\"nd-color-picker-figure\"><span class=\"nd-color-picker-chip\"></span></span>"
 summary = "Let users choose a colour from a square, with every notation for it folded away."
 
 # EVERY ID DERIVES FROM `name`, AND A CALLER WRITES NONE OF THEM.

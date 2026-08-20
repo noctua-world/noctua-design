@@ -104,7 +104,7 @@ pub use blockquote::{Blockquote, BlockquoteTone};
 pub use button::{
     Button, ButtonJustify, ButtonShape, ButtonSize, ButtonSubmit, ButtonTone, ButtonVariant,
 };
-pub use button_group::{ButtonGroup, ButtonGroupOrientation};
+pub use button_group::{ButtonGroup, ButtonGroupJustify, ButtonGroupOrientation};
 pub use carousel::{Carousel, CarouselOrientation, CarouselSnap};
 pub use carousel_slide::CarouselSlide;
 pub use checkbox::{Checkbox, CheckboxSize};

@@ -95,7 +95,13 @@ test("a hidden label is off the screen and still in the document", async ({ page
 test("every meter on the page is a different reading, in every locale", async ({ page }) => {
   for (const locale of LOCALES) {
     await page.goto(url(PAGE.meter, locale));
-    const bars = await page.locator("[data-nd-meter]").evaluateAll((all) =>
+    // THE EXAMPLES, NOT THE GRID. The `size` grid draws one reading three
+    // times deliberately: the words have to be identical for two values
+    // painted alike to measure alike, which is what `variants.spec.js` asks of
+    // every row on the site. It still announces one — a bar with no
+    // `value_label` is a shape a reader has to estimate from, wherever it is —
+    // and that half of the claim is the emitter's, in `specimens::itself`.
+    const bars = await page.locator("[data-nd-meter]:not(.nd-variant-stage *)").evaluateAll((all) =>
       all.map((one, at) => ({
         name: one.getAttribute("data-nd-meter"),
         reading: one.querySelector("meter")?.getAttribute("aria-valuetext") ?? null,

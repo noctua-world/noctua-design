@@ -69,7 +69,7 @@ pub fn Dialog(
     description: Option<String>,
     /// Whether the page behind it goes inert. `showModal` puts the surface in the top
     /// layer and hides the rest of the document from assistive technology. `show`
-    /// leaves the page reachable and the surface beside it.
+    /// leaves the page reachable and the surface in the page's flow.
     #[props(default = true)]
     modal: bool,
     /// How wide the surface may grow. `small` suits a question with two answers,

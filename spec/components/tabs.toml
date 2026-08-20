@@ -11,10 +11,6 @@ name = "Tabs"
 element = "div"
 class = "nd-tabs"
 page = "tabs"
-# The still picture needs REAL CHILDREN. Without this the grid falls back to the
-# pangram placeholder, so every value of every enum prop draws one identical
-# line of text. `Segmented` learned this first.
-specimen = "<a class=\"nd-tab\" data-nd-selected=\"true\"><span class=\"nd-tab-text nd-identifier\">Aa</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Bbbb</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Cc</span></a>"
 summary = "Show one panel at a time out of several, from a strip a reader chooses in."
 
 # WHY THIS IS A COMPONENT AND NOT A `Segmented` PROP.

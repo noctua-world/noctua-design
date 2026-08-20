@@ -280,6 +280,21 @@ mod structure {
                 walk(nodes, &mut all);
             }
         }
+        // AND EVERY VARIANT GRID, because a specimen is a tree of real
+        // components now rather than a picture the contract carried. The gates
+        // below are the only thing between a misspelled prop and a grid that
+        // silently draws the default: `Scope::find` returns `None` for a name
+        // no component declares, and nothing anywhere reports it.
+        for component in COMPONENTS {
+            for prop in component.props {
+                for value in prop.values {
+                    walk(
+                        crate::generated::specimens::nodes(component.name, prop.name, value),
+                        &mut all,
+                    );
+                }
+            }
+        }
         all
     }
 
@@ -312,6 +327,32 @@ mod structure {
                 "a tree names `{name}`, which is not a component"
             );
         }
+    }
+
+    /// The walk reaches the examples, the heroes AND the variant grids.
+    ///
+    /// Every gate in this module loops over [`everything`], and a loop over
+    /// nothing passes for ever. This is the floor, and it counts each of the
+    /// three sources separately because the grids were added last and an empty
+    /// third source would hide behind the other two.
+    #[test]
+    fn the_walk_reaches_every_tree_on_the_site() {
+        let mut grids = Vec::new();
+        for component in COMPONENTS {
+            for prop in component.props {
+                for value in prop.values {
+                    walk(
+                        crate::generated::specimens::nodes(component.name, prop.name, value),
+                        &mut grids,
+                    );
+                }
+            }
+        }
+        assert!(grids.len() > 500, "only {} nodes of grid", grids.len());
+        assert!(
+            everything().len() > grids.len(),
+            "the walk found the grids and nothing else"
+        );
     }
 
     /// A prop a tree sets must be one that component declares.

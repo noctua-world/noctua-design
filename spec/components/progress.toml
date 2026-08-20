@@ -10,10 +10,6 @@ use `Meter`. An absent `value` draws the indeterminate bar.
 name = "Progress"
 element = "progress"
 class = "nd-progress"
-# Part-way, so the fill has something to fill. `<progress>` draws its own bar;
-# the content is what a browser too old for the element would show.
-# The bar, for `Meter`'s reason: `size` is the bar's block size.
-specimen = "<span class=\"nd-progress-bar\"></span>"
 summary = "Show how far a task has got, or that it is running with no total known."
 
 [prop.name]

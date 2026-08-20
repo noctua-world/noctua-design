@@ -1153,7 +1153,14 @@ const BUTTON_GROUP: &[Example] = &[
         Key::ExampleGroupAttached
     ),
     example!(r"ButtonGroup { attached: false, … }"),
-    example!(r"ButtonGroup { orientation: ButtonGroupOrientation::Vertical, … }"),
+    example!(
+        r"ButtonGroup { orientation: ButtonGroupOrientation::Vertical, … }",
+        Key::ExampleGroupVertical
+    ),
+    example!(
+        r"ButtonGroup { orientation: …Vertical, justify: ButtonGroupJustify::Start, … }",
+        Key::ExampleGroupJustify
+    ),
     example!(r"ButtonGroup { fill: true, … }", Key::ExampleGroupFill),
     example!(
         r#"ButtonGroup { labelledby: "…", … } — a split button"#,
@@ -2047,7 +2054,7 @@ const COLOR_PICKER: &[Example] = &[
         Key::ExampleColorPickerPaletteNote
     ),
     example!(
-        r"ColorPicker { hint, error, required: true, glass: true, entry: false, size: Small, shape: Square } / ColorPicker { disabled: true }",
+        r"ColorPicker { hint, error, required: true, glass: true, entry: false, size: Small } / ColorPicker { disabled: true }",
         Key::ExampleColorPickerFormNote
     ),
 ];

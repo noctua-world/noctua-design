@@ -32,6 +32,33 @@ impl ButtonGroupOrientation {
     }
 }
 
+/// Where the content of every button sits when a button is wider than its content, which is what a vertical group and `fill` both produce. Stated once here, it overrides each `Button`'s own `justify`, so the members of one group cannot disagree.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum ButtonGroupJustify {
+    #[default]
+    /// `center`
+    Center,
+    /// `start`
+    Start,
+    /// `between`
+    Between,
+}
+
+impl ButtonGroupJustify {
+    /// Every value, in the order the spec declares them.
+    pub const ALL: [Self; 3] = [Self::Center, Self::Start, Self::Between];
+
+    /// The value as it appears in the DOM.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Center => "center",
+            Self::Start => "start",
+            Self::Between => "between",
+        }
+    }
+}
+
 /// Group buttons that belong together, joined into one control or spaced apart.
 ///
 /// # Accessibility
@@ -54,6 +81,9 @@ pub fn ButtonGroup(
     /// Stretches the group across its container and gives every button an equal share of it.
     #[props(default = false)]
     fill: bool,
+    /// Where the content of every button sits when a button is wider than its content, which is what a vertical group and `fill` both produce. Stated once here, it overrides each `Button`'s own `justify`, so the members of one group cannot disagree.
+    #[props(default)]
+    justify: ButtonGroupJustify,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -72,6 +102,7 @@ pub fn ButtonGroup(
             "data-nd-attached": if attached { "true" } else { "false" },
             "aria-orientation": orientation.as_str(),
             "data-nd-fill": if fill { "true" } else { "false" },
+            "data-nd-justify": justify.as_str(),
             {children}
         }
     }

@@ -9,14 +9,6 @@ name = "Checkbox"
 # it and a stylesheet can reach it from its own siblings.
 element = "div"
 class = "nd-choice nd-checkbox"
-# THE SPECIMEN IS THE BOX, and the box is the only thing `size` changes.
-#
-# The variant grid ships raw markup, so it can show one element carrying one
-# attribute — which is enough for `Text` and not for a control made of four
-# elements. Written as the box's own markup rather than as a word, the grid
-# shows exactly what the prop does: three boxes, 40, 32 and 24 pixels, with
-# nothing beside them to read.
-specimen = "<span class=\"nd-choice-box\"></span>"
 summary = "Let users select one or more options, or agree to a single statement."
 
 # WHY THE BOX IS 40 PIXELS AND NOT 16.

@@ -2,10 +2,6 @@
 name = "List"
 element = "ul"
 class = "nd-list"
-# The still picture needs REAL CHILDREN. Without this the grid falls
-# back to the pangram placeholder, so every value of every enum prop
-# draws one identical line of text — which is what the reader saw.
-specimen = "<li class=\"nd-list-item nd-identifier\">Aa</li><li class=\"nd-list-item nd-identifier\">Bb</li><li class=\"nd-list-item nd-identifier\">Cc</li>"
 page = "list"
 summary = "Group items as an ordered, unordered or description list, with nesting."
 

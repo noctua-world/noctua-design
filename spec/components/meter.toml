@@ -11,13 +11,6 @@ beside it.
 name = "Meter"
 element = "meter"
 class = "nd-meter"
-# A reading in the middle, so the fill has something to fill and the specimen
-# is not an empty box. `<meter>` renders its own bar, so the content is only
-# what a browser too old for the element would show.
-# THE BAR, because `size` is the bar's block size and a bare percentage has
-# none. `<meter>` accepts flow content as its fallback, so this is legal
-# markup and not a trick.
-specimen = "<span class=\"nd-meter-bar\"></span>"
 summary = "Show how much of a known total is used, as a real `<meter>`."
 
 [prop.name]

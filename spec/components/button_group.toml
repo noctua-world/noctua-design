@@ -6,10 +6,6 @@ guidance = "Use a button group for two or more buttons that are one decision, su
 name = "ButtonGroup"
 element = "div"
 class = "nd-button-group"
-# The still picture needs REAL CHILDREN. Without this the grid falls
-# back to the pangram placeholder, so every value of every enum prop
-# draws one identical line of text — which is what the reader saw.
-specimen = "<button class=\"nd-button\" type=\"button\" data-nd-variant=\"outline\" data-nd-tone=\"neutral\" data-nd-size=\"medium\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Aa</span></span></button><button class=\"nd-button\" type=\"button\" data-nd-variant=\"outline\" data-nd-tone=\"neutral\" data-nd-size=\"medium\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Bb</span></span></button>"
 summary = "Group buttons that belong together, joined into one control or spaced apart."
 
 [prop.label]
@@ -40,6 +36,27 @@ type = "bool"
 default = "false"
 attribute = "data-nd-fill"
 doc = "Stretches the group across its container and gives every button an equal share of it."
+
+# THE GROUP OWNS THIS, NOT EACH BUTTON, and that is the same answer
+# `AvatarGroup.size` gives. A group is the one arrangement where every member
+# is wider than its own content, so `justify` stopped being a per-button
+# refinement and became a fact about the row: three buttons repeating
+# `justify: start` is three chances to forget the fourth, and a group whose
+# members disagree about where their words sit reads as broken (`NOCTUA.md
+# §9.7`). The stylesheet writes it one class deeper than `Button`'s own rule,
+# so the group wins wherever both are stated.
+#
+# TWO THINGS IN EACH BUTTON AND ROOM BETWEEN THEM, or `start` and `between`
+# are one picture. No `specimen` here, though: this component draws ITSELF in a
+# grid, so a drawing in the contract would never be reached. The arm that gives
+# each button an icon is in `crates/noctua-design-emit/src/specimens.rs`, beside
+# the one `Button.justify` already needed.
+[prop.justify]
+type = "enum"
+values = ["center", "start", "between"]
+default = "center"
+attribute = "data-nd-justify"
+doc = "Where the content of every button sits when a button is wider than its content, which is what a vertical group and `fill` both produce. Stated once here, it overrides each `Button`'s own `justify`, so the members of one group cannot disagree."
 
 [prop.children]
 type = "children"

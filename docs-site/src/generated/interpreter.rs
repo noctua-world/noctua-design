@@ -18,11 +18,11 @@ use dioxus::prelude::*;
 use noctua_design::components::{
     Abbr, Avatar, AvatarGroup, AvatarGroupOverlap, AvatarGroupShape, AvatarGroupSize, AvatarShape,
     AvatarSize, AvatarTone, Badge, BadgeOverlap, BadgePlacement, Blockquote, BlockquoteTone,
-    Button, ButtonGroup, ButtonGroupOrientation, ButtonJustify, ButtonShape, ButtonSize,
-    ButtonSubmit, ButtonTone, ButtonVariant, Carousel, CarouselOrientation, CarouselSlide,
-    CarouselSnap, Checkbox, CheckboxSize, Code, CodeBlock, CodeBlockTheme, CodeTone, ColorPicker,
-    ColorPickerShape, ColorPickerSize, DateInput, DateInputOrder, DateInputSize, Del, Dialog,
-    DialogSize, Disclosure, DisclosureHeading, Divider, DividerOrientation, DividerSpacing,
+    Button, ButtonGroup, ButtonGroupJustify, ButtonGroupOrientation, ButtonJustify, ButtonShape,
+    ButtonSize, ButtonSubmit, ButtonTone, ButtonVariant, Carousel, CarouselOrientation,
+    CarouselSlide, CarouselSnap, Checkbox, CheckboxSize, Code, CodeBlock, CodeBlockTheme, CodeTone,
+    ColorPicker, ColorPickerShape, ColorPickerSize, DateInput, DateInputOrder, DateInputSize, Del,
+    Dialog, DialogSize, Disclosure, DisclosureHeading, Divider, DividerOrientation, DividerSpacing,
     DividerWeight, Em, ErrorSummary, ErrorSummaryItem, Field, FieldKind, FieldSize, Fieldset,
     FileInput, FileInputSize, Heading, HeadingLevel, HeadingSize, HeadingTone, Icon, IconSize,
     Image, ImageFit, ImageLoading, ImageRatio, Info, InfoPlacement, Input, InputKind, InputSize,
@@ -441,6 +441,14 @@ fn button_group(
         )
         .unwrap_or_default();
     let fill_ = scope.flag(props, "fill").unwrap_or(false);
+    let justify_ = scope
+        .pick(
+            props,
+            "justify",
+            &ButtonGroupJustify::ALL,
+            ButtonGroupJustify::as_str,
+        )
+        .unwrap_or_default();
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -450,6 +458,7 @@ fn button_group(
             attached: attached_,
             orientation: orientation_,
             fill: fill_,
+            justify: justify_,
             class: class_,
             {render(children, scope)}
         }

@@ -10,7 +10,6 @@ element = "span"
 class = "nd-avatar"
 page = "avatars"
 summary = "Show who a person is, as a picture, as initials, or as an icon."
-specimen = "<span class=\"nd-avatar-initials nd-identifier\">NA</span>"
 
 [prop.label]
 type = "text"

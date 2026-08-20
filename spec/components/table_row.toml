@@ -6,9 +6,6 @@ guidance = "Use a table row for one record. Its cells are its fields, in the ord
 name = "TableRow"
 element = "tr"
 class = "nd-table-row"
-# Two cells, so the row reads as a row. Wrapped in a `<table><tbody>` by the
-# variant grid, because a `<tr>` outside one is a start tag the parser drops.
-specimen = "<th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td>"
 page = "tables"
 summary = "Show one record, with a tone, a choice control and a detail row."
 

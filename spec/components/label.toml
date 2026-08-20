@@ -10,11 +10,6 @@ is no field, beside a `Segmented` or over a `Toolbar`.
 name = "Label"
 element = "label"
 class = "nd-label"
-# Two letters rather than a word: `kind` renders three different elements, and
-# a specimen whose content changed with the element would document the content
-# instead of the element. `nd-identifier` because two letters cut from an
-# alphabet are the same two letters in every locale.
-specimen = "<span class=\"nd-identifier\">Aa</span>"
 summary = "Name a control, a group of controls or a region, in the reader's language."
 
 # THIS IS THE ONE LABEL IN THE SYSTEM.
@@ -43,6 +38,12 @@ type = "enum"
 values = ["label", "legend", "name"]
 elements = ["label", "legend", "p"]
 default = "label"
+# NO GRID: A QUESTION LOOKS LIKE A QUESTION WHICHEVER ELEMENT CARRIES IT.
+# All three take `.nd-label` and the same type scale, so the three cells were
+# one picture drawn three times — which reads as a prop that does nothing. It
+# does something a picture cannot show: it chooses the element, and that is
+# what the reference table and the examples are for.
+variants = false
 doc = """Which element names it. `label` names one labelable control through `for`. `legend` names the `<fieldset>` it opens. `name` renders a `<p>` for a group that is neither, such as a `role="radiogroup"`."""
 
 [prop.size]

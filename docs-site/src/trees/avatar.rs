@@ -148,11 +148,16 @@ pub(crate) const EXAMPLES: &[Tree] = &[
             tag: "div",
             attributes: &[("class", Value::Text("nd-example-row"))],
             children: &[
+                // ONE PERSON, ONE PORTRAIT. Ana is `ada` and Bruno is `bob`
+                // wherever either of them stands on this site, so two avatars
+                // side by side are two people a reader can tell apart — which
+                // is the whole claim an avatar makes.
                 Node::Component {
                     name: "Avatar",
                     props: &[
                         ("href", Value::Text("../button/")),
                         ("initials", Value::Data("AL")),
+                        ("src", Value::Asset("assets/portraits/ada.svg")),
                         ("label", Value::Message(Key::ExampleAvatarAna)),
                     ],
                     children: &[],
@@ -168,6 +173,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                             props: &[
                                 ("decorative", Value::Bool(true)),
                                 ("initials", Value::Data("BS")),
+                                ("src", Value::Asset("assets/portraits/bob.svg")),
                                 ("label", Value::Message(Key::ExampleAvatarBruno)),
                             ],
                             children: &[],

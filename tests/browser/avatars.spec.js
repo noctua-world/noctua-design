@@ -130,6 +130,38 @@ test("the group's size wins over an avatar's own", async ({ page }) => {
   }
 });
 
+test("no group draws one person's face twice", async ({ page }) => {
+  // A GROUP IS SEVERAL PEOPLE, AND IT WAS THREE COPIES OF ONE STRANGER. Every
+  // `Avatar { src }` on the site pointed at the same portrait for a while, so
+  // the component whose whole subject is who is standing in front of whom drew
+  // the same face at every position — and `overlap`, `size` and `shape` are all
+  // claims about telling the members apart, none of which a stack of identical
+  // discs can show.
+  //
+  // FROM THE PIXELS, NOT FROM `src`. Two `<img>` elements agreeing on a URL is
+  // one way to draw one face twice; two files that happen to be the same
+  // drawing is another, and a reader cannot tell them apart. What the reader
+  // sees is what is compared, which is the same reason nothing here reads a
+  // colour back out of the DOM.
+  await page.goto(url(PAGE.avatars));
+  await showParts(page);
+  const groups = await page.locator(".nd-avatar-group:has(.nd-avatar-image)").all();
+  expect(groups.length, "no group on the page shows a portrait at all").toBeGreaterThan(0);
+  for (const group of groups) {
+    const faces = await group.locator(".nd-avatar-image").all();
+    const seen = [];
+    for (const face of faces) {
+      await face.scrollIntoViewIfNeeded();
+      const shot = (await face.screenshot()).toString("base64");
+      expect(
+        seen.includes(shot),
+        `a group of ${faces.length} draws the same face at two positions`,
+      ).toBe(false);
+      seen.push(shot);
+    }
+  }
+});
+
 test("every face in a group keeps a strip a pointer can reach", async ({ page }) => {
   await page.goto(url(PAGE.avatars));
   await showParts(page);

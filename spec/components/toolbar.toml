@@ -6,10 +6,6 @@ guidance = "Use a toolbar for a bar of controls that belong to one thing, such a
 name = "Toolbar"
 element = "div"
 class = "nd-toolbar"
-# The still picture needs REAL CHILDREN. Without this the grid falls
-# back to the pangram placeholder, so every value of every enum prop
-# draws one identical line of text — which is what the reader saw.
-specimen = "<div class=\"nd-toolbar-group\" role=\"group\"><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Aa</span></span></button><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Bb</span></span></button></div>"
 summary = "Group controls into one bar that is a single tab stop, walked with the arrow keys."
 
 # THE ROLE IS A PROMISE ABOUT THE KEYBOARD, AND IT IS KEPT ELSEWHERE.

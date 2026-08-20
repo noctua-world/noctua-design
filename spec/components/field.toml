@@ -7,13 +7,6 @@ name = "Field"
 element = "div"
 class = "nd-field"
 summary = "Label a form control, and show the hint and the error message under it."
-# Two drawn bars rather than a word: the variant grid shows what `size` does to
-# the question and the box under it, and a specimen carrying the English word
-# "Label" would be English on a page in three locales.
-# THE LABEL IS IN THE PICTURE, because `size` reaches the label and nothing
-# else — a figure of a rule and a box drew three identical fields under
-# `small`, `medium` and `large`.
-specimen = "<span class=\"nd-field-figure\"><span class=\"nd-label nd-identifier\">Aa</span><span class=\"nd-field-rule\"></span><span class=\"nd-field-box\"></span></span>"
 
 # THE ID IS THE CALLER'S, AND THAT IS THE ONE THING IT MUST BE.
 #

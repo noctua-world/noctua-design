@@ -7,6 +7,7 @@
 import type { ReactNode } from "react";
 
 export type ButtonGroupOrientation = "horizontal" | "vertical";
+export type ButtonGroupJustify = "center" | "start" | "between";
 
 export interface ButtonGroupProps {
   /** The group's accessible name, saying what the buttons are for. Required unless `labelledby` names it instead, because a `role="group"` with no name gives a screen reader only the word `group`. */
@@ -19,6 +20,8 @@ export interface ButtonGroupProps {
   orientation?: ButtonGroupOrientation;
   /** Stretches the group across its container and gives every button an equal share of it. */
   fill?: boolean;
+  /** Where the content of every button sits when a button is wider than its content, which is what a vertical group and `fill` both produce. Stated once here, it overrides each `Button`'s own `justify`, so the members of one group cannot disagree. */
+  justify?: ButtonGroupJustify;
   className?: string;
   children?: ReactNode;
 }

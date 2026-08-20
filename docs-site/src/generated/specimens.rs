@@ -12,53 +12,18 @@
 //!
 //! # The grids that draw a picture rather than the component
 //!
-//! Each of these carries a `specimen` its own props cannot take: markup in
-//! nearly every case, because a live control in a grid is one a reader can
-//! operate by mistake, and for `Rating` the name of an icon it draws itself.
-//! Their grids draw the element the contract names, carrying the attributes
-//! the contract declares, with that picture inside. Rendering one shows the
-//! markup matches in both languages and nothing more about the component.
+//! Every other grid on the site draws the real component, so this list is
+//! the exception and the emitter that wrote it says why each entry is on
+//! it. A picture is the contract's element carrying the contract's
+//! attributes with the contract's `specimen` inside, and rendering one
+//! shows the markup matches in both languages and nothing more about the
+//! component.
 //!
 //! The prop is named because a prop may carry a picture where the component
 //! carries none, and the other way round.
 //!
-//! - `Avatar: size, shape, tone`
-//! - `AvatarGroup: size, shape, overlap`
-//! - `Badge: placement, overlap`
-//! - `Button: justify`
-//! - `ButtonGroup: orientation`
-//! - `Checkbox: size`
-//! - `ColorPicker: size, shape`
-//! - `Field: kind, size`
-//! - `Image: ratio`
-//! - `Input: size`
-//! - `Label: kind, size`
 //! - `Lineage: view, route, line, lettering, size, thickness, filter_mode, pick, height`
 //! - `LineageFigure: shape, tone`
-//! - `List: kind, marker, spacing`
-//! - `Meter: size`
-//! - `NumberInput: stepping, size`
-//! - `OtpField: kind, size`
-//! - `Pagination: size`
-//! - `Progress: size`
-//! - `Prose: measure`
-//! - `Radio: size`
-//! - `Rating: size`
-//! - `Search: size`
-//! - `Segmented: appearance, size, shape, orientation, selection`
-//! - `Select: size`
-//! - `Table: density, rules`
-//! - `TableCell: align, wrap`
-//! - `TableColumn: width`
-//! - `TableHeaderCell: align, wrap`
-//! - `TableRow: emphasis`
-//! - `Tabs: orientation, appearance, size, fill`
-//! - `Tag: variant, size, shape`
-//! - `TagPicker: size`
-//! - `Textarea: resize`
-//! - `Toolbar: orientation, density`
-//! - `Tree: size`
-//! - `Truncate: lines`
 
 use noctua_design_i18n::Key;
 
@@ -72,21 +37,18 @@ const AVATAR_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("avatar")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar")),
-                    ("data-nd-shape", Value::Text("circle")),
-                    ("data-nd-tone", Value::Text("neutral")),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Avatar",
+                props: &[
+                    ("label", Value::Text("Avatar")),
+                    ("initials", Value::Data("NA")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-avatar-initials nd-identifier\">NA</span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -112,21 +74,18 @@ const AVATAR_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("avatar")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar")),
-                    ("data-nd-shape", Value::Text("circle")),
-                    ("data-nd-tone", Value::Text("neutral")),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Avatar",
+                props: &[
+                    ("label", Value::Text("Avatar")),
+                    ("initials", Value::Data("NA")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-avatar-initials nd-identifier\">NA</span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -152,21 +111,18 @@ const AVATAR_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("avatar")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar")),
-                    ("data-nd-shape", Value::Text("circle")),
-                    ("data-nd-tone", Value::Text("neutral")),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Avatar",
+                props: &[
+                    ("label", Value::Text("Avatar")),
+                    ("initials", Value::Data("NA")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-avatar-initials nd-identifier\">NA</span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -192,21 +148,18 @@ const AVATAR_SHAPE_CIRCLE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("avatar")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-tone", Value::Text("neutral")),
-                    ("data-nd-shape", Value::Text("circle")),
+            children: &[Node::Component {
+                name: "Avatar",
+                props: &[
+                    ("label", Value::Text("Avatar")),
+                    ("initials", Value::Data("NA")),
+                    ("shape", Value::Text("circle")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-avatar-initials nd-identifier\">NA</span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -232,21 +185,18 @@ const AVATAR_SHAPE_ROUNDED: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("avatar")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-tone", Value::Text("neutral")),
-                    ("data-nd-shape", Value::Text("rounded")),
+            children: &[Node::Component {
+                name: "Avatar",
+                props: &[
+                    ("label", Value::Text("Avatar")),
+                    ("initials", Value::Data("NA")),
+                    ("shape", Value::Text("rounded")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-avatar-initials nd-identifier\">NA</span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -272,21 +222,18 @@ const AVATAR_SHAPE_SQUARE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("avatar")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-tone", Value::Text("neutral")),
-                    ("data-nd-shape", Value::Text("square")),
+            children: &[Node::Component {
+                name: "Avatar",
+                props: &[
+                    ("label", Value::Text("Avatar")),
+                    ("initials", Value::Data("NA")),
+                    ("shape", Value::Text("square")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-avatar-initials nd-identifier\">NA</span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -312,21 +259,18 @@ const AVATAR_TONE_NEUTRAL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("avatar")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("circle")),
-                    ("data-nd-tone", Value::Text("neutral")),
+            children: &[Node::Component {
+                name: "Avatar",
+                props: &[
+                    ("label", Value::Text("Avatar")),
+                    ("initials", Value::Data("NA")),
+                    ("tone", Value::Text("neutral")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-avatar-initials nd-identifier\">NA</span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -352,21 +296,18 @@ const AVATAR_TONE_ACCENT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("avatar")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("circle")),
-                    ("data-nd-tone", Value::Text("accent")),
+            children: &[Node::Component {
+                name: "Avatar",
+                props: &[
+                    ("label", Value::Text("Avatar")),
+                    ("initials", Value::Data("NA")),
+                    ("tone", Value::Text("accent")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-avatar-initials nd-identifier\">NA</span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -392,21 +333,18 @@ const AVATAR_TONE_DANGER: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("avatar")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("circle")),
-                    ("data-nd-tone", Value::Text("danger")),
+            children: &[Node::Component {
+                name: "Avatar",
+                props: &[
+                    ("label", Value::Text("Avatar")),
+                    ("initials", Value::Data("NA")),
+                    ("tone", Value::Text("danger")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-avatar-initials nd-identifier\">NA</span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -432,21 +370,18 @@ const AVATAR_TONE_SUCCESS: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("avatar")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("circle")),
-                    ("data-nd-tone", Value::Text("success")),
+            children: &[Node::Component {
+                name: "Avatar",
+                props: &[
+                    ("label", Value::Text("Avatar")),
+                    ("initials", Value::Data("NA")),
+                    ("tone", Value::Text("success")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-avatar-initials nd-identifier\">NA</span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -472,21 +407,43 @@ const AVATAR_GROUP_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("avatar-group")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar-group")),
-                    ("data-nd-shape", Value::Text("circle")),
-                    ("data-nd-overlap", Value::Text("loose")),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "AvatarGroup",
+                props: &[
+                    ("label", Value::Text("AvatarGroup")),
+                    ("more", Value::Data("+3")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw(
-                    "<li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">AL</span></span></li><li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">BS</span></span></li><li class=\"nd-avatar-more\"><span class=\"nd-avatar-more-chip\"><span aria-hidden=\"true\">+3</span></span></li>",
-                )],
+                children: &[
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("AL")),
+                                ("initials", Value::Data("AL")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("BS")),
+                                ("initials", Value::Data("BS")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -512,21 +469,43 @@ const AVATAR_GROUP_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("avatar-group")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar-group")),
-                    ("data-nd-shape", Value::Text("circle")),
-                    ("data-nd-overlap", Value::Text("loose")),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "AvatarGroup",
+                props: &[
+                    ("label", Value::Text("AvatarGroup")),
+                    ("more", Value::Data("+3")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw(
-                    "<li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">AL</span></span></li><li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">BS</span></span></li><li class=\"nd-avatar-more\"><span class=\"nd-avatar-more-chip\"><span aria-hidden=\"true\">+3</span></span></li>",
-                )],
+                children: &[
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("AL")),
+                                ("initials", Value::Data("AL")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("BS")),
+                                ("initials", Value::Data("BS")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -552,21 +531,43 @@ const AVATAR_GROUP_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("avatar-group")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar-group")),
-                    ("data-nd-shape", Value::Text("circle")),
-                    ("data-nd-overlap", Value::Text("loose")),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "AvatarGroup",
+                props: &[
+                    ("label", Value::Text("AvatarGroup")),
+                    ("more", Value::Data("+3")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw(
-                    "<li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">AL</span></span></li><li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">BS</span></span></li><li class=\"nd-avatar-more\"><span class=\"nd-avatar-more-chip\"><span aria-hidden=\"true\">+3</span></span></li>",
-                )],
+                children: &[
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("AL")),
+                                ("initials", Value::Data("AL")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("BS")),
+                                ("initials", Value::Data("BS")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -592,21 +593,43 @@ const AVATAR_GROUP_SHAPE_CIRCLE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("avatar-group")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar-group")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-overlap", Value::Text("loose")),
-                    ("data-nd-shape", Value::Text("circle")),
+            children: &[Node::Component {
+                name: "AvatarGroup",
+                props: &[
+                    ("label", Value::Text("AvatarGroup")),
+                    ("more", Value::Data("+3")),
+                    ("shape", Value::Text("circle")),
                 ],
-                children: &[Node::Raw(
-                    "<li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">AL</span></span></li><li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">BS</span></span></li><li class=\"nd-avatar-more\"><span class=\"nd-avatar-more-chip\"><span aria-hidden=\"true\">+3</span></span></li>",
-                )],
+                children: &[
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("AL")),
+                                ("initials", Value::Data("AL")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("BS")),
+                                ("initials", Value::Data("BS")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -632,21 +655,43 @@ const AVATAR_GROUP_SHAPE_ROUNDED: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("avatar-group")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar-group")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-overlap", Value::Text("loose")),
-                    ("data-nd-shape", Value::Text("rounded")),
+            children: &[Node::Component {
+                name: "AvatarGroup",
+                props: &[
+                    ("label", Value::Text("AvatarGroup")),
+                    ("more", Value::Data("+3")),
+                    ("shape", Value::Text("rounded")),
                 ],
-                children: &[Node::Raw(
-                    "<li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">AL</span></span></li><li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">BS</span></span></li><li class=\"nd-avatar-more\"><span class=\"nd-avatar-more-chip\"><span aria-hidden=\"true\">+3</span></span></li>",
-                )],
+                children: &[
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("AL")),
+                                ("initials", Value::Data("AL")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("BS")),
+                                ("initials", Value::Data("BS")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -672,21 +717,43 @@ const AVATAR_GROUP_SHAPE_SQUARE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("avatar-group")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar-group")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-overlap", Value::Text("loose")),
-                    ("data-nd-shape", Value::Text("square")),
+            children: &[Node::Component {
+                name: "AvatarGroup",
+                props: &[
+                    ("label", Value::Text("AvatarGroup")),
+                    ("more", Value::Data("+3")),
+                    ("shape", Value::Text("square")),
                 ],
-                children: &[Node::Raw(
-                    "<li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">AL</span></span></li><li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">BS</span></span></li><li class=\"nd-avatar-more\"><span class=\"nd-avatar-more-chip\"><span aria-hidden=\"true\">+3</span></span></li>",
-                )],
+                children: &[
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("AL")),
+                                ("initials", Value::Data("AL")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("BS")),
+                                ("initials", Value::Data("BS")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -712,21 +779,43 @@ const AVATAR_GROUP_OVERLAP_TIGHT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("overlap")),
                 ("data-nd-slug", Value::Text("avatar-group")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar-group")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("circle")),
-                    ("data-nd-overlap", Value::Text("tight")),
+            children: &[Node::Component {
+                name: "AvatarGroup",
+                props: &[
+                    ("label", Value::Text("AvatarGroup")),
+                    ("more", Value::Data("+3")),
+                    ("overlap", Value::Text("tight")),
                 ],
-                children: &[Node::Raw(
-                    "<li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">AL</span></span></li><li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">BS</span></span></li><li class=\"nd-avatar-more\"><span class=\"nd-avatar-more-chip\"><span aria-hidden=\"true\">+3</span></span></li>",
-                )],
+                children: &[
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("AL")),
+                                ("initials", Value::Data("AL")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("BS")),
+                                ("initials", Value::Data("BS")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -752,21 +841,43 @@ const AVATAR_GROUP_OVERLAP_LOOSE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("overlap")),
                 ("data-nd-slug", Value::Text("avatar-group")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar-group")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("circle")),
-                    ("data-nd-overlap", Value::Text("loose")),
+            children: &[Node::Component {
+                name: "AvatarGroup",
+                props: &[
+                    ("label", Value::Text("AvatarGroup")),
+                    ("more", Value::Data("+3")),
+                    ("overlap", Value::Text("loose")),
                 ],
-                children: &[Node::Raw(
-                    "<li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">AL</span></span></li><li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">BS</span></span></li><li class=\"nd-avatar-more\"><span class=\"nd-avatar-more-chip\"><span aria-hidden=\"true\">+3</span></span></li>",
-                )],
+                children: &[
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("AL")),
+                                ("initials", Value::Data("AL")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("BS")),
+                                ("initials", Value::Data("BS")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -792,21 +903,43 @@ const AVATAR_GROUP_OVERLAP_NONE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("overlap")),
                 ("data-nd-slug", Value::Text("avatar-group")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-avatar-group")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("circle")),
-                    ("data-nd-overlap", Value::Text("none")),
+            children: &[Node::Component {
+                name: "AvatarGroup",
+                props: &[
+                    ("label", Value::Text("AvatarGroup")),
+                    ("more", Value::Data("+3")),
+                    ("overlap", Value::Text("none")),
                 ],
-                children: &[Node::Raw(
-                    "<li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">AL</span></span></li><li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">BS</span></span></li><li class=\"nd-avatar-more\"><span class=\"nd-avatar-more-chip\"><span aria-hidden=\"true\">+3</span></span></li>",
-                )],
+                children: &[
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("AL")),
+                                ("initials", Value::Data("AL")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                    Node::Element {
+                        tag: "li",
+                        attributes: &[],
+                        children: &[Node::Component {
+                            name: "Avatar",
+                            props: &[
+                                ("label", Value::Data("BS")),
+                                ("initials", Value::Data("BS")),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -832,20 +965,26 @@ const BADGE_PLACEMENT_TOP_END: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("placement")),
                 ("data-nd-slug", Value::Text("badge")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-badge")),
-                    ("data-nd-overlap", Value::Text("rectangle")),
-                    ("data-nd-placement", Value::Text("top-end")),
+            children: &[Node::Component {
+                name: "Badge",
+                props: &[
+                    ("label", Value::Message(Key::ExampleBadgeUnread)),
+                    ("count", Value::Data("3")),
+                    ("tone", Value::Text("danger")),
+                    ("placement", Value::Text("top-end")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-badge\" data-nd-tone=\"danger\"><span class=\"nd-badge-mark\">3</span></span>",
-                )],
+                children: &[Node::Component {
+                    name: "Avatar",
+                    props: &[
+                        ("label", Value::Data("NA")),
+                        ("initials", Value::Data("NA")),
+                    ],
+                    children: &[],
+                }],
             }],
         },
         Node::Element {
@@ -871,20 +1010,26 @@ const BADGE_PLACEMENT_TOP_START: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("placement")),
                 ("data-nd-slug", Value::Text("badge")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-badge")),
-                    ("data-nd-overlap", Value::Text("rectangle")),
-                    ("data-nd-placement", Value::Text("top-start")),
+            children: &[Node::Component {
+                name: "Badge",
+                props: &[
+                    ("label", Value::Message(Key::ExampleBadgeUnread)),
+                    ("count", Value::Data("3")),
+                    ("tone", Value::Text("danger")),
+                    ("placement", Value::Text("top-start")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-badge\" data-nd-tone=\"danger\"><span class=\"nd-badge-mark\">3</span></span>",
-                )],
+                children: &[Node::Component {
+                    name: "Avatar",
+                    props: &[
+                        ("label", Value::Data("NA")),
+                        ("initials", Value::Data("NA")),
+                    ],
+                    children: &[],
+                }],
             }],
         },
         Node::Element {
@@ -910,20 +1055,26 @@ const BADGE_PLACEMENT_BOTTOM_END: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("placement")),
                 ("data-nd-slug", Value::Text("badge")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-badge")),
-                    ("data-nd-overlap", Value::Text("rectangle")),
-                    ("data-nd-placement", Value::Text("bottom-end")),
+            children: &[Node::Component {
+                name: "Badge",
+                props: &[
+                    ("label", Value::Message(Key::ExampleBadgeUnread)),
+                    ("count", Value::Data("3")),
+                    ("tone", Value::Text("danger")),
+                    ("placement", Value::Text("bottom-end")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-badge\" data-nd-tone=\"danger\"><span class=\"nd-badge-mark\">3</span></span>",
-                )],
+                children: &[Node::Component {
+                    name: "Avatar",
+                    props: &[
+                        ("label", Value::Data("NA")),
+                        ("initials", Value::Data("NA")),
+                    ],
+                    children: &[],
+                }],
             }],
         },
         Node::Element {
@@ -949,20 +1100,26 @@ const BADGE_PLACEMENT_BOTTOM_START: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("placement")),
                 ("data-nd-slug", Value::Text("badge")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-badge")),
-                    ("data-nd-overlap", Value::Text("rectangle")),
-                    ("data-nd-placement", Value::Text("bottom-start")),
+            children: &[Node::Component {
+                name: "Badge",
+                props: &[
+                    ("label", Value::Message(Key::ExampleBadgeUnread)),
+                    ("count", Value::Data("3")),
+                    ("tone", Value::Text("danger")),
+                    ("placement", Value::Text("bottom-start")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-badge\" data-nd-tone=\"danger\"><span class=\"nd-badge-mark\">3</span></span>",
-                )],
+                children: &[Node::Component {
+                    name: "Avatar",
+                    props: &[
+                        ("label", Value::Data("NA")),
+                        ("initials", Value::Data("NA")),
+                    ],
+                    children: &[],
+                }],
             }],
         },
         Node::Element {
@@ -988,20 +1145,26 @@ const BADGE_OVERLAP_RECTANGLE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("overlap")),
                 ("data-nd-slug", Value::Text("badge")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-badge")),
-                    ("data-nd-placement", Value::Text("top-end")),
-                    ("data-nd-overlap", Value::Text("rectangle")),
+            children: &[Node::Component {
+                name: "Badge",
+                props: &[
+                    ("label", Value::Message(Key::ExampleBadgeUnread)),
+                    ("count", Value::Data("3")),
+                    ("tone", Value::Text("danger")),
+                    ("overlap", Value::Text("rectangle")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-badge\" data-nd-tone=\"danger\"><span class=\"nd-badge-mark\">3</span></span>",
-                )],
+                children: &[Node::Component {
+                    name: "Avatar",
+                    props: &[
+                        ("label", Value::Data("NA")),
+                        ("initials", Value::Data("NA")),
+                    ],
+                    children: &[],
+                }],
             }],
         },
         Node::Element {
@@ -1027,20 +1190,26 @@ const BADGE_OVERLAP_CIRCLE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("overlap")),
                 ("data-nd-slug", Value::Text("badge")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-badge")),
-                    ("data-nd-placement", Value::Text("top-end")),
-                    ("data-nd-overlap", Value::Text("circle")),
+            children: &[Node::Component {
+                name: "Badge",
+                props: &[
+                    ("label", Value::Message(Key::ExampleBadgeUnread)),
+                    ("count", Value::Data("3")),
+                    ("tone", Value::Text("danger")),
+                    ("overlap", Value::Text("circle")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-badge\" data-nd-tone=\"danger\"><span class=\"nd-badge-mark\">3</span></span>",
-                )],
+                children: &[Node::Component {
+                    name: "Avatar",
+                    props: &[
+                        ("label", Value::Data("NA")),
+                        ("initials", Value::Data("NA")),
+                    ],
+                    children: &[],
+                }],
             }],
         },
         Node::Element {
@@ -1132,7 +1301,7 @@ const BUTTON_VARIANT_SOLID: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("variant")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1142,7 +1311,6 @@ const BUTTON_VARIANT_SOLID: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("variant", Value::Text("solid")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1170,7 +1338,7 @@ const BUTTON_VARIANT_OUTLINE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("variant")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1180,7 +1348,6 @@ const BUTTON_VARIANT_OUTLINE: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("variant", Value::Text("outline")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1208,7 +1375,7 @@ const BUTTON_VARIANT_SUBTLE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("variant")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1218,7 +1385,6 @@ const BUTTON_VARIANT_SUBTLE: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("variant", Value::Text("subtle")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1246,7 +1412,7 @@ const BUTTON_VARIANT_TRANSPARENT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("variant")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1256,7 +1422,6 @@ const BUTTON_VARIANT_TRANSPARENT: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("variant", Value::Text("transparent")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1284,7 +1449,7 @@ const BUTTON_VARIANT_LINK: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("variant")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1294,7 +1459,6 @@ const BUTTON_VARIANT_LINK: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("variant", Value::Text("link")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1322,7 +1486,7 @@ const BUTTON_VARIANT_NAV: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("variant")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1332,7 +1496,6 @@ const BUTTON_VARIANT_NAV: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("variant", Value::Text("nav")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1360,7 +1523,7 @@ const BUTTON_TONE_ACCENT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1370,7 +1533,6 @@ const BUTTON_TONE_ACCENT: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("tone", Value::Text("accent")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1398,7 +1560,7 @@ const BUTTON_TONE_NEUTRAL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1408,7 +1570,6 @@ const BUTTON_TONE_NEUTRAL: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("tone", Value::Text("neutral")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1436,7 +1597,7 @@ const BUTTON_TONE_DANGER: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1446,7 +1607,6 @@ const BUTTON_TONE_DANGER: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("tone", Value::Text("danger")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1474,7 +1634,7 @@ const BUTTON_TONE_SUCCESS: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1484,7 +1644,6 @@ const BUTTON_TONE_SUCCESS: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("tone", Value::Text("success")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1512,7 +1671,7 @@ const BUTTON_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1522,7 +1681,6 @@ const BUTTON_SIZE_SMALL: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("size", Value::Text("small")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1550,7 +1708,7 @@ const BUTTON_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1560,7 +1718,6 @@ const BUTTON_SIZE_MEDIUM: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("size", Value::Text("medium")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1588,7 +1745,7 @@ const BUTTON_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1598,7 +1755,6 @@ const BUTTON_SIZE_LARGE: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("size", Value::Text("large")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1626,7 +1782,7 @@ const BUTTON_SHAPE_ROUNDED: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1636,7 +1792,6 @@ const BUTTON_SHAPE_ROUNDED: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("shape", Value::Text("rounded")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1664,7 +1819,7 @@ const BUTTON_SHAPE_PILL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1674,7 +1829,6 @@ const BUTTON_SHAPE_PILL: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("shape", Value::Text("pill")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1702,7 +1856,7 @@ const BUTTON_SHAPE_SQUARE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1712,7 +1866,6 @@ const BUTTON_SHAPE_SQUARE: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("shape", Value::Text("square")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1740,7 +1893,7 @@ const BUTTON_SHAPE_BEVEL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("button")),
             ],
@@ -1750,7 +1903,6 @@ const BUTTON_SHAPE_BEVEL: &[Node] = &[Node::Element {
                     ("label", Value::Text("Button")),
                     ("shape", Value::Text("bevel")),
                     ("icon", Value::Text("check")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -1778,28 +1930,18 @@ const BUTTON_JUSTIFY_CENTER: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("justify")),
                 ("data-nd-slug", Value::Text("button")),
             ],
-            children: &[Node::Element {
-                tag: "button",
-                attributes: &[
-                    ("class", Value::Text("nd-button")),
-                    ("type", Value::Text("button")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-button-justify-center"),
-                    ),
-                    ("data-nd-variant", Value::Text("solid")),
-                    ("data-nd-tone", Value::Text("accent")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-justify", Value::Text("center")),
+            children: &[Node::Component {
+                name: "Button",
+                props: &[
+                    ("label", Value::Text("Button")),
+                    ("icon", Value::Text("check")),
+                    ("justify", Value::Text("center")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-button-text nd-identifier\">A</span><span class=\"nd-button-text nd-identifier\">Z</span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -1825,28 +1967,18 @@ const BUTTON_JUSTIFY_START: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("justify")),
                 ("data-nd-slug", Value::Text("button")),
             ],
-            children: &[Node::Element {
-                tag: "button",
-                attributes: &[
-                    ("class", Value::Text("nd-button")),
-                    ("type", Value::Text("button")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-button-justify-start"),
-                    ),
-                    ("data-nd-variant", Value::Text("solid")),
-                    ("data-nd-tone", Value::Text("accent")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-justify", Value::Text("start")),
+            children: &[Node::Component {
+                name: "Button",
+                props: &[
+                    ("label", Value::Text("Button")),
+                    ("icon", Value::Text("check")),
+                    ("justify", Value::Text("start")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-button-text nd-identifier\">A</span><span class=\"nd-button-text nd-identifier\">Z</span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -1872,28 +2004,18 @@ const BUTTON_JUSTIFY_BETWEEN: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("justify")),
                 ("data-nd-slug", Value::Text("button")),
             ],
-            children: &[Node::Element {
-                tag: "button",
-                attributes: &[
-                    ("class", Value::Text("nd-button")),
-                    ("type", Value::Text("button")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-button-justify-between"),
-                    ),
-                    ("data-nd-variant", Value::Text("solid")),
-                    ("data-nd-tone", Value::Text("accent")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-justify", Value::Text("between")),
+            children: &[Node::Component {
+                name: "Button",
+                props: &[
+                    ("label", Value::Text("Button")),
+                    ("icon", Value::Text("check")),
+                    ("justify", Value::Text("between")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-button-text nd-identifier\">A</span><span class=\"nd-button-text nd-identifier\">Z</span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -1919,23 +2041,39 @@ const BUTTON_GROUP_ORIENTATION_HORIZONTAL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("orientation")),
                 ("data-nd-slug", Value::Text("button-group")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-button-group")),
+            children: &[Node::Component {
+                name: "ButtonGroup",
+                props: &[
                     (
-                        "aria-labelledby",
+                        "labelledby",
                         Value::Text("nd-variant-button-group-orientation-horizontal"),
                     ),
-                    ("aria-orientation", Value::Text("horizontal")),
+                    ("orientation", Value::Text("horizontal")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-button\" type=\"button\" data-nd-variant=\"outline\" data-nd-tone=\"neutral\" data-nd-size=\"medium\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Aa</span></span></button><button class=\"nd-button\" type=\"button\" data-nd-variant=\"outline\" data-nd-tone=\"neutral\" data-nd-size=\"medium\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Bb</span></span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("outline")),
+                            ("tone", Value::Text("neutral")),
+                            ("label", Value::Data("Aa")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("outline")),
+                            ("tone", Value::Text("neutral")),
+                            ("label", Value::Data("Bbbb")),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -1964,23 +2102,39 @@ const BUTTON_GROUP_ORIENTATION_VERTICAL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("orientation")),
                 ("data-nd-slug", Value::Text("button-group")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-button-group")),
+            children: &[Node::Component {
+                name: "ButtonGroup",
+                props: &[
                     (
-                        "aria-labelledby",
+                        "labelledby",
                         Value::Text("nd-variant-button-group-orientation-vertical"),
                     ),
-                    ("aria-orientation", Value::Text("vertical")),
+                    ("orientation", Value::Text("vertical")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-button\" type=\"button\" data-nd-variant=\"outline\" data-nd-tone=\"neutral\" data-nd-size=\"medium\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Aa</span></span></button><button class=\"nd-button\" type=\"button\" data-nd-variant=\"outline\" data-nd-tone=\"neutral\" data-nd-size=\"medium\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Bb</span></span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("outline")),
+                            ("tone", Value::Text("neutral")),
+                            ("label", Value::Data("Aa")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("outline")),
+                            ("tone", Value::Text("neutral")),
+                            ("label", Value::Data("Bbbb")),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -2001,6 +2155,186 @@ const BUTTON_GROUP_ORIENTATION_VERTICAL: &[Node] = &[Node::Element {
     ],
 }];
 
+/// `ButtonGroup.justify` at `center`.
+const BUTTON_GROUP_JUSTIFY_CENTER: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("justify")),
+                ("data-nd-slug", Value::Text("button-group")),
+            ],
+            children: &[Node::Component {
+                name: "ButtonGroup",
+                props: &[
+                    (
+                        "labelledby",
+                        Value::Text("nd-variant-button-group-justify-center"),
+                    ),
+                    ("justify", Value::Text("center")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("outline")),
+                            ("tone", Value::Text("neutral")),
+                            ("icon", Value::Text("check")),
+                            ("label", Value::Data("Aa")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("outline")),
+                            ("tone", Value::Text("neutral")),
+                            ("icon", Value::Text("check")),
+                            ("label", Value::Data("Bbbb")),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-button-group-justify-center")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("center"))],
+            }],
+        },
+    ],
+}];
+
+/// `ButtonGroup.justify` at `start`.
+const BUTTON_GROUP_JUSTIFY_START: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("justify")),
+                ("data-nd-slug", Value::Text("button-group")),
+            ],
+            children: &[Node::Component {
+                name: "ButtonGroup",
+                props: &[
+                    (
+                        "labelledby",
+                        Value::Text("nd-variant-button-group-justify-start"),
+                    ),
+                    ("justify", Value::Text("start")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("outline")),
+                            ("tone", Value::Text("neutral")),
+                            ("icon", Value::Text("check")),
+                            ("label", Value::Data("Aa")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("outline")),
+                            ("tone", Value::Text("neutral")),
+                            ("icon", Value::Text("check")),
+                            ("label", Value::Data("Bbbb")),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-button-group-justify-start")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("start"))],
+            }],
+        },
+    ],
+}];
+
+/// `ButtonGroup.justify` at `between`.
+const BUTTON_GROUP_JUSTIFY_BETWEEN: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("justify")),
+                ("data-nd-slug", Value::Text("button-group")),
+            ],
+            children: &[Node::Component {
+                name: "ButtonGroup",
+                props: &[
+                    (
+                        "labelledby",
+                        Value::Text("nd-variant-button-group-justify-between"),
+                    ),
+                    ("justify", Value::Text("between")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("outline")),
+                            ("tone", Value::Text("neutral")),
+                            ("icon", Value::Text("check")),
+                            ("label", Value::Data("Aa")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("outline")),
+                            ("tone", Value::Text("neutral")),
+                            ("icon", Value::Text("check")),
+                            ("label", Value::Data("Bbbb")),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-button-group-justify-between")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("between"))],
+            }],
+        },
+    ],
+}];
+
 /// `Checkbox.size` at `small`.
 const CHECKBOX_SIZE_SMALL: &[Node] = &[Node::Element {
     tag: "figure",
@@ -2009,21 +2343,19 @@ const CHECKBOX_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("checkbox")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-choice nd-checkbox")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-checkbox-size-small"),
-                    ),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Checkbox",
+                props: &[
+                    ("name", Value::Text("nd-variant-checkbox-size-small")),
+                    ("value", Value::Text("on")),
+                    ("label", Value::Data("Aa")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-choice-box\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -2049,21 +2381,19 @@ const CHECKBOX_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("checkbox")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-choice nd-checkbox")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-checkbox-size-medium"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Checkbox",
+                props: &[
+                    ("name", Value::Text("nd-variant-checkbox-size-medium")),
+                    ("value", Value::Text("on")),
+                    ("label", Value::Data("Aa")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-choice-box\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -2089,21 +2419,19 @@ const CHECKBOX_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("checkbox")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-choice nd-checkbox")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-checkbox-size-large"),
-                    ),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Checkbox",
+                props: &[
+                    ("name", Value::Text("nd-variant-checkbox-size-large")),
+                    ("value", Value::Text("on")),
+                    ("label", Value::Data("Aa")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-choice-box\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -2129,16 +2457,13 @@ const CODE_TONE_DEFAULT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("code")),
             ],
             children: &[Node::Component {
                 name: "Code",
-                props: &[
-                    ("tone", Value::Text("default")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("tone", Value::Text("default"))],
                 children: &[Node::Text(Value::Text("Code"))],
             }],
         },
@@ -2165,16 +2490,13 @@ const CODE_TONE_SUBTLE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("code")),
             ],
             children: &[Node::Component {
                 name: "Code",
-                props: &[
-                    ("tone", Value::Text("subtle")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("tone", Value::Text("subtle"))],
                 children: &[Node::Text(Value::Text("Code"))],
             }],
         },
@@ -2201,24 +2523,20 @@ const COLOR_PICKER_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("color-picker")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-color-picker")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-color-picker-size-small"),
-                    ),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "ColorPicker",
+                props: &[
+                    ("name", Value::Text("nd-variant-color-picker-size-small")),
+                    ("label", Value::Text("ColorPicker")),
+                    ("size", Value::Text("small")),
+                    ("area_label", Value::Message(Key::ExampleColorPickerArea)),
+                    ("hue_label", Value::Message(Key::ExampleColorPickerHue)),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-color-picker-figure\"><span class=\"nd-color-picker-chip\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -2244,24 +2562,20 @@ const COLOR_PICKER_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("color-picker")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-color-picker")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-color-picker-size-medium"),
-                    ),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "ColorPicker",
+                props: &[
+                    ("name", Value::Text("nd-variant-color-picker-size-medium")),
+                    ("label", Value::Text("ColorPicker")),
+                    ("size", Value::Text("medium")),
+                    ("area_label", Value::Message(Key::ExampleColorPickerArea)),
+                    ("hue_label", Value::Message(Key::ExampleColorPickerHue)),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-color-picker-figure\"><span class=\"nd-color-picker-chip\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -2287,24 +2601,20 @@ const COLOR_PICKER_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("color-picker")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-color-picker")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-color-picker-size-large"),
-                    ),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "ColorPicker",
+                props: &[
+                    ("name", Value::Text("nd-variant-color-picker-size-large")),
+                    ("label", Value::Text("ColorPicker")),
+                    ("size", Value::Text("large")),
+                    ("area_label", Value::Message(Key::ExampleColorPickerArea)),
+                    ("hue_label", Value::Message(Key::ExampleColorPickerHue)),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-color-picker-figure\"><span class=\"nd-color-picker-chip\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -2330,24 +2640,20 @@ const COLOR_PICKER_SHAPE_PILL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("color-picker")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-color-picker")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-color-picker-shape-pill"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("pill")),
+            children: &[Node::Component {
+                name: "ColorPicker",
+                props: &[
+                    ("name", Value::Text("nd-variant-color-picker-shape-pill")),
+                    ("label", Value::Text("ColorPicker")),
+                    ("shape", Value::Text("pill")),
+                    ("area_label", Value::Message(Key::ExampleColorPickerArea)),
+                    ("hue_label", Value::Message(Key::ExampleColorPickerHue)),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-color-picker-figure\"><span class=\"nd-color-picker-chip\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -2373,24 +2679,20 @@ const COLOR_PICKER_SHAPE_ROUNDED: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("color-picker")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-color-picker")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-color-picker-shape-rounded"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("rounded")),
+            children: &[Node::Component {
+                name: "ColorPicker",
+                props: &[
+                    ("name", Value::Text("nd-variant-color-picker-shape-rounded")),
+                    ("label", Value::Text("ColorPicker")),
+                    ("shape", Value::Text("rounded")),
+                    ("area_label", Value::Message(Key::ExampleColorPickerArea)),
+                    ("hue_label", Value::Message(Key::ExampleColorPickerHue)),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-color-picker-figure\"><span class=\"nd-color-picker-chip\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -2416,24 +2718,20 @@ const COLOR_PICKER_SHAPE_SQUARE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("color-picker")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-color-picker")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-color-picker-shape-square"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("square")),
+            children: &[Node::Component {
+                name: "ColorPicker",
+                props: &[
+                    ("name", Value::Text("nd-variant-color-picker-shape-square")),
+                    ("label", Value::Text("ColorPicker")),
+                    ("shape", Value::Text("square")),
+                    ("area_label", Value::Message(Key::ExampleColorPickerArea)),
+                    ("hue_label", Value::Message(Key::ExampleColorPickerHue)),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-color-picker-figure\"><span class=\"nd-color-picker-chip\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -2627,19 +2925,30 @@ const FIELD_KIND_SINGLE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("kind")),
                 ("data-nd-slug", Value::Text("field")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-field")),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Field",
+                props: &[
+                    (
+                        "control",
+                        Value::Text("nd-nd-variant-field-kind-single-0-Aa"),
+                    ),
+                    ("label", Value::Text("Field")),
+                    ("kind", Value::Text("single")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-field-figure\"><span class=\"nd-label nd-identifier\">Aa</span><span class=\"nd-field-rule\"></span><span class=\"nd-field-box\"></span></span>",
-                )],
+                children: &[Node::Component {
+                    name: "Checkbox",
+                    props: &[
+                        ("name", Value::Text("nd-variant-field-kind-single-0")),
+                        ("value", Value::Text("Aa")),
+                        ("label", Value::Data("Aa")),
+                        ("size", Value::Text("small")),
+                    ],
+                    children: &[],
+                }],
             }],
         },
         Node::Element {
@@ -2672,19 +2981,52 @@ const FIELD_KIND_GROUP: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("kind")),
                 ("data-nd-slug", Value::Text("field")),
             ],
-            children: &[Node::Element {
-                tag: "fieldset",
-                attributes: &[
-                    ("class", Value::Text("nd-field")),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Field",
+                props: &[
+                    (
+                        "control",
+                        Value::Text("nd-nd-variant-field-kind-group-0-Aa"),
+                    ),
+                    ("label", Value::Text("Field")),
+                    ("kind", Value::Text("group")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-field-figure\"><span class=\"nd-label nd-identifier\">Aa</span><span class=\"nd-field-rule\"></span><span class=\"nd-field-box\"></span></span>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "Checkbox",
+                        props: &[
+                            ("name", Value::Text("nd-variant-field-kind-group-0")),
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("size", Value::Text("small")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Checkbox",
+                        props: &[
+                            ("name", Value::Text("nd-variant-field-kind-group-1")),
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("size", Value::Text("small")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Checkbox",
+                        props: &[
+                            ("name", Value::Text("nd-variant-field-kind-group-2")),
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("size", Value::Text("small")),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -2717,19 +3059,30 @@ const FIELD_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("field")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-field")),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Field",
+                props: &[
+                    (
+                        "control",
+                        Value::Text("nd-nd-variant-field-size-small-0-Aa"),
+                    ),
+                    ("label", Value::Text("Field")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-field-figure\"><span class=\"nd-label nd-identifier\">Aa</span><span class=\"nd-field-rule\"></span><span class=\"nd-field-box\"></span></span>",
-                )],
+                children: &[Node::Component {
+                    name: "Checkbox",
+                    props: &[
+                        ("name", Value::Text("nd-variant-field-size-small-0")),
+                        ("value", Value::Text("Aa")),
+                        ("label", Value::Data("Aa")),
+                        ("size", Value::Text("small")),
+                    ],
+                    children: &[],
+                }],
             }],
         },
         Node::Element {
@@ -2755,19 +3108,30 @@ const FIELD_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("field")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-field")),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Field",
+                props: &[
+                    (
+                        "control",
+                        Value::Text("nd-nd-variant-field-size-medium-0-Aa"),
+                    ),
+                    ("label", Value::Text("Field")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-field-figure\"><span class=\"nd-label nd-identifier\">Aa</span><span class=\"nd-field-rule\"></span><span class=\"nd-field-box\"></span></span>",
-                )],
+                children: &[Node::Component {
+                    name: "Checkbox",
+                    props: &[
+                        ("name", Value::Text("nd-variant-field-size-medium-0")),
+                        ("value", Value::Text("Aa")),
+                        ("label", Value::Data("Aa")),
+                        ("size", Value::Text("small")),
+                    ],
+                    children: &[],
+                }],
             }],
         },
         Node::Element {
@@ -2793,19 +3157,30 @@ const FIELD_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("field")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-field")),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Field",
+                props: &[
+                    (
+                        "control",
+                        Value::Text("nd-nd-variant-field-size-large-0-Aa"),
+                    ),
+                    ("label", Value::Text("Field")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-field-figure\"><span class=\"nd-label nd-identifier\">Aa</span><span class=\"nd-field-rule\"></span><span class=\"nd-field-box\"></span></span>",
-                )],
+                children: &[Node::Component {
+                    name: "Checkbox",
+                    props: &[
+                        ("name", Value::Text("nd-variant-field-size-large-0")),
+                        ("value", Value::Text("Aa")),
+                        ("label", Value::Data("Aa")),
+                        ("size", Value::Text("small")),
+                    ],
+                    children: &[],
+                }],
             }],
         },
         Node::Element {
@@ -3128,7 +3503,7 @@ const ICON_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("icon")),
             ],
@@ -3164,7 +3539,7 @@ const ICON_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("icon")),
             ],
@@ -3200,7 +3575,7 @@ const ICON_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("icon")),
             ],
@@ -3236,23 +3611,18 @@ const IMAGE_RATIO_SQUARE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("ratio")),
                 ("data-nd-slug", Value::Text("image")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-image")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-image-ratio-square"),
-                    ),
-                    ("data-nd-fit", Value::Text("cover")),
-                    ("loading", Value::Text("lazy")),
-                    ("data-nd-ratio", Value::Text("square")),
+            children: &[Node::Component {
+                name: "Image",
+                props: &[
+                    ("src", Value::Asset("assets/portraits/ada.svg")),
+                    ("alt", Value::Text("Image")),
+                    ("ratio", Value::Text("square")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-image-media\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -3278,23 +3648,18 @@ const IMAGE_RATIO_LANDSCAPE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("ratio")),
                 ("data-nd-slug", Value::Text("image")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-image")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-image-ratio-landscape"),
-                    ),
-                    ("data-nd-fit", Value::Text("cover")),
-                    ("loading", Value::Text("lazy")),
-                    ("data-nd-ratio", Value::Text("landscape")),
+            children: &[Node::Component {
+                name: "Image",
+                props: &[
+                    ("src", Value::Asset("assets/portraits/ada.svg")),
+                    ("alt", Value::Text("Image")),
+                    ("ratio", Value::Text("landscape")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-image-media\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -3320,23 +3685,18 @@ const IMAGE_RATIO_PORTRAIT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("ratio")),
                 ("data-nd-slug", Value::Text("image")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-image")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-image-ratio-portrait"),
-                    ),
-                    ("data-nd-fit", Value::Text("cover")),
-                    ("loading", Value::Text("lazy")),
-                    ("data-nd-ratio", Value::Text("portrait")),
+            children: &[Node::Component {
+                name: "Image",
+                props: &[
+                    ("src", Value::Asset("assets/portraits/ada.svg")),
+                    ("alt", Value::Text("Image")),
+                    ("ratio", Value::Text("portrait")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-image-media\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -3362,23 +3722,18 @@ const IMAGE_RATIO_WIDE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("ratio")),
                 ("data-nd-slug", Value::Text("image")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-image")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-image-ratio-wide"),
-                    ),
-                    ("data-nd-fit", Value::Text("cover")),
-                    ("loading", Value::Text("lazy")),
-                    ("data-nd-ratio", Value::Text("wide")),
+            children: &[Node::Component {
+                name: "Image",
+                props: &[
+                    ("src", Value::Asset("assets/portraits/ada.svg")),
+                    ("alt", Value::Text("Image")),
+                    ("ratio", Value::Text("wide")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-image-media\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -3404,24 +3759,19 @@ const INPUT_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("input")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-input")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-input-size-small"),
-                    ),
-                    ("type", Value::Text("text")),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Input",
+                props: &[
+                    ("name", Value::Text("nd-variant-input-size-small")),
+                    ("label", Value::Text("Input")),
+                    ("value", Value::Data("Aa")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-input-figure\"><span class=\"nd-input-box\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -3447,24 +3797,19 @@ const INPUT_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("input")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-input")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-input-size-medium"),
-                    ),
-                    ("type", Value::Text("text")),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Input",
+                props: &[
+                    ("name", Value::Text("nd-variant-input-size-medium")),
+                    ("label", Value::Text("Input")),
+                    ("value", Value::Data("Aa")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-input-figure\"><span class=\"nd-input-box\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -3490,24 +3835,19 @@ const INPUT_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("input")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-input")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-input-size-large"),
-                    ),
-                    ("type", Value::Text("text")),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Input",
+                props: &[
+                    ("name", Value::Text("nd-variant-input-size-large")),
+                    ("label", Value::Text("Input")),
+                    ("value", Value::Data("Aa")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-input-figure\"><span class=\"nd-input-box\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -3533,16 +3873,13 @@ const KBD_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("kbd")),
             ],
             children: &[Node::Component {
                 name: "Kbd",
-                props: &[
-                    ("size", Value::Text("small")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("size", Value::Text("small"))],
                 children: &[Node::Text(Value::Text("Kbd"))],
             }],
         },
@@ -3569,16 +3906,13 @@ const KBD_SIZE_BODY: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("kbd")),
             ],
             children: &[Node::Component {
                 name: "Kbd",
-                props: &[
-                    ("size", Value::Text("body")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("size", Value::Text("body"))],
                 children: &[Node::Text(Value::Text("Kbd"))],
             }],
         },
@@ -3597,135 +3931,6 @@ const KBD_SIZE_BODY: &[Node] = &[Node::Element {
     ],
 }];
 
-/// `Label.kind` at `label`.
-const LABEL_KIND_LABEL: &[Node] = &[Node::Element {
-    tag: "figure",
-    attributes: &[("class", Value::Text("nd-variant-item"))],
-    children: &[
-        Node::Element {
-            tag: "div",
-            attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
-                ("data-nd-prop", Value::Text("kind")),
-                ("data-nd-slug", Value::Text("label")),
-            ],
-            children: &[Node::Element {
-                tag: "label",
-                attributes: &[
-                    ("class", Value::Text("nd-label")),
-                    ("data-nd-size", Value::Text("medium")),
-                ],
-                children: &[Node::Raw("<span class=\"nd-identifier\">Aa</span>")],
-            }],
-        },
-        Node::Element {
-            tag: "figcaption",
-            attributes: &[
-                ("class", Value::Text("nd-variant-label")),
-                ("id", Value::Text("nd-variant-label-kind-label")),
-            ],
-            children: &[
-                Node::Component {
-                    name: "Code",
-                    props: &[("class", Value::Text("nd-identifier"))],
-                    children: &[Node::Text(Value::Text("label"))],
-                },
-                Node::Component {
-                    name: "VisuallyHidden",
-                    props: &[("class", Value::Text("nd-identifier"))],
-                    children: &[Node::Text(Value::Text("label"))],
-                },
-            ],
-        },
-    ],
-}];
-
-/// `Label.kind` at `legend`.
-const LABEL_KIND_LEGEND: &[Node] = &[Node::Element {
-    tag: "figure",
-    attributes: &[("class", Value::Text("nd-variant-item"))],
-    children: &[
-        Node::Element {
-            tag: "div",
-            attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
-                ("data-nd-prop", Value::Text("kind")),
-                ("data-nd-slug", Value::Text("label")),
-            ],
-            children: &[Node::Element {
-                tag: "legend",
-                attributes: &[
-                    ("class", Value::Text("nd-label")),
-                    ("data-nd-size", Value::Text("medium")),
-                ],
-                children: &[Node::Raw("<span class=\"nd-identifier\">Aa</span>")],
-            }],
-        },
-        Node::Element {
-            tag: "figcaption",
-            attributes: &[
-                ("class", Value::Text("nd-variant-label")),
-                ("id", Value::Text("nd-variant-label-kind-legend")),
-            ],
-            children: &[
-                Node::Component {
-                    name: "Code",
-                    props: &[("class", Value::Text("nd-identifier"))],
-                    children: &[Node::Text(Value::Text("legend"))],
-                },
-                Node::Component {
-                    name: "VisuallyHidden",
-                    props: &[("class", Value::Text("nd-identifier"))],
-                    children: &[Node::Text(Value::Text("legend"))],
-                },
-            ],
-        },
-    ],
-}];
-
-/// `Label.kind` at `name`.
-const LABEL_KIND_NAME: &[Node] = &[Node::Element {
-    tag: "figure",
-    attributes: &[("class", Value::Text("nd-variant-item"))],
-    children: &[
-        Node::Element {
-            tag: "div",
-            attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
-                ("data-nd-prop", Value::Text("kind")),
-                ("data-nd-slug", Value::Text("label")),
-            ],
-            children: &[Node::Element {
-                tag: "p",
-                attributes: &[
-                    ("class", Value::Text("nd-label")),
-                    ("data-nd-size", Value::Text("medium")),
-                ],
-                children: &[Node::Raw("<span class=\"nd-identifier\">Aa</span>")],
-            }],
-        },
-        Node::Element {
-            tag: "figcaption",
-            attributes: &[
-                ("class", Value::Text("nd-variant-label")),
-                ("id", Value::Text("nd-variant-label-kind-name")),
-            ],
-            children: &[
-                Node::Component {
-                    name: "Code",
-                    props: &[("class", Value::Text("nd-identifier"))],
-                    children: &[Node::Text(Value::Text("name"))],
-                },
-                Node::Component {
-                    name: "VisuallyHidden",
-                    props: &[("class", Value::Text("nd-identifier"))],
-                    children: &[Node::Text(Value::Text("p"))],
-                },
-            ],
-        },
-    ],
-}];
-
 /// `Label.size` at `small`.
 const LABEL_SIZE_SMALL: &[Node] = &[Node::Element {
     tag: "figure",
@@ -3734,17 +3939,14 @@ const LABEL_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("label")),
             ],
-            children: &[Node::Element {
-                tag: "label",
-                attributes: &[
-                    ("class", Value::Text("nd-label")),
-                    ("data-nd-size", Value::Text("small")),
-                ],
-                children: &[Node::Raw("<span class=\"nd-identifier\">Aa</span>")],
+            children: &[Node::Component {
+                name: "Label",
+                props: &[("text", Value::Data("Aa")), ("size", Value::Text("small"))],
+                children: &[],
             }],
         },
         Node::Element {
@@ -3770,17 +3972,14 @@ const LABEL_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("label")),
             ],
-            children: &[Node::Element {
-                tag: "label",
-                attributes: &[
-                    ("class", Value::Text("nd-label")),
-                    ("data-nd-size", Value::Text("medium")),
-                ],
-                children: &[Node::Raw("<span class=\"nd-identifier\">Aa</span>")],
+            children: &[Node::Component {
+                name: "Label",
+                props: &[("text", Value::Data("Aa")), ("size", Value::Text("medium"))],
+                children: &[],
             }],
         },
         Node::Element {
@@ -3806,17 +4005,14 @@ const LABEL_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("label")),
             ],
-            children: &[Node::Element {
-                tag: "label",
-                attributes: &[
-                    ("class", Value::Text("nd-label")),
-                    ("data-nd-size", Value::Text("large")),
-                ],
-                children: &[Node::Raw("<span class=\"nd-identifier\">Aa</span>")],
+            children: &[Node::Component {
+                name: "Label",
+                props: &[("text", Value::Data("Aa")), ("size", Value::Text("large"))],
+                children: &[],
             }],
         },
         Node::Element {
@@ -3842,7 +4038,7 @@ const LINEAGE_VIEW_FLAT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("view")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -3893,7 +4089,7 @@ const LINEAGE_VIEW_DEEP: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("view")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -3944,7 +4140,7 @@ const LINEAGE_ROUTE_ELBOW: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("route")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -3995,7 +4191,7 @@ const LINEAGE_ROUTE_TAUT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("route")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4046,7 +4242,7 @@ const LINEAGE_LINE_RIBBON: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("line")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4098,7 +4294,7 @@ const LINEAGE_LINE_BEAM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("line")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4150,7 +4346,7 @@ const LINEAGE_LETTERING_FLAT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("lettering")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4201,7 +4397,7 @@ const LINEAGE_LETTERING_SOLID: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("lettering")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4252,7 +4448,7 @@ const LINEAGE_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4303,7 +4499,7 @@ const LINEAGE_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4354,7 +4550,7 @@ const LINEAGE_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4405,7 +4601,7 @@ const LINEAGE_THICKNESS_NONE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("thickness")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4456,7 +4652,7 @@ const LINEAGE_THICKNESS_THIN: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("thickness")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4507,7 +4703,7 @@ const LINEAGE_THICKNESS_SLAB: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("thickness")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4558,7 +4754,7 @@ const LINEAGE_FILTER_MODE_HIGHLIGHT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("filter_mode")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4612,7 +4808,7 @@ const LINEAGE_FILTER_MODE_ISOLATE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("filter_mode")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4663,7 +4859,7 @@ const LINEAGE_PICK_NONE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("pick")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4714,7 +4910,7 @@ const LINEAGE_PICK_BOND: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("pick")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4765,7 +4961,7 @@ const LINEAGE_PICK_FIGURE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("pick")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4816,7 +5012,7 @@ const LINEAGE_PICK_BOTH: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("pick")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4867,7 +5063,7 @@ const LINEAGE_HEIGHT_SHORT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("height")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4918,7 +5114,7 @@ const LINEAGE_HEIGHT_TALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("height")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -4969,7 +5165,7 @@ const LINEAGE_HEIGHT_FULL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("height")),
                 ("data-nd-slug", Value::Text("lineage")),
             ],
@@ -5020,7 +5216,7 @@ const LINEAGE_FIGURE_SHAPE_CARD: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("lineage-figure")),
             ],
@@ -5058,7 +5254,7 @@ const LINEAGE_FIGURE_SHAPE_ROUND: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("lineage-figure")),
             ],
@@ -5096,7 +5292,7 @@ const LINEAGE_FIGURE_SHAPE_PLAQUE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("lineage-figure")),
             ],
@@ -5134,7 +5330,7 @@ const LINEAGE_FIGURE_SHAPE_BARE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("lineage-figure")),
             ],
@@ -5172,7 +5368,7 @@ const LINEAGE_FIGURE_TONE_NEUTRAL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("lineage-figure")),
             ],
@@ -5210,7 +5406,7 @@ const LINEAGE_FIGURE_TONE_ACCENT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("lineage-figure")),
             ],
@@ -5248,7 +5444,7 @@ const LINEAGE_FIGURE_TONE_SUCCESS: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("lineage-figure")),
             ],
@@ -5286,7 +5482,7 @@ const LINEAGE_FIGURE_TONE_WARNING: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("lineage-figure")),
             ],
@@ -5324,7 +5520,7 @@ const LINEAGE_FIGURE_TONE_DANGER: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("lineage-figure")),
             ],
@@ -5362,7 +5558,7 @@ const LINEAGE_FIGURE_TONE_INFO: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("lineage-figure")),
             ],
@@ -5400,16 +5596,13 @@ const LINK_TONE_ACCENT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("link")),
             ],
             children: &[Node::Component {
                 name: "Link",
-                props: &[
-                    ("tone", Value::Text("accent")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("tone", Value::Text("accent"))],
                 children: &[Node::Text(Value::Text("Link"))],
             }],
         },
@@ -5436,16 +5629,13 @@ const LINK_TONE_INHERIT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("link")),
             ],
             children: &[Node::Component {
                 name: "Link",
-                props: &[
-                    ("tone", Value::Text("inherit")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("tone", Value::Text("inherit"))],
                 children: &[Node::Text(Value::Text("Link"))],
             }],
         },
@@ -5472,20 +5662,30 @@ const LIST_KIND_UNORDERED: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("kind")),
                 ("data-nd-slug", Value::Text("list")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-list")),
-                    ("data-nd-marker", Value::Text("default")),
-                    ("data-nd-spacing", Value::Text("default")),
+            children: &[Node::Component {
+                name: "List",
+                props: &[("kind", Value::Text("unordered"))],
+                children: &[
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<li class=\"nd-list-item nd-identifier\">Aa</li><li class=\"nd-list-item nd-identifier\">Bb</li><li class=\"nd-list-item nd-identifier\">Cc</li>",
-                )],
             }],
         },
         Node::Element {
@@ -5518,20 +5718,30 @@ const LIST_KIND_ORDERED: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("kind")),
                 ("data-nd-slug", Value::Text("list")),
             ],
-            children: &[Node::Element {
-                tag: "ol",
-                attributes: &[
-                    ("class", Value::Text("nd-list")),
-                    ("data-nd-marker", Value::Text("default")),
-                    ("data-nd-spacing", Value::Text("default")),
+            children: &[Node::Component {
+                name: "List",
+                props: &[("kind", Value::Text("ordered"))],
+                children: &[
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<li class=\"nd-list-item nd-identifier\">Aa</li><li class=\"nd-list-item nd-identifier\">Bb</li><li class=\"nd-list-item nd-identifier\">Cc</li>",
-                )],
             }],
         },
         Node::Element {
@@ -5564,20 +5774,30 @@ const LIST_KIND_DESCRIPTION: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("kind")),
                 ("data-nd-slug", Value::Text("list")),
             ],
-            children: &[Node::Element {
-                tag: "dl",
-                attributes: &[
-                    ("class", Value::Text("nd-list")),
-                    ("data-nd-marker", Value::Text("default")),
-                    ("data-nd-spacing", Value::Text("default")),
+            children: &[Node::Component {
+                name: "List",
+                props: &[("kind", Value::Text("description"))],
+                children: &[
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[("term", Value::Data("Aa"))],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[("term", Value::Data("Bbbb"))],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[("term", Value::Data("Cc"))],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<li class=\"nd-list-item nd-identifier\">Aa</li><li class=\"nd-list-item nd-identifier\">Bb</li><li class=\"nd-list-item nd-identifier\">Cc</li>",
-                )],
             }],
         },
         Node::Element {
@@ -5610,20 +5830,30 @@ const LIST_MARKER_DEFAULT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("marker")),
                 ("data-nd-slug", Value::Text("list")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-list")),
-                    ("data-nd-spacing", Value::Text("default")),
-                    ("data-nd-marker", Value::Text("default")),
+            children: &[Node::Component {
+                name: "List",
+                props: &[("marker", Value::Text("default"))],
+                children: &[
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<li class=\"nd-list-item nd-identifier\">Aa</li><li class=\"nd-list-item nd-identifier\">Bb</li><li class=\"nd-list-item nd-identifier\">Cc</li>",
-                )],
             }],
         },
         Node::Element {
@@ -5649,20 +5879,30 @@ const LIST_MARKER_NONE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("marker")),
                 ("data-nd-slug", Value::Text("list")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-list")),
-                    ("data-nd-spacing", Value::Text("default")),
-                    ("data-nd-marker", Value::Text("none")),
+            children: &[Node::Component {
+                name: "List",
+                props: &[("marker", Value::Text("none"))],
+                children: &[
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<li class=\"nd-list-item nd-identifier\">Aa</li><li class=\"nd-list-item nd-identifier\">Bb</li><li class=\"nd-list-item nd-identifier\">Cc</li>",
-                )],
             }],
         },
         Node::Element {
@@ -5688,20 +5928,30 @@ const LIST_SPACING_TIGHT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("spacing")),
                 ("data-nd-slug", Value::Text("list")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-list")),
-                    ("data-nd-marker", Value::Text("default")),
-                    ("data-nd-spacing", Value::Text("tight")),
+            children: &[Node::Component {
+                name: "List",
+                props: &[("spacing", Value::Text("tight"))],
+                children: &[
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<li class=\"nd-list-item nd-identifier\">Aa</li><li class=\"nd-list-item nd-identifier\">Bb</li><li class=\"nd-list-item nd-identifier\">Cc</li>",
-                )],
             }],
         },
         Node::Element {
@@ -5727,20 +5977,30 @@ const LIST_SPACING_DEFAULT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("spacing")),
                 ("data-nd-slug", Value::Text("list")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-list")),
-                    ("data-nd-marker", Value::Text("default")),
-                    ("data-nd-spacing", Value::Text("default")),
+            children: &[Node::Component {
+                name: "List",
+                props: &[("spacing", Value::Text("default"))],
+                children: &[
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<li class=\"nd-list-item nd-identifier\">Aa</li><li class=\"nd-list-item nd-identifier\">Bb</li><li class=\"nd-list-item nd-identifier\">Cc</li>",
-                )],
             }],
         },
         Node::Element {
@@ -5766,20 +6026,30 @@ const LIST_SPACING_LOOSE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("spacing")),
                 ("data-nd-slug", Value::Text("list")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-list")),
-                    ("data-nd-marker", Value::Text("default")),
-                    ("data-nd-spacing", Value::Text("loose")),
+            children: &[Node::Component {
+                name: "List",
+                props: &[("spacing", Value::Text("loose"))],
+                children: &[
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "ListItem",
+                        props: &[],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<li class=\"nd-list-item nd-identifier\">Aa</li><li class=\"nd-list-item nd-identifier\">Bb</li><li class=\"nd-list-item nd-identifier\">Cc</li>",
-                )],
             }],
         },
         Node::Element {
@@ -5805,21 +6075,21 @@ const METER_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("meter")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-meter")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-meter-size-small"),
-                    ),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Meter",
+                props: &[
+                    ("name", Value::Text("nd-variant-meter-size-small")),
+                    ("label", Value::Text("Meter")),
+                    ("value", Value::Text("41.2")),
+                    ("max", Value::Text("50")),
+                    ("value_label", Value::Message(Key::SpecimenBarValue)),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-meter-bar\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -5845,21 +6115,21 @@ const METER_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("meter")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-meter")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-meter-size-medium"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Meter",
+                props: &[
+                    ("name", Value::Text("nd-variant-meter-size-medium")),
+                    ("label", Value::Text("Meter")),
+                    ("value", Value::Text("41.2")),
+                    ("max", Value::Text("50")),
+                    ("value_label", Value::Message(Key::SpecimenBarValue)),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-meter-bar\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -5885,21 +6155,21 @@ const METER_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("meter")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-meter")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-meter-size-large"),
-                    ),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Meter",
+                props: &[
+                    ("name", Value::Text("nd-variant-meter-size-large")),
+                    ("label", Value::Text("Meter")),
+                    ("value", Value::Text("41.2")),
+                    ("max", Value::Text("50")),
+                    ("value_label", Value::Message(Key::SpecimenBarValue)),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-meter-bar\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -5925,24 +6195,22 @@ const NUMBER_INPUT_STEPPING_ASSIST: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("stepping")),
                 ("data-nd-slug", Value::Text("number-input")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-number-input")),
+            children: &[Node::Component {
+                name: "NumberInput",
+                props: &[
                     (
-                        "aria-labelledby",
+                        "name",
                         Value::Text("nd-variant-number-input-stepping-assist"),
                     ),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-stepping", Value::Text("assist")),
+                    ("label", Value::Text("NumberInput")),
+                    ("value", Value::Data("42")),
+                    ("stepping", Value::Text("assist")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-number-input-figure\"><span class=\"nd-number-input-box\"></span><span class=\"nd-number-input-steps\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -5968,24 +6236,22 @@ const NUMBER_INPUT_STEPPING_PRIMARY: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("stepping")),
                 ("data-nd-slug", Value::Text("number-input")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-number-input")),
+            children: &[Node::Component {
+                name: "NumberInput",
+                props: &[
                     (
-                        "aria-labelledby",
+                        "name",
                         Value::Text("nd-variant-number-input-stepping-primary"),
                     ),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-stepping", Value::Text("primary")),
+                    ("label", Value::Text("NumberInput")),
+                    ("value", Value::Data("42")),
+                    ("stepping", Value::Text("primary")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-number-input-figure\"><span class=\"nd-number-input-box\"></span><span class=\"nd-number-input-steps\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6014,24 +6280,19 @@ const NUMBER_INPUT_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("number-input")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-number-input")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-number-input-size-small"),
-                    ),
-                    ("data-nd-stepping", Value::Text("assist")),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "NumberInput",
+                props: &[
+                    ("name", Value::Text("nd-variant-number-input-size-small")),
+                    ("label", Value::Text("NumberInput")),
+                    ("value", Value::Data("42")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-number-input-figure\"><span class=\"nd-number-input-box\"></span><span class=\"nd-number-input-steps\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6057,24 +6318,19 @@ const NUMBER_INPUT_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("number-input")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-number-input")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-number-input-size-medium"),
-                    ),
-                    ("data-nd-stepping", Value::Text("assist")),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "NumberInput",
+                props: &[
+                    ("name", Value::Text("nd-variant-number-input-size-medium")),
+                    ("label", Value::Text("NumberInput")),
+                    ("value", Value::Data("42")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-number-input-figure\"><span class=\"nd-number-input-box\"></span><span class=\"nd-number-input-steps\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6100,24 +6356,19 @@ const NUMBER_INPUT_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("number-input")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-number-input")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-number-input-size-large"),
-                    ),
-                    ("data-nd-stepping", Value::Text("assist")),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "NumberInput",
+                props: &[
+                    ("name", Value::Text("nd-variant-number-input-size-large")),
+                    ("label", Value::Text("NumberInput")),
+                    ("value", Value::Data("42")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-number-input-figure\"><span class=\"nd-number-input-box\"></span><span class=\"nd-number-input-steps\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6143,24 +6394,21 @@ const OTP_FIELD_KIND_NUMERIC: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("kind")),
                 ("data-nd-slug", Value::Text("otp-field")),
             ],
-            children: &[Node::Element {
-                tag: "fieldset",
-                attributes: &[
-                    ("class", Value::Text("nd-otp-field")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-otp-field-kind-numeric"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-kind", Value::Text("numeric")),
+            children: &[Node::Component {
+                name: "OtpField",
+                props: &[
+                    ("name", Value::Text("nd-variant-otp-field-kind-numeric")),
+                    ("legend", Value::Text("OtpField")),
+                    ("box_label", Value::Text("OtpField")),
+                    ("length", Value::Text("3")),
+                    ("kind", Value::Text("numeric")),
+                    ("value", Value::Data("421")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-otp-field-figure\"><span class=\"nd-identifier\">4</span><span class=\"nd-identifier\">2</span><span class=\"nd-identifier\">1</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6186,24 +6434,24 @@ const OTP_FIELD_KIND_ALPHANUMERIC: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("kind")),
                 ("data-nd-slug", Value::Text("otp-field")),
             ],
-            children: &[Node::Element {
-                tag: "fieldset",
-                attributes: &[
-                    ("class", Value::Text("nd-otp-field")),
+            children: &[Node::Component {
+                name: "OtpField",
+                props: &[
                     (
-                        "aria-labelledby",
+                        "name",
                         Value::Text("nd-variant-otp-field-kind-alphanumeric"),
                     ),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-kind", Value::Text("alphanumeric")),
+                    ("legend", Value::Text("OtpField")),
+                    ("box_label", Value::Text("OtpField")),
+                    ("length", Value::Text("3")),
+                    ("kind", Value::Text("alphanumeric")),
+                    ("value", Value::Data("421")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-otp-field-figure\"><span class=\"nd-identifier\">4</span><span class=\"nd-identifier\">2</span><span class=\"nd-identifier\">1</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6229,24 +6477,21 @@ const OTP_FIELD_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("otp-field")),
             ],
-            children: &[Node::Element {
-                tag: "fieldset",
-                attributes: &[
-                    ("class", Value::Text("nd-otp-field")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-otp-field-size-small"),
-                    ),
-                    ("data-nd-kind", Value::Text("numeric")),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "OtpField",
+                props: &[
+                    ("name", Value::Text("nd-variant-otp-field-size-small")),
+                    ("legend", Value::Text("OtpField")),
+                    ("box_label", Value::Text("OtpField")),
+                    ("length", Value::Text("3")),
+                    ("value", Value::Data("421")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-otp-field-figure\"><span class=\"nd-identifier\">4</span><span class=\"nd-identifier\">2</span><span class=\"nd-identifier\">1</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6272,24 +6517,21 @@ const OTP_FIELD_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("otp-field")),
             ],
-            children: &[Node::Element {
-                tag: "fieldset",
-                attributes: &[
-                    ("class", Value::Text("nd-otp-field")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-otp-field-size-medium"),
-                    ),
-                    ("data-nd-kind", Value::Text("numeric")),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "OtpField",
+                props: &[
+                    ("name", Value::Text("nd-variant-otp-field-size-medium")),
+                    ("legend", Value::Text("OtpField")),
+                    ("box_label", Value::Text("OtpField")),
+                    ("length", Value::Text("3")),
+                    ("value", Value::Data("421")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-otp-field-figure\"><span class=\"nd-identifier\">4</span><span class=\"nd-identifier\">2</span><span class=\"nd-identifier\">1</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6315,24 +6557,21 @@ const OTP_FIELD_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("otp-field")),
             ],
-            children: &[Node::Element {
-                tag: "fieldset",
-                attributes: &[
-                    ("class", Value::Text("nd-otp-field")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-otp-field-size-large"),
-                    ),
-                    ("data-nd-kind", Value::Text("numeric")),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "OtpField",
+                props: &[
+                    ("name", Value::Text("nd-variant-otp-field-size-large")),
+                    ("legend", Value::Text("OtpField")),
+                    ("box_label", Value::Text("OtpField")),
+                    ("length", Value::Text("3")),
+                    ("value", Value::Data("421")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-otp-field-figure\"><span class=\"nd-identifier\">4</span><span class=\"nd-identifier\">2</span><span class=\"nd-identifier\">1</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6358,24 +6597,21 @@ const PAGINATION_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("pagination")),
             ],
-            children: &[Node::Element {
-                tag: "nav",
-                attributes: &[
-                    ("class", Value::Text("nd-pagination")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-pagination-size-small"),
-                    ),
-                    ("data-nd-spread", Value::Text("default")),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Pagination",
+                props: &[
+                    ("name", Value::Text("nd-variant-pagination-size-small")),
+                    ("label", Value::Text("Pagination")),
+                    ("page", Value::Text("2")),
+                    ("pages", Value::Text("3")),
+                    ("href", Value::Text("#")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw(
-                    "<ul class=\"nd-pagination-list\"><li><a class=\"nd-pagination-link\" href=\"#\">1</a></li><li><a class=\"nd-pagination-link\" href=\"#\" aria-current=\"page\">2</a></li><li><a class=\"nd-pagination-link\" href=\"#\">3</a></li></ul>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6401,24 +6637,21 @@ const PAGINATION_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("pagination")),
             ],
-            children: &[Node::Element {
-                tag: "nav",
-                attributes: &[
-                    ("class", Value::Text("nd-pagination")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-pagination-size-medium"),
-                    ),
-                    ("data-nd-spread", Value::Text("default")),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Pagination",
+                props: &[
+                    ("name", Value::Text("nd-variant-pagination-size-medium")),
+                    ("label", Value::Text("Pagination")),
+                    ("page", Value::Text("2")),
+                    ("pages", Value::Text("3")),
+                    ("href", Value::Text("#")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw(
-                    "<ul class=\"nd-pagination-list\"><li><a class=\"nd-pagination-link\" href=\"#\">1</a></li><li><a class=\"nd-pagination-link\" href=\"#\" aria-current=\"page\">2</a></li><li><a class=\"nd-pagination-link\" href=\"#\">3</a></li></ul>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6444,24 +6677,21 @@ const PAGINATION_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("pagination")),
             ],
-            children: &[Node::Element {
-                tag: "nav",
-                attributes: &[
-                    ("class", Value::Text("nd-pagination")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-pagination-size-large"),
-                    ),
-                    ("data-nd-spread", Value::Text("default")),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Pagination",
+                props: &[
+                    ("name", Value::Text("nd-variant-pagination-size-large")),
+                    ("label", Value::Text("Pagination")),
+                    ("page", Value::Text("2")),
+                    ("pages", Value::Text("3")),
+                    ("href", Value::Text("#")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw(
-                    "<ul class=\"nd-pagination-list\"><li><a class=\"nd-pagination-link\" href=\"#\">1</a></li><li><a class=\"nd-pagination-link\" href=\"#\" aria-current=\"page\">2</a></li><li><a class=\"nd-pagination-link\" href=\"#\">3</a></li></ul>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6652,21 +6882,21 @@ const PROGRESS_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("progress")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-progress")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-progress-size-small"),
-                    ),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Progress",
+                props: &[
+                    ("name", Value::Text("nd-variant-progress-size-small")),
+                    ("label", Value::Text("Progress")),
+                    ("value", Value::Text("7")),
+                    ("max", Value::Text("12")),
+                    ("value_label", Value::Message(Key::SpecimenBarValue)),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-progress-bar\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6692,21 +6922,21 @@ const PROGRESS_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("progress")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-progress")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-progress-size-medium"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Progress",
+                props: &[
+                    ("name", Value::Text("nd-variant-progress-size-medium")),
+                    ("label", Value::Text("Progress")),
+                    ("value", Value::Text("7")),
+                    ("max", Value::Text("12")),
+                    ("value_label", Value::Message(Key::SpecimenBarValue)),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-progress-bar\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6732,21 +6962,21 @@ const PROGRESS_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("progress")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-progress")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-progress-size-large"),
-                    ),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Progress",
+                props: &[
+                    ("name", Value::Text("nd-variant-progress-size-large")),
+                    ("label", Value::Text("Progress")),
+                    ("value", Value::Text("7")),
+                    ("max", Value::Text("12")),
+                    ("value_label", Value::Message(Key::SpecimenBarValue)),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-progress-bar\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6776,15 +7006,21 @@ const PROSE_MEASURE_DEFAULT: &[Node] = &[Node::Element {
                 ("data-nd-prop", Value::Text("measure")),
                 ("data-nd-slug", Value::Text("prose")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-prose-block")),
-                    ("data-nd-measure", Value::Text("default")),
+            children: &[Node::Component {
+                name: "Prose",
+                props: &[("measure", Value::Text("default"))],
+                children: &[
+                    Node::Component {
+                        name: "Heading",
+                        props: &[("level", Value::Text("3")), ("size", Value::Text("h4"))],
+                        children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+                    },
+                    Node::Component {
+                        name: "Paragraph",
+                        props: &[("size", Value::Text("small"))],
+                        children: &[Node::Text(Value::Message(Key::ExampleListLong))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<h3 class=\"nd-heading nd-identifier\" data-nd-size=\"h3\">Aa bb cc</h3><p class=\"nd-paragraph nd-identifier\" data-nd-size=\"body\">Aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt</p>",
-                )],
             }],
         },
         Node::Element {
@@ -6814,15 +7050,21 @@ const PROSE_MEASURE_LEAD: &[Node] = &[Node::Element {
                 ("data-nd-prop", Value::Text("measure")),
                 ("data-nd-slug", Value::Text("prose")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-prose-block")),
-                    ("data-nd-measure", Value::Text("lead")),
+            children: &[Node::Component {
+                name: "Prose",
+                props: &[("measure", Value::Text("lead"))],
+                children: &[
+                    Node::Component {
+                        name: "Heading",
+                        props: &[("level", Value::Text("3")), ("size", Value::Text("h4"))],
+                        children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+                    },
+                    Node::Component {
+                        name: "Paragraph",
+                        props: &[("size", Value::Text("small"))],
+                        children: &[Node::Text(Value::Message(Key::ExampleListLong))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<h3 class=\"nd-heading nd-identifier\" data-nd-size=\"h3\">Aa bb cc</h3><p class=\"nd-paragraph nd-identifier\" data-nd-size=\"body\">Aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt</p>",
-                )],
             }],
         },
         Node::Element {
@@ -6852,15 +7094,21 @@ const PROSE_MEASURE_NONE: &[Node] = &[Node::Element {
                 ("data-nd-prop", Value::Text("measure")),
                 ("data-nd-slug", Value::Text("prose")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-prose-block")),
-                    ("data-nd-measure", Value::Text("none")),
+            children: &[Node::Component {
+                name: "Prose",
+                props: &[("measure", Value::Text("none"))],
+                children: &[
+                    Node::Component {
+                        name: "Heading",
+                        props: &[("level", Value::Text("3")), ("size", Value::Text("h4"))],
+                        children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+                    },
+                    Node::Component {
+                        name: "Paragraph",
+                        props: &[("size", Value::Text("small"))],
+                        children: &[Node::Text(Value::Message(Key::ExampleListLong))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<h3 class=\"nd-heading nd-identifier\" data-nd-size=\"h3\">Aa bb cc</h3><p class=\"nd-paragraph nd-identifier\" data-nd-size=\"body\">Aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt</p>",
-                )],
             }],
         },
         Node::Element {
@@ -6886,21 +7134,19 @@ const RADIO_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("radio")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-choice nd-radio")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-radio-size-small"),
-                    ),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Radio",
+                props: &[
+                    ("name", Value::Text("nd-variant-radio-size-small")),
+                    ("value", Value::Text("on")),
+                    ("label", Value::Data("Aa")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-choice-box\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6926,21 +7172,19 @@ const RADIO_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("radio")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-choice nd-radio")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-radio-size-medium"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Radio",
+                props: &[
+                    ("name", Value::Text("nd-variant-radio-size-medium")),
+                    ("value", Value::Text("on")),
+                    ("label", Value::Data("Aa")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-choice-box\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -6966,21 +7210,19 @@ const RADIO_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("radio")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-choice nd-radio")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-radio-size-large"),
-                    ),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Radio",
+                props: &[
+                    ("name", Value::Text("nd-variant-radio-size-large")),
+                    ("value", Value::Text("on")),
+                    ("label", Value::Data("Aa")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw("<span class=\"nd-choice-box\"></span>")],
+                children: &[],
             }],
         },
         Node::Element {
@@ -7006,25 +7248,20 @@ const RATING_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("rating")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-rating")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-rating-size-small"),
-                    ),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Rating",
+                props: &[
+                    ("name", Value::Text("nd-variant-rating-size-small")),
+                    ("label", Value::Text("Rating")),
+                    ("value", Value::Text("3")),
+                    ("readonly", Value::Bool(true)),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Component {
-                    name: "Icon",
-                    props: &[("icon", Value::Text("star"))],
-                    children: &[],
-                }],
+                children: &[],
             }],
         },
         Node::Element {
@@ -7050,25 +7287,20 @@ const RATING_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("rating")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-rating")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-rating-size-medium"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Rating",
+                props: &[
+                    ("name", Value::Text("nd-variant-rating-size-medium")),
+                    ("label", Value::Text("Rating")),
+                    ("value", Value::Text("3")),
+                    ("readonly", Value::Bool(true)),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Component {
-                    name: "Icon",
-                    props: &[("icon", Value::Text("star"))],
-                    children: &[],
-                }],
+                children: &[],
             }],
         },
         Node::Element {
@@ -7094,25 +7326,20 @@ const RATING_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("rating")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-rating")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-rating-size-large"),
-                    ),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Rating",
+                props: &[
+                    ("name", Value::Text("nd-variant-rating-size-large")),
+                    ("label", Value::Text("Rating")),
+                    ("value", Value::Text("3")),
+                    ("readonly", Value::Bool(true)),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Component {
-                    name: "Icon",
-                    props: &[("icon", Value::Text("star"))],
-                    children: &[],
-                }],
+                children: &[],
             }],
         },
         Node::Element {
@@ -7138,24 +7365,19 @@ const SEARCH_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("search")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-search")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-search-size-small"),
-                    ),
-                    ("data-nd-presentation", Value::Text("inline")),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Search",
+                props: &[
+                    ("name", Value::Text("nd-variant-search-size-small")),
+                    ("label", Value::Text("Search")),
+                    ("value", Value::Data("Aa")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw(
-                    "<div class=\"nd-search-field\"><span class=\"nd-search-input\"></span></div>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -7181,24 +7403,19 @@ const SEARCH_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("search")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-search")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-search-size-medium"),
-                    ),
-                    ("data-nd-presentation", Value::Text("inline")),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Search",
+                props: &[
+                    ("name", Value::Text("nd-variant-search-size-medium")),
+                    ("label", Value::Text("Search")),
+                    ("value", Value::Data("Aa")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw(
-                    "<div class=\"nd-search-field\"><span class=\"nd-search-input\"></span></div>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -7224,24 +7441,19 @@ const SEARCH_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("search")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-search")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-search-size-large"),
-                    ),
-                    ("data-nd-presentation", Value::Text("inline")),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Search",
+                props: &[
+                    ("name", Value::Text("nd-variant-search-size-large")),
+                    ("label", Value::Text("Search")),
+                    ("value", Value::Data("Aa")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw(
-                    "<div class=\"nd-search-field\"><span class=\"nd-search-input\"></span></div>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -7267,27 +7479,52 @@ const SEGMENTED_APPEARANCE_JOINED: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("appearance")),
                 ("data-nd-slug", Value::Text("segmented")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-segmented")),
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
                     (
-                        "aria-labelledby",
+                        "name",
                         Value::Text("nd-variant-segmented-appearance-joined"),
                     ),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-selection", Value::Text("accent")),
-                    ("data-nd-appearance", Value::Text("joined")),
+                    (
+                        "labelledby",
+                        Value::Text("nd-variant-segmented-appearance-joined"),
+                    ),
+                    ("appearance", Value::Text("joined")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7313,27 +7550,52 @@ const SEGMENTED_APPEARANCE_SPREAD: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("appearance")),
                 ("data-nd-slug", Value::Text("segmented")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-segmented")),
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
                     (
-                        "aria-labelledby",
+                        "name",
                         Value::Text("nd-variant-segmented-appearance-spread"),
                     ),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-selection", Value::Text("accent")),
-                    ("data-nd-appearance", Value::Text("spread")),
+                    (
+                        "labelledby",
+                        Value::Text("nd-variant-segmented-appearance-spread"),
+                    ),
+                    ("appearance", Value::Text("spread")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7359,27 +7621,46 @@ const SEGMENTED_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("segmented")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-segmented")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-segmented-size-small"),
-                    ),
-                    ("data-nd-appearance", Value::Text("joined")),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-selection", Value::Text("accent")),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
+                    ("name", Value::Text("nd-variant-segmented-size-small")),
+                    ("labelledby", Value::Text("nd-variant-segmented-size-small")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7405,27 +7686,49 @@ const SEGMENTED_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("segmented")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-segmented")),
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
+                    ("name", Value::Text("nd-variant-segmented-size-medium")),
                     (
-                        "aria-labelledby",
+                        "labelledby",
                         Value::Text("nd-variant-segmented-size-medium"),
                     ),
-                    ("data-nd-appearance", Value::Text("joined")),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-selection", Value::Text("accent")),
-                    ("data-nd-size", Value::Text("medium")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7451,27 +7754,46 @@ const SEGMENTED_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("segmented")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-segmented")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-segmented-size-large"),
-                    ),
-                    ("data-nd-appearance", Value::Text("joined")),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-selection", Value::Text("accent")),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
+                    ("name", Value::Text("nd-variant-segmented-size-large")),
+                    ("labelledby", Value::Text("nd-variant-segmented-size-large")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7497,27 +7819,49 @@ const SEGMENTED_SHAPE_ROUNDED: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("segmented")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-segmented")),
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
+                    ("name", Value::Text("nd-variant-segmented-shape-rounded")),
                     (
-                        "aria-labelledby",
+                        "labelledby",
                         Value::Text("nd-variant-segmented-shape-rounded"),
                     ),
-                    ("data-nd-appearance", Value::Text("joined")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-selection", Value::Text("accent")),
-                    ("data-nd-shape", Value::Text("rounded")),
+                    ("shape", Value::Text("rounded")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7543,27 +7887,46 @@ const SEGMENTED_SHAPE_PILL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("segmented")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-segmented")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-segmented-shape-pill"),
-                    ),
-                    ("data-nd-appearance", Value::Text("joined")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-selection", Value::Text("accent")),
-                    ("data-nd-shape", Value::Text("pill")),
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
+                    ("name", Value::Text("nd-variant-segmented-shape-pill")),
+                    ("labelledby", Value::Text("nd-variant-segmented-shape-pill")),
+                    ("shape", Value::Text("pill")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7589,27 +7952,49 @@ const SEGMENTED_SHAPE_SQUARE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("segmented")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-segmented")),
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
+                    ("name", Value::Text("nd-variant-segmented-shape-square")),
                     (
-                        "aria-labelledby",
+                        "labelledby",
                         Value::Text("nd-variant-segmented-shape-square"),
                     ),
-                    ("data-nd-appearance", Value::Text("joined")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-selection", Value::Text("accent")),
-                    ("data-nd-shape", Value::Text("square")),
+                    ("shape", Value::Text("square")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7635,27 +8020,49 @@ const SEGMENTED_SHAPE_BEVEL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("segmented")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-segmented")),
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
+                    ("name", Value::Text("nd-variant-segmented-shape-bevel")),
                     (
-                        "aria-labelledby",
+                        "labelledby",
                         Value::Text("nd-variant-segmented-shape-bevel"),
                     ),
-                    ("data-nd-appearance", Value::Text("joined")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-selection", Value::Text("accent")),
-                    ("data-nd-shape", Value::Text("bevel")),
+                    ("shape", Value::Text("bevel")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7681,28 +8088,52 @@ const SEGMENTED_ORIENTATION_HORIZONTAL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("orientation")),
                 ("data-nd-slug", Value::Text("segmented")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-segmented")),
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
                     (
-                        "aria-labelledby",
+                        "name",
                         Value::Text("nd-variant-segmented-orientation-horizontal"),
                     ),
-                    ("data-nd-appearance", Value::Text("joined")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-selection", Value::Text("accent")),
-                    ("aria-orientation", Value::Text("horizontal")),
+                    (
+                        "labelledby",
+                        Value::Text("nd-variant-segmented-orientation-horizontal"),
+                    ),
+                    ("orientation", Value::Text("horizontal")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7731,28 +8162,52 @@ const SEGMENTED_ORIENTATION_VERTICAL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("orientation")),
                 ("data-nd-slug", Value::Text("segmented")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-segmented")),
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
                     (
-                        "aria-labelledby",
+                        "name",
                         Value::Text("nd-variant-segmented-orientation-vertical"),
                     ),
-                    ("data-nd-appearance", Value::Text("joined")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-selection", Value::Text("accent")),
-                    ("aria-orientation", Value::Text("vertical")),
+                    (
+                        "labelledby",
+                        Value::Text("nd-variant-segmented-orientation-vertical"),
+                    ),
+                    ("orientation", Value::Text("vertical")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7781,27 +8236,49 @@ const SEGMENTED_SELECTION_ACCENT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("selection")),
                 ("data-nd-slug", Value::Text("segmented")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-segmented")),
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
+                    ("name", Value::Text("nd-variant-segmented-selection-accent")),
                     (
-                        "aria-labelledby",
+                        "labelledby",
                         Value::Text("nd-variant-segmented-selection-accent"),
                     ),
-                    ("data-nd-appearance", Value::Text("joined")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-selection", Value::Text("accent")),
+                    ("selection", Value::Text("accent")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7827,27 +8304,49 @@ const SEGMENTED_SELECTION_QUIET: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("selection")),
                 ("data-nd-slug", Value::Text("segmented")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-segmented")),
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
+                    ("name", Value::Text("nd-variant-segmented-selection-quiet")),
                     (
-                        "aria-labelledby",
+                        "labelledby",
                         Value::Text("nd-variant-segmented-selection-quiet"),
                     ),
-                    ("data-nd-appearance", Value::Text("joined")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("rounded")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-selection", Value::Text("quiet")),
+                    ("selection", Value::Text("quiet")),
                 ],
-                children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7873,23 +8372,46 @@ const SELECT_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("select")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-select")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-select-size-small"),
-                    ),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Select",
+                props: &[
+                    ("name", Value::Text("nd-variant-select-size-small")),
+                    ("label", Value::Text("Select")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-select-figure\"><span class=\"nd-select-box\"></span></span>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7915,23 +8437,46 @@ const SELECT_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("select")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-select")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-select-size-medium"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Select",
+                props: &[
+                    ("name", Value::Text("nd-variant-select-size-medium")),
+                    ("label", Value::Text("Select")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-select-figure\"><span class=\"nd-select-box\"></span></span>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -7957,23 +8502,46 @@ const SELECT_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("select")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-select")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-select-size-large"),
-                    ),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Select",
+                props: &[
+                    ("name", Value::Text("nd-variant-select-size-large")),
+                    ("label", Value::Text("Select")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-select-figure\"><span class=\"nd-select-box\"></span></span>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -8197,19 +8765,18 @@ const SWITCH_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("switch")),
             ],
             children: &[Node::Component {
                 name: "Switch",
                 props: &[
-                    ("name", Value::Text("Switch")),
+                    ("name", Value::Text("nd-variant-switch-size-small")),
                     ("label", Value::Text("Switch")),
                     ("on", Value::Text("Switch")),
                     ("off", Value::Text("Switch")),
                     ("size", Value::Text("small")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -8237,19 +8804,18 @@ const SWITCH_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("switch")),
             ],
             children: &[Node::Component {
                 name: "Switch",
                 props: &[
-                    ("name", Value::Text("Switch")),
+                    ("name", Value::Text("nd-variant-switch-size-medium")),
                     ("label", Value::Text("Switch")),
                     ("on", Value::Text("Switch")),
                     ("off", Value::Text("Switch")),
                     ("size", Value::Text("medium")),
-                    ("class", Value::Text("nd-identifier")),
                 ],
                 children: &[],
             }],
@@ -8277,30 +8843,75 @@ const TABLE_DENSITY_COMPACT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("density")),
                 ("data-nd-slug", Value::Text("table")),
             ],
             children: &[Node::Element {
                 tag: "div",
                 attributes: &[("class", Value::Text("nd-table-scroll"))],
-                children: &[Node::Element {
-                    tag: "table",
-                    attributes: &[
-                        ("class", Value::Text("nd-table")),
-                        (
-                            "aria-labelledby",
-                            Value::Text("nd-variant-table-density-compact"),
-                        ),
-                        ("data-nd-rules", Value::Text("rows")),
-                        ("data-nd-width", Value::Text("full")),
-                        ("data-nd-height", Value::Text("auto")),
-                        ("data-nd-layout", Value::Text("auto")),
-                        ("data-nd-density", Value::Text("compact")),
+                children: &[Node::Component {
+                    name: "Table",
+                    props: &[
+                        ("name", Value::Text("nd-variant-table-density-compact")),
+                        ("caption", Value::Text("Table")),
+                        ("hide_caption", Value::Bool(true)),
+                        ("density", Value::Text("compact")),
                     ],
-                    children: &[Node::Raw(
-                        "<tbody><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4211</th><td class=\"nd-table-cell nd-identifier\">12s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4209</th><td class=\"nd-table-cell nd-identifier\">48s</td></tr></tbody>",
-                    )],
+                    children: &[Node::Component {
+                        name: "TableSection",
+                        props: &[],
+                        children: &[
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4213"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("51s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4211"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("12s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4209"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("48s"))],
+                                    },
+                                ],
+                            },
+                        ],
+                    }],
                 }],
             }],
         },
@@ -8327,30 +8938,75 @@ const TABLE_DENSITY_DEFAULT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("density")),
                 ("data-nd-slug", Value::Text("table")),
             ],
             children: &[Node::Element {
                 tag: "div",
                 attributes: &[("class", Value::Text("nd-table-scroll"))],
-                children: &[Node::Element {
-                    tag: "table",
-                    attributes: &[
-                        ("class", Value::Text("nd-table")),
-                        (
-                            "aria-labelledby",
-                            Value::Text("nd-variant-table-density-default"),
-                        ),
-                        ("data-nd-rules", Value::Text("rows")),
-                        ("data-nd-width", Value::Text("full")),
-                        ("data-nd-height", Value::Text("auto")),
-                        ("data-nd-layout", Value::Text("auto")),
-                        ("data-nd-density", Value::Text("default")),
+                children: &[Node::Component {
+                    name: "Table",
+                    props: &[
+                        ("name", Value::Text("nd-variant-table-density-default")),
+                        ("caption", Value::Text("Table")),
+                        ("hide_caption", Value::Bool(true)),
+                        ("density", Value::Text("default")),
                     ],
-                    children: &[Node::Raw(
-                        "<tbody><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4211</th><td class=\"nd-table-cell nd-identifier\">12s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4209</th><td class=\"nd-table-cell nd-identifier\">48s</td></tr></tbody>",
-                    )],
+                    children: &[Node::Component {
+                        name: "TableSection",
+                        props: &[],
+                        children: &[
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4213"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("51s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4211"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("12s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4209"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("48s"))],
+                                    },
+                                ],
+                            },
+                        ],
+                    }],
                 }],
             }],
         },
@@ -8377,30 +9033,75 @@ const TABLE_DENSITY_COMFORTABLE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("density")),
                 ("data-nd-slug", Value::Text("table")),
             ],
             children: &[Node::Element {
                 tag: "div",
                 attributes: &[("class", Value::Text("nd-table-scroll"))],
-                children: &[Node::Element {
-                    tag: "table",
-                    attributes: &[
-                        ("class", Value::Text("nd-table")),
-                        (
-                            "aria-labelledby",
-                            Value::Text("nd-variant-table-density-comfortable"),
-                        ),
-                        ("data-nd-rules", Value::Text("rows")),
-                        ("data-nd-width", Value::Text("full")),
-                        ("data-nd-height", Value::Text("auto")),
-                        ("data-nd-layout", Value::Text("auto")),
-                        ("data-nd-density", Value::Text("comfortable")),
+                children: &[Node::Component {
+                    name: "Table",
+                    props: &[
+                        ("name", Value::Text("nd-variant-table-density-comfortable")),
+                        ("caption", Value::Text("Table")),
+                        ("hide_caption", Value::Bool(true)),
+                        ("density", Value::Text("comfortable")),
                     ],
-                    children: &[Node::Raw(
-                        "<tbody><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4211</th><td class=\"nd-table-cell nd-identifier\">12s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4209</th><td class=\"nd-table-cell nd-identifier\">48s</td></tr></tbody>",
-                    )],
+                    children: &[Node::Component {
+                        name: "TableSection",
+                        props: &[],
+                        children: &[
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4213"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("51s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4211"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("12s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4209"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("48s"))],
+                                    },
+                                ],
+                            },
+                        ],
+                    }],
                 }],
             }],
         },
@@ -8427,30 +9128,75 @@ const TABLE_RULES_ROWS: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("rules")),
                 ("data-nd-slug", Value::Text("table")),
             ],
             children: &[Node::Element {
                 tag: "div",
                 attributes: &[("class", Value::Text("nd-table-scroll"))],
-                children: &[Node::Element {
-                    tag: "table",
-                    attributes: &[
-                        ("class", Value::Text("nd-table")),
-                        (
-                            "aria-labelledby",
-                            Value::Text("nd-variant-table-rules-rows"),
-                        ),
-                        ("data-nd-density", Value::Text("default")),
-                        ("data-nd-width", Value::Text("full")),
-                        ("data-nd-height", Value::Text("auto")),
-                        ("data-nd-layout", Value::Text("auto")),
-                        ("data-nd-rules", Value::Text("rows")),
+                children: &[Node::Component {
+                    name: "Table",
+                    props: &[
+                        ("name", Value::Text("nd-variant-table-rules-rows")),
+                        ("caption", Value::Text("Table")),
+                        ("hide_caption", Value::Bool(true)),
+                        ("rules", Value::Text("rows")),
                     ],
-                    children: &[Node::Raw(
-                        "<tbody><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4211</th><td class=\"nd-table-cell nd-identifier\">12s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4209</th><td class=\"nd-table-cell nd-identifier\">48s</td></tr></tbody>",
-                    )],
+                    children: &[Node::Component {
+                        name: "TableSection",
+                        props: &[],
+                        children: &[
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4213"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("51s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4211"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("12s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4209"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("48s"))],
+                                    },
+                                ],
+                            },
+                        ],
+                    }],
                 }],
             }],
         },
@@ -8477,30 +9223,75 @@ const TABLE_RULES_COLUMNS: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("rules")),
                 ("data-nd-slug", Value::Text("table")),
             ],
             children: &[Node::Element {
                 tag: "div",
                 attributes: &[("class", Value::Text("nd-table-scroll"))],
-                children: &[Node::Element {
-                    tag: "table",
-                    attributes: &[
-                        ("class", Value::Text("nd-table")),
-                        (
-                            "aria-labelledby",
-                            Value::Text("nd-variant-table-rules-columns"),
-                        ),
-                        ("data-nd-density", Value::Text("default")),
-                        ("data-nd-width", Value::Text("full")),
-                        ("data-nd-height", Value::Text("auto")),
-                        ("data-nd-layout", Value::Text("auto")),
-                        ("data-nd-rules", Value::Text("columns")),
+                children: &[Node::Component {
+                    name: "Table",
+                    props: &[
+                        ("name", Value::Text("nd-variant-table-rules-columns")),
+                        ("caption", Value::Text("Table")),
+                        ("hide_caption", Value::Bool(true)),
+                        ("rules", Value::Text("columns")),
                     ],
-                    children: &[Node::Raw(
-                        "<tbody><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4211</th><td class=\"nd-table-cell nd-identifier\">12s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4209</th><td class=\"nd-table-cell nd-identifier\">48s</td></tr></tbody>",
-                    )],
+                    children: &[Node::Component {
+                        name: "TableSection",
+                        props: &[],
+                        children: &[
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4213"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("51s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4211"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("12s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4209"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("48s"))],
+                                    },
+                                ],
+                            },
+                        ],
+                    }],
                 }],
             }],
         },
@@ -8527,30 +9318,75 @@ const TABLE_RULES_GRID: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("rules")),
                 ("data-nd-slug", Value::Text("table")),
             ],
             children: &[Node::Element {
                 tag: "div",
                 attributes: &[("class", Value::Text("nd-table-scroll"))],
-                children: &[Node::Element {
-                    tag: "table",
-                    attributes: &[
-                        ("class", Value::Text("nd-table")),
-                        (
-                            "aria-labelledby",
-                            Value::Text("nd-variant-table-rules-grid"),
-                        ),
-                        ("data-nd-density", Value::Text("default")),
-                        ("data-nd-width", Value::Text("full")),
-                        ("data-nd-height", Value::Text("auto")),
-                        ("data-nd-layout", Value::Text("auto")),
-                        ("data-nd-rules", Value::Text("grid")),
+                children: &[Node::Component {
+                    name: "Table",
+                    props: &[
+                        ("name", Value::Text("nd-variant-table-rules-grid")),
+                        ("caption", Value::Text("Table")),
+                        ("hide_caption", Value::Bool(true)),
+                        ("rules", Value::Text("grid")),
                     ],
-                    children: &[Node::Raw(
-                        "<tbody><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4211</th><td class=\"nd-table-cell nd-identifier\">12s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4209</th><td class=\"nd-table-cell nd-identifier\">48s</td></tr></tbody>",
-                    )],
+                    children: &[Node::Component {
+                        name: "TableSection",
+                        props: &[],
+                        children: &[
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4213"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("51s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4211"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("12s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4209"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("48s"))],
+                                    },
+                                ],
+                            },
+                        ],
+                    }],
                 }],
             }],
         },
@@ -8577,30 +9413,75 @@ const TABLE_RULES_NONE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("rules")),
                 ("data-nd-slug", Value::Text("table")),
             ],
             children: &[Node::Element {
                 tag: "div",
                 attributes: &[("class", Value::Text("nd-table-scroll"))],
-                children: &[Node::Element {
-                    tag: "table",
-                    attributes: &[
-                        ("class", Value::Text("nd-table")),
-                        (
-                            "aria-labelledby",
-                            Value::Text("nd-variant-table-rules-none"),
-                        ),
-                        ("data-nd-density", Value::Text("default")),
-                        ("data-nd-width", Value::Text("full")),
-                        ("data-nd-height", Value::Text("auto")),
-                        ("data-nd-layout", Value::Text("auto")),
-                        ("data-nd-rules", Value::Text("none")),
+                children: &[Node::Component {
+                    name: "Table",
+                    props: &[
+                        ("name", Value::Text("nd-variant-table-rules-none")),
+                        ("caption", Value::Text("Table")),
+                        ("hide_caption", Value::Bool(true)),
+                        ("rules", Value::Text("none")),
                     ],
-                    children: &[Node::Raw(
-                        "<tbody><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4211</th><td class=\"nd-table-cell nd-identifier\">12s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4209</th><td class=\"nd-table-cell nd-identifier\">48s</td></tr></tbody>",
-                    )],
+                    children: &[Node::Component {
+                        name: "TableSection",
+                        props: &[],
+                        children: &[
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4213"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("51s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4211"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("12s"))],
+                                    },
+                                ],
+                            },
+                            Node::Component {
+                                name: "TableRow",
+                                props: &[],
+                                children: &[
+                                    Node::Component {
+                                        name: "TableHeaderCell",
+                                        props: &[("scope", Value::Text("row"))],
+                                        children: &[Node::Text(Value::Data("#4209"))],
+                                    },
+                                    Node::Component {
+                                        name: "TableCell",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Data("48s"))],
+                                    },
+                                ],
+                            },
+                        ],
+                    }],
                 }],
             }],
         },
@@ -8627,7 +9508,7 @@ const TABLE_CELL_ALIGN_START: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("align")),
                 ("data-nd-slug", Value::Text("table-cell")),
             ],
@@ -8640,18 +9521,10 @@ const TABLE_CELL_ALIGN_START: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "td",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-cell")),
-                                ("data-nd-wrap", Value::Text("wrap")),
-                                ("data-nd-aggregate", Value::Text("none")),
-                                ("data-nd-aggregate-over", Value::Text("table")),
-                                ("data-nd-align", Value::Text("start")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">R$ 1.240,00</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableCell",
+                            props: &[("align", Value::Text("start"))],
+                            children: &[Node::Text(Value::Data("R$ 1.240,00"))],
                         }],
                     }],
                 }],
@@ -8680,7 +9553,7 @@ const TABLE_CELL_ALIGN_CENTER: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("align")),
                 ("data-nd-slug", Value::Text("table-cell")),
             ],
@@ -8693,18 +9566,10 @@ const TABLE_CELL_ALIGN_CENTER: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "td",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-cell")),
-                                ("data-nd-wrap", Value::Text("wrap")),
-                                ("data-nd-aggregate", Value::Text("none")),
-                                ("data-nd-aggregate-over", Value::Text("table")),
-                                ("data-nd-align", Value::Text("center")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">R$ 1.240,00</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableCell",
+                            props: &[("align", Value::Text("center"))],
+                            children: &[Node::Text(Value::Data("R$ 1.240,00"))],
                         }],
                     }],
                 }],
@@ -8733,7 +9598,7 @@ const TABLE_CELL_ALIGN_END: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("align")),
                 ("data-nd-slug", Value::Text("table-cell")),
             ],
@@ -8746,18 +9611,10 @@ const TABLE_CELL_ALIGN_END: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "td",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-cell")),
-                                ("data-nd-wrap", Value::Text("wrap")),
-                                ("data-nd-aggregate", Value::Text("none")),
-                                ("data-nd-aggregate-over", Value::Text("table")),
-                                ("data-nd-align", Value::Text("end")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">R$ 1.240,00</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableCell",
+                            props: &[("align", Value::Text("end"))],
+                            children: &[Node::Text(Value::Data("R$ 1.240,00"))],
                         }],
                     }],
                 }],
@@ -8786,7 +9643,7 @@ const TABLE_CELL_ALIGN_NUMERIC: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("align")),
                 ("data-nd-slug", Value::Text("table-cell")),
             ],
@@ -8799,18 +9656,10 @@ const TABLE_CELL_ALIGN_NUMERIC: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "td",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-cell")),
-                                ("data-nd-wrap", Value::Text("wrap")),
-                                ("data-nd-aggregate", Value::Text("none")),
-                                ("data-nd-aggregate-over", Value::Text("table")),
-                                ("data-nd-align", Value::Text("numeric")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">R$ 1.240,00</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableCell",
+                            props: &[("align", Value::Text("numeric"))],
+                            children: &[Node::Text(Value::Data("R$ 1.240,00"))],
                         }],
                     }],
                 }],
@@ -8839,7 +9688,7 @@ const TABLE_CELL_WRAP_WRAP: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("wrap")),
                 ("data-nd-slug", Value::Text("table-cell")),
             ],
@@ -8852,18 +9701,12 @@ const TABLE_CELL_WRAP_WRAP: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "td",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-cell")),
-                                ("data-nd-align", Value::Text("start")),
-                                ("data-nd-aggregate", Value::Text("none")),
-                                ("data-nd-aggregate-over", Value::Text("table")),
-                                ("data-nd-wrap", Value::Text("wrap")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">release/2026-03-candidate-rollback</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableCell",
+                            props: &[("wrap", Value::Text("wrap"))],
+                            children: &[Node::Text(Value::Data(
+                                "release/2026-03-candidate-rollback",
+                            ))],
                         }],
                     }],
                 }],
@@ -8892,7 +9735,7 @@ const TABLE_CELL_WRAP_NOWRAP: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("wrap")),
                 ("data-nd-slug", Value::Text("table-cell")),
             ],
@@ -8905,18 +9748,12 @@ const TABLE_CELL_WRAP_NOWRAP: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "td",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-cell")),
-                                ("data-nd-align", Value::Text("start")),
-                                ("data-nd-aggregate", Value::Text("none")),
-                                ("data-nd-aggregate-over", Value::Text("table")),
-                                ("data-nd-wrap", Value::Text("nowrap")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">release/2026-03-candidate-rollback</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableCell",
+                            props: &[("wrap", Value::Text("nowrap"))],
+                            children: &[Node::Text(Value::Data(
+                                "release/2026-03-candidate-rollback",
+                            ))],
                         }],
                     }],
                 }],
@@ -8945,7 +9782,7 @@ const TABLE_CELL_WRAP_TRUNCATE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("wrap")),
                 ("data-nd-slug", Value::Text("table-cell")),
             ],
@@ -8958,18 +9795,12 @@ const TABLE_CELL_WRAP_TRUNCATE: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "td",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-cell")),
-                                ("data-nd-align", Value::Text("start")),
-                                ("data-nd-aggregate", Value::Text("none")),
-                                ("data-nd-aggregate-over", Value::Text("table")),
-                                ("data-nd-wrap", Value::Text("truncate")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">release/2026-03-candidate-rollback</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableCell",
+                            props: &[("wrap", Value::Text("truncate"))],
+                            children: &[Node::Text(Value::Data(
+                                "release/2026-03-candidate-rollback",
+                            ))],
                         }],
                     }],
                 }],
@@ -8998,7 +9829,7 @@ const TABLE_COLUMN_WIDTH_AUTO: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("width")),
                 ("data-nd-slug", Value::Text("table-column")),
             ],
@@ -9006,40 +9837,30 @@ const TABLE_COLUMN_WIDTH_AUTO: &[Node] = &[Node::Element {
                 tag: "table",
                 attributes: &[("class", Value::Text("nd-table"))],
                 children: &[
-                    Node::Element {
-                        tag: "colgroup",
-                        attributes: &[
-                            ("class", Value::Text("nd-table-column")),
-                            ("data-nd-sort-as", Value::Text("text")),
-                            ("data-nd-width", Value::Text("auto")),
+                    Node::Component {
+                        name: "TableColumn",
+                        props: &[
+                            ("name", Value::Text("nd-variant-table-column-width-auto")),
+                            ("width", Value::Text("auto")),
                         ],
-                        children: &[Node::Raw("<col>")],
+                        children: &[],
                     },
-                    Node::Element {
-                        tag: "tbody",
-                        attributes: &[],
-                        children: &[Node::Element {
-                            tag: "tr",
-                            attributes: &[("class", Value::Text("nd-table-row"))],
+                    Node::Component {
+                        name: "TableSection",
+                        props: &[("class", Value::Text("nd-identifier"))],
+                        children: &[Node::Component {
+                            name: "TableRow",
+                            props: &[],
                             children: &[
-                                Node::Element {
-                                    tag: "th",
-                                    attributes: &[
-                                        (
-                                            "class",
-                                            Value::Text("nd-table-header-cell nd-identifier"),
-                                        ),
-                                        ("scope", Value::Text("row")),
-                                    ],
-                                    children: &[Node::Text(Value::Text("#4213"))],
+                                Node::Component {
+                                    name: "TableHeaderCell",
+                                    props: &[("scope", Value::Text("row"))],
+                                    children: &[Node::Text(Value::Data("#4213"))],
                                 },
-                                Node::Element {
-                                    tag: "td",
-                                    attributes: &[(
-                                        "class",
-                                        Value::Text("nd-table-cell nd-identifier"),
-                                    )],
-                                    children: &[Node::Text(Value::Text("51s"))],
+                                Node::Component {
+                                    name: "TableCell",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Data("51s"))],
                                 },
                             ],
                         }],
@@ -9070,7 +9891,7 @@ const TABLE_COLUMN_WIDTH_NARROW: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("width")),
                 ("data-nd-slug", Value::Text("table-column")),
             ],
@@ -9078,40 +9899,30 @@ const TABLE_COLUMN_WIDTH_NARROW: &[Node] = &[Node::Element {
                 tag: "table",
                 attributes: &[("class", Value::Text("nd-table"))],
                 children: &[
-                    Node::Element {
-                        tag: "colgroup",
-                        attributes: &[
-                            ("class", Value::Text("nd-table-column")),
-                            ("data-nd-sort-as", Value::Text("text")),
-                            ("data-nd-width", Value::Text("narrow")),
+                    Node::Component {
+                        name: "TableColumn",
+                        props: &[
+                            ("name", Value::Text("nd-variant-table-column-width-narrow")),
+                            ("width", Value::Text("narrow")),
                         ],
-                        children: &[Node::Raw("<col>")],
+                        children: &[],
                     },
-                    Node::Element {
-                        tag: "tbody",
-                        attributes: &[],
-                        children: &[Node::Element {
-                            tag: "tr",
-                            attributes: &[("class", Value::Text("nd-table-row"))],
+                    Node::Component {
+                        name: "TableSection",
+                        props: &[("class", Value::Text("nd-identifier"))],
+                        children: &[Node::Component {
+                            name: "TableRow",
+                            props: &[],
                             children: &[
-                                Node::Element {
-                                    tag: "th",
-                                    attributes: &[
-                                        (
-                                            "class",
-                                            Value::Text("nd-table-header-cell nd-identifier"),
-                                        ),
-                                        ("scope", Value::Text("row")),
-                                    ],
-                                    children: &[Node::Text(Value::Text("#4213"))],
+                                Node::Component {
+                                    name: "TableHeaderCell",
+                                    props: &[("scope", Value::Text("row"))],
+                                    children: &[Node::Text(Value::Data("#4213"))],
                                 },
-                                Node::Element {
-                                    tag: "td",
-                                    attributes: &[(
-                                        "class",
-                                        Value::Text("nd-table-cell nd-identifier"),
-                                    )],
-                                    children: &[Node::Text(Value::Text("51s"))],
+                                Node::Component {
+                                    name: "TableCell",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Data("51s"))],
                                 },
                             ],
                         }],
@@ -9142,7 +9953,7 @@ const TABLE_COLUMN_WIDTH_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("width")),
                 ("data-nd-slug", Value::Text("table-column")),
             ],
@@ -9150,40 +9961,30 @@ const TABLE_COLUMN_WIDTH_MEDIUM: &[Node] = &[Node::Element {
                 tag: "table",
                 attributes: &[("class", Value::Text("nd-table"))],
                 children: &[
-                    Node::Element {
-                        tag: "colgroup",
-                        attributes: &[
-                            ("class", Value::Text("nd-table-column")),
-                            ("data-nd-sort-as", Value::Text("text")),
-                            ("data-nd-width", Value::Text("medium")),
+                    Node::Component {
+                        name: "TableColumn",
+                        props: &[
+                            ("name", Value::Text("nd-variant-table-column-width-medium")),
+                            ("width", Value::Text("medium")),
                         ],
-                        children: &[Node::Raw("<col>")],
+                        children: &[],
                     },
-                    Node::Element {
-                        tag: "tbody",
-                        attributes: &[],
-                        children: &[Node::Element {
-                            tag: "tr",
-                            attributes: &[("class", Value::Text("nd-table-row"))],
+                    Node::Component {
+                        name: "TableSection",
+                        props: &[("class", Value::Text("nd-identifier"))],
+                        children: &[Node::Component {
+                            name: "TableRow",
+                            props: &[],
                             children: &[
-                                Node::Element {
-                                    tag: "th",
-                                    attributes: &[
-                                        (
-                                            "class",
-                                            Value::Text("nd-table-header-cell nd-identifier"),
-                                        ),
-                                        ("scope", Value::Text("row")),
-                                    ],
-                                    children: &[Node::Text(Value::Text("#4213"))],
+                                Node::Component {
+                                    name: "TableHeaderCell",
+                                    props: &[("scope", Value::Text("row"))],
+                                    children: &[Node::Text(Value::Data("#4213"))],
                                 },
-                                Node::Element {
-                                    tag: "td",
-                                    attributes: &[(
-                                        "class",
-                                        Value::Text("nd-table-cell nd-identifier"),
-                                    )],
-                                    children: &[Node::Text(Value::Text("51s"))],
+                                Node::Component {
+                                    name: "TableCell",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Data("51s"))],
                                 },
                             ],
                         }],
@@ -9214,7 +10015,7 @@ const TABLE_COLUMN_WIDTH_WIDE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("width")),
                 ("data-nd-slug", Value::Text("table-column")),
             ],
@@ -9222,40 +10023,30 @@ const TABLE_COLUMN_WIDTH_WIDE: &[Node] = &[Node::Element {
                 tag: "table",
                 attributes: &[("class", Value::Text("nd-table"))],
                 children: &[
-                    Node::Element {
-                        tag: "colgroup",
-                        attributes: &[
-                            ("class", Value::Text("nd-table-column")),
-                            ("data-nd-sort-as", Value::Text("text")),
-                            ("data-nd-width", Value::Text("wide")),
+                    Node::Component {
+                        name: "TableColumn",
+                        props: &[
+                            ("name", Value::Text("nd-variant-table-column-width-wide")),
+                            ("width", Value::Text("wide")),
                         ],
-                        children: &[Node::Raw("<col>")],
+                        children: &[],
                     },
-                    Node::Element {
-                        tag: "tbody",
-                        attributes: &[],
-                        children: &[Node::Element {
-                            tag: "tr",
-                            attributes: &[("class", Value::Text("nd-table-row"))],
+                    Node::Component {
+                        name: "TableSection",
+                        props: &[("class", Value::Text("nd-identifier"))],
+                        children: &[Node::Component {
+                            name: "TableRow",
+                            props: &[],
                             children: &[
-                                Node::Element {
-                                    tag: "th",
-                                    attributes: &[
-                                        (
-                                            "class",
-                                            Value::Text("nd-table-header-cell nd-identifier"),
-                                        ),
-                                        ("scope", Value::Text("row")),
-                                    ],
-                                    children: &[Node::Text(Value::Text("#4213"))],
+                                Node::Component {
+                                    name: "TableHeaderCell",
+                                    props: &[("scope", Value::Text("row"))],
+                                    children: &[Node::Text(Value::Data("#4213"))],
                                 },
-                                Node::Element {
-                                    tag: "td",
-                                    attributes: &[(
-                                        "class",
-                                        Value::Text("nd-table-cell nd-identifier"),
-                                    )],
-                                    children: &[Node::Text(Value::Text("51s"))],
+                                Node::Component {
+                                    name: "TableCell",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Data("51s"))],
                                 },
                             ],
                         }],
@@ -9286,7 +10077,7 @@ const TABLE_COLUMN_WIDTH_FIT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("width")),
                 ("data-nd-slug", Value::Text("table-column")),
             ],
@@ -9294,40 +10085,30 @@ const TABLE_COLUMN_WIDTH_FIT: &[Node] = &[Node::Element {
                 tag: "table",
                 attributes: &[("class", Value::Text("nd-table"))],
                 children: &[
-                    Node::Element {
-                        tag: "colgroup",
-                        attributes: &[
-                            ("class", Value::Text("nd-table-column")),
-                            ("data-nd-sort-as", Value::Text("text")),
-                            ("data-nd-width", Value::Text("fit")),
+                    Node::Component {
+                        name: "TableColumn",
+                        props: &[
+                            ("name", Value::Text("nd-variant-table-column-width-fit")),
+                            ("width", Value::Text("fit")),
                         ],
-                        children: &[Node::Raw("<col>")],
+                        children: &[],
                     },
-                    Node::Element {
-                        tag: "tbody",
-                        attributes: &[],
-                        children: &[Node::Element {
-                            tag: "tr",
-                            attributes: &[("class", Value::Text("nd-table-row"))],
+                    Node::Component {
+                        name: "TableSection",
+                        props: &[("class", Value::Text("nd-identifier"))],
+                        children: &[Node::Component {
+                            name: "TableRow",
+                            props: &[],
                             children: &[
-                                Node::Element {
-                                    tag: "th",
-                                    attributes: &[
-                                        (
-                                            "class",
-                                            Value::Text("nd-table-header-cell nd-identifier"),
-                                        ),
-                                        ("scope", Value::Text("row")),
-                                    ],
-                                    children: &[Node::Text(Value::Text("#4213"))],
+                                Node::Component {
+                                    name: "TableHeaderCell",
+                                    props: &[("scope", Value::Text("row"))],
+                                    children: &[Node::Text(Value::Data("#4213"))],
                                 },
-                                Node::Element {
-                                    tag: "td",
-                                    attributes: &[(
-                                        "class",
-                                        Value::Text("nd-table-cell nd-identifier"),
-                                    )],
-                                    children: &[Node::Text(Value::Text("51s"))],
+                                Node::Component {
+                                    name: "TableCell",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Data("51s"))],
                                 },
                             ],
                         }],
@@ -9358,7 +10139,7 @@ const TABLE_HEADER_CELL_ALIGN_START: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("align")),
                 ("data-nd-slug", Value::Text("table-header-cell")),
             ],
@@ -9371,17 +10152,10 @@ const TABLE_HEADER_CELL_ALIGN_START: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "th",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-header-cell")),
-                                ("scope", Value::Text("col")),
-                                ("data-nd-wrap", Value::Text("nowrap")),
-                                ("data-nd-align", Value::Text("start")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">R$ 1.240</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableHeaderCell",
+                            props: &[("align", Value::Text("start"))],
+                            children: &[Node::Text(Value::Data("R$ 1.240"))],
                         }],
                     }],
                 }],
@@ -9413,7 +10187,7 @@ const TABLE_HEADER_CELL_ALIGN_CENTER: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("align")),
                 ("data-nd-slug", Value::Text("table-header-cell")),
             ],
@@ -9426,17 +10200,10 @@ const TABLE_HEADER_CELL_ALIGN_CENTER: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "th",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-header-cell")),
-                                ("scope", Value::Text("col")),
-                                ("data-nd-wrap", Value::Text("nowrap")),
-                                ("data-nd-align", Value::Text("center")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">R$ 1.240</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableHeaderCell",
+                            props: &[("align", Value::Text("center"))],
+                            children: &[Node::Text(Value::Data("R$ 1.240"))],
                         }],
                     }],
                 }],
@@ -9468,7 +10235,7 @@ const TABLE_HEADER_CELL_ALIGN_END: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("align")),
                 ("data-nd-slug", Value::Text("table-header-cell")),
             ],
@@ -9481,17 +10248,10 @@ const TABLE_HEADER_CELL_ALIGN_END: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "th",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-header-cell")),
-                                ("scope", Value::Text("col")),
-                                ("data-nd-wrap", Value::Text("nowrap")),
-                                ("data-nd-align", Value::Text("end")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">R$ 1.240</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableHeaderCell",
+                            props: &[("align", Value::Text("end"))],
+                            children: &[Node::Text(Value::Data("R$ 1.240"))],
                         }],
                     }],
                 }],
@@ -9520,7 +10280,7 @@ const TABLE_HEADER_CELL_ALIGN_NUMERIC: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("align")),
                 ("data-nd-slug", Value::Text("table-header-cell")),
             ],
@@ -9533,17 +10293,10 @@ const TABLE_HEADER_CELL_ALIGN_NUMERIC: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "th",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-header-cell")),
-                                ("scope", Value::Text("col")),
-                                ("data-nd-wrap", Value::Text("nowrap")),
-                                ("data-nd-align", Value::Text("numeric")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">R$ 1.240</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableHeaderCell",
+                            props: &[("align", Value::Text("numeric"))],
+                            children: &[Node::Text(Value::Data("R$ 1.240"))],
                         }],
                     }],
                 }],
@@ -9575,7 +10328,7 @@ const TABLE_HEADER_CELL_WRAP_WRAP: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("wrap")),
                 ("data-nd-slug", Value::Text("table-header-cell")),
             ],
@@ -9588,17 +10341,10 @@ const TABLE_HEADER_CELL_WRAP_WRAP: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "th",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-header-cell")),
-                                ("scope", Value::Text("col")),
-                                ("data-nd-align", Value::Text("start")),
-                                ("data-nd-wrap", Value::Text("wrap")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">release/2026-03-candidate</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableHeaderCell",
+                            props: &[("wrap", Value::Text("wrap"))],
+                            children: &[Node::Text(Value::Data("release/2026-03-candidate"))],
                         }],
                     }],
                 }],
@@ -9627,7 +10373,7 @@ const TABLE_HEADER_CELL_WRAP_NOWRAP: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("wrap")),
                 ("data-nd-slug", Value::Text("table-header-cell")),
             ],
@@ -9640,17 +10386,10 @@ const TABLE_HEADER_CELL_WRAP_NOWRAP: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "th",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-header-cell")),
-                                ("scope", Value::Text("col")),
-                                ("data-nd-align", Value::Text("start")),
-                                ("data-nd-wrap", Value::Text("nowrap")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">release/2026-03-candidate</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableHeaderCell",
+                            props: &[("wrap", Value::Text("nowrap"))],
+                            children: &[Node::Text(Value::Data("release/2026-03-candidate"))],
                         }],
                     }],
                 }],
@@ -9682,7 +10421,7 @@ const TABLE_HEADER_CELL_WRAP_TRUNCATE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("wrap")),
                 ("data-nd-slug", Value::Text("table-header-cell")),
             ],
@@ -9695,17 +10434,10 @@ const TABLE_HEADER_CELL_WRAP_TRUNCATE: &[Node] = &[Node::Element {
                     children: &[Node::Element {
                         tag: "tr",
                         attributes: &[],
-                        children: &[Node::Element {
-                            tag: "th",
-                            attributes: &[
-                                ("class", Value::Text("nd-table-header-cell")),
-                                ("scope", Value::Text("col")),
-                                ("data-nd-align", Value::Text("start")),
-                                ("data-nd-wrap", Value::Text("truncate")),
-                            ],
-                            children: &[Node::Raw(
-                                "<div class=\"nd-table-value\"><span class=\"nd-identifier\">release/2026-03-candidate</span></div>",
-                            )],
+                        children: &[Node::Component {
+                            name: "TableHeaderCell",
+                            props: &[("wrap", Value::Text("truncate"))],
+                            children: &[Node::Text(Value::Data("release/2026-03-candidate"))],
                         }],
                     }],
                 }],
@@ -9737,7 +10469,7 @@ const TABLE_ROW_EMPHASIS_NONE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("emphasis")),
                 ("data-nd-slug", Value::Text("table-row")),
             ],
@@ -9747,16 +10479,21 @@ const TABLE_ROW_EMPHASIS_NONE: &[Node] = &[Node::Element {
                 children: &[Node::Element {
                     tag: "tbody",
                     attributes: &[],
-                    children: &[Node::Element {
-                        tag: "tr",
-                        attributes: &[
-                            ("class", Value::Text("nd-table-row")),
-                            ("data-nd-select", Value::Text("none")),
-                            ("data-nd-emphasis", Value::Text("none")),
+                    children: &[Node::Component {
+                        name: "TableRow",
+                        props: &[("emphasis", Value::Text("none"))],
+                        children: &[
+                            Node::Component {
+                                name: "TableHeaderCell",
+                                props: &[("scope", Value::Text("row"))],
+                                children: &[Node::Text(Value::Data("#4213"))],
+                            },
+                            Node::Component {
+                                name: "TableCell",
+                                props: &[],
+                                children: &[Node::Text(Value::Data("51s"))],
+                            },
                         ],
-                        children: &[Node::Raw(
-                            "<th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td>",
-                        )],
                     }],
                 }],
             }],
@@ -9784,7 +10521,7 @@ const TABLE_ROW_EMPHASIS_SUBTLE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("emphasis")),
                 ("data-nd-slug", Value::Text("table-row")),
             ],
@@ -9794,16 +10531,21 @@ const TABLE_ROW_EMPHASIS_SUBTLE: &[Node] = &[Node::Element {
                 children: &[Node::Element {
                     tag: "tbody",
                     attributes: &[],
-                    children: &[Node::Element {
-                        tag: "tr",
-                        attributes: &[
-                            ("class", Value::Text("nd-table-row")),
-                            ("data-nd-select", Value::Text("none")),
-                            ("data-nd-emphasis", Value::Text("subtle")),
+                    children: &[Node::Component {
+                        name: "TableRow",
+                        props: &[("emphasis", Value::Text("subtle"))],
+                        children: &[
+                            Node::Component {
+                                name: "TableHeaderCell",
+                                props: &[("scope", Value::Text("row"))],
+                                children: &[Node::Text(Value::Data("#4213"))],
+                            },
+                            Node::Component {
+                                name: "TableCell",
+                                props: &[],
+                                children: &[Node::Text(Value::Data("51s"))],
+                            },
                         ],
-                        children: &[Node::Raw(
-                            "<th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td>",
-                        )],
                     }],
                 }],
             }],
@@ -9831,7 +10573,7 @@ const TABLE_ROW_EMPHASIS_STRONG: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("emphasis")),
                 ("data-nd-slug", Value::Text("table-row")),
             ],
@@ -9841,16 +10583,21 @@ const TABLE_ROW_EMPHASIS_STRONG: &[Node] = &[Node::Element {
                 children: &[Node::Element {
                     tag: "tbody",
                     attributes: &[],
-                    children: &[Node::Element {
-                        tag: "tr",
-                        attributes: &[
-                            ("class", Value::Text("nd-table-row")),
-                            ("data-nd-select", Value::Text("none")),
-                            ("data-nd-emphasis", Value::Text("strong")),
+                    children: &[Node::Component {
+                        name: "TableRow",
+                        props: &[("emphasis", Value::Text("strong"))],
+                        children: &[
+                            Node::Component {
+                                name: "TableHeaderCell",
+                                props: &[("scope", Value::Text("row"))],
+                                children: &[Node::Text(Value::Data("#4213"))],
+                            },
+                            Node::Component {
+                                name: "TableCell",
+                                props: &[],
+                                children: &[Node::Text(Value::Data("51s"))],
+                            },
                         ],
-                        children: &[Node::Raw(
-                            "<th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td>",
-                        )],
                     }],
                 }],
             }],
@@ -9878,23 +10625,99 @@ const TABS_ORIENTATION_HORIZONTAL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("orientation")),
                 ("data-nd-slug", Value::Text("tabs")),
             ],
             children: &[Node::Element {
                 tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-tabs")),
-                    ("data-nd-activation", Value::Text("automatic")),
-                    ("data-nd-appearance", Value::Text("underline")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("aria-orientation", Value::Text("horizontal")),
+                attributes: &[],
+                children: &[
+                    Node::Component {
+                        name: "Tabs",
+                        props: &[
+                            (
+                                "name",
+                                Value::Text("nd-variant-tabs-orientation-horizontal"),
+                            ),
+                            ("orientation", Value::Text("horizontal")),
+                        ],
+                        children: &[
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    (
+                                        "name",
+                                        Value::Text("nd-variant-tabs-orientation-horizontal"),
+                                    ),
+                                    ("value", Value::Text("Aa")),
+                                    ("label", Value::Data("Aa")),
+                                    ("selected", Value::Bool(true)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    (
+                                        "name",
+                                        Value::Text("nd-variant-tabs-orientation-horizontal"),
+                                    ),
+                                    ("value", Value::Text("Bbbb")),
+                                    ("label", Value::Data("Bbbb")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    (
+                                        "name",
+                                        Value::Text("nd-variant-tabs-orientation-horizontal"),
+                                    ),
+                                    ("value", Value::Text("Cc")),
+                                    ("label", Value::Data("Cc")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            (
+                                "name",
+                                Value::Text("nd-variant-tabs-orientation-horizontal"),
+                            ),
+                            ("value", Value::Text("Aa")),
+                        ],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            (
+                                "name",
+                                Value::Text("nd-variant-tabs-orientation-horizontal"),
+                            ),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            (
+                                "name",
+                                Value::Text("nd-variant-tabs-orientation-horizontal"),
+                            ),
+                            ("value", Value::Text("Cc")),
+                        ],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<a class=\"nd-tab\" data-nd-selected=\"true\"><span class=\"nd-tab-text nd-identifier\">Aa</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Bbbb</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Cc</span></a>",
-                )],
             }],
         },
         Node::Element {
@@ -9920,23 +10743,78 @@ const TABS_ORIENTATION_VERTICAL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("orientation")),
                 ("data-nd-slug", Value::Text("tabs")),
             ],
             children: &[Node::Element {
                 tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-tabs")),
-                    ("data-nd-activation", Value::Text("automatic")),
-                    ("data-nd-appearance", Value::Text("underline")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("aria-orientation", Value::Text("vertical")),
+                attributes: &[],
+                children: &[
+                    Node::Component {
+                        name: "Tabs",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-orientation-vertical")),
+                            ("orientation", Value::Text("vertical")),
+                        ],
+                        children: &[
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-orientation-vertical")),
+                                    ("value", Value::Text("Aa")),
+                                    ("label", Value::Data("Aa")),
+                                    ("selected", Value::Bool(true)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-orientation-vertical")),
+                                    ("value", Value::Text("Bbbb")),
+                                    ("label", Value::Data("Bbbb")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-orientation-vertical")),
+                                    ("value", Value::Text("Cc")),
+                                    ("label", Value::Data("Cc")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-orientation-vertical")),
+                            ("value", Value::Text("Aa")),
+                        ],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-orientation-vertical")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-orientation-vertical")),
+                            ("value", Value::Text("Cc")),
+                        ],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<a class=\"nd-tab\" data-nd-selected=\"true\"><span class=\"nd-tab-text nd-identifier\">Aa</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Bbbb</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Cc</span></a>",
-                )],
             }],
         },
         Node::Element {
@@ -9962,22 +10840,78 @@ const TABS_APPEARANCE_UNDERLINE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("appearance")),
                 ("data-nd-slug", Value::Text("tabs")),
             ],
             children: &[Node::Element {
                 tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-tabs")),
-                    ("data-nd-activation", Value::Text("automatic")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-appearance", Value::Text("underline")),
+                attributes: &[],
+                children: &[
+                    Node::Component {
+                        name: "Tabs",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-underline")),
+                            ("appearance", Value::Text("underline")),
+                        ],
+                        children: &[
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-appearance-underline")),
+                                    ("value", Value::Text("Aa")),
+                                    ("label", Value::Data("Aa")),
+                                    ("selected", Value::Bool(true)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-appearance-underline")),
+                                    ("value", Value::Text("Bbbb")),
+                                    ("label", Value::Data("Bbbb")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-appearance-underline")),
+                                    ("value", Value::Text("Cc")),
+                                    ("label", Value::Data("Cc")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-underline")),
+                            ("value", Value::Text("Aa")),
+                        ],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-underline")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-underline")),
+                            ("value", Value::Text("Cc")),
+                        ],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<a class=\"nd-tab\" data-nd-selected=\"true\"><span class=\"nd-tab-text nd-identifier\">Aa</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Bbbb</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Cc</span></a>",
-                )],
             }],
         },
         Node::Element {
@@ -10003,22 +10937,78 @@ const TABS_APPEARANCE_ENCLOSED: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("appearance")),
                 ("data-nd-slug", Value::Text("tabs")),
             ],
             children: &[Node::Element {
                 tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-tabs")),
-                    ("data-nd-activation", Value::Text("automatic")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-appearance", Value::Text("enclosed")),
+                attributes: &[],
+                children: &[
+                    Node::Component {
+                        name: "Tabs",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-enclosed")),
+                            ("appearance", Value::Text("enclosed")),
+                        ],
+                        children: &[
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-appearance-enclosed")),
+                                    ("value", Value::Text("Aa")),
+                                    ("label", Value::Data("Aa")),
+                                    ("selected", Value::Bool(true)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-appearance-enclosed")),
+                                    ("value", Value::Text("Bbbb")),
+                                    ("label", Value::Data("Bbbb")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-appearance-enclosed")),
+                                    ("value", Value::Text("Cc")),
+                                    ("label", Value::Data("Cc")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-enclosed")),
+                            ("value", Value::Text("Aa")),
+                        ],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-enclosed")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-enclosed")),
+                            ("value", Value::Text("Cc")),
+                        ],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<a class=\"nd-tab\" data-nd-selected=\"true\"><span class=\"nd-tab-text nd-identifier\">Aa</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Bbbb</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Cc</span></a>",
-                )],
             }],
         },
         Node::Element {
@@ -10044,22 +11034,78 @@ const TABS_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("tabs")),
             ],
             children: &[Node::Element {
                 tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-tabs")),
-                    ("data-nd-activation", Value::Text("automatic")),
-                    ("data-nd-appearance", Value::Text("underline")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-size", Value::Text("small")),
+                attributes: &[],
+                children: &[
+                    Node::Component {
+                        name: "Tabs",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-size-small")),
+                            ("size", Value::Text("small")),
+                        ],
+                        children: &[
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-size-small")),
+                                    ("value", Value::Text("Aa")),
+                                    ("label", Value::Data("Aa")),
+                                    ("selected", Value::Bool(true)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-size-small")),
+                                    ("value", Value::Text("Bbbb")),
+                                    ("label", Value::Data("Bbbb")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-size-small")),
+                                    ("value", Value::Text("Cc")),
+                                    ("label", Value::Data("Cc")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-size-small")),
+                            ("value", Value::Text("Aa")),
+                        ],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-size-small")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-size-small")),
+                            ("value", Value::Text("Cc")),
+                        ],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<a class=\"nd-tab\" data-nd-selected=\"true\"><span class=\"nd-tab-text nd-identifier\">Aa</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Bbbb</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Cc</span></a>",
-                )],
             }],
         },
         Node::Element {
@@ -10085,22 +11131,78 @@ const TABS_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("tabs")),
             ],
             children: &[Node::Element {
                 tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-tabs")),
-                    ("data-nd-activation", Value::Text("automatic")),
-                    ("data-nd-appearance", Value::Text("underline")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-size", Value::Text("medium")),
+                attributes: &[],
+                children: &[
+                    Node::Component {
+                        name: "Tabs",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-size-medium")),
+                            ("size", Value::Text("medium")),
+                        ],
+                        children: &[
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-size-medium")),
+                                    ("value", Value::Text("Aa")),
+                                    ("label", Value::Data("Aa")),
+                                    ("selected", Value::Bool(true)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-size-medium")),
+                                    ("value", Value::Text("Bbbb")),
+                                    ("label", Value::Data("Bbbb")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-size-medium")),
+                                    ("value", Value::Text("Cc")),
+                                    ("label", Value::Data("Cc")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-size-medium")),
+                            ("value", Value::Text("Aa")),
+                        ],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-size-medium")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-size-medium")),
+                            ("value", Value::Text("Cc")),
+                        ],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<a class=\"nd-tab\" data-nd-selected=\"true\"><span class=\"nd-tab-text nd-identifier\">Aa</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Bbbb</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Cc</span></a>",
-                )],
             }],
         },
         Node::Element {
@@ -10126,22 +11228,78 @@ const TABS_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("tabs")),
             ],
             children: &[Node::Element {
                 tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-tabs")),
-                    ("data-nd-activation", Value::Text("automatic")),
-                    ("data-nd-appearance", Value::Text("underline")),
-                    ("data-nd-fill", Value::Text("hug")),
-                    ("data-nd-size", Value::Text("large")),
+                attributes: &[],
+                children: &[
+                    Node::Component {
+                        name: "Tabs",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-size-large")),
+                            ("size", Value::Text("large")),
+                        ],
+                        children: &[
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-size-large")),
+                                    ("value", Value::Text("Aa")),
+                                    ("label", Value::Data("Aa")),
+                                    ("selected", Value::Bool(true)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-size-large")),
+                                    ("value", Value::Text("Bbbb")),
+                                    ("label", Value::Data("Bbbb")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-size-large")),
+                                    ("value", Value::Text("Cc")),
+                                    ("label", Value::Data("Cc")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-size-large")),
+                            ("value", Value::Text("Aa")),
+                        ],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-size-large")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-size-large")),
+                            ("value", Value::Text("Cc")),
+                        ],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<a class=\"nd-tab\" data-nd-selected=\"true\"><span class=\"nd-tab-text nd-identifier\">Aa</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Bbbb</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Cc</span></a>",
-                )],
             }],
         },
         Node::Element {
@@ -10167,22 +11325,78 @@ const TABS_FILL_HUG: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("fill")),
                 ("data-nd-slug", Value::Text("tabs")),
             ],
             children: &[Node::Element {
                 tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-tabs")),
-                    ("data-nd-activation", Value::Text("automatic")),
-                    ("data-nd-appearance", Value::Text("underline")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-fill", Value::Text("hug")),
+                attributes: &[],
+                children: &[
+                    Node::Component {
+                        name: "Tabs",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-fill-hug")),
+                            ("fill", Value::Text("hug")),
+                        ],
+                        children: &[
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-fill-hug")),
+                                    ("value", Value::Text("Aa")),
+                                    ("label", Value::Data("Aa")),
+                                    ("selected", Value::Bool(true)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-fill-hug")),
+                                    ("value", Value::Text("Bbbb")),
+                                    ("label", Value::Data("Bbbb")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-fill-hug")),
+                                    ("value", Value::Text("Cc")),
+                                    ("label", Value::Data("Cc")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-fill-hug")),
+                            ("value", Value::Text("Aa")),
+                        ],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-fill-hug")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-fill-hug")),
+                            ("value", Value::Text("Cc")),
+                        ],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<a class=\"nd-tab\" data-nd-selected=\"true\"><span class=\"nd-tab-text nd-identifier\">Aa</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Bbbb</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Cc</span></a>",
-                )],
             }],
         },
         Node::Element {
@@ -10208,22 +11422,78 @@ const TABS_FILL_EQUAL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("fill")),
                 ("data-nd-slug", Value::Text("tabs")),
             ],
             children: &[Node::Element {
                 tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-tabs")),
-                    ("data-nd-activation", Value::Text("automatic")),
-                    ("data-nd-appearance", Value::Text("underline")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-fill", Value::Text("equal")),
+                attributes: &[],
+                children: &[
+                    Node::Component {
+                        name: "Tabs",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-fill-equal")),
+                            ("fill", Value::Text("equal")),
+                        ],
+                        children: &[
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-fill-equal")),
+                                    ("value", Value::Text("Aa")),
+                                    ("label", Value::Data("Aa")),
+                                    ("selected", Value::Bool(true)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-fill-equal")),
+                                    ("value", Value::Text("Bbbb")),
+                                    ("label", Value::Data("Bbbb")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-fill-equal")),
+                                    ("value", Value::Text("Cc")),
+                                    ("label", Value::Data("Cc")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-fill-equal")),
+                            ("value", Value::Text("Aa")),
+                        ],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-fill-equal")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-fill-equal")),
+                            ("value", Value::Text("Cc")),
+                        ],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<a class=\"nd-tab\" data-nd-selected=\"true\"><span class=\"nd-tab-text nd-identifier\">Aa</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Bbbb</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Cc</span></a>",
-                )],
             }],
         },
         Node::Element {
@@ -10249,22 +11519,78 @@ const TABS_FILL_STRETCH: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("fill")),
                 ("data-nd-slug", Value::Text("tabs")),
             ],
             children: &[Node::Element {
                 tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-tabs")),
-                    ("data-nd-activation", Value::Text("automatic")),
-                    ("data-nd-appearance", Value::Text("underline")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-fill", Value::Text("stretch")),
+                attributes: &[],
+                children: &[
+                    Node::Component {
+                        name: "Tabs",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-fill-stretch")),
+                            ("fill", Value::Text("stretch")),
+                        ],
+                        children: &[
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-fill-stretch")),
+                                    ("value", Value::Text("Aa")),
+                                    ("label", Value::Data("Aa")),
+                                    ("selected", Value::Bool(true)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-fill-stretch")),
+                                    ("value", Value::Text("Bbbb")),
+                                    ("label", Value::Data("Bbbb")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-fill-stretch")),
+                                    ("value", Value::Text("Cc")),
+                                    ("label", Value::Data("Cc")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-fill-stretch")),
+                            ("value", Value::Text("Aa")),
+                        ],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-fill-stretch")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-fill-stretch")),
+                            ("value", Value::Text("Cc")),
+                        ],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
                 ],
-                children: &[Node::Raw(
-                    "<a class=\"nd-tab\" data-nd-selected=\"true\"><span class=\"nd-tab-text nd-identifier\">Aa</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Bbbb</span></a><a class=\"nd-tab\" data-nd-selected=\"false\"><span class=\"nd-tab-text nd-identifier\">Cc</span></a>",
-                )],
             }],
         },
         Node::Element {
@@ -10290,21 +11616,17 @@ const TAG_VARIANT_SOFT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("variant")),
                 ("data-nd-slug", Value::Text("tag")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-tag")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("pill")),
-                    ("data-nd-variant", Value::Text("soft")),
+            children: &[Node::Component {
+                name: "Tag",
+                props: &[
+                    ("label", Value::Data("Tag")),
+                    ("variant", Value::Text("soft")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-tag-body\"><span class=\"nd-tag-label nd-identifier\">Tag</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -10330,21 +11652,17 @@ const TAG_VARIANT_SOLID: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("variant")),
                 ("data-nd-slug", Value::Text("tag")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-tag")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("pill")),
-                    ("data-nd-variant", Value::Text("solid")),
+            children: &[Node::Component {
+                name: "Tag",
+                props: &[
+                    ("label", Value::Data("Tag")),
+                    ("variant", Value::Text("solid")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-tag-body\"><span class=\"nd-tag-label nd-identifier\">Tag</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -10370,21 +11688,17 @@ const TAG_VARIANT_OUTLINE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("variant")),
                 ("data-nd-slug", Value::Text("tag")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-tag")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("pill")),
-                    ("data-nd-variant", Value::Text("outline")),
+            children: &[Node::Component {
+                name: "Tag",
+                props: &[
+                    ("label", Value::Data("Tag")),
+                    ("variant", Value::Text("outline")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-tag-body\"><span class=\"nd-tag-label nd-identifier\">Tag</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -10410,21 +11724,17 @@ const TAG_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("tag")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-tag")),
-                    ("data-nd-variant", Value::Text("soft")),
-                    ("data-nd-shape", Value::Text("pill")),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Tag",
+                props: &[
+                    ("label", Value::Data("Tag")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-tag-body\"><span class=\"nd-tag-label nd-identifier\">Tag</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -10450,21 +11760,17 @@ const TAG_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("tag")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-tag")),
-                    ("data-nd-variant", Value::Text("soft")),
-                    ("data-nd-shape", Value::Text("pill")),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Tag",
+                props: &[
+                    ("label", Value::Data("Tag")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-tag-body\"><span class=\"nd-tag-label nd-identifier\">Tag</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -10490,21 +11796,17 @@ const TAG_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("tag")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-tag")),
-                    ("data-nd-variant", Value::Text("soft")),
-                    ("data-nd-shape", Value::Text("pill")),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Tag",
+                props: &[
+                    ("label", Value::Data("Tag")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-tag-body\"><span class=\"nd-tag-label nd-identifier\">Tag</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -10530,21 +11832,17 @@ const TAG_SHAPE_PILL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("tag")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-tag")),
-                    ("data-nd-variant", Value::Text("soft")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("pill")),
+            children: &[Node::Component {
+                name: "Tag",
+                props: &[
+                    ("label", Value::Data("Tag")),
+                    ("shape", Value::Text("pill")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-tag-body\"><span class=\"nd-tag-label nd-identifier\">Tag</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -10570,21 +11868,17 @@ const TAG_SHAPE_ROUNDED: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("tag")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-tag")),
-                    ("data-nd-variant", Value::Text("soft")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("rounded")),
+            children: &[Node::Component {
+                name: "Tag",
+                props: &[
+                    ("label", Value::Data("Tag")),
+                    ("shape", Value::Text("rounded")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-tag-body\"><span class=\"nd-tag-label nd-identifier\">Tag</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -10610,21 +11904,17 @@ const TAG_SHAPE_SQUARE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("shape")),
                 ("data-nd-slug", Value::Text("tag")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-tag")),
-                    ("data-nd-variant", Value::Text("soft")),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-shape", Value::Text("square")),
+            children: &[Node::Component {
+                name: "Tag",
+                props: &[
+                    ("label", Value::Data("Tag")),
+                    ("shape", Value::Text("square")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-tag-body\"><span class=\"nd-tag-label nd-identifier\">Tag</span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -10650,23 +11940,46 @@ const TAG_PICKER_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("tag-picker")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-tag-picker")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-tag-picker-size-small"),
-                    ),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "TagPicker",
+                props: &[
+                    ("name", Value::Text("nd-variant-tag-picker-size-small")),
+                    ("label", Value::Text("TagPicker")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-tag-picker-figure\"><span class=\"nd-tag-picker-box\"></span></span>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -10692,23 +12005,46 @@ const TAG_PICKER_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("tag-picker")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-tag-picker")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-tag-picker-size-medium"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "TagPicker",
+                props: &[
+                    ("name", Value::Text("nd-variant-tag-picker-size-medium")),
+                    ("label", Value::Text("TagPicker")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-tag-picker-figure\"><span class=\"nd-tag-picker-box\"></span></span>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -10734,23 +12070,46 @@ const TAG_PICKER_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("tag-picker")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-tag-picker")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-tag-picker-size-large"),
-                    ),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "TagPicker",
+                props: &[
+                    ("name", Value::Text("nd-variant-tag-picker-size-large")),
+                    ("label", Value::Text("TagPicker")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-tag-picker-figure\"><span class=\"nd-tag-picker-box\"></span></span>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("selected", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SelectOption",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("selected", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -10776,16 +12135,13 @@ const TEXT_SIZE_CAPTION: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("text")),
             ],
             children: &[Node::Component {
                 name: "Text",
-                props: &[
-                    ("size", Value::Text("caption")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("size", Value::Text("caption"))],
                 children: &[Node::Text(Value::Text("Text"))],
             }],
         },
@@ -10812,16 +12168,13 @@ const TEXT_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("text")),
             ],
             children: &[Node::Component {
                 name: "Text",
-                props: &[
-                    ("size", Value::Text("small")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("size", Value::Text("small"))],
                 children: &[Node::Text(Value::Text("Text"))],
             }],
         },
@@ -10848,16 +12201,13 @@ const TEXT_SIZE_BODY: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("text")),
             ],
             children: &[Node::Component {
                 name: "Text",
-                props: &[
-                    ("size", Value::Text("body")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("size", Value::Text("body"))],
                 children: &[Node::Text(Value::Text("Text"))],
             }],
         },
@@ -10884,16 +12234,13 @@ const TEXT_SIZE_LEAD: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("text")),
             ],
             children: &[Node::Component {
                 name: "Text",
-                props: &[
-                    ("size", Value::Text("lead")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("size", Value::Text("lead"))],
                 children: &[Node::Text(Value::Text("Text"))],
             }],
         },
@@ -10920,16 +12267,13 @@ const TEXT_WEIGHT_REGULAR: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("weight")),
                 ("data-nd-slug", Value::Text("text")),
             ],
             children: &[Node::Component {
                 name: "Text",
-                props: &[
-                    ("weight", Value::Text("regular")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("weight", Value::Text("regular"))],
                 children: &[Node::Text(Value::Text("Text"))],
             }],
         },
@@ -10956,16 +12300,13 @@ const TEXT_WEIGHT_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("weight")),
                 ("data-nd-slug", Value::Text("text")),
             ],
             children: &[Node::Component {
                 name: "Text",
-                props: &[
-                    ("weight", Value::Text("medium")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("weight", Value::Text("medium"))],
                 children: &[Node::Text(Value::Text("Text"))],
             }],
         },
@@ -10992,16 +12333,13 @@ const TEXT_WEIGHT_SEMIBOLD: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("weight")),
                 ("data-nd-slug", Value::Text("text")),
             ],
             children: &[Node::Component {
                 name: "Text",
-                props: &[
-                    ("weight", Value::Text("semibold")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("weight", Value::Text("semibold"))],
                 children: &[Node::Text(Value::Text("Text"))],
             }],
         },
@@ -11028,16 +12366,13 @@ const TEXT_WEIGHT_BOLD: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("weight")),
                 ("data-nd-slug", Value::Text("text")),
             ],
             children: &[Node::Component {
                 name: "Text",
-                props: &[
-                    ("weight", Value::Text("bold")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("weight", Value::Text("bold"))],
                 children: &[Node::Text(Value::Text("Text"))],
             }],
         },
@@ -11064,16 +12399,13 @@ const TEXT_TONE_DEFAULT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("text")),
             ],
             children: &[Node::Component {
                 name: "Text",
-                props: &[
-                    ("tone", Value::Text("default")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("tone", Value::Text("default"))],
                 children: &[Node::Text(Value::Text("Text"))],
             }],
         },
@@ -11100,16 +12432,13 @@ const TEXT_TONE_MUTED: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("text")),
             ],
             children: &[Node::Component {
                 name: "Text",
-                props: &[
-                    ("tone", Value::Text("muted")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("tone", Value::Text("muted"))],
                 children: &[Node::Text(Value::Text("Text"))],
             }],
         },
@@ -11136,16 +12465,13 @@ const TEXT_TONE_ACCENT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("tone")),
                 ("data-nd-slug", Value::Text("text")),
             ],
             children: &[Node::Component {
                 name: "Text",
-                props: &[
-                    ("tone", Value::Text("accent")),
-                    ("class", Value::Text("nd-identifier")),
-                ],
+                props: &[("tone", Value::Text("accent"))],
                 children: &[Node::Text(Value::Text("Text"))],
             }],
         },
@@ -11172,24 +12498,19 @@ const TEXTAREA_RESIZE_NONE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("resize")),
                 ("data-nd-slug", Value::Text("textarea")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-textarea")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-textarea-resize-none"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-resize", Value::Text("none")),
+            children: &[Node::Component {
+                name: "Textarea",
+                props: &[
+                    ("name", Value::Text("nd-variant-textarea-resize-none")),
+                    ("label", Value::Text("Textarea")),
+                    ("value", Value::Data("Aa")),
+                    ("resize", Value::Text("none")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-textarea-figure\"><span class=\"nd-textarea-box\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -11215,24 +12536,19 @@ const TEXTAREA_RESIZE_VERTICAL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("resize")),
                 ("data-nd-slug", Value::Text("textarea")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-textarea")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-textarea-resize-vertical"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-resize", Value::Text("vertical")),
+            children: &[Node::Component {
+                name: "Textarea",
+                props: &[
+                    ("name", Value::Text("nd-variant-textarea-resize-vertical")),
+                    ("label", Value::Text("Textarea")),
+                    ("value", Value::Data("Aa")),
+                    ("resize", Value::Text("vertical")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-textarea-figure\"><span class=\"nd-textarea-box\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -11258,24 +12574,19 @@ const TEXTAREA_RESIZE_BOTH: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("resize")),
                 ("data-nd-slug", Value::Text("textarea")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-textarea")),
-                    (
-                        "aria-labelledby",
-                        Value::Text("nd-variant-textarea-resize-both"),
-                    ),
-                    ("data-nd-size", Value::Text("medium")),
-                    ("data-nd-resize", Value::Text("both")),
+            children: &[Node::Component {
+                name: "Textarea",
+                props: &[
+                    ("name", Value::Text("nd-variant-textarea-resize-both")),
+                    ("label", Value::Text("Textarea")),
+                    ("value", Value::Data("Aa")),
+                    ("resize", Value::Text("both")),
                 ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-textarea-figure\"><span class=\"nd-textarea-box\"></span></span>",
-                )],
+                children: &[],
             }],
         },
         Node::Element {
@@ -11301,24 +12612,41 @@ const TOOLBAR_ORIENTATION_HORIZONTAL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("orientation")),
                 ("data-nd-slug", Value::Text("toolbar")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-toolbar")),
+            children: &[Node::Component {
+                name: "Toolbar",
+                props: &[
                     (
-                        "aria-labelledby",
+                        "labelledby",
                         Value::Text("nd-variant-toolbar-orientation-horizontal"),
                     ),
-                    ("data-nd-density", Value::Text("comfortable")),
-                    ("aria-orientation", Value::Text("horizontal")),
+                    ("orientation", Value::Text("horizontal")),
                 ],
-                children: &[Node::Raw(
-                    "<div class=\"nd-toolbar-group\" role=\"group\"><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Aa</span></span></button><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Bb</span></span></button></div>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("transparent")),
+                            ("tone", Value::Text("neutral")),
+                            ("size", Value::Text("small")),
+                            ("label", Value::Data("Aa")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("transparent")),
+                            ("tone", Value::Text("neutral")),
+                            ("size", Value::Text("small")),
+                            ("label", Value::Data("Bbbb")),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -11347,24 +12675,41 @@ const TOOLBAR_ORIENTATION_VERTICAL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("orientation")),
                 ("data-nd-slug", Value::Text("toolbar")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-toolbar")),
+            children: &[Node::Component {
+                name: "Toolbar",
+                props: &[
                     (
-                        "aria-labelledby",
+                        "labelledby",
                         Value::Text("nd-variant-toolbar-orientation-vertical"),
                     ),
-                    ("data-nd-density", Value::Text("comfortable")),
-                    ("aria-orientation", Value::Text("vertical")),
+                    ("orientation", Value::Text("vertical")),
                 ],
-                children: &[Node::Raw(
-                    "<div class=\"nd-toolbar-group\" role=\"group\"><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Aa</span></span></button><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Bb</span></span></button></div>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("transparent")),
+                            ("tone", Value::Text("neutral")),
+                            ("size", Value::Text("small")),
+                            ("label", Value::Data("Aa")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("transparent")),
+                            ("tone", Value::Text("neutral")),
+                            ("size", Value::Text("small")),
+                            ("label", Value::Data("Bbbb")),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -11390,23 +12735,41 @@ const TOOLBAR_DENSITY_COMFORTABLE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("density")),
                 ("data-nd-slug", Value::Text("toolbar")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-toolbar")),
+            children: &[Node::Component {
+                name: "Toolbar",
+                props: &[
                     (
-                        "aria-labelledby",
+                        "labelledby",
                         Value::Text("nd-variant-toolbar-density-comfortable"),
                     ),
-                    ("data-nd-density", Value::Text("comfortable")),
+                    ("density", Value::Text("comfortable")),
                 ],
-                children: &[Node::Raw(
-                    "<div class=\"nd-toolbar-group\" role=\"group\"><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Aa</span></span></button><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Bb</span></span></button></div>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("transparent")),
+                            ("tone", Value::Text("neutral")),
+                            ("size", Value::Text("small")),
+                            ("label", Value::Data("Aa")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("transparent")),
+                            ("tone", Value::Text("neutral")),
+                            ("size", Value::Text("small")),
+                            ("label", Value::Data("Bbbb")),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -11432,23 +12795,41 @@ const TOOLBAR_DENSITY_COMPACT: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("density")),
                 ("data-nd-slug", Value::Text("toolbar")),
             ],
-            children: &[Node::Element {
-                tag: "div",
-                attributes: &[
-                    ("class", Value::Text("nd-toolbar")),
+            children: &[Node::Component {
+                name: "Toolbar",
+                props: &[
                     (
-                        "aria-labelledby",
+                        "labelledby",
                         Value::Text("nd-variant-toolbar-density-compact"),
                     ),
-                    ("data-nd-density", Value::Text("compact")),
+                    ("density", Value::Text("compact")),
                 ],
-                children: &[Node::Raw(
-                    "<div class=\"nd-toolbar-group\" role=\"group\"><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Aa</span></span></button><button class=\"nd-button\" type=\"button\" data-nd-variant=\"transparent\" data-nd-tone=\"neutral\" data-nd-size=\"small\" data-nd-shape=\"rounded\"><span class=\"nd-button-text\"><span class=\"nd-button-label nd-identifier\">Bb</span></span></button></div>",
-                )],
+                children: &[
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("transparent")),
+                            ("tone", Value::Text("neutral")),
+                            ("size", Value::Text("small")),
+                            ("label", Value::Data("Aa")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("transparent")),
+                            ("tone", Value::Text("neutral")),
+                            ("size", Value::Text("small")),
+                            ("label", Value::Data("Bbbb")),
+                        ],
+                        children: &[],
+                    },
+                ],
             }],
         },
         Node::Element {
@@ -11474,20 +12855,34 @@ const TREE_SIZE_SMALL: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("tree")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-tree")),
-                    ("data-nd-selection", Value::Text("none")),
-                    ("data-nd-size", Value::Text("small")),
+            children: &[Node::Component {
+                name: "Tree",
+                props: &[
+                    ("name", Value::Text("nd-variant-tree-size-small")),
+                    ("label", Value::Text("Tree")),
+                    ("size", Value::Text("small")),
                 ],
-                children: &[Node::Raw(
-                    "<li class=\"nd-tree-item\"><span class=\"nd-tree-row\"><span class=\"nd-identifier\">src</span></span></li>",
-                )],
+                children: &[Node::Component {
+                    name: "TreeItem",
+                    props: &[
+                        ("label", Value::Data("Aa")),
+                        ("value", Value::Text("Aa")),
+                        ("branch", Value::Bool(true)),
+                        ("expanded", Value::Bool(true)),
+                    ],
+                    children: &[Node::Component {
+                        name: "TreeItem",
+                        props: &[
+                            ("label", Value::Data("Bbbb")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[],
+                    }],
+                }],
             }],
         },
         Node::Element {
@@ -11513,20 +12908,34 @@ const TREE_SIZE_MEDIUM: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("tree")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-tree")),
-                    ("data-nd-selection", Value::Text("none")),
-                    ("data-nd-size", Value::Text("medium")),
+            children: &[Node::Component {
+                name: "Tree",
+                props: &[
+                    ("name", Value::Text("nd-variant-tree-size-medium")),
+                    ("label", Value::Text("Tree")),
+                    ("size", Value::Text("medium")),
                 ],
-                children: &[Node::Raw(
-                    "<li class=\"nd-tree-item\"><span class=\"nd-tree-row\"><span class=\"nd-identifier\">src</span></span></li>",
-                )],
+                children: &[Node::Component {
+                    name: "TreeItem",
+                    props: &[
+                        ("label", Value::Data("Aa")),
+                        ("value", Value::Text("Aa")),
+                        ("branch", Value::Bool(true)),
+                        ("expanded", Value::Bool(true)),
+                    ],
+                    children: &[Node::Component {
+                        name: "TreeItem",
+                        props: &[
+                            ("label", Value::Data("Bbbb")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[],
+                    }],
+                }],
             }],
         },
         Node::Element {
@@ -11552,20 +12961,34 @@ const TREE_SIZE_LARGE: &[Node] = &[Node::Element {
         Node::Element {
             tag: "div",
             attributes: &[
-                ("class", Value::Text("nd-variant-stage")),
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
                 ("data-nd-prop", Value::Text("size")),
                 ("data-nd-slug", Value::Text("tree")),
             ],
-            children: &[Node::Element {
-                tag: "ul",
-                attributes: &[
-                    ("class", Value::Text("nd-tree")),
-                    ("data-nd-selection", Value::Text("none")),
-                    ("data-nd-size", Value::Text("large")),
+            children: &[Node::Component {
+                name: "Tree",
+                props: &[
+                    ("name", Value::Text("nd-variant-tree-size-large")),
+                    ("label", Value::Text("Tree")),
+                    ("size", Value::Text("large")),
                 ],
-                children: &[Node::Raw(
-                    "<li class=\"nd-tree-item\"><span class=\"nd-tree-row\"><span class=\"nd-identifier\">src</span></span></li>",
-                )],
+                children: &[Node::Component {
+                    name: "TreeItem",
+                    props: &[
+                        ("label", Value::Data("Aa")),
+                        ("value", Value::Text("Aa")),
+                        ("branch", Value::Bool(true)),
+                        ("expanded", Value::Bool(true)),
+                    ],
+                    children: &[Node::Component {
+                        name: "TreeItem",
+                        props: &[
+                            ("label", Value::Data("Bbbb")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[],
+                    }],
+                }],
             }],
         },
         Node::Element {
@@ -11595,15 +13018,10 @@ const TRUNCATE_LINES_1: &[Node] = &[Node::Element {
                 ("data-nd-prop", Value::Text("lines")),
                 ("data-nd-slug", Value::Text("truncate")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-truncate")),
-                    ("data-nd-lines", Value::Text("1")),
-                ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-identifier\">Aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp</span>",
-                )],
+            children: &[Node::Component {
+                name: "Truncate",
+                props: &[("lines", Value::Text("1"))],
+                children: &[Node::Text(Value::Message(Key::ExampleListLong))],
             }],
         },
         Node::Element {
@@ -11633,15 +13051,10 @@ const TRUNCATE_LINES_2: &[Node] = &[Node::Element {
                 ("data-nd-prop", Value::Text("lines")),
                 ("data-nd-slug", Value::Text("truncate")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-truncate")),
-                    ("data-nd-lines", Value::Text("2")),
-                ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-identifier\">Aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp</span>",
-                )],
+            children: &[Node::Component {
+                name: "Truncate",
+                props: &[("lines", Value::Text("2"))],
+                children: &[Node::Text(Value::Message(Key::ExampleListLong))],
             }],
         },
         Node::Element {
@@ -11671,15 +13084,10 @@ const TRUNCATE_LINES_3: &[Node] = &[Node::Element {
                 ("data-nd-prop", Value::Text("lines")),
                 ("data-nd-slug", Value::Text("truncate")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-truncate")),
-                    ("data-nd-lines", Value::Text("3")),
-                ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-identifier\">Aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp</span>",
-                )],
+            children: &[Node::Component {
+                name: "Truncate",
+                props: &[("lines", Value::Text("3"))],
+                children: &[Node::Text(Value::Message(Key::ExampleListLong))],
             }],
         },
         Node::Element {
@@ -11709,15 +13117,10 @@ const TRUNCATE_LINES_4: &[Node] = &[Node::Element {
                 ("data-nd-prop", Value::Text("lines")),
                 ("data-nd-slug", Value::Text("truncate")),
             ],
-            children: &[Node::Element {
-                tag: "span",
-                attributes: &[
-                    ("class", Value::Text("nd-truncate")),
-                    ("data-nd-lines", Value::Text("4")),
-                ],
-                children: &[Node::Raw(
-                    "<span class=\"nd-identifier\">Aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp</span>",
-                )],
+            children: &[Node::Component {
+                name: "Truncate",
+                props: &[("lines", Value::Text("4"))],
+                children: &[Node::Text(Value::Message(Key::ExampleListLong))],
             }],
         },
         Node::Element {
@@ -11795,6 +13198,9 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("Button", "justify", "between") => BUTTON_JUSTIFY_BETWEEN,
         ("ButtonGroup", "orientation", "horizontal") => BUTTON_GROUP_ORIENTATION_HORIZONTAL,
         ("ButtonGroup", "orientation", "vertical") => BUTTON_GROUP_ORIENTATION_VERTICAL,
+        ("ButtonGroup", "justify", "center") => BUTTON_GROUP_JUSTIFY_CENTER,
+        ("ButtonGroup", "justify", "start") => BUTTON_GROUP_JUSTIFY_START,
+        ("ButtonGroup", "justify", "between") => BUTTON_GROUP_JUSTIFY_BETWEEN,
         ("Checkbox", "size", "small") => CHECKBOX_SIZE_SMALL,
         ("Checkbox", "size", "medium") => CHECKBOX_SIZE_MEDIUM,
         ("Checkbox", "size", "large") => CHECKBOX_SIZE_LARGE,
@@ -11837,9 +13243,6 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("Input", "size", "large") => INPUT_SIZE_LARGE,
         ("Kbd", "size", "small") => KBD_SIZE_SMALL,
         ("Kbd", "size", "body") => KBD_SIZE_BODY,
-        ("Label", "kind", "label") => LABEL_KIND_LABEL,
-        ("Label", "kind", "legend") => LABEL_KIND_LEGEND,
-        ("Label", "kind", "name") => LABEL_KIND_NAME,
         ("Label", "size", "small") => LABEL_SIZE_SMALL,
         ("Label", "size", "medium") => LABEL_SIZE_MEDIUM,
         ("Label", "size", "large") => LABEL_SIZE_LARGE,

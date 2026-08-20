@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
-/// Every `ButtonGroup` example. 5 of them.
+/// Every `ButtonGroup` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"ButtonGroup { label: "…", Button { … } }"#,
@@ -80,13 +80,54 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     &[Value::Message(Key::ExampleButtonPublish)],
                     &[Value::Message(Key::ExampleButtonCancel)],
                 ]),
+                // NO `justify` HERE AT ALL. Each of these three used to say
+                // `start`, so *Save* and *Cancel* floated against the leading
+                // edge of a box the width of *Publish*. The centre is the
+                // group's default now and this example is what it looks like.
                 body: &[Node::Component {
                     name: "Button",
                     props: &[
                         ("variant", Value::Text("outline")),
                         ("tone", Value::Text("neutral")),
-                        ("justify", Value::Text("start")),
                         ("label", Value::Bound(0)),
+                    ],
+                    children: &[],
+                }],
+            }],
+        }],
+    ),
+    (
+        r"ButtonGroup { orientation: …Vertical, justify: ButtonGroupJustify::Start, … }",
+        &[Node::Component {
+            name: "ButtonGroup",
+            props: &[
+                ("label", Value::Message(Key::ExampleGroupLabel)),
+                ("orientation", Value::Text("vertical")),
+                ("justify", Value::Text("start")),
+            ],
+            // THE SAME THREE BUTTONS AGAIN, with an icon in front of each.
+            // Two examples that differ in one prop are what makes the prop
+            // legible, and the icons are the case `start` exists for: they
+            // line up only when every button starts at the same edge.
+            children: &[Node::Each {
+                over: Each::Rows(&[
+                    &[Value::Message(Key::ExampleButtonSave), Value::Text("check")],
+                    &[
+                        Value::Message(Key::ExampleButtonPublish),
+                        Value::Text("upload"),
+                    ],
+                    &[
+                        Value::Message(Key::ExampleButtonCancel),
+                        Value::Text("close"),
+                    ],
+                ]),
+                body: &[Node::Component {
+                    name: "Button",
+                    props: &[
+                        ("variant", Value::Text("outline")),
+                        ("tone", Value::Text("neutral")),
+                        ("label", Value::Bound(0)),
+                        ("icon", Value::Bound(1)),
                     ],
                     children: &[],
                 }],

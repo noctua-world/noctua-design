@@ -8,10 +8,6 @@ name = "Radio"
 # beside it, the label and the hint.
 element = "div"
 class = "nd-choice nd-radio"
-# The circle, at the three sizes and with nothing beside it to read. See
-# `Checkbox` for why the specimen of a compound control is the part the prop
-# changes rather than the whole of it.
-specimen = "<span class=\"nd-choice-box\"></span>"
 summary = "Let users pick exactly one answer out of several."
 
 # THE SAME SIZES AS `Checkbox`, AND THEY HAVE TO BE.

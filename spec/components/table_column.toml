@@ -10,10 +10,6 @@ resized, hidden or frozen. Any of those turns the `Table` into a `grid`.
 name = "TableColumn"
 element = "colgroup"
 class = "nd-table-column"
-# A `<colgroup>` may only contain `<col>`, so the specimen is one — and the
-# variant grid wraps it in a table with a row in it, because a table with no
-# rows has no column to paint.
-specimen = "<col>"
 page = "tables"
 summary = "Declares one column of a table: its width, its sorting and what a reader may do to it."
 

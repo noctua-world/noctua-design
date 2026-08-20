@@ -11,9 +11,6 @@ keyboard a phone opens.
 name = "Input"
 element = "input"
 class = "nd-input"
-# The part `size` and the tones change, drawn rather than live: a specimen of a
-# `needs_name` component must not render a nameless control.
-specimen = "<span class=\"nd-input-figure\"><span class=\"nd-input-box\"></span></span>"
 summary = "Let users write one line of text, with the keyboard their phone should open for it."
 
 # EVERY ID DERIVES FROM `name`, AND A CALLER WRITES NONE OF THEM.

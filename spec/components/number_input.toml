@@ -6,7 +6,6 @@ guidance = """Use a number input for a quantity: how many, how much, how long. F
 name = "NumberInput"
 element = "input"
 class = "nd-number-input"
-specimen = "<span class=\"nd-number-input-figure\"><span class=\"nd-number-input-box\"></span><span class=\"nd-number-input-steps\"></span></span>"
 summary = "Let users enter a quantity, with steppers and a numeric keyboard."
 
 [prop.name]

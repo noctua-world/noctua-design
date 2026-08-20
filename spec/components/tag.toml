@@ -5,10 +5,6 @@ name = "Tag"
 element = "span"
 class = "nd-tag"
 summary = "Show a value or a label in a pill that can also be a link, a toggle or removable."
-# The component's own name, marked as the identifier it is — the same escape
-# `Select`'s specimen uses, because the variant grid renders one per enum
-# value and a translated word there would be a sentence nobody wrote.
-specimen = "<span class=\"nd-tag-body\"><span class=\"nd-tag-label nd-identifier\">Tag</span></span>"
 
 # THE WORD IS A PROP, NOT CHILDREN, AND `TagPicker` IS WHY.
 #

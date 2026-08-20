@@ -10,9 +10,6 @@ are a picture of the code and never a shape it has to be typed into.
 name = "OtpField"
 element = "fieldset"
 class = "nd-otp-field"
-# Drawn characters rather than live boxes: a specimen of a `needs_name`
-# component must not render a nameless control. `TimeInput` says the same.
-specimen = "<span class=\"nd-otp-field-figure\"><span class=\"nd-identifier\">4</span><span class=\"nd-identifier\">2</span><span class=\"nd-identifier\">1</span></span>"
 summary = "Ask for one short code, in a row of boxes that fill and move on as it is typed."
 
 # WHY THE BOXES ALL POST UNDER ONE NAME.

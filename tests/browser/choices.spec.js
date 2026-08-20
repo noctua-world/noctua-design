@@ -428,34 +428,35 @@ test("focus is visible on the drawing, since the control is not", async ({ page 
 
 test("no choice on the page is a specimen pretending to be a control", async ({ page }) => {
   await page.goto(url(PAGE.checkbox));
-  // The variant grid ships raw markup — a box and nothing else — and it is
-  // deliberate: `size` is the box. What it must not become is a row that looks
-  // like a control and answers nothing, so the two are told apart here and
-  // every assertion above reads only the real ones.
+  await showParts(page);
+  // THIS USED TO ASSERT THE OPPOSITE, AND THE OPPOSITE WAS THE DEFECT. The
+  // variant grid shipped raw markup — a box and nothing else — and this test
+  // held it there: it required at least three `.nd-choice` roots with no
+  // `<input>` under them, which is precisely a row that looks like a control
+  // and answers nothing.
+  //
+  // The grids draw the real component now, so every choice on the page has a
+  // real input in it, and that is the claim. The floor stays, because a
+  // selector that matches nothing satisfies any equality.
   const real = await page.locator(REAL).count();
   const boxes = await page.locator(".nd-choice").count();
+  expect(boxes, "there are no choices on the page at all").toBeGreaterThan(12);
   expect(real, "there are no real controls on the page").toBeGreaterThan(10);
-  expect(boxes - real, "the variant grid lost its specimens").toBeGreaterThan(2);
+  expect(boxes - real, "a choice on the page is a picture of one").toBe(0);
 });
 
-test("the tick is drawn heavily enough to read as a mark", async ({ page }) => {
-  // LEGIBLE AND THIN ARE TWO DIFFERENT CLAIMS, and only the first was being
-  // made. The tick was the icon set's own 1.75 stroke on a 24px glyph — white
-  // on the accent fill, so the contrast test above passed comfortably while
-  // the mark itself was a hairline in a forty-pixel box. What separates a
-  // hairline from a mark is how much of the box it covers, so that is what is
-  // measured: the fraction of the drawing that is ink.
-  await page.goto(url(PAGE.checkbox));
-  await page.locator("#nd-apply-study").check();
-  const glyph = page
-    .locator(".nd-choice:has(#nd-apply-study) .nd-choice-box .nd-icon-glyph")
-    .first();
+/**
+ * How much of a drawing is the stroke rather than what it sits on.
+ *
+ * `ink` in `pixels.js` takes the LIGHTEST pixel as the ground, and a tick is
+ * the lightest thing in its own box: it is white on a filled square. So the
+ * box is read the other way round here, with the darkest pixel as the fill and
+ * everything near the light end as the mark.
+ */
+async function marked(page, glyph) {
+  await glyph.scrollIntoViewIfNeeded();
   const shot = await glyph.screenshot();
-  // `ink` takes the lightest pixel as the ground, which here is the tick
-  // itself: it is white on a filled square. The complement is what is wanted,
-  // so the box is read the other way round — the darkest pixel is the fill and
-  // everything near the light end is the stroke.
-  const covered = await page.evaluate(async (data) => {
+  return page.evaluate(async (data) => {
     const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
     const bitmap = await createImageBitmap(blob);
     const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
@@ -472,11 +473,43 @@ test("the tick is drawn heavily enough to read as a mark", async ({ page }) => {
     }
     return drawn / (px.length / 4);
   }, shot.toString("base64"));
-  // The glyph's box is 24px square and the tick crosses about two thirds of
-  // it, so a one-unit change in the stroke is a few percent of the box.
-  // Measured: 0.070 at the 1.75 this shipped with, 0.113 at the weight of the
-  // box's own edge and a hairline more. The floor sits between them.
-  expect(covered, "the tick is a hairline rather than a mark").toBeGreaterThan(0.09);
+}
+
+test("the tick is drawn heavily enough to read as a mark, at all three sizes", async ({ page }) => {
+  // LEGIBLE AND THIN ARE TWO DIFFERENT CLAIMS, and only the first was being
+  // made. The tick was the icon set's own 1.75 stroke on a 24px glyph — white
+  // on the accent fill, so the contrast test above passed comfortably while
+  // the mark itself was a hairline in a forty-pixel box. What separates a
+  // hairline from a mark is how much of the box it covers, so that is what is
+  // measured: the fraction of the drawing that is stroke.
+  //
+  // ALL THREE SIZES, BECAUSE THE GRID DOES NOT SCALE WITH THE GLYPH. The
+  // stroke is a length on the drawing's own 24-unit grid, so one number covers
+  // every size in the stylesheet — and the number of device pixels it lands on
+  // does not, which is exactly where a weight that reads at 40px stops reading
+  // at 24. A test that opened one checkbox could never have said so.
+  //
+  // A BAND RATHER THAN A FLOOR. Measured here, at the three sizes:
+  //
+  //     1.75  0.087  0.088  0.088   the icon set's own weight, and a hairline
+  //     3     0.153  0.162  0.162   the box's edge and a hairline more
+  //     5     0.227  0.272  0.279   twice the edge and a hairline, which ships
+  //     7     0.377  0.386  0.386   a wedge with the notch closing
+  //
+  // The floor is what a reader called thin twice. The ceiling is the other
+  // failure and it is a real one: the two limbs meet at a right angle and the
+  // short one is seven units long, so a heavy enough stroke swallows the notch
+  // between them and the tick stops being a tick.
+  await page.goto(url(PAGE.checkbox));
+  await showParts(page);
+  for (const size of ["large", "medium", "small"]) {
+    const row = page.locator(`.nd-checkbox[data-nd-size="${size}"]:has(.nd-choice-input)`).first();
+    await expect(row, `no real ${size} checkbox on the page`).toHaveCount(1);
+    await row.locator(".nd-choice-input").check();
+    const covered = await marked(page, row.locator(".nd-choice-box .nd-icon-glyph").first());
+    expect(covered, `the ${size} tick is a hairline rather than a mark`).toBeGreaterThan(0.2);
+    expect(covered, `the ${size} tick has closed up into a wedge`).toBeLessThan(0.35);
+  }
 });
 
 test("the rule down a refused group covers the whole of its first line", async ({ page }) => {

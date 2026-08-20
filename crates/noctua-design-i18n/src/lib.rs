@@ -980,6 +980,10 @@ pub enum Key {
     ExampleGroupSplitLabel,
     /// `example.group.attached`
     ExampleGroupAttached,
+    /// `example.group.vertical`
+    ExampleGroupVertical,
+    /// `example.group.justify`
+    ExampleGroupJustify,
     /// `example.group.fill`
     ExampleGroupFill,
     /// `example.group.split`
@@ -1726,6 +1730,8 @@ pub enum Key {
     TypeScriptSimplifiedChineseName,
     /// `type.script.simplified-chinese.proves`
     TypeScriptSimplifiedChineseProves,
+    /// `specimen.bar.value`
+    SpecimenBarValue,
     /// `specimen.title`
     SpecimenTitle,
     /// `specimen.lead`
@@ -3106,6 +3112,8 @@ pub enum Key {
     ComponentButtonGroupPropOrientationDoc,
     /// `component.button-group.prop.fill.doc`
     ComponentButtonGroupPropFillDoc,
+    /// `component.button-group.prop.justify.doc`
+    ComponentButtonGroupPropJustifyDoc,
     /// `component.button-group.prop.children.doc`
     ComponentButtonGroupPropChildrenDoc,
     /// `component.carousel.guidance`
@@ -5698,7 +5706,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2787] = [
+    pub const ALL: [Self; 2791] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -6129,6 +6137,8 @@ impl Key {
         Self::ExampleGroupNext,
         Self::ExampleGroupSplitLabel,
         Self::ExampleGroupAttached,
+        Self::ExampleGroupVertical,
+        Self::ExampleGroupJustify,
         Self::ExampleGroupFill,
         Self::ExampleGroupSplit,
         Self::ExampleSwitchState,
@@ -6502,6 +6512,7 @@ impl Key {
         Self::TypeScriptKoreanProves,
         Self::TypeScriptSimplifiedChineseName,
         Self::TypeScriptSimplifiedChineseProves,
+        Self::SpecimenBarValue,
         Self::SpecimenTitle,
         Self::SpecimenLead,
         Self::SpecimenSectionTitle,
@@ -7192,6 +7203,7 @@ impl Key {
         Self::ComponentButtonGroupPropAttachedDoc,
         Self::ComponentButtonGroupPropOrientationDoc,
         Self::ComponentButtonGroupPropFillDoc,
+        Self::ComponentButtonGroupPropJustifyDoc,
         Self::ComponentButtonGroupPropChildrenDoc,
         Self::ComponentCarouselGuidance,
         Self::ComponentCarouselA11yNotes,
@@ -8922,6 +8934,8 @@ impl Key {
             Self::ExampleGroupNext => "example.group.next",
             Self::ExampleGroupSplitLabel => "example.group.split-label",
             Self::ExampleGroupAttached => "example.group.attached",
+            Self::ExampleGroupVertical => "example.group.vertical",
+            Self::ExampleGroupJustify => "example.group.justify",
             Self::ExampleGroupFill => "example.group.fill",
             Self::ExampleGroupSplit => "example.group.split",
             Self::ExampleSwitchState => "example.switch.state",
@@ -9295,6 +9309,7 @@ impl Key {
             Self::TypeScriptKoreanProves => "type.script.korean.proves",
             Self::TypeScriptSimplifiedChineseName => "type.script.simplified-chinese.name",
             Self::TypeScriptSimplifiedChineseProves => "type.script.simplified-chinese.proves",
+            Self::SpecimenBarValue => "specimen.bar.value",
             Self::SpecimenTitle => "specimen.title",
             Self::SpecimenLead => "specimen.lead",
             Self::SpecimenSectionTitle => "specimen.section.title",
@@ -9997,6 +10012,7 @@ impl Key {
                 "component.button-group.prop.orientation.doc"
             }
             Self::ComponentButtonGroupPropFillDoc => "component.button-group.prop.fill.doc",
+            Self::ComponentButtonGroupPropJustifyDoc => "component.button-group.prop.justify.doc",
             Self::ComponentButtonGroupPropChildrenDoc => "component.button-group.prop.children.doc",
             Self::ComponentCarouselGuidance => "component.carousel.guidance",
             Self::ComponentCarouselA11yNotes => "component.carousel.a11y-notes",
@@ -12475,6 +12491,12 @@ impl Locale {
                 Key::ExampleGroupAttached => {
                     "The shared edge is drawn once, so the inner rules are no heavier than the outer ones."
                 }
+                Key::ExampleGroupVertical => {
+                    "A vertical group makes every button as wide as the widest, and the group centres what is inside them all."
+                }
+                Key::ExampleGroupJustify => {
+                    "Icons line up down a column only when every button starts its content at the same edge. That is what `start` is for."
+                }
                 Key::ExampleGroupFill => {
                     "`fill` gives every button an equal share of the width, so a translated label does not re-flow the row."
                 }
@@ -13200,6 +13222,7 @@ impl Locale {
                 Key::TypeScriptSimplifiedChineseProves => {
                     "dense ideographs, and full-width punctuation"
                 }
+                Key::SpecimenBarValue => "{value} of {max} used",
                 Key::SpecimenTitle => "Everything, on one page",
                 Key::SpecimenLead => {
                     "A title, the sentence under it, the text under that, and the marks a paragraph carries. Every element here is the component itself rather than a picture of it."
@@ -14488,6 +14511,9 @@ impl Locale {
                 Key::ComponentButtonGroupPropFillDoc => {
                     "Stretches the group across its container and gives every button an equal share of it."
                 }
+                Key::ComponentButtonGroupPropJustifyDoc => {
+                    "Where the content of every button sits when a button is wider than its content, which is what a vertical group and `fill` both produce. Stated once here, it overrides each `Button`'s own `justify`, so the members of one group cannot disagree."
+                }
                 Key::ComponentButtonGroupPropChildrenDoc => "The buttons.",
                 Key::ComponentCarouselGuidance => {
                     "Use a carousel for a row of things a reader moves through sideways, such as photographs of one product. Readers rarely reach slide two, so use a grid when the content matters. The slides scroll and snap before any script runs."
@@ -15034,7 +15060,7 @@ impl Locale {
                     "One sentence under the title, wired with `aria-describedby`. A screen reader reads it after the name, so it belongs to what the dialog is asking rather than to the content below."
                 }
                 Key::ComponentDialogPropModalDoc => {
-                    "Whether the page behind it goes inert. `showModal` puts the surface in the top layer and hides the rest of the document from assistive technology. `show` leaves the page reachable and the surface beside it."
+                    "Whether the page behind it goes inert. `showModal` puts the surface in the top layer and hides the rest of the document from assistive technology. `show` leaves the page reachable and the surface in the page's flow."
                 }
                 Key::ComponentDialogPropSizeDoc => {
                     "How wide the surface may grow. `small` suits a question with two answers, `medium` a short form, `large` a table a reader has to read. The window caps all three."
@@ -18762,6 +18788,12 @@ impl Locale {
                 Key::ExampleGroupAttached => {
                     "A borda compartilhada é desenhada uma vez, então as linhas internas não pesam mais que as externas."
                 }
+                Key::ExampleGroupVertical => {
+                    "Um grupo vertical deixa cada botão tão largo quanto o mais largo, e o grupo centraliza o que está dentro de todos."
+                }
+                Key::ExampleGroupJustify => {
+                    "Ícones só se alinham em coluna quando todo botão começa o conteúdo na mesma borda. É para isso que serve `start`."
+                }
                 Key::ExampleGroupFill => {
                     "`fill` dá a cada botão uma fatia igual da largura, então um rótulo traduzido não refaz a fileira."
                 }
@@ -19487,6 +19519,7 @@ impl Locale {
                 Key::TypeScriptSimplifiedChineseProves => {
                     "ideogramas densos, e pontuação de largura plena"
                 }
+                Key::SpecimenBarValue => "{value} de {max} em uso",
                 Key::SpecimenTitle => "Tudo, em uma página só",
                 Key::SpecimenLead => {
                     "Um título, a frase abaixo dele, o texto abaixo disso, e as marcas que um parágrafo carrega. Cada elemento aqui é o próprio componente, e não uma imagem dele."
@@ -20789,6 +20822,9 @@ impl Locale {
                 Key::ComponentButtonGroupPropFillDoc => {
                     "Estica o grupo pelo contêiner e dá a cada botão uma fatia igual dele."
                 }
+                Key::ComponentButtonGroupPropJustifyDoc => {
+                    "Onde fica o conteúdo de cada botão quando o botão é mais largo que ele, que é o que um grupo vertical e `fill` produzem. Declarado uma vez aqui, prevalece sobre o `justify` de cada `Button`. `center` por padrão."
+                }
                 Key::ComponentButtonGroupPropChildrenDoc => "Os botões.",
                 Key::ComponentCarouselGuidance => {
                     "Use um carrossel para uma fileira de coisas que se percorre de lado, como fotos de um produto. É raro chegar ao segundo slide, então use uma grade quando o conteúdo importa. Os slides rolam e encaixam antes de qualquer script."
@@ -21337,7 +21373,7 @@ impl Locale {
                     "Uma frase abaixo do título, ligada por `aria-describedby`. Um leitor de tela a lê depois do nome, então ela pertence ao que o diálogo pergunta e não ao conteúdo abaixo."
                 }
                 Key::ComponentDialogPropModalDoc => {
-                    "Se a página atrás fica inerte. `showModal` põe a superfície na camada de topo e esconde o resto do documento da tecnologia assistiva. `show` deixa a página alcançável e a superfície ao lado."
+                    "Se a página atrás fica inerte. `showModal` põe a superfície na camada de topo e esconde o resto do documento da tecnologia assistiva. `show` deixa a página alcançável e a superfície no fluxo dela."
                 }
                 Key::ComponentDialogPropSizeDoc => {
                     "Quanto a superfície pode crescer. `small` serve a uma pergunta com duas respostas, `medium` a um formulário curto, `large` a uma tabela que a pessoa precisa ler. A janela limita os três."
@@ -25109,6 +25145,12 @@ impl Locale {
                 Key::ExampleGroupAttached => {
                     "⟦Thee shaareed eedgee iis draawn ooncee, soo thee iinneer ruulees aaree noo heeaaviieer thaan thee oouuteer oonees.⟧"
                 }
+                Key::ExampleGroupVertical => {
+                    "⟦AA veertiicaal groouup maakees eeveery buuttoon aas wiidee aas thee wiideest, aand thee groouup ceentrees whaat iis iinsiidee theem aall.⟧"
+                }
+                Key::ExampleGroupJustify => {
+                    "⟦IIcoons liinee uup doown aa cooluumn oonly wheen eeveery buuttoon staarts iits coonteent aat thee saamee eedgee. Thaat iis whaat `staart` iis foor.⟧"
+                }
                 Key::ExampleGroupFill => {
                     "⟦`fiill` giivees eeveery buuttoon aan eequuaal shaaree oof thee wiidth, soo aa traanslaateed laabeel dooees noot ree-floow thee roow.⟧"
                 }
@@ -25870,6 +25912,7 @@ impl Locale {
                 Key::TypeScriptSimplifiedChineseProves => {
                     "⟦deensee iideeoograaphs, aand fuull-wiidth puunctuuaatiioon⟧"
                 }
+                Key::SpecimenBarValue => "⟦{value} oof {max} uuseed⟧",
                 Key::SpecimenTitle => "⟦EEveerythiing, oon oonee paagee⟧",
                 Key::SpecimenLead => {
                     "⟦AA tiitlee, thee seenteencee uundeer iit, thee teext uundeer thaat, aand thee maarks aa paaraagraaph caarriiees. EEveery eeleemeent heeree iis thee coompooneent iitseelf raatheer thaan aa piictuuree oof iit.⟧"
@@ -27222,6 +27265,9 @@ impl Locale {
                 Key::ComponentButtonGroupPropFillDoc => {
                     "⟦Streetchees thee groouup aacrooss iits coontaaiineer aand giivees eeveery buuttoon aan eequuaal shaaree oof iit.⟧"
                 }
+                Key::ComponentButtonGroupPropJustifyDoc => {
+                    "⟦Wheeree thee coonteent oof eeveery buuttoon siits wheen aa buuttoon iis wiideer thaan iits coonteent, whiich iis whaat aa veertiicaal groouup aand `fiill` booth prooduucee. Staateed ooncee heeree, iit ooveerriidees eeaach `Buuttoon`'s oown `juustiify`, soo thee meembeers oof oonee groouup caannoot diisaagreeee.⟧"
+                }
                 Key::ComponentButtonGroupPropChildrenDoc => "⟦Thee buuttoons.⟧",
                 Key::ComponentCarouselGuidance => {
                     "⟦UUsee aa caaroouuseel foor aa roow oof thiings aa reeaadeer moovees throouugh siideewaays, suuch aas phootoograaphs oof oonee prooduuct. Reeaadeers raareely reeaach sliidee twoo, soo uusee aa griid wheen thee coonteent maatteers. Thee sliidees scrooll aand snaap beefooree aany scriipt ruuns.⟧"
@@ -27780,7 +27826,7 @@ impl Locale {
                     "⟦OOnee seenteencee uundeer thee tiitlee, wiireed wiith `aariiaa-deescriibeedby`. AA screeeen reeaadeer reeaads iit aafteer thee naamee, soo iit beeloongs too whaat thee diiaaloog iis aaskiing raatheer thaan too thee coonteent beeloow.⟧"
                 }
                 Key::ComponentDialogPropModalDoc => {
-                    "⟦Wheetheer thee paagee beehiind iit gooees iineert. `shoowMoodaal` puuts thee suurfaacee iin thee toop laayeer aand hiidees thee reest oof thee doocuumeent froom aassiistiivee teechnooloogy. `shoow` leeaavees thee paagee reeaachaablee aand thee suurfaacee beesiidee iit.⟧"
+                    "⟦Wheetheer thee paagee beehiind iit gooees iineert. `shoowMoodaal` puuts thee suurfaacee iin thee toop laayeer aand hiidees thee reest oof thee doocuumeent froom aassiistiivee teechnooloogy. `shoow` leeaavees thee paagee reeaachaablee aand thee suurfaacee iin thee paagee's floow.⟧"
                 }
                 Key::ComponentDialogPropSizeDoc => {
                     "⟦Hoow wiidee thee suurfaacee maay groow. `smaall` suuiits aa quueestiioon wiith twoo aansweers, `meediiuum` aa shoort foorm, `laargee` aa taablee aa reeaadeer haas too reeaad. Thee wiindoow caaps aall threeee.⟧"

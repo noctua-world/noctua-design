@@ -9,10 +9,6 @@ name = "Tree"
 element = "ul"
 class = "nd-tree"
 page = "tree"
-# A ROW, BECAUSE `size` IS THE ROW'S HEIGHT. It is declared as a custom
-# property the rows read, so a `<ul>` with nothing in it takes all three
-# values and draws the same empty box for each.
-specimen = "<li class=\"nd-tree-item\"><span class=\"nd-tree-row\"><span class=\"nd-identifier\">src</span></span></li>"
 summary = "Let users walk a hierarchy, opening, closing and choosing nodes in it."
 
 [prop.name]

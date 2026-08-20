@@ -6,7 +6,6 @@ guidance = "Use a textarea for an answer of several lines: a description, a note
 name = "Textarea"
 element = "textarea"
 class = "nd-textarea"
-specimen = "<span class=\"nd-textarea-figure\"><span class=\"nd-textarea-box\"></span></span>"
 summary = "Let users write an answer of several lines, in a box that can grow to fit it."
 
 [prop.name]

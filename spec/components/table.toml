@@ -6,13 +6,6 @@ guidance = """Use a table for data with two dimensions: rows that are records, c
 name = "Table"
 element = "table"
 class = "nd-table"
-# Two rows and two columns, so the density, the rules, the stripe and the
-# narrow-screen layout all have something to change. See `Checkbox` for why the
-# specimen of a compound component is markup rather than a word.
-# DIGITS, NOT WORDS. The variant grid ships raw markup, so anything in here
-# never passes through the message catalogue — and a word that does not is a
-# word `every_sentence_on_every_page_is_translated` refuses.
-specimen = "<tbody><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4213</th><td class=\"nd-table-cell nd-identifier\">51s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4211</th><td class=\"nd-table-cell nd-identifier\">12s</td></tr><tr class=\"nd-table-row\"><th class=\"nd-table-header-cell nd-identifier\" scope=\"row\">#4209</th><td class=\"nd-table-cell nd-identifier\">48s</td></tr></tbody>"
 page = "tables"
 summary = "Show data in rows and columns, with sorting, filtering, selection and totals."
 

@@ -472,6 +472,13 @@ test("no variant grid renders a live control nothing has named", async ({ page }
     await page.goto(url(path));
     const nameless = await page.evaluate(() =>
       [...document.querySelectorAll(".nd-variant-stage input, .nd-variant-stage select")]
+        // LIVE, WHICH IS THE WORD IN THE TITLE. A control the runtime owns
+        // ships `hidden` and is replaced by the one it built: `Select` hides
+        // its native `<select>` and moves the label's `for` onto the button.
+        // Reading the hidden one reports every enhanced control in every grid
+        // as nameless, which is a claim about the enhancement rather than
+        // about the grid.
+        .filter((el) => !el.hidden && getComputedStyle(el).display !== "none")
         .filter(
           (el) =>
             !el.getAttribute("aria-label") &&

@@ -10,10 +10,6 @@ a real radio group that submits with no script.
 name = "Rating"
 element = "div"
 class = "nd-rating"
-# A NAME, WHICH THE VARIANT GRID TURNS INTO THAT DRAWING. `size` is the height
-# of a star, and a `<div>` with nothing in it is the same empty box three times.
-# `Icon`'s contract carries the same kind of specimen for the same reason.
-specimen = "star"
 summary = "Show or ask for a score out of five, with the number written out beside it."
 
 # WHY THE NUMBER IS ALWAYS WRITTEN OUT.

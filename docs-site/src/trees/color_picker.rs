@@ -193,7 +193,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         }],
     ),
     (
-        r"ColorPicker { hint, error, required: true, glass: true, entry: false, size: Small, shape: Square } / ColorPicker { disabled: true }",
+        r"ColorPicker { hint, error, required: true, glass: true, entry: false, size: Small } / ColorPicker { disabled: true }",
         &[Node::Element {
             tag: "form",
             attributes: &[
@@ -218,7 +218,17 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         // colours are a reader's own rather than a brand's.
                         ("entry", Value::Bool(false)),
                         ("size", Value::Text("small")),
-                        ("shape", Value::Text("square")),
+                        // NO `shape` HERE. It said `square`, which resolves to
+                        // `--noctua-radius-none` under every corner preset, so
+                        // the one chip a reader meets beside an error message
+                        // was the one chip on the site that did not answer the
+                        // *Corners* setting. It sat inside a trigger that did,
+                        // and under the circular preset that is a hard square
+                        // inside a circle. `shape` is shown by the `pill`
+                        // example above and by its own variant grid, both of
+                        // which are about the corners rather than about a
+                        // refusal. Left off, the chip is `rounded` and follows
+                        // the preset, square preset included.
                         (
                             "trigger_label",
                             Value::Message(Key::ExampleColorPickerTrigger),

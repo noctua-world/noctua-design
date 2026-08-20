@@ -942,17 +942,50 @@ follow from that and are easy to get wrong:
   prop and value into `docs-site/src/generated/specimens.rs`, and both the page
   and the React mount draw it. The component writes its own attributes, its own
   defaults and its own bools.
-* **A `specimen` that is MARKUP is still markup, and the generated file says
-  which components those are.** About thirty contracts carry a drawing rather
-  than a use of the component, because a live `<input>` in a grid is a control a
-  reader can type into by mistake. Those grids are the contract's element
-  carrying the contract's attributes with that markup inside, so rendering one
-  shows the markup matches in both languages and nothing more. **A picture
-  carries every other enum prop at its default**, because one attribute alone
-  matches no compound rule and compound is how every tone here is painted.
-  **Never an `aria-*` one, though**: no rule in this system selects on ARIA, and
-  what a specimen invented was `aria-sort="none"` on eight still `<th>`
-  pictures — each announcing itself as a column somebody can sort by.
+* **A `specimen` THAT IS MARKUP IS THE FALLBACK, AND TWO COMPONENTS ARE LEFT ON
+  IT.** Thirty-seven contracts used to carry a drawing rather than a use of the
+  component, on the grounds that a live `<input>` in a grid is a control a
+  reader can type into by mistake. That trade bought nothing and cost the grids
+  their subject. `Meter` and `Progress` drew a `<span>` carrying the real
+  element's class, which no `::-webkit-meter-*` rule paints, so six sizes were
+  six grey stubs. `Badge` placed a badge against nothing, so all four
+  placements landed in one spot. `List { kind: description }` put `<li>` inside
+  a `<dl>`, which is markup no parser accepts. `Field` drew a large "Aa", a
+  grey bar and an empty box — no label, no control, and nothing telling
+  `single` from `group`.
+  **`specimens::itself` is the reach**: what a component needs beside the prop
+  under test in order to draw ITSELF — a control for `Field` to label,
+  something for `Badge` to sit on, tabs for `Tabs`, rows for `Table`. It is a
+  tree, so it lives beside the emitter that writes trees rather than in TOML,
+  exactly as `controls.rs` holds a body a contract cannot describe. The two
+  left on the fallback are `Lineage`, four of whose grids are about the WINDOW
+  rather than the drawing, and `LineageFigure`, which is a piece with nowhere
+  to stand outside a scene. **A picture carries every other enum prop at its
+  default**, because one attribute alone matches no compound rule and compound
+  is how every tone here is painted. **Never an `aria-*` one, though**: no rule
+  in this system selects on ARIA, and what a specimen invented was
+  `aria-sort="none"` on eight still `<th>` pictures — each announcing itself as
+  a column somebody can sort by.
+* **A GRID DRAWING THE REAL COMPONENT IS AN AUDIT OF THE COMPONENT, and it
+  found four things nothing else had.** `Prose { measure: none }` was inert
+  around every paragraph on the site, because `.nd-paragraph` caps itself and
+  the absence of a rule left that cap in place. `AvatarGroup`'s overlap is
+  `li + li`, so members handed over as bare avatars overlapped by nothing.
+  A `Toolbar` holding one `ToolbarGroup` has one child, so `horizontal` and
+  `vertical` were one picture. And a `ColorPicker` given no `area_label` or
+  `hue_label` renders two nameless range inputs in its panel — on every page
+  that has one, not only in a grid.
+* **THE MARKER SAYING A CELL SHOWS NAMES IS ON THE STAGE.** `.nd-identifier` on
+  the component call works for a component that draws its own content and fails
+  for the six that wrap themselves in a `Field`: the class lands on
+  `.nd-select`, and the `<label>` the field drew is its SIBLING. `/select/`
+  shipped the word `Select` unbracketed until the class moved one level out.
+* **AND A SPECIMEN'S `name` IS THE CELL'S, NOT THE COMPONENT'S.** Every other
+  required text prop takes the component's own name — the same string in every
+  cell, which is what lets `variants.spec.js` measure two values against each
+  other — but `name` is the hook every control derives its ids from. One `name`
+  across a page of grids is one `id` a dozen times over, and for a radio group
+  it is worse: two groups sharing a name are one group.
 * **A SPECIMEN STILL HAS A NAME, AND THE COMPONENT GIVES IT.** A picture points
   at its own caption with `aria-labelledby`, and a component call is passed the
   prop its contract requires for the purpose — filled with the component's own
@@ -973,10 +1006,21 @@ follow from that and are easy to get wrong:
   the declaration silently did nothing on every single-component page.
 * **A prop's own `specimen` beats the component's**, including when the
   component's is an icon name.
-* **`variants.spec.js` asks every component page whether two values of one prop
-  draw the same picture.** Its fingerprint reads the `::-webkit-*` parts too,
-  because `<meter>`, `<progress>` and a range `<input>` are painted there and
-  nowhere else.
+* **`variants.spec.js` ASKS THE FOUR QUESTIONS A GRID EXISTS TO ANSWER.** Two
+  values of one prop drawing the same picture is the first, and its fingerprint
+  reads the `::-webkit-*` parts too, because `<meter>`, `<progress>` and a range
+  `<input>` are painted there and nowhere else. The other three: **every cell
+  draws something** with a box bigger than nothing, **every cell carries the
+  value its caption names** wherever the prop has an attribute at all, and **no
+  cell overhangs a frame that cannot scroll** at 320 pixels. A picture whose far
+  side is beyond anything a reader can do is not a picture.
+* **A GRID REPEATS ITS OWN WORDS ON PURPOSE, and three sweeps had to be told.**
+  Every cell of one row says the same thing, so that two values painted alike
+  measure alike — which is the opposite of what `no two number fields ask the
+  same question` and `every meter is a different reading` demand of the
+  examples. Both read `:not(.nd-variant-stage *)` now. `no choice on the page is
+  a specimen pretending to be a control` asserted the reverse of its own title
+  and was rewritten: every choice on that page has a real `<input>` in it.
 * **There is no `glow` and no aurora.** Removed on the developer's instruction,
   and with it the last animation on any page: `[effect.blur]`,
   `[effect.duration]`, the `drift` keyframes and the reduced-motion stop. An
@@ -1579,6 +1623,57 @@ build already copies them, and `Value::Asset("assets/portraits/….svg")` reache
 them. **And several faces at one `tone` are several identical discs** — an
 `AvatarGroup` whose whole subject is the overlap cannot show which of four grey
 discs is in front, so each member of an example group carries its own colour.
+
+**ONE PERSON, ONE PORTRAIT — AND THE FIRST FIX POINTED THREE PEOPLE AT `ada`.**
+Eight faces are vendored and the site was using one, so a group whose subject is
+who stands in front of whom drew the same stranger at every position. Ana is
+`ada`, Bruno is `bob`, Carla is `cara`, wherever any of them appears; Diego has
+none on purpose, because he stands only where the subject is `tone` and a
+picture there covers the thing being shown. The initials stay underneath every
+portrait, so blocking the files leaves four people rather than four grey discs.
+`no group draws one person's face twice` in `avatars.spec.js` compares the
+PIXELS, not `src`: two files that happen to be one drawing fail the same way a
+repeated URL does, and a reader cannot tell those apart either.
+
+**A PROP EVERY CHILD REPEATS IS A PROP THE GROUP OWNS.** `ButtonGroup` is
+`align-items: stretch`, so every button in a vertical one is as wide as the
+widest and a short label had nowhere to sit but where `justify` put it — and
+`justify` was `Button`'s, repeated on each child, said `start` three times in
+one example, and left *Save* floating against the leading edge. It is
+`ButtonGroup.justify` now, and it **overrides** each `Button`'s own, which is
+the answer `AvatarGroup.size` and `.shape` already give: siblings share their
+arrangement (`§9.7`), and there is no second mechanism to learn. The stylesheet
+wins by being one class deeper (`.nd-button-group[data-nd-justify="…"] >
+.nd-button`), and it writes the DEFAULT out too, because `Button` always writes
+its own attribute and a group that said nothing would lose to it. Assert where
+the words land, never `justify-content`: the two rules are one specificity step
+apart and a rule that loses reads exactly like one that works.
+
+**A GROUP'S OWN GRID NEEDS TWO THINGS IN EACH MEMBER.** `Button.justify`
+already had an `itself()` arm giving its specimen an icon; the group's needs the
+same, or `center`, `start` and `between` are one picture and `variants.spec.js`
+says so. And a `specimen` in a contract whose component draws ITSELF is never
+reached — put the arm in `specimens.rs`, not in the TOML.
+
+**A CHIP THAT IS SQUARE BY DECLARATION LOOKS LIKE ONE THE PRESET MADE SQUARE.**
+`ColorPicker.shape = square` resolves `--noctua-radius-none`, which is `0` under
+all four corner presets — so the one chip a reader meets beside an error message
+was the only surface on the site that did not answer *Corners*, and under the
+circular preset it was a hard square inside a capsule. The example stopped
+setting it; `shape` is shown where the subject is corners. **Sweep all four
+presets when a corner is the claim**, `square` included, and read the corner
+PIXEL rather than the radius: the length would prove the declaration is there
+and nothing about which rule won.
+
+**THE CHECKBOX TICK IS `stroke-width` ON A 24-UNIT GRID, AND IT HAS BEEN TOO
+THIN TWICE.** The icon set's own 1.75, then the box's edge and a hairline (3),
+now twice the edge and a hairline (5). One number covers all three sizes because
+the grid does not scale with the glyph — which is also why a weight has to be
+looked at at the smallest size, where it lands on fewest device pixels. The
+ceiling is the drawing: two limbs at a right angle with the short one seven
+units long, so past six the notch closes and the tick becomes a wedge.
+`choices.spec.js` measures the painted share at every size, with a floor and a
+ceiling, and records the table it chose them from.
 
 ## Maintaining this file
 

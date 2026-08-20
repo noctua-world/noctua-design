@@ -10,10 +10,6 @@ element = "ul"
 class = "nd-avatar-group"
 page = "avatars"
 summary = "Shows several people as one overlapping group, with a count for the rest."
-# Two faces and a counter, because every one of this component's enum props is
-# about how several of them sit together — a grid rendering an empty list
-# would show three identical nothings.
-specimen = "<li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">AL</span></span></li><li><span class=\"nd-avatar\"><span class=\"nd-avatar-initials nd-identifier\">BS</span></span></li><li class=\"nd-avatar-more\"><span class=\"nd-avatar-more-chip\"><span aria-hidden=\"true\">+3</span></span></li>"
 
 [prop.label]
 type = "text"

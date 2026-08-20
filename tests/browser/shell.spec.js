@@ -160,10 +160,12 @@ test.describe("§9.7, enforced", () => {
       //
       // `nd-dialog`: the surface a `<dialog>` draws, which covers both classes
       // that carry it — `nd-dialog-surface` and the wrapper the trigger lives
-      // in. A modal one is in the browser's top layer, which is `fixed` by
-      // definition and cannot be anything else; a non-modal one is `absolute`
-      // against the control that opened it. It carries a hairline and the
-      // raised surface colour, and no shadow.
+      // in. Only a MODAL one floats: it is in the browser's top layer, which is
+      // `fixed` by definition and cannot be anything else. A non-modal one is
+      // an ordinary box in the flow of the page and this sweep never sees it,
+      // which is the point of it — it used to be `absolute`, and an out-of-flow
+      // panel is one every ancestor's `overflow` can cut in half. It carries a
+      // hairline and the raised surface colour, and no shadow.
       "nd-dialog",
       // `nd-popover`: a `role="dialog"` anchored to its trigger. It is `fixed`
       // for `anchor.js`'s reason, stated at the top of that file: a panel its

@@ -9,11 +9,6 @@ name = "TagPicker"
 element = "div"
 class = "nd-tag-picker"
 summary = "Let users enter several values, each one a tag they can take off again."
-# A DRAWN BOX, NOT A LIVE COMPOSER. This was a real `<input>`, so the variant
-# grid shipped three focusable text boxes with no `name`, no `id`, no label and
-# no `aria-label` — the only nameless live control in the system, on the page
-# of a component that needs a name. `Select` records the whole argument.
-specimen = "<span class=\"nd-tag-picker-figure\"><span class=\"nd-tag-picker-box\"></span></span>"
 
 # EVERY ID DERIVES FROM `name`, AND A CALLER WRITES NONE OF THEM.
 #

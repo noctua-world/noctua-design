@@ -6,11 +6,6 @@ element = "div"
 class = "nd-search"
 # The three are only ever used together, which is what a collection page is for.
 page = "search"
-# A DRAWN BOX, NOT A LIVE `<input>`. It was a real search box with no `name`,
-# no `id`, no label and no `aria-label`, three times over in the size grid —
-# the defect `Select` and `TagPicker` each record, on a third component that
-# needs a name. A `<span>` wearing the same class draws the same picture.
-specimen = "<div class=\"nd-search-field\"><span class=\"nd-search-input\"></span></div>"
 summary = "Let users find one thing among many, with the results under the box or in a panel."
 
 # `<div role="search">`, AND IT WANTED TO BE `<search>`.

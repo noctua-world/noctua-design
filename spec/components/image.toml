@@ -10,10 +10,6 @@ arrive. For a picture of a person, use `Avatar`.
 name = "Image"
 element = "img"
 class = "nd-image"
-# A drawn box rather than a file: a specimen of a picture cannot be a picture,
-# because the one thing the grid documents here is the SHAPE the box holds
-# before anything arrives. `Avatar` reached the same place from the other side.
-specimen = "<span class=\"nd-image-media\"></span>"
 summary = "Show a picture in a box held before it arrives, with a caption where it needs one."
 
 # EVERYTHING HERE IS `Avatar`'S ARRANGEMENT, WIDENED.
