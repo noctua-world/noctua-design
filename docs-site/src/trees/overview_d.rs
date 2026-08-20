@@ -309,9 +309,12 @@ SelectGroup { label: "…" }  ·  SelectOption { value: "ochre-balanced", label:
         "switch",
         r#"Switch { name: "overview-grain", on: "on", off: "off", checked: true, label: "…", describedby: "overview-switch-note" }
 Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#,
+        // A COLUMN SOMEBODY BOUNDED, as on `/switch/`. The control puts its
+        // label at one end of its row and its track at the other, so a row as
+        // wide as the stage is a name and a control 680px apart.
         &[Node::Element {
             tag: "div",
-            attributes: &[("class", Value::Text("nd-example-stack"))],
+            attributes: &[("class", Value::Text("nd-example-stack nd-example-narrow"))],
             children: &[
                 Node::Component {
                     name: "Switch",

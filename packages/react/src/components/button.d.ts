@@ -45,7 +45,7 @@ export interface ButtonProps {
   wrap?: boolean;
   /** Stretches the control to the width of whatever contains it. Off by default. */
   fill?: boolean;
-  /** Marks the button as the one that opens a `Menu`, and draws the chevron. **`controls` has to name that menu by id.** The press itself is `dist/menu.js`, which ships the opening, the arrow walk, Escape and the focus return. */
+  /** Marks the button as the one that opens a `Menu`, and draws the chevron unless `icon` or `icon_end` names one. **`controls` names that menu by id.** The press is `dist/menu.js`, which ships the opening, the arrow walk, Escape and the focus return. */
   menu?: boolean;
   /** Where the control goes. Given one, the component renders an `<a>` rather than a `<button>`, which is what a control that changes the address has to be. Never combine it with `disabled`, because a disabled link is not a thing the platform has. */
   href?: string;

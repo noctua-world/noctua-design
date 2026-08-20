@@ -424,4 +424,48 @@ Segmented { name, label, fill: SegmentedFill::Stretch }",
             }],
         }],
     ),
+    (
+        r"Field { label, hint } / Segmented { name, label } with no selected item",
+        &[Node::Component {
+            name: "Field",
+            props: &[
+                ("control", Value::Text("segmented-delivery")),
+                ("label", Value::Message(Key::ExampleSegmentedDeliveryLabel)),
+                ("hint", Value::Message(Key::ExampleSegmentedDeliveryHint)),
+            ],
+            children: &[Node::Component {
+                name: "Segmented",
+                props: &[
+                    ("name", Value::Text("segmented-delivery")),
+                    ("label", Value::Message(Key::ExampleSegmentedDeliveryLabel)),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("post")),
+                            ("label", Value::Message(Key::ExampleSegmentedDeliveryPost)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("locker")),
+                            ("label", Value::Message(Key::ExampleSegmentedDeliveryLocker)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SegmentedItem",
+                        props: &[
+                            ("value", Value::Text("shop")),
+                            ("label", Value::Message(Key::ExampleSegmentedDeliveryShop)),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        }],
+    ),
 ];

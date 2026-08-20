@@ -22,6 +22,8 @@
 //    message is starting the sentence again, so the whole `duration` is served
 //    again rather than the remainder of it.
 
+import { plural } from "./messages.js";
+
 /** What the stylesheet reads for a message that has gone. */
 const DISMISSED = "data-nd-dismissed";
 
@@ -30,6 +32,9 @@ const PAUSED = "data-nd-paused";
 
 /** How long after the page settles a live region starts speaking. */
 const SETTLE = 500;
+
+/** How often the time left is redrawn, in milliseconds. */
+const TICK = 250;
 
 /** Every enhanced toast's teardown, so a subtree can be released. */
 const toasts = new WeakMap();
@@ -59,6 +64,13 @@ export function releaseToasts(root = document) {
     // A control that closes nothing is worse than no control at all.
     const control = element.querySelector("[data-nd-dismiss]");
     if (control) control.hidden = true;
+    // And so does the countdown, for the same reason: a number that has
+    // stopped counting is a message claiming a deadline nothing is keeping.
+    const clock = element.querySelector("[data-nd-toast-countdown]");
+    if (clock) {
+      clock.hidden = true;
+      clock.textContent = "";
+    }
     toasts.get(element)?.abort();
     toasts.delete(element);
     delete element.dataset.ndEnhanced;
@@ -87,14 +99,64 @@ function enhance(toast, signal) {
   /** How many things are holding it: a pointer, the focus, or both. */
   let held = 0;
 
+  // THE TIME LEFT, DRAWN ONLY WHERE THE CALLER WROTE THE SENTENCE FOR IT.
+  //
+  // It is revealed here rather than in the markup for the dismiss control's
+  // reason: with no script the message never leaves, so a countdown would be
+  // a number counting down to nothing. And it is `role="timer"`, which is a
+  // live region that does not speak, because a screen reader reading a new
+  // number every second is a message a reader cannot get past.
+  //
+  // IT SHOWS THE WHOLE WAIT AGAIN WHENEVER THE WAIT RESTARTS. `toast.toml`
+  // guarantees the wait never shortens, so a countdown that carried on from
+  // where a pause stopped it would be reporting a timer this file does not
+  // run. While it is held the number stands still, and it goes back to the
+  // full duration the moment the last hold is released.
+  const clock = toast.querySelector("[data-nd-toast-countdown]");
+  const sentence = toast.getAttribute("data-nd-countdown-label");
+  let ticking = null;
+  /** When the wait now running began, so the remainder is arithmetic. */
+  let since = 0;
+
+  function draw() {
+    if (!clock || !sentence) return;
+    // EVERY WAY A MESSAGE ENDS PASSES THROUGH THIS ATTRIBUTE, and only one of
+    // them is the timer. A reader who presses the dismiss control leaves an
+    // interval drawing the time left on a message that has gone, so the stop
+    // is asked here rather than beside each of the three call sites.
+    if (toast.hasAttribute(DISMISSED)) {
+      clearInterval(ticking);
+      clock.hidden = true;
+      return;
+    }
+    // Rounded up, because a reader who is told one second has one second.
+    // `Math.max` keeps a wait that has run out from drawing a negative.
+    const left = Math.max(0, Math.ceil((every - (Date.now() - since)) / 1000));
+    const words = plural(sentence, left);
+    if (clock.textContent !== words) clock.textContent = words;
+  }
+
+  function tick() {
+    if (!clock || !sentence) return;
+    clearInterval(ticking);
+    clock.hidden = false;
+    draw();
+    ticking = setInterval(draw, TICK);
+  }
+
   function run() {
     clearTimeout(waiting);
+    since = Date.now();
     waiting = setTimeout(() => dismiss(toast), every);
+    tick();
   }
 
   function hold() {
     held += 1;
     clearTimeout(waiting);
+    // The number stands still rather than counting on: what it says has to be
+    // true, and nothing is running.
+    clearInterval(ticking);
     toast.setAttribute(PAUSED, "");
   }
 
@@ -129,8 +191,13 @@ function enhance(toast, signal) {
   }, { signal });
 
   run();
-  // The wait goes with the listeners that hold and release it.
-  signal.addEventListener("abort", () => clearTimeout(waiting));
+  // The wait goes with the listeners that hold and release it, and so does the
+  // interval that draws what is left of it. An interval nothing clears is a
+  // callback holding a detached message for as long as the tab is open.
+  signal.addEventListener("abort", () => {
+    clearTimeout(waiting);
+    clearInterval(ticking);
+  });
 }
 
 /**

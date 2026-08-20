@@ -58,6 +58,14 @@
      number stop agreeing. A ratio rather than a colour, so it can be mixed at
      the point of use and never freezes to a palette. */
   --nd-veil-checked: 14%;
+  /* How much of the page a modal surface takes away. It is the largest of the
+     veils because it is the only one whose job is to stop a reader reading:
+     `Dialog` shipped at `--nd-veil-checked`, which is a mark on the value in
+     force wearing a scrim's hat, and at 14% every word behind an open dialog
+     was legible. A ratio rather than a colour, mixed at the point of use —
+     against a SURFACE, so the page fades toward its own ground and the token
+     the colour system already solved answers both appearances at once. */
+  --nd-veil-modal: 82%;
   /* How much of a control's own colour survives in its frosted pane. The
      tone's `-bg` step was the obvious candidate and measured 0.975 lightness at
      zero chroma — a tint nobody can see, which made a primary button identical
@@ -151,8 +159,13 @@ a {
  * settings panel were visibly different materials on the same page.
  *
  * The recipe is now emitted once, as `.noctua-glass` in dist/theme.css, and
- * `gates::nested_backdrop_filter` fails the build on a `backdrop-filter`
- * written anywhere under docs-site or assets. Surfaces take the class. */
+ * `gates::hand_written_glass` fails the build on a `backdrop-filter` written
+ * anywhere under docs-site or assets. Surfaces take the class.
+ *
+ * The name matters. This comment used to name a gate called something like
+ * "nested backdrop filter", which does not exist and never did, and which
+ * describes a NARROWER rule than the one that really holds: a reader trusting
+ * it would have thought a top-level `backdrop-filter` was allowed. */
 
 /* --- The effect layers ---------------------------------------------------- */
 
@@ -409,14 +422,34 @@ a {
   min-inline-size: 0;
 }
 
-/* The track, and the knob as its pseudo-element. Both drawn from
-   `aria-checked`, so the state a screen reader hears and the state a reader
-   sees are one attribute rather than two kept in step. */
+/* THE TRACK AND THE KNOB, FROM THREE NUMBERS.
+ *
+ * Both are drawn from `aria-checked`, so the state a screen reader hears and
+ * the state a reader sees are one attribute rather than two kept in step.
+ *
+ * ONE GAP, ON FOUR SIDES, IN BOTH STATES. The track's two measurements and the
+ * knob's are declared; the gap around the knob and the distance it travels are
+ * DERIVED from them. Off and on used to carry separate sums, so the knob sat
+ * 5px from the leading edge when it was off and 7px from the trailing edge
+ * when it was on, with 4px above and below it either way — three different
+ * gaps around one circle, which is what made the two states read as two
+ * controls. A size now changes the three numbers and nothing else.
+ *
+ * The gap is measured from the track's OUTER edge, because that is the edge a
+ * reader sees. An absolute inset resolves against the PADDING box, so the
+ * hairline comes off it. */
 .nd-switch-track {
+  --nd-switch-track-inline: var(--noctua-space-12);
+  --nd-switch-track-block: var(--noctua-space-6);
+  --nd-switch-knob: var(--noctua-space-4);
+  --nd-switch-gap: calc((var(--nd-switch-track-block) - var(--nd-switch-knob)) / 2);
+  --nd-switch-travel: calc(
+    var(--nd-switch-track-inline) - var(--nd-switch-knob) - var(--nd-switch-gap) * 2
+  );
   position: relative;
   flex: none;
-  inline-size: var(--noctua-space-12);
-  block-size: var(--noctua-space-6);
+  inline-size: var(--nd-switch-track-inline);
+  block-size: var(--nd-switch-track-block);
   border: var(--noctua-border-hairline) solid var(--nc-color-border-strong);
   border-radius: var(--noctua-radius-pill);
   background: var(--nc-color-subtle-bg);
@@ -426,19 +459,18 @@ a {
 .nd-switch-track::after {
   content: "";
   position: absolute;
-  inset-block-start: 50%;
-  inset-inline-start: var(--noctua-space-1);
-  inline-size: var(--noctua-space-4);
-  block-size: var(--noctua-space-4);
+  inset-block-start: calc(var(--nd-switch-gap) - var(--noctua-border-hairline));
+  inset-inline-start: calc(var(--nd-switch-gap) - var(--noctua-border-hairline));
+  inline-size: var(--nd-switch-knob);
+  block-size: var(--nd-switch-knob);
   border-radius: var(--noctua-radius-pill);
   background: var(--nc-color-fg-muted);
-  /* Centred by translation rather than by arithmetic on the track's height:
-     the two sizes are separate tokens and doing the sum here would break the
-     day either moves. */
-  transform: translate(0, -50%);
+  transform: translate(0, 0);
   transition: transform var(--noctua-duration-fast) var(--noctua-easing-out);
 }
 
+/* The two things that change between off and on, and there are no others:
+   which end the knob sits at, and what colour the track is. */
 .nd-switch[aria-checked="true"] > .nd-switch-track {
   background: var(--nc-color-accent);
   border-color: var(--nc-color-accent);
@@ -446,12 +478,7 @@ a {
 
 .nd-switch[aria-checked="true"] > .nd-switch-track::after {
   background: var(--nc-color-on-accent);
-  /* The track's width less the knob's, less both insets. Composed from the
-     same tokens the box is, so it stays right if either changes. */
-  transform: translate(
-      calc(var(--noctua-space-12) - var(--noctua-space-4) - var(--noctua-space-3)),
-      -50%
-    );
+  transform: translate(var(--nd-switch-travel), 0);
 }
 
 .nd-switch:hover > .nd-switch-track {
@@ -474,23 +501,14 @@ a {
   min-block-size: var(--noctua-space-6);
 }
 
+/* THREE NUMBERS, AND THE GAP AND THE TRAVEL FOLLOW. A 12px knob in a 16px
+   track leaves 2px all round, the same construction as `medium`'s 16 in 24
+   leaving 4. Nothing here repeats a sum the rule above already did, which is
+   how the two sizes came to disagree about where the knob stops. */
 .nd-switch[data-nd-size="small"] > .nd-switch-track {
-  inline-size: var(--noctua-space-8);
-  block-size: var(--noctua-space-4);
-}
-
-.nd-switch[data-nd-size="small"] > .nd-switch-track::after {
-  inline-size: var(--noctua-space-3);
-  block-size: var(--noctua-space-3);
-}
-
-/* The same sum as the medium track's, in this track's own tokens, so neither
-   has to be recomputed when the scale moves. */
-.nd-switch[data-nd-size="small"][aria-checked="true"] > .nd-switch-track::after {
-  transform: translate(
-      calc(var(--noctua-space-8) - var(--noctua-space-3) - var(--noctua-space-2)),
-      -50%
-    );
+  --nd-switch-track-inline: var(--noctua-space-8);
+  --nd-switch-track-block: var(--noctua-space-4);
+  --nd-switch-knob: var(--noctua-space-3);
 }
 
 .nd-switch[aria-disabled="true"] {
@@ -596,6 +614,18 @@ a {
   font-size: var(--nd-choice-mark);
   color: var(--nc-color-on-accent);
   opacity: 0;
+  /* THICKER THAN EVERY OTHER GLYPH, AND FOR THE REASON THE SET IS THIN.
+     `spec/icons.toml` lightened the stroke to 1.75 because an icon BESIDE a
+     line of text reads heavier than the text it labels. A tick alone on a
+     filled square is the opposite case: nothing sits beside it, the fill is
+     solid, and at 1.75 it was a hairline in a forty-pixel box. It is drawn at
+     the weight of the box's own edge and a hairline more, so the mark and the
+     border it sits inside are one drawing.
+
+     `stroke-width` is a geometry property, so a length in `px` here is one
+     unit of the drawing's own 24-unit grid rather than a device pixel — which
+     is why the border tokens are the right scale to read it from. */
+  stroke-width: calc(var(--noctua-border-hairline) + var(--noctua-border-strong));
 }
 
 .nd-choice-dot {
@@ -1520,7 +1550,9 @@ a {
    DECLARED HERE, so the panel lands under the header rather than at the corner
    of the screen if the script never runs — a `var()` whose only writer is
    JavaScript is a rule that silently does nothing, which is what
-   `gates::undeclared_custom_property` refuses. Full width below `sm`, as the
+   `gates::unknown_token` refuses. (This comment named a gate after the
+   property rather than after the function, and no such function exists.) Full
+   width below `sm`, as the
    header's panel is, because a rounded panel a few pixels from the edge of a
    narrow screen reads as a card (§9.7). */
 .nd-frame-theme > .nd-panel {
@@ -1581,24 +1613,65 @@ a {
    example frame's viewport control are one control rather than three
    spellings — and React gets the same one. */
 
-/* A CONTROL DOES NOT SHRINK BELOW WHAT IT SAYS.
+/* A DEFAULT VALUE IS THE ABSENCE OF ITS ATTRIBUTE HERE, SO EVERY RULE ASKS FOR
+ * THE VALUE A GROUP IS NOT.
+ *
+ * Two things draw a `Segmented` without writing `data-nd-appearance` or
+ * `aria-orientation`. A variant specimen skips every `aria-*` default on
+ * purpose, and `inputs.js` builds the meridiem pair from the class alone.
+ * Written as `[data-nd-appearance="joined"]` the joined rules reached neither:
+ * the vertical grid lost its corners and the AM/PM pair came apart into two
+ * boxes with a doubled edge between them. `:not(spread)` and `:not(vertical)`
+ * are the same two sets with the contract's defaults included. */
+
+/* A CONTROL DOES NOT SHRINK BELOW WHAT IT SAYS, AND DOES NOT RUN OFF THE PAGE
+ * EITHER. `fit-content` IS BOTH OF THOSE IN ONE WORD.
  *
  * As a flex item in a toolbar it was shrinkable, so at 320px the five-stop
  * viewport control gave up eight pixels to its neighbours and clipped the last
  * label instead of letting them wrap. Text may be squeezed; a control may not —
  * `flex: none` makes the toolbar wrap around it, which is what
- * `Toolbar { wrap }` is for. A joined group cannot wrap internally by design:
- * the shared edges only read as one control while they are in one line. */
+ * `Toolbar { wrap }` is for.
+ *
+ * `flex: none` alone put the first example past the right edge of a 320px
+ * viewport in pt-BR, because a group that refuses to shrink and forbids its
+ * labels to wrap has nowhere to put "Acompanhar o sistema". `fit-content` is
+ * the group's content when it fits and the container when it does not, and it
+ * never goes below the words: the labels take a second line inside their own
+ * boxes and the row stays one line of boxes.
+ *
+ * NOT `max-inline-size: 100%`, WHICH IS THE SAME IDEA AND HAS A TRAP IN IT. A
+ * closed `<details>` is `content-visibility: hidden`, so everything in the
+ * settings panel has a containing block of zero — and a percentage cap against
+ * zero is zero. Every group in the panel on every page collapsed, took the
+ * panel's own width down with it, and `audit.spec.js` reported fifty thousand
+ * controls under the minimum target. `fit-content` floors at `min-content`
+ * instead, which is why nothing in this rule set gives an item
+ * `min-inline-size: 0`: that would make the floor zero again. */
 .nd-segmented {
+  /* The corner the two ENDS of the group are cut from. Naming it once is what
+     lets one set of corner rules serve all four shapes on both axes. */
+  --nd-segment-radius: var(--noctua-radius-control);
   display: inline-flex;
   align-items: stretch;
+  inline-size: fit-content;
 }
 
-/* Only a JOINED group refuses to shrink. It cannot wrap — the shared edges
-   only read as one control while they are in one line — so being squeezed
-   clips its last label instead. A spread group has the other answer available
+.nd-segmented[data-nd-shape="pill"] {
+  --nd-segment-radius: var(--noctua-radius-pill);
+}
+
+/* A bevel is cut, not rounded. Its corners are square and the cut is below. */
+.nd-segmented[data-nd-shape="square"],
+.nd-segmented[data-nd-shape="bevel"] {
+  --nd-segment-radius: var(--noctua-radius-none);
+}
+
+/* Only a JOINED group refuses to shrink. It cannot wrap into two rows — the
+   shared edges only read as one control while they are in one line — so a
+   toolbar has to wrap around it. A spread group has the other answer available
    and takes it: it wraps, which is the whole reason that appearance exists. */
-.nd-segmented[data-nd-appearance="joined"] {
+.nd-segmented:not([data-nd-appearance="spread"]) {
   flex: none;
 }
 
@@ -1607,12 +1680,21 @@ a {
   align-items: stretch;
 }
 
+/* AN ICON GOES BESIDE THE LABEL UNTIL THERE IS NO BESIDE LEFT.
+ *
+ * A stop divided by count rather than by content can be narrower than its own
+ * icon and word together, and a centred flex line that does not fit overflows
+ * BOTH ends: at 320px in pt-BR the `system` stop's monitor was painted over
+ * the middle of `Escuro` in the stop before it. Wrapping puts the icon on a
+ * line of its own instead, which is the same stop stacked — and it costs
+ * nothing at any width where the two fit side by side. */
 .nd-segmented-item {
   display: inline-flex;
+  flex-wrap: wrap;
+  align-content: center;
   align-items: center;
   justify-content: center;
   gap: var(--noctua-space-2);
-  min-inline-size: 0;
   padding: var(--noctua-space-2) var(--noctua-space-3);
   min-block-size: var(--noctua-space-12);
   font: inherit;
@@ -1620,19 +1702,27 @@ a {
   color: var(--nc-color-fg-muted);
   background: none;
   border: var(--noctua-border-hairline) solid var(--nc-color-border);
-  border-radius: var(--noctua-radius-control);
+  border-radius: var(--nd-segment-radius);
   cursor: pointer;
   text-align: center;
 }
 
-/* ONLY A JOINED GROUP FORBIDS WRAPPING, AND ONLY IT NEEDS TO.
+/* NOTHING FORBIDS A LABEL TO WRAP, AND NOTHING NEEDS TO.
  *
- * Joined segments share their edges, so the row has to stay one line or the
- * control comes apart. A spread group is separate boxes and may wrap inside
- * one: at 320px "Match the system" needs 128px in a 94px column, and a
- * `nowrap` it did not need clipped it rather than putting it on two lines. */
-.nd-segmented[data-nd-appearance="joined"] > .nd-segmented-item {
-  white-space: nowrap;
+ * A joined group has to stay one line of BOXES or the shared edges stop
+ * reading as one control, and no rule here lets it wrap into two rows. That is
+ * a different question from whether a label may take a second line inside its
+ * own box, and a `white-space: nowrap` written for the first answered the
+ * second: at 320px in pt-BR the group could neither shrink nor wrap, so it
+ * ran off the side of the viewport with its last label half on screen.
+ *
+ * `break-word` rather than `anywhere`, because the two differ in the one place
+ * it matters here: `anywhere` takes the longest word out of the intrinsic
+ * minimum, and `fit-content` above floors a `hug` group at exactly that. A
+ * `hug` group therefore never breaks a word, and a filled one may — see below,
+ * where the stops are divided by count rather than by content. */
+.nd-segmented-text {
+  overflow-wrap: break-word;
 }
 
 /* THE UNIT UNDER THE NUMBER, NOT BESIDE IT.
@@ -1648,6 +1738,9 @@ a {
  * a colour solved against the page's surface is the wrong one there. */
 .nd-segmented-item:has(> .nd-segmented-detail) {
   flex-direction: column;
+  /* The stack is already two lines, and a column that wraps wraps sideways:
+     the unit would land in a second column beside its own number. */
+  flex-wrap: nowrap;
   gap: 0;
   line-height: var(--noctua-leading-tight);
 }
@@ -1744,18 +1837,55 @@ a {
 
 /* --- Its corners --------------------------------------------------------- */
 
-.nd-segmented[data-nd-shape="pill"] > .nd-segmented-item {
-  border-radius: var(--noctua-radius-pill);
+/* THE CORNERS BELONG TO THE TWO ENDS OF THE GROUP, AND THE AXIS DECIDES WHICH
+ * TWO EACH END OWNS.
+ *
+ * This used to be two rules that zeroed the leading and trailing corners for
+ * the horizontal case, plus two more that zeroed the top and bottom pair for
+ * the vertical one — and the first pair was not restricted to the horizontal
+ * axis, so a vertical group ran all four. Every corner in it was zeroed except
+ * the top left of the first item and the bottom right of the last: a stack of
+ * square boxes with one rounded corner at each end, diagonally opposite. The
+ * same shape of defect is on record for `ButtonGroup`.
+ *
+ * Each axis now writes its own end corners whole, from `--nd-segment-radius`,
+ * and the two sets cannot both match. A lone item is both ends, so it keeps
+ * all four whichever axis it is on. */
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item {
+  border-radius: 0;
 }
 
-.nd-segmented[data-nd-shape="square"] > .nd-segmented-item {
-  border-radius: var(--noctua-radius-none);
+.nd-segmented:not([data-nd-appearance="spread"]):not([aria-orientation="vertical"])
+  > .nd-segmented-item:first-child {
+  border-start-start-radius: var(--nd-segment-radius);
+  border-end-start-radius: var(--nd-segment-radius);
+}
+
+.nd-segmented:not([data-nd-appearance="spread"]):not([aria-orientation="vertical"])
+  > .nd-segmented-item:last-child {
+  border-start-end-radius: var(--nd-segment-radius);
+  border-end-end-radius: var(--nd-segment-radius);
+}
+
+.nd-segmented:not([data-nd-appearance="spread"])[aria-orientation="vertical"]
+  > .nd-segmented-item:first-child {
+  border-start-start-radius: var(--nd-segment-radius);
+  border-start-end-radius: var(--nd-segment-radius);
+}
+
+.nd-segmented:not([data-nd-appearance="spread"])[aria-orientation="vertical"]
+  > .nd-segmented-item:last-child {
+  border-end-start-radius: var(--nd-segment-radius);
+  border-end-end-radius: var(--nd-segment-radius);
 }
 
 /* A bevel cuts rather than rounds, so it does not come from the radius preset
-   — the same reasoning, and the same step of the spacing scale, as `Button`. */
-.nd-segmented[data-nd-shape="bevel"] > .nd-segmented-item {
-  border-radius: var(--noctua-radius-none);
+   — the same reasoning, and the same step of the spacing scale, as `Button`.
+   A JOINED GROUP IS CUT ONCE, AROUND THE WHOLE CONTROL. Clipping each item
+   notched both ends of every shared edge, so the row read as four loose
+   fragments with gaps where it should have been one box. */
+.nd-segmented[data-nd-shape="bevel"]:not([data-nd-appearance="spread"]),
+.nd-segmented[data-nd-shape="bevel"][data-nd-appearance="spread"] > .nd-segmented-item {
   clip-path: polygon(
     var(--noctua-space-2) 0%,
     calc(100% - var(--noctua-space-2)) 0%,
@@ -1768,6 +1898,7 @@ a {
   );
 }
 
+/* The ring is drawn inside the item, or the cut takes half of it. */
 .nd-segmented[data-nd-shape="bevel"] > .nd-segmented-item:focus-visible {
   outline-offset: calc(-1 * (var(--noctua-focus-width) + var(--noctua-focus-offset)));
 }
@@ -1776,49 +1907,42 @@ a {
 
 /* Joined: one box, drawn once. Each item is pulled back over its neighbour's
    border, because two hairlines meeting is two pixels and a control whose
-   inner rules are twice the weight of its outer ones reads as broken. */
-.nd-segmented[data-nd-appearance="joined"] > .nd-segmented-item {
+   inner rules are twice the weight of its outer ones reads as broken.
+
+   AND THE GROUP PROVIDES WHAT THE FIRST ITEM IS PULLED AGAINST. The pull used
+   to be on every item BUT the first, which makes the first stop one hairline
+   narrower than the ones beside it — invisible under `hug`, where the labels
+   differ anyway, and the whole of the claim under `equal`, where the stops are
+   supposed to be identical. Every item is pulled by the same amount now and
+   the group carries one hairline of padding for the first to sit on, so the
+   outer box lands where it always did and no stop is a pixel short. */
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item {
   position: relative;
 }
 
-.nd-segmented[data-nd-appearance="joined"] > .nd-segmented-item + .nd-segmented-item {
+.nd-segmented:not([data-nd-appearance="spread"]):not([aria-orientation="vertical"]) {
+  padding-inline-start: var(--noctua-border-hairline);
+}
+
+.nd-segmented:not([data-nd-appearance="spread"]):not([aria-orientation="vertical"])
+  > .nd-segmented-item {
   margin-inline-start: calc(-1 * var(--noctua-border-hairline));
 }
 
-.nd-segmented[data-nd-appearance="joined"][aria-orientation="vertical"]
-  > .nd-segmented-item
-  + .nd-segmented-item {
-  margin-inline-start: 0;
+.nd-segmented:not([data-nd-appearance="spread"])[aria-orientation="vertical"] {
+  padding-block-start: var(--noctua-border-hairline);
+}
+
+.nd-segmented:not([data-nd-appearance="spread"])[aria-orientation="vertical"]
+  > .nd-segmented-item {
   margin-block-start: calc(-1 * var(--noctua-border-hairline));
-}
-
-.nd-segmented[data-nd-appearance="joined"] > .nd-segmented-item:not(:first-child) {
-  border-start-start-radius: 0;
-  border-end-start-radius: 0;
-}
-
-.nd-segmented[data-nd-appearance="joined"] > .nd-segmented-item:not(:last-child) {
-  border-start-end-radius: 0;
-  border-end-end-radius: 0;
-}
-
-.nd-segmented[data-nd-appearance="joined"][aria-orientation="vertical"]
-  > .nd-segmented-item:not(:first-child) {
-  border-start-start-radius: 0;
-  border-start-end-radius: 0;
-}
-
-.nd-segmented[data-nd-appearance="joined"][aria-orientation="vertical"]
-  > .nd-segmented-item:not(:last-child) {
-  border-end-start-radius: 0;
-  border-end-end-radius: 0;
 }
 
 /* The chosen and the focused item are drawn over their neighbours, or the ring
    is half hidden under the item the negative margin pulled on top of it. */
-.nd-segmented[data-nd-appearance="joined"] > .nd-segmented-item:hover,
-.nd-segmented[data-nd-appearance="joined"] > .nd-segmented-item:focus-visible,
-.nd-segmented[data-nd-appearance="joined"] > .nd-segmented-item[aria-checked="true"] {
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:hover,
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:focus-visible,
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item[aria-checked="true"] {
   z-index: 1;
 }
 
@@ -1832,25 +1956,65 @@ a {
 
 /* --- hug, equal and stretch ---------------------------------------------- */
 
-/* `equal` and `stretch` are a grid, not a flex row: `flex: 1 1 0` shares the
-   SPARE space, so a long label still gets a wider box. `auto-fit` with a
-   `1fr` minimum gives every item the same width whatever its label says, which
-   is the whole point — the group stops re-flowing when one word is translated
-   and "Match the system" stops landing on a line of its own. */
+/* `equal` and `stretch` are a grid with ONE TRACK PER ITEM.
+ *
+ * It was `repeat(auto-fit, minmax(var(--noctua-space-24), 1fr))`, which counts
+ * tracks by how many fit rather than by how many there are. A group whose
+ * width comes from its own content has no definite space to fit them in, so
+ * that resolved to a single column and drew a horizontal control as a stack of
+ * boxes — including the overview at the head of this component's page. At
+ * 256px it resolved to two columns and put the third stop on a second row.
+ *
+ * `grid-auto-flow: column` gives every item a track of its own, however many
+ * there are, and `1fr` makes every track the same width whatever the labels
+ * say.
+ *
+ * `minmax(0, 1fr)` RATHER THAN `1fr`, AND THE ZERO IS THE WHOLE OF IT. A bare
+ * `1fr` is `minmax(auto, 1fr)`, so each track keeps a floor of its own item's
+ * minimum — and once the container is tighter than the content those floors
+ * differ, which is a row of stops of different widths under the one prop that
+ * exists to make them the same. In pt-BR the `fill` example measured 100.8 and
+ * 78.6 side by side. A floor of zero lets the labels wrap instead.
+ *
+ * `flex: 1 1 0` is not the answer for either value, and the reason is the one
+ * this comment used to give: it shares the SPARE space, so a long label still
+ * gets a wider box.
+ *
+ * `equal` needs no width of its own. `fit-content` on the group above is
+ * already the widest stop times the number of them, capped at the container —
+ * which is what this prop promises. `stretch` is the one that takes the
+ * container whether it needs it or not. */
 .nd-segmented[data-nd-fill="equal"],
 .nd-segmented[data-nd-fill="stretch"] {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(var(--noctua-space-24), 1fr));
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+}
+
+/* A FILLED STOP MAY BE NARROWER THAN ITS OWN LONGEST WORD, so the word has to
+   give way. Without this the label kept its minimum and the box did not: a
+   centred flex line overflows both ends equally, and at 320px in pt-BR the
+   `system` stop's icon was painted across the middle of the word `Escuro` in
+   the stop before it. Only the filled variants reach this — `hug` is floored
+   at its content by `fit-content`, and that floor is exactly what this
+   removes. */
+.nd-segmented[data-nd-fill="equal"] > .nd-segmented-item,
+.nd-segmented[data-nd-fill="stretch"] > .nd-segmented-item,
+.nd-segmented[data-nd-fill="equal"] .nd-segmented-text,
+.nd-segmented[data-nd-fill="stretch"] .nd-segmented-text {
+  min-inline-size: 0;
 }
 
 .nd-segmented[data-nd-fill="stretch"] {
-  display: grid;
   inline-size: 100%;
 }
 
+/* Vertical: one track across, one row per item, and the row heights are the
+   grid's to work out. */
 .nd-segmented[data-nd-fill="equal"][aria-orientation="vertical"],
 .nd-segmented[data-nd-fill="stretch"][aria-orientation="vertical"] {
-  grid-template-columns: 1fr;
+  grid-auto-flow: row;
+  grid-auto-columns: auto;
 }
 
 /* --- Floating surfaces: the appearance panel and the language menu -------- */
@@ -1942,7 +2106,12 @@ a {
  * "circular". Padding it, insetting it or hiding it are all patches on the
  * same missing structure.
  *
- * `gates::scrollable_radius` fails the build on any rule that declares both. */
+ * NOTHING FAILS THE BUILD ON THIS, and the comment used to claim otherwise.
+ * There is no gate for this in `xtask/src/gates.rs` and there never was — the
+ * comment here used to name one, after the scrollable corner it describes. What holds the rule is `material.spec.js`, which measures a
+ * scroller's painted corner rather than reading its declarations — and a
+ * comment naming a guard that does not exist is worse than no comment, because
+ * the next person trusts it and stops looking. */
 .nd-panel {
   position: fixed;
   inset-block-start: var(--nd-header-h);
@@ -3010,12 +3179,24 @@ span.nd-search-input {
   margin-block-start: calc(-1 * var(--noctua-border-hairline));
 }
 
-.nd-button-group[data-nd-attached="true"] > .nd-button:not(:first-child) {
+/* THE OUTER CORNERS ARE THE GROUP'S, AND THE AXIS DECIDES WHICH THOSE ARE.
+   The first and last member keep the corners on the group's own outside and
+   every corner on a shared edge goes, so the row reads as one control.
+
+   The two horizontal rules used to carry no orientation, so a VERTICAL group
+   ran them as well as its own pair: the first button lost the corners at the
+   end of a row it is not in and the last lost the ones at the start of it. A
+   stack of three kept two of its eight corners, one at the top left and one at
+   the bottom right, which is the picture a reader complained about. Every rule
+   here names its axis for that reason. */
+.nd-button-group[data-nd-attached="true"][aria-orientation="horizontal"]
+  > .nd-button:not(:first-child) {
   border-start-start-radius: 0;
   border-end-start-radius: 0;
 }
 
-.nd-button-group[data-nd-attached="true"] > .nd-button:not(:last-child) {
+.nd-button-group[data-nd-attached="true"][aria-orientation="horizontal"]
+  > .nd-button:not(:last-child) {
   border-start-end-radius: 0;
   border-end-end-radius: 0;
 }
@@ -3030,6 +3211,65 @@ span.nd-search-input {
   > .nd-button:not(:last-child) {
   border-end-start-radius: 0;
   border-end-end-radius: 0;
+}
+
+/* A BEVEL IS A CUT AND NOT A RADIUS, so the same rule reaches it by changing
+   the polygon rather than the corner. Left to the rules above it is untouched
+   — `bevel` sets `border-radius: 0` already — and every member keeps all eight
+   of its cuts, so the shared edges of an attached group are a row of notches
+   with the surface showing through. The middle of a group has no outer corner
+   at all, which is one rectangle. */
+.nd-button-group[data-nd-attached="true"]
+  > .nd-button[data-nd-shape="bevel"]:not(:first-child):not(:last-child) {
+  clip-path: none;
+}
+
+.nd-button-group[data-nd-attached="true"][aria-orientation="horizontal"]
+  > .nd-button[data-nd-shape="bevel"]:first-child:not(:last-child) {
+  clip-path: polygon(
+    var(--noctua-space-2) 0%,
+    100% 0%,
+    100% 100%,
+    var(--noctua-space-2) 100%,
+    0% calc(100% - var(--noctua-space-2)),
+    0% var(--noctua-space-2)
+  );
+}
+
+.nd-button-group[data-nd-attached="true"][aria-orientation="horizontal"]
+  > .nd-button[data-nd-shape="bevel"]:last-child:not(:first-child) {
+  clip-path: polygon(
+    0% 0%,
+    calc(100% - var(--noctua-space-2)) 0%,
+    100% var(--noctua-space-2),
+    100% calc(100% - var(--noctua-space-2)),
+    calc(100% - var(--noctua-space-2)) 100%,
+    0% 100%
+  );
+}
+
+.nd-button-group[data-nd-attached="true"][aria-orientation="vertical"]
+  > .nd-button[data-nd-shape="bevel"]:first-child:not(:last-child) {
+  clip-path: polygon(
+    var(--noctua-space-2) 0%,
+    calc(100% - var(--noctua-space-2)) 0%,
+    100% var(--noctua-space-2),
+    100% 100%,
+    0% 100%,
+    0% var(--noctua-space-2)
+  );
+}
+
+.nd-button-group[data-nd-attached="true"][aria-orientation="vertical"]
+  > .nd-button[data-nd-shape="bevel"]:last-child:not(:first-child) {
+  clip-path: polygon(
+    0% 0%,
+    100% 0%,
+    100% calc(100% - var(--noctua-space-2)),
+    calc(100% - var(--noctua-space-2)) 100%,
+    var(--noctua-space-2) 100%,
+    0% calc(100% - var(--noctua-space-2))
+  );
 }
 
 /* The focused member has to be drawn over its neighbours, or the ring is half
@@ -5251,6 +5491,68 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   margin-block-start: var(--noctua-space-3);
 }
 
+/* A COLOUR PER LEVEL, COUNTED BY THE SELECTOR AND NOT READ OFF THE MARKUP.
+
+   A nested `List` is its own component instance, so `data-nd-levels` is on the
+   list a caller set it on and on NONE of the lists inside it. Asking each list
+   what level it is would mean a prop every caller had to count for themselves,
+   and a number counted wrongly is a wrong colour with nothing to check it
+   against. So the depth is the selector: one `.nd-list` between the root and
+   the item is level two, two of them level three, three of them level four.
+
+   FOUR NAMES, AND EVERY ONE OF THEM SOLVED IN BOTH APPEARANCES. The only hues
+   a palette guarantees are its neutral and its accent, so the levels alternate
+   between them and change strength as they go: ink, accent, muted ink, muted
+   accent. Each is a `--nc-*` the colour system already answered for light and
+   dark and for all thirty-nine palettes, which is the whole reason none of
+   them is written here as a value.
+
+   IT MARKS TWO THINGS, BECAUSE ONE OF THEM CAN BE SWITCHED OFF. `marker: none`
+   leaves no marker to colour, and a prop that does nothing under another prop
+   is the defect `List.kind` already was. The rule down the inside edge of a
+   nested list is the other half, and it is a hairline and a colour rather than
+   a box, which is what §9.7 leaves for separating things. */
+.nd-list[data-nd-levels="true"] > .nd-list-item::marker {
+  color: var(--nc-color-fg);
+}
+
+/* Every list inside a levelled one takes the rule and a level's worth of
+   indent, whatever its own `marker` and `kind` say — a `dl` and a marker-less
+   list both zero the padding, and a rule hard against the text is not a level,
+   it is a stripe. Two classes and an attribute, so it outranks both. */
+.nd-list[data-nd-levels="true"] .nd-list {
+  /* `strong` and not `rule`: `--noctua-border-rule` is 5px and is the mark on
+     a wrong answer, which is a claim this is not making. */
+  border-inline-start: var(--noctua-border-strong) solid var(--nc-color-accent);
+  padding-inline-start: var(--noctua-space-6);
+}
+.nd-list[data-nd-levels="true"] .nd-list > .nd-list-item::marker {
+  color: var(--nc-color-accent);
+}
+
+.nd-list[data-nd-levels="true"] .nd-list .nd-list {
+  border-inline-start-color: var(--nc-color-fg-muted);
+}
+.nd-list[data-nd-levels="true"] .nd-list .nd-list > .nd-list-item::marker {
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-list[data-nd-levels="true"] .nd-list .nd-list .nd-list {
+  border-inline-start-color: var(--nc-accent-text-muted);
+}
+.nd-list[data-nd-levels="true"] .nd-list .nd-list .nd-list > .nd-list-item::marker {
+  color: var(--nc-accent-text-muted);
+}
+
+/* A term is the marker of a description list: there is no `::marker` on a
+   `<dt>`, so the level lands on the word itself. */
+.nd-list[data-nd-levels="true"] .nd-list > .nd-list-term {
+  color: var(--nc-color-accent);
+}
+.nd-list[data-nd-levels="true"] .nd-list .nd-list > .nd-list-term {
+  color: var(--nc-color-fg-muted);
+}
+
 .nd-em { font-style: italic; }
 .nd-strong { font-weight: var(--noctua-weight-semibold); }
 
@@ -5681,6 +5983,44 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   color: var(--nc-color-fg-muted);
 }
 
+/* THE GAP THAT IS A CONTROL, AND THE CHARACTER IT REPLACES.
+ *
+ * Both ship: the inert `…` a page with no script keeps, and the button
+ * `dist/menu.js` reveals once it has found the menu it names. So the character
+ * steps aside exactly when the button stops being hidden, which is a question
+ * about the markup that `:has()` can ask and nothing else can. */
+.nd-pagination-gap:has(+ .nd-pagination-more:not([hidden])) {
+  display: none;
+}
+
+.nd-pagination-more {
+  font-weight: var(--noctua-weight-medium);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  cursor: pointer;
+}
+
+.nd-pagination-more[hidden] {
+  display: none;
+}
+
+.nd-pagination-more:hover {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
+/* A MENU OF NUMBERS, AND THE ONE THING THAT MAKES IT ONE.
+ *
+ * A gap can stand for twenty-five pages, so this is the longest menu on the
+ * site — and it needs no rule of its own for that, because `.nd-menu-scroll`
+ * already bounds every menu against the window. What it does need is figures
+ * that do not shuffle: a column of proportional digits puts each number at a
+ * different width, and a reader scanning down for one is reading an edge that
+ * moves. */
+.nd-pagination-menu .nd-menu-item {
+  font-variant-numeric: tabular-nums;
+}
+
 .nd-pagination-summary {
   font-size: var(--noctua-size-small);
   color: var(--nc-color-fg-muted);
@@ -5739,12 +6079,17 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   border: 0;
   border-radius: var(--noctua-radius-pill);
   background: none;
-  color: var(--nc-color-fg-muted);
+  /* THE COLOUR A READER ALREADY READS AS *press this*, which is the colour
+     `.nd-link` is painted in. It was `--nc-color-fg-muted` — quieter than the
+     sentence it sits in, so the one thing on the line that does something
+     looked like the one thing that had been turned off, and it only became a
+     control on hover, which a touch screen never reports. */
+  color: var(--nc-color-accent);
   cursor: help;
 }
 
 .nd-info-marker:hover {
-  color: var(--nc-color-accent);
+  color: var(--nc-color-accent-hover);
 }
 
 .nd-info-marker:focus-visible {
@@ -5778,6 +6123,18 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   flex-direction: column;
   min-inline-size: var(--noctua-space-48);
   max-inline-size: min(var(--noctua-measure-lead), calc(100vw - var(--noctua-space-8)));
+  /* AS TALL AS THE ANCHOR LEFT ROOM FOR, AND NO TALLER.
+     `anchor.js` writes `--nd-anchor-block` as the distance from the edge of
+     the window the menu hangs from, and flips the menu above its button when
+     there is more room up there — so one expression bounds both directions
+     and this is the same one `.nd-select-panel`, `.nd-date-input-panel` and
+     `.nd-color-picker-panel` are bounded by. Without it a menu longer than the
+     window simply ran off the bottom of it: measured on `/menu/` at a 520px
+     window as 1216px of surface with its last eighteen rows unreachable. */
+  max-block-size: calc(100vh - var(--nd-anchor-block) - var(--noctua-space-8));
+  /* The clipping context. Not `auto`: this element carries the radius, so it
+     is the one thing here that must never scroll. */
+  overflow: hidden;
   padding-block: var(--noctua-space-1);
   background: var(--nc-color-surface-raised);
   border: var(--noctua-border-hairline) solid var(--nc-color-border);
@@ -5791,6 +6148,19 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 .nd-menu[data-nd-above] {
   inset-block-start: auto;
   inset-block-end: calc(var(--nd-anchor-block) + var(--noctua-space-1));
+}
+
+/* AND THE LIST INSIDE IT IS WHAT MOVES. It carries no radius, so a classic
+   scrollbar has a square edge to paint against, and `min-block-size: 0` is
+   what lets a flex item shrink below its own content — without it the surface
+   grows to the list and the `max-block-size` above buys nothing. */
+.nd-menu-scroll {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  overflow-y: auto;
+  /* Reaching the end of the menu must not start scrolling the page behind it. */
+  overscroll-behavior: contain;
 }
 
 .nd-menu[hidden] {
@@ -7888,6 +8258,19 @@ dl.nd-list > .nd-list-item + .nd-list-term {
       var(--noctua-glass-opacity),
     transparent
   );
+}
+
+/* THE RECIPE'S LIT EDGE RECOLOURS A BORDER, AND A GROUP HAS NONE TO RECOLOUR.
+ *
+ * `[data-nd-glass="true"]` sets a `border-block-start`, which on every other
+ * frosted control replaces an edge that was already there. `Segmented` keeps
+ * its borders on its items, so the group gained one: the frosted pane was a
+ * pixel taller than the row inside it and carried a stray hairline across the
+ * top of the control. The pane takes the control's corners for the same
+ * reason — a rounded control on a square plate is the plate showing. */
+.nd-segmented[data-nd-glass="true"] {
+  border-block-start-width: 0;
+  border-radius: var(--nd-segment-radius);
 }
 
 /* An option's box says `background: none` at (0,1,0), which ties with the
@@ -10026,7 +10409,17 @@ button.nd-lineage-figure {
   align-items: center;
   gap: var(--noctua-space-2);
   margin-block-start: calc(var(--noctua-space-3) * -1);
-  padding-block: var(--noctua-space-3);
+  /* THE PADDING AT THE TOP IS THE PANEL'S OWN, MOVED IN — the negative margin
+     above pulls the row up over it so the sticky band covers the panel's inset
+     while a hundred and eighty-seven swatches scroll under it, and the two
+     cancel, so the control still starts where the panel's padding says.
+
+     AT THE BOTTOM THERE IS NOTHING TO COVER, and a second copy of the gap is
+     what it was. The panel is a flex column with `gap: --noctua-space-3`, so
+     this padding sat on top of that gap and the field opened 69px down a
+     322px panel — a close button alone in a band two thirds of it empty. One
+     gap, the same one every other row of the panel is separated by. */
+  padding-block: var(--noctua-space-3) 0;
   background: var(--nc-color-surface-subtle);
 }
 
@@ -10353,6 +10746,29 @@ button.nd-lineage-figure {
   border-inline-start: var(--noctua-border-rule) solid var(--nc-color-danger);
 }
 
+/* AND A `<legend>` MOVES THE BOX THE RULE IS DRAWN ON, so the rule above
+ * covered every refused question except the ones inside a `<fieldset>`.
+ *
+ * A rendered legend straddles its fieldset's block-start border: the engine
+ * paints all four borders from the legend's own middle downwards, whatever the
+ * block-start width is. The mark therefore began at the middle of the first
+ * line and left the top half of the question unmarked — measured on
+ * `/fieldset/` as red from y=14 of a 117px box whose legend is 26px tall.
+ *
+ * The legend draws the missing piece itself. Floating it out of the way is the
+ * other answer and it is the wrong one: a legend that is not the rendered
+ * legend stops being laid out by the fieldset at all, and it measured as the
+ * choices climbing over the question and the float escaping the box.
+ *
+ * The two lengths are the rule above read back — the fieldset's own padding
+ * and its own border width — so the piece lands exactly on the strip the
+ * fieldset paints and never beside it. */
+.nd-fieldset[data-nd-invalid="true"] > .nd-fieldset-legend {
+  margin-inline-start: calc((var(--noctua-space-4) + var(--noctua-border-rule)) * -1);
+  padding-inline-start: calc(var(--noctua-space-4) + var(--noctua-border-rule));
+  border-inline-start: var(--noctua-border-rule) solid var(--nc-color-danger);
+}
+
 /* THE SLOT TAKES NO ROOM UNTIL IT HAS WORDS. `error_slot` renders it whenever
    the control's real element will be hidden by a script, so the browser's own
    complaint has somewhere to go — and empty, a `role="alert"` over nothing
@@ -10431,7 +10847,7 @@ button.nd-lineage-figure {
  * looked right. `:has()` asks the question the markup can answer. */
 .nd-input:focus-within,
 .nd-number-input:focus-within,
-.nd-textarea:focus-visible,
+.nd-textarea:focus-within,
 .nd-time-input-segment:focus-visible,
 .nd-file-input:has(> .nd-file-input-native:focus-visible) > .nd-file-input-area {
   border-color: var(--nc-color-border-strong);
@@ -10443,7 +10859,7 @@ button.nd-lineage-figure {
    says: a 14px input is what makes a phone zoom the whole page on focus. */
 .nd-input-box,
 .nd-number-input-box,
-.nd-textarea,
+.nd-textarea-box,
 .nd-time-input-segment {
   min-inline-size: 0;
   /* A form control does not inherit the page's face on its own — every engine
@@ -10464,6 +10880,7 @@ button.nd-lineage-figure {
 
 .nd-input-box:focus,
 .nd-number-input-box:focus,
+.nd-textarea-box:focus,
 .nd-time-input-segment:focus {
   outline: none;
 }
@@ -10546,17 +10963,69 @@ button.nd-lineage-figure {
 
 /* --- Textarea ------------------------------------------------------------- */
 
-/* NO RADIUS, BECAUSE IT SCROLLS. A scrollbar paints over a rounded corner, and
-   `material.spec.js` holds every scrollable element on the site to that — the
-   same lesson the tables learned. The border and the corners are the field's,
-   which does not scroll; this is the box inside it. */
+/* A BOX AROUND THE BOX, AND IT IS THE ONLY WAY THIS CONTROL CAN HAVE CORNERS.
+ *
+ * `.nd-textarea` used to BE the `<textarea>`, and a `<textarea>` is a scroll
+ * container: `material.spec.js` refuses a radius on one, because a classic
+ * scrollbar paints square straight through a rounded corner. So this shipped
+ * `border-radius: 0` and was the one control on the site that ignored the
+ * reader's corner preset — square while every button, input and select beside
+ * it went round.
+ *
+ * The fix is structural and it is already the house pattern: `.nd-panel` +
+ * `.nd-panel-body`, `.nd-codeblock` + `.nd-codeblock-code`, and — the one that
+ * matters here — `.nd-input` + `.nd-input-box`. The border, the fill, the
+ * corners and the frost go on an element that does not scroll; the scrolling
+ * goes to the control inside it, inset from those corners by this padding, so
+ * no scrollbar ever meets one.
+ *
+ * `overflow: hidden` is not a scroller, so the radius above is safe, and it is
+ * what lets `resize` apply to this element rather than to the `<textarea>`. A
+ * `<textarea>` dragged wider than the border around it draws outside its own
+ * field. */
 .nd-textarea {
-  inline-size: 100%;
+  display: flex;
   padding: var(--noctua-space-2) var(--noctua-space-3);
   background: var(--nc-color-surface);
   border: var(--noctua-border-hairline) solid var(--nc-color-border);
-  border-radius: 0;
+  border-radius: var(--noctua-radius-control);
+  overflow: hidden;
   resize: vertical;
+}
+
+/* The control. Its own border, corners and fill are the box's above, and its
+   `resize` is the box's too.
+ *
+ * A LINE HEIGHT, AND `max_rows` DEPENDS ON IT. A form control does not inherit
+ * the page's leading — every engine leaves it at `normal` — and `inputs.js`
+ * reads `getComputedStyle(box).lineHeight` to work out how tall `max_rows`
+ * rows are. `Number.parseFloat("normal")` is `NaN`, the ceiling fell back to
+ * `Infinity`, and the box grew to fit forty lines with `max_rows: 8` on it.
+ * That is the prop's whole purpose, and it had never once applied.
+ *
+ * The reading is prose, so it takes the body's leading and not the tight one
+ * every single-line control here is set in. */
+.nd-textarea-box {
+  flex: 1;
+  min-block-size: 0;
+  margin: 0;
+  padding: 0;
+  line-height: var(--noctua-leading-body);
+  border-radius: 0;
+  resize: none;
+}
+
+/* AND `size` NOW CHANGES SOMETHING. The only rules keyed on it were
+   `.nd-textarea[data-nd-size] .nd-textarea-box`, and until the box above
+   existed a `<textarea>` had no children for them to match — so a prop
+   documented as the box's padding set no padding anywhere, at any value. These
+   are `Input`'s three steps, to the token: 4/8, 8/12, 12/12. */
+.nd-textarea[data-nd-size="small"] {
+  padding: var(--noctua-space-1) var(--noctua-space-2);
+}
+
+.nd-textarea[data-nd-size="large"] {
+  padding: var(--noctua-space-3) var(--noctua-space-3);
 }
 
 .nd-textarea[data-nd-resize="none"] {
@@ -10567,10 +11036,14 @@ button.nd-lineage-figure {
   resize: both;
 }
 
-/* Growing is the script's, and it sets this from the content's own height. */
+/* Growing is the script's, and it sets the height from the content's own. The
+   box around it takes that height, because the field is what a reader drags. */
 .nd-textarea[data-nd-autosize="true"] {
-  overflow-y: hidden;
   resize: none;
+}
+
+.nd-textarea[data-nd-autosize="true"] > .nd-textarea-box {
+  overflow-y: hidden;
 }
 
 /* --- NumberInput ---------------------------------------------------------- */
@@ -10612,6 +11085,94 @@ button.nd-lineage-figure {
   color: var(--nc-color-fg);
 }
 
+/* THE STEPPERS EITHER SIDE OF THE VALUE, AND THE SAME MARKUP EITHER WAY.
+ *
+ * `stepping: "primary"` is one control per side at `Button`'s medium size,
+ * with the digits between them. Nothing moves in the DOM: the wrapper becomes
+ * `display: contents`, so its two buttons are laid out by the control's own
+ * flex row, and `order` puts the one that subtracts in front of the box. That
+ * keeps the runtime finding the same two controls, the same reveal and the
+ * same `readonly` refusal.
+ *
+ * `:not([hidden])` IS LOAD-BEARING. `[hidden]` is `display: none` from the UA
+ * sheet at one attribute of specificity, and this rule carries a class and an
+ * attribute — so without it the wrapper the markup ships hidden would be
+ * revealed by the stylesheet, and a page with no script would draw two
+ * steppers that move nothing. */
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-steppers:not([hidden]) {
+  display: contents;
+}
+
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-step {
+  min-inline-size: var(--noctua-space-12);
+  min-block-size: var(--noctua-space-12);
+  color: var(--nc-color-fg);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-step:enabled:hover {
+  background: var(--nc-color-surface-subtle);
+}
+
+/* The one that subtracts leads, wherever the value sits, because `order` is
+   read in the writing direction and so is the row. */
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-step[data-nd-number-input-step="down"] {
+  order: -1;
+}
+
+/* AND IT IS AS WIDE AS THE QUANTITY, NOT AS WIDE AS THE FORM.
+ *
+ * Every other control here fills its field, which is right for a question a
+ * reader types an answer to. This one is answered by pressing, and two
+ * controls a hand's width apart are two controls a reader travels between —
+ * so the box takes the width of a few digits and the whole row shrinks to its
+ * content. `.nd-field` is a flex column, which is what makes `align-self` the
+ * way to say it. */
+.nd-number-input[data-nd-stepping="primary"] {
+  align-self: flex-start;
+  max-inline-size: 100%;
+}
+
+/* Centred, and only here. A column of quantities is read down its last digit,
+   which is what the default alignment is for, and one number between two
+   controls is read in the middle of them. */
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-box {
+  flex: none;
+  inline-size: var(--noctua-space-16);
+  text-align: center;
+}
+
+/* THE SMALLER SIZE KEEPS THE 44-PIXEL FLOOR AT THE STEP BELOW. */
+.nd-number-input[data-nd-stepping="primary"][data-nd-size="small"] .nd-number-input-step {
+  min-inline-size: var(--noctua-space-8);
+  min-block-size: var(--noctua-space-8);
+}
+
+.nd-number-input[data-nd-stepping="primary"][data-nd-size="large"] .nd-number-input-step {
+  min-inline-size: var(--noctua-space-16);
+  min-block-size: var(--noctua-space-16);
+}
+
+/* AND THE PICTURE ON THE PROP TABLE SAYS THE SAME THING. The specimen is a
+   drawing rather than a live control, so the two step boxes are the drawn
+   span's own `::before` and `::after`. The span goes `display: contents` for
+   the reason above, which makes both of them items of the figure's row, and
+   one of them moves in front of the box. */
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-figure .nd-number-input-steps {
+  display: contents;
+}
+
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-figure .nd-number-input-steps::before,
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-figure .nd-number-input-steps::after {
+  inline-size: var(--noctua-space-12);
+  block-size: var(--noctua-space-12);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-figure .nd-number-input-steps::before {
+  order: -1;
+}
+
 /* --- Slider --------------------------------------------------------------- */
 
 .nd-slider {
@@ -10627,6 +11188,10 @@ button.nd-lineage-figure {
      `gates::unknown_token` exists to catch. Zero rather than a colour, for
      `frozen_color_indirection`'s reason. */
   --nd-slider-fill: 0%;
+  /* WHERE THE FILLED PART STARTS, which is the leading end of the track for a
+     single thumb and the FIRST THUMB for a range. Declared here for the reason
+     above it, and zero so a single slider is exactly what it was. */
+  --nd-slider-from: 0%;
   position: relative;
   flex: 1;
   min-inline-size: 0;
@@ -10648,6 +11213,38 @@ button.nd-lineage-figure {
 
 .nd-slider[data-nd-range="true"] .nd-slider-track::-moz-range-thumb {
   pointer-events: auto;
+}
+
+/* AND ONLY ONE OF THEM DRAWS THE RAIL.
+ *
+ * Both inputs are full-width and share one grid cell, so the second painted
+ * its own rail straight over the first one's thumb. What a reader saw was the
+ * start handle reduced to the two arcs that stuck out above and below an
+ * eight-pixel rail — a ring around a hole, which reads as a limit drawn on the
+ * control rather than as the handle it is. The end input keeps the rail, the
+ * start input paints none, and the start input is raised so its handle is on
+ * top of the rail rather than under it. Raising an input whose track is
+ * transparent hides nothing.
+ *
+ * WHAT MARKS THE TRAVEL INSTEAD IS THE FILL. `--nd-slider-from` moves the
+ * coloured band's leading end onto the first thumb, so the band between the
+ * two handles IS the chosen span and each handle sits on one end of it. That
+ * is the same fact the ring was trying to state, drawn out of the part of the
+ * control that already means something. */
+.nd-slider[data-nd-range="true"] .nd-slider-track[data-nd-slider-thumb="start"] {
+  z-index: var(--noctua-layer-raised);
+}
+
+.nd-slider[data-nd-range="true"]
+  .nd-slider-track[data-nd-slider-thumb="start"]::-webkit-slider-runnable-track {
+  background: none;
+  border-color: transparent;
+}
+
+.nd-slider[data-nd-range="true"]
+  .nd-slider-track[data-nd-slider-thumb="start"]::-moz-range-track {
+  background: none;
+  border-color: transparent;
 }
 
 .nd-slider-track {
@@ -10673,6 +11270,8 @@ button.nd-lineage-figure {
   border-radius: var(--noctua-radius-pill);
   background: linear-gradient(
       to right,
+      transparent var(--nd-slider-from, 0%),
+      var(--nc-color-accent) var(--nd-slider-from, 0%),
       var(--nc-color-accent) var(--nd-slider-fill, 0%),
       transparent var(--nd-slider-fill, 0%)
     ),
@@ -10857,6 +11456,14 @@ button.nd-lineage-figure {
 .nd-time-input-segment {
   inline-size: 4ch; /* allow-literal: two digits plus the box's own padding, in the digit's own unit */
   padding: var(--noctua-space-2);
+  /* THE BOXES ARE THE FIELD'S SIZE, AND THEY WERE NOT ANY SIZE AT ALL. `size`
+     reached the `Field`'s question and stopped there, under a doc calling it
+     the size of the boxes — so a `large` time field held medium boxes and a
+     medium one stood 6px shorter than every other control on its row. The
+     three steps are `Segmented`'s own ladder, because the meridiem control
+     beside them IS one and two siblings in a row may not disagree about their
+     height. */
+  min-block-size: var(--noctua-space-12);
   text-align: center;
   font-variant-numeric: tabular-nums;
   background: var(--nc-color-surface);
@@ -10864,20 +11471,40 @@ button.nd-lineage-figure {
   border-radius: var(--noctua-radius-control);
 }
 
+/* The two steps either side of it, matching `Segmented`'s exactly. */
+/* THE PADDING GOES DOWN WITH THE TYPE, AND IT HAS TO. The box is `4ch` wide,
+   which is two digits and two digits' worth of room, so a padding measured in
+   rem eats more of it at every step down: caption type inside medium padding
+   clipped the second digit of every small field. */
+.nd-time-input[data-nd-size="small"] .nd-time-input-segment {
+  min-block-size: var(--noctua-space-8);
+  padding: var(--noctua-space-1);
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-time-input[data-nd-size="large"] .nd-time-input-segment {
+  min-block-size: var(--noctua-space-16);
+  padding-block: var(--noctua-space-3);
+  font-size: var(--noctua-size-body);
+}
+
+/* THE SLOT THE MERIDIEM CONTROL IS REVEALED FROM. It holds a real
+   `Segmented`, which a component cannot be handed `hidden`, so the span
+   carries it and `inputs.js` takes it off once it has read the clock. The
+   second rule is here because an author declaration beats the browser's own
+   `[hidden]` rule, and `display: flex` because the group has to sit on the
+   boxes' baseline rather than on the row's top edge — the labels above them
+   are what makes those two different lines. */
+.nd-time-input-meridiem {
+  display: flex;
+  align-items: flex-end;
+  /* THE ROW IS CENTRED, AND EVERY OTHER ITEM IN IT IS A LABEL OVER A BOX. So
+     a control with no label above it, centred, floats between the two lines.
+     It sits on the boxes' own bottom edge instead. */
+  align-self: flex-end;
+}
+
 .nd-time-input-meridiem[hidden] {
-  display: none;
-}
-
-/* THE SLOT THE *NOW* CONTROL IS REVEALED FROM. The button inside it is a
-   `Button`, and a component cannot be handed `hidden`, so the span carries it
-   and `inputs.js` takes it off. `display: contents` so the row lays out
-   exactly as it did when the button was its own child, and the second rule
-   because an author declaration beats the browser's `[hidden]` rule. */
-.nd-time-input-now {
-  display: contents;
-}
-
-.nd-time-input-now[hidden] {
   display: none;
 }
 
@@ -10906,7 +11533,7 @@ button.nd-lineage-figure {
 .nd-input-box:disabled,
 .nd-number-input-box:disabled,
 .nd-number-input-step:disabled,
-.nd-textarea:disabled,
+.nd-textarea-box:disabled,
 .nd-time-input-segment:disabled,
 .nd-slider-track:disabled,
 /* See the focus rule above: the label comes first in the markup, so this is a
@@ -10944,12 +11571,19 @@ button.nd-lineage-figure {
    right. These are the three heights the contracts actually claim, the same
    32, 48 and 64 that `Button` steps through. Written once for every drawn
    control, because three inputs disagreeing about what `large` looks like is
-   the defect one step along from this one. */
+   the defect one step along from this one.
+
+   `.nd-textarea` NAMES ITS FIGURE, and the others do not have to. A `Textarea`
+   is a box around a `<textarea class="nd-textarea-box">` now, so
+   `.nd-textarea[data-nd-size] .nd-textarea-box` reaches the live control as
+   well as the drawing — and a fixed 32, 48 or 64 pixels on the live one takes
+   `rows` and `autosize` away from it. A picture is the only thing being drawn
+   here. */
 .nd-input[data-nd-size="small"] .nd-input-box,
 .nd-number-input[data-nd-size="small"] .nd-number-input-box,
 .nd-select[data-nd-size="small"] .nd-select-box,
 .nd-tag-picker[data-nd-size="small"] .nd-tag-picker-box,
-.nd-textarea[data-nd-size="small"] .nd-textarea-box {
+.nd-textarea[data-nd-size="small"] .nd-textarea-figure .nd-textarea-box {
   block-size: var(--noctua-space-8);
 }
 
@@ -10957,7 +11591,7 @@ button.nd-lineage-figure {
 .nd-number-input[data-nd-size="medium"] .nd-number-input-box,
 .nd-select[data-nd-size="medium"] .nd-select-box,
 .nd-tag-picker[data-nd-size="medium"] .nd-tag-picker-box,
-.nd-textarea[data-nd-size="medium"] .nd-textarea-box {
+.nd-textarea[data-nd-size="medium"] .nd-textarea-figure .nd-textarea-box {
   block-size: var(--noctua-space-12);
 }
 
@@ -10965,7 +11599,7 @@ button.nd-lineage-figure {
 .nd-number-input[data-nd-size="large"] .nd-number-input-box,
 .nd-select[data-nd-size="large"] .nd-select-box,
 .nd-tag-picker[data-nd-size="large"] .nd-tag-picker-box,
-.nd-textarea[data-nd-size="large"] .nd-textarea-box {
+.nd-textarea[data-nd-size="large"] .nd-textarea-figure .nd-textarea-box {
   block-size: var(--noctua-space-16);
 }
 
@@ -11609,6 +12243,16 @@ figure.nd-image {
 .nd-message-bar-icon {
   flex: 0 0 auto;
   display: inline-flex;
+  /* ON THE FIRST LINE'S CENTRE, NOT ON THE BOX'S AND NOT ON ITS TOP EDGE.
+     The bar is `align-items: flex-start`, which is right — a glyph centred
+     against a paragraph floats in the middle of nothing — but flush with the
+     top of the text block it sat six pixels above the middle of the title
+     beside it, because the glyph's box is shorter than the line's. A box
+     exactly one line tall with the glyph centred inside it puts the two on one
+     centre line, and it stays there however many lines follow. `1lh` is the
+     line the icon itself is on, so it moves with the type scale. */
+  block-size: 1lh;
+  align-items: center;
   /* The tone where there is one, and the quieter text colour where there is
      not. An untoned bar is the absence of the attribute, never a name. */
   color: var(--nd-tone, var(--nc-color-fg-muted));
@@ -12222,8 +12866,18 @@ figure.nd-image {
   .nd-dialog-surface[open] { border-radius: var(--noctua-radius-surface); }
 }
 
+/* THE PAGE FADES TOWARD ITS OWN GROUND, and that is one rule for both
+   appearances. It was the INK at `--nd-veil-checked`: a fourteen-percent wash
+   that left every word behind an open dialog readable, and whose colour
+   inverted with the mode — near-black over a light page, near-white over a
+   dark one, so the value that was merely weak in light was a bright fog in
+   dark. `--nc-color-surface` is the one the colour system has already solved
+   in both modes, so the veil needs no mode condition and no second answer:
+   light washes the page out toward paper, dark sinks it toward black, and the
+   surface the dialog itself is drawn on still separates from it by a
+   hairline. */
 .nd-dialog-surface::backdrop {
-  background: color-mix(in oklab, var(--nc-color-fg) var(--nd-veil-checked), transparent);
+  background: color-mix(in oklab, var(--nc-color-surface) var(--nd-veil-modal), transparent);
 }
 
 /* A NON-MODAL SURFACE IS NOT IN THE TOP LAYER, so it has no backdrop to be
@@ -12556,6 +13210,28 @@ figure.nd-image {
 
 .nd-toast-body {
   color: var(--nc-color-fg-muted);
+}
+
+/* THE TIME LEFT, BESIDE THE WAY OUT.
+ *
+ * A number that changes every second is the one thing on this surface a reader
+ * has to be able to ignore, so it takes the caption size and the muted ink,
+ * and `tabular-nums` keeps it from shuffling the dismiss control sideways as
+ * the digits change. `NOCTUA.md §9.7` refuses a layout that shifts, and a
+ * proportional `9` and `1` are a shift once a second. */
+.nd-toast-countdown {
+  /* UNDER THE MESSAGE, WHICH IS WHERE THE ROOM IS. A toast is about twenty
+     characters wide, so a line of digits beside the sentence takes its width
+     off the sentence. */
+  align-self: flex-start;
+  font-size: var(--noctua-size-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--nc-color-fg-muted);
+  white-space: nowrap;
+}
+
+.nd-toast-countdown[hidden] {
+  display: none;
 }
 
 /* A STAGE THAT OWNS ITS OWN CORNER.

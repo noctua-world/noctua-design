@@ -414,16 +414,28 @@ test("a list restates the role its own stylesheet takes away", async ({ page }) 
   // emitted `role="list"` — while the stylesheet does both things that drop it:
   // every list is a flex column and `marker: none` removes the marker. So a
   // reader was told "three items" by the markup and nothing by the browser.
+  //
+  // NOT THE VARIANT GRID, for the reason `segmented.spec.js` gives about
+  // radiogroups: a specimen whose contract carries MARKUP is the contract's
+  // element with that markup inside, drawn to be looked at rather than a
+  // component that rendered itself. Those pictures deliberately carry no ARIA
+  // at all — `aria-sort="none"` on eight still `<th>` pictures is what
+  // inventing it cost last time — so asking one to restate a role is asking
+  // the wrong element. `/list/` is where this shows: seven real lists on it
+  // claim the role, and eight pictures of a list do not.
   let seen = 0;
   for (const path of Object.values(PAGE)) {
     await page.goto(url(path));
     const wrong = await page.evaluate(() => {
       const out = { lists: 0, unnamed: 0, items: 0, unnamedItems: 0 };
+      const drawn = (el) => el.closest(".nd-variant-stage") !== null;
       for (const list of document.querySelectorAll("ul.nd-list, ol.nd-list")) {
+        if (drawn(list)) continue;
         out.lists += 1;
         if (list.getAttribute("role") !== "list") out.unnamed += 1;
       }
       for (const item of document.querySelectorAll("li.nd-list-item")) {
+        if (drawn(item)) continue;
         out.items += 1;
         if (item.getAttribute("role") !== "listitem") out.unnamedItems += 1;
       }

@@ -24,10 +24,13 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     props: &[
                         ("label", Value::Message(Key::ExampleAvatarAna)),
                         ("initials", Value::Data("AL")),
-                        // The site's own mark, because it is a file the build
-                        // already writes: an example pointing at a URL nothing
-                        // answers would be a permanent 404 on a published page.
-                        ("src", Value::Asset("favicon.svg")),
+                        // A PORTRAIT, NOT THE SITE'S OWN MARK. The favicon is a
+                        // ring around a dot, so `object-fit: cover` drew a
+                        // second circle inside the avatar's own and the reader
+                        // saw two rings where a face belongs. These are files
+                        // the docs build already copies, so the URL still
+                        // answers and the picture is a picture of somebody.
+                        ("src", Value::Asset("assets/portraits/ada.svg")),
                     ],
                     children: &[],
                 },

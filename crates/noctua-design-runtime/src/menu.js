@@ -176,6 +176,17 @@ function enhance(button, menu, signal) {
   }, { signal });
 
   button.addEventListener("keydown", (event) => {
+    // ESCAPE CLOSES IT FROM THE BUTTON TOO, and it had nowhere to be heard
+    // from there. Opening with a POINTER leaves the focus on the button, which
+    // is deliberate — a reader who clicked is reading — and the only Escape
+    // handler was on the menu, so that reader had no key that would put the
+    // surface away. Stopped for the menu's reason: a menu inside a dialog
+    // closes itself rather than taking the dialog down with it.
+    if (event.key === "Escape" && !menu.hidden) {
+      event.stopPropagation();
+      close(true);
+      return;
+    }
     // DOWN OPENS ONTO THE FIRST ITEM AND UP ONTO THE LAST, which is the one
     // keyboard convention a menu button has that an ordinary button does not.
     if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;

@@ -289,3 +289,79 @@ test("the wait comes back when the focus leaves a message holding two controls",
     "",
   );
 });
+
+// --- The time left, and the way to see it again -----------------------------
+//
+// TWO HALVES THAT BELONG IN DIFFERENT PLACES, and this file measures both.
+// `countdown_label` is the component's, because a message with a deadline owes
+// its reader the deadline wherever it is used. The control that raises the
+// message again is this site's, because raising a message is the job of the
+// page that raises it, and `spec/components/toast.toml` writes down why.
+
+const CLOCK = '[data-nd-toast="toast-sent"] [data-nd-toast-countdown]';
+
+/** The number the countdown is showing, or nothing if it shows no number. */
+const seconds = async (page) => {
+  const words = await page.locator(CLOCK).textContent();
+  const found = /\d+/.exec(words ?? "");
+  return found ? Number(found[0]) : null;
+};
+
+test("a timed message shows what is left of the wait, and holds it under a pointer", async ({
+  page,
+}) => {
+  await page.goto(url(PAGE.toast));
+  await showParts(page);
+  const clock = page.locator(CLOCK);
+  await expect(clock, "the countdown was never revealed").toBeVisible();
+
+  // It counts DOWN, which is the one thing a number on a timer has to do.
+  const first = await seconds(page);
+  expect(first, "the countdown drew no number").toBeGreaterThan(0);
+  await expect
+    .poll(async () => await seconds(page), { timeout: 4000 })
+    .toBeLessThan(first);
+
+  // AND IT STANDS STILL WHILE THE WAIT IS HELD. A number counting down beside
+  // a timer that is not running says something untrue about the message.
+  const toast = named(page, "toast-sent");
+  await toast.hover();
+  await expect(toast).toHaveAttribute("data-nd-paused", "");
+  const held = await seconds(page);
+  await page.waitForTimeout(1200);
+  expect(await seconds(page), "the countdown ran while the wait was held").toBe(held);
+
+  // Leaving restarts the WHOLE wait, which `toast.toml` guarantees, so the
+  // number goes back up rather than carrying on from where it stopped.
+  await page.locator("h1").hover();
+  await expect(toast).not.toHaveAttribute("data-nd-paused", "");
+  await expect.poll(async () => await seconds(page), { timeout: 2000 }).toBeGreaterThan(held);
+});
+
+test("the example that vanishes can be run again", async ({ page }) => {
+  await page.goto(url(PAGE.toast));
+  await showParts(page);
+  const toast = named(page, "toast-sent");
+
+  // Six seconds, and then the box is empty. That is the state a reader who
+  // arrives late has always met, and the control below is the answer to it.
+  await expect(toast).toHaveAttribute("data-nd-dismissed", "", { timeout: 12000 });
+
+  await page.locator('[data-nd-action="toast-replay"]').first().click();
+  await expect(toast, "the message never came back").not.toHaveAttribute("data-nd-dismissed", "");
+  // And the wait is running again rather than merely being visible again: a
+  // message put back with a dead timer is a picture of the example.
+  await expect(page.locator(CLOCK)).toBeVisible();
+  expect(await seconds(page), "the wait was not re-armed").toBeGreaterThan(0);
+});
+
+test("with the script blocked no countdown is drawn", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(url(PAGE.toast));
+  await showParts(page);
+  // The message never leaves without a script, so a number counting down to
+  // nothing would be the same lie the dismiss control ships hidden to avoid.
+  await expect(page.locator(CLOCK), "a countdown appeared with no timer").toBeHidden();
+  await context.close();
+});

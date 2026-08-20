@@ -93,7 +93,7 @@ pub enum IconName {
     EyeOff,
     /// Marks a `FileInput`'s drop area. An arrow into a tray, which is what the gesture is; a paperclip would say *attachment*, which is what the result is called and not what the control does.
     Upload,
-    /// Fills a `TimeInput` with the current time, on the control `now_label` names. A clock, because that is what the field is; the button it sits on is icon-only and takes its name from that prop.
+    /// Marks a time, such as when a row of a schedule names one. A clock face with two hands, which is the drawing every reader already reads as a time. No component draws it on its own.
     Clock,
     /// The previous slide, on a `Carousel`. A chevron rather than an arrow: an arrow in this system marks the direction a column is SORTED, and one drawing meaning two things is how a reader learns to distrust both.
     ChevronLeft,
@@ -492,7 +492,7 @@ impl IconName {
                 "Marks a `FileInput`'s drop area. An arrow into a tray, which is what the gesture is; a paperclip would say *attachment*, which is what the result is called and not what the control does."
             }
             Self::Clock => {
-                "Fills a `TimeInput` with the current time, on the control `now_label` names. A clock, because that is what the field is; the button it sits on is icon-only and takes its name from that prop."
+                "Marks a time, such as when a row of a schedule names one. A clock face with two hands, which is the drawing every reader already reads as a time. No component draws it on its own."
             }
             Self::ChevronLeft => {
                 "The previous slide, on a `Carousel`. A chevron rather than an arrow: an arrow in this system marks the direction a column is SORTED, and one drawing meaning two things is how a reader learns to distrust both."

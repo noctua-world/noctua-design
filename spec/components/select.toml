@@ -22,6 +22,7 @@ class = "nd-select"
 # way to carry. Three sizes of the browser's widget is not a picture of this
 # component at three sizes.
 specimen = "<span class=\"nd-select-figure\"><span class=\"nd-select-box\"></span></span>"
+page = "select"
 summary = "Let users choose one value, or several, out of more than a list can show."
 
 # IT IS A `<select>`, AND EVERYTHING ELSE IS ADDED TO ONE.

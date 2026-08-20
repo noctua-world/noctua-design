@@ -6,6 +6,7 @@ guidance = "Use a select option for one of the values a `Select` offers. A secon
 name = "SelectOption"
 element = "option"
 class = "nd-select-option"
+page = "select"
 summary = "Add one value to a select, with an optional second line, icon or colour."
 
 # AN `<option>` HOLDS TEXT AND NOTHING ELSE.

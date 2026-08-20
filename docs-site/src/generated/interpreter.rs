@@ -31,23 +31,23 @@ use noctua_design::components::{
     LineageLine, LineagePick, LineageReach, LineageRoute, LineageSize, LineageThickness,
     LineageTilt, LineageView, Link, LinkTone, List, ListItem, ListKind, ListMarker, ListSpacing,
     Mark, Menu, MenuItem, MenuPlacement, MessageBar, MessageBarLive, Meter, MeterSize, NumberInput,
-    NumberInputSize, OtpField, OtpFieldKind, OtpFieldSize, Pagination, PaginationSize,
-    PaginationSpread, Paragraph, ParagraphSize, ParagraphTone, Popover, PopoverPlacement, Progress,
-    ProgressSize, Prose, ProseMeasure, Radio, RadioSize, Rating, RatingSize, Search, SearchGroup,
-    SearchPresentation, SearchResult, SearchSize, Segmented, SegmentedAppearance, SegmentedFill,
-    SegmentedItem, SegmentedOrientation, SegmentedSelection, SegmentedShape, SegmentedSize, Select,
-    SelectGroup, SelectOption, SelectSize, Slider, SliderSize, SliderTone, Strong, Swatch,
-    SwatchShape, SwatchSize, Switch, SwitchSize, Tab, TabPanel, Table, TableCell,
-    TableCellAggregate, TableCellAggregateOver, TableCellAlign, TableCellWrap, TableColumn,
-    TableColumnSortAs, TableColumnWidth, TableDensity, TableHeaderCell, TableHeaderCellAlign,
-    TableHeaderCellScope, TableHeaderCellSort, TableHeaderCellWrap, TableHeight, TableLayout,
-    TableRow, TableRowEmphasis, TableRowSelect, TableRules, TableSection, TableSectionKind,
-    TableWidth, Tabs, TabsActivation, TabsAppearance, TabsFill, TabsOrientation, TabsSize, Tag,
-    TagPicker, TagPickerSize, TagPressed, TagShape, TagSize, TagVariant, Text, TextSize, TextTone,
-    TextWeight, Textarea, TextareaResize, TextareaSize, Time, TimeInput, TimeInputClock,
-    TimeInputSize, Toast, ToastLive, ToastPlacement, Toolbar, ToolbarDensity, ToolbarGroup,
-    ToolbarGroupAlign, ToolbarOrientation, Tooltip, TooltipDelay, TooltipPlacement, Tree, TreeItem,
-    TreeSelection, TreeSize, Truncate, TruncateLines, VisuallyHidden,
+    NumberInputSize, NumberInputStepping, OtpField, OtpFieldKind, OtpFieldSize, Pagination,
+    PaginationSize, PaginationSpread, Paragraph, ParagraphSize, ParagraphTone, Popover,
+    PopoverPlacement, Progress, ProgressSize, Prose, ProseMeasure, Radio, RadioSize, Rating,
+    RatingSize, Search, SearchGroup, SearchPresentation, SearchResult, SearchSize, Segmented,
+    SegmentedAppearance, SegmentedFill, SegmentedItem, SegmentedOrientation, SegmentedSelection,
+    SegmentedShape, SegmentedSize, Select, SelectGroup, SelectOption, SelectSize, Slider,
+    SliderSize, SliderTone, Strong, Swatch, SwatchShape, SwatchSize, Switch, SwitchSize, Tab,
+    TabPanel, Table, TableCell, TableCellAggregate, TableCellAggregateOver, TableCellAlign,
+    TableCellWrap, TableColumn, TableColumnSortAs, TableColumnWidth, TableDensity, TableHeaderCell,
+    TableHeaderCellAlign, TableHeaderCellScope, TableHeaderCellSort, TableHeaderCellWrap,
+    TableHeight, TableLayout, TableRow, TableRowEmphasis, TableRowSelect, TableRules, TableSection,
+    TableSectionKind, TableWidth, Tabs, TabsActivation, TabsAppearance, TabsFill, TabsOrientation,
+    TabsSize, Tag, TagPicker, TagPickerSize, TagPressed, TagShape, TagSize, TagVariant, Text,
+    TextSize, TextTone, TextWeight, Textarea, TextareaResize, TextareaSize, Time, TimeInput,
+    TimeInputClock, TimeInputSize, Toast, ToastLive, ToastPlacement, Toolbar, ToolbarDensity,
+    ToolbarGroup, ToolbarGroupAlign, ToolbarOrientation, Tooltip, TooltipDelay, TooltipPlacement,
+    Tree, TreeItem, TreeSelection, TreeSize, Truncate, TruncateLines, VisuallyHidden,
 };
 
 use crate::tree::{Node, Scope, Value, render};
@@ -1744,6 +1744,7 @@ fn list(
     let spacing_ = scope
         .pick(props, "spacing", &ListSpacing::ALL, ListSpacing::as_str)
         .unwrap_or_default();
+    let levels_ = scope.flag(props, "levels").unwrap_or(false);
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -1751,6 +1752,7 @@ fn list(
             kind: kind_,
             marker: marker_,
             spacing: spacing_,
+            levels: levels_,
             class: class_,
             {render(children, scope)}
         }
@@ -1964,6 +1966,14 @@ fn number_input(
     let step_ = scope.find(props, "step");
     let big_step_ = scope.find(props, "big_step");
     let steppers_ = scope.flag(props, "steppers").unwrap_or(true);
+    let stepping_ = scope
+        .pick(
+            props,
+            "stepping",
+            &NumberInputStepping::ALL,
+            NumberInputStepping::as_str,
+        )
+        .unwrap_or_default();
     let increment_label_ = scope.find(props, "increment_label");
     let decrement_label_ = scope.find(props, "decrement_label");
     let min_label_ = scope.find(props, "min_label");
@@ -2000,6 +2010,7 @@ fn number_input(
             step: step_,
             big_step: big_step_,
             steppers: steppers_,
+            stepping: stepping_,
             increment_label: increment_label_,
             decrement_label: decrement_label_,
             min_label: min_label_,
@@ -2113,6 +2124,7 @@ fn pagination(
     let next_label_ = scope.find(props, "next_label");
     let page_label_ = scope.find(props, "page_label");
     let current_label_ = scope.find(props, "current_label");
+    let more_label_ = scope.find(props, "more_label");
     let summary_ = scope.find(props, "summary");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
@@ -2129,6 +2141,7 @@ fn pagination(
             next_label: next_label_,
             page_label: page_label_,
             current_label: current_label_,
+            more_label: more_label_,
             summary: summary_,
             class: class_,
         }
@@ -3626,7 +3639,6 @@ fn time_input(
     let min_ = scope.find(props, "min");
     let max_ = scope.find(props, "max");
     let step_ = scope.find(props, "step");
-    let now_label_ = scope.find(props, "now_label");
     let required_label_ = scope.find(props, "required_label");
     let missing_label_ = scope.find(props, "missing_label");
     let invalid_label_ = scope.find(props, "invalid_label");
@@ -3659,7 +3671,6 @@ fn time_input(
             min: min_,
             max: max_,
             step: step_,
-            now_label: now_label_,
             required_label: required_label_,
             missing_label: missing_label_,
             invalid_label: invalid_label_,
@@ -3689,6 +3700,7 @@ fn toast(
     let tone_ = scope.find(props, "tone");
     let title_ = scope.find(props, "title");
     let duration_ = scope.find(props, "duration");
+    let countdown_label_ = scope.find(props, "countdown_label");
     let dismissible_ = scope.flag(props, "dismissible").unwrap_or(true);
     let dismiss_label_ = scope.find(props, "dismiss_label");
     let placement_ = scope
@@ -3708,6 +3720,7 @@ fn toast(
             tone: tone_,
             title: title_,
             duration: duration_,
+            countdown_label: countdown_label_,
             dismissible: dismissible_,
             dismiss_label: dismiss_label_,
             placement: placement_,

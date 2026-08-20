@@ -115,7 +115,7 @@ doc = "Stretches the control to the width of whatever contains it. Off by defaul
 type = "bool"
 default = "false"
 attribute = "aria-haspopup"
-doc = "Marks the button as the one that opens a `Menu`, and draws the chevron. **`controls` has to name that menu by id.** The press itself is `dist/menu.js`, which ships the opening, the arrow walk, Escape and the focus return."
+doc = "Marks the button as the one that opens a `Menu`, and draws the chevron unless `icon` or `icon_end` names one. **`controls` names that menu by id.** The press is `dist/menu.js`, which ships the opening, the arrow walk, Escape and the focus return."
 
 [prop.href]
 type = "text"

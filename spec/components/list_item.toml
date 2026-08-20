@@ -4,6 +4,7 @@ guidance = "Use it for one item of a `List`. Give it a `term` when the list is a
 name = "ListItem"
 element = "li"
 class = "nd-list-item"
+page = "list"
 summary = "Show one item of a list, or one term and its description."
 
 [prop.term]

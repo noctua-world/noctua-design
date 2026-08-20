@@ -9,7 +9,13 @@ class = "nd-segmented"
 # The still picture needs REAL CHILDREN. Without this the grid falls
 # back to the pangram placeholder, so every value of every enum prop
 # draws one identical line of text — which is what the reader saw.
-specimen = "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>"
+#
+# AND THE CHILDREN ARE THE MARKUP THE COMPONENT WRITES. The label span
+# was `nd-segmented-label`, a class no body writes and no rule selects,
+# so every grid on this page shipped markup a reader could copy and a
+# stylesheet would ignore. `SegmentedItem` writes `nd-segmented-text`.
+specimen = "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>"
+page = "segmented"
 summary = "Let users pick one value from a short, fixed set, with every option visible."
 
 # WHY THIS IS A radiogroup OF BUTTONS AND NOT ANYTHING ELSE.

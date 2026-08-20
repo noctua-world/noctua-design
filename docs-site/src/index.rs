@@ -9,6 +9,7 @@
 //! `spec/tokens.toml` or a palette added upstream in `noctua-colors` becomes
 //! searchable on the next build with no edit to this file.
 
+use std::collections::HashSet;
 use std::fmt::Write as _;
 
 use noctua_design_i18n::Locale;
@@ -136,21 +137,41 @@ pub(crate) fn all() -> Vec<Entry> {
     // it. Generated, so a component added to the spec is searchable with no edit
     // here; the thirty hand-written entries below are the token layer, which has
     // no catalogue of its own.
+    //
+    // A COLLECTION PAGE CONTRIBUTES EVERY COMPONENT ON IT, not none of them.
+    // This used to read `page.component` alone, which is `None` for a page
+    // several components share — so `SelectOption`, `TableColumn` and every
+    // prop either of them declares was absent from the site's own search, and
+    // `site.rs` recorded that as the price of moving a component onto a shared
+    // page. It is not a price worth paying: a reader searching for `swatch`
+    // wants the page that explains it, and which page that is is exactly what
+    // `documented_on` answers.
     for page in site::pages() {
-        let Some(component) = page.component else {
-            continue;
+        let documented = match page.component {
+            Some(component) => vec![component],
+            None => site::documented_on(page),
         };
-        entries.push(Entry {
-            name: component.name,
-            page,
-        });
-        for prop in component.props {
+        for component in documented {
             entries.push(Entry {
-                name: prop.name,
+                name: component.name,
                 page,
             });
+            for prop in component.props {
+                entries.push(Entry {
+                    name: prop.name,
+                    page,
+                });
+            }
         }
     }
+    // TWO COMPONENTS ON ONE PAGE DECLARE ONE NAME TWICE. `children` is on
+    // every part of a collection and `label` on most of them, and each would
+    // be its own row in the palette pointing at the same place. The name and
+    // the page together are the entry, and anything after the first is a
+    // repeat. Not `dedup`: the copies are not adjacent, because one component's
+    // props are all pushed before the next component's begin.
+    let mut seen = HashSet::new();
+    entries.retain(|entry| seen.insert((entry.name, entry.page.slug)));
     // Every name the spacing scale emits — the base, thirteen steps and
     // seven gaps — pointed at the page that explains them. Generated, so this
     // is the list and not a copy of it.

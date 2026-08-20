@@ -269,3 +269,50 @@ test("a menu opened with the pointer is a tab stop, and Tab closes it", async ({
   await page.keyboard.press("Tab");
   await expect(page.locator('[role="menu"]:not([hidden])')).toHaveCount(0);
 });
+
+test("a menu longer than the window scrolls rather than running off it", async ({ page }) => {
+  // THE DEFECT, MEASURED. A menu carried no height of its own, so a list
+  // longer than the screen simply extended past the bottom of it: at this
+  // window the surface came out 1216px tall with its last eighteen rows below
+  // the fold and unreachable by pointer, wheel or scrollbar.
+  //
+  // The rows are added here rather than written into an example, because what
+  // is being asserted is about a menu that does not fit — and an example long
+  // enough to prove it is an example nobody would put on a page.
+  await page.setViewportSize({ width: 1120, height: 520 });
+  await page.goto(url(PAGE.menu));
+  await showParts(page);
+  const { button, menu } = parts(page);
+  await menu.evaluate((el) => {
+    const item = el.querySelector('[role="menuitem"]');
+    const home = item.parentElement;
+    for (let i = 0; i < 24; i += 1) home.append(item.cloneNode(true));
+  });
+  await button.click();
+  await expect(menu).toBeVisible();
+
+  const shape = await menu.evaluate((el) => {
+    const items = [...el.querySelectorAll('[role="menuitem"]')];
+    const scroller = el.querySelector(".nd-menu-scroll");
+    return {
+      bottom: el.getBoundingClientRect().bottom,
+      top: el.getBoundingClientRect().top,
+      window: window.innerHeight,
+      last: items[items.length - 1].getBoundingClientRect().bottom,
+      hidden: scroller.scrollHeight - scroller.clientHeight,
+    };
+  });
+  // It ends inside the window it was measured against, at both edges.
+  expect(shape.top, "the menu starts above the window").toBeGreaterThanOrEqual(0);
+  expect(shape.bottom, "the menu runs past the bottom of the window").toBeLessThanOrEqual(
+    shape.window,
+  );
+  // And the rows that did not fit are reachable rather than absent: something
+  // is genuinely held back, which is what tells this apart from a menu that
+  // was quietly cropped.
+  expect(shape.hidden, "nothing is scrollable, so the extra rows are simply gone").toBeGreaterThan(
+    0,
+  );
+  // The last row is one scroll away, not one screen away.
+  expect(shape.last, "the last row is not inside the surface").toBeGreaterThan(shape.top);
+});

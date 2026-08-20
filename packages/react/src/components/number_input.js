@@ -14,8 +14,9 @@ import { createElement as h } from "react";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
-export function NumberInput({ name, label, value, min, max, step, bigStep, steppers, incrementLabel, decrementLabel, minLabel, maxLabel, invalidLabel, group, prefix, suffix, placeholder, hint, error, required, requiredLabel, disabled, readonly, size, glass, className, ...rest }) {
+export function NumberInput({ name, label, value, min, max, step, bigStep, steppers, stepping, incrementLabel, decrementLabel, minLabel, maxLabel, invalidLabel, group, prefix, suffix, placeholder, hint, error, required, requiredLabel, disabled, readonly, size, glass, className, ...rest }) {
   const size_ = size ?? "medium";
+  const stepping_ = stepping ?? "assist";
   const id = `nd-number-input-${name}`;
   // See the Dioxus half: the error id is always one of them, because the slot
   // is always drawn.
@@ -52,6 +53,9 @@ export function NumberInput({ name, label, value, min, max, step, bigStep, stepp
         "data-nd-size": size_,
         "data-nd-glass": String(glass ?? false),
         "data-nd-steppers": String(steppers ?? true),
+        // See the Dioxus half: the arrangement is painting, not structure, so
+        // both forms ship the same two controls.
+        "data-nd-stepping": stepping_,
         "data-nd-group": String(group ?? false),
         "data-nd-min": min,
         "data-nd-max": max,

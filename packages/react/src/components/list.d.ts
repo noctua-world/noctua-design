@@ -17,6 +17,8 @@ export interface ListProps {
   marker?: ListMarker;
   /** The gap between items: `tight`, `default` or `loose`. */
   spacing?: ListSpacing;
+  /** Whether each level of nesting is drawn in a colour of its own. Off by default. It marks the level on the marker and on the rule down the inside edge, so it still reads when `marker` is `none`. */
+  levels?: boolean;
   className?: string;
   children?: ReactNode;
 }

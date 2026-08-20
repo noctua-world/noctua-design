@@ -36,6 +36,8 @@ export function Button({ label, detail, variant, tone, size, shape, icon, iconEn
   // Only the icon-only form names itself: everywhere else the label IS the
   // visible text, and an `aria-label` beside it is a second name.
   const named = hideLabel_ ? label : undefined;
+  // One chevron, whoever drew it: see the Dioxus half.
+  const chevron = menu && icon !== "chevron-down";
 
   const content = [
     // A toggle ships BOTH glyphs and lets the state pick one: swapping a
@@ -62,7 +64,7 @@ export function Button({ label, detail, variant, tone, size, shape, icon, iconEn
     // The chevron steps aside for an `iconEnd` the caller chose.
     iconEnd
       ? h(Icon, { key: "e", icon: iconEnd })
-      : menu
+      : chevron
         ? h(Icon, { key: "m", icon: "chevron-down", size: "small" })
         : null,
   ];

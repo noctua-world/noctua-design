@@ -11,7 +11,9 @@
 
 import { createElement as h } from "react";
 
-export function Pagination({ name, label, page, pages, href, spread, size, previousLabel, nextLabel, pageLabel, currentLabel, summary, className, ...rest }) {
+import { Menu } from "./menu.js";
+import { MenuItem } from "./menu_item.js";
+export function Pagination({ name, label, page, pages, href, spread, size, previousLabel, nextLabel, pageLabel, currentLabel, moreLabel, summary, className, ...rest }) {
   const spread_ = spread ?? "default";
   const size_ = size ?? "medium";
   const root = ["nd-pagination", className].filter(Boolean).join(" ");
@@ -30,6 +32,14 @@ export function Pagination({ name, label, page, pages, href, spread, size, previ
   if (to < last) window.push(last);
   const address = (n) => href.replace("{page}", String(n));
   const named = (template, n) => (template ? template.replace("{page}", String(n)) : undefined);
+  // See the Dioxus half: a leading gap can only sit at index 1, so the index is
+  // what says which of the two gaps this is.
+  const hidden = (index) => (index === 1 ? [2, from - 1] : [to + 1, last - 1]);
+  const pagesIn = ([first, past]) => {
+    const numbers = [];
+    for (let n = first; n <= past; n += 1) numbers.push(n);
+    return numbers;
+  };
   return h(
     "nav",
     {
@@ -68,7 +78,50 @@ export function Pagination({ name, label, page, pages, href, spread, size, previ
           { key: `n${index}` },
           spot === null
             ? // A character, not a word, and hidden: both ends are drawn anyway.
-              h("span", { className: "nd-pagination-gap", "aria-hidden": "true" }, "…")
+              // See the Dioxus half for the control beside it, which ships
+              // hidden and is revealed by `dist/menu.js`.
+              [
+                h("span", { key: "g", className: "nd-pagination-gap", "aria-hidden": "true" }, "…"),
+                moreLabel
+                  ? h(
+                      "button",
+                      {
+                        key: "m",
+                        className: "nd-pagination-link nd-pagination-more",
+                        type: "button",
+                        "aria-label": moreLabel,
+                        "aria-haspopup": "menu",
+                        // "false" is TRUE on a menu button.
+                        "aria-expanded": "false",
+                        "aria-controls": `nd-pagination-${name}-gap-${hidden(index)[0]}`,
+                        "data-nd-pagination-more": "",
+                        hidden: true,
+                      },
+                      "…",
+                    )
+                  : null,
+                moreLabel
+                  ? h(
+                      Menu,
+                      {
+                        key: "p",
+                        name: `nd-pagination-${name}-gap-${hidden(index)[0]}`,
+                        label: moreLabel,
+                        className: "nd-pagination-menu",
+                      },
+                      // The pages this gap stands for. A number is an
+                      // identifier, so nothing here is translated.
+                      pagesIn(hidden(index)).map((n) =>
+                        h(MenuItem, {
+                          key: `p${n}`,
+                          className: "nd-identifier",
+                          label: String(n),
+                          href: address(n),
+                        }),
+                      ),
+                    )
+                  : null,
+              ]
             : h(
                 "a",
                 {

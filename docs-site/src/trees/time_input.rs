@@ -49,7 +49,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         }],
     ),
     (
-        r"TimeInput { name, legend, hour_label, minute_label, clock: _12, meridiem_label, am_label, pm_label, now_label, value }",
+        r"TimeInput { name, legend, hour_label, minute_label, clock: _12, meridiem_label, am_label, pm_label, value }",
         &[Node::Component {
             name: "TimeInput",
             props: &[
@@ -57,14 +57,14 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 ("legend", Value::Message(Key::ExampleInputTimeLegend)),
                 ("hour_label", Value::Message(Key::ExampleInputHour)),
                 ("minute_label", Value::Message(Key::ExampleInputMinute)),
-                // `_12`, NOT `Auto`. `auto` is the default, so the example
-                // asked for what it would have got anyway, and the four
-                // meridiem strings under it had no clock to appear on.
+                // `_12`, AND IT IS NOT THE DEFAULT ANY MORE. Twenty-four is
+                // what a field is read on unless it is asked otherwise, so
+                // this is the one example that shows the other clock and the
+                // meridiem control that goes with it.
                 ("clock", Value::Text("12")),
                 ("meridiem_label", Value::Message(Key::ExampleInputMeridiem)),
                 ("am_label", Value::Message(Key::ExampleInputAm)),
                 ("pm_label", Value::Message(Key::ExampleInputPm)),
-                ("now_label", Value::Message(Key::ExampleInputNow)),
                 ("value", Value::Text("14:05")),
             ],
             children: &[],
@@ -136,6 +136,11 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         ("hour_label", Value::Message(Key::ExampleInputHour)),
                         ("minute_label", Value::Message(Key::ExampleInputMinute)),
                         ("clock", Value::Text("12")),
+                        // A NAME AND BOTH WORDS. The meridiem control is
+                        // drawn only when all three are given, because a
+                        // radiogroup with no name announces its role and
+                        // nothing else.
+                        ("meridiem_label", Value::Message(Key::ExampleInputMeridiem)),
                         ("am_label", Value::Message(Key::ExampleInputAm)),
                         ("pm_label", Value::Message(Key::ExampleInputPm)),
                         ("disabled", Value::Bool(true)),

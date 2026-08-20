@@ -631,6 +631,25 @@ mod complete {
         }
     }
 
+    /// And every hero leads a page that exists.
+    ///
+    /// The other half of `examples::every_overview_leads_a_page_that_exists`:
+    /// the caption and the tree are keyed by the same slug in two files, so a
+    /// page that stops existing orphans one of each. A hero nothing can look up
+    /// still passes every walk in `structure`, because those read the table
+    /// rather than the site.
+    #[test]
+    fn every_hero_leads_a_page_that_exists() {
+        for group in HEROES {
+            for (slug, _, _) in group {
+                assert!(
+                    crate::site::by_slug(slug).is_some(),
+                    "a hero leads `{slug}`, which is not a page"
+                );
+            }
+        }
+    }
+
     /// Every shape the IR declares is one a tree actually uses.
     ///
     /// `Node` and `Value` were designed from a census of all 499 examples

@@ -15,6 +15,7 @@
 import { expect, test } from "@playwright/test";
 
 import { PAGE, url, showParts } from "./pages.js";
+import { contrast, extremes } from "./pixels.js";
 
 const named = (page, name) => page.locator(`[data-nd-dialog="${name}"]`);
 
@@ -235,3 +236,59 @@ test("Escape on a shut dialog is left for whatever else wants it", async ({ page
   });
   expect(swallowed, "a shut dialog stopped an Escape that was not its own").toBe(false);
 });
+
+// --- What the layer behind it is for ----------------------------------------
+
+/**
+ * How readable the page is, from the pixels of a strip beside the dialog.
+ *
+ * The extremes of a strip of the page are its ink and its ground, so the
+ * contrast between them is how legible whatever is written there still is. The
+ * strip is taken clear of the surface itself, because the question is about
+ * what the veil did to the page and not about the dialog drawn over it.
+ */
+async function legibility(page, strip) {
+  const shot = await page.screenshot({ clip: strip });
+  const { min, max } = await extremes(page, shot);
+  return contrast(min, max);
+}
+
+for (const scheme of ["light", "dark"]) {
+  test(`the page behind a modal one stops being readable in ${scheme}`, async ({ page }) => {
+    // THE VEIL WAS A MARK WEARING A SCRIM'S HAT. `Dialog` painted its backdrop
+    // from `--nd-veil-checked` — the fourteen percent that marks which value
+    // is in force in a group — over the INK, whose colour inverts with the
+    // mode. In light that was a wash nobody had to read around; in dark it was
+    // a white haze at the same fourteen percent, which is fainter still.
+    //
+    // Measured from the pixels of the page beside the dialog, before and
+    // after, and in both appearances — because a veil that works in one is
+    // routinely invisible in the other.
+    await page.emulateMedia({ colorScheme: scheme });
+    await dialogs(page);
+    const surface = named(page, "dialog-remove").locator(".nd-dialog-surface");
+    await named(page, "dialog-remove").locator(".nd-dialog-open").click();
+    await expect(surface).toBeVisible();
+
+    // ONE STRIP, MEASURED TWICE. It is named while the surface is open, so it
+    // is the same pixels either way — the page beside the dialog, clear of the
+    // dialog itself, at the height the dialog covers.
+    const box = await surface.boundingBox();
+    const strip = {
+      x: 8,
+      y: box.y,
+      width: Math.max(Math.round(box.x) - 24, 24),
+      height: Math.round(box.height),
+    };
+    const veiled = await legibility(page, strip);
+    await page.keyboard.press("Escape");
+    await expect(surface).toBeHidden();
+    const plain = await legibility(page, strip);
+
+    // The page was readable a moment ago, so the strip has something in it.
+    expect(plain, "the page beside the dialog carries no text to hide").toBeGreaterThan(4);
+    // And behind an open dialog it is not. 3:1 is the floor for large text, so
+    // a page under this is a page nothing on it can be read from.
+    expect(veiled, `the page behind the dialog is still readable in ${scheme}`).toBeLessThan(3);
+  });
+}

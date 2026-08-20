@@ -468,3 +468,41 @@ test("the panel does not make the page scroll sideways", async ({ page }) => {
   );
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test("the field starts one gap under the row above it, not two", async ({ page }) => {
+  // THE ROW AT THE TOP HELD ONE SMALL CONTROL AND RESERVED A BAND. It is
+  // sticky, so it carries the panel's own block-start padding to cover the
+  // inset while the palette scrolls under it — and it carried the same padding
+  // at the BOTTOM, where there is nothing to cover and the panel's own `gap`
+  // had already separated it. The two stacked: the saturation field opened
+  // 69px down a 322px panel, most of that empty.
+  //
+  // Geometry rather than a declaration, because the padding was never wrong on
+  // its own — it was wrong beside the gap.
+  await page.goto(url(PAGE.colorPicker));
+  const panel = await open(page, PLAIN);
+  const space = await panel.evaluate((el) => {
+    const head = el.querySelector(".nd-color-picker-head");
+    const field = el.querySelector(".nd-color-picker-area");
+    const control = head.querySelector(".nd-button");
+    const gap = parseFloat(getComputedStyle(el).rowGap);
+    return {
+      control: control.getBoundingClientRect().height,
+      headToField:
+        field.getBoundingClientRect().top - head.getBoundingClientRect().bottom,
+      topToField: field.getBoundingClientRect().top - el.getBoundingClientRect().top,
+      gap,
+    };
+  });
+  // Between the row and the field there is exactly the panel's own gap, and
+  // never a second copy of it added by the row's own padding.
+  expect(
+    space.headToField,
+    "the row under the close control is padded as well as gapped",
+  ).toBeLessThanOrEqual(space.gap + 1);
+  // And the whole band above the field is the panel's inset, the control, and
+  // that one gap. A band larger than the sum is space nothing asked for.
+  expect(space.topToField, "the panel reserves a band above its field").toBeLessThanOrEqual(
+    space.control + space.gap * 2 + 2,
+  );
+});

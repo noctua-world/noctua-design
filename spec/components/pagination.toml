@@ -23,6 +23,19 @@ summary = "Move through a set of pages with real links and a window around the c
 # The window is the one piece of arithmetic any component in this system does,
 # and it is written once, in both languages side by side, in
 # `crates/noctua-design-emit/src/controls.rs`.
+#
+# AND THE GAP IS STILL NOTHING UNTIL A SCRIPT ARRIVES.
+#
+# `more_label` turns the `…` into a button that opens a `Menu` of the pages it
+# stands for, so page 7 of 40 is one press away rather than five. That button
+# ships `hidden`, exactly as `Button`'s own menu form does, and `dist/menu.js`
+# reveals it once it has found the menu it names. With the script blocked the
+# gap is the inert character it has always been, because a control announcing a
+# menu nothing can open is worse than no control at all.
+#
+# The items are page numbers. A number is an identifier, so no item is
+# translated and each is marked as a name; the menu's own label is a sentence
+# and comes from `more_label`.
 
 [prop.name]
 type = "text"
@@ -84,6 +97,10 @@ doc = "The accessible name of a numbered link, with a `{page}` placeholder, such
 type = "text"
 doc = "The accessible name of the page in force, which says so as well, such as *Page 4, current page*. `aria-current` carries the same fact, and this half survives an engine that does not announce the attribute."
 
+[prop.more_label]
+type = "text"
+doc = """The name of the control the gap between two runs of numbers becomes, such as *Skipped pages*. It names the menu of those pages as well, so the two cannot disagree. Leave it out and the gap stays an inert character."""
+
 [prop.summary]
 type = "text"
 doc = "The sentence under the control: how many results there are, and which of them this page holds. It sits in a live region, so a reader is told the set did not change when a page turns."
@@ -94,4 +111,4 @@ doc = "Whether this link is the page being read. The value is `page` rather than
 
 [a11y]
 needs_name = true
-notes = "A named `<nav>` holding a list of links, so a screen reader says how many pages there are. The gap between two runs of numbers is `aria-hidden`, and every page is a real `<a href>` needing no script."
+notes = "A named `<nav>` holding a list of links, so a screen reader says how many pages there are. Every page is a real `<a href>` needing no script, and the gap is `aria-hidden` until `more_label` makes a menu of it."

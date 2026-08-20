@@ -19,7 +19,7 @@
 // green by measuring nothing.
 
 import { test, expect } from "@playwright/test";
-import { PAGE, url } from "./pages.js";
+import { PAGE, showParts, url } from "./pages.js";
 import { contrast, extremes } from "./pixels.js";
 
 /** The controls the page renders, as against the specimens in the variant grid. */
@@ -436,4 +436,86 @@ test("no choice on the page is a specimen pretending to be a control", async ({ 
   const boxes = await page.locator(".nd-choice").count();
   expect(real, "there are no real controls on the page").toBeGreaterThan(10);
   expect(boxes - real, "the variant grid lost its specimens").toBeGreaterThan(2);
+});
+
+test("the tick is drawn heavily enough to read as a mark", async ({ page }) => {
+  // LEGIBLE AND THIN ARE TWO DIFFERENT CLAIMS, and only the first was being
+  // made. The tick was the icon set's own 1.75 stroke on a 24px glyph — white
+  // on the accent fill, so the contrast test above passed comfortably while
+  // the mark itself was a hairline in a forty-pixel box. What separates a
+  // hairline from a mark is how much of the box it covers, so that is what is
+  // measured: the fraction of the drawing that is ink.
+  await page.goto(url(PAGE.checkbox));
+  await page.locator("#nd-apply-study").check();
+  const glyph = page
+    .locator(".nd-choice:has(#nd-apply-study) .nd-choice-box .nd-icon-glyph")
+    .first();
+  const shot = await glyph.screenshot();
+  // `ink` takes the lightest pixel as the ground, which here is the tick
+  // itself: it is white on a filled square. The complement is what is wanted,
+  // so the box is read the other way round — the darkest pixel is the fill and
+  // everything near the light end is the stroke.
+  const covered = await page.evaluate(async (data) => {
+    const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
+    const bitmap = await createImageBitmap(blob);
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(bitmap, 0, 0);
+    const { data: px } = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+    let ground = Infinity;
+    for (let i = 0; i < px.length; i += 4) {
+      ground = Math.min(ground, px[i] + px[i + 1] + px[i + 2]);
+    }
+    let drawn = 0;
+    for (let i = 0; i < px.length; i += 4) {
+      if (px[i] + px[i + 1] + px[i + 2] - ground > 60) drawn += 1;
+    }
+    return drawn / (px.length / 4);
+  }, shot.toString("base64"));
+  // The glyph's box is 24px square and the tick crosses about two thirds of
+  // it, so a one-unit change in the stroke is a few percent of the box.
+  // Measured: 0.070 at the 1.75 this shipped with, 0.113 at the weight of the
+  // box's own edge and a hairline more. The floor sits between them.
+  expect(covered, "the tick is a hairline rather than a mark").toBeGreaterThan(0.09);
+});
+
+test("the rule down a refused group covers the whole of its first line", async ({ page }) => {
+  // A `<legend>` STRADDLES ITS FIELDSET'S BLOCK-START BORDER. Every engine
+  // paints a fieldset's borders from the legend's own middle downwards, so the
+  // mark on a refused group began halfway down the question and left the top
+  // half of it unmarked — measured on this page as red starting 14px into a
+  // 117px box whose legend is 26px tall. Nothing anywhere reported it: the
+  // declaration is correct, and it is the element that moves.
+  //
+  // Read from the pixels rather than from the declaration, because the
+  // declaration was never the thing that was wrong.
+  await page.goto(url(PAGE.fieldset));
+  await showParts(page);
+  const group = page.locator('.nd-fieldset[data-nd-invalid="true"]').first();
+  await expect(group).toBeVisible();
+  const shot = await group.screenshot();
+  const rule = await page.evaluate(async (data) => {
+    const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
+    const bitmap = await createImageBitmap(blob);
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(bitmap, 0, 0);
+    const { data: px } = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+    // One pixel in from the leading edge, down the whole box: the mark is the
+    // only red thing that column can hold.
+    const rows = [];
+    for (let y = 0; y < bitmap.height; y += 1) {
+      const i = (y * bitmap.width + 1) * 4;
+      if (px[i] > 140 && px[i + 1] < 110 && px[i + 2] < 110) rows.push(y);
+    }
+    return { height: bitmap.height, first: rows[0], last: rows[rows.length - 1], drawn: rows.length };
+  }, shot.toString("base64"));
+
+  expect(rule.drawn, "no mark is drawn beside the refused group").toBeGreaterThan(0);
+  // It starts at the top of the question rather than in the middle of it. One
+  // pixel of slack for the antialiasing of a rounded corner above it.
+  expect(rule.first, "the mark starts below the first line").toBeLessThanOrEqual(1);
+  expect(rule.last, "the mark stops before the group does").toBeGreaterThanOrEqual(
+    rule.height - 2,
+  );
 });

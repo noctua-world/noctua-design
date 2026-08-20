@@ -153,10 +153,14 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         },
                         Node::Component {
                             name: "Button",
+                            // NO `icon`. `menu` DRAWS THE CHEVRON ITSELF, and
+                            // this asked for a second one beside it: one split
+                            // button, two chevrons, which is not a control
+                            // anybody designed. A split button is one label
+                            // and one chevron.
                             props: &[
                                 ("menu", Value::Bool(true)),
                                 ("hide_label", Value::Bool(true)),
-                                ("icon", Value::Text("chevron-down")),
                                 ("controls", Value::Text("example-split-menu")),
                                 ("label", Value::Message(Key::ExampleButtonMore)),
                             ],

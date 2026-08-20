@@ -10,7 +10,6 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Hero;
 use crate::trees::menu::menu_button;
-use crate::trees::select::{AMBER, AZURE, CLAY, INDIGO, OCHRE, TEAL};
 
 /// The sample the `code-block` hero highlights.
 ///
@@ -26,7 +25,7 @@ pub fn scope_attributes(request: &ScopeRequest) -> Option<Attributes> {
     Some(Attributes { palette: resolved.palette, mode: resolved.mode })
 }";
 
-/// The heroes in this group. 15 of them.
+/// The heroes in this group. 13 of them.
 pub(crate) const HEROES: &[Hero] = &[
     (
         "badge",
@@ -368,51 +367,9 @@ Progress { name, label, busy_label } — no value at all",
             ],
         }],
     ),
-    (
-        "segmented-item",
-        r#"Segmented { name, label,
-    SegmentedItem { value: "light", label: "…", icon: …, selected: true }
-}"#,
-        &[Node::Component {
-            name: "Segmented",
-            props: &[
-                ("name", Value::Text("overview-segmented-item")),
-                ("label", Value::Message(Key::ThemeModeLabel)),
-            ],
-            children: &[Node::Each {
-                over: Each::Rows(&[
-                    &[
-                        Value::Text("light"),
-                        Value::Text("sun"),
-                        Value::Message(Key::ThemeModeLight),
-                        Value::Bool(false),
-                    ],
-                    &[
-                        Value::Text("dark"),
-                        Value::Text("moon"),
-                        Value::Message(Key::ThemeModeDark),
-                        Value::Bool(true),
-                    ],
-                    &[
-                        Value::Text("system"),
-                        Value::Text("monitor"),
-                        Value::Message(Key::ThemeModeSystem),
-                        Value::Bool(false),
-                    ],
-                ]),
-                body: &[Node::Component {
-                    name: "SegmentedItem",
-                    props: &[
-                        ("value", Value::Bound(0)),
-                        ("icon", Value::Bound(1)),
-                        ("label", Value::Bound(2)),
-                        ("selected", Value::Bound(3)),
-                    ],
-                    children: &[],
-                }],
-            }],
-        }],
-    ),
+    // `segmented-item` had a hero here, and `/segmented/`'s own draws the same
+    // three modes with the same icons. `SegmentedItem` is documented on
+    // `/segmented/` now, and a page has one hero.
     (
         "swatch",
         r"SegmentedItem { value, label, Swatch { palette: value, size: SwatchSize::Small } }",
@@ -665,44 +622,9 @@ Input { kind: Password, reveal_label, conceal_label }"#,
             ],
         }],
     ),
-    (
-        "select-group",
-        r#"Select { name, label, hint, placeholder }
-SelectGroup { label: "Warm" } / SelectGroup { label: "Cool" }
-SelectOption { value, label, swatch }"#,
-        &[Node::Component {
-            name: "Select",
-            props: &[
-                ("name", Value::Text("overview-palette")),
-                ("label", Value::Message(Key::ExampleSelectPaletteLabel)),
-                ("hint", Value::Message(Key::ExampleSelectPaletteHint)),
-                (
-                    "placeholder",
-                    Value::Message(Key::ExampleSelectPalettePlaceholder),
-                ),
-            ],
-            children: &[
-                Node::Component {
-                    name: "SelectGroup",
-                    props: &[("label", Value::Message(Key::ExampleSelectWarm))],
-                    children: &[
-                        Node::Fragment(OCHRE),
-                        Node::Fragment(AMBER),
-                        Node::Fragment(CLAY),
-                    ],
-                },
-                Node::Component {
-                    name: "SelectGroup",
-                    props: &[("label", Value::Message(Key::ExampleSelectCool))],
-                    children: &[
-                        Node::Fragment(TEAL),
-                        Node::Fragment(AZURE),
-                        Node::Fragment(INDIGO),
-                    ],
-                },
-            ],
-        }],
-    ),
+    // `select-group` had a hero here, and it was the same two groups over the
+    // same six palettes that `/select/`'s own hero draws. `SelectGroup` is
+    // documented on `/select/` now, and a page has one hero.
     (
         "divider",
         r#"Divider { spacing: Loose }

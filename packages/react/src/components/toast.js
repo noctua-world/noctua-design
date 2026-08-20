@@ -12,7 +12,7 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
-export function Toast({ name, tone, title, duration, dismissible, dismissLabel, placement, live, className, children, ...rest }) {
+export function Toast({ name, tone, title, duration, countdownLabel, dismissible, dismissLabel, placement, live, className, children, ...rest }) {
   const placement_ = placement ?? "bottom-end";
   const dismissible_ = dismissible ?? true;
   const root = ["nd-toast", className].filter(Boolean).join(" ");
@@ -29,6 +29,7 @@ export function Toast({ name, tone, title, duration, dismissible, dismissLabel, 
       "data-nd-tone": tone,
       "data-nd-placement": placement_,
       "data-nd-duration": duration,
+      "data-nd-countdown-label": countdownLabel,
       "data-nd-dismissible": String(dismissible_),
       ...rest,
     },
@@ -37,6 +38,18 @@ export function Toast({ name, tone, title, duration, dismissible, dismissLabel, 
       { key: "t", className: "nd-toast-text" },
       title ? h("strong", { key: "h", className: "nd-toast-title" }, title) : null,
       h("div", { key: "b", className: "nd-toast-body", "data-nd-toast-body": "" }, children),
+      // See the Dioxus half: a timer that does not announce, empty and hidden
+      // until `dist/toast.js` is running the wait it reports, and under the
+      // message rather than beside it.
+      countdownLabel
+        ? h("span", {
+            key: "c",
+            className: "nd-toast-countdown",
+            role: "timer",
+            "data-nd-toast-countdown": "",
+            hidden: true,
+          })
+        : null,
     ),
     dismissible_
       ? h(

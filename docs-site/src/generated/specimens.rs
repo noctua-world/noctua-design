@@ -37,7 +37,7 @@
 //! - `LineageFigure: shape, tone`
 //! - `List: kind, marker, spacing`
 //! - `Meter: size`
-//! - `NumberInput: size`
+//! - `NumberInput: stepping, size`
 //! - `OtpField: kind, size`
 //! - `Pagination: size`
 //! - `Progress: size`
@@ -5917,6 +5917,95 @@ const METER_SIZE_LARGE: &[Node] = &[Node::Element {
     ],
 }];
 
+/// `NumberInput.stepping` at `assist`.
+const NUMBER_INPUT_STEPPING_ASSIST: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("stepping")),
+                ("data-nd-slug", Value::Text("number-input")),
+            ],
+            children: &[Node::Element {
+                tag: "span",
+                attributes: &[
+                    ("class", Value::Text("nd-number-input")),
+                    (
+                        "aria-labelledby",
+                        Value::Text("nd-variant-number-input-stepping-assist"),
+                    ),
+                    ("data-nd-size", Value::Text("medium")),
+                    ("data-nd-stepping", Value::Text("assist")),
+                ],
+                children: &[Node::Raw(
+                    "<span class=\"nd-number-input-figure\"><span class=\"nd-number-input-box\"></span><span class=\"nd-number-input-steps\"></span></span>",
+                )],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-number-input-stepping-assist")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("assist"))],
+            }],
+        },
+    ],
+}];
+
+/// `NumberInput.stepping` at `primary`.
+const NUMBER_INPUT_STEPPING_PRIMARY: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("stepping")),
+                ("data-nd-slug", Value::Text("number-input")),
+            ],
+            children: &[Node::Element {
+                tag: "span",
+                attributes: &[
+                    ("class", Value::Text("nd-number-input")),
+                    (
+                        "aria-labelledby",
+                        Value::Text("nd-variant-number-input-stepping-primary"),
+                    ),
+                    ("data-nd-size", Value::Text("medium")),
+                    ("data-nd-stepping", Value::Text("primary")),
+                ],
+                children: &[Node::Raw(
+                    "<span class=\"nd-number-input-figure\"><span class=\"nd-number-input-box\"></span><span class=\"nd-number-input-steps\"></span></span>",
+                )],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                (
+                    "id",
+                    Value::Text("nd-variant-number-input-stepping-primary"),
+                ),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("primary"))],
+            }],
+        },
+    ],
+}];
+
 /// `NumberInput.size` at `small`.
 const NUMBER_INPUT_SIZE_SMALL: &[Node] = &[Node::Element {
     tag: "figure",
@@ -5937,6 +6026,7 @@ const NUMBER_INPUT_SIZE_SMALL: &[Node] = &[Node::Element {
                         "aria-labelledby",
                         Value::Text("nd-variant-number-input-size-small"),
                     ),
+                    ("data-nd-stepping", Value::Text("assist")),
                     ("data-nd-size", Value::Text("small")),
                 ],
                 children: &[Node::Raw(
@@ -5979,6 +6069,7 @@ const NUMBER_INPUT_SIZE_MEDIUM: &[Node] = &[Node::Element {
                         "aria-labelledby",
                         Value::Text("nd-variant-number-input-size-medium"),
                     ),
+                    ("data-nd-stepping", Value::Text("assist")),
                     ("data-nd-size", Value::Text("medium")),
                 ],
                 children: &[Node::Raw(
@@ -6021,6 +6112,7 @@ const NUMBER_INPUT_SIZE_LARGE: &[Node] = &[Node::Element {
                         "aria-labelledby",
                         Value::Text("nd-variant-number-input-size-large"),
                     ),
+                    ("data-nd-stepping", Value::Text("assist")),
                     ("data-nd-size", Value::Text("large")),
                 ],
                 children: &[Node::Raw(
@@ -7194,7 +7286,7 @@ const SEGMENTED_APPEARANCE_JOINED: &[Node] = &[Node::Element {
                     ("data-nd-appearance", Value::Text("joined")),
                 ],
                 children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>",
+                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
                 )],
             }],
         },
@@ -7240,7 +7332,7 @@ const SEGMENTED_APPEARANCE_SPREAD: &[Node] = &[Node::Element {
                     ("data-nd-appearance", Value::Text("spread")),
                 ],
                 children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>",
+                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
                 )],
             }],
         },
@@ -7286,7 +7378,7 @@ const SEGMENTED_SIZE_SMALL: &[Node] = &[Node::Element {
                     ("data-nd-size", Value::Text("small")),
                 ],
                 children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>",
+                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
                 )],
             }],
         },
@@ -7332,7 +7424,7 @@ const SEGMENTED_SIZE_MEDIUM: &[Node] = &[Node::Element {
                     ("data-nd-size", Value::Text("medium")),
                 ],
                 children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>",
+                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
                 )],
             }],
         },
@@ -7378,7 +7470,7 @@ const SEGMENTED_SIZE_LARGE: &[Node] = &[Node::Element {
                     ("data-nd-size", Value::Text("large")),
                 ],
                 children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>",
+                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
                 )],
             }],
         },
@@ -7424,7 +7516,7 @@ const SEGMENTED_SHAPE_ROUNDED: &[Node] = &[Node::Element {
                     ("data-nd-shape", Value::Text("rounded")),
                 ],
                 children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>",
+                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
                 )],
             }],
         },
@@ -7470,7 +7562,7 @@ const SEGMENTED_SHAPE_PILL: &[Node] = &[Node::Element {
                     ("data-nd-shape", Value::Text("pill")),
                 ],
                 children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>",
+                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
                 )],
             }],
         },
@@ -7516,7 +7608,7 @@ const SEGMENTED_SHAPE_SQUARE: &[Node] = &[Node::Element {
                     ("data-nd-shape", Value::Text("square")),
                 ],
                 children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>",
+                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
                 )],
             }],
         },
@@ -7562,7 +7654,7 @@ const SEGMENTED_SHAPE_BEVEL: &[Node] = &[Node::Element {
                     ("data-nd-shape", Value::Text("bevel")),
                 ],
                 children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>",
+                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
                 )],
             }],
         },
@@ -7609,7 +7701,7 @@ const SEGMENTED_ORIENTATION_HORIZONTAL: &[Node] = &[Node::Element {
                     ("aria-orientation", Value::Text("horizontal")),
                 ],
                 children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>",
+                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
                 )],
             }],
         },
@@ -7659,7 +7751,7 @@ const SEGMENTED_ORIENTATION_VERTICAL: &[Node] = &[Node::Element {
                     ("aria-orientation", Value::Text("vertical")),
                 ],
                 children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>",
+                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
                 )],
             }],
         },
@@ -7708,7 +7800,7 @@ const SEGMENTED_SELECTION_ACCENT: &[Node] = &[Node::Element {
                     ("data-nd-selection", Value::Text("accent")),
                 ],
                 children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>",
+                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
                 )],
             }],
         },
@@ -7754,7 +7846,7 @@ const SEGMENTED_SELECTION_QUIET: &[Node] = &[Node::Element {
                     ("data-nd-selection", Value::Text("quiet")),
                 ],
                 children: &[Node::Raw(
-                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-label nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-label nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-label nd-identifier\">Cc</span></button>",
+                    "<button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"true\" data-nd-value=\"a\"><span class=\"nd-segmented-text nd-identifier\">Aa</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"b\"><span class=\"nd-segmented-text nd-identifier\">Bb</span></button><button class=\"nd-segmented-item\" type=\"button\" role=\"radio\" aria-checked=\"false\" data-nd-value=\"c\"><span class=\"nd-segmented-text nd-identifier\">Cc</span></button>",
                 )],
             }],
         },
@@ -11797,6 +11889,8 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("Meter", "size", "small") => METER_SIZE_SMALL,
         ("Meter", "size", "medium") => METER_SIZE_MEDIUM,
         ("Meter", "size", "large") => METER_SIZE_LARGE,
+        ("NumberInput", "stepping", "assist") => NUMBER_INPUT_STEPPING_ASSIST,
+        ("NumberInput", "stepping", "primary") => NUMBER_INPUT_STEPPING_PRIMARY,
         ("NumberInput", "size", "small") => NUMBER_INPUT_SIZE_SMALL,
         ("NumberInput", "size", "medium") => NUMBER_INPUT_SIZE_MEDIUM,
         ("NumberInput", "size", "large") => NUMBER_INPUT_SIZE_LARGE,

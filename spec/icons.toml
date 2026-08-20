@@ -236,7 +236,7 @@ doc = "Marks a `FileInput`'s drop area. An arrow into a tray, which is what the 
 [icon.clock]
 source = "lucide"
 file = "clock.svg"
-doc = "Fills a `TimeInput` with the current time, on the control `now_label` names. A clock, because that is what the field is; the button it sits on is icon-only and takes its name from that prop."
+doc = "Marks a time, such as when a row of a schedule names one. A clock face with two hands, which is the drawing every reader already reads as a time. No component draws it on its own."
 
 [icon.chevron-left]
 source = "lucide"

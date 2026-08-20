@@ -184,6 +184,18 @@ pub enum Key {
     PageIconsTitle,
     /// `page.icons.summary`
     PageIconsSummary,
+    /// `page.list.summary`
+    PageListSummary,
+    /// `page.list.body`
+    PageListBody,
+    /// `page.segmented.summary`
+    PageSegmentedSummary,
+    /// `page.segmented.body`
+    PageSegmentedBody,
+    /// `page.select.summary`
+    PageSelectSummary,
+    /// `page.select.body`
+    PageSelectBody,
     /// `page.inline-text.summary`
     PageInlineTextSummary,
     /// `page.inline-text.body`
@@ -1004,6 +1016,18 @@ pub enum Key {
     ExampleSegmentedLabelledby,
     /// `example.segmented.quiet`
     ExampleSegmentedQuiet,
+    /// `example.segmented.unanswered`
+    ExampleSegmentedUnanswered,
+    /// `example.segmented.delivery-label`
+    ExampleSegmentedDeliveryLabel,
+    /// `example.segmented.delivery-hint`
+    ExampleSegmentedDeliveryHint,
+    /// `example.segmented.delivery-post`
+    ExampleSegmentedDeliveryPost,
+    /// `example.segmented.delivery-locker`
+    ExampleSegmentedDeliveryLocker,
+    /// `example.segmented.delivery-shop`
+    ExampleSegmentedDeliveryShop,
     /// `example.item.selected`
     ExampleItemSelected,
     /// `example.item.icons`
@@ -1138,6 +1162,8 @@ pub enum Key {
     ExampleListMarker,
     /// `example.list.nested`
     ExampleListNested,
+    /// `example.list.levels`
+    ExampleListLevels,
     /// `example.item.term`
     ExampleItemTerm,
     /// `example.item.detail`
@@ -1372,6 +1398,8 @@ pub enum Key {
     ExamplePaginationPage,
     /// `example.pagination.current`
     ExamplePaginationCurrent,
+    /// `example.pagination.more`
+    ExamplePaginationMore,
     /// `example.pagination.summary`
     ExamplePaginationSummary,
     /// `example.pagination.summary-last`
@@ -1392,6 +1420,26 @@ pub enum Key {
     ExampleSearchForm,
     /// `example.search.filter`
     ExampleSearchFilter,
+    /// `example.search.label`
+    ExampleSearchLabel,
+    /// `example.search.placeholder`
+    ExampleSearchPlaceholder,
+    /// `example.search.group-tomatoes`
+    ExampleSearchGroupTomatoes,
+    /// `example.search.group-herbs`
+    ExampleSearchGroupHerbs,
+    /// `example.search.cherokee`
+    ExampleSearchCherokee,
+    /// `example.search.sungold`
+    ExampleSearchSungold,
+    /// `example.search.marzano`
+    ExampleSearchMarzano,
+    /// `example.search.genovese`
+    ExampleSearchGenovese,
+    /// `example.search.opal`
+    ExampleSearchOpal,
+    /// `example.search.gem`
+    ExampleSearchGem,
     /// `example.search.sizes`
     ExampleSearchSizes,
     /// `example.search.states`
@@ -1872,8 +1920,6 @@ pub enum Key {
     ExampleInputAm,
     /// `example.input.pm`
     ExampleInputPm,
-    /// `example.input.now`
-    ExampleInputNow,
     /// `example.input.time-hint`
     ExampleInputTimeHint,
     /// `example.input.time-missing`
@@ -1902,6 +1948,10 @@ pub enum Key {
     ExampleNumberInputNoteLarge,
     /// `example.number-input.note-states`
     ExampleNumberInputNoteStates,
+    /// `example.number-input.note-stepping`
+    ExampleNumberInputNoteStepping,
+    /// `example.number-input.cart-label`
+    ExampleNumberInputCartLabel,
     /// `example.number-input.tickets-label`
     ExampleNumberInputTicketsLabel,
     /// `example.number-input.tickets-hint`
@@ -2414,8 +2464,6 @@ pub enum Key {
     ExampleOverviewBadgeWaiting,
     /// `example.overview.error-summary.note`
     ExampleOverviewErrorSummaryNote,
-    /// `example.overview.list-item.corners`
-    ExampleOverviewListItemCorners,
     /// `example.overview.paragraph.lead`
     ExampleOverviewParagraphLead,
     /// `example.overview.paragraph.body`
@@ -2868,6 +2916,10 @@ pub enum Key {
     ExampleToastNoteStays,
     /// `example.toast.note-timer`
     ExampleToastNoteTimer,
+    /// `example.toast.countdown`
+    ExampleToastCountdown,
+    /// `example.toast.replay`
+    ExampleToastReplay,
     /// `example.toast.note-loud`
     ExampleToastNoteLoud,
     /// `example.toast.note-fixed`
@@ -4000,6 +4052,8 @@ pub enum Key {
     ComponentListPropMarkerDoc,
     /// `component.list.prop.spacing.doc`
     ComponentListPropSpacingDoc,
+    /// `component.list.prop.levels.doc`
+    ComponentListPropLevelsDoc,
     /// `component.list.prop.children.doc`
     ComponentListPropChildrenDoc,
     /// `component.list-item.guidance`
@@ -4160,6 +4214,8 @@ pub enum Key {
     ComponentNumberInputPropBigStepDoc,
     /// `component.number-input.prop.steppers.doc`
     ComponentNumberInputPropSteppersDoc,
+    /// `component.number-input.prop.stepping.doc`
+    ComponentNumberInputPropSteppingDoc,
     /// `component.number-input.prop.increment_label.doc`
     ComponentNumberInputPropIncrementLabelDoc,
     /// `component.number-input.prop.decrement_label.doc`
@@ -4288,6 +4344,8 @@ pub enum Key {
     ComponentPaginationPropPageLabelDoc,
     /// `component.pagination.prop.current_label.doc`
     ComponentPaginationPropCurrentLabelDoc,
+    /// `component.pagination.prop.more_label.doc`
+    ComponentPaginationPropMoreLabelDoc,
     /// `component.pagination.prop.summary.doc`
     ComponentPaginationPropSummaryDoc,
     /// `component.pagination.state.current.doc`
@@ -5378,8 +5436,6 @@ pub enum Key {
     ComponentTimeInputPropMaxDoc,
     /// `component.time-input.prop.step.doc`
     ComponentTimeInputPropStepDoc,
-    /// `component.time-input.prop.now_label.doc`
-    ComponentTimeInputPropNowLabelDoc,
     /// `component.time-input.prop.required_label.doc`
     ComponentTimeInputPropRequiredLabelDoc,
     /// `component.time-input.prop.missing_label.doc`
@@ -5436,6 +5492,8 @@ pub enum Key {
     ComponentToastPropTitleDoc,
     /// `component.toast.prop.duration.doc`
     ComponentToastPropDurationDoc,
+    /// `component.toast.prop.countdown_label.doc`
+    ComponentToastPropCountdownLabelDoc,
     /// `component.toast.prop.dismissible.doc`
     ComponentToastPropDismissibleDoc,
     /// `component.toast.prop.dismiss_label.doc`
@@ -5640,7 +5698,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2758] = [
+    pub const ALL: [Self; 2787] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -5673,6 +5731,12 @@ impl Key {
         Self::PageTypographySummary,
         Self::PageIconsTitle,
         Self::PageIconsSummary,
+        Self::PageListSummary,
+        Self::PageListBody,
+        Self::PageSegmentedSummary,
+        Self::PageSegmentedBody,
+        Self::PageSelectSummary,
+        Self::PageSelectBody,
         Self::PageInlineTextSummary,
         Self::PageInlineTextBody,
         Self::PageAvatarsSummary,
@@ -6083,6 +6147,12 @@ impl Key {
         Self::ExampleSegmentedEqual,
         Self::ExampleSegmentedLabelledby,
         Self::ExampleSegmentedQuiet,
+        Self::ExampleSegmentedUnanswered,
+        Self::ExampleSegmentedDeliveryLabel,
+        Self::ExampleSegmentedDeliveryHint,
+        Self::ExampleSegmentedDeliveryPost,
+        Self::ExampleSegmentedDeliveryLocker,
+        Self::ExampleSegmentedDeliveryShop,
         Self::ExampleItemSelected,
         Self::ExampleItemIcons,
         Self::ExampleItemDisabled,
@@ -6150,6 +6220,7 @@ impl Key {
         Self::ExampleListDescription,
         Self::ExampleListMarker,
         Self::ExampleListNested,
+        Self::ExampleListLevels,
         Self::ExampleItemTerm,
         Self::ExampleItemDetail,
         Self::ExampleMarkLead,
@@ -6267,6 +6338,7 @@ impl Key {
         Self::ExamplePaginationNext,
         Self::ExamplePaginationPage,
         Self::ExamplePaginationCurrent,
+        Self::ExamplePaginationMore,
         Self::ExamplePaginationSummary,
         Self::ExamplePaginationSummaryLast,
         Self::ExamplePaginationNoteLinks,
@@ -6277,6 +6349,16 @@ impl Key {
         Self::ExampleSearchDialog,
         Self::ExampleSearchForm,
         Self::ExampleSearchFilter,
+        Self::ExampleSearchLabel,
+        Self::ExampleSearchPlaceholder,
+        Self::ExampleSearchGroupTomatoes,
+        Self::ExampleSearchGroupHerbs,
+        Self::ExampleSearchCherokee,
+        Self::ExampleSearchSungold,
+        Self::ExampleSearchMarzano,
+        Self::ExampleSearchGenovese,
+        Self::ExampleSearchOpal,
+        Self::ExampleSearchGem,
         Self::ExampleSearchSizes,
         Self::ExampleSearchStates,
         Self::ExampleSearchGroup,
@@ -6517,7 +6599,6 @@ impl Key {
         Self::ExampleInputMeridiem,
         Self::ExampleInputAm,
         Self::ExampleInputPm,
-        Self::ExampleInputNow,
         Self::ExampleInputTimeHint,
         Self::ExampleInputTimeMissing,
         Self::ExampleInputTimeInvalid,
@@ -6532,6 +6613,8 @@ impl Key {
         Self::ExampleNumberInputNoteUnit,
         Self::ExampleNumberInputNoteLarge,
         Self::ExampleNumberInputNoteStates,
+        Self::ExampleNumberInputNoteStepping,
+        Self::ExampleNumberInputCartLabel,
         Self::ExampleNumberInputTicketsLabel,
         Self::ExampleNumberInputTicketsHint,
         Self::ExampleNumberInputBoxesLabel,
@@ -6788,7 +6871,6 @@ impl Key {
         Self::ExampleOverviewBadgeReviews,
         Self::ExampleOverviewBadgeWaiting,
         Self::ExampleOverviewErrorSummaryNote,
-        Self::ExampleOverviewListItemCorners,
         Self::ExampleOverviewParagraphLead,
         Self::ExampleOverviewParagraphBody,
         Self::ExampleOverviewParagraphNote,
@@ -7015,6 +7097,8 @@ impl Key {
         Self::ExampleToastOffline,
         Self::ExampleToastNoteStays,
         Self::ExampleToastNoteTimer,
+        Self::ExampleToastCountdown,
+        Self::ExampleToastReplay,
         Self::ExampleToastNoteLoud,
         Self::ExampleToastNoteFixed,
         Self::ExampleToastReviewTitle,
@@ -7581,6 +7665,7 @@ impl Key {
         Self::ComponentListPropKindDoc,
         Self::ComponentListPropMarkerDoc,
         Self::ComponentListPropSpacingDoc,
+        Self::ComponentListPropLevelsDoc,
         Self::ComponentListPropChildrenDoc,
         Self::ComponentListItemGuidance,
         Self::ComponentListItemA11yNotes,
@@ -7661,6 +7746,7 @@ impl Key {
         Self::ComponentNumberInputPropStepDoc,
         Self::ComponentNumberInputPropBigStepDoc,
         Self::ComponentNumberInputPropSteppersDoc,
+        Self::ComponentNumberInputPropSteppingDoc,
         Self::ComponentNumberInputPropIncrementLabelDoc,
         Self::ComponentNumberInputPropDecrementLabelDoc,
         Self::ComponentNumberInputPropMinLabelDoc,
@@ -7725,6 +7811,7 @@ impl Key {
         Self::ComponentPaginationPropNextLabelDoc,
         Self::ComponentPaginationPropPageLabelDoc,
         Self::ComponentPaginationPropCurrentLabelDoc,
+        Self::ComponentPaginationPropMoreLabelDoc,
         Self::ComponentPaginationPropSummaryDoc,
         Self::ComponentPaginationStateCurrentDoc,
         Self::ComponentParagraphPropSizeDoc,
@@ -8270,7 +8357,6 @@ impl Key {
         Self::ComponentTimeInputPropMinDoc,
         Self::ComponentTimeInputPropMaxDoc,
         Self::ComponentTimeInputPropStepDoc,
-        Self::ComponentTimeInputPropNowLabelDoc,
         Self::ComponentTimeInputPropRequiredLabelDoc,
         Self::ComponentTimeInputPropMissingLabelDoc,
         Self::ComponentTimeInputPropInvalidLabelDoc,
@@ -8299,6 +8385,7 @@ impl Key {
         Self::ComponentToastPropToneDoc,
         Self::ComponentToastPropTitleDoc,
         Self::ComponentToastPropDurationDoc,
+        Self::ComponentToastPropCountdownLabelDoc,
         Self::ComponentToastPropDismissibleDoc,
         Self::ComponentToastPropDismissLabelDoc,
         Self::ComponentToastPropPlacementDoc,
@@ -8437,6 +8524,12 @@ impl Key {
             Self::PageTypographySummary => "page.typography.summary",
             Self::PageIconsTitle => "page.icons.title",
             Self::PageIconsSummary => "page.icons.summary",
+            Self::PageListSummary => "page.list.summary",
+            Self::PageListBody => "page.list.body",
+            Self::PageSegmentedSummary => "page.segmented.summary",
+            Self::PageSegmentedBody => "page.segmented.body",
+            Self::PageSelectSummary => "page.select.summary",
+            Self::PageSelectBody => "page.select.body",
             Self::PageInlineTextSummary => "page.inline-text.summary",
             Self::PageInlineTextBody => "page.inline-text.body",
             Self::PageAvatarsSummary => "page.avatars.summary",
@@ -8847,6 +8940,12 @@ impl Key {
             Self::ExampleSegmentedEqual => "example.segmented.equal",
             Self::ExampleSegmentedLabelledby => "example.segmented.labelledby",
             Self::ExampleSegmentedQuiet => "example.segmented.quiet",
+            Self::ExampleSegmentedUnanswered => "example.segmented.unanswered",
+            Self::ExampleSegmentedDeliveryLabel => "example.segmented.delivery-label",
+            Self::ExampleSegmentedDeliveryHint => "example.segmented.delivery-hint",
+            Self::ExampleSegmentedDeliveryPost => "example.segmented.delivery-post",
+            Self::ExampleSegmentedDeliveryLocker => "example.segmented.delivery-locker",
+            Self::ExampleSegmentedDeliveryShop => "example.segmented.delivery-shop",
             Self::ExampleItemSelected => "example.item.selected",
             Self::ExampleItemIcons => "example.item.icons",
             Self::ExampleItemDisabled => "example.item.disabled",
@@ -8914,6 +9013,7 @@ impl Key {
             Self::ExampleListDescription => "example.list.description",
             Self::ExampleListMarker => "example.list.marker",
             Self::ExampleListNested => "example.list.nested",
+            Self::ExampleListLevels => "example.list.levels",
             Self::ExampleItemTerm => "example.item.term",
             Self::ExampleItemDetail => "example.item.detail",
             Self::ExampleMarkLead => "example.mark.lead",
@@ -9031,6 +9131,7 @@ impl Key {
             Self::ExamplePaginationNext => "example.pagination.next",
             Self::ExamplePaginationPage => "example.pagination.page",
             Self::ExamplePaginationCurrent => "example.pagination.current",
+            Self::ExamplePaginationMore => "example.pagination.more",
             Self::ExamplePaginationSummary => "example.pagination.summary",
             Self::ExamplePaginationSummaryLast => "example.pagination.summary-last",
             Self::ExamplePaginationNoteLinks => "example.pagination.note-links",
@@ -9041,6 +9142,16 @@ impl Key {
             Self::ExampleSearchDialog => "example.search.dialog",
             Self::ExampleSearchForm => "example.search.form",
             Self::ExampleSearchFilter => "example.search.filter",
+            Self::ExampleSearchLabel => "example.search.label",
+            Self::ExampleSearchPlaceholder => "example.search.placeholder",
+            Self::ExampleSearchGroupTomatoes => "example.search.group-tomatoes",
+            Self::ExampleSearchGroupHerbs => "example.search.group-herbs",
+            Self::ExampleSearchCherokee => "example.search.cherokee",
+            Self::ExampleSearchSungold => "example.search.sungold",
+            Self::ExampleSearchMarzano => "example.search.marzano",
+            Self::ExampleSearchGenovese => "example.search.genovese",
+            Self::ExampleSearchOpal => "example.search.opal",
+            Self::ExampleSearchGem => "example.search.gem",
             Self::ExampleSearchSizes => "example.search.sizes",
             Self::ExampleSearchStates => "example.search.states",
             Self::ExampleSearchGroup => "example.search.group",
@@ -9281,7 +9392,6 @@ impl Key {
             Self::ExampleInputMeridiem => "example.input.meridiem",
             Self::ExampleInputAm => "example.input.am",
             Self::ExampleInputPm => "example.input.pm",
-            Self::ExampleInputNow => "example.input.now",
             Self::ExampleInputTimeHint => "example.input.time-hint",
             Self::ExampleInputTimeMissing => "example.input.time-missing",
             Self::ExampleInputTimeInvalid => "example.input.time-invalid",
@@ -9296,6 +9406,8 @@ impl Key {
             Self::ExampleNumberInputNoteUnit => "example.number-input.note-unit",
             Self::ExampleNumberInputNoteLarge => "example.number-input.note-large",
             Self::ExampleNumberInputNoteStates => "example.number-input.note-states",
+            Self::ExampleNumberInputNoteStepping => "example.number-input.note-stepping",
+            Self::ExampleNumberInputCartLabel => "example.number-input.cart-label",
             Self::ExampleNumberInputTicketsLabel => "example.number-input.tickets-label",
             Self::ExampleNumberInputTicketsHint => "example.number-input.tickets-hint",
             Self::ExampleNumberInputBoxesLabel => "example.number-input.boxes-label",
@@ -9552,7 +9664,6 @@ impl Key {
             Self::ExampleOverviewBadgeReviews => "example.overview.badge.reviews",
             Self::ExampleOverviewBadgeWaiting => "example.overview.badge.waiting",
             Self::ExampleOverviewErrorSummaryNote => "example.overview.error-summary.note",
-            Self::ExampleOverviewListItemCorners => "example.overview.list-item.corners",
             Self::ExampleOverviewParagraphLead => "example.overview.paragraph.lead",
             Self::ExampleOverviewParagraphBody => "example.overview.paragraph.body",
             Self::ExampleOverviewParagraphNote => "example.overview.paragraph.note",
@@ -9781,6 +9892,8 @@ impl Key {
             Self::ExampleToastOffline => "example.toast.offline",
             Self::ExampleToastNoteStays => "example.toast.note-stays",
             Self::ExampleToastNoteTimer => "example.toast.note-timer",
+            Self::ExampleToastCountdown => "example.toast.countdown",
+            Self::ExampleToastReplay => "example.toast.replay",
             Self::ExampleToastNoteLoud => "example.toast.note-loud",
             Self::ExampleToastNoteFixed => "example.toast.note-fixed",
             Self::ExampleToastReviewTitle => "example.toast.review-title",
@@ -10539,6 +10652,7 @@ impl Key {
             Self::ComponentListPropKindDoc => "component.list.prop.kind.doc",
             Self::ComponentListPropMarkerDoc => "component.list.prop.marker.doc",
             Self::ComponentListPropSpacingDoc => "component.list.prop.spacing.doc",
+            Self::ComponentListPropLevelsDoc => "component.list.prop.levels.doc",
             Self::ComponentListPropChildrenDoc => "component.list.prop.children.doc",
             Self::ComponentListItemGuidance => "component.list-item.guidance",
             Self::ComponentListItemA11yNotes => "component.list-item.a11y-notes",
@@ -10635,6 +10749,7 @@ impl Key {
             Self::ComponentNumberInputPropStepDoc => "component.number-input.prop.step.doc",
             Self::ComponentNumberInputPropBigStepDoc => "component.number-input.prop.big_step.doc",
             Self::ComponentNumberInputPropSteppersDoc => "component.number-input.prop.steppers.doc",
+            Self::ComponentNumberInputPropSteppingDoc => "component.number-input.prop.stepping.doc",
             Self::ComponentNumberInputPropIncrementLabelDoc => {
                 "component.number-input.prop.increment_label.doc"
             }
@@ -10739,6 +10854,7 @@ impl Key {
             Self::ComponentPaginationPropCurrentLabelDoc => {
                 "component.pagination.prop.current_label.doc"
             }
+            Self::ComponentPaginationPropMoreLabelDoc => "component.pagination.prop.more_label.doc",
             Self::ComponentPaginationPropSummaryDoc => "component.pagination.prop.summary.doc",
             Self::ComponentPaginationStateCurrentDoc => "component.pagination.state.current.doc",
             Self::ComponentParagraphPropSizeDoc => "component.paragraph.prop.size.doc",
@@ -11438,7 +11554,6 @@ impl Key {
             Self::ComponentTimeInputPropMinDoc => "component.time-input.prop.min.doc",
             Self::ComponentTimeInputPropMaxDoc => "component.time-input.prop.max.doc",
             Self::ComponentTimeInputPropStepDoc => "component.time-input.prop.step.doc",
-            Self::ComponentTimeInputPropNowLabelDoc => "component.time-input.prop.now_label.doc",
             Self::ComponentTimeInputPropRequiredLabelDoc => {
                 "component.time-input.prop.required_label.doc"
             }
@@ -11489,6 +11604,7 @@ impl Key {
             Self::ComponentToastPropToneDoc => "component.toast.prop.tone.doc",
             Self::ComponentToastPropTitleDoc => "component.toast.prop.title.doc",
             Self::ComponentToastPropDurationDoc => "component.toast.prop.duration.doc",
+            Self::ComponentToastPropCountdownLabelDoc => "component.toast.prop.countdown_label.doc",
             Self::ComponentToastPropDismissibleDoc => "component.toast.prop.dismissible.doc",
             Self::ComponentToastPropDismissLabelDoc => "component.toast.prop.dismiss_label.doc",
             Self::ComponentToastPropPlacementDoc => "component.toast.prop.placement.doc",
@@ -11647,7 +11763,7 @@ impl Locale {
                 Key::PageIntroTitle => "Intro",
                 Key::PageIntroSummary => "Read what this design system is and where to start.",
                 Key::PageIntroBody => {
-                    "Noctua is a design system in two packages that behave identically: a Dioxus crate and a React package, both built from one specification. Start with Typography, Spacing or Icons for the foundations, or open a component in the sidebar."
+                    "Noctua is a design system in two packages that behave identically: a Dioxus crate and a React package, both built from one specification. Start with Typography, Spacing or Icons list for the foundations, or open a component in the sidebar."
                 }
                 Key::PageMenuSummary => "Let users choose an action from the list a button opens.",
                 Key::PageMenuBody => {
@@ -11669,9 +11785,27 @@ impl Locale {
                 Key::PageTypographySummary => {
                     "Set text with the type scale, the four families and a fixed line length."
                 }
-                Key::PageIconsTitle => "Icons",
+                Key::PageIconsTitle => "Icons list",
                 Key::PageIconsSummary => {
                     "Use any icon in the set, and add a new one to the specification."
+                }
+                Key::PageListSummary => {
+                    "Group items into a list, and nest lists inside the items of one."
+                }
+                Key::PageListBody => {
+                    "The list and one item of it. The kind chooses the element, so an ordered list is an `<ol>` and a description list is a `<dl>`. A nested list indents, marks and can colour itself by how deep it sits."
+                }
+                Key::PageSegmentedSummary => {
+                    "Let users pick one value from a row of options, all of them on screen."
+                }
+                Key::PageSegmentedBody => {
+                    "The group and one of the values it chooses between. It is a radio group with a name and a value, so it posts like any other form control. The rendered tab stop is on the group, never on the chosen item."
+                }
+                Key::PageSelectSummary => {
+                    "Let users choose a value out of more than a list can show, grouped and searchable."
+                }
+                Key::PageSelectBody => {
+                    "The field, a named run of options and one option. The native control is what submits, and the script draws a listbox over it. An option carries a second line, an icon or a colour as data, because an `<option>` holds text alone."
                 }
                 Key::PageInlineTextSummary => {
                     "Mark up abbreviations, keystrokes, corrections and dates inside a sentence."
@@ -11945,7 +12079,7 @@ impl Locale {
                     "Let users choose files, by picking or dropping them, and correct what they chose."
                 }
                 Key::ComponentTimeInputSummary => {
-                    "Asks for one time of day, in separate boxes, on the reader's own clock."
+                    "Asks for one time of day, in separate boxes, on a twenty-four hour clock."
                 }
                 Key::ComponentFieldSummary => {
                     "Label a form control, and show the hint and the error message under it."
@@ -12389,6 +12523,14 @@ impl Locale {
                 Key::ExampleSegmentedQuiet => {
                     "`selection: SegmentedSelection::Quiet` marks the chosen stop lightly, for a group that sits inside a bar."
                 }
+                Key::ExampleSegmentedUnanswered => {
+                    "An unanswered question writes no `selected`. The group is still one tab stop, so a keyboard reaches it."
+                }
+                Key::ExampleSegmentedDeliveryLabel => "How should it reach you",
+                Key::ExampleSegmentedDeliveryHint => "You can change this before you confirm.",
+                Key::ExampleSegmentedDeliveryPost => "By post",
+                Key::ExampleSegmentedDeliveryLocker => "To a locker",
+                Key::ExampleSegmentedDeliveryShop => "To a shop",
                 Key::ExampleItemSelected => {
                     "`aria-checked` is written whatever the value, because a radio that omits it has an unknown state."
                 }
@@ -12535,6 +12677,9 @@ impl Locale {
                 }
                 Key::ExampleListNested => {
                     "A nested list goes inside the item it belongs to, rather than beside it."
+                }
+                Key::ExampleListLevels => {
+                    "Each level takes a colour of its own, on the marker and on the rule down its inside edge."
                 }
                 Key::ExampleItemTerm => {
                     "`term` switches the item from an `<li>` to a `<dt>` and a `<dd>`."
@@ -12757,13 +12902,14 @@ impl Locale {
                 Key::ExamplePaginationNext => "Next",
                 Key::ExamplePaginationPage => "Page {page}",
                 Key::ExamplePaginationCurrent => "Page {page}, the one you are reading",
+                Key::ExamplePaginationMore => "Pages left out",
                 Key::ExamplePaginationSummary => "Showing 21 to 30 of 39 palettes.",
                 Key::ExamplePaginationSummaryLast => "Showing 31 to 39 of 39 palettes.",
                 Key::ExamplePaginationNoteLinks => {
                     "Every page is a real `<a href>`, so it opens in a new tab and lands in the browser history."
                 }
                 Key::ExamplePaginationNoteWindow => {
-                    "`spread` sets how many pages sit either side of the current one. The first and the last page are always shown."
+                    "`spread` sets how many pages sit either side of the current one. With `more_label` the gap opens a menu of the pages it hides."
                 }
                 Key::ExamplePaginationNoteEnds => {
                     "On the last page the forward link is left out rather than disabled. `summary` adds the line that counts the pages."
@@ -12781,8 +12927,18 @@ impl Locale {
                     "With `action` the field is a real `<form method=\"get\">`, so Enter submits it with no script."
                 }
                 Key::ExampleSearchFilter => {
-                    "Type `bg` to see `ButtonGroup` survive. `filter` hides every `data-nd-index` element in the same landmark."
+                    "Type `san` to see `San Marzano` survive. `filter` hides every `data-nd-index` element in the same landmark."
                 }
+                Key::ExampleSearchLabel => "Search the catalogue",
+                Key::ExampleSearchPlaceholder => "Tomato, basil, marigold",
+                Key::ExampleSearchGroupTomatoes => "Tomatoes",
+                Key::ExampleSearchGroupHerbs => "Herbs",
+                Key::ExampleSearchCherokee => "Beefsteak, eighty days, dusky red.",
+                Key::ExampleSearchSungold => "Cherry, orange, and the first to ripen.",
+                Key::ExampleSearchMarzano => "Plum, thick walls, made for sauce.",
+                Key::ExampleSearchGenovese => "Basil for pesto, and it likes being cut.",
+                Key::ExampleSearchOpal => "Purple basil, slower and stronger.",
+                Key::ExampleSearchGem => "Marigold, edible, and it tastes of citrus.",
                 Key::ExampleSearchSizes => {
                     "The three sizes match `Button` step for step, so a search beside a button lines up."
                 }
@@ -13169,7 +13325,6 @@ impl Locale {
                 Key::ExampleInputMeridiem => "Morning or afternoon",
                 Key::ExampleInputAm => "AM",
                 Key::ExampleInputPm => "PM",
-                Key::ExampleInputNow => "Use the time now",
                 Key::ExampleInputTimeHint => "For example, 09 30.",
                 Key::ExampleInputTimeMissing => "The {part} is still empty.",
                 Key::ExampleInputTimeInvalid => "{value} is not a time.",
@@ -13200,6 +13355,10 @@ impl Locale {
                 Key::ExampleNumberInputNoteStates => {
                     "A locked value is still submitted, and its steppers go with it. A refused value keeps the caller's sentence under the question."
                 }
+                Key::ExampleNumberInputNoteStepping => {
+                    "`primary` puts a full control either side of the value. The box, the bounds and the arrow keys are the same ones."
+                }
+                Key::ExampleNumberInputCartLabel => "Bags of coffee",
                 Key::ExampleNumberInputTicketsLabel => "How many tickets",
                 Key::ExampleNumberInputTicketsHint => "Twenty is the most we sell to one person.",
                 Key::ExampleNumberInputBoxesLabel => "How many boxes",
@@ -13222,7 +13381,7 @@ impl Locale {
                     "Two segments rather than `<input type=\"time\">`. The submitted value is twenty-four hour either way."
                 }
                 Key::ExampleInputFixedNote => {
-                    "Two lines, and it does not move. The reader may still drag it."
+                    "Two rows to start with. It grows to fit what is written, and it cannot be dragged."
                 }
                 Key::ExampleInputLockedNote => "Readable, copyable, still submitted.",
                 Key::ExampleInputNameValue => "Ada Lovelace",
@@ -13245,7 +13404,7 @@ impl Locale {
                     "`reveal_label` adds the button that shows what was typed, so a reader can check a password before sending it."
                 }
                 Key::ExampleInputNoteExtras => {
-                    "The clear button and the counter arrive with the script. Without it the box still works, so nothing here is load bearing."
+                    "The suffix is drawn and never submitted, so the counter counts only what a reader typed. The clear button arrives with the script."
                 }
                 Key::ExampleInputNoteSize => {
                     "Every size clears the 24 pixel target. Pick one for the whole form rather than per field."
@@ -13658,9 +13817,6 @@ impl Locale {
                 Key::ExampleOverviewErrorSummaryNote => {
                     "A form the server rejected: the messages at the top, each a real `<a href>` to its control. `focus` is off on this page of examples."
                 }
-                Key::ExampleOverviewListItemCorners => {
-                    "How round every corner in the page is, from square to circular."
-                }
                 Key::ExampleOverviewParagraphLead => {
                     "Every colour in this system is asked for by name. A component says `danger`, and the palette answers with whatever `danger` means in the appearance the reader is in."
                 }
@@ -14069,8 +14225,10 @@ impl Locale {
                     "No timer, which is the default. A message that removes itself is unreadable to a reader who reads slowly."
                 }
                 Key::ExampleToastNoteTimer => {
-                    "Six seconds, and the wait holds while a pointer or the focus is on the message. Leaving starts the whole wait again."
+                    "Six seconds, and the wait holds while a pointer or the focus is on the message. Leaving starts the whole wait again, countdown included."
                 }
+                Key::ExampleToastCountdown => "one:{count} second left|other:{count} seconds left",
+                Key::ExampleToastReplay => "Send it again",
                 Key::ExampleToastNoteLoud => {
                     "`assertive` interrupts, which suits a result a reader has to act on. The corner is the one they were already looking at."
                 }
@@ -14263,7 +14421,7 @@ impl Locale {
                     "Stretches the control to the width of whatever contains it. Off by default."
                 }
                 Key::ComponentButtonPropMenuDoc => {
-                    "Marks the button as the one that opens a `Menu`, and draws the chevron. **`controls` has to name that menu by id.** The press itself is `dist/menu.js`, which ships the opening, the arrow walk, Escape and the focus return."
+                    "Marks the button as the one that opens a `Menu`, and draws the chevron unless `icon` or `icon_end` names one. **`controls` names that menu by id.** The press is `dist/menu.js`, which ships the opening, the arrow walk, Escape and the focus return."
                 }
                 Key::ComponentButtonPropHrefDoc => {
                     "Where the control goes. Given one, the component renders an `<a>` rather than a `<button>`, which is what a control that changes the address has to be. Never combine it with `disabled`, because a disabled link is not a thing the platform has."
@@ -15629,6 +15787,9 @@ impl Locale {
                 Key::ComponentListPropSpacingDoc => {
                     "The gap between items: `tight`, `default` or `loose`."
                 }
+                Key::ComponentListPropLevelsDoc => {
+                    "Whether each level of nesting is drawn in a colour of its own. Off by default. It marks the level on the marker and on the rule down the inside edge, so it still reads when `marker` is `none`."
+                }
                 Key::ComponentListPropChildrenDoc => "The list items.",
                 Key::ComponentListItemGuidance => {
                     "Use it for one item of a `List`. Give it a `term` when the list is a description list, and leave it off for any other kind of list."
@@ -15847,6 +16008,9 @@ impl Locale {
                 Key::ComponentNumberInputPropSteppersDoc => {
                     "Whether the two stepper controls appear. **On by default**, because they make a small adjustment one press instead of a select-all and a retype. Turn them off where the numbers are too large to step to."
                 }
+                Key::ComponentNumberInputPropSteppingDoc => {
+                    "What the steppers are for. `assist` is two small controls at the end of the box, for correcting a typed value. `primary` is one full control either side of the value, for a quantity answered by pressing rather than by typing."
+                }
                 Key::ComponentNumberInputPropIncrementLabelDoc => {
                     "The name of the control that adds a step. Supply it with `steppers`, because the controls are glyphs and this is the only name each has."
                 }
@@ -15986,7 +16150,7 @@ impl Locale {
                     "Use pagination under anything showing one page of a longer set: a table, a list, a grid of results. It is a component of its own rather than a prop on `Table`, because a list of search results needs the same control."
                 }
                 Key::ComponentPaginationA11yNotes => {
-                    "A named `<nav>` holding a list of links, so a screen reader says how many pages there are. The gap between two runs of numbers is `aria-hidden`, and every page is a real `<a href>` needing no script."
+                    "A named `<nav>` holding a list of links, so a screen reader says how many pages there are. Every page is a real `<a href>` needing no script, and the gap is `aria-hidden` until `more_label` makes a menu of it."
                 }
                 Key::ComponentPaginationPropNameDoc => {
                     "What is being paged through. It names the control for anything binding to it, and it is what tells two paginations on one page apart. Required."
@@ -16020,6 +16184,9 @@ impl Locale {
                 }
                 Key::ComponentPaginationPropCurrentLabelDoc => {
                     "The accessible name of the page in force, which says so as well, such as *Page 4, current page*. `aria-current` carries the same fact, and this half survives an engine that does not announce the attribute."
+                }
+                Key::ComponentPaginationPropMoreLabelDoc => {
+                    "The name of the control the gap between two runs of numbers becomes, such as *Skipped pages*. It names the menu of those pages as well, so the two cannot disagree. Leave it out and the gap stays an inert character."
                 }
                 Key::ComponentPaginationPropSummaryDoc => {
                     "The sentence under the control: how many results there are, and which of them this page holds. It sits in a live region, so a reader is told the set did not change when a page turns."
@@ -17451,7 +17618,7 @@ impl Locale {
                     "Whether the browser underlines what it takes to be mistakes. **On by default**, unlike `Input`, because this box holds prose."
                 }
                 Key::ComponentTextareaPropSizeDoc => {
-                    "The box's padding and the type inside it: `small`, `medium` or `large`, matching the rest of the form."
+                    "The box's padding: `small`, `medium` or `large`, matching `Input` step for step. The type inside never goes below the body size, so a phone does not zoom on focus."
                 }
                 Key::ComponentTextareaPropGlassDoc => {
                     "Whether the box is frosted. Use it on a ground opaque enough to read several lines against."
@@ -17469,7 +17636,7 @@ impl Locale {
                     "How the date is written for a reader, in their locale."
                 }
                 Key::ComponentTimeInputGuidance => {
-                    "Use a time input to ask for one time of day, in separate labelled boxes for the hour, the minute and sometimes the second. `clock` follows the reader's locale. The form posts a twenty-four hour value whatever they were shown."
+                    "Use a time input to ask for one time of day, in separate labelled boxes for the hour, the minute and sometimes the second. The boxes are read on a twenty-four hour clock unless `clock` asks otherwise, and the form posts one either way."
                 }
                 Key::ComponentTimeInputA11yNotes => {
                     "It is a `<fieldset>` with a `<legend>`, and every box has its own name, because a `<label>` points at one element. The messages are the caller's sentences in one live region rather than the platform's three bubbles."
@@ -17490,22 +17657,22 @@ impl Locale {
                     "The name of the third box, in the reader's language. Wanted in practice by `seconds`."
                 }
                 Key::ComponentTimeInputPropMeridiemLabelDoc => {
-                    "The name of the morning and afternoon control, where the reader's locale has one. Wanted in practice by `clock = \"auto\"` or `\"12\"`, because the control appears only for some readers."
+                    "The accessible name of the morning and afternoon control, drawn only for a twelve hour clock. It is wanted by `clock = \"auto\"` and `\"12\"`, together with `am_label` and `pm_label`. Without all three the field keeps twenty-four hours."
                 }
                 Key::ComponentTimeInputPropAmLabelDoc => {
-                    "The word for before noon in the reader's language, such as *AM* or *Manhã*. Not derived, because the platform's own formatter spells it differently in each locale."
+                    "The word for before noon in the reader's language, such as *AM* or *Manhã*. It is the morning half of the meridiem control. Not derived, because the platform spells it differently in each locale."
                 }
                 Key::ComponentTimeInputPropPmLabelDoc => {
                     "The word for after noon, on the same terms."
                 }
                 Key::ComponentTimeInputPropValueDoc => {
-                    "The time to start with, as `HH:MM` or `HH:MM:SS` on a twenty-four hour clock. That is the shape a server sends and the shape it gets back, whatever clock the reader is shown."
+                    "The time to start with, as `HH:MM` or `HH:MM:SS` on a twenty-four hour clock. It is rendered into the boxes, so a page with no script shows it. That is the shape a server sends and the shape it gets back."
                 }
                 Key::ComponentTimeInputPropSecondsDoc => {
                     "Whether a third box asks for seconds. Off by default, because few of the things people schedule happen at a named second."
                 }
                 Key::ComponentTimeInputPropClockDoc => {
-                    "Which clock the boxes are read on. `auto` asks the reader's own locale. `12` and `24` are for a page whose subject has a clock of its own, such as a flight schedule. **What is submitted is twenty-four hour either way**."
+                    "Which clock the boxes are read on. **Twenty-four hours by default**, whatever the reader's machine keeps. `auto` asks the reader's own browser instead, and `12` fixes it at twelve. **What is submitted is twenty-four hour in every case**."
                 }
                 Key::ComponentTimeInputPropMinDoc => {
                     "The earliest time allowed, as `HH:MM`. A time before it is refused with `min_label` rather than rewritten, so the reader's own numbers stay."
@@ -17516,14 +17683,11 @@ impl Locale {
                 Key::ComponentTimeInputPropStepDoc => {
                     "How many minutes one press of an arrow moves the minute box. One by default. A booking form usually wants fifteen, so a reader reaches `:45` in three presses."
                 }
-                Key::ComponentTimeInputPropNowLabelDoc => {
-                    "The name of a control that fills the boxes with the current time. Absent, there is no such control."
-                }
                 Key::ComponentTimeInputPropRequiredLabelDoc => {
                     "What it says when the boxes are empty and an answer was needed. The platform cannot say it, because `required` on three boxes refuses each of them separately."
                 }
                 Key::ComponentTimeInputPropMissingLabelDoc => {
-                    "What it says when some boxes are filled and others are not, with a `{part}` hole naming the empty one. Half a time is the commonest way this field goes wrong."
+                    "What it says when some boxes are filled and others are not, with a `{part}` hole filled with that box's own label. Half a time is the commonest way this field goes wrong."
                 }
                 Key::ComponentTimeInputPropInvalidLabelDoc => {
                     "What it says when the numbers are not a time, such as twenty-five o'clock. It has a `{value}` hole, and the numbers stay exactly as typed."
@@ -17581,7 +17745,7 @@ impl Locale {
                     "Use a toast for a result that arrives after a reader acted, where the page has no room to say it in place. Never as the only record of that result. For a message that belongs where it happened, use `MessageBar`."
                 }
                 Key::ComponentToastA11yNotes => {
-                    "A `role=\"status\"`, which waits for a pause instead of cutting in. The dismiss control is a real `<button>` with a name, and the timer stops while a reader is on the message."
+                    "A `role=\"status\"`, which waits for a pause instead of cutting in. The dismiss control is a real `<button>` with a name, and the timer stops while a reader is on the message. The countdown is a `role=\"timer\"`, which does not announce."
                 }
                 Key::ComponentToastPropNameDoc => {
                     "What this message is about, as a script finds it. **Required**, because a page may raise several and the script has to tell one timer from another."
@@ -17594,6 +17758,9 @@ impl Locale {
                 }
                 Key::ComponentToastPropDurationDoc => {
                     "How long it waits before taking itself away, in milliseconds. Absent leaves it on the page until it is dismissed, and so does `0`. The wait pauses under a pointer and under focus."
+                }
+                Key::ComponentToastPropCountdownLabelDoc => {
+                    "What the message says about the time it has left, with a `{count}` hole, such as *6 seconds left*. Write both forms as `one:… |other:…`. It needs `duration`, and it is drawn only once a script is running the wait it reports."
                 }
                 Key::ComponentToastPropDismissibleDoc => {
                     "Whether a control that takes the message away is drawn. On by default: with no `duration` the message stays, and one that stays with no way out is one a reader has to work around."
@@ -17867,7 +18034,7 @@ impl Locale {
                 Key::PageIntroTitle => "Introdução",
                 Key::PageIntroSummary => "Leia o que é este design system e por onde começar.",
                 Key::PageIntroBody => {
-                    "O Noctua é um design system em dois pacotes que se comportam de forma idêntica: um crate Dioxus e um pacote React. Os dois vêm da mesma especificação. Comece pelas bases, em Tipografia, Espaçamento ou Ícones, ou abra um componente na barra lateral."
+                    "O Noctua é um design system em dois pacotes de comportamento idêntico: um crate Dioxus e um pacote React. Os dois vêm da mesma especificação. Comece pelas bases, em Tipografia, Espaçamento ou Lista de ícones, ou abra um componente na barra lateral."
                 }
                 Key::PageMenuSummary => {
                     "Deixe a pessoa escolher uma ação na lista que um botão abre."
@@ -17891,9 +18058,27 @@ impl Locale {
                 Key::PageTypographySummary => {
                     "Componha o texto com a escala tipográfica, as quatro famílias e uma medida de linha fixa."
                 }
-                Key::PageIconsTitle => "Ícones",
+                Key::PageIconsTitle => "Lista de ícones",
                 Key::PageIconsSummary => {
                     "Use qualquer ícone do conjunto, e acrescente um novo à especificação."
+                }
+                Key::PageListSummary => {
+                    "Agrupe itens numa lista, e aninhe listas dentro dos itens dela."
+                }
+                Key::PageListBody => {
+                    "A lista e um item dela. O tipo escolhe o elemento, então uma lista ordenada é um `<ol>` e uma lista de descrição é um `<dl>`. Uma lista aninhada recua, marca e pode se colorir pelo nível em que está."
+                }
+                Key::PageSegmentedSummary => {
+                    "Deixe a pessoa escolher um valor numa fileira de opções, todas visíveis."
+                }
+                Key::PageSegmentedBody => {
+                    "O grupo e um dos valores entre os quais ele escolhe. É um grupo de rádio com nome e valor, então envia como qualquer outro controle de formulário. A parada de tabulação renderizada fica no grupo, nunca no item escolhido."
+                }
+                Key::PageSelectSummary => {
+                    "Deixe a pessoa escolher um valor entre mais opções do que uma lista mostra."
+                }
+                Key::PageSelectBody => {
+                    "O campo, um trecho nomeado de opções e uma opção. O controle nativo é o que envia, e o script desenha uma listbox sobre ele. Uma opção carrega segunda linha, ícone ou cor como dado, porque um `<option>` só guarda texto."
                 }
                 Key::PageInlineTextSummary => {
                     "Marque abreviaturas, teclas, correções e datas dentro de uma frase."
@@ -18169,7 +18354,7 @@ impl Locale {
                     "Deixe a pessoa escolher arquivos, selecionando ou soltando, e corrigir o que escolheu."
                 }
                 Key::ComponentTimeInputSummary => {
-                    "Pede uma hora do dia, em caixas separadas, no relógio da pessoa."
+                    "Pede uma hora do dia, em caixas separadas, num relógio de vinte e quatro horas."
                 }
                 Key::ComponentFieldSummary => {
                     "Rotule um controle de formulário, e mostre a dica e a mensagem de erro embaixo dele."
@@ -18625,6 +18810,14 @@ impl Locale {
                 Key::ExampleSegmentedQuiet => {
                     "`selection: SegmentedSelection::Quiet` marca a parada escolhida de leve, para um grupo que fica dentro de uma barra."
                 }
+                Key::ExampleSegmentedUnanswered => {
+                    "Uma pergunta sem resposta não escreve `selected`. O grupo continua sendo um ponto de tabulação, então o teclado o alcança."
+                }
+                Key::ExampleSegmentedDeliveryLabel => "Como quer receber",
+                Key::ExampleSegmentedDeliveryHint => "Dá para mudar antes de confirmar.",
+                Key::ExampleSegmentedDeliveryPost => "Pelos Correios",
+                Key::ExampleSegmentedDeliveryLocker => "Em um armário",
+                Key::ExampleSegmentedDeliveryShop => "Em uma loja",
                 Key::ExampleItemSelected => {
                     "`aria-checked` é escrito seja qual for o valor, porque um radio que o omite fica com estado desconhecido."
                 }
@@ -18771,6 +18964,9 @@ impl Locale {
                 }
                 Key::ExampleListNested => {
                     "Uma lista aninhada vai dentro do item a que pertence, e não ao lado dele."
+                }
+                Key::ExampleListLevels => {
+                    "Cada nível ganha uma cor própria, no marcador e no traço da borda interna."
                 }
                 Key::ExampleItemTerm => {
                     "`term` troca o item de um `<li>` para um `<dt>` e um `<dd>`."
@@ -18995,13 +19191,14 @@ impl Locale {
                 Key::ExamplePaginationNext => "Próxima",
                 Key::ExamplePaginationPage => "Página {page}",
                 Key::ExamplePaginationCurrent => "Página {page}, a que você está lendo",
+                Key::ExamplePaginationMore => "Páginas omitidas",
                 Key::ExamplePaginationSummary => "Mostrando 21 a 30 de 39 paletas.",
                 Key::ExamplePaginationSummaryLast => "Mostrando 31 a 39 de 39 paletas.",
                 Key::ExamplePaginationNoteLinks => {
                     "Cada página é um `<a href>` de verdade, então abre em aba nova e entra no histórico do navegador."
                 }
                 Key::ExamplePaginationNoteWindow => {
-                    "`spread` define quantas páginas ficam de cada lado da atual. A primeira e a última página aparecem sempre."
+                    "`spread` define quantas páginas ficam de cada lado da atual. Com `more_label` o intervalo abre um menu das páginas que esconde."
                 }
                 Key::ExamplePaginationNoteEnds => {
                     "Na última página o link para a frente é omitido em vez de desabilitado. `summary` acrescenta a linha que conta as páginas."
@@ -19019,8 +19216,18 @@ impl Locale {
                     "Com `action` o campo é um `<form method=\"get\">` de verdade, então Enter envia sem script."
                 }
                 Key::ExampleSearchFilter => {
-                    "Digite `bg` para ver `ButtonGroup` sobreviver. `filter` esconde todo elemento `data-nd-index` no mesmo marco."
+                    "Digite `san` para ver `San Marzano` sobreviver. `filter` esconde todo elemento `data-nd-index` no mesmo marco."
                 }
+                Key::ExampleSearchLabel => "Buscar no catálogo",
+                Key::ExampleSearchPlaceholder => "Tomate, manjericão, cravo",
+                Key::ExampleSearchGroupTomatoes => "Tomates",
+                Key::ExampleSearchGroupHerbs => "Ervas",
+                Key::ExampleSearchCherokee => "Tipo gordo, oitenta dias, vermelho fosco.",
+                Key::ExampleSearchSungold => "Cereja, laranja, e o primeiro a amadurecer.",
+                Key::ExampleSearchMarzano => "Tipo italiano, casca grossa, feito para molho.",
+                Key::ExampleSearchGenovese => "Manjericão para pesto, e gosta de ser cortado.",
+                Key::ExampleSearchOpal => "Manjericão roxo, mais lento e mais forte.",
+                Key::ExampleSearchGem => "Cravo comestível, com gosto cítrico.",
                 Key::ExampleSearchSizes => {
                     "Os três tamanhos acompanham os do `Button`, um a um, então uma busca ao lado de um botão se alinha."
                 }
@@ -19411,7 +19618,6 @@ impl Locale {
                 Key::ExampleInputMeridiem => "Manhã ou tarde",
                 Key::ExampleInputAm => "Manhã",
                 Key::ExampleInputPm => "Tarde",
-                Key::ExampleInputNow => "Usar a hora de agora",
                 Key::ExampleInputTimeHint => "Por exemplo, 09 30.",
                 Key::ExampleInputTimeMissing => "O campo {part} ainda está vazio.",
                 Key::ExampleInputTimeInvalid => "{value} não é uma hora.",
@@ -19442,6 +19648,10 @@ impl Locale {
                 Key::ExampleNumberInputNoteStates => {
                     "Um valor travado continua sendo enviado, e os botões de passo travam junto. Um valor recusado mantém a frase de quem chama sob a pergunta."
                 }
+                Key::ExampleNumberInputNoteStepping => {
+                    "`primary` põe um controle inteiro de cada lado do valor. A caixa, os limites e as teclas de seta são os mesmos."
+                }
+                Key::ExampleNumberInputCartLabel => "Sacos de café",
                 Key::ExampleNumberInputTicketsLabel => "Quantos ingressos",
                 Key::ExampleNumberInputTicketsHint => "Vinte é o máximo que vendemos por pessoa.",
                 Key::ExampleNumberInputBoxesLabel => "Quantas caixas",
@@ -19464,7 +19674,7 @@ impl Locale {
                     "Dois segmentos em vez de `<input type=\"time\">`. O valor enviado está no formato de vinte e quatro horas nos dois casos."
                 }
                 Key::ExampleInputFixedNote => {
-                    "Duas linhas, e ela não se mexe. A pessoa ainda pode arrastá-la."
+                    "Duas linhas para começar. Ela cresce para caber o que for escrito, e não pode ser arrastada."
                 }
                 Key::ExampleInputLockedNote => "Legível, copiável, ainda enviado.",
                 Key::ExampleInputNameValue => "Ada Lovelace",
@@ -19487,7 +19697,7 @@ impl Locale {
                     "`reveal_label` acrescenta o botão que mostra o que foi digitado, para a pessoa conferir a senha antes de enviar."
                 }
                 Key::ExampleInputNoteExtras => {
-                    "O botão de limpar e o contador chegam com o script. Sem ele a caixa continua funcionando, então nada aqui é essencial."
+                    "O sufixo é desenhado e nunca enviado, então o contador conta só o que a pessoa digitou. O botão de limpar chega com o script."
                 }
                 Key::ExampleInputNoteSize => {
                     "Todo tamanho passa do alvo de 24 pixels. Escolha um para o formulário inteiro, não um por campo."
@@ -19906,9 +20116,6 @@ impl Locale {
                 Key::ExampleOverviewErrorSummaryNote => {
                     "Um formulário recusado pelo servidor: as mensagens no topo, cada uma um `<a href>` para o controle. `focus` está desligado nesta página."
                 }
-                Key::ExampleOverviewListItemCorners => {
-                    "Quão arredondado é cada canto da página, de quadrado a circular."
-                }
                 Key::ExampleOverviewParagraphLead => {
                     "Toda cor deste sistema é pedida pelo nome. Um componente pede `danger`, e a paleta responde com o que `danger` significa na aparência em que o leitor está."
                 }
@@ -20323,8 +20530,12 @@ impl Locale {
                     "Sem cronômetro, que é o padrão. Uma mensagem que se remove sozinha é ilegível para quem lê devagar."
                 }
                 Key::ExampleToastNoteTimer => {
-                    "Seis segundos, e a espera segura enquanto um ponteiro ou o foco está na mensagem. Sair recomeça a espera inteira."
+                    "Seis segundos, e a espera segura enquanto um ponteiro ou o foco está na mensagem. Sair recomeça a espera inteira, contagem incluída."
                 }
+                Key::ExampleToastCountdown => {
+                    "one:falta {count} segundo|other:faltam {count} segundos"
+                }
+                Key::ExampleToastReplay => "Enviar de novo",
                 Key::ExampleToastNoteLoud => {
                     "`assertive` interrompe, o que serve a um resultado sobre o qual a pessoa precisa agir. O canto é o que ela já olhava."
                 }
@@ -20513,7 +20724,7 @@ impl Locale {
                     "Estica o controle até a largura do que o contém. Desligado por padrão."
                 }
                 Key::ComponentButtonPropMenuDoc => {
-                    "Marca o botão como o que abre um `Menu`, e desenha o chevron. **`controls` precisa nomear esse menu por id.** O toque em si é o `dist/menu.js`, que traz a abertura, o percurso das setas, o Escape e a volta do foco."
+                    "Marca o botão como o que abre um `Menu`, e desenha o chevron a menos que `icon` ou `icon_end` já nomeie um. **`controls` nomeia esse menu por id.** O toque é o `dist/menu.js`, que traz a abertura, o percurso das setas, o Escape e a volta do foco."
                 }
                 Key::ComponentButtonPropHrefDoc => {
                     "Para onde o controle vai. Com ele, o componente renderiza um `<a>` em vez de um `<button>`, que é o que um controle que muda o endereço tem de ser. Nunca combine com `disabled`."
@@ -21879,6 +22090,9 @@ impl Locale {
                 Key::ComponentListPropSpacingDoc => {
                     "O espaço entre os itens: `tight`, `default` ou `loose`."
                 }
+                Key::ComponentListPropLevelsDoc => {
+                    "Se cada nível de aninhamento é desenhado numa cor própria. Desligado por padrão. Marca o nível no marcador e no traço da borda interna, então ainda se lê quando `marker` é `none`."
+                }
                 Key::ComponentListPropChildrenDoc => "Os itens da lista.",
                 Key::ComponentListItemGuidance => {
                     "Use para um item de uma `List`. Dê um `term` quando a lista for uma lista de descrição, e deixe de fora em qualquer outro tipo de lista."
@@ -22097,6 +22311,9 @@ impl Locale {
                 Key::ComponentNumberInputPropSteppersDoc => {
                     "Se os dois controles de passo aparecem. **Ligados por padrão**, porque transformam um ajuste pequeno em um toque, em vez de selecionar tudo e redigitar. Desligue onde os números são grandes demais para se chegar de passo em passo."
                 }
+                Key::ComponentNumberInputPropSteppingDoc => {
+                    "Para que servem os botões de passo. `assist` são dois controles pequenos no fim da caixa, para corrigir um valor digitado. `primary` é um controle inteiro de cada lado do valor, para uma quantidade que se responde tocando."
+                }
                 Key::ComponentNumberInputPropIncrementLabelDoc => {
                     "O nome do controle que soma um passo. Informe junto com `steppers`, porque os controles são glifos e este é o único nome que cada um tem."
                 }
@@ -22240,7 +22457,7 @@ impl Locale {
                     "Use a paginação sob qualquer coisa que mostra uma página de um conjunto maior: uma tabela, uma lista, uma grade de resultados. É um componente próprio, e não uma prop do `Table`, porque uma lista de resultados precisa do mesmo controle."
                 }
                 Key::ComponentPaginationA11yNotes => {
-                    "Um `<nav>` nomeado com uma lista de links, então um leitor de tela diz quantas páginas existem. O intervalo entre duas séries de números leva `aria-hidden`, e toda página é um `<a href>` de verdade."
+                    "Um `<nav>` nomeado com uma lista de links, então um leitor de tela diz quantas páginas existem. Toda página é um `<a href>` de verdade que dispensa script, e o intervalo leva `aria-hidden` até `more_label` fazer um menu dele."
                 }
                 Key::ComponentPaginationPropNameDoc => {
                     "O que está sendo paginado. Nomeia o controle para qualquer coisa que se ligue a ele, e é o que diferencia duas paginações numa mesma página. Obrigatório."
@@ -22274,6 +22491,9 @@ impl Locale {
                 }
                 Key::ComponentPaginationPropCurrentLabelDoc => {
                     "O nome acessível da página em vigor, que também diz isso, como *Página 4, página atual*. O `aria-current` carrega o mesmo fato, e esta metade sobrevive a um motor que não anuncia o atributo."
+                }
+                Key::ComponentPaginationPropMoreLabelDoc => {
+                    "O nome do controle em que vira o intervalo entre duas séries de números, como *Páginas omitidas*. Nomeia também o menu dessas páginas, então os dois não podem discordar. Sem ele o intervalo continua um caractere inerte."
                 }
                 Key::ComponentPaginationPropSummaryDoc => {
                     "A frase sob o controle: quantos resultados existem, e quais deles esta página tem. Fica numa região dinâmica, então quem lê ouve que o conjunto não mudou quando a página vira."
@@ -23705,7 +23925,7 @@ impl Locale {
                     "Se o navegador sublinha o que ele toma por erros. **Ligado por padrão**, ao contrário do `TextInput`, porque esta caixa contém prosa."
                 }
                 Key::ComponentTextareaPropSizeDoc => {
-                    "O preenchimento da caixa e o tipo dentro dela: `small`, `medium` ou `large`, acompanhando o resto do formulário."
+                    "O preenchimento da caixa: `small`, `medium` ou `large`, acompanhando `Input` passo a passo. O texto dentro nunca fica menor que o do corpo, e o celular não dá zoom."
                 }
                 Key::ComponentTextareaPropGlassDoc => {
                     "Se a caixa é fosca. Use sobre um fundo opaco o bastante para ler várias linhas em cima dele."
@@ -23723,7 +23943,7 @@ impl Locale {
                     "Como a data é escrita para quem lê, no locale dessa pessoa."
                 }
                 Key::ComponentTimeInputGuidance => {
-                    "Use um campo de hora para pedir uma hora do dia, em caixas rotuladas separadas para a hora, o minuto e às vezes o segundo. `clock` segue o locale de quem lê. O formulário envia um valor de vinte e quatro horas."
+                    "Use um campo de hora para pedir uma hora do dia, em caixas rotuladas separadas para a hora, o minuto e às vezes o segundo. As caixas são lidas num relógio de vinte e quatro horas, salvo se `clock` pedir outro, e é o que o formulário envia."
                 }
                 Key::ComponentTimeInputA11yNotes => {
                     "É um `<fieldset>` com um `<legend>`, e cada caixa tem o próprio nome, porque um `<label>` aponta para um elemento. As mensagens são as frases de quem chama numa região dinâmica só, e não as três bolhas da plataforma."
@@ -23744,22 +23964,22 @@ impl Locale {
                     "O nome da terceira caixa, na língua de quem lê. Desejado na prática por `seconds`."
                 }
                 Key::ComponentTimeInputPropMeridiemLabelDoc => {
-                    "O nome do controle de manhã e tarde, onde o locale de quem lê tem um. Desejado na prática por `clock = \"auto\"` ou `\"12\"`, porque o controle aparece só para algumas pessoas."
+                    "O nome acessível do controle de manhã e tarde, desenhado só num relógio de doze horas. É desejado por `clock = \"auto\"` e `\"12\"`, junto com `am_label` e `pm_label`. Sem os três, o campo fica em vinte e quatro horas."
                 }
                 Key::ComponentTimeInputPropAmLabelDoc => {
-                    "A palavra para antes do meio-dia na língua de quem lê, como *AM* ou *Manhã*. Não derivada, porque o formatador da plataforma a escreve de um jeito em cada locale."
+                    "A palavra para antes do meio-dia na língua de quem lê, como *AM* ou *Manhã*. É a metade da manhã nesse controle. Não derivada, porque a plataforma a escreve de um jeito em cada locale."
                 }
                 Key::ComponentTimeInputPropPmLabelDoc => {
                     "A palavra para depois do meio-dia, nos mesmos termos."
                 }
                 Key::ComponentTimeInputPropValueDoc => {
-                    "A hora inicial, como `HH:MM` ou `HH:MM:SS` num relógio de vinte e quatro horas. É o formato que o servidor manda e o formato que ele recebe de volta, seja qual for o relógio mostrado."
+                    "A hora inicial, como `HH:MM` ou `HH:MM:SS` num relógio de vinte e quatro horas. É renderizada nas caixas, então uma página sem script a mostra. É o formato que o servidor manda e o formato que ele recebe de volta."
                 }
                 Key::ComponentTimeInputPropSecondsDoc => {
                     "Se uma terceira caixa pede segundos. Desligado por padrão, porque poucas das coisas que as pessoas agendam acontecem num segundo nomeado."
                 }
                 Key::ComponentTimeInputPropClockDoc => {
-                    "Em qual relógio as caixas são lidas. `auto` pergunta ao idioma de quem lê. `12` e `24` servem a uma página cujo assunto tem relógio próprio, como uma escala de voos. **O que é enviado é de vinte e quatro horas.**"
+                    "Em qual relógio as caixas são lidas. **Vinte e quatro horas por padrão**, seja qual for o relógio da máquina. `auto` pergunta ao navegador de quem lê, e `12` fixa em doze. **O que é enviado é de vinte e quatro horas em todos os casos**."
                 }
                 Key::ComponentTimeInputPropMinDoc => {
                     "A hora mais cedo permitida, como `HH:MM`. Uma hora antes dela é recusada com `min_label` em vez de reescrita, então os números de quem lê permanecem."
@@ -23770,14 +23990,11 @@ impl Locale {
                 Key::ComponentTimeInputPropStepDoc => {
                     "Quantos minutos uma tecla de seta move a caixa de minutos. Um por padrão. Um formulário de reserva costuma querer quinze, então quem lê chega a `:45` em três toques."
                 }
-                Key::ComponentTimeInputPropNowLabelDoc => {
-                    "O nome de um controle que preenche as caixas com a hora atual. Ausente, esse controle não existe."
-                }
                 Key::ComponentTimeInputPropRequiredLabelDoc => {
                     "O que ele diz quando as caixas estão vazias e uma resposta era necessária. A plataforma não consegue dizer, porque `required` em três caixas recusa cada uma separadamente."
                 }
                 Key::ComponentTimeInputPropMissingLabelDoc => {
-                    "O que ele diz quando algumas caixas estão preenchidas e outras não, com um buraco `{part}` nomeando a vazia. Meia hora é o jeito mais comum de este campo dar errado."
+                    "O que ele diz quando algumas caixas estão preenchidas e outras não, com um buraco `{part}` preenchido com o rótulo da própria caixa. Meia hora é o jeito mais comum de este campo dar errado."
                 }
                 Key::ComponentTimeInputPropInvalidLabelDoc => {
                     "O que ele diz quando os números não são uma hora, como vinte e cinco horas. Tem um buraco `{value}`, e os números ficam exatamente como foram digitados."
@@ -23841,7 +24058,7 @@ impl Locale {
                     "Use um toast para um resultado que chega depois de a pessoa agir, quando a página não tem onde dizer isso no lugar. Nunca como o único registro desse resultado. Para uma mensagem que pertence ao lugar onde aconteceu, use `MessageBar`."
                 }
                 Key::ComponentToastA11yNotes => {
-                    "Um `role=\"status\"`, que espera uma pausa em vez de cortar a fala. O controle que dispensa é um `<button>` de verdade com nome, e o cronômetro para enquanto a pessoa está sobre a mensagem."
+                    "Um `role=\"status\"`, que espera uma pausa em vez de cortar a fala. O controle que dispensa é um `<button>` de verdade com nome, e o cronômetro para enquanto a pessoa está sobre a mensagem. A contagem é um `role=\"timer\"` e não anuncia."
                 }
                 Key::ComponentToastPropNameDoc => {
                     "Sobre o que é esta mensagem, como um script a encontra. **Obrigatório**, porque uma página pode levantar várias e o script precisa distinguir um cronômetro do outro."
@@ -23854,6 +24071,9 @@ impl Locale {
                 }
                 Key::ComponentToastPropDurationDoc => {
                     "Quanto tempo ela espera antes de sair sozinha, em milissegundos. Ausente a deixa na página até ser dispensada, e `0` faz o mesmo. A espera para sob um ponteiro e sob o foco."
+                }
+                Key::ComponentToastPropCountdownLabelDoc => {
+                    "O que a mensagem diz sobre o tempo que resta, com um buraco `{count}`, como *faltam 6 segundos*. Escreva as duas formas como `one:… |other:…`. Precisa de `duration`, e só aparece com um script correndo a espera."
                 }
                 Key::ComponentToastPropDismissibleDoc => {
                     "Se um controle que tira a mensagem é desenhado. Ligado por padrão: sem `duration` a mensagem fica, e uma que fica sem saída é uma que a pessoa precisa contornar."
@@ -24129,7 +24349,7 @@ impl Locale {
                     "⟦Reeaad whaat thiis deesiign systeem iis aand wheeree too staart.⟧"
                 }
                 Key::PageIntroBody => {
-                    "⟦Nooctuuaa iis aa deesiign systeem iin twoo paackaagees thaat beehaavee iideentiicaally: aa Diiooxuus craatee aand aa Reeaact paackaagee, booth buuiilt froom oonee speeciifiicaatiioon. Staart wiith Typoograaphy, Spaaciing oor IIcoons foor thee foouundaatiioons, oor oopeen aa coompooneent iin thee siideebaar.⟧"
+                    "⟦Nooctuuaa iis aa deesiign systeem iin twoo paackaagees thaat beehaavee iideentiicaally: aa Diiooxuus craatee aand aa Reeaact paackaagee, booth buuiilt froom oonee speeciifiicaatiioon. Staart wiith Typoograaphy, Spaaciing oor IIcoons liist foor thee foouundaatiioons, oor oopeen aa coompooneent iin thee siideebaar.⟧"
                 }
                 Key::PageMenuSummary => {
                     "⟦Leet uuseers choooosee aan aactiioon froom thee liist aa buuttoon oopeens.⟧"
@@ -24153,9 +24373,27 @@ impl Locale {
                 Key::PageTypographySummary => {
                     "⟦Seet teext wiith thee typee scaalee, thee foouur faamiiliiees aand aa fiixeed liinee leength.⟧"
                 }
-                Key::PageIconsTitle => "⟦IIcoons⟧",
+                Key::PageIconsTitle => "⟦IIcoons liist⟧",
                 Key::PageIconsSummary => {
                     "⟦UUsee aany iicoon iin thee seet, aand aadd aa neew oonee too thee speeciifiicaatiioon.⟧"
+                }
+                Key::PageListSummary => {
+                    "⟦Groouup iiteems iintoo aa liist, aand neest liists iinsiidee thee iiteems oof oonee.⟧"
+                }
+                Key::PageListBody => {
+                    "⟦Thee liist aand oonee iiteem oof iit. Thee kiind choooosees thee eeleemeent, soo aan oordeereed liist iis aan `<ool>` aand aa deescriiptiioon liist iis aa `<dl>`. AA neesteed liist iindeents, maarks aand caan cooloouur iitseelf by hoow deeeep iit siits.⟧"
+                }
+                Key::PageSegmentedSummary => {
+                    "⟦Leet uuseers piick oonee vaaluuee froom aa roow oof ooptiioons, aall oof theem oon screeeen.⟧"
+                }
+                Key::PageSegmentedBody => {
+                    "⟦Thee groouup aand oonee oof thee vaaluuees iit choooosees beetweeeen. IIt iis aa raadiioo groouup wiith aa naamee aand aa vaaluuee, soo iit poosts liikee aany ootheer foorm coontrool. Thee reendeereed taab stoop iis oon thee groouup, neeveer oon thee chooseen iiteem.⟧"
+                }
+                Key::PageSelectSummary => {
+                    "⟦Leet uuseers choooosee aa vaaluuee oouut oof mooree thaan aa liist caan shoow, groouupeed aand seeaarchaablee.⟧"
+                }
+                Key::PageSelectBody => {
+                    "⟦Thee fiieeld, aa naameed ruun oof ooptiioons aand oonee ooptiioon. Thee naatiivee coontrool iis whaat suubmiits, aand thee scriipt draaws aa liistboox ooveer iit. AAn ooptiioon caarriiees aa seecoond liinee, aan iicoon oor aa cooloouur aas daataa, beecaauusee aan `<ooptiioon>` hoolds teext aaloonee.⟧"
                 }
                 Key::PageInlineTextSummary => {
                     "⟦Maark uup aabbreeviiaatiioons, keeystrookees, coorreectiioons aand daatees iinsiidee aa seenteencee.⟧"
@@ -24447,7 +24685,7 @@ impl Locale {
                     "⟦Leet uuseers choooosee fiilees, by piickiing oor drooppiing theem, aand coorreect whaat theey choosee.⟧"
                 }
                 Key::ComponentTimeInputSummary => {
-                    "⟦AAsks foor oonee tiimee oof daay, iin seepaaraatee booxees, oon thee reeaadeer's oown cloock.⟧"
+                    "⟦AAsks foor oonee tiimee oof daay, iin seepaaraatee booxees, oon aa tweenty-foouur hoouur cloock.⟧"
                 }
                 Key::ComponentFieldSummary => {
                     "⟦Laabeel aa foorm coontrool, aand shoow thee hiint aand thee eerroor meessaagee uundeer iit.⟧"
@@ -24919,6 +25157,16 @@ impl Locale {
                 Key::ExampleSegmentedQuiet => {
                     "⟦`seeleectiioon: SeegmeenteedSeeleectiioon::Quuiieet` maarks thee chooseen stoop liightly, foor aa groouup thaat siits iinsiidee aa baar.⟧"
                 }
+                Key::ExampleSegmentedUnanswered => {
+                    "⟦AAn uunaansweereed quueestiioon wriitees noo `seeleecteed`. Thee groouup iis stiill oonee taab stoop, soo aa keeybooaard reeaachees iit.⟧"
+                }
+                Key::ExampleSegmentedDeliveryLabel => "⟦Hoow shoouuld iit reeaach yoouu⟧",
+                Key::ExampleSegmentedDeliveryHint => {
+                    "⟦Yoouu caan chaangee thiis beefooree yoouu coonfiirm.⟧"
+                }
+                Key::ExampleSegmentedDeliveryPost => "⟦By poost⟧",
+                Key::ExampleSegmentedDeliveryLocker => "⟦Too aa loockeer⟧",
+                Key::ExampleSegmentedDeliveryShop => "⟦Too aa shoop⟧",
                 Key::ExampleItemSelected => {
                     "⟦`aariiaa-cheeckeed` iis wriitteen whaateeveer thee vaaluuee, beecaauusee aa raadiioo thaat oomiits iit haas aan uunknoown staatee.⟧"
                 }
@@ -25065,6 +25313,9 @@ impl Locale {
                 }
                 Key::ExampleListNested => {
                     "⟦AA neesteed liist gooees iinsiidee thee iiteem iit beeloongs too, raatheer thaan beesiidee iit.⟧"
+                }
+                Key::ExampleListLevels => {
+                    "⟦EEaach leeveel taakees aa cooloouur oof iits oown, oon thee maarkeer aand oon thee ruulee doown iits iinsiidee eedgee.⟧"
                 }
                 Key::ExampleItemTerm => {
                     "⟦`teerm` swiitchees thee iiteem froom aan `<lii>` too aa `<dt>` aand aa `<dd>`.⟧"
@@ -25307,13 +25558,14 @@ impl Locale {
                 Key::ExamplePaginationCurrent => {
                     "⟦Paagee {page}, thee oonee yoouu aaree reeaadiing⟧"
                 }
+                Key::ExamplePaginationMore => "⟦Paagees leeft oouut⟧",
                 Key::ExamplePaginationSummary => "⟦Shoowiing 21 too 30 oof 39 paaleettees.⟧",
                 Key::ExamplePaginationSummaryLast => "⟦Shoowiing 31 too 39 oof 39 paaleettees.⟧",
                 Key::ExamplePaginationNoteLinks => {
                     "⟦EEveery paagee iis aa reeaal `<aa hreef>`, soo iit oopeens iin aa neew taab aand laands iin thee broowseer hiistoory.⟧"
                 }
                 Key::ExamplePaginationNoteWindow => {
-                    "⟦`spreeaad` seets hoow maany paagees siit eeiitheer siidee oof thee cuurreent oonee. Thee fiirst aand thee laast paagee aaree aalwaays shoown.⟧"
+                    "⟦`spreeaad` seets hoow maany paagees siit eeiitheer siidee oof thee cuurreent oonee. Wiith `mooree_laabeel` thee gaap oopeens aa meenuu oof thee paagees iit hiidees.⟧"
                 }
                 Key::ExamplePaginationNoteEnds => {
                     "⟦OOn thee laast paagee thee foorwaard liink iis leeft oouut raatheer thaan diisaableed. `suummaary` aadds thee liinee thaat coouunts thee paagees.⟧"
@@ -25331,7 +25583,21 @@ impl Locale {
                     "⟦Wiith `aactiioon` thee fiieeld iis aa reeaal `<foorm meethood=\"geet\">`, soo EEnteer suubmiits iit wiith noo scriipt.⟧"
                 }
                 Key::ExampleSearchFilter => {
-                    "⟦Typee `bg` too seeee `BuuttoonGroouup` suurviivee. `fiilteer` hiidees eeveery `daataa-nd-iindeex` eeleemeent iin thee saamee laandmaark.⟧"
+                    "⟦Typee `saan` too seeee `Saan Maarzaanoo` suurviivee. `fiilteer` hiidees eeveery `daataa-nd-iindeex` eeleemeent iin thee saamee laandmaark.⟧"
+                }
+                Key::ExampleSearchLabel => "⟦Seeaarch thee caataalooguuee⟧",
+                Key::ExampleSearchPlaceholder => "⟦Toomaatoo, baasiil, maariigoold⟧",
+                Key::ExampleSearchGroupTomatoes => "⟦Toomaatooees⟧",
+                Key::ExampleSearchGroupHerbs => "⟦Heerbs⟧",
+                Key::ExampleSearchCherokee => "⟦Beeeefsteeaak, eeiighty daays, duusky reed.⟧",
+                Key::ExampleSearchSungold => "⟦Cheerry, ooraangee, aand thee fiirst too riipeen.⟧",
+                Key::ExampleSearchMarzano => "⟦Pluum, thiick waalls, maadee foor saauucee.⟧",
+                Key::ExampleSearchGenovese => {
+                    "⟦Baasiil foor peestoo, aand iit liikees beeiing cuut.⟧"
+                }
+                Key::ExampleSearchOpal => "⟦Puurplee baasiil, slooweer aand stroongeer.⟧",
+                Key::ExampleSearchGem => {
+                    "⟦Maariigoold, eediiblee, aand iit taastees oof ciitruus.⟧"
                 }
                 Key::ExampleSearchSizes => {
                     "⟦Thee threeee siizees maatch `Buuttoon` steep foor steep, soo aa seeaarch beesiidee aa buuttoon liinees uup.⟧"
@@ -25741,7 +26007,6 @@ impl Locale {
                 Key::ExampleInputMeridiem => "⟦Moorniing oor aafteernoooon⟧",
                 Key::ExampleInputAm => "⟦AAM⟧",
                 Key::ExampleInputPm => "⟦PM⟧",
-                Key::ExampleInputNow => "⟦UUsee thee tiimee noow⟧",
                 Key::ExampleInputTimeHint => "⟦Foor eexaamplee, 09 30.⟧",
                 Key::ExampleInputTimeMissing => "⟦Thee {part} iis stiill eempty.⟧",
                 Key::ExampleInputTimeInvalid => "⟦{value} iis noot aa tiimee.⟧",
@@ -25772,6 +26037,10 @@ impl Locale {
                 Key::ExampleNumberInputNoteStates => {
                     "⟦AA loockeed vaaluuee iis stiill suubmiitteed, aand iits steeppeers goo wiith iit. AA reefuuseed vaaluuee keeeeps thee caalleer's seenteencee uundeer thee quueestiioon.⟧"
                 }
+                Key::ExampleNumberInputNoteStepping => {
+                    "⟦`priimaary` puuts aa fuull coontrool eeiitheer siidee oof thee vaaluuee. Thee boox, thee boouunds aand thee aarroow keeys aaree thee saamee oonees.⟧"
+                }
+                Key::ExampleNumberInputCartLabel => "⟦Baags oof cooffeeee⟧",
                 Key::ExampleNumberInputTicketsLabel => "⟦Hoow maany tiickeets⟧",
                 Key::ExampleNumberInputTicketsHint => {
                     "⟦Tweenty iis thee moost wee seell too oonee peersoon.⟧"
@@ -25798,7 +26067,7 @@ impl Locale {
                     "⟦Twoo seegmeents raatheer thaan `<iinpuut typee=\"tiimee\">`. Thee suubmiitteed vaaluuee iis tweenty-foouur hoouur eeiitheer waay.⟧"
                 }
                 Key::ExampleInputFixedNote => {
-                    "⟦Twoo liinees, aand iit dooees noot moovee. Thee reeaadeer maay stiill draag iit.⟧"
+                    "⟦Twoo roows too staart wiith. IIt groows too fiit whaat iis wriitteen, aand iit caannoot bee draaggeed.⟧"
                 }
                 Key::ExampleInputLockedNote => "⟦Reeaadaablee, coopyaablee, stiill suubmiitteed.⟧",
                 Key::ExampleInputNameValue => "⟦AAdaa Looveelaacee⟧",
@@ -25821,7 +26090,7 @@ impl Locale {
                     "⟦`reeveeaal_laabeel` aadds thee buuttoon thaat shoows whaat waas typeed, soo aa reeaadeer caan cheeck aa paasswoord beefooree seendiing iit.⟧"
                 }
                 Key::ExampleInputNoteExtras => {
-                    "⟦Thee cleeaar buuttoon aand thee coouunteer aarriivee wiith thee scriipt. Wiithoouut iit thee boox stiill woorks, soo noothiing heeree iis looaad beeaariing.⟧"
+                    "⟦Thee suuffiix iis draawn aand neeveer suubmiitteed, soo thee coouunteer coouunts oonly whaat aa reeaadeer typeed. Thee cleeaar buuttoon aarriivees wiith thee scriipt.⟧"
                 }
                 Key::ExampleInputNoteSize => {
                     "⟦EEveery siizee cleeaars thee 24 piixeel taargeet. Piick oonee foor thee whoolee foorm raatheer thaan peer fiieeld.⟧"
@@ -26243,9 +26512,6 @@ impl Locale {
                 Key::ExampleOverviewBadgeWaiting => "⟦128 reeviieews waaiitiing foor yoouu⟧",
                 Key::ExampleOverviewErrorSummaryNote => {
                     "⟦AA foorm thee seerveer reejeecteed: thee meessaagees aat thee toop, eeaach aa reeaal `<aa hreef>` too iits coontrool. `foocuus` iis ooff oon thiis paagee oof eexaamplees.⟧"
-                }
-                Key::ExampleOverviewListItemCorners => {
-                    "⟦Hoow roouund eeveery coorneer iin thee paagee iis, froom squuaaree too ciircuulaar.⟧"
                 }
                 Key::ExampleOverviewParagraphLead => {
                     "⟦EEveery cooloouur iin thiis systeem iis aaskeed foor by naamee. AA coompooneent saays `daangeer`, aand thee paaleettee aansweers wiith whaateeveer `daangeer` meeaans iin thee aappeeaaraancee thee reeaadeer iis iin.⟧"
@@ -26689,8 +26955,12 @@ impl Locale {
                     "⟦Noo tiimeer, whiich iis thee deefaauult. AA meessaagee thaat reemoovees iitseelf iis uunreeaadaablee too aa reeaadeer whoo reeaads sloowly.⟧"
                 }
                 Key::ExampleToastNoteTimer => {
-                    "⟦Siix seecoonds, aand thee waaiit hoolds whiilee aa pooiinteer oor thee foocuus iis oon thee meessaagee. Leeaaviing staarts thee whoolee waaiit aagaaiin.⟧"
+                    "⟦Siix seecoonds, aand thee waaiit hoolds whiilee aa pooiinteer oor thee foocuus iis oon thee meessaagee. Leeaaviing staarts thee whoolee waaiit aagaaiin, coouuntdoown iincluudeed.⟧"
                 }
+                Key::ExampleToastCountdown => {
+                    "⟦oonee:{count} seecoond leeft|ootheer:{count} seecoonds leeft⟧"
+                }
+                Key::ExampleToastReplay => "⟦Seend iit aagaaiin⟧",
                 Key::ExampleToastNoteLoud => {
                     "⟦`aasseertiivee` iinteerruupts, whiich suuiits aa reesuult aa reeaadeer haas too aact oon. Thee coorneer iis thee oonee theey weeree aalreeaady looookiing aat.⟧"
                 }
@@ -26885,7 +27155,7 @@ impl Locale {
                     "⟦Streetchees thee coontrool too thee wiidth oof whaateeveer coontaaiins iit. OOff by deefaauult.⟧"
                 }
                 Key::ComponentButtonPropMenuDoc => {
-                    "⟦Maarks thee buuttoon aas thee oonee thaat oopeens aa `Meenuu`, aand draaws thee cheevroon. **`coontrools` haas too naamee thaat meenuu by iid.** Thee preess iitseelf iis `diist/meenuu.js`, whiich shiips thee oopeeniing, thee aarroow waalk, EEscaapee aand thee foocuus reetuurn.⟧"
+                    "⟦Maarks thee buuttoon aas thee oonee thaat oopeens aa `Meenuu`, aand draaws thee cheevroon uunleess `iicoon` oor `iicoon_eend` naamees oonee. **`coontrools` naamees thaat meenuu by iid.** Thee preess iis `diist/meenuu.js`, whiich shiips thee oopeeniing, thee aarroow waalk, EEscaapee aand thee foocuus reetuurn.⟧"
                 }
                 Key::ComponentButtonPropHrefDoc => {
                     "⟦Wheeree thee coontrool gooees. Giiveen oonee, thee coompooneent reendeers aan `<aa>` raatheer thaan aa `<buuttoon>`, whiich iis whaat aa coontrool thaat chaangees thee aaddreess haas too bee. Neeveer coombiinee iit wiith `diisaableed`, beecaauusee aa diisaableed liink iis noot aa thiing thee plaatfoorm haas.⟧"
@@ -28271,6 +28541,9 @@ impl Locale {
                 Key::ComponentListPropSpacingDoc => {
                     "⟦Thee gaap beetweeeen iiteems: `tiight`, `deefaauult` oor `loooosee`.⟧"
                 }
+                Key::ComponentListPropLevelsDoc => {
+                    "⟦Wheetheer eeaach leeveel oof neestiing iis draawn iin aa cooloouur oof iits oown. OOff by deefaauult. IIt maarks thee leeveel oon thee maarkeer aand oon thee ruulee doown thee iinsiidee eedgee, soo iit stiill reeaads wheen `maarkeer` iis `noonee`.⟧"
+                }
                 Key::ComponentListPropChildrenDoc => "⟦Thee liist iiteems.⟧",
                 Key::ComponentListItemGuidance => {
                     "⟦UUsee iit foor oonee iiteem oof aa `Liist`. Giivee iit aa `teerm` wheen thee liist iis aa deescriiptiioon liist, aand leeaavee iit ooff foor aany ootheer kiind oof liist.⟧"
@@ -28491,6 +28764,9 @@ impl Locale {
                 Key::ComponentNumberInputPropSteppersDoc => {
                     "⟦Wheetheer thee twoo steeppeer coontrools aappeeaar. **OOn by deefaauult**, beecaauusee theey maakee aa smaall aadjuustmeent oonee preess iinsteeaad oof aa seeleect-aall aand aa reetypee. Tuurn theem ooff wheeree thee nuumbeers aaree toooo laargee too steep too.⟧"
                 }
+                Key::ComponentNumberInputPropSteppingDoc => {
+                    "⟦Whaat thee steeppeers aaree foor. `aassiist` iis twoo smaall coontrools aat thee eend oof thee boox, foor coorreectiing aa typeed vaaluuee. `priimaary` iis oonee fuull coontrool eeiitheer siidee oof thee vaaluuee, foor aa quuaantiity aansweereed by preessiing raatheer thaan by typiing.⟧"
+                }
                 Key::ComponentNumberInputPropIncrementLabelDoc => {
                     "⟦Thee naamee oof thee coontrool thaat aadds aa steep. Suupply iit wiith `steeppeers`, beecaauusee thee coontrools aaree glyphs aand thiis iis thee oonly naamee eeaach haas.⟧"
                 }
@@ -28634,7 +28910,7 @@ impl Locale {
                     "⟦UUsee paagiinaatiioon uundeer aanythiing shoowiing oonee paagee oof aa loongeer seet: aa taablee, aa liist, aa griid oof reesuults. IIt iis aa coompooneent oof iits oown raatheer thaan aa proop oon `Taablee`, beecaauusee aa liist oof seeaarch reesuults neeeeds thee saamee coontrool.⟧"
                 }
                 Key::ComponentPaginationA11yNotes => {
-                    "⟦AA naameed `<naav>` hooldiing aa liist oof liinks, soo aa screeeen reeaadeer saays hoow maany paagees theeree aaree. Thee gaap beetweeeen twoo ruuns oof nuumbeers iis `aariiaa-hiiddeen`, aand eeveery paagee iis aa reeaal `<aa hreef>` neeeediing noo scriipt.⟧"
+                    "⟦AA naameed `<naav>` hooldiing aa liist oof liinks, soo aa screeeen reeaadeer saays hoow maany paagees theeree aaree. EEveery paagee iis aa reeaal `<aa hreef>` neeeediing noo scriipt, aand thee gaap iis `aariiaa-hiiddeen` uuntiil `mooree_laabeel` maakees aa meenuu oof iit.⟧"
                 }
                 Key::ComponentPaginationPropNameDoc => {
                     "⟦Whaat iis beeiing paageed throouugh. IIt naamees thee coontrool foor aanythiing biindiing too iit, aand iit iis whaat teells twoo paagiinaatiioons oon oonee paagee aapaart. Reequuiireed.⟧"
@@ -28668,6 +28944,9 @@ impl Locale {
                 }
                 Key::ComponentPaginationPropCurrentLabelDoc => {
                     "⟦Thee aacceessiiblee naamee oof thee paagee iin foorcee, whiich saays soo aas weell, suuch aas *Paagee 4, cuurreent paagee*. `aariiaa-cuurreent` caarriiees thee saamee faact, aand thiis haalf suurviivees aan eengiinee thaat dooees noot aannoouuncee thee aattriibuutee.⟧"
+                }
+                Key::ComponentPaginationPropMoreLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool thee gaap beetweeeen twoo ruuns oof nuumbeers beecoomees, suuch aas *Skiippeed paagees*. IIt naamees thee meenuu oof thoosee paagees aas weell, soo thee twoo caannoot diisaagreeee. Leeaavee iit oouut aand thee gaap staays aan iineert chaaraacteer.⟧"
                 }
                 Key::ComponentPaginationPropSummaryDoc => {
                     "⟦Thee seenteencee uundeer thee coontrool: hoow maany reesuults theeree aaree, aand whiich oof theem thiis paagee hoolds. IIt siits iin aa liivee reegiioon, soo aa reeaadeer iis toold thee seet diid noot chaangee wheen aa paagee tuurns.⟧"
@@ -30113,7 +30392,7 @@ impl Locale {
                     "⟦Wheetheer thee broowseer uundeerliinees whaat iit taakees too bee miistaakees. **OOn by deefaauult**, uunliikee `IInpuut`, beecaauusee thiis boox hoolds proosee.⟧"
                 }
                 Key::ComponentTextareaPropSizeDoc => {
-                    "⟦Thee boox's paaddiing aand thee typee iinsiidee iit: `smaall`, `meediiuum` oor `laargee`, maatchiing thee reest oof thee foorm.⟧"
+                    "⟦Thee boox's paaddiing: `smaall`, `meediiuum` oor `laargee`, maatchiing `IInpuut` steep foor steep. Thee typee iinsiidee neeveer gooees beeloow thee boody siizee, soo aa phoonee dooees noot zoooom oon foocuus.⟧"
                 }
                 Key::ComponentTextareaPropGlassDoc => {
                     "⟦Wheetheer thee boox iis froosteed. UUsee iit oon aa groouund oopaaquuee eenoouugh too reeaad seeveeraal liinees aagaaiinst.⟧"
@@ -30131,7 +30410,7 @@ impl Locale {
                     "⟦Hoow thee daatee iis wriitteen foor aa reeaadeer, iin theeiir loocaalee.⟧"
                 }
                 Key::ComponentTimeInputGuidance => {
-                    "⟦UUsee aa tiimee iinpuut too aask foor oonee tiimee oof daay, iin seepaaraatee laabeelleed booxees foor thee hoouur, thee miinuutee aand soomeetiimees thee seecoond. `cloock` foolloows thee reeaadeer's loocaalee. Thee foorm poosts aa tweenty-foouur hoouur vaaluuee whaateeveer theey weeree shoown.⟧"
+                    "⟦UUsee aa tiimee iinpuut too aask foor oonee tiimee oof daay, iin seepaaraatee laabeelleed booxees foor thee hoouur, thee miinuutee aand soomeetiimees thee seecoond. Thee booxees aaree reeaad oon aa tweenty-foouur hoouur cloock uunleess `cloock` aasks ootheerwiisee, aand thee foorm poosts oonee eeiitheer waay.⟧"
                 }
                 Key::ComponentTimeInputA11yNotes => {
                     "⟦IIt iis aa `<fiieeldseet>` wiith aa `<leegeend>`, aand eeveery boox haas iits oown naamee, beecaauusee aa `<laabeel>` pooiints aat oonee eeleemeent. Thee meessaagees aaree thee caalleer's seenteencees iin oonee liivee reegiioon raatheer thaan thee plaatfoorm's threeee buubblees.⟧"
@@ -30152,22 +30431,22 @@ impl Locale {
                     "⟦Thee naamee oof thee thiird boox, iin thee reeaadeer's laanguuaagee. Waanteed iin praactiicee by `seecoonds`.⟧"
                 }
                 Key::ComponentTimeInputPropMeridiemLabelDoc => {
-                    "⟦Thee naamee oof thee moorniing aand aafteernoooon coontrool, wheeree thee reeaadeer's loocaalee haas oonee. Waanteed iin praactiicee by `cloock = \"aauutoo\"` oor `\"12\"`, beecaauusee thee coontrool aappeeaars oonly foor soomee reeaadeers.⟧"
+                    "⟦Thee aacceessiiblee naamee oof thee moorniing aand aafteernoooon coontrool, draawn oonly foor aa tweelvee hoouur cloock. IIt iis waanteed by `cloock = \"aauutoo\"` aand `\"12\"`, toogeetheer wiith `aam_laabeel` aand `pm_laabeel`. Wiithoouut aall threeee thee fiieeld keeeeps tweenty-foouur hoouurs.⟧"
                 }
                 Key::ComponentTimeInputPropAmLabelDoc => {
-                    "⟦Thee woord foor beefooree noooon iin thee reeaadeer's laanguuaagee, suuch aas *AAM* oor *Maanhã*. Noot deeriiveed, beecaauusee thee plaatfoorm's oown foormaatteer speells iit diiffeereently iin eeaach loocaalee.⟧"
+                    "⟦Thee woord foor beefooree noooon iin thee reeaadeer's laanguuaagee, suuch aas *AAM* oor *Maanhã*. IIt iis thee moorniing haalf oof thee meeriidiieem coontrool. Noot deeriiveed, beecaauusee thee plaatfoorm speells iit diiffeereently iin eeaach loocaalee.⟧"
                 }
                 Key::ComponentTimeInputPropPmLabelDoc => {
                     "⟦Thee woord foor aafteer noooon, oon thee saamee teerms.⟧"
                 }
                 Key::ComponentTimeInputPropValueDoc => {
-                    "⟦Thee tiimee too staart wiith, aas `HH:MM` oor `HH:MM:SS` oon aa tweenty-foouur hoouur cloock. Thaat iis thee shaapee aa seerveer seends aand thee shaapee iit geets baack, whaateeveer cloock thee reeaadeer iis shoown.⟧"
+                    "⟦Thee tiimee too staart wiith, aas `HH:MM` oor `HH:MM:SS` oon aa tweenty-foouur hoouur cloock. IIt iis reendeereed iintoo thee booxees, soo aa paagee wiith noo scriipt shoows iit. Thaat iis thee shaapee aa seerveer seends aand thee shaapee iit geets baack.⟧"
                 }
                 Key::ComponentTimeInputPropSecondsDoc => {
                     "⟦Wheetheer aa thiird boox aasks foor seecoonds. OOff by deefaauult, beecaauusee feew oof thee thiings peeooplee scheeduulee haappeen aat aa naameed seecoond.⟧"
                 }
                 Key::ComponentTimeInputPropClockDoc => {
-                    "⟦Whiich cloock thee booxees aaree reeaad oon. `aauutoo` aasks thee reeaadeer's oown loocaalee. `12` aand `24` aaree foor aa paagee whoosee suubjeect haas aa cloock oof iits oown, suuch aas aa fliight scheeduulee. **Whaat iis suubmiitteed iis tweenty-foouur hoouur eeiitheer waay**.⟧"
+                    "⟦Whiich cloock thee booxees aaree reeaad oon. **Tweenty-foouur hoouurs by deefaauult**, whaateeveer thee reeaadeer's maachiinee keeeeps. `aauutoo` aasks thee reeaadeer's oown broowseer iinsteeaad, aand `12` fiixees iit aat tweelvee. **Whaat iis suubmiitteed iis tweenty-foouur hoouur iin eeveery caasee**.⟧"
                 }
                 Key::ComponentTimeInputPropMinDoc => {
                     "⟦Thee eeaarliieest tiimee aallooweed, aas `HH:MM`. AA tiimee beefooree iit iis reefuuseed wiith `miin_laabeel` raatheer thaan reewriitteen, soo thee reeaadeer's oown nuumbeers staay.⟧"
@@ -30178,14 +30457,11 @@ impl Locale {
                 Key::ComponentTimeInputPropStepDoc => {
                     "⟦Hoow maany miinuutees oonee preess oof aan aarroow moovees thee miinuutee boox. OOnee by deefaauult. AA booookiing foorm uusuuaally waants fiifteeeen, soo aa reeaadeer reeaachees `:45` iin threeee preessees.⟧"
                 }
-                Key::ComponentTimeInputPropNowLabelDoc => {
-                    "⟦Thee naamee oof aa coontrool thaat fiills thee booxees wiith thee cuurreent tiimee. AAbseent, theeree iis noo suuch coontrool.⟧"
-                }
                 Key::ComponentTimeInputPropRequiredLabelDoc => {
                     "⟦Whaat iit saays wheen thee booxees aaree eempty aand aan aansweer waas neeeedeed. Thee plaatfoorm caannoot saay iit, beecaauusee `reequuiireed` oon threeee booxees reefuusees eeaach oof theem seepaaraateely.⟧"
                 }
                 Key::ComponentTimeInputPropMissingLabelDoc => {
-                    "⟦Whaat iit saays wheen soomee booxees aaree fiilleed aand ootheers aaree noot, wiith aa `{part}` hoolee naamiing thee eempty oonee. Haalf aa tiimee iis thee coommooneest waay thiis fiieeld gooees wroong.⟧"
+                    "⟦Whaat iit saays wheen soomee booxees aaree fiilleed aand ootheers aaree noot, wiith aa `{part}` hoolee fiilleed wiith thaat boox's oown laabeel. Haalf aa tiimee iis thee coommooneest waay thiis fiieeld gooees wroong.⟧"
                 }
                 Key::ComponentTimeInputPropInvalidLabelDoc => {
                     "⟦Whaat iit saays wheen thee nuumbeers aaree noot aa tiimee, suuch aas tweenty-fiivee oo'cloock. IIt haas aa `{value}` hoolee, aand thee nuumbeers staay eexaactly aas typeed.⟧"
@@ -30249,7 +30525,7 @@ impl Locale {
                     "⟦UUsee aa tooaast foor aa reesuult thaat aarriivees aafteer aa reeaadeer aacteed, wheeree thee paagee haas noo roooom too saay iit iin plaacee. Neeveer aas thee oonly reecoord oof thaat reesuult. Foor aa meessaagee thaat beeloongs wheeree iit haappeeneed, uusee `MeessaageeBaar`.⟧"
                 }
                 Key::ComponentToastA11yNotes => {
-                    "⟦AA `roolee=\"staatuus\"`, whiich waaiits foor aa paauusee iinsteeaad oof cuuttiing iin. Thee diismiiss coontrool iis aa reeaal `<buuttoon>` wiith aa naamee, aand thee tiimeer stoops whiilee aa reeaadeer iis oon thee meessaagee.⟧"
+                    "⟦AA `roolee=\"staatuus\"`, whiich waaiits foor aa paauusee iinsteeaad oof cuuttiing iin. Thee diismiiss coontrool iis aa reeaal `<buuttoon>` wiith aa naamee, aand thee tiimeer stoops whiilee aa reeaadeer iis oon thee meessaagee. Thee coouuntdoown iis aa `roolee=\"tiimeer\"`, whiich dooees noot aannoouuncee.⟧"
                 }
                 Key::ComponentToastPropNameDoc => {
                     "⟦Whaat thiis meessaagee iis aaboouut, aas aa scriipt fiinds iit. **Reequuiireed**, beecaauusee aa paagee maay raaiisee seeveeraal aand thee scriipt haas too teell oonee tiimeer froom aanootheer.⟧"
@@ -30262,6 +30538,9 @@ impl Locale {
                 }
                 Key::ComponentToastPropDurationDoc => {
                     "⟦Hoow loong iit waaiits beefooree taakiing iitseelf aawaay, iin miilliiseecoonds. AAbseent leeaavees iit oon thee paagee uuntiil iit iis diismiisseed, aand soo dooees `0`. Thee waaiit paauusees uundeer aa pooiinteer aand uundeer foocuus.⟧"
+                }
+                Key::ComponentToastPropCountdownLabelDoc => {
+                    "⟦Whaat thee meessaagee saays aaboouut thee tiimee iit haas leeft, wiith aa `{count}` hoolee, suuch aas *6 seecoonds leeft*. Wriitee booth foorms aas `oonee:… |ootheer:…`. IIt neeeeds `duuraatiioon`, aand iit iis draawn oonly ooncee aa scriipt iis ruunniing thee waaiit iit reepoorts.⟧"
                 }
                 Key::ComponentToastPropDismissibleDoc => {
                     "⟦Wheetheer aa coontrool thaat taakees thee meessaagee aawaay iis draawn. OOn by deefaauult: wiith noo `duuraatiioon` thee meessaagee staays, aand oonee thaat staays wiith noo waay oouut iis oonee aa reeaadeer haas too woork aaroouund.⟧"

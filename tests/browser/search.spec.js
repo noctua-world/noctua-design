@@ -130,7 +130,9 @@ test("aria-activedescendant names a row that exists", async ({ page }) => {
   await page.goto(url(PAGE.search));
   await showParts(page);
   const box = page.locator(CHILDREN.box);
-  await box.fill("bu");
+  // A letter every row in the catalogue carries, so the walk below has
+  // somewhere to go on all four presses.
+  await box.fill("o");
   await box.press("ArrowDown");
 
   // THE DEFECT this guards: rebuilding the `<ul>` on every keystroke, which is
@@ -147,9 +149,9 @@ test("aria-activedescendant names a row that exists", async ({ page }) => {
   }
 
   // Focus never left the box, so a fourth typed letter still reaches the query.
-  await box.press("t");
+  await box.press("p");
   await expect(box).toBeFocused();
-  await expect(box).toHaveValue("but");
+  await expect(box).toHaveValue("op");
 });
 
 test("only the active row claims to be selected", async ({ page }) => {
@@ -198,28 +200,34 @@ test("keywords reach a page whose name does not contain them", async ({ page }) 
   await page.goto(url(PAGE.search));
   await showParts(page);
   const box = page.locator('[data-nd-search="result-keywords"] .nd-search-input');
-  await box.fill("gap");
-  // There is no `g`, `a`, `p` run anywhere in "Spacing" — the letters are in
-  // its keywords, and that is the only way this row is here.
-  const spacing = page.locator('[data-nd-search="result-keywords"] li:has(a[href*="spacing"])');
-  await expect(spacing).toBeVisible();
+  await box.fill("slic");
+  // Neither the name nor the line under it carries an `l` after an `s`:
+  // "Cherokee Purple" has no `s` at all, and `slicing` is in the keywords.
+  // That is the only way this row is here.
+  const heirloom = page.locator('[data-nd-search="result-keywords"] li:has(a[href*="cherokee"])');
+  await expect(heirloom).toBeVisible();
 
   await box.fill("zzzz");
-  await expect(spacing).toBeHidden();
+  await expect(heirloom).toBeHidden();
 });
 
 test("a row matched only on its keywords is not highlighted", async ({ page }) => {
   await page.goto(url(PAGE.search));
   await showParts(page);
-  await page.locator('[data-nd-search="result-keywords"] .nd-search-input').fill("gap");
+  const box = page.locator('[data-nd-search="result-keywords"] .nd-search-input');
+  await box.fill("slic");
   // The positions index a string that is not on the screen, and a highlight
-  // over the wrong letters is worse than no highlight. Its neighbour IS marked
-  // — `gap` is a subsequence of `Typography` — so this is the difference
-  // between the two paths rather than the absence of highlighting altogether.
-  const spacing = page.locator('[data-nd-search="result-keywords"] li:has(a[href*="spacing"])');
-  await expect(spacing.locator("[data-nd-hit]")).toHaveCount(0);
-  const typography = page.locator('[data-nd-search="result-keywords"] li:has(a[href*="typography"])');
-  expect((await typography.locator("[data-nd-hit]").allTextContents()).join("")).toBe("gap");
+  // over the wrong letters is worse than no highlight.
+  const heirloom = page.locator('[data-nd-search="result-keywords"] li:has(a[href*="cherokee"])');
+  await expect(heirloom.locator("[data-nd-hit]")).toHaveCount(0);
+  // And a row matched on its NAME is marked, which is what makes the line
+  // above a difference between two paths rather than highlighting being off.
+  await box.fill("sun");
+  const named_ = page.locator('[data-nd-search="result-keywords"] li:has(a[href*="sungold"])');
+  // Waited for rather than read straight away: the query is answered a beat
+  // after the keystroke, and a marked row read too early is an empty one.
+  await expect(named_.locator("[data-nd-hit]").first()).toBeVisible();
+  expect((await named_.locator("[data-nd-hit]").allTextContents()).join("")).toBe("Sun");
 });
 
 // --- The highlight ----------------------------------------------------------
@@ -244,7 +252,7 @@ test("a highlight never destroys the label it came from", async ({ page }) => {
   const label = page.locator(`${CHILDREN.rows} .nd-search-result-label`).first();
   const before = await label.innerHTML();
 
-  await box.fill("spa");
+  await box.fill("san");
   await expect(page.locator(`${CHILDREN.root} [data-nd-hit]`).first()).toBeVisible();
   await box.fill("");
   await expect(page.locator(`${CHILDREN.root} [data-nd-hit]`)).toHaveCount(0);
@@ -377,12 +385,14 @@ test("a capped list says how many it is not showing", async ({ page }) => {
   await page.goto(url(PAGE.search));
   await showParts(page);
   const box = page.locator('[data-nd-search="popover"] .nd-search-input');
-  await box.fill("s");
+  // A letter every variety in the catalogue carries, so there are six answers
+  // and the cap has something to leave out.
+  await box.fill("o");
   // `cap: "3"`. Without the sentence a capped search silently claims there were
   // three answers when there were five, which is the quietest way a search lies.
   const rows = page.locator('[data-nd-search="popover"] .nd-search-result:not([hidden])');
   await expect(rows).toHaveCount(3);
-  await expect(page.locator("#nd-search-popover-status")).toContainText("Showing 3 of");
+  await expect(page.locator("#nd-search-popover-status")).toContainText("Showing 3 of 6");
 });
 
 test("nothing matched is an answer, not silence", async ({ page }) => {
@@ -420,9 +430,9 @@ test("filtering reaches the page around the box and stops there", async ({ page 
   await page.goto(url(PAGE.search));
   await showParts(page);
   const rows = page.locator(".nd-example-filtered li");
-  await page.locator('[data-nd-search="filter"] .nd-search-input').fill("bg");
+  await page.locator('[data-nd-search="filter"] .nd-search-input').fill("san");
   await expect(rows.filter({ visible: true })).toHaveCount(1);
-  await expect(rows.filter({ visible: true }).first()).toHaveText("ButtonGroup");
+  await expect(rows.filter({ visible: true }).first()).toHaveText("San Marzano");
 
   // And the navigation did not move. Filtering the navigation removes the rows
   // a reader is navigating BY, which is why the site's search became a palette.
@@ -541,4 +551,61 @@ test("every offered locale searches in its own words", async ({ page }) => {
     const status = await page.locator(PALETTE.status).textContent();
     expect(status.trim(), `${locale} said nothing`).not.toBe("");
   }
+});
+
+// --- An example is not the page it sits on ----------------------------------
+//
+// EVERY ROW THESE EXAMPLES DREW WAS A REAL PAGE OF THIS SITE: `Button`,
+// `Checkbox`, *Spacing*, *Typography*, and `/search/` itself marked `current`.
+// A reader could not tell the demonstration from the application, which is the
+// one thing an example has to make obvious. They are a seed catalogue now,
+// invented, and this is what keeps them that way.
+
+test("the examples search an invented catalogue rather than this site", async ({ page }) => {
+  await page.goto(url(PAGE.search));
+  await showParts(page);
+
+  // What is drawn on the page, which is every example except the palette: its
+  // index is fetched, and `src` is the one prop whose subject is fetching.
+  const labels = await page
+    .locator(".nd-search-result-label")
+    .evaluateAll((all) => all.map((one) => one.textContent.trim()));
+  expect(labels.length, "the page drew no results at all").toBeGreaterThan(10);
+
+  // The site's own names, which are what these rows used to be. `Table` and
+  // `Switch` are ordinary words, so each is compared whole rather than by
+  // substring, and the two that are not — a page title in the reader's
+  // language — are checked from the sidebar instead.
+  const OURS = ["Button", "ButtonGroup", "Checkbox", "Segmented", "Select", "Switch", "Table"];
+  for (const label of labels) {
+    expect(OURS, `an example still lists this site's own components: ${label}`).not.toContain(label);
+  }
+
+  const titles = await page
+    .locator(".nd-nav a")
+    .evaluateAll((all) => all.map((one) => one.textContent.trim()).filter(Boolean));
+  for (const label of labels) {
+    expect(titles, `an example still lists this site's own pages: ${label}`).not.toContain(label);
+  }
+
+  // AND THE CATALOGUE IS ACTUALLY THERE, because every check above holds for a
+  // page that drew nothing at all.
+  expect(labels, "the invented catalogue is missing").toContain("Cherokee Purple");
+});
+
+test("the invented rows are the same rows in every locale, and the sentences are not", async ({
+  page,
+}) => {
+  const seen = [];
+  for (const locale of OFFERED) {
+    await page.goto(url(PAGE.search, locale));
+    await showParts(page);
+    // A VARIETY IS A PROPER NAME AND CROSSES UNCHANGED, which is what lets a
+    // query written into an example match in every language. The line under it
+    // is a sentence and goes through the catalogue, so the two must differ.
+    const row = page.locator('[data-nd-search="children"] .nd-search-result').first();
+    expect(await row.locator(".nd-search-result-label").textContent()).toBe("Cherokee Purple");
+    seen.push((await row.locator(".nd-search-result-detail").textContent()).trim());
+  }
+  expect(new Set(seen).size, "the detail line is the same in both languages").toBe(seen.length);
 });

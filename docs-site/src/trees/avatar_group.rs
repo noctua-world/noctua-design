@@ -14,10 +14,16 @@ use crate::trees::Tree;
 /// The people the avatar examples are about.
 ///
 /// Real names with real initials, and one of each shape the fallback takes: a
-/// picture that loads, letters, and nothing at all. The pictures are the site's
-/// own mark, because it is a file the build already writes — an example
-/// pointing at a URL nothing answers would be a permanent 404 on a published
-/// page, and `theme.spec.js` refuses those in writing.
+/// picture that loads, letters, and nothing at all. The picture is a portrait
+/// the docs build already copies, so the URL answers on a published page and
+/// `theme.spec.js` has nothing to refuse. It used to be the site's own mark,
+/// which is a ring around a dot: every face carrying it drew a second circle
+/// inside the avatar's own.
+///
+/// EACH FACE IS A DIFFERENT PERSON, SO EACH IS A DIFFERENT COLOUR. Four
+/// avatars at one tone are four identical grey discs, and a group whose whole
+/// purpose is the overlap cannot show which of four identical discs is in
+/// front. `pending` keeps the default, because nobody has taken that place yet.
 ///
 /// One fragment rather than four copies, for the reason the macro it replaces
 /// existed: three examples show the same group, and three copies stop agreeing.
@@ -30,7 +36,7 @@ const PEOPLE: &[Node] = &[
             props: &[
                 ("label", Value::Message(Key::ExampleAvatarAna)),
                 ("initials", Value::Data("AL")),
-                ("src", Value::Asset("favicon.svg")),
+                ("src", Value::Asset("assets/portraits/ada.svg")),
             ],
             children: &[],
         }],
@@ -43,6 +49,7 @@ const PEOPLE: &[Node] = &[
             props: &[
                 ("label", Value::Message(Key::ExampleAvatarBruno)),
                 ("initials", Value::Data("BS")),
+                ("tone", Value::Text("accent")),
             ],
             children: &[],
         }],
@@ -55,6 +62,7 @@ const PEOPLE: &[Node] = &[
             props: &[
                 ("label", Value::Message(Key::ExampleAvatarCarla)),
                 ("initials", Value::Data("CM")),
+                ("tone", Value::Text("success")),
             ],
             children: &[],
         }],
@@ -166,6 +174,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         props: &[
                             ("label", Value::Message(Key::ExampleAvatarAna)),
                             ("initials", Value::Data("AL")),
+                            ("src", Value::Asset("assets/portraits/ada.svg")),
                         ],
                         children: &[],
                     }],
@@ -178,6 +187,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         props: &[
                             ("label", Value::Message(Key::ExampleAvatarBruno)),
                             ("initials", Value::Data("BS")),
+                            ("tone", Value::Text("accent")),
                         ],
                         children: &[],
                     }],

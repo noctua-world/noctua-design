@@ -240,7 +240,7 @@ pub fn Button(
     /// Stretches the control to the width of whatever contains it. Off by default.
     #[props(default = false)]
     fill: bool,
-    /// Marks the button as the one that opens a `Menu`, and draws the chevron. **`controls` has to name that menu by id.** The press itself is `dist/menu.js`, which ships the opening, the arrow walk, Escape and the focus return.
+    /// Marks the button as the one that opens a `Menu`, and draws the chevron unless `icon` or `icon_end` names one. **`controls` names that menu by id.** The press is `dist/menu.js`, which ships the opening, the arrow walk, Escape and the focus return.
     #[props(default = false)]
     menu: bool,
     /// Where the control goes. Given one, the component renders an `<a>` rather than a `<button>`, which is what a control that changes the address has to be. Never combine it with `disabled`, because a disabled link is not a thing the platform has.
@@ -303,6 +303,18 @@ pub fn Button(
         rel
     };
 
+    // ONE CHEVRON, WHOEVER DREW IT.
+    //
+    // `menu` draws the chevron that makes a menu control look like
+    // one, and it already steps aside for an `icon_end`. A LEADING
+    // `icon` NAMING THE SAME DRAWING WAS NOT COVERED, so a split
+    // button asking for `icon: "chevron-down"` beside `menu` drew two
+    // of them side by side. That shipped on two pages of this site.
+    // A button with two chevrons is not a control anybody designs, so
+    // the component refuses to draw the second rather than trusting
+    // every caller to notice.
+    let chevron = menu && icon != Some(IconName::ChevronDown);
+
     let content = rsx! {
         // A TOGGLE SHIPS BOTH GLYPHS AND LETS THE STATE PICK ONE.
         //
@@ -332,7 +344,7 @@ pub fn Button(
         // steps aside for an `icon_end` the caller chose deliberately.
         if let Some(icon_end) = icon_end {
             Icon { icon: icon_end }
-        } else if menu {
+        } else if chevron {
             Icon { icon: IconName::ChevronDown, size: crate::components::IconSize::Small }
         }
     };

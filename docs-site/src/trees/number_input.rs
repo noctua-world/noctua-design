@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `NumberInput` example. 6 of them.
+/// Every `NumberInput` example. 7 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // ONE QUESTION, IN A FORM THAT SUBMITS. Press Save and the quantity
     // arrives in the address bar, which is the only way to show that this is a
@@ -60,6 +60,34 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     children: &[],
                 },
             ],
+        }],
+    ),
+    // STEPPING IS THE ANSWER RATHER THAN A CORRECTION. `primary` is the shape
+    // a quantity takes on a product page: one full control either side of the
+    // value, each big enough to hit with a thumb, and the digits between them.
+    // The markup is the same as the default's, so the arrow keys, the bounds
+    // and the sentences are all still this control's.
+    (
+        r#"NumberInput { stepping: "primary", label, value, min, max, increment_label, decrement_label }"#,
+        &[Node::Component {
+            name: "NumberInput",
+            props: &[
+                ("name", Value::Text("cart")),
+                ("label", Value::Message(Key::ExampleNumberInputCartLabel)),
+                ("stepping", Value::Text("primary")),
+                ("value", Value::Text("1")),
+                ("min", Value::Text("1")),
+                ("max", Value::Text("12")),
+                (
+                    "increment_label",
+                    Value::Message(Key::ExampleNumberInputMore),
+                ),
+                (
+                    "decrement_label",
+                    Value::Message(Key::ExampleNumberInputLess),
+                ),
+            ],
+            children: &[],
         }],
     ),
     // REFUSED AND EXPLAINED, NEVER REWRITTEN. Type 40, leave the box, and the

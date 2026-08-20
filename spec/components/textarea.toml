@@ -110,7 +110,7 @@ values = ["small", "medium", "large"]
 variants = false
 default = "medium"
 attribute = "data-nd-size"
-doc = "The box's padding and the type inside it: `small`, `medium` or `large`, matching the rest of the form."
+doc = "The box's padding: `small`, `medium` or `large`, matching `Input` step for step. The type inside never goes below the body size, so a phone does not zoom on focus."
 
 [prop.glass]
 type = "bool"

@@ -129,10 +129,21 @@ pub(crate) const EXAMPLES: &[Tree] = &[
             children: &[],
         }],
     ),
-    // WHAT THE BOX CARRIES BESIDE THE TEXT. A handle, which is what an icon, a
-    // prefix, a suffix and a character count are all actually for.
+    // WHAT THE BOX CARRIES BESIDE THE TEXT: ONE ORNAMENT AT EACH END, AND A
+    // COUNT OF WHAT IS BETWEEN THEM.
+    //
+    // It carried an `icon` AND a `prefix`, both at the leading end, so the box
+    // opened with a person and an `@` doing one job twice. `prefix` is already
+    // shown twice in the example above, on `+55` and on `https://`, and
+    // nowhere else does an icon say what kind of answer a box wants, so the
+    // `@` is the one that goes.
+    //
+    // AND IT SHIPS A VALUE, because the counter counts the value. Empty, it
+    // read *0 of 24 characters* under a box with `.noctua` visibly in it,
+    // which is the counter appearing to disagree with the box. Filled, the
+    // same sentence says the affix is drawn and never counted.
     (
-        r"Input { icon, prefix, suffix, clearable, clear_label, maxlength, counter, counter_label }",
+        r"Input { icon, suffix, value, clearable, clear_label, maxlength, counter, counter_label }",
         &[Node::Component {
             name: "Input",
             props: &[
@@ -140,7 +151,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 ("label", Value::Message(Key::ExampleInputHandleLabel)),
                 ("hint", Value::Message(Key::ExampleInputHandleHint)),
                 ("icon", Value::Text("user")),
-                ("prefix", Value::Data("@")),
+                ("value", Value::Data("ada.lovelace")),
                 ("suffix", Value::Data(".noctua")),
                 ("clearable", Value::Bool(true)),
                 ("clear_label", Value::Message(Key::ExampleInputClear)),

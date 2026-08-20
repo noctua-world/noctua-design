@@ -45,20 +45,61 @@ test("the submit control does not touch the field above it", async ({ page }) =>
   expect(apart).toBeGreaterThanOrEqual(8);
 });
 
-test("the English page re-lays the row month-first, and it is ONE order", async ({ page }) => {
-  await page.goto(url(PAGE.dateInput));
-  const field = page.locator(BIRTH);
-  await expect(field).toHaveAttribute("data-nd-resolved", "mdy");
-  // Document order agrees with the stamp…
-  const parts = await field
-    .locator(".nd-date-input-row [data-nd-part]")
-    .evaluateAll((all) => all.map((one) => one.dataset.ndPart));
-  expect(parts).toEqual(["month", "day", "year"]);
-  // …and Tab walks it: from the month box, Tab lands on the day box. Three
-  // orders — eyes, Tab, reader — were the defect this contract forbids.
-  await page.focus(box(BIRTH, "month"));
-  await page.keyboard.press("Tab");
-  await expect(page.locator(box(BIRTH, "day"))).toBeFocused();
+// --- The order is the READER's, and this is the test that says so ----------
+
+/** What each forced locale writes a numeric date in, and what CLDR says. */
+const ORDERS = [
+  ["en-GB", ["day", "month", "year"], "dmy"],
+  ["en-US", ["month", "day", "year"], "mdy"],
+  ["pt-BR", ["day", "month", "year"], "dmy"],
+];
+
+for (const [locale, expected, stamp] of ORDERS) {
+  test(`a reader whose browser says ${locale} gets ${stamp}`, async ({ browser }) => {
+    // THE TEST THAT WOULD HAVE CAUGHT IT, AND THE ONE THAT WAS THERE INSTEAD.
+    // The old pair asserted `mdy` on the English page and `dmy` on the
+    // Portuguese one, which is the defect written down as the requirement:
+    // the detection was asking `document.documentElement.lang`, so it
+    // answered with the language the PAGE is written in. A bare `en` has no
+    // region and CLDR resolves it to the United States, so every reader of
+    // the English build was re-laid month-first — including the ones whose
+    // browser says `en-GB`, who had been served the right order and were
+    // moved off it.
+    //
+    // Forcing the locale is the whole point: it is the one thing the page
+    // cannot influence, so a detection that reads the page cannot pass this.
+    const context = await browser.newContext({ locale });
+    const page = await context.newPage();
+    await page.goto(url(PAGE.dateInput));
+    const field = page.locator(BIRTH);
+    await expect(field).toHaveAttribute("data-nd-resolved", stamp);
+    // Document order agrees with the stamp…
+    const parts = await field
+      .locator(".nd-date-input-row [data-nd-part]")
+      .evaluateAll((all) => all.map((one) => one.dataset.ndPart));
+    expect(parts).toEqual(expected);
+    // …and Tab walks it: from the first box, Tab lands on the second. Three
+    // orders — eyes, Tab, reader — were the defect this contract forbids.
+    await page.focus(box(BIRTH, expected[0]));
+    await page.keyboard.press("Tab");
+    await expect(page.locator(box(BIRTH, expected[1]))).toBeFocused();
+    await context.close();
+  });
+}
+
+test("the page's own language does not decide the order", async ({ browser }) => {
+  // The other half of the same claim, and the one a single-locale run cannot
+  // make: the Portuguese page read by an American browser is month-first,
+  // because the order is a convention the READER keeps and not a word this
+  // page is written in. The month NAMES in the calendar stay Portuguese,
+  // which is why `dateWords` and `readerLocales` are two functions.
+  const context = await browser.newContext({ locale: "en-US" });
+  const page = await context.newPage();
+  await page.goto(url(PAGE.dateInput, "pt-BR"));
+  await expect(page.locator(BIRTH)).toHaveAttribute("data-nd-resolved", "mdy");
+  await page.locator(`${VISIT} .nd-date-input-suggest-button`).click();
+  await expect(page.locator(`${VISIT} .nd-date-input-month`)).not.toHaveText(/Jan|Feb|Mar/);
+  await context.close();
 });
 
 test("every label still points at its own box after the move", async ({ page }) => {
@@ -81,10 +122,6 @@ test("a declared order is never second-guessed by detection", async ({ page }) =
   await expect(first).toHaveAttribute("data-nd-part", "year");
 });
 
-test("the Portuguese page keeps day-first", async ({ page }) => {
-  await page.goto(url(PAGE.dateInput, "pt-BR"));
-  await expect(page.locator(BIRTH)).toHaveAttribute("data-nd-resolved", "dmy");
-});
 
 test("an empty required submit is named, and focus lands on the first box", async ({ page }) => {
   await page.goto(url(PAGE.dateInput));

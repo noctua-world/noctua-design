@@ -10,7 +10,7 @@ use noctua_design_i18n::Key;
 
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
-use crate::trees::search::PAGES;
+use crate::trees::search::CATALOGUE;
 
 /// Every `SearchGroup` example. 4 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
@@ -20,21 +20,21 @@ pub(crate) const EXAMPLES: &[Tree] = &[
             name: "Search",
             props: &[
                 ("name", Value::Text("group-one")),
-                ("label", Value::Message(Key::SearchLabel)),
-                ("placeholder", Value::Message(Key::SearchPlaceholder)),
+                ("label", Value::Message(Key::ExampleSearchLabel)),
+                ("placeholder", Value::Message(Key::ExampleSearchPlaceholder)),
                 ("status", Value::Message(Key::SearchResults)),
                 ("empty_label", Value::Message(Key::SearchEmpty)),
             ],
             children: &[Node::Component {
                 name: "SearchGroup",
-                props: &[("label", Value::Message(Key::SearchGroupComponents))],
+                props: &[("label", Value::Message(Key::ExampleSearchGroupTomatoes))],
                 children: &[
                     Node::Component {
                         name: "SearchResult",
                         props: &[
                             ("class", Value::Text("nd-identifier")),
-                            ("href", Value::Text("../button/")),
-                            ("label", Value::Data("Button")),
+                            ("href", Value::Text("#sungold")),
+                            ("label", Value::Data("Sungold")),
                         ],
                         children: &[],
                     },
@@ -42,8 +42,8 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         name: "SearchResult",
                         props: &[
                             ("class", Value::Text("nd-identifier")),
-                            ("href", Value::Text("../select/")),
-                            ("label", Value::Data("Select")),
+                            ("href", Value::Text("#san-marzano")),
+                            ("label", Value::Data("San Marzano")),
                         ],
                         children: &[],
                     },
@@ -57,12 +57,12 @@ pub(crate) const EXAMPLES: &[Tree] = &[
             name: "Search",
             props: &[
                 ("name", Value::Text("group-two")),
-                ("label", Value::Message(Key::SearchLabel)),
-                ("placeholder", Value::Message(Key::SearchPlaceholder)),
+                ("label", Value::Message(Key::ExampleSearchLabel)),
+                ("placeholder", Value::Message(Key::ExampleSearchPlaceholder)),
                 ("status", Value::Message(Key::SearchResults)),
                 ("empty_label", Value::Message(Key::SearchEmpty)),
             ],
-            children: &[Node::Fragment(PAGES)],
+            children: &[Node::Fragment(CATALOGUE)],
         }],
     ),
     (
@@ -71,8 +71,8 @@ pub(crate) const EXAMPLES: &[Tree] = &[
             name: "Search",
             props: &[
                 ("name", Value::Text("group-mixed")),
-                ("label", Value::Message(Key::SearchLabel)),
-                ("placeholder", Value::Message(Key::SearchPlaceholder)),
+                ("label", Value::Message(Key::ExampleSearchLabel)),
+                ("placeholder", Value::Message(Key::ExampleSearchPlaceholder)),
                 ("status", Value::Message(Key::SearchResults)),
                 ("empty_label", Value::Message(Key::SearchEmpty)),
             ],
@@ -80,22 +80,23 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 Node::Component {
                     name: "SearchResult",
                     props: &[
-                        ("href", Value::Text("../intro/")),
-                        ("label", Value::PageTitle("intro")),
-                        ("detail", Value::Message(Key::PageIntroSummary)),
+                        ("class", Value::Text("nd-identifier")),
+                        ("href", Value::Text("#lemon-gem")),
+                        ("label", Value::Data("Lemon Gem")),
+                        ("detail", Value::Message(Key::ExampleSearchGem)),
                     ],
                     children: &[],
                 },
                 Node::Component {
                     name: "SearchGroup",
-                    props: &[("label", Value::Message(Key::SearchGroupComponents))],
+                    props: &[("label", Value::Message(Key::ExampleSearchGroupTomatoes))],
                     children: &[
                         Node::Component {
                             name: "SearchResult",
                             props: &[
                                 ("class", Value::Text("nd-identifier")),
-                                ("href", Value::Text("../button/")),
-                                ("label", Value::Data("Button")),
+                                ("href", Value::Text("#sungold")),
+                                ("label", Value::Data("Sungold")),
                             ],
                             children: &[],
                         },
@@ -103,8 +104,8 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                             name: "SearchResult",
                             props: &[
                                 ("class", Value::Text("nd-identifier")),
-                                ("href", Value::Text("../select/")),
-                                ("label", Value::Data("Select")),
+                                ("href", Value::Text("#san-marzano")),
+                                ("label", Value::Data("San Marzano")),
                             ],
                             children: &[],
                         },
@@ -119,14 +120,14 @@ pub(crate) const EXAMPLES: &[Tree] = &[
             name: "Search",
             props: &[
                 ("name", Value::Text("group-empty")),
-                ("value", Value::Data("sel")),
-                ("label", Value::Message(Key::SearchLabel)),
-                ("placeholder", Value::Message(Key::SearchPlaceholder)),
+                ("value", Value::Data("okra")),
+                ("label", Value::Message(Key::ExampleSearchLabel)),
+                ("placeholder", Value::Message(Key::ExampleSearchPlaceholder)),
                 ("status", Value::Message(Key::SearchResults)),
                 ("empty_label", Value::Message(Key::SearchEmpty)),
                 ("clear_label", Value::Message(Key::SearchClear)),
             ],
-            children: &[Node::Fragment(PAGES)],
+            children: &[Node::Fragment(CATALOGUE)],
         }],
     ),
 ];

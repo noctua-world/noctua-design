@@ -154,25 +154,32 @@ function countFor(box, region, sentence, signal) {
 // --- Textarea ----------------------------------------------------------------
 
 function enhanceTextarea(root, signal) {
+  // THE ROOT IS THE FIELD, NOT THE CONTROL, exactly as it is for an `Input`.
+  // The border, the corners and the frost sit on a box around the `<textarea>`
+  // now, because a radius on a scroller lets the scrollbar paint through it —
+  // so everything measured and grown below is the box inside.
+  const at = reader(root);
+  const box = root.querySelector("[data-nd-textarea-box]");
+  if (!box) return;
   const counter = root.parentElement?.querySelector("[data-nd-textarea-counter]");
-  if (counter) countFor(root, counter, root.getAttribute("data-nd-counter-label"), signal);
-  if (root.getAttribute("data-nd-autosize") !== "true") return;
+  if (counter) countFor(box, counter, at("counter-label"), signal);
+  if (at("autosize") !== "true") return;
 
-  const maxRows = number(root.getAttribute("data-nd-max-rows"));
+  const maxRows = number(at("max-rows"));
   const grow = () => {
     // Measured from zero, because a box already at its old height reports that
     // height as its content's. The cap is applied to the STYLE rather than to
     // the measurement, so the box scrolls at the ceiling instead of stopping
     // short of its own text.
-    root.style.height = "auto";
-    const line = Number.parseFloat(getComputedStyle(root).lineHeight) || 0;
+    box.style.height = "auto";
+    const line = Number.parseFloat(getComputedStyle(box).lineHeight) || 0;
     const ceiling = maxRows && line ? maxRows * line : Infinity;
-    const wanted = root.scrollHeight;
-    root.style.height = `${Math.min(wanted, ceiling)}px`;
-    root.style.overflowY = wanted > ceiling ? "auto" : "hidden";
+    const wanted = box.scrollHeight;
+    box.style.height = `${Math.min(wanted, ceiling)}px`;
+    box.style.overflowY = wanted > ceiling ? "auto" : "hidden";
   };
   grow();
-  root.addEventListener("input", grow, { signal });
+  box.addEventListener("input", grow, { signal });
   // A box that was hidden when the page loaded measures as zero, so it is
   // measured again the first time it is shown.
   //
@@ -180,7 +187,7 @@ function enhanceTextarea(root, signal) {
   // listeners take. A second registry of observers to shut down is a second
   // list that stops agreeing with the first.
   const watch = new ResizeObserver(grow);
-  watch.observe(root);
+  watch.observe(box);
   signal.addEventListener("abort", () => watch.disconnect());
 }
 
@@ -448,6 +455,13 @@ function enhanceSlider(root, signal) {
     const high = Number(thumbs[0].max || 100);
     const span = high - low || 1;
     const fillTo = range && end ? Number(end.value) : Number(start.value);
+    // AND THE BAND STARTS AT THE FIRST THUMB WHEN THERE ARE TWO. It ran from
+    // the leading end of the track whatever the range was, so the start handle
+    // sat in the middle of a solid band and nothing said what it bounded. A
+    // single slider still fills from the start, because there is nothing below
+    // its value to leave out.
+    const fillFrom = range && end ? Number(start.value) : low;
+    rails?.style.setProperty("--nd-slider-from", `${((fillFrom - low) / span) * 100}%`);
     rails?.style.setProperty("--nd-slider-fill", `${((fillTo - low) / span) * 100}%`);
     // THE UNIT IS ANNOUNCED, NOT ONLY DRAWN. `37` is a number; *37 pixels* is
     // an answer, and the two must not say different things about one value.
@@ -729,10 +743,24 @@ export function segmentWalk(boxes, options = {}) {
 
 // --- TimeInput ---------------------------------------------------------------
 
-/** Whether this locale writes its times on a twelve-hour clock. */
-function twelveHour(locale) {
+/**
+ * Whether the READER's own locale writes its times on a twelve-hour clock.
+ *
+ * IT IS THE READER'S AND NEVER THE PAGE'S. This was handed
+ * `document.documentElement.lang` — the language the page happens to be
+ * written in, which is `en` on an English build. A bare `en` has no region, so
+ * CLDR answers with the United States and every reader of that page was put on
+ * a twelve-hour clock, including the ones whose browser says `en-GB` and keeps
+ * twenty-four. `DateInput`'s row order had the same defect from the same line.
+ *
+ * An empty chain is passed as an empty array on purpose: `Intl` reads that as
+ * *use the default locale*, which is the reader's own by definition. There is
+ * no table of locales to clocks here and there must not be one.
+ */
+function twelveHourReader() {
   try {
-    return new Intl.DateTimeFormat(locale, { hour: "numeric" }).resolvedOptions().hour12 === true;
+    const asked = [...(navigator.languages || []), navigator.language].filter(Boolean);
+    return new Intl.DateTimeFormat(asked, { hour: "numeric" }).resolvedOptions().hour12 === true;
   } catch {
     return false;
   }
@@ -743,64 +771,52 @@ function enhanceTimeInput(root, signal) {
   const segments = [...root.querySelectorAll("[data-nd-time-input-segment]")];
   if (segments.length === 0) return;
   const status = root.querySelector("[data-nd-time-input-status]");
-  const row = root.querySelector("[data-nd-time-input-row]");
   const meridiem = root.querySelector("[data-nd-time-input-meridiem]");
+  const group = root.querySelector(".nd-time-input-meridiem-group");
   const pad = at("pad") !== "false";
   const step = number(at("step")) ?? 1;
-  const locale = document.documentElement.lang || undefined;
+  // TWENTY-FOUR UNLESS SOMEBODY SAID OTHERWISE, and `auto` is the only value
+  // that asks anything. A missing attribute is twenty-four too, so a field
+  // this file cannot read the clock of is left on the one it was served.
   const clock = at("clock");
-  const twelve = clock === "12" || (clock === "auto" && twelveHour(locale));
+  // AND NEVER WITHOUT THE CONTROL THAT SAYS WHICH HALF OF THE DAY IT IS. A
+  // field re-laid to twelve with no meridiem control is a field a reader
+  // cannot state an afternoon in, so it stays on the clock it was served.
+  const twelve = (clock === "12" || (clock === "auto" && twelveHourReader())) && Boolean(group);
 
   const bounds = { hour: [0, 23], minute: [0, 59], second: [0, 59] };
   const of = (part) => segments.find((one) => one.dataset.ndTimeInputSegment === part);
+  /** A box's own visible label, which is the only name for it in the reader's
+   * language. The part's key is an identifier and was reaching sentences. */
+  const labelOf = (part) =>
+    root.querySelector(`label[for="${CSS.escape(of(part)?.id ?? "")}"]`)?.textContent?.trim() ??
+    part;
 
   // THE VALUE ARRIVES AS TWENTY-FOUR HOURS AND LEAVES AS TWENTY-FOUR HOURS,
   // whatever the reader was shown — a server should not have to know what
-  // clock somebody's phone keeps.
-  const given = (at("value") ?? "").split(":");
-  segments.forEach((segment, index) => {
-    if (given[index] !== undefined && given[index] !== "") {
-      segment.value = pad ? String(given[index]).padStart(2, "0") : given[index];
-    }
-  });
+  // clock somebody's phone keeps. The boxes are RENDERED with it, so nothing
+  // here fills them in; what this reads is the hour it must go back to.
+  const served = number(of("hour")?.value ?? "");
 
-  let afternoon = Number(given[0] ?? -1) >= 12;
+  /** Whether the reader is in the afternoon, or `null` for *not said yet*. */
+  let afternoon = served === null ? null : served >= 12;
 
   if (twelve && meridiem) {
     meridiem.hidden = false;
-    // A choice between two named things, which is what `Segmented` is for —
-    // built here rather than shipped because a control that appears for some
-    // readers and not others cannot be server-rendered honestly.
-    const group = document.createElement("div");
-    group.className = "nd-segmented nd-time-input-meridiem-group";
-    group.setAttribute("role", "radiogroup");
-    group.dataset.ndSize = "small";
-    const named = root.querySelector(".nd-visually-hidden[id$='-meridiem-label']");
-    if (named) group.setAttribute("aria-labelledby", named.id);
-    for (const [value, word] of [
-      ["am", at("am-label")],
-      ["pm", at("pm-label")],
-    ]) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "nd-segmented-item";
-      button.setAttribute("role", "radio");
-      button.dataset.ndValue = value;
-      button.setAttribute("aria-checked", String((value === "pm") === afternoon));
-      button.tabIndex = (value === "pm") === afternoon ? 0 : -1;
-      button.textContent = word ?? value;
-      button.addEventListener("click", () => {
-        afternoon = value === "pm";
-        for (const other of group.querySelectorAll("[data-nd-value]")) {
-          const on = other.dataset.ndValue === value;
-          other.setAttribute("aria-checked", String(on));
-          other.tabIndex = on ? 0 : -1;
-        }
-        commit();
-      }, { signal });
-      group.append(button);
+    if (group) {
+      for (const button of group.querySelectorAll("[data-nd-value]")) {
+        button.addEventListener("click", () => {
+          if (button.getAttribute("aria-disabled") === "true") return;
+          afternoon = button.dataset.ndValue === "pm";
+          for (const other of group.querySelectorAll("[data-nd-value]")) {
+            const on = other === button;
+            other.setAttribute("aria-checked", String(on));
+            other.tabIndex = on ? 0 : -1;
+          }
+          commit();
+        }, { signal });
+      }
     }
-    meridiem.append(group);
 
     // The hour box is read on twelve now, so what it shows is re-laid — the
     // boxes MOVE rather than being restyled, which is why `data-nd-resolved`
@@ -812,7 +828,6 @@ function enhanceTimeInput(root, signal) {
       hour.value = pad ? String(shown).padStart(2, "0") : String(shown);
     }
     bounds.hour = [1, 12];
-    if (row && meridiem) row.append(meridiem);
     // INSIDE THE BRANCH, WHERE THE RE-LAYING HAPPENS. This was written
     // unconditionally, so the one state that exists to tell a re-laid clock
     // from a served one was true of every time field on every page.
@@ -839,23 +854,45 @@ function enhanceTimeInput(root, signal) {
     for (const part of ["hour", "minute", "second"]) {
       const segment = of(part);
       if (!segment) continue;
-      if (segment.value.trim() === "") return { missing: part };
+      if (segment.value.trim() === "") return { missing: labelOf(part) };
       const value = number(segment.value);
       const [low, high] = bounds[part];
       if (value === null || value < low || value > high) return { invalid: segment.value };
       parts[part] = value;
     }
     if (twelve) {
+      // HALF THE READING IS THE MERIDIEM CONTROL'S, so a time whose half of
+      // the day nobody has chosen is half a time. This used to read `null` as
+      // false and post the morning, which is a wrong answer rather than an
+      // unfinished one.
+      if (afternoon === null) return { missing: meridiemName() };
       const raw = parts.hour % 12;
       parts.hour = afternoon ? raw + 12 : raw;
     }
     return parts;
   }
 
-  /** Writes what the boxes mean back onto the fieldset, and says what is wrong. */
-  function commit() {
+  /** The meridiem control's own name, for the sentence that asks for it. It
+   * is the element the group already points `aria-labelledby` at, so the
+   * sentence and the announcement cannot say two different things. */
+  function meridiemName() {
+    const named = group?.getAttribute("aria-labelledby") ?? "";
+    return document.getElementById(named)?.textContent?.trim() ?? "";
+  }
+
+  /**
+   * Writes what the boxes mean back onto the fieldset, and says what is wrong.
+   *
+   * `speak: false` IS THE FIRST PASS, AND IT JUDGES NOTHING. This ran whole at
+   * enhance time, so a required field said *Give a time to continue* into a
+   * live region before the reader had touched it, and a field the CALLER had
+   * marked wrong had its boxes un-marked by `flag(false)` — a sentence still
+   * under the question and nothing on the page agreeing with it.
+   */
+  function commit({ speak = true } = {}) {
     const read = readAll();
     if (read.missing !== undefined) {
+      if (!speak) return;
       // Half a time is the commonest way this goes wrong and the one the
       // platform has nothing to say about.
       const empty = segments.every((one) => one.value.trim() === "");
@@ -864,6 +901,7 @@ function enhanceTimeInput(root, signal) {
       return;
     }
     if (read.invalid !== undefined) {
+      if (!speak) return;
       say(status, fill(at("invalid-label"), { value: read.invalid }));
       flag(true);
       return;
@@ -880,13 +918,16 @@ function enhanceTimeInput(root, signal) {
         ? spelled >= low || spelled <= high
         : (!low || spelled >= low) && (!high || spelled <= high);
     if (!inside) {
+      if (!speak) return;
       say(status, spelled < (low ?? "") ? fill(at("min-label"), { min: low }) : fill(at("max-label"), { max: high }));
       flag(true);
       return;
     }
-    flag(false);
+    if (speak) {
+      flag(false);
+      say(status, "");
+    }
     root.setAttribute("data-nd-value", spelled);
-    say(status, "");
   }
 
   // THE THREE GESTURES A ROW OF BOXES SHARES, from `segmentWalk`: two digits
@@ -975,35 +1016,26 @@ function enhanceTimeInput(root, signal) {
     }, { signal });
   }
 
-  // REVEALED ONLY NOW, because reading the clock is this file's and nothing
-  // else's. The control shipped visible and did nothing at all with the script
-  // blocked, which is what `NumberInput`'s steppers and `Input`'s clear and
-  // reveal controls are gated to prevent. The component wraps it in the span
-  // this uncovers, since a component cannot be handed `hidden` itself.
-  const nowSlot = root.querySelector("[data-nd-time-input-now]");
-  if (nowSlot) nowSlot.hidden = false;
+  // TWENTY-FOUR HOURS IS WHAT THE FORM POSTS, WHICHEVER CLOCK IS ON SCREEN,
+  // and the contract says so in three places. A box posts what it SHOWS, so a
+  // re-laid field sent `hour=02` for a reader who had said two in the
+  // afternoon and marked PM beside it — a wrong time, silently, with nothing
+  // in the request to reconstruct it from. The entry is rewritten on the way
+  // out instead, which is exactly what `NumberInput` does with the separators
+  // `group` draws.
+  //
+  // Only on a re-laid clock, and only for a reading this file can vouch for:
+  // anything else is posted exactly as the reader typed it.
+  const hourBox = of("hour");
+  if (twelve && hourBox?.form && hourBox.name) {
+    hourBox.form.addEventListener("formdata", (event) => {
+      const read = readAll();
+      if (read.hour === undefined) return;
+      event.formData.set(hourBox.name, String(read.hour).padStart(2, "0"));
+    }, { signal });
+  }
 
-  const now = root.querySelector('[data-nd-action="time-input-now"]');
-  now?.addEventListener("click", () => {
-    const clockNow = new Date();
-    const values = { hour: clockNow.getHours(), minute: clockNow.getMinutes(), second: clockNow.getSeconds() };
-    afternoon = values.hour >= 12;
-    for (const part of ["hour", "minute", "second"]) {
-      const segment = of(part);
-      if (!segment) continue;
-      let value = values[part];
-      if (twelve && part === "hour") value = value % 12 === 0 ? 12 : value % 12;
-      segment.value = pad ? String(value).padStart(2, "0") : String(value);
-    }
-    for (const button of root.querySelectorAll(".nd-time-input-meridiem-group [data-nd-value]")) {
-      const on = (button.dataset.ndValue === "pm") === afternoon;
-      button.setAttribute("aria-checked", String(on));
-      button.tabIndex = on ? 0 : -1;
-    }
-    commit();
-  }, { signal });
-
-  commit();
+  commit({ speak: false });
 }
 
 // --- OtpField ----------------------------------------------------------------
@@ -1118,11 +1150,11 @@ export function enhanceInputs(root = document) {
  * Takes the behaviour back off every input control under `root`.
  *
  * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
- * CLIENT-SIDE ROUTER. Two of the seven controls reach OUTSIDE the element they
- * were given: a `NumberInput` in a form listens for `formdata` on that form,
- * and a `TimeInput` listens for `submit` on it. The form outlives the control,
- * so both listeners outlive it too, and each one holds the whole detached
- * subtree alive through its closure.
+ * CLIENT-SIDE ROUTER. Three of the seven controls reach OUTSIDE the element
+ * they were given: a `NumberInput` and a re-laid `TimeInput` both listen for
+ * `formdata` on the form, and an `OtpField` listens for `submit` on it. The
+ * form outlives the control, so those listeners outlive it too, and each one
+ * holds the whole detached subtree alive through its closure.
  *
  * A `Textarea` adds a third: it observes itself for resizes, and an observer
  * with a live observation keeps its target alive whether or not the target is

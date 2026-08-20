@@ -27,6 +27,8 @@ export function Menu({ name, label, placement, className, children, ...rest }) {
       hidden: true,
       ...rest,
     },
-    children,
+    // See the Dioxus half: the surface clips and this scrolls, because a
+    // scrollable element carries no radius.
+    h("div", { key: "s", className: "nd-menu-scroll", role: "none" }, children),
   );
 }

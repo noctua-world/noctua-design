@@ -10,7 +10,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Hero;
 
-/// The heroes in this group. 16 of them.
+/// The heroes in this group. 15 of them.
 pub(crate) const HEROES: &[Hero] = &[
     (
         "avatars",
@@ -26,12 +26,15 @@ AvatarGroup { label: "Reviewers", more: "+5", more_label: "…", more_href: "…
                     tag: "span",
                     attributes: &[("class", Value::Text("nd-example-byline"))],
                     children: &[
+                        // A PORTRAIT, NOT THE SITE'S OWN MARK. The favicon is a
+                        // ring around a dot, so it drew a second circle inside
+                        // the avatar's own — two rings where a face belongs.
                         Node::Component {
                             name: "Avatar",
                             props: &[
                                 ("decorative", Value::Bool(true)),
                                 ("initials", Value::Data("AL")),
-                                ("src", Value::Asset("favicon.svg")),
+                                ("src", Value::Asset("assets/portraits/ada.svg")),
                                 ("label", Value::Message(Key::ExampleAvatarAna)),
                             ],
                             children: &[],
@@ -60,6 +63,7 @@ AvatarGroup { label: "Reviewers", more: "+5", more_label: "…", more_href: "…
                                 props: &[
                                     ("label", Value::Message(Key::ExampleAvatarBruno)),
                                     ("initials", Value::Data("BS")),
+                                    ("tone", Value::Text("accent")),
                                 ],
                                 children: &[],
                             }],
@@ -72,6 +76,7 @@ AvatarGroup { label: "Reviewers", more: "+5", more_label: "…", more_href: "…
                                 props: &[
                                     ("label", Value::Message(Key::ExampleAvatarCarla)),
                                     ("initials", Value::Data("CM")),
+                                    ("tone", Value::Text("success")),
                                 ],
                                 children: &[],
                             }],
@@ -289,34 +294,9 @@ ErrorSummaryItem { control: "nd-overview-terms-yes", "…" }"#,
             ],
         }],
     ),
-    (
-        "list-item",
-        r#"List { kind: ListKind::Description }
-ListItem { term: "Accent", "…" }"#,
-        &[Node::Component {
-            name: "List",
-            props: &[("kind", Value::Text("description"))],
-            children: &[
-                Node::Component {
-                    name: "ListItem",
-                    props: &[("term", Value::Message(Key::ThemeAccentLabel))],
-                    children: &[Node::Text(Value::Message(Key::ExampleTermAccent))],
-                },
-                Node::Component {
-                    name: "ListItem",
-                    props: &[("term", Value::Message(Key::ThemeGlassLabel))],
-                    children: &[Node::Text(Value::Message(Key::ExampleTermGlass))],
-                },
-                Node::Component {
-                    name: "ListItem",
-                    props: &[("term", Value::Message(Key::ThemeRadiusLabel))],
-                    children: &[Node::Text(Value::Message(
-                        Key::ExampleOverviewListItemCorners,
-                    ))],
-                },
-            ],
-        }],
-    ),
+    // `list-item` had a hero here, and `/list/`'s own already draws the
+    // description list it showed. `ListItem` is documented on `/list/` now,
+    // and a page has one hero.
     (
         "paragraph",
         r"Paragraph { size: ParagraphSize::Lead, … }

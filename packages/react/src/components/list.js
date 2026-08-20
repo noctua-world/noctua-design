@@ -11,7 +11,7 @@
 
 import { createElement as h } from "react";
 
-export function List({ kind, marker, spacing, className, children, ...rest }) {
+export function List({ kind, marker, spacing, levels, className, children, ...rest }) {
   const kind_ = kind ?? "unordered";
   const root = ["nd-list", className].filter(Boolean).join(" ");
   // This prop chooses the element rather than an attribute.
@@ -25,6 +25,9 @@ export function List({ kind, marker, spacing, className, children, ...rest }) {
       role: element === "dl" ? undefined : "list",
       "data-nd-marker": marker ?? "default",
       "data-nd-spacing": spacing ?? "default",
+      // See the Dioxus half: the flag belongs to the outermost
+      // list, and the stylesheet counts the lists under it.
+      "data-nd-levels": String(levels ?? false),
       ...rest,
     },
     children,

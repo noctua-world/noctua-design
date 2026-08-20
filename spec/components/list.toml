@@ -6,6 +6,7 @@ class = "nd-list"
 # back to the pangram placeholder, so every value of every enum prop
 # draws one identical line of text — which is what the reader saw.
 specimen = "<li class=\"nd-list-item nd-identifier\">Aa</li><li class=\"nd-list-item nd-identifier\">Bb</li><li class=\"nd-list-item nd-identifier\">Cc</li>"
+page = "list"
 summary = "Group items as an ordered, unordered or description list, with nesting."
 
 [prop.kind]
@@ -28,6 +29,23 @@ values = ["tight", "default", "loose"]
 default = "default"
 attribute = "data-nd-spacing"
 doc = "The gap between items: `tight`, `default` or `loose`."
+
+# SET IT ON THE OUTERMOST LIST AND NOWHERE ELSE.
+#
+# A nested `List` is its own component instance, so the attribute is on the
+# list a caller wrote it on and on none of the lists inside it. The stylesheet
+# counts the lists between the root and an item rather than reading a number
+# off each one, which is why a caller never has to say how deep a list is and
+# cannot say a depth that is wrong.
+[prop.levels]
+type = "bool"
+default = "false"
+attribute = "data-nd-levels"
+# NO `specimen` HERE, AND THAT IS NOT AN OVERSIGHT. `specimens::drawn` takes
+# enum props only, so a bool has no variant grid to carry a picture into. What
+# shows this one is the last example on the page, which is the only place a
+# nested list exists to be coloured.
+doc = "Whether each level of nesting is drawn in a colour of its own. Off by default. It marks the level on the marker and on the rule down the inside edge, so it still reads when `marker` is `none`."
 
 [prop.children]
 type = "children"

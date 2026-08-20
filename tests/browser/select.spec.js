@@ -10,7 +10,7 @@
 // measuring nothing.
 
 import { test, expect } from "@playwright/test";
-import { PAGE, url } from "./pages.js";
+import { PAGE, showParts, url } from "./pages.js";
 import { extremes } from "./pixels.js";
 
 // THE ONE ASSERTION THAT MATTERS MOST IS THAT THE NATIVE VALUE FOLLOWS.
@@ -25,6 +25,7 @@ const field = (page, name) => page.locator(`[data-nd-select]:has(#nd-select-${na
 
 test("the enhancement keeps the real control and hides it properly", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   const native = page.locator("#nd-select-palette");
 
   // Still in the page, still named, still what submits.
@@ -46,6 +47,7 @@ test("the enhancement keeps the real control and hides it properly", async ({ pa
 
 test("a select is the same box as a button, at every size", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   // MEASURED AGAINST THE BUTTON, NOT AGAINST THREE NUMBERS.
   //
   // The contract says `Button`'s scale step for step, and the first version of
@@ -80,6 +82,7 @@ test("a select is the same box as a button, at every size", async ({ page }) => 
 
 test("the combobox keeps its ARIA contract while it is open", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   const control = page.locator("#nd-select-palette-control");
   await control.scrollIntoViewIfNeeded();
 
@@ -104,6 +107,7 @@ test("the combobox keeps its ARIA contract while it is open", async ({ page }) =
 
 test("choosing writes the value into the select that submits", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   const control = page.locator("#nd-select-palette-control");
   const native = page.locator("#nd-select-palette");
   await control.scrollIntoViewIfNeeded();
@@ -119,6 +123,7 @@ test("choosing writes the value into the select that submits", async ({ page }) 
 
 test("the keyboard opens it, moves in it and never chooses by moving", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   const control = page.locator("#nd-select-palette-control");
   const native = page.locator("#nd-select-palette");
   await control.scrollIntoViewIfNeeded();
@@ -145,6 +150,7 @@ test("the keyboard opens it, moves in it and never chooses by moving", async ({ 
 
 test("Escape closes, restores focus and changes nothing", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   const control = page.locator("#nd-select-palette-control");
   const native = page.locator("#nd-select-palette");
   await control.scrollIntoViewIfNeeded();
@@ -160,6 +166,7 @@ test("Escape closes, restores focus and changes nothing", async ({ page }) => {
 
 test("Tab leaves without taking what was highlighted", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   const control = page.locator("#nd-select-palette-control");
   const native = page.locator("#nd-select-palette");
   await control.scrollIntoViewIfNeeded();
@@ -175,6 +182,7 @@ test("Tab leaves without taking what was highlighted", async ({ page }) => {
 
 test("type-ahead lands on the option the letters name", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   const control = page.locator("#nd-select-palette-control");
   await control.scrollIntoViewIfNeeded();
   await control.focus();
@@ -187,6 +195,7 @@ test("type-ahead lands on the option the letters name", async ({ page }) => {
 
 test("filtering hides what does not match, and says so when nothing does", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   const control = page.locator("#nd-select-palette-search-control");
   await control.scrollIntoViewIfNeeded();
   await control.click();
@@ -214,6 +223,7 @@ test("filtering hides what does not match, and says so when nothing does", async
 
 test("clearing puts the field back to nothing", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   const control = page.locator("#nd-select-palette-search-control");
   const native = page.locator("#nd-select-palette-search");
   await control.scrollIntoViewIfNeeded();
@@ -231,6 +241,7 @@ test("clearing puts the field back to nothing", async ({ page }) => {
 
 test("several may be chosen, and the control counts rather than lists", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   const control = page.locator("#nd-select-palette-compare-control");
   const native = page.locator("#nd-select-palette-compare");
   await control.scrollIntoViewIfNeeded();
@@ -270,6 +281,7 @@ test("several may be chosen, and the control counts rather than lists", async ({
 
 test("what is created is appended to the real select", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   const control = page.locator("#nd-select-palette-new-control");
   const native = page.locator("#nd-select-palette-new");
   await control.scrollIntoViewIfNeeded();
@@ -292,6 +304,7 @@ test("what is created is appended to the real select", async ({ page }) => {
 
 test("a list that has not arrived says so instead of looking empty", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   // OPENABLE, which is the point of saying anything at all.
   //
   // This example used to be `disabled` as well, so the one sentence the loading
@@ -312,6 +325,7 @@ test("a list that has not arrived says so instead of looking empty", async ({ pa
 
 test("a refused select refuses the value it holds", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   // The real attribute rather than `aria-disabled`: only the real one stops a
   // value being submitted, which is the whole difference on a form control.
   await expect(page.locator("#nd-select-palette-off")).toBeDisabled();
@@ -320,6 +334,7 @@ test("a refused select refuses the value it holds", async ({ page }) => {
 
 test("a group is a group, and its options belong to it", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   const control = page.locator("#nd-select-palette-control");
   await control.scrollIntoViewIfNeeded();
   await control.click();
@@ -341,7 +356,8 @@ test("a group is a group, and its options belong to it", async ({ page }) => {
 });
 
 test("every drawing in the list came out of the markup", async ({ page }) => {
-  await page.goto(url(PAGE.selectOption));
+  await page.goto(url(PAGE.select));
+  await showParts(page);
   const control = page.locator("#nd-select-option-icon-control");
   await control.scrollIntoViewIfNeeded();
   await control.click();
@@ -364,12 +380,18 @@ test("every drawing in the list came out of the markup", async ({ page }) => {
 });
 
 test("the chip beside an option is that option's palette", async ({ page }) => {
-  await page.goto(url(PAGE.selectOption));
+  await page.goto(url(PAGE.select));
+  await showParts(page);
   const control = page.locator("#nd-select-option-rich-control");
   await control.scrollIntoViewIfNeeded();
   await control.click();
-  // The stylesheet a palette needs is fetched on open, so give it a moment.
-  await page.waitForTimeout(400);
+  // The stylesheet a palette needs is fetched on open, so WAIT FOR IT rather
+  // than for a number of milliseconds. This was 400ms, which was enough while
+  // `SelectOption` had a page of its own and not always enough on `/select/`,
+  // where the same control sits under two other components' worth of examples:
+  // a chip whose sheet has not arrived paints the reader's own accent, so the
+  // slow machine reads three chips as two colours and reports a paint bug.
+  await page.waitForLoadState("networkidle");
 
   // SIX IDENTICAL CHIPS IS WHAT THE FAILURE LOOKS LIKE.
   //
@@ -393,6 +415,7 @@ test("with the script blocked the select is still a select", async ({ browser })
   const context = await browser.newContext({ javaScriptEnabled: false });
   const noScript = await context.newPage();
   await noScript.goto(`http://127.0.0.1:8731${url(PAGE.select)}`);
+  await showParts(noScript);
 
   const native = noScript.locator("#nd-select-palette");
   await expect(native).toBeVisible();
@@ -435,6 +458,7 @@ const FORM = ".nd-select:has(#nd-select-palette-form)";
 
 test("a hidden select still submits, and submits the value rather than the label", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   await page.locator(`${FORM} .nd-select-control`).click();
   await page.locator(`${FORM} .nd-select-item`).filter({ hasText: "Teal" }).click();
   // `SelectOption { value: "teal-balanced", label: "Teal" }` — a form that
@@ -444,6 +468,7 @@ test("a hidden select still submits, and submits the value rather than the label
 
 test("creating a value the control already has submits it once", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   await page.locator(`${FORM} .nd-select-control`).click();
   // THE DEFECT: the create offer compared `textContent` while `create()` wrote
   // the term into `value` AND `textContent`. Where the two differ — and
@@ -466,6 +491,7 @@ test("a refused submit says why, where the reader is looking", async ({ page }) 
     if (message.type() === "error") complaints.push(message.text());
   });
   await page.goto(url(PAGE.select));
+  await showParts(page);
   await page.evaluate(() => {
     document.querySelector("#nd-select-palette-form").selectedIndex = -1;
   });
@@ -483,6 +509,7 @@ test("a refused submit says why, where the reader is looking", async ({ page }) 
 
 test("a reset takes back what the script added", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   await page.locator(`${FORM} .nd-select-control`).click();
   await page.locator(`${FORM} .nd-select-search`).fill("brand new");
   await page.keyboard.press("Enter");
@@ -504,6 +531,7 @@ test("a reset takes back what the script added", async ({ page }) => {
 
 test("a required select says so on the control a reader can reach", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   // THE NATIVE CONTROL IS HIDDEN, SO ITS `required` IS UNREACHABLE. The string
   // `aria-required` did not exist anywhere in this repository, under a contract
   // saying it follows from the prop — so an enhanced compulsory field
@@ -529,6 +557,7 @@ test("a required select says so on the control a reader can reach", async ({ pag
 
 test("a creatable select always has the filter box creating depends on", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   // `creatable` is consumed inside `applyFilter`, which runs only where there
   // is a box to filter with, and `create()` reads that box. Without one the
   // attribute reached nothing at all.
@@ -542,6 +571,7 @@ test("a creatable select always has the filter box creating depends on", async (
 
 test("the browser's own refusal arrives with the word that introduces it", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   // THE CASE `error_slot` EXISTS FOR. `Field` used to render `error_label`
   // only beside a caller's own `error`, so the one path the slot was built
   // for — a script writing the browser's `validationMessage` into an empty
@@ -563,6 +593,7 @@ test("the browser's own refusal arrives with the word that introduces it", async
 
 test("Home and End reach the list once the filter box is empty", async ({ page }) => {
   await page.goto(url(PAGE.select));
+  await showParts(page);
   // BOTH USED TO BAIL OUT WHENEVER THERE WAS A FILTER BOX, and the only
   // `multiple` select on the site is searchable — so the two ways of moving
   // across a long list did not work anywhere it mattered. With something typed

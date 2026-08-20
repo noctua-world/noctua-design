@@ -36,7 +36,7 @@ impl TextareaResize {
     }
 }
 
-/// The box's padding and the type inside it: `small`, `medium` or `large`, matching the rest of the form.
+/// The box's padding: `small`, `medium` or `large`, matching `Input` step for step. The type inside never goes below the body size, so a phone does not zoom on focus.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TextareaSize {
     /// `small`
@@ -113,7 +113,7 @@ pub fn Textarea(
     /// Whether the browser underlines what it takes to be mistakes. **On by default**, unlike `Input`, because this box holds prose.
     #[props(default = true)]
     spellcheck: bool,
-    /// The box's padding and the type inside it: `small`, `medium` or `large`, matching the rest of the form.
+    /// The box's padding: `small`, `medium` or `large`, matching `Input` step for step. The type inside never goes below the body size, so a phone does not zoom on focus.
     #[props(default)]
     size: TextareaSize,
     /// Whether the box is frosted. Use it on a ground opaque enough to read several lines against.
@@ -184,17 +184,22 @@ pub fn Textarea(
             },
             disabled,
 
-            textarea {
+            // A BOX AROUND THE BOX, AND IT IS `Input`'S ARRANGEMENT EXACTLY.
+            //
+            // `.nd-textarea` used to be the `<textarea>` itself, which made it
+            // the one control on the site that ignored the reader's corner
+            // preset: a `<textarea>` is a scroll container, a radius on a
+            // scroller lets the bar paint through the corner, so it shipped
+            // with no radius at all. The border, the fill, the corners and the
+            // frost belong on something that does not scroll; the scrolling
+            // belongs to the control inside it. `.nd-panel` and `.nd-codeblock`
+            // are the same shape for the same reason.
+            //
+            // It also gives the frost somewhere to land. The one glass recipe
+            // paints its sheen in an `::after`, and a `<textarea>` is a
+            // replaced element with no pseudo-elements at all.
+            div {
                 class: "{box_class}",
-                id: "{id}",
-                name: "{name}",
-                rows,
-                placeholder,
-                required,
-                disabled,
-                readonly,
-                maxlength,
-                spellcheck: if spellcheck { "true" } else { "false" },
                 "data-nd-textarea": "{name}",
                 "data-nd-size": size.as_str(),
                 "data-nd-glass": if glass { "true" } else { "false" },
@@ -203,11 +208,25 @@ pub fn Textarea(
                 "data-nd-resize": resize.as_str(),
                 "data-nd-counter": if counter { "true" } else { "false" },
                 "data-nd-counter-label": counter_label,
-                "aria-invalid": invalid,
-                "aria-describedby": described,
-                // THE VALUE IS THE CONTENT, not an attribute — which is why a
-                // value with a newline in it survives the round trip.
-                {value.unwrap_or_default()}
+
+                textarea {
+                    class: "nd-textarea-box",
+                    id: "{id}",
+                    name: "{name}",
+                    rows,
+                    placeholder,
+                    required,
+                    disabled,
+                    readonly,
+                    maxlength,
+                    spellcheck: if spellcheck { "true" } else { "false" },
+                    "aria-invalid": invalid,
+                    "aria-describedby": described,
+                    "data-nd-textarea-box": "",
+                    // THE VALUE IS THE CONTENT, not an attribute — which is why
+                    // a value with a newline in it survives the round trip.
+                    {value.unwrap_or_default()}
+                }
             }
             if counter {
                 p {

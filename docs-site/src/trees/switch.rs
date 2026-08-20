@@ -12,25 +12,39 @@ use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
 /// Every `Switch` example. 6 of them.
+///
+/// EVERY ONE OF THEM IS IN A COLUMN OF THE SAME WIDTH, and that is not
+/// decoration. A `Switch` is `justify-content: space-between`: the label at one
+/// end of its row and the track at the other, which is the settings-row idiom
+/// and needs a row somebody bounded. Three of these examples were bare children
+/// of the stage, so at 1120px they drew a name and a control 680px apart with
+/// nothing in between, while the three inside a stack hugged their own content
+/// at 120px and the one beside a note sat at 271px. One control, three widths,
+/// on one page. `nd-example-narrow` is 256px or the stage, whichever is less —
+/// a panel's width, which is where a switch actually lives.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Switch { name: "…", on: "on", off: "off", label: "…" }"#,
-        &[Node::Component {
-            name: "Switch",
-            props: &[
-                ("name", Value::Text("example-grain")),
-                ("on", Value::Text("on")),
-                ("off", Value::Text("off")),
-                ("label", Value::Message(Key::ExampleSwitchGrain)),
-            ],
-            children: &[],
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-narrow"))],
+            children: &[Node::Component {
+                name: "Switch",
+                props: &[
+                    ("name", Value::Text("example-grain")),
+                    ("on", Value::Text("on")),
+                    ("off", Value::Text("off")),
+                    ("label", Value::Message(Key::ExampleSwitchGrain)),
+                ],
+                children: &[],
+            }],
         }],
     ),
     (
         r"Switch { checked: true, … }",
         &[Node::Element {
             tag: "div",
-            attributes: &[("class", Value::Text("nd-example-stack"))],
+            attributes: &[("class", Value::Text("nd-example-stack nd-example-narrow"))],
             children: &[
                 Node::Component {
                     name: "Switch",
@@ -60,7 +74,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         r#"Switch { describedby: "…", … }"#,
         &[Node::Element {
             tag: "div",
-            attributes: &[("class", Value::Text("nd-example-stack"))],
+            attributes: &[("class", Value::Text("nd-example-stack nd-example-narrow"))],
             children: &[
                 Node::Component {
                     name: "Switch",
@@ -89,7 +103,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         r"Switch { size: SwitchSize::… }",
         &[Node::Element {
             tag: "div",
-            attributes: &[("class", Value::Text("nd-example-stack"))],
+            attributes: &[("class", Value::Text("nd-example-stack nd-example-narrow"))],
             children: &[Node::Each {
                 over: Each::Values {
                     component: "Switch",
@@ -115,31 +129,39 @@ pub(crate) const EXAMPLES: &[Tree] = &[
     ),
     (
         r"Switch { disabled: true, … }",
-        &[Node::Component {
-            name: "Switch",
-            props: &[
-                ("name", Value::Text("example-refused")),
-                ("on", Value::Text("on")),
-                ("off", Value::Text("off")),
-                ("disabled", Value::Bool(true)),
-                ("label", Value::Message(Key::SettingsGrainLabel)),
-            ],
-            children: &[],
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-narrow"))],
+            children: &[Node::Component {
+                name: "Switch",
+                props: &[
+                    ("name", Value::Text("example-refused")),
+                    ("on", Value::Text("on")),
+                    ("off", Value::Text("off")),
+                    ("disabled", Value::Bool(true)),
+                    ("label", Value::Message(Key::SettingsGrainLabel)),
+                ],
+                children: &[],
+            }],
         }],
     ),
     (
         r"Switch { glass: true, … }",
-        &[Node::Component {
-            name: "Switch",
-            props: &[
-                ("name", Value::Text("example-glass-switch")),
-                ("on", Value::Text("on")),
-                ("off", Value::Text("off")),
-                ("glass", Value::Bool(true)),
-                ("checked", Value::Bool(true)),
-                ("label", Value::Message(Key::ExampleSwitchGrain)),
-            ],
-            children: &[],
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-narrow"))],
+            children: &[Node::Component {
+                name: "Switch",
+                props: &[
+                    ("name", Value::Text("example-glass-switch")),
+                    ("on", Value::Text("on")),
+                    ("off", Value::Text("off")),
+                    ("glass", Value::Bool(true)),
+                    ("checked", Value::Bool(true)),
+                    ("label", Value::Message(Key::ExampleSwitchGrain)),
+                ],
+                children: &[],
+            }],
         }],
     ),
 ];

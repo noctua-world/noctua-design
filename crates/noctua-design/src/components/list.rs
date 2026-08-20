@@ -102,6 +102,9 @@ pub fn List(
     /// The gap between items: `tight`, `default` or `loose`.
     #[props(default)]
     spacing: ListSpacing,
+    /// Whether each level of nesting is drawn in a colour of its own. Off by default. It marks the level on the marker and on the rule down the inside edge, so it still reads when `marker` is `none`.
+    #[props(default = false)]
+    levels: bool,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -113,6 +116,11 @@ pub fn List(
 
     // One arm per value: `rsx!` takes a literal element name, and
     // this prop chooses the element rather than an attribute.
+    // The levels flag is a fact about the OUTERMOST list, and the
+    // stylesheet counts the lists under it. Written on every kind,
+    // because a description list nests like any other.
+    let levels = if levels { "true" } else { "false" };
+
     rsx! {
         match kind {
             ListKind::Unordered => rsx! {
@@ -121,6 +129,7 @@ pub fn List(
                     role: "list",
                     "data-nd-marker": marker.as_str(),
                     "data-nd-spacing": spacing.as_str(),
+                    "data-nd-levels": levels,
                     {children}
                 }
             },
@@ -130,6 +139,7 @@ pub fn List(
                     role: "list",
                     "data-nd-marker": marker.as_str(),
                     "data-nd-spacing": spacing.as_str(),
+                    "data-nd-levels": levels,
                     {children}
                 }
             },
@@ -139,6 +149,7 @@ pub fn List(
                     class: "{root}",
                     "data-nd-marker": marker.as_str(),
                     "data-nd-spacing": spacing.as_str(),
+                    "data-nd-levels": levels,
                     {children}
                 }
             },

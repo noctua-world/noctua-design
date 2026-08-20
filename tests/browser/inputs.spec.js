@@ -6,7 +6,7 @@
 import { expect, test } from "@playwright/test";
 
 import { LOCALES, PAGE, showParts, url } from "./pages.js";
-import { extremes } from "./pixels.js";
+import { extremes, pixelAt } from "./pixels.js";
 
 /** Every page a control of this family is documented on.
  *
@@ -127,6 +127,13 @@ test("the clear control appears with the text and moves nothing", async ({ page 
   const clear = page.locator('[data-nd-input="handle"] [data-nd-input-clear]');
   // A control that is there when the box is empty is a control that does
   // nothing, so it appears with the text and nowhere else.
+  //
+  // THE EMPTY CASE IS MADE HERE, NOT ASSUMED. The example ships a handle in
+  // the box now, because a counter reading *0 of 24* under a box a reader can
+  // see something in is a counter that appears to disagree with it. A test
+  // reading a starting value it never set is a test the next edit to that
+  // example breaks, which is what this one did.
+  await box.fill("");
   await expect(clear).toBeHidden();
   // AND THE BOX DOES NOT MOVE. This test used to repeat `clearable`'s own
   // self-contradicting sentence — "a control that appears as a reader types is
@@ -189,9 +196,44 @@ test("a password can be shown, and the control renames itself", async ({ page })
 
 // --- Textarea ----------------------------------------------------------------
 
+test("every text field follows the reader's corner preset", async ({ page }) => {
+  // `Textarea` was the one control on the site that did not, and the reason it
+  // could not is worth keeping: its root WAS the `<textarea>`, a `<textarea>`
+  // is a scroll container, and `material.spec.js` refuses a radius on one
+  // because the scrollbar paints square straight through the corner. So it
+  // shipped `border-radius: 0` and stayed square while every control beside it
+  // went round. A box around the control is what gives the corners somewhere
+  // to live. Both claims are asserted here: the field is round, and nothing
+  // that scrolls inside it is.
+  for (const [slug, field] of [
+    [PAGE.input, ".nd-input"],
+    [PAGE.textarea, ".nd-textarea"],
+    [PAGE.numberInput, ".nd-number-input"],
+  ]) {
+    await page.goto(url(slug));
+    await page.evaluate(() =>
+      document.documentElement.setAttribute("data-noctua-radius", "round"),
+    );
+    const square = await page.evaluate(
+      (sel) =>
+        // Inside a `.nd-field`, so this is the live control and never the
+        // drawing in a variant grid.
+        [...document.querySelectorAll(`.nd-field ${sel}`)]
+          .map((el) => getComputedStyle(el).borderRadius)
+          // A length read this way is a length. Invariant 6 is about colour.
+          .filter((radius) => Number.parseFloat(radius) === 0),
+      field,
+    );
+    expect(square, `${slug}: a field ignored the corner preset`).toEqual([]);
+  }
+});
+
 test("an autosizing box grows with its content and stops at its ceiling", async ({ page }) => {
   await page.goto(url(PAGE.textarea));
-  const box = page.locator('[data-nd-textarea="note"]');
+  // `[data-nd-textarea]` is the FIELD, as `[data-nd-input]` is: the border, the
+  // corners and the frost sit on a box around the control, because a radius on
+  // a scroller lets the scrollbar paint through it. The `<textarea>` is inside.
+  const box = page.locator('[data-nd-textarea="note"] .nd-textarea-box');
   const start = (await box.boundingBox()).height;
   await box.fill("one\ntwo\nthree\nfour\nfive");
   const grown = (await box.boundingBox()).height;
@@ -200,10 +242,24 @@ test("an autosizing box grows with its content and stops at its ceiling", async 
   // A box with no ceiling pushes the submit control somewhere nobody will
   // find it, so `max_rows` is where the growing stops and the scrolling
   // starts.
+  //
+  // AND IT HAD NEVER ONCE APPLIED. The script works the ceiling out from
+  // `getComputedStyle(box).lineHeight`; a form control's leading is `normal`
+  // whatever the page around it is set in, `Number.parseFloat("normal")` is
+  // `NaN`, and the fallback made the ceiling `Infinity`. The box grew to 724px
+  // with `max_rows: 8` on it — and this test passed, because `< 2000` is not a
+  // ceiling, it is a number chosen to be safe. It is held to the real one now.
   await box.fill(Array.from({ length: 40 }, (_, i) => `line ${i}`).join("\n"));
   const capped = (await box.boundingBox()).height;
   expect(await box.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);
-  expect(capped).toBeLessThan(2000);
+  const ceiling = await box.evaluate((el) => {
+    const rows = Number(el.closest("[data-nd-textarea]").getAttribute("data-nd-max-rows"));
+    return rows * Number.parseFloat(getComputedStyle(el).lineHeight);
+  });
+  expect(ceiling, "the box has no line height, so `max_rows` cannot mean anything").toBeGreaterThan(
+    0,
+  );
+  expect(capped).toBeLessThanOrEqual(ceiling + 1);
 });
 
 // --- NumberInput -------------------------------------------------------------
@@ -539,6 +595,117 @@ test("a file of the wrong kind is refused with a sentence", async ({ page }) => 
 
 // --- TimeInput ---------------------------------------------------------------
 
+// The field that asks the reader, and the two answers it can get. `auto` is
+// the only value that asks anything at all now.
+const AUTO = '[data-nd-time-input="overview-slot"]';
+
+test("twenty-four hours is the default, whatever the reader's machine keeps", async ({ page }) => {
+  // THE DEFAULT WAS `auto`, AND `auto` READ THE PAGE. Every field that did not
+  // name a clock was handed `document.documentElement.lang`, so the English
+  // build put every reader on twelve hours — including the ones whose browser
+  // says `en-GB` and keeps twenty-four. The default is twenty-four now and
+  // nothing about the machine changes it.
+  //
+  // This runs in the suite's pinned `en-US`, which IS a twelve-hour locale, so
+  // the assertion is exactly the one that used to fail.
+  await page.goto(url(PAGE.timeInput));
+  const root = '[data-nd-time-input="starts"]';
+  await expect(page.locator(root)).toHaveAttribute("data-nd-clock", "24");
+  await expect(page.locator(`${root} [data-nd-time-input-segment="hour"]`)).toHaveValue("09");
+  await expect(page.locator(`${root} [data-nd-time-input-meridiem]`)).toBeHidden();
+  await expect(page.locator(root)).not.toHaveAttribute("data-nd-resolved", "true");
+});
+
+test("auto asks the reader's own browser, and never the page's language", async ({ browser }) => {
+  // The one value that detects anything, measured from both sides. The page is
+  // the same English build in both runs, so a detection that reads the page
+  // cannot tell these two apart — which is precisely how the defect survived.
+  const gb = await browser.newContext({ locale: "en-GB" });
+  const still = await gb.newPage();
+  await still.goto(url(PAGE.timeInput));
+  await expect(still.locator(AUTO)).toHaveAttribute("data-nd-clock", "auto");
+  await expect(
+    still.locator(`${AUTO} [data-nd-time-input-meridiem]`),
+    "a reader on a twenty-four hour clock was given a morning and afternoon control",
+  ).toBeHidden();
+  await expect(still.locator(`${AUTO} [data-nd-time-input-segment="hour"]`)).toHaveValue("09");
+  await gb.close();
+
+  const us = await browser.newContext({ locale: "en-US" });
+  const shown = await us.newPage();
+  await shown.goto(url(PAGE.timeInput));
+  await expect(shown.locator(`${AUTO} [data-nd-time-input-meridiem]`)).toBeVisible();
+  await expect(shown.locator(AUTO)).toHaveAttribute("data-nd-resolved", "true");
+  // 09:30 is the morning, and the control says so rather than guessing.
+  const chosen = shown.locator(`${AUTO} .nd-time-input-meridiem-group [aria-checked="true"]`);
+  await expect(chosen).toHaveCount(1);
+  expect(await chosen.getAttribute("data-nd-value")).toBe("am");
+  await us.close();
+});
+
+test("the morning and afternoon control is a real Segmented, with its keyboard", async ({
+  page,
+}) => {
+  // IT WAS `createElement` MARKUP THAT LOOKED LIKE ONE. A `<div>` given
+  // `class="nd-segmented"` and two `<button class="nd-segmented-item">`, built
+  // in `inputs.js` — a copy of a component's markup, already drifted from it:
+  // no `appearance`, no `shape`, no `fill`, no `aria-orientation`, so every
+  // compound rule that draws a joined control matched nothing. It is the
+  // component now, so it carries what the component carries and the arrow
+  // walk that a `role="radiogroup"` owes finds it.
+  await page.goto(url(PAGE.timeInput));
+  const root = '[data-nd-time-input="meeting"]';
+  const group = page.locator(`${root} .nd-time-input-meridiem-group`);
+  await expect(group).toHaveAttribute("role", "radiogroup");
+  await expect(group).toHaveAttribute("data-nd-appearance", "joined");
+  await expect(group).toHaveAttribute("aria-orientation", "horizontal");
+  // Named, because a radiogroup with no name announces its role and no more.
+  const named = await group.getAttribute("aria-labelledby");
+  expect(await page.locator(`#${named}`).textContent()).not.toBe("");
+  // One tab stop, on the chosen value, and the arrows move the choice.
+  const items = group.locator('[role="radio"]');
+  await expect(items).toHaveCount(2);
+  await items.nth(1).focus();
+  await expect(items.nth(1)).toHaveAttribute("aria-checked", "true");
+  await page.keyboard.press("ArrowLeft");
+  await expect(items.nth(0)).toBeFocused();
+  await expect(items.nth(0)).toHaveAttribute("aria-checked", "true");
+  await expect(items.nth(1)).toHaveAttribute("aria-checked", "false");
+  // And the reading follows it: two in the afternoon became two in the
+  // morning, on the fieldset the server reads.
+  await expect(page.locator(root)).toHaveAttribute("data-nd-value", "02:05");
+});
+
+test("the words in the control are the caller's, never the raw values", async ({ page }) => {
+  // The script fell back to `word ?? value`, so a field that named neither
+  // drew `am` and `pm` — two identifiers, untranslated, on the page. A field
+  // that names them draws the words, and one that does not draws no control.
+  await page.goto(url(PAGE.timeInput, "pt-BR"));
+  const words = await page
+    .locator('[data-nd-time-input="meeting"] .nd-time-input-meridiem-group [role="radio"]')
+    .allTextContents();
+  expect(words.map((word) => word.trim())).toEqual(["Manhã", "Tarde"]);
+});
+
+test("a twelve-hour field still posts a twenty-four hour value", async ({ page }) => {
+  // WHAT THE CONTRACT SAYS IN THREE PLACES, AND WHAT IT DID. A box posts what
+  // it SHOWS, so a re-laid field sent `hour=02` for a reader who had said two
+  // in the afternoon and marked PM beside it. The entry is rewritten on the
+  // way out now, exactly as `NumberInput` rewrites the separators `group`
+  // draws. The suite's locale is twelve-hour, which is what makes this field
+  // re-lay at all.
+  await page.goto(url(PAGE.timeInput));
+  await page.locator(`${AUTO} [data-nd-time-input-segment="hour"]`).fill("02");
+  await page.locator(`${AUTO} [data-nd-time-input-segment="minute"]`).fill("30");
+  await page.locator(`${AUTO} .nd-time-input-meridiem-group [data-nd-value="pm"]`).click();
+  const posted = await page.locator(AUTO).evaluate((field) => {
+    const form = field.closest("form");
+    return Object.fromEntries(new FormData(form));
+  });
+  expect(posted["overview-slot-hour"], "the form posted the clock the reader was shown").toBe("14");
+  expect(posted["overview-slot-minute"]).toBe("30");
+});
+
 test("it is served on a twenty-four hour clock and re-laid to the reader's", async ({
   browser,
   page,
@@ -605,7 +772,12 @@ test("half a time is refused with the sentence the platform has none for", async
   await page.locator(`${root} [data-nd-time-input-segment="minute"]`).blur();
   // `required` on three boxes gives three identical bubbles, none of which
   // says *you gave me an hour and no minute*.
-  await expect(page.locator(`${root} [data-nd-time-input-status]`)).toContainText("minute");
+  //
+  // AND THE HOLE IS FILLED WITH THE BOX'S OWN LABEL. It was filled with the
+  // part's key — `hour`, `minute`, `second` — so the Portuguese page read
+  // *O minute ainda está vazio*: an English identifier inside a translated
+  // sentence, which is what `NOCTUA.md §9.9` rule 1 exists to prevent.
+  await expect(page.locator(`${root} [data-nd-time-input-status]`)).toContainText("Minute");
 });
 
 // --- The shell they sit in --------------------------------------------------
@@ -733,6 +905,70 @@ test("the slider draws its value and its scale before any script runs", async ({
   await context.close();
 });
 
+test("a range draws both handles, and the band between them is what is chosen", async ({
+  page,
+}) => {
+  // WHAT A READER SAW WAS A RING AROUND A HOLE. A range is two full-width
+  // inputs sharing one grid cell, and the second painted its own rail straight
+  // over the first one's handle — so the start handle was reduced to the two
+  // arcs of its border that stuck out above and below an eight-pixel rail. It
+  // reads as a limit drawn onto the control, which is not a thing this system
+  // draws, and it was a paint order.
+  //
+  // The band was the other half: it ran from the leading end of the track
+  // whatever the start value was, so the first handle sat inside a solid fill
+  // and nothing said what it bounded. It now spans the two handles, which is
+  // the chosen span and the room each handle has left.
+  //
+  // Read from the pixels, because both halves of this are about which of two
+  // overlapping elements ended up on the screen.
+  await page.goto(url(PAGE.slider));
+  const root = page.locator('[data-nd-slider="budget"]');
+  await root.scrollIntoViewIfNeeded();
+  const rails = root.locator("[data-nd-slider-rails]");
+  const thumbs = await root.locator("[data-nd-slider-thumb]").all();
+  expect(thumbs.length, "the range slider is not a range").toBe(2);
+
+  const at = await rails.evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    const inputs = [...el.querySelectorAll("[data-nd-slider-thumb]")];
+    const span = Number(inputs[0].max) - Number(inputs[0].min) || 1;
+    const along = (value) =>
+      box.left + ((Number(value) - Number(inputs[0].min)) / span) * box.width;
+    return {
+      y: box.top + box.height / 2,
+      start: along(inputs[0].value),
+      end: along(inputs[1].value),
+      before: box.left + 2,
+      middle: along((Number(inputs[0].value) + Number(inputs[1].value)) / 2),
+    };
+  });
+  const shot = await page.screenshot();
+  const sample = async (x, y) => {
+    const [r, g, b] = await pixelAt(page, shot, x, y);
+    return { r, g, b };
+  };
+
+  // The centre of the start handle is the handle's own fill, not the rail
+  // running through it. The fill is the surface — much lighter than the accent
+  // band beside it — so the two are told apart by how bright the pixel is.
+  const handle = await sample(at.start, at.y);
+  const band = await sample(at.middle, at.y);
+  const handleSum = handle.r + handle.g + handle.b;
+  const bandSum = band.r + band.g + band.b;
+  expect(
+    handleSum,
+    `the start handle is painted over by the rail: ${JSON.stringify(handle)}`,
+  ).toBeGreaterThan(bandSum + 60);
+
+  // And the track before the first handle is not part of the chosen span.
+  const outside = await sample(at.before, at.y);
+  expect(
+    outside.r + outside.g + outside.b,
+    `the band runs past the start handle: ${JSON.stringify(outside)}`,
+  ).toBeGreaterThan(bandSum + 60);
+});
+
 test("the counter says how much room is left before any script runs", async ({ browser }) => {
   // `maxlength` stops accepting characters in silence, and this sentence is
   // the only thing that says why. The `<p>` was rendered, put into
@@ -774,28 +1010,18 @@ test("the script keeps the counter right, and the sentence agrees with itself", 
   expect((await counter.textContent()).trim()).toContain("3");
 });
 
-test("the now control is hidden until something can read the clock", async ({ browser }) => {
-  // `NumberInput`'s steppers and `Input`'s clear and reveal controls are all
-  // rendered hidden and revealed by `inputs.js`, and the comments beside them
-  // cite the rule. This one shipped visible and inert: reading the clock is
-  // the script's and nothing else's.
+test("the time field shows the time it was given before any script runs", async ({ browser }) => {
+  // The value reached the boxes from `data-nd-value` at enhance time and
+  // nowhere else, so a field handed `14:05` was two empty boxes until a
+  // script ran — under a prop whose whole promise is the time to start with.
+  // It is rendered now, on the twenty-four hour clock the server keeps.
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto(url(PAGE.timeInput));
-  const now = page.locator('[data-nd-action="time-input-now"]').first();
-  await expect(now).toBeAttached();
-  await expect(now, "a control that fills nothing is on the page").toBeHidden();
-  await context.close();
-});
-
-test("the script reveals the now control, and it fills the boxes", async ({ page }) => {
-  await page.goto(url(PAGE.timeInput));
   const root = '[data-nd-time-input="meeting"]';
-  const now = page.locator(`${root} [data-nd-action="time-input-now"]`);
-  await expect(now).toBeVisible();
-  await now.click();
-  const hour = page.locator(`${root} [data-nd-time-input-segment="hour"]`);
-  expect((await hour.inputValue()).length, "the now control filled nothing").toBeGreaterThan(0);
+  await expect(page.locator(`${root} [data-nd-time-input-segment="hour"]`)).toHaveValue("14");
+  await expect(page.locator(`${root} [data-nd-time-input-segment="minute"]`)).toHaveValue("05");
+  await context.close();
 });
 
 // --- The two directions of a range, and the one that was never tried --------
@@ -868,7 +1094,7 @@ test("a refusal is cleared once the value is right again", async ({ page }) => {
   await hour.fill("09");
   await minute.fill("");
   await minute.blur();
-  await expect(status).toContainText("minute");
+  await expect(status).toContainText("Minute");
 
   await minute.fill("30");
   await minute.blur();
@@ -953,4 +1179,67 @@ test("an empty number field is a spinbutton with no value, not a stale one", asy
   await box.fill("");
   await box.blur();
   expect(await box.getAttribute("aria-valuenow")).toBeNull();
+});
+
+// --- The steppers, and where they sit ---------------------------------------
+//
+// `stepping` is one prop and two arrangements of the same markup: `assist`
+// keeps the two small controls at the end of the box, and `primary` puts one
+// full control either side of the value. The claim is geometric, so it is
+// measured rather than read off a class — a declaration that loses on
+// specificity is indistinguishable from one that works if what you measure
+// would have passed anyway.
+
+/** Where each part of a number field sits, in page coordinates. */
+async function stepperGeometry(page, name) {
+  return page.evaluate((field) => {
+    const root = document.querySelector(`[data-nd-number-input="${field}"]`);
+    const middle = (el) => {
+      const box = el.getBoundingClientRect();
+      return { x: box.x + box.width / 2, width: box.width, height: box.height };
+    };
+    const at = (way) => middle(root.querySelector(`[data-nd-number-input-step="${way}"]`));
+    return { box: middle(root.querySelector("[data-nd-number-input-box]")), up: at("up"), down: at("down") };
+  }, name);
+}
+
+test("primary stepping puts a full control either side of the value", async ({ page }) => {
+  await page.goto(url(PAGE.numberInput));
+  await showParts(page);
+
+  const quantity = await stepperGeometry(page, "cart");
+  // THE VALUE IS BETWEEN THEM, which is the whole of the arrangement. Read in
+  // the writing direction: the control that subtracts leads and the one that
+  // adds follows.
+  expect(quantity.down.x, "the value is not between the two controls").toBeLessThan(quantity.box.x);
+  expect(quantity.up.x, "the value is not between the two controls").toBeGreaterThan(quantity.box.x);
+
+  // AND BOTH ARE A REAL TARGET. The default form is a 24-pixel glyph beside a
+  // box, which is right for a correction and wrong for the control a reader is
+  // meant to press. This one clears the 44 pixels WCAG 2.5.5 asks for.
+  for (const part of [quantity.up, quantity.down]) {
+    expect(part.width, "a primary stepper is under the 44-pixel target").toBeGreaterThanOrEqual(44);
+    expect(part.height, "a primary stepper is under the 44-pixel target").toBeGreaterThanOrEqual(44);
+  }
+
+  // THE DEFAULT IS UNTOUCHED, which is what a default is for: every field that
+  // shipped before this prop existed still draws both controls after the box.
+  const plain = await stepperGeometry(page, "tickets");
+  expect(plain.up.x, "the default arrangement moved").toBeGreaterThan(plain.box.x);
+  expect(plain.down.x, "the default arrangement moved").toBeGreaterThan(plain.box.x);
+});
+
+test("with the script blocked a primary stepper is still absent", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto(url(PAGE.numberInput));
+  // THE ARRANGEMENT IS A STYLESHEET AND THE REVEAL IS NOT. `display: contents`
+  // on the wrapper outranks the `[hidden]` rule the browser ships, so the
+  // guard against that is what this measures: two controls that move nothing
+  // are two controls a reader presses twice.
+  await expect(
+    page.locator('[data-nd-number-input="cart"] [data-nd-number-input-step="up"]'),
+    "a stepper appeared with nothing to run it",
+  ).toBeHidden();
+  await context.close();
 });

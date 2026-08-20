@@ -203,15 +203,19 @@ test("every locale ships the same page and switches between them", async ({ page
   expect(order).toContain("Tipografia");
   // THE CLAIM IS THE COLLATION, NOT THE MEMBERSHIP.
   //
-  // `Ícones` sorts by its base letter rather than after `z`, and `Espaçamento`
-  // before both — which is the reader's alphabet and not Rust's `str` ordering.
+  // `Lista de ícones` sorts by its base letter rather than after `z`, and
+  // `Espaçamento` before both — which is the reader's alphabet and not Rust's `str` ordering.
   // This used to assert the exact list, so adding the spacing page failed a
   // test about sorting for a reason that had nothing to do with sorting.
   const foundations = order.slice(1, order.indexOf("Blockquote"));
-  expect(foundations).toContain("Ícones");
+  expect(foundations).toContain("Lista de ícones");
   expect(foundations).toContain("Tipografia");
-  expect(foundations.indexOf("Espaçamento")).toBeLessThan(foundations.indexOf("Ícones"));
-  expect(foundations.indexOf("Ícones")).toBeLessThan(foundations.indexOf("Tipografia"));
+  expect(foundations.indexOf("Espaçamento")).toBeLessThan(
+    foundations.indexOf("Lista de ícones"),
+  );
+  expect(foundations.indexOf("Lista de ícones")).toBeLessThan(
+    foundations.indexOf("Tipografia"),
+  );
 
   // And the components are a block of their own, in order, after them.
   const components = order.slice(order.indexOf("Blockquote"));
@@ -235,9 +239,10 @@ test("every locale ships the same page and switches between them", async ({ page
 
   // COLLATED, like the sidebar itself. A plain `.sort()` is codepoint order,
   // which agrees with this block while every title in it is ASCII — so the
-  // claim it settles today is the foundations' (`Espaçamento` before `Ícones`
-  // before `Tipografia`, above). It stays here because the day a component
-  // block title stops being ASCII is the day it starts settling this one too.
+  // claim it settles today is the foundations' (`Espaçamento` before
+  // `Lista de ícones` before `Tipografia`, above). It stays here because the
+  // day a component block title stops being ASCII is the day it starts
+  // settling this one too.
   const collated = [...components].sort((a, b) => a.localeCompare(b, "pt-BR"));
   expect(collated).toEqual(components);
 });

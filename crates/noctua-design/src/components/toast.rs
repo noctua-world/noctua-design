@@ -82,7 +82,7 @@ impl ToastLive {
 ///
 /// A `role="status"`, which waits for a pause instead of cutting in. The dismiss
 /// control is a real `<button>` with a name, and the timer stops while a reader is
-/// on the message.
+/// on the message. The countdown is a `role="timer"`, which does not announce.
 #[component]
 pub fn Toast(
     /// What this message is about, as a script finds it. **Required**, because a page
@@ -100,6 +100,10 @@ pub fn Toast(
     /// on the page until it is dismissed, and so does `0`. The wait pauses under a
     /// pointer and under focus.
     duration: Option<String>,
+    /// What the message says about the time it has left, with a `{count}` hole, such
+    /// as *6 seconds left*. Write both forms as `one:… |other:…`. It needs `duration`,
+    /// and it is drawn only once a script is running the wait it reports.
+    countdown_label: Option<String>,
     /// Whether a control that takes the message away is drawn. On by default: with no
     /// `duration` the message stays, and one that stays with no way out is one a reader
     /// has to work around.
@@ -138,6 +142,7 @@ pub fn Toast(
             "data-nd-tone": tone,
             "data-nd-placement": placement.as_str(),
             "data-nd-duration": duration,
+            "data-nd-countdown-label": countdown_label.clone(),
             "data-nd-dismissible": if dismissible { "true" } else { "false" },
 
             div { class: "nd-toast-text",
@@ -148,6 +153,27 @@ pub fn Toast(
                     strong { class: "nd-toast-title", "{title}" }
                 }
                 div { class: "nd-toast-body", "data-nd-toast-body": "", {children} }
+
+                // THE TIME LEFT, AND IT IS EMPTY UNTIL SOMETHING IS RUNNING
+                // THE WAIT. `role="timer"` is a live region that does not
+                // announce, so a screen reader is not read a new number every
+                // second. It ships `hidden` for the dismiss control's reason:
+                // a countdown that counts nothing is a number a reader watches
+                // and learns nothing from, and with no script the message
+                // never leaves at all.
+                //
+                // IT IS UNDER THE MESSAGE AND NOT BESIDE IT. A toast is about
+                // twenty characters wide, so a line of digits in the row took
+                // its width off the sentence and broke a message of nine words
+                // over four lines.
+                if countdown_label.is_some() {
+                    span {
+                        class: "nd-toast-countdown",
+                        role: "timer",
+                        "data-nd-toast-countdown": "",
+                        hidden: true,
+                    }
+                }
             }
 
             if dismissible {

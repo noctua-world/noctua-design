@@ -27,6 +27,27 @@ summary = "Report what just happened in a short message that floats clear of the
 # 3. IT IS NEVER THE ONLY RECORD. `NOCTUA.md §9.8`: a result a reader can miss
 #    is a result they were never told. The page underneath still has to say what
 #    happened.
+# 4. IT CAN BE SEEN, which is what `countdown_label` is for. A deadline nobody
+#    is shown is a deadline nobody can plan around, and this is the same
+#    argument that made the wait pause: the reader decides how long they need,
+#    and they cannot decide about a limit they cannot see.
+#
+# WHY THE COUNTDOWN IS THE COMPONENT'S AND THE REPLAY CONTROL IS NOT.
+#
+# The two arrived together, from one example on the documentation site that
+# emptied itself after six seconds. They belong in different places. The
+# countdown is about the message: every consumer with a `duration` owes its
+# reader the same sentence, and a docs-site copy of it would be one this
+# package's users could never have. Raising a message a second time is about
+# the page that raised it, so *show it again* is written where that example is
+# and ships nowhere. `AGENTS.md` draws the line in the same place for the
+# viewport rig.
+#
+# AND IT SHOWS THE FULL WAIT AGAIN WHENEVER THE WAIT RESTARTS, because
+# guarantee 2 is that the wait never shortens. A reader who rests a pointer on
+# the message and takes it away is served the whole `duration` again, and a
+# countdown that carried on from where it stopped would be describing a timer
+# this component does not have.
 #
 # `role="status"` AND NOT `role="alert"`.
 #
@@ -80,6 +101,15 @@ doc = """
 How long it waits before taking itself away, in milliseconds. Absent leaves it
 on the page until it is dismissed, and so does `0`. The wait pauses under a
 pointer and under focus.
+"""
+
+[prop.countdown_label]
+type = "text"
+attribute = "data-nd-countdown-label"
+doc = """
+What the message says about the time it has left, with a `{count}` hole, such
+as *6 seconds left*. Write both forms as `one:… |other:…`. It needs `duration`,
+and it is drawn only once a script is running the wait it reports.
 """
 
 [prop.dismissible]
@@ -145,7 +175,7 @@ doc = "Set while a pointer or the focus is on the message and its timer is holdi
 notes = """
 A `role="status"`, which waits for a pause instead of cutting in. The dismiss
 control is a real `<button>` with a name, and the timer stops while a reader is
-on the message.
+on the message. The countdown is a `role="timer"`, which does not announce.
 """
 
 [keyboard]

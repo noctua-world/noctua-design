@@ -308,13 +308,6 @@ List { kind: ListKind::Description, spacing: Tight } with ListItem { term: "…"
         ),
     ),
     (
-        "list-item",
-        example!(
-            r#"List { kind: ListKind::Description }
-ListItem { term: "Accent", "…" }"#
-        ),
-    ),
-    (
         "menu",
         example!(
             r#"Button { menu: true, controls: "overview-menu-actions", label: "Actions" }
@@ -376,24 +369,10 @@ SegmentedItem { value: "system", icon: "monitor", label: "…", selected: true }
         ),
     ),
     (
-        "segmented-item",
-        example!(
-            r#"Segmented { name, label,
-    SegmentedItem { value: "light", label: "…", icon: …, selected: true }
-}"#
-        ),
-    ),
-    (
         "select",
         example!(
             r#"Select { name: "overview-palette", label: "…", hint: "…", placeholder: "…", searchable: true, clearable: true }
 SelectGroup { label: "…" }  ·  SelectOption { value: "ochre-balanced", label: "Ochre", swatch: "ochre-balanced", detail: "…" }"#
-        ),
-    ),
-    (
-        "select-option",
-        example!(
-            r#"SelectOption { value: "…", label: "…", swatch: "…", detail: "…", selected: true }"#
         ),
     ),
     (
@@ -480,7 +459,7 @@ ToolbarGroup { align: ToolbarGroupAlign::End, … }"#
         example!(
             r#"ButtonGroup { label: "Publishing", … }
 Button { label: "Publish" }
-Button { menu: true, hide_label: true, icon: "chevron-down", controls: "overview-button-group-menu" }"#
+Button { menu: true, hide_label: true, controls: "overview-button-group-menu", label: "More actions" }"#
         ),
     ),
     (
@@ -516,14 +495,6 @@ Radio { name: "overview-delivery", value, label, hint, checked, size: Medium }"#
         ),
     ),
     (
-        "select-group",
-        example!(
-            r#"Select { name, label, hint, placeholder }
-SelectGroup { label: "Warm" } / SelectGroup { label: "Cool" }
-SelectOption { value, label, swatch }"#
-        ),
-    ),
-    (
         "tables",
         example!(
             r"Table { name, caption, note, sort_ascending_label, sort_descending_label, sort_cleared_label }
@@ -536,7 +507,7 @@ TableRow { emphasis: Strong } / TableCell { aggregate: Sum }"
     (
         "time-input",
         example!(
-            r"TimeInput { name, legend, hint, hour_label, minute_label, meridiem_label, am_label, pm_label, value, min, max, step, pad, now_label, required, required_label, missing_label, invalid_label, min_label, max_label }"
+            r"TimeInput { name, legend, hint, hour_label, minute_label, meridiem_label, am_label, pm_label, clock: Auto, value, min, max, step, pad, required, required_label, missing_label, invalid_label, min_label, max_label }"
         ),
     ),
     (
@@ -1067,8 +1038,10 @@ const TOAST: &[Example] = &[
         r"Toast { name, title, dismiss_label, … }",
         Key::ExampleToastNoteStays
     ),
+    // The countdown is the component's and the replay control is this site's.
+    // `spec/components/toast.toml` writes down which is which and why.
     example!(
-        r#"Toast { tone: "success", duration: "6000", … }"#,
+        r#"Toast { tone: "success", duration: "6000", countdown_label, … } — with a control that runs it again"#,
         Key::ExampleToastNoteTimer
     ),
     example!(
@@ -1221,6 +1194,17 @@ Segmented { name, label, fill: SegmentedFill::Stretch }",
     example!(
         r"Segmented { selection: SegmentedSelection::Quiet, … }",
         Key::ExampleSegmentedQuiet
+    ),
+    // THE UNANSWERED CASE, WHICH THE PAGE HAD STOPPED SHOWING.
+    //
+    // `a group with nothing chosen is still one tab stop` needs a group with
+    // nothing chosen to be true of, and the site had run out of them: the scope
+    // controls were made to state their answer, and every example here chose
+    // one. The guarantee is real, so the subject goes back rather than the test
+    // being relaxed to whatever the page happens to contain.
+    example!(
+        r"Field { label, hint } / Segmented { name, label } with no selected item",
+        Key::ExampleSegmentedUnanswered
     ),
 ];
 
@@ -1486,7 +1470,7 @@ const PAGINATION: &[Example] = &[
         Key::ExamplePaginationNoteLinks
     ),
     example!(
-        r"Pagination { spread: PaginationSpread::Compact, previous_label, next_label }",
+        r"Pagination { spread: PaginationSpread::Compact, more_label, previous_label, next_label }",
         Key::ExamplePaginationNoteWindow
     ),
     example!(r"Pagination { spread: PaginationSpread::Wide, size: PaginationSize::Small }"),
@@ -1923,7 +1907,14 @@ const LIST: &[Example] = &[
         Key::ExampleListMarker
     ),
     example!(r"List { spacing: ListSpacing::Loose, … }"),
-    example!(r"A list inside a list", Key::ExampleListNested),
+    example!(
+        r"Ordered inside unordered inside ordered, four deep",
+        Key::ExampleListNested
+    ),
+    example!(
+        r"List { levels: true } — a colour for each level",
+        Key::ExampleListLevels
+    ),
 ];
 
 const LIST_ITEM: &[Example] = &[
@@ -1970,7 +1961,7 @@ const SEARCH: &[Example] = &[
         Key::ExampleSearchChildren
     ),
     example!(
-        r#"Search { presentation: SearchPresentation::Popover, value: "but", cap: "3", cap_label: "…" }"#,
+        r#"Search { presentation: SearchPresentation::Popover, value: "san", cap: "3", cap_label: "…" }"#,
         Key::ExampleSearchPopover
     ),
     example!(
@@ -2016,7 +2007,7 @@ const SEARCH_RESULT: &[Example] = &[
         Key::ExampleSearchResultDetail
     ),
     example!(
-        r#"SearchResult { keywords: "gap inset step scale rhythm" }"#,
+        r#"SearchResult { keywords: "heirloom slicing beefsteak" }"#,
         Key::ExampleSearchResultKeywords
     ),
     example!(
@@ -2097,10 +2088,10 @@ const INPUT: &[Example] = &[
         r"Input { kind: Password, reveal_label, conceal_label }",
         Key::ExampleInputNotePassword
     ),
-    // WHAT THE BOX CARRIES BESIDE THE TEXT. A handle, which is what an icon, a
-    // prefix, a suffix and a character count are all actually for.
+    // WHAT THE BOX CARRIES BESIDE THE TEXT: ONE ORNAMENT AT EACH END, AND A
+    // COUNT OF WHAT IS BETWEEN THEM. See the tree for why the `@` went.
     example!(
-        r"Input { icon, prefix, suffix, clearable, clear_label, maxlength, counter, counter_label }",
+        r"Input { icon, suffix, value, clearable, clear_label, maxlength, counter, counter_label }",
         Key::ExampleInputNoteExtras
     ),
     // THE THREE SIZES, ITERATED RATHER THAN LISTED, so this cannot fall out of
@@ -2139,6 +2130,13 @@ const NUMBER_INPUT: &[Example] = &[
     example!(
         r"NumberInput { name, label, value, min, max, step, big_step, increment_label, decrement_label, hint, required, required_label }",
         Key::ExampleNumberInputNoteForm
+    ),
+    // STEPPING IS THE ANSWER RATHER THAN A CORRECTION. `primary` is the shape
+    // a quantity takes on a product page: one full control either side of the
+    // value, each big enough to hit with a thumb.
+    example!(
+        r#"NumberInput { stepping: "primary", label, value, min, max, increment_label, decrement_label }"#,
+        Key::ExampleNumberInputNoteStepping
     ),
     // REFUSED AND EXPLAINED, NEVER REWRITTEN. Type 40, leave the box, and the
     // sentence under the question is the caller's own. The number stays as it
@@ -2215,7 +2213,7 @@ const TIME_INPUT: &[Example] = &[
         Key::ExampleTimeInputNote
     ),
     example!(
-        r"TimeInput { name, legend, hour_label, minute_label, clock: _12, meridiem_label, am_label, pm_label, now_label, value }"
+        r"TimeInput { name, legend, hour_label, minute_label, clock: _12, meridiem_label, am_label, pm_label, value }"
     ),
     example!(
         r"TimeInput { min, max, step, pad: false, required, required_label, missing_label, invalid_label, min_label, max_label }"
@@ -2492,6 +2490,25 @@ mod tests {
                 "{} has {} example(s); a component page needs several",
                 component.name,
                 examples.len()
+            );
+        }
+    }
+
+    /// AN OVERVIEW IS KEYED BY SLUG, AND A SLUG CAN STOP BEING A PAGE.
+    ///
+    /// Merging a component onto the page of the component it is part of leaves
+    /// the overview it led behind, keyed to a slug `overview_for_page` will
+    /// never be handed again. Nothing reports it, because the lookup that
+    /// misses simply returns `None` and the page opens with no example at all.
+    /// Four were orphaned that way — `ListItem`, `SegmentedItem`, `SelectGroup`
+    /// and `SelectOption` — and `trees::complete` guards their trees the same
+    /// way.
+    #[test]
+    fn every_overview_leads_a_page_that_exists() {
+        for (slug, _) in OVERVIEWS {
+            assert!(
+                crate::site::by_slug(slug).is_some(),
+                "an overview leads `{slug}`, which is not a page"
             );
         }
     }

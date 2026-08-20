@@ -141,3 +141,38 @@ test("it is a bordered block and never a card", async ({ page }) => {
   // rule down the leading edge is what tells one bar from the page around it.
   expect(wrong, "a message bar is drawing an elevated surface").toEqual([]);
 });
+
+test("the icon sits on the centre of the first line, not on the top of the block", async ({
+  page,
+}) => {
+  // THE BAR IS `align-items: flex-start` AND THAT IS RIGHT — a glyph centred
+  // against a paragraph floats in the middle of nothing. What was wrong is
+  // what flush-with-the-top means: the glyph's box is shorter than the line
+  // beside it, so its centre sat six pixels above the title's on every bar on
+  // the page. `Button` has no such gap because its glyph takes its box from
+  // the type scale and its row is one line tall.
+  //
+  // The line is measured with a Range rather than from the element, because an
+  // element that wraps is several lines and only the first one is the question.
+  const all = await bars(page);
+  const offsets = await all.evaluateAll((els) =>
+    els
+      .map((el) => {
+        const icon = el.querySelector(".nd-message-bar-icon");
+        const first = el.querySelector(".nd-message-bar-text")?.firstElementChild;
+        if (!icon || !first) return null;
+        const range = document.createRange();
+        range.selectNodeContents(first);
+        const line = range.getClientRects()[0];
+        if (!line) return null;
+        const box = icon.getBoundingClientRect();
+        return box.top + box.height / 2 - (line.top + line.bottom) / 2;
+      })
+      .filter((one) => one !== null),
+  );
+  expect(offsets.length, "no bar on the page has an icon and a sentence").toBeGreaterThan(2);
+  for (const off of offsets) {
+    // Within a pixel of the line's own centre. It was -6 on every bar.
+    expect(Math.abs(off), "the icon is off the first line's centre").toBeLessThanOrEqual(1.5);
+  }
+});

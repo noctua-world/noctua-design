@@ -20,17 +20,17 @@ export interface TimeInputProps {
   minuteLabel: string;
   /** The name of the third box, in the reader's language. Wanted in practice by `seconds`. */
   secondLabel?: string;
-  /** The name of the morning and afternoon control, where the reader's locale has one. Wanted in practice by `clock = "auto"` or `"12"`, because the control appears only for some readers. */
+  /** The accessible name of the morning and afternoon control, drawn only for a twelve hour clock. It is wanted by `clock = "auto"` and `"12"`, together with `am_label` and `pm_label`. Without all three the field keeps twenty-four hours. */
   meridiemLabel?: string;
-  /** The word for before noon in the reader's language, such as *AM* or *Manhã*. Not derived, because the platform's own formatter spells it differently in each locale. */
+  /** The word for before noon in the reader's language, such as *AM* or *Manhã*. It is the morning half of the meridiem control. Not derived, because the platform spells it differently in each locale. */
   amLabel?: string;
   /** The word for after noon, on the same terms. */
   pmLabel?: string;
-  /** The time to start with, as `HH:MM` or `HH:MM:SS` on a twenty-four hour clock. That is the shape a server sends and the shape it gets back, whatever clock the reader is shown. */
+  /** The time to start with, as `HH:MM` or `HH:MM:SS` on a twenty-four hour clock. It is rendered into the boxes, so a page with no script shows it. That is the shape a server sends and the shape it gets back. */
   value?: string;
   /** Whether a third box asks for seconds. Off by default, because few of the things people schedule happen at a named second. */
   seconds?: boolean;
-  /** Which clock the boxes are read on. `auto` asks the reader's own locale. `12` and `24` are for a page whose subject has a clock of its own, such as a flight schedule. **What is submitted is twenty-four hour either way**. */
+  /** Which clock the boxes are read on. **Twenty-four hours by default**, whatever the reader's machine keeps. `auto` asks the reader's own browser instead, and `12` fixes it at twelve. **What is submitted is twenty-four hour in every case**. */
   clock?: TimeInputClock;
   /** The earliest time allowed, as `HH:MM`. A time before it is refused with `min_label` rather than rewritten, so the reader's own numbers stay. */
   min?: string;
@@ -38,11 +38,9 @@ export interface TimeInputProps {
   max?: string;
   /** How many minutes one press of an arrow moves the minute box. One by default. A booking form usually wants fifteen, so a reader reaches `:45` in three presses. */
   step?: string;
-  /** The name of a control that fills the boxes with the current time. Absent, there is no such control. */
-  nowLabel?: string;
   /** What it says when the boxes are empty and an answer was needed. The platform cannot say it, because `required` on three boxes refuses each of them separately. */
   requiredLabel?: string;
-  /** What it says when some boxes are filled and others are not, with a `{part}` hole naming the empty one. Half a time is the commonest way this field goes wrong. */
+  /** What it says when some boxes are filled and others are not, with a `{part}` hole filled with that box's own label. Half a time is the commonest way this field goes wrong. */
   missingLabel?: string;
   /** What it says when the numbers are not a time, such as twenty-five o'clock. It has a `{value}` hole, and the numbers stay exactly as typed. */
   invalidLabel?: string;
@@ -67,5 +65,5 @@ export interface TimeInputProps {
   className?: string;
 }
 
-/** Asks for one time of day, in separate boxes, on the reader's own clock. */
+/** Asks for one time of day, in separate boxes, on a twenty-four hour clock. */
 export declare function TimeInput(props: TimeInputProps): JSX.Element;

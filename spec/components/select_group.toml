@@ -6,6 +6,7 @@ guidance = "Use a select group inside a `Select` when the options fall into name
 name = "SelectGroup"
 element = "optgroup"
 class = "nd-select-group"
+page = "select"
 summary = "Group the options inside a Select under a name."
 
 # `<optgroup>` AND NOTHING ELSE.

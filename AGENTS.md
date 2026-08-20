@@ -224,6 +224,28 @@ component, deliberately: a viewport rig and a lazily-imported React bundle are
 documentation apparatus, not something a design system ships. What it is *built*
 from is the components above.
 
+**THAT LINE IS DRAWN PER FEATURE, NOT PER FILE, AND `Toast` IS THE WORKED
+CASE.** Its timed example emptied itself after six seconds and needed two
+things. The COUNTDOWN is the component's — `countdown_label`, drawn by
+`dist/toast.js` — because a message with a deadline owes its reader the deadline
+wherever it is used, and a docs-site copy is one no consumer could have. Raising
+the same message again is the job of the page that raised it, so *show it again*
+is a `Button { action }` answered in `shell.js` and ships nowhere. Ask which of
+the two a consumer would want, not which file is easier to reach. The countdown
+also shows the WHOLE wait again whenever the wait restarts, because "the wait
+never shortens" is a guarantee a resuming number would contradict.
+
+**AN EXAMPLE IS FICTIONAL, AND `Search`'S USED TO BE THIS SITE.** Every row of
+every `Search` example was a real page or component of this documentation, so a
+reader could not tell the demonstration from the application. They are an
+invented seed catalogue now, in one fragment
+(`docs-site/src/trees/search.rs::CATALOGUE`) that six examples and the hero
+share. The varieties are proper names and cross untranslated under
+`nd-identifier`, which is what lets a pre-filled query like `san` match in every
+locale; every sentence in them is a message in both. `src` is the one prop still
+pointed at this site and says why in place: its subject is FETCHING an index,
+and a fictional file would be untranslated content with no catalogue behind it.
+
 ## Repository map
 
 ```
@@ -374,6 +396,19 @@ because a convention nothing enforces is a convention that decays.
    is that component — it reads its own content, so it can split it into lines
    and a counter has something to count.
 
+   **`List.levels` is the same test applied before shipping.** It colours the
+   depth of a nested list, and colouring the marker alone would have been inert
+   under `marker: none` — a prop that does nothing under another prop. So it
+   marks the marker *and* the rule down a nested list's inside edge. Two more
+   things about it generalise: the depth comes from the SELECTOR
+   (`.nd-list[data-nd-levels="true"] .nd-list .nd-list`) because a nested
+   `List` is its own instance and carries none of the root's attributes, and
+   the four colours alternate the palette's neutral and its accent, which are
+   the only two hues thirty-nine palettes all have. **A bool has no variant
+   grid** — `specimens::drawn` takes enum props only — so the example is the
+   only place it is shown, and a `specimen` written on a bool prop is a
+   picture nothing draws.
+
 **The escape hatch.** Every gate honours `// allow-literal: <reason>` on the same
 line, and the reason has to be a real one. It exists so an exception lands in
 front of a reviewer instead of quietly disabling a gate.
@@ -521,6 +556,13 @@ number either of them draws. A variant grid draws its icons through `Icon`
 itself now, so there is no third reader to keep in step. `/icons/` remains the
 gallery of drawings; `/icon/` is the component that draws them.
 
+**AND THE GALLERY IS CALLED *Icons list*, because *Icons* was not a name it
+could keep.** Two sidebar rows a letter apart, neither saying which was the
+component and which the set of drawings. It is a foundation, so the title is a
+sentence and both locales carry it — `Lista de ícones` in Portuguese. The slug
+stays `icons`, for the reason `/avatars/` keeps its own: a URL a reader may
+have kept is not worth a rename, and nothing derives the title from it.
+
 **Its three size fields went with it, because they decided nothing.**
 `size_small`, `size_medium` and `size_large` reached one doc comment and no
 declaration, and had already drifted from the stylesheet, which sizes
@@ -545,6 +587,32 @@ names a collection — several components on one page — and absent means a pag
 its own. `site::pages` panics on a value no page declares, because the failure
 mode is silent: a component documented nowhere looks exactly like one that
 moved. Never keep a list of which components moved anywhere else.
+
+**AND THREE THINGS MOVE WITH IT, EACH KEYED BY SLUG IN A DIFFERENT FILE.**
+`examples::OVERVIEWS` holds the caption of the page's one hero, `trees::HEROES`
+holds its tree, and `tests/browser/pages.js` holds its URL. A merge leaves an
+entry in each pointing at a slug that is no longer a page, and nothing reported
+it: the lookup that misses returns `None` and the page simply opens with no
+example on it. `every_overview_leads_a_page_that_exists` and
+`every_hero_leads_a_page_that_exists` are the two gates, added when `ListItem`,
+`SegmentedItem`, `SelectGroup` and `SelectOption` moved onto the pages of the
+components they are part of.
+
+**A COLLECTION PAGE PUTS EVERY COMPONENT ON IT INTO THE SEARCH INDEX.**
+`index::all` used to read `page.component`, which is `None` for a shared page —
+so `TableColumn`, `SelectOption` and every prop either declares were absent
+from the site's own search, and `site.rs` wrote that down as the price of
+merging. It reads `site::documented_on` now and dedupes on name-and-page,
+because two parts of one collection declare `children` and `label` and each
+would otherwise be its own row pointing at the same place.
+
+**A PICTURE OF A LIST CLAIMS NO ROLE, AND THAT IS THE RULE ABOUT PICTURES
+AGAIN.** `audit.spec.js`'s list sweep asks every `ul.nd-list` to restate
+`role="list"`, and a specimen whose contract carries MARKUP is the contract's
+element with that markup inside — it deliberately carries no ARIA at all. The
+sweep skips `.nd-variant-stage` for the same reason `segmented.spec.js` does.
+Adding a page to `pages.js` is what surfaced it: five whole-site sweeps only
+ever open the pages named there.
 
 **A ROW OF BOXES HAS ONE WALK, AND IT IS `segmentWalk`.** Auto-advance when a
 box fills, Backspace in an empty box going back, and a paste splitting itself
@@ -594,6 +662,77 @@ them generalise to any control this runtime enhances:
 * **A control the script owns ships `hidden`**, and `readonly` refuses a
   stepper exactly as `disabled` does — in the markup and in the handler, since
   a value a press can still change is a value that is still editable.
+* **`stepping` IS AN ARRANGEMENT, NOT A SECOND CONTROL.** `primary` puts one
+  full-size stepper either side of the value and `assist` keeps the two small
+  ones at the end of the box, and the MARKUP is identical: the wrapper becomes
+  `display: contents` and `order` moves the one that subtracts in front. So the
+  runtime finds the same two buttons, the same reveal and the same refusal. The
+  `:not([hidden])` on that rule is load-bearing — `[hidden]` is one attribute of
+  specificity, so without it the stylesheet reveals a stepper the markup shipped
+  hidden and a page with no script draws two controls that move nothing.
+
+**THE READER'S LOCALE IS NOT THE PAGE'S LANGUAGE, AND `document.documentElement.lang`
+IS THE PAGE'S.** The site is pre-rendered per locale, so that attribute is `en`,
+`pt-BR` or `qps` — never a region. A bare `en` has no region, so CLDR resolves it
+to the United States, and both places that asked it a question about the reader
+got the American answer for every reader of the English build: `DateInput` re-laid
+the row to month-day-year, and `TimeInput`'s `auto` put everyone on a twelve-hour
+clock. Both were served the right thing and moved off it by the script.
+
+Split the question, because it is two questions:
+
+* **A WORD follows the page.** Month names, weekday initials and the bound
+  inside `min_label` are written into a sentence the page is already written
+  in. `dateWords()` in `shell.js`.
+* **A CONVENTION follows the reader**, and the reader is `navigator.languages`.
+  The row's order, the week's first day and the clock are conventions.
+  `readerLocales()` in `shell.js` and `twelveHourReader()` in `inputs.js`, both
+  read through `Intl` — `formatToParts` for the order, `resolvedOptions().hour12`
+  for the clock. **Never a table of locales to formats**: a table is a copy of
+  CLDR that stops being true the day CLDR changes.
+* **An empty chain is passed as an empty array**, which `Intl` reads as *the
+  default locale* — the reader's own by definition.
+* **`playwright.config.js` pins `locale: "en-US"`** for the same reason it pins
+  the colour scheme and the device scale: the suite asserted month-first and
+  would have asserted it on a machine set to en-GB too, because the defect made
+  the answer independent of the machine. A spec that wants another locale opens
+  its own context, which is what the three forced-locale tests in
+  `date-input.spec.js` do.
+
+**`TimeInput` IS TWENTY-FOUR HOURS UNLESS ASKED, AND ITS MERIDIEM CONTROL IS A
+REAL `Segmented`.** `clock` has three answers — `24` (the default), `auto` (ask
+the reader's browser) and `12` — and the morning/afternoon control used to be
+`createElement` markup imitating `Segmented`: no `appearance`, no `shape`, no
+`fill`, no `aria-orientation`, so every compound rule that draws a joined
+control matched nothing and the pair rendered as two detached boxes. It is the
+component now, rendered by both bodies inside the `hidden` span, revealed by
+`inputs.js` when the clock resolves to twelve. Four things came with it:
+
+* **The server decides which half of the day is chosen**, from `value`, and an
+  empty field chooses NEITHER. A control that ships with the morning marked has
+  answered for the reader, and a twelve-hour reading whose half nobody has
+  stated is half a time — `readAll` reports it missing rather than posting the
+  morning.
+* **The form still posts twenty-four hours**, which the contract promises in
+  three places and the re-laid field broke: a box posts what it SHOWS, so
+  `hour=02` left for the server when the reader meant 14:00. The entry is
+  rewritten on `formdata`, exactly as `NumberInput` rewrites the separators
+  `group` draws.
+* **The value is RENDERED into the boxes.** It reached them from
+  `data-nd-value` at enhance time and nowhere else, so a field given `14:05`
+  was two empty boxes until a script ran.
+* **A name and both words, or no control at all**, and no re-lay without one.
+  The script used to fall back to the raw values and draw `am` and `pm` — two
+  identifiers, untranslated, on the page. `{part}` in `missing_label` was the
+  same failure: it was filled with the part's key, so the Portuguese page said
+  *O minute ainda está vazio*.
+
+**AND `DateInput`'S BEHAVIOUR DOES NOT SHIP.** It is `enhanceDateInput` in
+`docs-site/assets/shell.js`, not in `crates/noctua-design-runtime/`, so a
+consumer taking the packages gets the three boxes and none of the reorder,
+stepping, paste, suggestions or month grid. Same recorded gap as `Tabs`,
+`Segmented` and `Tree`, and the same fix when somebody takes it: move the
+module, and let `shell.js` import it back.
 
 **`Tabs` REVEALS A PANEL AND `Segmented` CHOOSES A VALUE**, and both contracts
 say so. `Segmented` is a form control with a `name`, a `value` and
@@ -632,6 +771,42 @@ fourth is chosen. So `Segmented` writes `tabindex="0"` on itself, every
 `SegmentedItem` writes `-1`, and `refreshRoving()` strips the group's own stop
 before it places a real one — which it must, because `stops()` collects
 `[tabindex]` and a group inside a toolbar would otherwise join the bar's walk.
+
+**A DEFAULT VALUE IS THE ABSENCE OF ITS ATTRIBUTE, SO SELECT THE VALUE A THING
+IS NOT.** A variant specimen writes every enum default EXCEPT an `aria-*` one
+(`specimens.rs` skips those on purpose), and a runtime that builds a control by
+hand writes the class alone — `inputs.js` does, for `TimeInput`'s AM/PM pair.
+So `[data-nd-appearance="joined"]` and `[aria-orientation="horizontal"]` each
+matched nothing for a reader who was looking at the default. `:not(spread)` and
+`:not(vertical)` are the same two sets with the defaults included, and they
+cannot both match, which is what lets one axis override the other without a
+specificity fight. `Segmented`'s vertical grid lost every corner to this and
+the AM/PM pair came apart into two boxes with a doubled edge between them.
+
+**THE CORNERS OF AN ATTACHED ROW BELONG TO ITS TWO ENDS, AND THE AXIS DECIDES
+WHICH TWO EACH END OWNS.** Zeroing the leading and trailing pair for the
+horizontal case without restricting it to that axis leaves a vertical group
+running both sets: one rounded corner at the top left, one at the bottom right,
+diagonally opposite, and squares everywhere else. Write each axis's end corners
+whole, from one named radius, and a lone member keeps all four because it is
+both ends. `Segmented` is fixed; **`ButtonGroup` still has it**, in the same
+shape, at `.nd-button-group[data-nd-attached="true"]`.
+
+**`max-inline-size: 100%` IS A PERCENTAGE OF ZERO INSIDE A SHUT FOLD.** A
+closed `<details>` is `content-visibility: hidden`, so every containing block
+in the settings panel measures zero and a percentage cap against it collapses
+the control — and takes the panel's own width down with it. `audit.spec.js`
+reported fifty thousand controls under the minimum target from one such
+declaration. `inline-size: fit-content` is the same intent with a floor: the
+content when it fits, the container when it does not, never below
+`min-content`. Which is also why nothing in that rule set may give a part
+`min-inline-size: 0` — that puts the floor back at zero.
+
+**A CENTRED FLEX LINE THAT DOES NOT FIT OVERFLOWS BOTH ENDS.** A stop divided
+by count rather than by content can be narrower than its own icon and word
+together, and `justify-content: center` then paints the icon over the label of
+the stop before it. `flex-wrap: wrap` on the box puts the icon on a line of its
+own instead, which costs nothing at any width where the two fit side by side.
 
 **A DECLARED `attribute` IS A CLAIM ABOUT THE MARKUP, AND `rust_element` KEEPS
 IT ONLY FOR A DERIVED BODY.** A component written by hand in `controls.rs`
@@ -729,6 +904,32 @@ follow from that and are easy to get wrong:
   the arrow walk is an action a reader concludes does not exist.
 * **`aria-expanded="false"` is TRUE on a menu button** — the one exception to
   `Button`'s write-it-only-when-true rule.
+* **AND ESCAPE HAS TO BE HEARD ON THE BUTTON, NOT ONLY ON THE SURFACE.**
+  Opening with a pointer leaves the focus on the button deliberately — a reader
+  who clicked is reading — and the only Escape handler was on the menu, so that
+  reader had no key that put it away. It is on both now, `stopPropagation` on
+  each, so a menu inside a dialog closes itself rather than the dialog.
+* **`Pagination`'s gap is the second menu trigger in the system.** `more_label`
+  turns the `…` between two runs of numbers into a button opening a `Menu` of
+  the pages it stands for, so page 7 of 40 is one press rather than five. It
+  reuses `dist/menu.js` rather than growing a second menu, and it ships
+  `hidden` exactly as `Button { menu }` does. The inert character stays in the
+  markup and `.nd-pagination-gap:has(+ .nd-pagination-more:not([hidden]))` takes
+  it away once the script has revealed the control, so a page with no script is
+  what it always was. The items are page NUMBERS: identifiers, marked
+  `nd-identifier` and never translated, while the menu's own name is a sentence
+  and comes from the prop.
+* **A MENU BUTTON DRAWS ONE CHEVRON, WHOEVER DREW IT.** `menu` draws the
+  chevron and steps aside for an `icon` or an `icon_end` naming the same
+  drawing. It only stepped aside for the trailing one, so a split button asking
+  for `icon: "chevron-down"` beside `menu` shipped two of them side by side, on
+  `/button-group/` and in that page's hero. `no button anywhere draws the same
+  chevron twice` in `button.spec.js` is the guard.
+* **A RULE THAT NAMES ONE AXIS HAS TO NAME BOTH.** `ButtonGroup`'s outer
+  corners were two unconditional rules plus two for `vertical`, so a vertical
+  group ran all four and kept two of its eight corners. Squaring an inner
+  corner is `border-radius` for three shapes and the `clip-path` polygon for
+  `bevel`, which is a cut rather than a radius and needs its own rules.
 * **A `text` icon prop draws nothing when the name does not parse.** `x.svg` is
   the file; `close` is the icon's name. A test reads every icon an example names.
 * **A SPECIMEN IS A GENERATED TREE, AND IT RENDERS THE REAL COMPONENT.** It was
@@ -1175,7 +1376,19 @@ scrollbar paints square straight through the rounded corner. That is what a
 reader sees the moment corners are set to `circular`. The fix is structural:
 an outer element with the radius and `overflow: hidden`, an inner one with
 `overflow-y: auto`. `.nd-panel` + `.nd-panel-body` is the shape, and so is
-`.nd-codeblock` + `.nd-codeblock-code`.
+`.nd-codeblock` + `.nd-codeblock-code`, and so is `.nd-menu` +
+`.nd-menu-scroll` — that last one is why `Menu` renders a `role="none"` box
+around its items. A generic element between a `role="menu"` and its
+`role="menuitem"` children is the `<ul role="menu"><li role="none">`
+arrangement, and it is what a menu that has to scroll costs.
+
+**A floating surface that cannot scroll is a floating surface with a height
+nobody set.** `Menu` had neither: a list longer than the window ran off the
+bottom of it with no bar and no flip. Every panel `anchor.js` positions bounds
+itself with `calc(100vh - var(--nd-anchor-block) - …)`, because the script
+writes that variable as the distance from whichever edge the panel hangs from —
+so one expression is right above and below. Reach for that expression rather
+than a number.
 
 **It happened twice.** The code block declared both on one rule and survived
 the browser assertion for a whole stage, because no page the suite looked at
@@ -1186,6 +1399,27 @@ the page" only covers the elements that are on it.
 bar and nothing else — every panel and code block keeps the browser's default,
 which is the bar a reader is actually looking at. The emitted rule uses
 `:where(*)`.
+
+**IT HAPPENED A THIRD TIME, AND THE COST WAS THE CORNER PRESET.** A
+`<textarea>` IS a scroll container, so `.nd-textarea` — which was the
+`<textarea>` — could not carry a radius and shipped `border-radius: 0`. It was
+the one control on the site that ignored the reader's corner setting, and the
+"no radius, because it scrolls" comment above it read as a decision rather than
+as a missing box. `Textarea` is `.nd-textarea` + `.nd-textarea-box` now,
+exactly as `Input` is `.nd-input` + `.nd-input-box`, and `inputs.spec.js`
+asserts every field in the family goes round when the preset does. Two things
+came out with it: **a bare `<textarea>` has no `::after`**, so the one glass
+recipe's sheen had never drawn on a frosted one, and **`size` set no padding
+anywhere**, because the only rules keyed on it needed a child the control did
+not have.
+
+**AND A FORM CONTROL'S `line-height` IS `normal`, whatever the page is set
+in.** `Textarea`'s `max_rows` is worked out as `maxRows * lineHeight`;
+`Number.parseFloat("normal")` is `NaN`, the ceiling fell back to `Infinity`,
+and a box with `max_rows: 8` grew to 724px. The prop had never once applied,
+and the test guarding it passed because it asserted `< 2000` rather than the
+ceiling. Anything a script derives from a computed font metric on an `<input>`,
+`<textarea>` or `<select>` needs that metric written down first.
 
 ### Trap 0.7 — a render-blocking stylesheet that 404s blocks nothing
 
@@ -1335,6 +1569,16 @@ is about a note that is not open; `Heading.level` is document structure.
 `<textarea>`, like `<input>`, `<meter>` and `<progress>`, is handled as a
 replaced element by the specimen emitter: its content is the **value**, so
 injected markup is rendered to the reader as prose.
+
+**AN EXAMPLE'S PICTURE IS CONTENT, AND `favicon.svg` IS NOT A PICTURE OF
+ANYBODY.** Every `Avatar { src }` on the site pointed at the site's own mark,
+which is a ring around a dot: under `object-fit: cover` each face drew a second
+circle inside the avatar's own, and a reader reported two rings where a portrait
+belongs. `docs-site/assets/portraits/*.svg` are the placeholder faces, the docs
+build already copies them, and `Value::Asset("assets/portraits/….svg")` reaches
+them. **And several faces at one `tone` are several identical discs** — an
+`AvatarGroup` whose whole subject is the overlap cannot show which of four grey
+discs is in front, so each member of an example group carries its own colour.
 
 ## Maintaining this file
 

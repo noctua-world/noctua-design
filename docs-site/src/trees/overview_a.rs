@@ -10,7 +10,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Hero;
 
-/// The heroes in this group. 16 of them.
+/// The heroes in this group. 15 of them.
 pub(crate) const HEROES: &[Hero] = &[
     (
         "button",
@@ -329,110 +329,22 @@ SearchResult { href: "…", label: "…", detail: "…", keywords: "…", curren
             name: "Search",
             props: &[
                 ("name", Value::Text("overview-search")),
-                ("label", Value::Message(Key::SearchLabel)),
-                ("placeholder", Value::Message(Key::SearchPlaceholder)),
+                ("label", Value::Message(Key::ExampleSearchLabel)),
+                ("placeholder", Value::Message(Key::ExampleSearchPlaceholder)),
                 ("status", Value::Message(Key::SearchResults)),
                 ("empty_label", Value::Message(Key::SearchEmpty)),
                 ("clear_label", Value::Message(Key::SearchClear)),
             ],
-            children: &[
-                Node::Component {
-                    name: "SearchGroup",
-                    props: &[("label", Value::Message(Key::SearchGroupPages))],
-                    children: &[
-                        Node::Component {
-                            name: "SearchResult",
-                            props: &[
-                                ("href", Value::Text("../spacing/")),
-                                ("label", Value::PageTitle("spacing")),
-                                ("detail", Value::Message(Key::PageSpacingSummary)),
-                                // Letters a reader might type that the name does
-                                // not contain: `gap` reaches this row and nothing
-                                // else.
-                                ("keywords", Value::Text("gap inset step scale rhythm")),
-                            ],
-                            children: &[],
-                        },
-                        Node::Component {
-                            name: "SearchResult",
-                            props: &[
-                                ("href", Value::Text("../typography/")),
-                                ("label", Value::PageTitle("typography")),
-                                ("detail", Value::Message(Key::PageTypographySummary)),
-                            ],
-                            children: &[],
-                        },
-                    ],
-                },
-                Node::Component {
-                    name: "SearchGroup",
-                    props: &[("label", Value::Message(Key::SearchGroupComponents))],
-                    children: &[
-                        Node::Component {
-                            name: "SearchResult",
-                            props: &[
-                                ("class", Value::Text("nd-identifier")),
-                                ("href", Value::Text("../button/")),
-                                ("label", Value::Data("Button")),
-                            ],
-                            children: &[],
-                        },
-                        Node::Component {
-                            name: "SearchResult",
-                            props: &[
-                                ("class", Value::Text("nd-identifier")),
-                                ("href", Value::Text("../select/")),
-                                ("label", Value::Data("Select")),
-                            ],
-                            children: &[],
-                        },
-                        // The page this is on, so `current` is a claim the
-                        // document can back rather than a decoration.
-                        Node::Component {
-                            name: "SearchResult",
-                            props: &[
-                                ("class", Value::Text("nd-identifier")),
-                                ("href", Value::Text("../search/")),
-                                ("label", Value::PageTitle("search")),
-                                ("current", Value::Bool(true)),
-                            ],
-                            children: &[],
-                        },
-                    ],
-                },
-            ],
+            // THE SAME INVENTED CATALOGUE THE EXAMPLES BELOW DRAW, and one
+            // copy of it rather than two. This hero used to list the real
+            // pages and components of this site, which is a demonstration a
+            // reader cannot tell from the page around it.
+            children: &[Node::Fragment(crate::trees::search::CATALOGUE)],
         }],
     ),
-    (
-        "select-option",
-        r#"SelectOption { value: "…", label: "…", swatch: "…", detail: "…", selected: true }"#,
-        &[Node::Component {
-            name: "Select",
-            props: &[
-                ("name", Value::Text("overview-select-option")),
-                ("label", Value::Message(Key::ExampleSelectPaletteLabel)),
-                ("hint", Value::Message(Key::ExampleSelectPaletteHint)),
-            ],
-            children: &[
-                Node::Fragment(crate::trees::select::AMBER_DETAILED),
-                // The one option the page's own fragments cannot supply, since
-                // `selected` is what this hero is showing.
-                Node::Component {
-                    name: "SelectOption",
-                    props: &[
-                        ("class", Value::Text("nd-identifier")),
-                        ("value", Value::Text("ochre-balanced")),
-                        ("label", Value::Data("Ochre")),
-                        ("swatch", Value::Text("ochre-balanced")),
-                        ("detail", Value::Message(Key::ExampleSelectDetailBalanced)),
-                        ("selected", Value::Bool(true)),
-                    ],
-                    children: &[],
-                },
-                Node::Fragment(crate::trees::select::CLAY_DETAILED),
-            ],
-        }],
-    ),
+    // `select-option` had a hero here. `SelectOption` is documented on
+    // `/select/` now, and a page has one hero: this one led a page that no
+    // longer exists, so nothing could ever have drawn it again.
     (
         "tag",
         r#"Tag { icon: IconName::Check, tone: "shipped", label: "Shipped" }
@@ -544,7 +456,7 @@ ToolbarGroup { … } / ToolbarGroup { align: ToolbarGroupAlign::End, … }"#,
         "button-group",
         r#"ButtonGroup { label: "Publishing", … }
 Button { label: "Publish" }
-Button { menu: true, hide_label: true, icon: "chevron-down", controls: "overview-button-group-menu" }"#,
+Button { menu: true, hide_label: true, controls: "overview-button-group-menu", label: "More actions" }"#,
         &[Node::Element {
             tag: "div",
             attributes: &[("class", Value::Text("nd-example-row"))],
@@ -560,10 +472,12 @@ Button { menu: true, hide_label: true, icon: "chevron-down", controls: "overview
                         },
                         Node::Component {
                             name: "Button",
+                            // NO `icon`. `menu` DRAWS THE CHEVRON ITSELF, so a
+                            // caller who names one as well gets two of them
+                            // side by side on one control.
                             props: &[
                                 ("menu", Value::Bool(true)),
                                 ("hide_label", Value::Bool(true)),
-                                ("icon", Value::Text("chevron-down")),
                                 ("controls", Value::Text("overview-button-group-menu")),
                                 ("label", Value::Message(Key::ExampleButtonMore)),
                             ],
@@ -638,7 +552,7 @@ Button { menu: true, hide_label: true, icon: "chevron-down", controls: "overview
     ),
     (
         "time-input",
-        r"TimeInput { name, legend, hint, hour_label, minute_label, meridiem_label, am_label, pm_label, value, min, max, step, pad, now_label, required, required_label, missing_label, invalid_label, min_label, max_label }",
+        r"TimeInput { name, legend, hint, hour_label, minute_label, meridiem_label, am_label, pm_label, clock: Auto, value, min, max, step, pad, required, required_label, missing_label, invalid_label, min_label, max_label }",
         &[Node::Element {
             tag: "form",
             attributes: &[
@@ -664,7 +578,10 @@ Button { menu: true, hide_label: true, icon: "chevron-down", controls: "overview
                         ("max", Value::Text("18:00")),
                         ("step", Value::Text("15")),
                         ("pad", Value::Bool(true)),
-                        ("now_label", Value::Message(Key::ExampleInputNow)),
+                        // THE ONE EXAMPLE THAT ASKS THE READER. Twenty-four
+                        // is the default, so `auto` is a value somebody has
+                        // to choose, and this is where it is shown working.
+                        ("clock", Value::Text("auto")),
                         ("required", Value::Bool(true)),
                         (
                             "required_label",

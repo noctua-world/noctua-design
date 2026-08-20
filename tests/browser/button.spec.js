@@ -7,9 +7,11 @@
 // class was nearest.
 
 import { test, expect } from "@playwright/test";
-import { LOCALES, PAGE, url } from "./pages.js";
+import { LOCALES, PAGE, showParts, url } from "./pages.js";
 
 const BUTTONS = "button/";
+// The split button lives here, and this page is not in `PAGE`.
+const GROUPS = "button-group/";
 
 test("no control anywhere on the button page is nameless", async ({ page }) => {
   for (const locale of LOCALES) {
@@ -98,16 +100,88 @@ test("every radio group on every page announces exactly one chosen", async ({ pa
           const radios = [...group.querySelectorAll('[role="radio"]')];
           return {
             group: group.dataset.ndGroup ?? "(unnamed)",
+            // A SETTING IS IN FORCE AND A QUESTION MAY BE UNANSWERED, and the
+            // structure says which this is: a group inside a `Field` is a
+            // question the reader has been asked. `TimeInput`'s morning and
+            // afternoon control is the first, and it ships with NEITHER half
+            // marked when the field was given no time — a control that arrives
+            // already saying *morning* has answered for the reader, and a
+            // twelve-hour reading whose half nobody stated is half a time.
+            asks: group.closest(".nd-field") !== null,
             missing: radios.filter((r) => !r.hasAttribute("aria-checked")).length,
             chosen: radios.filter((r) => r.getAttribute("aria-checked") === "true").length,
           };
         })
-        .filter((row) => row.missing > 0 || row.chosen !== 1),
+        .filter((row) => row.missing > 0 || row.chosen > 1 || (row.chosen === 0 && !row.asks)),
     );
     // A radio with no `aria-checked` is a radio whose state is unknown, and a
     // group of those announces nothing chosen. Server-rendered, so it is true
     // before any script runs — the thirteen accent swatches used to hardcode
-    // `false` on all thirteen and rely on a script to repair it.
+    // `false` on all thirteen and rely on a script to repair it. Two chosen is
+    // wrong everywhere, including in a question.
     expect(wrong, `${name}: a group with no single chosen option`).toEqual([]);
   }
+});
+
+test("no button anywhere draws the same chevron twice", async ({ page }) => {
+  for (const [name, path] of [...Object.entries(PAGE), ["buttonGroup", GROUPS]]) {
+    await page.goto(url(path));
+    await showParts(page);
+    const doubled = await page.evaluate(() =>
+      [...document.querySelectorAll(".nd-button")]
+        .filter((el) => el.querySelectorAll('[data-nd-icon="chevron-down"]').length > 1)
+        .map((el) => el.outerHTML.slice(0, 100)),
+    );
+    // `menu` draws the chevron, and a caller who names the same drawing on
+    // `icon` or `icon_end` gets theirs rather than both. The split button on
+    // this page and the one in the `ButtonGroup` hero each asked for a chevron
+    // beside `menu` and each shipped a control with two of them side by side.
+    expect(doubled, `${name}: a button drawing two chevrons`).toEqual([]);
+  }
+});
+
+test("an attached group keeps its outer corners and squares every shared edge", async ({
+  page,
+}) => {
+  await page.goto(url(GROUPS));
+  await showParts(page);
+  const wrong = await page.evaluate(() => {
+    const round = (value) => Number.parseFloat(value) > 0;
+    const bad = [];
+    for (const group of document.querySelectorAll(
+      '.nd-button-group[data-nd-attached="true"]',
+    )) {
+      const vertical = group.getAttribute("aria-orientation") === "vertical";
+      const members = [...group.querySelectorAll(":scope > .nd-button")];
+      members.forEach((member, index) => {
+        const first = index === 0;
+        const last = index === members.length - 1;
+        const style = getComputedStyle(member);
+        // Which corners belong to the group's own outside, on this axis. A
+        // vertical group owns both top corners of its first member and both
+        // bottom corners of its last; a horizontal one owns both leading
+        // corners and both trailing ones.
+        const want = {
+          borderTopLeftRadius: first,
+          borderTopRightRadius: vertical ? first : last,
+          borderBottomRightRadius: last,
+          borderBottomLeftRadius: vertical ? last : first,
+        };
+        for (const [corner, expected] of Object.entries(want)) {
+          if (round(style[corner]) !== expected) {
+            bad.push(
+              `${vertical ? "vertical" : "horizontal"} member ${index}: ` +
+                `${corner} is ${style[corner]} and should be ${expected ? "round" : "square"}`,
+            );
+          }
+        }
+      });
+    }
+    return bad;
+  });
+  // The two horizontal rules used to carry no orientation, so a vertical group
+  // ran them as well as its own and kept two of its eight corners. Reading the
+  // radius is reading a LENGTH, which is the one thing `getComputedStyle` is
+  // allowed to answer here.
+  expect(wrong, "a corner on the wrong side of a shared edge").toEqual([]);
 });

@@ -6,8 +6,39 @@
 import { expect, test } from "@playwright/test";
 
 import { PAGE, url, showParts } from "./pages.js";
-
 const named = (page, name) => page.locator(`[data-nd-info="${name}"]`);
+
+/**
+ * The most coloured pixel of a screenshot.
+ *
+ * `pixels.js` answers *is this readable*, *what colour is this surface* and
+ * *how much of this is ink*, and none of the three answers *which colour is
+ * the ink here* — the darkest pixel of a box holding a blue link and a line of
+ * body text is the body text. Everything else on this page is neutral, so the
+ * pixel furthest from grey is the one thing in the box that has a colour, and
+ * it lands on the token exactly rather than on an antialiased edge.
+ */
+async function ink(page, shot) {
+  return page.evaluate(async (data) => {
+    const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
+    const bitmap = await createImageBitmap(blob);
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const context = canvas.getContext("2d");
+    context.drawImage(bitmap, 0, 0);
+    const { data: px } = context.getImageData(0, 0, bitmap.width, bitmap.height);
+    let best = [0, 0, 0];
+    let spread = -1;
+    for (let i = 0; i < px.length; i += 4) {
+      const [r, g, b] = [px[i], px[i + 1], px[i + 2]];
+      const range = Math.max(r, g, b) - Math.min(r, g, b);
+      if (range > spread) {
+        spread = range;
+        best = [r, g, b];
+      }
+    }
+    return { colour: best, spread };
+  }, shot.toString("base64"));
+}
 
 test("with the script blocked there is no marker and no note", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
@@ -143,4 +174,50 @@ test("auto reads the measurement and start ignores it", async ({ page }) => {
   expect(await at("auto", "start")).not.toBe(await at("auto", "end"));
   // Under `start` it hangs from the leading edge whatever the measurement says.
   expect(await at("start", "start")).toBe(await at("start", "end"));
+});
+
+test("the marker is painted the colour a reader already reads as a control", async ({ page }) => {
+  // IT WAS THE MUTED INK AT REST. The one thing on the line that does
+  // something looked like the one thing that had been switched off, and it
+  // only became a control on hover — which a touch screen never reports, and
+  // this control exists so that a touch screen can reach the sentence.
+  //
+  // Read from the pixels of both, because a colour compared through
+  // `getComputedStyle` is two serialisations being compared and not two
+  // colours. The claim is that a reader sees one colour, so it is asked of the
+  // screen.
+  await page.goto(url(PAGE.info));
+  await showParts(page);
+
+  // AT REST, which is the whole of the claim: the marker already turns accent
+  // on hover and while its note is open, so a reading taken in either of those
+  // states would pass whatever the resting colour was.
+  const marker = named(page, "deadline").locator(".nd-info-marker");
+  await marker.scrollIntoViewIfNeeded();
+  await expect(marker).toHaveAttribute("aria-expanded", "false");
+  const glyph = await ink(page, await marker.screenshot());
+
+  // A link on the same page, drawn from `--nc-color-accent` and nothing else.
+  // It lives inside a note, so the note is opened to get at it — a different
+  // marker from the one measured above, so nothing about this reading touches
+  // the reading that matters.
+  const usage = named(page, "overview-usage");
+  await usage.locator(".nd-info-marker").click();
+  const link = usage.locator(".nd-info-note a").first();
+  await expect(link).toBeVisible();
+  const anchor = await ink(page, await link.screenshot());
+
+  // The marker has a colour at all, which the muted grey it shipped with did
+  // not: a neutral's channels are within a few levels of each other however
+  // dark it is.
+  expect(glyph.spread, "the marker is painted a neutral").toBeGreaterThan(40);
+  // And it is the same colour a link on this page is painted. Compared against
+  // the page rather than against a value written down here, because the token
+  // is the palette's and the palette can be changed.
+  for (const channel of [0, 1, 2]) {
+    expect(
+      Math.abs(glyph.colour[channel] - anchor.colour[channel]),
+      `the marker and a link disagree: ${glyph.colour} against ${anchor.colour}`,
+    ).toBeLessThanOrEqual(6);
+  }
 });

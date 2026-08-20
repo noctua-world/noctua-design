@@ -915,7 +915,8 @@ fn ThemeScopePage(context: Context) -> Element {
 
                     div { class: "nd-scope-head",
                         h3 { class: "nd-scope-title", "{context.t(Key::ScopeComponentTitle)}" }
-                        ScopeControls { context }
+                        // What this scope declares, one line above.
+                        ScopeControls { context, mode: "light", radius: "round", glass: "full" }
                     }
                     p { class: "nd-prose", "{context.t(Key::ScopeComponentBody)}" }
                     Sample { context }
@@ -928,7 +929,9 @@ fn ThemeScopePage(context: Context) -> Element {
 
                         div { class: "nd-scope-head",
                             h4 { class: "nd-scope-title", "{context.t(Key::ScopeNestedTitle)}" }
-                            ScopeControls { context }
+                            // What this one declares, and `full` because it
+                            // declares no glass and inherits its parent's.
+                            ScopeControls { context, mode: "dark", radius: "circular", glass: "full" }
                         }
                         p { class: "nd-prose", "{context.t(Key::ScopeNestedBody)}" }
                         Sample { context }
@@ -974,8 +977,25 @@ fn ThemeScopePage(context: Context) -> Element {
 /// back except the reset. They are `Segmented` groups now, so the state is
 /// visible before anything is pressed, which is the whole reason the header
 /// control is three radios rather than one cycling icon.
+/// # And they state what is in force before any script runs
+///
+/// All three shipped with `aria-checked="false"` on every item, and `refresh()`
+/// marked the right one once the module had loaded. That is exactly the defect
+/// the accent swatches were fixed for: a radio group that announces nothing
+/// chosen, to a reader with no script or to anything measuring the page before
+/// it runs — while the scope around it plainly IS light, round and frosted.
+/// The scope declares those three where it is built, so they are passed in and
+/// the answer is rendered.
 #[component]
-fn ScopeControls(context: Context) -> Element {
+fn ScopeControls(
+    context: Context,
+    /// What the scope this sits in has in force, and therefore which item is
+    /// marked. A nested scope passes what it inherited where it declared
+    /// nothing of its own.
+    mode: &'static str,
+    radius: &'static str,
+    glass: &'static str,
+) -> Element {
     rsx! {
         div { class: "nd-scope-controls",
             Segmented {
@@ -987,7 +1007,13 @@ fn ScopeControls(context: Context) -> Element {
                     ("dark", IconName::Moon, Key::ThemeModeDark),
                     ("system", IconName::Monitor, Key::ThemeModeSystem),
                 ] {
-                    SegmentedItem { value, icon, hide_label: true, label: context.t(label) }
+                    SegmentedItem {
+                        value,
+                        icon,
+                        hide_label: true,
+                        selected: value == mode,
+                        label: context.t(label),
+                    }
                 }
             }
             Segmented {
@@ -1000,7 +1026,7 @@ fn ScopeControls(context: Context) -> Element {
                     ("round", Key::ThemeRadiusRound),
                     ("circular", Key::ThemeRadiusCircular),
                 ] {
-                    SegmentedItem { value, label: context.t(label) }
+                    SegmentedItem { value, selected: value == radius, label: context.t(label) }
                 }
             }
             Segmented {
@@ -1012,7 +1038,7 @@ fn ScopeControls(context: Context) -> Element {
                     ("subtle", Key::ThemeGlassSubtle),
                     ("full", Key::ThemeGlassFull),
                 ] {
-                    SegmentedItem { value, label: context.t(label) }
+                    SegmentedItem { value, selected: value == glass, label: context.t(label) }
                 }
             }
         }

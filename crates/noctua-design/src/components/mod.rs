@@ -145,7 +145,7 @@ pub use menu::{Menu, MenuPlacement};
 pub use menu_item::MenuItem;
 pub use message_bar::{MessageBar, MessageBarLive};
 pub use meter::{Meter, MeterSize};
-pub use number_input::{NumberInput, NumberInputSize};
+pub use number_input::{NumberInput, NumberInputSize, NumberInputStepping};
 pub use otp_field::{OtpField, OtpFieldKind, OtpFieldSize};
 pub use pagination::{Pagination, PaginationSize, PaginationSpread};
 pub use paragraph::{Paragraph, ParagraphSize, ParagraphTone};

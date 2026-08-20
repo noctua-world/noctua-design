@@ -43,7 +43,7 @@ export const PAGE = {
   // One component page, for a spec about what a component page IS rather than
   // about any particular component.
   component: "heading/",
-  // The six controls that were one `/forms` page. Each is on this list because
+  // The four controls that were one `/forms` page. Each is on this list because
   // the width x locale sweep, the radius sweep and the no-shadow sweep only
   // cover the pages named here — and a page dropped from this list is a page
   // three suites quietly stop looking at.
@@ -51,9 +51,11 @@ export const PAGE = {
   checkbox: "checkbox/",
   radio: "radio/",
   fieldset: "fieldset/",
+  // The select, its groups and its options, on one page. `select-group/` and
+  // `select-option/` were rows of their own until the three were merged: an
+  // `<optgroup>` outside a `<select>` is not a control, so neither was ever a
+  // page a reader looked up on its own.
   select: "select/",
-  selectGroup: "select-group/",
-  selectOption: "select-option/",
   // The search, and the same argument: it is the one page with three floating
   // presentations on it, a `<dialog>`, and a box whose panel scrolls — so the
   // radius sweep, the width x locale sweep and the no-shadow sweep all have
@@ -128,9 +130,9 @@ export const PAGE = {
   meter: "meter/",
   progress: "progress/",
   // Paging, on a page of its own. It left `/tables/` because a reader who
-  // clicked *Table* in the sidebar got the whole of `Pagination` first — and
-  // because a component on a collection page is absent from the site's own
-  // search index, so nobody could find `spread` by searching for it.
+  // clicked *Table* in the sidebar got the whole of `Pagination` first. The
+  // other half of that argument — that a component on a shared page was absent
+  // from the site's own search — is fixed in `index.rs` rather than still true.
   pagination: "pagination/",
   // The tables. Naming it here is not only for
   // the specs that are about tables: it is what puts the family into
@@ -204,8 +206,13 @@ export const PAGE = {
   // looked at. These two are the one place a roving tab stop is server
   // rendered, which is exactly the claim a sweep with the script blocked can
   // settle and nothing else on the list can.
+  // `segmented-item/` was a second row here and is one page with this one now.
   segmented: "segmented/",
-  segmentedItem: "segmented-item/",
+  // The list and its items. On this list because it is the one component whose
+  // whole subject is DEPTH — a list inside a list inside a list — so the width
+  // x locale sweep and the 320px audit have indentation here that nothing else
+  // on the site can give them.
+  list: "list/",
 };
 
 /**

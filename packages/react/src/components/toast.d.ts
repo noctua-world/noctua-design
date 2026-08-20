@@ -34,6 +34,12 @@ export interface ToastProps {
    */
   duration?: string;
   /**
+   * What the message says about the time it has left, with a `{count}` hole, such
+   * as *6 seconds left*. Write both forms as `one:… |other:…`. It needs `duration`,
+   * and it is drawn only once a script is running the wait it reports.
+   */
+  countdownLabel?: string;
+  /**
    * Whether a control that takes the message away is drawn. On by default: with no
    * `duration` the message stays, and one that stays with no way out is one a reader
    * has to work around.

@@ -4275,9 +4275,35 @@ const DATE_FIELD = "[data-nd-date-input]";
 /** Segment letters to their names, the order attributes' vocabulary. */
 const DATE_PARTS = { d: "day", m: "month", y: "year" };
 
-/** The reader's locale chain: the page's own language first, then the UA's. */
-function dateLocales() {
+/**
+ * The chain a WORD is written in: the page's own language first, then the UA's.
+ *
+ * Month names, weekday initials and the bound inside `min_label` are all words
+ * in a sentence the page is already written in, so they follow the page. A
+ * CONVENTION is a different question and has a different answer below.
+ */
+function dateWords() {
   return [document.documentElement.lang, ...(navigator.languages || [])].filter(Boolean);
+}
+
+/**
+ * The chain a CONVENTION is read from: the reader's own, and never the page's.
+ *
+ * THIS FUNCTION IS THE DEFECT. The one above was used for both questions, so
+ * the row's order was asked of `document.documentElement.lang` — the language
+ * this page happens to be written in, which is `en` on the English build. A
+ * bare `en` has no region, so CLDR answers with the United States and every
+ * reader of the English page was re-laid to month-day-year. A reader whose
+ * browser says `en-GB` was moved OFF the day-month-year the server had already
+ * served them, by a detection that never asked what their browser said.
+ *
+ * An empty chain is returned as an empty array on purpose: `Intl` reads that
+ * as *use the default locale*, which is the reader's own by definition. There
+ * is no table of locales to formats here and there must not be one — a table
+ * is a copy of CLDR that stops being true the day CLDR changes.
+ */
+function readerLocales() {
+  return [...(navigator.languages || []), navigator.language].filter(Boolean);
 }
 
 /** A segment's number, judged after Unicode normalisation so fullwidth
@@ -4295,7 +4321,7 @@ function dateIso(year, month, day) {
 /** A bound, written for a reader by the locale's own formatter. */
 function dateWorded(iso) {
   const [year, month, day] = iso.split("-").map(Number);
-  return new Intl.DateTimeFormat(dateLocales(), { dateStyle: "long", timeZone: "UTC" }).format(
+  return new Intl.DateTimeFormat(dateWords(), { dateStyle: "long", timeZone: "UTC" }).format(
     new Date(Date.UTC(year, month - 1, day)),
   );
 }
@@ -4366,16 +4392,25 @@ function enhanceDateInput(root, signal) {
   // the eyes, the Tab key and a screen reader must walk one row. Skipped if
   // something already has focus in here — the ground under a caret does not
   // move.
+  //
+  // THE ORDER COMES FROM THE PLATFORM, AND FROM THE READER. `formatToParts`
+  // is asked to write one numeric date and the answer is read back part by
+  // part, so what stands here is whatever CLDR says today for the locale the
+  // reader's browser asked for — see `readerLocales`, which is where this was
+  // wrong. The served `dmy` is the answer for a page with no script, not a
+  // default this detection may fall back on: a fallback that cannot be told
+  // from an answer is the defect, so `wanted` only moves on a part list this
+  // recognises.
   if (root.dataset.ndOrder === "auto") {
     let wanted = "dmy";
     try {
-      const parts = new Intl.DateTimeFormat(dateLocales(), {
+      const parts = new Intl.DateTimeFormat(readerLocales(), {
         day: "numeric",
         month: "numeric",
         year: "numeric",
       }).formatToParts(new Date(Date.UTC(2001, 1, 3)));
       const seen = parts
-        .filter((part) => part.type in { day: 1, month: 1, year: 1 })
+        .filter((part) => part.type === "day" || part.type === "month" || part.type === "year")
         .map((part) => part.type[0])
         .join("");
       if (seen === "mdy" || seen === "ymd" || seen === "dmy") wanted = seen;
@@ -4742,7 +4777,9 @@ function enhanceDateInput(root, signal) {
 
       let firstDay = 1;
       try {
-        const locale = new Intl.Locale(dateLocales()[0] ?? "en");
+        // A CONVENTION, so the reader's own — see `readerLocales`. The names
+        // in the grid are words and stay the page's.
+        const locale = new Intl.Locale(readerLocales()[0] ?? "en");
         const info = locale.getWeekInfo ? locale.getWeekInfo() : locale.weekInfo;
         if (info && info.firstDay) firstDay = info.firstDay % 7;
       } catch {
@@ -4756,7 +4793,7 @@ function enhanceDateInput(root, signal) {
       const build = (focusDay) => {
         const year = cursor.getUTCFullYear();
         const month = cursor.getUTCMonth();
-        monthName.textContent = new Intl.DateTimeFormat(dateLocales(), {
+        monthName.textContent = new Intl.DateTimeFormat(dateWords(), {
           month: "long",
           year: "numeric",
           timeZone: "UTC",
@@ -4765,7 +4802,7 @@ function enhanceDateInput(root, signal) {
         const header = document.createElement("div");
         header.setAttribute("role", "row");
         header.style.display = "contents";
-        const naming = new Intl.DateTimeFormat(dateLocales(), {
+        const naming = new Intl.DateTimeFormat(dateWords(), {
           weekday: "narrow",
           timeZone: "UTC",
         });
@@ -5087,9 +5124,59 @@ export function enhanceAll(root = document) {
   enhancePopovers(root);
   enhanceTooltips(root);
   enhanceToasts(root);
+  enhanceToastReplays(root);
   enhanceTabs(root);
   enhanceLineages(root);
   enhanceModels(root);
+}
+
+// --- Running a timed message again ------------------------------------------
+//
+// THIS IS APPARATUS, AND IT SHIPS NOWHERE. `/toast/` shows a message that takes
+// itself away after six seconds, and for every reader who arrives more than six
+// seconds later that example was an empty box. The countdown beside it is the
+// COMPONENT's, because a message with a deadline owes its reader the deadline
+// wherever it is used; raising the same message a second time is the job of the
+// page that raised it, so it lives here with the viewport rig and the
+// implementation switch. `AGENTS.md` draws that line and
+// `spec/components/toast.toml` writes down which half went which way.
+//
+// It borrows the component's own two verbs rather than reaching inside it: a
+// release and an enhance is what re-arms the wait, re-reveals the controls and
+// puts the live region back through `announce`, which is exactly what a message
+// arriving a second time should do.
+
+/** Every replay control, so a subtree can be released. */
+const replays = new WeakMap();
+
+function enhanceToastReplays(root = document) {
+  for (const control of root.querySelectorAll('[data-nd-action="toast-replay"]')) {
+    if (control.dataset.ndEnhanced) continue;
+    control.dataset.ndEnhanced = "toast-replay";
+    const binding = new AbortController();
+    replays.set(control, binding);
+    control.addEventListener("click", () => {
+      // The stage this control is in, never the page: two of these on one page
+      // would otherwise each raise the other's message.
+      const stage = control.closest(".nd-example-toasts") ?? control.parentElement;
+      if (!stage) return;
+      releaseToasts(stage);
+      for (const toast of stage.querySelectorAll("[data-nd-toast]")) {
+        toast.removeAttribute("data-nd-dismissed");
+        toast.removeAttribute("data-nd-paused");
+      }
+      enhanceToasts(stage);
+    }, { signal: binding.signal });
+  }
+}
+
+function releaseToastReplays(root = document) {
+  for (const control of root.querySelectorAll('[data-nd-action="toast-replay"]')) {
+    if (control.dataset.ndEnhanced !== "toast-replay") continue;
+    replays.get(control)?.abort();
+    replays.delete(control);
+    delete control.dataset.ndEnhanced;
+  }
 }
 
 /**
@@ -5115,6 +5202,7 @@ export function releaseAll(root = document) {
   releaseModels(root);
   releaseLineages(root);
   releaseTabs(root);
+  releaseToastReplays(root);
   releaseToasts(root);
   releaseTooltips(root);
   releasePopovers(root);

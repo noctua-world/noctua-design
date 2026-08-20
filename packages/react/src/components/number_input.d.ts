@@ -6,6 +6,7 @@
 
 import type { ReactNode } from "react";
 
+export type NumberInputStepping = "assist" | "primary";
 export type NumberInputSize = "small" | "medium" | "large";
 
 export interface NumberInputProps {
@@ -25,6 +26,8 @@ export interface NumberInputProps {
   bigStep?: string;
   /** Whether the two stepper controls appear. **On by default**, because they make a small adjustment one press instead of a select-all and a retype. Turn them off where the numbers are too large to step to. */
   steppers?: boolean;
+  /** What the steppers are for. `assist` is two small controls at the end of the box, for correcting a typed value. `primary` is one full control either side of the value, for a quantity answered by pressing rather than by typing. */
+  stepping?: NumberInputStepping;
   /** The name of the control that adds a step. Supply it with `steppers`, because the controls are glyphs and this is the only name each has. */
   incrementLabel?: string;
   /** The name of the control that subtracts a step, on the same terms. */

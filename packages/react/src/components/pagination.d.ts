@@ -32,6 +32,8 @@ export interface PaginationProps {
   pageLabel?: string;
   /** The accessible name of the page in force, which says so as well, such as *Page 4, current page*. `aria-current` carries the same fact, and this half survives an engine that does not announce the attribute. */
   currentLabel?: string;
+  /** The name of the control the gap between two runs of numbers becomes, such as *Skipped pages*. It names the menu of those pages as well, so the two cannot disagree. Leave it out and the gap stays an inert character. */
+  moreLabel?: string;
   /** The sentence under the control: how many results there are, and which of them this page holds. It sits in a live region, so a reader is told the set did not change when a page turns. */
   summary?: string;
   className?: string;

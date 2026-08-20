@@ -2,8 +2,8 @@
 # [meta], because a bare key after a table header belongs to that table.
 guidance = """
 Use a time input to ask for one time of day, in separate labelled boxes for the
-hour, the minute and sometimes the second. `clock` follows the reader's locale.
-The form posts a twenty-four hour value whatever they were shown.
+hour, the minute and sometimes the second. The boxes are read on a twenty-four
+hour clock unless `clock` asks otherwise, and the form posts one either way.
 """
 
 [meta]
@@ -13,7 +13,7 @@ class = "nd-time-input"
 # Drawn numerals rather than live boxes: a specimen of a `needs_name` component
 # must not render a nameless control. `DateInput` says the same.
 specimen = "<span class=\"nd-time-input-figure\"><span class=\"nd-identifier\">09</span><span class=\"nd-identifier\">30</span></span>"
-summary = "Asks for one time of day, in separate boxes, on the reader's own clock."
+summary = "Asks for one time of day, in separate boxes, on a twenty-four hour clock."
 
 [prop.name]
 type = "text"
@@ -42,22 +42,20 @@ doc = "The name of the third box, in the reader's language. Wanted in practice b
 
 [prop.meridiem_label]
 type = "text"
-doc = "The name of the morning and afternoon control, where the reader's locale has one. Wanted in practice by `clock = \"auto\"` or `\"12\"`, because the control appears only for some readers."
+doc = "The accessible name of the morning and afternoon control, drawn only for a twelve hour clock. It is wanted by `clock = \"auto\"` and `\"12\"`, together with `am_label` and `pm_label`. Without all three the field keeps twenty-four hours."
 
 [prop.am_label]
 type = "text"
-attribute = "data-nd-am-label"
-doc = "The word for before noon in the reader's language, such as *AM* or *Manhã*. Not derived, because the platform's own formatter spells it differently in each locale."
+doc = "The word for before noon in the reader's language, such as *AM* or *Manhã*. It is the morning half of the meridiem control. Not derived, because the platform spells it differently in each locale."
 
 [prop.pm_label]
 type = "text"
-attribute = "data-nd-pm-label"
 doc = "The word for after noon, on the same terms."
 
 [prop.value]
 type = "text"
 attribute = "data-nd-value"
-doc = "The time to start with, as `HH:MM` or `HH:MM:SS` on a twenty-four hour clock. That is the shape a server sends and the shape it gets back, whatever clock the reader is shown."
+doc = "The time to start with, as `HH:MM` or `HH:MM:SS` on a twenty-four hour clock. It is rendered into the boxes, so a page with no script shows it. That is the shape a server sends and the shape it gets back."
 
 [prop.seconds]
 type = "bool"
@@ -69,9 +67,9 @@ doc = "Whether a third box asks for seconds. Off by default, because few of the 
 type = "enum"
 values = ["auto", "12", "24"]
 variants = false
-default = "auto"
+default = "24"
 attribute = "data-nd-clock"
-doc = "Which clock the boxes are read on. `auto` asks the reader's own locale. `12` and `24` are for a page whose subject has a clock of its own, such as a flight schedule. **What is submitted is twenty-four hour either way**."
+doc = "Which clock the boxes are read on. **Twenty-four hours by default**, whatever the reader's machine keeps. `auto` asks the reader's own browser instead, and `12` fixes it at twelve. **What is submitted is twenty-four hour in every case**."
 
 [prop.min]
 type = "text"
@@ -88,11 +86,6 @@ type = "text"
 attribute = "data-nd-step"
 doc = "How many minutes one press of an arrow moves the minute box. One by default. A booking form usually wants fifteen, so a reader reaches `:45` in three presses."
 
-[prop.now_label]
-type = "text"
-attribute = "data-nd-now-label"
-doc = "The name of a control that fills the boxes with the current time. Absent, there is no such control."
-
 [prop.required_label]
 type = "text"
 attribute = "data-nd-required-label"
@@ -101,7 +94,7 @@ doc = "What it says when the boxes are empty and an answer was needed. The platf
 [prop.missing_label]
 type = "text"
 attribute = "data-nd-missing-label"
-doc = "What it says when some boxes are filled and others are not, with a `{part}` hole naming the empty one. Half a time is the commonest way this field goes wrong."
+doc = "What it says when some boxes are filled and others are not, with a `{part}` hole filled with that box's own label. Half a time is the commonest way this field goes wrong."
 
 [prop.invalid_label]
 type = "text"

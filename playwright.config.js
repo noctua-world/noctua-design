@@ -19,6 +19,13 @@ export default defineConfig({
     // rendering has to be deterministic across machines.
     deviceScaleFactor: 1,
     colorScheme: "light",
+    // AND SO DOES THE READER'S LOCALE, now that anything reads it. A date
+    // row's order and a time's clock are the reader's conventions, taken from
+    // `navigator.languages` — which is the machine's unless a context pins
+    // it, so the same suite would assert month-first here and day-first on a
+    // machine set to en-GB. A test that wants another locale asks for its own
+    // context, which is what `date-input.spec.js` does for all three.
+    locale: "en-US",
   },
   projects: [
     {

@@ -1204,6 +1204,61 @@ mod tests {
         assert!(!fires(generated));
     }
 
+    /// A comment naming a gate must name one that exists.
+    ///
+    /// Three did not. `shell.css` named one gate after a scrollable corner,
+    /// one after a nested backdrop filter and one after a custom property, and
+    /// none of the three is a function in this file. One of them described a
+    /// narrower rule than the gate that really holds it, so a reader trusting
+    /// the name would have believed a top-level `backdrop-filter` was allowed.
+    ///
+    /// They are spelled out here without the `gates::` prefix on purpose: this
+    /// sweep reads that prefix, and an example of the defect written inside the
+    /// guard against it would fail the guard.
+    ///
+    /// **A comment naming a guard that does not exist is worse than no
+    /// comment**, because the next person reads it, believes the rule is held,
+    /// and stops looking. That is the same shape as a test whose name promises
+    /// more than its body checks, which this repository has now found in four
+    /// separate places.
+    #[test]
+    fn every_gate_a_comment_names_is_a_gate_that_exists() {
+        let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/.."));
+        let mine = std::fs::read_to_string(root.join("xtask/src/gates.rs")).expect("gates.rs");
+        let mut checked = 0usize;
+
+        for path in sources(&root).expect("sources") {
+            // `dist/` is a copy of what is checked here, so a finding in it is
+            // the same finding twice.
+            if path.components().any(|part| part.as_os_str() == "dist") {
+                continue;
+            }
+            let Ok(text) = std::fs::read_to_string(&path) else {
+                continue;
+            };
+            for (at, _) in text.match_indices("gates::") {
+                let rest = &text[at + "gates::".len()..];
+                let name: String = rest
+                    .chars()
+                    .take_while(|c| c.is_ascii_lowercase() || *c == '_')
+                    .collect();
+                if name.is_empty() || name == "run" {
+                    continue;
+                }
+                checked += 1;
+                assert!(
+                    mine.contains(&format!("fn {name}(")),
+                    "{} names `gates::{name}`, and this file has no such function",
+                    path.display()
+                );
+            }
+        }
+
+        // A sweep that found nothing would pass for ever and report a property
+        // it never checked.
+        assert!(checked > 3, "only {checked} gate names were read");
+    }
+
     /// The exclusion list must not have swallowed what the gates protect.
     ///
     /// Every directory a component or a stylesheet can live in must still be

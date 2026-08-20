@@ -44,6 +44,12 @@ const FIELD_GROUP: &str = "use crate::components::{Field, FieldKind, FieldSize};
 /// The same, in JavaScript, where the field draws the group either way.
 const REACT_FIELD: &str = "import { Field } from \"./field.js\";\n";
 
+/// The choice between two named things, for the field that asks one.
+const REACT_SEGMENTED: &str = concat!(
+    "import { Segmented } from \"./segmented.js\";\n",
+    "import { SegmentedItem } from \"./segmented_item.js\";\n"
+);
+
 /// The one label in the system, for the one component that composes it.
 ///
 /// `Field` drew its own `<label>`, its own `<legend>` and its own required
@@ -350,6 +356,18 @@ fn button_dioxus_content(out: &mut String) {
          \x20       rel\n\
          \x20   };\n\
          \n\
+         \x20   // ONE CHEVRON, WHOEVER DREW IT.\n\
+         \x20   //\n\
+         \x20   // `menu` draws the chevron that makes a menu control look like\n\
+         \x20   // one, and it already steps aside for an `icon_end`. A LEADING\n\
+         \x20   // `icon` NAMING THE SAME DRAWING WAS NOT COVERED, so a split\n\
+         \x20   // button asking for `icon: \"chevron-down\"` beside `menu` drew two\n\
+         \x20   // of them side by side. That shipped on two pages of this site.\n\
+         \x20   // A button with two chevrons is not a control anybody designs, so\n\
+         \x20   // the component refuses to draw the second rather than trusting\n\
+         \x20   // every caller to notice.\n\
+         \x20   let chevron = menu && icon != Some(IconName::ChevronDown);\n\
+         \n\
          \x20   let content = rsx! {\n\
          \x20       // A TOGGLE SHIPS BOTH GLYPHS AND LETS THE STATE PICK ONE.\n\
          \x20       //\n\
@@ -379,7 +397,7 @@ fn button_dioxus_content(out: &mut String) {
          \x20       // steps aside for an `icon_end` the caller chose deliberately.\n\
          \x20       if let Some(icon_end) = icon_end {\n\
          \x20           Icon { icon: icon_end }\n\
-         \x20       } else if menu {\n\
+         \x20       } else if chevron {\n\
          \x20           Icon { icon: IconName::ChevronDown, size: crate::components::IconSize::Small }\n\
          \x20       }\n\
          \x20   };\n",
@@ -479,6 +497,12 @@ fn button_dioxus_elements(out: &mut String) {
 }
 
 fn button_react(out: &mut String) {
+    button_react_content(out);
+    button_react_elements(out);
+}
+
+/// The prelude and the shared content: everything before the element is chosen.
+fn button_react_content(out: &mut String) {
     out.push_str(
         "  const variant_ = variant ?? \"solid\";\n\
          \x20 const tone_ = tone ?? \"accent\";\n\
@@ -503,6 +527,8 @@ fn button_react(out: &mut String) {
          \x20 // Only the icon-only form names itself: everywhere else the label IS the\n\
          \x20 // visible text, and an `aria-label` beside it is a second name.\n\
          \x20 const named = hideLabel_ ? label : undefined;\n\
+         \x20 // One chevron, whoever drew it: see the Dioxus half.\n\
+         \x20 const chevron = menu && icon !== \"chevron-down\";\n\
          \n\
          \x20 const content = [\n\
          \x20   // A toggle ships BOTH glyphs and lets the state pick one: swapping a\n\
@@ -529,11 +555,17 @@ fn button_react(out: &mut String) {
          \x20   // The chevron steps aside for an `iconEnd` the caller chose.\n\
          \x20   iconEnd\n\
          \x20     ? h(Icon, { key: \"e\", icon: iconEnd })\n\
-         \x20     : menu\n\
+         \x20     : chevron\n\
          \x20       ? h(Icon, { key: \"m\", icon: \"chevron-down\", size: \"small\" })\n\
          \x20       : null,\n\
-         \x20 ];\n\
-         \n\
+         \x20 ];\n",
+    );
+}
+
+/// The attribute bag, the `<a>` form and the `<button>` form, in that order.
+fn button_react_elements(out: &mut String) {
+    out.push_str(
+        "\n\
          \x20 const shared = {\n\
          \x20   className: root,\n\
          \x20     \"data-nd-glass\": String(glass ?? false),\n\
@@ -649,6 +681,11 @@ fn list_dioxus(out: &mut String) {
          \n\
          \x20   // One arm per value: `rsx!` takes a literal element name, and\n\
          \x20   // this prop chooses the element rather than an attribute.\n\
+         \x20   // The levels flag is a fact about the OUTERMOST list, and the\n\
+         \x20   // stylesheet counts the lists under it. Written on every kind,\n\
+         \x20   // because a description list nests like any other.\n\
+         \x20   let levels = if levels { \"true\" } else { \"false\" };\n\
+         \n\
          \x20   rsx! {\n\
          \x20       match kind {\n\
          \x20           ListKind::Unordered => rsx! {\n\
@@ -657,6 +694,7 @@ fn list_dioxus(out: &mut String) {
          \x20                   role: \"list\",\n\
          \x20                   \"data-nd-marker\": marker.as_str(),\n\
          \x20                   \"data-nd-spacing\": spacing.as_str(),\n\
+         \x20                   \"data-nd-levels\": levels,\n\
          \x20                   {children}\n\
          \x20               }\n\
          \x20           },\n\
@@ -666,6 +704,7 @@ fn list_dioxus(out: &mut String) {
          \x20                   role: \"list\",\n\
          \x20                   \"data-nd-marker\": marker.as_str(),\n\
          \x20                   \"data-nd-spacing\": spacing.as_str(),\n\
+         \x20                   \"data-nd-levels\": levels,\n\
          \x20                   {children}\n\
          \x20               }\n\
          \x20           },\n\
@@ -675,6 +714,7 @@ fn list_dioxus(out: &mut String) {
          \x20                   class: \"{root}\",\n\
          \x20                   \"data-nd-marker\": marker.as_str(),\n\
          \x20                   \"data-nd-spacing\": spacing.as_str(),\n\
+         \x20                   \"data-nd-levels\": levels,\n\
          \x20                   {children}\n\
          \x20               }\n\
          \x20           },\n\
@@ -698,6 +738,9 @@ fn list_react(out: &mut String) {
          \x20     role: element === \"dl\" ? undefined : \"list\",\n\
          \x20     \"data-nd-marker\": marker ?? \"default\",\n\
          \x20     \"data-nd-spacing\": spacing ?? \"default\",\n\
+         \x20     // See the Dioxus half: the flag belongs to the outermost\n\
+         \x20     // list, and the stylesheet counts the lists under it.\n\
+         \x20     \"data-nd-levels\": String(levels ?? false),\n\
          \x20     ...rest,\n\
          \x20   },\n\
          \x20   children,\n\
@@ -3080,7 +3123,21 @@ const MENU_DIOXUS: &str = r#"    let root = format!("nd-menu {class}");
             "data-nd-menu": "{name}",
             "data-nd-placement": placement.as_str(),
             hidden: true,
-            {children}
+            // A SCROLLER INSIDE THE SURFACE, BECAUSE A SCROLLABLE ELEMENT
+            // CARRIES NO RADIUS. A menu longer than the window has to scroll,
+            // and a rounded box that scrolls paints a square scrollbar through
+            // its own corner — `.nd-panel` + `.nd-panel-body` and
+            // `.nd-codeblock` + `.nd-codeblock-code` are the same split for
+            // the same reason. The surface clips; this is what moves.
+            //
+            // `role="none"` so the items are still the menu's own children in
+            // the accessibility tree. A generic box between a `role="menu"`
+            // and its `role="menuitem"` items is the `<ul role="menu"><li
+            // role="none">` arrangement, said with the elements this
+            // component already renders.
+            div { class: "nd-menu-scroll", role: "none",
+                {children}
+            }
         }
     }
 "#;
@@ -3100,7 +3157,9 @@ const MENU_REACT: &str = r#"  const placement_ = placement ?? "auto";
       hidden: true,
       ...rest,
     },
-    children,
+    // See the Dioxus half: the surface clips and this scrolls, because a
+    // scrollable element carries no radius.
+    h("div", { key: "s", className: "nd-menu-scroll", role: "none" }, children),
   );
 "#;
 
@@ -3604,6 +3663,19 @@ const PAGINATION_DIOXUS: &str = r#"    let root = format!("nd-pagination {class}
             .as_ref()
             .map(|words| words.replace("{page}", &number.to_string()))
     };
+    // WHICH PAGES A GAP STANDS FOR, AND THE INDEX IS WHAT SAYS WHICH GAP IT IS.
+    //
+    // A leading gap can only ever sit at index 1: page one is pushed first
+    // whenever `from > 1`, and `from > 2` is the only thing that puts a gap
+    // after it. So every other gap is the trailing one, and no second list has
+    // to be carried alongside the window to tell them apart.
+    let hidden = |index: usize| {
+        if index == 1 {
+            (2, from - 1)
+        } else {
+            (to + 1, last - 1)
+        }
+    };
 
     rsx! {
         nav {
@@ -3631,6 +3703,13 @@ const PAGINATION_DIOXUS: &str = r#"    let root = format!("nd-pagination {class}
                 }
                 for (index, spot) in window.iter().enumerate() {
                     li { key: "{index}",
+                        // A number, or the gap between two runs of them.
+                        //
+                        // A `match` and not an `if let`, which clippy's pedantic
+                        // `single_match_else` would prefer: the gap arm needs three
+                        // `let` bindings, and `rsx!`'s own `if let` takes rsx content
+                        // rather than statements. The allow rides on the component,
+                        // with this reason, instead of the body being bent to a lint.
                         match spot {
                             Some(number) => rsx! {
                                 a {
@@ -3651,9 +3730,53 @@ const PAGINATION_DIOXUS: &str = r#"    let root = format!("nd-pagination {class}
                             // A character, not a word — and hidden, because an
                             // ellipsis read out between page three and page nine
                             // is noise, and both ends are drawn anyway.
-                            None => rsx! {
-                                span { class: "nd-pagination-gap", "aria-hidden": "true", "…" }
-                            },
+                            //
+                            // WITH `more_label` IT IS ALSO A CONTROL, and the
+                            // control ships `hidden` for `Button`'s reason:
+                            // `dist/menu.js` reveals it once it has found the
+                            // menu it names, so a page with no script carries
+                            // the same inert character it always carried. The
+                            // stylesheet takes the character away when the
+                            // button beside it is no longer hidden.
+                            None => {
+                                let (first, past) = hidden(index);
+                                let panel = format!("nd-pagination-{name}-gap-{first}");
+                                let opens = more_label.clone();
+                                rsx! {
+                                    span { class: "nd-pagination-gap", "aria-hidden": "true", "…" }
+                                    if let Some(opens) = opens {
+                                        button {
+                                            class: "nd-pagination-link nd-pagination-more",
+                                            r#type: "button",
+                                            "aria-label": "{opens}",
+                                            "aria-haspopup": "menu",
+                                            // "false" is TRUE on a menu button:
+                                            // it says a menu is there and shut.
+                                            "aria-expanded": "false",
+                                            "aria-controls": "{panel}",
+                                            "data-nd-pagination-more": "",
+                                            hidden: true,
+                                            "…"
+                                        }
+                                        Menu {
+                                            name: "{panel}",
+                                            label: "{opens}",
+                                            class: "nd-pagination-menu",
+                                            // The pages this gap stands for, in
+                                            // order. A number is an identifier,
+                                            // so nothing here is translated.
+                                            for number in first..=past {
+                                                MenuItem {
+                                                    key: "{number}",
+                                                    class: "nd-identifier",
+                                                    label: "{number}",
+                                                    href: address(number),
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -3697,6 +3820,14 @@ const PAGINATION_REACT: &str = r#"  const spread_ = spread ?? "default";
   if (to < last) window.push(last);
   const address = (n) => href.replace("{page}", String(n));
   const named = (template, n) => (template ? template.replace("{page}", String(n)) : undefined);
+  // See the Dioxus half: a leading gap can only sit at index 1, so the index is
+  // what says which of the two gaps this is.
+  const hidden = (index) => (index === 1 ? [2, from - 1] : [to + 1, last - 1]);
+  const pagesIn = ([first, past]) => {
+    const numbers = [];
+    for (let n = first; n <= past; n += 1) numbers.push(n);
+    return numbers;
+  };
   return h(
     "nav",
     {
@@ -3735,7 +3866,50 @@ const PAGINATION_REACT: &str = r#"  const spread_ = spread ?? "default";
           { key: `n${index}` },
           spot === null
             ? // A character, not a word, and hidden: both ends are drawn anyway.
-              h("span", { className: "nd-pagination-gap", "aria-hidden": "true" }, "…")
+              // See the Dioxus half for the control beside it, which ships
+              // hidden and is revealed by `dist/menu.js`.
+              [
+                h("span", { key: "g", className: "nd-pagination-gap", "aria-hidden": "true" }, "…"),
+                moreLabel
+                  ? h(
+                      "button",
+                      {
+                        key: "m",
+                        className: "nd-pagination-link nd-pagination-more",
+                        type: "button",
+                        "aria-label": moreLabel,
+                        "aria-haspopup": "menu",
+                        // "false" is TRUE on a menu button.
+                        "aria-expanded": "false",
+                        "aria-controls": `nd-pagination-${name}-gap-${hidden(index)[0]}`,
+                        "data-nd-pagination-more": "",
+                        hidden: true,
+                      },
+                      "…",
+                    )
+                  : null,
+                moreLabel
+                  ? h(
+                      Menu,
+                      {
+                        key: "p",
+                        name: `nd-pagination-${name}-gap-${hidden(index)[0]}`,
+                        label: moreLabel,
+                        className: "nd-pagination-menu",
+                      },
+                      // The pages this gap stands for. A number is an
+                      // identifier, so nothing here is translated.
+                      pagesIn(hidden(index)).map((n) =>
+                        h(MenuItem, {
+                          key: `p${n}`,
+                          className: "nd-identifier",
+                          label: String(n),
+                          href: address(n),
+                        }),
+                      ),
+                    )
+                  : null,
+              ]
             : h(
                 "a",
                 {
@@ -3795,6 +3969,26 @@ fn field_and_icon(name: &str) -> String {
 /// change when a path moves.
 fn beside_icon(components: &str) -> String {
     format!("use noctua_design_icons::IconName;\n\nuse crate::components::{{{components}}};\n")
+}
+
+/// Any lint a custom body legitimately trips, with the reason it trips it.
+///
+/// A body written by hand can be right and still lose an argument with a
+/// pedantic lint. The rule this repository keeps is not "no allows" but "no
+/// allow without a written reason", so the reason lives here, beside the body
+/// it is about, and reaches the generated file with it.
+#[must_use]
+pub fn allows(component: &Component) -> String {
+    match component.meta.name.as_str() {
+        // `Pagination` draws either a page number or the gap between two runs
+        // of them. Clippy would rather that were an `if let`, and it cannot be:
+        // the gap arm needs three `let` bindings to name the pages it hides,
+        // and `rsx!`'s own `if let` takes rsx content rather than statements.
+        "Pagination" => "#[allow(\n    clippy::single_match_else,\n    reason = \"the gap arm \
+             binds three names, and rsx's `if let` takes no statements\"\n)]\n"
+            .to_owned(),
+        _ => String::new(),
+    }
 }
 
 /// Anything a custom body needs imported, in Rust.
@@ -3861,6 +4055,11 @@ pub fn dioxus_imports(component: &Component) -> String {
             SIZED_ICON.to_owned()
         }
         "Field" => LABEL_IMPORT.to_owned(),
+        // THE GAP OPENS THE MENU THIS SYSTEM ALREADY HAS. A second surface with
+        // its own arrow walk would be a second thing to keep in step with
+        // `dist/menu.js`, which already ships the opening, the walk, Escape and
+        // the focus coming back.
+        "Pagination" => "use crate::components::{Menu, MenuItem};\n".to_owned(),
         "Table" => concat!(
             "use noctua_design_icons::IconName;\n",
             "\n",
@@ -3892,11 +4091,12 @@ pub fn dioxus_imports(component: &Component) -> String {
             "use crate::components::{Button, ButtonSize, ButtonVariant, Field, FieldSize, Icon};\n"
         )
         .to_owned(),
+        // A FIELD AND THE HALF OF THE DAY. The morning and afternoon control
+        // is a real `Segmented`, not a copy of its markup built in a script —
+        // see the body.
         "TimeInput" => concat!(
-            "use noctua_design_icons::IconName;\n",
-            "\n",
             "use crate::components::{\n",
-            "    Button, ButtonSize, ButtonVariant, Field, FieldKind, FieldSize,\n",
+            "    Field, FieldKind, FieldSize, Segmented, SegmentedItem, SegmentedSize,\n",
             "};\n"
         )
         .to_owned(),
@@ -3969,6 +4169,12 @@ pub fn react_imports(component: &Component) -> String {
             "import { Icon } from \"./icon.js\";\n"
         )
         .to_owned(),
+        // The same menu in the other language — see the Dioxus half.
+        "Pagination" => concat!(
+            "import { Menu } from \"./menu.js\";\n",
+            "import { MenuItem } from \"./menu_item.js\";\n"
+        )
+        .to_owned(),
         "Table" => concat!(
             "import { Button } from \"./button.js\";\n",
             "\n",
@@ -4013,11 +4219,8 @@ pub fn react_imports(component: &Component) -> String {
             "import { Icon } from \"./icon.js\";\n"
         )
         .to_owned(),
-        "TimeInput" => concat!(
-            "import { Button } from \"./button.js\";\n",
-            "import { Field } from \"./field.js\";\n"
-        )
-        .to_owned(),
+        // A field, and a real `Segmented` for the half of the day.
+        "TimeInput" => format!("{REACT_FIELD}{REACT_SEGMENTED}"),
         // The same panel, the same reasoning — see the Dioxus half.
         "ColorPicker" => concat!(
             "import { Button } from \"./button.js\";\n",
@@ -6361,17 +6564,22 @@ const TEXTAREA_DIOXUS: &str = r#"    let id = format!("nd-textarea-{name}");
             },
             disabled,
 
-            textarea {
+            // A BOX AROUND THE BOX, AND IT IS `Input`'S ARRANGEMENT EXACTLY.
+            //
+            // `.nd-textarea` used to be the `<textarea>` itself, which made it
+            // the one control on the site that ignored the reader's corner
+            // preset: a `<textarea>` is a scroll container, a radius on a
+            // scroller lets the bar paint through the corner, so it shipped
+            // with no radius at all. The border, the fill, the corners and the
+            // frost belong on something that does not scroll; the scrolling
+            // belongs to the control inside it. `.nd-panel` and `.nd-codeblock`
+            // are the same shape for the same reason.
+            //
+            // It also gives the frost somewhere to land. The one glass recipe
+            // paints its sheen in an `::after`, and a `<textarea>` is a
+            // replaced element with no pseudo-elements at all.
+            div {
                 class: "{box_class}",
-                id: "{id}",
-                name: "{name}",
-                rows,
-                placeholder,
-                required,
-                disabled,
-                readonly,
-                maxlength,
-                spellcheck: if spellcheck { "true" } else { "false" },
                 "data-nd-textarea": "{name}",
                 "data-nd-size": size.as_str(),
                 "data-nd-glass": if glass { "true" } else { "false" },
@@ -6380,11 +6588,25 @@ const TEXTAREA_DIOXUS: &str = r#"    let id = format!("nd-textarea-{name}");
                 "data-nd-resize": resize.as_str(),
                 "data-nd-counter": if counter { "true" } else { "false" },
                 "data-nd-counter-label": counter_label,
-                "aria-invalid": invalid,
-                "aria-describedby": described,
-                // THE VALUE IS THE CONTENT, not an attribute — which is why a
-                // value with a newline in it survives the round trip.
-                {value.unwrap_or_default()}
+
+                textarea {
+                    class: "nd-textarea-box",
+                    id: "{id}",
+                    name: "{name}",
+                    rows,
+                    placeholder,
+                    required,
+                    disabled,
+                    readonly,
+                    maxlength,
+                    spellcheck: if spellcheck { "true" } else { "false" },
+                    "aria-invalid": invalid,
+                    "aria-describedby": described,
+                    "data-nd-textarea-box": "",
+                    // THE VALUE IS THE CONTENT, not an attribute — which is why
+                    // a value with a newline in it survives the round trip.
+                    {value.unwrap_or_default()}
+                }
             }
             if counter {
                 p {
@@ -6447,32 +6669,42 @@ const TEXTAREA_REACT: &str = r#"  const size_ = size ?? "medium";
       size: size_,
       disabled,
     },
-    h("textarea", {
-      key: "b",
-      className: boxClass,
-      id,
-      name,
-      rows,
-      placeholder,
-      required,
-      disabled,
-      readOnly: readonly,
-      maxLength: maxlength,
-      spellCheck: String(spellcheck ?? true),
-      "data-nd-textarea": name,
-      "data-nd-size": size_,
-      "data-nd-glass": String(glass ?? false),
-      "data-nd-autosize": String(autosize ?? false),
-      "data-nd-max-rows": maxRows,
-      "data-nd-resize": resize_,
-      "data-nd-counter": String(counter ?? false),
-      "data-nd-counter-label": counterLabel,
-      "aria-invalid": error ? "true" : undefined,
-      "aria-describedby": described || undefined,
-      // See the Dioxus half: the value is the content.
-      defaultValue: value,
-      ...rest,
-    }),
+    // See the Dioxus half: a box around the box, so the corners, the border
+    // and the frost sit on something that does not scroll.
+    h(
+      "div",
+      {
+        key: "b",
+        className: boxClass,
+        "data-nd-textarea": name,
+        "data-nd-size": size_,
+        "data-nd-glass": String(glass ?? false),
+        "data-nd-autosize": String(autosize ?? false),
+        "data-nd-max-rows": maxRows,
+        "data-nd-resize": resize_,
+        "data-nd-counter": String(counter ?? false),
+        "data-nd-counter-label": counterLabel,
+        ...rest,
+      },
+      h("textarea", {
+        key: "x",
+        className: "nd-textarea-box",
+        id,
+        name,
+        rows,
+        placeholder,
+        required,
+        disabled,
+        readOnly: readonly,
+        maxLength: maxlength,
+        spellCheck: String(spellcheck ?? true),
+        "aria-invalid": error ? "true" : undefined,
+        "aria-describedby": described || undefined,
+        "data-nd-textarea-box": "",
+        // See the Dioxus half: the value is the content.
+        defaultValue: value,
+      }),
+    ),
     counter
       ? h(
           "p",
@@ -6551,6 +6783,13 @@ const NUMBER_INPUT_DIOXUS: &str = r#"    let id = format!("nd-number-input-{name
                 "data-nd-size": size.as_str(),
                 "data-nd-glass": if glass { "true" } else { "false" },
                 "data-nd-steppers": if steppers { "true" } else { "false" },
+                // WHAT THE STEPPERS ARE FOR, AND THE STYLESHEET DOES THE REST.
+                // `primary` puts one full control either side of the value and
+                // `assist` keeps the two small ones at the end of the box. The
+                // markup is the same either way, so the runtime finds the same
+                // two controls and the arrangement is a question about
+                // painting rather than about structure.
+                "data-nd-stepping": stepping.as_str(),
                 "data-nd-group": if group { "true" } else { "false" },
                 "data-nd-min": min,
                 "data-nd-max": max,
@@ -6629,6 +6868,7 @@ const NUMBER_INPUT_DIOXUS: &str = r#"    let id = format!("nd-number-input-{name
 "#;
 
 const NUMBER_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
+  const stepping_ = stepping ?? "assist";
   const id = `nd-number-input-${name}`;
   // See the Dioxus half: the error id is always one of them, because the slot
   // is always drawn.
@@ -6665,6 +6905,9 @@ const NUMBER_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
         "data-nd-size": size_,
         "data-nd-glass": String(glass ?? false),
         "data-nd-steppers": String(steppers ?? true),
+        // See the Dioxus half: the arrangement is painting, not structure, so
+        // both forms ship the same two controls.
+        "data-nd-stepping": stepping_,
         "data-nd-group": String(group ?? false),
         "data-nd-min": min,
         "data-nd-max": max,
@@ -7275,24 +7518,67 @@ const TIME_INPUT_DIOXUS: &str = r#"    let id = format!("nd-time-input-{name}");
     let invalid = error.is_some().then_some("true");
     let root = format!("nd-time-input {class}");
     let root = root.trim().to_owned();
-    // Taken before the button moves it: `rsx!` reads the attribute after the
-    // nested block has consumed the value, which is the one order that does
-    // not borrow-check. `Select` and `TagPicker` do the same.
-    let now = now_label.clone();
     // SERVED AS TWENTY-FOUR HOURS, WHATEVER `clock` SAYS. The re-lay to the
     // reader's own is the script's, and it MOVES the boxes rather than
     // restyling them — so what the eyes read, what Tab walks and what the form
     // posts are always one order.
-    let parts: Vec<(&str, String, Option<String>)> = {
+    //
+    // AND THE VALUE IS RENDERED INTO THEM. It used to reach the boxes from
+    // `data-nd-value` at enhance time and nowhere else, so a field given
+    // `14:05` was three empty boxes until a script ran — under a prop whose
+    // whole promise is the time to start with.
+    let given: Vec<&str> = value.as_deref().unwrap_or("").split(':').collect();
+    let served = |at: usize| -> Option<String> {
+        given
+            .get(at)
+            .map(|piece| piece.trim())
+            .filter(|piece| !piece.is_empty())
+            .map(|piece| {
+                if pad && piece.len() == 1 {
+                    format!("0{piece}")
+                } else {
+                    (*piece).to_owned()
+                }
+            })
+    };
+    let parts: Vec<(&str, String, Option<String>, Option<String>)> = {
         let mut all = vec![
-            ("hour", format!("{id}-hour"), Some(hour_label.clone())),
-            ("minute", format!("{id}-minute"), Some(minute_label.clone())),
+            (
+                "hour",
+                format!("{id}-hour"),
+                Some(hour_label.clone()),
+                served(0),
+            ),
+            (
+                "minute",
+                format!("{id}-minute"),
+                Some(minute_label.clone()),
+                served(1),
+            ),
         ];
         if seconds {
-            all.push(("second", format!("{id}-second"), second_label.clone()));
+            all.push((
+                "second",
+                format!("{id}-second"),
+                second_label.clone(),
+                served(2),
+            ));
         }
         all
     };
+    // WHICH HALF OF THE DAY THE SERVED VALUE IS IN, decided here rather than
+    // guessed by the script. An empty field chooses NEITHER: a control that
+    // ships with the morning already marked has answered for the reader.
+    let hour24 = given
+        .first()
+        .and_then(|piece| piece.trim().parse::<u32>().ok());
+    let morning = hour24.map(|hour| hour < 12);
+    // A NAME AND BOTH WORDS, OR NO CONTROL AT ALL. The script used to fall
+    // back to the raw values, so a field that named neither drew `am` and
+    // `pm` — two identifiers, untranslated, on the page. A radiogroup with no
+    // name is the other half of the same failure, so the name is required
+    // here too and the field simply stays on twenty-four hours without it.
+    let has_meridiem = meridiem_label.is_some() && am_label.is_some() && pm_label.is_some();
 
     rsx! {
         Field {
@@ -7322,9 +7608,6 @@ const TIME_INPUT_DIOXUS: &str = r#"    let id = format!("nd-time-input-{name}");
                 "data-nd-min": min,
                 "data-nd-max": max,
                 "data-nd-step": step,
-                "data-nd-am-label": am_label,
-                "data-nd-pm-label": pm_label,
-                "data-nd-now-label": now_label.clone(),
                 "data-nd-required-label": required_label.clone(),
                 "data-nd-missing-label": missing_label,
                 "data-nd-invalid-label": invalid_label,
@@ -7332,7 +7615,7 @@ const TIME_INPUT_DIOXUS: &str = r#"    let id = format!("nd-time-input-{name}");
                 "data-nd-max-label": max_label,
 
                 div { class: "nd-time-input-row", "data-nd-time-input-row": "",
-                    for (part, part_id, part_label) in parts {
+                    for (part, part_id, part_label, part_value) in parts {
                         // EVERY BOX IS NAMED, and the name survives the
                         // twelve-hour re-lay because the boxes move rather
                         // than being restyled.
@@ -7349,6 +7632,7 @@ const TIME_INPUT_DIOXUS: &str = r#"    let id = format!("nd-time-input-{name}");
                                 name: "{name}-{part}",
                                 inputmode: "numeric",
                                 autocomplete: "off",
+                                value: part_value,
                                 required,
                                 disabled,
                                 "aria-invalid": invalid,
@@ -7356,10 +7640,24 @@ const TIME_INPUT_DIOXUS: &str = r#"    let id = format!("nd-time-input-{name}");
                             }
                         }
                     }
-                    // The morning/afternoon control, and the script removes it
-                    // where the reader's clock has no use for one. A
-                    // `Segmented` because it is a choice between two named
-                    // things, which is what that component is for.
+                    // THE MORNING AND AFTERNOON CONTROL, AND IT IS A REAL
+                    // `Segmented` NOW.
+                    //
+                    // It was a `<div class="nd-segmented">` of two
+                    // `<button class="nd-segmented-item">` that `inputs.js`
+                    // built with `createElement` — a copy of this component's
+                    // markup, in a script, already drifted from it: no
+                    // `appearance`, no `shape`, no `fill`, no
+                    // `aria-orientation`, so every compound rule that draws a
+                    // joined control matched nothing and the pair rendered as
+                    // two detached boxes. A control in this system is a
+                    // component, never a class on a `<button>`.
+                    //
+                    // The WRAPPER carries `hidden`, because a component cannot
+                    // be handed the attribute, and it ships hidden for the
+                    // reason every script-owned control does: the twelve-hour
+                    // reading is the script's, so with nothing running there
+                    // is no half of the day to name.
                     span {
                         class: "nd-time-input-meridiem",
                         "data-nd-time-input-meridiem": "",
@@ -7367,32 +7665,34 @@ const TIME_INPUT_DIOXUS: &str = r#"    let id = format!("nd-time-input-{name}");
                         {meridiem_label.clone().map(|word| rsx! {
                             span { class: "nd-visually-hidden", id: "{id}-meridiem-label", "{word}" }
                         })}
-                    }
-                    if let Some(now) = now {
-                        // HIDDEN UNTIL THE SCRIPT CAN HONOUR IT, exactly as
-                        // `NumberInput`'s steppers and `Input`'s clear and
-                        // reveal controls are. This one shipped visible and
-                        // inert: reading the clock is `inputs.js`'s and
-                        // nothing else's, so with no script it was a named,
-                        // focusable button that filled nothing.
-                        //
-                        // The WRAPPER carries `hidden`, because a component is
-                        // not an element and cannot be given the attribute.
-                        // That is the steppers' arrangement, and the
-                        // stylesheet gives this span `display: contents` so
-                        // the row lays out as though it were not here.
-                        span {
-                            class: "nd-time-input-now",
-                            hidden: true,
-                            "data-nd-time-input-now": "",
-                            Button {
-                                label: now,
-                                icon: IconName::Clock,
-                                hide_label: true,
-                                variant: ButtonVariant::Outline,
-                                size: ButtonSize::Small,
-                                action: "time-input-now",
-                                disabled,
+                        if has_meridiem {
+                            Segmented {
+                                name: "{name}-meridiem",
+                                labelledby: "{id}-meridiem-label",
+                                // THE FIELD'S OWN SIZE. Siblings in one row
+                                // share their padding and their height, and a
+                                // control fixed at `small` beside a `large`
+                                // field reads as broken.
+                                size: match size {
+                                    TimeInputSize::Small => SegmentedSize::Small,
+                                    TimeInputSize::Medium => SegmentedSize::Medium,
+                                    TimeInputSize::Large => SegmentedSize::Large,
+                                },
+                                class: "nd-time-input-meridiem-group",
+                                SegmentedItem {
+                                    value: "am",
+                                    label: am_label.clone().unwrap_or_default(),
+                                    // NEITHER, when nothing is known. See
+                                    // `morning` above.
+                                    selected: morning == Some(true),
+                                    disabled,
+                                }
+                                SegmentedItem {
+                                    value: "pm",
+                                    label: pm_label.clone().unwrap_or_default(),
+                                    selected: morning == Some(false),
+                                    disabled,
+                                }
                             }
                         }
                     }
@@ -7411,19 +7711,34 @@ const TIME_INPUT_DIOXUS: &str = r#"    let id = format!("nd-time-input-{name}");
 "#;
 
 const TIME_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
-  const clock_ = clock ?? "auto";
+  const clock_ = clock ?? "24";
+  const pad_ = pad ?? true;
   const id = `nd-time-input-${name}`;
   // See the Dioxus half: the same `control` the field gets, or the sentences
   // are described by elements that do not exist.
   const control = `${id}-hour`;
   // See the Dioxus half: the fieldset describes itself now.
   const root = ["nd-time-input", className].filter(Boolean).join(" ");
-  // See the Dioxus half: served as twenty-four hours, re-laid by the script.
+  // See the Dioxus half: served as twenty-four hours, re-laid by the script,
+  // and the value RENDERED into the boxes rather than read out of an
+  // attribute once a script runs.
+  const given = String(value ?? "").split(":");
+  const served = (at) => {
+    const piece = (given[at] ?? "").trim();
+    if (piece === "") return undefined;
+    return pad_ && piece.length === 1 ? `0${piece}` : piece;
+  };
   const parts = [
-    ["hour", hourLabel],
-    ["minute", minuteLabel],
-    ...(seconds ? [["second", secondLabel]] : []),
+    ["hour", hourLabel, served(0)],
+    ["minute", minuteLabel, served(1)],
+    ...(seconds ? [["second", secondLabel, served(2)]] : []),
   ];
+  // See the Dioxus half: which half of the day the served value is in, and
+  // NEITHER when nothing is known.
+  const hour24 = /^\d+$/.test((given[0] ?? "").trim()) ? Number(given[0]) : null;
+  const morning = hour24 === null ? null : hour24 < 12;
+  // See the Dioxus half: a name and both words, or no control at all.
+  const hasMeridiem = Boolean(meridiemLabel) && Boolean(amLabel) && Boolean(pmLabel);
 
   return h(
     Field,
@@ -7448,14 +7763,11 @@ const TIME_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
         "data-nd-glass": String(glass ?? false),
         "data-nd-clock": clock_,
         "data-nd-seconds": String(seconds ?? false),
-        "data-nd-pad": String(pad ?? true),
+        "data-nd-pad": String(pad_),
         "data-nd-value": value,
         "data-nd-min": min,
         "data-nd-max": max,
         "data-nd-step": step,
-        "data-nd-am-label": amLabel,
-        "data-nd-pm-label": pmLabel,
-        "data-nd-now-label": nowLabel,
         "data-nd-required-label": requiredLabel,
         "data-nd-missing-label": missingLabel,
         "data-nd-invalid-label": invalidLabel,
@@ -7466,7 +7778,7 @@ const TIME_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
       h(
         "div",
         { key: "r", className: "nd-time-input-row", "data-nd-time-input-row": "" },
-        parts.map(([part, partLabel]) =>
+        parts.map(([part, partLabel, partValue]) =>
           h(
             "span",
             { key: part, className: "nd-time-input-part" },
@@ -7483,6 +7795,7 @@ const TIME_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
               name: `${name}-${part}`,
               inputMode: "numeric",
               autoComplete: "off",
+              defaultValue: partValue,
               required,
               disabled,
               "aria-invalid": error ? "true" : undefined,
@@ -7490,6 +7803,9 @@ const TIME_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
             }),
           ),
         ),
+        // See the Dioxus half: a real `Segmented`, hidden until the script
+        // reads the clock, and never a copy of that component's markup built
+        // with `createElement`.
         h(
           "span",
           {
@@ -7501,30 +7817,34 @@ const TIME_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
           meridiemLabel
             ? h("span", { key: "l", className: "nd-visually-hidden", id: `${id}-meridiem-label` }, meridiemLabel)
             : null,
+          hasMeridiem
+            ? h(
+                Segmented,
+                {
+                  key: "g",
+                  name: `${name}-meridiem`,
+                  labelledby: `${id}-meridiem-label`,
+                  // See the Dioxus half: the field's own size.
+                  size: size_,
+                  className: "nd-time-input-meridiem-group",
+                },
+                h(SegmentedItem, {
+                  key: "a",
+                  value: "am",
+                  label: amLabel ?? "",
+                  selected: morning === true,
+                  disabled,
+                }),
+                h(SegmentedItem, {
+                  key: "p",
+                  value: "pm",
+                  label: pmLabel ?? "",
+                  selected: morning === false,
+                  disabled,
+                }),
+              )
+            : null,
         ),
-        nowLabel
-          ? h(
-              "span",
-              {
-                key: "n",
-                className: "nd-time-input-now",
-                hidden: true,
-                "data-nd-time-input-now": "",
-              },
-              // See the Dioxus half: revealed by `inputs.js`, never built, and
-              // the wrapper carries `hidden` because a component cannot.
-              h(Button, {
-                key: "b",
-                label: nowLabel,
-                icon: "clock",
-                hideLabel: true,
-                variant: "outline",
-                size: "small",
-                action: "time-input-now",
-                disabled,
-              }),
-            )
-          : null,
       ),
       h("p", {
         key: "n",
@@ -11952,6 +12272,7 @@ const TOAST_DIOXUS: &str = r#"    let root = format!("nd-toast {class}");
             "data-nd-tone": tone,
             "data-nd-placement": placement.as_str(),
             "data-nd-duration": duration,
+            "data-nd-countdown-label": countdown_label.clone(),
             "data-nd-dismissible": if dismissible { "true" } else { "false" },
 
             div { class: "nd-toast-text",
@@ -11962,6 +12283,27 @@ const TOAST_DIOXUS: &str = r#"    let root = format!("nd-toast {class}");
                     strong { class: "nd-toast-title", "{title}" }
                 }
                 div { class: "nd-toast-body", "data-nd-toast-body": "", {children} }
+
+                // THE TIME LEFT, AND IT IS EMPTY UNTIL SOMETHING IS RUNNING
+                // THE WAIT. `role="timer"` is a live region that does not
+                // announce, so a screen reader is not read a new number every
+                // second. It ships `hidden` for the dismiss control's reason:
+                // a countdown that counts nothing is a number a reader watches
+                // and learns nothing from, and with no script the message
+                // never leaves at all.
+                //
+                // IT IS UNDER THE MESSAGE AND NOT BESIDE IT. A toast is about
+                // twenty characters wide, so a line of digits in the row took
+                // its width off the sentence and broke a message of nine words
+                // over four lines.
+                if countdown_label.is_some() {
+                    span {
+                        class: "nd-toast-countdown",
+                        role: "timer",
+                        "data-nd-toast-countdown": "",
+                        hidden: true,
+                    }
+                }
             }
 
             if dismissible {
@@ -11999,6 +12341,7 @@ const TOAST_REACT: &str = r#"  const placement_ = placement ?? "bottom-end";
       "data-nd-tone": tone,
       "data-nd-placement": placement_,
       "data-nd-duration": duration,
+      "data-nd-countdown-label": countdownLabel,
       "data-nd-dismissible": String(dismissible_),
       ...rest,
     },
@@ -12007,6 +12350,18 @@ const TOAST_REACT: &str = r#"  const placement_ = placement ?? "bottom-end";
       { key: "t", className: "nd-toast-text" },
       title ? h("strong", { key: "h", className: "nd-toast-title" }, title) : null,
       h("div", { key: "b", className: "nd-toast-body", "data-nd-toast-body": "" }, children),
+      // See the Dioxus half: a timer that does not announce, empty and hidden
+      // until `dist/toast.js` is running the wait it reports, and under the
+      // message rather than beside it.
+      countdownLabel
+        ? h("span", {
+            key: "c",
+            className: "nd-toast-countdown",
+            role: "timer",
+            "data-nd-toast-countdown": "",
+            hidden: true,
+          })
+        : null,
     ),
     dismissible_
       ? h(

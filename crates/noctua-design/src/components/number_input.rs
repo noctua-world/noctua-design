@@ -11,6 +11,30 @@ use noctua_design_icons::IconName;
 
 use crate::components::{Field, FieldSize, Icon};
 
+/// What the steppers are for. `assist` is two small controls at the end of the box, for correcting a typed value. `primary` is one full control either side of the value, for a quantity answered by pressing rather than by typing.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum NumberInputStepping {
+    #[default]
+    /// `assist`
+    Assist,
+    /// `primary`
+    Primary,
+}
+
+impl NumberInputStepping {
+    /// Every value, in the order the spec declares them.
+    pub const ALL: [Self; 2] = [Self::Assist, Self::Primary];
+
+    /// The value as it appears in the DOM.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Assist => "assist",
+            Self::Primary => "primary",
+        }
+    }
+}
+
 /// The size of the box and its steppers: `small`, `medium` or `large`. `medium` by default, matching the rest of the form.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum NumberInputSize {
@@ -62,6 +86,9 @@ pub fn NumberInput(
     /// Whether the two stepper controls appear. **On by default**, because they make a small adjustment one press instead of a select-all and a retype. Turn them off where the numbers are too large to step to.
     #[props(default = true)]
     steppers: bool,
+    /// What the steppers are for. `assist` is two small controls at the end of the box, for correcting a typed value. `primary` is one full control either side of the value, for a quantity answered by pressing rather than by typing.
+    #[props(default)]
+    stepping: NumberInputStepping,
     /// The name of the control that adds a step. Supply it with `steppers`, because the controls are glyphs and this is the only name each has.
     increment_label: Option<String>,
     /// The name of the control that subtracts a step, on the same terms.
@@ -167,6 +194,13 @@ pub fn NumberInput(
                 "data-nd-size": size.as_str(),
                 "data-nd-glass": if glass { "true" } else { "false" },
                 "data-nd-steppers": if steppers { "true" } else { "false" },
+                // WHAT THE STEPPERS ARE FOR, AND THE STYLESHEET DOES THE REST.
+                // `primary` puts one full control either side of the value and
+                // `assist` keeps the two small ones at the end of the box. The
+                // markup is the same either way, so the runtime finds the same
+                // two controls and the arrangement is a question about
+                // painting rather than about structure.
+                "data-nd-stepping": stepping.as_str(),
                 "data-nd-group": if group { "true" } else { "false" },
                 "data-nd-min": min,
                 "data-nd-max": max,

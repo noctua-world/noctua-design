@@ -6,6 +6,7 @@ guidance = "Use it only inside a `Segmented`. Outside one it is a `role=\"radio\
 name = "SegmentedItem"
 element = "button"
 class = "nd-segmented-item"
+page = "segmented"
 
 summary = "Give a `Segmented` one of the values it chooses between."
 

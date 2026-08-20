@@ -6,6 +6,7 @@
 //!
 //! Move through a set of pages with real links and a window around the current one.
 
+use crate::components::{Menu, MenuItem};
 use dioxus::prelude::*;
 
 /// How many pages are offered either side of the one in force: one, two or three. `compact` is for a control sharing a row with something else, and the two ends are always shown. `default` by default.
@@ -66,7 +67,11 @@ impl PaginationSize {
 ///
 /// # Accessibility
 ///
-/// A named `<nav>` holding a list of links, so a screen reader says how many pages there are. The gap between two runs of numbers is `aria-hidden`, and every page is a real `<a href>` needing no script.
+/// A named `<nav>` holding a list of links, so a screen reader says how many pages there are. Every page is a real `<a href>` needing no script, and the gap is `aria-hidden` until `more_label` makes a menu of it.
+#[allow(
+    clippy::single_match_else,
+    reason = "the gap arm binds three names, and rsx's `if let` takes no statements"
+)]
 #[component]
 pub fn Pagination(
     /// What is being paged through. It names the control for anything binding to it, and it is what tells two paginations on one page apart. Required.
@@ -93,6 +98,8 @@ pub fn Pagination(
     page_label: Option<String>,
     /// The accessible name of the page in force, which says so as well, such as *Page 4, current page*. `aria-current` carries the same fact, and this half survives an engine that does not announce the attribute.
     current_label: Option<String>,
+    /// The name of the control the gap between two runs of numbers becomes, such as *Skipped pages*. It names the menu of those pages as well, so the two cannot disagree. Leave it out and the gap stays an inert character.
+    more_label: Option<String>,
     /// The sentence under the control: how many results there are, and which of them this page holds. It sits in a live region, so a reader is told the set did not change when a page turns.
     summary: Option<String>,
     /// Extra classes for the root element.
@@ -137,6 +144,19 @@ pub fn Pagination(
             .as_ref()
             .map(|words| words.replace("{page}", &number.to_string()))
     };
+    // WHICH PAGES A GAP STANDS FOR, AND THE INDEX IS WHAT SAYS WHICH GAP IT IS.
+    //
+    // A leading gap can only ever sit at index 1: page one is pushed first
+    // whenever `from > 1`, and `from > 2` is the only thing that puts a gap
+    // after it. So every other gap is the trailing one, and no second list has
+    // to be carried alongside the window to tell them apart.
+    let hidden = |index: usize| {
+        if index == 1 {
+            (2, from - 1)
+        } else {
+            (to + 1, last - 1)
+        }
+    };
 
     rsx! {
         nav {
@@ -164,6 +184,13 @@ pub fn Pagination(
                 }
                 for (index, spot) in window.iter().enumerate() {
                     li { key: "{index}",
+                        // A number, or the gap between two runs of them.
+                        //
+                        // A `match` and not an `if let`, which clippy's pedantic
+                        // `single_match_else` would prefer: the gap arm needs three
+                        // `let` bindings, and `rsx!`'s own `if let` takes rsx content
+                        // rather than statements. The allow rides on the component,
+                        // with this reason, instead of the body being bent to a lint.
                         match spot {
                             Some(number) => rsx! {
                                 a {
@@ -184,9 +211,53 @@ pub fn Pagination(
                             // A character, not a word — and hidden, because an
                             // ellipsis read out between page three and page nine
                             // is noise, and both ends are drawn anyway.
-                            None => rsx! {
-                                span { class: "nd-pagination-gap", "aria-hidden": "true", "…" }
-                            },
+                            //
+                            // WITH `more_label` IT IS ALSO A CONTROL, and the
+                            // control ships `hidden` for `Button`'s reason:
+                            // `dist/menu.js` reveals it once it has found the
+                            // menu it names, so a page with no script carries
+                            // the same inert character it always carried. The
+                            // stylesheet takes the character away when the
+                            // button beside it is no longer hidden.
+                            None => {
+                                let (first, past) = hidden(index);
+                                let panel = format!("nd-pagination-{name}-gap-{first}");
+                                let opens = more_label.clone();
+                                rsx! {
+                                    span { class: "nd-pagination-gap", "aria-hidden": "true", "…" }
+                                    if let Some(opens) = opens {
+                                        button {
+                                            class: "nd-pagination-link nd-pagination-more",
+                                            r#type: "button",
+                                            "aria-label": "{opens}",
+                                            "aria-haspopup": "menu",
+                                            // "false" is TRUE on a menu button:
+                                            // it says a menu is there and shut.
+                                            "aria-expanded": "false",
+                                            "aria-controls": "{panel}",
+                                            "data-nd-pagination-more": "",
+                                            hidden: true,
+                                            "…"
+                                        }
+                                        Menu {
+                                            name: "{panel}",
+                                            label: "{opens}",
+                                            class: "nd-pagination-menu",
+                                            // The pages this gap stands for, in
+                                            // order. A number is an identifier,
+                                            // so nothing here is translated.
+                                            for number in first..=past {
+                                                MenuItem {
+                                                    key: "{number}",
+                                                    class: "nd-identifier",
+                                                    label: "{number}",
+                                                    href: address(number),
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

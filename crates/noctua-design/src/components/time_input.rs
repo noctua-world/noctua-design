@@ -4,21 +4,19 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! Asks for one time of day, in separate boxes, on the reader's own clock.
+//! Asks for one time of day, in separate boxes, on a twenty-four hour clock.
 
+use crate::components::{Field, FieldKind, FieldSize, Segmented, SegmentedItem, SegmentedSize};
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
 
-use crate::components::{Button, ButtonSize, ButtonVariant, Field, FieldKind, FieldSize};
-
-/// Which clock the boxes are read on. `auto` asks the reader's own locale. `12` and `24` are for a page whose subject has a clock of its own, such as a flight schedule. **What is submitted is twenty-four hour either way**.
+/// Which clock the boxes are read on. **Twenty-four hours by default**, whatever the reader's machine keeps. `auto` asks the reader's own browser instead, and `12` fixes it at twelve. **What is submitted is twenty-four hour in every case**.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TimeInputClock {
-    #[default]
     /// `auto`
     Auto,
     /// `12`
     _12,
+    #[default]
     /// `24`
     _24,
 }
@@ -65,7 +63,7 @@ impl TimeInputSize {
     }
 }
 
-/// Asks for one time of day, in separate boxes, on the reader's own clock.
+/// Asks for one time of day, in separate boxes, on a twenty-four hour clock.
 ///
 /// # Accessibility
 ///
@@ -84,18 +82,18 @@ pub fn TimeInput(
     minute_label: String,
     /// The name of the third box, in the reader's language. Wanted in practice by `seconds`.
     second_label: Option<String>,
-    /// The name of the morning and afternoon control, where the reader's locale has one. Wanted in practice by `clock = "auto"` or `"12"`, because the control appears only for some readers.
+    /// The accessible name of the morning and afternoon control, drawn only for a twelve hour clock. It is wanted by `clock = "auto"` and `"12"`, together with `am_label` and `pm_label`. Without all three the field keeps twenty-four hours.
     meridiem_label: Option<String>,
-    /// The word for before noon in the reader's language, such as *AM* or *Manhã*. Not derived, because the platform's own formatter spells it differently in each locale.
+    /// The word for before noon in the reader's language, such as *AM* or *Manhã*. It is the morning half of the meridiem control. Not derived, because the platform spells it differently in each locale.
     am_label: Option<String>,
     /// The word for after noon, on the same terms.
     pm_label: Option<String>,
-    /// The time to start with, as `HH:MM` or `HH:MM:SS` on a twenty-four hour clock. That is the shape a server sends and the shape it gets back, whatever clock the reader is shown.
+    /// The time to start with, as `HH:MM` or `HH:MM:SS` on a twenty-four hour clock. It is rendered into the boxes, so a page with no script shows it. That is the shape a server sends and the shape it gets back.
     value: Option<String>,
     /// Whether a third box asks for seconds. Off by default, because few of the things people schedule happen at a named second.
     #[props(default = false)]
     seconds: bool,
-    /// Which clock the boxes are read on. `auto` asks the reader's own locale. `12` and `24` are for a page whose subject has a clock of its own, such as a flight schedule. **What is submitted is twenty-four hour either way**.
+    /// Which clock the boxes are read on. **Twenty-four hours by default**, whatever the reader's machine keeps. `auto` asks the reader's own browser instead, and `12` fixes it at twelve. **What is submitted is twenty-four hour in every case**.
     #[props(default)]
     clock: TimeInputClock,
     /// The earliest time allowed, as `HH:MM`. A time before it is refused with `min_label` rather than rewritten, so the reader's own numbers stay.
@@ -104,11 +102,9 @@ pub fn TimeInput(
     max: Option<String>,
     /// How many minutes one press of an arrow moves the minute box. One by default. A booking form usually wants fifteen, so a reader reaches `:45` in three presses.
     step: Option<String>,
-    /// The name of a control that fills the boxes with the current time. Absent, there is no such control.
-    now_label: Option<String>,
     /// What it says when the boxes are empty and an answer was needed. The platform cannot say it, because `required` on three boxes refuses each of them separately.
     required_label: Option<String>,
-    /// What it says when some boxes are filled and others are not, with a `{part}` hole naming the empty one. Half a time is the commonest way this field goes wrong.
+    /// What it says when some boxes are filled and others are not, with a `{part}` hole filled with that box's own label. Half a time is the commonest way this field goes wrong.
     missing_label: Option<String>,
     /// What it says when the numbers are not a time, such as twenty-five o'clock. It has a `{value}` hole, and the numbers stay exactly as typed.
     invalid_label: Option<String>,
@@ -155,24 +151,67 @@ pub fn TimeInput(
     let invalid = error.is_some().then_some("true");
     let root = format!("nd-time-input {class}");
     let root = root.trim().to_owned();
-    // Taken before the button moves it: `rsx!` reads the attribute after the
-    // nested block has consumed the value, which is the one order that does
-    // not borrow-check. `Select` and `TagPicker` do the same.
-    let now = now_label.clone();
     // SERVED AS TWENTY-FOUR HOURS, WHATEVER `clock` SAYS. The re-lay to the
     // reader's own is the script's, and it MOVES the boxes rather than
     // restyling them — so what the eyes read, what Tab walks and what the form
     // posts are always one order.
-    let parts: Vec<(&str, String, Option<String>)> = {
+    //
+    // AND THE VALUE IS RENDERED INTO THEM. It used to reach the boxes from
+    // `data-nd-value` at enhance time and nowhere else, so a field given
+    // `14:05` was three empty boxes until a script ran — under a prop whose
+    // whole promise is the time to start with.
+    let given: Vec<&str> = value.as_deref().unwrap_or("").split(':').collect();
+    let served = |at: usize| -> Option<String> {
+        given
+            .get(at)
+            .map(|piece| piece.trim())
+            .filter(|piece| !piece.is_empty())
+            .map(|piece| {
+                if pad && piece.len() == 1 {
+                    format!("0{piece}")
+                } else {
+                    (*piece).to_owned()
+                }
+            })
+    };
+    let parts: Vec<(&str, String, Option<String>, Option<String>)> = {
         let mut all = vec![
-            ("hour", format!("{id}-hour"), Some(hour_label.clone())),
-            ("minute", format!("{id}-minute"), Some(minute_label.clone())),
+            (
+                "hour",
+                format!("{id}-hour"),
+                Some(hour_label.clone()),
+                served(0),
+            ),
+            (
+                "minute",
+                format!("{id}-minute"),
+                Some(minute_label.clone()),
+                served(1),
+            ),
         ];
         if seconds {
-            all.push(("second", format!("{id}-second"), second_label.clone()));
+            all.push((
+                "second",
+                format!("{id}-second"),
+                second_label.clone(),
+                served(2),
+            ));
         }
         all
     };
+    // WHICH HALF OF THE DAY THE SERVED VALUE IS IN, decided here rather than
+    // guessed by the script. An empty field chooses NEITHER: a control that
+    // ships with the morning already marked has answered for the reader.
+    let hour24 = given
+        .first()
+        .and_then(|piece| piece.trim().parse::<u32>().ok());
+    let morning = hour24.map(|hour| hour < 12);
+    // A NAME AND BOTH WORDS, OR NO CONTROL AT ALL. The script used to fall
+    // back to the raw values, so a field that named neither drew `am` and
+    // `pm` — two identifiers, untranslated, on the page. A radiogroup with no
+    // name is the other half of the same failure, so the name is required
+    // here too and the field simply stays on twenty-four hours without it.
+    let has_meridiem = meridiem_label.is_some() && am_label.is_some() && pm_label.is_some();
 
     rsx! {
         Field {
@@ -202,9 +241,6 @@ pub fn TimeInput(
                 "data-nd-min": min,
                 "data-nd-max": max,
                 "data-nd-step": step,
-                "data-nd-am-label": am_label,
-                "data-nd-pm-label": pm_label,
-                "data-nd-now-label": now_label.clone(),
                 "data-nd-required-label": required_label.clone(),
                 "data-nd-missing-label": missing_label,
                 "data-nd-invalid-label": invalid_label,
@@ -212,7 +248,7 @@ pub fn TimeInput(
                 "data-nd-max-label": max_label,
 
                 div { class: "nd-time-input-row", "data-nd-time-input-row": "",
-                    for (part, part_id, part_label) in parts {
+                    for (part, part_id, part_label, part_value) in parts {
                         // EVERY BOX IS NAMED, and the name survives the
                         // twelve-hour re-lay because the boxes move rather
                         // than being restyled.
@@ -229,6 +265,7 @@ pub fn TimeInput(
                                 name: "{name}-{part}",
                                 inputmode: "numeric",
                                 autocomplete: "off",
+                                value: part_value,
                                 required,
                                 disabled,
                                 "aria-invalid": invalid,
@@ -236,10 +273,24 @@ pub fn TimeInput(
                             }
                         }
                     }
-                    // The morning/afternoon control, and the script removes it
-                    // where the reader's clock has no use for one. A
-                    // `Segmented` because it is a choice between two named
-                    // things, which is what that component is for.
+                    // THE MORNING AND AFTERNOON CONTROL, AND IT IS A REAL
+                    // `Segmented` NOW.
+                    //
+                    // It was a `<div class="nd-segmented">` of two
+                    // `<button class="nd-segmented-item">` that `inputs.js`
+                    // built with `createElement` — a copy of this component's
+                    // markup, in a script, already drifted from it: no
+                    // `appearance`, no `shape`, no `fill`, no
+                    // `aria-orientation`, so every compound rule that draws a
+                    // joined control matched nothing and the pair rendered as
+                    // two detached boxes. A control in this system is a
+                    // component, never a class on a `<button>`.
+                    //
+                    // The WRAPPER carries `hidden`, because a component cannot
+                    // be handed the attribute, and it ships hidden for the
+                    // reason every script-owned control does: the twelve-hour
+                    // reading is the script's, so with nothing running there
+                    // is no half of the day to name.
                     span {
                         class: "nd-time-input-meridiem",
                         "data-nd-time-input-meridiem": "",
@@ -247,32 +298,34 @@ pub fn TimeInput(
                         {meridiem_label.clone().map(|word| rsx! {
                             span { class: "nd-visually-hidden", id: "{id}-meridiem-label", "{word}" }
                         })}
-                    }
-                    if let Some(now) = now {
-                        // HIDDEN UNTIL THE SCRIPT CAN HONOUR IT, exactly as
-                        // `NumberInput`'s steppers and `Input`'s clear and
-                        // reveal controls are. This one shipped visible and
-                        // inert: reading the clock is `inputs.js`'s and
-                        // nothing else's, so with no script it was a named,
-                        // focusable button that filled nothing.
-                        //
-                        // The WRAPPER carries `hidden`, because a component is
-                        // not an element and cannot be given the attribute.
-                        // That is the steppers' arrangement, and the
-                        // stylesheet gives this span `display: contents` so
-                        // the row lays out as though it were not here.
-                        span {
-                            class: "nd-time-input-now",
-                            hidden: true,
-                            "data-nd-time-input-now": "",
-                            Button {
-                                label: now,
-                                icon: IconName::Clock,
-                                hide_label: true,
-                                variant: ButtonVariant::Outline,
-                                size: ButtonSize::Small,
-                                action: "time-input-now",
-                                disabled,
+                        if has_meridiem {
+                            Segmented {
+                                name: "{name}-meridiem",
+                                labelledby: "{id}-meridiem-label",
+                                // THE FIELD'S OWN SIZE. Siblings in one row
+                                // share their padding and their height, and a
+                                // control fixed at `small` beside a `large`
+                                // field reads as broken.
+                                size: match size {
+                                    TimeInputSize::Small => SegmentedSize::Small,
+                                    TimeInputSize::Medium => SegmentedSize::Medium,
+                                    TimeInputSize::Large => SegmentedSize::Large,
+                                },
+                                class: "nd-time-input-meridiem-group",
+                                SegmentedItem {
+                                    value: "am",
+                                    label: am_label.clone().unwrap_or_default(),
+                                    // NEITHER, when nothing is known. See
+                                    // `morning` above.
+                                    selected: morning == Some(true),
+                                    disabled,
+                                }
+                                SegmentedItem {
+                                    value: "pm",
+                                    label: pm_label.clone().unwrap_or_default(),
+                                    selected: morning == Some(false),
+                                    disabled,
+                                }
                             }
                         }
                     }

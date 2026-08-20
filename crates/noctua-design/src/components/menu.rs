@@ -69,7 +69,21 @@ pub fn Menu(
             "data-nd-menu": "{name}",
             "data-nd-placement": placement.as_str(),
             hidden: true,
-            {children}
+            // A SCROLLER INSIDE THE SURFACE, BECAUSE A SCROLLABLE ELEMENT
+            // CARRIES NO RADIUS. A menu longer than the window has to scroll,
+            // and a rounded box that scrolls paints a square scrollbar through
+            // its own corner — `.nd-panel` + `.nd-panel-body` and
+            // `.nd-codeblock` + `.nd-codeblock-code` are the same split for
+            // the same reason. The surface clips; this is what moves.
+            //
+            // `role="none"` so the items are still the menu's own children in
+            // the accessibility tree. A generic box between a `role="menu"`
+            // and its `role="menuitem"` items is the `<ul role="menu"><li
+            // role="none">` arrangement, said with the elements this
+            // component already renders.
+            div { class: "nd-menu-scroll", role: "none",
+                {children}
+            }
         }
     }
 }

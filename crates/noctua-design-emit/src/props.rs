@@ -74,6 +74,7 @@ fn dioxus(component: &Component) -> String {
             writeln!(out, "/// {line}").expect("write");
         }
     }
+    out.push_str(&controls::allows(component));
     out.push_str("#[component]\n");
     writeln!(out, "pub fn {name}(").expect("write");
 

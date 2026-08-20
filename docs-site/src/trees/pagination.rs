@@ -45,7 +45,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         }],
     ),
     (
-        r"Pagination { spread: PaginationSpread::Compact, previous_label, next_label }",
+        r"Pagination { spread: PaginationSpread::Compact, more_label, previous_label, next_label }",
         &[Node::Component {
             name: "Pagination",
             props: &[
@@ -55,6 +55,12 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 ("pages", Value::Text("40")),
                 ("href", Value::Text("#page-{page}")),
                 ("spread", Value::Text("compact")),
+                // THE GAP IS A CONTROL HERE. Page 12 of 40 hides nine pages
+                // behind the first `…` and twenty-five behind the second, and
+                // `more_label` is what lets a reader reach one of them in a
+                // press. With the script blocked both are the inert character
+                // they were, which is what `menu.js` reveals the button from.
+                ("more_label", Value::Message(Key::ExamplePaginationMore)),
                 (
                     "previous_label",
                     Value::Message(Key::ExamplePaginationPrevious),

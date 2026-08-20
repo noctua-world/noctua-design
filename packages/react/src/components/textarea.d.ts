@@ -46,7 +46,7 @@ export interface TextareaProps {
   counterLabel?: string;
   /** Whether the browser underlines what it takes to be mistakes. **On by default**, unlike `Input`, because this box holds prose. */
   spellcheck?: boolean;
-  /** The box's padding and the type inside it: `small`, `medium` or `large`, matching the rest of the form. */
+  /** The box's padding: `small`, `medium` or `large`, matching `Input` step for step. The type inside never goes below the body size, so a phone does not zoom on focus. */
   size?: TextareaSize;
   /** Whether the box is frosted. Use it on a ground opaque enough to read several lines against. */
   glass?: boolean;

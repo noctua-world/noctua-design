@@ -51,6 +51,13 @@ default = "true"
 attribute = "data-nd-steppers"
 doc = "Whether the two stepper controls appear. **On by default**, because they make a small adjustment one press instead of a select-all and a retype. Turn them off where the numbers are too large to step to."
 
+[prop.stepping]
+type = "enum"
+values = ["assist", "primary"]
+default = "assist"
+attribute = "data-nd-stepping"
+doc = "What the steppers are for. `assist` is two small controls at the end of the box, for correcting a typed value. `primary` is one full control either side of the value, for a quantity answered by pressing rather than by typing."
+
 [prop.increment_label]
 type = "text"
 attribute = "data-nd-increment-label"

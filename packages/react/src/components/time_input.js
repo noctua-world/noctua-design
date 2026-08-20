@@ -4,30 +4,46 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// Asks for one time of day, in separate boxes, on the reader's own clock.
+// Asks for one time of day, in separate boxes, on a twenty-four hour clock.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.
 
 import { createElement as h } from "react";
 
-import { Button } from "./button.js";
 import { Field } from "./field.js";
-export function TimeInput({ name, legend, hourLabel, minuteLabel, secondLabel, meridiemLabel, amLabel, pmLabel, value, seconds, clock, min, max, step, nowLabel, requiredLabel, missingLabel, invalidLabel, minLabel, maxLabel, hint, error, required, disabled, pad, size, glass, className, ...rest }) {
+import { Segmented } from "./segmented.js";
+import { SegmentedItem } from "./segmented_item.js";
+export function TimeInput({ name, legend, hourLabel, minuteLabel, secondLabel, meridiemLabel, amLabel, pmLabel, value, seconds, clock, min, max, step, requiredLabel, missingLabel, invalidLabel, minLabel, maxLabel, hint, error, required, disabled, pad, size, glass, className, ...rest }) {
   const size_ = size ?? "medium";
-  const clock_ = clock ?? "auto";
+  const clock_ = clock ?? "24";
+  const pad_ = pad ?? true;
   const id = `nd-time-input-${name}`;
   // See the Dioxus half: the same `control` the field gets, or the sentences
   // are described by elements that do not exist.
   const control = `${id}-hour`;
   // See the Dioxus half: the fieldset describes itself now.
   const root = ["nd-time-input", className].filter(Boolean).join(" ");
-  // See the Dioxus half: served as twenty-four hours, re-laid by the script.
+  // See the Dioxus half: served as twenty-four hours, re-laid by the script,
+  // and the value RENDERED into the boxes rather than read out of an
+  // attribute once a script runs.
+  const given = String(value ?? "").split(":");
+  const served = (at) => {
+    const piece = (given[at] ?? "").trim();
+    if (piece === "") return undefined;
+    return pad_ && piece.length === 1 ? `0${piece}` : piece;
+  };
   const parts = [
-    ["hour", hourLabel],
-    ["minute", minuteLabel],
-    ...(seconds ? [["second", secondLabel]] : []),
+    ["hour", hourLabel, served(0)],
+    ["minute", minuteLabel, served(1)],
+    ...(seconds ? [["second", secondLabel, served(2)]] : []),
   ];
+  // See the Dioxus half: which half of the day the served value is in, and
+  // NEITHER when nothing is known.
+  const hour24 = /^\d+$/.test((given[0] ?? "").trim()) ? Number(given[0]) : null;
+  const morning = hour24 === null ? null : hour24 < 12;
+  // See the Dioxus half: a name and both words, or no control at all.
+  const hasMeridiem = Boolean(meridiemLabel) && Boolean(amLabel) && Boolean(pmLabel);
 
   return h(
     Field,
@@ -52,14 +68,11 @@ export function TimeInput({ name, legend, hourLabel, minuteLabel, secondLabel, m
         "data-nd-glass": String(glass ?? false),
         "data-nd-clock": clock_,
         "data-nd-seconds": String(seconds ?? false),
-        "data-nd-pad": String(pad ?? true),
+        "data-nd-pad": String(pad_),
         "data-nd-value": value,
         "data-nd-min": min,
         "data-nd-max": max,
         "data-nd-step": step,
-        "data-nd-am-label": amLabel,
-        "data-nd-pm-label": pmLabel,
-        "data-nd-now-label": nowLabel,
         "data-nd-required-label": requiredLabel,
         "data-nd-missing-label": missingLabel,
         "data-nd-invalid-label": invalidLabel,
@@ -70,7 +83,7 @@ export function TimeInput({ name, legend, hourLabel, minuteLabel, secondLabel, m
       h(
         "div",
         { key: "r", className: "nd-time-input-row", "data-nd-time-input-row": "" },
-        parts.map(([part, partLabel]) =>
+        parts.map(([part, partLabel, partValue]) =>
           h(
             "span",
             { key: part, className: "nd-time-input-part" },
@@ -87,6 +100,7 @@ export function TimeInput({ name, legend, hourLabel, minuteLabel, secondLabel, m
               name: `${name}-${part}`,
               inputMode: "numeric",
               autoComplete: "off",
+              defaultValue: partValue,
               required,
               disabled,
               "aria-invalid": error ? "true" : undefined,
@@ -94,6 +108,9 @@ export function TimeInput({ name, legend, hourLabel, minuteLabel, secondLabel, m
             }),
           ),
         ),
+        // See the Dioxus half: a real `Segmented`, hidden until the script
+        // reads the clock, and never a copy of that component's markup built
+        // with `createElement`.
         h(
           "span",
           {
@@ -105,30 +122,34 @@ export function TimeInput({ name, legend, hourLabel, minuteLabel, secondLabel, m
           meridiemLabel
             ? h("span", { key: "l", className: "nd-visually-hidden", id: `${id}-meridiem-label` }, meridiemLabel)
             : null,
+          hasMeridiem
+            ? h(
+                Segmented,
+                {
+                  key: "g",
+                  name: `${name}-meridiem`,
+                  labelledby: `${id}-meridiem-label`,
+                  // See the Dioxus half: the field's own size.
+                  size: size_,
+                  className: "nd-time-input-meridiem-group",
+                },
+                h(SegmentedItem, {
+                  key: "a",
+                  value: "am",
+                  label: amLabel ?? "",
+                  selected: morning === true,
+                  disabled,
+                }),
+                h(SegmentedItem, {
+                  key: "p",
+                  value: "pm",
+                  label: pmLabel ?? "",
+                  selected: morning === false,
+                  disabled,
+                }),
+              )
+            : null,
         ),
-        nowLabel
-          ? h(
-              "span",
-              {
-                key: "n",
-                className: "nd-time-input-now",
-                hidden: true,
-                "data-nd-time-input-now": "",
-              },
-              // See the Dioxus half: revealed by `inputs.js`, never built, and
-              // the wrapper carries `hidden` because a component cannot.
-              h(Button, {
-                key: "b",
-                label: nowLabel,
-                icon: "clock",
-                hideLabel: true,
-                variant: "outline",
-                size: "small",
-                action: "time-input-now",
-                disabled,
-              }),
-            )
-          : null,
       ),
       h("p", {
         key: "n",

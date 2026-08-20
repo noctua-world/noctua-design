@@ -30,22 +30,49 @@ pub(crate) const EXAMPLES: &[Tree] = &[
             }],
         }],
     ),
+    // THE ONE THAT GOES AWAY, AND THE TWO THINGS THAT MAKE IT READABLE.
+    //
+    // `countdown_label` is the COMPONENT's: a message with a deadline owes its
+    // reader the deadline, and `toast.toml` argues it beside the three
+    // guarantees the timer already made. The control beside it is the
+    // DOCUMENTATION's: raising a message a second time is the page's job, so
+    // it is a `Button` with an `action` that `shell.js` answers, and it ships
+    // nowhere. Without it this example is an empty box for every reader who
+    // arrives more than six seconds late.
     (
-        r#"Toast { tone: "success", duration: "6000", … }"#,
+        r#"Toast { tone: "success", duration: "6000", countdown_label, … } — with a control that runs it again"#,
         &[Node::Element {
             tag: "div",
             attributes: &[("class", Value::Text("nd-example-toasts"))],
-            children: &[Node::Component {
-                name: "Toast",
-                props: &[
-                    ("name", Value::Text("toast-sent")),
-                    ("tone", Value::Text("success")),
-                    ("duration", Value::Text("6000")),
-                    ("title", Value::Message(Key::ExampleToastSentTitle)),
-                    ("dismiss_label", Value::Message(Key::ExampleToastDismiss)),
-                ],
-                children: &[Node::Text(Value::Message(Key::ExampleToastSent))],
-            }],
+            children: &[
+                Node::Component {
+                    name: "Button",
+                    props: &[
+                        ("label", Value::Message(Key::ExampleToastReplay)),
+                        ("action", Value::Text("toast-replay")),
+                        ("variant", Value::Text("outline")),
+                        ("tone", Value::Text("neutral")),
+                        ("size", Value::Text("small")),
+                        ("icon", Value::Text("rotate-ccw")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Toast",
+                    props: &[
+                        ("name", Value::Text("toast-sent")),
+                        ("tone", Value::Text("success")),
+                        ("duration", Value::Text("6000")),
+                        (
+                            "countdown_label",
+                            Value::Message(Key::ExampleToastCountdown),
+                        ),
+                        ("title", Value::Message(Key::ExampleToastSentTitle)),
+                        ("dismiss_label", Value::Message(Key::ExampleToastDismiss)),
+                    ],
+                    children: &[Node::Text(Value::Message(Key::ExampleToastSent))],
+                },
+            ],
         }],
     ),
     (

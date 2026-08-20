@@ -180,6 +180,15 @@ pub(crate) const SPACING: Page = Page {
     kind: Kind::Foundation,
     component: None,
 };
+/// Every drawing the platform ships, and how to add one.
+///
+/// **Named *Icons list*, because *Icons* was the component wearing a
+/// foundation's clothes.** `Icon` is a component and has its own row three
+/// lines further down the sidebar, so two adjacent entries differed by a single
+/// letter and neither said which was the gallery. This one is the gallery: what
+/// each drawing means, and what `spec/icons.toml` has to say for a new one to
+/// exist. Its title is a sentence a reader reads, so it is translated, and the
+/// slug stays `icons` for the reason `/avatars/` keeps its own.
 pub(crate) const ICONS: Page = Page {
     slug: "icons",
     title: Title::Message(Key::PageIconsTitle),
@@ -354,6 +363,47 @@ pub(crate) const TABS: Page = Page {
     component: None,
 };
 
+/// A list, and one item of it.
+///
+/// A collection by the rule below: a `ListItem` outside a list is an `<li>`
+/// with nothing to be an item of, and the two are never reached for
+/// separately. Its slug is the component's own, which is the collision
+/// `/search/`, `/menu/` and `/tree/` already have and is allowed for the same
+/// reason: there is one page at `/list/` and it is the one `List` points at.
+pub(crate) const LIST: Page = Page {
+    slug: "list",
+    title: Title::Name("List"),
+    summary: Key::PageListSummary,
+    kind: Kind::Component,
+    component: None,
+};
+
+/// The row of options, and one of the values it chooses between.
+///
+/// A collection by the rule below, and the contract says so in as many words:
+/// a `SegmentedItem` outside a `Segmented` is a `role="radio"` with no group,
+/// which announces a control belonging to a set that does not exist.
+pub(crate) const SEGMENTED: Page = Page {
+    slug: "segmented",
+    title: Title::Name("Segmented"),
+    summary: Key::PageSegmentedSummary,
+    kind: Kind::Component,
+    component: None,
+};
+
+/// The field, a named run of options, and one option.
+///
+/// A collection by the rule below: an `<optgroup>` outside a `<select>` is not
+/// a control at all, and an `<option>` on its own is a line of text. All three
+/// are written in one call and read in one place.
+pub(crate) const SELECT: Page = Page {
+    slug: "select",
+    title: Title::Name("Select"),
+    summary: Key::PageSelectSummary,
+    kind: Kind::Component,
+    component: None,
+};
+
 /// The six components that make a table, and nothing else.
 ///
 /// `Pagination` was on it once and has a page of its own now. Paging is a
@@ -416,17 +466,27 @@ pub(crate) struct Collection {
 /// select are alternatives, not parts, and a page of alternatives is six
 /// component pages a reader has to scroll past to reach the one they came for.
 ///
+/// **`Select`, `SelectGroup` and `SelectOption` share a page again, and that
+/// is not `/forms` coming back.** What `/forms` got wrong was putting
+/// alternatives together: a reader who wanted a checkbox scrolled past a
+/// select to reach it. These three are one control written in one call, and
+/// neither of the other two means anything outside it — the same test `Table`
+/// and its parts pass. `List` with `ListItem` and `Segmented` with
+/// `SegmentedItem` are that test again, and each replaces a sidebar row for a
+/// component nobody looks up on its own.
+///
 /// **`Pagination` used to be on `/tables/` and is not any more.** Its own
 /// contract already argued the point — *"a component of its own rather than a
 /// prop on `Table` because paging is a question about the DATASET, and a list
 /// of search results needs exactly the same control"* — and the page order made
 /// the cost visible: a reader who clicked *Table* in the sidebar got the whole
 /// of `Pagination` first, because `pagination.toml` sorts before `table.toml`.
-/// It also gains something by leaving: `index.rs` only indexes pages where
-/// `page.component.is_some()`, so a component on a collection page is absent
-/// from the site's own search — nobody could find `spread` or `current_label`
-/// by searching for them.
-pub(crate) const COLLECTIONS: [Collection; 10] = [
+/// It also gained something by leaving, and that half is fixed rather than
+/// still true: `index.rs` used to index a page only where
+/// `page.component.is_some()`, so nobody could search for `spread` or
+/// `current_label`. It reads `documented_on` now, so a component on a shared
+/// page is as findable as one with a page of its own.
+pub(crate) const COLLECTIONS: [Collection; 13] = [
     Collection {
         page: LINEAGE,
         parts: &["Lineage", "LineageFigure"],
@@ -479,6 +539,25 @@ pub(crate) const COLLECTIONS: [Collection; 10] = [
         page: SEARCH,
         parts: &["Search", "SearchGroup", "SearchResult"],
         body: Key::PageSearchBody,
+    },
+    Collection {
+        // The list first, then the item, which is the order a caller writes
+        // them in and the order the alphabet happens to agree with.
+        page: LIST,
+        parts: &["List", "ListItem"],
+        body: Key::PageListBody,
+    },
+    Collection {
+        page: SEGMENTED,
+        parts: &["Segmented", "SegmentedItem"],
+        body: Key::PageSegmentedBody,
+    },
+    Collection {
+        // The field, then the run of options, then one option: outside in,
+        // which is the order they nest and not the order they sort in.
+        page: SELECT,
+        parts: &["Select", "SelectGroup", "SelectOption"],
+        body: Key::PageSelectBody,
     },
     Collection {
         page: TABLES,
