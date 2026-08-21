@@ -294,32 +294,66 @@ mod tests {
 
 #[cfg(test)]
 mod contrast {
-    /// The switch's knob has to carry against its track, in every palette.
+    /// Every colour the switch draws, named in `shell.css` and measured here.
     ///
     /// # Why this is arithmetic and not a browser test
     ///
     /// The knob is one colour in both states, which is what makes it read as
     /// one object rather than two of different sizes — that was reported twice.
-    /// The price is that the track has to move away from it, and by how much is
-    /// a fact about all thirty-nine palettes in two appearances, not about the
-    /// one a page happens to be showing.
+    /// Whether it carries against the track is a fact about all thirty-nine
+    /// palettes in two appearances, not about the one a page happens to show,
+    /// and three browser probes failed to switch palette before this was
+    /// written. The vendored ramps are on disk and the sums are four lines.
     ///
-    /// Three browser probes failed to switch palette before this was written.
-    /// The vendored ramps are on disk and the sums are four lines, so the whole
-    /// set is checked here rather than a sample of it in a viewport.
+    /// # Why it READS the stylesheet rather than restating it
     ///
-    /// The measured curve, at the time of writing: the bare accent fails on
-    /// **39 of the 78 pairs**, worst 2.51:1 on `amber-vivid` dark. 86% failed
-    /// 39, 82% failed 28, 78% cleared every one at 3.08:1, and 74% is what
-    /// ships, at 3.21:1.
+    /// The first version of this test carried a copy of what the CSS did: a
+    /// `const ACCENT: f64 = 0.74` beside a rule that mixed the accent 74% into
+    /// the surface. It passed, and the thing it was guarding was already
+    /// broken — a switch showing three quarters of the theme's accent is
+    /// showing a colour the theme does not contain, which is a defect a reader
+    /// sees and a contrast sum never will.
+    ///
+    /// So the five colours come out of `shell.css`, each has to be a WHOLE
+    /// `var(--nc-color-…)` with nothing wrapped around it, and the semantic
+    /// name is resolved through the vendor's own `contexts.css` to the palette
+    /// token behind it. A `color-mix` in any of the five fails at the first
+    /// step, before a ratio is computed. Nothing here is a number this file
+    /// chose, and there is no second copy of the design to drift from.
+    ///
+    /// Measured, at the time of writing: 78 pairs, worst 3.13:1 on
+    /// `amber-sober` light, which is the palette's own solid-to-`bg-app`
+    /// guarantee arriving intact.
     #[test]
     fn every_switch_track_carries_its_knob() {
-        /// What `shell.css` mixes. Change one and this test changes with it.
-        const ACCENT: f64 = 0.74;
         /// `WCAG 1.4.11`, for a component's own parts.
         const FLOOR: f64 = 3.0;
 
         let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+        let css = std::fs::read_to_string(root.join("docs-site/assets/shell.css")).expect("shell");
+        let contexts =
+            std::fs::read_to_string(root.join("packages/tokens/vendor/css/contexts.css"))
+                .expect("contexts");
+
+        let knob = palette_token(&contexts, &whole_token(&css, ".nd-switch-track::after"));
+        let grounds: Vec<(&str, String)> = [
+            ("off", ".nd-switch-track"),
+            ("on", ".nd-switch[aria-checked=\"true\"] > .nd-switch-track"),
+            ("off hovered", ".nd-switch:hover > .nd-switch-track"),
+            (
+                "on hovered",
+                ".nd-switch[aria-checked=\"true\"]:hover > .nd-switch-track",
+            ),
+        ]
+        .into_iter()
+        .map(|(state, selector)| {
+            (
+                state,
+                palette_token(&contexts, &whole_token(&css, selector)),
+            )
+        })
+        .collect();
+
         let mut checked = 0usize;
         let mut worst = (f64::MAX, String::new());
 
@@ -336,23 +370,22 @@ mod contrast {
                 .to_string();
 
             for mode in ["light", "dark"] {
-                let Some(accent) = token(&text, mode, "--nc-accent-solid") else {
+                let Some(ink) = token(&text, mode, &knob) else {
                     continue;
                 };
-                let surface = token(&text, mode, "--nc-neutral-bg-app").expect("surface");
-                let knob = token(&text, mode, "--nc-neutral-text-strong").expect("fg");
-
-                let track: [f64; 3] =
-                    std::array::from_fn(|i| accent[i].mul_add(ACCENT, surface[i] * (1.0 - ACCENT)));
-                let ratio = contrast(luminance(track), luminance(knob));
-                if ratio < worst.0 {
-                    worst = (ratio, format!("{name} {mode}"));
+                for (state, ground) in &grounds {
+                    let track = token(&text, mode, ground)
+                        .unwrap_or_else(|| panic!("{ground} is missing from {name} {mode}"));
+                    let ratio = contrast(luminance(track), luminance(ink));
+                    if ratio < worst.0 {
+                        worst = (ratio, format!("{name} {mode}, {state}"));
+                    }
+                    assert!(
+                        ratio >= FLOOR,
+                        "the switch's knob is {ratio:.2}:1 against its {state} track on \
+                         {name} {mode}, under the {FLOOR}:1 a component's own parts need"
+                    );
                 }
-                assert!(
-                    ratio >= FLOOR,
-                    "the switch's knob is {ratio:.2}:1 against its track on {name} {mode}, \
-                     under the {FLOOR}:1 a component's own parts need"
-                );
                 checked += 1;
             }
         }
@@ -362,7 +395,67 @@ mod contrast {
             checked >= 70,
             "only {checked} palette and appearance pairs were read"
         );
-        println!("{checked} pairs, worst {:.2}:1 on {}", worst.0, worst.1);
+        println!(
+            "{checked} pairs x {} grounds, worst {:.2}:1 on {}",
+            grounds.len(),
+            worst.0,
+            worst.1
+        );
+    }
+
+    /// The `background` a selector sets, which has to be one whole token.
+    ///
+    /// Anything wrapped around it — a `color-mix`, a `linear-gradient`, a
+    /// second colour — leaves the value not starting `var(--nc-color-` and
+    /// fails here, which is the point: a colour this stylesheet DERIVED is a
+    /// colour no palette in the system contains.
+    fn whole_token(css: &str, selector: &str) -> String {
+        let head = format!("\n{selector} {{");
+        let at = css
+            .find(&head)
+            .unwrap_or_else(|| panic!("no rule for `{selector}` in shell.css"));
+        let body = css[at + head.len()..]
+            .split_once('}')
+            .unwrap_or_else(|| panic!("`{selector}` has no closing brace"))
+            .0;
+        let value = body
+            .split("\n  background:")
+            .nth(1)
+            .unwrap_or_else(|| panic!("`{selector}` sets no background"))
+            .split(';')
+            .next()
+            .unwrap_or_default()
+            .trim();
+        let name = value
+            .strip_prefix("var(")
+            .and_then(|rest| rest.strip_suffix(')'))
+            .filter(|name| name.starts_with("--nc-color-"))
+            .unwrap_or_else(|| {
+                panic!(
+                    "`{selector}` draws `{value}` rather than one whole \
+                     `var(--nc-color-…)`, so it is a colour no palette holds"
+                )
+            });
+        name.to_string()
+    }
+
+    /// The palette token a semantic name stands for, per the vendor's contract.
+    ///
+    /// Resolved from `contexts.css` rather than from a table here, so a rename
+    /// in the colour system reaches this test without anybody remembering to
+    /// bring it.
+    fn palette_token(contexts: &str, name: &str) -> String {
+        let at = contexts
+            .find(&format!("\n  {name}: var("))
+            .unwrap_or_else(|| panic!("`{name}` is not in the semantic contract"));
+        contexts[at..]
+            .split_once("var(")
+            .expect("checked above")
+            .1
+            .split_once(')')
+            .expect("a closed var()")
+            .0
+            .to_string()
     }
 
     /// One `#rrggbb` from a palette file, as linear light.

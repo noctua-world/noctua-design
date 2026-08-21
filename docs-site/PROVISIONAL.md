@@ -3256,3 +3256,41 @@ every locale.
     `spec/components/` and the generated interpreter had no arm for it —
     `tree::theme_scope` is that arm, and its sample markup is byte-identical to
     what the hand-written component drew.
+
+106. **The switch stopped being the theme's accent, and now it is again.** The
+    knob is one colour in both states, which is what makes it read as one object
+    rather than as two of different sizes. Yesterday's pass paid for that by
+    moving the TRACK away from the knob: the on state became
+    `color-mix(in oklch, var(--nc-color-accent) 74%, var(--nc-color-surface))`,
+    a percentage fitted until every one of the 78 palette-and-appearance pairs
+    cleared `WCAG 1.4.11`'s 3:1.
+
+    It cleared it, and it was wrong. Three quarters of a theme's accent over its
+    surface is a colour **no palette in this system contains**, so the one
+    control a reader flips to see the accent was the one control not showing it.
+    Every other filled control — a solid `Button`, a checked `Checkbox`, a
+    pressed `Tag` — paints `var(--nc-color-accent)` and nothing else.
+
+    The floor is met the way the colour system always meant it to be. The switch
+    is now the two solid tones the `Button` already ships: off is
+    `subtle` / `on-subtle`, on is `accent` / `on-accent`, hover one step of each.
+    An `on-` colour carrying against its own solid is the palette's own
+    guarantee rather than a sum this repository did, and measured across all 78
+    pairs the worst case is **3.13:1** with the bare accent. The browser agrees
+    with the arithmetic to the same palette and the same two decimals, over 156
+    painted-pixel measurements, at one knob size of 16x16 throughout.
+
+    **The test now reads the stylesheet instead of restating it.** The old one
+    carried `const ACCENT: f64 = 0.74` beside the rule that mixed 74%, so it
+    passed while guarding something already broken — a contrast sum cannot see
+    a wrong colour, only a wrong ratio. `every_switch_track_carries_its_knob`
+    pulls the five colours out of `shell.css`, demands each be a whole
+    `var(--nc-color-…)`, and resolves it through the vendor's `contexts.css` to
+    the palette token behind it. A `color-mix` fails at the first step.
+
+    One defect fell out of it. The frosted knob's override named
+    `[aria-checked="true"]`, leaving the off state to take the solid rule's ink
+    — survivable only while that ink was `fg` anyway. The moment the solid knob
+    became white, a frosted switch that was off had a white knob on a white
+    frost. Measured at **1.07:1**, and the browser suite asserts both states now
+    because the frost is a composite the arithmetic cannot reach.

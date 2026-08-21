@@ -437,7 +437,20 @@ a {
  *
  * The gap is measured from the track's OUTER edge, because that is the edge a
  * reader sees. An absolute inset resolves against the PADDING box, so the
- * hairline comes off it. */
+ * hairline comes off it.
+ *
+ * TWO SOLID TONES, AND NOTHING THIS FILE INVENTED. Off is `subtle`, on is
+ * `accent`, each with its own `on-` colour on the knob — which is exactly the
+ * pair `.nd-button[data-nd-variant="solid"]` and its `tone="neutral"` sibling
+ * already draw. A switch is therefore the same two fills every other filled
+ * control in this system uses, and the accent arrives at FULL STRENGTH.
+ *
+ * That last part is a repair. The on track shipped briefly as
+ * `color-mix(accent 74%, surface)`, a percentage fitted to clear a contrast
+ * floor. It cleared it and it was wrong: a theme's accent is the theme, and a
+ * control that shows three quarters of it shows a colour no palette in this
+ * system contains. The floor is met now the way the palette always meant it to
+ * be, by putting `on-accent` on the accent rather than by moving the accent. */
 .nd-switch-track {
   --nd-switch-track-inline: var(--noctua-space-12);
   --nd-switch-track-block: var(--noctua-space-6);
@@ -450,10 +463,15 @@ a {
   flex: none;
   inline-size: var(--nd-switch-track-inline);
   block-size: var(--nd-switch-track-block);
-  border: var(--noctua-border-hairline) solid var(--nc-color-border-strong);
+  /* Fill and edge the same tone, as on a solid button. The hairline is kept
+     for the geometry above rather than for a reader: the knob's insets come
+     off the padding box, and a border of zero would move it. */
+  border: var(--noctua-border-hairline) solid var(--nc-color-subtle);
   border-radius: var(--noctua-radius-pill);
-  background: var(--nc-color-subtle-bg);
-  transition: background-color var(--noctua-duration-fast) var(--noctua-easing-out);
+  background: var(--nc-color-subtle);
+  transition:
+    background-color var(--noctua-duration-fast) var(--noctua-easing-out),
+    border-color var(--noctua-duration-fast) var(--noctua-easing-out);
 }
 
 .nd-switch-track::after {
@@ -473,10 +491,14 @@ a {
    * size on a light one, so the two states looked like two knobs of different
    * sizes, which is exactly what was reported. The geometry was never wrong.
    *
-   * `fg` rather than `fg-muted` because it has to carry against both tracks:
-   * the off track is at either extreme of the mode and the on track is the
-   * accent, mid-lightness in both. */
-  background: var(--nc-color-fg);
+   * `on-accent` is the ink a solid accent fill is GUARANTEED to carry — that
+   * is the whole job of the token, and the accent track is the harder of the
+   * two grounds because it is chromatic and moves with the theme. Against the
+   * off track it is measured rather than promised, at 3.13:1 in the worst of
+   * the 78 pairs, and it is within 7/255 of that track's own `on-subtle` in
+   * every one of them. So a single declaration serves both states, and there
+   * is no second one to fall out of step with it. */
+  background: var(--nc-color-on-accent);
   transform: translate(0, 0);
   transition: transform var(--noctua-duration-fast) var(--noctua-easing-out);
 }
@@ -485,41 +507,26 @@ a {
    which end the knob sits at, and what colour the TRACK is. The knob's own
    colour is not one of them — see the rule above. */
 .nd-switch[aria-checked="true"] > .nd-switch-track {
-  /* THE ACCENT, CARRIED AWAY FROM THE KNOB.
-   *
-   * The knob is one colour in both states, which is what makes it read as one
-   * object — but measured against the bare accent it came to **2.7:1**, under
-   * the 3:1 that `WCAG 1.4.11` asks of a component's own parts. The off track
-   * gives 15.7:1, so only this half was failing, and a soft edge on the knob is
-   * also what made its gaps look uneven.
-   *
-   * Mixing toward the surface moves the track away from the knob in BOTH
-   * appearances rather than one: the surface is dark where the knob is light
-   * and light where it is dark, so a single mix serves the pair. Tokens only —
-   * nothing here is a colour this repository chose.
-   *
-   * **74% is measured, not chosen.** The bare accent fails 3:1 on 39 of the 78
-   * palette-and-appearance pairs this system ships, worst 2.51:1 on
-   * `amber-vivid` dark. 86% still failed 39 of them and 82% failed 28; 78% is
-   * the first that clears every one, at 3.08:1, and 74% is the first with
-   * margin, at 3.21:1 while keeping three quarters of the accent's chroma.
-   * `every_switch_track_carries_its_knob` recomputes all 78 from the vendored
-   * palettes, so a new palette cannot slip under. */
-  background: color-mix(in oklch, var(--nc-color-accent) 74%, var(--nc-color-surface));
-  border-color: color-mix(in oklch, var(--nc-color-accent) 74%, var(--nc-color-surface));
+  background: var(--nc-color-accent);
+  border-color: var(--nc-color-accent);
 }
 
 .nd-switch[aria-checked="true"] > .nd-switch-track::after {
   transform: translate(var(--nd-switch-travel), 0);
 }
 
+/* Hover moves the tone one step, on both halves, the way a solid button's
+   does. It used to lighten only the OFF track's edge, which is a different
+   gesture in each state on a control whose whole point is that the two states
+   are one drawing. */
 .nd-switch:hover > .nd-switch-track {
-  border-color: var(--nc-color-fg-muted);
+  background: var(--nc-color-subtle-hover);
+  border-color: var(--nc-color-subtle-hover);
 }
 
 .nd-switch[aria-checked="true"]:hover > .nd-switch-track {
-  background: color-mix(in oklch, var(--nc-color-accent-hover) 74%, var(--nc-color-surface));
-  border-color: color-mix(in oklch, var(--nc-color-accent-hover) 74%, var(--nc-color-surface));
+  background: var(--nc-color-accent-hover);
+  border-color: var(--nc-color-accent-hover);
 }
 
 /* THE BOX, AND IT USED TO BE ONLY THE WORDS.
@@ -8422,12 +8429,19 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   );
 }
 
-/* AND THE KNOB STOPS BEING WHITE. It is `--nc-color-on-accent` against a solid
-   accent track; against a frosted one that is the same mistake as white ink on
-   a frosted button. The accent itself reads against the frost, and the knob is
-   the thing whose position carries the state. */
-.nd-switch[aria-checked="true"] > .nd-switch-track[data-nd-glass="true"]::after {
-  background: var(--nc-color-accent);
+/* AND THE KNOB STOPS BEING WHITE, IN BOTH STATES RATHER THAN ONE.
+   `--nc-color-on-accent` is the ink for a SOLID accent fill; on a frosted track
+   it is the same mistake as white ink on a frosted button, and neither state's
+   track is solid here — off is the bare frost and on is the frost under a 14%
+   accent veil, so both sit near the surface colour.
+   `fg` is what carries against the surface, which is why it is what a frosted
+   `Segmented` puts on its chosen option four rules above.
+   This override used to name `[aria-checked="true"]`, which left the off state
+   taking the solid rule's ink. That was survivable while the solid ink was
+   `fg` itself. It stopped being survivable the moment the solid knob became
+   white, and one selector covering the pair is why it cannot come back. */
+.nd-switch-track[data-nd-glass="true"]::after {
+  background: var(--nc-color-fg);
 }
 
 /* --- The glass test ------------------------------------------------------- */

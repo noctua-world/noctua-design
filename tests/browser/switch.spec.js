@@ -14,6 +14,7 @@
 import { expect, test } from "@playwright/test";
 
 import { PAGE, url, showParts } from "./pages.js";
+import { contrast } from "./pixels.js";
 
 /** Every switch inside an example, which is every switch on this page. */
 const switches = (page) => page.locator('.nd-example-stage [role="switch"]');
@@ -253,4 +254,69 @@ test("the gap around the knob is one gap, on four sides, in both states", async 
     measured += 1;
   }
   expect(measured, "the page shows no switches at all").toBeGreaterThan(4);
+});
+
+test("the frosted knob carries against the frost, in both states", async ({ page }) => {
+  // WHY THE ARITHMETIC CANNOT REACH THIS ONE. Every solid pair the switch can
+  // draw is checked in `every_switch_track_carries_its_knob`, from the ramps on
+  // disk, because a solid fill is a colour and the sums are exact. A frosted
+  // track is not a colour: it is the surface at the material's opacity over
+  // whatever the page put behind it, and what a reader sees is the composite.
+  //
+  // WHAT IT GUARDS. The solid knob is `on-accent` — near-white in light and
+  // near-black in dark, right on a solid accent track and unreadable on a
+  // frosted one, which sits near the surface in BOTH states. So glass overrides
+  // it with `fg`. That override used to name `[aria-checked="true"]`, leaving
+  // the off state to take whatever the solid rule said, which was survivable
+  // only while the two happened to agree. Both states are read here so the pair
+  // cannot come apart again: with the old selector this measures 1.07:1.
+  for (const scheme of ["light", "dark"]) {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.goto(url(PAGE.switchControl));
+    await showParts(page);
+
+    // The frame's own glass control, which is the rig the site ships: it puts a
+    // hard-edged backdrop behind the stage, so the frost has something to
+    // sample and the composite measured below is a real one.
+    const frame = page.locator("[data-nd-frame]").filter({ has: switches(page) }).first();
+    await frame.locator(':scope > .nd-frame-bar [data-nd-action="frame-glass"]').click();
+    await expect(frame.locator('.nd-switch-track[data-nd-glass="true"]').first()).toBeVisible();
+    // Hover repaints the track, and this is a measurement of the track.
+    await page.mouse.move(0, 0);
+
+    for (const checked of ["true", "false"]) {
+      // `:visible`, because a frame also holds the React half of its example in
+      // a slot that is not showing, and that copy's switches match too.
+      const flip = frame.locator(`[role="switch"][aria-checked="${checked}"]:visible`).first();
+      if ((await flip.count()) === 0) continue;
+      const track = flip.locator(".nd-switch-track");
+      const shot = (await track.screenshot({ animations: "disabled" })).toString("base64");
+      // A quarter of the way in from each end: the knob is at one of them and
+      // the frost is at the other, whichever way round the state has it.
+      const seen = await page.evaluate(async ([data, onRight]) => {
+        const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
+        const bitmap = await createImageBitmap(blob);
+        const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(bitmap, 0, 0);
+        const { data: px, width, height } = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+        const at = (x, y) => {
+          const i = (y * width + x) * 4;
+          return [px[i], px[i + 1], px[i + 2]];
+        };
+        const mid = Math.floor(height / 2);
+        const quarter = Math.round(width / 4);
+        return {
+          knob: at(onRight ? width - quarter : quarter, mid),
+          frost: at(onRight ? quarter : width - quarter, mid),
+        };
+      }, [shot, checked === "true"]);
+
+      const ratio = contrast(seen.knob, seen.frost);
+      expect(
+        ratio,
+        `${scheme}, checked=${checked}: the frosted knob is ${ratio.toFixed(2)}:1 on its track`,
+      ).toBeGreaterThanOrEqual(3);
+    }
+  }
 });
