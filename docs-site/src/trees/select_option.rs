@@ -74,7 +74,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         }],
     ),
     (
-        r"SelectOption { icon: IconName::Sun, … }",
+        r"SelectOption { icon: IconDrawing::SUN, … }",
         &[Node::Component {
             name: "Select",
             props: &[

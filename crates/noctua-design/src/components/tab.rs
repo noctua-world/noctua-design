@@ -7,7 +7,7 @@
 //! Name one panel in a tab strip, and show it when a reader chooses it.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Icon, IconSize};
 
@@ -29,7 +29,7 @@ pub fn Tab(
     /// The words on the tab, in the reader's language. **Required**, because a tab is a name for a panel and a tab with no name names nothing.
     label: String,
     /// A drawing before the words, named from `spec/icons.toml`. It carries `aria-hidden`, because the label beside it already says what the panel holds.
-    icon: Option<IconName>,
+    icon: Option<IconDrawing>,
     /// A number after the words, such as how many rows the panel holds. It is part of the tab's accessible name, so a reader who cannot see it is still told.
     count: Option<String>,
     /// Whether this is the panel shown first. Exactly one tab in a strip carries it, and

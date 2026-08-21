@@ -7,7 +7,7 @@
 //! Let readers move through a row of things sideways, in a real scroll container.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::Icon;
 
@@ -198,8 +198,8 @@ pub fn Carousel(
                         "aria-label": pause.clone(),
                         title: pause,
                         "data-nd-carousel-rotation": "",
-                        Icon { icon: IconName::Pause, size: crate::components::IconSize::Small }
-                        Icon { icon: IconName::Play, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::PAUSE, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::PLAY, size: crate::components::IconSize::Small }
                     }
                 }
                 if controls {
@@ -211,7 +211,7 @@ pub fn Carousel(
                         "aria-label": previous.clone(),
                         title: previous,
                         "data-nd-carousel-step": "previous",
-                        Icon { icon: IconName::ChevronLeft, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::CHEVRON_LEFT, size: crate::components::IconSize::Small }
                     }
                     button {
                         class: "nd-carousel-control",
@@ -221,7 +221,7 @@ pub fn Carousel(
                         "aria-label": next.clone(),
                         title: next,
                         "data-nd-carousel-step": "next",
-                        Icon { icon: IconName::ChevronRight, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::CHEVRON_RIGHT, size: crate::components::IconSize::Small }
                     }
                 }
                 if dots {

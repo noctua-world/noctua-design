@@ -15,6 +15,7 @@ import { Fragment } from "react";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { star } from "@noctua-world/design-tokens/icons/star.js";
 export function Rating({ name, label, value, max, readonly, valueLabel, itemLabel, size, tone, hint, error, required, requiredLabel, disabled, className, ...rest }) {
   const size_ = size ?? "medium";
   const max_ = max ?? "5";
@@ -48,7 +49,7 @@ export function Rating({ name, label, value, max, readonly, valueLabel, itemLabe
     };
   });
   const stars = (key) =>
-    Array.from({ length: steps }, (_, at) => h(Icon, { key: `${key}${at}`, icon: "star" }));
+    Array.from({ length: steps }, (_, at) => h(Icon, { key: `${key}${at}`, icon: star }));
 
   if (readonly_)
     return h(
@@ -135,7 +136,7 @@ export function Rating({ name, label, value, max, readonly, valueLabel, itemLabe
               "label",
               { className: "nd-rating-star", htmlFor: `${id}-${step.number}` },
               h("span", { key: "n", className: "nd-visually-hidden" }, step.named),
-              h(Icon, { key: "s", icon: "star" }),
+              h(Icon, { key: "s", icon: star }),
             ),
             h("span", { className: "nd-rating-count" }, step.count),
           ),

@@ -5,13 +5,14 @@
 // Edits to this file will be overwritten. Change the spec instead.
 
 import type { ReactNode } from "react";
+import type { IconDrawing } from "@noctua-world/design-tokens/icons.js";
 
 
 export interface MenuItemProps {
   /** The item's text, in the reader's language. It is the visible text **and** the accessible name at once, so the two cannot disagree. Required. */
   label: string;
   /** An icon before the label, optically centred on the text. It is decoration and is `aria-hidden`, because it repeats the label. */
-  icon?: string;
+  icon?: IconDrawing;
   /** A second, smaller line under the label, for an action whose consequence is worth spelling out. It is part of the accessible name, so a reader who cannot see it still hears it. */
   detail?: string;
   /** What this item applies its action to, as an identifier. The script reads it and nothing else, so it is never translated. `SegmentedItem` carries the same prop for the same reason. */

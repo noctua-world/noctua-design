@@ -122,7 +122,7 @@ impl Role {
 
 /// Every language a code block can be shown in.
 ///
-/// An enum rather than a string, for the reason `IconName` is one: a
+/// An enum rather than a string, for the reason `IconDrawing` is a type: a
 /// typo is a compile error instead of an unhighlighted block nobody
 /// notices. The runtime spelling is [`Language::parse`], for the case
 /// where the name really does arrive as text — a markdown fence.

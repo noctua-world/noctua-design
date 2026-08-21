@@ -17,23 +17,25 @@
 //! written, and it is written ONCE — in this file, in both languages, side by
 //! side — so the two implementations still cannot drift apart in a review.
 
+use std::collections::BTreeSet;
 use std::fmt::Write as _;
 
 use noctua_design_spec::component::Component;
+use noctua_design_spec::icons::Resolved as Icon;
 
 /// The icon import for a body that asks for a size as well as a name.
 ///
 /// A `const` rather than a literal in the arm: three components want the same
 /// line, and the arm that holds them is one line long because of it.
 const SIZED_ICON: &str =
-    "use noctua_design_icons::IconName;\n\nuse crate::components::{Icon, IconSize};\n";
+    "use noctua_design_icons::IconDrawing;\n\nuse crate::components::{Icon, IconSize};\n";
 
 /// A drawing and its name, for a body that needs no size.
 ///
 /// `Icon` is a component now, so it arrives from `crate::components` like every
-/// other one. `IconName` stays with the drawings, because it is a fact about
+/// other one. `IconDrawing` stays with the drawings, because it is a fact about
 /// the icon set rather than about the component.
-const PLAIN_ICON: &str = "use noctua_design_icons::IconName;\n\nuse crate::components::Icon;\n";
+const PLAIN_ICON: &str = "use noctua_design_icons::IconDrawing;\n\nuse crate::components::Icon;\n";
 
 /// The same, in JavaScript, where an icon is only ever an icon.
 const REACT_ICON: &str = "import { Icon } from \"./icon.js\";\n";
@@ -366,7 +368,7 @@ fn button_dioxus_content(out: &mut String) {
          \x20   // A button with two chevrons is not a control anybody designs, so\n\
          \x20   // the component refuses to draw the second rather than trusting\n\
          \x20   // every caller to notice.\n\
-         \x20   let chevron = menu && icon != Some(IconName::ChevronDown);\n\
+         \x20   let chevron = menu && icon != Some(IconDrawing::CHEVRON_DOWN);\n\
          \n\
          \x20   let content = rsx! {\n\
          \x20       // A TOGGLE SHIPS BOTH GLYPHS AND LETS THE STATE PICK ONE.\n\
@@ -398,7 +400,7 @@ fn button_dioxus_content(out: &mut String) {
          \x20       if let Some(icon_end) = icon_end {\n\
          \x20           Icon { icon: icon_end }\n\
          \x20       } else if chevron {\n\
-         \x20           Icon { icon: IconName::ChevronDown, size: crate::components::IconSize::Small }\n\
+         \x20           Icon { icon: IconDrawing::CHEVRON_DOWN, size: crate::components::IconSize::Small }\n\
          \x20       }\n\
          \x20   };\n",
     );
@@ -528,7 +530,9 @@ fn button_react_content(out: &mut String) {
          \x20 // visible text, and an `aria-label` beside it is a second name.\n\
          \x20 const named = hideLabel_ ? label : undefined;\n\
          \x20 // One chevron, whoever drew it: see the Dioxus half.\n\
-         \x20 const chevron = menu && icon !== \"chevron-down\";\n\
+         \x20 // A drawing rather than a name, so what is compared is the name it\n\
+         \x20 // carries. See the Dioxus half, which compares the constants.\n\
+         \x20 const chevron = menu && icon?.name !== \"chevron-down\";\n\
          \n\
          \x20 const content = [\n\
          \x20   // A toggle ships BOTH glyphs and lets the state pick one: swapping a\n\
@@ -556,7 +560,7 @@ fn button_react_content(out: &mut String) {
          \x20   iconEnd\n\
          \x20     ? h(Icon, { key: \"e\", icon: iconEnd })\n\
          \x20     : chevron\n\
-         \x20       ? h(Icon, { key: \"m\", icon: \"chevron-down\", size: \"small\" })\n\
+         \x20       ? h(Icon, { key: \"m\", icon: chevronDown, size: \"small\" })\n\
          \x20       : null,\n\
          \x20 ];\n",
     );
@@ -915,7 +919,7 @@ fn link_dioxus(out: &mut String) {
          \x20           \"data-nd-tone\": tone.as_str(),\n\
          \x20           {children}\n\
          \x20           if external {\n\
-         \x20               Icon { icon: IconName::ExternalLink, size: crate::components::IconSize::Small }\n\
+         \x20               Icon { icon: IconDrawing::EXTERNAL_LINK, size: crate::components::IconSize::Small }\n\
          \x20           }\n\
          \x20       }\n\
          \x20   }\n",
@@ -937,7 +941,7 @@ fn link_react(out: &mut String) {
          \x20     ...rest,\n\
          \x20   },\n\
          \x20   children,\n\
-         \x20   external ? h(Icon, { icon: \"external-link\", size: \"small\" }) : null,\n\
+         \x20   external ? h(Icon, { icon: externalLink, size: \"small\" }) : null,\n\
          \x20 );\n",
     );
 }
@@ -1283,7 +1287,7 @@ fn disclosure_dioxus(out: &mut String) {
          \x20                   // turned the gear upside down.\n\
          \x20                   if marker {\n\
          \x20                       Icon {\n\
-         \x20                           icon: IconName::ChevronDown,\n\
+         \x20                           icon: IconDrawing::CHEVRON_DOWN,\n\
          \x20                           size: crate::components::IconSize::Small,\n\
          \x20                           class: \"nd-disclosure-marker\",\n\
          \x20                       }\n\
@@ -1330,7 +1334,7 @@ fn disclosure_react(out: &mut String) {
          \x20           marker_\n\
          \x20             ? h(Icon, {\n\
          \x20                 key: \"m\",\n\
-         \x20                 icon: \"chevron-down\",\n\
+         \x20                 icon: chevronDown,\n\
          \x20                 size: \"small\",\n\
          \x20                 className: \"nd-disclosure-marker\",\n\
          \x20               })\n\
@@ -1377,8 +1381,8 @@ struct Choice {
 const CHECKBOX: Choice = Choice {
     class: "nd-checkbox",
     input: "checkbox",
-    mark_rust: "Icon { icon: IconName::Check }",
-    mark_js: "h(Icon, { key: \"m\", icon: \"check\" })",
+    mark_rust: "Icon { icon: IconDrawing::CHECK }",
+    mark_js: "h(Icon, { key: \"m\", icon: check })",
     exclusive_rust: "                \"data-nd-exclusive\": if exclusive { \"true\" } else { \"false\" },\n",
     exclusive_js: "        \"data-nd-exclusive\": String(exclusive ?? false),\n",
 };
@@ -1814,7 +1818,7 @@ const SELECT_DIOXUS: &str = r#"    let root = format!("nd-select {class}");
                 // — and the enhancement clones this node onto the control it
                 // builds, so the script never carries a drawing.
                 span { class: "nd-select-chevron", "aria-hidden": "true",
-                    Icon { icon: IconName::ChevronDown, size: crate::components::IconSize::Small }
+                    Icon { icon: IconDrawing::CHEVRON_DOWN, size: crate::components::IconSize::Small }
                 }
                 // The control that empties the field. Rendered here rather than
                 // built by the script for the same reason as the chevron — and
@@ -1828,7 +1832,7 @@ const SELECT_DIOXUS: &str = r#"    let root = format!("nd-select {class}");
                         "data-nd-select-clear": "",
                         "aria-label": clear_label.clone(),
                         title: clear_label.clone(),
-                        Icon { icon: IconName::Close, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
                     }
                 }
                 // THE TICK THE ENHANCED LIST MARKS A CHOSEN OPTION WITH.
@@ -1839,7 +1843,7 @@ const SELECT_DIOXUS: &str = r#"    let root = format!("nd-select {class}");
                 // an SVG would be a second place icons come from, which is what
                 // `NOCTUA.md §9.5` exists to prevent.
                 template { "data-nd-glyph": "check",
-                    Icon { icon: IconName::Check, size: crate::components::IconSize::Small }
+                    Icon { icon: IconDrawing::CHECK, size: crate::components::IconSize::Small }
                 }
             }
         }
@@ -1921,7 +1925,7 @@ const SELECT_REACT: &str = r#"  const size_ = size ?? "medium";
       h(
         "span",
         { key: "c", className: "nd-select-chevron", "aria-hidden": "true" },
-        h(Icon, { icon: "chevron-down", size: "small" }),
+        h(Icon, { icon: chevronDown, size: "small" }),
       ),
       // A real control with a real name, rendered rather than built by a
       // script, and hidden until the script has something to clear with it.
@@ -1936,7 +1940,7 @@ const SELECT_REACT: &str = r#"  const size_ = size ?? "medium";
               "aria-label": clearLabel,
               title: clearLabel,
             },
-            h(Icon, { icon: "close", size: "small" }),
+            h(Icon, { icon: close, size: "small" }),
           )
         : null,
       // The tick the enhanced list marks a chosen option with, in a template
@@ -1944,7 +1948,7 @@ const SELECT_REACT: &str = r#"  const size_ = size ?? "medium";
       h(
         "template",
         { key: "t", "data-nd-glyph": "check" },
-        h(Icon, { icon: "check", size: "small" }),
+        h(Icon, { icon: check, size: "small" }),
       ),
     ),
   ),
@@ -2010,7 +2014,7 @@ const SELECT_OPTION_DIOXUS: &str = r#"    let root = format!("nd-select-option {
             // Data, because an <option> holds text and nothing else. The
             // native control shows the label; the enhanced list draws these.
             "data-nd-detail": detail,
-            "data-nd-icon": icon.map(IconName::as_str),
+            "data-nd-icon": icon.map(|icon| icon.name),
             "data-nd-swatch": swatch,
             "{label}"
         }
@@ -2024,7 +2028,7 @@ const SELECT_OPTION_DIOXUS: &str = r#"    let root = format!("nd-select-option {
         // contain one. The enhanced list clones it; the script still ships no
         // drawings of its own.
         if let Some(icon) = icon {
-            template { "data-nd-glyph": icon.as_str(),
+            template { "data-nd-glyph": icon.name,
                 Icon { icon, size: crate::components::IconSize::Small }
             }
         }
@@ -2127,11 +2131,11 @@ const TABLE_DIOXUS: &str = r#"    let root = format!("nd-table {class}");
                             "aria-expanded": "false",
                             "aria-controls": "{search_id}",
                             "aria-label": search_label.clone().unwrap_or_default(),
-                            Icon { icon: IconName::Search, size: IconSize::Small }
+                            Icon { icon: IconDrawing::SEARCH, size: IconSize::Small }
                         }
                         div { class: "nd-table-search-field", id: "{search_id}", hidden: true,
                             span { class: "nd-table-search-glyph", "aria-hidden": "true",
-                                Icon { icon: IconName::Search, size: IconSize::Small }
+                                Icon { icon: IconDrawing::SEARCH, size: IconSize::Small }
                             }
                             label {
                                 class: "nd-visually-hidden",
@@ -2153,7 +2157,7 @@ const TABLE_DIOXUS: &str = r#"    let root = format!("nd-table {class}");
                 if columns_label.is_some() {
                     details { class: "nd-table-columns", "data-nd-table-columns": "",
                         summary { class: "nd-table-columns-summary",
-                            Icon { icon: IconName::Columns, size: IconSize::Small }
+                            Icon { icon: IconDrawing::COLUMNS_2, size: IconSize::Small }
                             span { "{columns_name}" }
                         }
                         // ITS OWN SURFACE, not `.nd-panel`. That class is the site header's
@@ -2168,7 +2172,7 @@ const TABLE_DIOXUS: &str = r#"    let root = format!("nd-table {class}");
                 if copy {
                     Button {
                         label: copy_label.clone().unwrap_or_default(),
-                        icon: IconName::Copy,
+                        icon: IconDrawing::COPY,
                         variant: ButtonVariant::Outline,
                         tone: ButtonTone::Neutral,
                         size: ButtonSize::Small,
@@ -2180,7 +2184,7 @@ const TABLE_DIOXUS: &str = r#"    let root = format!("nd-table {class}");
                 if export {
                     details { class: "nd-table-export", "data-nd-table-export": "",
                         summary { class: "nd-table-export-summary",
-                            Icon { icon: IconName::Download, size: IconSize::Small }
+                            Icon { icon: IconDrawing::DOWNLOAD, size: IconSize::Small }
                             span { {export_label.clone().unwrap_or_default()} }
                         }
                         div { class: "nd-table-export-panel",
@@ -2371,7 +2375,7 @@ const TABLE_REACT: &str = r#"  const density_ = density ?? "default";
                 "aria-controls": searchId,
                 "aria-label": searchLabel,
               },
-              h(Icon, { icon: "search", size: "small" }),
+              h(Icon, { icon: search, size: "small" }),
             ),
             h(
               "div",
@@ -2379,7 +2383,7 @@ const TABLE_REACT: &str = r#"  const density_ = density ?? "default";
               h(
                 "span",
                 { key: "g", className: "nd-table-search-glyph", "aria-hidden": "true" },
-                h(Icon, { icon: "search", size: "small" }),
+                h(Icon, { icon: search, size: "small" }),
               ),
               h("label", { key: "l", className: "nd-visually-hidden", htmlFor: searchInputId }, searchLabel),
               h("input", {
@@ -2402,7 +2406,7 @@ const TABLE_REACT: &str = r#"  const density_ = density ?? "default";
             h(
               "summary",
               { key: "s", className: "nd-table-columns-summary" },
-              h(Icon, { key: "i", icon: "columns", size: "small" }),
+              h(Icon, { key: "i", icon: columns2, size: "small" }),
               h("span", { key: "w" }, columnsLabel),
             ),
             h(
@@ -2420,7 +2424,7 @@ const TABLE_REACT: &str = r#"  const density_ = density ?? "default";
         ? h(Button, {
             key: "y",
             label: copyLabel ?? "",
-            icon: "copy",
+            icon: copy,
             variant: "outline",
             tone: "neutral",
             size: "small",
@@ -2434,7 +2438,7 @@ const TABLE_REACT: &str = r#"  const density_ = density ?? "default";
             h(
               "summary",
               { key: "s", className: "nd-table-export-summary" },
-              h(Icon, { key: "i", icon: "download", size: "small" }),
+              h(Icon, { key: "i", icon: download, size: "small" }),
               h("span", { key: "w" }, exportLabel),
             ),
             h(
@@ -2737,7 +2741,7 @@ const TABLE_ROW_DIOXUS: &str = r#"    let root = format!("nd-table-row {class}")
                     Button {
                         label: expand_label.unwrap_or_default(),
                         hide_label: true,
-                        icon: IconName::ChevronDown,
+                        icon: IconDrawing::CHEVRON_DOWN,
                         variant: ButtonVariant::Transparent,
                         size: ButtonSize::Small,
                         controls,
@@ -2821,7 +2825,7 @@ const TABLE_ROW_REACT: &str = r#"  const tone_ = tone ?? "default";
           h(Button, {
             label: expandLabel ?? "",
             hideLabel: true,
-            icon: "chevron-down",
+            icon: chevronDown,
             variant: "transparent",
             size: "small",
             controls,
@@ -3033,7 +3037,7 @@ const INFO_DIOXUS: &str = r#"    let root = format!("nd-info {class}");
                 // RENDERED HIDDEN. Revealed by the script, because a marker
                 // that opens nothing is worse than no marker.
                 hidden: true,
-                Icon { icon: IconName::Info, size: IconSize::Small }
+                Icon { icon: IconDrawing::INFO, size: IconSize::Small }
             }
             span {
                 class: "nd-info-note",
@@ -3077,7 +3081,7 @@ const INFO_REACT: &str = r#"  const placement_ = placement ?? "auto";
         // See the Dioxus half: revealed by the script.
         hidden: true,
       },
-      h(Icon, { icon: "info", size: "small" }),
+      h(Icon, { icon: info, size: "small" }),
     ),
     h(
       "span",
@@ -3181,7 +3185,7 @@ const MENU_ITEM_DIOXUS: &str = r#"    let root = format!("nd-menu-item {class}")
     // Built once and used by whichever element this turns out to be, so the two
     // branches cannot come to draw different things.
     let content = rsx! {
-        if let Some(icon) = icon.as_deref().and_then(IconName::parse) {
+        if let Some(icon) = icon {
             Icon { icon, size: IconSize::Small }
         }
         span { class: "nd-menu-item-text",
@@ -3958,7 +3962,7 @@ fn field_and_icon(name: &str) -> String {
         "FieldSize"
     };
     format!(
-        "use noctua_design_icons::IconName;\n\nuse crate::components::{{Field, {kind}, Icon}};\n"
+        "use noctua_design_icons::IconDrawing;\n\nuse crate::components::{{Field, {kind}, Icon}};\n"
     )
 }
 
@@ -3968,7 +3972,7 @@ fn field_and_icon(name: &str) -> String {
 /// something else, and four copies of the same two lines is four places to
 /// change when a path moves.
 fn beside_icon(components: &str) -> String {
-    format!("use noctua_design_icons::IconName;\n\nuse crate::components::{{{components}}};\n")
+    format!("use noctua_design_icons::IconDrawing;\n\nuse crate::components::{{{components}}};\n")
 }
 
 /// Any lint a custom body legitimately trips, with the reason it trips it.
@@ -3996,9 +4000,9 @@ pub fn allows(component: &Component) -> String {
 pub fn dioxus_imports(component: &Component) -> String {
     match component.meta.name.as_str() {
         // THE ONE COMPONENT THAT IMPORTS NO COMPONENT. Its body reads the
-        // geometry off `IconName` and the weight off the spec, and it renders
+        // geometry off `IconDrawing` and the weight off the spec, and it renders
         // an element rather than anything from this crate.
-        "Icon" => "use noctua_design_icons::{IconName, STROKE_WIDTH};\n".to_owned(),
+        "Icon" => "use noctua_design_icons::{IconDrawing, STROKE_WIDTH};\n".to_owned(),
         // A field, a fieldset and the one drawing a rating is made of. A tab
         // wants the same drawing at a size it names.
         "Rating" => beside_icon("Field, FieldKind, FieldSize, Icon"),
@@ -4014,7 +4018,7 @@ pub fn dioxus_imports(component: &Component) -> String {
         // `Swatch` and its remove control is a real `Button` — a pill is not
         // the place to grow a second chip and a second button.
         "Tag" => concat!(
-            "use noctua_design_icons::IconName;\n",
+            "use noctua_design_icons::IconDrawing;\n",
             "\n",
             "use crate::components::{Button, ButtonShape, ButtonSize, ButtonTone, ButtonVariant, Icon, Swatch, SwatchSize};\n"
         )
@@ -4061,13 +4065,13 @@ pub fn dioxus_imports(component: &Component) -> String {
         // the focus coming back.
         "Pagination" => "use crate::components::{Menu, MenuItem};\n".to_owned(),
         "Table" => concat!(
-            "use noctua_design_icons::IconName;\n",
+            "use noctua_design_icons::IconDrawing;\n",
             "\n",
             "use crate::components::{Button, ButtonSize, ButtonTone, ButtonVariant, Icon, IconSize};\n"
         )
         .to_owned(),
         "TableRow" => concat!(
-            "use noctua_design_icons::IconName;\n",
+            "use noctua_design_icons::IconDrawing;\n",
             "\n",
             "use crate::components::{\n",
             "    Button, ButtonSize, ButtonVariant, Checkbox, CheckboxSize, Radio, RadioSize,\n",
@@ -4086,7 +4090,7 @@ pub fn dioxus_imports(component: &Component) -> String {
         "Textarea" => "use crate::components::{Field, FieldSize};\n".to_owned(),
         "Slider" | "OtpField" => FIELD_GROUP.to_owned(),
         "FileInput" => concat!(
-            "use noctua_design_icons::IconName;\n",
+            "use noctua_design_icons::IconDrawing;\n",
             "\n",
             "use crate::components::{Button, ButtonSize, ButtonVariant, Field, FieldSize, Icon};\n"
         )
@@ -4110,7 +4114,7 @@ pub fn dioxus_imports(component: &Component) -> String {
             "    LabelKind, LabelSize, Segmented, SegmentedItem, SegmentedSize,\n",
             "};\n",
             "\n",
-            "use noctua_design_icons::IconName;\n"
+            "use noctua_design_icons::IconDrawing;\n"
         )
         .to_owned(),
         // THE SCANNER, NOT A SCRIPT. Highlighting happens where the component
@@ -4118,7 +4122,7 @@ pub fn dioxus_imports(component: &Component) -> String {
         // `shell.js` to fall back on.
         "CodeBlock" => concat!(
             "use noctua_design_grammars::{Language, Role, lines, scan};\n",
-            "use noctua_design_icons::IconName;\n",
+            "use noctua_design_icons::IconDrawing;\n",
             "\n",
             "use crate::components::Icon;\n"
         )
@@ -4138,14 +4142,17 @@ pub fn react_imports(component: &Component) -> String {
         // Dioxus half: this is the component every other one imports, and it
         // imports none of them.
         "Icon" => {
-            "import { ICONS, ICON_STROKE_WIDTH } from \"@noctua-world/design-tokens/icons.js\";\n"
+            // THE WEIGHT, AND NOTHING ELSE. This imported `ICONS` too — every
+            // drawing in the system, so that one component could index it by
+            // name. The drawing arrives as a prop now.
+            "import { ICON_STROKE_WIDTH } from \"@noctua-world/design-tokens/icons.js\";\n"
                 .to_owned()
         }
         // A fragment, because one step of a rating is three SIBLINGS and the
         // stylesheet reads the two adjacencies between them.
         "Rating" => format!("import {{ Fragment }} from \"react\";\n{REACT_FIELD}\n{REACT_ICON}"),
         // Everything whose body draws an icon and nothing else. The Dioxus half
-        // splits these across several arms because `IconName` and `IconSize`
+        // splits these across several arms because `IconDrawing` and `IconSize`
         // are imported unevenly there; in JavaScript an icon is an icon.
         "Button" | "Link" | "SegmentedItem" | "Disclosure" | "Search" | "SearchResult"
         | "Avatar" | "Carousel" | "Info" | "MenuItem" | "MessageBar" | "Tab" | "Dialog"
@@ -4277,11 +4284,18 @@ pub fn react_imports(component: &Component) -> String {
 /// `.d.ts` import all have to name the same set, and they were three separate
 /// match arms with the same contents — which is how `MessageBar` came to be the
 /// one component whose `icon` crossed as an unparsed string. Dioxus ran it
-/// through `IconName::parse` and rendered nothing for a name nothing declares;
+/// through `IconDrawing::parse` and rendered nothing for a name nothing declares;
 /// React handed the string to `Icon`, which throws. One list, so a component
 /// cannot be in two of the three.
-const TYPED_ICONS: [&str; 11] = [
+const TYPED_ICONS: [&str; 12] = [
     "Button",
+    // IT WAS THE LAST ONE HOLDING A NAME. `MenuItem.icon` was a `String` run
+    // through `IconDrawing::parse` at render time, so a name nothing declares
+    // drew nothing and said nothing — the exact failure the type exists to make
+    // impossible. It was also the only caller of `parse` outside the gallery,
+    // and `parse` is behind the `catalogue` feature now: keeping it here would
+    // have put every drawing in the system into every consumer of a menu.
+    "MenuItem",
     "SegmentedItem",
     "Disclosure",
     "SelectOption",
@@ -4302,29 +4316,79 @@ fn typed_icon(component: &Component, prop: &str) -> bool {
 
 /// The Rust type a `text` prop takes, when it is not a `String`.
 ///
-/// `icon` is an `IconName`, which is the whole reason a name that is not an
+/// `icon` is an `IconDrawing`, which is the whole reason a name that is not an
 /// icon does not compile.
 #[must_use]
 pub fn dioxus_type(component: &Component, prop: &str) -> Option<&'static str> {
-    // `Option<IconName>` where the prop is optional: the generator wraps
+    // `Option<IconDrawing>` where the prop is optional: the generator wraps
     // whatever this returns.
-    typed_icon(component, prop).then_some("IconName")
+    typed_icon(component, prop).then_some("IconDrawing")
 }
 
 /// The same, for the TypeScript declaration.
 #[must_use]
 pub fn typescript_type(component: &Component, prop: &str) -> Option<&'static str> {
-    typed_icon(component, prop).then_some("IconName")
+    typed_icon(component, prop).then_some("IconDrawing")
 }
 
 /// Extra imports a `.d.ts` needs.
 #[must_use]
 pub fn typescript_imports(component: &Component) -> String {
     if TYPED_ICONS.contains(&component.meta.name.as_str()) {
-        "import type { IconName } from \"@noctua-world/design-tokens/icons.js\";\n".to_owned()
+        "import type { IconDrawing } from \"@noctua-world/design-tokens/icons.js\";\n".to_owned()
     } else {
         String::new()
     }
+}
+
+/// The drawings a custom React body reaches for, as `import` statements.
+///
+/// # Derived from the body, never listed beside it
+///
+/// Each drawing is its own module now, so a body that renders one has to import
+/// it — and a list of which component wants which icon would be a second place
+/// the same fact is written. What it produces when the two disagree is not a
+/// build error either: an identifier with no import is a `ReferenceError` at
+/// render time, which is the exact class of defect that shipped when
+/// `react_imports` existed and was called from nowhere.
+///
+/// So the body is generated, then read. An icon appears in a body as
+/// `icon: <export>`, and an export name that the icon set declares gets an
+/// import; `icon: icon`, `icon: iconEnd` and the rest pass a prop through and
+/// match nothing, because no drawing is called `icon` or `icon-end`.
+///
+/// Position matters and a bare word will not do: `menu`, `check`, `search` and
+/// `columns` are all real drawings *and* real local variables in these bodies.
+#[must_use]
+pub fn react_icon_imports(component: &Component, drawings: &[Icon]) -> String {
+    if !is_custom(component) {
+        return String::new();
+    }
+    let mut body = String::new();
+    react_body(&mut body, component);
+
+    let mut wanted: BTreeSet<(&str, &str)> = BTreeSet::new();
+    for at in body
+        .match_indices("icon: ")
+        .map(|(at, _)| at + "icon: ".len())
+    {
+        let identifier: String = body[at..]
+            .chars()
+            .take_while(char::is_ascii_alphanumeric)
+            .collect();
+        if let Some(icon) = drawings.iter().find(|icon| icon.export == identifier) {
+            wanted.insert((icon.export.as_str(), icon.name.as_str()));
+        }
+    }
+
+    let mut out = String::new();
+    for (export, name) in wanted {
+        let _ = writeln!(
+            out,
+            "import {{ {export} }} from \"@noctua-world/design-tokens/icons/{name}.js\";"
+        );
+    }
+    out
 }
 
 // --- Tag and Badge ----------------------------------------------------------
@@ -4428,7 +4492,7 @@ const TAG_DIOXUS: &str = r#"    let root = format!("nd-tag {class}");
                     size: ButtonSize::Small,
                     shape: ButtonShape::Pill,
                     hide_label: true,
-                    icon: IconName::Close,
+                    icon: IconDrawing::CLOSE,
                     label: remove,
                     disabled,
                 }
@@ -4511,7 +4575,7 @@ const TAG_REACT: &str = r#"  const variant_ = variant ?? "soft";
           size: "small",
           shape: "pill",
           hideLabel: true,
-          icon: "close",
+          icon: close,
           label: remove,
           disabled,
         })
@@ -4635,7 +4699,7 @@ const BADGE_REACT: &str = r#"  const placement_ = placement ?? "top-end";
 /// shows through. The name lives on the wrapper, where one thing has one name.
 const AVATAR_DIOXUS: &str = r#"    let root = format!("nd-avatar {class}");
     let root = root.trim().to_owned();
-    let icon = icon.unwrap_or(IconName::User);
+    let icon = icon.unwrap_or(IconDrawing::USER);
 
     // The three layers, deepest first. Written once so the two elements below
     // cannot come to disagree about what an avatar contains.
@@ -4996,7 +5060,7 @@ const TAG_PICKER_DIOXUS: &str = r#"    let root = format!("nd-tag-picker {class}
                         title: clear,
                         "data-nd-tag-picker-clear": "",
                         hidden: true,
-                        Icon { icon: IconName::Close, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
                     }
                 }
             }
@@ -5141,7 +5205,7 @@ const TAG_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
               "data-nd-tag-picker-clear": "",
               hidden: true,
             },
-            h(Icon, { icon: "close", size: "small" }),
+            h(Icon, { icon: close, size: "small" }),
           )
         : null,
     ),
@@ -5571,7 +5635,7 @@ const COLOR_PICKER_DIOXUS: &str = r#"    let root = format!("nd-color-picker {cl
                     }
                     Button {
                         label: close_label.clone().unwrap_or_default(),
-                        icon: IconName::Close,
+                        icon: IconDrawing::CLOSE,
                         hide_label: true,
                         variant: ButtonVariant::Transparent,
                         size: ButtonSize::Small,
@@ -5674,7 +5738,7 @@ const COLOR_PICKER_DIOXUS: &str = r#"    let root = format!("nd-color-picker {cl
                             // do honestly, and drawing one is not.
                             Button {
                                 label: eyedropper_label.clone().unwrap_or_default(),
-                                icon: IconName::Pipette,
+                                icon: IconDrawing::PIPETTE,
                                 hide_label: true,
                                 variant: ButtonVariant::Outline,
                                 size: ButtonSize::Small,
@@ -5722,7 +5786,7 @@ const COLOR_PICKER_DIOXUS: &str = r#"    let root = format!("nd-color-picker {cl
                         ul { class: "nd-color-picker-committed", "data-nd-color-picker-committed": "" }
                         Button {
                             label: add_label.clone().unwrap_or_default(),
-                            icon: IconName::Plus,
+                            icon: IconDrawing::PLUS,
                             variant: ButtonVariant::Outline,
                             size: ButtonSize::Small,
                             action: "color-picker-add",
@@ -5764,7 +5828,7 @@ const COLOR_PICKER_DIOXUS: &str = r#"    let root = format!("nd-color-picker {cl
                     code { class: "nd-code-inline nd-identifier", "data-nd-tone": "subtle" }
                     Button {
                         label: "",
-                        icon: IconName::Close,
+                        icon: IconDrawing::CLOSE,
                         hide_label: true,
                         variant: ButtonVariant::Transparent,
                         size: ButtonSize::Small,
@@ -5784,8 +5848,8 @@ const COLOR_PICKER_DIOXUS: &str = r#"    let root = format!("nd-color-picker {cl
                         class: "nd-color-picker-copy",
                         r#type: "button",
                         "data-nd-color-copy": "",
-                        Icon { icon: IconName::Copy, size: crate::components::IconSize::Small }
-                        Icon { icon: IconName::Check, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::COPY, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::CHECK, size: crate::components::IconSize::Small }
                     }
                 }
             }
@@ -5944,7 +6008,7 @@ const COLOR_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
         h(Button, {
           key: "c",
           label: closeLabel ?? "",
-          icon: "close",
+          icon: close,
           hideLabel: true,
           variant: "transparent",
           size: "small",
@@ -6049,7 +6113,7 @@ const COLOR_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
               ? h(Button, {
                   key: "d",
                   label: eyedropperLabel ?? "",
-                  icon: "pipette",
+                  icon: pipette,
                   hideLabel: true,
                   variant: "outline",
                   size: "small",
@@ -6109,7 +6173,7 @@ const COLOR_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
             h(Button, {
               key: "a",
               label: addLabel ?? "",
-              icon: "plus",
+              icon: plus,
               variant: "outline",
               size: "small",
               action: "color-picker-add",
@@ -6156,7 +6220,7 @@ const COLOR_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
         h(Button, {
           key: "r",
           label: "",
-          icon: "close",
+          icon: close,
           hideLabel: true,
           variant: "transparent",
           size: "small",
@@ -6175,8 +6239,8 @@ const COLOR_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
         h(
           "button",
           { key: "c", className: "nd-color-picker-copy", type: "button", "data-nd-color-copy": "" },
-          h(Icon, { key: "i", icon: "copy", size: "small" }),
-          h(Icon, { key: "k", icon: "check", size: "small" }),
+          h(Icon, { key: "i", icon: copy, size: "small" }),
+          h(Icon, { key: "k", icon: check, size: "small" }),
         ),
       ),
     ),
@@ -6324,7 +6388,7 @@ const INPUT_DIOXUS: &str = r#"    let id = format!("nd-input-{name}");
                         "aria-label": clear.clone(),
                         title: clear,
                         "data-nd-input-clear": "",
-                        Icon { icon: IconName::Close, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
                     }
                 }
                 if password {
@@ -6340,8 +6404,8 @@ const INPUT_DIOXUS: &str = r#"    let id = format!("nd-input-{name}");
                         // Both drawings are rendered and the state picks one:
                         // swapping a glyph from script is shipping a drawing
                         // to the script (`NOCTUA.md §9.5`).
-                        Icon { icon: IconName::Eye, size: crate::components::IconSize::Small }
-                        Icon { icon: IconName::EyeOff, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::EYE, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::EYE_OFF, size: crate::components::IconSize::Small }
                     }
                 }
             }
@@ -6464,7 +6528,7 @@ const INPUT_REACT: &str = r#"  const kind_ = kind ?? "text";
               title: clearLabel,
               "data-nd-input-clear": "",
             },
-            h(Icon, { key: "i", icon: "close", size: "small" }),
+            h(Icon, { key: "i", icon: close, size: "small" }),
           )
         : null,
       password
@@ -6481,8 +6545,8 @@ const INPUT_REACT: &str = r#"  const kind_ = kind ?? "text";
               title: revealLabel,
               "data-nd-input-reveal": "",
             },
-            h(Icon, { key: "a", icon: "eye", size: "small" }),
-            h(Icon, { key: "b", icon: "eye-off", size: "small" }),
+            h(Icon, { key: "a", icon: eye, size: "small" }),
+            h(Icon, { key: "b", icon: eyeOff, size: "small" }),
           )
         : null,
     ),
@@ -6848,7 +6912,7 @@ const NUMBER_INPUT_DIOXUS: &str = r#"    let id = format!("nd-number-input-{name
                             "aria-label": up.clone(),
                             title: up,
                             "data-nd-number-input-step": "up",
-                            Icon { icon: IconName::Plus, size: crate::components::IconSize::Small }
+                            Icon { icon: IconDrawing::PLUS, size: crate::components::IconSize::Small }
                         }
                         button {
                             class: "nd-number-input-step",
@@ -6858,7 +6922,7 @@ const NUMBER_INPUT_DIOXUS: &str = r#"    let id = format!("nd-number-input-{name
                             "aria-label": down.clone(),
                             title: down,
                             "data-nd-number-input-step": "down",
-                            Icon { icon: IconName::Minus, size: crate::components::IconSize::Small }
+                            Icon { icon: IconDrawing::MINUS, size: crate::components::IconSize::Small }
                         }
                     }
                 }
@@ -6968,7 +7032,7 @@ const NUMBER_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
                 title: incrementLabel,
                 "data-nd-number-input-step": "up",
               },
-              h(Icon, { key: "i", icon: "plus", size: "small" }),
+              h(Icon, { key: "i", icon: plus, size: "small" }),
             ),
             h(
               "button",
@@ -6982,7 +7046,7 @@ const NUMBER_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
                 title: decrementLabel,
                 "data-nd-number-input-step": "down",
               },
-              h(Icon, { key: "i", icon: "minus", size: "small" }),
+              h(Icon, { key: "i", icon: minus, size: "small" }),
             ),
           )
         : null,
@@ -7338,7 +7402,7 @@ const FILE_INPUT_DIOXUS: &str = r#"    let id = format!("nd-file-input-{name}");
                     class: "nd-file-input-area",
                     r#for: "{id}",
                     "data-nd-file-input-area": "",
-                    Icon { icon: IconName::Upload }
+                    Icon { icon: IconDrawing::UPLOAD }
                     span { class: "nd-file-input-browse", "{browse_label}" }
                     if let Some(drop_label) = drop_label {
                         span { class: "nd-file-input-drop", "{drop_label}" }
@@ -7384,7 +7448,7 @@ const FILE_INPUT_DIOXUS: &str = r#"    let id = format!("nd-file-input-{name}");
                     span { class: "nd-file-input-size nd-identifier" }
                     Button {
                         label: "",
-                        icon: IconName::Close,
+                        icon: IconDrawing::CLOSE,
                         hide_label: true,
                         variant: ButtonVariant::Transparent,
                         size: ButtonSize::Small,
@@ -7441,7 +7505,7 @@ const FILE_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
       h(
         "label",
         { key: "a", className: "nd-file-input-area", htmlFor: id, "data-nd-file-input-area": "" },
-        h(Icon, { key: "i", icon: "upload" }),
+        h(Icon, { key: "i", icon: upload }),
         h("span", { key: "b", className: "nd-file-input-browse" }, browseLabel),
         dropLabel ? h("span", { key: "d", className: "nd-file-input-drop" }, dropLabel) : null,
       ),
@@ -7491,7 +7555,7 @@ const FILE_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
         h(Button, {
           key: "x",
           label: "",
-          icon: "close",
+          icon: close,
           hideLabel: true,
           variant: "transparent",
           size: "small",
@@ -7961,8 +8025,8 @@ const CAROUSEL_DIOXUS: &str = r#"    let root = format!("nd-carousel {class}");
                         "aria-label": pause.clone(),
                         title: pause,
                         "data-nd-carousel-rotation": "",
-                        Icon { icon: IconName::Pause, size: crate::components::IconSize::Small }
-                        Icon { icon: IconName::Play, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::PAUSE, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::PLAY, size: crate::components::IconSize::Small }
                     }
                 }
                 if controls {
@@ -7974,7 +8038,7 @@ const CAROUSEL_DIOXUS: &str = r#"    let root = format!("nd-carousel {class}");
                         "aria-label": previous.clone(),
                         title: previous,
                         "data-nd-carousel-step": "previous",
-                        Icon { icon: IconName::ChevronLeft, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::CHEVRON_LEFT, size: crate::components::IconSize::Small }
                     }
                     button {
                         class: "nd-carousel-control",
@@ -7984,7 +8048,7 @@ const CAROUSEL_DIOXUS: &str = r#"    let root = format!("nd-carousel {class}");
                         "aria-label": next.clone(),
                         title: next,
                         "data-nd-carousel-step": "next",
-                        Icon { icon: IconName::ChevronRight, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::CHEVRON_RIGHT, size: crate::components::IconSize::Small }
                     }
                 }
                 if dots {
@@ -8096,8 +8160,8 @@ const CAROUSEL_REACT: &str = r#"  const perView_ = perView ?? "1";
               title: pauseLabel,
               "data-nd-carousel-rotation": "",
             },
-            h(Icon, { key: "a", icon: "pause", size: "small" }),
-            h(Icon, { key: "b", icon: "play", size: "small" }),
+            h(Icon, { key: "a", icon: pause, size: "small" }),
+            h(Icon, { key: "b", icon: play, size: "small" }),
           )
         : null,
       (controls ?? true)
@@ -8114,7 +8178,7 @@ const CAROUSEL_REACT: &str = r#"  const perView_ = perView ?? "1";
                 title: previousLabel,
                 "data-nd-carousel-step": "previous",
               },
-              h(Icon, { key: "i", icon: "chevron-left", size: "small" }),
+              h(Icon, { key: "i", icon: chevronLeft, size: "small" }),
             ),
             h(
               "button",
@@ -8128,7 +8192,7 @@ const CAROUSEL_REACT: &str = r#"  const perView_ = perView ?? "1";
                 title: nextLabel,
                 "data-nd-carousel-step": "next",
               },
-              h(Icon, { key: "i", icon: "chevron-right", size: "small" }),
+              h(Icon, { key: "i", icon: chevronRight, size: "small" }),
             ),
           ]
         : null,
@@ -8521,7 +8585,7 @@ const DATE_INPUT_DIOXUS: &str = r#"    let root = format!("nd-date-input {class}
             // script.
             if has_suggest {
                 template { "data-nd-date-input-glyph": "",
-                    Icon { icon: IconName::Calendar, size: crate::components::IconSize::Small }
+                    Icon { icon: IconDrawing::CALENDAR, size: crate::components::IconSize::Small }
                 }
             }
         }
@@ -8641,7 +8705,7 @@ const DATE_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
       ? h(
           "template",
           { key: "t", "data-nd-date-input-glyph": "" },
-          h(Icon, { icon: "calendar", size: "small" }),
+          h(Icon, { icon: calendar, size: "small" }),
         )
       : null,
   ),
@@ -8780,7 +8844,7 @@ const TREE_ITEM_DIOXUS: &str = r#"    let root = format!("nd-tree-item {class}")
                     r#type: "button",
                     hidden: true,
                     "data-nd-tree-toggle": "",
-                    Icon { icon: IconName::ChevronDown, size: crate::components::IconSize::Small }
+                    Icon { icon: IconDrawing::CHEVRON_DOWN, size: crate::components::IconSize::Small }
                 }
                 if let Some(href) = href {
                     a {
@@ -9733,7 +9797,7 @@ const TREE_ITEM_REACT: &str = r#"  const root = ["nd-tree-item", className].filt
           hidden: true,
           "data-nd-tree-toggle": "",
         },
-        h(Icon, { icon: "chevron-down", size: "small" }),
+        h(Icon, { icon: chevronDown, size: "small" }),
       ),
       href
         ? h(
@@ -9866,7 +9930,7 @@ const CODE_BLOCK_DIOXUS: &str = r#"    let named = Language::parse(language.as_d
                             title: "{wrap_label}",
                             "aria-pressed": if wrap { "true" } else { "false" },
                             "data-nd-wrap-toggle": "",
-                            Icon { icon: IconName::WrapText }
+                            Icon { icon: IconDrawing::TEXT_WRAP }
                         }
                     }
                     if let Some(copy) = copy.clone() {
@@ -9877,8 +9941,8 @@ const CODE_BLOCK_DIOXUS: &str = r#"    let named = Language::parse(language.as_d
                             title: "{copy}",
                             "data-nd-copy": "",
                             "data-nd-copied": copied.clone(),
-                            Icon { icon: IconName::Copy }
-                            Icon { icon: IconName::Check }
+                            Icon { icon: IconDrawing::COPY }
+                            Icon { icon: IconDrawing::CHECK }
                         }
                         // Empty until the copy succeeds: a live region that
                         // already holds its text announces nothing when that
@@ -10024,7 +10088,7 @@ const CODE_BLOCK_REACT: &str = r#"  const numbered_ = numbered ?? false;
                   "aria-pressed": String(wrap_),
                   "data-nd-wrap-toggle": "",
                 },
-                h(Icon, { icon: "wrap-text" }),
+                h(Icon, { icon: textWrap }),
               )
             : null,
           copy
@@ -10039,8 +10103,8 @@ const CODE_BLOCK_REACT: &str = r#"  const numbered_ = numbered ?? false;
                   "data-nd-copy": "",
                   "data-nd-copied": copied,
                 },
-                h(Icon, { key: "i", icon: "copy" }),
-                h(Icon, { key: "k", icon: "check" }),
+                h(Icon, { key: "i", icon: copy }),
+                h(Icon, { key: "k", icon: check }),
               )
             : null,
           copy
@@ -10149,7 +10213,7 @@ const SEARCH_DIOXUS: &str = r#"    let id = format!("nd-search-{name}");
 
     let row = rsx! {
         span { class: "nd-search-glyph", "aria-hidden": "true",
-            Icon { icon: IconName::Search, size: crate::components::IconSize::Small }
+            Icon { icon: IconDrawing::SEARCH, size: crate::components::IconSize::Small }
         }
         label { class: "nd-visually-hidden", id: "{id}-label", r#for: "{id}", "{label}" }
         input {
@@ -10188,7 +10252,7 @@ const SEARCH_DIOXUS: &str = r#"    let id = format!("nd-search-{name}");
                 "aria-label": "{clear}",
                 title: "{clear}",
                 "data-nd-search-clear": "",
-                Icon { icon: IconName::Close, size: crate::components::IconSize::Small }
+                Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
             }
         }
     };
@@ -10283,7 +10347,7 @@ const SEARCH_DIOXUS: &str = r#"    let id = format!("nd-search-{name}");
                     "data-nd-search-open": "",
                     hidden: true,
                     span { class: "nd-search-glyph", "aria-hidden": "true",
-                        Icon { icon: IconName::Search, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::SEARCH, size: crate::components::IconSize::Small }
                     }
                     span { class: "nd-search-open-text", "{label}" }
                     if hotkey {
@@ -10316,7 +10380,7 @@ const SEARCH_DIOXUS: &str = r#"    let id = format!("nd-search-{name}");
                                 "aria-label": "{close}",
                                 title: "{close}",
                                 "data-nd-search-close": "",
-                                Icon { icon: IconName::Close, size: crate::components::IconSize::Small }
+                                Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
                             }
                         }
                     }
@@ -10377,7 +10441,7 @@ const SEARCH_RESULT_DIOXUS: &str = r#"    let root = format!("nd-search-result {
                 if current {
                     // The non-colour half of `aria-current`: a list of places
                     // owes a mark to a reader who cannot see which row is lit.
-                    Icon { icon: IconName::Check, size: crate::components::IconSize::Small }
+                    Icon { icon: IconDrawing::CHECK, size: crate::components::IconSize::Small }
                 }
             }
         }
@@ -10406,7 +10470,7 @@ const SEARCH_REACT: &str = r#"  const presentation_ = presentation ?? "inline";
     h(
       "span",
       { key: "g", className: "nd-search-glyph", "aria-hidden": "true" },
-      h(Icon, { icon: "search", size: "small" }),
+      h(Icon, { icon: search, size: "small" }),
     ),
     h("label", { key: "l", className: "nd-visually-hidden", id: `${id}-label`, htmlFor: id }, label),
     h("input", {
@@ -10437,7 +10501,7 @@ const SEARCH_REACT: &str = r#"  const presentation_ = presentation ?? "inline";
             title: clearLabel,
             "data-nd-search-clear": "",
           },
-          h(Icon, { icon: "close", size: "small" }),
+          h(Icon, { icon: close, size: "small" }),
         )
       : null,
   ];
@@ -10533,7 +10597,7 @@ const SEARCH_REACT: &str = r#"  const presentation_ = presentation ?? "inline";
           h(
             "span",
             { key: "g", className: "nd-search-glyph", "aria-hidden": "true" },
-            h(Icon, { icon: "search", size: "small" }),
+            h(Icon, { icon: search, size: "small" }),
           ),
           h("span", { key: "t", className: "nd-search-open-text" }, label),
           hotkeyHint,
@@ -10567,7 +10631,7 @@ const SEARCH_REACT: &str = r#"  const presentation_ = presentation ?? "inline";
                     title: closeLabel,
                     "data-nd-search-close": "",
                   },
-                  h(Icon, { icon: "close", size: "small" }),
+                  h(Icon, { icon: close, size: "small" }),
                 )
               : null,
           ),
@@ -10612,7 +10676,7 @@ const SEARCH_RESULT_REACT: &str = r#"  const current_ = current ?? false;
       h("span", { key: "l", className: "nd-search-result-label", "data-nd-search-label": "" }, label),
       badge ? h("span", { key: "b", className: "nd-search-result-badge" }, badge) : null,
       detail ? h("span", { key: "d", className: "nd-search-result-detail" }, detail) : null,
-      current_ ? h(Icon, { key: "c", icon: "check", size: "small" }) : null,
+      current_ ? h(Icon, { key: "c", icon: check, size: "small" }) : null,
     ),
   );
 "#;
@@ -10947,8 +11011,8 @@ const IMAGE_REACT: &str = r#"  const fit_ = fit ?? "cover";
 ///
 /// # And the icon is a drawing, not a word
 ///
-/// It is an `IconName`, as `Input`'s and `Tab`'s are. It was a `String` run
-/// through `IconName::parse` here and handed straight to `Icon` in React — so a
+/// It is an `IconDrawing`, as `Input`'s and `Tab`'s are. It was a `String` run
+/// through `IconDrawing::parse` here and handed straight to `Icon` in React — so a
 /// name nothing declares rendered *nothing* in Dioxus and *threw* in React,
 /// which is the one behaviour `NOCTUA.md §9.3` says the two may not have.
 /// Typed, neither language can be given a name that is not an icon.
@@ -10995,7 +11059,7 @@ const MESSAGE_BAR_DIOXUS: &str = r#"    let root = format!("nd-message-bar {clas
                     "aria-label": dismiss_label,
                     "data-nd-dismiss": "",
                     hidden: true,
-                    Icon { icon: IconName::Close, size: IconSize::Small }
+                    Icon { icon: IconDrawing::CLOSE, size: IconSize::Small }
                 }
             }
         }
@@ -11044,7 +11108,7 @@ const MESSAGE_BAR_REACT: &str = r#"  const alert_ = alert ?? false;
             // See the Dioxus half: revealed by the script.
             hidden: true,
           },
-          h(Icon, { icon: "close", size: "small" }),
+          h(Icon, { icon: close, size: "small" }),
         )
       : null,
   );
@@ -11057,7 +11121,7 @@ const MESSAGE_BAR_REACT: &str = r#"  const alert_ = alert ?? false;
 /// # Why it is authored rather than derived
 ///
 /// Nothing about it is a one-to-one mapping of a prop. The geometry, the view
-/// box and the paint are read from `IconName`; `label` decides three attributes
+/// box and the paint are read from `IconDrawing`; `label` decides three attributes
 /// at once and the absence of it decides two others; and the drawing goes in as
 /// inner HTML rather than as children, because it is a string in the generated
 /// module rather than markup a caller wrote.
@@ -11085,15 +11149,15 @@ const ICON_DIOXUS: &str = r#"    let root = format!("nd-icon-glyph {class}");
     rsx! {
         svg {
             class: "{root}",
-            "data-nd-icon": icon.as_str(),
+            "data-nd-icon": icon.name,
             "data-nd-size": size.as_str(),
-            view_box: icon.view_box(),
+            view_box: icon.view_box,
             // `1em`, so the box comes from whatever contains it and one class
             // covers every context. `data-nd-size` sets that `em`.
             width: "1em",
             height: "1em",
-            fill: if icon.filled() { "currentColor" } else { "none" },
-            stroke: if icon.filled() { "none" } else { "currentColor" },
+            fill: if icon.filled { "currentColor" } else { "none" },
+            stroke: if icon.filled { "none" } else { "currentColor" },
             // FROM THE SPEC, NOT FROM HERE. `spec/icons.toml` decides the
             // weight, and three places draw it: this body, the React one, and
             // the documentation page's variant grid.
@@ -11108,7 +11172,7 @@ const ICON_DIOXUS: &str = r#"    let root = format!("nd-icon-glyph {class}");
             "aria-label": label,
             "aria-hidden": (!named).then_some("true"),
             "focusable": "false",
-            dangerous_inner_html: "{icon.body()}",
+            dangerous_inner_html: "{icon.body}",
         }
     }
 "#;
@@ -11116,22 +11180,25 @@ const ICON_DIOXUS: &str = r#"    let root = format!("nd-icon-glyph {class}");
 /// The same drawing, in React.
 const ICON_REACT: &str = r#"  const size_ = size ?? "medium";
   const root = ["nd-icon-glyph", className].filter(Boolean).join(" ");
-  const drawing = ICONS[icon];
-  // A name that is not an icon is a type error in TypeScript and a thrown error
-  // here. It is never an empty box: that is what shipped once.
-  if (!drawing) throw new Error(`no icon named ${icon}`);
+  // THE DRAWING ARRIVES AS A VALUE, NOT AS A NAME.
+  //
+  // This read `ICONS[icon]` out of a table of every drawing in the system,
+  // which is what made one icon cost all of them. The caller imports the one
+  // it wants and hands it over, so the only drawing in a bundle is the one
+  // somebody imported. See the Dioxus half, where the same value is a `const`.
+  if (!icon || !icon.body) throw new Error("Icon needs a drawing, imported from @noctua-world/design-tokens/icons/<name>.js");
   const named = label !== undefined && label !== null;
 
   return h("svg", {
     className: root,
-    "data-nd-icon": icon,
+    "data-nd-icon": icon.name,
     "data-nd-size": size_,
-    viewBox: drawing.viewBox,
+    viewBox: icon.viewBox,
     // See the Dioxus half: `1em`, and `data-nd-size` sets that `em`.
     width: "1em",
     height: "1em",
-    fill: drawing.filled ? "currentColor" : "none",
-    stroke: drawing.filled ? "none" : "currentColor",
+    fill: icon.filled ? "currentColor" : "none",
+    stroke: icon.filled ? "none" : "currentColor",
     // See the Dioxus half: the weight is `spec/icons.toml`'s.
     strokeWidth: ICON_STROKE_WIDTH,
     strokeLinecap: "round",
@@ -11140,7 +11207,7 @@ const ICON_REACT: &str = r#"  const size_ = size ?? "medium";
     "aria-label": named ? label : undefined,
     "aria-hidden": named ? undefined : "true",
     focusable: "false",
-    dangerouslySetInnerHTML: { __html: drawing.body },
+    dangerouslySetInnerHTML: { __html: icon.body },
     ...rest,
   });
 "#;
@@ -11235,7 +11302,7 @@ const RATING_DIOXUS: &str = r#"    let root = format!("nd-rating {class}");
                 span { class: "nd-rating-stars", "aria-hidden": "true",
                     span { class: "nd-rating-track",
                         for _ in 1..=steps {
-                            Icon { icon: IconName::Star }
+                            Icon { icon: IconDrawing::STAR }
                         }
                     }
                     span {
@@ -11243,7 +11310,7 @@ const RATING_DIOXUS: &str = r#"    let root = format!("nd-rating {class}");
                         "data-nd-level": "{level}",
                         style: "--nd-rating-share: {level}",
                         for _ in 1..=steps {
-                            Icon { icon: IconName::Star }
+                            Icon { icon: IconDrawing::STAR }
                         }
                     }
                 }
@@ -11300,7 +11367,7 @@ const RATING_DIOXUS: &str = r#"    let root = format!("nd-rating {class}");
                                 // A star is a drawing, so this is the only
                                 // name this option has.
                                 span { class: "nd-visually-hidden", "{named}" }
-                                Icon { icon: IconName::Star }
+                                Icon { icon: IconDrawing::STAR }
                             }
                             span { class: "nd-rating-count", "{count}" }
                         }
@@ -11344,7 +11411,7 @@ const RATING_REACT: &str = r#"  const size_ = size ?? "medium";
     };
   });
   const stars = (key) =>
-    Array.from({ length: steps }, (_, at) => h(Icon, { key: `${key}${at}`, icon: "star" }));
+    Array.from({ length: steps }, (_, at) => h(Icon, { key: `${key}${at}`, icon: star }));
 
   if (readonly_)
     return h(
@@ -11431,7 +11498,7 @@ const RATING_REACT: &str = r#"  const size_ = size ?? "medium";
               "label",
               { className: "nd-rating-star", htmlFor: `${id}-${step.number}` },
               h("span", { key: "n", className: "nd-visually-hidden" }, step.named),
-              h(Icon, { key: "s", icon: "star" }),
+              h(Icon, { key: "s", icon: star }),
             ),
             h("span", { className: "nd-rating-count" }, step.count),
           ),
@@ -11938,7 +12005,7 @@ const DIALOG_DIOXUS: &str = r#"    let root = format!("nd-dialog {class}");
                                 r#type: "button",
                                 "aria-label": close_label,
                                 "data-nd-dialog-close": "",
-                                Icon { icon: IconName::Close, size: IconSize::Small }
+                                Icon { icon: IconDrawing::CLOSE, size: IconSize::Small }
                             }
                         }
                     }
@@ -12014,7 +12081,7 @@ const DIALOG_REACT: &str = r#"  const modal_ = modal ?? true;
                     "aria-label": closeLabel,
                     "data-nd-dialog-close": "",
                   },
-                  h(Icon, { icon: "close", size: "small" }),
+                  h(Icon, { icon: close, size: "small" }),
                 )
               : null,
           )
@@ -12087,7 +12154,7 @@ const POPOVER_DIOXUS: &str = r#"    let root = format!("nd-popover {class}");
                                 r#type: "button",
                                 "aria-label": close_label,
                                 "data-nd-popover-close": "",
-                                Icon { icon: IconName::Close, size: IconSize::Small }
+                                Icon { icon: IconDrawing::CLOSE, size: IconSize::Small }
                             }
                         }
                     }
@@ -12157,7 +12224,7 @@ const POPOVER_REACT: &str = r#"  const placement_ = placement ?? "auto";
                     "aria-label": closeLabel,
                     "data-nd-popover-close": "",
                   },
-                  h(Icon, { icon: "close", size: "small" }),
+                  h(Icon, { icon: close, size: "small" }),
                 )
               : null,
           )
@@ -12317,7 +12384,7 @@ const TOAST_DIOXUS: &str = r#"    let root = format!("nd-toast {class}");
                     "aria-label": dismiss_label,
                     "data-nd-dismiss": "",
                     hidden: true,
-                    Icon { icon: IconName::Close, size: IconSize::Small }
+                    Icon { icon: IconDrawing::CLOSE, size: IconSize::Small }
                 }
             }
         }
@@ -12375,7 +12442,7 @@ const TOAST_REACT: &str = r#"  const placement_ = placement ?? "bottom-end";
             // See the Dioxus half: revealed by the script.
             hidden: true,
           },
-          h(Icon, { icon: "close", size: "small" }),
+          h(Icon, { icon: close, size: "small" }),
         )
       : null,
   );

@@ -14,6 +14,9 @@ import { createElement as h } from "react";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { check } from "@noctua-world/design-tokens/icons/check.js";
+import { chevronDown } from "@noctua-world/design-tokens/icons/chevron-down.js";
+import { close } from "@noctua-world/design-tokens/icons/close.js";
 export function Select({ name, label, hint, error, errorLabel, placeholder, required, multiple, disabled, size, searchable, clearable, loading, creatable, searchLabel, emptyLabel, loadingLabel, createLabel, clearLabel, selectedLabel, className, children, ...rest }) {
   const size_ = size ?? "medium";
   const root = ["nd-select", className].filter(Boolean).join(" ");
@@ -89,7 +92,7 @@ export function Select({ name, label, hint, error, errorLabel, placeholder, requ
       h(
         "span",
         { key: "c", className: "nd-select-chevron", "aria-hidden": "true" },
-        h(Icon, { icon: "chevron-down", size: "small" }),
+        h(Icon, { icon: chevronDown, size: "small" }),
       ),
       // A real control with a real name, rendered rather than built by a
       // script, and hidden until the script has something to clear with it.
@@ -104,7 +107,7 @@ export function Select({ name, label, hint, error, errorLabel, placeholder, requ
               "aria-label": clearLabel,
               title: clearLabel,
             },
-            h(Icon, { icon: "close", size: "small" }),
+            h(Icon, { icon: close, size: "small" }),
           )
         : null,
       // The tick the enhanced list marks a chosen option with, in a template
@@ -112,7 +115,7 @@ export function Select({ name, label, hint, error, errorLabel, placeholder, requ
       h(
         "template",
         { key: "t", "data-nd-glyph": "check" },
-        h(Icon, { icon: "check", size: "small" }),
+        h(Icon, { icon: check, size: "small" }),
       ),
     ),
   ),

@@ -7,7 +7,7 @@
 //! Let users enter several values, each one a tag they can take off again.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Field, FieldSize, Icon, Tag, TagSize};
 
@@ -236,7 +236,7 @@ pub fn TagPicker(
                         title: clear,
                         "data-nd-tag-picker-clear": "",
                         hidden: true,
-                        Icon { icon: IconName::Close, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
                     }
                 }
             }

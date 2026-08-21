@@ -5,7 +5,7 @@
 // Edits to this file will be overwritten. Change the spec instead.
 
 import type { ReactNode } from "react";
-import type { IconName } from "@noctua-world/design-tokens/icons.js";
+import type { IconDrawing } from "@noctua-world/design-tokens/icons.js";
 
 export type ButtonVariant = "solid" | "outline" | "subtle" | "transparent" | "link" | "nav";
 export type ButtonTone = "accent" | "neutral" | "danger" | "success";
@@ -28,11 +28,11 @@ export interface ButtonProps {
   /** The corners: `rounded`, `pill`, `square` or `bevel`. The first three follow whichever corner preset the reader has chosen. `bevel` cuts the corner at a fixed angle under every preset. Set one shape for a whole row of controls. */
   shape?: ButtonShape;
   /** An icon before the label. It is decoration and is hidden from screen readers, because it repeats the label. It is optically centred on the text, and on both lines together when there is a `detail`. */
-  icon?: IconName;
+  icon?: IconDrawing;
   /** An icon after the label, for a direction or a destination. Use one decorative icon rather than one on each side. */
-  iconEnd?: IconName;
+  iconEnd?: IconDrawing;
   /** The icon a toggle shows while it is pressed. Both glyphs are rendered and the state picks one, so no script has to swap them. Use it with `icon`, which is the other half of the pair. */
-  iconAlt?: IconName;
+  iconAlt?: IconDrawing;
   /** The name the control takes while it is pressed or expanded. Without it a toggle keeps one name and announces the wrong state from the first press onward. */
   labelAlt?: string;
   /** A name a script can find this button by. Use it where the behaviour is the caller's own code, such as a toggle. A button that submits a form or follows a link needs no hook. `Disclosure`, `MenuItem` and `Search` spell it the same way. */

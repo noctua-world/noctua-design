@@ -12,6 +12,10 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { chevronLeft } from "@noctua-world/design-tokens/icons/chevron-left.js";
+import { chevronRight } from "@noctua-world/design-tokens/icons/chevron-right.js";
+import { pause } from "@noctua-world/design-tokens/icons/pause.js";
+import { play } from "@noctua-world/design-tokens/icons/play.js";
 export function Carousel({ name, label, perView, snap, orientation, controls, previousLabel, nextLabel, dots, dotLabel, counter, counterLabel, announceLabel, wrap, autoplay, pauseLabel, playLabel, glass, className, children, ...rest }) {
   const perView_ = perView ?? "1";
   const snap_ = snap ?? "start";
@@ -82,8 +86,8 @@ export function Carousel({ name, label, perView, snap, orientation, controls, pr
               title: pauseLabel,
               "data-nd-carousel-rotation": "",
             },
-            h(Icon, { key: "a", icon: "pause", size: "small" }),
-            h(Icon, { key: "b", icon: "play", size: "small" }),
+            h(Icon, { key: "a", icon: pause, size: "small" }),
+            h(Icon, { key: "b", icon: play, size: "small" }),
           )
         : null,
       (controls ?? true)
@@ -100,7 +104,7 @@ export function Carousel({ name, label, perView, snap, orientation, controls, pr
                 title: previousLabel,
                 "data-nd-carousel-step": "previous",
               },
-              h(Icon, { key: "i", icon: "chevron-left", size: "small" }),
+              h(Icon, { key: "i", icon: chevronLeft, size: "small" }),
             ),
             h(
               "button",
@@ -114,7 +118,7 @@ export function Carousel({ name, label, perView, snap, orientation, controls, pr
                 title: nextLabel,
                 "data-nd-carousel-step": "next",
               },
-              h(Icon, { key: "i", icon: "chevron-right", size: "small" }),
+              h(Icon, { key: "i", icon: chevronRight, size: "small" }),
             ),
           ]
         : null,

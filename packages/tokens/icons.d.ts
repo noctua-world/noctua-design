@@ -4,56 +4,25 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-/** Every icon in the system. A name outside this union does not exist. */
-export type IconName =
-  | "menu"
-  | "close"
-  | "sun"
-  | "moon"
-  | "monitor"
-  | "palette"
-  | "settings"
-  | "search"
-  | "user"
-  | "external-link"
-  | "chevron-down"
-  | "copy"
-  | "atom"
-  | "dna"
-  | "download"
-  | "info"
-  | "columns"
-  | "warning"
-  | "alert"
-  | "check"
-  | "rotate-ccw"
-  | "flask-conical"
-  | "arrow-up"
-  | "arrow-down"
-  | "chevrons-up-down"
-  | "languages"
-  | "calendar"
-  | "wrap-text"
-  | "pipette"
-  | "plus"
-  | "minus"
-  | "eye"
-  | "eye-off"
-  | "upload"
-  | "clock"
-  | "chevron-left"
-  | "chevron-right"
-  | "pause"
-  | "play"
-  | "star"
-  | "github";
-
+/**
+ * One icon: its name, its geometry, and how it is painted.
+ *
+* Reached by importing it, one module per icon:
+ *
+*     import { chevronDown } from "@noctua-world/design-tokens/icons/chevron-down.js";
+ *
+* A path that names no icon fails at build time, which is the guarantee the
+* deleted `IconName` union used to give and gives sooner.
+ */
 export interface IconDrawing {
+  /** Its name, as `spec/icons.toml` spells it. Written to `data-nd-icon`. */
+  name: string;
+  /** Its `viewBox`, taken from the drawing rather than assumed. */
   viewBox: string;
+  /** Whether it is drawn as a solid shape rather than an outline. */
   filled: boolean;
+  /** The drawing: the children of `<svg>`, and nothing else. */
   body: string;
 }
 
-export declare const ICONS: Record<IconName, IconDrawing>;
-export declare const ICON_NAMES: readonly IconName[];
 export declare const ICON_STROKE_WIDTH: string;

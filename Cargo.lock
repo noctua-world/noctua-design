@@ -428,6 +428,7 @@ dependencies = [
  "noctua-design",
  "noctua-design-grammars",
  "noctua-design-i18n",
+ "noctua-design-icons",
  "noctua-design-theme",
  "noctua-design-tokens",
 ]

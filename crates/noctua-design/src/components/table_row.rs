@@ -7,7 +7,7 @@
 //! Show one record, with a tone, a choice control and a detail row.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{
     Button, ButtonSize, ButtonVariant, Checkbox, CheckboxSize, Radio, RadioSize,
@@ -194,7 +194,7 @@ pub fn TableRow(
                     Button {
                         label: expand_label.unwrap_or_default(),
                         hide_label: true,
-                        icon: IconName::ChevronDown,
+                        icon: IconDrawing::CHEVRON_DOWN,
                         variant: ButtonVariant::Transparent,
                         size: ButtonSize::Small,
                         controls,

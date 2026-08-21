@@ -145,7 +145,7 @@ fn write_language(out: &mut String, grammars: &[Grammar]) {
     out.push_str(
         "/// Every language a code block can be shown in.\n\
          ///\n\
-         /// An enum rather than a string, for the reason `IconName` is one: a\n\
+         /// An enum rather than a string, for the reason `IconDrawing` is a type: a\n\
          /// typo is a compile error instead of an unhighlighted block nobody\n\
          /// notices. The runtime spelling is [`Language::parse`], for the case\n\
          /// where the name really does arrive as text — a markdown fence.\n\

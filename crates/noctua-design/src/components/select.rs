@@ -7,7 +7,7 @@
 //! Let users choose one value, or several, out of more than a list can show.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Field, FieldSize, Icon};
 
@@ -211,7 +211,7 @@ pub fn Select(
                 // — and the enhancement clones this node onto the control it
                 // builds, so the script never carries a drawing.
                 span { class: "nd-select-chevron", "aria-hidden": "true",
-                    Icon { icon: IconName::ChevronDown, size: crate::components::IconSize::Small }
+                    Icon { icon: IconDrawing::CHEVRON_DOWN, size: crate::components::IconSize::Small }
                 }
                 // The control that empties the field. Rendered here rather than
                 // built by the script for the same reason as the chevron — and
@@ -225,7 +225,7 @@ pub fn Select(
                         "data-nd-select-clear": "",
                         "aria-label": clear_label.clone(),
                         title: clear_label.clone(),
-                        Icon { icon: IconName::Close, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
                     }
                 }
                 // THE TICK THE ENHANCED LIST MARKS A CHOSEN OPTION WITH.
@@ -236,7 +236,7 @@ pub fn Select(
                 // an SVG would be a second place icons come from, which is what
                 // `NOCTUA.md §9.5` exists to prevent.
                 template { "data-nd-glyph": "check",
-                    Icon { icon: IconName::Check, size: crate::components::IconSize::Small }
+                    Icon { icon: IconDrawing::CHECK, size: crate::components::IconSize::Small }
                 }
             }
         }

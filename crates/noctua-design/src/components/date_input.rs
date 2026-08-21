@@ -7,7 +7,7 @@
 //! Ask for one date as three numbers, in the order the reader's language writes them.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Field, FieldKind, FieldSize, Icon};
 
@@ -297,7 +297,7 @@ pub fn DateInput(
             // script.
             if has_suggest {
                 template { "data-nd-date-input-glyph": "",
-                    Icon { icon: IconName::Calendar, size: crate::components::IconSize::Small }
+                    Icon { icon: IconDrawing::CALENDAR, size: crate::components::IconSize::Small }
                 }
             }
         }

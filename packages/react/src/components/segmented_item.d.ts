@@ -5,7 +5,7 @@
 // Edits to this file will be overwritten. Change the spec instead.
 
 import type { ReactNode } from "react";
-import type { IconName } from "@noctua-world/design-tokens/icons.js";
+import type { IconDrawing } from "@noctua-world/design-tokens/icons.js";
 
 
 export interface SegmentedItemProps {
@@ -18,7 +18,7 @@ export interface SegmentedItemProps {
   /** A second, smaller line under the label, such as the unit under a number. It is part of the accessible name, because a reader who cannot see the stack has the first line alone. */
   detail?: string;
   /** An icon beside the label, or instead of it with `hide_label`. It is `aria-hidden` either way, because it repeats the label and announcing both says the same thing twice. */
-  icon?: IconName;
+  icon?: IconDrawing;
   /** Whether the text comes off the screen while the name stays. Off by default. Use it for a row of icons whose meaning is clear by sight and must still be announced by name. */
   hideLabel?: boolean;
   /** Whether the choice is refused. Off by default. The item stays reachable, so a reader can find that it exists and is refused rather than meeting a gap where an option was. */

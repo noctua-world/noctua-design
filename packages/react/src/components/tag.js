@@ -15,6 +15,7 @@ import { Button } from "./button.js";
 import { Swatch } from "./swatch.js";
 
 import { Icon } from "./icon.js";
+import { close } from "@noctua-world/design-tokens/icons/close.js";
 export function Tag({ label, value, href, pressed, tone, variant, size, shape, icon, swatch, image, removeLabel, removeName, disabled, glass, className, ...rest }) {
   const variant_ = variant ?? "soft";
   const size_ = size ?? "medium";
@@ -89,7 +90,7 @@ export function Tag({ label, value, href, pressed, tone, variant, size, shape, i
           size: "small",
           shape: "pill",
           hideLabel: true,
-          icon: "close",
+          icon: close,
           label: remove,
           disabled,
         })

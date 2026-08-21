@@ -45,9 +45,9 @@ pub use noctua_design_tokens as tokens;
 // have reported it. Not a compile error. A silent divergence.
 //
 // So the component is `spec/components/icon.toml` and arrives through the glob
-// below, exactly as every other one does. `IconName` stays with the drawings,
+// below, exactly as every other one does. `IconDrawing` stays with the drawings,
 // because it is a fact about the icon set rather than about the component.
 pub use components::*;
-pub use noctua_design_icons::IconName;
+pub use noctua_design_icons::IconDrawing;
 pub use script::{Script, dominant_script, font_override};
 pub use theme::{ThemeScope, use_theme};

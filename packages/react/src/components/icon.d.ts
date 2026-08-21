@@ -5,17 +5,13 @@
 // Edits to this file will be overwritten. Change the spec instead.
 
 import type { ReactNode } from "react";
-import type { IconName } from "@noctua-world/design-tokens/icons.js";
+import type { IconDrawing } from "@noctua-world/design-tokens/icons.js";
 
 export type IconSize = "small" | "medium" | "large";
 
 export interface IconProps {
-  /**
-   * Which drawing, by the name `spec/icons.toml` gives it. **Required**, and a real
-   * type in both languages rather than a string. A name that is not an icon is then
-   * a compile error instead of an empty box on a page.
-   */
-  icon: IconName;
+  /** The drawing itself, not its name. **Required**, and a real type in both languages rather than a string. Rust takes `IconDrawing::CHEVRON_DOWN`. JavaScript imports one module per icon. A value that names no icon fails to build. */
+  icon: IconDrawing;
   /**
    * Its accessible name. Absent is the common case and makes the icon `aria-hidden`,
    * which is right beside a word that already says it. Give one only where the

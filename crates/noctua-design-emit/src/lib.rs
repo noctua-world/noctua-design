@@ -170,7 +170,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
         three,
         three_licence,
     ));
-    files.extend(props::emit(components));
+    files.extend(props::emit(components, inputs.drawings));
     // `crate::` because `runtime` is also the local holding `Lineage`'s own
     // runtime three lines up, and a reader should not have to know which
     // namespace wins to read this line.
@@ -503,7 +503,7 @@ mod tests {
         );
         assert!(!i18n::emit(&catalogue).is_empty(), "i18n");
         assert!(!interpreter::emit(&components).is_empty(), "interpreter");
-        assert!(!props::emit(&components).is_empty(), "props");
+        assert!(!props::emit(&components, &[]).is_empty(), "props");
         assert!(!rust::emit(&spec).is_empty(), "rust");
         assert!(!scope::emit(&vendor).is_empty(), "scope");
         assert!(!specimens::emit(&components).is_empty(), "specimens");

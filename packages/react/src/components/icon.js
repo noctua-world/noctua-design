@@ -11,26 +11,29 @@
 
 import { createElement as h } from "react";
 
-import { ICONS, ICON_STROKE_WIDTH } from "@noctua-world/design-tokens/icons.js";
+import { ICON_STROKE_WIDTH } from "@noctua-world/design-tokens/icons.js";
 export function Icon({ icon, label, size, className, ...rest }) {
   const size_ = size ?? "medium";
   const root = ["nd-icon-glyph", className].filter(Boolean).join(" ");
-  const drawing = ICONS[icon];
-  // A name that is not an icon is a type error in TypeScript and a thrown error
-  // here. It is never an empty box: that is what shipped once.
-  if (!drawing) throw new Error(`no icon named ${icon}`);
+  // THE DRAWING ARRIVES AS A VALUE, NOT AS A NAME.
+  //
+  // This read `ICONS[icon]` out of a table of every drawing in the system,
+  // which is what made one icon cost all of them. The caller imports the one
+  // it wants and hands it over, so the only drawing in a bundle is the one
+  // somebody imported. See the Dioxus half, where the same value is a `const`.
+  if (!icon || !icon.body) throw new Error("Icon needs a drawing, imported from @noctua-world/design-tokens/icons/<name>.js");
   const named = label !== undefined && label !== null;
 
   return h("svg", {
     className: root,
-    "data-nd-icon": icon,
+    "data-nd-icon": icon.name,
     "data-nd-size": size_,
-    viewBox: drawing.viewBox,
+    viewBox: icon.viewBox,
     // See the Dioxus half: `1em`, and `data-nd-size` sets that `em`.
     width: "1em",
     height: "1em",
-    fill: drawing.filled ? "currentColor" : "none",
-    stroke: drawing.filled ? "none" : "currentColor",
+    fill: icon.filled ? "currentColor" : "none",
+    stroke: icon.filled ? "none" : "currentColor",
     // See the Dioxus half: the weight is `spec/icons.toml`'s.
     strokeWidth: ICON_STROKE_WIDTH,
     strokeLinecap: "round",
@@ -39,7 +42,7 @@ export function Icon({ icon, label, size, className, ...rest }) {
     "aria-label": named ? label : undefined,
     "aria-hidden": named ? undefined : "true",
     focusable: "false",
-    dangerouslySetInnerHTML: { __html: drawing.body },
+    dangerouslySetInnerHTML: { __html: icon.body },
     ...rest,
   });
 }

@@ -463,7 +463,7 @@ mod structure {
                 }
                 let Value::Text(name) = value else { continue };
                 assert!(
-                    noctua_design::IconName::parse(name).is_some(),
+                    noctua_design_icons::IconDrawing::parse(name).is_some(),
                     "a tree names the icon `{name}`, which does not exist"
                 );
                 checked += 1;

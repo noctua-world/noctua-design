@@ -7,7 +7,7 @@
 //! Let users select one or more options, or agree to a single statement.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::Icon;
 
@@ -128,7 +128,7 @@ pub fn Checkbox(
             // The box and its mark are decoration. The state a reader hears is
             // the input's, and a second copy of it here could only disagree.
             span { class: "nd-choice-box", "aria-hidden": "true",
-                Icon { icon: IconName::Check }
+                Icon { icon: IconDrawing::CHECK }
             }
             // HIDDEN, NOT ABSENT. The label is still the accessible name — the
             // recipe clips it rather than removing it — so a box in a table's

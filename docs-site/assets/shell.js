@@ -5128,7 +5128,61 @@ export function enhanceAll(root = document) {
   enhanceTabs(root);
   enhanceLineages(root);
   enhanceModels(root);
+  enhanceIconGallery(root);
 }
+
+// --- The icon gallery -------------------------------------------------------
+
+/**
+ * Narrows the gallery at `/icons/` to the drawings whose name matches.
+ *
+ * THIS SITE'S FURNITURE, NOT A COMPONENT. One page in the system shows every
+ * icon there is, and one page is not a component — what is a component is the
+ * field doing the asking, which is an `Input` like any other.
+ *
+ * IT HIDES, IT DOES NOT REMOVE. The rule `Table`'s filter already keeps, for
+ * the same two reasons: the count in the prose above stays true, and a reader
+ * whose script never ran gets the whole set rather than an empty box. Server
+ * rendering the grid is what makes the second one free.
+ *
+ * The match is a plain substring of the icon's own name, folded for case. Not a
+ * fuzzy match and not a search over tags: a name is what the gallery shows
+ * beside each drawing, so it is the only thing a reader can be typing.
+ */
+function enhanceIconGallery(root = document) {
+  for (const gallery of root.querySelectorAll("[data-nd-icon-gallery]")) {
+    if (galleries.has(gallery)) continue;
+    const field = gallery.querySelector("input");
+    const empty = gallery.querySelector(".nd-icon-empty");
+    const cells = [...gallery.querySelectorAll(".nd-icon-cell")];
+    if (!field || !cells.length) continue;
+    galleries.add(gallery);
+
+    const narrow = () => {
+      const query = field.value.trim().toLowerCase();
+      let shown = 0;
+      for (const cell of cells) {
+        const name = cell.getAttribute("data-nd-icon-name") || "";
+        const matches = !query || name.includes(query);
+        // `hidden` rather than a class: it takes the cell out of the
+        // accessibility tree as well as off the screen, which a reader walking
+        // the list needs and `display: none` in a stylesheet also gives — but
+        // only one of the two survives a stylesheet that failed to load.
+        cell.hidden = !matches;
+        if (matches) shown += 1;
+      }
+      if (empty) empty.hidden = shown > 0;
+    };
+
+    field.addEventListener("input", narrow);
+    // The clear control writes the value and fires `input`, so it arrives here
+    // through the same path rather than through a second listener.
+    narrow();
+  }
+}
+
+/** The galleries already wired, so a re-enhanced subtree is not wired twice. */
+const galleries = new WeakSet();
 
 // --- Running a timed message again ------------------------------------------
 //

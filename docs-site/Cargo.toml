@@ -11,6 +11,14 @@ publish = false
 dioxus.workspace = true
 dioxus-ssr.workspace = true
 noctua-design.workspace = true
+# THE CATALOGUE, WHICH IS THE ONE PLACE ANYTHING WANTS EVERY ICON.
+#
+# Every icon is an associated `const`, so an application that draws one carries
+# one drawing. `ALL` and `IconDrawing::parse` name all of them and are behind
+# this feature for exactly that reason: the gallery at `/icons/` lists the set
+# and the tree renderer resolves an icon a page named as text, and nothing that
+# ships to a consumer does either.
+noctua-design-icons = { workspace = true, features = ["catalogue"] }
 noctua-design-grammars.workspace = true
 noctua-design-i18n.workspace = true
 noctua-design-theme.workspace = true

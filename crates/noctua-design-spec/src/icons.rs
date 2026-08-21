@@ -9,21 +9,34 @@
 //! icon".
 //!
 //! So the set is declared here, the drawings are vendored beside their
-//! licences, and the generated output is an **enum**. `Icon { icon: "repository" }`
-//! is now a type error rather than an empty box, and `NOCTUA.md §9.5` asks for
-//! exactly that: "`Icon` takes a name from a generated enum/union, so a typo is
-//! a compile error."
+//! licences, and the generated output is one **constant per icon**. A name that
+//! does not exist is a compile error rather than an empty box, and
+//! `NOCTUA.md §9.5` asks for exactly that.
+//!
+//! # A source may be swept
+//!
+//! The whole Lucide set is 1,776 drawings, and 1,776 hand-written tables would
+//! be a list nobody reads and nobody keeps. A `[source.*]` with `sweep = true`
+//! turns every drawing in its directory into an icon named after its file. What
+//! stays a table is what a filename cannot say: a deliberate rename, a
+//! hand-written `doc`, or `paint = "fill"`.
+//!
+//! **A table claims its file.** `[icon.close]` with `file = "x.svg"` produces
+//! `close` and no `x`, so a rename cannot leave two names for one drawing.
 //!
 //! # What normalisation means here
 //!
 //! An inlined SVG shares a document with everything else on the page. So the
 //! wrapper is discarded and rebuilt by the component, and the drawing itself
 //! may carry only geometry: no `id` (which would collide the second time the
-//! same icon appears), no `class`, no `style`, and no `fill`/`stroke` of its
-//! own (which would refuse `currentColor` and paint the icon a fixed color
-//! inside a themed subtree — the frozen-color trap in a different costume).
+//! same icon appears), no `class`, no `style`, and no `fill`/`stroke` naming a
+//! color of its own — which would refuse `currentColor` and paint the icon a
+//! fixed color inside a themed subtree, the frozen-color trap in a different
+//! costume. `currentColor` and `none` are the two values that are not that, and
+//! they are the two this accepts: ten Lucide drawings fill a half-unit dot with
+//! `currentColor`, which follows the theme rather than escaping it.
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
 use indexmap::IndexMap;
@@ -42,7 +55,10 @@ pub struct Icons {
     /// Where the drawings come from, keyed by the name an icon cites.
     pub source: IndexMap<String, Source>,
 
-    /// Every icon, keyed by the name the generated enum will carry.
+    /// Every icon a table declares, keyed by the name it will carry.
+    ///
+    /// Not every icon: a swept source contributes the rest.
+    #[serde(default)]
     pub icon: IndexMap<String, Icon>,
 }
 
@@ -87,16 +103,31 @@ pub struct Source {
     pub licence: String,
     /// The licence text, vendored beside the drawings.
     pub licence_file: String,
+    /// Its directory under `assets/icons/`.
+    pub directory: String,
+    /// Whether every drawing in that directory is an icon.
+    ///
+    /// `false` keeps the original rule in both directions: a drawing no table
+    /// declares fails the build.
+    #[serde(default)]
+    pub sweep: bool,
+    /// The commands that produced the directory, for the attribution.
+    ///
+    /// Vendoring is a person running these, not a build step — the build reads
+    /// what is on disk and needs no network. Recording them here is what makes
+    /// the result reproducible by somebody who was not there.
+    pub fetch: String,
 }
 
-/// One icon.
+/// One icon a table declares.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Icon {
     /// Which `[source.*]` it came from.
     pub source: String,
-    /// Its file under `assets/icons/`, named as upstream names it.
-    pub file: String,
+    /// Its file in that source's directory. Defaults to `<name>.svg`.
+    #[serde(default)]
+    pub file: Option<String>,
     /// How it is painted.
     #[serde(default)]
     pub paint: Paint,
@@ -118,12 +149,18 @@ pub enum Paint {
 /// An icon with its drawing read, normalised and checked.
 #[derive(Debug, Clone)]
 pub struct Resolved {
-    /// The name the generated enum carries, in `kebab-case`.
+    /// The name the generated constant carries, in `kebab-case`.
     pub name: String,
-    /// Its `PascalCase` spelling, for the Rust variant.
-    pub variant: String,
+    /// Its `SCREAMING_SNAKE_CASE` spelling, for the Rust constant.
+    pub constant: String,
+    /// Its `camelCase` spelling, for the JavaScript export.
+    pub export: String,
     /// The upstream project's name, for the attribution.
     pub project: String,
+    /// The `[source.*]` key it came from.
+    pub source: String,
+    /// Its file in that source's directory.
+    pub file: String,
     /// Its `viewBox`, taken from the drawing rather than assumed.
     pub view_box: String,
     /// How it is painted.
@@ -132,6 +169,8 @@ pub struct Resolved {
     pub body: String,
     /// What it is for.
     pub doc: String,
+    /// Whether a table declared it, rather than a sweep finding it.
+    pub curated: bool,
 }
 
 /// The elements an inlined drawing may use.
@@ -163,8 +202,19 @@ const GEOMETRY: [&str; 16] = [
     "transform",
 ];
 
+/// The two paint attributes, and the only two values either may take.
+///
+/// `currentColor` is not a color the drawing chose; it is the drawing refusing
+/// to choose, which is the whole property this rule protects. `none` is the
+/// same refusal for the other half. Anything else — a hex, an `oklch()`, a
+/// `var()`, a keyword — is a color frozen into a drawing that will then ignore
+/// the theme it is rendered inside.
+const PAINT: [&str; 2] = ["fill", "stroke"];
+/// What a paint attribute may say.
+const PAINTABLE: [&str; 2] = ["currentColor", "none"];
+
 /// Attributes that must not survive into an inlined drawing, and why.
-const FORBIDDEN: [(&str, &str); 8] = [
+const FORBIDDEN: [(&str, &str); 6] = [
     (
         "id",
         "an id collides the second time the same icon is on the page",
@@ -174,11 +224,6 @@ const FORBIDDEN: [(&str, &str); 8] = [
         "a class in a drawing is styling that escapes the component",
     ),
     ("style", "the same, and it wins over the stylesheet"),
-    (
-        "fill",
-        "a fixed fill refuses `currentColor` and ignores the theme",
-    ),
-    ("stroke", "the same, for the outline"),
     ("mask", "an inlined mask needs an id, and ids collide"),
     ("clip-path", "the same"),
     (
@@ -187,14 +232,124 @@ const FORBIDDEN: [(&str, &str); 8] = [
     ),
 ];
 
+/// The name a file may have: what becomes an identifier in two languages.
+fn is_vendorable(file: &str) -> bool {
+    let Some(stem) = file.strip_suffix(".svg") else {
+        return false;
+    };
+    !stem.is_empty()
+        && stem.starts_with(|c: char| c.is_ascii_lowercase() || c.is_ascii_digit())
+        && stem
+            .chars()
+            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+}
+
+/// Reads one source's directory and verifies it against its `SHA256SUMS`.
+///
+/// Returns the drawings it holds, sorted, and everything wrong with them.
+fn vendored(directory: &Path, key: &str) -> (Vec<String>, Vec<Problem>) {
+    let mut drawings: Vec<String> = Vec::new();
+    let mut problems = Vec::new();
+    let mut sums: BTreeMap<String, String> = BTreeMap::new();
+
+    let Ok(entries) = std::fs::read_dir(directory) else {
+        problems.push(
+            Problem::whole_file(format!(
+                "`{key}` names {}, which is not a directory",
+                directory.display()
+            ))
+            .fix("Create it and vendor the drawings there, beside their licence."),
+        );
+        return (drawings, problems);
+    };
+
+    for entry in entries.flatten() {
+        let file = entry.file_name().to_string_lossy().into_owned();
+        if !file.to_ascii_lowercase().ends_with(".svg") {
+            continue;
+        }
+        if is_vendorable(&file) {
+            drawings.push(file);
+        } else {
+            problems.push(
+                Problem::whole_file(format!("`{key}` holds {file}, which cannot be a name")).fix(
+                    "A drawing's file name becomes an identifier in Rust and in \
+                     JavaScript: lowercase letters, digits and hyphens, starting with a \
+                     letter or a digit.",
+                ),
+            );
+        }
+    }
+    drawings.sort();
+
+    // THE CHECKSUMS ARE VERIFIED, NEVER REGENERATED HERE. A build that rewrote
+    // `SHA256SUMS` from what it found would verify nothing at all: the file is
+    // recorded once, by the person who vendored the drawings, and every build
+    // afterwards asks whether the bytes on disk are still those.
+    let list = directory.join("SHA256SUMS");
+    match std::fs::read_to_string(&list) {
+        Ok(text) => {
+            for line in text.lines().filter(|line| !line.trim().is_empty()) {
+                if let Some((digest, file)) = line.split_once("  ") {
+                    sums.insert(file.trim().to_owned(), digest.trim().to_owned());
+                }
+            }
+        }
+        Err(error) => problems.push(
+            Problem::whole_file(format!("could not read {}: {error}", list.display())).fix(
+                "Record it where the drawings were vendored: \
+                 `( cd <directory> && sha256sum *.svg > SHA256SUMS )`.",
+            ),
+        ),
+    }
+
+    for file in &drawings {
+        let Some(expected) = sums.get(file) else {
+            problems.push(
+                Problem::whole_file(format!(
+                    "{file} is vendored but SHA256SUMS does not list it"
+                ))
+                .fix("Re-record the checksums, deliberately, after re-vendoring."),
+            );
+            continue;
+        };
+        let Ok(bytes) = std::fs::read(directory.join(file)) else {
+            continue;
+        };
+        let actual = crate::sha256::hex(&bytes);
+        if &actual != expected {
+            problems.push(
+                Problem::whole_file(format!(
+                    "{file} does not match its recorded checksum ({expected} != {actual})"
+                ))
+                .fix(
+                    "A vendored drawing is upstream's bytes. Restore it from the pinned \
+                     tag, or re-vendor and re-record the whole directory.",
+                ),
+            );
+        }
+    }
+    for file in sums.keys() {
+        if !drawings.contains(file) {
+            problems.push(
+                Problem::whole_file(format!("SHA256SUMS lists {file}, which is not there"))
+                    .fix("Restore the drawing from the pinned tag, or re-record the checksums."),
+            );
+        }
+    }
+
+    (drawings, problems)
+}
+
 /// Parses `spec/icons.toml` and reads every drawing it points at.
 ///
-/// `directory` is where the vendored SVGs live.
+/// `directory` is where the vendored source directories live.
 ///
 /// # Errors
 ///
-/// Every problem at once: a bad table, a missing drawing, an unused drawing, a
-/// drawing that uses something an inlined icon may not.
+/// Every problem at once: a bad table, a missing drawing, an undeclared
+/// drawing, a checksum that does not match, a drawing that uses something an
+/// inlined icon may not.
 pub fn parse(
     path: &str,
     text: &str,
@@ -205,25 +360,121 @@ pub fn parse(
             path,
             text.to_owned(),
             vec![Problem::whole_file(error.message().to_owned()).fix(
-                "Every icon is `[icon.<name>]` with `source`, `file` and `doc`, and every \
-                 source it cites is a `[source.<name>]` table.",
+                "Every source is a `[source.<name>]` table with a `directory`, a tag, a \
+                 licence and the commands that vendored it. A `[icon.<name>]` table is \
+                 only needed where a filename cannot say it: a rename, a written `doc`, \
+                 or `paint`.",
             )],
         )
     })?;
 
     let mut problems = Vec::new();
-    let mut resolved = Vec::new();
-    let mut used: BTreeSet<String> = BTreeSet::new();
+    let mut resolved: Vec<Resolved> = Vec::new();
 
+    // Read every source directory once, verifying its checksums as it goes.
+    let mut listings: IndexMap<&str, Vec<String>> = IndexMap::new();
+    for (key, source) in &icons.source {
+        let (drawings, mut found) = vendored(&directory.join(&source.directory), key);
+        problems.append(&mut found);
+        listings.insert(key.as_str(), drawings);
+    }
+
+    // A table claims its file, so the sweep cannot produce a second name for
+    // the same drawing. Both halves add to the same two sets, which is why they
+    // are threaded through rather than owned by either.
+    let mut claimed: BTreeSet<(String, String)> = BTreeSet::new();
+    let mut named: BTreeSet<String> = BTreeSet::new();
+
+    declared(
+        &icons,
+        directory,
+        &mut claimed,
+        &mut named,
+        &mut resolved,
+        &mut problems,
+    );
+    swept(
+        &icons,
+        directory,
+        &listings,
+        &claimed,
+        &mut named,
+        &mut resolved,
+        &mut problems,
+    );
+
+    // ONE ORDER, AND IT IS THE READER'S. The set was in the order the spec
+    // declared it, which was readable at forty and is meaningless at a
+    // thousand: the gallery, the manifest, the attribution and `ALL` are all
+    // alphabetical now, so a person looking for one icon looks in one place.
+    resolved.sort_by(|a, b| a.name.cmp(&b.name));
+
+    // TWO NAMES, TWO IDENTIFIERS, AND A THIRD WAY TO COLLIDE. Names are
+    // distinct by construction — a file name is a path and a table key is a TOML
+    // key — but the spellings derived from them are not: `columns-2` and
+    // `columns_2` would be one Rust constant, and a reserved word taking an
+    // `Icon` suffix could land on a drawing genuinely called that. Either would
+    // shadow the other in a generated file that still compiles.
+    collisions(&resolved, &mut problems);
+
+    if problems.is_empty() {
+        Ok((icons, resolved))
+    } else {
+        Err(SpecError::new(path, text.to_owned(), problems))
+    }
+}
+
+/// Two icons that would generate one identifier.
+///
+/// A generated constant or export written twice is not a compile error in
+/// either language: Rust reports a duplicate definition, but JavaScript takes
+/// the second module quietly, and the two spellings are derived rather than
+/// declared — so the collision is between things nobody wrote down.
+fn collisions(resolved: &[Resolved], problems: &mut Vec<Problem>) {
+    let mut constants: BTreeMap<&str, &str> = BTreeMap::new();
+    let mut exports: BTreeMap<&str, &str> = BTreeMap::new();
+    for icon in resolved {
+        for (spelling, taken, language) in [
+            (icon.constant.as_str(), &mut constants, "Rust constant"),
+            (icon.export.as_str(), &mut exports, "JavaScript export"),
+        ] {
+            if let Some(other) = taken.insert(spelling, icon.name.as_str()) {
+                problems.push(
+                    Problem::whole_file(format!(
+                        "`{}` and `{other}` are both the {language} `{spelling}`",
+                        icon.name
+                    ))
+                    .fix("Rename one of them with an `[icon.<name>]` table."),
+                );
+            }
+        }
+    }
+}
+
+/// The icons a `[icon.<name>]` table declares: a rename, a written `doc`, or a
+/// `paint` — everything a filename cannot say on its own.
+fn declared(
+    icons: &Icons,
+    directory: &Path,
+    claimed: &mut BTreeSet<(String, String)>,
+    named: &mut BTreeSet<String>,
+    resolved: &mut Vec<Resolved>,
+    problems: &mut Vec<Problem>,
+) {
     for (name, icon) in &icons.icon {
-        if !name
-            .chars()
-            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
-        {
+        if !is_vendorable(&format!("{name}.svg")) {
             problems.push(
                 Problem::whole_file(format!("`{name}` is not kebab-case")).fix(
-                    "An icon name becomes an enum variant in Rust and a union member in \
-                     TypeScript. Lowercase, digits and hyphens.",
+                    "An icon name becomes a constant in Rust and an export in \
+                     JavaScript. Lowercase, digits and hyphens.",
+                ),
+            );
+            continue;
+        }
+        if !named.insert(name.clone()) {
+            problems.push(
+                Problem::whole_file(format!("`{name}` is declared twice")).fix(
+                    "One table per icon. Two tables of one name is a drawing chosen at random.",
                 ),
             );
             continue;
@@ -239,13 +490,25 @@ pub fn parse(
             );
             continue;
         };
+        let file = icon.file.clone().unwrap_or_else(|| format!("{name}.svg"));
+        let full = directory.join(&source.directory).join(&file);
 
-        let file = directory.join(&icon.file);
-        let Ok(svg) = std::fs::read_to_string(&file) else {
+        if !claimed.insert((icon.source.clone(), file.clone())) {
+            problems.push(
+                Problem::whole_file(format!("`{name}` claims {file}, which another icon claims"))
+                    .fix(
+                        "One drawing, one name. Two names for one drawing is two things to \
+                         keep in step for a difference nobody can see.",
+                    ),
+            );
+            continue;
+        }
+
+        let Ok(svg) = std::fs::read_to_string(&full) else {
             problems.push(
                 Problem::whole_file(format!(
                     "`{name}` names {}, which is not there",
-                    file.display()
+                    full.display()
                 ))
                 .fix(format!(
                     "Fetch it from {} at {} and vendor it there, byte for byte.",
@@ -254,17 +517,20 @@ pub fn parse(
             );
             continue;
         };
-        used.insert(icon.file.clone());
 
-        match normalise(&svg, icon.paint) {
+        match normalise(&svg) {
             Ok((view_box, body)) => resolved.push(Resolved {
                 name: name.clone(),
-                variant: pascal(name),
+                constant: screaming(name),
+                export: camel(name),
                 project: source.project.clone(),
+                source: icon.source.clone(),
+                file,
                 view_box,
                 paint: icon.paint,
                 body,
-                doc: icon.doc.clone(),
+                doc: icon.doc.trim().to_owned(),
+                curated: true,
             }),
             Err(reason) => problems.push(
                 Problem::whole_file(format!("`{name}` cannot be inlined: {reason}")).fix(
@@ -274,37 +540,96 @@ pub fn parse(
             ),
         }
     }
+}
 
-    // A drawing nothing declares is payload, and `NOCTUA.md §9.5` says so.
-    if let Ok(entries) = std::fs::read_dir(directory) {
-        for entry in entries.flatten() {
-            let is_svg = entry
-                .path()
-                .extension()
-                .is_some_and(|e| e.eq_ignore_ascii_case("svg"));
-            let file = entry.file_name().to_string_lossy().into_owned();
-            if is_svg && !used.contains(&file) {
+/// Everything else in a swept source: one icon per drawing, named after its
+/// file. A source that is not swept keeps the original rule instead.
+fn swept(
+    icons: &Icons,
+    directory: &Path,
+    listings: &IndexMap<&str, Vec<String>>,
+    claimed: &BTreeSet<(String, String)>,
+    named: &mut BTreeSet<String>,
+    resolved: &mut Vec<Resolved>,
+    problems: &mut Vec<Problem>,
+) {
+    for (key, source) in &icons.source {
+        let Some(drawings) = listings.get(key.as_str()) else {
+            continue;
+        };
+        for file in drawings {
+            if claimed.contains(&(key.clone(), file.clone())) {
+                continue;
+            }
+            // A source that is not swept keeps the original rule: a drawing
+            // nothing declares is payload, and `NOCTUA.md §9.5` says so.
+            if !source.sweep {
                 problems.push(
-                    Problem::whole_file(format!("{file} is vendored but no icon declares it")).fix(
-                        "Declare it in spec/icons.toml, or delete it. An unused icon is \
-                         payload and review surface.",
+                    Problem::whole_file(format!(
+                        "{}/{file} is vendored but no icon declares it",
+                        source.directory
+                    ))
+                    .fix(
+                        "Declare it in spec/icons.toml, delete it, or mark its source \
+                         `sweep = true`.",
                     ),
                 );
+                continue;
+            }
+
+            let name = file.trim_end_matches(".svg").to_owned();
+            if !named.insert(name.clone()) {
+                problems.push(
+                    Problem::whole_file(format!(
+                        "{}/{file} would be `{name}`, which a table already declares",
+                        source.directory
+                    ))
+                    .fix(
+                        "Rename the table's icon, or point it at this file so it claims \
+                         it.",
+                    ),
+                );
+                continue;
+            }
+
+            let Ok(svg) = std::fs::read_to_string(directory.join(&source.directory).join(file))
+            else {
+                continue;
+            };
+            match normalise(&svg) {
+                Ok((view_box, body)) => resolved.push(Resolved {
+                    constant: screaming(&name),
+                    export: camel(&name),
+                    project: source.project.clone(),
+                    source: key.clone(),
+                    file: file.clone(),
+                    view_box,
+                    paint: Paint::Stroke,
+                    body,
+                    doc: format!("`{name}`, from {}.", source.project),
+                    curated: false,
+                    name,
+                }),
+                Err(reason) => problems.push(
+                    Problem::whole_file(format!(
+                        "{}/{file} cannot be inlined: {reason}",
+                        source.directory
+                    ))
+                    .fix(
+                        "Vendor the upstream drawing unmodified; if upstream itself \
+                         carries the offending attribute, the icon is not one this system \
+                         can inline.",
+                    ),
+                ),
             }
         }
-    }
-
-    if problems.is_empty() {
-        Ok((icons, resolved))
-    } else {
-        Err(SpecError::new(path, text.to_owned(), problems))
     }
 }
 
 /// Strips the wrapper and checks what is left.
 ///
 /// Returns the `viewBox` and the drawing, whitespace collapsed.
-fn normalise(svg: &str, paint: Paint) -> Result<(String, String), String> {
+fn normalise(svg: &str) -> Result<(String, String), String> {
     let open_end = svg.find('>').ok_or("there is no `<svg>` element")?;
     let open = &svg[..=open_end];
     if !open.starts_with("<svg") {
@@ -356,14 +681,20 @@ fn normalise(svg: &str, paint: Paint) -> Result<(String, String), String> {
         }
     }
     for (name, why) in FORBIDDEN {
-        // A filled brand mark's `fill` lives on the wrapper, which is gone; a
-        // `fill` on the drawing itself is still refused for both kinds.
         if body.contains(&format!("{name}=\"")) {
             return Err(format!("it carries `{name}`, and {why}"));
         }
     }
-    for attribute in attributes(&body) {
-        if !GEOMETRY.contains(&attribute.as_str()) {
+    for (attribute, value) in attributes(&body) {
+        if PAINT.contains(&attribute.as_str()) {
+            if !PAINTABLE.contains(&value.as_str()) {
+                return Err(format!(
+                    "it paints with `{attribute}=\"{value}\"`, and a color frozen into a \
+                     drawing ignores the theme it is rendered inside — only {} may appear",
+                    PAINTABLE.join(" or ")
+                ));
+            }
+        } else if !GEOMETRY.contains(&attribute.as_str()) {
             return Err(format!(
                 "it carries `{attribute}`, which is not geometry — only {} may survive",
                 GEOMETRY.join(", ")
@@ -377,7 +708,6 @@ fn normalise(svg: &str, paint: Paint) -> Result<(String, String), String> {
     if body.contains("d=\"\"") {
         return Err("it contains an empty path".to_owned());
     }
-    let _ = paint;
 
     Ok((view_box, body))
 }
@@ -399,12 +729,12 @@ fn elements(body: &str) -> Vec<String> {
         .collect()
 }
 
-/// Every attribute name in a drawing.
+/// Every attribute in a drawing, with its value.
 ///
 /// Quote-aware, because a `d` is full of spaces: splitting a tag on whitespace
 /// turns `d="M4 6h16"` into two "attributes", one of which is `6h16"/`.
-fn attributes(body: &str) -> Vec<String> {
-    let mut names = Vec::new();
+fn attributes(body: &str) -> Vec<(String, String)> {
+    let mut found = Vec::new();
     for tag in body.split('<').skip(1) {
         let Some(end) = tag.find('>') else { continue };
         let mut rest = tag[..end].trim_start();
@@ -412,18 +742,21 @@ fn attributes(body: &str) -> Vec<String> {
         rest = rest.split_once(char::is_whitespace).map_or("", |(_, r)| r);
         while let Some(equals) = rest.find('=') {
             let name = rest[..equals].trim();
-            if !name.is_empty() {
-                names.push(name.to_owned());
-            }
             let after = &rest[equals + 1..];
             let Some(open) = after.find('"') else { break };
             let Some(close) = after[open + 1..].find('"') else {
                 break;
             };
+            if !name.is_empty() {
+                found.push((
+                    name.to_owned(),
+                    after[open + 1..open + 1 + close].to_owned(),
+                ));
+            }
             rest = &after[open + close + 2..];
         }
     }
-    names
+    found
 }
 
 /// `chevron-down` → `ChevronDown`.
@@ -438,6 +771,79 @@ pub fn pascal(name: &str) -> String {
             })
         })
         .collect()
+}
+
+/// `chevron-down` → `CHEVRON_DOWN`, the Rust constant.
+#[must_use]
+pub fn screaming(name: &str) -> String {
+    name.to_ascii_uppercase().replace('-', "_")
+}
+
+/// Words JavaScript will not let a `const` be called.
+///
+/// Three drawings land on one — `delete`, `import` and `package` — and
+/// `export const delete = …` is a syntax error, not a lint. The whole list
+/// rather than those three: the next tag Lucide publishes may add a `class` or
+/// a `default`, and a check that knows only about today's collisions finds out
+/// about tomorrow's from a bundler.
+const RESERVED: [&str; 39] = [
+    "await",
+    "break",
+    "case",
+    "catch",
+    "class",
+    "const",
+    "continue",
+    "debugger",
+    "default",
+    "delete",
+    "do",
+    "else",
+    "enum",
+    "export",
+    "extends",
+    "false",
+    "finally",
+    "for",
+    "function",
+    "if",
+    "implements",
+    "import",
+    "in",
+    "instanceof",
+    "interface",
+    "let",
+    "new",
+    "null",
+    "package",
+    "private",
+    "protected",
+    "public",
+    "return",
+    "static",
+    "super",
+    "switch",
+    "this",
+    "throw",
+    "true",
+];
+
+/// `chevron-down` → `chevronDown`, the JavaScript export.
+///
+/// A name that is a reserved word takes an `Icon` suffix — `delete` becomes
+/// `deleteIcon` — because the alternative is a module that does not parse. The
+/// icon's own name is untouched: the module is still `icons/delete.js` and
+/// `data-nd-icon` still says `delete`, so only the binding moves.
+#[must_use]
+pub fn camel(name: &str) -> String {
+    let mut parts = name.split('-').filter(|part| !part.is_empty());
+    let first = parts.next().unwrap_or_default().to_owned();
+    let export = first + &parts.map(pascal).collect::<String>();
+    if RESERVED.contains(&export.as_str()) {
+        export + "Icon"
+    } else {
+        export
+    }
 }
 
 /// Loads `spec/icons.toml` and the drawings beside it.
@@ -475,7 +881,7 @@ mod tests {
 
     #[test]
     fn the_wrapper_is_stripped_and_the_drawing_survives() {
-        let (view_box, body) = normalise(LUCIDE, Paint::Stroke).expect("valid");
+        let (view_box, body) = normalise(LUCIDE).expect("valid");
         assert_eq!(view_box, "0 0 24 24");
         assert_eq!(
             body,
@@ -491,20 +897,34 @@ mod tests {
     #[test]
     fn an_id_is_refused() {
         let svg = r#"<svg viewBox="0 0 24 24"><path id="a" d="M0 0h1"/></svg>"#;
-        let error = normalise(svg, Paint::Stroke).unwrap_err();
+        let error = normalise(svg).unwrap_err();
         assert!(error.contains("id"), "{error}");
+    }
+
+    /// The ten Lucide drawings that fill a half-unit dot. `currentColor` is the
+    /// drawing declining to choose a color, which is the property the rule
+    /// exists to protect rather than something it should refuse.
+    #[test]
+    fn current_color_is_allowed_on_a_drawing() {
+        let svg = r#"<svg viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/></svg>"#;
+        let (_, body) = normalise(svg).expect("currentColor follows the theme");
+        assert!(body.contains("fill=\"currentColor\""));
     }
 
     #[test]
     fn a_fixed_color_is_refused() {
-        let svg = r##"<svg viewBox="0 0 24 24"><path fill="#f00" d="M0 0h1"/></svg>"##;
-        assert!(normalise(svg, Paint::Fill).is_err());
+        for value in ["#f00", "red", "oklch(50% 0 0)", "var(--nc-color-accent)"] {
+            let svg =
+                format!(r#"<svg viewBox="0 0 24 24"><path fill="{value}" d="M0 0h1"/></svg>"#);
+            let error = normalise(&svg).unwrap_err();
+            assert!(error.contains("frozen into a drawing"), "{value}: {error}");
+        }
     }
 
     #[test]
     fn a_foreign_element_is_refused() {
         let svg = r##"<svg viewBox="0 0 24 24"><use href="#x"/></svg>"##;
-        let error = normalise(svg, Paint::Stroke).unwrap_err();
+        let error = normalise(svg).unwrap_err();
         assert!(error.contains("use"), "{error}");
     }
 
@@ -513,14 +933,25 @@ mod tests {
     #[test]
     fn an_empty_path_is_refused() {
         let svg = r#"<svg viewBox="0 0 24 24"><path d=""/></svg>"#;
-        let error = normalise(svg, Paint::Stroke).unwrap_err();
+        let error = normalise(svg).unwrap_err();
         assert!(error.contains("empty path"), "{error}");
     }
 
     #[test]
     fn a_drawing_with_no_view_box_is_refused() {
         let svg = r#"<svg width="24"><path d="M0 0h1"/></svg>"#;
-        assert!(normalise(svg, Paint::Stroke).is_err());
+        assert!(normalise(svg).is_err());
+    }
+
+    /// A file name is an identifier in two languages before it is anything else.
+    #[test]
+    fn a_file_name_that_cannot_be_an_identifier_is_refused() {
+        assert!(is_vendorable("chevron-down.svg"));
+        assert!(is_vendorable("columns-2.svg"));
+        assert!(!is_vendorable("Chevron_Down.svg"));
+        assert!(!is_vendorable("-leading.svg"));
+        assert!(!is_vendorable("../escape.svg"));
+        assert!(!is_vendorable(".svg"));
     }
 
     /// The set as it ships must validate, and its failure must be readable.
@@ -531,15 +962,38 @@ mod tests {
             format!("{root}/spec/icons.toml"),
             format!("{root}/assets/icons"),
         ) {
-            Ok((_, icons)) => assert!(!icons.is_empty(), "the set is empty"),
+            Ok((_, icons)) => assert!(icons.len() > 1_000, "the sweep found {}", icons.len()),
             Err(error) => panic!("{error:?}"),
         }
     }
 
+    /// A rename claims its file, so the upstream name is not a second icon.
     #[test]
-    fn names_become_variants() {
+    fn a_claimed_drawing_is_not_swept_again() {
+        let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
+        let (_, icons) = load(
+            format!("{root}/spec/icons.toml"),
+            format!("{root}/assets/icons"),
+        )
+        .expect("the shipped set");
+        assert!(icons.iter().any(|icon| icon.name == "close"));
+        assert!(
+            !icons.iter().any(|icon| icon.name == "x"),
+            "`x.svg` is claimed by `close` and must not also be `x`"
+        );
+    }
+
+    #[test]
+    fn names_become_identifiers() {
         assert_eq!(pascal("chevron-down"), "ChevronDown");
-        assert_eq!(pascal("menu"), "Menu");
-        assert_eq!(pascal("external-link"), "ExternalLink");
+        assert_eq!(screaming("chevron-down"), "CHEVRON_DOWN");
+        assert_eq!(screaming("columns-2"), "COLUMNS_2");
+        assert_eq!(camel("chevron-down"), "chevronDown");
+        assert_eq!(camel("menu"), "menu");
+        assert_eq!(camel("a-arrow-down"), "aArrowDown");
+        // `export const delete = …` is a syntax error, not a lint.
+        assert_eq!(camel("delete"), "deleteIcon");
+        assert_eq!(camel("import"), "importIcon");
+        assert_eq!(camel("package"), "packageIcon");
     }
 }

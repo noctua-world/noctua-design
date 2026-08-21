@@ -108,7 +108,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         }],
     ),
     (
-        r"Button { icon: IconName::Check, … }",
+        r"Button { icon: IconDrawing::CHECK, … }",
         &[Node::Element {
             tag: "div",
             attributes: &[("class", Value::Text("nd-example-row"))],
@@ -135,7 +135,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         }],
     ),
     (
-        r"Button { icon_end: IconName::ExternalLink | ::ChevronRight, … }",
+        r"Button { icon_end: IconDrawing::EXTERNAL_LINK | ::ChevronRight, … }",
         &[Node::Element {
             tag: "div",
             attributes: &[("class", Value::Text("nd-example-row"))],

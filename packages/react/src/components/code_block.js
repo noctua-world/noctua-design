@@ -14,6 +14,9 @@ import { createElement as h } from "react";
 import { ALIASES, GRAMMARS, lines, scan } from "@noctua-world/design-tokens/grammars.js";
 
 import { Icon } from "./icon.js";
+import { check } from "@noctua-world/design-tokens/icons/check.js";
+import { copy } from "@noctua-world/design-tokens/icons/copy.js";
+import { textWrap } from "@noctua-world/design-tokens/icons/text-wrap.js";
 export function CodeBlock({ code, language, theme, filename, caption, numbered, startLine, markLines, focus, wrap, maxLines, expandLabel, collapseLabel, wrapLabel, copy, copied, glass, className, ...rest }) {
   const numbered_ = numbered ?? false;
   const wrap_ = wrap ?? false;
@@ -80,7 +83,7 @@ export function CodeBlock({ code, language, theme, filename, caption, numbered, 
                   "aria-pressed": String(wrap_),
                   "data-nd-wrap-toggle": "",
                 },
-                h(Icon, { icon: "wrap-text" }),
+                h(Icon, { icon: textWrap }),
               )
             : null,
           copy
@@ -95,8 +98,8 @@ export function CodeBlock({ code, language, theme, filename, caption, numbered, 
                   "data-nd-copy": "",
                   "data-nd-copied": copied,
                 },
-                h(Icon, { key: "i", icon: "copy" }),
-                h(Icon, { key: "k", icon: "check" }),
+                h(Icon, { key: "i", icon: copy }),
+                h(Icon, { key: "k", icon: check }),
               )
             : null,
           copy

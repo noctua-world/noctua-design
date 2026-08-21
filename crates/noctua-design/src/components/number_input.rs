@@ -7,7 +7,7 @@
 //! Let users enter a quantity, with steppers and a numeric keyboard.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Field, FieldSize, Icon};
 
@@ -259,7 +259,7 @@ pub fn NumberInput(
                             "aria-label": up.clone(),
                             title: up,
                             "data-nd-number-input-step": "up",
-                            Icon { icon: IconName::Plus, size: crate::components::IconSize::Small }
+                            Icon { icon: IconDrawing::PLUS, size: crate::components::IconSize::Small }
                         }
                         button {
                             class: "nd-number-input-step",
@@ -269,7 +269,7 @@ pub fn NumberInput(
                             "aria-label": down.clone(),
                             title: down,
                             "data-nd-number-input-step": "down",
-                            Icon { icon: IconName::Minus, size: crate::components::IconSize::Small }
+                            Icon { icon: IconDrawing::MINUS, size: crate::components::IconSize::Small }
                         }
                     }
                 }

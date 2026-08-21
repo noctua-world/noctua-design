@@ -12,6 +12,8 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { close } from "@noctua-world/design-tokens/icons/close.js";
+import { search } from "@noctua-world/design-tokens/icons/search.js";
 export function Search({ name, label, placeholder, value, presentation, size, src, action, query, cap, filter, hotkey, clearable, loading, disabled, glass, recent, status, emptyLabel, loadingLabel, errorLabel, capLabel, clearLabel, recentLabel, forgetLabel, closeLabel, className, children, ...rest }) {
   const presentation_ = presentation ?? "inline";
   const size_ = size ?? "medium";
@@ -34,7 +36,7 @@ export function Search({ name, label, placeholder, value, presentation, size, sr
     h(
       "span",
       { key: "g", className: "nd-search-glyph", "aria-hidden": "true" },
-      h(Icon, { icon: "search", size: "small" }),
+      h(Icon, { icon: search, size: "small" }),
     ),
     h("label", { key: "l", className: "nd-visually-hidden", id: `${id}-label`, htmlFor: id }, label),
     h("input", {
@@ -65,7 +67,7 @@ export function Search({ name, label, placeholder, value, presentation, size, sr
             title: clearLabel,
             "data-nd-search-clear": "",
           },
-          h(Icon, { icon: "close", size: "small" }),
+          h(Icon, { icon: close, size: "small" }),
         )
       : null,
   ];
@@ -161,7 +163,7 @@ export function Search({ name, label, placeholder, value, presentation, size, sr
           h(
             "span",
             { key: "g", className: "nd-search-glyph", "aria-hidden": "true" },
-            h(Icon, { icon: "search", size: "small" }),
+            h(Icon, { icon: search, size: "small" }),
           ),
           h("span", { key: "t", className: "nd-search-open-text" }, label),
           hotkeyHint,
@@ -195,7 +197,7 @@ export function Search({ name, label, placeholder, value, presentation, size, sr
                     title: closeLabel,
                     "data-nd-search-close": "",
                   },
-                  h(Icon, { icon: "close", size: "small" }),
+                  h(Icon, { icon: close, size: "small" }),
                 )
               : null,
           ),

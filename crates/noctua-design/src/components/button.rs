@@ -7,7 +7,7 @@
 //! Let users carry out an action with one press, in every shape an interface needs.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::Icon;
 
@@ -219,11 +219,11 @@ pub fn Button(
     #[props(default)]
     shape: ButtonShape,
     /// An icon before the label. It is decoration and is hidden from screen readers, because it repeats the label. It is optically centred on the text, and on both lines together when there is a `detail`.
-    icon: Option<IconName>,
+    icon: Option<IconDrawing>,
     /// An icon after the label, for a direction or a destination. Use one decorative icon rather than one on each side.
-    icon_end: Option<IconName>,
+    icon_end: Option<IconDrawing>,
     /// The icon a toggle shows while it is pressed. Both glyphs are rendered and the state picks one, so no script has to swap them. Use it with `icon`, which is the other half of the pair.
-    icon_alt: Option<IconName>,
+    icon_alt: Option<IconDrawing>,
     /// The name the control takes while it is pressed or expanded. Without it a toggle keeps one name and announces the wrong state from the first press onward.
     label_alt: Option<String>,
     /// A name a script can find this button by. Use it where the behaviour is the caller's own code, such as a toggle. A button that submits a form or follows a link needs no hook. `Disclosure`, `MenuItem` and `Search` spell it the same way.
@@ -313,7 +313,7 @@ pub fn Button(
     // A button with two chevrons is not a control anybody designs, so
     // the component refuses to draw the second rather than trusting
     // every caller to notice.
-    let chevron = menu && icon != Some(IconName::ChevronDown);
+    let chevron = menu && icon != Some(IconDrawing::CHEVRON_DOWN);
 
     let content = rsx! {
         // A TOGGLE SHIPS BOTH GLYPHS AND LETS THE STATE PICK ONE.
@@ -345,7 +345,7 @@ pub fn Button(
         if let Some(icon_end) = icon_end {
             Icon { icon: icon_end }
         } else if chevron {
-            Icon { icon: IconName::ChevronDown, size: crate::components::IconSize::Small }
+            Icon { icon: IconDrawing::CHEVRON_DOWN, size: crate::components::IconSize::Small }
         }
     };
 

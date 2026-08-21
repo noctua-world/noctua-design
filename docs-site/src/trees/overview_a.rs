@@ -347,7 +347,7 @@ SearchResult { href: "…", label: "…", detail: "…", keywords: "…", curren
     // longer exists, so nothing could ever have drawn it again.
     (
         "tag",
-        r#"Tag { icon: IconName::Check, tone: "shipped", label: "Shipped" }
+        r#"Tag { icon: IconDrawing::CHECK, tone: "shipped", label: "Shipped" }
 Tag { tone: "accent", variant: TagVariant::Solid, label: "In review" }
 Tag { tone: "danger", variant: TagVariant::Outline, label: "Blocked" }"#,
         &[Node::Element {

@@ -14,7 +14,7 @@ use crate::trees::Tree;
 /// Every `Avatar` example. 4 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
-        r#"Avatar { label: "…", src: "…" } / { initials: "…" } / { icon: IconName::Monitor }"#,
+        r#"Avatar { label: "…", src: "…" } / { initials: "…" } / { icon: IconDrawing::MONITOR }"#,
         &[Node::Element {
             tag: "div",
             attributes: &[("class", Value::Text("nd-example-row"))],

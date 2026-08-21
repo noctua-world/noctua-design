@@ -398,7 +398,7 @@ Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#
     (
         "tag",
         example!(
-            r#"Tag { icon: IconName::Check, tone: "shipped", label: "Shipped" }
+            r#"Tag { icon: IconDrawing::CHECK, tone: "shipped", label: "Shipped" }
 Tag { tone: "accent", variant: TagVariant::Solid, label: "In review" }
 Tag { tone: "danger", variant: TagVariant::Outline, label: "Blocked" }"#
         ),
@@ -542,7 +542,7 @@ Label { kind: Name, for_control } / Segmented { labelledby }"
     (
         "message-bar",
         example!(
-            r#"MessageBar { tone: "warning", icon: IconName::Warning, title, dismissible: true }"#
+            r#"MessageBar { tone: "warning", icon: IconDrawing::WARNING, title, dismissible: true }"#
         ),
     ),
     (
@@ -929,20 +929,20 @@ const MESSAGE_BAR: &[Example] = &[
     // THE DEFAULT, AND THE QUIET ONE. A status waits for a pause instead of
     // cutting a screen reader off, which is right about something that worked.
     example!(
-        r#"MessageBar { tone: "success", icon: IconName::Check, title, … }"#,
+        r#"MessageBar { tone: "success", icon: IconDrawing::CHECK, title, … }"#,
         Key::ExampleMessageBarNoteStatus
     ),
     // THE RUDE ONE, OPTED INTO. `alert` cuts in, and `live` says how loudly,
     // which is the one case worth overruling the role for.
     example!(
-        r#"MessageBar { alert: true, live: Assertive, tone: "danger", icon: IconName::Alert }"#,
+        r#"MessageBar { alert: true, live: Assertive, tone: "danger", icon: IconDrawing::ALERT }"#,
         Key::ExampleMessageBarNoteAlert
     ),
     // ONE A READER CAN TAKE AWAY. The control ships hidden and the script
     // reveals it, so a page with no script carries no button that closes
     // nothing.
     example!(
-        r#"MessageBar { dismissible: true, dismiss_label, tone: "warning", icon: IconName::Warning }"#,
+        r#"MessageBar { dismissible: true, dismiss_label, tone: "warning", icon: IconDrawing::WARNING }"#,
         Key::ExampleMessageBarNoteDismiss
     ),
     // NO TONE AT ALL, which is the absence of the attribute rather than a name
@@ -1101,12 +1101,12 @@ const BUTTON: &[Example] = &[
         r"Button { shape: ButtonShape::… }",
         Key::ExampleButtonShapes
     ),
-    example!(r"Button { icon: IconName::Check, … }"),
+    example!(r"Button { icon: IconDrawing::CHECK, … }"),
     example!(
         // THE CAPTION NAMED AN ICON THE EXAMPLE DID NOT DRAW. It said
         // `ChevronDown` and rendered `ExternalLink`, which is a caption a reader
         // has no way to check and every reason to believe.
-        r"Button { icon_end: IconName::ExternalLink | ::ChevronRight, … }",
+        r"Button { icon_end: IconDrawing::EXTERNAL_LINK | ::ChevronRight, … }",
         Key::ExampleButtonIconEnd
     ),
     example!(
@@ -1740,7 +1740,7 @@ const SELECT_OPTION: &[Example] = &[
         Key::ExampleSelectNoteRich
     ),
     example!(
-        r"SelectOption { icon: IconName::Sun, … }",
+        r"SelectOption { icon: IconDrawing::SUN, … }",
         Key::ExampleSelectNoteIcon
     ),
     example!(
@@ -2310,7 +2310,7 @@ const TAG: &[Example] = &[
         Key::ExampleTagTones
     ),
     example!(
-        r#"Tag { icon: IconName::Check, swatch: "…", image: "…" }"#,
+        r#"Tag { icon: IconDrawing::CHECK, swatch: "…", image: "…" }"#,
         Key::ExampleTagBeside
     ),
     example!(
@@ -2347,7 +2347,7 @@ const BADGE: &[Example] = &[
 ];
 const AVATAR: &[Example] = &[
     example!(
-        r#"Avatar { label: "…", src: "…" } / { initials: "…" } / { icon: IconName::Monitor }"#,
+        r#"Avatar { label: "…", src: "…" } / { initials: "…" } / { icon: IconDrawing::MONITOR }"#,
         Key::ExampleAvatarLayers
     ),
     example!(

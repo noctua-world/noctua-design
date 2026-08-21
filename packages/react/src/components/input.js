@@ -14,6 +14,9 @@ import { createElement as h } from "react";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { close } from "@noctua-world/design-tokens/icons/close.js";
+import { eye } from "@noctua-world/design-tokens/icons/eye.js";
+import { eyeOff } from "@noctua-world/design-tokens/icons/eye-off.js";
 export function Input({ name, label, kind, value, placeholder, hint, error, required, requiredLabel, disabled, readonly, size, icon, prefix, suffix, clearable, clearLabel, maxlength, counter, counterLabel, revealLabel, concealLabel, autocomplete, pattern, spellcheck, glass, className, ...rest }) {
   const kind_ = kind ?? "text";
   const size_ = size ?? "medium";
@@ -119,7 +122,7 @@ export function Input({ name, label, kind, value, placeholder, hint, error, requ
               title: clearLabel,
               "data-nd-input-clear": "",
             },
-            h(Icon, { key: "i", icon: "close", size: "small" }),
+            h(Icon, { key: "i", icon: close, size: "small" }),
           )
         : null,
       password
@@ -136,8 +139,8 @@ export function Input({ name, label, kind, value, placeholder, hint, error, requ
               title: revealLabel,
               "data-nd-input-reveal": "",
             },
-            h(Icon, { key: "a", icon: "eye", size: "small" }),
-            h(Icon, { key: "b", icon: "eye-off", size: "small" }),
+            h(Icon, { key: "a", icon: eye, size: "small" }),
+            h(Icon, { key: "b", icon: eyeOff, size: "small" }),
           )
         : null,
     ),

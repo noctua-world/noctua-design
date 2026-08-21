@@ -7,7 +7,7 @@
 //! Show who a person is, as a picture, as initials, or as an icon.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::Icon;
 
@@ -111,7 +111,7 @@ pub fn Avatar(
     /// The picture. It is laid **over** the initials rather than instead of them, so a URL that never answers shows the letters, with no script. Its box is the size below rather than the image's, so nothing moves when it arrives.
     src: Option<String>,
     /// The drawing behind everything else, for a person with neither a picture nor initials, such as a pending invitation. Absent draws `user`.
-    icon: Option<IconName>,
+    icon: Option<IconDrawing>,
     /// Where this person leads, such as their profile page. Its presence makes the avatar a real `<a>`, so the middle mouse button, the context menu and a screen reader's list of links all work.
     href: Option<String>,
     /// The box size: `small`, `medium` or `large`. It matches `Button` step for step, so an avatar beside a control lines up. Inside an `AvatarGroup` the group's size wins.
@@ -132,7 +132,7 @@ pub fn Avatar(
 ) -> Element {
     let root = format!("nd-avatar {class}");
     let root = root.trim().to_owned();
-    let icon = icon.unwrap_or(IconName::User);
+    let icon = icon.unwrap_or(IconDrawing::USER);
 
     // The three layers, deepest first. Written once so the two elements below
     // cannot come to disagree about what an avatar contains.

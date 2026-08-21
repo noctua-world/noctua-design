@@ -12,6 +12,7 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { chevronDown } from "@noctua-world/design-tokens/icons/chevron-down.js";
 export function Disclosure({ summary, name, icon, open, marker, heading, glass, className, children, ...rest }) {
   const marker_ = marker ?? true;
   const heading_ = heading ?? "none";
@@ -45,7 +46,7 @@ export function Disclosure({ summary, name, icon, open, marker, heading, glass, 
             marker_
               ? h(Icon, {
                   key: "m",
-                  icon: "chevron-down",
+                  icon: chevronDown,
                   size: "small",
                   className: "nd-disclosure-marker",
                 })

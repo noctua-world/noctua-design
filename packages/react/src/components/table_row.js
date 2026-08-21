@@ -14,6 +14,7 @@ import { createElement as h } from "react";
 import { Button } from "./button.js";
 import { Checkbox } from "./checkbox.js";
 import { Radio } from "./radio.js";
+import { chevronDown } from "@noctua-world/design-tokens/icons/chevron-down.js";
 export function TableRow({ name, tone, select, emphasis, selected, selectLabel, selectName, disabled, expandable, expandLabel, detailFor, empty, className, children, ...rest }) {
   const tone_ = tone ?? "default";
   const select_ = select ?? "none";
@@ -86,7 +87,7 @@ export function TableRow({ name, tone, select, emphasis, selected, selectLabel, 
           h(Button, {
             label: expandLabel ?? "",
             hideLabel: true,
-            icon: "chevron-down",
+            icon: chevronDown,
             variant: "transparent",
             size: "small",
             controls,

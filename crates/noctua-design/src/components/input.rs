@@ -7,7 +7,7 @@
 //! Let users write one line of text, with the keyboard their phone should open for it.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Field, FieldSize, Icon};
 
@@ -116,7 +116,7 @@ pub fn Input(
     #[props(default)]
     size: InputSize,
     /// An icon inside the box, before the text. It says what kind of answer this is at a glance, and it is `aria-hidden`, because the question above it is the name.
-    icon: Option<IconName>,
+    icon: Option<IconDrawing>,
     /// A fixed word or symbol before the value, inside the box, such as `https://`, `R$` or `+55`. It is **not** part of the submitted value, and it is `aria-hidden`.
     prefix: Option<String>,
     /// A fixed word or symbol after the value, such as `.com`, `kg` or `%`. Same rule: drawn, never submitted.
@@ -281,7 +281,7 @@ pub fn Input(
                         "aria-label": clear.clone(),
                         title: clear,
                         "data-nd-input-clear": "",
-                        Icon { icon: IconName::Close, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
                     }
                 }
                 if password {
@@ -297,8 +297,8 @@ pub fn Input(
                         // Both drawings are rendered and the state picks one:
                         // swapping a glyph from script is shipping a drawing
                         // to the script (`NOCTUA.md §9.5`).
-                        Icon { icon: IconName::Eye, size: crate::components::IconSize::Small }
-                        Icon { icon: IconName::EyeOff, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::EYE, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::EYE_OFF, size: crate::components::IconSize::Small }
                     }
                 }
             }

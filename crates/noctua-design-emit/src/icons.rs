@@ -2,12 +2,38 @@
 //!
 //! | Output | For |
 //! |---|---|
-//! | `crates/noctua-design-icons/src/lib.rs` | the names, the drawings and `STROKE_WIDTH` |
-//! | `packages/tokens/icons.js` + `.d.ts` | the same, for consumers with no framework |
-//! | `dist/icons.json` | the manifest the documentation page reads |
+//! | `crates/noctua-design-icons/src/lib.rs` | one constant per icon, and `STROKE_WIDTH` |
+//! | `packages/tokens/icons/<name>.js` + `.d.ts` | one module per icon |
+//! | `packages/tokens/icons.js` + `.d.ts` | the stroke weight and the shape of a drawing |
+//! | `dist/icons.json` | the manifest, for anything that wants the whole set |
 //! | `assets/icons/ATTRIBUTION.md` | who drew them, and under what licence |
 //!
-//! # The `Icon` COMPONENT is not here any more
+//! # One constant, one module, and why the shape is the feature
+//!
+//! This emitted one `IconName` enum with a `match` per fact, and one `ICONS`
+//! object read as `ICONS[name]`. Both are aggregates, and an aggregate is
+//! indivisible: a `match` arm lives inside a function the linker keeps whole,
+//! and a dynamic property read is a thing no bundler can trace. At forty icons
+//! that cost a few kilobytes. At 1,777 it would cost every consumer the entire
+//! set to draw one chevron.
+//!
+//! So a name is not a string that indexes a table any more — it is a
+//! **constant that carries its own drawing**:
+//!
+//! - Rust: `IconDrawing::CHEVRON_DOWN`, an associated `const`. A `const` is
+//!   materialised at its use sites and nowhere else, so an icon nothing names
+//!   contributes no bytes at any optimisation level.
+//! - JavaScript: `import { chevronDown } from ".../icons/chevron-down.js"`. One
+//!   module per icon, one export each, so a bundler keeps exactly what was
+//!   imported.
+//!
+//! `NOCTUA.md §9.5` asked for a name a typo could not survive. An import path
+//! is that, harder: it fails before a type checker is consulted.
+//!
+//! `cargo xtask check` proves both — a release binary and a real esbuild
+//! bundle, each scanned for drawings that must not be in it.
+//!
+//! # The `Icon` COMPONENT is not here
 //!
 //! It was, in `crates/noctua-design/src/icon.rs` and `packages/react/src/icon.js`,
 //! and that put one component outside the catalogue: no props table, no variant
@@ -23,17 +49,6 @@
 //! What stays here is what is about the DRAWINGS rather than about the
 //! component: the names, the geometry, the manifest, the attribution, and the
 //! stroke weight both bodies read from `noctua_design_icons::STROKE_WIDTH`.
-//!
-//! # An enum, not a string
-//!
-//! The site shipped `Icon { name: "repository" }` against a `match` with a
-//! `_ => ""` arm. It compiled, and it rendered `<path d="">` inside a 44×44
-//! clickable box in the header of every page. Nothing could have caught it:
-//! "an icon called repository" and "no icon" were the same value.
-//!
-//! Here the name is a generated enum in Rust and a generated union in
-//! TypeScript, so that call is a type error in both languages. `NOCTUA.md §9.5`
-//! asks for exactly this.
 
 use std::fmt::Write as _;
 
@@ -47,16 +62,27 @@ pub const ICON_SPEC: &str = "spec/icons.toml";
 /// Emits the whole icon layer.
 #[must_use]
 pub fn emit(icons: &Icons, resolved: &[Resolved]) -> Vec<EmittedFile> {
-    vec![
+    let mut files = vec![
         EmittedFile::new(
             "crates/noctua-design-icons/src/lib.rs",
             names(&icons.meta, resolved),
         ),
-        EmittedFile::new("packages/tokens/icons.js", tokens_js(&icons.meta, resolved)),
-        EmittedFile::new("packages/tokens/icons.d.ts", tokens_types(resolved)),
+        EmittedFile::new("packages/tokens/icons.js", tokens_js(&icons.meta)),
+        EmittedFile::new("packages/tokens/icons.d.ts", tokens_types()),
         EmittedFile::new("dist/icons.json", manifest(resolved)),
         EmittedFile::new("assets/icons/ATTRIBUTION.md", attribution(icons, resolved)),
-    ]
+    ];
+    for icon in resolved {
+        files.push(EmittedFile::new(
+            format!("packages/tokens/icons/{}.js", icon.name),
+            module_js(icon),
+        ));
+        files.push(EmittedFile::new(
+            format!("packages/tokens/icons/{}.d.ts", icon.name),
+            module_types(icon),
+        ));
+    }
+    files
 }
 
 // --- The names and the drawings --------------------------------------------
@@ -65,10 +91,18 @@ fn names(meta: &Meta, icons: &[Resolved]) -> String {
     let mut out = header_from(CommentStyle::Line("//!"), ICON_SPEC);
     out.push_str(
         "//!\n\
-         //! Every icon the interface uses, as a name and a drawing.\n\
+         //! Every icon in the system, as one constant each.\n\
          //!\n\
          //! `no_std`: this is a table of string literals, and a consumer should not\n\
          //! take a standard library on to read one.\n\
+         //!\n\
+         //! # One constant per icon, and nothing that touches all of them\n\
+         //!\n\
+         //! A `const` is materialised at its use sites and at no others, so an icon\n\
+         //! nothing names reaches no binary. `ALL` and [`IconDrawing::parse`] are the\n\
+         //! two things that touch every icon, and they are behind the `catalogue`\n\
+         //! feature, which is off: an interface reaches an icon by naming it, and only\n\
+         //! a gallery wants the set.\n\
          \n#![no_std]\n\n",
     );
 
@@ -88,181 +122,198 @@ fn names(meta: &Meta, icons: &[Resolved]) -> String {
         meta.stroke_width
     );
 
-    out.push_str("/// Every icon in the system.\n");
     out.push_str(
-        "///\n\
-         /// A generated enum rather than a name, so an icon that does not exist is a\n\
-         /// compile error rather than an empty box on a page. There is deliberately\n\
-         /// no `FromStr` and no `From<&str>`: a string that comes from anywhere but\n\
-         /// this enum is exactly what shipped an invisible control.\n",
+        "/// One icon: its name, its geometry, and how it is painted.\n\
+         ///\n\
+         /// A value rather than a name, so the drawing travels with the reference to\n\
+         /// it. That is what lets an application that draws one icon pay for one icon:\n\
+         /// there is no table to look the name up in, so there is no table to keep.\n\
+         ///\n\
+         /// Constructed only by this module. A drawing assembled anywhere else has not\n\
+         /// been through the validator in `spec/icons.toml`'s loader, and the whole\n\
+         /// point of that validator is that a drawing carries geometry and nothing\n\
+         /// else — which is why the fields are readable and the type is not.\n\
+         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]\n\
+         #[non_exhaustive]\n\
+         pub struct IconDrawing {\n\
+         \x20   /// Its name, as `spec/icons.toml` spells it. Written to `data-nd-icon`.\n\
+         \x20   pub name: &'static str,\n\
+         \x20   /// Its `viewBox`, taken from the drawing rather than assumed.\n\
+         \x20   pub view_box: &'static str,\n\
+         \x20   /// Whether it is drawn as a solid shape rather than an outline.\n\
+         \x20   pub filled: bool,\n\
+         \x20   /// The drawing: the children of `<svg>`, and nothing else.\n\
+         \x20   pub body: &'static str,\n\
+         \x20   /// What it is for.\n\
+         \x20   pub doc: &'static str,\n\
+         }\n\n",
     );
-    out.push_str("#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]\n");
-    out.push_str("pub enum IconName {\n");
-    for icon in icons {
-        let _ = writeln!(out, "    /// {}\n    {},", icon.doc, icon.variant);
+
+    out.push_str("impl IconDrawing {\n");
+    for (index, icon) in icons.iter().enumerate() {
+        if index > 0 {
+            out.push('\n');
+        }
+        let _ = writeln!(out, "    /// {}", doc_line(&icon.doc));
+        let _ = writeln!(out, "    pub const {}: Self = Self {{", icon.constant);
+        let _ = writeln!(out, "        name: \"{}\",", icon.name);
+        let _ = writeln!(out, "        view_box: \"{}\",", icon.view_box);
+        let _ = writeln!(out, "        filled: {},", icon.paint == Paint::Fill);
+        let _ = writeln!(out, "        body: r#\"{}\"#,", icon.body);
+        let _ = writeln!(out, "        doc: \"{}\",", escape_rust(&icon.doc));
+        out.push_str("    };\n");
     }
     out.push_str("}\n\n");
 
-    out.push_str("impl IconName {\n");
-    let _ = writeln!(
+    catalogue(&mut out, icons);
+    out
+}
+
+/// `ALL` and `parse`: the two things that touch every icon.
+///
+/// Behind a feature because they are the two that would defeat the whole shape
+/// — an array naming 1,777 constants materialises 1,777 constants. The
+/// documentation site's gallery is what asks for them, and nothing else should.
+fn catalogue(out: &mut String, icons: &[Resolved]) {
+    out.push_str(
+        "/// Every icon in the system, in name order.\n\
+         ///\n\
+         /// Behind the `catalogue` feature: referring to this array refers to every\n\
+         /// icon in it, which is exactly the payload an application must not take on to\n\
+         /// draw one. The gallery on the documentation site is what it is for.\n\
+         ///\n\
+         /// A `static` rather than a `const`, and clippy is right about why: a `const`\n\
+         /// array is copied whole at every use site, so two readers of a thousand-entry\n\
+         /// catalogue would be two thousand entries. A `static` is one instance, and one\n\
+         /// nothing refers to is dropped at link time.\n\
+         #[cfg(feature = \"catalogue\")]\n",
+    );
+    let _ = writeln!(out, "pub static ALL: [IconDrawing; {}] = [", icons.len());
+    for icon in icons {
+        let _ = writeln!(out, "    IconDrawing::{},", icon.constant);
+    }
+    out.push_str("];\n\n");
+
+    out.push_str(
+        "#[cfg(feature = \"catalogue\")]\n\
+         impl IconDrawing {\n\
+         \x20   /// The icon of this name, for the documentation page and for tests.\n\
+         \x20   ///\n\
+         \x20   /// Deliberately fallible and deliberately not `FromStr`: nothing in an\n\
+         \x20   /// interface should reach an icon by name. A name that is a string cannot\n\
+         \x20   /// tell \"this icon\" from \"no icon\", which is the defect the constants\n\
+         \x20   /// above exist to make impossible.\n\
+         \x20   #[must_use]\n\
+         \x20   pub fn parse(name: &str) -> Option<Self> {\n\
+         \x20       let mut index = 0;\n\
+         \x20       while index < ALL.len() {\n\
+         \x20           let icon = ALL[index];\n\
+         \x20           if str_eq(icon.name, name) {\n\
+         \x20               return Some(icon);\n\
+         \x20           }\n\
+         \x20           index += 1;\n\
+         \x20       }\n\
+         \x20       None\n\
+         \x20   }\n\
+         }\n\n\
+         /// `str::eq` without the standard library.\n\
+         #[cfg(feature = \"catalogue\")]\n\
+         fn str_eq(a: &str, b: &str) -> bool {\n\
+         \x20   a.as_bytes() == b.as_bytes()\n\
+         }\n",
+    );
+}
+
+/// One `doc` as a single Rust doc-comment line.
+///
+/// A derived doc is one sentence and a written one is often several, but a
+/// `///` cannot carry a newline: the alternative is a multi-line comment whose
+/// second line rustfmt is free to rewrap, and a generated file that rustfmt
+/// changes fails the drift check.
+fn doc_line(doc: &str) -> String {
+    doc.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+/// A Rust string literal's contents, escaped.
+fn escape_rust(text: &str) -> String {
+    doc_line(text).replace('\\', "\\\\").replace('"', "\\\"")
+}
+
+// --- One module per icon ----------------------------------------------------
+
+fn module_js(icon: &Resolved) -> String {
+    let mut out = header_from(CommentStyle::Line("//"), ICON_SPEC);
+    let _ = write!(
         out,
-        "    /// Every icon, in the order the spec declares them.\n    \
-         pub const ALL: [Self; {}] = [",
-        icons.len()
-    );
-    for icon in icons {
-        let _ = writeln!(out, "        Self::{},", icon.variant);
-    }
-    out.push_str("    ];\n\n");
-
-    out.push_str(
-        "    /// Its name, as the spec spells it.\n    \
-         #[must_use]\n    pub const fn as_str(self) -> &'static str {\n        match self {\n",
-    );
-    for icon in icons {
-        let _ = writeln!(
-            out,
-            "            Self::{} => \"{}\",",
-            icon.variant, icon.name
-        );
-    }
-    out.push_str("        }\n    }\n\n");
-
-    out.push_str(
-        "    /// The drawing: the children of `<svg>`, and nothing else.\n    \
-         #[must_use]\n    pub const fn body(self) -> &'static str {\n        match self {\n",
-    );
-    for icon in icons {
-        let _ = writeln!(
-            out,
-            "            Self::{} => r#\"{}\"#,",
-            icon.variant, icon.body
-        );
-    }
-    out.push_str("        }\n    }\n\n");
-
-    shared_tables(&mut out, icons);
-
-    out.push_str(
-        "    /// The icon of this name, for the documentation page and for tests.\n    \
-         ///\n    /// Deliberately fallible and deliberately not `FromStr`: nothing in an\n    \
-         /// interface should reach an icon by name.\n    \
-         #[must_use]\n    pub fn parse(name: &str) -> Option<Self> {\n        \
-         let mut index = 0;\n        while index < Self::ALL.len() {\n            \
-         let icon = Self::ALL[index];\n            \
-         if str_eq(icon.as_str(), name) {\n                return Some(icon);\n            }\n            \
-         index += 1;\n        }\n        None\n    }\n}\n\n",
-    );
-
-    out.push_str(
-        "/// `str::eq` without the standard library.\nfn str_eq(a: &str, b: &str) -> bool {\n    \
-         a.as_bytes() == b.as_bytes()\n}\n",
+        "\n/** {} */\nexport const {} = {{\n  \
+         name: \"{}\",\n  viewBox: \"{}\",\n  filled: {},\n  body: {},\n}};\n",
+        doc_line(&icon.doc),
+        icon.export,
+        icon.name,
+        icon.view_box,
+        icon.paint == Paint::Fill,
+        json_string(&icon.body),
     );
     out
 }
 
-/// The three tables where many icons legitimately agree.
-///
-/// One arm per icon even where the values repeat: collapsing the ones that
-/// happen to agree today would make the next icon that disagrees a structural
-/// change to this emitter rather than a line in the spec.
-fn shared_tables(out: &mut String, icons: &[Resolved]) {
-    const SAME_ARMS: &str = "    #[expect(\n        clippy::match_same_arms,\n        \
-         reason = \"one arm per icon, generated from the spec\"\n    )]\n";
-
+fn module_types(icon: &Resolved) -> String {
+    let mut out = header_from(CommentStyle::Line("//"), ICON_SPEC);
     let _ = write!(
         out,
-        "    /// Its `viewBox`, taken from the drawing rather than assumed.\n\
-         {SAME_ARMS}    #[must_use]\n    \
-         pub const fn view_box(self) -> &'static str {{\n        match self {{\n"
+        "\nimport type {{ IconDrawing }} from \"../icons.js\";\n\n\
+         /** {} */\nexport declare const {}: IconDrawing;\n",
+        doc_line(&icon.doc),
+        icon.export,
     );
-    for icon in icons {
-        let _ = writeln!(
-            out,
-            "            Self::{} => \"{}\",",
-            icon.variant, icon.view_box
-        );
-    }
-    out.push_str("        }\n    }\n\n");
-
-    let _ = write!(
-        out,
-        "    /// Whether it is drawn as an outline or as a solid shape.\n    \
-         ///\n    /// Brand marks are solid; everything else is an outline.\n\
-         {SAME_ARMS}    #[must_use]\n    \
-         pub const fn filled(self) -> bool {{\n        match self {{\n"
-    );
-    for icon in icons {
-        let _ = writeln!(
-            out,
-            "            Self::{} => {},",
-            icon.variant,
-            icon.paint == Paint::Fill
-        );
-    }
-    out.push_str("        }\n    }\n\n");
-
-    out.push_str(
-        "    /// What it is for.\n    \
-         #[must_use]\n    pub const fn doc(self) -> &'static str {\n        match self {\n",
-    );
-    for icon in icons {
-        let _ = writeln!(
-            out,
-            "            Self::{} => \"{}\",",
-            icon.variant,
-            icon.doc.replace('"', "\\\"")
-        );
-    }
-    out.push_str("        }\n    }\n\n");
+    out
 }
 
-// --- The names, framework-free ---------------------------------------------
+// --- What every icon shares -------------------------------------------------
 
-fn tokens_js(meta: &Meta, icons: &[Resolved]) -> String {
+fn tokens_js(meta: &Meta) -> String {
     let mut out = header_from(CommentStyle::Line("//"), ICON_SPEC);
-    // The React `Icon` reads it from here, as the Dioxus one reads
-    // `noctua_design_icons::STROKE_WIDTH`. One declaration, two languages.
-    out.push_str("\n/** The weight a stroked icon is drawn at. */\n");
+    out.push_str(
+        "\n// THERE IS NO TABLE OF ICONS HERE, AND THAT IS THE FEATURE.\n\
+         //\n\
+         // This module held an `ICONS` object with every drawing in it, and the React\n\
+         // `Icon` read it as `ICONS[name]`. A dynamic property read is a thing no\n\
+         // bundler can trace, so one icon meant shipping all of them. Each drawing is\n\
+         // its own module now:\n\
+         //\n\
+         //     import { chevronDown } from \"@noctua-world/design-tokens/icons/chevron-down.js\";\n\
+         //\n\
+         // A consumer that wants the whole set — an icon picker — fetches\n\
+         // `dist/icons.json` at run time, which is where a catalogue belongs: lazy,\n\
+         // cacheable, and outside the bundle.\n\n",
+    );
+    out.push_str("/** The weight a stroked icon is drawn at. */\n");
     let _ = writeln!(
         out,
-        "export const ICON_STROKE_WIDTH = \"{}\";\n",
+        "export const ICON_STROKE_WIDTH = \"{}\";",
         meta.stroke_width
     );
-    out.push_str("/** Every icon: its drawing, its box, and how it is painted. */\n");
-    out.push_str("export const ICONS = {\n");
-    for icon in icons {
-        let _ = writeln!(
-            out,
-            "  \"{}\": {{ viewBox: \"{}\", filled: {}, body: {} }},",
-            icon.name,
-            icon.view_box,
-            icon.paint == Paint::Fill,
-            json_string(&icon.body)
-        );
-    }
-    out.push_str("};\n\n/** Every icon name, in the order the spec declares them. */\n");
-    out.push_str("export const ICON_NAMES = [\n");
-    for icon in icons {
-        let _ = writeln!(out, "  \"{}\",", icon.name);
-    }
-    out.push_str("];\n");
     out
 }
 
-fn tokens_types(icons: &[Resolved]) -> String {
+fn tokens_types() -> String {
     let mut out = header_from(CommentStyle::Line("//"), ICON_SPEC);
-    out.push_str("\n/** Every icon in the system. A name outside this union does not exist. */\n");
-    out.push_str("export type IconName =\n");
-    for (index, icon) in icons.iter().enumerate() {
-        let end = if index + 1 == icons.len() { ";" } else { "" };
-        let _ = writeln!(out, "  | \"{}\"{end}", icon.name);
-    }
     out.push_str(
-        "\nexport interface IconDrawing {\n  viewBox: string;\n  filled: boolean;\n  body: string;\n}\n\n",
+        "\n/**\n * One icon: its name, its geometry, and how it is painted.\n *\n\
+         * Reached by importing it, one module per icon:\n *\n\
+         *     import { chevronDown } from \"@noctua-world/design-tokens/icons/chevron-down.js\";\n *\n\
+         * A path that names no icon fails at build time, which is the guarantee the\n\
+         * deleted `IconName` union used to give and gives sooner.\n */\n\
+         export interface IconDrawing {\n  \
+         /** Its name, as `spec/icons.toml` spells it. Written to `data-nd-icon`. */\n  \
+         name: string;\n  \
+         /** Its `viewBox`, taken from the drawing rather than assumed. */\n  \
+         viewBox: string;\n  \
+         /** Whether it is drawn as a solid shape rather than an outline. */\n  \
+         filled: boolean;\n  \
+         /** The drawing: the children of `<svg>`, and nothing else. */\n  \
+         body: string;\n}\n\n",
     );
-    out.push_str("export declare const ICONS: Record<IconName, IconDrawing>;\n");
-    out.push_str("export declare const ICON_NAMES: readonly IconName[];\n");
     out.push_str("export declare const ICON_STROKE_WIDTH: string;\n");
     out
 }
@@ -276,6 +327,10 @@ fn manifest(icons: &[Resolved]) -> String {
         "  \"_generated\": \"Generated by noctua-design — do not edit. Source: {ICON_SPEC}. Regenerate: {}.\",",
         crate::REGENERATE
     );
+    // NOTHING ON A PAGE FETCHES THIS. It is the machine-readable catalogue —
+    // for an icon picker, for tooling, for a search — and a browser test
+    // asserts no rendered page requests it. A page that did would be shipping
+    // every drawing to draw one.
     out.push_str("  \"icons\": [\n");
     for (index, icon) in icons.iter().enumerate() {
         let comma = if index + 1 == icons.len() { "" } else { "," };
@@ -286,7 +341,7 @@ fn manifest(icons: &[Resolved]) -> String {
             icon.project,
             icon.view_box,
             icon.paint == Paint::Fill,
-            json_string(&icon.doc),
+            json_string(&doc_line(&icon.doc)),
             json_string(&icon.body)
         );
     }
@@ -302,38 +357,82 @@ fn attribution(icons: &Icons, resolved: &[Resolved]) -> String {
         let _ = writeln!(out, "{}", line.trim_start());
     }
     out.push_str("-->\n\n# Icons\n\n");
-    out.push_str(
+    let _ = write!(
+        out,
         "The drawings under this directory are **vendored by hand** at a pinned tag \
          and are not build output. What *is* generated from them is everything else: \
-         the enum, both `Icon` implementations, the manifest, and this file.\n\n\
-         Only icons the interface actually uses are here. `NOCTUA.md §9.5`: \
-         *\"an unused icon is payload and review surface\"* — and the build enforces it \
-         in both directions, so a drawing nothing declares fails `cargo xtask check`.\n\n",
+         the constants, both `Icon` implementations, the manifest, and this file.\n\n\
+         Every drawing is checksummed. `cargo xtask check` verifies each one against \
+         the `SHA256SUMS` recorded when it was fetched, and fails on a file that \
+         changed, a file that is missing, and a file the list does not mention.\n\n\
+         `NOCTUA.md §9.5` used to keep the set to what the interfaces used, because \
+         *\"an unused icon is payload and review surface\"*. That is still true and it \
+         is now enforced by measurement: an icon nothing names reaches no binary and \
+         no bundle, and `cargo xtask check` proves it on a linked release binary and \
+         on a real bundler's output.\n\n\
+         **{} icons**, from {} source(s).\n\n",
+        resolved.len(),
+        icons.source.len(),
     );
 
     for (key, source) in &icons.source {
-        let mine: Vec<&Resolved> = resolved
-            .iter()
-            .filter(|icon| icon.project == source.project)
-            .collect();
+        let mine: Vec<&Resolved> = resolved.iter().filter(|icon| icon.source == *key).collect();
+        let curated: Vec<&&Resolved> = mine.iter().filter(|icon| icon.curated).collect();
         let _ = write!(
             out,
             "## {}\n\n\
              - Source: <{}>\n\
              - Tag: `{}`\n\
-             - Licence: {} — [`{}`]({})\n\n\
-             | Icon | File | For |\n|---|---|---|\n",
+             - Licence: {} — [`{}`]({}/{})\n\
+             - Vendored: `{}/`, {} drawing(s)\n\n\
+             Fetched with:\n\n```sh\n{}```\n\n",
             source.project,
             source.repository,
             source.tag,
             source.licence,
             source.licence_file,
+            source.directory,
             source.licence_file,
+            source.directory,
+            mine.len(),
+            source.fetch.trim_start(),
         );
-        for icon in mine {
-            let _ = writeln!(out, "| `{}` | `{}` | {} |", icon.name, key, icon.doc);
+
+        if !curated.is_empty() {
+            out.push_str(
+                "### What this system reaches for, and why\n\n\
+                 Every other drawing from this source is swept in under its own name \
+                 and is documented by that name alone.\n\n\
+                 | Icon | File | For |\n|---|---|---|\n",
+            );
+            for icon in &curated {
+                let _ = writeln!(
+                    out,
+                    "| `{}` | `{}` | {} |",
+                    icon.name,
+                    icon.file,
+                    doc_line(&icon.doc)
+                );
+            }
+            out.push('\n');
         }
-        out.push('\n');
+
+        let swept: Vec<&str> = mine
+            .iter()
+            .filter(|icon| !icon.curated)
+            .map(|icon| icon.name.as_str())
+            .collect();
+        if !swept.is_empty() {
+            let _ = write!(
+                out,
+                "### The rest, in full\n\n\
+                 {} drawing(s), each named after its file. Listed rather than \
+                 summarised: an attribution that says \"and others\" attributes \
+                 nothing.\n\n{}\n\n",
+                swept.len(),
+                swept.join(", ")
+            );
+        }
     }
     out
 }
@@ -381,13 +480,21 @@ mod tests {
         }
     }
 
-    /// A drawing that names its own color cannot follow a theme.
+    /// A drawing that names its own color cannot follow a theme. `currentColor`
+    /// is the one value that is not naming one.
     #[test]
-    fn no_drawing_carries_a_color() {
+    fn no_drawing_carries_a_fixed_color() {
         let (_, resolved) = shipped();
         for icon in &resolved {
-            assert!(!icon.body.contains("fill="), "{}", icon.name);
-            assert!(!icon.body.contains("stroke="), "{}", icon.name);
+            for painted in icon.body.split("fill=\"").skip(1) {
+                let value = painted.split('"').next().unwrap_or_default();
+                assert!(
+                    matches!(value, "currentColor" | "none"),
+                    "{} fills with {value}",
+                    icon.name
+                );
+            }
+            assert!(!icon.body.contains("stroke=\""), "{}", icon.name);
         }
     }
 
@@ -401,44 +508,66 @@ mod tests {
     }
 
     #[test]
-    fn the_enum_has_a_variant_for_every_icon() {
+    fn every_icon_has_a_constant_and_a_module() {
         let (icons, resolved) = shipped();
         let rust = names(&icons.meta, &resolved);
         for icon in &resolved {
             assert!(
-                rust.contains(&format!("Self::{} => \"{}\"", icon.variant, icon.name)),
-                "{} is missing from the enum",
+                rust.contains(&format!("pub const {}: Self = Self {{", icon.constant)),
+                "{} is missing its constant",
+                icon.name
+            );
+            assert!(
+                module_js(icon).contains(&format!("export const {} = {{", icon.export)),
+                "{} is missing its module",
                 icon.name
             );
         }
     }
 
-    /// The two implementations must offer the same names, or "identical
-    /// behaviour" is a claim nobody checks.
+    /// The shape the whole change exists for: nothing a consumer imports may
+    /// name more than the icon it asked for.
     #[test]
-    fn both_languages_ship_the_same_names() {
+    fn no_emitted_module_mentions_a_second_icon() {
         let (icons, resolved) = shipped();
-        let ts = tokens_types(&resolved);
-        let rust = names(&icons.meta, &resolved);
-        for icon in &resolved {
-            assert!(ts.contains(&format!("\"{}\"", icon.name)), "{}", icon.name);
-            assert!(
-                rust.contains(&format!("\"{}\"", icon.name)),
-                "{}",
-                icon.name
-            );
+        let shared = tokens_js(&icons.meta);
+        assert!(
+            !shared.contains("body:"),
+            "the shared module carries a drawing"
+        );
+        for icon in resolved.iter().take(200) {
+            let module = module_js(icon);
+            let mentions = resolved
+                .iter()
+                .filter(|other| module.contains(&format!("\"{}\"", other.name)))
+                .count();
+            assert_eq!(mentions, 1, "{} names another icon", icon.name);
         }
+    }
+
+    /// `ALL` is the one thing that names every icon, and a consumer must have
+    /// to ask for it.
+    #[test]
+    fn the_catalogue_is_behind_a_feature() {
+        let (icons, resolved) = shipped();
+        let rust = names(&icons.meta, &resolved);
+        let at = rust.find("pub static ALL").expect("the catalogue");
+        assert!(
+            rust[..at].ends_with("#[cfg(feature = \"catalogue\")]\n"),
+            "ALL is not behind the feature"
+        );
+        assert!(rust.contains("#[cfg(feature = \"catalogue\")]\nimpl IconDrawing {"));
     }
 
     /// The header link that shipped invisible asked for this name.
     #[test]
-    fn an_icon_that_does_not_exist_has_no_variant() {
+    fn an_icon_that_does_not_exist_has_no_constant() {
         let (icons, resolved) = shipped();
         assert!(
             !resolved.iter().any(|icon| icon.name == "repository"),
             "the test is stale"
         );
         let rust = names(&icons.meta, &resolved);
-        assert!(!rust.contains("Repository"));
+        assert!(!rust.contains("pub const REPOSITORY"));
     }
 }

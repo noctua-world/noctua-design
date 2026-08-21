@@ -7,7 +7,7 @@
 //! Ask for one thing in a window over the page, and hand the focus back after.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Icon, IconSize};
 
@@ -144,7 +144,7 @@ pub fn Dialog(
                                 r#type: "button",
                                 "aria-label": close_label,
                                 "data-nd-dialog-close": "",
-                                Icon { icon: IconName::Close, size: IconSize::Small }
+                                Icon { icon: IconDrawing::CLOSE, size: IconSize::Small }
                             }
                         }
                     }

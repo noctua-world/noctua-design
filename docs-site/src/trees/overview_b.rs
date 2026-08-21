@@ -521,7 +521,7 @@ ToolbarGroup { align: ToolbarGroupAlign::End, … }"#,
                                 ("tone", Value::Text("neutral")),
                                 ("size", Value::Text("small")),
                                 ("hide_label", Value::Bool(true)),
-                                ("icon", Value::Text("columns")),
+                                ("icon", Value::Text("columns-2")),
                                 ("label", Value::Message(Key::ExampleTableColumns)),
                             ],
                             children: &[],
@@ -777,7 +777,7 @@ Radio { name: "overview-delivery", value, label, hint, checked, size: Medium }"#
     ),
     (
         "message-bar",
-        r#"MessageBar { tone: "warning", icon: IconName::Warning, title, dismissible: true }"#,
+        r#"MessageBar { tone: "warning", icon: IconDrawing::WARNING, title, dismissible: true }"#,
         &[Node::Component {
             name: "MessageBar",
             props: &[

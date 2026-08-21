@@ -16,7 +16,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
     // THE DEFAULT, AND THE QUIET ONE. A status waits for a pause instead of
     // cutting a screen reader off, which is right about something that worked.
     (
-        r#"MessageBar { tone: "success", icon: IconName::Check, title, … }"#,
+        r#"MessageBar { tone: "success", icon: IconDrawing::CHECK, title, … }"#,
         &[Node::Component {
             name: "MessageBar",
             props: &[
@@ -30,7 +30,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
     // THE RUDE ONE, OPTED INTO. `alert` cuts in, and `live` says how loudly,
     // which is the one case worth overruling the role for.
     (
-        r#"MessageBar { alert: true, live: Assertive, tone: "danger", icon: IconName::Alert }"#,
+        r#"MessageBar { alert: true, live: Assertive, tone: "danger", icon: IconDrawing::ALERT }"#,
         &[Node::Component {
             name: "MessageBar",
             props: &[
@@ -47,7 +47,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
     // reveals it, so a page with no script carries no button that closes
     // nothing.
     (
-        r#"MessageBar { dismissible: true, dismiss_label, tone: "warning", icon: IconName::Warning }"#,
+        r#"MessageBar { dismissible: true, dismiss_label, tone: "warning", icon: IconDrawing::WARNING }"#,
         &[Node::Component {
             name: "MessageBar",
             props: &[

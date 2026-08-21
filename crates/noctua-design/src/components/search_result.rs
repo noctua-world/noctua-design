@@ -7,7 +7,7 @@
 //! Shows one search result as a link, with a second line under its name.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::Icon;
 
@@ -53,7 +53,7 @@ pub fn SearchResult(
                 if current {
                     // The non-colour half of `aria-current`: a list of places
                     // owes a mark to a reader who cannot see which row is lit.
-                    Icon { icon: IconName::Check, size: crate::components::IconSize::Small }
+                    Icon { icon: IconDrawing::CHECK, size: crate::components::IconSize::Small }
                 }
             }
         }

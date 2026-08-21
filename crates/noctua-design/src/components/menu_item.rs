@@ -7,7 +7,7 @@
 //! Put one action in a menu, as a real button or a real link when it goes somewhere.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Icon, IconSize};
 
@@ -21,7 +21,7 @@ pub fn MenuItem(
     /// The item's text, in the reader's language. It is the visible text **and** the accessible name at once, so the two cannot disagree. Required.
     label: String,
     /// An icon before the label, optically centred on the text. It is decoration and is `aria-hidden`, because it repeats the label.
-    icon: Option<String>,
+    icon: Option<IconDrawing>,
     /// A second, smaller line under the label, for an action whose consequence is worth spelling out. It is part of the accessible name, so a reader who cannot see it still hears it.
     detail: Option<String>,
     /// What this item applies its action to, as an identifier. The script reads it and nothing else, so it is never translated. `SegmentedItem` carries the same prop for the same reason.
@@ -53,7 +53,7 @@ pub fn MenuItem(
     // Built once and used by whichever element this turns out to be, so the two
     // branches cannot come to draw different things.
     let content = rsx! {
-        if let Some(icon) = icon.as_deref().and_then(IconName::parse) {
+        if let Some(icon) = icon {
             Icon { icon, size: IconSize::Small }
         }
         span { class: "nd-menu-item-text",

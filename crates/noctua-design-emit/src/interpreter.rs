@@ -212,7 +212,7 @@ fn body(component: &Component) -> String {
 ///
 /// The whole type surface, and it is closed: the spec's `type` is `text`,
 /// `bool`, `enum` or `children`, and the only Rust type outside those four is
-/// `IconName`, which eleven components take where the spec says `text`.
+/// `IconDrawing`, which twelve components take where the spec says `text`.
 fn read(
     component: &Component,
     prop_name: &str,

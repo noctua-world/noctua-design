@@ -10,15 +10,15 @@ use noctua_design::ThemeScope;
 use noctua_design::components::{
     Abbr, Blockquote, BlockquoteTone, Button, ButtonGroup, ButtonSize, ButtonTone, ButtonVariant,
     Code, CodeBlock, CodeTone, Del, Disclosure, DisclosureHeading, Em, Heading, HeadingLevel,
-    HeadingSize, Ins, Kbd, Label, LabelKind, LabelSize, Link, List, ListItem, ListKind, ListMarker,
-    ListSpacing, Mark, Menu, MenuItem, Paragraph, ParagraphSize, ParagraphTone, Prose, Segmented,
-    SegmentedItem, SegmentedSize, Strong, Table, TableCell, TableCellAlign, TableColumn,
+    HeadingSize, Input, Ins, Kbd, Label, LabelKind, LabelSize, Link, List, ListItem, ListKind,
+    ListMarker, ListSpacing, Mark, Menu, MenuItem, Paragraph, ParagraphSize, ParagraphTone, Prose,
+    Segmented, SegmentedItem, SegmentedSize, Strong, Table, TableCell, TableCellAlign, TableColumn,
     TableColumnWidth, TableHeaderCell, TableHeaderCellAlign, TableHeaderCellScope,
     TableHeaderCellWrap, TableRow, TableSection, TableSectionKind, Text, TextSize, TextTone,
     TextWeight, Time, Toolbar, ToolbarDensity, Truncate, TruncateLines,
 };
 use noctua_design::model::{Glass, Mode, Palette, Radius};
-use noctua_design::{Icon, IconName, IconSize};
+use noctua_design::{Icon, IconDrawing, IconSize};
 use noctua_design_i18n::Key;
 use noctua_design_tokens as tokens;
 
@@ -462,7 +462,7 @@ fn ExampleFrame(
                 Disclosure {
                     class: "nd-frame-theme",
                     name: "frame-theme",
-                    icon: IconName::Palette,
+                    icon: IconDrawing::PALETTE,
                     summary: context.t(Key::SettingsLabel),
                     // NOT `noctua-glass`: what would read through this one is
                     // the examples it controls, in the appearance it has just
@@ -486,7 +486,7 @@ fn ExampleFrame(
                     tone: ButtonTone::Neutral,
                     size: ButtonSize::Small,
                     hide_label: true,
-                    icon: IconName::FlaskConical,
+                    icon: IconDrawing::FLASK_CONICAL,
                     label: context.t(Key::ExampleGlassTest),
                     label_alt: context.t(Key::ExampleGlassStop),
                 }
@@ -498,8 +498,8 @@ fn ExampleFrame(
                     tone: ButtonTone::Neutral,
                     size: ButtonSize::Small,
                     hide_label: true,
-                    icon: IconName::Moon,
-                    icon_alt: IconName::Sun,
+                    icon: IconDrawing::MOON,
+                    icon_alt: IconDrawing::SUN,
                     label: context.t(Key::ExampleModeInvert),
                     label_alt: context.t(Key::ExampleModeRestore),
                 }
@@ -544,8 +544,8 @@ fn ExampleFrame(
                         //
                         // `frame-mode` beside it is the same shape, with a moon
                         // and a sun.
-                        icon: IconName::Atom,
-                        icon_alt: IconName::Dna,
+                        icon: IconDrawing::ATOM,
+                        icon_alt: IconDrawing::DNA,
                         label: context.t(Key::ExampleImplFrameReact),
                         label_alt: context.t(Key::ExampleImplFrameDioxus),
                         pressed: false,
@@ -557,7 +557,7 @@ fn ExampleFrame(
                     tone: ButtonTone::Neutral,
                     size: ButtonSize::Small,
                     hide_label: true,
-                    icon: IconName::RotateCcw,
+                    icon: IconDrawing::ROTATE_CCW,
                     label: context.t(Key::ExampleReset),
                 }
             }
@@ -1003,9 +1003,9 @@ fn ScopeControls(
                 size: SegmentedSize::Small,
                 label: context.t(Key::ThemeModeLabel),
                 for (value, icon, label) in [
-                    ("light", IconName::Sun, Key::ThemeModeLight),
-                    ("dark", IconName::Moon, Key::ThemeModeDark),
-                    ("system", IconName::Monitor, Key::ThemeModeSystem),
+                    ("light", IconDrawing::SUN, Key::ThemeModeLight),
+                    ("dark", IconDrawing::MOON, Key::ThemeModeDark),
+                    ("system", IconDrawing::MONITOR, Key::ThemeModeSystem),
                 ] {
                     SegmentedItem {
                         value,
@@ -2292,11 +2292,20 @@ fn Specimen(
 
 /// Every icon in the system, listed by the system itself.
 ///
-/// The page loops `IconName::ALL`, so adding an icon to `spec/icons.toml`
-/// documents it with no edit here. That is the user-facing half of the reason
-/// the set is generated: a hand-maintained gallery is a list that goes stale,
-/// and a stale gallery of icons is indistinguishable from a missing icon —
-/// which is exactly the failure this whole layer replaced.
+/// The page loops `noctua_design_icons::ALL`, so vendoring a drawing documents
+/// it with no edit here. That is the user-facing half of the reason the set is
+/// generated: a hand-maintained gallery is a list that goes stale, and a stale
+/// gallery of icons is indistinguishable from a missing icon — which is exactly
+/// the failure this whole layer replaced.
+///
+/// # The filter, and why it hides rather than removes
+///
+/// The set is over a thousand drawings, and a wall of a thousand pictures with
+/// no way to narrow it is a gallery nobody finds anything in. The field above
+/// the grid hides the cells whose name does not match, which is the rule
+/// `Table` already keeps: what is filtered is still in the document, so the
+/// count below stays true and the page a reader loads with no script working is
+/// the whole set rather than an empty box.
 #[component]
 fn Icons(context: Context) -> Element {
     // Filled here rather than inside `rsx!`: the placeholder is literally
@@ -2305,7 +2314,11 @@ fn Icons(context: Context) -> Element {
     // Through `Context::fill`, which is the generated resolver, rather than a
     // `str::replace` written on the spot — a message with a value in it is one
     // message, and there is one function that knows how to finish one.
-    let counted = context.fill(Key::IconsCount, "count", &IconName::ALL.len().to_string());
+    let counted = context.fill(
+        Key::IconsCount,
+        "count",
+        &noctua_design_icons::ALL.len().to_string(),
+    );
     rsx! {
         Paragraph { "{context.t(Key::IconsBody)}" }
 
@@ -2318,14 +2331,40 @@ fn Icons(context: Context) -> Element {
         // sensibly on a phone", and there was no way to ask it.
         ExampleFrame { context, name: "icons", label: Key::PageIconsTitle,
             Example { context, source: ICONS_SOURCE,
-                ul { class: "nd-icon-grid",
-                    for icon in IconName::ALL {
-                        li { class: "nd-icon-cell",
-                            // Unlabelled: the name beside it is the accessible
-                            // name, and an icon that repeats the text next to it
-                            // is noise to a screen reader rather than help.
-                            Icon { icon, size: IconSize::Large }
-                            Code { "{icon.as_str()}" }
+                div { class: "nd-icon-gallery", "data-nd-icon-gallery": "true",
+                    // A REAL COMPONENT, because every interactive control in
+                    // this system is one. The narrowing is the site's own
+                    // behaviour and lives in `shell.js`; the field is `Input`.
+                    Input {
+                        name: "icon-filter",
+                        label: context.t(Key::IconsFilterLabel),
+                        icon: IconDrawing::SEARCH,
+                        clearable: true,
+                        clear_label: context.t(Key::IconsFilterClear),
+                        autocomplete: "off",
+                        spellcheck: false,
+                    }
+
+                    // Written server-side and hidden, so the script has the
+                    // sentence in the reader's language without a catalogue of
+                    // its own. `role="status"` because it appears in response
+                    // to typing, which a screen reader is otherwise not told.
+                    p {
+                        class: "nd-icon-empty",
+                        role: "status",
+                        hidden: true,
+                        "{context.t(Key::IconsFilterEmpty)}"
+                    }
+
+                    ul { class: "nd-icon-grid",
+                        for icon in noctua_design_icons::ALL {
+                            li { class: "nd-icon-cell", "data-nd-icon-name": icon.name,
+                                // Unlabelled: the name beside it is the accessible
+                                // name, and an icon that repeats the text next to it
+                                // is noise to a screen reader rather than help.
+                                Icon { icon, size: IconSize::Large }
+                                Code { "{icon.name}" }
+                            }
                         }
                     }
                 }
@@ -2335,7 +2374,8 @@ fn Icons(context: Context) -> Element {
 }
 
 /// The call that produced the icon gallery.
-const ICONS_SOURCE: &str = "for icon in IconName::ALL { Icon { icon, size: IconSize::Large } }";
+const ICONS_SOURCE: &str =
+    "for icon in noctua_design_icons::ALL { Icon { icon, size: IconSize::Large } }";
 
 /// The type scale, the four families, and the fourteen scripts.
 ///

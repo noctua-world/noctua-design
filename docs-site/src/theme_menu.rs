@@ -29,7 +29,7 @@
 //! past everything it undoes.
 
 use dioxus::prelude::*;
-use noctua_design::IconName;
+use noctua_design::IconDrawing;
 use noctua_design::components::{
     Button, ButtonSize, ButtonTone, ButtonVariant, Heading, HeadingLevel, HeadingSize, Label,
     LabelKind, LabelSize, Segmented, SegmentedAppearance, SegmentedFill, SegmentedItem,
@@ -123,9 +123,9 @@ pub(crate) fn ThemeMenu(
                         labelledby: "{name}-mode-label",
                         size: SegmentedSize::Small,
                         for (value, icon, text) in [
-                            ("light", IconName::Sun, Key::ThemeModeLight),
-                            ("dark", IconName::Moon, Key::ThemeModeDark),
-                            ("system", IconName::Monitor, Key::ThemeModeSystem),
+                            ("light", IconDrawing::SUN, Key::ThemeModeLight),
+                            ("dark", IconDrawing::MOON, Key::ThemeModeDark),
+                            ("system", IconDrawing::MONITOR, Key::ThemeModeSystem),
                         ] {
                             SegmentedItem {
                                 value,

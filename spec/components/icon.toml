@@ -35,18 +35,22 @@ summary = "Draw one of the declared icons, at the size of the text it stands bes
 # contract, one component, one name.
 #
 # WHAT THE ICON EMITTER STILL OWNS is everything that is about the drawings
-# rather than about the component — `IconName`, `dist/icons.json`, the
-# attribution, and the stroke weight both bodies read from
+# rather than about the component — `IconDrawing` and its constants, the module
+# per icon under `packages/tokens/icons/`, `dist/icons.json`, the attribution,
+# and the stroke weight both bodies read from
 # `noctua_design_icons::STROKE_WIDTH`.
+#
+# AND THE PROP IS THE DRAWING, NOT ITS NAME. A name has to be looked up, a
+# lookup needs a table of every drawing, and a table is the one thing that
+# cannot be split — which is what made one icon cost all of them. `NOCTUA.md
+# §9.5` records the amendment and the reasoning.
 
 [prop.icon]
 type = "text"
 required = true
 attribute = "data-nd-icon"
 doc = """
-Which drawing, by the name `spec/icons.toml` gives it. **Required**, and a real
-type in both languages rather than a string. A name that is not an icon is then
-a compile error instead of an empty box on a page.
+The drawing itself, not its name. **Required**, and a real type in both languages rather than a string. Rust takes `IconDrawing::CHEVRON_DOWN`. JavaScript imports one module per icon. A value that names no icon fails to build.
 """
 
 [prop.label]

@@ -5,7 +5,7 @@
 // Edits to this file will be overwritten. Change the spec instead.
 
 import type { ReactNode } from "react";
-import type { IconName } from "@noctua-world/design-tokens/icons.js";
+import type { IconDrawing } from "@noctua-world/design-tokens/icons.js";
 
 export type TagPressed = "off" | "on";
 export type TagVariant = "soft" | "solid" | "outline";
@@ -30,7 +30,7 @@ export interface TagProps {
   /** The tag's corners, from the radius preset in force: `pill`, `rounded` or `square`. `pill` by default. */
   shape?: TagShape;
   /** A glyph shown before the text. It is decorative, because the text beside it is the accessible name. */
-  icon?: IconName;
+  icon?: IconDrawing;
   /** A palette name, drawn as a real `Swatch` before the text. The chip resolves the accent inside its own scope, which is the mechanism `ThemeScope` uses and the only one `NOCTUA.md §8.8` allows. */
   swatch?: string;
   /** A picture shown before the text, such as a face or a favicon. Its alternative text is empty, because the text beside it is the name. Its box takes the tag's size, and a URL that fails draws nothing. */

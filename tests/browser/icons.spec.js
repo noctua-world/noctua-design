@@ -5,9 +5,10 @@
 // icon was asked for by name, as a string, against a `match` with a `_ => ""`
 // arm: "an icon called repository" and "no icon at all" were the same value.
 //
-// The names are a generated enum now, so that call does not compile. These are
-// the assertions for what a type cannot catch: that a drawing reached the page,
-// and that a control made of nothing but a drawing still has a name.
+// Each drawing is a generated constant now, so that call does not compile, and
+// in JavaScript it is a module whose path does not resolve. These are the
+// assertions for what a type cannot catch: that a drawing reached the page, and
+// that a control made of nothing but a drawing still has a name.
 
 import { test, expect } from "@playwright/test";
 import { modeControl } from "./pages.js";
@@ -70,6 +71,56 @@ test("the icon page lists the whole set, and lists it from the set", async ({ pa
   // And the count in the prose comes from the same place the cells do.
   const stated = await page.locator(".nd-note").first().textContent();
   expect(stated).toContain(String(count));
+});
+
+test("the filter narrows the gallery, and hides rather than removes", async ({ page }) => {
+  await page.goto(url(PAGE.icons));
+  const cells = page.locator(".nd-icon-cell");
+  const total = await cells.count();
+  // A thousand-odd drawings with no way to narrow them is a gallery nobody
+  // finds anything in, which is why the field exists at all.
+  expect(total).toBeGreaterThan(1000);
+
+  const field = page.locator('input[name="icon-filter"]');
+  await field.fill("chevron");
+  const shown = page.locator(".nd-icon-cell:not([hidden])");
+  const narrowed = await shown.count();
+  expect(narrowed).toBeGreaterThan(0);
+  expect(narrowed).toBeLessThan(total);
+
+  // HIDES, DOES NOT REMOVE. The count in the prose above is the size of the
+  // set, and it stays true while a filter is on because the set is still there.
+  expect(await cells.count(), "a filtered cell was removed from the document").toBe(total);
+  for (const name of await shown.evaluateAll((els) =>
+    els.map((el) => el.getAttribute("data-nd-icon-name")),
+  )) {
+    expect(name).toContain("chevron");
+  }
+
+  // A name nothing has says so, rather than leaving an empty grid that looks
+  // like a page that failed to load.
+  await field.fill("zzzz");
+  await expect(page.locator(".nd-icon-empty")).toBeVisible();
+  expect(await shown.count()).toBe(0);
+
+  await field.fill("");
+  await expect(page.locator(".nd-icon-empty")).toBeHidden();
+  expect(await shown.count(), "clearing the filter did not bring the set back").toBe(total);
+});
+
+test("no page fetches the whole manifest", async ({ page }) => {
+  // `dist/icons.json` is every drawing in the system, and it is for tooling —
+  // an icon picker that wants the set fetches it once and caches it. A PAGE
+  // that fetched it would be loading six hundred kilobytes of geometry to draw
+  // the handful it shows, which is the cost this whole layer exists to avoid.
+  const asked = [];
+  page.on("request", (request) => {
+    if (request.url().includes("icons.json")) asked.push(request.url());
+  });
+  for (const name of [PAGE.icons, ANY]) {
+    await page.goto(url(name));
+  }
+  expect(asked, "a page requested the icon manifest").toEqual([]);
 });
 
 test("the repository link has a visible icon", async ({ page }) => {

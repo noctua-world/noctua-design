@@ -7,7 +7,7 @@
 //! Show or ask for a score out of five, with the number written out beside it.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Field, FieldKind, FieldSize, Icon};
 
@@ -166,7 +166,7 @@ pub fn Rating(
                 span { class: "nd-rating-stars", "aria-hidden": "true",
                     span { class: "nd-rating-track",
                         for _ in 1..=steps {
-                            Icon { icon: IconName::Star }
+                            Icon { icon: IconDrawing::STAR }
                         }
                     }
                     span {
@@ -174,7 +174,7 @@ pub fn Rating(
                         "data-nd-level": "{level}",
                         style: "--nd-rating-share: {level}",
                         for _ in 1..=steps {
-                            Icon { icon: IconName::Star }
+                            Icon { icon: IconDrawing::STAR }
                         }
                     }
                 }
@@ -231,7 +231,7 @@ pub fn Rating(
                                 // A star is a drawing, so this is the only
                                 // name this option has.
                                 span { class: "nd-visually-hidden", "{named}" }
-                                Icon { icon: IconName::Star }
+                                Icon { icon: IconDrawing::STAR }
                             }
                             span { class: "nd-rating-count", "{count}" }
                         }

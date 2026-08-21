@@ -4,10 +4,18 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! Every icon the interface uses, as a name and a drawing.
+//! Every icon in the system, as one constant each.
 //!
 //! `no_std`: this is a table of string literals, and a consumer should not
 //! take a standard library on to read one.
+//!
+//! # One constant per icon, and nothing that touches all of them
+//!
+//! A `const` is materialised at its use sites and at no others, so an icon
+//! nothing names reaches no binary. `ALL` and [`IconDrawing::parse`] are the
+//! two things that touch every icon, and they are behind the `catalogue`
+//! feature, which is off: an interface reaches an icon by naming it, and only
+//! a gallery wants the set.
 
 #![no_std]
 
@@ -17,512 +25,17831 @@
 /// variant grid, so the declaration has exactly one value in it.
 pub const STROKE_WIDTH: &str = "1.75";
 
-/// Every icon in the system.
+/// One icon: its name, its geometry, and how it is painted.
 ///
-/// A generated enum rather than a name, so an icon that does not exist is a
-/// compile error rather than an empty box on a page. There is deliberately
-/// no `FromStr` and no `From<&str>`: a string that comes from anywhere but
-/// this enum is exactly what shipped an invisible control.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum IconName {
-    /// Opens the navigation drawer.
-    Menu,
-    /// Dismisses the drawer or a floating surface.
-    Close,
-    /// The light appearance mode.
-    Sun,
-    /// The dark appearance mode.
-    Moon,
-    /// The appearance mode the operating system asked for.
-    Monitor,
-    /// Opens the theme menu. A palette rather than a gear: the menu is the appearance of the page — its mode, its accent, its corners — and a gear says "settings" about a product that has no other kind.
-    Palette,
-    /// Settings that are not the theme. `Disclosure` documents itself with it.
-    Settings,
-    /// Marks the search field.
-    Search,
-    /// A person, where there is no picture of them. `Avatar`'s last fallback, after the initials.
-    User,
-    /// Marks a link that leaves the site. Replaces a bare `↗` character, which is text pretending to be an icon.
-    ExternalLink,
-    /// The disclosure marker on a `<details>` summary.
-    ChevronDown,
-    /// Copies a code block to the clipboard.
-    Copy,
-    /// Moves an example to the React implementation.
-    Atom,
-    /// Moves an example back to the Dioxus implementation.
-    Dna,
-    /// Opens the menu that takes a table away as a file.
-    Download,
-    /// Opens the note explaining what a heading or a value means.
-    Info,
-    /// Opens the list of a table's columns, where a reader chooses which are shown.
-    Columns,
-    /// Marks a message about something that is about to go wrong. The triangle is the shape, and the sentence beside it is what says what is wrong.
-    Warning,
-    /// Marks a message about something that has already gone wrong, such as a refused payment. Paired with the danger tone, never standing in for it.
-    Alert,
-    /// Confirms an action, and marks the option in force.
-    Check,
-    /// Puts an example frame back the way it was found: its width, its appearance and its glass test all at once. An arrow that comes back round to where it started, which is the one gesture in this set that means *undo my changes* rather than *go back a step* — `chevron-left` is already the carousel's previous slide, and one drawing meaning two things is how a reader learns to distrust both.
-    RotateCcw,
-    /// Puts an example frame under a glass test: colour and edges behind it, blank space and a scrollbar, and the material on everything inside. A flask, because what the control is is a test rig — `layers` and `image` were both here first, and both described the backdrop rather than the thing being done with it.
-    FlaskConical,
-    /// A column sorted from the beginning of the alphabet, or the smallest number. Paired with `aria-sort="ascending"`, which is what a screen reader reads; the arrow is the half a reader can see.
-    ArrowUp,
-    /// The same, the other way. Two arrows rather than one rotated by the stylesheet: a transform is a thing a preset or a reduced-motion path can reach, and the direction of a sort is not something to leave to CSS.
-    ArrowDown,
-    /// A column that can be sorted and is not — the affordance. Without it a sortable heading looks exactly like a fixed one until somebody presses it, which is a feature nobody finds.
-    ChevronsUpDown,
-    /// Opens the language menu. Not a flag: a flag names a country and this names a language, and the two disagree for most languages anybody speaks.
-    Languages,
-    /// Opens a `DateInput`'s suggestions — the quick picks and the month grid. A calendar, because that is what the panel is; the button it sits on is icon-only and takes its name from `suggest_label`.
-    Calendar,
-    /// Toggles line wrapping in a code block.
-    WrapText,
-    /// Takes a colour off the screen, on a `ColorPicker` with `eyedropper`. Drawn rather than absent where the browser has no `EyeDropper`: the button is what the script removes, and an icon nothing renders is not payload.
-    Pipette,
-    /// Commits the colour under the cursor to a `ColorPicker { multiple }`'s list. A plus rather than a check: a check says *this one is chosen*, which is what the option rows already say, and this says *and one more*.
-    Plus,
-    /// Subtracts one step, on a `NumberInput`. A minus rather than a downward chevron: the control changes a quantity, and a chevron says *move* about a thing that is not moving.
-    Minus,
-    /// Shows a password, on a `Input { kind = "password" }`. A reader who cannot see what they typed cannot correct it, and the alternative they reach for is a shorter password.
-    Eye,
-    /// The other half of that toggle, on a password. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script.
-    EyeOff,
-    /// Marks a `FileInput`'s drop area. An arrow into a tray, which is what the gesture is; a paperclip would say *attachment*, which is what the result is called and not what the control does.
-    Upload,
-    /// Marks a time, such as when a row of a schedule names one. A clock face with two hands, which is the drawing every reader already reads as a time. No component draws it on its own.
-    Clock,
-    /// The previous slide, on a `Carousel`. A chevron rather than an arrow: an arrow in this system marks the direction a column is SORTED, and one drawing meaning two things is how a reader learns to distrust both.
-    ChevronLeft,
-    /// The next slide, on the same terms. The pair is mirrored by the stylesheet in a right-to-left locale, which is the one place a transform is the right answer — *previous* means the other way there.
-    ChevronRight,
-    /// Stops a `Carousel` rotating. WCAG 2.2.2 requires a way to stop anything that moves for more than five seconds, and this is it — the component refuses to start rotating without it.
-    Pause,
-    /// The other half of that toggle. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script.
-    Play,
-    /// One step of a `Rating`. The outline is the empty step and the stylesheet fills the same geometry for the full one, so a rating is one drawing rather than two that could drift apart.
-    Star,
-    /// The repository this system is built in the open in.
-    Github,
+/// A value rather than a name, so the drawing travels with the reference to
+/// it. That is what lets an application that draws one icon pay for one icon:
+/// there is no table to look the name up in, so there is no table to keep.
+///
+/// Constructed only by this module. A drawing assembled anywhere else has not
+/// been through the validator in `spec/icons.toml`'s loader, and the whole
+/// point of that validator is that a drawing carries geometry and nothing
+/// else — which is why the fields are readable and the type is not.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[non_exhaustive]
+pub struct IconDrawing {
+    /// Its name, as `spec/icons.toml` spells it. Written to `data-nd-icon`.
+    pub name: &'static str,
+    /// Its `viewBox`, taken from the drawing rather than assumed.
+    pub view_box: &'static str,
+    /// Whether it is drawn as a solid shape rather than an outline.
+    pub filled: bool,
+    /// The drawing: the children of `<svg>`, and nothing else.
+    pub body: &'static str,
+    /// What it is for.
+    pub doc: &'static str,
 }
 
-impl IconName {
-    /// Every icon, in the order the spec declares them.
-    pub const ALL: [Self; 41] = [
-        Self::Menu,
-        Self::Close,
-        Self::Sun,
-        Self::Moon,
-        Self::Monitor,
-        Self::Palette,
-        Self::Settings,
-        Self::Search,
-        Self::User,
-        Self::ExternalLink,
-        Self::ChevronDown,
-        Self::Copy,
-        Self::Atom,
-        Self::Dna,
-        Self::Download,
-        Self::Info,
-        Self::Columns,
-        Self::Warning,
-        Self::Alert,
-        Self::Check,
-        Self::RotateCcw,
-        Self::FlaskConical,
-        Self::ArrowUp,
-        Self::ArrowDown,
-        Self::ChevronsUpDown,
-        Self::Languages,
-        Self::Calendar,
-        Self::WrapText,
-        Self::Pipette,
-        Self::Plus,
-        Self::Minus,
-        Self::Eye,
-        Self::EyeOff,
-        Self::Upload,
-        Self::Clock,
-        Self::ChevronLeft,
-        Self::ChevronRight,
-        Self::Pause,
-        Self::Play,
-        Self::Star,
-        Self::Github,
-    ];
+impl IconDrawing {
+    /// `a-arrow-down`, from Lucide.
+    pub const A_ARROW_DOWN: Self = Self {
+        name: "a-arrow-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14 12 4 4 4-4"/><path d="M18 16V7"/><path d="m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16"/><path d="M3.304 13h6.392"/>"#,
+        doc: "`a-arrow-down`, from Lucide.",
+    };
 
-    /// Its name, as the spec spells it.
-    #[must_use]
-    pub const fn as_str(self) -> &'static str {
-        match self {
-            Self::Menu => "menu",
-            Self::Close => "close",
-            Self::Sun => "sun",
-            Self::Moon => "moon",
-            Self::Monitor => "monitor",
-            Self::Palette => "palette",
-            Self::Settings => "settings",
-            Self::Search => "search",
-            Self::User => "user",
-            Self::ExternalLink => "external-link",
-            Self::ChevronDown => "chevron-down",
-            Self::Copy => "copy",
-            Self::Atom => "atom",
-            Self::Dna => "dna",
-            Self::Download => "download",
-            Self::Info => "info",
-            Self::Columns => "columns",
-            Self::Warning => "warning",
-            Self::Alert => "alert",
-            Self::Check => "check",
-            Self::RotateCcw => "rotate-ccw",
-            Self::FlaskConical => "flask-conical",
-            Self::ArrowUp => "arrow-up",
-            Self::ArrowDown => "arrow-down",
-            Self::ChevronsUpDown => "chevrons-up-down",
-            Self::Languages => "languages",
-            Self::Calendar => "calendar",
-            Self::WrapText => "wrap-text",
-            Self::Pipette => "pipette",
-            Self::Plus => "plus",
-            Self::Minus => "minus",
-            Self::Eye => "eye",
-            Self::EyeOff => "eye-off",
-            Self::Upload => "upload",
-            Self::Clock => "clock",
-            Self::ChevronLeft => "chevron-left",
-            Self::ChevronRight => "chevron-right",
-            Self::Pause => "pause",
-            Self::Play => "play",
-            Self::Star => "star",
-            Self::Github => "github",
-        }
-    }
+    /// `a-arrow-up`, from Lucide.
+    pub const A_ARROW_UP: Self = Self {
+        name: "a-arrow-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14 11 4-4 4 4"/><path d="M18 16V7"/><path d="m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16"/><path d="M3.304 13h6.392"/>"#,
+        doc: "`a-arrow-up`, from Lucide.",
+    };
 
-    /// The drawing: the children of `<svg>`, and nothing else.
-    #[must_use]
-    pub const fn body(self) -> &'static str {
-        match self {
-            Self::Menu => {
-                r#"<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>"#
-            }
-            Self::Close => r#"<path d="M18 6 6 18"/><path d="m6 6 12 12"/>"#,
-            Self::Sun => {
-                r#"<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>"#
-            }
-            Self::Moon => r#"<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>"#,
-            Self::Monitor => {
-                r#"<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>"#
-            }
-            Self::Palette => {
-                r#"<circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>"#
-            }
-            Self::Settings => {
-                r#"<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>"#
-            }
-            Self::Search => r#"<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>"#,
-            Self::User => {
-                r#"<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>"#
-            }
-            Self::ExternalLink => {
-                r#"<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>"#
-            }
-            Self::ChevronDown => r#"<path d="m6 9 6 6 6-6"/>"#,
-            Self::Copy => {
-                r#"<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>"#
-            }
-            Self::Atom => {
-                r#"<circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"/>"#
-            }
-            Self::Dna => {
-                r#"<path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="m17 6-2.5-2.5"/><path d="m14 8-1-1"/><path d="m7 18 2.5 2.5"/><path d="m3.5 14.5.5.5"/><path d="m20 9 .5.5"/><path d="m6.5 12.5 1 1"/><path d="m16.5 10.5 1 1"/><path d="m10 16 1.5 1.5"/>"#
-            }
-            Self::Download => {
-                r#"<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>"#
-            }
-            Self::Info => {
-                r#"<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>"#
-            }
-            Self::Columns => {
-                r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="12" x2="12" y1="3" y2="21"/>"#
-            }
-            Self::Warning => {
-                r#"<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>"#
-            }
-            Self::Alert => {
-                r#"<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>"#
-            }
-            Self::Check => r#"<polyline points="20 6 9 17 4 12"/>"#,
-            Self::RotateCcw => {
-                r#"<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>"#
-            }
-            Self::FlaskConical => {
-                r#"<path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/>"#
-            }
-            Self::ArrowUp => r#"<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>"#,
-            Self::ArrowDown => r#"<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>"#,
-            Self::ChevronsUpDown => r#"<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>"#,
-            Self::Languages => {
-                r#"<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>"#
-            }
-            Self::Calendar => {
-                r#"<rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>"#
-            }
-            Self::WrapText => {
-                r#"<line x1="3" x2="21" y1="6" y2="6"/><path d="M3 12h15a3 3 0 1 1 0 6h-4"/><polyline points="16 16 14 18 16 20"/><line x1="3" x2="10" y1="18" y2="18"/>"#
-            }
-            Self::Pipette => {
-                r#"<path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"/>"#
-            }
-            Self::Plus => r#"<path d="M5 12h14"/><path d="M12 5v14"/>"#,
-            Self::Minus => r#"<path d="M5 12h14"/>"#,
-            Self::Eye => {
-                r#"<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>"#
-            }
-            Self::EyeOff => {
-                r#"<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>"#
-            }
-            Self::Upload => {
-                r#"<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>"#
-            }
-            Self::Clock => {
-                r#"<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>"#
-            }
-            Self::ChevronLeft => r#"<path d="m15 18-6-6 6-6"/>"#,
-            Self::ChevronRight => r#"<path d="m9 18 6-6-6-6"/>"#,
-            Self::Pause => {
-                r#"<rect width="4" height="16" x="6" y="4"/><rect width="4" height="16" x="14" y="4"/>"#
-            }
-            Self::Play => r#"<polygon points="5 3 19 12 5 21 5 3"/>"#,
-            Self::Star => {
-                r#"<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>"#
-            }
-            Self::Github => {
-                r#"<path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/>"#
-            }
-        }
-    }
+    /// `a-large-small`, from Lucide.
+    pub const A_LARGE_SMALL: Self = Self {
+        name: "a-large-small",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 16 2.536-7.328a1.02 1.02 1 0 1 1.928 0L22 16"/><path d="M15.697 14h5.606"/><path d="m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16"/><path d="M3.304 13h6.392"/>"#,
+        doc: "`a-large-small`, from Lucide.",
+    };
 
-    /// Its `viewBox`, taken from the drawing rather than assumed.
-    #[expect(
-        clippy::match_same_arms,
-        reason = "one arm per icon, generated from the spec"
-    )]
-    #[must_use]
-    pub const fn view_box(self) -> &'static str {
-        match self {
-            Self::Menu => "0 0 24 24",
-            Self::Close => "0 0 24 24",
-            Self::Sun => "0 0 24 24",
-            Self::Moon => "0 0 24 24",
-            Self::Monitor => "0 0 24 24",
-            Self::Palette => "0 0 24 24",
-            Self::Settings => "0 0 24 24",
-            Self::Search => "0 0 24 24",
-            Self::User => "0 0 24 24",
-            Self::ExternalLink => "0 0 24 24",
-            Self::ChevronDown => "0 0 24 24",
-            Self::Copy => "0 0 24 24",
-            Self::Atom => "0 0 24 24",
-            Self::Dna => "0 0 24 24",
-            Self::Download => "0 0 24 24",
-            Self::Info => "0 0 24 24",
-            Self::Columns => "0 0 24 24",
-            Self::Warning => "0 0 24 24",
-            Self::Alert => "0 0 24 24",
-            Self::Check => "0 0 24 24",
-            Self::RotateCcw => "0 0 24 24",
-            Self::FlaskConical => "0 0 24 24",
-            Self::ArrowUp => "0 0 24 24",
-            Self::ArrowDown => "0 0 24 24",
-            Self::ChevronsUpDown => "0 0 24 24",
-            Self::Languages => "0 0 24 24",
-            Self::Calendar => "0 0 24 24",
-            Self::WrapText => "0 0 24 24",
-            Self::Pipette => "0 0 24 24",
-            Self::Plus => "0 0 24 24",
-            Self::Minus => "0 0 24 24",
-            Self::Eye => "0 0 24 24",
-            Self::EyeOff => "0 0 24 24",
-            Self::Upload => "0 0 24 24",
-            Self::Clock => "0 0 24 24",
-            Self::ChevronLeft => "0 0 24 24",
-            Self::ChevronRight => "0 0 24 24",
-            Self::Pause => "0 0 24 24",
-            Self::Play => "0 0 24 24",
-            Self::Star => "0 0 24 24",
-            Self::Github => "0 0 16 16",
-        }
-    }
+    /// `accessibility`, from Lucide.
+    pub const ACCESSIBILITY: Self = Self {
+        name: "accessibility",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="16" cy="4" r="1"/><path d="m18 19 1-7-6 1"/><path d="m5 8 3-3 5.5 3-2.36 3.5"/><path d="M4.24 14.5a5 5 0 0 0 6.88 6"/><path d="M13.76 17.5a5 5 0 0 0-6.88-6"/>"#,
+        doc: "`accessibility`, from Lucide.",
+    };
 
-    /// Whether it is drawn as an outline or as a solid shape.
-    ///
-    /// Brand marks are solid; everything else is an outline.
-    #[expect(
-        clippy::match_same_arms,
-        reason = "one arm per icon, generated from the spec"
-    )]
-    #[must_use]
-    pub const fn filled(self) -> bool {
-        match self {
-            Self::Menu => false,
-            Self::Close => false,
-            Self::Sun => false,
-            Self::Moon => false,
-            Self::Monitor => false,
-            Self::Palette => false,
-            Self::Settings => false,
-            Self::Search => false,
-            Self::User => false,
-            Self::ExternalLink => false,
-            Self::ChevronDown => false,
-            Self::Copy => false,
-            Self::Atom => false,
-            Self::Dna => false,
-            Self::Download => false,
-            Self::Info => false,
-            Self::Columns => false,
-            Self::Warning => false,
-            Self::Alert => false,
-            Self::Check => false,
-            Self::RotateCcw => false,
-            Self::FlaskConical => false,
-            Self::ArrowUp => false,
-            Self::ArrowDown => false,
-            Self::ChevronsUpDown => false,
-            Self::Languages => false,
-            Self::Calendar => false,
-            Self::WrapText => false,
-            Self::Pipette => false,
-            Self::Plus => false,
-            Self::Minus => false,
-            Self::Eye => false,
-            Self::EyeOff => false,
-            Self::Upload => false,
-            Self::Clock => false,
-            Self::ChevronLeft => false,
-            Self::ChevronRight => false,
-            Self::Pause => false,
-            Self::Play => false,
-            Self::Star => false,
-            Self::Github => true,
-        }
-    }
+    /// `activity`, from Lucide.
+    pub const ACTIVITY: Self = Self {
+        name: "activity",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>"#,
+        doc: "`activity`, from Lucide.",
+    };
 
-    /// What it is for.
-    #[must_use]
-    pub const fn doc(self) -> &'static str {
-        match self {
-            Self::Menu => "Opens the navigation drawer.",
-            Self::Close => "Dismisses the drawer or a floating surface.",
-            Self::Sun => "The light appearance mode.",
-            Self::Moon => "The dark appearance mode.",
-            Self::Monitor => "The appearance mode the operating system asked for.",
-            Self::Palette => {
-                "Opens the theme menu. A palette rather than a gear: the menu is the appearance of the page — its mode, its accent, its corners — and a gear says \"settings\" about a product that has no other kind."
-            }
-            Self::Settings => {
-                "Settings that are not the theme. `Disclosure` documents itself with it."
-            }
-            Self::Search => "Marks the search field.",
-            Self::User => {
-                "A person, where there is no picture of them. `Avatar`'s last fallback, after the initials."
-            }
-            Self::ExternalLink => {
-                "Marks a link that leaves the site. Replaces a bare `↗` character, which is text pretending to be an icon."
-            }
-            Self::ChevronDown => "The disclosure marker on a `<details>` summary.",
-            Self::Copy => "Copies a code block to the clipboard.",
-            Self::Atom => "Moves an example to the React implementation.",
-            Self::Dna => "Moves an example back to the Dioxus implementation.",
-            Self::Download => "Opens the menu that takes a table away as a file.",
-            Self::Info => "Opens the note explaining what a heading or a value means.",
-            Self::Columns => {
-                "Opens the list of a table's columns, where a reader chooses which are shown."
-            }
-            Self::Warning => {
-                "Marks a message about something that is about to go wrong. The triangle is the shape, and the sentence beside it is what says what is wrong."
-            }
-            Self::Alert => {
-                "Marks a message about something that has already gone wrong, such as a refused payment. Paired with the danger tone, never standing in for it."
-            }
-            Self::Check => "Confirms an action, and marks the option in force.",
-            Self::RotateCcw => {
-                "Puts an example frame back the way it was found: its width, its appearance and its glass test all at once. An arrow that comes back round to where it started, which is the one gesture in this set that means *undo my changes* rather than *go back a step* — `chevron-left` is already the carousel's previous slide, and one drawing meaning two things is how a reader learns to distrust both."
-            }
-            Self::FlaskConical => {
-                "Puts an example frame under a glass test: colour and edges behind it, blank space and a scrollbar, and the material on everything inside. A flask, because what the control is is a test rig — `layers` and `image` were both here first, and both described the backdrop rather than the thing being done with it."
-            }
-            Self::ArrowUp => {
-                "A column sorted from the beginning of the alphabet, or the smallest number. Paired with `aria-sort=\"ascending\"`, which is what a screen reader reads; the arrow is the half a reader can see."
-            }
-            Self::ArrowDown => {
-                "The same, the other way. Two arrows rather than one rotated by the stylesheet: a transform is a thing a preset or a reduced-motion path can reach, and the direction of a sort is not something to leave to CSS."
-            }
-            Self::ChevronsUpDown => {
-                "A column that can be sorted and is not — the affordance. Without it a sortable heading looks exactly like a fixed one until somebody presses it, which is a feature nobody finds."
-            }
-            Self::Languages => {
-                "Opens the language menu. Not a flag: a flag names a country and this names a language, and the two disagree for most languages anybody speaks."
-            }
-            Self::Calendar => {
-                "Opens a `DateInput`'s suggestions — the quick picks and the month grid. A calendar, because that is what the panel is; the button it sits on is icon-only and takes its name from `suggest_label`."
-            }
-            Self::WrapText => "Toggles line wrapping in a code block.",
-            Self::Pipette => {
-                "Takes a colour off the screen, on a `ColorPicker` with `eyedropper`. Drawn rather than absent where the browser has no `EyeDropper`: the button is what the script removes, and an icon nothing renders is not payload."
-            }
-            Self::Plus => {
-                "Commits the colour under the cursor to a `ColorPicker { multiple }`'s list. A plus rather than a check: a check says *this one is chosen*, which is what the option rows already say, and this says *and one more*."
-            }
-            Self::Minus => {
-                "Subtracts one step, on a `NumberInput`. A minus rather than a downward chevron: the control changes a quantity, and a chevron says *move* about a thing that is not moving."
-            }
-            Self::Eye => {
-                "Shows a password, on a `Input { kind = \"password\" }`. A reader who cannot see what they typed cannot correct it, and the alternative they reach for is a shorter password."
-            }
-            Self::EyeOff => {
-                "The other half of that toggle, on a password. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script."
-            }
-            Self::Upload => {
-                "Marks a `FileInput`'s drop area. An arrow into a tray, which is what the gesture is; a paperclip would say *attachment*, which is what the result is called and not what the control does."
-            }
-            Self::Clock => {
-                "Marks a time, such as when a row of a schedule names one. A clock face with two hands, which is the drawing every reader already reads as a time. No component draws it on its own."
-            }
-            Self::ChevronLeft => {
-                "The previous slide, on a `Carousel`. A chevron rather than an arrow: an arrow in this system marks the direction a column is SORTED, and one drawing meaning two things is how a reader learns to distrust both."
-            }
-            Self::ChevronRight => {
-                "The next slide, on the same terms. The pair is mirrored by the stylesheet in a right-to-left locale, which is the one place a transform is the right answer — *previous* means the other way there."
-            }
-            Self::Pause => {
-                "Stops a `Carousel` rotating. WCAG 2.2.2 requires a way to stop anything that moves for more than five seconds, and this is it — the component refuses to start rotating without it."
-            }
-            Self::Play => {
-                "The other half of that toggle. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script."
-            }
-            Self::Star => {
-                "One step of a `Rating`. The outline is the empty step and the stylesheet fills the same geometry for the full one, so a rating is one drawing rather than two that could drift apart."
-            }
-            Self::Github => "The repository this system is built in the open in.",
-        }
-    }
+    /// `ad`, from Lucide.
+    pub const AD: Self = Self {
+        name: "ad",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 13H6"/><path d="M10 15v-4a2 2 0 0 0-4 0v4"/><path d="M14 14.5a.5.5 0 0 0 .5.5h1a2.5 2.5 0 0 0 2.5-2.5v-1A2.5 2.5 0 0 0 15.5 9h-1a.5.5 0 0 0-.5.5z"/><rect x="2" y="5" width="20" height="14" rx="2"/>"#,
+        doc: "`ad`, from Lucide.",
+    };
 
+    /// `air-vent`, from Lucide.
+    pub const AIR_VENT: Self = Self {
+        name: "air-vent",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 17.5a2.5 2.5 0 1 1-4 2.03V12"/><path d="M6 12H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 8h12"/><path d="M6.6 15.572A2 2 0 1 0 10 17v-5"/>"#,
+        doc: "`air-vent`, from Lucide.",
+    };
+
+    /// `airplay`, from Lucide.
+    pub const AIRPLAY: Self = Self {
+        name: "airplay",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/><path d="m12 15 5 6H7Z"/>"#,
+        doc: "`airplay`, from Lucide.",
+    };
+
+    /// `alarm-clock`, from Lucide.
+    pub const ALARM_CLOCK: Self = Self {
+        name: "alarm-clock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/>"#,
+        doc: "`alarm-clock`, from Lucide.",
+    };
+
+    /// `alarm-clock-check`, from Lucide.
+    pub const ALARM_CLOCK_CHECK: Self = Self {
+        name: "alarm-clock-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="m9 13 2 2 4-4"/>"#,
+        doc: "`alarm-clock-check`, from Lucide.",
+    };
+
+    /// `alarm-clock-minus`, from Lucide.
+    pub const ALARM_CLOCK_MINUS: Self = Self {
+        name: "alarm-clock-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M9 13h6"/>"#,
+        doc: "`alarm-clock-minus`, from Lucide.",
+    };
+
+    /// `alarm-clock-off`, from Lucide.
+    pub const ALARM_CLOCK_OFF: Self = Self {
+        name: "alarm-clock-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6.87 6.87a8 8 0 1 0 11.26 11.26"/><path d="M19.9 14.25a8 8 0 0 0-9.15-9.15"/><path d="m22 6-3-3"/><path d="M6.26 18.67 4 21"/><path d="m2 2 20 20"/><path d="M4 4 2 6"/>"#,
+        doc: "`alarm-clock-off`, from Lucide.",
+    };
+
+    /// `alarm-clock-plus`, from Lucide.
+    pub const ALARM_CLOCK_PLUS: Self = Self {
+        name: "alarm-clock-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/>"#,
+        doc: "`alarm-clock-plus`, from Lucide.",
+    };
+
+    /// `alarm-smoke`, from Lucide.
+    pub const ALARM_SMOKE: Self = Self {
+        name: "alarm-smoke",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 21c0-2.5 2-2.5 2-5"/><path d="M16 21c0-2.5 2-2.5 2-5"/><path d="m19 8-.8 3a1.25 1.25 0 0 1-1.2 1H7a1.25 1.25 0 0 1-1.2-1L5 8"/><path d="M21 3a1 1 0 0 1 1 1v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a1 1 0 0 1 1-1z"/><path d="M6 21c0-2.5 2-2.5 2-5"/>"#,
+        doc: "`alarm-smoke`, from Lucide.",
+    };
+
+    /// `album`, from Lucide.
+    pub const ALBUM: Self = Self {
+        name: "album",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><polyline points="11 3 11 11 14 8 17 11 17 3"/>"#,
+        doc: "`album`, from Lucide.",
+    };
+
+    /// Marks a message about something that has already gone wrong, such as a refused payment. Paired with the danger tone, never standing in for it.
+    pub const ALERT: Self = Self {
+        name: "alert",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>"#,
+        doc: "Marks a message about something that has already gone wrong, such as a refused payment. Paired with the danger tone, never standing in for it.",
+    };
+
+    /// `align-center-horizontal`, from Lucide.
+    pub const ALIGN_CENTER_HORIZONTAL: Self = Self {
+        name: "align-center-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 12h20"/><path d="M10 16v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/><path d="M10 8V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v4"/><path d="M20 16v1a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-1"/><path d="M14 8V7c0-1.1.9-2 2-2h2a2 2 0 0 1 2 2v1"/>"#,
+        doc: "`align-center-horizontal`, from Lucide.",
+    };
+
+    /// `align-center-vertical`, from Lucide.
+    pub const ALIGN_CENTER_VERTICAL: Self = Self {
+        name: "align-center-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v20"/><path d="M8 10H4a2 2 0 0 1-2-2V6c0-1.1.9-2 2-2h4"/><path d="M16 10h4a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-4"/><path d="M8 20H7a2 2 0 0 1-2-2v-2c0-1.1.9-2 2-2h1"/><path d="M16 14h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1"/>"#,
+        doc: "`align-center-vertical`, from Lucide.",
+    };
+
+    /// `align-end-horizontal`, from Lucide.
+    pub const ALIGN_END_HORIZONTAL: Self = Self {
+        name: "align-end-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="6" height="16" x="4" y="2" rx="2"/><rect width="6" height="9" x="14" y="9" rx="2"/><path d="M22 22H2"/>"#,
+        doc: "`align-end-horizontal`, from Lucide.",
+    };
+
+    /// `align-end-vertical`, from Lucide.
+    pub const ALIGN_END_VERTICAL: Self = Self {
+        name: "align-end-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="16" height="6" x="2" y="4" rx="2"/><rect width="9" height="6" x="9" y="14" rx="2"/><path d="M22 22V2"/>"#,
+        doc: "`align-end-vertical`, from Lucide.",
+    };
+
+    /// `align-horizontal-distribute-center`, from Lucide.
+    pub const ALIGN_HORIZONTAL_DISTRIBUTE_CENTER: Self = Self {
+        name: "align-horizontal-distribute-center",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="6" height="14" x="4" y="5" rx="2"/><rect width="6" height="10" x="14" y="7" rx="2"/><path d="M17 22v-5"/><path d="M17 7V2"/><path d="M7 22v-3"/><path d="M7 5V2"/>"#,
+        doc: "`align-horizontal-distribute-center`, from Lucide.",
+    };
+
+    /// `align-horizontal-distribute-end`, from Lucide.
+    pub const ALIGN_HORIZONTAL_DISTRIBUTE_END: Self = Self {
+        name: "align-horizontal-distribute-end",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="6" height="14" x="4" y="5" rx="2"/><rect width="6" height="10" x="14" y="7" rx="2"/><path d="M10 2v20"/><path d="M20 2v20"/>"#,
+        doc: "`align-horizontal-distribute-end`, from Lucide.",
+    };
+
+    /// `align-horizontal-distribute-start`, from Lucide.
+    pub const ALIGN_HORIZONTAL_DISTRIBUTE_START: Self = Self {
+        name: "align-horizontal-distribute-start",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="6" height="14" x="4" y="5" rx="2"/><rect width="6" height="10" x="14" y="7" rx="2"/><path d="M4 2v20"/><path d="M14 2v20"/>"#,
+        doc: "`align-horizontal-distribute-start`, from Lucide.",
+    };
+
+    /// `align-horizontal-justify-center`, from Lucide.
+    pub const ALIGN_HORIZONTAL_JUSTIFY_CENTER: Self = Self {
+        name: "align-horizontal-justify-center",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="6" height="14" x="2" y="5" rx="2"/><rect width="6" height="10" x="16" y="7" rx="2"/><path d="M12 2v20"/>"#,
+        doc: "`align-horizontal-justify-center`, from Lucide.",
+    };
+
+    /// `align-horizontal-justify-end`, from Lucide.
+    pub const ALIGN_HORIZONTAL_JUSTIFY_END: Self = Self {
+        name: "align-horizontal-justify-end",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="6" height="14" x="2" y="5" rx="2"/><rect width="6" height="10" x="12" y="7" rx="2"/><path d="M22 2v20"/>"#,
+        doc: "`align-horizontal-justify-end`, from Lucide.",
+    };
+
+    /// `align-horizontal-justify-start`, from Lucide.
+    pub const ALIGN_HORIZONTAL_JUSTIFY_START: Self = Self {
+        name: "align-horizontal-justify-start",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="6" height="14" x="6" y="5" rx="2"/><rect width="6" height="10" x="16" y="7" rx="2"/><path d="M2 2v20"/>"#,
+        doc: "`align-horizontal-justify-start`, from Lucide.",
+    };
+
+    /// `align-horizontal-space-around`, from Lucide.
+    pub const ALIGN_HORIZONTAL_SPACE_AROUND: Self = Self {
+        name: "align-horizontal-space-around",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="6" height="10" x="9" y="7" rx="2"/><path d="M4 22V2"/><path d="M20 22V2"/>"#,
+        doc: "`align-horizontal-space-around`, from Lucide.",
+    };
+
+    /// `align-horizontal-space-between`, from Lucide.
+    pub const ALIGN_HORIZONTAL_SPACE_BETWEEN: Self = Self {
+        name: "align-horizontal-space-between",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="6" height="14" x="3" y="5" rx="2"/><rect width="6" height="10" x="15" y="7" rx="2"/><path d="M3 2v20"/><path d="M21 2v20"/>"#,
+        doc: "`align-horizontal-space-between`, from Lucide.",
+    };
+
+    /// `align-start-horizontal`, from Lucide.
+    pub const ALIGN_START_HORIZONTAL: Self = Self {
+        name: "align-start-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="6" height="16" x="4" y="6" rx="2"/><rect width="6" height="9" x="14" y="6" rx="2"/><path d="M22 2H2"/>"#,
+        doc: "`align-start-horizontal`, from Lucide.",
+    };
+
+    /// `align-start-vertical`, from Lucide.
+    pub const ALIGN_START_VERTICAL: Self = Self {
+        name: "align-start-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="9" height="6" x="6" y="14" rx="2"/><rect width="16" height="6" x="6" y="4" rx="2"/><path d="M2 2v20"/>"#,
+        doc: "`align-start-vertical`, from Lucide.",
+    };
+
+    /// `align-vertical-distribute-center`, from Lucide.
+    pub const ALIGN_VERTICAL_DISTRIBUTE_CENTER: Self = Self {
+        name: "align-vertical-distribute-center",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17h-3"/><path d="M22 7h-5"/><path d="M5 17H2"/><path d="M7 7H2"/><rect x="5" y="14" width="14" height="6" rx="2"/><rect x="7" y="4" width="10" height="6" rx="2"/>"#,
+        doc: "`align-vertical-distribute-center`, from Lucide.",
+    };
+
+    /// `align-vertical-distribute-end`, from Lucide.
+    pub const ALIGN_VERTICAL_DISTRIBUTE_END: Self = Self {
+        name: "align-vertical-distribute-end",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="14" height="6" x="5" y="14" rx="2"/><rect width="10" height="6" x="7" y="4" rx="2"/><path d="M2 20h20"/><path d="M2 10h20"/>"#,
+        doc: "`align-vertical-distribute-end`, from Lucide.",
+    };
+
+    /// `align-vertical-distribute-start`, from Lucide.
+    pub const ALIGN_VERTICAL_DISTRIBUTE_START: Self = Self {
+        name: "align-vertical-distribute-start",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="14" height="6" x="5" y="14" rx="2"/><rect width="10" height="6" x="7" y="4" rx="2"/><path d="M2 14h20"/><path d="M2 4h20"/>"#,
+        doc: "`align-vertical-distribute-start`, from Lucide.",
+    };
+
+    /// `align-vertical-justify-center`, from Lucide.
+    pub const ALIGN_VERTICAL_JUSTIFY_CENTER: Self = Self {
+        name: "align-vertical-justify-center",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="14" height="6" x="5" y="16" rx="2"/><rect width="10" height="6" x="7" y="2" rx="2"/><path d="M2 12h20"/>"#,
+        doc: "`align-vertical-justify-center`, from Lucide.",
+    };
+
+    /// `align-vertical-justify-end`, from Lucide.
+    pub const ALIGN_VERTICAL_JUSTIFY_END: Self = Self {
+        name: "align-vertical-justify-end",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="14" height="6" x="5" y="12" rx="2"/><rect width="10" height="6" x="7" y="2" rx="2"/><path d="M2 22h20"/>"#,
+        doc: "`align-vertical-justify-end`, from Lucide.",
+    };
+
+    /// `align-vertical-justify-start`, from Lucide.
+    pub const ALIGN_VERTICAL_JUSTIFY_START: Self = Self {
+        name: "align-vertical-justify-start",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="14" height="6" x="5" y="16" rx="2"/><rect width="10" height="6" x="7" y="6" rx="2"/><path d="M2 2h20"/>"#,
+        doc: "`align-vertical-justify-start`, from Lucide.",
+    };
+
+    /// `align-vertical-space-around`, from Lucide.
+    pub const ALIGN_VERTICAL_SPACE_AROUND: Self = Self {
+        name: "align-vertical-space-around",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="10" height="6" x="7" y="9" rx="2"/><path d="M22 20H2"/><path d="M22 4H2"/>"#,
+        doc: "`align-vertical-space-around`, from Lucide.",
+    };
+
+    /// `align-vertical-space-between`, from Lucide.
+    pub const ALIGN_VERTICAL_SPACE_BETWEEN: Self = Self {
+        name: "align-vertical-space-between",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="14" height="6" x="5" y="15" rx="2"/><rect width="10" height="6" x="7" y="3" rx="2"/><path d="M2 21h20"/><path d="M2 3h20"/>"#,
+        doc: "`align-vertical-space-between`, from Lucide.",
+    };
+
+    /// `ambulance`, from Lucide.
+    pub const AMBULANCE: Self = Self {
+        name: "ambulance",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 10H6"/><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.684-.948l-1.923-.641a1 1 0 0 1-.578-.502l-1.539-3.076A1 1 0 0 0 16.382 8H14"/><path d="M8 8v4"/><path d="M9 18h6"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>"#,
+        doc: "`ambulance`, from Lucide.",
+    };
+
+    /// `ampersand`, from Lucide.
+    pub const AMPERSAND: Self = Self {
+        name: "ampersand",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 12h3"/><path d="M17.5 12a8 8 0 0 1-8 8A4.5 4.5 0 0 1 5 15.5c0-6 8-4 8-8.5a3 3 0 1 0-6 0c0 3 2.5 8.5 12 13"/>"#,
+        doc: "`ampersand`, from Lucide.",
+    };
+
+    /// `ampersands`, from Lucide.
+    pub const AMPERSANDS: Self = Self {
+        name: "ampersands",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 17c-5-3-7-7-7-9a2 2 0 0 1 4 0c0 2.5-5 2.5-5 6 0 1.7 1.3 3 3 3 2.8 0 5-2.2 5-5"/><path d="M22 17c-5-3-7-7-7-9a2 2 0 0 1 4 0c0 2.5-5 2.5-5 6 0 1.7 1.3 3 3 3 2.8 0 5-2.2 5-5"/>"#,
+        doc: "`ampersands`, from Lucide.",
+    };
+
+    /// `amphora`, from Lucide.
+    pub const AMPHORA: Self = Self {
+        name: "amphora",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 2v5.632c0 .424-.272.795-.653.982A6 6 0 0 0 6 14c.006 4 3 7 5 8"/><path d="M10 5H8a2 2 0 0 0 0 4h.68"/><path d="M14 2v5.632c0 .424.272.795.652.982A6 6 0 0 1 18 14c0 4-3 7-5 8"/><path d="M14 5h2a2 2 0 0 1 0 4h-.68"/><path d="M18 22H6"/><path d="M9 2h6"/>"#,
+        doc: "`amphora`, from Lucide.",
+    };
+
+    /// `anchor`, from Lucide.
+    pub const ANCHOR: Self = Self {
+        name: "anchor",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6v16"/><path d="m19 13 2-1a9 9 0 0 1-18 0l2 1"/><path d="M9 11h6"/><circle cx="12" cy="4" r="2"/>"#,
+        doc: "`anchor`, from Lucide.",
+    };
+
+    /// `angle`, from Lucide.
+    pub const ANGLE: Self = Self {
+        name: "angle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M3 11a10 10 0 0 1 10 10"/>"#,
+        doc: "`angle`, from Lucide.",
+    };
+
+    /// `antenna`, from Lucide.
+    pub const ANTENNA: Self = Self {
+        name: "antenna",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 12 7 2"/><path d="m7 12 5-10"/><path d="m12 12 5-10"/><path d="m17 12 5-10"/><path d="M4.5 7h15"/><path d="M12 16v6"/>"#,
+        doc: "`antenna`, from Lucide.",
+    };
+
+    /// `anvil`, from Lucide.
+    pub const ANVIL: Self = Self {
+        name: "anvil",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 10H6a4 4 0 0 1-4-4 1 1 0 0 1 1-1h4"/><path d="M7 5a1 1 0 0 1 1-1h13a1 1 0 0 1 1 1 7 7 0 0 1-7 7H8a1 1 0 0 1-1-1z"/><path d="M9 12v5"/><path d="M15 12v5"/><path d="M5 20a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3 1 1 0 0 1-1 1H6a1 1 0 0 1-1-1"/>"#,
+        doc: "`anvil`, from Lucide.",
+    };
+
+    /// `aperture`, from Lucide.
+    pub const APERTURE: Self = Self {
+        name: "aperture",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="m14.31 8 5.74 9.94"/><path d="M9.69 8h11.48"/><path d="m7.38 12 5.74-9.94"/><path d="M9.69 16 3.95 6.06"/><path d="M14.31 16H2.83"/><path d="m16.62 12-5.74 9.94"/>"#,
+        doc: "`aperture`, from Lucide.",
+    };
+
+    /// `app-window`, from Lucide.
+    pub const APP_WINDOW: Self = Self {
+        name: "app-window",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 4v4"/><path d="M2 8h20"/><path d="M6 4v4"/>"#,
+        doc: "`app-window`, from Lucide.",
+    };
+
+    /// `app-window-mac`, from Lucide.
+    pub const APP_WINDOW_MAC: Self = Self {
+        name: "app-window-mac",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/>"#,
+        doc: "`app-window-mac`, from Lucide.",
+    };
+
+    /// `apple`, from Lucide.
+    pub const APPLE: Self = Self {
+        name: "apple",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6.528V3a1 1 0 0 1 1-1h0"/><path d="M18.237 21A15 15 0 0 0 22 11a6 6 0 0 0-10-4.472A6 6 0 0 0 2 11a15.1 15.1 0 0 0 3.763 10 3 3 0 0 0 3.648.648 5.5 5.5 0 0 1 5.178 0A3 3 0 0 0 18.237 21"/>"#,
+        doc: "`apple`, from Lucide.",
+    };
+
+    /// `archive`, from Lucide.
+    pub const ARCHIVE: Self = Self {
+        name: "archive",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>"#,
+        doc: "`archive`, from Lucide.",
+    };
+
+    /// `archive-restore`, from Lucide.
+    pub const ARCHIVE_RESTORE: Self = Self {
+        name: "archive-restore",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h2"/><path d="M20 8v11a2 2 0 0 1-2 2h-2"/><path d="m9 15 3-3 3 3"/><path d="M12 12v9"/>"#,
+        doc: "`archive-restore`, from Lucide.",
+    };
+
+    /// `archive-x`, from Lucide.
+    pub const ARCHIVE_X: Self = Self {
+        name: "archive-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="m9.5 17 5-5"/><path d="m9.5 12 5 5"/>"#,
+        doc: "`archive-x`, from Lucide.",
+    };
+
+    /// `armchair`, from Lucide.
+    pub const ARMCHAIR: Self = Self {
+        name: "armchair",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/><path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/><path d="M5 18v2"/><path d="M19 18v2"/>"#,
+        doc: "`armchair`, from Lucide.",
+    };
+
+    /// `arrow-big-down`, from Lucide.
+    pub const ARROW_BIG_DOWN: Self = Self {
+        name: "arrow-big-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 0 1 1h3.293a.707.707 0 0 1 .5 1.207l-7.086 7.086a1 1 0 0 1-1.414 0l-7.086-7.086a.707.707 0 0 1 .5-1.207H8a1 1 0 0 0 1-1z"/>"#,
+        doc: "`arrow-big-down`, from Lucide.",
+    };
+
+    /// `arrow-big-down-dash`, from Lucide.
+    pub const ARROW_BIG_DOWN_DASH: Self = Self {
+        name: "arrow-big-down-dash",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 8a1 1 0 0 1 1 1v2a1 1 0 0 0 1 1h3.293a.707.707 0 0 1 .5 1.207l-6.939 6.939a1.207 1.207 0 0 1-1.708 0l-6.94-6.94a.707.707 0 0 1 .5-1.206H8a1 1 0 0 0 1-1V9a1 1 0 0 1 1-1z"/><path d="M9 4h6"/>"#,
+        doc: "`arrow-big-down-dash`, from Lucide.",
+    };
+
+    /// `arrow-big-left`, from Lucide.
+    pub const ARROW_BIG_LEFT: Self = Self {
+        name: "arrow-big-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.793 19.793a.707.707 0 0 0 1.207-.5V16a1 1 0 0 1 1-1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-6a1 1 0 0 1-1-1V4.707a.707.707 0 0 0-1.207-.5l-6.94 6.94a1.207 1.207 0 0 0 0 1.707z"/>"#,
+        doc: "`arrow-big-left`, from Lucide.",
+    };
+
+    /// `arrow-big-left-dash`, from Lucide.
+    pub const ARROW_BIG_LEFT_DASH: Self = Self {
+        name: "arrow-big-left-dash",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 9a1 1 0 0 1-1-1V4.707a.707.707 0 0 0-1.207-.5l-6.94 6.94a1.207 1.207 0 0 0 0 1.707l6.94 6.94a.707.707 0 0 0 1.207-.5V16a1 1 0 0 1 1-1h2a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1z"/><path d="M20 9v6"/>"#,
+        doc: "`arrow-big-left-dash`, from Lucide.",
+    };
+
+    /// `arrow-big-right`, from Lucide.
+    pub const ARROW_BIG_RIGHT: Self = Self {
+        name: "arrow-big-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.207 19.793a.707.707 0 0 1-1.207-.5V16a1 1 0 0 0-1-1H5a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h6a1 1 0 0 0 1-1V4.707a.707.707 0 0 1 1.207-.5l6.94 6.94a1.207 1.207 0 0 1 0 1.707z"/>"#,
+        doc: "`arrow-big-right`, from Lucide.",
+    };
+
+    /// `arrow-big-right-dash`, from Lucide.
+    pub const ARROW_BIG_RIGHT_DASH: Self = Self {
+        name: "arrow-big-right-dash",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 9a1 1 0 0 0 1-1V4.707a.707.707 0 0 1 1.207-.5l6.94 6.94a1.207 1.207 0 0 1 0 1.707l-6.94 6.94a.707.707 0 0 1-1.207-.5V16a1 1 0 0 0-1-1H9a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1z"/><path d="M4 9v6"/>"#,
+        doc: "`arrow-big-right-dash`, from Lucide.",
+    };
+
+    /// `arrow-big-up`, from Lucide.
+    pub const ARROW_BIG_UP: Self = Self {
+        name: "arrow-big-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 19a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-6a1 1 0 0 1 1-1h3.293a.707.707 0 0 0 .5-1.207l-7.086-7.086a1 1 0 0 0-1.414 0l-7.086 7.086a.707.707 0 0 0 .5 1.207H8a1 1 0 0 1 1 1z"/>"#,
+        doc: "`arrow-big-up`, from Lucide.",
+    };
+
+    /// `arrow-big-up-dash`, from Lucide.
+    pub const ARROW_BIG_UP_DASH: Self = Self {
+        name: "arrow-big-up-dash",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 16a1 1 0 0 0 1-1v-2a1 1 0 0 1 1-1h3.293a.707.707 0 0 0 .5-1.207l-6.939-6.939a1.207 1.207 0 0 0-1.708 0l-6.94 6.94a.707.707 0 0 0 .5 1.206H8a1 1 0 0 1 1 1v2a1 1 0 0 0 1 1z"/><path d="M9 20h6"/>"#,
+        doc: "`arrow-big-up-dash`, from Lucide.",
+    };
+
+    /// The same, the other way. Two arrows rather than one rotated by the stylesheet: a transform is a thing a preset or a reduced-motion path can reach, and the direction of a sort is not something to leave to CSS.
+    pub const ARROW_DOWN: Self = Self {
+        name: "arrow-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>"#,
+        doc: "The same, the other way. Two arrows rather than one rotated by the stylesheet: a transform is a thing a preset or a reduced-motion path can reach, and the direction of a sort is not something to leave to CSS.",
+    };
+
+    /// `arrow-down-0-1`, from Lucide.
+    pub const ARROW_DOWN_0_1: Self = Self {
+        name: "arrow-down-0-1",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><rect x="15" y="4" width="4" height="6" ry="2"/><path d="M17 20v-6h-2"/><path d="M15 20h4"/>"#,
+        doc: "`arrow-down-0-1`, from Lucide.",
+    };
+
+    /// `arrow-down-1-0`, from Lucide.
+    pub const ARROW_DOWN_1_0: Self = Self {
+        name: "arrow-down-1-0",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M17 10V4h-2"/><path d="M15 10h4"/><rect x="15" y="14" width="4" height="6" ry="2"/>"#,
+        doc: "`arrow-down-1-0`, from Lucide.",
+    };
+
+    /// `arrow-down-a-z`, from Lucide.
+    pub const ARROW_DOWN_A_Z: Self = Self {
+        name: "arrow-down-a-z",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M20 8h-5"/><path d="M15 10V6.5a2.5 2.5 0 0 1 5 0V10"/><path d="M15 14h5l-5 6h5"/>"#,
+        doc: "`arrow-down-a-z`, from Lucide.",
+    };
+
+    /// `arrow-down-from-line`, from Lucide.
+    pub const ARROW_DOWN_FROM_LINE: Self = Self {
+        name: "arrow-down-from-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 3H5"/><path d="M12 21V7"/><path d="m6 15 6 6 6-6"/>"#,
+        doc: "`arrow-down-from-line`, from Lucide.",
+    };
+
+    /// `arrow-down-left`, from Lucide.
+    pub const ARROW_DOWN_LEFT: Self = Self {
+        name: "arrow-down-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 7 7 17"/><path d="M17 17H7V7"/>"#,
+        doc: "`arrow-down-left`, from Lucide.",
+    };
+
+    /// `arrow-down-narrow-wide`, from Lucide.
+    pub const ARROW_DOWN_NARROW_WIDE: Self = Self {
+        name: "arrow-down-narrow-wide",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M11 4h4"/><path d="M11 8h7"/><path d="M11 12h10"/>"#,
+        doc: "`arrow-down-narrow-wide`, from Lucide.",
+    };
+
+    /// `arrow-down-right`, from Lucide.
+    pub const ARROW_DOWN_RIGHT: Self = Self {
+        name: "arrow-down-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m7 7 10 10"/><path d="M17 7v10H7"/>"#,
+        doc: "`arrow-down-right`, from Lucide.",
+    };
+
+    /// `arrow-down-to-dot`, from Lucide.
+    pub const ARROW_DOWN_TO_DOT: Self = Self {
+        name: "arrow-down-to-dot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v14"/><path d="m19 9-7 7-7-7"/><circle cx="12" cy="21" r="1"/>"#,
+        doc: "`arrow-down-to-dot`, from Lucide.",
+    };
+
+    /// `arrow-down-to-line`, from Lucide.
+    pub const ARROW_DOWN_TO_LINE: Self = Self {
+        name: "arrow-down-to-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/>"#,
+        doc: "`arrow-down-to-line`, from Lucide.",
+    };
+
+    /// `arrow-down-up`, from Lucide.
+    pub const ARROW_DOWN_UP: Self = Self {
+        name: "arrow-down-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/>"#,
+        doc: "`arrow-down-up`, from Lucide.",
+    };
+
+    /// `arrow-down-wide-narrow`, from Lucide.
+    pub const ARROW_DOWN_WIDE_NARROW: Self = Self {
+        name: "arrow-down-wide-narrow",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M11 4h10"/><path d="M11 8h7"/><path d="M11 12h4"/>"#,
+        doc: "`arrow-down-wide-narrow`, from Lucide.",
+    };
+
+    /// `arrow-down-z-a`, from Lucide.
+    pub const ARROW_DOWN_Z_A: Self = Self {
+        name: "arrow-down-z-a",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 16 4 4 4-4"/><path d="M7 4v16"/><path d="M15 4h5l-5 6h5"/><path d="M15 20v-3.5a2.5 2.5 0 0 1 5 0V20"/><path d="M20 18h-5"/>"#,
+        doc: "`arrow-down-z-a`, from Lucide.",
+    };
+
+    /// `arrow-left`, from Lucide.
+    pub const ARROW_LEFT: Self = Self {
+        name: "arrow-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>"#,
+        doc: "`arrow-left`, from Lucide.",
+    };
+
+    /// `arrow-left-from-line`, from Lucide.
+    pub const ARROW_LEFT_FROM_LINE: Self = Self {
+        name: "arrow-left-from-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m9 6-6 6 6 6"/><path d="M3 12h14"/><path d="M21 19V5"/>"#,
+        doc: "`arrow-left-from-line`, from Lucide.",
+    };
+
+    /// `arrow-left-right`, from Lucide.
+    pub const ARROW_LEFT_RIGHT: Self = Self {
+        name: "arrow-left-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>"#,
+        doc: "`arrow-left-right`, from Lucide.",
+    };
+
+    /// `arrow-left-to-line`, from Lucide.
+    pub const ARROW_LEFT_TO_LINE: Self = Self {
+        name: "arrow-left-to-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 19V5"/><path d="m13 6-6 6 6 6"/><path d="M7 12h14"/>"#,
+        doc: "`arrow-left-to-line`, from Lucide.",
+    };
+
+    /// `arrow-right`, from Lucide.
+    pub const ARROW_RIGHT: Self = Self {
+        name: "arrow-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>"#,
+        doc: "`arrow-right`, from Lucide.",
+    };
+
+    /// `arrow-right-from-line`, from Lucide.
+    pub const ARROW_RIGHT_FROM_LINE: Self = Self {
+        name: "arrow-right-from-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 5v14"/><path d="M21 12H7"/><path d="m15 18 6-6-6-6"/>"#,
+        doc: "`arrow-right-from-line`, from Lucide.",
+    };
+
+    /// `arrow-right-left`, from Lucide.
+    pub const ARROW_RIGHT_LEFT: Self = Self {
+        name: "arrow-right-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/>"#,
+        doc: "`arrow-right-left`, from Lucide.",
+    };
+
+    /// `arrow-right-to-line`, from Lucide.
+    pub const ARROW_RIGHT_TO_LINE: Self = Self {
+        name: "arrow-right-to-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 12H3"/><path d="m11 18 6-6-6-6"/><path d="M21 5v14"/>"#,
+        doc: "`arrow-right-to-line`, from Lucide.",
+    };
+
+    /// A column sorted from the beginning of the alphabet, or the smallest number. Paired with `aria-sort="ascending"`, which is what a screen reader reads; the arrow is the half a reader can see.
+    pub const ARROW_UP: Self = Self {
+        name: "arrow-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>"#,
+        doc: "A column sorted from the beginning of the alphabet, or the smallest number. Paired with `aria-sort=\"ascending\"`, which is what a screen reader reads; the arrow is the half a reader can see.",
+    };
+
+    /// `arrow-up-0-1`, from Lucide.
+    pub const ARROW_UP_0_1: Self = Self {
+        name: "arrow-up-0-1",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><rect x="15" y="4" width="4" height="6" ry="2"/><path d="M17 20v-6h-2"/><path d="M15 20h4"/>"#,
+        doc: "`arrow-up-0-1`, from Lucide.",
+    };
+
+    /// `arrow-up-1-0`, from Lucide.
+    pub const ARROW_UP_1_0: Self = Self {
+        name: "arrow-up-1-0",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="M17 10V4h-2"/><path d="M15 10h4"/><rect x="15" y="14" width="4" height="6" ry="2"/>"#,
+        doc: "`arrow-up-1-0`, from Lucide.",
+    };
+
+    /// `arrow-up-a-z`, from Lucide.
+    pub const ARROW_UP_A_Z: Self = Self {
+        name: "arrow-up-a-z",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="M20 8h-5"/><path d="M15 10V6.5a2.5 2.5 0 0 1 5 0V10"/><path d="M15 14h5l-5 6h5"/>"#,
+        doc: "`arrow-up-a-z`, from Lucide.",
+    };
+
+    /// `arrow-up-down`, from Lucide.
+    pub const ARROW_UP_DOWN: Self = Self {
+        name: "arrow-up-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>"#,
+        doc: "`arrow-up-down`, from Lucide.",
+    };
+
+    /// `arrow-up-from-dot`, from Lucide.
+    pub const ARROW_UP_FROM_DOT: Self = Self {
+        name: "arrow-up-from-dot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m5 9 7-7 7 7"/><path d="M12 16V2"/><circle cx="12" cy="21" r="1"/>"#,
+        doc: "`arrow-up-from-dot`, from Lucide.",
+    };
+
+    /// `arrow-up-from-line`, from Lucide.
+    pub const ARROW_UP_FROM_LINE: Self = Self {
+        name: "arrow-up-from-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m18 9-6-6-6 6"/><path d="M12 3v14"/><path d="M5 21h14"/>"#,
+        doc: "`arrow-up-from-line`, from Lucide.",
+    };
+
+    /// `arrow-up-left`, from Lucide.
+    pub const ARROW_UP_LEFT: Self = Self {
+        name: "arrow-up-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 17V7h10"/><path d="M17 17 7 7"/>"#,
+        doc: "`arrow-up-left`, from Lucide.",
+    };
+
+    /// `arrow-up-narrow-wide`, from Lucide.
+    pub const ARROW_UP_NARROW_WIDE: Self = Self {
+        name: "arrow-up-narrow-wide",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="M11 12h4"/><path d="M11 16h7"/><path d="M11 20h10"/>"#,
+        doc: "`arrow-up-narrow-wide`, from Lucide.",
+    };
+
+    /// `arrow-up-right`, from Lucide.
+    pub const ARROW_UP_RIGHT: Self = Self {
+        name: "arrow-up-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 7h10v10"/><path d="M7 17 17 7"/>"#,
+        doc: "`arrow-up-right`, from Lucide.",
+    };
+
+    /// `arrow-up-to-line`, from Lucide.
+    pub const ARROW_UP_TO_LINE: Self = Self {
+        name: "arrow-up-to-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 3h14"/><path d="m18 13-6-6-6 6"/><path d="M12 7v14"/>"#,
+        doc: "`arrow-up-to-line`, from Lucide.",
+    };
+
+    /// `arrow-up-wide-narrow`, from Lucide.
+    pub const ARROW_UP_WIDE_NARROW: Self = Self {
+        name: "arrow-up-wide-narrow",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="M11 12h10"/><path d="M11 16h7"/><path d="M11 20h4"/>"#,
+        doc: "`arrow-up-wide-narrow`, from Lucide.",
+    };
+
+    /// `arrow-up-z-a`, from Lucide.
+    pub const ARROW_UP_Z_A: Self = Self {
+        name: "arrow-up-z-a",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="M15 4h5l-5 6h5"/><path d="M15 20v-3.5a2.5 2.5 0 0 1 5 0V20"/><path d="M20 18h-5"/>"#,
+        doc: "`arrow-up-z-a`, from Lucide.",
+    };
+
+    /// `arrows-up-from-line`, from Lucide.
+    pub const ARROWS_UP_FROM_LINE: Self = Self {
+        name: "arrows-up-from-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m4 6 3-3 3 3"/><path d="M7 17V3"/><path d="m14 6 3-3 3 3"/><path d="M17 17V3"/><path d="M4 21h16"/>"#,
+        doc: "`arrows-up-from-line`, from Lucide.",
+    };
+
+    /// `asterisk`, from Lucide.
+    pub const ASTERISK: Self = Self {
+        name: "asterisk",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6v12"/><path d="M17.196 9 6.804 15"/><path d="m6.804 9 10.392 6"/>"#,
+        doc: "`asterisk`, from Lucide.",
+    };
+
+    /// `astroid`, from Lucide.
+    pub const ASTROID: Self = Self {
+        name: "astroid",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.983 21.186a1 1 0 0 1-1.966 0 10 10 0 0 0-8.203-8.203 1 1 0 0 1 0-1.966 10 10 0 0 0 8.203-8.203 1 1 0 0 1 1.966 0 10 10 0 0 0 8.203 8.203 1 1 0 0 1 0 1.966 10 10 0 0 0-8.203 8.203"/>"#,
+        doc: "`astroid`, from Lucide.",
+    };
+
+    /// `at-sign`, from Lucide.
+    pub const AT_SIGN: Self = Self {
+        name: "at-sign",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>"#,
+        doc: "`at-sign`, from Lucide.",
+    };
+
+    /// Moves an example to the React implementation.
+    pub const ATOM: Self = Self {
+        name: "atom",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"/>"#,
+        doc: "Moves an example to the React implementation.",
+    };
+
+    /// `audio-lines`, from Lucide.
+    pub const AUDIO_LINES: Self = Self {
+        name: "audio-lines",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/>"#,
+        doc: "`audio-lines`, from Lucide.",
+    };
+
+    /// `audio-lines-off`, from Lucide.
+    pub const AUDIO_LINES_OFF: Self = Self {
+        name: "audio-lines-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 10v11"/><path d="M10 3v1.35"/><path d="M14 14v1"/><path d="M14 8v.35"/><path d="M18 5v7.35"/><path d="M2 10v3"/><path d="m2 2 20 20"/><path d="M22 10v3"/><path d="M6 6v11"/>"#,
+        doc: "`audio-lines-off`, from Lucide.",
+    };
+
+    /// `audio-lines-x`, from Lucide.
+    pub const AUDIO_LINES_X: Self = Self {
+        name: "audio-lines-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 3v18"/><path d="M14 8v6.35"/><path d="m17 17 5 5"/><path d="M18 5v8.1"/><path d="M2 10v3"/><path d="M22 10v3"/><path d="m22 17-5 5"/><path d="M6 6v11"/>"#,
+        doc: "`audio-lines-x`, from Lucide.",
+    };
+
+    /// `audio-waveform`, from Lucide.
+    pub const AUDIO_WAVEFORM: Self = Self {
+        name: "audio-waveform",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 13a2 2 0 0 0 2-2V7a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0V4a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0v-4a2 2 0 0 1 2-2"/>"#,
+        doc: "`audio-waveform`, from Lucide.",
+    };
+
+    /// `award`, from Lucide.
+    pub const AWARD: Self = Self {
+        name: "award",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/>"#,
+        doc: "`award`, from Lucide.",
+    };
+
+    /// `axe`, from Lucide.
+    pub const AXE: Self = Self {
+        name: "axe",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14 12-8.381 8.38a1 1 0 0 1-3.001-3L11 9"/><path d="M15 15.5a.5.5 0 0 0 .5.5A6.5 6.5 0 0 0 22 9.5a.5.5 0 0 0-.5-.5h-1.672a2 2 0 0 1-1.414-.586l-5.062-5.062a1.205 1.205 0 0 0-1.704 0L9.352 5.648a1.205 1.205 0 0 0 0 1.704l5.062 5.062A2 2 0 0 1 15 13.828z"/>"#,
+        doc: "`axe`, from Lucide.",
+    };
+
+    /// `axis-3d`, from Lucide.
+    pub const AXIS_3D: Self = Self {
+        name: "axis-3d",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.5 10.5 15 9"/><path d="M4 4v15a1 1 0 0 0 1 1h15"/><path d="M4.293 19.707 6 18"/><path d="m9 15 1.5-1.5"/>"#,
+        doc: "`axis-3d`, from Lucide.",
+    };
+
+    /// `baby`, from Lucide.
+    pub const BABY: Self = Self {
+        name: "baby",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M15 12h.01"/><path d="M19.38 6.813A9 9 0 0 1 20.8 10.2a2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/><path d="M9 12h.01"/>"#,
+        doc: "`baby`, from Lucide.",
+    };
+
+    /// `backpack`, from Lucide.
+    pub const BACKPACK: Self = Self {
+        name: "backpack",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 10h8"/><path d="M8 18h8"/><path d="M8 22v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>"#,
+        doc: "`backpack`, from Lucide.",
+    };
+
+    /// `badge`, from Lucide.
+    pub const BADGE: Self = Self {
+        name: "badge",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>"#,
+        doc: "`badge`, from Lucide.",
+    };
+
+    /// `badge-alert`, from Lucide.
+    pub const BADGE_ALERT: Self = Self {
+        name: "badge-alert",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>"#,
+        doc: "`badge-alert`, from Lucide.",
+    };
+
+    /// `badge-cent`, from Lucide.
+    pub const BADGE_CENT: Self = Self {
+        name: "badge-cent",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="M12 7v10"/><path d="M15.4 10a4 4 0 1 0 0 4"/>"#,
+        doc: "`badge-cent`, from Lucide.",
+    };
+
+    /// `badge-check`, from Lucide.
+    pub const BADGE_CHECK: Self = Self {
+        name: "badge-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>"#,
+        doc: "`badge-check`, from Lucide.",
+    };
+
+    /// `badge-dollar-sign`, from Lucide.
+    pub const BADGE_DOLLAR_SIGN: Self = Self {
+        name: "badge-dollar-sign",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/>"#,
+        doc: "`badge-dollar-sign`, from Lucide.",
+    };
+
+    /// `badge-euro`, from Lucide.
+    pub const BADGE_EURO: Self = Self {
+        name: "badge-euro",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="M7 12h5"/><path d="M15 9.4a4 4 0 1 0 0 5.2"/>"#,
+        doc: "`badge-euro`, from Lucide.",
+    };
+
+    /// `badge-indian-rupee`, from Lucide.
+    pub const BADGE_INDIAN_RUPEE: Self = Self {
+        name: "badge-indian-rupee",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="m13 17-5-1h1a4 4 0 0 0 0-8"/>"#,
+        doc: "`badge-indian-rupee`, from Lucide.",
+    };
+
+    /// `badge-info`, from Lucide.
+    pub const BADGE_INFO: Self = Self {
+        name: "badge-info",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/>"#,
+        doc: "`badge-info`, from Lucide.",
+    };
+
+    /// `badge-japanese-yen`, from Lucide.
+    pub const BADGE_JAPANESE_YEN: Self = Self {
+        name: "badge-japanese-yen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 8 3 3v7"/><path d="m12 11 3-3"/><path d="M9 12h6"/><path d="M9 16h6"/>"#,
+        doc: "`badge-japanese-yen`, from Lucide.",
+    };
+
+    /// `badge-minus`, from Lucide.
+    pub const BADGE_MINUS: Self = Self {
+        name: "badge-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><line x1="8" x2="16" y1="12" y2="12"/>"#,
+        doc: "`badge-minus`, from Lucide.",
+    };
+
+    /// `badge-percent`, from Lucide.
+    pub const BADGE_PERCENT: Self = Self {
+        name: "badge-percent",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m15 9-6 6"/><path d="M9 9h.01"/><path d="M15 15h.01"/>"#,
+        doc: "`badge-percent`, from Lucide.",
+    };
+
+    /// `badge-plus`, from Lucide.
+    pub const BADGE_PLUS: Self = Self {
+        name: "badge-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><line x1="12" x2="12" y1="8" y2="16"/><line x1="8" x2="16" y1="12" y2="12"/>"#,
+        doc: "`badge-plus`, from Lucide.",
+    };
+
+    /// `badge-pound-sterling`, from Lucide.
+    pub const BADGE_POUND_STERLING: Self = Self {
+        name: "badge-pound-sterling",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="M8 12h4"/><path d="M10 16V9.5a2.5 2.5 0 0 1 5 0"/><path d="M8 16h7"/>"#,
+        doc: "`badge-pound-sterling`, from Lucide.",
+    };
+
+    /// `badge-question-mark`, from Lucide.
+    pub const BADGE_QUESTION_MARK: Self = Self {
+        name: "badge-question-mark",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/>"#,
+        doc: "`badge-question-mark`, from Lucide.",
+    };
+
+    /// `badge-russian-ruble`, from Lucide.
+    pub const BADGE_RUSSIAN_RUBLE: Self = Self {
+        name: "badge-russian-ruble",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="M9 16h5"/><path d="M9 12h5a2 2 0 1 0 0-4h-3v9"/>"#,
+        doc: "`badge-russian-ruble`, from Lucide.",
+    };
+
+    /// `badge-swiss-franc`, from Lucide.
+    pub const BADGE_SWISS_FRANC: Self = Self {
+        name: "badge-swiss-franc",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="M11 17V8h4"/><path d="M11 12h3"/><path d="M9 16h4"/>"#,
+        doc: "`badge-swiss-franc`, from Lucide.",
+    };
+
+    /// `badge-turkish-lira`, from Lucide.
+    pub const BADGE_TURKISH_LIRA: Self = Self {
+        name: "badge-turkish-lira",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 7v10a5 5 0 0 0 5-5"/><path d="m15 8-6 3"/><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76"/>"#,
+        doc: "`badge-turkish-lira`, from Lucide.",
+    };
+
+    /// `badge-x`, from Lucide.
+    pub const BADGE_X: Self = Self {
+        name: "badge-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/>"#,
+        doc: "`badge-x`, from Lucide.",
+    };
+
+    /// `baggage-claim`, from Lucide.
+    pub const BAGGAGE_CLAIM: Self = Self {
+        name: "baggage-claim",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 18H6a2 2 0 0 1-2-2V7a2 2 0 0 0-2-2"/><path d="M17 14V4a2 2 0 0 0-2-2h-1a2 2 0 0 0-2 2v10"/><rect width="13" height="8" x="8" y="6" rx="1"/><circle cx="18" cy="20" r="2"/><circle cx="9" cy="20" r="2"/>"#,
+        doc: "`baggage-claim`, from Lucide.",
+    };
+
+    /// `balloon`, from Lucide.
+    pub const BALLOON: Self = Self {
+        name: "balloon",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 16v1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v1"/><path d="M12 6a2 2 0 0 1 2 2"/><path d="M18 8c0 4-3.5 8-6 8s-6-4-6-8a6 6 0 0 1 12 0"/>"#,
+        doc: "`balloon`, from Lucide.",
+    };
+
+    /// `ban`, from Lucide.
+    pub const BAN: Self = Self {
+        name: "ban",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M4.929 4.929 19.07 19.071"/>"#,
+        doc: "`ban`, from Lucide.",
+    };
+
+    /// `banana`, from Lucide.
+    pub const BANANA: Self = Self {
+        name: "banana",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 13c3.5-2 8-2 10 2a5.5 5.5 0 0 1 8 5"/><path d="M5.15 17.89c5.52-1.52 8.65-6.89 7-12C11.55 4 11.5 2 13 2c3.22 0 5 5.5 5 8 0 6.5-4.2 12-10.49 12C5.11 22 2 22 2 20c0-1.5 1.14-1.55 3.15-2.11Z"/>"#,
+        doc: "`banana`, from Lucide.",
+    };
+
+    /// `bandage`, from Lucide.
+    pub const BANDAGE: Self = Self {
+        name: "bandage",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 10.01h.01"/><path d="M10 14.01h.01"/><path d="M14 10.01h.01"/><path d="M14 14.01h.01"/><path d="M18 6v12"/><path d="M6 6v12"/><rect x="2" y="6" width="20" height="12" rx="2"/>"#,
+        doc: "`bandage`, from Lucide.",
+    };
+
+    /// `banknote`, from Lucide.
+    pub const BANKNOTE: Self = Self {
+        name: "banknote",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>"#,
+        doc: "`banknote`, from Lucide.",
+    };
+
+    /// `banknote-arrow-down`, from Lucide.
+    pub const BANKNOTE_ARROW_DOWN: Self = Self {
+        name: "banknote-arrow-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5"/><path d="m16 19 3 3 3-3"/><path d="M18 12h.01"/><path d="M19 16v6"/><path d="M6 12h.01"/><circle cx="12" cy="12" r="2"/>"#,
+        doc: "`banknote-arrow-down`, from Lucide.",
+    };
+
+    /// `banknote-arrow-up`, from Lucide.
+    pub const BANKNOTE_ARROW_UP: Self = Self {
+        name: "banknote-arrow-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5"/><path d="M18 12h.01"/><path d="M19 22v-6"/><path d="m22 19-3-3-3 3"/><path d="M6 12h.01"/><circle cx="12" cy="12" r="2"/>"#,
+        doc: "`banknote-arrow-up`, from Lucide.",
+    };
+
+    /// `banknote-check`, from Lucide.
+    pub const BANKNOTE_CHECK: Self = Self {
+        name: "banknote-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.748 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4.875"/><path d="m16 19 2 2 4-4"/><path d="M18 12h.01"/><path d="M6 12h.01"/><circle cx="12" cy="12" r="2"/>"#,
+        doc: "`banknote-check`, from Lucide.",
+    };
+
+    /// `banknote-x`, from Lucide.
+    pub const BANKNOTE_X: Self = Self {
+        name: "banknote-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5"/><path d="m17 17 5 5"/><path d="M18 12h.01"/><path d="m22 17-5 5"/><path d="M6 12h.01"/><circle cx="12" cy="12" r="2"/>"#,
+        doc: "`banknote-x`, from Lucide.",
+    };
+
+    /// `barcode`, from Lucide.
+    pub const BARCODE: Self = Self {
+        name: "barcode",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 5v14"/><path d="M8 5v14"/><path d="M12 5v14"/><path d="M17 5v14"/><path d="M21 5v14"/>"#,
+        doc: "`barcode`, from Lucide.",
+    };
+
+    /// `barrel`, from Lucide.
+    pub const BARREL: Self = Self {
+        name: "barrel",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 3a41 41 0 000 18"/><path d="M14 3a41 41 0 010 18"/><path d="M16.997 21a2 2 0 001.68-.92 15.25 15.25 0 000-16.16 2 2 0 00-1.68-.92h-10a2 2 0 00-1.681.92 15.25 15.25 0 000 16.16 2 2 0 001.681.92z"/><path d="M3.54 16h16.914"/><path d="M3.54 8h16.914"/>"#,
+        doc: "`barrel`, from Lucide.",
+    };
+
+    /// `baseline`, from Lucide.
+    pub const BASELINE: Self = Self {
+        name: "baseline",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 20h16"/><path d="m6 16 6-12 6 12"/><path d="M8 12h8"/>"#,
+        doc: "`baseline`, from Lucide.",
+    };
+
+    /// `bath`, from Lucide.
+    pub const BATH: Self = Self {
+        name: "bath",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 4 8 6"/><path d="M17 19v2"/><path d="M2 12h20"/><path d="M7 19v2"/><path d="M9 5 7.621 3.621A2.121 2.121 0 0 0 4 5v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/>"#,
+        doc: "`bath`, from Lucide.",
+    };
+
+    /// `battery`, from Lucide.
+    pub const BATTERY: Self = Self {
+        name: "battery",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M 22 14 L 22 10"/><rect x="2" y="6" width="16" height="12" rx="2"/>"#,
+        doc: "`battery`, from Lucide.",
+    };
+
+    /// `battery-charging`, from Lucide.
+    pub const BATTERY_CHARGING: Self = Self {
+        name: "battery-charging",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m11 7-3 5h4l-3 5"/><path d="M14.856 6H16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.935"/><path d="M22 14v-4"/><path d="M5.14 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2.936"/>"#,
+        doc: "`battery-charging`, from Lucide.",
+    };
+
+    /// `battery-full`, from Lucide.
+    pub const BATTERY_FULL: Self = Self {
+        name: "battery-full",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 10v4"/><path d="M14 10v4"/><path d="M22 14v-4"/><path d="M6 10v4"/><rect x="2" y="6" width="16" height="12" rx="2"/>"#,
+        doc: "`battery-full`, from Lucide.",
+    };
+
+    /// `battery-low`, from Lucide.
+    pub const BATTERY_LOW: Self = Self {
+        name: "battery-low",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 14v-4"/><path d="M6 14v-4"/><rect x="2" y="6" width="16" height="12" rx="2"/>"#,
+        doc: "`battery-low`, from Lucide.",
+    };
+
+    /// `battery-medium`, from Lucide.
+    pub const BATTERY_MEDIUM: Self = Self {
+        name: "battery-medium",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 14v-4"/><path d="M22 14v-4"/><path d="M6 14v-4"/><rect x="2" y="6" width="16" height="12" rx="2"/>"#,
+        doc: "`battery-medium`, from Lucide.",
+    };
+
+    /// `battery-plus`, from Lucide.
+    pub const BATTERY_PLUS: Self = Self {
+        name: "battery-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 9v6"/><path d="M12.543 6H16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3.605"/><path d="M22 14v-4"/><path d="M7 12h6"/><path d="M7.606 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.606"/>"#,
+        doc: "`battery-plus`, from Lucide.",
+    };
+
+    /// `battery-warning`, from Lucide.
+    pub const BATTERY_WARNING: Self = Self {
+        name: "battery-warning",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 17h.01"/><path d="M10 7v6"/><path d="M14 6h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2"/><path d="M22 14v-4"/><path d="M6 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2"/>"#,
+        doc: "`battery-warning`, from Lucide.",
+    };
+
+    /// `beaker`, from Lucide.
+    pub const BEAKER: Self = Self {
+        name: "beaker",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4.5 3h15"/><path d="M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3"/><path d="M6 14h12"/>"#,
+        doc: "`beaker`, from Lucide.",
+    };
+
+    /// `bean`, from Lucide.
+    pub const BEAN: Self = Self {
+        name: "bean",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.165 6.598C9.954 7.478 9.64 8.36 9 9c-.64.64-1.521.954-2.402 1.165A6 6 0 0 0 8 22c7.732 0 14-6.268 14-14a6 6 0 0 0-11.835-1.402Z"/><path d="M5.341 10.62a4 4 0 1 0 5.279-5.28"/>"#,
+        doc: "`bean`, from Lucide.",
+    };
+
+    /// `bean-off`, from Lucide.
+    pub const BEAN_OFF: Self = Self {
+        name: "bean-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 9c-.64.64-1.521.954-2.402 1.165A6 6 0 0 0 8 22a13.96 13.96 0 0 0 9.9-4.1"/><path d="M10.75 5.093A6 6 0 0 1 22 8c0 2.411-.61 4.68-1.683 6.66"/><path d="M5.341 10.62a4 4 0 0 0 6.487 1.208M10.62 5.341a4.015 4.015 0 0 1 2.039 2.04"/><line x1="2" x2="22" y1="2" y2="22"/>"#,
+        doc: "`bean-off`, from Lucide.",
+    };
+
+    /// `bed`, from Lucide.
+    pub const BED: Self = Self {
+        name: "bed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>"#,
+        doc: "`bed`, from Lucide.",
+    };
+
+    /// `bed-double`, from Lucide.
+    pub const BED_DOUBLE: Self = Self {
+        name: "bed-double",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M12 4v6"/><path d="M2 18h20"/>"#,
+        doc: "`bed-double`, from Lucide.",
+    };
+
+    /// `bed-single`, from Lucide.
+    pub const BED_SINGLE: Self = Self {
+        name: "bed-single",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 20v-8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8"/><path d="M5 10V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M3 18h18"/>"#,
+        doc: "`bed-single`, from Lucide.",
+    };
+
+    /// `beef`, from Lucide.
+    pub const BEEF: Self = Self {
+        name: "beef",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16.4 13.7A6.5 6.5 0 1 0 6.28 6.6c-1.1 3.13-.78 3.9-3.18 6.08A3 3 0 0 0 5 18c4 0 8.4-1.8 11.4-4.3"/><path d="m18.5 6 2.19 4.5a6.48 6.48 0 0 1-2.29 7.2C15.4 20.2 11 22 7 22a3 3 0 0 1-2.68-1.66L2.4 16.5"/><circle cx="12.5" cy="8.5" r="2.5"/>"#,
+        doc: "`beef`, from Lucide.",
+    };
+
+    /// `beef-off`, from Lucide.
+    pub const BEEF_OFF: Self = Self {
+        name: "beef-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.771 6.109a2.5 2.5 0 0 1 3.12 3.12"/><path d="M17.852 12.185a6.5 6.5 0 0 0-9.035-9.04"/><path d="M18.013 18.013C15.029 20.349 10.831 22 7 22a3 3 0 0 1-2.68-1.66L2.4 16.5"/><path d="m18.5 6 2.19 4.5a6.48 6.48 0 0 1-.139 4.393"/><path d="m2 2 20 20"/><path d="M6.355 6.37a7 7 0 0 0-.075.23c-1.1 3.13-.78 3.9-3.18 6.08A3 3 0 0 0 5 18c3.356 0 6.993-1.267 9.85-3.151"/>"#,
+        doc: "`beef-off`, from Lucide.",
+    };
+
+    /// `beer`, from Lucide.
+    pub const BEER: Self = Self {
+        name: "beer",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 11h1a3 3 0 0 1 0 6h-1"/><path d="M9 12v6"/><path d="M13 12v6"/><path d="M14 7.5c-1 0-1.44.5-3 .5s-2-.5-3-.5-1.72.5-2.5.5a2.5 2.5 0 0 1 0-5c.78 0 1.57.5 2.5.5S9.44 2 11 2s2 1.5 3 1.5 1.72-.5 2.5-.5a2.5 2.5 0 0 1 0 5c-.78 0-1.5-.5-2.5-.5Z"/><path d="M5 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/>"#,
+        doc: "`beer`, from Lucide.",
+    };
+
+    /// `beer-off`, from Lucide.
+    pub const BEER_OFF: Self = Self {
+        name: "beer-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 13v5"/><path d="M17 11.47V8"/><path d="M17 11h1a3 3 0 0 1 2.745 4.211"/><path d="m2 2 20 20"/><path d="M5 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-3"/><path d="M7.536 7.535C6.766 7.649 6.154 8 5.5 8a2.5 2.5 0 0 1-1.768-4.268"/><path d="M8.727 3.204C9.306 2.767 9.885 2 11 2c1.56 0 2 1.5 3 1.5s1.72-.5 2.5-.5a1 1 0 1 1 0 5c-.78 0-1.5-.5-2.5-.5a3.149 3.149 0 0 0-.842.12"/><path d="M9 14.6V18"/>"#,
+        doc: "`beer-off`, from Lucide.",
+    };
+
+    /// `bell`, from Lucide.
+    pub const BELL: Self = Self {
+        name: "bell",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>"#,
+        doc: "`bell`, from Lucide.",
+    };
+
+    /// `bell-check`, from Lucide.
+    pub const BELL_CHECK: Self = Self {
+        name: "bell-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="m15 8 2 2 4-4"/><path d="M16.8607 4.4824A6 6 0 0 0 6 8C6 12.499 4.589 13.956 3.262 15.326"/><path d="M3.262 15.326A1 1 0 0 0 4 17H20A1 1 0 0 0 20.74 15.327C20.209 14.779 19.665 14.218 19.203 13.454"/>"#,
+        doc: "`bell-check`, from Lucide.",
+    };
+
+    /// `bell-dot`, from Lucide.
+    pub const BELL_DOT: Self = Self {
+        name: "bell-dot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M11.68 2.009A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673c-.824-.85-1.678-1.731-2.21-3.348"/><circle cx="18" cy="5" r="3"/>"#,
+        doc: "`bell-dot`, from Lucide.",
+    };
+
+    /// `bell-electric`, from Lucide.
+    pub const BELL_ELECTRIC: Self = Self {
+        name: "bell-electric",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18.518 17.347A7 7 0 0 1 14 19"/><path d="M18.8 4A11 11 0 0 1 20 9"/><path d="M9 9h.01"/><circle cx="20" cy="16" r="2"/><circle cx="9" cy="9" r="7"/><rect x="4" y="16" width="10" height="6" rx="2"/>"#,
+        doc: "`bell-electric`, from Lucide.",
+    };
+
+    /// `bell-minus`, from Lucide.
+    pub const BELL_MINUS: Self = Self {
+        name: "bell-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M15 8h6"/><path d="M16.243 3.757A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673A9.4 9.4 0 0 1 18.667 12"/>"#,
+        doc: "`bell-minus`, from Lucide.",
+    };
+
+    /// `bell-off`, from Lucide.
+    pub const BELL_OFF: Self = Self {
+        name: "bell-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M17 17H4a1 1 0 0 1-.74-1.673C4.59 13.956 6 12.499 6 8a6 6 0 0 1 .258-1.742"/><path d="m2 2 20 20"/><path d="M8.668 3.01A6 6 0 0 1 18 8c0 2.687.77 4.653 1.707 6.05"/>"#,
+        doc: "`bell-off`, from Lucide.",
+    };
+
+    /// `bell-plus`, from Lucide.
+    pub const BELL_PLUS: Self = Self {
+        name: "bell-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M15 8h6"/><path d="M18 5v6"/><path d="M20.002 14.464a9 9 0 0 0 .738.863A1 1 0 0 1 20 17H4a1 1 0 0 1-.74-1.673C4.59 13.956 6 12.499 6 8a6 6 0 0 1 8.75-5.332"/>"#,
+        doc: "`bell-plus`, from Lucide.",
+    };
+
+    /// `bell-ring`, from Lucide.
+    pub const BELL_RING: Self = Self {
+        name: "bell-ring",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M22 8c0-2.3-.8-4.3-2-6"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/><path d="M4 2C2.8 3.7 2 5.7 2 8"/>"#,
+        doc: "`bell-ring`, from Lucide.",
+    };
+
+    /// `between-horizontal-end`, from Lucide.
+    pub const BETWEEN_HORIZONTAL_END: Self = Self {
+        name: "between-horizontal-end",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="13" height="7" x="3" y="3" rx="1"/><path d="m22 15-3-3 3-3"/><rect width="13" height="7" x="3" y="14" rx="1"/>"#,
+        doc: "`between-horizontal-end`, from Lucide.",
+    };
+
+    /// `between-horizontal-start`, from Lucide.
+    pub const BETWEEN_HORIZONTAL_START: Self = Self {
+        name: "between-horizontal-start",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="13" height="7" x="8" y="3" rx="1"/><path d="m2 9 3 3-3 3"/><rect width="13" height="7" x="8" y="14" rx="1"/>"#,
+        doc: "`between-horizontal-start`, from Lucide.",
+    };
+
+    /// `between-vertical-end`, from Lucide.
+    pub const BETWEEN_VERTICAL_END: Self = Self {
+        name: "between-vertical-end",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="7" height="13" x="3" y="3" rx="1"/><path d="m9 22 3-3 3 3"/><rect width="7" height="13" x="14" y="3" rx="1"/>"#,
+        doc: "`between-vertical-end`, from Lucide.",
+    };
+
+    /// `between-vertical-start`, from Lucide.
+    pub const BETWEEN_VERTICAL_START: Self = Self {
+        name: "between-vertical-start",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="7" height="13" x="3" y="8" rx="1"/><path d="m15 2-3 3-3-3"/><rect width="7" height="13" x="14" y="8" rx="1"/>"#,
+        doc: "`between-vertical-start`, from Lucide.",
+    };
+
+    /// `biceps-flexed`, from Lucide.
+    pub const BICEPS_FLEXED: Self = Self {
+        name: "biceps-flexed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.409 13.017A5 5 0 0 1 22 15c0 3.866-4 7-9 7-4.077 0-8.153-.82-10.371-2.462-.426-.316-.631-.832-.62-1.362C2.118 12.723 2.627 2 10 2a3 3 0 0 1 3 3 2 2 0 0 1-2 2c-1.105 0-1.64-.444-2-1"/><path d="M15 14a5 5 0 0 0-7.584 2"/><path d="M9.964 6.825C8.019 7.977 9.5 13 8 15"/>"#,
+        doc: "`biceps-flexed`, from Lucide.",
+    };
+
+    /// `bike`, from Lucide.
+    pub const BIKE: Self = Self {
+        name: "bike",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>"#,
+        doc: "`bike`, from Lucide.",
+    };
+
+    /// `binary`, from Lucide.
+    pub const BINARY: Self = Self {
+        name: "binary",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect x="14" y="14" width="4" height="6" rx="2"/><rect x="6" y="4" width="4" height="6" rx="2"/><path d="M6 20h4"/><path d="M14 10h4"/><path d="M6 14h2v6"/><path d="M14 4h2v6"/>"#,
+        doc: "`binary`, from Lucide.",
+    };
+
+    /// `binoculars`, from Lucide.
+    pub const BINOCULARS: Self = Self {
+        name: "binoculars",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 10h4"/><path d="M19 7V4a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v3"/><path d="M20 21a2 2 0 0 0 2-2v-3.851c0-1.39-2-2.962-2-4.829V8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v11a2 2 0 0 0 2 2z"/><path d="M 22 16 L 2 16"/><path d="M4 21a2 2 0 0 1-2-2v-3.851c0-1.39 2-2.962 2-4.829V8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v11a2 2 0 0 1-2 2z"/><path d="M9 7V4a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v3"/>"#,
+        doc: "`binoculars`, from Lucide.",
+    };
+
+    /// `biohazard`, from Lucide.
+    pub const BIOHAZARD: Self = Self {
+        name: "biohazard",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="11.9" r="2"/><path d="M6.7 3.4c-.9 2.5 0 5.2 2.2 6.7C6.5 9 3.7 9.6 2 11.6"/><path d="m8.9 10.1 1.4.8"/><path d="M17.3 3.4c.9 2.5 0 5.2-2.2 6.7 2.4-1.2 5.2-.6 6.9 1.5"/><path d="m15.1 10.1-1.4.8"/><path d="M16.7 20.8c-2.6-.4-4.6-2.6-4.7-5.3-.2 2.6-2.1 4.8-4.7 5.2"/><path d="M12 13.9v1.6"/><path d="M13.5 5.4c-1-.2-2-.2-3 0"/><path d="M17 16.4c.7-.7 1.2-1.6 1.5-2.5"/><path d="M5.5 13.9c.3.9.8 1.8 1.5 2.5"/>"#,
+        doc: "`biohazard`, from Lucide.",
+    };
+
+    /// `bird`, from Lucide.
+    pub const BIRD: Self = Self {
+        name: "bird",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/>"#,
+        doc: "`bird`, from Lucide.",
+    };
+
+    /// `birdhouse`, from Lucide.
+    pub const BIRDHOUSE: Self = Self {
+        name: "birdhouse",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 18v4"/><path d="m17 18 1.956-11.468"/><path d="m3 8 7.82-5.615a2 2 0 0 1 2.36 0L21 8"/><path d="M4 18h16"/><path d="M7 18 5.044 6.532"/><circle cx="12" cy="10" r="2"/>"#,
+        doc: "`birdhouse`, from Lucide.",
+    };
+
+    /// `bitcoin`, from Lucide.
+    pub const BITCOIN: Self = Self {
+        name: "bitcoin",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.767 19.089c4.924.868 6.14-6.025 1.216-6.894m-1.216 6.894L5.86 18.047m5.908 1.042-.347 1.97m1.563-8.864c4.924.869 6.14-6.025 1.215-6.893m-1.215 6.893-3.94-.694m5.155-6.2L8.29 4.26m5.908 1.042.348-1.97M7.48 20.364l3.126-17.727"/>"#,
+        doc: "`bitcoin`, from Lucide.",
+    };
+
+    /// `blend`, from Lucide.
+    pub const BLEND: Self = Self {
+        name: "blend",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="9" cy="9" r="7"/><circle cx="15" cy="15" r="7"/>"#,
+        doc: "`blend`, from Lucide.",
+    };
+
+    /// `blender`, from Lucide.
+    pub const BLENDER: Self = Self {
+        name: "blender",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 14a2 2 0 0 0-1.963 1.615l-1.018 5.193A1 1 0 0 0 6 22h12a1 1 0 0 0 .981-1.192l-1.018-5.193A2 2 0 0 0 16 14z"/><path d="m17 2-1 12"/><path d="M8.006 14 7 2"/><path d="M7.565 8.787A5 5 0 0 0 12 8a5 5 0 0 1 4.56-.75"/><path d="M19 2H5a2 2 0 0 0-2 2v5a2 2 0 0 0 .688 1.5"/><path d="M12 18h.01"/>"#,
+        doc: "`blender`, from Lucide.",
+    };
+
+    /// `blinds`, from Lucide.
+    pub const BLINDS: Self = Self {
+        name: "blinds",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 3h18"/><path d="M20 7H8"/><path d="M20 11H8"/><path d="M10 19h10"/><path d="M8 15h12"/><path d="M4 3v14"/><circle cx="4" cy="19" r="2"/>"#,
+        doc: "`blinds`, from Lucide.",
+    };
+
+    /// `blocks`, from Lucide.
+    pub const BLOCKS: Self = Self {
+        name: "blocks",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 22V7a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5a1 1 0 0 0-1-1H2"/><rect x="14" y="2" width="8" height="8" rx="1"/>"#,
+        doc: "`blocks`, from Lucide.",
+    };
+
+    /// `bluetooth`, from Lucide.
+    pub const BLUETOOTH: Self = Self {
+        name: "bluetooth",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m7 7 10 10-5 5V2l5 5L7 17"/>"#,
+        doc: "`bluetooth`, from Lucide.",
+    };
+
+    /// `bluetooth-connected`, from Lucide.
+    pub const BLUETOOTH_CONNECTED: Self = Self {
+        name: "bluetooth-connected",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m7 7 10 10-5 5V2l5 5L7 17"/><line x1="18" x2="21" y1="12" y2="12"/><line x1="3" x2="6" y1="12" y2="12"/>"#,
+        doc: "`bluetooth-connected`, from Lucide.",
+    };
+
+    /// `bluetooth-off`, from Lucide.
+    pub const BLUETOOTH_OFF: Self = Self {
+        name: "bluetooth-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m17 17-5 5V12l-5 5"/><path d="m2 2 20 20"/><path d="M14.5 9.5 17 7l-5-5v4.5"/>"#,
+        doc: "`bluetooth-off`, from Lucide.",
+    };
+
+    /// `bluetooth-searching`, from Lucide.
+    pub const BLUETOOTH_SEARCHING: Self = Self {
+        name: "bluetooth-searching",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m7 7 10 10-5 5V2l5 5L7 17"/><path d="M20.83 14.83a4 4 0 0 0 0-5.66"/><path d="M18 12h.01"/>"#,
+        doc: "`bluetooth-searching`, from Lucide.",
+    };
+
+    /// `bold`, from Lucide.
+    pub const BOLD: Self = Self {
+        name: "bold",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8"/>"#,
+        doc: "`bold`, from Lucide.",
+    };
+
+    /// `bolt`, from Lucide.
+    pub const BOLT: Self = Self {
+        name: "bolt",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><circle cx="12" cy="12" r="4"/>"#,
+        doc: "`bolt`, from Lucide.",
+    };
+
+    /// `bomb`, from Lucide.
+    pub const BOMB: Self = Self {
+        name: "bomb",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="11" cy="13" r="9"/><path d="M14.35 4.65 16.3 2.7a2.41 2.41 0 0 1 3.4 0l1.6 1.6a2.4 2.4 0 0 1 0 3.4l-1.95 1.95"/><path d="m22 2-1.5 1.5"/>"#,
+        doc: "`bomb`, from Lucide.",
+    };
+
+    /// `bone`, from Lucide.
+    pub const BONE: Self = Self {
+        name: "bone",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 10c.7-.7 1.69 0 2.5 0a2.5 2.5 0 1 0 0-5 .5.5 0 0 1-.5-.5 2.5 2.5 0 1 0-5 0c0 .81.7 1.8 0 2.5l-7 7c-.7.7-1.69 0-2.5 0a2.5 2.5 0 0 0 0 5c.28 0 .5.22.5.5a2.5 2.5 0 1 0 5 0c0-.81-.7-1.8 0-2.5Z"/>"#,
+        doc: "`bone`, from Lucide.",
+    };
+
+    /// `bone-fracture`, from Lucide.
+    pub const BONE_FRACTURE: Self = Self {
+        name: "bone-fracture",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 4.5a1 1 0 0 1 5 0 .5.5 0 0 0 .5.5 1 1 0 0 1 0 5c-.81 0-1.8-.7-2.5 0l-1.958 1.957a.15.15 0 0 1-.252-.072l-.493-2.07a.15.15 0 0 0-.111-.112l-2.072-.494a.15.15 0 0 1-.072-.252L14 7c.7-.7 0-1.69 0-2.5"/><path d="m16 20-1-2"/><path d="m20 16-2-1"/><path d="m4 8 2 1"/><path d="m8 4 1 2"/><path d="M9.698 14.19a.15.15 0 0 0 .112.112l2.074.489a.15.15 0 0 1 .072.252L10 17c-.7.7 0 1.69 0 2.5a1 1 0 0 1-5 0 .495.495 0 0 0-.5-.5 1 1 0 0 1 0-5c.81 0 1.8.7 2.5 0l1.956-1.957a.15.15 0 0 1 .252.072z"/>"#,
+        doc: "`bone-fracture`, from Lucide.",
+    };
+
+    /// `book`, from Lucide.
+    pub const BOOK: Self = Self {
+        name: "book",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>"#,
+        doc: "`book`, from Lucide.",
+    };
+
+    /// `book-a`, from Lucide.
+    pub const BOOK_A: Self = Self {
+        name: "book-a",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="m8 13 4-7 4 7"/><path d="M9.1 11h5.7"/>"#,
+        doc: "`book-a`, from Lucide.",
+    };
+
+    /// `book-alert`, from Lucide.
+    pub const BOOK_ALERT: Self = Self {
+        name: "book-alert",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13h.01"/><path d="M12 6v3"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>"#,
+        doc: "`book-alert`, from Lucide.",
+    };
+
+    /// `book-audio`, from Lucide.
+    pub const BOOK_AUDIO: Self = Self {
+        name: "book-audio",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6v7"/><path d="M16 8v3"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M8 8v3"/>"#,
+        doc: "`book-audio`, from Lucide.",
+    };
+
+    /// `book-check`, from Lucide.
+    pub const BOOK_CHECK: Self = Self {
+        name: "book-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="m9 9.5 2 2 4-4"/>"#,
+        doc: "`book-check`, from Lucide.",
+    };
+
+    /// `book-copy`, from Lucide.
+    pub const BOOK_COPY: Self = Self {
+        name: "book-copy",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 7a2 2 0 0 0-2 2v11"/><path d="M5.803 18H5a2 2 0 0 0 0 4h9.5a.5.5 0 0 0 .5-.5V21"/><path d="M9 15V4a2 2 0 0 1 2-2h9.5a.5.5 0 0 1 .5.5v14a.5.5 0 0 1-.5.5H11a2 2 0 0 1 0-4h10"/>"#,
+        doc: "`book-copy`, from Lucide.",
+    };
+
+    /// `book-dashed`, from Lucide.
+    pub const BOOK_DASHED: Self = Self {
+        name: "book-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 17h1.5"/><path d="M12 22h1.5"/><path d="M12 2h1.5"/><path d="M17.5 22H19a1 1 0 0 0 1-1"/><path d="M17.5 2H19a1 1 0 0 1 1 1v1.5"/><path d="M20 14v3h-2.5"/><path d="M20 8.5V10"/><path d="M4 10V8.5"/><path d="M4 19.5V14"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H8"/><path d="M8 22H6.5a1 1 0 0 1 0-5H8"/>"#,
+        doc: "`book-dashed`, from Lucide.",
+    };
+
+    /// `book-down`, from Lucide.
+    pub const BOOK_DOWN: Self = Self {
+        name: "book-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13V7"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="m9 10 3 3 3-3"/>"#,
+        doc: "`book-down`, from Lucide.",
+    };
+
+    /// `book-headphones`, from Lucide.
+    pub const BOOK_HEADPHONES: Self = Self {
+        name: "book-headphones",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M8 12v-2a4 4 0 0 1 8 0v2"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="12" r="1"/>"#,
+        doc: "`book-headphones`, from Lucide.",
+    };
+
+    /// `book-heart`, from Lucide.
+    pub const BOOK_HEART: Self = Self {
+        name: "book-heart",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M8.62 9.8A2.25 2.25 0 1 1 12 6.836a2.25 2.25 0 1 1 3.38 2.966l-2.626 2.856a.998.998 0 0 1-1.507 0z"/>"#,
+        doc: "`book-heart`, from Lucide.",
+    };
+
+    /// `book-image`, from Lucide.
+    pub const BOOK_IMAGE: Self = Self {
+        name: "book-image",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m20 13.7-2.1-2.1a2 2 0 0 0-2.8 0L9.7 17"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><circle cx="10" cy="8" r="2"/>"#,
+        doc: "`book-image`, from Lucide.",
+    };
+
+    /// `book-key`, from Lucide.
+    pub const BOOK_KEY: Self = Self {
+        name: "book-key",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 2H6.5A2.5 2.5 0 0 0 4 4.5v15"/><path d="M17 2v6"/><path d="M17 4h2"/><path d="M20 15.2V21a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><circle cx="17" cy="10" r="2"/>"#,
+        doc: "`book-key`, from Lucide.",
+    };
+
+    /// `book-lock`, from Lucide.
+    pub const BOOK_LOCK: Self = Self {
+        name: "book-lock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 6V4a2 2 0 1 0-4 0v2"/><path d="M20 15v6a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H10"/><rect x="12" y="6" width="8" height="5" rx="1"/>"#,
+        doc: "`book-lock`, from Lucide.",
+    };
+
+    /// `book-marked`, from Lucide.
+    pub const BOOK_MARKED: Self = Self {
+        name: "book-marked",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 2v8l3-3 3 3V2"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>"#,
+        doc: "`book-marked`, from Lucide.",
+    };
+
+    /// `book-minus`, from Lucide.
+    pub const BOOK_MINUS: Self = Self {
+        name: "book-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M9 10h6"/>"#,
+        doc: "`book-minus`, from Lucide.",
+    };
+
+    /// `book-open`, from Lucide.
+    pub const BOOK_OPEN: Self = Self {
+        name: "book-open",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 5v16"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/>"#,
+        doc: "`book-open`, from Lucide.",
+    };
+
+    /// `book-open-check`, from Lucide.
+    pub const BOOK_OPEN_CHECK: Self = Self {
+        name: "book-open-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 5v16"/><path d="m16 12 2 2 4-4"/><path d="M22 6V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2h4.001A2 2 0 0022 17v-1.344"/>"#,
+        doc: "`book-open-check`, from Lucide.",
+    };
+
+    /// `book-open-text`, from Lucide.
+    pub const BOOK_OPEN_TEXT: Self = Self {
+        name: "book-open-text",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 5v16"/><path d="M16 13h2"/><path d="M16 9h2"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/><path d="M6 13h2"/><path d="M6 9h2"/>"#,
+        doc: "`book-open-text`, from Lucide.",
+    };
+
+    /// `book-plus`, from Lucide.
+    pub const BOOK_PLUS: Self = Self {
+        name: "book-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 7v6"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M9 10h6"/>"#,
+        doc: "`book-plus`, from Lucide.",
+    };
+
+    /// `book-search`, from Lucide.
+    pub const BOOK_SEARCH: Self = Self {
+        name: "book-search",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 22H5.5a1 1 0 0 1 0-5h4.501"/><path d="m21 22-1.879-1.878"/><path d="M3 19.5v-15A2.5 2.5 0 0 1 5.5 2H18a1 1 0 0 1 1 1v8"/><circle cx="17" cy="18" r="3"/>"#,
+        doc: "`book-search`, from Lucide.",
+    };
+
+    /// `book-text`, from Lucide.
+    pub const BOOK_TEXT: Self = Self {
+        name: "book-text",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M8 11h8"/><path d="M8 7h6"/>"#,
+        doc: "`book-text`, from Lucide.",
+    };
+
+    /// `book-type`, from Lucide.
+    pub const BOOK_TYPE: Self = Self {
+        name: "book-type",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 13h4"/><path d="M12 6v7"/><path d="M16 8V6H8v2"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>"#,
+        doc: "`book-type`, from Lucide.",
+    };
+
+    /// `book-up`, from Lucide.
+    pub const BOOK_UP: Self = Self {
+        name: "book-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13V7"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="m9 10 3-3 3 3"/>"#,
+        doc: "`book-up`, from Lucide.",
+    };
+
+    /// `book-up-2`, from Lucide.
+    pub const BOOK_UP_2: Self = Self {
+        name: "book-up-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13V7"/><path d="M18 2h1a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2"/><path d="m9 10 3-3 3 3"/><path d="m9 5 3-3 3 3"/>"#,
+        doc: "`book-up-2`, from Lucide.",
+    };
+
+    /// `book-user`, from Lucide.
+    pub const BOOK_USER: Self = Self {
+        name: "book-user",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 13a3 3 0 1 0-6 0"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><circle cx="12" cy="8" r="2"/>"#,
+        doc: "`book-user`, from Lucide.",
+    };
+
+    /// `book-x`, from Lucide.
+    pub const BOOK_X: Self = Self {
+        name: "book-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14.5 7-5 5"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="m9.5 7 5 5"/>"#,
+        doc: "`book-x`, from Lucide.",
+    };
+
+    /// `bookmark`, from Lucide.
+    pub const BOOKMARK: Self = Self {
+        name: "bookmark",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"/>"#,
+        doc: "`bookmark`, from Lucide.",
+    };
+
+    /// `bookmark-check`, from Lucide.
+    pub const BOOKMARK_CHECK: Self = Self {
+        name: "bookmark-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"/><path d="m9 10 2 2 4-4"/>"#,
+        doc: "`bookmark-check`, from Lucide.",
+    };
+
+    /// `bookmark-minus`, from Lucide.
+    pub const BOOKMARK_MINUS: Self = Self {
+        name: "bookmark-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 10H9"/><path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"/>"#,
+        doc: "`bookmark-minus`, from Lucide.",
+    };
+
+    /// `bookmark-off`, from Lucide.
+    pub const BOOKMARK_OFF: Self = Self {
+        name: "bookmark-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 19v1a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5"/><path d="m2 2 20 20"/><path d="M8.656 3H17a2 2 0 0 1 2 2v8.344"/>"#,
+        doc: "`bookmark-off`, from Lucide.",
+    };
+
+    /// `bookmark-plus`, from Lucide.
+    pub const BOOKMARK_PLUS: Self = Self {
+        name: "bookmark-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 7v6"/><path d="M15 10H9"/><path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"/>"#,
+        doc: "`bookmark-plus`, from Lucide.",
+    };
+
+    /// `bookmark-x`, from Lucide.
+    pub const BOOKMARK_X: Self = Self {
+        name: "bookmark-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14.5 7.5-5 5"/><path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"/><path d="m9.5 7.5 5 5"/>"#,
+        doc: "`bookmark-x`, from Lucide.",
+    };
+
+    /// `boom-box`, from Lucide.
+    pub const BOOM_BOX: Self = Self {
+        name: "boom-box",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 9V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M8 8v1"/><path d="M12 8v1"/><path d="M16 8v1"/><rect width="20" height="12" x="2" y="9" rx="2"/><circle cx="8" cy="15" r="2"/><circle cx="16" cy="15" r="2"/>"#,
+        doc: "`boom-box`, from Lucide.",
+    };
+
+    /// `bot`, from Lucide.
+    pub const BOT: Self = Self {
+        name: "bot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>"#,
+        doc: "`bot`, from Lucide.",
+    };
+
+    /// `bot-message-square`, from Lucide.
+    pub const BOT_MESSAGE_SQUARE: Self = Self {
+        name: "bot-message-square",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6V2H8"/><path d="M15 11v2"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M20 16a2 2 0 0 1-2 2H8.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 4 20.286V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/><path d="M9 11v2"/>"#,
+        doc: "`bot-message-square`, from Lucide.",
+    };
+
+    /// `bot-off`, from Lucide.
+    pub const BOT_OFF: Self = Self {
+        name: "bot-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.67 8H18a2 2 0 0 1 2 2v4.33"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M22 22 2 2"/><path d="M8 8H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 1.414-.586"/><path d="M9 13v2"/><path d="M9.67 4H12v2.33"/>"#,
+        doc: "`bot-off`, from Lucide.",
+    };
+
+    /// `bottle-wine`, from Lucide.
+    pub const BOTTLE_WINE: Self = Self {
+        name: "bottle-wine",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a6 6 0 0 0 1.2 3.6l.6.8A6 6 0 0 1 17 13v8a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-8a6 6 0 0 1 1.2-3.6l.6-.8A6 6 0 0 0 10 5z"/><path d="M17 13h-4a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h4"/>"#,
+        doc: "`bottle-wine`, from Lucide.",
+    };
+
+    /// `bow-arrow`, from Lucide.
+    pub const BOW_ARROW: Self = Self {
+        name: "bow-arrow",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 3h4v4"/><path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17"/><path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05"/><path d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z"/><path d="M9.707 14.293 21 3"/>"#,
+        doc: "`bow-arrow`, from Lucide.",
+    };
+
+    /// `box`, from Lucide.
+    pub const BOX: Self = Self {
+        name: "box",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>"#,
+        doc: "`box`, from Lucide.",
+    };
+
+    /// `boxes`, from Lucide.
+    pub const BOXES: Self = Self {
+        name: "boxes",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"/><path d="m7 16.5-4.74-2.85"/><path d="m7 16.5 5-3"/><path d="M7 16.5v5.17"/><path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"/><path d="m17 16.5-5-3"/><path d="m17 16.5 4.74-2.85"/><path d="M17 16.5v5.17"/><path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z"/><path d="M12 8 7.26 5.15"/><path d="m12 8 4.74-2.85"/><path d="M12 13.5V8"/>"#,
+        doc: "`boxes`, from Lucide.",
+    };
+
+    /// `braces`, from Lucide.
+    pub const BRACES: Self = Self {
+        name: "braces",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/>"#,
+        doc: "`braces`, from Lucide.",
+    };
+
+    /// `brackets`, from Lucide.
+    pub const BRACKETS: Self = Self {
+        name: "brackets",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 3h3a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-3"/><path d="M8 21H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h3"/>"#,
+        doc: "`brackets`, from Lucide.",
+    };
+
+    /// `brain`, from Lucide.
+    pub const BRAIN: Self = Self {
+        name: "brain",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 18V5"/><path d="M15 13a4.17 4.17 0 0 1-3-4 4.17 4.17 0 0 1-3 4"/><path d="M17.598 6.5A3 3 0 1 0 12 5a3 3 0 1 0-5.598 1.5"/><path d="M17.997 5.125a4 4 0 0 1 2.526 5.77"/><path d="M18 18a4 4 0 0 0 2-7.464"/><path d="M19.967 17.483A4 4 0 1 1 12 18a4 4 0 1 1-7.967-.517"/><path d="M6 18a4 4 0 0 1-2-7.464"/><path d="M6.003 5.125a4 4 0 0 0-2.526 5.77"/>"#,
+        doc: "`brain`, from Lucide.",
+    };
+
+    /// `brain-circuit`, from Lucide.
+    pub const BRAIN_CIRCUIT: Self = Self {
+        name: "brain-circuit",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M9 13a4.5 4.5 0 0 0 3-4"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M12 13h4"/><path d="M12 18h6a2 2 0 0 1 2 2v1"/><path d="M12 8h8"/><path d="M16 8V5a2 2 0 0 1 2-2"/><circle cx="16" cy="13" r=".5"/><circle cx="18" cy="3" r=".5"/><circle cx="20" cy="21" r=".5"/><circle cx="20" cy="8" r=".5"/>"#,
+        doc: "`brain-circuit`, from Lucide.",
+    };
+
+    /// `brain-cog`, from Lucide.
+    pub const BRAIN_COG: Self = Self {
+        name: "brain-cog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10.852 14.772-.383.923"/><path d="m10.852 9.228-.383-.923"/><path d="m13.148 14.772.382.924"/><path d="m13.531 8.305-.383.923"/><path d="m14.772 10.852.923-.383"/><path d="m14.772 13.148.923.383"/><path d="M17.598 6.5A3 3 0 1 0 12 5a3 3 0 0 0-5.63-1.446 3 3 0 0 0-.368 1.571 4 4 0 0 0-2.525 5.771"/><path d="M17.998 5.125a4 4 0 0 1 2.525 5.771"/><path d="M19.505 10.294a4 4 0 0 1-1.5 7.706"/><path d="M4.032 17.483A4 4 0 0 0 11.464 20c.18-.311.892-.311 1.072 0a4 4 0 0 0 7.432-2.516"/><path d="M4.5 10.291A4 4 0 0 0 6 18"/><path d="M6.002 5.125a3 3 0 0 0 .4 1.375"/><path d="m9.228 10.852-.923-.383"/><path d="m9.228 13.148-.923.383"/><circle cx="12" cy="12" r="3"/>"#,
+        doc: "`brain-cog`, from Lucide.",
+    };
+
+    /// `brick-wall`, from Lucide.
+    pub const BRICK_WALL: Self = Self {
+        name: "brick-wall",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 9v6"/><path d="M16 15v6"/><path d="M16 3v6"/><path d="M3 15h18"/><path d="M3 9h18"/><path d="M8 15v6"/><path d="M8 3v6"/>"#,
+        doc: "`brick-wall`, from Lucide.",
+    };
+
+    /// `brick-wall-fire`, from Lucide.
+    pub const BRICK_WALL_FIRE: Self = Self {
+        name: "brick-wall-fire",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 3v2.107"/><path d="M17 9c1 3 2.5 3.5 3.5 4.5A5 5 0 0 1 22 17a5 5 0 0 1-10 0c0-.3 0-.6.1-.9a2 2 0 1 0 3.3-2C13 11.5 16 9 17 9"/><path d="M21 8.274V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.938"/><path d="M3 15h5.253"/><path d="M3 9h8.228"/><path d="M8 15v6"/><path d="M8 3v6"/>"#,
+        doc: "`brick-wall-fire`, from Lucide.",
+    };
+
+    /// `brick-wall-shield`, from Lucide.
+    pub const BRICK_WALL_SHIELD: Self = Self {
+        name: "brick-wall-shield",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 9v1.258"/><path d="M16 3v5.46"/><path d="M21 9.118V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5.75"/><path d="M22 17.5c0 2.499-1.75 3.749-3.83 4.474a.5.5 0 0 1-.335-.005c-2.085-.72-3.835-1.97-3.835-4.47V14a.5.5 0 0 1 .5-.499c1 0 2.25-.6 3.12-1.36a.6.6 0 0 1 .76-.001c.875.765 2.12 1.36 3.12 1.36a.5.5 0 0 1 .5.5z"/><path d="M3 15h7"/><path d="M3 9h12.142"/><path d="M8 15v6"/><path d="M8 3v6"/>"#,
+        doc: "`brick-wall-shield`, from Lucide.",
+    };
+
+    /// `briefcase`, from Lucide.
+    pub const BRIEFCASE: Self = Self {
+        name: "briefcase",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>"#,
+        doc: "`briefcase`, from Lucide.",
+    };
+
+    /// `briefcase-business`, from Lucide.
+    pub const BRIEFCASE_BUSINESS: Self = Self {
+        name: "briefcase-business",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 12h.01"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M22 13a18.15 18.15 0 0 1-20 0"/><rect width="20" height="14" x="2" y="6" rx="2"/>"#,
+        doc: "`briefcase-business`, from Lucide.",
+    };
+
+    /// `briefcase-conveyor-belt`, from Lucide.
+    pub const BRIEFCASE_CONVEYOR_BELT: Self = Self {
+        name: "briefcase-conveyor-belt",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 20v2"/><path d="M14 20v2"/><path d="M18 20v2"/><path d="M21 20H3"/><path d="M6 20v2"/><path d="M8 16V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v12"/><rect x="4" y="6" width="16" height="10" rx="2"/>"#,
+        doc: "`briefcase-conveyor-belt`, from Lucide.",
+    };
+
+    /// `briefcase-medical`, from Lucide.
+    pub const BRIEFCASE_MEDICAL: Self = Self {
+        name: "briefcase-medical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 11v4"/><path d="M14 13h-4"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M18 6v14"/><path d="M6 6v14"/><rect width="20" height="14" x="2" y="6" rx="2"/>"#,
+        doc: "`briefcase-medical`, from Lucide.",
+    };
+
+    /// `bring-to-front`, from Lucide.
+    pub const BRING_TO_FRONT: Self = Self {
+        name: "bring-to-front",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect x="8" y="8" width="8" height="8" rx="2"/><path d="M4 10a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2"/><path d="M14 20a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2"/>"#,
+        doc: "`bring-to-front`, from Lucide.",
+    };
+
+    /// `broccoli`, from Lucide.
+    pub const BROCCOLI: Self = Self {
+        name: "broccoli",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 13a3 3 0 0 1-2.121-5.121"/><path d="M15.606 14.204c-3.5 1.5-5.899 4.503-8.899 7.503A1 1 0 0 1 6 22c-2 0-4-2-4-4a1 1 0 0 1 .293-.707c1.911-1.911 3.823-3.578 5.347-5.441"/><path d="M16.573 14.737A4 4 0 0 1 14 11"/><path d="M7.14 10.907a4 4 0 1 1 2.756-7.43A4 4 0 0 1 16.7 4.48a2 2 0 0 1 2.82 2.82 4 4 0 0 1 1.002 6.805A4 4 0 1 1 13 16"/>"#,
+        doc: "`broccoli`, from Lucide.",
+    };
+
+    /// `broom`, from Lucide.
+    pub const BROOM: Self = Self {
+        name: "broom",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.5 10.5 22 2"/><path d="M14.734 13.841a2 2 0 00-.314-2.42L12.58 9.58a2 2 0 00-2.421-.314l-7.657 4.461A1 1 0 002.3 15.3l6.403 6.403a1 1 0 001.571-.204z"/><path d="m5 18 2-2"/><path d="m7.699 10.7 5.602 5.601"/>"#,
+        doc: "`broom`, from Lucide.",
+    };
+
+    /// `broom-sparkles`, from Lucide.
+    pub const BROOM_SPARKLES: Self = Self {
+        name: "broom-sparkles",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 2v2"/><path d="M12 3h-2"/><path d="M13.5 10.5 22 2"/><path d="M14.734 13.841a2 2 0 00-.314-2.42L12.58 9.58a2 2 0 00-2.421-.314l-7.657 4.461A1 1 0 002.3 15.3l6.403 6.403a1 1 0 001.571-.204z"/><path d="M20 15v4"/><path d="M22 17h-4"/><path d="M4 4v4"/><path d="m5 18 2-2"/><path d="M6 6H2"/><path d="m7.699 10.7 5.602 5.601"/>"#,
+        doc: "`broom-sparkles`, from Lucide.",
+    };
+
+    /// `brush`, from Lucide.
+    pub const BRUSH: Self = Self {
+        name: "brush",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m11 10 3 3"/><path d="M6.5 21A3.5 3.5 0 1 0 3 17.5a2.62 2.62 0 0 1-.708 1.792A1 1 0 0 0 3 21z"/><path d="M9.969 17.031 21.378 5.624a1 1 0 0 0-3.002-3.002L6.967 14.031"/>"#,
+        doc: "`brush`, from Lucide.",
+    };
+
+    /// `brush-cleaning`, from Lucide.
+    pub const BRUSH_CLEANING: Self = Self {
+        name: "brush-cleaning",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 22-1-4"/><path d="M19 14a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2h-3a1 1 0 0 1-1-1V4a2 2 0 0 0-4 0v5a1 1 0 0 1-1 1H6a2 2 0 0 0-2 2v1a1 1 0 0 0 1 1"/><path d="M19 14H5l-1.973 6.767A1 1 0 0 0 4 22h16a1 1 0 0 0 .973-1.233z"/><path d="m8 22 1-4"/>"#,
+        doc: "`brush-cleaning`, from Lucide.",
+    };
+
+    /// `bubbles`, from Lucide.
+    pub const BUBBLES: Self = Self {
+        name: "bubbles",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7.001 15.085A1.5 1.5 0 0 1 9 16.5"/><circle cx="18.5" cy="8.5" r="3.5"/><circle cx="7.5" cy="16.5" r="5.5"/><circle cx="7.5" cy="4.5" r="2.5"/>"#,
+        doc: "`bubbles`, from Lucide.",
+    };
+
+    /// `bug`, from Lucide.
+    pub const BUG: Self = Self {
+        name: "bug",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 20v-9"/><path d="M14 7a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4z"/><path d="M14.12 3.88 16 2"/><path d="M21 21a4 4 0 0 0-3.81-4"/><path d="M21 5a4 4 0 0 1-3.55 3.97"/><path d="M22 13h-4"/><path d="M3 21a4 4 0 0 1 3.81-4"/><path d="M3 5a4 4 0 0 0 3.55 3.97"/><path d="M6 13H2"/><path d="m8 2 1.88 1.88"/><path d="M9 7.13V6a3 3 0 1 1 6 0v1.13"/>"#,
+        doc: "`bug`, from Lucide.",
+    };
+
+    /// `bug-off`, from Lucide.
+    pub const BUG_OFF: Self = Self {
+        name: "bug-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 20v-8"/><path d="M12.656 7H14a4 4 0 0 1 4 4v1.344"/><path d="M14.12 3.88 16 2"/><path d="M17.123 17.123A6 6 0 0 1 6 14v-3a4 4 0 0 1 1.72-3.287"/><path d="m2 2 20 20"/><path d="M21 5a4 4 0 0 1-3.55 3.97"/><path d="M22 13h-3.344"/><path d="M3 21a4 4 0 0 1 3.81-4"/><path d="M3 5a4 4 0 0 0 3.55 3.97"/><path d="M6 13H2"/><path d="m8 2 1.88 1.88"/><path d="M9.712 4.06A3 3 0 0 1 15 6v1.13"/>"#,
+        doc: "`bug-off`, from Lucide.",
+    };
+
+    /// `bug-play`, from Lucide.
+    pub const BUG_PLAY: Self = Self {
+        name: "bug-play",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 19.655A6 6 0 0 1 6 14v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 3.97"/><path d="M14 15.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997a1 1 0 0 1-1.517-.86z"/><path d="M14.12 3.88 16 2"/><path d="M21 5a4 4 0 0 1-3.55 3.97"/><path d="M3 21a4 4 0 0 1 3.81-4"/><path d="M3 5a4 4 0 0 0 3.55 3.97"/><path d="M6 13H2"/><path d="m8 2 1.88 1.88"/><path d="M9 7.13V6a3 3 0 1 1 6 0v1.13"/>"#,
+        doc: "`bug-play`, from Lucide.",
+    };
+
+    /// `building`, from Lucide.
+    pub const BUILDING: Self = Self {
+        name: "building",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M12 6h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/><path d="M8 6h.01"/><path d="M9 22v-3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/><rect x="4" y="2" width="16" height="20" rx="2"/>"#,
+        doc: "`building`, from Lucide.",
+    };
+
+    /// `building-2`, from Lucide.
+    pub const BUILDING_2: Self = Self {
+        name: "building-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 12h4"/><path d="M10 8h4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"/><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/>"#,
+        doc: "`building-2`, from Lucide.",
+    };
+
+    /// `bus`, from Lucide.
+    pub const BUS: Self = Self {
+        name: "bus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>"#,
+        doc: "`bus`, from Lucide.",
+    };
+
+    /// `bus-front`, from Lucide.
+    pub const BUS_FRONT: Self = Self {
+        name: "bus-front",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 6 2 7"/><path d="M10 6h4"/><path d="m22 7-2-1"/><rect width="16" height="16" x="4" y="3" rx="2"/><path d="M4 11h16"/><path d="M8 15h.01"/><path d="M16 15h.01"/><path d="M6 19v2"/><path d="M18 21v-2"/>"#,
+        doc: "`bus-front`, from Lucide.",
+    };
+
+    /// `cable`, from Lucide.
+    pub const CABLE: Self = Self {
+        name: "cable",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 19a1 1 0 0 1-1-1v-2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a1 1 0 0 1-1 1z"/><path d="M17 21v-2"/><path d="M19 14V6.5a1 1 0 0 0-7 0v11a1 1 0 0 1-7 0V10"/><path d="M21 21v-2"/><path d="M3 5V3"/><path d="M4 10a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2a2 2 0 0 1-2 2z"/><path d="M7 5V3"/>"#,
+        doc: "`cable`, from Lucide.",
+    };
+
+    /// `cable-car`, from Lucide.
+    pub const CABLE_CAR: Self = Self {
+        name: "cable-car",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 3h.01"/><path d="M14 2h.01"/><path d="m2 9 20-5"/><path d="M12 12V6.5"/><rect width="16" height="10" x="4" y="12" rx="3"/><path d="M9 12v5"/><path d="M15 12v5"/><path d="M4 17h16"/>"#,
+        doc: "`cable-car`, from Lucide.",
+    };
+
+    /// `cake`, from Lucide.
+    pub const CAKE: Self = Self {
+        name: "cake",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v3"/><path d="M12 8v3"/><path d="M17 8v3"/><path d="M7 4h.01"/><path d="M12 4h.01"/><path d="M17 4h.01"/>"#,
+        doc: "`cake`, from Lucide.",
+    };
+
+    /// `cake-slice`, from Lucide.
+    pub const CAKE_SLICE: Self = Self {
+        name: "cake-slice",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 13H3"/><path d="M16 17H3"/><path d="m7.2 7.9-3.388 2.5A2 2 0 0 0 3 12.01V20a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-8.654c0-2-2.44-6.026-6.44-8.026a1 1 0 0 0-1.082.057L10.4 5.6"/><circle cx="9" cy="7" r="2"/>"#,
+        doc: "`cake-slice`, from Lucide.",
+    };
+
+    /// `calculator`, from Lucide.
+    pub const CALCULATOR: Self = Self {
+        name: "calculator",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>"#,
+        doc: "`calculator`, from Lucide.",
+    };
+
+    /// Opens a `DateInput`'s suggestions — the quick picks and the month grid. A calendar, because that is what the panel is; the button it sits on is icon-only and takes its name from `suggest_label`.
+    pub const CALENDAR: Self = Self {
+        name: "calendar",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/>"#,
+        doc: "Opens a `DateInput`'s suggestions — the quick picks and the month grid. A calendar, because that is what the panel is; the button it sits on is icon-only and takes its name from `suggest_label`.",
+    };
+
+    /// `calendar-1`, from Lucide.
+    pub const CALENDAR_1: Self = Self {
+        name: "calendar-1",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 13h1v4"/><path d="M16 2v3"/><path d="M3 9h18"/><path d="M8 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`calendar-1`, from Lucide.",
+    };
+
+    /// `calendar-arrow-down`, from Lucide.
+    pub const CALENDAR_ARROW_DOWN: Self = Self {
+        name: "calendar-arrow-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14 17 4 4 4-4"/><path d="M16 2v3"/><path d="M18 13v8"/><path d="M21 10.354V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h7.343"/><path d="M3 9h18"/><path d="M8 2v3"/>"#,
+        doc: "`calendar-arrow-down`, from Lucide.",
+    };
+
+    /// `calendar-arrow-up`, from Lucide.
+    pub const CALENDAR_ARROW_UP: Self = Self {
+        name: "calendar-arrow-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14 17 4-4 4 4"/><path d="M16 2v3"/><path d="M18 21v-8"/><path d="M21 10.343V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h9"/><path d="M3 9h18"/><path d="M8 2v3"/>"#,
+        doc: "`calendar-arrow-up`, from Lucide.",
+    };
+
+    /// `calendar-check`, from Lucide.
+    pub const CALENDAR_CHECK: Self = Self {
+        name: "calendar-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m9 15 2 2 4-4"/>"#,
+        doc: "`calendar-check`, from Lucide.",
+    };
+
+    /// `calendar-check-2`, from Lucide.
+    pub const CALENDAR_CHECK_2: Self = Self {
+        name: "calendar-check-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M 19 3 L 5 3"/><path d="M 21 13 L 21 5"/><path d="M 21 5 A2 2 0 0 0 19 3"/><path d="M 3 19 A2 2 0 0 0 5 21"/><path d="M 3 5 L 3 19"/><path d="M 5 3 A2 2 0 0 0 3 5"/><path d="m16 19 2 2 4-4"/><path d="M16 2v3"/><path d="M3 9h18"/><path d="M5 21 L12.5 21"/><path d="M8 2v3"/>"#,
+        doc: "`calendar-check-2`, from Lucide.",
+    };
+
+    /// `calendar-clock`, from Lucide.
+    pub const CALENDAR_CLOCK: Self = Self {
+        name: "calendar-clock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 14v2.2l1.6 1"/><path d="M16 2v3"/><path d="M21 7.338V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h2.338"/><path d="M3 9h5.859"/><path d="M8 2v3"/><circle cx="16" cy="16" r="6"/>"#,
+        doc: "`calendar-clock`, from Lucide.",
+    };
+
+    /// `calendar-cog`, from Lucide.
+    pub const CALENDAR_COG: Self = Self {
+        name: "calendar-cog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15.228 16.852-.923-.383"/><path d="m15.228 19.148-.923.383"/><path d="M16 2v3"/><path d="m16.47 14.305.382.923"/><path d="m16.852 20.772-.383.924"/><path d="m19.148 15.228.383-.923"/><path d="m19.53 21.696-.382-.924"/><path d="m20.773 16.852.924-.383"/><path d="m20.773 19.148.924.383"/><path d="M21 10.5V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h5.5"/><path d="M3 9h18"/><path d="M8 2v3"/><circle cx="18" cy="18" r="3"/>"#,
+        doc: "`calendar-cog`, from Lucide.",
+    };
+
+    /// `calendar-days`, from Lucide.
+    pub const CALENDAR_DAYS: Self = Self {
+        name: "calendar-days",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/>"#,
+        doc: "`calendar-days`, from Lucide.",
+    };
+
+    /// `calendar-fold`, from Lucide.
+    pub const CALENDAR_FOLD: Self = Self {
+        name: "calendar-fold",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 2v3"/><path d="M21 15V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h10v-5a1 1 0 011-1za2.4 2.4 0 01-.706 1.706l-3.588 3.588A2.4 2.4 0 0115 21"/><path d="M3 9h18"/><path d="M8 2v3"/>"#,
+        doc: "`calendar-fold`, from Lucide.",
+    };
+
+    /// `calendar-heart`, from Lucide.
+    pub const CALENDAR_HEART: Self = Self {
+        name: "calendar-heart",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.127 21H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v5.125"/><path d="M14.62 17.8A2.25 2.25 0 1118 14.836a2.25 2.25 0 113.38 2.966l-2.626 2.856a.998.998 0 01-1.507 0z"/><path d="M16 2v3"/><path d="M3 9h18"/><path d="M8 2v3"/>"#,
+        doc: "`calendar-heart`, from Lucide.",
+    };
+
+    /// `calendar-minus`, from Lucide.
+    pub const CALENDAR_MINUS: Self = Self {
+        name: "calendar-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 18h6"/><path d="M16 2v3"/><path d="M21 14V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h8.3"/><path d="M3 9h18"/><path d="M8 2v3"/>"#,
+        doc: "`calendar-minus`, from Lucide.",
+    };
+
+    /// `calendar-minus-2`, from Lucide.
+    pub const CALENDAR_MINUS_2: Self = Self {
+        name: "calendar-minus-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M10 15h4"/>"#,
+        doc: "`calendar-minus-2`, from Lucide.",
+    };
+
+    /// `calendar-off`, from Lucide.
+    pub const CALENDAR_OFF: Self = Self {
+        name: "calendar-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 2v3"/><path d="m2 2 20 20"/><path d="M21 9h-5.5"/><path d="M3 9h6"/><path d="M3.586 3.586A2 2 0 003 5v14a2 2 0 002 2h14a2 2 0 001.414-.586"/><path d="M8.656 3H19a2 2 0 012 2v10.344"/>"#,
+        doc: "`calendar-off`, from Lucide.",
+    };
+
+    /// `calendar-plus`, from Lucide.
+    pub const CALENDAR_PLUS: Self = Self {
+        name: "calendar-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 18h6"/><path d="M16 2v3"/><path d="M19 15v6"/><path d="M21 11.5V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h8.3"/><path d="M3 9h18"/><path d="M8 2v3"/>"#,
+        doc: "`calendar-plus`, from Lucide.",
+    };
+
+    /// `calendar-plus-2`, from Lucide.
+    pub const CALENDAR_PLUS_2: Self = Self {
+        name: "calendar-plus-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M10 15h4"/><path d="M12 13v4"/>"#,
+        doc: "`calendar-plus-2`, from Lucide.",
+    };
+
+    /// `calendar-range`, from Lucide.
+    pub const CALENDAR_RANGE: Self = Self {
+        name: "calendar-range",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M16 2v3"/><path d="M3 9h18"/><path d="M8 2v3"/><path d="M17 13h-6"/><path d="M13 17H7"/><path d="M7 13h.01"/><path d="M17 17h.01"/>"#,
+        doc: "`calendar-range`, from Lucide.",
+    };
+
+    /// `calendar-search`, from Lucide.
+    pub const CALENDAR_SEARCH: Self = Self {
+        name: "calendar-search",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 2v3"/><path d="M21 10.69V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h7.25"/><path d="m22 21-1.875-1.875"/><path d="M3 9h18"/><path d="M8 2v3"/><circle cx="18" cy="17" r="3"/>"#,
+        doc: "`calendar-search`, from Lucide.",
+    };
+
+    /// `calendar-sync`, from Lucide.
+    pub const CALENDAR_SYNC: Self = Self {
+        name: "calendar-sync",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 10v4h4"/><path d="m11 14 1.535-1.605a5 5 0 018 1.5"/><path d="M16 2v3"/><path d="m21 18-1.535 1.605a5 5 0 01-8-1.5"/><path d="M21 22v-4h-4"/><path d="M21 8.517V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h3.517"/><path d="M3 9h4"/><path d="M8 2v3"/>"#,
+        doc: "`calendar-sync`, from Lucide.",
+    };
+
+    /// `calendar-x`, from Lucide.
+    pub const CALENDAR_X: Self = Self {
+        name: "calendar-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="m14 13-4 4"/><path d="m10 13 4 4"/>"#,
+        doc: "`calendar-x`, from Lucide.",
+    };
+
+    /// `calendar-x-2`, from Lucide.
+    pub const CALENDAR_X_2: Self = Self {
+        name: "calendar-x-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 2v3"/><path d="m17 16 5 5"/><path d="m17 21 5-5"/><path d="M21 12V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h8"/><path d="M3 9h18"/><path d="M8 2v3"/>"#,
+        doc: "`calendar-x-2`, from Lucide.",
+    };
+
+    /// `calendars`, from Lucide.
+    pub const CALENDARS: Self = Self {
+        name: "calendars",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v2"/><path d="M15.726 21.01A2 2 0 0 1 14 22H4a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2"/><path d="M18 2v2"/><path d="M2 13h2"/><path d="M8 8h14"/><rect x="8" y="3" width="14" height="14" rx="2"/>"#,
+        doc: "`calendars`, from Lucide.",
+    };
+
+    /// `camera`, from Lucide.
+    pub const CAMERA: Self = Self {
+        name: "camera",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/>"#,
+        doc: "`camera`, from Lucide.",
+    };
+
+    /// `camera-off`, from Lucide.
+    pub const CAMERA_OFF: Self = Self {
+        name: "camera-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14.564 14.558a3 3 0 1 1-4.122-4.121"/><path d="m2 2 20 20"/><path d="M20 20H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 .819-.175"/><path d="M9.695 4.024A2 2 0 0 1 10.004 4h3.993a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v7.344"/>"#,
+        doc: "`camera-off`, from Lucide.",
+    };
+
+    /// `candy`, from Lucide.
+    pub const CANDY: Self = Self {
+        name: "candy",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 7v10.9"/><path d="M14 6.1V17"/><path d="M16 7V3a1 1 0 0 1 1.707-.707 2.5 2.5 0 0 0 2.152.717 1 1 0 0 1 1.131 1.131 2.5 2.5 0 0 0 .717 2.152A1 1 0 0 1 21 8h-4"/><path d="M16.536 7.465a5 5 0 0 0-7.072 0l-2 2a5 5 0 0 0 0 7.07 5 5 0 0 0 7.072 0l2-2a5 5 0 0 0 0-7.07"/><path d="M8 17v4a1 1 0 0 1-1.707.707 2.5 2.5 0 0 0-2.152-.717 1 1 0 0 1-1.131-1.131 2.5 2.5 0 0 0-.717-2.152A1 1 0 0 1 3 16h4"/>"#,
+        doc: "`candy`, from Lucide.",
+    };
+
+    /// `candy-cane`, from Lucide.
+    pub const CANDY_CANE: Self = Self {
+        name: "candy-cane",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10.8 5 2.111 4.223"/><path d="M17.75 7 15 2.1"/><path d="m4.874 14.647 2.12 4.24"/><path d="M5.7 21a2 2 0 0 1-3.5-2l8.6-14a6 6 0 0 1 10.4 6 2 2 0 1 1-3.464-2 2 2 0 1 0-3.464-2z"/><path d="m7.906 9.712 2.005 4.411"/>"#,
+        doc: "`candy-cane`, from Lucide.",
+    };
+
+    /// `candy-off`, from Lucide.
+    pub const CANDY_OFF: Self = Self {
+        name: "candy-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 10v7.9"/><path d="M11.802 6.145a5 5 0 0 1 6.053 6.053"/><path d="M14 6.1v2.243"/><path d="m15.5 15.571-.964.964a5 5 0 0 1-7.071 0 5 5 0 0 1 0-7.07l.964-.965"/><path d="M16 7V3a1 1 0 0 1 1.707-.707 2.5 2.5 0 0 0 2.152.717 1 1 0 0 1 1.131 1.131 2.5 2.5 0 0 0 .717 2.152A1 1 0 0 1 21 8h-4"/><path d="m2 2 20 20"/><path d="M8 17v4a1 1 0 0 1-1.707.707 2.5 2.5 0 0 0-2.152-.717 1 1 0 0 1-1.131-1.131 2.5 2.5 0 0 0-.717-2.152A1 1 0 0 1 3 16h4"/>"#,
+        doc: "`candy-off`, from Lucide.",
+    };
+
+    /// `cannabis`, from Lucide.
+    pub const CANNABIS: Self = Self {
+        name: "cannabis",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22v-4"/><path d="M7 12c-1.5 0-4.5 1.5-5 3 3.5 1.5 6 1 6 1-1.5 1.5-2 3.5-2 5 2.5 0 4.5-1.5 6-3 1.5 1.5 3.5 3 6 3 0-1.5-.5-3.5-2-5 0 0 2.5.5 6-1-.5-1.5-3.5-3-5-3 1.5-1 4-4 4-6-2.5 0-5.5 1.5-7 3 0-2.5-.5-5-2-7-1.5 2-2 4.5-2 7-1.5-1.5-4.5-3-7-3 0 2 2.5 5 4 6"/>"#,
+        doc: "`cannabis`, from Lucide.",
+    };
+
+    /// `cannabis-off`, from Lucide.
+    pub const CANNABIS_OFF: Self = Self {
+        name: "cannabis-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22v-4c1.5 1.5 3.5 3 6 3 0-1.5-.5-3.5-2-5"/><path d="M13.988 8.327C13.902 6.054 13.365 3.82 12 2a9.3 9.3 0 0 0-1.445 2.9"/><path d="M17.375 11.725C18.882 10.53 21 7.841 21 6c-2.324 0-5.08 1.296-6.662 2.684"/><path d="m2 2 20 20"/><path d="M21.024 15.378A15 15 0 0 0 22 15c-.426-1.279-2.67-2.557-4.25-2.907"/><path d="M6.995 6.992C5.714 6.4 4.29 6 3 6c0 2 2.5 5 4 6-1.5 0-4.5 1.5-5 3 3.5 1.5 6 1 6 1-1.5 1.5-2 3.5-2 5 2.5 0 4.5-1.5 6-3"/>"#,
+        doc: "`cannabis-off`, from Lucide.",
+    };
+
+    /// `captions`, from Lucide.
+    pub const CAPTIONS: Self = Self {
+        name: "captions",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="14" x="3" y="5" rx="2" ry="2"/><path d="M7 15h4M15 15h2M7 11h2M13 11h4"/>"#,
+        doc: "`captions`, from Lucide.",
+    };
+
+    /// `captions-off`, from Lucide.
+    pub const CAPTIONS_OFF: Self = Self {
+        name: "captions-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.5 5H19a2 2 0 0 1 2 2v8.5"/><path d="M17 11h-.5"/><path d="M19 19H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2"/><path d="m2 2 20 20"/><path d="M7 11h4"/><path d="M7 15h2.5"/>"#,
+        doc: "`captions-off`, from Lucide.",
+    };
+
+    /// `car`, from Lucide.
+    pub const CAR: Self = Self {
+        name: "car",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>"#,
+        doc: "`car`, from Lucide.",
+    };
+
+    /// `car-battery`, from Lucide.
+    pub const CAR_BATTERY: Self = Self {
+        name: "car-battery",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 13h4"/><path d="M16 15v-4"/><path d="M18 5v2"/><path d="M6 13h4"/><path d="M6 5v2"/><rect x="2" y="7" width="20" height="12" rx="2"/>"#,
+        doc: "`car-battery`, from Lucide.",
+    };
+
+    /// `car-front`, from Lucide.
+    pub const CAR_FRONT: Self = Self {
+        name: "car-front",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m21 8-2 2-1.5-3.7A2 2 0 0 0 15.646 5H8.4a2 2 0 0 0-1.903 1.257L5 10 3 8"/><path d="M7 14h.01"/><path d="M17 14h.01"/><rect width="18" height="8" x="3" y="10" rx="2"/><path d="M5 18v2"/><path d="M19 18v2"/>"#,
+        doc: "`car-front`, from Lucide.",
+    };
+
+    /// `car-taxi-front`, from Lucide.
+    pub const CAR_TAXI_FRONT: Self = Self {
+        name: "car-taxi-front",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 2h4"/><path d="m21 8-2 2-1.5-3.7A2 2 0 0 0 15.646 5H8.4a2 2 0 0 0-1.903 1.257L5 10 3 8"/><path d="M7 14h.01"/><path d="M17 14h.01"/><rect width="18" height="8" x="3" y="10" rx="2"/><path d="M5 18v2"/><path d="M19 18v2"/>"#,
+        doc: "`car-taxi-front`, from Lucide.",
+    };
+
+    /// `caravan`, from Lucide.
+    pub const CARAVAN: Self = Self {
+        name: "caravan",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 19V9a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v8a2 2 0 0 0 2 2h2"/><path d="M2 9h3a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H2"/><path d="M22 17v1a1 1 0 0 1-1 1H10v-9a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v9"/><circle cx="8" cy="19" r="2"/>"#,
+        doc: "`caravan`, from Lucide.",
+    };
+
+    /// `card-sim`, from Lucide.
+    pub const CARD_SIM: Self = Self {
+        name: "card-sim",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 14v4"/><path d="M14.172 2a2 2 0 0 1 1.414.586l3.828 3.828A2 2 0 0 1 20 7.828V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M8 14h8"/><rect x="8" y="10" width="8" height="8" rx="1"/>"#,
+        doc: "`card-sim`, from Lucide.",
+    };
+
+    /// `carrot`, from Lucide.
+    pub const CARROT: Self = Self {
+        name: "carrot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 16a1 1 0 0 0-7-7q-4 4-5.987 12.385a.5.5 0 0 0 .602.602Q11 20 15 16l-3-3"/><path d="M15 9q4 4 7 0-3-4-7 0 4-4 0-7-4 3 0 7"/><path d="m8 15-2.58-2.58"/>"#,
+        doc: "`carrot`, from Lucide.",
+    };
+
+    /// `case-lower`, from Lucide.
+    pub const CASE_LOWER: Self = Self {
+        name: "case-lower",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 9v7"/><path d="M14 6v10"/><circle cx="17.5" cy="12.5" r="3.5"/><circle cx="6.5" cy="12.5" r="3.5"/>"#,
+        doc: "`case-lower`, from Lucide.",
+    };
+
+    /// `case-sensitive`, from Lucide.
+    pub const CASE_SENSITIVE: Self = Self {
+        name: "case-sensitive",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16"/><path d="M22 9v7"/><path d="M3.304 13h6.392"/><circle cx="18.5" cy="12.5" r="3.5"/>"#,
+        doc: "`case-sensitive`, from Lucide.",
+    };
+
+    /// `case-upper`, from Lucide.
+    pub const CASE_UPPER: Self = Self {
+        name: "case-upper",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 11h4.5a1 1 0 0 1 0 5h-4a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h3a1 1 0 0 1 0 5"/><path d="m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16"/><path d="M3.304 13h6.392"/>"#,
+        doc: "`case-upper`, from Lucide.",
+    };
+
+    /// `cassette-tape`, from Lucide.
+    pub const CASSETTE_TAPE: Self = Self {
+        name: "cassette-tape",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="16" x="2" y="4" rx="2"/><circle cx="8" cy="10" r="2"/><path d="M8 12h8"/><circle cx="16" cy="10" r="2"/><path d="m6 20 .7-2.9A1.4 1.4 0 0 1 8.1 16h7.8a1.4 1.4 0 0 1 1.4 1l.7 3"/>"#,
+        doc: "`cassette-tape`, from Lucide.",
+    };
+
+    /// `cast`, from Lucide.
+    pub const CAST: Self = Self {
+        name: "cast",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><path d="M2 12a9 9 0 0 1 8 8"/><path d="M2 16a5 5 0 0 1 4 4"/><line x1="2" x2="2.01" y1="20" y2="20"/>"#,
+        doc: "`cast`, from Lucide.",
+    };
+
+    /// `castle`, from Lucide.
+    pub const CASTLE: Self = Self {
+        name: "castle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 5V3"/><path d="M14 5V3"/><path d="M15 21v-3a3 3 0 0 0-6 0v3"/><path d="M18 3v8"/><path d="M18 5H6"/><path d="M22 11H2"/><path d="M22 9v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9"/><path d="M6 3v8"/>"#,
+        doc: "`castle`, from Lucide.",
+    };
+
+    /// `cat`, from Lucide.
+    pub const CAT: Self = Self {
+        name: "cat",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 5c.67 0 1.35.09 2 .26 1.78-2 5.03-2.84 6.42-2.26 1.4.58-.42 7-.42 7 .57 1.07 1 2.24 1 3.44C21 17.9 16.97 21 12 21s-9-3-9-7.56c0-1.25.5-2.4 1-3.44 0 0-1.89-6.42-.5-7 1.39-.58 4.72.23 6.5 2.23A9.04 9.04 0 0 1 12 5Z"/><path d="M8 14v.5"/><path d="M16 14v.5"/><path d="M11.25 16.25h1.5L12 17l-.75-.75Z"/>"#,
+        doc: "`cat`, from Lucide.",
+    };
+
+    /// `cctv`, from Lucide.
+    pub const CCTV: Self = Self {
+        name: "cctv",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16.75 12h3.632a1 1 0 0 1 .894 1.447l-2.034 4.069a1 1 0 0 1-1.708.134l-2.124-2.97"/><path d="M17.106 9.053a1 1 0 0 1 .447 1.341l-3.106 6.211a1 1 0 0 1-1.342.447L3.61 12.3a2.92 2.92 0 0 1-1.3-3.91L3.69 5.6a2.92 2.92 0 0 1 3.92-1.3z"/><path d="M2 19h3.76a2 2 0 0 0 1.8-1.1L9 15"/><path d="M2 21v-4"/><path d="M7 9h.01"/>"#,
+        doc: "`cctv`, from Lucide.",
+    };
+
+    /// `cctv-off`, from Lucide.
+    pub const CCTV_OFF: Self = Self {
+        name: "cctv-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12.309 6.652 4.797 2.401a1 1 0 0 1 .447 1.341l-.501 1.001.605.605h2.725a1 1 0 0 1 .894 1.447l-.724 1.448"/><path d="m15.166 15.166-.719 1.439a1 1 0 0 1-1.342.447L3.61 12.3a2.92 2.92 0 0 1-1.3-3.91L3.69 5.6a2.9 2.9 0 0 1 .873-1.037"/><path d="M2 19h3.76a2 2 0 0 0 1.8-1.1l1.441-2.902"/><path d="m2 2 20 20"/><path d="M2 21v-4"/><path d="M7 9h.01"/>"#,
+        doc: "`cctv-off`, from Lucide.",
+    };
+
+    /// `chart-area`, from Lucide.
+    pub const CHART_AREA: Self = Self {
+        name: "chart-area",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 11.207a.5.5 0 0 1 .146-.353l2-2a.5.5 0 0 1 .708 0l3.292 3.292a.5.5 0 0 0 .708 0l4.292-4.292a.5.5 0 0 1 .854.353V16a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z"/>"#,
+        doc: "`chart-area`, from Lucide.",
+    };
+
+    /// `chart-bar`, from Lucide.
+    pub const CHART_BAR: Self = Self {
+        name: "chart-bar",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16h8"/><path d="M7 11h12"/><path d="M7 6h3"/>"#,
+        doc: "`chart-bar`, from Lucide.",
+    };
+
+    /// `chart-bar-big`, from Lucide.
+    pub const CHART_BAR_BIG: Self = Self {
+        name: "chart-bar-big",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 3v16a2 2 0 0 0 2 2h16"/><rect x="7" y="13" width="9" height="4" rx="1"/><rect x="7" y="5" width="12" height="4" rx="1"/>"#,
+        doc: "`chart-bar-big`, from Lucide.",
+    };
+
+    /// `chart-bar-decreasing`, from Lucide.
+    pub const CHART_BAR_DECREASING: Self = Self {
+        name: "chart-bar-decreasing",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 11h8"/><path d="M7 16h3"/><path d="M7 6h12"/>"#,
+        doc: "`chart-bar-decreasing`, from Lucide.",
+    };
+
+    /// `chart-bar-increasing`, from Lucide.
+    pub const CHART_BAR_INCREASING: Self = Self {
+        name: "chart-bar-increasing",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 11h8"/><path d="M7 16h12"/><path d="M7 6h3"/>"#,
+        doc: "`chart-bar-increasing`, from Lucide.",
+    };
+
+    /// `chart-bar-stacked`, from Lucide.
+    pub const CHART_BAR_STACKED: Self = Self {
+        name: "chart-bar-stacked",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 13v4"/><path d="M15 5v4"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/><rect x="7" y="13" width="9" height="4" rx="1"/><rect x="7" y="5" width="12" height="4" rx="1"/>"#,
+        doc: "`chart-bar-stacked`, from Lucide.",
+    };
+
+    /// `chart-candlestick`, from Lucide.
+    pub const CHART_CANDLESTICK: Self = Self {
+        name: "chart-candlestick",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 5v4"/><rect width="4" height="6" x="7" y="9" rx="1"/><path d="M9 15v2"/><path d="M17 3v2"/><rect width="4" height="8" x="15" y="5" rx="1"/><path d="M17 13v3"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/>"#,
+        doc: "`chart-candlestick`, from Lucide.",
+    };
+
+    /// `chart-column`, from Lucide.
+    pub const CHART_COLUMN: Self = Self {
+        name: "chart-column",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>"#,
+        doc: "`chart-column`, from Lucide.",
+    };
+
+    /// `chart-column-big`, from Lucide.
+    pub const CHART_COLUMN_BIG: Self = Self {
+        name: "chart-column-big",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 3v16a2 2 0 0 0 2 2h16"/><rect x="15" y="5" width="4" height="12" rx="1"/><rect x="7" y="8" width="4" height="9" rx="1"/>"#,
+        doc: "`chart-column-big`, from Lucide.",
+    };
+
+    /// `chart-column-decreasing`, from Lucide.
+    pub const CHART_COLUMN_DECREASING: Self = Self {
+        name: "chart-column-decreasing",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 17V9"/><path d="M18 17v-3"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M8 17V5"/>"#,
+        doc: "`chart-column-decreasing`, from Lucide.",
+    };
+
+    /// `chart-column-increasing`, from Lucide.
+    pub const CHART_COLUMN_INCREASING: Self = Self {
+        name: "chart-column-increasing",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 17V9"/><path d="M18 17V5"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M8 17v-3"/>"#,
+        doc: "`chart-column-increasing`, from Lucide.",
+    };
+
+    /// `chart-column-stacked`, from Lucide.
+    pub const CHART_COLUMN_STACKED: Self = Self {
+        name: "chart-column-stacked",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 13H7"/><path d="M19 9h-4"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/><rect x="15" y="5" width="4" height="12" rx="1"/><rect x="7" y="8" width="4" height="9" rx="1"/>"#,
+        doc: "`chart-column-stacked`, from Lucide.",
+    };
+
+    /// `chart-gantt`, from Lucide.
+    pub const CHART_GANTT: Self = Self {
+        name: "chart-gantt",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 6h8"/><path d="M12 16h6"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M8 11h7"/>"#,
+        doc: "`chart-gantt`, from Lucide.",
+    };
+
+    /// `chart-line`, from Lucide.
+    pub const CHART_LINE: Self = Self {
+        name: "chart-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/>"#,
+        doc: "`chart-line`, from Lucide.",
+    };
+
+    /// `chart-network`, from Lucide.
+    pub const CHART_NETWORK: Self = Self {
+        name: "chart-network",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m13.11 7.664 1.78 2.672"/><path d="m14.162 12.788-3.324 1.424"/><path d="m20 4-6.06 1.515"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/><circle cx="12" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="9" cy="15" r="2"/>"#,
+        doc: "`chart-network`, from Lucide.",
+    };
+
+    /// `chart-no-axes-column`, from Lucide.
+    pub const CHART_NO_AXES_COLUMN: Self = Self {
+        name: "chart-no-axes-column",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 21v-6"/><path d="M12 21V3"/><path d="M19 21V9"/>"#,
+        doc: "`chart-no-axes-column`, from Lucide.",
+    };
+
+    /// `chart-no-axes-column-decreasing`, from Lucide.
+    pub const CHART_NO_AXES_COLUMN_DECREASING: Self = Self {
+        name: "chart-no-axes-column-decreasing",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 21V3"/><path d="M12 21V9"/><path d="M19 21v-6"/>"#,
+        doc: "`chart-no-axes-column-decreasing`, from Lucide.",
+    };
+
+    /// `chart-no-axes-column-increasing`, from Lucide.
+    pub const CHART_NO_AXES_COLUMN_INCREASING: Self = Self {
+        name: "chart-no-axes-column-increasing",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 21v-6"/><path d="M12 21V9"/><path d="M19 21V3"/>"#,
+        doc: "`chart-no-axes-column-increasing`, from Lucide.",
+    };
+
+    /// `chart-no-axes-combined`, from Lucide.
+    pub const CHART_NO_AXES_COMBINED: Self = Self {
+        name: "chart-no-axes-combined",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 16v5"/><path d="M16 14.639V21"/><path d="M20 10.656V21"/><path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15"/><path d="M4 18.463V21"/><path d="M8 14.656V21"/>"#,
+        doc: "`chart-no-axes-combined`, from Lucide.",
+    };
+
+    /// `chart-no-axes-gantt`, from Lucide.
+    pub const CHART_NO_AXES_GANTT: Self = Self {
+        name: "chart-no-axes-gantt",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 5h12"/><path d="M4 12h10"/><path d="M12 19h8"/>"#,
+        doc: "`chart-no-axes-gantt`, from Lucide.",
+    };
+
+    /// `chart-pie`, from Lucide.
+    pub const CHART_PIE: Self = Self {
+        name: "chart-pie",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z"/><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>"#,
+        doc: "`chart-pie`, from Lucide.",
+    };
+
+    /// `chart-scatter`, from Lucide.
+    pub const CHART_SCATTER: Self = Self {
+        name: "chart-scatter",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="18.5" cy="5.5" r=".5" fill="currentColor"/><circle cx="11.5" cy="11.5" r=".5" fill="currentColor"/><circle cx="7.5" cy="16.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="14.5" r=".5" fill="currentColor"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/>"#,
+        doc: "`chart-scatter`, from Lucide.",
+    };
+
+    /// `chart-spline`, from Lucide.
+    pub const CHART_SPLINE: Self = Self {
+        name: "chart-spline",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 16c.5-2 1.5-7 4-7 2 0 2 3 4 3 2.5 0 4.5-5 5-7"/>"#,
+        doc: "`chart-spline`, from Lucide.",
+    };
+
+    /// Confirms an action, and marks the option in force.
+    pub const CHECK: Self = Self {
+        name: "check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 6 9 17l-5-5"/>"#,
+        doc: "Confirms an action, and marks the option in force.",
+    };
+
+    /// `check-check`, from Lucide.
+    pub const CHECK_CHECK: Self = Self {
+        name: "check-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/>"#,
+        doc: "`check-check`, from Lucide.",
+    };
+
+    /// `check-line`, from Lucide.
+    pub const CHECK_LINE: Self = Self {
+        name: "check-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 4L9 15"/><path d="M21 19L3 19"/><path d="M9 15L4 10"/>"#,
+        doc: "`check-line`, from Lucide.",
+    };
+
+    /// `chef-hat`, from Lucide.
+    pub const CHEF_HAT: Self = Self {
+        name: "chef-hat",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 21a1 1 0 0 0 1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589 5 5 0 0 0-9.186 0 4 4 0 0 0-2.134 7.588c.411.198.727.585.727 1.041V20a1 1 0 0 0 1 1Z"/><path d="M6 17h12"/>"#,
+        doc: "`chef-hat`, from Lucide.",
+    };
+
+    /// `cherry`, from Lucide.
+    pub const CHERRY: Self = Self {
+        name: "cherry",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 17a5 5 0 0 0 10 0c0-2.76-2.5-5-5-3-2.5-2-5 .24-5 3Z"/><path d="M12 17a5 5 0 0 0 10 0c0-2.76-2.5-5-5-3-2.5-2-5 .24-5 3Z"/><path d="M7 14c3.22-2.91 4.29-8.75 5-12 1.66 2.38 4.94 9 5 12"/><path d="M22 9c-4.29 0-7.14-2.33-10-7 5.71 0 10 4.67 10 7Z"/>"#,
+        doc: "`cherry`, from Lucide.",
+    };
+
+    /// `chess-bishop`, from Lucide.
+    pub const CHESS_BISHOP: Self = Self {
+        name: "chess-bishop",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 20a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M15 18c1.5-.615 3-2.461 3-4.923C18 8.769 14.5 4.462 12 2 9.5 4.462 6 8.77 6 13.077 6 15.539 7.5 17.385 9 18"/><path d="m16 7-2.5 2.5"/><path d="M9 2h6"/>"#,
+        doc: "`chess-bishop`, from Lucide.",
+    };
+
+    /// `chess-king`, from Lucide.
+    pub const CHESS_KING: Self = Self {
+        name: "chess-king",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 20a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="m6.7 18-1-1C4.35 15.682 3 14.09 3 12a5 5 0 0 1 4.95-5c1.584 0 2.7.455 4.05 1.818C13.35 7.455 14.466 7 16.05 7A5 5 0 0 1 21 12c0 2.082-1.359 3.673-2.7 5l-1 1"/><path d="M10 4h4"/><path d="M12 2v6.818"/>"#,
+        doc: "`chess-king`, from Lucide.",
+    };
+
+    /// `chess-knight`, from Lucide.
+    pub const CHESS_KNIGHT: Self = Self {
+        name: "chess-knight",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 20a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M16.5 18c1-2 2.5-5 2.5-9a7 7 0 0 0-7-7H6.635a1 1 0 0 0-.768 1.64L7 5l-2.32 5.802a2 2 0 0 0 .95 2.526l2.87 1.456"/><path d="m15 5 1.425-1.425"/><path d="m17 8 1.53-1.53"/><path d="M9.713 12.185 7 18"/>"#,
+        doc: "`chess-knight`, from Lucide.",
+    };
+
+    /// `chess-pawn`, from Lucide.
+    pub const CHESS_PAWN: Self = Self {
+        name: "chess-pawn",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 20a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="m14.5 10 1.5 8"/><path d="M7 10h10"/><path d="m8 18 1.5-8"/><circle cx="12" cy="6" r="4"/>"#,
+        doc: "`chess-pawn`, from Lucide.",
+    };
+
+    /// `chess-queen`, from Lucide.
+    pub const CHESS_QUEEN: Self = Self {
+        name: "chess-queen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 20a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="m12.474 5.943 1.567 5.34a1 1 0 0 0 1.75.328l2.616-3.402"/><path d="m20 9-3 9"/><path d="m5.594 8.209 2.615 3.403a1 1 0 0 0 1.75-.329l1.567-5.34"/><path d="M7 18 4 9"/><circle cx="12" cy="4" r="2"/><circle cx="20" cy="7" r="2"/><circle cx="4" cy="7" r="2"/>"#,
+        doc: "`chess-queen`, from Lucide.",
+    };
+
+    /// `chess-rook`, from Lucide.
+    pub const CHESS_ROOK: Self = Self {
+        name: "chess-rook",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 20a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M10 2v2"/><path d="M14 2v2"/><path d="m17 18-1-9"/><path d="M6 2v5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2"/><path d="M6 4h12"/><path d="m7 18 1-9"/>"#,
+        doc: "`chess-rook`, from Lucide.",
+    };
+
+    /// The disclosure marker on a `<details>` summary.
+    pub const CHEVRON_DOWN: Self = Self {
+        name: "chevron-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m6 9 6 6 6-6"/>"#,
+        doc: "The disclosure marker on a `<details>` summary.",
+    };
+
+    /// `chevron-first`, from Lucide.
+    pub const CHEVRON_FIRST: Self = Self {
+        name: "chevron-first",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m17 18-6-6 6-6"/><path d="M7 6v12"/>"#,
+        doc: "`chevron-first`, from Lucide.",
+    };
+
+    /// `chevron-last`, from Lucide.
+    pub const CHEVRON_LAST: Self = Self {
+        name: "chevron-last",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m7 18 6-6-6-6"/><path d="M17 6v12"/>"#,
+        doc: "`chevron-last`, from Lucide.",
+    };
+
+    /// The previous slide, on a `Carousel`. A chevron rather than an arrow: an arrow in this system marks the direction a column is SORTED, and one drawing meaning two things is how a reader learns to distrust both.
+    pub const CHEVRON_LEFT: Self = Self {
+        name: "chevron-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 18-6-6 6-6"/>"#,
+        doc: "The previous slide, on a `Carousel`. A chevron rather than an arrow: an arrow in this system marks the direction a column is SORTED, and one drawing meaning two things is how a reader learns to distrust both.",
+    };
+
+    /// The next slide, on the same terms. The pair is mirrored by the stylesheet in a right-to-left locale, which is the one place a transform is the right answer — *previous* means the other way there.
+    pub const CHEVRON_RIGHT: Self = Self {
+        name: "chevron-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m9 18 6-6-6-6"/>"#,
+        doc: "The next slide, on the same terms. The pair is mirrored by the stylesheet in a right-to-left locale, which is the one place a transform is the right answer — *previous* means the other way there.",
+    };
+
+    /// `chevron-up`, from Lucide.
+    pub const CHEVRON_UP: Self = Self {
+        name: "chevron-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m18 15-6-6-6 6"/>"#,
+        doc: "`chevron-up`, from Lucide.",
+    };
+
+    /// `chevrons-down`, from Lucide.
+    pub const CHEVRONS_DOWN: Self = Self {
+        name: "chevrons-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m7 6 5 5 5-5"/><path d="m7 13 5 5 5-5"/>"#,
+        doc: "`chevrons-down`, from Lucide.",
+    };
+
+    /// `chevrons-down-up`, from Lucide.
+    pub const CHEVRONS_DOWN_UP: Self = Self {
+        name: "chevrons-down-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m7 20 5-5 5 5"/><path d="m7 4 5 5 5-5"/>"#,
+        doc: "`chevrons-down-up`, from Lucide.",
+    };
+
+    /// `chevrons-left`, from Lucide.
+    pub const CHEVRONS_LEFT: Self = Self {
+        name: "chevrons-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m11 17-5-5 5-5"/><path d="m18 17-5-5 5-5"/>"#,
+        doc: "`chevrons-left`, from Lucide.",
+    };
+
+    /// `chevrons-left-right`, from Lucide.
+    pub const CHEVRONS_LEFT_RIGHT: Self = Self {
+        name: "chevrons-left-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m9 7-5 5 5 5"/><path d="m15 7 5 5-5 5"/>"#,
+        doc: "`chevrons-left-right`, from Lucide.",
+    };
+
+    /// `chevrons-left-right-ellipsis`, from Lucide.
+    pub const CHEVRONS_LEFT_RIGHT_ELLIPSIS: Self = Self {
+        name: "chevrons-left-right-ellipsis",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 12h.01"/><path d="M16 12h.01"/><path d="m17 7 5 5-5 5"/><path d="m7 7-5 5 5 5"/><path d="M8 12h.01"/>"#,
+        doc: "`chevrons-left-right-ellipsis`, from Lucide.",
+    };
+
+    /// `chevrons-right`, from Lucide.
+    pub const CHEVRONS_RIGHT: Self = Self {
+        name: "chevrons-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m6 17 5-5-5-5"/><path d="m13 17 5-5-5-5"/>"#,
+        doc: "`chevrons-right`, from Lucide.",
+    };
+
+    /// `chevrons-right-left`, from Lucide.
+    pub const CHEVRONS_RIGHT_LEFT: Self = Self {
+        name: "chevrons-right-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m20 17-5-5 5-5"/><path d="m4 17 5-5-5-5"/>"#,
+        doc: "`chevrons-right-left`, from Lucide.",
+    };
+
+    /// `chevrons-up`, from Lucide.
+    pub const CHEVRONS_UP: Self = Self {
+        name: "chevrons-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m17 11-5-5-5 5"/><path d="m17 18-5-5-5 5"/>"#,
+        doc: "`chevrons-up`, from Lucide.",
+    };
+
+    /// A column that can be sorted and is not — the affordance. Without it a sortable heading looks exactly like a fixed one until somebody presses it, which is a feature nobody finds.
+    pub const CHEVRONS_UP_DOWN: Self = Self {
+        name: "chevrons-up-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>"#,
+        doc: "A column that can be sorted and is not — the affordance. Without it a sortable heading looks exactly like a fixed one until somebody presses it, which is a feature nobody finds.",
+    };
+
+    /// `church`, from Lucide.
+    pub const CHURCH: Self = Self {
+        name: "church",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 9h4"/><path d="M12 7v5"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="m18 9 3.52 2.147a1 1 0 0 1 .48.854V19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6.999a1 1 0 0 1 .48-.854L6 9"/><path d="M6 21V7a1 1 0 0 1 .376-.782l5-3.999a1 1 0 0 1 1.249.001l5 4A1 1 0 0 1 18 7v14"/>"#,
+        doc: "`church`, from Lucide.",
+    };
+
+    /// `cigarette`, from Lucide.
+    pub const CIGARETTE: Self = Self {
+        name: "cigarette",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 12H3a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h14"/><path d="M18 8c0-2.5-2-2.5-2-5"/><path d="M21 16a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M22 8c0-2.5-2-2.5-2-5"/><path d="M7 12v4"/>"#,
+        doc: "`cigarette`, from Lucide.",
+    };
+
+    /// `cigarette-off`, from Lucide.
+    pub const CIGARETTE_OFF: Self = Self {
+        name: "cigarette-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 12H3a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h13"/><path d="M18 8c0-2.5-2-2.5-2-5"/><path d="m2 2 20 20"/><path d="M21 12a1 1 0 0 1 1 1v2a1 1 0 0 1-.5.866"/><path d="M22 8c0-2.5-2-2.5-2-5"/><path d="M7 12v4"/>"#,
+        doc: "`cigarette-off`, from Lucide.",
+    };
+
+    /// `circle`, from Lucide.
+    pub const CIRCLE: Self = Self {
+        name: "circle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/>"#,
+        doc: "`circle`, from Lucide.",
+    };
+
+    /// `circle-arrow-down`, from Lucide.
+    pub const CIRCLE_ARROW_DOWN: Self = Self {
+        name: "circle-arrow-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="m8 12 4 4 4-4"/>"#,
+        doc: "`circle-arrow-down`, from Lucide.",
+    };
+
+    /// `circle-arrow-left`, from Lucide.
+    pub const CIRCLE_ARROW_LEFT: Self = Self {
+        name: "circle-arrow-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="m12 8-4 4 4 4"/><path d="M16 12H8"/>"#,
+        doc: "`circle-arrow-left`, from Lucide.",
+    };
+
+    /// `circle-arrow-out-down-left`, from Lucide.
+    pub const CIRCLE_ARROW_OUT_DOWN_LEFT: Self = Self {
+        name: "circle-arrow-out-down-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 12a10 10 0 1 1 10 10"/><path d="m2 22 10-10"/><path d="M8 22H2v-6"/>"#,
+        doc: "`circle-arrow-out-down-left`, from Lucide.",
+    };
+
+    /// `circle-arrow-out-down-right`, from Lucide.
+    pub const CIRCLE_ARROW_OUT_DOWN_RIGHT: Self = Self {
+        name: "circle-arrow-out-down-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22a10 10 0 1 1 10-10"/><path d="M22 22 12 12"/><path d="M22 16v6h-6"/>"#,
+        doc: "`circle-arrow-out-down-right`, from Lucide.",
+    };
+
+    /// `circle-arrow-out-up-left`, from Lucide.
+    pub const CIRCLE_ARROW_OUT_UP_LEFT: Self = Self {
+        name: "circle-arrow-out-up-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 8V2h6"/><path d="m2 2 10 10"/><path d="M12 2A10 10 0 1 1 2 12"/>"#,
+        doc: "`circle-arrow-out-up-left`, from Lucide.",
+    };
+
+    /// `circle-arrow-out-up-right`, from Lucide.
+    pub const CIRCLE_ARROW_OUT_UP_RIGHT: Self = Self {
+        name: "circle-arrow-out-up-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 12A10 10 0 1 1 12 2"/><path d="M22 2 12 12"/><path d="M16 2h6v6"/>"#,
+        doc: "`circle-arrow-out-up-right`, from Lucide.",
+    };
+
+    /// `circle-arrow-right`, from Lucide.
+    pub const CIRCLE_ARROW_RIGHT: Self = Self {
+        name: "circle-arrow-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="m12 16 4-4-4-4"/><path d="M8 12h8"/>"#,
+        doc: "`circle-arrow-right`, from Lucide.",
+    };
+
+    /// `circle-arrow-up`, from Lucide.
+    pub const CIRCLE_ARROW_UP: Self = Self {
+        name: "circle-arrow-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/>"#,
+        doc: "`circle-arrow-up`, from Lucide.",
+    };
+
+    /// `circle-check`, from Lucide.
+    pub const CIRCLE_CHECK: Self = Self {
+        name: "circle-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>"#,
+        doc: "`circle-check`, from Lucide.",
+    };
+
+    /// `circle-check-big`, from Lucide.
+    pub const CIRCLE_CHECK_BIG: Self = Self {
+        name: "circle-check-big",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/>"#,
+        doc: "`circle-check-big`, from Lucide.",
+    };
+
+    /// `circle-chevron-down`, from Lucide.
+    pub const CIRCLE_CHEVRON_DOWN: Self = Self {
+        name: "circle-chevron-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="m16 10-4 4-4-4"/>"#,
+        doc: "`circle-chevron-down`, from Lucide.",
+    };
+
+    /// `circle-chevron-left`, from Lucide.
+    pub const CIRCLE_CHEVRON_LEFT: Self = Self {
+        name: "circle-chevron-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="m14 16-4-4 4-4"/>"#,
+        doc: "`circle-chevron-left`, from Lucide.",
+    };
+
+    /// `circle-chevron-right`, from Lucide.
+    pub const CIRCLE_CHEVRON_RIGHT: Self = Self {
+        name: "circle-chevron-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="m10 8 4 4-4 4"/>"#,
+        doc: "`circle-chevron-right`, from Lucide.",
+    };
+
+    /// `circle-chevron-up`, from Lucide.
+    pub const CIRCLE_CHEVRON_UP: Self = Self {
+        name: "circle-chevron-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="m8 14 4-4 4 4"/>"#,
+        doc: "`circle-chevron-up`, from Lucide.",
+    };
+
+    /// `circle-dashed`, from Lucide.
+    pub const CIRCLE_DASHED: Self = Self {
+        name: "circle-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.721a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.279 17.609a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="M6.391 20.279a10 10 0 0 1-2.69-2.7"/>"#,
+        doc: "`circle-dashed`, from Lucide.",
+    };
+
+    /// `circle-divide`, from Lucide.
+    pub const CIRCLE_DIVIDE: Self = Self {
+        name: "circle-divide",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><line x1="8" x2="16" y1="12" y2="12"/><line x1="12" x2="12" y1="16" y2="16"/><line x1="12" x2="12" y1="8" y2="8"/>"#,
+        doc: "`circle-divide`, from Lucide.",
+    };
+
+    /// `circle-dollar-sign`, from Lucide.
+    pub const CIRCLE_DOLLAR_SIGN: Self = Self {
+        name: "circle-dollar-sign",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/>"#,
+        doc: "`circle-dollar-sign`, from Lucide.",
+    };
+
+    /// `circle-dot`, from Lucide.
+    pub const CIRCLE_DOT: Self = Self {
+        name: "circle-dot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/>"#,
+        doc: "`circle-dot`, from Lucide.",
+    };
+
+    /// `circle-dot-dashed`, from Lucide.
+    pub const CIRCLE_DOT_DASHED: Self = Self {
+        name: "circle-dot-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.1 2.18a9.93 9.93 0 0 1 3.8 0"/><path d="M17.6 3.71a9.95 9.95 0 0 1 2.69 2.7"/><path d="M21.82 10.1a9.93 9.93 0 0 1 0 3.8"/><path d="M20.29 17.6a9.95 9.95 0 0 1-2.7 2.69"/><path d="M13.9 21.82a9.94 9.94 0 0 1-3.8 0"/><path d="M6.4 20.29a9.95 9.95 0 0 1-2.69-2.7"/><path d="M2.18 13.9a9.93 9.93 0 0 1 0-3.8"/><path d="M3.71 6.4a9.95 9.95 0 0 1 2.7-2.69"/><circle cx="12" cy="12" r="1"/>"#,
+        doc: "`circle-dot-dashed`, from Lucide.",
+    };
+
+    /// `circle-ellipsis`, from Lucide.
+    pub const CIRCLE_ELLIPSIS: Self = Self {
+        name: "circle-ellipsis",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M17 12h.01"/><path d="M12 12h.01"/><path d="M7 12h.01"/>"#,
+        doc: "`circle-ellipsis`, from Lucide.",
+    };
+
+    /// `circle-equal`, from Lucide.
+    pub const CIRCLE_EQUAL: Self = Self {
+        name: "circle-equal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M7 10h10"/><path d="M7 14h10"/>"#,
+        doc: "`circle-equal`, from Lucide.",
+    };
+
+    /// `circle-euro`, from Lucide.
+    pub const CIRCLE_EURO: Self = Self {
+        name: "circle-euro",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 9.4a4 4 0 1 0 0 5.2"/><path d="M7 12h5"/><circle cx="12" cy="12" r="10"/>"#,
+        doc: "`circle-euro`, from Lucide.",
+    };
+
+    /// `circle-fading-arrow-up`, from Lucide.
+    pub const CIRCLE_FADING_ARROW_UP: Self = Self {
+        name: "circle-fading-arrow-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2a10 10 0 0 1 7.38 16.75"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/><path d="M2.5 8.875a10 10 0 0 0-.5 3"/><path d="M2.83 16a10 10 0 0 0 2.43 3.4"/><path d="M4.636 5.235a10 10 0 0 1 .891-.857"/><path d="M8.644 21.42a10 10 0 0 0 7.631-.38"/>"#,
+        doc: "`circle-fading-arrow-up`, from Lucide.",
+    };
+
+    /// `circle-fading-plus`, from Lucide.
+    pub const CIRCLE_FADING_PLUS: Self = Self {
+        name: "circle-fading-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2a10 10 0 0 1 7.38 16.75"/><path d="M12 8v8"/><path d="M16 12H8"/><path d="M2.5 8.875a10 10 0 0 0-.5 3"/><path d="M2.83 16a10 10 0 0 0 2.43 3.4"/><path d="M4.636 5.235a10 10 0 0 1 .891-.857"/><path d="M8.644 21.42a10 10 0 0 0 7.631-.38"/>"#,
+        doc: "`circle-fading-plus`, from Lucide.",
+    };
+
+    /// `circle-gauge`, from Lucide.
+    pub const CIRCLE_GAUGE: Self = Self {
+        name: "circle-gauge",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.6 2.7a10 10 0 1 0 5.7 5.7"/><circle cx="12" cy="12" r="2"/><path d="M13.4 10.6 19 5"/>"#,
+        doc: "`circle-gauge`, from Lucide.",
+    };
+
+    /// `circle-minus`, from Lucide.
+    pub const CIRCLE_MINUS: Self = Self {
+        name: "circle-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M8 12h8"/>"#,
+        doc: "`circle-minus`, from Lucide.",
+    };
+
+    /// `circle-off`, from Lucide.
+    pub const CIRCLE_OFF: Self = Self {
+        name: "circle-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m2 2 20 20"/><path d="M8.35 2.69A10 10 0 0 1 21.3 15.65"/><path d="M19.08 19.08A10 10 0 1 1 4.92 4.92"/>"#,
+        doc: "`circle-off`, from Lucide.",
+    };
+
+    /// `circle-parking`, from Lucide.
+    pub const CIRCLE_PARKING: Self = Self {
+        name: "circle-parking",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>"#,
+        doc: "`circle-parking`, from Lucide.",
+    };
+
+    /// `circle-parking-off`, from Lucide.
+    pub const CIRCLE_PARKING_OFF: Self = Self {
+        name: "circle-parking-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.656 7H13a3 3 0 0 1 2.984 3.307"/><path d="M13 13H9"/><path d="M19.071 19.071A1 1 0 0 1 4.93 4.93"/><path d="m2 2 20 20"/><path d="M8.357 2.687a10 10 0 0 1 12.956 12.956"/><path d="M9 17V9"/>"#,
+        doc: "`circle-parking-off`, from Lucide.",
+    };
+
+    /// `circle-pause`, from Lucide.
+    pub const CIRCLE_PAUSE: Self = Self {
+        name: "circle-pause",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><line x1="10" x2="10" y1="15" y2="9"/><line x1="14" x2="14" y1="15" y2="9"/>"#,
+        doc: "`circle-pause`, from Lucide.",
+    };
+
+    /// `circle-percent`, from Lucide.
+    pub const CIRCLE_PERCENT: Self = Self {
+        name: "circle-percent",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="M9 9h.01"/><path d="M15 15h.01"/>"#,
+        doc: "`circle-percent`, from Lucide.",
+    };
+
+    /// `circle-pile`, from Lucide.
+    pub const CIRCLE_PILE: Self = Self {
+        name: "circle-pile",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="19" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="20" cy="19" r="2"/><circle cx="4" cy="19" r="2"/><circle cx="8" cy="12" r="2"/>"#,
+        doc: "`circle-pile`, from Lucide.",
+    };
+
+    /// `circle-play`, from Lucide.
+    pub const CIRCLE_PLAY: Self = Self {
+        name: "circle-play",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 9.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997A1 1 0 0 1 9 14.996z"/><circle cx="12" cy="12" r="10"/>"#,
+        doc: "`circle-play`, from Lucide.",
+    };
+
+    /// `circle-plus`, from Lucide.
+    pub const CIRCLE_PLUS: Self = Self {
+        name: "circle-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/>"#,
+        doc: "`circle-plus`, from Lucide.",
+    };
+
+    /// `circle-pound-sterling`, from Lucide.
+    pub const CIRCLE_POUND_STERLING: Self = Self {
+        name: "circle-pound-sterling",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M10 16V9.5a1 1 0 0 1 5 0"/><path d="M8 12h4"/><path d="M8 16h7"/>"#,
+        doc: "`circle-pound-sterling`, from Lucide.",
+    };
+
+    /// `circle-power`, from Lucide.
+    pub const CIRCLE_POWER: Self = Self {
+        name: "circle-power",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 7v4"/><path d="M7.998 9.003a5 5 0 1 0 8-.005"/>"#,
+        doc: "`circle-power`, from Lucide.",
+    };
+
+    /// `circle-question-mark`, from Lucide.
+    pub const CIRCLE_QUESTION_MARK: Self = Self {
+        name: "circle-question-mark",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>"#,
+        doc: "`circle-question-mark`, from Lucide.",
+    };
+
+    /// `circle-slash`, from Lucide.
+    pub const CIRCLE_SLASH: Self = Self {
+        name: "circle-slash",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><line x1="9" x2="15" y1="15" y2="9"/>"#,
+        doc: "`circle-slash`, from Lucide.",
+    };
+
+    /// `circle-slash-2`, from Lucide.
+    pub const CIRCLE_SLASH_2: Self = Self {
+        name: "circle-slash-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M22 2 2 22"/>"#,
+        doc: "`circle-slash-2`, from Lucide.",
+    };
+
+    /// `circle-small`, from Lucide.
+    pub const CIRCLE_SMALL: Self = Self {
+        name: "circle-small",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="6"/>"#,
+        doc: "`circle-small`, from Lucide.",
+    };
+
+    /// `circle-star`, from Lucide.
+    pub const CIRCLE_STAR: Self = Self {
+        name: "circle-star",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M11.051 7.616a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.867l-1.156-1.152a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z"/>"#,
+        doc: "`circle-star`, from Lucide.",
+    };
+
+    /// `circle-stop`, from Lucide.
+    pub const CIRCLE_STOP: Self = Self {
+        name: "circle-stop",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6" rx="1"/>"#,
+        doc: "`circle-stop`, from Lucide.",
+    };
+
+    /// `circle-user`, from Lucide.
+    pub const CIRCLE_USER: Self = Self {
+        name: "circle-user",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/>"#,
+        doc: "`circle-user`, from Lucide.",
+    };
+
+    /// `circle-user-round`, from Lucide.
+    pub const CIRCLE_USER_ROUND: Self = Self {
+        name: "circle-user-round",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17.925 20.056a6 6 0 0 0-11.851.001"/><circle cx="12" cy="11" r="4"/><circle cx="12" cy="12" r="10"/>"#,
+        doc: "`circle-user-round`, from Lucide.",
+    };
+
+    /// `circle-x`, from Lucide.
+    pub const CIRCLE_X: Self = Self {
+        name: "circle-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>"#,
+        doc: "`circle-x`, from Lucide.",
+    };
+
+    /// `circuit-board`, from Lucide.
+    pub const CIRCUIT_BOARD: Self = Self {
+        name: "circuit-board",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M11 9h4a2 2 0 0 0 2-2V3"/><circle cx="9" cy="9" r="2"/><path d="M7 21v-4a2 2 0 0 1 2-2h4"/><circle cx="15" cy="15" r="2"/>"#,
+        doc: "`circuit-board`, from Lucide.",
+    };
+
+    /// `citrus`, from Lucide.
+    pub const CITRUS: Self = Self {
+        name: "citrus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21.66 17.67a1.08 1.08 0 0 1-.04 1.6A12 12 0 0 1 4.73 2.38a1.1 1.1 0 0 1 1.61-.04z"/><path d="M19.65 15.66A8 8 0 0 1 8.35 4.34"/><path d="m14 10-5.5 5.5"/><path d="M14 17.85V10H6.15"/>"#,
+        doc: "`citrus`, from Lucide.",
+    };
+
+    /// `clapperboard`, from Lucide.
+    pub const CLAPPERBOARD: Self = Self {
+        name: "clapperboard",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12.296 3.464 3.02 3.956"/><path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z"/><path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m6.18 5.276 3.1 3.899"/>"#,
+        doc: "`clapperboard`, from Lucide.",
+    };
+
+    /// `clipboard`, from Lucide.
+    pub const CLIPBOARD: Self = Self {
+        name: "clipboard",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>"#,
+        doc: "`clipboard`, from Lucide.",
+    };
+
+    /// `clipboard-check`, from Lucide.
+    pub const CLIPBOARD_CHECK: Self = Self {
+        name: "clipboard-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>"#,
+        doc: "`clipboard-check`, from Lucide.",
+    };
+
+    /// `clipboard-clock`, from Lucide.
+    pub const CLIPBOARD_CLOCK: Self = Self {
+        name: "clipboard-clock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 14v2.2l1.6 1"/><path d="M16 4h2a2 2 0 0 1 2 2v.832"/><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h2"/><circle cx="16" cy="16" r="6"/><rect x="8" y="2" width="8" height="4" rx="1"/>"#,
+        doc: "`clipboard-clock`, from Lucide.",
+    };
+
+    /// `clipboard-copy`, from Lucide.
+    pub const CLIPBOARD_COPY: Self = Self {
+        name: "clipboard-copy",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><path d="M16 4h2a2 2 0 0 1 2 2v4"/><path d="M21 14H11"/><path d="m15 10-4 4 4 4"/>"#,
+        doc: "`clipboard-copy`, from Lucide.",
+    };
+
+    /// `clipboard-list`, from Lucide.
+    pub const CLIPBOARD_LIST: Self = Self {
+        name: "clipboard-list",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>"#,
+        doc: "`clipboard-list`, from Lucide.",
+    };
+
+    /// `clipboard-minus`, from Lucide.
+    pub const CLIPBOARD_MINUS: Self = Self {
+        name: "clipboard-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 14h6"/>"#,
+        doc: "`clipboard-minus`, from Lucide.",
+    };
+
+    /// `clipboard-paste`, from Lucide.
+    pub const CLIPBOARD_PASTE: Self = Self {
+        name: "clipboard-paste",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 14h10"/><path d="M16 4h2a2 2 0 0 1 2 2v1.344"/><path d="m17 18 4-4-4-4"/><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 1.793-1.113"/><rect x="8" y="2" width="8" height="4" rx="1"/>"#,
+        doc: "`clipboard-paste`, from Lucide.",
+    };
+
+    /// `clipboard-pen`, from Lucide.
+    pub const CLIPBOARD_PEN: Self = Self {
+        name: "clipboard-pen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M21.34 15.664a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><path d="M8 22H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>"#,
+        doc: "`clipboard-pen`, from Lucide.",
+    };
+
+    /// `clipboard-pen-line`, from Lucide.
+    pub const CLIPBOARD_PEN_LINE: Self = Self {
+        name: "clipboard-pen-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="8" height="4" x="8" y="2" rx="1"/><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-.5"/><path d="M16 4h2a2 2 0 0 1 1.73 1"/><path d="M8 18h1"/><path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/>"#,
+        doc: "`clipboard-pen-line`, from Lucide.",
+    };
+
+    /// `clipboard-plus`, from Lucide.
+    pub const CLIPBOARD_PLUS: Self = Self {
+        name: "clipboard-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 14h6"/><path d="M12 17v-6"/>"#,
+        doc: "`clipboard-plus`, from Lucide.",
+    };
+
+    /// `clipboard-type`, from Lucide.
+    pub const CLIPBOARD_TYPE: Self = Self {
+        name: "clipboard-type",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12v-1h6v1"/><path d="M11 17h2"/><path d="M12 11v6"/>"#,
+        doc: "`clipboard-type`, from Lucide.",
+    };
+
+    /// `clipboard-x`, from Lucide.
+    pub const CLIPBOARD_X: Self = Self {
+        name: "clipboard-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m15 11-6 6"/><path d="m9 11 6 6"/>"#,
+        doc: "`clipboard-x`, from Lucide.",
+    };
+
+    /// Marks a time, such as when a row of a schedule names one. A clock face with two hands, which is the drawing every reader already reads as a time. No component draws it on its own.
+    pub const CLOCK: Self = Self {
+        name: "clock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>"#,
+        doc: "Marks a time, such as when a row of a schedule names one. A clock face with two hands, which is the drawing every reader already reads as a time. No component draws it on its own.",
+    };
+
+    /// `clock-1`, from Lucide.
+    pub const CLOCK_1: Self = Self {
+        name: "clock-1",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 6v6l2-4"/>"#,
+        doc: "`clock-1`, from Lucide.",
+    };
+
+    /// `clock-10`, from Lucide.
+    pub const CLOCK_10: Self = Self {
+        name: "clock-10",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 6v6l-4-2"/>"#,
+        doc: "`clock-10`, from Lucide.",
+    };
+
+    /// `clock-11`, from Lucide.
+    pub const CLOCK_11: Self = Self {
+        name: "clock-11",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 6v6l-2-4"/>"#,
+        doc: "`clock-11`, from Lucide.",
+    };
+
+    /// `clock-12`, from Lucide.
+    pub const CLOCK_12: Self = Self {
+        name: "clock-12",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 6v6"/>"#,
+        doc: "`clock-12`, from Lucide.",
+    };
+
+    /// `clock-2`, from Lucide.
+    pub const CLOCK_2: Self = Self {
+        name: "clock-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4-2"/>"#,
+        doc: "`clock-2`, from Lucide.",
+    };
+
+    /// `clock-3`, from Lucide.
+    pub const CLOCK_3: Self = Self {
+        name: "clock-3",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 6v6h4"/>"#,
+        doc: "`clock-3`, from Lucide.",
+    };
+
+    /// `clock-4`, from Lucide.
+    pub const CLOCK_4: Self = Self {
+        name: "clock-4",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>"#,
+        doc: "`clock-4`, from Lucide.",
+    };
+
+    /// `clock-5`, from Lucide.
+    pub const CLOCK_5: Self = Self {
+        name: "clock-5",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 6v6l2 4"/>"#,
+        doc: "`clock-5`, from Lucide.",
+    };
+
+    /// `clock-6`, from Lucide.
+    pub const CLOCK_6: Self = Self {
+        name: "clock-6",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 6v10"/>"#,
+        doc: "`clock-6`, from Lucide.",
+    };
+
+    /// `clock-7`, from Lucide.
+    pub const CLOCK_7: Self = Self {
+        name: "clock-7",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 6v6l-2 4"/>"#,
+        doc: "`clock-7`, from Lucide.",
+    };
+
+    /// `clock-8`, from Lucide.
+    pub const CLOCK_8: Self = Self {
+        name: "clock-8",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 6v6l-4 2"/>"#,
+        doc: "`clock-8`, from Lucide.",
+    };
+
+    /// `clock-9`, from Lucide.
+    pub const CLOCK_9: Self = Self {
+        name: "clock-9",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 6v6H8"/>"#,
+        doc: "`clock-9`, from Lucide.",
+    };
+
+    /// `clock-alert`, from Lucide.
+    pub const CLOCK_ALERT: Self = Self {
+        name: "clock-alert",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6v6l4 2"/><path d="M20 12v5"/><path d="M20 21h.01"/><path d="M21.25 8.2A10 10 0 1 0 16 21.16"/>"#,
+        doc: "`clock-alert`, from Lucide.",
+    };
+
+    /// `clock-arrow-down`, from Lucide.
+    pub const CLOCK_ARROW_DOWN: Self = Self {
+        name: "clock-arrow-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6v6l2 1"/><path d="M12.337 21.994a10 10 0 1 1 9.588-8.767"/><path d="m14 18 4 4 4-4"/><path d="M18 14v8"/>"#,
+        doc: "`clock-arrow-down`, from Lucide.",
+    };
+
+    /// `clock-arrow-left`, from Lucide.
+    pub const CLOCK_ARROW_LEFT: Self = Self {
+        name: "clock-arrow-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6v6l1.5.8"/><path d="M12.338 21.994a10 10 0 1 1 9.587-8.767"/><path d="M14 18h8"/><path d="m18 22-4-4 4-4"/>"#,
+        doc: "`clock-arrow-left`, from Lucide.",
+    };
+
+    /// `clock-arrow-right`, from Lucide.
+    pub const CLOCK_ARROW_RIGHT: Self = Self {
+        name: "clock-arrow-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6v6l2 1"/><path d="M13.5 21.885A10 10 0 1 1 22 12"/><path d="M14 18h8"/><path d="m18 22 4-4-4-4"/>"#,
+        doc: "`clock-arrow-right`, from Lucide.",
+    };
+
+    /// `clock-arrow-up`, from Lucide.
+    pub const CLOCK_ARROW_UP: Self = Self {
+        name: "clock-arrow-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6v6l1.56.78"/><path d="M13.227 21.925a10 10 0 1 1 8.767-9.588"/><path d="m14 18 4-4 4 4"/><path d="M18 22v-8"/>"#,
+        doc: "`clock-arrow-up`, from Lucide.",
+    };
+
+    /// `clock-check`, from Lucide.
+    pub const CLOCK_CHECK: Self = Self {
+        name: "clock-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6v6l4 2"/><path d="M22 12a10 10 0 1 0-11 9.95"/><path d="m22 16-5.5 5.5L14 19"/>"#,
+        doc: "`clock-check`, from Lucide.",
+    };
+
+    /// `clock-fading`, from Lucide.
+    pub const CLOCK_FADING: Self = Self {
+        name: "clock-fading",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2a10 10 0 0 1 7.38 16.75"/><path d="M12 6v6l4 2"/><path d="M2.5 8.875a10 10 0 0 0-.5 3"/><path d="M2.83 16a10 10 0 0 0 2.43 3.4"/><path d="M4.636 5.235a10 10 0 0 1 .891-.857"/><path d="M8.644 21.42a10 10 0 0 0 7.631-.38"/>"#,
+        doc: "`clock-fading`, from Lucide.",
+    };
+
+    /// `clock-plus`, from Lucide.
+    pub const CLOCK_PLUS: Self = Self {
+        name: "clock-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6v6l3.644 1.822"/><path d="M16 19h6"/><path d="M19 16v6"/><path d="M21.92 13.267a10 10 0 1 0-8.653 8.653"/>"#,
+        doc: "`clock-plus`, from Lucide.",
+    };
+
+    /// Dismisses the drawer or a floating surface.
+    pub const CLOSE: Self = Self {
+        name: "close",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 6 6 18"/><path d="m6 6 12 12"/>"#,
+        doc: "Dismisses the drawer or a floating surface.",
+    };
+
+    /// `closed-caption`, from Lucide.
+    pub const CLOSED_CAPTION: Self = Self {
+        name: "closed-caption",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 9.17a3 3 0 1 0 0 5.66"/><path d="M17 9.17a3 3 0 1 0 0 5.66"/><rect x="2" y="5" width="20" height="14" rx="2"/>"#,
+        doc: "`closed-caption`, from Lucide.",
+    };
+
+    /// `cloud`, from Lucide.
+    pub const CLOUD: Self = Self {
+        name: "cloud",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>"#,
+        doc: "`cloud`, from Lucide.",
+    };
+
+    /// `cloud-alert`, from Lucide.
+    pub const CLOUD_ALERT: Self = Self {
+        name: "cloud-alert",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 12v4"/><path d="M12 20h.01"/><path d="M8.128 16.949A7 7 0 1 1 15.71 8h1.79a1 1 0 0 1 0 9h-1.642"/>"#,
+        doc: "`cloud-alert`, from Lucide.",
+    };
+
+    /// `cloud-backup`, from Lucide.
+    pub const CLOUD_BACKUP: Self = Self {
+        name: "cloud-backup",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 15.251A4.5 4.5 0 0 0 17.5 8h-1.79A7 7 0 1 0 3 13.607"/><path d="M7 11v4h4"/><path d="M8 19a5 5 0 0 0 9-3 4.5 4.5 0 0 0-4.5-4.5 4.82 4.82 0 0 0-3.41 1.41L7 15"/>"#,
+        doc: "`cloud-backup`, from Lucide.",
+    };
+
+    /// `cloud-check`, from Lucide.
+    pub const CLOUD_CHECK: Self = Self {
+        name: "cloud-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m17 15-5.5 5.5L9 18"/><path d="M5.516 16.07A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 3.501 7.327"/>"#,
+        doc: "`cloud-check`, from Lucide.",
+    };
+
+    /// `cloud-cog`, from Lucide.
+    pub const CLOUD_COG: Self = Self {
+        name: "cloud-cog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10.852 19.772-.383.924"/><path d="m13.148 14.228.383-.923"/><path d="M13.148 19.772a3 3 0 1 0-2.296-5.544l-.383-.923"/><path d="m13.53 20.696-.382-.924a3 3 0 1 1-2.296-5.544"/><path d="m14.772 15.852.923-.383"/><path d="m14.772 18.148.923.383"/><path d="M4.2 15.1a7 7 0 1 1 9.93-9.858A7 7 0 0 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.2"/><path d="m9.228 15.852-.923-.383"/><path d="m9.228 18.148-.923.383"/>"#,
+        doc: "`cloud-cog`, from Lucide.",
+    };
+
+    /// `cloud-download`, from Lucide.
+    pub const CLOUD_DOWNLOAD: Self = Self {
+        name: "cloud-download",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13v8l-4-4"/><path d="m12 21 4-4"/><path d="M4.393 15.269A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.436 8.284"/>"#,
+        doc: "`cloud-download`, from Lucide.",
+    };
+
+    /// `cloud-drizzle`, from Lucide.
+    pub const CLOUD_DRIZZLE: Self = Self {
+        name: "cloud-drizzle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M8 19v1"/><path d="M8 14v1"/><path d="M16 19v1"/><path d="M16 14v1"/><path d="M12 21v1"/><path d="M12 16v1"/>"#,
+        doc: "`cloud-drizzle`, from Lucide.",
+    };
+
+    /// `cloud-fog`, from Lucide.
+    pub const CLOUD_FOG: Self = Self {
+        name: "cloud-fog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 17H7"/><path d="M17 21H9"/>"#,
+        doc: "`cloud-fog`, from Lucide.",
+    };
+
+    /// `cloud-hail`, from Lucide.
+    pub const CLOUD_HAIL: Self = Self {
+        name: "cloud-hail",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v2"/><path d="M8 14v2"/><path d="M16 20h.01"/><path d="M8 20h.01"/><path d="M12 16v2"/><path d="M12 22h.01"/>"#,
+        doc: "`cloud-hail`, from Lucide.",
+    };
+
+    /// `cloud-lightning`, from Lucide.
+    pub const CLOUD_LIGHTNING: Self = Self {
+        name: "cloud-lightning",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"/><path d="m13 12-3 5h4l-3 5"/>"#,
+        doc: "`cloud-lightning`, from Lucide.",
+    };
+
+    /// `cloud-moon`, from Lucide.
+    pub const CLOUD_MOON: Self = Self {
+        name: "cloud-moon",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 16a3 3 0 0 1 0 6H7a5 5 0 1 1 4.9-6z"/><path d="M18.376 14.512a6 6 0 0 0 3.461-4.127c.148-.625-.659-.97-1.248-.714a4 4 0 0 1-5.259-5.26c.255-.589-.09-1.395-.716-1.248a6 6 0 0 0-4.594 5.36"/>"#,
+        doc: "`cloud-moon`, from Lucide.",
+    };
+
+    /// `cloud-moon-rain`, from Lucide.
+    pub const CLOUD_MOON_RAIN: Self = Self {
+        name: "cloud-moon-rain",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 20v2"/><path d="M18.376 14.512a6 6 0 0 0 3.461-4.127c.148-.625-.659-.97-1.248-.714a4 4 0 0 1-5.259-5.26c.255-.589-.09-1.395-.716-1.248a6 6 0 0 0-4.594 5.36"/><path d="M3 20a5 5 0 1 1 8.9-4H13a3 3 0 0 1 2 5.24"/><path d="M7 19v2"/>"#,
+        doc: "`cloud-moon-rain`, from Lucide.",
+    };
+
+    /// `cloud-off`, from Lucide.
+    pub const CLOUD_OFF: Self = Self {
+        name: "cloud-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.94 5.274A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 4.222 6.057"/><path d="M18.796 18.81A4.5 4.5 0 0 1 17.5 19H9A7 7 0 0 1 5.79 5.78"/><path d="m2 2 20 20"/>"#,
+        doc: "`cloud-off`, from Lucide.",
+    };
+
+    /// `cloud-rain`, from Lucide.
+    pub const CLOUD_RAIN: Self = Self {
+        name: "cloud-rain",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/>"#,
+        doc: "`cloud-rain`, from Lucide.",
+    };
+
+    /// `cloud-rain-wind`, from Lucide.
+    pub const CLOUD_RAIN_WIND: Self = Self {
+        name: "cloud-rain-wind",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m9.2 22 3-7"/><path d="m9 13-3 7"/><path d="m17 13-3 7"/>"#,
+        doc: "`cloud-rain-wind`, from Lucide.",
+    };
+
+    /// `cloud-snow`, from Lucide.
+    pub const CLOUD_SNOW: Self = Self {
+        name: "cloud-snow",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M8 15h.01"/><path d="M8 19h.01"/><path d="M12 17h.01"/><path d="M12 21h.01"/><path d="M16 15h.01"/><path d="M16 19h.01"/>"#,
+        doc: "`cloud-snow`, from Lucide.",
+    };
+
+    /// `cloud-sun`, from Lucide.
+    pub const CLOUD_SUN: Self = Self {
+        name: "cloud-sun",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/>"#,
+        doc: "`cloud-sun`, from Lucide.",
+    };
+
+    /// `cloud-sun-rain`, from Lucide.
+    pub const CLOUD_SUN_RAIN: Self = Self {
+        name: "cloud-sun-rain",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M3 20a5 5 0 1 1 8.9-4H13a3 3 0 0 1 2 5.24"/><path d="M11 20v2"/><path d="M7 19v2"/>"#,
+        doc: "`cloud-sun-rain`, from Lucide.",
+    };
+
+    /// `cloud-sync`, from Lucide.
+    pub const CLOUD_SYNC: Self = Self {
+        name: "cloud-sync",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m17 18-1.535 1.605a5 5 0 0 1-8-1.5"/><path d="M17 22v-4h-4"/><path d="M20.996 15.251A4.5 4.5 0 0 0 17.495 8h-1.79a7 7 0 1 0-12.709 5.607"/><path d="M7 10v4h4"/><path d="m7 14 1.535-1.605a5 5 0 0 1 8 1.5"/>"#,
+        doc: "`cloud-sync`, from Lucide.",
+    };
+
+    /// `cloud-upload`, from Lucide.
+    pub const CLOUD_UPLOAD: Self = Self {
+        name: "cloud-upload",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13v8"/><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m8 17 4-4 4 4"/>"#,
+        doc: "`cloud-upload`, from Lucide.",
+    };
+
+    /// `cloudy`, from Lucide.
+    pub const CLOUDY: Self = Self {
+        name: "cloudy",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17.5 12a1 1 0 1 1 0 9H9.006a7 7 0 1 1 6.702-9z"/><path d="M21.832 9A3 3 0 0 0 19 7h-2.207a5.5 5.5 0 0 0-10.72.61"/>"#,
+        doc: "`cloudy`, from Lucide.",
+    };
+
+    /// `clover`, from Lucide.
+    pub const CLOVER: Self = Self {
+        name: "clover",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16.17 7.83 2 22"/><path d="M4.02 12a2.827 2.827 0 1 1 3.81-4.17A2.827 2.827 0 1 1 12 4.02a2.827 2.827 0 1 1 4.17 3.81A2.827 2.827 0 1 1 19.98 12a2.827 2.827 0 1 1-3.81 4.17A2.827 2.827 0 1 1 12 19.98a2.827 2.827 0 1 1-4.17-3.81A1 1 0 1 1 4 12"/><path d="m7.83 7.83 8.34 8.34"/>"#,
+        doc: "`clover`, from Lucide.",
+    };
+
+    /// `club`, from Lucide.
+    pub const CLUB: Self = Self {
+        name: "club",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17.28 9.05a5.5 5.5 0 1 0-10.56 0A5.5 5.5 0 1 0 12 17.66a5.5 5.5 0 1 0 5.28-8.6Z"/><path d="M12 17.66L12 22"/>"#,
+        doc: "`club`, from Lucide.",
+    };
+
+    /// `code`, from Lucide.
+    pub const CODE: Self = Self {
+        name: "code",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>"#,
+        doc: "`code`, from Lucide.",
+    };
+
+    /// `code-xml`, from Lucide.
+    pub const CODE_XML: Self = Self {
+        name: "code-xml",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>"#,
+        doc: "`code-xml`, from Lucide.",
+    };
+
+    /// `coffee`, from Lucide.
+    pub const COFFEE: Self = Self {
+        name: "coffee",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/>"#,
+        doc: "`coffee`, from Lucide.",
+    };
+
+    /// `cog`, from Lucide.
+    pub const COG: Self = Self {
+        name: "cog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 10.27 7 3.34"/><path d="m11 13.73-4 6.93"/><path d="M12 22v-2"/><path d="M12 2v2"/><path d="M14 12h8"/><path d="m17 20.66-1-1.73"/><path d="m17 3.34-1 1.73"/><path d="M2 12h2"/><path d="m20.66 17-1.73-1"/><path d="m20.66 7-1.73 1"/><path d="m3.34 17 1.73-1"/><path d="m3.34 7 1.73 1"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="8"/>"#,
+        doc: "`cog`, from Lucide.",
+    };
+
+    /// `coins`, from Lucide.
+    pub const COINS: Self = Self {
+        name: "coins",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.744 17.736a6 6 0 1 1-7.48-7.48"/><path d="M15 6h1v4"/><path d="m6.134 14.768.866-.5 2 3.464"/><circle cx="16" cy="8" r="6"/>"#,
+        doc: "`coins`, from Lucide.",
+    };
+
+    /// Opens the list of a table's columns, where a reader chooses which are shown. It was `columns` until the set was vendored at `1.33.0`, where upstream numbers the panel counts; the name was never this system's choice, so it follows upstream.
+    pub const COLUMNS_2: Self = Self {
+        name: "columns-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/>"#,
+        doc: "Opens the list of a table's columns, where a reader chooses which are shown. It was `columns` until the set was vendored at `1.33.0`, where upstream numbers the panel counts; the name was never this system's choice, so it follows upstream.",
+    };
+
+    /// `columns-3`, from Lucide.
+    pub const COLUMNS_3: Self = Self {
+        name: "columns-3",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/>"#,
+        doc: "`columns-3`, from Lucide.",
+    };
+
+    /// `columns-3-cog`, from Lucide.
+    pub const COLUMNS_3_COG: Self = Self {
+        name: "columns-3-cog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.6 21H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v5.6"/><path d="m14.305 19.53.923-.382"/><path d="M15 3v7.6"/><path d="m15.229 16.852-.924-.383"/><path d="m16.852 15.228-.383-.923"/><path d="m16.852 20.772-.383.924"/><path d="m19.148 15.228.383-.923"/><path d="m19.53 21.696-.382-.924"/><path d="m20.773 16.852.922-.383"/><path d="m20.773 19.148.922.383"/><path d="M9 3v18"/><circle cx="18" cy="18" r="3"/>"#,
+        doc: "`columns-3-cog`, from Lucide.",
+    };
+
+    /// `columns-4`, from Lucide.
+    pub const COLUMNS_4: Self = Self {
+        name: "columns-4",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7.5 3v18"/><path d="M12 3v18"/><path d="M16.5 3v18"/>"#,
+        doc: "`columns-4`, from Lucide.",
+    };
+
+    /// `combine`, from Lucide.
+    pub const COMBINE: Self = Self {
+        name: "combine",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 3a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1"/><path d="M19 3a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1"/><path d="m7 15 3 3"/><path d="m7 21 3-3H5a2 2 0 0 1-2-2v-2"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="3" width="7" height="7" rx="1"/>"#,
+        doc: "`combine`, from Lucide.",
+    };
+
+    /// `command`, from Lucide.
+    pub const COMMAND: Self = Self {
+        name: "command",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/>"#,
+        doc: "`command`, from Lucide.",
+    };
+
+    /// `compass`, from Lucide.
+    pub const COMPASS: Self = Self {
+        name: "compass",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/>"#,
+        doc: "`compass`, from Lucide.",
+    };
+
+    /// `component`, from Lucide.
+    pub const COMPONENT: Self = Self {
+        name: "component",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.536 11.293a1 1 0 0 0 0 1.414l2.376 2.377a1 1 0 0 0 1.414 0l2.377-2.377a1 1 0 0 0 0-1.414l-2.377-2.377a1 1 0 0 0-1.414 0z"/><path d="M2.297 11.293a1 1 0 0 0 0 1.414l2.377 2.377a1 1 0 0 0 1.414 0l2.377-2.377a1 1 0 0 0 0-1.414L6.088 8.916a1 1 0 0 0-1.414 0z"/><path d="M8.916 17.912a1 1 0 0 0 0 1.415l2.377 2.376a1 1 0 0 0 1.414 0l2.377-2.376a1 1 0 0 0 0-1.415l-2.377-2.376a1 1 0 0 0-1.414 0z"/><path d="M8.916 4.674a1 1 0 0 0 0 1.414l2.377 2.376a1 1 0 0 0 1.414 0l2.377-2.376a1 1 0 0 0 0-1.414l-2.377-2.377a1 1 0 0 0-1.414 0z"/>"#,
+        doc: "`component`, from Lucide.",
+    };
+
+    /// `computer`, from Lucide.
+    pub const COMPUTER: Self = Self {
+        name: "computer",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="14" height="8" x="5" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 18h2"/><path d="M12 18h6"/>"#,
+        doc: "`computer`, from Lucide.",
+    };
+
+    /// `concierge-bell`, from Lucide.
+    pub const CONCIERGE_BELL: Self = Self {
+        name: "concierge-bell",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 20a1 1 0 0 1-1-1v-1a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1Z"/><path d="M20 16a8 8 0 1 0-16 0"/><path d="M12 4v4"/><path d="M10 4h4"/>"#,
+        doc: "`concierge-bell`, from Lucide.",
+    };
+
+    /// `cone`, from Lucide.
+    pub const CONE: Self = Self {
+        name: "cone",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m20.9 18.55-8-15.98a1 1 0 0 0-1.8 0l-8 15.98"/><ellipse cx="12" cy="19" rx="9" ry="3"/>"#,
+        doc: "`cone`, from Lucide.",
+    };
+
+    /// `construction`, from Lucide.
+    pub const CONSTRUCTION: Self = Self {
+        name: "construction",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect x="2" y="6" width="20" height="8" rx="1"/><path d="M17 14v7"/><path d="M7 14v7"/><path d="M17 3v3"/><path d="M7 3v3"/><path d="M10 14 2.3 6.3"/><path d="m14 6 7.7 7.7"/><path d="m8 6 8 8"/>"#,
+        doc: "`construction`, from Lucide.",
+    };
+
+    /// `contact`, from Lucide.
+    pub const CONTACT: Self = Self {
+        name: "contact",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 2v2"/><path d="M7 21v-2a2 2 0 012-2h6a2 2 0 012 2v2"/><path d="M8 2v2"/><circle cx="12" cy="10" r="3"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`contact`, from Lucide.",
+    };
+
+    /// `contact-round`, from Lucide.
+    pub const CONTACT_ROUND: Self = Self {
+        name: "contact-round",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 2v2"/><path d="M17.915 21a6 6 0 10-12 0"/><path d="M8 2v2"/><circle cx="12" cy="11" r="4"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`contact-round`, from Lucide.",
+    };
+
+    /// `container`, from Lucide.
+    pub const CONTAINER: Self = Self {
+        name: "container",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 7.7c0-.6-.4-1.2-.8-1.5l-6.3-3.9a1.72 1.72 0 0 0-1.7 0l-10.3 6c-.5.2-.9.8-.9 1.4v6.6c0 .5.4 1.2.8 1.5l6.3 3.9a1.72 1.72 0 0 0 1.7 0l10.3-6c.5-.3.9-1 .9-1.5Z"/><path d="M10 21.9V14L2.1 9.1"/><path d="m10 14 11.9-6.9"/><path d="M14 19.8v-8.1"/><path d="M18 17.5V9.4"/>"#,
+        doc: "`container`, from Lucide.",
+    };
+
+    /// `contrast`, from Lucide.
+    pub const CONTRAST: Self = Self {
+        name: "contrast",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 18a6 6 0 0 0 0-12v12z"/>"#,
+        doc: "`contrast`, from Lucide.",
+    };
+
+    /// `cookie`, from Lucide.
+    pub const COOKIE: Self = Self {
+        name: "cookie",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/>"#,
+        doc: "`cookie`, from Lucide.",
+    };
+
+    /// `cooking-pot`, from Lucide.
+    pub const COOKING_POT: Self = Self {
+        name: "cooking-pot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 12h20"/><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="m4 8 16-4"/><path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8"/>"#,
+        doc: "`cooking-pot`, from Lucide.",
+    };
+
+    /// Copies a code block to the clipboard.
+    pub const COPY: Self = Self {
+        name: "copy",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>"#,
+        doc: "Copies a code block to the clipboard.",
+    };
+
+    /// `copy-check`, from Lucide.
+    pub const COPY_CHECK: Self = Self {
+        name: "copy-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12 15 2 2 4-4"/><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>"#,
+        doc: "`copy-check`, from Lucide.",
+    };
+
+    /// `copy-minus`, from Lucide.
+    pub const COPY_MINUS: Self = Self {
+        name: "copy-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="12" x2="18" y1="15" y2="15"/><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>"#,
+        doc: "`copy-minus`, from Lucide.",
+    };
+
+    /// `copy-plus`, from Lucide.
+    pub const COPY_PLUS: Self = Self {
+        name: "copy-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="15" x2="15" y1="12" y2="18"/><line x1="12" x2="18" y1="15" y2="15"/><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>"#,
+        doc: "`copy-plus`, from Lucide.",
+    };
+
+    /// `copy-slash`, from Lucide.
+    pub const COPY_SLASH: Self = Self {
+        name: "copy-slash",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="12" x2="18" y1="18" y2="12"/><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>"#,
+        doc: "`copy-slash`, from Lucide.",
+    };
+
+    /// `copy-x`, from Lucide.
+    pub const COPY_X: Self = Self {
+        name: "copy-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="12" x2="18" y1="12" y2="18"/><line x1="12" x2="18" y1="18" y2="12"/><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>"#,
+        doc: "`copy-x`, from Lucide.",
+    };
+
+    /// `copyleft`, from Lucide.
+    pub const COPYLEFT: Self = Self {
+        name: "copyleft",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M9.17 14.83a4 4 0 1 0 0-5.66"/>"#,
+        doc: "`copyleft`, from Lucide.",
+    };
+
+    /// `copyright`, from Lucide.
+    pub const COPYRIGHT: Self = Self {
+        name: "copyright",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M14.83 14.83a4 4 0 1 1 0-5.66"/>"#,
+        doc: "`copyright`, from Lucide.",
+    };
+
+    /// `corner-down-left`, from Lucide.
+    pub const CORNER_DOWN_LEFT: Self = Self {
+        name: "corner-down-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 4v7a4 4 0 0 1-4 4H4"/><path d="m9 10-5 5 5 5"/>"#,
+        doc: "`corner-down-left`, from Lucide.",
+    };
+
+    /// `corner-down-right`, from Lucide.
+    pub const CORNER_DOWN_RIGHT: Self = Self {
+        name: "corner-down-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 10 5 5-5 5"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/>"#,
+        doc: "`corner-down-right`, from Lucide.",
+    };
+
+    /// `corner-left-down`, from Lucide.
+    pub const CORNER_LEFT_DOWN: Self = Self {
+        name: "corner-left-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14 15-5 5-5-5"/><path d="M20 4h-7a4 4 0 0 0-4 4v12"/>"#,
+        doc: "`corner-left-down`, from Lucide.",
+    };
+
+    /// `corner-left-up`, from Lucide.
+    pub const CORNER_LEFT_UP: Self = Self {
+        name: "corner-left-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 9 9 4 4 9"/><path d="M20 20h-7a4 4 0 0 1-4-4V4"/>"#,
+        doc: "`corner-left-up`, from Lucide.",
+    };
+
+    /// `corner-right-down`, from Lucide.
+    pub const CORNER_RIGHT_DOWN: Self = Self {
+        name: "corner-right-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10 15 5 5 5-5"/><path d="M4 4h7a4 4 0 0 1 4 4v12"/>"#,
+        doc: "`corner-right-down`, from Lucide.",
+    };
+
+    /// `corner-right-up`, from Lucide.
+    pub const CORNER_RIGHT_UP: Self = Self {
+        name: "corner-right-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10 9 5-5 5 5"/><path d="M4 20h7a4 4 0 0 0 4-4V4"/>"#,
+        doc: "`corner-right-up`, from Lucide.",
+    };
+
+    /// `corner-up-left`, from Lucide.
+    pub const CORNER_UP_LEFT: Self = Self {
+        name: "corner-up-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 20v-7a4 4 0 0 0-4-4H4"/><path d="M9 14 4 9l5-5"/>"#,
+        doc: "`corner-up-left`, from Lucide.",
+    };
+
+    /// `corner-up-right`, from Lucide.
+    pub const CORNER_UP_RIGHT: Self = Self {
+        name: "corner-up-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/>"#,
+        doc: "`corner-up-right`, from Lucide.",
+    };
+
+    /// `cpu`, from Lucide.
+    pub const CPU: Self = Self {
+        name: "cpu",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 20v2"/><path d="M12 2v2"/><path d="M17 20v2"/><path d="M17 2v2"/><path d="M2 12h2"/><path d="M2 17h2"/><path d="M2 7h2"/><path d="M20 12h2"/><path d="M20 17h2"/><path d="M20 7h2"/><path d="M7 20v2"/><path d="M7 2v2"/><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="8" y="8" width="8" height="8" rx="1"/>"#,
+        doc: "`cpu`, from Lucide.",
+    };
+
+    /// `creative-commons`, from Lucide.
+    pub const CREATIVE_COMMONS: Self = Self {
+        name: "creative-commons",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M10 9.3a2.8 2.8 0 0 0-3.5 1 3.1 3.1 0 0 0 0 3.4 2.7 2.7 0 0 0 3.5 1"/><path d="M17 9.3a2.8 2.8 0 0 0-3.5 1 3.1 3.1 0 0 0 0 3.4 2.7 2.7 0 0 0 3.5 1"/>"#,
+        doc: "`creative-commons`, from Lucide.",
+    };
+
+    /// `credit-card`, from Lucide.
+    pub const CREDIT_CARD: Self = Self {
+        name: "credit-card",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>"#,
+        doc: "`credit-card`, from Lucide.",
+    };
+
+    /// `croissant`, from Lucide.
+    pub const CROISSANT: Self = Self {
+        name: "croissant",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.2 18H4.774a1.5 1.5 0 0 1-1.352-.97 11 11 0 0 1 .132-6.487"/><path d="M18 10.2V4.774a1.5 1.5 0 0 0-.97-1.352 11 11 0 0 0-6.486.132"/><path d="M18 5a4 3 0 0 1 4 3 2 2 0 0 1-2 2 10 10 0 0 0-5.139 1.42"/><path d="M5 18a3 4 0 0 0 3 4 2 2 0 0 0 2-2 10 10 0 0 1 1.42-5.14"/><path d="M8.709 2.554a10 10 0 0 0-6.155 6.155 1.5 1.5 0 0 0 .676 1.626l9.807 5.42a2 2 0 0 0 2.718-2.718l-5.42-9.807a1.5 1.5 0 0 0-1.626-.676"/>"#,
+        doc: "`croissant`, from Lucide.",
+    };
+
+    /// `crop`, from Lucide.
+    pub const CROP: Self = Self {
+        name: "crop",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>"#,
+        doc: "`crop`, from Lucide.",
+    };
+
+    /// `cross`, from Lucide.
+    pub const CROSS: Self = Self {
+        name: "cross",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 9a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h4a1 1 0 0 1 1 1v4a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-4a1 1 0 0 1 1-1h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-4a1 1 0 0 1-1-1V4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4a1 1 0 0 1-1 1z"/>"#,
+        doc: "`cross`, from Lucide.",
+    };
+
+    /// `crosshair`, from Lucide.
+    pub const CROSSHAIR: Self = Self {
+        name: "crosshair",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/>"#,
+        doc: "`crosshair`, from Lucide.",
+    };
+
+    /// `crown`, from Lucide.
+    pub const CROWN: Self = Self {
+        name: "crown",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/><path d="M5 21h14"/>"#,
+        doc: "`crown`, from Lucide.",
+    };
+
+    /// `cuboid`, from Lucide.
+    pub const CUBOID: Self = Self {
+        name: "cuboid",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 22v-8"/><path d="M2.336 8.89 10 14l11.715-7.029"/><path d="M22 14a2 2 0 0 1-.971 1.715l-10 6a2 2 0 0 1-2.138-.05l-6-4A2 2 0 0 1 2 16v-6a2 2 0 0 1 .971-1.715l10-6a2 2 0 0 1 2.138.05l6 4A2 2 0 0 1 22 8z"/>"#,
+        doc: "`cuboid`, from Lucide.",
+    };
+
+    /// `cup-soda`, from Lucide.
+    pub const CUP_SODA: Self = Self {
+        name: "cup-soda",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m6 8 1.75 12.28a2 2 0 0 0 2 1.72h4.54a2 2 0 0 0 2-1.72L18 8"/><path d="M5 8h14"/><path d="M7 15a6.47 6.47 0 0 1 5 0 6.47 6.47 0 0 0 5 0"/><path d="m12 8 1-6h2"/>"#,
+        doc: "`cup-soda`, from Lucide.",
+    };
+
+    /// `currency`, from Lucide.
+    pub const CURRENCY: Self = Self {
+        name: "currency",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="8"/><line x1="3" x2="6" y1="3" y2="6"/><line x1="21" x2="18" y1="3" y2="6"/><line x1="3" x2="6" y1="21" y2="18"/><line x1="21" x2="18" y1="21" y2="18"/>"#,
+        doc: "`currency`, from Lucide.",
+    };
+
+    /// `cylinder`, from Lucide.
+    pub const CYLINDER: Self = Self {
+        name: "cylinder",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/>"#,
+        doc: "`cylinder`, from Lucide.",
+    };
+
+    /// `dam`, from Lucide.
+    pub const DAM: Self = Self {
+        name: "dam",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 11.31c1.17.56 1.54 1.69 3.5 1.69 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M11.75 18c.35.5 1.45 1 2.75 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M2 6h4"/><path d="M7 3a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1L10 4a1 1 0 0 0-1-1z"/>"#,
+        doc: "`dam`, from Lucide.",
+    };
+
+    /// `database`, from Lucide.
+    pub const DATABASE: Self = Self {
+        name: "database",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>"#,
+        doc: "`database`, from Lucide.",
+    };
+
+    /// `database-arrow-down`, from Lucide.
+    pub const DATABASE_ARROW_DOWN: Self = Self {
+        name: "database-arrow-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 19 3 3 3-3"/><path d="M19 16v6"/><path d="M21 12.536V5"/><path d="M3 12A9 3 0 0 0 15.182 14.806"/><path d="M3 5V19A9 3 0 0 0 13.318 21.968"/><ellipse cx="12" cy="5" rx="9" ry="3"/>"#,
+        doc: "`database-arrow-down`, from Lucide.",
+    };
+
+    /// `database-arrow-up`, from Lucide.
+    pub const DATABASE_ARROW_UP: Self = Self {
+        name: "database-arrow-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 22v-6"/><path d="M21 12.536V5"/><path d="m22 19-3-3-3 3"/><path d="M3 12A9 3 0 0 0 14.457 14.886"/><path d="M3 5V19A9 3 0 0 0 13.318 21.968"/><ellipse cx="12" cy="5" rx="9" ry="3"/>"#,
+        doc: "`database-arrow-up`, from Lucide.",
+    };
+
+    /// `database-backup`, from Lucide.
+    pub const DATABASE_BACKUP: Self = Self {
+        name: "database-backup",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 12a9 3 0 0 0 5 2.69"/><path d="M21 9.3V5"/><path d="M3 5v14a9 3 0 0 0 6.47 2.88"/><path d="M12 12v4h4"/><path d="M13 20a5 5 0 0 0 9-3 4.5 4.5 0 0 0-4.5-4.5c-1.33 0-2.54.54-3.41 1.41L12 16"/>"#,
+        doc: "`database-backup`, from Lucide.",
+    };
+
+    /// `database-check`, from Lucide.
+    pub const DATABASE_CHECK: Self = Self {
+        name: "database-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 19 2 2 4-4"/><path d="M21 13.127V5"/><path d="M3 12A9 3 0 0 0 21 12"/><path d="M3 5V19A9 3 0 0 0 13.318 21.968"/><ellipse cx="12" cy="5" rx="9" ry="3"/>"#,
+        doc: "`database-check`, from Lucide.",
+    };
+
+    /// `database-minus`, from Lucide.
+    pub const DATABASE_MINUS: Self = Self {
+        name: "database-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 15V5"/><path d="M22 19h-6"/><path d="M3 12A9 3 0 0 0 21 12"/><path d="M3 5V19A9 3 0 0 0 13.318 21.968"/><ellipse cx="12" cy="5" rx="9" ry="3"/>"#,
+        doc: "`database-minus`, from Lucide.",
+    };
+
+    /// `database-plus`, from Lucide.
+    pub const DATABASE_PLUS: Self = Self {
+        name: "database-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 16v6"/><path d="M21 12.536V5"/><path d="M22 19h-6"/><path d="M3 12A9 3 0 0 0 15.1824 14.8061"/><path d="M3 5V19A9 3 0 0 0 13.318 21.968"/><ellipse cx="12" cy="5" rx="9" ry="3"/>"#,
+        doc: "`database-plus`, from Lucide.",
+    };
+
+    /// `database-search`, from Lucide.
+    pub const DATABASE_SEARCH: Self = Self {
+        name: "database-search",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 11.693V5"/><path d="m22 22-1.875-1.875"/><path d="M3 12a9 3 0 0 0 8.697 2.998"/><path d="M3 5v14a9 3 0 0 0 9.28 2.999"/><circle cx="18" cy="18" r="3"/><ellipse cx="12" cy="5" rx="9" ry="3"/>"#,
+        doc: "`database-search`, from Lucide.",
+    };
+
+    /// `database-x`, from Lucide.
+    pub const DATABASE_X: Self = Self {
+        name: "database-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m17 17 5 5"/><path d="M19.323 13.744A9 3 0 0 0 21 12"/><path d="M21 13.127V5"/><path d="m22 17-5 5"/><path d="M3 12A9 3 0 0 0 13.563 14.954"/><path d="M3 5V19A9 3 0 0 0 13 21.981"/><ellipse cx="12" cy="5" rx="9" ry="3"/>"#,
+        doc: "`database-x`, from Lucide.",
+    };
+
+    /// `database-zap`, from Lucide.
+    pub const DATABASE_ZAP: Self = Self {
+        name: "database-zap",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 15 21.84"/><path d="M21 5V8"/><path d="M21 12L18 17H22L19 22"/><path d="M3 12A9 3 0 0 0 14.59 14.87"/>"#,
+        doc: "`database-zap`, from Lucide.",
+    };
+
+    /// `decimals-arrow-left`, from Lucide.
+    pub const DECIMALS_ARROW_LEFT: Self = Self {
+        name: "decimals-arrow-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m13 21-3-3 3-3"/><path d="M20 18H10"/><path d="M3 11h.01"/><rect x="6" y="3" width="5" height="8" rx="2.5"/>"#,
+        doc: "`decimals-arrow-left`, from Lucide.",
+    };
+
+    /// `decimals-arrow-right`, from Lucide.
+    pub const DECIMALS_ARROW_RIGHT: Self = Self {
+        name: "decimals-arrow-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 18h10"/><path d="m17 21 3-3-3-3"/><path d="M3 11h.01"/><rect x="15" y="3" width="5" height="8" rx="2.5"/><rect x="6" y="3" width="5" height="8" rx="2.5"/>"#,
+        doc: "`decimals-arrow-right`, from Lucide.",
+    };
+
+    /// `delete`, from Lucide.
+    pub const DELETE: Self = Self {
+        name: "delete",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/><path d="m12 9 6 6"/><path d="m18 9-6 6"/>"#,
+        doc: "`delete`, from Lucide.",
+    };
+
+    /// `dessert`, from Lucide.
+    pub const DESSERT: Self = Self {
+        name: "dessert",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.162 3.167A10 10 0 0 0 2 13a2 2 0 0 0 4 0v-1a2 2 0 0 1 4 0v4a2 2 0 0 0 4 0v-4a2 2 0 0 1 4 0v1a2 2 0 0 0 4-.006 10 10 0 0 0-8.161-9.826"/><path d="M20.804 14.869a9 9 0 0 1-17.608 0"/><circle cx="12" cy="4" r="2"/>"#,
+        doc: "`dessert`, from Lucide.",
+    };
+
+    /// `diameter`, from Lucide.
+    pub const DIAMETER: Self = Self {
+        name: "diameter",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="19" cy="19" r="2"/><circle cx="5" cy="5" r="2"/><path d="M6.48 3.66a10 10 0 0 1 13.86 13.86"/><path d="m6.41 6.41 11.18 11.18"/><path d="M3.66 6.48a10 10 0 0 0 13.86 13.86"/>"#,
+        doc: "`diameter`, from Lucide.",
+    };
+
+    /// `diamond`, from Lucide.
+    pub const DIAMOND: Self = Self {
+        name: "diamond",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41l-7.59-7.59a2.41 2.41 0 0 0-3.41 0Z"/>"#,
+        doc: "`diamond`, from Lucide.",
+    };
+
+    /// `diamond-minus`, from Lucide.
+    pub const DIAMOND_MINUS: Self = Self {
+        name: "diamond-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41L13.7 2.71a2.41 2.41 0 0 0-3.41 0z"/><path d="M8 12h8"/>"#,
+        doc: "`diamond-minus`, from Lucide.",
+    };
+
+    /// `diamond-percent`, from Lucide.
+    pub const DIAMOND_PERCENT: Self = Self {
+        name: "diamond-percent",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41L13.7 2.71a2.41 2.41 0 0 0-3.41 0Z"/><path d="M9.2 9.2h.01"/><path d="m14.5 9.5-5 5"/><path d="M14.7 14.8h.01"/>"#,
+        doc: "`diamond-percent`, from Lucide.",
+    };
+
+    /// `diamond-plus`, from Lucide.
+    pub const DIAMOND_PLUS: Self = Self {
+        name: "diamond-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 8v8"/><path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41L13.7 2.71a2.41 2.41 0 0 0-3.41 0z"/><path d="M8 12h8"/>"#,
+        doc: "`diamond-plus`, from Lucide.",
+    };
+
+    /// `dice-1`, from Lucide.
+    pub const DICE_1: Self = Self {
+        name: "dice-1",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M12 12h.01"/>"#,
+        doc: "`dice-1`, from Lucide.",
+    };
+
+    /// `dice-2`, from Lucide.
+    pub const DICE_2: Self = Self {
+        name: "dice-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M15 9h.01"/><path d="M9 15h.01"/>"#,
+        doc: "`dice-2`, from Lucide.",
+    };
+
+    /// `dice-3`, from Lucide.
+    pub const DICE_3: Self = Self {
+        name: "dice-3",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M16 8h.01"/><path d="M12 12h.01"/><path d="M8 16h.01"/>"#,
+        doc: "`dice-3`, from Lucide.",
+    };
+
+    /// `dice-4`, from Lucide.
+    pub const DICE_4: Self = Self {
+        name: "dice-4",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M16 8h.01"/><path d="M8 8h.01"/><path d="M8 16h.01"/><path d="M16 16h.01"/>"#,
+        doc: "`dice-4`, from Lucide.",
+    };
+
+    /// `dice-5`, from Lucide.
+    pub const DICE_5: Self = Self {
+        name: "dice-5",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M16 8h.01"/><path d="M8 8h.01"/><path d="M8 16h.01"/><path d="M16 16h.01"/><path d="M12 12h.01"/>"#,
+        doc: "`dice-5`, from Lucide.",
+    };
+
+    /// `dice-6`, from Lucide.
+    pub const DICE_6: Self = Self {
+        name: "dice-6",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M16 8h.01"/><path d="M16 12h.01"/><path d="M16 16h.01"/><path d="M8 8h.01"/><path d="M8 12h.01"/><path d="M8 16h.01"/>"#,
+        doc: "`dice-6`, from Lucide.",
+    };
+
+    /// `dices`, from Lucide.
+    pub const DICES: Self = Self {
+        name: "dices",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/>"#,
+        doc: "`dices`, from Lucide.",
+    };
+
+    /// `diff`, from Lucide.
+    pub const DIFF: Self = Self {
+        name: "diff",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3v14"/><path d="M5 10h14"/><path d="M5 21h14"/>"#,
+        doc: "`diff`, from Lucide.",
+    };
+
+    /// `disc`, from Lucide.
+    pub const DISC: Self = Self {
+        name: "disc",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/>"#,
+        doc: "`disc`, from Lucide.",
+    };
+
+    /// `disc-2`, from Lucide.
+    pub const DISC_2: Self = Self {
+        name: "disc-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 12h.01"/>"#,
+        doc: "`disc-2`, from Lucide.",
+    };
+
+    /// `disc-3`, from Lucide.
+    pub const DISC_3: Self = Self {
+        name: "disc-3",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M6 12c0-1.7.7-3.2 1.8-4.2"/><circle cx="12" cy="12" r="2"/><path d="M18 12c0 1.7-.7 3.2-1.8 4.2"/>"#,
+        doc: "`disc-3`, from Lucide.",
+    };
+
+    /// `disc-album`, from Lucide.
+    pub const DISC_ALBUM: Self = Self {
+        name: "disc-album",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="12" cy="12" r="5"/><path d="M12 12h.01"/>"#,
+        doc: "`disc-album`, from Lucide.",
+    };
+
+    /// `divide`, from Lucide.
+    pub const DIVIDE: Self = Self {
+        name: "divide",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="6" r="1"/><line x1="5" x2="19" y1="12" y2="12"/><circle cx="12" cy="18" r="1"/>"#,
+        doc: "`divide`, from Lucide.",
+    };
+
+    /// Moves an example back to the Dioxus implementation.
+    pub const DNA: Self = Self {
+        name: "dna",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10 16 1.5 1.5"/><path d="m14 8-1.5-1.5"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="m16.5 10.5 1 1"/><path d="m17 6-2.891-2.891"/><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="m20 9 .891.891"/><path d="M3.109 14.109 4 15"/><path d="m6.5 12.5 1 1"/><path d="m7 18 2.891 2.891"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/>"#,
+        doc: "Moves an example back to the Dioxus implementation.",
+    };
+
+    /// `dna-off`, from Lucide.
+    pub const DNA_OFF: Self = Self {
+        name: "dna-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 2c-1.35 1.5-2.092 3-2.5 4.5L14 8"/><path d="m17 6-2.891-2.891"/><path d="M2 15c3.333-3 6.667-3 10-3"/><path d="m2 2 20 20"/><path d="m20 9 .891.891"/><path d="M22 9c-1.5 1.35-3 2.092-4.5 2.5l-1-1"/><path d="M3.109 14.109 4 15"/><path d="m6.5 12.5 1 1"/><path d="m7 18 2.891 2.891"/><path d="M9 22c1.35-1.5 2.092-3 2.5-4.5L10 16"/>"#,
+        doc: "`dna-off`, from Lucide.",
+    };
+
+    /// `dock`, from Lucide.
+    pub const DOCK: Self = Self {
+        name: "dock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 8h20"/><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 16h12"/>"#,
+        doc: "`dock`, from Lucide.",
+    };
+
+    /// `dog`, from Lucide.
+    pub const DOG: Self = Self {
+        name: "dog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.25 16.25h1.5L12 17z"/><path d="M16 14v.5"/><path d="M4.42 11.247A13.152 13.152 0 0 0 4 14.556C4 18.728 7.582 21 12 21s8-2.272 8-6.444a11.702 11.702 0 0 0-.493-3.309"/><path d="M8 14v.5"/><path d="M8.5 8.5c-.384 1.05-1.083 2.028-2.344 2.5-1.931.722-3.576-.297-3.656-1-.113-.994 1.177-6.53 4-7 1.923-.321 3.651.845 3.651 2.235A7.497 7.497 0 0 1 14 5.277c0-1.39 1.844-2.598 3.767-2.277 2.823.47 4.113 6.006 4 7-.08.703-1.725 1.722-3.656 1-1.261-.472-1.855-1.45-2.239-2.5"/>"#,
+        doc: "`dog`, from Lucide.",
+    };
+
+    /// `dollar-sign`, from Lucide.
+    pub const DOLLAR_SIGN: Self = Self {
+        name: "dollar-sign",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>"#,
+        doc: "`dollar-sign`, from Lucide.",
+    };
+
+    /// `donut`, from Lucide.
+    pub const DONUT: Self = Self {
+        name: "donut",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20.5 10a2.5 2.5 0 0 1-2.4-3H18a2.95 2.95 0 0 1-2.6-4.4 10 10 0 1 0 6.3 7.1c-.3.2-.8.3-1.2.3"/><circle cx="12" cy="12" r="3"/>"#,
+        doc: "`donut`, from Lucide.",
+    };
+
+    /// `door-closed`, from Lucide.
+    pub const DOOR_CLOSED: Self = Self {
+        name: "door-closed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 12h.01"/><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"/><path d="M2 20h20"/>"#,
+        doc: "`door-closed`, from Lucide.",
+    };
+
+    /// `door-closed-locked`, from Lucide.
+    pub const DOOR_CLOSED_LOCKED: Self = Self {
+        name: "door-closed-locked",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 12h.01"/><path d="M18 9V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"/><path d="M2 20h8"/><path d="M20 17v-2a2 2 0 1 0-4 0v2"/><rect x="14" y="17" width="8" height="5" rx="1"/>"#,
+        doc: "`door-closed-locked`, from Lucide.",
+    };
+
+    /// `door-open`, from Lucide.
+    pub const DOOR_OPEN: Self = Self {
+        name: "door-open",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 20H2"/><path d="M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z"/><path d="M11 4H8a2 2 0 0 0-2 2v14"/><path d="M14 12h.01"/><path d="M22 20h-3"/>"#,
+        doc: "`door-open`, from Lucide.",
+    };
+
+    /// `dot`, from Lucide.
+    pub const DOT: Self = Self {
+        name: "dot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="1"/>"#,
+        doc: "`dot`, from Lucide.",
+    };
+
+    /// Opens the menu that takes a table away as a file.
+    pub const DOWNLOAD: Self = Self {
+        name: "download",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>"#,
+        doc: "Opens the menu that takes a table away as a file.",
+    };
+
+    /// `drafting-compass`, from Lucide.
+    pub const DRAFTING_COMPASS: Self = Self {
+        name: "drafting-compass",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12.99 6.74 1.93 3.44"/><path d="M19.136 12a10 10 0 0 1-14.271 0"/><path d="m21 21-2.16-3.84"/><path d="m3 21 8.02-14.26"/><circle cx="12" cy="5" r="2"/>"#,
+        doc: "`drafting-compass`, from Lucide.",
+    };
+
+    /// `drama`, from Lucide.
+    pub const DRAMA: Self = Self {
+        name: "drama",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 11h.01"/><path d="M14 6h.01"/><path d="M18 6h.01"/><path d="M6.5 13.1h.01"/><path d="M22 5c0 9-4 12-6 12s-6-3-6-12c0-2 2-3 6-3s6 1 6 3"/><path d="M17.4 9.9c-.8.8-2 .8-2.8 0"/><path d="M10.1 7.1C9 7.2 7.7 7.7 6 8.6c-3.5 2-4.7 3.9-3.7 5.6 4.5 7.8 9.5 8.4 11.2 7.4.9-.5 1.9-2.1 1.9-4.7"/><path d="M9.1 16.5c.3-1.1 1.4-1.7 2.4-1.4"/>"#,
+        doc: "`drama`, from Lucide.",
+    };
+
+    /// `drill`, from Lucide.
+    pub const DRILL: Self = Self {
+        name: "drill",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 18a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a3 3 0 0 1-3-3 1 1 0 0 1 1-1z"/><path d="M13 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1l-.81 3.242a1 1 0 0 1-.97.758H8"/><path d="M14 4h3a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-3"/><path d="M18 6h4"/><path d="m5 10-2 8"/><path d="m7 18 2-8"/>"#,
+        doc: "`drill`, from Lucide.",
+    };
+
+    /// `drone`, from Lucide.
+    pub const DRONE: Self = Self {
+        name: "drone",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 10 7 7"/><path d="m10 14-3 3"/><path d="m14 10 3-3"/><path d="m14 14 3 3"/><path d="M14.205 4.139a4 4 0 1 1 5.439 5.863"/><path d="M19.637 14a4 4 0 1 1-5.432 5.868"/><path d="M4.367 10a4 4 0 1 1 5.438-5.862"/><path d="M9.795 19.862a4 4 0 1 1-5.429-5.873"/><rect x="10" y="8" width="4" height="8" rx="1"/>"#,
+        doc: "`drone`, from Lucide.",
+    };
+
+    /// `droplet`, from Lucide.
+    pub const DROPLET: Self = Self {
+        name: "droplet",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>"#,
+        doc: "`droplet`, from Lucide.",
+    };
+
+    /// `droplet-off`, from Lucide.
+    pub const DROPLET_OFF: Self = Self {
+        name: "droplet-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18.715 13.186C18.29 11.858 17.384 10.607 16 9.5c-2-1.6-3.5-4-4-6.5a10.7 10.7 0 0 1-.884 2.586"/><path d="m2 2 20 20"/><path d="M8.795 8.797A11 11 0 0 1 8 9.5C6 11.1 5 13 5 15a7 7 0 0 0 13.222 3.208"/>"#,
+        doc: "`droplet-off`, from Lucide.",
+    };
+
+    /// `droplets`, from Lucide.
+    pub const DROPLETS: Self = Self {
+        name: "droplets",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/>"#,
+        doc: "`droplets`, from Lucide.",
+    };
+
+    /// `drum`, from Lucide.
+    pub const DRUM: Self = Self {
+        name: "drum",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m2 2 8 8"/><path d="m22 2-8 8"/><ellipse cx="12" cy="9" rx="10" ry="5"/><path d="M7 13.4v7.9"/><path d="M12 14v8"/><path d="M17 13.4v7.9"/><path d="M2 9v8a10 5 0 0 0 20 0V9"/>"#,
+        doc: "`drum`, from Lucide.",
+    };
+
+    /// `drumstick`, from Lucide.
+    pub const DRUMSTICK: Self = Self {
+        name: "drumstick",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/><path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/>"#,
+        doc: "`drumstick`, from Lucide.",
+    };
+
+    /// `dumbbell`, from Lucide.
+    pub const DUMBBELL: Self = Self {
+        name: "dumbbell",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/><path d="m2.5 21.5 1.4-1.4"/><path d="m20.1 3.9 1.4-1.4"/><path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/><path d="m9.6 14.4 4.8-4.8"/>"#,
+        doc: "`dumbbell`, from Lucide.",
+    };
+
+    /// `ear`, from Lucide.
+    pub const EAR: Self = Self {
+        name: "ear",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"/><path d="M15 8.5a2.5 2.5 0 0 0-5 0v1a2 2 0 1 1 0 4"/>"#,
+        doc: "`ear`, from Lucide.",
+    };
+
+    /// `ear-off`, from Lucide.
+    pub const EAR_OFF: Self = Self {
+        name: "ear-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 18.5a3.5 3.5 0 1 0 7 0c0-1.57.92-2.52 2.04-3.46"/><path d="M6 8.5c0-.75.13-1.47.36-2.14"/><path d="M8.8 3.15A6.5 6.5 0 0 1 19 8.5c0 1.63-.44 2.81-1.09 3.76"/><path d="M12.5 6A2.5 2.5 0 0 1 15 8.5M10 13a2 2 0 0 0 1.82-1.18"/><line x1="2" x2="22" y1="2" y2="22"/>"#,
+        doc: "`ear-off`, from Lucide.",
+    };
+
+    /// `earth`, from Lucide.
+    pub const EARTH: Self = Self {
+        name: "earth",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"/><path d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17"/><path d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"/><circle cx="12" cy="12" r="10"/>"#,
+        doc: "`earth`, from Lucide.",
+    };
+
+    /// `earth-lock`, from Lucide.
+    pub const EARTH_LOCK: Self = Self {
+        name: "earth-lock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 3.34V5a3 3 0 0 0 3 3"/><path d="M11 21.95V18a2 2 0 0 0-2-2 2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"/><path d="M21.54 15H17a2 2 0 0 0-2 2v4.54"/><path d="M12 2a10 10 0 1 0 9.54 13"/><path d="M20 6V4a2 2 0 1 0-4 0v2"/><rect width="8" height="5" x="14" y="6" rx="1"/>"#,
+        doc: "`earth-lock`, from Lucide.",
+    };
+
+    /// `eclipse`, from Lucide.
+    pub const ECLIPSE: Self = Self {
+        name: "eclipse",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 1 0 10 10"/>"#,
+        doc: "`eclipse`, from Lucide.",
+    };
+
+    /// `egg`, from Lucide.
+    pub const EGG: Self = Self {
+        name: "egg",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2C8 2 4 8 4 14a8 8 0 0 0 16 0c0-6-4-12-8-12"/>"#,
+        doc: "`egg`, from Lucide.",
+    };
+
+    /// `egg-fried`, from Lucide.
+    pub const EGG_FRIED: Self = Self {
+        name: "egg-fried",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="11.5" cy="12.5" r="3.5"/><path d="M3 8c0-3.5 2.5-6 6.5-6 5 0 4.83 3 7.5 5s5 2 5 6c0 4.5-2.5 6.5-7 6.5-2.5 0-2.5 2.5-6 2.5s-7-2-7-5.5c0-3 1.5-3 1.5-5C3.5 10 3 9 3 8Z"/>"#,
+        doc: "`egg-fried`, from Lucide.",
+    };
+
+    /// `egg-off`, from Lucide.
+    pub const EGG_OFF: Self = Self {
+        name: "egg-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m2 2 20 20"/><path d="M20 14.347V14c0-6-4-12-8-12-1.078 0-2.157.436-3.157 1.19"/><path d="M6.206 6.21C4.871 8.4 4 11.2 4 14a8 8 0 0 0 14.568 4.568"/>"#,
+        doc: "`egg-off`, from Lucide.",
+    };
+
+    /// `eject`, from Lucide.
+    pub const EJECT: Self = Self {
+        name: "eject",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 13a1 1 0 0 1-.72-1.695l7.257-7.668a2 2 0 0 1 2.926 0l7.256 7.668A1 1 0 0 1 20 13z"/><rect x="3" y="17" width="18" height="4" rx="1"/>"#,
+        doc: "`eject`, from Lucide.",
+    };
+
+    /// `ellipse`, from Lucide.
+    pub const ELLIPSE: Self = Self {
+        name: "ellipse",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<ellipse cx="12" cy="12" rx="10" ry="6"/>"#,
+        doc: "`ellipse`, from Lucide.",
+    };
+
+    /// `ellipsis`, from Lucide.
+    pub const ELLIPSIS: Self = Self {
+        name: "ellipsis",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>"#,
+        doc: "`ellipsis`, from Lucide.",
+    };
+
+    /// `ellipsis-vertical`, from Lucide.
+    pub const ELLIPSIS_VERTICAL: Self = Self {
+        name: "ellipsis-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>"#,
+        doc: "`ellipsis-vertical`, from Lucide.",
+    };
+
+    /// `equal`, from Lucide.
+    pub const EQUAL: Self = Self {
+        name: "equal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="5" x2="19" y1="9" y2="9"/><line x1="5" x2="19" y1="15" y2="15"/>"#,
+        doc: "`equal`, from Lucide.",
+    };
+
+    /// `equal-approximately`, from Lucide.
+    pub const EQUAL_APPROXIMATELY: Self = Self {
+        name: "equal-approximately",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 15a6.5 6.5 0 0 1 7 0 6.5 6.5 0 0 0 7 0"/><path d="M5 9a6.5 6.5 0 0 1 7 0 6.5 6.5 0 0 0 7 0"/>"#,
+        doc: "`equal-approximately`, from Lucide.",
+    };
+
+    /// `equal-not`, from Lucide.
+    pub const EQUAL_NOT: Self = Self {
+        name: "equal-not",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="5" x2="19" y1="9" y2="9"/><line x1="5" x2="19" y1="15" y2="15"/><line x1="19" x2="5" y1="5" y2="19"/>"#,
+        doc: "`equal-not`, from Lucide.",
+    };
+
+    /// `eraser`, from Lucide.
+    pub const ERASER: Self = Self {
+        name: "eraser",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21"/><path d="m5.082 11.09 8.828 8.828"/>"#,
+        doc: "`eraser`, from Lucide.",
+    };
+
+    /// `ethernet-port`, from Lucide.
+    pub const ETHERNET_PORT: Self = Self {
+        name: "ethernet-port",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 8v1"/><path d="M14 8v1"/><path d="M18 8v1"/><path d="M19 17a2 2 0 00-1.765 1.059l-.47.882A2 2 0 0115 20H9a2 2 0 01-1.765-1.059l-.47-.882A2 2 0 005 17H4a2 2 0 01-2-2V6a2 2 0 012-2h16a2 2 0 012 2v9a2 2 0 01-2 2z"/><path d="M6 8v1"/>"#,
+        doc: "`ethernet-port`, from Lucide.",
+    };
+
+    /// `euro`, from Lucide.
+    pub const EURO: Self = Self {
+        name: "euro",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/>"#,
+        doc: "`euro`, from Lucide.",
+    };
+
+    /// `ev-charger`, from Lucide.
+    pub const EV_CHARGER: Self = Self {
+        name: "ev-charger",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/><path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"/><path d="M2 21h13"/><path d="M3 7h11"/><path d="m9 11-2 3h3l-2 3"/>"#,
+        doc: "`ev-charger`, from Lucide.",
+    };
+
+    /// `expand`, from Lucide.
+    pub const EXPAND: Self = Self {
+        name: "expand",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 15 6 6"/><path d="m15 9 6-6"/><path d="M21 16v5h-5"/><path d="M21 8V3h-5"/><path d="M3 16v5h5"/><path d="m3 21 6-6"/><path d="M3 8V3h5"/><path d="M9 9 3 3"/>"#,
+        doc: "`expand`, from Lucide.",
+    };
+
+    /// Marks a link that leaves the site. Replaces a bare `↗` character, which is text pretending to be an icon.
+    pub const EXTERNAL_LINK: Self = Self {
+        name: "external-link",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>"#,
+        doc: "Marks a link that leaves the site. Replaces a bare `↗` character, which is text pretending to be an icon.",
+    };
+
+    /// Shows a password, on a `Input { kind = "password" }`. A reader who cannot see what they typed cannot correct it, and the alternative they reach for is a shorter password.
+    pub const EYE: Self = Self {
+        name: "eye",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>"#,
+        doc: "Shows a password, on a `Input { kind = \"password\" }`. A reader who cannot see what they typed cannot correct it, and the alternative they reach for is a shorter password.",
+    };
+
+    /// `eye-closed`, from Lucide.
+    pub const EYE_CLOSED: Self = Self {
+        name: "eye-closed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 18-.722-3.25"/><path d="M2 8a10.645 10.645 0 0 0 20 0"/><path d="m20 15-1.726-2.05"/><path d="m4 15 1.726-2.05"/><path d="m9 18 .722-3.25"/>"#,
+        doc: "`eye-closed`, from Lucide.",
+    };
+
+    /// `eye-dashed`, from Lucide.
+    pub const EYE_DASHED: Self = Self {
+        name: "eye-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.054 18.946a11 11 0 0 1-2.11 0"/><path d="M13.054 5.054a11 11 0 0 0-2.11-.001"/><path d="M17.072 6.274a11 11 0 0 1 1.753 1.173"/><path d="M18.825 16.552a11 11 0 0 1-1.753 1.174"/><path d="M2.514 13.303a11 11 0 0 1-.452-.954 1 1 0 0 1 0-.697 11 11 0 0 1 .45-.955"/><path d="M21.485 10.697a11 11 0 0 1 .453.955 1 1 0 0 1 0 .697 11 11 0 0 1-.453.954"/><path d="M5.173 7.448a11 11 0 0 1 1.753-1.174"/><path d="M6.926 17.726a11 11 0 0 1-1.753-1.174"/><circle cx="12" cy="12" r="3"/>"#,
+        doc: "`eye-dashed`, from Lucide.",
+    };
+
+    /// The other half of that toggle, on a password. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script.
+    pub const EYE_OFF: Self = Self {
+        name: "eye-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/>"#,
+        doc: "The other half of that toggle, on a password. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script.",
+    };
+
+    /// `face-angry`, from Lucide.
+    pub const FACE_ANGRY: Self = Self {
+        name: "face-angry",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 11V9.416"/><path d="M17 9a5 5 0 00-3 1"/><path d="M7 9a5 5 0 013 1"/><path d="M9 11V9.416"/><path d="M9 16a5 5 0 016.001 0"/><circle cx="12" cy="12" r="10"/>"#,
+        doc: "`face-angry`, from Lucide.",
+    };
+
+    /// `face-expressionless`, from Lucide.
+    pub const FACE_EXPRESSIONLESS: Self = Self {
+        name: "face-expressionless",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 10h2"/><path d="M8 10h2"/><path d="M8 16h8"/><circle cx="12" cy="12" r="10"/>"#,
+        doc: "`face-expressionless`, from Lucide.",
+    };
+
+    /// `face-grinning`, from Lucide.
+    pub const FACE_GRINNING: Self = Self {
+        name: "face-grinning",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 10V9"/><path d="M7.084 14.302a5.12 5.12 0 009.833 0 .24.24 0 00-.235-.302H7.32a.24.24 0 00-.235.302"/><path d="M9 10V9"/><circle cx="12" cy="12" r="10"/>"#,
+        doc: "`face-grinning`, from Lucide.",
+    };
+
+    /// `face-neutral`, from Lucide.
+    pub const FACE_NEUTRAL: Self = Self {
+        name: "face-neutral",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 10V9"/><path d="M8 16h8"/><path d="M9 10V9"/><circle cx="12" cy="12" r="10"/>"#,
+        doc: "`face-neutral`, from Lucide.",
+    };
+
+    /// `face-slightly-frowning`, from Lucide.
+    pub const FACE_SLIGHTLY_FROWNING: Self = Self {
+        name: "face-slightly-frowning",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 10V9"/><path d="M9 10V9"/><path d="M9 16a5 5 0 016 0"/><circle cx="12" cy="12" r="10"/>"#,
+        doc: "`face-slightly-frowning`, from Lucide.",
+    };
+
+    /// `face-slightly-smiling`, from Lucide.
+    pub const FACE_SLIGHTLY_SMILING: Self = Self {
+        name: "face-slightly-smiling",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 10V9"/><path d="M16.472 15a6 6 0 01-8.943 0"/><path d="M9 10V9"/><circle cx="12" cy="12" r="10"/>"#,
+        doc: "`face-slightly-smiling`, from Lucide.",
+    };
+
+    /// `face-slightly-smiling-plus`, from Lucide.
+    pub const FACE_SLIGHTLY_SMILING_PLUS: Self = Self {
+        name: "face-slightly-smiling-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.267 2.08a10 10 0 108.653 8.653"/><path d="M15 10V9"/><path d="M16 5h6"/><path d="M16.472 15a6 6 0 01-8.943 0"/><path d="M19 2v6"/><path d="M9 10V9"/>"#,
+        doc: "`face-slightly-smiling-plus`, from Lucide.",
+    };
+
+    /// `factory`, from Lucide.
+    pub const FACTORY: Self = Self {
+        name: "factory",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 16h.01"/><path d="M16 16h.01"/><path d="M3 19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5a.5.5 0 0 0-.769-.422l-4.462 2.844A.5.5 0 0 1 15 10.5v-2a.5.5 0 0 0-.769-.422L9.77 10.922A.5.5 0 0 1 9 10.5V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><path d="M8 16h.01"/>"#,
+        doc: "`factory`, from Lucide.",
+    };
+
+    /// `fan`, from Lucide.
+    pub const FAN: Self = Self {
+        name: "fan",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.827 16.379a6.082 6.082 0 0 1-8.618-7.002l5.412 1.45a6.082 6.082 0 0 1 7.002-8.618l-1.45 5.412a6.082 6.082 0 0 1 8.618 7.002l-5.412-1.45a6.082 6.082 0 0 1-7.002 8.618l1.45-5.412Z"/><path d="M12 12v.01"/>"#,
+        doc: "`fan`, from Lucide.",
+    };
+
+    /// `fast-forward`, from Lucide.
+    pub const FAST_FORWARD: Self = Self {
+        name: "fast-forward",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6a2 2 0 0 1 3.414-1.414l6 6a2 2 0 0 1 0 2.828l-6 6A2 2 0 0 1 12 18z"/><path d="M2 6a2 2 0 0 1 3.414-1.414l6 6a2 2 0 0 1 0 2.828l-6 6A2 2 0 0 1 2 18z"/>"#,
+        doc: "`fast-forward`, from Lucide.",
+    };
+
+    /// `feather`, from Lucide.
+    pub const FEATHER: Self = Self {
+        name: "feather",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14.086 18.412A2 2 0 0112.67 19H5v-7.672a2 2 0 01.586-1.414L11.75 3.75a6 6 0 118.49 8.49z"/><path d="M16 8 2 22"/><path d="M17.488 15H9"/>"#,
+        doc: "`feather`, from Lucide.",
+    };
+
+    /// `fence`, from Lucide.
+    pub const FENCE: Self = Self {
+        name: "fence",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 3 2 5v15c0 .6.4 1 1 1h2c.6 0 1-.4 1-1V5Z"/><path d="M6 8h4"/><path d="M6 18h4"/><path d="m12 3-2 2v15c0 .6.4 1 1 1h2c.6 0 1-.4 1-1V5Z"/><path d="M14 8h4"/><path d="M14 18h4"/><path d="m20 3-2 2v15c0 .6.4 1 1 1h2c.6 0 1-.4 1-1V5Z"/>"#,
+        doc: "`fence`, from Lucide.",
+    };
+
+    /// `ferris-wheel`, from Lucide.
+    pub const FERRIS_WHEEL: Self = Self {
+        name: "ferris-wheel",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="2"/><path d="M12 2v4"/><path d="m6.8 15-3.5 2"/><path d="m20.7 7-3.5 2"/><path d="M6.8 9 3.3 7"/><path d="m20.7 17-3.5-2"/><path d="m9 22 3-8 3 8"/><path d="M8 22h8"/><path d="M18 18.7a9 9 0 1 0-12 0"/>"#,
+        doc: "`ferris-wheel`, from Lucide.",
+    };
+
+    /// `file`, from Lucide.
+    pub const FILE: Self = Self {
+        name: "file",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/>"#,
+        doc: "`file`, from Lucide.",
+    };
+
+    /// `file-archive`, from Lucide.
+    pub const FILE_ARCHIVE: Self = Self {
+        name: "file-archive",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.659 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v11.5"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M8 12v-1"/><path d="M8 18v-2"/><path d="M8 7V6"/><circle cx="8" cy="20" r="2"/>"#,
+        doc: "`file-archive`, from Lucide.",
+    };
+
+    /// `file-axis-3d`, from Lucide.
+    pub const FILE_AXIS_3D: Self = Self {
+        name: "file-axis-3d",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m8 18 4-4"/><path d="M8 10v8h8"/>"#,
+        doc: "`file-axis-3d`, from Lucide.",
+    };
+
+    /// `file-badge`, from Lucide.
+    pub const FILE_BADGE: Self = Self {
+        name: "file-badge",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 22h5a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v3.3"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m7.69 16.479 1.29 4.88a.5.5 0 0 1-.698.591l-1.843-.849a1 1 0 0 0-.879.001l-1.846.85a.5.5 0 0 1-.692-.593l1.29-4.88"/><circle cx="6" cy="14" r="3"/>"#,
+        doc: "`file-badge`, from Lucide.",
+    };
+
+    /// `file-box`, from Lucide.
+    pub const FILE_BOX: Self = Self {
+        name: "file-box",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 2v5a1 1 0 001 1h5"/><path d="M14.692 22H18a2 2 0 002-2V8a2.4 2.4 0 00-.706-1.706l-3.588-3.588A2.4 2.4 0 0014 2H6a2 2 0 00-2 2v3.804"/><path d="M2.264 13.752 7 16.5l4.737-2.748"/><path d="M2.995 13.014A2 2 0 002 14.744v3.516a2 2 0 00.996 1.73l3 1.74a2 2 0 002.008 0l3-1.74A2 2 0 0012 18.26v-3.517a2 2 0 00-.995-1.73l-3-1.742a2 2 0 00-1.892-.064z"/><path d="M7 16.5V22"/>"#,
+        doc: "`file-box`, from Lucide.",
+    };
+
+    /// `file-braces`, from Lucide.
+    pub const FILE_BRACES: Self = Self {
+        name: "file-braces",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1"/><path d="M14 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"/>"#,
+        doc: "`file-braces`, from Lucide.",
+    };
+
+    /// `file-braces-corner`, from Lucide.
+    pub const FILE_BRACES_CORNER: Self = Self {
+        name: "file-braces-corner",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 22h4a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v6"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M5 14a1 1 0 0 0-1 1v2a1 1 0 0 1-1 1 1 1 0 0 1 1 1v2a1 1 0 0 0 1 1"/><path d="M9 22a1 1 0 0 0 1-1v-2a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-2a1 1 0 0 0-1-1"/>"#,
+        doc: "`file-braces-corner`, from Lucide.",
+    };
+
+    /// `file-chart-column`, from Lucide.
+    pub const FILE_CHART_COLUMN: Self = Self {
+        name: "file-chart-column",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M8 18v-1"/><path d="M12 18v-6"/><path d="M16 18v-3"/>"#,
+        doc: "`file-chart-column`, from Lucide.",
+    };
+
+    /// `file-chart-column-increasing`, from Lucide.
+    pub const FILE_CHART_COLUMN_INCREASING: Self = Self {
+        name: "file-chart-column-increasing",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M8 18v-2"/><path d="M12 18v-4"/><path d="M16 18v-6"/>"#,
+        doc: "`file-chart-column-increasing`, from Lucide.",
+    };
+
+    /// `file-chart-line`, from Lucide.
+    pub const FILE_CHART_LINE: Self = Self {
+        name: "file-chart-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m16 13-3.5 3.5-2-2L8 17"/>"#,
+        doc: "`file-chart-line`, from Lucide.",
+    };
+
+    /// `file-chart-pie`, from Lucide.
+    pub const FILE_CHART_PIE: Self = Self {
+        name: "file-chart-pie",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.941 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.704l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v3.512"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M4.017 11.512a6 6 0 1 0 8.466 8.475"/><path d="M9 16a1 1 0 0 1-1-1v-4c0-.552.45-1.008.995-.917a6 6 0 0 1 4.922 4.922c.091.544-.365.995-.917.995z"/>"#,
+        doc: "`file-chart-pie`, from Lucide.",
+    };
+
+    /// `file-check`, from Lucide.
+    pub const FILE_CHECK: Self = Self {
+        name: "file-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m9 15 2 2 4-4"/>"#,
+        doc: "`file-check`, from Lucide.",
+    };
+
+    /// `file-check-corner`, from Lucide.
+    pub const FILE_CHECK_CORNER: Self = Self {
+        name: "file-check-corner",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.5 22H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v6"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m14 20 2 2 4-4"/>"#,
+        doc: "`file-check-corner`, from Lucide.",
+    };
+
+    /// `file-clock`, from Lucide.
+    pub const FILE_CLOCK: Self = Self {
+        name: "file-clock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 22h2a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v2.85"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M8 14v2.2l1.6 1"/><circle cx="8" cy="16" r="6"/>"#,
+        doc: "`file-clock`, from Lucide.",
+    };
+
+    /// `file-code`, from Lucide.
+    pub const FILE_CODE: Self = Self {
+        name: "file-code",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/>"#,
+        doc: "`file-code`, from Lucide.",
+    };
+
+    /// `file-code-corner`, from Lucide.
+    pub const FILE_CODE_CORNER: Self = Self {
+        name: "file-code-corner",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 12.15V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3.35"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m5 16-3 3 3 3"/><path d="m9 22 3-3-3-3"/>"#,
+        doc: "`file-code-corner`, from Lucide.",
+    };
+
+    /// `file-cog`, from Lucide.
+    pub const FILE_COG: Self = Self {
+        name: "file-cog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 8a1 1 0 0 1-1-1V2a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8z"/><path d="M20 8v12a2 2 0 0 1-2 2h-4.182"/><path d="m3.305 19.53.923-.382"/><path d="M4 10.592V4a2 2 0 0 1 2-2h8"/><path d="m4.228 16.852-.924-.383"/><path d="m5.852 15.228-.383-.923"/><path d="m5.852 20.772-.383.924"/><path d="m8.148 15.228.383-.923"/><path d="m8.53 21.696-.382-.924"/><path d="m9.773 16.852.922-.383"/><path d="m9.773 19.148.922.383"/><circle cx="7" cy="18" r="3"/>"#,
+        doc: "`file-cog`, from Lucide.",
+    };
+
+    /// `file-diff`, from Lucide.
+    pub const FILE_DIFF: Self = Self {
+        name: "file-diff",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M9 10h6"/><path d="M12 13V7"/><path d="M9 17h6"/>"#,
+        doc: "`file-diff`, from Lucide.",
+    };
+
+    /// `file-digit`, from Lucide.
+    pub const FILE_DIGIT: Self = Self {
+        name: "file-digit",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 12V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 16h2v6"/><path d="M10 22h4"/><rect x="2" y="16" width="4" height="6" rx="2"/>"#,
+        doc: "`file-digit`, from Lucide.",
+    };
+
+    /// `file-down`, from Lucide.
+    pub const FILE_DOWN: Self = Self {
+        name: "file-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/>"#,
+        doc: "`file-down`, from Lucide.",
+    };
+
+    /// `file-exclamation-point`, from Lucide.
+    pub const FILE_EXCLAMATION_POINT: Self = Self {
+        name: "file-exclamation-point",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M12 9v4"/><path d="M12 17h.01"/>"#,
+        doc: "`file-exclamation-point`, from Lucide.",
+    };
+
+    /// `file-headphone`, from Lucide.
+    pub const FILE_HEADPHONE: Self = Self {
+        name: "file-headphone",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 6.835V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-.343"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M2 19a2 2 0 0 1 4 0v1a2 2 0 0 1-4 0v-4a6 6 0 0 1 12 0v4a2 2 0 0 1-4 0v-1a2 2 0 0 1 4 0"/>"#,
+        doc: "`file-headphone`, from Lucide.",
+    };
+
+    /// `file-heart`, from Lucide.
+    pub const FILE_HEART: Self = Self {
+        name: "file-heart",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 22h5a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v7"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M3.62 18.8A2.25 2.25 0 1 1 7 15.836a2.25 2.25 0 1 1 3.38 2.966l-2.626 2.856a1 1 0 0 1-1.507 0z"/>"#,
+        doc: "`file-heart`, from Lucide.",
+    };
+
+    /// `file-image`, from Lucide.
+    pub const FILE_IMAGE: Self = Self {
+        name: "file-image",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><circle cx="10" cy="12" r="2"/><path d="m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22"/>"#,
+        doc: "`file-image`, from Lucide.",
+    };
+
+    /// `file-input`, from Lucide.
+    pub const FILE_INPUT: Self = Self {
+        name: "file-input",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 11V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M2 15h10"/><path d="m9 18 3-3-3-3"/>"#,
+        doc: "`file-input`, from Lucide.",
+    };
+
+    /// `file-key`, from Lucide.
+    pub const FILE_KEY: Self = Self {
+        name: "file-key",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M4 12v6"/><path d="M4 14h2"/><path d="M9.65 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v4"/><circle cx="4" cy="20" r="2"/>"#,
+        doc: "`file-key`, from Lucide.",
+    };
+
+    /// `file-lock`, from Lucide.
+    pub const FILE_LOCK: Self = Self {
+        name: "file-lock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 9.8V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M9 17v-2a2 2 0 0 0-4 0v2"/><rect width="8" height="5" x="3" y="17" rx="1"/>"#,
+        doc: "`file-lock`, from Lucide.",
+    };
+
+    /// `file-minus`, from Lucide.
+    pub const FILE_MINUS: Self = Self {
+        name: "file-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M9 15h6"/>"#,
+        doc: "`file-minus`, from Lucide.",
+    };
+
+    /// `file-minus-corner`, from Lucide.
+    pub const FILE_MINUS_CORNER: Self = Self {
+        name: "file-minus-corner",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 14V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M14 18h6"/>"#,
+        doc: "`file-minus-corner`, from Lucide.",
+    };
+
+    /// `file-music`, from Lucide.
+    pub const FILE_MUSIC: Self = Self {
+        name: "file-music",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.65 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v10.35"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M8 20v-7l3 1.474"/><circle cx="6" cy="20" r="2"/>"#,
+        doc: "`file-music`, from Lucide.",
+    };
+
+    /// `file-output`, from Lucide.
+    pub const FILE_OUTPUT: Self = Self {
+        name: "file-output",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4.226 20.925A2 2 0 0 0 6 22h12a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v3.127"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m5 11-3 3"/><path d="m5 17-3-3h10"/>"#,
+        doc: "`file-output`, from Lucide.",
+    };
+
+    /// `file-pen`, from Lucide.
+    pub const FILE_PEN: Self = Self {
+        name: "file-pen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.659 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v9.34"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10.378 12.622a1 1 0 0 1 3 3.003L8.36 20.637a2 2 0 0 1-.854.506l-2.867.837a.5.5 0 0 1-.62-.62l.836-2.869a2 2 0 0 1 .506-.853z"/>"#,
+        doc: "`file-pen`, from Lucide.",
+    };
+
+    /// `file-pen-line`, from Lucide.
+    pub const FILE_PEN_LINE: Self = Self {
+        name: "file-pen-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14.364 13.634a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506l4.013-4.009a1 1 0 0 0-3.004-3.004z"/><path d="M14.487 7.858A1 1 0 0 1 14 7V2"/><path d="M20 19.645V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l2.516 2.516"/><path d="M8 18h1"/>"#,
+        doc: "`file-pen-line`, from Lucide.",
+    };
+
+    /// `file-play`, from Lucide.
+    pub const FILE_PLAY: Self = Self {
+        name: "file-play",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M15.033 13.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56v-4.704a.645.645 0 0 1 .967-.56z"/>"#,
+        doc: "`file-play`, from Lucide.",
+    };
+
+    /// `file-plus`, from Lucide.
+    pub const FILE_PLUS: Self = Self {
+        name: "file-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M9 15h6"/><path d="M12 18v-6"/>"#,
+        doc: "`file-plus`, from Lucide.",
+    };
+
+    /// `file-plus-corner`, from Lucide.
+    pub const FILE_PLUS_CORNER: Self = Self {
+        name: "file-plus-corner",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.35 22H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v5.35"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M14 19h6"/><path d="M17 16v6"/>"#,
+        doc: "`file-plus-corner`, from Lucide.",
+    };
+
+    /// `file-question-mark`, from Lucide.
+    pub const FILE_QUESTION_MARK: Self = Self {
+        name: "file-question-mark",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M12 17h.01"/><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"/>"#,
+        doc: "`file-question-mark`, from Lucide.",
+    };
+
+    /// `file-scan`, from Lucide.
+    pub const FILE_SCAN: Self = Self {
+        name: "file-scan",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 10V8a2.4 2.4 0 0 0-.706-1.704l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.35"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M16 14a2 2 0 0 0-2 2"/><path d="M16 22a2 2 0 0 1-2-2"/><path d="M20 14a2 2 0 0 1 2 2"/><path d="M20 22a2 2 0 0 0 2-2"/>"#,
+        doc: "`file-scan`, from Lucide.",
+    };
+
+    /// `file-search`, from Lucide.
+    pub const FILE_SEARCH: Self = Self {
+        name: "file-search",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><circle cx="11.5" cy="14.5" r="2.5"/><path d="M13.3 16.3 15 18"/>"#,
+        doc: "`file-search`, from Lucide.",
+    };
+
+    /// `file-search-corner`, from Lucide.
+    pub const FILE_SEARCH_CORNER: Self = Self {
+        name: "file-search-corner",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.1 22H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.589 3.588A2.4 2.4 0 0 1 20 8v3.25"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m21 22-2.88-2.88"/><circle cx="16" cy="17" r="3"/>"#,
+        doc: "`file-search-corner`, from Lucide.",
+    };
+
+    /// `file-signal`, from Lucide.
+    pub const FILE_SIGNAL: Self = Self {
+        name: "file-signal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M8 15h.01"/><path d="M11.5 13.5a2.5 2.5 0 0 1 0 3"/><path d="M15 12a5 5 0 0 1 0 6"/>"#,
+        doc: "`file-signal`, from Lucide.",
+    };
+
+    /// `file-sliders`, from Lucide.
+    pub const FILE_SLIDERS: Self = Self {
+        name: "file-sliders",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M8 12h8"/><path d="M10 11v2"/><path d="M8 17h8"/><path d="M14 16v2"/>"#,
+        doc: "`file-sliders`, from Lucide.",
+    };
+
+    /// `file-spreadsheet`, from Lucide.
+    pub const FILE_SPREADSHEET: Self = Self {
+        name: "file-spreadsheet",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/>"#,
+        doc: "`file-spreadsheet`, from Lucide.",
+    };
+
+    /// `file-stack`, from Lucide.
+    pub const FILE_STACK: Self = Self {
+        name: "file-stack",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1"/><path d="M16 16a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1"/><path d="M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z"/>"#,
+        doc: "`file-stack`, from Lucide.",
+    };
+
+    /// `file-symlink`, from Lucide.
+    pub const FILE_SYMLINK: Self = Self {
+        name: "file-symlink",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 11V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h7"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m10 18 3-3-3-3"/>"#,
+        doc: "`file-symlink`, from Lucide.",
+    };
+
+    /// `file-terminal`, from Lucide.
+    pub const FILE_TERMINAL: Self = Self {
+        name: "file-terminal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m8 16 2-2-2-2"/><path d="M12 18h4"/>"#,
+        doc: "`file-terminal`, from Lucide.",
+    };
+
+    /// `file-text`, from Lucide.
+    pub const FILE_TEXT: Self = Self {
+        name: "file-text",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>"#,
+        doc: "`file-text`, from Lucide.",
+    };
+
+    /// `file-type`, from Lucide.
+    pub const FILE_TYPE: Self = Self {
+        name: "file-type",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M11 18h2"/><path d="M12 12v6"/><path d="M9 13v-.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v.5"/>"#,
+        doc: "`file-type`, from Lucide.",
+    };
+
+    /// `file-type-corner`, from Lucide.
+    pub const FILE_TYPE_CORNER: Self = Self {
+        name: "file-type-corner",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22h6a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v6"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M3 16v-1.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5V16"/><path d="M6 22h2"/><path d="M7 14v8"/>"#,
+        doc: "`file-type-corner`, from Lucide.",
+    };
+
+    /// `file-up`, from Lucide.
+    pub const FILE_UP: Self = Self {
+        name: "file-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/>"#,
+        doc: "`file-up`, from Lucide.",
+    };
+
+    /// `file-user`, from Lucide.
+    pub const FILE_USER: Self = Self {
+        name: "file-user",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M16 22a4 4 0 0 0-8 0"/><circle cx="12" cy="15" r="3"/>"#,
+        doc: "`file-user`, from Lucide.",
+    };
+
+    /// `file-video-camera`, from Lucide.
+    pub const FILE_VIDEO_CAMERA: Self = Self {
+        name: "file-video-camera",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 12V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m10 17.843 3.033-1.755a.64.64 0 0 1 .967.56v4.704a.65.65 0 0 1-.967.56L10 20.157"/><rect width="7" height="6" x="3" y="16" rx="1"/>"#,
+        doc: "`file-video-camera`, from Lucide.",
+    };
+
+    /// `file-volume`, from Lucide.
+    pub const FILE_VOLUME: Self = Self {
+        name: "file-volume",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 11.55V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-1.95"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M12 15a5 5 0 0 1 0 6"/><path d="M8 14.502a.5.5 0 0 0-.826-.381l-1.893 1.631a1 1 0 0 1-.651.243H3.5a.5.5 0 0 0-.5.501v3.006a.5.5 0 0 0 .5.501h1.129a1 1 0 0 1 .652.243l1.893 1.633a.5.5 0 0 0 .826-.38z"/>"#,
+        doc: "`file-volume`, from Lucide.",
+    };
+
+    /// `file-x`, from Lucide.
+    pub const FILE_X: Self = Self {
+        name: "file-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m14.5 12.5-5 5"/><path d="m9.5 12.5 5 5"/>"#,
+        doc: "`file-x`, from Lucide.",
+    };
+
+    /// `file-x-corner`, from Lucide.
+    pub const FILE_X_CORNER: Self = Self {
+        name: "file-x-corner",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 22H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v5"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="m15 17 5 5"/><path d="m20 17-5 5"/>"#,
+        doc: "`file-x-corner`, from Lucide.",
+    };
+
+    /// `files`, from Lucide.
+    pub const FILES: Self = Self {
+        name: "files",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 2h-4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><path d="M16.706 2.706A2.4 2.4 0 0 0 15 2v5a1 1 0 0 0 1 1h5a2.4 2.4 0 0 0-.706-1.706z"/><path d="M5 7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 1.732-1"/>"#,
+        doc: "`files`, from Lucide.",
+    };
+
+    /// `film`, from Lucide.
+    pub const FILM: Self = Self {
+        name: "film",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/>"#,
+        doc: "`film`, from Lucide.",
+    };
+
+    /// `fingerprint-pattern`, from Lucide.
+    pub const FINGERPRINT_PATTERN: Self = Self {
+        name: "fingerprint-pattern",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>"#,
+        doc: "`fingerprint-pattern`, from Lucide.",
+    };
+
+    /// `fire-extinguisher`, from Lucide.
+    pub const FIRE_EXTINGUISHER: Self = Self {
+        name: "fire-extinguisher",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 6.5V3a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v3.5"/><path d="M9 18h8"/><path d="M18 3h-3"/><path d="M11 3a6 6 0 0 0-6 6v11"/><path d="M5 13h4"/><path d="M17 10a4 4 0 0 0-8 0v10a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2Z"/>"#,
+        doc: "`fire-extinguisher`, from Lucide.",
+    };
+
+    /// `fish`, from Lucide.
+    pub const FISH: Self = Self {
+        name: "fish",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.47-3.44 6-7 6s-7.56-2.53-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 5 .23 6.5-1.24 1.5-1.24 5-.23 6.5C5.58 18.03 7 16 7 13.33"/><path d="M10.46 7.26C10.2 5.88 9.17 4.24 8 3h5.8a2 2 0 0 1 1.98 1.67l.23 1.4"/><path d="m16.01 17.93-.23 1.4A2 2 0 0 1 13.8 21H9.5a5.96 5.96 0 0 0 1.49-3.98"/>"#,
+        doc: "`fish`, from Lucide.",
+    };
+
+    /// `fish-off`, from Lucide.
+    pub const FISH_OFF: Self = Self {
+        name: "fish-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 12.47v.03m0-.5v.47m-.475 5.056A6.744 6.744 0 0 1 15 18c-3.56 0-7.56-2.53-8.5-6 .348-1.28 1.114-2.433 2.121-3.38m3.444-2.088A8.802 8.802 0 0 1 15 6c3.56 0 6.06 2.54 7 6-.309 1.14-.786 2.177-1.413 3.058"/><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 5 .23 6.5-1.24 1.5-1.24 5-.23 6.5C5.58 18.03 7 16 7 13.33m7.48-4.372A9.77 9.77 0 0 1 16 6.07m0 11.86a9.77 9.77 0 0 1-1.728-3.618"/><path d="m16.01 17.93-.23 1.4A2 2 0 0 1 13.8 21H9.5a5.96 5.96 0 0 0 1.49-3.98M8.53 3h5.27a2 2 0 0 1 1.98 1.67l.23 1.4M2 2l20 20"/>"#,
+        doc: "`fish-off`, from Lucide.",
+    };
+
+    /// `fish-symbol`, from Lucide.
+    pub const FISH_SYMBOL: Self = Self {
+        name: "fish-symbol",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 16s9-15 20-4C11 23 2 8 2 8"/>"#,
+        doc: "`fish-symbol`, from Lucide.",
+    };
+
+    /// `fishing-hook`, from Lucide.
+    pub const FISHING_HOOK: Self = Self {
+        name: "fishing-hook",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m17.586 11.414-5.93 5.93a1 1 0 0 1-8-8l3.137-3.137a.707.707 0 0 1 1.207.5V10"/><path d="M20.414 8.586 22 7"/><circle cx="19" cy="10" r="2"/>"#,
+        doc: "`fishing-hook`, from Lucide.",
+    };
+
+    /// `fishing-rod`, from Lucide.
+    pub const FISHING_ROD: Self = Self {
+        name: "fishing-rod",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 11h1"/><path d="M8 15a2 2 0 0 1-4 0V3a1 1 0 0 1 1-1h.5C14 2 20 9 20 18v4"/><circle cx="18" cy="18" r="2"/>"#,
+        doc: "`fishing-rod`, from Lucide.",
+    };
+
+    /// `flag`, from Lucide.
+    pub const FLAG: Self = Self {
+        name: "flag",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/>"#,
+        doc: "`flag`, from Lucide.",
+    };
+
+    /// `flag-off`, from Lucide.
+    pub const FLAG_OFF: Self = Self {
+        name: "flag-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/><path d="m2 2 20 20"/><path d="M4 22V4"/><path d="M7.656 2H8c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10.347"/>"#,
+        doc: "`flag-off`, from Lucide.",
+    };
+
+    /// `flag-triangle-left`, from Lucide.
+    pub const FLAG_TRIANGLE_LEFT: Self = Self {
+        name: "flag-triangle-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 22V2.8a.8.8 0 0 0-1.17-.71L5.45 7.78a.8.8 0 0 0 0 1.44L18 15.5"/>"#,
+        doc: "`flag-triangle-left`, from Lucide.",
+    };
+
+    /// `flag-triangle-right`, from Lucide.
+    pub const FLAG_TRIANGLE_RIGHT: Self = Self {
+        name: "flag-triangle-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 22V2.8a.8.8 0 0 1 1.17-.71l11.38 5.69a.8.8 0 0 1 0 1.44L6 15.5"/>"#,
+        doc: "`flag-triangle-right`, from Lucide.",
+    };
+
+    /// `flame`, from Lucide.
+    pub const FLAME: Self = Self {
+        name: "flame",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"/>"#,
+        doc: "`flame`, from Lucide.",
+    };
+
+    /// `flame-kindling`, from Lucide.
+    pub const FLAME_KINDLING: Self = Self {
+        name: "flame-kindling",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2c1 3 2.5 3.5 3.5 4.5A5 5 0 0 1 17 10a5 5 0 1 1-10 0c0-.3 0-.6.1-.9a2 2 0 1 0 3.3-2C8 4.5 11 2 12 2Z"/><path d="m5 22 14-4"/><path d="m5 18 14 4"/>"#,
+        doc: "`flame-kindling`, from Lucide.",
+    };
+
+    /// `flashlight`, from Lucide.
+    pub const FLASHLIGHT: Self = Self {
+        name: "flashlight",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13v1"/><path d="M17 2a1 1 0 0 1 1 1v4a3 3 0 0 1-.6 1.8l-.6.8A4 4 0 0 0 16 12v8a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-8a4 4 0 0 0-.8-2.4l-.6-.8A3 3 0 0 1 6 7V3a1 1 0 0 1 1-1z"/><path d="M6 6h12"/>"#,
+        doc: "`flashlight`, from Lucide.",
+    };
+
+    /// `flashlight-off`, from Lucide.
+    pub const FLASHLIGHT_OFF: Self = Self {
+        name: "flashlight-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.652 6H18"/><path d="M12 13v1"/><path d="M16 16v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-8a4 4 0 0 0-.8-2.4l-.6-.8A3 3 0 0 1 6 7V6"/><path d="m2 2 20 20"/><path d="M7.649 2H17a1 1 0 0 1 1 1v4a3 3 0 0 1-.6 1.8l-.6.8a4 4 0 0 0-.55 1.007"/>"#,
+        doc: "`flashlight-off`, from Lucide.",
+    };
+
+    /// Puts an example frame under a glass test: colour and edges behind it, blank space and a scrollbar, and the material on everything inside. A flask, because what the control is is a test rig — `layers` and `image` were both here first, and both described the backdrop rather than the thing being done with it.
+    pub const FLASK_CONICAL: Self = Self {
+        name: "flask-conical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>"#,
+        doc: "Puts an example frame under a glass test: colour and edges behind it, blank space and a scrollbar, and the material on everything inside. A flask, because what the control is is a test rig — `layers` and `image` were both here first, and both described the backdrop rather than the thing being done with it.",
+    };
+
+    /// `flask-conical-off`, from Lucide.
+    pub const FLASK_CONICAL_OFF: Self = Self {
+        name: "flask-conical-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 2v2.343"/><path d="M14 2v6.343"/><path d="m2 2 20 20"/><path d="M20 20a2 2 0 0 1-2 2H6a2 2 0 0 1-1.755-2.96l5.227-9.563"/><path d="M6.453 15H15"/><path d="M8.5 2h7"/>"#,
+        doc: "`flask-conical-off`, from Lucide.",
+    };
+
+    /// `flask-round`, from Lucide.
+    pub const FLASK_ROUND: Self = Self {
+        name: "flask-round",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 2v6.292a7 7 0 1 0 4 0V2"/><path d="M5 15h14"/><path d="M8.5 2h7"/>"#,
+        doc: "`flask-round`, from Lucide.",
+    };
+
+    /// `flip-horizontal-2`, from Lucide.
+    pub const FLIP_HORIZONTAL_2: Self = Self {
+        name: "flip-horizontal-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3 7 5 5-5 5V7"/><path d="m21 7-5 5 5 5V7"/><path d="M12 20v2"/><path d="M12 14v2"/><path d="M12 8v2"/><path d="M12 2v2"/>"#,
+        doc: "`flip-horizontal-2`, from Lucide.",
+    };
+
+    /// `flip-vertical-2`, from Lucide.
+    pub const FLIP_VERTICAL_2: Self = Self {
+        name: "flip-vertical-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m17 3-5 5-5-5h10"/><path d="m17 21-5-5-5 5h10"/><path d="M4 12H2"/><path d="M10 12H8"/><path d="M16 12h-2"/><path d="M22 12h-2"/>"#,
+        doc: "`flip-vertical-2`, from Lucide.",
+    };
+
+    /// `flower`, from Lucide.
+    pub const FLOWER: Self = Self {
+        name: "flower",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="3"/><path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5"/><path d="M12 7.5V9"/><path d="M7.5 12H9"/><path d="M16.5 12H15"/><path d="M12 16.5V15"/><path d="m8 8 1.88 1.88"/><path d="M14.12 9.88 16 8"/><path d="m8 16 1.88-1.88"/><path d="M14.12 14.12 16 16"/>"#,
+        doc: "`flower`, from Lucide.",
+    };
+
+    /// `flower-2`, from Lucide.
+    pub const FLOWER_2: Self = Self {
+        name: "flower-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 5a3 3 0 1 1 3 3m-3-3a3 3 0 1 0-3 3m3-3v1M9 8a3 3 0 1 0 3 3M9 8h1m5 0a3 3 0 1 1-3 3m3-3h-1m-2 3v-1"/><circle cx="12" cy="8" r="2"/><path d="M12 10v12"/><path d="M12 22c4.2 0 7-1.667 7-5-4.2 0-7 1.667-7 5Z"/><path d="M12 22c-4.2 0-7-1.667-7-5 4.2 0 7 1.667 7 5Z"/>"#,
+        doc: "`flower-2`, from Lucide.",
+    };
+
+    /// `focus`, from Lucide.
+    pub const FOCUS: Self = Self {
+        name: "focus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>"#,
+        doc: "`focus`, from Lucide.",
+    };
+
+    /// `fold-horizontal`, from Lucide.
+    pub const FOLD_HORIZONTAL: Self = Self {
+        name: "fold-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 12h6"/><path d="M22 12h-6"/><path d="M12 2v2"/><path d="M12 8v2"/><path d="M12 14v2"/><path d="M12 20v2"/><path d="m19 9-3 3 3 3"/><path d="m5 15 3-3-3-3"/>"#,
+        doc: "`fold-horizontal`, from Lucide.",
+    };
+
+    /// `fold-vertical`, from Lucide.
+    pub const FOLD_VERTICAL: Self = Self {
+        name: "fold-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22v-6"/><path d="M12 8V2"/><path d="M4 12H2"/><path d="M10 12H8"/><path d="M16 12h-2"/><path d="M22 12h-2"/><path d="m15 19-3-3-3 3"/><path d="m15 5-3 3-3-3"/>"#,
+        doc: "`fold-vertical`, from Lucide.",
+    };
+
+    /// `folder`, from Lucide.
+    pub const FOLDER: Self = Self {
+        name: "folder",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>"#,
+        doc: "`folder`, from Lucide.",
+    };
+
+    /// `folder-archive`, from Lucide.
+    pub const FOLDER_ARCHIVE: Self = Self {
+        name: "folder-archive",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="15" cy="19" r="2"/><path d="M20.9 19.8A2 2 0 0 0 22 18V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h5.1"/><path d="M15 11v-1"/><path d="M15 17v-2"/>"#,
+        doc: "`folder-archive`, from Lucide.",
+    };
+
+    /// `folder-bookmark`, from Lucide.
+    pub const FOLDER_BOOKMARK: Self = Self {
+        name: "folder-bookmark",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6v8l3-3 3 3V6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>"#,
+        doc: "`folder-bookmark`, from Lucide.",
+    };
+
+    /// `folder-check`, from Lucide.
+    pub const FOLDER_CHECK: Self = Self {
+        name: "folder-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="m9 13 2 2 4-4"/>"#,
+        doc: "`folder-check`, from Lucide.",
+    };
+
+    /// `folder-clock`, from Lucide.
+    pub const FOLDER_CLOCK: Self = Self {
+        name: "folder-clock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 14v2.2l1.6 1"/><path d="M7 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2"/><circle cx="16" cy="16" r="6"/>"#,
+        doc: "`folder-clock`, from Lucide.",
+    };
+
+    /// `folder-closed`, from Lucide.
+    pub const FOLDER_CLOSED: Self = Self {
+        name: "folder-closed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M2 10h20"/>"#,
+        doc: "`folder-closed`, from Lucide.",
+    };
+
+    /// `folder-code`, from Lucide.
+    pub const FOLDER_CODE: Self = Self {
+        name: "folder-code",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 10.5 8 13l2 2.5"/><path d="m14 10.5 2 2.5-2 2.5"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>"#,
+        doc: "`folder-code`, from Lucide.",
+    };
+
+    /// `folder-cog`, from Lucide.
+    pub const FOLDER_COG: Self = Self {
+        name: "folder-cog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.3 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.98a2 2 0 0 1 1.69.9l.66 1.2A2 2 0 0 0 12 6h8a2 2 0 0 1 2 2v3.3"/><path d="m14.305 19.53.923-.382"/><path d="m15.228 16.852-.923-.383"/><path d="m16.852 15.228-.383-.923"/><path d="m16.852 20.772-.383.924"/><path d="m19.148 15.228.383-.923"/><path d="m19.53 21.696-.382-.924"/><path d="m20.772 16.852.924-.383"/><path d="m20.772 19.148.924.383"/><circle cx="18" cy="18" r="3"/>"#,
+        doc: "`folder-cog`, from Lucide.",
+    };
+
+    /// `folder-dot`, from Lucide.
+    pub const FOLDER_DOT: Self = Self {
+        name: "folder-dot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><circle cx="12" cy="13" r="1"/>"#,
+        doc: "`folder-dot`, from Lucide.",
+    };
+
+    /// `folder-down`, from Lucide.
+    pub const FOLDER_DOWN: Self = Self {
+        name: "folder-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M12 10v6"/><path d="m15 13-3 3-3-3"/>"#,
+        doc: "`folder-down`, from Lucide.",
+    };
+
+    /// `folder-git`, from Lucide.
+    pub const FOLDER_GIT: Self = Self {
+        name: "folder-git",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="13" r="2"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M14 13h3"/><path d="M7 13h3"/>"#,
+        doc: "`folder-git`, from Lucide.",
+    };
+
+    /// `folder-git-2`, from Lucide.
+    pub const FOLDER_GIT_2: Self = Self {
+        name: "folder-git-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 19a5 5 0 0 1-5-5v8"/><path d="M9 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v5"/><circle cx="13" cy="12" r="2"/><circle cx="20" cy="19" r="2"/>"#,
+        doc: "`folder-git-2`, from Lucide.",
+    };
+
+    /// `folder-heart`, from Lucide.
+    pub const FOLDER_HEART: Self = Self {
+        name: "folder-heart",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.638 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v3.417"/><path d="M14.62 18.8A2.25 2.25 0 1 1 18 15.836a2.25 2.25 0 1 1 3.38 2.966l-2.626 2.856a.998.998 0 0 1-1.507 0z"/>"#,
+        doc: "`folder-heart`, from Lucide.",
+    };
+
+    /// `folder-input`, from Lucide.
+    pub const FOLDER_INPUT: Self = Self {
+        name: "folder-input",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 9V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1"/><path d="M2 13h10"/><path d="m9 16 3-3-3-3"/>"#,
+        doc: "`folder-input`, from Lucide.",
+    };
+
+    /// `folder-kanban`, from Lucide.
+    pub const FOLDER_KANBAN: Self = Self {
+        name: "folder-kanban",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v6"/>"#,
+        doc: "`folder-kanban`, from Lucide.",
+    };
+
+    /// `folder-key`, from Lucide.
+    pub const FOLDER_KEY: Self = Self {
+        name: "folder-key",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v1.36"/><path d="M19 12v6"/><path d="M19 14h2"/><circle cx="19" cy="20" r="2"/>"#,
+        doc: "`folder-key`, from Lucide.",
+    };
+
+    /// `folder-lock`, from Lucide.
+    pub const FOLDER_LOCK: Self = Self {
+        name: "folder-lock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="8" height="5" x="14" y="17" rx="1"/><path d="M10 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v2.5"/><path d="M20 17v-2a2 2 0 1 0-4 0v2"/>"#,
+        doc: "`folder-lock`, from Lucide.",
+    };
+
+    /// `folder-minus`, from Lucide.
+    pub const FOLDER_MINUS: Self = Self {
+        name: "folder-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>"#,
+        doc: "`folder-minus`, from Lucide.",
+    };
+
+    /// `folder-open`, from Lucide.
+    pub const FOLDER_OPEN: Self = Self {
+        name: "folder-open",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>"#,
+        doc: "`folder-open`, from Lucide.",
+    };
+
+    /// `folder-open-dot`, from Lucide.
+    pub const FOLDER_OPEN_DOT: Self = Self {
+        name: "folder-open-dot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/><circle cx="14" cy="15" r="1"/>"#,
+        doc: "`folder-open-dot`, from Lucide.",
+    };
+
+    /// `folder-output`, from Lucide.
+    pub const FOLDER_OUTPUT: Self = Self {
+        name: "folder-output",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 7.5V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-1.5"/><path d="M2 13h10"/><path d="m5 10-3 3 3 3"/>"#,
+        doc: "`folder-output`, from Lucide.",
+    };
+
+    /// `folder-pen`, from Lucide.
+    pub const FOLDER_PEN: Self = Self {
+        name: "folder-pen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 11.5V5a2 2 0 0 1 2-2h3.9c.7 0 1.3.3 1.7.9l.8 1.2c.4.6 1 .9 1.7.9H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-9.5"/><path d="M11.378 13.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/>"#,
+        doc: "`folder-pen`, from Lucide.",
+    };
+
+    /// `folder-plus`, from Lucide.
+    pub const FOLDER_PLUS: Self = Self {
+        name: "folder-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>"#,
+        doc: "`folder-plus`, from Lucide.",
+    };
+
+    /// `folder-root`, from Lucide.
+    pub const FOLDER_ROOT: Self = Self {
+        name: "folder-root",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><circle cx="12" cy="13" r="2"/><path d="M12 15v5"/>"#,
+        doc: "`folder-root`, from Lucide.",
+    };
+
+    /// `folder-search`, from Lucide.
+    pub const FOLDER_SEARCH: Self = Self {
+        name: "folder-search",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.7 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v4.1"/><path d="m21 21-1.9-1.9"/><circle cx="17" cy="17" r="3"/>"#,
+        doc: "`folder-search`, from Lucide.",
+    };
+
+    /// `folder-search-2`, from Lucide.
+    pub const FOLDER_SEARCH_2: Self = Self {
+        name: "folder-search-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="11.5" cy="12.5" r="2.5"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M13.3 14.3 15 16"/>"#,
+        doc: "`folder-search-2`, from Lucide.",
+    };
+
+    /// `folder-symlink`, from Lucide.
+    pub const FOLDER_SYMLINK: Self = Self {
+        name: "folder-symlink",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 9.35V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h7"/><path d="m8 16 3-3-3-3"/>"#,
+        doc: "`folder-symlink`, from Lucide.",
+    };
+
+    /// `folder-sync`, from Lucide.
+    pub const FOLDER_SYNC: Self = Self {
+        name: "folder-sync",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v.5"/><path d="M12 10v4h4"/><path d="m12 14 1.535-1.605a5 5 0 0 1 8 1.5"/><path d="M22 22v-4h-4"/><path d="m22 18-1.535 1.605a5 5 0 0 1-8-1.5"/>"#,
+        doc: "`folder-sync`, from Lucide.",
+    };
+
+    /// `folder-tree`, from Lucide.
+    pub const FOLDER_TREE: Self = Self {
+        name: "folder-tree",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2.5a1 1 0 0 1-.8-.4l-.9-1.2A1 1 0 0 0 15 3h-2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z"/><path d="M20 21a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-2.9a1 1 0 0 1-.88-.55l-.42-.85a1 1 0 0 0-.92-.6H13a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z"/><path d="M3 5a2 2 0 0 0 2 2h3"/><path d="M3 3v13a2 2 0 0 0 2 2h3"/>"#,
+        doc: "`folder-tree`, from Lucide.",
+    };
+
+    /// `folder-up`, from Lucide.
+    pub const FOLDER_UP: Self = Self {
+        name: "folder-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M12 10v6"/><path d="m9 13 3-3 3 3"/>"#,
+        doc: "`folder-up`, from Lucide.",
+    };
+
+    /// `folder-x`, from Lucide.
+    pub const FOLDER_X: Self = Self {
+        name: "folder-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="m9.5 10.5 5 5"/><path d="m14.5 10.5-5 5"/>"#,
+        doc: "`folder-x`, from Lucide.",
+    };
+
+    /// `folders`, from Lucide.
+    pub const FOLDERS: Self = Self {
+        name: "folders",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 5a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2.5a1.5 1.5 0 0 1 1.2.6l.6.8a1.5 1.5 0 0 0 1.2.6z"/><path d="M3 8.268a2 2 0 0 0-1 1.738V19a2 2 0 0 0 2 2h11a2 2 0 0 0 1.732-1"/>"#,
+        doc: "`folders`, from Lucide.",
+    };
+
+    /// `footprints`, from Lucide.
+    pub const FOOTPRINTS: Self = Self {
+        name: "footprints",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>"#,
+        doc: "`footprints`, from Lucide.",
+    };
+
+    /// `forklift`, from Lucide.
+    pub const FORKLIFT: Self = Self {
+        name: "forklift",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 12H5a2 2 0 0 0-2 2v5"/><path d="M15 19h7"/><path d="M16 19V2"/><path d="M6 12V7a2 2 0 0 1 2-2h2.172a2 2 0 0 1 1.414.586l3.828 3.828A2 2 0 0 1 16 10.828"/><path d="M7 19h4"/><circle cx="13" cy="19" r="2"/><circle cx="5" cy="19" r="2"/>"#,
+        doc: "`forklift`, from Lucide.",
+    };
+
+    /// `form`, from Lucide.
+    pub const FORM: Self = Self {
+        name: "form",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 14h6"/><path d="M4 2h10"/><rect x="4" y="18" width="16" height="4" rx="1"/><rect x="4" y="6" width="16" height="4" rx="1"/>"#,
+        doc: "`form`, from Lucide.",
+    };
+
+    /// `forward`, from Lucide.
+    pub const FORWARD: Self = Self {
+        name: "forward",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 17 5-5-5-5"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/>"#,
+        doc: "`forward`, from Lucide.",
+    };
+
+    /// `frame`, from Lucide.
+    pub const FRAME: Self = Self {
+        name: "frame",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="22" x2="2" y1="6" y2="6"/><line x1="22" x2="2" y1="18" y2="18"/><line x1="6" x2="6" y1="2" y2="22"/><line x1="18" x2="18" y1="2" y2="22"/>"#,
+        doc: "`frame`, from Lucide.",
+    };
+
+    /// `fuel`, from Lucide.
+    pub const FUEL: Self = Self {
+        name: "fuel",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/><path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16"/><path d="M2 21h13"/><path d="M3 9h11"/>"#,
+        doc: "`fuel`, from Lucide.",
+    };
+
+    /// `fullscreen`, from Lucide.
+    pub const FULLSCREEN: Self = Self {
+        name: "fullscreen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect width="10" height="8" x="7" y="8" rx="1"/>"#,
+        doc: "`fullscreen`, from Lucide.",
+    };
+
+    /// `funnel`, from Lucide.
+    pub const FUNNEL: Self = Self {
+        name: "funnel",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/>"#,
+        doc: "`funnel`, from Lucide.",
+    };
+
+    /// `funnel-plus`, from Lucide.
+    pub const FUNNEL_PLUS: Self = Self {
+        name: "funnel-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.354 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14v6a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341l1.218-1.348"/><path d="M16 6h6"/><path d="M19 3v6"/>"#,
+        doc: "`funnel-plus`, from Lucide.",
+    };
+
+    /// `funnel-x`, from Lucide.
+    pub const FUNNEL_X: Self = Self {
+        name: "funnel-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.531 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14v6a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341l.427-.473"/><path d="m16.5 3.5 5 5"/><path d="m21.5 3.5-5 5"/>"#,
+        doc: "`funnel-x`, from Lucide.",
+    };
+
+    /// `gallery-horizontal`, from Lucide.
+    pub const GALLERY_HORIZONTAL: Self = Self {
+        name: "gallery-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 3v18"/><rect width="12" height="18" x="6" y="3" rx="2"/><path d="M22 3v18"/>"#,
+        doc: "`gallery-horizontal`, from Lucide.",
+    };
+
+    /// `gallery-horizontal-end`, from Lucide.
+    pub const GALLERY_HORIZONTAL_END: Self = Self {
+        name: "gallery-horizontal-end",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 7v10"/><path d="M6 5v14"/><rect width="12" height="18" x="10" y="3" rx="2"/>"#,
+        doc: "`gallery-horizontal-end`, from Lucide.",
+    };
+
+    /// `gallery-thumbnails`, from Lucide.
+    pub const GALLERY_THUMBNAILS: Self = Self {
+        name: "gallery-thumbnails",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="14" x="3" y="3" rx="2"/><path d="M4 21h1"/><path d="M9 21h1"/><path d="M14 21h1"/><path d="M19 21h1"/>"#,
+        doc: "`gallery-thumbnails`, from Lucide.",
+    };
+
+    /// `gallery-vertical`, from Lucide.
+    pub const GALLERY_VERTICAL: Self = Self {
+        name: "gallery-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 2h18"/><rect width="18" height="12" x="3" y="6" rx="2"/><path d="M3 22h18"/>"#,
+        doc: "`gallery-vertical`, from Lucide.",
+    };
+
+    /// `gallery-vertical-end`, from Lucide.
+    pub const GALLERY_VERTICAL_END: Self = Self {
+        name: "gallery-vertical-end",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 2h10"/><path d="M5 6h14"/><rect width="18" height="12" x="3" y="10" rx="2"/>"#,
+        doc: "`gallery-vertical-end`, from Lucide.",
+    };
+
+    /// `gamepad`, from Lucide.
+    pub const GAMEPAD: Self = Self {
+        name: "gamepad",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="2"/>"#,
+        doc: "`gamepad`, from Lucide.",
+    };
+
+    /// `gamepad-2`, from Lucide.
+    pub const GAMEPAD_2: Self = Self {
+        name: "gamepad-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/>"#,
+        doc: "`gamepad-2`, from Lucide.",
+    };
+
+    /// `gamepad-directional`, from Lucide.
+    pub const GAMEPAD_DIRECTIONAL: Self = Self {
+        name: "gamepad-directional",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.146 15.854a1.207 1.207 0 0 1 1.708 0l1.56 1.56A2 2 0 0 1 15 18.828V21a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-2.172a2 2 0 0 1 .586-1.414z"/><path d="M18.828 15a2 2 0 0 1-1.414-.586l-1.56-1.56a1.207 1.207 0 0 1 0-1.708l1.56-1.56A2 2 0 0 1 18.828 9H21a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1z"/><path d="M6.586 14.414A2 2 0 0 1 5.172 15H3a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h2.172a2 2 0 0 1 1.414.586l1.56 1.56a1.207 1.207 0 0 1 0 1.708z"/><path d="M9 3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2.172a2 2 0 0 1-.586 1.414l-1.56 1.56a1.207 1.207 0 0 1-1.708 0l-1.56-1.56A2 2 0 0 1 9 5.172z"/>"#,
+        doc: "`gamepad-directional`, from Lucide.",
+    };
+
+    /// `gauge`, from Lucide.
+    pub const GAUGE: Self = Self {
+        name: "gauge",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/>"#,
+        doc: "`gauge`, from Lucide.",
+    };
+
+    /// `gavel`, from Lucide.
+    pub const GAVEL: Self = Self {
+        name: "gavel",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14 13-8.381 8.38a1 1 0 0 1-3.001-3l8.384-8.381"/><path d="m16 16 6-6"/><path d="m21.5 10.5-8-8"/><path d="m8 8 6-6"/><path d="m8.5 7.5 8 8"/>"#,
+        doc: "`gavel`, from Lucide.",
+    };
+
+    /// `gem`, from Lucide.
+    pub const GEM: Self = Self {
+        name: "gem",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.5 3 8 9l4 13 4-13-2.5-6"/><path d="M17 3a2 2 0 0 1 1.6.8l3 4a2 2 0 0 1 .013 2.382l-7.99 10.986a2 2 0 0 1-3.247 0l-7.99-10.986A2 2 0 0 1 2.4 7.8l2.998-3.997A2 2 0 0 1 7 3z"/><path d="M2 9h20"/>"#,
+        doc: "`gem`, from Lucide.",
+    };
+
+    /// `georgian-lari`, from Lucide.
+    pub const GEORGIAN_LARI: Self = Self {
+        name: "georgian-lari",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.5 21a7.5 7.5 0 1 1 7.35-9"/><path d="M13 12V3"/><path d="M4 21h16"/><path d="M9 12V3"/>"#,
+        doc: "`georgian-lari`, from Lucide.",
+    };
+
+    /// `ghost`, from Lucide.
+    pub const GHOST: Self = Self {
+        name: "ghost",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 10h.01"/><path d="M15 10h.01"/><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/>"#,
+        doc: "`ghost`, from Lucide.",
+    };
+
+    /// `gift`, from Lucide.
+    pub const GIFT: Self = Self {
+        name: "gift",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 7v14"/><path d="M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5"/><rect x="3" y="7" width="18" height="4" rx="1"/>"#,
+        doc: "`gift`, from Lucide.",
+    };
+
+    /// `git-branch`, from Lucide.
+    pub const GIT_BRANCH: Self = Self {
+        name: "git-branch",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 6a9 9 0 0 0-9 9V3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>"#,
+        doc: "`git-branch`, from Lucide.",
+    };
+
+    /// `git-branch-minus`, from Lucide.
+    pub const GIT_BRANCH_MINUS: Self = Self {
+        name: "git-branch-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 6a9 9 0 0 0-9 9V3"/><path d="M21 18h-6"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>"#,
+        doc: "`git-branch-minus`, from Lucide.",
+    };
+
+    /// `git-branch-plus`, from Lucide.
+    pub const GIT_BRANCH_PLUS: Self = Self {
+        name: "git-branch-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 3v12"/><path d="M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M15 6a9 9 0 0 0-9 9"/><path d="M18 15v6"/><path d="M21 18h-6"/>"#,
+        doc: "`git-branch-plus`, from Lucide.",
+    };
+
+    /// `git-commit-horizontal`, from Lucide.
+    pub const GIT_COMMIT_HORIZONTAL: Self = Self {
+        name: "git-commit-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="3"/><line x1="3" x2="9" y1="12" y2="12"/><line x1="15" x2="21" y1="12" y2="12"/>"#,
+        doc: "`git-commit-horizontal`, from Lucide.",
+    };
+
+    /// `git-commit-vertical`, from Lucide.
+    pub const GIT_COMMIT_VERTICAL: Self = Self {
+        name: "git-commit-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3v6"/><circle cx="12" cy="12" r="3"/><path d="M12 15v6"/>"#,
+        doc: "`git-commit-vertical`, from Lucide.",
+    };
+
+    /// `git-compare`, from Lucide.
+    pub const GIT_COMPARE: Self = Self {
+        name: "git-compare",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/>"#,
+        doc: "`git-compare`, from Lucide.",
+    };
+
+    /// `git-compare-arrows`, from Lucide.
+    pub const GIT_COMPARE_ARROWS: Self = Self {
+        name: "git-compare-arrows",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="5" cy="6" r="3"/><path d="M12 6h5a2 2 0 0 1 2 2v7"/><path d="m15 9-3-3 3-3"/><circle cx="19" cy="18" r="3"/><path d="M12 18H7a2 2 0 0 1-2-2V9"/><path d="m9 15 3 3-3 3"/>"#,
+        doc: "`git-compare-arrows`, from Lucide.",
+    };
+
+    /// `git-fork`, from Lucide.
+    pub const GIT_FORK: Self = Self {
+        name: "git-fork",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"/><path d="M12 12v3"/>"#,
+        doc: "`git-fork`, from Lucide.",
+    };
+
+    /// `git-graph`, from Lucide.
+    pub const GIT_GRAPH: Self = Self {
+        name: "git-graph",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="5" cy="6" r="3"/><path d="M5 9v6"/><circle cx="5" cy="18" r="3"/><path d="M12 3v18"/><circle cx="19" cy="6" r="3"/><path d="M16 15.7A9 9 0 0 0 19 9"/>"#,
+        doc: "`git-graph`, from Lucide.",
+    };
+
+    /// `git-merge`, from Lucide.
+    pub const GIT_MERGE: Self = Self {
+        name: "git-merge",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/>"#,
+        doc: "`git-merge`, from Lucide.",
+    };
+
+    /// `git-merge-conflict`, from Lucide.
+    pub const GIT_MERGE_CONFLICT: Self = Self {
+        name: "git-merge-conflict",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6h4a2 2 0 0 1 2 2v7"/><path d="M6 12v9"/><path d="M9 3 3 9"/><path d="M9 9 3 3"/><circle cx="18" cy="18" r="3"/>"#,
+        doc: "`git-merge-conflict`, from Lucide.",
+    };
+
+    /// `git-pull-request`, from Lucide.
+    pub const GIT_PULL_REQUEST: Self = Self {
+        name: "git-pull-request",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" x2="6" y1="9" y2="21"/>"#,
+        doc: "`git-pull-request`, from Lucide.",
+    };
+
+    /// `git-pull-request-arrow`, from Lucide.
+    pub const GIT_PULL_REQUEST_ARROW: Self = Self {
+        name: "git-pull-request-arrow",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="5" cy="6" r="3"/><path d="M5 9v12"/><circle cx="19" cy="18" r="3"/><path d="m15 9-3-3 3-3"/><path d="M12 6h5a2 2 0 0 1 2 2v7"/>"#,
+        doc: "`git-pull-request-arrow`, from Lucide.",
+    };
+
+    /// `git-pull-request-closed`, from Lucide.
+    pub const GIT_PULL_REQUEST_CLOSED: Self = Self {
+        name: "git-pull-request-closed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="6" cy="6" r="3"/><path d="M6 9v12"/><path d="m21 3-6 6"/><path d="m21 9-6-6"/><path d="M18 11.5V15"/><circle cx="18" cy="18" r="3"/>"#,
+        doc: "`git-pull-request-closed`, from Lucide.",
+    };
+
+    /// `git-pull-request-create`, from Lucide.
+    pub const GIT_PULL_REQUEST_CREATE: Self = Self {
+        name: "git-pull-request-create",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="6" cy="6" r="3"/><path d="M6 9v12"/><path d="M13 6h3a2 2 0 0 1 2 2v3"/><path d="M18 15v6"/><path d="M21 18h-6"/>"#,
+        doc: "`git-pull-request-create`, from Lucide.",
+    };
+
+    /// `git-pull-request-create-arrow`, from Lucide.
+    pub const GIT_PULL_REQUEST_CREATE_ARROW: Self = Self {
+        name: "git-pull-request-create-arrow",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="5" cy="6" r="3"/><path d="M5 9v12"/><path d="m15 9-3-3 3-3"/><path d="M12 6h5a2 2 0 0 1 2 2v3"/><path d="M19 15v6"/><path d="M22 18h-6"/>"#,
+        doc: "`git-pull-request-create-arrow`, from Lucide.",
+    };
+
+    /// `git-pull-request-draft`, from Lucide.
+    pub const GIT_PULL_REQUEST_DRAFT: Self = Self {
+        name: "git-pull-request-draft",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M18 6V5"/><path d="M18 11v-1"/><line x1="6" x2="6" y1="9" y2="21"/>"#,
+        doc: "`git-pull-request-draft`, from Lucide.",
+    };
+
+    /// The repository this system is built in the open in.
+    pub const GITHUB: Self = Self {
+        name: "github",
+        view_box: "0 0 16 16",
+        filled: true,
+        body: r#"<path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/>"#,
+        doc: "The repository this system is built in the open in.",
+    };
+
+    /// `glass-water`, from Lucide.
+    pub const GLASS_WATER: Self = Self {
+        name: "glass-water",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5.116 4.104A1 1 0 0 1 6.11 3h11.78a1 1 0 0 1 .994 1.105L17.19 20.21A2 2 0 0 1 15.2 22H8.8a2 2 0 0 1-2-1.79z"/><path d="M6 12a5 5 0 0 1 6 0 5 5 0 0 0 6 0"/>"#,
+        doc: "`glass-water`, from Lucide.",
+    };
+
+    /// `glasses`, from Lucide.
+    pub const GLASSES: Self = Self {
+        name: "glasses",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M14 15a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M2.5 13 5 7c.7-1.3 1.4-2 3-2"/><path d="M21.5 13 19 7c-.7-1.3-1.5-2-3-2"/>"#,
+        doc: "`glasses`, from Lucide.",
+    };
+
+    /// `globe`, from Lucide.
+    pub const GLOBE: Self = Self {
+        name: "globe",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>"#,
+        doc: "`globe`, from Lucide.",
+    };
+
+    /// `globe-check`, from Lucide.
+    pub const GLOBE_CHECK: Self = Self {
+        name: "globe-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 6 2 2 4-4"/><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"/>"#,
+        doc: "`globe-check`, from Lucide.",
+    };
+
+    /// `globe-lock`, from Lucide.
+    pub const GLOBE_LOCK: Self = Self {
+        name: "globe-lock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.686 15A14.5 14.5 0 0 1 12 22a14.5 14.5 0 0 1 0-20 10 10 0 1 0 9.542 13"/><path d="M2 12h8.5"/><path d="M20 6V4a2 2 0 1 0-4 0v2"/><rect width="8" height="5" x="14" y="6" rx="1"/>"#,
+        doc: "`globe-lock`, from Lucide.",
+    };
+
+    /// `globe-off`, from Lucide.
+    pub const GLOBE_OFF: Self = Self {
+        name: "globe-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.114 4.462A14.5 14.5 0 0 1 12 2a10 10 0 0 1 9.313 13.643"/><path d="M15.557 15.556A14.5 14.5 0 0 1 12 22 10 10 0 0 1 4.929 4.929"/><path d="M15.892 10.234A14.5 14.5 0 0 0 12 2a10 10 0 0 0-3.643.687"/><path d="M17.656 12H22"/><path d="M19.071 19.071A10 10 0 0 1 12 22 14.5 14.5 0 0 1 8.44 8.45"/><path d="M2 12h10"/><path d="m2 2 20 20"/>"#,
+        doc: "`globe-off`, from Lucide.",
+    };
+
+    /// `globe-x`, from Lucide.
+    pub const GLOBE_X: Self = Self {
+        name: "globe-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 3 5 5"/><path d="M2 12h20A10 10 0 1 1 12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 4-10"/><path d="m21 3-5 5"/>"#,
+        doc: "`globe-x`, from Lucide.",
+    };
+
+    /// `goal`, from Lucide.
+    pub const GOAL: Self = Self {
+        name: "goal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13V2l8 4-8 4"/><path d="M20.561 10.222a9 9 0 1 1-12.55-5.29"/><path d="M8.002 9.997a5 5 0 1 0 8.9 2.02"/>"#,
+        doc: "`goal`, from Lucide.",
+    };
+
+    /// `gpu`, from Lucide.
+    pub const GPU: Self = Self {
+        name: "gpu",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 17h18a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H2"/><path d="M2 21V3"/><path d="M7 17v3a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-3"/><circle cx="16" cy="11" r="2"/><circle cx="8" cy="11" r="2"/>"#,
+        doc: "`gpu`, from Lucide.",
+    };
+
+    /// `graduation-cap`, from Lucide.
+    pub const GRADUATION_CAP: Self = Self {
+        name: "graduation-cap",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>"#,
+        doc: "`graduation-cap`, from Lucide.",
+    };
+
+    /// `grape`, from Lucide.
+    pub const GRAPE: Self = Self {
+        name: "grape",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 5V2l-5.89 5.89"/><circle cx="16.6" cy="15.89" r="3"/><circle cx="8.11" cy="7.4" r="3"/><circle cx="12.35" cy="11.65" r="3"/><circle cx="13.91" cy="5.85" r="3"/><circle cx="18.15" cy="10.09" r="3"/><circle cx="6.56" cy="13.2" r="3"/><circle cx="10.8" cy="17.44" r="3"/><circle cx="5" cy="19" r="3"/>"#,
+        doc: "`grape`, from Lucide.",
+    };
+
+    /// `grid-2x2`, from Lucide.
+    pub const GRID_2X2: Self = Self {
+        name: "grid-2x2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3v18"/><path d="M3 12h18"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`grid-2x2`, from Lucide.",
+    };
+
+    /// `grid-2x2-check`, from Lucide.
+    pub const GRID_2X2_CHECK: Self = Self {
+        name: "grid-2x2-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3v17a1 1 0 0 1-1 1H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1H3"/><path d="m16 19 2 2 4-4"/>"#,
+        doc: "`grid-2x2-check`, from Lucide.",
+    };
+
+    /// `grid-2x2-plus`, from Lucide.
+    pub const GRID_2X2_PLUS: Self = Self {
+        name: "grid-2x2-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3v17a1 1 0 0 1-1 1H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1H3"/><path d="M16 19h6"/><path d="M19 22v-6"/>"#,
+        doc: "`grid-2x2-plus`, from Lucide.",
+    };
+
+    /// `grid-2x2-x`, from Lucide.
+    pub const GRID_2X2_X: Self = Self {
+        name: "grid-2x2-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3v17a1 1 0 0 1-1 1H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1H3"/><path d="m16 16 5 5"/><path d="m16 21 5-5"/>"#,
+        doc: "`grid-2x2-x`, from Lucide.",
+    };
+
+    /// `grid-3x2`, from Lucide.
+    pub const GRID_3X2: Self = Self {
+        name: "grid-3x2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 3v18"/><path d="M3 12h18"/><path d="M9 3v18"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`grid-3x2`, from Lucide.",
+    };
+
+    /// `grid-3x3`, from Lucide.
+    pub const GRID_3X3: Self = Self {
+        name: "grid-3x3",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/>"#,
+        doc: "`grid-3x3`, from Lucide.",
+    };
+
+    /// `grip`, from Lucide.
+    pub const GRIP: Self = Self {
+        name: "grip",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="5" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="19" cy="19" r="1"/><circle cx="5" cy="19" r="1"/>"#,
+        doc: "`grip`, from Lucide.",
+    };
+
+    /// `grip-horizontal`, from Lucide.
+    pub const GRIP_HORIZONTAL: Self = Self {
+        name: "grip-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="9" r="1"/><circle cx="19" cy="9" r="1"/><circle cx="5" cy="9" r="1"/><circle cx="12" cy="15" r="1"/><circle cx="19" cy="15" r="1"/><circle cx="5" cy="15" r="1"/>"#,
+        doc: "`grip-horizontal`, from Lucide.",
+    };
+
+    /// `grip-vertical`, from Lucide.
+    pub const GRIP_VERTICAL: Self = Self {
+        name: "grip-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/>"#,
+        doc: "`grip-vertical`, from Lucide.",
+    };
+
+    /// `group`, from Lucide.
+    pub const GROUP: Self = Self {
+        name: "group",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 7V5c0-1.1.9-2 2-2h2"/><path d="M17 3h2c1.1 0 2 .9 2 2v2"/><path d="M21 17v2c0 1.1-.9 2-2 2h-2"/><path d="M7 21H5c-1.1 0-2-.9-2-2v-2"/><rect width="7" height="5" x="7" y="7" rx="1"/><rect width="7" height="5" x="10" y="12" rx="1"/>"#,
+        doc: "`group`, from Lucide.",
+    };
+
+    /// `guitar`, from Lucide.
+    pub const GUITAR: Self = Self {
+        name: "guitar",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m11.9 12.1 4.514-4.514"/><path d="M20.1 2.3a1 1 0 0 0-1.4 0l-1.114 1.114A2 2 0 0 0 17 4.828v1.344a2 2 0 0 1-.586 1.414A2 2 0 0 1 17.828 7h1.344a2 2 0 0 0 1.414-.586L21.7 5.3a1 1 0 0 0 0-1.4z"/><path d="m6 16 2 2"/><path d="M8.23 9.85A3 3 0 0 1 11 8a5 5 0 0 1 5 5 3 3 0 0 1-1.85 2.77l-.92.38A2 2 0 0 0 12 18a4 4 0 0 1-4 4 6 6 0 0 1-6-6 4 4 0 0 1 4-4 2 2 0 0 0 1.85-1.23z"/>"#,
+        doc: "`guitar`, from Lucide.",
+    };
+
+    /// `ham`, from Lucide.
+    pub const HAM: Self = Self {
+        name: "ham",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.144 21.144A7.274 10.445 45 1 0 2.856 10.856"/><path d="M13.144 21.144A7.274 4.365 45 0 0 2.856 10.856a7.274 4.365 45 0 0 10.288 10.288"/><path d="M16.565 10.435 18.6 8.4a2.501 2.501 0 1 0 1.65-4.65 2.5 2.5 0 1 0-4.66 1.66l-2.024 2.025"/><path d="m8.5 16.5-1-1"/>"#,
+        doc: "`ham`, from Lucide.",
+    };
+
+    /// `hamburger`, from Lucide.
+    pub const HAMBURGER: Self = Self {
+        name: "hamburger",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 16H4a2 2 0 1 1 0-4h16a2 2 0 1 1 0 4h-4.25"/><path d="M5 12a2 2 0 0 1-2-2 9 7 0 0 1 18 0 2 2 0 0 1-2 2"/><path d="M5 16a2 2 0 0 0-2 2 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 2 2 0 0 0-2-2q0 0 0 0"/><path d="m6.67 12 6.13 4.6a2 2 0 0 0 2.8-.4l3.15-4.2"/>"#,
+        doc: "`hamburger`, from Lucide.",
+    };
+
+    /// `hammer`, from Lucide.
+    pub const HAMMER: Self = Self {
+        name: "hammer",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 12-9.373 9.373a1 1 0 0 1-3.001-3L12 9"/><path d="m18 15 4-4"/><path d="m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.172v-.344a2 2 0 0 0-.586-1.414l-1.657-1.657A6 6 0 0 0 12.516 3H9l1.243 1.243A6 6 0 0 1 12 8.485V10l2 2h1.172a2 2 0 0 1 1.414.586L18.5 14.5"/>"#,
+        doc: "`hammer`, from Lucide.",
+    };
+
+    /// `hand`, from Lucide.
+    pub const HAND: Self = Self {
+        name: "hand",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>"#,
+        doc: "`hand`, from Lucide.",
+    };
+
+    /// `hand-coins`, from Lucide.
+    pub const HAND_COINS: Self = Self {
+        name: "hand-coins",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/><path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 16 6 6"/><circle cx="16" cy="9" r="2.9"/><circle cx="6" cy="5" r="3"/>"#,
+        doc: "`hand-coins`, from Lucide.",
+    };
+
+    /// `hand-fist`, from Lucide.
+    pub const HAND_FIST: Self = Self {
+        name: "hand-fist",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.035 17.012a3 3 0 0 0-3-3l-.311-.002a.72.72 0 0 1-.505-1.229l1.195-1.195A2 2 0 0 1 10.828 11H12a2 2 0 0 0 0-4H9.243a3 3 0 0 0-2.122.879l-2.707 2.707A4.83 4.83 0 0 0 3 14a8 8 0 0 0 8 8h2a8 8 0 0 0 8-8V7a2 2 0 1 0-4 0v2a2 2 0 1 0 4 0"/><path d="M13.888 9.662A2 2 0 0 0 17 8V5A2 2 0 1 0 13 5"/><path d="M9 5A2 2 0 1 0 5 5V10"/><path d="M9 7V4A2 2 0 1 1 13 4V7.268"/>"#,
+        doc: "`hand-fist`, from Lucide.",
+    };
+
+    /// `hand-grab`, from Lucide.
+    pub const HAND_GRAB: Self = Self {
+        name: "hand-grab",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 11.5V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1.4"/><path d="M14 10V8a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 9.9V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v5"/><path d="M6 14a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8 2 2 0 1 1 4 0"/>"#,
+        doc: "`hand-grab`, from Lucide.",
+    };
+
+    /// `hand-heart`, from Lucide.
+    pub const HAND_HEART: Self = Self {
+        name: "hand-heart",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 14h2a2 2 0 0 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="m14.45 13.39 5.05-4.694C20.196 8 21 6.85 21 5.75a2.75 2.75 0 0 0-4.797-1.837.276.276 0 0 1-.406 0A2.75 2.75 0 0 0 11 5.75c0 1.2.802 2.248 1.5 2.946L16 11.95"/><path d="m2 15 6 6"/><path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a1 1 0 0 0-2.75-2.91"/>"#,
+        doc: "`hand-heart`, from Lucide.",
+    };
+
+    /// `hand-helping`, from Lucide.
+    pub const HAND_HELPING: Self = Self {
+        name: "hand-helping",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 12h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 14"/><path d="m7 18 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 13 6 6"/>"#,
+        doc: "`hand-helping`, from Lucide.",
+    };
+
+    /// `hand-metal`, from Lucide.
+    pub const HAND_METAL: Self = Self {
+        name: "hand-metal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 12.5V10a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1.4"/><path d="M14 11V9a2 2 0 1 0-4 0v2"/><path d="M10 10.5V5a2 2 0 1 0-4 0v9"/><path d="m7 15-1.76-1.76a2 2 0 0 0-2.83 2.82l3.6 3.6C7.5 21.14 9.2 22 12 22h2a8 8 0 0 0 8-8V7a2 2 0 1 0-4 0v5"/>"#,
+        doc: "`hand-metal`, from Lucide.",
+    };
+
+    /// `hand-platter`, from Lucide.
+    pub const HAND_PLATTER: Self = Self {
+        name: "hand-platter",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3V2"/><path d="m15.4 17.4 3.2-2.8a2 2 0 1 1 2.8 2.9l-3.6 3.3c-.7.8-1.7 1.2-2.8 1.2h-4c-1.1 0-2.1-.4-2.8-1.2l-1.302-1.464A1 1 0 0 0 6.151 19H5"/><path d="M2 14h12a2 2 0 0 1 0 4h-2"/><path d="M4 10h16"/><path d="M5 10a7 7 0 0 1 14 0"/><path d="M5 14v6a1 1 0 0 1-1 1H2"/>"#,
+        doc: "`hand-platter`, from Lucide.",
+    };
+
+    /// `handbag`, from Lucide.
+    pub const HANDBAG: Self = Self {
+        name: "handbag",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.048 18.566A2 2 0 0 0 4 21h16a2 2 0 0 0 1.952-2.434l-2-9A2 2 0 0 0 18 8H6a2 2 0 0 0-1.952 1.566z"/><path d="M8 11V6a4 4 0 0 1 8 0v5"/>"#,
+        doc: "`handbag`, from Lucide.",
+    };
+
+    /// `handshake`, from Lucide.
+    pub const HANDSHAKE: Self = Self {
+        name: "handshake",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/>"#,
+        doc: "`handshake`, from Lucide.",
+    };
+
+    /// `hard-drive`, from Lucide.
+    pub const HARD_DRIVE: Self = Self {
+        name: "hard-drive",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 16h.01"/><path d="M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><path d="M21.946 12.013H2.054"/><path d="M6 16h.01"/>"#,
+        doc: "`hard-drive`, from Lucide.",
+    };
+
+    /// `hard-drive-download`, from Lucide.
+    pub const HARD_DRIVE_DOWNLOAD: Self = Self {
+        name: "hard-drive-download",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v8"/><path d="m16 6-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 18h.01"/><path d="M10 18h.01"/>"#,
+        doc: "`hard-drive-download`, from Lucide.",
+    };
+
+    /// `hard-drive-upload`, from Lucide.
+    pub const HARD_DRIVE_UPLOAD: Self = Self {
+        name: "hard-drive-upload",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 6-4-4-4 4"/><path d="M12 2v8"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 18h.01"/><path d="M10 18h.01"/>"#,
+        doc: "`hard-drive-upload`, from Lucide.",
+    };
+
+    /// `hard-hat`, from Lucide.
+    pub const HARD_HAT: Self = Self {
+        name: "hard-hat",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M14 6a6 6 0 0 1 6 6v3"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><rect x="2" y="15" width="20" height="4" rx="1"/>"#,
+        doc: "`hard-hat`, from Lucide.",
+    };
+
+    /// `hash`, from Lucide.
+    pub const HASH: Self = Self {
+        name: "hash",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/>"#,
+        doc: "`hash`, from Lucide.",
+    };
+
+    /// `hat-glasses`, from Lucide.
+    pub const HAT_GLASSES: Self = Self {
+        name: "hat-glasses",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 18a2 2 0 0 0-4 0"/><path d="m19 11-2.11-6.657a2 2 0 0 0-2.752-1.148l-1.276.61A2 2 0 0 1 12 4H8.5a2 2 0 0 0-1.925 1.456L5 11"/><path d="M2 11h20"/><circle cx="17" cy="18" r="3"/><circle cx="7" cy="18" r="3"/>"#,
+        doc: "`hat-glasses`, from Lucide.",
+    };
+
+    /// `haze`, from Lucide.
+    pub const HAZE: Self = Self {
+        name: "haze",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m5.2 6.2 1.4 1.4"/><path d="M2 13h2"/><path d="M20 13h2"/><path d="m17.4 7.6 1.4-1.4"/><path d="M22 17H2"/><path d="M22 21H2"/><path d="M16 13a4 4 0 0 0-8 0"/><path d="M12 5V2.5"/>"#,
+        doc: "`haze`, from Lucide.",
+    };
+
+    /// `hd`, from Lucide.
+    pub const HD: Self = Self {
+        name: "hd",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 12H6"/><path d="M10 15V9"/><path d="M14 14.5a.5.5 0 0 0 .5.5h1a2.5 2.5 0 0 0 2.5-2.5v-1A2.5 2.5 0 0 0 15.5 9h-1a.5.5 0 0 0-.5.5z"/><path d="M6 15V9"/><rect x="2" y="5" width="20" height="14" rx="2"/>"#,
+        doc: "`hd`, from Lucide.",
+    };
+
+    /// `hdmi-port`, from Lucide.
+    pub const HDMI_PORT: Self = Self {
+        name: "hdmi-port",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 9a1 1 0 00-1-1H3a1 1 0 00-1 1v4a1 1 0 001 1h.5a2 2 0 011.6.8l.3.4A2 2 0 007 16h10a2 2 0 001.6-.8l.3-.4a2 2 0 011.6-.8h.5a1 1 0 001-1z"/><path d="M8 12h8"/>"#,
+        doc: "`hdmi-port`, from Lucide.",
+    };
+
+    /// `heading`, from Lucide.
+    pub const HEADING: Self = Self {
+        name: "heading",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 12h12"/><path d="M6 20V4"/><path d="M18 20V4"/>"#,
+        doc: "`heading`, from Lucide.",
+    };
+
+    /// `heading-1`, from Lucide.
+    pub const HEADING_1: Self = Self {
+        name: "heading-1",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="m17 12 3-2v8"/>"#,
+        doc: "`heading-1`, from Lucide.",
+    };
+
+    /// `heading-2`, from Lucide.
+    pub const HEADING_2: Self = Self {
+        name: "heading-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1"/>"#,
+        doc: "`heading-2`, from Lucide.",
+    };
+
+    /// `heading-3`, from Lucide.
+    pub const HEADING_3: Self = Self {
+        name: "heading-3",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17.5 10.5c1.7-1 3.5 0 3.5 1.5a2 2 0 0 1-2 2"/><path d="M17 17.5c2 1.5 4 .3 4-1.5a2 2 0 0 0-2-2"/>"#,
+        doc: "`heading-3`, from Lucide.",
+    };
+
+    /// `heading-4`, from Lucide.
+    pub const HEADING_4: Self = Self {
+        name: "heading-4",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 18V6"/><path d="M17 10v3a1 1 0 0 0 1 1h3"/><path d="M21 10v8"/><path d="M4 12h8"/><path d="M4 18V6"/>"#,
+        doc: "`heading-4`, from Lucide.",
+    };
+
+    /// `heading-5`, from Lucide.
+    pub const HEADING_5: Self = Self {
+        name: "heading-5",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17 13v-3h4"/><path d="M17 17.7c.4.2.8.3 1.3.3 1.5 0 2.7-1.1 2.7-2.5S19.8 13 18.3 13H17"/>"#,
+        doc: "`heading-5`, from Lucide.",
+    };
+
+    /// `heading-6`, from Lucide.
+    pub const HEADING_6: Self = Self {
+        name: "heading-6",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><circle cx="19" cy="16" r="2"/><path d="M20 10c-2 2-3 3.5-3 6"/>"#,
+        doc: "`heading-6`, from Lucide.",
+    };
+
+    /// `headphone-off`, from Lucide.
+    pub const HEADPHONE_OFF: Self = Self {
+        name: "headphone-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 14h-1.343"/><path d="M9.128 3.47A9 9 0 0 1 21 12v3.343"/><path d="m2 2 20 20"/><path d="M20.414 20.414A2 2 0 0 1 19 21h-1a2 2 0 0 1-2-2v-3"/><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 2.636-6.364"/>"#,
+        doc: "`headphone-off`, from Lucide.",
+    };
+
+    /// `headphones`, from Lucide.
+    pub const HEADPHONES: Self = Self {
+        name: "headphones",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/>"#,
+        doc: "`headphones`, from Lucide.",
+    };
+
+    /// `headset`, from Lucide.
+    pub const HEADSET: Self = Self {
+        name: "headset",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"/><path d="M21 16v2a4 4 0 0 1-4 4h-5"/>"#,
+        doc: "`headset`, from Lucide.",
+    };
+
+    /// `heart`, from Lucide.
+    pub const HEART: Self = Self {
+        name: "heart",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/>"#,
+        doc: "`heart`, from Lucide.",
+    };
+
+    /// `heart-crack`, from Lucide.
+    pub const HEART_CRACK: Self = Self {
+        name: "heart-crack",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.409 5.824c-.702.792-1.15 1.496-1.415 2.166l2.153 2.156a.5.5 0 0 1 0 .707l-2.293 2.293a.5.5 0 0 0 0 .707L12 15"/><path d="M13.508 20.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5a5.5 5.5 0 0 1 9.591-3.677.6.6 0 0 0 .818.001A5.5 5.5 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5z"/>"#,
+        doc: "`heart-crack`, from Lucide.",
+    };
+
+    /// `heart-handshake`, from Lucide.
+    pub const HEART_HANDSHAKE: Self = Self {
+        name: "heart-handshake",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19.414 14.414C21 12.828 22 11.5 22 9.5a5.5 5.5 0 0 0-9.591-3.676.6.6 0 0 1-.818.001A5.5 5.5 0 0 0 2 9.5c0 2.3 1.5 4 3 5.5l5.535 5.362a2 2 0 0 0 2.879.052 2.12 2.12 0 0 0-.004-3 2.124 2.124 0 1 0 3-3 2.124 2.124 0 0 0 3.004 0 2 2 0 0 0 0-2.828l-1.881-1.882a2.41 2.41 0 0 0-3.409 0l-1.71 1.71a2 2 0 0 1-2.828 0 2 2 0 0 1 0-2.828l2.823-2.762"/>"#,
+        doc: "`heart-handshake`, from Lucide.",
+    };
+
+    /// `heart-minus`, from Lucide.
+    pub const HEART_MINUS: Self = Self {
+        name: "heart-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14.876 18.99-1.368 1.323a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5a5.2 5.2 0 0 1-.244 1.572"/><path d="M15 15h6"/>"#,
+        doc: "`heart-minus`, from Lucide.",
+    };
+
+    /// `heart-off`, from Lucide.
+    pub const HEART_OFF: Self = Self {
+        name: "heart-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.5 4.893a5.5 5.5 0 0 1 1.091.931.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 1.872-1.002 3.356-2.187 4.655"/><path d="m16.967 16.967-3.459 3.346a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5a5.5 5.5 0 0 1 2.747-4.761"/><path d="m2 2 20 20"/>"#,
+        doc: "`heart-off`, from Lucide.",
+    };
+
+    /// `heart-plus`, from Lucide.
+    pub const HEART_PLUS: Self = Self {
+        name: "heart-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14.479 19.374-.971.939a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5a5.2 5.2 0 0 1-.219 1.49"/><path d="M15 15h6"/><path d="M18 12v6"/>"#,
+        doc: "`heart-plus`, from Lucide.",
+    };
+
+    /// `heart-pulse`, from Lucide.
+    pub const HEART_PULSE: Self = Self {
+        name: "heart-pulse",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/><path d="M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>"#,
+        doc: "`heart-pulse`, from Lucide.",
+    };
+
+    /// `heart-x`, from Lucide.
+    pub const HEART_X: Self = Self {
+        name: "heart-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15.5 12.5 5 5"/><path d="m20.5 12.5-5 5"/><path d="M21.955 8.774a5.5 5.5 0 0 0-9.546-2.95.6.6 0 0 1-.818 0A5.5 5.5 0 0 0 2 9.5c0 2.3 1.5 4 3 5.5l5.508 5.332a2 2 0 0 0 2.57.352"/>"#,
+        doc: "`heart-x`, from Lucide.",
+    };
+
+    /// `heater`, from Lucide.
+    pub const HEATER: Self = Self {
+        name: "heater",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 8c2-3-2-3 0-6"/><path d="M15.5 8c2-3-2-3 0-6"/><path d="M6 10h.01"/><path d="M6 14h.01"/><path d="M10 16v-4"/><path d="M14 16v-4"/><path d="M18 16v-4"/><path d="M20 6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3"/><path d="M5 20v2"/><path d="M19 20v2"/>"#,
+        doc: "`heater`, from Lucide.",
+    };
+
+    /// `helicopter`, from Lucide.
+    pub const HELICOPTER: Self = Self {
+        name: "helicopter",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 17v4"/><path d="M14 3v8a2 2 0 0 0 2 2h5.865"/><path d="M17 17v4"/><path d="M18 17a4 4 0 0 0 4-4 8 6 0 0 0-8-6 6 5 0 0 0-6 5v3a2 2 0 0 0 2 2z"/><path d="M2 10v5"/><path d="M6 3h16"/><path d="M7 21h14"/><path d="M8 13H2"/>"#,
+        doc: "`helicopter`, from Lucide.",
+    };
+
+    /// `hexagon`, from Lucide.
+    pub const HEXAGON: Self = Self {
+        name: "hexagon",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>"#,
+        doc: "`hexagon`, from Lucide.",
+    };
+
+    /// `highlighter`, from Lucide.
+    pub const HIGHLIGHTER: Self = Self {
+        name: "highlighter",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/>"#,
+        doc: "`highlighter`, from Lucide.",
+    };
+
+    /// `hop`, from Lucide.
+    pub const HOP: Self = Self {
+        name: "hop",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.82 16.12c1.69.6 3.91.79 5.18.85.55.03 1-.42.97-.97-.06-1.27-.26-3.5-.85-5.18"/><path d="M11.5 6.5c1.64 0 5-.38 6.71-1.07.52-.2.55-.82.12-1.17A10 10 0 0 0 4.26 18.33c.35.43.96.4 1.17-.12.69-1.71 1.07-5.07 1.07-6.71 1.34.45 3.1.9 4.88.62a.88.88 0 0 0 .73-.74c.3-2.14-.15-3.5-.61-4.88"/><path d="M15.62 16.95c.2.85.62 2.76.5 4.28a.77.77 0 0 1-.9.7 16.64 16.64 0 0 1-4.08-1.36"/><path d="M16.13 21.05c1.65.63 3.68.84 4.87.91a.9.9 0 0 0 .96-.96 17.68 17.68 0 0 0-.9-4.87"/><path d="M16.94 15.62c.86.2 2.77.62 4.29.5a.77.77 0 0 0 .7-.9 16.64 16.64 0 0 0-1.36-4.08"/><path d="M17.99 5.52a20.82 20.82 0 0 1 3.15 4.5.8.8 0 0 1-.68 1.13c-2.33.2-5.3-.32-8.27-1.57"/><path d="M4.93 4.93 3 3a.7.7 0 0 1 0-1"/><path d="M9.58 12.18c1.24 2.98 1.77 5.95 1.57 8.28a.8.8 0 0 1-1.13.68 20.82 20.82 0 0 1-4.5-3.15"/>"#,
+        doc: "`hop`, from Lucide.",
+    };
+
+    /// `hop-off`, from Lucide.
+    pub const HOP_OFF: Self = Self {
+        name: "hop-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.82 16.12c1.69.6 3.91.79 5.18.85.28.01.53-.09.7-.27"/><path d="M11.14 20.57c.52.24 2.44 1.12 4.08 1.37.46.06.86-.25.9-.71.12-1.52-.3-3.43-.5-4.28"/><path d="M16.13 21.05c1.65.63 3.68.84 4.87.91a.9.9 0 0 0 .7-.26"/><path d="M17.99 5.52a20.83 20.83 0 0 1 3.15 4.5.8.8 0 0 1-.68 1.13c-1.17.1-2.5.02-3.9-.25"/><path d="M20.57 11.14c.24.52 1.12 2.44 1.37 4.08.04.3-.08.59-.31.75"/><path d="M4.93 4.93a10 10 0 0 0-.67 13.4c.35.43.96.4 1.17-.12.69-1.71 1.07-5.07 1.07-6.71 1.34.45 3.1.9 4.88.62a.85.85 0 0 0 .48-.24"/><path d="M5.52 17.99c1.05.95 2.91 2.42 4.5 3.15a.8.8 0 0 0 1.13-.68c.2-2.34-.33-5.3-1.57-8.28"/><path d="M8.35 2.68a10 10 0 0 1 9.98 1.58c.43.35.4.96-.12 1.17-1.5.6-4.3.98-6.07 1.05"/><path d="m2 2 20 20"/>"#,
+        doc: "`hop-off`, from Lucide.",
+    };
+
+    /// `hospital`, from Lucide.
+    pub const HOSPITAL: Self = Self {
+        name: "hospital",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 7v4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M14 9h-4"/><path d="M18 11h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"/><path d="M18 21V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16"/>"#,
+        doc: "`hospital`, from Lucide.",
+    };
+
+    /// `hotel`, from Lucide.
+    pub const HOTEL: Self = Self {
+        name: "hotel",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 22v-6.57"/><path d="M12 11h.01"/><path d="M12 7h.01"/><path d="M14 15.43V22"/><path d="M15 16a5 5 0 0 0-6 0"/><path d="M16 11h.01"/><path d="M16 7h.01"/><path d="M8 11h.01"/><path d="M8 7h.01"/><rect x="4" y="2" width="16" height="20" rx="2"/>"#,
+        doc: "`hotel`, from Lucide.",
+    };
+
+    /// `hourglass`, from Lucide.
+    pub const HOURGLASS: Self = Self {
+        name: "hourglass",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/>"#,
+        doc: "`hourglass`, from Lucide.",
+    };
+
+    /// `house`, from Lucide.
+    pub const HOUSE: Self = Self {
+        name: "house",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>"#,
+        doc: "`house`, from Lucide.",
+    };
+
+    /// `house-heart`, from Lucide.
+    pub const HOUSE_HEART: Self = Self {
+        name: "house-heart",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8.62 13.8A2.25 2.25 0 1 1 12 10.836a2.25 2.25 0 1 1 3.38 2.966l-2.626 2.856a.998.998 0 0 1-1.507 0z"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>"#,
+        doc: "`house-heart`, from Lucide.",
+    };
+
+    /// `house-plug`, from Lucide.
+    pub const HOUSE_PLUG: Self = Self {
+        name: "house-plug",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 12V8.964"/><path d="M14 12V8.964"/><path d="M15 12a1 1 0 0 1 1 1v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2a1 1 0 0 1 1-1z"/><path d="M8.5 21H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2v-2"/>"#,
+        doc: "`house-plug`, from Lucide.",
+    };
+
+    /// `house-plus`, from Lucide.
+    pub const HOUSE_PLUS: Self = Self {
+        name: "house-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.35 21H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 .71-1.53l7-6a2 2 0 0 1 2.58 0l7 6A2 2 0 0 1 21 10v2.35"/><path d="M14.8 12.4A1 1 0 0 0 14 12h-4a1 1 0 0 0-1 1v8"/><path d="M15 18h6"/><path d="M18 15v6"/>"#,
+        doc: "`house-plus`, from Lucide.",
+    };
+
+    /// `house-wifi`, from Lucide.
+    pub const HOUSE_WIFI: Self = Self {
+        name: "house-wifi",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9.5 13.866a4 4 0 0 1 5 .01"/><path d="M12 17h.01"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M7 10.754a8 8 0 0 1 10 0"/>"#,
+        doc: "`house-wifi`, from Lucide.",
+    };
+
+    /// `ice-cream-bowl`, from Lucide.
+    pub const ICE_CREAM_BOWL: Self = Self {
+        name: "ice-cream-bowl",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 17c5 0 8-2.69 8-6H4c0 3.31 3 6 8 6m-4 4h8m-4-3v3M5.14 11a3.5 3.5 0 1 1 6.71 0"/><path d="M12.14 11a3.5 3.5 0 1 1 6.71 0"/><path d="M15.5 6.5a3.5 3.5 0 1 0-7 0"/>"#,
+        doc: "`ice-cream-bowl`, from Lucide.",
+    };
+
+    /// `ice-cream-cone`, from Lucide.
+    pub const ICE_CREAM_CONE: Self = Self {
+        name: "ice-cream-cone",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m7 11 4.08 10.35a1 1 0 0 0 1.84 0L17 11"/><path d="M17 7A5 5 0 0 0 7 7"/><path d="M17 7a2 2 0 0 1 0 4H7a2 2 0 0 1 0-4"/>"#,
+        doc: "`ice-cream-cone`, from Lucide.",
+    };
+
+    /// `id-card`, from Lucide.
+    pub const ID_CARD: Self = Self {
+        name: "id-card",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/>"#,
+        doc: "`id-card`, from Lucide.",
+    };
+
+    /// `id-card-lanyard`, from Lucide.
+    pub const ID_CARD_LANYARD: Self = Self {
+        name: "id-card-lanyard",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.5 8h-3"/><path d="m15 2-1 2h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3"/><path d="M16.899 22A5 5 0 0 0 7.1 22"/><path d="m9 2 3 6"/><circle cx="12" cy="15" r="3"/>"#,
+        doc: "`id-card-lanyard`, from Lucide.",
+    };
+
+    /// `image`, from Lucide.
+    pub const IMAGE: Self = Self {
+        name: "image",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>"#,
+        doc: "`image`, from Lucide.",
+    };
+
+    /// `image-down`, from Lucide.
+    pub const IMAGE_DOWN: Self = Self {
+        name: "image-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21"/><path d="m14 19 3 3v-5.5"/><path d="m17 22 3-3"/><circle cx="9" cy="9" r="2"/>"#,
+        doc: "`image-down`, from Lucide.",
+    };
+
+    /// `image-minus`, from Lucide.
+    pub const IMAGE_MINUS: Self = Self {
+        name: "image-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 9v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/><line x1="16" x2="22" y1="5" y2="5"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>"#,
+        doc: "`image-minus`, from Lucide.",
+    };
+
+    /// `image-off`, from Lucide.
+    pub const IMAGE_OFF: Self = Self {
+        name: "image-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="2" x2="22" y1="2" y2="22"/><path d="M10.41 10.41a2 2 0 1 1-2.83-2.83"/><line x1="13.5" x2="6" y1="13.5" y2="21"/><line x1="18" x2="21" y1="12" y2="15"/><path d="M3.59 3.59A1.99 1.99 0 0 0 3 5v14a2 2 0 0 0 2 2h14c.55 0 1.052-.22 1.41-.59"/><path d="M21 15V5a2 2 0 0 0-2-2H9"/>"#,
+        doc: "`image-off`, from Lucide.",
+    };
+
+    /// `image-play`, from Lucide.
+    pub const IMAGE_PLAY: Self = Self {
+        name: "image-play",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 15.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997a1 1 0 0 1-1.517-.86z"/><path d="M21 12.17V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/><path d="m6 21 5-5"/><circle cx="9" cy="9" r="2"/>"#,
+        doc: "`image-play`, from Lucide.",
+    };
+
+    /// `image-plus`, from Lucide.
+    pub const IMAGE_PLUS: Self = Self {
+        name: "image-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 5h6"/><path d="M19 2v6"/><path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/><circle cx="9" cy="9" r="2"/>"#,
+        doc: "`image-plus`, from Lucide.",
+    };
+
+    /// `image-up`, from Lucide.
+    pub const IMAGE_UP: Self = Self {
+        name: "image-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21"/><path d="m14 19.5 3-3 3 3"/><path d="M17 22v-5.5"/><circle cx="9" cy="9" r="2"/>"#,
+        doc: "`image-up`, from Lucide.",
+    };
+
+    /// `image-upscale`, from Lucide.
+    pub const IMAGE_UPSCALE: Self = Self {
+        name: "image-upscale",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 3h5v5"/><path d="M17 21h2a2 2 0 0 0 2-2"/><path d="M21 12v3"/><path d="m21 3-5 5"/><path d="M3 7V5a2 2 0 0 1 2-2"/><path d="m5 21 4.144-4.144a1.21 1.21 0 0 1 1.712 0L13 19"/><path d="M9 3h3"/><rect x="3" y="11" width="10" height="10" rx="1"/>"#,
+        doc: "`image-upscale`, from Lucide.",
+    };
+
+    /// `images`, from Lucide.
+    pub const IMAGES: Self = Self {
+        name: "images",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m22 11-1.296-1.296a2.4 2.4 0 0 0-3.408 0L11 16"/><path d="M4 8a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2"/><circle cx="13" cy="7" r="1" fill="currentColor"/><rect x="8" y="2" width="14" height="14" rx="2"/>"#,
+        doc: "`images`, from Lucide.",
+    };
+
+    /// `import`, from Lucide.
+    pub const IMPORT: Self = Self {
+        name: "import",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><path d="M8 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-4"/>"#,
+        doc: "`import`, from Lucide.",
+    };
+
+    /// `inbox`, from Lucide.
+    pub const INBOX: Self = Self {
+        name: "inbox",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>"#,
+        doc: "`inbox`, from Lucide.",
+    };
+
+    /// `indian-rupee`, from Lucide.
+    pub const INDIAN_RUPEE: Self = Self {
+        name: "indian-rupee",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 3h12"/><path d="M6 8h12"/><path d="m6 13 8.5 8"/><path d="M6 13h3"/><path d="M9 13c6.667 0 6.667-10 0-10"/>"#,
+        doc: "`indian-rupee`, from Lucide.",
+    };
+
+    /// `infinity`, from Lucide.
+    pub const INFINITY: Self = Self {
+        name: "infinity",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 16c5 0 7-8 12-8a4 4 0 0 1 0 8c-5 0-7-8-12-8a4 4 0 1 0 0 8"/>"#,
+        doc: "`infinity`, from Lucide.",
+    };
+
+    /// Opens the note explaining what a heading or a value means.
+    pub const INFO: Self = Self {
+        name: "info",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>"#,
+        doc: "Opens the note explaining what a heading or a value means.",
+    };
+
+    /// `inspection-panel`, from Lucide.
+    pub const INSPECTION_PANEL: Self = Self {
+        name: "inspection-panel",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><path d="M17 17h.01"/>"#,
+        doc: "`inspection-panel`, from Lucide.",
+    };
+
+    /// `italic`, from Lucide.
+    pub const ITALIC: Self = Self {
+        name: "italic",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="19" x2="10" y1="4" y2="4"/><line x1="14" x2="5" y1="20" y2="20"/><line x1="15" x2="9" y1="4" y2="20"/>"#,
+        doc: "`italic`, from Lucide.",
+    };
+
+    /// `iteration-ccw`, from Lucide.
+    pub const ITERATION_CCW: Self = Self {
+        name: "iteration-ccw",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 14 4 4-4 4"/><path d="M20 10a8 8 0 1 0-8 8h8"/>"#,
+        doc: "`iteration-ccw`, from Lucide.",
+    };
+
+    /// `iteration-cw`, from Lucide.
+    pub const ITERATION_CW: Self = Self {
+        name: "iteration-cw",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 10a8 8 0 1 1 8 8H4"/><path d="m8 22-4-4 4-4"/>"#,
+        doc: "`iteration-cw`, from Lucide.",
+    };
+
+    /// `japanese-yen`, from Lucide.
+    pub const JAPANESE_YEN: Self = Self {
+        name: "japanese-yen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 9.5V21m0-11.5L6 3m6 6.5L18 3"/><path d="M6 15h12"/><path d="M6 11h12"/>"#,
+        doc: "`japanese-yen`, from Lucide.",
+    };
+
+    /// `joystick`, from Lucide.
+    pub const JOYSTICK: Self = Self {
+        name: "joystick",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 17a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2Z"/><path d="M6 15v-2"/><path d="M12 15V9"/><circle cx="12" cy="6" r="3"/>"#,
+        doc: "`joystick`, from Lucide.",
+    };
+
+    /// `kanban`, from Lucide.
+    pub const KANBAN: Self = Self {
+        name: "kanban",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 3v14"/><path d="M12 3v8"/><path d="M19 3v18"/>"#,
+        doc: "`kanban`, from Lucide.",
+    };
+
+    /// `kayak`, from Lucide.
+    pub const KAYAK: Self = Self {
+        name: "kayak",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 17a1 1 0 0 0-1 1v1a2 2 0 1 0 2-2z"/><path d="M20.97 3.61a.45.45 0 0 0-.58-.58C10.2 6.6 6.6 10.2 3.03 20.39a.45.45 0 0 0 .58.58C13.8 17.4 17.4 13.8 20.97 3.61"/><path d="m6.707 6.707 10.586 10.586"/><path d="M7 5a2 2 0 1 0-2 2h1a1 1 0 0 0 1-1z"/>"#,
+        doc: "`kayak`, from Lucide.",
+    };
+
+    /// `key`, from Lucide.
+    pub const KEY: Self = Self {
+        name: "key",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/>"#,
+        doc: "`key`, from Lucide.",
+    };
+
+    /// `key-round`, from Lucide.
+    pub const KEY_ROUND: Self = Self {
+        name: "key-round",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>"#,
+        doc: "`key-round`, from Lucide.",
+    };
+
+    /// `key-square`, from Lucide.
+    pub const KEY_SQUARE: Self = Self {
+        name: "key-square",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.4 2.7a2.5 2.5 0 0 1 3.4 0l5.5 5.5a2.5 2.5 0 0 1 0 3.4l-3.7 3.7a2.5 2.5 0 0 1-3.4 0L8.7 9.8a2.5 2.5 0 0 1 0-3.4z"/><path d="m14 7 3 3"/><path d="m9.4 10.6-6.814 6.814A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814"/>"#,
+        doc: "`key-square`, from Lucide.",
+    };
+
+    /// `keyboard`, from Lucide.
+    pub const KEYBOARD: Self = Self {
+        name: "keyboard",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 8h.01"/><path d="M12 12h.01"/><path d="M14 8h.01"/><path d="M16 12h.01"/><path d="M18 8h.01"/><path d="M6 8h.01"/><path d="M7 16h10"/><path d="M8 12h.01"/><rect width="20" height="16" x="2" y="4" rx="2"/>"#,
+        doc: "`keyboard`, from Lucide.",
+    };
+
+    /// `keyboard-music`, from Lucide.
+    pub const KEYBOARD_MUSIC: Self = Self {
+        name: "keyboard-music",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h4"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M2 12h20"/><path d="M6 12v4"/><path d="M10 12v4"/><path d="M14 12v4"/><path d="M18 12v4"/>"#,
+        doc: "`keyboard-music`, from Lucide.",
+    };
+
+    /// `keyboard-off`, from Lucide.
+    pub const KEYBOARD_OFF: Self = Self {
+        name: "keyboard-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M 20 4 A2 2 0 0 1 22 6"/><path d="M 22 6 L 22 16.41"/><path d="M 7 16 L 16 16"/><path d="M 9.69 4 L 20 4"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="m2 2 20 20"/><path d="M20 20H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/><path d="M6 8h.01"/><path d="M8 12h.01"/>"#,
+        doc: "`keyboard-off`, from Lucide.",
+    };
+
+    /// `lamp`, from Lucide.
+    pub const LAMP: Self = Self {
+        name: "lamp",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 12v6"/><path d="M4.077 10.615A1 1 0 0 0 5 12h14a1 1 0 0 0 .923-1.385l-3.077-7.384A2 2 0 0 0 15 2H9a2 2 0 0 0-1.846 1.23Z"/><path d="M8 20a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1z"/>"#,
+        doc: "`lamp`, from Lucide.",
+    };
+
+    /// `lamp-ceiling`, from Lucide.
+    pub const LAMP_CEILING: Self = Self {
+        name: "lamp-ceiling",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v5"/><path d="M14.829 15.998a3 3 0 1 1-5.658 0"/><path d="M20.92 14.606A1 1 0 0 1 20 16H4a1 1 0 0 1-.92-1.394l3-7A1 1 0 0 1 7 7h10a1 1 0 0 1 .92.606z"/>"#,
+        doc: "`lamp-ceiling`, from Lucide.",
+    };
+
+    /// `lamp-desk`, from Lucide.
+    pub const LAMP_DESK: Self = Self {
+        name: "lamp-desk",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.293 2.293a1 1 0 0 1 1.414 0l2.5 2.5 5.994 1.227a1 1 0 0 1 .506 1.687l-7 7a1 1 0 0 1-1.687-.506l-1.227-5.994-2.5-2.5a1 1 0 0 1 0-1.414z"/><path d="m14.207 4.793-3.414 3.414"/><path d="M3 20a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="m9.086 6.5-4.793 4.793a1 1 0 0 0-.18 1.17L7 18"/>"#,
+        doc: "`lamp-desk`, from Lucide.",
+    };
+
+    /// `lamp-floor`, from Lucide.
+    pub const LAMP_FLOOR: Self = Self {
+        name: "lamp-floor",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 10v12"/><path d="M17.929 7.629A1 1 0 0 1 17 9H7a1 1 0 0 1-.928-1.371l2-5A1 1 0 0 1 9 2h6a1 1 0 0 1 .928.629z"/><path d="M9 22h6"/>"#,
+        doc: "`lamp-floor`, from Lucide.",
+    };
+
+    /// `lamp-wall-down`, from Lucide.
+    pub const LAMP_WALL_DOWN: Self = Self {
+        name: "lamp-wall-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19.929 18.629A1 1 0 0 1 19 20H9a1 1 0 0 1-.928-1.371l2-5A1 1 0 0 1 11 13h6a1 1 0 0 1 .928.629z"/><path d="M6 3a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M8 6h4a2 2 0 0 1 2 2v5"/>"#,
+        doc: "`lamp-wall-down`, from Lucide.",
+    };
+
+    /// `lamp-wall-up`, from Lucide.
+    pub const LAMP_WALL_UP: Self = Self {
+        name: "lamp-wall-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19.929 9.629A1 1 0 0 1 19 11H9a1 1 0 0 1-.928-1.371l2-5A1 1 0 0 1 11 4h6a1 1 0 0 1 .928.629z"/><path d="M6 15a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H5a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1z"/><path d="M8 18h4a2 2 0 0 0 2-2v-5"/>"#,
+        doc: "`lamp-wall-up`, from Lucide.",
+    };
+
+    /// `land-plot`, from Lucide.
+    pub const LAND_PLOT: Self = Self {
+        name: "land-plot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12 8 6-3-6-3v10"/><path d="m8 11.99-5.5 3.14a1 1 0 0 0 0 1.74l8.5 4.86a2 2 0 0 0 2 0l8.5-4.86a1 1 0 0 0 0-1.74L16 12"/><path d="m6.49 12.85 11.02 6.3"/><path d="M17.51 12.85 6.5 19.15"/>"#,
+        doc: "`land-plot`, from Lucide.",
+    };
+
+    /// `landmark`, from Lucide.
+    pub const LANDMARK: Self = Self {
+        name: "landmark",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 18v-7"/><path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/><path d="M6 18v-7"/>"#,
+        doc: "`landmark`, from Lucide.",
+    };
+
+    /// Opens the language menu. Not a flag: a flag names a country and this names a language, and the two disagree for most languages anybody speaks.
+    pub const LANGUAGES: Self = Self {
+        name: "languages",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>"#,
+        doc: "Opens the language menu. Not a flag: a flag names a country and this names a language, and the two disagree for most languages anybody speaks.",
+    };
+
+    /// `laptop`, from Lucide.
+    pub const LAPTOP: Self = Self {
+        name: "laptop",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 5a2 2 0 0 1 2 2v8.526a2 2 0 0 0 .212.897l1.068 2.127a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45l1.068-2.127A2 2 0 0 0 4 15.526V7a2 2 0 0 1 2-2z"/><path d="M20.054 15.987H3.946"/>"#,
+        doc: "`laptop`, from Lucide.",
+    };
+
+    /// `laptop-minimal`, from Lucide.
+    pub const LAPTOP_MINIMAL: Self = Self {
+        name: "laptop-minimal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="12" x="3" y="4" rx="2" ry="2"/><line x1="2" x2="22" y1="20" y2="20"/>"#,
+        doc: "`laptop-minimal`, from Lucide.",
+    };
+
+    /// `laptop-minimal-check`, from Lucide.
+    pub const LAPTOP_MINIMAL_CHECK: Self = Self {
+        name: "laptop-minimal-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 20h20"/><path d="m9 10 2 2 4-4"/><rect x="3" y="4" width="18" height="12" rx="2"/>"#,
+        doc: "`laptop-minimal-check`, from Lucide.",
+    };
+
+    /// `lasso`, from Lucide.
+    pub const LASSO: Self = Self {
+        name: "lasso",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.704 14.467a10 8 0 1 1 3.115 2.375"/><path d="M7 22a5 5 0 0 1-2-3.994"/><circle cx="5" cy="16" r="2"/>"#,
+        doc: "`lasso`, from Lucide.",
+    };
+
+    /// `lasso-select`, from Lucide.
+    pub const LASSO_SELECT: Self = Self {
+        name: "lasso-select",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 22a5 5 0 0 1-2-4"/><path d="M7 16.93c.96.43 1.96.74 2.99.91"/><path d="M3.34 14A6.8 6.8 0 0 1 2 10c0-4.42 4.48-8 10-8s10 3.58 10 8a7.19 7.19 0 0 1-.33 2"/><path d="M5 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M14.33 22h-.09a.35.35 0 0 1-.24-.32v-10a.34.34 0 0 1 .33-.34c.08 0 .15.03.21.08l7.34 6a.33.33 0 0 1-.21.59h-4.49l-2.57 3.85a.35.35 0 0 1-.28.14z"/>"#,
+        doc: "`lasso-select`, from Lucide.",
+    };
+
+    /// `layer-arrow-down`, from Lucide.
+    pub const LAYER_ARROW_DOWN: Self = Self {
+        name: "layer-arrow-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 10v10"/><path d="M22 10a1 1 0 01-.59.92l-5.077 2.308"/><path d="M22.017 10.005a1 1 0 00-.597-.916l-8.59-3.91a2 2 0 00-1.66.001L2.6 9.08a1 1 0 00-.02 1.831l5.093 2.316"/><path d="m9 17 3 3 3-3"/>"#,
+        doc: "`layer-arrow-down`, from Lucide.",
+    };
+
+    /// `layer-arrow-up`, from Lucide.
+    pub const LAYER_ARROW_UP: Self = Self {
+        name: "layer-arrow-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 14V4"/><path d="M7.674 10.774 2.58 13.09a1 1 0 000 1.822l8.6 3.91a2 2 0 001.65 0l8.58-3.9a1 1 0 00.59-.92 1 1 0 00-.59-.922l-5.078-2.308"/><path d="m9 7 3-3 3 3"/>"#,
+        doc: "`layer-arrow-up`, from Lucide.",
+    };
+
+    /// `layers`, from Lucide.
+    pub const LAYERS: Self = Self {
+        name: "layers",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/>"#,
+        doc: "`layers`, from Lucide.",
+    };
+
+    /// `layers-2`, from Lucide.
+    pub const LAYERS_2: Self = Self {
+        name: "layers-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 13.74a2 2 0 0 1-2 0L2.5 8.87a1 1 0 0 1 0-1.74L11 2.26a2 2 0 0 1 2 0l8.5 4.87a1 1 0 0 1 0 1.74z"/><path d="m20 14.285 1.5.845a1 1 0 0 1 0 1.74L13 21.74a2 2 0 0 1-2 0l-8.5-4.87a1 1 0 0 1 0-1.74l1.5-.845"/>"#,
+        doc: "`layers-2`, from Lucide.",
+    };
+
+    /// `layers-arrow-down`, from Lucide.
+    pub const LAYERS_ARROW_DOWN: Self = Self {
+        name: "layers-arrow-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 7v15"/><path d="M2 12a1 1 0 00.58.91l5.093 2.316"/><path d="M22 12a1 1 0 01-.59.92l-5.077 2.308"/><path d="M8 10.37 2.6 7.91a1 1 0 010-1.831l8.57-3.9a2 2 0 011.66.001l8.59 3.91a1 1 0 010 1.831l-5.392 2.45"/><path d="m9 19 3 3 3-3"/>"#,
+        doc: "`layers-arrow-down`, from Lucide.",
+    };
+
+    /// `layers-arrow-up`, from Lucide.
+    pub const LAYERS_ARROW_UP: Self = Self {
+        name: "layers-arrow-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 12V2"/><path d="M2 17.002a1 1 0 00.58.91l8.6 3.91a2 2 0 001.65 0l8.58-3.9a1 1 0 00.59-.92"/><path d="M7.674 8.774 2.58 11.09a1 1 0 000 1.822l8.6 3.91a2 2 0 001.65 0l8.58-3.9a1 1 0 00.59-.92 1 1 0 00-.59-.922l-5.078-2.308"/><path d="m9 5 3-3 3 3"/>"#,
+        doc: "`layers-arrow-up`, from Lucide.",
+    };
+
+    /// `layers-minus`, from Lucide.
+    pub const LAYERS_MINUS: Self = Self {
+        name: "layers-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 .83.18 2 2 0 0 0 .83-.18l8.58-3.9a1 1 0 0 0 0-1.832z"/><path d="M16 17h6"/><path d="M2.003 11.995a1 1 0 0 0 .597.915l8.58 3.91a2 2 0 0 0 .83.18"/><path d="M2.003 16.995a1 1 0 0 0 .597.915l8.58 3.91a2 2 0 0 0 .83.18 2 2 0 0 0 .83-.18l2.11-.96"/><path d="M22.018 12.004a1 1 0 0 1-.598.916l-.177.08"/>"#,
+        doc: "`layers-minus`, from Lucide.",
+    };
+
+    /// `layers-plus`, from Lucide.
+    pub const LAYERS_PLUS: Self = Self {
+        name: "layers-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 .83.18 2 2 0 0 0 .83-.18l8.58-3.9a1 1 0 0 0 0-1.831z"/><path d="M16 17h6"/><path d="M19 14v6"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 .825.178"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l2.116-.962"/>"#,
+        doc: "`layers-plus`, from Lucide.",
+    };
+
+    /// `layout-dashboard`, from Lucide.
+    pub const LAYOUT_DASHBOARD: Self = Self {
+        name: "layout-dashboard",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>"#,
+        doc: "`layout-dashboard`, from Lucide.",
+    };
+
+    /// `layout-freeform`, from Lucide.
+    pub const LAYOUT_FREEFORM: Self = Self {
+        name: "layout-freeform",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="4" rx="1"/><rect width="7" height="7" x="4" y="14" rx="1"/>"#,
+        doc: "`layout-freeform`, from Lucide.",
+    };
+
+    /// `layout-grid`, from Lucide.
+    pub const LAYOUT_GRID: Self = Self {
+        name: "layout-grid",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>"#,
+        doc: "`layout-grid`, from Lucide.",
+    };
+
+    /// `layout-list`, from Lucide.
+    pub const LAYOUT_LIST: Self = Self {
+        name: "layout-list",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><path d="M14 4h7"/><path d="M14 9h7"/><path d="M14 15h7"/><path d="M14 20h7"/>"#,
+        doc: "`layout-list`, from Lucide.",
+    };
+
+    /// `layout-panel-left`, from Lucide.
+    pub const LAYOUT_PANEL_LEFT: Self = Self {
+        name: "layout-panel-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="7" height="18" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/>"#,
+        doc: "`layout-panel-left`, from Lucide.",
+    };
+
+    /// `layout-panel-top`, from Lucide.
+    pub const LAYOUT_PANEL_TOP: Self = Self {
+        name: "layout-panel-top",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/>"#,
+        doc: "`layout-panel-top`, from Lucide.",
+    };
+
+    /// `layout-template`, from Lucide.
+    pub const LAYOUT_TEMPLATE: Self = Self {
+        name: "layout-template",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="7" x="3" y="3" rx="1"/><rect width="9" height="7" x="3" y="14" rx="1"/><rect width="5" height="7" x="16" y="14" rx="1"/>"#,
+        doc: "`layout-template`, from Lucide.",
+    };
+
+    /// `leaf`, from Lucide.
+    pub const LEAF: Self = Self {
+        name: "leaf",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>"#,
+        doc: "`leaf`, from Lucide.",
+    };
+
+    /// `leafy-green`, from Lucide.
+    pub const LEAFY_GREEN: Self = Self {
+        name: "leafy-green",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 22c1.25-.987 2.27-1.975 3.9-2.2a5.56 5.56 0 0 1 3.8 1.5 4 4 0 0 0 6.187-2.353 3.5 3.5 0 0 0 3.69-5.116A3.5 3.5 0 0 0 20.95 8 3.5 3.5 0 1 0 16 3.05a3.5 3.5 0 0 0-5.831 1.373 3.5 3.5 0 0 0-5.116 3.69 4 4 0 0 0-2.348 6.155C3.499 15.42 4.409 16.712 4.2 18.1 3.926 19.743 3.014 20.732 2 22"/><path d="M2 22 17 7"/>"#,
+        doc: "`leafy-green`, from Lucide.",
+    };
+
+    /// `lectern`, from Lucide.
+    pub const LECTERN: Self = Self {
+        name: "lectern",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 12h3a2 2 0 0 0 1.902-1.38l1.056-3.333A1 1 0 0 0 21 6H3a1 1 0 0 0-.958 1.287l1.056 3.334A2 2 0 0 0 5 12h3"/><path d="M18 6V3a1 1 0 0 0-1-1h-3"/><rect width="8" height="12" x="8" y="10" rx="1"/>"#,
+        doc: "`lectern`, from Lucide.",
+    };
+
+    /// `lens-concave`, from Lucide.
+    pub const LENS_CONCAVE: Self = Self {
+        name: "lens-concave",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 2a1 1 0 0 0-.8 1.6 14 14 0 0 1 0 16.8A1 1 0 0 0 7 22h10a1 1 0 0 0 .8-1.6 14 14 0 0 1 0-16.8A1 1 0 0 0 17 2z"/>"#,
+        doc: "`lens-concave`, from Lucide.",
+    };
+
+    /// `lens-convex`, from Lucide.
+    pub const LENS_CONVEX: Self = Self {
+        name: "lens-convex",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.433 2a1 1 0 0 1 .824.448 18 18 0 0 1 0 19.104 1 1 0 0 1-.824.448h-2.866a1 1 0 0 1-.824-.448 18 18 0 0 1 0-19.104A1 1 0 0 1 10.567 2z"/>"#,
+        doc: "`lens-convex`, from Lucide.",
+    };
+
+    /// `library`, from Lucide.
+    pub const LIBRARY: Self = Self {
+        name: "library",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/>"#,
+        doc: "`library`, from Lucide.",
+    };
+
+    /// `library-big`, from Lucide.
+    pub const LIBRARY_BIG: Self = Self {
+        name: "library-big",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="8" height="18" x="3" y="3" rx="1"/><path d="M7 3v18"/><path d="M20.4 18.9c.2.5-.1 1.1-.6 1.3l-1.9.7c-.5.2-1.1-.1-1.3-.6L11.1 5.1c-.2-.5.1-1.1.6-1.3l1.9-.7c.5-.2 1.1.1 1.3.6Z"/>"#,
+        doc: "`library-big`, from Lucide.",
+    };
+
+    /// `life-buoy`, from Lucide.
+    pub const LIFE_BUOY: Self = Self {
+        name: "life-buoy",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/><circle cx="12" cy="12" r="4"/>"#,
+        doc: "`life-buoy`, from Lucide.",
+    };
+
+    /// `ligature`, from Lucide.
+    pub const LIGATURE: Self = Self {
+        name: "ligature",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 12h2v8"/><path d="M14 20h4"/><path d="M6 12h4"/><path d="M6 20h4"/><path d="M8 20V8a4 4 0 0 1 7.464-2"/>"#,
+        doc: "`ligature`, from Lucide.",
+    };
+
+    /// `lightbulb`, from Lucide.
+    pub const LIGHTBULB: Self = Self {
+        name: "lightbulb",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>"#,
+        doc: "`lightbulb`, from Lucide.",
+    };
+
+    /// `lightbulb-off`, from Lucide.
+    pub const LIGHTBULB_OFF: Self = Self {
+        name: "lightbulb-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16.8 11.2c.8-.9 1.2-2 1.2-3.2a6 6 0 0 0-9.3-5"/><path d="m2 2 20 20"/><path d="M6.3 6.3a4.67 4.67 0 0 0 1.2 5.2c.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>"#,
+        doc: "`lightbulb-off`, from Lucide.",
+    };
+
+    /// `line-dot-right-horizontal`, from Lucide.
+    pub const LINE_DOT_RIGHT_HORIZONTAL: Self = Self {
+        name: "line-dot-right-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M 3 12 L 15 12"/><circle cx="18" cy="12" r="3"/>"#,
+        doc: "`line-dot-right-horizontal`, from Lucide.",
+    };
+
+    /// `line-squiggle`, from Lucide.
+    pub const LINE_SQUIGGLE: Self = Self {
+        name: "line-squiggle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 3.5c5-2 7 2.5 3 4C1.5 10 2 15 5 16c5 2 9-10 14-7s.5 13.5-4 12c-5-2.5.5-11 6-2"/>"#,
+        doc: "`line-squiggle`, from Lucide.",
+    };
+
+    /// `line-style`, from Lucide.
+    pub const LINE_STYLE: Self = Self {
+        name: "line-style",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 5h2"/><path d="M15 12h6"/><path d="M19 5h2"/><path d="M3 12h6"/><path d="M3 19h18"/><path d="M3 5h2"/>"#,
+        doc: "`line-style`, from Lucide.",
+    };
+
+    /// `link`, from Lucide.
+    pub const LINK: Self = Self {
+        name: "link",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>"#,
+        doc: "`link`, from Lucide.",
+    };
+
+    /// `link-2`, from Lucide.
+    pub const LINK_2: Self = Self {
+        name: "link-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/>"#,
+        doc: "`link-2`, from Lucide.",
+    };
+
+    /// `link-2-off`, from Lucide.
+    pub const LINK_2_OFF: Self = Self {
+        name: "link-2-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 17H7A5 5 0 0 1 7 7"/><path d="M15 7h2a5 5 0 0 1 4 8"/><line x1="8" x2="12" y1="12" y2="12"/><line x1="2" x2="22" y1="2" y2="22"/>"#,
+        doc: "`link-2-off`, from Lucide.",
+    };
+
+    /// `list`, from Lucide.
+    pub const LIST: Self = Self {
+        name: "list",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/>"#,
+        doc: "`list`, from Lucide.",
+    };
+
+    /// `list-check`, from Lucide.
+    pub const LIST_CHECK: Self = Self {
+        name: "list-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 5H3"/><path d="M16 12H3"/><path d="M11 19H3"/><path d="m15 18 2 2 4-4"/>"#,
+        doc: "`list-check`, from Lucide.",
+    };
+
+    /// `list-checks`, from Lucide.
+    pub const LIST_CHECKS: Self = Self {
+        name: "list-checks",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/>"#,
+        doc: "`list-checks`, from Lucide.",
+    };
+
+    /// `list-chevrons-down-up`, from Lucide.
+    pub const LIST_CHEVRONS_DOWN_UP: Self = Self {
+        name: "list-chevrons-down-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 5h8"/><path d="M3 12h8"/><path d="M3 19h8"/><path d="m15 5 3 3 3-3"/><path d="m15 19 3-3 3 3"/>"#,
+        doc: "`list-chevrons-down-up`, from Lucide.",
+    };
+
+    /// `list-chevrons-up-down`, from Lucide.
+    pub const LIST_CHEVRONS_UP_DOWN: Self = Self {
+        name: "list-chevrons-up-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 5h8"/><path d="M3 12h8"/><path d="M3 19h8"/><path d="m15 8 3-3 3 3"/><path d="m15 16 3 3 3-3"/>"#,
+        doc: "`list-chevrons-up-down`, from Lucide.",
+    };
+
+    /// `list-clock`, from Lucide.
+    pub const LIST_CLOCK: Self = Self {
+        name: "list-clock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 13v2.2l1.6 1"/><path d="M3 12h3.458"/><path d="M3 19h3.832"/><path d="M3 5h18"/><circle cx="16" cy="15" r="6"/>"#,
+        doc: "`list-clock`, from Lucide.",
+    };
+
+    /// `list-collapse`, from Lucide.
+    pub const LIST_COLLAPSE: Self = Self {
+        name: "list-collapse",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 5h11"/><path d="M10 12h11"/><path d="M10 19h11"/><path d="m3 10 3-3-3-3"/><path d="m3 20 3-3-3-3"/>"#,
+        doc: "`list-collapse`, from Lucide.",
+    };
+
+    /// `list-end`, from Lucide.
+    pub const LIST_END: Self = Self {
+        name: "list-end",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 5H3"/><path d="M16 12H3"/><path d="M9 19H3"/><path d="m16 16-3 3 3 3"/><path d="M21 5v12a2 2 0 0 1-2 2h-6"/>"#,
+        doc: "`list-end`, from Lucide.",
+    };
+
+    /// `list-filter`, from Lucide.
+    pub const LIST_FILTER: Self = Self {
+        name: "list-filter",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 5h20"/><path d="M6 12h12"/><path d="M9 19h6"/>"#,
+        doc: "`list-filter`, from Lucide.",
+    };
+
+    /// `list-filter-plus`, from Lucide.
+    pub const LIST_FILTER_PLUS: Self = Self {
+        name: "list-filter-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 5H2"/><path d="M6 12h12"/><path d="M9 19h6"/><path d="M16 5h6"/><path d="M19 8V2"/>"#,
+        doc: "`list-filter-plus`, from Lucide.",
+    };
+
+    /// `list-indent-decrease`, from Lucide.
+    pub const LIST_INDENT_DECREASE: Self = Self {
+        name: "list-indent-decrease",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 5H11"/><path d="M21 12H11"/><path d="M21 19H11"/><path d="m7 8-4 4 4 4"/>"#,
+        doc: "`list-indent-decrease`, from Lucide.",
+    };
+
+    /// `list-indent-increase`, from Lucide.
+    pub const LIST_INDENT_INCREASE: Self = Self {
+        name: "list-indent-increase",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 5H11"/><path d="M21 12H11"/><path d="M21 19H11"/><path d="m3 8 4 4-4 4"/>"#,
+        doc: "`list-indent-increase`, from Lucide.",
+    };
+
+    /// `list-minus`, from Lucide.
+    pub const LIST_MINUS: Self = Self {
+        name: "list-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 5H3"/><path d="M11 12H3"/><path d="M16 19H3"/><path d="M21 12h-6"/>"#,
+        doc: "`list-minus`, from Lucide.",
+    };
+
+    /// `list-music`, from Lucide.
+    pub const LIST_MUSIC: Self = Self {
+        name: "list-music",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 5H3"/><path d="M11 12H3"/><path d="M11 19H3"/><path d="M21 16V5"/><circle cx="18" cy="16" r="3"/>"#,
+        doc: "`list-music`, from Lucide.",
+    };
+
+    /// `list-ordered`, from Lucide.
+    pub const LIST_ORDERED: Self = Self {
+        name: "list-ordered",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 5h10"/><path d="M11 12h10"/><path d="M11 19h10"/><path d="M4 4h1v5"/><path d="M4 9h2"/><path d="M6.5 20H3.4c0-1 2.6-1.925 2.6-3.5a1.5 1.5 0 0 0-2.6-1.02"/>"#,
+        doc: "`list-ordered`, from Lucide.",
+    };
+
+    /// `list-plus`, from Lucide.
+    pub const LIST_PLUS: Self = Self {
+        name: "list-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 5H3"/><path d="M11 12H3"/><path d="M16 19H3"/><path d="M18 9v6"/><path d="M21 12h-6"/>"#,
+        doc: "`list-plus`, from Lucide.",
+    };
+
+    /// `list-restart`, from Lucide.
+    pub const LIST_RESTART: Self = Self {
+        name: "list-restart",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 5H3"/><path d="M7 12H3"/><path d="M7 19H3"/><path d="M12 18a5 5 0 0 0 9-3 4.5 4.5 0 0 0-4.5-4.5c-1.33 0-2.54.54-3.41 1.41L11 14"/><path d="M11 10v4h4"/>"#,
+        doc: "`list-restart`, from Lucide.",
+    };
+
+    /// `list-sort-ascending`, from Lucide.
+    pub const LIST_SORT_ASCENDING: Self = Self {
+        name: "list-sort-ascending",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 19h18"/><path d="M15 12H3"/><path d="M9 5H3"/>"#,
+        doc: "`list-sort-ascending`, from Lucide.",
+    };
+
+    /// `list-sort-descending`, from Lucide.
+    pub const LIST_SORT_DESCENDING: Self = Self {
+        name: "list-sort-descending",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 12H3"/><path d="M3 5h18"/><path d="M9 19H3"/>"#,
+        doc: "`list-sort-descending`, from Lucide.",
+    };
+
+    /// `list-start`, from Lucide.
+    pub const LIST_START: Self = Self {
+        name: "list-start",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 5h6"/><path d="M3 12h13"/><path d="M3 19h13"/><path d="m16 8-3-3 3-3"/><path d="M21 19V7a2 2 0 0 0-2-2h-6"/>"#,
+        doc: "`list-start`, from Lucide.",
+    };
+
+    /// `list-todo`, from Lucide.
+    pub const LIST_TODO: Self = Self {
+        name: "list-todo",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><rect x="3" y="4" width="6" height="6" rx="1"/>"#,
+        doc: "`list-todo`, from Lucide.",
+    };
+
+    /// `list-tree`, from Lucide.
+    pub const LIST_TREE: Self = Self {
+        name: "list-tree",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 5h13"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="M3 10a2 2 0 0 0 2 2h3"/><path d="M3 5v12a2 2 0 0 0 2 2h3"/>"#,
+        doc: "`list-tree`, from Lucide.",
+    };
+
+    /// `list-video`, from Lucide.
+    pub const LIST_VIDEO: Self = Self {
+        name: "list-video",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 5H3"/><path d="M10 12H3"/><path d="M10 19H3"/><path d="M15 12.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997a1 1 0 0 1-1.517-.86z"/>"#,
+        doc: "`list-video`, from Lucide.",
+    };
+
+    /// `list-x`, from Lucide.
+    pub const LIST_X: Self = Self {
+        name: "list-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 5H3"/><path d="M11 12H3"/><path d="M16 19H3"/><path d="m15.5 9.5 5 5"/><path d="m20.5 9.5-5 5"/>"#,
+        doc: "`list-x`, from Lucide.",
+    };
+
+    /// `loader`, from Lucide.
+    pub const LOADER: Self = Self {
+        name: "loader",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/>"#,
+        doc: "`loader`, from Lucide.",
+    };
+
+    /// `loader-circle`, from Lucide.
+    pub const LOADER_CIRCLE: Self = Self {
+        name: "loader-circle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 12a9 9 0 1 1-6.219-8.56"/>"#,
+        doc: "`loader-circle`, from Lucide.",
+    };
+
+    /// `loader-pinwheel`, from Lucide.
+    pub const LOADER_PINWHEEL: Self = Self {
+        name: "loader-pinwheel",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 12a1 1 0 0 1-10 0 1 1 0 0 0-10 0"/><path d="M7 20.7a1 1 0 1 1 5-8.7 1 1 0 1 0 5-8.6"/><path d="M7 3.3a1 1 0 1 1 5 8.6 1 1 0 1 0 5 8.6"/><circle cx="12" cy="12" r="10"/>"#,
+        doc: "`loader-pinwheel`, from Lucide.",
+    };
+
+    /// `locate`, from Lucide.
+    pub const LOCATE: Self = Self {
+        name: "locate",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="2" x2="5" y1="12" y2="12"/><line x1="19" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="5"/><line x1="12" x2="12" y1="19" y2="22"/><circle cx="12" cy="12" r="7"/>"#,
+        doc: "`locate`, from Lucide.",
+    };
+
+    /// `locate-fixed`, from Lucide.
+    pub const LOCATE_FIXED: Self = Self {
+        name: "locate-fixed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="2" x2="5" y1="12" y2="12"/><line x1="19" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="5"/><line x1="12" x2="12" y1="19" y2="22"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/>"#,
+        doc: "`locate-fixed`, from Lucide.",
+    };
+
+    /// `locate-off`, from Lucide.
+    pub const LOCATE_OFF: Self = Self {
+        name: "locate-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 19v3"/><path d="M12 2v3"/><path d="M18.89 13.24a7 7 0 0 0-8.13-8.13"/><path d="M19 12h3"/><path d="M2 12h3"/><path d="m2 2 20 20"/><path d="M7.05 7.05a7 7 0 0 0 9.9 9.9"/>"#,
+        doc: "`locate-off`, from Lucide.",
+    };
+
+    /// `lock`, from Lucide.
+    pub const LOCK: Self = Self {
+        name: "lock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>"#,
+        doc: "`lock`, from Lucide.",
+    };
+
+    /// `lock-keyhole`, from Lucide.
+    pub const LOCK_KEYHOLE: Self = Self {
+        name: "lock-keyhole",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/>"#,
+        doc: "`lock-keyhole`, from Lucide.",
+    };
+
+    /// `lock-keyhole-open`, from Lucide.
+    pub const LOCK_KEYHOLE_OPEN: Self = Self {
+        name: "lock-keyhole-open",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="16" r="1"/><rect width="18" height="12" x="3" y="10" rx="2"/><path d="M7 10V7a5 5 0 0 1 9.33-2.5"/>"#,
+        doc: "`lock-keyhole-open`, from Lucide.",
+    };
+
+    /// `lock-open`, from Lucide.
+    pub const LOCK_OPEN: Self = Self {
+        name: "lock-open",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>"#,
+        doc: "`lock-open`, from Lucide.",
+    };
+
+    /// `log-in`, from Lucide.
+    pub const LOG_IN: Self = Self {
+        name: "log-in",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10 17 5-5-5-5"/><path d="M15 12H3"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>"#,
+        doc: "`log-in`, from Lucide.",
+    };
+
+    /// `log-out`, from Lucide.
+    pub const LOG_OUT: Self = Self {
+        name: "log-out",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>"#,
+        doc: "`log-out`, from Lucide.",
+    };
+
+    /// `logs`, from Lucide.
+    pub const LOGS: Self = Self {
+        name: "logs",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 5h1"/><path d="M3 12h1"/><path d="M3 19h1"/><path d="M8 5h1"/><path d="M8 12h1"/><path d="M8 19h1"/><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/>"#,
+        doc: "`logs`, from Lucide.",
+    };
+
+    /// `lollipop`, from Lucide.
+    pub const LOLLIPOP: Self = Self {
+        name: "lollipop",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 11a2 2 0 0 0 4 0 4 4 0 0 0-8 0 6 6 0 0 0 12 0"/>"#,
+        doc: "`lollipop`, from Lucide.",
+    };
+
+    /// `luggage`, from Lucide.
+    pub const LUGGAGE: Self = Self {
+        name: "luggage",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 20a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2"/><path d="M8 18V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v14"/><path d="M10 20h4"/><circle cx="16" cy="20" r="2"/><circle cx="8" cy="20" r="2"/>"#,
+        doc: "`luggage`, from Lucide.",
+    };
+
+    /// `magnet`, from Lucide.
+    pub const MAGNET: Self = Self {
+        name: "magnet",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12 15 4 4"/><path d="M2.352 10.648a1.205 1.205 0 0 0 0 1.704l2.296 2.296a1.205 1.205 0 0 0 1.704 0l6.029-6.029a1 1 0 1 1 3 3l-6.029 6.029a1.205 1.205 0 0 0 0 1.704l2.296 2.296a1.205 1.205 0 0 0 1.704 0l6.365-6.367A1 1 0 0 0 8.716 4.282z"/><path d="m5 8 4 4"/>"#,
+        doc: "`magnet`, from Lucide.",
+    };
+
+    /// `mail`, from Lucide.
+    pub const MAIL: Self = Self {
+        name: "mail",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/>"#,
+        doc: "`mail`, from Lucide.",
+    };
+
+    /// `mail-badge`, from Lucide.
+    pub const MAIL_BADGE: Self = Self {
+        name: "mail-badge",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 7.7V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8.25"/><path d="M12 12.996a1.94 1.94 0 0 1-1.03-.296L2 7"/><path d="m20.69 16.479 1.29 4.88a.5.5 0 0 1-.698.591l-1.843-.849a1 1 0 0 0-.879.001l-1.846.85a.5.5 0 0 1-.692-.593l1.29-4.88"/><circle cx="19" cy="14" r="3"/>"#,
+        doc: "`mail-badge`, from Lucide.",
+    };
+
+    /// `mail-check`, from Lucide.
+    pub const MAIL_CHECK: Self = Self {
+        name: "mail-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/><path d="m16 19 2 2 4-4"/>"#,
+        doc: "`mail-check`, from Lucide.",
+    };
+
+    /// `mail-minus`, from Lucide.
+    pub const MAIL_MINUS: Self = Self {
+        name: "mail-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 15V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/><path d="M16 19h6"/>"#,
+        doc: "`mail-minus`, from Lucide.",
+    };
+
+    /// `mail-open`, from Lucide.
+    pub const MAIL_OPEN: Self = Self {
+        name: "mail-open",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/>"#,
+        doc: "`mail-open`, from Lucide.",
+    };
+
+    /// `mail-plus`, from Lucide.
+    pub const MAIL_PLUS: Self = Self {
+        name: "mail-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/><path d="M19 16v6"/><path d="M16 19h6"/>"#,
+        doc: "`mail-plus`, from Lucide.",
+    };
+
+    /// `mail-question-mark`, from Lucide.
+    pub const MAIL_QUESTION_MARK: Self = Self {
+        name: "mail-question-mark",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 10.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h12.5"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/><path d="M18 15.28c.2-.4.5-.8.9-1a2.1 2.1 0 0 1 2.6.4c.3.4.5.8.5 1.3 0 1.3-2 2-2 2"/><path d="M20 22v.01"/>"#,
+        doc: "`mail-question-mark`, from Lucide.",
+    };
+
+    /// `mail-search`, from Lucide.
+    pub const MAIL_SEARCH: Self = Self {
+        name: "mail-search",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 12.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h7.5"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/><path d="M18 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><circle cx="18" cy="18" r="3"/><path d="m22 22-1.5-1.5"/>"#,
+        doc: "`mail-search`, from Lucide.",
+    };
+
+    /// `mail-warning`, from Lucide.
+    pub const MAIL_WARNING: Self = Self {
+        name: "mail-warning",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 10.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h12.5"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/><path d="M20 14v4"/><path d="M20 22v.01"/>"#,
+        doc: "`mail-warning`, from Lucide.",
+    };
+
+    /// `mail-x`, from Lucide.
+    pub const MAIL_X: Self = Self {
+        name: "mail-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h9"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/><path d="m17 17 4 4"/><path d="m21 17-4 4"/>"#,
+        doc: "`mail-x`, from Lucide.",
+    };
+
+    /// `mailbox`, from Lucide.
+    pub const MAILBOX: Self = Self {
+        name: "mailbox",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.5C2 7 4 5 6.5 5H18c2.2 0 4 1.8 4 4v8Z"/><polyline points="15,9 18,9 18,11"/><path d="M6.5 5C9 5 11 7 11 9.5V17a2 2 0 0 1-2 2"/><line x1="6" x2="7" y1="10" y2="10"/>"#,
+        doc: "`mailbox`, from Lucide.",
+    };
+
+    /// `mails`, from Lucide.
+    pub const MAILS: Self = Self {
+        name: "mails",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 1-1.732"/><path d="m22 5.5-6.419 4.179a2 2 0 0 1-2.162 0L7 5.5"/><rect x="7" y="3" width="15" height="12" rx="2"/>"#,
+        doc: "`mails`, from Lucide.",
+    };
+
+    /// `map`, from Lucide.
+    pub const MAP: Self = Self {
+        name: "map",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/>"#,
+        doc: "`map`, from Lucide.",
+    };
+
+    /// `map-minus`, from Lucide.
+    pub const MAP_MINUS: Self = Self {
+        name: "map-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m11 19-1.106-.552a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0l4.212 2.106a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619V14"/><path d="M15 5.764V14"/><path d="M21 18h-6"/><path d="M9 3.236v15"/>"#,
+        doc: "`map-minus`, from Lucide.",
+    };
+
+    /// `map-pin`, from Lucide.
+    pub const MAP_PIN: Self = Self {
+        name: "map-pin",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>"#,
+        doc: "`map-pin`, from Lucide.",
+    };
+
+    /// `map-pin-check`, from Lucide.
+    pub const MAP_PIN_CHECK: Self = Self {
+        name: "map-pin-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19.43 12.935c.357-.967.57-1.955.57-2.935a8 8 0 0 0-16 0c0 4.993 5.539 10.193 7.399 11.799a1 1 0 0 0 1.202 0 32.197 32.197 0 0 0 .813-.728"/><circle cx="12" cy="10" r="3"/><path d="m16 18 2 2 4-4"/>"#,
+        doc: "`map-pin-check`, from Lucide.",
+    };
+
+    /// `map-pin-check-inside`, from Lucide.
+    pub const MAP_PIN_CHECK_INSIDE: Self = Self {
+        name: "map-pin-check-inside",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><path d="m9 10 2 2 4-4"/>"#,
+        doc: "`map-pin-check-inside`, from Lucide.",
+    };
+
+    /// `map-pin-house`, from Lucide.
+    pub const MAP_PIN_HOUSE: Self = Self {
+        name: "map-pin-house",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 22a1 1 0 0 1-1-1v-4a1 1 0 0 1 .445-.832l3-2a1 1 0 0 1 1.11 0l3 2A1 1 0 0 1 22 17v4a1 1 0 0 1-1 1z"/><path d="M18 10a8 8 0 0 0-16 0c0 4.993 5.539 10.193 7.399 11.799a1 1 0 0 0 .601.2"/><path d="M18 22v-3"/><circle cx="10" cy="10" r="3"/>"#,
+        doc: "`map-pin-house`, from Lucide.",
+    };
+
+    /// `map-pin-minus`, from Lucide.
+    pub const MAP_PIN_MINUS: Self = Self {
+        name: "map-pin-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18.977 14C19.6 12.701 20 11.343 20 10a8 8 0 0 0-16 0c0 4.993 5.539 10.193 7.399 11.799a1 1 0 0 0 1.202 0 32 32 0 0 0 .824-.738"/><circle cx="12" cy="10" r="3"/><path d="M16 18h6"/>"#,
+        doc: "`map-pin-minus`, from Lucide.",
+    };
+
+    /// `map-pin-minus-inside`, from Lucide.
+    pub const MAP_PIN_MINUS_INSIDE: Self = Self {
+        name: "map-pin-minus-inside",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><path d="M9 10h6"/>"#,
+        doc: "`map-pin-minus-inside`, from Lucide.",
+    };
+
+    /// `map-pin-off`, from Lucide.
+    pub const MAP_PIN_OFF: Self = Self {
+        name: "map-pin-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.75 7.09a3 3 0 0 1 2.16 2.16"/><path d="M17.072 17.072c-1.634 2.17-3.527 3.912-4.471 4.727a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 1.432-4.568"/><path d="m2 2 20 20"/><path d="M8.475 2.818A8 8 0 0 1 20 10c0 1.183-.31 2.377-.81 3.533"/><path d="M9.13 9.13a3 3 0 0 0 3.74 3.74"/>"#,
+        doc: "`map-pin-off`, from Lucide.",
+    };
+
+    /// `map-pin-pen`, from Lucide.
+    pub const MAP_PIN_PEN: Self = Self {
+        name: "map-pin-pen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17.97 9.304A8 8 0 0 0 2 10c0 4.69 4.887 9.562 7.022 11.468"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="10" r="3"/>"#,
+        doc: "`map-pin-pen`, from Lucide.",
+    };
+
+    /// `map-pin-plus`, from Lucide.
+    pub const MAP_PIN_PLUS: Self = Self {
+        name: "map-pin-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19.914 11.105A7.298 7.298 0 0 0 20 10a8 8 0 0 0-16 0c0 4.993 5.539 10.193 7.399 11.799a1 1 0 0 0 1.202 0 32 32 0 0 0 .824-.738"/><circle cx="12" cy="10" r="3"/><path d="M16 18h6"/><path d="M19 15v6"/>"#,
+        doc: "`map-pin-plus`, from Lucide.",
+    };
+
+    /// `map-pin-plus-inside`, from Lucide.
+    pub const MAP_PIN_PLUS_INSIDE: Self = Self {
+        name: "map-pin-plus-inside",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><path d="M12 7v6"/><path d="M9 10h6"/>"#,
+        doc: "`map-pin-plus-inside`, from Lucide.",
+    };
+
+    /// `map-pin-search`, from Lucide.
+    pub const MAP_PIN_SEARCH: Self = Self {
+        name: "map-pin-search",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M 12.248 21.969 a 1 1 0 0 1 -0.849 -0.17 C 9.539 20.193 4 14.993 4 10 a 8 8 0 0 1 16 0 C 20 10.42 19.961 10.841 19.888 11.262"/><path d="m22 22-1.88-1.88"/><circle cx="12" cy="10" r="3"/><circle cx="18" cy="18" r="3"/>"#,
+        doc: "`map-pin-search`, from Lucide.",
+    };
+
+    /// `map-pin-x`, from Lucide.
+    pub const MAP_PIN_X: Self = Self {
+        name: "map-pin-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19.752 11.901A7.78 7.78 0 0 0 20 10a8 8 0 0 0-16 0c0 4.993 5.539 10.193 7.399 11.799a1 1 0 0 0 1.202 0 19 19 0 0 0 .09-.077"/><circle cx="12" cy="10" r="3"/><path d="m21.5 15.5-5 5"/><path d="m21.5 20.5-5-5"/>"#,
+        doc: "`map-pin-x`, from Lucide.",
+    };
+
+    /// `map-pin-x-inside`, from Lucide.
+    pub const MAP_PIN_X_INSIDE: Self = Self {
+        name: "map-pin-x-inside",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><path d="m14.5 7.5-5 5"/><path d="m9.5 7.5 5 5"/>"#,
+        doc: "`map-pin-x-inside`, from Lucide.",
+    };
+
+    /// `map-pinned`, from Lucide.
+    pub const MAP_PINNED: Self = Self {
+        name: "map-pinned",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 8c0 3.613-3.869 7.429-5.393 8.795a1 1 0 0 1-1.214 0C9.87 15.429 6 11.613 6 8a6 6 0 0 1 12 0"/><circle cx="12" cy="8" r="2"/><path d="M8.714 14h-3.71a1 1 0 0 0-.948.683l-2.004 6A1 1 0 0 0 3 22h18a1 1 0 0 0 .948-1.316l-2-6a1 1 0 0 0-.949-.684h-3.712"/>"#,
+        doc: "`map-pinned`, from Lucide.",
+    };
+
+    /// `map-plus`, from Lucide.
+    pub const MAP_PLUS: Self = Self {
+        name: "map-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m11 19-1.106-.552a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0l4.212 2.106a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619V12"/><path d="M15 5.764V12"/><path d="M18 15v6"/><path d="M21 18h-6"/><path d="M9 3.236v15"/>"#,
+        doc: "`map-plus`, from Lucide.",
+    };
+
+    /// `mars`, from Lucide.
+    pub const MARS: Self = Self {
+        name: "mars",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 3h5v5"/><path d="m21 3-6.75 6.75"/><circle cx="10" cy="14" r="6"/>"#,
+        doc: "`mars`, from Lucide.",
+    };
+
+    /// `mars-stroke`, from Lucide.
+    pub const MARS_STROKE: Self = Self {
+        name: "mars-stroke",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14 6 4 4"/><path d="M17 3h4v4"/><path d="m21 3-7.75 7.75"/><circle cx="9" cy="15" r="6"/>"#,
+        doc: "`mars-stroke`, from Lucide.",
+    };
+
+    /// `martini`, from Lucide.
+    pub const MARTINI: Self = Self {
+        name: "martini",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 12 4.207 4.207A.707.707 0 0 1 4.707 3h14.586a.707.707 0 0 1 .5 1.207z"/><path d="M12 12v10"/><path d="M7 22h10"/>"#,
+        doc: "`martini`, from Lucide.",
+    };
+
+    /// `maximize`, from Lucide.
+    pub const MAXIMIZE: Self = Self {
+        name: "maximize",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>"#,
+        doc: "`maximize`, from Lucide.",
+    };
+
+    /// `maximize-2`, from Lucide.
+    pub const MAXIMIZE_2: Self = Self {
+        name: "maximize-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 3h6v6"/><path d="m21 3-7 7"/><path d="m3 21 7-7"/><path d="M9 21H3v-6"/>"#,
+        doc: "`maximize-2`, from Lucide.",
+    };
+
+    /// `medal`, from Lucide.
+    pub const MEDAL: Self = Self {
+        name: "medal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><path d="M11 12 5.12 2.2"/><path d="m13 12 5.88-9.8"/><path d="M8 7h8"/><circle cx="12" cy="17" r="5"/><path d="M12 18v-2h-.5"/>"#,
+        doc: "`medal`, from Lucide.",
+    };
+
+    /// `megaphone`, from Lucide.
+    pub const MEGAPHONE: Self = Self {
+        name: "megaphone",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/><path d="M8 6v8"/>"#,
+        doc: "`megaphone`, from Lucide.",
+    };
+
+    /// `megaphone-off`, from Lucide.
+    pub const MEGAPHONE_OFF: Self = Self {
+        name: "megaphone-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.636 6A13 13 0 0 0 19.4 3.2 1 1 0 0 1 21 4v11.344"/><path d="M14.378 14.357A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1"/><path d="m2 2 20 20"/><path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/><path d="M8 8v6"/>"#,
+        doc: "`megaphone-off`, from Lucide.",
+    };
+
+    /// `memory-stick`, from Lucide.
+    pub const MEMORY_STICK: Self = Self {
+        name: "memory-stick",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 12v-2"/><path d="M12 18v-2"/><path d="M16 12v-2"/><path d="M16 18v-2"/><path d="M2 11h1.5"/><path d="M20 18v-2"/><path d="M20.5 11H22"/><path d="M4 18v-2"/><path d="M8 12v-2"/><path d="M8 18v-2"/><rect x="2" y="6" width="20" height="10" rx="2"/>"#,
+        doc: "`memory-stick`, from Lucide.",
+    };
+
+    /// Opens the navigation drawer.
+    pub const MENU: Self = Self {
+        name: "menu",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/>"#,
+        doc: "Opens the navigation drawer.",
+    };
+
+    /// `merge`, from Lucide.
+    pub const MERGE: Self = Self {
+        name: "merge",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m8 6 4-4 4 4"/><path d="M12 2v10.3a4 4 0 0 1-1.172 2.872L4 22"/><path d="m20 22-5-5"/>"#,
+        doc: "`merge`, from Lucide.",
+    };
+
+    /// `message-circle`, from Lucide.
+    pub const MESSAGE_CIRCLE: Self = Self {
+        name: "message-circle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>"#,
+        doc: "`message-circle`, from Lucide.",
+    };
+
+    /// `message-circle-check`, from Lucide.
+    pub const MESSAGE_CIRCLE_CHECK: Self = Self {
+        name: "message-circle-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/><path d="m9 12 2 2 4-4"/>"#,
+        doc: "`message-circle-check`, from Lucide.",
+    };
+
+    /// `message-circle-code`, from Lucide.
+    pub const MESSAGE_CIRCLE_CODE: Self = Self {
+        name: "message-circle-code",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10 9-3 3 3 3"/><path d="m14 15 3-3-3-3"/><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>"#,
+        doc: "`message-circle-code`, from Lucide.",
+    };
+
+    /// `message-circle-dashed`, from Lucide.
+    pub const MESSAGE_CIRCLE_DASHED: Self = Self {
+        name: "message-circle-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.1 2.182a10 10 0 0 1 3.8 0"/><path d="M13.9 21.818a10 10 0 0 1-3.8 0"/><path d="M17.609 3.72a10 10 0 0 1 2.69 2.7"/><path d="M2.182 13.9a10 10 0 0 1 0-3.8"/><path d="M20.28 17.61a10 10 0 0 1-2.7 2.69"/><path d="M21.818 10.1a10 10 0 0 1 0 3.8"/><path d="M3.721 6.391a10 10 0 0 1 2.7-2.69"/><path d="m6.163 21.117-2.906.85a1 1 0 0 1-1.236-1.169l.965-2.98"/>"#,
+        doc: "`message-circle-dashed`, from Lucide.",
+    };
+
+    /// `message-circle-heart`, from Lucide.
+    pub const MESSAGE_CIRCLE_HEART: Self = Self {
+        name: "message-circle-heart",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/><path d="M7.828 13.07A3 3 0 0 1 12 8.764a3 3 0 0 1 5.004 2.224 3 3 0 0 1-.832 2.083l-3.447 3.62a1 1 0 0 1-1.45-.001z"/>"#,
+        doc: "`message-circle-heart`, from Lucide.",
+    };
+
+    /// `message-circle-more`, from Lucide.
+    pub const MESSAGE_CIRCLE_MORE: Self = Self {
+        name: "message-circle-more",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/>"#,
+        doc: "`message-circle-more`, from Lucide.",
+    };
+
+    /// `message-circle-off`, from Lucide.
+    pub const MESSAGE_CIRCLE_OFF: Self = Self {
+        name: "message-circle-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m2 2 20 20"/><path d="M4.93 4.929a10 10 0 0 0-1.938 11.412 2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 0 0 11.302-1.989"/><path d="M8.35 2.69A10 10 0 0 1 21.3 15.65"/>"#,
+        doc: "`message-circle-off`, from Lucide.",
+    };
+
+    /// `message-circle-plus`, from Lucide.
+    pub const MESSAGE_CIRCLE_PLUS: Self = Self {
+        name: "message-circle-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/><path d="M8 12h8"/><path d="M12 8v8"/>"#,
+        doc: "`message-circle-plus`, from Lucide.",
+    };
+
+    /// `message-circle-question-mark`, from Lucide.
+    pub const MESSAGE_CIRCLE_QUESTION_MARK: Self = Self {
+        name: "message-circle-question-mark",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>"#,
+        doc: "`message-circle-question-mark`, from Lucide.",
+    };
+
+    /// `message-circle-reply`, from Lucide.
+    pub const MESSAGE_CIRCLE_REPLY: Self = Self {
+        name: "message-circle-reply",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/><path d="m10 15-3-3 3-3"/><path d="M7 12h8a2 2 0 0 1 2 2v1"/>"#,
+        doc: "`message-circle-reply`, from Lucide.",
+    };
+
+    /// `message-circle-warning`, from Lucide.
+    pub const MESSAGE_CIRCLE_WARNING: Self = Self {
+        name: "message-circle-warning",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/><path d="M12 8v4"/><path d="M12 16h.01"/>"#,
+        doc: "`message-circle-warning`, from Lucide.",
+    };
+
+    /// `message-circle-x`, from Lucide.
+    pub const MESSAGE_CIRCLE_X: Self = Self {
+        name: "message-circle-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>"#,
+        doc: "`message-circle-x`, from Lucide.",
+    };
+
+    /// `message-square`, from Lucide.
+    pub const MESSAGE_SQUARE: Self = Self {
+        name: "message-square",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/>"#,
+        doc: "`message-square`, from Lucide.",
+    };
+
+    /// `message-square-check`, from Lucide.
+    pub const MESSAGE_SQUARE_CHECK: Self = Self {
+        name: "message-square-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.7.7 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="m9 11 2 2 4-4"/>"#,
+        doc: "`message-square-check`, from Lucide.",
+    };
+
+    /// `message-square-code`, from Lucide.
+    pub const MESSAGE_SQUARE_CODE: Self = Self {
+        name: "message-square-code",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="m10 8-3 3 3 3"/><path d="m14 14 3-3-3-3"/>"#,
+        doc: "`message-square-code`, from Lucide.",
+    };
+
+    /// `message-square-dashed`, from Lucide.
+    pub const MESSAGE_SQUARE_DASHED: Self = Self {
+        name: "message-square-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 3h2"/><path d="M16 19h-2"/><path d="M2 12v-2"/><path d="M2 16v5.286a.71.71 0 0 0 1.212.502l1.149-1.149"/><path d="M20 19a2 2 0 0 0 2-2v-1"/><path d="M22 10v2"/><path d="M22 6V5a2 2 0 0 0-2-2"/><path d="M4 3a2 2 0 0 0-2 2v1"/><path d="M8 19h2"/><path d="M8 3h2"/>"#,
+        doc: "`message-square-dashed`, from Lucide.",
+    };
+
+    /// `message-square-diff`, from Lucide.
+    pub const MESSAGE_SQUARE_DIFF: Self = Self {
+        name: "message-square-diff",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M10 15h4"/><path d="M10 9h4"/><path d="M12 7v4"/>"#,
+        doc: "`message-square-diff`, from Lucide.",
+    };
+
+    /// `message-square-dot`, from Lucide.
+    pub const MESSAGE_SQUARE_DOT: Self = Self {
+        name: "message-square-dot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.7 3H4a2 2 0 0 0-2 2v16.286a.71.71 0 0 0 1.212.502l2.202-2.202A2 2 0 0 1 6.828 19H20a2 2 0 0 0 2-2v-4.7"/><circle cx="19" cy="6" r="3"/>"#,
+        doc: "`message-square-dot`, from Lucide.",
+    };
+
+    /// `message-square-heart`, from Lucide.
+    pub const MESSAGE_SQUARE_HEART: Self = Self {
+        name: "message-square-heart",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M7.5 9.5c0 .687.265 1.383.697 1.844l3.009 3.264a1.14 1.14 0 0 0 .407.314 1 1 0 0 0 .783-.004 1.14 1.14 0 0 0 .398-.31l3.008-3.264A2.77 2.77 0 0 0 16.5 9.5 2.5 2.5 0 0 0 12 8a2.5 2.5 0 0 0-4.5 1.5"/>"#,
+        doc: "`message-square-heart`, from Lucide.",
+    };
+
+    /// `message-square-lock`, from Lucide.
+    pub const MESSAGE_SQUARE_LOCK: Self = Self {
+        name: "message-square-lock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 8.5V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v16.286a.71.71 0 0 0 1.212.502l2.202-2.202A2 2 0 0 1 6.828 19H10"/><path d="M20 15v-2a2 2 0 0 0-4 0v2"/><rect x="14" y="15" width="8" height="5" rx="1"/>"#,
+        doc: "`message-square-lock`, from Lucide.",
+    };
+
+    /// `message-square-more`, from Lucide.
+    pub const MESSAGE_SQUARE_MORE: Self = Self {
+        name: "message-square-more",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M12 11h.01"/><path d="M16 11h.01"/><path d="M8 11h.01"/>"#,
+        doc: "`message-square-more`, from Lucide.",
+    };
+
+    /// `message-square-off`, from Lucide.
+    pub const MESSAGE_SQUARE_OFF: Self = Self {
+        name: "message-square-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 19H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.7.7 0 0 1 2 21.286V5a2 2 0 0 1 1.184-1.826"/><path d="m2 2 20 20"/><path d="M8.656 3H20a2 2 0 0 1 2 2v11.344"/>"#,
+        doc: "`message-square-off`, from Lucide.",
+    };
+
+    /// `message-square-plus`, from Lucide.
+    pub const MESSAGE_SQUARE_PLUS: Self = Self {
+        name: "message-square-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M12 8v6"/><path d="M9 11h6"/>"#,
+        doc: "`message-square-plus`, from Lucide.",
+    };
+
+    /// `message-square-quote`, from Lucide.
+    pub const MESSAGE_SQUARE_QUOTE: Self = Self {
+        name: "message-square-quote",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 14a2 2 0 0 0 2-2V8h-2"/><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M8 14a2 2 0 0 0 2-2V8H8"/>"#,
+        doc: "`message-square-quote`, from Lucide.",
+    };
+
+    /// `message-square-reply`, from Lucide.
+    pub const MESSAGE_SQUARE_REPLY: Self = Self {
+        name: "message-square-reply",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="m10 8-3 3 3 3"/><path d="M17 14v-1a2 2 0 0 0-2-2H7"/>"#,
+        doc: "`message-square-reply`, from Lucide.",
+    };
+
+    /// `message-square-share`, from Lucide.
+    pub const MESSAGE_SQUARE_SHARE: Self = Self {
+        name: "message-square-share",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3H4a2 2 0 0 0-2 2v16.286a.71.71 0 0 0 1.212.502l2.202-2.202A2 2 0 0 1 6.828 19H20a2 2 0 0 0 2-2v-4"/><path d="M16 3h6v6"/><path d="m16 9 6-6"/>"#,
+        doc: "`message-square-share`, from Lucide.",
+    };
+
+    /// `message-square-text`, from Lucide.
+    pub const MESSAGE_SQUARE_TEXT: Self = Self {
+        name: "message-square-text",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M7 11h10"/><path d="M7 15h6"/><path d="M7 7h8"/>"#,
+        doc: "`message-square-text`, from Lucide.",
+    };
+
+    /// `message-square-warning`, from Lucide.
+    pub const MESSAGE_SQUARE_WARNING: Self = Self {
+        name: "message-square-warning",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="M12 15h.01"/><path d="M12 7v4"/>"#,
+        doc: "`message-square-warning`, from Lucide.",
+    };
+
+    /// `message-square-x`, from Lucide.
+    pub const MESSAGE_SQUARE_X: Self = Self {
+        name: "message-square-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/><path d="m14.5 8.5-5 5"/><path d="m9.5 8.5 5 5"/>"#,
+        doc: "`message-square-x`, from Lucide.",
+    };
+
+    /// `messages-square`, from Lucide.
+    pub const MESSAGES_SQUARE: Self = Self {
+        name: "messages-square",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/>"#,
+        doc: "`messages-square`, from Lucide.",
+    };
+
+    /// `metronome`, from Lucide.
+    pub const METRONOME: Self = Self {
+        name: "metronome",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 11.4V9.1"/><path d="m12 17 6.59-6.59"/><path d="m15.05 5.7-.218-.691a3 3 0 0 0-5.663 0L4.418 19.695A1 1 0 0 0 5.37 21h13.253a1 1 0 0 0 .951-1.31L18.45 16.2"/><circle cx="20" cy="9" r="2"/>"#,
+        doc: "`metronome`, from Lucide.",
+    };
+
+    /// `mic`, from Lucide.
+    pub const MIC: Self = Self {
+        name: "mic",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 19v3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><rect x="9" y="2" width="6" height="13" rx="3"/>"#,
+        doc: "`mic`, from Lucide.",
+    };
+
+    /// `mic-audio-lines`, from Lucide.
+    pub const MIC_AUDIO_LINES: Self = Self {
+        name: "mic-audio-lines",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 3v2.341"/><path d="M12 17v4"/><path d="M14 5v.341"/><path d="M18 5v13"/><path d="M2 10v3"/><path d="M22 10v3"/><path d="M6 6v11"/><path d="M9 21h6"/><rect width="4" height="8" x="10" y="9" rx="2"/>"#,
+        doc: "`mic-audio-lines`, from Lucide.",
+    };
+
+    /// `mic-off`, from Lucide.
+    pub const MIC_OFF: Self = Self {
+        name: "mic-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 19v3"/><path d="M15 9.34V5a3 3 0 0 0-5.68-1.33"/><path d="M16.95 16.95A7 7 0 0 1 5 12v-2"/><path d="M18.89 13.23A7 7 0 0 0 19 12v-2"/><path d="m2 2 20 20"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12"/>"#,
+        doc: "`mic-off`, from Lucide.",
+    };
+
+    /// `mic-signal`, from Lucide.
+    pub const MIC_SIGNAL: Self = Self {
+        name: "mic-signal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 17v4"/><path d="M18 11a6 6 0 00-3-5.197"/><path d="M2 11a10 10 0 015-8.662"/><path d="M22 11a10 10 0 00-5-8.662"/><path d="M6 11a6 6 0 013-5.197"/><path d="M9 21h6"/><rect x="10" y="9" width="4" height="8" rx="2"/>"#,
+        doc: "`mic-signal`, from Lucide.",
+    };
+
+    /// `mic-vocal`, from Lucide.
+    pub const MIC_VOCAL: Self = Self {
+        name: "mic-vocal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m11 7.601-5.994 8.19a1 1 0 0 0 .1 1.298l.817.818a1 1 0 0 0 1.314.087L15.09 12"/><path d="M16.5 21.174C15.5 20.5 14.372 20 13 20c-2.058 0-3.928 2.356-6 2-2.072-.356-2.775-3.369-1.5-4.5"/><circle cx="16" cy="7" r="5"/>"#,
+        doc: "`mic-vocal`, from Lucide.",
+    };
+
+    /// `microchip`, from Lucide.
+    pub const MICROCHIP: Self = Self {
+        name: "microchip",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 12h4"/><path d="M10 17h4"/><path d="M10 7h4"/><path d="M18 12h2"/><path d="M18 18h2"/><path d="M18 6h2"/><path d="M4 12h2"/><path d="M4 18h2"/><path d="M4 6h2"/><rect x="6" y="2" width="12" height="20" rx="2"/>"#,
+        doc: "`microchip`, from Lucide.",
+    };
+
+    /// `microscope`, from Lucide.
+    pub const MICROSCOPE: Self = Self {
+        name: "microscope",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>"#,
+        doc: "`microscope`, from Lucide.",
+    };
+
+    /// `microwave`, from Lucide.
+    pub const MICROWAVE: Self = Self {
+        name: "microwave",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="15" x="2" y="4" rx="2"/><rect width="8" height="7" x="6" y="8" rx="1"/><path d="M18 8v7"/><path d="M6 19v2"/><path d="M18 19v2"/>"#,
+        doc: "`microwave`, from Lucide.",
+    };
+
+    /// `midi-port`, from Lucide.
+    pub const MIDI_PORT: Self = Self {
+        name: "midi-port",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 18h.01"/><path d="M15 2.458V5a1 1 0 01-1 1h-4a1 1 0 01-1-1V2.458"/><path d="M16 16h.01"/><path d="M18 12h.01"/><path d="M6 12h.01"/><path d="M8 16h.01"/><circle cx="12" cy="12" r="10"/>"#,
+        doc: "`midi-port`, from Lucide.",
+    };
+
+    /// `milestone`, from Lucide.
+    pub const MILESTONE: Self = Self {
+        name: "milestone",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13v8"/><path d="M12 3v3"/><path d="M18.172 6a2 2 0 0 1 1.414.586l2.06 2.06a1.207 1.207 0 0 1 0 1.708l-2.06 2.06a2 2 0 0 1-1.414.586H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/>"#,
+        doc: "`milestone`, from Lucide.",
+    };
+
+    /// `milk`, from Lucide.
+    pub const MILK: Self = Self {
+        name: "milk",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 2h8"/><path d="M9 2v2.789a4 4 0 0 1-.672 2.219l-.656.984A4 4 0 0 0 7 10.212V20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9.789a4 4 0 0 0-.672-2.219l-.656-.984A4 4 0 0 1 15 4.788V2"/><path d="M7 15a6.472 6.472 0 0 1 5 0 6.47 6.47 0 0 0 5 0"/>"#,
+        doc: "`milk`, from Lucide.",
+    };
+
+    /// `milk-off`, from Lucide.
+    pub const MILK_OFF: Self = Self {
+        name: "milk-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 2h8"/><path d="M9 2v1.343M15 2v2.789a4 4 0 0 0 .672 2.219l.656.984a4 4 0 0 1 .672 2.22v1.131M7.8 7.8l-.128.192A4 4 0 0 0 7 10.212V20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-3"/><path d="M7 15a6.47 6.47 0 0 1 5 0 6.472 6.472 0 0 0 3.435.435"/><line x1="2" x2="22" y1="2" y2="22"/>"#,
+        doc: "`milk-off`, from Lucide.",
+    };
+
+    /// `minimize`, from Lucide.
+    pub const MINIMIZE: Self = Self {
+        name: "minimize",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/>"#,
+        doc: "`minimize`, from Lucide.",
+    };
+
+    /// `minimize-2`, from Lucide.
+    pub const MINIMIZE_2: Self = Self {
+        name: "minimize-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14 10 7-7"/><path d="M20 10h-6V4"/><path d="m3 21 7-7"/><path d="M4 14h6v6"/>"#,
+        doc: "`minimize-2`, from Lucide.",
+    };
+
+    /// Subtracts one step, on a `NumberInput`. A minus rather than a downward chevron: the control changes a quantity, and a chevron says *move* about a thing that is not moving.
+    pub const MINUS: Self = Self {
+        name: "minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 12h14"/>"#,
+        doc: "Subtracts one step, on a `NumberInput`. A minus rather than a downward chevron: the control changes a quantity, and a chevron says *move* about a thing that is not moving.",
+    };
+
+    /// `mirror-rectangular`, from Lucide.
+    pub const MIRROR_RECTANGULAR: Self = Self {
+        name: "mirror-rectangular",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 6 8 9"/><path d="m16 7-8 8"/><rect x="4" y="2" width="16" height="20" rx="2"/>"#,
+        doc: "`mirror-rectangular`, from Lucide.",
+    };
+
+    /// `mirror-round`, from Lucide.
+    pub const MIRROR_ROUND: Self = Self {
+        name: "mirror-round",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 6.6 8.6 8"/><path d="M12 18v4"/><path d="M15 7.5 9.5 13"/><path d="M7 22h10"/><circle cx="12" cy="10" r="8"/>"#,
+        doc: "`mirror-round`, from Lucide.",
+    };
+
+    /// The appearance mode the operating system asked for.
+    pub const MONITOR: Self = Self {
+        name: "monitor",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>"#,
+        doc: "The appearance mode the operating system asked for.",
+    };
+
+    /// `monitor-check`, from Lucide.
+    pub const MONITOR_CHECK: Self = Self {
+        name: "monitor-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m9 10 2 2 4-4"/><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M12 17v4"/><path d="M8 21h8"/>"#,
+        doc: "`monitor-check`, from Lucide.",
+    };
+
+    /// `monitor-cloud`, from Lucide.
+    pub const MONITOR_CLOUD: Self = Self {
+        name: "monitor-cloud",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 13a3 3 0 1 1 2.83-4H14a2 2 0 0 1 0 4z"/><path d="M12 17v4"/><path d="M8 21h8"/><rect x="2" y="3" width="20" height="14" rx="2"/>"#,
+        doc: "`monitor-cloud`, from Lucide.",
+    };
+
+    /// `monitor-cog`, from Lucide.
+    pub const MONITOR_COG: Self = Self {
+        name: "monitor-cog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 17v4"/><path d="m14.305 7.53.923-.382"/><path d="m15.228 4.852-.923-.383"/><path d="m16.852 3.228-.383-.924"/><path d="m16.852 8.772-.383.923"/><path d="m19.148 3.228.383-.924"/><path d="m19.53 9.696-.382-.924"/><path d="m20.772 4.852.924-.383"/><path d="m20.772 7.148.924.383"/><path d="M22 13v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/><path d="M8 21h8"/><circle cx="18" cy="6" r="3"/>"#,
+        doc: "`monitor-cog`, from Lucide.",
+    };
+
+    /// `monitor-dot`, from Lucide.
+    pub const MONITOR_DOT: Self = Self {
+        name: "monitor-dot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 17v4"/><path d="M22 12.307V15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8.693"/><path d="M8 21h8"/><circle cx="19" cy="6" r="3"/>"#,
+        doc: "`monitor-dot`, from Lucide.",
+    };
+
+    /// `monitor-down`, from Lucide.
+    pub const MONITOR_DOWN: Self = Self {
+        name: "monitor-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13V7"/><path d="m15 10-3 3-3-3"/><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M12 17v4"/><path d="M8 21h8"/>"#,
+        doc: "`monitor-down`, from Lucide.",
+    };
+
+    /// `monitor-off`, from Lucide.
+    pub const MONITOR_OFF: Self = Self {
+        name: "monitor-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 17v4"/><path d="M17 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 1.184-1.826"/><path d="m2 2 20 20"/><path d="M8 21h8"/><path d="M8.656 3H20a2 2 0 0 1 2 2v10a2 2 0 0 1-.293 1.042"/>"#,
+        doc: "`monitor-off`, from Lucide.",
+    };
+
+    /// `monitor-pause`, from Lucide.
+    pub const MONITOR_PAUSE: Self = Self {
+        name: "monitor-pause",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 13V7"/><path d="M14 13V7"/><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M12 17v4"/><path d="M8 21h8"/>"#,
+        doc: "`monitor-pause`, from Lucide.",
+    };
+
+    /// `monitor-play`, from Lucide.
+    pub const MONITOR_PLAY: Self = Self {
+        name: "monitor-play",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.033 9.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56V7.648a.645.645 0 0 1 .967-.56z"/><path d="M12 17v4"/><path d="M8 21h8"/><rect x="2" y="3" width="20" height="14" rx="2"/>"#,
+        doc: "`monitor-play`, from Lucide.",
+    };
+
+    /// `monitor-smartphone`, from Lucide.
+    pub const MONITOR_SMARTPHONE: Self = Self {
+        name: "monitor-smartphone",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 8V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8"/><path d="M10 19v-3.96 3.15"/><path d="M7 19h5"/><rect width="6" height="10" x="16" y="12" rx="2"/>"#,
+        doc: "`monitor-smartphone`, from Lucide.",
+    };
+
+    /// `monitor-speaker`, from Lucide.
+    pub const MONITOR_SPEAKER: Self = Self {
+        name: "monitor-speaker",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5.5 20H8"/><path d="M17 9h.01"/><rect width="10" height="16" x="12" y="4" rx="2"/><path d="M8 6H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h4"/><circle cx="17" cy="15" r="1"/>"#,
+        doc: "`monitor-speaker`, from Lucide.",
+    };
+
+    /// `monitor-stop`, from Lucide.
+    pub const MONITOR_STOP: Self = Self {
+        name: "monitor-stop",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 17v4"/><path d="M8 21h8"/><rect x="2" y="3" width="20" height="14" rx="2"/><rect x="9" y="7" width="6" height="6" rx="1"/>"#,
+        doc: "`monitor-stop`, from Lucide.",
+    };
+
+    /// `monitor-up`, from Lucide.
+    pub const MONITOR_UP: Self = Self {
+        name: "monitor-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m9 10 3-3 3 3"/><path d="M12 13V7"/><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M12 17v4"/><path d="M8 21h8"/>"#,
+        doc: "`monitor-up`, from Lucide.",
+    };
+
+    /// `monitor-x`, from Lucide.
+    pub const MONITOR_X: Self = Self {
+        name: "monitor-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14.5 12.5-5-5"/><path d="m9.5 12.5 5-5"/><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M12 17v4"/><path d="M8 21h8"/>"#,
+        doc: "`monitor-x`, from Lucide.",
+    };
+
+    /// The dark appearance mode.
+    pub const MOON: Self = Self {
+        name: "moon",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>"#,
+        doc: "The dark appearance mode.",
+    };
+
+    /// `moon-star`, from Lucide.
+    pub const MOON_STAR: Self = Self {
+        name: "moon-star",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 5h4"/><path d="M20 3v4"/><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>"#,
+        doc: "`moon-star`, from Lucide.",
+    };
+
+    /// `mop`, from Lucide.
+    pub const MOP: Self = Self {
+        name: "mop",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 22c2.761 0 5-1.79 5-4-4.42 0-4.08-5-8.5-5a1 1 0 100 9za3 3 0 01-3-3"/><path d="M12.5 11.5 22 2"/><path d="m6.98 13.02 2.665-2.664a1.21 1.21 0 011.71 0l2.29 2.288a1.21 1.21 0 010 1.712l-2.088 2.087"/>"#,
+        doc: "`mop`, from Lucide.",
+    };
+
+    /// `mop-sparkles`, from Lucide.
+    pub const MOP_SPARKLES: Self = Self {
+        name: "mop-sparkles",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 22a3 3 0 01-3-3"/><path d="M10 22c2.761 0 5-1.79 5-4-4.42 0-4.08-5-8.5-5a4.501 4.501 0 000 9z"/><path d="M10 3H8"/><path d="M12.5 11.5 22 2"/><path d="M20 13v4"/><path d="M22 15h-4"/><path d="M4 5v4"/><path d="M6 7H2"/><path d="m6.98 13.02 2.665-2.664a1.21 1.21 0 011.71 0l2.29 2.288a1.21 1.21 0 010 1.712l-2.088 2.087"/><path d="M9 2v2"/>"#,
+        doc: "`mop-sparkles`, from Lucide.",
+    };
+
+    /// `mosque`, from Lucide.
+    pub const MOSQUE: Self = Self {
+        name: "mosque",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.268 2a2 2 0 003.465 2"/><path d="M14 5 L14 8"/><path d="M16 22v-3a2 2 0 00-4 0v3"/><path d="M21 13c-.662-1.497-1.666-2.753-2.9-3.63C16.825 8.47 15.422 8 14 8s-2.826.47-4.1 1.37C8.668 10.248 7.663 11.504 7 13z"/><path d="M3 9h4"/><path d="M7 22V6a5 5 0 00-2-4 5 5 0 00-2 4v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>"#,
+        doc: "`mosque`, from Lucide.",
+    };
+
+    /// `motorbike`, from Lucide.
+    pub const MOTORBIKE: Self = Self {
+        name: "motorbike",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m18 14-1-3"/><path d="m3 9 6 2a2 2 0 0 1 2-2h2a2 2 0 0 1 1.99 1.81"/><path d="M8 17h3a1 1 0 0 0 1-1 6 6 0 0 1 6-6 1 1 0 0 0 1-1v-.75A5 5 0 0 0 17 5"/><circle cx="19" cy="17" r="3"/><circle cx="5" cy="17" r="3"/>"#,
+        doc: "`motorbike`, from Lucide.",
+    };
+
+    /// `mountain`, from Lucide.
+    pub const MOUNTAIN: Self = Self {
+        name: "mountain",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m8 3 4 8 5-5 5 15H2L8 3z"/>"#,
+        doc: "`mountain`, from Lucide.",
+    };
+
+    /// `mountain-snow`, from Lucide.
+    pub const MOUNTAIN_SNOW: Self = Self {
+        name: "mountain-snow",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m8 3 4 8 5-5 5 15H2L8 3z"/><path d="M4.14 15.08c2.62-1.57 5.24-1.43 7.86.42 2.74 1.94 5.49 2 8.23.19"/>"#,
+        doc: "`mountain-snow`, from Lucide.",
+    };
+
+    /// `mouse`, from Lucide.
+    pub const MOUSE: Self = Self {
+        name: "mouse",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 6v4"/>"#,
+        doc: "`mouse`, from Lucide.",
+    };
+
+    /// `mouse-left`, from Lucide.
+    pub const MOUSE_LEFT: Self = Self {
+        name: "mouse-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 7.318V10"/><path d="M5 10v5a7 7 0 0 0 14 0V9c0-3.527-2.608-6.515-6-7"/><circle cx="7" cy="4" r="2"/>"#,
+        doc: "`mouse-left`, from Lucide.",
+    };
+
+    /// `mouse-off`, from Lucide.
+    pub const MOUSE_OFF: Self = Self {
+        name: "mouse-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6v.343"/><path d="M18.218 18.218A7 7 0 0 1 5 15V9a7 7 0 0 1 .782-3.218"/><path d="M19 13.343V9A7 7 0 0 0 8.56 2.902"/><path d="M22 22 2 2"/>"#,
+        doc: "`mouse-off`, from Lucide.",
+    };
+
+    /// `mouse-pointer`, from Lucide.
+    pub const MOUSE_POINTER: Self = Self {
+        name: "mouse-pointer",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.586 12.586 19 19"/><path d="M3.688 3.037a.497.497 0 0 0-.651.651l6.5 15.999a.501.501 0 0 0 .947-.062l1.569-6.083a2 2 0 0 1 1.448-1.479l6.124-1.579a.5.5 0 0 0 .063-.947z"/>"#,
+        doc: "`mouse-pointer`, from Lucide.",
+    };
+
+    /// `mouse-pointer-2`, from Lucide.
+    pub const MOUSE_POINTER_2: Self = Self {
+        name: "mouse-pointer-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z"/>"#,
+        doc: "`mouse-pointer-2`, from Lucide.",
+    };
+
+    /// `mouse-pointer-2-off`, from Lucide.
+    pub const MOUSE_POINTER_2_OFF: Self = Self {
+        name: "mouse-pointer-2-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15.55 8.45 5.138 2.087a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063L8.45 15.551"/><path d="M22 2 2 22"/><path d="m6.816 11.528-2.779-6.84a.495.495 0 0 1 .651-.651l6.84 2.779"/>"#,
+        doc: "`mouse-pointer-2-off`, from Lucide.",
+    };
+
+    /// `mouse-pointer-ban`, from Lucide.
+    pub const MOUSE_POINTER_BAN: Self = Self {
+        name: "mouse-pointer-ban",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.034 2.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.944L8.204 7.545a1 1 0 0 0-.66.66l-1.066 3.443a.5.5 0 0 1-.944.033z"/><circle cx="16" cy="16" r="6"/><path d="m11.8 11.8 8.4 8.4"/>"#,
+        doc: "`mouse-pointer-ban`, from Lucide.",
+    };
+
+    /// `mouse-pointer-click`, from Lucide.
+    pub const MOUSE_POINTER_CLICK: Self = Self {
+        name: "mouse-pointer-click",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 4.1 12 6"/><path d="m5.1 8-2.9-.8"/><path d="m6 12-1.9 2"/><path d="M7.2 2.2 8 5.1"/><path d="M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z"/>"#,
+        doc: "`mouse-pointer-click`, from Lucide.",
+    };
+
+    /// `mouse-right`, from Lucide.
+    pub const MOUSE_RIGHT: Self = Self {
+        name: "mouse-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 7.318V10"/><path d="M19 10v5a7 7 0 0 1-14 0V9c0-3.527 2.608-6.515 6-7"/><circle cx="17" cy="4" r="2"/>"#,
+        doc: "`mouse-right`, from Lucide.",
+    };
+
+    /// `move`, from Lucide.
+    pub const MOVE: Self = Self {
+        name: "move",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v20"/><path d="m15 19-3 3-3-3"/><path d="m19 9 3 3-3 3"/><path d="M2 12h20"/><path d="m5 9-3 3 3 3"/><path d="m9 5 3-3 3 3"/>"#,
+        doc: "`move`, from Lucide.",
+    };
+
+    /// `move-3d`, from Lucide.
+    pub const MOVE_3D: Self = Self {
+        name: "move-3d",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 3v16h16"/><path d="m5 19 6-6"/><path d="m2 6 3-3 3 3"/><path d="m18 16 3 3-3 3"/>"#,
+        doc: "`move-3d`, from Lucide.",
+    };
+
+    /// `move-diagonal`, from Lucide.
+    pub const MOVE_DIAGONAL: Self = Self {
+        name: "move-diagonal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 19H5v-6"/><path d="M13 5h6v6"/><path d="M19 5 5 19"/>"#,
+        doc: "`move-diagonal`, from Lucide.",
+    };
+
+    /// `move-diagonal-2`, from Lucide.
+    pub const MOVE_DIAGONAL_2: Self = Self {
+        name: "move-diagonal-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 13v6h-6"/><path d="M5 11V5h6"/><path d="m5 5 14 14"/>"#,
+        doc: "`move-diagonal-2`, from Lucide.",
+    };
+
+    /// `move-down`, from Lucide.
+    pub const MOVE_DOWN: Self = Self {
+        name: "move-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 18L12 22L16 18"/><path d="M12 2V22"/>"#,
+        doc: "`move-down`, from Lucide.",
+    };
+
+    /// `move-down-left`, from Lucide.
+    pub const MOVE_DOWN_LEFT: Self = Self {
+        name: "move-down-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 19H5V13"/><path d="M19 5L5 19"/>"#,
+        doc: "`move-down-left`, from Lucide.",
+    };
+
+    /// `move-down-right`, from Lucide.
+    pub const MOVE_DOWN_RIGHT: Self = Self {
+        name: "move-down-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 13V19H13"/><path d="M5 5L19 19"/>"#,
+        doc: "`move-down-right`, from Lucide.",
+    };
+
+    /// `move-horizontal`, from Lucide.
+    pub const MOVE_HORIZONTAL: Self = Self {
+        name: "move-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m18 8 4 4-4 4"/><path d="M2 12h20"/><path d="m6 8-4 4 4 4"/>"#,
+        doc: "`move-horizontal`, from Lucide.",
+    };
+
+    /// `move-left`, from Lucide.
+    pub const MOVE_LEFT: Self = Self {
+        name: "move-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 8L2 12L6 16"/><path d="M2 12H22"/>"#,
+        doc: "`move-left`, from Lucide.",
+    };
+
+    /// `move-right`, from Lucide.
+    pub const MOVE_RIGHT: Self = Self {
+        name: "move-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 8L22 12L18 16"/><path d="M2 12H22"/>"#,
+        doc: "`move-right`, from Lucide.",
+    };
+
+    /// `move-up`, from Lucide.
+    pub const MOVE_UP: Self = Self {
+        name: "move-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 6L12 2L16 6"/><path d="M12 2V22"/>"#,
+        doc: "`move-up`, from Lucide.",
+    };
+
+    /// `move-up-left`, from Lucide.
+    pub const MOVE_UP_LEFT: Self = Self {
+        name: "move-up-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 11V5H11"/><path d="M5 5L19 19"/>"#,
+        doc: "`move-up-left`, from Lucide.",
+    };
+
+    /// `move-up-right`, from Lucide.
+    pub const MOVE_UP_RIGHT: Self = Self {
+        name: "move-up-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 5H19V11"/><path d="M19 5L5 19"/>"#,
+        doc: "`move-up-right`, from Lucide.",
+    };
+
+    /// `move-vertical`, from Lucide.
+    pub const MOVE_VERTICAL: Self = Self {
+        name: "move-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v20"/><path d="m8 18 4 4 4-4"/><path d="m8 6 4-4 4 4"/>"#,
+        doc: "`move-vertical`, from Lucide.",
+    };
+
+    /// `music`, from Lucide.
+    pub const MUSIC: Self = Self {
+        name: "music",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>"#,
+        doc: "`music`, from Lucide.",
+    };
+
+    /// `music-2`, from Lucide.
+    pub const MUSIC_2: Self = Self {
+        name: "music-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="8" cy="18" r="4"/><path d="M12 18V2l7 4"/>"#,
+        doc: "`music-2`, from Lucide.",
+    };
+
+    /// `music-3`, from Lucide.
+    pub const MUSIC_3: Self = Self {
+        name: "music-3",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="18" r="4"/><path d="M16 18V2"/>"#,
+        doc: "`music-3`, from Lucide.",
+    };
+
+    /// `music-4`, from Lucide.
+    pub const MUSIC_4: Self = Self {
+        name: "music-4",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 18V5l12-2v13"/><path d="m9 9 12-2"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>"#,
+        doc: "`music-4`, from Lucide.",
+    };
+
+    /// `navigation`, from Lucide.
+    pub const NAVIGATION: Self = Self {
+        name: "navigation",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<polygon points="3 11 22 2 13 21 11 13 3 11"/>"#,
+        doc: "`navigation`, from Lucide.",
+    };
+
+    /// `navigation-2`, from Lucide.
+    pub const NAVIGATION_2: Self = Self {
+        name: "navigation-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<polygon points="12 2 19 21 12 17 5 21 12 2"/>"#,
+        doc: "`navigation-2`, from Lucide.",
+    };
+
+    /// `navigation-2-off`, from Lucide.
+    pub const NAVIGATION_2_OFF: Self = Self {
+        name: "navigation-2-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9.31 9.31 5 21l7-4 7 4-1.17-3.17"/><path d="M14.53 8.88 12 2l-1.17 3.17"/><line x1="2" x2="22" y1="2" y2="22"/>"#,
+        doc: "`navigation-2-off`, from Lucide.",
+    };
+
+    /// `navigation-off`, from Lucide.
+    pub const NAVIGATION_OFF: Self = Self {
+        name: "navigation-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8.43 8.43 3 11l8 2 2 8 2.57-5.43"/><path d="M17.39 11.73 22 2l-9.73 4.61"/><line x1="2" x2="22" y1="2" y2="22"/>"#,
+        doc: "`navigation-off`, from Lucide.",
+    };
+
+    /// `network`, from Lucide.
+    pub const NETWORK: Self = Self {
+        name: "network",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>"#,
+        doc: "`network`, from Lucide.",
+    };
+
+    /// `newspaper`, from Lucide.
+    pub const NEWSPAPER: Self = Self {
+        name: "newspaper",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 18h-5"/><path d="M18 14h-8"/><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="10" y="6" rx="1"/>"#,
+        doc: "`newspaper`, from Lucide.",
+    };
+
+    /// `nfc`, from Lucide.
+    pub const NFC: Self = Self {
+        name: "nfc",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 8.32a7.43 7.43 0 0 1 0 7.36"/><path d="M9.46 6.21a11.76 11.76 0 0 1 0 11.58"/><path d="M12.91 4.1a15.91 15.91 0 0 1 .01 15.8"/><path d="M16.37 2a20.16 20.16 0 0 1 0 20"/>"#,
+        doc: "`nfc`, from Lucide.",
+    };
+
+    /// `non-binary`, from Lucide.
+    pub const NON_BINARY: Self = Self {
+        name: "non-binary",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v10"/><path d="m8.5 4 7 4"/><path d="m8.5 8 7-4"/><circle cx="12" cy="17" r="5"/>"#,
+        doc: "`non-binary`, from Lucide.",
+    };
+
+    /// `notebook`, from Lucide.
+    pub const NOTEBOOK: Self = Self {
+        name: "notebook",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M16 2v20"/>"#,
+        doc: "`notebook`, from Lucide.",
+    };
+
+    /// `notebook-pen`, from Lucide.
+    pub const NOTEBOOK_PEN: Self = Self {
+        name: "notebook-pen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/>"#,
+        doc: "`notebook-pen`, from Lucide.",
+    };
+
+    /// `notebook-tabs`, from Lucide.
+    pub const NOTEBOOK_TABS: Self = Self {
+        name: "notebook-tabs",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M15 2v20"/><path d="M15 7h5"/><path d="M15 12h5"/><path d="M15 17h5"/>"#,
+        doc: "`notebook-tabs`, from Lucide.",
+    };
+
+    /// `notebook-text`, from Lucide.
+    pub const NOTEBOOK_TEXT: Self = Self {
+        name: "notebook-text",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9.5 8h5"/><path d="M9.5 12H16"/><path d="M9.5 16H14"/>"#,
+        doc: "`notebook-text`, from Lucide.",
+    };
+
+    /// `notepad-text`, from Lucide.
+    pub const NOTEPAD_TEXT: Self = Self {
+        name: "notepad-text",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 2v4"/><path d="M12 2v4"/><path d="M16 2v4"/><rect width="16" height="18" x="4" y="4" rx="2"/><path d="M8 10h6"/><path d="M8 14h8"/><path d="M8 18h5"/>"#,
+        doc: "`notepad-text`, from Lucide.",
+    };
+
+    /// `notepad-text-dashed`, from Lucide.
+    pub const NOTEPAD_TEXT_DASHED: Self = Self {
+        name: "notepad-text-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 2v4"/><path d="M12 2v4"/><path d="M16 2v4"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M20 12v2"/><path d="M20 18v2a2 2 0 0 1-2 2h-1"/><path d="M13 22h-2"/><path d="M7 22H6a2 2 0 0 1-2-2v-2"/><path d="M4 14v-2"/><path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M8 10h6"/><path d="M8 14h8"/><path d="M8 18h5"/>"#,
+        doc: "`notepad-text-dashed`, from Lucide.",
+    };
+
+    /// `nut`, from Lucide.
+    pub const NUT: Self = Self {
+        name: "nut",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 4V2"/><path d="M5 10v4a7.004 7.004 0 0 0 5.277 6.787c.412.104.802.292 1.102.592L12 22l.621-.621c.3-.3.69-.488 1.102-.592A7.003 7.003 0 0 0 19 14v-4"/><path d="M12 4C8 4 4.5 6 4 8c-.243.97-.919 1.952-2 3 1.31-.082 1.972-.29 3-1 .54.92.982 1.356 2 2 1.452-.647 1.954-1.098 2.5-2 .595.995 1.151 1.427 2.5 2 1.31-.621 1.862-1.058 2.5-2 .629.977 1.162 1.423 2.5 2 1.209-.548 1.68-.967 2-2 1.032.916 1.683 1.157 3 1-1.297-1.036-1.758-2.03-2-3-.5-2-4-4-8-4Z"/>"#,
+        doc: "`nut`, from Lucide.",
+    };
+
+    /// `nut-off`, from Lucide.
+    pub const NUT_OFF: Self = Self {
+        name: "nut-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 4V2"/><path d="M5 10v4a7.004 7.004 0 0 0 5.277 6.787c.412.104.802.292 1.102.592L12 22l.621-.621c.3-.3.69-.488 1.102-.592a7.01 7.01 0 0 0 4.125-2.939"/><path d="M19 10v3.343"/><path d="M12 12c-1.349-.573-1.905-1.005-2.5-2-.546.902-1.048 1.353-2.5 2-1.018-.644-1.46-1.08-2-2-1.028.71-1.69.918-3 1 1.081-1.048 1.757-2.03 2-3 .194-.776.84-1.551 1.79-2.21m11.654 5.997c.887-.457 1.28-.891 1.556-1.787 1.032.916 1.683 1.157 3 1-1.297-1.036-1.758-2.03-2-3-.5-2-4-4-8-4-.74 0-1.461.068-2.15.192"/><line x1="2" x2="22" y1="2" y2="22"/>"#,
+        doc: "`nut-off`, from Lucide.",
+    };
+
+    /// `octagon`, from Lucide.
+    pub const OCTAGON: Self = Self {
+        name: "octagon",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.586 16.726A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2h6.624a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586z"/>"#,
+        doc: "`octagon`, from Lucide.",
+    };
+
+    /// `octagon-alert`, from Lucide.
+    pub const OCTAGON_ALERT: Self = Self {
+        name: "octagon-alert",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/>"#,
+        doc: "`octagon-alert`, from Lucide.",
+    };
+
+    /// `octagon-minus`, from Lucide.
+    pub const OCTAGON_MINUS: Self = Self {
+        name: "octagon-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.586 16.726A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2h6.624a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586z"/><path d="M8 12h8"/>"#,
+        doc: "`octagon-minus`, from Lucide.",
+    };
+
+    /// `octagon-pause`, from Lucide.
+    pub const OCTAGON_PAUSE: Self = Self {
+        name: "octagon-pause",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 15V9"/><path d="M14 15V9"/><path d="M2.586 16.726A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2h6.624a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586z"/>"#,
+        doc: "`octagon-pause`, from Lucide.",
+    };
+
+    /// `octagon-x`, from Lucide.
+    pub const OCTAGON_X: Self = Self {
+        name: "octagon-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 9-6 6"/><path d="M2.586 16.726A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2h6.624a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586z"/><path d="m9 9 6 6"/>"#,
+        doc: "`octagon-x`, from Lucide.",
+    };
+
+    /// `omega`, from Lucide.
+    pub const OMEGA: Self = Self {
+        name: "omega",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 20h4.5a.5.5 0 0 0 .5-.5v-.282a.52.52 0 0 0-.247-.437 8 8 0 1 1 8.494-.001.52.52 0 0 0-.247.438v.282a.5.5 0 0 0 .5.5H21"/>"#,
+        doc: "`omega`, from Lucide.",
+    };
+
+    /// `option`, from Lucide.
+    pub const OPTION: Self = Self {
+        name: "option",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 3h7"/><path d="M3 3h5.28a1 1 0 0 1 .948.684l5.544 16.632a1 1 0 0 0 .949.684H21"/>"#,
+        doc: "`option`, from Lucide.",
+    };
+
+    /// `orbit`, from Lucide.
+    pub const ORBIT: Self = Self {
+        name: "orbit",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20.341 6.484A10 10 0 0 1 10.266 21.85"/><path d="M3.659 17.516A10 10 0 0 1 13.74 2.152"/><circle cx="12" cy="12" r="3"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/>"#,
+        doc: "`orbit`, from Lucide.",
+    };
+
+    /// `origami`, from Lucide.
+    pub const ORIGAMI: Self = Self {
+        name: "origami",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 12V4a1 1 0 0 1 1-1h6.297a1 1 0 0 1 .651 1.759l-4.696 4.025"/><path d="m12 21-7.414-7.414A2 2 0 0 1 4 12.172V6.415a1.002 1.002 0 0 1 1.707-.707L20 20.009"/><path d="m12.214 3.381 8.414 14.966a1 1 0 0 1-.167 1.199l-1.168 1.163a1 1 0 0 1-.706.291H6.351a1 1 0 0 1-.625-.219L3.25 18.8a1 1 0 0 1 .631-1.781l4.165.027"/>"#,
+        doc: "`origami`, from Lucide.",
+    };
+
+    /// `package`, from Lucide.
+    pub const PACKAGE: Self = Self {
+        name: "package",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/>"#,
+        doc: "`package`, from Lucide.",
+    };
+
+    /// `package-2`, from Lucide.
+    pub const PACKAGE_2: Self = Self {
+        name: "package-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3v6"/><path d="M16.76 3a2 2 0 0 1 1.8 1.1l2.23 4.479a2 2 0 0 1 .21.891V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.472a2 2 0 0 1 .211-.894L5.45 4.1A2 2 0 0 1 7.24 3z"/><path d="M3.054 9.013h17.893"/>"#,
+        doc: "`package-2`, from Lucide.",
+    };
+
+    /// `package-check`, from Lucide.
+    pub const PACKAGE_CHECK: Self = Self {
+        name: "package-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22V12"/><path d="m16 17 2 2 4-4"/><path d="M21 11.127V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.729l7 4a2 2 0 0 0 2 .001l1.32-.753"/><path d="M3.29 7 12 12l8.71-5"/><path d="m7.5 4.27 8.997 5.148"/>"#,
+        doc: "`package-check`, from Lucide.",
+    };
+
+    /// `package-minus`, from Lucide.
+    pub const PACKAGE_MINUS: Self = Self {
+        name: "package-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22V12"/><path d="M16 17h6"/><path d="M21 13V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.729l7 4a2 2 0 0 0 2 .001l1.675-.955"/><path d="M3.29 7 12 12l8.71-5"/><path d="m7.5 4.27 8.997 5.148"/>"#,
+        doc: "`package-minus`, from Lucide.",
+    };
+
+    /// `package-open`, from Lucide.
+    pub const PACKAGE_OPEN: Self = Self {
+        name: "package-open",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22v-9"/><path d="M15.17 2.21a1.67 1.67 0 0 1 1.63 0L21 4.57a1.93 1.93 0 0 1 0 3.36L8.82 14.79a1.655 1.655 0 0 1-1.64 0L3 12.43a1.93 1.93 0 0 1 0-3.36z"/><path d="M20 13v3.87a2.06 2.06 0 0 1-1.11 1.83l-6 3.08a1.93 1.93 0 0 1-1.78 0l-6-3.08A2.06 2.06 0 0 1 4 16.87V13"/><path d="M21 12.43a1.93 1.93 0 0 0 0-3.36L8.83 2.2a1.64 1.64 0 0 0-1.63 0L3 4.57a1.93 1.93 0 0 0 0 3.36l12.18 6.86a1.636 1.636 0 0 0 1.63 0z"/>"#,
+        doc: "`package-open`, from Lucide.",
+    };
+
+    /// `package-plus`, from Lucide.
+    pub const PACKAGE_PLUS: Self = Self {
+        name: "package-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22V12"/><path d="M16 17h6"/><path d="M19 14v6"/><path d="M21 10.535V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.729l7 4a2 2 0 0 0 2 .001l1.675-.955"/><path d="M3.29 7 12 12l8.71-5"/><path d="m7.5 4.27 8.997 5.148"/>"#,
+        doc: "`package-plus`, from Lucide.",
+    };
+
+    /// `package-search`, from Lucide.
+    pub const PACKAGE_SEARCH: Self = Self {
+        name: "package-search",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22V12"/><path d="M20.27 18.27 22 20"/><path d="M21 10.498V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.729l7 4a2 2 0 0 0 2 .001l.98-.559"/><path d="M3.29 7 12 12l8.71-5"/><path d="m7.5 4.27 8.997 5.148"/><circle cx="18.5" cy="16.5" r="2.5"/>"#,
+        doc: "`package-search`, from Lucide.",
+    };
+
+    /// `package-x`, from Lucide.
+    pub const PACKAGE_X: Self = Self {
+        name: "package-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22V12"/><path d="m16.5 14.5 5 5"/><path d="m16.5 19.5 5-5"/><path d="M21 10.5V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.729l7 4a2 2 0 0 0 2 .001l.13-.074"/><path d="M3.29 7 12 12l8.71-5"/><path d="m7.5 4.27 8.997 5.148"/>"#,
+        doc: "`package-x`, from Lucide.",
+    };
+
+    /// `paint-bucket`, from Lucide.
+    pub const PAINT_BUCKET: Self = Self {
+        name: "paint-bucket",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 7 6 2"/><path d="M18.992 12H2.041"/><path d="M21.145 18.38A3.34 3.34 0 0 1 20 16.5a3.3 3.3 0 0 1-1.145 1.88c-.575.46-.855 1.02-.855 1.595A2 2 0 0 0 20 22a2 2 0 0 0 2-2.025c0-.58-.285-1.13-.855-1.595"/><path d="m8.5 4.5 2.148-2.148a1.205 1.205 0 0 1 1.704 0l7.296 7.296a1.205 1.205 0 0 1 0 1.704l-7.592 7.592a3.615 3.615 0 0 1-5.112 0l-3.888-3.888a3.615 3.615 0 0 1 0-5.112L5.67 7.33"/>"#,
+        doc: "`paint-bucket`, from Lucide.",
+    };
+
+    /// `paint-roller`, from Lucide.
+    pub const PAINT_ROLLER: Self = Self {
+        name: "paint-roller",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="16" height="6" x="2" y="2" rx="2"/><path d="M10 16v-2a2 2 0 0 1 2-2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect width="4" height="6" x="8" y="16" rx="1"/>"#,
+        doc: "`paint-roller`, from Lucide.",
+    };
+
+    /// `paintbrush`, from Lucide.
+    pub const PAINTBRUSH: Self = Self {
+        name: "paintbrush",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14.622 17.897-10.68-2.913"/><path d="M18.376 2.622a1 1 0 1 1 3.002 3.002L17.36 9.643a.5.5 0 0 0 0 .707l.944.944a2.41 2.41 0 0 1 0 3.408l-.944.944a.5.5 0 0 1-.707 0L8.354 7.348a.5.5 0 0 1 0-.707l.944-.944a2.41 2.41 0 0 1 3.408 0l.944.944a.5.5 0 0 0 .707 0z"/><path d="M9 8c-1.804 2.71-3.97 3.46-6.583 3.948a.507.507 0 0 0-.302.819l7.32 8.883a1 1 0 0 0 1.185.204C12.735 20.405 16 16.792 16 15"/>"#,
+        doc: "`paintbrush`, from Lucide.",
+    };
+
+    /// `paintbrush-vertical`, from Lucide.
+    pub const PAINTBRUSH_VERTICAL: Self = Self {
+        name: "paintbrush-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 2v2"/><path d="M14 2v4"/><path d="M17 2a1 1 0 0 1 1 1v9H6V3a1 1 0 0 1 1-1z"/><path d="M6 12a1 1 0 0 0-1 1v1a2 2 0 0 0 2 2h2a1 1 0 0 1 1 1v2.9a2 2 0 1 0 4 0V17a1 1 0 0 1 1-1h2a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1"/>"#,
+        doc: "`paintbrush-vertical`, from Lucide.",
+    };
+
+    /// Opens the theme menu. A palette rather than a gear: the menu is the appearance of the page — its mode, its accent, its corners — and a gear says "settings" about a product that has no other kind.
+    pub const PALETTE: Self = Self {
+        name: "palette",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>"#,
+        doc: "Opens the theme menu. A palette rather than a gear: the menu is the appearance of the page — its mode, its accent, its corners — and a gear says \"settings\" about a product that has no other kind.",
+    };
+
+    /// `panda`, from Lucide.
+    pub const PANDA: Self = Self {
+        name: "panda",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.25 17.25h1.5L12 18z"/><path d="m15 12 2 2"/><path d="M18 6.5a.5.5 0 0 0-.5-.5"/><path d="M20.69 9.67a4.5 4.5 0 1 0-7.04-5.5 8.35 8.35 0 0 0-3.3 0 4.5 4.5 0 1 0-7.04 5.5C2.49 11.2 2 12.88 2 14.5 2 19.47 6.48 22 12 22s10-2.53 10-7.5c0-1.62-.48-3.3-1.3-4.83"/><path d="M6 6.5a.495.495 0 0 1 .5-.5"/><path d="m9 12-2 2"/>"#,
+        doc: "`panda`, from Lucide.",
+    };
+
+    /// `panel-bottom`, from Lucide.
+    pub const PANEL_BOTTOM: Self = Self {
+        name: "panel-bottom",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 15h18"/>"#,
+        doc: "`panel-bottom`, from Lucide.",
+    };
+
+    /// `panel-bottom-close`, from Lucide.
+    pub const PANEL_BOTTOM_CLOSE: Self = Self {
+        name: "panel-bottom-close",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 15h18"/><path d="m15 8-3 3-3-3"/>"#,
+        doc: "`panel-bottom-close`, from Lucide.",
+    };
+
+    /// `panel-bottom-dashed`, from Lucide.
+    pub const PANEL_BOTTOM_DASHED: Self = Self {
+        name: "panel-bottom-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M14 15h1"/><path d="M19 15h2"/><path d="M3 15h2"/><path d="M9 15h1"/>"#,
+        doc: "`panel-bottom-dashed`, from Lucide.",
+    };
+
+    /// `panel-bottom-open`, from Lucide.
+    pub const PANEL_BOTTOM_OPEN: Self = Self {
+        name: "panel-bottom-open",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 15h18"/><path d="m9 10 3-3 3 3"/>"#,
+        doc: "`panel-bottom-open`, from Lucide.",
+    };
+
+    /// `panel-left`, from Lucide.
+    pub const PANEL_LEFT: Self = Self {
+        name: "panel-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>"#,
+        doc: "`panel-left`, from Lucide.",
+    };
+
+    /// `panel-left-close`, from Lucide.
+    pub const PANEL_LEFT_CLOSE: Self = Self {
+        name: "panel-left-close",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/>"#,
+        doc: "`panel-left-close`, from Lucide.",
+    };
+
+    /// `panel-left-dashed`, from Lucide.
+    pub const PANEL_LEFT_DASHED: Self = Self {
+        name: "panel-left-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 14v1"/><path d="M9 19v2"/><path d="M9 3v2"/><path d="M9 9v1"/>"#,
+        doc: "`panel-left-dashed`, from Lucide.",
+    };
+
+    /// `panel-left-open`, from Lucide.
+    pub const PANEL_LEFT_OPEN: Self = Self {
+        name: "panel-left-open",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m14 9 3 3-3 3"/>"#,
+        doc: "`panel-left-open`, from Lucide.",
+    };
+
+    /// `panel-left-right-dashed`, from Lucide.
+    pub const PANEL_LEFT_RIGHT_DASHED: Self = Self {
+        name: "panel-left-right-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 10V9"/><path d="M15 15v-1"/><path d="M15 21v-2"/><path d="M15 5V3"/><path d="M9 10V9"/><path d="M9 15v-1"/><path d="M9 21v-2"/><path d="M9 5V3"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`panel-left-right-dashed`, from Lucide.",
+    };
+
+    /// `panel-right`, from Lucide.
+    pub const PANEL_RIGHT: Self = Self {
+        name: "panel-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/>"#,
+        doc: "`panel-right`, from Lucide.",
+    };
+
+    /// `panel-right-close`, from Lucide.
+    pub const PANEL_RIGHT_CLOSE: Self = Self {
+        name: "panel-right-close",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/><path d="m8 9 3 3-3 3"/>"#,
+        doc: "`panel-right-close`, from Lucide.",
+    };
+
+    /// `panel-right-dashed`, from Lucide.
+    pub const PANEL_RIGHT_DASHED: Self = Self {
+        name: "panel-right-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 14v1"/><path d="M15 19v2"/><path d="M15 3v2"/><path d="M15 9v1"/>"#,
+        doc: "`panel-right-dashed`, from Lucide.",
+    };
+
+    /// `panel-right-open`, from Lucide.
+    pub const PANEL_RIGHT_OPEN: Self = Self {
+        name: "panel-right-open",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/><path d="m10 15-3-3 3-3"/>"#,
+        doc: "`panel-right-open`, from Lucide.",
+    };
+
+    /// `panel-top`, from Lucide.
+    pub const PANEL_TOP: Self = Self {
+        name: "panel-top",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/>"#,
+        doc: "`panel-top`, from Lucide.",
+    };
+
+    /// `panel-top-bottom-dashed`, from Lucide.
+    pub const PANEL_TOP_BOTTOM_DASHED: Self = Self {
+        name: "panel-top-bottom-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 15h1"/><path d="M14 9h1"/><path d="M19 15h2"/><path d="M19 9h2"/><path d="M3 15h2"/><path d="M3 9h2"/><path d="M9 15h1"/><path d="M9 9h1"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`panel-top-bottom-dashed`, from Lucide.",
+    };
+
+    /// `panel-top-close`, from Lucide.
+    pub const PANEL_TOP_CLOSE: Self = Self {
+        name: "panel-top-close",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="m9 16 3-3 3 3"/>"#,
+        doc: "`panel-top-close`, from Lucide.",
+    };
+
+    /// `panel-top-dashed`, from Lucide.
+    pub const PANEL_TOP_DASHED: Self = Self {
+        name: "panel-top-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M14 9h1"/><path d="M19 9h2"/><path d="M3 9h2"/><path d="M9 9h1"/>"#,
+        doc: "`panel-top-dashed`, from Lucide.",
+    };
+
+    /// `panel-top-open`, from Lucide.
+    pub const PANEL_TOP_OPEN: Self = Self {
+        name: "panel-top-open",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="m15 14-3 3-3-3"/>"#,
+        doc: "`panel-top-open`, from Lucide.",
+    };
+
+    /// `panels-left-bottom`, from Lucide.
+    pub const PANELS_LEFT_BOTTOM: Self = Self {
+        name: "panels-left-bottom",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M9 15h12"/>"#,
+        doc: "`panels-left-bottom`, from Lucide.",
+    };
+
+    /// `panels-right-bottom`, from Lucide.
+    pub const PANELS_RIGHT_BOTTOM: Self = Self {
+        name: "panels-right-bottom",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 15h12"/><path d="M15 3v18"/>"#,
+        doc: "`panels-right-bottom`, from Lucide.",
+    };
+
+    /// `panels-top-left`, from Lucide.
+    pub const PANELS_TOP_LEFT: Self = Self {
+        name: "panels-top-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>"#,
+        doc: "`panels-top-left`, from Lucide.",
+    };
+
+    /// `paper-bag`, from Lucide.
+    pub const PAPER_BAG: Self = Self {
+        name: "paper-bag",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5.364 3.848C4 6 3 9.652 3 12.652V19a2 2 0 002 2h14a2 2 0 002-2v-5c0-2.334-1.816-4.668-2.622-7.002"/><path d="M7 3h11.379a2 2 0 011.789 1.106l.723 1.447A1 1 0 0119.997 7h-8.525a2 2 0 01-1.789-1.106L8.79 4.105a2 2 0 10-3.579 1.789l2.261 4.522A5 5 0 018 12.652V21"/>"#,
+        doc: "`paper-bag`, from Lucide.",
+    };
+
+    /// `paperclip`, from Lucide.
+    pub const PAPERCLIP: Self = Self {
+        name: "paperclip",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"/>"#,
+        doc: "`paperclip`, from Lucide.",
+    };
+
+    /// `parasol`, from Lucide.
+    pub const PARASOL: Self = Self {
+        name: "parasol",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.5 11.134 18.196 21"/><path d="M20.425 5.299a10 10 0 0 0-16.941 9.78c.183.563.843.774 1.355.478L20.16 6.711c.512-.296.66-.973.264-1.413"/><path d="M21 21H3"/>"#,
+        doc: "`parasol`, from Lucide.",
+    };
+
+    /// `parentheses`, from Lucide.
+    pub const PARENTHESES: Self = Self {
+        name: "parentheses",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 21s-4-3-4-9 4-9 4-9"/><path d="M16 3s4 3 4 9-4 9-4 9"/>"#,
+        doc: "`parentheses`, from Lucide.",
+    };
+
+    /// `parking-meter`, from Lucide.
+    pub const PARKING_METER: Self = Self {
+        name: "parking-meter",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 15h2"/><path d="M12 12v3"/><path d="M12 19v3"/><path d="M15.282 19a1 1 0 0 0 .948-.68l2.37-6.988a7 7 0 1 0-13.2 0l2.37 6.988a1 1 0 0 0 .948.68z"/><path d="M9 9a3 3 0 1 1 6 0"/>"#,
+        doc: "`parking-meter`, from Lucide.",
+    };
+
+    /// `party-popper`, from Lucide.
+    pub const PARTY_POPPER: Self = Self {
+        name: "party-popper",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/>"#,
+        doc: "`party-popper`, from Lucide.",
+    };
+
+    /// Stops a `Carousel` rotating. WCAG 2.2.2 requires a way to stop anything that moves for more than five seconds, and this is it — the component refuses to start rotating without it.
+    pub const PAUSE: Self = Self {
+        name: "pause",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/>"#,
+        doc: "Stops a `Carousel` rotating. WCAG 2.2.2 requires a way to stop anything that moves for more than five seconds, and this is it — the component refuses to start rotating without it.",
+    };
+
+    /// `paw-print`, from Lucide.
+    pub const PAW_PRINT: Self = Self {
+        name: "paw-print",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/>"#,
+        doc: "`paw-print`, from Lucide.",
+    };
+
+    /// `pc-case`, from Lucide.
+    pub const PC_CASE: Self = Self {
+        name: "pc-case",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="14" height="20" x="5" y="2" rx="2"/><path d="M15 14h.01"/><path d="M9 6h6"/><path d="M9 10h6"/>"#,
+        doc: "`pc-case`, from Lucide.",
+    };
+
+    /// `pen`, from Lucide.
+    pub const PEN: Self = Self {
+        name: "pen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>"#,
+        doc: "`pen`, from Lucide.",
+    };
+
+    /// `pen-line`, from Lucide.
+    pub const PEN_LINE: Self = Self {
+        name: "pen-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 21h8"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>"#,
+        doc: "`pen-line`, from Lucide.",
+    };
+
+    /// `pen-off`, from Lucide.
+    pub const PEN_OFF: Self = Self {
+        name: "pen-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10 10-6.157 6.162a2 2 0 0 0-.5.833l-1.322 4.36a.5.5 0 0 0 .622.624l4.358-1.323a2 2 0 0 0 .83-.5L14 13.982"/><path d="m12.829 7.172 4.359-4.346a1 1 0 1 1 3.986 3.986l-4.353 4.353"/><path d="m2 2 20 20"/>"#,
+        doc: "`pen-off`, from Lucide.",
+    };
+
+    /// `pen-tool`, from Lucide.
+    pub const PEN_TOOL: Self = Self {
+        name: "pen-tool",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z"/><path d="m18 13-1.375-6.874a1 1 0 0 0-.746-.776L3.235 2.028a1 1 0 0 0-1.207 1.207L5.35 15.879a1 1 0 0 0 .776.746L13 18"/><path d="m2.3 2.3 7.286 7.286"/><circle cx="11" cy="11" r="2"/>"#,
+        doc: "`pen-tool`, from Lucide.",
+    };
+
+    /// `pencil`, from Lucide.
+    pub const PENCIL: Self = Self {
+        name: "pencil",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>"#,
+        doc: "`pencil`, from Lucide.",
+    };
+
+    /// `pencil-line`, from Lucide.
+    pub const PENCIL_LINE: Self = Self {
+        name: "pencil-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 21h8"/><path d="m15 5 4 4"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>"#,
+        doc: "`pencil-line`, from Lucide.",
+    };
+
+    /// `pencil-off`, from Lucide.
+    pub const PENCIL_OFF: Self = Self {
+        name: "pencil-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10 10-6.157 6.162a2 2 0 0 0-.5.833l-1.322 4.36a.5.5 0 0 0 .622.624l4.358-1.323a2 2 0 0 0 .83-.5L14 13.982"/><path d="m12.829 7.172 4.359-4.346a1 1 0 1 1 3.986 3.986l-4.353 4.353"/><path d="m15 5 4 4"/><path d="m2 2 20 20"/>"#,
+        doc: "`pencil-off`, from Lucide.",
+    };
+
+    /// `pencil-ruler`, from Lucide.
+    pub const PENCIL_RULER: Self = Self {
+        name: "pencil-ruler",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 7 8.7 2.7a2.41 2.41 0 0 0-3.4 0L2.7 5.3a2.41 2.41 0 0 0 0 3.4L7 13"/><path d="m8 6 2-2"/><path d="m18 16 2-2"/><path d="m17 11 4.3 4.3c.94.94.94 2.46 0 3.4l-2.6 2.6c-.94.94-2.46.94-3.4 0L11 17"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>"#,
+        doc: "`pencil-ruler`, from Lucide.",
+    };
+
+    /// `pencil-sparkles`, from Lucide.
+    pub const PENCIL_SPARKLES: Self = Self {
+        name: "pencil-sparkles",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 3H8"/><path d="m15.007 5.008 3.987 3.986"/><path d="M20 15v4"/><path d="M21.174 6.813a2.82 2.82 0 0 0-3.986-3.987L3.842 16.175a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="M22 17h-4"/><path d="M4 5v4"/><path d="M6 7H2"/><path d="M9 2v2"/>"#,
+        doc: "`pencil-sparkles`, from Lucide.",
+    };
+
+    /// `pentagon`, from Lucide.
+    pub const PENTAGON: Self = Self {
+        name: "pentagon",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.83 2.38a2 2 0 0 1 2.34 0l8 5.74a2 2 0 0 1 .73 2.25l-3.04 9.26a2 2 0 0 1-1.9 1.37H7.04a2 2 0 0 1-1.9-1.37L2.1 10.37a2 2 0 0 1 .73-2.25z"/>"#,
+        doc: "`pentagon`, from Lucide.",
+    };
+
+    /// `percent`, from Lucide.
+    pub const PERCENT: Self = Self {
+        name: "percent",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>"#,
+        doc: "`percent`, from Lucide.",
+    };
+
+    /// `person-standing`, from Lucide.
+    pub const PERSON_STANDING: Self = Self {
+        name: "person-standing",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/>"#,
+        doc: "`person-standing`, from Lucide.",
+    };
+
+    /// `phi`, from Lucide.
+    pub const PHI: Self = Self {
+        name: "phi",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v20"/><circle cx="12" cy="12" r="7"/>"#,
+        doc: "`phi`, from Lucide.",
+    };
+
+    /// `philippine-peso`, from Lucide.
+    pub const PHILIPPINE_PESO: Self = Self {
+        name: "philippine-peso",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 11H4"/><path d="M20 7H4"/><path d="M7 21V4a1 1 0 0 1 1-1h4a1 1 0 0 1 0 12H7"/>"#,
+        doc: "`philippine-peso`, from Lucide.",
+    };
+
+    /// `phone`, from Lucide.
+    pub const PHONE: Self = Self {
+        name: "phone",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/>"#,
+        doc: "`phone`, from Lucide.",
+    };
+
+    /// `phone-call`, from Lucide.
+    pub const PHONE_CALL: Self = Self {
+        name: "phone-call",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 2a9 9 0 0 1 9 9"/><path d="M13 6a5 5 0 0 1 5 5"/><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/>"#,
+        doc: "`phone-call`, from Lucide.",
+    };
+
+    /// `phone-forwarded`, from Lucide.
+    pub const PHONE_FORWARDED: Self = Self {
+        name: "phone-forwarded",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 6h8"/><path d="m18 2 4 4-4 4"/><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/>"#,
+        doc: "`phone-forwarded`, from Lucide.",
+    };
+
+    /// `phone-incoming`, from Lucide.
+    pub const PHONE_INCOMING: Self = Self {
+        name: "phone-incoming",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 2v6h6"/><path d="m22 2-6 6"/><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/>"#,
+        doc: "`phone-incoming`, from Lucide.",
+    };
+
+    /// `phone-missed`, from Lucide.
+    pub const PHONE_MISSED: Self = Self {
+        name: "phone-missed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 2 6 6"/><path d="m22 2-6 6"/><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/>"#,
+        doc: "`phone-missed`, from Lucide.",
+    };
+
+    /// `phone-off`, from Lucide.
+    pub const PHONE_OFF: Self = Self {
+        name: "phone-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.1 13.9a14 14 0 0 0 3.732 2.668 1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2 18 18 0 0 1-12.728-5.272"/><path d="M22 2 2 22"/><path d="M4.76 13.582A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 .244.473"/>"#,
+        doc: "`phone-off`, from Lucide.",
+    };
+
+    /// `phone-outgoing`, from Lucide.
+    pub const PHONE_OUTGOING: Self = Self {
+        name: "phone-outgoing",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 8 6-6"/><path d="M22 8V2h-6"/><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/>"#,
+        doc: "`phone-outgoing`, from Lucide.",
+    };
+
+    /// `pi`, from Lucide.
+    pub const PI: Self = Self {
+        name: "pi",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="9" x2="9" y1="4" y2="20"/><path d="M4 7c0-1.7 1.3-3 3-3h13"/><path d="M18 20c-1.7 0-3-1.3-3-3V4"/>"#,
+        doc: "`pi`, from Lucide.",
+    };
+
+    /// `piano`, from Lucide.
+    pub const PIANO: Self = Self {
+        name: "piano",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18.5 8c-1.4 0-2.6-.8-3.2-2A6.87 6.87 0 0 0 2 9v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-8.5C22 9.6 20.4 8 18.5 8"/><path d="M2 14h20"/><path d="M6 14v4"/><path d="M10 14v4"/><path d="M14 14v4"/><path d="M18 14v4"/>"#,
+        doc: "`piano`, from Lucide.",
+    };
+
+    /// `pickaxe`, from Lucide.
+    pub const PICKAXE: Self = Self {
+        name: "pickaxe",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14 13-8.381 8.38a1 1 0 0 1-3.001-3L11 9.999"/><path d="M15.973 4.027A13 13 0 0 0 5.902 2.373c-1.398.342-1.092 2.158.277 2.601a19.9 19.9 0 0 1 5.822 3.024"/><path d="M16.001 11.999a19.9 19.9 0 0 1 3.024 5.824c.444 1.369 2.26 1.676 2.603.278A13 13 0 0 0 20 8.069"/><path d="M18.352 3.352a1.205 1.205 0 0 0-1.704 0l-5.296 5.296a1.205 1.205 0 0 0 0 1.704l2.296 2.296a1.205 1.205 0 0 0 1.704 0l5.296-5.296a1.205 1.205 0 0 0 0-1.704z"/>"#,
+        doc: "`pickaxe`, from Lucide.",
+    };
+
+    /// `picture-in-picture`, from Lucide.
+    pub const PICTURE_IN_PICTURE: Self = Self {
+        name: "picture-in-picture",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 10h6V4"/><path d="m2 4 6 6"/><path d="M21 10V7a2 2 0 0 0-2-2h-7"/><path d="M3 14v2a2 2 0 0 0 2 2h3"/><rect x="12" y="14" width="10" height="7" rx="1"/>"#,
+        doc: "`picture-in-picture`, from Lucide.",
+    };
+
+    /// `picture-in-picture-2`, from Lucide.
+    pub const PICTURE_IN_PICTURE_2: Self = Self {
+        name: "picture-in-picture-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 9V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h4"/><rect width="10" height="7" x="12" y="13" rx="2"/>"#,
+        doc: "`picture-in-picture-2`, from Lucide.",
+    };
+
+    /// `piggy-bank`, from Lucide.
+    pub const PIGGY_BANK: Self = Self {
+        name: "piggy-bank",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a3.16 3.16 0 0 0 2-2h1a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-1a5 5 0 0 0-2-4V3a4 4 0 0 0-3.2 1.6l-.3.4H11a6 6 0 0 0-6 6v1a5 5 0 0 0 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1z"/><path d="M16 10h.01"/><path d="M2 8v1a2 2 0 0 0 2 2h1"/>"#,
+        doc: "`piggy-bank`, from Lucide.",
+    };
+
+    /// `pilcrow`, from Lucide.
+    pub const PILCROW: Self = Self {
+        name: "pilcrow",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 4v16"/><path d="M17 4v16"/><path d="M19 4H9.5a4.5 4.5 0 0 0 0 9H13"/>"#,
+        doc: "`pilcrow`, from Lucide.",
+    };
+
+    /// `pilcrow-left`, from Lucide.
+    pub const PILCROW_LEFT: Self = Self {
+        name: "pilcrow-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 3v11"/><path d="M14 9h-3a3 3 0 0 1 0-6h9"/><path d="M18 3v11"/><path d="M22 18H2l4-4"/><path d="m6 22-4-4"/>"#,
+        doc: "`pilcrow-left`, from Lucide.",
+    };
+
+    /// `pilcrow-right`, from Lucide.
+    pub const PILCROW_RIGHT: Self = Self {
+        name: "pilcrow-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 3v11"/><path d="M10 9H7a1 1 0 0 1 0-6h8"/><path d="M14 3v11"/><path d="m18 14 4 4H2"/><path d="m22 18-4 4"/>"#,
+        doc: "`pilcrow-right`, from Lucide.",
+    };
+
+    /// `pill`, from Lucide.
+    pub const PILL: Self = Self {
+        name: "pill",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>"#,
+        doc: "`pill`, from Lucide.",
+    };
+
+    /// `pill-bottle`, from Lucide.
+    pub const PILL_BOTTLE: Self = Self {
+        name: "pill-bottle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 11h-4a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h4"/><path d="M6 7v13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7"/><rect width="16" height="5" x="4" y="2" rx="1"/>"#,
+        doc: "`pill-bottle`, from Lucide.",
+    };
+
+    /// `pin`, from Lucide.
+    pub const PIN: Self = Self {
+        name: "pin",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/>"#,
+        doc: "`pin`, from Lucide.",
+    };
+
+    /// `pin-off`, from Lucide.
+    pub const PIN_OFF: Self = Self {
+        name: "pin-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 17v5"/><path d="M15 9.34V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H7.89"/><path d="m2 2 20 20"/><path d="M9 9v1.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h11"/>"#,
+        doc: "`pin-off`, from Lucide.",
+    };
+
+    /// Takes a colour off the screen, on a `ColorPicker` with `eyedropper`. Drawn rather than absent where the browser has no `EyeDropper`: the button is what the script removes, and an icon nothing renders is not payload.
+    pub const PIPETTE: Self = Self {
+        name: "pipette",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12 9-8.414 8.414A2 2 0 0 0 3 18.828v1.344a2 2 0 0 1-.586 1.414A2 2 0 0 1 3.828 21h1.344a2 2 0 0 0 1.414-.586L15 12"/><path d="m18 9 .4.4a1 1 0 1 1-3 3l-3.8-3.8a1 1 0 1 1 3-3l.4.4 3.4-3.4a1 1 0 1 1 3 3z"/><path d="m2 22 .414-.414"/>"#,
+        doc: "Takes a colour off the screen, on a `ColorPicker` with `eyedropper`. Drawn rather than absent where the browser has no `EyeDropper`: the button is what the script removes, and an icon nothing renders is not payload.",
+    };
+
+    /// `pizza`, from Lucide.
+    pub const PIZZA: Self = Self {
+        name: "pizza",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12 14-1 1"/><path d="m13.75 18.25-1.25 1.42"/><path d="M17.775 5.654a15.68 15.68 0 0 0-12.121 12.12"/><path d="M18.8 9.3a1 1 0 0 0 2.1 7.7"/><path d="M21.964 20.732a1 1 0 0 1-1.232 1.232l-18-5a1 1 0 0 1-.695-1.232A19.68 19.68 0 0 1 15.732 2.037a1 1 0 0 1 1.232.695z"/>"#,
+        doc: "`pizza`, from Lucide.",
+    };
+
+    /// `plane`, from Lucide.
+    pub const PLANE: Self = Self {
+        name: "plane",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>"#,
+        doc: "`plane`, from Lucide.",
+    };
+
+    /// `plane-landing`, from Lucide.
+    pub const PLANE_LANDING: Self = Self {
+        name: "plane-landing",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 22h20"/><path d="M3.77 10.77 2 9l2-4.5 1.1.55c.55.28.9.84.9 1.45s.35 1.17.9 1.45L8 8.5l3-6 1.05.53a2 2 0 0 1 1.09 1.52l.72 5.4a2 2 0 0 0 1.09 1.52l4.4 2.2c.42.22.78.55 1.01.96l.6 1.03c.49.88-.06 1.98-1.06 2.1l-1.18.15c-.47.06-.95-.02-1.37-.24L4.29 11.15a2 2 0 0 1-.52-.38Z"/>"#,
+        doc: "`plane-landing`, from Lucide.",
+    };
+
+    /// `plane-takeoff`, from Lucide.
+    pub const PLANE_TAKEOFF: Self = Self {
+        name: "plane-takeoff",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 22h20"/><path d="M6.36 17.4 4 17l-2-4 1.1-.55a2 2 0 0 1 1.8 0l.17.1a2 2 0 0 0 1.8 0L8 12 5 6l.9-.45a2 2 0 0 1 2.09.2l4.02 3a2 2 0 0 0 2.1.2l4.19-2.06a2.41 2.41 0 0 1 1.73-.17L21 7a1.4 1.4 0 0 1 .87 1.99l-.38.76c-.23.46-.6.84-1.07 1.08L7.58 17.2a2 2 0 0 1-1.22.18Z"/>"#,
+        doc: "`plane-takeoff`, from Lucide.",
+    };
+
+    /// The other half of that toggle. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script.
+    pub const PLAY: Self = Self {
+        name: "play",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/>"#,
+        doc: "The other half of that toggle. Both are rendered and the state picks one, because swapping a drawing from script means shipping a drawing to the script.",
+    };
+
+    /// `play-off`, from Lucide.
+    pub const PLAY_OFF: Self = Self {
+        name: "play-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10.215 4.56 9.79 5.71a2 2 0 0 1 .003 3.458l-.393.23"/><path d="m16.042 16.042-8.034 4.686A2 2 0 0 1 5 19V5"/><path d="m2 2 20 20"/>"#,
+        doc: "`play-off`, from Lucide.",
+    };
+
+    /// `plug`, from Lucide.
+    pub const PLUG: Self = Self {
+        name: "plug",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22v-5"/><path d="M15 8V2"/><path d="M17 8a1 1 0 0 1 1 1v4a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1z"/><path d="M9 8V2"/>"#,
+        doc: "`plug`, from Lucide.",
+    };
+
+    /// `plug-2`, from Lucide.
+    pub const PLUG_2: Self = Self {
+        name: "plug-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 2v6"/><path d="M15 2v6"/><path d="M12 17v5"/><path d="M5 8h14"/><path d="M6 11V8h12v3a6 6 0 1 1-12 0Z"/>"#,
+        doc: "`plug-2`, from Lucide.",
+    };
+
+    /// `plug-zap`, from Lucide.
+    pub const PLUG_ZAP: Self = Self {
+        name: "plug-zap",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"/><path d="m2 22 3-3"/><path d="M7.5 13.5 10 11"/><path d="M10.5 16.5 13 14"/><path d="m18 3-4 4h6l-4 4"/>"#,
+        doc: "`plug-zap`, from Lucide.",
+    };
+
+    /// Commits the colour under the cursor to a `ColorPicker { multiple }`'s list. A plus rather than a check: a check says *this one is chosen*, which is what the option rows already say, and this says *and one more*.
+    pub const PLUS: Self = Self {
+        name: "plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 12h14"/><path d="M12 5v14"/>"#,
+        doc: "Commits the colour under the cursor to a `ColorPicker { multiple }`'s list. A plus rather than a check: a check says *this one is chosen*, which is what the option rows already say, and this says *and one more*.",
+    };
+
+    /// `pocket-knife`, from Lucide.
+    pub const POCKET_KNIFE: Self = Self {
+        name: "pocket-knife",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 2v1c0 1 2 1 2 2S3 6 3 7s2 1 2 2-2 1-2 2 2 1 2 2"/><path d="M18 6h.01"/><path d="M6 18h.01"/><path d="M20.83 8.83a4 4 0 0 0-5.66-5.66l-12 12a4 4 0 1 0 5.66 5.66Z"/><path d="M18 11.66V22a4 4 0 0 0 4-4V6"/>"#,
+        doc: "`pocket-knife`, from Lucide.",
+    };
+
+    /// `podium`, from Lucide.
+    pub const PODIUM: Self = Self {
+        name: "podium",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6V2h-1"/><path d="M9 15a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1"/><path d="M9 21V11a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10"/>"#,
+        doc: "`podium`, from Lucide.",
+    };
+
+    /// `pointer`, from Lucide.
+    pub const POINTER: Self = Self {
+        name: "pointer",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 14a8 8 0 0 1-8 8"/><path d="M18 11v-1a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1"/><path d="M10 9.5V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v10"/><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>"#,
+        doc: "`pointer`, from Lucide.",
+    };
+
+    /// `pointer-off`, from Lucide.
+    pub const POINTER_OFF: Self = Self {
+        name: "pointer-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 4.5V4a2 2 0 0 0-2.41-1.957"/><path d="M13.9 8.4a2 2 0 0 0-1.26-1.295"/><path d="M21.7 16.2A8 8 0 0 0 22 14v-3a2 2 0 1 0-4 0v-1a2 2 0 0 0-3.63-1.158"/><path d="m7 15-1.8-1.8a2 2 0 0 0-2.79 2.86L6 19.7a7.74 7.74 0 0 0 6 2.3h2a8 8 0 0 0 5.657-2.343"/><path d="M6 6v8"/><path d="m2 2 20 20"/>"#,
+        doc: "`pointer-off`, from Lucide.",
+    };
+
+    /// `popcorn`, from Lucide.
+    pub const POPCORN: Self = Self {
+        name: "popcorn",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 8a2 2 0 0 0 0-4 2 2 0 0 0-4 0 2 2 0 0 0-4 0 2 2 0 0 0-4 0 2 2 0 0 0 0 4"/><path d="M10 22 9 8"/><path d="m14 22 1-14"/><path d="M20 8c.5 0 .9.4.8 1l-2.6 12c-.1.5-.7 1-1.2 1H7c-.6 0-1.1-.4-1.2-1L3.2 9c-.1-.6.3-1 .8-1Z"/>"#,
+        doc: "`popcorn`, from Lucide.",
+    };
+
+    /// `popsicle`, from Lucide.
+    pub const POPSICLE: Self = Self {
+        name: "popsicle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18.6 14.4c.8-.8.8-2 0-2.8l-8.1-8.1a4.95 4.95 0 1 0-7.1 7.1l8.1 8.1c.9.7 2.1.7 2.9-.1Z"/><path d="m22 22-5.5-5.5"/>"#,
+        doc: "`popsicle`, from Lucide.",
+    };
+
+    /// `pound-sterling`, from Lucide.
+    pub const POUND_STERLING: Self = Self {
+        name: "pound-sterling",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 7c0-5.333-8-5.333-8 0"/><path d="M10 7v14"/><path d="M6 21h12"/><path d="M6 13h10"/>"#,
+        doc: "`pound-sterling`, from Lucide.",
+    };
+
+    /// `power`, from Lucide.
+    pub const POWER: Self = Self {
+        name: "power",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/>"#,
+        doc: "`power`, from Lucide.",
+    };
+
+    /// `power-off`, from Lucide.
+    pub const POWER_OFF: Self = Self {
+        name: "power-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18.36 6.64A9 9 0 0 1 20.77 15"/><path d="M6.16 6.16a9 9 0 1 0 12.68 12.68"/><path d="M12 2v4"/><path d="m2 2 20 20"/>"#,
+        doc: "`power-off`, from Lucide.",
+    };
+
+    /// `presentation`, from Lucide.
+    pub const PRESENTATION: Self = Self {
+        name: "presentation",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/>"#,
+        doc: "`presentation`, from Lucide.",
+    };
+
+    /// `printer`, from Lucide.
+    pub const PRINTER: Self = Self {
+        name: "printer",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>"#,
+        doc: "`printer`, from Lucide.",
+    };
+
+    /// `printer-check`, from Lucide.
+    pub const PRINTER_CHECK: Self = Self {
+        name: "printer-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.5 22H7a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v.5"/><path d="m16 19 2 2 4-4"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/>"#,
+        doc: "`printer-check`, from Lucide.",
+    };
+
+    /// `printer-x`, from Lucide.
+    pub const PRINTER_X: Self = Self {
+        name: "printer-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.531 22H7a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h6.377"/><path d="m16.5 16.5 5 5"/><path d="m16.5 21.5 5-5"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1.5"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/>"#,
+        doc: "`printer-x`, from Lucide.",
+    };
+
+    /// `projector`, from Lucide.
+    pub const PROJECTOR: Self = Self {
+        name: "projector",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 7 3 5"/><path d="M9 6V3"/><path d="m13 7 2-2"/><circle cx="9" cy="13" r="3"/><path d="M11.83 12H20a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h2.17"/><path d="M16 16h2"/>"#,
+        doc: "`projector`, from Lucide.",
+    };
+
+    /// `proportions`, from Lucide.
+    pub const PROPORTIONS: Self = Self {
+        name: "proportions",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="16" x="2" y="4" rx="2"/><path d="M12 9v11"/><path d="M2 9h13a2 2 0 0 1 2 2v9"/>"#,
+        doc: "`proportions`, from Lucide.",
+    };
+
+    /// `puzzle`, from Lucide.
+    pub const PUZZLE: Self = Self {
+        name: "puzzle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"/>"#,
+        doc: "`puzzle`, from Lucide.",
+    };
+
+    /// `pyramid`, from Lucide.
+    pub const PYRAMID: Self = Self {
+        name: "pyramid",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2.5 16.88a1 1 0 0 1-.32-1.43l9-13.02a1 1 0 0 1 1.64 0l9 13.01a1 1 0 0 1-.32 1.44l-8.51 4.86a2 2 0 0 1-1.98 0Z"/><path d="M12 2v20"/>"#,
+        doc: "`pyramid`, from Lucide.",
+    };
+
+    /// `qr-code`, from Lucide.
+    pub const QR_CODE: Self = Self {
+        name: "qr-code",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/>"#,
+        doc: "`qr-code`, from Lucide.",
+    };
+
+    /// `quote`, from Lucide.
+    pub const QUOTE: Self = Self {
+        name: "quote",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/><path d="M5 3a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2 1 1 0 0 1 1 1v1a2 2 0 0 1-2 2 1 1 0 0 0-1 1v2a1 1 0 0 0 1 1 6 6 0 0 0 6-6V5a2 2 0 0 0-2-2z"/>"#,
+        doc: "`quote`, from Lucide.",
+    };
+
+    /// `rabbit`, from Lucide.
+    pub const RABBIT: Self = Self {
+        name: "rabbit",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 16a3 3 0 0 1 2.24 5"/><path d="M18 12h.01"/><path d="M18 21h-8a4 4 0 0 1-4-4 7 7 0 0 1 7-7h.2L9.6 6.4a1 1 0 1 1 2.8-2.8L15.8 7h.2c3.3 0 6 2.7 6 6v1a2 2 0 0 1-2 2h-1a3 3 0 0 0-3 3"/><path d="M20 8.54V4a2 2 0 1 0-4 0v3"/><path d="M7.612 12.524a3 3 0 1 0-1.6 4.3"/>"#,
+        doc: "`rabbit`, from Lucide.",
+    };
+
+    /// `radar`, from Lucide.
+    pub const RADAR: Self = Self {
+        name: "radar",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/>"#,
+        doc: "`radar`, from Lucide.",
+    };
+
+    /// `radiation`, from Lucide.
+    pub const RADIATION: Self = Self {
+        name: "radiation",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 12h.01"/><path d="M14 15.4641a4 4 0 0 1-4 0L7.52786 19.74597 A 1 1 0 0 0 7.99303 21.16211 10 10 0 0 0 16.00697 21.16211 1 1 0 0 0 16.47214 19.74597z"/><path d="M16 12a4 4 0 0 0-2-3.464l2.472-4.282a1 1 0 0 1 1.46-.305 10 10 0 0 1 4.006 6.94A1 1 0 0 1 21 12z"/><path d="M8 12a4 4 0 0 1 2-3.464L7.528 4.254a1 1 0 0 0-1.46-.305 10 10 0 0 0-4.006 6.94A1 1 0 0 0 3 12z"/>"#,
+        doc: "`radiation`, from Lucide.",
+    };
+
+    /// `radical`, from Lucide.
+    pub const RADICAL: Self = Self {
+        name: "radical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 12h3.28a1 1 0 0 1 .948.684l2.298 7.934a.5.5 0 0 0 .96-.044L13.82 4.771A1 1 0 0 1 14.792 4H21"/>"#,
+        doc: "`radical`, from Lucide.",
+    };
+
+    /// `radio`, from Lucide.
+    pub const RADIO: Self = Self {
+        name: "radio",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16.247 7.761a6 6 0 0 1 0 8.478"/><path d="M19.075 4.933a10 10 0 0 1 0 14.134"/><path d="M4.925 19.067a10 10 0 0 1 0-14.134"/><path d="M7.753 16.239a6 6 0 0 1 0-8.478"/><circle cx="12" cy="12" r="2"/>"#,
+        doc: "`radio`, from Lucide.",
+    };
+
+    /// `radio-off`, from Lucide.
+    pub const RADIO_OFF: Self = Self {
+        name: "radio-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.414 13.414a2 2 0 1 1-2.828-2.828"/><path d="M16.247 7.761a6 6 0 0 1 1.744 4.572"/><path d="M19.075 4.933a10 10 0 0 1 2.234 10.72"/><path d="m2 2 20 20"/><path d="M4.925 19.067a10 10 0 0 1 0-14.134"/><path d="M7.753 16.239a6 6 0 0 1 0-8.478"/>"#,
+        doc: "`radio-off`, from Lucide.",
+    };
+
+    /// `radio-receiver`, from Lucide.
+    pub const RADIO_RECEIVER: Self = Self {
+        name: "radio-receiver",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 16v2"/><path d="M19 16v2"/><rect width="20" height="8" x="2" y="8" rx="2"/><path d="M18 12h.01"/>"#,
+        doc: "`radio-receiver`, from Lucide.",
+    };
+
+    /// `radio-tower`, from Lucide.
+    pub const RADIO_TOWER: Self = Self {
+        name: "radio-tower",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0-.8 7.5"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.8c2 2 2.26 5.11.8 7.47"/><path d="M19.1 1.9a9.96 9.96 0 0 1 0 14.1"/><path d="M9.5 18h5"/><path d="m8 22 4-11 4 11"/>"#,
+        doc: "`radio-tower`, from Lucide.",
+    };
+
+    /// `radius`, from Lucide.
+    pub const RADIUS: Self = Self {
+        name: "radius",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20.34 17.52a10 10 0 1 0-2.82 2.82"/><circle cx="19" cy="19" r="2"/><path d="m13.41 13.41 4.18 4.18"/><circle cx="12" cy="12" r="2"/>"#,
+        doc: "`radius`, from Lucide.",
+    };
+
+    /// `rainbow`, from Lucide.
+    pub const RAINBOW: Self = Self {
+        name: "rainbow",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17a10 10 0 0 0-20 0"/><path d="M6 17a6 6 0 0 1 12 0"/><path d="M10 17a2 2 0 0 1 4 0"/>"#,
+        doc: "`rainbow`, from Lucide.",
+    };
+
+    /// `rat`, from Lucide.
+    pub const RAT: Self = Self {
+        name: "rat",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 22H4a2 2 0 0 1 0-4h12"/><path d="M13.236 18a3 3 0 0 0-2.2-5"/><path d="M16 9h.01"/><path d="M16.82 3.94a3 3 0 1 1 3.237 4.868l1.815 2.587a1.5 1.5 0 0 1-1.5 2.1l-2.872-.453a3 3 0 0 0-3.5 3"/><path d="M17 4.988a3 3 0 1 0-5.2 2.052A7 7 0 0 0 4 14.015 4 4 0 0 0 8 18"/>"#,
+        doc: "`rat`, from Lucide.",
+    };
+
+    /// `ratio`, from Lucide.
+    pub const RATIO: Self = Self {
+        name: "ratio",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="12" height="20" x="6" y="2" rx="2"/><rect width="20" height="12" x="2" y="6" rx="2"/>"#,
+        doc: "`ratio`, from Lucide.",
+    };
+
+    /// `receipt`, from Lucide.
+    pub const RECEIPT: Self = Self {
+        name: "receipt",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 17V7"/><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>"#,
+        doc: "`receipt`, from Lucide.",
+    };
+
+    /// `receipt-cent`, from Lucide.
+    pub const RECEIPT_CENT: Self = Self {
+        name: "receipt-cent",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 7v10"/><path d="M14.828 14.829a4 4 0 0 1-5.656 0 4 4 0 0 1 0-5.657 4 4 0 0 1 5.656 0"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>"#,
+        doc: "`receipt-cent`, from Lucide.",
+    };
+
+    /// `receipt-euro`, from Lucide.
+    pub const RECEIPT_EURO: Self = Self {
+        name: "receipt-euro",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.828 14.829a4 4 0 0 1-5.656 0 4 4 0 0 1 0-5.657 4 4 0 0 1 5.656 0"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/><path d="M8 12h5"/>"#,
+        doc: "`receipt-euro`, from Lucide.",
+    };
+
+    /// `receipt-indian-rupee`, from Lucide.
+    pub const RECEIPT_INDIAN_RUPEE: Self = Self {
+        name: "receipt-indian-rupee",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/><path d="M8 11h8"/><path d="M8 7h8"/><path d="M9 7a4 4 0 0 1 0 8H8l3 2"/>"#,
+        doc: "`receipt-indian-rupee`, from Lucide.",
+    };
+
+    /// `receipt-japanese-yen`, from Lucide.
+    pub const RECEIPT_JAPANESE_YEN: Self = Self {
+        name: "receipt-japanese-yen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12 10 3-3"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/><path d="M9 11h6"/><path d="M9 15h6"/><path d="m9 7 3 3v7"/>"#,
+        doc: "`receipt-japanese-yen`, from Lucide.",
+    };
+
+    /// `receipt-pound-sterling`, from Lucide.
+    pub const RECEIPT_POUND_STERLING: Self = Self {
+        name: "receipt-pound-sterling",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 17V9.5a1 1 0 0 1 5 0"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/><path d="M8 13h5"/><path d="M8 17h7"/>"#,
+        doc: "`receipt-pound-sterling`, from Lucide.",
+    };
+
+    /// `receipt-russian-ruble`, from Lucide.
+    pub const RECEIPT_RUSSIAN_RUBLE: Self = Self {
+        name: "receipt-russian-ruble",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/><path d="M8 11h5a2 2 0 0 0 0-4h-3v10"/><path d="M8 15h5"/>"#,
+        doc: "`receipt-russian-ruble`, from Lucide.",
+    };
+
+    /// `receipt-swiss-franc`, from Lucide.
+    pub const RECEIPT_SWISS_FRANC: Self = Self {
+        name: "receipt-swiss-franc",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 11h4"/><path d="M10 17V7h5"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/><path d="M8 15h5"/>"#,
+        doc: "`receipt-swiss-franc`, from Lucide.",
+    };
+
+    /// `receipt-text`, from Lucide.
+    pub const RECEIPT_TEXT: Self = Self {
+        name: "receipt-text",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 16H8"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>"#,
+        doc: "`receipt-text`, from Lucide.",
+    };
+
+    /// `receipt-turkish-lira`, from Lucide.
+    pub const RECEIPT_TURKISH_LIRA: Self = Self {
+        name: "receipt-turkish-lira",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 7v10a5 5 0 0 0 5-5"/><path d="m14 8-6 3"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>"#,
+        doc: "`receipt-turkish-lira`, from Lucide.",
+    };
+
+    /// `rectangle-circle`, from Lucide.
+    pub const RECTANGLE_CIRCLE: Self = Self {
+        name: "rectangle-circle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 4v16H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><circle cx="14" cy="12" r="8"/>"#,
+        doc: "`rectangle-circle`, from Lucide.",
+    };
+
+    /// `rectangle-ellipsis`, from Lucide.
+    pub const RECTANGLE_ELLIPSIS: Self = Self {
+        name: "rectangle-ellipsis",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="12" x="2" y="6" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/>"#,
+        doc: "`rectangle-ellipsis`, from Lucide.",
+    };
+
+    /// `rectangle-goggles`, from Lucide.
+    pub const RECTANGLE_GOGGLES: Self = Self {
+        name: "rectangle-goggles",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-1.6-.8l-1.6-2.13a1 1 0 0 0-1.6 0L9.6 17.2A2 2 0 0 1 8 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>"#,
+        doc: "`rectangle-goggles`, from Lucide.",
+    };
+
+    /// `rectangle-horizontal`, from Lucide.
+    pub const RECTANGLE_HORIZONTAL: Self = Self {
+        name: "rectangle-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="12" x="2" y="6" rx="2"/>"#,
+        doc: "`rectangle-horizontal`, from Lucide.",
+    };
+
+    /// `rectangle-vertical`, from Lucide.
+    pub const RECTANGLE_VERTICAL: Self = Self {
+        name: "rectangle-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="12" height="20" x="6" y="2" rx="2"/>"#,
+        doc: "`rectangle-vertical`, from Lucide.",
+    };
+
+    /// `recycle`, from Lucide.
+    pub const RECYCLE: Self = Self {
+        name: "recycle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12"/><path d="m14 16-3 3 3 3"/><path d="M8.293 13.596 7.196 9.5 3.1 10.598"/><path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888l3.943 6.843"/><path d="m13.378 9.633 4.096 1.098 1.097-4.096"/>"#,
+        doc: "`recycle`, from Lucide.",
+    };
+
+    /// `redo`, from Lucide.
+    pub const REDO: Self = Self {
+        name: "redo",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/>"#,
+        doc: "`redo`, from Lucide.",
+    };
+
+    /// `redo-2`, from Lucide.
+    pub const REDO_2: Self = Self {
+        name: "redo-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"/>"#,
+        doc: "`redo-2`, from Lucide.",
+    };
+
+    /// `redo-dot`, from Lucide.
+    pub const REDO_DOT: Self = Self {
+        name: "redo-dot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="17" r="1"/><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/>"#,
+        doc: "`redo-dot`, from Lucide.",
+    };
+
+    /// `refresh-ccw`, from Lucide.
+    pub const REFRESH_CCW: Self = Self {
+        name: "refresh-ccw",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/>"#,
+        doc: "`refresh-ccw`, from Lucide.",
+    };
+
+    /// `refresh-ccw-dot`, from Lucide.
+    pub const REFRESH_CCW_DOT: Self = Self {
+        name: "refresh-ccw-dot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/><circle cx="12" cy="12" r="1"/>"#,
+        doc: "`refresh-ccw-dot`, from Lucide.",
+    };
+
+    /// `refresh-cw`, from Lucide.
+    pub const REFRESH_CW: Self = Self {
+        name: "refresh-cw",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>"#,
+        doc: "`refresh-cw`, from Lucide.",
+    };
+
+    /// `refresh-cw-off`, from Lucide.
+    pub const REFRESH_CW_OFF: Self = Self {
+        name: "refresh-cw-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 8L18.74 5.74A9.75 9.75 0 0 0 12 3C11 3 10.03 3.16 9.13 3.47"/><path d="M8 16H3v5"/><path d="M3 12C3 9.51 4 7.26 5.64 5.64"/><path d="m3 16 2.26 2.26A9.75 9.75 0 0 0 12 21c2.49 0 4.74-1 6.36-2.64"/><path d="M21 12c0 1-.16 1.97-.47 2.87"/><path d="M21 3v5h-5"/><path d="M22 22 2 2"/>"#,
+        doc: "`refresh-cw-off`, from Lucide.",
+    };
+
+    /// `refrigerator`, from Lucide.
+    pub const REFRIGERATOR: Self = Self {
+        name: "refrigerator",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 6a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6Z"/><path d="M5 10h14"/><path d="M15 7v6"/>"#,
+        doc: "`refrigerator`, from Lucide.",
+    };
+
+    /// `regex`, from Lucide.
+    pub const REGEX: Self = Self {
+        name: "regex",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 3v10"/><path d="m12.67 5.5 8.66 5"/><path d="m12.67 10.5 8.66-5"/><path d="M9 17a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2z"/>"#,
+        doc: "`regex`, from Lucide.",
+    };
+
+    /// `remove-formatting`, from Lucide.
+    pub const REMOVE_FORMATTING: Self = Self {
+        name: "remove-formatting",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 7V4h16v3"/><path d="M5 20h6"/><path d="M13 4 8 20"/><path d="m15 15 5 5"/><path d="m20 15-5 5"/>"#,
+        doc: "`remove-formatting`, from Lucide.",
+    };
+
+    /// `repeat`, from Lucide.
+    pub const REPEAT: Self = Self {
+        name: "repeat",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>"#,
+        doc: "`repeat`, from Lucide.",
+    };
+
+    /// `repeat-1`, from Lucide.
+    pub const REPEAT_1: Self = Self {
+        name: "repeat-1",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/><path d="M11 10h1v4"/>"#,
+        doc: "`repeat-1`, from Lucide.",
+    };
+
+    /// `repeat-2`, from Lucide.
+    pub const REPEAT_2: Self = Self {
+        name: "repeat-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/>"#,
+        doc: "`repeat-2`, from Lucide.",
+    };
+
+    /// `repeat-off`, from Lucide.
+    pub const REPEAT_OFF: Self = Self {
+        name: "repeat-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.656 6H21l-4-4"/><path d="M17.898 17.898A4 4 0 0 1 17 18H3l4-4"/><path d="m2 2 20 20"/><path d="M21 13v1a4 4 0 0 1-.171 1.159"/><path d="m21 6-4 4"/><path d="M3 11v-1a4 4 0 0 1 3.102-3.898"/><path d="m7 22-4-4"/>"#,
+        doc: "`repeat-off`, from Lucide.",
+    };
+
+    /// `replace`, from Lucide.
+    pub const REPLACE: Self = Self {
+        name: "replace",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 4a1 1 0 0 1 1-1"/><path d="M15 10a1 1 0 0 1-1-1"/><path d="M21 4a1 1 0 0 0-1-1"/><path d="M21 9a1 1 0 0 1-1 1"/><path d="m3 7 3 3 3-3"/><path d="M6 10V5a2 2 0 0 1 2-2h2"/><rect x="3" y="14" width="7" height="7" rx="1"/>"#,
+        doc: "`replace`, from Lucide.",
+    };
+
+    /// `replace-all`, from Lucide.
+    pub const REPLACE_ALL: Self = Self {
+        name: "replace-all",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 14a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1"/><path d="M14 4a1 1 0 0 1 1-1"/><path d="M15 10a1 1 0 0 1-1-1"/><path d="M19 14a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1"/><path d="M21 4a1 1 0 0 0-1-1"/><path d="M21 9a1 1 0 0 1-1 1"/><path d="m3 7 3 3 3-3"/><path d="M6 10V5a2 2 0 0 1 2-2h2"/><rect x="3" y="14" width="7" height="7" rx="1"/>"#,
+        doc: "`replace-all`, from Lucide.",
+    };
+
+    /// `reply`, from Lucide.
+    pub const REPLY: Self = Self {
+        name: "reply",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 18v-2a4 4 0 0 0-4-4H4"/><path d="m9 17-5-5 5-5"/>"#,
+        doc: "`reply`, from Lucide.",
+    };
+
+    /// `reply-all`, from Lucide.
+    pub const REPLY_ALL: Self = Self {
+        name: "reply-all",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12 17-5-5 5-5"/><path d="M22 18v-2a4 4 0 0 0-4-4H7"/><path d="m7 17-5-5 5-5"/>"#,
+        doc: "`reply-all`, from Lucide.",
+    };
+
+    /// `rewind`, from Lucide.
+    pub const REWIND: Self = Self {
+        name: "rewind",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 6a2 2 0 0 0-3.414-1.414l-6 6a2 2 0 0 0 0 2.828l6 6A2 2 0 0 0 12 18z"/><path d="M22 6a2 2 0 0 0-3.414-1.414l-6 6a2 2 0 0 0 0 2.828l6 6A2 2 0 0 0 22 18z"/>"#,
+        doc: "`rewind`, from Lucide.",
+    };
+
+    /// `ribbon`, from Lucide.
+    pub const RIBBON: Self = Self {
+        name: "ribbon",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 11.22C11 9.997 10 9 10 8a2 2 0 0 1 4 0c0 1-.998 2.002-2.01 3.22"/><path d="m12 18 2.57-3.5"/><path d="M6.243 9.016a7 7 0 0 1 11.507-.009"/><path d="M9.35 14.53 12 11.22"/><path d="M9.35 14.53C7.728 12.246 6 10.221 6 7a6 5 0 0 1 12 0c-.005 3.22-1.778 5.235-3.43 7.5l3.557 4.527a1 1 0 0 1-.203 1.43l-1.894 1.36a1 1 0 0 1-1.384-.215L12 18l-2.679 3.593a1 1 0 0 1-1.39.213l-1.865-1.353a1 1 0 0 1-.203-1.422z"/>"#,
+        doc: "`ribbon`, from Lucide.",
+    };
+
+    /// `road`, from Lucide.
+    pub const ROAD: Self = Self {
+        name: "road",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 17v4"/><path d="M12 5V3"/><path d="M12 9v3"/><path d="M2.077 18.449A2 2 0 0 0 4 21h16a2 2 0 0 0 1.924-2.55l-4-14A2 2 0 0 0 16 3H8a2 2 0 0 0-1.924 1.45z"/>"#,
+        doc: "`road`, from Lucide.",
+    };
+
+    /// `rocket`, from Lucide.
+    pub const ROCKET: Self = Self {
+        name: "rocket",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"/><path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"/>"#,
+        doc: "`rocket`, from Lucide.",
+    };
+
+    /// `rocking-chair`, from Lucide.
+    pub const ROCKING_CHAIR: Self = Self {
+        name: "rocking-chair",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 13 3.708 7.416"/><path d="M3 19a15 15 0 0 0 18 0"/><path d="m3 2 3.21 9.633A2 2 0 0 0 8.109 13H18"/><path d="m9 13-3.708 7.416"/>"#,
+        doc: "`rocking-chair`, from Lucide.",
+    };
+
+    /// `roller-coaster`, from Lucide.
+    pub const ROLLER_COASTER: Self = Self {
+        name: "roller-coaster",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 19V5"/><path d="M10 19V6.8"/><path d="M14 19v-7.8"/><path d="M18 5v4"/><path d="M18 19v-6"/><path d="M22 19V9"/><path d="M2 19V9a4 4 0 0 1 4-4c2 0 4 1.33 6 4s4 4 6 4a4 4 0 1 0-3-6.65"/>"#,
+        doc: "`roller-coaster`, from Lucide.",
+    };
+
+    /// `rose`, from Lucide.
+    pub const ROSE: Self = Self {
+        name: "rose",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 10h-1a4 4 0 1 1 4-4v.534"/><path d="M17 6h1a4 4 0 0 1 1.42 7.74l-2.29.87a6 6 0 0 1-5.339-10.68l2.069-1.31"/><path d="M4.5 17c2.8-.5 4.4 0 5.5.8s1.8 2.2 2.3 3.7c-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2"/><path d="M9.77 12C4 15 2 22 2 22"/><circle cx="17" cy="8" r="2"/>"#,
+        doc: "`rose`, from Lucide.",
+    };
+
+    /// `rotate-3d`, from Lucide.
+    pub const ROTATE_3D: Self = Self {
+        name: "rotate-3d",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15.194 13.707 3.814 1.86-1.86 3.814"/><path d="M16.47214 7.52786 A 5 10 0 1 0 13 21.79796"/><path d="M21.79796 11 A 10 5 0 1 0 19 15.57071"/>"#,
+        doc: "`rotate-3d`, from Lucide.",
+    };
+
+    /// Puts an example frame back the way it was found: its width, its appearance and its glass test all at once. An arrow that comes back round to where it started, which is the one gesture in this set that means *undo my changes* rather than *go back a step* — `chevron-left` is already the carousel's previous slide, and one drawing meaning two things is how a reader learns to distrust both.
+    pub const ROTATE_CCW: Self = Self {
+        name: "rotate-ccw",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>"#,
+        doc: "Puts an example frame back the way it was found: its width, its appearance and its glass test all at once. An arrow that comes back round to where it started, which is the one gesture in this set that means *undo my changes* rather than *go back a step* — `chevron-left` is already the carousel's previous slide, and one drawing meaning two things is how a reader learns to distrust both.",
+    };
+
+    /// `rotate-ccw-clock`, from Lucide.
+    pub const ROTATE_CCW_CLOCK: Self = Self {
+        name: "rotate-ccw-clock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>"#,
+        doc: "`rotate-ccw-clock`, from Lucide.",
+    };
+
+    /// `rotate-ccw-key`, from Lucide.
+    pub const ROTATE_CCW_KEY: Self = Self {
+        name: "rotate-ccw-key",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 7v6"/><path d="M12 9h2"/><path d="M3 12a9 9 0 1 0 9-9 9.74 9.74 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><circle cx="12" cy="15" r="2"/>"#,
+        doc: "`rotate-ccw-key`, from Lucide.",
+    };
+
+    /// `rotate-ccw-square`, from Lucide.
+    pub const ROTATE_CCW_SQUARE: Self = Self {
+        name: "rotate-ccw-square",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 9V7a2 2 0 0 0-2-2h-6"/><path d="m15 2-3 3 3 3"/><path d="M20 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/>"#,
+        doc: "`rotate-ccw-square`, from Lucide.",
+    };
+
+    /// `rotate-cw`, from Lucide.
+    pub const ROTATE_CW: Self = Self {
+        name: "rotate-cw",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>"#,
+        doc: "`rotate-cw`, from Lucide.",
+    };
+
+    /// `rotate-cw-fading-clock`, from Lucide.
+    pub const ROTATE_CW_FADING_CLOCK: Self = Self {
+        name: "rotate-cw-fading-clock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3a9.75 9.75 0 0 1 6.74 2.74"/><path d="M18.74 5.74 21 8"/><path d="M21 8V3"/><path d="M7.5 19.794c-6-3.464-6-12.124 0-15.588"/><path d="M7.5 4.206A9 9 0 0 1 12 3"/><path d="M12 7v5l4 2"/><path d="M14 20.775A9 9 0 0 1 12 21"/><path d="M19 17.656a9 9 0 0 1-1.5 1.456"/><path d="M21 12a9 9 0 0 1-.228 2"/><path d="M21 8h-5"/>"#,
+        doc: "`rotate-cw-fading-clock`, from Lucide.",
+    };
+
+    /// `rotate-cw-square`, from Lucide.
+    pub const ROTATE_CW_SQUARE: Self = Self {
+        name: "rotate-cw-square",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 5H6a2 2 0 0 0-2 2v3"/><path d="m9 8 3-3-3-3"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>"#,
+        doc: "`rotate-cw-square`, from Lucide.",
+    };
+
+    /// `route`, from Lucide.
+    pub const ROUTE: Self = Self {
+        name: "route",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>"#,
+        doc: "`route`, from Lucide.",
+    };
+
+    /// `route-off`, from Lucide.
+    pub const ROUTE_OFF: Self = Self {
+        name: "route-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5c.4 0 .9-.1 1.3-.2"/><path d="M5.2 5.2A3.5 3.53 0 0 0 6.5 12H12"/><path d="m2 2 20 20"/><path d="M21 15.3a3.5 3.5 0 0 0-3.3-3.3"/><path d="M15 5h-4.3"/><circle cx="18" cy="5" r="3"/>"#,
+        doc: "`route-off`, from Lucide.",
+    };
+
+    /// `router`, from Lucide.
+    pub const ROUTER: Self = Self {
+        name: "router",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6.01 18H6"/><path d="M10.01 18H10"/><path d="M15 10v4"/><path d="M17.84 7.17a4 4 0 0 0-5.66 0"/><path d="M20.66 4.34a8 8 0 0 0-11.31 0"/>"#,
+        doc: "`router`, from Lucide.",
+    };
+
+    /// `rows-2`, from Lucide.
+    pub const ROWS_2: Self = Self {
+        name: "rows-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 12h18"/>"#,
+        doc: "`rows-2`, from Lucide.",
+    };
+
+    /// `rows-3`, from Lucide.
+    pub const ROWS_3: Self = Self {
+        name: "rows-3",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M21 9H3"/><path d="M21 15H3"/>"#,
+        doc: "`rows-3`, from Lucide.",
+    };
+
+    /// `rows-4`, from Lucide.
+    pub const ROWS_4: Self = Self {
+        name: "rows-4",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M21 7.5H3"/><path d="M21 12H3"/><path d="M21 16.5H3"/>"#,
+        doc: "`rows-4`, from Lucide.",
+    };
+
+    /// `rss`, from Lucide.
+    pub const RSS: Self = Self {
+        name: "rss",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/>"#,
+        doc: "`rss`, from Lucide.",
+    };
+
+    /// `ruler`, from Lucide.
+    pub const RULER: Self = Self {
+        name: "ruler",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/>"#,
+        doc: "`ruler`, from Lucide.",
+    };
+
+    /// `ruler-dimension-line`, from Lucide.
+    pub const RULER_DIMENSION_LINE: Self = Self {
+        name: "ruler-dimension-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 15v-3"/><path d="M14 15v-3"/><path d="M18 15v-3"/><path d="M2 8V4"/><path d="M22 6H2"/><path d="M22 8V4"/><path d="M6 15v-3"/><rect x="2" y="12" width="20" height="8" rx="2"/>"#,
+        doc: "`ruler-dimension-line`, from Lucide.",
+    };
+
+    /// `russian-ruble`, from Lucide.
+    pub const RUSSIAN_RUBLE: Self = Self {
+        name: "russian-ruble",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 11h8a4 4 0 0 0 0-8H9v18"/><path d="M6 15h8"/>"#,
+        doc: "`russian-ruble`, from Lucide.",
+    };
+
+    /// `sailboat`, from Lucide.
+    pub const SAILBOAT: Self = Self {
+        name: "sailboat",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 2v15"/><path d="M7 22a4 4 0 0 1-4-4 1 1 0 0 1 1-1h16a1 1 0 0 1 1 1 4 4 0 0 1-4 4z"/><path d="M9.159 2.46a1 1 0 0 1 1.521-.193l9.977 8.98A1 1 0 0 1 20 13H4a1 1 0 0 1-.824-1.567z"/>"#,
+        doc: "`sailboat`, from Lucide.",
+    };
+
+    /// `salad`, from Lucide.
+    pub const SALAD: Self = Self {
+        name: "salad",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 21h10"/><path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z"/><path d="M11.38 12a2.4 2.4 0 0 1-.4-4.77 2.4 2.4 0 0 1 3.2-2.77 2.4 2.4 0 0 1 3.47-.63 2.4 2.4 0 0 1 3.37 3.37 2.4 2.4 0 0 1-1.1 3.7 2.51 2.51 0 0 1 .03 1.1"/><path d="m13 12 4-4"/><path d="M10.9 7.25A3.99 3.99 0 0 0 4 10c0 .73.2 1.41.54 2"/>"#,
+        doc: "`salad`, from Lucide.",
+    };
+
+    /// `sandwich`, from Lucide.
+    pub const SANDWICH: Self = Self {
+        name: "sandwich",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m2.37 11.223 8.372-6.777a2 2 0 0 1 2.516 0l8.371 6.777"/><path d="M21 15a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-5.25"/><path d="M3 15a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h9"/><path d="m6.67 15 6.13 4.6a2 2 0 0 0 2.8-.4l3.15-4.2"/><rect width="20" height="4" x="2" y="11" rx="1"/>"#,
+        doc: "`sandwich`, from Lucide.",
+    };
+
+    /// `satellite`, from Lucide.
+    pub const SATELLITE: Self = Self {
+        name: "satellite",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m13.5 6.5-3.148-3.148a1.205 1.205 0 0 0-1.704 0L6.352 5.648a1.205 1.205 0 0 0 0 1.704L9.5 10.5"/><path d="M16.5 7.5 19 5"/><path d="m17.5 10.5 3.148 3.148a1.205 1.205 0 0 1 0 1.704l-2.296 2.296a1.205 1.205 0 0 1-1.704 0L13.5 14.5"/><path d="M9 21a6 6 0 0 0-6-6"/><path d="M9.352 10.648a1.205 1.205 0 0 0 0 1.704l2.296 2.296a1.205 1.205 0 0 0 1.704 0l4.296-4.296a1.205 1.205 0 0 0 0-1.704l-2.296-2.296a1.205 1.205 0 0 0-1.704 0z"/>"#,
+        doc: "`satellite`, from Lucide.",
+    };
+
+    /// `satellite-dish`, from Lucide.
+    pub const SATELLITE_DISH: Self = Self {
+        name: "satellite-dish",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 10a7.31 7.31 0 0 0 10 10Z"/><path d="m9 15 3-3"/><path d="M17 13a6 6 0 0 0-6-6"/><path d="M21 13A10 10 0 0 0 11 3"/>"#,
+        doc: "`satellite-dish`, from Lucide.",
+    };
+
+    /// `saudi-riyal`, from Lucide.
+    pub const SAUDI_RIYAL: Self = Self {
+        name: "saudi-riyal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m20 19.5-5.5 1.2"/><path d="M14.5 4v11.22a1 1 0 0 0 1.242.97L20 15.2"/><path d="m2.978 19.351 5.549-1.363A2 2 0 0 0 10 16V2"/><path d="M20 10 4 13.5"/>"#,
+        doc: "`saudi-riyal`, from Lucide.",
+    };
+
+    /// `save`, from Lucide.
+    pub const SAVE: Self = Self {
+        name: "save",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>"#,
+        doc: "`save`, from Lucide.",
+    };
+
+    /// `save-all`, from Lucide.
+    pub const SAVE_ALL: Self = Self {
+        name: "save-all",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 2v3a1 1 0 0 0 1 1h5"/><path d="M18 18v-6a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6"/><path d="M18 22H4a2 2 0 0 1-2-2V6"/><path d="M8 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9.172a2 2 0 0 1 1.414.586l2.828 2.828A2 2 0 0 1 22 6.828V16a2 2 0 0 1-2.01 2z"/>"#,
+        doc: "`save-all`, from Lucide.",
+    };
+
+    /// `save-check`, from Lucide.
+    pub const SAVE_CHECK: Self = Self {
+        name: "save-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.5 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h10.2a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4v4.35"/><path d="m16 19 2 2 4-4"/><path d="M17 15.13V14a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>"#,
+        doc: "`save-check`, from Lucide.",
+    };
+
+    /// `save-off`, from Lucide.
+    pub const SAVE_OFF: Self = Self {
+        name: "save-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 13H8a1 1 0 0 0-1 1v7"/><path d="M14 8h1"/><path d="M17 21v-4"/><path d="m2 2 20 20"/><path d="M20.41 20.41A2 2 0 0 1 19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 .59-1.41"/><path d="M29.5 11.5s5 5 4 5"/><path d="M9 3h6.2a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V15"/>"#,
+        doc: "`save-off`, from Lucide.",
+    };
+
+    /// `save-pen`, from Lucide.
+    pub const SAVE_PEN: Self = Self {
+        name: "save-pen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.33 13H8a1 1 0 00-1 1v7"/><path d="M14.363 17.634a2 2 0 00-.506.854l-.837 2.87a.5.5 0 00.62.62l2.87-.837a2 2 0 00.854-.506l4.013-4.009a1 1 0 10-3.004-3.004z"/><path d="M7 3v4a1 1 0 001 1h7"/><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h10.2a2 2 0 011.4.6l3.8 3.8a2 2 0 01.6 1.4v.3"/>"#,
+        doc: "`save-pen`, from Lucide.",
+    };
+
+    /// `save-plus`, from Lucide.
+    pub const SAVE_PLUS: Self = Self {
+        name: "save-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.5 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h10.2a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V12"/><path d="M16 13H8a1 1 0 0 0-1 1v7"/><path d="M19 22v-6"/><path d="M22 19h-6"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>"#,
+        doc: "`save-plus`, from Lucide.",
+    };
+
+    /// `scale`, from Lucide.
+    pub const SCALE: Self = Self {
+        name: "scale",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3v18"/><path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/><path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/><path d="M7 21h10"/>"#,
+        doc: "`scale`, from Lucide.",
+    };
+
+    /// `scale-3d`, from Lucide.
+    pub const SCALE_3D: Self = Self {
+        name: "scale-3d",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 7v11a1 1 0 0 0 1 1h11"/><path d="M5.293 18.707 11 13"/><circle cx="19" cy="19" r="2"/><circle cx="5" cy="5" r="2"/>"#,
+        doc: "`scale-3d`, from Lucide.",
+    };
+
+    /// `scaling`, from Lucide.
+    pub const SCALING: Self = Self {
+        name: "scaling",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M14 15H9v-5"/><path d="M16 3h5v5"/><path d="M21 3 9 15"/>"#,
+        doc: "`scaling`, from Lucide.",
+    };
+
+    /// `scan`, from Lucide.
+    pub const SCAN: Self = Self {
+        name: "scan",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>"#,
+        doc: "`scan`, from Lucide.",
+    };
+
+    /// `scan-barcode`, from Lucide.
+    pub const SCAN_BARCODE: Self = Self {
+        name: "scan-barcode",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 7v10"/><path d="M12 7v10"/><path d="M17 7v10"/>"#,
+        doc: "`scan-barcode`, from Lucide.",
+    };
+
+    /// `scan-box`, from Lucide.
+    pub const SCAN_BOX: Self = Self {
+        name: "scan-box",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 12v5.5"/><path d="M17 3h2a2 2 0 012 2v2"/><path d="M21 17v2a2 2 0 01-2 2h-2"/><path d="M3 7V5a2 2 0 012-2h2"/><path d="M7 21H5a2 2 0 01-2-2v-2"/><path d="M7.264 9.252 12 12l4.737-2.748"/><path d="M7.995 8.514A2 2 0 007 10.244v3.516a2 2 0 00.996 1.73l3 1.74a2 2 0 002.008 0l3-1.74A2 2 0 0017 13.76v-3.517a2 2 0 00-.995-1.73l-3-1.742a2 2 0 00-1.892-.064z"/>"#,
+        doc: "`scan-box`, from Lucide.",
+    };
+
+    /// `scan-eye`, from Lucide.
+    pub const SCAN_EYE: Self = Self {
+        name: "scan-eye",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="1"/><path d="M18.944 12.33a1 1 0 0 0 0-.66 7.5 7.5 0 0 0-13.888 0 1 1 0 0 0 0 .66 7.5 7.5 0 0 0 13.888 0"/>"#,
+        doc: "`scan-eye`, from Lucide.",
+    };
+
+    /// `scan-face`, from Lucide.
+    pub const SCAN_FACE: Self = Self {
+        name: "scan-face",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/>"#,
+        doc: "`scan-face`, from Lucide.",
+    };
+
+    /// `scan-heart`, from Lucide.
+    pub const SCAN_HEART: Self = Self {
+        name: "scan-heart",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7.828 13.07A3 3 0 0 1 12 8.764a3 3 0 0 1 4.172 4.306l-3.447 3.62a1 1 0 0 1-1.449 0z"/>"#,
+        doc: "`scan-heart`, from Lucide.",
+    };
+
+    /// `scan-line`, from Lucide.
+    pub const SCAN_LINE: Self = Self {
+        name: "scan-line",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/>"#,
+        doc: "`scan-line`, from Lucide.",
+    };
+
+    /// `scan-qr-code`, from Lucide.
+    pub const SCAN_QR_CODE: Self = Self {
+        name: "scan-qr-code",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 12v4a1 1 0 0 1-1 1h-4"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M17 8V7"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M7 17h.01"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="5" height="5" rx="1"/>"#,
+        doc: "`scan-qr-code`, from Lucide.",
+    };
+
+    /// `scan-search`, from Lucide.
+    pub const SCAN_SEARCH: Self = Self {
+        name: "scan-search",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/><path d="m16 16-1.9-1.9"/>"#,
+        doc: "`scan-search`, from Lucide.",
+    };
+
+    /// `scan-square`, from Lucide.
+    pub const SCAN_SQUARE: Self = Self {
+        name: "scan-square",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect width="8" height="8" x="8" y="8" rx="1"/>"#,
+        doc: "`scan-square`, from Lucide.",
+    };
+
+    /// `scan-text`, from Lucide.
+    pub const SCAN_TEXT: Self = Self {
+        name: "scan-text",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8h8"/><path d="M7 12h10"/><path d="M7 16h6"/>"#,
+        doc: "`scan-text`, from Lucide.",
+    };
+
+    /// `school`, from Lucide.
+    pub const SCHOOL: Self = Self {
+        name: "school",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M18 4.933V21"/><path d="m4 6 7.106-3.79a2 2 0 0 1 1.788 0L20 6"/><path d="m6 11-3.52 2.147a1 1 0 0 0-.48.854V19a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a1 1 0 0 0-.48-.853L18 11"/><path d="M6 4.933V21"/><circle cx="12" cy="9" r="2"/>"#,
+        doc: "`school`, from Lucide.",
+    };
+
+    /// `scissors`, from Lucide.
+    pub const SCISSORS: Self = Self {
+        name: "scissors",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/>"#,
+        doc: "`scissors`, from Lucide.",
+    };
+
+    /// `scissors-line-dashed`, from Lucide.
+    pub const SCISSORS_LINE_DASHED: Self = Self {
+        name: "scissors-line-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5.42 9.42 8 12"/><circle cx="4" cy="8" r="2"/><path d="m14 6-8.58 8.58"/><circle cx="4" cy="16" r="2"/><path d="M10.8 14.8 14 18"/><path d="M16 12h-2"/><path d="M22 12h-2"/>"#,
+        doc: "`scissors-line-dashed`, from Lucide.",
+    };
+
+    /// `scooter`, from Lucide.
+    pub const SCOOTER: Self = Self {
+        name: "scooter",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 4h-3.5l2 11.05"/><path d="M6.95 17h5.142c.523 0 .95-.406 1.063-.916a6.5 6.5 0 0 1 5.345-5.009"/><circle cx="19.5" cy="17.5" r="2.5"/><circle cx="4.5" cy="17.5" r="2.5"/>"#,
+        doc: "`scooter`, from Lucide.",
+    };
+
+    /// `screen-share`, from Lucide.
+    pub const SCREEN_SHARE: Self = Self {
+        name: "screen-share",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 3H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="m17 8 5-5"/><path d="M17 3h5v5"/>"#,
+        doc: "`screen-share`, from Lucide.",
+    };
+
+    /// `screen-share-off`, from Lucide.
+    pub const SCREEN_SHARE_OFF: Self = Self {
+        name: "screen-share-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 3H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="m22 3-5 5"/><path d="m17 3 5 5"/>"#,
+        doc: "`screen-share-off`, from Lucide.",
+    };
+
+    /// `scroll`, from Lucide.
+    pub const SCROLL: Self = Self {
+        name: "scroll",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/>"#,
+        doc: "`scroll`, from Lucide.",
+    };
+
+    /// `scroll-text`, from Lucide.
+    pub const SCROLL_TEXT: Self = Self {
+        name: "scroll-text",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/>"#,
+        doc: "`scroll-text`, from Lucide.",
+    };
+
+    /// Marks the search field.
+    pub const SEARCH: Self = Self {
+        name: "search",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>"#,
+        doc: "Marks the search field.",
+    };
+
+    /// `search-alert`, from Lucide.
+    pub const SEARCH_ALERT: Self = Self {
+        name: "search-alert",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 7v4"/><path d="M11 15h.01"/>"#,
+        doc: "`search-alert`, from Lucide.",
+    };
+
+    /// `search-check`, from Lucide.
+    pub const SEARCH_CHECK: Self = Self {
+        name: "search-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m8 11 2 2 4-4"/><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>"#,
+        doc: "`search-check`, from Lucide.",
+    };
+
+    /// `search-code`, from Lucide.
+    pub const SEARCH_CODE: Self = Self {
+        name: "search-code",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m13 13.5 2-2.5-2-2.5"/><path d="m21 21-4.3-4.3"/><path d="M9 8.5 7 11l2 2.5"/><circle cx="11" cy="11" r="8"/>"#,
+        doc: "`search-code`, from Lucide.",
+    };
+
+    /// `search-slash`, from Lucide.
+    pub const SEARCH_SLASH: Self = Self {
+        name: "search-slash",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m13.5 8.5-5 5"/><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>"#,
+        doc: "`search-slash`, from Lucide.",
+    };
+
+    /// `search-x`, from Lucide.
+    pub const SEARCH_X: Self = Self {
+        name: "search-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m13.5 8.5-5 5"/><path d="m8.5 8.5 5 5"/><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>"#,
+        doc: "`search-x`, from Lucide.",
+    };
+
+    /// `section`, from Lucide.
+    pub const SECTION: Self = Self {
+        name: "section",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 5a4 3 0 0 0-8 0c0 4 8 3 8 7a4 3 0 0 1-8 0"/><path d="M8 19a4 3 0 0 0 8 0c0-4-8-3-8-7a4 3 0 0 1 8 0"/>"#,
+        doc: "`section`, from Lucide.",
+    };
+
+    /// `send`, from Lucide.
+    pub const SEND: Self = Self {
+        name: "send",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>"#,
+        doc: "`send`, from Lucide.",
+    };
+
+    /// `send-horizontal`, from Lucide.
+    pub const SEND_HORIZONTAL: Self = Self {
+        name: "send-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.714 3.048a.498.498 0 0 0-.683.627l2.843 7.627a2 2 0 0 1 0 1.396l-2.842 7.627a.498.498 0 0 0 .682.627l18-8.5a.5.5 0 0 0 0-.904z"/><path d="M6 12h16"/>"#,
+        doc: "`send-horizontal`, from Lucide.",
+    };
+
+    /// `send-to-back`, from Lucide.
+    pub const SEND_TO_BACK: Self = Self {
+        name: "send-to-back",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect x="14" y="14" width="8" height="8" rx="2"/><rect x="2" y="2" width="8" height="8" rx="2"/><path d="M7 14v1a2 2 0 0 0 2 2h1"/><path d="M14 7h1a2 2 0 0 1 2 2v1"/>"#,
+        doc: "`send-to-back`, from Lucide.",
+    };
+
+    /// `separator-horizontal`, from Lucide.
+    pub const SEPARATOR_HORIZONTAL: Self = Self {
+        name: "separator-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 16-4 4-4-4"/><path d="M3 12h18"/><path d="m8 8 4-4 4 4"/>"#,
+        doc: "`separator-horizontal`, from Lucide.",
+    };
+
+    /// `separator-vertical`, from Lucide.
+    pub const SEPARATOR_VERTICAL: Self = Self {
+        name: "separator-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3v18"/><path d="m16 16 4-4-4-4"/><path d="m8 8-4 4 4 4"/>"#,
+        doc: "`separator-vertical`, from Lucide.",
+    };
+
+    /// `server`, from Lucide.
+    pub const SERVER: Self = Self {
+        name: "server",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>"#,
+        doc: "`server`, from Lucide.",
+    };
+
+    /// `server-cog`, from Lucide.
+    pub const SERVER_COG: Self = Self {
+        name: "server-cog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10.852 14.772-.383.923"/><path d="M13.148 14.772a3 3 0 1 0-2.296-5.544l-.383-.923"/><path d="m13.148 9.228.383-.923"/><path d="m13.53 15.696-.382-.924a3 3 0 1 1-2.296-5.544"/><path d="m14.772 10.852.923-.383"/><path d="m14.772 13.148.923.383"/><path d="M4.5 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5"/><path d="M4.5 14H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-.5"/><path d="M6 18h.01"/><path d="M6 6h.01"/><path d="m9.228 10.852-.923-.383"/><path d="m9.228 13.148-.923.383"/>"#,
+        doc: "`server-cog`, from Lucide.",
+    };
+
+    /// `server-crash`, from Lucide.
+    pub const SERVER_CRASH: Self = Self {
+        name: "server-crash",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M6 14H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-2"/><path d="M6 6h.01"/><path d="M6 18h.01"/><path d="m13 6-4 6h6l-4 6"/>"#,
+        doc: "`server-crash`, from Lucide.",
+    };
+
+    /// `server-off`, from Lucide.
+    pub const SERVER_OFF: Self = Self {
+        name: "server-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-5"/><path d="M10 10 2.5 2.5C2 2 2 2.5 2 5v3a2 2 0 0 0 2 2h6z"/><path d="M22 17v-1a2 2 0 0 0-2-2h-1"/><path d="M4 14a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16.5l1-.5.5.5-8-8H4z"/><path d="M6 18h.01"/><path d="m2 2 20 20"/>"#,
+        doc: "`server-off`, from Lucide.",
+    };
+
+    /// `server-plus`, from Lucide.
+    pub const SERVER_PLUS: Self = Self {
+        name: "server-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.5 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v2"/><path d="M16 12h6"/><path d="M19 9v6"/><path d="M22 18v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h8.5"/><path d="M6 18h.01"/><path d="M6 6h.01"/>"#,
+        doc: "`server-plus`, from Lucide.",
+    };
+
+    /// Settings that are not the theme. `Disclosure` documents itself with it.
+    pub const SETTINGS: Self = Self {
+        name: "settings",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/>"#,
+        doc: "Settings that are not the theme. `Disclosure` documents itself with it.",
+    };
+
+    /// `settings-2`, from Lucide.
+    pub const SETTINGS_2: Self = Self {
+        name: "settings-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 17H5"/><path d="M19 7h-9"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>"#,
+        doc: "`settings-2`, from Lucide.",
+    };
+
+    /// `shapes`, from Lucide.
+    pub const SHAPES: Self = Self {
+        name: "shapes",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8.3 10a.7.7 0 0 1-.626-1.079L11.4 3a.7.7 0 0 1 1.198-.043L16.3 8.9a.7.7 0 0 1-.572 1.1Z"/><rect x="3" y="14" width="7" height="7" rx="1"/><circle cx="17.5" cy="17.5" r="3.5"/>"#,
+        doc: "`shapes`, from Lucide.",
+    };
+
+    /// `share`, from Lucide.
+    pub const SHARE: Self = Self {
+        name: "share",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v13"/><path d="m16 6-4-4-4 4"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>"#,
+        doc: "`share`, from Lucide.",
+    };
+
+    /// `share-2`, from Lucide.
+    pub const SHARE_2: Self = Self {
+        name: "share-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>"#,
+        doc: "`share-2`, from Lucide.",
+    };
+
+    /// `sheet`, from Lucide.
+    pub const SHEET: Self = Self {
+        name: "sheet",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="3" x2="21" y1="15" y2="15"/><line x1="9" x2="9" y1="9" y2="21"/><line x1="15" x2="15" y1="9" y2="21"/>"#,
+        doc: "`sheet`, from Lucide.",
+    };
+
+    /// `shell`, from Lucide.
+    pub const SHELL: Self = Self {
+        name: "shell",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 11a2 2 0 1 1-4 0 4 4 0 0 1 8 0 6 6 0 0 1-12 0 8 8 0 0 1 16 0 10 10 0 1 1-20 0 11.93 11.93 0 0 1 2.42-7.22 2 2 0 1 1 3.16 2.44"/>"#,
+        doc: "`shell`, from Lucide.",
+    };
+
+    /// `shelving-unit`, from Lucide.
+    pub const SHELVING_UNIT: Self = Self {
+        name: "shelving-unit",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 12V9a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/><path d="M16 20v-3a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v3"/><path d="M20 22V2"/><path d="M4 12h16"/><path d="M4 20h16"/><path d="M4 2v20"/><path d="M4 4h16"/>"#,
+        doc: "`shelving-unit`, from Lucide.",
+    };
+
+    /// `shield`, from Lucide.
+    pub const SHIELD: Self = Self {
+        name: "shield",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>"#,
+        doc: "`shield`, from Lucide.",
+    };
+
+    /// `shield-alert`, from Lucide.
+    pub const SHIELD_ALERT: Self = Self {
+        name: "shield-alert",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/>"#,
+        doc: "`shield-alert`, from Lucide.",
+    };
+
+    /// `shield-ban`, from Lucide.
+    pub const SHIELD_BAN: Self = Self {
+        name: "shield-ban",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m4.243 5.21 14.39 12.472"/>"#,
+        doc: "`shield-ban`, from Lucide.",
+    };
+
+    /// `shield-check`, from Lucide.
+    pub const SHIELD_CHECK: Self = Self {
+        name: "shield-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>"#,
+        doc: "`shield-check`, from Lucide.",
+    };
+
+    /// `shield-cog`, from Lucide.
+    pub const SHIELD_COG: Self = Self {
+        name: "shield-cog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10.929 14.467-.383.924"/><path d="M10.929 8.923 10.546 8"/><path d="M13.225 8.923 13.608 8"/><path d="m13.607 15.391-.382-.924"/><path d="m14.849 10.547.923-.383"/><path d="m14.849 12.843.923.383"/><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9.305 10.547-.923-.383"/><path d="m9.305 12.843-.923.383"/><circle cx="12.077" cy="11.695" r="3"/>"#,
+        doc: "`shield-cog`, from Lucide.",
+    };
+
+    /// `shield-cog-corner`, from Lucide.
+    pub const SHIELD_COG_CORNER: Self = Self {
+        name: "shield-cog-corner",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 22c-3.806-1.45-7-3.966-7-9V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v4"/><path d="M14.923 16.547 14 16.164"/><path d="m14.923 18.843-.923.383"/><path d="M16.547 14.923 16.164 14"/><path d="m16.547 20.467-.383.924"/><path d="m18.843 14.923.383-.923"/><path d="m19.225 21.391-.382-.924"/><path d="m20.467 16.547.923-.383"/><path d="m20.467 18.843.923.383"/><circle cx="17.695" cy="17.695" r="3"/>"#,
+        doc: "`shield-cog-corner`, from Lucide.",
+    };
+
+    /// `shield-ellipsis`, from Lucide.
+    pub const SHIELD_ELLIPSIS: Self = Self {
+        name: "shield-ellipsis",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/>"#,
+        doc: "`shield-ellipsis`, from Lucide.",
+    };
+
+    /// `shield-half`, from Lucide.
+    pub const SHIELD_HALF: Self = Self {
+        name: "shield-half",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 22V2"/>"#,
+        doc: "`shield-half`, from Lucide.",
+    };
+
+    /// `shield-keyhole`, from Lucide.
+    pub const SHIELD_KEYHOLE: Self = Self {
+        name: "shield-keyhole",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13v3"/><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 01-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 011-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 011.52 0C14.51 3.81 17 5 19 5a1 1 0 011 1z"/><circle cx="12" cy="11" r="2"/>"#,
+        doc: "`shield-keyhole`, from Lucide.",
+    };
+
+    /// `shield-lock`, from Lucide.
+    pub const SHIELD_LOCK: Self = Self {
+        name: "shield-lock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 9.807V6a1 1 0 00-1-1c-2 0-4.49-1.19-6.24-2.72a1.17 1.17 0 00-1.52 0C9.5 3.8 7 5 5 5a1 1 0 00-1 1v7c0 3.88 2.107 6.254 5 7.796"/><path d="M19 17v-2a2 2 0 00-4 0v2"/><rect x="13" y="17" width="8" height="5" rx="1"/>"#,
+        doc: "`shield-lock`, from Lucide.",
+    };
+
+    /// `shield-minus`, from Lucide.
+    pub const SHIELD_MINUS: Self = Self {
+        name: "shield-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M9 12h6"/>"#,
+        doc: "`shield-minus`, from Lucide.",
+    };
+
+    /// `shield-off`, from Lucide.
+    pub const SHIELD_OFF: Self = Self {
+        name: "shield-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m2 2 20 20"/><path d="M5 5a1 1 0 0 0-1 1v7c0 5 3.5 7.5 7.67 8.94a1 1 0 0 0 .67.01c2.35-.82 4.48-1.97 5.9-3.71"/><path d="M9.309 3.652A12.252 12.252 0 0 0 11.24 2.28a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1v7a9.784 9.784 0 0 1-.08 1.264"/>"#,
+        doc: "`shield-off`, from Lucide.",
+    };
+
+    /// `shield-plus`, from Lucide.
+    pub const SHIELD_PLUS: Self = Self {
+        name: "shield-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M9 12h6"/><path d="M12 9v6"/>"#,
+        doc: "`shield-plus`, from Lucide.",
+    };
+
+    /// `shield-question-mark`, from Lucide.
+    pub const SHIELD_QUESTION_MARK: Self = Self {
+        name: "shield-question-mark",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>"#,
+        doc: "`shield-question-mark`, from Lucide.",
+    };
+
+    /// `shield-user`, from Lucide.
+    pub const SHIELD_USER: Self = Self {
+        name: "shield-user",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M6.376 18.91a6 6 0 0 1 11.249.003"/><circle cx="12" cy="11" r="4"/>"#,
+        doc: "`shield-user`, from Lucide.",
+    };
+
+    /// `shield-x`, from Lucide.
+    pub const SHIELD_X: Self = Self {
+        name: "shield-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m14.5 9.5-5 5"/><path d="m9.5 9.5 5 5"/>"#,
+        doc: "`shield-x`, from Lucide.",
+    };
+
+    /// `ship`, from Lucide.
+    pub const SHIP: Self = Self {
+        name: "ship",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 10.189V14"/><path d="M12 2v3"/><path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6"/><path d="M19.38 20A11.6 11.6 0 0 0 21 14l-8.188-3.639a2 2 0 0 0-1.624 0L3 14a11.6 11.6 0 0 0 2.81 7.76"/><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1s1.2 1 2.5 1c2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>"#,
+        doc: "`ship`, from Lucide.",
+    };
+
+    /// `ship-wheel`, from Lucide.
+    pub const SHIP_WHEEL: Self = Self {
+        name: "ship-wheel",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="8"/><path d="M12 2v7.5"/><path d="m19 5-5.23 5.23"/><path d="M22 12h-7.5"/><path d="m19 19-5.23-5.23"/><path d="M12 14.5V22"/><path d="M10.23 13.77 5 19"/><path d="M9.5 12H2"/><path d="M10.23 10.23 5 5"/><circle cx="12" cy="12" r="2.5"/>"#,
+        doc: "`ship-wheel`, from Lucide.",
+    };
+
+    /// `shirt`, from Lucide.
+    pub const SHIRT: Self = Self {
+        name: "shirt",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>"#,
+        doc: "`shirt`, from Lucide.",
+    };
+
+    /// `shopping-bag`, from Lucide.
+    pub const SHOPPING_BAG: Self = Self {
+        name: "shopping-bag",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 10a4 4 0 0 1-8 0"/><path d="M3.103 6.034h17.794"/><path d="M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z"/>"#,
+        doc: "`shopping-bag`, from Lucide.",
+    };
+
+    /// `shopping-basket`, from Lucide.
+    pub const SHOPPING_BASKET: Self = Self {
+        name: "shopping-basket",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 11-1 9"/><path d="m19 11-4-7"/><path d="M2 11h20"/><path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/><path d="M4.5 15.5h15"/><path d="m5 11 4-7"/><path d="m9 11 1 9"/>"#,
+        doc: "`shopping-basket`, from Lucide.",
+    };
+
+    /// `shopping-cart`, from Lucide.
+    pub const SHOPPING_CART: Self = Self {
+        name: "shopping-cart",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>"#,
+        doc: "`shopping-cart`, from Lucide.",
+    };
+
+    /// `shovel`, from Lucide.
+    pub const SHOVEL: Self = Self {
+        name: "shovel",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21.56 4.56a1.5 1.5 0 0 1 0 2.122l-.47.47a3 3 0 0 1-4.212-.03 3 3 0 0 1 0-4.243l.44-.44a1.5 1.5 0 0 1 2.121 0z"/><path d="M3 22a1 1 0 0 1-1-1v-3.586a1 1 0 0 1 .293-.707l3.355-3.355a1.205 1.205 0 0 1 1.704 0l3.296 3.296a1.205 1.205 0 0 1 0 1.704l-3.355 3.355a1 1 0 0 1-.707.293z"/><path d="m9 15 7.879-7.878"/>"#,
+        doc: "`shovel`, from Lucide.",
+    };
+
+    /// `shower-head`, from Lucide.
+    pub const SHOWER_HEAD: Self = Self {
+        name: "shower-head",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m4 4 2.5 2.5"/><path d="M13.5 6.5a4.95 4.95 0 0 0-7 7"/><path d="M15 5 5 15"/><path d="M14 17v.01"/><path d="M10 16v.01"/><path d="M13 13v.01"/><path d="M16 10v.01"/><path d="M11 20v.01"/><path d="M17 14v.01"/><path d="M20 11v.01"/>"#,
+        doc: "`shower-head`, from Lucide.",
+    };
+
+    /// `shredder`, from Lucide.
+    pub const SHREDDER: Self = Self {
+        name: "shredder",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 13V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v5"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 22v-5"/><path d="M14 19v-2"/><path d="M18 20v-3"/><path d="M2 13h20"/><path d="M6 20v-3"/>"#,
+        doc: "`shredder`, from Lucide.",
+    };
+
+    /// `shrimp`, from Lucide.
+    pub const SHRIMP: Self = Self {
+        name: "shrimp",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 12h.01"/><path d="M13 22c.5-.5 1.12-1 2.5-1-1.38 0-2-.5-2.5-1"/><path d="M14 2a3.28 3.28 0 0 1-3.227 1.798l-6.17-.561A2.387 2.387 0 1 0 4.387 8H15.5a1 1 0 0 1 0 13 1 1 0 0 0 0-5H12a7 7 0 0 1-7-7V8"/><path d="M14 8a8.5 8.5 0 0 1 0 8"/><path d="M16 16c2 0 4.5-4 4-6"/>"#,
+        doc: "`shrimp`, from Lucide.",
+    };
+
+    /// `shrink`, from Lucide.
+    pub const SHRINK: Self = Self {
+        name: "shrink",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 15 6 6m-6-6v4.8m0-4.8h4.8"/><path d="M9 19.8V15m0 0H4.2M9 15l-6 6"/><path d="M15 4.2V9m0 0h4.8M15 9l6-6"/><path d="M9 4.2V9m0 0H4.2M9 9 3 3"/>"#,
+        doc: "`shrink`, from Lucide.",
+    };
+
+    /// `shrub`, from Lucide.
+    pub const SHRUB: Self = Self {
+        name: "shrub",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22v-5.172a2 2 0 0 0-.586-1.414L9.5 13.5"/><path d="M14.5 14.5 12 17"/><path d="M17 8.8A6 6 0 0 1 13.8 20H10A6.5 6.5 0 0 1 7 8a5 5 0 0 1 10 0z"/>"#,
+        doc: "`shrub`, from Lucide.",
+    };
+
+    /// `shuffle`, from Lucide.
+    pub const SHUFFLE: Self = Self {
+        name: "shuffle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/>"#,
+        doc: "`shuffle`, from Lucide.",
+    };
+
+    /// `sigma`, from Lucide.
+    pub const SIGMA: Self = Self {
+        name: "sigma",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 7V5a1 1 0 0 0-1-1H6.5a.5.5 0 0 0-.4.8l4.5 6a2 2 0 0 1 0 2.4l-4.5 6a.5.5 0 0 0 .4.8H17a1 1 0 0 0 1-1v-2"/>"#,
+        doc: "`sigma`, from Lucide.",
+    };
+
+    /// `signal`, from Lucide.
+    pub const SIGNAL: Self = Self {
+        name: "signal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/>"#,
+        doc: "`signal`, from Lucide.",
+    };
+
+    /// `signal-high`, from Lucide.
+    pub const SIGNAL_HIGH: Self = Self {
+        name: "signal-high",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/>"#,
+        doc: "`signal-high`, from Lucide.",
+    };
+
+    /// `signal-low`, from Lucide.
+    pub const SIGNAL_LOW: Self = Self {
+        name: "signal-low",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 20h.01"/><path d="M7 20v-4"/>"#,
+        doc: "`signal-low`, from Lucide.",
+    };
+
+    /// `signal-medium`, from Lucide.
+    pub const SIGNAL_MEDIUM: Self = Self {
+        name: "signal-medium",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/>"#,
+        doc: "`signal-medium`, from Lucide.",
+    };
+
+    /// `signal-zero`, from Lucide.
+    pub const SIGNAL_ZERO: Self = Self {
+        name: "signal-zero",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 20h.01"/>"#,
+        doc: "`signal-zero`, from Lucide.",
+    };
+
+    /// `signature`, from Lucide.
+    pub const SIGNATURE: Self = Self {
+        name: "signature",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m21 17-2.156-1.868A.5.5 0 0 0 18 15.5v.5a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1c0-2.545-3.991-3.97-8.5-4a1 1 0 0 0 0 5c4.153 0 4.745-11.295 5.708-13.5a2.5 2.5 0 1 1 3.31 3.284"/><path d="M3 21h18"/>"#,
+        doc: "`signature`, from Lucide.",
+    };
+
+    /// `signpost`, from Lucide.
+    pub const SIGNPOST: Self = Self {
+        name: "signpost",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13v8"/><path d="M12 3v3"/><path d="M2.354 10.354a1.207 1.207 0 0 1 0-1.708l2.06-2.06A2 2 0 0 1 5.828 6h12.344a2 2 0 0 1 1.414.586l2.06 2.06a1.207 1.207 0 0 1 0 1.708l-2.06 2.06a2 2 0 0 1-1.414.586H5.828a2 2 0 0 1-1.414-.586z"/>"#,
+        doc: "`signpost`, from Lucide.",
+    };
+
+    /// `signpost-big`, from Lucide.
+    pub const SIGNPOST_BIG: Self = Self {
+        name: "signpost-big",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 9H4L2 7l2-2h6"/><path d="M14 5h6l2 2-2 2h-6"/><path d="M10 22V4a2 2 0 1 1 4 0v18"/><path d="M8 22h8"/>"#,
+        doc: "`signpost-big`, from Lucide.",
+    };
+
+    /// `siren`, from Lucide.
+    pub const SIREN: Self = Self {
+        name: "siren",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/><path d="M21 12h1"/><path d="M18.5 4.5 18 5"/><path d="M2 12h1"/><path d="M12 2v1"/><path d="m4.929 4.929.707.707"/><path d="M12 12v6"/>"#,
+        doc: "`siren`, from Lucide.",
+    };
+
+    /// `skip-back`, from Lucide.
+    pub const SKIP_BACK: Self = Self {
+        name: "skip-back",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17.971 4.285A2 2 0 0 1 21 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"/><path d="M3 20V4"/>"#,
+        doc: "`skip-back`, from Lucide.",
+    };
+
+    /// `skip-forward`, from Lucide.
+    pub const SKIP_FORWARD: Self = Self {
+        name: "skip-forward",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 4v16"/><path d="M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"/>"#,
+        doc: "`skip-forward`, from Lucide.",
+    };
+
+    /// `skull`, from Lucide.
+    pub const SKULL: Self = Self {
+        name: "skull",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12.5 17-.5-1-.5 1h1z"/><path d="M15 22a1 1 0 0 0 1-1v-1a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20v1a1 1 0 0 0 1 1z"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="12" r="1"/>"#,
+        doc: "`skull`, from Lucide.",
+    };
+
+    /// `slash`, from Lucide.
+    pub const SLASH: Self = Self {
+        name: "slash",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 2 2 22"/>"#,
+        doc: "`slash`, from Lucide.",
+    };
+
+    /// `slice`, from Lucide.
+    pub const SLICE: Self = Self {
+        name: "slice",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 16.586V19a1 1 0 0 1-1 1H2L18.37 3.63a1 1 0 1 1 3 3l-9.663 9.663a1 1 0 0 1-1.414 0L8 14"/>"#,
+        doc: "`slice`, from Lucide.",
+    };
+
+    /// `sliders-horizontal`, from Lucide.
+    pub const SLIDERS_HORIZONTAL: Self = Self {
+        name: "sliders-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 5H3"/><path d="M12 19H3"/><path d="M14 3v4"/><path d="M16 17v4"/><path d="M21 12h-9"/><path d="M21 19h-5"/><path d="M21 5h-7"/><path d="M8 10v4"/><path d="M8 12H3"/>"#,
+        doc: "`sliders-horizontal`, from Lucide.",
+    };
+
+    /// `sliders-vertical`, from Lucide.
+    pub const SLIDERS_VERTICAL: Self = Self {
+        name: "sliders-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 8h4"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M17 16h4"/><path d="M19 12V3"/><path d="M19 21v-5"/><path d="M3 14h4"/><path d="M5 10V3"/><path d="M5 21v-7"/>"#,
+        doc: "`sliders-vertical`, from Lucide.",
+    };
+
+    /// `smartphone`, from Lucide.
+    pub const SMARTPHONE: Self = Self {
+        name: "smartphone",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>"#,
+        doc: "`smartphone`, from Lucide.",
+    };
+
+    /// `smartphone-charging`, from Lucide.
+    pub const SMARTPHONE_CHARGING: Self = Self {
+        name: "smartphone-charging",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12.667 8 10 12h4l-2.667 4"/>"#,
+        doc: "`smartphone-charging`, from Lucide.",
+    };
+
+    /// `smartphone-nfc`, from Lucide.
+    pub const SMARTPHONE_NFC: Self = Self {
+        name: "smartphone-nfc",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="7" height="12" x="2" y="6" rx="1"/><path d="M13 8.32a7.43 7.43 0 0 1 0 7.36"/><path d="M16.46 6.21a11.76 11.76 0 0 1 0 11.58"/><path d="M19.91 4.1a15.91 15.91 0 0 1 .01 15.8"/>"#,
+        doc: "`smartphone-nfc`, from Lucide.",
+    };
+
+    /// `snail`, from Lucide.
+    pub const SNAIL: Self = Self {
+        name: "snail",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 13a6 6 0 1 0 12 0 4 4 0 1 0-8 0 2 2 0 0 0 4 0"/><circle cx="10" cy="13" r="8"/><path d="M2 21h12c4.4 0 8-3.6 8-8V7a2 2 0 1 0-4 0v6"/><path d="M18 3 19.1 5.2"/><path d="M22 3 20.9 5.2"/>"#,
+        doc: "`snail`, from Lucide.",
+    };
+
+    /// `snowflake`, from Lucide.
+    pub const SNOWFLAKE: Self = Self {
+        name: "snowflake",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10 20-1.25-2.5L6 18"/><path d="M10 4 8.75 6.5 6 6"/><path d="m14 20 1.25-2.5L18 18"/><path d="m14 4 1.25 2.5L18 6"/><path d="m17 21-3-6h-4"/><path d="m17 3-3 6 1.5 3"/><path d="M2 12h6.5L10 9"/><path d="m20 10-1.5 2 1.5 2"/><path d="M22 12h-6.5L14 15"/><path d="m4 10 1.5 2L4 14"/><path d="m7 21 3-6-1.5-3"/><path d="m7 3 3 6h4"/>"#,
+        doc: "`snowflake`, from Lucide.",
+    };
+
+    /// `soap-dispenser-droplet`, from Lucide.
+    pub const SOAP_DISPENSER_DROPLET: Self = Self {
+        name: "soap-dispenser-droplet",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.5 2v4"/><path d="M14 2H7a2 2 0 0 0-2 2"/><path d="M19.29 14.76A6.67 6.67 0 0 1 17 11a6.6 6.6 0 0 1-2.29 3.76c-1.15.92-1.71 2.04-1.71 3.19 0 2.22 1.8 4.05 4 4.05s4-1.83 4-4.05c0-1.16-.57-2.26-1.71-3.19"/><path d="M9.607 21H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h7V7a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>"#,
+        doc: "`soap-dispenser-droplet`, from Lucide.",
+    };
+
+    /// `sofa`, from Lucide.
+    pub const SOFA: Self = Self {
+        name: "sofa",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5V11a2 2 0 0 0-4 0z"/><path d="M4 18v2"/><path d="M20 18v2"/><path d="M12 4v9"/>"#,
+        doc: "`sofa`, from Lucide.",
+    };
+
+    /// `solar-panel`, from Lucide.
+    pub const SOLAR_PANEL: Self = Self {
+        name: "solar-panel",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 2h2"/><path d="m14.28 14-4.56 8"/><path d="m21 22-1.558-4H4.558"/><path d="M3 10v2"/><path d="M6.245 15.04A2 2 0 0 1 8 14h12a1 1 0 0 1 .864 1.505l-3.11 5.457A2 2 0 0 1 16 22H4a1 1 0 0 1-.863-1.506z"/><path d="M7 2a4 4 0 0 1-4 4"/><path d="m8.66 7.66 1.41 1.41"/>"#,
+        doc: "`solar-panel`, from Lucide.",
+    };
+
+    /// `soup`, from Lucide.
+    pub const SOUP: Self = Self {
+        name: "soup",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z"/><path d="M7 21h10"/><path d="M19.5 12 22 6"/><path d="M16.25 3c.27.1.8.53.75 1.36-.06.83-.93 1.2-1 2.02-.05.78.34 1.24.73 1.62"/><path d="M11.25 3c.27.1.8.53.74 1.36-.05.83-.93 1.2-.98 2.02-.06.78.33 1.24.72 1.62"/><path d="M6.25 3c.27.1.8.53.75 1.36-.06.83-.93 1.2-1 2.02-.05.78.34 1.24.74 1.62"/>"#,
+        doc: "`soup`, from Lucide.",
+    };
+
+    /// `space`, from Lucide.
+    pub const SPACE: Self = Self {
+        name: "space",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 17v1c0 .5-.5 1-1 1H3c-.5 0-1-.5-1-1v-1"/>"#,
+        doc: "`space`, from Lucide.",
+    };
+
+    /// `spade`, from Lucide.
+    pub const SPADE: Self = Self {
+        name: "spade",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 18v4"/><path d="M2 14.499a5.5 5.5 0 0 0 9.591 3.675.6.6 0 0 1 .818.001A5.5 5.5 0 0 0 22 14.5c0-2.29-1.5-4-3-5.5l-5.492-5.312a2 2 0 0 0-3-.02L5 8.999c-1.5 1.5-3 3.2-3 5.5"/>"#,
+        doc: "`spade`, from Lucide.",
+    };
+
+    /// `sparkle`, from Lucide.
+    pub const SPARKLE: Self = Self {
+        name: "sparkle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/>"#,
+        doc: "`sparkle`, from Lucide.",
+    };
+
+    /// `sparkles`, from Lucide.
+    pub const SPARKLES: Self = Self {
+        name: "sparkles",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/>"#,
+        doc: "`sparkles`, from Lucide.",
+    };
+
+    /// `speaker`, from Lucide.
+    pub const SPEAKER: Self = Self {
+        name: "speaker",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="16" height="20" x="4" y="2" rx="2"/><path d="M12 6h.01"/><circle cx="12" cy="14" r="4"/><path d="M12 14h.01"/>"#,
+        doc: "`speaker`, from Lucide.",
+    };
+
+    /// `speech`, from Lucide.
+    pub const SPEECH: Self = Self {
+        name: "speech",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8.8 20v-4.1l1.9.2a2.3 2.3 0 0 0 2.164-2.1V8.3A5.37 5.37 0 0 0 2 8.25c0 2.8.656 3.054 1 4.55a5.77 5.77 0 0 1 .029 2.758L2 20"/><path d="M19.8 17.8a7.5 7.5 0 0 0 .003-10.603"/><path d="M17 15a3.5 3.5 0 0 0-.025-4.975"/>"#,
+        doc: "`speech`, from Lucide.",
+    };
+
+    /// `spell-check`, from Lucide.
+    pub const SPELL_CHECK: Self = Self {
+        name: "spell-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m6 16 6-12 6 12"/><path d="M8 12h8"/><path d="m16 20 2 2 4-4"/>"#,
+        doc: "`spell-check`, from Lucide.",
+    };
+
+    /// `spell-check-2`, from Lucide.
+    pub const SPELL_CHECK_2: Self = Self {
+        name: "spell-check-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m6 16 6-12 6 12"/><path d="M8 12h8"/><path d="M4 21c1.1 0 1.1-1 2.3-1s1.1 1 2.3 1c1.1 0 1.1-1 2.3-1 1.1 0 1.1 1 2.3 1 1.1 0 1.1-1 2.3-1 1.1 0 1.1 1 2.3 1 1.1 0 1.1-1 2.3-1"/>"#,
+        doc: "`spell-check-2`, from Lucide.",
+    };
+
+    /// `spline`, from Lucide.
+    pub const SPLINE: Self = Self {
+        name: "spline",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><path d="M5 17A12 12 0 0 1 17 5"/>"#,
+        doc: "`spline`, from Lucide.",
+    };
+
+    /// `spline-pointer`, from Lucide.
+    pub const SPLINE_POINTER: Self = Self {
+        name: "spline-pointer",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/><path d="M5 17A12 12 0 0 1 17 5"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/>"#,
+        doc: "`spline-pointer`, from Lucide.",
+    };
+
+    /// `split`, from Lucide.
+    pub const SPLIT: Self = Self {
+        name: "split",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 9 6-6"/>"#,
+        doc: "`split`, from Lucide.",
+    };
+
+    /// `spool`, from Lucide.
+    pub const SPOOL: Self = Self {
+        name: "spool",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 13.44 4.442 17.082A2 2 0 0 0 4.982 21H19a2 2 0 0 0 .558-3.921l-1.115-.32A2 2 0 0 1 17 14.837V7.66"/><path d="m7 10.56 12.558-3.642A2 2 0 0 0 19.018 3H5a2 2 0 0 0-.558 3.921l1.115.32A2 2 0 0 1 7 9.163v7.178"/>"#,
+        doc: "`spool`, from Lucide.",
+    };
+
+    /// `sport-shoe`, from Lucide.
+    pub const SPORT_SHOE: Self = Self {
+        name: "sport-shoe",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 10.42 4.8-5.07"/><path d="M19 18h3"/><path d="M9.5 22 21.414 9.415A2 2 0 0 0 21.2 6.4l-5.61-4.208A1 1 0 0 0 14 3v2a2 2 0 0 1-1.394 1.906L8.677 8.053A1 1 0 0 0 8 9c-.155 6.393-2.082 9-4 9a2 2 0 0 0 0 4h14"/>"#,
+        doc: "`sport-shoe`, from Lucide.",
+    };
+
+    /// `spotlight`, from Lucide.
+    pub const SPOTLIGHT: Self = Self {
+        name: "spotlight",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.295 19.562 16 22"/><path d="m17 16 3.758 2.098"/><path d="m19 12.5 3.026-.598"/><path d="M7.61 6.3a3 3 0 0 0-3.92 1.3l-1.38 2.79a3 3 0 0 0 1.3 3.91l6.89 3.597a1 1 0 0 0 1.342-.447l3.106-6.211a1 1 0 0 0-.447-1.341z"/><path d="M8 9V2"/>"#,
+        doc: "`spotlight`, from Lucide.",
+    };
+
+    /// `spray-can`, from Lucide.
+    pub const SPRAY_CAN: Self = Self {
+        name: "spray-can",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 3h.01"/><path d="M7 5h.01"/><path d="M11 7h.01"/><path d="M3 7h.01"/><path d="M7 9h.01"/><path d="M3 11h.01"/><rect width="4" height="4" x="15" y="5"/><path d="m19 9 2 2v10c0 .6-.4 1-1 1h-6c-.6 0-1-.4-1-1V11l2-2"/><path d="m13 14 8-2"/><path d="m13 19 8-2"/>"#,
+        doc: "`spray-can`, from Lucide.",
+    };
+
+    /// `sprout`, from Lucide.
+    pub const SPROUT: Self = Self {
+        name: "sprout",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/><path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/><path d="M5 21h14"/>"#,
+        doc: "`sprout`, from Lucide.",
+    };
+
+    /// `square`, from Lucide.
+    pub const SQUARE: Self = Self {
+        name: "square",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/>"#,
+        doc: "`square`, from Lucide.",
+    };
+
+    /// `square-activity`, from Lucide.
+    pub const SQUARE_ACTIVITY: Self = Self {
+        name: "square-activity",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M17 12h-2l-2 5-2-10-2 5H7"/>"#,
+        doc: "`square-activity`, from Lucide.",
+    };
+
+    /// `square-arrow-down`, from Lucide.
+    pub const SQUARE_ARROW_DOWN: Self = Self {
+        name: "square-arrow-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 8v8"/><path d="m8 12 4 4 4-4"/>"#,
+        doc: "`square-arrow-down`, from Lucide.",
+    };
+
+    /// `square-arrow-down-left`, from Lucide.
+    pub const SQUARE_ARROW_DOWN_LEFT: Self = Self {
+        name: "square-arrow-down-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 15H9l6-6"/><path d="M9 15V9"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`square-arrow-down-left`, from Lucide.",
+    };
+
+    /// `square-arrow-down-right`, from Lucide.
+    pub const SQUARE_ARROW_DOWN_RIGHT: Self = Self {
+        name: "square-arrow-down-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 15 9 9"/><path d="M9 15h6V9"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`square-arrow-down-right`, from Lucide.",
+    };
+
+    /// `square-arrow-left`, from Lucide.
+    pub const SQUARE_ARROW_LEFT: Self = Self {
+        name: "square-arrow-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m12 8-4 4 4 4"/><path d="M16 12H8"/>"#,
+        doc: "`square-arrow-left`, from Lucide.",
+    };
+
+    /// `square-arrow-out-down-left`, from Lucide.
+    pub const SQUARE_ARROW_OUT_DOWN_LEFT: Self = Self {
+        name: "square-arrow-out-down-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 21h6a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6"/><path d="m3 21 9-9"/><path d="M9 21H3v-6"/>"#,
+        doc: "`square-arrow-out-down-left`, from Lucide.",
+    };
+
+    /// `square-arrow-out-down-right`, from Lucide.
+    pub const SQUARE_ARROW_OUT_DOWN_RIGHT: Self = Self {
+        name: "square-arrow-out-down-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/><path d="m21 21-9-9"/><path d="M21 15v6h-6"/>"#,
+        doc: "`square-arrow-out-down-right`, from Lucide.",
+    };
+
+    /// `square-arrow-out-up-left`, from Lucide.
+    pub const SQUARE_ARROW_OUT_UP_LEFT: Self = Self {
+        name: "square-arrow-out-up-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6"/><path d="m3 3 9 9"/><path d="M3 9V3h6"/>"#,
+        doc: "`square-arrow-out-up-left`, from Lucide.",
+    };
+
+    /// `square-arrow-out-up-right`, from Lucide.
+    pub const SQUARE_ARROW_OUT_UP_RIGHT: Self = Self {
+        name: "square-arrow-out-up-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"/><path d="m21 3-9 9"/><path d="M15 3h6v6"/>"#,
+        doc: "`square-arrow-out-up-right`, from Lucide.",
+    };
+
+    /// `square-arrow-right`, from Lucide.
+    pub const SQUARE_ARROW_RIGHT: Self = Self {
+        name: "square-arrow-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8"/><path d="m12 16 4-4-4-4"/>"#,
+        doc: "`square-arrow-right`, from Lucide.",
+    };
+
+    /// `square-arrow-right-enter`, from Lucide.
+    pub const SQUARE_ARROW_RIGHT_ENTER: Self = Self {
+        name: "square-arrow-right-enter",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10 16 4-4-4-4"/><path d="M3 12h11"/><path d="M3 8V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3"/>"#,
+        doc: "`square-arrow-right-enter`, from Lucide.",
+    };
+
+    /// `square-arrow-right-exit`, from Lucide.
+    pub const SQUARE_ARROW_RIGHT_EXIT: Self = Self {
+        name: "square-arrow-right-exit",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 12h11"/><path d="m17 16 4-4-4-4"/><path d="M21 6.344V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-1.344"/>"#,
+        doc: "`square-arrow-right-exit`, from Lucide.",
+    };
+
+    /// `square-arrow-up`, from Lucide.
+    pub const SQUARE_ARROW_UP: Self = Self {
+        name: "square-arrow-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/>"#,
+        doc: "`square-arrow-up`, from Lucide.",
+    };
+
+    /// `square-arrow-up-left`, from Lucide.
+    pub const SQUARE_ARROW_UP_LEFT: Self = Self {
+        name: "square-arrow-up-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 15 9 9"/><path d="M9 15V9h6"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`square-arrow-up-left`, from Lucide.",
+    };
+
+    /// `square-arrow-up-right`, from Lucide.
+    pub const SQUARE_ARROW_UP_RIGHT: Self = Self {
+        name: "square-arrow-up-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 15V9H9"/><path d="m9 15 6-6"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`square-arrow-up-right`, from Lucide.",
+    };
+
+    /// `square-asterisk`, from Lucide.
+    pub const SQUARE_ASTERISK: Self = Self {
+        name: "square-asterisk",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 8v8"/><path d="m8.5 14 7-4"/><path d="m8.5 10 7 4"/>"#,
+        doc: "`square-asterisk`, from Lucide.",
+    };
+
+    /// `square-bottom-dashed-scissors`, from Lucide.
+    pub const SQUARE_BOTTOM_DASHED_SCISSORS: Self = Self {
+        name: "square-bottom-dashed-scissors",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 21h1"/><path d="m17 17-2.18-2.18"/><path d="M5 21a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2"/><path d="M9 21h1"/><path d="M9.56 14.44 17 7"/><path d="M9.56 9.56 12 12"/><circle cx="8.5" cy="15.5" r="1.5"/><circle cx="8.5" cy="8.5" r="1.5"/>"#,
+        doc: "`square-bottom-dashed-scissors`, from Lucide.",
+    };
+
+    /// `square-centerline-dashed-horizontal`, from Lucide.
+    pub const SQUARE_CENTERLINE_DASHED_HORIZONTAL: Self = Self {
+        name: "square-centerline-dashed-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><path d="M12 20v2"/><path d="M12 14v2"/><path d="M12 8v2"/><path d="M12 2v2"/>"#,
+        doc: "`square-centerline-dashed-horizontal`, from Lucide.",
+    };
+
+    /// `square-centerline-dashed-vertical`, from Lucide.
+    pub const SQUARE_CENTERLINE_DASHED_VERTICAL: Self = Self {
+        name: "square-centerline-dashed-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3"/><path d="M4 12H2"/><path d="M10 12H8"/><path d="M16 12h-2"/><path d="M22 12h-2"/>"#,
+        doc: "`square-centerline-dashed-vertical`, from Lucide.",
+    };
+
+    /// `square-chart-gantt`, from Lucide.
+    pub const SQUARE_CHART_GANTT: Self = Self {
+        name: "square-chart-gantt",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 8h7"/><path d="M8 12h6"/><path d="M11 16h5"/>"#,
+        doc: "`square-chart-gantt`, from Lucide.",
+    };
+
+    /// `square-check`, from Lucide.
+    pub const SQUARE_CHECK: Self = Self {
+        name: "square-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/>"#,
+        doc: "`square-check`, from Lucide.",
+    };
+
+    /// `square-check-big`, from Lucide.
+    pub const SQUARE_CHECK_BIG: Self = Self {
+        name: "square-check-big",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 10.656V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.344"/><path d="m9 11 3 3L22 4"/>"#,
+        doc: "`square-check-big`, from Lucide.",
+    };
+
+    /// `square-chevron-down`, from Lucide.
+    pub const SQUARE_CHEVRON_DOWN: Self = Self {
+        name: "square-chevron-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m16 10-4 4-4-4"/>"#,
+        doc: "`square-chevron-down`, from Lucide.",
+    };
+
+    /// `square-chevron-left`, from Lucide.
+    pub const SQUARE_CHEVRON_LEFT: Self = Self {
+        name: "square-chevron-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m14 16-4-4 4-4"/>"#,
+        doc: "`square-chevron-left`, from Lucide.",
+    };
+
+    /// `square-chevron-right`, from Lucide.
+    pub const SQUARE_CHEVRON_RIGHT: Self = Self {
+        name: "square-chevron-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m10 8 4 4-4 4"/>"#,
+        doc: "`square-chevron-right`, from Lucide.",
+    };
+
+    /// `square-chevron-up`, from Lucide.
+    pub const SQUARE_CHEVRON_UP: Self = Self {
+        name: "square-chevron-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m8 14 4-4 4 4"/>"#,
+        doc: "`square-chevron-up`, from Lucide.",
+    };
+
+    /// `square-code`, from Lucide.
+    pub const SQUARE_CODE: Self = Self {
+        name: "square-code",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10 9-3 3 3 3"/><path d="m14 15 3-3-3-3"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`square-code`, from Lucide.",
+    };
+
+    /// `square-dashed`, from Lucide.
+    pub const SQUARE_DASHED: Self = Self {
+        name: "square-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 3a2 2 0 0 0-2 2"/><path d="M19 3a2 2 0 0 1 2 2"/><path d="M21 19a2 2 0 0 1-2 2"/><path d="M5 21a2 2 0 0 1-2-2"/><path d="M9 3h1"/><path d="M9 21h1"/><path d="M14 3h1"/><path d="M14 21h1"/><path d="M3 9v1"/><path d="M21 9v1"/><path d="M3 14v1"/><path d="M21 14v1"/>"#,
+        doc: "`square-dashed`, from Lucide.",
+    };
+
+    /// `square-dashed-bottom`, from Lucide.
+    pub const SQUARE_DASHED_BOTTOM: Self = Self {
+        name: "square-dashed-bottom",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 21a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2"/><path d="M9 21h1"/><path d="M14 21h1"/>"#,
+        doc: "`square-dashed-bottom`, from Lucide.",
+    };
+
+    /// `square-dashed-bottom-code`, from Lucide.
+    pub const SQUARE_DASHED_BOTTOM_CODE: Self = Self {
+        name: "square-dashed-bottom-code",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 9.5 8 12l2 2.5"/><path d="M14 21h1"/><path d="m14 9.5 2 2.5-2 2.5"/><path d="M5 21a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2"/><path d="M9 21h1"/>"#,
+        doc: "`square-dashed-bottom-code`, from Lucide.",
+    };
+
+    /// `square-dashed-kanban`, from Lucide.
+    pub const SQUARE_DASHED_KANBAN: Self = Self {
+        name: "square-dashed-kanban",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 7v7"/><path d="M12 7v4"/><path d="M16 7v9"/><path d="M5 3a2 2 0 0 0-2 2"/><path d="M9 3h1"/><path d="M14 3h1"/><path d="M19 3a2 2 0 0 1 2 2"/><path d="M21 9v1"/><path d="M21 14v1"/><path d="M21 19a2 2 0 0 1-2 2"/><path d="M14 21h1"/><path d="M9 21h1"/><path d="M5 21a2 2 0 0 1-2-2"/><path d="M3 14v1"/><path d="M3 9v1"/>"#,
+        doc: "`square-dashed-kanban`, from Lucide.",
+    };
+
+    /// `square-dashed-mouse-pointer`, from Lucide.
+    pub const SQUARE_DASHED_MOUSE_POINTER: Self = Self {
+        name: "square-dashed-mouse-pointer",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/><path d="M5 3a2 2 0 0 0-2 2"/><path d="M19 3a2 2 0 0 1 2 2"/><path d="M5 21a2 2 0 0 1-2-2"/><path d="M9 3h1"/><path d="M9 21h2"/><path d="M14 3h1"/><path d="M3 9v1"/><path d="M21 9v2"/><path d="M3 14v1"/>"#,
+        doc: "`square-dashed-mouse-pointer`, from Lucide.",
+    };
+
+    /// `square-dashed-text`, from Lucide.
+    pub const SQUARE_DASHED_TEXT: Self = Self {
+        name: "square-dashed-text",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 21h1"/><path d="M14 3h1"/><path d="M19 3a2 2 0 0 1 2 2"/><path d="M21 14v1"/><path d="M21 19a2 2 0 0 1-2 2"/><path d="M21 9v1"/><path d="M3 14v1"/><path d="M3 9v1"/><path d="M5 21a2 2 0 0 1-2-2"/><path d="M5 3a2 2 0 0 0-2 2"/><path d="M7 12h10"/><path d="M7 16h6"/><path d="M7 8h8"/><path d="M9 21h1"/><path d="M9 3h1"/>"#,
+        doc: "`square-dashed-text`, from Lucide.",
+    };
+
+    /// `square-dashed-top-solid`, from Lucide.
+    pub const SQUARE_DASHED_TOP_SOLID: Self = Self {
+        name: "square-dashed-top-solid",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 21h1"/><path d="M21 14v1"/><path d="M21 19a2 2 0 0 1-2 2"/><path d="M21 9v1"/><path d="M3 14v1"/><path d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2"/><path d="M3 9v1"/><path d="M5 21a2 2 0 0 1-2-2"/><path d="M9 21h1"/>"#,
+        doc: "`square-dashed-top-solid`, from Lucide.",
+    };
+
+    /// `square-dimensions`, from Lucide.
+    pub const SQUARE_DIMENSIONS: Self = Self {
+        name: "square-dimensions",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 7H7v5"/><path d="M12 17h5v-5"/>"#,
+        doc: "`square-dimensions`, from Lucide.",
+    };
+
+    /// `square-divide`, from Lucide.
+    pub const SQUARE_DIVIDE: Self = Self {
+        name: "square-divide",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="8" x2="16" y1="12" y2="12"/><line x1="12" x2="12" y1="16" y2="16"/><line x1="12" x2="12" y1="8" y2="8"/>"#,
+        doc: "`square-divide`, from Lucide.",
+    };
+
+    /// `square-dot`, from Lucide.
+    pub const SQUARE_DOT: Self = Self {
+        name: "square-dot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="12" cy="12" r="1"/>"#,
+        doc: "`square-dot`, from Lucide.",
+    };
+
+    /// `square-equal`, from Lucide.
+    pub const SQUARE_EQUAL: Self = Self {
+        name: "square-equal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 10h10"/><path d="M7 14h10"/>"#,
+        doc: "`square-equal`, from Lucide.",
+    };
+
+    /// `square-function`, from Lucide.
+    pub const SQUARE_FUNCTION: Self = Self {
+        name: "square-function",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M9 17c2 0 2.8-1 2.8-2.8V10c0-2 1-3.3 3.2-3"/><path d="M9 11.2h5.7"/>"#,
+        doc: "`square-function`, from Lucide.",
+    };
+
+    /// `square-kanban`, from Lucide.
+    pub const SQUARE_KANBAN: Self = Self {
+        name: "square-kanban",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 7v7"/><path d="M12 7v4"/><path d="M16 7v9"/>"#,
+        doc: "`square-kanban`, from Lucide.",
+    };
+
+    /// `square-library`, from Lucide.
+    pub const SQUARE_LIBRARY: Self = Self {
+        name: "square-library",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7v10"/><path d="M11 7v10"/><path d="m15 7 2 10"/>"#,
+        doc: "`square-library`, from Lucide.",
+    };
+
+    /// `square-m`, from Lucide.
+    pub const SQUARE_M: Self = Self {
+        name: "square-m",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 16V8.5a.5.5 0 0 1 .9-.3l2.7 3.599a.5.5 0 0 0 .8 0l2.7-3.6a.5.5 0 0 1 .9.3V16"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`square-m`, from Lucide.",
+    };
+
+    /// `square-menu`, from Lucide.
+    pub const SQUARE_MENU: Self = Self {
+        name: "square-menu",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h10"/>"#,
+        doc: "`square-menu`, from Lucide.",
+    };
+
+    /// `square-minus`, from Lucide.
+    pub const SQUARE_MINUS: Self = Self {
+        name: "square-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8"/>"#,
+        doc: "`square-minus`, from Lucide.",
+    };
+
+    /// `square-mouse-pointer`, from Lucide.
+    pub const SQUARE_MOUSE_POINTER: Self = Self {
+        name: "square-mouse-pointer",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/><path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/>"#,
+        doc: "`square-mouse-pointer`, from Lucide.",
+    };
+
+    /// `square-off`, from Lucide.
+    pub const SQUARE_OFF: Self = Self {
+        name: "square-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20.4 20.4a2 2 0 01-1.4.6H5a2 2 0 01-2-2V5a2 2 0 01.59-1.41"/><path d="M21 15.3V5a2 2 0 00-2-2H8.7"/><path d="M22 22 2 2"/>"#,
+        doc: "`square-off`, from Lucide.",
+    };
+
+    /// `square-parking`, from Lucide.
+    pub const SQUARE_PARKING: Self = Self {
+        name: "square-parking",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>"#,
+        doc: "`square-parking`, from Lucide.",
+    };
+
+    /// `square-parking-off`, from Lucide.
+    pub const SQUARE_PARKING_OFF: Self = Self {
+        name: "square-parking-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.6 3.6A2 2 0 0 1 5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-.59 1.41"/><path d="M3 8.7V19a2 2 0 0 0 2 2h10.3"/><path d="m2 2 20 20"/><path d="M13 13a3 3 0 1 0 0-6H9v2"/><path d="M9 17v-2.3"/>"#,
+        doc: "`square-parking-off`, from Lucide.",
+    };
+
+    /// `square-pause`, from Lucide.
+    pub const SQUARE_PAUSE: Self = Self {
+        name: "square-pause",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><line x1="10" x2="10" y1="15" y2="9"/><line x1="14" x2="14" y1="15" y2="9"/>"#,
+        doc: "`square-pause`, from Lucide.",
+    };
+
+    /// `square-pen`, from Lucide.
+    pub const SQUARE_PEN: Self = Self {
+        name: "square-pen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>"#,
+        doc: "`square-pen`, from Lucide.",
+    };
+
+    /// `square-percent`, from Lucide.
+    pub const SQUARE_PERCENT: Self = Self {
+        name: "square-percent",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m15 9-6 6"/><path d="M9 9h.01"/><path d="M15 15h.01"/>"#,
+        doc: "`square-percent`, from Lucide.",
+    };
+
+    /// `square-pi`, from Lucide.
+    pub const SQUARE_PI: Self = Self {
+        name: "square-pi",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10"/><path d="M10 7v10"/><path d="M16 17a2 2 0 0 1-2-2V7"/>"#,
+        doc: "`square-pi`, from Lucide.",
+    };
+
+    /// `square-pilcrow`, from Lucide.
+    pub const SQUARE_PILCROW: Self = Self {
+        name: "square-pilcrow",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 12H9.5a2.5 2.5 0 0 1 0-5H17"/><path d="M12 7v10"/><path d="M16 7v10"/>"#,
+        doc: "`square-pilcrow`, from Lucide.",
+    };
+
+    /// `square-play`, from Lucide.
+    pub const SQUARE_PLAY: Self = Self {
+        name: "square-play",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997A1 1 0 0 1 9 14.996z"/>"#,
+        doc: "`square-play`, from Lucide.",
+    };
+
+    /// `square-plus`, from Lucide.
+    pub const SQUARE_PLUS: Self = Self {
+        name: "square-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8"/><path d="M12 8v8"/>"#,
+        doc: "`square-plus`, from Lucide.",
+    };
+
+    /// `square-power`, from Lucide.
+    pub const SQUARE_POWER: Self = Self {
+        name: "square-power",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 7v4"/><path d="M7.998 9.003a5 5 0 1 0 8-.005"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`square-power`, from Lucide.",
+    };
+
+    /// `square-radical`, from Lucide.
+    pub const SQUARE_RADICAL: Self = Self {
+        name: "square-radical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 12h2l2 5 2-10h4"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`square-radical`, from Lucide.",
+    };
+
+    /// `square-round-corner`, from Lucide.
+    pub const SQUARE_ROUND_CORNER: Self = Self {
+        name: "square-round-corner",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 11a8 8 0 0 0-8-8"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>"#,
+        doc: "`square-round-corner`, from Lucide.",
+    };
+
+    /// `square-scissors`, from Lucide.
+    pub const SQUARE_SCISSORS: Self = Self {
+        name: "square-scissors",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m17 17-2.18-2.18"/><path d="M9.56 14.44 17 7"/><path d="M9.56 9.56 12 12"/><circle cx="8.5" cy="15.5" r="1.5"/><circle cx="8.5" cy="8.5" r="1.5"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`square-scissors`, from Lucide.",
+    };
+
+    /// `square-sigma`, from Lucide.
+    pub const SQUARE_SIGMA: Self = Self {
+        name: "square-sigma",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M16 8.9V7H8l4 5-4 5h8v-1.9"/>"#,
+        doc: "`square-sigma`, from Lucide.",
+    };
+
+    /// `square-slash`, from Lucide.
+    pub const SQUARE_SLASH: Self = Self {
+        name: "square-slash",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><line x1="9" x2="15" y1="15" y2="9"/>"#,
+        doc: "`square-slash`, from Lucide.",
+    };
+
+    /// `square-split-horizontal`, from Lucide.
+    pub const SQUARE_SPLIT_HORIZONTAL: Self = Self {
+        name: "square-split-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 19H5c-1 0-2-1-2-2V7c0-1 1-2 2-2h3"/><path d="M16 5h3c1 0 2 1 2 2v10c0 1-1 2-2 2h-3"/><line x1="12" x2="12" y1="4" y2="20"/>"#,
+        doc: "`square-split-horizontal`, from Lucide.",
+    };
+
+    /// `square-split-vertical`, from Lucide.
+    pub const SQUARE_SPLIT_VERTICAL: Self = Self {
+        name: "square-split-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M5 8V5c0-1 1-2 2-2h10c1 0 2 1 2 2v3"/><path d="M19 16v3c0 1-1 2-2 2H7c-1 0-2-1-2-2v-3"/><line x1="4" x2="20" y1="12" y2="12"/>"#,
+        doc: "`square-split-vertical`, from Lucide.",
+    };
+
+    /// `square-square`, from Lucide.
+    pub const SQUARE_SQUARE: Self = Self {
+        name: "square-square",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect x="3" y="3" width="18" height="18" rx="2"/><rect x="8" y="8" width="8" height="8" rx="1"/>"#,
+        doc: "`square-square`, from Lucide.",
+    };
+
+    /// `square-stack`, from Lucide.
+    pub const SQUARE_STACK: Self = Self {
+        name: "square-stack",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 10c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2"/><path d="M10 16c-1.1 0-2-.9-2-2v-4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2"/><rect width="8" height="8" x="14" y="14" rx="2"/>"#,
+        doc: "`square-stack`, from Lucide.",
+    };
+
+    /// `square-star`, from Lucide.
+    pub const SQUARE_STAR: Self = Self {
+        name: "square-star",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.035 7.69a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`square-star`, from Lucide.",
+    };
+
+    /// `square-stop`, from Lucide.
+    pub const SQUARE_STOP: Self = Self {
+        name: "square-stop",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><rect x="9" y="9" width="6" height="6" rx="1"/>"#,
+        doc: "`square-stop`, from Lucide.",
+    };
+
+    /// `square-terminal`, from Lucide.
+    pub const SQUARE_TERMINAL: Self = Self {
+        name: "square-terminal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m7 11 2-2-2-2"/><path d="M11 13h4"/><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>"#,
+        doc: "`square-terminal`, from Lucide.",
+    };
+
+    /// `square-text`, from Lucide.
+    pub const SQUARE_TEXT: Self = Self {
+        name: "square-text",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 8h8"/><path d="M7 12h10"/><path d="M7 16h6"/>"#,
+        doc: "`square-text`, from Lucide.",
+    };
+
+    /// `square-user`, from Lucide.
+    pub const SQUARE_USER: Self = Self {
+        name: "square-user",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M7 21v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/>"#,
+        doc: "`square-user`, from Lucide.",
+    };
+
+    /// `square-user-round`, from Lucide.
+    pub const SQUARE_USER_ROUND: Self = Self {
+        name: "square-user-round",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 21a6 6 0 0 0-12 0"/><circle cx="12" cy="11" r="4"/><rect width="18" height="18" x="3" y="3" rx="2"/>"#,
+        doc: "`square-user-round`, from Lucide.",
+    };
+
+    /// `square-x`, from Lucide.
+    pub const SQUARE_X: Self = Self {
+        name: "square-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>"#,
+        doc: "`square-x`, from Lucide.",
+    };
+
+    /// `squares-exclude`, from Lucide.
+    pub const SQUARES_EXCLUDE: Self = Self {
+        name: "squares-exclude",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 12v2a2 2 0 0 1-2 2H9a1 1 0 0 0-1 1v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h0"/><path d="M4 16a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3a1 1 0 0 1-1 1h-5a2 2 0 0 0-2 2v2"/>"#,
+        doc: "`squares-exclude`, from Lucide.",
+    };
+
+    /// `squares-intersect`, from Lucide.
+    pub const SQUARES_INTERSECT: Self = Self {
+        name: "squares-intersect",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 22a2 2 0 0 1-2-2"/><path d="M14 2a2 2 0 0 1 2 2"/><path d="M16 22h-2"/><path d="M2 10V8"/><path d="M2 4a2 2 0 0 1 2-2"/><path d="M20 8a2 2 0 0 1 2 2"/><path d="M22 14v2"/><path d="M22 20a2 2 0 0 1-2 2"/><path d="M4 16a2 2 0 0 1-2-2"/><path d="M8 10a2 2 0 0 1 2-2h5a1 1 0 0 1 1 1v5a2 2 0 0 1-2 2H9a1 1 0 0 1-1-1z"/><path d="M8 2h2"/>"#,
+        doc: "`squares-intersect`, from Lucide.",
+    };
+
+    /// `squares-subtract`, from Lucide.
+    pub const SQUARES_SUBTRACT: Self = Self {
+        name: "squares-subtract",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 22a2 2 0 0 1-2-2"/><path d="M16 22h-2"/><path d="M16 4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-5a2 2 0 0 1 2-2h5a1 1 0 0 0 1-1z"/><path d="M20 8a2 2 0 0 1 2 2"/><path d="M22 14v2"/><path d="M22 20a2 2 0 0 1-2 2"/>"#,
+        doc: "`squares-subtract`, from Lucide.",
+    };
+
+    /// `squares-unite`, from Lucide.
+    pub const SQUARES_UNITE: Self = Self {
+        name: "squares-unite",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 16a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3a1 1 0 0 0 1 1h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-3a1 1 0 0 0-1-1z"/>"#,
+        doc: "`squares-unite`, from Lucide.",
+    };
+
+    /// `squircle`, from Lucide.
+    pub const SQUIRCLE: Self = Self {
+        name: "squircle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9-9 9-9-1.8-9-9 1.8-9 9-9"/>"#,
+        doc: "`squircle`, from Lucide.",
+    };
+
+    /// `squircle-dashed`, from Lucide.
+    pub const SQUIRCLE_DASHED: Self = Self {
+        name: "squircle-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.77 3.043a34 34 0 0 0-3.54 0"/><path d="M13.771 20.956a33 33 0 0 1-3.541.001"/><path d="M20.18 17.74c-.51 1.15-1.29 1.93-2.439 2.44"/><path d="M20.18 6.259c-.51-1.148-1.291-1.929-2.44-2.438"/><path d="M20.957 10.23a33 33 0 0 1 0 3.54"/><path d="M3.043 10.23a34 34 0 0 0 .001 3.541"/><path d="M6.26 20.179c-1.15-.508-1.93-1.29-2.44-2.438"/><path d="M6.26 3.82c-1.149.51-1.93 1.291-2.44 2.44"/>"#,
+        doc: "`squircle-dashed`, from Lucide.",
+    };
+
+    /// `squirrel`, from Lucide.
+    pub const SQUIRREL: Self = Self {
+        name: "squirrel",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.236 22a3 3 0 0 0-2.2-5"/><path d="M16 20a3 3 0 0 1 3-3h1a2 2 0 0 0 2-2v-2a4 4 0 0 0-4-4V4"/><path d="M18 13h.01"/><path d="M18 6a4 4 0 0 0-4 4 7 7 0 0 0-7 7c0-5 4-5 4-10.5a4.5 4.5 0 1 0-9 0 2.5 2.5 0 0 0 5 0C7 10 3 11 3 17c0 2.8 2.2 5 5 5h10"/>"#,
+        doc: "`squirrel`, from Lucide.",
+    };
+
+    /// `stamp`, from Lucide.
+    pub const STAMP: Self = Self {
+        name: "stamp",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 13V8.5C14 7 15 7 15 5a3 3 0 0 0-6 0c0 2 1 2 1 3.5V13"/><path d="M20 15.5a2.5 2.5 0 0 0-2.5-2.5h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1z"/><path d="M5 22h14"/>"#,
+        doc: "`stamp`, from Lucide.",
+    };
+
+    /// One step of a `Rating`. The outline is the empty step and the stylesheet fills the same geometry for the full one, so a rating is one drawing rather than two that could drift apart.
+    pub const STAR: Self = Self {
+        name: "star",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>"#,
+        doc: "One step of a `Rating`. The outline is the empty step and the stylesheet fills the same geometry for the full one, so a rating is one drawing rather than two that could drift apart.",
+    };
+
+    /// `star-check`, from Lucide.
+    pub const STAR_CHECK: Self = Self {
+        name: "star-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m19.06 12.501 2.78-2.707a.53.53 0 0 0-.294-.905l-5.166-.755a2.1 2.1 0 0 1-1.595-1.16l-2.31-4.68a.53.53 0 0 0-.95.001L9.216 6.974a2.1 2.1 0 0 1-1.597 1.16l-5.165.755a.53.53 0 0 0-.294.906l3.736 3.637a2.1 2.1 0 0 1 .611 1.879l-.88 5.139a.53.53 0 0 0 .769.56l4.617-2.428.027-.014"/><path d="m15 18 2 2 4-4"/>"#,
+        doc: "`star-check`, from Lucide.",
+    };
+
+    /// `star-half`, from Lucide.
+    pub const STAR_HALF: Self = Self {
+        name: "star-half",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 18.338a2.1 2.1 0 0 0-.987.244L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16l2.309-4.679A.53.53 0 0 1 12 2"/>"#,
+        doc: "`star-half`, from Lucide.",
+    };
+
+    /// `star-minus`, from Lucide.
+    pub const STAR_MINUS: Self = Self {
+        name: "star-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 18h6"/><path d="M17.688 14a2.1 2.1 0 0 1 .416-.568l3.736-3.638a.53.53 0 0 0-.294-.905l-5.166-.755a2.1 2.1 0 0 1-1.595-1.16l-2.31-4.68a.53.53 0 0 0-.95.001L9.216 6.974a2.1 2.1 0 0 1-1.597 1.16l-5.165.755a.53.53 0 0 0-.294.906l3.736 3.637a2.1 2.1 0 0 1 .611 1.879l-.88 5.139a.53.53 0 0 0 .769.56l4.617-2.428.027-.014"/>"#,
+        doc: "`star-minus`, from Lucide.",
+    };
+
+    /// `star-off`, from Lucide.
+    pub const STAR_OFF: Self = Self {
+        name: "star-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10.344 4.688 1.181-2.393a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.237 3.152"/><path d="m17.945 17.945.43 2.505a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a8 8 0 0 0 .4-.099"/><path d="m2 2 20 20"/>"#,
+        doc: "`star-off`, from Lucide.",
+    };
+
+    /// `star-plus`, from Lucide.
+    pub const STAR_PLUS: Self = Self {
+        name: "star-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.013 18.582 6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16l2.309-4.679a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904L20 11.5"/><path d="M15 18h6"/><path d="M18 15v6"/>"#,
+        doc: "`star-plus`, from Lucide.",
+    };
+
+    /// `star-x`, from Lucide.
+    pub const STAR_X: Self = Self {
+        name: "star-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15.5 15.5 5 5"/><path d="m20.063 11.525 1.777-1.731a.53.53 0 0 0-.294-.905l-5.166-.755a2.1 2.1 0 0 1-1.595-1.16l-2.31-4.68a.53.53 0 0 0-.95.001L9.216 6.974a2.1 2.1 0 0 1-1.597 1.16l-5.165.755a.53.53 0 0 0-.294.906l3.736 3.637a2.1 2.1 0 0 1 .611 1.879l-.88 5.139a.53.53 0 0 0 .769.56l4.617-2.428a2.1 2.1 0 0 1 .987-.243 2 2 0 0 1 .132.004"/><path d="m20.5 15.5-5 5"/>"#,
+        doc: "`star-x`, from Lucide.",
+    };
+
+    /// `step-back`, from Lucide.
+    pub const STEP_BACK: Self = Self {
+        name: "step-back",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.971 4.285A2 2 0 0 1 17 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"/><path d="M21 20V4"/>"#,
+        doc: "`step-back`, from Lucide.",
+    };
+
+    /// `step-forward`, from Lucide.
+    pub const STEP_FORWARD: Self = Self {
+        name: "step-forward",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.029 4.285A2 2 0 0 0 7 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"/><path d="M3 4v16"/>"#,
+        doc: "`step-forward`, from Lucide.",
+    };
+
+    /// `stethoscope`, from Lucide.
+    pub const STETHOSCOPE: Self = Self {
+        name: "stethoscope",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/>"#,
+        doc: "`stethoscope`, from Lucide.",
+    };
+
+    /// `sticker`, from Lucide.
+    pub const STICKER: Self = Self {
+        name: "sticker",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 9a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/><path d="M15 3v5a1 1 0 0 0 1 1h5"/><path d="M8 13h.01"/><path d="M16 13h.01"/><path d="M10 16s.8 1 2 1c1.3 0 2-1 2-1"/>"#,
+        doc: "`sticker`, from Lucide.",
+    };
+
+    /// `sticky-note`, from Lucide.
+    pub const STICKY_NOTE: Self = Self {
+        name: "sticky-note",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 9a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/><path d="M15 3v5a1 1 0 0 0 1 1h5"/>"#,
+        doc: "`sticky-note`, from Lucide.",
+    };
+
+    /// `sticky-note-check`, from Lucide.
+    pub const STICKY_NOTE_CHECK: Self = Self {
+        name: "sticky-note-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m15 19 2 2 4-4"/><path d="M15 3v5a1 1 0 0 0 1 1h5"/><path d="M21 13V9a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6.5"/>"#,
+        doc: "`sticky-note-check`, from Lucide.",
+    };
+
+    /// `sticky-note-minus`, from Lucide.
+    pub const STICKY_NOTE_MINUS: Self = Self {
+        name: "sticky-note-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 3v5a1 1 0 0 0 1 1h5"/><path d="M21 14V9a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7.35"/><path d="M21 18h-6"/>"#,
+        doc: "`sticky-note-minus`, from Lucide.",
+    };
+
+    /// `sticky-note-off`, from Lucide.
+    pub const STICKY_NOTE_OFF: Self = Self {
+        name: "sticky-note-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 3v5a1 1 0 0 0 1 1h5"/><path d="m2 2 20 20"/><path d="M3.586 3.586A2 2 0 0 0 3 5v14a2 2 0 0 0 2 2h14a2 2 0 0 0 1.414-.586"/><path d="M8.656 3H15a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 21 9v6.344"/>"#,
+        doc: "`sticky-note-off`, from Lucide.",
+    };
+
+    /// `sticky-note-plus`, from Lucide.
+    pub const STICKY_NOTE_PLUS: Self = Self {
+        name: "sticky-note-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 3v5a1 1 0 0 0 1 1h5"/><path d="M18 15v6"/><path d="M21 12.356V9a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7.355"/><path d="M21 18h-6"/>"#,
+        doc: "`sticky-note-plus`, from Lucide.",
+    };
+
+    /// `sticky-note-x`, from Lucide.
+    pub const STICKY_NOTE_X: Self = Self {
+        name: "sticky-note-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 3v5a1 1 0 0 0 1 1h5"/><path d="m16 16 5 5"/><path d="M21 12V9a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7"/><path d="m21 16-5 5"/>"#,
+        doc: "`sticky-note-x`, from Lucide.",
+    };
+
+    /// `sticky-notes`, from Lucide.
+    pub const STICKY_NOTES: Self = Self {
+        name: "sticky-notes",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 16 14v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2z"/><path d="M10 8v5a1 1 0 0 0 1 1h5"/><path d="M8 4a2 2 0 0 1 2-2h6a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 22 8v6a2 2 0 0 1-2 2"/><path d="M16 2v5a1 1 0 0 0 1 1h5"/>"#,
+        doc: "`sticky-notes`, from Lucide.",
+    };
+
+    /// `stone`, from Lucide.
+    pub const STONE: Self = Self {
+        name: "stone",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.264 2.205A4 4 0 0 0 6.42 4.211l-4 8a4 4 0 0 0 1.359 5.117l6 4a4 4 0 0 0 4.438 0l6-4a4 4 0 0 0 1.576-4.592l-2-6a4 4 0 0 0-2.53-2.53z"/><path d="M11.99 22 14 12l7.822 3.184"/><path d="M14 12 8.47 2.302"/>"#,
+        doc: "`stone`, from Lucide.",
+    };
+
+    /// `store`, from Lucide.
+    pub const STORE: Self = Self {
+        name: "store",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5"/><path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244"/><path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05"/>"#,
+        doc: "`store`, from Lucide.",
+    };
+
+    /// `stretch-horizontal`, from Lucide.
+    pub const STRETCH_HORIZONTAL: Self = Self {
+        name: "stretch-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="6" x="2" y="4" rx="2"/><rect width="20" height="6" x="2" y="14" rx="2"/>"#,
+        doc: "`stretch-horizontal`, from Lucide.",
+    };
+
+    /// `stretch-vertical`, from Lucide.
+    pub const STRETCH_VERTICAL: Self = Self {
+        name: "stretch-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="6" height="20" x="4" y="2" rx="2"/><rect width="6" height="20" x="14" y="2" rx="2"/>"#,
+        doc: "`stretch-vertical`, from Lucide.",
+    };
+
+    /// `strikethrough`, from Lucide.
+    pub const STRIKETHROUGH: Self = Self {
+        name: "strikethrough",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 4H9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><line x1="4" x2="20" y1="12" y2="12"/>"#,
+        doc: "`strikethrough`, from Lucide.",
+    };
+
+    /// `subscript`, from Lucide.
+    pub const SUBSCRIPT: Self = Self {
+        name: "subscript",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m4 5 8 8"/><path d="m12 5-8 8"/><path d="M20 19h-4c0-1.5.44-2 1.5-2.5S20 15.33 20 14c0-.47-.17-.93-.48-1.29a2.11 2.11 0 0 0-2.62-.44c-.42.24-.74.62-.9 1.07"/>"#,
+        doc: "`subscript`, from Lucide.",
+    };
+
+    /// `summary`, from Lucide.
+    pub const SUMMARY: Self = Self {
+        name: "summary",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 4H7"/><path d="m18 16 3 3-3 3"/><path d="M3 4v13a2 2 0 0 0 2 2h16"/><path d="M7 14h7"/><path d="M7 9h12"/>"#,
+        doc: "`summary`, from Lucide.",
+    };
+
+    /// The light appearance mode.
+    pub const SUN: Self = Self {
+        name: "sun",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>"#,
+        doc: "The light appearance mode.",
+    };
+
+    /// `sun-dim`, from Lucide.
+    pub const SUN_DIM: Self = Self {
+        name: "sun-dim",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="4"/><path d="M12 4h.01"/><path d="M20 12h.01"/><path d="M12 20h.01"/><path d="M4 12h.01"/><path d="M17.657 6.343h.01"/><path d="M17.657 17.657h.01"/><path d="M6.343 17.657h.01"/><path d="M6.343 6.343h.01"/>"#,
+        doc: "`sun-dim`, from Lucide.",
+    };
+
+    /// `sun-medium`, from Lucide.
+    pub const SUN_MEDIUM: Self = Self {
+        name: "sun-medium",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="4"/><path d="M12 3v1"/><path d="M12 20v1"/><path d="M3 12h1"/><path d="M20 12h1"/><path d="m18.364 5.636-.707.707"/><path d="m6.343 17.657-.707.707"/><path d="m5.636 5.636.707.707"/><path d="m17.657 17.657.707.707"/>"#,
+        doc: "`sun-medium`, from Lucide.",
+    };
+
+    /// `sun-moon`, from Lucide.
+    pub const SUN_MOON: Self = Self {
+        name: "sun-moon",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v2"/><path d="M14.837 16.385a6 6 0 1 1-7.223-7.222c.624-.147.97.66.715 1.248a4 4 0 0 0 5.26 5.259c.589-.255 1.396.09 1.248.715"/><path d="M16 12a4 4 0 0 0-4-4"/><path d="m19 5-1.256 1.256"/><path d="M20 12h2"/>"#,
+        doc: "`sun-moon`, from Lucide.",
+    };
+
+    /// `sun-snow`, from Lucide.
+    pub const SUN_SNOW: Self = Self {
+        name: "sun-snow",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 21v-1"/><path d="M10 4V3"/><path d="M10 9a3 3 0 0 0 0 6"/><path d="m14 20 1.25-2.5L18 18"/><path d="m14 4 1.25 2.5L18 6"/><path d="m17 21-3-6 1.5-3H22"/><path d="m17 3-3 6 1.5 3"/><path d="M2 12h1"/><path d="m20 10-1.5 2 1.5 2"/><path d="m3.64 18.36.7-.7"/><path d="m4.34 6.34-.7-.7"/>"#,
+        doc: "`sun-snow`, from Lucide.",
+    };
+
+    /// `sunrise`, from Lucide.
+    pub const SUNRISE: Self = Self {
+        name: "sunrise",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 6 4-4 4 4"/><path d="M16 18a4 4 0 0 0-8 0"/>"#,
+        doc: "`sunrise`, from Lucide.",
+    };
+
+    /// `sunset`, from Lucide.
+    pub const SUNSET: Self = Self {
+        name: "sunset",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/>"#,
+        doc: "`sunset`, from Lucide.",
+    };
+
+    /// `superscript`, from Lucide.
+    pub const SUPERSCRIPT: Self = Self {
+        name: "superscript",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m4 19 8-8"/><path d="m12 19-8-8"/><path d="M20 12h-4c0-1.5.442-2 1.5-2.5S20 8.334 20 7.002c0-.472-.17-.93-.484-1.29a2.105 2.105 0 0 0-2.617-.436c-.42.239-.738.614-.899 1.06"/>"#,
+        doc: "`superscript`, from Lucide.",
+    };
+
+    /// `swatch-book`, from Lucide.
+    pub const SWATCH_BOOK: Self = Self {
+        name: "swatch-book",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 17a4 4 0 0 1-8 0V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2Z"/><path d="M16.7 13H19a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H7"/><path d="M 7 17h.01"/><path d="m11 8 2.3-2.3a2.4 2.4 0 0 1 3.404.004L18.6 7.6a2.4 2.4 0 0 1 .026 3.434L9.9 19.8"/>"#,
+        doc: "`swatch-book`, from Lucide.",
+    };
+
+    /// `swiss-franc`, from Lucide.
+    pub const SWISS_FRANC: Self = Self {
+        name: "swiss-franc",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 21V3h8"/><path d="M6 16h9"/><path d="M10 9.5h7"/>"#,
+        doc: "`swiss-franc`, from Lucide.",
+    };
+
+    /// `switch-camera`, from Lucide.
+    pub const SWITCH_CAMERA: Self = Self {
+        name: "switch-camera",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 19H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/><path d="M13 5h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-5"/><circle cx="12" cy="12" r="3"/><path d="m18 22-3-3 3-3"/><path d="m6 2 3 3-3 3"/>"#,
+        doc: "`switch-camera`, from Lucide.",
+    };
+
+    /// `sword`, from Lucide.
+    pub const SWORD: Self = Self {
+        name: "sword",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m11 19-6-6"/><path d="m5 21-2-2"/><path d="m8 16-4 4"/><path d="M9.5 17.5 21 6V3h-3L6.5 14.5"/>"#,
+        doc: "`sword`, from Lucide.",
+    };
+
+    /// `swords`, from Lucide.
+    pub const SWORDS: Self = Self {
+        name: "swords",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" x2="9" y1="14" y2="18"/><line x1="7" x2="4" y1="17" y2="20"/><line x1="3" x2="5" y1="19" y2="21"/>"#,
+        doc: "`swords`, from Lucide.",
+    };
+
+    /// `syringe`, from Lucide.
+    pub const SYRINGE: Self = Self {
+        name: "syringe",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6 6"/>"#,
+        doc: "`syringe`, from Lucide.",
+    };
+
+    /// `table`, from Lucide.
+    pub const TABLE: Self = Self {
+        name: "table",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/>"#,
+        doc: "`table`, from Lucide.",
+    };
+
+    /// `table-2`, from Lucide.
+    pub const TABLE_2: Self = Self {
+        name: "table-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/>"#,
+        doc: "`table-2`, from Lucide.",
+    };
+
+    /// `table-cells-merge`, from Lucide.
+    pub const TABLE_CELLS_MERGE: Self = Self {
+        name: "table-cells-merge",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 21v-6"/><path d="M12 9V3"/><path d="M3 15h18"/><path d="M3 9h18"/><rect width="18" height="18" x="3" y="3" rx="2"/>"#,
+        doc: "`table-cells-merge`, from Lucide.",
+    };
+
+    /// `table-cells-split`, from Lucide.
+    pub const TABLE_CELLS_SPLIT: Self = Self {
+        name: "table-cells-split",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 15V9"/><path d="M3 15h18"/><path d="M3 9h18"/><rect width="18" height="18" x="3" y="3" rx="2"/>"#,
+        doc: "`table-cells-split`, from Lucide.",
+    };
+
+    /// `table-columns-split`, from Lucide.
+    pub const TABLE_COLUMNS_SPLIT: Self = Self {
+        name: "table-columns-split",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 14v2"/><path d="M14 20v2"/><path d="M14 2v2"/><path d="M14 8v2"/><path d="M2 15h8"/><path d="M2 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H2"/><path d="M2 9h8"/><path d="M22 15h-4"/><path d="M22 3h-2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h2"/><path d="M22 9h-4"/><path d="M5 3v18"/>"#,
+        doc: "`table-columns-split`, from Lucide.",
+    };
+
+    /// `table-of-contents`, from Lucide.
+    pub const TABLE_OF_CONTENTS: Self = Self {
+        name: "table-of-contents",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 5H3"/><path d="M16 12H3"/><path d="M16 19H3"/><path d="M21 5h.01"/><path d="M21 12h.01"/><path d="M21 19h.01"/>"#,
+        doc: "`table-of-contents`, from Lucide.",
+    };
+
+    /// `table-properties`, from Lucide.
+    pub const TABLE_PROPERTIES: Self = Self {
+        name: "table-properties",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M21 9H3"/><path d="M21 15H3"/>"#,
+        doc: "`table-properties`, from Lucide.",
+    };
+
+    /// `table-rows-split`, from Lucide.
+    pub const TABLE_ROWS_SPLIT: Self = Self {
+        name: "table-rows-split",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 10h2"/><path d="M15 22v-8"/><path d="M15 2v4"/><path d="M2 10h2"/><path d="M20 10h2"/><path d="M3 19h18"/><path d="M3 22v-6a2 2 135 0 1 2-2h14a2 2 45 0 1 2 2v6"/><path d="M3 2v2a2 2 45 0 0 2 2h14a2 2 135 0 0 2-2V2"/><path d="M8 10h2"/><path d="M9 22v-8"/><path d="M9 2v4"/>"#,
+        doc: "`table-rows-split`, from Lucide.",
+    };
+
+    /// `tablet`, from Lucide.
+    pub const TABLET: Self = Self {
+        name: "tablet",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><line x1="12" x2="12.01" y1="18" y2="18"/>"#,
+        doc: "`tablet`, from Lucide.",
+    };
+
+    /// `tablet-smartphone`, from Lucide.
+    pub const TABLET_SMARTPHONE: Self = Self {
+        name: "tablet-smartphone",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="10" height="14" x="3" y="8" rx="2"/><path d="M5 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-2.4"/><path d="M8 18h.01"/>"#,
+        doc: "`tablet-smartphone`, from Lucide.",
+    };
+
+    /// `tablets`, from Lucide.
+    pub const TABLETS: Self = Self {
+        name: "tablets",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="7" cy="7" r="5"/><circle cx="17" cy="17" r="5"/><path d="M12 17h10"/><path d="m3.46 10.54 7.08-7.08"/>"#,
+        doc: "`tablets`, from Lucide.",
+    };
+
+    /// `tag`, from Lucide.
+    pub const TAG: Self = Self {
+        name: "tag",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>"#,
+        doc: "`tag`, from Lucide.",
+    };
+
+    /// `tag-plus`, from Lucide.
+    pub const TAG_PLUS: Self = Self {
+        name: "tag-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 13h6"/><path d="m16.5 6.5-3.914-3.914A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l1.79-1.79"/><path d="M19 10v6"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>"#,
+        doc: "`tag-plus`, from Lucide.",
+    };
+
+    /// `tag-x`, from Lucide.
+    pub const TAG_X: Self = Self {
+        name: "tag-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16.5 6.5-3.914-3.914A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.43 2.43 0 0 0 3.42 0l1.79-1.79"/><path d="m16.5 10.5 5 5"/><path d="m21.5 10.5-5 5"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>"#,
+        doc: "`tag-x`, from Lucide.",
+    };
+
+    /// `tags`, from Lucide.
+    pub const TAGS: Self = Self {
+        name: "tags",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.172 2a2 2 0 0 1 1.414.586l6.71 6.71a2.4 2.4 0 0 1 0 3.408l-4.592 4.592a2.4 2.4 0 0 1-3.408 0l-6.71-6.71A2 2 0 0 1 6 9.172V3a1 1 0 0 1 1-1z"/><path d="M2 7v6.172a2 2 0 0 0 .586 1.414l6.71 6.71a2.4 2.4 0 0 0 3.191.193"/><circle cx="10.5" cy="6.5" r=".5" fill="currentColor"/>"#,
+        doc: "`tags`, from Lucide.",
+    };
+
+    /// `tally-1`, from Lucide.
+    pub const TALLY_1: Self = Self {
+        name: "tally-1",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 4v16"/>"#,
+        doc: "`tally-1`, from Lucide.",
+    };
+
+    /// `tally-2`, from Lucide.
+    pub const TALLY_2: Self = Self {
+        name: "tally-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 4v16"/><path d="M9 4v16"/>"#,
+        doc: "`tally-2`, from Lucide.",
+    };
+
+    /// `tally-3`, from Lucide.
+    pub const TALLY_3: Self = Self {
+        name: "tally-3",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 4v16"/><path d="M9 4v16"/><path d="M14 4v16"/>"#,
+        doc: "`tally-3`, from Lucide.",
+    };
+
+    /// `tally-4`, from Lucide.
+    pub const TALLY_4: Self = Self {
+        name: "tally-4",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 4v16"/><path d="M9 4v16"/><path d="M14 4v16"/><path d="M19 4v16"/>"#,
+        doc: "`tally-4`, from Lucide.",
+    };
+
+    /// `tally-5`, from Lucide.
+    pub const TALLY_5: Self = Self {
+        name: "tally-5",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 4v16"/><path d="M9 4v16"/><path d="M14 4v16"/><path d="M19 4v16"/><path d="M22 6 2 18"/>"#,
+        doc: "`tally-5`, from Lucide.",
+    };
+
+    /// `tangent`, from Lucide.
+    pub const TANGENT: Self = Self {
+        name: "tangent",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="17" cy="4" r="2"/><path d="M15.59 5.41 5.41 15.59"/><circle cx="4" cy="17" r="2"/><path d="M12 22s-4-9-1.5-11.5S22 12 22 12"/>"#,
+        doc: "`tangent`, from Lucide.",
+    };
+
+    /// `target`, from Lucide.
+    pub const TARGET: Self = Self {
+        name: "target",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>"#,
+        doc: "`target`, from Lucide.",
+    };
+
+    /// `telescope`, from Lucide.
+    pub const TELESCOPE: Self = Self {
+        name: "telescope",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10.065 12.493-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.44"/><path d="m13.56 11.747 4.332-.924"/><path d="m16 21-3.105-6.21"/><path d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455z"/><path d="m6.158 8.633 1.114 4.456"/><path d="m8 21 3.105-6.21"/><circle cx="12" cy="13" r="2"/>"#,
+        doc: "`telescope`, from Lucide.",
+    };
+
+    /// `tent`, from Lucide.
+    pub const TENT: Self = Self {
+        name: "tent",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3.5 21 14 3"/><path d="M20.5 21 10 3"/><path d="M15.5 21 12 15l-3.5 6"/><path d="M2 21h20"/>"#,
+        doc: "`tent`, from Lucide.",
+    };
+
+    /// `tent-tree`, from Lucide.
+    pub const TENT_TREE: Self = Self {
+        name: "tent-tree",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="4" cy="4" r="2"/><path d="m14 5 3-3 3 3"/><path d="m14 10 3-3 3 3"/><path d="M17 14V2"/><path d="M17 14H7l-5 8h20Z"/><path d="M8 14v8"/><path d="m9 14 5 8"/>"#,
+        doc: "`tent-tree`, from Lucide.",
+    };
+
+    /// `terminal`, from Lucide.
+    pub const TERMINAL: Self = Self {
+        name: "terminal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 19h8"/><path d="m4 17 6-6-6-6"/>"#,
+        doc: "`terminal`, from Lucide.",
+    };
+
+    /// `test-tube`, from Lucide.
+    pub const TEST_TUBE: Self = Self {
+        name: "test-tube",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14.5 2v17.5c0 1.4-1.1 2.5-2.5 2.5c-1.4 0-2.5-1.1-2.5-2.5V2"/><path d="M8.5 2h7"/><path d="M14.5 16h-5"/>"#,
+        doc: "`test-tube`, from Lucide.",
+    };
+
+    /// `test-tube-diagonal`, from Lucide.
+    pub const TEST_TUBE_DIAGONAL: Self = Self {
+        name: "test-tube-diagonal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 7 6.82 21.18a2.83 2.83 0 0 1-3.99-.01a2.83 2.83 0 0 1 0-4L17 3"/><path d="m16 2 6 6"/><path d="M12 16H4"/>"#,
+        doc: "`test-tube-diagonal`, from Lucide.",
+    };
+
+    /// `test-tubes`, from Lucide.
+    pub const TEST_TUBES: Self = Self {
+        name: "test-tubes",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 2v17.5A2.5 2.5 0 0 1 6.5 22A2.5 2.5 0 0 1 4 19.5V2"/><path d="M20 2v17.5a2.5 2.5 0 0 1-2.5 2.5a2.5 2.5 0 0 1-2.5-2.5V2"/><path d="M3 2h7"/><path d="M14 2h7"/><path d="M9 16H4"/><path d="M20 16h-5"/>"#,
+        doc: "`test-tubes`, from Lucide.",
+    };
+
+    /// `text-align-center`, from Lucide.
+    pub const TEXT_ALIGN_CENTER: Self = Self {
+        name: "text-align-center",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 5H3"/><path d="M17 12H7"/><path d="M19 19H5"/>"#,
+        doc: "`text-align-center`, from Lucide.",
+    };
+
+    /// `text-align-end`, from Lucide.
+    pub const TEXT_ALIGN_END: Self = Self {
+        name: "text-align-end",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 5H3"/><path d="M21 12H9"/><path d="M21 19H7"/>"#,
+        doc: "`text-align-end`, from Lucide.",
+    };
+
+    /// `text-align-justify`, from Lucide.
+    pub const TEXT_ALIGN_JUSTIFY: Self = Self {
+        name: "text-align-justify",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/>"#,
+        doc: "`text-align-justify`, from Lucide.",
+    };
+
+    /// `text-align-start`, from Lucide.
+    pub const TEXT_ALIGN_START: Self = Self {
+        name: "text-align-start",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 5H3"/><path d="M15 12H3"/><path d="M17 19H3"/>"#,
+        doc: "`text-align-start`, from Lucide.",
+    };
+
+    /// `text-cursor`, from Lucide.
+    pub const TEXT_CURSOR: Self = Self {
+        name: "text-cursor",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 22h-1a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h1"/><path d="M7 22h1a4 4 0 0 0 4-4"/><path d="M7 2h1a4 4 0 0 1 4 4"/>"#,
+        doc: "`text-cursor`, from Lucide.",
+    };
+
+    /// `text-cursor-input`, from Lucide.
+    pub const TEXT_CURSOR_INPUT: Self = Self {
+        name: "text-cursor-input",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 20h-1a2 2 0 0 1-2-2 2 2 0 0 1-2 2H6"/><path d="M13 8h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-7"/><path d="M5 16H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h1"/><path d="M6 4h1a2 2 0 0 1 2 2 2 2 0 0 1 2-2h1"/><path d="M9 6v12"/>"#,
+        doc: "`text-cursor-input`, from Lucide.",
+    };
+
+    /// `text-initial`, from Lucide.
+    pub const TEXT_INITIAL: Self = Self {
+        name: "text-initial",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 5h6"/><path d="M15 12h6"/><path d="M3 19h18"/><path d="m3 12 3.553-7.724a.5.5 0 0 1 .894 0L11 12"/><path d="M3.92 10h6.16"/>"#,
+        doc: "`text-initial`, from Lucide.",
+    };
+
+    /// `text-quote`, from Lucide.
+    pub const TEXT_QUOTE: Self = Self {
+        name: "text-quote",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 5H3"/><path d="M21 12H8"/><path d="M21 19H8"/><path d="M3 12v7"/>"#,
+        doc: "`text-quote`, from Lucide.",
+    };
+
+    /// `text-search`, from Lucide.
+    pub const TEXT_SEARCH: Self = Self {
+        name: "text-search",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 5H3"/><path d="M10 12H3"/><path d="M10 19H3"/><circle cx="17" cy="15" r="3"/><path d="m21 19-1.9-1.9"/>"#,
+        doc: "`text-search`, from Lucide.",
+    };
+
+    /// Toggles line wrapping in a code block. It was `wrap-text` until the set was vendored at `1.33.0`; the name was never this system's choice, so it follows upstream.
+    pub const TEXT_WRAP: Self = Self {
+        name: "text-wrap",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 16-3 3 3 3"/><path d="M3 12h14.5a1 1 0 0 1 0 7H13"/><path d="M3 19h6"/><path d="M3 5h18"/>"#,
+        doc: "Toggles line wrapping in a code block. It was `wrap-text` until the set was vendored at `1.33.0`; the name was never this system's choice, so it follows upstream.",
+    };
+
+    /// `theater`, from Lucide.
+    pub const THEATER: Self = Self {
+        name: "theater",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 10s3-3 3-8"/><path d="M22 10s-3-3-3-8"/><path d="M10 2c0 4.4-3.6 8-8 8"/><path d="M14 2c0 4.4 3.6 8 8 8"/><path d="M2 10s2 2 2 5"/><path d="M22 10s-2 2-2 5"/><path d="M8 15h8"/><path d="M2 22v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/><path d="M14 22v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1"/>"#,
+        doc: "`theater`, from Lucide.",
+    };
+
+    /// `thermometer`, from Lucide.
+    pub const THERMOMETER: Self = Self {
+        name: "thermometer",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/>"#,
+        doc: "`thermometer`, from Lucide.",
+    };
+
+    /// `thermometer-snowflake`, from Lucide.
+    pub const THERMOMETER_SNOWFLAKE: Self = Self {
+        name: "thermometer-snowflake",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10 20-1.25-2.5L6 18"/><path d="M10 4 8.75 6.5 6 6"/><path d="M10.585 15H10"/><path d="M2 12h6.5L10 9"/><path d="M20 14.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/><path d="m4 10 1.5 2L4 14"/><path d="m7 21 3-6-1.5-3"/><path d="m7 3 3 6h2"/>"#,
+        doc: "`thermometer-snowflake`, from Lucide.",
+    };
+
+    /// `thermometer-sun`, from Lucide.
+    pub const THERMOMETER_SUN: Self = Self {
+        name: "thermometer-sun",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v2"/><path d="M12 8a4 4 0 0 0-1.645 7.647"/><path d="M2 12h2"/><path d="M20 14.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/><path d="m4.93 4.93 1.41 1.41"/><path d="m6.34 17.66-1.41 1.41"/>"#,
+        doc: "`thermometer-sun`, from Lucide.",
+    };
+
+    /// `thumbs-down`, from Lucide.
+    pub const THUMBS_DOWN: Self = Self {
+        name: "thumbs-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/><path d="M17 14V2"/>"#,
+        doc: "`thumbs-down`, from Lucide.",
+    };
+
+    /// `thumbs-up`, from Lucide.
+    pub const THUMBS_UP: Self = Self {
+        name: "thumbs-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/><path d="M7 10v12"/>"#,
+        doc: "`thumbs-up`, from Lucide.",
+    };
+
+    /// `ticket`, from Lucide.
+    pub const TICKET: Self = Self {
+        name: "ticket",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>"#,
+        doc: "`ticket`, from Lucide.",
+    };
+
+    /// `ticket-check`, from Lucide.
+    pub const TICKET_CHECK: Self = Self {
+        name: "ticket-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="m9 12 2 2 4-4"/>"#,
+        doc: "`ticket-check`, from Lucide.",
+    };
+
+    /// `ticket-minus`, from Lucide.
+    pub const TICKET_MINUS: Self = Self {
+        name: "ticket-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M9 12h6"/>"#,
+        doc: "`ticket-minus`, from Lucide.",
+    };
+
+    /// `ticket-percent`, from Lucide.
+    pub const TICKET_PERCENT: Self = Self {
+        name: "ticket-percent",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 9a3 3 0 1 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 1 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M9 9h.01"/><path d="m15 9-6 6"/><path d="M15 15h.01"/>"#,
+        doc: "`ticket-percent`, from Lucide.",
+    };
+
+    /// `ticket-plus`, from Lucide.
+    pub const TICKET_PLUS: Self = Self {
+        name: "ticket-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M9 12h6"/><path d="M12 9v6"/>"#,
+        doc: "`ticket-plus`, from Lucide.",
+    };
+
+    /// `ticket-slash`, from Lucide.
+    pub const TICKET_SLASH: Self = Self {
+        name: "ticket-slash",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="m9.5 14.5 5-5"/>"#,
+        doc: "`ticket-slash`, from Lucide.",
+    };
+
+    /// `ticket-x`, from Lucide.
+    pub const TICKET_X: Self = Self {
+        name: "ticket-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="m9.5 14.5 5-5"/><path d="m9.5 9.5 5 5"/>"#,
+        doc: "`ticket-x`, from Lucide.",
+    };
+
+    /// `tickets`, from Lucide.
+    pub const TICKETS: Self = Self {
+        name: "tickets",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m3.173 8.18 11-5a2 2 0 0 1 2.647.993L18.56 8"/><path d="M6 10V8"/><path d="M6 14v1"/><path d="M6 19v2"/><rect x="2" y="8" width="20" height="13" rx="2"/>"#,
+        doc: "`tickets`, from Lucide.",
+    };
+
+    /// `tickets-plane`, from Lucide.
+    pub const TICKETS_PLANE: Self = Self {
+        name: "tickets-plane",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.5 17h1.227a2 2 0 0 0 1.345-.52L18 12"/><path d="m12 13.5 3.794.506"/><path d="m3.173 8.18 11-5a2 2 0 0 1 2.647.993L18.56 8"/><path d="M6 10V8"/><path d="M6 14v1"/><path d="M6 19v2"/><rect x="2" y="8" width="20" height="13" rx="2"/>"#,
+        doc: "`tickets-plane`, from Lucide.",
+    };
+
+    /// `timeline`, from Lucide.
+    pub const TIMELINE: Self = Self {
+        name: "timeline",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M4 12h.01"/><path d="M4 16h.01"/><path d="M4 20h.01"/><path d="M4 4h.01"/><path d="M4 8h.01"/><path d="M9.414 13.414a2 2 0 0 0 1.414.586H19a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-8.172a2 2 0 0 0-1.414.586L8 12z"/><path d="M9.414 21.414a2 2 0 0 0 1.414.586H19a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-8.172a2 2 0 0 0-1.414.586L8 20z"/><path d="M9.414 5.414A2 2 0 0 0 10.828 6H19a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1h-8.172a2 2 0 0 0-1.414.586L8 4z"/>"#,
+        doc: "`timeline`, from Lucide.",
+    };
+
+    /// `timer`, from Lucide.
+    pub const TIMER: Self = Self {
+        name: "timer",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/>"#,
+        doc: "`timer`, from Lucide.",
+    };
+
+    /// `timer-off`, from Lucide.
+    pub const TIMER_OFF: Self = Self {
+        name: "timer-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 2h4"/><path d="M4.6 11a8 8 0 0 0 1.7 8.7 8 8 0 0 0 8.7 1.7"/><path d="M7.4 7.4a8 8 0 0 1 10.3 1 8 8 0 0 1 .9 10.2"/><path d="m2 2 20 20"/><path d="M12 12v-2"/>"#,
+        doc: "`timer-off`, from Lucide.",
+    };
+
+    /// `timer-reset`, from Lucide.
+    pub const TIMER_RESET: Self = Self {
+        name: "timer-reset",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 2h4"/><path d="M12 14v-4"/><path d="M4 13a8 8 0 0 1 8-7 8 8 0 1 1-5.3 14L4 17.6"/><path d="M9 17H4v5"/>"#,
+        doc: "`timer-reset`, from Lucide.",
+    };
+
+    /// `toggle-left`, from Lucide.
+    pub const TOGGLE_LEFT: Self = Self {
+        name: "toggle-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="9" cy="12" r="3"/><rect width="20" height="14" x="2" y="5" rx="7"/>"#,
+        doc: "`toggle-left`, from Lucide.",
+    };
+
+    /// `toggle-right`, from Lucide.
+    pub const TOGGLE_RIGHT: Self = Self {
+        name: "toggle-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="15" cy="12" r="3"/><rect width="20" height="14" x="2" y="5" rx="7"/>"#,
+        doc: "`toggle-right`, from Lucide.",
+    };
+
+    /// `toilet`, from Lucide.
+    pub const TOILET: Self = Self {
+        name: "toilet",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 12h13a1 1 0 0 1 1 1 5 5 0 0 1-5 5h-.598a.5.5 0 0 0-.424.765l1.544 2.47a.5.5 0 0 1-.424.765H5.402a.5.5 0 0 1-.424-.765L7 18"/><path d="M8 18a5 5 0 0 1-5-5V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8"/>"#,
+        doc: "`toilet`, from Lucide.",
+    };
+
+    /// `tool-case`, from Lucide.
+    pub const TOOL_CASE: Self = Self {
+        name: "tool-case",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 15h4"/><path d="m14.817 10.995-.971-1.45 1.034-1.232a2 2 0 0 0-2.025-3.238l-1.82.364L9.91 3.885a2 2 0 0 0-3.625.748L6.141 6.55l-1.725.426a2 2 0 0 0-.19 3.756l.657.27"/><path d="m18.822 10.995 2.26-5.38a1 1 0 0 0-.557-1.318L16.954 2.9a1 1 0 0 0-1.281.533l-.924 2.122"/><path d="M4 12.006A1 1 0 0 1 4.994 11H19a1 1 0 0 1 1 1v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/>"#,
+        doc: "`tool-case`, from Lucide.",
+    };
+
+    /// `toolbox`, from Lucide.
+    pub const TOOLBOX: Self = Self {
+        name: "toolbox",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 12v4"/><path d="M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><path d="M17 6a2 2 0 011.414.586l3 3A2 2 0 0122 11v8a2 2 0 01-2 2H4a2 2 0 01-2-2v-8a2 2 0 01.586-1.414l3-3A2 2 0 017 6z"/><path d="M2 14h20"/><path d="M8 12v4"/>"#,
+        doc: "`toolbox`, from Lucide.",
+    };
+
+    /// `tornado`, from Lucide.
+    pub const TORNADO: Self = Self {
+        name: "tornado",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 4H3"/><path d="M18 8H6"/><path d="M19 12H9"/><path d="M16 16h-6"/><path d="M11 20H9"/>"#,
+        doc: "`tornado`, from Lucide.",
+    };
+
+    /// `torus`, from Lucide.
+    pub const TORUS: Self = Self {
+        name: "torus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<ellipse cx="12" cy="11" rx="3" ry="2"/><ellipse cx="12" cy="12.5" rx="10" ry="8.5"/>"#,
+        doc: "`torus`, from Lucide.",
+    };
+
+    /// `touchpad`, from Lucide.
+    pub const TOUCHPAD: Self = Self {
+        name: "touchpad",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="16" x="2" y="4" rx="2"/><path d="M2 14h20"/><path d="M12 20v-6"/>"#,
+        doc: "`touchpad`, from Lucide.",
+    };
+
+    /// `touchpad-off`, from Lucide.
+    pub const TOUCHPAD_OFF: Self = Self {
+        name: "touchpad-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 20v-6"/><path d="M19.656 14H22"/><path d="M2 14h12"/><path d="m2 2 20 20"/><path d="M20 20H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"/><path d="M9.656 4H20a2 2 0 0 1 2 2v10.344"/>"#,
+        doc: "`touchpad-off`, from Lucide.",
+    };
+
+    /// `towel-rack`, from Lucide.
+    pub const TOWEL_RACK: Self = Self {
+        name: "towel-rack",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 7h-2"/><path d="M6.5 3h11A2.5 2.5 0 0 1 20 5.5V20a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V5.5a1 1 0 0 0-5 0V17a1 1 0 0 0 1 1h4"/><path d="M9 7H2"/>"#,
+        doc: "`towel-rack`, from Lucide.",
+    };
+
+    /// `tower-control`, from Lucide.
+    pub const TOWER_CONTROL: Self = Self {
+        name: "tower-control",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18.2 12.27 20 6H4l1.8 6.27a1 1 0 0 0 .95.73h10.5a1 1 0 0 0 .96-.73Z"/><path d="M8 13v9"/><path d="M16 22v-9"/><path d="m9 6 1 7"/><path d="m15 6-1 7"/><path d="M12 6V2"/><path d="M13 2h-2"/>"#,
+        doc: "`tower-control`, from Lucide.",
+    };
+
+    /// `toy-brick`, from Lucide.
+    pub const TOY_BRICK: Self = Self {
+        name: "toy-brick",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="12" x="3" y="8" rx="1"/><path d="M10 8V5c0-.6-.4-1-1-1H6a1 1 0 0 0-1 1v3"/><path d="M19 8V5c0-.6-.4-1-1-1h-3a1 1 0 0 0-1 1v3"/>"#,
+        doc: "`toy-brick`, from Lucide.",
+    };
+
+    /// `tractor`, from Lucide.
+    pub const TRACTOR: Self = Self {
+        name: "tractor",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10 11 11 .9a1 1 0 0 1 .8 1.1l-.665 4.158a1 1 0 0 1-.988.842H20"/><path d="M16 18h-5"/><path d="M18 5a1 1 0 0 0-1 1v5.573"/><path d="M3 4h8.129a1 1 0 0 1 .99.863L13 11.246"/><path d="M4 11V4"/><path d="M7 15h.01"/><path d="M8 10.1V4"/><circle cx="18" cy="18" r="2"/><circle cx="7" cy="15" r="5"/>"#,
+        doc: "`tractor`, from Lucide.",
+    };
+
+    /// `traffic-cone`, from Lucide.
+    pub const TRAFFIC_CONE: Self = Self {
+        name: "traffic-cone",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16.05 10.966a5 2.5 0 0 1-8.1 0"/><path d="m16.923 14.049 4.48 2.04a1 1 0 0 1 .001 1.831l-8.574 3.9a2 2 0 0 1-1.66 0l-8.574-3.91a1 1 0 0 1 0-1.83l4.484-2.04"/><path d="M16.949 14.14a5 2.5 0 1 1-9.9 0L10.063 3.5a2 2 0 0 1 3.874 0z"/><path d="M9.194 6.57a5 2.5 0 0 0 5.61 0"/>"#,
+        doc: "`traffic-cone`, from Lucide.",
+    };
+
+    /// `train-front`, from Lucide.
+    pub const TRAIN_FRONT: Self = Self {
+        name: "train-front",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/><path d="m9 15-1-1"/><path d="m15 15 1-1"/><path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/>"#,
+        doc: "`train-front`, from Lucide.",
+    };
+
+    /// `train-front-tunnel`, from Lucide.
+    pub const TRAIN_FRONT_TUNNEL: Self = Self {
+        name: "train-front-tunnel",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 22V12a10 10 0 1 1 20 0v10"/><path d="M15 6.8v1.4a3 2.8 0 1 1-6 0V6.8"/><path d="M10 15h.01"/><path d="M14 15h.01"/><path d="M10 19a4 4 0 0 1-4-4v-3a6 6 0 1 1 12 0v3a4 4 0 0 1-4 4Z"/><path d="m9 19-2 3"/><path d="m15 19 2 3"/>"#,
+        doc: "`train-front-tunnel`, from Lucide.",
+    };
+
+    /// `train-track`, from Lucide.
+    pub const TRAIN_TRACK: Self = Self {
+        name: "train-track",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 17 17 2"/><path d="m2 14 8 8"/><path d="m5 11 8 8"/><path d="m8 8 8 8"/><path d="m11 5 8 8"/><path d="m14 2 8 8"/><path d="M7 22 22 7"/>"#,
+        doc: "`train-track`, from Lucide.",
+    };
+
+    /// `tram-front`, from Lucide.
+    pub const TRAM_FRONT: Self = Self {
+        name: "tram-front",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="16" height="16" x="4" y="3" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m18 22-2-3"/><path d="M8 15h.01"/><path d="M16 15h.01"/>"#,
+        doc: "`tram-front`, from Lucide.",
+    };
+
+    /// `transgender`, from Lucide.
+    pub const TRANSGENDER: Self = Self {
+        name: "transgender",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 16v6"/><path d="M14 20h-4"/><path d="M18 2h4v4"/><path d="m2 2 7.17 7.17"/><path d="M2 5.355V2h3.357"/><path d="m22 2-7.17 7.17"/><path d="M8 5 5 8"/><circle cx="12" cy="12" r="4"/>"#,
+        doc: "`transgender`, from Lucide.",
+    };
+
+    /// `trash`, from Lucide.
+    pub const TRASH: Self = Self {
+        name: "trash",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>"#,
+        doc: "`trash`, from Lucide.",
+    };
+
+    /// `trash-2`, from Lucide.
+    pub const TRASH_2: Self = Self {
+        name: "trash-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>"#,
+        doc: "`trash-2`, from Lucide.",
+    };
+
+    /// `tree-deciduous`, from Lucide.
+    pub const TREE_DECIDUOUS: Self = Self {
+        name: "tree-deciduous",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 19a4 4 0 0 1-2.24-7.32A3.5 3.5 0 0 1 9 6.03V6a3 3 0 1 1 6 0v.04a3.5 3.5 0 0 1 3.24 5.65A4 4 0 0 1 16 19Z"/><path d="M12 19v3"/>"#,
+        doc: "`tree-deciduous`, from Lucide.",
+    };
+
+    /// `tree-palm`, from Lucide.
+    pub const TREE_PALM: Self = Self {
+        name: "tree-palm",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 8c0-2.76-2.46-5-5.5-5S2 5.24 2 8h2l1-1 1 1h4"/><path d="M13 7.14A5.82 5.82 0 0 1 16.5 6c3.04 0 5.5 2.24 5.5 5h-3l-1-1-1 1h-3"/><path d="M5.89 9.71c-2.15 2.15-2.3 5.47-.35 7.43l4.24-4.25.7-.7.71-.71 2.12-2.12c-1.95-1.96-5.27-1.8-7.42.35"/><path d="M11 15.5c.5 2.5-.17 4.5-1 6.5h4c2-5.5-.5-12-1-14"/>"#,
+        doc: "`tree-palm`, from Lucide.",
+    };
+
+    /// `tree-pine`, from Lucide.
+    pub const TREE_PINE: Self = Self {
+        name: "tree-pine",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m17 14 3 3.3a1 1 0 0 1-.7 1.7H4.7a1 1 0 0 1-.7-1.7L7 14h-.3a1 1 0 0 1-.7-1.7L9 9h-.2A1 1 0 0 1 8 7.3L12 3l4 4.3a1 1 0 0 1-.8 1.7H15l3 3.3a1 1 0 0 1-.7 1.7H17Z"/><path d="M12 22v-3"/>"#,
+        doc: "`tree-pine`, from Lucide.",
+    };
+
+    /// `trees`, from Lucide.
+    pub const TREES: Self = Self {
+        name: "trees",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/>"#,
+        doc: "`trees`, from Lucide.",
+    };
+
+    /// `trending-down`, from Lucide.
+    pub const TRENDING_DOWN: Self = Self {
+        name: "trending-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 17h6v-6"/><path d="m22 17-8.5-8.5-5 5L2 7"/>"#,
+        doc: "`trending-down`, from Lucide.",
+    };
+
+    /// `trending-up`, from Lucide.
+    pub const TRENDING_UP: Self = Self {
+        name: "trending-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>"#,
+        doc: "`trending-up`, from Lucide.",
+    };
+
+    /// `trending-up-down`, from Lucide.
+    pub const TRENDING_UP_DOWN: Self = Self {
+        name: "trending-up-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14.828 14.828 21 21"/><path d="M21 16v5h-5"/><path d="m21 3-9 9-4-4-6 6"/><path d="M21 8V3h-5"/>"#,
+        doc: "`trending-up-down`, from Lucide.",
+    };
+
+    /// `triangle`, from Lucide.
+    pub const TRIANGLE: Self = Self {
+        name: "triangle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>"#,
+        doc: "`triangle`, from Lucide.",
+    };
+
+    /// `triangle-dashed`, from Lucide.
+    pub const TRIANGLE_DASHED: Self = Self {
+        name: "triangle-dashed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.17 4.193a2 2 0 0 1 3.666.013"/><path d="M14 21h2"/><path d="m15.874 7.743 1 1.732"/><path d="m18.849 12.952 1 1.732"/><path d="M21.824 18.18a2 2 0 0 1-1.835 2.824"/><path d="M4.024 21a2 2 0 0 1-1.839-2.839"/><path d="m5.136 12.952-1 1.732"/><path d="M8 21h2"/><path d="m8.102 7.743-1 1.732"/>"#,
+        doc: "`triangle-dashed`, from Lucide.",
+    };
+
+    /// `triangle-right`, from Lucide.
+    pub const TRIANGLE_RIGHT: Self = Self {
+        name: "triangle-right",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M22 18a2 2 0 0 1-2 2H3c-1.1 0-1.3-.6-.4-1.3L20.4 4.3c.9-.7 1.6-.4 1.6.7Z"/>"#,
+        doc: "`triangle-right`, from Lucide.",
+    };
+
+    /// `trophy`, from Lucide.
+    pub const TROPHY: Self = Self {
+        name: "trophy",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/><path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/><path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/>"#,
+        doc: "`trophy`, from Lucide.",
+    };
+
+    /// `truck`, from Lucide.
+    pub const TRUCK: Self = Self {
+        name: "truck",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>"#,
+        doc: "`truck`, from Lucide.",
+    };
+
+    /// `truck-electric`, from Lucide.
+    pub const TRUCK_ELECTRIC: Self = Self {
+        name: "truck-electric",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 19V7a2 2 0 0 0-2-2H9"/><path d="M15 19H9"/><path d="M19 19h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62L18.3 9.38a1 1 0 0 0-.78-.38H14"/><path d="M2 13v5a1 1 0 0 0 1 1h2"/><path d="M4 3 2.15 5.15a.495.495 0 0 0 .35.86h2.15a.47.47 0 0 1 .35.86L3 9.02"/><circle cx="17" cy="19" r="2"/><circle cx="7" cy="19" r="2"/>"#,
+        doc: "`truck-electric`, from Lucide.",
+    };
+
+    /// `turkish-lira`, from Lucide.
+    pub const TURKISH_LIRA: Self = Self {
+        name: "turkish-lira",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 4 5 9"/><path d="m15 8.5-10 5"/><path d="M18 12a9 9 0 0 1-9 9V3"/>"#,
+        doc: "`turkish-lira`, from Lucide.",
+    };
+
+    /// `turntable`, from Lucide.
+    pub const TURNTABLE: Self = Self {
+        name: "turntable",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 12.01h.01"/><path d="M18 8v4a8 8 0 0 1-1.07 4"/><circle cx="10" cy="12" r="4"/><rect x="2" y="4" width="20" height="16" rx="2"/>"#,
+        doc: "`turntable`, from Lucide.",
+    };
+
+    /// `turtle`, from Lucide.
+    pub const TURTLE: Self = Self {
+        name: "turtle",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m12 10 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a8 8 0 1 0-16 0v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3l2-4h4Z"/><path d="M4.82 7.9 8 10"/><path d="M15.18 7.9 12 10"/><path d="M16.93 10H20a2 2 0 0 1 0 4H2"/>"#,
+        doc: "`turtle`, from Lucide.",
+    };
+
+    /// `tv`, from Lucide.
+    pub const TV: Self = Self {
+        name: "tv",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m17 2-5 5-5-5"/><rect width="20" height="15" x="2" y="7" rx="2"/>"#,
+        doc: "`tv`, from Lucide.",
+    };
+
+    /// `tv-minimal`, from Lucide.
+    pub const TV_MINIMAL: Self = Self {
+        name: "tv-minimal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M7 21h10"/><rect width="20" height="14" x="2" y="3" rx="2"/>"#,
+        doc: "`tv-minimal`, from Lucide.",
+    };
+
+    /// `tv-minimal-play`, from Lucide.
+    pub const TV_MINIMAL_PLAY: Self = Self {
+        name: "tv-minimal-play",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.033 9.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56V7.648a.645.645 0 0 1 .967-.56z"/><path d="M7 21h10"/><rect width="20" height="14" x="2" y="3" rx="2"/>"#,
+        doc: "`tv-minimal-play`, from Lucide.",
+    };
+
+    /// `type`, from Lucide.
+    pub const TYPE: Self = Self {
+        name: "type",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 4v16"/><path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2"/><path d="M9 20h6"/>"#,
+        doc: "`type`, from Lucide.",
+    };
+
+    /// `type-outline`, from Lucide.
+    pub const TYPE_OUTLINE: Self = Self {
+        name: "type-outline",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 16.5a.5.5 0 0 0 .5.5h.5a2 2 0 0 1 0 4H9a2 2 0 0 1 0-4h.5a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5V8a2 2 0 0 1-4 0V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-4 0v-.5a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5Z"/>"#,
+        doc: "`type-outline`, from Lucide.",
+    };
+
+    /// `umbrella`, from Lucide.
+    pub const UMBRELLA: Self = Self {
+        name: "umbrella",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13v7a2 2 0 0 0 4 0"/><path d="M12 2v2"/><path d="M20.992 13a1 1 0 0 0 .97-1.274 10.284 10.284 0 0 0-19.923 0A1 1 0 0 0 3 13z"/>"#,
+        doc: "`umbrella`, from Lucide.",
+    };
+
+    /// `umbrella-off`, from Lucide.
+    pub const UMBRELLA_OFF: Self = Self {
+        name: "umbrella-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 13v7a2 2 0 0 0 4 0"/><path d="M12 2v2"/><path d="M18.656 13h2.336a1 1 0 0 0 .97-1.274 10.284 10.284 0 0 0-12.07-7.51"/><path d="m2 2 20 20"/><path d="M5.961 5.957a10.28 10.28 0 0 0-3.922 5.769A1 1 0 0 0 3 13h10"/>"#,
+        doc: "`umbrella-off`, from Lucide.",
+    };
+
+    /// `underline`, from Lucide.
+    pub const UNDERLINE: Self = Self {
+        name: "underline",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 4v6a6 6 0 0 0 12 0V4"/><line x1="4" x2="20" y1="20" y2="20"/>"#,
+        doc: "`underline`, from Lucide.",
+    };
+
+    /// `undo`, from Lucide.
+    pub const UNDO: Self = Self {
+        name: "undo",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>"#,
+        doc: "`undo`, from Lucide.",
+    };
+
+    /// `undo-2`, from Lucide.
+    pub const UNDO_2: Self = Self {
+        name: "undo-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/>"#,
+        doc: "`undo-2`, from Lucide.",
+    };
+
+    /// `undo-dot`, from Lucide.
+    pub const UNDO_DOT: Self = Self {
+        name: "undo-dot",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 17a9 9 0 0 0-15-6.7L3 13"/><path d="M3 7v6h6"/><circle cx="12" cy="17" r="1"/>"#,
+        doc: "`undo-dot`, from Lucide.",
+    };
+
+    /// `unfold-horizontal`, from Lucide.
+    pub const UNFOLD_HORIZONTAL: Self = Self {
+        name: "unfold-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 12h6"/><path d="M8 12H2"/><path d="M12 2v2"/><path d="M12 8v2"/><path d="M12 14v2"/><path d="M12 20v2"/><path d="m19 15 3-3-3-3"/><path d="m5 9-3 3 3 3"/>"#,
+        doc: "`unfold-horizontal`, from Lucide.",
+    };
+
+    /// `unfold-vertical`, from Lucide.
+    pub const UNFOLD_VERTICAL: Self = Self {
+        name: "unfold-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22v-6"/><path d="M12 8V2"/><path d="M4 12H2"/><path d="M10 12H8"/><path d="M16 12h-2"/><path d="M22 12h-2"/><path d="m15 19-3 3-3-3"/><path d="m15 5-3-3-3 3"/>"#,
+        doc: "`unfold-vertical`, from Lucide.",
+    };
+
+    /// `ungroup`, from Lucide.
+    pub const UNGROUP: Self = Self {
+        name: "ungroup",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect x="11" y="14" width="10" height="7" rx="2"/><rect x="3" y="3" width="10" height="7" rx="2"/>"#,
+        doc: "`ungroup`, from Lucide.",
+    };
+
+    /// `university`, from Lucide.
+    pub const UNIVERSITY: Self = Self {
+        name: "university",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M18 12h.01"/><path d="M18 16h.01"/><path d="M22 7a1 1 0 0 0-1-1h-2a2 2 0 0 1-1.143-.359L13.143 2.36a2 2 0 0 0-2.286-.001L6.143 5.64A2 2 0 0 1 5 6H3a1 1 0 0 0-1 1v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2z"/><path d="M6 12h.01"/><path d="M6 16h.01"/><circle cx="12" cy="10" r="2"/>"#,
+        doc: "`university`, from Lucide.",
+    };
+
+    /// `unlink`, from Lucide.
+    pub const UNLINK: Self = Self {
+        name: "unlink",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m18.84 12.25 1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07 5.006 5.006 0 0 0-6.95 0l-1.72 1.71"/><path d="m5.17 11.75-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.006 5.006 0 0 0 6.95 0l1.71-1.71"/><line x1="8" x2="8" y1="2" y2="5"/><line x1="2" x2="5" y1="8" y2="8"/><line x1="16" x2="16" y1="19" y2="22"/><line x1="19" x2="22" y1="16" y2="16"/>"#,
+        doc: "`unlink`, from Lucide.",
+    };
+
+    /// `unlink-2`, from Lucide.
+    pub const UNLINK_2: Self = Self {
+        name: "unlink-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 7h2a5 5 0 0 1 0 10h-2m-6 0H7A5 5 0 0 1 7 7h2"/>"#,
+        doc: "`unlink-2`, from Lucide.",
+    };
+
+    /// `unplug`, from Lucide.
+    pub const UNPLUG: Self = Self {
+        name: "unplug",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m19 5 3-3"/><path d="m2 22 3-3"/><path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"/><path d="M7.5 13.5 10 11"/><path d="M10.5 16.5 13 14"/><path d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z"/>"#,
+        doc: "`unplug`, from Lucide.",
+    };
+
+    /// Marks a `FileInput`'s drop area. An arrow into a tray, which is what the gesture is; a paperclip would say *attachment*, which is what the result is called and not what the control does.
+    pub const UPLOAD: Self = Self {
+        name: "upload",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>"#,
+        doc: "Marks a `FileInput`'s drop area. An arrow into a tray, which is what the gesture is; a paperclip would say *attachment*, which is what the result is called and not what the control does.",
+    };
+
+    /// `usb`, from Lucide.
+    pub const USB: Self = Self {
+        name: "usb",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="10" cy="7" r="1"/><circle cx="4" cy="20" r="1"/><path d="M4.7 19.3 19 5"/><path d="m21 3-3 1 2 2Z"/><path d="M9.26 7.68 5 12l2 5"/><path d="m10 14 5 2 3.5-3.5"/><path d="m18 12 1-1 1 1-1 1Z"/>"#,
+        doc: "`usb`, from Lucide.",
+    };
+
+    /// `usb-c-port`, from Lucide.
+    pub const USB_C_PORT: Self = Self {
+        name: "usb-c-port",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6 12h12"/><rect x="2" y="8" width="20" height="8" rx="4"/>"#,
+        doc: "`usb-c-port`, from Lucide.",
+    };
+
+    /// A person, where there is no picture of them. `Avatar`'s last fallback, after the initials.
+    pub const USER: Self = Self {
+        name: "user",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>"#,
+        doc: "A person, where there is no picture of them. `Avatar`'s last fallback, after the initials.",
+    };
+
+    /// `user-check`, from Lucide.
+    pub const USER_CHECK: Self = Self {
+        name: "user-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 11 2 2 4-4"/><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>"#,
+        doc: "`user-check`, from Lucide.",
+    };
+
+    /// `user-cog`, from Lucide.
+    pub const USER_COG: Self = Self {
+        name: "user-cog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 15H6a4 4 0 0 0-4 4v2"/><path d="m14.305 16.53.923-.382"/><path d="m15.228 13.852-.923-.383"/><path d="m16.852 12.228-.383-.923"/><path d="m16.852 17.772-.383.924"/><path d="m19.148 12.228.383-.923"/><path d="m19.53 18.696-.382-.924"/><path d="m20.772 13.852.924-.383"/><path d="m20.772 16.148.924.383"/><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/>"#,
+        doc: "`user-cog`, from Lucide.",
+    };
+
+    /// `user-key`, from Lucide.
+    pub const USER_KEY: Self = Self {
+        name: "user-key",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M20 11v6"/><path d="M20 13h2"/><path d="M3 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 2.072.578"/><circle cx="10" cy="7" r="4"/><circle cx="20" cy="19" r="2"/>"#,
+        doc: "`user-key`, from Lucide.",
+    };
+
+    /// `user-lock`, from Lucide.
+    pub const USER_LOCK: Self = Self {
+        name: "user-lock",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 16v-2a2 2 0 0 0-4 0v2"/><path d="M9.5 15H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><rect x="13" y="16" width="8" height="5" rx=".899"/>"#,
+        doc: "`user-lock`, from Lucide.",
+    };
+
+    /// `user-minus`, from Lucide.
+    pub const USER_MINUS: Self = Self {
+        name: "user-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" x2="16" y1="11" y2="11"/>"#,
+        doc: "`user-minus`, from Lucide.",
+    };
+
+    /// `user-pen`, from Lucide.
+    pub const USER_PEN: Self = Self {
+        name: "user-pen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.5 15H7a4 4 0 0 0-4 4v2"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="7" r="4"/>"#,
+        doc: "`user-pen`, from Lucide.",
+    };
+
+    /// `user-plus`, from Lucide.
+    pub const USER_PLUS: Self = Self {
+        name: "user-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>"#,
+        doc: "`user-plus`, from Lucide.",
+    };
+
+    /// `user-round`, from Lucide.
+    pub const USER_ROUND: Self = Self {
+        name: "user-round",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>"#,
+        doc: "`user-round`, from Lucide.",
+    };
+
+    /// `user-round-arrow-left`, from Lucide.
+    pub const USER_ROUND_ARROW_LEFT: Self = Self {
+        name: "user-round-arrow-left",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m19 16-3 3"/><path d="M2 21a8 8 0 0 1 12.664-6.5"/><path d="M22 19h-6l3 3"/><circle cx="10" cy="8" r="5"/>"#,
+        doc: "`user-round-arrow-left`, from Lucide.",
+    };
+
+    /// `user-round-check`, from Lucide.
+    pub const USER_ROUND_CHECK: Self = Self {
+        name: "user-round-check",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 21a8 8 0 0 1 13.292-6"/><circle cx="10" cy="8" r="5"/><path d="m16 19 2 2 4-4"/>"#,
+        doc: "`user-round-check`, from Lucide.",
+    };
+
+    /// `user-round-cog`, from Lucide.
+    pub const USER_ROUND_COG: Self = Self {
+        name: "user-round-cog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14.305 19.53.923-.382"/><path d="m15.228 16.852-.923-.383"/><path d="m16.852 15.228-.383-.923"/><path d="m16.852 20.772-.383.924"/><path d="m19.148 15.228.383-.923"/><path d="m19.53 21.696-.382-.924"/><path d="M2 21a8 8 0 0 1 10.434-7.62"/><path d="m20.772 16.852.924-.383"/><path d="m20.772 19.148.924.383"/><circle cx="10" cy="8" r="5"/><circle cx="18" cy="18" r="3"/>"#,
+        doc: "`user-round-cog`, from Lucide.",
+    };
+
+    /// `user-round-key`, from Lucide.
+    pub const USER_ROUND_KEY: Self = Self {
+        name: "user-round-key",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 11v6"/><path d="M19 13h2"/><path d="M2 21a8 8 0 0 1 12.868-6.349"/><circle cx="10" cy="8" r="5"/><circle cx="19" cy="19" r="2"/>"#,
+        doc: "`user-round-key`, from Lucide.",
+    };
+
+    /// `user-round-minus`, from Lucide.
+    pub const USER_ROUND_MINUS: Self = Self {
+        name: "user-round-minus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 21a8 8 0 0 1 13.292-6"/><circle cx="10" cy="8" r="5"/><path d="M22 19h-6"/>"#,
+        doc: "`user-round-minus`, from Lucide.",
+    };
+
+    /// `user-round-pen`, from Lucide.
+    pub const USER_ROUND_PEN: Self = Self {
+        name: "user-round-pen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 21a8 8 0 0 1 10.821-7.487"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><circle cx="10" cy="8" r="5"/>"#,
+        doc: "`user-round-pen`, from Lucide.",
+    };
+
+    /// `user-round-plus`, from Lucide.
+    pub const USER_ROUND_PLUS: Self = Self {
+        name: "user-round-plus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 21a8 8 0 0 1 13.292-6"/><circle cx="10" cy="8" r="5"/><path d="M19 16v6"/><path d="M22 19h-6"/>"#,
+        doc: "`user-round-plus`, from Lucide.",
+    };
+
+    /// `user-round-search`, from Lucide.
+    pub const USER_ROUND_SEARCH: Self = Self {
+        name: "user-round-search",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="10" cy="8" r="5"/><path d="M2 21a8 8 0 0 1 10.434-7.62"/><circle cx="18" cy="18" r="3"/><path d="m22 22-1.9-1.9"/>"#,
+        doc: "`user-round-search`, from Lucide.",
+    };
+
+    /// `user-round-x`, from Lucide.
+    pub const USER_ROUND_X: Self = Self {
+        name: "user-round-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 21a8 8 0 0 1 11.873-7"/><circle cx="10" cy="8" r="5"/><path d="m17 17 5 5"/><path d="m22 17-5 5"/>"#,
+        doc: "`user-round-x`, from Lucide.",
+    };
+
+    /// `user-search`, from Lucide.
+    pub const USER_SEARCH: Self = Self {
+        name: "user-search",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="10" cy="7" r="4"/><path d="M10.3 15H7a4 4 0 0 0-4 4v2"/><circle cx="17" cy="17" r="3"/><path d="m21 21-1.9-1.9"/>"#,
+        doc: "`user-search`, from Lucide.",
+    };
+
+    /// `user-shield`, from Lucide.
+    pub const USER_SHIELD: Self = Self {
+        name: "user-shield",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 15H6a4 4 0 0 0-4 4v2"/><path d="M22 17.5c0 2.499-1.75 3.749-3.83 4.474a.5.5 0 0 1-.335-.005c-2.085-.72-3.835-1.97-3.835-4.47V14a.5.5 0 0 1 .5-.499c1 0 2.25-.6 3.12-1.36a.6.6 0 0 1 .76-.001c.875.765 2.12 1.36 3.12 1.36a.5.5 0 0 1 .5.5z"/><circle cx="9" cy="7" r="4"/>"#,
+        doc: "`user-shield`, from Lucide.",
+    };
+
+    /// `user-star`, from Lucide.
+    pub const USER_STAR: Self = Self {
+        name: "user-star",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16.051 12.616a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z"/><path d="M8 15H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/>"#,
+        doc: "`user-star`, from Lucide.",
+    };
+
+    /// `user-x`, from Lucide.
+    pub const USER_X: Self = Self {
+        name: "user-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" x2="22" y1="8" y2="13"/><line x1="22" x2="17" y1="8" y2="13"/>"#,
+        doc: "`user-x`, from Lucide.",
+    };
+
+    /// `users`, from Lucide.
+    pub const USERS: Self = Self {
+        name: "users",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/>"#,
+        doc: "`users`, from Lucide.",
+    };
+
+    /// `users-round`, from Lucide.
+    pub const USERS_ROUND: Self = Self {
+        name: "users-round",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/>"#,
+        doc: "`users-round`, from Lucide.",
+    };
+
+    /// `utensils`, from Lucide.
+    pub const UTENSILS: Self = Self {
+        name: "utensils",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>"#,
+        doc: "`utensils`, from Lucide.",
+    };
+
+    /// `utensils-crossed`, from Lucide.
+    pub const UTENSILS_CROSSED: Self = Self {
+        name: "utensils-crossed",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8"/><path d="M15 15 3.3 3.3a4.2 4.2 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7"/><path d="m2.1 21.8 6.4-6.3"/><path d="m19 5-7 7"/>"#,
+        doc: "`utensils-crossed`, from Lucide.",
+    };
+
+    /// `utility-pole`, from Lucide.
+    pub const UTILITY_POLE: Self = Self {
+        name: "utility-pole",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v20"/><path d="M2 5h20"/><path d="M3 3v2"/><path d="M7 3v2"/><path d="M17 3v2"/><path d="M21 3v2"/><path d="m19 5-7 7-7-7"/>"#,
+        doc: "`utility-pole`, from Lucide.",
+    };
+
+    /// `van`, from Lucide.
+    pub const VAN: Self = Self {
+        name: "van",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M13 6v5a1 1 0 0 0 1 1h6.102a1 1 0 0 1 .712.298l.898.91a1 1 0 0 1 .288.702V17a1 1 0 0 1-1 1h-3"/><path d="M5 18H3a1 1 0 0 1-1-1V8a2 2 0 0 1 2-2h12c1.1 0 2.1.8 2.4 1.8l1.176 4.2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>"#,
+        doc: "`van`, from Lucide.",
+    };
+
+    /// `variable`, from Lucide.
+    pub const VARIABLE: Self = Self {
+        name: "variable",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 21s-4-3-4-9 4-9 4-9"/><path d="M16 3s4 3 4 9-4 9-4 9"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/>"#,
+        doc: "`variable`, from Lucide.",
+    };
+
+    /// `vault`, from Lucide.
+    pub const VAULT: Self = Self {
+        name: "vault",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/><path d="m7.9 7.9 2.7 2.7"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/><path d="m13.4 10.6 2.7-2.7"/><circle cx="7.5" cy="16.5" r=".5" fill="currentColor"/><path d="m7.9 16.1 2.7-2.7"/><circle cx="16.5" cy="16.5" r=".5" fill="currentColor"/><path d="m13.4 13.4 2.7 2.7"/><circle cx="12" cy="12" r="2"/>"#,
+        doc: "`vault`, from Lucide.",
+    };
+
+    /// `vector-square`, from Lucide.
+    pub const VECTOR_SQUARE: Self = Self {
+        name: "vector-square",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19.5 7a24 24 0 0 1 0 10"/><path d="M4.5 7a24 24 0 0 0 0 10"/><path d="M7 19.5a24 24 0 0 0 10 0"/><path d="M7 4.5a24 24 0 0 1 10 0"/><rect x="17" y="17" width="5" height="5" rx="1"/><rect x="17" y="2" width="5" height="5" rx="1"/><rect x="2" y="17" width="5" height="5" rx="1"/><rect x="2" y="2" width="5" height="5" rx="1"/>"#,
+        doc: "`vector-square`, from Lucide.",
+    };
+
+    /// `vegan`, from Lucide.
+    pub const VEGAN: Self = Self {
+        name: "vegan",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 8q6 0 6-6-6 0-6 6"/><path d="M17.41 3.59a10 10 0 1 0 3 3"/><path d="M2 2a26.6 26.6 0 0 1 10 20c.9-6.82 1.5-9.5 4-14"/>"#,
+        doc: "`vegan`, from Lucide.",
+    };
+
+    /// `venetian-mask`, from Lucide.
+    pub const VENETIAN_MASK: Self = Self {
+        name: "venetian-mask",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 11c-1.5 0-2.5.5-3 2"/><path d="M4 6a2 2 0 0 0-2 2v4a5 5 0 0 0 5 5 8 8 0 0 1 5 2 8 8 0 0 1 5-2 5 5 0 0 0 5-5V8a2 2 0 0 0-2-2h-3a8 8 0 0 0-5 2 8 8 0 0 0-5-2z"/><path d="M6 11c1.5 0 2.5.5 3 2"/>"#,
+        doc: "`venetian-mask`, from Lucide.",
+    };
+
+    /// `venus`, from Lucide.
+    pub const VENUS: Self = Self {
+        name: "venus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 15v7"/><path d="M9 19h6"/><circle cx="12" cy="9" r="6"/>"#,
+        doc: "`venus`, from Lucide.",
+    };
+
+    /// `venus-and-mars`, from Lucide.
+    pub const VENUS_AND_MARS: Self = Self {
+        name: "venus-and-mars",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 20h4"/><path d="M12 16v6"/><path d="M17 2h4v4"/><path d="m21 2-5.46 5.46"/><circle cx="12" cy="11" r="5"/>"#,
+        doc: "`venus-and-mars`, from Lucide.",
+    };
+
+    /// `vibrate`, from Lucide.
+    pub const VIBRATE: Self = Self {
+        name: "vibrate",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m2 8 2 2-2 2 2 2-2 2"/><path d="m22 8-2 2 2 2-2 2 2 2"/><rect width="8" height="14" x="8" y="5" rx="1"/>"#,
+        doc: "`vibrate`, from Lucide.",
+    };
+
+    /// `vibrate-off`, from Lucide.
+    pub const VIBRATE_OFF: Self = Self {
+        name: "vibrate-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m2 8 2 2-2 2 2 2-2 2"/><path d="m22 8-2 2 2 2-2 2 2 2"/><path d="M8 8v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2"/><path d="M16 10.34V6c0-.55-.45-1-1-1h-4.34"/><line x1="2" x2="22" y1="2" y2="22"/>"#,
+        doc: "`vibrate-off`, from Lucide.",
+    };
+
+    /// `video`, from Lucide.
+    pub const VIDEO: Self = Self {
+        name: "video",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/>"#,
+        doc: "`video`, from Lucide.",
+    };
+
+    /// `video-off`, from Lucide.
+    pub const VIDEO_OFF: Self = Self {
+        name: "video-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.66 6H14a2 2 0 0 1 2 2v2.5l5.248-3.062A.5.5 0 0 1 22 7.87v8.196"/><path d="M16 16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2"/><path d="m2 2 20 20"/>"#,
+        doc: "`video-off`, from Lucide.",
+    };
+
+    /// `videotape`, from Lucide.
+    pub const VIDEOTAPE: Self = Self {
+        name: "videotape",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="20" height="16" x="2" y="4" rx="2"/><path d="M2 8h20"/><circle cx="8" cy="14" r="2"/><path d="M8 12h8"/><circle cx="16" cy="14" r="2"/>"#,
+        doc: "`videotape`, from Lucide.",
+    };
+
+    /// `view`, from Lucide.
+    pub const VIEW: Self = Self {
+        name: "view",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"/><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"/><circle cx="12" cy="12" r="1"/><path d="M18.944 12.33a1 1 0 0 0 0-.66 7.5 7.5 0 0 0-13.888 0 1 1 0 0 0 0 .66 7.5 7.5 0 0 0 13.888 0"/>"#,
+        doc: "`view`, from Lucide.",
+    };
+
+    /// `voicemail`, from Lucide.
+    pub const VOICEMAIL: Self = Self {
+        name: "voicemail",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="6" cy="12" r="4"/><circle cx="18" cy="12" r="4"/><line x1="6" x2="18" y1="16" y2="16"/>"#,
+        doc: "`voicemail`, from Lucide.",
+    };
+
+    /// `volleyball`, from Lucide.
+    pub const VOLLEYBALL: Self = Self {
+        name: "volleyball",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 7a16 16 20 0 1 10.98 4.362"/><path d="M12 12a13 13 0 0 1-8.66 5"/><path d="M16.83 13.634a16 16 0 0 1-9.267 7.328"/><path d="M20.66 17A13 13 0 0 0 12 12a13 13 0 0 1 0-10"/><path d="M8.17 15.366a16 16 0 0 1-1.713-11.69"/><circle cx="12" cy="12" r="10"/>"#,
+        doc: "`volleyball`, from Lucide.",
+    };
+
+    /// `volume`, from Lucide.
+    pub const VOLUME: Self = Self {
+        name: "volume",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/>"#,
+        doc: "`volume`, from Lucide.",
+    };
+
+    /// `volume-1`, from Lucide.
+    pub const VOLUME_1: Self = Self {
+        name: "volume-1",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/>"#,
+        doc: "`volume-1`, from Lucide.",
+    };
+
+    /// `volume-2`, from Lucide.
+    pub const VOLUME_2: Self = Self {
+        name: "volume-2",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/>"#,
+        doc: "`volume-2`, from Lucide.",
+    };
+
+    /// `volume-off`, from Lucide.
+    pub const VOLUME_OFF: Self = Self {
+        name: "volume-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 9a5 5 0 0 1 .95 2.293"/><path d="M19.364 5.636a9 9 0 0 1 1.889 9.96"/><path d="m2 2 20 20"/><path d="m7 7-.587.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298V11"/><path d="M9.828 4.172A.686.686 0 0 1 11 4.657v.686"/>"#,
+        doc: "`volume-off`, from Lucide.",
+    };
+
+    /// `volume-x`, from Lucide.
+    pub const VOLUME_X: Self = Self {
+        name: "volume-x",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/>"#,
+        doc: "`volume-x`, from Lucide.",
+    };
+
+    /// `vote`, from Lucide.
+    pub const VOTE: Self = Self {
+        name: "vote",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m9 12 2 2 4-4"/><path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5V7Z"/><path d="M22 19H2"/>"#,
+        doc: "`vote`, from Lucide.",
+    };
+
+    /// `wallet`, from Lucide.
+    pub const WALLET: Self = Self {
+        name: "wallet",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>"#,
+        doc: "`wallet`, from Lucide.",
+    };
+
+    /// `wallet-cards`, from Lucide.
+    pub const WALLET_CARDS: Self = Self {
+        name: "wallet-cards",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 11h3.75a2 2 0 0 1 1.6.8l.45.6a4 4 0 0 0 6.4 0l.45-.6a2 2 0 0 1 1.6-.8H21"/><path d="M3 7h18"/><rect x="3" y="3" width="18" height="18" rx="2"/>"#,
+        doc: "`wallet-cards`, from Lucide.",
+    };
+
+    /// `wallet-minimal`, from Lucide.
+    pub const WALLET_MINIMAL: Self = Self {
+        name: "wallet-minimal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 14h.01"/><path d="M7 7h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14"/>"#,
+        doc: "`wallet-minimal`, from Lucide.",
+    };
+
+    /// `wallpaper`, from Lucide.
+    pub const WALLPAPER: Self = Self {
+        name: "wallpaper",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 17v4"/><path d="M8 21h8"/><path d="m9 17 6.1-6.1a2 2 0 0 1 2.81.01L22 15"/><circle cx="8" cy="9" r="2"/><rect x="2" y="3" width="20" height="14" rx="2"/>"#,
+        doc: "`wallpaper`, from Lucide.",
+    };
+
+    /// `wand`, from Lucide.
+    pub const WAND: Self = Self {
+        name: "wand",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/>"#,
+        doc: "`wand`, from Lucide.",
+    };
+
+    /// `wand-sparkles`, from Lucide.
+    pub const WAND_SPARKLES: Self = Self {
+        name: "wand-sparkles",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/>"#,
+        doc: "`wand-sparkles`, from Lucide.",
+    };
+
+    /// `warehouse`, from Lucide.
+    pub const WAREHOUSE: Self = Self {
+        name: "warehouse",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 21V10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v11"/><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 1.132-1.803l7.95-3.974a2 2 0 0 1 1.837 0l7.948 3.974A2 2 0 0 1 22 8z"/><path d="M6 13h12"/><path d="M6 17h12"/>"#,
+        doc: "`warehouse`, from Lucide.",
+    };
+
+    /// Marks a message about something that is about to go wrong. The triangle is the shape, and the sentence beside it is what says what is wrong.
+    pub const WARNING: Self = Self {
+        name: "warning",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>"#,
+        doc: "Marks a message about something that is about to go wrong. The triangle is the shape, and the sentence beside it is what says what is wrong.",
+    };
+
+    /// `washing-machine`, from Lucide.
+    pub const WASHING_MACHINE: Self = Self {
+        name: "washing-machine",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 6h3"/><path d="M17 6h.01"/><rect width="18" height="20" x="3" y="2" rx="2"/><circle cx="12" cy="13" r="5"/><path d="M12 18a2.5 2.5 0 0 0 0-5 2.5 2.5 0 0 1 0-5"/>"#,
+        doc: "`washing-machine`, from Lucide.",
+    };
+
+    /// `watch`, from Lucide.
+    pub const WATCH: Self = Self {
+        name: "watch",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 10v2.2l1.6 1"/><path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05"/><path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05"/><circle cx="12" cy="12" r="6"/>"#,
+        doc: "`watch`, from Lucide.",
+    };
+
+    /// `waves-arrow-down`, from Lucide.
+    pub const WAVES_ARROW_DOWN: Self = Self {
+        name: "waves-arrow-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 10L12 2"/><path d="M16 6L12 10L8 6"/><path d="M2 15C2.6 15.5 3.2 16 4.5 16C7 16 7 14 9.5 14C12.1 14 11.9 16 14.5 16C17 16 17 14 19.5 14C20.8 14 21.4 14.5 22 15"/><path d="M2 21C2.6 21.5 3.2 22 4.5 22C7 22 7 20 9.5 20C12.1 20 11.9 22 14.5 22C17 22 17 20 19.5 20C20.8 20 21.4 20.5 22 21"/>"#,
+        doc: "`waves-arrow-down`, from Lucide.",
+    };
+
+    /// `waves-arrow-up`, from Lucide.
+    pub const WAVES_ARROW_UP: Self = Self {
+        name: "waves-arrow-up",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2v8"/><path d="M2 15c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="m8 6 4-4 4 4"/>"#,
+        doc: "`waves-arrow-up`, from Lucide.",
+    };
+
+    /// `waves-horizontal`, from Lucide.
+    pub const WAVES_HORIZONTAL: Self = Self {
+        name: "waves-horizontal",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 12q2.5 2 5 0t5 0 5 0 5 0"/><path d="M2 19q2.5 2 5 0t5 0 5 0 5 0"/><path d="M2 5q2.5 2 5 0t5 0 5 0 5 0"/>"#,
+        doc: "`waves-horizontal`, from Lucide.",
+    };
+
+    /// `waves-ladder`, from Lucide.
+    pub const WAVES_LADDER: Self = Self {
+        name: "waves-ladder",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 5a2 2 0 0 0-2 2v11"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M7 13h10"/><path d="M7 9h10"/><path d="M9 5a2 2 0 0 0-2 2v11"/>"#,
+        doc: "`waves-ladder`, from Lucide.",
+    };
+
+    /// `waves-vertical`, from Lucide.
+    pub const WAVES_VERTICAL: Self = Self {
+        name: "waves-vertical",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 2q2 2.5 0 5t0 5 0 5 0 5"/><path d="M19 2q2 2.5 0 5t0 5 0 5 0 5"/><path d="M5 2q2 2.5 0 5t0 5 0 5 0 5"/>"#,
+        doc: "`waves-vertical`, from Lucide.",
+    };
+
+    /// `waypoints`, from Lucide.
+    pub const WAYPOINTS: Self = Self {
+        name: "waypoints",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m10.586 5.414-5.172 5.172"/><path d="m18.586 13.414-5.172 5.172"/><path d="M6 12h12"/><circle cx="12" cy="20" r="2"/><circle cx="12" cy="4" r="2"/><circle cx="20" cy="12" r="2"/><circle cx="4" cy="12" r="2"/>"#,
+        doc: "`waypoints`, from Lucide.",
+    };
+
+    /// `webcam`, from Lucide.
+    pub const WEBCAM: Self = Self {
+        name: "webcam",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="10" r="8"/><circle cx="12" cy="10" r="3"/><path d="M7 22h10"/><path d="M12 22v-4"/>"#,
+        doc: "`webcam`, from Lucide.",
+    };
+
+    /// `webcam-off`, from Lucide.
+    pub const WEBCAM_OFF: Self = Self {
+        name: "webcam-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 22v-4"/><path d="M12.754 7.096a3 3 0 0 1 2.15 2.15"/><path d="M12.863 12.873a3 3 0 0 1-3.736-3.735"/><path d="M16.566 16.57A8 8 0 0 1 5.43 5.433"/><path d="m2 2 20 20"/><path d="M7 22h10"/><path d="M8.478 2.817a8 8 0 0 1 10.705 10.705"/>"#,
+        doc: "`webcam-off`, from Lucide.",
+    };
+
+    /// `webhook`, from Lucide.
+    pub const WEBHOOK: Self = Self {
+        name: "webhook",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"/><path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06"/><path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8"/>"#,
+        doc: "`webhook`, from Lucide.",
+    };
+
+    /// `webhook-off`, from Lucide.
+    pub const WEBHOOK_OFF: Self = Self {
+        name: "webhook-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M17 17h-5c-1.09-.02-1.94.92-2.5 1.9A3 3 0 1 1 2.57 15"/><path d="M9 3.4a4 4 0 0 1 6.52.66"/><path d="m6 17 3.1-5.8a2.5 2.5 0 0 0 .057-2.05"/><path d="M20.3 20.3a4 4 0 0 1-2.3.7"/><path d="M18.6 13a4 4 0 0 1 3.357 3.414"/><path d="m12 6 .6 1"/><path d="m2 2 20 20"/>"#,
+        doc: "`webhook-off`, from Lucide.",
+    };
+
+    /// `weight`, from Lucide.
+    pub const WEIGHT: Self = Self {
+        name: "weight",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="5" r="3"/><path d="M6.5 8a2 2 0 0 0-1.905 1.46L2.1 18.5A2 2 0 0 0 4 21h16a2 2 0 0 0 1.925-2.54L19.4 9.5A2 2 0 0 0 17.48 8Z"/>"#,
+        doc: "`weight`, from Lucide.",
+    };
+
+    /// `weight-tilde`, from Lucide.
+    pub const WEIGHT_TILDE: Self = Self {
+        name: "weight-tilde",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M6.5 8a2 2 0 0 0-1.906 1.46L2.1 18.5A2 2 0 0 0 4 21h16a2 2 0 0 0 1.925-2.54L19.4 9.5A2 2 0 0 0 17.48 8z"/><path d="M7.999 15a2.5 2.5 0 0 1 4 0 2.5 2.5 0 0 0 4 0"/><circle cx="12" cy="5" r="3"/>"#,
+        doc: "`weight-tilde`, from Lucide.",
+    };
+
+    /// `wheat`, from Lucide.
+    pub const WHEAT: Self = Self {
+        name: "wheat",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/><path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L13 11l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/>"#,
+        doc: "`wheat`, from Lucide.",
+    };
+
+    /// `wheat-off`, from Lucide.
+    pub const WHEAT_OFF: Self = Self {
+        name: "wheat-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m2 22 10-10"/><path d="m16 8-1.17 1.17"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="m8 8-.53.53a3.5 3.5 0 0 0 0 4.94L9 15l1.53-1.53c.55-.55.88-1.25.98-1.97"/><path d="M10.91 5.26c.15-.26.34-.51.56-.73L13 3l1.53 1.53a3.5 3.5 0 0 1 .28 4.62"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/><path d="M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z"/><path d="m16 16-.53.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.49 3.49 0 0 1 1.97-.98"/><path d="M18.74 13.09c.26-.15.51-.34.73-.56L21 11l-1.53-1.53a3.5 3.5 0 0 0-4.62-.28"/><line x1="2" x2="22" y1="2" y2="22"/>"#,
+        doc: "`wheat-off`, from Lucide.",
+    };
+
+    /// `whole-word`, from Lucide.
+    pub const WHOLE_WORD: Self = Self {
+        name: "whole-word",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="7" cy="12" r="3"/><path d="M10 9v6"/><circle cx="17" cy="12" r="3"/><path d="M14 7v8"/><path d="M22 17v1c0 .5-.5 1-1 1H3c-.5 0-1-.5-1-1v-1"/>"#,
+        doc: "`whole-word`, from Lucide.",
+    };
+
+    /// `wifi`, from Lucide.
+    pub const WIFI: Self = Self {
+        name: "wifi",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/>"#,
+        doc: "`wifi`, from Lucide.",
+    };
+
+    /// `wifi-cog`, from Lucide.
+    pub const WIFI_COG: Self = Self {
+        name: "wifi-cog",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m14.305 19.53.923-.382"/><path d="m15.228 16.852-.923-.383"/><path d="m16.852 15.228-.383-.923"/><path d="m16.852 20.772-.383.924"/><path d="m19.148 15.228.383-.923"/><path d="m19.53 21.696-.382-.924"/><path d="M2 7.82a15 15 0 0 1 20 0"/><path d="m20.772 16.852.924-.383"/><path d="m20.772 19.148.924.383"/><path d="M5 11.858a10 10 0 0 1 11.5-1.785"/><path d="M8.5 15.429a5 5 0 0 1 2.413-1.31"/><circle cx="18" cy="18" r="3"/>"#,
+        doc: "`wifi-cog`, from Lucide.",
+    };
+
+    /// `wifi-high`, from Lucide.
+    pub const WIFI_HIGH: Self = Self {
+        name: "wifi-high",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 20h.01"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/>"#,
+        doc: "`wifi-high`, from Lucide.",
+    };
+
+    /// `wifi-low`, from Lucide.
+    pub const WIFI_LOW: Self = Self {
+        name: "wifi-low",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 20h.01"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/>"#,
+        doc: "`wifi-low`, from Lucide.",
+    };
+
+    /// `wifi-off`, from Lucide.
+    pub const WIFI_OFF: Self = Self {
+        name: "wifi-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 20h.01"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/><path d="M5 12.859a10 10 0 0 1 5.17-2.69"/><path d="M19 12.859a10 10 0 0 0-2.007-1.523"/><path d="M2 8.82a15 15 0 0 1 4.177-2.643"/><path d="M22 8.82a15 15 0 0 0-11.288-3.764"/><path d="m2 2 20 20"/>"#,
+        doc: "`wifi-off`, from Lucide.",
+    };
+
+    /// `wifi-pen`, from Lucide.
+    pub const WIFI_PEN: Self = Self {
+        name: "wifi-pen",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><path d="M5 12.859a10 10 0 0 1 10.5-2.222"/><path d="M8.5 16.429a5 5 0 0 1 3-1.406"/>"#,
+        doc: "`wifi-pen`, from Lucide.",
+    };
+
+    /// `wifi-sync`, from Lucide.
+    pub const WIFI_SYNC: Self = Self {
+        name: "wifi-sync",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11.965 10.105v4L13.5 12.5a5 5 0 0 1 8 1.5"/><path d="M11.965 14.105h4"/><path d="M17.965 18.105h4L20.43 19.71a5 5 0 0 1-8-1.5"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M21.965 22.105v-4"/><path d="M5 12.86a10 10 0 0 1 3-2.032"/><path d="M8.5 16.429h.01"/>"#,
+        doc: "`wifi-sync`, from Lucide.",
+    };
+
+    /// `wifi-zero`, from Lucide.
+    pub const WIFI_ZERO: Self = Self {
+        name: "wifi-zero",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 20h.01"/>"#,
+        doc: "`wifi-zero`, from Lucide.",
+    };
+
+    /// `wind`, from Lucide.
+    pub const WIND: Self = Self {
+        name: "wind",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/>"#,
+        doc: "`wind`, from Lucide.",
+    };
+
+    /// `wind-arrow-down`, from Lucide.
+    pub const WIND_ARROW_DOWN: Self = Self {
+        name: "wind-arrow-down",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 2v8"/><path d="M12.8 21.6A2 2 0 1 0 14 18H2"/><path d="M17.5 10a2.5 2.5 0 1 1 2 4H2"/><path d="m6 6 4 4 4-4"/>"#,
+        doc: "`wind-arrow-down`, from Lucide.",
+    };
+
+    /// `wine`, from Lucide.
+    pub const WINE: Self = Self {
+        name: "wine",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/>"#,
+        doc: "`wine`, from Lucide.",
+    };
+
+    /// `wine-off`, from Lucide.
+    pub const WINE_OFF: Self = Self {
+        name: "wine-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M8 22h8"/><path d="M7 10h3m7 0h-1.343"/><path d="M12 15v7"/><path d="M7.307 7.307A12.33 12.33 0 0 0 7 10a5 5 0 0 0 7.391 4.391M8.638 2.981C8.75 2.668 8.872 2.34 9 2h6c1.5 4 2 6 2 8 0 .407-.05.809-.145 1.198"/><line x1="2" x2="22" y1="2" y2="22"/>"#,
+        doc: "`wine-off`, from Lucide.",
+    };
+
+    /// `workflow`, from Lucide.
+    pub const WORKFLOW: Self = Self {
+        name: "workflow",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/>"#,
+        doc: "`workflow`, from Lucide.",
+    };
+
+    /// `worm`, from Lucide.
+    pub const WORM: Self = Self {
+        name: "worm",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m19 12-1.5 3"/><path d="M19.63 18.81 22 20"/><path d="M6.47 8.23a1.68 1.68 0 0 1 2.44 1.93l-.64 2.08a6.76 6.76 0 0 0 10.16 7.67l.42-.27a1 1 0 1 0-2.73-4.21l-.42.27a1.76 1.76 0 0 1-2.63-1.99l.64-2.08A6.66 6.66 0 0 0 3.94 3.9l-.7.4a1 1 0 1 0 2.55 4.34z"/>"#,
+        doc: "`worm`, from Lucide.",
+    };
+
+    /// `wrench`, from Lucide.
+    pub const WRENCH: Self = Self {
+        name: "wrench",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/>"#,
+        doc: "`wrench`, from Lucide.",
+    };
+
+    /// `wrench-off`, from Lucide.
+    pub const WRENCH_OFF: Self = Self {
+        name: "wrench-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.747 5.093a6 6 0 0 1 6.841-2.882c.438.12.54.662.219.984L14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-2.882 6.842"/><path d="m13.5 13.5-7.88 7.88a1 1 0 0 1-2.999-3l7.88-7.88"/><path d="m2 2 20 20"/>"#,
+        doc: "`wrench-off`, from Lucide.",
+    };
+
+    /// `x-line-top`, from Lucide.
+    pub const X_LINE_TOP: Self = Self {
+        name: "x-line-top",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M18 4H6"/><path d="M18 8 6 20"/><path d="m6 8 12 12"/>"#,
+        doc: "`x-line-top`, from Lucide.",
+    };
+
+    /// `zap`, from Lucide.
+    pub const ZAP: Self = Self {
+        name: "zap",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/>"#,
+        doc: "`zap`, from Lucide.",
+    };
+
+    /// `zap-off`, from Lucide.
+    pub const ZAP_OFF: Self = Self {
+        name: "zap-off",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10.768 5.111 13.44 2.44a1.5 1.5 0 012.474 1.561l-1.633 4.625"/><path d="m18.889 13.232.672-.672A1.5 1.5 0 0018.5 10h-2.844"/><path d="m2 2 20 20"/><path d="m7.94 7.94-3.5 3.499A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l5.5-5.5"/>"#,
+        doc: "`zap-off`, from Lucide.",
+    };
+
+    /// `zodiac-aquarius`, from Lucide.
+    pub const ZODIAC_AQUARIUS: Self = Self {
+        name: "zodiac-aquarius",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="m2 10 2.456-3.684a.7.7 0 0 1 1.106-.013l2.39 3.413a.7.7 0 0 0 1.096-.001l2.402-3.432a.7.7 0 0 1 1.098 0l2.402 3.432a.7.7 0 0 0 1.098 0l2.389-3.413a.7.7 0 0 1 1.106.013L22 10"/><path d="m2 18.002 2.456-3.684a.7.7 0 0 1 1.106-.013l2.39 3.413a.7.7 0 0 0 1.097 0l2.402-3.432a.7.7 0 0 1 1.098 0l2.402 3.432a.7.7 0 0 0 1.098 0l2.389-3.413a.7.7 0 0 1 1.106.013L22 18.002"/>"#,
+        doc: "`zodiac-aquarius`, from Lucide.",
+    };
+
+    /// `zodiac-aries`, from Lucide.
+    pub const ZODIAC_ARIES: Self = Self {
+        name: "zodiac-aries",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M12 7.5a4.5 4.5 0 1 1 5 4.5"/><path d="M7 12a4.5 4.5 0 1 1 5-4.5V21"/>"#,
+        doc: "`zodiac-aries`, from Lucide.",
+    };
+
+    /// `zodiac-cancer`, from Lucide.
+    pub const ZODIAC_CANCER: Self = Self {
+        name: "zodiac-cancer",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M21 14.5A9 6.5 0 0 1 5.5 19"/><path d="M3 9.5A9 6.5 0 0 1 18.5 5"/><circle cx="17.5" cy="14.5" r="3.5"/><circle cx="6.5" cy="9.5" r="3.5"/>"#,
+        doc: "`zodiac-cancer`, from Lucide.",
+    };
+
+    /// `zodiac-capricorn`, from Lucide.
+    pub const ZODIAC_CAPRICORN: Self = Self {
+        name: "zodiac-capricorn",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 21a3 3 0 0 0 3-3V6.5a1 1 0 0 0-7 0"/><path d="M7 19V6a3 3 0 0 0-3-3h0"/><circle cx="17" cy="17" r="3"/>"#,
+        doc: "`zodiac-capricorn`, from Lucide.",
+    };
+
+    /// `zodiac-gemini`, from Lucide.
+    pub const ZODIAC_GEMINI: Self = Self {
+        name: "zodiac-gemini",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M16 4.525v14.948"/><path d="M20 3A17 17 0 0 1 4 3"/><path d="M4 21a17 17 0 0 1 16 0"/><path d="M8 4.525v14.948"/>"#,
+        doc: "`zodiac-gemini`, from Lucide.",
+    };
+
+    /// `zodiac-leo`, from Lucide.
+    pub const ZODIAC_LEO: Self = Self {
+        name: "zodiac-leo",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 16c0-4-3-4.5-3-8a5 5 0 0 1 10 0c0 3.466-3 6.196-3 10a3 3 0 0 0 6 0"/><circle cx="7" cy="16" r="3"/>"#,
+        doc: "`zodiac-leo`, from Lucide.",
+    };
+
+    /// `zodiac-libra`, from Lucide.
+    pub const ZODIAC_LIBRA: Self = Self {
+        name: "zodiac-libra",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 16h6.857c.162-.012.19-.323.038-.38a6 6 0 1 1 4.212 0c-.153.057-.125.368.038.38H21"/><path d="M3 20h18"/>"#,
+        doc: "`zodiac-libra`, from Lucide.",
+    };
+
+    /// `zodiac-ophiuchus`, from Lucide.
+    pub const ZODIAC_OPHIUCHUS: Self = Self {
+        name: "zodiac-ophiuchus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M3 10A6.06 6.06 0 0 1 12 10 A6.06 6.06 0 0 0 21 10"/><path d="M6 3v12a6 6 0 0 0 12 0V3"/>"#,
+        doc: "`zodiac-ophiuchus`, from Lucide.",
+    };
+
+    /// `zodiac-pisces`, from Lucide.
+    pub const ZODIAC_PISCES: Self = Self {
+        name: "zodiac-pisces",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M19 21a15 15 0 0 1 0-18"/><path d="M20 12H4"/><path d="M5 3a15 15 0 0 1 0 18"/>"#,
+        doc: "`zodiac-pisces`, from Lucide.",
+    };
+
+    /// `zodiac-sagittarius`, from Lucide.
+    pub const ZODIAC_SAGITTARIUS: Self = Self {
+        name: "zodiac-sagittarius",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M15 3h6v6"/><path d="M21 3 3 21"/><path d="m9 9 6 6"/>"#,
+        doc: "`zodiac-sagittarius`, from Lucide.",
+    };
+
+    /// `zodiac-scorpio`, from Lucide.
+    pub const ZODIAC_SCORPIO: Self = Self {
+        name: "zodiac-scorpio",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M10 19V5.5a1 1 0 0 1 5 0V17a2 2 0 0 0 2 2h5l-3-3"/><path d="m22 19-3 3"/><path d="M5 19V5.5a1 1 0 0 1 5 0"/><path d="M5 5.5A2.5 2.5 0 0 0 2.5 3"/>"#,
+        doc: "`zodiac-scorpio`, from Lucide.",
+    };
+
+    /// `zodiac-taurus`, from Lucide.
+    pub const ZODIAC_TAURUS: Self = Self {
+        name: "zodiac-taurus",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="12" cy="15" r="6"/><path d="M18 3A6 6 0 0 1 6 3"/>"#,
+        doc: "`zodiac-taurus`, from Lucide.",
+    };
+
+    /// `zodiac-virgo`, from Lucide.
+    pub const ZODIAC_VIRGO: Self = Self {
+        name: "zodiac-virgo",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<path d="M11 5.5a1 1 0 0 1 5 0V16a5 5 0 0 0 5 5"/><path d="M16 11.5a1 1 0 0 1 5 0V16a5 5 0 0 1-5 5"/><path d="M6 19V6a3 3 0 0 0-3-3h0"/><path d="M6 5.5a1 1 0 0 1 5 0V19"/>"#,
+        doc: "`zodiac-virgo`, from Lucide.",
+    };
+
+    /// `zoom-in`, from Lucide.
+    pub const ZOOM_IN: Self = Self {
+        name: "zoom-in",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="11" x2="11" y1="8" y2="14"/><line x1="8" x2="14" y1="11" y2="11"/>"#,
+        doc: "`zoom-in`, from Lucide.",
+    };
+
+    /// `zoom-out`, from Lucide.
+    pub const ZOOM_OUT: Self = Self {
+        name: "zoom-out",
+        view_box: "0 0 24 24",
+        filled: false,
+        body: r#"<circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="8" x2="14" y1="11" y2="11"/>"#,
+        doc: "`zoom-out`, from Lucide.",
+    };
+}
+
+/// Every icon in the system, in name order.
+///
+/// Behind the `catalogue` feature: referring to this array refers to every
+/// icon in it, which is exactly the payload an application must not take on to
+/// draw one. The gallery on the documentation site is what it is for.
+///
+/// A `static` rather than a `const`, and clippy is right about why: a `const`
+/// array is copied whole at every use site, so two readers of a thousand-entry
+/// catalogue would be two thousand entries. A `static` is one instance, and one
+/// nothing refers to is dropped at link time.
+#[cfg(feature = "catalogue")]
+pub static ALL: [IconDrawing; 1777] = [
+    IconDrawing::A_ARROW_DOWN,
+    IconDrawing::A_ARROW_UP,
+    IconDrawing::A_LARGE_SMALL,
+    IconDrawing::ACCESSIBILITY,
+    IconDrawing::ACTIVITY,
+    IconDrawing::AD,
+    IconDrawing::AIR_VENT,
+    IconDrawing::AIRPLAY,
+    IconDrawing::ALARM_CLOCK,
+    IconDrawing::ALARM_CLOCK_CHECK,
+    IconDrawing::ALARM_CLOCK_MINUS,
+    IconDrawing::ALARM_CLOCK_OFF,
+    IconDrawing::ALARM_CLOCK_PLUS,
+    IconDrawing::ALARM_SMOKE,
+    IconDrawing::ALBUM,
+    IconDrawing::ALERT,
+    IconDrawing::ALIGN_CENTER_HORIZONTAL,
+    IconDrawing::ALIGN_CENTER_VERTICAL,
+    IconDrawing::ALIGN_END_HORIZONTAL,
+    IconDrawing::ALIGN_END_VERTICAL,
+    IconDrawing::ALIGN_HORIZONTAL_DISTRIBUTE_CENTER,
+    IconDrawing::ALIGN_HORIZONTAL_DISTRIBUTE_END,
+    IconDrawing::ALIGN_HORIZONTAL_DISTRIBUTE_START,
+    IconDrawing::ALIGN_HORIZONTAL_JUSTIFY_CENTER,
+    IconDrawing::ALIGN_HORIZONTAL_JUSTIFY_END,
+    IconDrawing::ALIGN_HORIZONTAL_JUSTIFY_START,
+    IconDrawing::ALIGN_HORIZONTAL_SPACE_AROUND,
+    IconDrawing::ALIGN_HORIZONTAL_SPACE_BETWEEN,
+    IconDrawing::ALIGN_START_HORIZONTAL,
+    IconDrawing::ALIGN_START_VERTICAL,
+    IconDrawing::ALIGN_VERTICAL_DISTRIBUTE_CENTER,
+    IconDrawing::ALIGN_VERTICAL_DISTRIBUTE_END,
+    IconDrawing::ALIGN_VERTICAL_DISTRIBUTE_START,
+    IconDrawing::ALIGN_VERTICAL_JUSTIFY_CENTER,
+    IconDrawing::ALIGN_VERTICAL_JUSTIFY_END,
+    IconDrawing::ALIGN_VERTICAL_JUSTIFY_START,
+    IconDrawing::ALIGN_VERTICAL_SPACE_AROUND,
+    IconDrawing::ALIGN_VERTICAL_SPACE_BETWEEN,
+    IconDrawing::AMBULANCE,
+    IconDrawing::AMPERSAND,
+    IconDrawing::AMPERSANDS,
+    IconDrawing::AMPHORA,
+    IconDrawing::ANCHOR,
+    IconDrawing::ANGLE,
+    IconDrawing::ANTENNA,
+    IconDrawing::ANVIL,
+    IconDrawing::APERTURE,
+    IconDrawing::APP_WINDOW,
+    IconDrawing::APP_WINDOW_MAC,
+    IconDrawing::APPLE,
+    IconDrawing::ARCHIVE,
+    IconDrawing::ARCHIVE_RESTORE,
+    IconDrawing::ARCHIVE_X,
+    IconDrawing::ARMCHAIR,
+    IconDrawing::ARROW_BIG_DOWN,
+    IconDrawing::ARROW_BIG_DOWN_DASH,
+    IconDrawing::ARROW_BIG_LEFT,
+    IconDrawing::ARROW_BIG_LEFT_DASH,
+    IconDrawing::ARROW_BIG_RIGHT,
+    IconDrawing::ARROW_BIG_RIGHT_DASH,
+    IconDrawing::ARROW_BIG_UP,
+    IconDrawing::ARROW_BIG_UP_DASH,
+    IconDrawing::ARROW_DOWN,
+    IconDrawing::ARROW_DOWN_0_1,
+    IconDrawing::ARROW_DOWN_1_0,
+    IconDrawing::ARROW_DOWN_A_Z,
+    IconDrawing::ARROW_DOWN_FROM_LINE,
+    IconDrawing::ARROW_DOWN_LEFT,
+    IconDrawing::ARROW_DOWN_NARROW_WIDE,
+    IconDrawing::ARROW_DOWN_RIGHT,
+    IconDrawing::ARROW_DOWN_TO_DOT,
+    IconDrawing::ARROW_DOWN_TO_LINE,
+    IconDrawing::ARROW_DOWN_UP,
+    IconDrawing::ARROW_DOWN_WIDE_NARROW,
+    IconDrawing::ARROW_DOWN_Z_A,
+    IconDrawing::ARROW_LEFT,
+    IconDrawing::ARROW_LEFT_FROM_LINE,
+    IconDrawing::ARROW_LEFT_RIGHT,
+    IconDrawing::ARROW_LEFT_TO_LINE,
+    IconDrawing::ARROW_RIGHT,
+    IconDrawing::ARROW_RIGHT_FROM_LINE,
+    IconDrawing::ARROW_RIGHT_LEFT,
+    IconDrawing::ARROW_RIGHT_TO_LINE,
+    IconDrawing::ARROW_UP,
+    IconDrawing::ARROW_UP_0_1,
+    IconDrawing::ARROW_UP_1_0,
+    IconDrawing::ARROW_UP_A_Z,
+    IconDrawing::ARROW_UP_DOWN,
+    IconDrawing::ARROW_UP_FROM_DOT,
+    IconDrawing::ARROW_UP_FROM_LINE,
+    IconDrawing::ARROW_UP_LEFT,
+    IconDrawing::ARROW_UP_NARROW_WIDE,
+    IconDrawing::ARROW_UP_RIGHT,
+    IconDrawing::ARROW_UP_TO_LINE,
+    IconDrawing::ARROW_UP_WIDE_NARROW,
+    IconDrawing::ARROW_UP_Z_A,
+    IconDrawing::ARROWS_UP_FROM_LINE,
+    IconDrawing::ASTERISK,
+    IconDrawing::ASTROID,
+    IconDrawing::AT_SIGN,
+    IconDrawing::ATOM,
+    IconDrawing::AUDIO_LINES,
+    IconDrawing::AUDIO_LINES_OFF,
+    IconDrawing::AUDIO_LINES_X,
+    IconDrawing::AUDIO_WAVEFORM,
+    IconDrawing::AWARD,
+    IconDrawing::AXE,
+    IconDrawing::AXIS_3D,
+    IconDrawing::BABY,
+    IconDrawing::BACKPACK,
+    IconDrawing::BADGE,
+    IconDrawing::BADGE_ALERT,
+    IconDrawing::BADGE_CENT,
+    IconDrawing::BADGE_CHECK,
+    IconDrawing::BADGE_DOLLAR_SIGN,
+    IconDrawing::BADGE_EURO,
+    IconDrawing::BADGE_INDIAN_RUPEE,
+    IconDrawing::BADGE_INFO,
+    IconDrawing::BADGE_JAPANESE_YEN,
+    IconDrawing::BADGE_MINUS,
+    IconDrawing::BADGE_PERCENT,
+    IconDrawing::BADGE_PLUS,
+    IconDrawing::BADGE_POUND_STERLING,
+    IconDrawing::BADGE_QUESTION_MARK,
+    IconDrawing::BADGE_RUSSIAN_RUBLE,
+    IconDrawing::BADGE_SWISS_FRANC,
+    IconDrawing::BADGE_TURKISH_LIRA,
+    IconDrawing::BADGE_X,
+    IconDrawing::BAGGAGE_CLAIM,
+    IconDrawing::BALLOON,
+    IconDrawing::BAN,
+    IconDrawing::BANANA,
+    IconDrawing::BANDAGE,
+    IconDrawing::BANKNOTE,
+    IconDrawing::BANKNOTE_ARROW_DOWN,
+    IconDrawing::BANKNOTE_ARROW_UP,
+    IconDrawing::BANKNOTE_CHECK,
+    IconDrawing::BANKNOTE_X,
+    IconDrawing::BARCODE,
+    IconDrawing::BARREL,
+    IconDrawing::BASELINE,
+    IconDrawing::BATH,
+    IconDrawing::BATTERY,
+    IconDrawing::BATTERY_CHARGING,
+    IconDrawing::BATTERY_FULL,
+    IconDrawing::BATTERY_LOW,
+    IconDrawing::BATTERY_MEDIUM,
+    IconDrawing::BATTERY_PLUS,
+    IconDrawing::BATTERY_WARNING,
+    IconDrawing::BEAKER,
+    IconDrawing::BEAN,
+    IconDrawing::BEAN_OFF,
+    IconDrawing::BED,
+    IconDrawing::BED_DOUBLE,
+    IconDrawing::BED_SINGLE,
+    IconDrawing::BEEF,
+    IconDrawing::BEEF_OFF,
+    IconDrawing::BEER,
+    IconDrawing::BEER_OFF,
+    IconDrawing::BELL,
+    IconDrawing::BELL_CHECK,
+    IconDrawing::BELL_DOT,
+    IconDrawing::BELL_ELECTRIC,
+    IconDrawing::BELL_MINUS,
+    IconDrawing::BELL_OFF,
+    IconDrawing::BELL_PLUS,
+    IconDrawing::BELL_RING,
+    IconDrawing::BETWEEN_HORIZONTAL_END,
+    IconDrawing::BETWEEN_HORIZONTAL_START,
+    IconDrawing::BETWEEN_VERTICAL_END,
+    IconDrawing::BETWEEN_VERTICAL_START,
+    IconDrawing::BICEPS_FLEXED,
+    IconDrawing::BIKE,
+    IconDrawing::BINARY,
+    IconDrawing::BINOCULARS,
+    IconDrawing::BIOHAZARD,
+    IconDrawing::BIRD,
+    IconDrawing::BIRDHOUSE,
+    IconDrawing::BITCOIN,
+    IconDrawing::BLEND,
+    IconDrawing::BLENDER,
+    IconDrawing::BLINDS,
+    IconDrawing::BLOCKS,
+    IconDrawing::BLUETOOTH,
+    IconDrawing::BLUETOOTH_CONNECTED,
+    IconDrawing::BLUETOOTH_OFF,
+    IconDrawing::BLUETOOTH_SEARCHING,
+    IconDrawing::BOLD,
+    IconDrawing::BOLT,
+    IconDrawing::BOMB,
+    IconDrawing::BONE,
+    IconDrawing::BONE_FRACTURE,
+    IconDrawing::BOOK,
+    IconDrawing::BOOK_A,
+    IconDrawing::BOOK_ALERT,
+    IconDrawing::BOOK_AUDIO,
+    IconDrawing::BOOK_CHECK,
+    IconDrawing::BOOK_COPY,
+    IconDrawing::BOOK_DASHED,
+    IconDrawing::BOOK_DOWN,
+    IconDrawing::BOOK_HEADPHONES,
+    IconDrawing::BOOK_HEART,
+    IconDrawing::BOOK_IMAGE,
+    IconDrawing::BOOK_KEY,
+    IconDrawing::BOOK_LOCK,
+    IconDrawing::BOOK_MARKED,
+    IconDrawing::BOOK_MINUS,
+    IconDrawing::BOOK_OPEN,
+    IconDrawing::BOOK_OPEN_CHECK,
+    IconDrawing::BOOK_OPEN_TEXT,
+    IconDrawing::BOOK_PLUS,
+    IconDrawing::BOOK_SEARCH,
+    IconDrawing::BOOK_TEXT,
+    IconDrawing::BOOK_TYPE,
+    IconDrawing::BOOK_UP,
+    IconDrawing::BOOK_UP_2,
+    IconDrawing::BOOK_USER,
+    IconDrawing::BOOK_X,
+    IconDrawing::BOOKMARK,
+    IconDrawing::BOOKMARK_CHECK,
+    IconDrawing::BOOKMARK_MINUS,
+    IconDrawing::BOOKMARK_OFF,
+    IconDrawing::BOOKMARK_PLUS,
+    IconDrawing::BOOKMARK_X,
+    IconDrawing::BOOM_BOX,
+    IconDrawing::BOT,
+    IconDrawing::BOT_MESSAGE_SQUARE,
+    IconDrawing::BOT_OFF,
+    IconDrawing::BOTTLE_WINE,
+    IconDrawing::BOW_ARROW,
+    IconDrawing::BOX,
+    IconDrawing::BOXES,
+    IconDrawing::BRACES,
+    IconDrawing::BRACKETS,
+    IconDrawing::BRAIN,
+    IconDrawing::BRAIN_CIRCUIT,
+    IconDrawing::BRAIN_COG,
+    IconDrawing::BRICK_WALL,
+    IconDrawing::BRICK_WALL_FIRE,
+    IconDrawing::BRICK_WALL_SHIELD,
+    IconDrawing::BRIEFCASE,
+    IconDrawing::BRIEFCASE_BUSINESS,
+    IconDrawing::BRIEFCASE_CONVEYOR_BELT,
+    IconDrawing::BRIEFCASE_MEDICAL,
+    IconDrawing::BRING_TO_FRONT,
+    IconDrawing::BROCCOLI,
+    IconDrawing::BROOM,
+    IconDrawing::BROOM_SPARKLES,
+    IconDrawing::BRUSH,
+    IconDrawing::BRUSH_CLEANING,
+    IconDrawing::BUBBLES,
+    IconDrawing::BUG,
+    IconDrawing::BUG_OFF,
+    IconDrawing::BUG_PLAY,
+    IconDrawing::BUILDING,
+    IconDrawing::BUILDING_2,
+    IconDrawing::BUS,
+    IconDrawing::BUS_FRONT,
+    IconDrawing::CABLE,
+    IconDrawing::CABLE_CAR,
+    IconDrawing::CAKE,
+    IconDrawing::CAKE_SLICE,
+    IconDrawing::CALCULATOR,
+    IconDrawing::CALENDAR,
+    IconDrawing::CALENDAR_1,
+    IconDrawing::CALENDAR_ARROW_DOWN,
+    IconDrawing::CALENDAR_ARROW_UP,
+    IconDrawing::CALENDAR_CHECK,
+    IconDrawing::CALENDAR_CHECK_2,
+    IconDrawing::CALENDAR_CLOCK,
+    IconDrawing::CALENDAR_COG,
+    IconDrawing::CALENDAR_DAYS,
+    IconDrawing::CALENDAR_FOLD,
+    IconDrawing::CALENDAR_HEART,
+    IconDrawing::CALENDAR_MINUS,
+    IconDrawing::CALENDAR_MINUS_2,
+    IconDrawing::CALENDAR_OFF,
+    IconDrawing::CALENDAR_PLUS,
+    IconDrawing::CALENDAR_PLUS_2,
+    IconDrawing::CALENDAR_RANGE,
+    IconDrawing::CALENDAR_SEARCH,
+    IconDrawing::CALENDAR_SYNC,
+    IconDrawing::CALENDAR_X,
+    IconDrawing::CALENDAR_X_2,
+    IconDrawing::CALENDARS,
+    IconDrawing::CAMERA,
+    IconDrawing::CAMERA_OFF,
+    IconDrawing::CANDY,
+    IconDrawing::CANDY_CANE,
+    IconDrawing::CANDY_OFF,
+    IconDrawing::CANNABIS,
+    IconDrawing::CANNABIS_OFF,
+    IconDrawing::CAPTIONS,
+    IconDrawing::CAPTIONS_OFF,
+    IconDrawing::CAR,
+    IconDrawing::CAR_BATTERY,
+    IconDrawing::CAR_FRONT,
+    IconDrawing::CAR_TAXI_FRONT,
+    IconDrawing::CARAVAN,
+    IconDrawing::CARD_SIM,
+    IconDrawing::CARROT,
+    IconDrawing::CASE_LOWER,
+    IconDrawing::CASE_SENSITIVE,
+    IconDrawing::CASE_UPPER,
+    IconDrawing::CASSETTE_TAPE,
+    IconDrawing::CAST,
+    IconDrawing::CASTLE,
+    IconDrawing::CAT,
+    IconDrawing::CCTV,
+    IconDrawing::CCTV_OFF,
+    IconDrawing::CHART_AREA,
+    IconDrawing::CHART_BAR,
+    IconDrawing::CHART_BAR_BIG,
+    IconDrawing::CHART_BAR_DECREASING,
+    IconDrawing::CHART_BAR_INCREASING,
+    IconDrawing::CHART_BAR_STACKED,
+    IconDrawing::CHART_CANDLESTICK,
+    IconDrawing::CHART_COLUMN,
+    IconDrawing::CHART_COLUMN_BIG,
+    IconDrawing::CHART_COLUMN_DECREASING,
+    IconDrawing::CHART_COLUMN_INCREASING,
+    IconDrawing::CHART_COLUMN_STACKED,
+    IconDrawing::CHART_GANTT,
+    IconDrawing::CHART_LINE,
+    IconDrawing::CHART_NETWORK,
+    IconDrawing::CHART_NO_AXES_COLUMN,
+    IconDrawing::CHART_NO_AXES_COLUMN_DECREASING,
+    IconDrawing::CHART_NO_AXES_COLUMN_INCREASING,
+    IconDrawing::CHART_NO_AXES_COMBINED,
+    IconDrawing::CHART_NO_AXES_GANTT,
+    IconDrawing::CHART_PIE,
+    IconDrawing::CHART_SCATTER,
+    IconDrawing::CHART_SPLINE,
+    IconDrawing::CHECK,
+    IconDrawing::CHECK_CHECK,
+    IconDrawing::CHECK_LINE,
+    IconDrawing::CHEF_HAT,
+    IconDrawing::CHERRY,
+    IconDrawing::CHESS_BISHOP,
+    IconDrawing::CHESS_KING,
+    IconDrawing::CHESS_KNIGHT,
+    IconDrawing::CHESS_PAWN,
+    IconDrawing::CHESS_QUEEN,
+    IconDrawing::CHESS_ROOK,
+    IconDrawing::CHEVRON_DOWN,
+    IconDrawing::CHEVRON_FIRST,
+    IconDrawing::CHEVRON_LAST,
+    IconDrawing::CHEVRON_LEFT,
+    IconDrawing::CHEVRON_RIGHT,
+    IconDrawing::CHEVRON_UP,
+    IconDrawing::CHEVRONS_DOWN,
+    IconDrawing::CHEVRONS_DOWN_UP,
+    IconDrawing::CHEVRONS_LEFT,
+    IconDrawing::CHEVRONS_LEFT_RIGHT,
+    IconDrawing::CHEVRONS_LEFT_RIGHT_ELLIPSIS,
+    IconDrawing::CHEVRONS_RIGHT,
+    IconDrawing::CHEVRONS_RIGHT_LEFT,
+    IconDrawing::CHEVRONS_UP,
+    IconDrawing::CHEVRONS_UP_DOWN,
+    IconDrawing::CHURCH,
+    IconDrawing::CIGARETTE,
+    IconDrawing::CIGARETTE_OFF,
+    IconDrawing::CIRCLE,
+    IconDrawing::CIRCLE_ARROW_DOWN,
+    IconDrawing::CIRCLE_ARROW_LEFT,
+    IconDrawing::CIRCLE_ARROW_OUT_DOWN_LEFT,
+    IconDrawing::CIRCLE_ARROW_OUT_DOWN_RIGHT,
+    IconDrawing::CIRCLE_ARROW_OUT_UP_LEFT,
+    IconDrawing::CIRCLE_ARROW_OUT_UP_RIGHT,
+    IconDrawing::CIRCLE_ARROW_RIGHT,
+    IconDrawing::CIRCLE_ARROW_UP,
+    IconDrawing::CIRCLE_CHECK,
+    IconDrawing::CIRCLE_CHECK_BIG,
+    IconDrawing::CIRCLE_CHEVRON_DOWN,
+    IconDrawing::CIRCLE_CHEVRON_LEFT,
+    IconDrawing::CIRCLE_CHEVRON_RIGHT,
+    IconDrawing::CIRCLE_CHEVRON_UP,
+    IconDrawing::CIRCLE_DASHED,
+    IconDrawing::CIRCLE_DIVIDE,
+    IconDrawing::CIRCLE_DOLLAR_SIGN,
+    IconDrawing::CIRCLE_DOT,
+    IconDrawing::CIRCLE_DOT_DASHED,
+    IconDrawing::CIRCLE_ELLIPSIS,
+    IconDrawing::CIRCLE_EQUAL,
+    IconDrawing::CIRCLE_EURO,
+    IconDrawing::CIRCLE_FADING_ARROW_UP,
+    IconDrawing::CIRCLE_FADING_PLUS,
+    IconDrawing::CIRCLE_GAUGE,
+    IconDrawing::CIRCLE_MINUS,
+    IconDrawing::CIRCLE_OFF,
+    IconDrawing::CIRCLE_PARKING,
+    IconDrawing::CIRCLE_PARKING_OFF,
+    IconDrawing::CIRCLE_PAUSE,
+    IconDrawing::CIRCLE_PERCENT,
+    IconDrawing::CIRCLE_PILE,
+    IconDrawing::CIRCLE_PLAY,
+    IconDrawing::CIRCLE_PLUS,
+    IconDrawing::CIRCLE_POUND_STERLING,
+    IconDrawing::CIRCLE_POWER,
+    IconDrawing::CIRCLE_QUESTION_MARK,
+    IconDrawing::CIRCLE_SLASH,
+    IconDrawing::CIRCLE_SLASH_2,
+    IconDrawing::CIRCLE_SMALL,
+    IconDrawing::CIRCLE_STAR,
+    IconDrawing::CIRCLE_STOP,
+    IconDrawing::CIRCLE_USER,
+    IconDrawing::CIRCLE_USER_ROUND,
+    IconDrawing::CIRCLE_X,
+    IconDrawing::CIRCUIT_BOARD,
+    IconDrawing::CITRUS,
+    IconDrawing::CLAPPERBOARD,
+    IconDrawing::CLIPBOARD,
+    IconDrawing::CLIPBOARD_CHECK,
+    IconDrawing::CLIPBOARD_CLOCK,
+    IconDrawing::CLIPBOARD_COPY,
+    IconDrawing::CLIPBOARD_LIST,
+    IconDrawing::CLIPBOARD_MINUS,
+    IconDrawing::CLIPBOARD_PASTE,
+    IconDrawing::CLIPBOARD_PEN,
+    IconDrawing::CLIPBOARD_PEN_LINE,
+    IconDrawing::CLIPBOARD_PLUS,
+    IconDrawing::CLIPBOARD_TYPE,
+    IconDrawing::CLIPBOARD_X,
+    IconDrawing::CLOCK,
+    IconDrawing::CLOCK_1,
+    IconDrawing::CLOCK_10,
+    IconDrawing::CLOCK_11,
+    IconDrawing::CLOCK_12,
+    IconDrawing::CLOCK_2,
+    IconDrawing::CLOCK_3,
+    IconDrawing::CLOCK_4,
+    IconDrawing::CLOCK_5,
+    IconDrawing::CLOCK_6,
+    IconDrawing::CLOCK_7,
+    IconDrawing::CLOCK_8,
+    IconDrawing::CLOCK_9,
+    IconDrawing::CLOCK_ALERT,
+    IconDrawing::CLOCK_ARROW_DOWN,
+    IconDrawing::CLOCK_ARROW_LEFT,
+    IconDrawing::CLOCK_ARROW_RIGHT,
+    IconDrawing::CLOCK_ARROW_UP,
+    IconDrawing::CLOCK_CHECK,
+    IconDrawing::CLOCK_FADING,
+    IconDrawing::CLOCK_PLUS,
+    IconDrawing::CLOSE,
+    IconDrawing::CLOSED_CAPTION,
+    IconDrawing::CLOUD,
+    IconDrawing::CLOUD_ALERT,
+    IconDrawing::CLOUD_BACKUP,
+    IconDrawing::CLOUD_CHECK,
+    IconDrawing::CLOUD_COG,
+    IconDrawing::CLOUD_DOWNLOAD,
+    IconDrawing::CLOUD_DRIZZLE,
+    IconDrawing::CLOUD_FOG,
+    IconDrawing::CLOUD_HAIL,
+    IconDrawing::CLOUD_LIGHTNING,
+    IconDrawing::CLOUD_MOON,
+    IconDrawing::CLOUD_MOON_RAIN,
+    IconDrawing::CLOUD_OFF,
+    IconDrawing::CLOUD_RAIN,
+    IconDrawing::CLOUD_RAIN_WIND,
+    IconDrawing::CLOUD_SNOW,
+    IconDrawing::CLOUD_SUN,
+    IconDrawing::CLOUD_SUN_RAIN,
+    IconDrawing::CLOUD_SYNC,
+    IconDrawing::CLOUD_UPLOAD,
+    IconDrawing::CLOUDY,
+    IconDrawing::CLOVER,
+    IconDrawing::CLUB,
+    IconDrawing::CODE,
+    IconDrawing::CODE_XML,
+    IconDrawing::COFFEE,
+    IconDrawing::COG,
+    IconDrawing::COINS,
+    IconDrawing::COLUMNS_2,
+    IconDrawing::COLUMNS_3,
+    IconDrawing::COLUMNS_3_COG,
+    IconDrawing::COLUMNS_4,
+    IconDrawing::COMBINE,
+    IconDrawing::COMMAND,
+    IconDrawing::COMPASS,
+    IconDrawing::COMPONENT,
+    IconDrawing::COMPUTER,
+    IconDrawing::CONCIERGE_BELL,
+    IconDrawing::CONE,
+    IconDrawing::CONSTRUCTION,
+    IconDrawing::CONTACT,
+    IconDrawing::CONTACT_ROUND,
+    IconDrawing::CONTAINER,
+    IconDrawing::CONTRAST,
+    IconDrawing::COOKIE,
+    IconDrawing::COOKING_POT,
+    IconDrawing::COPY,
+    IconDrawing::COPY_CHECK,
+    IconDrawing::COPY_MINUS,
+    IconDrawing::COPY_PLUS,
+    IconDrawing::COPY_SLASH,
+    IconDrawing::COPY_X,
+    IconDrawing::COPYLEFT,
+    IconDrawing::COPYRIGHT,
+    IconDrawing::CORNER_DOWN_LEFT,
+    IconDrawing::CORNER_DOWN_RIGHT,
+    IconDrawing::CORNER_LEFT_DOWN,
+    IconDrawing::CORNER_LEFT_UP,
+    IconDrawing::CORNER_RIGHT_DOWN,
+    IconDrawing::CORNER_RIGHT_UP,
+    IconDrawing::CORNER_UP_LEFT,
+    IconDrawing::CORNER_UP_RIGHT,
+    IconDrawing::CPU,
+    IconDrawing::CREATIVE_COMMONS,
+    IconDrawing::CREDIT_CARD,
+    IconDrawing::CROISSANT,
+    IconDrawing::CROP,
+    IconDrawing::CROSS,
+    IconDrawing::CROSSHAIR,
+    IconDrawing::CROWN,
+    IconDrawing::CUBOID,
+    IconDrawing::CUP_SODA,
+    IconDrawing::CURRENCY,
+    IconDrawing::CYLINDER,
+    IconDrawing::DAM,
+    IconDrawing::DATABASE,
+    IconDrawing::DATABASE_ARROW_DOWN,
+    IconDrawing::DATABASE_ARROW_UP,
+    IconDrawing::DATABASE_BACKUP,
+    IconDrawing::DATABASE_CHECK,
+    IconDrawing::DATABASE_MINUS,
+    IconDrawing::DATABASE_PLUS,
+    IconDrawing::DATABASE_SEARCH,
+    IconDrawing::DATABASE_X,
+    IconDrawing::DATABASE_ZAP,
+    IconDrawing::DECIMALS_ARROW_LEFT,
+    IconDrawing::DECIMALS_ARROW_RIGHT,
+    IconDrawing::DELETE,
+    IconDrawing::DESSERT,
+    IconDrawing::DIAMETER,
+    IconDrawing::DIAMOND,
+    IconDrawing::DIAMOND_MINUS,
+    IconDrawing::DIAMOND_PERCENT,
+    IconDrawing::DIAMOND_PLUS,
+    IconDrawing::DICE_1,
+    IconDrawing::DICE_2,
+    IconDrawing::DICE_3,
+    IconDrawing::DICE_4,
+    IconDrawing::DICE_5,
+    IconDrawing::DICE_6,
+    IconDrawing::DICES,
+    IconDrawing::DIFF,
+    IconDrawing::DISC,
+    IconDrawing::DISC_2,
+    IconDrawing::DISC_3,
+    IconDrawing::DISC_ALBUM,
+    IconDrawing::DIVIDE,
+    IconDrawing::DNA,
+    IconDrawing::DNA_OFF,
+    IconDrawing::DOCK,
+    IconDrawing::DOG,
+    IconDrawing::DOLLAR_SIGN,
+    IconDrawing::DONUT,
+    IconDrawing::DOOR_CLOSED,
+    IconDrawing::DOOR_CLOSED_LOCKED,
+    IconDrawing::DOOR_OPEN,
+    IconDrawing::DOT,
+    IconDrawing::DOWNLOAD,
+    IconDrawing::DRAFTING_COMPASS,
+    IconDrawing::DRAMA,
+    IconDrawing::DRILL,
+    IconDrawing::DRONE,
+    IconDrawing::DROPLET,
+    IconDrawing::DROPLET_OFF,
+    IconDrawing::DROPLETS,
+    IconDrawing::DRUM,
+    IconDrawing::DRUMSTICK,
+    IconDrawing::DUMBBELL,
+    IconDrawing::EAR,
+    IconDrawing::EAR_OFF,
+    IconDrawing::EARTH,
+    IconDrawing::EARTH_LOCK,
+    IconDrawing::ECLIPSE,
+    IconDrawing::EGG,
+    IconDrawing::EGG_FRIED,
+    IconDrawing::EGG_OFF,
+    IconDrawing::EJECT,
+    IconDrawing::ELLIPSE,
+    IconDrawing::ELLIPSIS,
+    IconDrawing::ELLIPSIS_VERTICAL,
+    IconDrawing::EQUAL,
+    IconDrawing::EQUAL_APPROXIMATELY,
+    IconDrawing::EQUAL_NOT,
+    IconDrawing::ERASER,
+    IconDrawing::ETHERNET_PORT,
+    IconDrawing::EURO,
+    IconDrawing::EV_CHARGER,
+    IconDrawing::EXPAND,
+    IconDrawing::EXTERNAL_LINK,
+    IconDrawing::EYE,
+    IconDrawing::EYE_CLOSED,
+    IconDrawing::EYE_DASHED,
+    IconDrawing::EYE_OFF,
+    IconDrawing::FACE_ANGRY,
+    IconDrawing::FACE_EXPRESSIONLESS,
+    IconDrawing::FACE_GRINNING,
+    IconDrawing::FACE_NEUTRAL,
+    IconDrawing::FACE_SLIGHTLY_FROWNING,
+    IconDrawing::FACE_SLIGHTLY_SMILING,
+    IconDrawing::FACE_SLIGHTLY_SMILING_PLUS,
+    IconDrawing::FACTORY,
+    IconDrawing::FAN,
+    IconDrawing::FAST_FORWARD,
+    IconDrawing::FEATHER,
+    IconDrawing::FENCE,
+    IconDrawing::FERRIS_WHEEL,
+    IconDrawing::FILE,
+    IconDrawing::FILE_ARCHIVE,
+    IconDrawing::FILE_AXIS_3D,
+    IconDrawing::FILE_BADGE,
+    IconDrawing::FILE_BOX,
+    IconDrawing::FILE_BRACES,
+    IconDrawing::FILE_BRACES_CORNER,
+    IconDrawing::FILE_CHART_COLUMN,
+    IconDrawing::FILE_CHART_COLUMN_INCREASING,
+    IconDrawing::FILE_CHART_LINE,
+    IconDrawing::FILE_CHART_PIE,
+    IconDrawing::FILE_CHECK,
+    IconDrawing::FILE_CHECK_CORNER,
+    IconDrawing::FILE_CLOCK,
+    IconDrawing::FILE_CODE,
+    IconDrawing::FILE_CODE_CORNER,
+    IconDrawing::FILE_COG,
+    IconDrawing::FILE_DIFF,
+    IconDrawing::FILE_DIGIT,
+    IconDrawing::FILE_DOWN,
+    IconDrawing::FILE_EXCLAMATION_POINT,
+    IconDrawing::FILE_HEADPHONE,
+    IconDrawing::FILE_HEART,
+    IconDrawing::FILE_IMAGE,
+    IconDrawing::FILE_INPUT,
+    IconDrawing::FILE_KEY,
+    IconDrawing::FILE_LOCK,
+    IconDrawing::FILE_MINUS,
+    IconDrawing::FILE_MINUS_CORNER,
+    IconDrawing::FILE_MUSIC,
+    IconDrawing::FILE_OUTPUT,
+    IconDrawing::FILE_PEN,
+    IconDrawing::FILE_PEN_LINE,
+    IconDrawing::FILE_PLAY,
+    IconDrawing::FILE_PLUS,
+    IconDrawing::FILE_PLUS_CORNER,
+    IconDrawing::FILE_QUESTION_MARK,
+    IconDrawing::FILE_SCAN,
+    IconDrawing::FILE_SEARCH,
+    IconDrawing::FILE_SEARCH_CORNER,
+    IconDrawing::FILE_SIGNAL,
+    IconDrawing::FILE_SLIDERS,
+    IconDrawing::FILE_SPREADSHEET,
+    IconDrawing::FILE_STACK,
+    IconDrawing::FILE_SYMLINK,
+    IconDrawing::FILE_TERMINAL,
+    IconDrawing::FILE_TEXT,
+    IconDrawing::FILE_TYPE,
+    IconDrawing::FILE_TYPE_CORNER,
+    IconDrawing::FILE_UP,
+    IconDrawing::FILE_USER,
+    IconDrawing::FILE_VIDEO_CAMERA,
+    IconDrawing::FILE_VOLUME,
+    IconDrawing::FILE_X,
+    IconDrawing::FILE_X_CORNER,
+    IconDrawing::FILES,
+    IconDrawing::FILM,
+    IconDrawing::FINGERPRINT_PATTERN,
+    IconDrawing::FIRE_EXTINGUISHER,
+    IconDrawing::FISH,
+    IconDrawing::FISH_OFF,
+    IconDrawing::FISH_SYMBOL,
+    IconDrawing::FISHING_HOOK,
+    IconDrawing::FISHING_ROD,
+    IconDrawing::FLAG,
+    IconDrawing::FLAG_OFF,
+    IconDrawing::FLAG_TRIANGLE_LEFT,
+    IconDrawing::FLAG_TRIANGLE_RIGHT,
+    IconDrawing::FLAME,
+    IconDrawing::FLAME_KINDLING,
+    IconDrawing::FLASHLIGHT,
+    IconDrawing::FLASHLIGHT_OFF,
+    IconDrawing::FLASK_CONICAL,
+    IconDrawing::FLASK_CONICAL_OFF,
+    IconDrawing::FLASK_ROUND,
+    IconDrawing::FLIP_HORIZONTAL_2,
+    IconDrawing::FLIP_VERTICAL_2,
+    IconDrawing::FLOWER,
+    IconDrawing::FLOWER_2,
+    IconDrawing::FOCUS,
+    IconDrawing::FOLD_HORIZONTAL,
+    IconDrawing::FOLD_VERTICAL,
+    IconDrawing::FOLDER,
+    IconDrawing::FOLDER_ARCHIVE,
+    IconDrawing::FOLDER_BOOKMARK,
+    IconDrawing::FOLDER_CHECK,
+    IconDrawing::FOLDER_CLOCK,
+    IconDrawing::FOLDER_CLOSED,
+    IconDrawing::FOLDER_CODE,
+    IconDrawing::FOLDER_COG,
+    IconDrawing::FOLDER_DOT,
+    IconDrawing::FOLDER_DOWN,
+    IconDrawing::FOLDER_GIT,
+    IconDrawing::FOLDER_GIT_2,
+    IconDrawing::FOLDER_HEART,
+    IconDrawing::FOLDER_INPUT,
+    IconDrawing::FOLDER_KANBAN,
+    IconDrawing::FOLDER_KEY,
+    IconDrawing::FOLDER_LOCK,
+    IconDrawing::FOLDER_MINUS,
+    IconDrawing::FOLDER_OPEN,
+    IconDrawing::FOLDER_OPEN_DOT,
+    IconDrawing::FOLDER_OUTPUT,
+    IconDrawing::FOLDER_PEN,
+    IconDrawing::FOLDER_PLUS,
+    IconDrawing::FOLDER_ROOT,
+    IconDrawing::FOLDER_SEARCH,
+    IconDrawing::FOLDER_SEARCH_2,
+    IconDrawing::FOLDER_SYMLINK,
+    IconDrawing::FOLDER_SYNC,
+    IconDrawing::FOLDER_TREE,
+    IconDrawing::FOLDER_UP,
+    IconDrawing::FOLDER_X,
+    IconDrawing::FOLDERS,
+    IconDrawing::FOOTPRINTS,
+    IconDrawing::FORKLIFT,
+    IconDrawing::FORM,
+    IconDrawing::FORWARD,
+    IconDrawing::FRAME,
+    IconDrawing::FUEL,
+    IconDrawing::FULLSCREEN,
+    IconDrawing::FUNNEL,
+    IconDrawing::FUNNEL_PLUS,
+    IconDrawing::FUNNEL_X,
+    IconDrawing::GALLERY_HORIZONTAL,
+    IconDrawing::GALLERY_HORIZONTAL_END,
+    IconDrawing::GALLERY_THUMBNAILS,
+    IconDrawing::GALLERY_VERTICAL,
+    IconDrawing::GALLERY_VERTICAL_END,
+    IconDrawing::GAMEPAD,
+    IconDrawing::GAMEPAD_2,
+    IconDrawing::GAMEPAD_DIRECTIONAL,
+    IconDrawing::GAUGE,
+    IconDrawing::GAVEL,
+    IconDrawing::GEM,
+    IconDrawing::GEORGIAN_LARI,
+    IconDrawing::GHOST,
+    IconDrawing::GIFT,
+    IconDrawing::GIT_BRANCH,
+    IconDrawing::GIT_BRANCH_MINUS,
+    IconDrawing::GIT_BRANCH_PLUS,
+    IconDrawing::GIT_COMMIT_HORIZONTAL,
+    IconDrawing::GIT_COMMIT_VERTICAL,
+    IconDrawing::GIT_COMPARE,
+    IconDrawing::GIT_COMPARE_ARROWS,
+    IconDrawing::GIT_FORK,
+    IconDrawing::GIT_GRAPH,
+    IconDrawing::GIT_MERGE,
+    IconDrawing::GIT_MERGE_CONFLICT,
+    IconDrawing::GIT_PULL_REQUEST,
+    IconDrawing::GIT_PULL_REQUEST_ARROW,
+    IconDrawing::GIT_PULL_REQUEST_CLOSED,
+    IconDrawing::GIT_PULL_REQUEST_CREATE,
+    IconDrawing::GIT_PULL_REQUEST_CREATE_ARROW,
+    IconDrawing::GIT_PULL_REQUEST_DRAFT,
+    IconDrawing::GITHUB,
+    IconDrawing::GLASS_WATER,
+    IconDrawing::GLASSES,
+    IconDrawing::GLOBE,
+    IconDrawing::GLOBE_CHECK,
+    IconDrawing::GLOBE_LOCK,
+    IconDrawing::GLOBE_OFF,
+    IconDrawing::GLOBE_X,
+    IconDrawing::GOAL,
+    IconDrawing::GPU,
+    IconDrawing::GRADUATION_CAP,
+    IconDrawing::GRAPE,
+    IconDrawing::GRID_2X2,
+    IconDrawing::GRID_2X2_CHECK,
+    IconDrawing::GRID_2X2_PLUS,
+    IconDrawing::GRID_2X2_X,
+    IconDrawing::GRID_3X2,
+    IconDrawing::GRID_3X3,
+    IconDrawing::GRIP,
+    IconDrawing::GRIP_HORIZONTAL,
+    IconDrawing::GRIP_VERTICAL,
+    IconDrawing::GROUP,
+    IconDrawing::GUITAR,
+    IconDrawing::HAM,
+    IconDrawing::HAMBURGER,
+    IconDrawing::HAMMER,
+    IconDrawing::HAND,
+    IconDrawing::HAND_COINS,
+    IconDrawing::HAND_FIST,
+    IconDrawing::HAND_GRAB,
+    IconDrawing::HAND_HEART,
+    IconDrawing::HAND_HELPING,
+    IconDrawing::HAND_METAL,
+    IconDrawing::HAND_PLATTER,
+    IconDrawing::HANDBAG,
+    IconDrawing::HANDSHAKE,
+    IconDrawing::HARD_DRIVE,
+    IconDrawing::HARD_DRIVE_DOWNLOAD,
+    IconDrawing::HARD_DRIVE_UPLOAD,
+    IconDrawing::HARD_HAT,
+    IconDrawing::HASH,
+    IconDrawing::HAT_GLASSES,
+    IconDrawing::HAZE,
+    IconDrawing::HD,
+    IconDrawing::HDMI_PORT,
+    IconDrawing::HEADING,
+    IconDrawing::HEADING_1,
+    IconDrawing::HEADING_2,
+    IconDrawing::HEADING_3,
+    IconDrawing::HEADING_4,
+    IconDrawing::HEADING_5,
+    IconDrawing::HEADING_6,
+    IconDrawing::HEADPHONE_OFF,
+    IconDrawing::HEADPHONES,
+    IconDrawing::HEADSET,
+    IconDrawing::HEART,
+    IconDrawing::HEART_CRACK,
+    IconDrawing::HEART_HANDSHAKE,
+    IconDrawing::HEART_MINUS,
+    IconDrawing::HEART_OFF,
+    IconDrawing::HEART_PLUS,
+    IconDrawing::HEART_PULSE,
+    IconDrawing::HEART_X,
+    IconDrawing::HEATER,
+    IconDrawing::HELICOPTER,
+    IconDrawing::HEXAGON,
+    IconDrawing::HIGHLIGHTER,
+    IconDrawing::HOP,
+    IconDrawing::HOP_OFF,
+    IconDrawing::HOSPITAL,
+    IconDrawing::HOTEL,
+    IconDrawing::HOURGLASS,
+    IconDrawing::HOUSE,
+    IconDrawing::HOUSE_HEART,
+    IconDrawing::HOUSE_PLUG,
+    IconDrawing::HOUSE_PLUS,
+    IconDrawing::HOUSE_WIFI,
+    IconDrawing::ICE_CREAM_BOWL,
+    IconDrawing::ICE_CREAM_CONE,
+    IconDrawing::ID_CARD,
+    IconDrawing::ID_CARD_LANYARD,
+    IconDrawing::IMAGE,
+    IconDrawing::IMAGE_DOWN,
+    IconDrawing::IMAGE_MINUS,
+    IconDrawing::IMAGE_OFF,
+    IconDrawing::IMAGE_PLAY,
+    IconDrawing::IMAGE_PLUS,
+    IconDrawing::IMAGE_UP,
+    IconDrawing::IMAGE_UPSCALE,
+    IconDrawing::IMAGES,
+    IconDrawing::IMPORT,
+    IconDrawing::INBOX,
+    IconDrawing::INDIAN_RUPEE,
+    IconDrawing::INFINITY,
+    IconDrawing::INFO,
+    IconDrawing::INSPECTION_PANEL,
+    IconDrawing::ITALIC,
+    IconDrawing::ITERATION_CCW,
+    IconDrawing::ITERATION_CW,
+    IconDrawing::JAPANESE_YEN,
+    IconDrawing::JOYSTICK,
+    IconDrawing::KANBAN,
+    IconDrawing::KAYAK,
+    IconDrawing::KEY,
+    IconDrawing::KEY_ROUND,
+    IconDrawing::KEY_SQUARE,
+    IconDrawing::KEYBOARD,
+    IconDrawing::KEYBOARD_MUSIC,
+    IconDrawing::KEYBOARD_OFF,
+    IconDrawing::LAMP,
+    IconDrawing::LAMP_CEILING,
+    IconDrawing::LAMP_DESK,
+    IconDrawing::LAMP_FLOOR,
+    IconDrawing::LAMP_WALL_DOWN,
+    IconDrawing::LAMP_WALL_UP,
+    IconDrawing::LAND_PLOT,
+    IconDrawing::LANDMARK,
+    IconDrawing::LANGUAGES,
+    IconDrawing::LAPTOP,
+    IconDrawing::LAPTOP_MINIMAL,
+    IconDrawing::LAPTOP_MINIMAL_CHECK,
+    IconDrawing::LASSO,
+    IconDrawing::LASSO_SELECT,
+    IconDrawing::LAYER_ARROW_DOWN,
+    IconDrawing::LAYER_ARROW_UP,
+    IconDrawing::LAYERS,
+    IconDrawing::LAYERS_2,
+    IconDrawing::LAYERS_ARROW_DOWN,
+    IconDrawing::LAYERS_ARROW_UP,
+    IconDrawing::LAYERS_MINUS,
+    IconDrawing::LAYERS_PLUS,
+    IconDrawing::LAYOUT_DASHBOARD,
+    IconDrawing::LAYOUT_FREEFORM,
+    IconDrawing::LAYOUT_GRID,
+    IconDrawing::LAYOUT_LIST,
+    IconDrawing::LAYOUT_PANEL_LEFT,
+    IconDrawing::LAYOUT_PANEL_TOP,
+    IconDrawing::LAYOUT_TEMPLATE,
+    IconDrawing::LEAF,
+    IconDrawing::LEAFY_GREEN,
+    IconDrawing::LECTERN,
+    IconDrawing::LENS_CONCAVE,
+    IconDrawing::LENS_CONVEX,
+    IconDrawing::LIBRARY,
+    IconDrawing::LIBRARY_BIG,
+    IconDrawing::LIFE_BUOY,
+    IconDrawing::LIGATURE,
+    IconDrawing::LIGHTBULB,
+    IconDrawing::LIGHTBULB_OFF,
+    IconDrawing::LINE_DOT_RIGHT_HORIZONTAL,
+    IconDrawing::LINE_SQUIGGLE,
+    IconDrawing::LINE_STYLE,
+    IconDrawing::LINK,
+    IconDrawing::LINK_2,
+    IconDrawing::LINK_2_OFF,
+    IconDrawing::LIST,
+    IconDrawing::LIST_CHECK,
+    IconDrawing::LIST_CHECKS,
+    IconDrawing::LIST_CHEVRONS_DOWN_UP,
+    IconDrawing::LIST_CHEVRONS_UP_DOWN,
+    IconDrawing::LIST_CLOCK,
+    IconDrawing::LIST_COLLAPSE,
+    IconDrawing::LIST_END,
+    IconDrawing::LIST_FILTER,
+    IconDrawing::LIST_FILTER_PLUS,
+    IconDrawing::LIST_INDENT_DECREASE,
+    IconDrawing::LIST_INDENT_INCREASE,
+    IconDrawing::LIST_MINUS,
+    IconDrawing::LIST_MUSIC,
+    IconDrawing::LIST_ORDERED,
+    IconDrawing::LIST_PLUS,
+    IconDrawing::LIST_RESTART,
+    IconDrawing::LIST_SORT_ASCENDING,
+    IconDrawing::LIST_SORT_DESCENDING,
+    IconDrawing::LIST_START,
+    IconDrawing::LIST_TODO,
+    IconDrawing::LIST_TREE,
+    IconDrawing::LIST_VIDEO,
+    IconDrawing::LIST_X,
+    IconDrawing::LOADER,
+    IconDrawing::LOADER_CIRCLE,
+    IconDrawing::LOADER_PINWHEEL,
+    IconDrawing::LOCATE,
+    IconDrawing::LOCATE_FIXED,
+    IconDrawing::LOCATE_OFF,
+    IconDrawing::LOCK,
+    IconDrawing::LOCK_KEYHOLE,
+    IconDrawing::LOCK_KEYHOLE_OPEN,
+    IconDrawing::LOCK_OPEN,
+    IconDrawing::LOG_IN,
+    IconDrawing::LOG_OUT,
+    IconDrawing::LOGS,
+    IconDrawing::LOLLIPOP,
+    IconDrawing::LUGGAGE,
+    IconDrawing::MAGNET,
+    IconDrawing::MAIL,
+    IconDrawing::MAIL_BADGE,
+    IconDrawing::MAIL_CHECK,
+    IconDrawing::MAIL_MINUS,
+    IconDrawing::MAIL_OPEN,
+    IconDrawing::MAIL_PLUS,
+    IconDrawing::MAIL_QUESTION_MARK,
+    IconDrawing::MAIL_SEARCH,
+    IconDrawing::MAIL_WARNING,
+    IconDrawing::MAIL_X,
+    IconDrawing::MAILBOX,
+    IconDrawing::MAILS,
+    IconDrawing::MAP,
+    IconDrawing::MAP_MINUS,
+    IconDrawing::MAP_PIN,
+    IconDrawing::MAP_PIN_CHECK,
+    IconDrawing::MAP_PIN_CHECK_INSIDE,
+    IconDrawing::MAP_PIN_HOUSE,
+    IconDrawing::MAP_PIN_MINUS,
+    IconDrawing::MAP_PIN_MINUS_INSIDE,
+    IconDrawing::MAP_PIN_OFF,
+    IconDrawing::MAP_PIN_PEN,
+    IconDrawing::MAP_PIN_PLUS,
+    IconDrawing::MAP_PIN_PLUS_INSIDE,
+    IconDrawing::MAP_PIN_SEARCH,
+    IconDrawing::MAP_PIN_X,
+    IconDrawing::MAP_PIN_X_INSIDE,
+    IconDrawing::MAP_PINNED,
+    IconDrawing::MAP_PLUS,
+    IconDrawing::MARS,
+    IconDrawing::MARS_STROKE,
+    IconDrawing::MARTINI,
+    IconDrawing::MAXIMIZE,
+    IconDrawing::MAXIMIZE_2,
+    IconDrawing::MEDAL,
+    IconDrawing::MEGAPHONE,
+    IconDrawing::MEGAPHONE_OFF,
+    IconDrawing::MEMORY_STICK,
+    IconDrawing::MENU,
+    IconDrawing::MERGE,
+    IconDrawing::MESSAGE_CIRCLE,
+    IconDrawing::MESSAGE_CIRCLE_CHECK,
+    IconDrawing::MESSAGE_CIRCLE_CODE,
+    IconDrawing::MESSAGE_CIRCLE_DASHED,
+    IconDrawing::MESSAGE_CIRCLE_HEART,
+    IconDrawing::MESSAGE_CIRCLE_MORE,
+    IconDrawing::MESSAGE_CIRCLE_OFF,
+    IconDrawing::MESSAGE_CIRCLE_PLUS,
+    IconDrawing::MESSAGE_CIRCLE_QUESTION_MARK,
+    IconDrawing::MESSAGE_CIRCLE_REPLY,
+    IconDrawing::MESSAGE_CIRCLE_WARNING,
+    IconDrawing::MESSAGE_CIRCLE_X,
+    IconDrawing::MESSAGE_SQUARE,
+    IconDrawing::MESSAGE_SQUARE_CHECK,
+    IconDrawing::MESSAGE_SQUARE_CODE,
+    IconDrawing::MESSAGE_SQUARE_DASHED,
+    IconDrawing::MESSAGE_SQUARE_DIFF,
+    IconDrawing::MESSAGE_SQUARE_DOT,
+    IconDrawing::MESSAGE_SQUARE_HEART,
+    IconDrawing::MESSAGE_SQUARE_LOCK,
+    IconDrawing::MESSAGE_SQUARE_MORE,
+    IconDrawing::MESSAGE_SQUARE_OFF,
+    IconDrawing::MESSAGE_SQUARE_PLUS,
+    IconDrawing::MESSAGE_SQUARE_QUOTE,
+    IconDrawing::MESSAGE_SQUARE_REPLY,
+    IconDrawing::MESSAGE_SQUARE_SHARE,
+    IconDrawing::MESSAGE_SQUARE_TEXT,
+    IconDrawing::MESSAGE_SQUARE_WARNING,
+    IconDrawing::MESSAGE_SQUARE_X,
+    IconDrawing::MESSAGES_SQUARE,
+    IconDrawing::METRONOME,
+    IconDrawing::MIC,
+    IconDrawing::MIC_AUDIO_LINES,
+    IconDrawing::MIC_OFF,
+    IconDrawing::MIC_SIGNAL,
+    IconDrawing::MIC_VOCAL,
+    IconDrawing::MICROCHIP,
+    IconDrawing::MICROSCOPE,
+    IconDrawing::MICROWAVE,
+    IconDrawing::MIDI_PORT,
+    IconDrawing::MILESTONE,
+    IconDrawing::MILK,
+    IconDrawing::MILK_OFF,
+    IconDrawing::MINIMIZE,
+    IconDrawing::MINIMIZE_2,
+    IconDrawing::MINUS,
+    IconDrawing::MIRROR_RECTANGULAR,
+    IconDrawing::MIRROR_ROUND,
+    IconDrawing::MONITOR,
+    IconDrawing::MONITOR_CHECK,
+    IconDrawing::MONITOR_CLOUD,
+    IconDrawing::MONITOR_COG,
+    IconDrawing::MONITOR_DOT,
+    IconDrawing::MONITOR_DOWN,
+    IconDrawing::MONITOR_OFF,
+    IconDrawing::MONITOR_PAUSE,
+    IconDrawing::MONITOR_PLAY,
+    IconDrawing::MONITOR_SMARTPHONE,
+    IconDrawing::MONITOR_SPEAKER,
+    IconDrawing::MONITOR_STOP,
+    IconDrawing::MONITOR_UP,
+    IconDrawing::MONITOR_X,
+    IconDrawing::MOON,
+    IconDrawing::MOON_STAR,
+    IconDrawing::MOP,
+    IconDrawing::MOP_SPARKLES,
+    IconDrawing::MOSQUE,
+    IconDrawing::MOTORBIKE,
+    IconDrawing::MOUNTAIN,
+    IconDrawing::MOUNTAIN_SNOW,
+    IconDrawing::MOUSE,
+    IconDrawing::MOUSE_LEFT,
+    IconDrawing::MOUSE_OFF,
+    IconDrawing::MOUSE_POINTER,
+    IconDrawing::MOUSE_POINTER_2,
+    IconDrawing::MOUSE_POINTER_2_OFF,
+    IconDrawing::MOUSE_POINTER_BAN,
+    IconDrawing::MOUSE_POINTER_CLICK,
+    IconDrawing::MOUSE_RIGHT,
+    IconDrawing::MOVE,
+    IconDrawing::MOVE_3D,
+    IconDrawing::MOVE_DIAGONAL,
+    IconDrawing::MOVE_DIAGONAL_2,
+    IconDrawing::MOVE_DOWN,
+    IconDrawing::MOVE_DOWN_LEFT,
+    IconDrawing::MOVE_DOWN_RIGHT,
+    IconDrawing::MOVE_HORIZONTAL,
+    IconDrawing::MOVE_LEFT,
+    IconDrawing::MOVE_RIGHT,
+    IconDrawing::MOVE_UP,
+    IconDrawing::MOVE_UP_LEFT,
+    IconDrawing::MOVE_UP_RIGHT,
+    IconDrawing::MOVE_VERTICAL,
+    IconDrawing::MUSIC,
+    IconDrawing::MUSIC_2,
+    IconDrawing::MUSIC_3,
+    IconDrawing::MUSIC_4,
+    IconDrawing::NAVIGATION,
+    IconDrawing::NAVIGATION_2,
+    IconDrawing::NAVIGATION_2_OFF,
+    IconDrawing::NAVIGATION_OFF,
+    IconDrawing::NETWORK,
+    IconDrawing::NEWSPAPER,
+    IconDrawing::NFC,
+    IconDrawing::NON_BINARY,
+    IconDrawing::NOTEBOOK,
+    IconDrawing::NOTEBOOK_PEN,
+    IconDrawing::NOTEBOOK_TABS,
+    IconDrawing::NOTEBOOK_TEXT,
+    IconDrawing::NOTEPAD_TEXT,
+    IconDrawing::NOTEPAD_TEXT_DASHED,
+    IconDrawing::NUT,
+    IconDrawing::NUT_OFF,
+    IconDrawing::OCTAGON,
+    IconDrawing::OCTAGON_ALERT,
+    IconDrawing::OCTAGON_MINUS,
+    IconDrawing::OCTAGON_PAUSE,
+    IconDrawing::OCTAGON_X,
+    IconDrawing::OMEGA,
+    IconDrawing::OPTION,
+    IconDrawing::ORBIT,
+    IconDrawing::ORIGAMI,
+    IconDrawing::PACKAGE,
+    IconDrawing::PACKAGE_2,
+    IconDrawing::PACKAGE_CHECK,
+    IconDrawing::PACKAGE_MINUS,
+    IconDrawing::PACKAGE_OPEN,
+    IconDrawing::PACKAGE_PLUS,
+    IconDrawing::PACKAGE_SEARCH,
+    IconDrawing::PACKAGE_X,
+    IconDrawing::PAINT_BUCKET,
+    IconDrawing::PAINT_ROLLER,
+    IconDrawing::PAINTBRUSH,
+    IconDrawing::PAINTBRUSH_VERTICAL,
+    IconDrawing::PALETTE,
+    IconDrawing::PANDA,
+    IconDrawing::PANEL_BOTTOM,
+    IconDrawing::PANEL_BOTTOM_CLOSE,
+    IconDrawing::PANEL_BOTTOM_DASHED,
+    IconDrawing::PANEL_BOTTOM_OPEN,
+    IconDrawing::PANEL_LEFT,
+    IconDrawing::PANEL_LEFT_CLOSE,
+    IconDrawing::PANEL_LEFT_DASHED,
+    IconDrawing::PANEL_LEFT_OPEN,
+    IconDrawing::PANEL_LEFT_RIGHT_DASHED,
+    IconDrawing::PANEL_RIGHT,
+    IconDrawing::PANEL_RIGHT_CLOSE,
+    IconDrawing::PANEL_RIGHT_DASHED,
+    IconDrawing::PANEL_RIGHT_OPEN,
+    IconDrawing::PANEL_TOP,
+    IconDrawing::PANEL_TOP_BOTTOM_DASHED,
+    IconDrawing::PANEL_TOP_CLOSE,
+    IconDrawing::PANEL_TOP_DASHED,
+    IconDrawing::PANEL_TOP_OPEN,
+    IconDrawing::PANELS_LEFT_BOTTOM,
+    IconDrawing::PANELS_RIGHT_BOTTOM,
+    IconDrawing::PANELS_TOP_LEFT,
+    IconDrawing::PAPER_BAG,
+    IconDrawing::PAPERCLIP,
+    IconDrawing::PARASOL,
+    IconDrawing::PARENTHESES,
+    IconDrawing::PARKING_METER,
+    IconDrawing::PARTY_POPPER,
+    IconDrawing::PAUSE,
+    IconDrawing::PAW_PRINT,
+    IconDrawing::PC_CASE,
+    IconDrawing::PEN,
+    IconDrawing::PEN_LINE,
+    IconDrawing::PEN_OFF,
+    IconDrawing::PEN_TOOL,
+    IconDrawing::PENCIL,
+    IconDrawing::PENCIL_LINE,
+    IconDrawing::PENCIL_OFF,
+    IconDrawing::PENCIL_RULER,
+    IconDrawing::PENCIL_SPARKLES,
+    IconDrawing::PENTAGON,
+    IconDrawing::PERCENT,
+    IconDrawing::PERSON_STANDING,
+    IconDrawing::PHI,
+    IconDrawing::PHILIPPINE_PESO,
+    IconDrawing::PHONE,
+    IconDrawing::PHONE_CALL,
+    IconDrawing::PHONE_FORWARDED,
+    IconDrawing::PHONE_INCOMING,
+    IconDrawing::PHONE_MISSED,
+    IconDrawing::PHONE_OFF,
+    IconDrawing::PHONE_OUTGOING,
+    IconDrawing::PI,
+    IconDrawing::PIANO,
+    IconDrawing::PICKAXE,
+    IconDrawing::PICTURE_IN_PICTURE,
+    IconDrawing::PICTURE_IN_PICTURE_2,
+    IconDrawing::PIGGY_BANK,
+    IconDrawing::PILCROW,
+    IconDrawing::PILCROW_LEFT,
+    IconDrawing::PILCROW_RIGHT,
+    IconDrawing::PILL,
+    IconDrawing::PILL_BOTTLE,
+    IconDrawing::PIN,
+    IconDrawing::PIN_OFF,
+    IconDrawing::PIPETTE,
+    IconDrawing::PIZZA,
+    IconDrawing::PLANE,
+    IconDrawing::PLANE_LANDING,
+    IconDrawing::PLANE_TAKEOFF,
+    IconDrawing::PLAY,
+    IconDrawing::PLAY_OFF,
+    IconDrawing::PLUG,
+    IconDrawing::PLUG_2,
+    IconDrawing::PLUG_ZAP,
+    IconDrawing::PLUS,
+    IconDrawing::POCKET_KNIFE,
+    IconDrawing::PODIUM,
+    IconDrawing::POINTER,
+    IconDrawing::POINTER_OFF,
+    IconDrawing::POPCORN,
+    IconDrawing::POPSICLE,
+    IconDrawing::POUND_STERLING,
+    IconDrawing::POWER,
+    IconDrawing::POWER_OFF,
+    IconDrawing::PRESENTATION,
+    IconDrawing::PRINTER,
+    IconDrawing::PRINTER_CHECK,
+    IconDrawing::PRINTER_X,
+    IconDrawing::PROJECTOR,
+    IconDrawing::PROPORTIONS,
+    IconDrawing::PUZZLE,
+    IconDrawing::PYRAMID,
+    IconDrawing::QR_CODE,
+    IconDrawing::QUOTE,
+    IconDrawing::RABBIT,
+    IconDrawing::RADAR,
+    IconDrawing::RADIATION,
+    IconDrawing::RADICAL,
+    IconDrawing::RADIO,
+    IconDrawing::RADIO_OFF,
+    IconDrawing::RADIO_RECEIVER,
+    IconDrawing::RADIO_TOWER,
+    IconDrawing::RADIUS,
+    IconDrawing::RAINBOW,
+    IconDrawing::RAT,
+    IconDrawing::RATIO,
+    IconDrawing::RECEIPT,
+    IconDrawing::RECEIPT_CENT,
+    IconDrawing::RECEIPT_EURO,
+    IconDrawing::RECEIPT_INDIAN_RUPEE,
+    IconDrawing::RECEIPT_JAPANESE_YEN,
+    IconDrawing::RECEIPT_POUND_STERLING,
+    IconDrawing::RECEIPT_RUSSIAN_RUBLE,
+    IconDrawing::RECEIPT_SWISS_FRANC,
+    IconDrawing::RECEIPT_TEXT,
+    IconDrawing::RECEIPT_TURKISH_LIRA,
+    IconDrawing::RECTANGLE_CIRCLE,
+    IconDrawing::RECTANGLE_ELLIPSIS,
+    IconDrawing::RECTANGLE_GOGGLES,
+    IconDrawing::RECTANGLE_HORIZONTAL,
+    IconDrawing::RECTANGLE_VERTICAL,
+    IconDrawing::RECYCLE,
+    IconDrawing::REDO,
+    IconDrawing::REDO_2,
+    IconDrawing::REDO_DOT,
+    IconDrawing::REFRESH_CCW,
+    IconDrawing::REFRESH_CCW_DOT,
+    IconDrawing::REFRESH_CW,
+    IconDrawing::REFRESH_CW_OFF,
+    IconDrawing::REFRIGERATOR,
+    IconDrawing::REGEX,
+    IconDrawing::REMOVE_FORMATTING,
+    IconDrawing::REPEAT,
+    IconDrawing::REPEAT_1,
+    IconDrawing::REPEAT_2,
+    IconDrawing::REPEAT_OFF,
+    IconDrawing::REPLACE,
+    IconDrawing::REPLACE_ALL,
+    IconDrawing::REPLY,
+    IconDrawing::REPLY_ALL,
+    IconDrawing::REWIND,
+    IconDrawing::RIBBON,
+    IconDrawing::ROAD,
+    IconDrawing::ROCKET,
+    IconDrawing::ROCKING_CHAIR,
+    IconDrawing::ROLLER_COASTER,
+    IconDrawing::ROSE,
+    IconDrawing::ROTATE_3D,
+    IconDrawing::ROTATE_CCW,
+    IconDrawing::ROTATE_CCW_CLOCK,
+    IconDrawing::ROTATE_CCW_KEY,
+    IconDrawing::ROTATE_CCW_SQUARE,
+    IconDrawing::ROTATE_CW,
+    IconDrawing::ROTATE_CW_FADING_CLOCK,
+    IconDrawing::ROTATE_CW_SQUARE,
+    IconDrawing::ROUTE,
+    IconDrawing::ROUTE_OFF,
+    IconDrawing::ROUTER,
+    IconDrawing::ROWS_2,
+    IconDrawing::ROWS_3,
+    IconDrawing::ROWS_4,
+    IconDrawing::RSS,
+    IconDrawing::RULER,
+    IconDrawing::RULER_DIMENSION_LINE,
+    IconDrawing::RUSSIAN_RUBLE,
+    IconDrawing::SAILBOAT,
+    IconDrawing::SALAD,
+    IconDrawing::SANDWICH,
+    IconDrawing::SATELLITE,
+    IconDrawing::SATELLITE_DISH,
+    IconDrawing::SAUDI_RIYAL,
+    IconDrawing::SAVE,
+    IconDrawing::SAVE_ALL,
+    IconDrawing::SAVE_CHECK,
+    IconDrawing::SAVE_OFF,
+    IconDrawing::SAVE_PEN,
+    IconDrawing::SAVE_PLUS,
+    IconDrawing::SCALE,
+    IconDrawing::SCALE_3D,
+    IconDrawing::SCALING,
+    IconDrawing::SCAN,
+    IconDrawing::SCAN_BARCODE,
+    IconDrawing::SCAN_BOX,
+    IconDrawing::SCAN_EYE,
+    IconDrawing::SCAN_FACE,
+    IconDrawing::SCAN_HEART,
+    IconDrawing::SCAN_LINE,
+    IconDrawing::SCAN_QR_CODE,
+    IconDrawing::SCAN_SEARCH,
+    IconDrawing::SCAN_SQUARE,
+    IconDrawing::SCAN_TEXT,
+    IconDrawing::SCHOOL,
+    IconDrawing::SCISSORS,
+    IconDrawing::SCISSORS_LINE_DASHED,
+    IconDrawing::SCOOTER,
+    IconDrawing::SCREEN_SHARE,
+    IconDrawing::SCREEN_SHARE_OFF,
+    IconDrawing::SCROLL,
+    IconDrawing::SCROLL_TEXT,
+    IconDrawing::SEARCH,
+    IconDrawing::SEARCH_ALERT,
+    IconDrawing::SEARCH_CHECK,
+    IconDrawing::SEARCH_CODE,
+    IconDrawing::SEARCH_SLASH,
+    IconDrawing::SEARCH_X,
+    IconDrawing::SECTION,
+    IconDrawing::SEND,
+    IconDrawing::SEND_HORIZONTAL,
+    IconDrawing::SEND_TO_BACK,
+    IconDrawing::SEPARATOR_HORIZONTAL,
+    IconDrawing::SEPARATOR_VERTICAL,
+    IconDrawing::SERVER,
+    IconDrawing::SERVER_COG,
+    IconDrawing::SERVER_CRASH,
+    IconDrawing::SERVER_OFF,
+    IconDrawing::SERVER_PLUS,
+    IconDrawing::SETTINGS,
+    IconDrawing::SETTINGS_2,
+    IconDrawing::SHAPES,
+    IconDrawing::SHARE,
+    IconDrawing::SHARE_2,
+    IconDrawing::SHEET,
+    IconDrawing::SHELL,
+    IconDrawing::SHELVING_UNIT,
+    IconDrawing::SHIELD,
+    IconDrawing::SHIELD_ALERT,
+    IconDrawing::SHIELD_BAN,
+    IconDrawing::SHIELD_CHECK,
+    IconDrawing::SHIELD_COG,
+    IconDrawing::SHIELD_COG_CORNER,
+    IconDrawing::SHIELD_ELLIPSIS,
+    IconDrawing::SHIELD_HALF,
+    IconDrawing::SHIELD_KEYHOLE,
+    IconDrawing::SHIELD_LOCK,
+    IconDrawing::SHIELD_MINUS,
+    IconDrawing::SHIELD_OFF,
+    IconDrawing::SHIELD_PLUS,
+    IconDrawing::SHIELD_QUESTION_MARK,
+    IconDrawing::SHIELD_USER,
+    IconDrawing::SHIELD_X,
+    IconDrawing::SHIP,
+    IconDrawing::SHIP_WHEEL,
+    IconDrawing::SHIRT,
+    IconDrawing::SHOPPING_BAG,
+    IconDrawing::SHOPPING_BASKET,
+    IconDrawing::SHOPPING_CART,
+    IconDrawing::SHOVEL,
+    IconDrawing::SHOWER_HEAD,
+    IconDrawing::SHREDDER,
+    IconDrawing::SHRIMP,
+    IconDrawing::SHRINK,
+    IconDrawing::SHRUB,
+    IconDrawing::SHUFFLE,
+    IconDrawing::SIGMA,
+    IconDrawing::SIGNAL,
+    IconDrawing::SIGNAL_HIGH,
+    IconDrawing::SIGNAL_LOW,
+    IconDrawing::SIGNAL_MEDIUM,
+    IconDrawing::SIGNAL_ZERO,
+    IconDrawing::SIGNATURE,
+    IconDrawing::SIGNPOST,
+    IconDrawing::SIGNPOST_BIG,
+    IconDrawing::SIREN,
+    IconDrawing::SKIP_BACK,
+    IconDrawing::SKIP_FORWARD,
+    IconDrawing::SKULL,
+    IconDrawing::SLASH,
+    IconDrawing::SLICE,
+    IconDrawing::SLIDERS_HORIZONTAL,
+    IconDrawing::SLIDERS_VERTICAL,
+    IconDrawing::SMARTPHONE,
+    IconDrawing::SMARTPHONE_CHARGING,
+    IconDrawing::SMARTPHONE_NFC,
+    IconDrawing::SNAIL,
+    IconDrawing::SNOWFLAKE,
+    IconDrawing::SOAP_DISPENSER_DROPLET,
+    IconDrawing::SOFA,
+    IconDrawing::SOLAR_PANEL,
+    IconDrawing::SOUP,
+    IconDrawing::SPACE,
+    IconDrawing::SPADE,
+    IconDrawing::SPARKLE,
+    IconDrawing::SPARKLES,
+    IconDrawing::SPEAKER,
+    IconDrawing::SPEECH,
+    IconDrawing::SPELL_CHECK,
+    IconDrawing::SPELL_CHECK_2,
+    IconDrawing::SPLINE,
+    IconDrawing::SPLINE_POINTER,
+    IconDrawing::SPLIT,
+    IconDrawing::SPOOL,
+    IconDrawing::SPORT_SHOE,
+    IconDrawing::SPOTLIGHT,
+    IconDrawing::SPRAY_CAN,
+    IconDrawing::SPROUT,
+    IconDrawing::SQUARE,
+    IconDrawing::SQUARE_ACTIVITY,
+    IconDrawing::SQUARE_ARROW_DOWN,
+    IconDrawing::SQUARE_ARROW_DOWN_LEFT,
+    IconDrawing::SQUARE_ARROW_DOWN_RIGHT,
+    IconDrawing::SQUARE_ARROW_LEFT,
+    IconDrawing::SQUARE_ARROW_OUT_DOWN_LEFT,
+    IconDrawing::SQUARE_ARROW_OUT_DOWN_RIGHT,
+    IconDrawing::SQUARE_ARROW_OUT_UP_LEFT,
+    IconDrawing::SQUARE_ARROW_OUT_UP_RIGHT,
+    IconDrawing::SQUARE_ARROW_RIGHT,
+    IconDrawing::SQUARE_ARROW_RIGHT_ENTER,
+    IconDrawing::SQUARE_ARROW_RIGHT_EXIT,
+    IconDrawing::SQUARE_ARROW_UP,
+    IconDrawing::SQUARE_ARROW_UP_LEFT,
+    IconDrawing::SQUARE_ARROW_UP_RIGHT,
+    IconDrawing::SQUARE_ASTERISK,
+    IconDrawing::SQUARE_BOTTOM_DASHED_SCISSORS,
+    IconDrawing::SQUARE_CENTERLINE_DASHED_HORIZONTAL,
+    IconDrawing::SQUARE_CENTERLINE_DASHED_VERTICAL,
+    IconDrawing::SQUARE_CHART_GANTT,
+    IconDrawing::SQUARE_CHECK,
+    IconDrawing::SQUARE_CHECK_BIG,
+    IconDrawing::SQUARE_CHEVRON_DOWN,
+    IconDrawing::SQUARE_CHEVRON_LEFT,
+    IconDrawing::SQUARE_CHEVRON_RIGHT,
+    IconDrawing::SQUARE_CHEVRON_UP,
+    IconDrawing::SQUARE_CODE,
+    IconDrawing::SQUARE_DASHED,
+    IconDrawing::SQUARE_DASHED_BOTTOM,
+    IconDrawing::SQUARE_DASHED_BOTTOM_CODE,
+    IconDrawing::SQUARE_DASHED_KANBAN,
+    IconDrawing::SQUARE_DASHED_MOUSE_POINTER,
+    IconDrawing::SQUARE_DASHED_TEXT,
+    IconDrawing::SQUARE_DASHED_TOP_SOLID,
+    IconDrawing::SQUARE_DIMENSIONS,
+    IconDrawing::SQUARE_DIVIDE,
+    IconDrawing::SQUARE_DOT,
+    IconDrawing::SQUARE_EQUAL,
+    IconDrawing::SQUARE_FUNCTION,
+    IconDrawing::SQUARE_KANBAN,
+    IconDrawing::SQUARE_LIBRARY,
+    IconDrawing::SQUARE_M,
+    IconDrawing::SQUARE_MENU,
+    IconDrawing::SQUARE_MINUS,
+    IconDrawing::SQUARE_MOUSE_POINTER,
+    IconDrawing::SQUARE_OFF,
+    IconDrawing::SQUARE_PARKING,
+    IconDrawing::SQUARE_PARKING_OFF,
+    IconDrawing::SQUARE_PAUSE,
+    IconDrawing::SQUARE_PEN,
+    IconDrawing::SQUARE_PERCENT,
+    IconDrawing::SQUARE_PI,
+    IconDrawing::SQUARE_PILCROW,
+    IconDrawing::SQUARE_PLAY,
+    IconDrawing::SQUARE_PLUS,
+    IconDrawing::SQUARE_POWER,
+    IconDrawing::SQUARE_RADICAL,
+    IconDrawing::SQUARE_ROUND_CORNER,
+    IconDrawing::SQUARE_SCISSORS,
+    IconDrawing::SQUARE_SIGMA,
+    IconDrawing::SQUARE_SLASH,
+    IconDrawing::SQUARE_SPLIT_HORIZONTAL,
+    IconDrawing::SQUARE_SPLIT_VERTICAL,
+    IconDrawing::SQUARE_SQUARE,
+    IconDrawing::SQUARE_STACK,
+    IconDrawing::SQUARE_STAR,
+    IconDrawing::SQUARE_STOP,
+    IconDrawing::SQUARE_TERMINAL,
+    IconDrawing::SQUARE_TEXT,
+    IconDrawing::SQUARE_USER,
+    IconDrawing::SQUARE_USER_ROUND,
+    IconDrawing::SQUARE_X,
+    IconDrawing::SQUARES_EXCLUDE,
+    IconDrawing::SQUARES_INTERSECT,
+    IconDrawing::SQUARES_SUBTRACT,
+    IconDrawing::SQUARES_UNITE,
+    IconDrawing::SQUIRCLE,
+    IconDrawing::SQUIRCLE_DASHED,
+    IconDrawing::SQUIRREL,
+    IconDrawing::STAMP,
+    IconDrawing::STAR,
+    IconDrawing::STAR_CHECK,
+    IconDrawing::STAR_HALF,
+    IconDrawing::STAR_MINUS,
+    IconDrawing::STAR_OFF,
+    IconDrawing::STAR_PLUS,
+    IconDrawing::STAR_X,
+    IconDrawing::STEP_BACK,
+    IconDrawing::STEP_FORWARD,
+    IconDrawing::STETHOSCOPE,
+    IconDrawing::STICKER,
+    IconDrawing::STICKY_NOTE,
+    IconDrawing::STICKY_NOTE_CHECK,
+    IconDrawing::STICKY_NOTE_MINUS,
+    IconDrawing::STICKY_NOTE_OFF,
+    IconDrawing::STICKY_NOTE_PLUS,
+    IconDrawing::STICKY_NOTE_X,
+    IconDrawing::STICKY_NOTES,
+    IconDrawing::STONE,
+    IconDrawing::STORE,
+    IconDrawing::STRETCH_HORIZONTAL,
+    IconDrawing::STRETCH_VERTICAL,
+    IconDrawing::STRIKETHROUGH,
+    IconDrawing::SUBSCRIPT,
+    IconDrawing::SUMMARY,
+    IconDrawing::SUN,
+    IconDrawing::SUN_DIM,
+    IconDrawing::SUN_MEDIUM,
+    IconDrawing::SUN_MOON,
+    IconDrawing::SUN_SNOW,
+    IconDrawing::SUNRISE,
+    IconDrawing::SUNSET,
+    IconDrawing::SUPERSCRIPT,
+    IconDrawing::SWATCH_BOOK,
+    IconDrawing::SWISS_FRANC,
+    IconDrawing::SWITCH_CAMERA,
+    IconDrawing::SWORD,
+    IconDrawing::SWORDS,
+    IconDrawing::SYRINGE,
+    IconDrawing::TABLE,
+    IconDrawing::TABLE_2,
+    IconDrawing::TABLE_CELLS_MERGE,
+    IconDrawing::TABLE_CELLS_SPLIT,
+    IconDrawing::TABLE_COLUMNS_SPLIT,
+    IconDrawing::TABLE_OF_CONTENTS,
+    IconDrawing::TABLE_PROPERTIES,
+    IconDrawing::TABLE_ROWS_SPLIT,
+    IconDrawing::TABLET,
+    IconDrawing::TABLET_SMARTPHONE,
+    IconDrawing::TABLETS,
+    IconDrawing::TAG,
+    IconDrawing::TAG_PLUS,
+    IconDrawing::TAG_X,
+    IconDrawing::TAGS,
+    IconDrawing::TALLY_1,
+    IconDrawing::TALLY_2,
+    IconDrawing::TALLY_3,
+    IconDrawing::TALLY_4,
+    IconDrawing::TALLY_5,
+    IconDrawing::TANGENT,
+    IconDrawing::TARGET,
+    IconDrawing::TELESCOPE,
+    IconDrawing::TENT,
+    IconDrawing::TENT_TREE,
+    IconDrawing::TERMINAL,
+    IconDrawing::TEST_TUBE,
+    IconDrawing::TEST_TUBE_DIAGONAL,
+    IconDrawing::TEST_TUBES,
+    IconDrawing::TEXT_ALIGN_CENTER,
+    IconDrawing::TEXT_ALIGN_END,
+    IconDrawing::TEXT_ALIGN_JUSTIFY,
+    IconDrawing::TEXT_ALIGN_START,
+    IconDrawing::TEXT_CURSOR,
+    IconDrawing::TEXT_CURSOR_INPUT,
+    IconDrawing::TEXT_INITIAL,
+    IconDrawing::TEXT_QUOTE,
+    IconDrawing::TEXT_SEARCH,
+    IconDrawing::TEXT_WRAP,
+    IconDrawing::THEATER,
+    IconDrawing::THERMOMETER,
+    IconDrawing::THERMOMETER_SNOWFLAKE,
+    IconDrawing::THERMOMETER_SUN,
+    IconDrawing::THUMBS_DOWN,
+    IconDrawing::THUMBS_UP,
+    IconDrawing::TICKET,
+    IconDrawing::TICKET_CHECK,
+    IconDrawing::TICKET_MINUS,
+    IconDrawing::TICKET_PERCENT,
+    IconDrawing::TICKET_PLUS,
+    IconDrawing::TICKET_SLASH,
+    IconDrawing::TICKET_X,
+    IconDrawing::TICKETS,
+    IconDrawing::TICKETS_PLANE,
+    IconDrawing::TIMELINE,
+    IconDrawing::TIMER,
+    IconDrawing::TIMER_OFF,
+    IconDrawing::TIMER_RESET,
+    IconDrawing::TOGGLE_LEFT,
+    IconDrawing::TOGGLE_RIGHT,
+    IconDrawing::TOILET,
+    IconDrawing::TOOL_CASE,
+    IconDrawing::TOOLBOX,
+    IconDrawing::TORNADO,
+    IconDrawing::TORUS,
+    IconDrawing::TOUCHPAD,
+    IconDrawing::TOUCHPAD_OFF,
+    IconDrawing::TOWEL_RACK,
+    IconDrawing::TOWER_CONTROL,
+    IconDrawing::TOY_BRICK,
+    IconDrawing::TRACTOR,
+    IconDrawing::TRAFFIC_CONE,
+    IconDrawing::TRAIN_FRONT,
+    IconDrawing::TRAIN_FRONT_TUNNEL,
+    IconDrawing::TRAIN_TRACK,
+    IconDrawing::TRAM_FRONT,
+    IconDrawing::TRANSGENDER,
+    IconDrawing::TRASH,
+    IconDrawing::TRASH_2,
+    IconDrawing::TREE_DECIDUOUS,
+    IconDrawing::TREE_PALM,
+    IconDrawing::TREE_PINE,
+    IconDrawing::TREES,
+    IconDrawing::TRENDING_DOWN,
+    IconDrawing::TRENDING_UP,
+    IconDrawing::TRENDING_UP_DOWN,
+    IconDrawing::TRIANGLE,
+    IconDrawing::TRIANGLE_DASHED,
+    IconDrawing::TRIANGLE_RIGHT,
+    IconDrawing::TROPHY,
+    IconDrawing::TRUCK,
+    IconDrawing::TRUCK_ELECTRIC,
+    IconDrawing::TURKISH_LIRA,
+    IconDrawing::TURNTABLE,
+    IconDrawing::TURTLE,
+    IconDrawing::TV,
+    IconDrawing::TV_MINIMAL,
+    IconDrawing::TV_MINIMAL_PLAY,
+    IconDrawing::TYPE,
+    IconDrawing::TYPE_OUTLINE,
+    IconDrawing::UMBRELLA,
+    IconDrawing::UMBRELLA_OFF,
+    IconDrawing::UNDERLINE,
+    IconDrawing::UNDO,
+    IconDrawing::UNDO_2,
+    IconDrawing::UNDO_DOT,
+    IconDrawing::UNFOLD_HORIZONTAL,
+    IconDrawing::UNFOLD_VERTICAL,
+    IconDrawing::UNGROUP,
+    IconDrawing::UNIVERSITY,
+    IconDrawing::UNLINK,
+    IconDrawing::UNLINK_2,
+    IconDrawing::UNPLUG,
+    IconDrawing::UPLOAD,
+    IconDrawing::USB,
+    IconDrawing::USB_C_PORT,
+    IconDrawing::USER,
+    IconDrawing::USER_CHECK,
+    IconDrawing::USER_COG,
+    IconDrawing::USER_KEY,
+    IconDrawing::USER_LOCK,
+    IconDrawing::USER_MINUS,
+    IconDrawing::USER_PEN,
+    IconDrawing::USER_PLUS,
+    IconDrawing::USER_ROUND,
+    IconDrawing::USER_ROUND_ARROW_LEFT,
+    IconDrawing::USER_ROUND_CHECK,
+    IconDrawing::USER_ROUND_COG,
+    IconDrawing::USER_ROUND_KEY,
+    IconDrawing::USER_ROUND_MINUS,
+    IconDrawing::USER_ROUND_PEN,
+    IconDrawing::USER_ROUND_PLUS,
+    IconDrawing::USER_ROUND_SEARCH,
+    IconDrawing::USER_ROUND_X,
+    IconDrawing::USER_SEARCH,
+    IconDrawing::USER_SHIELD,
+    IconDrawing::USER_STAR,
+    IconDrawing::USER_X,
+    IconDrawing::USERS,
+    IconDrawing::USERS_ROUND,
+    IconDrawing::UTENSILS,
+    IconDrawing::UTENSILS_CROSSED,
+    IconDrawing::UTILITY_POLE,
+    IconDrawing::VAN,
+    IconDrawing::VARIABLE,
+    IconDrawing::VAULT,
+    IconDrawing::VECTOR_SQUARE,
+    IconDrawing::VEGAN,
+    IconDrawing::VENETIAN_MASK,
+    IconDrawing::VENUS,
+    IconDrawing::VENUS_AND_MARS,
+    IconDrawing::VIBRATE,
+    IconDrawing::VIBRATE_OFF,
+    IconDrawing::VIDEO,
+    IconDrawing::VIDEO_OFF,
+    IconDrawing::VIDEOTAPE,
+    IconDrawing::VIEW,
+    IconDrawing::VOICEMAIL,
+    IconDrawing::VOLLEYBALL,
+    IconDrawing::VOLUME,
+    IconDrawing::VOLUME_1,
+    IconDrawing::VOLUME_2,
+    IconDrawing::VOLUME_OFF,
+    IconDrawing::VOLUME_X,
+    IconDrawing::VOTE,
+    IconDrawing::WALLET,
+    IconDrawing::WALLET_CARDS,
+    IconDrawing::WALLET_MINIMAL,
+    IconDrawing::WALLPAPER,
+    IconDrawing::WAND,
+    IconDrawing::WAND_SPARKLES,
+    IconDrawing::WAREHOUSE,
+    IconDrawing::WARNING,
+    IconDrawing::WASHING_MACHINE,
+    IconDrawing::WATCH,
+    IconDrawing::WAVES_ARROW_DOWN,
+    IconDrawing::WAVES_ARROW_UP,
+    IconDrawing::WAVES_HORIZONTAL,
+    IconDrawing::WAVES_LADDER,
+    IconDrawing::WAVES_VERTICAL,
+    IconDrawing::WAYPOINTS,
+    IconDrawing::WEBCAM,
+    IconDrawing::WEBCAM_OFF,
+    IconDrawing::WEBHOOK,
+    IconDrawing::WEBHOOK_OFF,
+    IconDrawing::WEIGHT,
+    IconDrawing::WEIGHT_TILDE,
+    IconDrawing::WHEAT,
+    IconDrawing::WHEAT_OFF,
+    IconDrawing::WHOLE_WORD,
+    IconDrawing::WIFI,
+    IconDrawing::WIFI_COG,
+    IconDrawing::WIFI_HIGH,
+    IconDrawing::WIFI_LOW,
+    IconDrawing::WIFI_OFF,
+    IconDrawing::WIFI_PEN,
+    IconDrawing::WIFI_SYNC,
+    IconDrawing::WIFI_ZERO,
+    IconDrawing::WIND,
+    IconDrawing::WIND_ARROW_DOWN,
+    IconDrawing::WINE,
+    IconDrawing::WINE_OFF,
+    IconDrawing::WORKFLOW,
+    IconDrawing::WORM,
+    IconDrawing::WRENCH,
+    IconDrawing::WRENCH_OFF,
+    IconDrawing::X_LINE_TOP,
+    IconDrawing::ZAP,
+    IconDrawing::ZAP_OFF,
+    IconDrawing::ZODIAC_AQUARIUS,
+    IconDrawing::ZODIAC_ARIES,
+    IconDrawing::ZODIAC_CANCER,
+    IconDrawing::ZODIAC_CAPRICORN,
+    IconDrawing::ZODIAC_GEMINI,
+    IconDrawing::ZODIAC_LEO,
+    IconDrawing::ZODIAC_LIBRA,
+    IconDrawing::ZODIAC_OPHIUCHUS,
+    IconDrawing::ZODIAC_PISCES,
+    IconDrawing::ZODIAC_SAGITTARIUS,
+    IconDrawing::ZODIAC_SCORPIO,
+    IconDrawing::ZODIAC_TAURUS,
+    IconDrawing::ZODIAC_VIRGO,
+    IconDrawing::ZOOM_IN,
+    IconDrawing::ZOOM_OUT,
+];
+
+#[cfg(feature = "catalogue")]
+impl IconDrawing {
     /// The icon of this name, for the documentation page and for tests.
     ///
     /// Deliberately fallible and deliberately not `FromStr`: nothing in an
-    /// interface should reach an icon by name.
+    /// interface should reach an icon by name. A name that is a string cannot
+    /// tell "this icon" from "no icon", which is the defect the constants
+    /// above exist to make impossible.
     #[must_use]
     pub fn parse(name: &str) -> Option<Self> {
         let mut index = 0;
-        while index < Self::ALL.len() {
-            let icon = Self::ALL[index];
-            if str_eq(icon.as_str(), name) {
+        while index < ALL.len() {
+            let icon = ALL[index];
+            if str_eq(icon.name, name) {
                 return Some(icon);
             }
             index += 1;
@@ -532,6 +17859,7 @@ impl IconName {
 }
 
 /// `str::eq` without the standard library.
+#[cfg(feature = "catalogue")]
 fn str_eq(a: &str, b: &str) -> bool {
     a.as_bytes() == b.as_bytes()
 }

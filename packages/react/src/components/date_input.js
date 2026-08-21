@@ -14,6 +14,7 @@ import { createElement as h } from "react";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { calendar } from "@noctua-world/design-tokens/icons/calendar.js";
 export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint, error, errorLabel, value, min, max, required, disabled, size, order, bday, pad, expand, calendar, suggestLabel, previousLabel, nextLabel, requiredLabel, missingLabel, numberLabel, yearDigitsLabel, invalidLabel, minLabel, maxLabel, glass, className, children, ...rest }) {
   const size_ = size ?? "medium";
   const order_ = order ?? "auto";
@@ -126,7 +127,7 @@ export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint,
       ? h(
           "template",
           { key: "t", "data-nd-date-input-glyph": "" },
-          h(Icon, { icon: "calendar", size: "small" }),
+          h(Icon, { icon: calendar, size: "small" }),
         )
       : null,
   ),

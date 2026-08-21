@@ -19,6 +19,11 @@ import { Segmented } from "./segmented.js";
 import { SegmentedItem } from "./segmented_item.js";
 
 import { Icon } from "./icon.js";
+import { check } from "@noctua-world/design-tokens/icons/check.js";
+import { close } from "@noctua-world/design-tokens/icons/close.js";
+import { copy } from "@noctua-world/design-tokens/icons/copy.js";
+import { pipette } from "@noctua-world/design-tokens/icons/pipette.js";
+import { plus } from "@noctua-world/design-tokens/icons/plus.js";
 export function ColorPicker({ name, label, value, hint, error, size, shape, triggerLabel, glass, multiple, max, maxLabel, addLabel, removeLabel, addedLabel, removedLabel, status, spectrumLabel, areaLabel, hueLabel, alpha, alphaLabel, palette, paletteLabel, entry, entryLabel, entryInvalidLabel, eyedropper, eyedropperLabel, recent, recentLabel, forgetLabel, codesLabel, formats, copyLabel, copiedLabel, closeLabel, disabled, required, className, ...rest }) {
   const size_ = size ?? "medium";
   const shape_ = shape ?? "rounded";
@@ -170,7 +175,7 @@ export function ColorPicker({ name, label, value, hint, error, size, shape, trig
         h(Button, {
           key: "c",
           label: closeLabel ?? "",
-          icon: "close",
+          icon: close,
           hideLabel: true,
           variant: "transparent",
           size: "small",
@@ -275,7 +280,7 @@ export function ColorPicker({ name, label, value, hint, error, size, shape, trig
               ? h(Button, {
                   key: "d",
                   label: eyedropperLabel ?? "",
-                  icon: "pipette",
+                  icon: pipette,
                   hideLabel: true,
                   variant: "outline",
                   size: "small",
@@ -335,7 +340,7 @@ export function ColorPicker({ name, label, value, hint, error, size, shape, trig
             h(Button, {
               key: "a",
               label: addLabel ?? "",
-              icon: "plus",
+              icon: plus,
               variant: "outline",
               size: "small",
               action: "color-picker-add",
@@ -382,7 +387,7 @@ export function ColorPicker({ name, label, value, hint, error, size, shape, trig
         h(Button, {
           key: "r",
           label: "",
-          icon: "close",
+          icon: close,
           hideLabel: true,
           variant: "transparent",
           size: "small",
@@ -401,8 +406,8 @@ export function ColorPicker({ name, label, value, hint, error, size, shape, trig
         h(
           "button",
           { key: "c", className: "nd-color-picker-copy", type: "button", "data-nd-color-copy": "" },
-          h(Icon, { key: "i", icon: "copy", size: "small" }),
-          h(Icon, { key: "k", icon: "check", size: "small" }),
+          h(Icon, { key: "i", icon: copy, size: "small" }),
+          h(Icon, { key: "k", icon: check, size: "small" }),
         ),
       ),
     ),

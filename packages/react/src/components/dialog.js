@@ -12,6 +12,7 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { close } from "@noctua-world/design-tokens/icons/close.js";
 export function Dialog({ name, triggerLabel, heading, label, description, modal, size, dismissible, closeLabel, className, children, ...rest }) {
   const modal_ = modal ?? true;
   const size_ = size ?? "medium";
@@ -71,7 +72,7 @@ export function Dialog({ name, triggerLabel, heading, label, description, modal,
                     "aria-label": closeLabel,
                     "data-nd-dialog-close": "",
                   },
-                  h(Icon, { icon: "close", size: "small" }),
+                  h(Icon, { icon: close, size: "small" }),
                 )
               : null,
           )

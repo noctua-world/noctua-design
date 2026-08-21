@@ -15,6 +15,7 @@ import { Field } from "./field.js";
 import { Tag } from "./tag.js";
 
 import { Icon } from "./icon.js";
+import { close } from "@noctua-world/design-tokens/icons/close.js";
 export function TagPicker({ name, label, hint, error, placeholder, size, creatable, createLabel, separators, paste, duplicates, max, maxLabel, pattern, invalidLabel, clearable, clearLabel, removeLabel, addedLabel, removedLabel, status, emptyLabel, loading, loadingLabel, disabled, required, glass, className, children, ...rest }) {
   const size_ = size ?? "medium";
   const separators_ = separators ?? ",";
@@ -122,7 +123,7 @@ export function TagPicker({ name, label, hint, error, placeholder, size, creatab
               "data-nd-tag-picker-clear": "",
               hidden: true,
             },
-            h(Icon, { icon: "close", size: "small" }),
+            h(Icon, { icon: close, size: "small" }),
           )
         : null,
     ),

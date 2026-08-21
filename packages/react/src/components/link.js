@@ -12,6 +12,7 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { externalLink } from "@noctua-world/design-tokens/icons/external-link.js";
 export function Link({ href, external, rel, tone, className, children, ...rest }) {
   const tone_ = tone ?? "accent";
   const root = ["nd-a", className].filter(Boolean).join(" ");
@@ -26,6 +27,6 @@ export function Link({ href, external, rel, tone, className, children, ...rest }
       ...rest,
     },
     children,
-    external ? h(Icon, { icon: "external-link", size: "small" }) : null,
+    external ? h(Icon, { icon: externalLink, size: "small" }) : null,
   );
 }

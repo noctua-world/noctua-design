@@ -12,6 +12,7 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { close } from "@noctua-world/design-tokens/icons/close.js";
 export function Popover({ name, triggerLabel, heading, label, placement, dismissible, closeLabel, className, children, ...rest }) {
   const placement_ = placement ?? "auto";
   const dismissible_ = dismissible ?? true;
@@ -71,7 +72,7 @@ export function Popover({ name, triggerLabel, heading, label, placement, dismiss
                     "aria-label": closeLabel,
                     "data-nd-popover-close": "",
                   },
-                  h(Icon, { icon: "close", size: "small" }),
+                  h(Icon, { icon: close, size: "small" }),
                 )
               : null,
           )

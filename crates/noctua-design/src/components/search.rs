@@ -7,7 +7,7 @@
 //! Let users find one thing among many, with the results under the box or in a panel.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::Icon;
 
@@ -150,7 +150,7 @@ pub fn Search(
 
     let row = rsx! {
         span { class: "nd-search-glyph", "aria-hidden": "true",
-            Icon { icon: IconName::Search, size: crate::components::IconSize::Small }
+            Icon { icon: IconDrawing::SEARCH, size: crate::components::IconSize::Small }
         }
         label { class: "nd-visually-hidden", id: "{id}-label", r#for: "{id}", "{label}" }
         input {
@@ -189,7 +189,7 @@ pub fn Search(
                 "aria-label": "{clear}",
                 title: "{clear}",
                 "data-nd-search-clear": "",
-                Icon { icon: IconName::Close, size: crate::components::IconSize::Small }
+                Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
             }
         }
     };
@@ -284,7 +284,7 @@ pub fn Search(
                     "data-nd-search-open": "",
                     hidden: true,
                     span { class: "nd-search-glyph", "aria-hidden": "true",
-                        Icon { icon: IconName::Search, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::SEARCH, size: crate::components::IconSize::Small }
                     }
                     span { class: "nd-search-open-text", "{label}" }
                     if hotkey {
@@ -317,7 +317,7 @@ pub fn Search(
                                 "aria-label": "{close}",
                                 title: "{close}",
                                 "data-nd-search-close": "",
-                                Icon { icon: IconName::Close, size: crate::components::IconSize::Small }
+                                Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
                             }
                         }
                     }

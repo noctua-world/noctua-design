@@ -7,7 +7,7 @@
 //! Explain a word with one sentence, opened by a small `i` beside it.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Icon, IconSize};
 
@@ -85,7 +85,7 @@ pub fn Info(
                 // RENDERED HIDDEN. Revealed by the script, because a marker
                 // that opens nothing is worse than no marker.
                 hidden: true,
-                Icon { icon: IconName::Info, size: IconSize::Small }
+                Icon { icon: IconDrawing::INFO, size: IconSize::Small }
             }
             span {
                 class: "nd-info-note",

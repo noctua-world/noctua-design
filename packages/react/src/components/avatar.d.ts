@@ -5,7 +5,7 @@
 // Edits to this file will be overwritten. Change the spec instead.
 
 import type { ReactNode } from "react";
-import type { IconName } from "@noctua-world/design-tokens/icons.js";
+import type { IconDrawing } from "@noctua-world/design-tokens/icons.js";
 
 export type AvatarSize = "small" | "medium" | "large";
 export type AvatarShape = "circle" | "rounded" | "square";
@@ -19,7 +19,7 @@ export interface AvatarProps {
   /** The picture. It is laid **over** the initials rather than instead of them, so a URL that never answers shows the letters, with no script. Its box is the size below rather than the image's, so nothing moves when it arrives. */
   src?: string;
   /** The drawing behind everything else, for a person with neither a picture nor initials, such as a pending invitation. Absent draws `user`. */
-  icon?: IconName;
+  icon?: IconDrawing;
   /** Where this person leads, such as their profile page. Its presence makes the avatar a real `<a>`, so the middle mouse button, the context menu and a screen reader's list of links all work. */
   href?: string;
   /** The box size: `small`, `medium` or `large`. It matches `Button` step for step, so an avatar beside a control lines up. Inside an `AvatarGroup` the group's size wins. */

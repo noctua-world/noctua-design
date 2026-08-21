@@ -5,7 +5,7 @@
 // Edits to this file will be overwritten. Change the spec instead.
 
 import type { ReactNode } from "react";
-import type { IconName } from "@noctua-world/design-tokens/icons.js";
+import type { IconDrawing } from "@noctua-world/design-tokens/icons.js";
 
 export type InputKind = "text" | "email" | "tel" | "url" | "password";
 export type InputSize = "small" | "medium" | "large";
@@ -36,7 +36,7 @@ export interface InputProps {
   /** The box size: `small`, `medium` or `large`. Defaults to `medium`, and matches `Button` step for step, so a field and the control beside it sit on one line. The type inside never goes below the body size, so a phone does not zoom on focus. */
   size?: InputSize;
   /** An icon inside the box, before the text. It says what kind of answer this is at a glance, and it is `aria-hidden`, because the question above it is the name. */
-  icon?: IconName;
+  icon?: IconDrawing;
   /** A fixed word or symbol before the value, inside the box, such as `https://`, `R$` or `+55`. It is **not** part of the submitted value, and it is `aria-hidden`. */
   prefix?: string;
   /** A fixed word or symbol after the value, such as `.com`, `kg` or `%`. Same rule: drawn, never submitted. */

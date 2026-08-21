@@ -33,6 +33,7 @@ pub mod icons;
 pub mod lineage;
 pub mod model;
 pub mod prose;
+pub mod sha256;
 pub mod syntax;
 pub mod theme;
 mod validate;

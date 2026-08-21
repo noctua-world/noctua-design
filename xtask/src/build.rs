@@ -1,5 +1,6 @@
 //! `cargo xtask build` — compile `spec/` into every target.
 
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
 use noctua_design_emit::EmittedFile;
@@ -390,11 +391,42 @@ pub(crate) fn run(root: &Path, spec_path: &Path) -> Result<Spec, String> {
         "{} generated file(s), {written} rewritten",
         files.len()
     ));
-    for file in &files {
-        ui::detail(&file.path);
+    for line in listing(&files) {
+        ui::detail(&line);
     }
 
     Ok(spec)
+}
+
+/// How many files one directory may contribute before it is summarised.
+///
+/// The icon layer emits two modules per icon, which is three and a half
+/// thousand paths — a build log nobody reads is a build log that hides the one
+/// line that mattered. A directory over this many becomes one line with a
+/// count; everything else is still named.
+const LISTED: usize = 8;
+
+/// The emitted paths, with crowded directories collapsed to a count.
+fn listing(files: &[EmittedFile]) -> Vec<String> {
+    let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
+    for file in files {
+        *counts
+            .entry(file.path.rsplit_once('/').map_or("", |(head, _)| head))
+            .or_default() += 1;
+    }
+
+    let mut lines = Vec::new();
+    let mut summarised: BTreeSet<&str> = BTreeSet::new();
+    for file in files {
+        let directory = file.path.rsplit_once('/').map_or("", |(head, _)| head);
+        let count = counts.get(directory).copied().unwrap_or_default();
+        if count <= LISTED {
+            lines.push(file.path.clone());
+        } else if summarised.insert(directory) {
+            lines.push(format!("{directory}/ — {count} file(s)"));
+        }
+    }
+    lines
 }
 
 /// The spec path as written in generated headers.

@@ -29,7 +29,7 @@
 //! and that is the whole of it. A richer IR would be a language nothing writes.
 
 use dioxus::prelude::*;
-use noctua_design::IconName;
+use noctua_design::IconDrawing;
 use noctua_design::ThemeScope;
 use noctua_design_grammars::Language;
 use noctua_design_i18n::Key;
@@ -273,7 +273,7 @@ impl Scope {
     //
     // The whole surface, and it really is only four: the spec's `type` is
     // `text`, `bool`, `enum` or `children`, and the only Rust type outside that
-    // is `IconName`, which eleven components take where the spec says `text`.
+    // is `IconDrawing`, which eleven components take where the spec says `text`.
     // The generated interpreter calls these and nothing else.
 
     /// What a prop is set to, or nothing if the call left it out.
@@ -309,8 +309,8 @@ impl Scope {
     /// gate refuses it at build time instead — the same division the React half
     /// makes, where TypeScript refuses it and the runtime throws.
     #[must_use]
-    pub(crate) fn icon(self, props: &[(&'static str, Value)], name: &str) -> Option<IconName> {
-        IconName::parse(&self.find(props, name)?)
+    pub(crate) fn icon(self, props: &[(&'static str, Value)], name: &str) -> Option<IconDrawing> {
+        noctua_design_icons::IconDrawing::parse(&self.find(props, name)?)
     }
 
     /// The enum value a prop names, or nothing if the call left it out.

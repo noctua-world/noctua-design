@@ -127,7 +127,241 @@ pub(crate) fn run(root: &Path, spec_path: &Path, spec_only: bool) -> Result<(), 
         }
     }
 
+    payload(root, &mut failures);
+
     finish(&failures)
+}
+
+/// The promise the icon set is arranged around, measured rather than argued.
+///
+/// `spec/icons.toml` ships every Lucide drawing, and what makes that acceptable
+/// is that an application drawing one of them pays for one of them. That is a
+/// claim about a linked binary and about a bundler's output; the bundler half
+/// needs Node and lives in `tests/browser/bundle.spec.js`, and this is the half
+/// the Rust build can make on its own. `NOCTUA.md §9.5`.
+fn payload(root: &Path, failures: &mut Vec<String>) {
+    ui::gap();
+    ui::heading("payload");
+
+    // THE NEEDLES AND THE EXPECTED MODULES COME OUT OF THE SPEC. Written into
+    // these gates they would be copies of upstream geometry and of a file
+    // listing, and the day a tag bump changed either the gate would stop
+    // finding anything and go on reporting success. Upstream redrew `menu` from
+    // three `<line>`s to three `<path>`s between the two tags this repository
+    // has vendored, which is exactly that day.
+    let drawings = match noctua_design_spec::icons::load(
+        root.join("spec/icons.toml"),
+        root.join("assets/icons"),
+    ) {
+        Ok((_, drawings)) => drawings,
+        Err(error) => {
+            ui::failure(&format!("{error:?}"));
+            failures.push("the icon set does not load".to_owned());
+            return;
+        }
+    };
+
+    for (label, outcome) in [
+        (
+            "no aggregate of drawings is importable",
+            no_icon_aggregate(root, &drawings),
+        ),
+        (
+            "one icon in a release binary is one icon",
+            one_icon_is_one_icon(root, &drawings),
+        ),
+    ] {
+        match outcome {
+            Ok(detail) => {
+                ui::ok(label);
+                ui::detail(&detail);
+            }
+            Err(problem) => {
+                ui::failure(&problem);
+                failures.push(label.to_owned());
+            }
+        }
+    }
+}
+
+/// The icon a binary names is in it, and the ones it does not name are not.
+///
+/// # Why a binary and not a unit test
+///
+/// A unit test proves what a `const` evaluates to. It cannot prove what reaches
+/// the linker, and that is the entire question: the previous shape put every
+/// drawing in one `match` inside one reachable function, which no test would
+/// have noticed and every consumer would have paid for.
+///
+/// So this builds the smallest real thing — an example that draws exactly one
+/// icon — in release, and reads the bytes. The positive half matters as much as
+/// the negative one: a needle nobody can find in a binary that genuinely
+/// contains it means the search is broken, not that the payload is small.
+fn one_icon_is_one_icon(
+    root: &Path,
+    drawings: &[noctua_design_spec::Icon],
+) -> Result<String, String> {
+    /// The icon `examples/one_icon.rs` draws. Change one, change the other.
+    const DRAWN: &str = "menu";
+    /// Three it does not, from three corners of the set.
+    const ABSENT: [&str; 3] = ["dna", "vault", "flask-conical"];
+
+    let body = |name: &str| {
+        drawings
+            .iter()
+            .find(|icon| icon.name == name)
+            .map(|icon| icon.body.clone())
+            .ok_or_else(|| format!("this gate names `{name}`, which is not an icon"))
+    };
+    let drawn = body(DRAWN)?;
+
+    cargo(
+        root,
+        &[
+            "build",
+            "--release",
+            "--quiet",
+            "-p",
+            "noctua-design-icons",
+            "--example",
+            "one_icon",
+        ],
+    )?;
+
+    let binary = root.join("target/release/examples/one_icon");
+    let bytes = std::fs::read(&binary)
+        .map_err(|error| format!("could not read {}: {error}", binary.display()))?;
+    let holds = |needle: &str| {
+        bytes
+            .windows(needle.len())
+            .any(|window| window == needle.as_bytes())
+    };
+
+    if !holds(&drawn) {
+        return Err(format!(
+            "{} does not contain `{DRAWN}`, which is the icon it draws. The search \
+             is wrong, so the absences prove nothing",
+            binary.display()
+        ));
+    }
+    for name in ABSENT {
+        if holds(&body(name)?) {
+            return Err(format!(
+                "{} draws one icon and contains `{name}` as well. Something reached \
+                 the whole set — `ALL`, `parse`, or a table that came back",
+                binary.display()
+            ));
+        }
+    }
+    Ok(format!(
+        "{} KB of binary for {} icon(s) in the system: `{DRAWN}` present, {} absent",
+        bytes.len() / 1024,
+        drawings.len(),
+        ABSENT.join(", ")
+    ))
+}
+
+/// Nothing a consumer can import names more than one drawing.
+///
+/// The measurement above is the proof; this is what keeps the shape that makes
+/// it true. A single module re-exporting every icon would pass every other gate
+/// in this file and quietly undo the whole arrangement the first time somebody
+/// imported it for convenience.
+fn no_icon_aggregate(root: &Path, drawings: &[noctua_design_spec::Icon]) -> Result<String, String> {
+    let shared = root.join("packages/tokens/icons.js");
+    let text = std::fs::read_to_string(&shared)
+        .map_err(|error| format!("could not read {}: {error}", shared.display()))?;
+    // WHAT IT EXPORTS, not what it mentions: the file explains at length why
+    // the `ICONS` table is gone, and a gate that read the explanation as the
+    // offence would be a gate nobody could satisfy without deleting the reason.
+    let exported: Vec<&str> = text
+        .lines()
+        .map(str::trim)
+        .filter(|line| line.starts_with("export "))
+        .collect();
+    let only_the_weight = exported.len() == 1
+        && exported[0].starts_with("export const ICON_STROKE_WIDTH = \"")
+        && exported[0].ends_with("\";");
+    if !only_the_weight {
+        return Err(format!(
+            "{} exports {exported:?}. It holds the stroke weight and nothing else; \
+             a table here is a table every consumer of one icon imports",
+            shared.display()
+        ));
+    }
+
+    let directory = root.join("packages/tokens/icons");
+    let entries = std::fs::read_dir(&directory)
+        .map_err(|error| format!("could not read {}: {error}", directory.display()))?;
+    let declared: std::collections::BTreeSet<&str> =
+        drawings.iter().map(|icon| icon.name.as_str()).collect();
+    let mut found: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.extension().is_none_or(|kind| kind != "js") {
+            continue;
+        }
+        let Some(name) = path
+            .file_stem()
+            .map(|stem| stem.to_string_lossy().into_owned())
+        else {
+            continue;
+        };
+        found.insert(name);
+        let text = std::fs::read_to_string(&path)
+            .map_err(|error| format!("could not read {}: {error}", path.display()))?;
+        if text.contains("icons/") {
+            return Err(format!(
+                "{} imports another icon. One module, one drawing: a module that \
+                 reaches a second one is a bundle that carries a second one",
+                path.display()
+            ));
+        }
+        if text.matches("export const").count() != 1 {
+            return Err(format!(
+                "{} does not export exactly one drawing",
+                path.display()
+            ));
+        }
+    }
+
+    // AND NOTHING STALE. `cargo xtask build` writes changed files and never
+    // removes one nothing produces any more, so an icon deleted from the set
+    // leaves its module behind — importable, unmentioned by the drift check,
+    // and drawing something this system no longer has. The same hazard
+    // `AGENTS.md` records for a deleted component, in a directory with 1,777
+    // files where nobody would notice one.
+    let stale: Vec<&String> = found
+        .iter()
+        .filter(|name| !declared.contains(name.as_str()))
+        .collect();
+    if !stale.is_empty() {
+        return Err(format!(
+            "{} holds {} module(s) no icon declares — {stale:?}. `build` never \
+             removes a file, so these have to go by hand",
+            directory.display(),
+            stale.len()
+        ));
+    }
+    if found.len() != declared.len() {
+        return Err(format!(
+            "{} holds {} module(s) for {} icon(s)",
+            directory.display(),
+            found.len(),
+            declared.len()
+        ));
+    }
+    if found.is_empty() {
+        return Err(format!(
+            "{} holds no modules, so this gate covered nothing",
+            directory.display()
+        ));
+    }
+    Ok(format!(
+        "{} module(s), one drawing each, and none the spec does not declare",
+        found.len()
+    ))
 }
 
 fn finish(failures: &[String]) -> Result<(), String> {

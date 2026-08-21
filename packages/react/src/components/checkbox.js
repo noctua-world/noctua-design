@@ -13,6 +13,7 @@ import { createElement as h } from "react";
 
 import { Fragment } from "react";
 import { Icon } from "./icon.js";
+import { check } from "@noctua-world/design-tokens/icons/check.js";
 export function Checkbox({ name, value, label, hint, checked, disabled, invalid, size, hideLabel, divider, exclusive, reveal, className, children, ...rest }) {
   const size_ = size ?? "large";
   const root = ["nd-choice nd-checkbox", className].filter(Boolean).join(" ");
@@ -52,7 +53,7 @@ export function Checkbox({ name, value, label, hint, checked, disabled, invalid,
         ...rest,
       }),
       // Decoration. The state a reader hears is the input's.
-      h("span", { key: "b", className: "nd-choice-box", "aria-hidden": "true" }, h(Icon, { key: "m", icon: "check" })),
+      h("span", { key: "b", className: "nd-choice-box", "aria-hidden": "true" }, h(Icon, { key: "m", icon: check })),
       // Hidden, not absent: the recipe clips the words and leaves them as the
       // control's accessible name.
       h(

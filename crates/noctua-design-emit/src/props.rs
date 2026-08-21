@@ -17,13 +17,14 @@
 use std::fmt::Write as _;
 
 use noctua_design_spec::component::{Component, Kind, Prop};
+use noctua_design_spec::icons::Resolved as Icon;
 
 use crate::controls;
 use crate::{COMPONENT_SPEC, CommentStyle, EmittedFile, camel, header_from, identifier};
 
 /// Emits every component in both languages, plus each package's module index.
 #[must_use]
-pub fn emit(components: &[Component]) -> Vec<EmittedFile> {
+pub fn emit(components: &[Component], drawings: &[Icon]) -> Vec<EmittedFile> {
     let mut files = Vec::new();
     for component in components {
         let file = file_stem(&component.meta.name);
@@ -33,7 +34,7 @@ pub fn emit(components: &[Component]) -> Vec<EmittedFile> {
         ));
         files.push(EmittedFile::new(
             format!("packages/react/src/components/{file}.js"),
-            react(component),
+            react(component, drawings),
         ));
         files.push(EmittedFile::new(
             format!("packages/react/src/components/{file}.d.ts"),
@@ -472,7 +473,7 @@ fn react_element(out: &mut String, component: &Component) -> String {
     "element".to_owned()
 }
 
-fn react(component: &Component) -> String {
+fn react(component: &Component, drawings: &[Icon]) -> String {
     let mut out = header_from(CommentStyle::Line("//"), COMPONENT_SPEC);
     let name = &component.meta.name;
     writeln!(
@@ -493,6 +494,8 @@ fn react(component: &Component) -> String {
     // it reads its grammar tables at render time, so an absent import is not a
     // wrong icon, it is a `ReferenceError` on every block.
     out.push_str(&controls::react_imports(component));
+    // And the drawings the body reaches for, read out of the body itself.
+    out.push_str(&controls::react_icon_imports(component, drawings));
 
     // NO `const defaults = {…}` OBJECT.
     //
@@ -772,9 +775,14 @@ mod tests {
         let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
         let components = noctua_design_spec::component::load_all(root.join("spec/components"))
             .expect("the shipped components");
+        let (_, drawings) = noctua_design_spec::icons::load(
+            root.join("spec/icons.toml"),
+            root.join("assets/icons"),
+        )
+        .expect("the shipped icon set");
 
         for component in &components {
-            let source = react(component);
+            let source = react(component, &drawings);
             let head = source
                 .split("export function")
                 .next()
@@ -794,6 +802,30 @@ mod tests {
                     component.meta.name
                 );
             }
+
+            // AND EVERY DRAWING IT DRAWS. Each icon is its own module, so a
+            // body that renders one names an identifier that only an import can
+            // supply. The imports are derived from the body — this is what
+            // checks the derivation actually ran.
+            let body = &source[head.len()..];
+            for at in body
+                .match_indices("icon: ")
+                .map(|(at, _)| at + "icon: ".len())
+            {
+                let identifier: String = body[at..]
+                    .chars()
+                    .take_while(char::is_ascii_alphanumeric)
+                    .collect();
+                let Some(icon) = drawings.iter().find(|icon| icon.export == identifier) else {
+                    continue;
+                };
+                assert!(
+                    head.contains(&format!("icons/{}.js", icon.name)),
+                    "{}'s React body draws `{}` and does not import it",
+                    component.meta.name,
+                    icon.name
+                );
+            }
         }
     }
 
@@ -808,7 +840,7 @@ mod tests {
     #[test]
     fn both_languages_declare_the_same_props() {
         for component in shipped() {
-            let files = emit(std::slice::from_ref(&component));
+            let files = emit(std::slice::from_ref(&component), &[]);
             let stem = file_stem(&component.meta.name);
             let rust = &files
                 .iter()
@@ -846,7 +878,7 @@ mod tests {
     fn a_bool_default_reaches_both_languages() {
         let mut checked = 0usize;
         for component in shipped() {
-            let files = emit(std::slice::from_ref(&component));
+            let files = emit(std::slice::from_ref(&component), &[]);
             let stem = file_stem(&component.meta.name);
             let rust = &files
                 .iter()
@@ -911,7 +943,7 @@ mod tests {
     fn every_declared_default_reaches_the_generated_react() {
         let mut checked = 0usize;
         for component in shipped() {
-            let source = react(&component);
+            let source = react(&component, &[]);
             for (prop_name, prop) in component.attributes() {
                 let Some(default) = prop.default.as_deref() else {
                     continue;
@@ -956,8 +988,19 @@ mod tests {
     /// fail in.
     #[test]
     fn no_react_body_names_something_it_does_not_have() {
+        // WITH THE REAL DRAWINGS. Each icon is its own module, so a body that
+        // renders one reads an identifier only its import can supply — and
+        // `react_icon_imports` derives those imports from the body. Passing an
+        // empty set here would make this test pass by asking a body that draws
+        // nothing whether it declares what it reads.
+        let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+        let (_, drawings) = noctua_design_spec::icons::load(
+            root.join("spec/icons.toml"),
+            root.join("assets/icons"),
+        )
+        .expect("the shipped icon set");
         for component in shipped() {
-            let source = react(&component);
+            let source = react(&component, &drawings);
             let missing = crate::javascript::undeclared(&source).unwrap_or_else(|problem| {
                 panic!("{} does not lex — {problem}", component.meta.name)
             });
@@ -972,7 +1015,7 @@ mod tests {
     #[test]
     fn every_component_reaches_both_indexes() {
         let components = shipped();
-        let files = emit(&components);
+        let files = emit(&components, &[]);
         let rust = &files
             .iter()
             .find(|f| f.path.ends_with("components/mod.rs"))
@@ -1057,7 +1100,7 @@ mod tests {
         let mut missing = Vec::new();
         for component in shipped() {
             let rust = dioxus(&component);
-            let js = react(&component);
+            let js = react(&component, &[]);
             for (name, prop) in component.attributes() {
                 let Some(attribute) = prop.attribute.as_deref() else {
                     continue;

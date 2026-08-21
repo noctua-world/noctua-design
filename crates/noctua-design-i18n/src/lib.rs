@@ -516,6 +516,12 @@ pub enum Key {
     IconsBody,
     /// `icons.count`
     IconsCount,
+    /// `icons.filter.label`
+    IconsFilterLabel,
+    /// `icons.filter.clear`
+    IconsFilterClear,
+    /// `icons.filter.empty`
+    IconsFilterEmpty,
     /// `scope.reset`
     ScopeReset,
     /// `component.abbr.summary`
@@ -5706,7 +5712,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2791] = [
+    pub const ALL: [Self; 2794] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -5905,6 +5911,9 @@ impl Key {
         Self::TypeSpecimenLine,
         Self::IconsBody,
         Self::IconsCount,
+        Self::IconsFilterLabel,
+        Self::IconsFilterClear,
+        Self::IconsFilterEmpty,
         Self::ScopeReset,
         Self::ComponentAbbrSummary,
         Self::ComponentThemeScopeSummary,
@@ -8702,6 +8711,9 @@ impl Key {
             Self::TypeSpecimenLine => "type.specimen.line",
             Self::IconsBody => "icons.body",
             Self::IconsCount => "icons.count",
+            Self::IconsFilterLabel => "icons.filter.label",
+            Self::IconsFilterClear => "icons.filter.clear",
+            Self::IconsFilterEmpty => "icons.filter.empty",
             Self::ScopeReset => "scope.reset",
             Self::ComponentAbbrSummary => "component.abbr.summary",
             Self::ComponentThemeScopeSummary => "component.theme-scope.summary",
@@ -12042,9 +12054,12 @@ impl Locale {
                 }
                 Key::TypeSpecimenLine => "Sphinx of black quartz, judge my vow",
                 Key::IconsBody => {
-                    "The set is declared once, and the enum, both implementations, the manifest and this page follow from it. Adding an icon is one row in the specification and the drawing beside it."
+                    "The set is declared once, and one constant per icon, both implementations, the manifest and this page follow from it. An icon that is never drawn adds nothing to an application, so the whole set ships."
                 }
                 Key::IconsCount => "{count} icons",
+                Key::IconsFilterLabel => "Filter by name",
+                Key::IconsFilterClear => "Clear the filter",
+                Key::IconsFilterEmpty => "No icon has that name.",
                 Key::ScopeReset => "Reset both",
                 Key::ComponentAbbrSummary => {
                     "Show an abbreviation together with the words it stands for."
@@ -15401,7 +15416,7 @@ impl Locale {
                     "An unlabelled icon is `aria-hidden` and `focusable=\"false\"`, so it reaches no screen reader and no tab order. A `label` makes it a `role=\"img\"` carrying that name instead, and the two states are exclusive."
                 }
                 Key::ComponentIconPropIconDoc => {
-                    "Which drawing, by the name `spec/icons.toml` gives it. **Required**, and a real type in both languages rather than a string. A name that is not an icon is then a compile error instead of an empty box on a page."
+                    "The drawing itself, not its name. **Required**, and a real type in both languages rather than a string. Rust takes `IconDrawing::CHEVRON_DOWN`. JavaScript imports one module per icon. A value that names no icon fails to build."
                 }
                 Key::ComponentIconPropLabelDoc => {
                     "Its accessible name. Absent is the common case and makes the icon `aria-hidden`, which is right beside a word that already says it. Give one only where the drawing carries the whole message."
@@ -18327,9 +18342,12 @@ impl Locale {
                 }
                 Key::TypeSpecimenLine => "Um pequeno jabuti xereta viu dez cegonhas felizes",
                 Key::IconsBody => {
-                    "O conjunto é declarado uma vez, e o enum, as duas implementações, o manifesto e esta página decorrem dele. Acrescentar um ícone é uma linha na especificação e o desenho ao lado."
+                    "O conjunto é declarado uma vez, e uma constante por ícone, as duas implementações, o manifesto e esta página decorrem dele. Um ícone que não é desenhado não acrescenta nada a uma aplicação, então o conjunto inteiro é publicado."
                 }
                 Key::IconsCount => "{count} ícones",
+                Key::IconsFilterLabel => "Filtrar por nome",
+                Key::IconsFilterClear => "Limpar o filtro",
+                Key::IconsFilterEmpty => "Nenhum ícone tem esse nome.",
                 Key::ScopeReset => "Restaurar os dois",
                 Key::ComponentAbbrSummary => {
                     "Mostre uma abreviatura junto com as palavras que ela representa."
@@ -21714,7 +21732,7 @@ impl Locale {
                     "Um ícone sem rótulo é `aria-hidden` e `focusable=\"false\"`, então não chega a leitor de tela nenhum nem à ordem de tabulação. Um `label` o torna um `role=\"img\"` com esse nome, e os dois estados se excluem."
                 }
                 Key::ComponentIconPropIconDoc => {
-                    "Qual desenho, pelo nome que o `spec/icons.toml` dá a ele. **Obrigatório**, e um tipo de verdade nas duas linguagens em vez de uma string. Um nome que não é um ícone vira então erro de compilação e não uma caixa vazia na página."
+                    "O próprio desenho, não o nome dele. **Obrigatório**, e um tipo de verdade nas duas linguagens em vez de uma string. Rust recebe `IconDrawing::CHEVRON_DOWN`. JavaScript importa um módulo por ícone. Um valor sem ícone falha na compilação."
                 }
                 Key::ComponentIconPropLabelDoc => {
                     "O nome acessível dele. Ausente é o caso comum e deixa o ícone `aria-hidden`, o que está certo ao lado de uma palavra que já diz aquilo. Dê um só onde o desenho carrega a mensagem inteira."
@@ -24668,9 +24686,12 @@ impl Locale {
                 }
                 Key::TypeSpecimenLine => "⟦Sphiinx oof blaack quuaartz, juudgee my voow⟧",
                 Key::IconsBody => {
-                    "⟦Thee seet iis deeclaareed ooncee, aand thee eenuum, booth iimpleemeentaatiioons, thee maaniifeest aand thiis paagee foolloow froom iit. AAddiing aan iicoon iis oonee roow iin thee speeciifiicaatiioon aand thee draawiing beesiidee iit.⟧"
+                    "⟦Thee seet iis deeclaareed ooncee, aand oonee coonstaant peer iicoon, booth iimpleemeentaatiioons, thee maaniifeest aand thiis paagee foolloow froom iit. AAn iicoon thaat iis neeveer draawn aadds noothiing too aan aappliicaatiioon, soo thee whoolee seet shiips.⟧"
                 }
                 Key::IconsCount => "⟦{count} iicoons⟧",
+                Key::IconsFilterLabel => "⟦Fiilteer by naamee⟧",
+                Key::IconsFilterClear => "⟦Cleeaar thee fiilteer⟧",
+                Key::IconsFilterEmpty => "⟦Noo iicoon haas thaat naamee.⟧",
                 Key::ScopeReset => "⟦Reeseet booth⟧",
                 Key::ComponentAbbrSummary => {
                     "⟦Shoow aan aabbreeviiaatiioon toogeetheer wiith thee woords iit staands foor.⟧"
@@ -28167,7 +28188,7 @@ impl Locale {
                     "⟦AAn uunlaabeelleed iicoon iis `aariiaa-hiiddeen` aand `foocuusaablee=\"faalsee\"`, soo iit reeaachees noo screeeen reeaadeer aand noo taab oordeer. AA `laabeel` maakees iit aa `roolee=\"iimg\"` caarryiing thaat naamee iinsteeaad, aand thee twoo staatees aaree eexcluusiivee.⟧"
                 }
                 Key::ComponentIconPropIconDoc => {
-                    "⟦Whiich draawiing, by thee naamee `speec/iicoons.tooml` giivees iit. **Reequuiireed**, aand aa reeaal typee iin booth laanguuaagees raatheer thaan aa striing. AA naamee thaat iis noot aan iicoon iis theen aa coompiilee eerroor iinsteeaad oof aan eempty boox oon aa paagee.⟧"
+                    "⟦Thee draawiing iitseelf, noot iits naamee. **Reequuiireed**, aand aa reeaal typee iin booth laanguuaagees raatheer thaan aa striing. Ruust taakees `IIcoonDraawiing::CHEEVROON_DOOWN`. JaavaaScriipt iimpoorts oonee mooduulee peer iicoon. AA vaaluuee thaat naamees noo iicoon faaiils too buuiild.⟧"
                 }
                 Key::ComponentIconPropLabelDoc => {
                     "⟦IIts aacceessiiblee naamee. AAbseent iis thee coommoon caasee aand maakees thee iicoon `aariiaa-hiiddeen`, whiich iis riight beesiidee aa woord thaat aalreeaady saays iit. Giivee oonee oonly wheeree thee draawiing caarriiees thee whoolee meessaagee.⟧"

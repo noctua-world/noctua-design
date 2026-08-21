@@ -271,8 +271,11 @@ dir = "ltr"
 
 # --- Page content ---------------------------------------------------------
 
-"icons.body" = """The set is declared once, and the enum, both implementations, the manifest and this page follow from it. Adding an icon is one row in the specification and the drawing beside it."""
+"icons.body" = """The set is declared once, and one constant per icon, both implementations, the manifest and this page follow from it. An icon that is never drawn adds nothing to an application, so the whole set ships."""
 "icons.count" = "{count} icons"
+"icons.filter.label" = "Filter by name"
+"icons.filter.clear" = "Clear the filter"
+"icons.filter.empty" = "No icon has that name."
 "scope.reset" = "Reset both"
 
 # --- Components ------------------------------------------------------------

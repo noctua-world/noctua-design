@@ -15,6 +15,8 @@ import { Button } from "./button.js";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { close } from "@noctua-world/design-tokens/icons/close.js";
+import { upload } from "@noctua-world/design-tokens/icons/upload.js";
 export function FileInput({ name, label, browseLabel, drop, dropLabel, accept, acceptLabel, multiple, max, maxLabel, maxSize, maxSizeLabel, removeLabel, emptyLabel, status, addedLabel, removedLabel, hint, error, required, requiredLabel, disabled, size, glass, className, ...rest }) {
   const size_ = size ?? "medium";
   const id = `nd-file-input-${name}`;
@@ -61,7 +63,7 @@ export function FileInput({ name, label, browseLabel, drop, dropLabel, accept, a
       h(
         "label",
         { key: "a", className: "nd-file-input-area", htmlFor: id, "data-nd-file-input-area": "" },
-        h(Icon, { key: "i", icon: "upload" }),
+        h(Icon, { key: "i", icon: upload }),
         h("span", { key: "b", className: "nd-file-input-browse" }, browseLabel),
         dropLabel ? h("span", { key: "d", className: "nd-file-input-drop" }, dropLabel) : null,
       ),
@@ -111,7 +113,7 @@ export function FileInput({ name, label, browseLabel, drop, dropLabel, accept, a
         h(Button, {
           key: "x",
           label: "",
-          icon: "close",
+          icon: close,
           hideLabel: true,
           variant: "transparent",
           size: "small",

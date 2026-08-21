@@ -6,5 +6,17 @@ rust-version.workspace = true
 license.workspace = true
 publish = false
 
+[features]
+# `ALL` and `IconDrawing::parse`, the two things that name every icon.
+#
+# OFF, and that is the whole design. Every icon is an associated `const`, and a
+# `const` is materialised at its use sites and nowhere else — so an application
+# that draws one icon carries one drawing. An array of all of them is a use site
+# for all of them, which is exactly the payload this arrangement exists to
+# avoid, so reaching the catalogue is something a consumer has to ask for.
+#
+# The documentation site's gallery asks for it. Nothing else should.
+catalogue = []
+
 [lints]
 workspace = true

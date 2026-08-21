@@ -5,7 +5,7 @@
 // Edits to this file will be overwritten. Change the spec instead.
 
 import type { ReactNode } from "react";
-import type { IconName } from "@noctua-world/design-tokens/icons.js";
+import type { IconDrawing } from "@noctua-world/design-tokens/icons.js";
 
 
 export interface TabProps {
@@ -20,7 +20,7 @@ export interface TabProps {
   /** The words on the tab, in the reader's language. **Required**, because a tab is a name for a panel and a tab with no name names nothing. */
   label: string;
   /** A drawing before the words, named from `spec/icons.toml`. It carries `aria-hidden`, because the label beside it already says what the panel holds. */
-  icon?: IconName;
+  icon?: IconDrawing;
   /** A number after the words, such as how many rows the panel holds. It is part of the tab's accessible name, so a reader who cannot see it is still told. */
   count?: string;
   /**

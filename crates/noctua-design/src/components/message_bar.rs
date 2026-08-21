@@ -7,7 +7,7 @@
 //! Tell users what happened, in a bar that stays where the thing happened.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Icon, IconSize};
 
@@ -49,7 +49,7 @@ pub fn MessageBar(
     /// A short line above the message, such as *Payment refused*. Absent is the common case, because one sentence needs no heading. It is a `<strong>` rather than a heading, so it adds nothing to the outline.
     title: Option<String>,
     /// A drawing before the words, named from `spec/icons.toml`. It carries `aria-hidden`, because it says what the words say. Choose one that means what the tone means, so colour is never alone.
-    icon: Option<IconName>,
+    icon: Option<IconDrawing>,
     /// Whether the bar interrupts. Off by default, and off is almost always right: `role="alert"` stops a screen reader mid-sentence. Turn it on where a reader has to act before carrying on.
     #[props(default = false)]
     alert: bool,
@@ -109,7 +109,7 @@ pub fn MessageBar(
                     "aria-label": dismiss_label,
                     "data-nd-dismiss": "",
                     hidden: true,
-                    Icon { icon: IconName::Close, size: IconSize::Small }
+                    Icon { icon: IconDrawing::CLOSE, size: IconSize::Small }
                 }
             }
         }

@@ -7,7 +7,7 @@
 //! Report what just happened in a short message that floats clear of the work.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Icon, IconSize};
 
@@ -187,7 +187,7 @@ pub fn Toast(
                     "aria-label": dismiss_label,
                     "data-nd-dismiss": "",
                     hidden: true,
-                    Icon { icon: IconName::Close, size: IconSize::Small }
+                    Icon { icon: IconDrawing::CLOSE, size: IconSize::Small }
                 }
             }
         }

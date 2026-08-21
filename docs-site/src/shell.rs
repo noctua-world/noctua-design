@@ -20,7 +20,7 @@
 //! state to unwind.
 
 use dioxus::prelude::*;
-use noctua_design::IconName;
+use noctua_design::IconDrawing;
 use noctua_design::components::{
     Button, ButtonTone, ButtonVariant, Disclosure, Label, LabelKind, LabelSize, Search,
     SearchPresentation,
@@ -92,8 +92,8 @@ pub(crate) fn Header(context: Context) -> Element {
                 variant: ButtonVariant::Transparent,
                 tone: ButtonTone::Neutral,
                 hide_label: true,
-                icon: IconName::Menu,
-                icon_alt: IconName::Close,
+                icon: IconDrawing::MENU,
+                icon_alt: IconDrawing::CLOSE,
                 label: context.t(Key::NavOpen),
                 label_alt: context.t(Key::NavClose),
                 expanded: false,
@@ -128,8 +128,8 @@ pub(crate) fn Header(context: Context) -> Element {
                         // Dioxus's. The glyph is what pressing it does, so it
                         // shows the half a reader would move to — see the
                         // frame's own switch in `pages.rs`.
-                        icon: IconName::Atom,
-                        icon_alt: IconName::Dna,
+                        icon: IconDrawing::ATOM,
+                        icon_alt: IconDrawing::DNA,
                         label: context.t(Key::ExampleImplPageReact),
                         label_alt: context.t(Key::ExampleImplPageDioxus),
                         // Server-rendered as not pressed, and that is honest
@@ -144,7 +144,7 @@ pub(crate) fn Header(context: Context) -> Element {
                     variant: ButtonVariant::Transparent,
                     tone: ButtonTone::Neutral,
                     hide_label: true,
-                    icon: IconName::Github,
+                    icon: IconDrawing::GITHUB,
                     label: context.t(Key::AppRepository),
                     href: "https://github.com/noctua-world/noctua-design",
                     rel: "noreferrer",
@@ -180,7 +180,7 @@ fn LocaleSwitch(context: Context) -> Element {
         Disclosure {
             class: "nd-locale",
             name: "locale",
-            icon: IconName::Languages,
+            icon: IconDrawing::LANGUAGES,
             summary: context.t(Key::LocaleLabel),
             div { class: "nd-panel nd-panel--menu noctua-glass",
                 div { class: "nd-panel-body",
@@ -252,7 +252,7 @@ fn Settings(context: Context) -> Element {
             // A palette, not a gear. The menu is the appearance of the page —
             // its mode, its accent, its corners — and a gear says "settings"
             // about a product that has no other kind.
-            icon: IconName::Palette,
+            icon: IconDrawing::PALETTE,
             summary: context.t(Key::SettingsLabel),
             div { class: "nd-panel noctua-glass",
                 div { class: "nd-panel-body",

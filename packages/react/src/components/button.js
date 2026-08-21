@@ -12,6 +12,7 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { chevronDown } from "@noctua-world/design-tokens/icons/chevron-down.js";
 export function Button({ label, detail, variant, tone, size, shape, icon, iconEnd, iconAlt, labelAlt, action, hideLabel, justify, wrap, fill, menu, href, rel, target, pressed, expanded, controls, current, disabled, submit, name, value, glass, className, ...rest }) {
   const variant_ = variant ?? "solid";
   const tone_ = tone ?? "accent";
@@ -37,7 +38,9 @@ export function Button({ label, detail, variant, tone, size, shape, icon, iconEn
   // visible text, and an `aria-label` beside it is a second name.
   const named = hideLabel_ ? label : undefined;
   // One chevron, whoever drew it: see the Dioxus half.
-  const chevron = menu && icon !== "chevron-down";
+  // A drawing rather than a name, so what is compared is the name it
+  // carries. See the Dioxus half, which compares the constants.
+  const chevron = menu && icon?.name !== "chevron-down";
 
   const content = [
     // A toggle ships BOTH glyphs and lets the state pick one: swapping a
@@ -65,7 +68,7 @@ export function Button({ label, detail, variant, tone, size, shape, icon, iconEn
     iconEnd
       ? h(Icon, { key: "e", icon: iconEnd })
       : chevron
-        ? h(Icon, { key: "m", icon: "chevron-down", size: "small" })
+        ? h(Icon, { key: "m", icon: chevronDown, size: "small" })
         : null,
   ];
 

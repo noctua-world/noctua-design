@@ -5749,7 +5749,12 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   padding: 0;
   margin-block: var(--noctua-space-section) 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--noctua-space-24), 1fr));
+  /* A TRACK WIDE ENOUGH FOR THE NAMES THE SET ACTUALLY HAS. It was
+     `--noctua-space-24`, sized when the gallery was forty drawings whose names
+     were a word each. At 1,777 the longest is thirty-five characters, and a
+     107px track broke `accessibility` across two lines in the middle of the
+     word. */
+  grid-template-columns: repeat(auto-fill, minmax(var(--noctua-space-32), 1fr));
   gap: var(--noctua-space-gap);
   /* THE GRID HAD COLLAPSED TO ONE COLUMN. It sits in `.nd-example-stage`, a
      flex column with `align-items: start` — which shrinks a child to fit
@@ -5766,6 +5771,42 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   gap: var(--noctua-space-tight);
   padding-block: var(--noctua-space-4);
   color: var(--nc-color-fg);
+  /* THE DRAWINGS LINE UP ACROSS A ROW even where one name wraps to three lines
+     and its neighbour's fits on one. A grid row is as tall as its tallest cell,
+     and a cell that stretches would centre its contents in that height — which
+     put the drawings on four different baselines in one row. */
+  justify-content: start;
+}
+
+/* THE NAME IS A CAPTION, AND IT BREAKS ON ITS OWN HYPHENS.
+   `.nd-code-inline` carries `overflow-wrap: anywhere`, which is right for a
+   token in running prose and wrong here: it split `accessibility` into
+   `accessibil` and `ity`. These names are hyphenated, so `break-word` finds a
+   place to break in almost all of them, and the caption step buys the width
+   for the rest. */
+.nd-icon-cell code {
+  font-size: var(--noctua-size-caption);
+  overflow-wrap: break-word;
+  text-align: center;
+}
+
+/* The gallery is over a thousand drawings, so the field that narrows it sits
+   above the grid rather than beside it: at 320px a control and a grid on one
+   line leaves neither enough room. */
+.nd-icon-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-gap);
+  inline-size: 100%;
+}
+
+/* WHAT THE FILTER FOUND NOTHING FOR. `hidden` is what the script toggles, and
+   `[hidden]` is honoured by the browser's own stylesheet — this rule is only
+   the appearance of the sentence when it is shown. */
+.nd-icon-empty {
+  margin: 0;
+  color: var(--nc-color-fg-muted);
+  font-size: var(--noctua-size-small);
 }
 
 /* The rule between the foundations block and the component list.

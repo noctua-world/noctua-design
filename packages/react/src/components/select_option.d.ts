@@ -5,7 +5,7 @@
 // Edits to this file will be overwritten. Change the spec instead.
 
 import type { ReactNode } from "react";
-import type { IconName } from "@noctua-world/design-tokens/icons.js";
+import type { IconDrawing } from "@noctua-world/design-tokens/icons.js";
 
 
 export interface SelectOptionProps {
@@ -16,7 +16,7 @@ export interface SelectOptionProps {
   /** A quieter second line under the label, for what tells two similar options apart. Only the enhanced list draws it, where it is part of the option's accessible name. */
   detail?: string;
   /** A glyph shown beside the label, from the icon set. Never the only thing that distinguishes an option, because the native control shows only the text. */
-  icon?: IconName;
+  icon?: IconDrawing;
   /** A palette name, drawn as a colour chip beside the label. It uses `Swatch`'s mechanism: the chip carries `data-palette` and takes its colour from that scope, so no colour is named here. */
   swatch?: string;
   /** Whether this option starts chosen. The attribute is omitted when false, because HTML reads its presence rather than its value. */

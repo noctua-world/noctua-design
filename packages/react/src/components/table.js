@@ -14,6 +14,10 @@ import { createElement as h } from "react";
 import { Button } from "./button.js";
 
 import { Icon } from "./icon.js";
+import { columns2 } from "@noctua-world/design-tokens/icons/columns-2.js";
+import { copy } from "@noctua-world/design-tokens/icons/copy.js";
+import { download } from "@noctua-world/design-tokens/icons/download.js";
+import { search } from "@noctua-world/design-tokens/icons/search.js";
 export function Table({ name, caption, hideCaption, note, density, rules, zebra, hover, width, height, layout, stickyHeader, selectedLabel, sortAscendingLabel, sortDescendingLabel, sortClearedLabel, filteredLabel, resizeLabel, resizedLabel, columnsLabel, columnShownLabel, columnHiddenLabel, searchLabel, searchPlaceholder, export: _export, exportLabel, csvLabel, jsonLabel, printLabel, exportedLabel, moreSrc, moreLabel, moreStatusLabel, total, copy, copyLabel, copiedLabel, summaryLabel, className, children, ...rest }) {
   const density_ = density ?? "default";
   const rules_ = rules ?? "rows";
@@ -53,7 +57,7 @@ export function Table({ name, caption, hideCaption, note, density, rules, zebra,
                 "aria-controls": searchId,
                 "aria-label": searchLabel,
               },
-              h(Icon, { icon: "search", size: "small" }),
+              h(Icon, { icon: search, size: "small" }),
             ),
             h(
               "div",
@@ -61,7 +65,7 @@ export function Table({ name, caption, hideCaption, note, density, rules, zebra,
               h(
                 "span",
                 { key: "g", className: "nd-table-search-glyph", "aria-hidden": "true" },
-                h(Icon, { icon: "search", size: "small" }),
+                h(Icon, { icon: search, size: "small" }),
               ),
               h("label", { key: "l", className: "nd-visually-hidden", htmlFor: searchInputId }, searchLabel),
               h("input", {
@@ -84,7 +88,7 @@ export function Table({ name, caption, hideCaption, note, density, rules, zebra,
             h(
               "summary",
               { key: "s", className: "nd-table-columns-summary" },
-              h(Icon, { key: "i", icon: "columns", size: "small" }),
+              h(Icon, { key: "i", icon: columns2, size: "small" }),
               h("span", { key: "w" }, columnsLabel),
             ),
             h(
@@ -102,7 +106,7 @@ export function Table({ name, caption, hideCaption, note, density, rules, zebra,
         ? h(Button, {
             key: "y",
             label: copyLabel ?? "",
-            icon: "copy",
+            icon: copy,
             variant: "outline",
             tone: "neutral",
             size: "small",
@@ -116,7 +120,7 @@ export function Table({ name, caption, hideCaption, note, density, rules, zebra,
             h(
               "summary",
               { key: "s", className: "nd-table-export-summary" },
-              h(Icon, { key: "i", icon: "download", size: "small" }),
+              h(Icon, { key: "i", icon: download, size: "small" }),
               h("span", { key: "w" }, exportLabel),
             ),
             h(

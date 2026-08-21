@@ -5,7 +5,7 @@
 // Edits to this file will be overwritten. Change the spec instead.
 
 import type { ReactNode } from "react";
-import type { IconName } from "@noctua-world/design-tokens/icons.js";
+import type { IconDrawing } from "@noctua-world/design-tokens/icons.js";
 
 
 export interface TreeItemProps {
@@ -16,9 +16,9 @@ export interface TreeItemProps {
   /** Where the node leads. Its presence makes the row's content a real `<a>`, inside the row and never instead of it. The role stays on the `<li>`, so *copy link address* keeps working. */
   href?: string;
   /** A drawing before the name, such as a folder or a file. It is decorative, and the name beside it is what a screen reader reads. */
-  icon?: IconName;
+  icon?: IconDrawing;
   /** The drawing to use while the branch is open, such as an open folder. Absent keeps `icon` whatever the state is, which suits anything that is not a container. */
-  iconExpanded?: IconName;
+  iconExpanded?: IconDrawing;
   /** A short word or count at the end of the row, such as how many nodes are inside. It renders as a real `Tag`. */
   badge?: string;
   /** Whether this branch starts open. It is honoured **before the first paint**, by a rule keyed on the attribute the bootstrap stamps. A half-closed tree does not shift when the script arrives. */

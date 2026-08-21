@@ -7,7 +7,7 @@
 //! Place one node in a tree: its name, where it leads, and what is under it.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Icon, Tag, TagSize, TagVariant};
 
@@ -27,9 +27,9 @@ pub fn TreeItem(
     /// Where the node leads. Its presence makes the row's content a real `<a>`, inside the row and never instead of it. The role stays on the `<li>`, so *copy link address* keeps working.
     href: Option<String>,
     /// A drawing before the name, such as a folder or a file. It is decorative, and the name beside it is what a screen reader reads.
-    icon: Option<IconName>,
+    icon: Option<IconDrawing>,
     /// The drawing to use while the branch is open, such as an open folder. Absent keeps `icon` whatever the state is, which suits anything that is not a container.
-    icon_expanded: Option<IconName>,
+    icon_expanded: Option<IconDrawing>,
     /// A short word or count at the end of the row, such as how many nodes are inside. It renders as a real `Tag`.
     badge: Option<String>,
     /// Whether this branch starts open. It is honoured **before the first paint**, by a rule keyed on the attribute the bootstrap stamps. A half-closed tree does not shift when the script arrives.
@@ -107,7 +107,7 @@ pub fn TreeItem(
                     r#type: "button",
                     hidden: true,
                     "data-nd-tree-toggle": "",
-                    Icon { icon: IconName::ChevronDown, size: crate::components::IconSize::Small }
+                    Icon { icon: IconDrawing::CHEVRON_DOWN, size: crate::components::IconSize::Small }
                 }
                 if let Some(href) = href {
                     a {

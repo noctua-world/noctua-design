@@ -14,6 +14,8 @@ import { createElement as h } from "react";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { minus } from "@noctua-world/design-tokens/icons/minus.js";
+import { plus } from "@noctua-world/design-tokens/icons/plus.js";
 export function NumberInput({ name, label, value, min, max, step, bigStep, steppers, stepping, incrementLabel, decrementLabel, minLabel, maxLabel, invalidLabel, group, prefix, suffix, placeholder, hint, error, required, requiredLabel, disabled, readonly, size, glass, className, ...rest }) {
   const size_ = size ?? "medium";
   const stepping_ = stepping ?? "assist";
@@ -116,7 +118,7 @@ export function NumberInput({ name, label, value, min, max, step, bigStep, stepp
                 title: incrementLabel,
                 "data-nd-number-input-step": "up",
               },
-              h(Icon, { key: "i", icon: "plus", size: "small" }),
+              h(Icon, { key: "i", icon: plus, size: "small" }),
             ),
             h(
               "button",
@@ -130,7 +132,7 @@ export function NumberInput({ name, label, value, min, max, step, bigStep, stepp
                 title: decrementLabel,
                 "data-nd-number-input-step": "down",
               },
-              h(Icon, { key: "i", icon: "minus", size: "small" }),
+              h(Icon, { key: "i", icon: minus, size: "small" }),
             ),
           )
         : null,

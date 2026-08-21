@@ -7,7 +7,7 @@
 //! Show data in rows and columns, with sorting, filtering, selection and totals.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Button, ButtonSize, ButtonTone, ButtonVariant, Icon, IconSize};
 
@@ -280,11 +280,11 @@ pub fn Table(
                             "aria-expanded": "false",
                             "aria-controls": "{search_id}",
                             "aria-label": search_label.clone().unwrap_or_default(),
-                            Icon { icon: IconName::Search, size: IconSize::Small }
+                            Icon { icon: IconDrawing::SEARCH, size: IconSize::Small }
                         }
                         div { class: "nd-table-search-field", id: "{search_id}", hidden: true,
                             span { class: "nd-table-search-glyph", "aria-hidden": "true",
-                                Icon { icon: IconName::Search, size: IconSize::Small }
+                                Icon { icon: IconDrawing::SEARCH, size: IconSize::Small }
                             }
                             label {
                                 class: "nd-visually-hidden",
@@ -306,7 +306,7 @@ pub fn Table(
                 if columns_label.is_some() {
                     details { class: "nd-table-columns", "data-nd-table-columns": "",
                         summary { class: "nd-table-columns-summary",
-                            Icon { icon: IconName::Columns, size: IconSize::Small }
+                            Icon { icon: IconDrawing::COLUMNS_2, size: IconSize::Small }
                             span { "{columns_name}" }
                         }
                         // ITS OWN SURFACE, not `.nd-panel`. That class is the site header's
@@ -321,7 +321,7 @@ pub fn Table(
                 if copy {
                     Button {
                         label: copy_label.clone().unwrap_or_default(),
-                        icon: IconName::Copy,
+                        icon: IconDrawing::COPY,
                         variant: ButtonVariant::Outline,
                         tone: ButtonTone::Neutral,
                         size: ButtonSize::Small,
@@ -333,7 +333,7 @@ pub fn Table(
                 if export {
                     details { class: "nd-table-export", "data-nd-table-export": "",
                         summary { class: "nd-table-export-summary",
-                            Icon { icon: IconName::Download, size: IconSize::Small }
+                            Icon { icon: IconDrawing::DOWNLOAD, size: IconSize::Small }
                             span { {export_label.clone().unwrap_or_default()} }
                         }
                         div { class: "nd-table-export-panel",

@@ -7,7 +7,7 @@
 //! Add one value to a select, with an optional second line, icon or colour.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::Icon;
 
@@ -25,7 +25,7 @@ pub fn SelectOption(
     /// A quieter second line under the label, for what tells two similar options apart. Only the enhanced list draws it, where it is part of the option's accessible name.
     detail: Option<String>,
     /// A glyph shown beside the label, from the icon set. Never the only thing that distinguishes an option, because the native control shows only the text.
-    icon: Option<IconName>,
+    icon: Option<IconDrawing>,
     /// A palette name, drawn as a colour chip beside the label. It uses `Swatch`'s mechanism: the chip carries `data-palette` and takes its colour from that scope, so no colour is named here.
     swatch: Option<String>,
     /// Whether this option starts chosen. The attribute is omitted when false, because HTML reads its presence rather than its value.
@@ -50,7 +50,7 @@ pub fn SelectOption(
             // Data, because an <option> holds text and nothing else. The
             // native control shows the label; the enhanced list draws these.
             "data-nd-detail": detail,
-            "data-nd-icon": icon.map(IconName::as_str),
+            "data-nd-icon": icon.map(|icon| icon.name),
             "data-nd-swatch": swatch,
             "{label}"
         }
@@ -64,7 +64,7 @@ pub fn SelectOption(
         // contain one. The enhanced list clones it; the script still ships no
         // drawings of its own.
         if let Some(icon) = icon {
-            template { "data-nd-glyph": icon.as_str(),
+            template { "data-nd-glyph": icon.name,
                 Icon { icon, size: crate::components::IconSize::Small }
             }
         }

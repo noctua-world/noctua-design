@@ -7,7 +7,7 @@
 //! Show a value or a label in a pill that can also be a link, a toggle or removable.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{
     Button, ButtonShape, ButtonSize, ButtonTone, ButtonVariant, Icon, Swatch, SwatchSize,
@@ -144,7 +144,7 @@ pub fn Tag(
     #[props(default)]
     shape: TagShape,
     /// A glyph shown before the text. It is decorative, because the text beside it is the accessible name.
-    icon: Option<IconName>,
+    icon: Option<IconDrawing>,
     /// A palette name, drawn as a real `Swatch` before the text. The chip resolves the accent inside its own scope, which is the mechanism `ThemeScope` uses and the only one `NOCTUA.md §8.8` allows.
     swatch: Option<String>,
     /// A picture shown before the text, such as a face or a favicon. Its alternative text is empty, because the text beside it is the name. Its box takes the tag's size, and a URL that fails draws nothing.
@@ -244,7 +244,7 @@ pub fn Tag(
                     size: ButtonSize::Small,
                     shape: ButtonShape::Pill,
                     hide_label: true,
-                    icon: IconName::Close,
+                    icon: IconDrawing::CLOSE,
                     label: remove,
                     disabled,
                 }

@@ -7,7 +7,7 @@
 //! Draw one of the declared icons, at the size of the text it stands beside.
 
 use dioxus::prelude::*;
-use noctua_design_icons::{IconName, STROKE_WIDTH};
+use noctua_design_icons::{IconDrawing, STROKE_WIDTH};
 
 /// The rendered box, as a step of the type scale: the small step, the body step and
 /// the h3 step. The drawing is `1em`, so an icon with no size takes the size of the
@@ -47,10 +47,8 @@ impl IconSize {
 /// name instead, and the two states are exclusive.
 #[component]
 pub fn Icon(
-    /// Which drawing, by the name `spec/icons.toml` gives it. **Required**, and a real
-    /// type in both languages rather than a string. A name that is not an icon is then
-    /// a compile error instead of an empty box on a page.
-    icon: IconName,
+    /// The drawing itself, not its name. **Required**, and a real type in both languages rather than a string. Rust takes `IconDrawing::CHEVRON_DOWN`. JavaScript imports one module per icon. A value that names no icon fails to build.
+    icon: IconDrawing,
     /// Its accessible name. Absent is the common case and makes the icon `aria-hidden`,
     /// which is right beside a word that already says it. Give one only where the
     /// drawing carries the whole message.
@@ -71,15 +69,15 @@ pub fn Icon(
     rsx! {
         svg {
             class: "{root}",
-            "data-nd-icon": icon.as_str(),
+            "data-nd-icon": icon.name,
             "data-nd-size": size.as_str(),
-            view_box: icon.view_box(),
+            view_box: icon.view_box,
             // `1em`, so the box comes from whatever contains it and one class
             // covers every context. `data-nd-size` sets that `em`.
             width: "1em",
             height: "1em",
-            fill: if icon.filled() { "currentColor" } else { "none" },
-            stroke: if icon.filled() { "none" } else { "currentColor" },
+            fill: if icon.filled { "currentColor" } else { "none" },
+            stroke: if icon.filled { "none" } else { "currentColor" },
             // FROM THE SPEC, NOT FROM HERE. `spec/icons.toml` decides the
             // weight, and three places draw it: this body, the React one, and
             // the documentation page's variant grid.
@@ -94,7 +92,7 @@ pub fn Icon(
             "aria-label": label,
             "aria-hidden": (!named).then_some("true"),
             "focusable": "false",
-            dangerous_inner_html: "{icon.body()}",
+            dangerous_inner_html: "{icon.body}",
         }
     }
 }

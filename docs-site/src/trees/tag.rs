@@ -68,7 +68,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         ],
     ),
     (
-        r#"Tag { icon: IconName::Check, swatch: "…", image: "…" }"#,
+        r#"Tag { icon: IconDrawing::CHECK, swatch: "…", image: "…" }"#,
         &[Node::Element {
             tag: "div",
             attributes: &[("class", Value::Text("nd-example-row"))],

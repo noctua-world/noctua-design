@@ -11,6 +11,7 @@
     "./theme.js": "./theme.js",
     "./i18n.js": "./i18n.js",
     "./icons.js": "./icons.js",
+    "./icons/*.js": "./icons/*.js",
     "./grammars.js": "./grammars.js",
     "./lineage.js": "./lineage.js",
     "./color.js": "./color.js",

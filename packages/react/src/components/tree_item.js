@@ -14,6 +14,7 @@ import { createElement as h } from "react";
 import { Tag } from "./tag.js";
 
 import { Icon } from "./icon.js";
+import { chevronDown } from "@noctua-world/design-tokens/icons/chevron-down.js";
 export function TreeItem({ label, value, href, icon, iconExpanded, badge, expanded, branch, selected, disabled, current, className, children, ...rest }) {
   const root = ["nd-tree-item", className].filter(Boolean).join(" ");
 
@@ -62,7 +63,7 @@ export function TreeItem({ label, value, href, icon, iconExpanded, badge, expand
           hidden: true,
           "data-nd-tree-toggle": "",
         },
-        h(Icon, { icon: "chevron-down", size: "small" }),
+        h(Icon, { icon: chevronDown, size: "small" }),
       ),
       href
         ? h(

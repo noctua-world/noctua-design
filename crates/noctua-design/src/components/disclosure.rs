@@ -7,7 +7,7 @@
 //! Let users show and hide a block of content from its own control.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::Icon;
 
@@ -53,7 +53,7 @@ pub fn Disclosure(
     /// The identifier a script uses to find this disclosure. It is written to `data-nd-disclosure`. A disclosure with no script behind it does not need one.
     name: Option<String>,
     /// An icon shown instead of the summary text. `summary` is still required and becomes the accessible name.
-    icon: Option<IconName>,
+    icon: Option<IconDrawing>,
     /// Whether the disclosure starts open. Rendered in the markup rather than applied by a script, because opening after the page has painted moves the content below it.
     #[props(default = false)]
     open: bool,
@@ -114,7 +114,7 @@ pub fn Disclosure(
                     // turned the gear upside down.
                     if marker {
                         Icon {
-                            icon: IconName::ChevronDown,
+                            icon: IconDrawing::CHEVRON_DOWN,
                             size: crate::components::IconSize::Small,
                             class: "nd-disclosure-marker",
                         }

@@ -262,8 +262,11 @@ dir = "ltr"
 
 # --- Conteúdo das páginas -------------------------------------------------
 
-"icons.body" = """O conjunto é declarado uma vez, e o enum, as duas implementações, o manifesto e esta página decorrem dele. Acrescentar um ícone é uma linha na especificação e o desenho ao lado."""
+"icons.body" = """O conjunto é declarado uma vez, e uma constante por ícone, as duas implementações, o manifesto e esta página decorrem dele. Um ícone que não é desenhado não acrescenta nada a uma aplicação, então o conjunto inteiro é publicado."""
 "icons.count" = "{count} ícones"
+"icons.filter.label" = """Filtrar por nome"""
+"icons.filter.clear" = """Limpar o filtro"""
+"icons.filter.empty" = """Nenhum ícone tem esse nome."""
 "scope.reset" = """Restaurar os dois"""
 # --- Componentes -----------------------------------------------------------
 #
@@ -2657,7 +2660,7 @@ dir = "ltr"
 
 "component.icon.guidance" = """Use um ícone ao lado de uma palavra, onde o desenho repete o que a palavra diz. Sozinho ele precisa de um `label`. Um controle que é só um desenho é `Button { hide_label }` e não um ícone clicável."""
 "component.icon.a11y-notes" = """Um ícone sem rótulo é `aria-hidden` e `focusable="false"`, então não chega a leitor de tela nenhum nem à ordem de tabulação. Um `label` o torna um `role="img"` com esse nome, e os dois estados se excluem."""
-"component.icon.prop.icon.doc" = """Qual desenho, pelo nome que o `spec/icons.toml` dá a ele. **Obrigatório**, e um tipo de verdade nas duas linguagens em vez de uma string. Um nome que não é um ícone vira então erro de compilação e não uma caixa vazia na página."""
+"component.icon.prop.icon.doc" = """O próprio desenho, não o nome dele. **Obrigatório**, e um tipo de verdade nas duas linguagens em vez de uma string. Rust recebe `IconDrawing::CHEVRON_DOWN`. JavaScript importa um módulo por ícone. Um valor sem ícone falha na compilação."""
 "component.icon.prop.label.doc" = """O nome acessível dele. Ausente é o caso comum e deixa o ícone `aria-hidden`, o que está certo ao lado de uma palavra que já diz aquilo. Dê um só onde o desenho carrega a mensagem inteira."""
 "component.icon.prop.size.doc" = """A caixa desenhada, como um degrau da escala tipográfica: o degrau pequeno, o de corpo e o de h3. O desenho em si é `1em`, então um ícone sem tamanho assume o tamanho do texto em volta."""
 

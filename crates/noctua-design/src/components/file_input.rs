@@ -7,7 +7,7 @@
 //! Let users choose files, by picking or dropping them, and correct what they chose.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Button, ButtonSize, ButtonVariant, Field, FieldSize, Icon};
 
@@ -166,7 +166,7 @@ pub fn FileInput(
                     class: "nd-file-input-area",
                     r#for: "{id}",
                     "data-nd-file-input-area": "",
-                    Icon { icon: IconName::Upload }
+                    Icon { icon: IconDrawing::UPLOAD }
                     span { class: "nd-file-input-browse", "{browse_label}" }
                     if let Some(drop_label) = drop_label {
                         span { class: "nd-file-input-drop", "{drop_label}" }
@@ -212,7 +212,7 @@ pub fn FileInput(
                     span { class: "nd-file-input-size nd-identifier" }
                     Button {
                         label: "",
-                        icon: IconName::Close,
+                        icon: IconDrawing::CLOSE,
                         hide_label: true,
                         variant: ButtonVariant::Transparent,
                         size: ButtonSize::Small,

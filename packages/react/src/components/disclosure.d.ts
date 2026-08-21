@@ -5,7 +5,7 @@
 // Edits to this file will be overwritten. Change the spec instead.
 
 import type { ReactNode } from "react";
-import type { IconName } from "@noctua-world/design-tokens/icons.js";
+import type { IconDrawing } from "@noctua-world/design-tokens/icons.js";
 
 export type DisclosureHeading = "none" | "h2" | "h3" | "h4";
 
@@ -15,7 +15,7 @@ export interface DisclosureProps {
   /** The identifier a script uses to find this disclosure. It is written to `data-nd-disclosure`. A disclosure with no script behind it does not need one. */
   name?: string;
   /** An icon shown instead of the summary text. `summary` is still required and becomes the accessible name. */
-  icon?: IconName;
+  icon?: IconDrawing;
   /** Whether the disclosure starts open. Rendered in the markup rather than applied by a script, because opening after the page has painted moves the content below it. */
   open?: boolean;
   /** Whether the chevron is drawn. Turn it off for a control that is already an icon. */

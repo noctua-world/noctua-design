@@ -98,17 +98,29 @@ test("the drawing takes its size from the text around it", async ({ page }) => {
 
 test("every icon on the page is a vendored drawing and not a coloured one", async ({ page }) => {
   await iconPage(page);
-  // A drawing that names its own colour cannot follow a theme, which is the
+  // A drawing that NAMES its own colour cannot follow a theme, which is the
   // frozen-colour trap wearing a different hat. The wrapper paints; the
-  // geometry inside it does not.
-  const coloured = await page.evaluate(() =>
-    [...document.querySelectorAll("svg.nd-icon-glyph")]
-      .filter((el) =>
-        [...el.children].some(
-          (child) => child.hasAttribute("fill") || child.hasAttribute("stroke"),
+  // geometry inside it may say only that it is not choosing.
+  //
+  // `currentColor` is that: it resolves to whatever `color` the icon inherits,
+  // so it follows a themed scope exactly as the wrapper does. Ten Lucide
+  // drawings fill a half-unit dot with it — `palette` is one, and it is on
+  // every page of this site — and this refused all ten until it was told the
+  // difference between declining to choose and choosing.
+  const coloured = await page.evaluate(() => {
+    const FOLLOWS_THE_THEME = ["currentColor", "none"];
+    return [...document.querySelectorAll("svg.nd-icon-glyph")]
+      .flatMap((el) =>
+        [...el.children].flatMap((child) =>
+          ["fill", "stroke"]
+            .filter(
+              (name) =>
+                child.hasAttribute(name) &&
+                !FOLLOWS_THE_THEME.includes(child.getAttribute(name)),
+            )
+            .map((name) => `${el.getAttribute("data-nd-icon")} ${name}="${child.getAttribute(name)}"`),
         ),
-      )
-      .map((el) => el.getAttribute("data-nd-icon")),
-  );
+      );
+  });
   expect(coloured, "a drawing that paints itself").toEqual([]);
 });

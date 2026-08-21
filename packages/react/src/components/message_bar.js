@@ -12,6 +12,7 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { close } from "@noctua-world/design-tokens/icons/close.js";
 export function MessageBar({ tone, title, icon, alert, live, dismissible, dismissLabel, className, children, ...rest }) {
   const alert_ = alert ?? false;
   const dismissible_ = dismissible ?? false;
@@ -54,7 +55,7 @@ export function MessageBar({ tone, title, icon, alert, live, dismissible, dismis
             // See the Dioxus half: revealed by the script.
             hidden: true,
           },
-          h(Icon, { icon: "close", size: "small" }),
+          h(Icon, { icon: close, size: "small" }),
         )
       : null,
   );

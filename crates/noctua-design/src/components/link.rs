@@ -7,7 +7,7 @@
 //! Links to another page, and marks the links that leave the site.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::Icon;
 
@@ -72,7 +72,7 @@ pub fn Link(
             "data-nd-tone": tone.as_str(),
             {children}
             if external {
-                Icon { icon: IconName::ExternalLink, size: crate::components::IconSize::Small }
+                Icon { icon: IconDrawing::EXTERNAL_LINK, size: crate::components::IconSize::Small }
             }
         }
     }

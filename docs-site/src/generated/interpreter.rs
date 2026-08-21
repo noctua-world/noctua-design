@@ -1844,7 +1844,7 @@ fn menu_item(
     let label_ = scope
         .find(props, "label")
         .expect("MenuItem.label is required and this tree does not set it");
-    let icon_ = scope.find(props, "icon");
+    let icon_ = scope.icon(props, "icon");
     let detail_ = scope.find(props, "detail");
     let value_ = scope.find(props, "value");
     let action_ = scope.find(props, "action");

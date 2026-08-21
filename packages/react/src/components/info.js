@@ -12,6 +12,7 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { info } from "@noctua-world/design-tokens/icons/info.js";
 export function Info({ name, label, heading, closeLabel, placement, className, children, ...rest }) {
   const placement_ = placement ?? "auto";
   const root = ["nd-info", className].filter(Boolean).join(" ");
@@ -40,7 +41,7 @@ export function Info({ name, label, heading, closeLabel, placement, className, c
         // See the Dioxus half: revealed by the script.
         hidden: true,
       },
-      h(Icon, { icon: "info", size: "small" }),
+      h(Icon, { icon: info, size: "small" }),
     ),
     h(
       "span",

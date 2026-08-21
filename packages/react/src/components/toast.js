@@ -12,6 +12,7 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { close } from "@noctua-world/design-tokens/icons/close.js";
 export function Toast({ name, tone, title, duration, countdownLabel, dismissible, dismissLabel, placement, live, className, children, ...rest }) {
   const placement_ = placement ?? "bottom-end";
   const dismissible_ = dismissible ?? true;
@@ -63,7 +64,7 @@ export function Toast({ name, tone, title, duration, countdownLabel, dismissible
             // See the Dioxus half: revealed by the script.
             hidden: true,
           },
-          h(Icon, { icon: "close", size: "small" }),
+          h(Icon, { icon: close, size: "small" }),
         )
       : null,
   );

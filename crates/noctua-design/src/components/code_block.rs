@@ -8,7 +8,7 @@
 
 use dioxus::prelude::*;
 use noctua_design_grammars::{Language, Role, lines, scan};
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::Icon;
 
@@ -186,7 +186,7 @@ pub fn CodeBlock(
                             title: "{wrap_label}",
                             "aria-pressed": if wrap { "true" } else { "false" },
                             "data-nd-wrap-toggle": "",
-                            Icon { icon: IconName::WrapText }
+                            Icon { icon: IconDrawing::TEXT_WRAP }
                         }
                     }
                     if let Some(copy) = copy.clone() {
@@ -197,8 +197,8 @@ pub fn CodeBlock(
                             title: "{copy}",
                             "data-nd-copy": "",
                             "data-nd-copied": copied.clone(),
-                            Icon { icon: IconName::Copy }
-                            Icon { icon: IconName::Check }
+                            Icon { icon: IconDrawing::COPY }
+                            Icon { icon: IconDrawing::CHECK }
                         }
                         // Empty until the copy succeeds: a live region that
                         // already holds its text announces nothing when that

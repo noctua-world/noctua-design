@@ -7,7 +7,7 @@
 //! Hang a small surface off a control, holding text a reader can act on.
 
 use dioxus::prelude::*;
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 use crate::components::{Icon, IconSize};
 
@@ -135,7 +135,7 @@ pub fn Popover(
                                 r#type: "button",
                                 "aria-label": close_label,
                                 "data-nd-popover-close": "",
-                                Icon { icon: IconName::Close, size: IconSize::Small }
+                                Icon { icon: IconDrawing::CLOSE, size: IconSize::Small }
                             }
                         }
                     }

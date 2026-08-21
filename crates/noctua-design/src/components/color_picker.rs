@@ -12,7 +12,7 @@ use crate::components::{
 };
 use dioxus::prelude::*;
 
-use noctua_design_icons::IconName;
+use noctua_design_icons::IconDrawing;
 
 /// The size of the chip, matching `Button` and `Swatch` step for step so a picker lines up in a row of controls. `medium` by default.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -340,7 +340,7 @@ pub fn ColorPicker(
                     }
                     Button {
                         label: close_label.clone().unwrap_or_default(),
-                        icon: IconName::Close,
+                        icon: IconDrawing::CLOSE,
                         hide_label: true,
                         variant: ButtonVariant::Transparent,
                         size: ButtonSize::Small,
@@ -443,7 +443,7 @@ pub fn ColorPicker(
                             // do honestly, and drawing one is not.
                             Button {
                                 label: eyedropper_label.clone().unwrap_or_default(),
-                                icon: IconName::Pipette,
+                                icon: IconDrawing::PIPETTE,
                                 hide_label: true,
                                 variant: ButtonVariant::Outline,
                                 size: ButtonSize::Small,
@@ -491,7 +491,7 @@ pub fn ColorPicker(
                         ul { class: "nd-color-picker-committed", "data-nd-color-picker-committed": "" }
                         Button {
                             label: add_label.clone().unwrap_or_default(),
-                            icon: IconName::Plus,
+                            icon: IconDrawing::PLUS,
                             variant: ButtonVariant::Outline,
                             size: ButtonSize::Small,
                             action: "color-picker-add",
@@ -533,7 +533,7 @@ pub fn ColorPicker(
                     code { class: "nd-code-inline nd-identifier", "data-nd-tone": "subtle" }
                     Button {
                         label: "",
-                        icon: IconName::Close,
+                        icon: IconDrawing::CLOSE,
                         hide_label: true,
                         variant: ButtonVariant::Transparent,
                         size: ButtonSize::Small,
@@ -553,8 +553,8 @@ pub fn ColorPicker(
                         class: "nd-color-picker-copy",
                         r#type: "button",
                         "data-nd-color-copy": "",
-                        Icon { icon: IconName::Copy, size: crate::components::IconSize::Small }
-                        Icon { icon: IconName::Check, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::COPY, size: crate::components::IconSize::Small }
+                        Icon { icon: IconDrawing::CHECK, size: crate::components::IconSize::Small }
                     }
                 }
             }
