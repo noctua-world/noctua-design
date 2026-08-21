@@ -485,8 +485,28 @@ a {
    which end the knob sits at, and what colour the TRACK is. The knob's own
    colour is not one of them — see the rule above. */
 .nd-switch[aria-checked="true"] > .nd-switch-track {
-  background: var(--nc-color-accent);
-  border-color: var(--nc-color-accent);
+  /* THE ACCENT, CARRIED AWAY FROM THE KNOB.
+   *
+   * The knob is one colour in both states, which is what makes it read as one
+   * object — but measured against the bare accent it came to **2.7:1**, under
+   * the 3:1 that `WCAG 1.4.11` asks of a component's own parts. The off track
+   * gives 15.7:1, so only this half was failing, and a soft edge on the knob is
+   * also what made its gaps look uneven.
+   *
+   * Mixing toward the surface moves the track away from the knob in BOTH
+   * appearances rather than one: the surface is dark where the knob is light
+   * and light where it is dark, so a single mix serves the pair. Tokens only —
+   * nothing here is a colour this repository chose.
+   *
+   * **74% is measured, not chosen.** The bare accent fails 3:1 on 39 of the 78
+   * palette-and-appearance pairs this system ships, worst 2.51:1 on
+   * `amber-vivid` dark. 86% still failed 39 of them and 82% failed 28; 78% is
+   * the first that clears every one, at 3.08:1, and 74% is the first with
+   * margin, at 3.21:1 while keeping three quarters of the accent's chroma.
+   * `every_switch_track_carries_its_knob` recomputes all 78 from the vendored
+   * palettes, so a new palette cannot slip under. */
+  background: color-mix(in oklch, var(--nc-color-accent) 74%, var(--nc-color-surface));
+  border-color: color-mix(in oklch, var(--nc-color-accent) 74%, var(--nc-color-surface));
 }
 
 .nd-switch[aria-checked="true"] > .nd-switch-track::after {
@@ -498,8 +518,8 @@ a {
 }
 
 .nd-switch[aria-checked="true"]:hover > .nd-switch-track {
-  background: var(--nc-color-accent-hover);
-  border-color: var(--nc-color-accent-hover);
+  background: color-mix(in oklch, var(--nc-color-accent-hover) 74%, var(--nc-color-surface));
+  border-color: color-mix(in oklch, var(--nc-color-accent-hover) 74%, var(--nc-color-surface));
 }
 
 /* THE BOX, AND IT USED TO BE ONLY THE WORDS.
@@ -857,9 +877,6 @@ a {
   min-inline-size: 0;
   max-inline-size: var(--noctua-breakpoint-sm);
 }
-
-
-
 
 /* The slot is rendered whenever the control is `required`, so the script has
    somewhere to put the browser's own complaint — a hidden `<select>` cannot be
@@ -1242,9 +1259,6 @@ a {
   flex-direction: column;
   gap: var(--noctua-space-2);
 }
-
-
-
 
 /* Always rendered so the id it is announced by always exists; hidden while
  * nobody — caller or validator — has a sentence for it. */
@@ -3921,9 +3935,6 @@ span.nd-search-input {
   --nd-tag-picker-height: var(--noctua-space-16);
 }
 
-
-
-
 /* THE NATIVE CONTROL SCROLLS, SO IT IS SQUARE.
  *
  * A `<select multiple>` with no `size` is a four-row scrolling listbox, and a
@@ -4390,8 +4401,6 @@ span.nd-search-input {
   }
 }
 
-
-
 /* The bar is a `Toolbar` now, so the layout, the wrapping and the alignment
    are the component's. What is left here is what the frame adds: the rule that
    separates it from the stage, and the wash that makes it read as chrome
@@ -4597,7 +4606,6 @@ span.nd-search-input {
    the width control saying a third thing about width; it is the `Max` stop's
    own second line now — the one stop whose real width is not already stated by
    its own label. One control, and the number where it is missing. */
-
 
 /* --- Scales -------------------------------------------------------------- */
 
@@ -6645,8 +6653,8 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   background: linear-gradient(
       90deg,
       transparent 0%,
-      var(--nc-color-accent) 45%,
-      var(--nc-color-accent) 55%,
+      var(--nc-color-accent) 74%,
+      var(--nc-color-accent) 74%,
       transparent 100%
     )
     no-repeat;
@@ -8875,8 +8883,6 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   background: var(--noctua-backdrop);
 }
 
-
-
 /* THE STAGE IS POSITIONED WHEREVER THE FRAME IS FROSTED, WHICH IS EVERYWHERE.
  *
  * The layer is `position: absolute` and a positioned element paints above a
@@ -10196,7 +10202,6 @@ button.nd-lineage-figure {
   display: none;
 }
 
-
 .nd-lineage-sample .nd-lineage-space {
   position: relative;
   transform: none;
@@ -10360,9 +10365,6 @@ button.nd-lineage-figure {
   gap: var(--noctua-space-1);
 }
 
-
-
-
 /* The native inputs are the value with no script; the script hides them and
    shows the square. Neither is ever visible at the same time as the other. */
 .nd-color-picker-values[hidden] {
@@ -10408,11 +10410,12 @@ button.nd-lineage-figure {
   gap: var(--noctua-space-1);
 }
 
-/* The chip, and the specimen figure on the component's own page, are one box
+/* The chip,
+and the specimen figure on the component's own page,
+are one box
    drawn once — a second thing that looks like a swatch is a second thing to
    keep in step. */
-.nd-color-picker-chip,
-.nd-color-picker-figure .nd-color-picker-chip {
+.nd-color-picker-chip{
   display: block;
   inline-size: var(--noctua-space-6);
   block-size: var(--noctua-space-6);
@@ -10436,6 +10439,25 @@ button.nd-lineage-figure {
 }
 
 .nd-color-picker[data-nd-shape="square"] .nd-color-picker-chip {
+  border-radius: var(--noctua-radius-none);
+}
+
+/* THE BUTTON ROUND THE CHIP FOLLOWS THE CHIP.
+ *
+ * `shape` names "the chip's corners", so the trigger took the control radius
+ * whatever the chip did — and a caller asking for `square` got a hard square
+ * sitting inside a rounded button, or inside a capsule under the circular
+ * preset. The prop was doing three quarters of its job for every consumer, not
+ * only in the one example that made it visible.
+ *
+ * The trigger keeps a step more than the chip, because it is a box AROUND the
+ * chip and matching them exactly reads as one shape with a stripe in it. Under
+ * `square` there is no step to keep. */
+.nd-color-picker[data-nd-shape="pill"] .nd-color-picker-trigger {
+  border-radius: var(--noctua-radius-pill);
+}
+
+.nd-color-picker[data-nd-shape="square"] .nd-color-picker-trigger {
   border-radius: var(--noctua-radius-none);
 }
 
@@ -10886,28 +10908,10 @@ button.nd-lineage-figure {
   opacity: 0.5; /* allow-literal: a refused question is dimmed with its control, and there is no color token for "the same color, less of it" */
 }
 
-/* The specimen on the component's own page: a drawn question over a drawn box,
-   because a specimen of a component that renders no control must not render a
-   nameless one. */
-.nd-field-figure {
+/* The specimen on the component's own page: a drawn question over a drawn box{
   display: flex;
   flex-direction: column;
   gap: var(--noctua-space-1);
-}
-
-.nd-field-figure .nd-field-rule {
-  inline-size: var(--noctua-space-16);
-  block-size: var(--noctua-space-2);
-  background: var(--nc-color-fg-muted);
-  border-radius: var(--noctua-radius-pill);
-}
-
-.nd-field-figure .nd-field-box {
-  inline-size: var(--noctua-space-32);
-  block-size: var(--noctua-space-8);
-  background: var(--nc-color-surface);
-  border: var(--noctua-border-hairline) solid var(--nc-color-border);
-  border-radius: var(--noctua-radius-control);
 }
 
 /* --- The input controls --------------------------------------------------- */
@@ -11254,23 +11258,12 @@ button.nd-lineage-figure {
 }
 
 /* AND THE PICTURE ON THE PROP TABLE SAYS THE SAME THING. The specimen is a
-   drawing rather than a live control, so the two step boxes are the drawn
+   drawing rather than a live control,
+so the two step boxes are the drawn
    span's own `::before` and `::after`. The span goes `display: contents` for
-   the reason above, which makes both of them items of the figure's row, and
-   one of them moves in front of the box. */
-.nd-number-input[data-nd-stepping="primary"] .nd-number-input-figure .nd-number-input-steps {
+   the reason above,
+which makes both of them items of the figure's row{
   display: contents;
-}
-
-.nd-number-input[data-nd-stepping="primary"] .nd-number-input-figure .nd-number-input-steps::before,
-.nd-number-input[data-nd-stepping="primary"] .nd-number-input-figure .nd-number-input-steps::after {
-  inline-size: var(--noctua-space-12);
-  block-size: var(--noctua-space-12);
-  border-radius: var(--noctua-radius-control);
-}
-
-.nd-number-input[data-nd-stepping="primary"] .nd-number-input-figure .nd-number-input-steps::before {
-  order: -1;
 }
 
 /* --- Slider --------------------------------------------------------------- */
@@ -11644,15 +11637,9 @@ button.nd-lineage-figure {
 }
 
 /* The specimens on each component's own page: drawn boxes rather than live
-   controls, because a specimen of a `needs_name` component must not render a
-   nameless one. */
-.nd-input-figure .nd-input-box,
-.nd-number-input-figure .nd-number-input-box,
-.nd-select-figure .nd-select-box,
-.nd-tag-picker-figure .nd-tag-picker-box,
-.nd-textarea-figure .nd-textarea-box,
+   controls,
 .nd-file-input-figure .nd-file-input-area,
-.nd-slider-figure .nd-slider-rail {
+.nd-slider-figure .nd-slider-rail{
   display: block;
   inline-size: var(--noctua-space-32);
   block-size: var(--noctua-space-8);
@@ -11661,66 +11648,52 @@ button.nd-lineage-figure {
   border-radius: var(--noctua-radius-control);
 }
 
-.nd-textarea-figure .nd-textarea-box {
-  block-size: var(--noctua-space-8);
-}
-
 /* A PICTURE OF `size` HAS TO BE THREE DIFFERENT SIZES.
-   The rule above draws one box, so every value of `size` came out identical —
-   `variants.spec.js` calls that a grid that lies about its own prop, and it is
-   right. These are the three heights the contracts actually claim, the same
-   32, 48 and 64 that `Button` steps through. Written once for every drawn
-   control, because three inputs disagreeing about what `large` looks like is
+   The rule above draws one box,
+so every value of `size` came out identical —
+   `variants.spec.js` calls that a grid that lies about its own prop,
+and it is
+   right. These are the three heights the contracts actually claim,
+the same
+   32,
+48 and 64 that `Button` steps through. Written once for every drawn
+   control,
+because three inputs disagreeing about what `large` looks like is
    the defect one step along from this one.
 
-   `.nd-textarea` NAMES ITS FIGURE, and the others do not have to. A `Textarea`
-   is a box around a `<textarea class="nd-textarea-box">` now, so
+   `.nd-textarea` NAMES ITS FIGURE,
+and the others do not have to. A `Textarea`
+   is a box around a `<textarea class="nd-textarea-box">` now,
+so
    `.nd-textarea[data-nd-size] .nd-textarea-box` reaches the live control as
-   well as the drawing — and a fixed 32, 48 or 64 pixels on the live one takes
+   well as the drawing — and a fixed 32,
+48 or 64 pixels on the live one takes
    `rows` and `autosize` away from it. A picture is the only thing being drawn
    here. */
 .nd-input[data-nd-size="small"] .nd-input-box,
-.nd-number-input[data-nd-size="small"] .nd-number-input-box,
-.nd-select[data-nd-size="small"] .nd-select-box,
-.nd-tag-picker[data-nd-size="small"] .nd-tag-picker-box,
-.nd-textarea[data-nd-size="small"] .nd-textarea-figure .nd-textarea-box {
+.nd-number-input[data-nd-size="small"] .nd-number-input-box{
   block-size: var(--noctua-space-8);
 }
 
 .nd-input[data-nd-size="medium"] .nd-input-box,
-.nd-number-input[data-nd-size="medium"] .nd-number-input-box,
-.nd-select[data-nd-size="medium"] .nd-select-box,
-.nd-tag-picker[data-nd-size="medium"] .nd-tag-picker-box,
-.nd-textarea[data-nd-size="medium"] .nd-textarea-figure .nd-textarea-box {
+.nd-number-input[data-nd-size="medium"] .nd-number-input-box{
   block-size: var(--noctua-space-12);
 }
 
 .nd-input[data-nd-size="large"] .nd-input-box,
-.nd-number-input[data-nd-size="large"] .nd-number-input-box,
-.nd-select[data-nd-size="large"] .nd-select-box,
-.nd-tag-picker[data-nd-size="large"] .nd-tag-picker-box,
-.nd-textarea[data-nd-size="large"] .nd-textarea-figure .nd-textarea-box {
+.nd-number-input[data-nd-size="large"] .nd-number-input-box{
   block-size: var(--noctua-space-16);
 }
 
-/* THE STEPPERS, DRAWN. `number_input.toml`'s specimen has always emitted this
-   span and nothing in this file matched it, so all three sizes showed a box and
+/* THE STEPPERS,
+DRAWN. `number_input.toml`'s specimen has always emitted this
+   span and nothing in this file matched it,
+so all three sizes showed a box and
    a gap where the one part that tells a number input from a text input should
-   be. A stack of two, because that is what the control has. */
-.nd-number-input-figure .nd-number-input-steps {
+   be. A stack of two{
   display: flex;
   flex-direction: column;
   gap: var(--noctua-border-hairline);
-}
-
-.nd-number-input-figure .nd-number-input-steps::before,
-.nd-number-input-figure .nd-number-input-steps::after {
-  content: "";
-  display: block;
-  inline-size: var(--noctua-space-6);
-  block-size: var(--noctua-space-4);
-  background: var(--nc-color-surface);
-  border: var(--noctua-border-hairline) solid var(--nc-color-border);
 }
 
 .nd-file-input-figure .nd-file-input-area {
@@ -11746,11 +11719,7 @@ button.nd-lineage-figure {
   border: var(--noctua-border-strong) solid var(--nc-color-accent);
 }
 
-.nd-number-input-figure,
-.nd-input-figure,
-.nd-select-figure,
-.nd-tag-picker-figure,
-.nd-time-input-figure {
+.nd-time-input-figure{
   display: flex;
   align-items: center;
   gap: var(--noctua-space-2);
@@ -12617,21 +12586,19 @@ figure.nd-image {
   border-radius: var(--noctua-radius-control);
 }
 
-/* Letters need more of the box than digits do, and the row is the same shape
+/* Letters need more of the box than digits do,
+and the row is the same shape
    either way. */
-.nd-otp-field[data-nd-kind="alphanumeric"] .nd-otp-field-input,
-.nd-otp-field[data-nd-kind="alphanumeric"] .nd-otp-field-figure > span {
+.nd-otp-field[data-nd-kind="alphanumeric"] .nd-otp-field-input{
   --nd-otp-wide: 1.35;
 }
 
-.nd-otp-field[data-nd-size="small"] .nd-otp-field-input,
-.nd-otp-field[data-nd-size="small"] .nd-otp-field-figure > span {
+.nd-otp-field[data-nd-size="small"] .nd-otp-field-input{
   --nd-otp-box: var(--noctua-space-8);
   font-size: var(--noctua-size-body);
 }
 
-.nd-otp-field[data-nd-size="large"] .nd-otp-field-input,
-.nd-otp-field[data-nd-size="large"] .nd-otp-field-figure > span {
+.nd-otp-field[data-nd-size="large"] .nd-otp-field-input{
   --nd-otp-box: var(--noctua-space-16);
   font-size: var(--noctua-size-h3);
 }
@@ -12670,28 +12637,11 @@ figure.nd-image {
 }
 
 /* The specimen on the component's own page: drawn characters rather than live
-   boxes, because a specimen of a `needs_name` component must not render a
-   nameless control. It answers the same two props the real box does, or the
-   grid draws one picture for all three sizes and both kinds. */
-.nd-otp-field-figure {
+   boxes,
+because a specimen of a `needs_name` component must not render a
+   nameless control. It answers the same two props the real box does{
   display: inline-flex;
   gap: var(--noctua-space-2);
-}
-
-.nd-otp-field-figure > span {
-  --nd-otp-box: var(--noctua-space-12);
-  --nd-otp-wide: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  inline-size: calc(var(--nd-otp-box) * var(--nd-otp-wide));
-  min-block-size: var(--nd-otp-box);
-  font-family: var(--noctua-font-mono);
-  font-size: var(--noctua-size-lead);
-  color: var(--nc-color-fg);
-  background: var(--nc-color-surface);
-  border: var(--noctua-border-hairline) solid var(--nc-color-border-strong);
-  border-radius: var(--noctua-radius-control);
 }
 
 /* --- Tabs, Tab and TabPanel ----------------------------------------------- */

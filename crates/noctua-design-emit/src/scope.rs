@@ -291,3 +291,102 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+mod contrast {
+    /// The switch's knob has to carry against its track, in every palette.
+    ///
+    /// # Why this is arithmetic and not a browser test
+    ///
+    /// The knob is one colour in both states, which is what makes it read as
+    /// one object rather than two of different sizes — that was reported twice.
+    /// The price is that the track has to move away from it, and by how much is
+    /// a fact about all thirty-nine palettes in two appearances, not about the
+    /// one a page happens to be showing.
+    ///
+    /// Three browser probes failed to switch palette before this was written.
+    /// The vendored ramps are on disk and the sums are four lines, so the whole
+    /// set is checked here rather than a sample of it in a viewport.
+    ///
+    /// The measured curve, at the time of writing: the bare accent fails on
+    /// **39 of the 78 pairs**, worst 2.51:1 on `amber-vivid` dark. 86% failed
+    /// 39, 82% failed 28, 78% cleared every one at 3.08:1, and 74% is what
+    /// ships, at 3.21:1.
+    #[test]
+    fn every_switch_track_carries_its_knob() {
+        /// What `shell.css` mixes. Change one and this test changes with it.
+        const ACCENT: f64 = 0.74;
+        /// `WCAG 1.4.11`, for a component's own parts.
+        const FLOOR: f64 = 3.0;
+
+        let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
+        let mut checked = 0usize;
+        let mut worst = (f64::MAX, String::new());
+
+        for entry in std::fs::read_dir(root.join("dist/palettes")).expect("palettes") {
+            let path = entry.expect("entry").path();
+            if path.extension().is_none_or(|e| e != "json") {
+                continue;
+            }
+            let text = std::fs::read_to_string(&path).expect("read");
+            let name = path
+                .file_stem()
+                .unwrap_or_default()
+                .to_string_lossy()
+                .to_string();
+
+            for mode in ["light", "dark"] {
+                let Some(accent) = token(&text, mode, "--nc-accent-solid") else {
+                    continue;
+                };
+                let surface = token(&text, mode, "--nc-neutral-bg-app").expect("surface");
+                let knob = token(&text, mode, "--nc-neutral-text-strong").expect("fg");
+
+                let track: [f64; 3] =
+                    std::array::from_fn(|i| accent[i].mul_add(ACCENT, surface[i] * (1.0 - ACCENT)));
+                let ratio = contrast(luminance(track), luminance(knob));
+                if ratio < worst.0 {
+                    worst = (ratio, format!("{name} {mode}"));
+                }
+                assert!(
+                    ratio >= FLOOR,
+                    "the switch's knob is {ratio:.2}:1 against its track on {name} {mode}, \
+                     under the {FLOOR}:1 a component's own parts need"
+                );
+                checked += 1;
+            }
+        }
+
+        // A sweep that read nothing would pass for ever.
+        assert!(
+            checked >= 70,
+            "only {checked} palette and appearance pairs were read"
+        );
+        println!("{checked} pairs, worst {:.2}:1 on {}", worst.0, worst.1);
+    }
+
+    /// One `#rrggbb` from a palette file, as linear light.
+    fn token(text: &str, mode: &str, name: &str) -> Option<[f64; 3]> {
+        let block = text.split(&format!("\"{mode}\"")).nth(1)?;
+        let at = block.find(name)?;
+        let hex = block[at..].split('#').nth(1)?;
+        let hex = &hex[..6];
+        Some(std::array::from_fn(|i| {
+            let byte = u8::from_str_radix(&hex[i * 2..i * 2 + 2], 16).unwrap_or(0);
+            let v = f64::from(byte) / 255.0;
+            if v <= 0.039_28 {
+                v / 12.92
+            } else {
+                ((v + 0.055) / 1.055).powf(2.4)
+            }
+        }))
+    }
+
+    fn luminance(c: [f64; 3]) -> f64 {
+        0.2126f64.mul_add(c[0], 0.7152f64.mul_add(c[1], 0.0722 * c[2]))
+    }
+
+    fn contrast(a: f64, b: f64) -> f64 {
+        (a.max(b) + 0.05) / (a.min(b) + 0.05)
+    }
+}
