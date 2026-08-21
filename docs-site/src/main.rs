@@ -666,17 +666,116 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
     // Node (`NOCTUA.md §9.11`). Without it the page renders no implementation
     // control at all rather than one that fails once per reader — see
     // `react_is_available`, which is what `document` reads to decide.
+    count += copy_react(root, out)?;
+
+    Ok(count)
+}
+
+/// The React bundle, copied where it exists and reported on where it does not.
+///
+/// Its own function because `copy_assets` is at clippy's line ceiling and this
+/// is the one asset with something to say about itself.
+fn copy_react(root: &Path, out: &Path) -> Result<usize, String> {
     let react = root.join("docs-site/assets/react");
-    if react.is_dir() {
-        count += copy_dir(&react, &out.join("assets/react"), "js")?;
-    } else {
+    if !react.is_dir() {
         println!(
             "  note: docs-site/assets/react is absent — run \
              `pnpm --filter @noctua-world/docs-site run build:example`"
         );
+        return Ok(0);
     }
-
+    let count = copy_dir(&react, &out.join("assets/react"), "js")?;
+    if let Some(stale) = react_is_stale(root, &react) {
+        println!(
+            "  note: the React bundle is older than {stale} — run \
+             `pnpm --filter @noctua-world/docs-site run build:example`"
+        );
+    }
     Ok(count)
+}
+
+/// The newest file the React bundle packages, if the bundle is older than it.
+///
+/// # Why this is a note and not a failure
+///
+/// The bundle is gitignored, esbuild builds it, and `NOCTUA.md §9.11` says the
+/// Rust half of this repository owes nothing to Node — so a machine that has
+/// never run `pnpm install` has to be able to build the whole site. It cannot
+/// rebuild the bundle, and failing here would make Node a requirement through
+/// the back door.
+///
+/// # Why it is worth saying at all
+///
+/// The bundle went **five days stale** without anybody noticing, so every React
+/// example in the browser was running a five-day-old package: a change to a
+/// component reached the Dioxus half of every page and the React half of none,
+/// and the one test that compares them compares a single example. That is the
+/// same shape as a generated file drifting from its spec, and this repository
+/// fails the build on that.
+///
+/// # The list of sources is esbuild's, not a guess
+///
+/// The first version of this walked `packages/react/src`, `packages/tokens` and
+/// `docs-site/js` and asked which was newest. It cried wolf on the very first
+/// build, naming `packages/tokens/i18n.js` — 1.2 MB of message catalogue that
+/// the bundle **deliberately never imports**, and that a build assertion keeps
+/// out of it. A guessed dependency list is a warning nobody believes twice.
+///
+/// `--metafile` writes exactly what was read, so that is what is read here.
+fn react_is_stale(root: &Path, bundle: &Path) -> Option<String> {
+    // `root` is `<manifest>/..`, which is not canonical, so a `strip_prefix`
+    // against it silently fails and the note reads `../packages/…`.
+    let here = root.canonicalize().ok()?;
+    let built = newest_js(bundle)?.0;
+    let meta = std::fs::read_to_string(bundle.join("meta.json")).ok()?;
+
+    let mut worst: Option<(std::time::SystemTime, String)> = None;
+    // EVERY QUOTED PATH IN THE FILE, not the first of each `"inputs"` block.
+    //
+    // Slicing to the next `}` was the obvious thing and it is wrong: that brace
+    // closes the FIRST input's own object, so exactly one of a hundred and
+    // three was ever read, and touching any other left the note silent. A
+    // parser would be a dependency for one field (`NOCTUA.md §2.3`), so this
+    // reads every string that names a `.js` and lets the filesystem say which
+    // of them exist. The outputs are in there too and resolve to the bundle
+    // itself, which is the baseline being compared against.
+    for key in meta.split('"').skip(1).step_by(2) {
+        // `Path::extension` rather than `ends_with`, which clippy reads as a
+        // case-sensitive extension test — and it is right that this is one.
+        if Path::new(key).extension().is_none_or(|e| e != "js") {
+            continue;
+        }
+        // Paths are relative to `docs-site`, which is where esbuild ran.
+        let path = root.join("docs-site").join(key);
+        let Ok(when) = std::fs::metadata(&path).and_then(|m| m.modified()) else {
+            continue;
+        };
+        if when > built && worst.as_ref().is_none_or(|(seen, _)| when > *seen) {
+            worst = Some((
+                when,
+                path.canonicalize()
+                    .ok()
+                    .and_then(|p| p.strip_prefix(&here).ok().map(Path::to_path_buf))
+                    .unwrap_or_else(|| PathBuf::from(key))
+                    .display()
+                    .to_string(),
+            ));
+        }
+    }
+    worst.map(|(_, what)| what)
+}
+
+/// The newest `.js` directly inside a directory, with the file it came from.
+fn newest_js(dir: &Path) -> Option<(std::time::SystemTime, PathBuf)> {
+    std::fs::read_dir(dir)
+        .ok()?
+        .flatten()
+        .filter(|entry| entry.path().extension().is_some_and(|e| e == "js"))
+        .filter_map(|entry| {
+            let when = entry.metadata().and_then(|m| m.modified()).ok()?;
+            Some((when, entry.path()))
+        })
+        .max_by_key(|(when, _)| *when)
 }
 
 fn copy_dir(from: &Path, to: &Path, extension: &str) -> Result<usize, String> {
