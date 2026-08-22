@@ -7,9 +7,9 @@
 // width the author does not use, or in a language the author does not read, and
 // it makes every line on the page require two gestures instead of one.
 //
-// `docs-site/PROVISIONAL.md` says to open `/qps/` at 320px "as well: anything
-// that overflows only fitted because English is short". This is that sentence
-// as a check that runs. It found the compound button's second line, which
+// `docs-site/README.md` says to open `/qps/` at 320px "as well: anything that
+// overflows only fitted because English is short". This is that sentence as a
+// check that runs. It found the compound button's second line, which
 // inherited `white-space: nowrap` from the button around it and was 410px of
 // pseudo-locale text inside a 199px control.
 //

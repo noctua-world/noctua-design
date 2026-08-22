@@ -371,7 +371,7 @@ fn docs(root: &Path, verify: bool) -> Result<(), String> {
             .map_err(|error| {
                 format!(
                     "could not run the browser suite: {error}. It needs `pnpm install` \
-                     and a Chrome; see docs-site/PROVISIONAL.md"
+                     and a Chrome; see docs-site/README.md"
                 )
             })?;
         if !status.success() {
