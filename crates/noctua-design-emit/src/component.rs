@@ -7,7 +7,7 @@
 //! surface transcribed by hand agrees with its counterpart only until somebody
 //! adds the eighth setting to one of them.
 //!
-//! # Why there is no `spec/components/theme-scope.toml`
+//! # Why there is no `spec/components/theme-scope.toml` — allow-reference: the absence is the subject of this section
 //!
 //! Every other component will have one. This one must not, and the reason is
 //! worth stating: `ThemeScope`'s props **are** the scopable settings, exactly

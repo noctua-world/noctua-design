@@ -12,11 +12,12 @@
 //!
 //! # One file per component, on purpose
 //!
-//! 499 examples had to be transcribed, and a transcription is exactly the kind
+//! Every example had to be transcribed, and a transcription is exactly the kind
 //! of work that goes wrong quietly. Splitting them by component means each one
-//! could be done and checked on its own, against
-//! `every_tree_draws_what_its_closure_drew` — which renders both halves and
-//! compares the markup byte for byte, in every locale.
+//! can be done and checked on its own — and what pins a tree to the example it
+//! belongs to is the caption repeated beside it, which
+//! [`every_example_has_a_tree`](tests::every_example_has_a_tree) reads against
+//! the table's own.
 
 use dioxus::prelude::*;
 

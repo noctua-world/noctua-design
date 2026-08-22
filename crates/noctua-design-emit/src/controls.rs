@@ -4026,7 +4026,7 @@ pub fn dioxus_imports(component: &Component) -> String {
         // THE ENGINE, NOT A SCRIPT. The scene is laid out where the component
         // renders — here during pre-rendering, and in `layout.js` for React —
         // because this package ships no runtime and a consumer has none to
-        // borrow. `shown_name_of` is aliased so the two bodies can say the same
+        // borrow. `shown_name` is aliased so the two bodies can say the same
         // word without shadowing the `label` prop.
         "Lineage" => concat!(
             "use std::fmt::Write as _;\n",
@@ -5245,8 +5245,8 @@ const TAG_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
 /// a text box, three date segments and a colour swatch. The cost is that this
 /// cannot write `aria-describedby` on something it cannot reach — so the ids
 /// are derived from `control` by the rule its own documentation states, and the
-/// control computes the same two strings. `every_describedby_points_at_something`
-/// is the assertion that they agreed.
+/// control computes the same two strings. `inputs.spec.js`'s *every describedby
+/// points at something* is the assertion that they agreed.
 ///
 /// # It no longer draws the question either
 ///
@@ -7572,8 +7572,8 @@ const TIME_INPUT_DIOXUS: &str = r#"    let id = format!("nd-time-input-{name}");
     // `{id}-hint` while the field drew `{id}-hour-hint`, and every sentence
     // under a `TimeInput` was described by an element that did not exist.
     // Nothing reports a dangling `aria-describedby` — not a browser, not a
-    // validator — which is why `every_describedby_points_at_something` is a
-    // browser test rather than a comment asking for care.
+    // validator — which is why `inputs.spec.js`'s *every describedby points at
+    // something* is a browser test rather than a comment asking for care.
     let control = format!("{id}-hour");
     // THE GROUP DESCRIBES ITSELF NOW. `Field { kind: Group }` is the
     // `<fieldset>`, and a reader entering one hears the hint once rather than

@@ -720,7 +720,7 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
     // `pnpm install`, because the Rust half of this repository owes nothing to
     // Node (`NOCTUA.md §9.11`). Without it the page renders no implementation
     // control at all rather than one that fails once per reader — see
-    // `react_is_available`, which is what `document` reads to decide.
+    // `react_available`, which is what `document` reads to decide.
     count += copy_react(root, out)?;
 
     Ok(count)

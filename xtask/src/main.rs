@@ -13,6 +13,7 @@
 mod build;
 mod check;
 mod gates;
+mod references;
 mod ui;
 
 use std::path::{Path, PathBuf};

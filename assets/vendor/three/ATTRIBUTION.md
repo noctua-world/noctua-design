@@ -25,7 +25,7 @@ documentation site that shows it.
 |---|---|
 | File | `three-webgl.js` |
 | Size | 571 KB, 146 KB gzipped |
-| Fetched | by `docs-site/assets/owl.js`, on the first frame the owl is on screen |
+| Fetched | by `docs-site/assets/model.js`, on the first frame the model is on screen |
 
 ## Why it is vendored rather than installed
 

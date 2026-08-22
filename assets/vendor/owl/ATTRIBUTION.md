@@ -50,4 +50,5 @@ deliberately NOT in `dist/`: no consumer of the packages ever receives a
 byte of her, so the constraint binds this site and nothing downstream.
 
 `docs-site/src/main.rs` copies `owl.glb` to the site as
-`assets/vendor/owl.glb` only when it exists; nothing anywhere requires it.
+`assets/vendor/owl.glb` only when it exists; nothing anywhere requires it. <!-- allow-reference: the URL the built site serves, not a path in this tree -->
+

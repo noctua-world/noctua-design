@@ -141,8 +141,8 @@ pub fn TimeInput(
     // `{id}-hint` while the field drew `{id}-hour-hint`, and every sentence
     // under a `TimeInput` was described by an element that did not exist.
     // Nothing reports a dangling `aria-describedby` — not a browser, not a
-    // validator — which is why `every_describedby_points_at_something` is a
-    // browser test rather than a comment asking for care.
+    // validator — which is why `inputs.spec.js`'s *every describedby points at
+    // something* is a browser test rather than a comment asking for care.
     let control = format!("{id}-hour");
     // THE GROUP DESCRIBES ITSELF NOW. `Field { kind: Group }` is the
     // `<fieldset>`, and a reader entering one hears the hint once rather than

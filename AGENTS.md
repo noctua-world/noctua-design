@@ -256,6 +256,12 @@ because a convention nothing enforces is a convention that decays.
    prop reaches the markup before shipping it, and check it *under the other
    props* — a value inert under another prop's default is the same defect one
    step further away.
+14. **Every path and every name a document cites exists.** A stale reference is
+   worse than a missing one: a missing one asks the reader to look, a stale one
+   answers and the answer is wrong. `xtask/src/references.rs` reads every
+   backtick and every link target in this repository's documents and comments —
+   a path must resolve, and a name with two underscores must be something the
+   code actually declares. **A rename is not finished until this passes.**
 
 **The escape hatch.** Every gate honours `// allow-literal: <reason>` on the same
 line, and the reason has to be a real one. It exists so an exception lands in
@@ -458,6 +464,7 @@ to change.** Each of these carries measured rules, not description:
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
 | a source gate | `xtask/src/gates.rs` |
+| a path or a name cited in prose | `xtask/src/references.rs` |
 | a frame, a scope, the rail, a fold | `docs-site/assets/shell.js` |
 | the router, or any enhancer that must release | `docs-site/assets/navigate.js` |
 | the shell's layout, paint order, or a radius | `docs-site/assets/shell.css` |

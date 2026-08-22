@@ -2,7 +2,7 @@
 //!
 //! One entry per example in `examples::TREE_ITEM`, in the same order. The
 //! caption is repeated here so the pairing is pinned to something a
-//! reader can check: `every_tree_belongs_to_its_example` reads it against
+//! reader can check: `every_example_has_a_tree` reads it against
 //! the table's own, and a tree that slid a row apart fails there rather
 //! than drawing the wrong picture.
 

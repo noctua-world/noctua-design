@@ -326,7 +326,7 @@ a {
  * Stating the height here instead means the NEXT control added is aligned
  * because it is in the bar, not because somebody remembered. The child is told
  * to fill it rather than to match it, so a control cannot opt out by being a
- * different element. `align.spec.js` measures it.
+ * different element. `settings.spec.js` measures it.
  *
  * The direct child is what carries the height, and the interactive box inside
  * it centres within: on `<details>` the child IS the whole disclosure, and

@@ -33,7 +33,7 @@ pub(crate) struct Finding {
 }
 
 /// The marker that excuses a line from every gate.
-const ALLOW: &str = "allow-literal:";
+pub(crate) const ALLOW: &str = "allow-literal:";
 
 /// Directories a gate never walks, each for a stated reason.
 ///

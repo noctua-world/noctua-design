@@ -111,7 +111,7 @@ pub(crate) const SCOPABLE: [Prop; 10] = [
 /// ARE the theme model, and this one has none because it is not a component
 /// the packages ship. Three props is a list short enough that writing it down
 /// costs less than a mechanism to derive it, and
-/// `the_documented_frame_props_are_the_real_ones` is what stops it going
+/// `the_documented_props_are_the_scopable_settings` is what stops it going
 /// stale.
 pub(crate) const FRAME: [Prop; 3] = [
     Prop {

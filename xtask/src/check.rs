@@ -18,7 +18,7 @@
 use std::path::Path;
 use std::process::Command;
 
-use crate::{build, gates, ui};
+use crate::{build, gates, references, ui};
 
 /// Runs every gate.
 ///
@@ -49,6 +49,11 @@ pub(crate) fn run(root: &Path, spec_path: &Path, spec_only: bool) -> Result<(), 
              on the same line",
         );
         failures.push(format!("{} source-gate finding(s)", findings.len()));
+    }
+
+    ui::gap();
+    if let Some(failure) = dangling_references(root)? {
+        failures.push(failure);
     }
 
     ui::gap();
@@ -130,6 +135,32 @@ pub(crate) fn run(root: &Path, spec_path: &Path, spec_only: bool) -> Result<(), 
     payload(root, &mut failures);
 
     finish(&failures)
+}
+
+/// Every path and every name a document cites, checked against what is here.
+///
+/// The other gates read code; this one reads what the code is described BY, and
+/// `references` says why that half needed a mechanism of its own.
+///
+/// # Errors
+///
+/// Only a filesystem failure. A dangling reference is reported and summarised,
+/// like every other finding here.
+fn dangling_references(root: &Path) -> Result<Option<String>, String> {
+    ui::heading("references");
+    let dangling = references::run(root)?;
+    if dangling.is_empty() {
+        ui::ok("every path and name a document cites exists");
+        return Ok(None);
+    }
+    for finding in &dangling {
+        ui::failure(&format!(
+            "{}:{} — {}",
+            finding.file, finding.line, finding.message
+        ));
+    }
+    ui::detail("a renamed file leaves these behind; the rename is not done until they are");
+    Ok(Some(format!("{} dangling reference(s)", dangling.len())))
 }
 
 /// The promise the icon set is arranged around, measured rather than argued.

@@ -5,9 +5,8 @@
 // value it holds is the value that was chosen, and with the script blocked the
 // page is a form that works.
 //
-// Split out of `forms.spec.js` when `/forms` became six component pages. What
-// each test opens matters — a select test on a page with no select passes by
-// measuring nothing.
+// WHAT EACH TEST OPENS MATTERS: a select test on a page with no select passes
+// by measuring nothing.
 
 import { test, expect } from "@playwright/test";
 import { PAGE, showParts, url } from "./pages.js";
