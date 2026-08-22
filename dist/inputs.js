@@ -27,6 +27,56 @@
 //    are no steppers and nothing to spin.
 // 3. Rewrites what a reader typed. Out of range, not a number, not a time —
 //    each is refused with the caller's own sentence, and the value stays.
+//
+// A CONTROL CARRIES ITS VALUE AT REST, AND WHAT THIS SCRIPT DREW CANNOT BE READ
+// BACK OUT OF THE BOX. Five rules, each of which has failed here, and each of
+// which generalises to any control this runtime enhances:
+//
+// 1. `aria-valuenow` BELONGS AT ENHANCE TIME, not inside the move. Written only
+//    on move, a number field is a spinbutton with no current value until a
+//    reader touches it. `aria-valuetext` goes beside it wherever the drawing
+//    says more than the digits do: a currency, a unit, the separators a
+//    grouping option writes.
+// 2. FORMATTING THAT RUNS ON FOCUS AND BLUR ALONE DOES NOTHING AT REST, so a
+//    grouped field renders its raw value until somebody enters it.
+// 3. `Number("1.499,90")` IS `NaN`. A value this script formatted has to be
+//    REMEMBERED, with the text drawn for it, and trusted only while the box
+//    still shows that text. A stepper that re-parses the box falls back to the
+//    minimum.
+// 4. `step` SETS THE FEWEST DECIMALS DRAWN, NEVER THE MOST. Rounding to what
+//    `step` implies is a rewrite: 7.5 in a field that steps by one is 7.5.
+// 5. A CONTROL THIS SCRIPT OWNS SHIPS `hidden`, and `readonly` refuses a
+//    stepper exactly as `disabled` does — in the markup AND in the handler,
+//    since a value a press can still change is a value that is still editable.
+//    The `:not([hidden])` on a reveal rule is load-bearing: `[hidden]` is one
+//    attribute of specificity, so without it the stylesheet reveals a control
+//    the markup shipped hidden and a page with no script draws two that move
+//    nothing.
+//
+// THE READER'S LOCALE IS NOT THE PAGE'S LANGUAGE, and
+// `document.documentElement.lang` is the page's. The site is pre-rendered per
+// locale, so that attribute is `en`, `pt-BR` or `qps` — never a region — and a
+// bare `en` resolves to the United States for every reader of the English
+// build. Split the question, because it is two questions:
+//
+//   * A WORD FOLLOWS THE PAGE. Month names, weekday initials, a bound inside a
+//     sentence the page is already written in.
+//   * A CONVENTION FOLLOWS THE READER, and the reader is `navigator.languages`.
+//     The row's order, the week's first day and the clock are conventions, read
+//     through `Intl` — `formatToParts` for the order, `resolvedOptions().hour12`
+//     for the clock. NEVER A TABLE OF LOCALES TO FORMATS: a table is a copy of
+//     CLDR that stops being true the day CLDR changes. An empty chain is passed
+//     as an empty array, which `Intl` reads as the reader's own default.
+//
+// A TWELVE-HOUR CONTROL IS A REAL `Segmented`, AND THE FORM STILL POSTS
+// TWENTY-FOUR HOURS. Markup that imitates a component carries none of its
+// attributes, so every compound rule that draws a joined control matches
+// nothing and the pair renders as two detached boxes. Four rules came with it:
+// the server decides which half of the day is chosen and an empty field chooses
+// NEITHER; a box posts what it SHOWS, so the entry is rewritten on `formdata`;
+// the value is RENDERED into the boxes rather than arriving only at enhance
+// time; and a name and both words, or no control at all — a fallback that draws
+// raw values puts untranslated identifiers on the page.
 
 import { fill, plural, say, saySentence } from "./messages.js";
 

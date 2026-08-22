@@ -25,6 +25,38 @@
 //! It does not check that a sentence is true, or useful, or that it names the
 //! right prop. It cannot. Those stay a person's job, and this exists so the
 //! person is reading for those things rather than for em dashes.
+//!
+//! # What it covers, and what to write
+//!
+//! It runs under `cargo xtask check` over `[meta] summary`, `guidance`,
+//! `[a11y] notes`, every prop `doc`, every keyboard action, and both
+//! `spec/i18n/*.toml`. Say what the thing is and what it does. A summary opens
+//! on a verb and names what a reader can do; a reason belongs in a `doc` only
+//! when it changes what the caller writes.
+//!
+//! Two things this checker knows that are easy to get wrong when extending it:
+//! a backticked run is CODE, so `` `tones::ALL` `` is a name rather than a
+//! shout; and whether an `example.*` key is a note or the content inside a
+//! picture is decided by the macro in `docs-site/src/examples.rs`, which the
+//! test reads rather than guesses. `spec/components/checkbox.toml` is the
+//! worked reference, and its Portuguese is under `component.checkbox.*`.
+//!
+//! # The Portuguese has a glossary, and nothing here enforces it
+//!
+//! `spec/i18n/pt-BR.toml` is written by whoever changes the English, and a term
+//! translated two ways is the commonest defect in it. Settled: *a pessoa* for
+//! the person using the interface, *quem chama* for the developer, *leitor de
+//! tela*, *parada de tabulação*, *padrão* (never the English *default*),
+//! *linha* for a table row, *rótulo* for a visible label and *nome acessível*
+//! for the accessible name, *traço* for a drawn rule, *alça* for a slider grip
+//! and *cursor* only for the text caret, *região dinâmica*, *resumo* for an
+//! error summary, *marcação*, *navegador*, *o build*.
+//!
+//! This module measures length, punctuation and banned constructions in both
+//! languages. It cannot tell whether a sentence reads AS Portuguese: *portão*
+//! for a build gate, *compositor* for a composer input and *sumário* for an
+//! error summary all passed it. That half is a reading, against the English,
+//! and it is worth doing whenever the Portuguese is written in bulk.
 
 use crate::error::Problem;
 

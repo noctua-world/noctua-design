@@ -13,6 +13,37 @@
 //! value, so neither can disagree with the other about one. Adding a prop to one
 //! implementation by hand is either overwritten by the next build or reported by
 //! the drift check.
+//!
+//! # What a contract may claim, and what checks the claim
+//!
+//! **A declared `attribute` is a claim about the markup**, and [`rust_element`]
+//! keeps it only for a DERIVED body. A component written by hand in
+//! `controls.rs` never reaches that function, so a contract can declare a
+//! `data-nd-*` that no body writes and no script reads while the site's
+//! generated markup snippet prints it as though it were there. Nothing else
+//! reports it, because the values do reach the DOM — as labels, as tab names,
+//! as text. `every_declared_attribute_is_written_by_both_bodies` reads the
+//! emitted source, so it covers both kinds of body.
+//!
+//! **A prop may choose the ELEMENT, and that is declared**: `elements = [...]`
+//! beside `values`, position by position. At most one prop per component may,
+//! and a prop that switches the element carries no attribute. Without the
+//! declaration a prop that promises an element renders the default one, silently
+//! — accepted, documented, and inert.
+//!
+//! **A prop that does nothing is a defect, not a stub.** It is not a compile
+//! error and not visible in review, so check that a prop reaches the markup
+//! before shipping it — and check it UNDER THE OTHER PROPS, because a value
+//! inert under another prop's default is the same defect one step further away.
+//!
+//! **No prop value may name a domain.** `subtotal | total` is `subtle |
+//! strong`: a table of servers has no subtotal, and the two weights are *where
+//! a section ends* and *which line is the answer*.
+//!
+//! **A prop may not be named after a reserved word** in either language, and
+//! the spec refuses one by name. Escaping to `r#loop` would work and would be
+//! one prop with two spellings across the two packages, which is the thing they
+//! exist not to have.
 
 use std::fmt::Write as _;
 

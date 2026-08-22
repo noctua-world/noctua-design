@@ -17,6 +17,69 @@
 // 3. It does not trap focus or set `inert`. The drawer is not modal — widening
 //    the window past `lg` undoes the whole open state in CSS, with no listener
 //    to miss and no state to unwind.
+//
+// A FRAME OWNS WHAT IS INSIDE IT, AND THAT RULE IS WHY THERE IS NO TARGET PROP.
+//
+// A setting a frame STATES owns its whole subtree — a nested frame, its bar,
+// its border, its own menu panel. A setting nobody stated comes from OUTSIDE,
+// which on an ordinary page is the page and inside another frame is that frame.
+// Reset CLEARS the request; it does not state the page. This replaces a rule
+// that said the opposite, and the opposite is why the defect kept coming back:
+// a frame that defaults its request to the page's whole theme has the resolver
+// stamp the page back on and cancel the frame around it.
+// `tests/browser/frame-isolation.spec.js` is named after this rule so a rewrite
+// cannot lose it.
+//
+// Four things that make it look done when it is not:
+//
+//   * A FRAME THE RESOLVER NEVER VISITS CANNOT FOLLOW ANYTHING, so every frame
+//     is registered at load whether or not it has been themed.
+//   * `inheritedAt` MUST WALK REGISTERED SCOPES, NOT STAMPED ONES. Stamped
+//     means resolution depends on which ancestors happen to have been visited
+//     in the current pass — theme the inner frame first and it inherits the
+//     page.
+//   * A VALUE STAMPED AS THE ABSENCE OF ITS ATTRIBUTE means both "the machine
+//     decides" AND "whatever is above me". One spelling for two facts, so that
+//     one value is written out concretely and nothing else is.
+//   * A NO-OP SCOPE CARRIES NO ATTRIBUTES AT ALL, so anything selecting
+//     `[data-noctua-scope]` under a frame — a reset, an assertion — skips
+//     exactly the frames that stated nothing. Never write `getAttribute` in a
+//     test; ask the pixels, or ask what is in force.
+//
+// WHERE A SETTINGS VALUE LANDS IS DECIDED BY WHERE THE CONTROL SITS. Inside a
+// themed scope it themes that scope; inside an example frame it themes that
+// frame's stage; a setting the model knows themes the document; anything else
+// moves and no more. And a scoped control inverts what is in force WHERE IT
+// SITS: `settingAt(element, name)` walks every scope above the element and is
+// the only correct answer once anything can nest.
+//
+// A FRAME'S PARTS ARE ITS OWN, AND A NESTED FRAME IS NOT PART OF ITS PARENT.
+// Every one of a frame's controls is resolved through the nearest
+// `[data-nd-frame]`, because the frame's own documentation page puts one inside
+// another. A `frame.querySelectorAll(…)` there reaches into the nested one, and
+// a control that marks a stop it did not set is a control that lies.
+//
+// THE FRAME'S CONTROLS ARE A RAIL, AND THEIR AXIS CHANGES. The bar is an
+// ordinary STATIC grid item, in flow, so the floating-surface allow-list does
+// not apply to it; below the `sm` step the grid collapses to one column and the
+// rail lies down into a row. `Toolbar` writes `aria-orientation` and this file
+// reads it to choose the arrow keys, so THE MARKUP CANNOT NAME THE AXIS: it
+// ships `horizontal`, the ARIA default and true at the narrow width a
+// script-free reader is likeliest to be at, and `railAxis()` upgrades it to
+// `vertical` when the stylesheet stands the rail up — reading the breakpoint
+// off `--noctua-breakpoint-sm` rather than writing the length a second time.
+//
+// THE FOLDS ON A PAGE SHIP CLOSED, AND ONE OF THEM IS NOT LIKE THE OTHERS. This
+// file closes any open NAMED `[data-nd-disclosure]` the pointer lands outside
+// of, which is right for the header's panels and wrong for a section a reader
+// opened on purpose — so the reference sections are rendered without a `name`.
+// In a browser spec, call `showParts(page)` from `tests/browser/pages.js` after
+// `goto`: a spec about what a component DOES is not a spec about the fold in
+// front of it. AND A TEST THAT SKIPS WHAT IS HIDDEN IS A TEST A FOLD SWITCHES
+// OFF — a floating-surface sweep skipping on `offsetParent` and a 320px sweep
+// skipping on `display: none` both did nothing for a whole stage when these
+// controls were folded behind a gear. Before folding anything, check what stops
+// looking at it.
 
 import {
   modeValues,

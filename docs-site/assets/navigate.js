@@ -31,6 +31,43 @@
 // the implementation switch in a file of its own. It reaches nothing inside
 // `shell.js`: what it is given is `adopt` and `abandon`, and what it hands back
 // is markup.
+//
+// # What routing changes for every enhancer on this site
+//
+// A behaviour that cannot be taken back off is a real LEAK now, not a note in a
+// header comment. Three shapes fail here and nowhere else:
+//
+//  1. AN ENHANCER WITH NO RELEASE. `enhanceAll`/`releaseAll` in `shell.js` are
+//     the two lists and `adopt`/`abandon` are what this file calls. Every new
+//     enhancer belongs in both. `release.spec.js` and `navigation.spec.js` each
+//     ask in a different way, and the second asks through the real path.
+//  2. A FUNCTION CALLED WITH THE STATE IT IS ALREADY IN MUST DO NOTHING.
+//     Anything that exchanges rather than sets has this shape: a toggle that
+//     swapped its two labels on every call was invisible while a link took the
+//     page with it, and became a control announcing the opposite of what it
+//     does the moment the page stopped being thrown away.
+//  3. A REGISTRY FILLED AT MODULE LEVEL IS FILLED ONCE, so anything that
+//     arrives in a second render is in nobody's list. Fill it from a function
+//     the router can call again.
+//
+// THE CLAIM TO KEEP: a page reached by clicking is `document.body.outerHTML`-
+// identical to the same page reached by loading it. `navigation.spec.js`
+// asserts exactly that, with one documented exception. If you change what the
+// shell renders per page, that test is what tells you this file has to copy it.
+//
+// # It never resolves the language
+//
+// The inline script in `<head>` does, and stamps `data-noctua-locale-wanted`;
+// this module refuses to install when that differs from `data-noctua-locale`,
+// so a reader whose preference points elsewhere keeps the full load and the
+// redirect that has always followed it.
+//
+// And that resolution has nothing to say about `qps`. A locale nobody is
+// offered is not a reader's: the pseudo-locale is absent from the language
+// menu, from `data-noctua-locales` and from every link on the site, so the only
+// way to be there is to have typed it — but it is a routed locale like any
+// other once you are. A resolver that bounces every link out of `/qps/` makes
+// the one locale that exists to break layouts unbrowsable.
 
 /// The region that changes, and the only one.
 const MAIN = "#nd-main";

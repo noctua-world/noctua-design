@@ -32,6 +32,32 @@
 //  5. It never guesses which column a cell is in. The `<colgroup>` declarations
 //     say, and a cell may name its own column where a span made the position
 //     ambiguous.
+//
+// FIVE THINGS THAT LOOK LIKE A LAYOUT BUG AND ARE NOT ONE:
+//
+//  a. NEVER HIDE ONE THING TWO WAYS. A column hidden by `visibility: collapse`
+//     on its `<colgroup>` AND by `hidden` on its cells makes automatic table
+//     layout take the next column away as well.
+//  b. A `<col>` WIDTH MUST NOT SWITCH THE TABLE TO `table-layout: fixed`. Under
+//     fixed layout every column with no declared width takes an equal share, so
+//     one resize resets all the others and the values print through each other.
+//     A width is a preference, not a decree.
+//  c. THE NARROW LAYOUT IS A CONTAINER QUERY, NOT A MEDIA QUERY. A props table
+//     inside a narrow example frame must stack on a wide window, which is the
+//     case a media query cannot see. The corollary: a table left to shrink to
+//     its content inside a flex column becomes a box under the breakpoint and
+//     stacks itself, taking its heading row and every sort control with it. A
+//     table in a stack takes the width.
+//  d. THE UN-STACKING QUERY MUST RESTORE ALIGNMENT. The stacked rule is one
+//     class and two attributes deep, so it outranks `[data-nd-align]` at every
+//     width — invisible, because a heading is a flex column that ends its own
+//     items and the words move without the values.
+//  e. A ROW DRAWS ITS OWN LEADING CELLS AND THE HEADING ROW DOES NOT. A choice
+//     control and an expand control are cells the row added, and the `<col>`
+//     declarations know nothing about them, so a table with either wants a
+//     leading `TableColumn` declared for it. The runtime inserts what a caller
+//     did not, because the failure is silent and looks like a broken width
+//     rather than like a missing declaration.
 
 import { fill, plural, say } from "./messages.js";
 

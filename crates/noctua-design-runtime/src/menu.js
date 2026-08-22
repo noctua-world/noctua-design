@@ -22,6 +22,23 @@
 //    thing they were using.
 // 4. It never makes an item a tab stop. A menu owns the arrow keys; a Tab per
 //    item is a menu a keyboard reader walks THROUGH rather than past.
+//
+// THREE THINGS ABOUT THE MARKUP THAT ARE EASY TO GET BACKWARDS:
+//
+//   * `aria-disabled` ON AN ITEM, `disabled` ON A BUTTON. An item that leaves
+//     the arrow walk is an action a reader concludes does not exist.
+//   * `aria-expanded="false"` IS TRUE ON A MENU BUTTON — the one exception to
+//     `Button`'s write-it-only-when-true rule. A button that announces a menu
+//     has to say the menu is shut, not say nothing.
+//   * ESCAPE HAS TO BE HEARD ON THE BUTTON, NOT ONLY ON THE SURFACE. Opening
+//     with a pointer leaves focus on the button deliberately, so a handler only
+//     on the menu leaves that reader no key that puts it away. It is on both,
+//     with `stopPropagation` on each, so a menu inside a dialog closes itself
+//     rather than the dialog.
+//
+// AND A MENU BUTTON DRAWS ONE CHEVRON, WHOEVER DREW IT. `menu` draws it and
+// steps aside for an `icon` or an `icon_end` naming the same drawing — both
+// positions, or a split button ships two side by side.
 
 import { keepAnchored, releaseAnchor } from "./anchor.js";
 

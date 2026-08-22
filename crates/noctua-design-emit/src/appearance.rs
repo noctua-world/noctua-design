@@ -27,6 +27,43 @@
 //!
 //! So this file emits only dimensionless numbers, and the `color-mix()` is
 //! written at the point of use, where the palette is already correct.
+//!
+//! # Three ways a `backdrop-filter` does nothing, none of which reports anything
+//!
+//! 1. **An ancestor has one.** It is then inert — which is why the header's
+//!    frost is a *sibling* painted behind it, and why a scope is not glass: a
+//!    nested scope's blur sampled its parent's and was switched off entirely.
+//! 2. **The element already has an opaque background.** There is nothing behind
+//!    it left to sample.
+//! 3. **Its tokens are undefined**, which computes to `none` — the trap the
+//!    `:where(:root)` default below exists to close.
+//!
+//! It also makes the element the containing block for every `position: fixed`
+//! descendant, so **frost a layer, never a box that contains a floating panel**:
+//! frosting a frame or a header re-anchors any menu inside it, and if that box
+//! also clips, the menu opens where nobody can see it.
+//!
+//! # There is one recipe, and an override wins on specificity
+//!
+//! A component that paints a fill declares `glass`, and a second
+//! `backdrop-filter` written anywhere is a source-gate finding. The
+//! per-component rule that replaces the fill must carry **one more attribute
+//! than the fill it replaces** — winning on source order is how a wrong value
+//! survives review. And a bool prop always writes its attribute, so
+//! `[data-nd-glass]` IS the set of controls that support it: never write that
+//! list down.
+//!
+//! The opacity is 78/58, not 92/82. At 92% there is nothing to see through: the
+//! blur has nothing to do and the effect reads as a tinted panel, which was
+//! precisely the complaint. The floor is readability, and it is measured.
+//!
+//! **A frosted control keeps its colour if it had one, and gains none if it did
+//! not.** The tint is for the variants that were FILLED; tinting the others
+//! turns a white outline control grey. It is mixed from the tone's solid step
+//! against the surface — never the tone at partial alpha, which keeps an
+//! `--nc-color-on-*` ink solved against an OPAQUE fill, and never the tone's
+//! `-bg` step, which is a tint nobody can see. The label is always
+//! `--nc-color-fg`.
 
 use std::fmt::Write as _;
 

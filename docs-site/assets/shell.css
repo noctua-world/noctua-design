@@ -23,6 +23,77 @@
  *
  * 4. Breakpoints are minimum-width only. Never `calc(64rem - 1px)`: that is
  *    how a layout gets a dead zone nobody tests at.
+ *
+ * EIGHT TRAPS THIS FILE HAS FALLEN INTO. Every one of them is a rule that
+ * still binds, and not one of them reports anything:
+ *
+ * a. A SCROLLABLE ELEMENT NEVER CARRIES A RADIUS, and a radius element never
+ *    scrolls. A radius on a scroller has nothing to clip the bar against, so a
+ *    classic scrollbar paints square straight through the rounded corner — the
+ *    moment corners are set to `circular`, a reader sees it. The fix is
+ *    structural: an outer element with the radius and `overflow: hidden`, an
+ *    inner one with `overflow-y: auto`. `.nd-panel` + `.nd-panel-body` is the
+ *    shape. A `<textarea>` IS a scroll container and needs it too.
+ *    `material.spec.js` asserts this over every element on the page, which
+ *    only ever covers the elements that are on it.
+ * b. `scrollbar-width` IS NOT INHERITED. Set on `:root` it styles the page's
+ *    own bar and nothing else, so every panel and code block keeps the
+ *    browser's default — which is the bar a reader is actually looking at.
+ * c. A DEFAULT VALUE IS THE ABSENCE OF ITS ATTRIBUTE, so select the value a
+ *    thing is NOT. A specimen writes every enum default except an `aria-*`
+ *    one, and a runtime building a control by hand writes the class alone, so
+ *    `[data-nd-appearance="joined"]` matches nothing for a reader looking at
+ *    the default. `:not(spread)` is the same set with the defaults included,
+ *    and two such rules cannot both match — which is what lets one axis
+ *    override the other without a specificity fight.
+ * d. A RULE THAT NAMES ONE AXIS HAS TO NAME BOTH. Unconditional rules plus
+ *    rules for `vertical` means a vertical group runs all four and keeps half
+ *    its corners, diagonally opposite. Write each axis's end corners whole,
+ *    from one named radius, and a lone member keeps all four because it is
+ *    both ends.
+ * e. A PROP EVERY CHILD REPEATS IS A PROP THE GROUP OWNS. Siblings share their
+ *    arrangement (`NOCTUA.md §9.7`), so the group's rule overrides each
+ *    child's by being one class deeper — and it must write the DEFAULT out
+ *    too, because the child always writes its own attribute and a group that
+ *    said nothing would lose to it.
+ * f. A DECLARATION THAT LOSES ON SPECIFICITY IS INDISTINGUISHABLE FROM ONE
+ *    THAT WORKS, if the thing you measure would have passed regardless. So
+ *    assert the GEOMETRY — where a control's centre line is, which pixel the
+ *    corner paints — never the property. And when a scripted edit changes this
+ *    file, read the value back out of the built copy: a `replace` with a count
+ *    of one matches the first occurrence in the file, not the one you meant.
+ * g. `max-inline-size: 100%` IS A PERCENTAGE OF ZERO INSIDE A SHUT FOLD. A
+ *    closed `<details>` is `content-visibility: hidden`, so every containing
+ *    block measures zero and a percentage cap collapses the control, taking
+ *    the panel's own width down with it. `inline-size: fit-content` is the
+ *    same intent with a floor — and nothing in that rule set may give a part
+ *    `min-inline-size: 0`, which puts the floor back at zero.
+ * h. A CENTRED FLEX LINE THAT DOES NOT FIT OVERFLOWS BOTH ENDS. A stop divided
+ *    by count rather than by content can be narrower than its own icon and
+ *    word together, and `justify-content: center` then paints the icon over
+ *    the label of the stop before it. `flex-wrap: wrap` costs nothing at any
+ *    width where the two fit side by side.
+ * i. NOTHING CAN BE PULLED TO A SCROLLER'S EDGES WITH A NEGATIVE MARGIN.
+ *    Content overflowing a scroll container's START edge is clipped and
+ *    unreachable, so a band that needs a frame's full width takes its padding
+ *    from `.nd-example`'s own parts rather than from `.nd-frame-stage`. That
+ *    works because `.nd-glass-scroll` is `display: contents` at rest — under
+ *    the glass rig it becomes a real box, and a `padding-inline` on it there
+ *    doubles the inset and moves every example across the colour field.
+ * j. A SHAPE THAT IS SQUARE BY DECLARATION LOOKS LIKE ONE THE PRESET MADE
+ *    SQUARE. `--noctua-radius-none` is `0` under all four corner presets, so a
+ *    part that declares it is a surface that does not answer *Corners* — and
+ *    under the circular preset it is a hard square inside a capsule. SWEEP ALL
+ *    FOUR PRESETS WHEN A CORNER IS THE CLAIM, `square` included, and read the
+ *    corner PIXEL rather than the radius: a length proves the declaration is
+ *    there and nothing about which rule won.
+ *
+ * AND TWO ABOUT PAINT ORDER. A POSITIONED ELEMENT PAINTS ABOVE A STATIC
+ * SIBLING, so anything that must sit ON a frosted layer needs a position of its
+ * own, unconditionally — and `relative` inherits whatever `inset-*` was written
+ * for `sticky`, so cancel it. A PANEL CANNOT OUTRANK ITS OWN ANCESTOR'S
+ * STACKING CONTEXT: a bar that is `sticky` with a `z-index` paints a panel
+ * inside it at the BAR's layer whatever the panel asks for. Raise the bar.
  */
 
 /* --- The one layout variable both the drawer and the scrim read ----------- */

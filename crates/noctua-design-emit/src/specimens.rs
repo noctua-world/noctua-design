@@ -41,6 +41,46 @@
 //! other, so the two travel together. Generating the figure once means the page
 //! and the React mount draw it from one description, rather than from a Rust
 //! copy and a JSON copy that can drift.
+//!
+//! # Rules a new specimen has to keep
+//!
+//! Each of these has failed here, and none of them reports anything.
+//!
+//! - **A picture carries every other enum prop at its default**, because one
+//!   attribute alone matches no compound rule and compound is how every tone is
+//!   painted. **Never an `aria-*` one**: no rule in this system selects on ARIA,
+//!   and a picture inventing `aria-sort="none"` announces itself as a column
+//!   somebody can sort by. A picture of a list claims no role either, which is
+//!   why the whole-page sweeps skip [`STAGE`].
+//! - **A specimen's `name` is the CELL's, not the component's.** Every other
+//!   required text prop takes the component's own name — the same string in
+//!   every cell, which is what lets `variants.spec.js` measure two values
+//!   against each other — but `name` is the hook every control derives its ids
+//!   from, and two radio groups sharing a name are one group.
+//! - **A specimen still has a name**, given by the component through the prop
+//!   its contract requires. `every_specimen_of_a_named_control_has_a_name` is
+//!   the gate.
+//! - **The marker saying a cell shows names goes on the stage**, not on the
+//!   component call: where a component wraps itself in a `Field`, the class
+//!   lands on the control and the `<label>` is its SIBLING.
+//! - **A grid repeats its own words on purpose**, so two values painted alike
+//!   measure alike. That is the opposite of what the example sweeps demand, so
+//!   those read `:not(.nd-variant-stage *)`.
+//! - **A cell carries `.nd-table-value`** where a table is the subject, or
+//!   every rule acting on the value rather than the cell does nothing here.
+//! - **A group's own grid needs the reach in each MEMBER**, or three
+//!   arrangements draw one picture.
+//! - **The stage disables three things** — `container-type` (which IS
+//!   `contain: inline-size`, so the intrinsic width is zero), the scroller's
+//!   overflow, and `inline-size: 100%`. Any one left in place collapses the
+//!   specimen to nothing.
+//!
+//! `variants.spec.js` asks the four questions a grid exists to answer: two
+//! values of one prop drawing the same picture (its fingerprint reads
+//! `::-webkit-*` parts, because `<meter>`, `<progress>` and a range `<input>`
+//! are painted there and nowhere else); every cell draws something; every cell
+//! carries the value its caption names; and no cell overhangs a frame that
+//! cannot scroll at 320 pixels.
 
 use std::collections::BTreeSet;
 use std::fmt::Write as _;

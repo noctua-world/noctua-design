@@ -22,6 +22,36 @@
 //! `cargo xtask check` rather than the site build; and the pages stay a `const`
 //! array of `&'static str`, which is what lets a link be a `PageId` instead of
 //! a string.
+//!
+//! # Which page a component is documented on is in its contract
+//!
+//! `[meta] page` names a collection — several components on one page — and
+//! absent means a page of its own. `site::pages` panics on a value no page
+//! declares, because the failure mode is silent: a component documented nowhere
+//! looks exactly like one that moved. **Never keep a list of which components
+//! moved anywhere else.**
+//!
+//! Three things nevertheless move with a component, each keyed by SLUG in a
+//! different file: `examples::OVERVIEWS` holds the caption of the page's hero,
+//! `trees::HEROES` holds its tree, and `tests/browser/pages.js` holds its URL. A
+//! merge leaves an entry in each pointing at a slug that is no longer a page,
+//! and nothing reports it — the lookup that misses returns `None` and the page
+//! simply opens with no example on it. `every_overview_leads_a_page_that_exists`
+//! and `every_hero_leads_a_page_that_exists` are the two gates.
+//!
+//! **A collection page puts every component on it into the search index.**
+//! `page.component` is `None` for a shared page, so reading it drops every
+//! member of every collection out of the site's own search. `site::documented_on`
+//! is the answer, deduped on name-and-page, because two parts of one collection
+//! each declaring `children` would otherwise be two rows pointing at one place.
+//!
+//! **A collection page's title is a NAME, never a message.** A foundation is a
+//! sentence a reader reads; a component page is an identifier a developer
+//! types, and a translated collection title names components that exist under
+//! no such name anywhere. Title a collection with the name at its head, or with
+//! an English label where its members share none, and **leave the slug alone**:
+//! a URL a reader may have kept is not worth a rename, and nothing derives the
+//! title from it.
 
 use std::fmt::Write as _;
 

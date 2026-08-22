@@ -49,6 +49,42 @@
 //! What stays here is what is about the DRAWINGS rather than about the
 //! component: the names, the geometry, the manifest, the attribution, and the
 //! stroke weight both bodies read from `noctua_design_icons::STROKE_WIDTH`.
+//!
+//! # Adding a drawing
+//!
+//! **An icon is fetched, never drawn.** Every `[source.*]` in `spec/icons.toml`
+//! carries the commands that vendored its directory, and `ATTRIBUTION.md` is
+//! generated from them. `SHA256SUMS` is recorded at fetch and verified on every
+//! build, so an edited file fails the build rather than shipping a glyph that
+//! claims a provenance it does not have. A glyph reproduced from memory is
+//! exactly that failure.
+//!
+//! **A source is SWEPT; a table is for an opinion.** `sweep = true` makes every
+//! drawing in a directory an icon named after its file. Write an
+//! `[icon.<name>]` table only for what a filename cannot say — a deliberate
+//! rename, a hand-written `doc`, `paint = "fill"` — and **a table claims its
+//! file**, so `close` ← `x.svg` produces `close` and no `x`. Upstream's name
+//! stands unless this system renamed it on purpose.
+//!
+//! **Do not add a barrel.** A module re-exporting every icon would pass every
+//! other gate and undo the whole arrangement the first time somebody imported
+//! it for convenience. A consumer that genuinely wants the set fetches
+//! `dist/icons.json` at run time.
+//!
+//! # The React bodies' imports are derived from the bodies
+//!
+//! Each drawing is its own module, so a body that renders one has to import it
+//! — and a list beside the bodies saying which component wants which icon would
+//! be a second place the same fact is written, failing as a `ReferenceError` at
+//! render time rather than as a build error. `controls::react_icon_imports`
+//! reads `icon: <export>` out of the generated body and imports exactly those.
+//! Position matters and a bare word will not do: `menu`, `check`, `search` and
+//! `columns` are all real drawings *and* real local variables in those bodies.
+//!
+//! An icon prop is a TYPE wherever it appears, including on a menu item. A
+//! `String` run through a name lookup at render time is the defect the type
+//! exists to prevent, and it puts every drawing in the system into every
+//! consumer of that component.
 
 use std::fmt::Write as _;
 

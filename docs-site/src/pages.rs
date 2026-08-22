@@ -4,6 +4,32 @@
 //! paragraph, never on `<main>` — the page is as wide as the screen and the
 //! *line* is not (`NOCTUA.md §9.7`), which is also what leaves the empty column
 //! the effect layers show through.
+//!
+//! # One page shape, and it is built once
+//!
+//! [`DocPage`] is the only page body: a head (title, one-line lead, and one
+//! complete working example from `examples::OVERVIEWS`), a `DocIndex`, then the
+//! sections `ComponentSections` emits — **when · examples · variants ·
+//! reference**. `Depth` is what a collection page changes and the only thing it
+//! changes; it used to be a `bool` and two copies of a hundred lines, which is
+//! how the two copies drifted apart. A page whose shape differs from this is a
+//! bug, and `tests/browser/audit.spec.js` asserts it on every page.
+//!
+//! The reference folds ship CLOSED, so every `<summary>` carries a real
+//! heading: closed, the title is all that is left of the section. They are
+//! rendered without a `name`, because `shell.js` closes any open *named*
+//! disclosure the pointer lands outside of — right for the header's panels,
+//! wrong for a section a reader opened on purpose.
+//!
+//! # Every document sits at the same depth
+//!
+//! `<locale>/<slug>/index.html`, for foundations and components alike, which is
+//! what makes `site::BASE` a constant rather than a calculation and every
+//! relative href resolve identically after the router swaps a page in.
+//! `site.rs` asserts it. Nothing shows `.html`, so `file://` cannot serve this
+//! site — `cargo xtask dev` is the way to look at it — and a directory reached
+//! without its trailing slash must 301, or every document-relative href on the
+//! page resolves one level too high.
 
 use dioxus::prelude::*;
 use noctua_design::ThemeScope;
