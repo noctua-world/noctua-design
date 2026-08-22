@@ -51,12 +51,12 @@ of it.
 
 ## A measurement worth acting on
 
-This directory is **73 MB**, and 56 MB of that is the `json-ts` target:
+This directory is **72 MB**, and 55 MB of that is the `json-ts` target:
 
 | Target | Size | Consumed by |
 |---|---|---|
 | `json` | 37 MB | nothing here yet |
-| `ts` | 19 MB | nothing here yet |
+| `ts` | 18 MB | nothing here yet |
 | `css` | 14 MB | the components and the docs site |
 | `rust` | 3.6 MB | the Dioxus package |
 | `tailwind` | 132 KB | the Tailwind bridge |

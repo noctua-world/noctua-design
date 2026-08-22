@@ -12,7 +12,7 @@ classes `CSS3DRenderer` needs and nothing else: `PerspectiveCamera`, `Scene`,
 | Home | https://threejs.org |
 | Source | https://github.com/mrdoob/three.js |
 | Licence | MIT — `LICENSE-three-MIT.txt` beside this file |
-| Size | 235 KB, 53 KB gzipped |
+| Size | 230 KB, 52 KB gzipped |
 
 `three-webgl.js` is a second tree-shaken bundle of the same release, containing
 the renderer, the geometries, the materials and the lights that the owl on the
