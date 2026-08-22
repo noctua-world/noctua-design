@@ -1693,8 +1693,23 @@ function buildSearch(root_) {
 
   // Choosing a result is what makes it recent, and it is the only thing that
   // does: a query somebody typed and abandoned is not one they meant.
+  //
+  // AND IT ANSWERS THE QUESTION, which is what closes and clears the palette.
+  // Until `navigate.js` existed, following a result took the whole document
+  // with it and both were free; with the document kept, the dialog stayed open
+  // over the page the reader had just asked for, and the box stayed full — so
+  // reopening the palette showed the results of the query they had already
+  // answered instead of the recents that are the point of an empty box.
+  //
+  // Here rather than in the router, because the dialog is `Search`'s. A router
+  // that reached in to close somebody else's surface would need a second line
+  // for every surface a link can sit in.
   list.addEventListener("click", (event) => {
-    if (event.target.closest("a")) rememberQuery(state);
+    if (!event.target.closest("a")) return;
+    rememberQuery(state);
+    if (!state.dialog) return;
+    clearQuery(state);
+    state.dialog.close();
   }, { signal });
 
   if (state.dialog) {
@@ -3363,7 +3378,25 @@ if (document.querySelector("[data-nd-all-palettes]")) {
 
 // --- The drawer ------------------------------------------------------------
 
+/**
+ * Opens the drawer, or closes it — and does nothing at all otherwise.
+ *
+ * THE GUARD IS NOT AN OPTIMISATION. The exchange below is a SWAP: it puts the
+ * name the control is not showing into `aria-label` and files the one it was
+ * showing under `data-nd-label-alt`. That is only correct once per real change
+ * of state, and this function used to be called with the state it was already
+ * in — every click on a link in the navigation calls it with `false`, whether
+ * or not the drawer was ever open.
+ *
+ * It was invisible while a link took the whole page with it: the swap happened
+ * and the document was gone a moment later. `navigate.js` keeps the document,
+ * so the first click on any sidebar row renamed the closed hamburger to *Close
+ * the menu* and marked it `aria-pressed="false"` — a control announcing the
+ * opposite of what it does, on a page that had not moved. The byte-for-byte
+ * comparison in `navigation.spec.js` is what found it.
+ */
 function setDrawer(open) {
+  if (open === (root.getAttribute("data-nd-nav") === "open")) return;
   if (open) {
     root.setAttribute("data-nd-nav", "open");
   } else {
@@ -3680,7 +3713,7 @@ function fillMessage(template, args, count = null) {
 // subtree hanging off it. `resolveScopes` walks the array on every theme
 // change, so each leaked stage is also work done for nobody. `forgetScopes`
 // below is the eviction.
-const scopes = [...document.querySelectorAll(`[${scopeAttribute}], [data-nd-frame-stage]`)];
+const scopes = [];
 
 /**
  * Drops every registered scope that has left the document.
@@ -3712,17 +3745,46 @@ const initial = new WeakMap();
  */
 const readableSettings = scopableSettings.filter((name) => model[name].attribute != null);
 
-for (const element of scopes) {
-  const request = {};
-  for (const name of readableSettings) {
-    const value = element.getAttribute(model[name].attribute);
-    if (value != null) request[name] = value;
+/**
+ * Registers every scope and every stage under `root`, and reads what it asks.
+ *
+ * THIS USED TO BE A `const` AND A LOOP AT MODULE LEVEL, which was correct while
+ * the page was rendered exactly once. `navigate.js` renders `<main>` again, and
+ * a stage that arrived in the second render was in nobody's list: it resolved
+ * against nothing, so a frame the reader had navigated to could not be themed
+ * and its own controls reported the page.
+ *
+ * IN DOCUMENT ORDER, AND THAT IS THE WHOLE REASON THIS IS A LIST AT ALL.
+ * `inheritedAt` reads a request off an ancestor, so an inner scope resolved
+ * before its outer one has been visited would inherit the page and stamp the
+ * page's values absolutely — which no later pass undoes. `querySelectorAll`
+ * answers in document order; appending its answer keeps the invariant, because
+ * everything already registered sits outside the subtree being adopted (the old
+ * one's entries went in `forgetScopes`, which runs first).
+ *
+ * ALREADY-REGISTERED ELEMENTS ARE SKIPPED RATHER THAN RE-READ. A second pass
+ * over a live scope would overwrite `requests` with what is STAMPED on it,
+ * which is the resolver's output rather than the scope's question — so a stage
+ * the reader had themed would silently adopt its own resolved answer as an
+ * absolute request and stop following the page.
+ */
+function registerScopes(root = document) {
+  for (const element of root.querySelectorAll(`[${scopeAttribute}], [data-nd-frame-stage]`)) {
+    if (scopes.includes(element)) continue;
+    const request = {};
+    for (const name of readableSettings) {
+      const value = element.getAttribute(model[name].attribute);
+      if (value != null) request[name] = value;
+    }
+    // A scope with no `data-theme` is following whatever it inherits, which is
+    // exactly what an absent value means everywhere else in this system.
+    scopes.push(element);
+    requests.set(element, request);
+    initial.set(element, { ...request });
   }
-  // A scope with no `data-theme` is following whatever it inherits, which is
-  // exactly what an absent value means everywhere else in this system.
-  requests.set(element, request);
-  initial.set(element, { ...request });
 }
+
+registerScopes();
 
 function documentTheme() {
   const theme = {};
@@ -5302,23 +5364,29 @@ enhanceAll();
  * THE BREAKPOINT IS READ, NOT WRITTEN. It comes off the token layer, so this
  * cannot drift from the `@media` rule in the stylesheet that stands the rail
  * up. Writing `30rem` here would be a second copy of one number.
+ *
+ * THE QUERY IS REGISTERED ONCE AND THE PASS IS RE-RUNNABLE, which is the split
+ * a second render needs: a rail that arrived with `navigate.js`'s new `<main>`
+ * ships the markup's `horizontal` and would announce a horizontal walk on a
+ * wide screen for ever, because the media query it answers to had already
+ * fired. Re-registering the listener instead would add one per navigation.
  */
-function railAxis() {
+const railWide = (() => {
   const step = getComputedStyle(document.documentElement)
     .getPropertyValue("--noctua-breakpoint-sm")
     .trim();
-  if (!step) return;
-  const wide = matchMedia(`(min-width: ${step})`);
-  const apply = () => {
-    for (const rail of document.querySelectorAll(".nd-frame-bar")) {
-      rail.setAttribute("aria-orientation", wide.matches ? "vertical" : "horizontal");
-    }
-  };
-  apply();
-  wide.addEventListener("change", apply);
+  return step ? matchMedia(`(min-width: ${step})`) : null;
+})();
+
+function applyRailAxis(root = document) {
+  if (!railWide) return;
+  for (const rail of root.querySelectorAll(".nd-frame-bar")) {
+    rail.setAttribute("aria-orientation", railWide.matches ? "vertical" : "horizontal");
+  }
 }
 
-railAxis();
+railWide?.addEventListener("change", () => applyRailAxis());
+applyRailAxis();
 revealTarget();
 
 // --- The implementation switch -------------------------------------------
@@ -5330,6 +5398,65 @@ revealTarget();
 // The behaviours are passed in rather than imported there. They are 208 KB this
 // page has already loaded, and importing them from the React bundle would make
 // esbuild inline a second copy of every one of them.
-import { install as installExamples } from "./implementation.js";
+import { install as installExamples, observe as observeFrames, forget as forgetFrames }
+  from "./implementation.js";
 
 installExamples({ enhance: enhanceAll, release: releaseAll });
+
+// --- Rendering the page a second time --------------------------------------
+
+/**
+ * Everything this file does to markup that has just arrived.
+ *
+ * IN THE ORDER THE PAGE ITSELF IS BUILT, and that is not a preference. The
+ * sequence at the foot of a first load is: scopes registered, `refresh`,
+ * `refreshRoving`, `refreshChoices`, `enhanceAll`, the rail's axis,
+ * `revealTarget`, then the example frames observed. A second ordering here
+ * would be a second thing that stops agreeing with the first, and each pair in
+ * it has a reason — `refresh` resolves the scopes BEFORE anything reads one,
+ * and `enhanceAll` runs after the controls have been marked so a roving walk is
+ * placed over the answer rather than over the markup's guess.
+ *
+ * `forgetScopes` FIRST, and it has to be called with the old subtree already
+ * detached: it evicts by `isConnected`, so calling it while the old `<main>` is
+ * still in the document evicts nothing and every stage on the page a reader has
+ * left stays in the list for the rest of the visit.
+ *
+ * `ensureStylesheet` is deliberately absent. The palette in force was linked on
+ * the first load and a navigation cannot change it; the one page that needs the
+ * other thirty-eight asks for them itself.
+ */
+export function adopt(root) {
+  forgetScopes();
+  registerScopes(root);
+  resolveScopes();
+  refresh();
+  refreshRoving();
+  refreshChoices();
+  enhanceAll(root);
+  applyRailAxis(root);
+  revealTarget();
+  observeFrames(root);
+}
+
+/**
+ * Everything this file undoes before markup leaves.
+ *
+ * Called while the subtree is still in the document, because that is the only
+ * moment a behaviour can be taken off the elements holding it — which is the
+ * rule `releaseAll` states and `undraw` in `implementation.js` obeys for React.
+ */
+export function abandon(root) {
+  forgetFrames(root);
+  releaseAll(root);
+}
+
+// --- The router ------------------------------------------------------------
+//
+// Its own module for the same reason the implementation switch is: it owns a
+// history entry, a fetch, a parser and a failure mode, and none of those is
+// this file's business. What it needs from here is the two functions above and
+// nothing else — it never reaches into this file's registries.
+import { install as installNavigation } from "./navigate.js";
+
+installNavigation({ adopt, abandon });

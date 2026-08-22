@@ -3294,3 +3294,146 @@ every locale.
     became white, a frosted switch that was off had a white knob on a white
     frost. Measured at **1.07:1**, and the browser suite asserts both states now
     because the frost is a composite the arithmetic cannot reach.
+
+107. **The sidebar stops reloading, and it turned out the whole repository had
+    been built for it.** Following a link threw away the header, the navigation,
+    the search palette and the entire module graph of `shell.js`, then rebuilt
+    all of it byte-for-byte. Measured: diffing everything outside `<main>`
+    between two built pages gives **five** differences and nothing else — the
+    `<title>`, the description, the three hrefs in the language menu, and the
+    two sidebar rows that trade `nd-nav-link--current` between them. Every
+    stylesheet link, the header and the scrim are identical. The reader watched
+    the sidebar blink and lost wherever they had scrolled it to, in order to
+    change the region to the right of it.
+
+    `assets/navigate.js` replaces that region instead. It is **an interception
+    of a real `<a href>` and nothing else**: no route table, no matcher, no
+    rendering, and every destination a static file the build wrote — so with the
+    script blocked, or with the module absent, every link navigates. Measured in
+    the browser: **one request per navigation**, no stylesheet and no script
+    refetched, and `performance.getEntriesByType('navigation').length` stays at
+    one for the whole visit.
+
+    **Almost none of it was new work.** `shell.js` already exported
+    `enhanceAll(root)` and `releaseAll(root)`; every file in
+    `crates/noctua-design-runtime/` already carries an `enhance`/`release` pair,
+    and a dozen of them already say in their own header that a behaviour which
+    cannot be released "IS A DEFECT FOR EVERY CONSUMER WITH A CLIENT-SIDE
+    ROUTER". `release.spec.js` already asserted ten enhancement passes leave one
+    behaviour behind. What was missing was the caller.
+
+    **The claim the test is named after**: a page reached by clicking is
+    `document.body.outerHTML`-identical to the same page reached by loading it.
+    One entry is normalised away — the `tabindex="-1"` this file puts on the
+    heading it focuses — and anything else appearing in that list is a defect
+    until somebody writes down why it is not. It covers the whole class of "the
+    router forgot to update X" without anybody having to think of X first, and
+    it is what found the first defect below.
+
+    **`setDrawer` swapped its two names on a call that changed nothing.** The
+    navigation's click listener calls `setDrawer(false)` on every link inside
+    it, whether or not the drawer was ever open, and the label exchange under it
+    is only correct once per real change of state. It was invisible while a link
+    took the whole page with it; with the document kept, the first click on any
+    sidebar row renamed the closed hamburger to *Close the menu* and marked it
+    `aria-pressed="false"` — a control announcing the opposite of what it does,
+    on a page that had not moved. One guard at the top of the function.
+
+    **A registry filled once at load.** `scopes` was a module-level
+    `const … = [...document.querySelectorAll(…)]` with a seeding loop under it,
+    which is exactly right for a page rendered once. A stage that arrived in a
+    second render was in nobody's list: it resolved against nothing, so a frame
+    the reader had navigated to could not be themed and its own controls
+    reported the page. It is `registerScopes(root)` now, and it **skips what is
+    already registered** rather than re-reading it — a second pass over a live
+    scope would overwrite its request with what is *stamped* on it, which is the
+    resolver's output rather than the scope's question, and a themed stage would
+    quietly adopt its own answer as an absolute request and stop following the
+    page.
+
+    **The implementation switch was dead for anybody who came in the front
+    door.** `install()` returned early on a document with no `[data-nd-example]`
+    — right while a page was loaded once, and `/intro/` is the front door and
+    the first sidebar entry. A reader who started there and walked to a
+    component page carried a switch that is drawn, is not disabled, and does
+    nothing. Beside it, `forget(root)`: an `IntersectionObserver` is a strong
+    reference from the browser and `watching` is a strong `Set` on top of it, so
+    ten pages visited kept ten pages of detached frames alive — each still
+    reachable by a later page-wide press, which would have mounted React into a
+    subtree nobody can see.
+
+    **The palette answered a question and kept showing the question.** Following
+    a result in the ⌘K search used to take the document with it, so nothing had
+    to close the dialog or empty the box. With the document kept, the dialog
+    stayed open over the page the reader had just asked for and the box stayed
+    full — so reopening it drew the results of a query already answered instead
+    of the recents that are the point of an empty box. Fixed in `Search`'s own
+    result handler rather than in the router: a router that reached in to close
+    somebody else's surface would need a line for every surface a link can sit
+    in, and would be wrong about the ones it did not know.
+
+    **The language must not be resolved twice, and the router steps aside rather
+    than restating it.** `main.rs`'s inline resolver sends a reader to their
+    stored locale before the first paint, and its rule turns on whether the
+    navigation was *followed from inside the site* — which a client-side
+    navigation erases, because there is no navigation left to inspect. A reader
+    whose preference points elsewhere is redirected on their next click today
+    and would have stayed put for the rest of the visit. So the inline script
+    stamps `data-noctua-locale-wanted` — **before** the referrer test narrows
+    it, because that test is about how *this* document was entered and says
+    nothing about where the reader wants to be — and the router refuses to
+    install when it differs from `data-noctua-locale`.
+
+    **And that turned up a defect older than any of this: the pseudo-locale
+    could not be browsed at all.** No browser asks for `qps`, so the resolver
+    always wanted something else and **every link out of `/qps/` bounced to
+    `/en/`** — the one locale that exists to show what happens when a string is
+    40% longer could only ever be opened one page at a time, by hand, by URL.
+    It surfaced only because the router reads what that script resolved and so
+    inherited the answer, which is what made it visible as a rule rather than as
+    a nuisance.
+
+    A locale nobody is offered has nothing for that rule to resolve. `qps` is
+    absent from the language menu, from `data-noctua-locales` and from every
+    link on the site, so the only way to be there is to have typed it — somebody
+    inspecting rather than somebody reading, and sending them to their own
+    language is the rule answering a question nobody asked. One line —
+    `if (offered.indexOf(here) === -1) want = null` — and `/qps/` navigates like
+    any other locale. `en` and `pt-BR` are untouched, which is its own test:
+    **a reader IS still moved out of a locale they were offered.**
+
+    **Scroll restoration had to be taken over completely, and the obvious half
+    does not work.** The browser restores on a back or a forward *before* the
+    content it belongs to exists, so it measures against the page being left;
+    turning that off takes the reload restoration with it. Writing the offset in
+    `pagehide` looked like the answer and is not — measured in Chrome, the
+    `replaceState` succeeds in the outgoing document and the reloaded one still
+    reads the value from before it, because the entry's state is snapshotted
+    when the reload is *initiated*, which is earlier than any unload handler.
+    The only write that survives a reload is one that already happened, so the
+    offset is written 150 ms after the reader stops scrolling and the history
+    entry knows where they are at all times. Restored on `load` and once more
+    after `document.fonts.ready`, and only where the reader has not moved since:
+    putting somebody back who has already started reading is worse than landing
+    them short.
+
+    **`revealTarget` is why the history entry is written before the swap.** It
+    runs inside `adopt`, and with the old address still in place a link carrying
+    a fragment opens nothing. Written after the fetch and before the markup goes
+    in — pushing on the press would leave a failed fetch showing the old page at
+    the new URL with a back button to somewhere the reader has never been.
+
+    Also here: `railAxis` is split into one `matchMedia` registered once and an
+    `applyRailAxis(root)` that can be re-run, or a rail arriving with a second
+    render announces a horizontal walk on a wide screen for ever; and a
+    navigation moves focus to the new `<h1 class="nd-title">`, which is the
+    page's own name, already on the page and already translated, so announcing
+    where the reader has arrived costs no new sentence in the catalogue.
+
+    `tests/browser/navigation.spec.js` is **35 specs**, of which twelve are a
+    sweep of four widths × **three** locales × two modes × six pages with the
+    browser's own language matched to the site's — because with an `en-US`
+    browser on `/pt-BR/` the inline resolver moves the reader and the router
+    never installs, so a sweep that did not match would be measuring the
+    redirect and reporting it as Portuguese. The `qps` rows are the ones that
+    matter most and are the ones that could not have existed before this change.

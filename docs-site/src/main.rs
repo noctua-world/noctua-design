@@ -257,7 +257,43 @@ fn document(locale: Locale, page: Page) -> String {
 /// of which exist only to send a reader somewhere — is exempt, because sending
 /// a reader somewhere is the entire content of the document.
 ///
+/// # And it says what it resolved, so the router does not resolve it again
+///
+/// `assets/navigate.js` replaces `<main>` in place, which leaves the rule above
+/// nothing to inspect: there is no navigation, so there is no referrer. A reader
+/// whose stored language differs from this document's is redirected on their
+/// next click today, and with the router unaware would stay here for the rest of
+/// the visit.
+///
+/// So this stamps `data-noctua-locale-wanted`, and the router refuses to install
+/// whenever it differs from `data-noctua-locale` — every click stays a full load
+/// decided by this script, and the resolution is still written exactly once.
+///
+/// **Stamped before the referrer test narrows it**, deliberately. That test is
+/// about how *this document* was entered — a shared link keeps its language —
+/// and says nothing about where the reader wants to be, which is the only
+/// question the router has to answer.
+///
+/// # And it has nothing to say about a locale nobody is offered
+///
+/// [`Locale::OFFERED`] is `en` and `pt-BR`; `qps` is generated to break layouts
+/// during review and is deliberately absent from the language menu, from
+/// `data-noctua-locales`, and from every link on the site. So the only way to be
+/// on a `/qps/` page is to have typed it — somebody inspecting rather than
+/// somebody reading — and sending them to their own language is this rule
+/// answering a question nobody asked.
+///
+/// It did exactly that, and the cost was that **the pseudo-locale could not be
+/// browsed at all**: every link out of it bounced to `/en/`, so the one locale
+/// that exists to show what happens when a string is 40% longer could only ever
+/// be opened one page at a time, by hand, by URL. With the resolution skipped
+/// where `here` is not offered, `/qps/` navigates like any other locale — and
+/// since the router installs exactly where this stamps agreement, the pseudo
+/// locale is now on the routed path too, which is where a layout defect that
+/// only appears after a second render would show up.
+///
 /// [`defaults::AUTOMATIC_LOCALE`]: crate::defaults::AUTOMATIC_LOCALE
+/// [`Locale::OFFERED`]: noctua_design_i18n::Locale::OFFERED
 fn locale_script(here: &str, targets: &[(&str, String)], door: bool) -> String {
     let table = targets
         .iter()
@@ -300,6 +336,8 @@ fn locale_script(here: &str, targets: &[(&str, String)], door: bool) -> String {
         \x20   var stored = localStorage.getItem('{key}');\n\
         \x20   if (stored !== '{auto}' && offered.indexOf(stored) === -1) stored = '{auto}';\n\
         \x20   var want = null;\n\
+        \x20   // Decided where it is computed, applied after the stamp.\n\
+        \x20   var narrow = false;\n\
         \x20   if (stored === '{auto}') {{\n\
         \x20     var asked = navigator.languages || [navigator.language || ''];\n\
         \x20     for (var i = 0; i < asked.length && want === null; i++) {{\n\
@@ -331,10 +369,18 @@ fn locale_script(here: &str, targets: &[(&str, String)], door: bool) -> String {
         \x20     var followed =\n\
         \x20       (!entry || entry.type === 'navigate') &&\n\
         \x20       document.referrer.indexOf(location.origin + '/') === 0;\n\
-        \x20     if (!door && !followed) want = null;\n\
+        \x20     narrow = !door && !followed;\n\
         \x20   }} else {{\n\
         \x20     want = stored;\n\
         \x20   }}\n\
+        \x20   // A document in a locale nobody is offered is not a reader's,\n\
+        \x20   // and this function's own documentation says what that cost.\n\
+        \x20   if (offered.indexOf(here) === -1) want = null;\n\
+        \x20   // Where the reader's preference points, before the test below\n\
+        \x20   // narrows it. `assets/navigate.js` reads it; see above for why.\n\
+        \x20   document.documentElement.setAttribute(\n\
+        \x20     'data-noctua-locale-wanted', want === null ? here : want);\n\
+        \x20   if (narrow) want = null;\n\
         \x20   if (want !== null && want !== here && targets[want]) {{\n\
         \x20     location.replace(targets[want]);\n\
         \x20   }}\n\
@@ -578,6 +624,15 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
     count += copy(
         &root.join("docs-site/assets/implementation.js"),
         &out.join("assets/implementation.js"),
+    )?;
+    // The router. A file of its own for the same reason as the one above it: it
+    // owns a history entry, a fetch, a parser and a failure mode, none of which
+    // is the shell's business. It is an interception of a real `<a href>` and
+    // nothing else, so a site served without it — or read with the script
+    // blocked — navigates exactly as it always has.
+    count += copy(
+        &root.join("docs-site/assets/navigate.js"),
+        &out.join("assets/navigate.js"),
     )?;
     // The model stage: any glTF, file and parameters as inputs — the seed of
     // the upload feature, and the reason it must know nothing about owls.

@@ -1374,6 +1374,49 @@ Two consequences worth knowing before you fight them:
 locale's sidebar. It is a door, not a page: no title, no prose, no sidebar
 entry, and `site::first` is what both it and the wordmark read.
 
+### The site routes, so an enhancer with no release is live rather than latent
+
+`docs-site/assets/navigate.js` replaces `<main>` in place when a reader follows
+a link inside their own locale. The uniform depth above is what makes it cheap:
+every relative href in the fetched markup resolves identically after
+`pushState`, so nothing has to be rewritten.
+
+**Three things this changes for you.**
+
+- **A behaviour that cannot be taken back off is now a real leak**, not a note
+  in a header comment. `enhanceAll`/`releaseAll` in `shell.js` are the two
+  lists, `adopt`/`abandon` beside them are what the router calls, and every new
+  enhancer belongs in both. `release.spec.js` and `navigation.spec.js` each ask
+  in a different way, and the second one asks through the real path.
+- **A function called with the state it is already in must do nothing.**
+  `setDrawer` swapped its two labels on every call, which was invisible while a
+  link took the page with it and became a control announcing the opposite of
+  what it does. Anything that exchanges rather than sets has the same shape.
+- **A registry filled at module level is filled once.** `registerScopes(root)`
+  exists because `scopes` was a `const` and a loop, and a stage that arrived in
+  a second render was in nobody's list.
+
+**The claim to keep**: a page reached by clicking is
+`document.body.outerHTML`-identical to the same page reached by loading it.
+`navigation.spec.js` asserts exactly that, with one documented exception. If you
+change what the shell renders per page, that test is what tells you the router
+has to copy it too.
+
+**It never resolves the language.** The inline script in `<head>` does, and
+stamps `data-noctua-locale-wanted`; the router refuses to install when that
+differs from `data-noctua-locale`, so a reader whose preference points elsewhere
+keeps the full load and the redirect that has always followed it.
+
+**And that resolution has nothing to say about `qps`.** A locale nobody is
+offered is not a reader's: the pseudo-locale is absent from the language menu,
+from `data-noctua-locales` and from every link on the site, so the only way to
+be there is to have typed it. Until this was fixed the resolver bounced every
+link out of `/qps/` to `/en/`, which meant **the one locale that exists to break
+layouts could not be browsed** — each page had to be opened by URL. `qps` is a
+routed locale like any other now, and it is a row in `navigation.spec.js`'s
+width sweep, which is where a layout that only fits because English is short
+will show up on the second render as well as the first.
+
 ### The language is resolved before the first paint, and never against the reader
 
 `spec/i18n/` gives three locales; the site is pre-rendered in all of them, so

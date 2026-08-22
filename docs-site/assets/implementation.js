@@ -350,6 +350,27 @@ export function observe(root = document) {
   }
 }
 
+/// Stops watching every frame under `root`, and forgets it was ever near.
+///
+/// AN OBSERVER IS A STRONG REFERENCE FROM THE BROWSER, and `watching` is a
+/// strong `Set` on top of it. Neither lets go when the markup leaves, so with
+/// `navigate.js` in the page a reader who visited ten component pages left ten
+/// pages' worth of detached frames alive — each holding every example in it,
+/// and each still able to be handed to `queue` by a later page-wide press,
+/// which would mount React into a subtree nobody can see.
+///
+/// `pending` is drained here too. A frame that came into reach and was
+/// navigated away from before its `requestAnimationFrame` fired is a frame the
+/// drain would otherwise fetch the whole React bundle for.
+export function forget(root = document) {
+  for (const frame of root.querySelectorAll("[data-nd-frame]")) {
+    approaching.unobserve(frame);
+    watching.delete(frame);
+    const at = pending.indexOf(frame);
+    if (at !== -1) pending.splice(at, 1);
+  }
+}
+
 /// Wires the controls and honours what the reader asked for last time.
 ///
 /// `hooks` carries `enhance` and `release`. They are injected rather than
@@ -357,8 +378,20 @@ export function observe(root = document) {
 /// loaded, and importing them from the React bundle would inline a second copy.
 export function install(hooks) {
   behaviours = hooks;
-  if (!document.querySelector("[data-nd-example]")) return;
 
+  // THE LISTENERS BIND WHATEVER THIS PAGE HOLDS, and that is a change the
+  // router forced. This returned early on a document with no `[data-nd-example]`
+  // in it, which was exactly right while a page was loaded once: `/intro/` has
+  // no examples, so there was nothing for the switch to do and no second page
+  // to worry about. With `navigate.js` there is. A reader who entered the site
+  // at the introduction — which is the front door, and the first sidebar entry
+  // — and then walked to a component page carried a dead implementation switch
+  // for the whole visit, and the failure is silent: the control is drawn, it is
+  // not disabled, and pressing it does nothing at all.
+  //
+  // Binding unconditionally costs two delegated listeners on a page that may
+  // never use them. `observe()` below is still asked, and answers nothing where
+  // there is nothing to watch.
   document.addEventListener("click", (event) => {
     const toggle = event.target.closest?.('[data-nd-action="impl"]');
     if (toggle) {
