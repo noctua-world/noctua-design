@@ -4625,24 +4625,26 @@ span.nd-search-input {
 /* GRID, NOT FLEX, AND CENTRED, NOT BASELINE. Both halves are fixes.
  *
  * Flex with a fixed-width, `nowrap`, `overflow: visible` label let the longest
- * token name — `--noctua-space-paragraph`, 24 monospaced characters — spill out
- * of its box and paint underneath the bar beside it. A grid track cannot be
- * overflowed into a sibling's.
- *
- * And `align-items: baseline` was the second half: `.nd-bar` is an empty
- * inline-block, whose baseline is its bottom margin edge, so the whole bar was
- * lifted into the label's x-height band rather than sitting beside it.
- * Centring removes the question. */
+ * size name spill out of its box and paint underneath the specimen beside it.
+ * A grid track cannot be overflowed into a sibling's. And `align-items:
+ * baseline` was the second half: a row holds one line at `caption` and one at
+ * `display`, so aligning on the baseline dropped the name to the bottom of a
+ * 48px specimen. Centring removes the question. */
 .nd-scale-row {
   display: grid;
-  /* `auto` for the name, not a token: a grid column is shared by every row, so
-     the track is exactly as wide as the longest token name and no number here
-     can be wrong about it. `--noctua-space-paragraph` is 24 monospaced
-     characters and there is no spacing token that wide — which is how the old
-     fixed width came to be too small in the first place. At 320px the name
-     wraps rather than overflowing, because a track cannot spill into its
-     sibling. */
-  grid-template-columns: auto var(--noctua-space-16) 1fr;
+  /* TWO TRACKS, BECAUSE A ROW HAS TWO CHILDREN. It declared three — a name, a
+     fixed `--noctua-space-16`, and the rest — which is the shape the SPACING
+     ruler had when it shared this class: a name, a bar, and the room the bar
+     grew into. The type scale has a name and a specimen, so the specimen
+     landed in the bar's 64px track with `text-overflow: ellipsis` over it, and
+     every line of the scale read `S…`. The larger the size, the fewer letters
+     survived, which is the reverse of what a type scale is for.
+
+     `auto` for the name, not a token: a grid column is shared by every row, so
+     the track is exactly as wide as the longest name and no number here can be
+     wrong about it. At 320px the name wraps rather than overflowing, because a
+     track cannot spill into its sibling. */
+  grid-template-columns: auto 1fr;
   align-items: center;
   gap: var(--noctua-space-4);
   padding-block-end: var(--noctua-space-2);
@@ -4695,14 +4697,6 @@ span.nd-search-input {
   padding-inline: var(--noctua-space-4);
 }
 
-/* The stage's block padding, restored at the two ends of the column it used to
-   bound. The caption supplies its own, so the top is only wanted where an
-   example opens with something else — a title, on the four pages whose examples
-   are four different subjects. */
-.nd-example > .nd-example-title {
-  padding-block-start: var(--noctua-space-4);
-}
-
 .nd-example:last-child {
   padding-block-end: var(--noctua-space-4);
 }
@@ -4716,13 +4710,10 @@ span.nd-search-input {
   padding-block-start: var(--noctua-space-6);
 }
 
-/* The example's own heading, on the few pages where the examples are four
-   different subjects rather than sixteen uses of one component. It comes
-   before the source in the DOM as well as on the page. */
-.nd-example-title {
-  order: -2;
-  margin: 0;
-}
+/* An example carried its own heading on the two pages whose examples were
+   several different subjects. Both are a stack of `<section>`s with an `<h2>`
+   each now, which is the shape every other page has, so the caption is once
+   again the first thing in every figure on the site. */
 
 /* `<figcaption>` first in the DOM as well as first on the page: reading the
    call before the result is the order the reader needs, and a caption moved by
@@ -4894,15 +4885,12 @@ span.nd-search-input {
    did the picture: what changed is that a `<p>` carrying it is rendered by a
    component instead of written out in four files. */
 
-/* --- The whole-page specimen, and the index under it --------------------- */
+/* --- The page shape ------------------------------------------------------ */
 
-.nd-specimen-page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--noctua-space-6);
-  padding-block-end: var(--noctua-space-8);
-  border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
-}
+/* `.nd-specimen-page` bounded a whole page of everything on the typography
+   page: a display heading, a lead, two kinds of list, the ten inline marks and
+   a block of code. Every one of those is a component with a page of its own,
+   and the typography page is the scale, the families and the scripts. */
 
 /* A row of links, wrapping. Not a grid: the names are of very different
    lengths, and a grid of them leaves a ragged column of white space that reads
@@ -6037,42 +6025,50 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 
 /* --- The rhythm, drawn ---------------------------------------------------- */
 
+/* A NAME COLUMN AND A CONTENT COLUMN, which is the grammar the type scale and
+ * every table on this page already use. It was one column, and each gap was a
+ * full-width accent wash with its token name set in mono and pushed to the
+ * right edge — a way of labelling a value that appears nowhere else on this
+ * site, and which the reader read as a defect rather than as a demonstration.
+ *
+ * `auto` for the names, so the track is exactly as wide as the longest one and
+ * no number here can be wrong about it. The blocks of text sit in the second
+ * track beside the gaps, so what a reader compares is one column of content
+ * with the real gaps between its parts. */
 .nd-rhythm {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: var(--noctua-space-4);
 }
 
 .nd-rhythm-block {
+  grid-column: 2;
   display: flex;
   flex-direction: column;
 }
 
-/* THE GAP AT ITS REAL HEIGHT, wearing its own name.
- *
- * The height comes off the token, so this is the gap rather than a drawing of
- * one — tint it and the reader is looking at the value. The name is pushed to
- * the end so it never lands over the text above or below it, and the smallest
- * band here is twenty-four pixels, which is why the label is caption-sized and
- * its line height is collapsed. */
+/* THE GAP AT ITS REAL HEIGHT. The height comes off the token, so this is the
+ * gap rather than a drawing of one, and the tint is what makes a height
+ * visible at all. It carries no text now, so it is a measure and nothing else
+ * — the same thing `.nd-bar` is in the tables above, turned on its side. */
 .nd-rhythm-gap {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-inline-end: var(--noctua-space-2);
+  grid-column: 2;
   background: color-mix(in oklab, var(--nc-color-accent) var(--nd-veil-checked), transparent);
+  /* NO RADIUS, for the reason `.nd-bar` above gives: a ruler does not have
+     rounded ends, and the smallest band here is a quarter of the largest. */
 }
 
+/* Set like `.nd-scale-name`, because it is doing that job: the name of the
+ * value drawn beside it. The smallest band here is twenty-four pixels, which
+ * is why it is caption-sized with its line height collapsed. */
 .nd-rhythm-gap-name {
+  grid-column: 1;
+  justify-self: end;
   font-family: var(--noctua-font-mono);
   font-size: var(--noctua-size-caption);
   line-height: 1;
   color: var(--nc-color-fg-muted);
-}
-
-.nd-inset-demo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--noctua-space-gap);
 }
 
 /* --- Pagination ----------------------------------------------------------- */
@@ -7607,8 +7603,21 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   display: block;
 }
 
-.nd-table[data-nd-layout="stack"] > .nd-table-caption,
-.nd-table[data-nd-layout="auto"] > .nd-table-caption,
+/* A CAPTION THE TABLE ASKED TO HIDE STAYS HIDDEN WHEN THE ROWS STACK.
+ *
+ * These two rules and the visually-hidden one above have the same specificity,
+ * so this one — being later — was handing `display: block` and
+ * `inline-size: auto` back to a caption that had already been taken out of the
+ * layout. What was left was an absolutely positioned, `nowrap`, clipped box as
+ * wide as its own sentence, hanging off whatever the nearest positioned
+ * ancestor was. It is invisible, and a clipped box still counts towards the
+ * document's scroll width: 323px of pseudo-locale caption on a 320px screen.
+ *
+ * It only ever showed where a stacked table was NOT inside a scroller, which
+ * on this site was nowhere until the spacing page stopped putting its tables
+ * in a frame. */
+.nd-table[data-nd-layout="stack"]:not([data-nd-caption-hidden="true"]) > .nd-table-caption,
+.nd-table[data-nd-layout="auto"]:not([data-nd-caption-hidden="true"]) > .nd-table-caption,
 .nd-table[data-nd-layout="stack"] .nd-table-note,
 .nd-table[data-nd-layout="auto"] .nd-table-note {
   display: block;

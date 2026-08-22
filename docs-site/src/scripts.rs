@@ -10,7 +10,7 @@
 
 use noctua_design_i18n::Key;
 
-/// One script, its sample, and what it proves.
+/// One script, and the sample it is set in.
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Sample {
     /// A stable name for the DOM and for a test, in every locale.
@@ -27,8 +27,6 @@ pub(crate) struct Sample {
     pub dir: &'static str,
     /// A real sentence in the script.
     pub text: &'static str,
-    /// What this particular sample exercises, for the reader of the page.
-    pub proves: Key,
     /// Whether Noctua Iosevka can set it — the fallback must fire when it cannot.
     pub monospaceable: bool,
 
@@ -50,7 +48,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "en",
         dir: "ltr",
         text: "The quick brown fox jumps over the lazy dog.",
-        proves: Key::TypeScriptLatinProves,
         monospaceable: true,
         ideographic: false,
     },
@@ -60,7 +57,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "pt-BR",
         dir: "ltr",
         text: "Uma ação em português: coração, ambiguïdade, José até vovô.",
-        proves: Key::TypeScriptLatinPortugueseProves,
         monospaceable: true,
         ideographic: false,
     },
@@ -70,7 +66,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "el",
         dir: "ltr",
         text: "Η γρήγορη καφέ αλεπού πηδάει πάνω από το τεμπέλικο σκυλί.",
-        proves: Key::TypeScriptGreekProves,
         monospaceable: true,
         ideographic: false,
     },
@@ -80,7 +75,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "ru",
         dir: "ltr",
         text: "Съешь же ещё этих мягких французских булок, да выпей чаю.",
-        proves: Key::TypeScriptCyrillicProves,
         monospaceable: true,
         ideographic: false,
     },
@@ -90,7 +84,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "ar",
         dir: "rtl",
         text: "نص حكيم له سر قاطع وذو شأن عظيم مكتوب على ثوب أخضر ومغلف بجلد أزرق.",
-        proves: Key::TypeScriptArabicProves,
         monospaceable: false,
         ideographic: false,
     },
@@ -100,7 +93,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "he",
         dir: "rtl",
         text: "דג סקרן שט בים מאוכזב ולפתע מצא חברה.",
-        proves: Key::TypeScriptHebrewProves,
         monospaceable: false,
         ideographic: false,
     },
@@ -110,7 +102,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "hi",
         dir: "ltr",
         text: "ऋषियों को सताने वाले दुष्ट राक्षसों के राजा रावण का सर्वनाश।",
-        proves: Key::TypeScriptDevanagariProves,
         monospaceable: false,
         ideographic: false,
     },
@@ -120,7 +111,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "th",
         dir: "ltr",
         text: "เป็นมนุษย์สุดประเสริฐเลิศคุณค่ากว่าบรรดาฝูงสัตว์เดรัจฉาน",
-        proves: Key::TypeScriptThaiProves,
         monospaceable: false,
         ideographic: false,
     },
@@ -130,7 +120,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "am",
         dir: "ltr",
         text: "ሰማይ አይታረስ ንጉሥ አይከሰስ።",
-        proves: Key::TypeScriptEthiopicProves,
         monospaceable: false,
         ideographic: false,
     },
@@ -140,7 +129,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "ka",
         dir: "ltr",
         text: "ვეპხის ტყაოსანი შოთა რუსთაველის პოემაა.",
-        proves: Key::TypeScriptGeorgianProves,
         monospaceable: false,
         ideographic: false,
     },
@@ -150,7 +138,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "hy",
         dir: "ltr",
         text: "Բոլոր մարդիկ ծնվում են ազատ և հավասար իրենց արժանապատվությամբ։",
-        proves: Key::TypeScriptArmenianProves,
         monospaceable: false,
         ideographic: false,
     },
@@ -160,7 +147,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "ja",
         dir: "ltr",
         text: "いろはにほへと ちりぬるを 和歌 東京都は日本の首都です。",
-        proves: Key::TypeScriptJapaneseProves,
         monospaceable: false,
         ideographic: true,
     },
@@ -170,7 +156,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "ko",
         dir: "ltr",
         text: "다람쥐 헌 쳇바퀴에 타고파. 한국어는 한글로 씁니다.",
-        proves: Key::TypeScriptKoreanProves,
         monospaceable: false,
         ideographic: true,
     },
@@ -180,7 +165,6 @@ pub(crate) const SAMPLES: [Sample; 14] = [
         lang: "zh-Hans",
         dir: "ltr",
         text: "天地玄黄，宇宙洪荒。中文是世界上使用人数最多的语言。",
-        proves: Key::TypeScriptSimplifiedChineseProves,
         monospaceable: false,
         ideographic: true,
     },

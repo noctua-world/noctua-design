@@ -78,18 +78,32 @@ test("the lengths the page prints are the lengths the tokens resolve to", async 
   }
 });
 
-test("each gap in the rhythm is its own token's height", async ({ page }) => {
+test("each gap in the rhythm is its own token's height, named beside it", async ({ page }) => {
   await page.goto(url(PAGE.spacing));
   const gaps = await page.evaluate(() =>
-    [...document.querySelectorAll(".nd-rhythm-gap")].map((gap) => ({
-      name: gap.querySelector(".nd-rhythm-gap-name").textContent.trim(),
-      drawn: gap.getBoundingClientRect().height,
-    })),
+    [...document.querySelectorAll(".nd-rhythm-gap")].map((gap) => {
+      // THE NAME IS A SIBLING, NOT A CHILD. It used to be set on top of the
+      // tinted band, right-aligned, in a way nothing else on this site names a
+      // value. It is in the grid's own name column now, which is what the type
+      // scale and both tables on this page do.
+      const label = gap.previousElementSibling;
+      return {
+        name: label?.classList.contains("nd-rhythm-gap-name")
+          ? label.textContent.trim()
+          : null,
+        painted: !!gap.querySelector(".nd-rhythm-gap-name"),
+        drawn: gap.getBoundingClientRect().height,
+      };
+    }),
   );
   expect(gaps.length, "the rhythm draws no gaps").toBeGreaterThan(3);
+  expect(gaps.filter((gap) => !gap.name), "a gap is drawn with nothing naming it").toEqual([]);
+  expect(gaps.filter((gap) => gap.painted), "a name is painted on the band again").toEqual([]);
 
   for (const gap of gaps) {
-    const wanted = await resolve(page, gap.name);
+    // The label is the short name, as `.nd-scale-name` is — so this also
+    // checks it is a real one: an invented name resolves to nothing.
+    const wanted = await resolve(page, `--noctua-space-${gap.name}`);
     expect(Math.abs(gap.drawn - wanted), `${gap.name} is ${gap.drawn}px`).toBeLessThan(1);
   }
   // And they really are different from each other, or the demonstration

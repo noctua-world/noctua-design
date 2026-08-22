@@ -252,14 +252,6 @@ pub enum Key {
     SpacingRhythmNext,
     /// `spacing.rhythm.third`
     SpacingRhythmThird,
-    /// `spacing.inset.title`
-    SpacingInsetTitle,
-    /// `spacing.inset.body`
-    SpacingInsetBody,
-    /// `spacing.inset.one`
-    SpacingInsetOne,
-    /// `spacing.inset.two`
-    SpacingInsetTwo,
     /// `spacing.column.token`
     SpacingColumnToken,
     /// `spacing.column.step`
@@ -504,16 +496,10 @@ pub enum Key {
     TypeScaleBody,
     /// `type.families.title`
     TypeFamiliesTitle,
-    /// `type.families.body`
-    TypeFamiliesBody,
     /// `type.scripts.title`
     TypeScriptsTitle,
-    /// `type.scripts.body`
-    TypeScriptsBody,
     /// `type.specimen.line`
     TypeSpecimenLine,
-    /// `icons.body`
-    IconsBody,
     /// `icons.count`
     IconsCount,
     /// `icons.filter.label`
@@ -1682,96 +1668,34 @@ pub enum Key {
     ExampleGlassHeld,
     /// `type.script.latin.name`
     TypeScriptLatinName,
-    /// `type.script.latin.proves`
-    TypeScriptLatinProves,
     /// `type.script.latin-portuguese.name`
     TypeScriptLatinPortugueseName,
-    /// `type.script.latin-portuguese.proves`
-    TypeScriptLatinPortugueseProves,
     /// `type.script.greek.name`
     TypeScriptGreekName,
-    /// `type.script.greek.proves`
-    TypeScriptGreekProves,
     /// `type.script.cyrillic.name`
     TypeScriptCyrillicName,
-    /// `type.script.cyrillic.proves`
-    TypeScriptCyrillicProves,
     /// `type.script.arabic.name`
     TypeScriptArabicName,
-    /// `type.script.arabic.proves`
-    TypeScriptArabicProves,
     /// `type.script.hebrew.name`
     TypeScriptHebrewName,
-    /// `type.script.hebrew.proves`
-    TypeScriptHebrewProves,
     /// `type.script.devanagari.name`
     TypeScriptDevanagariName,
-    /// `type.script.devanagari.proves`
-    TypeScriptDevanagariProves,
     /// `type.script.thai.name`
     TypeScriptThaiName,
-    /// `type.script.thai.proves`
-    TypeScriptThaiProves,
     /// `type.script.ethiopic.name`
     TypeScriptEthiopicName,
-    /// `type.script.ethiopic.proves`
-    TypeScriptEthiopicProves,
     /// `type.script.georgian.name`
     TypeScriptGeorgianName,
-    /// `type.script.georgian.proves`
-    TypeScriptGeorgianProves,
     /// `type.script.armenian.name`
     TypeScriptArmenianName,
-    /// `type.script.armenian.proves`
-    TypeScriptArmenianProves,
     /// `type.script.japanese.name`
     TypeScriptJapaneseName,
-    /// `type.script.japanese.proves`
-    TypeScriptJapaneseProves,
     /// `type.script.korean.name`
     TypeScriptKoreanName,
-    /// `type.script.korean.proves`
-    TypeScriptKoreanProves,
     /// `type.script.simplified-chinese.name`
     TypeScriptSimplifiedChineseName,
-    /// `type.script.simplified-chinese.proves`
-    TypeScriptSimplifiedChineseProves,
     /// `specimen.bar.value`
     SpecimenBarValue,
-    /// `specimen.title`
-    SpecimenTitle,
-    /// `specimen.lead`
-    SpecimenLead,
-    /// `specimen.section.title`
-    SpecimenSectionTitle,
-    /// `specimen.body`
-    SpecimenBody,
-    /// `specimen.body.two`
-    SpecimenBodyTwo,
-    /// `specimen.lists.title`
-    SpecimenListsTitle,
-    /// `specimen.lists.body`
-    SpecimenListsBody,
-    /// `specimen.marks.title`
-    SpecimenMarksTitle,
-    /// `specimen.marks.body`
-    SpecimenMarksBody,
-    /// `specimen.mark.link`
-    SpecimenMarkLink,
-    /// `specimen.mark.strong`
-    SpecimenMarkStrong,
-    /// `specimen.mark.em`
-    SpecimenMarkEm,
-    /// `specimen.mark.mark`
-    SpecimenMarkMark,
-    /// `specimen.mark.abbr.title`
-    SpecimenMarkAbbrTitle,
-    /// `specimen.code.title`
-    SpecimenCodeTitle,
-    /// `specimen.code.body`
-    SpecimenCodeBody,
-    /// `specimen.components.title`
-    SpecimenComponentsTitle,
     /// `example.color-picker.label`
     ExampleColorPickerLabel,
     /// `example.color-picker.tags-label`
@@ -5712,7 +5636,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2794] = [
+    pub const ALL: [Self; 2756] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -5779,10 +5703,6 @@ impl Key {
         Self::SpacingRhythmSecond,
         Self::SpacingRhythmNext,
         Self::SpacingRhythmThird,
-        Self::SpacingInsetTitle,
-        Self::SpacingInsetBody,
-        Self::SpacingInsetOne,
-        Self::SpacingInsetTwo,
         Self::SpacingColumnToken,
         Self::SpacingColumnStep,
         Self::SpacingColumnRem,
@@ -5905,11 +5825,8 @@ impl Key {
         Self::TypeScaleTitle,
         Self::TypeScaleBody,
         Self::TypeFamiliesTitle,
-        Self::TypeFamiliesBody,
         Self::TypeScriptsTitle,
-        Self::TypeScriptsBody,
         Self::TypeSpecimenLine,
-        Self::IconsBody,
         Self::IconsCount,
         Self::IconsFilterLabel,
         Self::IconsFilterClear,
@@ -6494,51 +6411,20 @@ impl Key {
         Self::ExampleGlassStop,
         Self::ExampleGlassHeld,
         Self::TypeScriptLatinName,
-        Self::TypeScriptLatinProves,
         Self::TypeScriptLatinPortugueseName,
-        Self::TypeScriptLatinPortugueseProves,
         Self::TypeScriptGreekName,
-        Self::TypeScriptGreekProves,
         Self::TypeScriptCyrillicName,
-        Self::TypeScriptCyrillicProves,
         Self::TypeScriptArabicName,
-        Self::TypeScriptArabicProves,
         Self::TypeScriptHebrewName,
-        Self::TypeScriptHebrewProves,
         Self::TypeScriptDevanagariName,
-        Self::TypeScriptDevanagariProves,
         Self::TypeScriptThaiName,
-        Self::TypeScriptThaiProves,
         Self::TypeScriptEthiopicName,
-        Self::TypeScriptEthiopicProves,
         Self::TypeScriptGeorgianName,
-        Self::TypeScriptGeorgianProves,
         Self::TypeScriptArmenianName,
-        Self::TypeScriptArmenianProves,
         Self::TypeScriptJapaneseName,
-        Self::TypeScriptJapaneseProves,
         Self::TypeScriptKoreanName,
-        Self::TypeScriptKoreanProves,
         Self::TypeScriptSimplifiedChineseName,
-        Self::TypeScriptSimplifiedChineseProves,
         Self::SpecimenBarValue,
-        Self::SpecimenTitle,
-        Self::SpecimenLead,
-        Self::SpecimenSectionTitle,
-        Self::SpecimenBody,
-        Self::SpecimenBodyTwo,
-        Self::SpecimenListsTitle,
-        Self::SpecimenListsBody,
-        Self::SpecimenMarksTitle,
-        Self::SpecimenMarksBody,
-        Self::SpecimenMarkLink,
-        Self::SpecimenMarkStrong,
-        Self::SpecimenMarkEm,
-        Self::SpecimenMarkMark,
-        Self::SpecimenMarkAbbrTitle,
-        Self::SpecimenCodeTitle,
-        Self::SpecimenCodeBody,
-        Self::SpecimenComponentsTitle,
         Self::ExampleColorPickerLabel,
         Self::ExampleColorPickerTagsLabel,
         Self::ExampleColorPickerBrandLabel,
@@ -8579,10 +8465,6 @@ impl Key {
             Self::SpacingRhythmSecond => "spacing.rhythm.second",
             Self::SpacingRhythmNext => "spacing.rhythm.next",
             Self::SpacingRhythmThird => "spacing.rhythm.third",
-            Self::SpacingInsetTitle => "spacing.inset.title",
-            Self::SpacingInsetBody => "spacing.inset.body",
-            Self::SpacingInsetOne => "spacing.inset.one",
-            Self::SpacingInsetTwo => "spacing.inset.two",
             Self::SpacingColumnToken => "spacing.column.token",
             Self::SpacingColumnStep => "spacing.column.step",
             Self::SpacingColumnRem => "spacing.column.rem",
@@ -8705,11 +8587,8 @@ impl Key {
             Self::TypeScaleTitle => "type.scale.title",
             Self::TypeScaleBody => "type.scale.body",
             Self::TypeFamiliesTitle => "type.families.title",
-            Self::TypeFamiliesBody => "type.families.body",
             Self::TypeScriptsTitle => "type.scripts.title",
-            Self::TypeScriptsBody => "type.scripts.body",
             Self::TypeSpecimenLine => "type.specimen.line",
-            Self::IconsBody => "icons.body",
             Self::IconsCount => "icons.count",
             Self::IconsFilterLabel => "icons.filter.label",
             Self::IconsFilterClear => "icons.filter.clear",
@@ -9294,51 +9173,20 @@ impl Key {
             Self::ExampleGlassStop => "example.glass.stop",
             Self::ExampleGlassHeld => "example.glass.held",
             Self::TypeScriptLatinName => "type.script.latin.name",
-            Self::TypeScriptLatinProves => "type.script.latin.proves",
             Self::TypeScriptLatinPortugueseName => "type.script.latin-portuguese.name",
-            Self::TypeScriptLatinPortugueseProves => "type.script.latin-portuguese.proves",
             Self::TypeScriptGreekName => "type.script.greek.name",
-            Self::TypeScriptGreekProves => "type.script.greek.proves",
             Self::TypeScriptCyrillicName => "type.script.cyrillic.name",
-            Self::TypeScriptCyrillicProves => "type.script.cyrillic.proves",
             Self::TypeScriptArabicName => "type.script.arabic.name",
-            Self::TypeScriptArabicProves => "type.script.arabic.proves",
             Self::TypeScriptHebrewName => "type.script.hebrew.name",
-            Self::TypeScriptHebrewProves => "type.script.hebrew.proves",
             Self::TypeScriptDevanagariName => "type.script.devanagari.name",
-            Self::TypeScriptDevanagariProves => "type.script.devanagari.proves",
             Self::TypeScriptThaiName => "type.script.thai.name",
-            Self::TypeScriptThaiProves => "type.script.thai.proves",
             Self::TypeScriptEthiopicName => "type.script.ethiopic.name",
-            Self::TypeScriptEthiopicProves => "type.script.ethiopic.proves",
             Self::TypeScriptGeorgianName => "type.script.georgian.name",
-            Self::TypeScriptGeorgianProves => "type.script.georgian.proves",
             Self::TypeScriptArmenianName => "type.script.armenian.name",
-            Self::TypeScriptArmenianProves => "type.script.armenian.proves",
             Self::TypeScriptJapaneseName => "type.script.japanese.name",
-            Self::TypeScriptJapaneseProves => "type.script.japanese.proves",
             Self::TypeScriptKoreanName => "type.script.korean.name",
-            Self::TypeScriptKoreanProves => "type.script.korean.proves",
             Self::TypeScriptSimplifiedChineseName => "type.script.simplified-chinese.name",
-            Self::TypeScriptSimplifiedChineseProves => "type.script.simplified-chinese.proves",
             Self::SpecimenBarValue => "specimen.bar.value",
-            Self::SpecimenTitle => "specimen.title",
-            Self::SpecimenLead => "specimen.lead",
-            Self::SpecimenSectionTitle => "specimen.section.title",
-            Self::SpecimenBody => "specimen.body",
-            Self::SpecimenBodyTwo => "specimen.body.two",
-            Self::SpecimenListsTitle => "specimen.lists.title",
-            Self::SpecimenListsBody => "specimen.lists.body",
-            Self::SpecimenMarksTitle => "specimen.marks.title",
-            Self::SpecimenMarksBody => "specimen.marks.body",
-            Self::SpecimenMarkLink => "specimen.mark.link",
-            Self::SpecimenMarkStrong => "specimen.mark.strong",
-            Self::SpecimenMarkEm => "specimen.mark.em",
-            Self::SpecimenMarkMark => "specimen.mark.mark",
-            Self::SpecimenMarkAbbrTitle => "specimen.mark.abbr.title",
-            Self::SpecimenCodeTitle => "specimen.code.title",
-            Self::SpecimenCodeBody => "specimen.code.body",
-            Self::SpecimenComponentsTitle => "specimen.components.title",
             Self::ExampleColorPickerLabel => "example.color-picker.label",
             Self::ExampleColorPickerTagsLabel => "example.color-picker.tags-label",
             Self::ExampleColorPickerBrandLabel => "example.color-picker.brand-label",
@@ -11789,9 +11637,11 @@ impl Locale {
                 Key::SearchGroupComponents => "Components",
                 Key::SearchResults => "one:{count} result|other:{count} results",
                 Key::PageIntroTitle => "Intro",
-                Key::PageIntroSummary => "Read what this design system is and where to start.",
+                Key::PageIntroSummary => {
+                    "Build accessible, themeable interfaces in Dioxus or in React."
+                }
                 Key::PageIntroBody => {
-                    "Noctua is a design system in two packages that behave identically: a Dioxus crate and a React package, both built from one specification. Start with Typography, Spacing or Icons list for the foundations, or open a component in the sidebar."
+                    "Noctua is a design system in two packages that behave identically: a Dioxus crate and a React package, both built from one specification."
                 }
                 Key::PageMenuSummary => "Let users choose an action from the list a button opens.",
                 Key::PageMenuBody => {
@@ -11811,11 +11661,11 @@ impl Locale {
                 }
                 Key::PageTypographyTitle => "Typography",
                 Key::PageTypographySummary => {
-                    "Set text with the type scale, the four families and a fixed line length."
+                    "Set text from one scale and four families, in fourteen scripts."
                 }
                 Key::PageIconsTitle => "Icons list",
                 Key::PageIconsSummary => {
-                    "Use any icon in the set, and add a new one to the specification."
+                    "Browse every icon in the system, and filter by name to find one."
                 }
                 Key::PageListSummary => {
                     "Group items into a list, and nest lists inside the items of one."
@@ -11857,14 +11707,16 @@ impl Locale {
                 }
                 Key::PageSpacingTitle => "Spacing",
                 Key::PageSpacingSummary => {
-                    "Space a page from one scale. Every gap on this site is a step of it."
+                    "Space a page from one scale, where every gap is a step."
                 }
                 Key::SpacingTight => {
                     "Between a label and the control it labels. The smallest of the named gaps."
                 }
                 Key::SpacingInset => "Inside a control: the padding of a button, an input, a chip.",
                 Key::SpacingGap => "Between sibling controls in a row or a form.",
-                Key::SpacingParagraph => "Between paragraphs. Generous, because §9.7 asks for it.",
+                Key::SpacingParagraph => {
+                    "Between paragraphs. The most generous of the gaps inside a block of text."
+                }
                 Key::SpacingHeading => "Between a heading and the text under it.",
                 Key::SpacingSection => "Between one section of a page and the next.",
                 Key::SpacingRegion => "Between the major regions of a layout.",
@@ -11891,12 +11743,6 @@ impl Locale {
                 Key::SpacingRhythmThird => {
                     "Far enough that the eye knows the subject changed before it reads a word."
                 }
-                Key::SpacingInsetTitle => "Inside a control, and between two",
-                Key::SpacingInsetBody => {
-                    "One is the padding a control carries. The other is the space between it and the next control. Drawn on real buttons, so what is measured is the padding that ships."
-                }
-                Key::SpacingInsetOne => "Save",
-                Key::SpacingInsetTwo => "Cancel",
                 Key::SpacingColumnToken => "Token",
                 Key::SpacingColumnStep => "Step",
                 Key::SpacingColumnRem => "rem",
@@ -12045,17 +11891,8 @@ impl Locale {
                     "The scale is anchored at body size. Every other size is stated as an absolute value rather than as a multiplier, so a value can be read without arithmetic."
                 }
                 Key::TypeFamiliesTitle => "The families",
-                Key::TypeFamiliesBody => {
-                    "Four families ship, each at every weight and style the system uses. Nothing else is loaded."
-                }
                 Key::TypeScriptsTitle => "Every script this system renders",
-                Key::TypeScriptsBody => {
-                    "Noto covers every script this system renders. Each line below is real text in the script it names, rather than a placeholder."
-                }
                 Key::TypeSpecimenLine => "Sphinx of black quartz, judge my vow",
-                Key::IconsBody => {
-                    "The set is declared once, and one constant per icon, both implementations, the manifest and this page follow from it. An icon that is never drawn adds nothing to an application, so the whole set ships."
-                }
                 Key::IconsCount => "{count} icons",
                 Key::IconsFilterLabel => "Filter by name",
                 Key::IconsFilterClear => "Clear the filter",
@@ -13190,81 +13027,20 @@ impl Locale {
                     "The glass test needs the material, so `Off` is refused while it runs."
                 }
                 Key::TypeScriptLatinName => "Latin",
-                Key::TypeScriptLatinProves => "the base case, and every letter of the alphabet",
                 Key::TypeScriptLatinPortugueseName => "Latin, Portuguese",
-                Key::TypeScriptLatinPortugueseProves => {
-                    "stacked diacritics — the tilde, cedilla, circumflex and acute this project needs"
-                }
                 Key::TypeScriptGreekName => "Greek",
-                Key::TypeScriptGreekProves => {
-                    "Greek, which Iosevka does cover — the fallback must NOT fire"
-                }
                 Key::TypeScriptCyrillicName => "Cyrillic",
-                Key::TypeScriptCyrillicProves => {
-                    "Cyrillic, likewise covered — the fallback must not fire"
-                }
                 Key::TypeScriptArabicName => "Arabic",
-                Key::TypeScriptArabicProves => {
-                    "right-to-left shaping, and initial/medial/final letter forms"
-                }
                 Key::TypeScriptHebrewName => "Hebrew",
-                Key::TypeScriptHebrewProves => "right-to-left without joining forms",
                 Key::TypeScriptDevanagariName => "Devanagari",
-                Key::TypeScriptDevanagariProves => {
-                    "conjunct consonants and marks above and below the baseline"
-                }
                 Key::TypeScriptThaiName => "Thai",
-                Key::TypeScriptThaiProves => {
-                    "a script with no spaces, where line breaking is the font's problem"
-                }
                 Key::TypeScriptEthiopicName => "Ethiopic",
-                Key::TypeScriptEthiopicProves => "a syllabary with no case",
                 Key::TypeScriptGeorgianName => "Georgian",
-                Key::TypeScriptGeorgianProves => {
-                    "a unicameral alphabet with tall ascenders and deep descenders"
-                }
                 Key::TypeScriptArmenianName => "Armenian",
-                Key::TypeScriptArmenianProves => {
-                    "its own punctuation, which is not Latin punctuation"
-                }
                 Key::TypeScriptJapaneseName => "Japanese",
-                Key::TypeScriptJapaneseProves => {
-                    "three writing systems on one line — hiragana, katakana and kanji"
-                }
                 Key::TypeScriptKoreanName => "Korean",
-                Key::TypeScriptKoreanProves => "composed syllable blocks",
                 Key::TypeScriptSimplifiedChineseName => "Simplified Chinese",
-                Key::TypeScriptSimplifiedChineseProves => {
-                    "dense ideographs, and full-width punctuation"
-                }
                 Key::SpecimenBarValue => "{value} of {max} used",
-                Key::SpecimenTitle => "Everything, on one page",
-                Key::SpecimenLead => {
-                    "A title, the sentence under it, the text under that, and the marks a paragraph carries. Every element here is the component itself rather than a picture of it."
-                }
-                Key::SpecimenSectionTitle => "A section, and the text under it",
-                Key::SpecimenBody => {
-                    "This is body text at the default size. The line ends at the **measure** rather than at the edge of the window. A word can be *emphasised*, and a token like `--noctua-space-paragraph` sits inside the sentence."
-                }
-                Key::SpecimenBodyTwo => {
-                    "The gap between these two paragraphs is one named step, and so is the gap above the heading. Nothing here sets a number: change what the step means and every page moves together."
-                }
-                Key::SpecimenListsTitle => "Lists",
-                Key::SpecimenListsBody => "Unordered and ordered, both spaced from the same scale.",
-                Key::SpecimenMarksTitle => "The marks",
-                Key::SpecimenMarksBody => {
-                    "Each line below is one component, doing the one thing it is for."
-                }
-                Key::SpecimenMarkLink => "A link to somewhere else",
-                Key::SpecimenMarkStrong => "Something that matters",
-                Key::SpecimenMarkEm => "Something said with weight",
-                Key::SpecimenMarkMark => "Something you just searched for",
-                Key::SpecimenMarkAbbrTitle => "What You See Is What You Get",
-                Key::SpecimenCodeTitle => "And a block of code",
-                Key::SpecimenCodeBody => {
-                    "Wide enough to scroll, focusable so a keyboard can scroll it, and with a control that copies it."
-                }
-                Key::SpecimenComponentsTitle => "Every component",
                 Key::ExampleColorPickerLabel => "Label colour",
                 Key::ExampleColorPickerTagsLabel => "Tag colours",
                 Key::ExampleColorPickerBrandLabel => "Brand colour",
@@ -18073,9 +17849,11 @@ impl Locale {
                 Key::SearchGroupComponents => "Componentes",
                 Key::SearchResults => "one:{count} resultado|other:{count} resultados",
                 Key::PageIntroTitle => "Introdução",
-                Key::PageIntroSummary => "Leia o que é este design system e por onde começar.",
+                Key::PageIntroSummary => {
+                    "Construa interfaces acessíveis e personalizáveis, em Dioxus ou em React."
+                }
                 Key::PageIntroBody => {
-                    "O Noctua é um design system em dois pacotes de comportamento idêntico: um crate Dioxus e um pacote React. Os dois vêm da mesma especificação. Comece pelas bases, em Tipografia, Espaçamento ou Lista de ícones, ou abra um componente na barra lateral."
+                    "O Noctua é um design system em dois pacotes de comportamento idêntico: um crate Dioxus e um pacote React. Os dois vêm da mesma especificação."
                 }
                 Key::PageMenuSummary => {
                     "Deixe a pessoa escolher uma ação na lista que um botão abre."
@@ -18097,11 +17875,11 @@ impl Locale {
                 }
                 Key::PageTypographyTitle => "Tipografia",
                 Key::PageTypographySummary => {
-                    "Componha o texto com a escala tipográfica, as quatro famílias e uma medida de linha fixa."
+                    "Escreva com uma escala, quatro famílias e catorze escritas."
                 }
                 Key::PageIconsTitle => "Lista de ícones",
                 Key::PageIconsSummary => {
-                    "Use qualquer ícone do conjunto, e acrescente um novo à especificação."
+                    "Navegue por todos os ícones do sistema, e filtre por nome para achar um."
                 }
                 Key::PageListSummary => {
                     "Agrupe itens numa lista, e aninhe listas dentro dos itens dela."
@@ -18143,7 +17921,7 @@ impl Locale {
                 }
                 Key::PageSpacingTitle => "Espaçamento",
                 Key::PageSpacingSummary => {
-                    "Espace a página a partir de uma escala. Todo espaço deste site é um degrau dela."
+                    "Espace uma página a partir de uma escala, onde todo espaço é um degrau."
                 }
                 Key::SpacingTight => {
                     "Entre um rótulo e o controle que ele nomeia. O menor dos espaços nomeados."
@@ -18152,7 +17930,9 @@ impl Locale {
                     "Dentro de um controle: o preenchimento de um botão, de um campo, de um chip."
                 }
                 Key::SpacingGap => "Entre controles irmãos numa fileira ou num formulário.",
-                Key::SpacingParagraph => "Entre parágrafos. Generoso, porque a §9.7 pede isso.",
+                Key::SpacingParagraph => {
+                    "Entre parágrafos. O mais generoso dos espaços dentro de um bloco de texto."
+                }
                 Key::SpacingHeading => "Entre um título e o texto embaixo dele.",
                 Key::SpacingSection => "Entre uma seção da página e a seguinte.",
                 Key::SpacingRegion => "Entre as regiões maiores de um layout.",
@@ -18179,12 +17959,6 @@ impl Locale {
                 Key::SpacingRhythmThird => {
                     "Longe o bastante para o olho saber que o assunto mudou antes de ler uma palavra."
                 }
-                Key::SpacingInsetTitle => "Dentro de um controle, e entre dois",
-                Key::SpacingInsetBody => {
-                    "Um é o preenchimento que um controle carrega. O outro é o espaço entre ele e o próximo controle. Desenhados em botões de verdade, então o que se mede é o preenchimento entregue."
-                }
-                Key::SpacingInsetOne => "Salvar",
-                Key::SpacingInsetTwo => "Cancelar",
                 Key::SpacingColumnToken => "Token",
                 Key::SpacingColumnStep => "Degrau",
                 Key::SpacingColumnRem => "rem",
@@ -18333,17 +18107,8 @@ impl Locale {
                     "A escala é ancorada no tamanho do texto corrido. Todos os outros tamanhos são declarados em valor absoluto, e não como multiplicador, então dá para ler o valor sem fazer conta."
                 }
                 Key::TypeFamiliesTitle => "As famílias",
-                Key::TypeFamiliesBody => {
-                    "São quatro famílias, cada uma em todos os pesos e estilos que o sistema usa. Nada além disso é carregado."
-                }
                 Key::TypeScriptsTitle => "Todas as escritas que este sistema renderiza",
-                Key::TypeScriptsBody => {
-                    "O Noto cobre todas as escritas que este sistema renderiza. Cada linha abaixo é texto de verdade na escrita que nomeia, e não um texto genérico."
-                }
                 Key::TypeSpecimenLine => "Um pequeno jabuti xereta viu dez cegonhas felizes",
-                Key::IconsBody => {
-                    "O conjunto é declarado uma vez, e uma constante por ícone, as duas implementações, o manifesto e esta página decorrem dele. Um ícone que não é desenhado não acrescenta nada a uma aplicação, então o conjunto inteiro é publicado."
-                }
                 Key::IconsCount => "{count} ícones",
                 Key::IconsFilterLabel => "Filtrar por nome",
                 Key::IconsFilterClear => "Limpar o filtro",
@@ -19492,81 +19257,20 @@ impl Locale {
                     "O teste de vidro precisa do material, então `Desligado` fica recusado enquanto ele roda."
                 }
                 Key::TypeScriptLatinName => "Latino",
-                Key::TypeScriptLatinProves => "o caso base, e todas as letras do alfabeto",
                 Key::TypeScriptLatinPortugueseName => "Latino, português",
-                Key::TypeScriptLatinPortugueseProves => {
-                    "diacríticos empilhados — o til, a cedilha, o circunflexo e o agudo de que este projeto precisa"
-                }
                 Key::TypeScriptGreekName => "Grego",
-                Key::TypeScriptGreekProves => {
-                    "o grego, que a Iosevka cobre — a fonte reserva NÃO pode ser acionada"
-                }
                 Key::TypeScriptCyrillicName => "Cirílico",
-                Key::TypeScriptCyrillicProves => {
-                    "o cirílico, igualmente coberto — a fonte reserva não pode ser acionada"
-                }
                 Key::TypeScriptArabicName => "Árabe",
-                Key::TypeScriptArabicProves => {
-                    "a composição da direita para a esquerda, e as formas inicial, medial e final das letras"
-                }
                 Key::TypeScriptHebrewName => "Hebraico",
-                Key::TypeScriptHebrewProves => "da direita para a esquerda, sem formas de ligação",
                 Key::TypeScriptDevanagariName => "Devanágari",
-                Key::TypeScriptDevanagariProves => {
-                    "consoantes conjuntas e marcas acima e abaixo da linha de base"
-                }
                 Key::TypeScriptThaiName => "Tailandês",
-                Key::TypeScriptThaiProves => {
-                    "uma escrita sem espaços, onde a quebra de linha é problema da fonte"
-                }
                 Key::TypeScriptEthiopicName => "Etíope",
-                Key::TypeScriptEthiopicProves => "um silabário sem caixa alta e baixa",
                 Key::TypeScriptGeorgianName => "Georgiano",
-                Key::TypeScriptGeorgianProves => {
-                    "um alfabeto unicameral com ascendentes altas e descendentes profundas"
-                }
                 Key::TypeScriptArmenianName => "Armênio",
-                Key::TypeScriptArmenianProves => "pontuação própria, que não é a pontuação latina",
                 Key::TypeScriptJapaneseName => "Japonês",
-                Key::TypeScriptJapaneseProves => {
-                    "três sistemas de escrita numa linha só — hiragana, katakana e kanji"
-                }
                 Key::TypeScriptKoreanName => "Coreano",
-                Key::TypeScriptKoreanProves => "blocos silábicos compostos",
                 Key::TypeScriptSimplifiedChineseName => "Chinês simplificado",
-                Key::TypeScriptSimplifiedChineseProves => {
-                    "ideogramas densos, e pontuação de largura plena"
-                }
                 Key::SpecimenBarValue => "{value} de {max} em uso",
-                Key::SpecimenTitle => "Tudo, em uma página só",
-                Key::SpecimenLead => {
-                    "Um título, a frase abaixo dele, o texto abaixo disso, e as marcas que um parágrafo carrega. Cada elemento aqui é o próprio componente, e não uma imagem dele."
-                }
-                Key::SpecimenSectionTitle => "Uma seção, e o texto abaixo dela",
-                Key::SpecimenBody => {
-                    "Este é o texto corrido no tamanho padrão. A linha termina na **medida**, e não na borda da janela. Uma palavra pode ser *enfatizada*, e um token como `--noctua-space-paragraph` cabe dentro da frase."
-                }
-                Key::SpecimenBodyTwo => {
-                    "O espaço entre estes dois parágrafos é um degrau nomeado, e o espaço acima do título também. Nada aqui define um número: mude o que o degrau significa e todas as páginas se movem juntas."
-                }
-                Key::SpecimenListsTitle => "Listas",
-                Key::SpecimenListsBody => {
-                    "Não ordenada e ordenada, as duas espaçadas pela mesma escala."
-                }
-                Key::SpecimenMarksTitle => "As marcas",
-                Key::SpecimenMarksBody => {
-                    "Cada linha abaixo é um componente, fazendo a única coisa para a qual ele serve."
-                }
-                Key::SpecimenMarkLink => "Um link para outro lugar",
-                Key::SpecimenMarkStrong => "Algo que importa",
-                Key::SpecimenMarkEm => "Algo dito com peso",
-                Key::SpecimenMarkMark => "Algo que você acabou de buscar",
-                Key::SpecimenMarkAbbrTitle => "O que você vê é o que você obtém",
-                Key::SpecimenCodeTitle => "E um bloco de código",
-                Key::SpecimenCodeBody => {
-                    "Largo o bastante para rolar, focalizável para que o teclado consiga rolar, e com um controle que o copia."
-                }
-                Key::SpecimenComponentsTitle => "Todos os componentes",
                 Key::ExampleColorPickerLabel => "Cor do rótulo",
                 Key::ExampleColorPickerTagsLabel => "Cores das tags",
                 Key::ExampleColorPickerBrandLabel => "Cor da marca",
@@ -24400,10 +24104,10 @@ impl Locale {
                 Key::SearchResults => "⟦oonee:{count} reesuult|ootheer:{count} reesuults⟧",
                 Key::PageIntroTitle => "⟦IIntroo⟧",
                 Key::PageIntroSummary => {
-                    "⟦Reeaad whaat thiis deesiign systeem iis aand wheeree too staart.⟧"
+                    "⟦Buuiild aacceessiiblee, theemeeaablee iinteerfaacees iin Diiooxuus oor iin Reeaact.⟧"
                 }
                 Key::PageIntroBody => {
-                    "⟦Nooctuuaa iis aa deesiign systeem iin twoo paackaagees thaat beehaavee iideentiicaally: aa Diiooxuus craatee aand aa Reeaact paackaagee, booth buuiilt froom oonee speeciifiicaatiioon. Staart wiith Typoograaphy, Spaaciing oor IIcoons liist foor thee foouundaatiioons, oor oopeen aa coompooneent iin thee siideebaar.⟧"
+                    "⟦Nooctuuaa iis aa deesiign systeem iin twoo paackaagees thaat beehaavee iideentiicaally: aa Diiooxuus craatee aand aa Reeaact paackaagee, booth buuiilt froom oonee speeciifiicaatiioon.⟧"
                 }
                 Key::PageMenuSummary => {
                     "⟦Leet uuseers choooosee aan aactiioon froom thee liist aa buuttoon oopeens.⟧"
@@ -24425,11 +24129,11 @@ impl Locale {
                 }
                 Key::PageTypographyTitle => "⟦Typoograaphy⟧",
                 Key::PageTypographySummary => {
-                    "⟦Seet teext wiith thee typee scaalee, thee foouur faamiiliiees aand aa fiixeed liinee leength.⟧"
+                    "⟦Seet teext froom oonee scaalee aand foouur faamiiliiees, iin foouurteeeen scriipts.⟧"
                 }
                 Key::PageIconsTitle => "⟦IIcoons liist⟧",
                 Key::PageIconsSummary => {
-                    "⟦UUsee aany iicoon iin thee seet, aand aadd aa neew oonee too thee speeciifiicaatiioon.⟧"
+                    "⟦Broowsee eeveery iicoon iin thee systeem, aand fiilteer by naamee too fiind oonee.⟧"
                 }
                 Key::PageListSummary => {
                     "⟦Groouup iiteems iintoo aa liist, aand neest liists iinsiidee thee iiteems oof oonee.⟧"
@@ -24475,7 +24179,7 @@ impl Locale {
                 }
                 Key::PageSpacingTitle => "⟦Spaaciing⟧",
                 Key::PageSpacingSummary => {
-                    "⟦Spaacee aa paagee froom oonee scaalee. EEveery gaap oon thiis siitee iis aa steep oof iit.⟧"
+                    "⟦Spaacee aa paagee froom oonee scaalee, wheeree eeveery gaap iis aa steep.⟧"
                 }
                 Key::SpacingTight => {
                     "⟦Beetweeeen aa laabeel aand thee coontrool iit laabeels. Thee smaalleest oof thee naameed gaaps.⟧"
@@ -24485,7 +24189,7 @@ impl Locale {
                 }
                 Key::SpacingGap => "⟦Beetweeeen siibliing coontrools iin aa roow oor aa foorm.⟧",
                 Key::SpacingParagraph => {
-                    "⟦Beetweeeen paaraagraaphs. Geeneeroouus, beecaauusee §9.7 aasks foor iit.⟧"
+                    "⟦Beetweeeen paaraagraaphs. Thee moost geeneeroouus oof thee gaaps iinsiidee aa bloock oof teext.⟧"
                 }
                 Key::SpacingHeading => "⟦Beetweeeen aa heeaadiing aand thee teext uundeer iit.⟧",
                 Key::SpacingSection => {
@@ -24515,12 +24219,6 @@ impl Locale {
                 Key::SpacingRhythmThird => {
                     "⟦Faar eenoouugh thaat thee eeyee knoows thee suubjeect chaangeed beefooree iit reeaads aa woord.⟧"
                 }
-                Key::SpacingInsetTitle => "⟦IInsiidee aa coontrool, aand beetweeeen twoo⟧",
-                Key::SpacingInsetBody => {
-                    "⟦OOnee iis thee paaddiing aa coontrool caarriiees. Thee ootheer iis thee spaacee beetweeeen iit aand thee neext coontrool. Draawn oon reeaal buuttoons, soo whaat iis meeaasuureed iis thee paaddiing thaat shiips.⟧"
-                }
-                Key::SpacingInsetOne => "⟦Saavee⟧",
-                Key::SpacingInsetTwo => "⟦Caanceel⟧",
                 Key::SpacingColumnToken => "⟦Tookeen⟧",
                 Key::SpacingColumnStep => "⟦Steep⟧",
                 Key::SpacingColumnRem => "⟦reem⟧",
@@ -24677,17 +24375,8 @@ impl Locale {
                     "⟦Thee scaalee iis aanchooreed aat boody siizee. EEveery ootheer siizee iis staateed aas aan aabsooluutee vaaluuee raatheer thaan aas aa muultiipliieer, soo aa vaaluuee caan bee reeaad wiithoouut aariithmeetiic.⟧"
                 }
                 Key::TypeFamiliesTitle => "⟦Thee faamiiliiees⟧",
-                Key::TypeFamiliesBody => {
-                    "⟦Foouur faamiiliiees shiip, eeaach aat eeveery weeiight aand stylee thee systeem uusees. Noothiing eelsee iis looaadeed.⟧"
-                }
                 Key::TypeScriptsTitle => "⟦EEveery scriipt thiis systeem reendeers⟧",
-                Key::TypeScriptsBody => {
-                    "⟦Nootoo cooveers eeveery scriipt thiis systeem reendeers. EEaach liinee beeloow iis reeaal teext iin thee scriipt iit naamees, raatheer thaan aa plaaceehooldeer.⟧"
-                }
                 Key::TypeSpecimenLine => "⟦Sphiinx oof blaack quuaartz, juudgee my voow⟧",
-                Key::IconsBody => {
-                    "⟦Thee seet iis deeclaareed ooncee, aand oonee coonstaant peer iicoon, booth iimpleemeentaatiioons, thee maaniifeest aand thiis paagee foolloow froom iit. AAn iicoon thaat iis neeveer draawn aadds noothiing too aan aappliicaatiioon, soo thee whoolee seet shiips.⟧"
-                }
                 Key::IconsCount => "⟦{count} iicoons⟧",
                 Key::IconsFilterLabel => "⟦Fiilteer by naamee⟧",
                 Key::IconsFilterClear => "⟦Cleeaar thee fiilteer⟧",
@@ -25884,85 +25573,20 @@ impl Locale {
                     "⟦Thee glaass teest neeeeds thee maateeriiaal, soo `OOff` iis reefuuseed whiilee iit ruuns.⟧"
                 }
                 Key::TypeScriptLatinName => "⟦Laatiin⟧",
-                Key::TypeScriptLatinProves => {
-                    "⟦thee baasee caasee, aand eeveery leetteer oof thee aalphaabeet⟧"
-                }
                 Key::TypeScriptLatinPortugueseName => "⟦Laatiin, Poortuuguueesee⟧",
-                Key::TypeScriptLatinPortugueseProves => {
-                    "⟦staackeed diiaacriitiics — thee tiildee, ceediillaa, ciircuumfleex aand aacuutee thiis proojeect neeeeds⟧"
-                }
                 Key::TypeScriptGreekName => "⟦Greeeek⟧",
-                Key::TypeScriptGreekProves => {
-                    "⟦Greeeek, whiich IIooseevkaa dooees cooveer — thee faallbaack muust NOOT fiiree⟧"
-                }
                 Key::TypeScriptCyrillicName => "⟦Cyriilliic⟧",
-                Key::TypeScriptCyrillicProves => {
-                    "⟦Cyriilliic, liikeewiisee cooveereed — thee faallbaack muust noot fiiree⟧"
-                }
                 Key::TypeScriptArabicName => "⟦AAraabiic⟧",
-                Key::TypeScriptArabicProves => {
-                    "⟦riight-too-leeft shaapiing, aand iiniitiiaal/meediiaal/fiinaal leetteer foorms⟧"
-                }
                 Key::TypeScriptHebrewName => "⟦Heebreew⟧",
-                Key::TypeScriptHebrewProves => "⟦riight-too-leeft wiithoouut jooiiniing foorms⟧",
                 Key::TypeScriptDevanagariName => "⟦Deevaanaagaarii⟧",
-                Key::TypeScriptDevanagariProves => {
-                    "⟦coonjuunct coonsoonaants aand maarks aaboovee aand beeloow thee baaseeliinee⟧"
-                }
                 Key::TypeScriptThaiName => "⟦Thaaii⟧",
-                Key::TypeScriptThaiProves => {
-                    "⟦aa scriipt wiith noo spaacees, wheeree liinee breeaakiing iis thee foont's proobleem⟧"
-                }
                 Key::TypeScriptEthiopicName => "⟦EEthiioopiic⟧",
-                Key::TypeScriptEthiopicProves => "⟦aa syllaabaary wiith noo caasee⟧",
                 Key::TypeScriptGeorgianName => "⟦Geeoorgiiaan⟧",
-                Key::TypeScriptGeorgianProves => {
-                    "⟦aa uuniicaameeraal aalphaabeet wiith taall aasceendeers aand deeeep deesceendeers⟧"
-                }
                 Key::TypeScriptArmenianName => "⟦AArmeeniiaan⟧",
-                Key::TypeScriptArmenianProves => {
-                    "⟦iits oown puunctuuaatiioon, whiich iis noot Laatiin puunctuuaatiioon⟧"
-                }
                 Key::TypeScriptJapaneseName => "⟦Jaapaaneesee⟧",
-                Key::TypeScriptJapaneseProves => {
-                    "⟦threeee wriitiing systeems oon oonee liinee — hiiraagaanaa, kaataakaanaa aand kaanjii⟧"
-                }
                 Key::TypeScriptKoreanName => "⟦Kooreeaan⟧",
-                Key::TypeScriptKoreanProves => "⟦coompooseed syllaablee bloocks⟧",
                 Key::TypeScriptSimplifiedChineseName => "⟦Siimpliifiieed Chiineesee⟧",
-                Key::TypeScriptSimplifiedChineseProves => {
-                    "⟦deensee iideeoograaphs, aand fuull-wiidth puunctuuaatiioon⟧"
-                }
                 Key::SpecimenBarValue => "⟦{value} oof {max} uuseed⟧",
-                Key::SpecimenTitle => "⟦EEveerythiing, oon oonee paagee⟧",
-                Key::SpecimenLead => {
-                    "⟦AA tiitlee, thee seenteencee uundeer iit, thee teext uundeer thaat, aand thee maarks aa paaraagraaph caarriiees. EEveery eeleemeent heeree iis thee coompooneent iitseelf raatheer thaan aa piictuuree oof iit.⟧"
-                }
-                Key::SpecimenSectionTitle => "⟦AA seectiioon, aand thee teext uundeer iit⟧",
-                Key::SpecimenBody => {
-                    "⟦Thiis iis boody teext aat thee deefaauult siizee. Thee liinee eends aat thee **meeaasuuree** raatheer thaan aat thee eedgee oof thee wiindoow. AA woord caan bee *eemphaasiiseed*, aand aa tookeen liikee `--nooctuuaa-spaacee-paaraagraaph` siits iinsiidee thee seenteencee.⟧"
-                }
-                Key::SpecimenBodyTwo => {
-                    "⟦Thee gaap beetweeeen theesee twoo paaraagraaphs iis oonee naameed steep, aand soo iis thee gaap aaboovee thee heeaadiing. Noothiing heeree seets aa nuumbeer: chaangee whaat thee steep meeaans aand eeveery paagee moovees toogeetheer.⟧"
-                }
-                Key::SpecimenListsTitle => "⟦Liists⟧",
-                Key::SpecimenListsBody => {
-                    "⟦UUnoordeereed aand oordeereed, booth spaaceed froom thee saamee scaalee.⟧"
-                }
-                Key::SpecimenMarksTitle => "⟦Thee maarks⟧",
-                Key::SpecimenMarksBody => {
-                    "⟦EEaach liinee beeloow iis oonee coompooneent, dooiing thee oonee thiing iit iis foor.⟧"
-                }
-                Key::SpecimenMarkLink => "⟦AA liink too soomeewheeree eelsee⟧",
-                Key::SpecimenMarkStrong => "⟦Soomeethiing thaat maatteers⟧",
-                Key::SpecimenMarkEm => "⟦Soomeethiing saaiid wiith weeiight⟧",
-                Key::SpecimenMarkMark => "⟦Soomeethiing yoouu juust seeaarcheed foor⟧",
-                Key::SpecimenMarkAbbrTitle => "⟦Whaat Yoouu Seeee IIs Whaat Yoouu Geet⟧",
-                Key::SpecimenCodeTitle => "⟦AAnd aa bloock oof coodee⟧",
-                Key::SpecimenCodeBody => {
-                    "⟦Wiidee eenoouugh too scrooll, foocuusaablee soo aa keeybooaard caan scrooll iit, aand wiith aa coontrool thaat coopiiees iit.⟧"
-                }
-                Key::SpecimenComponentsTitle => "⟦EEveery coompooneent⟧",
                 Key::ExampleColorPickerLabel => "⟦Laabeel cooloouur⟧",
                 Key::ExampleColorPickerTagsLabel => "⟦Taag cooloouurs⟧",
                 Key::ExampleColorPickerBrandLabel => "⟦Braand cooloouur⟧",

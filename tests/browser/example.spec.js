@@ -399,7 +399,11 @@ const band = (page, index = 0) =>
 
 test("the call's band reaches both edges of its stage", async ({ page }) => {
   await page.setViewportSize({ width: 1120, height: 900 });
-  for (const path of [PAGE.button, PAGE.spacing]) {
+  // A component page and a foundation page, which is the pair this is about:
+  // one frame per use of one component against one frame per specimen. It was
+  // `/spacing/`, whose tables and rhythm are not renderings anybody resizes and
+  // which carries no frame at all now.
+  for (const path of [PAGE.button, PAGE.typography]) {
     await page.goto(url(path));
     const m = await band(page);
     // Flush, to the pixel. A band inset by the stage's old padding is a chip,

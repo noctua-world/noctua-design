@@ -8,14 +8,12 @@
 use dioxus::prelude::*;
 use noctua_design::ThemeScope;
 use noctua_design::components::{
-    Abbr, Blockquote, BlockquoteTone, Button, ButtonGroup, ButtonSize, ButtonTone, ButtonVariant,
-    Code, CodeBlock, CodeTone, Del, Disclosure, DisclosureHeading, Em, Heading, HeadingLevel,
-    HeadingSize, Input, Ins, Kbd, Label, LabelKind, LabelSize, Link, List, ListItem, ListKind,
-    ListMarker, ListSpacing, Mark, Menu, MenuItem, Paragraph, ParagraphSize, ParagraphTone, Prose,
-    Segmented, SegmentedItem, SegmentedSize, Strong, Table, TableCell, TableCellAlign, TableColumn,
-    TableColumnWidth, TableHeaderCell, TableHeaderCellAlign, TableHeaderCellScope,
-    TableHeaderCellWrap, TableRow, TableSection, TableSectionKind, Text, TextSize, TextTone,
-    TextWeight, Time, Toolbar, ToolbarDensity, Truncate, TruncateLines,
+    Button, ButtonSize, ButtonTone, ButtonVariant, Code, CodeTone, Disclosure, DisclosureHeading,
+    Em, Heading, HeadingLevel, HeadingSize, Input, Kbd, Label, LabelKind, LabelSize, Link, Menu,
+    MenuItem, Paragraph, ParagraphSize, ParagraphTone, Prose, Segmented, SegmentedItem,
+    SegmentedSize, Strong, Table, TableCell, TableCellAlign, TableColumn, TableColumnWidth,
+    TableHeaderCell, TableHeaderCellAlign, TableHeaderCellScope, TableHeaderCellWrap, TableRow,
+    TableSection, TableSectionKind, Text, TextSize, TextTone, TextWeight, Toolbar, ToolbarDensity,
 };
 use noctua_design::model::{Glass, Mode, Palette, Radius};
 use noctua_design::{Icon, IconDrawing, IconSize};
@@ -51,14 +49,15 @@ pub(crate) fn Body(context: Context) -> Element {
                 "intro" => rsx! {
                     section { class: "nd-doc-section", id: "intro", Intro { context } }
                 },
-                "typography" => rsx! {
-                    section { class: "nd-doc-section", id: "typography", Typography { context } }
-                },
+                // THE TWO FOUNDATION PAGES RENDER THEIR OWN SECTIONS, like the
+                // lineage page below. Each documents three separate things —
+                // a scale, a set of families, a set of scripts — and one
+                // `<section>` around all three is a page whose outline is one
+                // entry and whose jump index has nothing to point at.
+                "typography" => rsx! { Typography { context } },
+                "spacing" => rsx! { Spacing { context } },
                 "icons" => rsx! {
                     section { class: "nd-doc-section", id: "icons", Icons { context } }
-                },
-                "spacing" => rsx! {
-                    section { class: "nd-doc-section", id: "spacing", Spacing { context } }
                 },
                 // The one component whose page is written rather than derived: its
                 // props ARE the scopable settings, so it has no contract file and
@@ -636,15 +635,12 @@ fn framed(
 #[component]
 fn Example(
     context: Context,
-    /// A heading, for an example whose subject needs naming.
-    ///
-    /// Component examples do not have one and should not: the call above them
-    /// IS the name, and a heading per example would be sixteen headings in a
-    /// page's outline saying nothing the caption did not. The typography page
-    /// is the case that wants it — four demonstrations of four different
-    /// things, which a reader navigates rather than reads through.
-    #[props(default)]
-    title: Option<Key>,
+    // NO `title`. There was one, for an example whose subject needed naming,
+    // and its two callers were the spacing and typography pages. Both are a
+    // stack of `<section>`s with a real `<h2>` each now, which is the shape
+    // every other page has and the shape the page outline is read from — so a
+    // heading inside the figure would be a second name for the same thing,
+    // one level too deep.
     /// The Dioxus call that produced it.
     source: String,
     /// The React call.
@@ -669,11 +665,6 @@ fn Example(
     let react_hook = react.as_ref().map(|_| String::new());
     rsx! {
         figure { class: "nd-example",
-            if let Some(title) = title {
-                Heading { level: HeadingLevel::_2, size: HeadingSize::H3, class: "nd-example-title",
-                    "{context.t(title)}"
-                }
-            }
             figcaption { class: "nd-example-source",
                 // THE SWITCHABLE WRAPPER ONLY WHERE THERE IS SOMETHING TO
                 // SWITCH TO.
@@ -901,9 +892,11 @@ fn ThemeScopePage(context: Context) -> Element {
             // nowhere — the exact condition that let six other React modules
             // ship broken under a green suite.
             mountable: crate::react_available(),
+            // No heading on the figure: the scope inside it opens with an
+            // `<h3>` carrying this very key, an inch below where the figure's
+            // own would have been.
             Example {
                 context,
-                title: Key::ScopeComponentTitle,
                 source: NESTED_SOURCE,
                 note: Key::ScopeNote,
                 ThemeScope {
@@ -1189,8 +1182,20 @@ fn step_length(step: u32) -> (String, String) {
 /// one — nothing is laid out from it.
 const ROOT_PX: f64 = 16.0;
 
-/// The named gaps, the raw scale, the rhythm they make, and the two that are
-/// most often confused.
+/// The three sections of the spacing page, and what goes in each.
+///
+/// One list, so the jump index above the page and the sections below it are
+/// read from the same place and cannot fall out of step. The order is the
+/// argument: the named gaps are what a component actually asks for, the raw
+/// scale under them is the material, and the rhythm is the only claim of the
+/// three that a table cannot make.
+const SPACING_SECTIONS: [(&str, Key); 3] = [
+    ("spacing-named", Key::SpacingNamedTitle),
+    ("spacing-scale", Key::SpacingScaleTitle),
+    ("spacing-rhythm", Key::SpacingRhythmTitle),
+];
+
+/// The named gaps, the raw scale, and the rhythm they make.
 ///
 /// # Why the named gaps come first
 ///
@@ -1199,44 +1204,67 @@ const ROOT_PX: f64 = 16.0;
 /// for the number has to decide what four means every time. The scale below
 /// them is the raw material, and it is second because it is the answer to a
 /// rarer question.
+///
+/// # The same shape the typography page has
+///
+/// A section, an `<h2>`, one frame, one demonstration, and the sentence about
+/// it under the stage. The page was frameless for one revision and read as a
+/// different site: the tables ran the full width of the column while every
+/// other demonstration on the site sits in a stage with a rail beside it, and
+/// nothing here could be looked at at 320px without resizing the window.
 #[component]
 fn Spacing(context: Context) -> Element {
+    let marks = SPACING_SECTIONS
+        .iter()
+        .map(|(id, heading)| Jump::section((*id).to_owned(), context.t(*heading)))
+        .collect();
     rsx! {
-        // No component index. That belongs to the typography page, where it is
-        // "every component, set in the type"; here it would be a list of
-        // components on a page that is not about them.
-        ExampleFrame { context, name: "spacing", label: Key::PageSpacingTitle,
-            Example {
-                context,
-                title: Key::SpacingNamedTitle,
-                source: NAMED_SOURCE,
-                note: Key::SpacingNamedBody,
-                NamedGaps { context }
+        DocIndex { context, marks }
+
+        section { class: "nd-doc-section", id: "{SPACING_SECTIONS[0].0}",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H2,
+                "{context.t(Key::SpacingNamedTitle)}"
             }
-            Example {
-                context,
-                title: Key::SpacingScaleTitle,
-                source: SCALE_STEP_SOURCE,
-                note: Key::SpacingScaleBody,
-                RawScale { context }
+            ExampleFrame { context, name: "spacing-named", label: Key::SpacingNamedTitle,
+                Example { context, source: NAMED_SOURCE, note: Key::SpacingNamedBody,
+                    NamedGaps { context }
+                }
             }
-            Example {
-                context,
-                title: Key::SpacingRhythmTitle,
-                source: RHYTHM_SOURCE,
-                note: Key::SpacingRhythmBody,
-                Rhythm { context }
+        }
+
+        section { class: "nd-doc-section", id: "{SPACING_SECTIONS[1].0}",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H2,
+                "{context.t(Key::SpacingScaleTitle)}"
             }
-            Example {
-                context,
-                title: Key::SpacingInsetTitle,
-                source: INSET_SOURCE,
-                note: Key::SpacingInsetBody,
-                InsetAndGap { context }
+            ExampleFrame { context, name: "spacing-scale", label: Key::SpacingScaleTitle,
+                Example { context, source: SCALE_STEP_SOURCE, note: Key::SpacingScaleBody,
+                    RawScale { context }
+                }
+            }
+        }
+
+        section { class: "nd-doc-section", id: "{SPACING_SECTIONS[2].0}",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H2,
+                "{context.t(Key::SpacingRhythmTitle)}"
+            }
+            ExampleFrame { context, name: "spacing-rhythm", label: Key::SpacingRhythmTitle,
+                Example { context, source: RHYTHM_SOURCE, note: Key::SpacingRhythmBody,
+                    Rhythm { context }
+                }
             }
         }
     }
 }
+
+/// The three calls the spacing page's demonstrations were produced by.
+///
+/// Each one names the generated list the demonstration above it LOOPS, rather
+/// than a sample of what is in it. The tables read `tokens::space::NAMED` and
+/// `tokens::space::STEPS`, so those are the calls, and a reader who follows
+/// either reaches the whole scale rather than the one step a sample chose.
+const NAMED_SOURCE: &str = "noctua_design_tokens::space::NAMED";
+const SCALE_STEP_SOURCE: &str = "noctua_design_tokens::space::STEPS";
+const RHYTHM_SOURCE: &str = "space::HEADING · space::PARAGRAPH · space::SECTION";
 
 /// The seven gaps a component asks for by purpose.
 #[component]
@@ -1393,6 +1421,20 @@ fn RawScale(context: Context) -> Element {
 /// only claim that cannot be made in a table: that the gaps are *different
 /// enough* to read as a hierarchy, and that a heading and its paragraph belong
 /// together while two sections do not.
+///
+/// # Two columns, because that is how this site names a thing
+///
+/// It was one column of full-width bands with `--noctua-space-heading` set in
+/// mono, right-aligned, floating on an accent wash — a way of labelling that
+/// appears nowhere else here and read as a defect rather than as a
+/// demonstration. The type scale beside it puts the name in its own track and
+/// the specimen in the next, and so does every table on the page: a name
+/// column and a value column. This is that grid.
+///
+/// The names are short for the same reason `.nd-scale-name` says `display`
+/// rather than `--noctua-size-display`. The table above gives the custom
+/// property in full, twice, and a 24-character name in a gutter would take a
+/// third of a phone's width to repeat it.
 #[component]
 fn Rhythm(context: Context) -> Element {
     rsx! {
@@ -1401,9 +1443,13 @@ fn Rhythm(context: Context) -> Element {
                 Heading { level: HeadingLevel::_3, size: HeadingSize::H4,
                     "{context.t(Key::SpacingRhythmHeading)}"
                 }
-                RhythmGap { name: "heading" }
+            }
+            RhythmGap { name: "heading" }
+            div { class: "nd-rhythm-block",
                 Paragraph { size: ParagraphSize::Small, "{context.t(Key::SpacingRhythmFirst)}" }
-                RhythmGap { name: "paragraph" }
+            }
+            RhythmGap { name: "paragraph" }
+            div { class: "nd-rhythm-block",
                 Paragraph { size: ParagraphSize::Small, "{context.t(Key::SpacingRhythmSecond)}" }
             }
             RhythmGap { name: "section" }
@@ -1411,76 +1457,43 @@ fn Rhythm(context: Context) -> Element {
                 Heading { level: HeadingLevel::_3, size: HeadingSize::H4,
                     "{context.t(Key::SpacingRhythmNext)}"
                 }
-                RhythmGap { name: "heading" }
+            }
+            RhythmGap { name: "heading" }
+            div { class: "nd-rhythm-block",
                 Paragraph { size: ParagraphSize::Small, "{context.t(Key::SpacingRhythmThird)}" }
             }
         }
     }
 }
 
-/// One gap in the rhythm, at its real height and wearing its own name.
+/// One gap in the rhythm: its name in the first track, the gap itself in the
+/// second, at the height the token really is.
 ///
-/// The height is the token, so this is the gap rather than a picture of one —
-/// and the name beside it is the answer to the question the demonstration
-/// raises, which is *which one is that*.
+/// TWO ROOTS, ON PURPOSE. They are direct children of the `.nd-rhythm` grid, so
+/// the name lands in the name column and the band in the content column —
+/// wrapping them in a box of their own would put both in one cell and undo the
+/// alignment this exists for.
+///
+/// `Code`, like `.nd-scale-name` beside it, rather than the bare span this used
+/// to be. The span carried `nd-identifier` by hand to tell the pseudo-locale
+/// scan that a token name is not a sentence somebody forgot to translate, and
+/// `<code>` says that already.
 #[component]
 fn RhythmGap(name: String) -> Element {
     rsx! {
+        Code { class: "nd-rhythm-gap-name", "{name}" }
         div {
             class: "nd-rhythm-gap",
             style: "block-size: var(--noctua-space-{name})",
-            // A plain span rather than `Code`: the inline-code recipe carries
-            // padding, and this box is twenty-four pixels tall at its smallest.
-            // `nd-identifier` is what tells the pseudo-locale scan that a token
-            // name is a name rather than a sentence nobody translated.
-            span { class: "nd-rhythm-gap-name nd-identifier", "--noctua-space-{name}" }
+            "aria-hidden": "true",
         }
     }
 }
 
-/// `inset` and `gap`, which are the two most often confused.
-///
-/// One is the space *inside* a control and the other is the space *between*
-/// two, and the difference is invisible in a token list. Drawn on real
-/// `Button`s, so what is measured is the shipped padding rather than a box
-/// pretending to be one.
-#[component]
-fn InsetAndGap(context: Context) -> Element {
-    rsx! {
-        div { class: "nd-inset-demo",
-            // NOT attached, which is the group's default: this example is about
-            // the space BETWEEN two controls, and a joined pair has none.
-            ButtonGroup { label: context.t(Key::SpacingInsetTitle), attached: false,
-                Button { label: context.t(Key::SpacingInsetOne) }
-                Button {
-                    label: context.t(Key::SpacingInsetTwo),
-                    variant: ButtonVariant::Outline,
-                    tone: ButtonTone::Neutral,
-                }
-            }
-            List { kind: ListKind::Unordered, spacing: ListSpacing::Tight,
-                ListItem {
-                    Code { class: "nd-identifier", "--noctua-space-inset" }
-                    " — {context.t(Key::SpacingInset)}"
-                }
-                ListItem {
-                    Code { class: "nd-identifier", "--noctua-space-gap" }
-                    " — {context.t(Key::SpacingGap)}"
-                }
-            }
-        }
-    }
-}
-
-/// The calls the four spacing examples show, as `const`s.
-///
-/// A `const` rather than a literal in the `rsx!`, for the reason `BUTTON_SOURCE`
-/// is one: the macro reads a string literal as a format string, so a `{` inside
-/// it is an interpolation of a variable that does not exist.
-const NAMED_SOURCE: &str = "space::GAP";
-const SCALE_STEP_SOURCE: &str = "var(--noctua-space-8)";
-const RHYTHM_SOURCE: &str = "space::HEADING, space::PARAGRAPH, space::SECTION";
-const INSET_SOURCE: &str = "space::INSET, space::GAP";
+// `inset` and `gap` drawn on two real `Button`s were a fourth demonstration
+// here. The distinction they made — the space INSIDE a control against the
+// space BETWEEN two — is a row each in the table above, in the same words, and
+// a pair of buttons on a page about a scale is a picture of `ButtonGroup`.
 
 // --- The contract tables, which four pages used to write out by hand ---------
 
@@ -2320,8 +2333,11 @@ fn Icons(context: Context) -> Element {
         &noctua_design_icons::ALL.len().to_string(),
     );
     rsx! {
-        Paragraph { "{context.t(Key::IconsBody)}" }
-
+        // NO OPENING PARAGRAPH. It said the set was declared once, that there
+        // is one constant per icon, and that an undrawn icon costs an
+        // application nothing. All three are facts about how this repository
+        // builds, which `NOCTUA.md §9.5` records and `xtask check` measures. A
+        // reader here wants the drawing and its name.
         p { class: "nd-note nd-prose", "{counted}" }
 
         // The gallery is an EXAMPLE, in the frame every example sits in. It was
@@ -2377,235 +2393,103 @@ fn Icons(context: Context) -> Element {
 const ICONS_SOURCE: &str =
     "for icon in noctua_design_icons::ALL { Icon { icon, size: IconSize::Large } }";
 
+/// The three sections of the typography page: the scale, the families, the
+/// scripts.
+///
+/// Read once, by the jump index and by the page under it, for the reason
+/// `SPACING_SECTIONS` is.
+const TYPE_SECTIONS: [(&str, Key); 3] = [
+    ("type-scale", Key::TypeScaleTitle),
+    ("type-families", Key::TypeFamiliesTitle),
+    ("type-scripts", Key::TypeScriptsTitle),
+];
+
 /// The type scale, the four families, and the fourteen scripts.
 ///
 /// The scripts are not decoration: `NOCTUA.md §7.3.1` is the reason Noto was
 /// chosen over any other family, and this page is where that reason is either
 /// visible or false. A browser spec asserts every one renders with no tofu.
+///
+/// # One frame per demonstration, and three demonstrations
+///
+/// The page held four inside a single frame, so one width control resized a
+/// scale, a set of family specimens and fourteen writing systems together —
+/// which is the arrangement `ComponentSections` records as a correction, for
+/// the same reason. A frame is a viewport, and *does this survive a narrow
+/// column* is a question about one specimen at a time.
+///
+/// The fourth was a whole page of `Prose`, `Blockquote`, `List`, `CodeBlock`
+/// and the ten inline marks. Each of those has a page of its own with its own
+/// examples, and none of them is the type scale, the families or the scripts.
 #[component]
 fn Typography(context: Context) -> Element {
+    let marks = TYPE_SECTIONS
+        .iter()
+        .map(|(id, heading)| Jump::section((*id).to_owned(), context.t(*heading)))
+        .collect();
     rsx! {
-        ComponentIndex { context }
+        DocIndex { context, marks }
 
-        // FOUR DEMONSTRATIONS, ONE FRAME, like every other page on this site.
-        //
-        // These were four bespoke containers — a page-length specimen, a scale,
-        // a set of family samples and fourteen writing systems — each with its
-        // own spacing and none with a width control. The specimen in particular
-        // is the whole system laid out as a page, which is exactly the thing a
-        // reader wants to see at 320px, and there was no way to ask for it.
-        //
-        // The prose that introduced each one is now that example's note, which
-        // is where a sentence about an example belongs.
-        ExampleFrame { context, name: "typography", label: Key::PageTypographyTitle,
-            Example {
-                context,
-                title: Key::SpecimenTitle,
-                source: SPECIMEN_SOURCE,
-                note: Key::SpecimenLead,
-                WholePage { context }
+        section { class: "nd-doc-section", id: "{TYPE_SECTIONS[0].0}",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H2,
+                "{context.t(Key::TypeScaleTitle)}"
             }
-            Example {
-                context,
-                title: Key::TypeScaleTitle,
-                source: SCALE_SOURCE,
-                note: Key::TypeScaleBody,
-                Scale { context }
+            ExampleFrame { context, name: "type-scale", label: Key::TypeScaleTitle,
+                Example { context, source: SCALE_SOURCE, note: Key::TypeScaleBody,
+                    Scale { context }
+                }
             }
-            Example {
-                context,
-                title: Key::TypeFamiliesTitle,
-                source: FAMILIES_SOURCE,
-                note: Key::TypeFamiliesBody,
-                Families { context }
+        }
+
+        section { class: "nd-doc-section", id: "{TYPE_SECTIONS[1].0}",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H2,
+                "{context.t(Key::TypeFamiliesTitle)}"
             }
-            Example {
-                context,
-                title: Key::TypeScriptsTitle,
-                source: SCRIPTS_SOURCE,
-                note: Key::TypeScriptsBody,
-                Scripts { context }
+            // NO NOTE. The four families are named beside their own specimens
+            // and the weights are named beside their own lines, so a sentence
+            // saying there are four of them at every weight is the picture
+            // again in words.
+            ExampleFrame { context, name: "type-families", label: Key::TypeFamiliesTitle,
+                Example { context, source: FAMILIES_SOURCE,
+                    Families { context }
+                }
+            }
+        }
+
+        section { class: "nd-doc-section", id: "{TYPE_SECTIONS[2].0}",
+            Heading { level: HeadingLevel::_2, size: HeadingSize::H2,
+                "{context.t(Key::TypeScriptsTitle)}"
+            }
+            // Nor here, and for the same reason: every line below is visibly
+            // in the script named above it.
+            ExampleFrame { context, name: "type-scripts", label: Key::TypeScriptsTitle,
+                Example { context, source: SCRIPTS_SOURCE,
+                    Scripts { context }
+                }
             }
         }
     }
 }
 
-/// The four calls the typography page's examples were produced by.
-const SPECIMEN_SOURCE: &str = "A page of everything, before any of it is taken apart";
+/// The three calls the typography page's demonstrations were produced by.
+///
+/// A CALL, not a sentence about one. `source` is rendered as the figure's
+/// caption inside `<code>`, and it is the thing a reader came to copy — two of
+/// these were English prose sitting in that slot, which reads as a caption the
+/// stylesheet set in the wrong face.
+///
+/// The interpunct separates alternatives, which is the convention
+/// `examples.rs` already uses where one demonstration shows several calls.
 const SCALE_SOURCE: &str = "noctua_design_tokens::size::*";
-const FAMILIES_SOURCE: &str = "var(--noctua-font-sans | -serif | -display | -mono)";
-const SCRIPTS_SOURCE: &str = "Every writing system this system renders";
+const FAMILIES_SOURCE: &str = "var(--noctua-font-sans) · var(--noctua-font-serif) · \
+                               var(--noctua-font-display) · var(--noctua-font-mono)";
+const SCRIPTS_SOURCE: &str = r#"p { lang: "ar", dir: "rtl", class: "nd-script-sample" }"#;
 
-/// One page of everything, before any of it is taken apart.
-///
-/// # Why this comes first
-///
-/// The page below it is a set of tables: the scale, the families, the scripts.
-/// Each answers a question somebody already knew to ask. What none of them
-/// answers is what the system LOOKS like when it is used — headings against the
-/// text under them, the spacing between blocks, a paragraph with the marks a
-/// paragraph really has in it, a quotation, two kinds of list, a block of code.
-/// Every one of those is a component with a page of its own, and a reader who
-/// has to open twelve of them to imagine one page is a reader who does not.
-///
-/// It is a real render, not a screenshot: every element here is the component,
-/// so it moves with the theme, the typeface and the corner preset like the rest
-/// of the page.
-#[component]
-fn WholePage(context: Context) -> Element {
-    rsx! {
-        div { class: "nd-specimen-page",
-            Prose {
-                Heading { level: HeadingLevel::_2, size: HeadingSize::Display, balance: true,
-                    "{context.t(Key::SpecimenTitle)}"
-                }
-                Paragraph { size: ParagraphSize::Lead, "{context.t(Key::SpecimenLead)}" }
-
-                Heading { level: HeadingLevel::_3, size: HeadingSize::H2,
-                    "{context.t(Key::SpecimenSectionTitle)}"
-                }
-                Paragraph {
-                    Message { context, message: Key::SpecimenBody }
-                }
-                Paragraph {
-                    Message { context, message: Key::SpecimenBodyTwo }
-                }
-
-                Blockquote { tone: BlockquoteTone::Accent, attribution: "Edsger W. Dijkstra",
-                    Paragraph { "{context.t(Key::ExampleQuote)}" }
-                }
-
-                Heading { level: HeadingLevel::_4, size: HeadingSize::H3,
-                    "{context.t(Key::SpecimenListsTitle)}"
-                }
-                Paragraph { "{context.t(Key::SpecimenListsBody)}" }
-                List {
-                    ListItem { "{context.t(Key::ExampleListOne)}" }
-                    ListItem { "{context.t(Key::ExampleListTwo)}" }
-                    ListItem { "{context.t(Key::ExampleListThree)}" }
-                }
-                List { kind: ListKind::Ordered,
-                    ListItem { "{context.t(Key::ExampleListOne)}" }
-                    ListItem { "{context.t(Key::ExampleListTwo)}" }
-                }
-
-                Heading { level: HeadingLevel::_4, size: HeadingSize::H3,
-                    "{context.t(Key::SpecimenMarksTitle)}"
-                }
-                Paragraph { "{context.t(Key::SpecimenMarksBody)}" }
-                // ONE COMPONENT PER ITEM, each wrapping ONE whole message.
-                //
-                // Not a paragraph with the components threaded through it: that
-                // is a sentence assembled from fragments, and where a mark
-                // falls in a sentence moves when the sentence is translated
-                // (`NOCTUA.md §9.9` rule 1). Each of these is a complete
-                // sentence a translator can rewrite freely.
-                List { marker: ListMarker::None, spacing: ListSpacing::Tight,
-                    ListItem {
-                        Link { href: "#", "{context.t(Key::SpecimenMarkLink)}" }
-                    }
-                    ListItem {
-                        Strong { "{context.t(Key::SpecimenMarkStrong)}" }
-                    }
-                    ListItem {
-                        Em { "{context.t(Key::SpecimenMarkEm)}" }
-                    }
-                    ListItem {
-                        Mark { "{context.t(Key::SpecimenMarkMark)}" }
-                    }
-                    ListItem {
-                        Abbr {
-                            title: context.t(Key::SpecimenMarkAbbrTitle),
-                            class: "nd-identifier",
-                            "WYSIWYG"
-                        }
-                    }
-                    ListItem {
-                        Kbd { class: "nd-identifier", "Ctrl" }
-                        " + "
-                        Kbd { class: "nd-identifier", "S" }
-                    }
-                    ListItem {
-                        Time { datetime: "2026-07-29", "{context.t(Key::ExampleTimeDate)}" }
-                    }
-                    ListItem {
-                        Del {
-                            label: context.t(Key::ExampleEditRemoved),
-                            "{context.t(Key::ExampleEditOld)}"
-                        }
-                        " "
-                        Ins {
-                            label: context.t(Key::ExampleEditAdded),
-                            "{context.t(Key::ExampleEditNew)}"
-                        }
-                    }
-                    ListItem {
-                        Code { class: "nd-identifier", "--noctua-measure" }
-                    }
-                    ListItem {
-                        Truncate {
-                            lines: TruncateLines::_1,
-                            title: context.t(Key::ExampleListLong),
-                            "{context.t(Key::ExampleListLong)}"
-                        }
-                    }
-                }
-
-                Heading { level: HeadingLevel::_4, size: HeadingSize::H3,
-                    "{context.t(Key::SpecimenCodeTitle)}"
-                }
-                Paragraph { tone: ParagraphTone::Muted, "{context.t(Key::SpecimenCodeBody)}" }
-            }
-            CodeBlock {
-                code: SPECIMEN_CODE,
-                language: "rust",
-                filename: "page.rs",
-                copy: context.t(Key::ExampleCopy),
-                copied: context.t(Key::ExampleCopied),
-            }
-        }
-    }
-}
-
-/// The code in the specimen: the call that produced the page above it.
-const SPECIMEN_CODE: &str = r#"Prose {
-    Heading { level: HeadingLevel::_2, size: HeadingSize::Display, "A title" }
-    Paragraph { size: ParagraphSize::Lead, "The sentence under it." }
-    List {
-        ListItem { "One" }
-        ListItem { "Two" }
-    }
-}"#;
-
-/// Every component page, side by side.
-///
-/// Built from `site::sorted`, so a component added to `spec/components/`
-/// appears here with nothing edited — and in the reader's alphabet, because
-/// that is the order the sidebar is in and two orders for one list is one
-/// order that is wrong.
-#[component]
-fn ComponentIndex(context: Context) -> Element {
-    rsx! {
-        nav { class: "nd-doc-index", "aria-label": context.t(Key::SpecimenComponentsTitle),
-            Label {
-                kind: LabelKind::Name,
-                size: LabelSize::Small,
-                text: context.t(Key::SpecimenComponentsTitle),
-            }
-            ul { class: "nd-doc-index-list",
-                for page in site::sorted(context.locale) {
-                    if page.kind == site::Kind::Component {
-                        li {
-                            Link { class: "nd-identifier", href: "{page.href()}",
-                                "{page.title(context.locale)}"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+// A WHOLE PAGE OF EVERYTHING was a fourth demonstration here, and an index
+// of every component page under it. The specimen drew `Prose`, `Blockquote`,
+// two kinds of `List`, a `CodeBlock` and the ten inline marks, each of which
+// has a page of its own; the index was the sidebar a second time, sixty
+// links deep, on a page the sidebar is already open beside.
 
 /// Every size, at its real size, with its token name.
 #[component]
@@ -2691,12 +2575,21 @@ fn Families(context: Context) -> Element {
     }
 }
 
-/// The fourteen scripts, each with what it proves.
+/// The fourteen scripts, each named and each set in real text.
 ///
 /// Every row carries `lang` and `dir`, because a browser shapes Arabic
 /// correctly only when it is told the text is Arabic — and because a test that
 /// rendered the right glyphs from the wrong language tag would be proving
 /// something other than what it claims.
+///
+/// # The name, and nothing under it
+///
+/// Each row carried a second line saying what that sample exercised: *the
+/// fallback must not fire*, *conjunct consonants and marks above and below the
+/// baseline*, *the base case, and every letter of the alphabet*. Those are the
+/// claims `scripts.spec.js` makes, in the file that can check them, and on the
+/// page they were fourteen notes to a maintainer in front of a reader who came
+/// to look at the type.
 #[component]
 fn Scripts(context: Context) -> Element {
     rsx! {
@@ -2709,9 +2602,6 @@ fn Scripts(context: Context) -> Element {
                     div { class: "nd-script-meta",
                         Text { class: "nd-script-name", weight: TextWeight::Semibold,
                             "{context.t(sample.name)}"
-                        }
-                        Text { size: TextSize::Caption, tone: TextTone::Muted,
-                            "{context.t(sample.proves)}"
                         }
                     }
                     // Real text in that script. Translating a Devanagari

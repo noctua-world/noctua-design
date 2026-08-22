@@ -141,20 +141,36 @@ test("the settings panel clips its own scroller", async ({ page }) => {
 });
 
 test("the spacing ruler never paints over its label", async ({ page }) => {
+  // ON THE PAGE THAT HAS ONE, AND WITH A FLOOR UNDER IT.
+  //
+  // This went to `/icons/` and selected `.nd-scale-row` and `.nd-scale-name`,
+  // which are the typography page's type scale, together with `.nd-bar`, which
+  // is the spacing page's ruler. No page carries all three, so the loop ran
+  // over an empty list at every width and the assertion held whatever the rows
+  // were doing. The count below is what stops that returning.
   for (const width of [320, 390, 1280]) {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto(url(PAGE.icons));
-    const overlaps = await page.evaluate(() =>
-      [...document.querySelectorAll(".nd-scale-row")]
+    await page.goto(url(PAGE.spacing));
+    const measured = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll("tr:has(.nd-bar)")];
+      const overlaps = rows
         .map((row) => {
-          const name = row.querySelector(".nd-scale-name")?.getBoundingClientRect();
+          const name = row.querySelector("th")?.getBoundingClientRect();
           const bar = row.querySelector(".nd-bar")?.getBoundingClientRect();
           if (!name || !bar) return null;
-          return name.right > bar.left ? row.textContent.trim().slice(0, 40) : null;
+          // BOTH AXES, because the table stacks below its breakpoint and puts
+          // the name on the line above the bar. Two boxes sharing a column and
+          // no row are not painted over one another, and asking about `right`
+          // alone would call every narrow row a failure.
+          const across = name.right > bar.left && bar.right > name.left;
+          const down = name.bottom > bar.top && bar.bottom > name.top;
+          return across && down ? row.textContent.trim().slice(0, 40) : null;
         })
-        .filter(Boolean),
-    );
-    expect(overlaps, `at ${width}px the label runs under the bar`).toEqual([]);
+        .filter(Boolean);
+      return { rows: rows.length, overlaps };
+    });
+    expect(measured.rows, `no ruler row was measured at ${width}px`).toBeGreaterThan(10);
+    expect(measured.overlaps, `at ${width}px the label runs under the bar`).toEqual([]);
   }
 });
 
