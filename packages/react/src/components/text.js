@@ -11,7 +11,8 @@
 
 import { createElement as h } from "react";
 
-export function Text({ size, weight, tone, numeric, className, children, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Text({ size, weight, tone, numeric, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const size_ = size ?? "body";
   const weight_ = weight ?? "regular";
   const tone_ = tone ?? "default";
@@ -22,5 +23,8 @@ export function Text({ size, weight, tone, numeric, className, children, ...rest
   if (weight_ !== undefined) props["data-nd-weight"] = String(weight_);
   if (tone_ !== undefined) props["data-nd-tone"] = String(tone_);
   if (numeric_ !== undefined) props["data-nd-numeric"] = String(numeric_);
-  return h("span", props, children);
+  return h("span", props, children,
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-inline", mark: aiMark, label: aiLabel, note: aiNote })
+      : null);
 }

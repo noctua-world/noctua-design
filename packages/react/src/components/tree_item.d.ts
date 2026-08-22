@@ -31,6 +31,10 @@ export interface TreeItemProps {
   disabled?: boolean;
   /** Marks the node as the page the reader is on, with `aria-current="page"`. That is a different claim from `selected`, and a tree used as navigation has exactly one current node. */
   current?: boolean;
+  /** The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means. */
+  aiMark?: string;
+  /** What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads. */
+  aiLabel?: string;
   className?: string;
   children?: ReactNode;
 }

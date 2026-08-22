@@ -15,8 +15,9 @@ import { Fragment } from "react";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { star } from "@noctua-world/design-tokens/icons/star.js";
-export function Rating({ name, label, value, max, readonly, valueLabel, itemLabel, size, tone, hint, error, required, requiredLabel, disabled, className, ...rest }) {
+export function Rating({ name, label, value, max, readonly, valueLabel, itemLabel, size, tone, hint, error, required, requiredLabel, disabled, aiMark, aiLabel, aiNote, className, ...rest }) {
   const size_ = size ?? "medium";
   const max_ = max ?? "5";
   const readonly_ = readonly ?? false;
@@ -84,6 +85,9 @@ export function Rating({ name, label, value, max, readonly, valueLabel, itemLabe
       sentence === undefined
         ? null
         : h("span", { key: "v", className: "nd-rating-value" }, sentence),
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-apart", mark: aiMark, label: aiLabel, note: aiNote })
+        : null,
     );
 
   return h(

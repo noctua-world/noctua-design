@@ -15,8 +15,9 @@ import { Button } from "./button.js";
 import { Swatch } from "./swatch.js";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
-export function Tag({ label, value, href, pressed, tone, variant, size, shape, icon, swatch, image, removeLabel, removeName, disabled, glass, className, ...rest }) {
+export function Tag({ label, value, href, pressed, tone, variant, size, shape, icon, swatch, image, removeLabel, removeName, disabled, glass, aiMark, aiLabel, aiNote, className, ...rest }) {
   const variant_ = variant ?? "soft";
   const size_ = size ?? "medium";
   const shape_ = shape ?? "pill";
@@ -78,6 +79,9 @@ export function Tag({ label, value, href, pressed, tone, variant, size, shape, i
       ...rest,
     },
     body,
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-tag-ai", mark: aiMark, label: aiLabel, note: aiNote })
+      : null,
     remove
       ? h(Button, {
           key: "x",

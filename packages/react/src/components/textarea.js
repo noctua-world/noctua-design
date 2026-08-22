@@ -12,7 +12,8 @@
 import { createElement as h } from "react";
 
 import { Field } from "./field.js";
-export function Textarea({ name, label, value, placeholder, hint, error, required, requiredLabel, disabled, readonly, rows, autosize, maxRows, resize, maxlength, counter, counterLabel, spellcheck, size, glass, className, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Textarea({ name, label, value, placeholder, hint, error, required, requiredLabel, disabled, readonly, rows, autosize, maxRows, resize, maxlength, counter, counterLabel, spellcheck, size, glass, aiMark, aiLabel, aiNote, className, ...rest }) {
   const size_ = size ?? "medium";
   const resize_ = resize ?? "vertical";
   const id = `nd-textarea-${name}`;
@@ -94,6 +95,9 @@ export function Textarea({ name, label, value, placeholder, hint, error, require
         // See the Dioxus half: the value is the content.
         defaultValue: value,
       }),
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-start", mark: aiMark, label: aiLabel, note: aiNote })
+        : null,
     ),
     counter
       ? h(

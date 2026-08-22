@@ -7,6 +7,8 @@ name = "Disclosure"
 element = "details"
 class = "nd-disclosure"
 summary = "Let users show and hide a block of content from its own control."
+ai = "custom"
+ai_pressable = false
 
 [prop.summary]
 type = "text"

@@ -8,6 +8,8 @@ element = "td"
 class = "nd-table-cell"
 page = "tables"
 summary = "Holds one value, with its alignment, tone and wrapping, or a total in a foot."
+ai = "custom"
+ai_pressable = false
 
 [prop.align]
 type = "enum"

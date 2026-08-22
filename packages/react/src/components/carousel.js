@@ -12,11 +12,12 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { chevronLeft } from "@noctua-world/design-tokens/icons/chevron-left.js";
 import { chevronRight } from "@noctua-world/design-tokens/icons/chevron-right.js";
 import { pause } from "@noctua-world/design-tokens/icons/pause.js";
 import { play } from "@noctua-world/design-tokens/icons/play.js";
-export function Carousel({ name, label, perView, snap, orientation, controls, previousLabel, nextLabel, dots, dotLabel, counter, counterLabel, announceLabel, wrap, autoplay, pauseLabel, playLabel, glass, className, children, ...rest }) {
+export function Carousel({ name, label, perView, snap, orientation, controls, previousLabel, nextLabel, dots, dotLabel, counter, counterLabel, announceLabel, wrap, autoplay, pauseLabel, playLabel, glass, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const perView_ = perView ?? "1";
   const snap_ = snap ?? "start";
   const orientation_ = orientation ?? "horizontal";
@@ -139,6 +140,9 @@ export function Carousel({ name, label, perView, snap, orientation, controls, pr
             hidden: true,
             "data-nd-carousel-counter": "",
           })
+        : null,
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel, note: aiNote })
         : null,
     ),
     h("p", {

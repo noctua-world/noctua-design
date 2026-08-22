@@ -7,6 +7,7 @@ class = "nd-search"
 # The three are only ever used together, which is what a collection page is for.
 page = "search"
 summary = "Let users find one thing among many, with the results under the box or in a panel."
+ai = "custom"
 
 # `<div role="search">`, AND IT WANTED TO BE `<search>`.
 #

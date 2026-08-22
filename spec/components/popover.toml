@@ -11,6 +11,7 @@ name = "Popover"
 element = "div"
 class = "nd-popover"
 summary = "Hang a small surface off a control, holding text a reader can act on."
+ai = "custom"
 
 # WHY THIS IS A DIALOG AND `Info` IS A NOTE.
 #

@@ -3,6 +3,7 @@ name = "Truncate"
 element = "span"
 class = "nd-truncate"
 summary = "Clip text to a fixed number of lines and keep the full value available."
+ai = "custom"
 
 [prop.lines]
 type = "enum"

@@ -29,6 +29,228 @@ use noctua_design_i18n::Key;
 
 use crate::tree::{Node, Value};
 
+/// `AILabel.size` at `small`.
+const AI_LABEL_SIZE_SMALL: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("size")),
+                ("data-nd-slug", Value::Text("ai-label")),
+            ],
+            children: &[Node::Component {
+                name: "AILabel",
+                props: &[
+                    ("mark", Value::Message(Key::ExampleAiMark)),
+                    ("label", Value::Message(Key::ExampleAiName)),
+                    ("size", Value::Text("small")),
+                ],
+                children: &[],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-ai-label-size-small")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("small"))],
+            }],
+        },
+    ],
+}];
+
+/// `AILabel.size` at `medium`.
+const AI_LABEL_SIZE_MEDIUM: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("size")),
+                ("data-nd-slug", Value::Text("ai-label")),
+            ],
+            children: &[Node::Component {
+                name: "AILabel",
+                props: &[
+                    ("mark", Value::Message(Key::ExampleAiMark)),
+                    ("label", Value::Message(Key::ExampleAiName)),
+                    ("size", Value::Text("medium")),
+                ],
+                children: &[],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-ai-label-size-medium")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("medium"))],
+            }],
+        },
+    ],
+}];
+
+/// `AILabel.size` at `large`.
+const AI_LABEL_SIZE_LARGE: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("size")),
+                ("data-nd-slug", Value::Text("ai-label")),
+            ],
+            children: &[Node::Component {
+                name: "AILabel",
+                props: &[
+                    ("mark", Value::Message(Key::ExampleAiMark)),
+                    ("label", Value::Message(Key::ExampleAiName)),
+                    ("size", Value::Text("large")),
+                ],
+                children: &[],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-ai-label-size-large")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("large"))],
+            }],
+        },
+    ],
+}];
+
+/// `AILabel.variant` at `soft`.
+const AI_LABEL_VARIANT_SOFT: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("variant")),
+                ("data-nd-slug", Value::Text("ai-label")),
+            ],
+            children: &[Node::Component {
+                name: "AILabel",
+                props: &[
+                    ("mark", Value::Message(Key::ExampleAiMark)),
+                    ("label", Value::Message(Key::ExampleAiName)),
+                    ("variant", Value::Text("soft")),
+                ],
+                children: &[],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-ai-label-variant-soft")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("soft"))],
+            }],
+        },
+    ],
+}];
+
+/// `AILabel.variant` at `solid`.
+const AI_LABEL_VARIANT_SOLID: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("variant")),
+                ("data-nd-slug", Value::Text("ai-label")),
+            ],
+            children: &[Node::Component {
+                name: "AILabel",
+                props: &[
+                    ("mark", Value::Message(Key::ExampleAiMark)),
+                    ("label", Value::Message(Key::ExampleAiName)),
+                    ("variant", Value::Text("solid")),
+                ],
+                children: &[],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-ai-label-variant-solid")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("solid"))],
+            }],
+        },
+    ],
+}];
+
+/// `AILabel.variant` at `outline`.
+const AI_LABEL_VARIANT_OUTLINE: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("variant")),
+                ("data-nd-slug", Value::Text("ai-label")),
+            ],
+            children: &[Node::Component {
+                name: "AILabel",
+                props: &[
+                    ("mark", Value::Message(Key::ExampleAiMark)),
+                    ("label", Value::Message(Key::ExampleAiName)),
+                    ("variant", Value::Text("outline")),
+                ],
+                children: &[],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-ai-label-variant-outline")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("outline"))],
+            }],
+        },
+    ],
+}];
+
 /// `Avatar.size` at `small`.
 const AVATAR_SIZE_SMALL: &[Node] = &[Node::Element {
     tag: "figure",
@@ -13149,6 +13371,12 @@ const TRUNCATE_LINES_4: &[Node] = &[Node::Element {
 )]
 pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node] {
     match (component, prop, value) {
+        ("AILabel", "size", "small") => AI_LABEL_SIZE_SMALL,
+        ("AILabel", "size", "medium") => AI_LABEL_SIZE_MEDIUM,
+        ("AILabel", "size", "large") => AI_LABEL_SIZE_LARGE,
+        ("AILabel", "variant", "soft") => AI_LABEL_VARIANT_SOFT,
+        ("AILabel", "variant", "solid") => AI_LABEL_VARIANT_SOLID,
+        ("AILabel", "variant", "outline") => AI_LABEL_VARIANT_OUTLINE,
         ("Avatar", "size", "small") => AVATAR_SIZE_SMALL,
         ("Avatar", "size", "medium") => AVATAR_SIZE_MEDIUM,
         ("Avatar", "size", "large") => AVATAR_SIZE_LARGE,

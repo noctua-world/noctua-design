@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `TreeItem` example. 4 of them.
+/// Every `TreeItem` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"TreeItem { label: "…", href: "…", icon, icon_expanded, badge: "…" }"#,
@@ -199,6 +199,48 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     children: &[],
                 },
             ],
+        }],
+    ),
+    (
+        r"TreeItem { ai_mark, ai_label }",
+        &[Node::Component {
+            name: "Tree",
+            props: &[
+                ("name", Value::Text("rows-ai")),
+                ("label", Value::Message(Key::ExampleTreeLabel)),
+                ("expand_label", Value::Message(Key::ExampleTreeExpand)),
+                ("collapse_label", Value::Message(Key::ExampleTreeCollapse)),
+            ],
+            children: &[Node::Component {
+                name: "TreeItem",
+                props: &[
+                    ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                    ("ai_label", Value::Message(Key::ExampleAiName)),
+                    ("label", Value::Message(Key::ExampleTreeFoundations)),
+                    ("icon", Value::Text("palette")),
+                    ("icon_expanded", Value::Text("check")),
+                    ("badge", Value::Data("3")),
+                    ("expanded", Value::Bool(true)),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "TreeItem",
+                        props: &[
+                            ("href", Value::Text("../typography/")),
+                            ("label", Value::PageTitle("typography")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "TreeItem",
+                        props: &[
+                            ("href", Value::Text("../spacing/")),
+                            ("label", Value::PageTitle("spacing")),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
         }],
     ),
 ];

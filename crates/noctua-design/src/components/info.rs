@@ -87,8 +87,12 @@ pub fn Info(
                 hidden: true,
                 Icon { icon: IconDrawing::INFO, size: IconSize::Small }
             }
+            // `.nd-note` IS THE SURFACE AND `.nd-info-note` IS THE PART, the
+            // way `.nd-panel.nd-select-panel` already splits the two. `AILabel`
+            // opens the same surface, so it is painted once and each component
+            // keeps the class its own script and its own tests look for.
             span {
-                class: "nd-info-note",
+                class: "nd-note nd-info-note",
                 id: "{note_id}",
                 role: "note",
                 "aria-labelledby": described,
@@ -96,7 +100,7 @@ pub fn Info(
                 if let Some(heading) = heading {
                     span { class: "nd-info-title", id: "{title_id}", "{heading}" }
                 }
-                span { class: "nd-info-body", {children} }
+                span { class: "nd-note-body", {children} }
             }
         }
     }

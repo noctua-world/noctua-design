@@ -39,6 +39,10 @@ pub fn MenuItem(
     rel: Option<String>,
     /// Where the link opens. Opening a new window takes the decision away from the reader, so give it a reason.
     target: Option<String>,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -60,6 +64,19 @@ pub fn MenuItem(
             span { class: "nd-menu-item-label", "{label}" }
             if let Some(detail) = detail.clone() {
                 span { class: "nd-menu-item-detail", "{detail}" }
+            }
+        }
+        // NEVER A CONTROL. A `role="menu"` holds items and nothing else, and
+        // the menu's own script walks its items with the arrows — a control
+        // inside one is a stop that walk can never reach.
+        // The assistant's mark, in the room this component reserves for
+        // it. A child in the flow and never a corner: `Badge` translates
+        // its mark onto what it marks, and this may not.
+        if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+            crate::components::AILabel {
+                class: "nd-ai-slot",
+                mark,
+                label: phrase,
             }
         }
     };

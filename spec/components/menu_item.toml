@@ -11,6 +11,8 @@ class = "nd-menu-item"
 specimen = "<span class=\"nd-menu-item-label nd-identifier\">Aa</span>"
 page = "menu"
 summary = "Put one action in a menu, as a real button or a real link when it goes somewhere."
+ai = "custom"
+ai_pressable = false
 
 [prop.label]
 type = "text"

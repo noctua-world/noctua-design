@@ -12,7 +12,7 @@
 //! | `error-summary.js` | `enhanceErrorSummaries()` — the focus, the jump to the control, and the list a client-side refusal makes |
 //! | `carousel.js` | `enhanceCarousels()` — the controls, the dots, the count, and the four rules autoplay carries |
 //! | `table.js` | `enhanceTables()` — sorting, filtering, resizing, pinning, grouping, export, and the aggregates a filter recounts |
-//! | `info.js` | `enhanceInfos()` — the note beside a word, on a press and never on a hover |
+//! | `info.js` | `enhanceInfos()` — the note beside a word or beside an assistant's mark, on a press and never on a hover |
 //! | `menu.js` | `enhanceMenus()` — the list of actions a button opens, and every key a menu owes |
 //! | `message-bar.js` | `enhanceMessageBars()` — revealing the control that takes a bar away, and taking it |
 //! | `dialog.js` | `enhanceDialogs()` — opening the platform's `<dialog>`, and the Escape a non-modal one is owed |

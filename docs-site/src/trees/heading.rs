@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Heading` example. 5 of them.
+/// Every `Heading` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"An outline: levels 2, 3 and 4",
@@ -83,5 +83,30 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 children: &[Node::Text(Value::Message(Key::ExampleHeadingLong))],
             }],
         }],
+    ),
+    (
+        r"Heading { ai_mark, ai_label, ai_note }",
+        &[
+            Node::Component {
+                name: "Heading",
+                props: &[
+                    ("level", Value::Text("2")),
+                    ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                    ("ai_label", Value::Message(Key::ExampleAiName)),
+                    ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ],
+                children: &[Node::Text(Value::Message(Key::ExampleHeadingSection))],
+            },
+            Node::Component {
+                name: "Heading",
+                props: &[("level", Value::Text("3")), ("size", Value::Text("h3"))],
+                children: &[Node::Text(Value::Message(Key::ExampleHeadingSub))],
+            },
+            Node::Component {
+                name: "Heading",
+                props: &[("level", Value::Text("4")), ("size", Value::Text("h4"))],
+                children: &[Node::Text(Value::Message(Key::ExampleHeadingDetail))],
+            },
+        ],
     ),
 ];

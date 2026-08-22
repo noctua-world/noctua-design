@@ -7,6 +7,7 @@
 // Every component, generated from spec/components/.
 
 export { Abbr } from "./abbr.js";
+export { AILabel } from "./ai_label.js";
 export { Avatar } from "./avatar.js";
 export { AvatarGroup } from "./avatar_group.js";
 export { Badge } from "./badge.js";

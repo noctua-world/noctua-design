@@ -12,7 +12,8 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
-export function SegmentedItem({ value, label, selected, detail, icon, hideLabel, disabled, glass, className, children, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function SegmentedItem({ value, label, selected, detail, icon, hideLabel, disabled, aiMark, aiLabel, glass, className, children, ...rest }) {
   const selected_ = selected ?? false;
   const disabled_ = disabled ?? false;
   const hideLabel_ = hideLabel ?? false;
@@ -41,5 +42,8 @@ export function SegmentedItem({ value, label, selected, detail, icon, hideLabel,
       : h("span", { key: "l", className: "nd-segmented-text" }, label),
     // The second line, and it is part of the name.
     detail ? h("span", { key: "d", className: "nd-segmented-detail" }, detail) : null,
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel })
+      : null,
   );
 }

@@ -15,7 +15,7 @@ use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 use crate::trees::tabs::PANELS;
 
-/// Every `Tab` example. 4 of them.
+/// Every `Tab` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"Tab { name, value, label, selected: true }",
@@ -234,6 +234,63 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 Node::Each {
                     over: Each::Rows(&[&[
                         Value::Text("tab-off"),
+                        Value::Message(Key::ExampleTabSettingsBody),
+                        Value::Message(Key::ExampleTabPeopleBody),
+                        Value::Message(Key::ExampleTabBillingBody),
+                    ]]),
+                    body: PANELS,
+                },
+            ],
+        }],
+    ),
+    (
+        r"Tab { ai_mark, ai_label }",
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-stack"))],
+            children: &[
+                Node::Component {
+                    name: "Tabs",
+                    props: &[
+                        ("name", Value::Text("tab-plain-ai")),
+                        ("label", Value::Message(Key::ExampleTabsLabel)),
+                    ],
+                    children: &[
+                        Node::Component {
+                            name: "Tab",
+                            props: &[
+                                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                                ("ai_label", Value::Message(Key::ExampleAiName)),
+                                ("name", Value::Text("tab-plain-ai")),
+                                ("value", Value::Text("items")),
+                                ("label", Value::Message(Key::ExampleTabSettings)),
+                                ("selected", Value::Bool(true)),
+                            ],
+                            children: &[],
+                        },
+                        Node::Component {
+                            name: "Tab",
+                            props: &[
+                                ("name", Value::Text("tab-plain-ai")),
+                                ("value", Value::Text("delivery")),
+                                ("label", Value::Message(Key::ExampleTabPeople)),
+                            ],
+                            children: &[],
+                        },
+                        Node::Component {
+                            name: "Tab",
+                            props: &[
+                                ("name", Value::Text("tab-plain-ai")),
+                                ("value", Value::Text("payment")),
+                                ("label", Value::Message(Key::ExampleTabBilling)),
+                            ],
+                            children: &[],
+                        },
+                    ],
+                },
+                Node::Each {
+                    over: Each::Rows(&[&[
+                        Value::Text("tab-plain-ai"),
                         Value::Message(Key::ExampleTabSettingsBody),
                         Value::Message(Key::ExampleTabPeopleBody),
                         Value::Message(Key::ExampleTabBillingBody),

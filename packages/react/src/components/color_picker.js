@@ -19,12 +19,13 @@ import { Segmented } from "./segmented.js";
 import { SegmentedItem } from "./segmented_item.js";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { check } from "@noctua-world/design-tokens/icons/check.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
 import { copy } from "@noctua-world/design-tokens/icons/copy.js";
 import { pipette } from "@noctua-world/design-tokens/icons/pipette.js";
 import { plus } from "@noctua-world/design-tokens/icons/plus.js";
-export function ColorPicker({ name, label, value, hint, error, size, shape, triggerLabel, glass, multiple, max, maxLabel, addLabel, removeLabel, addedLabel, removedLabel, status, spectrumLabel, areaLabel, hueLabel, alpha, alphaLabel, palette, paletteLabel, entry, entryLabel, entryInvalidLabel, eyedropper, eyedropperLabel, recent, recentLabel, forgetLabel, codesLabel, formats, copyLabel, copiedLabel, closeLabel, disabled, required, className, ...rest }) {
+export function ColorPicker({ name, label, value, hint, error, size, shape, triggerLabel, glass, multiple, max, maxLabel, addLabel, removeLabel, addedLabel, removedLabel, status, spectrumLabel, areaLabel, hueLabel, alpha, alphaLabel, palette, paletteLabel, entry, entryLabel, entryInvalidLabel, eyedropper, eyedropperLabel, recent, recentLabel, forgetLabel, codesLabel, formats, copyLabel, copiedLabel, closeLabel, disabled, required, aiMark, aiLabel, aiNote, className, ...rest }) {
   const size_ = size ?? "medium";
   const shape_ = shape ?? "rounded";
   const entry_ = entry ?? true;
@@ -141,6 +142,9 @@ export function ColorPicker({ name, label, value, hint, error, size, shape, trig
           ),
       ),
     ),
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel, note: aiNote })
+      : null,
     h(
       "div",
       {

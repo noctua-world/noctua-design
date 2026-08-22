@@ -42,6 +42,10 @@ pub fn Tab(
     /// they conclude does not exist.
     #[props(default = false)]
     disabled: bool,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -75,6 +79,17 @@ pub fn Tab(
             // a tab rather than in it is a number a screen reader never reaches.
             if let Some(count) = count {
                 span { class: "nd-tab-count", "{count}" }
+            }
+            // AFTER THE COUNT, and never a control: this root is an `<a>`.
+            // The assistant's mark, in the room this component reserves for
+            // it. A child in the flow and never a corner: `Badge` translates
+            // its mark onto what it marks, and this may not.
+            if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                crate::components::AILabel {
+                    class: "nd-ai-slot",
+                    mark,
+                    label: phrase,
+                }
             }
         }
     }

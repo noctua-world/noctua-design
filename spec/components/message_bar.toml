@@ -11,6 +11,7 @@ name = "MessageBar"
 element = "div"
 class = "nd-message-bar"
 summary = "Tell users what happened, in a bar that stays where the thing happened."
+ai = "custom"
 
 # WHY `role="alert"` IS OPT-IN AND `role="status"` IS THE DEFAULT.
 #

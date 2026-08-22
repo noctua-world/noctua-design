@@ -3,6 +3,7 @@ name = "Blockquote"
 element = "blockquote"
 class = "nd-blockquote"
 summary = "Show a quotation set apart from the text around it."
+ai = "custom"
 
 [prop.cite]
 type = "text"

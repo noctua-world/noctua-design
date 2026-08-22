@@ -12,8 +12,9 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { check } from "@noctua-world/design-tokens/icons/check.js";
-export function SearchResult({ href, label, detail, badge, keywords, current, className, ...rest }) {
+export function SearchResult({ href, label, detail, badge, keywords, current, aiMark, aiLabel, className, ...rest }) {
   const current_ = current ?? false;
   return h(
     "li",
@@ -33,6 +34,9 @@ export function SearchResult({ href, label, detail, badge, keywords, current, cl
       // `<mark>` runs. See the Dioxus half.
       h("span", { key: "l", className: "nd-search-result-label", "data-nd-search-label": "" }, label),
       badge ? h("span", { key: "b", className: "nd-search-result-badge" }, badge) : null,
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel })
+        : null,
       detail ? h("span", { key: "d", className: "nd-search-result-detail" }, detail) : null,
       current_ ? h(Icon, { key: "c", icon: check, size: "small" }) : null,
     ),

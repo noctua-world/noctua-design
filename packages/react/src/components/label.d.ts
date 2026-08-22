@@ -24,6 +24,10 @@ export interface LabelProps {
   requiredLabel?: string;
   /** The word for a question that may be left blank, such as *optional*. Written only while `required` is off, because a question is one or the other. Mark whichever of the two is rarer in the form. */
   optionalLabel?: string;
+  /** The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means. */
+  aiMark?: string;
+  /** What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads. */
+  aiLabel?: string;
   className?: string;
 }
 

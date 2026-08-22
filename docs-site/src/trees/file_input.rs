@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `FileInput` example. 4 of them.
+/// Every `FileInput` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"FileInput { name, label, browse_label, drop_label, empty_label, status, hint, required, required_label }",
@@ -127,6 +127,48 @@ FileInput { name, label, browse_label, disabled, size }",
                         ("browse_label", Value::Message(Key::ExampleInputBrowse)),
                         ("disabled", Value::Bool(true)),
                         ("size", Value::Text("large")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        r"FileInput { ai_mark, ai_label, ai_note }",
+        // NO `drop: true` HERE. It is the default, so it showed nothing.
+        // The example that turns it off is the last one on this page.
+        &[Node::Element {
+            tag: "form",
+            attributes: &[
+                ("class", Value::Text("nd-example-form")),
+                ("method", Value::Text("get")),
+                ("action", Value::Text("#")),
+                ("novalidate", Value::Bool(true)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "FileInput",
+                    props: &[
+                        ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                        ("ai_label", Value::Message(Key::ExampleAiName)),
+                        ("ai_note", Value::Message(Key::ExampleAiNote)),
+                        ("name", Value::Text("one-attachment-ai")),
+                        ("label", Value::Message(Key::ExampleInputFilesLabel)),
+                        ("browse_label", Value::Message(Key::ExampleInputBrowse)),
+                        ("drop_label", Value::Message(Key::ExampleInputDrop)),
+                        ("empty_label", Value::Message(Key::ExampleInputFileEmpty)),
+                        ("status", Value::Message(Key::ExampleInputFileStatus)),
+                        ("hint", Value::Message(Key::ExampleInputFilesHint)),
+                        ("required", Value::Bool(true)),
+                        ("required_label", Value::Message(Key::ExampleInputRequired)),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Button",
+                    props: &[
+                        ("submit", Value::Text("submit")),
+                        ("label", Value::Message(Key::ExampleInputSend)),
                     ],
                     children: &[],
                 },

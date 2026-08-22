@@ -11,7 +11,8 @@
 
 import { createElement as h } from "react";
 
-export function Blockquote({ cite, tone, attribution, glass, className, children, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Blockquote({ cite, tone, attribution, aiMark, aiLabel, aiNote, glass, className, children, ...rest }) {
   const tone_ = tone ?? "default";
   const root = ["nd-blockquote", className].filter(Boolean).join(" ");
   return h(
@@ -24,6 +25,9 @@ export function Blockquote({ cite, tone, attribution, glass, className, children
       ...rest,
     },
     children,
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-inline", mark: aiMark, label: aiLabel, note: aiNote })
+      : null,
     attribution
       ? h(
           "footer",

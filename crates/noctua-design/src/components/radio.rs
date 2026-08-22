@@ -70,6 +70,12 @@ pub fn Radio(
     /// Whether choosing this answer reveals the block inside it. Set it explicitly so both implementations behave the same way.
     #[props(default = false)]
     reveal: bool,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
+    /// One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control.
+    ai_note: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -133,6 +139,21 @@ pub fn Radio(
             }
             if let Some(hint) = hint {
                 p { class: "nd-choice-hint", id: "{hint_id}", "{hint}" }
+            }
+            // A THIRD GRID TRACK, AND NEVER INSIDE `.nd-choice-label`. Every
+            // press inside a `<label for>` activates the control it names, so
+            // a mark in there would toggle the box. The track is `auto`, so it
+            // is zero wide on every choice that carries no mark.
+            // The assistant's mark, in the room this component reserves for
+            // it. A child in the flow and never a corner: `Badge` translates
+            // its mark onto what it marks, and this may not.
+            if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                crate::components::AILabel {
+                    class: "nd-ai-slot nd-choice-ai",
+                    mark,
+                    label: phrase,
+                    note: ai_note.clone(),
+                }
             }
         }
         // VISIBLE WITH NO SCRIPT AT ALL. The script is what hides it, which is

@@ -181,6 +181,13 @@ pub(crate) struct DocComponent {
     /// Its name, which is an identifier and the same in every locale.
     pub name: &'static str,
     /// Its URL segment, and its anchor on a collection page.
+    ///
+    /// It is also the file its spec and its trees are written in, with
+    /// underscores for the dashes: both come out of one splitter in the
+    /// contract reader, so a caller that needs the file name derives it from
+    /// this rather than splitting the component's name a second way. A run of
+    /// capitals is one word in that splitter, and getting that wrong is what
+    /// `AILabel` found.
     pub slug: &'static str,
     /// The collection page it is documented on, or none for a page of its own.
     pub page: Option<&'static str>,
@@ -239,40 +246,7 @@ fn write_component(out: &mut String, component: &Component) {
         option(component.meta.specimen.as_deref())
     );
 
-    out.push_str("        props: &[\n");
-    for (prop_name, prop) in &component.prop {
-        let kind = match prop.kind {
-            Kind::Enum => "enum",
-            Kind::Bool => "bool",
-            Kind::Text => "text",
-            Kind::Children => "children",
-        };
-        let values = prop
-            .values
-            .iter()
-            .map(|value| format!("\"{value}\""))
-            .collect::<Vec<_>>()
-            .join(", ");
-        let elements = prop
-            .elements
-            .iter()
-            .map(|element| format!("\"{element}\""))
-            .collect::<Vec<_>>()
-            .join(", ");
-        let _ = writeln!(
-            out,
-            "            DocProp {{ name: \"{prop_name}\", kind: \"{kind}\", values: &[{values}], \
-             elements: &[{elements}], default: {}, attribute: {}, required: {}, \
-             variants: {}, specimen: {}, doc: {} }},",
-            option(prop.default.as_deref()),
-            option(prop.attribute.as_deref()),
-            prop.required,
-            prop.variants,
-            option(prop.specimen.as_deref()),
-            required_message(&slug, &format!("prop.{prop_name}.doc"), &prop.doc)
-        );
-    }
-    out.push_str("        ],\n");
+    write_props(out, component, &slug);
 
     out.push_str("        states: &[\n");
     for (state_name, state) in &component.state {
@@ -309,6 +283,60 @@ fn write_component(out: &mut String, component: &Component) {
         message(&slug, "a11y-notes", &component.a11y.notes)
     );
     out.push_str("    },\n");
+}
+
+/// The reference table's prop rows.
+///
+/// Its own function because `write_component` reached the hundred-line
+/// ceiling the moment a prop gained a second place its documentation can
+/// come from.
+fn write_props(out: &mut String, component: &Component, slug: &str) {
+    out.push_str("        props: &[\n");
+    for (prop_name, prop) in &component.prop {
+        let kind = match prop.kind {
+            Kind::Enum => "enum",
+            Kind::Bool => "bool",
+            Kind::Text => "text",
+            Kind::Children => "children",
+        };
+        let values = prop
+            .values
+            .iter()
+            .map(|value| format!("\"{value}\""))
+            .collect::<Vec<_>>()
+            .join(", ");
+        let elements = prop
+            .elements
+            .iter()
+            .map(|element| format!("\"{element}\""))
+            .collect::<Vec<_>>()
+            .join(", ");
+        let _ = writeln!(
+            out,
+            "            DocProp {{ name: \"{prop_name}\", kind: \"{kind}\", values: &[{values}], \
+             elements: &[{elements}], default: {}, attribute: {}, required: {}, \
+             variants: {}, specimen: {}, doc: {} }},",
+            option(prop.default.as_deref()),
+            option(prop.attribute.as_deref()),
+            prop.required,
+            prop.variants,
+            option(prop.specimen.as_deref()),
+            // ONE KEY, EVERY HOST'S TABLE. A shared prop's sentence belongs to
+            // the mark rather than to the fifty things that carry it, so
+            // `derived_messages` emits it under `component.ai.*` once and every
+            // reference table reads that one.
+            required_message(
+                if prop.shared {
+                    noctua_design_spec::component::AI_SLUG
+                } else {
+                    slug
+                },
+                &format!("prop.{prop_name}.doc"),
+                &prop.doc,
+            )
+        );
+    }
+    out.push_str("        ],\n");
 }
 
 /// The `Key` variant a derived message becomes, or `None` when the spec is

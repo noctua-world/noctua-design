@@ -2277,7 +2277,59 @@ dir = "ltr"
 "component.info.key.tab.name" = "Tab"
 "component.info.key.tab.action" = """Entra na nota e sai dela. Nada fica preso, e sair da nota é o que a fecha."""
 "component.info.summary" = """Explique uma palavra com uma frase, aberta por um pequeno `i` ao lado dela."""
+
+"component.ai-label.guidance" = """Use um rótulo de IA ao lado de um valor que um assistente escreveu ou mudou. Dê a ele um `note` quando houver uma frase que valha a leitura sobre o que o assistente fez. Para explicar uma palavra, use `Info`."""
+"component.ai-label.a11y-notes" = """As letras carregam `aria-hidden` e `label` é um nó de texto escondido, então um leitor de tela lê a frase em vez de duas letras. Com um `note`, a marca é um `<button aria-expanded>` ao lado de um `role="note"`."""
+"component.ai-label.prop.mark.doc" = """As duas letras que a marca desenha, na língua de quem lê. `AI` em inglês e `IA` em português, então ela chega como mensagem e não como literal. **Obrigatório**: sem ela não há o que desenhar."""
+"component.ai-label.prop.label.doc" = """O que a marca significa, como frase inteira: *Escrito pelo assistente*. **Obrigatório**, porque as letras carregam `aria-hidden` e é isto que um leitor de tela lê no lugar delas."""
+"component.ai-label.prop.note.doc" = """Uma frase sobre o que o assistente fez. **Preenchê-lo é o que torna a marca um controle.** Sem ele a marca é um `<span>` sem papel e sem parada de tabulação."""
+"component.ai-label.prop.close_label.doc" = """O nome do controle que fecha a nota. Necessário na prática, porque o Escape e um toque fora também fecham e nenhum dos dois se descobre numa tela de toque."""
+"component.ai-label.prop.placement.doc" = """Onde a nota abre. `auto` mede o espaço, virando para cima e pendurando pela borda que couber. `start` e `end` prendem a borda inicial ou final da nota, para uma marca na borda de uma tabela."""
+"component.ai-label.prop.size.doc" = """O tamanho da marca, igual à `Tag` passo a passo, para que uma marca ao lado de uma tag fique alinhada. `small` por padrão, porque isto fica dentro de outro componente e não pode pesar mais que ele."""
+"component.ai-label.prop.variant.doc" = """Com que força a marca é pintada. `soft` é um campo tingido, `solid` é o tom em força total, e `outline` é um fio sem preenchimento. `soft` por padrão."""
+"component.ai-label.prop.tone.doc" = """De qual tom do sistema de cores a marca é pintada. Um nome que nenhuma família declara quebra o build. Sem ele a marca fica discreta, que é o que uma marca ao lado de cada valor de uma coluna tem de ser."""
+"component.ai-label.state.open.doc" = """Se a nota está aparecendo. Escrito no controle, que é o elemento que a pessoa aperta e o elemento cujo estado um leitor de tela lê."""
+"component.ai-label.key.enter-or-space.name" = "Enter ou Espaço"
+"component.ai-label.key.enter-or-space.action" = """Abre a nota, e fecha de novo. Só numa marca que recebeu um `note`."""
+"component.ai-label.key.escape.name" = """Escape"""
+"component.ai-label.key.escape.action" = """Fecha a nota e devolve o foco à marca que a abriu."""
+"component.ai-label.key.tab.name" = "Tab"
+"component.ai-label.key.tab.action" = """Entra na nota e sai dela. Nada fica preso, e sair da nota é o que a fecha."""
+"component.ai-label.summary" = """Marque um valor que um assistente escreveu, e abra uma frase sobre o que ele fez."""
+
+# OS TRÊS PROPS QUE TODO COMPONENTE HOSPEDEIRO RECEBE, documentados uma vez só.
+# `component.ai.*` e não o slug de um hospedeiro qualquer, porque a frase é da
+# marca e não das cinquenta coisas que a carregam. Quem edita o inglês edita
+# `AI_PROPS`, em `crates/noctua-design-spec/src/component.rs`.
+"component.ai.prop.ai_mark.doc" = """As duas letras que a marca de um assistente desenha, na língua de quem lê. Preenchê-lo é o que desenha a marca, e `ai_label` tem de dizer o que ela significa."""
+"component.ai.prop.ai_label.doc" = """O que a marca significa, como frase inteira. Necessário sempre que `ai_mark` estiver preenchido, porque as letras carregam `aria-hidden` e é isto que um leitor de tela lê."""
+"component.ai.prop.ai_note.doc" = """Uma frase sobre o que o assistente fez. Preenchê-lo torna a marca um controle que abre a frase, fechado pelo Escape. Sem ele a marca não é um controle."""
 # O `i` e a nota dele.
+# A marca do assistente. As cinco primeiras são compartilhadas por todo
+# componente que hospeda uma, porque a mesma frase usada em quarenta páginas
+# continua sendo uma frase só.
+"example.ai.mark" = "IA"
+"example.ai.name" = "Escrito por um assistente"
+"example.ai.note" = "Um assistente escreveu este valor. Confira antes de enviar o formulário."
+"example.ai.close" = "Fechar"
+"example.ai.subject" = "Valor sugerido"
+"example.ai.caption" = """A marca fica depois do valor e nunca por cima dele. Aperte para ler a frase."""
+
+"example.ai-label.summary" = "A receita subiu em todas as regiões menos no norte, onde duas contas fecharam."
+"example.ai-label.name-summary" = "Resumo escrito por um assistente"
+"example.ai-label.note-summary" = "Escrito a partir dos três relatórios que esta página cita. Leia comparando com eles antes de citar."
+"example.ai-label.name-total" = "Total calculado por um assistente"
+"example.ai-label.note-total" = "Somado a partir das linhas acima, e arredondado para o inteiro mais próximo."
+"example.ai-label.name-figure" = "Número sugerido por um assistente"
+"example.ai-label.note-figure" = "Sugerido a partir dos três últimos trimestres. Nada foi enviado a lugar nenhum ainda."
+"example.ai-label.name-draft" = "Rascunho escrito por um assistente"
+"example.ai-label.note-draft" = "Um primeiro rascunho, feito das anotações do chamado. Edite antes de mandar."
+"example.ai-label.mark-hint" = """Sem `note` a marca é um `<span>`, então não recebe foco e não abre nada. A frase é o que um leitor de tela lê."""
+"example.ai-label.open-hint" = """Um `note` torna a marca um controle. `placement` prende onde a nota abre, para uma marca na borda de uma tabela."""
+"example.ai-label.variant-hint" = """Com que força a marca é pintada, de um tingimento até o tom em força total."""
+"example.ai-label.size-hint" = """Três tamanhos, iguais aos da `Tag` passo a passo. O menor ainda atinge o alvo de 24 pixels."""
+"example.ai-label.tone-hint" = """Qualquer família que a paleta declare. Sem um tom a marca fica discreta ao lado do valor."""
+
 "example.info.deadline" = "Prazo de pagamento"
 "example.info.deadline-label" = "Sobre o prazo de pagamento"
 "example.info.deadline-note" = "Dias úteis a partir da aprovação da fatura, não da data em que ela foi emitida. Feriados nacionais não contam."

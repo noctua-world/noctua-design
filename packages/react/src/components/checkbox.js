@@ -13,8 +13,9 @@ import { createElement as h } from "react";
 
 import { Fragment } from "react";
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { check } from "@noctua-world/design-tokens/icons/check.js";
-export function Checkbox({ name, value, label, hint, checked, disabled, invalid, size, hideLabel, divider, exclusive, reveal, className, children, ...rest }) {
+export function Checkbox({ name, value, label, hint, checked, disabled, invalid, size, hideLabel, divider, exclusive, reveal, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const size_ = size ?? "large";
   const root = ["nd-choice nd-checkbox", className].filter(Boolean).join(" ");
   // Derived, as in the Dioxus half: three things point at this id and a caller
@@ -67,6 +68,9 @@ export function Checkbox({ name, value, label, hint, checked, disabled, invalid,
         label,
       ),
       hint ? h("p", { key: "h", className: "nd-choice-hint", id: hintId }, hint) : null,
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-choice-ai", mark: aiMark, label: aiLabel, note: aiNote })
+        : null,
     ),
     // Visible with no script. The script hides it; nothing here reveals it.
     reveal

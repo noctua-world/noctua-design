@@ -15,9 +15,10 @@ import { Button } from "./button.js";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
 import { upload } from "@noctua-world/design-tokens/icons/upload.js";
-export function FileInput({ name, label, browseLabel, drop, dropLabel, accept, acceptLabel, multiple, max, maxLabel, maxSize, maxSizeLabel, removeLabel, emptyLabel, status, addedLabel, removedLabel, hint, error, required, requiredLabel, disabled, size, glass, className, ...rest }) {
+export function FileInput({ name, label, browseLabel, drop, dropLabel, accept, acceptLabel, multiple, max, maxLabel, maxSize, maxSizeLabel, removeLabel, emptyLabel, status, addedLabel, removedLabel, hint, error, required, requiredLabel, disabled, size, glass, aiMark, aiLabel, aiNote, className, ...rest }) {
   const size_ = size ?? "medium";
   const id = `nd-file-input-${name}`;
   const described = [hint ? `${id}-hint` : null, error ? `${id}-error` : null]
@@ -101,6 +102,9 @@ export function FileInput({ name, label, browseLabel, drop, dropLabel, accept, a
         "aria-atomic": "true",
         "data-nd-file-input-status": "",
       }),
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-start", mark: aiMark, label: aiLabel, note: aiNote })
+        : null,
     ),
     h(
       "template",

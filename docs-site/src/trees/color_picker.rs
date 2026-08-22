@@ -17,7 +17,7 @@ use crate::trees::Tree;
 // are written out per example rather than shared, because no two of them carry
 // the same set — the one with `entry: false` has no entry labels at all.
 
-/// Every `ColorPicker` example. 5 of them.
+/// Every `ColorPicker` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"ColorPicker { name, label, value, trigger_label, area_label, hue_label, entry_label, entry_invalid_label, codes_label, copy_label, copied_label, close_label }",
@@ -282,6 +282,44 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     children: &[],
                 },
             ],
+        }],
+    ),
+    (
+        r"ColorPicker { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "ColorPicker",
+            // NO `size`, NO `shape`, NO `formats`. All three were set to
+            // their own declared default here, so the plainest example on
+            // the page carried three props a reader could delete without
+            // changing a pixel. Each is shown at a value that differs
+            // further down.
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("name", Value::Text("label-colour-ai")),
+                ("label", Value::Message(Key::ExampleColorPickerLabel)),
+                ("value", Value::Text("#7c3aed")), // allow-literal: the colour a ColorPicker opens on IS a colour, and a picker whose starting value came from a palette token would follow the theme instead of showing the reader their own
+                (
+                    "trigger_label",
+                    Value::Message(Key::ExampleColorPickerTrigger),
+                ),
+                ("area_label", Value::Message(Key::ExampleColorPickerArea)),
+                ("hue_label", Value::Message(Key::ExampleColorPickerHue)),
+                ("entry_label", Value::Message(Key::ExampleColorPickerEntry)),
+                (
+                    "entry_invalid_label",
+                    Value::Message(Key::ExampleColorPickerEntryInvalid),
+                ),
+                ("codes_label", Value::Message(Key::ExampleColorPickerCodes)),
+                ("copy_label", Value::Message(Key::ExampleColorPickerCopy)),
+                (
+                    "copied_label",
+                    Value::Message(Key::ExampleColorPickerCopied),
+                ),
+                ("close_label", Value::Message(Key::ExampleColorPickerClose)),
+            ],
+            children: &[],
         }],
     ),
 ];

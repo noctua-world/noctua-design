@@ -99,6 +99,12 @@ pub fn CodeBlock(
     /// Frosts the block. Off by default, and rarely right, because code is read for a long time and a moving backdrop under it makes that harder.
     #[props(default = false)]
     glass: bool,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
+    /// One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control.
+    ai_note: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -177,6 +183,20 @@ pub fn CodeBlock(
                     }
                     if let Some(badge) = badge {
                         span { class: "nd-codeblock-badge nd-identifier", "{badge}" }
+                    }
+                    // IN THE BAR, beside the badge. The bar pushes its controls
+                    // to the trailing edge and the filename takes the rest, so
+                    // the mark drops in between with no rule of its own.
+                    // The assistant's mark, in the room this component reserves for
+                    // it. A child in the flow and never a corner: `Badge` translates
+                    // its mark onto what it marks, and this may not.
+                    if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                        crate::components::AILabel {
+                            class: "nd-ai-slot",
+                            mark,
+                            label: phrase,
+                            note: ai_note.clone(),
+                        }
                     }
                     if let Some(wrap_label) = wrap_label.clone() {
                         button {

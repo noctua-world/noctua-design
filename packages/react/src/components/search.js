@@ -12,9 +12,10 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
 import { search } from "@noctua-world/design-tokens/icons/search.js";
-export function Search({ name, label, placeholder, value, presentation, size, src, action, query, cap, filter, hotkey, clearable, loading, disabled, glass, recent, status, emptyLabel, loadingLabel, errorLabel, capLabel, clearLabel, recentLabel, forgetLabel, closeLabel, className, children, ...rest }) {
+export function Search({ name, label, placeholder, value, presentation, size, src, action, query, cap, filter, hotkey, clearable, loading, disabled, glass, recent, status, emptyLabel, loadingLabel, errorLabel, capLabel, clearLabel, recentLabel, forgetLabel, closeLabel, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const presentation_ = presentation ?? "inline";
   const size_ = size ?? "medium";
   const query_ = query ?? "q";
@@ -69,6 +70,9 @@ export function Search({ name, label, placeholder, value, presentation, size, sr
           },
           h(Icon, { icon: close, size: "small" }),
         )
+      : null,
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel, note: aiNote })
       : null,
   ];
 

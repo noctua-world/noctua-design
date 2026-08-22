@@ -11,7 +11,8 @@
 
 import { createElement as h } from "react";
 
-export function Image({ src, alt, ratio, fit, loading, caption, rounded, width, height, className, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Image({ src, alt, ratio, fit, loading, caption, rounded, width, height, aiMark, aiLabel, aiNote, className, ...rest }) {
   const fit_ = fit ?? "cover";
   const loading_ = loading ?? "lazy";
   const rounded_ = rounded ?? false;
@@ -24,12 +25,18 @@ export function Image({ src, alt, ratio, fit, loading, caption, rounded, width, 
   };
   const picture = { src, alt, width, height, loading: loading_, decoding: "async" };
 
-  if (!caption)
+  // See the Dioxus half: a caption or a mark makes it a figure.
+  const framed = caption || (aiMark && aiLabel);
+
+  if (!framed)
     return h("img", { className: `${root} nd-image-media`, ...shape, ...picture, ...rest });
   return h(
     "figure",
     { className: root, ...shape, ...rest },
     h("img", { key: "p", className: "nd-image-media", ...picture }),
-    h("figcaption", { key: "c", className: "nd-image-caption" }, caption),
+    caption ? h("figcaption", { key: "c", className: "nd-image-caption" }, caption) : null,
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-caption", mark: aiMark, label: aiLabel, note: aiNote })
+      : null,
   );
 }

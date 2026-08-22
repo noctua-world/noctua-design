@@ -15,8 +15,9 @@ import { Field } from "./field.js";
 import { Tag } from "./tag.js";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
-export function TagPicker({ name, label, hint, error, placeholder, size, creatable, createLabel, separators, paste, duplicates, max, maxLabel, pattern, invalidLabel, clearable, clearLabel, removeLabel, addedLabel, removedLabel, status, emptyLabel, loading, loadingLabel, disabled, required, glass, className, children, ...rest }) {
+export function TagPicker({ name, label, hint, error, placeholder, size, creatable, createLabel, separators, paste, duplicates, max, maxLabel, pattern, invalidLabel, clearable, clearLabel, removeLabel, addedLabel, removedLabel, status, emptyLabel, loading, loadingLabel, disabled, required, glass, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const size_ = size ?? "medium";
   const separators_ = separators ?? ",";
   const creatable_ = creatable ?? true;
@@ -125,6 +126,9 @@ export function TagPicker({ name, label, hint, error, placeholder, size, creatab
             },
             h(Icon, { icon: close, size: "small" }),
           )
+        : null,
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel, note: aiNote })
         : null,
     ),
     h("p", {

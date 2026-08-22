@@ -159,6 +159,12 @@ pub fn Tag(
     /// Frosts the tag. Use it for a tag over a photograph rather than in a row of tags.
     #[props(default = false)]
     glass: bool,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
+    /// One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control.
+    ai_note: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -226,6 +232,22 @@ pub fn Tag(
                 // NO ROLE AND NO TAB STOP. A pill that is only a label and
                 // claims a role is the promise the markup does not keep.
                 span { class: "nd-tag-body", {inside} }
+            }
+            // IN THE PILL, BETWEEN THE BODY AND THE REMOVE CONTROL. The body
+            // carries a NEGATIVE inline margin, so a sibling placed after it
+            // with no rule of its own lands on top of the body's own trailing
+            // padding — the overlap the remove control's `:has()` rule already
+            // exists to correct, and `.nd-tag-ai` extends it.
+            // The assistant's mark, in the room this component reserves for
+            // it. A child in the flow and never a corner: `Badge` translates
+            // its mark onto what it marks, and this may not.
+            if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                crate::components::AILabel {
+                    class: "nd-ai-slot nd-tag-ai",
+                    mark,
+                    label: phrase,
+                    note: ai_note.clone(),
+                }
             }
             if let Some(remove) = remove {
                 Button {

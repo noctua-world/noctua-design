@@ -11,7 +11,8 @@
 
 import { createElement as h } from "react";
 
-export function Switch({ name, label, on, off, checked, describedby, size, disabled, glass, className, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Switch({ name, label, on, off, checked, describedby, size, disabled, glass, aiMark, aiLabel, className, ...rest }) {
   const checked_ = checked ?? false;
   const disabled_ = disabled ?? false;
   const size_ = size ?? "medium";
@@ -34,6 +35,9 @@ export function Switch({ name, label, on, off, checked, describedby, size, disab
       ...rest,
     },
     h("span", { key: "l", className: "nd-switch-label" }, label),
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel })
+      : null,
     h("span", {
       key: "t",
       className: "nd-switch-track",

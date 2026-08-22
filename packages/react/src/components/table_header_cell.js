@@ -11,7 +11,8 @@
 
 import { createElement as h } from "react";
 
-export function TableHeaderCell({ column, scope, align, tone, wrap, span, rows, sort, className, children, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function TableHeaderCell({ column, scope, align, tone, wrap, span, rows, sort, aiMark, aiLabel, className, children, ...rest }) {
   const scope_ = scope ?? "col";
   const align_ = align ?? "start";
   // `nowrap`, THE OPPOSITE OF A CELL'S DEFAULT, which is the whole point of the
@@ -49,6 +50,9 @@ export function TableHeaderCell({ column, scope, align, tone, wrap, span, rows, 
         { key: "w", className: "nd-table-heading-words", "data-nd-table-heading": "" },
         children,
       ),
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-apart", mark: aiMark, label: aiLabel })
+        : null,
     ),
   );
 }

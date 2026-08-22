@@ -8,6 +8,7 @@ element = "input"
 class = "nd-file-input"
 specimen = "<span class=\"nd-file-input-figure\"><span class=\"nd-file-input-area\"></span></span>"
 summary = "Let users choose files, by picking or dropping them, and correct what they chose."
+ai = "custom"
 
 [prop.name]
 type = "text"

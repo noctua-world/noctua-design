@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `DateInput` example. 4 of them.
+/// Every `DateInput` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"DateInput { name, legend, hint, day_label, month_label, year_label, bday: true, required: true, required_label, missing_label, number_label, invalid_label, error_label }",
@@ -200,5 +200,66 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 children: &[],
             },
         ],
+    ),
+    (
+        r"DateInput { ai_mark, ai_label, ai_note }",
+        // `novalidate`, so the sentence a reader hears is the component's own
+        // rather than the browser bubble the no-script path already has.
+        &[Node::Element {
+            tag: "form",
+            attributes: &[
+                ("class", Value::Text("nd-example-form")),
+                ("method", Value::Text("get")),
+                ("action", Value::Text("#")),
+                ("novalidate", Value::Bool(true)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "DateInput",
+                    props: &[
+                        ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                        ("ai_label", Value::Message(Key::ExampleAiName)),
+                        ("ai_note", Value::Message(Key::ExampleAiNote)),
+                        ("name", Value::Text("birth-ai")),
+                        ("legend", Value::Message(Key::ExampleDateInputBirthLegend)),
+                        ("hint", Value::Message(Key::ExampleDateInputHint)),
+                        ("day_label", Value::Message(Key::ExampleDateInputDay)),
+                        ("month_label", Value::Message(Key::ExampleDateInputMonth)),
+                        ("year_label", Value::Message(Key::ExampleDateInputYear)),
+                        ("bday", Value::Bool(true)),
+                        ("required", Value::Bool(true)),
+                        (
+                            "error_label",
+                            Value::Message(Key::ExampleDateInputErrorWord),
+                        ),
+                        (
+                            "required_label",
+                            Value::Message(Key::ExampleDateInputRequired),
+                        ),
+                        (
+                            "missing_label",
+                            Value::Message(Key::ExampleDateInputMissing),
+                        ),
+                        ("number_label", Value::Message(Key::ExampleDateInputNumber)),
+                        ("invalid_label", Value::Message(Key::ExampleDateInputReal)),
+                        (
+                            "year_digits_label",
+                            Value::Message(Key::ExampleDateInputYearDigits),
+                        ),
+                    ],
+                    children: &[],
+                },
+                // A form of three boxes and no submit control never submits
+                // implicitly — the button is what makes Enter mean send.
+                Node::Component {
+                    name: "Button",
+                    props: &[
+                        ("submit", Value::Text("submit")),
+                        ("label", Value::Message(Key::ExampleDateInputSend)),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
     ),
 ];

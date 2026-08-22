@@ -18,7 +18,7 @@ const BODY: &[Node] = &[Node::Component {
     children: &[Node::Text(Value::Message(Key::ExampleDisclosureBody))],
 }];
 
-/// Every `Disclosure` example. 7 of them.
+/// Every `Disclosure` example. 8 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Disclosure { summary: "…", … }"#,
@@ -109,6 +109,18 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 ("summary", Value::Message(Key::ExampleDisclosureSummary)),
                 ("glass", Value::Bool(true)),
                 ("open", Value::Bool(true)),
+            ],
+            children: &[Node::Fragment(BODY)],
+        }],
+    ),
+    (
+        r"Disclosure { ai_mark, ai_label }",
+        &[Node::Component {
+            name: "Disclosure",
+            props: &[
+                ("summary", Value::Message(Key::ExampleDisclosureSummary)),
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
             ],
             children: &[Node::Fragment(BODY)],
         }],

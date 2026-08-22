@@ -122,6 +122,12 @@ pub fn Toast(
     /// almost always. Use `assertive` for a result a reader has to act on, and `off`
     /// for one that shipped with the page.
     live: Option<ToastLive>,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
+    /// One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control.
+    ai_note: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -176,6 +182,19 @@ pub fn Toast(
                 }
             }
 
+            // Before the dismiss control, in the message's own row. See
+            // `MessageBar`, which this arrangement copies.
+            // The assistant's mark, in the room this component reserves for
+            // it. A child in the flow and never a corner: `Badge` translates
+            // its mark onto what it marks, and this may not.
+            if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                crate::components::AILabel {
+                    class: "nd-ai-slot nd-ai-slot-line",
+                    mark,
+                    label: phrase,
+                    note: ai_note.clone(),
+                }
+            }
             if dismissible {
                 // RENDERED HIDDEN, revealed by `dist/toast.js` — `MessageBar`'s
                 // arrangement for `Info`'s reason. With no script there is

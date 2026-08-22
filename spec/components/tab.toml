@@ -11,6 +11,8 @@ class = "nd-tab"
 page = "tabs"
 specimen = "<span class=\"nd-tab-text nd-identifier\">Aa</span>"
 summary = "Name one panel in a tab strip, and show it when a reader chooses it."
+ai = "custom"
+ai_pressable = false
 
 # WHY IT IS A LINK AND NOT A BUTTON.
 #

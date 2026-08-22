@@ -5,6 +5,7 @@ class = "nd-text"
 # One of the marks that go inside a sentence, documented with the others.
 page = "inline-text"
 summary = "Set the size, weight and tone of a run of text, from the type scale."
+ai = "inline"
 
 [prop.size]
 type = "enum"

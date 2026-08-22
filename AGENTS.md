@@ -181,6 +181,14 @@ and `Search.name` are the only way markup gets an attribute a script can find.
 There is no arbitrary-attribute escape hatch, because an escape hatch on one
 component is an escape hatch on all of them.
 
+**A prop many components share is grafted, not written.** `[meta] ai` in a
+contract adds the props that forward an `AILabel`, with **one** doc each and
+**one** message key for that doc — `component.ai.prop.*`, not one per host. A
+hand-written body says where the mark goes with a `// @ai` marker on the line it
+belongs on, and the emitter fills it, so the fragment is written once and placed
+forty-five times. `NOCTUA.md §9.12.1`. The list of hosts is never written down:
+`grep -l '^ai = ' spec/components/*.toml` answers it.
+
 ## Commands
 
 ```bash
@@ -451,6 +459,7 @@ to change.** Each of these carries measured rules, not description:
 | If you are touching | Read the header of |
 |---|---|
 | a contract, a prop, either generated body | `crates/noctua-design-emit/src/props.rs`, `controls.rs` |
+| a component that hosts an `AILabel`, or the mark itself | `crates/noctua-design-emit/src/controls.rs` (`graft`), `crates/noctua-design-spec/src/component.rs` (`AI_PROPS`) |
 | a variant grid or a specimen | `crates/noctua-design-emit/src/specimens.rs` |
 | an icon, a source, the payload rules | `crates/noctua-design-emit/src/icons.rs` |
 | a `tone` | `crates/noctua-design-emit/src/tones.rs` |
@@ -471,12 +480,34 @@ to change.** Each of these carries measured rules, not description:
 | the page shape or the URL scheme | `docs-site/src/pages.rs` |
 | the site's scope, build, or its open gaps | `docs-site/README.md` |
 
-Two recorded gaps, because a reader would otherwise assume they are closed.
+Four recorded gaps, because a reader would otherwise assume they are closed.
 `Tabs`, `Segmented`, `Tree` and `DateInput` are enhanced from the site's script
 rather than from `dist/`, so a consumer taking the packages gets the roles
 without the keyboard they oblige — the fix is to move the module and let
 `shell.js` import it back. And `spec/components/<name>.cases.toml` is unwritten,
 so behavioural parity is demonstrated by the examples rather than asserted.
+
+**A `role="grid"` has one tab stop and three things sit in it.** `table.js`
+sets every cell to `-1` and the first to `0`, and sets nothing inside a cell —
+so the row-select box and the expand control are stops the comment above them
+says a grid does not have. Closing it needs a cell-entry gesture the runtime
+has no key for. Until then `TableCell` and `TableHeaderCell` host the quiet form
+of the assistant's mark, because a pressable one would be a stop per marked cell.
+
+**A note opened inside a `Dialog` covers the dialog's own text.** Every note on
+this site is a `position: fixed` panel anchored to the control that opened it,
+and `Info` has always behaved this way — a note opens over the page it is about.
+Inside a modal that is worse than elsewhere, because the text it lands on is the
+one a reader most needs: a delete dialog's note covered its own irreversibility
+warning. Closing it means teaching `anchor.js` about the surface a note opened
+inside, which is a change to five other callers.
+
+**`Tag` and `Badge` paint a tinted variant in the tone's own ink**, which
+measures 2.1:1 in the light appearance. `--nc-color-<family>` is solved against
+the page and `-bg` is a tint of it, so the two are neighbours; the workspace's
+own `AGENTS.md` states the rule the other way round — a `-bg` field takes the
+page's ordinary ink and the family's border. `AILabel` is painted that way and
+measures 13.5:1. The other two are worth a change of their own.
 
 ## Maintaining this file
 

@@ -12,7 +12,8 @@
 import { createElement as h } from "react";
 
 import { Field } from "./field.js";
-export function OtpField({ name, legend, boxLabel, length, kind, value, autocomplete, hint, error, invalidLabel, required, requiredLabel, size, disabled, className, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function OtpField({ name, legend, boxLabel, length, kind, value, autocomplete, hint, error, invalidLabel, required, requiredLabel, size, disabled, aiMark, aiLabel, aiNote, className, ...rest }) {
   const size_ = size ?? "medium";
   const kind_ = kind ?? "numeric";
   const length_ = length ?? "6";
@@ -96,6 +97,9 @@ export function OtpField({ name, legend, boxLabel, length, kind, value, autocomp
             }),
           ),
         ),
+        aiMark && aiLabel
+          ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-apart", mark: aiMark, label: aiLabel, note: aiNote })
+          : null,
       ),
       h("p", {
         key: "n",

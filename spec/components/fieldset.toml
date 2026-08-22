@@ -11,6 +11,7 @@ name = "Fieldset"
 element = "fieldset"
 class = "nd-fieldset"
 summary = "Group the controls that answer one question, with the hint and error for the group."
+ai = "custom"
 
 # WHY THIS EXISTS RATHER THAN A `<div>` WITH A HEADING.
 #

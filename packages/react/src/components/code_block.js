@@ -14,10 +14,11 @@ import { createElement as h } from "react";
 import { ALIASES, GRAMMARS, lines, scan } from "@noctua-world/design-tokens/grammars.js";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { check } from "@noctua-world/design-tokens/icons/check.js";
 import { copy } from "@noctua-world/design-tokens/icons/copy.js";
 import { textWrap } from "@noctua-world/design-tokens/icons/text-wrap.js";
-export function CodeBlock({ code, language, theme, filename, caption, numbered, startLine, markLines, focus, wrap, maxLines, expandLabel, collapseLabel, wrapLabel, copy, copied, glass, className, ...rest }) {
+export function CodeBlock({ code, language, theme, filename, caption, numbered, startLine, markLines, focus, wrap, maxLines, expandLabel, collapseLabel, wrapLabel, copy, copied, glass, aiMark, aiLabel, aiNote, className, ...rest }) {
   const numbered_ = numbered ?? false;
   const wrap_ = wrap ?? false;
   const focus_ = focus ?? false;
@@ -70,6 +71,9 @@ export function CodeBlock({ code, language, theme, filename, caption, numbered, 
             : null,
           badge
             ? h("span", { key: "l", className: "nd-codeblock-badge nd-identifier" }, badge)
+            : null,
+          aiMark && aiLabel
+            ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel, note: aiNote })
             : null,
           wrapLabel
             ? h(

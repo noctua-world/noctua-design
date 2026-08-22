@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
-/// Every `Button` example. 17 of them.
+/// Every `Button` example. 18 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Button { label: "…" }"#,
@@ -501,6 +501,18 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     children: &[],
                 }],
             }],
+        }],
+    ),
+    (
+        r"Button { ai_mark, ai_label }",
+        &[Node::Component {
+            name: "Button",
+            props: &[
+                ("label", Value::Message(Key::ExampleButtonSave)),
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+            ],
+            children: &[],
         }],
     ),
 ];

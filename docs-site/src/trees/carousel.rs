@@ -64,7 +64,7 @@ pub(crate) const SLIDES: &[Node] = &[
     },
 ];
 
-/// Every `Carousel` example. 5 of them.
+/// Every `Carousel` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"Carousel { name, label, snap: Center, previous_label, next_label, announce_label }",
@@ -211,6 +211,34 @@ Carousel { orientation: Vertical, controls: false }",
                     children: &[Node::Fragment(SLIDES)],
                 },
             ],
+        }],
+    ),
+    (
+        r"Carousel { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Carousel",
+            // NO `per_view: "1"` AND NO `controls: true`. Both are the declared
+            // default, so the first example on the page opened on two props a
+            // reader could delete without changing anything. Each is shown at a
+            // value that differs below.
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("name", Value::Text("gallery-ai")),
+                ("label", Value::Message(Key::ExampleCarouselLabel)),
+                ("snap", Value::Text("center")),
+                (
+                    "previous_label",
+                    Value::Message(Key::ExampleCarouselPrevious),
+                ),
+                ("next_label", Value::Message(Key::ExampleCarouselNext)),
+                (
+                    "announce_label",
+                    Value::Message(Key::ExampleCarouselAnnounce),
+                ),
+            ],
+            children: &[Node::Fragment(SLIDES)],
         }],
     ),
 ];

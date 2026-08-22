@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Truncate` example. 4 of them.
+/// Every `Truncate` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Truncate { title: "…", "…" }"#,
@@ -64,6 +64,23 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 name: "Truncate",
                 props: &[("title", Value::Message(Key::ExampleListOne))],
                 children: &[Node::Text(Value::Message(Key::ExampleListOne))],
+            }],
+        }],
+    ),
+    (
+        r"Truncate { ai_mark, ai_label, ai_note }",
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-narrow"))],
+            children: &[Node::Component {
+                name: "Truncate",
+                props: &[
+                    ("title", Value::Message(Key::ExampleListLong)),
+                    ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                    ("ai_label", Value::Message(Key::ExampleAiName)),
+                    ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ],
+                children: &[Node::Text(Value::Message(Key::ExampleListLong))],
             }],
         }],
     ),

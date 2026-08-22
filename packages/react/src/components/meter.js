@@ -11,7 +11,8 @@
 
 import { createElement as h } from "react";
 
-export function Meter({ name, label, value, min, max, low, high, optimum, unit, valueLabel, tone, size, hideLabel, showValue, className, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Meter({ name, label, value, min, max, low, high, optimum, unit, valueLabel, tone, size, hideLabel, showValue, aiMark, aiLabel, aiNote, className, ...rest }) {
   const size_ = size ?? "medium";
   const root = ["nd-meter", className].filter(Boolean).join(" ");
   const id = `nd-meter-${name}`;
@@ -54,6 +55,9 @@ export function Meter({ name, label, value, min, max, low, high, optimum, unit, 
       h("label", { key: "n", className: "nd-meter-label", htmlFor: id }, label),
       (showValue ?? true) && sentence
         ? h("span", { key: "v", className: "nd-meter-value" }, sentence)
+        : null,
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel, note: aiNote })
         : null,
     ),
     h(

@@ -12,8 +12,9 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
-export function MessageBar({ tone, title, icon, alert, live, dismissible, dismissLabel, className, children, ...rest }) {
+export function MessageBar({ tone, title, icon, alert, live, dismissible, dismissLabel, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const alert_ = alert ?? false;
   const dismissible_ = dismissible ?? false;
   const root = ["nd-message-bar", className].filter(Boolean).join(" ");
@@ -43,6 +44,9 @@ export function MessageBar({ tone, title, icon, alert, live, dismissible, dismis
       title ? h("strong", { key: "h", className: "nd-message-bar-title" }, title) : null,
       h("div", { key: "b", className: "nd-message-bar-body" }, children),
     ),
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-line", mark: aiMark, label: aiLabel, note: aiNote })
+      : null,
     dismissible_
       ? h(
           "button",

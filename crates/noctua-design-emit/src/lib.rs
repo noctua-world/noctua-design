@@ -33,6 +33,7 @@ pub mod interpreter;
 pub mod javascript;
 pub mod lineage;
 pub mod props;
+pub mod registry;
 pub mod runtime;
 pub mod rust;
 pub mod scope;
@@ -171,6 +172,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
         three_licence,
     ));
     files.extend(props::emit(components, inputs.drawings));
+    files.extend(registry::emit(components));
     // `crate::` because `runtime` is also the local holding `Lineage`'s own
     // runtime three lines up, and a reader should not have to know which
     // namespace wins to read this line.
@@ -540,7 +542,11 @@ mod tests {
             let javascript = std::path::Path::new(&file.path)
                 .extension()
                 .is_some_and(|kind| kind.eq_ignore_ascii_case("js"));
-            if !file.path.starts_with("packages/") || !javascript {
+            // `docs-site/js/` is emitted too now. It was `packages/` alone,
+            // and `registry.js` sat outside it for a year with a generated
+            // header and no generator, so nothing here ever read it as code.
+            let ours = file.path.starts_with("packages/") || file.path.starts_with("docs-site/js/");
+            if !ours || !javascript {
                 continue;
             }
             read += 1;

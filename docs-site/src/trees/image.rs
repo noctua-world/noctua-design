@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
-/// Every `Image` example. 5 of them.
+/// Every `Image` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // THE BOX BEFORE THE BYTES, which is the whole of this component. `width`
     // and `height` are the file's own numbers, handed to the browser before any
@@ -131,6 +131,30 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         children: &[],
                     }],
                 }],
+            }],
+        }],
+    ),
+    (
+        r"Image { ai_mark, ai_label, ai_note }",
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-picture"))],
+            children: &[Node::Component {
+                name: "Image",
+                // NO `fit: Cover` AND NO `loading`. `cover` is the default and
+                // `loading` was named in the caption without ever being passed.
+                // Both are shown further down at a value that differs.
+                props: &[
+                    ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                    ("ai_label", Value::Message(Key::ExampleAiName)),
+                    ("ai_note", Value::Message(Key::ExampleAiNote)),
+                    ("src", Value::Asset("assets/portraits/ada.svg")),
+                    ("alt", Value::Message(Key::ExampleImageAlt)),
+                    ("ratio", Value::Text("landscape")),
+                    ("width", Value::Text("480")),
+                    ("height", Value::Text("360")),
+                ],
+                children: &[],
             }],
         }],
     ),

@@ -12,6 +12,7 @@ name = "Meter"
 element = "meter"
 class = "nd-meter"
 summary = "Show how much of a known total is used, as a real `<meter>`."
+ai = "custom"
 
 [prop.name]
 type = "text"

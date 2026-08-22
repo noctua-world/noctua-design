@@ -152,7 +152,7 @@ pub(crate) const TEAL_DETAILED: &[Node] = &[Node::Component {
     children: &[],
 }];
 
-/// Every `Select` example. 8 of them.
+/// Every `Select` example. 9 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Select { name: "palette", label: "…", hint: "…", placeholder: "…" }"#,
@@ -415,6 +415,44 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 ("disabled", Value::Bool(true)),
             ],
             children: &[Node::Fragment(OCHRE), Node::Fragment(TEAL)],
+        }],
+    ),
+    (
+        r"Select { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Select",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("name", Value::Text("palette-ai")),
+                ("label", Value::Message(Key::ExampleSelectPaletteLabel)),
+                ("hint", Value::Message(Key::ExampleSelectPaletteHint)),
+                (
+                    "placeholder",
+                    Value::Message(Key::ExampleSelectPalettePlaceholder),
+                ),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SelectGroup",
+                    props: &[("label", Value::Message(Key::ExampleSelectWarm))],
+                    children: &[
+                        Node::Fragment(OCHRE),
+                        Node::Fragment(AMBER),
+                        Node::Fragment(CLAY),
+                    ],
+                },
+                Node::Component {
+                    name: "SelectGroup",
+                    props: &[("label", Value::Message(Key::ExampleSelectCool))],
+                    children: &[
+                        Node::Fragment(TEAL),
+                        Node::Fragment(AZURE),
+                        Node::Fragment(INDIGO),
+                    ],
+                },
+            ],
         }],
     ),
 ];

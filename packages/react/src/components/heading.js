@@ -11,7 +11,8 @@
 
 import { createElement as h } from "react";
 
-export function Heading({ level, size, tone, balance, className, children, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Heading({ level, size, tone, balance, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const level_ = level ?? "2";
   const size_ = size ?? "h2";
   const tone_ = tone ?? "default";
@@ -23,5 +24,8 @@ export function Heading({ level, size, tone, balance, className, children, ...re
   if (balance_ !== undefined) props["data-nd-balance"] = String(balance_);
   // This prop chooses the element rather than an attribute.
   const element = { "1": "h1", "2": "h2", "3": "h3", "4": "h4", "5": "h5", "6": "h6" }[level_] ?? "h2";
-  return h(element, props, children);
+  return h(element, props, children,
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-inline", mark: aiMark, label: aiLabel, note: aiNote })
+      : null);
 }

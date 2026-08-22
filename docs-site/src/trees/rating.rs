@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
-/// Every `Rating` example. 4 of them.
+/// Every `Rating` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // A READING, AND THE NUMBER IS WRITTEN OUT. The fifth star is filled three
     // tenths of the way, because rounding it would be a picture that disagrees
@@ -113,6 +113,24 @@ Rating { name, label, value, value_label, item_label, hint, disabled: true }",
                     children: &[],
                 },
             ],
+        }],
+    ),
+    (
+        r"Rating { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Rating",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("name", Value::Text("rating-read-ai")),
+                ("label", Value::Message(Key::ExampleRatingProduct)),
+                ("readonly", Value::Bool(true)),
+                ("value", Value::Text("4.3")),
+                ("max", Value::Text("5")),
+                ("value_label", Value::Message(Key::ExampleRatingValue)),
+            ],
+            children: &[],
         }],
     ),
 ];

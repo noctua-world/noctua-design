@@ -1152,8 +1152,33 @@ dir = "ltr"
 "example.meter.share-shared" = "Shared"
 
 "component.info.summary" = """Explain a word with one sentence, opened by a small `i` beside it."""
+"component.ai-label.summary" = """Mark a value an assistant wrote, and open one sentence about what it did."""
 # The `i` and its note. Real explanations, because a note that says "more
 # information" is the note this component exists to stop somebody writing.
+# The assistant's mark. The first five are shared by every component that hosts
+# one, because the same sentence used on forty pages is still one sentence.
+"example.ai.mark" = "AI"
+"example.ai.name" = "Written by an assistant"
+"example.ai.note" = "An assistant wrote this value. Check it before the form is sent."
+"example.ai.close" = "Close"
+"example.ai.subject" = "Suggested value"
+"example.ai.caption" = """The mark sits after the value and never over it. Press it for the sentence."""
+
+"example.ai-label.summary" = "Revenue rose in every region except the north, where two accounts closed."
+"example.ai-label.name-summary" = "Summary written by an assistant"
+"example.ai-label.note-summary" = "Written from the three reports this page links to. Read it against them before quoting it."
+"example.ai-label.name-total" = "Total worked out by an assistant"
+"example.ai-label.note-total" = "Added from the rows above, and rounded to the nearest whole number."
+"example.ai-label.name-figure" = "Figure suggested by an assistant"
+"example.ai-label.note-figure" = "Suggested from the last three quarters. Nothing has been sent anywhere yet."
+"example.ai-label.name-draft" = "Draft written by an assistant"
+"example.ai-label.note-draft" = "A first draft, from the notes on the ticket. Edit it before it goes out."
+"example.ai-label.mark-hint" = """With no `note` the mark is a `<span>`, so it takes no focus and opens nothing. The phrase is what a screen reader reads."""
+"example.ai-label.open-hint" = """A `note` makes the mark a control. `placement` pins where the note opens, for a mark at the edge of a table."""
+"example.ai-label.variant-hint" = """How strongly the mark is painted, from a tint to the tone at full strength."""
+"example.ai-label.size-hint" = """Three sizes, matching `Tag` step for step. The smallest still clears the 24 pixel target."""
+"example.ai-label.tone-hint" = """Any family the palette declares. Without a tone the mark stays quiet beside the value."""
+
 "example.info.deadline" = "Payment deadline"
 "example.info.deadline-label" = "About the payment deadline"
 "example.info.deadline-note" = "Working days from the invoice being approved, not from the date it was raised. National holidays do not count."

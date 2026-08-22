@@ -12,8 +12,9 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
-export function Toast({ name, tone, title, duration, countdownLabel, dismissible, dismissLabel, placement, live, className, children, ...rest }) {
+export function Toast({ name, tone, title, duration, countdownLabel, dismissible, dismissLabel, placement, live, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const placement_ = placement ?? "bottom-end";
   const dismissible_ = dismissible ?? true;
   const root = ["nd-toast", className].filter(Boolean).join(" ");
@@ -52,6 +53,9 @@ export function Toast({ name, tone, title, duration, countdownLabel, dismissible
           })
         : null,
     ),
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-line", mark: aiMark, label: aiLabel, note: aiNote })
+      : null,
     dismissible_
       ? h(
           "button",

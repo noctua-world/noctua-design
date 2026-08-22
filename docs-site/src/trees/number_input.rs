@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `NumberInput` example. 7 of them.
+/// Every `NumberInput` example. 8 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // ONE QUESTION, IN A FORM THAT SUBMITS. Press Save and the quantity
     // arrives in the address bar, which is the only way to show that this is a
@@ -277,6 +277,55 @@ NumberInput { name, label, disabled, glass, increment_label, decrement_label }",
                             "decrement_label",
                             Value::Message(Key::ExampleInputDecrement),
                         ),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        r"NumberInput { ai_mark, ai_label, ai_note }",
+        &[Node::Element {
+            tag: "form",
+            attributes: &[
+                ("class", Value::Text("nd-example-form")),
+                ("method", Value::Text("get")),
+                ("action", Value::Text("#")),
+                ("novalidate", Value::Bool(true)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "NumberInput",
+                    props: &[
+                        ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                        ("ai_label", Value::Message(Key::ExampleAiName)),
+                        ("ai_note", Value::Message(Key::ExampleAiNote)),
+                        ("name", Value::Text("tickets-ai")),
+                        ("label", Value::Message(Key::ExampleAiSubject)),
+                        ("value", Value::Text("2")),
+                        ("min", Value::Text("1")),
+                        ("max", Value::Text("20")),
+                        ("step", Value::Text("1")),
+                        ("big_step", Value::Text("5")),
+                        (
+                            "increment_label",
+                            Value::Message(Key::ExampleInputIncrement),
+                        ),
+                        (
+                            "decrement_label",
+                            Value::Message(Key::ExampleInputDecrement),
+                        ),
+                        ("hint", Value::Message(Key::ExampleNumberInputTicketsHint)),
+                        ("required", Value::Bool(true)),
+                        ("required_label", Value::Message(Key::ExampleInputRequired)),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Button",
+                    props: &[
+                        ("submit", Value::Text("submit")),
+                        ("label", Value::Message(Key::ExampleInputSend)),
                     ],
                     children: &[],
                 },

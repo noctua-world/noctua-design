@@ -6,6 +6,8 @@ element = "li"
 class = "nd-search-result"
 page = "search"
 summary = "Shows one search result as a link, with a second line under its name."
+ai = "custom"
+ai_pressable = false
 
 # THE ROW IS THE OPTION AND THE LINK IS THE LINK.
 #

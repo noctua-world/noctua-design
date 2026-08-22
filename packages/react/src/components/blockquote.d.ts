@@ -15,6 +15,12 @@ export interface BlockquoteProps {
   tone?: BlockquoteTone;
   /** Who said it, rendered as a `<footer>` with a `<cite>` inside. `cite` above is a URL for machines, and this is the line a reader sees. */
   attribution?: string;
+  /** The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means. */
+  aiMark?: string;
+  /** What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads. */
+  aiLabel?: string;
+  /** One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control. */
+  aiNote?: string;
   /** Frosts the quotation's own surface, leaving the rule beside it solid. */
   glass?: boolean;
   className?: string;

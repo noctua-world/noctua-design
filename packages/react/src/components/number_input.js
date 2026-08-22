@@ -14,9 +14,10 @@ import { createElement as h } from "react";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { minus } from "@noctua-world/design-tokens/icons/minus.js";
 import { plus } from "@noctua-world/design-tokens/icons/plus.js";
-export function NumberInput({ name, label, value, min, max, step, bigStep, steppers, stepping, incrementLabel, decrementLabel, minLabel, maxLabel, invalidLabel, group, prefix, suffix, placeholder, hint, error, required, requiredLabel, disabled, readonly, size, glass, className, ...rest }) {
+export function NumberInput({ name, label, value, min, max, step, bigStep, steppers, stepping, incrementLabel, decrementLabel, minLabel, maxLabel, invalidLabel, group, prefix, suffix, placeholder, hint, error, required, requiredLabel, disabled, readonly, size, glass, aiMark, aiLabel, aiNote, className, ...rest }) {
   const size_ = size ?? "medium";
   const stepping_ = stepping ?? "assist";
   const id = `nd-number-input-${name}`;
@@ -135,6 +136,9 @@ export function NumberInput({ name, label, value, min, max, step, bigStep, stepp
               h(Icon, { key: "i", icon: minus, size: "small" }),
             ),
           )
+        : null,
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel, note: aiNote })
         : null,
     ),
   );

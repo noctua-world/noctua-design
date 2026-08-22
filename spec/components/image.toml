@@ -11,6 +11,7 @@ name = "Image"
 element = "img"
 class = "nd-image"
 summary = "Show a picture in a box held before it arrives, with a caption where it needs one."
+ai = "custom"
 
 # EVERYTHING HERE IS `Avatar`'S ARRANGEMENT, WIDENED.
 #

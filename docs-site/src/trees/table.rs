@@ -450,7 +450,7 @@ pub(crate) const PASSING_4209: &[Value] = &[
     Value::Text("passing"),
 ];
 
-/// Every `Table` example. 12 of them.
+/// Every `Table` example. 13 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"Table { name, caption, note } with a Tag in a cell",
@@ -1670,6 +1670,32 @@ TableRow { emphasis } and TableCell { aggregate }: subtotal, tax, total",
                     props: &[],
                     children: &[Node::Each {
                         over: Each::Rows(&[CINTRA, AURORA, DELGADO, BRACKEN]),
+                        body: INVOICE_ROW,
+                    }],
+                },
+            ],
+        }],
+    ),
+    (
+        r"Table { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Table",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("name", Value::Text("invoices-ai")),
+                ("caption", Value::Message(Key::ExampleTableInvoices)),
+                ("note", Value::Message(Key::ExampleTableInvoicesNote)),
+            ],
+            children: &[
+                Node::Fragment(INVOICE_COLUMNS),
+                Node::Fragment(INVOICE_HEADINGS),
+                Node::Component {
+                    name: "TableSection",
+                    props: &[],
+                    children: &[Node::Each {
+                        over: Each::Rows(&[AURORA, BRACKEN, CINTRA]),
                         body: INVOICE_ROW,
                     }],
                 },

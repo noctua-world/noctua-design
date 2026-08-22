@@ -11,6 +11,7 @@ name = "Dialog"
 element = "div"
 class = "nd-dialog"
 summary = "Ask for one thing in a window over the page, and hand the focus back after."
+ai = "custom"
 
 # THE PLATFORM'S `<dialog>`, AND EVERY REASON THIS SYSTEM HAS TO WRITE ONE.
 #

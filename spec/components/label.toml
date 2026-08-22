@@ -11,6 +11,8 @@ name = "Label"
 element = "label"
 class = "nd-label"
 summary = "Name a control, a group of controls or a region, in the reader's language."
+ai = "custom"
+ai_pressable = false
 
 # THIS IS THE ONE LABEL IN THE SYSTEM.
 #

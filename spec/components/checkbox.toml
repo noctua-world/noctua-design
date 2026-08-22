@@ -10,6 +10,7 @@ name = "Checkbox"
 element = "div"
 class = "nd-choice nd-checkbox"
 summary = "Let users select one or more options, or agree to a single statement."
+ai = "custom"
 
 # WHY THE BOX IS 40 PIXELS AND NOT 16.
 #

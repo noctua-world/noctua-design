@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Fieldset` example. 5 of them.
+/// Every `Fieldset` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Fieldset { name: "…", legend: "…", hint: "…" }"#,
@@ -157,6 +157,40 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         ("name", Value::Text("closed")),
                         ("value", Value::Text("work")),
                         ("label", Value::Message(Key::ExampleFormsApplyWork)),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        r"Fieldset { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Fieldset",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("name", Value::Text("notify-ai")),
+                ("legend", Value::Message(Key::ExampleFormsContactLegend)),
+                ("hint", Value::Message(Key::ExampleFormsContactHint)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "Radio",
+                    props: &[
+                        ("name", Value::Text("notify-ai")),
+                        ("value", Value::Text("email")),
+                        ("label", Value::Message(Key::ExampleFormsContactEmail)),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Radio",
+                    props: &[
+                        ("name", Value::Text("notify-ai")),
+                        ("value", Value::Text("text")),
+                        ("label", Value::Message(Key::ExampleFormsContactText)),
                     ],
                     children: &[],
                 },

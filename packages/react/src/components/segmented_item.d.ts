@@ -23,6 +23,10 @@ export interface SegmentedItemProps {
   hideLabel?: boolean;
   /** Whether the choice is refused. Off by default. The item stays reachable, so a reader can find that it exists and is refused rather than meeting a gap where an option was. */
   disabled?: boolean;
+  /** The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means. */
+  aiMark?: string;
+  /** What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads. */
+  aiLabel?: string;
   /** Frosts each option's box. Off by default. The chosen option keeps its wash on top of the frost, so a reader can still tell which value is in force. */
   glass?: boolean;
   className?: string;

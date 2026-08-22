@@ -165,6 +165,10 @@ pub fn TableCell(
     /// Which rows the total counts. `table` is every visible row in the body, which makes a grand total. `section` is the rows of **this cell's own `<tbody>`**, which makes a subtotal, because several `<tbody>` elements are HTML's own row grouping.
     #[props(default)]
     aggregate_over: TableCellAggregateOver,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -199,7 +203,24 @@ pub fn TableCell(
             // `Info` or a table of its own, and flow content inside phrasing
             // content is invalid — it renders, and it is markup nobody can
             // defend.
-            div { class: "nd-table-value", {children} }
+            div { class: "nd-table-value", {children}
+                // IN THE CELL'S VALUE, AND NEVER A CONTROL. A table becomes a
+                // `role="grid"` as soon as any column sorts or filters, and
+                // `table.js` gives that grid exactly one tab stop. A button per
+                // marked cell would make it one stop per cell, silently, with
+                // nothing asking. Entering a cell needs a gesture this runtime
+                // does not have yet, and that is its own piece of work.
+                // The assistant's mark, in the room this component reserves for
+                // it. A child in the flow and never a corner: `Badge` translates
+                // its mark onto what it marks, and this may not.
+                if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                    crate::components::AILabel {
+                        class: "nd-ai-slot nd-ai-slot-apart",
+                        mark,
+                        label: phrase,
+                    }
+                }
+            }
         }
     }
 }

@@ -11,11 +11,25 @@
 
 import { createElement as h } from "react";
 
-export function Truncate({ lines, title, className, children, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Truncate({ lines, title, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const lines_ = lines ?? "1";
   const root = ["nd-truncate", className].filter(Boolean).join(" ");
-  const props = { className: root, ...rest };
-  if (lines_ !== undefined) props["data-nd-lines"] = String(lines_);
-  if (title !== undefined) props["title"] = String(title);
-  return h("span", props, children);
+  const marked = Boolean(aiMark && aiLabel);
+
+  return h(
+    "span",
+    {
+      className: root,
+      "data-nd-lines": lines_,
+      title,
+      "data-nd-ai": marked ? "" : undefined,
+      ...rest,
+    },
+    // See the Dioxus half: the clamp moves down one element when marked.
+    marked ? h("span", { key: "t", className: "nd-truncate-text" }, children) : children,
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-apart", mark: aiMark, label: aiLabel, note: aiNote })
+      : null,
+  );
 }

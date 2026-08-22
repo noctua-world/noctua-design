@@ -75,6 +75,12 @@ pub fn Meter(
     /// Whether the sentence is drawn beside the bar. **On by default**, because a bar without its number can only be estimated. Turn it off only where the same number is already in the cell next to it.
     #[props(default = true)]
     show_value: bool,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
+    /// One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control.
+    ai_note: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -138,6 +144,21 @@ pub fn Meter(
                 if show_value {
                     if let Some(sentence) = sentence.clone() {
                         span { class: "nd-meter-value", "{sentence}" }
+                    }
+                    // ON THE LABEL LINE, AFTER THE READING. That line is
+                    // `space-between` with two items in it, so a third would
+                    // push the reading to the CENTRE. `.nd-meter-line:has()`
+                    // in the stylesheet is what stops it.
+                    // The assistant's mark, in the room this component reserves for
+                    // it. A child in the flow and never a corner: `Badge` translates
+                    // its mark onto what it marks, and this may not.
+                    if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                        crate::components::AILabel {
+                            class: "nd-ai-slot",
+                            mark,
+                            label: phrase,
+                            note: ai_note.clone(),
+                        }
                     }
                 }
             }

@@ -12,8 +12,9 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
-export function Popover({ name, triggerLabel, heading, label, placement, dismissible, closeLabel, className, children, ...rest }) {
+export function Popover({ name, triggerLabel, heading, label, placement, dismissible, closeLabel, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const placement_ = placement ?? "auto";
   const dismissible_ = dismissible ?? true;
   const root = ["nd-popover", className].filter(Boolean).join(" ");
@@ -62,6 +63,9 @@ export function Popover({ name, triggerLabel, heading, label, placement, dismiss
             "div",
             { key: "h", className: "nd-popover-head" },
             heading ? h("h2", { key: "i", className: "nd-popover-title", id: titleId }, heading) : null,
+            aiMark && aiLabel
+              ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel, note: aiNote })
+              : null,
             dismissible_
               ? h(
                   "button",

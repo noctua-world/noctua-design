@@ -10,6 +10,8 @@ element = "li"
 class = "nd-tree-item"
 page = "tree"
 summary = "Place one node in a tree: its name, where it leads, and what is under it."
+ai = "custom"
+ai_pressable = false
 
 [prop.label]
 type = "text"

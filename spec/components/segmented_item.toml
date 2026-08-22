@@ -9,6 +9,8 @@ class = "nd-segmented-item"
 page = "segmented"
 
 summary = "Give a `Segmented` one of the values it chooses between."
+ai = "custom"
+ai_pressable = false
 
 [prop.value]
 type = "text"

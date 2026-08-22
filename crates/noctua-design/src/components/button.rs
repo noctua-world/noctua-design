@@ -273,6 +273,10 @@ pub fn Button(
     /// Frosts the control instead of filling it. The tone moves into the ink and the edge, and whatever is behind the control shows through. Use it only where there is something behind it.
     #[props(default = false)]
     glass: bool,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -337,6 +341,19 @@ pub fn Button(
                 span { class: "nd-button-label", "{label}" }
                 if let Some(detail) = detail {
                     span { class: "nd-button-detail", "{detail}" }
+                }
+            }
+            // AFTER THE WORDS, AND NEVER A CONTROL: this root is a
+            // `<button>` or an `<a>`. Inside `!hide_label`, because
+            // an icon-only button has no room and nothing to mark.
+            // The assistant's mark, in the room this component reserves for
+            // it. A child in the flow and never a corner: `Badge` translates
+            // its mark onto what it marks, and this may not.
+            if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                crate::components::AILabel {
+                    class: "nd-ai-slot",
+                    mark,
+                    label: phrase,
                 }
             }
         }

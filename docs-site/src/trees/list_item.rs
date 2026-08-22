@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `ListItem` example. 4 of them.
+/// Every `ListItem` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"ListItem { "…" }"#,
@@ -66,6 +66,22 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     props: &[("href", Value::Text("#"))],
                     children: &[Node::Text(Value::Message(Key::ExampleLinkText))],
                 }],
+            }],
+        }],
+    ),
+    (
+        r"ListItem { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "List",
+            props: &[("spacing", Value::Text("tight"))],
+            children: &[Node::Component {
+                name: "ListItem",
+                props: &[
+                    ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                    ("ai_label", Value::Message(Key::ExampleAiName)),
+                    ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ],
+                children: &[Node::Text(Value::Message(Key::ExampleListOne))],
             }],
         }],
     ),

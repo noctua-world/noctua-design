@@ -14,7 +14,8 @@ import { createElement as h } from "react";
 import { Field } from "./field.js";
 import { Segmented } from "./segmented.js";
 import { SegmentedItem } from "./segmented_item.js";
-export function TimeInput({ name, legend, hourLabel, minuteLabel, secondLabel, meridiemLabel, amLabel, pmLabel, value, seconds, clock, min, max, step, requiredLabel, missingLabel, invalidLabel, minLabel, maxLabel, hint, error, required, disabled, pad, size, glass, className, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function TimeInput({ name, legend, hourLabel, minuteLabel, secondLabel, meridiemLabel, amLabel, pmLabel, value, seconds, clock, min, max, step, requiredLabel, missingLabel, invalidLabel, minLabel, maxLabel, hint, error, required, disabled, pad, size, glass, aiMark, aiLabel, aiNote, className, ...rest }) {
   const size_ = size ?? "medium";
   const clock_ = clock ?? "24";
   const pad_ = pad ?? true;
@@ -148,6 +149,9 @@ export function TimeInput({ name, legend, hourLabel, minuteLabel, secondLabel, m
                   disabled,
                 }),
               )
+            : null,
+          aiMark && aiLabel
+            ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-end", mark: aiMark, label: aiLabel, note: aiNote })
             : null,
         ),
       ),

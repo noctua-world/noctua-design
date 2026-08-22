@@ -11,7 +11,8 @@
 
 import { createElement as h } from "react";
 
-export function Progress({ name, label, value, max, valueLabel, busyLabel, tone, size, hideLabel, className, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Progress({ name, label, value, max, valueLabel, busyLabel, tone, size, hideLabel, aiMark, aiLabel, aiNote, className, ...rest }) {
   const size_ = size ?? "medium";
   const root = ["nd-progress", className].filter(Boolean).join(" ");
   const id = `nd-progress-${name}`;
@@ -45,6 +46,9 @@ export function Progress({ name, label, value, max, valueLabel, busyLabel, tone,
       h("label", { key: "n", className: "nd-progress-label", htmlFor: id }, label),
       // See the Dioxus half: the sentence, not the bare percent.
       sentence ? h("span", { key: "v", className: "nd-progress-value" }, sentence) : null,
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel, note: aiNote })
+        : null,
     ),
     // See the Dioxus half: absent, not zero — no attribute is the
     // indeterminate bar.

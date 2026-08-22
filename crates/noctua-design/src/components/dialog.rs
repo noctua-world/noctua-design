@@ -85,6 +85,12 @@ pub fn Dialog(
     /// The name of the control that closes it. Wanted in practice by `dismissible`,
     /// because that control is a glyph and this is the only name it has.
     close_label: Option<String>,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
+    /// One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control.
+    ai_note: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -137,6 +143,19 @@ pub fn Dialog(
                     div { class: "nd-dialog-head",
                         if let Some(heading) = heading {
                             h2 { class: "nd-dialog-title", id: "{title_id}", "{heading}" }
+                        }
+                        // IN THE HEAD, before the close control. The head is
+                        // the one row a dialog has that is not its content.
+                        // The assistant's mark, in the room this component reserves for
+                        // it. A child in the flow and never a corner: `Badge` translates
+                        // its mark onto what it marks, and this may not.
+                        if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                            crate::components::AILabel {
+                                class: "nd-ai-slot",
+                                mark,
+                                label: phrase,
+                                note: ai_note.clone(),
+                            }
                         }
                         if dismissible {
                             button {

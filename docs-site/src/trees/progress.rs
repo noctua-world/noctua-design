@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Progress` example. 4 of them.
+/// Every `Progress` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"Progress { name, label, value, max, value_label }",
@@ -98,6 +98,26 @@ Progress { name, label, value, max, size: Small, hide_label: true, value_label }
                     children: &[],
                 },
             ],
+        }],
+    ),
+    (
+        r"Progress { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Progress",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("name", Value::Text("upload-ai")),
+                ("label", Value::Message(Key::ExampleProgressUpload)),
+                ("value", Value::Text("7.4")),
+                ("max", Value::Text("12")),
+                (
+                    "value_label",
+                    Value::Message(Key::ExampleProgressUploadValue),
+                ),
+            ],
+            children: &[],
         }],
     ),
 ];

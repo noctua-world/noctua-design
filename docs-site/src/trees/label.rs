@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
-/// Every `Label` example. 5 of them.
+/// Every `Label` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // A LABEL NAMING A CONTROL IT DOES NOT DRAW. The `<input>` here is a bare
     // one on purpose: `Field` and `Input` already compose this component, and
@@ -193,6 +193,36 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     children: &[],
                 }],
             }],
+        }],
+    ),
+    (
+        r"Label { ai_mark, ai_label }",
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-stack"))],
+            children: &[
+                Node::Component {
+                    name: "Label",
+                    props: &[
+                        ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                        ("ai_label", Value::Message(Key::ExampleAiName)),
+                        ("text", Value::Message(Key::ExampleInputEmailLabel)),
+                        ("for_control", Value::Text("example-label-email-ai")),
+                    ],
+                    children: &[],
+                },
+                Node::Element {
+                    tag: "input",
+                    attributes: &[
+                        ("class", Value::Text("nd-input-box")),
+                        ("id", Value::Text("example-label-email-ai")),
+                        ("type", Value::Text("email")),
+                        ("name", Value::Text("example-label-email-ai")),
+                        ("autocomplete", Value::Text("email")),
+                    ],
+                    children: &[],
+                },
+            ],
         }],
     ),
 ];

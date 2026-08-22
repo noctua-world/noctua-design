@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Checkbox` example. 6 of them.
+/// Every `Checkbox` example. 7 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Fieldset { … } / Checkbox { name: "apply", value: "study", label: "…" }"#,
@@ -254,6 +254,50 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         ("label", Value::Message(Key::ExampleFormsApplyCare)),
                         ("hint", Value::Message(Key::ExampleFormsContactPostHint)),
                         ("disabled", Value::Bool(true)),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        r"Checkbox { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Fieldset",
+            props: &[
+                ("name", Value::Text("apply-ai")),
+                ("legend", Value::Message(Key::ExampleFormsApplyLegend)),
+                ("hint", Value::Message(Key::ExampleFormsApplyHint)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "Checkbox",
+                    props: &[
+                        ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                        ("ai_label", Value::Message(Key::ExampleAiName)),
+                        ("ai_note", Value::Message(Key::ExampleAiNote)),
+                        ("name", Value::Text("apply-ai")),
+                        ("value", Value::Text("study")),
+                        ("label", Value::Message(Key::ExampleFormsApplyStudy)),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Checkbox",
+                    props: &[
+                        ("name", Value::Text("apply-ai")),
+                        ("value", Value::Text("work")),
+                        ("label", Value::Message(Key::ExampleFormsApplyWork)),
+                        ("checked", Value::Bool(true)),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Checkbox",
+                    props: &[
+                        ("name", Value::Text("apply-ai")),
+                        ("value", Value::Text("care")),
+                        ("label", Value::Message(Key::ExampleFormsApplyCare)),
                     ],
                     children: &[],
                 },

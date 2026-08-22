@@ -10,7 +10,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Hero;
 
-/// The heroes in this group. 15 of them.
+/// The heroes in this group. 16 of them.
 pub(crate) const HEROES: &[Hero] = &[
     (
         "avatars",
@@ -297,6 +297,31 @@ ErrorSummaryItem { control: "nd-overview-terms-yes", "…" }"#,
                         },
                         Node::Text(Value::Data(".")),
                     ],
+                },
+            ],
+        }],
+    ),
+    (
+        "ai-label",
+        r#"AILabel { mark: "AI", label: "…", note: "…", close_label: "…", tone: "pending" }"#,
+        &[Node::Component {
+            name: "Paragraph",
+            props: &[],
+            children: &[
+                Node::Text(Value::Join(&[
+                    Value::Message(Key::ExampleAiLabelSummary),
+                    Value::Text(" "),
+                ])),
+                Node::Component {
+                    name: "AILabel",
+                    props: &[
+                        ("mark", Value::Message(Key::ExampleAiMark)),
+                        ("label", Value::Message(Key::ExampleAiLabelNameSummary)),
+                        ("note", Value::Message(Key::ExampleAiLabelNoteSummary)),
+                        ("close_label", Value::Message(Key::ExampleAiClose)),
+                        ("tone", Value::Text("pending")),
+                    ],
+                    children: &[],
                 },
             ],
         }],

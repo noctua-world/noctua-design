@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
-/// Every `Switch` example. 6 of them.
+/// Every `Switch` example. 7 of them.
 ///
 /// EVERY ONE OF THEM IS IN A COLUMN OF THE SAME WIDTH, and that is not
 /// decoration. A `Switch` is `justify-content: space-between`: the label at one
@@ -158,6 +158,25 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     ("off", Value::Text("off")),
                     ("glass", Value::Bool(true)),
                     ("checked", Value::Bool(true)),
+                    ("label", Value::Message(Key::ExampleSwitchGrain)),
+                ],
+                children: &[],
+            }],
+        }],
+    ),
+    (
+        r"Switch { ai_mark, ai_label }",
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-narrow"))],
+            children: &[Node::Component {
+                name: "Switch",
+                props: &[
+                    ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                    ("ai_label", Value::Message(Key::ExampleAiName)),
+                    ("name", Value::Text("example-grain-ai")),
+                    ("on", Value::Text("on")),
+                    ("off", Value::Text("off")),
                     ("label", Value::Message(Key::ExampleSwitchGrain)),
                 ],
                 children: &[],

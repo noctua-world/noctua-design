@@ -7,6 +7,8 @@ name = "Button"
 element = "button"
 class = "nd-button"
 summary = "Let users carry out an action with one press, in every shape an interface needs."
+ai = "custom"
+ai_pressable = false
 specimen = "check"
 
 # THE CONTENT IS PROPS, NOT CHILDREN, AND THAT IS THE POINT.

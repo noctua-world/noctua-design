@@ -32,6 +32,10 @@ export interface TableCellProps {
   aggregate?: TableCellAggregate;
   /** Which rows the total counts. `table` is every visible row in the body, which makes a grand total. `section` is the rows of **this cell's own `<tbody>`**, which makes a subtotal, because several `<tbody>` elements are HTML's own row grouping. */
   aggregateOver?: TableCellAggregateOver;
+  /** The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means. */
+  aiMark?: string;
+  /** What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads. */
+  aiLabel?: string;
   className?: string;
   children?: ReactNode;
 }

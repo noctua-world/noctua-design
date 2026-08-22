@@ -12,8 +12,9 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
-export function Dialog({ name, triggerLabel, heading, label, description, modal, size, dismissible, closeLabel, className, children, ...rest }) {
+export function Dialog({ name, triggerLabel, heading, label, description, modal, size, dismissible, closeLabel, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const modal_ = modal ?? true;
   const size_ = size ?? "medium";
   const dismissible_ = dismissible ?? true;
@@ -62,6 +63,9 @@ export function Dialog({ name, triggerLabel, heading, label, description, modal,
             "div",
             { key: "h", className: "nd-dialog-head" },
             heading ? h("h2", { key: "t", className: "nd-dialog-title", id: titleId }, heading) : null,
+            aiMark && aiLabel
+              ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel, note: aiNote })
+              : null,
             dismissible_
               ? h(
                   "button",

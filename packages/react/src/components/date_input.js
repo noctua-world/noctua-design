@@ -14,8 +14,9 @@ import { createElement as h } from "react";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { calendar } from "@noctua-world/design-tokens/icons/calendar.js";
-export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint, error, errorLabel, value, min, max, required, disabled, size, order, bday, pad, expand, calendar, suggestLabel, previousLabel, nextLabel, requiredLabel, missingLabel, numberLabel, yearDigitsLabel, invalidLabel, minLabel, maxLabel, glass, className, children, ...rest }) {
+export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint, error, errorLabel, value, min, max, required, disabled, size, order, bday, pad, expand, calendar, suggestLabel, previousLabel, nextLabel, requiredLabel, missingLabel, numberLabel, yearDigitsLabel, invalidLabel, minLabel, maxLabel, glass, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const size_ = size ?? "medium";
   const order_ = order ?? "auto";
   const root = ["nd-date-input", className].filter(Boolean).join(" ");
@@ -112,6 +113,9 @@ export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint,
             ? segment("month", "nd-date-input-two", monthLabel, valueMonth, "bday-month")
             : segment("year", "nd-date-input-four", yearLabel, valueYear, "bday-year"),
       ),
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-end", mark: aiMark, label: aiLabel, note: aiNote })
+        : null,
     ),
     h(
       "div",

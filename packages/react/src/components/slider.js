@@ -12,7 +12,8 @@
 import { createElement as h } from "react";
 
 import { Field } from "./field.js";
-export function Slider({ name, label, value, end, range, min, max, step, marks, markLabels, output, outputLabel, hint, error, required, requiredLabel, disabled, size, tone, glass, className, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Slider({ name, label, value, end, range, min, max, step, marks, markLabels, output, outputLabel, hint, error, required, requiredLabel, disabled, size, tone, glass, aiMark, aiLabel, aiNote, className, ...rest }) {
   const size_ = size ?? "medium";
   const tone_ = tone ?? "accent";
   const id = `nd-slider-${name}`;
@@ -131,6 +132,9 @@ export function Slider({ name, label, value, end, range, min, max, step, marks, 
             },
             reading,
           )
+        : null,
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel, note: aiNote })
         : null,
     ),
   );

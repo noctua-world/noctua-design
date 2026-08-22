@@ -9,6 +9,7 @@ name = "Radio"
 element = "div"
 class = "nd-choice nd-radio"
 summary = "Let users pick exactly one answer out of several."
+ai = "custom"
 
 # THE SAME SIZES AS `Checkbox`, AND THEY HAVE TO BE.
 #

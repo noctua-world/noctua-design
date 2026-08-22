@@ -5,6 +5,7 @@ name = "Tag"
 element = "span"
 class = "nd-tag"
 summary = "Show a value or a label in a pill that can also be a link, a toggle or removable."
+ai = "custom"
 
 # THE WORD IS A PROP, NOT CHILDREN, AND `TagPicker` IS WHY.
 #

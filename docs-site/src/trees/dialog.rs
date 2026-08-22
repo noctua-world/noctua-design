@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Dialog` example. 4 of them.
+/// Every `Dialog` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // THE ORDINARY ONE, AND EVERY NAMING PROP AT ONCE: a visible heading names
     // the surface, a sentence describes it, and the way out has a name.
@@ -117,6 +117,53 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 props: &[],
                 children: &[Node::Text(Value::Message(Key::ExampleDialogRenameBody))],
             }],
+        }],
+    ),
+    (
+        r"Dialog { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Dialog",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("name", Value::Text("dialog-remove-ai")),
+                ("trigger_label", Value::Message(Key::ExampleDialogOpen)),
+                ("heading", Value::Message(Key::ExampleDialogHeading)),
+                ("description", Value::Message(Key::ExampleDialogDescription)),
+                ("close_label", Value::Message(Key::ExampleDialogClose)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "Paragraph",
+                    props: &[],
+                    children: &[Node::Text(Value::Message(Key::ExampleDialogBody))],
+                },
+                Node::Element {
+                    tag: "div",
+                    attributes: &[("class", Value::Text("nd-example-row"))],
+                    children: &[
+                        Node::Component {
+                            name: "Button",
+                            props: &[
+                                ("variant", Value::Text("outline")),
+                                ("tone", Value::Text("neutral")),
+                                ("label", Value::Message(Key::ExampleDialogCancel)),
+                            ],
+                            children: &[],
+                        },
+                        Node::Component {
+                            name: "Button",
+                            props: &[
+                                ("variant", Value::Text("solid")),
+                                ("tone", Value::Text("danger")),
+                                ("label", Value::Message(Key::ExampleDialogConfirm)),
+                            ],
+                            children: &[],
+                        },
+                    ],
+                },
+            ],
         }],
     ),
 ];

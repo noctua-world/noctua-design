@@ -133,6 +133,12 @@ pub fn Search(
     forget_label: Option<String>,
     /// The name of the dialog's close control. Escape closes the dialog and so does a tap outside, and neither is visible on a touch screen.
     close_label: Option<String>,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
+    /// One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control.
+    ai_note: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -190,6 +196,20 @@ pub fn Search(
                 title: "{clear}",
                 "data-nd-search-clear": "",
                 Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
+            }
+        }
+        // IN THE ROW, so all three presentations draw it once rather than
+        // three times. `.nd-search-field` is a flex row and the input is what
+        // gives up the width, exactly as `Input`'s does.
+        // The assistant's mark, in the room this component reserves for
+        // it. A child in the flow and never a corner: `Badge` translates
+        // its mark onto what it marks, and this may not.
+        if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+            crate::components::AILabel {
+                class: "nd-ai-slot",
+                mark,
+                label: phrase,
+                note: ai_note.clone(),
             }
         }
     };

@@ -149,11 +149,211 @@ pub struct Meta {
     /// which `NOCTUA.md §1` keeps in English along with every other identifier
     /// and doc comment. Reader-facing prose on the page around it is translated.
     pub summary: String,
+
+    /// Where this component reserves room for an `AILabel`, or nothing.
+    ///
+    /// One of [`AI_SLOTS`]. A **name** rather than a flag, because the emitter
+    /// has to know where to put the mark and a validator has to be able to
+    /// refuse a slot this component has no room for.
+    ///
+    /// Setting it grafts the props in [`AI_PROPS`] onto the contract, with one
+    /// shared doc each. Fifty copies of one sentence is forty-nine copies that
+    /// go stale, and the Portuguese half would go stale first.
+    #[serde(default)]
+    pub ai: Option<String>,
+
+    /// Whether the mark this component hosts may be a control.
+    ///
+    /// `true` unless stated. `false` drops `ai_note` from the grafted set, so
+    /// the mark is always a plain `<span>`.
+    ///
+    /// FOR THE HOSTS WHOSE OWN ROOT IS ALREADY INTERACTIVE. A `<button>` inside
+    /// a `<button>` is unreachable in several engines and a `<button>` inside
+    /// an `<a>` is invalid, and a control inside a `role="menuitem"` is a stop
+    /// the menu's own arrow walk cannot reach. Declaring `ai_note` on one of
+    /// those and dropping it on the floor is the defect `props.rs` calls
+    /// accepted, documented and inert.
+    #[serde(default)]
+    pub ai_pressable: Option<bool>,
 }
 
 /// `serde`'s default for a `bool` is `false`, and `variants` is `true`.
 fn yes() -> bool {
     true
+}
+
+/// Where a host reserves room for an `AILabel`. Two, because there are two
+/// mechanisms and not because two is a tidy number.
+///
+/// * `inline` — a DERIVED body, which is one element holding its children, so
+///   the only room it has is the end of the run. The emitter appends the mark
+///   there and no body is written by hand.
+/// * `custom` — a body written in `controls.rs`, which places its own mark at a
+///   `// @ai` marker, because only it knows which of its own regions has room.
+///   The emitter fills the marker, so the fragment is still written once.
+pub const AI_SLOTS: [&str; 2] = ["inline", "custom"];
+
+/// The slug the shared prop documentation is keyed under.
+///
+/// `component.ai.*` rather than any one host's slug, because the sentence
+/// belongs to the mark and not to the fifty things that carry it. No component
+/// may slug to this, and [`check_ai`] refuses one that does.
+pub const AI_SLUG: &str = "ai";
+
+/// The props a host forwards to the `AILabel` it draws, and the one doc each.
+///
+/// ONE DOC, NOT ONE PER HOST. `ai_note` means the same thing on a `TableCell`
+/// as on an `Input`, so the sentence is written once here and
+/// [`derived_messages`] emits one key for it.
+///
+/// The third is grafted only where `[meta] ai_pressable` is not `false`.
+pub const AI_PROPS: [(&str, &str); 3] = [
+    (
+        "ai_mark",
+        "The two letters an assistant's mark draws, in the reader's language. \
+         Setting it is what draws the mark, and `ai_label` has to say what it means.",
+    ),
+    (
+        "ai_label",
+        "What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, \
+         because the letters carry `aria-hidden` and this is what a screen reader reads.",
+    ),
+    (
+        "ai_note",
+        "One sentence about what the assistant did. Setting it makes the mark a control \
+         that opens the sentence, closed by Escape. Without it the mark is not a control.",
+    ),
+];
+
+/// How many of [`AI_PROPS`] this component takes.
+///
+/// Two where the host's own root is already interactive, three otherwise.
+#[must_use]
+pub fn ai_prop_count(meta: &Meta) -> usize {
+    if meta.ai_pressable == Some(false) {
+        2
+    } else {
+        AI_PROPS.len()
+    }
+}
+
+/// Adds the props a host forwards to its `AILabel`.
+///
+/// Grafted into `component.prop` rather than merged at every read, so every
+/// consumer downstream sees them with no change at all: both emitters, the
+/// documentation catalogue, the example interpreter and the TypeScript types.
+///
+/// Inserted BEFORE any `children`, because the reference table renders `prop` in
+/// declaration order and a component's content reads last.
+fn graft_ai(component: &mut Component) {
+    if component.meta.ai.is_none() {
+        return;
+    }
+    let at = component
+        .prop
+        .iter()
+        .position(|(_, prop)| prop.kind == Kind::Children)
+        .unwrap_or(component.prop.len());
+    let taken = ai_prop_count(&component.meta);
+    for (offset, (name, doc)) in AI_PROPS.iter().take(taken).enumerate() {
+        component.prop.shift_insert(
+            at + offset,
+            (*name).to_owned(),
+            Prop {
+                kind: Kind::Text,
+                values: Vec::new(),
+                elements: Vec::new(),
+                // NO GRID. The variant grid draws enum props, so three text
+                // props would draw none of it anyway. Saying so is what stops
+                // the next reader wondering whether it was an oversight.
+                variants: false,
+                specimen: None,
+                default: None,
+                // NO ATTRIBUTE. All three are handed to the `AILabel` this host
+                // renders, and that component writes what the DOM carries. A
+                // `data-nd-*` here would be a second, redundant hook that can
+                // disagree with the first.
+                attribute: None,
+                required: false,
+                doc: (*doc).to_owned(),
+                shared: true,
+            },
+        );
+    }
+}
+
+/// Everything that can be wrong with `[meta] ai`.
+fn check_ai(component: &Component, problems: &mut Vec<Problem>) {
+    if slug(&component.meta.name) == AI_SLUG {
+        problems.push(
+            Problem::whole_file(format!("`{}` slugs to `{AI_SLUG}`", component.meta.name)).fix(
+                "The shared prop documentation is keyed under `component.ai.*`. A component \
+                 with that slug would give the catalogue two answers for one key.",
+            ),
+        );
+    }
+
+    let Some(slot) = &component.meta.ai else {
+        if component.meta.ai_pressable.is_some() {
+            problems.push(
+                Problem::whole_file("`ai_pressable` is set and `ai` is not").fix(
+                    "`ai_pressable` narrows what `[meta] ai` grafts. On a component that \
+                     hosts no mark it decides nothing.",
+                ),
+            );
+        }
+        return;
+    };
+
+    if !AI_SLOTS.contains(&slot.as_str()) {
+        problems.push(
+            Problem::whole_file(format!("`ai = \"{slot}\"` is not a slot the emitter knows"))
+                .fix(format!("One of: {}.", AI_SLOTS.join(", "))),
+        );
+    }
+
+    if component.meta.name == "AILabel" {
+        problems.push(
+            Problem::whole_file("`AILabel` hosts a mark of its own")
+                .fix("A mark inside a mark is a control inside a control."),
+        );
+    }
+
+    // A ROOT THAT IS ALREADY A CONTROL CANNOT HOLD ANOTHER ONE, and the element
+    // is declared, so this is derivable rather than remembered.
+    //
+    // `a_host_that_cannot_be_pressed_takes_no_note` in `props.rs` reads the
+    // emitted React body and cannot catch this: dropping `ai_pressable` drops
+    // the component out of that test's own loop, so the check passed on the
+    // defect it was written for. Four hosts still decide it by hand —
+    // `SearchResult`, `Disclosure` and the two table cells, whose roots are not
+    // controls but whose focus is managed by something that is.
+    if component.meta.ai_pressable != Some(false)
+        && matches!(component.meta.element.as_str(), "button" | "a")
+    {
+        problems.push(
+            Problem::whole_file(format!(
+                "`{}` renders a `<{}>` and hosts a mark that can be pressed",
+                component.meta.name, component.meta.element
+            ))
+            .fix(
+                "Add `ai_pressable = false`. A `<button>` inside a `<button>` is unreachable \
+                 in several engines and a `<button>` inside an `<a>` is invalid, so the note \
+                 would be a prop accepted, documented and dropped.",
+            ),
+        );
+    }
+
+    for (name, _) in AI_PROPS {
+        if component.prop.contains_key(name) {
+            problems.push(
+                Problem::whole_file(format!("`{name}` is declared here and also grafted")).fix(
+                    "`[meta] ai` supplies all of them. A prop of the same name would be \
+                     replaced along with its documentation, and nothing would report it.",
+                ),
+            );
+        }
+    }
 }
 
 /// One prop.
@@ -237,6 +437,15 @@ pub struct Prop {
 
     /// What it is for. Becomes the doc comment in both languages.
     pub doc: String,
+
+    /// Whether this prop's documentation is shared with every other host.
+    ///
+    /// `#[serde(skip)]`, so a contract may not claim it — and with
+    /// `deny_unknown_fields` above, writing `shared = true` in a component file
+    /// is refused by name. [`graft_ai`] is the only thing that sets it, and it
+    /// is what makes [`derived_messages`] emit one key for fifty props.
+    #[serde(skip)]
+    pub shared: bool,
 }
 
 /// The kinds of value a prop can take.
@@ -278,10 +487,32 @@ pub struct A11y {
 /// message derived from this component is named after.
 #[must_use]
 pub fn slug(name: &str) -> String {
+    separate(name, '-')
+}
+
+/// A `PascalCase` name, lowercased, with `sep` between its words.
+///
+/// # A RUN OF CAPITALS IS ONE WORD
+///
+/// This split on every capital, which is right for every name that has no
+/// acronym in it and wrong for the first one that does: `AILabel` came out as
+/// `a-i-label`, a slug, a file name, a message key and a URL all naming
+/// something a reader would never look up. The rule is the ordinary one — a
+/// capital starts a word when the letter before it is lower, or when it is the
+/// last capital of a run and the letter after it is lower.
+///
+/// `CodeBlock` → `code_block`, `TableHeaderCell` → `table_header_cell`,
+/// `AILabel` → `ai_label`, and no name in the catalogue before `AILabel` moves.
+fn separate(name: &str, sep: char) -> String {
+    let chars: Vec<char> = name.chars().collect();
     let mut out = String::with_capacity(name.len() + 2);
-    for (index, ch) in name.char_indices() {
-        if ch.is_ascii_uppercase() && index > 0 {
-            out.push('-');
+    for (index, ch) in chars.iter().enumerate() {
+        let starts_word = index > 0
+            && ch.is_ascii_uppercase()
+            && (!chars[index - 1].is_ascii_uppercase()
+                || chars.get(index + 1).is_some_and(char::is_ascii_lowercase));
+        if starts_word {
+            out.push(sep);
         }
         out.extend(ch.to_lowercase());
     }
@@ -338,6 +569,12 @@ pub fn derived_messages(components: &[Component]) -> Vec<(String, String)> {
         push("guidance".to_owned(), &component.guidance);
         push("a11y-notes".to_owned(), &component.a11y.notes);
         for (prop, spec) in &component.prop {
+            // A SHARED PROP IS ONE KEY, NOT ONE PER HOST. Emitted once below,
+            // under `component.ai.*`. Fifty keys carrying one sentence is fifty
+            // answers to one question, and a translator asked it fifty times.
+            if spec.shared {
+                continue;
+            }
             push(format!("prop.{prop}.doc"), &spec.doc);
         }
         for (state, spec) in &component.state {
@@ -349,6 +586,29 @@ pub fn derived_messages(components: &[Component]) -> Vec<(String, String)> {
             push(format!("key.{name}.action"), action);
         }
     }
+
+    // THE SHARED DOCS, ONCE, AND ONLY WHILE SOMETHING HOSTS A MARK. Guarded on
+    // a host existing so that removing the last one removes the keys, and the
+    // cross-locale check tells the translator rather than leaving three
+    // Portuguese sentences answering nothing.
+    if components
+        .iter()
+        .any(|component| component.meta.ai.is_some())
+    {
+        let most = components
+            .iter()
+            .filter(|component| component.meta.ai.is_some())
+            .map(|component| ai_prop_count(&component.meta))
+            .max()
+            .unwrap_or(0);
+        for (name, doc) in AI_PROPS.iter().take(most) {
+            out.push((
+                format!("component.{AI_SLUG}.prop.{name}.doc"),
+                collapse(doc),
+            ));
+        }
+    }
+
     out
 }
 
@@ -369,7 +629,7 @@ fn collapse(text: &str) -> String {
 /// A file that does not parse, a prop with an unusable name, an `enum` with no
 /// values, a default outside its own value list, or more than one `children`.
 pub fn parse(path: &str, text: &str) -> Result<Component, SpecError> {
-    let component: Component = toml::from_str(text).map_err(|error| {
+    let mut component: Component = toml::from_str(text).map_err(|error| {
         SpecError::new(
             path,
             text.to_owned(),
@@ -415,6 +675,9 @@ pub fn parse(path: &str, text: &str) -> Result<Component, SpecError> {
     }
 
     check_props(&component, &mut problems);
+    // BEFORE THE GRAFT, so a contract that declares one of the three by hand is
+    // reported rather than silently replaced.
+    check_ai(&component, &mut problems);
 
     for (name, state) in &component.state {
         if !state.attribute.starts_with("data-") && !state.attribute.starts_with("aria-") {
@@ -443,6 +706,7 @@ pub fn parse(path: &str, text: &str) -> Result<Component, SpecError> {
     }
 
     if problems.is_empty() {
+        graft_ai(&mut component);
         Ok(component)
     } else {
         Err(SpecError::new(path, text.to_owned(), problems))
@@ -807,16 +1071,11 @@ pub fn load_cases(
 }
 
 /// `CodeBlock` → `code_block`, matching the file it came from.
+///
+/// The same split as [`slug`], and a run of capitals is one word there too.
 #[must_use]
 pub fn file_stem(name: &str) -> String {
-    let mut out = String::with_capacity(name.len() + 2);
-    for (index, ch) in name.char_indices() {
-        if ch.is_ascii_uppercase() && index > 0 {
-            out.push('_');
-        }
-        out.extend(ch.to_lowercase());
-    }
-    out
+    separate(name, '_')
 }
 
 #[cfg(test)]

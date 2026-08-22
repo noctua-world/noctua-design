@@ -12,8 +12,9 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { chevronDown } from "@noctua-world/design-tokens/icons/chevron-down.js";
-export function Disclosure({ summary, name, icon, open, marker, heading, glass, className, children, ...rest }) {
+export function Disclosure({ summary, name, icon, open, marker, heading, aiMark, aiLabel, glass, className, children, ...rest }) {
   const marker_ = marker ?? true;
   const heading_ = heading ?? "none";
   // The summary's own tag: a real heading when this disclosure is a
@@ -41,6 +42,9 @@ export function Disclosure({ summary, name, icon, open, marker, heading, glass, 
         ? h(Icon, { icon })
         : [
             h(tag_, { key: "t", className: "nd-disclosure-text" }, summary),
+            aiMark && aiLabel
+              ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-apart", mark: aiMark, label: aiLabel })
+              : null,
             // See the Dioxus half: named, because the rule that turns
             // it used to ask for the last glyph in the summary.
             marker_

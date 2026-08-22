@@ -12,7 +12,7 @@ use crate::tree::{Node, Value};
 use crate::trees::Tree;
 use crate::trees::menu::menu_button;
 
-/// Every `MenuItem` example. 4 of them.
+/// Every `MenuItem` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"MenuItem { icon, label, action: "…", value: "…" }"#,
@@ -155,6 +155,47 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                                 ("target", Value::Text("_blank")),
                                 ("icon", Value::Text("external-link")),
                                 ("label", Value::Message(Key::ExampleMenuRepo)),
+                            ],
+                            children: &[],
+                        },
+                    ],
+                },
+            ],
+        }],
+    ),
+    (
+        r"MenuItem { ai_mark, ai_label }",
+        &[Node::Element {
+            tag: "div",
+            attributes: &[],
+            children: &[
+                menu_button!("example-item-icon-ai"),
+                Node::Component {
+                    name: "Menu",
+                    props: &[
+                        ("name", Value::Text("example-item-icon-ai")),
+                        ("label", Value::Message(Key::ExampleMenuLabel)),
+                    ],
+                    children: &[
+                        Node::Component {
+                            name: "MenuItem",
+                            props: &[
+                                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                                ("ai_label", Value::Message(Key::ExampleAiName)),
+                                ("icon", Value::Text("copy")),
+                                ("action", Value::Text("duplicate")),
+                                ("value", Value::Text("invoice-43")),
+                                ("label", Value::Message(Key::ExampleMenuDuplicate)),
+                            ],
+                            children: &[],
+                        },
+                        Node::Component {
+                            name: "MenuItem",
+                            props: &[
+                                ("icon", Value::Text("download")),
+                                ("action", Value::Text("archive")),
+                                ("value", Value::Text("invoice-43")),
+                                ("label", Value::Message(Key::ExampleMenuArchive)),
                             ],
                             children: &[],
                         },

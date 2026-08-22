@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Paragraph` example. 5 of them.
+/// Every `Paragraph` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"Paragraph { … }",
@@ -62,6 +62,18 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     children: &[Node::Text(Value::Message(Key::ExampleListLong))],
                 },
             ],
+        }],
+    ),
+    (
+        r"Paragraph { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Paragraph",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+            ],
+            children: &[Node::Text(Value::Message(Key::ExampleListLong))],
         }],
     ),
 ];

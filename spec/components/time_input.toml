@@ -14,6 +14,7 @@ class = "nd-time-input"
 # must not render a nameless control. `DateInput` says the same.
 specimen = "<span class=\"nd-time-input-figure\"><span class=\"nd-identifier\">09</span><span class=\"nd-identifier\">30</span></span>"
 summary = "Asks for one time of day, in separate boxes, on a twenty-four hour clock."
+ai = "custom"
 
 [prop.name]
 type = "text"

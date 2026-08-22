@@ -11,7 +11,8 @@
 
 import { createElement as h } from "react";
 
-export function TableCell({ align, tone, wrap, span, rows, label, column, sortValue, aggregate, aggregateOver, className, children, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function TableCell({ align, tone, wrap, span, rows, label, column, sortValue, aggregate, aggregateOver, aiMark, aiLabel, className, children, ...rest }) {
   const align_ = align ?? "start";
   const wrap_ = wrap ?? "wrap";
   const aggregate_ = aggregate ?? "none";
@@ -36,6 +37,13 @@ export function TableCell({ align, tone, wrap, span, rows, label, column, sortVa
     // reader that already has the column from its heading.
     label ? h("span", { key: "l", className: "nd-table-label", "aria-hidden": "true" }, label) : null,
     // See the Dioxus half: a `<div>`, so any component may live in a cell.
-    h("div", { key: "v", className: "nd-table-value" }, children),
+    h(
+      "div",
+      { key: "v", className: "nd-table-value" },
+      children,
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-apart", mark: aiMark, label: aiLabel })
+        : null,
+    ),
   );
 }

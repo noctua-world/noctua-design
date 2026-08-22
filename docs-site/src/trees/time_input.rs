@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `TimeInput` example. 4 of them.
+/// Every `TimeInput` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"TimeInput { name, legend, hour_label, minute_label, value, hint, size }",
@@ -145,6 +145,44 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         ("pm_label", Value::Message(Key::ExampleInputPm)),
                         ("disabled", Value::Bool(true)),
                         ("size", Value::Text("large")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        r"TimeInput { ai_mark, ai_label, ai_note }",
+        &[Node::Element {
+            tag: "form",
+            attributes: &[
+                ("class", Value::Text("nd-example-form")),
+                ("method", Value::Text("get")),
+                ("action", Value::Text("#")),
+                ("novalidate", Value::Bool(true)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "TimeInput",
+                    props: &[
+                        ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                        ("ai_label", Value::Message(Key::ExampleAiName)),
+                        ("ai_note", Value::Message(Key::ExampleAiNote)),
+                        ("name", Value::Text("starts-ai")),
+                        ("legend", Value::Message(Key::ExampleInputTimeLegend)),
+                        ("hour_label", Value::Message(Key::ExampleInputHour)),
+                        ("minute_label", Value::Message(Key::ExampleInputMinute)),
+                        ("value", Value::Text("09:30")),
+                        ("hint", Value::Message(Key::ExampleInputTimeHint)),
+                        ("size", Value::Text("medium")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Button",
+                    props: &[
+                        ("submit", Value::Text("submit")),
+                        ("label", Value::Message(Key::ExampleInputSend)),
                     ],
                     children: &[],
                 },

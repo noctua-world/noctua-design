@@ -1,0 +1,88 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = "Use an AI label beside a value an assistant wrote or changed. Give it a `note` when there is one sentence worth reading about what the assistant did. To explain a word rather than mark a value, use `Info`."
+
+[meta]
+name = "AILabel"
+element = "span"
+class = "nd-ai-label"
+summary = "Mark a value an assistant wrote, and open one sentence about what it did."
+
+# THREE PROPS THIS DOES NOT HAVE, AND EACH ABSENCE IS LOAD-BEARING.
+#
+# NO `name`. `Info` needs one because it derives two ids, for `aria-controls`
+# and for `aria-labelledby`. There is no heading here and `aria-expanded` on the
+# control is the whole disclosure, so there are no ids and nothing to name them
+# after. That is also what lets a host forward three props rather than four, and
+# it removes the only place a caller's string would land in an attribute that
+# another attribute points at.
+#
+# NO `children`. The note is text, so a caller cannot put markup inside it. A
+# note that wants a `Link` in it is `Info`, which already exists.
+#
+# NO WORD FOR WHAT THE ASSISTANT DID. Four values would draw the same two
+# letters, and building one sentence out of those letters and that word is what
+# `NOCTUA.md §9.9` rule 1 refuses. `label` says it, in one string, in the
+# reader's own language.
+
+[prop.mark]
+type = "text"
+required = true
+doc = "The two letters the mark draws, in the reader's language. `AI` in English and `IA` in Portuguese, so it arrives as a message rather than a literal. **Required**: there is nothing to draw without it."
+
+[prop.label]
+type = "text"
+required = true
+doc = "What the mark means, as a whole phrase, such as *Written by the assistant*. **Required**, because the letters carry `aria-hidden` and this is what a screen reader reads instead."
+
+[prop.note]
+type = "text"
+doc = "One sentence about what the assistant did. **Setting it is what makes the mark a control.** Without it the mark is a `<span>` with no role and no tab stop."
+
+[prop.close_label]
+type = "text"
+attribute = "data-nd-close-label"
+doc = "The name of the control that closes the note. Wanted in practice, because Escape and a press outside also close it and neither is discoverable on a touch screen."
+
+[prop.placement]
+type = "enum"
+values = ["auto", "start", "end"]
+default = "auto"
+attribute = "data-nd-placement"
+# Where the NOTE opens, and a still picture has no open note in it. The three
+# values drew the same closed mark three times, which is the reason `Info`
+# gives for the same line.
+variants = false
+doc = "Where the note opens. `auto` measures the room, flipping above and hanging from whichever edge fits. `start` and `end` pin the note's leading or trailing edge, for a mark at the edge of a table."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "small"
+attribute = "data-nd-size"
+doc = "The size of the mark, matching `Tag` step for step so a mark beside a tag lines up. `small` by default, because this sits inside another component and must not outweigh it."
+
+[prop.variant]
+type = "enum"
+values = ["soft", "solid", "outline"]
+default = "soft"
+attribute = "data-nd-variant"
+doc = "How strongly the mark is painted. `soft` is a tinted field, `solid` is the tone at full strength, and `outline` is a hairline with no fill. `soft` by default."
+
+[prop.tone]
+type = "text"
+attribute = "data-nd-tone"
+doc = "Which of the colour system's tones the mark is painted from. A name no family declares fails the build. Without it the mark is quiet, which is what a mark beside every value in a column has to be."
+
+[state.open]
+attribute = "aria-expanded"
+doc = "Whether the note is showing. Written on the control, which is the element a reader presses and the element a screen reader reads the state of."
+
+[a11y]
+needs_name = true
+notes = """The letters carry `aria-hidden` and `label` is a hidden text node, so a screen reader reads the phrase rather than two letters. With a `note` the mark is a `<button aria-expanded>` beside a `role="note"`."""
+
+[keyboard]
+"Enter or Space" = "Opens the note, and closes it again. Only on a mark that was given a `note`."
+"Escape" = "Closes the note and puts the focus back on the mark that opened it."
+"Tab" = "Walks into the note and out of it. Nothing is trapped, and leaving the note closes it."

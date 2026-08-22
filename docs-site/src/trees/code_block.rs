@@ -89,7 +89,7 @@ pub(crate) const SAMPLE_TALL: &str = r"pub enum Role {
     Invalid,
 }";
 
-/// Every `CodeBlock` example. 11 of them.
+/// Every `CodeBlock` example. 12 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"CodeBlock { code: "…", language: "rust" }"#,
@@ -300,6 +300,20 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     ],
                 }],
             }],
+        }],
+    ),
+    (
+        r"CodeBlock { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "CodeBlock",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("code", Value::Data(SAMPLE_RUST)),
+                ("language", Value::Text("rust")),
+            ],
+            children: &[],
         }],
     ),
 ];

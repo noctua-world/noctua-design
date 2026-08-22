@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
-/// Every `Meter` example. 5 of them.
+/// Every `Meter` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"Meter { name, label, value, max, unit, value_label }",
@@ -163,6 +163,24 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 ("hide_label", Value::Bool(true)),
                 ("show_value", Value::Bool(false)),
                 ("size", Value::Text("small")),
+                ("value_label", Value::Message(Key::ExampleMeterStorageValue)),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        r"Meter { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Meter",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("name", Value::Text("storage-ai")),
+                ("label", Value::Message(Key::ExampleAiSubject)),
+                ("value", Value::Text("12.5")),
+                ("max", Value::Text("50")),
+                ("unit", Value::Text("GB")),
                 ("value_label", Value::Message(Key::ExampleMeterStorageValue)),
             ],
             children: &[],

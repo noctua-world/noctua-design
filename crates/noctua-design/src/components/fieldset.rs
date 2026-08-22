@@ -36,6 +36,12 @@ pub fn Fieldset(
     /// Disables every control inside it at once. Off by default. `<fieldset disabled>` is the browser's own cascade, so nothing here walks the children and nothing can miss one.
     #[props(default = false)]
     disabled: bool,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
+    /// One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control.
+    ai_note: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -80,6 +86,20 @@ pub fn Fieldset(
                     h1 { class: "nd-fieldset-heading", "{question}" }
                 } else {
                     "{question}"
+                }
+                // IN THE LEGEND, after the question it marks. A `<legend>` has
+                // no activation behaviour of its own, so the control form is
+                // safe here in a way it is not inside a `<label for>`.
+                // The assistant's mark, in the room this component reserves for
+                // it. A child in the flow and never a corner: `Badge` translates
+                // its mark onto what it marks, and this may not.
+                if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                    crate::components::AILabel {
+                        class: "nd-ai-slot nd-ai-slot-apart",
+                        mark,
+                        label: phrase,
+                        note: ai_note.clone(),
+                    }
                 }
             }
             if let Some(hint) = hint {

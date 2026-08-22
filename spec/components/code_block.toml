@@ -10,6 +10,7 @@ name = "CodeBlock"
 element = "figure"
 class = "nd-codeblock"
 summary = "Show a block of highlighted code, in any of thirty-four languages."
+ai = "custom"
 
 [prop.code]
 type = "text"

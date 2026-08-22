@@ -14,8 +14,9 @@ import { createElement as h } from "react";
 import { Tag } from "./tag.js";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { chevronDown } from "@noctua-world/design-tokens/icons/chevron-down.js";
-export function TreeItem({ label, value, href, icon, iconExpanded, badge, expanded, branch, selected, disabled, current, className, children, ...rest }) {
+export function TreeItem({ label, value, href, icon, iconExpanded, badge, expanded, branch, selected, disabled, current, aiMark, aiLabel, className, children, ...rest }) {
   const root = ["nd-tree-item", className].filter(Boolean).join(" ");
 
   // See the Dioxus half for every decision here.
@@ -81,6 +82,9 @@ export function TreeItem({ label, value, href, icon, iconExpanded, badge, expand
             { key: "b", className: "nd-tree-body", "aria-current": current ? "page" : undefined },
             ...row,
           ),
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel })
+        : null,
     ),
     h("ul", { key: "g", className: "nd-tree-group", "data-nd-tree-group": "" }, children),
   );

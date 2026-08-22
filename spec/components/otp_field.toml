@@ -11,6 +11,7 @@ name = "OtpField"
 element = "fieldset"
 class = "nd-otp-field"
 summary = "Ask for one short code, in a row of boxes that fill and move on as it is typed."
+ai = "custom"
 
 # WHY THE BOXES ALL POST UNDER ONE NAME.
 #

@@ -16,13 +16,14 @@
 
 use dioxus::prelude::*;
 use noctua_design::components::{
-    Abbr, Avatar, AvatarGroup, AvatarGroupOverlap, AvatarGroupShape, AvatarGroupSize, AvatarShape,
-    AvatarSize, AvatarTone, Badge, BadgeOverlap, BadgePlacement, Blockquote, BlockquoteTone,
-    Button, ButtonGroup, ButtonGroupJustify, ButtonGroupOrientation, ButtonJustify, ButtonShape,
-    ButtonSize, ButtonSubmit, ButtonTone, ButtonVariant, Carousel, CarouselOrientation,
-    CarouselSlide, CarouselSnap, Checkbox, CheckboxSize, Code, CodeBlock, CodeBlockTheme, CodeTone,
-    ColorPicker, ColorPickerShape, ColorPickerSize, DateInput, DateInputOrder, DateInputSize, Del,
-    Dialog, DialogSize, Disclosure, DisclosureHeading, Divider, DividerOrientation, DividerSpacing,
+    AILabel, AILabelPlacement, AILabelSize, AILabelVariant, Abbr, Avatar, AvatarGroup,
+    AvatarGroupOverlap, AvatarGroupShape, AvatarGroupSize, AvatarShape, AvatarSize, AvatarTone,
+    Badge, BadgeOverlap, BadgePlacement, Blockquote, BlockquoteTone, Button, ButtonGroup,
+    ButtonGroupJustify, ButtonGroupOrientation, ButtonJustify, ButtonShape, ButtonSize,
+    ButtonSubmit, ButtonTone, ButtonVariant, Carousel, CarouselOrientation, CarouselSlide,
+    CarouselSnap, Checkbox, CheckboxSize, Code, CodeBlock, CodeBlockTheme, CodeTone, ColorPicker,
+    ColorPickerShape, ColorPickerSize, DateInput, DateInputOrder, DateInputSize, Del, Dialog,
+    DialogSize, Disclosure, DisclosureHeading, Divider, DividerOrientation, DividerSpacing,
     DividerWeight, Em, ErrorSummary, ErrorSummaryItem, Field, FieldKind, FieldSize, Fieldset,
     FileInput, FileInputSize, Heading, HeadingLevel, HeadingSize, HeadingTone, Icon, IconSize,
     Image, ImageFit, ImageLoading, ImageRatio, Info, InfoPlacement, Input, InputKind, InputSize,
@@ -61,6 +62,7 @@ pub(crate) fn component(
 ) -> Element {
     match name {
         "Abbr" => abbr(props, children, scope),
+        "AILabel" => ai_label(props, children, scope),
         "Avatar" => avatar(props, children, scope),
         "AvatarGroup" => avatar_group(props, children, scope),
         "Badge" => badge(props, children, scope),
@@ -167,6 +169,57 @@ fn abbr(
             title: title_,
             class: class_,
             {render(children, scope)}
+        }
+    }
+}
+
+/// `AILabel`, from a tree.
+fn ai_label(
+    props: &'static [(&'static str, Value)],
+    _children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let mark_ = scope
+        .find(props, "mark")
+        .expect("AILabel.mark is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("AILabel.label is required and this tree does not set it");
+    let note_ = scope.find(props, "note");
+    let close_label_ = scope.find(props, "close_label");
+    let placement_ = scope
+        .pick(
+            props,
+            "placement",
+            &AILabelPlacement::ALL,
+            AILabelPlacement::as_str,
+        )
+        .unwrap_or_default();
+    let size_ = scope
+        .pick(props, "size", &AILabelSize::ALL, AILabelSize::as_str)
+        .unwrap_or_default();
+    let variant_ = scope
+        .pick(
+            props,
+            "variant",
+            &AILabelVariant::ALL,
+            AILabelVariant::as_str,
+        )
+        .unwrap_or_default();
+    let tone_ = scope.find(props, "tone");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        AILabel {
+            mark: mark_,
+            label: label_,
+            note: note_,
+            close_label: close_label_,
+            placement: placement_,
+            size: size_,
+            variant: variant_,
+            tone: tone_,
+            class: class_,
         }
     }
 }
@@ -319,6 +372,9 @@ fn blockquote(
         .pick(props, "tone", &BlockquoteTone::ALL, BlockquoteTone::as_str)
         .unwrap_or_default();
     let attribution_ = scope.find(props, "attribution");
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
     let class_ = scope.find(props, "class").unwrap_or_default();
 
@@ -327,6 +383,9 @@ fn blockquote(
             cite: cite_,
             tone: tone_,
             attribution: attribution_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             glass: glass_,
             class: class_,
             {render(children, scope)}
@@ -386,6 +445,8 @@ fn button(
     let name_ = scope.find(props, "name");
     let value_ = scope.find(props, "value");
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -418,6 +479,8 @@ fn button(
             name: name_,
             value: value_,
             glass: glass_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
             class: class_,
         }
     }
@@ -466,6 +529,10 @@ fn button_group(
 }
 
 /// `Carousel`, from a tree.
+#[allow(
+    clippy::too_many_lines,
+    reason = "one line per declared prop, and the prop set is the contract"
+)]
 fn carousel(
     props: &'static [(&'static str, Value)],
     children: &'static [Node],
@@ -504,6 +571,9 @@ fn carousel(
     let pause_label_ = scope.find(props, "pause_label");
     let play_label_ = scope.find(props, "play_label");
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -526,6 +596,9 @@ fn carousel(
             pause_label: pause_label_,
             play_label: play_label_,
             glass: glass_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -576,6 +649,9 @@ fn checkbox(
     let divider_ = scope.find(props, "divider");
     let exclusive_ = scope.flag(props, "exclusive").unwrap_or(false);
     let reveal_ = scope.flag(props, "reveal").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -592,6 +668,9 @@ fn checkbox(
             divider: divider_,
             exclusive: exclusive_,
             reveal: reveal_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -645,6 +724,9 @@ fn code_block(
     let copy_ = scope.find(props, "copy");
     let copied_ = scope.find(props, "copied");
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -666,6 +748,9 @@ fn code_block(
             copy: copy_,
             copied: copied_,
             glass: glass_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -740,6 +825,9 @@ fn color_picker(
     let close_label_ = scope.find(props, "close_label");
     let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
     let required_ = scope.flag(props, "required").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -783,6 +871,9 @@ fn color_picker(
             close_label: close_label_,
             disabled: disabled_,
             required: required_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -842,6 +933,9 @@ fn date_input(
     let min_label_ = scope.find(props, "min_label");
     let max_label_ = scope.find(props, "max_label");
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -876,6 +970,9 @@ fn date_input(
             min_label: min_label_,
             max_label: max_label_,
             glass: glass_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -925,6 +1022,9 @@ fn dialog(
         .unwrap_or_default();
     let dismissible_ = scope.flag(props, "dismissible").unwrap_or(true);
     let close_label_ = scope.find(props, "close_label");
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -938,6 +1038,9 @@ fn dialog(
             size: size_,
             dismissible: dismissible_,
             close_label: close_label_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -965,6 +1068,8 @@ fn disclosure(
             DisclosureHeading::as_str,
         )
         .unwrap_or_default();
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
     let class_ = scope.find(props, "class").unwrap_or_default();
 
@@ -976,6 +1081,8 @@ fn disclosure(
             open: open_,
             marker: marker_,
             heading: heading_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
             glass: glass_,
             class: class_,
             {render(children, scope)}
@@ -1154,6 +1261,9 @@ fn fieldset(
     let heading_ = scope.flag(props, "heading").unwrap_or(false);
     let inline_ = scope.flag(props, "inline").unwrap_or(false);
     let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -1166,6 +1276,9 @@ fn fieldset(
             heading: heading_,
             inline: inline_,
             disabled: disabled_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -1214,6 +1327,9 @@ fn file_input(
         .pick(props, "size", &FileInputSize::ALL, FileInputSize::as_str)
         .unwrap_or_default();
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -1242,6 +1358,9 @@ fn file_input(
             disabled: disabled_,
             size: size_,
             glass: glass_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -1263,6 +1382,9 @@ fn heading(
         .pick(props, "tone", &HeadingTone::ALL, HeadingTone::as_str)
         .unwrap_or_default();
     let balance_ = scope.flag(props, "balance").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -1271,6 +1393,9 @@ fn heading(
             size: size_,
             tone: tone_,
             balance: balance_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -1325,6 +1450,9 @@ fn image(
     let rounded_ = scope.flag(props, "rounded").unwrap_or(false);
     let width_ = scope.find(props, "width");
     let height_ = scope.find(props, "height");
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -1338,6 +1466,9 @@ fn image(
             rounded: rounded_,
             width: width_,
             height: height_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -1424,6 +1555,9 @@ fn input(
     let pattern_ = scope.find(props, "pattern");
     let spellcheck_ = scope.flag(props, "spellcheck").unwrap_or(false);
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -1454,6 +1588,9 @@ fn input(
             pattern: pattern_,
             spellcheck: spellcheck_,
             glass: glass_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -1520,6 +1657,8 @@ fn label(
     let required_ = scope.flag(props, "required").unwrap_or(false);
     let required_label_ = scope.find(props, "required_label");
     let optional_label_ = scope.find(props, "optional_label");
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -1531,6 +1670,8 @@ fn label(
             required: required_,
             required_label: required_label_,
             optional_label: optional_label_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
             class: class_,
         }
     }
@@ -1724,6 +1865,8 @@ fn link(
     let tone_ = scope
         .pick(props, "tone", &LinkTone::ALL, LinkTone::as_str)
         .unwrap_or_default();
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -1732,6 +1875,8 @@ fn link(
             external: external_,
             rel: rel_,
             tone: tone_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
             class: class_,
             {render(children, scope)}
         }
@@ -1775,11 +1920,17 @@ fn list_item(
     scope: Scope,
 ) -> Element {
     let term_ = scope.find(props, "term");
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
         ListItem {
             term: term_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -1853,6 +2004,8 @@ fn menu_item(
     let href_ = scope.find(props, "href");
     let rel_ = scope.find(props, "rel");
     let target_ = scope.find(props, "target");
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -1867,6 +2020,8 @@ fn menu_item(
             href: href_,
             rel: rel_,
             target: target_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
             class: class_,
         }
     }
@@ -1885,6 +2040,9 @@ fn message_bar(
     let live_ = scope.pick(props, "live", &MessageBarLive::ALL, MessageBarLive::as_str);
     let dismissible_ = scope.flag(props, "dismissible").unwrap_or(false);
     let dismiss_label_ = scope.find(props, "dismiss_label");
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -1896,6 +2054,9 @@ fn message_bar(
             live: live_,
             dismissible: dismissible_,
             dismiss_label: dismiss_label_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -1930,6 +2091,9 @@ fn meter(
         .unwrap_or_default();
     let hide_label_ = scope.flag(props, "hide_label").unwrap_or(false);
     let show_value_ = scope.flag(props, "show_value").unwrap_or(true);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -1948,6 +2112,9 @@ fn meter(
             size: size_,
             hide_label: hide_label_,
             show_value: show_value_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -2007,6 +2174,9 @@ fn number_input(
         )
         .unwrap_or_default();
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -2037,6 +2207,9 @@ fn number_input(
             readonly: readonly_,
             size: size_,
             glass: glass_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -2074,6 +2247,9 @@ fn otp_field(
         .pick(props, "size", &OtpFieldSize::ALL, OtpFieldSize::as_str)
         .unwrap_or_default();
     let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -2092,6 +2268,9 @@ fn otp_field(
             required_label: required_label_,
             size: size_,
             disabled: disabled_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -2169,12 +2348,18 @@ fn paragraph(
     let tone_ = scope
         .pick(props, "tone", &ParagraphTone::ALL, ParagraphTone::as_str)
         .unwrap_or_default();
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
         Paragraph {
             size: size_,
             tone: tone_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -2205,6 +2390,9 @@ fn popover(
         .unwrap_or_default();
     let dismissible_ = scope.flag(props, "dismissible").unwrap_or(true);
     let close_label_ = scope.find(props, "close_label");
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -2216,6 +2404,9 @@ fn popover(
             placement: placement_,
             dismissible: dismissible_,
             close_label: close_label_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -2243,6 +2434,9 @@ fn progress(
         .pick(props, "size", &ProgressSize::ALL, ProgressSize::as_str)
         .unwrap_or_default();
     let hide_label_ = scope.flag(props, "hide_label").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -2256,6 +2450,9 @@ fn progress(
             tone: tone_,
             size: size_,
             hide_label: hide_label_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -2306,6 +2503,9 @@ fn radio(
     let hide_label_ = scope.flag(props, "hide_label").unwrap_or(false);
     let divider_ = scope.find(props, "divider");
     let reveal_ = scope.flag(props, "reveal").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -2321,6 +2521,9 @@ fn radio(
             hide_label: hide_label_,
             divider: divider_,
             reveal: reveal_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -2353,6 +2556,9 @@ fn rating(
     let required_ = scope.flag(props, "required").unwrap_or(false);
     let required_label_ = scope.find(props, "required_label");
     let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -2371,6 +2577,9 @@ fn rating(
             required: required_,
             required_label: required_label_,
             disabled: disabled_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -2425,6 +2634,9 @@ fn search(
     let recent_label_ = scope.find(props, "recent_label");
     let forget_label_ = scope.find(props, "forget_label");
     let close_label_ = scope.find(props, "close_label");
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -2455,6 +2667,9 @@ fn search(
             recent_label: recent_label_,
             forget_label: forget_label_,
             close_label: close_label_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -2497,6 +2712,8 @@ fn search_result(
     let badge_ = scope.find(props, "badge");
     let keywords_ = scope.find(props, "keywords");
     let current_ = scope.flag(props, "current").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -2507,6 +2724,8 @@ fn search_result(
             badge: badge_,
             keywords: keywords_,
             current: current_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
             class: class_,
         }
     }
@@ -2594,6 +2813,8 @@ fn segmented_item(
     let icon_ = scope.icon(props, "icon");
     let hide_label_ = scope.flag(props, "hide_label").unwrap_or(false);
     let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
     let class_ = scope.find(props, "class").unwrap_or_default();
 
@@ -2606,6 +2827,8 @@ fn segmented_item(
             icon: icon_,
             hide_label: hide_label_,
             disabled: disabled_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
             glass: glass_,
             class: class_,
             {render(children, scope)}
@@ -2614,6 +2837,10 @@ fn segmented_item(
 }
 
 /// `Select`, from a tree.
+#[allow(
+    clippy::too_many_lines,
+    reason = "one line per declared prop, and the prop set is the contract"
+)]
 fn select(
     props: &'static [(&'static str, Value)],
     children: &'static [Node],
@@ -2645,6 +2872,9 @@ fn select(
     let create_label_ = scope.find(props, "create_label");
     let clear_label_ = scope.find(props, "clear_label");
     let selected_label_ = scope.find(props, "selected_label");
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -2669,6 +2899,9 @@ fn select(
             create_label: create_label_,
             clear_label: clear_label_,
             selected_label: selected_label_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -2731,6 +2964,10 @@ fn select_option(
 }
 
 /// `Slider`, from a tree.
+#[allow(
+    clippy::too_many_lines,
+    reason = "one line per declared prop, and the prop set is the contract"
+)]
 fn slider(
     props: &'static [(&'static str, Value)],
     _children: &'static [Node],
@@ -2764,6 +3001,9 @@ fn slider(
         .pick(props, "tone", &SliderTone::ALL, SliderTone::as_str)
         .unwrap_or_default();
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -2788,6 +3028,9 @@ fn slider(
             size: size_,
             tone: tone_,
             glass: glass_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -2859,6 +3102,8 @@ fn switch(
         .unwrap_or_default();
     let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -2872,6 +3117,8 @@ fn switch(
             size: size_,
             disabled: disabled_,
             glass: glass_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
             class: class_,
         }
     }
@@ -2896,6 +3143,8 @@ fn tab(
     let count_ = scope.find(props, "count");
     let selected_ = scope.flag(props, "selected").unwrap_or(false);
     let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -2907,6 +3156,8 @@ fn tab(
             count: count_,
             selected: selected_,
             disabled: disabled_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
             class: class_,
         }
     }
@@ -2998,6 +3249,9 @@ fn table(
     let copy_label_ = scope.find(props, "copy_label");
     let copied_label_ = scope.find(props, "copied_label");
     let summary_label_ = scope.find(props, "summary_label");
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -3040,6 +3294,9 @@ fn table(
             copy_label: copy_label_,
             copied_label: copied_label_,
             summary_label: summary_label_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -3080,6 +3337,8 @@ fn table_cell(
             TableCellAggregateOver::as_str,
         )
         .unwrap_or_default();
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -3094,6 +3353,8 @@ fn table_cell(
             sort_value: sort_value_,
             aggregate: aggregate_,
             aggregate_over: aggregate_over_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
             class: class_,
             {render(children, scope)}
         }
@@ -3201,6 +3462,8 @@ fn table_header_cell(
             TableHeaderCellSort::as_str,
         )
         .unwrap_or_default();
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -3213,6 +3476,8 @@ fn table_header_cell(
             span: span_,
             rows: rows_,
             sort: sort_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
             class: class_,
             {render(children, scope)}
         }
@@ -3392,6 +3657,9 @@ fn tag(
     let remove_name_ = scope.find(props, "remove_name");
     let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -3411,6 +3679,9 @@ fn tag(
             remove_name: remove_name_,
             disabled: disabled_,
             glass: glass_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -3461,6 +3732,9 @@ fn tag_picker(
     let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
     let required_ = scope.flag(props, "required").unwrap_or(false);
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -3492,6 +3766,9 @@ fn tag_picker(
             disabled: disabled_,
             required: required_,
             glass: glass_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -3514,6 +3791,9 @@ fn text(
         .pick(props, "tone", &TextTone::ALL, TextTone::as_str)
         .unwrap_or_default();
     let numeric_ = scope.flag(props, "numeric").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -3522,6 +3802,9 @@ fn text(
             weight: weight_,
             tone: tone_,
             numeric: numeric_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -3529,6 +3812,10 @@ fn text(
 }
 
 /// `Textarea`, from a tree.
+#[allow(
+    clippy::too_many_lines,
+    reason = "one line per declared prop, and the prop set is the contract"
+)]
 fn textarea(
     props: &'static [(&'static str, Value)],
     _children: &'static [Node],
@@ -3567,6 +3854,9 @@ fn textarea(
         .pick(props, "size", &TextareaSize::ALL, TextareaSize::as_str)
         .unwrap_or_default();
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -3591,6 +3881,9 @@ fn textarea(
             spellcheck: spellcheck_,
             size: size_,
             glass: glass_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -3662,6 +3955,9 @@ fn time_input(
         .pick(props, "size", &TimeInputSize::ALL, TimeInputSize::as_str)
         .unwrap_or_default();
     let glass_ = scope.flag(props, "glass").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -3692,6 +3988,9 @@ fn time_input(
             pad: pad_,
             size: size_,
             glass: glass_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
         }
     }
@@ -3721,6 +4020,9 @@ fn toast(
         )
         .unwrap_or_default();
     let live_ = scope.pick(props, "live", &ToastLive::ALL, ToastLive::as_str);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -3734,6 +4036,9 @@ fn toast(
             dismiss_label: dismiss_label_,
             placement: placement_,
             live: live_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }
@@ -3912,6 +4217,8 @@ fn tree_item(
     let selected_ = scope.flag(props, "selected").unwrap_or(false);
     let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
     let current_ = scope.flag(props, "current").unwrap_or(false);
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
@@ -3927,6 +4234,8 @@ fn tree_item(
             selected: selected_,
             disabled: disabled_,
             current: current_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
             class: class_,
             {render(children, scope)}
         }
@@ -3943,12 +4252,18 @@ fn truncate(
         .pick(props, "lines", &TruncateLines::ALL, TruncateLines::as_str)
         .unwrap_or_default();
     let title_ = scope.find(props, "title");
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
         Truncate {
             lines: lines_,
             title: title_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
             class: class_,
             {render(children, scope)}
         }

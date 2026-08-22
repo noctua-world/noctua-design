@@ -462,6 +462,15 @@ const WORDS: [&str; 3] = ["Aa", "Bbbb", "Cc"];
 )]
 fn itself(component: &Component, prop_name: &str, value: &str, caption: &str) -> Option<Drawn> {
     let drawn = match component.meta.name.as_str() {
+        // THE LETTERS ARE A MESSAGE, NOT THE COMPONENT'S NAME. Every other
+        // required text prop falls back to the name of the component, which
+        // here would draw `AILabel` inside a box sized for two glyphs, in
+        // every cell of both grids. `Badge` names the same exception for the
+        // same reason: a required prop the reader actually SEES is filled from
+        // the catalogue.
+        "AILabel" => Drawn::names()
+            .prop("mark", message("ExampleAiMark"))
+            .prop("label", message("ExampleAiName")),
         "Avatar" => Drawn::names().prop("initials", data("NA")),
         // AND ITS MEMBERS ARE LIST ITEMS. The group is a `<ul>` and its overlap
         // is `li + li { margin-inline-start }`, so three bare avatars matched

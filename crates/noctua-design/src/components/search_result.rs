@@ -27,6 +27,10 @@ pub fn SearchResult(
     /// Whether this result is the page the reader is already on. It draws a mark and writes `aria-current`, so the reader's own position is announced and not only shown.
     #[props(default = false)]
     current: bool,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -46,6 +50,19 @@ pub fn SearchResult(
                 span { class: "nd-search-result-label", "data-nd-search-label": "", "{label}" }
                 if let Some(badge) = badge {
                     span { class: "nd-search-result-badge", "{badge}" }
+                }
+                // NEVER A CONTROL. An enhanced row is a `role="option"` driven
+                // by `aria-activedescendant`, so focus never leaves the box and
+                // a control in a row can never receive it.
+                // The assistant's mark, in the room this component reserves for
+                // it. A child in the flow and never a corner: `Badge` translates
+                // its mark onto what it marks, and this may not.
+                if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                    crate::components::AILabel {
+                        class: "nd-ai-slot",
+                        mark,
+                        label: phrase,
+                    }
                 }
                 if let Some(detail) = detail {
                     span { class: "nd-search-result-detail", "{detail}" }

@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
-/// Every `Text` example. 5 of them.
+/// Every `Text` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"Every size",
@@ -104,6 +104,31 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 ("tone", Value::Text("muted")),
             ],
             children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+        }],
+    ),
+    (
+        r"Text { ai_mark, ai_label, ai_note }",
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-stack"))],
+            // Read from the contract, not listed: a fifth step added to
+            // `spec/components/text.toml` draws itself here.
+            children: &[Node::Each {
+                over: Each::Values {
+                    component: "Text",
+                    prop: "size",
+                },
+                body: &[Node::Component {
+                    name: "Text",
+                    props: &[
+                        ("size", Value::Bound(0)),
+                        ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                        ("ai_label", Value::Message(Key::ExampleAiName)),
+                        ("ai_note", Value::Message(Key::ExampleAiNote)),
+                    ],
+                    children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+                }],
+            }],
         }],
     ),
 ];

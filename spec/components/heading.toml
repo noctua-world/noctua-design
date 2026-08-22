@@ -9,6 +9,7 @@ name = "Heading"
 element = "h2"
 class = "nd-heading"
 summary = "Set a heading's outline level and its visual size independently."
+ai = "inline"
 
 [prop.level]
 type = "enum"

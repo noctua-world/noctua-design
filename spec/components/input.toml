@@ -12,6 +12,7 @@ name = "Input"
 element = "input"
 class = "nd-input"
 summary = "Let users write one line of text, with the keyboard their phone should open for it."
+ai = "custom"
 
 # EVERY ID DERIVES FROM `name`, AND A CALLER WRITES NONE OF THEM.
 #

@@ -14,10 +14,11 @@ import { createElement as h } from "react";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { check } from "@noctua-world/design-tokens/icons/check.js";
 import { chevronDown } from "@noctua-world/design-tokens/icons/chevron-down.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
-export function Select({ name, label, hint, error, errorLabel, placeholder, required, multiple, disabled, size, searchable, clearable, loading, creatable, searchLabel, emptyLabel, loadingLabel, createLabel, clearLabel, selectedLabel, className, children, ...rest }) {
+export function Select({ name, label, hint, error, errorLabel, placeholder, required, multiple, disabled, size, searchable, clearable, loading, creatable, searchLabel, emptyLabel, loadingLabel, createLabel, clearLabel, selectedLabel, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const size_ = size ?? "medium";
   const root = ["nd-select", className].filter(Boolean).join(" ");
   const id = `nd-select-${name}`;
@@ -109,6 +110,9 @@ export function Select({ name, label, hint, error, errorLabel, placeholder, requ
             },
             h(Icon, { icon: close, size: "small" }),
           )
+        : null,
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-select-ai", mark: aiMark, label: aiLabel, note: aiNote })
         : null,
       // The tick the enhanced list marks a chosen option with, in a template
       // for the script to clone: every drawing lives in the markup.

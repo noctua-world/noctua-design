@@ -12,7 +12,8 @@
 import { createElement as h } from "react";
 
 import { Fragment } from "react";
-export function ListItem({ term, className, children, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function ListItem({ term, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const root = ["nd-list-item", className].filter(Boolean).join(" ");
   if (term) {
     // A fragment, so the two land as siblings inside the <dl>.
@@ -20,10 +21,24 @@ export function ListItem({ term, className, children, ...rest }) {
       Fragment,
       null,
       h("dt", { key: "t", className: "nd-list-term" }, term),
-      h("dd", { key: "d", className: root, ...rest }, children),
+      h(
+        "dd",
+        { key: "d", className: root, ...rest },
+        children,
+        aiMark && aiLabel
+          ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-inline", mark: aiMark, label: aiLabel, note: aiNote })
+          : null,
+      ),
     );
   }
   // See the Dioxus half: the role is restated, because the rules
   // that take the list's role away take its items' with it.
-  return h("li", { className: root, role: "listitem", ...rest }, children);
+  return h(
+    "li",
+    { className: root, role: "listitem", ...rest },
+    children,
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-inline", mark: aiMark, label: aiLabel, note: aiNote })
+      : null,
+  );
 }

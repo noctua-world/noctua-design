@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Textarea` example. 4 of them.
+/// Every `Textarea` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"Textarea { name, label, rows, autosize, max_rows, placeholder, hint, required, required_label }",
@@ -115,6 +115,46 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         ("label", Value::Message(Key::ExampleInputNoteLabel)),
                         ("rows", Value::Text("2")),
                         ("disabled", Value::Bool(true)),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        r"Textarea { ai_mark, ai_label, ai_note }",
+        &[Node::Element {
+            tag: "form",
+            attributes: &[
+                ("class", Value::Text("nd-example-form")),
+                ("method", Value::Text("get")),
+                ("action", Value::Text("#")),
+                ("novalidate", Value::Bool(true)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "Textarea",
+                    props: &[
+                        ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                        ("ai_label", Value::Message(Key::ExampleAiName)),
+                        ("ai_note", Value::Message(Key::ExampleAiNote)),
+                        ("name", Value::Text("note-ai")),
+                        ("label", Value::Message(Key::ExampleInputNoteLabel)),
+                        ("hint", Value::Message(Key::ExampleInputNoteHint)),
+                        ("rows", Value::Text("3")),
+                        ("autosize", Value::Bool(true)),
+                        ("max_rows", Value::Text("8")),
+                        ("required", Value::Bool(true)),
+                        ("required_label", Value::Message(Key::ExampleInputRequired)),
+                        ("placeholder", Value::Data("…")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Button",
+                    props: &[
+                        ("submit", Value::Text("submit")),
+                        ("label", Value::Message(Key::ExampleInputSend)),
                     ],
                     children: &[],
                 },

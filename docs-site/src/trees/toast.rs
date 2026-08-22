@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Toast` example. 5 of them.
+/// Every `Toast` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // NO TIMER, which is the default: the message stays until it is dismissed.
     (
@@ -141,6 +141,25 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     ("placement", Value::Text("bottom-start")),
                 ],
                 children: &[Node::Text(Value::Message(Key::ExampleToastOffline))],
+            }],
+        }],
+    ),
+    (
+        r"Toast { ai_mark, ai_label, ai_note }",
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-toasts"))],
+            children: &[Node::Component {
+                name: "Toast",
+                props: &[
+                    ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                    ("ai_label", Value::Message(Key::ExampleAiName)),
+                    ("ai_note", Value::Message(Key::ExampleAiNote)),
+                    ("name", Value::Text("toast-saved-ai")),
+                    ("title", Value::Message(Key::ExampleToastSavedTitle)),
+                    ("dismiss_label", Value::Message(Key::ExampleToastDismiss)),
+                ],
+                children: &[Node::Text(Value::Message(Key::ExampleToastSaved))],
             }],
         }],
     ),

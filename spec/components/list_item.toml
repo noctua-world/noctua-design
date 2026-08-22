@@ -6,6 +6,7 @@ element = "li"
 class = "nd-list-item"
 page = "list"
 summary = "Show one item of a list, or one term and its description."
+ai = "custom"
 
 [prop.term]
 type = "text"

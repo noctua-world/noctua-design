@@ -11,6 +11,8 @@ name = "Switch"
 element = "button"
 class = "nd-switch"
 summary = "Let users turn one setting on or off, with effect as soon as it is pressed."
+ai = "custom"
+ai_pressable = false
 
 # WHY A SWITCH AND NOT A TWO-OPTION `Segmented`.
 #

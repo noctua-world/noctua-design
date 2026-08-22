@@ -11,7 +11,8 @@
 
 import { createElement as h } from "react";
 
-export function Fieldset({ name, legend, hint, error, errorLabel, heading, inline, disabled, className, children, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Fieldset({ name, legend, hint, error, errorLabel, heading, inline, disabled, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const root = ["nd-fieldset", className].filter(Boolean).join(" ");
   const hintId = `nd-${name}-hint`;
   const errorId = `nd-${name}-error`;
@@ -36,6 +37,9 @@ export function Fieldset({ name, legend, hint, error, errorLabel, heading, inlin
       // Wrapped, not replaced: a legend swapped for a heading stops being
       // attached to the controls, which is the only thing a legend is for.
       heading ? h("h1", { className: "nd-fieldset-heading" }, legend) : legend,
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-apart", mark: aiMark, label: aiLabel, note: aiNote })
+        : null,
     ),
     hint ? h("p", { key: "h", className: "nd-fieldset-hint", id: hintId }, hint) : null,
     error

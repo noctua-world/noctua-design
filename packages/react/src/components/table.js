@@ -14,11 +14,12 @@ import { createElement as h } from "react";
 import { Button } from "./button.js";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { columns2 } from "@noctua-world/design-tokens/icons/columns-2.js";
 import { copy } from "@noctua-world/design-tokens/icons/copy.js";
 import { download } from "@noctua-world/design-tokens/icons/download.js";
 import { search } from "@noctua-world/design-tokens/icons/search.js";
-export function Table({ name, caption, hideCaption, note, density, rules, zebra, hover, width, height, layout, stickyHeader, selectedLabel, sortAscendingLabel, sortDescendingLabel, sortClearedLabel, filteredLabel, resizeLabel, resizedLabel, columnsLabel, columnShownLabel, columnHiddenLabel, searchLabel, searchPlaceholder, export: _export, exportLabel, csvLabel, jsonLabel, printLabel, exportedLabel, moreSrc, moreLabel, moreStatusLabel, total, copy, copyLabel, copiedLabel, summaryLabel, className, children, ...rest }) {
+export function Table({ name, caption, hideCaption, note, density, rules, zebra, hover, width, height, layout, stickyHeader, selectedLabel, sortAscendingLabel, sortDescendingLabel, sortClearedLabel, filteredLabel, resizeLabel, resizedLabel, columnsLabel, columnShownLabel, columnHiddenLabel, searchLabel, searchPlaceholder, export: _export, exportLabel, csvLabel, jsonLabel, printLabel, exportedLabel, moreSrc, moreLabel, moreStatusLabel, total, copy, copyLabel, copiedLabel, summaryLabel, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const density_ = density ?? "default";
   const rules_ = rules ?? "rows";
   const width_ = width ?? "full";
@@ -214,6 +215,9 @@ export function Table({ name, caption, hideCaption, note, density, rules, zebra,
           "caption",
           { key: "c", className: "nd-table-caption" },
           h("span", { key: "n", id: captionId }, caption),
+          aiMark && aiLabel
+            ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel, note: aiNote })
+            : null,
           note ? h("span", { key: "d", className: "nd-table-note", id: noteId }, note) : null,
         ),
         children,

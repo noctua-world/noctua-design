@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Blockquote` example. 6 of them.
+/// Every `Blockquote` example. 7 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"Blockquote { … }",
@@ -92,6 +92,22 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         &[Node::Component {
             name: "Blockquote",
             props: &[("glass", Value::Bool(true))],
+            children: &[Node::Component {
+                name: "Paragraph",
+                props: &[],
+                children: &[Node::Text(Value::Message(Key::ExampleQuote))],
+            }],
+        }],
+    ),
+    (
+        r"Blockquote { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Blockquote",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+            ],
             children: &[Node::Component {
                 name: "Paragraph",
                 props: &[],

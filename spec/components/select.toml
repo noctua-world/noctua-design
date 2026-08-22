@@ -10,6 +10,7 @@ element = "div"
 class = "nd-select"
 page = "select"
 summary = "Let users choose one value, or several, out of more than a list can show."
+ai = "custom"
 
 # IT IS A `<select>`, AND EVERYTHING ELSE IS ADDED TO ONE.
 #

@@ -2114,6 +2114,48 @@ pub enum Key {
     ExampleMeterShareShared,
     /// `component.info.summary`
     ComponentInfoSummary,
+    /// `component.ai-label.summary`
+    ComponentAiLabelSummary,
+    /// `example.ai.mark`
+    ExampleAiMark,
+    /// `example.ai.name`
+    ExampleAiName,
+    /// `example.ai.note`
+    ExampleAiNote,
+    /// `example.ai.close`
+    ExampleAiClose,
+    /// `example.ai.subject`
+    ExampleAiSubject,
+    /// `example.ai.caption`
+    ExampleAiCaption,
+    /// `example.ai-label.summary`
+    ExampleAiLabelSummary,
+    /// `example.ai-label.name-summary`
+    ExampleAiLabelNameSummary,
+    /// `example.ai-label.note-summary`
+    ExampleAiLabelNoteSummary,
+    /// `example.ai-label.name-total`
+    ExampleAiLabelNameTotal,
+    /// `example.ai-label.note-total`
+    ExampleAiLabelNoteTotal,
+    /// `example.ai-label.name-figure`
+    ExampleAiLabelNameFigure,
+    /// `example.ai-label.note-figure`
+    ExampleAiLabelNoteFigure,
+    /// `example.ai-label.name-draft`
+    ExampleAiLabelNameDraft,
+    /// `example.ai-label.note-draft`
+    ExampleAiLabelNoteDraft,
+    /// `example.ai-label.mark-hint`
+    ExampleAiLabelMarkHint,
+    /// `example.ai-label.open-hint`
+    ExampleAiLabelOpenHint,
+    /// `example.ai-label.variant-hint`
+    ExampleAiLabelVariantHint,
+    /// `example.ai-label.size-hint`
+    ExampleAiLabelSizeHint,
+    /// `example.ai-label.tone-hint`
+    ExampleAiLabelToneHint,
     /// `example.info.deadline`
     ExampleInfoDeadline,
     /// `example.info.deadline-label`
@@ -2886,6 +2928,40 @@ pub enum Key {
     ComponentAbbrPropTitleDoc,
     /// `component.abbr.prop.children.doc`
     ComponentAbbrPropChildrenDoc,
+    /// `component.ai-label.guidance`
+    ComponentAiLabelGuidance,
+    /// `component.ai-label.a11y-notes`
+    ComponentAiLabelA11yNotes,
+    /// `component.ai-label.prop.mark.doc`
+    ComponentAiLabelPropMarkDoc,
+    /// `component.ai-label.prop.label.doc`
+    ComponentAiLabelPropLabelDoc,
+    /// `component.ai-label.prop.note.doc`
+    ComponentAiLabelPropNoteDoc,
+    /// `component.ai-label.prop.close_label.doc`
+    ComponentAiLabelPropCloseLabelDoc,
+    /// `component.ai-label.prop.placement.doc`
+    ComponentAiLabelPropPlacementDoc,
+    /// `component.ai-label.prop.size.doc`
+    ComponentAiLabelPropSizeDoc,
+    /// `component.ai-label.prop.variant.doc`
+    ComponentAiLabelPropVariantDoc,
+    /// `component.ai-label.prop.tone.doc`
+    ComponentAiLabelPropToneDoc,
+    /// `component.ai-label.state.open.doc`
+    ComponentAiLabelStateOpenDoc,
+    /// `component.ai-label.key.enter-or-space.name`
+    ComponentAiLabelKeyEnterOrSpaceName,
+    /// `component.ai-label.key.enter-or-space.action`
+    ComponentAiLabelKeyEnterOrSpaceAction,
+    /// `component.ai-label.key.escape.name`
+    ComponentAiLabelKeyEscapeName,
+    /// `component.ai-label.key.escape.action`
+    ComponentAiLabelKeyEscapeAction,
+    /// `component.ai-label.key.tab.name`
+    ComponentAiLabelKeyTabName,
+    /// `component.ai-label.key.tab.action`
+    ComponentAiLabelKeyTabAction,
     /// `component.avatar.guidance`
     ComponentAvatarGuidance,
     /// `component.avatar.a11y-notes`
@@ -5632,11 +5708,17 @@ pub enum Key {
     ComponentVisuallyHiddenPropFocusableDoc,
     /// `component.visually-hidden.prop.children.doc`
     ComponentVisuallyHiddenPropChildrenDoc,
+    /// `component.ai.prop.ai_mark.doc`
+    ComponentAiPropAiMarkDoc,
+    /// `component.ai.prop.ai_label.doc`
+    ComponentAiPropAiLabelDoc,
+    /// `component.ai.prop.ai_note.doc`
+    ComponentAiPropAiNoteDoc,
 }
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2756] = [
+    pub const ALL: [Self; 2797] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -6634,6 +6716,27 @@ impl Key {
         Self::ExampleMeterShareArchived,
         Self::ExampleMeterShareShared,
         Self::ComponentInfoSummary,
+        Self::ComponentAiLabelSummary,
+        Self::ExampleAiMark,
+        Self::ExampleAiName,
+        Self::ExampleAiNote,
+        Self::ExampleAiClose,
+        Self::ExampleAiSubject,
+        Self::ExampleAiCaption,
+        Self::ExampleAiLabelSummary,
+        Self::ExampleAiLabelNameSummary,
+        Self::ExampleAiLabelNoteSummary,
+        Self::ExampleAiLabelNameTotal,
+        Self::ExampleAiLabelNoteTotal,
+        Self::ExampleAiLabelNameFigure,
+        Self::ExampleAiLabelNoteFigure,
+        Self::ExampleAiLabelNameDraft,
+        Self::ExampleAiLabelNoteDraft,
+        Self::ExampleAiLabelMarkHint,
+        Self::ExampleAiLabelOpenHint,
+        Self::ExampleAiLabelVariantHint,
+        Self::ExampleAiLabelSizeHint,
+        Self::ExampleAiLabelToneHint,
         Self::ExampleInfoDeadline,
         Self::ExampleInfoDeadlineLabel,
         Self::ExampleInfoDeadlineNote,
@@ -7020,6 +7123,23 @@ impl Key {
         Self::ComponentAbbrA11yNotes,
         Self::ComponentAbbrPropTitleDoc,
         Self::ComponentAbbrPropChildrenDoc,
+        Self::ComponentAiLabelGuidance,
+        Self::ComponentAiLabelA11yNotes,
+        Self::ComponentAiLabelPropMarkDoc,
+        Self::ComponentAiLabelPropLabelDoc,
+        Self::ComponentAiLabelPropNoteDoc,
+        Self::ComponentAiLabelPropCloseLabelDoc,
+        Self::ComponentAiLabelPropPlacementDoc,
+        Self::ComponentAiLabelPropSizeDoc,
+        Self::ComponentAiLabelPropVariantDoc,
+        Self::ComponentAiLabelPropToneDoc,
+        Self::ComponentAiLabelStateOpenDoc,
+        Self::ComponentAiLabelKeyEnterOrSpaceName,
+        Self::ComponentAiLabelKeyEnterOrSpaceAction,
+        Self::ComponentAiLabelKeyEscapeName,
+        Self::ComponentAiLabelKeyEscapeAction,
+        Self::ComponentAiLabelKeyTabName,
+        Self::ComponentAiLabelKeyTabAction,
         Self::ComponentAvatarGuidance,
         Self::ComponentAvatarA11yNotes,
         Self::ComponentAvatarPropLabelDoc,
@@ -8393,6 +8513,9 @@ impl Key {
         Self::ComponentVisuallyHiddenA11yNotes,
         Self::ComponentVisuallyHiddenPropFocusableDoc,
         Self::ComponentVisuallyHiddenPropChildrenDoc,
+        Self::ComponentAiPropAiMarkDoc,
+        Self::ComponentAiPropAiLabelDoc,
+        Self::ComponentAiPropAiNoteDoc,
     ];
 
     /// The dotted name, for diagnostics and for the search index.
@@ -9396,6 +9519,27 @@ impl Key {
             Self::ExampleMeterShareArchived => "example.meter.share-archived",
             Self::ExampleMeterShareShared => "example.meter.share-shared",
             Self::ComponentInfoSummary => "component.info.summary",
+            Self::ComponentAiLabelSummary => "component.ai-label.summary",
+            Self::ExampleAiMark => "example.ai.mark",
+            Self::ExampleAiName => "example.ai.name",
+            Self::ExampleAiNote => "example.ai.note",
+            Self::ExampleAiClose => "example.ai.close",
+            Self::ExampleAiSubject => "example.ai.subject",
+            Self::ExampleAiCaption => "example.ai.caption",
+            Self::ExampleAiLabelSummary => "example.ai-label.summary",
+            Self::ExampleAiLabelNameSummary => "example.ai-label.name-summary",
+            Self::ExampleAiLabelNoteSummary => "example.ai-label.note-summary",
+            Self::ExampleAiLabelNameTotal => "example.ai-label.name-total",
+            Self::ExampleAiLabelNoteTotal => "example.ai-label.note-total",
+            Self::ExampleAiLabelNameFigure => "example.ai-label.name-figure",
+            Self::ExampleAiLabelNoteFigure => "example.ai-label.note-figure",
+            Self::ExampleAiLabelNameDraft => "example.ai-label.name-draft",
+            Self::ExampleAiLabelNoteDraft => "example.ai-label.note-draft",
+            Self::ExampleAiLabelMarkHint => "example.ai-label.mark-hint",
+            Self::ExampleAiLabelOpenHint => "example.ai-label.open-hint",
+            Self::ExampleAiLabelVariantHint => "example.ai-label.variant-hint",
+            Self::ExampleAiLabelSizeHint => "example.ai-label.size-hint",
+            Self::ExampleAiLabelToneHint => "example.ai-label.tone-hint",
             Self::ExampleInfoDeadline => "example.info.deadline",
             Self::ExampleInfoDeadlineLabel => "example.info.deadline-label",
             Self::ExampleInfoDeadlineNote => "example.info.deadline-note",
@@ -9784,6 +9928,27 @@ impl Key {
             Self::ComponentAbbrA11yNotes => "component.abbr.a11y-notes",
             Self::ComponentAbbrPropTitleDoc => "component.abbr.prop.title.doc",
             Self::ComponentAbbrPropChildrenDoc => "component.abbr.prop.children.doc",
+            Self::ComponentAiLabelGuidance => "component.ai-label.guidance",
+            Self::ComponentAiLabelA11yNotes => "component.ai-label.a11y-notes",
+            Self::ComponentAiLabelPropMarkDoc => "component.ai-label.prop.mark.doc",
+            Self::ComponentAiLabelPropLabelDoc => "component.ai-label.prop.label.doc",
+            Self::ComponentAiLabelPropNoteDoc => "component.ai-label.prop.note.doc",
+            Self::ComponentAiLabelPropCloseLabelDoc => "component.ai-label.prop.close_label.doc",
+            Self::ComponentAiLabelPropPlacementDoc => "component.ai-label.prop.placement.doc",
+            Self::ComponentAiLabelPropSizeDoc => "component.ai-label.prop.size.doc",
+            Self::ComponentAiLabelPropVariantDoc => "component.ai-label.prop.variant.doc",
+            Self::ComponentAiLabelPropToneDoc => "component.ai-label.prop.tone.doc",
+            Self::ComponentAiLabelStateOpenDoc => "component.ai-label.state.open.doc",
+            Self::ComponentAiLabelKeyEnterOrSpaceName => {
+                "component.ai-label.key.enter-or-space.name"
+            }
+            Self::ComponentAiLabelKeyEnterOrSpaceAction => {
+                "component.ai-label.key.enter-or-space.action"
+            }
+            Self::ComponentAiLabelKeyEscapeName => "component.ai-label.key.escape.name",
+            Self::ComponentAiLabelKeyEscapeAction => "component.ai-label.key.escape.action",
+            Self::ComponentAiLabelKeyTabName => "component.ai-label.key.tab.name",
+            Self::ComponentAiLabelKeyTabAction => "component.ai-label.key.tab.action",
             Self::ComponentAvatarGuidance => "component.avatar.guidance",
             Self::ComponentAvatarA11yNotes => "component.avatar.a11y-notes",
             Self::ComponentAvatarPropLabelDoc => "component.avatar.prop.label.doc",
@@ -11607,6 +11772,9 @@ impl Key {
             Self::ComponentVisuallyHiddenPropChildrenDoc => {
                 "component.visually-hidden.prop.children.doc"
             }
+            Self::ComponentAiPropAiMarkDoc => "component.ai.prop.ai_mark.doc",
+            Self::ComponentAiPropAiLabelDoc => "component.ai.prop.ai_label.doc",
+            Self::ComponentAiPropAiNoteDoc => "component.ai.prop.ai_note.doc",
         }
     }
 }
@@ -13382,6 +13550,53 @@ impl Locale {
                 Key::ComponentInfoSummary => {
                     "Explain a word with one sentence, opened by a small `i` beside it."
                 }
+                Key::ComponentAiLabelSummary => {
+                    "Mark a value an assistant wrote, and open one sentence about what it did."
+                }
+                Key::ExampleAiMark => "AI",
+                Key::ExampleAiName => "Written by an assistant",
+                Key::ExampleAiNote => {
+                    "An assistant wrote this value. Check it before the form is sent."
+                }
+                Key::ExampleAiClose => "Close",
+                Key::ExampleAiSubject => "Suggested value",
+                Key::ExampleAiCaption => {
+                    "The mark sits after the value and never over it. Press it for the sentence."
+                }
+                Key::ExampleAiLabelSummary => {
+                    "Revenue rose in every region except the north, where two accounts closed."
+                }
+                Key::ExampleAiLabelNameSummary => "Summary written by an assistant",
+                Key::ExampleAiLabelNoteSummary => {
+                    "Written from the three reports this page links to. Read it against them before quoting it."
+                }
+                Key::ExampleAiLabelNameTotal => "Total worked out by an assistant",
+                Key::ExampleAiLabelNoteTotal => {
+                    "Added from the rows above, and rounded to the nearest whole number."
+                }
+                Key::ExampleAiLabelNameFigure => "Figure suggested by an assistant",
+                Key::ExampleAiLabelNoteFigure => {
+                    "Suggested from the last three quarters. Nothing has been sent anywhere yet."
+                }
+                Key::ExampleAiLabelNameDraft => "Draft written by an assistant",
+                Key::ExampleAiLabelNoteDraft => {
+                    "A first draft, from the notes on the ticket. Edit it before it goes out."
+                }
+                Key::ExampleAiLabelMarkHint => {
+                    "With no `note` the mark is a `<span>`, so it takes no focus and opens nothing. The phrase is what a screen reader reads."
+                }
+                Key::ExampleAiLabelOpenHint => {
+                    "A `note` makes the mark a control. `placement` pins where the note opens, for a mark at the edge of a table."
+                }
+                Key::ExampleAiLabelVariantHint => {
+                    "How strongly the mark is painted, from a tint to the tone at full strength."
+                }
+                Key::ExampleAiLabelSizeHint => {
+                    "Three sizes, matching `Tag` step for step. The smallest still clears the 24 pixel target."
+                }
+                Key::ExampleAiLabelToneHint => {
+                    "Any family the palette declares. Without a tone the mark stays quiet beside the value."
+                }
                 Key::ExampleInfoDeadline => "Payment deadline",
                 Key::ExampleInfoDeadlineLabel => "About the payment deadline",
                 Key::ExampleInfoDeadlineNote => {
@@ -14073,6 +14288,51 @@ impl Locale {
                 }
                 Key::ComponentAbbrPropChildrenDoc => {
                     "The abbreviation, as it appears in the sentence."
+                }
+                Key::ComponentAiLabelGuidance => {
+                    "Use an AI label beside a value an assistant wrote or changed. Give it a `note` when there is one sentence worth reading about what the assistant did. To explain a word rather than mark a value, use `Info`."
+                }
+                Key::ComponentAiLabelA11yNotes => {
+                    "The letters carry `aria-hidden` and `label` is a hidden text node, so a screen reader reads the phrase rather than two letters. With a `note` the mark is a `<button aria-expanded>` beside a `role=\"note\"`."
+                }
+                Key::ComponentAiLabelPropMarkDoc => {
+                    "The two letters the mark draws, in the reader's language. `AI` in English and `IA` in Portuguese, so it arrives as a message rather than a literal. **Required**: there is nothing to draw without it."
+                }
+                Key::ComponentAiLabelPropLabelDoc => {
+                    "What the mark means, as a whole phrase, such as *Written by the assistant*. **Required**, because the letters carry `aria-hidden` and this is what a screen reader reads instead."
+                }
+                Key::ComponentAiLabelPropNoteDoc => {
+                    "One sentence about what the assistant did. **Setting it is what makes the mark a control.** Without it the mark is a `<span>` with no role and no tab stop."
+                }
+                Key::ComponentAiLabelPropCloseLabelDoc => {
+                    "The name of the control that closes the note. Wanted in practice, because Escape and a press outside also close it and neither is discoverable on a touch screen."
+                }
+                Key::ComponentAiLabelPropPlacementDoc => {
+                    "Where the note opens. `auto` measures the room, flipping above and hanging from whichever edge fits. `start` and `end` pin the note's leading or trailing edge, for a mark at the edge of a table."
+                }
+                Key::ComponentAiLabelPropSizeDoc => {
+                    "The size of the mark, matching `Tag` step for step so a mark beside a tag lines up. `small` by default, because this sits inside another component and must not outweigh it."
+                }
+                Key::ComponentAiLabelPropVariantDoc => {
+                    "How strongly the mark is painted. `soft` is a tinted field, `solid` is the tone at full strength, and `outline` is a hairline with no fill. `soft` by default."
+                }
+                Key::ComponentAiLabelPropToneDoc => {
+                    "Which of the colour system's tones the mark is painted from. A name no family declares fails the build. Without it the mark is quiet, which is what a mark beside every value in a column has to be."
+                }
+                Key::ComponentAiLabelStateOpenDoc => {
+                    "Whether the note is showing. Written on the control, which is the element a reader presses and the element a screen reader reads the state of."
+                }
+                Key::ComponentAiLabelKeyEnterOrSpaceName => "Enter or Space",
+                Key::ComponentAiLabelKeyEnterOrSpaceAction => {
+                    "Opens the note, and closes it again. Only on a mark that was given a `note`."
+                }
+                Key::ComponentAiLabelKeyEscapeName => "Escape",
+                Key::ComponentAiLabelKeyEscapeAction => {
+                    "Closes the note and puts the focus back on the mark that opened it."
+                }
+                Key::ComponentAiLabelKeyTabName => "Tab",
+                Key::ComponentAiLabelKeyTabAction => {
+                    "Walks into the note and out of it. Nothing is trapped, and leaving the note closes it."
                 }
                 Key::ComponentAvatarGuidance => {
                     "Use an avatar when a name alone does not identify a person, such as a row of reviewers or the author of a comment. For a thing rather than a person, use `Tag` with an `image`. It draws a picture over initials over an icon."
@@ -17827,6 +18087,15 @@ impl Locale {
                     "Whether the content is revealed when it receives focus, as a skip link is."
                 }
                 Key::ComponentVisuallyHiddenPropChildrenDoc => "The content.",
+                Key::ComponentAiPropAiMarkDoc => {
+                    "The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means."
+                }
+                Key::ComponentAiPropAiLabelDoc => {
+                    "What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads."
+                }
+                Key::ComponentAiPropAiNoteDoc => {
+                    "One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control."
+                }
             },
             Self::PtBr => match key {
                 Key::AppName => "Noctua Design System",
@@ -19618,6 +19887,53 @@ impl Locale {
                 Key::ComponentInfoSummary => {
                     "Explique uma palavra com uma frase, aberta por um pequeno `i` ao lado dela."
                 }
+                Key::ComponentAiLabelSummary => {
+                    "Marque um valor que um assistente escreveu, e abra uma frase sobre o que ele fez."
+                }
+                Key::ExampleAiMark => "IA",
+                Key::ExampleAiName => "Escrito por um assistente",
+                Key::ExampleAiNote => {
+                    "Um assistente escreveu este valor. Confira antes de enviar o formulário."
+                }
+                Key::ExampleAiClose => "Fechar",
+                Key::ExampleAiSubject => "Valor sugerido",
+                Key::ExampleAiCaption => {
+                    "A marca fica depois do valor e nunca por cima dele. Aperte para ler a frase."
+                }
+                Key::ExampleAiLabelSummary => {
+                    "A receita subiu em todas as regiões menos no norte, onde duas contas fecharam."
+                }
+                Key::ExampleAiLabelNameSummary => "Resumo escrito por um assistente",
+                Key::ExampleAiLabelNoteSummary => {
+                    "Escrito a partir dos três relatórios que esta página cita. Leia comparando com eles antes de citar."
+                }
+                Key::ExampleAiLabelNameTotal => "Total calculado por um assistente",
+                Key::ExampleAiLabelNoteTotal => {
+                    "Somado a partir das linhas acima, e arredondado para o inteiro mais próximo."
+                }
+                Key::ExampleAiLabelNameFigure => "Número sugerido por um assistente",
+                Key::ExampleAiLabelNoteFigure => {
+                    "Sugerido a partir dos três últimos trimestres. Nada foi enviado a lugar nenhum ainda."
+                }
+                Key::ExampleAiLabelNameDraft => "Rascunho escrito por um assistente",
+                Key::ExampleAiLabelNoteDraft => {
+                    "Um primeiro rascunho, feito das anotações do chamado. Edite antes de mandar."
+                }
+                Key::ExampleAiLabelMarkHint => {
+                    "Sem `note` a marca é um `<span>`, então não recebe foco e não abre nada. A frase é o que um leitor de tela lê."
+                }
+                Key::ExampleAiLabelOpenHint => {
+                    "Um `note` torna a marca um controle. `placement` prende onde a nota abre, para uma marca na borda de uma tabela."
+                }
+                Key::ExampleAiLabelVariantHint => {
+                    "Com que força a marca é pintada, de um tingimento até o tom em força total."
+                }
+                Key::ExampleAiLabelSizeHint => {
+                    "Três tamanhos, iguais aos da `Tag` passo a passo. O menor ainda atinge o alvo de 24 pixels."
+                }
+                Key::ExampleAiLabelToneHint => {
+                    "Qualquer família que a paleta declare. Sem um tom a marca fica discreta ao lado do valor."
+                }
                 Key::ExampleInfoDeadline => "Prazo de pagamento",
                 Key::ExampleInfoDeadlineLabel => "Sobre o prazo de pagamento",
                 Key::ExampleInfoDeadlineNote => {
@@ -20318,6 +20634,51 @@ impl Locale {
                     "As palavras que a abreviatura representa, escritas no atributo `title`. Informe sempre, porque uma abreviatura sem o significado é só um texto pequeno."
                 }
                 Key::ComponentAbbrPropChildrenDoc => "A abreviatura, como ela aparece na frase.",
+                Key::ComponentAiLabelGuidance => {
+                    "Use um rótulo de IA ao lado de um valor que um assistente escreveu ou mudou. Dê a ele um `note` quando houver uma frase que valha a leitura sobre o que o assistente fez. Para explicar uma palavra, use `Info`."
+                }
+                Key::ComponentAiLabelA11yNotes => {
+                    "As letras carregam `aria-hidden` e `label` é um nó de texto escondido, então um leitor de tela lê a frase em vez de duas letras. Com um `note`, a marca é um `<button aria-expanded>` ao lado de um `role=\"note\"`."
+                }
+                Key::ComponentAiLabelPropMarkDoc => {
+                    "As duas letras que a marca desenha, na língua de quem lê. `AI` em inglês e `IA` em português, então ela chega como mensagem e não como literal. **Obrigatório**: sem ela não há o que desenhar."
+                }
+                Key::ComponentAiLabelPropLabelDoc => {
+                    "O que a marca significa, como frase inteira: *Escrito pelo assistente*. **Obrigatório**, porque as letras carregam `aria-hidden` e é isto que um leitor de tela lê no lugar delas."
+                }
+                Key::ComponentAiLabelPropNoteDoc => {
+                    "Uma frase sobre o que o assistente fez. **Preenchê-lo é o que torna a marca um controle.** Sem ele a marca é um `<span>` sem papel e sem parada de tabulação."
+                }
+                Key::ComponentAiLabelPropCloseLabelDoc => {
+                    "O nome do controle que fecha a nota. Necessário na prática, porque o Escape e um toque fora também fecham e nenhum dos dois se descobre numa tela de toque."
+                }
+                Key::ComponentAiLabelPropPlacementDoc => {
+                    "Onde a nota abre. `auto` mede o espaço, virando para cima e pendurando pela borda que couber. `start` e `end` prendem a borda inicial ou final da nota, para uma marca na borda de uma tabela."
+                }
+                Key::ComponentAiLabelPropSizeDoc => {
+                    "O tamanho da marca, igual à `Tag` passo a passo, para que uma marca ao lado de uma tag fique alinhada. `small` por padrão, porque isto fica dentro de outro componente e não pode pesar mais que ele."
+                }
+                Key::ComponentAiLabelPropVariantDoc => {
+                    "Com que força a marca é pintada. `soft` é um campo tingido, `solid` é o tom em força total, e `outline` é um fio sem preenchimento. `soft` por padrão."
+                }
+                Key::ComponentAiLabelPropToneDoc => {
+                    "De qual tom do sistema de cores a marca é pintada. Um nome que nenhuma família declara quebra o build. Sem ele a marca fica discreta, que é o que uma marca ao lado de cada valor de uma coluna tem de ser."
+                }
+                Key::ComponentAiLabelStateOpenDoc => {
+                    "Se a nota está aparecendo. Escrito no controle, que é o elemento que a pessoa aperta e o elemento cujo estado um leitor de tela lê."
+                }
+                Key::ComponentAiLabelKeyEnterOrSpaceName => "Enter ou Espaço",
+                Key::ComponentAiLabelKeyEnterOrSpaceAction => {
+                    "Abre a nota, e fecha de novo. Só numa marca que recebeu um `note`."
+                }
+                Key::ComponentAiLabelKeyEscapeName => "Escape",
+                Key::ComponentAiLabelKeyEscapeAction => {
+                    "Fecha a nota e devolve o foco à marca que a abriu."
+                }
+                Key::ComponentAiLabelKeyTabName => "Tab",
+                Key::ComponentAiLabelKeyTabAction => {
+                    "Entra na nota e sai dela. Nada fica preso, e sair da nota é o que a fecha."
+                }
                 Key::ComponentAvatarGuidance => {
                     "Use um avatar quando o nome sozinho não identifica a pessoa, como em uma fileira de revisores ou em quem escreveu um comentário. Para uma coisa em vez de uma pessoa, use `Tag` com uma `image`. Ele desenha a foto sobre as iniciais sobre o ícone."
                 }
@@ -24081,6 +24442,15 @@ impl Locale {
                     "Se o conteúdo é revelado quando recebe o foco, como acontece com um link de pular para o conteúdo."
                 }
                 Key::ComponentVisuallyHiddenPropChildrenDoc => "O conteúdo.",
+                Key::ComponentAiPropAiMarkDoc => {
+                    "As duas letras que a marca de um assistente desenha, na língua de quem lê. Preenchê-lo é o que desenha a marca, e `ai_label` tem de dizer o que ela significa."
+                }
+                Key::ComponentAiPropAiLabelDoc => {
+                    "O que a marca significa, como frase inteira. Necessário sempre que `ai_mark` estiver preenchido, porque as letras carregam `aria-hidden` e é isto que um leitor de tela lê."
+                }
+                Key::ComponentAiPropAiNoteDoc => {
+                    "Uma frase sobre o que o assistente fez. Preenchê-lo torna a marca um controle que abre a frase, fechado pelo Escape. Sem ele a marca não é um controle."
+                }
             },
             Self::Qps => match key {
                 Key::AppName => "⟦Nooctuuaa Deesiign Systeem⟧",
@@ -25948,6 +26318,53 @@ impl Locale {
                 Key::ComponentInfoSummary => {
                     "⟦EExplaaiin aa woord wiith oonee seenteencee, oopeeneed by aa smaall `ii` beesiidee iit.⟧"
                 }
+                Key::ComponentAiLabelSummary => {
+                    "⟦Maark aa vaaluuee aan aassiistaant wrootee, aand oopeen oonee seenteencee aaboouut whaat iit diid.⟧"
+                }
+                Key::ExampleAiMark => "⟦AAII⟧",
+                Key::ExampleAiName => "⟦Wriitteen by aan aassiistaant⟧",
+                Key::ExampleAiNote => {
+                    "⟦AAn aassiistaant wrootee thiis vaaluuee. Cheeck iit beefooree thee foorm iis seent.⟧"
+                }
+                Key::ExampleAiClose => "⟦Cloosee⟧",
+                Key::ExampleAiSubject => "⟦Suuggeesteed vaaluuee⟧",
+                Key::ExampleAiCaption => {
+                    "⟦Thee maark siits aafteer thee vaaluuee aand neeveer ooveer iit. Preess iit foor thee seenteencee.⟧"
+                }
+                Key::ExampleAiLabelSummary => {
+                    "⟦Reeveenuuee roosee iin eeveery reegiioon eexceept thee noorth, wheeree twoo aaccoouunts clooseed.⟧"
+                }
+                Key::ExampleAiLabelNameSummary => "⟦Suummaary wriitteen by aan aassiistaant⟧",
+                Key::ExampleAiLabelNoteSummary => {
+                    "⟦Wriitteen froom thee threeee reepoorts thiis paagee liinks too. Reeaad iit aagaaiinst theem beefooree quuootiing iit.⟧"
+                }
+                Key::ExampleAiLabelNameTotal => "⟦Tootaal woorkeed oouut by aan aassiistaant⟧",
+                Key::ExampleAiLabelNoteTotal => {
+                    "⟦AAddeed froom thee roows aaboovee, aand roouundeed too thee neeaareest whoolee nuumbeer.⟧"
+                }
+                Key::ExampleAiLabelNameFigure => "⟦Fiiguuree suuggeesteed by aan aassiistaant⟧",
+                Key::ExampleAiLabelNoteFigure => {
+                    "⟦Suuggeesteed froom thee laast threeee quuaarteers. Noothiing haas beeeen seent aanywheeree yeet.⟧"
+                }
+                Key::ExampleAiLabelNameDraft => "⟦Draaft wriitteen by aan aassiistaant⟧",
+                Key::ExampleAiLabelNoteDraft => {
+                    "⟦AA fiirst draaft, froom thee nootees oon thee tiickeet. EEdiit iit beefooree iit gooees oouut.⟧"
+                }
+                Key::ExampleAiLabelMarkHint => {
+                    "⟦Wiith noo `nootee` thee maark iis aa `<spaan>`, soo iit taakees noo foocuus aand oopeens noothiing. Thee phraasee iis whaat aa screeeen reeaadeer reeaads.⟧"
+                }
+                Key::ExampleAiLabelOpenHint => {
+                    "⟦AA `nootee` maakees thee maark aa coontrool. `plaaceemeent` piins wheeree thee nootee oopeens, foor aa maark aat thee eedgee oof aa taablee.⟧"
+                }
+                Key::ExampleAiLabelVariantHint => {
+                    "⟦Hoow stroongly thee maark iis paaiinteed, froom aa tiint too thee toonee aat fuull streength.⟧"
+                }
+                Key::ExampleAiLabelSizeHint => {
+                    "⟦Threeee siizees, maatchiing `Taag` steep foor steep. Thee smaalleest stiill cleeaars thee 24 piixeel taargeet.⟧"
+                }
+                Key::ExampleAiLabelToneHint => {
+                    "⟦AAny faamiily thee paaleettee deeclaarees. Wiithoouut aa toonee thee maark staays quuiieet beesiidee thee vaaluuee.⟧"
+                }
                 Key::ExampleInfoDeadline => "⟦Paaymeent deeaadliinee⟧",
                 Key::ExampleInfoDeadlineLabel => "⟦AAboouut thee paaymeent deeaadliinee⟧",
                 Key::ExampleInfoDeadlineNote => {
@@ -26681,6 +27098,51 @@ impl Locale {
                 }
                 Key::ComponentAbbrPropChildrenDoc => {
                     "⟦Thee aabbreeviiaatiioon, aas iit aappeeaars iin thee seenteencee.⟧"
+                }
+                Key::ComponentAiLabelGuidance => {
+                    "⟦UUsee aan AAII laabeel beesiidee aa vaaluuee aan aassiistaant wrootee oor chaangeed. Giivee iit aa `nootee` wheen theeree iis oonee seenteencee woorth reeaadiing aaboouut whaat thee aassiistaant diid. Too eexplaaiin aa woord raatheer thaan maark aa vaaluuee, uusee `IInfoo`.⟧"
+                }
+                Key::ComponentAiLabelA11yNotes => {
+                    "⟦Thee leetteers caarry `aariiaa-hiiddeen` aand `laabeel` iis aa hiiddeen teext noodee, soo aa screeeen reeaadeer reeaads thee phraasee raatheer thaan twoo leetteers. Wiith aa `nootee` thee maark iis aa `<buuttoon aariiaa-eexpaandeed>` beesiidee aa `roolee=\"nootee\"`.⟧"
+                }
+                Key::ComponentAiLabelPropMarkDoc => {
+                    "⟦Thee twoo leetteers thee maark draaws, iin thee reeaadeer's laanguuaagee. `AAII` iin EEngliish aand `IIAA` iin Poortuuguueesee, soo iit aarriivees aas aa meessaagee raatheer thaan aa liiteeraal. **Reequuiireed**: theeree iis noothiing too draaw wiithoouut iit.⟧"
+                }
+                Key::ComponentAiLabelPropLabelDoc => {
+                    "⟦Whaat thee maark meeaans, aas aa whoolee phraasee, suuch aas *Wriitteen by thee aassiistaant*. **Reequuiireed**, beecaauusee thee leetteers caarry `aariiaa-hiiddeen` aand thiis iis whaat aa screeeen reeaadeer reeaads iinsteeaad.⟧"
+                }
+                Key::ComponentAiLabelPropNoteDoc => {
+                    "⟦OOnee seenteencee aaboouut whaat thee aassiistaant diid. **Seettiing iit iis whaat maakees thee maark aa coontrool.** Wiithoouut iit thee maark iis aa `<spaan>` wiith noo roolee aand noo taab stoop.⟧"
+                }
+                Key::ComponentAiLabelPropCloseLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool thaat cloosees thee nootee. Waanteed iin praactiicee, beecaauusee EEscaapee aand aa preess oouutsiidee aalsoo cloosee iit aand neeiitheer iis diiscooveeraablee oon aa toouuch screeeen.⟧"
+                }
+                Key::ComponentAiLabelPropPlacementDoc => {
+                    "⟦Wheeree thee nootee oopeens. `aauutoo` meeaasuurees thee roooom, fliippiing aaboovee aand haangiing froom whiicheeveer eedgee fiits. `staart` aand `eend` piin thee nootee's leeaadiing oor traaiiliing eedgee, foor aa maark aat thee eedgee oof aa taablee.⟧"
+                }
+                Key::ComponentAiLabelPropSizeDoc => {
+                    "⟦Thee siizee oof thee maark, maatchiing `Taag` steep foor steep soo aa maark beesiidee aa taag liinees uup. `smaall` by deefaauult, beecaauusee thiis siits iinsiidee aanootheer coompooneent aand muust noot oouutweeiigh iit.⟧"
+                }
+                Key::ComponentAiLabelPropVariantDoc => {
+                    "⟦Hoow stroongly thee maark iis paaiinteed. `sooft` iis aa tiinteed fiieeld, `sooliid` iis thee toonee aat fuull streength, aand `oouutliinee` iis aa haaiirliinee wiith noo fiill. `sooft` by deefaauult.⟧"
+                }
+                Key::ComponentAiLabelPropToneDoc => {
+                    "⟦Whiich oof thee cooloouur systeem's toonees thee maark iis paaiinteed froom. AA naamee noo faamiily deeclaarees faaiils thee buuiild. Wiithoouut iit thee maark iis quuiieet, whiich iis whaat aa maark beesiidee eeveery vaaluuee iin aa cooluumn haas too bee.⟧"
+                }
+                Key::ComponentAiLabelStateOpenDoc => {
+                    "⟦Wheetheer thee nootee iis shoowiing. Wriitteen oon thee coontrool, whiich iis thee eeleemeent aa reeaadeer preessees aand thee eeleemeent aa screeeen reeaadeer reeaads thee staatee oof.⟧"
+                }
+                Key::ComponentAiLabelKeyEnterOrSpaceName => "⟦EEnteer oor Spaacee⟧",
+                Key::ComponentAiLabelKeyEnterOrSpaceAction => {
+                    "⟦OOpeens thee nootee, aand cloosees iit aagaaiin. OOnly oon aa maark thaat waas giiveen aa `nootee`.⟧"
+                }
+                Key::ComponentAiLabelKeyEscapeName => "⟦EEscaapee⟧",
+                Key::ComponentAiLabelKeyEscapeAction => {
+                    "⟦Cloosees thee nootee aand puuts thee foocuus baack oon thee maark thaat oopeeneed iit.⟧"
+                }
+                Key::ComponentAiLabelKeyTabName => "⟦Taab⟧",
+                Key::ComponentAiLabelKeyTabAction => {
+                    "⟦Waalks iintoo thee nootee aand oouut oof iit. Noothiing iis traappeed, aand leeaaviing thee nootee cloosees iit.⟧"
                 }
                 Key::ComponentAvatarGuidance => {
                     "⟦UUsee aan aavaataar wheen aa naamee aaloonee dooees noot iideentiify aa peersoon, suuch aas aa roow oof reeviieeweers oor thee aauuthoor oof aa coommeent. Foor aa thiing raatheer thaan aa peersoon, uusee `Taag` wiith aan `iimaagee`. IIt draaws aa piictuuree ooveer iiniitiiaals ooveer aan iicoon.⟧"
@@ -30483,6 +30945,15 @@ impl Locale {
                     "⟦Wheetheer thee coonteent iis reeveeaaleed wheen iit reeceeiivees foocuus, aas aa skiip liink iis.⟧"
                 }
                 Key::ComponentVisuallyHiddenPropChildrenDoc => "⟦Thee coonteent.⟧",
+                Key::ComponentAiPropAiMarkDoc => {
+                    "⟦Thee twoo leetteers aan aassiistaant's maark draaws, iin thee reeaadeer's laanguuaagee. Seettiing iit iis whaat draaws thee maark, aand `aaii_laabeel` haas too saay whaat iit meeaans.⟧"
+                }
+                Key::ComponentAiPropAiLabelDoc => {
+                    "⟦Whaat thee maark meeaans, aas aa whoolee phraasee. Waanteed wheeneeveer `aaii_maark` iis seet, beecaauusee thee leetteers caarry `aariiaa-hiiddeen` aand thiis iis whaat aa screeeen reeaadeer reeaads.⟧"
+                }
+                Key::ComponentAiPropAiNoteDoc => {
+                    "⟦OOnee seenteencee aaboouut whaat thee aassiistaant diid. Seettiing iit maakees thee maark aa coontrool thaat oopeens thee seenteencee, clooseed by EEscaapee. Wiithoouut iit thee maark iis noot aa coontrool.⟧"
+                }
             },
         }
     }

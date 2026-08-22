@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Popover` example. 4 of them.
+/// Every `Popover` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // CONTROLS IN IT, which is the difference between this and an `Info`.
     (
@@ -129,6 +129,41 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         ("variant", Value::Text("transparent")),
                         ("tone", Value::Text("neutral")),
                         ("label", Value::Message(Key::ExamplePopoverOldest)),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        r"Popover { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Popover",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("name", Value::Text("popover-filter-ai")),
+                ("trigger_label", Value::Message(Key::ExamplePopoverOpen)),
+                ("heading", Value::Message(Key::ExamplePopoverHeading)),
+                ("close_label", Value::Message(Key::ExamplePopoverClose)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "Checkbox",
+                    props: &[
+                        ("name", Value::Text("popover-filter-unread-ai")),
+                        ("value", Value::Text("unread")),
+                        ("label", Value::Message(Key::ExamplePopoverUnread)),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Button",
+                    props: &[
+                        ("variant", Value::Text("solid")),
+                        ("tone", Value::Text("accent")),
+                        ("label", Value::Message(Key::ExamplePopoverApply)),
                     ],
                     children: &[],
                 },

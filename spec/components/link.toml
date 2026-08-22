@@ -3,6 +3,8 @@ name = "Link"
 element = "a"
 class = "nd-a"
 summary = "Links to another page, and marks the links that leave the site."
+ai = "custom"
+ai_pressable = false
 
 [prop.href]
 type = "text"

@@ -37,6 +37,10 @@ pub fn SegmentedItem(
     /// Whether the choice is refused. Off by default. The item stays reachable, so a reader can find that it exists and is refused rather than meeting a gap where an option was.
     #[props(default = false)]
     disabled: bool,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
     /// Frosts each option's box. Off by default. The chosen option keeps its wash on top of the frost, so a reader can still tell which value is in force.
     #[props(default = false)]
     glass: bool,
@@ -89,6 +93,19 @@ pub fn SegmentedItem(
             // stack is choosing from the number alone otherwise.
             if let Some(detail) = detail {
                 span { class: "nd-segmented-detail", "{detail}" }
+            }
+            // NEVER A CONTROL. This root is a `<button role="radio">`
+            // and a roving stop, so a control inside it would be a
+            // tab stop inside a one-stop widget.
+            // The assistant's mark, in the room this component reserves for
+            // it. A child in the flow and never a corner: `Badge` translates
+            // its mark onto what it marks, and this may not.
+            if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                crate::components::AILabel {
+                    class: "nd-ai-slot",
+                    mark,
+                    label: phrase,
+                }
             }
         }
     }

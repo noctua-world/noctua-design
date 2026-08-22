@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Radio` example. 5 of them.
+/// Every `Radio` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Fieldset { … } / Radio { name: "contact", value: "email", label: "…", checked: true }"#,
@@ -199,6 +199,50 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         ("label", Value::Message(Key::ExampleFormsContactPost)),
                         ("hint", Value::Message(Key::ExampleFormsContactPostHint)),
                         ("disabled", Value::Bool(true)),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        r"Radio { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Fieldset",
+            props: &[
+                ("name", Value::Text("contact-ai")),
+                ("legend", Value::Message(Key::ExampleFormsContactLegend)),
+                ("hint", Value::Message(Key::ExampleFormsContactHint)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "Radio",
+                    props: &[
+                        ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                        ("ai_label", Value::Message(Key::ExampleAiName)),
+                        ("ai_note", Value::Message(Key::ExampleAiNote)),
+                        ("name", Value::Text("contact-ai")),
+                        ("value", Value::Text("email")),
+                        ("label", Value::Message(Key::ExampleFormsContactEmail)),
+                        ("checked", Value::Bool(true)),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Radio",
+                    props: &[
+                        ("name", Value::Text("contact-ai")),
+                        ("value", Value::Text("phone")),
+                        ("label", Value::Message(Key::ExampleFormsContactPhone)),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Radio",
+                    props: &[
+                        ("name", Value::Text("contact-ai")),
+                        ("value", Value::Text("text")),
+                        ("label", Value::Message(Key::ExampleFormsContactText)),
                     ],
                     children: &[],
                 },

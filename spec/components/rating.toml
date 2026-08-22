@@ -11,6 +11,7 @@ name = "Rating"
 element = "div"
 class = "nd-rating"
 summary = "Show or ask for a score out of five, with the number written out beside it."
+ai = "custom"
 
 # WHY THE NUMBER IS ALWAYS WRITTEN OUT.
 #

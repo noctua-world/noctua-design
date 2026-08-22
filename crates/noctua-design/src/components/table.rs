@@ -243,6 +243,12 @@ pub fn Table(
     copied_label: Option<String>,
     /// A sentence under the table saying how much of it is showing, with `{visible}` and `{total}` holes, such as *{visible} of {total} rows*. It is drawn only when the two differ.
     summary_label: Option<String>,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
+    /// One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control.
+    ai_note: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -433,6 +439,23 @@ pub fn Table(
                     "aria-describedby": described,
                     caption { class: "nd-table-caption",
                         span { id: "{caption_id}", "{title}" }
+                        // IN THE CAPTION, BESIDE THE TITLE. This is the one
+                        // container in the catalogue that is also a single
+                        // artefact with chrome of its own, so the claim that a
+                        // table was written by an assistant has somewhere to
+                        // go. Mark the narrowest thing that is true: a marked
+                        // table and marked cells inside it is one claim twice.
+                        // The assistant's mark, in the room this component reserves for
+                        // it. A child in the flow and never a corner: `Badge` translates
+                        // its mark onto what it marks, and this may not.
+                        if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                            crate::components::AILabel {
+                                class: "nd-ai-slot",
+                                mark,
+                                label: phrase,
+                                note: ai_note.clone(),
+                            }
+                        }
                         if let Some(note) = note {
                             span { class: "nd-table-note", id: "{note_id}", "{note}" }
                         }

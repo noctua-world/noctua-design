@@ -17,7 +17,7 @@ use crate::trees::table::{
     AURORA, BRACKEN, CINTRA, DELGADO, INVOICE_COLUMNS, INVOICE_HEADINGS, INVOICE_ROW,
 };
 
-/// Every `TableHeaderCell` example. 4 of them.
+/// Every `TableHeaderCell` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r"TableHeaderCell { scope: ::Col | ::Row }",
@@ -356,6 +356,78 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                                 },
                             ],
                         }],
+                    }],
+                },
+            ],
+        }],
+    ),
+    (
+        r"TableHeaderCell { ai_mark, ai_label }",
+        &[Node::Component {
+            name: "Table",
+            props: &[
+                ("name", Value::Text("header-ai-ai")),
+                ("caption", Value::Message(Key::ExampleTableInvoices)),
+            ],
+            children: &[
+                Node::Fragment(INVOICE_COLUMNS),
+                Node::Component {
+                    name: "TableSection",
+                    props: &[("kind", Value::Text("head"))],
+                    children: &[Node::Component {
+                        name: "TableRow",
+                        props: &[],
+                        children: &[
+                            Node::Component {
+                                name: "TableHeaderCell",
+                                props: &[("column", Value::Text("invoice"))],
+                                children: &[Node::Text(Value::Message(
+                                    Key::ExampleTableColInvoice,
+                                ))],
+                            },
+                            Node::Component {
+                                name: "TableHeaderCell",
+                                props: &[("column", Value::Text("client"))],
+                                children: &[Node::Text(Value::Message(Key::ExampleTableColClient))],
+                            },
+                            Node::Component {
+                                name: "TableHeaderCell",
+                                props: &[
+                                    ("column", Value::Text("due")),
+                                    ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                                    ("ai_label", Value::Message(Key::ExampleAiName)),
+                                ],
+                                children: &[Node::Text(Value::Message(Key::ExampleTableColDue))],
+                            },
+                            // ONE HEADING PER COLUMN, AND ALL FIVE. `table.js`
+                            // pads a short header row by PREPENDING blank cells,
+                            // for the leading choice and expand columns a script
+                            // inserts — so a row of three under five columns is
+                            // not a table missing two headings, it is a table
+                            // where every heading names the column two to its
+                            // left. Silent, and the runtime's own comment says so.
+                            Node::Component {
+                                name: "TableHeaderCell",
+                                props: &[("column", Value::Text("status"))],
+                                children: &[Node::Text(Value::Message(Key::ExampleTableColStatus))],
+                            },
+                            Node::Component {
+                                name: "TableHeaderCell",
+                                props: &[
+                                    ("column", Value::Text("amount")),
+                                    ("align", Value::Text("numeric")),
+                                ],
+                                children: &[Node::Text(Value::Message(Key::ExampleTableColAmount))],
+                            },
+                        ],
+                    }],
+                },
+                Node::Component {
+                    name: "TableSection",
+                    props: &[],
+                    children: &[Node::Each {
+                        over: Each::Rows(&[AURORA, DELGADO]),
+                        body: INVOICE_ROW,
                     }],
                 },
             ],

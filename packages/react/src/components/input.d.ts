@@ -63,6 +63,12 @@ export interface InputProps {
   spellcheck?: boolean;
   /** Frosts the box. Off by default. The text inside stays on a ground opaque enough to read. */
   glass?: boolean;
+  /** The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means. */
+  aiMark?: string;
+  /** What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads. */
+  aiLabel?: string;
+  /** One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control. */
+  aiNote?: string;
   className?: string;
 }
 

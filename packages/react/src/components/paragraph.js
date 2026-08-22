@@ -11,12 +11,16 @@
 
 import { createElement as h } from "react";
 
-export function Paragraph({ size, tone, className, children, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Paragraph({ size, tone, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const size_ = size ?? "body";
   const tone_ = tone ?? "default";
   const root = ["nd-paragraph", className].filter(Boolean).join(" ");
   const props = { className: root, ...rest };
   if (size_ !== undefined) props["data-nd-size"] = String(size_);
   if (tone_ !== undefined) props["data-nd-tone"] = String(tone_);
-  return h("p", props, children);
+  return h("p", props, children,
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-inline", mark: aiMark, label: aiLabel, note: aiNote })
+      : null);
 }

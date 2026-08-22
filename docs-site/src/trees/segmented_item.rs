@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
-/// Every `SegmentedItem` example. 7 of them.
+/// Every `SegmentedItem` example. 8 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"SegmentedItem { value: "…", label: "…" }"#,
@@ -266,6 +266,41 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     children: &[],
                 }],
             }],
+        }],
+    ),
+    (
+        r"SegmentedItem { ai_mark, ai_label }",
+        // ONE ITEM STATES THE ANSWER. A radiogroup with nothing chosen is a
+        // legal state and the group is still one tab stop, but the first
+        // picture of this component should show what a radio group looks
+        // like when it has been answered.
+        &[Node::Component {
+            name: "Segmented",
+            props: &[
+                ("name", Value::Text("example-item-ai")),
+                ("label", Value::Message(Key::ThemeSaturationLabel)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SegmentedItem",
+                    props: &[
+                        ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                        ("ai_label", Value::Message(Key::ExampleAiName)),
+                        ("value", Value::Text("balanced")),
+                        ("label", Value::Message(Key::ThemeSaturationBalanced)),
+                        ("selected", Value::Bool(true)),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SegmentedItem",
+                    props: &[
+                        ("value", Value::Text("vivid")),
+                        ("label", Value::Message(Key::ThemeSaturationVivid)),
+                    ],
+                    children: &[],
+                },
+            ],
         }],
     ),
 ];

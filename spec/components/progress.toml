@@ -11,6 +11,7 @@ name = "Progress"
 element = "progress"
 class = "nd-progress"
 summary = "Show how far a task has got, or that it is running with no total known."
+ai = "custom"
 
 [prop.name]
 type = "text"

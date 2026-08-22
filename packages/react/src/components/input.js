@@ -14,10 +14,11 @@ import { createElement as h } from "react";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
 import { eye } from "@noctua-world/design-tokens/icons/eye.js";
 import { eyeOff } from "@noctua-world/design-tokens/icons/eye-off.js";
-export function Input({ name, label, kind, value, placeholder, hint, error, required, requiredLabel, disabled, readonly, size, icon, prefix, suffix, clearable, clearLabel, maxlength, counter, counterLabel, revealLabel, concealLabel, autocomplete, pattern, spellcheck, glass, className, ...rest }) {
+export function Input({ name, label, kind, value, placeholder, hint, error, required, requiredLabel, disabled, readonly, size, icon, prefix, suffix, clearable, clearLabel, maxlength, counter, counterLabel, revealLabel, concealLabel, autocomplete, pattern, spellcheck, glass, aiMark, aiLabel, aiNote, className, ...rest }) {
   const kind_ = kind ?? "text";
   const size_ = size ?? "medium";
   const id = `nd-input-${name}`;
@@ -142,6 +143,9 @@ export function Input({ name, label, kind, value, placeholder, hint, error, requ
             h(Icon, { key: "a", icon: eye, size: "small" }),
             h(Icon, { key: "b", icon: eyeOff, size: "small" }),
           )
+        : null,
+      aiMark && aiLabel
+        ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel, note: aiNote })
         : null,
     ),
     counter

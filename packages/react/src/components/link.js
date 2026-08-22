@@ -12,8 +12,9 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { externalLink } from "@noctua-world/design-tokens/icons/external-link.js";
-export function Link({ href, external, rel, tone, className, children, ...rest }) {
+export function Link({ href, external, rel, tone, aiMark, aiLabel, className, children, ...rest }) {
   const tone_ = tone ?? "accent";
   const root = ["nd-a", className].filter(Boolean).join(" ");
   return h(
@@ -27,6 +28,9 @@ export function Link({ href, external, rel, tone, className, children, ...rest }
       ...rest,
     },
     children,
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-inline", mark: aiMark, label: aiLabel })
+      : null,
     external ? h(Icon, { icon: externalLink, size: "small" }) : null,
   );
 }

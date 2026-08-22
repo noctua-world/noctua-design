@@ -285,6 +285,12 @@ Heading { level: _3, size: HeadingSize::H3, tone: HeadingTone::Muted }"
         ),
     ),
     (
+        "ai-label",
+        example!(
+            r#"AILabel { mark: "AI", label: "…", note: "…", close_label: "…", tone: "pending" }"#
+        ),
+    ),
+    (
         "inline-text",
         example!(
             r#"Paragraph {
@@ -619,6 +625,7 @@ pub(crate) fn for_component(name: &str) -> &'static [Example] {
         "Radio" => RADIO,
         "Fieldset" => FIELDSET,
         "Info" => INFO,
+        "AILabel" => AI_LABEL,
         "Divider" => DIVIDER,
         "Label" => LABEL,
         "Image" => IMAGE,
@@ -728,6 +735,10 @@ const RATING: &[Example] = &[
 Rating { name, label, value, value_label, item_label, hint, disabled: true }",
         Key::ExampleRatingNoteRefused
     ),
+    example!(
+        r"Rating { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- OtpField ---------------------------------------------------------------
@@ -751,6 +762,10 @@ const OTP_FIELD: &[Example] = &[
         r"OtpField { name, legend, box_label, length, value, error }
 OtpField { name, legend, box_label, length, autocomplete: false, disabled: true }",
         Key::ExampleOtpFieldNoteRefused
+    ),
+    example!(
+        r"OtpField { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
     ),
 ];
 // --- Tabs -------------------------------------------------------------------
@@ -785,6 +800,7 @@ const TAB: &[Example] = &[
     example!(r#"Tab { icon: "settings" }"#, Key::ExampleTabNoteIcon),
     example!(r#"Tab { count: "4" }"#, Key::ExampleTabNoteCount),
     example!(r"Tab { disabled: true }", Key::ExampleTabNoteDisabled),
+    example!(r"Tab { ai_mark, ai_label }", Key::ExampleAiCaption),
 ];
 
 // --- TabPanel ---------------------------------------------------------------
@@ -886,6 +902,7 @@ const LABEL: &[Example] = &[
         r"Label { size } for size in LabelSize::ALL",
         Key::ExampleLabelNoteSize
     ),
+    example!(r"Label { ai_mark, ai_label }", Key::ExampleAiCaption),
 ];
 
 // --- Image ------------------------------------------------------------------
@@ -921,6 +938,10 @@ const IMAGE: &[Example] = &[
         r"Image { ratio } for ratio in ImageRatio::ALL",
         Key::ExampleImageNoteRatio
     ),
+    example!(
+        r"Image { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- MessageBar -------------------------------------------------------------
@@ -948,6 +969,10 @@ const MESSAGE_BAR: &[Example] = &[
     // NO TONE AT ALL, which is the absence of the attribute rather than a name
     // called `default`. The words do the work on their own.
     example!(r"MessageBar { … }", Key::ExampleMessageBarNotePlain),
+    example!(
+        r"MessageBar { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- Dialog -----------------------------------------------------------------
@@ -977,6 +1002,10 @@ const DIALOG: &[Example] = &[
     ),
     // NAMED BY `label`, because there is no title to name it from.
     example!(r#"Dialog { label: "…", … }"#, Key::ExampleDialogNotePlain),
+    example!(
+        r"Dialog { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- Popover ----------------------------------------------------------------
@@ -996,6 +1025,10 @@ const POPOVER: &[Example] = &[
         Key::ExamplePopoverNoteFixed
     ),
     example!(r#"Popover { label: "…", … }"#, Key::ExamplePopoverNotePlain),
+    example!(
+        r"Popover { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- Tooltip ----------------------------------------------------------------
@@ -1062,6 +1095,10 @@ const TOAST: &[Example] = &[
         r"Toast { dismissible: false, placement: ToastPlacement::BottomStart }",
         Key::ExampleToastNoteFixed
     ),
+    example!(
+        r"Toast { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- Abbr -------------------------------------------------------------------
@@ -1085,6 +1122,10 @@ const BLOCKQUOTE: &[Example] = &[
     ),
     example!(r"Blockquote { … Link { … } }"),
     example!(r"Blockquote { glass: true, … }", Key::ExampleGlassBehind),
+    example!(
+        r"Blockquote { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- Button -----------------------------------------------------------------
@@ -1143,6 +1184,7 @@ const BUTTON: &[Example] = &[
         Key::ExampleButtonNav
     ),
     example!(r"Button { glass: true, … }", Key::ExampleGlassBehind),
+    example!(r"Button { ai_mark, ai_label }", Key::ExampleAiCaption),
 ];
 
 // --- ButtonGroup ------------------------------------------------------------
@@ -1235,6 +1277,10 @@ const SEGMENTED_ITEM: &[Example] = &[
         r#"SegmentedItem { label: "320", detail: "px" }"#,
         Key::ExampleItemDetail
     ),
+    example!(
+        r"SegmentedItem { ai_mark, ai_label }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- Switch -------------------------------------------------------------------
@@ -1252,6 +1298,7 @@ const SWITCH: &[Example] = &[
     example!(r"Switch { size: SwitchSize::… }"),
     example!(r"Switch { disabled: true, … }", Key::ExampleSwitchRefused),
     example!(r"Switch { glass: true, … }", Key::ExampleGlassBehind),
+    example!(r"Switch { ai_mark, ai_label }", Key::ExampleAiCaption),
 ];
 const TOOLBAR: &[Example] = &[
     example!(
@@ -1339,6 +1386,10 @@ const DATE_INPUT: &[Example] = &[
         r"DateInput { size: Small }  ·  { size: Large, glass: true }  ·  { disabled: true }  ·  { error }",
         Key::ExampleDateInputFormsNote
     ),
+    example!(
+        r"DateInput { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 const CHECKBOX: &[Example] = &[
@@ -1365,6 +1416,10 @@ const CHECKBOX: &[Example] = &[
         r"Checkbox { checked: true, disabled: true, invalid: true, hide_label }",
         Key::ExampleFormsNoteTarget
     ),
+    example!(
+        r"Checkbox { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 const RADIO: &[Example] = &[
@@ -1389,6 +1444,10 @@ const RADIO: &[Example] = &[
         r"Radio { disabled: true, invalid: true, hide_label }",
         Key::ExampleFormsNoteTarget
     ),
+    example!(
+        r"Radio { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 const FIELDSET: &[Example] = &[
@@ -1406,6 +1465,10 @@ const FIELDSET: &[Example] = &[
         r"Fieldset { disabled: true, … }",
         Key::ExampleFormsNoteDisabled
     ),
+    example!(
+        r"Fieldset { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- Info -------------------------------------------------------------------
@@ -1418,6 +1481,35 @@ const INFO: &[Example] = &[
     example!(r"Info { heading }", Key::ExampleInfoUsageHint),
     example!(r"Info { close_label }", Key::ExampleInfoCloseHint),
     example!(r"Info { placement: InfoPlacement::End } at the edge of a table"),
+];
+
+// --- AILabel ----------------------------------------------------------------
+
+// THE MARK ALONE, THEN THE MARK IN USE. The first four show the component by
+// itself, because this page is where a reader looks up what it is. The last one
+// shows the form every other page carries: a host takes the three `ai_*` props
+// and composes this component into the room it reserves for one.
+const AI_LABEL: &[Example] = &[
+    example!(
+        r"AILabel { mark, label } beside the value it marks",
+        Key::ExampleAiLabelMarkHint
+    ),
+    example!(
+        r"AILabel { note, close_label, placement }",
+        Key::ExampleAiLabelOpenHint
+    ),
+    example!(
+        r"AILabel { variant } for variant in AILabelVariant::ALL",
+        Key::ExampleAiLabelVariantHint
+    ),
+    example!(
+        r"AILabel { size } for size in AILabelSize::ALL",
+        Key::ExampleAiLabelSizeHint
+    ),
+    example!(
+        r#"AILabel { tone: "pending" }  ·  AILabel { tone: "approved" }"#,
+        Key::ExampleAiLabelToneHint
+    ),
 ];
 
 // --- Meter and Progress -----------------------------------------------------
@@ -1447,6 +1539,10 @@ const METER: &[Example] = &[
         r"Meter { name, label, value, max, unit, hide_label: true, show_value: false, size, value_label }",
         Key::ExampleMeterHiddenNote
     ),
+    example!(
+        r"Meter { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 const PROGRESS: &[Example] = &[
@@ -1466,6 +1562,10 @@ const PROGRESS: &[Example] = &[
         r"Progress { name, label, value, max, size: Large, value_label }
 Progress { name, label, value, max, size: Small, hide_label: true, value_label }",
         Key::ExampleProgressStepsNote
+    ),
+    example!(
+        r"Progress { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
     ),
 ];
 
@@ -1578,6 +1678,10 @@ TableRow { emphasis } and TableCell { aggregate }: subtotal, tax, total",
         r"Table { sort_ascending_label, sort_descending_label, sort_cleared_label }",
         Key::ExampleTableNoteSort
     ),
+    example!(
+        r"Table { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 const TABLE_ROW: &[Example] = &[
@@ -1626,6 +1730,7 @@ const TABLE_CELL: &[Example] = &[
 TableCell { aggregate, aggregate_over }: a total that recounts",
         Key::ExampleTableNoteCellAggregate
     ),
+    example!(r"TableCell { ai_mark, ai_label }", Key::ExampleAiCaption),
 ];
 
 const TABLE_HEADER_CELL: &[Example] = &[
@@ -1644,6 +1749,10 @@ const TABLE_HEADER_CELL: &[Example] = &[
     example!(
         r#"TableHeaderCell { span: "2", rows: "2", scope: ::Colgroup }"#,
         Key::ExampleTableNoteHeaderGroup
+    ),
+    example!(
+        r"TableHeaderCell { ai_mark, ai_label }",
+        Key::ExampleAiCaption
     ),
 ];
 const MENU: &[Example] = &[
@@ -1681,6 +1790,7 @@ const MENU_ITEM: &[Example] = &[
         r#"MenuItem { href: "…", rel, target }"#,
         Key::ExampleMenuNoteLinks
     ),
+    example!(r"MenuItem { ai_mark, ai_label }", Key::ExampleAiCaption),
 ];
 const SELECT: &[Example] = &[
     example!(
@@ -1718,6 +1828,10 @@ const SELECT: &[Example] = &[
     // a feature that demonstrated nothing. `disabled` gets an example of its
     // own instead, where it is the whole point.
     example!(r"Select { disabled: true }", Key::ExampleSelectNoteDisabled),
+    example!(
+        r"Select { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 const SELECT_GROUP: &[Example] = &[
@@ -1793,6 +1907,10 @@ const CODE_BLOCK: &[Example] = &[
     ),
     example!(r"CodeBlock { glass: true, … }", Key::ExampleGlassBehind),
     example!(r"Language::ALL", Key::ExampleCodeBlockEvery),
+    example!(
+        r"CodeBlock { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- Del and Ins ------------------------------------------------------------
@@ -1833,6 +1951,7 @@ const DISCLOSURE: &[Example] = &[
         Key::ExampleDisclosureHeading
     ),
     example!(r"Disclosure { glass: true, … }", Key::ExampleGlassBehind),
+    example!(r"Disclosure { ai_mark, ai_label }", Key::ExampleAiCaption),
 ];
 
 // --- Em and Strong ----------------------------------------------------------
@@ -1868,6 +1987,10 @@ const HEADING: &[Example] = &[
     example!(r"Heading { tone: HeadingTone::Muted, … }"),
     example!(r"Heading { tone: HeadingTone::Accent, … }"),
     example!(r"Heading { balance: true, … }", Key::ExampleHeadingBalance),
+    example!(
+        r"Heading { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- Kbd --------------------------------------------------------------------
@@ -1892,6 +2015,7 @@ const LINK: &[Example] = &[
         Key::ExampleLinkInherit
     ),
     example!(r"In a sentence"),
+    example!(r"Link { ai_mark, ai_label }", Key::ExampleAiCaption),
 ];
 
 // --- List and ListItem ------------------------------------------------------
@@ -1929,6 +2053,10 @@ const LIST_ITEM: &[Example] = &[
     example!(r#"ListItem { term: "…", "…" }"#, Key::ExampleItemTerm),
     example!(r"An item holding a whole paragraph"),
     example!(r"An item holding a link"),
+    example!(
+        r"ListItem { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- Mark -------------------------------------------------------------------
@@ -1951,6 +2079,10 @@ const PARAGRAPH: &[Example] = &[
     example!(r"Paragraph { size: ParagraphSize::Small, … }"),
     example!(r"Paragraph { tone: ParagraphTone::Muted, … }"),
     example!(r"Two, one after the other"),
+    example!(
+        r"Paragraph { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 const PROSE: &[Example] = &[
@@ -1989,6 +2121,10 @@ const SEARCH: &[Example] = &[
         Key::ExampleSearchStates
     ),
     example!(r"Search { glass: true }", Key::ExampleGlassBehind),
+    example!(
+        r"Search { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 const SEARCH_GROUP: &[Example] = &[
@@ -2021,6 +2157,7 @@ const SEARCH_RESULT: &[Example] = &[
         r#"SearchResult { badge: "…" } / SearchResult { current: true }"#,
         Key::ExampleSearchCurrent
     ),
+    example!(r"SearchResult { ai_mark, ai_label }", Key::ExampleAiCaption),
 ];
 
 // --- ColorPicker ------------------------------------------------------------
@@ -2056,6 +2193,10 @@ const COLOR_PICKER: &[Example] = &[
     example!(
         r"ColorPicker { hint, error, required: true, glass: true, entry: false, size: Small } / ColorPicker { disabled: true }",
         Key::ExampleColorPickerFormNote
+    ),
+    example!(
+        r"ColorPicker { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
     ),
 ];
 
@@ -2116,6 +2257,10 @@ Input { name, label, value, readonly }
 Input { name, label, kind: Password, reveal_label, conceal_label, disabled, glass }",
         Key::ExampleInputNoteRefused
     ),
+    example!(
+        r"Input { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 const TEXTAREA: &[Example] = &[
@@ -2128,6 +2273,10 @@ const TEXTAREA: &[Example] = &[
     ),
     example!(r"Textarea { name, label, value, rows, resize: None, autosize, size, glass, error }"),
     example!(r"Textarea { readonly } / Textarea { disabled }"),
+    example!(
+        r"Textarea { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 const NUMBER_INPUT: &[Example] = &[
@@ -2182,6 +2331,10 @@ NumberInput { name, label, value, readonly, size, increment_label, decrement_lab
 NumberInput { name, label, disabled, glass, increment_label, decrement_label }",
         Key::ExampleNumberInputNoteStates
     ),
+    example!(
+        r"NumberInput { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 const SLIDER: &[Example] = &[
@@ -2196,6 +2349,10 @@ const SLIDER: &[Example] = &[
     example!(
         r"Slider { name, label, value, output: false, tone, size, glass, error }
 Slider { name, label, value, tone, disabled }"
+    ),
+    example!(
+        r"Slider { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
     ),
 ];
 
@@ -2212,6 +2369,10 @@ const FILE_INPUT: &[Example] = &[
         r"FileInput { name, label, browse_label, drop: false, size, glass, error }
 FileInput { name, label, browse_label, disabled, size }"
     ),
+    example!(
+        r"FileInput { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 const TIME_INPUT: &[Example] = &[
@@ -2226,6 +2387,10 @@ const TIME_INPUT: &[Example] = &[
         r"TimeInput { min, max, step, pad: false, required, required_label, missing_label, invalid_label, min_label, max_label }"
     ),
     example!(r"TimeInput { seconds, second_label, glass, error } / TimeInput { disabled }"),
+    example!(
+        r"TimeInput { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 const CAROUSEL: &[Example] = &[
     example!(
@@ -2247,6 +2412,10 @@ const CAROUSEL: &[Example] = &[
         r"Carousel { per_view, wrap, snap: None, counter, counter_label }
 Carousel { orientation: Vertical, controls: false }",
         Key::ExampleCarouselWrapNote
+    ),
+    example!(
+        r"Carousel { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
     ),
 ];
 
@@ -2326,6 +2495,7 @@ const TAG: &[Example] = &[
         Key::ExampleTagSizes
     ),
     example!(r"Tag { glass: true }", Key::ExampleGlassBehind),
+    example!(r"Tag { ai_mark, ai_label, ai_note }", Key::ExampleAiCaption),
 ];
 
 // --- Badge ------------------------------------------------------------------
@@ -2398,6 +2568,10 @@ TagPicker { paste: false, duplicates: true, … }"#,
         r"TagPicker { size: TagPickerSize::… } / { loading: true, loading_label } / { disabled: true } / { glass: true }",
         Key::ExamplePickerStates
     ),
+    example!(
+        r"TagPicker { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- Text -------------------------------------------------------------------
@@ -2410,6 +2584,10 @@ const TEXT: &[Example] = &[
     example!(
         r"Text { size: Caption, weight: Semibold, tone: Muted }",
         Key::ExampleTextCombined
+    ),
+    example!(
+        r"Text { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
     ),
 ];
 
@@ -2457,6 +2635,7 @@ const TREE_ITEM: &[Example] = &[
         Key::ExampleTreeItemStates
     ),
     example!(r#"TreeItem { value: "…" }"#, Key::ExampleTreeItemValue),
+    example!(r"TreeItem { ai_mark, ai_label }", Key::ExampleAiCaption),
 ];
 
 // --- Truncate ---------------------------------------------------------------
@@ -2466,6 +2645,10 @@ const TRUNCATE: &[Example] = &[
     example!(r"Truncate { lines: TruncateLines::_2, … }"),
     example!(r"Truncate { lines: TruncateLines::_4, … }"),
     example!(r"Short enough not to clip", Key::ExampleTruncateShort),
+    example!(
+        r"Truncate { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
 ];
 
 // --- VisuallyHidden ---------------------------------------------------------
@@ -2535,7 +2718,8 @@ mod tests {
         }
     }
 
-    /// that has content demonstrates it.
+    /// Every prop a caller can set is set by some example, so the page that
+    /// has content demonstrates it.
     #[test]
     fn the_examples_reach_every_prop() {
         for component in COMPONENTS {
@@ -2549,12 +2733,55 @@ mod tests {
                     continue;
                 }
                 assert!(
-                    sources.contains(prop.name),
+                    mentions(&sources, prop.name),
                     "{}.{} appears in no example",
                     component.name,
                     prop.name
                 );
             }
         }
+    }
+
+    /// Whether a caption names this prop, rather than merely carrying its
+    /// letters inside a longer name.
+    ///
+    /// This was `sources.contains(prop.name)`. A prop whose name is a suffix of
+    /// another prop's name was answered for by that other one, and the pair
+    /// that made it matter is `label` and `ai_label`: fifty components declare
+    /// a `label`, so one caption naming the assistant's mark would have
+    /// satisfied the control's own name on every one of them, and
+    /// `ai_note` would have done the same to `Table.note`.
+    fn mentions(sources: &str, name: &str) -> bool {
+        let part = |c: char| c.is_ascii_alphanumeric() || c == '_';
+        sources.match_indices(name).any(|(at, _)| {
+            let before = sources[..at].chars().next_back().is_none_or(|c| !part(c));
+            let after = sources[at + name.len()..]
+                .chars()
+                .next()
+                .is_none_or(|c| !part(c));
+            before && after
+        })
+    }
+
+    /// The word-boundary rule above is the assertion, so it is confirmed here
+    /// rather than believed.
+    ///
+    /// `NOCTUA.md §19.5`: a guard is confirmed by restoring the defect it was
+    /// written for. The defect is a substring match, and the case it let
+    /// through is the one this component's props are about to create.
+    #[test]
+    fn a_longer_prop_name_does_not_answer_for_a_shorter_one() {
+        let caption = r"Input { ai_label, ai_note }";
+        assert!(mentions(caption, "ai_label"));
+        assert!(
+            !mentions(caption, "label"),
+            "`ai_label` answered for `label`"
+        );
+        assert!(!mentions(caption, "note"), "`ai_note` answered for `note`");
+        assert!(mentions(r"Input { label }", "label"));
+        assert!(mentions(
+            r"Input { size } for size in InputSize::ALL",
+            "size"
+        ));
     }
 }

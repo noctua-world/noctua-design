@@ -59,6 +59,159 @@ const REACT_SEGMENTED: &str = concat!(
 /// its own, so `Field` renders `Label` and draws none of the three.
 const LABEL_IMPORT: &str = "use crate::components::{Label, LabelKind, LabelSize};\n";
 
+/// The class every hosted mark carries, and the room it reserves.
+///
+/// One class for every host, so a component that wants the mark somewhere else
+/// says so in its `[meta] ai` slot rather than in a rule of its own.
+const AI_SLOT_CLASS: &str = "nd-ai-slot";
+
+/// The block a host draws its `AILabel` from, in Rust, at a given indent.
+///
+/// # One function, every host
+///
+/// The fragment is the same seven lines everywhere, so writing it into each
+/// host would be fifty copies of a thing that has to stay identical — the
+/// argument `props.rs` already makes about the two implementations, one layer
+/// down. A host says WHERE. This says WHAT.
+///
+/// FULLY QUALIFIED, SO NO HOST GAINS AN IMPORT. `rsx!` takes a path for a
+/// component name, and adding a `use` to forty existing import arms is forty
+/// chances to land it in the wrong sorted position and fail `cargo fmt`.
+///
+/// BOTH OR NEITHER. `AILabel` requires its name, so the pair is zipped before
+/// `rsx!` sees it: a mark with no phrase is a mark a screen reader reads as two
+/// letters, which is what `required` exists to make unconstructable.
+///
+/// `extra` is the slot's own class, for the hosts whose room needs one more
+/// rule than `flex: none`.
+#[must_use]
+pub fn ai_block_dioxus(component: &Component, pad: &str, extra: &str) -> String {
+    if component.meta.ai.is_none() {
+        return String::new();
+    }
+    let class = slot_class(extra);
+    let note = if component.meta.ai_pressable == Some(false) {
+        String::new()
+    } else {
+        format!("\n{pad}        note: ai_note.clone(),")
+    };
+    format!(
+        "{pad}// The assistant's mark, in the room this component reserves for\n\
+         {pad}// it. A child in the flow and never a corner: `Badge` translates\n\
+         {pad}// its mark onto what it marks, and this may not.\n\
+         {pad}if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {{\n\
+         {pad}    crate::components::AILabel {{\n\
+         {pad}        class: \"{class}\",\n\
+         {pad}        mark,\n\
+         {pad}        label: phrase,{note}\n\
+         {pad}    }}\n\
+         {pad}}}\n"
+    )
+}
+
+/// The same block, in React, as one more child argument.
+#[must_use]
+pub fn ai_block_react(component: &Component, pad: &str, extra: &str) -> String {
+    if component.meta.ai.is_none() {
+        return String::new();
+    }
+    let class = slot_class(extra);
+    let note = if component.meta.ai_pressable == Some(false) {
+        String::new()
+    } else {
+        ", note: aiNote".to_owned()
+    };
+    // A KEY, LIKE EVERY OTHER CHILD THIS FILE WRITES.
+    format!(
+        "aiMark && aiLabel\n\
+         {pad}  ? h(AILabel, {{ key: \"ai\", className: \"{class}\", mark: aiMark, \
+         label: aiLabel{note} }})\n\
+         {pad}  : null"
+    )
+}
+
+/// The one import a host gains, and the only one.
+#[must_use]
+pub fn ai_imports_react(component: &Component) -> String {
+    if component.meta.ai.is_none() {
+        return String::new();
+    }
+    "import { AILabel } from \"./ai_label.js\";\n".to_owned()
+}
+
+/// The slot class, with whatever the host's own room adds to it.
+fn slot_class(extra: &str) -> String {
+    if extra.is_empty() {
+        AI_SLOT_CLASS.to_owned()
+    } else {
+        format!("{AI_SLOT_CLASS} {extra}")
+    }
+}
+
+/// Fills every `// @ai` marker in a body with the fragment that draws the mark.
+///
+/// # Why the marker is in the body and the fragment is not
+///
+/// A CUSTOM BODY PLACES ITS OWN MARK, because only it knows which of its own
+/// regions has the room — inside `Tag`'s pill and before the remove control,
+/// after `NumberInput`'s steppers rather than before them, beside the words in
+/// a table heading rather than inside the button a script moves them into. What
+/// none of them should own is the fragment, which has to stay identical across
+/// every one.
+///
+/// So the body writes `// @ai` where the mark goes, optionally followed by the
+/// class that host's own room needs, and this reads the indent off the marker
+/// line rather than being told it. Anything after the class on the line — a
+/// comma, in React — is kept.
+///
+/// A body that forgot its marker still compiles and draws nothing, which is
+/// what `every_host_draws_the_mark_in_both_languages` reads the emitted source
+/// for.
+fn graft(body: &str, component: &Component, react: bool) -> String {
+    if component.meta.ai.is_none() {
+        debug_assert!(
+            !body.contains("// @ai"),
+            "{} carries an `// @ai` marker and declares no `[meta] ai`",
+            component.meta.name
+        );
+        return body.to_owned();
+    }
+
+    let mut out = String::with_capacity(body.len());
+    for line in body.split_inclusive('\n') {
+        let Some(at) = line.find("// @ai") else {
+            out.push_str(line);
+            continue;
+        };
+        // THE PREFIX IS WRITTEN ONCE AND THE INDENT ON EVERY LINE, and those
+        // are two different strings whenever a marker has code in front of it.
+        // `Button` writes `hideLabel_ ? null : // @ai`, and repeating that
+        // whole run on each line of the fragment produced three nested
+        // ternaries that parsed, ran, and meant something else.
+        let head = &line[..at];
+        let pad: String = head.chars().take_while(|c| c.is_whitespace()).collect();
+        let rest = line[at + "// @ai".len()..].trim_end();
+        let (extra, tail) = rest
+            .strip_suffix(',')
+            .map_or((rest, ""), |head| (head, ","));
+        let extra = extra.trim();
+        if react {
+            out.push_str(head);
+            out.push_str(&ai_block_react(component, &pad, extra));
+            out.push_str(tail);
+            out.push('\n');
+        } else {
+            debug_assert!(
+                head.trim().is_empty(),
+                "a Dioxus `// @ai` marker shares its line with `{}`",
+                head.trim()
+            );
+            out.push_str(&ai_block_dioxus(component, &pad, extra));
+        }
+    }
+    out
+}
+
 /// Whether this component's body is written here rather than derived.
 #[must_use]
 pub fn is_custom(component: &Component) -> bool {
@@ -134,11 +287,18 @@ pub fn is_custom(component: &Component) -> bool {
             | "Popover"
             | "Tooltip"
             | "Toast"
+            | "AILabel"
+            | "Truncate"
     )
 }
 
 /// The Dioxus body, from `let root = …` to the closing brace of `rsx!`.
-pub fn dioxus_body(out: &mut String, component: &Component) {
+pub fn dioxus_body(sink: &mut String, component: &Component) {
+    // Written into a local first, so `graft` can fill the `// @ai` markers in
+    // it. Every arm below is unchanged by that: a body says where its mark
+    // goes, and never what the mark is.
+    let mut body = String::new();
+    let out = &mut body;
     match component.meta.name.as_str() {
         "Button" => button_dioxus(out),
         "Lineage" => out.push_str(LINEAGE_DIOXUS),
@@ -169,6 +329,8 @@ pub fn dioxus_body(out: &mut String, component: &Component) {
         "TableCell" => out.push_str(TABLE_CELL_DIOXUS),
         "TableHeaderCell" => out.push_str(TABLE_HEADER_CELL_DIOXUS),
         "Info" => out.push_str(INFO_DIOXUS),
+        "AILabel" => out.push_str(AI_LABEL_DIOXUS),
+        "Truncate" => out.push_str(TRUNCATE_DIOXUS),
         "Menu" => out.push_str(MENU_DIOXUS),
         "MenuItem" => out.push_str(MENU_ITEM_DIOXUS),
         "Meter" => out.push_str(METER_DIOXUS),
@@ -212,10 +374,14 @@ pub fn dioxus_body(out: &mut String, component: &Component) {
         "Toast" => out.push_str(TOAST_DIOXUS),
         other => unreachable!("no custom body for `{other}`"),
     }
+    sink.push_str(&graft(&body, component, false));
 }
 
 /// The React body, from the first statement to the `return`.
-pub fn react_body(out: &mut String, component: &Component) {
+pub fn react_body(sink: &mut String, component: &Component) {
+    // See the Dioxus half.
+    let mut body = String::new();
+    let out = &mut body;
     match component.meta.name.as_str() {
         "Button" => button_react(out),
         "Lineage" => out.push_str(LINEAGE_REACT),
@@ -246,6 +412,8 @@ pub fn react_body(out: &mut String, component: &Component) {
         "TableCell" => out.push_str(TABLE_CELL_REACT),
         "TableHeaderCell" => out.push_str(TABLE_HEADER_CELL_REACT),
         "Info" => out.push_str(INFO_REACT),
+        "AILabel" => out.push_str(AI_LABEL_REACT),
+        "Truncate" => out.push_str(TRUNCATE_REACT),
         "Menu" => out.push_str(MENU_REACT),
         "MenuItem" => out.push_str(MENU_ITEM_REACT),
         "Meter" => out.push_str(METER_REACT),
@@ -289,6 +457,7 @@ pub fn react_body(out: &mut String, component: &Component) {
         "Toast" => out.push_str(TOAST_REACT),
         other => unreachable!("no custom body for `{other}`"),
     }
+    sink.push_str(&graft(&body, component, true));
 }
 
 // --- Button -----------------------------------------------------------------
@@ -394,6 +563,10 @@ fn button_dioxus_content(out: &mut String) {
          \x20                   span { class: \"nd-button-detail\", \"{detail}\" }\n\
          \x20               }\n\
          \x20           }\n\
+         \x20           // AFTER THE WORDS, AND NEVER A CONTROL: this root is a\n\
+         \x20           // `<button>` or an `<a>`. Inside `!hide_label`, because\n\
+         \x20           // an icon-only button has no room and nothing to mark.\n\
+         \x20           // @ai\n\
          \x20       }\n\
          \x20       // The chevron is what makes a menu control look like one, and it\n\
          \x20       // steps aside for an `icon_end` the caller chose deliberately.\n\
@@ -556,6 +729,7 @@ fn button_react_content(out: &mut String) {
          \x20         h(\"span\", { key: \"l\", className: \"nd-button-label\" }, label),\n\
          \x20         detail ? h(\"span\", { key: \"d\", className: \"nd-button-detail\" }, detail) : null,\n\
          \x20       ),\n\
+         \x20   !hideLabel_ && // @ai,\n\
          \x20   // The chevron steps aside for an `iconEnd` the caller chose.\n\
          \x20   iconEnd\n\
          \x20     ? h(Icon, { key: \"e\", icon: iconEnd })\n\
@@ -769,9 +943,13 @@ fn list_item_dioxus(out: &mut String) {
          \x20   rsx! {\n\
          \x20       if let Some(term) = term {\n\
          \x20           dt { class: \"nd-list-term\", \"{term}\" }\n\
-         \x20           dd { class: \"{root}\", {children} }\n\
+         \x20           dd { class: \"{root}\", {children}\n\
+         \x20               // @ai nd-ai-slot-inline\n\
+         \x20           }\n\
          \x20       } else {\n\
-         \x20           li { class: \"{root}\", role: \"listitem\", {children} }\n\
+         \x20           li { class: \"{root}\", role: \"listitem\", {children}\n\
+         \x20               // @ai nd-ai-slot-inline\n\
+         \x20           }\n\
          \x20       }\n\
          \x20   }\n",
     );
@@ -786,12 +964,22 @@ fn list_item_react(out: &mut String) {
          \x20     Fragment,\n\
          \x20     null,\n\
          \x20     h(\"dt\", { key: \"t\", className: \"nd-list-term\" }, term),\n\
-         \x20     h(\"dd\", { key: \"d\", className: root, ...rest }, children),\n\
+         \x20     h(\n\
+         \x20       \"dd\",\n\
+         \x20       { key: \"d\", className: root, ...rest },\n\
+         \x20       children,\n\
+         \x20       // @ai nd-ai-slot-inline,\n\
+         \x20     ),\n\
          \x20   );\n\
          \x20 }\n\
          \x20 // See the Dioxus half: the role is restated, because the rules\n\
          \x20 // that take the list's role away take its items' with it.\n\
-         \x20 return h(\"li\", { className: root, role: \"listitem\", ...rest }, children);\n",
+         \x20 return h(\n\
+         \x20   \"li\",\n\
+         \x20   { className: root, role: \"listitem\", ...rest },\n\
+         \x20   children,\n\
+         \x20   // @ai nd-ai-slot-inline,\n\
+         \x20 );\n",
     );
 }
 
@@ -814,6 +1002,10 @@ fn blockquote_dioxus(out: &mut String) {
          \x20           cite,\n\
          \x20           \"data-nd-tone\": tone.as_str(),\n\
          \x20           {children}\n\
+         \x20           // BEFORE THE ATTRIBUTION. That line is who SAID it and\n\
+         \x20           // this is who wrote it down, so the other order\n\
+         \x20           // conflates the two.\n\
+         \x20           // @ai nd-ai-slot-inline\n\
          \x20           if let Some(attribution) = attribution {\n\
          \x20               footer { class: \"nd-blockquote-attribution\",\n\
          \x20                   cite { \"{attribution}\" }\n\
@@ -838,6 +1030,7 @@ fn blockquote_react(out: &mut String) {
          \x20     ...rest,\n\
          \x20   },\n\
          \x20   children,\n\
+         \x20   // @ai nd-ai-slot-inline,\n\
          \x20   attribution\n\
          \x20     ? h(\n\
          \x20         \"footer\",\n\
@@ -918,6 +1111,9 @@ fn link_dioxus(out: &mut String) {
          \x20           \"data-nd-external\": if external { \"true\" } else { \"false\" },\n\
          \x20           \"data-nd-tone\": tone.as_str(),\n\
          \x20           {children}\n\
+         \x20           // AFTER THE WORDS AND BEFORE THE EXTERNAL GLYPH, and\n\
+         \x20           // never a control: a button inside an `<a>` is invalid.\n\
+         \x20           // @ai nd-ai-slot-inline\n\
          \x20           if external {\n\
          \x20               Icon { icon: IconDrawing::EXTERNAL_LINK, size: crate::components::IconSize::Small }\n\
          \x20           }\n\
@@ -941,6 +1137,7 @@ fn link_react(out: &mut String) {
          \x20     ...rest,\n\
          \x20   },\n\
          \x20   children,\n\
+         \x20   // @ai nd-ai-slot-inline,\n\
          \x20   external ? h(Icon, { icon: externalLink, size: \"small\" }) : null,\n\
          \x20 );\n",
     );
@@ -977,6 +1174,10 @@ fn switch_dioxus(out: &mut String) {
          \x20           \"aria-describedby\": describedby,\n\
          \x20           \"data-nd-size\": size.as_str(),\n\
          \x20           span { class: \"nd-switch-label\", \"{label}\" }\n\
+         \x20           // BETWEEN THE NAME AND THE TRACK, and never a control:\n\
+         \x20           // this root is a `<button role=\"switch\">`, and a button\n\
+         \x20           // inside a button is unreachable in several engines.\n\
+         \x20           // @ai\n\
          \x20           // The track and the knob are one element and its\n\
          \x20           // pseudo-element, so there is nothing here a caller can\n\
          \x20           // put the wrong thing inside.\n\
@@ -1020,6 +1221,7 @@ fn switch_react(out: &mut String) {
          \x20     ...rest,\n\
          \x20   },\n\
          \x20   h(\"span\", { key: \"l\", className: \"nd-switch-label\" }, label),\n\
+         \x20   // @ai,\n\
          \x20   h(\"span\", {\n\
          \x20     key: \"t\",\n\
          \x20     className: \"nd-switch-track\",\n\
@@ -1192,6 +1394,10 @@ fn segmented_item_dioxus(out: &mut String) {
          \x20           if let Some(detail) = detail {\n\
          \x20               span { class: \"nd-segmented-detail\", \"{detail}\" }\n\
          \x20           }\n\
+         \x20           // NEVER A CONTROL. This root is a `<button role=\"radio\">`\n\
+         \x20           // and a roving stop, so a control inside it would be a\n\
+         \x20           // tab stop inside a one-stop widget.\n\
+         \x20           // @ai\n\
          \x20       }\n\
          \x20   }\n",
     );
@@ -1227,6 +1433,7 @@ fn segmented_item_react(out: &mut String) {
          \x20     : h(\"span\", { key: \"l\", className: \"nd-segmented-text\" }, label),\n\
          \x20   // The second line, and it is part of the name.\n\
          \x20   detail ? h(\"span\", { key: \"d\", className: \"nd-segmented-detail\" }, detail) : null,\n\
+         \x20   // @ai,\n\
          \x20 );\n",
     );
 }
@@ -1280,6 +1487,11 @@ fn disclosure_dioxus(out: &mut String) {
          \x20                       DisclosureHeading::H4 => rsx! { h4 { class: \"nd-disclosure-text\", \"{summary}\" } },\n\
          \x20                       DisclosureHeading::None => rsx! { span { class: \"nd-disclosure-text\", \"{summary}\" } },\n\
          \x20                   }\n\
+         \x20                   // BEFORE THE MARKER, AND NEVER A CONTROL. A\n\
+         \x20                   // `<summary>` swallows every press inside it, so\n\
+         \x20                   // a button here would open the fold instead of\n\
+         \x20                   // its own note.\n\
+         \x20                   // @ai nd-ai-slot-apart\n\
          \x20                   // NAMED, BECAUSE THE RULE THAT TURNS IT USED TO\n\
          \x20                   // ASK FOR THE LAST GLYPH. In the icon-only form\n\
          \x20                   // the caller\'s own icon is the last glyph, so\n\
@@ -1329,6 +1541,7 @@ fn disclosure_react(out: &mut String) {
          \x20       ? h(Icon, { icon })\n\
          \x20       : [\n\
          \x20           h(tag_, { key: \"t\", className: \"nd-disclosure-text\" }, summary),\n\
+         \x20           // @ai nd-ai-slot-apart,\n\
          \x20           // See the Dioxus half: named, because the rule that turns\n\
          \x20           // it used to ask for the last glyph in the summary.\n\
          \x20           marker_\n\
@@ -1493,6 +1706,11 @@ const CHOICE_DIOXUS: &str = r#"    let root = format!("nd-choice «class» {clas
             if let Some(hint) = hint {
                 p { class: "nd-choice-hint", id: "{hint_id}", "{hint}" }
             }
+            // A THIRD GRID TRACK, AND NEVER INSIDE `.nd-choice-label`. Every
+            // press inside a `<label for>` activates the control it names, so
+            // a mark in there would toggle the box. The track is `auto`, so it
+            // is zero wide on every choice that carries no mark.
+            // @ai nd-choice-ai
         }
         // VISIBLE WITH NO SCRIPT AT ALL. The script is what hides it, which is
         // the only order of those two that degrades: a block hidden by CSS and
@@ -1555,6 +1773,7 @@ const CHOICE_REACT: &str = r#"  const size_ = size ?? "large";
         label,
       ),
       hint ? h("p", { key: "h", className: "nd-choice-hint", id: hintId }, hint) : null,
+      // @ai nd-choice-ai,
     ),
     // Visible with no script. The script hides it; nothing here reveals it.
     reveal
@@ -1626,6 +1845,10 @@ const FIELDSET_DIOXUS: &str = r#"    let root = format!("nd-fieldset {class}");
                 } else {
                     "{question}"
                 }
+                // IN THE LEGEND, after the question it marks. A `<legend>` has
+                // no activation behaviour of its own, so the control form is
+                // safe here in a way it is not inside a `<label for>`.
+                // @ai nd-ai-slot-apart
             }
             if let Some(hint) = hint {
                 p { class: "nd-fieldset-hint", id: "{hint_id}", "{hint}" }
@@ -1669,6 +1892,7 @@ const FIELDSET_REACT: &str = r#"  const root = ["nd-fieldset", className].filter
       // Wrapped, not replaced: a legend swapped for a heading stops being
       // attached to the controls, which is the only thing a legend is for.
       heading ? h("h1", { className: "nd-fieldset-heading" }, legend) : legend,
+      // @ai nd-ai-slot-apart,
     ),
     hint ? h("p", { key: "h", className: "nd-fieldset-hint", id: hintId }, hint) : null,
     error
@@ -1835,6 +2059,14 @@ const SELECT_DIOXUS: &str = r#"    let root = format!("nd-select {class}");
                         Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
                     }
                 }
+                // THE ONE HOST THAT RESERVES ROOM RATHER THAN TAKING IT. This
+                // field's trailing controls are absolute over a reserved
+                // `padding-inline-end`, so the mark is placed the same way and
+                // `--nd-select-ai-room` grows the reservation to match. The
+                // reservation lands on the native select too, because the mark
+                // is not script-gated and a page with no script would otherwise
+                // draw it over the value.
+                // @ai nd-select-ai
                 // THE TICK THE ENHANCED LIST MARKS A CHOSEN OPTION WITH.
                 //
                 // In a `<template>`, whose content is inert and unrendered, for
@@ -1943,6 +2175,7 @@ const SELECT_REACT: &str = r#"  const size_ = size ?? "medium";
             h(Icon, { icon: close, size: "small" }),
           )
         : null,
+      // @ai nd-select-ai,
       // The tick the enhanced list marks a chosen option with, in a template
       // for the script to clone: every drawing lives in the markup.
       h(
@@ -2284,6 +2517,13 @@ const TABLE_DIOXUS: &str = r#"    let root = format!("nd-table {class}");
                     "aria-describedby": described,
                     caption { class: "nd-table-caption",
                         span { id: "{caption_id}", "{title}" }
+                        // IN THE CAPTION, BESIDE THE TITLE. This is the one
+                        // container in the catalogue that is also a single
+                        // artefact with chrome of its own, so the claim that a
+                        // table was written by an assistant has somewhere to
+                        // go. Mark the narrowest thing that is true: a marked
+                        // table and marked cells inside it is one claim twice.
+                        // @ai
                         if let Some(note) = note {
                             span { class: "nd-table-note", id: "{note_id}", "{note}" }
                         }
@@ -2532,6 +2772,7 @@ const TABLE_REACT: &str = r#"  const density_ = density ?? "default";
           "caption",
           { key: "c", className: "nd-table-caption" },
           h("span", { key: "n", id: captionId }, caption),
+          // @ai,
           note ? h("span", { key: "d", className: "nd-table-note", id: noteId }, note) : null,
         ),
         children,
@@ -2872,7 +3113,15 @@ const TABLE_CELL_DIOXUS: &str = r#"    let root = format!("nd-table-cell {class}
             // `Info` or a table of its own, and flow content inside phrasing
             // content is invalid — it renders, and it is markup nobody can
             // defend.
-            div { class: "nd-table-value", {children} }
+            div { class: "nd-table-value", {children}
+                // IN THE CELL'S VALUE, AND NEVER A CONTROL. A table becomes a
+                // `role="grid"` as soon as any column sorts or filters, and
+                // `table.js` gives that grid exactly one tab stop. A button per
+                // marked cell would make it one stop per cell, silently, with
+                // nothing asking. Entering a cell needs a gesture this runtime
+                // does not have yet, and that is its own piece of work.
+                // @ai nd-ai-slot-apart
+            }
         }
     }
 "#;
@@ -2901,7 +3150,12 @@ const TABLE_CELL_REACT: &str = r#"  const align_ = align ?? "start";
     // reader that already has the column from its heading.
     label ? h("span", { key: "l", className: "nd-table-label", "aria-hidden": "true" }, label) : null,
     // See the Dioxus half: a `<div>`, so any component may live in a cell.
-    h("div", { key: "v", className: "nd-table-value" }, children),
+    h(
+      "div",
+      { key: "v", className: "nd-table-value" },
+      children,
+      // @ai nd-ai-slot-apart,
+    ),
   );
 "#;
 
@@ -2957,6 +3211,11 @@ const TABLE_HEADER_CELL_DIOXUS: &str = r#"    let root = format!("nd-table-heade
             "data-nd-wrap": wrap.as_str(),
             div { class: "nd-table-heading",
                 span { class: "nd-table-heading-words", "data-nd-table-heading": "", {children} }
+                // BESIDE THE WORDS AND NEVER INSIDE THEM. `table.js` MOVES
+                // `[data-nd-table-heading]` into a sort button it builds, so a
+                // mark in there would become part of a control that sorts when
+                // pressed. Not a control either, for `TableCell`'s reason.
+                // @ai nd-ai-slot-apart
             }
         }
     }
@@ -2999,6 +3258,7 @@ const TABLE_HEADER_CELL_REACT: &str = r#"  const scope_ = scope ?? "col";
         { key: "w", className: "nd-table-heading-words", "data-nd-table-heading": "" },
         children,
       ),
+      // @ai nd-ai-slot-apart,
     ),
   );
 "#;
@@ -3039,8 +3299,12 @@ const INFO_DIOXUS: &str = r#"    let root = format!("nd-info {class}");
                 hidden: true,
                 Icon { icon: IconDrawing::INFO, size: IconSize::Small }
             }
+            // `.nd-note` IS THE SURFACE AND `.nd-info-note` IS THE PART, the
+            // way `.nd-panel.nd-select-panel` already splits the two. `AILabel`
+            // opens the same surface, so it is painted once and each component
+            // keeps the class its own script and its own tests look for.
             span {
-                class: "nd-info-note",
+                class: "nd-note nd-info-note",
                 id: "{note_id}",
                 role: "note",
                 "aria-labelledby": described,
@@ -3048,7 +3312,7 @@ const INFO_DIOXUS: &str = r#"    let root = format!("nd-info {class}");
                 if let Some(heading) = heading {
                     span { class: "nd-info-title", id: "{title_id}", "{heading}" }
                 }
-                span { class: "nd-info-body", {children} }
+                span { class: "nd-note-body", {children} }
             }
         }
     }
@@ -3087,15 +3351,189 @@ const INFO_REACT: &str = r#"  const placement_ = placement ?? "auto";
       "span",
       {
         key: "n",
-        className: "nd-info-note",
+        // See the Dioxus half: the surface and the part are two classes.
+        className: "nd-note nd-info-note",
         id: noteId,
         role: "note",
         "aria-labelledby": heading ? titleId : undefined,
         hidden: true,
       },
       heading ? h("span", { key: "t", className: "nd-info-title", id: titleId }, heading) : null,
-      h("span", { key: "y", className: "nd-info-body" }, children),
+      h("span", { key: "y", className: "nd-note-body" }, children),
     ),
+  );
+"#;
+
+// --- AILabel ----------------------------------------------------------------
+
+/// The two letters that say an assistant wrote the value beside them.
+///
+/// # Why the root is a `<span>` in both shapes
+///
+/// The note has to be a SIBLING of the control. A `<span>` inside a `<button>`
+/// is content the button announces, and the note is not part of the mark's
+/// name. So the root wraps, the control sits inside it, and the note sits
+/// beside the control, which is the arrangement `Tag` already makes for its
+/// remove control.
+///
+/// # The control is not hidden, and `Info`'s is
+///
+/// `Info` ships its marker hidden and the script reveals it, because with no
+/// script there is nothing to open. This mark is drawn either way: that a value
+/// came from an assistant is true with a script and without one. The `note` is
+/// the extra, and its absence is what makes the mark a plain `<span>`.
+///
+/// # The note is `.nd-note`, which `Info`'s note also is
+///
+/// One surface, painted once, the way every panel on this site is a `.nd-panel`
+/// with a component class beside it. `info.js` enhances both hooks from one
+/// table, so there is one open note on a page rather than two.
+const AI_LABEL_DIOXUS: &str = r#"    let root = format!("nd-ai-label {class}");
+    let root = root.trim().to_owned();
+
+    // The hook the script finds this by, written only where there is something
+    // to open. A marker on every mark would be every mark enhanced, and most
+    // of them carry no note at all.
+    let hook = note.as_ref().map(|_| "");
+
+    // The letters and the phrase they stand for, built once. The same run
+    // whichever element ends up holding it, so the two branches below cannot
+    // drift apart.
+    //
+    // NOT `nd-identifier`. The letters are TRANSLATED, `AI` in English and `IA`
+    // in Portuguese, and that class tells the pseudo-locale sweep to skip the
+    // subtree. Marking these would leave the one string here that must be
+    // translated as the one string nothing checks.
+    let inside = rsx! {
+        span { class: "nd-ai-label-mark", "aria-hidden": "true", "{mark}" }
+        span { class: "nd-visually-hidden", "{label}" }
+    };
+
+    rsx! {
+        span {
+            class: "{root}",
+            "data-nd-size": size.as_str(),
+            "data-nd-variant": variant.as_str(),
+            "data-nd-placement": placement.as_str(),
+            "data-nd-tone": tone,
+            "data-nd-close-label": close_label,
+            "data-nd-ai-note": hook,
+            if let Some(note) = note {
+                button {
+                    class: "nd-ai-label-control",
+                    r#type: "button",
+                    "aria-expanded": "false",
+                    {inside}
+                }
+                span { class: "nd-note nd-ai-label-note", role: "note", hidden: true,
+                    span { class: "nd-note-body", "{note}" }
+                }
+            } else {
+                // NO ROLE AND NO TAB STOP. A mark with nothing to open that a
+                // reader can still focus is a stop they pay for and get
+                // nothing back from.
+                {inside}
+            }
+        }
+    }
+"#;
+
+const AI_LABEL_REACT: &str = r#"  const size_ = size ?? "small";
+  const variant_ = variant ?? "soft";
+  const placement_ = placement ?? "auto";
+  const root = ["nd-ai-label", className].filter(Boolean).join(" ");
+
+  // The letters and the phrase, built once. See the Dioxus half for both this
+  // and the reason they are not marked as an identifier.
+  const inside = [
+    h("span", { key: "m", className: "nd-ai-label-mark", "aria-hidden": "true" }, mark),
+    h("span", { key: "n", className: "nd-visually-hidden" }, label),
+  ];
+
+  return h(
+    "span",
+    {
+      className: root,
+      "data-nd-size": size_,
+      "data-nd-variant": variant_,
+      "data-nd-placement": placement_,
+      "data-nd-tone": tone,
+      "data-nd-close-label": closeLabel,
+      // Written only where there is something to open. See the Dioxus half.
+      "data-nd-ai-note": note ? "" : undefined,
+      ...rest,
+    },
+    note
+      ? h(
+          "button",
+          { key: "c", className: "nd-ai-label-control", type: "button", "aria-expanded": "false" },
+          inside,
+        )
+      : inside,
+    note
+      ? h(
+          "span",
+          { key: "t", className: "nd-note nd-ai-label-note", role: "note", hidden: true },
+          h("span", { key: "y", className: "nd-note-body" }, note),
+        )
+      : null,
+  );
+"#;
+
+// --- Truncate ---------------------------------------------------------------
+
+/// Clipped text, and the one thing that cannot be clipped with it.
+///
+/// # Why this stopped being derived
+///
+/// A derived body is one element holding its children, and this one carries the
+/// clamp. An inline mark inside a `-webkit-box` is counted into the last line
+/// and, at `lines = "1"`, clipped away entirely — the mark disappears and the
+/// reader is told nothing. Worse, the site's own audit skips clipped-text
+/// reporting wherever a clamp is set, so nothing would have reported it.
+///
+/// So a marked `Truncate` moves the clamp onto an inner element and lays the
+/// two out side by side. `data-nd-ai` is what the stylesheet switches on, and
+/// an unmarked one renders exactly the markup it always did.
+const TRUNCATE_DIOXUS: &str = r#"    let root = format!("nd-truncate {class}");
+    let root = root.trim().to_owned();
+    let marked = ai_mark.is_some() && ai_label.is_some();
+
+    rsx! {
+        span {
+            class: "{root}",
+            "data-nd-lines": lines.as_str(),
+            "title": title,
+            "data-nd-ai": marked.then_some(""),
+            if marked {
+                // THE CLAMP MOVES DOWN ONE ELEMENT. Everything about the
+                // clipping is the same; what changes is that the mark is
+                // outside the box being clipped rather than on its last line.
+                span { class: "nd-truncate-text", {children} }
+                // @ai nd-ai-slot-apart
+            } else {
+                {children}
+            }
+        }
+    }
+"#;
+
+const TRUNCATE_REACT: &str = r#"  const lines_ = lines ?? "1";
+  const root = ["nd-truncate", className].filter(Boolean).join(" ");
+  const marked = Boolean(aiMark && aiLabel);
+
+  return h(
+    "span",
+    {
+      className: root,
+      "data-nd-lines": lines_,
+      title,
+      "data-nd-ai": marked ? "" : undefined,
+      ...rest,
+    },
+    // See the Dioxus half: the clamp moves down one element when marked.
+    marked ? h("span", { key: "t", className: "nd-truncate-text" }, children) : children,
+    // @ai nd-ai-slot-apart,
   );
 "#;
 
@@ -3194,6 +3632,10 @@ const MENU_ITEM_DIOXUS: &str = r#"    let root = format!("nd-menu-item {class}")
                 span { class: "nd-menu-item-detail", "{detail}" }
             }
         }
+        // NEVER A CONTROL. A `role="menu"` holds items and nothing else, and
+        // the menu's own script walks its items with the arrows — a control
+        // inside one is a stop that walk can never reach.
+        // @ai
     };
 
     rsx! {
@@ -3237,6 +3679,7 @@ const MENU_ITEM_REACT: &str = r#"  const root = ["nd-menu-item", className].filt
       h("span", { key: "l", className: "nd-menu-item-label" }, label),
       detail ? h("span", { key: "d", className: "nd-menu-item-detail" }, detail) : null,
     ),
+    // @ai,
   ];
   const shared = {
     className: root,
@@ -3324,6 +3767,11 @@ const METER_DIOXUS: &str = r#"    let root = format!("nd-meter {class}");
                     if let Some(sentence) = sentence.clone() {
                         span { class: "nd-meter-value", "{sentence}" }
                     }
+                    // ON THE LABEL LINE, AFTER THE READING. That line is
+                    // `space-between` with two items in it, so a third would
+                    // push the reading to the CENTRE. `.nd-meter-line:has()`
+                    // in the stylesheet is what stops it.
+                    // @ai
                 }
             }
             meter {
@@ -3388,6 +3836,7 @@ const METER_REACT: &str = r#"  const size_ = size ?? "medium";
       (showValue ?? true) && sentence
         ? h("span", { key: "v", className: "nd-meter-value" }, sentence)
         : null,
+      // @ai,
     ),
     h(
       "meter",
@@ -3454,6 +3903,9 @@ const PROGRESS_DIOXUS: &str = r#"    let root = format!("nd-progress {class}");
                 if let Some(sentence) = sentence.clone() {
                     span { class: "nd-progress-value", "{sentence}" }
                 }
+                // See `Meter`: a third item on a `space-between` line moves
+                // the reading, and `:has()` is what stops it.
+                // @ai
             }
             progress {
                 class: "nd-progress-bar",
@@ -3502,6 +3954,7 @@ const PROGRESS_REACT: &str = r#"  const size_ = size ?? "medium";
       h("label", { key: "n", className: "nd-progress-label", htmlFor: id }, label),
       // See the Dioxus half: the sentence, not the bare percent.
       sentence ? h("span", { key: "v", className: "nd-progress-value" }, sentence) : null,
+      // @ai,
     ),
     // See the Dioxus half: absent, not zero — no attribute is the
     // indeterminate bar.
@@ -4475,6 +4928,12 @@ const TAG_DIOXUS: &str = r#"    let root = format!("nd-tag {class}");
                 // claims a role is the promise the markup does not keep.
                 span { class: "nd-tag-body", {inside} }
             }
+            // IN THE PILL, BETWEEN THE BODY AND THE REMOVE CONTROL. The body
+            // carries a NEGATIVE inline margin, so a sibling placed after it
+            // with no rule of its own lands on top of the body's own trailing
+            // padding — the overlap the remove control's `:has()` rule already
+            // exists to correct, and `.nd-tag-ai` extends it.
+            // @ai nd-tag-ai
             if let Some(remove) = remove {
                 Button {
                     class: "nd-tag-remove",
@@ -4563,6 +5022,7 @@ const TAG_REACT: &str = r#"  const variant_ = variant ?? "soft";
       ...rest,
     },
     body,
+    // @ai nd-tag-ai,
     remove
       ? h(Button, {
           key: "x",
@@ -5063,6 +5523,10 @@ const TAG_PICKER_DIOXUS: &str = r#"    let root = format!("nd-tag-picker {class}
                         Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
                     }
                 }
+                // LAST IN THE FIELD, after the composer and the clear. The
+                // field wraps, so the mark wraps with the tags rather than
+                // being wedged between two of them.
+                // @ai
             }
 
             // One sentence at a time: how many there are, what was added, what
@@ -5208,6 +5672,7 @@ const TAG_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
             h(Icon, { icon: close, size: "small" }),
           )
         : null,
+      // @ai,
     ),
     h("p", {
       key: "n",
@@ -5608,6 +6073,10 @@ const COLOR_PICKER_DIOXUS: &str = r#"    let root = format!("nd-color-picker {cl
                     }
                 }
             }
+            // BESIDE THE TRIGGER AND NEVER INSIDE THE PANEL. The panel is
+            // `position: fixed` and opens over the page; a mark in it would be
+            // a mark a reader can only find by opening something.
+            // @ai
 
             div {
                 class: "nd-panel nd-color-picker-panel",
@@ -5974,6 +6443,7 @@ const COLOR_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
           ),
       ),
     ),
+    // @ai,
     h(
       "div",
       {
@@ -6408,6 +6878,10 @@ const INPUT_DIOXUS: &str = r#"    let id = format!("nd-input-{name}");
                         Icon { icon: IconDrawing::EYE_OFF, size: crate::components::IconSize::Small }
                     }
                 }
+                // LAST IN THE ROW, after the clear and the reveal. `.nd-input-box`
+                // is the `flex: 1` item, so it gives up exactly the mark's width
+                // and nothing here is ever covered.
+                // @ai
             }
             if counter {
                 p {
@@ -6549,6 +7023,7 @@ const INPUT_REACT: &str = r#"  const kind_ = kind ?? "text";
             h(Icon, { key: "b", icon: eyeOff, size: "small" }),
           )
         : null,
+      // @ai,
     ),
     counter
       ? h(
@@ -6671,6 +7146,11 @@ const TEXTAREA_DIOXUS: &str = r#"    let id = format!("nd-textarea-{name}");
                     // a value with a newline in it survives the round trip.
                     {value.unwrap_or_default()}
                 }
+                // IN THE BOX'S OWN ROW, at its top edge. `.nd-textarea` is
+                // already a flex row with one item in it. The resize grip the
+                // browser paints sits on the block-end corner, so a mark at the
+                // end of the row would sit under it.
+                // @ai nd-ai-slot-start
             }
             if counter {
                 p {
@@ -6768,6 +7248,7 @@ const TEXTAREA_REACT: &str = r#"  const size_ = size ?? "medium";
         // See the Dioxus half: the value is the content.
         defaultValue: value,
       }),
+      // @ai nd-ai-slot-start,
     ),
     counter
       ? h(
@@ -6926,6 +7407,15 @@ const NUMBER_INPUT_DIOXUS: &str = r#"    let id = format!("nd-number-input-{name
                         }
                     }
                 }
+                // LAST IN THE DOM, AFTER THE STEPPERS, AND THAT ORDER IS LOAD
+                // BEARING. Under `stepping: "primary"` the steppers become
+                // `display: contents` and the down one takes `order: -1`, so
+                // the row lays out as minus, value, plus. A mark written before
+                // them would land between the value and the plus, splitting the
+                // pair that arrangement exists to create. Written after them it
+                // stays outside the pair in both arrangements, with no `order`
+                // declaration anywhere.
+                // @ai
             }
         }
     }
@@ -7050,6 +7540,7 @@ const NUMBER_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
             ),
           )
         : null,
+      // @ai,
     ),
   );
 "#;
@@ -7211,6 +7702,10 @@ const SLIDER_DIOXUS: &str = r#"    let id = format!("nd-slider-{name}");
                     // said twice.
                     output { class: "nd-slider-output", "for": "{start_id}", "data-nd-slider-output": "", "{reading}" }
                 }
+                // AFTER THE READING, never inside `.nd-slider-rails`. That is
+                // one grid cell holding two stacked ranges, and the site's own
+                // audit names it as a deliberate overlap.
+                // @ai
             }
         }
     }
@@ -7335,6 +7830,7 @@ const SLIDER_REACT: &str = r#"  const size_ = size ?? "medium";
             reading,
           )
         : null,
+      // @ai,
     ),
   );
 "#;
@@ -7440,6 +7936,15 @@ const FILE_INPUT_DIOXUS: &str = r#"    let id = format!("nd-file-input-{name}");
                     "aria-atomic": "true",
                     "data-nd-file-input-status": "",
                 }
+                // NEVER INSIDE `.nd-file-input-area`. That is the real file
+                // input's `<label>`, and a control inside a label opens the
+                // file dialog on every press.
+                //
+                // AND THE LEADING EDGE, NOT THE TRAILING ONE. This component is
+                // a flex COLUMN, so the slot that means *block*-end in a row
+                // means *inline*-end here — a mark alone on a line at the far
+                // right of a stack that is otherwise left-aligned.
+                // @ai nd-ai-slot-start
             }
             // The script does not know what a row looks like. It copies this.
             template { "data-nd-file-template": "",
@@ -7543,6 +8048,7 @@ const FILE_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
         "aria-atomic": "true",
         "data-nd-file-input-status": "",
       }),
+      // @ai nd-ai-slot-start,
     ),
     h(
       "template",
@@ -7760,6 +8266,11 @@ const TIME_INPUT_DIOXUS: &str = r#"    let id = format!("nd-time-input-{name}");
                             }
                         }
                     }
+                    // LAST IN THE ROW, on its block-end edge, beside the
+                    // meridiem control that already sits there. The row wraps
+                    // at 320px, so the mark wraps rather than squeezing a
+                    // segment that is a fixed number of characters wide.
+                    // @ai nd-ai-slot-end
                 }
                 p {
                     class: "nd-time-input-note",
@@ -7908,6 +8419,7 @@ const TIME_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
                 }),
               )
             : null,
+          // @ai nd-ai-slot-end,
         ),
       ),
       h("p", {
@@ -8066,6 +8578,10 @@ const CAROUSEL_DIOXUS: &str = r#"    let root = format!("nd-carousel {class}");
                 if counter {
                     p { class: "nd-carousel-counter", hidden: true, "data-nd-carousel-counter": "" }
                 }
+                // IN THE CONTROLS BAR, which is the one row a carousel has
+                // that is not a slide. A mark on a slide would be a mark that
+                // scrolls away from what it is about.
+                // @ai
             }
 
             // One sentence at a time, and never the slide's contents: what a
@@ -8214,6 +8730,7 @@ const CAROUSEL_REACT: &str = r#"  const perView_ = perView ?? "1";
             "data-nd-carousel-counter": "",
           })
         : null,
+      // @ai,
     ),
     h("p", {
       key: "s",
@@ -8570,6 +9087,11 @@ const DATE_INPUT_DIOXUS: &str = r#"    let root = format!("nd-date-input {class}
                 {first}
                 {second}
                 {third}
+                // LAST IN THE ROW, on its block-end edge, which is where the
+                // meridiem control already sits: every other item here is a
+                // label stacked over a box, so a mark aligned to the top would
+                // sit beside the labels rather than beside the values.
+                // @ai nd-ai-slot-end
             }
 
             // THE QUICK PICKS, INERT. Served hidden, so with no script they
@@ -8690,6 +9212,7 @@ const DATE_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
             ? segment("month", "nd-date-input-two", monthLabel, valueMonth, "bday-month")
             : segment("year", "nd-date-input-four", yearLabel, valueYear, "bday-year"),
       ),
+      // @ai nd-ai-slot-end,
     ),
     h(
       "div",
@@ -8860,6 +9383,10 @@ const TREE_ITEM_DIOXUS: &str = r#"    let root = format!("nd-tree-item {class}")
                         {row}
                     }
                 }
+                // IN THE ROW AND NEVER INSIDE THE BODY, which is an `<a>` on
+                // any node that links somewhere. The row is a flex row and the
+                // label inside the body is what gives up the width.
+                // @ai
             }
             // The `<ul>` that becomes `role="group"` and that a collapse hides.
             // Written here rather than by the caller, because a caller who has
@@ -9815,6 +10342,7 @@ const TREE_ITEM_REACT: &str = r#"  const root = ["nd-tree-item", className].filt
             { key: "b", className: "nd-tree-body", "aria-current": current ? "page" : undefined },
             ...row,
           ),
+      // @ai,
     ),
     h("ul", { key: "g", className: "nd-tree-group", "data-nd-tree-group": "" }, children),
   );
@@ -9922,6 +10450,10 @@ const CODE_BLOCK_DIOXUS: &str = r#"    let named = Language::parse(language.as_d
                     if let Some(badge) = badge {
                         span { class: "nd-codeblock-badge nd-identifier", "{badge}" }
                     }
+                    // IN THE BAR, beside the badge. The bar pushes its controls
+                    // to the trailing edge and the filename takes the rest, so
+                    // the mark drops in between with no rule of its own.
+                    // @ai
                     if let Some(wrap_label) = wrap_label.clone() {
                         button {
                             class: "nd-codeblock-control",
@@ -10076,6 +10608,7 @@ const CODE_BLOCK_REACT: &str = r#"  const numbered_ = numbered ?? false;
           badge
             ? h("span", { key: "l", className: "nd-codeblock-badge nd-identifier" }, badge)
             : null,
+          // @ai,
           wrapLabel
             ? h(
                 "button",
@@ -10255,6 +10788,10 @@ const SEARCH_DIOXUS: &str = r#"    let id = format!("nd-search-{name}");
                 Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
             }
         }
+        // IN THE ROW, so all three presentations draw it once rather than
+        // three times. `.nd-search-field` is a flex row and the input is what
+        // gives up the width, exactly as `Input`'s does.
+        // @ai
     };
 
     let field = rsx! {
@@ -10435,6 +10972,10 @@ const SEARCH_RESULT_DIOXUS: &str = r#"    let root = format!("nd-search-result {
                 if let Some(badge) = badge {
                     span { class: "nd-search-result-badge", "{badge}" }
                 }
+                // NEVER A CONTROL. An enhanced row is a `role="option"` driven
+                // by `aria-activedescendant`, so focus never leaves the box and
+                // a control in a row can never receive it.
+                // @ai
                 if let Some(detail) = detail {
                     span { class: "nd-search-result-detail", "{detail}" }
                 }
@@ -10504,6 +11045,7 @@ const SEARCH_REACT: &str = r#"  const presentation_ = presentation ?? "inline";
           h(Icon, { icon: close, size: "small" }),
         )
       : null,
+    // @ai,
   ];
 
   const field = action
@@ -10675,6 +11217,7 @@ const SEARCH_RESULT_REACT: &str = r#"  const current_ = current ?? false;
       // `<mark>` runs. See the Dioxus half.
       h("span", { key: "l", className: "nd-search-result-label", "data-nd-search-label": "" }, label),
       badge ? h("span", { key: "b", className: "nd-search-result-badge" }, badge) : null,
+      // @ai,
       detail ? h("span", { key: "d", className: "nd-search-result-detail" }, detail) : null,
       current_ ? h(Icon, { key: "c", icon: check, size: "small" }) : null,
     ),
@@ -10825,6 +11368,12 @@ const LABEL_DIOXUS: &str = r#"    let root = format!("nd-label {class}");
         if let Some(marker) = marker {
             span { class: "nd-label-mark", "{marker}" }
         }
+        // THE QUESTION'S OWN MARK, and never a control. One of the three kinds
+        // below is a `<label for>`, and every press inside one of those
+        // activates the control it names — so a button here would toggle the
+        // box a reader was only trying to read about. `ai_pressable = false`
+        // in the contract is what makes this a `<span>` in all three.
+        // @ai nd-ai-slot-apart
     };
 
     match kind {
@@ -10886,6 +11435,7 @@ const LABEL_REACT: &str = r#"  const kind_ = kind ?? "label";
     },
     text,
     marker ? h("span", { key: "m", className: "nd-label-mark" }, marker) : null,
+    // @ai nd-ai-slot-apart,
   );
 "#;
 
@@ -10919,8 +11469,14 @@ const IMAGE_DIOXUS: &str = r#"    let root = format!("nd-image {class}");
     let alone = format!("{root} nd-image-media");
     let shape = ratio.map(ImageRatio::as_str);
 
+    // A CAPTION OR A MARK MAKES IT A FIGURE, and either alone is enough. An
+    // `<img>` is a void element, so a bare picture has nowhere to put a mark —
+    // and a mark that only appeared on a captioned picture would be a prop
+    // inert under another prop's default, which is the defect `props.rs` names.
+    let framed = caption.is_some() || (ai_mark.is_some() && ai_label.is_some());
+
     rsx! {
-        if let Some(caption) = caption {
+        if framed {
             figure {
                 class: "{root}",
                 "data-nd-ratio": shape,
@@ -10940,7 +11496,13 @@ const IMAGE_DIOXUS: &str = r#"    let root = format!("nd-image {class}");
                 }
                 // A `<figcaption>` rather than a paragraph under the picture:
                 // the words belong to the figure rather than to the flow.
-                figcaption { class: "nd-image-caption", "{caption}" }
+                if let Some(caption) = caption {
+                    figcaption { class: "nd-image-caption", "{caption}" }
+                }
+                // IN THE CAPTION ROW, under the picture. A picture is a fixed
+                // box painted edge to edge, so this is the only room a figure
+                // has that is not the picture itself.
+                // @ai nd-ai-slot-caption
             }
         } else {
             img {
@@ -10972,13 +11534,17 @@ const IMAGE_REACT: &str = r#"  const fit_ = fit ?? "cover";
   };
   const picture = { src, alt, width, height, loading: loading_, decoding: "async" };
 
-  if (!caption)
+  // See the Dioxus half: a caption or a mark makes it a figure.
+  const framed = caption || (aiMark && aiLabel);
+
+  if (!framed)
     return h("img", { className: `${root} nd-image-media`, ...shape, ...picture, ...rest });
   return h(
     "figure",
     { className: root, ...shape, ...rest },
     h("img", { key: "p", className: "nd-image-media", ...picture }),
-    h("figcaption", { key: "c", className: "nd-image-caption" }, caption),
+    caption ? h("figcaption", { key: "c", className: "nd-image-caption" }, caption) : null,
+    // @ai nd-ai-slot-caption,
   );
 "#;
 
@@ -11048,6 +11614,11 @@ const MESSAGE_BAR_DIOXUS: &str = r#"    let root = format!("nd-message-bar {clas
                 div { class: "nd-message-bar-body", {children} }
             }
 
+            // IN THE BAR'S ROW, before the dismiss control. The row aligns to
+            // the first line rather than to the middle, so the mark takes one
+            // line's height and centres in that — which is what the icon
+            // beside it already does.
+            // @ai nd-ai-slot-line
             if dismissible {
                 // RENDERED HIDDEN, revealed by `dist/message-bar.js` — `Info`'s
                 // arrangement for `Info`'s reason. With no script there is
@@ -11096,6 +11667,7 @@ const MESSAGE_BAR_REACT: &str = r#"  const alert_ = alert ?? false;
       title ? h("strong", { key: "h", className: "nd-message-bar-title" }, title) : null,
       h("div", { key: "b", className: "nd-message-bar-body" }, children),
     ),
+    // @ai nd-ai-slot-line,
     dismissible_
       ? h(
           "button",
@@ -11317,6 +11889,10 @@ const RATING_DIOXUS: &str = r#"    let root = format!("nd-rating {class}");
                 if let Some(sentence) = sentence {
                     span { class: "nd-rating-value", "{sentence}" }
                 }
+                // AFTER THE READING, and never inside `.nd-rating-stars`. That
+                // holds an overlay clipped to the fraction of a star the value
+                // is, so anything in it is cut at the same fraction.
+                // @ai nd-ai-slot-apart
             }
         } else {
             Field {
@@ -11446,6 +12022,7 @@ const RATING_REACT: &str = r#"  const size_ = size ?? "medium";
       sentence === undefined
         ? null
         : h("span", { key: "v", className: "nd-rating-value" }, sentence),
+      // @ai nd-ai-slot-apart,
     );
 
   return h(
@@ -11632,6 +12209,10 @@ const OTP_FIELD_DIOXUS: &str = r#"    let root = format!("nd-otp-field {class}")
                             }
                         }
                     }
+                    // AFTER THE BOXES AND SET APART FROM THEM. The row's own
+                    // gap is one step, so the mark takes a second one: at the
+                    // same gap it reads as one more box in the code.
+                    // @ai nd-ai-slot-apart
                 }
                 // One sentence at a time: what is missing, and what the boxes
                 // do not accept. Said on leaving rather than between two boxes.
@@ -11732,6 +12313,7 @@ const OTP_FIELD_REACT: &str = r#"  const size_ = size ?? "medium";
             }),
           ),
         ),
+        // @ai nd-ai-slot-apart,
       ),
       h("p", {
         key: "n",
@@ -11855,6 +12437,8 @@ const TAB_DIOXUS: &str = r##"    let root = format!("nd-tab {class}");
             if let Some(count) = count {
                 span { class: "nd-tab-count", "{count}" }
             }
+            // AFTER THE COUNT, and never a control: this root is an `<a>`.
+            // @ai
         }
     }
 "##;
@@ -11884,6 +12468,7 @@ const TAB_REACT: &str = r#"  const selected_ = selected ?? false;
     h("span", { key: "t", className: "nd-tab-text" }, label),
     // See the Dioxus half: inside the tab, so it is part of the name.
     count ? h("span", { key: "c", className: "nd-tab-count" }, count) : null,
+    // @ai,
   );
 "#;
 
@@ -11999,6 +12584,9 @@ const DIALOG_DIOXUS: &str = r#"    let root = format!("nd-dialog {class}");
                         if let Some(heading) = heading {
                             h2 { class: "nd-dialog-title", id: "{title_id}", "{heading}" }
                         }
+                        // IN THE HEAD, before the close control. The head is
+                        // the one row a dialog has that is not its content.
+                        // @ai
                         if dismissible {
                             button {
                                 class: "nd-dialog-close",
@@ -12071,6 +12659,7 @@ const DIALOG_REACT: &str = r#"  const modal_ = modal ?? true;
             "div",
             { key: "h", className: "nd-dialog-head" },
             heading ? h("h2", { key: "t", className: "nd-dialog-title", id: titleId }, heading) : null,
+            // @ai,
             dismissible_
               ? h(
                   "button",
@@ -12148,6 +12737,8 @@ const POPOVER_DIOXUS: &str = r#"    let root = format!("nd-popover {class}");
                         if let Some(heading) = heading {
                             h2 { class: "nd-popover-title", id: "{title_id}", "{heading}" }
                         }
+                        // In the head, before the close control. See `Dialog`.
+                        // @ai
                         if dismissible {
                             button {
                                 class: "nd-popover-close",
@@ -12214,6 +12805,7 @@ const POPOVER_REACT: &str = r#"  const placement_ = placement ?? "auto";
             "div",
             { key: "h", className: "nd-popover-head" },
             heading ? h("h2", { key: "i", className: "nd-popover-title", id: titleId }, heading) : null,
+            // @ai,
             dismissible_
               ? h(
                   "button",
@@ -12373,6 +12965,9 @@ const TOAST_DIOXUS: &str = r#"    let root = format!("nd-toast {class}");
                 }
             }
 
+            // Before the dismiss control, in the message's own row. See
+            // `MessageBar`, which this arrangement copies.
+            // @ai nd-ai-slot-line
             if dismissible {
                 // RENDERED HIDDEN, revealed by `dist/toast.js` — `MessageBar`'s
                 // arrangement for `Info`'s reason. With no script there is
@@ -12430,6 +13025,7 @@ const TOAST_REACT: &str = r#"  const placement_ = placement ?? "bottom-end";
           })
         : null,
     ),
+    // @ai nd-ai-slot-line,
     dismissible_
       ? h(
           "button",

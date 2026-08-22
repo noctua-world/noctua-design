@@ -86,6 +86,10 @@ pub fn Label(
     required_label: Option<String>,
     /// The word for a question that may be left blank, such as *optional*. Written only while `required` is off, because a question is one or the other. Mark whichever of the two is rarer in the form.
     optional_label: Option<String>,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -113,6 +117,21 @@ pub fn Label(
         "{text}"
         if let Some(marker) = marker {
             span { class: "nd-label-mark", "{marker}" }
+        }
+        // THE QUESTION'S OWN MARK, and never a control. One of the three kinds
+        // below is a `<label for>`, and every press inside one of those
+        // activates the control it names — so a button here would toggle the
+        // box a reader was only trying to read about. `ai_pressable = false`
+        // in the contract is what makes this a `<span>` in all three.
+        // The assistant's mark, in the room this component reserves for
+        // it. A child in the flow and never a corner: `Badge` translates
+        // its mark onto what it marks, and this may not.
+        if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+            crate::components::AILabel {
+                class: "nd-ai-slot nd-ai-slot-apart",
+                mark,
+                label: phrase,
+            }
         }
     };
 

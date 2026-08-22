@@ -102,6 +102,12 @@ pub fn Rating(
     /// Whether the options refuse to be chosen. It reaches every radio and the `<fieldset>` around them, so nothing inside is reachable or submitted.
     #[props(default = false)]
     disabled: bool,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
+    /// One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control.
+    ai_note: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -180,6 +186,20 @@ pub fn Rating(
                 }
                 if let Some(sentence) = sentence {
                     span { class: "nd-rating-value", "{sentence}" }
+                }
+                // AFTER THE READING, and never inside `.nd-rating-stars`. That
+                // holds an overlay clipped to the fraction of a star the value
+                // is, so anything in it is cut at the same fraction.
+                // The assistant's mark, in the room this component reserves for
+                // it. A child in the flow and never a corner: `Badge` translates
+                // its mark onto what it marks, and this may not.
+                if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                    crate::components::AILabel {
+                        class: "nd-ai-slot nd-ai-slot-apart",
+                        mark,
+                        label: phrase,
+                        note: ai_note.clone(),
+                    }
                 }
             }
         } else {

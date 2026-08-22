@@ -12,7 +12,8 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
-export function MenuItem({ label, icon, detail, value, action, tone, disabled, href, rel, target, className, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function MenuItem({ label, icon, detail, value, action, tone, disabled, href, rel, target, aiMark, aiLabel, className, ...rest }) {
   const root = ["nd-menu-item", className].filter(Boolean).join(" ");
   const relation = rel ?? (target ? "noopener noreferrer" : undefined);
   const inside = [
@@ -23,6 +24,9 @@ export function MenuItem({ label, icon, detail, value, action, tone, disabled, h
       h("span", { key: "l", className: "nd-menu-item-label" }, label),
       detail ? h("span", { key: "d", className: "nd-menu-item-detail" }, detail) : null,
     ),
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel })
+      : null,
   ];
   const shared = {
     className: root,

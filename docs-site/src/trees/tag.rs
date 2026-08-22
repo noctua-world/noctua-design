@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
-/// Every `Tag` example. 6 of them.
+/// Every `Tag` example. 7 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Tag { label: "…", tone: "…", variant: TagVariant::… }"#,
@@ -288,5 +288,65 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 }],
             }],
         }],
+    ),
+    (
+        r"Tag { ai_mark, ai_label, ai_note }",
+        &[
+            Node::Element {
+                tag: "div",
+                attributes: &[("class", Value::Text("nd-example-row"))],
+                // ONE OF THESE IS NOT ONE OF `Button`'S FOUR. `shipped` is a
+                // family the colour system has always declared and no component
+                // could name until `tone` stopped being a closed list.
+                children: &[Node::Each {
+                    over: Each::Rows(&[
+                        &[Value::Text("neutral"), Value::Message(Key::ExampleTagDraft)],
+                        &[Value::Text("accent"), Value::Message(Key::ExampleTagReview)],
+                        &[
+                            Value::Text("shipped"),
+                            Value::Message(Key::ExampleTagShipped),
+                        ],
+                        &[
+                            Value::Text("danger"),
+                            Value::Message(Key::ExampleTagBlocked),
+                        ],
+                    ]),
+                    body: &[Node::Component {
+                        name: "Tag",
+                        props: &[
+                            ("tone", Value::Bound(0)),
+                            ("label", Value::Bound(1)),
+                            ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                            ("ai_label", Value::Message(Key::ExampleAiName)),
+                            ("ai_note", Value::Message(Key::ExampleAiNote)),
+                        ],
+                        children: &[],
+                    }],
+                }],
+            },
+            Node::Element {
+                tag: "div",
+                attributes: &[("class", Value::Text("nd-example-row"))],
+                children: &[Node::Each {
+                    over: Each::Rows(&[
+                        &[Value::Text("soft"), Value::Message(Key::ExampleTagDraft)],
+                        &[Value::Text("solid"), Value::Message(Key::ExampleTagReview)],
+                        &[
+                            Value::Text("outline"),
+                            Value::Message(Key::ExampleTagShipped),
+                        ],
+                    ]),
+                    body: &[Node::Component {
+                        name: "Tag",
+                        props: &[
+                            ("variant", Value::Bound(0)),
+                            ("tone", Value::Text("accent")),
+                            ("label", Value::Bound(1)),
+                        ],
+                        children: &[],
+                    }],
+                }],
+            },
+        ],
     ),
 ];

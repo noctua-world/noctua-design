@@ -3,6 +3,7 @@ name = "Paragraph"
 element = "p"
 class = "nd-paragraph"
 summary = "Render a paragraph of prose."
+ai = "inline"
 
 [prop.size]
 type = "enum"

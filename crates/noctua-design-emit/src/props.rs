@@ -335,6 +335,17 @@ fn rust_element(out: &mut String, component: &Component, element: &str, depth: u
     if component.takes_children() {
         writeln!(out, "{pad}    {{children}}").expect("write");
     }
+    // AFTER THE CONTENT, WHICH IS WHAT `inline` MEANS. A derived body is one
+    // element holding its children, so the only room it has is the end of the
+    // run — and that is where a mark on a heading or a paragraph belongs. It
+    // costs `Heading` nothing: the six-arm element match is still generated,
+    // and hand-writing it to add three lines would give up the
+    // parity-by-construction the whole of this module is for.
+    out.push_str(&controls::ai_block_dioxus(
+        component,
+        &format!("{pad}    "),
+        "nd-ai-slot-inline",
+    ));
     writeln!(out, "{pad}}}").expect("write");
 }
 
@@ -525,6 +536,9 @@ fn react(component: &Component, drawings: &[Icon]) -> String {
     // it reads its grammar tables at render time, so an absent import is not a
     // wrong icon, it is a `ReferenceError` on every block.
     out.push_str(&controls::react_imports(component));
+    // And the one a host gains from `[meta] ai`, which its body did not ask
+    // for and cannot: the fragment is written by `controls::ai_block_react`.
+    out.push_str(&controls::ai_imports_react(component));
     // And the drawings the body reaches for, read out of the body itself.
     out.push_str(&controls::react_icon_imports(component, drawings));
 
@@ -605,10 +619,21 @@ fn react(component: &Component, drawings: &[Icon]) -> String {
 
     let element = react_element(&mut out, component);
 
-    if component.takes_children() {
-        writeln!(out, "  return h({element}, props, children);").expect("write");
+    // See the Dioxus half: the mark goes after the content, which is the only
+    // room a derived body has.
+    let mark = controls::ai_block_react(component, "    ", "nd-ai-slot-inline");
+    let mark = if mark.is_empty() {
+        String::new()
     } else {
+        format!(",\n    {mark}")
+    };
+
+    if component.takes_children() {
+        writeln!(out, "  return h({element}, props, children{mark});").expect("write");
+    } else if mark.is_empty() {
         writeln!(out, "  return h({element}, props);").expect("write");
+    } else {
+        writeln!(out, "  return h({element}, props{mark});").expect("write");
     }
     out.push_str("}\n");
     out
@@ -696,15 +721,13 @@ fn js_index(components: &[Component]) -> String {
 // --- Shared ----------------------------------------------------------------
 
 /// `CodeBlock` → `code_block`; the file name in both packages.
+///
+/// The contract reader's own, rather than a second copy of the split. It was a
+/// second copy, and the two agreed until a name arrived with two capitals in a
+/// row — at which point one of them would have named a file the other could not
+/// find.
 pub(crate) fn file_stem(name: &str) -> String {
-    let mut out = String::with_capacity(name.len() + 2);
-    for (index, ch) in name.char_indices() {
-        if ch.is_uppercase() && index > 0 {
-            out.push('_');
-        }
-        out.extend(ch.to_lowercase());
-    }
-    out
+    noctua_design_spec::component::file_stem(name)
 }
 
 /// `line-numbers` → `LineNumbers`; `2` → `_2`, because a Rust variant cannot
@@ -865,6 +888,75 @@ mod tests {
     fn shipped() -> Vec<Component> {
         let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
         noctua_design_spec::component::load_all(root.join("spec/components")).expect("components")
+    }
+
+    /// EVERY HOST ACTUALLY DRAWS ITS MARK.
+    ///
+    /// `[meta] ai` grafts props onto a contract and the reference table then
+    /// documents them. A body written by hand in `controls.rs` never reaches
+    /// [`rust_element`], so a host whose body forgot its `// @ai` marker takes
+    /// all of them and renders nothing — accepted, documented, and inert, which
+    /// is this module's own definition of a defect, one mechanism further away.
+    ///
+    /// Nothing else catches it: the props exist, and they declare no attribute
+    /// for `every_declared_attribute_is_written_by_both_bodies` to look for.
+    #[test]
+    fn every_host_draws_the_mark_in_both_languages() {
+        let mut missing = Vec::new();
+        let mut hosts = 0usize;
+        for component in shipped() {
+            if component.meta.ai.is_none() {
+                continue;
+            }
+            hosts += 1;
+            let name = &component.meta.name;
+            if !dioxus(&component).contains("crate::components::AILabel {") {
+                missing.push(format!(
+                    "{name} hosts a mark and the Dioxus half draws none"
+                ));
+            }
+            if !react(&component, &[]).contains("h(AILabel, {") {
+                missing.push(format!("{name} hosts a mark and the React half draws none"));
+            }
+        }
+        assert!(missing.is_empty(), "{}", missing.join("\n"));
+        assert!(
+            hosts > 0,
+            "no component hosts a mark, so this proves nothing"
+        );
+    }
+
+    /// A host that cannot hold a control does not declare the prop for one.
+    ///
+    /// `ai_pressable = false` is the whole of the difference, and the failure
+    /// without it is silent: the mark renders as a `<span>` either way, so a
+    /// caller who set `ai_note` on a `MenuItem` would get no note, no error and
+    /// no reason.
+    #[test]
+    fn a_host_that_cannot_be_pressed_takes_no_note() {
+        let mut quiet = 0usize;
+        for component in shipped() {
+            if component.meta.ai_pressable != Some(false) {
+                continue;
+            }
+            quiet += 1;
+            assert!(
+                !component.prop.contains_key("ai_note"),
+                "{} cannot hold a control and declares `ai_note`",
+                component.meta.name
+            );
+            assert!(
+                component.prop.contains_key("ai_mark"),
+                "{} declares no `ai_mark`",
+                component.meta.name
+            );
+            assert!(
+                !react(&component, &[]).contains("note: aiNote"),
+                "{}'s React half forwards a note it does not take",
+                component.meta.name
+            );
+        }
+        assert!(quiet > 0, "no host is unpressable, so this proves nothing");
     }
 
     /// The whole point: one spec, two implementations, same props.
@@ -1159,5 +1251,40 @@ mod tests {
         assert_eq!(pascal("line-numbers"), "LineNumbers");
         // A heading level is a digit, and a Rust variant cannot start with one.
         assert_eq!(pascal("2"), "_2");
+    }
+
+    /// A RUN OF CAPITALS IS ONE WORD, and the split used to be one per capital.
+    ///
+    /// `AILabel` came out as `a_i_label` — allow-reference: the name that must
+    /// NOT exist is what this test is about — which is a file name, a slug, a
+    /// message key and a URL all naming something no reader would look up. Both
+    /// halves of the split are asserted here: the acronym, and every shape that
+    /// was already right and had to stay right.
+    #[test]
+    fn an_acronym_is_one_word_and_nothing_else_moved() {
+        use noctua_design_spec::component::slug;
+
+        assert_eq!(file_stem("AILabel"), "ai_label");
+        assert_eq!(slug("AILabel"), "ai-label");
+
+        // The whole catalogue as it stood before that name arrived.
+        for (name, stem) in [
+            ("CodeBlock", "code_block"),
+            ("TableHeaderCell", "table_header_cell"),
+            ("OtpField", "otp_field"),
+            ("VisuallyHidden", "visually_hidden"),
+            ("Tab", "tab"),
+        ] {
+            assert_eq!(file_stem(name), stem, "{name}");
+            assert_eq!(slug(name), stem.replace('_', "-"), "{name}");
+        }
+
+        // AND THE TWO SPELLINGS OF ONE FACT AGREE. The site derives a file name
+        // from the slug rather than splitting the name again, so this relation
+        // is the one holding that derivation up.
+        for component in shipped() {
+            let name = &component.meta.name;
+            assert_eq!(slug(name).replace('-', "_"), file_stem(name), "{name}");
+        }
     }
 }

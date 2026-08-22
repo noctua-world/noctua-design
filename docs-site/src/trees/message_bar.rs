@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `MessageBar` example. 4 of them.
+/// Every `MessageBar` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // THE DEFAULT, AND THE QUIET ONE. A status waits for a pause instead of
     // cutting a screen reader off, which is right about something that worked.
@@ -71,6 +71,21 @@ pub(crate) const EXAMPLES: &[Tree] = &[
             name: "MessageBar",
             props: &[("icon", Value::Text("info"))],
             children: &[Node::Text(Value::Message(Key::ExampleMessageBarPlain))],
+        }],
+    ),
+    (
+        r"MessageBar { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "MessageBar",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("tone", Value::Text("success")),
+                ("icon", Value::Text("check")),
+                ("title", Value::Message(Key::ExampleMessageBarSavedTitle)),
+            ],
+            children: &[Node::Text(Value::Message(Key::ExampleMessageBarSaved))],
         }],
     ),
 ];

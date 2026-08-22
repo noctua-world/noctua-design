@@ -6,17 +6,15 @@
 //
 // Every component the example interpreter can draw, by the name a tree uses.
 //
-// Generated because a hand-written list of 86 imports is a list that goes
-// stale: a component added to `spec/components/` would be a name the trees
-// could carry and the browser could not draw, and the failure would be one
-// empty stage on one page.
+// Generated because a hand-written list of imports is a list that goes stale: a
+// component added to `spec/components/` would be a name the trees carry and the
+// browser cannot draw, and `example-react.js` throws on every page showing it.
 //
-// THE THREE HEAVY ONES ARE NOT HERE. `CodeBlock` pulls the syntax grammars
-// and `Lineage` pulls the layout engine — 107 KB raw between them, needed on
-// two pages out of sixty-nine. They are fetched by name, on the pages that
-// name them, and `HEAVY` below is how.
+// THE HEAVY ONES ARE NOT HERE. They are fetched by name, on the pages that name
+// them, and `HEAVY` below is how.
 
 import { Abbr } from "@noctua-world/design-react/components/abbr.js";
+import { AILabel } from "@noctua-world/design-react/components/ai_label.js";
 import { Avatar } from "@noctua-world/design-react/components/avatar.js";
 import { AvatarGroup } from "@noctua-world/design-react/components/avatar_group.js";
 import { Badge } from "@noctua-world/design-react/components/badge.js";
@@ -100,9 +98,10 @@ import { TreeItem } from "@noctua-world/design-react/components/tree_item.js";
 import { Truncate } from "@noctua-world/design-react/components/truncate.js";
 import { VisuallyHidden } from "@noctua-world/design-react/components/visually_hidden.js";
 
-/// Every component that ships in the first chunk.
+/** Every component that ships in the first chunk. */
 export const COMPONENTS = {
   Abbr,
+  AILabel,
   Avatar,
   AvatarGroup,
   Badge,
@@ -187,7 +186,7 @@ export const COMPONENTS = {
   VisuallyHidden,
 };
 
-/// The rest, behind a dynamic import, keyed by the name a tree uses.
+/** The rest, behind a dynamic import, keyed by the name a tree uses. */
 export const HEAVY = {
   CodeBlock: () => import("./heavy-code.js"),
   Lineage: () => import("./heavy-lineage.js"),

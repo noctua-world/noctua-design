@@ -11,7 +11,8 @@
 
 import { createElement as h } from "react";
 
-export function Label({ text, forControl, kind, size, required, requiredLabel, optionalLabel, className, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Label({ text, forControl, kind, size, required, requiredLabel, optionalLabel, aiMark, aiLabel, className, ...rest }) {
   const kind_ = kind ?? "label";
   const size_ = size ?? "medium";
   const required_ = required ?? false;
@@ -33,5 +34,8 @@ export function Label({ text, forControl, kind, size, required, requiredLabel, o
     },
     text,
     marker ? h("span", { key: "m", className: "nd-label-mark" }, marker) : null,
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-apart", mark: aiMark, label: aiLabel })
+      : null,
   );
 }

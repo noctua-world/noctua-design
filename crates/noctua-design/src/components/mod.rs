@@ -10,6 +10,7 @@
 //! to remember and nothing to keep in step.
 
 mod abbr;
+mod ai_label;
 mod avatar;
 mod avatar_group;
 mod badge;
@@ -97,6 +98,7 @@ mod truncate;
 mod visually_hidden;
 
 pub use abbr::Abbr;
+pub use ai_label::{AILabel, AILabelPlacement, AILabelSize, AILabelVariant};
 pub use avatar::{Avatar, AvatarShape, AvatarSize, AvatarTone};
 pub use avatar_group::{AvatarGroup, AvatarGroupOverlap, AvatarGroupShape, AvatarGroupSize};
 pub use badge::{Badge, BadgeOverlap, BadgePlacement};

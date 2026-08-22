@@ -16,6 +16,7 @@ class = "nd-date-input"
 # `needs_name` component must not render a nameless control.
 specimen = "<span class=\"nd-date-input-figure\"><span class=\"nd-identifier\">07</span><span class=\"nd-identifier\">08</span><span class=\"nd-identifier\">2026</span></span>"
 summary = "Ask for one date as three numbers, in the order the reader's language writes them."
+ai = "custom"
 
 # WHY IT IS ITS OWN FIELDSET RATHER THAN CONTENT FOR `Fieldset`. The script
 # that validates writes into `{id}-error`, and the id it writes into must be

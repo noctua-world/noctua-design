@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
-/// Every `OtpField` example. 4 of them.
+/// Every `OtpField` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // SIX BOXES, ONE VALUE. Every box posts under the same name, so the code
     // reaches a server whether or not the script arrived.
@@ -109,6 +109,28 @@ OtpField { name, legend, box_label, length, autocomplete: false, disabled: true 
                     children: &[],
                 },
             ],
+        }],
+    ),
+    (
+        r"OtpField { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "OtpField",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("name", Value::Text("otp-code-ai")),
+                ("legend", Value::Message(Key::ExampleOtpFieldLegend)),
+                ("box_label", Value::Message(Key::ExampleOtpFieldBox)),
+                ("hint", Value::Message(Key::ExampleOtpFieldHint)),
+                ("invalid_label", Value::Message(Key::ExampleOtpFieldInvalid)),
+                ("required", Value::Bool(true)),
+                (
+                    "required_label",
+                    Value::Message(Key::ExampleOtpFieldRequired),
+                ),
+            ],
+            children: &[],
         }],
     ),
 ];

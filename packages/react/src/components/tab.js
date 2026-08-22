@@ -12,7 +12,8 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
-export function Tab({ name, value, label, icon, count, selected, disabled, className, ...rest }) {
+import { AILabel } from "./ai_label.js";
+export function Tab({ name, value, label, icon, count, selected, disabled, aiMark, aiLabel, className, ...rest }) {
   const selected_ = selected ?? false;
   const disabled_ = disabled ?? false;
   const root = ["nd-tab", className].filter(Boolean).join(" ");
@@ -37,5 +38,8 @@ export function Tab({ name, value, label, icon, count, selected, disabled, class
     h("span", { key: "t", className: "nd-tab-text" }, label),
     // See the Dioxus half: inside the tab, so it is part of the name.
     count ? h("span", { key: "c", className: "nd-tab-count" }, count) : null,
+    aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel })
+      : null,
   );
 }

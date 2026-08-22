@@ -15,6 +15,7 @@ class = "nd-carousel"
 page = "carousel"
 specimen = "<span class=\"nd-carousel-figure\"><span class=\"nd-carousel-cell\"></span><span class=\"nd-carousel-cell\"></span><span class=\"nd-carousel-cell\"></span></span>"
 summary = "Let readers move through a row of things sideways, in a real scroll container."
+ai = "custom"
 
 # EVERY ID DERIVES FROM `name`, AND A CALLER WRITES NONE OF THEM.
 #

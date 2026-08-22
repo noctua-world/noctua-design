@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `SearchResult` example. 4 of them.
+/// Every `SearchResult` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"SearchResult { href: "…", label: "…" }"#,
@@ -157,6 +157,50 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         ("href", Value::Text("#genovese")),
                         ("label", Value::Data("Genovese")),
                         ("current", Value::Bool(true)),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        r"SearchResult { ai_mark, ai_label }",
+        &[Node::Component {
+            name: "Search",
+            props: &[
+                ("name", Value::Text("result-plain-ai")),
+                ("label", Value::Message(Key::ExampleSearchLabel)),
+                ("placeholder", Value::Message(Key::ExampleSearchPlaceholder)),
+                ("status", Value::Message(Key::SearchResults)),
+                ("empty_label", Value::Message(Key::SearchEmpty)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SearchResult",
+                    props: &[
+                        ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                        ("ai_label", Value::Message(Key::ExampleAiName)),
+                        ("class", Value::Text("nd-identifier")),
+                        ("href", Value::Text("#cherokee-purple")),
+                        ("label", Value::Data("Cherokee Purple")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SearchResult",
+                    props: &[
+                        ("class", Value::Text("nd-identifier")),
+                        ("href", Value::Text("#sungold")),
+                        ("label", Value::Data("Sungold")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SearchResult",
+                    props: &[
+                        ("class", Value::Text("nd-identifier")),
+                        ("href", Value::Text("#san-marzano")),
+                        ("label", Value::Data("San Marzano")),
                     ],
                     children: &[],
                 },

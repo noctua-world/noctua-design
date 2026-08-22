@@ -9,6 +9,7 @@ name = "TagPicker"
 element = "div"
 class = "nd-tag-picker"
 summary = "Let users enter several values, each one a tag they can take off again."
+ai = "custom"
 
 # EVERY ID DERIVES FROM `name`, AND A CALLER WRITES NONE OF THEM.
 #

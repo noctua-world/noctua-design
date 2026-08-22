@@ -63,6 +63,10 @@ pub fn Disclosure(
     /// Makes the summary a real heading inside `<summary>`, at level 2, 3 or 4. Use it when the disclosure is a section of the page, so the section keeps its place in the outline a screen reader navigates by.
     #[props(default)]
     heading: DisclosureHeading,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
     /// Whether the control is frosted. It applies to the summary and the panel together, so both carry the same material.
     #[props(default = false)]
     glass: bool,
@@ -106,6 +110,20 @@ pub fn Disclosure(
                         DisclosureHeading::H3 => rsx! { h3 { class: "nd-disclosure-text", "{summary}" } },
                         DisclosureHeading::H4 => rsx! { h4 { class: "nd-disclosure-text", "{summary}" } },
                         DisclosureHeading::None => rsx! { span { class: "nd-disclosure-text", "{summary}" } },
+                    }
+                    // BEFORE THE MARKER, AND NEVER A CONTROL. A
+                    // `<summary>` swallows every press inside it, so
+                    // a button here would open the fold instead of
+                    // its own note.
+                    // The assistant's mark, in the room this component reserves for
+                    // it. A child in the flow and never a corner: `Badge` translates
+                    // its mark onto what it marks, and this may not.
+                    if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                        crate::components::AILabel {
+                            class: "nd-ai-slot nd-ai-slot-apart",
+                            mark,
+                            label: phrase,
+                        }
                     }
                     // NAMED, BECAUSE THE RULE THAT TURNS IT USED TO
                     // ASK FOR THE LAST GLYPH. In the icon-only form

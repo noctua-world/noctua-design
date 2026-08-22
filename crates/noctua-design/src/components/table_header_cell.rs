@@ -149,6 +149,10 @@ pub fn TableHeaderCell(
     /// Which way the rows are already sorted by this column. `none` writes no attribute, because a heading with no sort control must not claim one. **Only one heading in a table may be anything else**.
     #[props(default)]
     sort: TableHeaderCellSort,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -188,6 +192,20 @@ pub fn TableHeaderCell(
             "data-nd-wrap": wrap.as_str(),
             div { class: "nd-table-heading",
                 span { class: "nd-table-heading-words", "data-nd-table-heading": "", {children} }
+                // BESIDE THE WORDS AND NEVER INSIDE THEM. `table.js` MOVES
+                // `[data-nd-table-heading]` into a sort button it builds, so a
+                // mark in there would become part of a control that sorts when
+                // pressed. Not a control either, for `TableCell`'s reason.
+                // The assistant's mark, in the room this component reserves for
+                // it. A child in the flow and never a corner: `Badge` translates
+                // its mark onto what it marks, and this may not.
+                if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                    crate::components::AILabel {
+                        class: "nd-ai-slot nd-ai-slot-apart",
+                        mark,
+                        label: phrase,
+                    }
+                }
             }
         }
     }

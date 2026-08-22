@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
-/// Every `Segmented` example. 9 of them.
+/// Every `Segmented` example. 10 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Segmented { name: "…", label: "…", SegmentedItem { … } }"#,

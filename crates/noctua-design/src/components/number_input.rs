@@ -129,6 +129,12 @@ pub fn NumberInput(
     /// Frosts the box, on a ground opaque enough to read digits against.
     #[props(default = false)]
     glass: bool,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
+    /// One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control.
+    ai_note: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -271,6 +277,25 @@ pub fn NumberInput(
                             "data-nd-number-input-step": "down",
                             Icon { icon: IconDrawing::MINUS, size: crate::components::IconSize::Small }
                         }
+                    }
+                }
+                // LAST IN THE DOM, AFTER THE STEPPERS, AND THAT ORDER IS LOAD
+                // BEARING. Under `stepping: "primary"` the steppers become
+                // `display: contents` and the down one takes `order: -1`, so
+                // the row lays out as minus, value, plus. A mark written before
+                // them would land between the value and the plus, splitting the
+                // pair that arrangement exists to create. Written after them it
+                // stays outside the pair in both arrangements, with no `order`
+                // declaration anywhere.
+                // The assistant's mark, in the room this component reserves for
+                // it. A child in the flow and never a corner: `Badge` translates
+                // its mark onto what it marks, and this may not.
+                if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                    crate::components::AILabel {
+                        class: "nd-ai-slot",
+                        mark,
+                        label: phrase,
+                        note: ai_note.clone(),
                     }
                 }
             }

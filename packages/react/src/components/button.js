@@ -12,8 +12,9 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { AILabel } from "./ai_label.js";
 import { chevronDown } from "@noctua-world/design-tokens/icons/chevron-down.js";
-export function Button({ label, detail, variant, tone, size, shape, icon, iconEnd, iconAlt, labelAlt, action, hideLabel, justify, wrap, fill, menu, href, rel, target, pressed, expanded, controls, current, disabled, submit, name, value, glass, className, ...rest }) {
+export function Button({ label, detail, variant, tone, size, shape, icon, iconEnd, iconAlt, labelAlt, action, hideLabel, justify, wrap, fill, menu, href, rel, target, pressed, expanded, controls, current, disabled, submit, name, value, glass, aiMark, aiLabel, className, ...rest }) {
   const variant_ = variant ?? "solid";
   const tone_ = tone ?? "accent";
   const size_ = size ?? "medium";
@@ -64,6 +65,9 @@ export function Button({ label, detail, variant, tone, size, shape, icon, iconEn
           h("span", { key: "l", className: "nd-button-label" }, label),
           detail ? h("span", { key: "d", className: "nd-button-detail" }, detail) : null,
         ),
+    !hideLabel_ && aiMark && aiLabel
+      ? h(AILabel, { key: "ai", className: "nd-ai-slot", mark: aiMark, label: aiLabel })
+      : null,
     // The chevron steps aside for an `iconEnd` the caller chose.
     iconEnd
       ? h(Icon, { key: "e", icon: iconEnd })

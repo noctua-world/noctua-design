@@ -240,10 +240,15 @@ fn section(out: &mut String, title: &str) {
 /// Falls back to `calc()` only when the base is not a plain number-plus-unit,
 /// which the spec's unit check makes unreachable for a valid spec — but a
 /// silently wrong multiplication would be worse than an honest expression.
+///
+/// THE ZERO STEP CARRIES ITS UNIT, and it was a bare `0`. Both are the same
+/// length on their own, and inside `calc()` they are not: a unitless number
+/// added to a length makes the whole expression invalid at computed-value time,
+/// and the browser drops the declaration with no error. `Select` reserves room
+/// for two optional trailing controls by summing two lengths that default to
+/// the zero step, and with a bare `0` neither reservation existed — the value
+/// text was drawn under the controls. `0rem` costs nothing anywhere else.
 fn multiply(base: &str, factor: u32) -> String {
-    if factor == 0 {
-        return "0".to_owned();
-    }
     if factor == 1 {
         return base.to_owned();
     }
@@ -284,7 +289,10 @@ mod tests {
     fn the_scale_is_multiplied_out_rather_than_left_as_calc() {
         let css = css();
         assert!(css.contains("--noctua-space-4: 1rem;"), "{css}");
-        assert!(css.contains("--noctua-space-0: 0;"));
+        // WITH ITS UNIT. See `multiply`: a bare `0` cannot be added to a
+        // length inside `calc()`, and every use of the zero step is a
+        // placeholder in a sum.
+        assert!(css.contains("--noctua-space-0: 0rem;"));
         assert!(
             !css.contains("calc("),
             "a valid spec should never need calc()"
@@ -359,7 +367,11 @@ mod tests {
         assert_eq!(multiply("0.25rem", 4), "1rem");
         assert_eq!(multiply("0.25rem", 6), "1.5rem");
         assert_eq!(multiply("0.25rem", 1), "0.25rem");
-        assert_eq!(multiply("0.25rem", 0), "0");
+        // ZERO KEEPS IT TOO. A bare `0` is the same length on its own and not
+        // the same thing inside `calc()`, where adding a unitless number to a
+        // length makes the whole expression invalid and the browser drops the
+        // declaration without a word.
+        assert_eq!(multiply("0.25rem", 0), "0rem");
         assert_eq!(multiply("2px", 3), "6px");
     }
 

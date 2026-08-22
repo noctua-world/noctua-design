@@ -47,14 +47,15 @@ export function Info({ name, label, heading, closeLabel, placement, className, c
       "span",
       {
         key: "n",
-        className: "nd-info-note",
+        // See the Dioxus half: the surface and the part are two classes.
+        className: "nd-note nd-info-note",
         id: noteId,
         role: "note",
         "aria-labelledby": heading ? titleId : undefined,
         hidden: true,
       },
       heading ? h("span", { key: "t", className: "nd-info-title", id: titleId }, heading) : null,
-      h("span", { key: "y", className: "nd-info-body" }, children),
+      h("span", { key: "y", className: "nd-note-body" }, children),
     ),
   );
 }

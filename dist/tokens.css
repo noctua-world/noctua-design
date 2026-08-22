@@ -15,7 +15,7 @@
 :root {
   /* Spacing. Every value is a multiple of the base. */
   --noctua-space-base: 0.25rem;
-  --noctua-space-0: 0;
+  --noctua-space-0: 0rem;
   --noctua-space-1: 0.25rem;
   --noctua-space-2: 0.5rem;
   --noctua-space-3: 0.75rem;

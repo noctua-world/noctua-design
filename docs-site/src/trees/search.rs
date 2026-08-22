@@ -110,7 +110,7 @@ pub(super) const CATALOGUE: &[Node] = &[
     },
 ];
 
-/// Every `Search` example. 8 of them.
+/// Every `Search` example. 9 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Search { name: "…", label: "…", placeholder: "…", status: "one:… |other:…" }"#,
@@ -335,6 +335,24 @@ pub(crate) const EXAMPLES: &[Tree] = &[
             props: &[
                 ("name", Value::Text("frosted")),
                 ("glass", Value::Bool(true)),
+                ("label", Value::Message(Key::ExampleSearchLabel)),
+                ("placeholder", Value::Message(Key::ExampleSearchPlaceholder)),
+                ("status", Value::Message(Key::SearchResults)),
+                ("empty_label", Value::Message(Key::SearchEmpty)),
+                ("clear_label", Value::Message(Key::SearchClear)),
+            ],
+            children: &[Node::Fragment(CATALOGUE)],
+        }],
+    ),
+    (
+        r"Search { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "Search",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("name", Value::Text("children-ai")),
                 ("label", Value::Message(Key::ExampleSearchLabel)),
                 ("placeholder", Value::Message(Key::ExampleSearchPlaceholder)),
                 ("status", Value::Message(Key::SearchResults)),

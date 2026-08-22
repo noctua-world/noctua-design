@@ -99,6 +99,12 @@ pub fn FileInput(
     /// Frosts the area. The list of files stays opaque, because file names are what a reader is here to read.
     #[props(default = false)]
     glass: bool,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
+    /// One sentence about what the assistant did. Setting it makes the mark a control that opens the sentence, closed by Escape. Without it the mark is not a control.
+    ai_note: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -203,6 +209,25 @@ pub fn FileInput(
                     "aria-live": "polite",
                     "aria-atomic": "true",
                     "data-nd-file-input-status": "",
+                }
+                // NEVER INSIDE `.nd-file-input-area`. That is the real file
+                // input's `<label>`, and a control inside a label opens the
+                // file dialog on every press.
+                //
+                // AND THE LEADING EDGE, NOT THE TRAILING ONE. This component is
+                // a flex COLUMN, so the slot that means *block*-end in a row
+                // means *inline*-end here — a mark alone on a line at the far
+                // right of a stack that is otherwise left-aligned.
+                // The assistant's mark, in the room this component reserves for
+                // it. A child in the flow and never a corner: `Badge` translates
+                // its mark onto what it marks, and this may not.
+                if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                    crate::components::AILabel {
+                        class: "nd-ai-slot nd-ai-slot-start",
+                        mark,
+                        label: phrase,
+                        note: ai_note.clone(),
+                    }
                 }
             }
             // The script does not know what a row looks like. It copies this.

@@ -92,6 +92,70 @@ export async function pixelAt(page, buffer, x, y) {
 }
 
 /**
+ * How many pixels differ between two screenshots, outside a set of rectangles.
+ *
+ * `extremes` answers *is this readable*, `pixelAt` *what colour is this*, `ink`
+ * *how much of this is drawn on*. None of them answers *did this element paint
+ * outside its own box*, which is the only honest form of "never on top of
+ * content": hide the element without reflowing anything, and every pixel that
+ * changes has to be inside a rectangle the element itself reported.
+ *
+ * `rects` are viewport rectangles as `[left, top, right, bottom]`, taken from
+ * `getClientRects()` rather than from `getBoundingClientRect()` — an inline run
+ * that wraps has one box per line, and its bounding box is the union of them
+ * plus everything between.
+ *
+ * A tolerance of eight per channel, because a translucent fill lifting off a
+ * subpixel-antialiased glyph beside it is not the element painting there.
+ *
+ * IT RETURNS `Infinity` WHEN NOTHING CHANGED AT ALL. Two identical screenshots
+ * are two screenshots of a page where the element was already invisible, and a
+ * comparison that found no difference proves nothing about where it painted.
+ */
+export async function outside(page, before, after, rects) {
+  return page.evaluate(
+    async ([a, b, boxes]) => {
+      const read = async (data) => {
+        const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
+        const bitmap = await createImageBitmap(blob);
+        const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(bitmap, 0, 0);
+        // `data` rather than `px`, because `.px` in source reads as a raw
+        // length to the token-literal gate and this file has no lengths in it.
+        return {
+          data: ctx.getImageData(0, 0, bitmap.width, bitmap.height).data,
+          width: bitmap.width,
+        };
+      };
+      const one = await read(a);
+      const two = await read(b);
+      if (one.data.length !== two.data.length) return Infinity;
+
+      const inside = (x, y) =>
+        boxes.some(([l, t, r, bo]) => x >= l - 2 && x <= r + 2 && y >= t - 2 && y <= bo + 2);
+
+      let strays = 0;
+      let changed = 0;
+      for (let i = 0; i < one.data.length; i += 4) {
+        const delta = Math.max(
+          Math.abs(one.data[i] - two.data[i]),
+          Math.abs(one.data[i + 1] - two.data[i + 1]),
+          Math.abs(one.data[i + 2] - two.data[i + 2]),
+        );
+        if (delta <= 8) continue;
+        changed += 1;
+        const dot = i / 4;
+        const x = dot % one.width;
+        if (!inside(x, (dot - x) / one.width)) strays += 1;
+      }
+      return changed === 0 ? Infinity : strays;
+    },
+    [before.toString("base64"), after.toString("base64"), rects],
+  );
+}
+
+/**
  * How much of a screenshot is ink, as a fraction of its pixels.
  *
  * `extremes` answers *is anything here readable against anything else* and

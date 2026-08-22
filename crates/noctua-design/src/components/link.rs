@@ -54,6 +54,10 @@ pub fn Link(
     /// The colour of the link text. `accent` is the link colour, and `inherit` takes the colour of the text around it, for a link inside a coloured run.
     #[props(default)]
     tone: LinkTone,
+    /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
+    ai_mark: Option<String>,
+    /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
+    ai_label: Option<String>,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -71,6 +75,18 @@ pub fn Link(
             "data-nd-external": if external { "true" } else { "false" },
             "data-nd-tone": tone.as_str(),
             {children}
+            // AFTER THE WORDS AND BEFORE THE EXTERNAL GLYPH, and
+            // never a control: a button inside an `<a>` is invalid.
+            // The assistant's mark, in the room this component reserves for
+            // it. A child in the flow and never a corner: `Badge` translates
+            // its mark onto what it marks, and this may not.
+            if let Some((mark, phrase)) = ai_mark.clone().zip(ai_label.clone()) {
+                crate::components::AILabel {
+                    class: "nd-ai-slot nd-ai-slot-inline",
+                    mark,
+                    label: phrase,
+                }
+            }
             if external {
                 Icon { icon: IconDrawing::EXTERNAL_LINK, size: crate::components::IconSize::Small }
             }

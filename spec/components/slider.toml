@@ -8,6 +8,7 @@ element = "input"
 class = "nd-slider"
 specimen = "<span class=\"nd-slider-figure\"><span class=\"nd-slider-rail\"></span><span class=\"nd-slider-knob\"></span></span>"
 summary = "Let users set a value by moving a thumb along a track."
+ai = "custom"
 
 [prop.name]
 type = "text"

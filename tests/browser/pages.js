@@ -116,6 +116,12 @@ export const PAGE = {
   // text rather than off a form control — the radius sweep and the no-shadow
   // sweep have a panel here that nothing else on the site gives them.
   info: "info/",
+  // The assistant's mark, and the note it opens. On this list because it is the
+  // only control on the site whose trigger is two letters of TRANSLATED text —
+  // two glyphs in English, two different ones in Portuguese and six in `qps` —
+  // so the width x locale sweep has a control here whose own name triples, and
+  // the 320px audit has a hit target that has to survive it.
+  aiLabel: "ai-label/",
   // The menu and its items — the SEVENTH floating surface, and the only one
   // whose contents are a walk: `role="menu"` takes the arrow keys, so this is
   // the one page where the width x locale sweep is measuring a panel that a

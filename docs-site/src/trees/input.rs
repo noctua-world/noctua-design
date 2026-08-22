@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 
-/// Every `Input` example. 6 of them.
+/// Every `Input` example. 7 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // ONE FIELD, IN A FORM THAT SUBMITS. Press it and the answer arrives in the
     // address bar, which is the only way to show that the box is a real
@@ -233,6 +233,44 @@ Input { name, label, kind: Password, reveal_label, conceal_label, disabled, glas
                         ("conceal_label", Value::Message(Key::ExampleInputConceal)),
                         ("disabled", Value::Bool(true)),
                         ("glass", Value::Bool(true)),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        r"Input { ai_mark, ai_label, ai_note }",
+        &[Node::Element {
+            tag: "form",
+            attributes: &[
+                ("class", Value::Text("nd-example-form")),
+                ("method", Value::Text("get")),
+                ("action", Value::Text("#")),
+                ("novalidate", Value::Bool(true)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "Input",
+                    props: &[
+                        ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                        ("ai_label", Value::Message(Key::ExampleAiName)),
+                        ("ai_note", Value::Message(Key::ExampleAiNote)),
+                        ("name", Value::Text("who-ai")),
+                        ("label", Value::Message(Key::ExampleInputNameLabel)),
+                        ("value", Value::Message(Key::ExampleInputNameValue)),
+                        ("hint", Value::Message(Key::ExampleInputHint)),
+                        ("required", Value::Bool(true)),
+                        ("required_label", Value::Message(Key::ExampleInputRequired)),
+                        ("autocomplete", Value::Text("name")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Button",
+                    props: &[
+                        ("submit", Value::Text("submit")),
+                        ("label", Value::Message(Key::ExampleInputSend)),
                     ],
                     children: &[],
                 },

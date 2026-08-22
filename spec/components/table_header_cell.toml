@@ -8,6 +8,8 @@ element = "th"
 class = "nd-table-header-cell"
 page = "tables"
 summary = "Name a column or a record, and sort by it where the column allows."
+ai = "custom"
+ai_pressable = false
 
 [prop.column]
 type = "text"

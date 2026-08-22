@@ -11,6 +11,7 @@ name = "Toast"
 element = "div"
 class = "nd-toast"
 summary = "Report what just happened in a short message that floats clear of the work."
+ai = "custom"
 
 # THE TIMER IS OPT-IN, AND THAT IS THE WHOLE OF THIS COMPONENT'S OPINION.
 #

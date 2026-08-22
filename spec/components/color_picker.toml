@@ -7,6 +7,7 @@ name = "ColorPicker"
 element = "div"
 class = "nd-color-picker"
 summary = "Let users choose a colour from a square, with every notation for it folded away."
+ai = "custom"
 
 # EVERY ID DERIVES FROM `name`, AND A CALLER WRITES NONE OF THEM.
 #

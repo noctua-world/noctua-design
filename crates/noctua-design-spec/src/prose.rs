@@ -371,19 +371,40 @@ fn note_keys(root: &std::path::Path) -> std::collections::BTreeSet<String> {
         }
     }
 
-    // The three-argument arm of `example!` is `(source, note, render)`. A note
-    // is the SECOND argument, so it sits alone on its own line at the macro's
-    // own indent. A `Key::` inside a render closure is indented deeper.
+    // EVERY `Key::` IN THAT FILE IS A NOTE, and the indent this used to read
+    // is a leftover from when it was not.
+    //
+    // `example!` had a third argument once — a closure that rendered the
+    // picture — and a `Key::` inside one was content rather than documentation,
+    // so a note was identified by sitting alone at the macro's own indent. The
+    // closures became trees in `docs-site/src/trees/`, and the heuristic went
+    // on silently missing every `example!` short enough for rustfmt to keep on
+    // one line, plus every note in `OVERVIEWS`, which is nested one level
+    // deeper. Seventy-one of three hundred and forty-nine, unchecked against
+    // the register in either language.
+    //
+    // THE FLOOR IS PART OF THE ASSERTION. This reads source as text, which
+    // `NOCTUA.md §19.5` records as a way a check goes quiet: a rename that
+    // stopped every line matching would leave an empty set and nothing to fail.
     let mut keys = std::collections::BTreeSet::new();
     for line in examples.lines() {
-        let Some(rest) = line.strip_prefix("        Key::") else {
-            continue;
-        };
-        let variant = rest.trim().trim_end_matches(',');
-        if let Some(key) = named.get(variant) {
-            keys.insert(key.clone());
+        let mut rest = line;
+        while let Some(at) = rest.find("Key::") {
+            rest = &rest[at + "Key::".len()..];
+            let end = rest
+                .find(|c: char| !c.is_ascii_alphanumeric() && c != '_')
+                .unwrap_or(rest.len());
+            if let Some(key) = named.get(&rest[..end]) {
+                keys.insert(key.clone());
+            }
+            rest = &rest[end..];
         }
     }
+    assert!(
+        keys.len() > 300,
+        "only {} example note(s) were found, so the reader is not reading the file",
+        keys.len()
+    );
     keys
 }
 

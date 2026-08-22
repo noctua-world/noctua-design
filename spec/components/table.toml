@@ -8,6 +8,7 @@ element = "table"
 class = "nd-table"
 page = "tables"
 summary = "Show data in rows and columns, with sorting, filtering, selection and totals."
+ai = "custom"
 
 # EVERY ID DERIVES FROM `name`, AND A CALLER WRITES NONE OF THEM.
 #

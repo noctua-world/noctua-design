@@ -15,7 +15,7 @@ use crate::tree::{Each, Node, Value};
 use crate::trees::Tree;
 use crate::trees::table::{AURORA, BRACKEN, CINTRA, INVOICE_HEADINGS, INVOICE_ROW};
 
-/// Every `TableCell` example. 5 of them.
+/// Every `TableCell` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"TableCell { align: ::Numeric, sort_value: "…" }"#,
@@ -531,6 +531,123 @@ TableCell { aggregate, aggregate_over }: a total that recounts",
                                 children: &[Node::Text(Value::Data("R$ 6.820,00"))],
                             },
                         ],
+                    }],
+                },
+            ],
+        }],
+    ),
+    (
+        r"TableCell { ai_mark, ai_label }",
+        &[Node::Component {
+            name: "Table",
+            props: &[
+                ("name", Value::Text("cell-numeric-ai")),
+                ("caption", Value::Message(Key::ExampleTableInvoices)),
+                (
+                    "sort_ascending_label",
+                    Value::Message(Key::ExampleTableSortAscending),
+                ),
+                (
+                    "sort_descending_label",
+                    Value::Message(Key::ExampleTableSortDescending),
+                ),
+                (
+                    "sort_cleared_label",
+                    Value::Message(Key::ExampleTableSortCleared),
+                ),
+            ],
+            children: &[
+                Node::Component {
+                    name: "TableColumn",
+                    props: &[("name", Value::Text("client-ai"))],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "TableColumn",
+                    props: &[
+                        ("name", Value::Text("amount-ai")),
+                        ("width", Value::Text("fit")),
+                        ("sortable", Value::Bool(true)),
+                        ("sort_as", Value::Text("number")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "TableSection",
+                    props: &[("kind", Value::Text("head"))],
+                    children: &[Node::Component {
+                        name: "TableRow",
+                        props: &[],
+                        children: &[
+                            Node::Component {
+                                name: "TableHeaderCell",
+                                props: &[("column", Value::Text("client"))],
+                                children: &[Node::Text(Value::Message(Key::ExampleTableColClient))],
+                            },
+                            Node::Component {
+                                name: "TableHeaderCell",
+                                props: &[
+                                    ("column", Value::Text("amount")),
+                                    ("align", Value::Text("numeric")),
+                                ],
+                                children: &[Node::Text(Value::Message(Key::ExampleTableColAmount))],
+                            },
+                        ],
+                    }],
+                },
+                Node::Component {
+                    name: "TableSection",
+                    props: &[],
+                    children: &[Node::Each {
+                        over: Each::Rows(&[
+                            &[
+                                Value::Data("Aurora Ltd"),
+                                Value::Data("R$ 4.900,00"),
+                                Value::Text("4900"),
+                            ],
+                            &[
+                                Value::Data("Bracken & Co"),
+                                Value::Data("R$ 1.240,00"),
+                                Value::Text("1240"),
+                            ],
+                            &[
+                                Value::Data("Cintra Studio"),
+                                Value::Data("R$ 680,00"),
+                                Value::Text("680"),
+                            ],
+                            &[
+                                Value::Data("Delgado SA"),
+                                Value::Data("R$ 12.310,00"),
+                                Value::Text("12310"),
+                            ],
+                        ]),
+                        body: &[Node::Component {
+                            name: "TableRow",
+                            props: &[],
+                            children: &[
+                                Node::Component {
+                                    name: "TableHeaderCell",
+                                    props: &[
+                                        ("scope", Value::Text("row")),
+                                        ("column", Value::Text("client")),
+                                        ("class", Value::Text("nd-identifier")),
+                                    ],
+                                    children: &[Node::Text(Value::Bound(0))],
+                                },
+                                Node::Component {
+                                    name: "TableCell",
+                                    props: &[
+                                        ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                                        ("ai_label", Value::Message(Key::ExampleAiName)),
+                                        ("column", Value::Text("amount")),
+                                        ("class", Value::Text("nd-identifier")),
+                                        ("align", Value::Text("numeric")),
+                                        ("sort_value", Value::Bound(2)),
+                                    ],
+                                    children: &[Node::Text(Value::Bound(1))],
+                                },
+                            ],
+                        }],
                     }],
                 },
             ],

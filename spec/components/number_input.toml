@@ -7,6 +7,7 @@ name = "NumberInput"
 element = "input"
 class = "nd-number-input"
 summary = "Let users enter a quantity, with steppers and a numeric keyboard."
+ai = "custom"
 
 [prop.name]
 type = "text"

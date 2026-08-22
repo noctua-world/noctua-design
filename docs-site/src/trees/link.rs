@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Link` example. 4 of them.
+/// Every `Link` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Link { href: "…", "…" }"#,
@@ -80,6 +80,22 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 },
                 Node::Text(Value::Text(".")),
             ],
+        }],
+    ),
+    (
+        r"Link { ai_mark, ai_label }",
+        &[Node::Component {
+            name: "Paragraph",
+            props: &[],
+            children: &[Node::Component {
+                name: "Link",
+                props: &[
+                    ("href", Value::Text("#")),
+                    ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                    ("ai_label", Value::Message(Key::ExampleAiName)),
+                ],
+                children: &[Node::Text(Value::Message(Key::ExampleLinkText))],
+            }],
         }],
     ),
 ];

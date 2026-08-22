@@ -1,4 +1,14 @@
-// Everything an `Info` does once a script is running.
+// Everything a note beside a word does once a script is running.
+//
+// TWO COMPONENTS, ONE FILE, ONE OPEN NOTE. `Info` explains a word and `AILabel`
+// says an assistant wrote the value beside it, and past the letters on the
+// control they are the same surface: a `role="note"` holding one sentence,
+// opened on a press, closed by Escape with the focus put back. `KINDS` below is
+// the whole of the difference between them.
+//
+// A SECOND MODULE WOULD BE A SECOND `showing`, and two of those is an `Info`
+// note and an `AILabel` note open at the same time over one page, which is the
+// one thing a note beside a word must not do.
 //
 // IT SHIPS, for `ColorPicker`'s reason: a component whose consumer cannot use
 // it is a component that lies. A note that only opens inside this repository's
@@ -26,24 +36,54 @@ import { keepAnchored, releaseAnchor } from "./anchor.js";
 /** How much room a note wants below the marker before it flips above. */
 const ROOM = 200;
 
+/**
+ * The two markers this file enhances, and the parts each one is made of.
+ *
+ * `reveal` is the only behavioural difference. `Info` ships its marker hidden
+ * because with no script it opens nothing, and a marker that opens nothing is
+ * worse than no marker. An `AILabel`'s mark says a value came from an
+ * assistant, which is true with a script and without one, so it is drawn either
+ * way and the note is the extra.
+ */
+const KINDS = [
+  {
+    hook: "[data-nd-info]",
+    mark: "info",
+    marker: ".nd-info-marker",
+    note: ".nd-info-note",
+    close: "nd-note-close nd-info-close",
+    reveal: true,
+  },
+  {
+    hook: "[data-nd-ai-note]",
+    mark: "ai-label",
+    marker: ".nd-ai-label-control",
+    note: ".nd-ai-label-note",
+    close: "nd-note-close nd-ai-label-close",
+    reveal: false,
+  },
+];
+
 // THE NOTE THAT IS OPEN, SO OPENING A SECOND CLOSES THE FIRST.
 //
 // IT CARRIES ITS OWN ROOT, WHICH IS WHAT A RELEASE NEEDS. Holding the closure
 // alone meant nothing could ask which marker a note belonged to. A note open
-// when its subtree went away left this pointing at a dead marker for ever, and
-// the next note opened anywhere on the page called it.
+// when its subtree went away left this pointing at a dead marker, and the next
+// note opened anywhere on the page called it.
 let showing = null;
 
 /** Every enhanced note's teardown, so a subtree can be released. */
 const infos = new WeakMap();
 
 export function enhanceInfos(root = document) {
-  for (const element of root.querySelectorAll("[data-nd-info]")) {
-    if (element.dataset.ndEnhanced) continue;
-    element.dataset.ndEnhanced = "info";
-    const binding = new AbortController();
-    infos.set(element, binding);
-    enhance(element, binding.signal);
+  for (const kind of KINDS) {
+    for (const element of root.querySelectorAll(kind.hook)) {
+      if (element.dataset.ndEnhanced) continue;
+      element.dataset.ndEnhanced = kind.mark;
+      const binding = new AbortController();
+      infos.set(element, binding);
+      enhance(element, kind, binding.signal);
+    }
   }
 }
 
@@ -59,36 +99,41 @@ export function enhanceInfos(root = document) {
  * over the same markup would otherwise draw a second one beside it.
  */
 export function releaseInfos(root = document) {
-  for (const element of root.querySelectorAll("[data-nd-info]")) {
-    if (element.dataset.ndEnhanced !== "info") continue;
-    if (showing?.root === element) showing = null;
-    // AND THE NOTE GOES BACK TO WHAT THE MARKUP SHIPS. One left open with its
-    // listeners gone is a bubble over the page that Escape cannot dismiss.
-    const note = element.querySelector(".nd-info-note");
-    if (note) {
-      releaseAnchor(note);
-      note.hidden = true;
+  for (const kind of KINDS) {
+    for (const element of root.querySelectorAll(kind.hook)) {
+      if (element.dataset.ndEnhanced !== kind.mark) continue;
+      if (showing?.root === element) showing = null;
+      // AND THE NOTE GOES BACK TO WHAT THE MARKUP SHIPS. One left open with its
+      // listeners gone is a bubble over the page that Escape cannot dismiss.
+      const note = element.querySelector(kind.note);
+      if (note) {
+        releaseAnchor(note);
+        note.hidden = true;
+      }
+      const marker = element.querySelector(kind.marker);
+      if (marker) {
+        marker.setAttribute("aria-expanded", "false");
+        // Only the kind whose markup ships hidden goes back to hidden. Hiding
+        // an `AILabel`'s control on release would take the mark off the page,
+        // and the mark is true whether or not a script is running.
+        if (kind.reveal) marker.hidden = true;
+      }
+      element.querySelector(`.${kind.close.split(" ")[0]}`)?.remove();
+      infos.get(element)?.abort();
+      infos.delete(element);
+      delete element.dataset.ndEnhanced;
     }
-    const marker = element.querySelector(".nd-info-marker");
-    if (marker) {
-      marker.setAttribute("aria-expanded", "false");
-      marker.hidden = true;
-    }
-    element.querySelector(".nd-info-close")?.remove();
-    infos.get(element)?.abort();
-    infos.delete(element);
-    delete element.dataset.ndEnhanced;
   }
 }
 
-function enhance(root, signal) {
-  const marker = root.querySelector(".nd-info-marker");
-  const note = root.querySelector(".nd-info-note");
+function enhance(root, kind, signal) {
+  const marker = root.querySelector(kind.marker);
+  const note = root.querySelector(kind.note);
   if (!marker || !note) return;
 
-  // REVEALED, NEVER BUILT. The markup ships hidden so a page with no script
-  // carries no marker that opens nothing; this is the script arriving.
-  marker.hidden = false;
+  // REVEALED, NEVER BUILT. `Info`'s markup ships hidden so a page with no
+  // script carries no marker that opens nothing; this is the script arriving.
+  if (kind.reveal) marker.hidden = false;
 
   const closeLabel = root.getAttribute("data-nd-close-label");
   if (closeLabel) {
@@ -96,7 +141,7 @@ function enhance(root, signal) {
     // means nothing without a script: with none, there is nothing to close.
     const close = document.createElement("button");
     close.type = "button";
-    close.className = "nd-info-close";
+    close.className = kind.close;
     close.setAttribute("aria-label", closeLabel);
     close.title = closeLabel;
     close.addEventListener("click", () => hide(true), { signal });
@@ -128,8 +173,8 @@ function enhance(root, signal) {
 
   root.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || note.hidden) return;
-    // Stopped, so an `Info` inside a dialog closes its own note first rather
-    // than taking the dialog down with it.
+    // Stopped, so a note inside a dialog closes itself first rather than taking
+    // the dialog down with it.
     event.stopPropagation();
     hide(true);
   }, { signal });

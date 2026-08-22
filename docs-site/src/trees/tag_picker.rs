@@ -75,7 +75,7 @@ const TOPICS: &[Node] = &[
     },
 ];
 
-/// Every `TagPicker` example. 5 of them.
+/// Every `TagPicker` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"TagPicker { name: "…", label: "…", hint: "…", placeholder: "…", status, create_label, empty_label, remove_label, added_label, removed_label }"#,
@@ -296,6 +296,28 @@ TagPicker { paste: false, duplicates: true, … }"#,
                     children: &[Node::Fragment(TOPICS)],
                 },
             ],
+        }],
+    ),
+    (
+        r"TagPicker { ai_mark, ai_label, ai_note }",
+        &[Node::Component {
+            name: "TagPicker",
+            props: &[
+                ("ai_mark", Value::Message(Key::ExampleAiMark)),
+                ("ai_label", Value::Message(Key::ExampleAiName)),
+                ("ai_note", Value::Message(Key::ExampleAiNote)),
+                ("name", Value::Text("topics-ai")),
+                ("label", Value::Message(Key::ExamplePickerLabel)),
+                ("placeholder", Value::Message(Key::ExamplePickerPlaceholder)),
+                ("hint", Value::Message(Key::ExamplePickerHint)),
+                ("status", Value::Message(Key::ExamplePickerStatus)),
+                ("create_label", Value::Message(Key::ExamplePickerCreate)),
+                ("empty_label", Value::Message(Key::ExamplePickerEmpty)),
+                ("remove_label", Value::Message(Key::ExamplePickerRemove)),
+                ("added_label", Value::Message(Key::ExamplePickerAdded)),
+                ("removed_label", Value::Message(Key::ExamplePickerRemoved)),
+            ],
+            children: &[Node::Fragment(TOPICS)],
         }],
     ),
 ];
