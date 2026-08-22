@@ -7,11 +7,11 @@ procedural one when asked.
 
 ## Status: supplied
 
-The developer downloaded the model themselves and dropped it in — automation
-found every worthwhile source behind an account wall, which is recorded in
-`docs-site/PROVISIONAL.md` [72]. The file is a rigged, Blender-exported glTF
-with embedded textures, no Draco, no KTX2, and **one skeletal animation**,
-which is what the nest plays.
+The developer downloaded the model themselves and dropped it in: every
+worthwhile source is behind an account wall, so no automated fetch can replace
+this file. The file is a rigged, Blender-exported glTF with embedded textures,
+no Draco, no KTX2, and **one skeletal animation**, which is what the nest
+plays.
 
 ## What to put here
 
