@@ -9,9 +9,9 @@ Clone this **only** inside `noctua-workspace/repos/`, and start your agents
 **only** from the workspace root:
 
 ```sh
-cd /home/noctua/main/prjs/noctua-workspace
+cd path/to/noctua-workspace   # the directory holding the .noctua-workspace marker
 git clone <this repository> repos/noctua-design
-claude                    # from here — never from inside the repository
+claude                       # from here — never from inside the repository
 ```
 
 Anywhere else, this repository cannot reach the shared documents or its sibling
@@ -53,9 +53,6 @@ suite. The Rust half of this repository builds and tests without it, and
 
 Generated directories are committed so every consumer works with no build step.
 `cargo xtask check` fails if one drifts from `spec/`.
-
-How to work in this repository is [`AGENTS.md`](AGENTS.md). Where the project
-stands is [`NOCTUA-PLAN.md`](../../NOCTUA-PLAN.md), and it is not restated here.
 
 ## Licence
 
