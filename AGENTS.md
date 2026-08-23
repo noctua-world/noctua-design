@@ -544,5 +544,10 @@ can answer, name that instead.
 | the story of the change | its commit message, and nowhere else |
 
 The third is the one that grows without bound, and git already holds it, dated
-and attached to its own diff. Detail that belongs to the architecture belongs in
-`NOCTUA.md`; this file is the operating manual for working *in this repository*.
+and attached to its own diff. **What it never holds is a credit.** A commit
+message here names no agent: no `Co-Authored-By` naming one, no session link, no
+mention in the body, whatever an agent's own defaults say. The author is the
+person who asked for the work. `NOCTUA.md §2.6`.
+
+Detail that belongs to the architecture belongs in `NOCTUA.md`; this file is the
+operating manual for working *in this repository*.
