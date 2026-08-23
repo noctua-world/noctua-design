@@ -22,8 +22,10 @@ use noctua_design::components::{
     ButtonGroupJustify, ButtonGroupOrientation, ButtonJustify, ButtonShape, ButtonSize,
     ButtonSubmit, ButtonTone, ButtonVariant, Carousel, CarouselOrientation, CarouselSlide,
     CarouselSnap, Checkbox, CheckboxSize, Code, CodeBlock, CodeBlockTheme, CodeTone, ColorPicker,
-    ColorPickerShape, ColorPickerSize, DateInput, DateInputOrder, DateInputSize, Del, Dialog,
-    DialogSize, Disclosure, DisclosureHeading, Divider, DividerOrientation, DividerSpacing,
+    ColorPickerShape, ColorPickerSize, DateInput, DateInputOrder, DateInputSize, DatePicker,
+    DatePickerDay, DatePickerDayKind, DatePickerFirstDay, DatePickerForm, DatePickerLabels,
+    DatePickerMonths, DatePickerOrder, DatePickerPair, DatePickerSelection, DatePickerSize, Del,
+    Dialog, DialogSize, Disclosure, DisclosureHeading, Divider, DividerOrientation, DividerSpacing,
     DividerWeight, Em, ErrorSummary, ErrorSummaryItem, Field, FieldKind, FieldSize, Fieldset,
     FileInput, FileInputSize, Heading, HeadingLevel, HeadingSize, HeadingTone, Icon, IconSize,
     Image, ImageFit, ImageLoading, ImageRatio, Info, InfoPlacement, Input, InputKind, InputSize,
@@ -76,6 +78,8 @@ pub(crate) fn component(
         "CodeBlock" => code_block(props, children, scope),
         "ColorPicker" => color_picker(props, children, scope),
         "DateInput" => date_input(props, children, scope),
+        "DatePicker" => date_picker(props, children, scope),
+        "DatePickerDay" => date_picker_day(props, children, scope),
         "Del" => del(props, children, scope),
         "Dialog" => dialog(props, children, scope),
         "Disclosure" => disclosure(props, children, scope),
@@ -922,6 +926,7 @@ fn date_input(
     let pad_ = scope.flag(props, "pad").unwrap_or(false);
     let expand_ = scope.flag(props, "expand").unwrap_or(false);
     let calendar_ = scope.flag(props, "calendar").unwrap_or(false);
+    let today_ = scope.find(props, "today");
     let suggest_label_ = scope.find(props, "suggest_label");
     let previous_label_ = scope.find(props, "previous_label");
     let next_label_ = scope.find(props, "next_label");
@@ -959,6 +964,7 @@ fn date_input(
             pad: pad_,
             expand: expand_,
             calendar: calendar_,
+            today: today_,
             suggest_label: suggest_label_,
             previous_label: previous_label_,
             next_label: next_label_,
@@ -973,6 +979,230 @@ fn date_input(
             ai_mark: ai_mark_,
             ai_label: ai_label_,
             ai_note: ai_note_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `DatePicker`, from a tree.
+#[allow(
+    clippy::too_many_lines,
+    reason = "one line per declared prop, and the prop set is the contract"
+)]
+fn date_picker(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("DatePicker.name is required and this tree does not set it");
+    let legend_ = scope
+        .find(props, "legend")
+        .expect("DatePicker.legend is required and this tree does not set it");
+    let month_ = scope
+        .find(props, "month")
+        .expect("DatePicker.month is required and this tree does not set it");
+    let month_label_ = scope
+        .find(props, "month_label")
+        .expect("DatePicker.month_label is required and this tree does not set it");
+    let second_month_label_ = scope.find(props, "second_month_label");
+    let third_month_label_ = scope.find(props, "third_month_label");
+    let monday_label_ = scope
+        .find(props, "monday_label")
+        .expect("DatePicker.monday_label is required and this tree does not set it");
+    let tuesday_label_ = scope
+        .find(props, "tuesday_label")
+        .expect("DatePicker.tuesday_label is required and this tree does not set it");
+    let wednesday_label_ = scope
+        .find(props, "wednesday_label")
+        .expect("DatePicker.wednesday_label is required and this tree does not set it");
+    let thursday_label_ = scope
+        .find(props, "thursday_label")
+        .expect("DatePicker.thursday_label is required and this tree does not set it");
+    let friday_label_ = scope
+        .find(props, "friday_label")
+        .expect("DatePicker.friday_label is required and this tree does not set it");
+    let saturday_label_ = scope
+        .find(props, "saturday_label")
+        .expect("DatePicker.saturday_label is required and this tree does not set it");
+    let sunday_label_ = scope
+        .find(props, "sunday_label")
+        .expect("DatePicker.sunday_label is required and this tree does not set it");
+    let value_ = scope.find(props, "value");
+    let min_ = scope.find(props, "min");
+    let max_ = scope.find(props, "max");
+    let today_ = scope.find(props, "today");
+    let selection_ = scope
+        .pick(
+            props,
+            "selection",
+            &DatePickerSelection::ALL,
+            DatePickerSelection::as_str,
+        )
+        .unwrap_or_default();
+    let months_ = scope
+        .pick(
+            props,
+            "months",
+            &DatePickerMonths::ALL,
+            DatePickerMonths::as_str,
+        )
+        .unwrap_or_default();
+    let first_day_ = scope
+        .pick(
+            props,
+            "first_day",
+            &DatePickerFirstDay::ALL,
+            DatePickerFirstDay::as_str,
+        )
+        .unwrap_or_default();
+    let week_numbers_ = scope.flag(props, "week_numbers").unwrap_or(false);
+    let week_label_ = scope.find(props, "week_label");
+    let posts_ = scope.flag(props, "posts").unwrap_or(true);
+    let min_length_ = scope.find(props, "min_length");
+    let max_length_ = scope.find(props, "max_length");
+    let size_ = scope
+        .pick(props, "size", &DatePickerSize::ALL, DatePickerSize::as_str)
+        .unwrap_or_default();
+    let required_ = scope.flag(props, "required").unwrap_or(false);
+    let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
+    let hint_ = scope.find(props, "hint");
+    let error_ = scope.find(props, "error");
+    let error_label_ = scope.find(props, "error_label");
+    let form_ = scope
+        .pick(props, "form", &DatePickerForm::ALL, DatePickerForm::as_str)
+        .unwrap_or_default();
+    let order_ = scope
+        .pick(
+            props,
+            "order",
+            &DatePickerOrder::ALL,
+            DatePickerOrder::as_str,
+        )
+        .unwrap_or_default();
+    let format_dmy_ = scope.find(props, "format_dmy");
+    let format_mdy_ = scope.find(props, "format_mdy");
+    let format_ymd_ = scope.find(props, "format_ymd");
+    let pair_ = scope
+        .pick(props, "pair", &DatePickerPair::ALL, DatePickerPair::as_str)
+        .unwrap_or_default();
+    let labels_ = scope
+        .pick(
+            props,
+            "labels",
+            &DatePickerLabels::ALL,
+            DatePickerLabels::as_str,
+        )
+        .unwrap_or_default();
+    let start_label_ = scope.find(props, "start_label");
+    let end_label_ = scope.find(props, "end_label");
+    let open_label_ = scope.find(props, "open_label");
+    let invalid_label_ = scope.find(props, "invalid_label");
+    let chosen_label_ = scope.find(props, "chosen_label");
+    let range_label_ = scope.find(props, "range_label");
+    let count_label_ = scope.find(props, "count_label");
+    let cleared_label_ = scope.find(props, "cleared_label");
+    let blocked_label_ = scope.find(props, "blocked_label");
+    let too_short_label_ = scope.find(props, "too_short_label");
+    let too_long_label_ = scope.find(props, "too_long_label");
+    let clear_label_ = scope.find(props, "clear_label");
+    let previous_label_ = scope.find(props, "previous_label");
+    let next_label_ = scope.find(props, "next_label");
+    let close_label_ = scope.find(props, "close_label");
+    let ai_mark_ = scope.find(props, "ai_mark");
+    let ai_label_ = scope.find(props, "ai_label");
+    let ai_note_ = scope.find(props, "ai_note");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        DatePicker {
+            name: name_,
+            legend: legend_,
+            month: month_,
+            month_label: month_label_,
+            second_month_label: second_month_label_,
+            third_month_label: third_month_label_,
+            monday_label: monday_label_,
+            tuesday_label: tuesday_label_,
+            wednesday_label: wednesday_label_,
+            thursday_label: thursday_label_,
+            friday_label: friday_label_,
+            saturday_label: saturday_label_,
+            sunday_label: sunday_label_,
+            value: value_,
+            min: min_,
+            max: max_,
+            today: today_,
+            selection: selection_,
+            months: months_,
+            first_day: first_day_,
+            week_numbers: week_numbers_,
+            week_label: week_label_,
+            posts: posts_,
+            min_length: min_length_,
+            max_length: max_length_,
+            size: size_,
+            required: required_,
+            disabled: disabled_,
+            hint: hint_,
+            error: error_,
+            error_label: error_label_,
+            form: form_,
+            order: order_,
+            format_dmy: format_dmy_,
+            format_mdy: format_mdy_,
+            format_ymd: format_ymd_,
+            pair: pair_,
+            labels: labels_,
+            start_label: start_label_,
+            end_label: end_label_,
+            open_label: open_label_,
+            invalid_label: invalid_label_,
+            chosen_label: chosen_label_,
+            range_label: range_label_,
+            count_label: count_label_,
+            cleared_label: cleared_label_,
+            blocked_label: blocked_label_,
+            too_short_label: too_short_label_,
+            too_long_label: too_long_label_,
+            clear_label: clear_label_,
+            previous_label: previous_label_,
+            next_label: next_label_,
+            close_label: close_label_,
+            ai_mark: ai_mark_,
+            ai_label: ai_label_,
+            ai_note: ai_note_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `DatePickerDay`, from a tree.
+fn date_picker_day(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let datetime_ = scope
+        .find(props, "datetime")
+        .expect("DatePickerDay.datetime is required and this tree does not set it");
+    let kind_ = scope
+        .pick(
+            props,
+            "kind",
+            &DatePickerDayKind::ALL,
+            DatePickerDayKind::as_str,
+        )
+        .unwrap_or_default();
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        DatePickerDay {
+            datetime: datetime_,
+            kind: kind_,
             class: class_,
             {render(children, scope)}
         }

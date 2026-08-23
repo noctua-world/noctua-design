@@ -487,6 +487,13 @@ without the keyboard they oblige — the fix is to move the module and let
 `shell.js` import it back. And `spec/components/<name>.cases.toml` is unwritten,
 so behavioural parity is demonstrated by the examples rather than asserted.
 
+**`DateInput`'s share of that gap is smaller than it was, and the shape of the
+fix is now a worked example.** Its month grid was a hundred and seventy lines of
+`createElement` in the site's script; it is `DatePicker` now, and the field
+renders one. What is still the site's is the three-box behaviour — the stepping,
+the paste, the eight validation sentences, the locale re-lay and the quick-pick
+listbox. The count stays at four.
+
 **A `role="grid"` has one tab stop and three things sit in it.** `table.js`
 sets every cell to `-1` and the first to `0`, and sets nothing inside a cell —
 so the row-select box and the expand control are stops the comment above them

@@ -10,7 +10,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Hero;
 
-/// The heroes in this group. 16 of them.
+/// The heroes in this group. 17 of them.
 pub(crate) const HEROES: &[Hero] = &[
     (
         "avatars",
@@ -617,6 +617,56 @@ ToolbarGroup { align: ToolbarGroupAlign::End, … }"#,
                     ],
                 },
             ],
+        }],
+    ),
+    (
+        "date-picker",
+        r"DatePicker { name, legend, month, month_label, monday_label, tuesday_label, wednesday_label, thursday_label, friday_label, saturday_label, sunday_label, selection: Range, months: Two, second_month_label, value, range_label, previous_label, next_label }",
+        &[Node::Component {
+            name: "DatePicker",
+            props: &[
+                ("name", Value::Text("overview-stay")),
+                (
+                    "legend",
+                    Value::Message(Key::ExampleOverviewDatePickerLegend),
+                ),
+                ("month", Value::Text("2026-08")),
+                ("month_label", Value::Message(Key::ExampleDatePickerAugust)),
+                (
+                    "second_month_label",
+                    Value::Message(Key::ExampleDatePickerSeptember),
+                ),
+                ("months", Value::Text("two")),
+                ("selection", Value::Text("range")),
+                ("value", Value::Text("2026-08-18/2026-08-24")),
+                ("today", Value::Text("2026-08-14")),
+                ("range_label", Value::Message(Key::ExampleDatePickerRange)),
+                (
+                    "previous_label",
+                    Value::Message(Key::ExampleDatePickerPrevious),
+                ),
+                ("next_label", Value::Message(Key::ExampleDatePickerNext)),
+                ("monday_label", Value::Message(Key::ExampleDatePickerMonday)),
+                (
+                    "tuesday_label",
+                    Value::Message(Key::ExampleDatePickerTuesday),
+                ),
+                (
+                    "wednesday_label",
+                    Value::Message(Key::ExampleDatePickerWednesday),
+                ),
+                (
+                    "thursday_label",
+                    Value::Message(Key::ExampleDatePickerThursday),
+                ),
+                ("friday_label", Value::Message(Key::ExampleDatePickerFriday)),
+                (
+                    "saturday_label",
+                    Value::Message(Key::ExampleDatePickerSaturday),
+                ),
+                ("sunday_label", Value::Message(Key::ExampleDatePickerSunday)),
+            ],
+            children: &[],
         }],
     ),
     (

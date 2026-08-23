@@ -39,6 +39,8 @@ mod code;
 mod code_block;
 mod color_picker;
 mod date_input;
+mod date_picker;
+mod date_picker_day;
 mod del;
 mod dialog;
 mod disclosure;
@@ -151,6 +153,8 @@ pub(crate) fn for_component(name: &str) -> &'static [Tree] {
         "CodeBlock" => code_block::EXAMPLES,
         "ColorPicker" => color_picker::EXAMPLES,
         "DateInput" => date_input::EXAMPLES,
+        "DatePicker" => date_picker::EXAMPLES,
+        "DatePickerDay" => date_picker_day::EXAMPLES,
         "Del" => del::EXAMPLES,
         "Dialog" => dialog::EXAMPLES,
         "Disclosure" => disclosure::EXAMPLES,

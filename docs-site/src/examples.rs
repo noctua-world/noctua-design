@@ -469,6 +469,12 @@ Button { menu: true, hide_label: true, controls: "overview-button-group-menu", l
         ),
     ),
     (
+        "date-picker",
+        example!(
+            r"DatePicker { name, legend, month, month_label, monday_label, tuesday_label, wednesday_label, thursday_label, friday_label, saturday_label, sunday_label, selection: Range, months: Two, second_month_label, value, range_label, previous_label, next_label }"
+        ),
+    ),
+    (
         "date-input",
         example!(
             r"DateInput { name, legend, hint, day_label, month_label, year_label, pad: true, required: true, required_label, missing_label, number_label, invalid_label, year_digits_label, error_label }"
@@ -622,6 +628,8 @@ pub(crate) fn for_component(name: &str) -> &'static [Example] {
         "ToolbarGroup" => TOOLBAR_GROUP,
         "Checkbox" => CHECKBOX,
         "DateInput" => DATE_INPUT,
+        "DatePicker" => DATE_PICKER,
+        "DatePickerDay" => DATE_PICKER_DAY,
         "Radio" => RADIO,
         "Fieldset" => FIELDSET,
         "Info" => INFO,
@@ -1367,6 +1375,84 @@ const SWATCH: &[Example] = &[
 // `contact` would be six answers to one question, and choosing in the second
 // example would silently clear the first. The ids follow from the name, so
 // distinct names also mean distinct ids, which is what the labels point at.
+/// Twelve months, which between them set every prop the contract declares.
+///
+/// The last is the assistant's mark, appended for the reason every host's is:
+/// frame ids are positional, so a new example goes at the end or it renumbers
+/// the ones three specs name by hand.
+const DATE_PICKER: &[Example] = &[
+    example!(
+        r"DatePicker { name, legend, month, month_label, monday_label, tuesday_label, wednesday_label, thursday_label, friday_label, saturday_label, sunday_label, today, previous_label, next_label }",
+        Key::ExampleDatePickerOneNote
+    ),
+    example!(
+        r#"DatePicker { selection: Range, months: Two, second_month_label, value: "2026-08-18/2026-08-24", range_label, clear_label, cleared_label }"#,
+        Key::ExampleDatePickerRangeNote
+    ),
+    example!(
+        r#"DatePicker { min: "2026-08-10", max: "2026-08-28", min_length: "2", max_length: "9", too_short_label, too_long_label, blocked_label }"#,
+        Key::ExampleDatePickerBoundsNote
+    ),
+    example!(
+        r"DatePicker { form: Field, order, format_dmy, format_mdy, format_ymd, open_label, invalid_label, chosen_label, close_label }",
+        Key::ExampleDatePickerFieldNote
+    ),
+    example!(
+        r"DatePicker { form: Field, selection: Range, start_label, end_label, range_label }",
+        Key::ExampleDatePickerTripNote
+    ),
+    example!(
+        r"DatePicker { form: Field, selection: Range, pair: Attached, start_label, end_label }",
+        Key::ExampleDatePickerAttachedNote
+    ),
+    example!(
+        r"DatePicker { form: Field, selection: Range, pair: Stacked, labels: Hidden }",
+        Key::ExampleDatePickerStackedNote
+    ),
+    example!(
+        r"DatePicker { form: Field, selection: Range, pair: Stacked, labels: Inside }",
+        Key::ExampleDatePickerInsideNote
+    ),
+    example!(
+        r"DatePicker { months: Three, third_month_label, week_numbers: true, week_label, first_day: Sunday, selection: Multiple, count_label }",
+        Key::ExampleDatePickerWideNote
+    ),
+    example!(
+        r"DatePicker { DatePickerDay { datetime, kind, children } }",
+        Key::ExampleDatePickerNamedNote
+    ),
+    example!(
+        r"DatePicker { size: Small }  ·  { size: Large }  ·  { disabled: true }  ·  { required: true, hint, error, error_label }  ·  { posts: false }",
+        Key::ExampleDatePickerFormsNote
+    ),
+    example!(
+        r"DatePicker { ai_mark, ai_label, ai_note }",
+        Key::ExampleAiCaption
+    ),
+];
+
+/// The three kinds of named day, and the quiet default.
+///
+/// Each is drawn inside the picker that reads it. The element renders hidden,
+/// so a frame holding one on its own would be an empty frame under a caption.
+const DATE_PICKER_DAY: &[Example] = &[
+    example!(
+        r#"DatePickerDay { datetime: "2026-08-24/2026-08-28", kind: Preset }"#,
+        Key::ExampleDatePickerDayPresetNote
+    ),
+    example!(
+        r#"DatePickerDay { datetime: "2026-08-25", kind: Refused }"#,
+        Key::ExampleDatePickerDayRefusedNote
+    ),
+    example!(
+        r#"DatePickerDay { datetime: "2026-08-12", kind: Marked }"#,
+        Key::ExampleDatePickerDayMarkedNote
+    ),
+    example!(
+        r#"DatePickerDay { datetime: "2026-08-03/2026-08-07" }"#,
+        Key::ExampleDatePickerDaySpanNote
+    ),
+];
 
 /// Four fields, which between them set every prop the contract declares.
 const DATE_INPUT: &[Example] = &[
@@ -1375,7 +1461,7 @@ const DATE_INPUT: &[Example] = &[
         Key::ExampleDateInputBirthNote
     ),
     example!(
-        r"DateInput { min, max, min_label, max_label, year_digits_label, calendar: true, suggest_label, previous_label, next_label, Time { … } }",
+        r"DateInput { min, max, min_label, max_label, year_digits_label, calendar: true, today, suggest_label, previous_label, next_label, Time { … } }",
         Key::ExampleDateInputVisitNote
     ),
     example!(

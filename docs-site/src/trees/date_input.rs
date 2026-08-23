@@ -72,7 +72,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         }],
     ),
     (
-        r"DateInput { min, max, min_label, max_label, year_digits_label, calendar: true, suggest_label, previous_label, next_label, Time { … } }",
+        r"DateInput { min, max, min_label, max_label, year_digits_label, calendar: true, today, suggest_label, previous_label, next_label, Time { … } }",
         &[Node::Component {
             name: "DateInput",
             props: &[
@@ -100,6 +100,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 ("min_label", Value::Message(Key::ExampleDateInputMin)),
                 ("max_label", Value::Message(Key::ExampleDateInputMax)),
                 ("calendar", Value::Bool(true)),
+                ("today", Value::Text("2026-08-14")),
                 (
                     "suggest_label",
                     Value::Message(Key::ExampleDateInputSuggest),

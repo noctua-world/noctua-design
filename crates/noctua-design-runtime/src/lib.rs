@@ -15,6 +15,7 @@
 //! | `info.js` | `enhanceInfos()` — the note beside a word or beside an assistant's mark, on a press and never on a hover |
 //! | `menu.js` | `enhanceMenus()` — the list of actions a button opens, and every key a menu owes |
 //! | `message-bar.js` | `enhanceMessageBars()` — revealing the control that takes a bar away, and taking it |
+//! | `date-picker.js` | `enhanceDatePickers()` — the month a reader presses days in, the arrows that walk it, and the panel it folds into |
 //! | `dialog.js` | `enhanceDialogs()` — opening the platform's `<dialog>`, and the Escape a non-modal one is owed |
 //! | `popover.js` | `enhancePopovers()` — the named surface a control opens, and every way out of it |
 //! | `tooltip.js` | `enhanceTooltips()` — the hint a control gains on hover, on focus and under a held finger |
@@ -76,6 +77,9 @@ pub const TABLE_SOURCE: &str = "crates/noctua-design-runtime/src/table.js";
 /// `MessageBar { dismissible }` being a control that closes nothing.
 pub const MESSAGE_BAR_SOURCE: &str = "crates/noctua-design-runtime/src/message-bar.js";
 
+/// `date-picker.js`, likewise — the first date behaviour this crate ships.
+pub const DATE_PICKER_SOURCE: &str = "crates/noctua-design-runtime/src/date-picker.js";
+
 /// `dialog.js`, likewise — the one file here that opens a `<dialog>`, which is
 /// the only way one opens at all.
 pub const DIALOG_SOURCE: &str = "crates/noctua-design-runtime/src/dialog.js";
@@ -98,7 +102,7 @@ pub const TOAST_SOURCE: &str = "crates/noctua-design-runtime/src/toast.js";
 /// `xtask` that runs and writes an empty artifact. The paths above are what
 /// name it; these are what it says.
 #[must_use]
-pub fn sources() -> [(&'static str, &'static str); 15] {
+pub fn sources() -> [(&'static str, &'static str); 16] {
     [
         (ANCHOR_SOURCE, include_str!("anchor.js")),
         (COLOR_SOURCE, include_str!("color.js")),
@@ -111,6 +115,7 @@ pub fn sources() -> [(&'static str, &'static str); 15] {
         (INFO_SOURCE, include_str!("info.js")),
         (MENU_SOURCE, include_str!("menu.js")),
         (MESSAGE_BAR_SOURCE, include_str!("message-bar.js")),
+        (DATE_PICKER_SOURCE, include_str!("date-picker.js")),
         (DIALOG_SOURCE, include_str!("dialog.js")),
         (POPOVER_SOURCE, include_str!("popover.js")),
         (TOOLTIP_SOURCE, include_str!("tooltip.js")),

@@ -24,6 +24,8 @@ mod code;
 mod code_block;
 mod color_picker;
 mod date_input;
+mod date_picker;
+mod date_picker_day;
 mod del;
 mod dialog;
 mod disclosure;
@@ -114,6 +116,11 @@ pub use code::{Code, CodeTone};
 pub use code_block::{CodeBlock, CodeBlockTheme};
 pub use color_picker::{ColorPicker, ColorPickerShape, ColorPickerSize};
 pub use date_input::{DateInput, DateInputOrder, DateInputSize};
+pub use date_picker::{
+    DatePicker, DatePickerFirstDay, DatePickerForm, DatePickerLabels, DatePickerMonths,
+    DatePickerOrder, DatePickerPair, DatePickerSelection, DatePickerSize,
+};
+pub use date_picker_day::{DatePickerDay, DatePickerDayKind};
 pub use del::Del;
 pub use dialog::{Dialog, DialogSize};
 pub use disclosure::{Disclosure, DisclosureHeading};

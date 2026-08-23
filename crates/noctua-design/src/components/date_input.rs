@@ -120,9 +120,11 @@ pub fn DateInput(
     /// A typing aid, off by default: a two-digit year becomes four when the box is left. The century is the one that lands inside `min` and `max` when exactly one does. Otherwise a year up to ten ahead takes this century and any other takes the last.
     #[props(default = false)]
     expand: bool,
-    /// Adds a month grid to the suggestions panel, built by the script from the locale's own formatter: month names, weekday initials, the week's first day. Needs `suggest_label`, which names the control that opens it.
+    /// Adds a month grid to the suggestions panel, as a real `DatePicker` that posts nothing and writes into the three boxes. Needs `suggest_label`, which names the control that opens it, and `today`.
     #[props(default = false)]
     calendar: bool,
+    /// Which day is today, in the same wire format as `value`. It is the server's own date, and it decides the month the calendar opens on when no date has been given yet.
+    today: Option<String>,
     /// The name of the suggestions control and its panel. The script builds the button only when this is set, together with quick picks in the children or `calendar` set.
     suggest_label: Option<String>,
     /// The name of the calendar's step-back-a-month control. Icon-only controls still need a name.
@@ -235,6 +237,15 @@ pub fn DateInput(
         _ => (day_item, month_item, year_item),
     };
     let has_suggest = suggest_label.is_some();
+    // THE MONTH THE GRID OPENS ON, from the answer if there is one and from the
+    // server's own date otherwise. A calendar with neither is a calendar with
+    // no month to draw, so it is not drawn at all.
+    let opening = value
+        .as_deref()
+        .or(today.as_deref())
+        .filter(|one| one.len() >= 7)
+        .map_or_else(String::new, |one| one[..7].to_owned());
+    let calendared = calendar && !opening.is_empty();
 
     rsx! {
         // THE GROUP IS THE FIELD NOW. `Field { kind: Group }` renders the
@@ -271,9 +282,10 @@ pub fn DateInput(
             "data-nd-expand": if expand { "true" } else { "false" },
             "data-nd-calendar": if calendar { "true" } else { "false" },
             "data-nd-glass": if glass { "true" } else { "false" },
-            "data-nd-min": min,
-            "data-nd-max": max,
-            "data-nd-suggest-label": suggest_label,
+            "data-nd-min": min.clone(),
+            "data-nd-max": max.clone(),
+            "data-nd-today": today.clone(),
+            "data-nd-suggest-label": suggest_label.clone(),
             "data-nd-previous-label": previous_label,
             "data-nd-next-label": next_label,
             "data-nd-required-label": required_label,
@@ -313,9 +325,48 @@ pub fn DateInput(
                 "data-nd-date-input-suggest": "",
                 {children}
             }
-            // THE SCRIPT DOES NOT KNOW WHAT A CALENDAR LOOKS LIKE. It copies
-            // this, so the drawing stays declared rather than drawn in a
-            // script.
+            // THE MONTH GRID IS A COMPONENT NOW.
+            //
+            // It was a hundred and seventy lines of `createElement` in the
+            // site's own script: a `role="grid"`, a roving `tabindex`, six
+            // weeks of buttons and a keyboard, none of it in `dist/` and none
+            // of it reachable by anything else. `DatePicker` is that grid,
+            // declared. It renders here hidden and the script moves it into
+            // the panel it builds.
+            //
+            // `posts: false` IS WHAT KEEPS ONE CARRIER FOR ONE DATE. Without
+            // it this field would submit the day twice under two schemes: three
+            // text boxes and a month of checkboxes. The picker's days carry no
+            // name at all, which is the platform's own rule and needs no
+            // script to hold.
+            //
+            // The words are left empty on purpose. This grid only exists once a
+            // script is running, so there is nothing to serve them for, and
+            // the picker fills an empty heading from the page's own language.
+            if calendared {
+                div { class: "nd-date-input-calendar", hidden: true, "data-nd-date-input-calendar": "",
+                    crate::components::DatePicker {
+                        name: format!("{name}-calendar"),
+                        legend: suggest_label.clone().unwrap_or_default(),
+                        month: opening,
+                        month_label: String::new(),
+                        monday_label: String::new(),
+                        tuesday_label: String::new(),
+                        wednesday_label: String::new(),
+                        thursday_label: String::new(),
+                        friday_label: String::new(),
+                        saturday_label: String::new(),
+                        sunday_label: String::new(),
+                        value: value.clone(),
+                        min: min.clone(),
+                        max: max.clone(),
+                        today: today.clone(),
+                        previous_label: previous_label.clone(),
+                        next_label: next_label.clone(),
+                        posts: false,
+                    }
+                }
+            }
             if has_suggest {
                 template { "data-nd-date-input-glyph": "",
                     Icon { icon: IconDrawing::CALENDAR, size: crate::components::IconSize::Small }

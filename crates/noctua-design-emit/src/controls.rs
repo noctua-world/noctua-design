@@ -273,6 +273,8 @@ pub fn is_custom(component: &Component) -> bool {
             | "Lineage"
             | "LineageFigure"
             | "DateInput"
+            | "DatePicker"
+            | "DatePickerDay"
             | "Divider"
             | "Label"
             | "Image"
@@ -304,6 +306,8 @@ pub fn dioxus_body(sink: &mut String, component: &Component) {
         "Lineage" => out.push_str(LINEAGE_DIOXUS),
         "LineageFigure" => out.push_str(LINEAGE_FIGURE_DIOXUS),
         "DateInput" => out.push_str(DATE_INPUT_DIOXUS),
+        "DatePicker" => out.push_str(DATE_PICKER_DIOXUS),
+        "DatePickerDay" => out.push_str(DATE_PICKER_DAY_DIOXUS),
         "Swatch" => swatch_dioxus(out),
         "Switch" => switch_dioxus(out),
         "Segmented" => segmented_dioxus(out),
@@ -387,6 +391,8 @@ pub fn react_body(sink: &mut String, component: &Component) {
         "Lineage" => out.push_str(LINEAGE_REACT),
         "LineageFigure" => out.push_str(LINEAGE_FIGURE_REACT),
         "DateInput" => out.push_str(DATE_INPUT_REACT),
+        "DatePicker" => out.push_str(DATE_PICKER_REACT),
+        "DatePickerDay" => out.push_str(DATE_PICKER_DAY_REACT),
         "Swatch" => swatch_react(out),
         "Switch" => switch_react(out),
         "Segmented" => segmented_react(out),
@@ -4409,13 +4415,25 @@ const PAGINATION_REACT: &str = r#"  const spread_ = spread ?? "default";
 /// `DateInput` needs `FieldKind` besides, because a date is a group of three
 /// boxes and a group is named by a `<legend>`.
 fn field_and_icon(name: &str) -> String {
-    let kind = if name == "DateInput" {
+    let kind = if matches!(name, "DateInput" | "DatePicker") {
         "FieldKind, FieldSize"
     } else {
         "FieldSize"
     };
     format!(
         "use noctua_design_icons::IconDrawing;\n\nuse crate::components::{{Field, {kind}, Icon}};\n"
+    )
+}
+
+/// A field and a drawing in React, and whatever one body needs beside them.
+///
+/// The twin of `field_and_icon`, extracted when `DateInput` grew a third line
+/// and pushed `react_imports` past the length a lint allows. Two arms wanting
+/// the same two imports is one helper rather than two `concat!`s that agree
+/// until one of them is edited.
+fn react_field_and_icon(extra: &str) -> String {
+    format!(
+        "import {{ Field }} from \"./field.js\";\n\nimport {{ Icon }} from \"./icon.js\";\n{extra}"
     )
 }
 
@@ -4466,7 +4484,7 @@ pub fn dioxus_imports(component: &Component) -> String {
         "Button" | "Link" | "SegmentedItem" | "Disclosure" | "Checkbox" | "SelectOption"
         | "Search" | "SearchResult" | "Avatar" | "Carousel" => PLAIN_ICON.to_owned(),
         // A drawing and the field around it — see `field_and_icon`.
-        "Select" | "DateInput" => field_and_icon(&component.meta.name),
+        "Select" | "DateInput" | "DatePicker" => field_and_icon(&component.meta.name),
         // A COMPONENT THAT RENDERS COMPONENTS. A tag's colour chip is a real
         // `Swatch` and its remove control is a real `Button` — a pill is not
         // the place to grow a second chip and a second button.
@@ -4663,12 +4681,17 @@ pub fn react_imports(component: &Component) -> String {
         // in scope and threw on first render. Found by the guard in `props.rs`
         // that asks what each body names, rather than by the older one that
         // asks about a fixed list of six names.
-        "Input" | "NumberInput" | "DateInput" | "Select" => concat!(
-            "import { Field } from \"./field.js\";\n",
-            "\n",
-            "import { Icon } from \"./icon.js\";\n"
-        )
-        .to_owned(),
+        "Input" | "NumberInput" | "DatePicker" | "Select" => react_field_and_icon(""),
+        // `DateInput` RENDERS A `DatePicker` NOW, and its `calendar` prop and
+        // the `calendar` icon are two things with one name. The drawing is
+        // aliased rather than the prop renamed, because the prop is the
+        // contract and the alias is one line.
+        "DateInput" => format!(
+            "import {{ DatePicker }} from \"./date_picker.js\";\n{}",
+            react_field_and_icon(
+                "import { calendar as calendarIcon } from \"@noctua-world/design-tokens/icons/calendar.js\";\n",
+            )
+        ),
         "Textarea" | "Slider" | "OtpField" => REACT_FIELD.to_owned(),
         // The same composition in the other language — see the Dioxus half.
         "Field" => "import { Label } from \"./label.js\";\n".to_owned(),
@@ -9034,6 +9057,15 @@ const DATE_INPUT_DIOXUS: &str = r#"    let root = format!("nd-date-input {class}
         _ => (day_item, month_item, year_item),
     };
     let has_suggest = suggest_label.is_some();
+    // THE MONTH THE GRID OPENS ON, from the answer if there is one and from the
+    // server's own date otherwise. A calendar with neither is a calendar with
+    // no month to draw, so it is not drawn at all.
+    let opening = value
+        .as_deref()
+        .or(today.as_deref())
+        .filter(|one| one.len() >= 7)
+        .map_or_else(String::new, |one| one[..7].to_owned());
+    let calendared = calendar && !opening.is_empty();
 
     rsx! {
         // THE GROUP IS THE FIELD NOW. `Field { kind: Group }` renders the
@@ -9070,9 +9102,10 @@ const DATE_INPUT_DIOXUS: &str = r#"    let root = format!("nd-date-input {class}
             "data-nd-expand": if expand { "true" } else { "false" },
             "data-nd-calendar": if calendar { "true" } else { "false" },
             "data-nd-glass": if glass { "true" } else { "false" },
-            "data-nd-min": min,
-            "data-nd-max": max,
-            "data-nd-suggest-label": suggest_label,
+            "data-nd-min": min.clone(),
+            "data-nd-max": max.clone(),
+            "data-nd-today": today.clone(),
+            "data-nd-suggest-label": suggest_label.clone(),
             "data-nd-previous-label": previous_label,
             "data-nd-next-label": next_label,
             "data-nd-required-label": required_label,
@@ -9102,9 +9135,48 @@ const DATE_INPUT_DIOXUS: &str = r#"    let root = format!("nd-date-input {class}
                 "data-nd-date-input-suggest": "",
                 {children}
             }
-            // THE SCRIPT DOES NOT KNOW WHAT A CALENDAR LOOKS LIKE. It copies
-            // this, so the drawing stays declared rather than drawn in a
-            // script.
+            // THE MONTH GRID IS A COMPONENT NOW.
+            //
+            // It was a hundred and seventy lines of `createElement` in the
+            // site's own script: a `role="grid"`, a roving `tabindex`, six
+            // weeks of buttons and a keyboard, none of it in `dist/` and none
+            // of it reachable by anything else. `DatePicker` is that grid,
+            // declared. It renders here hidden and the script moves it into
+            // the panel it builds.
+            //
+            // `posts: false` IS WHAT KEEPS ONE CARRIER FOR ONE DATE. Without
+            // it this field would submit the day twice under two schemes: three
+            // text boxes and a month of checkboxes. The picker's days carry no
+            // name at all, which is the platform's own rule and needs no
+            // script to hold.
+            //
+            // The words are left empty on purpose. This grid only exists once a
+            // script is running, so there is nothing to serve them for, and
+            // the picker fills an empty heading from the page's own language.
+            if calendared {
+                div { class: "nd-date-input-calendar", hidden: true, "data-nd-date-input-calendar": "",
+                    crate::components::DatePicker {
+                        name: format!("{name}-calendar"),
+                        legend: suggest_label.clone().unwrap_or_default(),
+                        month: opening,
+                        month_label: String::new(),
+                        monday_label: String::new(),
+                        tuesday_label: String::new(),
+                        wednesday_label: String::new(),
+                        thursday_label: String::new(),
+                        friday_label: String::new(),
+                        saturday_label: String::new(),
+                        sunday_label: String::new(),
+                        value: value.clone(),
+                        min: min.clone(),
+                        max: max.clone(),
+                        today: today.clone(),
+                        previous_label: previous_label.clone(),
+                        next_label: next_label.clone(),
+                        posts: false,
+                    }
+                }
+            }
             if has_suggest {
                 template { "data-nd-date-input-glyph": "",
                     Icon { icon: IconDrawing::CALENDAR, size: crate::components::IconSize::Small }
@@ -9128,6 +9200,9 @@ const DATE_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
   // The one wire format, split — not locale arithmetic.
   const [valueYear = "", valueMonth = "", valueDay = ""] = (value ?? "").split("-");
   const resolved = order_ === "auto" ? "dmy" : order_;
+  // The month the grid opens on — see the Dioxus half.
+  const opening = ((value ?? "") || (today ?? "")).slice(0, 7);
+  const calendared = (calendar ?? false) && opening.length === 7;
   const segment = (part, width, partLabel, partValue, token) =>
     h(
       "div",
@@ -9184,6 +9259,7 @@ const DATE_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
       "data-nd-glass": String(glass ?? false),
       "data-nd-min": min,
       "data-nd-max": max,
+      "data-nd-today": today,
       "data-nd-suggest-label": suggestLabel,
       "data-nd-previous-label": previousLabel,
       "data-nd-next-label": nextLabel,
@@ -9224,11 +9300,44 @@ const DATE_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
       },
       children,
     ),
+    // The month grid, as a component — see the Dioxus half for why, and for
+    // why `posts` is off and the words are empty.
+    calendared
+      ? h(
+          "div",
+          {
+            key: "c",
+            className: "nd-date-input-calendar",
+            hidden: true,
+            "data-nd-date-input-calendar": "",
+          },
+          h(DatePicker, {
+            name: `${name}-calendar`,
+            legend: suggestLabel ?? "",
+            month: opening,
+            monthLabel: "",
+            mondayLabel: "",
+            tuesdayLabel: "",
+            wednesdayLabel: "",
+            thursdayLabel: "",
+            fridayLabel: "",
+            saturdayLabel: "",
+            sundayLabel: "",
+            value,
+            min,
+            max,
+            today,
+            previousLabel,
+            nextLabel,
+            posts: false,
+          }),
+        )
+      : null,
     suggestLabel
       ? h(
           "template",
           { key: "t", "data-nd-date-input-glyph": "" },
-          h(Icon, { icon: calendar, size: "small" }),
+          h(Icon, { icon: calendarIcon, size: "small" }),
         )
       : null,
   ),
@@ -13041,6 +13150,1002 @@ const TOAST_REACT: &str = r#"  const placement_ = placement ?? "bottom-end";
           h(Icon, { icon: close, size: "small" }),
         )
       : null,
+  );
+"#;
+
+/// A month a reader presses days in, and the days a caller names inside it.
+///
+/// # Every day is a real form control
+///
+/// A radio under `single`, a checkbox otherwise, clipped by
+/// `nd-visually-hidden`, with a `<label>` carrying the numeral. `Rating` is the
+/// worked precedent down to the class names. What it buys with no script is a
+/// radio group's own roving, the platform's arrow keys, a submitted value, and
+/// a real `disabled` on every day outside the bounds.
+///
+/// # The table claims nothing the markup cannot keep
+///
+/// It ships as a table with column headings. `role="grid"` promises arrows that
+/// move focus without choosing, which is the opposite of what a radio group
+/// does, so `dist/date-picker.js` writes that role at the moment it takes the
+/// arrows over.
+///
+/// # The arithmetic is transcribed, not imported
+///
+/// No date library, because a dependency here is one every consumer inherits.
+/// The React half writes the same algorithm beside this one, so a reader can
+/// diff them. Neither uses a platform date type: those carry a time zone, and a
+/// server in one zone has to agree with a browser in another about which day
+/// the first of the month falls on.
+const DATE_PICKER_DIOXUS: &str = r#"    // ITEMS FIRST, BECAUSE AN ITEM EXISTS FROM THE START OF ITS SCOPE and
+    // reading one halfway down a body suggests an order that is not there.
+    type Cell = (String, i64, bool, bool, bool, String, bool);
+    type Week = (i64, Vec<Cell>);
+    type Pane = (String, Vec<Week>);
+
+    // Days between the civil calendar and a count, by the standard algorithm.
+    // Every move below is integer arithmetic on that count, so a month edge and
+    // a leap day are the same case as any other.
+    fn days_from_civil(year: i64, month: i64, day: i64) -> i64 {
+        let year = if month <= 2 { year - 1 } else { year };
+        let era = if year >= 0 { year } else { year - 399 } / 400;
+        let of_era = year - era * 400;
+        let shifted = (month + 9) % 12;
+        let of_year = (153 * shifted + 2) / 5 + day - 1;
+        era * 146_097 + of_era * 365 + of_era / 4 - of_era / 100 + of_year - 719_468
+    }
+    fn civil_from_days(count: i64) -> (i64, i64, i64) {
+        let count = count + 719_468;
+        let era = if count >= 0 { count } else { count - 146_096 } / 146_097;
+        let of_era = count - era * 146_097;
+        let of_era_year = (of_era - of_era / 1460 + of_era / 36_524 - of_era / 146_096) / 365;
+        let year = of_era_year + era * 400;
+        let of_year = of_era - (365 * of_era_year + of_era_year / 4 - of_era_year / 100);
+        let shifted = (5 * of_year + 2) / 153;
+        let day = of_year - (153 * shifted + 2) / 5 + 1;
+        let month = if shifted < 10 { shifted + 3 } else { shifted - 9 };
+        (if month <= 2 { year + 1 } else { year }, month, day)
+    }
+    // 1 for Monday through 7 for Sunday. The first of January 1970 was a
+    // Thursday, which is 4.
+    fn weekday(count: i64) -> i64 {
+        (count + 3).rem_euclid(7) + 1
+    }
+    fn roll(year: i64, month: i64, step: i64) -> (i64, i64) {
+        let total = year * 12 + month - 1 + step;
+        (total.div_euclid(12), total.rem_euclid(12) + 1)
+    }
+    fn wire(year: i64, month: i64, day: i64) -> String {
+        format!("{year:04}-{month:02}-{day:02}")
+    }
+    // The week a day belongs to, by the rule the calendar data states: the week
+    // is named after the day four days into it. The script re-reads that four
+    // from the reader's own conventions.
+    fn week_number(count: i64, start: i64) -> i64 {
+        let naming = count - (weekday(count) - start).rem_euclid(7) + 3;
+        let (year, _, _) = civil_from_days(naming);
+        (naming - days_from_civil(year, 1, 1)) / 7 + 1
+    }
+
+    let root = format!("nd-date-picker {class}");
+    let root = root.trim().to_owned();
+    // Derived, so the cells' targets cannot be typed wrong.
+    let id = format!("nd-date-picker-{name}");
+    let flagged = if error.is_some() { "true" } else { "false" };
+
+    // MATCHED, NEVER PARSED. A bound no reader could have written must refuse
+    // every day rather than none, so anything that is not the wire format is
+    // treated as absent.
+    let drawn = month
+        .split_once('-')
+        .and_then(|(year, month)| Some((year.parse::<i64>().ok()?, month.parse::<i64>().ok()?)))
+        .filter(|(_, month)| (1..=12).contains(month))
+        .unwrap_or((2026, 1));
+    let panes: usize = match months {
+        DatePickerMonths::One => 1,
+        DatePickerMonths::Two => 2,
+        DatePickerMonths::Three => 3,
+    };
+    // Served as Monday under `auto`, and the script lays it out again for the
+    // reader. A named day is served as written and left alone.
+    let start: i64 = match first_day {
+        DatePickerFirstDay::Sunday => 7,
+        DatePickerFirstDay::Saturday => 6,
+        _ => 1,
+    };
+    let single = matches!(selection, DatePickerSelection::Single);
+    let ranged = matches!(selection, DatePickerSelection::Range);
+    // One prop, three wire formats, split on every separator at once so the
+    // reading needs no branch.
+    let ticked: Vec<String> = value
+        .as_deref()
+        .unwrap_or("")
+        .split(['/', ' ', ','])
+        .filter(|one| !one.is_empty())
+        .map(str::to_owned)
+        .collect();
+    let low = ticked.first().cloned().unwrap_or_default();
+    let high = ticked.last().cloned().unwrap_or_default();
+    let today_day = today.clone().unwrap_or_default();
+    let floor = min.clone().unwrap_or_default();
+    let ceiling = max.clone().unwrap_or_default();
+
+    // The seven headings in the week's own order. They are named after
+    // weekdays, so moving the week's first day moves the columns and the words
+    // travel with them.
+    let words = [
+        monday_label,
+        tuesday_label,
+        wednesday_label,
+        thursday_label,
+        friday_label,
+        saturday_label,
+        sunday_label,
+    ];
+    let opening = usize::try_from(start).unwrap_or(1) - 1;
+    let heads: Vec<(i64, String)> = (0..7_usize)
+        .map(|at| {
+            let index = (opening + at) % 7;
+            (i64::try_from(index).unwrap_or(0) + 1, words[index].clone())
+        })
+        .collect();
+
+    let captions = [
+        month_label,
+        second_month_label.unwrap_or_default(),
+        third_month_label.unwrap_or_default(),
+    ];
+    // Every cell as a value, so the markup below computes nothing.
+    let grid: Vec<Pane> = (0..panes)
+        .map(|pane| {
+            let pane = i64::try_from(pane).unwrap_or(0);
+            let (year, month) = roll(drawn.0, drawn.1, pane);
+            let first = days_from_civil(year, month, 1);
+            let lead = (weekday(first) - start).rem_euclid(7);
+            let rows = (0..6_i64)
+                .map(|week| {
+                    let head = first - lead + week * 7;
+                    let cells = (0..7_i64)
+                        .map(|step| {
+                            let count = head + step;
+                            let (this_year, this_month, this_day) = civil_from_days(count);
+                            let day = wire(this_year, this_month, this_day);
+                            let outside = this_month != month || this_year != year;
+                            // A DAY APPEARS ONCE, WHATEVER THE PANE COUNT.
+                            //
+                            // Six rows always hold forty-two days, so a month
+                            // spills into its neighbours at both ends. Beside a
+                            // second pane those spilled days are days the other
+                            // pane is already drawing, and two controls for one
+                            // day is two answers to one question: an id that
+                            // repeats, a checkbox that agrees with itself only
+                            // by accident, and a value that can post twice. The
+                            // spill a neighbour owns is drawn as an empty cell.
+                            let leading = count < first;
+                            let owned = outside
+                                && ((leading && pane > 0)
+                                    || (!leading
+                                        && pane + 1 < i64::try_from(panes).unwrap_or(1)));
+                            let refused = (!floor.is_empty() && day < floor)
+                                || (!ceiling.is_empty() && day > ceiling);
+                            let chosen = ticked.iter().any(|one| one == &day);
+                            // The band is drawn before any script runs, so a
+                            // range that arrived as a value reads as one.
+                            let band = if !ranged || low.is_empty() || high.is_empty() {
+                                String::new()
+                            } else if day == low && day == high {
+                                "both".to_owned()
+                            } else if day == low {
+                                "start".to_owned()
+                            } else if day == high {
+                                "end".to_owned()
+                            } else if day > low && day < high {
+                                "between".to_owned()
+                            } else {
+                                String::new()
+                            };
+                            (day, this_day, outside, refused, chosen, band, owned)
+                        })
+                        .collect();
+                    (week_number(head, start), cells)
+                })
+                // A LAST ROW THE NEIGHBOURING PANE OWNS ENTIRELY IS NOT A ROW.
+                // Six rows always hold forty-two days, and beside a second pane
+                // the last of them can be seven days that pane is already
+                // drawing — an empty line with a week number printed beside it,
+                // which reads as a mistake because it is one.
+                .filter(|(_, cells): &Week| !cells.iter().all(|cell| cell.6))
+                .collect();
+            (captions[usize::try_from(pane).unwrap_or(0)].clone(), rows)
+        })
+        .collect();
+    // TWO FORMS, ONE CARRIER EACH. Under a box the days carry no name, so the
+    // date reaches the server once, through the thing a reader typed into.
+    // A LOOSE SET IS NOT SOMETHING A READER TYPES INTO A BOX, so the box is
+    // derived rather than declared: it cannot be asked for where there is
+    // nothing to type.
+    let fielded = matches!(form, DatePickerForm::Field)
+        && !matches!(selection, DatePickerSelection::Multiple);
+    let day_names = posts && !fielded;
+    // Served day first under `auto`, and read again by the script for the
+    // reader's own conventions. A named order is served as written.
+    let resolved = match order {
+        DatePickerOrder::Mdy => "mdy",
+        DatePickerOrder::Ymd => "ymd",
+        _ => "dmy",
+    };
+    let empty_box = match resolved {
+        "mdy" => format_mdy.clone(),
+        "ymd" => format_ymd.clone(),
+        _ => format_dmy.clone(),
+    };
+    // A day written the way the box asks for it. Numbers only, so nothing here
+    // is a word and nothing here is joined from anybody's language.
+    let written = |day: &str| -> String {
+        let mut parts = day.splitn(3, '-');
+        let year = parts.next().unwrap_or("");
+        let month = parts.next().unwrap_or("");
+        let at = parts.next().unwrap_or("");
+        if at.is_empty() {
+            return String::new();
+        }
+        match resolved {
+            "mdy" => format!("{month}/{at}/{year}"),
+            "ymd" => format!("{year}-{month}-{at}"),
+            _ => format!("{at}/{month}/{year}"),
+        }
+    };
+    let start_id = if ranged { format!("{id}-start") } else { format!("{id}-date") };
+    let end_id = format!("{id}-end");
+    let start_name = if ranged { format!("{name}-start") } else { name.clone() };
+    let end_name = format!("{name}-end");
+    let served_start = ticked.first().map(|day| written(day)).unwrap_or_default();
+    let served_end = ticked.get(1).map(|day| written(day)).unwrap_or_default();
+    // WHERE A LABEL GOES, AND WHY IT IS NEVER SIMPLY ABSENT. Down a column the
+    // two boxes only meet if nothing is drawn between them, so a label either
+    // moves inside its own box or is clipped. Clipped, not dropped: the
+    // `<label for>` still binds, because a box a screen reader reads as unnamed
+    // is a box nobody can answer.
+    let embedded = matches!(labels, DatePickerLabels::Inside);
+    let label_class = if matches!(labels, DatePickerLabels::Hidden) {
+        "nd-date-picker-field-label nd-visually-hidden"
+    } else {
+        "nd-date-picker-field-label"
+    };
+    let entry = |box_id: String, box_name: String, part: &'static str, words: Option<String>, served: String| {
+        let over = words.clone().filter(|_| !embedded);
+        let within = words.filter(|_| embedded);
+        rsx! {
+            div { class: "nd-date-picker-field", "data-nd-part": part,
+                if let Some(words) = over {
+                    label { class: "{label_class}", r#for: "{box_id}", "{words}" }
+                }
+                span { class: "nd-date-picker-box",
+                    if let Some(words) = within {
+                        label { class: "nd-date-picker-field-label", r#for: "{box_id}", "{words}" }
+                    }
+                    input {
+                        class: "nd-date-picker-entry",
+                        id: "{box_id}",
+                        r#type: "text",
+                        name: "{box_name}",
+                        inputmode: "numeric",
+                        autocomplete: "off",
+                        placeholder: empty_box.clone(),
+                        value: (!served.is_empty()).then_some(served),
+                        required,
+                    }
+                    // REVEALED, NEVER BUILT. With no script the box is a box a
+                    // reader types into, and nothing beside it opens a month
+                    // nothing can draw.
+                    button {
+                        class: "nd-date-picker-control nd-date-picker-open",
+                        r#type: "button",
+                        hidden: true,
+                        "data-nd-open": part,
+                        "aria-label": open_label.clone(),
+                        Icon { icon: IconDrawing::CALENDAR, size: crate::components::IconSize::Small }
+                    }
+                }
+            }
+        }
+    };
+
+    let control = grid
+        .first()
+        .and_then(|(_, rows)| rows.first())
+        .and_then(|(_, cells)| cells.first())
+        .map_or_else(|| id.clone(), |(day, ..)| format!("{id}-{day}"));
+    // A single box is named by a `<label for>` and a pair of them by a
+    // `<legend>`, which is the difference between one control and a group.
+    let named_by = if fielded && !ranged {
+        FieldKind::Single
+    } else {
+        FieldKind::Group
+    };
+
+    rsx! {
+        Field {
+            control: if fielded { start_id.clone() } else { control },
+            label: legend.clone(),
+            hint: hint.clone(),
+            error: error.clone(),
+            // The slot `Select` invented and `DateInput` took, so the id
+            // `aria-describedby` names always exists.
+            //
+            // EXCEPT INSIDE ANOTHER FIELD. A picker that posts nothing is one
+            // this field renders, and the error about the answer belongs to
+            // the field that carries the answer. Two error paragraphs under
+            // one question is two places a sentence could land and one of them
+            // is always wrong.
+            error_slot: posts,
+            error_label: error_label,
+            kind: named_by,
+            required,
+            size: match size {
+                DatePickerSize::Small => FieldSize::Small,
+                DatePickerSize::Medium => FieldSize::Medium,
+                DatePickerSize::Large => FieldSize::Large,
+            },
+            disabled,
+
+        div {
+            class: "{root}",
+            "data-nd-date-picker": "{name}",
+            "data-nd-month": "{month}",
+            "data-nd-value": value,
+            "data-nd-min": min,
+            "data-nd-max": max,
+            "data-nd-today": today,
+            "data-nd-selection": selection.as_str(),
+            "data-nd-form": form.as_str(),
+            "data-nd-order": order.as_str(),
+            "data-nd-pair": pair.as_str(),
+            "data-nd-labels": labels.as_str(),
+            "data-nd-resolved": resolved,
+            "data-nd-open-label": open_label.clone(),
+            "data-nd-format-dmy": format_dmy,
+            "data-nd-format-mdy": format_mdy,
+            "data-nd-format-ymd": format_ymd,
+            "data-nd-invalid-label": invalid_label,
+            "data-nd-months": months.as_str(),
+            "data-nd-first-day": first_day.as_str(),
+            "data-nd-week-start": "{start}",
+            "data-nd-week-numbers": if week_numbers { "true" } else { "false" },
+            "data-nd-posts": if posts { "true" } else { "false" },
+            "data-nd-min-length": min_length,
+            "data-nd-max-length": max_length,
+            "data-nd-size": size.as_str(),
+            "data-nd-invalid": flagged,
+            "data-nd-chosen-label": chosen_label,
+            "data-nd-range-label": range_label,
+            "data-nd-count-label": count_label,
+            "data-nd-cleared-label": cleared_label,
+            "data-nd-blocked-label": blocked_label,
+            "data-nd-too-short-label": too_short_label,
+            "data-nd-too-long-label": too_long_label,
+            "data-nd-clear-label": clear_label.clone(),
+            "data-nd-previous-label": previous_label.clone(),
+            "data-nd-next-label": next_label.clone(),
+            "data-nd-close-label": close_label.clone(),
+
+            // THE HEAD, AND THE ONE PLACE THE MARK MAY GO. A grid is one tab
+            // stop; a pressable mark in a cell would make it one stop per
+            // marked cell, silently. Here it is an ordinary stop beside two
+            // ordinary controls.
+            // THE HEAD HOLDS THE MARK AND NOTHING ELSE, and it stays outside
+            // the region on purpose: folded, the region becomes the panel, and
+            // a mark saying a value came from an assistant has to be beside the
+            // value rather than inside the surface that shows it.
+            div { class: "nd-date-picker-head",
+                // @ai nd-ai-slot-apart
+            }
+
+            // THE BOXES, WHEN THE MONTH IS BEHIND ONE. They are what posts,
+            // they are what a reader types into, and they are complete with no
+            // script running.
+            if fielded {
+                div { class: "nd-date-picker-fields",
+                    {entry(start_id.clone(), start_name, "start", if ranged { start_label } else { None }, served_start)}
+                    if ranged {
+                        {entry(end_id, end_name, "end", end_label, served_end)}
+                    }
+                }
+            }
+
+            div { class: "nd-date-picker-region", hidden: fielded,
+                span { class: "nd-date-picker-tools",
+                    // REVEALED, NEVER BUILT, AND NOT BUILT AT ALL WITHOUT A
+                    // NAME. A page with no script carries no control that
+                    // empties nothing, and no picker carries one the caller
+                    // never named: an icon-only control with no name is a
+                    // control a screen reader reads as nothing.
+                    if clear_label.is_some() {
+                    button {
+                        class: "nd-date-picker-control nd-date-picker-clear",
+                        r#type: "button",
+                        hidden: true,
+                        "data-nd-clear": "",
+                        "aria-label": clear_label.clone(),
+                        Icon { icon: IconDrawing::ROTATE_CCW, size: crate::components::IconSize::Small }
+                    }
+                    }
+                    if close_label.is_some() {
+                    button {
+                        class: "nd-date-picker-control nd-date-picker-close",
+                        r#type: "button",
+                        hidden: true,
+                        "data-nd-close": "",
+                        "aria-label": close_label.clone(),
+                        Icon { icon: IconDrawing::CLOSE, size: crate::components::IconSize::Small }
+                    }
+                    }
+                }
+                div { class: "nd-date-picker-body",
+                    button {
+                        class: "nd-date-picker-control nd-date-picker-turn",
+                        r#type: "button",
+                        hidden: true,
+                        "data-nd-turn": "back",
+                        "aria-label": previous_label.clone(),
+                        Icon { icon: IconDrawing::CHEVRON_LEFT, size: crate::components::IconSize::Small }
+                    }
+                    div { class: "nd-date-picker-panes",
+                        for (caption, rows) in grid {
+                            table { class: "nd-date-picker-pane",
+                                // The table's own name, which is what a screen
+                                // reader reads on entering it.
+                                caption { class: "nd-date-picker-month", "{caption}" }
+                                thead {
+                                    tr {
+                                        if week_numbers {
+                                            th { class: "nd-date-picker-week-head", scope: "col", {week_label.clone()} }
+                                        }
+                                        for (number, word) in heads.clone() {
+                                            th {
+                                                class: "nd-date-picker-weekday",
+                                                scope: "col",
+                                                "data-nd-weekday": "{number}",
+                                                "{word}"
+                                            }
+                                        }
+                                    }
+                                }
+                                tbody {
+                                    for (week, cells) in rows {
+                                        tr {
+                                            // The row's own heading, so a reader
+                                            // entering a row hears which week it
+                                            // is. It is never a tab stop.
+                                            if week_numbers {
+                                                th { class: "nd-date-picker-week", scope: "row", "{week}" }
+                                            }
+                                            for (day, number, outside, refused, chosen, band, owned) in cells {
+                                                if owned {
+                                                    // The neighbouring pane draws this day.
+                                                    td { class: "nd-date-picker-slot" }
+                                                } else {
+                                                td { class: "nd-date-picker-slot",
+                                                    input {
+                                                        class: "nd-date-picker-input nd-visually-hidden",
+                                                        id: "{id}-{day}",
+                                                        r#type: if single { "radio" } else { "checkbox" },
+                                                        // NO NAME IS HOW A
+                                                        // NESTED PICKER POSTS
+                                                        // NOTHING. The platform's
+                                                        // own rule, and it needs
+                                                        // no script to hold.
+                                                        name: day_names.then(|| name.clone()),
+                                                        value: "{day}",
+                                                        checked: chosen,
+                                                        disabled: refused,
+                                                        required: required && single,
+                                                    }
+                                                    label {
+                                                        class: "nd-date-picker-cell",
+                                                        r#for: "{id}-{day}",
+                                                        "data-nd-day": "{day}",
+                                                        "data-nd-outside": if outside { Some("true") } else { None },
+                                                        "data-nd-in-range": (!band.is_empty()).then_some(band),
+                                                        "aria-current": (day == today_day).then_some("date"),
+                                                        "{number}"
+                                                    }
+                                                }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    button {
+                        class: "nd-date-picker-control nd-date-picker-turn",
+                        r#type: "button",
+                        hidden: true,
+                        "data-nd-turn": "ahead",
+                        "aria-label": next_label.clone(),
+                        Icon { icon: IconDrawing::CHEVRON_RIGHT, size: crate::components::IconSize::Small }
+                    }
+                }
+            }
+
+            // The days the caller named, inert and hidden. The script reads
+            // them, exactly as `DateInput` reads its quick picks.
+            div { class: "nd-date-picker-picks", hidden: true, {children} }
+            // WHERE AN ANSWER WAITS WHILE ITS MONTH IS OFF SCREEN. A day ticked
+            // in August and then turned past would otherwise be an element the
+            // rebuild discards, taking the reader's answer with it. It is moved
+            // here instead, and a hidden form control still submits.
+            div { class: "nd-date-picker-parked", hidden: true }
+            p {
+                class: "nd-date-picker-status",
+                role: "status",
+                "aria-live": "polite",
+                "aria-atomic": "true",
+                "data-nd-date-picker-status": "",
+            }
+            if fielded {
+                template { "data-nd-date-picker-glyph": "",
+                    Icon { icon: IconDrawing::CALENDAR, size: crate::components::IconSize::Small }
+                }
+            }
+        }
+        }
+    }
+"#;
+/// The same month, in React.
+const DATE_PICKER_REACT: &str = r#"  const selection_ = selection ?? "single";
+  const months_ = months ?? "one";
+  const firstDay_ = firstDay ?? "auto";
+  const size_ = size ?? "medium";
+  const posts_ = posts ?? true;
+  const form_ = form ?? "inline";
+  const order_ = order ?? "auto";
+  // TWO FORMS, ONE CARRIER EACH — see the Dioxus half.
+  const fielded = form_ === "field" && selection_ !== "multiple";
+  const weekNumbers_ = weekNumbers ?? false;
+  const root = ["nd-date-picker", className].filter(Boolean).join(" ");
+  const id = `nd-date-picker-${name}`;
+
+  // The same algorithm the Dioxus half writes, transcribed rather than
+  // imported. No platform date type: those carry a time zone, and a server in
+  // one zone has to agree with a browser in another about which day the first
+  // of the month falls on.
+  const daysFromCivil = (year, month, day) => {
+    const shifted = month <= 2 ? year - 1 : year;
+    const era = Math.floor(shifted / 400);
+    const ofEra = shifted - era * 400;
+    const moved = (month + 9) % 12;
+    const ofYear = Math.floor((153 * moved + 2) / 5) + day - 1;
+    return (
+      era * 146097 +
+      ofEra * 365 +
+      Math.floor(ofEra / 4) -
+      Math.floor(ofEra / 100) +
+      ofYear -
+      719468
+    );
+  };
+  const civilFromDays = (input) => {
+    const count = input + 719468;
+    const era = Math.floor(count / 146097);
+    const ofEra = count - era * 146097;
+    const ofEraYear = Math.floor(
+      (ofEra - Math.floor(ofEra / 1460) + Math.floor(ofEra / 36524) - Math.floor(ofEra / 146096)) / 365,
+    );
+    const year = ofEraYear + era * 400;
+    const ofYear = ofEra - (365 * ofEraYear + Math.floor(ofEraYear / 4) - Math.floor(ofEraYear / 100));
+    const moved = Math.floor((5 * ofYear + 2) / 153);
+    const day = ofYear - Math.floor((153 * moved + 2) / 5) + 1;
+    const month = moved < 10 ? moved + 3 : moved - 9;
+    return [month <= 2 ? year + 1 : year, month, day];
+  };
+  // 1 for Monday through 7 for Sunday. The first of January 1970 was a
+  // Thursday, which is 4.
+  const weekday = (count) => (((count + 3) % 7) + 7) % 7 + 1;
+  const roll = (year, month, step) => {
+    const total = year * 12 + month - 1 + step;
+    return [Math.floor(total / 12), (((total % 12) + 12) % 12) + 1];
+  };
+  const wire = (year, month, day) =>
+    `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  // The week a day belongs to, named after the day four days into it. The
+  // script re-reads that four from the reader's own conventions.
+  const weekNumber = (count, start) => {
+    const naming = count - ((((weekday(count) - start) % 7) + 7) % 7) + 3;
+    const [year] = civilFromDays(naming);
+    return Math.floor((naming - daysFromCivil(year, 1, 1)) / 7) + 1;
+  };
+
+  // MATCHED, NEVER PARSED. See the Dioxus half: an unreadable bound must refuse
+  // every day rather than none.
+  const asked = /^(\d{4})-(\d{2})$/.exec((month ?? "").trim());
+  const drawn = asked && Number(asked[2]) >= 1 && Number(asked[2]) <= 12
+    ? [Number(asked[1]), Number(asked[2])]
+    : [2026, 1];
+  const panes = months_ === "three" ? 3 : months_ === "two" ? 2 : 1;
+  const start = firstDay_ === "sunday" ? 7 : firstDay_ === "saturday" ? 6 : 1;
+  const single = selection_ === "single";
+  const ranged = selection_ === "range";
+  const ticked = (value ?? "").split(/[/ ,]/).filter(Boolean);
+  const low = ticked[0] ?? "";
+  const high = ticked[ticked.length - 1] ?? "";
+  const floor = min ?? "";
+  const ceiling = max ?? "";
+
+  const words = [
+    mondayLabel, tuesdayLabel, wednesdayLabel, thursdayLabel, fridayLabel,
+    saturdayLabel, sundayLabel,
+  ];
+  const heads = Array.from({ length: 7 }, (unused, at) => {
+    const day = ((start - 1 + at) % 7) + 1;
+    return [day, words[day - 1]];
+  });
+  const captions = [monthLabel, secondMonthLabel ?? "", thirdMonthLabel ?? ""];
+
+  const grid = Array.from({ length: panes }, (unused, pane) => {
+    const [year, month] = roll(drawn[0], drawn[1], pane);
+    const first = daysFromCivil(year, month, 1);
+    const lead = (((weekday(first) - start) % 7) + 7) % 7;
+    const rows = Array.from({ length: 6 }, (ignored, week) => {
+      const head = first - lead + week * 7;
+      const cells = Array.from({ length: 7 }, (spare, step) => {
+        const count = head + step;
+        const [thisYear, thisMonth, thisDay] = civilFromDays(count);
+        const day = wire(thisYear, thisMonth, thisDay);
+        const outside = thisMonth !== month || thisYear !== year;
+        // A day appears once, whatever the pane count — see the Dioxus half.
+        const leading = count < first;
+        const owned = outside && ((leading && pane > 0) || (pane + 1 < panes && !leading));
+        const refused = (floor !== "" && day < floor) || (ceiling !== "" && day > ceiling);
+        const chosen = ticked.includes(day);
+        // The band is drawn before any script runs, so a range that arrived as
+        // a value reads as one.
+        const band = !ranged || low === "" || high === ""
+          ? ""
+          : day === low && day === high
+            ? "both"
+            : day === low
+              ? "start"
+              : day === high
+                ? "end"
+                : day > low && day < high
+                  ? "between"
+                  : "";
+        return [day, thisDay, outside, refused, chosen, band, owned];
+      });
+      return [weekNumber(head, start), cells];
+    }).filter(([, cells]) => !cells.every((one) => one[6]));
+    return [captions[pane] ?? "", rows];
+  });
+  const control = grid[0]?.[1]?.[0]?.[1]?.[0]?.[0]
+    ? `${id}-${grid[0][1][0][1][0][0]}`
+    : id;
+  const dayNames = posts_ && !fielded;
+  const resolved = order_ === "mdy" ? "mdy" : order_ === "ymd" ? "ymd" : "dmy";
+  const emptyBox = resolved === "mdy" ? formatMdy : resolved === "ymd" ? formatYmd : formatDmy;
+  // A day written the way the box asks for it — numbers only.
+  const written = (day) => {
+    const [year, month, at] = (day ?? "").split("-");
+    if (!at) return "";
+    if (resolved === "mdy") return `${month}/${at}/${year}`;
+    if (resolved === "ymd") return `${year}-${month}-${at}`;
+    return `${at}/${month}/${year}`;
+  };
+  const startId = ranged ? `${id}-start` : `${id}-date`;
+  // Where a label goes, and why it is never simply absent — see the Dioxus half.
+  const labels_ = labels ?? "above";
+  const embedded = labels_ === "inside";
+  const labelClass =
+    labels_ === "hidden"
+      ? "nd-date-picker-field-label nd-visually-hidden"
+      : "nd-date-picker-field-label";
+  const entry = (boxId, boxName, part, words, served) =>
+    h(
+      "div",
+      { key: part, className: "nd-date-picker-field", "data-nd-part": part },
+      words && !embedded
+        ? h("label", { key: "l", className: labelClass, htmlFor: boxId }, words)
+        : null,
+      h(
+        "span",
+        { key: "b", className: "nd-date-picker-box" },
+        words && embedded
+          ? h("label", { key: "e", className: "nd-date-picker-field-label", htmlFor: boxId }, words)
+          : null,
+        h("input", {
+          key: "i",
+          className: "nd-date-picker-entry",
+          id: boxId,
+          type: "text",
+          name: boxName,
+          inputMode: "numeric",
+          autoComplete: "off",
+          placeholder: emptyBox,
+          defaultValue: served || undefined,
+          required,
+        }),
+        // Revealed, never built — see the Dioxus half.
+        h(
+          "button",
+          {
+            key: "o",
+            className: "nd-date-picker-control nd-date-picker-open",
+            type: "button",
+            hidden: true,
+            "data-nd-open": part,
+            "aria-label": openLabel,
+          },
+          h(Icon, { icon: calendar, size: "small" }),
+        ),
+      ),
+    );
+
+  const cell = ([day, number, outside, refused, chosen, band, owned], at) =>
+    owned
+      ? h("td", { key: `blank-${at}`, className: "nd-date-picker-slot" })
+      : h(
+      "td",
+      { key: day, className: "nd-date-picker-slot" },
+      h("input", {
+        key: "i",
+        className: "nd-date-picker-input nd-visually-hidden",
+        id: `${id}-${day}`,
+        type: single ? "radio" : "checkbox",
+        // NO NAME IS HOW A NESTED PICKER POSTS NOTHING — see the Dioxus half.
+        name: dayNames ? name : undefined,
+        value: day,
+        defaultChecked: chosen || undefined,
+        disabled: refused || undefined,
+        required: (required && single) || undefined,
+      }),
+      h(
+        "label",
+        {
+          key: "l",
+          className: "nd-date-picker-cell",
+          htmlFor: `${id}-${day}`,
+          "data-nd-day": day,
+          "data-nd-outside": outside ? "true" : undefined,
+          "data-nd-in-range": band || undefined,
+          "aria-current": day === (today ?? "") ? "date" : undefined,
+        },
+        String(number),
+      ),
+    );
+
+  return h(
+    Field,
+    {
+      control: fielded ? startId : control,
+      label: legend,
+      hint,
+      error,
+      errorSlot: posts_,
+      errorLabel,
+      kind: fielded && !ranged ? "single" : "group",
+      required,
+      size: size_,
+      disabled,
+    },
+    h(
+      "div",
+      {
+        key: "d",
+        className: root,
+        "data-nd-date-picker": name,
+        "data-nd-month": month,
+        "data-nd-value": value,
+        "data-nd-min": min,
+        "data-nd-max": max,
+        "data-nd-today": today,
+        "data-nd-selection": selection_,
+        "data-nd-form": form_,
+        "data-nd-order": order_,
+        "data-nd-pair": pair ?? "apart",
+        "data-nd-labels": labels_,
+        "data-nd-resolved": resolved,
+        "data-nd-open-label": openLabel,
+        "data-nd-format-dmy": formatDmy,
+        "data-nd-format-mdy": formatMdy,
+        "data-nd-format-ymd": formatYmd,
+        "data-nd-invalid-label": invalidLabel,
+        "data-nd-months": months_,
+        "data-nd-first-day": firstDay_,
+        "data-nd-week-start": String(start),
+        "data-nd-week-numbers": String(weekNumbers_),
+        "data-nd-posts": String(posts_),
+        "data-nd-min-length": minLength,
+        "data-nd-max-length": maxLength,
+        "data-nd-size": size_,
+        "data-nd-invalid": String(Boolean(error)),
+        "data-nd-chosen-label": chosenLabel,
+        "data-nd-range-label": rangeLabel,
+        "data-nd-count-label": countLabel,
+        "data-nd-cleared-label": clearedLabel,
+        "data-nd-blocked-label": blockedLabel,
+        "data-nd-too-short-label": tooShortLabel,
+        "data-nd-too-long-label": tooLongLabel,
+        "data-nd-clear-label": clearLabel,
+        "data-nd-previous-label": previousLabel,
+        "data-nd-next-label": nextLabel,
+        "data-nd-close-label": closeLabel,
+        ...rest,
+      },
+      h(
+        "div",
+        { key: "h", className: "nd-date-picker-head" },
+        // @ai nd-ai-slot-apart,
+      ),
+      fielded
+        ? h(
+            "div",
+            { key: "f", className: "nd-date-picker-fields" },
+            entry(startId, ranged ? `${name}-start` : name, "start", ranged ? startLabel : null, written(ticked[0])),
+            ranged ? entry(`${id}-end`, `${name}-end`, "end", endLabel, written(ticked[1])) : null,
+          )
+        : null,
+      h(
+        "div",
+        { key: "r", className: "nd-date-picker-region", hidden: fielded || undefined },
+        h(
+          "span",
+          { key: "t", className: "nd-date-picker-tools" },
+          clearLabel
+            ? h(
+                "button",
+                {
+                  key: "c",
+                  className: "nd-date-picker-control nd-date-picker-clear",
+                  type: "button",
+                  hidden: true,
+                  "data-nd-clear": "",
+                  "aria-label": clearLabel,
+                },
+                h(Icon, { icon: rotateCcw, size: "small" }),
+              )
+            : null,
+          closeLabel
+            ? h(
+                "button",
+                {
+                  key: "x",
+                  className: "nd-date-picker-control nd-date-picker-close",
+                  type: "button",
+                  hidden: true,
+                  "data-nd-close": "",
+                  "aria-label": closeLabel,
+                },
+                h(Icon, { icon: close, size: "small" }),
+              )
+            : null,
+        ),
+        h(
+          "div",
+          { key: "b", className: "nd-date-picker-body" },
+          h(
+            "button",
+            {
+              key: "p",
+              className: "nd-date-picker-control nd-date-picker-turn",
+              type: "button",
+              hidden: true,
+              "data-nd-turn": "back",
+              "aria-label": previousLabel,
+            },
+            h(Icon, { icon: chevronLeft, size: "small" }),
+          ),
+          h(
+            "div",
+            { key: "g", className: "nd-date-picker-panes" },
+            ...grid.map(([caption, rows], pane) =>
+              h(
+                "table",
+                { key: `pane-${pane}`, className: "nd-date-picker-pane" },
+                h("caption", { key: "c", className: "nd-date-picker-month" }, caption),
+                h(
+                  "thead",
+                  { key: "h" },
+                  h(
+                    "tr",
+                    null,
+                    weekNumbers_
+                      ? h("th", { key: "w", className: "nd-date-picker-week-head", scope: "col" }, weekLabel)
+                      : null,
+                    ...heads.map(([number, word]) =>
+                      h(
+                        "th",
+                        {
+                          key: `head-${number}`,
+                          className: "nd-date-picker-weekday",
+                          scope: "col",
+                          "data-nd-weekday": String(number),
+                        },
+                        word,
+                      ),
+                    ),
+                  ),
+                ),
+                h(
+                  "tbody",
+                  { key: "b" },
+                  ...rows.map(([week, cells], at) =>
+                    h(
+                      "tr",
+                      { key: `week-${at}` },
+                      weekNumbers_
+                        ? h("th", { key: "n", className: "nd-date-picker-week", scope: "row" }, String(week))
+                        : null,
+                      ...cells.map(cell),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          h(
+            "button",
+            {
+              key: "n",
+              className: "nd-date-picker-control nd-date-picker-turn",
+              type: "button",
+              hidden: true,
+              "data-nd-turn": "ahead",
+              "aria-label": nextLabel,
+            },
+            h(Icon, { icon: chevronRight, size: "small" }),
+          ),
+        ),
+      ),
+      h("div", { key: "k", className: "nd-date-picker-picks", hidden: true }, children),
+      h("div", { key: "w", className: "nd-date-picker-parked", hidden: true }),
+      h("p", {
+        key: "s",
+        className: "nd-date-picker-status",
+        role: "status",
+        "aria-live": "polite",
+        "aria-atomic": "true",
+        "data-nd-date-picker-status": "",
+      }),
+      fielded
+        ? h(
+            "template",
+            { key: "t", "data-nd-date-picker-glyph": "" },
+            h(Icon, { icon: calendar, size: "small" }),
+          )
+        : null,
+    ),
+  );
+"#;
+
+/// One day a caller named, served inert for the picker to read.
+///
+/// `DateInput` takes its quick picks the same way, and for the same reason: a
+/// `<time>` with the machine value on `datetime` and the reader's words as
+/// content is a thing the page can carry before any script runs, and a thing a
+/// script can read without the caller writing markup a script has to trust.
+const DATE_PICKER_DAY_DIOXUS: &str = r#"    let root = format!("nd-date-picker-day {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        time {
+            class: "{root}",
+            datetime: "{datetime}",
+            "data-nd-kind": kind.as_str(),
+            hidden: true,
+            {children}
+        }
+    }
+"#;
+
+/// The same day, in React.
+const DATE_PICKER_DAY_REACT: &str = r#"  const kind_ = kind ?? "marked";
+  const root = ["nd-date-picker-day", className].filter(Boolean).join(" ");
+  return h(
+    "time",
+    { className: root, dateTime: datetime, "data-nd-kind": kind_, hidden: true, ...rest },
+    children,
   );
 "#;
 

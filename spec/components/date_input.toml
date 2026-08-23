@@ -129,7 +129,12 @@ doc = "A typing aid, off by default: a two-digit year becomes four when the box 
 type = "bool"
 default = "false"
 attribute = "data-nd-calendar"
-doc = "Adds a month grid to the suggestions panel, built by the script from the locale's own formatter: month names, weekday initials, the week's first day. Needs `suggest_label`, which names the control that opens it."
+doc = "Adds a month grid to the suggestions panel, as a real `DatePicker` that posts nothing and writes into the three boxes. Needs `suggest_label`, which names the control that opens it, and `today`."
+
+[prop.today]
+type = "text"
+attribute = "data-nd-today"
+doc = "Which day is today, in the same wire format as `value`. It is the server's own date, and it decides the month the calendar opens on when no date has been given yet."
 
 [prop.suggest_label]
 type = "text"

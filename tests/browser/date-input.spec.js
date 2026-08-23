@@ -98,7 +98,19 @@ test("the page's own language does not decide the order", async ({ browser }) =>
   await page.goto(url(PAGE.dateInput, "pt-BR"));
   await expect(page.locator(BIRTH)).toHaveAttribute("data-nd-resolved", "mdy");
   await page.locator(`${VISIT} .nd-date-input-suggest-button`).click();
-  await expect(page.locator(`${VISIT} .nd-date-input-month`)).not.toHaveText(/Jan|Feb|Mar/);
+  // ASSERTED POSITIVELY. This read `not.toHaveText(/Jan|Feb|Mar/)`, which
+  // passes in April and says nothing: a test that asserts a consequence rather
+  // than the property. The caption has to be written in the page's language,
+  // so name that language's months and look for one.
+  const caption = await page.locator(`${VISIT} .nd-date-picker-month`).textContent();
+  const months = [
+    "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
+  ];
+  expect(
+    months.some((one) => caption.toLowerCase().includes(one)),
+    `the caption "${caption}" is not written in the page's language`,
+  ).toBe(true);
   await context.close();
 });
 
@@ -269,32 +281,38 @@ test("Escape closes the panel and abandons none of the three numbers", async ({ 
   await expect(day).toHaveValue("14");
 });
 
-test("the month grid walks by day and week, and refuses days out of range", async ({ page }) => {
+test("the panel holds a real picker, bounded by the field it sits in", async ({ page }) => {
   await page.goto(url(PAGE.dateInput));
   await page.locator(`${VISIT} .nd-date-input-suggest-button`).click();
-  const grid = page.locator(`${VISIT} [role="grid"]`);
-  await expect(grid).toBeVisible();
-  // The quick picks hold focus first; Tab walks through the month controls
-  // to the grid's one roving day.
-  const focused = () => page.evaluate(() => document.activeElement.dataset.ndValue);
-  for (let hop = 0; hop < 5 && !(await focused()); hop += 1) {
-    await page.keyboard.press("Tab");
+  // WHAT THIS TEST IS FOR NOW. Walking the grid by day and by week, turning the
+  // month, refusing a day out of range and every other claim about the calendar
+  // itself belong to `date-picker.spec.js`, which asks them harder: it asserts
+  // the arrow moved exactly one day and exactly seven, and that a refusal is
+  // the platform's own `disabled` rather than an attribute nothing enforces.
+  //
+  // What only this file can ask is the COMPOSITION: that the field renders a
+  // real picker rather than a second month grid, that the bounds reach it, and
+  // that a day chosen there lands in the three boxes that actually submit.
+  const picker = page.locator(`${VISIT} [data-nd-date-picker]`);
+  await expect(picker).toHaveCount(1);
+  await expect(picker.locator(".nd-date-picker-pane").first()).toHaveAttribute("role", "grid");
+  for (const bound of ["data-nd-min", "data-nd-max"]) {
+    expect(await picker.getAttribute(bound)).toBe(await page.locator(VISIT).getAttribute(bound));
   }
-  const before = await focused();
-  await page.keyboard.press("ArrowRight");
-  const after = await focused();
-  expect(after > before, "ArrowRight did not move a day forward").toBe(true);
-  await page.keyboard.press("ArrowDown");
-  // `min` is 2026-01-01: December 2025 must be reachable and refused.
-  const month = page.locator(`${VISIT} .nd-date-input-month`);
-  const start = await month.textContent();
-  await page.keyboard.press("PageUp");
-  expect(await month.textContent()).not.toBe(start);
-  for (let back = 0; back < 12; back += 1) await page.keyboard.press("PageUp");
-  const refused = await grid
-    .locator('.nd-date-input-day[aria-disabled="true"]')
-    .count();
-  expect(refused, "days before the bound are not refused").toBeGreaterThan(0);
+  // AND NOT ONE OF ITS DAYS POSTS. Two carriers for one date is what a picker
+  // inside a field would otherwise be: three text boxes and a month of
+  // checkboxes, both under the same field, both reaching the server.
+  await expect(page.locator(`${VISIT} .nd-date-picker-input[name]`)).toHaveCount(0);
+
+  const day = await picker
+    .locator(".nd-date-picker-cell:not([data-nd-outside])")
+    .first()
+    .getAttribute("data-nd-day");
+  await picker.locator(`.nd-date-picker-cell[data-nd-day="${day}"]`).click();
+  const [year, month, at] = day.split("-");
+  await expect(page.locator(box(VISIT, "year"))).toHaveValue(year);
+  await expect(page.locator(box(VISIT, "month"))).toHaveValue(month);
+  await expect(page.locator(box(VISIT, "day"))).toHaveValue(at);
 });
 
 test.describe("with the script blocked", () => {
@@ -311,10 +329,33 @@ test.describe("with the script blocked", () => {
       .locator(".nd-date-input-row [data-nd-part]")
       .evaluateAll((all) => all.map((one) => one.dataset.ndPart));
     expect(parts).toEqual(["day", "month", "year"]);
-    // No promise the page cannot keep: no listbox, no grid, no expanded.
-    for (const claim of ['[role="listbox"]', '[role="grid"]', "[aria-expanded]", "[aria-activedescendant]"]) {
-      await expect(page.locator(`${VISIT} ${claim}`)).toHaveCount(0);
+    // AND A FLOOR FOR THE OTHER FIELD, because everything below it is an
+    // absence and a field that rendered an empty box passes every absence
+    // there is. The three boxes that submit are three, on both fields.
+    await expect(page.locator(`${VISIT} input[name]`)).toHaveCount(3);
+    // No promise the page cannot keep: no listbox, no grid, no expanded, and
+    // none of the four a picker inside the panel could now leak. The list grew
+    // with the nested component, because a coverage list is a claim of its own
+    // and a stale one passes on exactly what it stopped naming.
+    for (const claim of [
+      '[role="listbox"]',
+      '[role="grid"]',
+      "[aria-expanded]",
+      "[aria-activedescendant]",
+      "[data-nd-phase]",
+      ".nd-date-picker-input[tabindex]",
+      ".nd-date-picker-trigger",
+    ]) {
+      await expect(page.locator(`${VISIT} ${claim}`), `${claim} is promised with no script`).toHaveCount(0);
     }
+    // `aria-current="date"` is NOT on that list, and the distinction is the
+    // whole rule. Which day is today is a fact the server knows and states.
+    // `role="grid"` is a promise about the arrow keys, and nothing is
+    // answering them.
+    // The picker itself is served, and served hidden: the field's calendar is
+    // an aid to three boxes that already work, so with no script it is simply
+    // not there.
+    await expect(page.locator(`${VISIT} [data-nd-date-input-calendar]`)).toBeHidden();
     // The quick picks stay inert and hidden.
     await expect(page.locator(`${VISIT} [data-nd-date-input-suggest]`)).toBeHidden();
     await expect(page.locator(`${VISIT} .nd-date-input-suggest-button`)).toHaveCount(0);

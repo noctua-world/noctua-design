@@ -11,12 +11,13 @@
 
 import { createElement as h } from "react";
 
+import { DatePicker } from "./date_picker.js";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { calendar as calendarIcon } from "@noctua-world/design-tokens/icons/calendar.js";
 import { AILabel } from "./ai_label.js";
-import { calendar } from "@noctua-world/design-tokens/icons/calendar.js";
-export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint, error, errorLabel, value, min, max, required, disabled, size, order, bday, pad, expand, calendar, suggestLabel, previousLabel, nextLabel, requiredLabel, missingLabel, numberLabel, yearDigitsLabel, invalidLabel, minLabel, maxLabel, glass, aiMark, aiLabel, aiNote, className, children, ...rest }) {
+export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint, error, errorLabel, value, min, max, required, disabled, size, order, bday, pad, expand, calendar, today, suggestLabel, previousLabel, nextLabel, requiredLabel, missingLabel, numberLabel, yearDigitsLabel, invalidLabel, minLabel, maxLabel, glass, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const size_ = size ?? "medium";
   const order_ = order ?? "auto";
   const root = ["nd-date-input", className].filter(Boolean).join(" ");
@@ -29,6 +30,9 @@ export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint,
   // The one wire format, split — not locale arithmetic.
   const [valueYear = "", valueMonth = "", valueDay = ""] = (value ?? "").split("-");
   const resolved = order_ === "auto" ? "dmy" : order_;
+  // The month the grid opens on — see the Dioxus half.
+  const opening = ((value ?? "") || (today ?? "")).slice(0, 7);
+  const calendared = (calendar ?? false) && opening.length === 7;
   const segment = (part, width, partLabel, partValue, token) =>
     h(
       "div",
@@ -85,6 +89,7 @@ export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint,
       "data-nd-glass": String(glass ?? false),
       "data-nd-min": min,
       "data-nd-max": max,
+      "data-nd-today": today,
       "data-nd-suggest-label": suggestLabel,
       "data-nd-previous-label": previousLabel,
       "data-nd-next-label": nextLabel,
@@ -127,11 +132,44 @@ export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint,
       },
       children,
     ),
+    // The month grid, as a component — see the Dioxus half for why, and for
+    // why `posts` is off and the words are empty.
+    calendared
+      ? h(
+          "div",
+          {
+            key: "c",
+            className: "nd-date-input-calendar",
+            hidden: true,
+            "data-nd-date-input-calendar": "",
+          },
+          h(DatePicker, {
+            name: `${name}-calendar`,
+            legend: suggestLabel ?? "",
+            month: opening,
+            monthLabel: "",
+            mondayLabel: "",
+            tuesdayLabel: "",
+            wednesdayLabel: "",
+            thursdayLabel: "",
+            fridayLabel: "",
+            saturdayLabel: "",
+            sundayLabel: "",
+            value,
+            min,
+            max,
+            today,
+            previousLabel,
+            nextLabel,
+            posts: false,
+          }),
+        )
+      : null,
     suggestLabel
       ? h(
           "template",
           { key: "t", "data-nd-date-input-glyph": "" },
-          h(Icon, { icon: calendar, size: "small" }),
+          h(Icon, { icon: calendarIcon, size: "small" }),
         )
       : null,
   ),

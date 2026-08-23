@@ -553,6 +553,7 @@ fn copy_runtime(root: &Path, out: &Path) -> Result<usize, String> {
         "info.js",
         "menu.js",
         "message-bar.js",
+        "date-picker.js",
         "dialog.js",
         "popover.js",
         "tooltip.js",

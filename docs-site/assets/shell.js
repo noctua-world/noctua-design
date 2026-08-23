@@ -128,6 +128,9 @@ import { enhanceCarousels, releaseCarousels } from "./carousel.js";
 // The summary at the top of a refused form: the focus, the jump to the
 // control, and the list a client-side refusal makes.
 import { enhanceErrorSummaries, releaseErrorSummaries } from "./error-summary.js";
+// The month grid, and the panel it folds into. A `dist/` file because a month
+// with no script is nothing at all, unlike the three-box field beside it.
+import { dateWords, enhanceDatePickers, readerLocales, releaseDatePickers } from "./date-picker.js";
 import { enhanceTables, releaseTables } from "./table.js";
 import { enhanceInfos, releaseInfos } from "./info.js";
 import { enhanceMenus, releaseMenus } from "./menu.js";
@@ -4400,36 +4403,11 @@ const DATE_FIELD = "[data-nd-date-input]";
 /** Segment letters to their names, the order attributes' vocabulary. */
 const DATE_PARTS = { d: "day", m: "month", y: "year" };
 
-/**
- * The chain a WORD is written in: the page's own language first, then the UA's.
- *
- * Month names, weekday initials and the bound inside `min_label` are all words
- * in a sentence the page is already written in, so they follow the page. A
- * CONVENTION is a different question and has a different answer below.
- */
-function dateWords() {
-  return [document.documentElement.lang, ...(navigator.languages || [])].filter(Boolean);
-}
-
-/**
- * The chain a CONVENTION is read from: the reader's own, and never the page's.
- *
- * THIS FUNCTION IS THE DEFECT. The one above was used for both questions, so
- * the row's order was asked of `document.documentElement.lang` — the language
- * this page happens to be written in, which is `en` on the English build. A
- * bare `en` has no region, so CLDR answers with the United States and every
- * reader of the English page was re-laid to month-day-year. A reader whose
- * browser says `en-GB` was moved OFF the day-month-year the server had already
- * served them, by a detection that never asked what their browser said.
- *
- * An empty chain is returned as an empty array on purpose: `Intl` reads that
- * as *use the default locale*, which is the reader's own by definition. There
- * is no table of locales to formats here and there must not be one — a table
- * is a copy of CLDR that stops being true the day CLDR changes.
- */
-function readerLocales() {
-  return [...(navigator.languages || []), navigator.language].filter(Boolean);
-}
+// THE TWO LOCALE CHAINS LIVE IN `date-picker.js` NOW, and are imported back.
+//
+// They were written here for the month grid, and the month grid moved out. A
+// second copy beside the first is two answers to the one question this file has
+// already got wrong once: whose language a word is in.
 
 /** A segment's number, judged after Unicode normalisation so fullwidth
  * digits are digits. Null is "not a number", not zero. */
@@ -4870,178 +4848,45 @@ function enhanceDateInput(root, signal) {
       panel.append(list);
     }
 
-    // The month grid, from the locale's own formatter — the one vocabulary
-    // that does not arrive as a prop, because month names are the locale's.
+    // THE MONTH GRID IS A COMPONENT NOW.
+    //
+    // What stood here was a hundred and seventy lines of `createElement`: a
+    // `role="grid"`, a roving `tabindex`, six weeks of buttons, a keyboard, and
+    // the week's first day read from the reader's own conventions. None of it
+    // was in `dist/`, so a consumer taking the packages got the field without
+    // the calendar, and nothing else in the system could reach it.
+    //
+    // `DatePicker` is that grid, declared. The field renders one in its own
+    // markup, hidden, and all that is left here is moving it into the panel and
+    // reading the day it settles on. `dist/date-picker.js` answers its keyboard.
     let grid = null;
-    let cursor = null;
     if (wantsCalendar) {
-      grid = document.createElement("div");
-      const head = document.createElement("div");
-      head.className = "nd-date-input-grid-head";
-      const back = document.createElement("button");
-      back.type = "button";
-      back.className = "nd-date-input-turn";
-      back.textContent = "‹";
-      back.setAttribute("aria-label", root.dataset.ndPreviousLabel ?? "");
-      const monthName = document.createElement("span");
-      monthName.className = "nd-date-input-month";
-      // Not `-month`: the month BOX already owns that id.
-      monthName.id = `${id}-month-name`;
-      const ahead = document.createElement("button");
-      ahead.type = "button";
-      ahead.className = "nd-date-input-turn";
-      ahead.textContent = "›";
-      ahead.setAttribute("aria-label", root.dataset.ndNextLabel ?? "");
-      head.append(back, monthName, ahead);
-      const days = document.createElement("div");
-      days.className = "nd-date-input-grid";
-      days.setAttribute("role", "grid");
-      days.setAttribute("aria-labelledby", monthName.id);
-      grid.append(head, days);
+      grid = root.querySelector("[data-nd-date-input-calendar]");
+    }
+    if (grid) {
+      grid.hidden = false;
       panel.append(grid);
-
-      let firstDay = 1;
-      try {
-        // A CONVENTION, so the reader's own — see `readerLocales`. The names
-        // in the grid are words and stay the page's.
-        const locale = new Intl.Locale(readerLocales()[0] ?? "en");
-        const info = locale.getWeekInfo ? locale.getWeekInfo() : locale.weekInfo;
-        if (info && info.firstDay) firstDay = info.firstDay % 7;
-      } catch {
-        firstDay = 1;
-      }
-
-      const within = (iso) =>
-        (!root.dataset.ndMin || iso >= root.dataset.ndMin) &&
-        (!root.dataset.ndMax || iso <= root.dataset.ndMax);
-
-      const build = (focusDay) => {
-        const year = cursor.getUTCFullYear();
-        const month = cursor.getUTCMonth();
-        monthName.textContent = new Intl.DateTimeFormat(dateWords(), {
-          month: "long",
-          year: "numeric",
-          timeZone: "UTC",
-        }).format(cursor);
-        days.replaceChildren();
-        const header = document.createElement("div");
-        header.setAttribute("role", "row");
-        header.style.display = "contents";
-        const naming = new Intl.DateTimeFormat(dateWords(), {
-          weekday: "narrow",
-          timeZone: "UTC",
-        });
-        for (let at = 0; at < 7; at += 1) {
-          const cell = document.createElement("span");
-          cell.className = "nd-date-input-weekday";
-          cell.setAttribute("role", "columnheader");
-          // 2023-01-01 was a Sunday; walk from the week's first day.
-          cell.textContent = naming.format(new Date(Date.UTC(2023, 0, 1 + firstDay + at)));
-          header.append(cell);
-        }
-        days.append(header);
-        const startsOn = new Date(Date.UTC(year, month, 1)).getUTCDay();
-        const lead = (startsOn - firstDay + 7) % 7;
-        const today = new Date();
-        const todayIso = dateIso(today.getFullYear(), today.getMonth() + 1, today.getDate());
-        let rowEl = null;
-        for (let at = 0; at < 42; at += 1) {
-          if (at % 7 === 0) {
-            rowEl = document.createElement("div");
-            rowEl.setAttribute("role", "row");
-            rowEl.style.display = "contents";
-            days.append(rowEl);
-          }
-          const date = new Date(Date.UTC(year, month, at - lead + 1));
-          const iso = dateIso(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
-          const day = document.createElement("button");
-          day.type = "button";
-          day.className = "nd-date-input-day";
-          day.setAttribute("role", "gridcell");
-          day.dataset.ndValue = iso;
-          day.textContent = String(date.getUTCDate());
-          if (date.getUTCMonth() !== month) day.dataset.ndOutside = "true";
-          if (iso === todayIso) day.setAttribute("aria-current", "date");
-          if (!within(iso)) day.setAttribute("aria-disabled", "true");
-          day.tabIndex = iso === focusDay ? 0 : -1;
-          day.addEventListener("click", () => {
-            if (day.getAttribute("aria-disabled") !== "true") take(iso);
-          }, { signal });
-          rowEl.append(day);
-        }
-        return days.querySelector('[tabindex="0"]');
-      };
-
-      const shift = (byDays, byMonths, byYears) => {
-        const focused = days.querySelector('[tabindex="0"]');
-        const [year, month, day] = (focused?.dataset.ndValue ?? dateIso(
-          cursor.getUTCFullYear(),
-          cursor.getUTCMonth() + 1,
-          1,
-        ))
-          .split("-")
-          .map(Number);
-        const next = new Date(Date.UTC(year + byYears, month - 1 + byMonths, day + byDays));
-        cursor = new Date(Date.UTC(next.getUTCFullYear(), next.getUTCMonth(), 1));
-        const target = build(
-          dateIso(next.getUTCFullYear(), next.getUTCMonth() + 1, next.getUTCDate()),
-        );
-        target?.focus();
-      };
-
-      days.addEventListener("keydown", (event) => {
-        const moves = {
-          ArrowLeft: [-1, 0, 0],
-          ArrowRight: [1, 0, 0],
-          ArrowUp: [-7, 0, 0],
-          ArrowDown: [7, 0, 0],
-          PageUp: [0, event.shiftKey ? 0 : -1, event.shiftKey ? -1 : 0],
-          PageDown: [0, event.shiftKey ? 0 : 1, event.shiftKey ? 1 : 0],
-        };
-        if (event.key in moves) {
-          event.preventDefault();
-          shift(...moves[event.key]);
-          return;
-        }
-        if (event.key === "Home" || event.key === "End") {
-          event.preventDefault();
-          const cells = [...days.querySelectorAll(".nd-date-input-day")];
-          const at = cells.findIndex((cell) => cell.tabIndex === 0);
-          if (at < 0) return;
-          const start = at - (at % 7);
-          const target = cells[event.key === "Home" ? start : start + 6];
-          for (const cell of cells) cell.tabIndex = -1;
-          target.tabIndex = 0;
-          target.focus();
-          return;
-        }
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          const focused = days.querySelector('[tabindex="0"]');
-          if (focused && focused.getAttribute("aria-disabled") !== "true") {
-            take(focused.dataset.ndValue);
-          }
-          return;
-        }
-        if (event.key === "Escape") {
-          event.preventDefault();
-          close();
-        }
+      // THE PICKER POSTS NOTHING, so this event is the only way a day leaves
+      // it, and the three boxes stay the one carrier of this field's answer.
+      grid.addEventListener("change", (event) => {
+        const day = event.target?.value;
+        if (!day || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return;
+        const [year, month, at] = day.split("-").map(Number);
+        fillAll(year, month, at);
+        close();
       }, { signal });
-
+      // Opening on the month the three boxes are showing, through the one seam
+      // the picker offers. A month nobody has typed yet is today's.
       grid.reset = () => {
         const year = dateNumber(boxes.year.value);
         const month = dateNumber(boxes.month.value);
-        const day = dateNumber(boxes.day.value);
-        const today = new Date();
-        const seed =
+        const now = new Date();
+        const wanted =
           year && month
-            ? new Date(Date.UTC(year, month - 1, day ?? 1))
-            : new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
-        cursor = new Date(Date.UTC(seed.getUTCFullYear(), seed.getUTCMonth(), 1));
-        return build(
-          dateIso(seed.getUTCFullYear(), seed.getUTCMonth() + 1, seed.getUTCDate()),
-        );
+            ? `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}`
+            : dateIso(now.getFullYear(), now.getMonth() + 1, 1).slice(0, 7);
+        grid.dispatchEvent(new CustomEvent("nd-date-picker-show", { detail: wanted }));
+        return grid.querySelector(".nd-date-picker-input[tabindex='0']");
       };
     }
 
@@ -5237,6 +5082,7 @@ export function enhanceAll(root = document) {
   enhanceTrees(root);
   collapseBlocks(root);
   enhanceDateInputs(root);
+  enhanceDatePickers(root);
   enhancePickers(root);
   enhanceInputs(root);
   enhanceCarousels(root);
@@ -5394,6 +5240,7 @@ export function releaseAll(root = document) {
   releaseCarousels(root);
   releaseInputs(root);
   releasePickers(root);
+  releaseDatePickers(root);
   releaseDateInputs(root);
   // `collapseBlocks` has no release and needs none. It binds nothing and holds
   // nothing: it reads the declared cap and writes one attribute on the block,

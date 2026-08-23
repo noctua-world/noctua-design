@@ -29,8 +29,8 @@
 use std::fmt::Write as _;
 
 use noctua_design_runtime::{
-    ANCHOR_SOURCE, CAROUSEL_SOURCE, COLOR_SOURCE, DIALOG_SOURCE, INFO_SOURCE, INPUTS_SOURCE,
-    MENU_SOURCE, MESSAGE_BAR_SOURCE, MESSAGES_SOURCE, PICKER_SOURCE, POPOVER_SOURCE,
+    ANCHOR_SOURCE, CAROUSEL_SOURCE, COLOR_SOURCE, DATE_PICKER_SOURCE, DIALOG_SOURCE, INFO_SOURCE,
+    INPUTS_SOURCE, MENU_SOURCE, MESSAGE_BAR_SOURCE, MESSAGES_SOURCE, PICKER_SOURCE, POPOVER_SOURCE,
     SUMMARY_SOURCE, TABLE_SOURCE, TOAST_SOURCE, TOOLTIP_SOURCE, source,
 };
 use noctua_design_spec::Vendor;
@@ -53,6 +53,7 @@ pub fn emit(vendor: &Vendor) -> Vec<EmittedFile> {
         EmittedFile::new("dist/info.js", copied(INFO_SOURCE)),
         EmittedFile::new("dist/menu.js", copied(MENU_SOURCE)),
         EmittedFile::new("dist/message-bar.js", copied(MESSAGE_BAR_SOURCE)),
+        EmittedFile::new("dist/date-picker.js", copied(DATE_PICKER_SOURCE)),
         EmittedFile::new("dist/dialog.js", copied(DIALOG_SOURCE)),
         EmittedFile::new("dist/popover.js", copied(POPOVER_SOURCE)),
         EmittedFile::new("dist/tooltip.js", copied(TOOLTIP_SOURCE)),

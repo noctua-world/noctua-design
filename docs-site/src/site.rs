@@ -390,6 +390,18 @@ pub(crate) const SEGMENTED: Page = Page {
     kind: Kind::Component,
     component: None,
 };
+/// The month, and the days a caller names inside it.
+///
+/// A collection by the same rule as `Select`: a `DatePickerDay` outside a
+/// picker is a `<time>` element nobody draws, so the two are written in one
+/// call and read in one place.
+pub(crate) const DATE_PICKER: Page = Page {
+    slug: "date-picker",
+    title: Title::Name("DatePicker"),
+    summary: Key::PageDatePickerSummary,
+    kind: Kind::Component,
+    component: None,
+};
 
 /// The field, a named run of options, and one option.
 ///
@@ -486,7 +498,7 @@ pub(crate) struct Collection {
 /// `page.component.is_some()`, so nobody could search for `spread` or
 /// `current_label`. It reads `documented_on` now, so a component on a shared
 /// page is as findable as one with a page of its own.
-pub(crate) const COLLECTIONS: [Collection; 13] = [
+pub(crate) const COLLECTIONS: [Collection; 14] = [
     Collection {
         page: LINEAGE,
         parts: &["Lineage", "LineageFigure"],
@@ -551,6 +563,12 @@ pub(crate) const COLLECTIONS: [Collection; 13] = [
         page: SEGMENTED,
         parts: &["Segmented", "SegmentedItem"],
         body: Key::PageSegmentedBody,
+    },
+    Collection {
+        // The picker, then the day it draws. Outside in, as `Select` reads.
+        page: DATE_PICKER,
+        parts: &["DatePicker", "DatePickerDay"],
+        body: Key::PageDatePickerBody,
     },
     Collection {
         // The field, then the run of options, then one option: outside in,

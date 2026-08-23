@@ -42,7 +42,7 @@ Every other drawing from this source is swept in under its own name and is docum
 | `arrow-down` | `arrow-down.svg` | The same, the other way. Two arrows rather than one rotated by the stylesheet: a transform is a thing a preset or a reduced-motion path can reach, and the direction of a sort is not something to leave to CSS. |
 | `arrow-up` | `arrow-up.svg` | A column sorted from the beginning of the alphabet, or the smallest number. Paired with `aria-sort="ascending"`, which is what a screen reader reads; the arrow is the half a reader can see. |
 | `atom` | `atom.svg` | Moves an example to the React implementation. |
-| `calendar` | `calendar.svg` | Opens a `DateInput`'s suggestions — the quick picks and the month grid. A calendar, because that is what the panel is; the button it sits on is icon-only and takes its name from `suggest_label`. |
+| `calendar` | `calendar.svg` | Opens a month: a `DatePicker`'s own box carries one, and so does the control on a `DateInput` that opens its suggestions. A calendar, because that is what opens. Both controls are icon-only and are named by a prop. |
 | `check` | `check.svg` | Confirms an action, and marks the option in force. |
 | `chevron-down` | `chevron-down.svg` | The disclosure marker on a `<details>` summary. |
 | `chevron-left` | `chevron-left.svg` | The previous slide, on a `Carousel`. A chevron rather than an arrow: an arrow in this system marks the direction a column is SORTED, and one drawing meaning two things is how a reader learns to distrust both. |

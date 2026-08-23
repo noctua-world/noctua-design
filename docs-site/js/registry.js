@@ -27,6 +27,8 @@ import { Checkbox } from "@noctua-world/design-react/components/checkbox.js";
 import { Code } from "@noctua-world/design-react/components/code.js";
 import { ColorPicker } from "@noctua-world/design-react/components/color_picker.js";
 import { DateInput } from "@noctua-world/design-react/components/date_input.js";
+import { DatePicker } from "@noctua-world/design-react/components/date_picker.js";
+import { DatePickerDay } from "@noctua-world/design-react/components/date_picker_day.js";
 import { Del } from "@noctua-world/design-react/components/del.js";
 import { Dialog } from "@noctua-world/design-react/components/dialog.js";
 import { Disclosure } from "@noctua-world/design-react/components/disclosure.js";
@@ -114,6 +116,8 @@ export const COMPONENTS = {
   Code,
   ColorPicker,
   DateInput,
+  DatePicker,
+  DatePickerDay,
   Del,
   Dialog,
   Disclosure,

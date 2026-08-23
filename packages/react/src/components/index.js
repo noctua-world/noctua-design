@@ -21,6 +21,8 @@ export { Code } from "./code.js";
 export { CodeBlock } from "./code_block.js";
 export { ColorPicker } from "./color_picker.js";
 export { DateInput } from "./date_input.js";
+export { DatePicker } from "./date_picker.js";
+export { DatePickerDay } from "./date_picker_day.js";
 export { Del } from "./del.js";
 export { Dialog } from "./dialog.js";
 export { Disclosure } from "./disclosure.js";

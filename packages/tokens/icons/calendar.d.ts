@@ -6,5 +6,5 @@
 
 import type { IconDrawing } from "../icons.js";
 
-/** Opens a `DateInput`'s suggestions — the quick picks and the month grid. A calendar, because that is what the panel is; the button it sits on is icon-only and takes its name from `suggest_label`. */
+/** Opens a month: a `DatePicker`'s own box carries one, and so does the control on a `DateInput` that opens its suggestions. A calendar, because that is what opens. Both controls are icon-only and are named by a prop. */
 export declare const calendar: IconDrawing;

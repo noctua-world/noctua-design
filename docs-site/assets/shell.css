@@ -1552,84 +1552,12 @@ a {
   color: var(--nc-color-on-accent);
 }
 
-/* The month grid. Seven columns because a week has seven days; the head row
- * holds the two named month controls around the script-written month name. */
-.nd-date-input-grid-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--noctua-space-2);
-  padding-block-end: var(--noctua-space-2);
-}
-
-.nd-date-input-month {
-  font-size: var(--noctua-size-small);
-  font-weight: var(--noctua-weight-semibold);
-}
-
-.nd-date-input-turn {
-  display: grid;
-  place-items: center;
-  min-inline-size: var(--noctua-space-8);
-  min-block-size: var(--noctua-space-8);
-  color: var(--nc-color-fg);
-  background: none;
-  border: 0;
-  border-radius: var(--noctua-radius-control);
-  cursor: pointer;
-}
-
-.nd-date-input-turn:hover {
-  background: var(--nc-color-subtle-bg);
-}
-
-.nd-date-input-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: var(--noctua-space-1);
-}
-
-.nd-date-input-weekday {
-  display: grid;
-  place-items: center;
-  font-size: var(--noctua-size-caption);
-  color: var(--nc-color-fg-muted);
-}
-
-.nd-date-input-day {
-  display: grid;
-  place-items: center;
-  min-block-size: var(--noctua-space-8);
-  font: inherit;
-  font-size: var(--noctua-size-small);
-  font-variant-numeric: tabular-nums;
-  color: var(--nc-color-fg);
-  background: none;
-  border: 0;
-  border-radius: var(--noctua-radius-control);
-  cursor: pointer;
-}
-
-.nd-date-input-day:hover {
-  background: var(--nc-color-subtle-bg);
-}
-
-/* Today is marked by more than color: the ring is a shape. */
-.nd-date-input-day[aria-current="date"] {
-  border: var(--noctua-border-strong) solid var(--nc-color-accent);
-}
-
-.nd-date-input-day[aria-disabled="true"] {
-  cursor: not-allowed;
-  color: var(--nc-color-fg-muted);
-  opacity: 0.5; /* allow-literal: a refused day is dimmed, and there is no color token for "the same color, less of it" */
-}
-
-/* A day from the spilled edge of the neighbouring month keeps the column
- * honest and says it is not this month's. */
-.nd-date-input-day[data-nd-outside="true"] {
-  color: var(--nc-color-fg-muted);
-}
+/* THE MONTH GRID'S RULES LEFT WITH THE MONTH GRID.
+ *
+ * Seven columns, a day cell, a weekday heading, today's ring and a spilled
+ * day: this was the only seven-column geometry in the file, and it belonged to
+ * a calendar the site's own script drew. `DatePicker` draws that calendar now,
+ * and this field renders one. The rules are `.nd-date-picker-*` above. */
 
 /* The specimen for the variant grids: three drawn boxes, no nameless inputs.
  * The ORDER variants may use CSS `order` here precisely because the real
@@ -1685,6 +1613,602 @@ a {
 
 .nd-date-input-figure[data-nd-order="ymd"] > span:nth-child(3) {
   order: 1;
+}
+
+/* --- The date picker -------------------------------------------------------
+ *
+ * A month a reader presses days in. Every day is a real radio or checkbox,
+ * clipped by `nd-visually-hidden`, with a `<label>` beside it carrying the
+ * numeral — `Rating`'s arrangement, and its reason: the focus ring has to land
+ * on the shape a reader can actually see, so `input:checked + label` is what
+ * paints a chosen day and it needs no script.
+ *
+ * THE COLUMNS ARE FIXED, AND THAT IS NOT A PREFERENCE. A table laid out
+ * automatically sizes each column to its own widest cell, and the widest cell
+ * is the weekday heading: `pt-BR` measured seven columns at 25 to 36px and the
+ * pseudo-locale spread them across 32 to 49. A calendar whose columns are
+ * different widths has lost the one thing a calendar is, which is a grid.
+ *
+ * FOUR STATES, FOUR PROPERTIES, SO A DAY CAN BE ALL OF THEM. Today is a
+ * `border`, focus is the global `outline`, the range is a `background` and the
+ * preview is an underline. Every cell carries the border at rest, transparent,
+ * because a border that appears only on today made today's row three pixels
+ * taller than every other row in the month. */
+
+.nd-date-picker {
+  /* The day, the column it sits in and the week number's own column. The
+   * column is at least four characters wide because the heading above it is a
+   * word in the reader's language, and three letters is what Portuguese uses.
+   * allow-literal: the count is characters, in the character's own unit, which
+   * is how `DateInput` sizes the boxes a reader types digits into */
+  --nd-date-picker-day: var(--noctua-space-8);
+  --nd-date-picker-column: max(var(--nd-date-picker-day), 4ch);
+  --nd-date-picker-week: var(--noctua-space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+  min-inline-size: 0;
+}
+
+.nd-date-picker[data-nd-size="small"] {
+  --nd-date-picker-day: var(--noctua-space-6);
+}
+
+.nd-date-picker[data-nd-size="large"] {
+  --nd-date-picker-day: var(--noctua-space-12);
+}
+
+/* The mark's strip, and nothing else in it. It stays outside the region so a
+ * folded picker keeps the mark beside the value rather than inside the panel.
+ * The `:has()` is on the strip rather than on a leaf, because a `:has()` that
+ * can only ever match nothing passes review and asserts nothing. */
+.nd-date-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--noctua-space-2);
+}
+
+.nd-date-picker-head:not(:has(> .nd-ai-slot)) {
+  display: none;
+}
+
+/* Inside the region, so a folded picker puts them in its own panel. The row
+ * holds its height whether or not a control is showing: the clear control
+ * appears the moment a day is chosen, and a strip that grew then would move
+ * the whole month down under the press that filled it. */
+.nd-date-picker-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--noctua-space-1);
+  min-block-size: var(--noctua-space-8);
+}
+
+.nd-date-picker-tools:not(:has(> *)) {
+  display: none;
+}
+
+.nd-date-picker-body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--noctua-space-1);
+}
+
+/* THE PANES DO NOT STRETCH. They did, and three months in a column too narrow
+ * for three wrapped two-and-one, with the third growing to the full width of
+ * the line and its days growing with it: one month drawn at twice the scale of
+ * the two above it. A pane is its natural width or it is nothing. */
+.nd-date-picker-panes {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--noctua-space-6);
+  min-inline-size: 0;
+}
+
+.nd-date-picker-pane {
+  flex: 0 0 auto;
+  table-layout: fixed;
+  border-collapse: collapse;
+  inline-size: calc(7 * var(--nd-date-picker-column));
+}
+
+.nd-date-picker-pane:has(.nd-date-picker-week) {
+  inline-size: calc(7 * var(--nd-date-picker-column) + var(--nd-date-picker-week));
+}
+
+/* Only the first pane shows below the breakpoint. The others are still in the
+ * document, so a reader on a narrow screen reaches them by turning the month
+ * rather than by scrolling sideways into a pane they cannot see whole. */
+.nd-date-picker-pane:not(:first-child) {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .nd-date-picker-pane:not(:first-child) {
+    display: table;
+  }
+}
+
+.nd-date-picker-month {
+  padding-block-end: var(--noctua-space-2);
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-semibold);
+  color: var(--nc-color-fg);
+  text-align: center;
+}
+
+.nd-date-picker[data-nd-size="large"] .nd-date-picker-month {
+  font-size: var(--noctua-size-body);
+}
+
+/* The heading grows with the grid it names. It did not, so a large picker
+ * labelled its 18px numerals with 15px words. */
+.nd-date-picker[data-nd-size="large"] .nd-date-picker-weekday,
+.nd-date-picker[data-nd-size="large"] .nd-date-picker-week-head,
+.nd-date-picker[data-nd-size="large"] .nd-date-picker-week {
+  font-size: var(--noctua-size-small);
+}
+
+/* The headings wrap rather than overflow, because the pseudo-locale exists to
+ * make every word too long and a clipped word is a defect an audit reports. */
+.nd-date-picker-weekday,
+.nd-date-picker-week-head {
+  inline-size: var(--nd-date-picker-column);
+  padding-block-end: var(--noctua-space-1);
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-medium);
+  color: var(--nc-color-fg-muted);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.nd-date-picker-week-head,
+.nd-date-picker-week {
+  inline-size: var(--nd-date-picker-week);
+}
+
+/* The week's own heading, read on entering a row. It is never a tab stop, and
+ * the arrows never land on it, because every move here is date arithmetic over
+ * days rather than an index into a row of cells. */
+.nd-date-picker-week {
+  padding-inline-end: var(--noctua-space-2);
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-regular);
+  color: var(--nc-color-fg-muted);
+  text-align: end;
+}
+
+.nd-date-picker-slot {
+  padding: 0;
+}
+
+.nd-date-picker-cell {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: var(--nd-date-picker-day);
+  /* Carried at rest and transparent — see the header. */
+  border: var(--noctua-border-strong) solid transparent;
+  font-size: var(--noctua-size-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--nc-color-fg);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-date-picker[data-nd-size="small"] .nd-date-picker-cell {
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-date-picker[data-nd-size="large"] .nd-date-picker-cell {
+  font-size: var(--noctua-size-body);
+}
+
+.nd-date-picker-cell:hover {
+  background: var(--nc-color-subtle-bg);
+}
+
+/* A day from the spilled edge of a neighbouring month keeps the column honest
+ * and says it is not this month's. It still takes the band, because a range
+ * that crosses a month edge is one range. */
+.nd-date-picker-cell[data-nd-outside="true"] {
+  color: var(--nc-color-fg-muted);
+}
+
+/* Today is marked by more than colour: the ring is a shape. */
+.nd-date-picker-cell[aria-current="date"] {
+  border-color: var(--nc-color-accent);
+}
+
+/* THE INPUT IS CLIPPED, SO THE RING IS DRAWN ON THE DAY A READER CAN SEE.
+ * `Rating`'s arrangement and its comment. */
+.nd-date-picker-input:focus-visible + .nd-date-picker-cell {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* --- The band, and the two ends ------------------------------------------- */
+
+/* THE BAND IS THE FAMILY'S BORDER COLOUR, AND IT USED TO BE THE TINT.
+ *
+ * Measured from pixels against the surface behind it: the tint is 1.06:1 in
+ * dark and 1.07:1 in light, which is a range a reader has to hunt for and the
+ * whole point of the component. The border colour is 2.47:1 and 1.81:1, and
+ * the page's own ink still reads on it at 6.5:1 and 8.0:1.
+ *
+ * The palette has nothing stronger that keeps a numeral legible in both
+ * appearances: `accent-hover` reaches 7.7:1 against the surface and drops the
+ * ink on it to 2.1:1, and `accent` itself has no ink that works in both. So
+ * the two ends are told apart by a shape rather than by more colour. */
+.nd-date-picker-cell[data-nd-in-range] {
+  background: var(--nc-color-accent-border);
+  border-radius: 0;
+}
+
+.nd-date-picker-cell[data-nd-in-range="start"],
+.nd-date-picker-cell[data-nd-in-range="both"] {
+  border-start-start-radius: var(--noctua-radius-control);
+  border-end-start-radius: var(--noctua-radius-control);
+}
+
+.nd-date-picker-cell[data-nd-in-range="end"],
+.nd-date-picker-cell[data-nd-in-range="both"] {
+  border-start-end-radius: var(--noctua-radius-control);
+  border-end-end-radius: var(--noctua-radius-control);
+}
+
+/* A band that leaves the month on show gets a flat edge instead of a cap, so
+ * it reads as carrying on past what the reader can see. */
+.nd-date-picker-cell[data-nd-continues="start"] {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.nd-date-picker-cell[data-nd-continues="end"] {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+/* THE TWO ENDS ARE A SHAPE, NOT A SECOND COLOUR. The ring is the page's own
+ * ink, which reads against the band at the same ratio the numeral does, and
+ * the weight says the same thing a second way. */
+.nd-date-picker-input:checked + .nd-date-picker-cell {
+  background: var(--nc-color-accent-border);
+  border-color: var(--nc-color-fg);
+  font-weight: var(--noctua-weight-semibold);
+}
+
+/* A day chosen where there is no band is a chip, so it keeps every corner. */
+.nd-date-picker-input:checked + .nd-date-picker-cell:not([data-nd-in-range]) {
+  border-radius: var(--noctua-radius-control);
+}
+
+/* AND TODAY'S RING SURVIVES BEING AN END. An accent ring on the accent's own
+ * tint is a ring nobody can see, so on a filled day it takes the page's ink
+ * for the reason the numeral does. */
+.nd-date-picker-input:checked + .nd-date-picker-cell[aria-current="date"] {
+  border-color: var(--nc-color-fg);
+}
+
+/* The preview a half-made range paints under the pointer. It carries a dashed
+ * underline as well as a tint, because a reader who cannot tell the two
+ * colours apart still has to see which days are already chosen. */
+.nd-date-picker-cell[data-nd-preview] {
+  background: var(--nc-color-subtle-bg);
+  text-decoration: underline dashed;
+  text-underline-offset: var(--noctua-space-1);
+}
+
+.nd-date-picker-input:disabled + .nd-date-picker-cell {
+  cursor: not-allowed;
+  color: var(--nc-color-fg-muted);
+  opacity: 0.5; /* allow-literal: a refused day is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+.nd-date-picker-input:disabled + .nd-date-picker-cell:hover {
+  background: none;
+}
+
+/* --- The controls the script reveals -------------------------------------- */
+
+.nd-date-picker-control {
+  display: grid;
+  place-items: center;
+  min-inline-size: var(--noctua-space-8);
+  min-block-size: var(--noctua-space-8);
+  color: var(--nc-color-fg);
+  background: none;
+  border: 0;
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-date-picker-control:hover {
+  background: var(--nc-color-subtle-bg);
+}
+
+/* Level with the month's own heading rather than with the middle of the grid,
+ * which is where they read as belonging to the month they turn. */
+.nd-date-picker-turn {
+  margin-block-start: var(--noctua-space-1);
+}
+
+/* THE LIVE REGION IS HEARD, NOT SEEN. What a sighted reader gets is the band
+ * itself, so an empty paragraph in the flow was eight pixels of nothing under
+ * every picker. `VisuallyHidden`'s recipe, because a region taken out of the
+ * document announces nothing. */
+.nd-date-picker-status {
+  position: absolute;
+  inline-size: var(--noctua-border-hairline);
+  block-size: var(--noctua-border-hairline);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- The boxes, and the panel they open ----------------------------------- */
+
+.nd-date-picker-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--noctua-space-4);
+}
+
+.nd-date-picker-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+}
+
+/* --- The two boxes of a range, and the three ways they sit ---------------- */
+
+/* ATTACHED: `ButtonGroup`'s technique and its reasons. The two boxes share one
+ * outline, the inner corners are squared off, and a negative margin of exactly
+ * one hairline turns the two adjacent edges into the single line a reader sees.
+ *
+ * It is `ButtonGroup`'s rule and not a second one, down to the `position:
+ * relative` that lets the focused box lift its ring over its neighbour's edge.
+ * Without that lift the ring is drawn under the box beside it and the focused
+ * field looks like the one that is not. */
+.nd-date-picker[data-nd-pair="attached"] .nd-date-picker-fields {
+  gap: 0;
+}
+
+.nd-date-picker[data-nd-pair="attached"] .nd-date-picker-box {
+  position: relative;
+}
+
+.nd-date-picker[data-nd-pair="attached"] .nd-date-picker-field:not(:first-child) .nd-date-picker-box {
+  margin-inline-start: calc(-1 * var(--noctua-border-hairline));
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.nd-date-picker[data-nd-pair="attached"] .nd-date-picker-field:not(:last-child) .nd-date-picker-box {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+/* The one a reader is in draws its whole edge, over the edge beside it. */
+.nd-date-picker[data-nd-pair="attached"]
+  .nd-date-picker-box:has(.nd-date-picker-entry:focus-visible),
+.nd-date-picker[data-nd-pair="attached"] .nd-date-picker-box:hover {
+  z-index: var(--noctua-layer-raised);
+}
+
+/* STACKED: the same one outline, down a column. It is one control asking for
+ * two ends, so the boxes meet here exactly as they do in a row, with the
+ * overlap and the squared corners on the block axis instead of the inline one.
+ *
+ * IT ONLY WORKS BECAUSE NOTHING IS DRAWN BETWEEN THEM. A label above the second
+ * box would sit inside the shared outline and split it, which is what `labels`
+ * is for: `inside` puts each label in its own box and `hidden` clips it. */
+.nd-date-picker[data-nd-pair="stacked"] .nd-date-picker-fields {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.nd-date-picker[data-nd-pair="stacked"] .nd-date-picker-box {
+  position: relative;
+}
+
+.nd-date-picker[data-nd-pair="stacked"] .nd-date-picker-field:not(:first-child) .nd-date-picker-box {
+  margin-block-start: calc(-1 * var(--noctua-border-hairline));
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+
+.nd-date-picker[data-nd-pair="stacked"] .nd-date-picker-field:not(:last-child) .nd-date-picker-box {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.nd-date-picker[data-nd-pair="stacked"]
+  .nd-date-picker-box:has(.nd-date-picker-entry:focus-visible),
+.nd-date-picker[data-nd-pair="stacked"] .nd-date-picker-box:hover {
+  z-index: var(--noctua-layer-raised);
+}
+
+/* A LABEL INSIDE THE BOX, BEFORE THE TYPING. It keeps its own column so the
+ * two dates line up under each other, and the column is a spacing step rather
+ * than a measurement of the longest word in one language. */
+.nd-date-picker[data-nd-labels="inside"] .nd-date-picker-box .nd-date-picker-field-label {
+  flex: none;
+  min-inline-size: var(--noctua-space-24);
+  padding-inline-start: var(--noctua-space-3);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+  cursor: pointer;
+}
+
+/* The typing gives up the padding the label now carries. */
+.nd-date-picker[data-nd-labels="inside"] .nd-date-picker-entry {
+  padding-inline-start: var(--noctua-space-1);
+}
+
+.nd-date-picker-field-label {
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-medium);
+  color: var(--nc-color-fg);
+}
+
+/* ONE BOX, TWO THINGS IN IT. The typing and the control that opens the month
+ * share an edge, so a reader aiming at either is aiming at the field. */
+.nd-date-picker-box {
+  display: inline-flex;
+  align-items: center;
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border-strong);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-date-picker-box:hover {
+  border-color: var(--nc-color-fg-muted);
+}
+
+/* THE RING IS ON THE BOX, NOT ON THE TYPING. The box is what a reader sees as
+ * the field, and a ring around the text alone leaves the control beside it
+ * outside the thing that just took focus. */
+.nd-date-picker-box:has(.nd-date-picker-entry:focus-visible) {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-date-picker-box:has([aria-invalid="true"]) {
+  border-color: var(--nc-color-danger);
+}
+
+.nd-date-picker-entry {
+  /* THE PLACEHOLDER IS LETTERS AND `ch` IS THE WIDTH OF A ZERO, which is why
+     this is fifteen for a ten-character hint: `DD/MM/YYYY` measured 100px
+     against a `ch` of 9.15px, and ten of them clipped it to `DD/MM/`. Fourteen
+     was a pixel short of `MM/DD/AAAA`, whose letters are wider still. The
+     value a reader types is digits and fits easily inside the same box.
+     allow-literal: a count of characters, in the character's own unit, which
+     is how `DateInput` sizes the boxes beside it */
+  inline-size: 15ch;
+  min-block-size: var(--noctua-space-12);
+  padding-block: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-3);
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--nc-color-fg);
+  background: none;
+  border: 0;
+}
+
+/* Taken off the typing because it is drawn on the box above. */
+.nd-date-picker-entry:focus-visible {
+  outline: none;
+}
+
+.nd-date-picker[data-nd-size="small"] .nd-date-picker-entry {
+  min-block-size: var(--noctua-space-8);
+  padding-block: var(--noctua-space-1);
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-date-picker[data-nd-size="large"] .nd-date-picker-entry {
+  min-block-size: var(--noctua-space-16);
+  padding-block: var(--noctua-space-3);
+  font-size: var(--noctua-size-body);
+}
+
+.nd-date-picker-open {
+  margin-inline-end: var(--noctua-space-1);
+}
+
+/* `Select`'s panel, and its reasoning: fixed so no frame clips it, opaque so a
+ * month of small numerals reads over whatever is behind the page.
+ *
+ * IT HANGS FROM THE LEADING EDGE. A month is wider than the control that opens
+ * it, and hanging a 448px panel off the trailing edge of a 229px trigger put
+ * it over the sidebar, opening leftwards from a control near the start of the
+ * line. `anchor.js` writes both distances and says which one a measurement
+ * would pick, so the stylesheet takes the leading edge unless it says
+ * otherwise — `Menu`'s arrangement, read the other way round. */
+.nd-panel.nd-date-picker-panel {
+  --nd-anchor-block: 0;
+  --nd-anchor-inline: 0;
+  --nd-anchor-start: 0;
+  position: fixed;
+  inset-block-start: calc(var(--nd-anchor-block) + var(--noctua-space-1));
+  inset-block-end: auto;
+  inset-inline: var(--nd-anchor-start) auto;
+  max-inline-size: calc(100vw - var(--noctua-space-8));
+  max-block-size: calc(100vh - var(--nd-anchor-block) - var(--noctua-space-8));
+  padding: var(--noctua-space-3);
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--nc-color-surface-subtle);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-surface);
+}
+
+.nd-panel.nd-date-picker-panel[data-nd-anchor="end"] {
+  inset-inline: auto var(--nd-anchor-inline);
+}
+
+.nd-panel.nd-date-picker-panel[data-nd-above] {
+  inset-block-start: auto;
+  inset-block-end: calc(var(--nd-anchor-block) + var(--noctua-space-1));
+}
+
+.nd-panel.nd-date-picker-panel[hidden] {
+  display: none;
+}
+
+/* THE REFUSAL IS ABOUT THE ANSWER, SO IT WRAPS THE CONTROL. It was on the
+ * month table, which drew two separate red rectangles around a two-month
+ * picker and left the controls that turn the month outside both of them. */
+.nd-date-picker[data-nd-invalid="true"] {
+  outline: var(--noctua-border-hairline) solid var(--nc-color-danger);
+  outline-offset: var(--noctua-space-2);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-field:disabled .nd-date-picker-cell,
+.nd-field:disabled .nd-date-picker-control {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused field is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+/* The specimen for the variant grids: three drawn numerals, no nameless
+ * controls. `DateInput` says why. */
+.nd-date-picker-figure {
+  display: inline-flex;
+  gap: var(--noctua-space-1);
+}
+
+.nd-date-picker-figure > span {
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: var(--noctua-space-8);
+  min-block-size: var(--noctua-space-8);
+  font-size: var(--noctua-size-small);
+  font-variant-numeric: tabular-nums;
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border-strong);
+  border-radius: var(--noctua-radius-control);
+}
+
+/* A MONTH NEEDS MORE ROOM THAN A LIST OF QUICK PICKS. The field's panel was
+ * sized for the latter, so the picker inside it was drawn 228px wide in a
+ * 212px box and clipped to two of its six weeks. */
+.nd-panel.nd-date-input-panel:has(.nd-date-picker) {
+  inline-size: max-content;
+  max-inline-size: calc(100vw - var(--noctua-space-8));
+  max-block-size: calc(100vh - var(--nd-anchor-block) - var(--noctua-space-8));
 }
 
 /* --- The frame's own theme menu ------------------------------------------- */

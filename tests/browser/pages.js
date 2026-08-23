@@ -48,6 +48,11 @@ export const PAGE = {
   // cover the pages named here — and a page dropped from this list is a page
   // three suites quietly stop looking at.
   dateInput: "date-input/",
+  // The only `role="grid"` outside `/tables/`, the only page that paints a
+  // range across cells, and the only control whose panel holds a second roving
+  // tab stop. A page dropped from this list is a page four sweeps stop looking
+  // at, and there is nowhere else those three are measured.
+  datePicker: "date-picker/",
   checkbox: "checkbox/",
   radio: "radio/",
   fieldset: "fieldset/",

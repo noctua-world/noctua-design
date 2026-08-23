@@ -1,0 +1,62 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a date picker day to name one day, or one span of days, inside a
+`DatePicker`. It is a quick pick a reader presses, a day the caller refuses, or
+a day worth pointing out. The picker draws it. This element never draws itself.
+"""
+
+[meta]
+name = "DatePickerDay"
+element = "time"
+class = "nd-date-picker-day"
+page = "date-picker"
+summary = "Name one day inside a date picker, as a quick pick, a refusal or a mark."
+
+# IT IS A `<time>`, AND IT IS SERVED INERT.
+#
+# `DateInput` already takes its quick picks as `Time` elements, with the
+# machine value on `datetime` and the reader's words as content, served hidden
+# for the script to read. This is that arrangement with one thing added: a word
+# saying what the day IS.
+#
+# WHY A DISCRIMINATOR RATHER THAN A GUESS. A quick pick, a refused day and a
+# marked day all name a date, and the shapes do not tell them apart. Reading a
+# slash as "a span, so a preset" holds until the first caller blacks out a
+# public holiday that lasts three days. `kind` says which, once, in the
+# contract.
+#
+# WHY THE WORDS ARE CONTENT AND NOT A PROP. They are the pick's label, the
+# refusal's reason and the mark's note, which is one job under three names, and
+# `Time` already settled that the words a reader sees are the element's
+# content. The script reads `textContent`.
+#
+# `variants = false` ON `kind`, AND IT IS NOT LAZINESS. The element renders
+# hidden in every one of its three forms, so a variant grid of them would be
+# three empty frames under three captions. What the three look like is shown by
+# the picker that draws them.
+
+[prop.datetime]
+type = "text"
+required = true
+attribute = "datetime"
+doc = "The machine-readable day, in the wire format such as `2026-12-25`, or a span with a slash between two of them. Required, because a named day with no date names nothing."
+
+[prop.kind]
+type = "enum"
+values = ["preset", "refused", "marked"]
+variants = false
+default = "marked"
+attribute = "data-nd-kind"
+doc = "What the day is. A `preset` is a control that chooses it. A `refused` day is out of reach and says why. A `marked` day stays choosable and is pointed out."
+
+[prop.children]
+type = "children"
+doc = "The words a reader sees, in their own language. They are the quick pick's name, the reason a day is refused, or the note on a marked one. The picker reads them and never renders this element."
+
+[a11y]
+notes = """
+The element is served hidden, so it claims nothing on a page with no script.
+The picker puts its words where they belong: on a control, on a day's
+description, or beside a mark.
+"""

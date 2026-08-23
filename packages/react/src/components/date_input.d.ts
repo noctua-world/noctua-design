@@ -46,8 +46,10 @@ export interface DateInputProps {
   pad?: boolean;
   /** A typing aid, off by default: a two-digit year becomes four when the box is left. The century is the one that lands inside `min` and `max` when exactly one does. Otherwise a year up to ten ahead takes this century and any other takes the last. */
   expand?: boolean;
-  /** Adds a month grid to the suggestions panel, built by the script from the locale's own formatter: month names, weekday initials, the week's first day. Needs `suggest_label`, which names the control that opens it. */
+  /** Adds a month grid to the suggestions panel, as a real `DatePicker` that posts nothing and writes into the three boxes. Needs `suggest_label`, which names the control that opens it, and `today`. */
   calendar?: boolean;
+  /** Which day is today, in the same wire format as `value`. It is the server's own date, and it decides the month the calendar opens on when no date has been given yet. */
+  today?: string;
   /** The name of the suggestions control and its panel. The script builds the button only when this is set, together with quick picks in the children or `calendar` set. */
   suggestLabel?: string;
   /** The name of the calendar's step-back-a-month control. Icon-only controls still need a name. */

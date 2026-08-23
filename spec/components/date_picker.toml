@@ -1,0 +1,468 @@
+# When to reach for it, and when not to. Top-level rather than inside
+# [meta], because a bare key after a table header belongs to that table.
+guidance = """
+Use a date picker where a reader chooses a day by seeing the month around it.
+For a date they already know, such as a birth date, use `DateInput`.
+`selection` takes one day, a range of two, or several loose ones.
+"""
+
+[meta]
+name = "DatePicker"
+element = "fieldset"
+class = "nd-date-picker"
+page = "date-picker"
+# Drawn numerals rather than live cells: a specimen of a `needs_name` component
+# must not render a nameless control, and a month is forty-two of them.
+# `DateInput` and `TimeInput` made the same call for the same reason.
+specimen = "<span class=\"nd-date-picker-figure\"><span class=\"nd-identifier\">14</span><span class=\"nd-identifier\">15</span><span class=\"nd-identifier\">16</span></span>"
+summary = "Choose one date, or a range of two, by pressing days in a month a reader can see."
+ai = "custom"
+
+# EVERY DAY IS A REAL FORM CONTROL, AND THAT IS THE WHOLE COMPONENT.
+#
+# `spec/components/select.toml` states the rule this obeys: the markup ships a
+# working, submittable native control, and the script is added to one. A
+# `div` with `role="listbox"` and a hidden input beside it is what the category
+# ships, and it is where the category's bugs come from. This system has no
+# `input` of type hidden anywhere in it.
+#
+# So a day is a radio under `single` and a checkbox under `range` and
+# `multiple`, clipped by `nd-visually-hidden`, with a `label` carrying the
+# numeral. `Rating` is the worked precedent down to the class names, and its
+# stylesheet comment says why the input is not the drawn thing: the focus ring
+# has to land on the shape a reader can actually see.
+#
+# WHAT THAT BUYS WITH NO SCRIPT. One tab stop under `single`, because a radio
+# group rovings itself. Arrow keys that walk and choose, because that is the
+# platform's contract for the role the markup really has. A submitted value
+# under the field's own name. A real `disabled` on every day outside `min` and
+# `max`, so the browser skips it rather than a script re-checking a decorative
+# attribute. And a real `required`.
+#
+# WHAT IT COSTS, WRITTEN DOWN RATHER THAN DISCOVERED. Under `range` and
+# `multiple` the days are checkboxes, and checkboxes have no roving of their
+# own, so a page with no script has forty-two tab stops instead of one. Two
+# radio groups would give two stops and two radios per cell, which is a grid
+# that means nothing to a screen reader. There is no third answer.
+#
+# THE TABLE CLAIMS NOTHING THE MARKUP CANNOT KEEP. It ships as a plain table
+# with column headings. `role="grid"` promises arrows that move without
+# choosing, which is the opposite of what a radio group does, so the script
+# writes that role at the moment it takes the arrows over. `Tabs` and `Tree`
+# reached the same rule.
+#
+# NO `readonly`. A checkbox marked readonly is not readonly in any engine, so
+# the prop would be a promise the markup cannot keep. `disabled` is the honest
+# answer, and a picture of a month nobody may change is `Table` with dates in
+# it.
+#
+# NO `children` FOR THE DAYS. Six rows of seven are arithmetic, and a caller
+# cannot put markup among them. The slot holds `DatePickerDay` elements, which
+# name days rather than draw them.
+#
+# BOTH JOINED ARRANGEMENTS SHARE ONE OUTLINE, AND THE LABELS DECIDE WHETHER
+# THE COLUMN CAN.
+#
+# `ButtonGroup` says `attached` and `orientation` separately, and its members
+# are adjacent whichever way it runs. These are only adjacent down a column
+# when nothing is drawn between them, and a label drawn above the second box is
+# exactly that. So `labels` is what makes the column possible: `inside` puts
+# each label in its own box and `hidden` leaves it to a screen reader, and
+# either way the two boxes meet. `above` is for the row, where the labels sit
+# over the pair rather than between it.
+#
+# A label is never simply absent. `hidden` still renders the `<label for>` and
+# clips it, which is `Table`'s `hide_caption` and `VisuallyHidden`'s recipe: a
+# box a screen reader reads as unnamed is a box nobody can answer.
+#
+# A BOX IS FOR A DATE SOMEBODY CAN TYPE, SO `multiple` HAS NONE.
+#
+# One box holds one date and two hold a range. A loose set of days is not
+# something a reader types into a box, and a box that showed the first of five
+# would be a box that is wrong about the answer. So `field` and `multiple` together
+# draw the month where it stands, which the `form` doc says outright.
+#
+# TWO FORMS, ONE CARRIER EACH, AND NEVER BOTH.
+#
+# `inline` posts through the days themselves, which are real radios or
+# checkboxes under the field's own name. `field` posts through the box a reader
+# types into, and its days carry no name at all. A month of checkboxes beside a
+# text box, both named, is one date reaching a server twice under two schemes.
+# That is the rule `posts` states for a picker nested inside another field,
+# applied to a picker carrying its own.
+#
+# THE ORDER IS A CONVENTION AND THE LETTERS ARE WORDS.
+#
+# Which number comes first is the reader's, read through `Intl` and never from
+# a table of locales to formats. The letters in an empty box are the page's, so
+# they arrive as props, one whole string per order rather than three fragments
+# this component would join. A placeholder assembled from parts is the
+# concatenation `NOCTUA.md` section 9.9 refuses, and it breaks the day an order
+# wants a separator that is not a slash.
+#
+# NO NUMBER PROPS, BECAUSE THERE IS NO NUMBER KIND. `months` is an enum of
+# three, which is also the honest ceiling: a fourth pane beside three is a
+# scroll rather than a glance, and a year view is a different cell and a
+# different keyboard.
+#
+# EVERY ENUM SETS `variants = false`. With nothing chosen, all three selections
+# and all three pane counts draw the same month, so a variant grid of them is
+# one picture under several captions.
+#
+# THE SEVEN WEEKDAY WORDS ARE NAMED AFTER WEEKDAYS, NOT AFTER COLUMNS. The
+# week's first day is a reader's convention and the script may move it, which
+# moves the columns. A prop bound to Monday survives that move, and one bound
+# to the first column would be rewritten by the script, which is a word in the
+# package by the back door.
+#
+# THE SECURITY QUESTION, ANSWERED IN WRITING (`NOCTUA.md` section 2.4). Six
+# kinds of caller string reach the page here. `name` becomes an attribute and
+# part of forty-two id pairs, and both frameworks escape an attribute by
+# construction. The words are text nodes and `aria-label` values, written with
+# `textContent` and `setAttribute` and never as markup. The sentences with
+# holes are filled by `messages.js` and assigned the same way. `value`, `min`,
+# `max`, `month` and `today` are matched against the wire format before
+# anything reads them, and a string that does not match is treated as absent:
+# an unparsable bound refuses every day rather than none. Parsing arbitrary
+# text as a date yields a value whose every comparison is false, which would
+# enable the whole calendar. Deny is the answer when the check cannot be made.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-date-picker"
+doc = "What a chosen day is called when the form posts, and the root of every id here. Required, because an id derived from an optional name repeats on every picker on the page."
+
+[prop.legend]
+type = "text"
+required = true
+doc = "The question, in the reader's language. Required, because a fieldset with no legend gives a screen reader a group and nothing saying what the group is for."
+
+[prop.month]
+type = "text"
+required = true
+attribute = "data-nd-month"
+doc = "Which month the grid draws, as a year and a month in the wire format such as `2026-08`. Required, because a grid has to draw a month and there is no month a caller could mean by leaving it out."
+
+[prop.month_label]
+type = "text"
+required = true
+doc = "The month on show, written for a reader, such as `August 2026`. Required, because the markup carries one month and nothing else names it. The script rewrites it from the locale's own formatter after a turn."
+
+[prop.second_month_label]
+type = "text"
+doc = "The same, for the month after it. Wanted when `months` is `two` or `three`. Only the words are asked for, because which month it is comes out of the arithmetic."
+
+[prop.third_month_label]
+type = "text"
+doc = "The same again, for the third month. Wanted only when `months` is `three`."
+
+[prop.monday_label]
+type = "text"
+required = true
+doc = "The Monday column's heading, in the reader's language, usually one letter. Required, because a column heading is what names the numerals under it for a screen reader."
+
+[prop.tuesday_label]
+type = "text"
+required = true
+doc = "The Tuesday column's own heading."
+
+[prop.wednesday_label]
+type = "text"
+required = true
+doc = "The Wednesday column's own heading."
+
+[prop.thursday_label]
+type = "text"
+required = true
+doc = "The Thursday column's own heading."
+
+[prop.friday_label]
+type = "text"
+required = true
+doc = "The Friday column's own heading."
+
+[prop.saturday_label]
+type = "text"
+required = true
+doc = "The Saturday column's own heading."
+
+[prop.sunday_label]
+type = "text"
+required = true
+doc = "The Sunday column's own heading."
+
+[prop.value]
+type = "text"
+attribute = "data-nd-value"
+doc = "The days already chosen, in the wire format. One day under `single`, two with a slash between them under `range`, and a list separated by spaces under `multiple`."
+
+[prop.min]
+type = "text"
+attribute = "data-nd-min"
+doc = "The earliest day accepted, in the wire format. Earlier days carry the platform's own `disabled`, so the browser refuses them with no script running and posts nothing for them."
+
+[prop.max]
+type = "text"
+attribute = "data-nd-max"
+doc = "The latest day accepted, in the same wire format, refused the same way."
+
+[prop.today]
+type = "text"
+attribute = "data-nd-today"
+doc = "Which day is marked as today, in the wire format. It is the server's own date at render, and the script stamps it again from the reader's clock."
+
+[prop.selection]
+type = "enum"
+values = ["single", "range", "multiple"]
+variants = false
+default = "single"
+attribute = "data-nd-selection"
+doc = "How many days may be chosen. `single` draws radios, so the browser holds one answer on its own. `range` and `multiple` draw checkboxes, and the script holds a range to its two ends."
+
+[prop.months]
+type = "enum"
+values = ["one", "two", "three"]
+variants = false
+default = "one"
+attribute = "data-nd-months"
+doc = "How many months are drawn side by side, each with its own heading and its own seven columns. A range across a month boundary is then one glance rather than two turns."
+
+[prop.first_day]
+type = "enum"
+values = ["auto", "monday", "sunday", "saturday"]
+variants = false
+default = "auto"
+attribute = "data-nd-first-day"
+doc = "Which weekday a row starts on. `auto` is served as Monday and laid out again by the script for the reader's own conventions. A named day is served as written and left alone."
+
+[prop.week_numbers]
+type = "bool"
+default = "false"
+attribute = "data-nd-week-numbers"
+doc = "Adds a leading column of week numbers, counted the way the reader's own conventions count them. Needs `week_label`, which names the column."
+
+[prop.week_label]
+type = "text"
+doc = "The week-number column's heading, in the reader's language. Wanted whenever `week_numbers` is on, because an unnamed column heading is a hole a screen reader falls into."
+
+[prop.posts]
+type = "bool"
+default = "true"
+attribute = "data-nd-posts"
+doc = "Whether the days carry a name and so reach the server. Off inside another field, where the days fill a control that already posts. Off is the only shape that avoids two carriers for one date."
+
+[prop.min_length]
+type = "text"
+attribute = "data-nd-min-length"
+doc = "The fewest days a range may cover, counting both ends. While a start is set, days too near it are disabled. A range that is too short cannot be made rather than refused after the fact."
+
+[prop.max_length]
+type = "text"
+attribute = "data-nd-max-length"
+doc = "The most days a range may cover, counting both ends, enforced the same way. Under `multiple` it caps how many days may be ticked."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+variants = false
+default = "medium"
+attribute = "data-nd-size"
+doc = "How large a day is. The steps match `Select`, so a picker and a select on one row sit level. Every step clears the target size an audit asks of a control."
+
+[prop.required]
+type = "bool"
+default = "false"
+attribute = "required"
+doc = "The real `required` attribute, written on the days only under `single`. A required checkbox is one the browser demands on its own, which is not what a range or a loose set means."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "disabled"
+doc = "Disables the whole picker at once. A disabled fieldset is the browser's own cascade, so nothing here walks the days. The trigger and the month controls stop with it."
+
+[prop.hint]
+type = "text"
+doc = "What a reader needs to know before choosing. It rides the fieldset's `aria-describedby`, so it is read out with the question."
+
+[prop.error]
+type = "text"
+doc = "What is wrong with the choice, in the caller's own words. Its presence marks the picker invalid, so the red edge and the message always appear together."
+
+[prop.error_label]
+type = "text"
+doc = "The word read out before the message, such as `Error:`. It is visually hidden, because the message is already marked as an error on the screen."
+
+[prop.form]
+type = "enum"
+values = ["inline", "field"]
+variants = false
+default = "inline"
+attribute = "data-nd-form"
+doc = "Whether the month is on the page or behind a box. `inline` draws it where it stands. `field` draws a box a reader types a date into, and opens the month from the control beside it. A box asks for one date, or two under `range`."
+
+[prop.order]
+type = "enum"
+values = ["auto", "dmy", "mdy", "ymd"]
+variants = false
+default = "auto"
+attribute = "data-nd-order"
+doc = "Which number the box asks for first. `auto` is served day first and read again by the script for the reader's own conventions. A named order is served as written and left alone."
+
+[prop.format_dmy]
+type = "text"
+attribute = "data-nd-format-dmy"
+doc = "What an empty box shows when the day comes first, such as `DD/MM/AAAA`. It is one whole string per order rather than three letters joined, because where the separators fall is the reader's convention."
+
+[prop.format_mdy]
+type = "text"
+attribute = "data-nd-format-mdy"
+doc = "The same for the order that puts the month first, such as `MM/DD/AAAA`. It is what a reader in the United States is shown."
+
+[prop.format_ymd]
+type = "text"
+attribute = "data-nd-format-ymd"
+doc = "The same for the order that puts the year first, such as `AAAA-MM-DD`."
+
+[prop.pair]
+type = "enum"
+values = ["apart", "attached", "stacked"]
+variants = false
+default = "apart"
+attribute = "data-nd-pair"
+doc = "How the two boxes of a range sit. `apart` gives each its own space. `attached` and `stacked` share one outline between them, side by side and down a column."
+
+[prop.labels]
+type = "enum"
+values = ["above", "inside", "hidden"]
+variants = false
+default = "above"
+attribute = "data-nd-labels"
+doc = "Where each box's own label is drawn. `above` puts it over the box, `inside` puts it in the box before the typing, and `hidden` leaves it to a screen reader alone."
+
+[prop.start_label]
+type = "text"
+doc = "The first box's own visible label, such as `Data de ida`. Wanted under `range`, because two boxes with one label between them leave a reader guessing which is which."
+
+[prop.end_label]
+type = "text"
+doc = "The second box's own visible label, such as `Data de volta`. Wanted under `range` for the same reason."
+
+[prop.open_label]
+type = "text"
+attribute = "data-nd-open-label"
+doc = "The name of the control that opens the month. It is icon-only and so has no words of its own. The control ships hidden, and the script reveals it."
+
+[prop.invalid_label]
+type = "text"
+attribute = "data-nd-invalid-label"
+doc = "The sentence for something typed that is not a date, with a `{value}` hole for what was typed. Examples are the 31st of April and a month numbered past twelve."
+
+[prop.chosen_label]
+type = "text"
+attribute = "data-nd-chosen-label"
+doc = "The sentence announced once a day is chosen, with a `{date}` hole the script fills from the locale's own formatter."
+
+[prop.range_label]
+type = "text"
+attribute = "data-nd-range-label"
+doc = "The same for a range, with `{start}` and `{end}` holes. Wanted under `range`, because the browser announces the second box rather than the span of days it completes."
+
+[prop.count_label]
+type = "text"
+attribute = "data-nd-count-label"
+doc = "The same for a loose set, with a `{count}` hole. It may carry one form per plural category, and the script picks between them through the reader's own language."
+
+[prop.cleared_label]
+type = "text"
+attribute = "data-nd-cleared-label"
+doc = "The sentence announced when the answer is emptied, such as `No date chosen`. Emptying moves nothing on the screen for a reader who cannot see the days lose their fill."
+
+[prop.blocked_label]
+type = "text"
+attribute = "data-nd-blocked-label"
+doc = "The sentence for a range that would cover a day the caller refused, with a `{date}` hole for the first day in the way. The range is refused rather than quietly shortened."
+
+[prop.too_short_label]
+type = "text"
+attribute = "data-nd-too-short-label"
+doc = "The sentence for a range shorter than `min_length`, with a `{count}` hole. It is announced when a reader reaches a day the bound has disabled."
+
+[prop.too_long_label]
+type = "text"
+attribute = "data-nd-too-long-label"
+doc = "The sentence for a range longer than `max_length`, with a `{count}` hole, announced the same way."
+
+[prop.clear_label]
+type = "text"
+attribute = "data-nd-clear-label"
+doc = "The name of the control that empties the answer. The control ships hidden and the script reveals it, so a page with no script carries no control that clears nothing."
+
+[prop.previous_label]
+type = "text"
+attribute = "data-nd-previous-label"
+doc = "The name of the control that turns back a month, revealed the same way. Icon-only controls still need a name."
+
+[prop.next_label]
+type = "text"
+attribute = "data-nd-next-label"
+doc = "The name of the control that turns forward a month, revealed the same way."
+
+[prop.close_label]
+type = "text"
+attribute = "data-nd-close-label"
+doc = "The name of the control that closes the panel. Wanted under a trigger, because Escape and a press outside also close it and neither is discoverable on a touch screen."
+
+[prop.children]
+type = "children"
+doc = "The days a caller names, as `DatePickerDay` elements: a quick pick, a day refused for a reason, or a day marked as worth seeing. They are served inert and hidden, and the script reads them."
+
+[state.resolved]
+attribute = "data-nd-resolved"
+doc = "The order actually in force, which is what the box asks for first: `dmy`, `mdy` or `ymd`. It is served from `order` and stamped again by the script for the reader."
+
+[state.week_start]
+attribute = "data-nd-week-start"
+doc = "The weekday a row starts on, as its number from 1 for Monday to 7 for Sunday. It is served from `first_day` and stamped again by the script for the reader's own conventions."
+
+[state.outside]
+attribute = "data-nd-outside"
+doc = "Whether a day belongs to the month before or after the one on show. Six rows always hold forty-two days, and the spill is real days a reader may still choose."
+
+[state.phase]
+attribute = "data-nd-phase"
+doc = "How much of a range is made: `empty`, `anchored` once a start is set, or `complete`. Only a script writes it, because only a script can hold a half-made answer."
+
+[state.in_range]
+attribute = "data-nd-in-range"
+doc = "Whether a day lies between the two ends of a range. It is derived from the days actually ticked wherever they change, so a band and its ends cannot come apart."
+
+[state.current]
+attribute = "aria-current"
+doc = "Which day is today, carrying the value `date`. It is served from `today` and stamped again by the script from the reader's own clock."
+
+[state.expanded]
+attribute = "aria-expanded"
+doc = "Whether the panel is open. It is written on the script-built trigger only, so a page with no script never claims a surface it cannot open."
+
+[a11y]
+needs_name = true
+notes = """
+Every day is a real radio or checkbox in a fieldset, so a choice submits and is
+announced with no script running. The grid is a plain table until the script
+upgrades it, and `role="grid"` arrives together with the arrows that answer it.
+"""
+
+[keyboard]
+"Digits" = "Fill the box, in the order it asks for. Nothing advances on its own, so a number already typed can still be corrected."
+"Alt with Down arrow" = "Opens the month from the box, when there is one. Plain Down is the grid's own."
+"Tab" = "Moves into the month and out of it. The whole grid is one stop, held by a roving `tabindex`."
+"Left / Right arrow" = "Moves a day back or forward, across the edge of the month when the day is at one."
+"Up / Down arrow" = "Moves a week back or forward, by date arithmetic rather than by counting cells."
+"Home / End" = "Moves to the first or last day of the week the focused day is in."
+"Page Up / Page Down" = "Turns the month back or forward. With Shift, the year."
+"Enter or Space" = "Chooses the focused day. Under `range` the first press sets the start and the second sets the end."
+"Shift with an arrow" = "Extends a finished range from the end that has focus. Under `multiple` it adds every day walked over."
+"Escape" = "Closes the panel, when there is one, and changes nothing already chosen."
+"Arrows, with no script" = "The radio group's own: a day back or forward in reading order, and the day moved to is the day chosen."

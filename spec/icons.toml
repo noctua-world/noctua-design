@@ -208,7 +208,7 @@ doc = "Opens the language menu. Not a flag: a flag names a country and this name
 
 [icon.calendar]
 source = "lucide"
-doc = "Opens a `DateInput`'s suggestions — the quick picks and the month grid. A calendar, because that is what the panel is; the button it sits on is icon-only and takes its name from `suggest_label`."
+doc = "Opens a month: a `DatePicker`'s own box carries one, and so does the control on a `DateInput` that opens its suggestions. A calendar, because that is what opens. Both controls are icon-only and are named by a prop."
 
 [icon.text-wrap]
 source = "lucide"

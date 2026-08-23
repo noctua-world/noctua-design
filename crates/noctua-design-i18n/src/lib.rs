@@ -192,6 +192,10 @@ pub enum Key {
     PageSegmentedSummary,
     /// `page.segmented.body`
     PageSegmentedBody,
+    /// `page.date-picker.summary`
+    PageDatePickerSummary,
+    /// `page.date-picker.body`
+    PageDatePickerBody,
     /// `page.select.summary`
     PageSelectSummary,
     /// `page.select.body`
@@ -674,6 +678,10 @@ pub enum Key {
     ComponentLineageFigureSummary,
     /// `component.date-input.summary`
     ComponentDateInputSummary,
+    /// `component.date-picker.summary`
+    ComponentDatePickerSummary,
+    /// `component.date-picker-day.summary`
+    ComponentDatePickerDaySummary,
     /// `component.truncate.summary`
     ComponentTruncateSummary,
     /// `component.visually-hidden.summary`
@@ -792,6 +800,158 @@ pub enum Key {
     ExampleDateInputClosedLegend,
     /// `example.date-input.forms-note`
     ExampleDateInputFormsNote,
+    /// `example.date-picker.legend`
+    ExampleDatePickerLegend,
+    /// `example.date-picker.stay-legend`
+    ExampleDatePickerStayLegend,
+    /// `example.date-picker.loose-legend`
+    ExampleDatePickerLooseLegend,
+    /// `example.date-picker.bounds-legend`
+    ExampleDatePickerBoundsLegend,
+    /// `example.date-picker.named-legend`
+    ExampleDatePickerNamedLegend,
+    /// `example.date-picker.forms-legend`
+    ExampleDatePickerFormsLegend,
+    /// `example.date-picker.field-legend`
+    ExampleDatePickerFieldLegend,
+    /// `example.date-picker.trip-legend`
+    ExampleDatePickerTripLegend,
+    /// `example.date-picker.flight-legend`
+    ExampleDatePickerFlightLegend,
+    /// `example.date-picker.nights-legend`
+    ExampleDatePickerNightsLegend,
+    /// `example.date-picker.rental-legend`
+    ExampleDatePickerRentalLegend,
+    /// `example.date-picker.pick-up`
+    ExampleDatePickerPickUp,
+    /// `example.date-picker.drop-off`
+    ExampleDatePickerDropOff,
+    /// `example.date-picker.inside-note`
+    ExampleDatePickerInsideNote,
+    /// `example.date-picker.departing`
+    ExampleDatePickerDeparting,
+    /// `example.date-picker.returning`
+    ExampleDatePickerReturning,
+    /// `example.date-picker.check-in`
+    ExampleDatePickerCheckIn,
+    /// `example.date-picker.check-out`
+    ExampleDatePickerCheckOut,
+    /// `example.date-picker.attached-note`
+    ExampleDatePickerAttachedNote,
+    /// `example.date-picker.stacked-note`
+    ExampleDatePickerStackedNote,
+    /// `example.date-picker.start`
+    ExampleDatePickerStart,
+    /// `example.date-picker.end`
+    ExampleDatePickerEnd,
+    /// `example.date-picker.open`
+    ExampleDatePickerOpen,
+    /// `example.date-picker.invalid`
+    ExampleDatePickerInvalid,
+    /// `example.date-picker.format-dmy`
+    ExampleDatePickerFormatDmy,
+    /// `example.date-picker.format-mdy`
+    ExampleDatePickerFormatMdy,
+    /// `example.date-picker.format-ymd`
+    ExampleDatePickerFormatYmd,
+    /// `example.date-picker.field-note`
+    ExampleDatePickerFieldNote,
+    /// `example.date-picker.trip-note`
+    ExampleDatePickerTripNote,
+    /// `example.date-picker.small-legend`
+    ExampleDatePickerSmallLegend,
+    /// `example.date-picker.large-legend`
+    ExampleDatePickerLargeLegend,
+    /// `example.date-picker.closed-legend`
+    ExampleDatePickerClosedLegend,
+    /// `example.date-picker.invalid-legend`
+    ExampleDatePickerInvalidLegend,
+    /// `example.date-picker.nested-legend`
+    ExampleDatePickerNestedLegend,
+    /// `example.date-picker.august`
+    ExampleDatePickerAugust,
+    /// `example.date-picker.september`
+    ExampleDatePickerSeptember,
+    /// `example.date-picker.october`
+    ExampleDatePickerOctober,
+    /// `example.date-picker.monday`
+    ExampleDatePickerMonday,
+    /// `example.date-picker.tuesday`
+    ExampleDatePickerTuesday,
+    /// `example.date-picker.wednesday`
+    ExampleDatePickerWednesday,
+    /// `example.date-picker.thursday`
+    ExampleDatePickerThursday,
+    /// `example.date-picker.friday`
+    ExampleDatePickerFriday,
+    /// `example.date-picker.saturday`
+    ExampleDatePickerSaturday,
+    /// `example.date-picker.sunday`
+    ExampleDatePickerSunday,
+    /// `example.date-picker.week`
+    ExampleDatePickerWeek,
+    /// `example.date-picker.previous`
+    ExampleDatePickerPrevious,
+    /// `example.date-picker.next`
+    ExampleDatePickerNext,
+    /// `example.date-picker.clear`
+    ExampleDatePickerClear,
+    /// `example.date-picker.close`
+    ExampleDatePickerClose,
+    /// `example.date-picker.trigger`
+    ExampleDatePickerTrigger,
+    /// `example.date-picker.chosen`
+    ExampleDatePickerChosen,
+    /// `example.date-picker.range`
+    ExampleDatePickerRange,
+    /// `example.date-picker.count`
+    ExampleDatePickerCount,
+    /// `example.date-picker.cleared`
+    ExampleDatePickerCleared,
+    /// `example.date-picker.blocked`
+    ExampleDatePickerBlocked,
+    /// `example.date-picker.too-short`
+    ExampleDatePickerTooShort,
+    /// `example.date-picker.too-long`
+    ExampleDatePickerTooLong,
+    /// `example.date-picker.hint`
+    ExampleDatePickerHint,
+    /// `example.date-picker.error`
+    ExampleDatePickerError,
+    /// `example.date-picker.error-word`
+    ExampleDatePickerErrorWord,
+    /// `example.date-picker.holiday`
+    ExampleDatePickerHoliday,
+    /// `example.date-picker.closed`
+    ExampleDatePickerClosed,
+    /// `example.date-picker.market`
+    ExampleDatePickerMarket,
+    /// `example.date-picker.this-week`
+    ExampleDatePickerThisWeek,
+    /// `example.date-picker.next-week`
+    ExampleDatePickerNextWeek,
+    /// `example.date-picker.one-note`
+    ExampleDatePickerOneNote,
+    /// `example.date-picker.range-note`
+    ExampleDatePickerRangeNote,
+    /// `example.date-picker.bounds-note`
+    ExampleDatePickerBoundsNote,
+    /// `example.date-picker.trigger-note`
+    ExampleDatePickerTriggerNote,
+    /// `example.date-picker.wide-note`
+    ExampleDatePickerWideNote,
+    /// `example.date-picker.named-note`
+    ExampleDatePickerNamedNote,
+    /// `example.date-picker.forms-note`
+    ExampleDatePickerFormsNote,
+    /// `example.date-picker-day.preset-note`
+    ExampleDatePickerDayPresetNote,
+    /// `example.date-picker-day.refused-note`
+    ExampleDatePickerDayRefusedNote,
+    /// `example.date-picker-day.marked-note`
+    ExampleDatePickerDayMarkedNote,
+    /// `example.date-picker-day.span-note`
+    ExampleDatePickerDaySpanNote,
     /// `example.date-input.error-message`
     ExampleDateInputErrorMessage,
     /// `example.lineage.doe`
@@ -2486,6 +2646,8 @@ pub enum Key {
     ExampleOverviewButtonGroupDraft,
     /// `example.overview.date-input.legend`
     ExampleOverviewDateInputLegend,
+    /// `example.overview.date-picker.legend`
+    ExampleOverviewDatePickerLegend,
     /// `example.overview.date-input.hint`
     ExampleOverviewDateInputHint,
     /// `example.overview.date-input.required`
@@ -3428,6 +3590,8 @@ pub enum Key {
     ComponentDateInputPropExpandDoc,
     /// `component.date-input.prop.calendar.doc`
     ComponentDateInputPropCalendarDoc,
+    /// `component.date-input.prop.today.doc`
+    ComponentDateInputPropTodayDoc,
     /// `component.date-input.prop.suggest_label.doc`
     ComponentDateInputPropSuggestLabelDoc,
     /// `component.date-input.prop.previous_label.doc`
@@ -3498,6 +3662,186 @@ pub enum Key {
     ComponentDateInputKeyPasteName,
     /// `component.date-input.key.paste.action`
     ComponentDateInputKeyPasteAction,
+    /// `component.date-picker.guidance`
+    ComponentDatePickerGuidance,
+    /// `component.date-picker.a11y-notes`
+    ComponentDatePickerA11yNotes,
+    /// `component.date-picker.prop.name.doc`
+    ComponentDatePickerPropNameDoc,
+    /// `component.date-picker.prop.legend.doc`
+    ComponentDatePickerPropLegendDoc,
+    /// `component.date-picker.prop.month.doc`
+    ComponentDatePickerPropMonthDoc,
+    /// `component.date-picker.prop.month_label.doc`
+    ComponentDatePickerPropMonthLabelDoc,
+    /// `component.date-picker.prop.second_month_label.doc`
+    ComponentDatePickerPropSecondMonthLabelDoc,
+    /// `component.date-picker.prop.third_month_label.doc`
+    ComponentDatePickerPropThirdMonthLabelDoc,
+    /// `component.date-picker.prop.monday_label.doc`
+    ComponentDatePickerPropMondayLabelDoc,
+    /// `component.date-picker.prop.tuesday_label.doc`
+    ComponentDatePickerPropTuesdayLabelDoc,
+    /// `component.date-picker.prop.wednesday_label.doc`
+    ComponentDatePickerPropWednesdayLabelDoc,
+    /// `component.date-picker.prop.thursday_label.doc`
+    ComponentDatePickerPropThursdayLabelDoc,
+    /// `component.date-picker.prop.friday_label.doc`
+    ComponentDatePickerPropFridayLabelDoc,
+    /// `component.date-picker.prop.saturday_label.doc`
+    ComponentDatePickerPropSaturdayLabelDoc,
+    /// `component.date-picker.prop.sunday_label.doc`
+    ComponentDatePickerPropSundayLabelDoc,
+    /// `component.date-picker.prop.value.doc`
+    ComponentDatePickerPropValueDoc,
+    /// `component.date-picker.prop.min.doc`
+    ComponentDatePickerPropMinDoc,
+    /// `component.date-picker.prop.max.doc`
+    ComponentDatePickerPropMaxDoc,
+    /// `component.date-picker.prop.today.doc`
+    ComponentDatePickerPropTodayDoc,
+    /// `component.date-picker.prop.selection.doc`
+    ComponentDatePickerPropSelectionDoc,
+    /// `component.date-picker.prop.months.doc`
+    ComponentDatePickerPropMonthsDoc,
+    /// `component.date-picker.prop.first_day.doc`
+    ComponentDatePickerPropFirstDayDoc,
+    /// `component.date-picker.prop.week_numbers.doc`
+    ComponentDatePickerPropWeekNumbersDoc,
+    /// `component.date-picker.prop.week_label.doc`
+    ComponentDatePickerPropWeekLabelDoc,
+    /// `component.date-picker.prop.posts.doc`
+    ComponentDatePickerPropPostsDoc,
+    /// `component.date-picker.prop.min_length.doc`
+    ComponentDatePickerPropMinLengthDoc,
+    /// `component.date-picker.prop.max_length.doc`
+    ComponentDatePickerPropMaxLengthDoc,
+    /// `component.date-picker.prop.size.doc`
+    ComponentDatePickerPropSizeDoc,
+    /// `component.date-picker.prop.required.doc`
+    ComponentDatePickerPropRequiredDoc,
+    /// `component.date-picker.prop.disabled.doc`
+    ComponentDatePickerPropDisabledDoc,
+    /// `component.date-picker.prop.hint.doc`
+    ComponentDatePickerPropHintDoc,
+    /// `component.date-picker.prop.error.doc`
+    ComponentDatePickerPropErrorDoc,
+    /// `component.date-picker.prop.error_label.doc`
+    ComponentDatePickerPropErrorLabelDoc,
+    /// `component.date-picker.prop.form.doc`
+    ComponentDatePickerPropFormDoc,
+    /// `component.date-picker.prop.order.doc`
+    ComponentDatePickerPropOrderDoc,
+    /// `component.date-picker.prop.format_dmy.doc`
+    ComponentDatePickerPropFormatDmyDoc,
+    /// `component.date-picker.prop.format_mdy.doc`
+    ComponentDatePickerPropFormatMdyDoc,
+    /// `component.date-picker.prop.format_ymd.doc`
+    ComponentDatePickerPropFormatYmdDoc,
+    /// `component.date-picker.prop.pair.doc`
+    ComponentDatePickerPropPairDoc,
+    /// `component.date-picker.prop.labels.doc`
+    ComponentDatePickerPropLabelsDoc,
+    /// `component.date-picker.prop.start_label.doc`
+    ComponentDatePickerPropStartLabelDoc,
+    /// `component.date-picker.prop.end_label.doc`
+    ComponentDatePickerPropEndLabelDoc,
+    /// `component.date-picker.prop.open_label.doc`
+    ComponentDatePickerPropOpenLabelDoc,
+    /// `component.date-picker.prop.invalid_label.doc`
+    ComponentDatePickerPropInvalidLabelDoc,
+    /// `component.date-picker.prop.chosen_label.doc`
+    ComponentDatePickerPropChosenLabelDoc,
+    /// `component.date-picker.prop.range_label.doc`
+    ComponentDatePickerPropRangeLabelDoc,
+    /// `component.date-picker.prop.count_label.doc`
+    ComponentDatePickerPropCountLabelDoc,
+    /// `component.date-picker.prop.cleared_label.doc`
+    ComponentDatePickerPropClearedLabelDoc,
+    /// `component.date-picker.prop.blocked_label.doc`
+    ComponentDatePickerPropBlockedLabelDoc,
+    /// `component.date-picker.prop.too_short_label.doc`
+    ComponentDatePickerPropTooShortLabelDoc,
+    /// `component.date-picker.prop.too_long_label.doc`
+    ComponentDatePickerPropTooLongLabelDoc,
+    /// `component.date-picker.prop.clear_label.doc`
+    ComponentDatePickerPropClearLabelDoc,
+    /// `component.date-picker.prop.previous_label.doc`
+    ComponentDatePickerPropPreviousLabelDoc,
+    /// `component.date-picker.prop.next_label.doc`
+    ComponentDatePickerPropNextLabelDoc,
+    /// `component.date-picker.prop.close_label.doc`
+    ComponentDatePickerPropCloseLabelDoc,
+    /// `component.date-picker.prop.children.doc`
+    ComponentDatePickerPropChildrenDoc,
+    /// `component.date-picker.state.resolved.doc`
+    ComponentDatePickerStateResolvedDoc,
+    /// `component.date-picker.state.week_start.doc`
+    ComponentDatePickerStateWeekStartDoc,
+    /// `component.date-picker.state.outside.doc`
+    ComponentDatePickerStateOutsideDoc,
+    /// `component.date-picker.state.phase.doc`
+    ComponentDatePickerStatePhaseDoc,
+    /// `component.date-picker.state.in_range.doc`
+    ComponentDatePickerStateInRangeDoc,
+    /// `component.date-picker.state.current.doc`
+    ComponentDatePickerStateCurrentDoc,
+    /// `component.date-picker.state.expanded.doc`
+    ComponentDatePickerStateExpandedDoc,
+    /// `component.date-picker.key.digits.name`
+    ComponentDatePickerKeyDigitsName,
+    /// `component.date-picker.key.digits.action`
+    ComponentDatePickerKeyDigitsAction,
+    /// `component.date-picker.key.alt-with-down-arrow.name`
+    ComponentDatePickerKeyAltWithDownArrowName,
+    /// `component.date-picker.key.alt-with-down-arrow.action`
+    ComponentDatePickerKeyAltWithDownArrowAction,
+    /// `component.date-picker.key.tab.name`
+    ComponentDatePickerKeyTabName,
+    /// `component.date-picker.key.tab.action`
+    ComponentDatePickerKeyTabAction,
+    /// `component.date-picker.key.left-right-arrow.name`
+    ComponentDatePickerKeyLeftRightArrowName,
+    /// `component.date-picker.key.left-right-arrow.action`
+    ComponentDatePickerKeyLeftRightArrowAction,
+    /// `component.date-picker.key.up-down-arrow.name`
+    ComponentDatePickerKeyUpDownArrowName,
+    /// `component.date-picker.key.up-down-arrow.action`
+    ComponentDatePickerKeyUpDownArrowAction,
+    /// `component.date-picker.key.home-end.name`
+    ComponentDatePickerKeyHomeEndName,
+    /// `component.date-picker.key.home-end.action`
+    ComponentDatePickerKeyHomeEndAction,
+    /// `component.date-picker.key.page-up-page-down.name`
+    ComponentDatePickerKeyPageUpPageDownName,
+    /// `component.date-picker.key.page-up-page-down.action`
+    ComponentDatePickerKeyPageUpPageDownAction,
+    /// `component.date-picker.key.enter-or-space.name`
+    ComponentDatePickerKeyEnterOrSpaceName,
+    /// `component.date-picker.key.enter-or-space.action`
+    ComponentDatePickerKeyEnterOrSpaceAction,
+    /// `component.date-picker.key.shift-with-an-arrow.name`
+    ComponentDatePickerKeyShiftWithAnArrowName,
+    /// `component.date-picker.key.shift-with-an-arrow.action`
+    ComponentDatePickerKeyShiftWithAnArrowAction,
+    /// `component.date-picker.key.escape.name`
+    ComponentDatePickerKeyEscapeName,
+    /// `component.date-picker.key.escape.action`
+    ComponentDatePickerKeyEscapeAction,
+    /// `component.date-picker.key.arrows-with-no-script.name`
+    ComponentDatePickerKeyArrowsWithNoScriptName,
+    /// `component.date-picker.key.arrows-with-no-script.action`
+    ComponentDatePickerKeyArrowsWithNoScriptAction,
+    /// `component.date-picker-day.guidance`
+    ComponentDatePickerDayGuidance,
+    /// `component.date-picker-day.a11y-notes`
+    ComponentDatePickerDayA11yNotes,
+    /// `component.date-picker-day.prop.datetime.doc`
+    ComponentDatePickerDayPropDatetimeDoc,
+    /// `component.date-picker-day.prop.kind.doc`
+    ComponentDatePickerDayPropKindDoc,
+    /// `component.date-picker-day.prop.children.doc`
+    ComponentDatePickerDayPropChildrenDoc,
     /// `component.del.a11y-notes`
     ComponentDelA11yNotes,
     /// `component.del.prop.cite.doc`
@@ -5718,7 +6062,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2797] = [
+    pub const ALL: [Self; 2969] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -5755,6 +6099,8 @@ impl Key {
         Self::PageListBody,
         Self::PageSegmentedSummary,
         Self::PageSegmentedBody,
+        Self::PageDatePickerSummary,
+        Self::PageDatePickerBody,
         Self::PageSelectSummary,
         Self::PageSelectBody,
         Self::PageInlineTextSummary,
@@ -5996,6 +6342,8 @@ impl Key {
         Self::ComponentLineageSummary,
         Self::ComponentLineageFigureSummary,
         Self::ComponentDateInputSummary,
+        Self::ComponentDatePickerSummary,
+        Self::ComponentDatePickerDaySummary,
         Self::ComponentTruncateSummary,
         Self::ComponentVisuallyHiddenSummary,
         Self::ComponentOverview,
@@ -6055,6 +6403,82 @@ impl Key {
         Self::ExampleDateInputLarge,
         Self::ExampleDateInputClosedLegend,
         Self::ExampleDateInputFormsNote,
+        Self::ExampleDatePickerLegend,
+        Self::ExampleDatePickerStayLegend,
+        Self::ExampleDatePickerLooseLegend,
+        Self::ExampleDatePickerBoundsLegend,
+        Self::ExampleDatePickerNamedLegend,
+        Self::ExampleDatePickerFormsLegend,
+        Self::ExampleDatePickerFieldLegend,
+        Self::ExampleDatePickerTripLegend,
+        Self::ExampleDatePickerFlightLegend,
+        Self::ExampleDatePickerNightsLegend,
+        Self::ExampleDatePickerRentalLegend,
+        Self::ExampleDatePickerPickUp,
+        Self::ExampleDatePickerDropOff,
+        Self::ExampleDatePickerInsideNote,
+        Self::ExampleDatePickerDeparting,
+        Self::ExampleDatePickerReturning,
+        Self::ExampleDatePickerCheckIn,
+        Self::ExampleDatePickerCheckOut,
+        Self::ExampleDatePickerAttachedNote,
+        Self::ExampleDatePickerStackedNote,
+        Self::ExampleDatePickerStart,
+        Self::ExampleDatePickerEnd,
+        Self::ExampleDatePickerOpen,
+        Self::ExampleDatePickerInvalid,
+        Self::ExampleDatePickerFormatDmy,
+        Self::ExampleDatePickerFormatMdy,
+        Self::ExampleDatePickerFormatYmd,
+        Self::ExampleDatePickerFieldNote,
+        Self::ExampleDatePickerTripNote,
+        Self::ExampleDatePickerSmallLegend,
+        Self::ExampleDatePickerLargeLegend,
+        Self::ExampleDatePickerClosedLegend,
+        Self::ExampleDatePickerInvalidLegend,
+        Self::ExampleDatePickerNestedLegend,
+        Self::ExampleDatePickerAugust,
+        Self::ExampleDatePickerSeptember,
+        Self::ExampleDatePickerOctober,
+        Self::ExampleDatePickerMonday,
+        Self::ExampleDatePickerTuesday,
+        Self::ExampleDatePickerWednesday,
+        Self::ExampleDatePickerThursday,
+        Self::ExampleDatePickerFriday,
+        Self::ExampleDatePickerSaturday,
+        Self::ExampleDatePickerSunday,
+        Self::ExampleDatePickerWeek,
+        Self::ExampleDatePickerPrevious,
+        Self::ExampleDatePickerNext,
+        Self::ExampleDatePickerClear,
+        Self::ExampleDatePickerClose,
+        Self::ExampleDatePickerTrigger,
+        Self::ExampleDatePickerChosen,
+        Self::ExampleDatePickerRange,
+        Self::ExampleDatePickerCount,
+        Self::ExampleDatePickerCleared,
+        Self::ExampleDatePickerBlocked,
+        Self::ExampleDatePickerTooShort,
+        Self::ExampleDatePickerTooLong,
+        Self::ExampleDatePickerHint,
+        Self::ExampleDatePickerError,
+        Self::ExampleDatePickerErrorWord,
+        Self::ExampleDatePickerHoliday,
+        Self::ExampleDatePickerClosed,
+        Self::ExampleDatePickerMarket,
+        Self::ExampleDatePickerThisWeek,
+        Self::ExampleDatePickerNextWeek,
+        Self::ExampleDatePickerOneNote,
+        Self::ExampleDatePickerRangeNote,
+        Self::ExampleDatePickerBoundsNote,
+        Self::ExampleDatePickerTriggerNote,
+        Self::ExampleDatePickerWideNote,
+        Self::ExampleDatePickerNamedNote,
+        Self::ExampleDatePickerFormsNote,
+        Self::ExampleDatePickerDayPresetNote,
+        Self::ExampleDatePickerDayRefusedNote,
+        Self::ExampleDatePickerDayMarkedNote,
+        Self::ExampleDatePickerDaySpanNote,
         Self::ExampleDateInputErrorMessage,
         Self::ExampleLineageDoe,
         Self::ExampleLineageDoeNote,
@@ -6902,6 +7326,7 @@ impl Key {
         Self::ExampleOverviewButtonGroupSchedule,
         Self::ExampleOverviewButtonGroupDraft,
         Self::ExampleOverviewDateInputLegend,
+        Self::ExampleOverviewDatePickerLegend,
         Self::ExampleOverviewDateInputHint,
         Self::ExampleOverviewDateInputRequired,
         Self::ExampleOverviewLinkLead,
@@ -7373,6 +7798,7 @@ impl Key {
         Self::ComponentDateInputPropPadDoc,
         Self::ComponentDateInputPropExpandDoc,
         Self::ComponentDateInputPropCalendarDoc,
+        Self::ComponentDateInputPropTodayDoc,
         Self::ComponentDateInputPropSuggestLabelDoc,
         Self::ComponentDateInputPropPreviousLabelDoc,
         Self::ComponentDateInputPropNextLabelDoc,
@@ -7408,6 +7834,96 @@ impl Key {
         Self::ComponentDateInputKeyEscapeAction,
         Self::ComponentDateInputKeyPasteName,
         Self::ComponentDateInputKeyPasteAction,
+        Self::ComponentDatePickerGuidance,
+        Self::ComponentDatePickerA11yNotes,
+        Self::ComponentDatePickerPropNameDoc,
+        Self::ComponentDatePickerPropLegendDoc,
+        Self::ComponentDatePickerPropMonthDoc,
+        Self::ComponentDatePickerPropMonthLabelDoc,
+        Self::ComponentDatePickerPropSecondMonthLabelDoc,
+        Self::ComponentDatePickerPropThirdMonthLabelDoc,
+        Self::ComponentDatePickerPropMondayLabelDoc,
+        Self::ComponentDatePickerPropTuesdayLabelDoc,
+        Self::ComponentDatePickerPropWednesdayLabelDoc,
+        Self::ComponentDatePickerPropThursdayLabelDoc,
+        Self::ComponentDatePickerPropFridayLabelDoc,
+        Self::ComponentDatePickerPropSaturdayLabelDoc,
+        Self::ComponentDatePickerPropSundayLabelDoc,
+        Self::ComponentDatePickerPropValueDoc,
+        Self::ComponentDatePickerPropMinDoc,
+        Self::ComponentDatePickerPropMaxDoc,
+        Self::ComponentDatePickerPropTodayDoc,
+        Self::ComponentDatePickerPropSelectionDoc,
+        Self::ComponentDatePickerPropMonthsDoc,
+        Self::ComponentDatePickerPropFirstDayDoc,
+        Self::ComponentDatePickerPropWeekNumbersDoc,
+        Self::ComponentDatePickerPropWeekLabelDoc,
+        Self::ComponentDatePickerPropPostsDoc,
+        Self::ComponentDatePickerPropMinLengthDoc,
+        Self::ComponentDatePickerPropMaxLengthDoc,
+        Self::ComponentDatePickerPropSizeDoc,
+        Self::ComponentDatePickerPropRequiredDoc,
+        Self::ComponentDatePickerPropDisabledDoc,
+        Self::ComponentDatePickerPropHintDoc,
+        Self::ComponentDatePickerPropErrorDoc,
+        Self::ComponentDatePickerPropErrorLabelDoc,
+        Self::ComponentDatePickerPropFormDoc,
+        Self::ComponentDatePickerPropOrderDoc,
+        Self::ComponentDatePickerPropFormatDmyDoc,
+        Self::ComponentDatePickerPropFormatMdyDoc,
+        Self::ComponentDatePickerPropFormatYmdDoc,
+        Self::ComponentDatePickerPropPairDoc,
+        Self::ComponentDatePickerPropLabelsDoc,
+        Self::ComponentDatePickerPropStartLabelDoc,
+        Self::ComponentDatePickerPropEndLabelDoc,
+        Self::ComponentDatePickerPropOpenLabelDoc,
+        Self::ComponentDatePickerPropInvalidLabelDoc,
+        Self::ComponentDatePickerPropChosenLabelDoc,
+        Self::ComponentDatePickerPropRangeLabelDoc,
+        Self::ComponentDatePickerPropCountLabelDoc,
+        Self::ComponentDatePickerPropClearedLabelDoc,
+        Self::ComponentDatePickerPropBlockedLabelDoc,
+        Self::ComponentDatePickerPropTooShortLabelDoc,
+        Self::ComponentDatePickerPropTooLongLabelDoc,
+        Self::ComponentDatePickerPropClearLabelDoc,
+        Self::ComponentDatePickerPropPreviousLabelDoc,
+        Self::ComponentDatePickerPropNextLabelDoc,
+        Self::ComponentDatePickerPropCloseLabelDoc,
+        Self::ComponentDatePickerPropChildrenDoc,
+        Self::ComponentDatePickerStateResolvedDoc,
+        Self::ComponentDatePickerStateWeekStartDoc,
+        Self::ComponentDatePickerStateOutsideDoc,
+        Self::ComponentDatePickerStatePhaseDoc,
+        Self::ComponentDatePickerStateInRangeDoc,
+        Self::ComponentDatePickerStateCurrentDoc,
+        Self::ComponentDatePickerStateExpandedDoc,
+        Self::ComponentDatePickerKeyDigitsName,
+        Self::ComponentDatePickerKeyDigitsAction,
+        Self::ComponentDatePickerKeyAltWithDownArrowName,
+        Self::ComponentDatePickerKeyAltWithDownArrowAction,
+        Self::ComponentDatePickerKeyTabName,
+        Self::ComponentDatePickerKeyTabAction,
+        Self::ComponentDatePickerKeyLeftRightArrowName,
+        Self::ComponentDatePickerKeyLeftRightArrowAction,
+        Self::ComponentDatePickerKeyUpDownArrowName,
+        Self::ComponentDatePickerKeyUpDownArrowAction,
+        Self::ComponentDatePickerKeyHomeEndName,
+        Self::ComponentDatePickerKeyHomeEndAction,
+        Self::ComponentDatePickerKeyPageUpPageDownName,
+        Self::ComponentDatePickerKeyPageUpPageDownAction,
+        Self::ComponentDatePickerKeyEnterOrSpaceName,
+        Self::ComponentDatePickerKeyEnterOrSpaceAction,
+        Self::ComponentDatePickerKeyShiftWithAnArrowName,
+        Self::ComponentDatePickerKeyShiftWithAnArrowAction,
+        Self::ComponentDatePickerKeyEscapeName,
+        Self::ComponentDatePickerKeyEscapeAction,
+        Self::ComponentDatePickerKeyArrowsWithNoScriptName,
+        Self::ComponentDatePickerKeyArrowsWithNoScriptAction,
+        Self::ComponentDatePickerDayGuidance,
+        Self::ComponentDatePickerDayA11yNotes,
+        Self::ComponentDatePickerDayPropDatetimeDoc,
+        Self::ComponentDatePickerDayPropKindDoc,
+        Self::ComponentDatePickerDayPropChildrenDoc,
         Self::ComponentDelA11yNotes,
         Self::ComponentDelPropCiteDoc,
         Self::ComponentDelPropDatetimeDoc,
@@ -8558,6 +9074,8 @@ impl Key {
             Self::PageListBody => "page.list.body",
             Self::PageSegmentedSummary => "page.segmented.summary",
             Self::PageSegmentedBody => "page.segmented.body",
+            Self::PageDatePickerSummary => "page.date-picker.summary",
+            Self::PageDatePickerBody => "page.date-picker.body",
             Self::PageSelectSummary => "page.select.summary",
             Self::PageSelectBody => "page.select.body",
             Self::PageInlineTextSummary => "page.inline-text.summary",
@@ -8799,6 +9317,8 @@ impl Key {
             Self::ComponentLineageSummary => "component.lineage.summary",
             Self::ComponentLineageFigureSummary => "component.lineage-figure.summary",
             Self::ComponentDateInputSummary => "component.date-input.summary",
+            Self::ComponentDatePickerSummary => "component.date-picker.summary",
+            Self::ComponentDatePickerDaySummary => "component.date-picker-day.summary",
             Self::ComponentTruncateSummary => "component.truncate.summary",
             Self::ComponentVisuallyHiddenSummary => "component.visually-hidden.summary",
             Self::ComponentOverview => "component.overview",
@@ -8858,6 +9378,82 @@ impl Key {
             Self::ExampleDateInputLarge => "example.date-input.large",
             Self::ExampleDateInputClosedLegend => "example.date-input.closed-legend",
             Self::ExampleDateInputFormsNote => "example.date-input.forms-note",
+            Self::ExampleDatePickerLegend => "example.date-picker.legend",
+            Self::ExampleDatePickerStayLegend => "example.date-picker.stay-legend",
+            Self::ExampleDatePickerLooseLegend => "example.date-picker.loose-legend",
+            Self::ExampleDatePickerBoundsLegend => "example.date-picker.bounds-legend",
+            Self::ExampleDatePickerNamedLegend => "example.date-picker.named-legend",
+            Self::ExampleDatePickerFormsLegend => "example.date-picker.forms-legend",
+            Self::ExampleDatePickerFieldLegend => "example.date-picker.field-legend",
+            Self::ExampleDatePickerTripLegend => "example.date-picker.trip-legend",
+            Self::ExampleDatePickerFlightLegend => "example.date-picker.flight-legend",
+            Self::ExampleDatePickerNightsLegend => "example.date-picker.nights-legend",
+            Self::ExampleDatePickerRentalLegend => "example.date-picker.rental-legend",
+            Self::ExampleDatePickerPickUp => "example.date-picker.pick-up",
+            Self::ExampleDatePickerDropOff => "example.date-picker.drop-off",
+            Self::ExampleDatePickerInsideNote => "example.date-picker.inside-note",
+            Self::ExampleDatePickerDeparting => "example.date-picker.departing",
+            Self::ExampleDatePickerReturning => "example.date-picker.returning",
+            Self::ExampleDatePickerCheckIn => "example.date-picker.check-in",
+            Self::ExampleDatePickerCheckOut => "example.date-picker.check-out",
+            Self::ExampleDatePickerAttachedNote => "example.date-picker.attached-note",
+            Self::ExampleDatePickerStackedNote => "example.date-picker.stacked-note",
+            Self::ExampleDatePickerStart => "example.date-picker.start",
+            Self::ExampleDatePickerEnd => "example.date-picker.end",
+            Self::ExampleDatePickerOpen => "example.date-picker.open",
+            Self::ExampleDatePickerInvalid => "example.date-picker.invalid",
+            Self::ExampleDatePickerFormatDmy => "example.date-picker.format-dmy",
+            Self::ExampleDatePickerFormatMdy => "example.date-picker.format-mdy",
+            Self::ExampleDatePickerFormatYmd => "example.date-picker.format-ymd",
+            Self::ExampleDatePickerFieldNote => "example.date-picker.field-note",
+            Self::ExampleDatePickerTripNote => "example.date-picker.trip-note",
+            Self::ExampleDatePickerSmallLegend => "example.date-picker.small-legend",
+            Self::ExampleDatePickerLargeLegend => "example.date-picker.large-legend",
+            Self::ExampleDatePickerClosedLegend => "example.date-picker.closed-legend",
+            Self::ExampleDatePickerInvalidLegend => "example.date-picker.invalid-legend",
+            Self::ExampleDatePickerNestedLegend => "example.date-picker.nested-legend",
+            Self::ExampleDatePickerAugust => "example.date-picker.august",
+            Self::ExampleDatePickerSeptember => "example.date-picker.september",
+            Self::ExampleDatePickerOctober => "example.date-picker.october",
+            Self::ExampleDatePickerMonday => "example.date-picker.monday",
+            Self::ExampleDatePickerTuesday => "example.date-picker.tuesday",
+            Self::ExampleDatePickerWednesday => "example.date-picker.wednesday",
+            Self::ExampleDatePickerThursday => "example.date-picker.thursday",
+            Self::ExampleDatePickerFriday => "example.date-picker.friday",
+            Self::ExampleDatePickerSaturday => "example.date-picker.saturday",
+            Self::ExampleDatePickerSunday => "example.date-picker.sunday",
+            Self::ExampleDatePickerWeek => "example.date-picker.week",
+            Self::ExampleDatePickerPrevious => "example.date-picker.previous",
+            Self::ExampleDatePickerNext => "example.date-picker.next",
+            Self::ExampleDatePickerClear => "example.date-picker.clear",
+            Self::ExampleDatePickerClose => "example.date-picker.close",
+            Self::ExampleDatePickerTrigger => "example.date-picker.trigger",
+            Self::ExampleDatePickerChosen => "example.date-picker.chosen",
+            Self::ExampleDatePickerRange => "example.date-picker.range",
+            Self::ExampleDatePickerCount => "example.date-picker.count",
+            Self::ExampleDatePickerCleared => "example.date-picker.cleared",
+            Self::ExampleDatePickerBlocked => "example.date-picker.blocked",
+            Self::ExampleDatePickerTooShort => "example.date-picker.too-short",
+            Self::ExampleDatePickerTooLong => "example.date-picker.too-long",
+            Self::ExampleDatePickerHint => "example.date-picker.hint",
+            Self::ExampleDatePickerError => "example.date-picker.error",
+            Self::ExampleDatePickerErrorWord => "example.date-picker.error-word",
+            Self::ExampleDatePickerHoliday => "example.date-picker.holiday",
+            Self::ExampleDatePickerClosed => "example.date-picker.closed",
+            Self::ExampleDatePickerMarket => "example.date-picker.market",
+            Self::ExampleDatePickerThisWeek => "example.date-picker.this-week",
+            Self::ExampleDatePickerNextWeek => "example.date-picker.next-week",
+            Self::ExampleDatePickerOneNote => "example.date-picker.one-note",
+            Self::ExampleDatePickerRangeNote => "example.date-picker.range-note",
+            Self::ExampleDatePickerBoundsNote => "example.date-picker.bounds-note",
+            Self::ExampleDatePickerTriggerNote => "example.date-picker.trigger-note",
+            Self::ExampleDatePickerWideNote => "example.date-picker.wide-note",
+            Self::ExampleDatePickerNamedNote => "example.date-picker.named-note",
+            Self::ExampleDatePickerFormsNote => "example.date-picker.forms-note",
+            Self::ExampleDatePickerDayPresetNote => "example.date-picker-day.preset-note",
+            Self::ExampleDatePickerDayRefusedNote => "example.date-picker-day.refused-note",
+            Self::ExampleDatePickerDayMarkedNote => "example.date-picker-day.marked-note",
+            Self::ExampleDatePickerDaySpanNote => "example.date-picker-day.span-note",
             Self::ExampleDateInputErrorMessage => "example.date-input.error-message",
             Self::ExampleLineageDoe => "example.lineage.doe",
             Self::ExampleLineageDoeNote => "example.lineage.doe-note",
@@ -9707,6 +10303,7 @@ impl Key {
             Self::ExampleOverviewButtonGroupSchedule => "example.overview.button-group.schedule",
             Self::ExampleOverviewButtonGroupDraft => "example.overview.button-group.draft",
             Self::ExampleOverviewDateInputLegend => "example.overview.date-input.legend",
+            Self::ExampleOverviewDatePickerLegend => "example.overview.date-picker.legend",
             Self::ExampleOverviewDateInputHint => "example.overview.date-input.hint",
             Self::ExampleOverviewDateInputRequired => "example.overview.date-input.required",
             Self::ExampleOverviewLinkLead => "example.overview.link.lead",
@@ -10272,6 +10869,7 @@ impl Key {
             Self::ComponentDateInputPropPadDoc => "component.date-input.prop.pad.doc",
             Self::ComponentDateInputPropExpandDoc => "component.date-input.prop.expand.doc",
             Self::ComponentDateInputPropCalendarDoc => "component.date-input.prop.calendar.doc",
+            Self::ComponentDateInputPropTodayDoc => "component.date-input.prop.today.doc",
             Self::ComponentDateInputPropSuggestLabelDoc => {
                 "component.date-input.prop.suggest_label.doc"
             }
@@ -10349,6 +10947,196 @@ impl Key {
             Self::ComponentDateInputKeyEscapeAction => "component.date-input.key.escape.action",
             Self::ComponentDateInputKeyPasteName => "component.date-input.key.paste.name",
             Self::ComponentDateInputKeyPasteAction => "component.date-input.key.paste.action",
+            Self::ComponentDatePickerGuidance => "component.date-picker.guidance",
+            Self::ComponentDatePickerA11yNotes => "component.date-picker.a11y-notes",
+            Self::ComponentDatePickerPropNameDoc => "component.date-picker.prop.name.doc",
+            Self::ComponentDatePickerPropLegendDoc => "component.date-picker.prop.legend.doc",
+            Self::ComponentDatePickerPropMonthDoc => "component.date-picker.prop.month.doc",
+            Self::ComponentDatePickerPropMonthLabelDoc => {
+                "component.date-picker.prop.month_label.doc"
+            }
+            Self::ComponentDatePickerPropSecondMonthLabelDoc => {
+                "component.date-picker.prop.second_month_label.doc"
+            }
+            Self::ComponentDatePickerPropThirdMonthLabelDoc => {
+                "component.date-picker.prop.third_month_label.doc"
+            }
+            Self::ComponentDatePickerPropMondayLabelDoc => {
+                "component.date-picker.prop.monday_label.doc"
+            }
+            Self::ComponentDatePickerPropTuesdayLabelDoc => {
+                "component.date-picker.prop.tuesday_label.doc"
+            }
+            Self::ComponentDatePickerPropWednesdayLabelDoc => {
+                "component.date-picker.prop.wednesday_label.doc"
+            }
+            Self::ComponentDatePickerPropThursdayLabelDoc => {
+                "component.date-picker.prop.thursday_label.doc"
+            }
+            Self::ComponentDatePickerPropFridayLabelDoc => {
+                "component.date-picker.prop.friday_label.doc"
+            }
+            Self::ComponentDatePickerPropSaturdayLabelDoc => {
+                "component.date-picker.prop.saturday_label.doc"
+            }
+            Self::ComponentDatePickerPropSundayLabelDoc => {
+                "component.date-picker.prop.sunday_label.doc"
+            }
+            Self::ComponentDatePickerPropValueDoc => "component.date-picker.prop.value.doc",
+            Self::ComponentDatePickerPropMinDoc => "component.date-picker.prop.min.doc",
+            Self::ComponentDatePickerPropMaxDoc => "component.date-picker.prop.max.doc",
+            Self::ComponentDatePickerPropTodayDoc => "component.date-picker.prop.today.doc",
+            Self::ComponentDatePickerPropSelectionDoc => "component.date-picker.prop.selection.doc",
+            Self::ComponentDatePickerPropMonthsDoc => "component.date-picker.prop.months.doc",
+            Self::ComponentDatePickerPropFirstDayDoc => "component.date-picker.prop.first_day.doc",
+            Self::ComponentDatePickerPropWeekNumbersDoc => {
+                "component.date-picker.prop.week_numbers.doc"
+            }
+            Self::ComponentDatePickerPropWeekLabelDoc => {
+                "component.date-picker.prop.week_label.doc"
+            }
+            Self::ComponentDatePickerPropPostsDoc => "component.date-picker.prop.posts.doc",
+            Self::ComponentDatePickerPropMinLengthDoc => {
+                "component.date-picker.prop.min_length.doc"
+            }
+            Self::ComponentDatePickerPropMaxLengthDoc => {
+                "component.date-picker.prop.max_length.doc"
+            }
+            Self::ComponentDatePickerPropSizeDoc => "component.date-picker.prop.size.doc",
+            Self::ComponentDatePickerPropRequiredDoc => "component.date-picker.prop.required.doc",
+            Self::ComponentDatePickerPropDisabledDoc => "component.date-picker.prop.disabled.doc",
+            Self::ComponentDatePickerPropHintDoc => "component.date-picker.prop.hint.doc",
+            Self::ComponentDatePickerPropErrorDoc => "component.date-picker.prop.error.doc",
+            Self::ComponentDatePickerPropErrorLabelDoc => {
+                "component.date-picker.prop.error_label.doc"
+            }
+            Self::ComponentDatePickerPropFormDoc => "component.date-picker.prop.form.doc",
+            Self::ComponentDatePickerPropOrderDoc => "component.date-picker.prop.order.doc",
+            Self::ComponentDatePickerPropFormatDmyDoc => {
+                "component.date-picker.prop.format_dmy.doc"
+            }
+            Self::ComponentDatePickerPropFormatMdyDoc => {
+                "component.date-picker.prop.format_mdy.doc"
+            }
+            Self::ComponentDatePickerPropFormatYmdDoc => {
+                "component.date-picker.prop.format_ymd.doc"
+            }
+            Self::ComponentDatePickerPropPairDoc => "component.date-picker.prop.pair.doc",
+            Self::ComponentDatePickerPropLabelsDoc => "component.date-picker.prop.labels.doc",
+            Self::ComponentDatePickerPropStartLabelDoc => {
+                "component.date-picker.prop.start_label.doc"
+            }
+            Self::ComponentDatePickerPropEndLabelDoc => "component.date-picker.prop.end_label.doc",
+            Self::ComponentDatePickerPropOpenLabelDoc => {
+                "component.date-picker.prop.open_label.doc"
+            }
+            Self::ComponentDatePickerPropInvalidLabelDoc => {
+                "component.date-picker.prop.invalid_label.doc"
+            }
+            Self::ComponentDatePickerPropChosenLabelDoc => {
+                "component.date-picker.prop.chosen_label.doc"
+            }
+            Self::ComponentDatePickerPropRangeLabelDoc => {
+                "component.date-picker.prop.range_label.doc"
+            }
+            Self::ComponentDatePickerPropCountLabelDoc => {
+                "component.date-picker.prop.count_label.doc"
+            }
+            Self::ComponentDatePickerPropClearedLabelDoc => {
+                "component.date-picker.prop.cleared_label.doc"
+            }
+            Self::ComponentDatePickerPropBlockedLabelDoc => {
+                "component.date-picker.prop.blocked_label.doc"
+            }
+            Self::ComponentDatePickerPropTooShortLabelDoc => {
+                "component.date-picker.prop.too_short_label.doc"
+            }
+            Self::ComponentDatePickerPropTooLongLabelDoc => {
+                "component.date-picker.prop.too_long_label.doc"
+            }
+            Self::ComponentDatePickerPropClearLabelDoc => {
+                "component.date-picker.prop.clear_label.doc"
+            }
+            Self::ComponentDatePickerPropPreviousLabelDoc => {
+                "component.date-picker.prop.previous_label.doc"
+            }
+            Self::ComponentDatePickerPropNextLabelDoc => {
+                "component.date-picker.prop.next_label.doc"
+            }
+            Self::ComponentDatePickerPropCloseLabelDoc => {
+                "component.date-picker.prop.close_label.doc"
+            }
+            Self::ComponentDatePickerPropChildrenDoc => "component.date-picker.prop.children.doc",
+            Self::ComponentDatePickerStateResolvedDoc => "component.date-picker.state.resolved.doc",
+            Self::ComponentDatePickerStateWeekStartDoc => {
+                "component.date-picker.state.week_start.doc"
+            }
+            Self::ComponentDatePickerStateOutsideDoc => "component.date-picker.state.outside.doc",
+            Self::ComponentDatePickerStatePhaseDoc => "component.date-picker.state.phase.doc",
+            Self::ComponentDatePickerStateInRangeDoc => "component.date-picker.state.in_range.doc",
+            Self::ComponentDatePickerStateCurrentDoc => "component.date-picker.state.current.doc",
+            Self::ComponentDatePickerStateExpandedDoc => "component.date-picker.state.expanded.doc",
+            Self::ComponentDatePickerKeyDigitsName => "component.date-picker.key.digits.name",
+            Self::ComponentDatePickerKeyDigitsAction => "component.date-picker.key.digits.action",
+            Self::ComponentDatePickerKeyAltWithDownArrowName => {
+                "component.date-picker.key.alt-with-down-arrow.name"
+            }
+            Self::ComponentDatePickerKeyAltWithDownArrowAction => {
+                "component.date-picker.key.alt-with-down-arrow.action"
+            }
+            Self::ComponentDatePickerKeyTabName => "component.date-picker.key.tab.name",
+            Self::ComponentDatePickerKeyTabAction => "component.date-picker.key.tab.action",
+            Self::ComponentDatePickerKeyLeftRightArrowName => {
+                "component.date-picker.key.left-right-arrow.name"
+            }
+            Self::ComponentDatePickerKeyLeftRightArrowAction => {
+                "component.date-picker.key.left-right-arrow.action"
+            }
+            Self::ComponentDatePickerKeyUpDownArrowName => {
+                "component.date-picker.key.up-down-arrow.name"
+            }
+            Self::ComponentDatePickerKeyUpDownArrowAction => {
+                "component.date-picker.key.up-down-arrow.action"
+            }
+            Self::ComponentDatePickerKeyHomeEndName => "component.date-picker.key.home-end.name",
+            Self::ComponentDatePickerKeyHomeEndAction => {
+                "component.date-picker.key.home-end.action"
+            }
+            Self::ComponentDatePickerKeyPageUpPageDownName => {
+                "component.date-picker.key.page-up-page-down.name"
+            }
+            Self::ComponentDatePickerKeyPageUpPageDownAction => {
+                "component.date-picker.key.page-up-page-down.action"
+            }
+            Self::ComponentDatePickerKeyEnterOrSpaceName => {
+                "component.date-picker.key.enter-or-space.name"
+            }
+            Self::ComponentDatePickerKeyEnterOrSpaceAction => {
+                "component.date-picker.key.enter-or-space.action"
+            }
+            Self::ComponentDatePickerKeyShiftWithAnArrowName => {
+                "component.date-picker.key.shift-with-an-arrow.name"
+            }
+            Self::ComponentDatePickerKeyShiftWithAnArrowAction => {
+                "component.date-picker.key.shift-with-an-arrow.action"
+            }
+            Self::ComponentDatePickerKeyEscapeName => "component.date-picker.key.escape.name",
+            Self::ComponentDatePickerKeyEscapeAction => "component.date-picker.key.escape.action",
+            Self::ComponentDatePickerKeyArrowsWithNoScriptName => {
+                "component.date-picker.key.arrows-with-no-script.name"
+            }
+            Self::ComponentDatePickerKeyArrowsWithNoScriptAction => {
+                "component.date-picker.key.arrows-with-no-script.action"
+            }
+            Self::ComponentDatePickerDayGuidance => "component.date-picker-day.guidance",
+            Self::ComponentDatePickerDayA11yNotes => "component.date-picker-day.a11y-notes",
+            Self::ComponentDatePickerDayPropDatetimeDoc => {
+                "component.date-picker-day.prop.datetime.doc"
+            }
+            Self::ComponentDatePickerDayPropKindDoc => "component.date-picker-day.prop.kind.doc",
+            Self::ComponentDatePickerDayPropChildrenDoc => {
+                "component.date-picker-day.prop.children.doc"
+            }
             Self::ComponentDelA11yNotes => "component.del.a11y-notes",
             Self::ComponentDelPropCiteDoc => "component.del.prop.cite.doc",
             Self::ComponentDelPropDatetimeDoc => "component.del.prop.datetime.doc",
@@ -11847,6 +12635,12 @@ impl Locale {
                 Key::PageSegmentedBody => {
                     "The group and one of the values it chooses between. It is a radio group with a name and a value, so it posts like any other form control. The rendered tab stop is on the group, never on the chosen item."
                 }
+                Key::PageDatePickerSummary => {
+                    "Choose a day out of the month around it, one date or a range of two."
+                }
+                Key::PageDatePickerBody => {
+                    "The month and the days a caller names. Every day is a real radio or checkbox, so a choice submits with no script. `dist/date-picker.js` adds the grid, the arrow walk, the months turning and the band a range paints between its ends."
+                }
                 Key::PageSelectSummary => {
                     "Let users choose a value out of more than a list can show, grouped and searchable."
                 }
@@ -12280,6 +13074,12 @@ impl Locale {
                 Key::ComponentDateInputSummary => {
                     "Ask for one date as three numbers, in the order the reader's language writes them."
                 }
+                Key::ComponentDatePickerSummary => {
+                    "Choose one date, or a range of two, by pressing days in a month a reader can see."
+                }
+                Key::ComponentDatePickerDaySummary => {
+                    "Name one day inside a date picker, as a quick pick, a refusal or a mark."
+                }
                 Key::ComponentTruncateSummary => {
                     "Clip text to a fixed number of lines and keep the full value available."
                 }
@@ -12350,6 +13150,114 @@ impl Locale {
                 Key::ExampleDateInputClosedLegend => "Not open yet",
                 Key::ExampleDateInputFormsNote => {
                     "An `error` passed by the caller marks the group, and the script never clears it."
+                }
+                Key::ExampleDatePickerLegend => "When would you like to visit?",
+                Key::ExampleDatePickerStayLegend => "When is your stay?",
+                Key::ExampleDatePickerLooseLegend => "Which days can you come?",
+                Key::ExampleDatePickerBoundsLegend => "Pick a delivery day",
+                Key::ExampleDatePickerNamedLegend => "When shall we deliver?",
+                Key::ExampleDatePickerFormsLegend => "Choose a day",
+                Key::ExampleDatePickerFieldLegend => "When do you arrive?",
+                Key::ExampleDatePickerTripLegend => "When is your trip?",
+                Key::ExampleDatePickerFlightLegend => "When do you fly?",
+                Key::ExampleDatePickerNightsLegend => "When do you check in and out?",
+                Key::ExampleDatePickerRentalLegend => "When is the rental?",
+                Key::ExampleDatePickerPickUp => "Pick up",
+                Key::ExampleDatePickerDropOff => "Drop off",
+                Key::ExampleDatePickerInsideNote => {
+                    "The labels ride inside the boxes, so the two still meet and the pair stays one control with two ends."
+                }
+                Key::ExampleDatePickerDeparting => "Departing",
+                Key::ExampleDatePickerReturning => "Returning",
+                Key::ExampleDatePickerCheckIn => "Check in",
+                Key::ExampleDatePickerCheckOut => "Check out",
+                Key::ExampleDatePickerAttachedNote => {
+                    "Two boxes sharing one outline, which is what says they are one answer with two ends rather than two questions."
+                }
+                Key::ExampleDatePickerStackedNote => {
+                    "One outline down a column, with the labels left to a screen reader so the two boxes meet."
+                }
+                Key::ExampleDatePickerStart => "Start date",
+                Key::ExampleDatePickerEnd => "End date",
+                Key::ExampleDatePickerOpen => "Open the calendar",
+                Key::ExampleDatePickerInvalid => "{value} is not a date",
+                Key::ExampleDatePickerFormatDmy => "DD/MM/YYYY",
+                Key::ExampleDatePickerFormatMdy => "MM/DD/YYYY",
+                Key::ExampleDatePickerFormatYmd => "YYYY-MM-DD",
+                Key::ExampleDatePickerFieldNote => {
+                    "Type it or press it. The order follows the reader's own conventions, and the platform's default is day first."
+                }
+                Key::ExampleDatePickerTripNote => {
+                    "Two boxes and one month. Pressing a start sends the reader to the second box, which is the one they were about to fill."
+                }
+                Key::ExampleDatePickerSmallLegend => "Arrival day",
+                Key::ExampleDatePickerLargeLegend => "Departure day",
+                Key::ExampleDatePickerClosedLegend => "Not open yet",
+                Key::ExampleDatePickerInvalidLegend => "Collection day",
+                Key::ExampleDatePickerNestedLegend => "Suggested day",
+                Key::ExampleDatePickerAugust => "August 2026",
+                Key::ExampleDatePickerSeptember => "September 2026",
+                Key::ExampleDatePickerOctober => "October 2026",
+                Key::ExampleDatePickerMonday => "Mo",
+                Key::ExampleDatePickerTuesday => "Tu",
+                Key::ExampleDatePickerWednesday => "We",
+                Key::ExampleDatePickerThursday => "Th",
+                Key::ExampleDatePickerFriday => "Fr",
+                Key::ExampleDatePickerSaturday => "Sa",
+                Key::ExampleDatePickerSunday => "Su",
+                Key::ExampleDatePickerWeek => "Week",
+                Key::ExampleDatePickerPrevious => "Previous month",
+                Key::ExampleDatePickerNext => "Next month",
+                Key::ExampleDatePickerClear => "Clear the dates",
+                Key::ExampleDatePickerClose => "Close the calendar",
+                Key::ExampleDatePickerTrigger => "Choose a date",
+                Key::ExampleDatePickerChosen => "Arriving {date}",
+                Key::ExampleDatePickerRange => "{start} to {end}, {count} days",
+                Key::ExampleDatePickerCount => "one:{count} day chosen|other:{count} days chosen",
+                Key::ExampleDatePickerCleared => "No dates chosen",
+                Key::ExampleDatePickerBlocked => "{date} is taken, so a stay cannot cover it",
+                Key::ExampleDatePickerTooShort => "A stay is at least {count} days",
+                Key::ExampleDatePickerTooLong => "A stay is at most {count} days",
+                Key::ExampleDatePickerHint => "We deliver Monday to Friday.",
+                Key::ExampleDatePickerError => "Choose a day before the end of the month.",
+                Key::ExampleDatePickerErrorWord => "Error:",
+                Key::ExampleDatePickerHoliday => "Public holiday",
+                Key::ExampleDatePickerClosed => "We are closed",
+                Key::ExampleDatePickerMarket => "Market day",
+                Key::ExampleDatePickerThisWeek => "This week",
+                Key::ExampleDatePickerNextWeek => "Next week",
+                Key::ExampleDatePickerOneNote => {
+                    "Every day is a real radio, so this month works and submits with no script running."
+                }
+                Key::ExampleDatePickerRangeNote => {
+                    "Press two days. The band between them is painted, and a third press starts over."
+                }
+                Key::ExampleDatePickerBoundsNote => {
+                    "A day a bound puts out of reach carries the platform's own `disabled`, so the browser skips it."
+                }
+                Key::ExampleDatePickerTriggerNote => {
+                    "The trigger folds the same grid into a panel, and says what has been chosen."
+                }
+                Key::ExampleDatePickerWideNote => {
+                    "Three months, week numbers, and a week starting on Sunday because the caller asked."
+                }
+                Key::ExampleDatePickerNamedNote => {
+                    "A named day is a quick pick, a refusal with a reason, or a mark. The picker draws it."
+                }
+                Key::ExampleDatePickerFormsNote => {
+                    "The states, at real sizes. `posts: false` is what a picker inside another field uses."
+                }
+                Key::ExampleDatePickerDayPresetNote => {
+                    "A quick pick. Pressing it chooses the span it names."
+                }
+                Key::ExampleDatePickerDayRefusedNote => {
+                    "A refused day, with the reason a reader hears on reaching it."
+                }
+                Key::ExampleDatePickerDayMarkedNote => {
+                    "A marked day stays choosable and says why it is worth seeing."
+                }
+                Key::ExampleDatePickerDaySpanNote => {
+                    "A span with no `kind` is marked, which is the quiet answer."
                 }
                 Key::ExampleDateInputErrorMessage => {
                     "The visit has to be booked for this year or the next."
@@ -13880,6 +14788,7 @@ impl Locale {
                 Key::ExampleOverviewButtonGroupSchedule => "Schedule for later",
                 Key::ExampleOverviewButtonGroupDraft => "Save as a draft",
                 Key::ExampleOverviewDateInputLegend => "When does your passport expire?",
+                Key::ExampleOverviewDatePickerLegend => "When would you like to stay?",
                 Key::ExampleOverviewDateInputHint => "For example, 14 8 2031",
                 Key::ExampleOverviewDateInputRequired => "Enter the date your passport expires",
                 Key::ExampleOverviewLinkLead => "Every colour on this page comes from",
@@ -14991,7 +15900,10 @@ impl Locale {
                     "A typing aid, off by default: a two-digit year becomes four when the box is left. The century is the one that lands inside `min` and `max` when exactly one does. Otherwise a year up to ten ahead takes this century and any other takes the last."
                 }
                 Key::ComponentDateInputPropCalendarDoc => {
-                    "Adds a month grid to the suggestions panel, built by the script from the locale's own formatter: month names, weekday initials, the week's first day. Needs `suggest_label`, which names the control that opens it."
+                    "Adds a month grid to the suggestions panel, as a real `DatePicker` that posts nothing and writes into the three boxes. Needs `suggest_label`, which names the control that opens it, and `today`."
+                }
+                Key::ComponentDateInputPropTodayDoc => {
+                    "Which day is today, in the same wire format as `value`. It is the server's own date, and it decides the month the calendar opens on when no date has been given yet."
                 }
                 Key::ComponentDateInputPropSuggestLabelDoc => {
                     "The name of the suggestions control and its panel. The script builds the button only when this is set, together with quick picks in the children or `calendar` set."
@@ -15077,6 +15989,248 @@ impl Locale {
                 Key::ComponentDateInputKeyPasteName => "Paste",
                 Key::ComponentDateInputKeyPasteAction => {
                     "Splits a pasted date across all three boxes, by the order in force. A four-digit first number is always the year."
+                }
+                Key::ComponentDatePickerGuidance => {
+                    "Use a date picker where a reader chooses a day by seeing the month around it. For a date they already know, such as a birth date, use `DateInput`. `selection` takes one day, a range of two, or several loose ones."
+                }
+                Key::ComponentDatePickerA11yNotes => {
+                    "Every day is a real radio or checkbox in a fieldset, so a choice submits and is announced with no script running. The grid is a plain table until the script upgrades it, and `role=\"grid\"` arrives together with the arrows that answer it."
+                }
+                Key::ComponentDatePickerPropNameDoc => {
+                    "What a chosen day is called when the form posts, and the root of every id here. Required, because an id derived from an optional name repeats on every picker on the page."
+                }
+                Key::ComponentDatePickerPropLegendDoc => {
+                    "The question, in the reader's language. Required, because a fieldset with no legend gives a screen reader a group and nothing saying what the group is for."
+                }
+                Key::ComponentDatePickerPropMonthDoc => {
+                    "Which month the grid draws, as a year and a month in the wire format such as `2026-08`. Required, because a grid has to draw a month and there is no month a caller could mean by leaving it out."
+                }
+                Key::ComponentDatePickerPropMonthLabelDoc => {
+                    "The month on show, written for a reader, such as `August 2026`. Required, because the markup carries one month and nothing else names it. The script rewrites it from the locale's own formatter after a turn."
+                }
+                Key::ComponentDatePickerPropSecondMonthLabelDoc => {
+                    "The same, for the month after it. Wanted when `months` is `two` or `three`. Only the words are asked for, because which month it is comes out of the arithmetic."
+                }
+                Key::ComponentDatePickerPropThirdMonthLabelDoc => {
+                    "The same again, for the third month. Wanted only when `months` is `three`."
+                }
+                Key::ComponentDatePickerPropMondayLabelDoc => {
+                    "The Monday column's heading, in the reader's language, usually one letter. Required, because a column heading is what names the numerals under it for a screen reader."
+                }
+                Key::ComponentDatePickerPropTuesdayLabelDoc => "The Tuesday column's own heading.",
+                Key::ComponentDatePickerPropWednesdayLabelDoc => {
+                    "The Wednesday column's own heading."
+                }
+                Key::ComponentDatePickerPropThursdayLabelDoc => {
+                    "The Thursday column's own heading."
+                }
+                Key::ComponentDatePickerPropFridayLabelDoc => "The Friday column's own heading.",
+                Key::ComponentDatePickerPropSaturdayLabelDoc => {
+                    "The Saturday column's own heading."
+                }
+                Key::ComponentDatePickerPropSundayLabelDoc => "The Sunday column's own heading.",
+                Key::ComponentDatePickerPropValueDoc => {
+                    "The days already chosen, in the wire format. One day under `single`, two with a slash between them under `range`, and a list separated by spaces under `multiple`."
+                }
+                Key::ComponentDatePickerPropMinDoc => {
+                    "The earliest day accepted, in the wire format. Earlier days carry the platform's own `disabled`, so the browser refuses them with no script running and posts nothing for them."
+                }
+                Key::ComponentDatePickerPropMaxDoc => {
+                    "The latest day accepted, in the same wire format, refused the same way."
+                }
+                Key::ComponentDatePickerPropTodayDoc => {
+                    "Which day is marked as today, in the wire format. It is the server's own date at render, and the script stamps it again from the reader's clock."
+                }
+                Key::ComponentDatePickerPropSelectionDoc => {
+                    "How many days may be chosen. `single` draws radios, so the browser holds one answer on its own. `range` and `multiple` draw checkboxes, and the script holds a range to its two ends."
+                }
+                Key::ComponentDatePickerPropMonthsDoc => {
+                    "How many months are drawn side by side, each with its own heading and its own seven columns. A range across a month boundary is then one glance rather than two turns."
+                }
+                Key::ComponentDatePickerPropFirstDayDoc => {
+                    "Which weekday a row starts on. `auto` is served as Monday and laid out again by the script for the reader's own conventions. A named day is served as written and left alone."
+                }
+                Key::ComponentDatePickerPropWeekNumbersDoc => {
+                    "Adds a leading column of week numbers, counted the way the reader's own conventions count them. Needs `week_label`, which names the column."
+                }
+                Key::ComponentDatePickerPropWeekLabelDoc => {
+                    "The week-number column's heading, in the reader's language. Wanted whenever `week_numbers` is on, because an unnamed column heading is a hole a screen reader falls into."
+                }
+                Key::ComponentDatePickerPropPostsDoc => {
+                    "Whether the days carry a name and so reach the server. Off inside another field, where the days fill a control that already posts. Off is the only shape that avoids two carriers for one date."
+                }
+                Key::ComponentDatePickerPropMinLengthDoc => {
+                    "The fewest days a range may cover, counting both ends. While a start is set, days too near it are disabled. A range that is too short cannot be made rather than refused after the fact."
+                }
+                Key::ComponentDatePickerPropMaxLengthDoc => {
+                    "The most days a range may cover, counting both ends, enforced the same way. Under `multiple` it caps how many days may be ticked."
+                }
+                Key::ComponentDatePickerPropSizeDoc => {
+                    "How large a day is. The steps match `Select`, so a picker and a select on one row sit level. Every step clears the target size an audit asks of a control."
+                }
+                Key::ComponentDatePickerPropRequiredDoc => {
+                    "The real `required` attribute, written on the days only under `single`. A required checkbox is one the browser demands on its own, which is not what a range or a loose set means."
+                }
+                Key::ComponentDatePickerPropDisabledDoc => {
+                    "Disables the whole picker at once. A disabled fieldset is the browser's own cascade, so nothing here walks the days. The trigger and the month controls stop with it."
+                }
+                Key::ComponentDatePickerPropHintDoc => {
+                    "What a reader needs to know before choosing. It rides the fieldset's `aria-describedby`, so it is read out with the question."
+                }
+                Key::ComponentDatePickerPropErrorDoc => {
+                    "What is wrong with the choice, in the caller's own words. Its presence marks the picker invalid, so the red edge and the message always appear together."
+                }
+                Key::ComponentDatePickerPropErrorLabelDoc => {
+                    "The word read out before the message, such as `Error:`. It is visually hidden, because the message is already marked as an error on the screen."
+                }
+                Key::ComponentDatePickerPropFormDoc => {
+                    "Whether the month is on the page or behind a box. `inline` draws it where it stands. `field` draws a box a reader types a date into, and opens the month from the control beside it. A box asks for one date, or two under `range`."
+                }
+                Key::ComponentDatePickerPropOrderDoc => {
+                    "Which number the box asks for first. `auto` is served day first and read again by the script for the reader's own conventions. A named order is served as written and left alone."
+                }
+                Key::ComponentDatePickerPropFormatDmyDoc => {
+                    "What an empty box shows when the day comes first, such as `DD/MM/AAAA`. It is one whole string per order rather than three letters joined, because where the separators fall is the reader's convention."
+                }
+                Key::ComponentDatePickerPropFormatMdyDoc => {
+                    "The same for the order that puts the month first, such as `MM/DD/AAAA`. It is what a reader in the United States is shown."
+                }
+                Key::ComponentDatePickerPropFormatYmdDoc => {
+                    "The same for the order that puts the year first, such as `AAAA-MM-DD`."
+                }
+                Key::ComponentDatePickerPropPairDoc => {
+                    "How the two boxes of a range sit. `apart` gives each its own space. `attached` and `stacked` share one outline between them, side by side and down a column."
+                }
+                Key::ComponentDatePickerPropLabelsDoc => {
+                    "Where each box's own label is drawn. `above` puts it over the box, `inside` puts it in the box before the typing, and `hidden` leaves it to a screen reader alone."
+                }
+                Key::ComponentDatePickerPropStartLabelDoc => {
+                    "The first box's own visible label, such as `Data de ida`. Wanted under `range`, because two boxes with one label between them leave a reader guessing which is which."
+                }
+                Key::ComponentDatePickerPropEndLabelDoc => {
+                    "The second box's own visible label, such as `Data de volta`. Wanted under `range` for the same reason."
+                }
+                Key::ComponentDatePickerPropOpenLabelDoc => {
+                    "The name of the control that opens the month. It is icon-only and so has no words of its own. The control ships hidden, and the script reveals it."
+                }
+                Key::ComponentDatePickerPropInvalidLabelDoc => {
+                    "The sentence for something typed that is not a date, with a `{value}` hole for what was typed. Examples are the 31st of April and a month numbered past twelve."
+                }
+                Key::ComponentDatePickerPropChosenLabelDoc => {
+                    "The sentence announced once a day is chosen, with a `{date}` hole the script fills from the locale's own formatter."
+                }
+                Key::ComponentDatePickerPropRangeLabelDoc => {
+                    "The same for a range, with `{start}` and `{end}` holes. Wanted under `range`, because the browser announces the second box rather than the span of days it completes."
+                }
+                Key::ComponentDatePickerPropCountLabelDoc => {
+                    "The same for a loose set, with a `{count}` hole. It may carry one form per plural category, and the script picks between them through the reader's own language."
+                }
+                Key::ComponentDatePickerPropClearedLabelDoc => {
+                    "The sentence announced when the answer is emptied, such as `No date chosen`. Emptying moves nothing on the screen for a reader who cannot see the days lose their fill."
+                }
+                Key::ComponentDatePickerPropBlockedLabelDoc => {
+                    "The sentence for a range that would cover a day the caller refused, with a `{date}` hole for the first day in the way. The range is refused rather than quietly shortened."
+                }
+                Key::ComponentDatePickerPropTooShortLabelDoc => {
+                    "The sentence for a range shorter than `min_length`, with a `{count}` hole. It is announced when a reader reaches a day the bound has disabled."
+                }
+                Key::ComponentDatePickerPropTooLongLabelDoc => {
+                    "The sentence for a range longer than `max_length`, with a `{count}` hole, announced the same way."
+                }
+                Key::ComponentDatePickerPropClearLabelDoc => {
+                    "The name of the control that empties the answer. The control ships hidden and the script reveals it, so a page with no script carries no control that clears nothing."
+                }
+                Key::ComponentDatePickerPropPreviousLabelDoc => {
+                    "The name of the control that turns back a month, revealed the same way. Icon-only controls still need a name."
+                }
+                Key::ComponentDatePickerPropNextLabelDoc => {
+                    "The name of the control that turns forward a month, revealed the same way."
+                }
+                Key::ComponentDatePickerPropCloseLabelDoc => {
+                    "The name of the control that closes the panel. Wanted under a trigger, because Escape and a press outside also close it and neither is discoverable on a touch screen."
+                }
+                Key::ComponentDatePickerPropChildrenDoc => {
+                    "The days a caller names, as `DatePickerDay` elements: a quick pick, a day refused for a reason, or a day marked as worth seeing. They are served inert and hidden, and the script reads them."
+                }
+                Key::ComponentDatePickerStateResolvedDoc => {
+                    "The order actually in force, which is what the box asks for first: `dmy`, `mdy` or `ymd`. It is served from `order` and stamped again by the script for the reader."
+                }
+                Key::ComponentDatePickerStateWeekStartDoc => {
+                    "The weekday a row starts on, as its number from 1 for Monday to 7 for Sunday. It is served from `first_day` and stamped again by the script for the reader's own conventions."
+                }
+                Key::ComponentDatePickerStateOutsideDoc => {
+                    "Whether a day belongs to the month before or after the one on show. Six rows always hold forty-two days, and the spill is real days a reader may still choose."
+                }
+                Key::ComponentDatePickerStatePhaseDoc => {
+                    "How much of a range is made: `empty`, `anchored` once a start is set, or `complete`. Only a script writes it, because only a script can hold a half-made answer."
+                }
+                Key::ComponentDatePickerStateInRangeDoc => {
+                    "Whether a day lies between the two ends of a range. It is derived from the days actually ticked wherever they change, so a band and its ends cannot come apart."
+                }
+                Key::ComponentDatePickerStateCurrentDoc => {
+                    "Which day is today, carrying the value `date`. It is served from `today` and stamped again by the script from the reader's own clock."
+                }
+                Key::ComponentDatePickerStateExpandedDoc => {
+                    "Whether the panel is open. It is written on the script-built trigger only, so a page with no script never claims a surface it cannot open."
+                }
+                Key::ComponentDatePickerKeyDigitsName => "Digits",
+                Key::ComponentDatePickerKeyDigitsAction => {
+                    "Fill the box, in the order it asks for. Nothing advances on its own, so a number already typed can still be corrected."
+                }
+                Key::ComponentDatePickerKeyAltWithDownArrowName => "Alt with Down arrow",
+                Key::ComponentDatePickerKeyAltWithDownArrowAction => {
+                    "Opens the month from the box, when there is one. Plain Down is the grid's own."
+                }
+                Key::ComponentDatePickerKeyTabName => "Tab",
+                Key::ComponentDatePickerKeyTabAction => {
+                    "Moves into the month and out of it. The whole grid is one stop, held by a roving `tabindex`."
+                }
+                Key::ComponentDatePickerKeyLeftRightArrowName => "Left / Right arrow",
+                Key::ComponentDatePickerKeyLeftRightArrowAction => {
+                    "Moves a day back or forward, across the edge of the month when the day is at one."
+                }
+                Key::ComponentDatePickerKeyUpDownArrowName => "Up / Down arrow",
+                Key::ComponentDatePickerKeyUpDownArrowAction => {
+                    "Moves a week back or forward, by date arithmetic rather than by counting cells."
+                }
+                Key::ComponentDatePickerKeyHomeEndName => "Home / End",
+                Key::ComponentDatePickerKeyHomeEndAction => {
+                    "Moves to the first or last day of the week the focused day is in."
+                }
+                Key::ComponentDatePickerKeyPageUpPageDownName => "Page Up / Page Down",
+                Key::ComponentDatePickerKeyPageUpPageDownAction => {
+                    "Turns the month back or forward. With Shift, the year."
+                }
+                Key::ComponentDatePickerKeyEnterOrSpaceName => "Enter or Space",
+                Key::ComponentDatePickerKeyEnterOrSpaceAction => {
+                    "Chooses the focused day. Under `range` the first press sets the start and the second sets the end."
+                }
+                Key::ComponentDatePickerKeyShiftWithAnArrowName => "Shift with an arrow",
+                Key::ComponentDatePickerKeyShiftWithAnArrowAction => {
+                    "Extends a finished range from the end that has focus. Under `multiple` it adds every day walked over."
+                }
+                Key::ComponentDatePickerKeyEscapeName => "Escape",
+                Key::ComponentDatePickerKeyEscapeAction => {
+                    "Closes the panel, when there is one, and changes nothing already chosen."
+                }
+                Key::ComponentDatePickerKeyArrowsWithNoScriptName => "Arrows, with no script",
+                Key::ComponentDatePickerKeyArrowsWithNoScriptAction => {
+                    "The radio group's own: a day back or forward in reading order, and the day moved to is the day chosen."
+                }
+                Key::ComponentDatePickerDayGuidance => {
+                    "Use a date picker day to name one day, or one span of days, inside a `DatePicker`. It is a quick pick a reader presses, a day the caller refuses, or a day worth pointing out. The picker draws it. This element never draws itself."
+                }
+                Key::ComponentDatePickerDayA11yNotes => {
+                    "The element is served hidden, so it claims nothing on a page with no script. The picker puts its words where they belong: on a control, on a day's description, or beside a mark."
+                }
+                Key::ComponentDatePickerDayPropDatetimeDoc => {
+                    "The machine-readable day, in the wire format such as `2026-12-25`, or a span with a slash between two of them. Required, because a named day with no date names nothing."
+                }
+                Key::ComponentDatePickerDayPropKindDoc => {
+                    "What the day is. A `preset` is a control that chooses it. A `refused` day is out of reach and says why. A `marked` day stays choosable and is pointed out."
+                }
+                Key::ComponentDatePickerDayPropChildrenDoc => {
+                    "The words a reader sees, in their own language. They are the quick pick's name, the reason a day is refused, or the note on a marked one. The picker reads them and never renders this element."
                 }
                 Key::ComponentDelA11yNotes => {
                     "Most screen readers do not report a strikethrough, so deleted text sounds the same as current text. `label` is the word that says it was removed, and it is needed when the deletion carries meaning."
@@ -18162,6 +19316,12 @@ impl Locale {
                 Key::PageSegmentedBody => {
                     "O grupo e um dos valores entre os quais ele escolhe. É um grupo de rádio com nome e valor, então envia como qualquer outro controle de formulário. A parada de tabulação renderizada fica no grupo, nunca no item escolhido."
                 }
+                Key::PageDatePickerSummary => {
+                    "Escolha um dia a partir do mês ao redor dele, uma data ou um intervalo de duas."
+                }
+                Key::PageDatePickerBody => {
+                    "O mês e os dias que quem chama nomeia. Cada dia é um rádio ou caixa de verdade, então a escolha é enviada sem script. `dist/date-picker.js` acrescenta a grade, o passeio das setas, os meses virando e a faixa que um intervalo pinta entre as pontas."
+                }
                 Key::PageSelectSummary => {
                     "Deixe a pessoa escolher um valor entre mais opções do que uma lista mostra."
                 }
@@ -18605,6 +19765,12 @@ impl Locale {
                 Key::ComponentDateInputSummary => {
                     "Peça uma data como três números, na ordem em que a língua da pessoa os escreve."
                 }
+                Key::ComponentDatePickerSummary => {
+                    "Escolha uma data, ou um intervalo de duas, pressionando dias num mês que a pessoa vê."
+                }
+                Key::ComponentDatePickerDaySummary => {
+                    "Nomeie um dia dentro de um seletor de data, como atalho, recusa ou marca."
+                }
                 Key::ComponentTruncateSummary => {
                     "Corte o texto num número fixo de linhas e mantenha o valor inteiro disponível."
                 }
@@ -18679,6 +19845,118 @@ impl Locale {
                 Key::ExampleDateInputClosedLegend => "Ainda não aberto",
                 Key::ExampleDateInputFormsNote => {
                     "Um `error` passado por quem chama marca o grupo, e o script nunca o apaga."
+                }
+                Key::ExampleDatePickerLegend => "Quando você gostaria de visitar?",
+                Key::ExampleDatePickerStayLegend => "Quando é a sua estadia?",
+                Key::ExampleDatePickerLooseLegend => "Em quais dias você pode vir?",
+                Key::ExampleDatePickerBoundsLegend => "Escolha um dia de entrega",
+                Key::ExampleDatePickerNamedLegend => "Quando devemos entregar?",
+                Key::ExampleDatePickerFormsLegend => "Escolha um dia",
+                Key::ExampleDatePickerFieldLegend => "Quando você chega?",
+                Key::ExampleDatePickerTripLegend => "Quando é a sua viagem?",
+                Key::ExampleDatePickerFlightLegend => "Quando você voa?",
+                Key::ExampleDatePickerNightsLegend => "Quando você entra e sai?",
+                Key::ExampleDatePickerRentalLegend => "Quando é a locação?",
+                Key::ExampleDatePickerPickUp => "Retirada",
+                Key::ExampleDatePickerDropOff => "Devolução",
+                Key::ExampleDatePickerInsideNote => {
+                    "Os rótulos vão dentro das caixas, então as duas continuam se encontrando e o par se lê como um controle com duas pontas."
+                }
+                Key::ExampleDatePickerDeparting => "Data de ida",
+                Key::ExampleDatePickerReturning => "Data de volta",
+                Key::ExampleDatePickerCheckIn => "Entrada",
+                Key::ExampleDatePickerCheckOut => "Saída",
+                Key::ExampleDatePickerAttachedNote => {
+                    "Duas caixas dividindo um contorno só, que é o que diz que são uma resposta com duas pontas, e não duas perguntas."
+                }
+                Key::ExampleDatePickerStackedNote => {
+                    "Um contorno só numa coluna, com os rótulos deixados ao leitor de tela para que as duas caixas se encontrem."
+                }
+                Key::ExampleDatePickerStart => "Data de ida",
+                Key::ExampleDatePickerEnd => "Data de volta",
+                Key::ExampleDatePickerOpen => "Abrir o calendário",
+                Key::ExampleDatePickerInvalid => "{value} não é uma data",
+                Key::ExampleDatePickerFormatDmy => "DD/MM/AAAA",
+                Key::ExampleDatePickerFormatMdy => "MM/DD/AAAA",
+                Key::ExampleDatePickerFormatYmd => "AAAA-MM-DD",
+                Key::ExampleDatePickerFieldNote => {
+                    "Digite ou pressione. A ordem segue as convenções de quem lê, e o padrão da plataforma é o dia na frente."
+                }
+                Key::ExampleDatePickerTripNote => {
+                    "Duas caixas e um mês só. Pressionar um início leva quem lê para a segunda caixa, que é a que ela ia preencher."
+                }
+                Key::ExampleDatePickerSmallLegend => "Dia de chegada",
+                Key::ExampleDatePickerLargeLegend => "Dia de partida",
+                Key::ExampleDatePickerClosedLegend => "Ainda não aberto",
+                Key::ExampleDatePickerInvalidLegend => "Dia de coleta",
+                Key::ExampleDatePickerNestedLegend => "Dia sugerido",
+                Key::ExampleDatePickerAugust => "Agosto de 2026",
+                Key::ExampleDatePickerSeptember => "Setembro de 2026",
+                Key::ExampleDatePickerOctober => "Outubro de 2026",
+                Key::ExampleDatePickerMonday => "Seg",
+                Key::ExampleDatePickerTuesday => "Ter",
+                Key::ExampleDatePickerWednesday => "Qua",
+                Key::ExampleDatePickerThursday => "Qui",
+                Key::ExampleDatePickerFriday => "Sex",
+                Key::ExampleDatePickerSaturday => "Sáb",
+                Key::ExampleDatePickerSunday => "Dom",
+                Key::ExampleDatePickerWeek => "Semana",
+                Key::ExampleDatePickerPrevious => "Mês anterior",
+                Key::ExampleDatePickerNext => "Próximo mês",
+                Key::ExampleDatePickerClear => "Limpar as datas",
+                Key::ExampleDatePickerClose => "Fechar o calendário",
+                Key::ExampleDatePickerTrigger => "Escolha uma data",
+                Key::ExampleDatePickerChosen => "Chegada em {date}",
+                Key::ExampleDatePickerRange => "De {start} a {end}, {count} dias",
+                Key::ExampleDatePickerCount => {
+                    "one:{count} dia escolhido|other:{count} dias escolhidos"
+                }
+                Key::ExampleDatePickerCleared => "Nenhuma data escolhida",
+                Key::ExampleDatePickerBlocked => {
+                    "{date} está ocupado, então a estadia não pode cobri-lo"
+                }
+                Key::ExampleDatePickerTooShort => "A estadia tem no mínimo {count} dias",
+                Key::ExampleDatePickerTooLong => "A estadia tem no máximo {count} dias",
+                Key::ExampleDatePickerHint => "Entregamos de segunda a sexta.",
+                Key::ExampleDatePickerError => "Escolha um dia antes do fim do mês.",
+                Key::ExampleDatePickerErrorWord => "Erro:",
+                Key::ExampleDatePickerHoliday => "Feriado",
+                Key::ExampleDatePickerClosed => "Estamos fechados",
+                Key::ExampleDatePickerMarket => "Dia de feira",
+                Key::ExampleDatePickerThisWeek => "Esta semana",
+                Key::ExampleDatePickerNextWeek => "Próxima semana",
+                Key::ExampleDatePickerOneNote => {
+                    "Cada dia é um rádio de verdade, então este mês funciona e é enviado sem script."
+                }
+                Key::ExampleDatePickerRangeNote => {
+                    "Pressione dois dias. A faixa entre eles é pintada, e um terceiro toque recomeça."
+                }
+                Key::ExampleDatePickerBoundsNote => {
+                    "Um dia fora de alcance leva o `disabled` da própria plataforma, então o navegador o pula."
+                }
+                Key::ExampleDatePickerTriggerNote => {
+                    "O gatilho dobra a mesma grade num painel, e diz o que foi escolhido."
+                }
+                Key::ExampleDatePickerWideNote => {
+                    "Três meses, números de semana, e a semana começando no domingo porque quem chama pediu."
+                }
+                Key::ExampleDatePickerNamedNote => {
+                    "Um dia nomeado é um atalho, uma recusa com motivo, ou uma marca. O seletor o desenha."
+                }
+                Key::ExampleDatePickerFormsNote => {
+                    "Os estados, em tamanhos reais. `posts: false` é o que um seletor dentro de outro campo usa."
+                }
+                Key::ExampleDatePickerDayPresetNote => {
+                    "Um atalho. Pressioná-lo escolhe o trecho que ele nomeia."
+                }
+                Key::ExampleDatePickerDayRefusedNote => {
+                    "Um dia recusado, com o motivo que a pessoa ouve ao alcançá-lo."
+                }
+                Key::ExampleDatePickerDayMarkedNote => {
+                    "Um dia marcado continua escolhível e diz por que vale ser visto."
+                }
+                Key::ExampleDatePickerDaySpanNote => {
+                    "Um trecho sem `kind` é marcado, que é a resposta silenciosa."
                 }
                 Key::ExampleDateInputErrorMessage => {
                     "A visita precisa ser marcada para este ano ou o próximo."
@@ -20223,6 +21501,7 @@ impl Locale {
                 Key::ExampleOverviewButtonGroupSchedule => "Agendar para depois",
                 Key::ExampleOverviewButtonGroupDraft => "Salvar como rascunho",
                 Key::ExampleOverviewDateInputLegend => "Quando seu passaporte vence?",
+                Key::ExampleOverviewDatePickerLegend => "Quando você gostaria de ficar?",
                 Key::ExampleOverviewDateInputHint => "Por exemplo, 14 8 2031",
                 Key::ExampleOverviewDateInputRequired => {
                     "Informe a data de vencimento do passaporte"
@@ -21336,7 +22615,10 @@ impl Locale {
                     "Um auxílio de digitação, desligado por padrão: um ano de dois dígitos vira quatro ao sair da caixa. O século é o que cai dentro de `min` e `max` quando exatamente um cai. Fora isso, um ano até dez à frente fica neste século e os outros no anterior."
                 }
                 Key::ComponentDateInputPropCalendarDoc => {
-                    "Adiciona uma grade de mês ao painel de sugestões, construída pelo script com o formatador do próprio locale. Traz nomes de mês, iniciais dos dias e o primeiro dia da semana. Precisa de `suggest_label`, que nomeia o controle que a abre."
+                    "Acrescenta uma grade de mês ao painel de sugestões, como um `DatePicker` de verdade que não envia nada e escreve nas três caixas. Precisa de `suggest_label`, que nomeia o controle que o abre, e de `today`."
+                }
+                Key::ComponentDateInputPropTodayDoc => {
+                    "Qual dia é hoje, no mesmo formato de máquina de `value`. É a data do próprio servidor, e decide em que mês o calendário abre quando nenhuma data foi dada ainda."
                 }
                 Key::ComponentDateInputPropSuggestLabelDoc => {
                     "O nome do controle de sugestões e do painel dele. O script só constrói o botão quando isto está definido, junto com escolhas rápidas nos filhos ou `calendar` ligado."
@@ -21422,6 +22704,256 @@ impl Locale {
                 Key::ComponentDateInputKeyPasteName => "Colar",
                 Key::ComponentDateInputKeyPasteAction => {
                     "Divide uma data colada pelas três caixas, na ordem em vigor. Um primeiro número de quatro dígitos é sempre o ano."
+                }
+                Key::ComponentDatePickerGuidance => {
+                    "Use um seletor de data quando a pessoa escolhe um dia vendo o mês ao redor dele. Para uma data que ela já sabe, como a de nascimento, use `DateInput`. `selection` aceita um dia, um intervalo de dois ou vários soltos."
+                }
+                Key::ComponentDatePickerA11yNotes => {
+                    "Cada dia é um rádio ou caixa de marcação de verdade num fieldset, então a escolha é enviada e anunciada sem script. A grade é uma tabela comum até o script promovê-la, e `role=\"grid\"` chega junto das setas que respondem por ele."
+                }
+                Key::ComponentDatePickerPropNameDoc => {
+                    "Como um dia escolhido se chama quando o formulário é enviado, e a raiz de todo id daqui. Obrigatório, porque um id derivado de um nome opcional se repete em cada seletor da página."
+                }
+                Key::ComponentDatePickerPropLegendDoc => {
+                    "A pergunta, na língua de quem lê. Obrigatória, porque um fieldset sem legenda dá ao leitor de tela um grupo e nada que diga para que o grupo serve."
+                }
+                Key::ComponentDatePickerPropMonthDoc => {
+                    "Qual mês a grade desenha, como ano e mês no formato de máquina, por exemplo `2026-08`. Obrigatório, porque a grade precisa desenhar um mês e não há mês que quem chama queira por omissão."
+                }
+                Key::ComponentDatePickerPropMonthLabelDoc => {
+                    "O mês em exibição, escrito para quem lê, como `Agosto de 2026`. Obrigatório, porque a marcação carrega um mês e nada mais o nomeia. O script o reescreve pelo formatador do locale depois de virar a página."
+                }
+                Key::ComponentDatePickerPropSecondMonthLabelDoc => {
+                    "O mesmo, para o mês seguinte. Desejado quando `months` é `two` ou `three`. Só as palavras são pedidas, porque qual mês é vem da aritmética."
+                }
+                Key::ComponentDatePickerPropThirdMonthLabelDoc => {
+                    "O mesmo de novo, para o terceiro mês. Desejado apenas quando `months` é `three`."
+                }
+                Key::ComponentDatePickerPropMondayLabelDoc => {
+                    "O título da coluna de segunda-feira, na língua de quem lê, em geral uma letra. Obrigatório, porque o título da coluna é o que nomeia os numerais abaixo dele para um leitor de tela."
+                }
+                Key::ComponentDatePickerPropTuesdayLabelDoc => {
+                    "O título da própria coluna de terça-feira."
+                }
+                Key::ComponentDatePickerPropWednesdayLabelDoc => {
+                    "O título da própria coluna de quarta-feira."
+                }
+                Key::ComponentDatePickerPropThursdayLabelDoc => {
+                    "O título da própria coluna de quinta-feira."
+                }
+                Key::ComponentDatePickerPropFridayLabelDoc => {
+                    "O título da própria coluna de sexta-feira."
+                }
+                Key::ComponentDatePickerPropSaturdayLabelDoc => {
+                    "O título da própria coluna de sábado."
+                }
+                Key::ComponentDatePickerPropSundayLabelDoc => {
+                    "O título da própria coluna de domingo."
+                }
+                Key::ComponentDatePickerPropValueDoc => {
+                    "Os dias já escolhidos, no formato de máquina. Um dia com `single`, dois com uma barra entre eles com `range`, e uma lista separada por espaços com `multiple`."
+                }
+                Key::ComponentDatePickerPropMinDoc => {
+                    "O dia mais cedo aceito, no formato de máquina. Dias anteriores levam o `disabled` da própria plataforma, então o navegador os recusa sem script e não envia nada por eles."
+                }
+                Key::ComponentDatePickerPropMaxDoc => {
+                    "O dia mais tarde aceito, no mesmo formato de máquina, recusado do mesmo jeito."
+                }
+                Key::ComponentDatePickerPropTodayDoc => {
+                    "Qual dia está marcado como hoje, no formato de máquina. É a data do próprio servidor na renderização, e o script a carimba de novo pelo relógio de quem lê."
+                }
+                Key::ComponentDatePickerPropSelectionDoc => {
+                    "Quantos dias podem ser escolhidos. `single` desenha rádios, então o navegador guarda uma resposta sozinho. `range` e `multiple` desenham caixas, e o script prende um intervalo às duas pontas."
+                }
+                Key::ComponentDatePickerPropMonthsDoc => {
+                    "Quantos meses são desenhados lado a lado, cada um com título próprio e sete colunas próprias. Um intervalo que cruza a virada do mês vira uma olhada só."
+                }
+                Key::ComponentDatePickerPropFirstDayDoc => {
+                    "Em que dia da semana a linha começa. `auto` é servido como segunda-feira e reorganizado pelo script pelas convenções de quem lê. Um dia nomeado é servido como escrito e deixado em paz."
+                }
+                Key::ComponentDatePickerPropWeekNumbersDoc => {
+                    "Acrescenta uma coluna inicial com o número da semana, contada como as convenções de quem lê a contam. Precisa de `week_label`, que nomeia a coluna."
+                }
+                Key::ComponentDatePickerPropWeekLabelDoc => {
+                    "O título da coluna de número da semana, na língua de quem lê. Desejado sempre que `week_numbers` está ligado, porque um título de coluna sem nome é um buraco onde o leitor de tela cai."
+                }
+                Key::ComponentDatePickerPropPostsDoc => {
+                    "Se os dias levam um nome e assim chegam ao servidor. Desligado dentro de outro campo, onde os dias preenchem um controle que já envia. Desligado é a única forma que evita dois portadores para uma data."
+                }
+                Key::ComponentDatePickerPropMinLengthDoc => {
+                    "Quantos dias no mínimo um intervalo cobre, contando as duas pontas. Com um início definido, dias perto demais ficam desabilitados. Um intervalo curto demais nem chega a ser feito."
+                }
+                Key::ComponentDatePickerPropMaxLengthDoc => {
+                    "Quantos dias no máximo um intervalo cobre, contando as duas pontas, garantido do mesmo jeito. Com `multiple`, limita quantos dias podem ser marcados."
+                }
+                Key::ComponentDatePickerPropSizeDoc => {
+                    "O tamanho de um dia. Os degraus acompanham `Select`, para que um seletor de data e um select na mesma fileira fiquem nivelados. Cada degrau passa do alvo que uma auditoria pede."
+                }
+                Key::ComponentDatePickerPropRequiredDoc => {
+                    "O atributo `required` de verdade, escrito nos dias apenas com `single`. Uma caixa obrigatória é uma que o navegador exige sozinho, e não é o que um intervalo ou um conjunto solto significa."
+                }
+                Key::ComponentDatePickerPropDisabledDoc => {
+                    "Desabilita o seletor inteiro de uma vez. Um fieldset desabilitado é a cascata do próprio navegador, então nada aqui percorre os dias. O gatilho e os controles de mês param junto."
+                }
+                Key::ComponentDatePickerPropHintDoc => {
+                    "O que a pessoa precisa saber antes de escolher. Anda no `aria-describedby` do fieldset, então é lido junto com a pergunta."
+                }
+                Key::ComponentDatePickerPropErrorDoc => {
+                    "O que está errado na escolha, nas palavras de quem chama. A presença dela marca o seletor como inválido, então a borda vermelha e a mensagem sempre aparecem juntas."
+                }
+                Key::ComponentDatePickerPropErrorLabelDoc => {
+                    "A palavra lida antes da mensagem, como `Erro:`. Fica escondida visualmente, porque a mensagem já está marcada como erro na tela."
+                }
+                Key::ComponentDatePickerPropFormDoc => {
+                    "Se o mês fica na página ou atrás de uma caixa. `inline` o desenha onde está. `field` desenha uma caixa em que a pessoa digita uma data, e abre o mês pelo controle ao lado. Uma caixa pede uma data, ou duas com `range`."
+                }
+                Key::ComponentDatePickerPropOrderDoc => {
+                    "Qual número a caixa pede primeiro. `auto` é servido com o dia na frente e lido de novo pelo script pelas convenções de quem lê. Uma ordem nomeada é servida como escrita e deixada em paz."
+                }
+                Key::ComponentDatePickerPropFormatDmyDoc => {
+                    "O que uma caixa vazia mostra quando o dia vem primeiro, por exemplo `DD/MM/AAAA`. É uma frase inteira por ordem, e não três letras emendadas, porque onde caem os separadores é convenção de quem lê."
+                }
+                Key::ComponentDatePickerPropFormatMdyDoc => {
+                    "O mesmo para a ordem que põe o mês na frente, por exemplo `MM/DD/AAAA`. É o que uma pessoa nos Estados Unidos vê."
+                }
+                Key::ComponentDatePickerPropFormatYmdDoc => {
+                    "O mesmo para a ordem que põe o ano na frente, por exemplo `AAAA-MM-DD`."
+                }
+                Key::ComponentDatePickerPropPairDoc => {
+                    "Como as duas caixas de um intervalo ficam. `apart` dá espaço próprio a cada uma. `attached` e `stacked` dividem um contorno só entre elas, lado a lado e numa coluna."
+                }
+                Key::ComponentDatePickerPropLabelsDoc => {
+                    "Onde o rótulo de cada caixa é desenhado. `above` o põe acima da caixa e `inside` o põe dentro dela, antes do que se digita. `hidden` o deixa só para o leitor de tela."
+                }
+                Key::ComponentDatePickerPropStartLabelDoc => {
+                    "O rótulo visível da primeira caixa, como `Data de ida`. Desejado com `range`, porque duas caixas com um rótulo só entre elas deixam quem lê adivinhando qual é qual."
+                }
+                Key::ComponentDatePickerPropEndLabelDoc => {
+                    "O rótulo visível da segunda caixa, como `Data de volta`. Desejado com `range` pelo mesmo motivo."
+                }
+                Key::ComponentDatePickerPropOpenLabelDoc => {
+                    "O nome do controle que abre o mês. Ele é feito só de ícone e por isso não tem palavras próprias. O controle chega escondido, e o script o revela."
+                }
+                Key::ComponentDatePickerPropInvalidLabelDoc => {
+                    "A frase para algo digitado que não é uma data, com um buraco `{value}` para o que foi digitado. Exemplos são 31 de abril e um mês numerado acima de doze."
+                }
+                Key::ComponentDatePickerPropChosenLabelDoc => {
+                    "A frase anunciada quando um dia é escolhido, com um buraco `{date}` que o script preenche pelo formatador do locale."
+                }
+                Key::ComponentDatePickerPropRangeLabelDoc => {
+                    "O mesmo para um intervalo, com buracos `{start}` e `{end}`. Desejado com `range`, porque o navegador anuncia a segunda caixa e não o intervalo de dias que ela completa."
+                }
+                Key::ComponentDatePickerPropCountLabelDoc => {
+                    "O mesmo para um conjunto solto, com um buraco `{count}`. Pode carregar uma forma por categoria de plural, e o script escolhe entre elas pela língua de quem lê."
+                }
+                Key::ComponentDatePickerPropClearedLabelDoc => {
+                    "A frase anunciada quando a resposta é esvaziada, como `Nenhuma data escolhida`. Esvaziar não move nada na tela para quem não vê os dias perderem o preenchimento."
+                }
+                Key::ComponentDatePickerPropBlockedLabelDoc => {
+                    "A frase para um intervalo que cobriria um dia recusado por quem chama, com um buraco `{date}` para o primeiro dia no caminho. O intervalo é recusado e não encurtado em silêncio."
+                }
+                Key::ComponentDatePickerPropTooShortLabelDoc => {
+                    "A frase para um intervalo menor que `min_length`, com um buraco `{count}`. É anunciada quando a pessoa chega a um dia que o limite desabilitou."
+                }
+                Key::ComponentDatePickerPropTooLongLabelDoc => {
+                    "A frase para um intervalo maior que `max_length`, com um buraco `{count}`, anunciada do mesmo jeito."
+                }
+                Key::ComponentDatePickerPropClearLabelDoc => {
+                    "O nome do controle que esvazia a resposta. O controle chega escondido e o script o revela, então uma página sem script não carrega um controle que não esvazia nada."
+                }
+                Key::ComponentDatePickerPropPreviousLabelDoc => {
+                    "O nome do controle que volta um mês, revelado do mesmo jeito. Controles feitos só de ícone ainda precisam de nome."
+                }
+                Key::ComponentDatePickerPropNextLabelDoc => {
+                    "O nome do controle que avança um mês, revelado do mesmo jeito."
+                }
+                Key::ComponentDatePickerPropCloseLabelDoc => {
+                    "O nome do controle que fecha o painel. Desejado com um gatilho, porque Escape e um toque fora também fecham, e nenhum dos dois se descobre numa tela sensível ao toque."
+                }
+                Key::ComponentDatePickerPropChildrenDoc => {
+                    "Os dias que quem chama nomeia, como elementos `DatePickerDay`: um atalho, um dia recusado por um motivo, ou um dia que vale apontar. Chegam inertes e escondidos, e o script os lê."
+                }
+                Key::ComponentDatePickerStateResolvedDoc => {
+                    "A ordem em vigor de verdade, que é o que a caixa pede primeiro: `dmy`, `mdy` ou `ymd`. É servida de `order` e carimbada de novo pelo script para quem lê."
+                }
+                Key::ComponentDatePickerStateWeekStartDoc => {
+                    "O dia da semana em que a fileira começa, como número de 1 para segunda-feira a 7 para domingo. É servido de `first_day` e carimbado de novo pelo script pelas convenções de quem lê."
+                }
+                Key::ComponentDatePickerStateOutsideDoc => {
+                    "Se um dia pertence ao mês anterior ou ao seguinte, e não ao que está em exibição. Seis fileiras sempre guardam quarenta e dois dias, e a sobra são dias reais que a pessoa ainda pode escolher."
+                }
+                Key::ComponentDatePickerStatePhaseDoc => {
+                    "Quanto de um intervalo está feito: `empty`, `anchored` quando há um início, ou `complete`. Só um script escreve, porque só um script segura uma resposta pela metade."
+                }
+                Key::ComponentDatePickerStateInRangeDoc => {
+                    "Se um dia fica entre as duas pontas de um intervalo. É derivado dos dias realmente marcados onde quer que mudem, então a faixa e suas pontas não se separam."
+                }
+                Key::ComponentDatePickerStateCurrentDoc => {
+                    "Qual dia é hoje, carregando o valor `date`. É servido de `today` e carimbado de novo pelo script pelo relógio de quem lê."
+                }
+                Key::ComponentDatePickerStateExpandedDoc => {
+                    "Se o painel está aberto. É escrito apenas no gatilho construído pelo script, então uma página sem script nunca reivindica uma superfície que não consegue abrir."
+                }
+                Key::ComponentDatePickerKeyDigitsName => "Dígitos",
+                Key::ComponentDatePickerKeyDigitsAction => {
+                    "Preenchem a caixa, na ordem que ela pede. Nada avança sozinho, então um número já digitado ainda pode ser corrigido."
+                }
+                Key::ComponentDatePickerKeyAltWithDownArrowName => "Alt com seta para baixo",
+                Key::ComponentDatePickerKeyAltWithDownArrowAction => {
+                    "Abre o mês a partir da caixa, quando existe uma. A seta para baixo sozinha é da grade."
+                }
+                Key::ComponentDatePickerKeyTabName => "Tab",
+                Key::ComponentDatePickerKeyTabAction => {
+                    "Entra no mês e sai dele. A grade inteira é uma parada de tabulação, mantida por um `tabindex` móvel."
+                }
+                Key::ComponentDatePickerKeyLeftRightArrowName => {
+                    "Seta para a esquerda / para a direita"
+                }
+                Key::ComponentDatePickerKeyLeftRightArrowAction => {
+                    "Move um dia para trás ou para a frente, cruzando a virada do mês quando o dia está numa delas."
+                }
+                Key::ComponentDatePickerKeyUpDownArrowName => "Seta para cima / para baixo",
+                Key::ComponentDatePickerKeyUpDownArrowAction => {
+                    "Move uma semana para trás ou para a frente, por aritmética de datas e não por contagem de células."
+                }
+                Key::ComponentDatePickerKeyHomeEndName => "Home / End",
+                Key::ComponentDatePickerKeyHomeEndAction => {
+                    "Vai para o primeiro ou o último dia da semana em que o dia focado está."
+                }
+                Key::ComponentDatePickerKeyPageUpPageDownName => "Page Up / Page Down",
+                Key::ComponentDatePickerKeyPageUpPageDownAction => {
+                    "Vira o mês para trás ou para a frente. Com Shift, o ano."
+                }
+                Key::ComponentDatePickerKeyEnterOrSpaceName => "Enter ou Espaço",
+                Key::ComponentDatePickerKeyEnterOrSpaceAction => {
+                    "Escolhe o dia focado. Com `range`, o primeiro toque marca o início e o segundo marca o fim."
+                }
+                Key::ComponentDatePickerKeyShiftWithAnArrowName => "Shift com uma seta",
+                Key::ComponentDatePickerKeyShiftWithAnArrowAction => {
+                    "Estende um intervalo pronto pela ponta que está focada. Com `multiple`, acrescenta cada dia percorrido."
+                }
+                Key::ComponentDatePickerKeyEscapeName => "Escape",
+                Key::ComponentDatePickerKeyEscapeAction => {
+                    "Fecha o painel, quando existe um, e não muda nada do que já foi escolhido."
+                }
+                Key::ComponentDatePickerKeyArrowsWithNoScriptName => "Setas, sem script",
+                Key::ComponentDatePickerKeyArrowsWithNoScriptAction => {
+                    "As do próprio grupo de rádios: um dia para trás ou à frente na ordem de leitura, e o dia alcançado é o escolhido."
+                }
+                Key::ComponentDatePickerDayGuidance => {
+                    "Use um dia de seletor de data para nomear um dia, ou um trecho de dias, dentro de um `DatePicker`. Ele é um atalho que a pessoa pressiona, um dia que quem chama recusa, ou um dia que vale apontar. O seletor o desenha, e ele nunca se desenha."
+                }
+                Key::ComponentDatePickerDayA11yNotes => {
+                    "O elemento chega escondido, então não reivindica nada numa página sem script. O seletor põe as palavras onde elas pertencem: num controle, na descrição de um dia, ou ao lado de uma marca."
+                }
+                Key::ComponentDatePickerDayPropDatetimeDoc => {
+                    "O dia legível por máquina, no formato de máquina como `2026-12-25`, ou um trecho com uma barra entre dois deles. Obrigatório, porque um dia nomeado sem data não nomeia nada."
+                }
+                Key::ComponentDatePickerDayPropKindDoc => {
+                    "O que o dia é. Um `preset` é um controle que o escolhe. Um dia `refused` fica fora de alcance e diz por quê. Um dia `marked` continua escolhível e é apontado."
+                }
+                Key::ComponentDatePickerDayPropChildrenDoc => {
+                    "As palavras que a pessoa vê, na língua dela. São o nome do atalho, o motivo de um dia ser recusado, ou a nota num dia marcado. O seletor as lê e nunca renderiza este elemento."
                 }
                 Key::ComponentDelA11yNotes => {
                     "A maioria dos leitores de tela não anuncia o tachado, então o texto removido soa igual ao texto atual. `label` é a palavra que diz que ele foi removido, e é necessária quando a remoção carrega sentido."
@@ -24517,6 +26049,12 @@ impl Locale {
                 Key::PageSegmentedBody => {
                     "⟦Thee groouup aand oonee oof thee vaaluuees iit choooosees beetweeeen. IIt iis aa raadiioo groouup wiith aa naamee aand aa vaaluuee, soo iit poosts liikee aany ootheer foorm coontrool. Thee reendeereed taab stoop iis oon thee groouup, neeveer oon thee chooseen iiteem.⟧"
                 }
+                Key::PageDatePickerSummary => {
+                    "⟦Choooosee aa daay oouut oof thee moonth aaroouund iit, oonee daatee oor aa raangee oof twoo.⟧"
+                }
+                Key::PageDatePickerBody => {
+                    "⟦Thee moonth aand thee daays aa caalleer naamees. EEveery daay iis aa reeaal raadiioo oor cheeckboox, soo aa chooiicee suubmiits wiith noo scriipt. `diist/daatee-piickeer.js` aadds thee griid, thee aarroow waalk, thee moonths tuurniing aand thee baand aa raangee paaiints beetweeeen iits eends.⟧"
+                }
                 Key::PageSelectSummary => {
                     "⟦Leet uuseers choooosee aa vaaluuee oouut oof mooree thaan aa liist caan shoow, groouupeed aand seeaarchaablee.⟧"
                 }
@@ -24980,6 +26518,12 @@ impl Locale {
                 Key::ComponentDateInputSummary => {
                     "⟦AAsk foor oonee daatee aas threeee nuumbeers, iin thee oordeer thee reeaadeer's laanguuaagee wriitees theem.⟧"
                 }
+                Key::ComponentDatePickerSummary => {
+                    "⟦Choooosee oonee daatee, oor aa raangee oof twoo, by preessiing daays iin aa moonth aa reeaadeer caan seeee.⟧"
+                }
+                Key::ComponentDatePickerDaySummary => {
+                    "⟦Naamee oonee daay iinsiidee aa daatee piickeer, aas aa quuiick piick, aa reefuusaal oor aa maark.⟧"
+                }
                 Key::ComponentTruncateSummary => {
                     "⟦Cliip teext too aa fiixeed nuumbeer oof liinees aand keeeep thee fuull vaaluuee aavaaiilaablee.⟧"
                 }
@@ -25054,6 +26598,120 @@ impl Locale {
                 Key::ExampleDateInputClosedLegend => "⟦Noot oopeen yeet⟧",
                 Key::ExampleDateInputFormsNote => {
                     "⟦AAn `eerroor` paasseed by thee caalleer maarks thee groouup, aand thee scriipt neeveer cleeaars iit.⟧"
+                }
+                Key::ExampleDatePickerLegend => "⟦Wheen woouuld yoouu liikee too viisiit?⟧",
+                Key::ExampleDatePickerStayLegend => "⟦Wheen iis yoouur staay?⟧",
+                Key::ExampleDatePickerLooseLegend => "⟦Whiich daays caan yoouu coomee?⟧",
+                Key::ExampleDatePickerBoundsLegend => "⟦Piick aa deeliiveery daay⟧",
+                Key::ExampleDatePickerNamedLegend => "⟦Wheen shaall wee deeliiveer?⟧",
+                Key::ExampleDatePickerFormsLegend => "⟦Choooosee aa daay⟧",
+                Key::ExampleDatePickerFieldLegend => "⟦Wheen doo yoouu aarriivee?⟧",
+                Key::ExampleDatePickerTripLegend => "⟦Wheen iis yoouur triip?⟧",
+                Key::ExampleDatePickerFlightLegend => "⟦Wheen doo yoouu fly?⟧",
+                Key::ExampleDatePickerNightsLegend => "⟦Wheen doo yoouu cheeck iin aand oouut?⟧",
+                Key::ExampleDatePickerRentalLegend => "⟦Wheen iis thee reentaal?⟧",
+                Key::ExampleDatePickerPickUp => "⟦Piick uup⟧",
+                Key::ExampleDatePickerDropOff => "⟦Droop ooff⟧",
+                Key::ExampleDatePickerInsideNote => {
+                    "⟦Thee laabeels riidee iinsiidee thee booxees, soo thee twoo stiill meeeet aand thee paaiir staays oonee coontrool wiith twoo eends.⟧"
+                }
+                Key::ExampleDatePickerDeparting => "⟦Deepaartiing⟧",
+                Key::ExampleDatePickerReturning => "⟦Reetuurniing⟧",
+                Key::ExampleDatePickerCheckIn => "⟦Cheeck iin⟧",
+                Key::ExampleDatePickerCheckOut => "⟦Cheeck oouut⟧",
+                Key::ExampleDatePickerAttachedNote => {
+                    "⟦Twoo booxees shaariing oonee oouutliinee, whiich iis whaat saays theey aaree oonee aansweer wiith twoo eends raatheer thaan twoo quueestiioons.⟧"
+                }
+                Key::ExampleDatePickerStackedNote => {
+                    "⟦OOnee oouutliinee doown aa cooluumn, wiith thee laabeels leeft too aa screeeen reeaadeer soo thee twoo booxees meeeet.⟧"
+                }
+                Key::ExampleDatePickerStart => "⟦Staart daatee⟧",
+                Key::ExampleDatePickerEnd => "⟦EEnd daatee⟧",
+                Key::ExampleDatePickerOpen => "⟦OOpeen thee caaleendaar⟧",
+                Key::ExampleDatePickerInvalid => "⟦{value} iis noot aa daatee⟧",
+                Key::ExampleDatePickerFormatDmy => "⟦DD/MM/YYYY⟧",
+                Key::ExampleDatePickerFormatMdy => "⟦MM/DD/YYYY⟧",
+                Key::ExampleDatePickerFormatYmd => "⟦YYYY-MM-DD⟧",
+                Key::ExampleDatePickerFieldNote => {
+                    "⟦Typee iit oor preess iit. Thee oordeer foolloows thee reeaadeer's oown coonveentiioons, aand thee plaatfoorm's deefaauult iis daay fiirst.⟧"
+                }
+                Key::ExampleDatePickerTripNote => {
+                    "⟦Twoo booxees aand oonee moonth. Preessiing aa staart seends thee reeaadeer too thee seecoond boox, whiich iis thee oonee theey weeree aaboouut too fiill.⟧"
+                }
+                Key::ExampleDatePickerSmallLegend => "⟦AArriivaal daay⟧",
+                Key::ExampleDatePickerLargeLegend => "⟦Deepaartuuree daay⟧",
+                Key::ExampleDatePickerClosedLegend => "⟦Noot oopeen yeet⟧",
+                Key::ExampleDatePickerInvalidLegend => "⟦Coolleectiioon daay⟧",
+                Key::ExampleDatePickerNestedLegend => "⟦Suuggeesteed daay⟧",
+                Key::ExampleDatePickerAugust => "⟦AAuuguust 2026⟧",
+                Key::ExampleDatePickerSeptember => "⟦Seepteembeer 2026⟧",
+                Key::ExampleDatePickerOctober => "⟦OOctoobeer 2026⟧",
+                Key::ExampleDatePickerMonday => "⟦Moo⟧",
+                Key::ExampleDatePickerTuesday => "⟦Tuu⟧",
+                Key::ExampleDatePickerWednesday => "⟦Wee⟧",
+                Key::ExampleDatePickerThursday => "⟦Th⟧",
+                Key::ExampleDatePickerFriday => "⟦Fr⟧",
+                Key::ExampleDatePickerSaturday => "⟦Saa⟧",
+                Key::ExampleDatePickerSunday => "⟦Suu⟧",
+                Key::ExampleDatePickerWeek => "⟦Weeeek⟧",
+                Key::ExampleDatePickerPrevious => "⟦Preeviioouus moonth⟧",
+                Key::ExampleDatePickerNext => "⟦Neext moonth⟧",
+                Key::ExampleDatePickerClear => "⟦Cleeaar thee daatees⟧",
+                Key::ExampleDatePickerClose => "⟦Cloosee thee caaleendaar⟧",
+                Key::ExampleDatePickerTrigger => "⟦Choooosee aa daatee⟧",
+                Key::ExampleDatePickerChosen => "⟦AArriiviing {date}⟧",
+                Key::ExampleDatePickerRange => "⟦{start} too {end}, {count} daays⟧",
+                Key::ExampleDatePickerCount => {
+                    "⟦oonee:{count} daay chooseen|ootheer:{count} daays chooseen⟧"
+                }
+                Key::ExampleDatePickerCleared => "⟦Noo daatees chooseen⟧",
+                Key::ExampleDatePickerBlocked => {
+                    "⟦{date} iis taakeen, soo aa staay caannoot cooveer iit⟧"
+                }
+                Key::ExampleDatePickerTooShort => "⟦AA staay iis aat leeaast {count} daays⟧",
+                Key::ExampleDatePickerTooLong => "⟦AA staay iis aat moost {count} daays⟧",
+                Key::ExampleDatePickerHint => "⟦Wee deeliiveer Moondaay too Friidaay.⟧",
+                Key::ExampleDatePickerError => {
+                    "⟦Choooosee aa daay beefooree thee eend oof thee moonth.⟧"
+                }
+                Key::ExampleDatePickerErrorWord => "⟦EErroor:⟧",
+                Key::ExampleDatePickerHoliday => "⟦Puubliic hooliidaay⟧",
+                Key::ExampleDatePickerClosed => "⟦Wee aaree clooseed⟧",
+                Key::ExampleDatePickerMarket => "⟦Maarkeet daay⟧",
+                Key::ExampleDatePickerThisWeek => "⟦Thiis weeeek⟧",
+                Key::ExampleDatePickerNextWeek => "⟦Neext weeeek⟧",
+                Key::ExampleDatePickerOneNote => {
+                    "⟦EEveery daay iis aa reeaal raadiioo, soo thiis moonth woorks aand suubmiits wiith noo scriipt ruunniing.⟧"
+                }
+                Key::ExampleDatePickerRangeNote => {
+                    "⟦Preess twoo daays. Thee baand beetweeeen theem iis paaiinteed, aand aa thiird preess staarts ooveer.⟧"
+                }
+                Key::ExampleDatePickerBoundsNote => {
+                    "⟦AA daay aa boouund puuts oouut oof reeaach caarriiees thee plaatfoorm's oown `diisaableed`, soo thee broowseer skiips iit.⟧"
+                }
+                Key::ExampleDatePickerTriggerNote => {
+                    "⟦Thee triiggeer foolds thee saamee griid iintoo aa paaneel, aand saays whaat haas beeeen chooseen.⟧"
+                }
+                Key::ExampleDatePickerWideNote => {
+                    "⟦Threeee moonths, weeeek nuumbeers, aand aa weeeek staartiing oon Suundaay beecaauusee thee caalleer aaskeed.⟧"
+                }
+                Key::ExampleDatePickerNamedNote => {
+                    "⟦AA naameed daay iis aa quuiick piick, aa reefuusaal wiith aa reeaasoon, oor aa maark. Thee piickeer draaws iit.⟧"
+                }
+                Key::ExampleDatePickerFormsNote => {
+                    "⟦Thee staatees, aat reeaal siizees. `poosts: faalsee` iis whaat aa piickeer iinsiidee aanootheer fiieeld uusees.⟧"
+                }
+                Key::ExampleDatePickerDayPresetNote => {
+                    "⟦AA quuiick piick. Preessiing iit choooosees thee spaan iit naamees.⟧"
+                }
+                Key::ExampleDatePickerDayRefusedNote => {
+                    "⟦AA reefuuseed daay, wiith thee reeaasoon aa reeaadeer heeaars oon reeaachiing iit.⟧"
+                }
+                Key::ExampleDatePickerDayMarkedNote => {
+                    "⟦AA maarkeed daay staays choooosaablee aand saays why iit iis woorth seeeeiing.⟧"
+                }
+                Key::ExampleDatePickerDaySpanNote => {
+                    "⟦AA spaan wiith noo `kiind` iis maarkeed, whiich iis thee quuiieet aansweer.⟧"
                 }
                 Key::ExampleDateInputErrorMessage => {
                     "⟦Thee viisiit haas too bee booookeed foor thiis yeeaar oor thee neext.⟧"
@@ -26658,6 +28316,7 @@ impl Locale {
                 Key::ExampleOverviewDateInputLegend => {
                     "⟦Wheen dooees yoouur paasspoort eexpiiree?⟧"
                 }
+                Key::ExampleOverviewDatePickerLegend => "⟦Wheen woouuld yoouu liikee too staay?⟧",
                 Key::ExampleOverviewDateInputHint => "⟦Foor eexaamplee, 14 8 2031⟧",
                 Key::ExampleOverviewDateInputRequired => {
                     "⟦EEnteer thee daatee yoouur paasspoort eexpiirees⟧"
@@ -27809,7 +29468,10 @@ impl Locale {
                     "⟦AA typiing aaiid, ooff by deefaauult: aa twoo-diigiit yeeaar beecoomees foouur wheen thee boox iis leeft. Thee ceentuury iis thee oonee thaat laands iinsiidee `miin` aand `maax` wheen eexaactly oonee dooees. OOtheerwiisee aa yeeaar uup too teen aaheeaad taakees thiis ceentuury aand aany ootheer taakees thee laast.⟧"
                 }
                 Key::ComponentDateInputPropCalendarDoc => {
-                    "⟦AAdds aa moonth griid too thee suuggeestiioons paaneel, buuiilt by thee scriipt froom thee loocaalee's oown foormaatteer: moonth naamees, weeeekdaay iiniitiiaals, thee weeeek's fiirst daay. Neeeeds `suuggeest_laabeel`, whiich naamees thee coontrool thaat oopeens iit.⟧"
+                    "⟦AAdds aa moonth griid too thee suuggeestiioons paaneel, aas aa reeaal `DaateePiickeer` thaat poosts noothiing aand wriitees iintoo thee threeee booxees. Neeeeds `suuggeest_laabeel`, whiich naamees thee coontrool thaat oopeens iit, aand `toodaay`.⟧"
+                }
+                Key::ComponentDateInputPropTodayDoc => {
+                    "⟦Whiich daay iis toodaay, iin thee saamee wiiree foormaat aas `vaaluuee`. IIt iis thee seerveer's oown daatee, aand iit deeciidees thee moonth thee caaleendaar oopeens oon wheen noo daatee haas beeeen giiveen yeet.⟧"
                 }
                 Key::ComponentDateInputPropSuggestLabelDoc => {
                     "⟦Thee naamee oof thee suuggeestiioons coontrool aand iits paaneel. Thee scriipt buuiilds thee buuttoon oonly wheen thiis iis seet, toogeetheer wiith quuiick piicks iin thee chiildreen oor `caaleendaar` seet.⟧"
@@ -27899,6 +29561,256 @@ impl Locale {
                 Key::ComponentDateInputKeyPasteName => "⟦Paastee⟧",
                 Key::ComponentDateInputKeyPasteAction => {
                     "⟦Spliits aa paasteed daatee aacrooss aall threeee booxees, by thee oordeer iin foorcee. AA foouur-diigiit fiirst nuumbeer iis aalwaays thee yeeaar.⟧"
+                }
+                Key::ComponentDatePickerGuidance => {
+                    "⟦UUsee aa daatee piickeer wheeree aa reeaadeer choooosees aa daay by seeeeiing thee moonth aaroouund iit. Foor aa daatee theey aalreeaady knoow, suuch aas aa biirth daatee, uusee `DaateeIInpuut`. `seeleectiioon` taakees oonee daay, aa raangee oof twoo, oor seeveeraal loooosee oonees.⟧"
+                }
+                Key::ComponentDatePickerA11yNotes => {
+                    "⟦EEveery daay iis aa reeaal raadiioo oor cheeckboox iin aa fiieeldseet, soo aa chooiicee suubmiits aand iis aannoouunceed wiith noo scriipt ruunniing. Thee griid iis aa plaaiin taablee uuntiil thee scriipt uupgraadees iit, aand `roolee=\"griid\"` aarriivees toogeetheer wiith thee aarroows thaat aansweer iit.⟧"
+                }
+                Key::ComponentDatePickerPropNameDoc => {
+                    "⟦Whaat aa chooseen daay iis caalleed wheen thee foorm poosts, aand thee roooot oof eeveery iid heeree. Reequuiireed, beecaauusee aan iid deeriiveed froom aan ooptiioonaal naamee reepeeaats oon eeveery piickeer oon thee paagee.⟧"
+                }
+                Key::ComponentDatePickerPropLegendDoc => {
+                    "⟦Thee quueestiioon, iin thee reeaadeer's laanguuaagee. Reequuiireed, beecaauusee aa fiieeldseet wiith noo leegeend giivees aa screeeen reeaadeer aa groouup aand noothiing saayiing whaat thee groouup iis foor.⟧"
+                }
+                Key::ComponentDatePickerPropMonthDoc => {
+                    "⟦Whiich moonth thee griid draaws, aas aa yeeaar aand aa moonth iin thee wiiree foormaat suuch aas `2026-08`. Reequuiireed, beecaauusee aa griid haas too draaw aa moonth aand theeree iis noo moonth aa caalleer coouuld meeaan by leeaaviing iit oouut.⟧"
+                }
+                Key::ComponentDatePickerPropMonthLabelDoc => {
+                    "⟦Thee moonth oon shoow, wriitteen foor aa reeaadeer, suuch aas `AAuuguust 2026`. Reequuiireed, beecaauusee thee maarkuup caarriiees oonee moonth aand noothiing eelsee naamees iit. Thee scriipt reewriitees iit froom thee loocaalee's oown foormaatteer aafteer aa tuurn.⟧"
+                }
+                Key::ComponentDatePickerPropSecondMonthLabelDoc => {
+                    "⟦Thee saamee, foor thee moonth aafteer iit. Waanteed wheen `moonths` iis `twoo` oor `threeee`. OOnly thee woords aaree aaskeed foor, beecaauusee whiich moonth iit iis coomees oouut oof thee aariithmeetiic.⟧"
+                }
+                Key::ComponentDatePickerPropThirdMonthLabelDoc => {
+                    "⟦Thee saamee aagaaiin, foor thee thiird moonth. Waanteed oonly wheen `moonths` iis `threeee`.⟧"
+                }
+                Key::ComponentDatePickerPropMondayLabelDoc => {
+                    "⟦Thee Moondaay cooluumn's heeaadiing, iin thee reeaadeer's laanguuaagee, uusuuaally oonee leetteer. Reequuiireed, beecaauusee aa cooluumn heeaadiing iis whaat naamees thee nuumeeraals uundeer iit foor aa screeeen reeaadeer.⟧"
+                }
+                Key::ComponentDatePickerPropTuesdayLabelDoc => {
+                    "⟦Thee Tuueesdaay cooluumn's oown heeaadiing.⟧"
+                }
+                Key::ComponentDatePickerPropWednesdayLabelDoc => {
+                    "⟦Thee Weedneesdaay cooluumn's oown heeaadiing.⟧"
+                }
+                Key::ComponentDatePickerPropThursdayLabelDoc => {
+                    "⟦Thee Thuursdaay cooluumn's oown heeaadiing.⟧"
+                }
+                Key::ComponentDatePickerPropFridayLabelDoc => {
+                    "⟦Thee Friidaay cooluumn's oown heeaadiing.⟧"
+                }
+                Key::ComponentDatePickerPropSaturdayLabelDoc => {
+                    "⟦Thee Saatuurdaay cooluumn's oown heeaadiing.⟧"
+                }
+                Key::ComponentDatePickerPropSundayLabelDoc => {
+                    "⟦Thee Suundaay cooluumn's oown heeaadiing.⟧"
+                }
+                Key::ComponentDatePickerPropValueDoc => {
+                    "⟦Thee daays aalreeaady chooseen, iin thee wiiree foormaat. OOnee daay uundeer `siinglee`, twoo wiith aa slaash beetweeeen theem uundeer `raangee`, aand aa liist seepaaraateed by spaacees uundeer `muultiiplee`.⟧"
+                }
+                Key::ComponentDatePickerPropMinDoc => {
+                    "⟦Thee eeaarliieest daay aacceepteed, iin thee wiiree foormaat. EEaarliieer daays caarry thee plaatfoorm's oown `diisaableed`, soo thee broowseer reefuusees theem wiith noo scriipt ruunniing aand poosts noothiing foor theem.⟧"
+                }
+                Key::ComponentDatePickerPropMaxDoc => {
+                    "⟦Thee laateest daay aacceepteed, iin thee saamee wiiree foormaat, reefuuseed thee saamee waay.⟧"
+                }
+                Key::ComponentDatePickerPropTodayDoc => {
+                    "⟦Whiich daay iis maarkeed aas toodaay, iin thee wiiree foormaat. IIt iis thee seerveer's oown daatee aat reendeer, aand thee scriipt staamps iit aagaaiin froom thee reeaadeer's cloock.⟧"
+                }
+                Key::ComponentDatePickerPropSelectionDoc => {
+                    "⟦Hoow maany daays maay bee chooseen. `siinglee` draaws raadiioos, soo thee broowseer hoolds oonee aansweer oon iits oown. `raangee` aand `muultiiplee` draaw cheeckbooxees, aand thee scriipt hoolds aa raangee too iits twoo eends.⟧"
+                }
+                Key::ComponentDatePickerPropMonthsDoc => {
+                    "⟦Hoow maany moonths aaree draawn siidee by siidee, eeaach wiith iits oown heeaadiing aand iits oown seeveen cooluumns. AA raangee aacrooss aa moonth boouundaary iis theen oonee glaancee raatheer thaan twoo tuurns.⟧"
+                }
+                Key::ComponentDatePickerPropFirstDayDoc => {
+                    "⟦Whiich weeeekdaay aa roow staarts oon. `aauutoo` iis seerveed aas Moondaay aand laaiid oouut aagaaiin by thee scriipt foor thee reeaadeer's oown coonveentiioons. AA naameed daay iis seerveed aas wriitteen aand leeft aaloonee.⟧"
+                }
+                Key::ComponentDatePickerPropWeekNumbersDoc => {
+                    "⟦AAdds aa leeaadiing cooluumn oof weeeek nuumbeers, coouunteed thee waay thee reeaadeer's oown coonveentiioons coouunt theem. Neeeeds `weeeek_laabeel`, whiich naamees thee cooluumn.⟧"
+                }
+                Key::ComponentDatePickerPropWeekLabelDoc => {
+                    "⟦Thee weeeek-nuumbeer cooluumn's heeaadiing, iin thee reeaadeer's laanguuaagee. Waanteed wheeneeveer `weeeek_nuumbeers` iis oon, beecaauusee aan uunnaameed cooluumn heeaadiing iis aa hoolee aa screeeen reeaadeer faalls iintoo.⟧"
+                }
+                Key::ComponentDatePickerPropPostsDoc => {
+                    "⟦Wheetheer thee daays caarry aa naamee aand soo reeaach thee seerveer. OOff iinsiidee aanootheer fiieeld, wheeree thee daays fiill aa coontrool thaat aalreeaady poosts. OOff iis thee oonly shaapee thaat aavooiids twoo caarriieers foor oonee daatee.⟧"
+                }
+                Key::ComponentDatePickerPropMinLengthDoc => {
+                    "⟦Thee feeweest daays aa raangee maay cooveer, coouuntiing booth eends. Whiilee aa staart iis seet, daays toooo neeaar iit aaree diisaableed. AA raangee thaat iis toooo shoort caannoot bee maadee raatheer thaan reefuuseed aafteer thee faact.⟧"
+                }
+                Key::ComponentDatePickerPropMaxLengthDoc => {
+                    "⟦Thee moost daays aa raangee maay cooveer, coouuntiing booth eends, eenfoorceed thee saamee waay. UUndeer `muultiiplee` iit caaps hoow maany daays maay bee tiickeed.⟧"
+                }
+                Key::ComponentDatePickerPropSizeDoc => {
+                    "⟦Hoow laargee aa daay iis. Thee steeps maatch `Seeleect`, soo aa piickeer aand aa seeleect oon oonee roow siit leeveel. EEveery steep cleeaars thee taargeet siizee aan aauudiit aasks oof aa coontrool.⟧"
+                }
+                Key::ComponentDatePickerPropRequiredDoc => {
+                    "⟦Thee reeaal `reequuiireed` aattriibuutee, wriitteen oon thee daays oonly uundeer `siinglee`. AA reequuiireed cheeckboox iis oonee thee broowseer deemaands oon iits oown, whiich iis noot whaat aa raangee oor aa loooosee seet meeaans.⟧"
+                }
+                Key::ComponentDatePickerPropDisabledDoc => {
+                    "⟦Diisaablees thee whoolee piickeer aat ooncee. AA diisaableed fiieeldseet iis thee broowseer's oown caascaadee, soo noothiing heeree waalks thee daays. Thee triiggeer aand thee moonth coontrools stoop wiith iit.⟧"
+                }
+                Key::ComponentDatePickerPropHintDoc => {
+                    "⟦Whaat aa reeaadeer neeeeds too knoow beefooree choooosiing. IIt riidees thee fiieeldseet's `aariiaa-deescriibeedby`, soo iit iis reeaad oouut wiith thee quueestiioon.⟧"
+                }
+                Key::ComponentDatePickerPropErrorDoc => {
+                    "⟦Whaat iis wroong wiith thee chooiicee, iin thee caalleer's oown woords. IIts preeseencee maarks thee piickeer iinvaaliid, soo thee reed eedgee aand thee meessaagee aalwaays aappeeaar toogeetheer.⟧"
+                }
+                Key::ComponentDatePickerPropErrorLabelDoc => {
+                    "⟦Thee woord reeaad oouut beefooree thee meessaagee, suuch aas `EErroor:`. IIt iis viisuuaally hiiddeen, beecaauusee thee meessaagee iis aalreeaady maarkeed aas aan eerroor oon thee screeeen.⟧"
+                }
+                Key::ComponentDatePickerPropFormDoc => {
+                    "⟦Wheetheer thee moonth iis oon thee paagee oor beehiind aa boox. `iinliinee` draaws iit wheeree iit staands. `fiieeld` draaws aa boox aa reeaadeer typees aa daatee iintoo, aand oopeens thee moonth froom thee coontrool beesiidee iit. AA boox aasks foor oonee daatee, oor twoo uundeer `raangee`.⟧"
+                }
+                Key::ComponentDatePickerPropOrderDoc => {
+                    "⟦Whiich nuumbeer thee boox aasks foor fiirst. `aauutoo` iis seerveed daay fiirst aand reeaad aagaaiin by thee scriipt foor thee reeaadeer's oown coonveentiioons. AA naameed oordeer iis seerveed aas wriitteen aand leeft aaloonee.⟧"
+                }
+                Key::ComponentDatePickerPropFormatDmyDoc => {
+                    "⟦Whaat aan eempty boox shoows wheen thee daay coomees fiirst, suuch aas `DD/MM/AAAAAAAA`. IIt iis oonee whoolee striing peer oordeer raatheer thaan threeee leetteers jooiineed, beecaauusee wheeree thee seepaaraatoors faall iis thee reeaadeer's coonveentiioon.⟧"
+                }
+                Key::ComponentDatePickerPropFormatMdyDoc => {
+                    "⟦Thee saamee foor thee oordeer thaat puuts thee moonth fiirst, suuch aas `MM/DD/AAAAAAAA`. IIt iis whaat aa reeaadeer iin thee UUniiteed Staatees iis shoown.⟧"
+                }
+                Key::ComponentDatePickerPropFormatYmdDoc => {
+                    "⟦Thee saamee foor thee oordeer thaat puuts thee yeeaar fiirst, suuch aas `AAAAAAAA-MM-DD`.⟧"
+                }
+                Key::ComponentDatePickerPropPairDoc => {
+                    "⟦Hoow thee twoo booxees oof aa raangee siit. `aapaart` giivees eeaach iits oown spaacee. `aattaacheed` aand `staackeed` shaaree oonee oouutliinee beetweeeen theem, siidee by siidee aand doown aa cooluumn.⟧"
+                }
+                Key::ComponentDatePickerPropLabelsDoc => {
+                    "⟦Wheeree eeaach boox's oown laabeel iis draawn. `aaboovee` puuts iit ooveer thee boox, `iinsiidee` puuts iit iin thee boox beefooree thee typiing, aand `hiiddeen` leeaavees iit too aa screeeen reeaadeer aaloonee.⟧"
+                }
+                Key::ComponentDatePickerPropStartLabelDoc => {
+                    "⟦Thee fiirst boox's oown viisiiblee laabeel, suuch aas `Daataa dee iidaa`. Waanteed uundeer `raangee`, beecaauusee twoo booxees wiith oonee laabeel beetweeeen theem leeaavee aa reeaadeer guueessiing whiich iis whiich.⟧"
+                }
+                Key::ComponentDatePickerPropEndLabelDoc => {
+                    "⟦Thee seecoond boox's oown viisiiblee laabeel, suuch aas `Daataa dee vooltaa`. Waanteed uundeer `raangee` foor thee saamee reeaasoon.⟧"
+                }
+                Key::ComponentDatePickerPropOpenLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool thaat oopeens thee moonth. IIt iis iicoon-oonly aand soo haas noo woords oof iits oown. Thee coontrool shiips hiiddeen, aand thee scriipt reeveeaals iit.⟧"
+                }
+                Key::ComponentDatePickerPropInvalidLabelDoc => {
+                    "⟦Thee seenteencee foor soomeethiing typeed thaat iis noot aa daatee, wiith aa `{value}` hoolee foor whaat waas typeed. EExaamplees aaree thee 31st oof AApriil aand aa moonth nuumbeereed paast tweelvee.⟧"
+                }
+                Key::ComponentDatePickerPropChosenLabelDoc => {
+                    "⟦Thee seenteencee aannoouunceed ooncee aa daay iis chooseen, wiith aa `{date}` hoolee thee scriipt fiills froom thee loocaalee's oown foormaatteer.⟧"
+                }
+                Key::ComponentDatePickerPropRangeLabelDoc => {
+                    "⟦Thee saamee foor aa raangee, wiith `{start}` aand `{end}` hoolees. Waanteed uundeer `raangee`, beecaauusee thee broowseer aannoouuncees thee seecoond boox raatheer thaan thee spaan oof daays iit coompleetees.⟧"
+                }
+                Key::ComponentDatePickerPropCountLabelDoc => {
+                    "⟦Thee saamee foor aa loooosee seet, wiith aa `{count}` hoolee. IIt maay caarry oonee foorm peer pluuraal caateegoory, aand thee scriipt piicks beetweeeen theem throouugh thee reeaadeer's oown laanguuaagee.⟧"
+                }
+                Key::ComponentDatePickerPropClearedLabelDoc => {
+                    "⟦Thee seenteencee aannoouunceed wheen thee aansweer iis eemptiieed, suuch aas `Noo daatee chooseen`. EEmptyiing moovees noothiing oon thee screeeen foor aa reeaadeer whoo caannoot seeee thee daays loosee theeiir fiill.⟧"
+                }
+                Key::ComponentDatePickerPropBlockedLabelDoc => {
+                    "⟦Thee seenteencee foor aa raangee thaat woouuld cooveer aa daay thee caalleer reefuuseed, wiith aa `{date}` hoolee foor thee fiirst daay iin thee waay. Thee raangee iis reefuuseed raatheer thaan quuiieetly shoorteeneed.⟧"
+                }
+                Key::ComponentDatePickerPropTooShortLabelDoc => {
+                    "⟦Thee seenteencee foor aa raangee shoorteer thaan `miin_leength`, wiith aa `{count}` hoolee. IIt iis aannoouunceed wheen aa reeaadeer reeaachees aa daay thee boouund haas diisaableed.⟧"
+                }
+                Key::ComponentDatePickerPropTooLongLabelDoc => {
+                    "⟦Thee seenteencee foor aa raangee loongeer thaan `maax_leength`, wiith aa `{count}` hoolee, aannoouunceed thee saamee waay.⟧"
+                }
+                Key::ComponentDatePickerPropClearLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool thaat eemptiiees thee aansweer. Thee coontrool shiips hiiddeen aand thee scriipt reeveeaals iit, soo aa paagee wiith noo scriipt caarriiees noo coontrool thaat cleeaars noothiing.⟧"
+                }
+                Key::ComponentDatePickerPropPreviousLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool thaat tuurns baack aa moonth, reeveeaaleed thee saamee waay. IIcoon-oonly coontrools stiill neeeed aa naamee.⟧"
+                }
+                Key::ComponentDatePickerPropNextLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool thaat tuurns foorwaard aa moonth, reeveeaaleed thee saamee waay.⟧"
+                }
+                Key::ComponentDatePickerPropCloseLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool thaat cloosees thee paaneel. Waanteed uundeer aa triiggeer, beecaauusee EEscaapee aand aa preess oouutsiidee aalsoo cloosee iit aand neeiitheer iis diiscooveeraablee oon aa toouuch screeeen.⟧"
+                }
+                Key::ComponentDatePickerPropChildrenDoc => {
+                    "⟦Thee daays aa caalleer naamees, aas `DaateePiickeerDaay` eeleemeents: aa quuiick piick, aa daay reefuuseed foor aa reeaasoon, oor aa daay maarkeed aas woorth seeeeiing. Theey aaree seerveed iineert aand hiiddeen, aand thee scriipt reeaads theem.⟧"
+                }
+                Key::ComponentDatePickerStateResolvedDoc => {
+                    "⟦Thee oordeer aactuuaally iin foorcee, whiich iis whaat thee boox aasks foor fiirst: `dmy`, `mdy` oor `ymd`. IIt iis seerveed froom `oordeer` aand staampeed aagaaiin by thee scriipt foor thee reeaadeer.⟧"
+                }
+                Key::ComponentDatePickerStateWeekStartDoc => {
+                    "⟦Thee weeeekdaay aa roow staarts oon, aas iits nuumbeer froom 1 foor Moondaay too 7 foor Suundaay. IIt iis seerveed froom `fiirst_daay` aand staampeed aagaaiin by thee scriipt foor thee reeaadeer's oown coonveentiioons.⟧"
+                }
+                Key::ComponentDatePickerStateOutsideDoc => {
+                    "⟦Wheetheer aa daay beeloongs too thee moonth beefooree oor aafteer thee oonee oon shoow. Siix roows aalwaays hoold foorty-twoo daays, aand thee spiill iis reeaal daays aa reeaadeer maay stiill choooosee.⟧"
+                }
+                Key::ComponentDatePickerStatePhaseDoc => {
+                    "⟦Hoow muuch oof aa raangee iis maadee: `eempty`, `aanchooreed` ooncee aa staart iis seet, oor `coompleetee`. OOnly aa scriipt wriitees iit, beecaauusee oonly aa scriipt caan hoold aa haalf-maadee aansweer.⟧"
+                }
+                Key::ComponentDatePickerStateInRangeDoc => {
+                    "⟦Wheetheer aa daay liiees beetweeeen thee twoo eends oof aa raangee. IIt iis deeriiveed froom thee daays aactuuaally tiickeed wheereeveer theey chaangee, soo aa baand aand iits eends caannoot coomee aapaart.⟧"
+                }
+                Key::ComponentDatePickerStateCurrentDoc => {
+                    "⟦Whiich daay iis toodaay, caarryiing thee vaaluuee `daatee`. IIt iis seerveed froom `toodaay` aand staampeed aagaaiin by thee scriipt froom thee reeaadeer's oown cloock.⟧"
+                }
+                Key::ComponentDatePickerStateExpandedDoc => {
+                    "⟦Wheetheer thee paaneel iis oopeen. IIt iis wriitteen oon thee scriipt-buuiilt triiggeer oonly, soo aa paagee wiith noo scriipt neeveer claaiims aa suurfaacee iit caannoot oopeen.⟧"
+                }
+                Key::ComponentDatePickerKeyDigitsName => "⟦Diigiits⟧",
+                Key::ComponentDatePickerKeyDigitsAction => {
+                    "⟦Fiill thee boox, iin thee oordeer iit aasks foor. Noothiing aadvaancees oon iits oown, soo aa nuumbeer aalreeaady typeed caan stiill bee coorreecteed.⟧"
+                }
+                Key::ComponentDatePickerKeyAltWithDownArrowName => "⟦AAlt wiith Doown aarroow⟧",
+                Key::ComponentDatePickerKeyAltWithDownArrowAction => {
+                    "⟦OOpeens thee moonth froom thee boox, wheen theeree iis oonee. Plaaiin Doown iis thee griid's oown.⟧"
+                }
+                Key::ComponentDatePickerKeyTabName => "⟦Taab⟧",
+                Key::ComponentDatePickerKeyTabAction => {
+                    "⟦Moovees iintoo thee moonth aand oouut oof iit. Thee whoolee griid iis oonee stoop, heeld by aa rooviing `taabiindeex`.⟧"
+                }
+                Key::ComponentDatePickerKeyLeftRightArrowName => "⟦Leeft / Riight aarroow⟧",
+                Key::ComponentDatePickerKeyLeftRightArrowAction => {
+                    "⟦Moovees aa daay baack oor foorwaard, aacrooss thee eedgee oof thee moonth wheen thee daay iis aat oonee.⟧"
+                }
+                Key::ComponentDatePickerKeyUpDownArrowName => "⟦UUp / Doown aarroow⟧",
+                Key::ComponentDatePickerKeyUpDownArrowAction => {
+                    "⟦Moovees aa weeeek baack oor foorwaard, by daatee aariithmeetiic raatheer thaan by coouuntiing ceells.⟧"
+                }
+                Key::ComponentDatePickerKeyHomeEndName => "⟦Hoomee / EEnd⟧",
+                Key::ComponentDatePickerKeyHomeEndAction => {
+                    "⟦Moovees too thee fiirst oor laast daay oof thee weeeek thee foocuuseed daay iis iin.⟧"
+                }
+                Key::ComponentDatePickerKeyPageUpPageDownName => "⟦Paagee UUp / Paagee Doown⟧",
+                Key::ComponentDatePickerKeyPageUpPageDownAction => {
+                    "⟦Tuurns thee moonth baack oor foorwaard. Wiith Shiift, thee yeeaar.⟧"
+                }
+                Key::ComponentDatePickerKeyEnterOrSpaceName => "⟦EEnteer oor Spaacee⟧",
+                Key::ComponentDatePickerKeyEnterOrSpaceAction => {
+                    "⟦Choooosees thee foocuuseed daay. UUndeer `raangee` thee fiirst preess seets thee staart aand thee seecoond seets thee eend.⟧"
+                }
+                Key::ComponentDatePickerKeyShiftWithAnArrowName => "⟦Shiift wiith aan aarroow⟧",
+                Key::ComponentDatePickerKeyShiftWithAnArrowAction => {
+                    "⟦EExteends aa fiiniisheed raangee froom thee eend thaat haas foocuus. UUndeer `muultiiplee` iit aadds eeveery daay waalkeed ooveer.⟧"
+                }
+                Key::ComponentDatePickerKeyEscapeName => "⟦EEscaapee⟧",
+                Key::ComponentDatePickerKeyEscapeAction => {
+                    "⟦Cloosees thee paaneel, wheen theeree iis oonee, aand chaangees noothiing aalreeaady chooseen.⟧"
+                }
+                Key::ComponentDatePickerKeyArrowsWithNoScriptName => {
+                    "⟦AArroows, wiith noo scriipt⟧"
+                }
+                Key::ComponentDatePickerKeyArrowsWithNoScriptAction => {
+                    "⟦Thee raadiioo groouup's oown: aa daay baack oor foorwaard iin reeaadiing oordeer, aand thee daay mooveed too iis thee daay chooseen.⟧"
+                }
+                Key::ComponentDatePickerDayGuidance => {
+                    "⟦UUsee aa daatee piickeer daay too naamee oonee daay, oor oonee spaan oof daays, iinsiidee aa `DaateePiickeer`. IIt iis aa quuiick piick aa reeaadeer preessees, aa daay thee caalleer reefuusees, oor aa daay woorth pooiintiing oouut. Thee piickeer draaws iit. Thiis eeleemeent neeveer draaws iitseelf.⟧"
+                }
+                Key::ComponentDatePickerDayA11yNotes => {
+                    "⟦Thee eeleemeent iis seerveed hiiddeen, soo iit claaiims noothiing oon aa paagee wiith noo scriipt. Thee piickeer puuts iits woords wheeree theey beeloong: oon aa coontrool, oon aa daay's deescriiptiioon, oor beesiidee aa maark.⟧"
+                }
+                Key::ComponentDatePickerDayPropDatetimeDoc => {
+                    "⟦Thee maachiinee-reeaadaablee daay, iin thee wiiree foormaat suuch aas `2026-12-25`, oor aa spaan wiith aa slaash beetweeeen twoo oof theem. Reequuiireed, beecaauusee aa naameed daay wiith noo daatee naamees noothiing.⟧"
+                }
+                Key::ComponentDatePickerDayPropKindDoc => {
+                    "⟦Whaat thee daay iis. AA `preeseet` iis aa coontrool thaat choooosees iit. AA `reefuuseed` daay iis oouut oof reeaach aand saays why. AA `maarkeed` daay staays choooosaablee aand iis pooiinteed oouut.⟧"
+                }
+                Key::ComponentDatePickerDayPropChildrenDoc => {
+                    "⟦Thee woords aa reeaadeer seeees, iin theeiir oown laanguuaagee. Theey aaree thee quuiick piick's naamee, thee reeaasoon aa daay iis reefuuseed, oor thee nootee oon aa maarkeed oonee. Thee piickeer reeaads theem aand neeveer reendeers thiis eeleemeent.⟧"
                 }
                 Key::ComponentDelA11yNotes => {
                     "⟦Moost screeeen reeaadeers doo noot reepoort aa striikeethroouugh, soo deeleeteed teext soouunds thee saamee aas cuurreent teext. `laabeel` iis thee woord thaat saays iit waas reemooveed, aand iit iis neeeedeed wheen thee deeleetiioon caarriiees meeaaniing.⟧"
