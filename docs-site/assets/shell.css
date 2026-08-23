@@ -7859,18 +7859,38 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 
 /* --- The caption and the note --- */
 
+/* THE TITLE IS A HEADING, SO IT IS SIZED LIKE ONE.
+ *
+ * At body size and semibold it was the largest plain text in the box, sitting
+ * under a heading row that is small and uppercase — so it read as the first row
+ * of the table rather than as the name of it. One step up the scale and a
+ * heading's line height, and the order is legible before a word is read.
+ *
+ * AND THE SENTENCE UNDER IT IS PROSE, SO IT TAKES A MEASURE. A caption is laid
+ * at the table's width, and a table's width is its columns' — nothing to do
+ * with how long a line should be. On a nine-hundred-pixel table the note ran
+ * past a hundred and twenty characters, which is twice the measure every other
+ * paragraph on this site is held to. The cap is the same token they use.
+ *
+ * The measure earns its place a second time. A caption's own content is part of
+ * what a table asks for in width, so an uncapped sentence is a table that is
+ * wider than its columns need and scrolls for a reason a reader cannot see. */
 .nd-table-caption {
   display: table-caption;
   text-align: start;
-  padding-block-end: var(--noctua-space-3);
+  padding-block-end: var(--noctua-space-4);
+  font-size: var(--noctua-size-lead);
+  line-height: var(--noctua-leading-heading);
   font-weight: var(--noctua-weight-semibold);
   color: var(--nc-color-fg);
 }
 
 .nd-table-note {
   display: block;
-  margin-block-start: var(--noctua-space-1);
+  max-inline-size: var(--noctua-measure);
+  margin-block-start: var(--noctua-space-2);
   font-size: var(--noctua-size-small);
+  line-height: var(--noctua-leading-body);
   font-weight: var(--noctua-weight-regular);
   color: var(--nc-color-fg-muted);
 }
@@ -8642,25 +8662,40 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   display: block;
 }
 
-/* A CAPTION THE TABLE ASKED TO HIDE STAYS HIDDEN WHEN THE ROWS STACK.
+/* ONE DECLARATION, AND IT IS `display`. THE SECOND ONE COST EVERY TABLE ON THE
+ * SITE ITS TITLE.
  *
- * These two rules and the visually-hidden one above have the same specificity,
- * so this one — being later — was handing `display: block` and
- * `inline-size: auto` back to a caption that had already been taken out of the
- * layout. What was left was an absolutely positioned, `nowrap`, clipped box as
- * wide as its own sentence, hanging off whatever the nearest positioned
- * ancestor was. It is invisible, and a clipped box still counts towards the
- * document's scroll width: 323px of pseudo-locale caption on a 320px screen.
+ * A caption the table asked to hide is taken out of the layout above, and this
+ * rule is later at the same specificity — so `inline-size: auto` handed a
+ * clipped, `nowrap` box its own sentence back as a width. Invisible, and a
+ * clipped box still counts towards the document's scroll width: 323px of
+ * pseudo-locale caption on a 320px screen.
  *
- * It only ever showed where a stacked table was NOT inside a scroller, which
- * on this site was nowhere until the spacing page stopped putting its tables
- * in a frame. */
-.nd-table[data-nd-layout="stack"]:not([data-nd-caption-hidden="true"]) > .nd-table-caption,
-.nd-table[data-nd-layout="auto"]:not([data-nd-caption-hidden="true"]) > .nd-table-caption,
+ * The repair was `:not([data-nd-caption-hidden="true"])`, and it is what broke
+ * the wide layout. It raised these two selectors to four class-level
+ * components, and the rule that hands `display: table-caption` back inside
+ * `@container` has three. A container query adds nothing to specificity, so the
+ * restore lost at every width, and a `display: block` child of a `display:
+ * table` parent is wrapped in an ANONYMOUS TABLE CELL. That is what shipped:
+ * the title and the note in a box the width of the first column, wrapping two
+ * words to the line, drawn UNDER the heading row because a header group is laid
+ * first whatever the source order says. Every table with a visible caption, at
+ * every width.
+ *
+ * So the guard goes and the declaration it was guarding goes with it. There is
+ * nothing to undo: `inline-size` is `auto` already unless the hidden rule says
+ * otherwise, and it only says so to captions this rule no longer needs to
+ * exclude. `display` is safe to hand a hidden caption because an absolutely
+ * positioned box is blockified whatever `display` asks for.
+ *
+ * The lesson is narrower than "watch specificity". A rule inside a container
+ * query is an override that cannot out-specify anything, so its pair outside
+ * the query must be written to lose on ORDER alone. */
+.nd-table[data-nd-layout="stack"] > .nd-table-caption,
+.nd-table[data-nd-layout="auto"] > .nd-table-caption,
 .nd-table[data-nd-layout="stack"] .nd-table-note,
 .nd-table[data-nd-layout="auto"] .nd-table-note {
   display: block;
-  inline-size: auto;
 }
 
 /* The heading row goes, because every value carries its own label — and it goes

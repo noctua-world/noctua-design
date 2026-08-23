@@ -385,6 +385,20 @@ whole property. Assert that a computed `transform` exists at all.
 **`100cqw` inside a container's own declarations answers for the container above
 it.** An element that establishes a query container is not its own.
 
+**A rule inside `@media` or `@container` adds nothing to its own specificity.** A
+query is a condition, not a weight, so a rule that undoes a narrow-screen default
+has to beat that default on ORDER alone. One extra `:not()` on the default is
+enough to make the wide-screen rule never apply at any width, and what that looks
+like from the outside is a query that is not matching. Every restore pair in the
+stylesheet is therefore written at the same specificity as the rule it restores.
+
+**Any child of a `display: table` box that is not a table part is wrapped in an
+anonymous table cell.** A `<caption>` handed `display: block` does not become a
+block above the table: it becomes a cell in a row, as wide as one column and
+wrapping two words to the line. It is also drawn UNDER the heading row, because a
+header group is laid first whatever the source order says — which makes it look
+like a stray cell rather than like a caption that lost a declaration.
+
 **`[hidden] { display: none }` is a user-agent rule, so any author rule outranks
 it.** `[hidden] { display: none !important }` is the only `!important` in the
 stylesheet.

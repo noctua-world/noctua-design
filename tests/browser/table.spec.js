@@ -109,6 +109,115 @@ test("the caption of a stacked table is one line the width of the table", async 
   expect(measured.height).toBeLessThan(measured.line * 2);
 });
 
+// THE OTHER HALF OF THAT PAIR, WHICH WAS NEVER ASSERTED AND THEREFORE BROKE.
+//
+// The test above pins the caption at 390px, where the rows stack. Nothing
+// pinned it at the width where they do not, and the rule handing
+// `display: table-caption` back lives inside a `@container` query — which adds
+// nothing to specificity, so it lost to its own pair outside the query and
+// never applied at any width. A `display: block` child of a `display: table`
+// parent is wrapped in an anonymous table cell, so what shipped was the title
+// and the note in a box the width of the first column, drawn under the heading
+// row because a header group is laid first whatever the source order says.
+//
+// It sweeps every caption on the page rather than one, because the defect was
+// not in any one table: it was in a rule every table matches.
+test("the caption of a wide table is its heading, at its width and above it", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+
+  const seen = await page.evaluate(() => {
+    // The declared breakpoint the stack is undone at, read rather than typed:
+    // the query is on the SCROLLER, so a table in a narrow example frame is
+    // legitimately still stacked on a wide screen. That is most of this page.
+    const room = 30 * Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const visible = [];
+    const hidden = [];
+    for (const table of document.querySelectorAll(".nd-table")) {
+      const caption = table.querySelector(":scope > caption");
+      if (!caption) continue;
+      const box = caption.getBoundingClientRect();
+      const whole = table.getBoundingClientRect();
+      const scroll = table.closest(".nd-table-scroll");
+      const entry = {
+        name: table.getAttribute("data-nd-table"),
+        display: getComputedStyle(caption).display,
+        caption: box.width,
+        table: whole.width,
+        // The signature of the anonymous cell: a header group is drawn first,
+        // so a caption that became one lands BELOW the top of the table.
+        drop: box.top - whole.top,
+        // Roomy AND allowed to undo the stack. `layout: "stack"` is the caller
+        // fixing the choice, and it is a block caption at every width.
+        roomy:
+          table.getAttribute("data-nd-layout") === "auto" &&
+          !!scroll &&
+          scroll.getBoundingClientRect().width >= room,
+      };
+      if (table.getAttribute("data-nd-caption-hidden") === "true") hidden.push(entry);
+      else visible.push(entry);
+    }
+    return { visible, hidden };
+  });
+
+  // A floor on each, because the count of things examined is itself a claim.
+  expect(seen.visible.length).toBeGreaterThan(8);
+  expect(seen.hidden.length).toBeGreaterThan(4);
+  const roomy = seen.visible.filter((one) => one.roomy);
+  expect(roomy.length).toBeGreaterThan(8);
+
+  for (const one of seen.visible) {
+    // TRUE AT EVERY WIDTH, in both layouts, and it is the defect stated as a
+    // measurement: an anonymous cell is neither the table's width nor above it.
+    expect(one.caption, one.name).toBeGreaterThan(one.table * 0.98);
+    expect(one.drop, one.name).toBeLessThan(1);
+    // And where the rows are laid as a table, so is the caption of them.
+    expect(one.display, one.name).toBe(one.roomy ? "table-caption" : "block");
+  }
+
+  // AND THE HIDDEN ONE STAYS TAKEN OUT. The guard that excluded it from the
+  // layout rules is what broke the visible one, so it is gone — and this is
+  // what says the door it left open is shut. A clipped box as wide as its own
+  // sentence still counts towards the document's scroll width.
+  for (const one of seen.hidden) {
+    expect(one.caption, one.name).toBeLessThan(2);
+  }
+});
+
+// A CAPTION IS LAID AT THE TABLE'S WIDTH, AND THAT IS NOT A MEASURE.
+//
+// The note is prose and the table's width is its columns', so on a
+// nine-hundred-pixel table the sentence ran past a hundred and twenty
+// characters to the line. It is held to the same token every paragraph on this
+// site is held to.
+test("the note under a caption is held to a measure", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+
+  const notes = await page.evaluate(() =>
+    [...document.querySelectorAll(".nd-table-note")].map((note) => {
+      const table = note.closest(".nd-table");
+      return {
+        name: table.getAttribute("data-nd-table"),
+        note: note.getBoundingClientRect().width,
+        table: table.getBoundingClientRect().width,
+        letters: note.textContent.trim().length,
+      };
+    }),
+  );
+
+  expect(notes.length).toBeGreaterThan(1);
+  for (const one of notes) {
+    // The floor. A note is only narrower than its table where the table is
+    // wide enough for the cap to bite, so the stage has to be that wide.
+    expect(one.table, one.name).toBeGreaterThan(700);
+    expect(one.letters, one.name).toBeGreaterThan(40);
+    expect(one.note, one.name).toBeLessThan(one.table - 1);
+  }
+});
+
 // --- Sorting -----------------------------------------------------------------
 
 test("sorting has three states, and the third is the order the table arrived in", async ({

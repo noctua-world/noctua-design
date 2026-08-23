@@ -174,10 +174,24 @@ test("a reload lands where the reader was", async ({ page }) => {
   // it. So the offset is written while the reader scrolls, and this is the test
   // that says the writing actually happens.
   await page.goto(url(PAGE.tables));
-  await showParts(page);
-  await page.mouse.wheel(0, 1200);
+
+  // AND THE PAGE HAS TO BE THE SAME PAGE ON BOTH SIDES OF THE RELOAD. This
+  // test used to open the folds and scroll 1200, which only worked because
+  // every table on the page was drawing its caption as a wrapped column of
+  // text a hundred pixels wide: the folded page happened to be tall enough.
+  // The folds are opened by a test rather than by the document, so a reload
+  // closes them — and an offset restored into a page that shrank under the
+  // reader is clamped, which reads as "restoration is broken" and is not.
+  const target = await page.evaluate(() =>
+    Math.round(Math.min(1200, document.documentElement.scrollHeight - innerHeight) * 0.75),
+  );
+  // A floor. Nothing is proved by restoring an offset of nothing.
+  expect(target).toBeGreaterThan(200);
+
+  await page.mouse.wheel(0, target);
   await expect.poll(() => page.evaluate(() => history.state?.y)).toBeGreaterThan(0);
   const y = await page.evaluate(() => scrollY);
+  expect(y).toBe(target);
 
   await page.reload();
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(y);
