@@ -442,6 +442,10 @@ TableCell { aggregate, aggregate_over }: a total that recounts",
                     "search_placeholder",
                     Value::Message(Key::ExampleTableSearchPlaceholder),
                 ),
+                (
+                    "search_clear_label",
+                    Value::Message(Key::ExampleTableSearchClear),
+                ),
                 ("filtered_label", Value::Message(Key::ExampleTableFiltered)),
             ],
             children: &[

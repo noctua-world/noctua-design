@@ -143,15 +143,32 @@ type = "text"
 attribute = "data-nd-column-hidden-label"
 doc = "The same, for a column going away."
 
+# ONE BOX, AND THE GLASS IS THE LEADING EDGE OF IT.
+#
+# The version before this drew the glass and the box as two elements side by
+# side: two borders, two radii, two magnifiers once it was open, and the focus
+# ring on the bare `<input>` inside the second one rather than on the box a
+# reader can see. It is the shape `Search` already has, down to the tokens, and
+# the difference is that the leading glyph is a CONTROL here. That is what makes
+# the box the size of a button while it is shut.
+
 [prop.search_label]
 type = "text"
 attribute = "data-nd-search-label"
-doc = "The name of the search field, and of the control that reveals it. **One box, behind a magnifying glass**, rather than one in every filterable heading. Wanted in practice by a filterable `TableColumn`."
+doc = "The name of the search field, and of the control that opens it. **One box, behind a magnifying glass**, rather than one in every filterable heading. Wanted in practice by a filterable `TableColumn`."
 
 [prop.search_placeholder]
 type = "text"
 attribute = "data-nd-search-placeholder"
 doc = "The example inside the search box, such as *invoice, client, status*. **Never the only name it has**, because it vanishes on the first keystroke."
+
+# NO ATTRIBUTE, BECAUSE NO BODY WRITES ONE. The word reaches the DOM as the
+# control's own name, which is why the component works and why nothing reported
+# the declaration. `attribute` is a claim about the markup, and `Search`'s own
+# `clear_label` states the same thing for the same reason.
+[prop.search_clear_label]
+type = "text"
+doc = "The name of the control that empties the search box. It is a glyph, so this is the only name it has. Without it the box is emptied by the keyboard alone, which is not a control a pointer can reach."
 
 [prop.export]
 type = "bool"

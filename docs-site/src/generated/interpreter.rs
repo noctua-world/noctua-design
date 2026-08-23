@@ -3465,6 +3465,7 @@ fn table(
     let column_hidden_label_ = scope.find(props, "column_hidden_label");
     let search_label_ = scope.find(props, "search_label");
     let search_placeholder_ = scope.find(props, "search_placeholder");
+    let search_clear_label_ = scope.find(props, "search_clear_label");
     let export_ = scope.flag(props, "export").unwrap_or(false);
     let export_label_ = scope.find(props, "export_label");
     let csv_label_ = scope.find(props, "csv_label");
@@ -3510,6 +3511,7 @@ fn table(
             column_hidden_label: column_hidden_label_,
             search_label: search_label_,
             search_placeholder: search_placeholder_,
+            search_clear_label: search_clear_label_,
             export: export_,
             export_label: export_label_,
             csv_label: csv_label_,

@@ -12028,6 +12028,18 @@ pub(crate) const COMPONENTS: [DocComponent; 89] = [
                 doc: Key::ComponentTablePropSearchPlaceholderDoc,
             },
             DocProp {
+                name: "search_clear_label",
+                kind: "text",
+                values: &[],
+                elements: &[],
+                default: None,
+                attribute: None,
+                required: false,
+                variants: true,
+                specimen: None,
+                doc: Key::ComponentTablePropSearchClearLabelDoc,
+            },
+            DocProp {
                 name: "export",
                 kind: "bool",
                 values: &[],

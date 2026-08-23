@@ -209,10 +209,12 @@ pub fn Table(
     column_shown_label: Option<String>,
     /// The same, for a column going away.
     column_hidden_label: Option<String>,
-    /// The name of the search field, and of the control that reveals it. **One box, behind a magnifying glass**, rather than one in every filterable heading. Wanted in practice by a filterable `TableColumn`.
+    /// The name of the search field, and of the control that opens it. **One box, behind a magnifying glass**, rather than one in every filterable heading. Wanted in practice by a filterable `TableColumn`.
     search_label: Option<String>,
     /// The example inside the search box, such as *invoice, client, status*. **Never the only name it has**, because it vanishes on the first keystroke.
     search_placeholder: Option<String>,
+    /// The name of the control that empties the search box. It is a glyph, so this is the only name it has. Without it the box is emptied by the keyboard alone, which is not a control a pointer can reach.
+    search_clear_label: Option<String>,
     /// Whether the toolbar carries the menu that saves the table: a `.csv` file, a `.json` file, the clipboard, and the printer. It writes what is **showing**: the visible columns, the rows a filter left, and the chosen rows when there are any.
     #[props(default = false)]
     export: bool,
@@ -278,18 +280,24 @@ pub fn Table(
                 // ONE SEARCH, BEHIND A GLASS. A box in every filterable heading
                 // is a heading row twice as tall and a row of controls a reader
                 // visits one at a time.
+                //
+                // AND ONE BOX, WITH THE GLASS INSIDE IT. The glass and the field
+                // used to be siblings: two borders, two radii, two magnifiers
+                // once it was open, and a gap between them. The field is the
+                // only box now, the glass is the control at its leading edge,
+                // and shut it is exactly the size of the buttons beside it.
+                // `Search`'s row, in the same order, with the glyph promoted
+                // from a `<span>` to the control that opens the box.
                 if search_label.is_some() {
                     div { class: "nd-table-search", "data-nd-table-search": "",
-                        button {
-                            class: "nd-table-search-open",
-                            r#type: "button",
-                            "aria-expanded": "false",
-                            "aria-controls": "{search_id}",
-                            "aria-label": search_label.clone().unwrap_or_default(),
-                            Icon { icon: IconDrawing::SEARCH, size: IconSize::Small }
-                        }
-                        div { class: "nd-table-search-field", id: "{search_id}", hidden: true,
-                            span { class: "nd-table-search-glyph", "aria-hidden": "true",
+                        div { class: "nd-table-search-field",
+                            button {
+                                class: "nd-table-search-open",
+                                r#type: "button",
+                                "aria-expanded": "false",
+                                "aria-controls": "{search_input_id}",
+                                "aria-label": search_label.clone().unwrap_or_default(),
+                                title: search_label.clone().unwrap_or_default(),
                                 Icon { icon: IconDrawing::SEARCH, size: IconSize::Small }
                             }
                             label {
@@ -302,9 +310,33 @@ pub fn Table(
                                 id: "{search_input_id}",
                                 r#type: "search",
                                 "data-nd-table-search-input": "",
+                                // A search box is not a name, an address or a
+                                // sentence, and every one of these is a browser
+                                // trying to be helpful about one of those.
+                                // `Search`'s own list, for the same reason.
                                 autocomplete: "off",
+                                autocorrect: "off",
+                                autocapitalize: "none",
                                 spellcheck: "false",
+                                enterkeyhint: "search",
                                 placeholder: search_placeholder.clone(),
+                                hidden: true,
+                            }
+                            // OURS RATHER THAN THE ENGINE'S. `type="search"`
+                            // draws a clear control in Blink and none in Gecko,
+                            // and a control that appears on some machines and
+                            // not others is worse than one we draw. The
+                            // stylesheet takes the engine's away.
+                            if let Some(clear) = search_clear_label.clone() {
+                                button {
+                                    class: "nd-table-search-clear",
+                                    r#type: "button",
+                                    "aria-label": "{clear}",
+                                    title: "{clear}",
+                                    "data-nd-table-search-clear": "",
+                                    hidden: true,
+                                    Icon { icon: IconDrawing::CLOSE, size: IconSize::Small }
+                                }
                             }
                         }
                     }

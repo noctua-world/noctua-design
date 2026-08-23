@@ -802,12 +802,19 @@ function wireDetails(state) {
  * The version before this drew a box into every filterable heading: a heading
  * row twice as tall, and a row of controls a reader had to visit one at a time
  * to narrow a table by two things at once.
+ *
+ * AND ONE BOX RATHER THAN TWO. The glass and the field used to be siblings and
+ * this function hid one of them, which is why an open search was two borders,
+ * two radii and two magnifiers with a gap down the middle. The field is the box
+ * now and the glass is the control at its leading edge, so opening changes what
+ * is INSIDE the box and never how many boxes there are.
  */
 function wireSearch(state, tools) {
   const holder = tools?.querySelector("[data-nd-table-search]");
   const open = holder?.querySelector(".nd-table-search-open");
   const field = holder?.querySelector(".nd-table-search-field");
   const box = holder?.querySelector("[data-nd-table-search-input]");
+  const clear = holder?.querySelector("[data-nd-table-search-clear]");
   if (!holder || !open || !field || !box) return;
   // Asked for and refused: a search over no column narrows nothing.
   if (!state.columns.some((column) => column.filterable)) {
@@ -815,44 +822,71 @@ function wireSearch(state, tools) {
     return;
   }
 
+  // A CONTROL THAT EMPTIES AN EMPTY BOX DOES NOTHING, and a reader learns to
+  // distrust the row it is in. `Search`'s own rule, reached the other way: it
+  // marks the root and the stylesheet hides the control, and this hides the
+  // control. One fact in one place either way, and here the control already
+  // ships `hidden`, so the script has nothing to add but the change.
+  const mark = () => {
+    if (clear) clear.hidden = box.value.length === 0;
+  };
+
+  /** Takes what is in the box now, with no pause. */
+  const take = () => {
+    state.query = box.value.trim().toLocaleLowerCase(language());
+    applyFilters(state, true);
+  };
+
   const show = (wanted) => {
-    field.hidden = !wanted;
+    box.hidden = !wanted;
     open.setAttribute("aria-expanded", String(wanted));
     holder.toggleAttribute("data-nd-open", wanted);
     if (wanted) box.focus();
+    mark();
   };
 
-  open.addEventListener("click", () => {
-    if (field.hidden) {
-      show(true);
-      return;
-    }
+  const shut = () => {
     // Closing clears: a glass that hides a box still narrowing the table is a
     // table missing rows for a reason nothing on the screen gives.
     box.value = "";
-    state.query = "";
-    applyFilters(state, true);
+    take();
     show(false);
+  };
+
+  open.addEventListener("click", () => {
+    if (box.hidden) show(true);
+    else shut();
+  }, { signal: state.signal });
+
+  // A POINTER'S WAY TO EMPTY THE BOX. Escape is the keyboard's, and it was the
+  // only one: `type="search"` draws a clear control in Blink and none in
+  // Gecko, so half the readers had one and it was the engine's rather than
+  // ours. Emptying leaves the box open and focused, because a reader emptying
+  // a search is usually about to type another one.
+  clear?.addEventListener("click", () => {
+    box.value = "";
+    take();
+    mark();
+    box.focus();
   }, { signal: state.signal });
 
   let pending = null;
   box.addEventListener("input", () => {
+    // The clear control follows the keystroke and the filter follows the
+    // pause. Waiting the pause out to draw it means a control that appears
+    // a beat after the letter that made it necessary.
+    mark();
     clearTimeout(pending);
     // One sentence per pause, not one per keystroke: a live region that speaks
     // through typing is a live region a reader turns off.
-    pending = setTimeout(() => {
-      state.query = box.value.trim().toLocaleLowerCase(language());
-      applyFilters(state, true);
-    }, SETTLE);
+    pending = setTimeout(take, SETTLE);
   }, { signal: state.signal });
 
   box.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
     event.stopPropagation();
-    box.value = "";
-    state.query = "";
-    applyFilters(state, true);
-    show(false);
+    clearTimeout(pending);
+    shut();
     open.focus();
   }, { signal: state.signal });
 

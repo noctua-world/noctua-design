@@ -2362,18 +2362,24 @@ const TABLE_DIOXUS: &str = r#"    let root = format!("nd-table {class}");
                 // ONE SEARCH, BEHIND A GLASS. A box in every filterable heading
                 // is a heading row twice as tall and a row of controls a reader
                 // visits one at a time.
+                //
+                // AND ONE BOX, WITH THE GLASS INSIDE IT. The glass and the field
+                // used to be siblings: two borders, two radii, two magnifiers
+                // once it was open, and a gap between them. The field is the
+                // only box now, the glass is the control at its leading edge,
+                // and shut it is exactly the size of the buttons beside it.
+                // `Search`'s row, in the same order, with the glyph promoted
+                // from a `<span>` to the control that opens the box.
                 if search_label.is_some() {
                     div { class: "nd-table-search", "data-nd-table-search": "",
-                        button {
-                            class: "nd-table-search-open",
-                            r#type: "button",
-                            "aria-expanded": "false",
-                            "aria-controls": "{search_id}",
-                            "aria-label": search_label.clone().unwrap_or_default(),
-                            Icon { icon: IconDrawing::SEARCH, size: IconSize::Small }
-                        }
-                        div { class: "nd-table-search-field", id: "{search_id}", hidden: true,
-                            span { class: "nd-table-search-glyph", "aria-hidden": "true",
+                        div { class: "nd-table-search-field",
+                            button {
+                                class: "nd-table-search-open",
+                                r#type: "button",
+                                "aria-expanded": "false",
+                                "aria-controls": "{search_input_id}",
+                                "aria-label": search_label.clone().unwrap_or_default(),
+                                title: search_label.clone().unwrap_or_default(),
                                 Icon { icon: IconDrawing::SEARCH, size: IconSize::Small }
                             }
                             label {
@@ -2386,9 +2392,33 @@ const TABLE_DIOXUS: &str = r#"    let root = format!("nd-table {class}");
                                 id: "{search_input_id}",
                                 r#type: "search",
                                 "data-nd-table-search-input": "",
+                                // A search box is not a name, an address or a
+                                // sentence, and every one of these is a browser
+                                // trying to be helpful about one of those.
+                                // `Search`'s own list, for the same reason.
                                 autocomplete: "off",
+                                autocorrect: "off",
+                                autocapitalize: "none",
                                 spellcheck: "false",
+                                enterkeyhint: "search",
                                 placeholder: search_placeholder.clone(),
+                                hidden: true,
+                            }
+                            // OURS RATHER THAN THE ENGINE'S. `type="search"`
+                            // draws a clear control in Blink and none in Gecko,
+                            // and a control that appears on some machines and
+                            // not others is worse than one we draw. The
+                            // stylesheet takes the engine's away.
+                            if let Some(clear) = search_clear_label.clone() {
+                                button {
+                                    class: "nd-table-search-clear",
+                                    r#type: "button",
+                                    "aria-label": "{clear}",
+                                    title: "{clear}",
+                                    "data-nd-table-search-clear": "",
+                                    hidden: true,
+                                    Icon { icon: IconDrawing::CLOSE, size: IconSize::Small }
+                                }
                             }
                         }
                     }
@@ -2606,29 +2636,26 @@ const TABLE_REACT: &str = r#"  const density_ = density ?? "default";
     h(
       "div",
       { key: "tools", className: "nd-table-tools", "data-nd-table-tools": "", hidden: true },
-      // See the Dioxus half: one search, behind a glass.
+      // See the Dioxus half: one search, behind a glass, and one box with the
+      // glass inside it.
       searchLabel
         ? h(
             "div",
             { key: "s", className: "nd-table-search", "data-nd-table-search": "" },
             h(
-              "button",
-              {
-                key: "o",
-                className: "nd-table-search-open",
-                type: "button",
-                "aria-expanded": "false",
-                "aria-controls": searchId,
-                "aria-label": searchLabel,
-              },
-              h(Icon, { icon: search, size: "small" }),
-            ),
-            h(
               "div",
-              { key: "f", className: "nd-table-search-field", id: searchId, hidden: true },
+              { key: "f", className: "nd-table-search-field" },
               h(
-                "span",
-                { key: "g", className: "nd-table-search-glyph", "aria-hidden": "true" },
+                "button",
+                {
+                  key: "o",
+                  className: "nd-table-search-open",
+                  type: "button",
+                  "aria-expanded": "false",
+                  "aria-controls": searchInputId,
+                  "aria-label": searchLabel,
+                  title: searchLabel,
+                },
                 h(Icon, { icon: search, size: "small" }),
               ),
               h("label", { key: "l", className: "nd-visually-hidden", htmlFor: searchInputId }, searchLabel),
@@ -2639,9 +2666,28 @@ const TABLE_REACT: &str = r#"  const density_ = density ?? "default";
                 type: "search",
                 "data-nd-table-search-input": "",
                 autoComplete: "off",
+                autoCorrect: "off",
+                autoCapitalize: "none",
                 spellCheck: false,
+                enterKeyHint: "search",
                 placeholder: searchPlaceholder,
+                hidden: true,
               }),
+              searchClearLabel
+                ? h(
+                    "button",
+                    {
+                      key: "c",
+                      className: "nd-table-search-clear",
+                      type: "button",
+                      "aria-label": searchClearLabel,
+                      title: searchClearLabel,
+                      "data-nd-table-search-clear": "",
+                      hidden: true,
+                    },
+                    h(Icon, { icon: close, size: "small" }),
+                  )
+                : null,
             ),
           )
         : null,

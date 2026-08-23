@@ -15,11 +15,12 @@ import { Button } from "./button.js";
 
 import { Icon } from "./icon.js";
 import { AILabel } from "./ai_label.js";
+import { close } from "@noctua-world/design-tokens/icons/close.js";
 import { columns2 } from "@noctua-world/design-tokens/icons/columns-2.js";
 import { copy } from "@noctua-world/design-tokens/icons/copy.js";
 import { download } from "@noctua-world/design-tokens/icons/download.js";
 import { search } from "@noctua-world/design-tokens/icons/search.js";
-export function Table({ name, caption, hideCaption, note, density, rules, zebra, hover, width, height, layout, stickyHeader, selectedLabel, sortAscendingLabel, sortDescendingLabel, sortClearedLabel, filteredLabel, resizeLabel, resizedLabel, columnsLabel, columnShownLabel, columnHiddenLabel, searchLabel, searchPlaceholder, export: _export, exportLabel, csvLabel, jsonLabel, printLabel, exportedLabel, moreSrc, moreLabel, moreStatusLabel, total, copy, copyLabel, copiedLabel, summaryLabel, aiMark, aiLabel, aiNote, className, children, ...rest }) {
+export function Table({ name, caption, hideCaption, note, density, rules, zebra, hover, width, height, layout, stickyHeader, selectedLabel, sortAscendingLabel, sortDescendingLabel, sortClearedLabel, filteredLabel, resizeLabel, resizedLabel, columnsLabel, columnShownLabel, columnHiddenLabel, searchLabel, searchPlaceholder, searchClearLabel, export: _export, exportLabel, csvLabel, jsonLabel, printLabel, exportedLabel, moreSrc, moreLabel, moreStatusLabel, total, copy, copyLabel, copiedLabel, summaryLabel, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const density_ = density ?? "default";
   const rules_ = rules ?? "rows";
   const width_ = width ?? "full";
@@ -43,29 +44,26 @@ export function Table({ name, caption, hideCaption, note, density, rules, zebra,
     h(
       "div",
       { key: "tools", className: "nd-table-tools", "data-nd-table-tools": "", hidden: true },
-      // See the Dioxus half: one search, behind a glass.
+      // See the Dioxus half: one search, behind a glass, and one box with the
+      // glass inside it.
       searchLabel
         ? h(
             "div",
             { key: "s", className: "nd-table-search", "data-nd-table-search": "" },
             h(
-              "button",
-              {
-                key: "o",
-                className: "nd-table-search-open",
-                type: "button",
-                "aria-expanded": "false",
-                "aria-controls": searchId,
-                "aria-label": searchLabel,
-              },
-              h(Icon, { icon: search, size: "small" }),
-            ),
-            h(
               "div",
-              { key: "f", className: "nd-table-search-field", id: searchId, hidden: true },
+              { key: "f", className: "nd-table-search-field" },
               h(
-                "span",
-                { key: "g", className: "nd-table-search-glyph", "aria-hidden": "true" },
+                "button",
+                {
+                  key: "o",
+                  className: "nd-table-search-open",
+                  type: "button",
+                  "aria-expanded": "false",
+                  "aria-controls": searchInputId,
+                  "aria-label": searchLabel,
+                  title: searchLabel,
+                },
                 h(Icon, { icon: search, size: "small" }),
               ),
               h("label", { key: "l", className: "nd-visually-hidden", htmlFor: searchInputId }, searchLabel),
@@ -76,9 +74,28 @@ export function Table({ name, caption, hideCaption, note, density, rules, zebra,
                 type: "search",
                 "data-nd-table-search-input": "",
                 autoComplete: "off",
+                autoCorrect: "off",
+                autoCapitalize: "none",
                 spellCheck: false,
+                enterKeyHint: "search",
                 placeholder: searchPlaceholder,
+                hidden: true,
               }),
+              searchClearLabel
+                ? h(
+                    "button",
+                    {
+                      key: "c",
+                      className: "nd-table-search-clear",
+                      type: "button",
+                      "aria-label": searchClearLabel,
+                      title: searchClearLabel,
+                      "data-nd-table-search-clear": "",
+                      hidden: true,
+                    },
+                    h(Icon, { icon: close, size: "small" }),
+                  )
+                : null,
             ),
           )
         : null,

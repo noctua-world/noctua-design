@@ -607,6 +607,10 @@ TableRow { empty: true }: the caller's own sentence",
                     "search_placeholder",
                     Value::Message(Key::ExampleTableSearchPlaceholder),
                 ),
+                (
+                    "search_clear_label",
+                    Value::Message(Key::ExampleTableSearchClear),
+                ),
                 ("filtered_label", Value::Message(Key::ExampleTableFiltered)),
             ],
             children: &[

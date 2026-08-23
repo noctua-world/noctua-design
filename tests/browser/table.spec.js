@@ -281,6 +281,242 @@ test("the foot does not sort with the body", async ({ page }) => {
   expect(await foot.evaluate((el) => el.parentElement.tagName)).toBe("TFOOT");
 });
 
+// --- The search, which is one box -------------------------------------------
+//
+// IT WAS TWO, AND EVERY ONE OF THESE IS A THING THAT SHIPPED. The glass and the
+// field were siblings with four pixels between them: two borders, two radii
+// that disagreed, two magnifiers once it was open, the focus ring on the bare
+// `<input>` inside the second box rather than on the box a reader can see, and
+// the engine's own clear control left showing beside ours. Not one of them was
+// asserted anywhere, which is why all five shipped together.
+
+/** The search of one named table, and the parts inside it. */
+const searchOf = (page, name) => ({
+  holder: frame(page, name).locator(".nd-table-search"),
+  field: frame(page, name).locator(".nd-table-search-field"),
+  glass: frame(page, name).locator(".nd-table-search-open"),
+  box: frame(page, name).locator(".nd-table-search-input"),
+  clear: frame(page, name).locator(".nd-table-search-clear"),
+});
+
+test("the search is one box, and the glass is the control inside it", async ({ page }) => {
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  const search = searchOf(page, "searchable");
+  await search.holder.scrollIntoViewIfNeeded();
+
+  const shut = await search.holder.evaluate((el) => {
+    const field = el.querySelector(".nd-table-search-field");
+    const glass = el.querySelector(".nd-table-search-open");
+    const box = field.getBoundingClientRect();
+    const inside = glass.getBoundingClientRect();
+    return {
+      // Every drawn magnifier, and there is one. A hidden part draws nothing.
+      glyphs: [...el.querySelectorAll("svg")].filter((one) => !one.closest("[hidden]")).length,
+      boxes: el.querySelectorAll(".nd-table-search-field").length,
+      field: { w: box.width, h: box.height },
+      // The glass is INSIDE the box rather than beside it, so its edges are
+      // within the field's. Beside it, this was 36 pixels of daylight.
+      spare: { start: inside.left - box.left, end: box.right - inside.right },
+    };
+  });
+  expect(shut.glyphs).toBe(1);
+  expect(shut.boxes).toBe(1);
+  expect(shut.spare.start).toBeGreaterThanOrEqual(0);
+  expect(shut.spare.end).toBeGreaterThanOrEqual(0);
+  // Shut, it is the size of the buttons it stands in a row with.
+  expect(shut.field.w).toBeLessThan(shut.field.h + 6);
+
+  await search.glass.click();
+  await expect(search.box).toBeVisible();
+
+  const open = await search.holder.evaluate((el) => ({
+    glyphs: [...el.querySelectorAll("svg")].filter((one) => !one.closest("[hidden]")).length,
+    boxes: el.querySelectorAll(".nd-table-search-field").length,
+    wide: el.querySelector(".nd-table-search-field").getBoundingClientRect().width,
+  }));
+  // STILL ONE, and this is the duplicate that was reported: the glass drew a
+  // magnifier and the field drew a second one beside it.
+  expect(open.glyphs).toBe(1);
+  expect(open.boxes).toBe(1);
+  expect(open.wide).toBeGreaterThan(shut.field.w * 2);
+});
+
+// AND ONE ROW IS ONE HEIGHT. Three controls at 32, 34 and 36 pixels is what
+// "it does not follow the layout" looks like from the outside, and the search
+// was the shortest of the three. Every toolbar on the page rather than one,
+// because the mix of controls differs from table to table and the one that
+// disagrees is the one nobody put beside the others.
+test("every control in a table's toolbar is the same height", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+
+  const rows = await page.evaluate(() => {
+    const out = [];
+    for (const tools of document.querySelectorAll(".nd-table-tools")) {
+      if (tools.hidden) continue;
+      const controls = [];
+      for (const kid of tools.children) {
+        // The search's box is the control; its wrapper is a layout box.
+        const el = kid.querySelector(".nd-table-search-field") ?? kid;
+        controls.push({
+          what: el.className.split(" ")[0],
+          height: Math.round(el.getBoundingClientRect().height),
+        });
+      }
+      out.push({
+        table: tools.closest(".nd-table-frame").getAttribute("data-nd-table-frame"),
+        controls,
+      });
+    }
+    return out;
+  });
+
+  // Floors. A row of one control agrees with itself, and a page with no
+  // searched table would pass this without measuring one.
+  expect(rows.length).toBeGreaterThan(4);
+  const kinds = new Set(rows.flatMap((row) => row.controls.map((one) => one.what)));
+  expect(kinds.size).toBeGreaterThan(2);
+  expect([...kinds]).toContain("nd-table-search-field");
+
+  const heights = new Set(rows.flatMap((row) => row.controls.map((one) => one.height)));
+  expect([...heights], JSON.stringify(rows)).toHaveLength(1);
+});
+
+test("the search box is the platform's own Search field, token for token", async ({ page }) => {
+  const read = (el) => {
+    const s = getComputedStyle(el);
+    return {
+      radius: s.borderTopLeftRadius,
+      border: s.borderTopWidth,
+      style: s.borderTopStyle,
+      colour: s.borderTopColor,
+      background: s.backgroundColor,
+    };
+  };
+
+  await page.goto(url(PAGE.search));
+  await showParts(page);
+  const platform = await page
+    .locator(".nd-search-field")
+    .first()
+    .evaluate(read);
+
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  const mine = await searchOf(page, "searchable").field.evaluate(read);
+
+  // A pill beside a rounded rectangle is what was reported, so the radius is
+  // the one that matters most — but a border that disagreed would be the same
+  // defect with a smaller number, so all five are read.
+  expect(mine).toEqual(platform);
+});
+
+test("the ring lands on the box a reader can see, never on the bare input", async ({ page }) => {
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  const search = searchOf(page, "searchable");
+  await search.glass.click();
+  await search.box.focus();
+
+  const rings = await search.holder.evaluate((el) => {
+    const one = (node) => {
+      const s = getComputedStyle(node);
+      return { style: s.outlineStyle, width: Number.parseFloat(s.outlineWidth) };
+    };
+    return {
+      field: one(el.querySelector(".nd-table-search-field")),
+      box: one(el.querySelector(".nd-table-search-input")),
+      glass: one(el.querySelector(".nd-table-search-open")),
+    };
+  });
+  // The blue rectangle drawn over the field in the report.
+  expect(rings.box.style).toBe("none");
+  expect(rings.glass.style).toBe("none");
+  expect(rings.field.style).not.toBe("none");
+  expect(rings.field.width).toBeGreaterThan(0);
+});
+
+test("the clear control is ours, and it is there only when there is a query", async ({ page }) => {
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  const table = named(page, "searchable");
+  const search = searchOf(page, "searchable");
+  const all = (await rows(table)).length;
+  expect(all).toBeGreaterThan(1);
+
+  await search.glass.click();
+  // A control that empties an empty box does nothing, and a reader learns to
+  // distrust the row it is in.
+  await expect(search.clear).toBeHidden();
+
+  await search.box.fill("Aurora");
+  await expect(search.clear).toBeVisible();
+  expect(await search.clear.getAttribute("aria-label")).toMatch(/\S/);
+  // Waited for rather than read once: the filter follows the pause, so a count
+  // taken straight after the typing is the count from before it.
+  await expect.poll(async () => (await rows(table)).length).toBeLessThan(all);
+
+  await search.clear.click();
+  await expect(search.box).toHaveValue("");
+  // Emptying leaves the box open and focused: a reader emptying a search is
+  // usually about to type another one.
+  await expect(search.box).toBeFocused();
+  await expect(search.clear).toBeHidden();
+  await expect.poll(async () => (await rows(table)).length).toBe(all);
+
+  // AND THE ENGINE'S OWN IS TAKEN AWAY. Blink draws a cross inside the box and
+  // Gecko draws none, so leaving it is a second clear control half the readers
+  // get, four pixels from ours. Asserted as what it DOES rather than as the
+  // declaration that removes it: `getComputedStyle` on that pseudo-element
+  // answers for the input, so it says `auto` whether the rule is there or not.
+  // A BAND RATHER THAN A POINT, because where the engine puts that control is
+  // the engine's business: it sits at the end of the CONTENT box, so a single
+  // click five pixels from the edge lands in the padding and misses it. The
+  // first version of this test did exactly that and passed with the defect
+  // restored.
+  // Measured with the query already in the box: our own clear control appears
+  // with the first letter and moves the input's trailing edge 32 pixels.
+  await search.box.fill("Aurora");
+  await expect(search.clear).toBeVisible();
+  const band = await search.box.evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    const at = [];
+    for (let back = 2; back <= 26; back += 2) {
+      at.push({ x: box.right - back, y: box.top + box.height / 2 });
+    }
+    return at;
+  });
+  expect(band.length).toBeGreaterThan(10);
+  for (const spot of band) {
+    await page.mouse.click(spot.x, spot.y);
+    await expect(search.box).toHaveValue("Aurora");
+  }
+});
+
+test("Escape empties the search, shuts the box and hands focus back to the glass", async ({
+  page,
+}) => {
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  const table = named(page, "searchable");
+  const search = searchOf(page, "searchable");
+  const all = (await rows(table)).length;
+
+  await search.glass.click();
+  await search.box.fill("Aurora");
+  await expect.poll(async () => (await rows(table)).length).toBeLessThan(all);
+
+  await search.box.press("Escape");
+  await expect(search.box).toBeHidden();
+  await expect(search.glass).toBeFocused();
+  expect(await search.glass.getAttribute("aria-expanded")).toBe("false");
+  // Shutting clears: a box that is out of sight and still narrowing the table
+  // is a table missing rows for a reason nothing on the screen gives.
+  await expect.poll(async () => (await rows(table)).length).toBe(all);
+});
+
 // --- Filtering, the totals and the count -------------------------------------
 
 test("a search hides rows, recounts the total and says how much is showing", async ({ page }) => {

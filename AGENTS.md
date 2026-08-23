@@ -288,8 +288,9 @@ From `NOCTUA.md §9.7`, and they bind every component and every page:
   `--nc-color-surface-raised` exists for the rare case that genuinely needs
   separation; reaching for it is a decision to justify, not a default.
 - **Generous spacing, one scale**, with a stated base step. Siblings share
-  spacing, padding and radius — a row of controls that disagrees on padding
-  reads as broken.
+  spacing, padding, radius and HEIGHT — a row of controls that disagrees on any
+  of the four reads as broken. Height is the one that goes unnoticed, because
+  nothing declares it: see the silent failure below.
 - **Large default title and body sizes.**
 - **A narrow default measure**, whatever the screen. `--noctua-measure` caps
   prose in `ch`. This is not a max-width on the page: the page may be wide, the
@@ -435,6 +436,13 @@ blocked — `material.spec.js` does.
 
 **`ch` is not a character.** It is the advance of `0`, so a fourteen-character
 word can be wider than `14ch`.
+
+**A control whose height is not declared is whatever its font size, its line
+height and its padding add up to.** Two controls side by side then agree only by
+accident, and they usually do not: a table toolbar shipped a button at 34
+pixels, two menus at 36 and a search box at 32, none of the three written down
+anywhere. It is invisible in a screenshot of any one of them. Declare the height
+on the row and measure the row, not the control.
 
 ## Two rules about proving something
 

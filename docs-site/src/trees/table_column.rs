@@ -318,6 +318,10 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     "search_placeholder",
                     Value::Message(Key::ExampleTableSearchPlaceholder),
                 ),
+                (
+                    "search_clear_label",
+                    Value::Message(Key::ExampleTableSearchClear),
+                ),
                 ("filtered_label", Value::Message(Key::ExampleTableFiltered)),
                 ("columns_label", Value::Message(Key::ExampleTableColumns)),
                 (

@@ -57,10 +57,12 @@ export interface TableProps {
   columnShownLabel?: string;
   /** The same, for a column going away. */
   columnHiddenLabel?: string;
-  /** The name of the search field, and of the control that reveals it. **One box, behind a magnifying glass**, rather than one in every filterable heading. Wanted in practice by a filterable `TableColumn`. */
+  /** The name of the search field, and of the control that opens it. **One box, behind a magnifying glass**, rather than one in every filterable heading. Wanted in practice by a filterable `TableColumn`. */
   searchLabel?: string;
   /** The example inside the search box, such as *invoice, client, status*. **Never the only name it has**, because it vanishes on the first keystroke. */
   searchPlaceholder?: string;
+  /** The name of the control that empties the search box. It is a glyph, so this is the only name it has. Without it the box is emptied by the keyboard alone, which is not a control a pointer can reach. */
+  searchClearLabel?: string;
   /** Whether the toolbar carries the menu that saves the table: a `.csv` file, a `.json` file, the clipboard, and the printer. It writes what is **showing**: the visible columns, the rows a filter left, and the chosen rows when there are any. */
   export?: boolean;
   /** The name of that menu. Wanted in practice by `export`. */

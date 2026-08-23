@@ -640,6 +640,10 @@ TableRow { emphasis } and TableCell { aggregate }: subtotal, tax, total",
                     "search_placeholder",
                     Value::Message(Key::ExampleTableSearchPlaceholder),
                 ),
+                (
+                    "search_clear_label",
+                    Value::Message(Key::ExampleTableSearchClear),
+                ),
                 ("filtered_label", Value::Message(Key::ExampleTableFiltered)),
             ],
             children: &[
@@ -1043,7 +1047,7 @@ TableRow { emphasis } and TableCell { aggregate }: subtotal, tax, total",
         }],
     ),
     (
-        r"Table { search_label, search_placeholder, filtered_label, summary_label }",
+        r"Table { search_label, search_placeholder, search_clear_label, summary_label }",
         &[Node::Component {
             name: "Table",
             props: &[
@@ -1053,6 +1057,10 @@ TableRow { emphasis } and TableCell { aggregate }: subtotal, tax, total",
                 (
                     "search_placeholder",
                     Value::Message(Key::ExampleTableSearchPlaceholder),
+                ),
+                (
+                    "search_clear_label",
+                    Value::Message(Key::ExampleTableSearchClear),
                 ),
                 ("filtered_label", Value::Message(Key::ExampleTableFiltered)),
                 ("summary_label", Value::Message(Key::ExampleTableSummary)),

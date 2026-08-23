@@ -1733,7 +1733,7 @@ TableRow { emphasis } and TableCell { aggregate }: subtotal, tax, total",
         Key::ExampleTableNoteUsage
     ),
     example!(
-        r"Table { search_label, search_placeholder, filtered_label, summary_label }",
+        r"Table { search_label, search_placeholder, search_clear_label, summary_label }",
         Key::ExampleTableNoteSearch
     ),
     example!(

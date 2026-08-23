@@ -2476,6 +2476,8 @@ pub enum Key {
     ExampleTableSearch,
     /// `example.table.search-placeholder`
     ExampleTableSearchPlaceholder,
+    /// `example.table.search-clear`
+    ExampleTableSearchClear,
     /// `example.table.filtered`
     ExampleTableFiltered,
     /// `example.table.summary`
@@ -5324,6 +5326,8 @@ pub enum Key {
     ComponentTablePropSearchLabelDoc,
     /// `component.table.prop.search_placeholder.doc`
     ComponentTablePropSearchPlaceholderDoc,
+    /// `component.table.prop.search_clear_label.doc`
+    ComponentTablePropSearchClearLabelDoc,
     /// `component.table.prop.export.doc`
     ComponentTablePropExportDoc,
     /// `component.table.prop.export_label.doc`
@@ -6062,7 +6066,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2969] = [
+    pub const ALL: [Self; 2971] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -7241,6 +7245,7 @@ impl Key {
         Self::ExampleTableGroupYesterday,
         Self::ExampleTableSearch,
         Self::ExampleTableSearchPlaceholder,
+        Self::ExampleTableSearchClear,
         Self::ExampleTableFiltered,
         Self::ExampleTableSummary,
         Self::ExampleTableEmpty,
@@ -8665,6 +8670,7 @@ impl Key {
         Self::ComponentTablePropColumnHiddenLabelDoc,
         Self::ComponentTablePropSearchLabelDoc,
         Self::ComponentTablePropSearchPlaceholderDoc,
+        Self::ComponentTablePropSearchClearLabelDoc,
         Self::ComponentTablePropExportDoc,
         Self::ComponentTablePropExportLabelDoc,
         Self::ComponentTablePropCsvLabelDoc,
@@ -10216,6 +10222,7 @@ impl Key {
             Self::ExampleTableGroupYesterday => "example.table.group-yesterday",
             Self::ExampleTableSearch => "example.table.search",
             Self::ExampleTableSearchPlaceholder => "example.table.search-placeholder",
+            Self::ExampleTableSearchClear => "example.table.search-clear",
             Self::ExampleTableFiltered => "example.table.filtered",
             Self::ExampleTableSummary => "example.table.summary",
             Self::ExampleTableEmpty => "example.table.empty",
@@ -12049,6 +12056,9 @@ impl Key {
             Self::ComponentTablePropSearchLabelDoc => "component.table.prop.search_label.doc",
             Self::ComponentTablePropSearchPlaceholderDoc => {
                 "component.table.prop.search_placeholder.doc"
+            }
+            Self::ComponentTablePropSearchClearLabelDoc => {
+                "component.table.prop.search_clear_label.doc"
             }
             Self::ComponentTablePropExportDoc => "component.table.prop.export.doc",
             Self::ComponentTablePropExportLabelDoc => "component.table.prop.export_label.doc",
@@ -14607,6 +14617,7 @@ impl Locale {
                 Key::ExampleTableGroupYesterday => "Yesterday",
                 Key::ExampleTableSearch => "Search this table",
                 Key::ExampleTableSearchPlaceholder => "invoice, client, status",
+                Key::ExampleTableSearchClear => "Clear the search",
                 Key::ExampleTableFiltered => "{count} of {total} rows are showing.",
                 Key::ExampleTableSummary => "{visible} of {total} rows.",
                 Key::ExampleTableEmpty => "Nothing matches what you searched for.",
@@ -18258,10 +18269,13 @@ impl Locale {
                 }
                 Key::ComponentTablePropColumnHiddenLabelDoc => "The same, for a column going away.",
                 Key::ComponentTablePropSearchLabelDoc => {
-                    "The name of the search field, and of the control that reveals it. **One box, behind a magnifying glass**, rather than one in every filterable heading. Wanted in practice by a filterable `TableColumn`."
+                    "The name of the search field, and of the control that opens it. **One box, behind a magnifying glass**, rather than one in every filterable heading. Wanted in practice by a filterable `TableColumn`."
                 }
                 Key::ComponentTablePropSearchPlaceholderDoc => {
                     "The example inside the search box, such as *invoice, client, status*. **Never the only name it has**, because it vanishes on the first keystroke."
+                }
+                Key::ComponentTablePropSearchClearLabelDoc => {
+                    "The name of the control that empties the search box. It is a glyph, so this is the only name it has. Without it the box is emptied by the keyboard alone, which is not a control a pointer can reach."
                 }
                 Key::ComponentTablePropExportDoc => {
                     "Whether the toolbar carries the menu that saves the table: a `.csv` file, a `.json` file, the clipboard, and the printer. It writes what is **showing**: the visible columns, the rows a filter left, and the chosen rows when there are any."
@@ -21314,6 +21328,7 @@ impl Locale {
                 Key::ExampleTableGroupYesterday => "Ontem",
                 Key::ExampleTableSearch => "Buscar nesta tabela",
                 Key::ExampleTableSearchPlaceholder => "fatura, cliente, status",
+                Key::ExampleTableSearchClear => "Limpar a busca",
                 Key::ExampleTableFiltered => "{count} de {total} linhas estão aparecendo.",
                 Key::ExampleTableSummary => "{visible} de {total} linhas.",
                 Key::ExampleTableEmpty => "Nada corresponde ao que você buscou.",
@@ -24981,10 +24996,13 @@ impl Locale {
                 }
                 Key::ComponentTablePropColumnHiddenLabelDoc => "O mesmo, para uma coluna que sai.",
                 Key::ComponentTablePropSearchLabelDoc => {
-                    "O nome do campo de busca, e do controle que o revela. **Uma caixa só, atrás de uma lupa**, em vez de uma em cada título filtrável. Necessário na prática por um `TableColumn` filtrável."
+                    "O nome do campo de busca, e do controle que o abre. **Uma caixa só, atrás de uma lupa**, em vez de uma em cada título filtrável. Necessário na prática por um `TableColumn` filtrável."
                 }
                 Key::ComponentTablePropSearchPlaceholderDoc => {
                     "O exemplo dentro da caixa de busca, como *fatura, cliente, status*. **Nunca o único nome que ela tem**, porque some na primeira tecla."
+                }
+                Key::ComponentTablePropSearchClearLabelDoc => {
+                    "O nome do controle que esvazia a caixa de busca. Ele é um glifo, então este é o único nome que ele tem. Sem ele a caixa só se esvazia pelo teclado, o que não é um controle que um ponteiro alcança."
                 }
                 Key::ComponentTablePropExportDoc => {
                     "Se a barra de ferramentas carrega o menu que salva a tabela: um arquivo `.csv`, um `.json`, a área de transferência e a impressora. Escreve o que está **aparecendo**: as colunas visíveis, as linhas que o filtro deixou e as escolhidas."
@@ -28125,6 +28143,7 @@ impl Locale {
                 Key::ExampleTableGroupYesterday => "⟦Yeesteerdaay⟧",
                 Key::ExampleTableSearch => "⟦Seeaarch thiis taablee⟧",
                 Key::ExampleTableSearchPlaceholder => "⟦iinvooiicee, cliieent, staatuus⟧",
+                Key::ExampleTableSearchClear => "⟦Cleeaar thee seeaarch⟧",
                 Key::ExampleTableFiltered => "⟦{count} oof {total} roows aaree shoowiing.⟧",
                 Key::ExampleTableSummary => "⟦{visible} oof {total} roows.⟧",
                 Key::ExampleTableEmpty => "⟦Noothiing maatchees whaat yoouu seeaarcheed foor.⟧",
@@ -31864,10 +31883,13 @@ impl Locale {
                     "⟦Thee saamee, foor aa cooluumn gooiing aawaay.⟧"
                 }
                 Key::ComponentTablePropSearchLabelDoc => {
-                    "⟦Thee naamee oof thee seeaarch fiieeld, aand oof thee coontrool thaat reeveeaals iit. **OOnee boox, beehiind aa maagniifyiing glaass**, raatheer thaan oonee iin eeveery fiilteeraablee heeaadiing. Waanteed iin praactiicee by aa fiilteeraablee `TaableeCooluumn`.⟧"
+                    "⟦Thee naamee oof thee seeaarch fiieeld, aand oof thee coontrool thaat oopeens iit. **OOnee boox, beehiind aa maagniifyiing glaass**, raatheer thaan oonee iin eeveery fiilteeraablee heeaadiing. Waanteed iin praactiicee by aa fiilteeraablee `TaableeCooluumn`.⟧"
                 }
                 Key::ComponentTablePropSearchPlaceholderDoc => {
                     "⟦Thee eexaamplee iinsiidee thee seeaarch boox, suuch aas *iinvooiicee, cliieent, staatuus*. **Neeveer thee oonly naamee iit haas**, beecaauusee iit vaaniishees oon thee fiirst keeystrookee.⟧"
+                }
+                Key::ComponentTablePropSearchClearLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool thaat eemptiiees thee seeaarch boox. IIt iis aa glyph, soo thiis iis thee oonly naamee iit haas. Wiithoouut iit thee boox iis eemptiieed by thee keeybooaard aaloonee, whiich iis noot aa coontrool aa pooiinteer caan reeaach.⟧"
                 }
                 Key::ComponentTablePropExportDoc => {
                     "⟦Wheetheer thee toooolbaar caarriiees thee meenuu thaat saavees thee taablee: aa `.csv` fiilee, aa `.jsoon` fiilee, thee cliipbooaard, aand thee priinteer. IIt wriitees whaat iis **shoowiing**: thee viisiiblee cooluumns, thee roows aa fiilteer leeft, aand thee chooseen roows wheen theeree aaree aany.⟧"

@@ -7909,7 +7909,20 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 
 /* --- The tools above it --- */
 
+/* ONE HEIGHT FOR THE ROW, AND IT IS DECLARED.
+ *
+ * There were three, none of them written down: a small `Button` at 34 pixels,
+ * the two menu summaries at 36 and the search at 32, each of them whatever its
+ * own font size and padding happened to add up to. Three controls side by side
+ * at three heights is what "it does not follow the layout" looks like from the
+ * outside, and the search was the shortest of the three.
+ *
+ * The number is a small `Button`'s, because `Button` is the component that says
+ * what a control of this size is: the space step, plus the hairline it draws
+ * outside it. Everything in this row is measured against that one. */
 .nd-table-tools {
+  --nd-table-tool-height: calc(var(--noctua-space-8) + var(--noctua-border-hairline) * 2);
+
   display: flex;
   flex-wrap: wrap;
   gap: var(--noctua-space-2);
@@ -7925,7 +7938,8 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   display: inline-flex;
   gap: var(--noctua-space-2);
   align-items: center;
-  padding-block: var(--noctua-space-1);
+  block-size: var(--nd-table-tool-height);
+  padding-block: 0;
   padding-inline: var(--noctua-space-3);
   border: var(--noctua-border-hairline) solid var(--nc-color-border);
   border-radius: var(--noctua-radius-control);
@@ -8400,71 +8414,113 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   outline-offset: calc(var(--noctua-focus-offset) * -1);
 }
 
-/* --- The search, behind a glass --- */
+/* --- The search, behind a glass ---
+ *
+ * ONE BOX. THE GLASS IS THE LEADING EDGE OF IT, AND IT IS THE CONTROL.
+ *
+ * What this replaced drew the glass and the field as two boxes side by side,
+ * and it was wrong in five ways at once, all of them visible in one screenshot:
+ * two borders with four pixels of gap between them, two radii that disagreed
+ * (`control` on one, `pill` on the other, and the page's controls are
+ * `control`), two magnifiers once it was open, a blue ring drawn on the bare
+ * `<input>` INSIDE the second box rather than on the box a reader can see, and
+ * the engine's own clear control left showing beside the border it overlapped.
+ * The two boxes were not even the same height: 32 pixels and 44.
+ *
+ * It is `.nd-search-field` now, token for token — the same hairline, the same
+ * `control` radius, the same veiled surface, the same ring on `:focus-within`
+ * and the same `outline: none` on the input, because a ring belongs on the box
+ * a reader sees and never on the bare control inside it. `table.spec.js`
+ * measures the two against each other rather than trusting this paragraph.
+ *
+ * ONE DIFFERENCE, AND IT IS WHY THE PADDING IS ZERO. `Search`'s glyph is a
+ * `<span>`, so its field pads the row and the glyph sits in the padding. Here
+ * the glyph is the control that opens the box, so it needs a hit target of its
+ * own: it is a square the height of the field, the field pads nothing, and the
+ * closed box is therefore exactly the size of the buttons beside it in the
+ * toolbar. */
 
 .nd-table-search {
   display: flex;
   align-items: center;
-  gap: var(--noctua-space-1);
 }
 
-.nd-table-search-open {
-  display: inline-flex;
+.nd-table-search-field {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  inline-size: var(--noctua-space-8);
-  block-size: var(--noctua-space-8);
+  block-size: var(--nd-table-tool-height);
   padding: 0;
   border: var(--noctua-border-hairline) solid var(--nc-color-border);
   border-radius: var(--noctua-radius-control);
-  background: none;
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil), transparent);
   color: var(--nc-color-fg-muted);
-  cursor: pointer;
 }
 
-.nd-table-search-open:hover,
-.nd-table-search[data-nd-open] .nd-table-search-open {
-  color: var(--nc-color-accent);
-  border-color: var(--nc-color-accent-border);
-}
-
-.nd-table-search-open:focus-visible,
-.nd-table-search-input:focus-visible {
+/* THE RING IS ON THE BOX, NEVER ON WHAT IS IN IT. `Rating`'s rule and
+   `Search`'s rule: the focus ring has to land on the thing the reader can see.
+   The input and the two buttons give theirs up so this one is the only one. */
+.nd-table-search-field:focus-within {
+  border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
 
-/* THE FIELD, NOT A BOX IN A HEADING. It is the shape `Search` already uses —
-   a glyph inside the field, a real label off the screen, and a `type="search"`
-   whose own clear control the platform draws. */
-.nd-table-search-field {
-  display: flex;
-  align-items: center;
-  gap: var(--noctua-space-2);
-  padding-inline: var(--noctua-space-3);
-  border: var(--noctua-border-hairline) solid var(--nc-color-border);
-  border-radius: var(--noctua-radius-pill);
-  background: var(--nc-color-surface);
-}
-
-.nd-table-search-field[hidden] {
-  display: none;
-}
-
-.nd-table-search-glyph {
+.nd-table-search-open,
+.nd-table-search-clear {
   display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--noctua-space-8);
+  block-size: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--noctua-radius-control);
+  background: none;
   color: var(--nc-color-fg-muted);
+  cursor: pointer;
+  outline: none;
+}
+
+@media (hover: hover) {
+  .nd-table-search-open:hover,
+  .nd-table-search-clear:hover {
+    color: var(--nc-color-fg);
+  }
+}
+
+/* Open, the glass is no longer the thing to press first — it is where the box
+   starts. The accent says which of the two states the toolbar is in, which is
+   the one thing the closed box cannot say by being a different shape. */
+.nd-table-search[data-nd-open] .nd-table-search-open {
+  color: var(--nc-color-accent);
 }
 
 .nd-table-search-input {
+  flex: 1 1 auto;
   inline-size: var(--noctua-space-48);
   max-inline-size: 40vw;
-  padding-block: var(--noctua-space-2);
+  min-inline-size: 0;
+  padding: 0;
+  padding-inline-end: var(--noctua-space-2);
   border: 0;
   background: none;
   font: inherit;
   font-size: var(--noctua-size-small);
   color: var(--nc-color-fg);
+  outline: none;
+}
+
+/* The engine's own clear control, in the two engines that draw one. Ours is a
+   real button with a name; a control that appears on some machines and not
+   others is worse than one we draw. `Search`'s rule, and the reason the box
+   in the screenshot had a cross it never asked for. */
+.nd-table-search-input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.nd-table-search-input::placeholder {
+  color: var(--nc-color-fg-muted);
 }
 
 /* --- The export menu --- */
@@ -8477,7 +8533,8 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   display: inline-flex;
   gap: var(--noctua-space-2);
   align-items: center;
-  padding-block: var(--noctua-space-1);
+  block-size: var(--nd-table-tool-height);
+  padding-block: 0;
   padding-inline: var(--noctua-space-3);
   border: var(--noctua-border-hairline) solid var(--nc-color-border);
   border-radius: var(--noctua-radius-control);
