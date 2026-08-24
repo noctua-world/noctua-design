@@ -1,0 +1,83 @@
+# Cuts a GitHub Release when a version tag is pushed.
+#
+# WHAT IT DOES NOT DO: publish to npm or to crates.io. Nothing here is
+# published to a registry yet, and the reason is written down rather than
+# forgotten — the stylesheets a consumer links live in `dist/`, at the
+# repository root, which Cargo cannot include from inside a package. Until that
+# question is answered a registry consumer would install components and get no
+# rules, which is the exact defect `dist/components.css` was written to remove.
+# `AGENTS.md` carries the note; a tag is consumed by git today.
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions: {}
+
+jobs:
+  release:
+    name: GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      # Creating the release and uploading assets.
+      contents: write
+      # Attestation. All three are required as of actions/attest v4 — the third
+      # is new, and omitting it is the most common failure with this action.
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install the pinned toolchain
+        run: rustup show
+
+      - uses: Swatinem/rust-cache@v2
+
+      # `dist/` and the generated packages are committed, so there is nothing to
+      # build — but they must match the spec, or the release would ship
+      # artifacts that no longer correspond to the source they claim to come
+      # from. This is the same command CI runs on every push.
+      - name: The committed output must match the spec
+        run: cargo xtask check
+
+      # What a consumer of a tag actually takes: the stylesheets and the
+      # behaviour modules, plus the fonts `dist/fonts.css` reaches for. The
+      # crate and the npm package come from the repository itself.
+      - name: Pack
+        run: |
+          name="noctua-design-${GITHUB_REF_NAME}"
+          tar -czf "${name}-dist.tar.gz" dist assets/fonts packages/tokens/vendor/css
+          zip -qr "${name}-dist.zip" dist assets/fonts packages/tokens/vendor/css
+          sha256sum "${name}-dist.tar.gz" "${name}-dist.zip" > SHA256SUMS
+          cat SHA256SUMS
+
+      # SLSA build provenance, signed through Sigstore's public-good instance.
+      # It binds each asset's digest to this workflow run:
+      #
+      #   gh attestation verify noctua-design-v0.1.0-dist.tar.gz \
+      #     --repo noctua-world/noctua-design
+      - uses: actions/attest@v4
+        with:
+          subject-path: "noctua-design-*-dist.*"
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            noctua-design-*-dist.tar.gz
+            noctua-design-*-dist.zip
+            SHA256SUMS
+          generate_release_notes: true
+          body: |
+            The stylesheets and the behaviour modules, as a consumer links them.
+            `README.md` says which three directories go where.
+
+            Verify what you downloaded:
+
+            ```sh
+            gh attestation verify noctua-design-${{ github.ref_name }}-dist.tar.gz \
+              --repo noctua-world/noctua-design
+            sha256sum -c SHA256SUMS
+            ```

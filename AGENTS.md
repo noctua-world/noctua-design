@@ -140,6 +140,8 @@ spec/                   the only files a developer edits
 crates/
   noctua-design/        the Dioxus package. src/theme.rs is GENERATED
   noctua-design-runtime/ the browser behaviour this system SHIPS. HAND-WRITTEN
+  noctua-design-styles/ the component RULES this system ships. HAND-WRITTEN CSS,
+                        and sources() is the order they load in
   noctua-design-lineage/ the `Lineage` engine. HAND-WRITTEN, and `layout.js`
                         beside `layout.rs` is the same algorithm again
   noctua-design-emit/   the emitters. HAND-WRITTEN
@@ -152,9 +154,8 @@ packages/
 assets/fonts/           copied from .TEMP/, + ATTRIBUTION.md + licences
 assets/icons/           upstream SVGs, pinned tag, licence, SHA256SUMS
 assets/vendor/          three.js and the owl model, each with ATTRIBUTION.md
-dist/                   GENERATED, COMMITTED: the CSS layers and every shipped
-                        behaviour module. NOT the component styles: those live
-                        in docs-site/assets/shell.css and ship nowhere yet
+dist/                   GENERATED, COMMITTED: the CSS layers, the component
+                        rules and every shipped behaviour module
 docs-site/              the docs app. src/ and assets/ are written; dist/ is
                         build output and is gitignored. Read its README.md
 xtask/                  the five verbs
@@ -190,6 +191,18 @@ hand-written body says where the mark goes with a `// @ai` marker on the line it
 belongs on, and the emitter fills it, so the fragment is written once and placed
 forty-five times. `NOCTUA.md §9.12.1`. The list of hosts is never written down:
 `grep -l '^ai = ' spec/components/*.toml` answers it.
+
+## Publishing
+
+**A tag cuts a GitHub Release and nothing else.** `.github/workflows/release.yml`
+packs `dist/`, the fonts and the vendored colour CSS, attests them, and attaches
+them. Nothing reaches npm or crates.io, and that is deliberate rather than
+unfinished: the stylesheets a consumer links live in `dist/`, at the repository
+root, which **Cargo cannot include from inside a package**. A crates.io consumer
+would install components and receive no rules — the exact defect
+`dist/components.css` exists to remove. Answer that first; the manifests are
+otherwise ready, and `publish = false` and `"private": true` are what hold the
+door.
 
 ## Commands
 
@@ -500,23 +513,30 @@ to change.** Each of these carries measured rules, not description:
 | a path or a name cited in prose | `xtask/src/references.rs` |
 | a frame, a scope, the rail, a fold | `docs-site/assets/shell.js` |
 | the router, or any enhancer that must release | `docs-site/assets/navigate.js` |
+| a component's own rules | `crates/noctua-design-styles/src/` — one file per family, and `sources()` is the cascade |
 | the shell's layout, paint order, or a radius | `docs-site/assets/shell.css` |
 | the page shape or the URL scheme | `docs-site/src/pages.rs` |
 | the site's scope, build, or its open gaps | `docs-site/README.md` |
 
-Four recorded gaps, because a reader would otherwise assume they are closed.
-`Tabs`, `Segmented`, `Tree` and `DateInput` are enhanced from the site's script
-rather than from `dist/`, so a consumer taking the packages gets the roles
-without the keyboard they oblige — the fix is to move the module and let
-`shell.js` import it back. And `spec/components/<name>.cases.toml` is unwritten,
-so behavioural parity is demonstrated by the examples rather than asserted.
+Two recorded gaps, because a reader would otherwise assume they are closed.
 
-**`DateInput`'s share of that gap is smaller than it was, and the shape of the
-fix is now a worked example.** Its month grid was a hundred and seventy lines of
-`createElement` in the site's script; it is `DatePicker` now, and the field
-renders one. What is still the site's is the three-box behaviour — the stepping,
-the paste, the eight validation sentences, the locale re-lay and the quick-pick
-listbox. The count stays at four.
+**`Search` is still enhanced from the site's script**, so a consumer taking the
+packages gets `role="combobox"` without the keyboard it obliges. The other five
+that were in this position — `Select`, `TagPicker`, `Tree`, `Tabs` and
+`DateInput` — ship now, and the site imports them back from `dist/`. `Search`
+did not move with them because its index is fetched from a path this site
+decides; until that is a prop rather than a convention, moving it would ship
+half a component.
+
+**`spec/components/<name>.cases.toml` is unwritten**, so behavioural parity is
+demonstrated by the examples rather than asserted (`NOCTUA.md §9.3` Leg 3).
+
+**And one loose end the styles move turned up**: `--noctua-font-ui` is declared
+in `dist/fonts.css` and read by nothing. The page's own typography is the
+documentation site's `body` rule, which stays in `docs-site/assets/shell.css`
+because a component library does not restyle a consumer's page — so components
+inherit whatever font the host sets, which is right, and the token that looks
+like the way to change it does nothing, which is not.
 
 **A `role="grid"` has one tab stop and three things sit in it.** `table.js`
 sets every cell to `-1` and the first to `0`, and sets nothing inside a cell —
