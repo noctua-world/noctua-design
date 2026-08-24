@@ -558,6 +558,13 @@ fn copy_runtime(root: &Path, out: &Path) -> Result<usize, String> {
         "popover.js",
         "tooltip.js",
         "toast.js",
+        "panels.js",
+        "roving.js",
+        "select.js",
+        "tag-picker.js",
+        "tree.js",
+        "tabs.js",
+        "date-input.js",
     ] {
         count += copy(
             &root.join("dist").join(file),
@@ -578,6 +585,10 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
         "theme.css",
         "scope.css",
         "syntax.css",
+        // The component rules, which this site is the first consumer of: it
+        // links them from `dist/` exactly as anyone else does, and keeps only
+        // its own shell in `assets/shell.css`.
+        "components.css",
         "favicon.svg",
     ] {
         count += copy(&root.join("dist").join(name), &out.join(name))?;
@@ -911,6 +922,17 @@ mod tests {
         let tokens = head.find("tokens.css").expect("the design tokens");
         assert!(scope < default, "scope.css must precede the palette");
         assert!(default < tokens, "the palette must precede the tokens");
+        // And the component rules come last of the base set, so a component
+        // rule that ties with a theme rule on specificity wins — which is the
+        // relation those rules were written in.
+        // By the href rather than the name: the comment above the links names
+        // both files, and a search for the bare name finds the prose first.
+        let theme = head.find("theme.css\">").expect("the appearance layer");
+        let components = head.find("components.css\">").expect("the component rules");
+        assert!(
+            theme < components,
+            "theme.css must precede the component rules"
+        );
     }
 
     /// The default palette's sheet is scope-anchored, so the attribute that

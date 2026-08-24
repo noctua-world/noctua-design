@@ -1,0 +1,18 @@
+
+
+/* A HEADING BREAKS BEFORE THE PAGE DOES.
+ *
+ * A component page's title is the component's NAME — one word, no spaces, at
+ * 3rem. `ExampleFrame` is twelve characters and does not fit on a 320px
+ * screen, so the whole document scrolled sideways to accommodate a heading;
+ * the pseudo-locale did the same to `⟦Tiipoograaphy⟧`. `anywhere` rather than
+ * `break-word` on purpose: only `anywhere` shrinks the min-content width, and
+ * the min-content width is what the page was sizing itself to. */
+.nd-heading {
+  overflow-wrap: anywhere;
+}
+
+.nd-note {
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}

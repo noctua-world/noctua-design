@@ -1,0 +1,167 @@
+
+
+/* --- Switch --------------------------------------------------------------- */
+
+/* THE WHOLE ROW IS THE CONTROL.
+ *
+ * The knob is 24px, which is the minimum WCAG 2.5.8 asks for and a poor thing
+ * to ask a thumb to find. The label is inside the button, so the hit target is
+ * the row — the same reasoning as a `<label for>` around a checkbox, done
+ * without a second element that can be pointed at the wrong control. */
+.nd-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--noctua-space-4);
+  inline-size: 100%;
+  /* A FLOOR, BECAUSE `100%` HAS NONE. Squeezed inside a 320px panel this
+     measured 0 x 24: a control with height and no width, which is a control
+     nobody can press and nothing reports. */
+  min-inline-size: var(--noctua-space-24);
+  min-block-size: var(--noctua-space-8);
+  padding: 0;
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  text-align: start;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.nd-switch-label {
+  min-inline-size: 0;
+}
+
+/* THE TRACK AND THE KNOB, FROM THREE NUMBERS.
+ *
+ * Both are drawn from `aria-checked`, so the state a screen reader hears and
+ * the state a reader sees are one attribute rather than two kept in step.
+ *
+ * ONE GAP, ON FOUR SIDES, IN BOTH STATES. The track's two measurements and the
+ * knob's are declared; the gap around the knob and the distance it travels are
+ * DERIVED from them. Off and on used to carry separate sums, so the knob sat
+ * 5px from the leading edge when it was off and 7px from the trailing edge
+ * when it was on, with 4px above and below it either way — three different
+ * gaps around one circle, which is what made the two states read as two
+ * controls. A size now changes the three numbers and nothing else.
+ *
+ * The gap is measured from the track's OUTER edge, because that is the edge a
+ * reader sees. An absolute inset resolves against the PADDING box, so the
+ * hairline comes off it.
+ *
+ * TWO SOLID TONES, AND NOTHING THIS FILE INVENTED. Off is `subtle`, on is
+ * `accent`, each with its own `on-` colour on the knob — which is exactly the
+ * pair `.nd-button[data-nd-variant="solid"]` and its `tone="neutral"` sibling
+ * already draw. A switch is therefore the same two fills every other filled
+ * control in this system uses, and the accent arrives at FULL STRENGTH.
+ *
+ * That last part is a repair. The on track shipped briefly as
+ * `color-mix(accent 74%, surface)`, a percentage fitted to clear a contrast
+ * floor. It cleared it and it was wrong: a theme's accent is the theme, and a
+ * control that shows three quarters of it shows a colour no palette in this
+ * system contains. The floor is met now the way the palette always meant it to
+ * be, by putting `on-accent` on the accent rather than by moving the accent. */
+.nd-switch-track {
+  --nd-switch-track-inline: var(--noctua-space-12);
+  --nd-switch-track-block: var(--noctua-space-6);
+  --nd-switch-knob: var(--noctua-space-4);
+  --nd-switch-gap: calc((var(--nd-switch-track-block) - var(--nd-switch-knob)) / 2);
+  --nd-switch-travel: calc(
+    var(--nd-switch-track-inline) - var(--nd-switch-knob) - var(--nd-switch-gap) * 2
+  );
+  position: relative;
+  flex: none;
+  inline-size: var(--nd-switch-track-inline);
+  block-size: var(--nd-switch-track-block);
+  /* Fill and edge the same tone, as on a solid button. The hairline is kept
+     for the geometry above rather than for a reader: the knob's insets come
+     off the padding box, and a border of zero would move it. */
+  border: var(--noctua-border-hairline) solid var(--nc-color-subtle);
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-subtle);
+  transition:
+    background-color var(--noctua-duration-fast) var(--noctua-easing-out),
+    border-color var(--noctua-duration-fast) var(--noctua-easing-out);
+}
+
+.nd-switch-track::after {
+  content: "";
+  position: absolute;
+  inset-block-start: calc(var(--nd-switch-gap) - var(--noctua-border-hairline));
+  inset-inline-start: calc(var(--nd-switch-gap) - var(--noctua-border-hairline));
+  inline-size: var(--nd-switch-knob);
+  block-size: var(--nd-switch-knob);
+  border-radius: var(--noctua-radius-pill);
+  /* ONE OBJECT, ONE COLOUR, IN BOTH STATES.
+   *
+   * The knob used to be `fg-muted` off and `on-accent` on. Measured in dark:
+   * off was lightness 0.83 on a 0.21 track and on was 0.18 on a 0.67 track —
+   * a near-white circle in one state and a near-black one in the other. A
+   * light shape on a dark ground reads LARGER than a dark shape of the same
+   * size on a light one, so the two states looked like two knobs of different
+   * sizes, which is exactly what was reported. The geometry was never wrong.
+   *
+   * `on-accent` is the ink a solid accent fill is GUARANTEED to carry — that
+   * is the whole job of the token, and the accent track is the harder of the
+   * two grounds because it is chromatic and moves with the theme. Against the
+   * off track it is measured rather than promised, at 3.13:1 in the worst of
+   * the 78 pairs, and it is within 7/255 of that track's own `on-subtle` in
+   * every one of them. So a single declaration serves both states, and there
+   * is no second one to fall out of step with it. */
+  background: var(--nc-color-on-accent);
+  transform: translate(0, 0);
+  transition: transform var(--noctua-duration-fast) var(--noctua-easing-out);
+}
+
+/* The two things that change between off and on, and there are no others:
+   which end the knob sits at, and what colour the TRACK is. The knob's own
+   colour is not one of them — see the rule above. */
+.nd-switch[aria-checked="true"] > .nd-switch-track {
+  background: var(--nc-color-accent);
+  border-color: var(--nc-color-accent);
+}
+
+.nd-switch[aria-checked="true"] > .nd-switch-track::after {
+  transform: translate(var(--nd-switch-travel), 0);
+}
+
+/* Hover moves the tone one step, on both halves, the way a solid button's
+   does. It used to lighten only the OFF track's edge, which is a different
+   gesture in each state on a control whose whole point is that the two states
+   are one drawing. */
+.nd-switch:hover > .nd-switch-track {
+  background: var(--nc-color-subtle-hover);
+  border-color: var(--nc-color-subtle-hover);
+}
+
+.nd-switch[aria-checked="true"]:hover > .nd-switch-track {
+  background: var(--nc-color-accent-hover);
+  border-color: var(--nc-color-accent-hover);
+}
+
+/* THE BOX, AND IT USED TO BE ONLY THE WORDS.
+ *
+ * `size`'s doc says "the size of the control's box", and the one rule keyed on
+ * it set a font size and a row height: the track and the knob were the same
+ * 48x24 at both values, so a reader looking at the two pictures side by side
+ * saw one control twice. The three declarations below are the box. */
+.nd-switch[data-nd-size="small"] {
+  font-size: var(--noctua-size-caption);
+  min-block-size: var(--noctua-space-6);
+}
+
+/* THREE NUMBERS, AND THE GAP AND THE TRAVEL FOLLOW. A 12px knob in a 16px
+   track leaves 2px all round, the same construction as `medium`'s 16 in 24
+   leaving 4. Nothing here repeats a sum the rule above already did, which is
+   how the two sizes came to disagree about where the knob stops. */
+.nd-switch[data-nd-size="small"] > .nd-switch-track {
+  --nd-switch-track-inline: var(--noctua-space-8);
+  --nd-switch-track-block: var(--noctua-space-4);
+  --nd-switch-knob: var(--noctua-space-3);
+}
+
+.nd-switch[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+}

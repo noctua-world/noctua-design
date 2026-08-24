@@ -1,0 +1,493 @@
+
+
+/* --- CodeBlock ---------------------------------------------------------------
+ *
+ * The COLOURS are not here. They are `dist/syntax.css`, generated from
+ * `spec/syntax.toml`, because a consumer of the Dioxus crate or the React
+ * package never loads this file and would otherwise get a component that
+ * renders `data-nd-tok` spans and paints none of them. What is here is the
+ * layout: the bar, the box, the lines, the counter and the gutter.
+ *
+ * A SCROLLABLE ELEMENT NEVER CARRIES A RADIUS. The `<pre>` owns the radius and
+ * the clipping; the `<code>` inside it owns the scrolling. A classic scrollbar
+ * paints square straight through a rounded corner the moment a reader sets
+ * corners to `circular`, and `tests/browser/material.spec.js` is where that is
+ * asserted. It is also the structure the component has to render anyway,
+ * because the bar has to sit outside whatever scrolls. */
+.nd-codeblock-figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  /* `inline-size` AND `min-inline-size`, and both are load-bearing. A stage is
+     a flex row, so a bare figure is a flex item and shrinks to its content —
+     the block ends wherever the longest line does and the space beside it reads
+     as a mistake. `min-inline-size: 0` is the other half: a flex item's minimum
+     is its content by default, so without it the block refuses to be narrower
+     than its longest line and pushes the page sideways instead of scrolling.
+     `.nd-table-scroll` learned the first of these; this is both. */
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+/* AND IT STRETCHES, where an example otherwise does not.
+ *
+ * `.nd-example-stage` and `.nd-example-stack` are both `align-items: start`,
+ * deliberately: a `Button` in a stage should be button-sized and not a bar
+ * across the page. A block of code is the opposite case — it is the one
+ * component whose content is unbounded sideways and which owns a scroll
+ * container, and a scroll container narrower than the space beside it is a
+ * scrollbar somebody chose to have. Two rules because there are two levels of
+ * flex between the block and the stage. */
+.nd-codeblock-figure {
+  align-self: stretch;
+}
+
+.nd-codeblock-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  padding: var(--noctua-space-1) var(--noctua-space-2) var(--noctua-space-1) var(--noctua-space-4);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-block-end: none;
+  border-start-start-radius: var(--noctua-radius-surface);
+  border-start-end-radius: var(--noctua-radius-surface);
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil-code), transparent);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+  /* The controls sit at the trailing edge and the names at the leading one. */
+  justify-content: flex-end;
+}
+
+.nd-codeblock-name {
+  margin-inline-end: auto;
+  color: var(--nc-color-fg);
+}
+
+.nd-codeblock-badge {
+  color: var(--nc-color-fg-muted);
+}
+/* With no filename, the language takes the leading edge instead of floating
+   next to the buttons. `:first-child` rather than a second class: which of the
+   two is first is a fact the markup already carries. */
+.nd-codeblock-badge:first-child {
+  margin-inline-end: auto;
+}
+
+/* NEITHER OF THEM DRAWS UNTIL SOMETHING CAN ANSWER FOR IT.
+ *
+ * The bar's two buttons are `shell.js`'s: the copy writes to the clipboard and
+ * the wrap toggle moves an attribute, and with the script blocked both shipped
+ * visible, focusable and completely dead — a control that does nothing is
+ * worse than a missing one. The expand button beside them was already gated
+ * this way, and so are `.nd-lineage-camera`, `.nd-dialog` and `.nd-popover`.
+ *
+ * `display: none` and not `visibility`, because a dead button must leave the
+ * tab order as well as the page. */
+.nd-codeblock-control {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--noctua-space-8);
+  block-size: var(--noctua-space-8);
+  padding: 0;
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: var(--noctua-border-hairline) solid transparent;
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+/* `data-nd-scripting` is stamped by the inline head script, before the first
+   paint, so the bar is drawn once and the buttons never arrive late. */
+:root[data-nd-scripting] .nd-codeblock-control {
+  display: inline-flex;
+}
+
+@media (hover: hover) {
+  .nd-codeblock-control:hover {
+    color: var(--nc-color-fg);
+    border-color: var(--nc-color-border);
+  }
+}
+.nd-codeblock-control[aria-pressed="true"] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
+/* Two glyphs, one shown at a time: the check is the visible half of the
+   confirmation the live region gives a screen reader.
+   SCOPED TO THE COPY CONTROL, and it has to be. Unqualified, `:last-child`
+   also matches the only glyph of a one-glyph control — so the wrap toggle
+   rendered a correctly named, correctly sized, completely empty button, and
+   the markup was right the whole time. */
+.nd-codeblock-control[data-nd-copy] > .nd-icon-glyph:last-child,
+.nd-codeblock-control[data-nd-copy][data-nd-done] > .nd-icon-glyph:first-child {
+  display: none;
+}
+.nd-codeblock-control[data-nd-copy][data-nd-done] > .nd-icon-glyph:last-child {
+  display: inline;
+}
+.nd-codeblock-control[data-nd-done] {
+  color: var(--nc-color-success);
+}
+
+.nd-codeblock {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-surface);
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil-code), transparent);
+  font-family: var(--noctua-font-mono);
+  font-size: var(--noctua-size-small);
+  line-height: var(--noctua-leading-body);
+}
+
+/* The bar and the box are one surface, so the seam between them is one
+   hairline rather than two. */
+.nd-codeblock-figure:has(> .nd-codeblock-bar) > .nd-codeblock {
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+
+/* WHITE SPACE IS SPLIT BETWEEN THE TWO, and it is what makes the newlines
+   invisible and copyable at the same time. The `<code>` is `normal`, so the
+   newline the component renders between two lines collapses on screen while
+   staying in `textContent` — which is what the copy control reads. Each line is
+   `pre`, so the indentation inside it survives. */
+.nd-codeblock-code {
+  display: block;
+  padding: var(--noctua-space-4) 0;
+  overflow-x: auto;
+  border-radius: 0;
+  white-space: normal;
+}
+
+.nd-codeblock-line {
+  display: block;
+  white-space: pre;
+  padding-inline: var(--noctua-space-4);
+  counter-increment: nd-code-line;
+  /* An empty line is still a line. Without this it has no height and a blank
+     line in the source disappears from the rendering. */
+  min-block-size: 1lh;
+}
+
+.nd-codeblock[data-nd-wrap="true"] .nd-codeblock-line {
+  white-space: pre-wrap;
+  /* A token name has nothing breakable in it, so at 320px one identifier can
+     push the block sideways however hard it is wrapped. */
+  overflow-wrap: anywhere;
+}
+
+/* --- Line numbers ---
+ *
+ * DRAWN, NOT WRITTEN. A counter on a pseudo element is not in the
+ * accessibility tree, is not selectable, and is not in what the copy control
+ * puts on the clipboard — which is the whole reason the component splits the
+ * code into lines rather than numbering them in the markup. */
+.nd-codeblock[data-nd-numbered="true"] .nd-codeblock-line {
+  padding-inline-start: var(--noctua-space-12);
+}
+.nd-codeblock[data-nd-numbered="true"] .nd-codeblock-line::before {
+  content: counter(nd-code-line);
+  position: absolute;
+  inset-inline-start: 0;
+  inline-size: var(--noctua-space-8);
+  text-align: end;
+  color: var(--nc-color-fg-muted);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.nd-codeblock[data-nd-numbered="true"] .nd-codeblock-line {
+  position: relative;
+}
+
+/* --- An emphasised line ---
+ *
+ * A TINT AND A RULE. A line singled out by colour alone is a line a dichromat
+ * cannot find, which is `NOCTUA.md §8.8` rule 6 at the scale of one row. */
+.nd-codeblock-line[data-nd-mark="true"] {
+  background: color-mix(in oklab, var(--nc-color-accent) var(--nd-veil-checked), transparent);
+  box-shadow: inset var(--noctua-border-strong) 0 0 0 var(--nc-color-accent);
+}
+
+/* And the dimming, which is a separate claim: the emphasis says *these lines*
+   and the dimming says *only these*. Opacity rather than a colour, so it stays
+   correct in both modes and in every theme. */
+.nd-codeblock[data-nd-focus="true"] .nd-codeblock-line:not([data-nd-mark="true"]) {
+  opacity: 0.55;
+}
+
+/* --- A diff ---
+ *
+ * The `+` and the `−` are in the text, where the scanner left them. What this
+ * adds is the wash and the edge, so a removed line is legible as removed with
+ * the colour switched off — `mono` is a real theme and a diff has to survive
+ * it. */
+.nd-codeblock-line[data-nd-line="inserted"] {
+  background: color-mix(in oklab, var(--nc-color-success) var(--nd-veil-checked), transparent);
+  box-shadow: inset var(--noctua-border-strong) 0 0 0 var(--nc-color-success);
+}
+.nd-codeblock-line[data-nd-line="deleted"] {
+  background: color-mix(in oklab, var(--nc-color-danger) var(--nd-veil-checked), transparent);
+  box-shadow: inset var(--noctua-border-strong) 0 0 0 var(--nc-color-danger);
+}
+.nd-codeblock-line[data-nd-line="meta"] {
+  background: color-mix(in oklab, var(--nc-color-fg-muted) var(--nd-veil-checked), transparent);
+}
+
+/* --- Collapsing ---
+ *
+ * THE CAP IS APPLIED BY THE SCRIPT, NOT HERE. With the script blocked the whole
+ * block is visible and there is no control claiming otherwise — an enhancement
+ * that hides content when it fails is a defect, and this is the shape that
+ * cannot have it. `shell.js` sets `data-nd-collapsed` and this reads it. */
+.nd-codeblock-figure[data-nd-collapsible="true"] > .nd-codeblock[data-nd-collapsed="true"] {
+  max-block-size: calc(var(--nd-code-max) * 1lh + var(--noctua-space-8));
+  /* AND IT FADES, because the cap cannot land on a line boundary. The padding
+     sits after the LAST line, not after the sixth, so a block capped at six
+     lines shows six lines and then the top of the seventh through where the
+     padding would have been. Sliced mid-glyph that reads as a rendering fault;
+     faded it reads as what it is, which is that there is more. `currentColor`
+     rather than a colour: a mask only reads alpha, so naming a colour here
+     would be a literal that means nothing. */
+  mask-image: linear-gradient(
+    to bottom,
+    currentColor calc(100% - var(--noctua-space-6)),
+    transparent
+  );
+}
+
+.nd-codeblock-expand {
+  align-self: flex-start;
+  margin-block-start: var(--noctua-space-2);
+  padding: var(--noctua-space-1) var(--noctua-space-3);
+  font: inherit;
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .nd-codeblock-expand:hover {
+    color: var(--nc-color-fg);
+    border-color: var(--nc-color-border-strong);
+  }
+}
+/* Absent until the script caps the block. A control that offers to expand
+   something already fully visible is a control that lies. */
+.nd-codeblock-figure:not(:has(> .nd-codeblock[data-nd-collapsed])) > .nd-codeblock-expand {
+  display: none;
+}
+
+.nd-codeblock-caption {
+  margin-block-start: var(--noctua-space-2);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+  max-inline-size: var(--noctua-measure);
+}
+
+.nd-codeblock[data-nd-glass="true"] {
+  background: color-mix(
+    in oklab,
+    var(--nc-color-surface-subtle) var(--noctua-glass-opacity),
+    transparent
+  );
+}
+
+.nd-blockquote {
+  margin: 0;
+  padding-inline-start: var(--noctua-space-4);
+  border-inline-start: var(--noctua-border-strong) solid var(--nc-color-border-strong);
+  max-inline-size: var(--noctua-measure);
+}
+.nd-blockquote[data-nd-tone="accent"] { border-inline-start-color: var(--nc-color-accent); }
+
+.nd-blockquote-attribution {
+  margin-block-start: var(--noctua-space-2);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+/* `<cite>` is italic by default in every engine, which reads as emphasis rather
+   than as a source. The name of a source is not being emphasised. */
+.nd-blockquote-attribution > cite {
+  font-style: normal;
+}
+
+.nd-list {
+  padding-inline-start: var(--noctua-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+  max-inline-size: var(--noctua-measure);
+}
+.nd-list[data-nd-spacing="tight"] { gap: var(--noctua-space-1); }
+.nd-list[data-nd-spacing="loose"] { gap: var(--noctua-space-4); }
+/* The marker goes, the semantics stay. */
+.nd-list[data-nd-marker="none"] { list-style: none; padding-inline-start: 0; }
+
+/* A description list has no marker to indent past, and its own indent belongs
+   to the description rather than to the pair.
+
+   `gap: 0` because the gap belongs between PAIRS, not between a term and its
+   own description: a flex gap cannot tell the two apart, and would separate the
+   two halves of one entry as widely as it separates one entry from the next.
+   The margins below put it where it means something. */
+dl.nd-list {
+  padding-inline-start: 0;
+  gap: 0;
+}
+
+.nd-list-term {
+  font-weight: var(--noctua-weight-semibold);
+}
+
+dl.nd-list > .nd-list-item {
+  margin-block-start: var(--noctua-space-1);
+  margin-inline-start: var(--noctua-space-4);
+  color: var(--nc-color-fg-muted);
+}
+
+dl.nd-list > .nd-list-item + .nd-list-term {
+  margin-block-start: var(--noctua-space-3);
+}
+
+/* A COLOUR PER LEVEL, COUNTED BY THE SELECTOR AND NOT READ OFF THE MARKUP.
+
+   A nested `List` is its own component instance, so `data-nd-levels` is on the
+   list a caller set it on and on NONE of the lists inside it. Asking each list
+   what level it is would mean a prop every caller had to count for themselves,
+   and a number counted wrongly is a wrong colour with nothing to check it
+   against. So the depth is the selector: one `.nd-list` between the root and
+   the item is level two, two of them level three, three of them level four.
+
+   FOUR NAMES, AND EVERY ONE OF THEM SOLVED IN BOTH APPEARANCES. The only hues
+   a palette guarantees are its neutral and its accent, so the levels alternate
+   between them and change strength as they go: ink, accent, muted ink, muted
+   accent. Each is a `--nc-*` the colour system already answered for light and
+   dark and for all thirty-nine palettes, which is the whole reason none of
+   them is written here as a value.
+
+   IT MARKS TWO THINGS, BECAUSE ONE OF THEM CAN BE SWITCHED OFF. `marker: none`
+   leaves no marker to colour, and a prop that does nothing under another prop
+   is the defect `List.kind` already was. The rule down the inside edge of a
+   nested list is the other half, and it is a hairline and a colour rather than
+   a box, which is what §9.7 leaves for separating things. */
+.nd-list[data-nd-levels="true"] > .nd-list-item::marker {
+  color: var(--nc-color-fg);
+}
+
+/* Every list inside a levelled one takes the rule and a level's worth of
+   indent, whatever its own `marker` and `kind` say — a `dl` and a marker-less
+   list both zero the padding, and a rule hard against the text is not a level,
+   it is a stripe. Two classes and an attribute, so it outranks both. */
+.nd-list[data-nd-levels="true"] .nd-list {
+  /* `strong` and not `rule`: `--noctua-border-rule` is 5px and is the mark on
+     a wrong answer, which is a claim this is not making. */
+  border-inline-start: var(--noctua-border-strong) solid var(--nc-color-accent);
+  padding-inline-start: var(--noctua-space-6);
+}
+.nd-list[data-nd-levels="true"] .nd-list > .nd-list-item::marker {
+  color: var(--nc-color-accent);
+}
+
+.nd-list[data-nd-levels="true"] .nd-list .nd-list {
+  border-inline-start-color: var(--nc-color-fg-muted);
+}
+.nd-list[data-nd-levels="true"] .nd-list .nd-list > .nd-list-item::marker {
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-list[data-nd-levels="true"] .nd-list .nd-list .nd-list {
+  border-inline-start-color: var(--nc-accent-text-muted);
+}
+.nd-list[data-nd-levels="true"] .nd-list .nd-list .nd-list > .nd-list-item::marker {
+  color: var(--nc-accent-text-muted);
+}
+
+/* A term is the marker of a description list: there is no `::marker` on a
+   `<dt>`, so the level lands on the word itself. */
+.nd-list[data-nd-levels="true"] .nd-list > .nd-list-term {
+  color: var(--nc-color-accent);
+}
+.nd-list[data-nd-levels="true"] .nd-list .nd-list > .nd-list-term {
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-em { font-style: italic; }
+.nd-strong { font-weight: var(--noctua-weight-semibold); }
+
+/* A highlight that means something needs more than a color. */
+.nd-mark {
+  background: var(--nc-color-accent-bg);
+  color: var(--nc-color-fg);
+  font-weight: var(--noctua-weight-medium);
+  padding: 0 var(--noctua-space-1);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-del { text-decoration: line-through; color: var(--nc-color-fg-muted); }
+.nd-ins { text-decoration: underline; text-decoration-style: wavy; }
+
+.nd-abbr {
+  text-decoration: underline dotted;
+  text-underline-offset: var(--noctua-space-1);
+  cursor: help;
+}
+
+.nd-time { font-variant-numeric: tabular-nums; }
+
+/* Clipping is visual only — the full value stays in the accessible tree. */
+.nd-truncate {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.nd-truncate[data-nd-lines="1"] { -webkit-line-clamp: 1; }
+.nd-truncate[data-nd-lines="2"] { -webkit-line-clamp: 2; }
+.nd-truncate[data-nd-lines="3"] { -webkit-line-clamp: 3; }
+.nd-truncate[data-nd-lines="4"] { -webkit-line-clamp: 4; }
+
+/* AND WHEN AN ASSISTANT'S MARK IS BESIDE IT, THE CLAMP MOVES DOWN ONE ELEMENT.
+ * A mark inside a `-webkit-box` is counted into the last line and, at one line,
+ * clipped away entirely — the mark disappears and the reader is told nothing.
+ * The unmarked form above is unchanged, byte for byte. */
+.nd-truncate[data-nd-ai] {
+  display: inline-flex;
+  align-items: baseline;
+  max-inline-size: 100%;
+  overflow: visible;
+}
+
+.nd-truncate[data-nd-ai] > .nd-truncate-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  min-inline-size: 0;
+  flex: 0 1 auto;
+  overflow: hidden;
+}
+
+.nd-truncate[data-nd-lines="1"][data-nd-ai] > .nd-truncate-text { -webkit-line-clamp: 1; }
+.nd-truncate[data-nd-lines="2"][data-nd-ai] > .nd-truncate-text { -webkit-line-clamp: 2; }
+.nd-truncate[data-nd-lines="3"][data-nd-ai] > .nd-truncate-text { -webkit-line-clamp: 3; }
+.nd-truncate[data-nd-lines="4"][data-nd-ai] > .nd-truncate-text { -webkit-line-clamp: 4; }
+
+/* Not display:none and not visibility:hidden — both would take the content out
+   of the accessible tree, which is the opposite of the point. */
+.nd-visually-hidden {
+  position: absolute;
+  inline-size: var(--noctua-border-hairline);
+  block-size: var(--noctua-border-hairline);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.nd-visually-hidden[data-nd-focusable="true"]:focus-within {
+  position: static;
+  inline-size: auto;
+  block-size: auto;
+  clip-path: none;
+}

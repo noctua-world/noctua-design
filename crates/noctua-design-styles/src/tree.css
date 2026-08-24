@@ -1,0 +1,228 @@
+
+
+/* --- Tree ------------------------------------------------------------------
+ *
+ * A nested list, and with no script that is all of it: no roles, no tab stops,
+ * nothing folded away. Every rule here that hides something is keyed on
+ * `data-nd-scripting` — the attribute the inline bootstrap stamps BEFORE the
+ * first paint — so a branch that ships closed is closed from the first frame
+ * and a page with no script has nothing hidden behind a control that cannot
+ * open it. That is `CodeBlock { max_lines }`'s rule, and the same mechanism
+ * that reserves the search trigger's slot. */
+.nd-tree,
+.nd-tree-group {
+  --nd-tree-row: var(--noctua-space-8);
+  --nd-tree-step: var(--noctua-space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nd-tree[data-nd-size="small"] {
+  --nd-tree-row: var(--noctua-space-6);
+  --nd-tree-step: var(--noctua-space-4);
+}
+
+.nd-tree[data-nd-size="large"] {
+  --nd-tree-row: var(--noctua-space-12);
+  --nd-tree-step: var(--noctua-space-8);
+}
+
+/* THE INDENT ACCUMULATES BY NESTING, not by a depth counter — so nothing has
+   to know how deep it is. Capped, because twelve levels at a full step leaves
+   no room for a name at 320px, which is a width this suite measures. */
+.nd-tree-group {
+  padding-inline-start: min(var(--nd-tree-step), var(--noctua-space-6));
+}
+
+/* Empty because the node claims children it was not given. It draws nothing
+   and takes no room; the toggle beside it is what says there is more. */
+.nd-tree-group:empty {
+  display: none;
+}
+
+/* AND WHERE THE CALLER GAVE A WORD FOR IT, THE GAP IS EXPLAINED. `empty_label`
+   is the sentence; this is the row it sits in. Muted and italic, because it is
+   the tree talking about itself rather than one more thing to open. */
+.nd-tree-empty {
+  min-block-size: var(--nd-tree-row);
+  display: flex;
+  align-items: center;
+  padding-inline-start: var(--noctua-space-6);
+  font-size: var(--noctua-size-small);
+  font-style: italic;
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-tree-row {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-1);
+  min-block-size: var(--nd-tree-row);
+}
+
+/* The whole row is the target, which is what makes a tree walkable with a
+   thumb. The focus ring is on the `<li>` because that is what has focus. */
+.nd-tree-item:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-tree-item {
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
+.nd-tree-body {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  min-inline-size: 0;
+  padding-inline: var(--noctua-space-1);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  text-decoration: none;
+}
+
+.nd-tree-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nd-tree-glyph {
+  display: inline-flex;
+  flex: none;
+  color: var(--nc-color-fg-muted);
+}
+
+/* BOTH DRAWINGS SHIP AND THE STATE PICKS ONE, so nothing sends a drawing to
+   the script. `Button`'s toggle already does this; the second glyph is only
+   drawn where a caller asked for one. */
+.nd-tree-glyph > .nd-icon-glyph:nth-child(2) {
+  display: none;
+}
+.nd-tree-item[aria-expanded="true"] > .nd-tree-row > .nd-tree-body > .nd-tree-glyph:has(> :nth-child(2)) > .nd-icon-glyph:first-child {
+  display: none;
+}
+.nd-tree-item[aria-expanded="true"] > .nd-tree-row > .nd-tree-body > .nd-tree-glyph > .nd-icon-glyph:nth-child(2) {
+  display: inline-flex;
+}
+
+.nd-tree-toggle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--noctua-space-6);
+  block-size: var(--noctua-space-6);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: none;
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+  /* Points along the row when closed, down when open. Rotated rather than a
+     second vendored drawing: `chevron-right` is a file this repository does not
+     need, and the same glyph turned is the same glyph. */
+  rotate: -90deg;
+}
+
+.nd-tree-item[aria-expanded="true"] > .nd-tree-row > .nd-tree-toggle {
+  rotate: 0deg;
+}
+
+/* A leaf keeps the space so the names of siblings line up, and keeps the
+   toggle hidden because there is nothing to open. */
+.nd-tree-item[data-nd-leaf="true"] > .nd-tree-row::before {
+  content: "";
+  flex: none;
+  inline-size: var(--noctua-space-6);
+}
+
+/* AND A ROW WITH NO DRAWING RESERVES ITS SLOT, in a tree that has any.
+ *
+ * Measured, because it did not look wrong until it was: every label on every
+ * level sat at exactly the same x. A parent's icon pushed its own name right by
+ * one step, and one step is precisely what the nesting had indented the child
+ * by — so the two cancelled and the hierarchy was invisible. The slot is
+ * reserved only where a tree uses icons at all, so a tree with none pays
+ * nothing for this. */
+.nd-tree:has(.nd-tree-glyph) .nd-tree-body:not(:has(> .nd-tree-glyph))::before {
+  content: "";
+  flex: none;
+  inline-size: var(--noctua-space-6);
+}
+
+@media (hover: hover) {
+  .nd-tree-body:hover {
+    color: var(--nc-color-accent);
+  }
+  .nd-tree-toggle:hover {
+    color: var(--nc-color-fg);
+  }
+}
+
+.nd-tree-item[aria-selected="true"] > .nd-tree-row {
+  background: var(--nc-color-accent-bg);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-tree-item[aria-current="page"] > .nd-tree-row > .nd-tree-body,
+.nd-tree-body[aria-current="page"] {
+  font-weight: var(--noctua-weight-semibold);
+  color: var(--nc-color-accent);
+}
+
+.nd-tree-item[aria-disabled="true"] > .nd-tree-row {
+  color: var(--nc-color-fg-muted);
+  cursor: not-allowed;
+}
+
+.nd-tree-item[aria-disabled="true"] > .nd-tree-row > .nd-tree-body {
+  color: var(--nc-color-fg-muted);
+  pointer-events: none;
+}
+
+/* Beside the name, not at the far edge of the row. A count pushed to the right
+   of a nine-hundred-pixel stage has nothing to do with the word it counts, and
+   at 320 pixels the two are beside each other anyway — so they are beside each
+   other at every width. */
+.nd-tree-badge {
+  flex: none;
+}
+
+/* The rule down a level, for a tree deep enough to need one. On the group so
+   it runs the height of what it contains, and inset so it lands between the
+   parent's toggle and its children's. */
+.nd-tree[data-nd-guides="true"] .nd-tree-group {
+  margin-inline-start: var(--noctua-space-3);
+  padding-inline-start: var(--noctua-space-3);
+  border-inline-start: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+/* THE PRE-PAINT COLLAPSE, AND THE ONLY RULE HERE THAT HIDES ANYTHING.
+ *
+ * `data-nd-scripting` is stamped by the inline head script, before anything is
+ * drawn — so a branch that ships closed is closed from the first frame rather
+ * than after the deferred module runs, which would be a layout shift on every
+ * tree on the page. With no script the attribute never appears, nothing is
+ * folded away, and no control claims otherwise: the toggles are `hidden` until
+ * the script reveals them. */
+:root[data-nd-scripting] .nd-tree-item[data-nd-expanded="false"] > .nd-tree-group {
+  display: none;
+}
+
+/* --- Colors and themes: the two axes, the grammar, the contexts ---------- */
+
+/* AN IDENTIFIER IS NOT AN UNTRANSLATED STRING.
+ *
+ * A token name, a component name, a language's own name and a line of sample
+ * text in Devanagari all stay as they are in every locale, and every one of
+ * them would otherwise look exactly like a string somebody forgot to
+ * translate. This class is how a page says which it is, and it is what the
+ * pseudo-locale test skips — so anything NOT marked with it and not bracketed
+ * in /qps/ is a real defect rather than a judgement call. */
+.nd-identifier {
+  font-variant-ligatures: none;
+}

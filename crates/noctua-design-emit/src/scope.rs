@@ -294,7 +294,7 @@ mod tests {
 
 #[cfg(test)]
 mod contrast {
-    /// Every colour the switch draws, named in `shell.css` and measured here.
+    /// Every colour the switch draws, named in the shipped sheet and measured here.
     ///
     /// # Why this is arithmetic and not a browser test
     ///
@@ -314,7 +314,9 @@ mod contrast {
     /// showing a colour the theme does not contain, which is a defect a reader
     /// sees and a contrast sum never will.
     ///
-    /// So the five colours come out of `shell.css`, each has to be a WHOLE
+    /// So the five colours come out of `dist/components.css` — what the build
+    /// produces, rather than whatever happens to be committed — each has to be
+    /// a WHOLE
     /// `var(--nc-color-…)` with nothing wrapped around it, and the semantic
     /// name is resolved through the vendor's own `contexts.css` to the palette
     /// token behind it. A `color-mix` in any of the five fails at the first
@@ -330,7 +332,9 @@ mod contrast {
         const FLOOR: f64 = 3.0;
 
         let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."));
-        let css = std::fs::read_to_string(root.join("docs-site/assets/shell.css")).expect("shell");
+        // The sheet as this build would write it, so the test asks about what
+        // ships rather than about what is on disk beside it.
+        let css = crate::styles::emit()[0].contents.clone();
         let contexts =
             std::fs::read_to_string(root.join("packages/tokens/vendor/css/contexts.css"))
                 .expect("contexts");
@@ -413,7 +417,7 @@ mod contrast {
         let head = format!("\n{selector} {{");
         let at = css
             .find(&head)
-            .unwrap_or_else(|| panic!("no rule for `{selector}` in shell.css"));
+            .unwrap_or_else(|| panic!("no rule for `{selector}` in dist/components.css"));
         let body = css[at + head.len()..]
             .split_once('}')
             .unwrap_or_else(|| panic!("`{selector}` has no closing brace"))

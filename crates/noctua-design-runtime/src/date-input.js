@@ -1,0 +1,576 @@
+// Everything a `DateInput` does once a script is running.
+//
+// IT SHIPS, for the reason `menu.js` gives: a component whose consumer cannot
+// use it is a component that lies. With no script a `DateInput` is three number
+// boxes and a month grid of real radios, and it submits — that is `DatePicker`,
+// and it is why this is an enhancement rather than the component. What this
+// adds is the stepping between boxes, the paste, the eight sentences a wrong
+// date earns, the re-lay when the reader's own locale asks for another order,
+// and the quick-pick list.
+//
+// THE MONTH GRID IS NOT HERE. `date-picker.js` draws and walks it, and this
+// asks it for the words a locale uses rather than keeping a second copy.
+//
+// THE ANCHORING IS NOT WRITTEN HERE, and neither is which panel may be open:
+// `anchor.js` places the panel and `panels.js` decides that only one floating
+// surface on the page is open at a time.
+
+import { keepAnchored, releaseAnchor } from "./anchor.js";
+import { claimOpenPanel, releaseOpenPanel } from "./panels.js";
+import { dateWords, readerLocales } from "./date-picker.js";
+import { message, saySentence } from "./messages.js";
+
+
+// The component renders a question and three labelled boxes that post three
+// values; this adds everything the contract says is the script's to keep:
+// the reorder to the reader's locale, the stepping, the paste that fills all
+// three, the validation sentences, and the suggestions panel with its quick
+// picks and its month grid. With this never running, none of that was
+// promised — the markup claims no popup, no combobox, no keyboard beyond a
+// text field's own.
+
+const DATE_FIELD = "[data-nd-date-input]";
+
+/** Segment letters to their names, the order attributes' vocabulary. */
+const DATE_PARTS = { d: "day", m: "month", y: "year" };
+
+// THE TWO LOCALE CHAINS LIVE IN `date-picker.js` NOW, and are imported back.
+//
+// They were written here for the month grid, and the month grid moved out. A
+// second copy beside the first is two answers to the one question this file has
+// already got wrong once: whose language a word is in.
+
+/** A segment's number, judged after Unicode normalisation so fullwidth
+ * digits are digits. Null is "not a number", not zero. */
+function dateNumber(raw) {
+  const clean = raw.trim().normalize("NFKC");
+  return /^[0-9]+$/.test(clean) ? Number.parseInt(clean, 10) : null;
+}
+
+/** ISO from three numbers, zero-padded — the wire format, never shown. */
+function dateIso(year, month, day) {
+  return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+/** A bound, written for a reader by the locale's own formatter. */
+function dateWorded(iso) {
+  const [year, month, day] = iso.split("-").map(Number);
+  return new Intl.DateTimeFormat(dateWords(), { dateStyle: "long", timeZone: "UTC" }).format(
+    new Date(Date.UTC(year, month - 1, day)),
+  );
+}
+
+/** Every enhanced date field's teardown, and the guard against a second pass. */
+const dates = new WeakMap();
+
+export function enhanceDateInputs(root = document) {
+  for (const field of root.querySelectorAll(DATE_FIELD)) {
+    // THE GUARD THE OTHER FOUR HAD AND THIS ONE DID NOT.
+    //
+    // `enhanceDateInput` binds a keydown, a paste and two blurs per box, a
+    // focusout on the field and a submit on the FORM, and it DRAWS a suggest
+    // button into the row. None of that was guarded, so a second pass over the
+    // same field bound every listener twice and appended a second button
+    // beside the first. One press of the up arrow then stepped the day twice,
+    // and the row grew a control per pass.
+    //
+    // It was latent only because this was called exactly once, at load. It is
+    // a live defect the moment anything re-enhances a subtree, whether that is
+    // a router or a framework remounting an example.
+    if (dates.has(field)) continue;
+    const binding = new AbortController();
+    dates.set(field, binding);
+    enhanceDateInput(field, binding.signal);
+  }
+}
+
+/**
+ * Takes the behaviour back off every date field under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER, and this field reaches outside itself twice. It binds
+ * `submit` to the FORM, which is an ancestor and outlives the field, and it
+ * DRAWS a suggest button and a panel into the row. The drawn parts are removed
+ * here so a later pass draws one of each rather than a second of each.
+ */
+export function releaseDateInputs(root = document) {
+  for (const field of root.querySelectorAll(DATE_FIELD)) {
+    const binding = dates.get(field);
+    if (!binding) continue;
+    binding.abort();
+    dates.delete(field);
+    field.querySelector(".nd-date-input-suggest-button")?.remove();
+    const panel = field.querySelector(".nd-date-input-panel");
+    if (panel) {
+      releaseAnchor(panel);
+      panel.remove();
+    }
+  }
+}
+
+function enhanceDateInput(root, signal) {
+  const row = root.querySelector(".nd-date-input-row");
+  const slot = root.closest(".nd-field")?.querySelector("[data-nd-field-error]");
+  if (!row || !slot) return;
+  const item = (part) => root.querySelector(`[data-nd-part="${part}"]`);
+  const box = (part) => item(part)?.querySelector("input");
+  const labelOf = (part) =>
+    item(part)?.querySelector(".nd-date-input-label")?.textContent?.trim() ?? "";
+  const boxes = { day: box("day"), month: box("month"), year: box("year") };
+  if (!boxes.day || !boxes.month || !boxes.year) return;
+  // A sentence the caller rendered is the caller's; the validator neither
+  // clears nor overwrites it. `Select` states the rule.
+  const saidByCaller = root.dataset.ndInvalid === "true";
+
+  // THE ORDER, DETECTED ONCE AND MOVED IN THE DOCUMENT. Never CSS `order`:
+  // the eyes, the Tab key and a screen reader must walk one row. Skipped if
+  // something already has focus in here — the ground under a caret does not
+  // move.
+  //
+  // THE ORDER COMES FROM THE PLATFORM, AND FROM THE READER. `formatToParts`
+  // is asked to write one numeric date and the answer is read back part by
+  // part, so what stands here is whatever CLDR says today for the locale the
+  // reader's browser asked for — see `readerLocales`, which is where this was
+  // wrong. The served `dmy` is the answer for a page with no script, not a
+  // default this detection may fall back on: a fallback that cannot be told
+  // from an answer is the defect, so `wanted` only moves on a part list this
+  // recognises.
+  if (root.dataset.ndOrder === "auto") {
+    let wanted = "dmy";
+    try {
+      const parts = new Intl.DateTimeFormat(readerLocales(), {
+        day: "numeric",
+        month: "numeric",
+        year: "numeric",
+      }).formatToParts(new Date(Date.UTC(2001, 1, 3)));
+      const seen = parts
+        .filter((part) => part.type === "day" || part.type === "month" || part.type === "year")
+        .map((part) => part.type[0])
+        .join("");
+      if (seen === "mdy" || seen === "ymd" || seen === "dmy") wanted = seen;
+    } catch {
+      wanted = "dmy";
+    }
+    if (wanted !== root.dataset.ndResolved && !root.contains(document.activeElement)) {
+      for (const letter of wanted) row.append(item(DATE_PARTS[letter]));
+      root.dataset.ndResolved = wanted;
+    }
+  }
+
+  /** The three boxes in visual order, which is document order. */
+  const inOrder = () =>
+    [...row.querySelectorAll(".nd-date-input-segment")].filter(Boolean);
+
+  // --- The sentences -------------------------------------------------------
+
+  const say = (sentence, wrong) => {
+    // THE WORD IN FRONT IS `Field`'S NOW. This built its own copy from
+    // `data-nd-error-label` and replaced the whole paragraph to place it,
+    // which is the same prefix drawn twice from one prop.
+    saySentence(slot, sentence);
+    root.dataset.ndInvalid = "true";
+    for (const part of ["day", "month", "year"]) {
+      if (wrong.includes(part)) boxes[part].setAttribute("aria-invalid", "true");
+      else boxes[part].removeAttribute("aria-invalid");
+    }
+  };
+
+  const settle = () => {
+    if (saidByCaller) return;
+    saySentence(slot, "");
+    root.dataset.ndInvalid = "false";
+    for (const part of ["day", "month", "year"]) boxes[part].removeAttribute("aria-invalid");
+  };
+
+  /** Judges the three boxes; speaks and returns the wrong parts, or settles
+   * and returns null. The first failing sentence only — one per pause. */
+  const judge = ({ askRequired = false } = {}) => {
+    const words = root.dataset;
+    const raw = {
+      day: boxes.day.value.trim(),
+      month: boxes.month.value.trim(),
+      year: boxes.year.value.trim(),
+    };
+    const empty = ["day", "month", "year"].filter((part) => raw[part] === "");
+    if (empty.length === 3) {
+      if (askRequired && root.dataset.ndDateInput && boxes.day.required && words.ndRequiredLabel) {
+        say(words.ndRequiredLabel, ["day", "month", "year"]);
+        return ["day", "month", "year"];
+      }
+      settle();
+      return null;
+    }
+    if (empty.length > 0) {
+      if (words.ndMissingLabel) {
+        say(words.ndMissingLabel.replace("{field}", labelOf(empty[0])), empty);
+        return empty;
+      }
+      settle();
+      return null;
+    }
+    const numbers = {
+      day: dateNumber(raw.day),
+      month: dateNumber(raw.month),
+      year: dateNumber(raw.year),
+    };
+    const wordy = ["day", "month", "year"].filter((part) => numbers[part] === null);
+    if (wordy.length > 0) {
+      if (words.ndNumberLabel) {
+        say(words.ndNumberLabel.replace("{field}", labelOf(wordy[0])), wordy);
+        return wordy;
+      }
+      settle();
+      return null;
+    }
+    if (raw.year.normalize("NFKC").length < 4) {
+      if (words.ndYearDigitsLabel) {
+        say(words.ndYearDigitsLabel, ["year"]);
+        return ["year"];
+      }
+      settle();
+      return null;
+    }
+    const at = new Date(Date.UTC(numbers.year, numbers.month - 1, numbers.day));
+    const real =
+      at.getUTCFullYear() === numbers.year &&
+      at.getUTCMonth() === numbers.month - 1 &&
+      at.getUTCDate() === numbers.day;
+    if (!real) {
+      const wrong = numbers.month < 1 || numbers.month > 12 ? ["month"] : ["day"];
+      if (words.ndInvalidLabel) {
+        say(words.ndInvalidLabel, wrong);
+        return wrong;
+      }
+      settle();
+      return null;
+    }
+    const iso = dateIso(numbers.year, numbers.month, numbers.day);
+    if (words.ndMin && iso < words.ndMin && words.ndMinLabel) {
+      const wrong = ["day", "month", "year"];
+      say(words.ndMinLabel.replace("{min}", dateWorded(words.ndMin)), wrong);
+      return wrong;
+    }
+    if (words.ndMax && iso > words.ndMax && words.ndMaxLabel) {
+      const wrong = ["day", "month", "year"];
+      say(words.ndMaxLabel.replace("{max}", dateWorded(words.ndMax)), wrong);
+      return wrong;
+    }
+    settle();
+    return null;
+  };
+
+  // ON SUBMIT, AND ON LEAVING A COMPLETE FIELD — never between two boxes of
+  // an unfinished answer. Scolding a reader between day and month is the
+  // anti-pattern the source pattern exists to document.
+  root.closest("form")?.addEventListener("submit", (event) => {
+    const wrong = judge({ askRequired: true });
+    if (wrong) {
+      event.preventDefault();
+      inOrder()
+        .find((one) => wrong.includes(one.closest("[data-nd-part]").dataset.ndPart))
+        ?.focus();
+    }
+  }, { signal });
+  root.addEventListener("focusout", (event) => {
+    if (root.contains(event.relatedTarget)) return;
+    const filled = [boxes.day, boxes.month, boxes.year].every((one) => one.value.trim() !== "");
+    if (filled) judge();
+  }, { signal });
+
+  // --- The typing aids, on leaving a box only ------------------------------
+
+  const padded = root.dataset.ndPad === "true";
+  const expands = root.dataset.ndExpand === "true";
+  for (const part of ["day", "month"]) {
+    boxes[part].addEventListener("blur", () => {
+      const value = boxes[part].value.trim().normalize("NFKC");
+      if (padded && /^[0-9]$/.test(value)) boxes[part].value = value.padStart(2, "0");
+    }, { signal });
+  }
+  boxes.year.addEventListener("blur", () => {
+    const value = boxes.year.value.trim().normalize("NFKC");
+    if (!expands || !/^[0-9]{2}$/.test(value)) return;
+    const two = Number.parseInt(value, 10);
+    const choices = [1900 + two, 2000 + two];
+    const minYear = root.dataset.ndMin ? Number.parseInt(root.dataset.ndMin, 10) : null;
+    const maxYear = root.dataset.ndMax ? Number.parseInt(root.dataset.ndMax, 10) : null;
+    const allowed = choices.filter(
+      (year) => (minYear === null || year >= minYear) && (maxYear === null || year <= maxYear),
+    );
+    const now = new Date().getFullYear();
+    const chosen =
+      allowed.length === 1 ? allowed[0] : 2000 + two <= now + 10 ? 2000 + two : 1900 + two;
+    boxes.year.value = String(chosen);
+  }, { signal });
+
+  // --- Stepping, and the paste that fills all three ------------------------
+
+  const write = (part, number) => {
+    const wide = part === "year" ? 4 : padded ? 2 : 0;
+    boxes[part].value = wide ? String(number).padStart(wide, "0") : String(number);
+    boxes[part].dispatchEvent(new Event("input", { bubbles: true }));
+    boxes[part].dispatchEvent(new Event("change", { bubbles: true }));
+  };
+
+  const step = (part, sign) => {
+    const bounds = { day: [1, 31], month: [1, 12] }[part];
+    const current = dateNumber(boxes[part].value);
+    if (bounds) {
+      const [low, high] = bounds;
+      const base = current ?? (sign > 0 ? low - 1 : low + 1);
+      let next = base + sign;
+      if (next > high) next = low;
+      if (next < low) next = high;
+      write(part, next);
+    } else {
+      const base = current ?? new Date().getFullYear();
+      write(part, Math.max(0, base + sign));
+    }
+  };
+
+  // A whole date arriving at once — a paste, a pick, a grid day — is echoed
+  // canonically: two digits for day and month whatever the typing aids say,
+  // because it was never typed.
+  const fillAll = (year, month, day) => {
+    boxes.year.value = String(year).padStart(4, "0");
+    boxes.month.value = String(month).padStart(2, "0");
+    boxes.day.value = String(day).padStart(2, "0");
+    for (const part of ["day", "month", "year"]) {
+      boxes[part].dispatchEvent(new Event("input", { bubbles: true }));
+      boxes[part].dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    judge();
+  };
+
+  for (const part of ["day", "month", "year"]) {
+    boxes[part].addEventListener("keydown", (event) => {
+      if (event.altKey && event.key === "ArrowDown") {
+        event.preventDefault();
+        openPanel?.();
+        return;
+      }
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        step(part, 1);
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        step(part, -1);
+      }
+    }, { signal });
+    boxes[part].addEventListener("paste", (event) => {
+      const text = (event.clipboardData?.getData("text") ?? "").trim();
+      let year;
+      let month;
+      let day;
+      let match = text.match(/^([0-9]{4})[-/. ]([0-9]{1,2})[-/. ]([0-9]{1,2})$/);
+      if (match) {
+        [, year, month, day] = match.map(Number);
+      } else {
+        match = text.match(/^([0-9]{1,2})[-/. ]([0-9]{1,2})[-/. ]([0-9]{4})$/);
+        if (!match) return;
+        const first = Number(match[1]);
+        const second = Number(match[2]);
+        year = Number(match[3]);
+        if (root.dataset.ndResolved === "mdy") {
+          month = first;
+          day = second;
+        } else {
+          day = first;
+          month = second;
+        }
+      }
+      event.preventDefault();
+      fillAll(year, month, day);
+      inOrder().at(-1)?.focus();
+    }, { signal });
+  }
+
+  // --- The suggestions panel -----------------------------------------------
+
+  const source = root.querySelector("[data-nd-date-input-suggest]");
+  const picks = source ? [...source.querySelectorAll("time[datetime]")] : [];
+  const wantsCalendar = root.dataset.ndCalendar === "true";
+  const suggestWord = root.dataset.ndSuggestLabel;
+  let openPanel = null;
+  if ((picks.length > 0 || wantsCalendar) && suggestWord) {
+    const id = `nd-date-input-${root.dataset.ndDateInput}`;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "nd-date-input-suggest-button";
+    button.setAttribute("aria-haspopup", "listbox");
+    button.setAttribute("aria-expanded", "false");
+    button.setAttribute("aria-label", suggestWord);
+    const glyph = root.querySelector("template[data-nd-date-input-glyph]");
+    if (glyph) button.append(glyph.content.cloneNode(true));
+    row.append(button);
+
+    const panel = document.createElement("div");
+    panel.className = "nd-panel nd-date-input-panel";
+    panel.hidden = true;
+    let opener = null;
+
+    const close = () => {
+      if (panel.hidden) return;
+      const inside = panel.contains(document.activeElement);
+      panel.hidden = true;
+      button.setAttribute("aria-expanded", "false");
+      releaseAnchor(panel);
+      releaseOpenPanel(close);
+      if (inside) (opener ?? button).focus();
+    };
+
+    const take = (iso) => {
+      const [year, month, day] = iso.split("-").map(Number);
+      fillAll(year, month, day);
+      close();
+    };
+
+    // The quick picks, cloned from the inert children the caller served.
+    let list = null;
+    let active = -1;
+    if (picks.length > 0) {
+      list = document.createElement("ul");
+      list.className = "nd-date-input-list";
+      list.id = `${id}-listbox`;
+      list.setAttribute("role", "listbox");
+      list.setAttribute("aria-label", suggestWord);
+      list.tabIndex = -1;
+      picks.forEach((pick, index) => {
+        const rowEl = document.createElement("li");
+        rowEl.className = "nd-date-input-option";
+        rowEl.id = `${id}-option-${index}`;
+        rowEl.setAttribute("role", "option");
+        rowEl.dataset.ndValue = pick.getAttribute("datetime");
+        rowEl.textContent = pick.textContent;
+        rowEl.addEventListener("click", () => take(rowEl.dataset.ndValue), { signal });
+        list.append(rowEl);
+      });
+      button.setAttribute("aria-controls", list.id);
+      const highlight = (index) => {
+        active = (index + picks.length) % picks.length;
+        for (const [at, rowEl] of [...list.children].entries()) {
+          rowEl.toggleAttribute("data-nd-active", at === active);
+        }
+        list.setAttribute("aria-activedescendant", `${id}-option-${active}`);
+      };
+      list.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          highlight(active + 1);
+        } else if (event.key === "ArrowUp") {
+          event.preventDefault();
+          highlight(active - 1);
+        } else if (event.key === "Home") {
+          event.preventDefault();
+          highlight(0);
+        } else if (event.key === "End") {
+          event.preventDefault();
+          highlight(picks.length - 1);
+        } else if (event.key === "Enter") {
+          event.preventDefault();
+          take(list.children[active]?.dataset.ndValue);
+        } else if (event.key === "Escape") {
+          event.preventDefault();
+          close();
+        }
+      }, { signal });
+      list.reset = () => highlight(0);
+      panel.append(list);
+    }
+
+    // THE MONTH GRID IS A COMPONENT NOW.
+    //
+    // What stood here was a hundred and seventy lines of `createElement`: a
+    // `role="grid"`, a roving `tabindex`, six weeks of buttons, a keyboard, and
+    // the week's first day read from the reader's own conventions. None of it
+    // was in `dist/`, so a consumer taking the packages got the field without
+    // the calendar, and nothing else in the system could reach it.
+    //
+    // `DatePicker` is that grid, declared. The field renders one in its own
+    // markup, hidden, and all that is left here is moving it into the panel and
+    // reading the day it settles on. `dist/date-picker.js` answers its keyboard.
+    let grid = null;
+    if (wantsCalendar) {
+      grid = root.querySelector("[data-nd-date-input-calendar]");
+    }
+    if (grid) {
+      grid.hidden = false;
+      panel.append(grid);
+      // THE PICKER POSTS NOTHING, so this event is the only way a day leaves
+      // it, and the three boxes stay the one carrier of this field's answer.
+      grid.addEventListener("change", (event) => {
+        const day = event.target?.value;
+        if (!day || !/^\d{4}-\d{2}-\d{2}$/.test(day)) return;
+        const [year, month, at] = day.split("-").map(Number);
+        fillAll(year, month, at);
+        close();
+      }, { signal });
+      // Opening on the month the three boxes are showing, through the one seam
+      // the picker offers. A month nobody has typed yet is today's.
+      grid.reset = () => {
+        const year = dateNumber(boxes.year.value);
+        const month = dateNumber(boxes.month.value);
+        const now = new Date();
+        const wanted =
+          year && month
+            ? `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}`
+            : dateIso(now.getFullYear(), now.getMonth() + 1, 1).slice(0, 7);
+        grid.dispatchEvent(new CustomEvent("nd-date-picker-show", { detail: wanted }));
+        return grid.querySelector(".nd-date-picker-input[tabindex='0']");
+      };
+    }
+
+    root.append(panel);
+    // The registry of open floating panels is module-level and holds this
+    // closure, so it has to be told when the field goes.
+    signal.addEventListener("abort", () => releaseOpenPanel(close));
+
+    openPanel = () => {
+      if (!panel.hidden) return;
+      opener = document.activeElement;
+      claimOpenPanel(close);
+      panel.hidden = false;
+      button.setAttribute("aria-expanded", "true");
+      keepAnchored(panel, row, {}, close);
+      if (list) {
+        list.reset();
+        list.focus();
+      } else if (grid) {
+        grid.reset()?.focus();
+      } else if (grid === null && list === null) {
+        button.focus();
+      }
+      if (list && grid) grid.reset();
+    };
+
+    button.addEventListener("click", () => {
+      if (panel.hidden) openPanel();
+      else close();
+    }, { signal });
+    panel.addEventListener("focusout", (event) => {
+      if (panel.contains(event.relatedTarget) || event.relatedTarget === button) return;
+      // Focus flickers to null while the grid rebuilds under it — a month
+      // turned is the focused button replaced. Judge where focus LANDS, one
+      // frame later, not where it left from.
+      requestAnimationFrame(() => {
+        if (!panel.contains(document.activeElement) && document.activeElement !== button) {
+          close();
+        }
+      });
+    }, { signal });
+  }
+}
+
+/**
+ * Opens whatever the address bar is pointing INTO.
+ *
+ * A page's sections fold now, so a jump link — from the index at the top, from
+ * the site search, from a link somebody sent — can land on a heading whose
+ * content is shut. Following a link and arriving at a closed box is arriving
+ * nowhere, and the reader has no way to know they are one press away from the
+ * thing they asked for.
+ *
+ * Chrome opens a `<details>` for find-in-page and for a fragment on its own;
+ * Firefox and Safari do not, and this site is not one browser's.
+ */

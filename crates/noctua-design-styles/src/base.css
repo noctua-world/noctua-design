@@ -1,0 +1,66 @@
+
+
+:root {
+  --nd-header-h: var(--noctua-space-16);
+  /* How much of a content surface survives, so the background pattern reads
+     THROUGH it. Content sitting on an opaque sheet was the other half of why
+     the patterns were invisible; §9.7 already says text sits directly on the
+     background and cards are not used. Code keeps a heavier veil — a pattern
+     behind monospace is noise, and `readability.spec.js` is the guard. */
+  --nd-veil: 72%;
+  --nd-veil-code: 90%;
+  /* How many lines a collapsed code block shows, and where its numbering
+     starts. Declared here so `gates::unknown_token` can see them: the component
+     writes both into a style attribute, and a `var()` naming a property nothing
+     declares is dropped with no error anywhere. */
+  --nd-code-max: 20;
+  /* How much accent marks the value in force in a group. It was written `14%`
+     three times, and the third was mine — a wash that has to survive being laid
+     over frosted glass as a separate layer, which is the moment two copies of a
+     number stop agreeing. A ratio rather than a colour, so it can be mixed at
+     the point of use and never freezes to a palette. */
+  --nd-veil-checked: 14%;
+  /* How much of the page a modal surface takes away. It is the largest of the
+     veils because it is the only one whose job is to stop a reader reading:
+     `Dialog` shipped at `--nd-veil-checked`, which is a mark on the value in
+     force wearing a scrim's hat, and at 14% every word behind an open dialog
+     was legible. A ratio rather than a colour, mixed at the point of use —
+     against a SURFACE, so the page fades toward its own ground and the token
+     the colour system already solved answers both appearances at once. */
+  --nd-veil-modal: 82%;
+  /* How much of a control's own colour survives in its frosted pane. The
+     tone's `-bg` step was the obvious candidate and measured 0.975 lightness at
+     zero chroma — a tint nobody can see, which made a primary button identical
+     to a secondary one the moment both were frosted. Mixed from the tone's
+     SOLID step against the surface instead, so it is visibly the tone in both
+     modes and the page's own ink still reads on it. */
+  --nd-tint: 32%;
+  /* How much of the ink a secondary line keeps. A ratio rather than a colour,
+     so it can be mixed against `currentColor` at the point of use and stays
+     right on a solid fill — where no `-muted` token was ever solved against
+     the fill's own colour. */
+  --nd-ink-quiet: 70%;
+}
+
+
+/* `hidden` has to win, and this is the one `!important` in the file.
+ *
+ * The browser's own `[hidden] { display: none }` is a USER-AGENT rule, so any
+ * author rule beats it — including `display: flex` on a class that happens to
+ * also carry the attribute. Every `hidden` in this shell then does nothing:
+ * the React example stays visible behind its replacement, the search results
+ * show before anything is typed, and the markup reads as though it were
+ * working. Two browser tests failed on exactly this and the JavaScript setting
+ * the attribute was correct in both.
+ *
+ * `display: revert` would leave the same hole open one layer down; the whole
+ * point is that `hidden` outranks whatever the element's class says. */
+[hidden] {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-accent);
+  outline-offset: var(--noctua-focus-offset);
+  border-radius: var(--noctua-radius-control);
+}

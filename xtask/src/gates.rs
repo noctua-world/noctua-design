@@ -85,9 +85,13 @@ const SKIP: [&str; 12] = [
 /// together, and asserted by a test: an exclusion list is only safe while
 /// somebody checks it did not swallow the thing being protected.
 #[cfg(test)]
-const COVERED: [&str; 4] = [
+const COVERED: [&str; 5] = [
     "crates/noctua-design/src",
     "packages/react/src",
+    // The component rules ship, so they answer to the colour, token and
+    // arbitrary-value gates exactly as they did when they were part of the
+    // site's own stylesheet. `dist/` is skipped, and this is where they live.
+    "crates/noctua-design-styles/src",
     "docs-site",
     "assets",
 ];

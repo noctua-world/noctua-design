@@ -1,0 +1,112 @@
+
+
+/* --- Toast ----------------------------------------------------------------
+ *
+ * A corner of the window, and the tone paints an EDGE rather than a fill: three
+ * lines floating over the page have to stay legible against whatever they land
+ * on, and a filled panel at the toast layer is the card §9.7 forbids wearing a
+ * different name. */
+
+/* IT FLOATS ONLY WHERE SOMETHING CAN TAKE IT AWAY.
+ *
+ * The dismiss control ships hidden and `dist/toast.js` reveals it, so with the
+ * script blocked there is nothing that closes this — and it was still
+ * `position: fixed`, which made it the one floating surface in the system that
+ * draws a panel over the page with no way out of it. `.nd-dialog` and
+ * `.nd-popover` never open at all without a script and `Menu` does not render;
+ * this one had no such rule.
+ *
+ * The words stay either way. Out of flow the message covers the page it is
+ * about; in flow it is a message in the page, which is what a reader with no
+ * script can be given honestly. */
+.nd-toast {
+  position: static;
+  z-index: var(--noctua-layer-toast);
+  display: flex;
+  align-items: start;
+  gap: var(--noctua-space-3);
+  /* `100%` and not `100vw`: this is `fixed`, so its containing block is the
+     window on a page and the stage on this site — see `.nd-example-toasts`. A
+     viewport unit here would push a message out of that stage and off the side
+     of the documentation. */
+  inline-size: min(var(--noctua-space-64) + var(--noctua-space-16), calc(100% - var(--noctua-space-4)));
+  padding: var(--noctua-space-3);
+  background: var(--nc-color-surface-raised);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-surface);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+}
+
+/* `data-nd-scripting` is stamped by the inline head script, before the first
+   paint, so a page that will have a dismiss control gets the floating message
+   from the beginning and one that will not never gets it at all. */
+:root[data-nd-scripting] .nd-toast {
+  position: fixed;
+}
+
+.nd-toast[data-nd-tone] {
+  border-inline-start: var(--noctua-border-rule) solid var(--nd-tone-border);
+}
+
+.nd-toast[data-nd-placement="top-start"] {
+  inset-block-start: var(--noctua-space-4);
+  inset-inline-start: var(--noctua-space-4);
+}
+.nd-toast[data-nd-placement="top-end"] {
+  inset-block-start: var(--noctua-space-4);
+  inset-inline-end: var(--noctua-space-4);
+}
+.nd-toast[data-nd-placement="bottom-start"] {
+  inset-block-end: var(--noctua-space-4);
+  inset-inline-start: var(--noctua-space-4);
+}
+.nd-toast[data-nd-placement="bottom-end"] {
+  inset-block-end: var(--noctua-space-4);
+  inset-inline-end: var(--noctua-space-4);
+}
+
+/* GONE FROM THE LAYOUT, STILL IN THE DOCUMENT. A live region taken out of the
+   document announces nothing the next time it is written into, so a dismissed
+   message keeps its node and loses its box. `ErrorSummary`'s empty state and
+   `MessageBar`'s dismissal are the same arrangement. */
+.nd-toast[data-nd-dismissed] {
+  display: none;
+}
+
+.nd-toast-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+  min-inline-size: 0;
+}
+
+.nd-toast-title {
+  font-weight: var(--noctua-weight-semibold);
+}
+
+.nd-toast-body {
+  color: var(--nc-color-fg-muted);
+}
+
+/* THE TIME LEFT, BESIDE THE WAY OUT.
+ *
+ * A number that changes every second is the one thing on this surface a reader
+ * has to be able to ignore, so it takes the caption size and the muted ink,
+ * and `tabular-nums` keeps it from shuffling the dismiss control sideways as
+ * the digits change. `NOCTUA.md §9.7` refuses a layout that shifts, and a
+ * proportional `9` and `1` are a shift once a second. */
+.nd-toast-countdown {
+  /* UNDER THE MESSAGE, WHICH IS WHERE THE ROOM IS. A toast is about twenty
+     characters wide, so a line of digits beside the sentence takes its width
+     off the sentence. */
+  align-self: flex-start;
+  font-size: var(--noctua-size-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--nc-color-fg-muted);
+  white-space: nowrap;
+}
+
+.nd-toast-countdown[hidden] {
+  display: none;
+}

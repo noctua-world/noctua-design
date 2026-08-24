@@ -1,0 +1,100 @@
+
+
+/* --- MessageBar ----------------------------------------------------------- */
+
+/* A BORDERED BLOCK, NEVER A CARD.
+ *
+ * `NOCTUA.md §9.7`: no elevated surfaces and no shadow anywhere. What sets this
+ * bar apart from the page is a hairline, a rule down its leading edge and a
+ * surface colour — the recipe `ErrorSummary` uses, and the one a `Field` marks
+ * a refused answer with.
+ *
+ * AND THE TONE IS THE SECOND SIGNAL, NEVER THE FIRST. The title, the sentence
+ * and the icon say what happened; `data-nd-tone` only paints it (`§8.8.6`). */
+.nd-message-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--noctua-space-3);
+  padding: var(--noctua-space-4);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-inline-start: var(--noctua-border-rule) solid var(--nc-color-border-strong);
+  border-radius: var(--noctua-radius-surface);
+  background: var(--nc-color-surface-subtle);
+  color: var(--nc-color-fg);
+}
+
+/* All 351 names, through one indirection. `dist/tones.css` declares the four
+   custom properties for every family the palette has, so a tone added upstream
+   works here with nothing edited. */
+.nd-message-bar[data-nd-tone] {
+  border-color: var(--nd-tone-border);
+  border-inline-start-color: var(--nd-tone);
+  background: var(--nd-tone-bg);
+}
+
+.nd-message-bar-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  /* ON THE FIRST LINE'S CENTRE, NOT ON THE BOX'S AND NOT ON ITS TOP EDGE.
+     The bar is `align-items: flex-start`, which is right — a glyph centred
+     against a paragraph floats in the middle of nothing — but flush with the
+     top of the text block it sat six pixels above the middle of the title
+     beside it, because the glyph's box is shorter than the line's. A box
+     exactly one line tall with the glyph centred inside it puts the two on one
+     centre line, and it stays there however many lines follow. `1lh` is the
+     line the icon itself is on, so it moves with the type scale. */
+  block-size: 1lh;
+  align-items: center;
+  /* The tone where there is one, and the quieter text colour where there is
+     not. An untoned bar is the absence of the attribute, never a name. */
+  color: var(--nd-tone, var(--nc-color-fg-muted));
+}
+
+.nd-message-bar-text {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+}
+
+/* A `<strong>` rather than a heading: a message that arrives after the page has
+   loaded must not rewrite the outline under a reader navigating by it. */
+.nd-message-bar-title {
+  font-weight: var(--noctua-weight-semibold);
+}
+
+.nd-message-bar-body > :first-child {
+  margin-block-start: 0;
+}
+
+.nd-message-bar-body > :last-child {
+  margin-block-end: 0;
+}
+
+/* 24px is the AA floor for a target and this clears it with room to spare. */
+.nd-message-bar-dismiss {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--noctua-space-8);
+  block-size: var(--noctua-space-8);
+  padding: 0;
+  border: 0;
+  border-radius: var(--noctua-radius-control);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.nd-message-bar-dismiss:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* Taken away by a reader. The element stays in the document so its live region
+   keeps working, and the layout stops giving it room. */
+.nd-message-bar[data-nd-dismissed] {
+  display: none;
+}

@@ -1,0 +1,213 @@
+
+
+/* --- Disclosure, now a component ------------------------------------------ */
+
+/* The default triangle goes; the component draws a chevron, or an icon. */
+.nd-disclosure-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--noctua-space-tight);
+  cursor: pointer;
+  list-style: none;
+}
+
+.nd-disclosure-summary::-webkit-details-marker {
+  display: none;
+}
+
+/* The chevron turns to point at what it opened. Not a rotation of the whole
+   summary: an icon beside a word must not drag the word with it.
+
+   AND IT ASKS FOR THE CHEVRON BY NAME. This said `.nd-icon-glyph:last-child`,
+   and in the icon-only form the caller's own icon IS the last glyph — so
+   opening a `Disclosure { icon: "settings" }` turned the gear upside down. */
+.nd-disclosure[open] > .nd-disclosure-summary > .nd-disclosure-marker {
+  transform: rotate(180deg);
+}
+
+/* --- Glass on a control --------------------------------------------------- */
+
+/* THE PANE IS THE SURFACE. THE TONE IS THE INK AND THE EDGE.
+ *
+ * `spec/components/button.toml` says exactly that — "a glass button is a pane,
+ * whatever it is for" — and the first version of this file did the opposite: it
+ * tinted the pane with the tone and left the ink alone. Both defects that came
+ * back follow from it, and neither is subtle once the rule is stated.
+ *
+ * A NEUTRAL OUTLINE BUTTON WENT GREY. `Cancel` has no fill at all — `background:
+ * none`, `--nc-color-fg` ink, a strong border — and the rule matched
+ * `[data-nd-variant][data-nd-tone="neutral"]` for EVERY variant and painted
+ * `--nc-color-subtle`, which is the solid grey a neutral button is filled with.
+ * A white control became a grey one.
+ *
+ * A SOLID BUTTON BECAME HARD TO READ. Its ink is `--nc-color-on-accent`, white,
+ * chosen against a SOLID accent fill. Frost that fill and a fifth of whatever is
+ * behind comes through and lifts it; white ink on a lifted pane is the contrast
+ * the reader complained about. So the ink moves to the tone's own colour — the
+ * one `outline` already uses, which the colour system has solved a readable pair
+ * for against a surface.
+ *
+ * Every rule here carries one more attribute than the fill it replaces, so
+ * specificity decides and not source order. */
+
+/* A FILLED CONTROL KEEPS ITS COLOUR. A CONTROL WITH NO FILL DOES NOT GAIN ONE.
+ *
+ * Both halves of that took a defect to learn.
+ *
+ * Tinting EVERY variant turned `Cancel` grey: `outline/neutral` has no fill at
+ * all, and painting it `--nc-color-subtle` — the solid grey a neutral button is
+ * FILLED with — made a white control into a grey one. So the tint is for the
+ * variants that were already filled, `solid` and `subtle`, and nothing else.
+ *
+ * Tinting NOTHING made `Save` and `Cancel` the same object: a primary button
+ * that loses its colour has lost the one thing it was for. A frosted control
+ * has to still be recognisable as itself.
+ *
+ * WHAT IT IS TINTED WITH IS THE WHOLE ANSWER. Not the tone's solid step at
+ * partial alpha — that is `--nc-color-accent` under `--nc-color-on-accent`, a
+ * pair solved against an OPAQUE fill, and a pane that lets a fifth of the
+ * backdrop through measures 3.17:1. The tone's `-bg` step is the one the system
+ * already pairs with `--nc-color-fg`, which is exactly what `subtle` is; frost
+ * that and the pane is visibly the tone AND readable, by construction rather
+ * than by luck. `glass.spec.js` measures every enabled frosted control from a
+ * screenshot over the colour field.
+ *
+ * Every rule here carries one more attribute than the fill it replaces, so
+ * specificity decides and not source order. */
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone],
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone]:hover {
+  color: var(--nc-color-fg);
+  background: color-mix(in oklab, var(--nc-color-surface) var(--noctua-glass-opacity), transparent);
+}
+
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="accent"],
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="accent"]:hover {
+  border-color: var(--nc-color-accent-border);
+}
+
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="neutral"],
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="neutral"]:hover {
+  border-color: var(--nc-color-border-strong);
+}
+
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="danger"],
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="danger"]:hover {
+  border-color: var(--nc-color-danger-border);
+}
+
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="success"],
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="success"]:hover {
+  border-color: var(--nc-color-success-border);
+}
+
+/* The tint, for the two variants that were filled to begin with. `:is()` takes
+   the specificity of its heaviest argument, so these are (0,4,0) and (0,5,0) —
+   one above the fills they replace, on specificity rather than on order. */
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="accent"],
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="accent"]:hover {
+  background: color-mix(
+    in oklab,
+    color-mix(in oklab, var(--nc-color-accent) var(--nd-tint), var(--nc-color-surface))
+      var(--noctua-glass-opacity),
+    transparent
+  );
+}
+
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="neutral"],
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="neutral"]:hover {
+  background: color-mix(
+    in oklab,
+    color-mix(in oklab, var(--nc-color-subtle) var(--nd-tint), var(--nc-color-surface))
+      var(--noctua-glass-opacity),
+    transparent
+  );
+}
+
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="danger"],
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="danger"]:hover {
+  background: color-mix(
+    in oklab,
+    color-mix(in oklab, var(--nc-color-danger) var(--nd-tint), var(--nc-color-surface))
+      var(--noctua-glass-opacity),
+    transparent
+  );
+}
+
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="success"],
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="success"]:hover {
+  background: color-mix(
+    in oklab,
+    color-mix(in oklab, var(--nc-color-success) var(--nd-tint), var(--nc-color-surface))
+      var(--noctua-glass-opacity),
+    transparent
+  );
+}
+
+/* THE RECIPE'S LIT EDGE RECOLOURS A BORDER, AND A GROUP HAS NONE TO RECOLOUR.
+ *
+ * `[data-nd-glass="true"]` sets a `border-block-start`, which on every other
+ * frosted control replaces an edge that was already there. `Segmented` keeps
+ * its borders on its items, so the group gained one: the frosted pane was a
+ * pixel taller than the row inside it and carried a stray hairline across the
+ * top of the control. The pane takes the control's corners for the same
+ * reason — a rounded control on a square plate is the plate showing. */
+.nd-segmented[data-nd-glass="true"] {
+  border-block-start-width: 0;
+  border-radius: var(--nd-segment-radius);
+}
+
+/* An option's box says `background: none` at (0,1,0), which ties with the
+   recipe and wins on order — this file is linked after `theme.css`. */
+.nd-segmented-item[data-nd-glass="true"][data-nd-value] {
+  background: color-mix(in oklab, var(--nc-color-surface) var(--noctua-glass-opacity), transparent);
+}
+
+/* THE WASH SURVIVES AS A SECOND LAYER, because only one declaration can win the
+   `background-color` and the group would otherwise lose its answer to "which
+   value is in force". `background-image` is a layer above the pane rather than
+   instead of it, so the chosen option is the accent wash ON frosted glass —
+   which is what it is on an opaque one. */
+.nd-segmented-item[data-nd-glass="true"][aria-checked="true"] {
+  background-color: color-mix(
+    in oklab,
+    var(--nc-color-surface) var(--noctua-glass-opacity),
+    transparent
+  );
+  background-image: linear-gradient(
+    color-mix(in oklab, var(--nc-color-accent) var(--nd-veil-checked), transparent) 0 0
+  );
+  color: var(--nc-color-fg);
+}
+
+/* The track, and only the track. `.nd-switch[aria-checked="true"] >
+   .nd-switch-track:hover` is (0,4,0), so the on state needs five. */
+.nd-switch-track[data-nd-glass="true"][aria-hidden] {
+  background: color-mix(in oklab, var(--nc-color-surface) var(--noctua-glass-opacity), transparent);
+}
+
+.nd-switch[aria-checked="true"] > .nd-switch-track[data-nd-glass="true"][aria-hidden],
+.nd-switch[aria-checked="true"]:hover > .nd-switch-track[data-nd-glass="true"][aria-hidden] {
+  background-color: color-mix(
+    in oklab,
+    var(--nc-color-surface) var(--noctua-glass-opacity),
+    transparent
+  );
+  background-image: linear-gradient(
+    color-mix(in oklab, var(--nc-color-accent) var(--nd-veil-checked), transparent) 0 0
+  );
+}
+
+/* AND THE KNOB STOPS BEING WHITE, IN BOTH STATES RATHER THAN ONE.
+   `--nc-color-on-accent` is the ink for a SOLID accent fill; on a frosted track
+   it is the same mistake as white ink on a frosted button, and neither state's
+   track is solid here — off is the bare frost and on is the frost under a 14%
+   accent veil, so both sit near the surface colour.
+   `fg` is what carries against the surface, which is why it is what a frosted
+   `Segmented` puts on its chosen option four rules above.
+   This override used to name `[aria-checked="true"]`, which left the off state
+   taking the solid rule's ink. That was survivable while the solid ink was
+   `fg` itself. It stopped being survivable the moment the solid knob became
+   white, and one selector covering the pair is why it cannot come back. */
+.nd-switch-track[data-nd-glass="true"]::after {
+  background: var(--nc-color-fg);
+}

@@ -1,0 +1,432 @@
+
+
+/* --- Select --------------------------------------------------------------- */
+
+/* THE CONTROL UNDER ALL OF THIS IS A `<select>`.
+ *
+ * `appearance: none` takes away the browser's own box and its arrow; the box
+ * comes back here and the arrow comes back as an icon from the set, which is
+ * what `NOCTUA.md §9.5` asks for and what a `background-image` of an inlined
+ * SVG would quietly get around.
+ *
+ * Everything below styles the native control. The listbox `shell.js` builds
+ * over it is styled further down, and it reuses `.nd-panel` — the surface the
+ * theme menu already opens — rather than inventing a fifth floating thing. */
+/* A FIELD IS AS WIDE AS ITS COLUMN, UP TO A POINT.
+ *
+ * Left to itself a `<select>` is as wide as its longest option, so six of them
+ * on one page are six different widths and the difference reads as a decision
+ * nobody made. The cap is the small breakpoint: a control wider than that is a
+ * line of text to track back along, and every option here is a word. */
+.nd-select {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: var(--noctua-breakpoint-sm);
+}
+
+/* The slot is rendered whenever the control is `required`, so the script has
+   somewhere to put the browser's own complaint — a hidden `<select>` cannot be
+   reported, and the submit was failing in silence. Empty, it takes no room and
+   a `role="alert"` over nothing announces nothing. */
+
+/* The control and the mark over it. A box of their own, because the chevron is
+   positioned against this and the field around it also holds a label and two
+   sentences it would otherwise be measured from. */
+.nd-select-field {
+  position: relative;
+  display: flex;
+  min-inline-size: 0;
+}
+
+/* ONE BOX, TWO CONTROLS.
+ *
+ * The native `<select>` and the button the script builds over it share every
+ * rule here, so swapping from one to the other changes nothing a reader can
+ * see until they open it. Written as one selector rather than as two rules
+ * that happen to agree, because two rules that happen to agree stop agreeing. */
+.nd-select-native,
+.nd-select-control {
+  display: flex;
+  align-items: center;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: var(--noctua-space-12);
+  /* Logical, not the four-value shorthand: `padding: a b c d` is physical, and
+     the room for the chevron has to be on the END side in both directions. */
+  padding-block: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-4);
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  line-height: var(--noctua-leading-body);
+  color: var(--nc-color-fg);
+  text-align: start;
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border-strong);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+/* `appearance: none` TAKES THE BROWSER'S ARROW AWAY, so it is scoped to the
+   place the replacement lives.
+ *
+ * The chevron is a sibling inside `.nd-select-field`. A `<select>` outside one
+ * — which is exactly what the variant grid ships, since it renders one element
+ * carrying one attribute — would be left with no arrow at all, and a select
+ * with no arrow reads as a text box. Scoped, the grid shows three real,
+ * complete controls at three sizes, which is what the grid is for. */
+.nd-select-field > .nd-select-native,
+.nd-select-control {
+  appearance: none;
+}
+
+/* And the room the chevron needs is the field's business too: a bare select
+   draws its own arrow and needs no gap left for one.
+ *
+ * TWO MORE LENGTHS THAT SUM, RATHER THAN A MATRIX. The clear control and the
+ * assistant's mark are both absolute over this padding, and either can appear
+ * without the other. Two custom properties defaulting to the zero step add up
+ * in one `calc()`, so the four combinations are three rules and every size
+ * override below stays one line. `var(--noctua-space-0)` and not `0`, because
+ * the token layer declares a zero step for exactly this.
+ *
+ * AND IT LANDS ON THE NATIVE SELECT AS WELL. The clear control is revealed by
+ * a script, so its reservation could be scoped to the enhanced control. The
+ * mark is drawn either way, so a page with no script would otherwise paint it
+ * over the value. */
+.nd-select-field {
+  --nd-select-clear-room: var(--noctua-space-0);
+  --nd-select-ai-room: var(--noctua-space-0);
+}
+
+.nd-select[data-nd-clearable="true"] .nd-select-field {
+  --nd-select-clear-room: var(--noctua-space-8);
+}
+
+.nd-select-field:has(> .nd-select-ai) {
+  --nd-select-ai-room: var(--noctua-space-8);
+}
+
+.nd-select-field > .nd-select-native,
+.nd-select-control {
+  padding-inline-end: calc(
+    var(--noctua-space-8) + var(--nd-select-clear-room) + var(--nd-select-ai-room)
+  );
+}
+
+/* Beside the chevron and beside the clear control, on whichever of them is
+   there. Same arithmetic as the reservation above, one term shorter. */
+.nd-select-ai {
+  position: absolute;
+  inset-inline-end: calc(
+    var(--noctua-space-3) + var(--noctua-space-6) + var(--nd-select-clear-room)
+  );
+  inset-block-start: 50%;
+  translate: 0 -50%;
+}
+
+.nd-select[data-nd-size="small"] .nd-select-field > .nd-select-native,
+.nd-select[data-nd-size="small"] .nd-select-control {
+  padding-inline-end: calc(
+    var(--noctua-space-8) + var(--nd-select-clear-room) + var(--nd-select-ai-room)
+  );
+}
+
+.nd-select[data-nd-size="large"] .nd-select-field > .nd-select-native,
+.nd-select[data-nd-size="large"] .nd-select-control {
+  padding-inline-end: calc(
+    var(--noctua-space-12) + var(--nd-select-clear-room) + var(--nd-select-ai-room)
+  );
+}
+
+/* One line, cut with an ellipsis. A chosen value that wrapped would grow the
+   control, and a control that changes height when the answer changes moves
+   everything under it. */
+.nd-select-value {
+  min-inline-size: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* The placeholder reads as the absence of an answer rather than as one. */
+.nd-select-value[data-nd-empty] {
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-select-chevron {
+  position: absolute;
+  inset-inline-end: var(--noctua-space-3);
+  inset-block-start: 50%;
+  translate: 0 -50%;
+  display: flex;
+  color: var(--nc-color-fg-muted);
+  /* The control underneath is the thing to press. */
+  pointer-events: none;
+}
+
+/* A `multiple` select is a list box rather than a popup: it has no arrow to
+   draw, and no room to leave for one. */
+.nd-select-native[multiple] {
+  padding-inline-end: var(--noctua-space-4);
+  min-block-size: auto;
+  cursor: default;
+}
+
+.nd-select-native[multiple] ~ .nd-select-chevron {
+  display: none;
+}
+
+/* The sizes are `Button`'s, step for step, so a select beside a button lines
+   up rather than nearly lines up. */
+.nd-select[data-nd-size="small"] .nd-select-native,
+.nd-select[data-nd-size="small"] .nd-select-control {
+  min-block-size: var(--noctua-space-8);
+  /* The block padding is `Button`'s too. Without it the content is taller than
+     the box and `min-block-size` never applies: the small control measured
+     42px against a button's 32, which is exactly the "nearly lines up" this
+     scale exists to avoid. */
+  padding-block: var(--noctua-space-1);
+  padding-inline-start: var(--noctua-space-3);
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-select[data-nd-size="large"] .nd-select-native,
+.nd-select[data-nd-size="large"] .nd-select-control {
+  min-block-size: var(--noctua-space-16);
+  padding-block: var(--noctua-space-3);
+  padding-inline-start: var(--noctua-space-6);
+  font-size: var(--noctua-size-body);
+}
+
+.nd-select-native:hover,
+.nd-select-control:hover {
+  border-color: var(--nc-color-fg-muted);
+}
+
+.nd-select[data-nd-invalid="true"] .nd-select-native,
+.nd-select[data-nd-invalid="true"] .nd-select-control {
+  border-color: var(--nc-color-danger);
+}
+
+.nd-select-native:disabled,
+.nd-select-control:disabled {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+/* A list that has not arrived, said with the pointer as well as with the
+   sentence in the panel: an empty list and a list still loading look identical
+   and mean opposite things. */
+.nd-select[data-nd-loading="true"] .nd-select-native,
+.nd-select[data-nd-loading="true"] .nd-select-control {
+  cursor: progress;
+}
+
+/* --- What the enhancement adds -------------------------------------------- */
+
+/* A `multiple` select has no arrow to draw and no room to leave for one — but
+   the button the script puts over it is a popup again, so the arrow comes
+   back. Specificity, not order: the rule that took it away is a sibling
+   selector and this has to beat it wherever either happens to be written. */
+.nd-select-field[data-nd-enhanced="true"] .nd-select-chevron {
+  display: flex;
+}
+
+/* The control that empties the field: rendered by the component, and shown only
+   once the script is there to make it do something AND there is an answer for
+   it to take away. A control that clears nothing is a control that lies. */
+.nd-select-clear {
+  display: none;
+}
+
+.nd-select-field[data-nd-enhanced="true"][data-nd-filled="true"] .nd-select-clear {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  /* Beside the chevron, not over it: the chevron sits a step in from the end
+     and is one small icon wide. */
+  inset-inline-end: calc(var(--noctua-space-3) + var(--noctua-space-6));
+  inset-block-start: 50%;
+  translate: 0 -50%;
+  padding: var(--noctua-space-1);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-select-clear:hover {
+  color: var(--nc-color-fg);
+}
+
+/* Room for both, whenever both can appear, is now `--nd-select-clear-room`
+   above: stated on the field rather than toggled with the button, so the
+   control does not change width the moment an answer is given. */
+
+/* THE PANEL IS `.nd-panel` WITH TWO CLASSES' WORTH OF OVERRIDE.
+ *
+ * `.nd-panel` restyles itself at 30rem — `absolute`, hanging from whatever is
+ * positioned above it — and that rule is in `surfaces.css`. An absolutely
+ * positioned panel inside an example frame is clipped by the frame, which is
+ * the bug the frame's own theme menu already paid for once. Two classes beat
+ * one wherever the one happens to be written, so this does not depend on where
+ * in the file it sits.
+ *
+ * Opaque rather than glass, for the same reason the frame's menu is: a list
+ * floating over the examples it belongs to has to be readable against whatever
+ * the reader has just done to them. */
+.nd-panel.nd-select-panel {
+  --nd-anchor-block: 0;
+  --nd-anchor-inline: 0;
+  --nd-select-width: var(--noctua-breakpoint-sm);
+  position: fixed;
+  inset-block-start: calc(var(--nd-anchor-block) + var(--noctua-space-1));
+  inset-block-end: auto;
+  inset-inline: auto var(--nd-anchor-inline);
+  inline-size: min(var(--nd-select-width), calc(100vw - var(--noctua-space-8)));
+  max-block-size: min(
+    calc(100vh - var(--nd-anchor-block) - var(--noctua-space-8)),
+    calc(var(--noctua-space-64) + var(--noctua-space-32))
+  );
+  background: var(--nc-color-surface-subtle);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-surface);
+}
+
+/* Hanging from the control's top edge when the script found more room up than
+   down. `--nd-anchor-block` is the distance from the other edge of the window
+   in that case, so one property serves both directions. */
+.nd-panel.nd-select-panel[data-nd-above] {
+  inset-block-start: auto;
+  inset-block-end: calc(var(--nd-anchor-block) + var(--noctua-space-1));
+}
+
+.nd-panel.nd-select-panel[hidden] {
+  display: none;
+}
+
+.nd-select-search {
+  margin: var(--noctua-space-2);
+  padding-block: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-3);
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border-strong);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-select-list {
+  margin: 0;
+  padding: var(--noctua-space-1);
+  list-style: none;
+  overflow-y: auto;
+  /* Reaching the end of the list must not start scrolling the page behind it. */
+  overscroll-behavior: contain;
+}
+
+.nd-select-group-row {
+  display: block;
+}
+
+.nd-select-group-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nd-select-group-label {
+  display: block;
+  padding-block: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-3);
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-semibold);
+  letter-spacing: var(--noctua-tracking-caps);
+  text-transform: uppercase;
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-select-item {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-3);
+  min-block-size: var(--noctua-space-12);
+  padding-block: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-3);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-select-item[hidden] {
+  display: none;
+}
+
+/* THE HIGHLIGHT AND THE ANSWER ARE TWO DIFFERENT THINGS.
+ *
+ * Where the keyboard is, and what has been chosen. A combobox that painted them
+ * the same way would be a control where moving looks like choosing — which is
+ * the misreading that makes people press Enter on the wrong row. */
+.nd-select-item[aria-selected="true"] {
+  color: var(--nc-color-accent);
+  font-weight: var(--noctua-weight-medium);
+}
+
+/* The highlight is the strong one, as it is in a native popup: a tint over a
+   panel that is itself a tint of the surface is a difference nobody can see,
+   and a highlight nobody can see is a keyboard nobody can follow. Written
+   AFTER the selected rule so an option that is both reads as highlighted —
+   where the keyboard is now beats what was chosen a moment ago. */
+.nd-select-item[data-nd-active] {
+  background: var(--nc-color-accent);
+  color: var(--nc-color-on-accent);
+}
+
+.nd-select-item[data-nd-active] .nd-select-item-detail,
+.nd-select-item[data-nd-active] .nd-select-item-mark {
+  color: var(--nc-color-on-accent);
+}
+
+.nd-select-item[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused option is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+.nd-select-item-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.nd-select-item-detail {
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-regular);
+  color: var(--nc-color-fg-muted);
+}
+
+/* The tick, and it is the second signal rather than the only one: `aria-selected`
+   is what a screen reader hears, and colour alone is what WCAG 1.4.1 refuses. */
+.nd-select-item-mark {
+  display: none;
+  color: var(--nc-color-accent);
+}
+
+.nd-select-item[aria-selected="true"] .nd-select-item-mark {
+  display: flex;
+}
+
+.nd-select-note {
+  padding-block: var(--noctua-space-3);
+  padding-inline: var(--noctua-space-4);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-select-note[hidden] {
+  display: none;
+}

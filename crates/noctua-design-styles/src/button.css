@@ -1,0 +1,443 @@
+
+
+/* --- Button, which is now a component ------------------------------------ */
+
+/* WHY EVERY TONE IS WRITTEN OUT INSTEAD OF GOING THROUGH ONE VARIABLE.
+ *
+ * The obvious shape is `--nd-btn-fill: var(--nc-color-accent)` once per tone
+ * and one set of rules reading it. That is precisely the frozen indirection
+ * `frozen_color_indirection` refuses, and it refuses it everywhere rather than
+ * only at `:root` — a var() resolves where it is DECLARED, and a rule that
+ * declared it on `.nd-button` would still be resolving against whatever
+ * palette reached that particular button, which is right, until somebody moves
+ * the declaration up one selector and it silently is not. The gate does not
+ * try to tell the two apart, and it is correct not to.
+ *
+ * So the colour lands at the point of use, four tones at a time. It is long.
+ * It is also the only version of this that cannot rot.
+ *
+ * THE TONE NAMED `neutral` IS PAINTED FROM THE COLOUR SYSTEM'S `subtle`
+ * CONTEXT. `--nc-color-neutral` does not exist and should not: the neutral a
+ * control wants is the one solved against the page's surface, which is what
+ * `subtle` is. The interface word and the colour word differ, once, here. */
+
+.nd-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--noctua-space-2);
+  min-inline-size: 0;
+  padding: var(--noctua-space-2) var(--noctua-space-4);
+  min-block-size: var(--noctua-space-12);
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-medium);
+  line-height: var(--noctua-leading-body);
+  text-align: start;
+  text-decoration: none;
+  /* One line unless asked. A button that wraps when a translation grows moves
+     everything under it, which is why `qps` is in the test matrix. */
+  white-space: nowrap;
+  cursor: pointer;
+  border: var(--noctua-border-hairline) solid transparent;
+  border-radius: var(--noctua-radius-control);
+}
+
+/* --- Its box ------------------------------------------------------------- */
+
+.nd-button[data-nd-size="small"] {
+  gap: var(--noctua-space-1);
+  padding: var(--noctua-space-1) var(--noctua-space-3);
+  min-block-size: var(--noctua-space-8);
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-button[data-nd-size="large"] {
+  gap: var(--noctua-space-3);
+  padding: var(--noctua-space-3) var(--noctua-space-6);
+  min-block-size: var(--noctua-space-16);
+  font-size: var(--noctua-size-body);
+}
+
+/* Square, and exactly as tall as the labelled button beside it — which is the
+   whole reason the box is stated per size rather than left to the padding. */
+.nd-button[data-nd-hide-label="true"] {
+  padding-inline: 0;
+  inline-size: var(--noctua-space-12);
+  justify-content: center;
+}
+
+.nd-button[data-nd-hide-label="true"][data-nd-size="small"] {
+  inline-size: var(--noctua-space-8);
+}
+
+.nd-button[data-nd-hide-label="true"][data-nd-size="large"] {
+  inline-size: var(--noctua-space-16);
+}
+
+.nd-button[data-nd-wrap="true"] {
+  white-space: normal;
+}
+
+.nd-button[data-nd-fill="true"] {
+  inline-size: 100%;
+}
+
+.nd-button[data-nd-justify="start"] {
+  justify-content: flex-start;
+}
+
+.nd-button[data-nd-justify="between"] {
+  justify-content: space-between;
+}
+
+/* --- Its corners --------------------------------------------------------- */
+
+.nd-button[data-nd-shape="pill"] {
+  border-radius: var(--noctua-radius-pill);
+}
+
+.nd-button[data-nd-shape="square"] {
+  border-radius: var(--noctua-radius-none);
+}
+
+/* A bevel CUTS the corner rather than rounding it, so it is not a radius and
+   deliberately does not come from the radius preset: under `square` a
+   preset-driven bevel would be a rectangle, and under `circular` the polygon
+   would swallow the whole control. One step of the spacing scale instead, so a
+   bevel stays a bevel under all four presets. */
+.nd-button[data-nd-shape="bevel"] {
+  border-radius: var(--noctua-radius-none);
+  clip-path: polygon(
+    var(--noctua-space-2) 0%,
+    calc(100% - var(--noctua-space-2)) 0%,
+    100% var(--noctua-space-2),
+    100% calc(100% - var(--noctua-space-2)),
+    calc(100% - var(--noctua-space-2)) 100%,
+    var(--noctua-space-2) 100%,
+    0% calc(100% - var(--noctua-space-2)),
+    0% var(--noctua-space-2)
+  );
+}
+
+/* `clip-path` clips the focus ring with everything else, and a control whose
+   focus is invisible is a control a keyboard cannot use. Drawn inside instead
+   — far enough in that the whole ring survives the cut. */
+.nd-button[data-nd-shape="bevel"]:focus-visible {
+  outline-offset: calc(-1 * (var(--noctua-focus-width) + var(--noctua-focus-offset)));
+}
+
+/* --- Its content --------------------------------------------------------- */
+
+.nd-button-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--noctua-space-0);
+  min-inline-size: 0;
+}
+
+/* The second line of a compound button. Quieter than the label but painted
+   from the SAME ink, so it stays readable on a solid fill where no `-muted`
+   token was ever solved against the fill's colour. */
+.nd-button-detail {
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-regular);
+  color: color-mix(in oklab, currentColor var(--nd-ink-quiet), transparent);
+  /* THE DETAIL WRAPS EVEN WHEN THE LABEL DOES NOT.
+   *
+   * `wrap` governs the label — a button whose name jumps to two lines moves
+   * everything under it. The detail is a second line by definition, and
+   * inheriting `nowrap` from the button made it unwrappable: in the
+   * pseudo-locale the compound example was 410px of text in a 199px button and
+   * pushed the whole page sideways. Exactly the failure `/qps/` exists to find,
+   * and it only fitted because English is short. */
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* The glyph takes its box from the font size, so one rule per size is all the
+   icon alignment there is. `flex: none` stops it being squeezed by a long
+   label, which is what makes a row of buttons line up at all. */
+.nd-button > .nd-icon-glyph {
+  flex: none;
+  font-size: var(--noctua-size-small);
+}
+
+.nd-button[data-nd-size="small"] > .nd-icon-glyph {
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-button[data-nd-size="large"] > .nd-icon-glyph {
+  font-size: var(--noctua-size-body);
+}
+
+/* A toggle carries both glyphs and the state picks one. Rendered rather than
+   swapped by script, because swapping a glyph from script means shipping a
+   drawing to the script — and this system ships no runtime. */
+.nd-button-swap {
+  display: inline-flex;
+  flex: none;
+}
+
+.nd-button-swap > .nd-icon-glyph {
+  font-size: inherit;
+}
+
+.nd-button-swap > .nd-icon-glyph:last-child,
+.nd-button[aria-pressed="true"] .nd-button-swap > .nd-icon-glyph:first-child {
+  display: none;
+}
+
+.nd-button[aria-pressed="true"] .nd-button-swap > .nd-icon-glyph:last-child {
+  display: inline-flex;
+}
+
+.nd-button[data-nd-size="small"] .nd-button-swap {
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-button .nd-button-swap {
+  font-size: var(--noctua-size-small);
+}
+
+.nd-button[data-nd-size="large"] .nd-button-swap {
+  font-size: var(--noctua-size-body);
+}
+
+/* --- solid --------------------------------------------------------------- */
+
+.nd-button[data-nd-variant="solid"] {
+  color: var(--nc-color-on-accent);
+  background: var(--nc-color-accent);
+  border-color: var(--nc-color-accent);
+}
+
+.nd-button[data-nd-variant="solid"]:hover {
+  background: var(--nc-color-accent-hover);
+  border-color: var(--nc-color-accent-hover);
+}
+
+.nd-button[data-nd-variant="solid"][data-nd-tone="neutral"] {
+  color: var(--nc-color-on-subtle);
+  background: var(--nc-color-subtle);
+  border-color: var(--nc-color-subtle);
+}
+
+.nd-button[data-nd-variant="solid"][data-nd-tone="neutral"]:hover {
+  background: var(--nc-color-subtle-hover);
+  border-color: var(--nc-color-subtle-hover);
+}
+
+.nd-button[data-nd-variant="solid"][data-nd-tone="danger"] {
+  color: var(--nc-color-on-danger);
+  background: var(--nc-color-danger);
+  border-color: var(--nc-color-danger);
+}
+
+.nd-button[data-nd-variant="solid"][data-nd-tone="danger"]:hover {
+  background: var(--nc-color-danger-hover);
+  border-color: var(--nc-color-danger-hover);
+}
+
+.nd-button[data-nd-variant="solid"][data-nd-tone="success"] {
+  color: var(--nc-color-on-success);
+  background: var(--nc-color-success);
+  border-color: var(--nc-color-success);
+}
+
+.nd-button[data-nd-variant="solid"][data-nd-tone="success"]:hover {
+  background: var(--nc-color-success-hover);
+  border-color: var(--nc-color-success-hover);
+}
+
+/* --- outline ------------------------------------------------------------- */
+
+.nd-button[data-nd-variant="outline"] {
+  color: var(--nc-color-accent);
+  background: none;
+  border-color: var(--nc-color-accent-border);
+}
+
+.nd-button[data-nd-variant="outline"]:hover {
+  background: var(--nc-color-accent-bg);
+}
+
+.nd-button[data-nd-variant="outline"][data-nd-tone="neutral"] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
+.nd-button[data-nd-variant="outline"][data-nd-tone="neutral"]:hover {
+  background: var(--nc-color-subtle-bg);
+}
+
+.nd-button[data-nd-variant="outline"][data-nd-tone="danger"] {
+  color: var(--nc-color-danger);
+  border-color: var(--nc-color-danger-border);
+}
+
+.nd-button[data-nd-variant="outline"][data-nd-tone="danger"]:hover {
+  background: var(--nc-color-danger-bg);
+}
+
+.nd-button[data-nd-variant="outline"][data-nd-tone="success"] {
+  color: var(--nc-color-success);
+  border-color: var(--nc-color-success-border);
+}
+
+.nd-button[data-nd-variant="outline"][data-nd-tone="success"]:hover {
+  background: var(--nc-color-success-bg);
+}
+
+/* --- subtle -------------------------------------------------------------- */
+
+/* THE TINT TAKES THE PAGE'S INK, NOT `on-<tone>`.
+ *
+ * `--nc-color-on-accent` is solved against the SOLID accent, not against the
+ * tinted `-bg`, and pairing the two produces text that is very nearly
+ * invisible with nothing to warn you — both are valid colours. The colour
+ * system solved `-bg` against ordinary text and against `-border`, so that is
+ * the pair used here. The tone is carried by the fill, which is what a subtle
+ * button is for. */
+.nd-button[data-nd-variant="subtle"] {
+  color: var(--nc-color-fg);
+  background: var(--nc-color-accent-bg);
+  border-color: transparent;
+}
+
+.nd-button[data-nd-variant="subtle"]:hover {
+  border-color: var(--nc-color-accent-border);
+}
+
+.nd-button[data-nd-variant="subtle"][data-nd-tone="neutral"] {
+  background: var(--nc-color-subtle-bg);
+}
+
+.nd-button[data-nd-variant="subtle"][data-nd-tone="neutral"]:hover {
+  border-color: var(--nc-color-subtle-border);
+}
+
+.nd-button[data-nd-variant="subtle"][data-nd-tone="danger"] {
+  background: var(--nc-color-danger-bg);
+}
+
+.nd-button[data-nd-variant="subtle"][data-nd-tone="danger"]:hover {
+  border-color: var(--nc-color-danger-border);
+}
+
+.nd-button[data-nd-variant="subtle"][data-nd-tone="success"] {
+  background: var(--nc-color-success-bg);
+}
+
+.nd-button[data-nd-variant="subtle"][data-nd-tone="success"]:hover {
+  border-color: var(--nc-color-success-border);
+}
+
+/* --- transparent --------------------------------------------------------- */
+
+/* The quiet one: nothing at rest, a wash on hover. Every icon-only control in
+   the shell is this variant, which is why its resting ink is muted rather than
+   the tone — a toolbar of eight accent-coloured glyphs is a toolbar shouting. */
+.nd-button[data-nd-variant="transparent"] {
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border-color: transparent;
+}
+
+.nd-button[data-nd-variant="transparent"]:hover,
+.nd-button[data-nd-variant="transparent"][aria-pressed="true"] {
+  color: var(--nc-color-fg);
+  background: color-mix(in oklab, var(--nc-color-subtle-bg) var(--nd-veil), transparent);
+}
+
+.nd-button[data-nd-variant="transparent"][data-nd-tone="danger"] {
+  color: var(--nc-color-danger);
+}
+
+.nd-button[data-nd-variant="transparent"][data-nd-tone="danger"]:hover {
+  color: var(--nc-color-danger);
+  background: var(--nc-color-danger-bg);
+}
+
+.nd-button[data-nd-variant="transparent"][data-nd-tone="success"] {
+  color: var(--nc-color-success);
+}
+
+.nd-button[data-nd-variant="transparent"][data-nd-tone="success"]:hover {
+  color: var(--nc-color-success);
+  background: var(--nc-color-success-bg);
+}
+
+/* --- link ---------------------------------------------------------------- */
+
+/* Text, not a box: no padding, no minimum height, and it sits on the baseline
+   of whatever sentence contains it. */
+.nd-button[data-nd-variant="link"] {
+  padding: 0;
+  min-block-size: auto;
+  font-size: inherit;
+  font-weight: inherit;
+  color: var(--nc-color-accent);
+  background: none;
+  border-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: var(--noctua-space-1);
+}
+
+.nd-button[data-nd-variant="link"]:hover {
+  color: var(--nc-color-accent-hover);
+}
+
+.nd-button[data-nd-variant="link"][data-nd-tone="neutral"] {
+  color: var(--nc-color-fg);
+}
+
+.nd-button[data-nd-variant="link"][data-nd-tone="danger"] {
+  color: var(--nc-color-danger);
+}
+
+.nd-button[data-nd-variant="link"][data-nd-tone="success"] {
+  color: var(--nc-color-success);
+}
+
+/* --- nav ----------------------------------------------------------------- */
+
+/* §9.10: the hover effect applies to the TEXT only — not to a row, not to a
+   background, not to a container. So this variant changes exactly one property
+   on hover, and `shell.spec.js` measures that it changes no other. */
+.nd-button[data-nd-variant="nav"] {
+  justify-content: flex-start;
+  padding-inline: 0;
+  min-block-size: var(--noctua-space-8);
+  font-weight: var(--noctua-weight-regular);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border-color: transparent;
+}
+
+.nd-button[data-nd-variant="nav"]:hover {
+  color: var(--nc-color-fg);
+}
+
+.nd-button[data-nd-variant="nav"][aria-current="page"] {
+  color: var(--nc-color-fg);
+  font-weight: var(--noctua-weight-medium);
+}
+
+/* --- Refused ------------------------------------------------------------- */
+
+.nd-button[disabled],
+.nd-button[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" — the same exemption `.nd-icon-button` already carries */
+}
+
+.nd-button[disabled]:hover,
+.nd-button[aria-disabled="true"]:hover {
+  background: none;
+}
+
+.nd-button[data-nd-variant="solid"][disabled]:hover {
+  background: var(--nc-color-accent);
+}

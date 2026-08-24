@@ -1,0 +1,158 @@
+
+
+/* --- Rating --------------------------------------------------------------- */
+
+/* THE STARS ARE THE PICTURE AND THE NUMBER IS THE READING.
+ *
+ * `Meter` and `Progress` both record the defect this avoids: a shape a reader
+ * has to estimate from is a value they were not given. So the sentence beside
+ * the stars is always drawn, and the stars carry `aria-hidden`. */
+.nd-rating {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--noctua-space-tight);
+  font-size: var(--noctua-size-body);
+}
+
+.nd-rating[data-nd-size="small"] {
+  font-size: var(--noctua-size-small);
+}
+
+.nd-rating[data-nd-size="large"] {
+  font-size: var(--noctua-size-h3);
+}
+
+/* A star follows the rating rather than its own default. `Icon` sizes itself
+   from `data-nd-size`, and inside a rating the size is the rating's. */
+.nd-rating .nd-icon-glyph {
+  font-size: inherit;
+}
+
+.nd-rating-name {
+  color: var(--nc-color-fg);
+}
+
+/* TWO COPIES OF ONE ROW, THE SECOND CLIPPED, so a fraction is drawn rather
+   than rounded away. Cutting a row of glyphs at an arbitrary point is what a
+   positioned layer with an `inline-size` is for, and there is no half-star
+   drawing to reach for instead. */
+.nd-rating-stars {
+  position: relative;
+  display: inline-flex;
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-rating-track,
+.nd-rating-level {
+  display: inline-flex;
+  gap: var(--noctua-space-1);
+}
+
+.nd-rating-level {
+  /* DECLARED HERE AS WELL AS WRITTEN BY THE COMPONENT. A `var()` that resolves
+     to nothing makes the whole declaration invalid at computed-value time, and
+     an invalid `inline-size` is `auto` — the whole row, filled. Trap 0. */
+  --nd-rating-share: 0%;
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--nd-rating-share);
+  overflow: hidden;
+  color: var(--nd-tone, var(--nc-color-fg));
+}
+
+/* One drawing rather than two files: the vendored star is an outline, and this
+   turns the same geometry into the solid shape. A presentation attribute loses
+   to any rule, which is what makes `fill="none"` on the element overridable. */
+.nd-rating-level .nd-icon-glyph {
+  fill: currentColor;
+}
+
+.nd-rating-value {
+  color: var(--nc-color-fg);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The interactive half: real radios, and the row is the only thing drawn. */
+.nd-rating-row {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-1);
+}
+
+/* 24px is WCAG 2.5.8's minimum target and this is exactly it; `large` clears
+   the 44px enhanced one. The star is the target, because the input beside it
+   is clipped to nothing. */
+.nd-rating-star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--noctua-space-6);
+  min-block-size: var(--noctua-space-6);
+  border-radius: var(--noctua-radius-control);
+  color: var(--nc-color-fg-muted);
+  cursor: pointer;
+}
+
+.nd-rating[data-nd-size="large"] .nd-rating-star {
+  min-inline-size: var(--noctua-space-12);
+  min-block-size: var(--noctua-space-12);
+}
+
+.nd-rating-star .nd-icon-glyph {
+  fill: none;
+}
+
+/* EVERY STAR UP TO AND INCLUDING THE CHOSEN ONE IS INK.
+ *
+ * `:has(~ input:checked)` reads *a star with a checked radio after it*, which
+ * is every star below the score; the adjacent selector adds the chosen star
+ * itself. Written this way round on purpose: the obvious inverse — fill them
+ * all, then unfill what follows the checked one — puts a `:has()` on the
+ * ancestor, and `:has()` takes the specificity of its argument, so the rule
+ * meant to win would have lost. */
+.nd-rating-star:has(~ .nd-rating-input:checked),
+.nd-rating-input:checked + .nd-rating-star {
+  color: var(--nd-tone, var(--nc-color-fg));
+}
+
+.nd-rating-star:has(~ .nd-rating-input:checked) .nd-icon-glyph,
+.nd-rating-input:checked + .nd-rating-star .nd-icon-glyph {
+  fill: currentColor;
+}
+
+/* The input is clipped rather than hidden, so the focus ring has to be drawn
+   on the star the reader can actually see. */
+.nd-rating-input:focus-visible + .nd-rating-star {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-rating-input[aria-invalid="true"] + .nd-rating-star {
+  color: var(--nc-color-danger);
+}
+
+/* `:disabled` also matches every control inside a `<fieldset disabled>`, which
+   is why `Field { disabled }` needs nothing here to walk its children. */
+.nd-rating-input:disabled + .nd-rating-star {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+/* ONE OF THEM AT A TIME, AND AT THE END OF THE ROW.
+ *
+ * `rating.toml` argues it: the sentence is filled once per step and every copy
+ * ships, so the number follows a reader's own choice with no script running.
+ * `order` puts the one on show after the stars, which are all at order 0. */
+.nd-rating-count {
+  display: none;
+  order: 1;
+  margin-inline-start: var(--noctua-space-2);
+  color: var(--nc-color-fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.nd-rating-input:checked + .nd-rating-star + .nd-rating-count {
+  display: inline;
+}

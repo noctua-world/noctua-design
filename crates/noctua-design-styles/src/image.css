@@ -1,0 +1,73 @@
+
+
+/* --- Image ---------------------------------------------------------------- */
+
+/* THE BOX IS THERE BEFORE THE BYTES ARE.
+ *
+ * An image with no reserved box is the commonest way a page moves under a
+ * reader: the file arrives after the layout, everything below it jumps, and
+ * whoever was about to press something presses something else. `ratio` is the
+ * fix, and `Avatar` reached the same arrangement from the other side.
+ *
+ * The shape rides the ROOT and the picture reads it from there, so one rule
+ * serves the bare `<img>` and the `<figure>` that a caption turns it into. */
+.nd-image {
+  --nd-image-ratio: auto;
+  --nd-image-fit: cover;
+  display: block;
+  max-inline-size: 100%;
+}
+
+.nd-image[data-nd-ratio="square"] {
+  --nd-image-ratio: 1 / 1;
+}
+
+.nd-image[data-nd-ratio="landscape"] {
+  --nd-image-ratio: 4 / 3;
+}
+
+.nd-image[data-nd-ratio="portrait"] {
+  --nd-image-ratio: 3 / 4;
+}
+
+.nd-image[data-nd-ratio="wide"] {
+  --nd-image-ratio: 16 / 9;
+}
+
+.nd-image[data-nd-fit="contain"] {
+  --nd-image-fit: contain;
+}
+
+/* A `<figure>` arrives with a margin the flow did not ask for. */
+figure.nd-image {
+  margin: 0;
+}
+
+/* The picture: the root itself with no caption, a child of the `<figure>` with
+   one. It fills the box the caller gave it rather than deciding how wide the
+   page is, which is the half of "no layout shift" a ratio cannot do alone. */
+.nd-image-media {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: var(--nd-image-ratio);
+  object-fit: var(--nd-image-fit);
+  /* Something to look at while nothing has arrived, and the ground a `contain`
+     fit leaves showing around a picture of another shape. */
+  background: var(--nc-color-surface-subtle);
+}
+
+/* SQUARE IS THE BASE AND ROUNDED IS THE OVERRIDE (`NOCTUA.md §9.7`), and the
+   radius is the theme's rather than a number: a reader who set square corners
+   set them here too. */
+.nd-image[data-nd-rounded="true"],
+.nd-image[data-nd-rounded="true"] .nd-image-media {
+  border-radius: var(--noctua-radius-surface);
+  overflow: hidden;
+}
+
+.nd-image-caption {
+  margin-block-start: var(--noctua-space-2);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}

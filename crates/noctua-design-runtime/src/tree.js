@@ -1,0 +1,398 @@
+// Everything a `Tree` does once a script is running.
+//
+// IT SHIPS, for the reason `menu.js` gives: a component whose consumer cannot
+// use it is a component that lies. `Tree` writes `role="tree"` and
+// `aria-expanded`, which promise a reader arrow keys, type-ahead and a single
+// tab stop — and until this moved out of the documentation site's own script,
+// a consumer who installed the packages got the promise and none of them.
+
+import { message } from "./messages.js";
+
+/** How long a run of typed letters counts as one word, with no filter box. */
+const TYPE_AHEAD = 700;
+
+
+// A HIERARCHY, AND EVERY ROLE IN IT WRITTEN HERE.
+//
+// The markup ships a nested `<ul>` of links and claims nothing: no
+// `role="tree"`, no `aria-expanded`, no `tabindex`. With no script that page is
+// complete and correct, and nothing on it promises a keyboard contract nothing
+// is answering — `Segmented`'s rule, and `Table`'s reason for refusing
+// `role="grid"`.
+//
+// WHY THIS IS NOT `stops()` AND `roving()`.
+//
+// Those two are one implementation for `role="toolbar"` and `role="radiogroup"`
+// and their comment block is a proof about exactly two roles. A tree breaks
+// both halves of it: the walk is over VISIBLE nodes, which skips a collapsed
+// subtree and crosses levels, and Left and Right are structural rather than
+// directional — collapse-or-parent and expand-or-first-child. About forty per
+// cent of the keyboard is the flat model and the rest is not, so what is shared
+// is the one sentence they have in common, `placeRoving` below, and the rest is
+// written beside it rather than folded into it.
+
+const TREE = "[data-nd-tree]";
+const trees = new WeakMap();
+
+/** One element carries `tabindex=0` and the rest `-1`. The shared sentence. */
+function placeRoving(list, active) {
+  if (list.length === 0) return;
+  const at = Math.max(0, Math.min(active, list.length - 1));
+  list.forEach((el, index) => {
+    el.tabIndex = index === at ? 0 : -1;
+  });
+}
+
+export function enhanceTrees(root = document) {
+  for (const root_ of root.querySelectorAll(TREE)) {
+    if (trees.has(root_)) continue;
+    const state = buildTree(root_);
+    if (state) trees.set(root_, state);
+  }
+}
+
+/**
+ * Takes the behaviour back off every enhanced tree under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. A tree binds only to its own elements, so what this
+ * mostly buys is the right to enhance the same markup again: the guard is the
+ * `trees` map, and an entry nothing removes is a tree that can never be rebuilt.
+ */
+export function releaseTrees(root = document) {
+  for (const element of root.querySelectorAll(TREE)) {
+    const state = trees.get(element);
+    if (!state) continue;
+    state.binding.abort();
+    trees.delete(element);
+  }
+}
+
+function buildTree(root_) {
+  const binding = new AbortController();
+  const signal = binding.signal;
+  const state = {
+    // CARRIED ON THE STATE, because every helper below already takes it. A
+    // parallel argument threaded through a dozen call sites is a dozen places
+    // for one of them to be forgotten.
+    binding,
+    signal,
+    root: root_,
+    name: root_.dataset.ndTree,
+    selection: root_.dataset.ndSelection ?? "none",
+    form: root_.dataset.ndForm ?? "",
+    words: {
+      expand: root_.dataset.ndExpandLabel ?? "",
+      collapse: root_.dataset.ndCollapseLabel ?? "",
+      empty: root_.dataset.ndEmptyLabel ?? "",
+    },
+    anchor: null,
+    typed: "",
+    typedAt: 0,
+  };
+
+  root_.setAttribute("role", "tree");
+  if (state.selection === "multiple") root_.setAttribute("aria-multiselectable", "true");
+  // IT READS PRINTABLE KEYS, AND SAYS SO. Without this `isTyping` does not
+  // recognise a focused tree node as somewhere letters belong, and `/` opens
+  // the search palette out from under a reader who was typing a node's name to
+  // jump to it — the hotkey listener is registered first, so it would win.
+  root_.dataset.ndTypeahead = "";
+
+  let index = 0;
+  for (const node of root_.querySelectorAll(".nd-tree-item")) {
+    node.id = node.id || `nd-tree-${state.name}-${index}`;
+    index += 1;
+    node.setAttribute("role", "treeitem");
+
+    const group = node.querySelector(":scope > .nd-tree-group");
+    const kids = group?.querySelector(":scope > .nd-tree-item");
+    const branch = Boolean(kids) || node.dataset.ndBranch === "true";
+    node.dataset.ndLeaf = String(!branch);
+    if (group) {
+      group.setAttribute("role", "group");
+      // A BRANCH THAT OPENS ONTO A GAP SAYS SO, AND IT USED TO SAY NOTHING.
+      //
+      // `empty_label` reached `state.words.empty` and stopped there: no
+      // element, no rule, nothing on the page — under a contract telling a
+      // caller to set it so exactly this row is explained. With the word the
+      // group holds one row that carries it; without one the group is empty,
+      // and an empty `role="group"` is a container announcing nothing.
+      // A BRANCH THAT CLAIMED CHILDREN, NOT A LEAF. Every node renders a
+      // group, so `!kids` alone is true of every leaf on the tree — and a leaf
+      // is not a row opening onto a gap, it is a row with nothing under it by
+      // design. `data-nd-branch` is the claim this explains.
+      if (!kids) {
+        if (branch && state.words.empty) {
+          const note = document.createElement("li");
+          note.className = "nd-tree-empty";
+          note.dataset.ndTreeEmpty = "";
+          // Not a `treeitem`: it is the group explaining itself, not a row a
+          // reader can walk to, choose or open.
+          note.setAttribute("role", "none");
+          note.textContent = state.words.empty;
+          group.append(note);
+        } else {
+          group.removeAttribute("role");
+        }
+      }
+    }
+
+    const toggle = node.querySelector(":scope > .nd-tree-row > [data-nd-tree-toggle]");
+    if (toggle) {
+      // A LEAF KEEPS ITS TOGGLE HIDDEN. `aria-expanded` on a node with nothing
+      // under it announces a control that is not there — the same reason
+      // `TableHeaderCell` writes `aria-sort` only on a sortable column.
+      if (branch) {
+        toggle.hidden = false;
+        // Not a tab stop of its own: the tree is one stop and the arrows do
+        // this. It is here for a pointer, and for nothing else.
+        toggle.tabIndex = -1;
+        toggle.addEventListener("click", (event) => {
+          event.stopPropagation();
+          setOpen(state, node, node.getAttribute("aria-expanded") !== "true");
+          focusNode(state, node);
+        }, { signal });
+      }
+      // The link inside the row is untouched except for this: the tree is one
+      // tab stop, so everything inside it is reached with the arrows.
+      const link = node.querySelector(":scope > .nd-tree-row a");
+      if (link) link.tabIndex = -1;
+    }
+
+    if (branch) setOpen(state, node, node.dataset.ndExpanded === "true", { quiet: true });
+    if (state.selection !== "none") {
+      node.setAttribute("aria-selected", String(node.dataset.ndSelected === "true"));
+      if (state.form) addBox(state, node);
+    }
+  }
+
+  root_.addEventListener("keydown", (event) => onTreeKey(state, event), { signal });
+  root_.addEventListener("pointerdown", (event) => {
+    const node = event.target.closest?.(".nd-tree-item");
+    if (!node || !root_.contains(node)) return;
+    if (event.target.closest("[data-nd-tree-toggle]")) return;
+    focusNode(state, node);
+    if (state.selection !== "none") {
+      chooseNode(state, node, { add: event.ctrlKey || event.metaKey, range: event.shiftKey });
+    }
+  }, { signal });
+
+  root_.dataset.ndEnhanced = "true";
+  placeRoving(visibleNodes(state), 0);
+  return state;
+}
+
+/**
+ * The hidden checkbox a selectable node submits through.
+ *
+ * `Table`'s ruling, applied: "selection is a real checkbox, whose state the
+ * browser announces without being asked". Hidden rather than styled away — the
+ * attribute takes it out of the tab order and out of the accessibility tree in
+ * one move, and a hidden form control still submits, which is the whole
+ * arrangement. It is the ONE stored fact; `aria-selected` is derived from it
+ * wherever selection changes, so the two can never come apart.
+ */
+function addBox(state, node) {
+  const box = document.createElement("input");
+  box.type = "checkbox";
+  box.hidden = true;
+  box.name = state.form;
+  box.value = node.dataset.ndValue || node.querySelector(".nd-tree-label")?.textContent || "";
+  box.checked = node.dataset.ndSelected === "true";
+  node.querySelector(":scope > .nd-tree-row").append(box);
+}
+
+/** Every node a reader can currently see, in the order they see them. */
+function visibleNodes(state) {
+  return [...state.root.querySelectorAll(".nd-tree-item")].filter((node) => {
+    const parent = node.parentElement?.closest(".nd-tree-item");
+    for (let up = parent; up; up = up.parentElement?.closest(".nd-tree-item")) {
+      if (up.getAttribute("aria-expanded") === "false") return false;
+    }
+    return true;
+  });
+}
+
+function setOpen(state, node, open, { quiet = false } = {}) {
+  node.setAttribute("aria-expanded", String(open));
+  node.dataset.ndExpanded = String(open);
+  const group = node.querySelector(":scope > .nd-tree-group");
+  if (group) group.hidden = !open;
+  const toggle = node.querySelector(":scope > .nd-tree-row > [data-nd-tree-toggle]");
+  if (toggle) {
+    const words = open ? state.words.collapse : state.words.expand;
+    const label = node.querySelector(".nd-tree-label")?.textContent ?? "";
+    const named = message(words, { label });
+    if (named) {
+      toggle.setAttribute("aria-label", named);
+      toggle.setAttribute("title", named);
+    }
+  }
+  if (!quiet) placeRoving(visibleNodes(state), visibleNodes(state).indexOf(node));
+}
+
+function focusNode(state, node) {
+  const nodes = visibleNodes(state);
+  placeRoving(nodes, nodes.indexOf(node));
+  node.focus();
+}
+
+/**
+ * Chooses a node, and keeps the checkbox and `aria-selected` in one direction.
+ *
+ * The checkbox is the stored state and `aria-selected` is written from it, here
+ * and nowhere else — which is the "two facts kept in step" trap `TableRow`
+ * warns about, avoided by having only one fact.
+ */
+function chooseNode(state, node, { add = false, range = false } = {}) {
+  if (node.getAttribute("aria-disabled") === "true") return;
+  const nodes = visibleNodes(state);
+  const single = state.selection === "single";
+
+  let wanted;
+  if (single || (!add && !range)) {
+    wanted = new Set([node]);
+  } else if (range && state.anchor) {
+    const from = nodes.indexOf(state.anchor);
+    const to = nodes.indexOf(node);
+    wanted = new Set(nodes.slice(Math.min(from, to), Math.max(from, to) + 1));
+    for (const other of nodes) {
+      if (other.getAttribute("aria-selected") === "true") wanted.add(other);
+    }
+  } else {
+    wanted = new Set(nodes.filter((n) => n.getAttribute("aria-selected") === "true"));
+    if (wanted.has(node)) wanted.delete(node);
+    else wanted.add(node);
+  }
+
+  if (!range) state.anchor = node;
+  for (const other of state.root.querySelectorAll(".nd-tree-item")) {
+    const on = wanted.has(other);
+    const box = other.querySelector(':scope > .nd-tree-row > input[type="checkbox"]');
+    if (box) box.checked = on;
+    other.setAttribute("aria-selected", String(on));
+    other.dataset.ndSelected = String(on);
+  }
+}
+
+function onTreeKey(state, event) {
+  if (event.isComposing) return;
+  const node = event.target.closest?.(".nd-tree-item");
+  if (!node || !state.root.contains(node)) return;
+  const nodes = visibleNodes(state);
+  const at = nodes.indexOf(node);
+  const open = node.getAttribute("aria-expanded");
+
+  const go = (to) => {
+    const next = nodes[Math.max(0, Math.min(to, nodes.length - 1))];
+    if (!next) return;
+    focusNode(state, next);
+    // Shift extends; Control moves without choosing, which is the whole reason
+    // it exists — a reader reaching a distant node and adding it with Space.
+    if (state.selection === "multiple" && event.shiftKey) chooseNode(state, next, { range: true });
+    else if (state.selection === "single" && !event.ctrlKey && !event.metaKey) chooseNode(state, next);
+  };
+
+  switch (event.key) {
+    case "ArrowDown":
+      event.preventDefault();
+      go(at + 1);
+      return;
+    case "ArrowUp":
+      event.preventDefault();
+      go(at - 1);
+      return;
+    case "ArrowRight":
+      event.preventDefault();
+      // Open it, or step into it. On a leaf, nothing — which is how a reader
+      // learns the row has nothing under it.
+      if (open === "false") setOpen(state, node, true);
+      else if (open === "true") go(at + 1);
+      return;
+    case "ArrowLeft": {
+      event.preventDefault();
+      // Close it, or climb out. That is how a reader leaves without walking
+      // back up through everything they opened.
+      if (open === "true") {
+        setOpen(state, node, false);
+        return;
+      }
+      const parent = node.parentElement?.closest(".nd-tree-item");
+      if (parent) focusNode(state, parent);
+      return;
+    }
+    case "Home":
+      event.preventDefault();
+      go(0);
+      return;
+    case "End":
+      event.preventDefault();
+      go(nodes.length - 1);
+      return;
+    case "*": {
+      event.preventDefault();
+      // Every branch at THIS level, and no deeper: opening everything is a
+      // different request nobody has made.
+      const siblings = [...(node.parentElement?.children ?? [])].filter((el) =>
+        el.classList.contains("nd-tree-item"),
+      );
+      for (const sibling of siblings) {
+        if (sibling.dataset.ndLeaf === "false") setOpen(state, sibling, true, { quiet: true });
+      }
+      placeRoving(visibleNodes(state), visibleNodes(state).indexOf(node));
+      return;
+    }
+    case "Enter": {
+      const link = node.querySelector(":scope > .nd-tree-row a");
+      if (link) {
+        event.preventDefault();
+        if (event.metaKey || event.ctrlKey) window.open(link.href, "_blank", "noopener");
+        else link.click();
+        return;
+      }
+      if (open !== null) {
+        event.preventDefault();
+        setOpen(state, node, open !== "true");
+      }
+      return;
+    }
+    case " ":
+      // REFUSED BEFORE IT IS ANSWERED. `tree.toml` promises that on a tree
+      // with no selection Space "does nothing rather than scrolling", and this
+      // returned before `preventDefault` — so the browser's own default ran
+      // and the page jumped a screen under a reader whose focus was on a row.
+      // Doing nothing is a thing that has to be done.
+      event.preventDefault();
+      if (state.selection === "none") return;
+      chooseNode(state, node, { add: true });
+      return;
+    case "a":
+    case "A":
+      // Scoped to a tree that has multiple selection; anywhere else this stays
+      // the browser's own *select all*.
+      if (state.selection !== "multiple" || !(event.ctrlKey || event.metaKey)) break;
+      event.preventDefault();
+      for (const other of nodes) chooseNode(state, other, { add: true });
+      return;
+    default:
+  }
+
+  // Type-to-jump, on the same window and the same accumulation `Select` uses.
+  // `isTyping` knows about this because the row carries `data-nd-typeahead`,
+  // which is what stops `/` opening the search palette out from under it.
+  if (event.key.length !== 1 || event.metaKey || event.ctrlKey || event.altKey) return;
+  const now = performance.now();
+  state.typed = now - state.typedAt > TYPE_AHEAD ? event.key : state.typed + event.key;
+  state.typedAt = now;
+  const term = state.typed.toLowerCase();
+  const from = nodes.indexOf(node);
+  const found = [...nodes.slice(from + 1), ...nodes.slice(0, from + 1)].find((other) =>
+    (other.querySelector(".nd-tree-label")?.textContent ?? "").toLowerCase().startsWith(term),
+  );
+  if (found) {
+    event.preventDefault();
+    focusNode(state, found);
+  }
+}
+

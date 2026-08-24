@@ -1,0 +1,21 @@
+
+
+/* `.nd-icon` and `.nd-icon--small` are gone. They were a class anything could
+   take, on a control that might or might not have had a name — the header's
+   menu trigger and four cycling scope controls wore them. All five are
+   `Button` or `Segmented` now, which cannot be built without a name. */
+
+/* The generated `Icon` sizes itself in `em`, so the box comes from whatever
+   contains it and one class covers every context. */
+.nd-icon-glyph {
+  font-size: var(--noctua-size-body);
+  flex: none;
+}
+
+.nd-icon-glyph[data-nd-size="small"] {
+  font-size: var(--noctua-size-small);
+}
+
+.nd-icon-glyph[data-nd-size="large"] {
+  font-size: var(--noctua-size-h3);
+}

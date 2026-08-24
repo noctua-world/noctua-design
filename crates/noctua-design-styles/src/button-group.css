@@ -1,0 +1,168 @@
+
+
+/* --- ButtonGroup --------------------------------------------------------- */
+
+.nd-button-group {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.nd-button-group[aria-orientation="vertical"] {
+  flex-direction: column;
+}
+
+.nd-button-group[data-nd-attached="false"] {
+  gap: var(--noctua-space-2);
+  flex-wrap: wrap;
+}
+
+.nd-button-group[data-nd-fill="true"] {
+  display: flex;
+  inline-size: 100%;
+}
+
+.nd-button-group[data-nd-fill="true"] > .nd-button {
+  flex: 1 1 0;
+}
+
+/* WHERE THE CONTENT SITS IS THE GROUP'S ANSWER, NOT EACH BUTTON'S.
+   `align-items: stretch` is what makes a vertical group's buttons as wide as
+   the widest of them, so every button in one is wider than its own content and
+   `justify` stops being a refinement on one control and becomes a fact about
+   the set. Siblings share their arrangement (`NOCTUA.md §9.7`), and a prop
+   three children each had to repeat is a prop the third one gets wrong.
+
+   ONE CLASS DEEPER THAN `Button`'S OWN RULE, which is how the group wins when
+   both are stated — the same override `AvatarGroup.size` performs on each
+   `Avatar`, written the same way. The default is written out rather than left
+   as the absence of the attribute, because `Button` always writes its own
+   `data-nd-justify` and a group that said nothing would lose to it. */
+.nd-button-group[data-nd-justify="center"] > .nd-button {
+  justify-content: center;
+}
+
+.nd-button-group[data-nd-justify="start"] > .nd-button {
+  justify-content: flex-start;
+}
+
+.nd-button-group[data-nd-justify="between"] > .nd-button {
+  justify-content: space-between;
+}
+
+/* Attached: the shared edge is drawn once, by pulling each button back over
+   its neighbour's border. Two hairlines meeting is two pixels, and a row whose
+   inner rules are twice the weight of its outer ones reads as a mistake. */
+.nd-button-group[data-nd-attached="true"] > .nd-button {
+  position: relative;
+}
+
+.nd-button-group[data-nd-attached="true"] > .nd-button + .nd-button {
+  margin-inline-start: calc(-1 * var(--noctua-border-hairline));
+}
+
+.nd-button-group[data-nd-attached="true"][aria-orientation="vertical"]
+  > .nd-button
+  + .nd-button {
+  margin-inline-start: 0;
+  margin-block-start: calc(-1 * var(--noctua-border-hairline));
+}
+
+/* THE OUTER CORNERS ARE THE GROUP'S, AND THE AXIS DECIDES WHICH THOSE ARE.
+   The first and last member keep the corners on the group's own outside and
+   every corner on a shared edge goes, so the row reads as one control.
+
+   The two horizontal rules used to carry no orientation, so a VERTICAL group
+   ran them as well as its own pair: the first button lost the corners at the
+   end of a row it is not in and the last lost the ones at the start of it. A
+   stack of three kept two of its eight corners, one at the top left and one at
+   the bottom right, which is the picture a reader complained about. Every rule
+   here names its axis for that reason. */
+.nd-button-group[data-nd-attached="true"][aria-orientation="horizontal"]
+  > .nd-button:not(:first-child) {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.nd-button-group[data-nd-attached="true"][aria-orientation="horizontal"]
+  > .nd-button:not(:last-child) {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+
+.nd-button-group[data-nd-attached="true"][aria-orientation="vertical"]
+  > .nd-button:not(:first-child) {
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+
+.nd-button-group[data-nd-attached="true"][aria-orientation="vertical"]
+  > .nd-button:not(:last-child) {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+
+/* A BEVEL IS A CUT AND NOT A RADIUS, so the same rule reaches it by changing
+   the polygon rather than the corner. Left to the rules above it is untouched
+   — `bevel` sets `border-radius: 0` already — and every member keeps all eight
+   of its cuts, so the shared edges of an attached group are a row of notches
+   with the surface showing through. The middle of a group has no outer corner
+   at all, which is one rectangle. */
+.nd-button-group[data-nd-attached="true"]
+  > .nd-button[data-nd-shape="bevel"]:not(:first-child):not(:last-child) {
+  clip-path: none;
+}
+
+.nd-button-group[data-nd-attached="true"][aria-orientation="horizontal"]
+  > .nd-button[data-nd-shape="bevel"]:first-child:not(:last-child) {
+  clip-path: polygon(
+    var(--noctua-space-2) 0%,
+    100% 0%,
+    100% 100%,
+    var(--noctua-space-2) 100%,
+    0% calc(100% - var(--noctua-space-2)),
+    0% var(--noctua-space-2)
+  );
+}
+
+.nd-button-group[data-nd-attached="true"][aria-orientation="horizontal"]
+  > .nd-button[data-nd-shape="bevel"]:last-child:not(:first-child) {
+  clip-path: polygon(
+    0% 0%,
+    calc(100% - var(--noctua-space-2)) 0%,
+    100% var(--noctua-space-2),
+    100% calc(100% - var(--noctua-space-2)),
+    calc(100% - var(--noctua-space-2)) 100%,
+    0% 100%
+  );
+}
+
+.nd-button-group[data-nd-attached="true"][aria-orientation="vertical"]
+  > .nd-button[data-nd-shape="bevel"]:first-child:not(:last-child) {
+  clip-path: polygon(
+    var(--noctua-space-2) 0%,
+    calc(100% - var(--noctua-space-2)) 0%,
+    100% var(--noctua-space-2),
+    100% 100%,
+    0% 100%,
+    0% var(--noctua-space-2)
+  );
+}
+
+.nd-button-group[data-nd-attached="true"][aria-orientation="vertical"]
+  > .nd-button[data-nd-shape="bevel"]:last-child:not(:first-child) {
+  clip-path: polygon(
+    0% 0%,
+    100% 0%,
+    100% calc(100% - var(--noctua-space-2)),
+    calc(100% - var(--noctua-space-2)) 100%,
+    var(--noctua-space-2) 100%,
+    0% calc(100% - var(--noctua-space-2))
+  );
+}
+
+/* The focused member has to be drawn over its neighbours, or the ring is half
+   hidden under the button the negative margin pulled on top of it. */
+.nd-button-group[data-nd-attached="true"] > .nd-button:hover,
+.nd-button-group[data-nd-attached="true"] > .nd-button:focus-visible {
+  z-index: 1;
+}

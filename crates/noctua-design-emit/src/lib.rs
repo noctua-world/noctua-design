@@ -38,6 +38,7 @@ pub mod runtime;
 pub mod rust;
 pub mod scope;
 pub mod specimens;
+pub mod styles;
 pub mod syntax;
 pub mod theme;
 pub mod tones;
@@ -181,6 +182,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
     files.extend(rust::emit(spec));
     files.extend(scope::emit(vendor));
     files.extend(specimens::emit(components));
+    files.extend(styles::emit());
     files.extend(syntax::emit(syntax_layer));
     files.extend(theme::emit(theme, vendor));
     files.extend(tones::emit(vendor));
@@ -445,6 +447,14 @@ mod tests {
                     noctua_design_runtime::POPOVER_SOURCE,
                     noctua_design_runtime::TOOLTIP_SOURCE,
                     noctua_design_runtime::TOAST_SOURCE,
+                    noctua_design_runtime::PANELS_SOURCE,
+                    noctua_design_runtime::ROVING_SOURCE,
+                    noctua_design_runtime::SELECT_SOURCE,
+                    noctua_design_runtime::TAG_PICKER_SOURCE,
+                    noctua_design_runtime::TREE_SOURCE,
+                    noctua_design_runtime::TABS_SOURCE,
+                    noctua_design_runtime::DATE_INPUT_SOURCE,
+                    noctua_design_styles::SOURCE_DIR,
                     noctua_design_spec::vendor::VENDOR,
                 ]
                 .iter()

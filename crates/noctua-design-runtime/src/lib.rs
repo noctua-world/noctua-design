@@ -20,6 +20,13 @@
 //! | `popover.js` | `enhancePopovers()` — the named surface a control opens, and every way out of it |
 //! | `tooltip.js` | `enhanceTooltips()` — the hint a control gains on hover, on focus and under a held finger |
 //! | `toast.js` | `enhanceToasts()` — the timer that pauses, and the live region a message arrives in |
+//! | `panels.js` | Which single floating list on the page is open, whoever drew it |
+//! | `roving.js` | `enhanceRoving()` — the one arrow walk a radio group, a toolbar and a tab list share |
+//! | `select.js` | `enhanceSelects()` — the listbox, the filter and the type-ahead a `Select` gains |
+//! | `tag-picker.js` | `enhanceTagPickers()` — the suggestions, and the tags a reader adds and takes back |
+//! | `tree.js` | `enhanceTrees()` — the arrows, the type-ahead and the one tab stop a tree owes |
+//! | `tabs.js` | `enhanceTabs()` — the panel that shows and the ones that stop being on the page |
+//! | `date-input.js` | `enhanceDateInputs()` — the three boxes: stepping, paste, the locale's own order |
 //!
 //! # Why a crate holds JavaScript
 //!
@@ -37,10 +44,13 @@
 //! a colour picker that cannot pick a colour outside this repository's own
 //! documentation site is not a colour picker.
 //!
-//! The three site-only controls — `Select`, `TagPicker`, `DateInput` — are
-//! still enhanced from `docs-site/assets/shell.js` and are still a recorded
-//! gap. `anchor.js` moving here is the first half of closing it: the rule they
-//! all float by is now in a file they could import.
+//! **The site-only controls are gone.** `Select`, `TagPicker`, `Tree`, `Tabs`
+//! and `DateInput` were enhanced from `docs-site/assets/shell.js`, so a
+//! consumer who installed the packages got their roles — `listbox`, `tree`,
+//! `tablist` — and none of the keyboard those roles oblige. They are here now,
+//! and the site imports them back. `Search` is the one that has not moved: its
+//! index is fetched from a path the documentation site decides, and until that
+//! is a prop rather than a convention it would ship half a component.
 
 /// `anchor.js`, as written in generated headers and read by `xtask`.
 pub const ANCHOR_SOURCE: &str = "crates/noctua-design-runtime/src/anchor.js";
@@ -95,6 +105,28 @@ pub const TOOLTIP_SOURCE: &str = "crates/noctua-design-runtime/src/tooltip.js";
 /// a message has to be written into rather than arrive full.
 pub const TOAST_SOURCE: &str = "crates/noctua-design-runtime/src/toast.js";
 
+/// `panels.js`, likewise — the registry that keeps one floating list open.
+pub const PANELS_SOURCE: &str = "crates/noctua-design-runtime/src/panels.js";
+
+/// `roving.js`, likewise — the arrow walk a radio group, a toolbar and a tab
+/// list all promise.
+pub const ROVING_SOURCE: &str = "crates/noctua-design-runtime/src/roving.js";
+
+/// `select.js`, likewise — the listbox a `Select` becomes.
+pub const SELECT_SOURCE: &str = "crates/noctua-design-runtime/src/select.js";
+
+/// `tag-picker.js`, likewise.
+pub const TAG_PICKER_SOURCE: &str = "crates/noctua-design-runtime/src/tag-picker.js";
+
+/// `tree.js`, likewise.
+pub const TREE_SOURCE: &str = "crates/noctua-design-runtime/src/tree.js";
+
+/// `tabs.js`, likewise.
+pub const TABS_SOURCE: &str = "crates/noctua-design-runtime/src/tabs.js";
+
+/// `date-input.js`, likewise — the three boxes, not the month behind them.
+pub const DATE_INPUT_SOURCE: &str = "crates/noctua-design-runtime/src/date-input.js";
+
 /// Every file this crate carries, as `(path, contents)`.
 ///
 /// `include_str!` rather than a read at build time: a file renamed out from
@@ -102,7 +134,7 @@ pub const TOAST_SOURCE: &str = "crates/noctua-design-runtime/src/toast.js";
 /// `xtask` that runs and writes an empty artifact. The paths above are what
 /// name it; these are what it says.
 #[must_use]
-pub fn sources() -> [(&'static str, &'static str); 16] {
+pub fn sources() -> [(&'static str, &'static str); 23] {
     [
         (ANCHOR_SOURCE, include_str!("anchor.js")),
         (COLOR_SOURCE, include_str!("color.js")),
@@ -120,6 +152,13 @@ pub fn sources() -> [(&'static str, &'static str); 16] {
         (POPOVER_SOURCE, include_str!("popover.js")),
         (TOOLTIP_SOURCE, include_str!("tooltip.js")),
         (TOAST_SOURCE, include_str!("toast.js")),
+        (PANELS_SOURCE, include_str!("panels.js")),
+        (ROVING_SOURCE, include_str!("roving.js")),
+        (SELECT_SOURCE, include_str!("select.js")),
+        (TAG_PICKER_SOURCE, include_str!("tag-picker.js")),
+        (TREE_SOURCE, include_str!("tree.js")),
+        (TABS_SOURCE, include_str!("tabs.js")),
+        (DATE_INPUT_SOURCE, include_str!("date-input.js")),
     ]
 }
 

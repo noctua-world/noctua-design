@@ -1,0 +1,251 @@
+
+
+/* --- Tag ------------------------------------------------------------------
+ *
+ * One component, three elements: a `<span>` when it is only a label, an `<a>`
+ * when it leads somewhere, a `<button>` when it toggles. The wrapper is always
+ * the `<span class="nd-tag">`, so every rule about the pill's shape and colour
+ * is written once and the element inside it decides only what answers to a
+ * press.
+ *
+ * The remove control is a real `Button` beside the body, never around it: a
+ * button inside a link is invalid and a button inside a button is unreachable.
+ * That is why the pill's border is on the wrapper and the body inside it has
+ * none — two borders on two nested boxes would draw a pill inside a pill. */
+.nd-tag {
+  --nd-tag-gap: var(--noctua-space-2);
+  --nd-tag-pad: var(--noctua-space-3);
+  --nd-tag-height: var(--noctua-space-8);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nd-tag-gap);
+  max-inline-size: 100%;
+  min-block-size: var(--nd-tag-height);
+  padding-inline: var(--nd-tag-pad);
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-medium);
+  line-height: var(--noctua-leading-body);
+  color: var(--nc-color-fg);
+  border: var(--noctua-border-hairline) solid transparent;
+  border-radius: var(--noctua-radius-pill);
+}
+
+/* The body is the word and whatever is drawn beside it — and it is the whole
+   target when the tag is a control, which is why it takes the padding back off
+   the wrapper and stretches to the full height rather than sitting inside it. */
+.nd-tag-body {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nd-tag-gap);
+  min-inline-size: 0;
+  margin-inline: calc(-1 * var(--nd-tag-pad));
+  padding-inline: var(--nd-tag-pad);
+  align-self: stretch;
+  font: inherit;
+  color: inherit;
+  text-decoration: none;
+  background: none;
+  border: none;
+  border-radius: inherit;
+}
+
+/* A LABEL IS NOT A CONTROL. Only the two interactive elements take a pointer,
+   and the `<span>` form takes none — a cursor that says "press me" over
+   something nothing happens to is the same lie as a role it does not have. */
+.nd-tag-body:is(a, button) {
+  cursor: pointer;
+}
+
+.nd-tag-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nd-tag-glyph {
+  display: inline-flex;
+  flex: none;
+  color: inherit;
+}
+
+/* Beside the word rather than instead of it, and never shrinking: a chip that
+   collapsed to nothing in a narrow column would take the tag's colour with it. */
+.nd-tag .nd-tag-swatch,
+.nd-tag-image {
+  flex: none;
+}
+
+.nd-tag-image {
+  inline-size: var(--noctua-space-4);
+  block-size: var(--noctua-space-4);
+  object-fit: cover;
+  border-radius: var(--noctua-radius-pill);
+}
+
+/* --- Its box --- */
+
+.nd-tag[data-nd-size="small"] {
+  --nd-tag-gap: var(--noctua-space-1);
+  --nd-tag-pad: var(--noctua-space-2);
+  --nd-tag-height: var(--noctua-space-6);
+}
+
+.nd-tag[data-nd-size="large"] {
+  --nd-tag-gap: var(--noctua-space-2);
+  --nd-tag-pad: var(--noctua-space-4);
+  --nd-tag-height: var(--noctua-space-12);
+  font-size: var(--noctua-size-small);
+}
+
+.nd-tag[data-nd-shape="rounded"] {
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-tag[data-nd-shape="square"] {
+  border-radius: var(--noctua-radius-none);
+}
+
+/* --- Its colour ---
+ *
+ * THREE RULES, NOT TWELVE — AND EVERY TONE IN THE PALETTE RATHER THAN FOUR.
+ *
+ * `dist/tones.css` declares `--nd-tone`, `--nd-tone-bg`, `--nd-tone-border` and
+ * `--nd-tone-on` once per family, generated from the colour system's own 349.
+ * A tag therefore says *the tone's background* and gets `overdue`, `shipped`,
+ * `degraded` and the three hundred others for free — including the ones the
+ * palette gains after this file was written.
+ *
+ * A tag with NO tone is the neutral one it used to default to, which is why the
+ * unqualified rules come first and the toned ones override them. */
+
+.nd-tag[data-nd-variant="soft"] {
+  color: var(--nc-color-fg);
+  background: var(--nc-color-subtle-bg);
+}
+
+.nd-tag[data-nd-variant="solid"] {
+  color: var(--nc-color-on-subtle);
+  background: var(--nc-color-subtle);
+}
+
+.nd-tag[data-nd-variant="outline"] {
+  color: var(--nc-color-fg-muted);
+  border-color: var(--nc-color-border);
+}
+
+.nd-tag[data-nd-variant="soft"][data-nd-tone] {
+  color: var(--nd-tone);
+  background: var(--nd-tone-bg);
+}
+
+.nd-tag[data-nd-variant="solid"][data-nd-tone] {
+  color: var(--nd-tone-on);
+  background: var(--nd-tone);
+}
+
+.nd-tag[data-nd-variant="outline"][data-nd-tone] {
+  color: var(--nd-tone);
+  border-color: var(--nd-tone-border);
+}
+
+/* --- What it does when touched --- */
+
+/* THE RING GOES ON THE WRAPPER, NOT ON THE BODY. The body has no border and
+   sits inside the pill; an outline on it would draw a rectangle through the
+   rounded corners of the thing around it. */
+.nd-tag:has(> .nd-tag-body:focus-visible) {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-tag-body:focus-visible {
+  outline: none;
+}
+
+@media (hover: hover) {
+  .nd-tag:has(> .nd-tag-body:is(a, button):hover) {
+    border-color: var(--nc-color-border-strong);
+  }
+}
+
+/* Pressed is a state, and it is drawn as one: the tone at full strength, which
+   is the same thing `solid` is — so a filter chip that is on reads as the same
+   object it was, turned up, rather than as a different component.
+   `[data-nd-variant]` is carried only to win, and there are TWO selectors for
+   the same reason: a tag with no tone writes no `data-nd-tone` at all now, so
+   the toned selector alone stopped matching the ordinary untoned chip and the
+   pressed state became invisible. Measured — `tags.spec.js` reads the pill's
+   own pixels and found the two identical. */
+.nd-tag[data-nd-variant]:has(> [aria-pressed="true"]),
+.nd-tag[data-nd-variant][data-nd-tone]:has(> [aria-pressed="true"]) {
+  color: var(--nd-tone-on, var(--nc-color-on-accent));
+  background: var(--nd-tone, var(--nc-color-accent));
+  border-color: var(--nd-tone, var(--nc-color-accent));
+}
+
+/* --- The remove control ---
+ *
+ * A real `Button`, so it has the target size, the focus ring and the disabled
+ * behaviour already. What it gives up is its own box: inside a pill it is a
+ * glyph on the trailing edge, and the pill's padding is what separates it from
+ * the word. */
+.nd-tag-remove.nd-button {
+  flex: none;
+  inline-size: var(--nd-tag-height);
+  block-size: var(--nd-tag-height);
+  min-block-size: 0;
+  /* Only the trailing padding, so the glyph reaches the pill's edge and the
+     wrapper's own gap is what separates it from the word. Eating the leading
+     one as well is what put the cross eight pixels ON TOP of the last letter. */
+  margin-inline-end: calc(-1 * var(--nd-tag-pad) + var(--noctua-space-1));
+  color: inherit;
+}
+
+/* THE BODY STOPS AT THE WORD WHEN THERE IS SOMETHING AFTER IT. Otherwise its
+   trailing padding and the wrapper's gap are both between the two, and the
+   negative margin that used to correct for it overlapped them instead. */
+.nd-tag:has(> .nd-tag-remove, > .nd-tag-ai) > .nd-tag-body {
+  margin-inline-end: 0;
+  padding-inline-end: 0;
+}
+
+/* The mark is one more thing after the word, so it is one more thing the rule
+   above has to know about. Without it the body's negative margin pulls the
+   mark back over the body's own trailing padding, which is the overlap that
+   comment records happening once already. */
+.nd-tag-ai {
+  flex: none;
+}
+
+/* AND INSIDE A PILL THE MARK GIVES UP ITS OWN BOX.
+ *
+ * A pill is one object. The mark's resting form is a chip with a field and a
+ * hairline, and a chip inside a chip reads as a second tag — at the small size
+ * it is exactly as tall as the pill it sits in, so it fills it edge to edge.
+ * Two letters in the tag's own ink, at the tag's own weight, say the same thing
+ * and say it quietly. The target keeps its size; only the drawing goes. */
+/* `.nd-ai-label` IS IN THE SELECTOR TO WIN. The mark's own fill is written in
+   `ai-label.css`, which loads after this, at the same specificity — so
+   without the fourth class this rule lost on source order and the chip stayed. */
+.nd-tag > .nd-ai-label.nd-tag-ai .nd-ai-label-mark {
+  background: none;
+  border-color: transparent;
+  color: inherit;
+  font-weight: var(--noctua-weight-medium);
+}
+
+.nd-tag[data-nd-size="small"] .nd-tag-remove.nd-button > .nd-icon-glyph {
+  font-size: var(--noctua-size-caption);
+}
+
+/* A refused tag. `:has` on the real attribute rather than a second data-flag
+   the component would have to stamp and keep in step with it. */
+.nd-tag:has(> .nd-tag-body[disabled]) {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+/* --- Glass --- */
+.nd-tag[data-nd-glass="true"] {
+  background: color-mix(in oklab, var(--nc-color-surface) var(--noctua-glass-opacity), transparent);
+}

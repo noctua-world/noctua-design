@@ -1,0 +1,290 @@
+
+
+/* --- NumberInput ---------------------------------------------------------- */
+
+/* Right-aligned digits, because a column of quantities is read down its last
+   digit and not its first. `tabular-nums` so the column does not shuffle as
+   the numbers change. */
+.nd-number-input-box {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.nd-number-input-steppers {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-0);
+}
+
+.nd-number-input-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* THE GLYPH IS 16px AND THE TARGET IS NOT. It was both — `padding: 0` around
+     a 16px icon — so every `+` and `-` on the site was a 16x16 control, under
+     the 24px floor, in a field that can be 48px tall. */
+  min-inline-size: var(--noctua-space-6);
+  min-block-size: var(--noctua-space-6);
+  padding: var(--noctua-space-0);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* `:enabled`, because a stepper a `readonly` or `disabled` field refuses must
+   not light up under the pointer as though it were about to do something. */
+.nd-number-input-step:enabled:hover {
+  color: var(--nc-color-fg);
+}
+
+/* THE STEPPERS EITHER SIDE OF THE VALUE, AND THE SAME MARKUP EITHER WAY.
+ *
+ * `stepping: "primary"` is one control per side at `Button`'s medium size,
+ * with the digits between them. Nothing moves in the DOM: the wrapper becomes
+ * `display: contents`, so its two buttons are laid out by the control's own
+ * flex row, and `order` puts the one that subtracts in front of the box. That
+ * keeps the runtime finding the same two controls, the same reveal and the
+ * same `readonly` refusal.
+ *
+ * `:not([hidden])` IS LOAD-BEARING. `[hidden]` is `display: none` from the UA
+ * sheet at one attribute of specificity, and this rule carries a class and an
+ * attribute — so without it the wrapper the markup ships hidden would be
+ * revealed by the stylesheet, and a page with no script would draw two
+ * steppers that move nothing. */
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-steppers:not([hidden]) {
+  display: contents;
+}
+
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-step {
+  min-inline-size: var(--noctua-space-12);
+  min-block-size: var(--noctua-space-12);
+  color: var(--nc-color-fg);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-step:enabled:hover {
+  background: var(--nc-color-surface-subtle);
+}
+
+/* The one that subtracts leads, wherever the value sits, because `order` is
+   read in the writing direction and so is the row. */
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-step[data-nd-number-input-step="down"] {
+  order: -1;
+}
+
+/* AND IT IS AS WIDE AS THE QUANTITY, NOT AS WIDE AS THE FORM.
+ *
+ * Every other control here fills its field, which is right for a question a
+ * reader types an answer to. This one is answered by pressing, and two
+ * controls a hand's width apart are two controls a reader travels between —
+ * so the box takes the width of a few digits and the whole row shrinks to its
+ * content. `.nd-field` is a flex column, which is what makes `align-self` the
+ * way to say it. */
+.nd-number-input[data-nd-stepping="primary"] {
+  align-self: flex-start;
+  max-inline-size: 100%;
+}
+
+/* Centred, and only here. A column of quantities is read down its last digit,
+   which is what the default alignment is for, and one number between two
+   controls is read in the middle of them. */
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-box {
+  flex: none;
+  inline-size: var(--noctua-space-16);
+  text-align: center;
+}
+
+/* THE SMALLER SIZE KEEPS THE 44-PIXEL FLOOR AT THE STEP BELOW. */
+.nd-number-input[data-nd-stepping="primary"][data-nd-size="small"] .nd-number-input-step {
+  min-inline-size: var(--noctua-space-8);
+  min-block-size: var(--noctua-space-8);
+}
+
+.nd-number-input[data-nd-stepping="primary"][data-nd-size="large"] .nd-number-input-step {
+  min-inline-size: var(--noctua-space-16);
+  min-block-size: var(--noctua-space-16);
+}
+
+/* AND THE PICTURE ON THE PROP TABLE SAYS THE SAME THING. The specimen is a
+   drawing rather than a live control,
+so the two step boxes are the drawn
+   span's own `::before` and `::after`. The span goes `display: contents` for
+   the reason above,
+which makes both of them items of the figure's row{
+  display: contents;
+}
+
+/* --- Slider --------------------------------------------------------------- */
+
+.nd-slider {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-3);
+}
+
+.nd-slider-rails {
+  /* WRITTEN BY THE SCRIPT, DECLARED HERE. A `var()` naming a property nothing
+     declares is dropped at computed-value time with no error at all, so the
+     rail would paint from its fallback and look almost right — which is what
+     `gates::unknown_token` exists to catch. Zero rather than a colour, for
+     `frozen_color_indirection`'s reason. */
+  --nd-slider-fill: 0%;
+  /* WHERE THE FILLED PART STARTS, which is the leading end of the track for a
+     single thumb and the FIRST THUMB for a range. Declared here for the reason
+     above it, and zero so a single slider is exactly what it was. */
+  --nd-slider-from: 0%;
+  position: relative;
+  flex: 1;
+  min-inline-size: 0;
+  display: grid;
+}
+
+/* Two thumbs share one rail, so the second sits on top of the first and only
+   its knob takes the pointer. A range built as two stacked inputs is the
+   arrangement that keeps both keyboards. */
+.nd-slider[data-nd-range="true"] .nd-slider-track {
+  grid-area: 1 / 1;
+  pointer-events: none;
+  background: none;
+}
+
+.nd-slider[data-nd-range="true"] .nd-slider-track::-webkit-slider-thumb {
+  pointer-events: auto;
+}
+
+.nd-slider[data-nd-range="true"] .nd-slider-track::-moz-range-thumb {
+  pointer-events: auto;
+}
+
+/* AND ONLY ONE OF THEM DRAWS THE RAIL.
+ *
+ * Both inputs are full-width and share one grid cell, so the second painted
+ * its own rail straight over the first one's thumb. What a reader saw was the
+ * start handle reduced to the two arcs that stuck out above and below an
+ * eight-pixel rail — a ring around a hole, which reads as a limit drawn on the
+ * control rather than as the handle it is. The end input keeps the rail, the
+ * start input paints none, and the start input is raised so its handle is on
+ * top of the rail rather than under it. Raising an input whose track is
+ * transparent hides nothing.
+ *
+ * WHAT MARKS THE TRAVEL INSTEAD IS THE FILL. `--nd-slider-from` moves the
+ * coloured band's leading end onto the first thumb, so the band between the
+ * two handles IS the chosen span and each handle sits on one end of it. That
+ * is the same fact the ring was trying to state, drawn out of the part of the
+ * control that already means something. */
+.nd-slider[data-nd-range="true"] .nd-slider-track[data-nd-slider-thumb="start"] {
+  z-index: var(--noctua-layer-raised);
+}
+
+.nd-slider[data-nd-range="true"]
+  .nd-slider-track[data-nd-slider-thumb="start"]::-webkit-slider-runnable-track {
+  background: none;
+  border-color: transparent;
+}
+
+.nd-slider[data-nd-range="true"]
+  .nd-slider-track[data-nd-slider-thumb="start"]::-moz-range-track {
+  background: none;
+  border-color: transparent;
+}
+
+.nd-slider-track {
+  inline-size: 100%;
+  margin: 0;
+  block-size: var(--noctua-space-6);
+  background: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.nd-slider-track:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+  border-radius: var(--noctua-radius-pill);
+}
+
+/* The rail, and the part of it behind the thumb. `--nd-slider-fill` is a
+   percentage the script writes; with no script the rail is still a rail and
+   the control still works. */
+.nd-slider-track::-webkit-slider-runnable-track {
+  block-size: var(--noctua-space-2);
+  border-radius: var(--noctua-radius-pill);
+  background: linear-gradient(
+      to right,
+      transparent var(--nd-slider-from, 0%),
+      var(--nc-color-accent) var(--nd-slider-from, 0%),
+      var(--nc-color-accent) var(--nd-slider-fill, 0%),
+      transparent var(--nd-slider-fill, 0%)
+    ),
+    var(--nc-color-surface-subtle);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+.nd-slider-track::-moz-range-track {
+  block-size: var(--noctua-space-2);
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-surface-subtle);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+.nd-slider-track::-moz-range-progress {
+  block-size: var(--noctua-space-2);
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-accent);
+}
+
+/* NEVER BELOW 24px, IN ANY SIZE. WCAG 2.5.8's minimum target, and a slider is
+   dragged — a thumb smaller than a fingertip is a control only a mouse can
+   use. */
+.nd-slider-track::-webkit-slider-thumb {
+  appearance: none;
+  inline-size: var(--noctua-space-6);
+  block-size: var(--noctua-space-6);
+  margin-block-start: calc((var(--noctua-space-6) - var(--noctua-space-2)) / -2);
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-strong) solid var(--nc-color-accent);
+  cursor: grab;
+}
+
+.nd-slider-track::-moz-range-thumb {
+  inline-size: var(--noctua-space-6);
+  block-size: var(--noctua-space-6);
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-strong) solid var(--nc-color-accent);
+  cursor: grab;
+}
+
+.nd-slider[data-nd-tone="danger"] .nd-slider-track::-webkit-slider-thumb,
+.nd-slider[data-nd-tone="danger"] .nd-slider-track::-moz-range-thumb {
+  border-color: var(--nc-color-danger);
+}
+
+.nd-slider[data-nd-tone="success"] .nd-slider-track::-webkit-slider-thumb,
+.nd-slider[data-nd-tone="success"] .nd-slider-track::-moz-range-thumb {
+  border-color: var(--nc-color-success);
+}
+
+.nd-slider[data-nd-tone="neutral"] .nd-slider-track::-webkit-slider-thumb,
+.nd-slider[data-nd-tone="neutral"] .nd-slider-track::-moz-range-thumb {
+  border-color: var(--nc-color-border-strong);
+}
+
+.nd-slider-marks {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-slider-output {
+  flex: none;
+  min-inline-size: var(--noctua-space-12);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  text-align: end;
+}

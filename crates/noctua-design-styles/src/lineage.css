@@ -1,0 +1,1149 @@
+
+
+/* --- Lineage ---------------------------------------------------------------
+ *
+ * A scene of figures in real three-dimensional space, made of elements rather
+ * than drawn on a canvas. The sizing model is the part that has to be read
+ * before anything else is touched, because getting it wrong three times is
+ * what this block replaces:
+ *
+ * 1. TEXT NEVER SCALES WITH THE LAYOUT. The pitch down the page and into the
+ *    scene is fixed; the pitch across may compress to `squeeze` (0.8) of
+ *    itself before the scene pans instead. Type, portraits and paddings are
+ *    real lengths multiplied only by the `size` prop — so nothing is ever
+ *    microscopic, truncated, or "reduced to an icon", which are the three
+ *    ways the fraction-of-a-shrinking-cell model failed.
+ *
+ * 2. `overflow`, `opacity` AND `backdrop-filter` FLATTEN A 3D CONTEXT. The
+ *    clipping is on the field, the glass is on the
+ *    card — never on `.nd-lineage-space` or `.nd-lineage-piece`.
+ *
+ * 3. THE CAMERA CHANGES NOTHING WHEN IT ARRIVES. The resting scene and the
+ *    mounted scene are the same picture; the runtime only ever rewrites one
+ *    transform, and it mounts on an act (a press, a key), never on a glance.
+ *
+ * 4. NO SHADOWS. §9.7: separation is a hairline, never elevation. Depth is
+ *    perspective and a real extruded body. */
+
+/* THE STATE THE SCRIPT AND THE STYLESHEET SHARE, REGISTERED SO IT IS
+ * READABLE. An unregistered custom property computes to its own source text —
+ * `getComputedStyle` answers `var(--noctua-scene-tilt)`, not an angle — and
+ * the camera once drew every tilted scene flat because of it. */
+@property --nd-pitch {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@property --nd-yaw {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@property --nd-zoom {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+@property --nd-cellx {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --nd-celly {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+.nd-lineage {
+  /* What `size` multiplies EVERYTHING by — lengths and type together, so the
+   * proportions cannot drift apart, which is how avatars became specks while
+   * their cards stayed large. */
+  --nd-scale: 1;
+  /* The fixed pitch: down the page, into the scene, and the most a column may
+   * take across. */
+  --nd-step: calc(var(--noctua-scene-cell) * var(--nd-scale));
+  /* The pitch down the page. Taller than the step across — the air between
+   * two rows is where the brackets, their labels and the stems into each
+   * card all live. */
+  --nd-fall: calc(var(--noctua-scene-row) * var(--nd-scale));
+  /* The runtime writes these; at rest they are the resting camera. */
+  --nd-zoom: 1;
+  --nd-pan-x: 0;
+  --nd-pan-y: 0;
+  --nd-pointer-x: 0;
+  --nd-pointer-y: 0;
+  /* Straight on at rest: a scene that opens at an angle is a scene whose text
+   * is read at an angle, and a reader who has not touched the camera has not
+   * asked for one. */
+  --nd-pitch: 0deg;
+  --nd-yaw: 0deg;
+  /* Declared here so a missing inline value falls back to something somebody
+   * chose, and so `gates::unknown_token` can see the names are real. */
+  --nd-w: 0;
+  --nd-h: 0;
+  --nd-d: 0;
+  --nd-shown: grid;
+  --nd-lean: 0;
+  /* AN IDENTITY, NOT `none`. Inside a transform list `none` is a syntax error
+   * and the whole declaration is dropped — every horizontal run once piled up
+   * at the origin because of it. */
+  --nd-swing: rotate(0deg);
+  --nd-basis: rotate(0deg);
+  position: relative;
+  display: block;
+  overflow: clip;
+  /* It fills what it is given; its drawing never decides any ancestor's
+   * width. Every example sits in a flex column that shrink-wraps, where a
+   * `width: auto` child is sized by its own max-content — which for a scene
+   * is the whole family. */
+  width: 100%;
+  min-width: 0;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-surface);
+  background-color: var(--nc-color-surface);
+}
+
+/* THE FIT MEASURES AGAINST THE SCENE'S OWN BOX, so the scene is the container
+ * — a query unit inside a container's declarations answers for the container
+ * ABOVE the element, which is why the fit lives on the field and the
+ * container on the root. Unconditional: the docs' variant samples opt OUT in
+ * their own section, because the documentation may override the component
+ * and the component may never consult the documentation. */
+.nd-lineage {
+  container-type: inline-size;
+}
+
+.nd-lineage[data-nd-size="small"] {
+  --nd-scale: var(--noctua-scene-scale-small);
+}
+.nd-lineage[data-nd-size="large"] {
+  --nd-scale: var(--noctua-scene-scale-large);
+}
+.nd-lineage[data-nd-tilt="resting"] {
+  --nd-pitch: var(--noctua-scene-tilt);
+}
+.nd-lineage[data-nd-tilt="raked"] {
+  --nd-pitch: calc(var(--noctua-scene-tilt) * 2);
+}
+.nd-lineage[data-nd-view="deep"] {
+  --nd-yaw: var(--noctua-scene-turn-deep);
+}
+/* --- The field: the window onto the scene ---------------------------------- */
+
+.nd-lineage-field {
+  position: relative;
+  /* THE PITCH ACROSS, AND THE ONE PLACE IT MAY GIVE. `clamp` compresses the
+   * columns until the drawing fits this box — but never below `squeeze` of a
+   * step, because horizontal air is negotiable and readable text is not.
+   * Below the floor, the scene pans: the platform's own scrolling with no
+   * script, the camera with one. Dividing a length by a NUMBER, which is
+   * ordinary `calc()` arithmetic.
+   *
+   * AND `--nd-zoom` IS NOT HERE. The camera's zoom is a magnification of the
+   * finished picture — the whole scene, cards and type together, like
+   * stepping back from it — and it lives in the space's transform below.
+   * Multiplied into the pitches instead, it re-laid the grid tighter around
+   * cards whose lengths are fixed, and zooming out drew the rows into each
+   * other until the figures overlapped. */
+  --nd-cellx: clamp(
+    var(--nd-step) * var(--noctua-scene-squeeze),
+    (100cqw - var(--noctua-space-6) * 2) / (var(--nd-w) + 1),
+    var(--nd-step)
+  );
+  /* Down and into the scene the pitch never gives — text lives on this axis. */
+  --nd-celly: var(--nd-fall);
+  /* Depth goes AWAY from the reader, which is the negative direction: a plane
+   * at `+z` is magnified toward the camera and was once enough to stop the
+   * compositor answering. */
+  --nd-depth: calc(var(--nd-celly) * -1);
+  /* A GUEST MAY ASK THE WINDOW TO BREATHE. A model stage's canvas is
+   * BIGGER than its element on purpose (the overdraw), and the rows know
+   * nothing about it — a big model on the first row painted past the
+   * scene, over the page. The module measures its own poke and stamps it
+   * here, and the air goes INTO the drawing: the grid origin moves down by
+   * it and the space grows by it (below), so the field — the very box the
+   * engaged camera clips to — holds the whole canvas in every mode. Air on
+   * the root once left the canvas outside the engaged window: a dead band
+   * above, the model cut at the field's edge, photographed. Padding inside
+   * the field once shifted the space within its own tilted projection and
+   * the last row left through the bottom. The origin is the one dial that
+   * moves the rows and the window together. */
+  --nd-model-air-over: 0px;
+  --nd-model-air-under: 0px;
+  /* Where the grid's (0,0) is: half a pitch in from the corner, because a
+   * figure is centred on its point. Padding cannot do this — the containing
+   * block of an absolutely positioned child is the padding box. */
+  --nd-ox: calc(var(--nd-cellx) / 2);
+  --nd-oy: calc(var(--nd-celly) / 2 + var(--nd-model-air-over));
+  /* The lengths the drawing is made of. Real lengths, scaled only by `size`. */
+  --nd-card: calc(var(--noctua-scene-card) * var(--nd-scale));
+  --nd-mark: calc(var(--noctua-scene-mark) * var(--nd-scale));
+  --nd-face: calc(var(--noctua-scene-face) * var(--nd-scale));
+  --nd-slab: calc(var(--noctua-scene-slab) * var(--nd-scale));
+  --nd-gutter: calc(var(--nd-cellx) * (1 - var(--noctua-scene-figure)));
+  /* A scene smaller than the window sits in the middle of it; one wider pans
+   * with the platform's own scrolling until the camera takes over. `safe`
+   * because a plain `center` on a scroll container puts the far side of a
+   * too-wide scene beyond where any scrollbar can reach. */
+  /* AUTO MARGINS, NOT `place-content: safe center`. The `safe` keyword is
+   * honoured inconsistently with an overflowing grid area, and when it is not,
+   * the left half of a wide scene is cut beyond the scrollbar's reach — which
+   * is exactly what it shipped. An auto margin centres a small child and
+   * start-aligns an overflowing one, in every engine, always. */
+  display: grid;
+  overflow-x: auto;
+  overflow-y: clip;
+  /* THE PAN, WITHOUT THE BAR. The field scrolls — wheel, trackpad, a swipe, or
+   * the arrow keys once it is focused — but it does not wear a scrollbar: a
+   * drawing in a classic-scrollbar environment carried a permanent grey bar
+   * under every wide scene, which the reader reported outright. The gutter
+   * going with it also means engaging the camera (`overflow: clip`) no longer
+   * changes the box by a scrollbar's height. */
+  scrollbar-width: none;
+  /* `-x` ONLY. The field scrolls horizontally, so it is a scroll container,
+   * and `contain` on both axes swallowed the VERTICAL wheel too — the field
+   * cannot scroll that way, chaining was forbidden, and the page under the
+   * pointer simply stopped scrolling over every scene on it. Containing x
+   * still keeps a horizontal pan from turning into the browser's own
+   * back-forward swipe. */
+  overscroll-behavior-x: contain;
+  /* The page scrolls through it; the runtime asks for its own gestures only
+   * once it exists. */
+  touch-action: pan-x pan-y;
+  perspective: calc(var(--noctua-scene-perspective) * var(--nd-scale));
+  /* The vanishing point is where the camera looks: the middle. Anywhere else
+   * and the stylesheet and three.js draw two different pictures. */
+  perspective-origin: 50% 50%;
+  padding: var(--noctua-space-6);
+}
+
+/* `height` CAPS THE WINDOW, IT NEVER SCALES THE SCENE. A capped window pans
+ * vertically with the platform's own scrolling — the standard behaviour of
+ * every drawing tool — and an uncapped one takes the height the drawing
+ * needs. */
+.nd-lineage[data-nd-height="short"] .nd-lineage-field {
+  max-height: calc(var(--nd-fall) * 3);
+  overflow-y: auto;
+}
+.nd-lineage[data-nd-height="tall"] .nd-lineage-field {
+  max-height: calc(var(--nd-fall) * 5);
+  overflow-y: auto;
+}
+
+.nd-lineage-field:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-accent);
+  outline-offset: calc(var(--noctua-focus-offset) * -1);
+}
+
+/* --- The scene: one transform moves the camera ------------------------------ */
+
+.nd-lineage-space {
+  position: relative;
+  margin: auto;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  /* The pan is OUTSIDE the zoom — a dragged pixel is a screen pixel at every
+   * magnification — and the zoom sits with the rotations, where a uniform
+   * scale commutes with them. */
+  transform: translate3d(
+      calc(var(--nd-pan-x) * var(--nd-cellx)),
+      calc(var(--nd-pan-y) * var(--nd-celly)),
+      0
+    )
+    scale3d(var(--nd-zoom), var(--nd-zoom), var(--nd-zoom)) rotateX(var(--nd-pitch))
+    rotateY(var(--nd-yaw));
+  width: calc((var(--nd-w) + 1) * var(--nd-cellx));
+  height: calc(
+    (var(--nd-h) + 1) * var(--nd-celly) + var(--nd-model-air-over) + var(--nd-model-air-under)
+  );
+}
+
+/* ONCE THE CAMERA HAS MOVED, THE SCENE LEAVES THE FLOW. The runtime swaps the
+ * scrollbars for its own pan at the FIRST camera movement — an act, mid-drag —
+ * and compensates the pan so the pixels do not move when it happens.
+ *
+ * THE WINDOW KEEPS ITS OWN HEIGHT. At rest the field is as tall as the space
+ * in its flow; the rule below takes the space OUT of the flow, and a field
+ * with nothing in it collapsed to its padding — a click squeezed the scene to
+ * a strip two lines tall. So the field states the height the space was giving
+ * it: the same `(h + 1)` pitches plus its own padding. In `--nd-step`, not
+ * `--nd-celly`, because the pitch carries the camera's zoom and the WINDOW
+ * must hold still while the scene zooms inside it. */
+.nd-lineage[data-nd-camera="three"] .nd-lineage-field {
+  overflow: clip;
+  height: calc(
+    (var(--nd-h) + 1) * var(--nd-fall) + var(--noctua-space-6) * 2 +
+      var(--nd-model-air-over) + var(--nd-model-air-under)
+  );
+}
+
+.nd-lineage[data-nd-camera="three"] .nd-lineage-space {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  /* The corner, because the centring translate is the LAST thing in the
+   * runtime's own transform chain. */
+  transform-origin: 0 0;
+}
+
+/* --- A piece ---------------------------------------------------------------- */
+
+.nd-lineage-piece,
+.nd-lineage-space > .nd-lineage-figure {
+  position: absolute;
+  inset-block-start: var(--nd-oy);
+  inset-inline-start: var(--nd-ox);
+  transform-style: preserve-3d;
+  transform: translate3d(
+      calc(var(--nd-x) * var(--nd-cellx)),
+      calc(var(--nd-y) * var(--nd-celly)),
+      calc(var(--nd-z) * var(--nd-depth))
+    )
+    translate(-50%, -50%);
+  /* COMPUTED HERE, WHERE `--nd-span` EXISTS. A custom property resolves its
+   * `var()`s on the element that declares it: written on the field this read
+   * the field's span — which is no span — and every two-cell card was one
+   * cell wide with its sentence ellipsised. The same trap this file has
+   * already documented once, which is why the width is now inline in the one
+   * rule that uses it. */
+  width: calc(var(--nd-span, 1) * var(--nd-cellx) - var(--nd-gutter));
+}
+
+/* --- The body: a real solid ------------------------------------------------- */
+
+/* AN EXTRUSION OF THE CARD'S OWN SILHOUETTE, not a stack of cards and not
+ * four full-width walls. The back face repeats the card's rounded outline a
+ * slab behind it; the four edge walls each span only the STRAIGHT run of
+ * their edge — inset by the corner radius at both ends — and fold 90° into
+ * the depth, so the silhouette is the card's from every angle and there is no
+ * square corner sticking out of a rounded shape. Shaded by direction, top
+ * lightest, which is the only lighting in this component: token mixes, no
+ * gradients, no shadows. */
+.nd-lineage-body {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.nd-lineage-body > i {
+  position: absolute;
+}
+
+.nd-lineage-body > [data-nd-face="back"] {
+  inset: 0;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  background-color: color-mix(in oklab, var(--nc-color-surface) 82%, var(--nc-color-fg));
+  transform: translateZ(calc(var(--nd-slab) * -1));
+}
+
+.nd-lineage-body > [data-nd-face="top"],
+.nd-lineage-body > [data-nd-face="bottom"] {
+  inset-inline: var(--noctua-radius-control);
+  height: var(--nd-slab);
+}
+
+.nd-lineage-body > [data-nd-face="top"] {
+  inset-block-start: 0;
+  transform-origin: 50% 0;
+  transform: rotateX(-90deg);
+  background-color: color-mix(in oklab, var(--nc-color-surface) 90%, var(--nc-color-fg));
+}
+
+.nd-lineage-body > [data-nd-face="bottom"] {
+  inset-block-end: 0;
+  transform-origin: 50% 100%;
+  transform: rotateX(90deg);
+  background-color: color-mix(in oklab, var(--nc-color-surface) 66%, var(--nc-color-fg));
+}
+
+.nd-lineage-body > [data-nd-face="start"],
+.nd-lineage-body > [data-nd-face="end"] {
+  inset-block: var(--noctua-radius-control);
+  width: var(--nd-slab);
+  background-color: color-mix(in oklab, var(--nc-color-surface) 78%, var(--nc-color-fg));
+}
+
+.nd-lineage-body > [data-nd-face="start"] {
+  inset-inline-start: 0;
+  transform-origin: 0 50%;
+  transform: rotateY(90deg);
+}
+
+.nd-lineage-body > [data-nd-face="end"] {
+  inset-inline-end: 0;
+  transform-origin: 100% 50%;
+  transform: rotateY(-90deg);
+}
+
+.nd-lineage[data-nd-thickness="none"] .nd-lineage-body {
+  display: none;
+}
+
+/* A cut marker is a ring standing in for people, not a solid pretending to be
+ * one — the extrusion behind it read as a grey card stuck to the ring. */
+.nd-lineage-piece[data-nd-piece="elided"] .nd-lineage-body {
+  display: none;
+}
+
+.nd-lineage[data-nd-thickness="slab"] .nd-lineage-field {
+  --nd-slab: calc(var(--noctua-scene-slab) * var(--nd-scale) * 2);
+}
+
+/* --- The card ---------------------------------------------------------------- */
+
+.nd-lineage-card {
+  position: relative;
+  display: grid;
+  gap: var(--noctua-space-1);
+  align-content: center;
+  justify-items: center;
+  /* FIXED, AND SIZED TO ITS WORST CONTENT: a portrait, a name on two lines
+   * and a date all fit, so nothing is ever clipped or ellipsised to make
+   * room. A fixed height is also what makes the channel between two rows a
+   * constant a label can rely on. */
+  height: var(--nd-card);
+  overflow: hidden;
+  /* Narrow at the sides on purpose: at the squeeze floor a card is 95 pixels
+   * and a date is 76, and the difference is what the padding may spend. */
+  padding: var(--noctua-space-2);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  background-color: var(--nc-color-surface);
+  color: var(--nc-color-fg);
+  text-align: center;
+  text-decoration: none;
+}
+
+a.nd-lineage-card:hover,
+a.nd-lineage-card:focus-visible {
+  border-color: var(--nc-color-accent);
+}
+
+.nd-lineage-name {
+  font-size: calc(var(--noctua-size-caption) * var(--nd-scale));
+  font-weight: var(--noctua-weight-medium);
+  line-height: var(--noctua-leading-tight);
+  overflow-wrap: anywhere;
+  /* Two lines, then an ellipsis — a guard for absurd names, not a budget the
+   * examples spend: the card is sized so real names never reach it. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.nd-lineage-meta {
+  font-size: calc(var(--noctua-size-caption) * var(--nd-scale));
+  line-height: var(--noctua-leading-tight);
+  color: var(--nc-color-fg-muted);
+  white-space: nowrap;
+}
+
+.nd-lineage-portrait {
+  width: var(--nd-face);
+  height: var(--nd-face);
+  flex: none;
+  border-radius: var(--noctua-radius-pill);
+  object-fit: cover;
+}
+
+/* A mark is a point on the structure, not a member of it. */
+.nd-lineage-piece[data-nd-piece="mark"] .nd-lineage-card {
+  width: var(--nd-mark);
+  height: var(--nd-mark);
+  min-height: 0;
+  padding: 0;
+  margin-inline: auto;
+  border-radius: var(--noctua-radius-pill);
+  background-color: var(--nc-color-border-strong);
+  border-color: var(--nc-color-border-strong);
+}
+
+.nd-lineage-piece[data-nd-piece="mark"][data-nd-kind="source"] .nd-lineage-card {
+  background-color: var(--nc-color-info-bg);
+  border-color: var(--nc-color-info-border);
+}
+
+/* An unknown parent: present, honest, and visibly not a person somebody
+ * forgot. The sentence inside it is the example's own words.
+ *
+ * QUIETER THAN A PERSON, in every dimension a card has. A reader compared
+ * the first version to the figures around it and said too big and too dark:
+ * a full figure's height around two lines of text read as the most
+ * important card in the scene. The height is the sentence's own now — the
+ * extrusion body follows it, because the body is `inset: 0` in the piece
+ * and the piece is as tall as its card — and the wash is four parts ink in
+ * a hundred rather than eight. */
+.nd-lineage-piece[data-nd-kind="unknown"] .nd-lineage-card {
+  height: auto;
+  padding: var(--noctua-space-4) var(--noctua-space-3);
+  border-style: dashed;
+  background-color: color-mix(in oklab, var(--nc-color-surface) 96%, var(--nc-color-fg));
+  color: var(--nc-color-fg-muted);
+}
+
+/* A ghost card's sentence breaks in two even lines rather than one long
+ * one. The cap is what makes it wrap at all (the card is wide enough not
+ * to), `balance` is what keeps the two lines even in any language, and the
+ * width is a caution learnt the hard way: `ch` is the width of a zero, not
+ * of a character, and a cap equal to a line's character count wrapped it to
+ * a third line the clamp then ellipsised. */
+.nd-lineage-piece[data-nd-kind="unknown"] .nd-lineage-name {
+  max-inline-size: min(100%, 16ch);
+  margin-inline: auto;
+  text-wrap: balance;
+}
+
+/* A BARE FIGURE IS NOT IN A BOX. `shape=bare` on a graph figure melts the
+ * card: no border, no surface, no extrusion body — the portrait and the
+ * words stand free in the scene, which is the reader's own ask. The card
+ * ELEMENT stays, transparent, so the runs still have a box to end under and
+ * the audit still has a thing to measure. */
+.nd-lineage-piece[data-nd-shape="bare"] .nd-lineage-card {
+  height: auto;
+  overflow: visible;
+  padding: 0;
+  border-color: transparent;
+  background-color: transparent;
+}
+
+.nd-lineage-piece[data-nd-shape="bare"] .nd-lineage-body {
+  display: none;
+}
+
+/* SOLID LETTERING: every name and date is an extrusion. The plies are five
+ * aria-hidden copies receding behind the real text — the beam's mechanism at
+ * glyph scale — darkening as they go, so the stack reads as the letters'
+ * own side. */
+.nd-lineage[data-nd-lettering="solid"] .nd-lineage-card,
+.nd-lineage[data-nd-lettering="solid"] .nd-lineage-name,
+.nd-lineage[data-nd-lettering="solid"] .nd-lineage-meta {
+  /* `overflow: visible` is load-bearing: any other value FLATTENS a
+   * `preserve-3d` element, silently, and the plies would collapse into the
+   * front text. The clamp's ellipsis guard is the price. */
+  overflow: visible;
+  transform-style: preserve-3d;
+}
+
+.nd-lineage[data-nd-lettering="solid"] .nd-lineage-name,
+.nd-lineage[data-nd-lettering="solid"] .nd-lineage-meta {
+  position: relative;
+}
+
+/* Inert until the scene says solid: the SPECIMEN carries its plies in every
+ * variant sample, and shown flat they would print every name six times. */
+.nd-lineage [data-nd-ply] {
+  display: none;
+}
+
+.nd-lineage[data-nd-lettering="solid"] [data-nd-ply] {
+  display: block;
+  position: absolute;
+  inset: 0;
+  font-style: normal;
+  transform: translateZ(calc(var(--nd-ply) * -0.6px)); /* allow-literal: the ply pitch is a depth epsilon at glyph scale, not a length on the spacing scale */
+  color: color-mix(in oklab, currentColor 82%, var(--nc-color-surface));
+  pointer-events: none;
+}
+
+.nd-lineage[data-nd-lettering="solid"] [data-nd-ply="1"] { --nd-ply: 1; }
+.nd-lineage[data-nd-lettering="solid"] [data-nd-ply="2"] { --nd-ply: 2; }
+.nd-lineage[data-nd-lettering="solid"] [data-nd-ply="3"] { --nd-ply: 3; }
+.nd-lineage[data-nd-lettering="solid"] [data-nd-ply="4"] { --nd-ply: 4; }
+.nd-lineage[data-nd-lettering="solid"] [data-nd-ply="5"] { --nd-ply: 5; }
+
+/* The tones, never on their own: each also carries the author's word in
+ * `data-nd-kind`. */
+/* NO `neutral` RULE, ON PURPOSE. `tone` defaults to neutral, so a neutral
+ * rule is a rule on EVERY card — and the one written here once repainted
+ * the border onto figures whose shape had deliberately melted it. Neutral
+ * IS the resting border above. */
+.nd-lineage-piece[data-nd-tone="accent"] .nd-lineage-card {
+  border-color: var(--nc-color-accent-border);
+}
+.nd-lineage-piece[data-nd-tone="success"] .nd-lineage-card {
+  border-color: var(--nc-color-success-border);
+}
+.nd-lineage-piece[data-nd-tone="warning"] .nd-lineage-card {
+  border-color: var(--nc-color-warning-border);
+}
+.nd-lineage-piece[data-nd-tone="danger"] .nd-lineage-card {
+  border-color: var(--nc-color-danger-border);
+}
+.nd-lineage-piece[data-nd-tone="info"] .nd-lineage-card {
+  border-color: var(--nc-color-info-border);
+}
+
+/* --- The relationships, as links -------------------------------------------- */
+
+.nd-lineage-ties {
+  position: absolute;
+  width: var(--noctua-border-hairline);
+  height: var(--noctua-border-hairline);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.nd-lineage-tie:focus-visible {
+  position: fixed;
+  inset-block-start: var(--noctua-space-4);
+  inset-inline-start: var(--noctua-space-4);
+  z-index: var(--noctua-layer-popover);
+  width: auto;
+  height: auto;
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  border-radius: var(--noctua-radius-control);
+  background-color: var(--nc-color-surface);
+  outline: var(--noctua-focus-width) solid var(--nc-color-accent);
+  clip-path: none;
+}
+
+/* --- A connection ------------------------------------------------------------ */
+
+.nd-lineage-bond {
+  position: absolute;
+  inset-block-start: var(--nd-oy);
+  inset-inline-start: var(--nd-ox);
+  transform-style: preserve-3d;
+  transform: none;
+}
+
+.nd-lineage-run {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  pointer-events: none;
+  transform-origin: 0 50%;
+  /* TWO PIXELS BEHIND THE CARDS' PLANE. A run is drawn to its piece's
+   * centre and the card covers the overlap — but coplanar, the cover held
+   * only at rest: turn the camera and the depth sort put the line on top of
+   * the face it enters, riding over a portrait. Two pixels back, the run's
+   * plane is parallel to the faces and behind it at EVERY angle, and the
+   * projected offset at the resting tilt is under half a pixel. */
+  transform: translate3d(
+      calc(var(--nd-x) * var(--nd-cellx)),
+      calc(var(--nd-y) * var(--nd-celly)),
+      calc(var(--nd-z) * var(--nd-depth) - 2px) /* allow-literal: a depth-sort epsilon, not a length on the spacing scale — any value above zero wins the sort, and scaling it would only grow the projected offset it costs */
+    )
+    var(--nd-swing) translateX(calc(var(--noctua-scene-line) / -2));
+  /* HALF A LINE LONGER AT EACH END. Two runs meeting at a corner used to
+   * butt at the path point, each stopping half the line's own thickness
+   * short of the other's far edge — a notch nobody sees at rest and a
+   * broken pipe at flight magnification. The cap makes every corner and
+   * every T a geometrically exact square, at any zoom. */
+  width: calc(var(--nd-len) * var(--nd-cellx) + var(--noctua-scene-line));
+  height: var(--noctua-scene-line);
+  margin-block-start: calc(var(--noctua-scene-line) / -2);
+  background-color: var(--nc-color-border-strong);
+}
+
+/* A vertical or depthward run is measured in the pitch that does not give,
+ * because that is the axis it travels. */
+.nd-lineage-run[data-nd-axis="y"] {
+  --nd-swing: rotateZ(90deg);
+  width: calc(var(--nd-len) * var(--nd-celly) + var(--noctua-scene-line));
+}
+.nd-lineage-run[data-nd-axis="z"] {
+  --nd-swing: rotateY(90deg);
+  width: calc(var(--nd-len) * var(--nd-celly) + var(--noctua-scene-line));
+}
+.nd-lineage-run[data-nd-axis="free"] {
+  --nd-swing: var(--nd-basis);
+  width: calc(var(--nd-len) * var(--nd-celly) + var(--noctua-scene-line));
+}
+
+/* --- A beam: the run with a real section ------------------------------------
+ *
+ * The same anatomy as a figure's body, at line scale: the run itself is the
+ * front face, and three <i> children — a back and two folded walls — close
+ * it into a square tube. `background: inherit`, so a dashed or coloured run
+ * dashes and colours all four faces without a second set of rules; the caps
+ * every run already wears close the corners in three dimensions too. */
+.nd-lineage[data-nd-line="beam"] .nd-lineage-run {
+  transform-style: preserve-3d;
+}
+
+.nd-lineage[data-nd-line="beam"] .nd-lineage-run > [data-nd-face] {
+  position: absolute;
+  inset: 0;
+  background: inherit;
+}
+
+.nd-lineage[data-nd-line="beam"] .nd-lineage-run > [data-nd-face="back"] {
+  transform: translateZ(calc(var(--noctua-scene-line) * -1));
+}
+
+.nd-lineage[data-nd-line="beam"] .nd-lineage-run > [data-nd-face="top"] {
+  height: var(--noctua-scene-line);
+  transform-origin: 50% 0;
+  transform: rotateX(-90deg);
+}
+
+.nd-lineage[data-nd-line="beam"] .nd-lineage-run > [data-nd-face="bottom"] {
+  inset-block-start: auto;
+  inset-block-end: 0;
+  height: var(--noctua-scene-line);
+  transform-origin: 50% 100%;
+  transform: rotateX(90deg);
+}
+
+/* A KIND IS A PATTERN AND A WORD BEFORE IT IS A COLOUR — under forced colours
+ * and dichromacy the dashes are what survives. */
+.nd-lineage-bond[data-nd-kind="adoption"] .nd-lineage-run,
+.nd-lineage-bond[data-nd-dash="dashed"] .nd-lineage-run {
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--nc-color-border-strong) 0 var(--noctua-space-2),
+    transparent var(--noctua-space-2) var(--noctua-space-3)
+  );
+}
+
+.nd-lineage-bond[data-nd-kind="link"] .nd-lineage-run,
+.nd-lineage-bond[data-nd-dash="dotted"] .nd-lineage-run {
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--nc-color-fg-muted) 0 var(--noctua-border-strong),
+    transparent var(--noctua-border-strong) var(--noctua-space-2)
+  );
+}
+
+.nd-lineage-bond[data-nd-kind="union"] .nd-lineage-run {
+  background-color: var(--nc-color-accent);
+}
+
+/* The two synthesized kinds share one quiet colour — see the contract. */
+.nd-lineage-bond[data-nd-kind="origin"] .nd-lineage-run,
+.nd-lineage-bond[data-nd-kind="elided"] .nd-lineage-run {
+  background-color: var(--nc-color-border);
+}
+
+.nd-lineage-bond[data-nd-kind="partner"] .nd-lineage-run {
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--nc-color-success-border) 0 var(--noctua-space-1),
+    transparent var(--noctua-space-1) var(--noctua-space-2)
+  );
+}
+
+.nd-lineage-bond[data-nd-kind="donor"] .nd-lineage-run {
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--nc-color-info-border) 0 var(--noctua-space-2),
+    transparent var(--noctua-space-2) var(--noctua-space-3)
+  );
+}
+
+/* --- Picking ----------------------------------------------------------------- */
+
+.nd-lineage-pick {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  width: var(--noctua-border-hairline);
+  height: var(--noctua-border-hairline);
+  margin: 0;
+  opacity: 0;
+}
+
+/* The label has no box at all, so the LINE is the control: the runs are
+ * inside it, and a label with no box still activates its checkbox. */
+.nd-lineage-grip {
+  display: contents;
+}
+
+.nd-lineage[data-nd-pick="bond"] .nd-lineage-run,
+.nd-lineage[data-nd-pick="both"] .nd-lineage-run {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* A three-pixel line is not a target; the invisible strip is. */
+.nd-lineage[data-nd-pick="bond"] .nd-lineage-run::before,
+.nd-lineage[data-nd-pick="both"] .nd-lineage-run::before {
+  content: "";
+  position: absolute;
+  inset-block: calc(var(--noctua-space-2) * -1);
+  inset-inline: 0;
+}
+
+/* --- The label on a connection ----------------------------------------------
+ *
+ * JUST ABOVE ITS LINE — the developer's explicit instruction, twice — and the
+ * geometry that makes it safe is structural: the engine parks every channel
+ * 0.45 of a pitch above the row it descends into, and a card is `card` tall in
+ * a `cell` pitch, so the strip above a channel line is real, constant air. On
+ * a row-line (a union) the label sits above the line too, in the gap between
+ * the two cards, which the engine keeps two pitches wide when a mark stands
+ * between them; where the two cards are adjacent the engine says so and the
+ * label drops just BELOW the line instead, into the empty channel. */
+.nd-lineage-tag {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  transform: translate3d(
+      calc(var(--nd-x) * var(--nd-cellx)),
+      calc(var(--nd-y) * var(--nd-celly)),
+      calc(var(--nd-z) * var(--nd-depth) + var(--nd-slab))
+    )
+    translate(-50%, calc(-100% - var(--noctua-space-1)));
+  padding: 0 var(--noctua-space-1);
+  border-radius: var(--noctua-radius-control);
+  background-color: color-mix(in oklab, var(--nc-color-surface) 75%, transparent);
+  color: var(--nc-color-fg-muted);
+  font-size: calc(var(--noctua-size-caption) * var(--nd-scale));
+  line-height: var(--noctua-leading-tight);
+}
+
+.nd-lineage-bond[data-nd-tag="below"] .nd-lineage-tag {
+  transform: translate3d(
+      calc(var(--nd-x) * var(--nd-cellx)),
+      calc(var(--nd-y) * var(--nd-celly)),
+      calc(var(--nd-z) * var(--nd-depth) + var(--nd-slab))
+    )
+    translate(-50%, var(--noctua-space-1));
+}
+
+.nd-lineage-pick:focus-visible ~ .nd-lineage-grip .nd-lineage-run {
+  outline: var(--noctua-focus-width) solid var(--nc-color-accent);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* A picked connection keeps its own colour; what it gains is thickness — the
+ * cue that survives forced colours — and a travelling band of that colour. */
+.nd-lineage-pick:checked ~ .nd-lineage-grip .nd-lineage-run {
+  height: calc(var(--noctua-scene-line) * 2);
+  margin-block-start: calc(var(--noctua-scene-line) * -1);
+}
+
+.nd-lineage-pick:checked ~ .nd-lineage-grip .nd-lineage-run::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in oklab, var(--nc-color-border-strong) 45%, var(--nc-color-fg)),
+    transparent
+  );
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  animation: nd-lineage-trace 1.6s linear infinite;
+}
+
+@keyframes nd-lineage-trace {
+  from {
+    background-position: -60% 0;
+  }
+  to {
+    background-position: 160% 0;
+  }
+}
+
+/* With less motion it is the same cue, still. */
+@media (prefers-reduced-motion: reduce) {
+  .nd-lineage-pick:checked ~ .nd-lineage-grip .nd-lineage-run::after {
+    background-size: 100% 100%;
+    animation: none;
+  }
+}
+
+/* The sentence a connection carries, shown when hovered or focused. A whole
+ * pitch toward the reader, so no figure's body is ever in front of it. */
+.nd-lineage-note {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  max-width: calc(var(--nd-cellx) * 3);
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  background-color: var(--nc-color-surface-raised);
+  color: var(--nc-color-fg);
+  font-size: calc(var(--noctua-size-caption) * var(--nd-scale));
+  line-height: var(--noctua-leading-tight);
+  transform: translate3d(
+      calc(var(--nd-x) * var(--nd-cellx)),
+      calc(var(--nd-y) * var(--nd-celly)),
+      calc(var(--nd-z) * var(--nd-depth) + var(--nd-celly))
+    )
+    translate(-50%, -50%);
+  visibility: hidden;
+}
+
+.nd-lineage-bond:hover .nd-lineage-note,
+.nd-lineage-pick:focus-visible ~ .nd-lineage-note {
+  visibility: visible;
+}
+
+/* --- Filtering ---------------------------------------------------------------
+ *
+ * `highlight` marks and never moves anything; a dimmed figure stays an opaque
+ * object whose CONTENTS fade, so no line ever shows through a face.
+ * `isolate` is different on purpose: the engine re-lays the scene on the
+ * subgraph the filter keeps, so there is nothing here to hide — the removed
+ * are simply not in the drawing, and one ring per removed group carries the
+ * count of who is behind it. */
+.nd-lineage[data-nd-filter-mode="highlight"] [data-nd-match="no"] .nd-lineage-card > *,
+.nd-lineage[data-nd-filter-mode="highlight"] [data-nd-match="no"].nd-lineage-figure > * {
+  opacity: 0.25; /* allow-literal: dimming is the same colour with less of it, and no token names that */
+}
+
+.nd-lineage[data-nd-filter-mode="highlight"] [data-nd-match="no"] .nd-lineage-card,
+.nd-lineage[data-nd-filter-mode="highlight"] [data-nd-match="no"].nd-lineage-figure {
+  border-color: color-mix(in oklab, var(--nc-color-border) 45%, var(--nc-color-surface));
+}
+
+.nd-lineage[data-nd-filter-mode="highlight"] [data-nd-match="no"].nd-lineage-bond .nd-lineage-run {
+  opacity: 0.25; /* allow-literal: a line has nothing behind it to protect */
+}
+
+.nd-lineage [data-nd-match="yes"] .nd-lineage-card {
+  border-color: var(--nc-color-accent-border);
+}
+
+/* A PICKED FIGURE, AND PICKING ONE USED TO CHANGE NOTHING AT ALL.
+ *
+ * Every `:checked` rule in this file targeted a bond, and `data-nd-picked`
+ * appeared in no rule anywhere — while `[keyboard] "Space"` and
+ * `[state.picked]` both promised a figure could be singled out. So a reader
+ * could pick a person, the checkbox would be checked, the form would post it,
+ * and the scene looked exactly as it had.
+ *
+ * The cue is the edge and the weight, the same pair a picked connection gains,
+ * and never colour alone: forced colours keep a border width and drop a border
+ * colour. `:checked` rather than `data-nd-picked`, so it holds with no script,
+ * which is the whole reason a pick is a real checkbox. */
+.nd-lineage-pick:checked ~ .nd-lineage-card,
+.nd-lineage-pick:checked ~ * .nd-lineage-card {
+  border-color: var(--nc-color-accent);
+  border-width: var(--noctua-border-strong);
+  font-weight: var(--noctua-weight-semibold);
+}
+
+/* The solid's own faces follow the card, or a picked figure reads as a picked
+   front with an unpicked box behind it. */
+.nd-lineage-pick:checked ~ .nd-lineage-body > i {
+  border-color: var(--nc-color-accent);
+}
+
+/* The cut marker: a dashed ring with a number in it — the drawing convention
+ * for "there is more here", and nothing a reader could mistake for a person. */
+.nd-lineage-piece[data-nd-piece="elided"] .nd-lineage-card {
+  width: calc(var(--nd-face) * 2);
+  height: calc(var(--nd-face) * 2);
+  min-height: 0;
+  padding: 0;
+  margin-inline: auto;
+  border-style: dashed;
+  border-color: var(--nc-color-border-strong);
+  border-radius: var(--noctua-radius-pill);
+  background-color: var(--nc-color-surface);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-lineage-count {
+  font-size: calc(var(--noctua-size-caption) * var(--nd-scale));
+  font-weight: var(--noctua-weight-medium);
+  line-height: var(--noctua-leading-tight);
+}
+
+/* --- A figure standing at a point -------------------------------------------- */
+
+.nd-lineage-figure {
+  display: var(--nd-shown);
+  gap: var(--noctua-space-1);
+  align-content: center;
+  justify-items: center;
+  /* The same box a card gets, for the same reason: uniform rows, a constant
+   * channel, and nothing tall enough to cover the bracket that reaches it. */
+  height: var(--nd-card);
+  overflow: hidden;
+  padding: var(--noctua-space-2);
+  border-radius: var(--noctua-radius-control);
+  background-color: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  color: var(--nc-color-fg);
+  text-align: center;
+  text-decoration: none;
+  font: inherit;
+}
+
+/* Anything standing in a scene is the scene's own size, whatever component it
+ * came in as — a 2rem avatar in a figure that has a fixed height would spend
+ * the name's room. */
+.nd-lineage-figure .nd-avatar {
+  --nd-avatar-size: var(--nd-face);
+}
+
+.nd-lineage-figure .nd-text {
+  margin: 0;
+  font-size: calc(var(--noctua-size-caption) * var(--nd-scale));
+  line-height: var(--noctua-leading-tight);
+}
+
+.nd-lineage-figure[data-nd-shape="round"] {
+  border-radius: var(--noctua-radius-pill);
+  aspect-ratio: 1;
+  place-content: center;
+  height: auto;
+  width: var(--nd-card);
+  margin-inline: auto;
+}
+
+/* A plaque is not sized here: its width is its anchor's `span`, published
+ * with the place — `width: 100%` made it as wide as the whole scene. */
+
+.nd-lineage-figure[data-nd-shape="bare"] {
+  /* No box means nothing to clip to: a bare figure's content — the flying
+   * owl's wings — stands free of the anchor's own rectangle, and the
+   * rectangle itself takes its content's height rather than a card's. */
+  height: auto;
+  overflow: visible;
+  border-color: transparent;
+  background-color: transparent;
+  padding: 0;
+}
+
+/* No `neutral` rule here either — see the piece tones. */
+.nd-lineage-figure[data-nd-tone="accent"] {
+  border-color: var(--nc-color-accent-border);
+}
+.nd-lineage-figure[data-nd-tone="success"] {
+  border-color: var(--nc-color-success-border);
+}
+.nd-lineage-figure[data-nd-tone="warning"] {
+  border-color: var(--nc-color-warning-border);
+}
+.nd-lineage-figure[data-nd-tone="danger"] {
+  border-color: var(--nc-color-danger-border);
+}
+.nd-lineage-figure[data-nd-tone="info"] {
+  border-color: var(--nc-color-info-border);
+}
+
+button.nd-lineage-figure {
+  cursor: pointer;
+}
+
+.nd-lineage-figure:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-accent);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* The parallax: layers lean with the pointer, and only where BOTH the scene
+ * and the figure asked for it. Zero with no script, zero under reduced
+ * motion. */
+.nd-lineage[data-nd-parallax="true"] .nd-lineage-figure[data-nd-parallax="subtle"] > *,
+.nd-lineage[data-nd-parallax="true"] .nd-lineage-figure[data-nd-parallax="deep"] > * {
+  transform: translate3d(
+    calc(var(--nd-pointer-x) * var(--nd-lean) * var(--noctua-space-2)),
+    calc(var(--nd-pointer-y) * var(--nd-lean) * var(--noctua-space-2)),
+    0
+  );
+}
+
+.nd-lineage-figure[data-nd-parallax="subtle"] {
+  --nd-lean: 1;
+}
+.nd-lineage-figure[data-nd-parallax="deep"] {
+  --nd-lean: 2;
+}
+
+/* --- What is left ------------------------------------------------------------ */
+
+.nd-lineage-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  margin: 0;
+  padding: var(--noctua-space-4);
+  color: var(--nc-color-fg-muted);
+  font-size: var(--noctua-size-small);
+  text-align: center;
+}
+
+.nd-lineage-status {
+  display: block;
+  padding: 0 var(--noctua-space-4) var(--noctua-space-2);
+  color: var(--nc-color-fg-muted);
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-lineage-status:empty {
+  display: none;
+}
+
+.nd-lineage-piece:focus-visible .nd-lineage-card {
+  outline: var(--noctua-focus-width) solid var(--nc-color-accent);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* Once the runtime exists the gestures are its own; with the script blocked
+ * the page keeps scrolling through every scene on it. */
+/* `="three"`, not bare: the marker attribute appears the moment the module
+ * looks at a scene, and taking the touch gestures then would stop a reader
+ * scrolling the page over a scene they never engaged. */
+.nd-lineage[data-nd-camera="three"] .nd-lineage-field {
+  touch-action: none;
+}
+
+.nd-lineage[data-nd-dragging] {
+  user-select: none;
+  cursor: grabbing;
+}
+
+/* --- Reduced motion, forced colours, print ----------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .nd-lineage-space,
+  .nd-lineage-figure > * {
+    transition: none;
+  }
+  .nd-lineage[data-nd-parallax="true"] .nd-lineage-figure > * {
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .nd-lineage-card,
+  .nd-lineage-figure {
+    forced-color-adjust: none;
+    background-color: Canvas;
+    border-color: CanvasText;
+    color: CanvasText;
+  }
+  .nd-lineage-run {
+    background-color: CanvasText;
+    opacity: 1;
+  }
+  .nd-lineage-pick:checked ~ .nd-lineage-grip .nd-lineage-run {
+    background-color: Highlight;
+  }
+}
+
+@media print {
+  .nd-lineage {
+    --nd-pitch: 0deg;
+    --nd-yaw: 0deg;
+  }
+  .nd-lineage-field {
+    max-height: none;
+    overflow: visible;
+  }
+}

@@ -1,0 +1,47 @@
+
+
+/* --- Toolbar and ToolbarGroup -------------------------------------------- */
+
+/* A bar of controls, and the two clusters it usually holds. The alignment is
+   `ToolbarGroup { align }` rather than a `margin-inline-start: auto` written
+   against a class in this file — which is what it used to be, on a selector
+   the markup did not carry, so the rule matched nothing and the frame's
+   controls simply ran along the left in source order. */
+.nd-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-4);
+  min-inline-size: 0;
+}
+
+.nd-toolbar[data-nd-wrap="true"] {
+  flex-wrap: wrap;
+}
+
+.nd-toolbar[data-nd-density="compact"] {
+  gap: var(--noctua-space-2);
+}
+
+.nd-toolbar[aria-orientation="vertical"] {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.nd-toolbar-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--noctua-space-2);
+  min-inline-size: 0;
+}
+
+/* `end` pushes this group AND everything after it to the far side, which is
+   what lets one bar hold two clusters with no spacer element between them. */
+.nd-toolbar-group[data-nd-align="end"] {
+  margin-inline-start: auto;
+}
+
+.nd-toolbar[aria-orientation="vertical"] > .nd-toolbar-group[data-nd-align="end"] {
+  margin-inline-start: 0;
+  margin-block-start: auto;
+}

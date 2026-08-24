@@ -6,6 +6,8 @@
 //! | `dist/color.js` | the picker, and anything that needs a notation for a colour |
 //! | `dist/color-picker.js` | `enhancePickers()` — everything a `ColorPicker` does |
 //! | `dist/inputs.js`, `dist/messages.js` | `enhanceInputs()`, and the sentence helpers both use |
+//! | `dist/select.js`, `dist/tag-picker.js`, `dist/tree.js`, `dist/tabs.js`, `dist/date-input.js` | the five that used to be enhanced from the documentation site alone |
+//! | `dist/panels.js`, `dist/roving.js` | what those five share: one open list, and one arrow walk |
 //! | `dist/palettes/*.json` | the Noctua tab, one file per palette, fetched on demand |
 //! | `packages/tokens/color.js` + `.d.ts` | the JavaScript package, and the Node test that checks the arithmetic |
 //!
@@ -29,9 +31,11 @@
 use std::fmt::Write as _;
 
 use noctua_design_runtime::{
-    ANCHOR_SOURCE, CAROUSEL_SOURCE, COLOR_SOURCE, DATE_PICKER_SOURCE, DIALOG_SOURCE, INFO_SOURCE,
-    INPUTS_SOURCE, MENU_SOURCE, MESSAGE_BAR_SOURCE, MESSAGES_SOURCE, PICKER_SOURCE, POPOVER_SOURCE,
-    SUMMARY_SOURCE, TABLE_SOURCE, TOAST_SOURCE, TOOLTIP_SOURCE, source,
+    ANCHOR_SOURCE, CAROUSEL_SOURCE, COLOR_SOURCE, DATE_INPUT_SOURCE, DATE_PICKER_SOURCE,
+    DIALOG_SOURCE, INFO_SOURCE, INPUTS_SOURCE, MENU_SOURCE, MESSAGE_BAR_SOURCE, MESSAGES_SOURCE,
+    PANELS_SOURCE, PICKER_SOURCE, POPOVER_SOURCE, ROVING_SOURCE, SELECT_SOURCE, SUMMARY_SOURCE,
+    TABLE_SOURCE, TABS_SOURCE, TAG_PICKER_SOURCE, TOAST_SOURCE, TOOLTIP_SOURCE, TREE_SOURCE,
+    source,
 };
 use noctua_design_spec::Vendor;
 use noctua_design_spec::vendor::VENDOR;
@@ -58,6 +62,13 @@ pub fn emit(vendor: &Vendor) -> Vec<EmittedFile> {
         EmittedFile::new("dist/popover.js", copied(POPOVER_SOURCE)),
         EmittedFile::new("dist/tooltip.js", copied(TOOLTIP_SOURCE)),
         EmittedFile::new("dist/toast.js", copied(TOAST_SOURCE)),
+        EmittedFile::new("dist/panels.js", copied(PANELS_SOURCE)),
+        EmittedFile::new("dist/roving.js", copied(ROVING_SOURCE)),
+        EmittedFile::new("dist/select.js", copied(SELECT_SOURCE)),
+        EmittedFile::new("dist/tag-picker.js", copied(TAG_PICKER_SOURCE)),
+        EmittedFile::new("dist/tree.js", copied(TREE_SOURCE)),
+        EmittedFile::new("dist/tabs.js", copied(TABS_SOURCE)),
+        EmittedFile::new("dist/date-input.js", copied(DATE_INPUT_SOURCE)),
         EmittedFile::new("packages/tokens/color.js", copied(COLOR_SOURCE)),
         EmittedFile::new("packages/tokens/color.d.ts", color_types()),
     ];

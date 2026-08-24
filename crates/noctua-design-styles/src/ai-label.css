@@ -1,0 +1,293 @@
+
+
+/* --- AILabel ----------------------------------------------------------------
+ *
+ * TWO LETTERS BESIDE A VALUE, AND NEVER ON TOP OF ONE. `Badge` translates its
+ * mark onto the corner of what it marks. This is laid out in the flow beside
+ * the value it is about, so a host gives it real room and nothing underneath is
+ * covered — `position` is deliberately absent from everything here, and the
+ * note above it is the one thing that floats.
+ *
+ * ITS NOTE IS `Info`'s NOTE. Same `role`, same script, same anchor properties,
+ * same flip, so `.nd-note` above paints both and the two placement rules there
+ * are the only thing that differs. */
+.nd-ai-label {
+  /* The letter box's height, and the one thing `size` moves. Everything else
+     here is derived from it, so three sizes are three values rather than three
+     blocks. `small` is `var(--noctua-space-6)` because that is the 24 pixel
+     floor `audit.spec.js` holds every control to, and this control is the
+     smallest thing on the row it sits in. */
+  --nd-ai-label-size: var(--noctua-space-6);
+
+  display: inline-flex;
+  align-items: center;
+  vertical-align: baseline;
+}
+
+/* THE ROOM A HOST RESERVES, ONE CLASS FOR ALL OF THEM. `controls.rs` writes it
+   on every hosted mark, so a host that wants the mark somewhere else says so in
+   its `[meta] ai` slot rather than in a rule of its own. `flex: none` is what
+   makes the reservation automatic: the row's `flex: 1` item gives up exactly
+   this width, so nothing is covered and nothing has to be measured. */
+.nd-ai-slot {
+  flex: none;
+}
+
+/* AND IN RUNNING TEXT IT IS AN INLINE RUN. The negative block margin is
+   `.nd-info-marker`'s, for `.nd-info-marker`'s reason: at the body size the 24
+   pixel box already fits the line box, and at the caption size it trades 3.4
+   pixels of the neighbouring line's LEADING, which is not content. That is the
+   one place the never-on-content rule is knowingly bent, and it is bent by the
+   same amount the marker beside it already bends it. */
+/* THE NEGATIVE MARGIN GOES ON THE ROOT AND NOT ON THE LETTERS. An inline-level
+   box contributes its MARGIN box to the line, so either place shortens the
+   line by the same four pixels — and putting it on the letters shortens the
+   control's own border box to sixteen, which is what the site's audit measures
+   a hit target with. `.nd-info-marker` carries it on the element that is the
+   control, and this is the same arrangement one level further out. */
+.nd-ai-slot-inline {
+  margin-block: calc(var(--noctua-space-1) * -1);
+  margin-inline-start: var(--noctua-space-1);
+}
+
+/* --- The six rooms a host reserves ---
+ *
+ * Every one of these is `.nd-ai-slot` plus one property, because a host that
+ * needed more than one would be a host whose own layout the mark does not fit.
+ * The slot each component asks for is the class on its `// @ai` marker in
+ * `crates/noctua-design-emit/src/controls.rs`. */
+
+/* `Textarea`. The box can be dragged taller and the browser paints its grip on
+   the block-end corner, so a mark at the end of that row would sit under it. */
+.nd-ai-slot-start {
+  align-self: flex-start;
+}
+
+/* `DateInput`, `TimeInput`, `FileInput`. Every item in those rows is a label
+   stacked over a box, so a mark centred on the row sits beside the labels
+   rather than beside the values. The meridiem control already does this.
+ *
+ * AND THEN IT IS LIFTED ONTO THE BOX'S OWN CENTRE LINE. `flex-end` is
+ * BLOCK-end, so a 24 pixel mark flush with the bottom of a 48 pixel box has its
+ * centre twelve pixels below the box's, and reads as dropped rather than
+ * aligned. Half the difference between the two, from the two tokens that set
+ * them, so the arithmetic is the layout's rather than a number written here. */
+.nd-ai-slot-end {
+  align-self: flex-end;
+  margin-block-end: calc((var(--noctua-space-12) - var(--nd-ai-label-size)) / 2);
+}
+
+/* `OtpField`, `Rating`, `Label`, `Fieldset`, `Truncate`, `Disclosure` and the
+   table cells. A second step of space, because at the row's own gap the mark
+   joins the rhythm it is standing beside: one more box in the code, one more
+   star in the rating. */
+.nd-ai-slot-apart {
+  margin-inline-start: var(--noctua-space-2);
+}
+
+/* `MessageBar` and `Toast`. Those rows align to the top rather than to the
+   middle, so the mark takes one line's height and centres inside that — which
+   is what the icon at the other end of the row already does. */
+.nd-ai-slot-line {
+  block-size: 1lh;
+  align-items: center;
+}
+
+/* --- The columns that would put the mark on a line of its own ---
+ *
+ * `ColorPicker` is a flex column holding a small square trigger, so a mark
+ * after it is a second row under a control 33 pixels wide with the whole line
+ * beside it unused. Marked, the trigger and the mark share a row and the live
+ * region under them keeps its own line. */
+.nd-color-picker:has(> .nd-ai-slot) {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--noctua-space-2);
+}
+
+.nd-color-picker:has(> .nd-ai-slot) > .nd-color-picker-note {
+  flex-basis: 100%;
+}
+
+/* `NumberInput`'s steppers are two 24 pixel controls in a column, and the mark
+   is a 24 pixel control right after them. At the row's own gap it reads as a
+   third one. */
+.nd-number-input > .nd-ai-slot {
+  margin-inline-start: var(--noctua-space-2);
+}
+
+/* `Disclosure`'s marker follows the mark, and the summary's gap alone put the
+   two glyphs against each other. */
+.nd-disclosure-summary > .nd-ai-slot {
+  margin-inline-end: var(--noctua-space-2);
+}
+
+/* `Image`. A picture is painted edge to edge, so the caption row is the only
+   room a figure has that is not the picture. */
+.nd-ai-slot-caption {
+  margin-block-start: var(--noctua-space-2);
+  align-self: flex-start;
+}
+
+/* --- The rows that push their last item to the far edge ---
+ *
+ * `Switch` sets `justify-content: space-between` with a name at one end and a
+ * track at the other, `Meter` and `Progress` do the same with a label and a
+ * reading, and a dialog's and a popover's head do it with a title and a close
+ * control. A THIRD ITEM ON SUCH A ROW LANDS IN THE MIDDLE, attached to neither
+ * — and moves the item that was on the trailing edge to the centre with it. So
+ * a marked row packs from the start and pushes with a margin instead. */
+.nd-switch:has(.nd-ai-label),
+.nd-dialog-head:has(> .nd-ai-slot),
+.nd-popover-head:has(> .nd-ai-slot) {
+  justify-content: flex-start;
+}
+
+/* WHICH ITEM CARRIES THE `auto` MARGIN IS THE WHOLE OF IT, and the two rows
+   want opposite answers. A `Switch` reads name, then a gap, then the mark
+   against the track it is about — so the NAME pushes. A head reads title, mark,
+   then a gap, then the close control, because the mark is about the title and
+   the close belongs to the panel — so the MARK pushes. Putting the margin on
+   the title left the mark floating midway between the two, attached to
+   neither, which is the arrangement this whole block exists to remove. */
+.nd-switch:has(.nd-ai-label) > .nd-switch-label {
+  margin-inline-end: auto;
+}
+
+.nd-switch:has(.nd-ai-label) > .nd-ai-slot {
+  margin-inline-end: var(--noctua-space-3);
+}
+
+.nd-dialog-head:has(> .nd-ai-slot) > .nd-ai-slot,
+.nd-popover-head:has(> .nd-ai-slot) > .nd-ai-slot {
+  margin-inline-end: auto;
+}
+
+/* THE LETTERS. `min-inline-size` equal to the box's own height, so the mark is
+   a square at rest and GROWS where a locale needs more room. A fixed width
+   would clip instead, and `qps` is the locale that asks: two glyphs become six
+   there, which is the widest ratio anything on this site is put through. */
+.nd-ai-label-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--nd-ai-label-size);
+  block-size: var(--nd-ai-label-size);
+  padding-inline: var(--noctua-space-1);
+  border: var(--noctua-border-hairline) solid transparent;
+  border-radius: var(--noctua-radius-control);
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-semibold);
+  /* An all-capital run of two, which needs more room to read than lowercase. */
+  letter-spacing: var(--noctua-tracking-caps);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* The narrow case unconditionally, overridden upward. */
+.nd-ai-label[data-nd-size="medium"] {
+  --nd-ai-label-size: var(--noctua-space-8);
+}
+
+.nd-ai-label[data-nd-size="medium"] .nd-ai-label-mark {
+  font-size: var(--noctua-size-small);
+}
+
+.nd-ai-label[data-nd-size="large"] {
+  --nd-ai-label-size: var(--noctua-space-12);
+}
+
+.nd-ai-label[data-nd-size="large"] .nd-ai-label-mark {
+  font-size: var(--noctua-size-body);
+}
+
+/* --- Its colour ---
+ *
+ * Six rules and every family in the palette, from `dist/tones.css`, which is
+ * what `Tag` does three sections up. A mark with NO tone is quiet on purpose:
+ * this says where a value came from, and one that shouted would be a page
+ * arguing with its own content.
+ *
+ * EVERY `--nd-tone*` READ CARRIES AN `--nc-*` FALLBACK. `tone` is free text, so
+ * a caller can name a family the palette does not declare, and an undefined
+ * custom property makes the whole declaration invalid at computed-value time —
+ * Trap 0.8 in `docs-site/assets/shell.css`'s preamble. Without the fallback that paints
+ * transparent letters on a transparent field, and a provenance mark that
+ * silently stopped saying anything is the worst failure this component has. The
+ * fallback sits inside a `var()` at the point of use and never in a custom
+ * property, so the frozen-indirection rule still holds. */
+.nd-ai-label[data-nd-variant="soft"] .nd-ai-label-mark {
+  color: var(--nc-color-fg-muted);
+  background: var(--nc-color-subtle-bg);
+}
+
+.nd-ai-label[data-nd-variant="solid"] .nd-ai-label-mark {
+  color: var(--nc-color-on-subtle);
+  background: var(--nc-color-subtle);
+}
+
+.nd-ai-label[data-nd-variant="outline"] .nd-ai-label-mark {
+  color: var(--nc-color-fg-muted);
+  border-color: var(--nc-color-border);
+}
+
+/* A TINTED FIELD TAKES THE PAGE'S OWN INK, NOT THE TONE'S.
+ *
+ * `--nc-color-<family>` is solved against the page, and `-bg` is a tint of it,
+ * so the two are near neighbours: measured across the palette they run 2.5:1 to
+ * 4.6:1 in the light appearance, which is a mark a reader has to lean into.
+ * `--nc-color-fg` over the same tint measures 13.5:1. The family still says
+ * which family it is, through the field and the hairline around it.
+ *
+ * `Tag` and `Badge` paint their own tinted variants the other way and measure
+ * 2.1:1. That is worth a change of their own and is not one this component can
+ * make: a mark that copied it would be a fifth measured thing agreeing with
+ * four unmeasured ones. */
+.nd-ai-label[data-nd-variant="soft"][data-nd-tone] .nd-ai-label-mark {
+  color: var(--nc-color-fg);
+  background: var(--nd-tone-bg, var(--nc-color-subtle-bg));
+  border-color: var(--nd-tone-border, transparent);
+}
+
+/* AND A SOLID FILL TAKES `on-`, which is what that name is solved for. This is
+   the colour system's own pair and every solid-filled component in the
+   catalogue uses it. */
+.nd-ai-label[data-nd-variant="solid"][data-nd-tone] .nd-ai-label-mark {
+  color: var(--nd-tone-on, var(--nc-color-on-subtle));
+  background: var(--nd-tone, var(--nc-color-subtle));
+}
+
+.nd-ai-label[data-nd-variant="outline"][data-nd-tone] .nd-ai-label-mark {
+  color: var(--nc-color-fg);
+  border-color: var(--nd-tone-border, var(--nc-color-border));
+}
+
+/* --- What it does when pressed --- */
+
+/* The control adds no box of its own. The letters are the target, and they are
+   already the size the target has to be. */
+.nd-ai-label-control {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* THE RING GOES ON THE CONTROL, which is the thing that takes focus, and it
+   repeats the mark's radius so the outline follows the corners underneath it
+   rather than cutting a rectangle through them. */
+.nd-ai-label-control:focus-visible {
+  border-radius: var(--noctua-radius-control);
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+@media (hover: hover) {
+  .nd-ai-label-control:hover .nd-ai-label-mark {
+    border-color: var(--nc-color-border-strong);
+  }
+}

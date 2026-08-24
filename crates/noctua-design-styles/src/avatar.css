@@ -1,0 +1,103 @@
+
+
+/* --- Avatar ---------------------------------------------------------------
+ *
+ * THREE LAYERS, NOT THREE BRANCHES. The icon is the floor, the initials sit
+ * over it, and the picture sits over both — so a URL that never answers shows
+ * the letters and a slow one shows them until it lands. There is no `onerror`
+ * to take a branch with: this package ships no runtime, so a fallback is CSS
+ * or it is nothing.
+ *
+ * The box is sized here and never by the image, so nothing moves when the
+ * picture arrives. */
+.nd-avatar {
+  --nd-avatar-size: var(--noctua-space-12);
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--nd-avatar-size);
+  block-size: var(--nd-avatar-size);
+  overflow: hidden;
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-semibold);
+  line-height: 1;
+  text-decoration: none;
+  background: var(--nc-color-subtle-bg);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-pill);
+}
+
+.nd-avatar-icon,
+.nd-avatar-initials {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inset: 0;
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-avatar-initials {
+  color: var(--nc-color-fg);
+  /* Over the icon, under the picture. The whole fallback is this one line and
+     the `alt=""` in the markup. */
+  z-index: var(--noctua-layer-raised);
+  background: var(--nc-color-subtle-bg);
+}
+
+.nd-avatar-image {
+  position: absolute;
+  inset: 0;
+  z-index: var(--noctua-layer-sticky);
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* --- Its box --- */
+
+.nd-avatar[data-nd-size="small"] {
+  --nd-avatar-size: var(--noctua-space-8);
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-avatar[data-nd-size="large"] {
+  --nd-avatar-size: var(--noctua-space-16);
+  font-size: var(--noctua-size-body);
+}
+
+.nd-avatar[data-nd-shape="rounded"] {
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-avatar[data-nd-shape="square"] {
+  border-radius: var(--noctua-radius-none);
+}
+
+/* --- Its colour ---
+ *
+ * The fallback only. A picture covers all of this, which is why the tone is
+ * about the letters rather than about the avatar. */
+.nd-avatar[data-nd-tone="accent"] .nd-avatar-initials,
+.nd-avatar[data-nd-tone="accent"] .nd-avatar-icon {
+  color: var(--nc-color-accent);
+  background: var(--nc-color-accent-bg);
+}
+.nd-avatar[data-nd-tone="danger"] .nd-avatar-initials,
+.nd-avatar[data-nd-tone="danger"] .nd-avatar-icon {
+  color: var(--nc-color-danger);
+  background: var(--nc-color-danger-bg);
+}
+.nd-avatar[data-nd-tone="success"] .nd-avatar-initials,
+.nd-avatar[data-nd-tone="success"] .nd-avatar-icon {
+  color: var(--nc-color-success);
+  background: var(--nc-color-success-bg);
+}
+
+@media (hover: hover) {
+  a.nd-avatar:hover {
+    border-color: var(--nc-color-border-strong);
+  }
+}

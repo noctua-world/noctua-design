@@ -1,0 +1,509 @@
+
+
+/* --- Search ------------------------------------------------------------------
+ *
+ * Three presentations out of one field and one panel. `inline` is the panel in
+ * flow; `popover` lifts it onto `position: fixed` and hangs it from the field
+ * with `--nd-anchor-*`, which `shell.js`'s one anchoring function writes; and
+ * `dialog` is the browser's own top layer, which needs no z-index, no anchor
+ * and no scroll listener at all.
+ *
+ * A SCROLLABLE ELEMENT NEVER CARRIES A RADIUS. The panel clips and the list
+ * inside it scrolls — the same two-element split `.nd-panel` and `.nd-codeblock`
+ * already make, and the reason is a classic scrollbar painting square straight
+ * through a rounded corner the moment a reader sets corners to `circular`. */
+.nd-search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+  position: relative;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.nd-search-field {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-3);
+  block-size: var(--nd-search-height);
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil), transparent);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  color: var(--nc-color-fg-muted);
+}
+
+/* The three sizes, matching `Button` step for step so a search beside a button
+   lines up rather than nearly lines up. */
+.nd-search {
+  --nd-search-height: var(--noctua-space-12);
+  /* Written by `shell.js` when the panel is anchored, and declared here so the
+     name exists whether or not that ever runs — a `var()` naming a property
+     nothing declares is dropped at computed-value time with no error. */
+  --nd-search-width: 100%;
+}
+.nd-search[data-nd-size="small"] { --nd-search-height: var(--noctua-space-8); }
+.nd-search[data-nd-size="large"] { --nd-search-height: var(--noctua-space-16); }
+
+/* A REFUSED BOX HAS TO LOOK REFUSED. `Search { disabled: true }` rendered a
+   field identical to a live one — the real `disabled` attribute was there and
+   stopped the typing, and nothing said why nothing happened. The same two
+   declarations `Select` already makes, and the same reason for the literal. */
+.nd-search-field:has(> .nd-search-input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+/* And a list that has not arrived, said with the pointer as well as with the
+   sentence in the panel — the same pair `Select` makes, for the same reason:
+   an empty list and a list still loading look identical and mean opposite
+   things. The attribute is kept current by `setLoading`. */
+.nd-search[data-nd-loading="true"] .nd-search-field,
+.nd-search[data-nd-loading="true"] .nd-search-input {
+  cursor: progress;
+}
+
+.nd-search-field:focus-within {
+  border-color: var(--nc-color-border-strong);
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-search-glyph {
+  display: inline-flex;
+  flex: none;
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-search-input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  padding: 0;
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  background: none;
+  border: none;
+  outline: none;
+}
+
+/* The engine's own clear control, in the two engines that draw one. Ours is a
+   real button with a name; a control that appears on some machines and not
+   others is worse than one we draw. */
+.nd-search-input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.nd-search-input::placeholder {
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-search-clear {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--noctua-space-8);
+  block-size: var(--noctua-space-8);
+  padding: 0;
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: none;
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .nd-search-clear:hover { color: var(--nc-color-fg); }
+}
+/* Absent while there is nothing to clear: a control that empties an empty box
+   is a control that does nothing, and a reader learns to distrust the row. */
+.nd-search:not([data-nd-has-query]) .nd-search-clear { display: none; }
+
+/* --- The key hint ---
+ *
+ * BOTH SPELLINGS SHIP AND ONE IS SHOWN. Which modifier a reader has is a fact
+ * about their hardware, and a pre-rendered page does not know it — a hint
+ * corrected after paint is the flicker §9.6 forbids. The stylesheet picks with
+ * a media query the browser answers before the first paint. */
+.nd-search-hotkey {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--noctua-space-tight);
+}
+.nd-search-hotkey > .nd-kbd { font-size: var(--noctua-size-caption); }
+.nd-search-hotkey > [data-nd-mod="apple"] { display: none; }
+@supports (-webkit-touch-callout: none) {
+  .nd-search-hotkey > [data-nd-mod="apple"] { display: inline; }
+  .nd-search-hotkey > [data-nd-mod="other"] { display: none; }
+}
+/* A pointer that is not fine is a touch screen, and a touch screen has no
+   modifier at all. */
+@media (pointer: coarse) {
+  .nd-search-hotkey { display: none; }
+}
+
+/* THE HINT GIVES WAY BEFORE THE NAME DOES.
+ *
+ * `Ctrl` and `K` are 89 pixels of the sidebar trigger's 167, which left the
+ * name 20 pixels for a word that wanted 51 — so the button read `S…` and said
+ * nothing about what it opened. A container query rather than a media query,
+ * because what decides this is how wide the TRIGGER is and not how wide the
+ * window is: the same component is 167 pixels in a sidebar and 700 on its own
+ * documentation page.
+ *
+ * Hidden by default and shown from a minimum up, like every other rule here. */
+.nd-search-open {
+  container-type: inline-size;
+}
+.nd-search-open > .nd-search-hotkey {
+  display: none;
+}
+@container (min-width: 30rem) {
+  .nd-search-open > .nd-search-hotkey {
+    display: inline-flex;
+  }
+}
+
+/* And never inside the dialog's own field: a reader reading it is already in
+   the thing the chord opens. */
+.nd-search-dialog .nd-search-hotkey {
+  display: none;
+}
+
+/* A HIT INSIDE A WORD CARRIES NO PADDING.
+ *
+ * `Mark`'s own rule pads it — right for a highlighted phrase in a paragraph,
+ * where the tint needs air around it. Wrong here, and visibly so: `bg` matched
+ * `ButtonGroup` on its two capitals and the row read `B utton G roup`, two
+ * gaps torn into the middle of a name by a rule written for prose. A search
+ * hit is a run of letters *inside* a word, so it keeps the tint, keeps the
+ * weight, and gives up the box.
+ *
+ * `[data-nd-hit]` rather than `.nd-mark`, because a caller's own `Mark` may be
+ * sitting in a result's label and this is not about that one. */
+.nd-search [data-nd-hit] {
+  padding: 0;
+  border-radius: 0;
+  /* The tint alone is thin on a one-letter run; the underline is what makes it
+     findable without colour, which `NOCTUA.md §9.8` asks of every signal. */
+  text-decoration: underline;
+  text-underline-offset: var(--noctua-space-1);
+}
+
+/* --- The panel --- */
+.nd-search-panel {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.nd-search-results,
+.nd-search-group-list,
+.nd-search-recent-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nd-search-results {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-block-size: 0;
+}
+
+.nd-search-result-link {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 0 var(--noctua-space-2);
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  border-radius: var(--noctua-radius-control);
+  color: var(--nc-color-fg);
+  text-decoration: none;
+}
+
+.nd-search-result-label {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.nd-search-result-detail {
+  grid-column: 1 / -1;
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-search-result-badge {
+  justify-self: end;
+  padding-inline: var(--noctua-space-2);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-accent);
+  border: var(--noctua-border-hairline) solid var(--nc-color-accent-border);
+  border-radius: var(--noctua-radius-pill);
+}
+
+@media (hover: hover) {
+  .nd-search-result-link:hover {
+    background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
+  }
+}
+
+/* THE ACTIVE ROW IS A FILL AND AN EDGE. Focus never leaves the box — the
+   highlight travels by `aria-activedescendant` — so this is the only thing a
+   sighted reader has to say which result Enter will follow, and a fill alone is
+   a signal a dichromat cannot separate from a hover. */
+.nd-search-result[data-nd-active] > .nd-search-result-link {
+  background: color-mix(in oklab, var(--nc-color-accent) var(--nd-veil-checked), transparent);
+  box-shadow: inset var(--noctua-border-strong) 0 0 0 var(--nc-color-accent);
+}
+
+.nd-search-group-label,
+.nd-search-recent-label {
+  padding: var(--noctua-space-3) var(--noctua-space-3) var(--noctua-space-1);
+  font-size: var(--noctua-size-caption);
+  letter-spacing: var(--noctua-tracking-caps);
+  text-transform: uppercase;
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-search-note {
+  padding: var(--noctua-space-3);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+/* Nothing to say takes no room. `:empty` rather than a `hidden` the script
+   would have to remember to write. */
+.nd-search-note:empty { display: none; }
+
+.nd-search-recent { border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border); }
+
+.nd-search-forget {
+  display: block;
+  inline-size: 100%;
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  text-align: start;
+  color: var(--nc-color-fg);
+  background: none;
+  border: none;
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+.nd-search-forget {
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+@media (hover: hover) {
+  .nd-search-forget:hover {
+    background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
+  }
+}
+
+
+/* --- inline ---
+ *
+ * The panel is in flow, so it needs no anchor and no cap — the page scrolls.
+ * A rule above it, because a list of results directly under a field with no
+ * separation reads as part of the field. */
+.nd-search[data-nd-presentation="inline"] > .nd-search-panel:has(.nd-search-result:not([hidden])) {
+  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+/* --- popover ---
+ *
+ * Full bleed is the base and floating is the override, mobile-first like every
+ * other rule here: a rounded panel a few pixels from the edge of a narrow
+ * screen reads as a card, and §9.7 forbids cards.
+ *
+ * EVERY FLOATING DECLARATION IS ON `[data-nd-enhanced]`, and the rule below
+ * used to say so in a comment while the selector did the opposite. `position:
+ * fixed` was unconditional, and `--nd-anchor-block` is written by the script —
+ * so with the script blocked the panel took its fallback of `100%`, resolved
+ * against the viewport rather than the field, and parked a full list of
+ * results over the top-left corner of the page, across the navigation.
+ *
+ * A popover with nothing to open it is not a popover. It is a list in flow,
+ * which is `inline`, which is a page with a list of links on it — and that is
+ * what these three selectors now say rather than describe. */
+.nd-search[data-nd-presentation="popover"][data-nd-enhanced] > .nd-search-panel {
+  position: fixed;
+  inset-block-start: var(--nd-anchor-block, 100%);
+  inset-inline: 0;
+  z-index: var(--noctua-layer-popover);
+  max-block-size: calc(100vh - var(--nd-anchor-block, 0px) - var(--noctua-space-8));
+  background: var(--nc-color-surface);
+  border-block: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+.nd-search[data-nd-presentation="popover"][data-nd-enhanced] > .nd-search-panel[data-nd-above] {
+  inset-block: auto var(--nd-anchor-block, 100%);
+  max-block-size: calc(100vh - var(--nd-anchor-block, 0px) - var(--noctua-space-8));
+}
+
+/* Closed is the resting state of a popover, and `[data-nd-enhanced]` is what
+   makes that true only once something can open it. */
+.nd-search[data-nd-presentation="popover"][data-nd-enhanced]:not([data-nd-open]) > .nd-search-panel {
+  display: none;
+}
+
+/* And the same separation `inline` draws, for the same reason, in the state
+   where this one is `inline`. */
+.nd-search[data-nd-presentation="popover"]:not([data-nd-enhanced])
+  > .nd-search-panel:has(.nd-search-result:not([hidden])) {
+  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+@media (min-width: 30rem) {
+  .nd-search[data-nd-presentation="popover"][data-nd-enhanced] > .nd-search-panel {
+    inset-inline: auto var(--nd-anchor-inline, 0);
+    inline-size: var(--nd-search-width, 100%);
+    border: var(--noctua-border-hairline) solid var(--nc-color-border);
+    border-radius: var(--noctua-radius-surface);
+  }
+}
+
+/* --- dialog ---
+ *
+ * The browser's top layer. No z-index, no anchor, no flip and no scroll
+ * listener — and the focus trap, the inert background, focus restoration and
+ * Escape all come with it. It is the cheapest of the three presentations, not
+ * the dearest. */
+/* THE TRIGGER'S SPACE IS RESERVED BEFORE IT IS REVEALED.
+ *
+ * It ships `hidden` and `shell.js` unhides it, which is right — a control that
+ * opens a modal nothing can fill is a button that does nothing — and it dropped
+ * the navigation forty-eight pixels on every page load, because a deferred
+ * script runs after the first paint. `theme.spec.js` measured 0.0042 of layout
+ * shift for it, and `NOCTUA.md §9.6` forbids exactly this.
+ *
+ * ON THE ROOT, NOT ON THE BUTTON, and the one `!important` in `base.css`
+ * is why: `[hidden]` wins over everything on purpose, so a rule laying the
+ * button out while it is hidden either does nothing or opens the hole that
+ * `!important` was put there to close. The box is held by its container
+ * instead, which is `display: flex` in a column and therefore exactly as tall
+ * as its one child — nothing, until the child arrives.
+ *
+ * `data-nd-scripting` is stamped by the inline head script, so the slot exists
+ * from the first paint on a page that will have a trigger, and never on a page
+ * that will not. */
+:root[data-nd-scripting] .nd-search[data-nd-presentation="dialog"] {
+  min-block-size: var(--nd-search-height);
+}
+
+.nd-search-open {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  inline-size: 100%;
+  block-size: var(--nd-search-height);
+  padding-inline: var(--noctua-space-3);
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  text-align: start;
+  color: var(--nc-color-fg-muted);
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil), transparent);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+.nd-search-open-text {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+@media (hover: hover) {
+  .nd-search-open:hover {
+    color: var(--nc-color-fg);
+    border-color: var(--nc-color-border-strong);
+  }
+}
+
+/* `[open]`, AND THE SELECTOR IS THE WHOLE BUG.
+ *
+ * A closed `<dialog>` is `display: none` by the user-agent stylesheet, and that
+ * declaration is the only thing keeping it off the page — so `display: flex`
+ * on `.nd-search-dialog` un-hid every closed dialog in the document. The
+ * palette and the example below it both drew their box over the page,
+ * permanently, and no other rule anywhere would have said so.
+ *
+ * Every layout property the dialog needs is therefore stated on `[open]`, not
+ * on the class: the class is the identity and `[open]` is the state, and a
+ * layout that only applies when the thing is shown cannot un-hide it. */
+.nd-search-dialog[open] {
+  inline-size: min(var(--noctua-space-64) + var(--noctua-space-48), calc(100vw - var(--noctua-space-6)));
+  max-block-size: min(var(--noctua-space-64) * 2, calc(100vh - var(--noctua-space-16)));
+  margin-block-start: var(--noctua-space-16);
+  padding: var(--noctua-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+  /* The clipping context. Not `auto`: this element must never scroll — the
+     list inside it does. */
+  overflow: hidden;
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+.nd-search-dialog::backdrop {
+  background: color-mix(in oklab, var(--nc-color-fg) var(--nd-veil-checked), transparent);
+}
+
+/* The field and the way out, on one line. The field takes what is left, so a
+   dialog with no close control is a dialog whose field is the whole width —
+   which is exactly what it was before the control existed. */
+.nd-search-head {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+}
+.nd-search-head > :first-child {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+.nd-search-close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--noctua-space-12);
+  block-size: var(--noctua-space-12);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .nd-search-close:hover {
+    color: var(--nc-color-fg);
+    border-color: var(--nc-color-border-strong);
+  }
+}
+
+/* SQUARE IS THE BASE AND ROUNDED IS THE OVERRIDE, like every other rule here.
+   A rounded box inset from four edges of a phone is the card §9.7 forbids, and
+   writing the narrow case as a `max-width` exception is how a layout grows a
+   dead zone nobody tests at. */
+.nd-search-dialog[open] {
+  margin-inline: auto;
+  border-radius: 0;
+}
+@media (min-width: 30rem) {
+  .nd-search-dialog[open] { border-radius: var(--noctua-radius-surface); }
+}
+
+.nd-search[data-nd-presentation="dialog"] > .nd-search-panel { display: none; }
+.nd-search[data-nd-presentation="dialog"] .nd-search-dialog .nd-search-panel { display: flex; }
+
+/* --- Glass --- */
+.nd-search[data-nd-glass="true"] > .nd-search-field,
+.nd-search[data-nd-glass="true"] .nd-search-panel,
+.nd-search[data-nd-glass="true"] .nd-search-dialog {
+  background: color-mix(in oklab, var(--nc-color-surface) var(--noctua-glass-opacity), transparent);
+}

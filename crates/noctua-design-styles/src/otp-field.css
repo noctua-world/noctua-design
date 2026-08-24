@@ -1,0 +1,259 @@
+
+
+/* --- OtpField ------------------------------------------------------------- */
+
+.nd-otp-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+}
+
+.nd-otp-field-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--noctua-space-2);
+}
+
+.nd-otp-field-box {
+  display: inline-flex;
+}
+
+/* A BOX SIZED FROM THE SPACING SCALE, NOT FROM THE CHARACTER.
+ *
+ * `DateInput` sizes its boxes in `ch`, because a year is four digits and the
+ * answer is a count of them. One character is not a count: what decides this
+ * box is the target a finger has to hit, and that is the scale's question. A
+ * `ch` width also collides with `box-sizing: border-box` — the padding comes
+ * out of the character rather than sitting around it, and the inner editor
+ * then overflows a box two pixels too small, which is what `audit.spec.js`
+ * reports as clipped text.
+ *
+ * Both props compose through custom properties rather than fighting over
+ * `inline-size`: `size` sets the box and `kind` widens it, and neither has to
+ * know the other's selector. */
+.nd-otp-field-input {
+  --nd-otp-box: var(--noctua-space-12);
+  --nd-otp-wide: 1;
+  inline-size: calc(var(--nd-otp-box) * var(--nd-otp-wide));
+  min-block-size: var(--nd-otp-box);
+  padding-inline: var(--noctua-space-1);
+  padding-block: var(--noctua-space-2);
+  font-family: var(--noctua-font-mono);
+  font-size: var(--noctua-size-lead);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border-strong);
+  border-radius: var(--noctua-radius-control);
+}
+
+/* Letters need more of the box than digits do,
+and the row is the same shape
+   either way. */
+.nd-otp-field[data-nd-kind="alphanumeric"] .nd-otp-field-input{
+  --nd-otp-wide: 1.35;
+}
+
+.nd-otp-field[data-nd-size="small"] .nd-otp-field-input{
+  --nd-otp-box: var(--noctua-space-8);
+  font-size: var(--noctua-size-body);
+}
+
+.nd-otp-field[data-nd-size="large"] .nd-otp-field-input{
+  --nd-otp-box: var(--noctua-space-16);
+  font-size: var(--noctua-size-h3);
+}
+
+.nd-otp-field-input:hover {
+  border-color: var(--nc-color-fg-muted);
+}
+
+.nd-otp-field-input:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* EVERY BOX, BECAUSE THE CODE IS ONE VALUE. Half a code cannot be wrong on its
+   own, so marking the box the caret happens to be in would say something the
+   field does not mean. */
+.nd-otp-field[data-nd-invalid="true"] .nd-otp-field-input,
+.nd-otp-field-input[aria-invalid="true"] {
+  border-width: var(--noctua-border-strong);
+  border-color: var(--nc-color-danger);
+}
+
+.nd-otp-field-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+.nd-otp-field-note {
+  margin: 0;
+  color: var(--nc-color-danger);
+  font-size: var(--noctua-size-small);
+}
+
+.nd-otp-field-note:empty {
+  display: none;
+}
+
+/* The specimen on the component's own page: drawn characters rather than live
+   boxes,
+because a specimen of a `needs_name` component must not render a
+   nameless control. It answers the same two props the real box does{
+  display: inline-flex;
+  gap: var(--noctua-space-2);
+}
+
+/* --- Tabs, Tab and TabPanel ----------------------------------------------- */
+
+/* A STRIP OF LINKS UNTIL A SCRIPT MAKES IT A TAB LIST.
+ *
+ * `tabs.toml` argues it: with no script every panel is on the page and each
+ * tab is a link down to the one it names, so nothing claims a role that
+ * nothing can honour. What the stylesheet draws is the same either way. */
+.nd-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--noctua-space-1);
+  border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+.nd-tabs[aria-orientation="vertical"] {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  border-block-end: 0;
+  border-inline-end: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+/* Each tab in its own box, which survives a strip that wraps onto two lines
+   where a shared rule under all of them would break apart. */
+.nd-tabs[data-nd-appearance="enclosed"] {
+  gap: var(--noctua-space-2);
+  border-block-end: 0;
+  border-inline-end: 0;
+}
+
+/* A GRID RATHER THAN `flex: 1`, because the two values differ in what they are
+   equal TO. Equal columns in a grid whose own width is indefinite all take the
+   width of the widest tab, which is what `equal` means and what stops a
+   translated word re-flowing the strip. `stretch` is that plus the container,
+   which is the only thing between them. */
+.nd-tabs[data-nd-fill="equal"],
+.nd-tabs[data-nd-fill="stretch"] {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+}
+
+/* AND `equal` SHRINKS TO ITS OWN CONTENT. Without this the grid is a block and
+   fills whatever holds it, so `equal` and `stretch` drew one picture and the
+   difference between them was a declaration that did nothing. */
+.nd-tabs[data-nd-fill="equal"] {
+  inline-size: fit-content;
+}
+
+.nd-tabs[data-nd-fill="stretch"] {
+  inline-size: 100%;
+}
+
+.nd-tabs[data-nd-fill="equal"][aria-orientation="vertical"],
+.nd-tabs[data-nd-fill="stretch"][aria-orientation="vertical"] {
+  grid-auto-flow: row;
+  grid-auto-rows: 1fr;
+}
+
+.nd-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--noctua-space-2);
+  min-block-size: var(--noctua-space-12);
+  padding-inline: var(--noctua-space-4);
+  padding-block: var(--noctua-space-2);
+  color: var(--nc-color-fg-muted);
+  text-decoration: none;
+  /* The mark, drawn always so the strip does not move when one is chosen. */
+  border-block-end: var(--noctua-border-strong) solid transparent;
+  cursor: pointer;
+}
+
+.nd-tabs[data-nd-size="small"] .nd-tab {
+  min-block-size: var(--noctua-space-8);
+  padding-inline: var(--noctua-space-3);
+  font-size: var(--noctua-size-small);
+}
+
+.nd-tabs[data-nd-size="large"] .nd-tab {
+  min-block-size: var(--noctua-space-16);
+  padding-inline: var(--noctua-space-6);
+  font-size: var(--noctua-size-lead);
+}
+
+.nd-tabs[data-nd-appearance="enclosed"] .nd-tab {
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-tabs[aria-orientation="vertical"] .nd-tab {
+  justify-content: flex-start;
+  border-block-end: 0;
+  border-inline-end: var(--noctua-border-strong) solid transparent;
+}
+
+.nd-tab:hover {
+  color: var(--nc-color-fg);
+}
+
+.nd-tab:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* TWO SIGNALS, NEVER ONE. The chosen tab is a colour AND a rule under it, so a
+   reader who cannot tell the two colours apart still has the mark
+   (`NOCTUA.md §8.8.6`). `data-nd-selected` is rendered and `aria-selected`
+   arrives with the script, so both are named. */
+.nd-tab[data-nd-selected="true"],
+.nd-tab[aria-selected="true"] {
+  color: var(--nc-color-fg);
+  font-weight: var(--noctua-weight-semibold);
+  border-block-end-color: var(--nc-color-accent);
+}
+
+.nd-tabs[aria-orientation="vertical"] .nd-tab[data-nd-selected="true"],
+.nd-tabs[aria-orientation="vertical"] .nd-tab[aria-selected="true"] {
+  border-block-end-color: transparent;
+  border-inline-end-color: var(--nc-color-accent);
+}
+
+.nd-tabs[data-nd-appearance="enclosed"] .nd-tab[data-nd-selected="true"],
+.nd-tabs[data-nd-appearance="enclosed"] .nd-tab[aria-selected="true"] {
+  background: var(--nc-color-surface-subtle);
+  border-color: var(--nc-color-accent);
+}
+
+.nd-tab[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+/* Inside the tab, so it is read as part of the name. */
+.nd-tab-count {
+  font-variant-numeric: tabular-nums;
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-tab-panel {
+  padding-block-start: var(--noctua-space-4);
+}
+
+.nd-tab-panel:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}

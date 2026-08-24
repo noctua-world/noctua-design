@@ -80,6 +80,10 @@ pub fn emit(components: &[Component], drawings: &[Icon]) -> Vec<EmittedFile> {
         "packages/react/src/components/index.js",
         js_index(components),
     ));
+    files.push(EmittedFile::new(
+        "packages/react/src/components/index.d.ts",
+        ts_index(components),
+    ));
     files
 }
 
@@ -710,6 +714,28 @@ fn js_index(components: &[Component]) -> String {
         writeln!(
             out,
             "export {{ {} }} from \"./{}.js\";",
+            component.meta.name,
+            file_stem(&component.meta.name)
+        )
+        .expect("write");
+    }
+    out
+}
+
+/// The same index, in types.
+///
+/// Without it the package publishes 89 `.d.ts` files that nothing re-exports,
+/// so `import { Button } from "@noctua-world/design-react"` resolves to a value
+/// with no type at all — which looks like the package having no types rather
+/// than like a missing file, and is why this is generated beside the index it
+/// mirrors rather than kept by hand.
+fn ts_index(components: &[Component]) -> String {
+    let mut out = header_from(CommentStyle::Line("//"), COMPONENT_SPEC);
+    out.push_str("\n// Every component's props, generated from spec/components/.\n\n");
+    for component in components {
+        writeln!(
+            out,
+            "export {{ {0}, type {0}Props }} from \"./{1}.js\";",
             component.meta.name,
             file_stem(&component.meta.name)
         )

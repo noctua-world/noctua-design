@@ -1,0 +1,109 @@
+// Everything a `Tabs` does once a script is running.
+//
+// IT SHIPS, for the reason `menu.js` gives: a component whose consumer cannot
+// use it is a component that lies.
+//
+// WHAT THE MARKUP CLAIMS AND WHAT THIS ADDS.
+//
+// `tabs.toml` argues it in full. With no script every panel is on the page and
+// each tab is a link down to the one it names, so nothing claims a role that
+// nothing can honour — `Tree`'s rule, applied to a second component. This is
+// what earns the roles: it can hide a panel and show another one.
+//
+// The arrow walk is NOT here. `roving.js` serves a toolbar, a radio group and a
+// tab list, because the walk is the same walk and a third copy of Home, End and
+// an orientation is a third place to get them wrong.
+
+import { roving } from "./roving.js";
+
+// WHAT THE MARKUP CLAIMS AND WHAT THIS ADDS.
+//
+// `tabs.toml` argues it in full. With no script every panel is on the page and
+// each tab is a link down to the one it names, so nothing claims a role that
+// nothing can honour — `Tree`'s rule, applied to a second component. This is
+// what earns the roles: it can hide a panel and show another one.
+//
+// The arrow walk is NOT here. `stops()` and `roving()` above serve a toolbar, a
+// radio group and now a tab list, because the walk is the same walk and a third
+// copy of Home, End and an orientation is a third place to get them wrong.
+
+/** Every enhanced strip's teardown, so a subtree can be released. */
+const tabStrips = new WeakMap();
+
+/**
+ * Takes the roles and the walk back off every strip under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. The roles go back with the listeners, because a strip
+ * still claiming `role="tablist"` with nothing answering its arrow keys is the
+ * exact defect this file refuses everywhere else: a promise the markup makes
+ * and nothing keeps.
+ */
+export function releaseTabs(root = document) {
+  for (const strip of root.querySelectorAll("[data-nd-tabs]")) {
+    if (strip.dataset.ndEnhanced !== "tabs") continue;
+    tabStrips.get(strip)?.abort();
+    tabStrips.delete(strip);
+    strip.removeAttribute("role");
+    for (const tab of strip.querySelectorAll(".nd-tab")) {
+      tab.removeAttribute("role");
+      document.getElementById(tab.getAttribute("aria-controls"))?.removeAttribute("role");
+    }
+    delete strip.dataset.ndEnhanced;
+  }
+}
+
+export function enhanceTabs(root = document) {
+  for (const strip of root.querySelectorAll("[data-nd-tabs]")) {
+    if (strip.dataset.ndEnhanced) continue;
+    const tabs = [...strip.querySelectorAll(".nd-tab")];
+    if (tabs.length === 0) continue;
+    strip.dataset.ndEnhanced = "tabs";
+    const binding = new AbortController();
+    tabStrips.set(strip, binding);
+    const signal = binding.signal;
+
+    // THE PANELS ARE SIBLINGS OF THE STRIP, NEVER CHILDREN: a tab list may hold
+    // tabs and nothing else. Each is found by the id its own tab already points
+    // at, so nothing here needs to know where a caller put them.
+    const panels = tabs.map((tab) => document.getElementById(tab.getAttribute("aria-controls")));
+
+    const show = (at) => {
+      tabs.forEach((tab, index) => {
+        const on = index === at;
+        tab.setAttribute("aria-selected", String(on));
+        tab.dataset.ndSelected = String(on);
+        tab.tabIndex = on ? 0 : -1;
+        const panel = panels[index];
+        if (!panel) return;
+        panel.hidden = !on;
+        // A panel whose content has no stop of its own is one a keyboard could
+        // not reach at all, so the panel itself is the stop.
+        panel.tabIndex = 0;
+      });
+    };
+
+    strip.setAttribute("role", "tablist");
+    tabs.forEach((tab, index) => {
+      tab.setAttribute("role", "tab");
+      panels[index]?.setAttribute("role", "tabpanel");
+      const choose = (event) => {
+        // The `href` is what a page with no script uses. With one, jumping is
+        // wrong: the panel arrives exactly where it already was.
+        event.preventDefault();
+        if (tab.getAttribute("aria-disabled") === "true") return;
+        show(index);
+        roving(strip);
+      };
+      tab.addEventListener("click", choose, { signal });
+      tab.addEventListener("keydown", (event) => {
+        if (event.key !== " " && event.key !== "Enter") return;
+        choose(event);
+      }, { signal });
+    });
+
+    const chosen = tabs.findIndex((tab) => tab.dataset.ndSelected === "true");
+    show(chosen === -1 ? 0 : chosen);
+  }
+}
+

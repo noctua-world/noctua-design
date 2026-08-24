@@ -44,11 +44,12 @@ Four gaps, recorded because a reader would otherwise assume they are closed.
 Verify one before relying on it. (Two different `dist/` directories appear below:
 `../dist/` is what the packages ship, `docs-site/dist/` is this site's own output.)
 
-- **`../dist/` carries no component styles.** It has the tokens, font faces, theme
-  and appearance layers and the scoped semantic contract — everything a page needs to
-  be *themed*. The rules that make an `.nd-heading` a heading live in
-  `assets/shell.css`, so today the components are styled only inside this site.
-  `NOCTUA.md §9.4` describes the artifact this is meant to become.
+- **`Search` is enhanced from this site's script**, not from `../dist/`, so a
+  consumer taking the packages gets `role="combobox"` and none of the keyboard it
+  obliges. The five that were in the same position — `Select`, `TagPicker`,
+  `Tree`, `Tabs` and `DateInput` — ship now, and `assets/shell.js` imports them
+  back. `Search` did not move with them because its index is fetched from a path
+  this site decides.
 - **The shared behavioural cases are unwritten.** `spec/components/<name>.cases.toml`,
   the one case set run against both implementations, is `NOCTUA.md §9.3` Leg 3 and
   does not exist yet. Prop-surface parity is generated and enforced; behavioural

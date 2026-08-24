@@ -1,0 +1,58 @@
+
+
+/* Full-bleed is the BASE, and floating is the override — mobile-first, like
+   every other rule here. A rounded panel a few pixels from the edge of a narrow
+   screen reads as a card, which §9.7 forbids; and writing the narrow case as a
+   `max-width` exception is how a layout grows a dead zone nobody tests at. */
+/* A SCROLLABLE ELEMENT NEVER CARRIES A RADIUS, AND A RADIUS ELEMENT NEVER
+ * SCROLLS. That rule is the whole reason this is two elements.
+ *
+ * The panel used to be one: `overflow-y: auto` in the base rule and a
+ * `border-radius` added at `sm`, with no clipping context between them. A
+ * classic scrollbar then paints square straight through the rounded corner —
+ * which is exactly what a reader sees the moment corners are set to
+ * "circular". Padding it, insetting it or hiding it are all patches on the
+ * same missing structure.
+ *
+ * NOTHING FAILS THE BUILD ON THIS, and the comment used to claim otherwise.
+ * There is no gate for this in `xtask/src/gates.rs` and there never was — the
+ * comment here used to name one, after the scrollable corner it describes. What holds the rule is `material.spec.js`, which measures a
+ * scroller's painted corner rather than reading its declarations — and a
+ * comment naming a guard that does not exist is worse than no comment, because
+ * the next person trusts it and stops looking. */
+.nd-panel {
+  position: fixed;
+  inset-block-start: var(--nd-header-h);
+  inset-inline: 0;
+  z-index: var(--noctua-layer-popover);
+  border-inline: 0;
+  border-radius: 0;
+  max-block-size: calc(100vh - var(--nd-header-h) - var(--noctua-space-8));
+  /* The clipping context. Not `auto`: this element must never scroll. */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-block: var(--noctua-border-hairline) solid var(--nc-color-border);
+  /* The material is `.noctua-glass`, applied in the markup. */
+}
+
+@media (min-width: 30rem) {
+  .nd-panel {
+    position: absolute;
+    inset-block-start: calc(100% + var(--noctua-space-2));
+    inset-inline: auto 0;
+    /* 28rem, composed rather than spelled. It was 20rem while every row was a
+       label above a full-width control, then 24rem when a row became a name
+       BESIDE its control — and at 24rem `Corners` still wrapped onto a second
+       line, which is what made the row bleed into the one under it. The width
+       that stops it wrapping is the width that buys the extra air for free:
+       the panel is the same height at 28rem with every gap doubled as it was
+       at 24rem with them halved. */
+    inline-size: min(
+      calc(var(--noctua-space-64) + var(--noctua-space-48)),
+      calc(100vw - var(--noctua-space-4))
+    );
+    border: var(--noctua-border-hairline) solid var(--nc-color-border);
+    border-radius: var(--noctua-radius-surface);
+  }
+}

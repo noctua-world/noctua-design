@@ -1115,7 +1115,11 @@ fn base_links(theme: &Theme, vendor: &Vendor) -> String {
         {note}\n\n\
         \x20    scope.css REPLACES the vendored contexts.css — it carries the same\n\
         \x20    declarations plus the selectors that make them resolve inside a\n\
-        \x20    themed subtree. Linking both would double the cost for nothing. -->\n\
+        \x20    themed subtree. Linking both would double the cost for nothing.\n\n\
+        \x20    components.css is LAST, so a component rule that ties with one in\n\
+        \x20    theme.css on specificity wins — which is the relation those rules\n\
+        \x20    were written in. A page with its own stylesheet links that after\n\
+        \x20    this, and then IT wins, which is the point of being last here. -->\n\
         <link rel=\"stylesheet\" href=\"{base}/ramp.css\">\n\
         <link rel=\"stylesheet\" href=\"scope.css\">\n\
         <link rel=\"stylesheet\" href=\"{base}/{sheet}.css\" id=\"noctua-base-palette\">\n\
@@ -1123,7 +1127,8 @@ fn base_links(theme: &Theme, vendor: &Vendor) -> String {
         <link rel=\"stylesheet\" href=\"tones.css\">\n\
         <link rel=\"stylesheet\" href=\"syntax.css\">\n\
         <link rel=\"stylesheet\" href=\"fonts.css\">\n\
-        <link rel=\"stylesheet\" href=\"theme.css\">\n"
+        <link rel=\"stylesheet\" href=\"theme.css\">\n\
+        <link rel=\"stylesheet\" href=\"components.css\">\n"
     )
 }
 

@@ -1,0 +1,86 @@
+
+
+/* --- Textarea ------------------------------------------------------------- */
+
+/* A BOX AROUND THE BOX, AND IT IS THE ONLY WAY THIS CONTROL CAN HAVE CORNERS.
+ *
+ * `.nd-textarea` used to BE the `<textarea>`, and a `<textarea>` is a scroll
+ * container: `material.spec.js` refuses a radius on one, because a classic
+ * scrollbar paints square straight through a rounded corner. So this shipped
+ * `border-radius: 0` and was the one control on the site that ignored the
+ * reader's corner preset — square while every button, input and select beside
+ * it went round.
+ *
+ * The fix is structural and it is already the house pattern: `.nd-panel` +
+ * `.nd-panel-body`, `.nd-codeblock` + `.nd-codeblock-code`, and — the one that
+ * matters here — `.nd-input` + `.nd-input-box`. The border, the fill, the
+ * corners and the frost go on an element that does not scroll; the scrolling
+ * goes to the control inside it, inset from those corners by this padding, so
+ * no scrollbar ever meets one.
+ *
+ * `overflow: hidden` is not a scroller, so the radius above is safe, and it is
+ * what lets `resize` apply to this element rather than to the `<textarea>`. A
+ * `<textarea>` dragged wider than the border around it draws outside its own
+ * field. */
+.nd-textarea {
+  display: flex;
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  overflow: hidden;
+  resize: vertical;
+}
+
+/* The control. Its own border, corners and fill are the box's above, and its
+   `resize` is the box's too.
+ *
+ * A LINE HEIGHT, AND `max_rows` DEPENDS ON IT. A form control does not inherit
+ * the page's leading — every engine leaves it at `normal` — and `inputs.js`
+ * reads `getComputedStyle(box).lineHeight` to work out how tall `max_rows`
+ * rows are. `Number.parseFloat("normal")` is `NaN`, the ceiling fell back to
+ * `Infinity`, and the box grew to fit forty lines with `max_rows: 8` on it.
+ * That is the prop's whole purpose, and it had never once applied.
+ *
+ * The reading is prose, so it takes the body's leading and not the tight one
+ * every single-line control here is set in. */
+.nd-textarea-box {
+  flex: 1;
+  min-block-size: 0;
+  margin: 0;
+  padding: 0;
+  line-height: var(--noctua-leading-body);
+  border-radius: 0;
+  resize: none;
+}
+
+/* AND `size` NOW CHANGES SOMETHING. The only rules keyed on it were
+   `.nd-textarea[data-nd-size] .nd-textarea-box`, and until the box above
+   existed a `<textarea>` had no children for them to match — so a prop
+   documented as the box's padding set no padding anywhere, at any value. These
+   are `Input`'s three steps, to the token: 4/8, 8/12, 12/12. */
+.nd-textarea[data-nd-size="small"] {
+  padding: var(--noctua-space-1) var(--noctua-space-2);
+}
+
+.nd-textarea[data-nd-size="large"] {
+  padding: var(--noctua-space-3) var(--noctua-space-3);
+}
+
+.nd-textarea[data-nd-resize="none"] {
+  resize: none;
+}
+
+.nd-textarea[data-nd-resize="both"] {
+  resize: both;
+}
+
+/* Growing is the script's, and it sets the height from the content's own. The
+   box around it takes that height, because the field is what a reader drags. */
+.nd-textarea[data-nd-autosize="true"] {
+  resize: none;
+}
+
+.nd-textarea[data-nd-autosize="true"] > .nd-textarea-box {
+  overflow-y: hidden;
+}

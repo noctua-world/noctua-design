@@ -1,0 +1,228 @@
+
+
+/* --- Dialog ---------------------------------------------------------------
+ *
+ * The second `<dialog>` in this system, and both of its rules were paid for by
+ * the first one, which is `Select`'s panel.
+ *
+ * 1. EVERY LAYOUT PROPERTY IS SCOPED TO `[open]`. A closed `<dialog>` is
+ *    `display: none` by the user-agent stylesheet, and that declaration is the
+ *    only thing keeping it off the page — so `display: flex` on the class
+ *    un-hides every closed dialog in the document. `.nd-search-dialog[open]`
+ *    records what that looked like.
+ * 2. THE TRIGGER'S BOX IS HELD BEFORE THE TRIGGER ARRIVES. It ships `hidden`
+ *    and `dist/dialog.js` unhides it after the first paint, which is a control
+ *    appearing under a reader unless the space is already reserved. The
+ *    reservation is on the container rather than on the button, because
+ *    `[hidden]` wins over everything on purpose. */
+
+.nd-dialog {
+  --nd-dialog-trigger-h: var(--noctua-space-8);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+/* `data-nd-scripting` is stamped by the inline head script, so the slot exists
+   from the first paint on a page that will have a trigger, and never on a page
+   that will not. */
+:root[data-nd-scripting] .nd-dialog {
+  min-block-size: var(--nd-dialog-trigger-h);
+}
+
+.nd-dialog-open,
+.nd-popover-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  min-block-size: var(--nd-dialog-trigger-h);
+  padding-inline: var(--noctua-space-3);
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  text-align: start;
+  color: var(--nc-color-fg);
+  background: none;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .nd-dialog-open:hover,
+  .nd-popover-trigger:hover {
+    border-color: var(--nc-color-border-strong);
+  }
+}
+
+.nd-dialog-open:focus-visible,
+.nd-popover-trigger:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* One width per size, named on the class rather than on `[open]`: a custom
+   property un-hides nothing, so this is the one thing that may sit there. */
+.nd-dialog-surface {
+  --nd-dialog-w: calc(var(--noctua-space-64) + var(--noctua-space-48));
+}
+.nd-dialog[data-nd-size="small"] .nd-dialog-surface {
+  --nd-dialog-w: var(--noctua-space-64);
+}
+.nd-dialog[data-nd-size="large"] .nd-dialog-surface {
+  --nd-dialog-w: calc(var(--noctua-space-64) * 2 + var(--noctua-space-48));
+}
+
+.nd-dialog-surface[open] {
+  inline-size: min(var(--nd-dialog-w), calc(100vw - var(--noctua-space-6)));
+  max-block-size: min(var(--noctua-space-64) * 2, calc(100vh - var(--noctua-space-16)));
+  margin-block-start: var(--noctua-space-16);
+  margin-inline: auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  /* The clipping context. Not `auto`: this element must never scroll — the
+     body inside it does. */
+  overflow: hidden;
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface-raised);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  /* SQUARE IS THE BASE AND ROUNDED IS THE OVERRIDE. A rounded box inset from
+     four edges of a phone is the card §9.7 forbids. */
+  border-radius: 0;
+}
+
+@media (min-width: 30rem) {
+  .nd-dialog-surface[open] { border-radius: var(--noctua-radius-surface); }
+}
+
+/* THE PAGE FADES TOWARD ITS OWN GROUND, and that is one rule for both
+   appearances. It was the INK at `--nd-veil-checked`: a fourteen-percent wash
+   that left every word behind an open dialog readable, and whose colour
+   inverted with the mode — near-black over a light page, near-white over a
+   dark one, so the value that was merely weak in light was a bright fog in
+   dark. `--nc-color-surface` is the one the colour system has already solved
+   in both modes, so the veil needs no mode condition and no second answer:
+   light washes the page out toward paper, dark sinks it toward black, and the
+   surface the dialog itself is drawn on still separates from it by a
+   hairline. */
+.nd-dialog-surface::backdrop {
+  background: color-mix(in oklab, var(--nc-color-surface) var(--nd-veil-modal), transparent);
+}
+
+/* A NON-MODAL SURFACE IS NOT IN THE TOP LAYER, so it has no backdrop to be
+ * centred against and nothing above the page to be centred on. It is an
+ * ordinary box in an ordinary container, and the page beside it stays reachable
+ * — which is the whole difference between `show()` and `showModal()`, and what
+ * `dialog.toml` means by "leaves the page reachable and the surface beside it".
+ *
+ * IT WAS `absolute`, WHICH IS THE ONE POSITION THAT COULD NOT WORK. It hung off
+ * the trigger, out of flow — so no ancestor grew to hold it — and it was not
+ * `fixed` — so every ancestor's `overflow` still clipped it. Measured inside an
+ * example frame at 1120px: a 168px panel in a stage whose in-flow content was
+ * 171px tall, cut off 95px short with the last two lines of its own body
+ * unreachable, and 53px of blank frame below the cut because the stage is as
+ * tall as what is in its flow and no taller. At 320px the cut was 18px, which
+ * is worse: it looks like a rendering artefact rather than like a bug.
+ *
+ * In the flow the container grows instead — the stage, the frame and the page
+ * each make room — and there is no ancestor anywhere that can take it away
+ * again. That is a property of the component rather than of this site: a
+ * consumer's scroll container, fold or clipped panel cuts it off exactly as the
+ * frame did, and none of those is a place this stylesheet could reach.
+ *
+ * `relative` RATHER THAN `static`, because the surface has to stay the
+ * containing block for what is positioned inside it — the close control of a
+ * dialog with no heading, below, is. AND NO `z-index`: in the flow it overlaps
+ * nothing, and a layer here would raise a panel over the page's own header the
+ * moment a reader scrolled past it. */
+.nd-dialog[data-nd-modal="false"] .nd-dialog-surface[open] {
+  position: relative;
+  /* The user-agent stylesheet writes `inset-inline: 0` for the absolute box it
+     assumes this is. On a relative one that is an offset waiting to be read. */
+  inset: auto;
+  /* The gap under the trigger, which the offset used to carry. */
+  margin-block: var(--noctua-space-2) 0;
+  margin-inline: 0;
+  max-block-size: min(var(--noctua-space-64), calc(100vh - var(--noctua-space-24)));
+}
+
+.nd-dialog-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--noctua-space-3);
+  padding: var(--noctua-space-4);
+  padding-block-end: 0;
+}
+
+/* NO HEADING, NO ROW — AND THE WAY OUT STILL SITS IN THE CORNER A READER LOOKS
+ * IN.
+ *
+ * The head is rendered whenever there is a heading OR a close control, and it
+ * is a flex row at `space-between`. A row with ONE item in it puts that item at
+ * the START, so a dialog named by `label` rather than by a title drew the `×` at
+ * the top left with the whole width of the panel empty beside it — and spent a
+ * whole 48px line on it, in a 111px panel holding one sentence.
+ *
+ * Out of flow it lands exactly where it lands beside a heading, 16px in from the
+ * top and from the trailing edge, and costs no line at all. The surface is
+ * positioned in both shapes — `fixed` in the top layer while modal, `relative`
+ * above while not — so this resolves against the panel and never against the
+ * wrapper the trigger sits in.
+ *
+ * ASKED OF THE MARKUP RATHER THAN WRITTEN BY THE EMITTER. The two shapes differ
+ * by whether a title was rendered, which is one rule here against an attribute
+ * both implementations would have to remember to write. It is asked of the HEAD
+ * rather than of the surface, so the row has to exist for either rule to apply
+ * — a dialog with neither a heading nor a close control renders no head, and it
+ * has nothing to make room for. The relative selector is CHILD-DEEP, so a
+ * titled dialog inside a headless one cannot answer for its parent.
+ *
+ * AND NEITHER RULE DECLARES ANYTHING ON THE `<dialog>` ITSELF. A layout
+ * property on the class rather than on `[open]` un-hides every closed dialog in
+ * the document, which is the bug at the top of this section. */
+.nd-dialog-head:not(:has(> .nd-dialog-title)) {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+}
+
+/* AND THE CONTENT CLEARS IT, because nothing in the flow knows the control is
+   there. The gutter is the panel's own padding, plus the control, plus the gap
+   the head keeps between a title and the `×` — so a sentence stops where it
+   would have stopped beside a heading rather than running under the glyph. */
+.nd-dialog-head:not(:has(> .nd-dialog-title)) ~ .nd-dialog-note,
+.nd-dialog-head:not(:has(> .nd-dialog-title)) ~ .nd-dialog-body {
+  padding-inline-end: calc(var(--noctua-space-4) + var(--noctua-space-8) + var(--noctua-space-3));
+}
+
+.nd-dialog-title {
+  margin: 0;
+  font-size: var(--noctua-size-h4);
+  font-weight: var(--noctua-weight-semibold);
+  line-height: var(--noctua-leading-tight);
+}
+
+.nd-dialog-note {
+  margin: 0;
+  padding-inline: var(--noctua-space-4);
+  padding-block-start: var(--noctua-space-2);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+/* THE SCROLLER, AND IT CARRIES NO RADIUS. The surface above it clips and holds
+   the corners; this holds the overflow. `.nd-panel` is two elements for exactly
+   this reason, and a classic scrollbar painting straight through a rounded
+   corner is what both of them are avoiding. */
+.nd-dialog-body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 0;
+  padding: var(--noctua-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-4);
+}

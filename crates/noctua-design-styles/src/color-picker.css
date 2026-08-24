@@ -1,0 +1,448 @@
+
+
+/* --- ColorPicker ---------------------------------------------------------- */
+
+/* THE ONE PLACE IN THIS REPOSITORY WHERE A COLOUR LITERAL IS NOT A PALETTE
+   DECISION, and `NOCTUA.md §8.8` is the reason it needs saying out loud.
+
+   A hue track and a saturation field DEFINE nothing. The track displays the
+   whole of sRGB so a reader can point at one part of it; the field's two axes
+   are the axes of HSV, and white and black are where those axes END rather
+   than colours this system chose. Nothing here will ever be asked to follow a
+   palette change, because none of it was ever the palette — and the colour
+   that comes out belongs to the consumer's data.
+
+   Every other surface, border, text and ring below is an `--nc-*` token like
+   every other component. The literals are five lines, each marked, and there
+   are no others. */
+
+.nd-color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+}
+
+/* The native inputs are the value with no script; the script hides them and
+   shows the square. Neither is ever visible at the same time as the other. */
+.nd-color-picker-values[hidden] {
+  display: none;
+}
+
+.nd-color-picker-native-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+}
+
+/* --- The square in the page ----------------------------------------------- */
+
+.nd-color-picker-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--noctua-space-1);
+  padding: var(--noctua-space-1);
+  background: none;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.nd-color-picker-trigger[hidden] {
+  display: none;
+}
+
+.nd-color-picker-trigger:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-color-picker-trigger:disabled {
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+  cursor: not-allowed;
+}
+
+.nd-color-picker-chips {
+  display: inline-flex;
+  gap: var(--noctua-space-1);
+}
+
+/* The chip,
+and the specimen figure on the component's own page,
+are one box
+   drawn once — a second thing that looks like a swatch is a second thing to
+   keep in step. */
+.nd-color-picker-chip{
+  display: block;
+  inline-size: var(--noctua-space-6);
+  block-size: var(--noctua-space-6);
+  background: var(--nd-color-picker-value, var(--nc-accent-solid));
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-color-picker[data-nd-size="small"] .nd-color-picker-chip {
+  inline-size: var(--noctua-space-4);
+  block-size: var(--noctua-space-4);
+}
+
+.nd-color-picker[data-nd-size="large"] .nd-color-picker-chip {
+  inline-size: var(--noctua-space-8);
+  block-size: var(--noctua-space-8);
+}
+
+.nd-color-picker[data-nd-shape="pill"] .nd-color-picker-chip {
+  border-radius: var(--noctua-radius-pill);
+}
+
+.nd-color-picker[data-nd-shape="square"] .nd-color-picker-chip {
+  border-radius: var(--noctua-radius-none);
+}
+
+/* THE BUTTON ROUND THE CHIP FOLLOWS THE CHIP.
+ *
+ * `shape` names "the chip's corners", so the trigger took the control radius
+ * whatever the chip did — and a caller asking for `square` got a hard square
+ * sitting inside a rounded button, or inside a capsule under the circular
+ * preset. The prop was doing three quarters of its job for every consumer, not
+ * only in the one example that made it visible.
+ *
+ * The trigger keeps a step more than the chip, because it is a box AROUND the
+ * chip and matching them exactly reads as one shape with a stripe in it. Under
+ * `square` there is no step to keep. */
+.nd-color-picker[data-nd-shape="pill"] .nd-color-picker-trigger {
+  border-radius: var(--noctua-radius-pill);
+}
+
+.nd-color-picker[data-nd-shape="square"] .nd-color-picker-trigger {
+  border-radius: var(--noctua-radius-none);
+}
+
+/* The root already carries `data-nd-glass`, which `dist/theme.css` frosts on
+   its own. This tints the square inside it, exactly as `TagPicker` tints its
+   field — one recipe, in one place, applied twice. */
+.nd-color-picker[data-nd-glass="true"] .nd-color-picker-trigger {
+  background: color-mix(in oklab, var(--nc-color-surface) var(--noctua-glass-opacity), transparent);
+}
+
+/* --- The panel ------------------------------------------------------------ */
+
+.nd-panel.nd-color-picker-panel {
+  --nd-anchor-block: 0;
+  --nd-anchor-inline: 0;
+  --nd-color-picker-width: var(--noctua-space-64);
+  /* WRITTEN BY THE SCRIPT, DECLARED HERE. A `var()` naming a property nothing
+     declares is dropped at computed-value time with no error at all, so the
+     panel would paint from a fallback and look almost right — which is what
+     `gates::unknown_token` exists to catch and what `.nd-select-panel`
+     declares its own anchor for.
+
+     `transparent` rather than a token, and that is the other gate: baking a
+     `var(--nc-…)` into a custom property freezes it to the palette of whatever
+     element carries the declaration, so a themed picker would paint the page's
+     colours. It is the colour analogue of `--nd-anchor-block: 0` — a neutral
+     stand-in for a value the script always writes before the panel is seen. */
+  --nd-color-picker-value: transparent;
+  --nd-color-picker-pure: transparent;
+  --nd-color-picker-x: 0%;
+  --nd-color-picker-y: 0%;
+  position: fixed;
+  inset-block-start: calc(var(--nd-anchor-block) + var(--noctua-space-1));
+  inset-block-end: auto;
+  inset-inline: auto var(--nd-anchor-inline);
+  inline-size: min(
+    max(var(--nd-color-picker-width), var(--noctua-space-64)),
+    calc(100vw - var(--noctua-space-8))
+  );
+  max-block-size: calc(100vh - var(--nd-anchor-block) - var(--noctua-space-8));
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-3);
+  padding: var(--noctua-space-3);
+  /* OPAQUE, WHATEVER `glass` SAYS. This panel is judged by its colours, and a
+     backdrop showing through is the one thing that must not tint them. */
+  background: var(--nc-color-surface-subtle);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-surface);
+  z-index: var(--noctua-layer-popover);
+}
+
+.nd-panel.nd-color-picker-panel[data-nd-above] {
+  inset-block-start: auto;
+  inset-block-end: calc(var(--nd-anchor-block) + var(--noctua-space-1));
+}
+
+.nd-panel.nd-color-picker-panel[hidden] {
+  display: none;
+}
+
+/* Sticky, because the Noctua tab is a hundred and eighty-seven swatches and a
+   reader who scrolls to the bottom of it must not have to scroll back to
+   reach the other tab or the way out. */
+.nd-color-picker-head {
+  position: sticky;
+  inset-block-start: calc(var(--noctua-space-3) * -1);
+  z-index: var(--noctua-layer-raised);
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  margin-block-start: calc(var(--noctua-space-3) * -1);
+  /* THE PADDING AT THE TOP IS THE PANEL'S OWN, MOVED IN — the negative margin
+     above pulls the row up over it so the sticky band covers the panel's inset
+     while a hundred and eighty-seven swatches scroll under it, and the two
+     cancel, so the control still starts where the panel's padding says.
+
+     AT THE BOTTOM THERE IS NOTHING TO COVER, and a second copy of the gap is
+     what it was. The panel is a flex column with `gap: --noctua-space-3`, so
+     this padding sat on top of that gap and the field opened 69px down a
+     322px panel — a close button alone in a band two thirds of it empty. One
+     gap, the same one every other row of the panel is separated by. */
+  padding-block: var(--noctua-space-3) 0;
+  background: var(--nc-color-surface-subtle);
+}
+
+/* The dismiss control sits at the trailing edge whether or not there are tabs
+   beside it. `space-between` put it at the leading edge on every picker
+   without `palette`, which is most of them — one child and nothing to be
+   between. */
+.nd-color-picker-head > .nd-button {
+  margin-inline-start: auto;
+}
+
+.nd-color-picker-tab[hidden] {
+  display: none;
+}
+
+/* --- The saturation and value field --------------------------------------- */
+
+.nd-color-picker-area {
+  position: relative;
+  block-size: var(--noctua-space-32);
+  border-radius: var(--noctua-radius-control);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  overflow: hidden;
+  touch-action: none;
+  /* THE TWO AXES OF HSV, AND NOTHING ELSE. `--nd-color-picker-pure` is the
+     fully saturated hue, computed by `color.js` and written by the script, so
+     the hue itself is never a literal here. */
+  background:
+    linear-gradient(to bottom, transparent, #000), /* allow-literal: the value axis of HSV ends at black; this is a coordinate, not a colour this system chose */
+    linear-gradient(to right, #fff, transparent), /* allow-literal: the saturation axis of HSV ends at white, for the same reason */
+    var(--nd-color-picker-pure, var(--nc-accent-solid));
+}
+
+.nd-color-picker-area-thumb {
+  position: absolute;
+  inset-block-start: var(--nd-color-picker-y, 0%);
+  inset-inline-start: var(--nd-color-picker-x, 0%);
+  inline-size: var(--noctua-space-4);
+  block-size: var(--noctua-space-4);
+  translate: -50% -50%;
+  border-radius: var(--noctua-radius-pill);
+  border: var(--noctua-border-strong) solid var(--nc-color-surface);
+  box-shadow: 0 0 0 var(--noctua-border-hairline) var(--nc-color-border-strong);
+  pointer-events: none;
+}
+
+/* THE TWO REAL SLIDERS, OFF THE SCREEN AND STILL IN THE PAGE. `display: none`
+   and `visibility: hidden` would take the role, the keyboard and the
+   announcement away with the pixels, which is the whole reason they are real
+   inputs. The technique is `VisuallyHidden`'s, and the focus ring is drawn on
+   the field they move in. */
+.nd-color-picker-axis {
+  position: absolute;
+  inline-size: var(--noctua-border-hairline);
+  block-size: var(--noctua-border-hairline);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.nd-color-picker-area:has(.nd-color-picker-axis:focus-visible) {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* --- The hue and transparency tracks -------------------------------------- */
+
+.nd-color-picker-track {
+  inline-size: 100%;
+  margin: 0;
+  block-size: var(--noctua-space-4);
+  border-radius: var(--noctua-radius-pill);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  appearance: none;
+  cursor: pointer;
+}
+
+.nd-color-picker-track:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* Seven stops around the wheel. The literals ARE the wheel — see the note at
+   the top of this section. */
+[data-nd-color-picker-hue] {
+  background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); /* allow-literal: the hue wheel is the whole of sRGB, displayed so a reader can point at one part of it; it defines nothing and follows no palette */
+}
+
+/* Transparency, over a chequer so the difference is visible against any
+   surface. The chequer is neutral tokens, because a chequer is a surface. */
+[data-nd-color-picker-alpha] {
+  background:
+    linear-gradient(to right, transparent, var(--nd-color-picker-value, var(--nc-accent-solid))),
+    repeating-conic-gradient(
+      var(--nc-color-surface) 0% 25%,
+      var(--nc-color-surface-subtle) 0% 50%
+    )
+    0 0 / var(--noctua-space-2) var(--noctua-space-2);
+}
+
+/* --- The Noctua tab ------------------------------------------------------- */
+
+.nd-color-picker-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+}
+
+.nd-color-picker-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--noctua-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nd-color-picker-swatch {
+  display: block;
+  inline-size: var(--noctua-space-6);
+  block-size: var(--noctua-space-6);
+  padding: 0;
+  background: var(--nd-color-picker-value, var(--nc-accent-solid));
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-color-picker-swatch:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* --- Typing a colour ------------------------------------------------------ */
+
+.nd-color-picker-entry-row {
+  display: flex;
+  align-items: end;
+  gap: var(--noctua-space-2);
+}
+
+.nd-color-picker-entry-label {
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-color-picker-entry {
+  flex: 1;
+  min-inline-size: 0;
+  padding: var(--noctua-space-1) var(--noctua-space-2);
+  font-family: var(--noctua-font-mono);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-color-picker-entry:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-color-picker-entry[aria-invalid="true"] {
+  border-color: var(--nc-color-danger-border);
+}
+
+/* --- The codes, and the list ---------------------------------------------- */
+
+.nd-color-picker-recent[hidden] {
+  display: none;
+}
+
+.nd-color-picker-code-list,
+.nd-color-picker-committed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nd-color-picker-code,
+.nd-color-picker-committed-row {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+}
+
+.nd-color-picker-code-name {
+  flex: none;
+  inline-size: var(--noctua-space-12);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-color-picker-code code,
+.nd-color-picker-committed-row code {
+  flex: 1;
+  min-inline-size: 0;
+  overflow-x: auto;
+}
+
+.nd-color-picker-copy {
+  flex: none;
+  display: inline-flex;
+  padding: var(--noctua-space-1);
+  background: none;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  color: var(--nc-color-fg-muted);
+  cursor: pointer;
+}
+
+.nd-color-picker-copy:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* Both glyphs are rendered and the state picks one, exactly as `CodeBlock`
+   does: swapping a drawing from script means shipping a drawing to the
+   script, and `NOCTUA.md §9.5` puts every drawing in one place. */
+.nd-color-picker-copy [data-nd-icon="check"],
+.nd-color-picker-copy[data-nd-done] [data-nd-icon="copy"] {
+  display: none;
+}
+
+.nd-color-picker-copy[data-nd-done] [data-nd-icon="check"] {
+  display: inline-flex;
+  color: var(--nc-color-success);
+}
+
+.nd-color-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+  align-items: start;
+}
+
+.nd-color-picker-note {
+  margin: 0;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}

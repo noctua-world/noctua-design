@@ -1,0 +1,253 @@
+
+
+/* --- Field ---------------------------------------------------------------- */
+
+/* The question, the help and what went wrong, drawn once for every control
+   that needs them. Five components carried a copy of this; the copies are
+   gone, and their class names with them. */
+
+.nd-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+  min-inline-size: 0;
+  /* A `<fieldset>` arrives with a border and padding no other element has. */
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.nd-field-hint {
+  margin: 0;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-field-error {
+  margin: 0;
+  font-size: var(--noctua-size-small);
+  /* Bolder than the hint above it, which is the one thing separating *what to
+     do* from *what went wrong* for a reader who is skimming. `Fieldset` gave
+     its own sentence this weight first. */
+  font-weight: var(--noctua-weight-semibold);
+  color: var(--nc-color-danger);
+}
+
+/* ONE MARK FOR A WRONG ANSWER, WHEREVER THE QUESTION IS DRAWN.
+ *
+ * A rule down the leading edge of the WHOLE question — the words, the hint,
+ * the sentence and the controls. It says *this one* at a glance,
+ * from across a long form, without saying it in colour alone: the sentence
+ * inside the bar is what carries the meaning (`NOCTUA.md §8.8.6`).
+ *
+ * WHAT DOES NOT GO RED IS THE QUESTION ITSELF. A label the same colour as the
+ * complaint reads as part of the complaint, and a reader scanning back up a
+ * form to find what they were asked has to read past it. The bar, the sentence
+ * and the control's border are the three that change; the words stay the words.
+ *
+ * `:has()` because a script writes `data-nd-invalid` on the CONTROL it just
+ * refused, not on the field around it — and a mark that appears only for
+ * errors the caller server-rendered is a mark that is missing exactly when a
+ * reader has just typed something wrong. */
+.nd-field[data-nd-invalid="true"],
+.nd-field:has([data-nd-invalid="true"]),
+.nd-fieldset[data-nd-invalid="true"] {
+  padding-inline-start: var(--noctua-space-4);
+  border-inline-start: var(--noctua-border-rule) solid var(--nc-color-danger);
+}
+
+/* AND A `<legend>` MOVES THE BOX THE RULE IS DRAWN ON, so the rule above
+ * covered every refused question except the ones inside a `<fieldset>`.
+ *
+ * A rendered legend straddles its fieldset's block-start border: the engine
+ * paints all four borders from the legend's own middle downwards, whatever the
+ * block-start width is. The mark therefore began at the middle of the first
+ * line and left the top half of the question unmarked — measured on
+ * `/fieldset/` as red from y=14 of a 117px box whose legend is 26px tall.
+ *
+ * The legend draws the missing piece itself. Floating it out of the way is the
+ * other answer and it is the wrong one: a legend that is not the rendered
+ * legend stops being laid out by the fieldset at all, and it measured as the
+ * choices climbing over the question and the float escaping the box.
+ *
+ * The two lengths are the rule above read back — the fieldset's own padding
+ * and its own border width — so the piece lands exactly on the strip the
+ * fieldset paints and never beside it. */
+.nd-fieldset[data-nd-invalid="true"] > .nd-fieldset-legend {
+  margin-inline-start: calc((var(--noctua-space-4) + var(--noctua-border-rule)) * -1);
+  padding-inline-start: calc(var(--noctua-space-4) + var(--noctua-border-rule));
+  border-inline-start: var(--noctua-border-rule) solid var(--nc-color-danger);
+}
+
+/* THE SLOT TAKES NO ROOM UNTIL IT HAS WORDS. `error_slot` renders it whenever
+   the control's real element will be hidden by a script, so the browser's own
+   complaint has somewhere to go — and empty, a `role="alert"` over nothing
+   announces nothing and a paragraph over nothing is a gap in the layout.
+   `Select` and `DateInput` each carried this rule; it is one now. */
+/* IT ASKS THE MESSAGE, NOT THE PARAGRAPH. The paragraph now always holds the
+   visually hidden `error_label`, so `:empty` stopped being the question — the
+   sentence has an element of its own and that is the one with nothing in it. */
+.nd-field-error:has([data-nd-field-message]:empty) {
+  display: none;
+}
+
+.nd-field[data-nd-disabled="true"] .nd-label,
+.nd-field[data-nd-disabled="true"] .nd-field-hint {
+  opacity: 0.5; /* allow-literal: a refused question is dimmed with its control, and there is no color token for "the same color, less of it" */
+}
+
+/* The specimen on the component's own page: a drawn question over a drawn box{
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+}
+
+/* --- The input controls --------------------------------------------------- */
+
+/* Seven components, one arrangement: a `Field` with a control in it. What is
+   shared — the box, its border, its focus ring, its refused state — is written
+   once here and selected by the classes each control's root carries, because a
+   text box and a number box that disagree about their focus ring are two
+   controls a reader reads as two systems. */
+
+.nd-input,
+.nd-number-input,
+.nd-file-input,
+.nd-time-input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  min-inline-size: 0;
+}
+
+.nd-input,
+.nd-number-input {
+  padding-inline: var(--noctua-space-3);
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+}
+
+/* THE FILE AREA IS MATCHED WITH `:has()`, NOT WITH `+`.
+ *
+ * The clipped `<input>` is the only focusable part of a `FileInput`, and the
+ * ring belongs on the area beside it. This was
+ * `.nd-file-input-native:focus-visible + .nd-file-input-area` — but the body
+ * renders the label BEFORE the input, so the sibling combinator was aimed
+ * backwards and matched nothing, ever. The one focusable thing in the control
+ * showed no focus at all, which is WCAG 2.4.7 failed in silence by a rule that
+ * looked right. `:has()` asks the question the markup can answer. */
+.nd-input:focus-within,
+.nd-number-input:focus-within,
+.nd-textarea:focus-within,
+.nd-time-input-segment:focus-visible,
+.nd-file-input:has(> .nd-file-input-native:focus-visible) > .nd-file-input-area {
+  border-color: var(--nc-color-border-strong);
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* The box never drops below the body size, whatever the control's own size
+   says: a 14px input is what makes a phone zoom the whole page on focus. */
+.nd-input-box,
+.nd-number-input-box,
+.nd-textarea-box,
+.nd-time-input-segment {
+  min-inline-size: 0;
+  /* A form control does not inherit the page's face on its own — every engine
+     gives it a platform default — so this has to be said, and it says the
+     token rather than a name so the interface-font setting still reaches it. */
+  font-family: var(--noctua-font-sans);
+  font-size: var(--noctua-size-body);
+  color: var(--nc-color-fg);
+  background: none;
+  border: 0;
+}
+
+.nd-input-box,
+.nd-number-input-box {
+  flex: 1;
+  padding-block: var(--noctua-space-2);
+}
+
+.nd-input-box:focus,
+.nd-number-input-box:focus,
+.nd-textarea-box:focus,
+.nd-time-input-segment:focus {
+  outline: none;
+}
+
+.nd-input[data-nd-size="small"],
+.nd-number-input[data-nd-size="small"] {
+  padding-inline: var(--noctua-space-2);
+}
+
+.nd-input[data-nd-size="small"] .nd-input-box,
+.nd-number-input[data-nd-size="small"] .nd-number-input-box {
+  padding-block: var(--noctua-space-1);
+}
+
+.nd-input[data-nd-size="large"] .nd-input-box,
+.nd-number-input[data-nd-size="large"] .nd-number-input-box {
+  padding-block: var(--noctua-space-3);
+}
+
+/* Drawn, never submitted, and `aria-hidden` — the contract says why. */
+.nd-input-affix,
+.nd-number-input-affix {
+  flex: none;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+  white-space: nowrap;
+}
+
+.nd-input-control {
+  flex: none;
+  display: inline-flex;
+  padding: var(--noctua-space-1);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-input-control:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-input-control[hidden] {
+  display: none;
+}
+
+/* Both drawings are rendered and the state picks one, exactly as `CodeBlock`
+   and `ColorPicker` do: swapping a glyph from script is shipping a drawing to
+   the script. */
+/* IT KEEPS ITS SPACE, AND THE CONTRACT SAYS WHY.
+ *
+ * `clearable`'s doc ends by naming the failure it used to cause: a control
+ * that appears only when there is text moves the layout as they type. The
+ * script hid it with `hidden`, which is `display: none`, so the box did reflow
+ * on the first keystroke and again on the last. `visibility` keeps the space,
+ * and keeps the control out of the tab order and the accessible tree while
+ * there is nothing to clear. */
+[data-nd-input-clear][data-nd-empty] {
+  visibility: hidden;
+}
+
+.nd-input[data-nd-revealed] [data-nd-input-reveal] [data-nd-icon="eye"] {
+  display: none;
+}
+
+.nd-input[data-nd-revealed] [data-nd-input-reveal] [data-nd-icon="eye-off"] {
+  display: inline-flex;
+}
+
+.nd-input-counter,
+.nd-textarea-counter {
+  margin: 0;
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+  text-align: end;
+}

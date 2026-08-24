@@ -1,0 +1,89 @@
+
+
+/* --- FileInput ------------------------------------------------------------ */
+
+.nd-file-input {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--noctua-space-2);
+}
+
+/* The area is the `<label>` of a real file input — see the contract. */
+.nd-file-input-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--noctua-space-1);
+  padding: var(--noctua-space-6);
+  color: var(--nc-color-fg-muted);
+  background: var(--nc-color-surface-subtle);
+  border: var(--noctua-border-hairline) dashed var(--nc-color-border);
+  border-radius: var(--noctua-radius-surface);
+  cursor: pointer;
+  text-align: center;
+}
+
+.nd-file-input-browse {
+  color: var(--nc-color-fg);
+}
+
+.nd-file-input[data-nd-dragging] .nd-file-input-area {
+  border-color: var(--nc-color-accent-border);
+  border-style: solid;
+  background: var(--nc-color-accent-bg);
+}
+
+/* CLIPPED, NOT `display: none` — that would take the control out of the
+   accessibility tree and out of the tab order, and what is left is a picture
+   of a file field. `VisuallyHidden`'s recipe, for its reason. */
+.nd-file-input-native {
+  position: absolute;
+  inline-size: var(--noctua-border-hairline);
+  block-size: var(--noctua-border-hairline);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.nd-file-input-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nd-file-input-row,
+.nd-file-input-empty {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  font-size: var(--noctua-size-small);
+}
+
+.nd-file-input-empty {
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-file-input-name {
+  flex: 1;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.nd-file-input-size {
+  flex: none;
+  color: var(--nc-color-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.nd-file-input-note,
+.nd-time-input-note {
+  margin: 0;
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}

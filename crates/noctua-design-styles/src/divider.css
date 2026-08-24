@@ -1,0 +1,103 @@
+
+
+/* --- Divider -------------------------------------------------------------- */
+
+/* A BOUNDARY A READER CAN ALREADY NAME, DRAWN.
+ *
+ * `.nd-rule` has a gravestone in `docs-site/assets/shell.css`, and the argument that
+ * killed it stands: one unexplained rule among eleven equal blocks marked
+ * nothing. What replaced it is `.nd-theme-section + .nd-theme-section` — a rule
+ * between blocks that have names — and this component is that rule, made
+ * something a caller can reach for.
+ *
+ * It has no colour of its own. The border colour every other edge in this
+ * system uses, at one of the three border widths, and nothing else. */
+.nd-divider {
+  --nd-divider-weight: var(--noctua-border-hairline);
+  --nd-divider-gap: var(--noctua-space-gap);
+  /* An `<hr>` arrives with `border: 1px inset` and a margin of its own. */
+  border: 0;
+  margin: 0;
+}
+
+.nd-divider[data-nd-weight="strong"] {
+  --nd-divider-weight: var(--noctua-border-strong);
+}
+
+.nd-divider[data-nd-weight="rule"] {
+  --nd-divider-weight: var(--noctua-border-rule);
+}
+
+.nd-divider[data-nd-spacing="none"] {
+  --nd-divider-gap: 0;
+}
+
+.nd-divider[data-nd-spacing="tight"] {
+  --nd-divider-gap: var(--noctua-space-tight);
+}
+
+.nd-divider[data-nd-spacing="loose"] {
+  --nd-divider-gap: var(--noctua-space-section);
+}
+
+/* The room around it, which is most of what a divider is. It is a margin
+   rather than padding because the gap belongs between the two blocks. */
+.nd-divider[data-nd-orientation="horizontal"] {
+  margin-block: var(--nd-divider-gap);
+}
+
+.nd-divider[data-nd-orientation="vertical"] {
+  margin-inline: var(--nd-divider-gap);
+}
+
+/* The line itself, when there is no word on it. `:not([data-nd-labelled])`
+   rather than an override further down: a labelled divider is a flex row whose
+   OWN border would draw a second line across the top of the word. */
+.nd-divider:not([data-nd-labelled])[data-nd-orientation="horizontal"] {
+  inline-size: 100%;
+  border-block-start: var(--nd-divider-weight) solid var(--nc-color-border);
+}
+
+/* A VERTICAL RULE TAKES ITS HEIGHT FROM THE ROW, NEVER FROM A NUMBER. A height
+   written here is a height that is wrong the first time the row beside it
+   grows, so it stretches — and carries a floor for the case where it is the
+   tallest thing on the line. */
+.nd-divider:not([data-nd-labelled])[data-nd-orientation="vertical"] {
+  align-self: stretch;
+  min-block-size: var(--noctua-space-6);
+  border-inline-start: var(--nd-divider-weight) solid var(--nc-color-border);
+}
+
+/* A LABELLED DIVIDER IS A `<div>`, because an `<hr>` holds no content. The two
+   half-rules are real elements rather than pseudo-elements: they have to grow
+   and shrink around a word whose length changes with the locale, and `flex`
+   does that for an element and not for a `::before`. */
+.nd-divider[data-nd-labelled] {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-3);
+}
+
+.nd-divider[data-nd-labelled] .nd-divider-line {
+  flex: 1 1 auto;
+  border-block-start: var(--nd-divider-weight) solid var(--nc-color-border);
+}
+
+.nd-divider[data-nd-labelled][data-nd-orientation="vertical"] {
+  flex-direction: column;
+  align-self: stretch;
+}
+
+.nd-divider[data-nd-labelled][data-nd-orientation="vertical"] .nd-divider-line {
+  border-block-start: 0;
+  border-inline-start: var(--nd-divider-weight) solid var(--nc-color-border);
+}
+
+/* Quieter than the blocks it stands between. It is a boundary marker rather
+   than a heading, and a heading is what it turns into at full weight. */
+.nd-divider-text {
+  flex: 0 0 auto;
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-medium);
+  color: var(--nc-color-fg-muted);
+}

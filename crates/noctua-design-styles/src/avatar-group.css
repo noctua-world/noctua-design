@@ -1,0 +1,117 @@
+
+
+/* --- AvatarGroup ----------------------------------------------------------
+ *
+ * A real list, with the overlap drawn by a negative margin. Each face covers the
+ * TRAILING edge of the one before it and leaves its leading strip exposed, full
+ * height — which is what keeps a pointer target under every member. A crescent
+ * is not the 24-pixel target WCAG 2.5.8 asks for, and a group whose members are
+ * links has to clear it: that is what `overlap: none` is for, and why the
+ * contract says so rather than leaving it to whoever writes the call. */
+.nd-avatar-group {
+  --nd-avatar-lap: var(--noctua-space-2);
+  display: flex;
+  align-items: center;
+  /* No wrap, and it is not an omission: overlapping avatars that wrapped would
+     put the second row's stacking the wrong way round against the first.
+     It SCROLLS instead — measured at 320 pixels, where five faces overhung the
+     stage by eighteen and pushed the whole document sideways. A row that is
+     too wide is a row a reader can drag; a row that widens the page is a bug
+     on every other component on it. */
+  flex-wrap: nowrap;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  /* It scrolls, so it carries no radius — the rule this stylesheet opens with,
+     and the reason the faces inside keep their own. */
+  border-radius: var(--noctua-radius-none);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nd-avatar-group > li {
+  display: inline-flex;
+  min-inline-size: 0;
+}
+
+.nd-avatar-group > li + li {
+  margin-inline-start: calc(-1 * var(--nd-avatar-lap));
+}
+
+.nd-avatar-group[data-nd-overlap="tight"] {
+  --nd-avatar-lap: var(--noctua-space-4);
+}
+
+.nd-avatar-group[data-nd-overlap="none"] {
+  --nd-avatar-lap: calc(-1 * var(--noctua-space-2));
+}
+
+/* The group's size wins: siblings share their box, and a row of faces that
+   disagreed about theirs would read as a mistake rather than as a hierarchy. */
+.nd-avatar-group[data-nd-size="small"] .nd-avatar {
+  --nd-avatar-size: var(--noctua-space-8);
+  font-size: var(--noctua-size-caption);
+}
+.nd-avatar-group[data-nd-size="medium"] .nd-avatar {
+  --nd-avatar-size: var(--noctua-space-12);
+  font-size: var(--noctua-size-small);
+}
+.nd-avatar-group[data-nd-size="large"] .nd-avatar {
+  --nd-avatar-size: var(--noctua-space-16);
+  font-size: var(--noctua-size-body);
+}
+.nd-avatar-group[data-nd-shape="rounded"] .nd-avatar {
+  border-radius: var(--noctua-radius-control);
+}
+.nd-avatar-group[data-nd-shape="square"] .nd-avatar {
+  border-radius: var(--noctua-radius-none);
+}
+
+/* Every face needs an edge against the one it covers, and the edge is the
+   surface it is standing on rather than a colour of its own. */
+.nd-avatar-group .nd-avatar {
+  border-color: var(--nc-color-surface);
+  border-width: var(--noctua-border-strong);
+}
+
+/* The counter is the last item and looks like one of them, because it stands
+   for the rest of them. */
+.nd-avatar-more-chip {
+  --nd-avatar-size: var(--noctua-space-12);
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--nd-avatar-size);
+  block-size: var(--nd-avatar-size);
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-semibold);
+  line-height: 1;
+  color: var(--nc-color-fg-muted);
+  text-decoration: none;
+  background: var(--nc-color-surface-subtle);
+  border: var(--noctua-border-strong) solid var(--nc-color-surface);
+  border-radius: var(--noctua-radius-pill);
+}
+
+.nd-avatar-group[data-nd-size="small"] .nd-avatar-more-chip {
+  --nd-avatar-size: var(--noctua-space-8);
+}
+.nd-avatar-group[data-nd-size="large"] .nd-avatar-more-chip {
+  --nd-avatar-size: var(--noctua-space-16);
+  font-size: var(--noctua-size-small);
+}
+.nd-avatar-group[data-nd-shape="rounded"] .nd-avatar-more-chip {
+  border-radius: var(--noctua-radius-control);
+}
+.nd-avatar-group[data-nd-shape="square"] .nd-avatar-more-chip {
+  border-radius: var(--noctua-radius-none);
+}
+
+@media (hover: hover) {
+  a.nd-avatar-more-chip:hover {
+    color: var(--nc-color-fg);
+  }
+}

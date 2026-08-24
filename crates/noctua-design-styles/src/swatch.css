@@ -1,0 +1,37 @@
+
+
+/* --- Swatch -------------------------------------------------------------- */
+
+/* It reads `--nc-accent-solid` from inside its own `data-palette` scope, which
+   is the same mechanism `ThemeScope` uses — so each chip shows ITS palette
+   rather than the page's. With no `data-palette` it falls back to whatever
+   theme reaches it, which is what makes it usable as a live indicator. The
+   stylesheets those scopes need are fetched when the panel is first opened,
+   and never on a page view that does not open it. */
+.nd-swatch {
+  display: inline-block;
+  flex: none;
+  inline-size: var(--noctua-space-4);
+  block-size: var(--noctua-space-4);
+  background: var(--nc-accent-solid, var(--nc-color-accent));
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-pill);
+}
+
+.nd-swatch[data-nd-size="small"] {
+  inline-size: var(--noctua-space-3);
+  block-size: var(--noctua-space-3);
+}
+
+.nd-swatch[data-nd-size="large"] {
+  inline-size: var(--noctua-space-6);
+  block-size: var(--noctua-space-6);
+}
+
+.nd-swatch[data-nd-shape="rounded"] {
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-swatch[data-nd-shape="square"] {
+  border-radius: var(--noctua-radius-none);
+}

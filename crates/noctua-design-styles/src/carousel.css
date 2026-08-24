@@ -1,0 +1,206 @@
+
+
+/* --- Carousel ------------------------------------------------------------- */
+
+/* IT IS A SCROLL CONTAINER BEFORE IT IS ANYTHING ELSE. Everything below is
+   scroll-snap and logical properties; the script never sets a transform and
+   never moves a slide. Dragging, flicking, the trackpad and Home/End are the
+   browser's, and they work with the script blocked. */
+
+.nd-carousel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+}
+
+.nd-carousel-track {
+  /* WRITTEN BY THE COMPONENT FROM `per_view`, DECLARED HERE. A `var()` naming a
+     property nothing declares is dropped at computed-value time with no error,
+     so every slide would fall back to one-across and look almost right —
+     `gates::unknown_token` exists for exactly that. It used to be written by
+     `carousel.js`, which made a width depend on a script: with JavaScript
+     blocked every carousel showed one slide whatever `per_view` said. */
+  --nd-carousel-per-view: 1;
+  display: flex;
+  gap: var(--noctua-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  /* NO RADIUS ON A SCROLLER — a scrollbar paints over a rounded corner, which
+     is what `material.spec.js` holds every scrolling element on this site to.
+     The corners belong to the slides. */
+  border-radius: 0;
+}
+
+.nd-carousel[data-nd-orientation="vertical"] .nd-carousel-track {
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  max-block-size: var(--noctua-space-64);
+}
+
+.nd-carousel[data-nd-snap="none"] .nd-carousel-track {
+  scroll-snap-type: none;
+}
+
+.nd-carousel-slide {
+  flex: none;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  border-radius: var(--noctua-radius-surface);
+  /* `1` is the gallery and `auto` is the shelf — see the contract. The width
+     is a share of the track minus the gaps between however many are shown. */
+  inline-size: calc(
+    (100% - (var(--nd-carousel-per-view, 1) - 1) * var(--noctua-space-3)) /
+      var(--nd-carousel-per-view, 1)
+  );
+}
+
+.nd-carousel[data-nd-snap="center"] .nd-carousel-slide {
+  scroll-snap-align: center;
+}
+
+/* At `auto` each card keeps its own width and runs off the edge, which is the
+   shape that survives a telephone. */
+.nd-carousel[data-nd-per-view="auto"] .nd-carousel-slide {
+  inline-size: auto;
+}
+
+.nd-carousel[data-nd-orientation="vertical"] .nd-carousel-slide {
+  inline-size: auto;
+}
+
+/* The track is focusable only when nothing inside it is — otherwise it is one
+   extra stop before every slide. The runtime decides; this draws the ring. */
+.nd-carousel-track:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-carousel-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+}
+
+.nd-carousel-control {
+  display: inline-flex;
+  padding: var(--noctua-space-2);
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface-subtle);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-pill);
+  cursor: pointer;
+}
+
+.nd-carousel-control[hidden] {
+  display: none;
+}
+
+.nd-carousel-control:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-carousel-control:disabled {
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+  cursor: not-allowed;
+}
+
+/* Mirrored where the language runs the other way: *previous* is the other
+   direction there, and this is the one place a transform is the right answer
+   — the two drawings are one pair rather than two meanings. */
+[dir="rtl"] .nd-carousel:not([data-nd-orientation="vertical"]) .nd-carousel-control [data-nd-icon^="chevron-"] {
+  scale: -1 1;
+}
+
+/* A VERTICAL CAROUSEL MOVES UP AND DOWN, AND ITS CONTROLS SAID LEFT AND RIGHT.
+ *
+ * Two of the carousels on the page stack their slides and scroll downwards,
+ * and both were pointing a reader sideways with the same two glyphs the eight
+ * horizontal ones use. The icon set has no `chevron-up` and this system does
+ * not draw its own, so the pair is turned — which is the same argument the
+ * mirror above makes, in the other axis: `<` and `>` are one pair of drawings
+ * rather than two meanings, and a quarter turn makes them `^` and `v`.
+ *
+ * Not the sort arrows: an arrow in this system marks the direction a column is
+ * SORTED, and `spec/icons.toml` says so where those are declared. */
+.nd-carousel[data-nd-orientation="vertical"] .nd-carousel-control [data-nd-icon^="chevron-"] {
+  rotate: 90deg;
+}
+
+/* Both glyphs are rendered and the state picks one, exactly as `CodeBlock`
+   and `ColorPicker` do. */
+.nd-carousel-rotation [data-nd-icon="play"],
+.nd-carousel[data-nd-paused] .nd-carousel-rotation [data-nd-icon="pause"] {
+  display: none;
+}
+
+.nd-carousel[data-nd-paused] .nd-carousel-rotation [data-nd-icon="play"] {
+  display: inline-flex;
+}
+
+.nd-carousel-dots {
+  display: flex;
+  gap: var(--noctua-space-1);
+}
+
+.nd-carousel-dots[hidden] {
+  display: none;
+}
+
+/* A real button with a real target, never a decoration: 24px square is
+   WCAG 2.5.8's minimum, and the dot drawn inside it is smaller than the thing
+   a finger has to hit. */
+.nd-carousel-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--noctua-space-6);
+  block-size: var(--noctua-space-6);
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.nd-carousel-dot::before {
+  content: "";
+  inline-size: var(--noctua-space-2);
+  block-size: var(--noctua-space-2);
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-border-strong);
+}
+
+.nd-carousel-dot[aria-current="true"]::before {
+  background: var(--nc-color-accent);
+  /* NEVER COLOUR ALONE (`NOCTUA.md §8.8.6`): the one in force is also wider,
+     and it is the only one carrying `aria-current`. */
+  inline-size: var(--noctua-space-4);
+}
+
+.nd-carousel-dot:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+  border-radius: var(--noctua-radius-pill);
+}
+
+.nd-carousel-counter {
+  margin: 0;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.nd-carousel-counter[hidden] {
+  display: none;
+}
+
+.nd-carousel[data-nd-glass="true"] .nd-carousel-control,
+.nd-carousel[data-nd-glass="true"] .nd-carousel-dot {
+  background: color-mix(in oklab, var(--nc-color-surface) var(--noctua-glass-opacity), transparent);
+}

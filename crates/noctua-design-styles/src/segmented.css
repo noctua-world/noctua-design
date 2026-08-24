@@ -1,0 +1,414 @@
+
+
+/* --- Segmented, which is now a component --------------------------------- */
+
+/* `.nd-segmented` was a class this stylesheet put on a `Choice`, and the joined
+   look lived here while the role, the tab stop and the arrow keys lived in the
+   component. Two owners for one control. It is the component's own class now
+   and `appearance` is a prop, so the header control, the settings rows and the
+   example frame's viewport control are one control rather than three
+   spellings — and React gets the same one. */
+
+/* A DEFAULT VALUE IS THE ABSENCE OF ITS ATTRIBUTE HERE, SO EVERY RULE ASKS FOR
+ * THE VALUE A GROUP IS NOT.
+ *
+ * Two things draw a `Segmented` without writing `data-nd-appearance` or
+ * `aria-orientation`. A variant specimen skips every `aria-*` default on
+ * purpose, and `inputs.js` builds the meridiem pair from the class alone.
+ * Written as `[data-nd-appearance="joined"]` the joined rules reached neither:
+ * the vertical grid lost its corners and the AM/PM pair came apart into two
+ * boxes with a doubled edge between them. `:not(spread)` and `:not(vertical)`
+ * are the same two sets with the contract's defaults included. */
+
+/* A CONTROL DOES NOT SHRINK BELOW WHAT IT SAYS, AND DOES NOT RUN OFF THE PAGE
+ * EITHER. `fit-content` IS BOTH OF THOSE IN ONE WORD.
+ *
+ * As a flex item in a toolbar it was shrinkable, so at 320px the five-stop
+ * viewport control gave up eight pixels to its neighbours and clipped the last
+ * label instead of letting them wrap. Text may be squeezed; a control may not —
+ * `flex: none` makes the toolbar wrap around it, which is what
+ * `Toolbar { wrap }` is for.
+ *
+ * `flex: none` alone put the first example past the right edge of a 320px
+ * viewport in pt-BR, because a group that refuses to shrink and forbids its
+ * labels to wrap has nowhere to put "Acompanhar o sistema". `fit-content` is
+ * the group's content when it fits and the container when it does not, and it
+ * never goes below the words: the labels take a second line inside their own
+ * boxes and the row stays one line of boxes.
+ *
+ * NOT `max-inline-size: 100%`, WHICH IS THE SAME IDEA AND HAS A TRAP IN IT. A
+ * closed `<details>` is `content-visibility: hidden`, so everything in the
+ * settings panel has a containing block of zero — and a percentage cap against
+ * zero is zero. Every group in the panel on every page collapsed, took the
+ * panel's own width down with it, and `audit.spec.js` reported fifty thousand
+ * controls under the minimum target. `fit-content` floors at `min-content`
+ * instead, which is why nothing in this rule set gives an item
+ * `min-inline-size: 0`: that would make the floor zero again. */
+.nd-segmented {
+  /* The corner the two ENDS of the group are cut from. Naming it once is what
+     lets one set of corner rules serve all four shapes on both axes. */
+  --nd-segment-radius: var(--noctua-radius-control);
+  display: inline-flex;
+  align-items: stretch;
+  inline-size: fit-content;
+}
+
+.nd-segmented[data-nd-shape="pill"] {
+  --nd-segment-radius: var(--noctua-radius-pill);
+}
+
+/* A bevel is cut, not rounded. Its corners are square and the cut is below. */
+.nd-segmented[data-nd-shape="square"],
+.nd-segmented[data-nd-shape="bevel"] {
+  --nd-segment-radius: var(--noctua-radius-none);
+}
+
+/* Only a JOINED group refuses to shrink. It cannot wrap into two rows — the
+   shared edges only read as one control while they are in one line — so a
+   toolbar has to wrap around it. A spread group has the other answer available
+   and takes it: it wraps, which is the whole reason that appearance exists. */
+.nd-segmented:not([data-nd-appearance="spread"]) {
+  flex: none;
+}
+
+.nd-segmented[aria-orientation="vertical"] {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* AN ICON GOES BESIDE THE LABEL UNTIL THERE IS NO BESIDE LEFT.
+ *
+ * A stop divided by count rather than by content can be narrower than its own
+ * icon and word together, and a centred flex line that does not fit overflows
+ * BOTH ends: at 320px in pt-BR the `system` stop's monitor was painted over
+ * the middle of `Escuro` in the stop before it. Wrapping puts the icon on a
+ * line of its own instead, which is the same stop stacked — and it costs
+ * nothing at any width where the two fit side by side. */
+.nd-segmented-item {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+  gap: var(--noctua-space-2);
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  min-block-size: var(--noctua-space-12);
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--nd-segment-radius);
+  cursor: pointer;
+  text-align: center;
+}
+
+/* NOTHING FORBIDS A LABEL TO WRAP, AND NOTHING NEEDS TO.
+ *
+ * A joined group has to stay one line of BOXES or the shared edges stop
+ * reading as one control, and no rule here lets it wrap into two rows. That is
+ * a different question from whether a label may take a second line inside its
+ * own box, and a `white-space: nowrap` written for the first answered the
+ * second: at 320px in pt-BR the group could neither shrink nor wrap, so it
+ * ran off the side of the viewport with its last label half on screen.
+ *
+ * `break-word` rather than `anywhere`, because the two differ in the one place
+ * it matters here: `anywhere` takes the longest word out of the intrinsic
+ * minimum, and `fit-content` above floors a `hug` group at exactly that. A
+ * `hug` group therefore never breaks a word, and a filled one may — see below,
+ * where the stops are divided by count rather than by content. */
+.nd-segmented-text {
+  overflow-wrap: break-word;
+}
+
+/* THE UNIT UNDER THE NUMBER, NOT BESIDE IT.
+ *
+ * The example frame's width control was five stops that each spelled their own
+ * unit — `320px 30rem 48rem 64rem Largura total` — and took more than half the
+ * toolbar to say what a number and a suffix say. Stacked, the same five stops
+ * are half as wide and every one is still one click away, which is the part
+ * worth protecting.
+ *
+ * `--nd-ink-quiet` against `currentColor` rather than a `-muted` token, exactly
+ * as `.nd-button-detail` does: the chosen stop sits on a wash of the accent, and
+ * a colour solved against the page's surface is the wrong one there. */
+.nd-segmented-item:has(> .nd-segmented-detail) {
+  flex-direction: column;
+  /* The stack is already two lines, and a column that wraps wraps sideways:
+     the unit would land in a second column beside its own number. */
+  flex-wrap: nowrap;
+  gap: 0;
+  line-height: var(--noctua-leading-tight);
+}
+
+.nd-segmented-detail {
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-regular);
+  color: color-mix(in oklab, currentColor var(--nd-ink-quiet), transparent);
+}
+
+.nd-segmented-item > .nd-icon-glyph {
+  flex: none;
+  font-size: var(--noctua-size-small);
+}
+
+.nd-segmented-item:hover {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
+/* THE CHOSEN ONE, AND THIS IS THE FEEDBACK THAT MATTERS.
+ *
+ * On a system already in dark, choosing `dark` and choosing `system` paint the
+ * page identically — so the CONTROL has to be what moves, or the reader gets no
+ * answer at all. A wash of the accent and full-contrast ink rather than a solid
+ * accent block: a solid one reads as a button that is about to do something,
+ * and this is a value that already is. */
+.nd-segmented-item[aria-checked="true"] {
+  color: var(--nc-color-fg);
+  background: color-mix(in oklab, var(--nc-color-accent) var(--nd-veil-checked), transparent);
+  border-color: var(--nc-color-accent-border);
+}
+
+/* QUIET: THE SAME ANSWER, SAID MORE SOFTLY.
+ *
+ * A group in a toolbar beside four other controls should not be the loudest
+ * thing on it — the example frame's width stops were an accent block in a bar
+ * of quiet outlines. The chosen value is still unmistakable; it is marked with
+ * the surface it sits on and a stronger edge instead of with the accent. */
+.nd-segmented[data-nd-selection="quiet"] > .nd-segmented-item[aria-checked="true"] {
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface-raised);
+  border-color: var(--nc-color-border-strong);
+}
+
+.nd-segmented-item[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+.nd-segmented-item[aria-disabled="true"]:hover {
+  color: var(--nc-color-fg-muted);
+  border-color: var(--nc-color-border);
+}
+
+/* --- Its box ------------------------------------------------------------- */
+
+.nd-segmented[data-nd-size="small"] > .nd-segmented-item {
+  gap: var(--noctua-space-1);
+  padding: var(--noctua-space-1) var(--noctua-space-2);
+  min-block-size: var(--noctua-space-8);
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-segmented[data-nd-size="small"] > .nd-segmented-item > .nd-icon-glyph {
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-segmented[data-nd-size="large"] > .nd-segmented-item {
+  gap: var(--noctua-space-3);
+  padding: var(--noctua-space-3) var(--noctua-space-4);
+  min-block-size: var(--noctua-space-16);
+  font-size: var(--noctua-size-body);
+}
+
+.nd-segmented[data-nd-size="large"] > .nd-segmented-item > .nd-icon-glyph {
+  font-size: var(--noctua-size-body);
+}
+
+/* An icon-only item is square, and exactly as tall as a labelled one beside
+   it: the box comes from the size, never from what happens to be inside. */
+.nd-segmented > .nd-segmented-item[data-nd-hide-label="true"] {
+  padding-inline: 0;
+  inline-size: var(--noctua-space-12);
+}
+
+.nd-segmented[data-nd-size="small"] > .nd-segmented-item[data-nd-hide-label="true"] {
+  inline-size: var(--noctua-space-8);
+}
+
+.nd-segmented[data-nd-size="large"] > .nd-segmented-item[data-nd-hide-label="true"] {
+  inline-size: var(--noctua-space-16);
+}
+
+/* --- Its corners --------------------------------------------------------- */
+
+/* THE CORNERS BELONG TO THE TWO ENDS OF THE GROUP, AND THE AXIS DECIDES WHICH
+ * TWO EACH END OWNS.
+ *
+ * This used to be two rules that zeroed the leading and trailing corners for
+ * the horizontal case, plus two more that zeroed the top and bottom pair for
+ * the vertical one — and the first pair was not restricted to the horizontal
+ * axis, so a vertical group ran all four. Every corner in it was zeroed except
+ * the top left of the first item and the bottom right of the last: a stack of
+ * square boxes with one rounded corner at each end, diagonally opposite. The
+ * same shape of defect is on record for `ButtonGroup`.
+ *
+ * Each axis now writes its own end corners whole, from `--nd-segment-radius`,
+ * and the two sets cannot both match. A lone item is both ends, so it keeps
+ * all four whichever axis it is on. */
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item {
+  border-radius: 0;
+}
+
+.nd-segmented:not([data-nd-appearance="spread"]):not([aria-orientation="vertical"])
+  > .nd-segmented-item:first-child {
+  border-start-start-radius: var(--nd-segment-radius);
+  border-end-start-radius: var(--nd-segment-radius);
+}
+
+.nd-segmented:not([data-nd-appearance="spread"]):not([aria-orientation="vertical"])
+  > .nd-segmented-item:last-child {
+  border-start-end-radius: var(--nd-segment-radius);
+  border-end-end-radius: var(--nd-segment-radius);
+}
+
+.nd-segmented:not([data-nd-appearance="spread"])[aria-orientation="vertical"]
+  > .nd-segmented-item:first-child {
+  border-start-start-radius: var(--nd-segment-radius);
+  border-start-end-radius: var(--nd-segment-radius);
+}
+
+.nd-segmented:not([data-nd-appearance="spread"])[aria-orientation="vertical"]
+  > .nd-segmented-item:last-child {
+  border-end-start-radius: var(--nd-segment-radius);
+  border-end-end-radius: var(--nd-segment-radius);
+}
+
+/* A bevel cuts rather than rounds, so it does not come from the radius preset
+   — the same reasoning, and the same step of the spacing scale, as `Button`.
+   A JOINED GROUP IS CUT ONCE, AROUND THE WHOLE CONTROL. Clipping each item
+   notched both ends of every shared edge, so the row read as four loose
+   fragments with gaps where it should have been one box. */
+.nd-segmented[data-nd-shape="bevel"]:not([data-nd-appearance="spread"]),
+.nd-segmented[data-nd-shape="bevel"][data-nd-appearance="spread"] > .nd-segmented-item {
+  clip-path: polygon(
+    var(--noctua-space-2) 0%,
+    calc(100% - var(--noctua-space-2)) 0%,
+    100% var(--noctua-space-2),
+    100% calc(100% - var(--noctua-space-2)),
+    calc(100% - var(--noctua-space-2)) 100%,
+    var(--noctua-space-2) 100%,
+    0% calc(100% - var(--noctua-space-2)),
+    0% var(--noctua-space-2)
+  );
+}
+
+/* The ring is drawn inside the item, or the cut takes half of it. */
+.nd-segmented[data-nd-shape="bevel"] > .nd-segmented-item:focus-visible {
+  outline-offset: calc(-1 * (var(--noctua-focus-width) + var(--noctua-focus-offset)));
+}
+
+/* --- joined and spread --------------------------------------------------- */
+
+/* Joined: one box, drawn once. Each item is pulled back over its neighbour's
+   border, because two hairlines meeting is two pixels and a control whose
+   inner rules are twice the weight of its outer ones reads as broken.
+
+   AND THE GROUP PROVIDES WHAT THE FIRST ITEM IS PULLED AGAINST. The pull used
+   to be on every item BUT the first, which makes the first stop one hairline
+   narrower than the ones beside it — invisible under `hug`, where the labels
+   differ anyway, and the whole of the claim under `equal`, where the stops are
+   supposed to be identical. Every item is pulled by the same amount now and
+   the group carries one hairline of padding for the first to sit on, so the
+   outer box lands where it always did and no stop is a pixel short. */
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item {
+  position: relative;
+}
+
+.nd-segmented:not([data-nd-appearance="spread"]):not([aria-orientation="vertical"]) {
+  padding-inline-start: var(--noctua-border-hairline);
+}
+
+.nd-segmented:not([data-nd-appearance="spread"]):not([aria-orientation="vertical"])
+  > .nd-segmented-item {
+  margin-inline-start: calc(-1 * var(--noctua-border-hairline));
+}
+
+.nd-segmented:not([data-nd-appearance="spread"])[aria-orientation="vertical"] {
+  padding-block-start: var(--noctua-border-hairline);
+}
+
+.nd-segmented:not([data-nd-appearance="spread"])[aria-orientation="vertical"]
+  > .nd-segmented-item {
+  margin-block-start: calc(-1 * var(--noctua-border-hairline));
+}
+
+/* The chosen and the focused item are drawn over their neighbours, or the ring
+   is half hidden under the item the negative margin pulled on top of it. */
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:hover,
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:focus-visible,
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item[aria-checked="true"] {
+  z-index: 1;
+}
+
+/* Spread: separate boxes, and the one appearance that survives wrapping. A
+   joined group that wraps breaks into pieces that no longer read as one
+   control, so a set that might wrap must be spread. */
+.nd-segmented[data-nd-appearance="spread"] {
+  flex-wrap: wrap;
+  gap: var(--noctua-space-1);
+}
+
+/* --- hug, equal and stretch ---------------------------------------------- */
+
+/* `equal` and `stretch` are a grid with ONE TRACK PER ITEM.
+ *
+ * It was `repeat(auto-fit, minmax(var(--noctua-space-24), 1fr))`, which counts
+ * tracks by how many fit rather than by how many there are. A group whose
+ * width comes from its own content has no definite space to fit them in, so
+ * that resolved to a single column and drew a horizontal control as a stack of
+ * boxes — including the overview at the head of this component's page. At
+ * 256px it resolved to two columns and put the third stop on a second row.
+ *
+ * `grid-auto-flow: column` gives every item a track of its own, however many
+ * there are, and `1fr` makes every track the same width whatever the labels
+ * say.
+ *
+ * `minmax(0, 1fr)` RATHER THAN `1fr`, AND THE ZERO IS THE WHOLE OF IT. A bare
+ * `1fr` is `minmax(auto, 1fr)`, so each track keeps a floor of its own item's
+ * minimum — and once the container is tighter than the content those floors
+ * differ, which is a row of stops of different widths under the one prop that
+ * exists to make them the same. In pt-BR the `fill` example measured 100.8 and
+ * 78.6 side by side. A floor of zero lets the labels wrap instead.
+ *
+ * `flex: 1 1 0` is not the answer for either value, and the reason is the one
+ * this comment used to give: it shares the SPARE space, so a long label still
+ * gets a wider box.
+ *
+ * `equal` needs no width of its own. `fit-content` on the group above is
+ * already the widest stop times the number of them, capped at the container —
+ * which is what this prop promises. `stretch` is the one that takes the
+ * container whether it needs it or not. */
+.nd-segmented[data-nd-fill="equal"],
+.nd-segmented[data-nd-fill="stretch"] {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+}
+
+/* A FILLED STOP MAY BE NARROWER THAN ITS OWN LONGEST WORD, so the word has to
+   give way. Without this the label kept its minimum and the box did not: a
+   centred flex line overflows both ends equally, and at 320px in pt-BR the
+   `system` stop's icon was painted across the middle of the word `Escuro` in
+   the stop before it. Only the filled variants reach this — `hug` is floored
+   at its content by `fit-content`, and that floor is exactly what this
+   removes. */
+.nd-segmented[data-nd-fill="equal"] > .nd-segmented-item,
+.nd-segmented[data-nd-fill="stretch"] > .nd-segmented-item,
+.nd-segmented[data-nd-fill="equal"] .nd-segmented-text,
+.nd-segmented[data-nd-fill="stretch"] .nd-segmented-text {
+  min-inline-size: 0;
+}
+
+.nd-segmented[data-nd-fill="stretch"] {
+  inline-size: 100%;
+}
+
+/* Vertical: one track across, one row per item, and the row heights are the
+   grid's to work out. */
+.nd-segmented[data-nd-fill="equal"][aria-orientation="vertical"],
+.nd-segmented[data-nd-fill="stretch"][aria-orientation="vertical"] {
+  grid-auto-flow: row;
+  grid-auto-columns: auto;
+}

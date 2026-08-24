@@ -18,6 +18,8 @@ noctua-design-spec = { path = "../noctua-design-spec" }
 # twin arrives — because a file renamed out from under an emitter should be a
 # compile error naming the file, not an artifact that emits empty.
 noctua-design-runtime = { path = "../noctua-design-runtime" }
+# The component rules, on the same terms and for the same reason.
+noctua-design-styles = { path = "../noctua-design-styles" }
 indexmap.workspace = true
 
 [lints]

@@ -23,7 +23,12 @@
 
      scope.css REPLACES the vendored contexts.css — it carries the same
      declarations plus the selectors that make them resolve inside a
-     themed subtree. Linking both would double the cost for nothing. -->
+     themed subtree. Linking both would double the cost for nothing.
+
+     components.css is LAST, so a component rule that ties with one in
+     theme.css on specificity wins — which is the relation those rules
+     were written in. A page with its own stylesheet links that after
+     this, and then IT wins, which is the point of being last here. -->
 <link rel="stylesheet" href="tokens/css/ramp.css">
 <link rel="stylesheet" href="scope.css">
 <link rel="stylesheet" href="tokens/css/theme-blue-balanced.css" id="noctua-base-palette">
@@ -32,3 +37,4 @@
 <link rel="stylesheet" href="syntax.css">
 <link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="components.css">

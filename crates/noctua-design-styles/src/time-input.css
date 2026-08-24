@@ -1,0 +1,159 @@
+
+
+/* --- TimeInput ------------------------------------------------------------ */
+
+.nd-time-input-row {
+  flex-wrap: wrap;
+}
+
+.nd-time-input-part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-0);
+}
+
+.nd-time-input-part-label {
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+/* Two digits plus the box's own padding, in the digit's own unit — the same
+   arithmetic `DateInput`'s segments use. */
+.nd-time-input-segment {
+  inline-size: 4ch; /* allow-literal: two digits plus the box's own padding, in the digit's own unit */
+  padding: var(--noctua-space-2);
+  /* THE BOXES ARE THE FIELD'S SIZE, AND THEY WERE NOT ANY SIZE AT ALL. `size`
+     reached the `Field`'s question and stopped there, under a doc calling it
+     the size of the boxes — so a `large` time field held medium boxes and a
+     medium one stood 6px shorter than every other control on its row. The
+     three steps are `Segmented`'s own ladder, because the meridiem control
+     beside them IS one and two siblings in a row may not disagree about their
+     height. */
+  min-block-size: var(--noctua-space-12);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+}
+
+/* The two steps either side of it, matching `Segmented`'s exactly. */
+/* THE PADDING GOES DOWN WITH THE TYPE, AND IT HAS TO. The box is `4ch` wide,
+   which is two digits and two digits' worth of room, so a padding measured in
+   rem eats more of it at every step down: caption type inside medium padding
+   clipped the second digit of every small field. */
+.nd-time-input[data-nd-size="small"] .nd-time-input-segment {
+  min-block-size: var(--noctua-space-8);
+  padding: var(--noctua-space-1);
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-time-input[data-nd-size="large"] .nd-time-input-segment {
+  min-block-size: var(--noctua-space-16);
+  padding-block: var(--noctua-space-3);
+  font-size: var(--noctua-size-body);
+}
+
+/* THE SLOT THE MERIDIEM CONTROL IS REVEALED FROM. It holds a real
+   `Segmented`, which a component cannot be handed `hidden`, so the span
+   carries it and `inputs.js` takes it off once it has read the clock. The
+   second rule is here because an author declaration beats the browser's own
+   `[hidden]` rule, and `display: flex` because the group has to sit on the
+   boxes' baseline rather than on the row's top edge — the labels above them
+   are what makes those two different lines. */
+.nd-time-input-meridiem {
+  display: flex;
+  align-items: flex-end;
+  /* THE ROW IS CENTRED, AND EVERY OTHER ITEM IN IT IS A LABEL OVER A BOX. So
+     a control with no label above it, centred, floats between the two lines.
+     It sits on the boxes' own bottom edge instead. */
+  align-self: flex-end;
+}
+
+.nd-time-input-meridiem[hidden] {
+  display: none;
+}
+
+/* --- What every one of them does when refused or wrong --------------------- */
+
+/* THE CONTROL IS OUTLINED, NOT TINTED. Two pixels of the solid danger colour
+   rather than one of the pale border step: a hairline in a
+   slightly different colour is a difference a reader has to look for, and the
+   whole job of this state is to be found without looking. It is the second of
+   the three things that change — the bar, this, and the sentence — and the
+   sentence is the one that carries the meaning. */
+.nd-field[data-nd-invalid="true"] .nd-input,
+.nd-field[data-nd-invalid="true"] .nd-number-input,
+.nd-field[data-nd-invalid="true"] .nd-textarea,
+.nd-field[data-nd-invalid="true"] .nd-file-input-area,
+.nd-field:has([data-nd-invalid="true"]) .nd-input,
+.nd-field:has([data-nd-invalid="true"]) .nd-number-input,
+.nd-field:has([data-nd-invalid="true"]) .nd-textarea,
+.nd-field:has([data-nd-invalid="true"]) .nd-file-input-area,
+.nd-time-input-segment[aria-invalid="true"],
+.nd-date-input-segment[aria-invalid="true"] {
+  border-width: var(--noctua-border-strong);
+  border-color: var(--nc-color-danger);
+}
+
+.nd-input-box:disabled,
+.nd-number-input-box:disabled,
+.nd-number-input-step:disabled,
+.nd-textarea-box:disabled,
+.nd-time-input-segment:disabled,
+.nd-slider-track:disabled,
+/* See the focus rule above: the label comes first in the markup, so this is a
+   question about the box that holds both and never about a next sibling. */
+.nd-file-input:has(> .nd-file-input-native:disabled) > .nd-file-input-area {
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+  cursor: not-allowed;
+}
+
+/* The specimens on each component's own page: drawn boxes rather than live
+   controls,
+.nd-file-input-figure .nd-file-input-area,
+.nd-slider-figure .nd-slider-rail{
+  display: block;
+  inline-size: var(--noctua-space-32);
+  block-size: var(--noctua-space-8);
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+}
+
+/* A PICTURE OF `size` HAS TO BE THREE DIFFERENT SIZES.
+   The rule above draws one box,
+so every value of `size` came out identical —
+   `variants.spec.js` calls that a grid that lies about its own prop,
+and it is
+   right. These are the three heights the contracts actually claim,
+the same
+   32,
+48 and 64 that `Button` steps through. Written once for every drawn
+   control,
+because three inputs disagreeing about what `large` looks like is
+   the defect one step along from this one.
+
+   `.nd-textarea` NAMES ITS FIGURE,
+and the others do not have to. A `Textarea`
+   is a box around a `<textarea class="nd-textarea-box">` now,
+so
+   `.nd-textarea[data-nd-size] .nd-textarea-box` reaches the live control as
+   well as the drawing — and a fixed 32,
+48 or 64 pixels on the live one takes
+   `rows` and `autosize` away from it. A picture is the only thing being drawn
+   here. */
+.nd-input[data-nd-size="small"] .nd-input-box,
+.nd-number-input[data-nd-size="small"] .nd-number-input-box{
+  block-size: var(--noctua-space-8);
+}
+
+.nd-input[data-nd-size="medium"] .nd-input-box,
+.nd-number-input[data-nd-size="medium"] .nd-number-input-box{
+  block-size: var(--noctua-space-12);
+}
+
+.nd-input[data-nd-size="large"] .nd-input-box,
+.nd-number-input[data-nd-size="large"] .nd-number-input-box{
+  block-size: var(--noctua-space-16);
+}

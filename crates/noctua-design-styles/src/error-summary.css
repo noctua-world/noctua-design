@@ -1,0 +1,66 @@
+
+
+/* --- ErrorSummary --------------------------------------------------------- */
+
+/* A border thick enough to be an edge rather than a hairline, because the
+   thing a reader has to do first is notice it.
+   The same rule width `Field` marks a wrong answer with, all the way round —
+   one thickness for one meaning. */
+
+.nd-error-summary {
+  padding: var(--noctua-space-4);
+  border: var(--noctua-border-rule) solid var(--nc-color-danger);
+  border-radius: var(--noctua-radius-surface);
+  margin-block-end: var(--noctua-space-6);
+}
+
+/* Focusable, not a tab stop — so the ring only ever appears when focus was
+   SENT here, which is the one moment it means something. */
+.nd-error-summary:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* Taken out of the page rather than rendered empty. A box that says *there is
+   a problem* above a form with no problems is a box readers learn to ignore. */
+.nd-error-summary[data-nd-empty] {
+  display: none;
+}
+
+.nd-error-summary-title {
+  margin: 0;
+  font-size: var(--noctua-size-h4);
+  font-weight: var(--noctua-weight-semibold);
+  color: var(--nc-color-fg);
+}
+
+.nd-error-summary-description {
+  margin-block: var(--noctua-space-2) 0;
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-error-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+  margin-block: var(--noctua-space-3) 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* UNDERLINED, AND IN THE DANGER TONE. Underlined because it is a link in a
+   block of links and nothing else here is one; in the tone because the box
+   already says what kind of list this is, and a black link inside a red box
+   reads as a footnote. Never the tone alone — the words are the complaint. */
+.nd-error-summary-link {
+  color: var(--nc-color-danger);
+  font-weight: var(--noctua-weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: var(--noctua-space-1);
+}
+
+.nd-error-summary-link:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+  border-radius: var(--noctua-radius-control);
+}

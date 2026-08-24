@@ -1,0 +1,48 @@
+
+
+.nd-info {
+  display: inline-flex;
+  vertical-align: baseline;
+}
+
+/* A MARKER, NOT A WORD. It sits after the thing it explains with a hair of
+   space, and it never grows the line it is on — a heading row that gets taller
+   because one column carries a note is a table that lost a row of data. */
+.nd-info-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* THE GLYPH IS 16px AND THE TARGET IS NOT. It was both, so every `Info` on
+     the site was a 16x16 control — under the 24px floor, beside a line of text
+     a reader is trying to hit with a thumb. The mark stays the size it was;
+     the box around it grew, and the negative margin keeps it from pushing the
+     sentence it belongs to apart. */
+  inline-size: var(--noctua-space-6);
+  block-size: var(--noctua-space-6);
+  margin-block: calc(var(--noctua-space-1) * -1);
+  margin-inline-start: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--noctua-radius-pill);
+  background: none;
+  /* THE COLOUR A READER ALREADY READS AS *press this*, which is the colour
+     `.nd-link` is painted in. It was `--nc-color-fg-muted` — quieter than the
+     sentence it sits in, so the one thing on the line that does something
+     looked like the one thing that had been turned off, and it only became a
+     control on hover, which a touch screen never reports. */
+  color: var(--nc-color-accent);
+  cursor: help;
+}
+
+.nd-info-marker:hover {
+  color: var(--nc-color-accent-hover);
+}
+
+.nd-info-marker:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-info-marker[aria-expanded="true"] {
+  color: var(--nc-color-accent);
+}

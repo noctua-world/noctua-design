@@ -1,0 +1,1104 @@
+
+
+/* --- Table ---------------------------------------------------------------- */
+
+/* THE SCROLLER IS NOT THE TABLE, AND THAT IS THE FIRST HALF OF THE FIX.
+ *
+ * `display: block` on a `<table>` is three decisions in one declaration, and
+ * the middle one is a defect: every engine computes the table roles from the
+ * LAYOUT OBJECT rather than from the tag, so a table laid out as a block is
+ * announced as a run of unrelated text. Overflow therefore belongs to a box
+ * around the table, and the table stays a table.
+ *
+ * THE SECOND HALF IS THE STACKED LAYOUT, AND IT IS WHY THIS FILE WAS REWRITTEN.
+ * The version before this one stacked by putting `display: block` on the
+ * `<table>` — which kept the roles only because every part restates its own,
+ * and quietly broke the `<caption>`: a `table-caption` box inside a `block`
+ * parent has no table to be the caption of, so it shrank to its own
+ * `min-content` and "The spacing scale" wrapped into three lines inside sixty
+ * pixels. Every part that changes its `display` here is given one explicitly,
+ * the caption and the note included.
+ *
+ * AND IT IS MEASURED AGAINST THE BOX, NOT THE WINDOW. `container-type` on the
+ * scroller, so a table inside a narrow column stacks on a wide screen — which
+ * is the case a media query gets wrong every time, and the case a documentation
+ * site is made of. */
+
+.nd-table-frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+  inline-size: 100%;
+}
+
+.nd-table-scroll {
+  overflow-x: auto;
+  container-type: inline-size;
+  container-name: nd-table;
+  /* NO RADIUS. A box that scrolls and has rounded corners clips its own
+     content against a curve nobody asked for — `material.spec.js` asserts it
+     across the site, and this is the box it is most about. */
+  border-radius: 0;
+}
+
+.nd-table-scroll:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  /* `fixed` the moment a column has been given a width: it is what makes a
+     resize immediate rather than a negotiation with the content. */
+  table-layout: auto;
+  font-size: var(--noctua-size-body);
+  color: var(--nc-color-fg);
+}
+
+.nd-table[data-nd-width="auto"] {
+  inline-size: auto;
+}
+
+/* NO `table-layout: fixed`, AND THAT IS THE REPAIR.
+ *
+ * A `<col>` width used to switch the table to fixed layout, where a column with
+ * no width declared gets an equal share of what is left — so the first drag
+ * threw every other column to the same width, values slid out from under their
+ * headings and ran over each other. Measured: three headings overlapping and
+ * `51s` printed through the word *Production*.
+ *
+ * Under automatic layout a declared width is a PREFERENCE. The column a reader
+ * dragged grows, the rest share what is left, and nothing is ever narrower than
+ * its content — which is the promise a table makes and a resize must not
+ * break. */
+.nd-table {
+  table-layout: auto;
+}
+
+/* The cap on the scrolling box, so a long table does not push the page below
+   the fold. Named steps rather than a free length: three answers a caller can
+   choose between beat one they have to invent. */
+.nd-table-scroll:has(> .nd-table[data-nd-height="short"]) {
+  max-block-size: var(--noctua-space-64);
+  overflow-y: auto;
+}
+
+.nd-table-scroll:has(> .nd-table[data-nd-height="medium"]) {
+  max-block-size: calc(var(--noctua-space-64) * 2);
+  overflow-y: auto;
+}
+
+.nd-table-scroll:has(> .nd-table[data-nd-height="tall"]) {
+  max-block-size: calc(var(--noctua-space-64) * 3);
+  overflow-y: auto;
+}
+
+/* --- The caption and the note --- */
+
+/* THE TITLE IS A HEADING, SO IT IS SIZED LIKE ONE.
+ *
+ * At body size and semibold it was the largest plain text in the box, sitting
+ * under a heading row that is small and uppercase — so it read as the first row
+ * of the table rather than as the name of it. One step up the scale and a
+ * heading's line height, and the order is legible before a word is read.
+ *
+ * AND THE SENTENCE UNDER IT IS PROSE, SO IT TAKES A MEASURE. A caption is laid
+ * at the table's width, and a table's width is its columns' — nothing to do
+ * with how long a line should be. On a nine-hundred-pixel table the note ran
+ * past a hundred and twenty characters, which is twice the measure every other
+ * paragraph on this site is held to. The cap is the same token they use.
+ *
+ * The measure earns its place a second time. A caption's own content is part of
+ * what a table asks for in width, so an uncapped sentence is a table that is
+ * wider than its columns need and scrolls for a reason a reader cannot see. */
+.nd-table-caption {
+  display: table-caption;
+  text-align: start;
+  padding-block-end: var(--noctua-space-4);
+  font-size: var(--noctua-size-lead);
+  line-height: var(--noctua-leading-heading);
+  font-weight: var(--noctua-weight-semibold);
+  color: var(--nc-color-fg);
+}
+
+.nd-table-note {
+  display: block;
+  max-inline-size: var(--noctua-measure);
+  margin-block-start: var(--noctua-space-2);
+  font-size: var(--noctua-size-small);
+  line-height: var(--noctua-leading-body);
+  font-weight: var(--noctua-weight-regular);
+  color: var(--nc-color-fg-muted);
+}
+
+/* Off the screen, still in the document: the name is what a screen reader says
+   on entering, and a page heading that repeats it is not on the same journey. */
+.nd-table[data-nd-caption-hidden="true"] > .nd-table-caption {
+  position: absolute;
+  inline-size: var(--noctua-border-hairline);
+  block-size: var(--noctua-border-hairline);
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- The tools above it --- */
+
+/* ONE HEIGHT FOR THE ROW, AND IT IS DECLARED.
+ *
+ * There were three, none of them written down: a small `Button` at 34 pixels,
+ * the two menu summaries at 36 and the search at 32, each of them whatever its
+ * own font size and padding happened to add up to. Three controls side by side
+ * at three heights is what "it does not follow the layout" looks like from the
+ * outside, and the search was the shortest of the three.
+ *
+ * The number is a small `Button`'s, because `Button` is the component that says
+ * what a control of this size is: the space step, plus the hairline it draws
+ * outside it. Everything in this row is measured against that one. */
+.nd-table-tools {
+  --nd-table-tool-height: calc(var(--noctua-space-8) + var(--noctua-border-hairline) * 2);
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--noctua-space-2);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.nd-table-columns {
+  position: relative;
+}
+
+.nd-table-columns-summary {
+  display: inline-flex;
+  gap: var(--noctua-space-2);
+  align-items: center;
+  block-size: var(--nd-table-tool-height);
+  padding-block: 0;
+  padding-inline: var(--noctua-space-3);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  cursor: pointer;
+  list-style: none;
+}
+
+.nd-table-columns-summary::-webkit-details-marker {
+  display: none;
+}
+
+.nd-table-columns-summary:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-table-columns-panel {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: calc(100% + var(--noctua-space-1));
+  z-index: var(--noctua-layer-popover);
+  min-inline-size: var(--noctua-space-48);
+  padding: var(--noctua-space-2);
+  /* OPAQUE, on its own surface. It hangs over the table, and a menu a reader
+     can read the table through is a menu they cannot read at all. */
+  background: var(--nc-color-surface-raised);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-surface);
+}
+
+.nd-table-columns-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nd-table-columns-choice {
+  display: flex;
+  gap: var(--noctua-space-2);
+  align-items: center;
+  padding-block: var(--noctua-space-1);
+  font-size: var(--noctua-size-small);
+  cursor: pointer;
+}
+
+/* THE BOX A READER PRESSES TO HIDE A COLUMN WAS 13 x 13.
+ *
+ * A native checkbox at the browser's own size, in a menu of six of them, under
+ * the 24px floor this system holds everywhere else — and the one place it is
+ * still a native control rather than the `Checkbox` component, because a menu
+ * of columns is not a form. Sized here rather than rebuilt: the platform draws
+ * the tick, and all this needs is room. */
+.nd-table-columns-choice > input {
+  inline-size: var(--noctua-space-6);
+  block-size: var(--noctua-space-6);
+  margin: 0;
+  accent-color: var(--nc-color-accent);
+  flex: none;
+}
+
+.nd-table-summary {
+  margin: 0;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+/* --- Cells --- */
+
+.nd-table-cell,
+.nd-table-header-cell {
+  padding-block: var(--noctua-space-3);
+  padding-inline: var(--noctua-space-4);
+  text-align: start;
+  vertical-align: top;
+}
+
+.nd-table-cell {
+  color: var(--nc-color-fg);
+}
+
+.nd-table-header-cell {
+  font-weight: var(--noctua-weight-semibold);
+  font-size: var(--noctua-size-small);
+  letter-spacing: var(--noctua-tracking-caps);
+  text-transform: uppercase;
+  color: var(--nc-color-fg-muted);
+  /* NO `white-space` HERE, AND THAT IS THE SECOND REPAIR OF ITS KIND. A column
+     heading really does want `nowrap` — a two-word heading broken in half makes
+     the whole head twice as tall — but it was declared twice: once by this rule
+     and once by `wrap`, whose own default then drew the same picture as the
+     value beside it. The default moved into the contract, where a reader can
+     see it and a caller can turn it off. */
+}
+
+/* A row's own name is a heading, and it reads as data rather than as a column
+   title: same weight as the words beside it, and never in small capitals. */
+.nd-table-header-cell[scope="row"] {
+  font-size: var(--noctua-size-body);
+  letter-spacing: var(--noctua-tracking-normal);
+  text-transform: none;
+  color: var(--nc-color-fg);
+  white-space: normal;
+}
+
+.nd-table-cell[data-nd-align="center"],
+.nd-table-header-cell[data-nd-align="center"] {
+  text-align: center;
+}
+
+.nd-table-cell[data-nd-align="end"],
+.nd-table-header-cell[data-nd-align="end"],
+.nd-table-cell[data-nd-align="numeric"],
+.nd-table-header-cell[data-nd-align="numeric"] {
+  text-align: end;
+}
+
+/* TABULAR FIGURES, which is the half of `numeric` nobody remembers: digits of
+   one width are what make a column of numbers comparable at a glance. */
+.nd-table-cell[data-nd-align="numeric"],
+.nd-table-header-cell[data-nd-align="numeric"] {
+  font-variant-numeric: tabular-nums;
+}
+
+.nd-table-cell[data-nd-wrap="nowrap"],
+.nd-table-header-cell[data-nd-wrap="nowrap"] {
+  white-space: nowrap;
+}
+
+/* Cut by the stylesheet and never in the markup: the whole value stays there to
+   be read out, found and copied. */
+.nd-table-cell[data-nd-wrap="truncate"] > .nd-table-value,
+.nd-table-header-cell[data-nd-wrap="truncate"] {
+  display: block;
+  max-inline-size: var(--noctua-space-48);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Column widths, from the `<colgroup>` a caller declared --- */
+
+.nd-table-column[data-nd-width="narrow"] {
+  inline-size: var(--noctua-space-24);
+}
+
+.nd-table-column[data-nd-width="medium"] {
+  inline-size: var(--noctua-space-48);
+}
+
+.nd-table-column[data-nd-width="wide"] {
+  inline-size: calc(var(--noctua-space-48) * 2);
+}
+
+.nd-table-column[data-nd-width="fit"] {
+  inline-size: 0;
+  white-space: nowrap;
+}
+
+/* NO `visibility: collapse` HERE, AND THAT IS A REPAIR.
+ *
+ * A hidden column was hidden twice: `collapse` on the `<colgroup>` and the
+ * `hidden` attribute on every cell. Automatic table layout then miscounted and
+ * took the NEXT column away as well — hiding *Status* also took *Amount*,
+ * hiding *Due* also took *Status*. The cells are the mechanism; the attribute
+ * here is the state a test reads. */
+.nd-table-column[data-nd-hidden="true"] {
+  --nd-table-column-hidden: 1;
+}
+
+/* --- Density and rules --- */
+
+.nd-table[data-nd-density="compact"] :is(.nd-table-cell, .nd-table-header-cell) {
+  padding-block: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-3);
+}
+
+.nd-table[data-nd-density="comfortable"] :is(.nd-table-cell, .nd-table-header-cell) {
+  padding-block: var(--noctua-space-4);
+}
+
+.nd-table[data-nd-rules="rows"] tbody .nd-table-row,
+.nd-table[data-nd-rules="grid"] tbody .nd-table-row {
+  border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+.nd-table[data-nd-rules="columns"] :is(.nd-table-cell, .nd-table-header-cell):not(:last-child),
+.nd-table[data-nd-rules="grid"] :is(.nd-table-cell, .nd-table-header-cell):not(:last-child) {
+  border-inline-end: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+/* The heading row is separated whatever the rules say: it is the one line that
+   is not a division between records but between the words and the data. */
+.nd-table thead .nd-table-row {
+  border-block-end: var(--noctua-border-strong) solid var(--nc-color-border-strong);
+}
+
+.nd-table tfoot .nd-table-row {
+  border-block-start: var(--noctua-border-strong) solid var(--nc-color-border-strong);
+  font-weight: var(--noctua-weight-semibold);
+}
+
+/* --- Sticky, and the columns a reader froze --- */
+
+.nd-table[data-nd-sticky-header="true"] thead .nd-table-header-cell {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--noctua-layer-sticky);
+  background: var(--nc-color-surface);
+}
+
+.nd-table-pinned {
+  /* Written by the script from a measurement — a frozen column's width is
+     whatever its content or a reader's resize made it — and declared here, as
+     `Carousel` declares its own, so the name is one the gate can find. */
+  --nd-table-pin: 0px;
+
+  position: sticky;
+  inset-inline-start: var(--nd-table-pin);
+  z-index: var(--noctua-layer-raised);
+  background: var(--nc-color-surface);
+}
+
+.nd-table[data-nd-sticky-header="true"] thead .nd-table-pinned {
+  z-index: var(--noctua-layer-sticky);
+}
+
+/* Where the frozen columns end. Drawn only while the table is actually
+   scrolling, because a rule down the middle of a table that fits is a rule
+   about nothing. */
+.nd-table[data-nd-scrollable] .nd-table-pinned:last-of-type {
+  border-inline-end: var(--noctua-border-hairline) solid var(--nc-color-border-strong);
+}
+
+/* --- Zebra, hover, tone and the chosen row --- */
+
+.nd-table[data-nd-zebra="true"] tbody .nd-table-row[data-nd-stripe="odd"] {
+  background: var(--nc-color-surface-subtle);
+}
+
+.nd-table[data-nd-hover="true"] tbody .nd-table-row:hover {
+  background: var(--nc-color-subtle-bg);
+}
+
+/* A TONE ON A ROW, A CELL OR A HEADING — AND ALL THREE WERE MISSING TWO.
+ *
+ * The row had four hand-written tones and the cell and the heading had none at
+ * all: `data-nd-tone` was emitted into the markup of every cell and nothing in
+ * this stylesheet read it, so an example that declared one showed nothing. All
+ * three read the generated indirection now, so every one of the colour
+ * system's families works and none of them is written here. */
+
+.nd-table-row[data-nd-tone] {
+  background: var(--nd-tone-bg);
+}
+
+/* THE TONE IS NEVER THE ONLY SIGNAL — §8.8.6 — so a toned row is a rule down
+   the leading edge as well as a wash, which survives a monochrome screen and a
+   printer. */
+.nd-table-row[data-nd-tone] > :first-child {
+  box-shadow: inset var(--noctua-border-strong) 0 0 0 var(--nd-tone);
+}
+
+/* A cell paints its own words rather than its box: a wash behind one cell in a
+   row of five reads as a mistake, and the number is what a reader came for. */
+.nd-table-cell[data-nd-tone] {
+  color: var(--nd-tone);
+  font-weight: var(--noctua-weight-medium);
+}
+
+.nd-table-header-cell[data-nd-tone] {
+  color: var(--nd-tone);
+}
+
+/* A cell inside a toned row keeps the row's wash and its own ink. */
+.nd-table-row[data-nd-tone] .nd-table-cell:not([data-nd-tone]) {
+  color: var(--nc-color-fg);
+}
+
+.nd-table-row[data-nd-selected="true"] {
+  background: var(--nc-color-accent-bg);
+}
+
+.nd-table-row[data-nd-disabled="true"] {
+  color: var(--nc-color-fg-muted);
+}
+
+/* --- The empty row --- */
+
+.nd-table-row[data-nd-empty="true"] .nd-table-cell {
+  padding-block: var(--noctua-space-8);
+  text-align: center;
+  color: var(--nc-color-fg-muted);
+}
+
+/* --- The heading's controls --- */
+
+.nd-table-heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+  align-items: inherit;
+}
+
+/* AND A ROW WHEN AN ASSISTANT'S MARK IS IN IT. Stacked, the mark sat under the
+   words and made a marked header row half again as tall as every other table
+   on the page — a heading that got taller because one column carries a mark is
+   a table that lost a row of data, which is the argument `.nd-info` already
+   makes one section down. */
+.nd-table-heading:has(> .nd-ai-label) {
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.nd-table-header-cell[data-nd-align="numeric"] .nd-table-heading,
+.nd-table-header-cell[data-nd-align="end"] .nd-table-heading {
+  align-items: flex-end;
+}
+
+.nd-table-header-cell[data-nd-align="center"] .nd-table-heading {
+  align-items: center;
+}
+
+/* A REAL BUTTON INSIDE THE HEADING, never a handler on the `<th>` — which is
+   not focusable, announces nothing actionable, and answers no key. */
+.nd-table-sort {
+  display: inline-flex;
+  gap: var(--noctua-space-1);
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.nd-table-sort:hover {
+  color: var(--nc-color-fg);
+}
+
+.nd-table-sort:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+  border-radius: var(--noctua-radius-control);
+}
+
+/* The glyph is drawn rather than iconised: three states out of one box, and it
+   points the way the rows are going. It is `aria-hidden`, because `aria-sort`
+   on the heading is what a screen reader reads. */
+.nd-table-sort-glyph {
+  inline-size: var(--noctua-space-2);
+  block-size: var(--noctua-space-2);
+  border-inline-end: var(--noctua-border-strong) solid currentcolor;
+  border-block-end: var(--noctua-border-strong) solid currentcolor;
+  opacity: 0.35;
+  rotate: 45deg;
+  transition: rotate var(--noctua-duration-fast) var(--noctua-easing-out);
+}
+
+.nd-table-header-cell[aria-sort="ascending"] .nd-table-sort-glyph {
+  opacity: 1;
+  rotate: 225deg;
+}
+
+.nd-table-header-cell[aria-sort="descending"] .nd-table-sort-glyph {
+  opacity: 1;
+}
+
+.nd-table-header-cell:not([aria-sort="none"]) {
+  color: var(--nc-color-fg);
+}
+
+/* THE HANDLE IS A CONTROL, NOT A HAIRLINE. It is the full height of the
+   heading and wide enough to hit, and it is a `<button>` so a keyboard can
+   reach it — a four-pixel drag target is a target a reader with a tremor
+   cannot hit and a reader with no pointer cannot reach at all. */
+.nd-table-resize {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  /* TWENTY-FOUR PIXELS OF TARGET, ALL OF IT INSIDE THE CELL. The handle was
+     `--noctua-space-2` — eight pixels for a gesture that has to be started
+     exactly on a line. It grows INWARD and stays anchored to the boundary: a
+     first attempt translated it across the edge, which moved the header cells
+     and put every heading off its own column. That is the defect this
+     repository has already been told about twice, and it is not worth trading
+     for a wider grip. */
+  inline-size: var(--noctua-space-6);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.nd-table-header-cell:has(> .nd-table-resize) {
+  position: relative;
+}
+
+.nd-table-resize::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--noctua-space-2);
+  /* ON the boundary, not half a handle inside it. At `50%` of an eight-pixel
+     box the line painted four pixels in, which on the last column left a stray
+     tick short of the table's own edge. */
+  inset-inline-end: 0;
+  inline-size: var(--noctua-border-strong);
+  background: var(--nc-color-border);
+}
+
+.nd-table-resize:hover::before,
+.nd-table-resize:focus-visible::before {
+  background: var(--nc-color-accent);
+  inset-block: 0;
+}
+
+.nd-table-resize:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* --- The choice and the detail row --- */
+
+.nd-table-select {
+  inline-size: var(--noctua-space-12);
+  vertical-align: middle;
+}
+
+.nd-table-expand {
+  inline-size: var(--noctua-space-12);
+  vertical-align: middle;
+}
+
+.nd-table-expand-button[aria-expanded="true"] {
+  rotate: 180deg;
+}
+
+/* --- The grid's own focus --- */
+
+/* A cell is focusable only inside a grid, and the ring is on the cell rather
+   than on what is in it — a reader walking cells needs to see which cell. */
+.nd-table[data-nd-interactive] :is(.nd-table-cell, .nd-table-header-cell):focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: calc(var(--noctua-focus-offset) * -1);
+}
+
+/* --- The search, behind a glass ---
+ *
+ * ONE BOX. THE GLASS IS THE LEADING EDGE OF IT, AND IT IS THE CONTROL.
+ *
+ * What this replaced drew the glass and the field as two boxes side by side,
+ * and it was wrong in five ways at once, all of them visible in one screenshot:
+ * two borders with four pixels of gap between them, two radii that disagreed
+ * (`control` on one, `pill` on the other, and the page's controls are
+ * `control`), two magnifiers once it was open, a blue ring drawn on the bare
+ * `<input>` INSIDE the second box rather than on the box a reader can see, and
+ * the engine's own clear control left showing beside the border it overlapped.
+ * The two boxes were not even the same height: 32 pixels and 44.
+ *
+ * It is `.nd-search-field` now, token for token — the same hairline, the same
+ * `control` radius, the same veiled surface, the same ring on `:focus-within`
+ * and the same `outline: none` on the input, because a ring belongs on the box
+ * a reader sees and never on the bare control inside it. `table.spec.js`
+ * measures the two against each other rather than trusting this paragraph.
+ *
+ * ONE DIFFERENCE, AND IT IS WHY THE PADDING IS ZERO. `Search`'s glyph is a
+ * `<span>`, so its field pads the row and the glyph sits in the padding. Here
+ * the glyph is the control that opens the box, so it needs a hit target of its
+ * own: it is a square the height of the field, the field pads nothing, and the
+ * closed box is therefore exactly the size of the buttons beside it in the
+ * toolbar. */
+
+.nd-table-search {
+  display: flex;
+  align-items: center;
+}
+
+.nd-table-search-field {
+  display: flex;
+  align-items: center;
+  block-size: var(--nd-table-tool-height);
+  padding: 0;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil), transparent);
+  color: var(--nc-color-fg-muted);
+}
+
+/* THE RING IS ON THE BOX, NEVER ON WHAT IS IN IT. `Rating`'s rule and
+   `Search`'s rule: the focus ring has to land on the thing the reader can see.
+   The input and the two buttons give theirs up so this one is the only one. */
+.nd-table-search-field:focus-within {
+  border-color: var(--nc-color-border-strong);
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-table-search-open,
+.nd-table-search-clear {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--noctua-space-8);
+  block-size: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--noctua-radius-control);
+  background: none;
+  color: var(--nc-color-fg-muted);
+  cursor: pointer;
+  outline: none;
+}
+
+@media (hover: hover) {
+  .nd-table-search-open:hover,
+  .nd-table-search-clear:hover {
+    color: var(--nc-color-fg);
+  }
+}
+
+/* Open, the glass is no longer the thing to press first — it is where the box
+   starts. The accent says which of the two states the toolbar is in, which is
+   the one thing the closed box cannot say by being a different shape. */
+.nd-table-search[data-nd-open] .nd-table-search-open {
+  color: var(--nc-color-accent);
+}
+
+.nd-table-search-input {
+  flex: 1 1 auto;
+  inline-size: var(--noctua-space-48);
+  max-inline-size: 40vw;
+  min-inline-size: 0;
+  padding: 0;
+  padding-inline-end: var(--noctua-space-2);
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  outline: none;
+}
+
+/* The engine's own clear control, in the two engines that draw one. Ours is a
+   real button with a name; a control that appears on some machines and not
+   others is worse than one we draw. `Search`'s rule, and the reason the box
+   in the screenshot had a cross it never asked for. */
+.nd-table-search-input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.nd-table-search-input::placeholder {
+  color: var(--nc-color-fg-muted);
+}
+
+/* --- The export menu --- */
+
+.nd-table-export {
+  position: relative;
+}
+
+.nd-table-export-summary {
+  display: inline-flex;
+  gap: var(--noctua-space-2);
+  align-items: center;
+  block-size: var(--nd-table-tool-height);
+  padding-block: 0;
+  padding-inline: var(--noctua-space-3);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  cursor: pointer;
+  list-style: none;
+}
+
+.nd-table-export-summary::-webkit-details-marker {
+  display: none;
+}
+
+.nd-table-export-summary:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-table-export-panel {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: calc(100% + var(--noctua-space-1));
+  z-index: var(--noctua-layer-popover);
+  min-inline-size: var(--noctua-space-48);
+  padding: var(--noctua-space-1);
+  background: var(--nc-color-surface-raised);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-surface);
+}
+
+.nd-table-export-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nd-table-export-item {
+  inline-size: 100%;
+  padding-block: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-3);
+  border: 0;
+  border-radius: var(--noctua-radius-control);
+  background: none;
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  text-align: start;
+  color: var(--nc-color-fg);
+  cursor: pointer;
+}
+
+.nd-table-export-item:hover {
+  background: var(--nc-color-subtle-bg);
+}
+
+.nd-table-export-item:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: calc(var(--noctua-focus-offset) * -1);
+}
+
+/* --- A group, and the fold it hangs from --- */
+
+.nd-table-group-cell {
+  padding-block: var(--noctua-space-2);
+  background: var(--nc-color-surface-subtle);
+}
+
+.nd-table-group-button {
+  display: inline-flex;
+  gap: var(--noctua-space-2);
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.nd-table-group-button:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-table-group-glyph {
+  inline-size: var(--noctua-space-2);
+  block-size: var(--noctua-space-2);
+  border-inline-end: var(--noctua-border-strong) solid currentcolor;
+  border-block-end: var(--noctua-border-strong) solid currentcolor;
+  rotate: 45deg;
+  transition: rotate var(--noctua-duration-fast) var(--noctua-easing-out);
+}
+
+.nd-table-group-button[aria-expanded="false"] .nd-table-group-glyph {
+  rotate: -45deg;
+}
+
+.nd-table-group-label {
+  font-weight: var(--noctua-weight-semibold);
+}
+
+/* --- The two weights a summary row can carry --- */
+
+/* ROWS IN A FOOT DRAWN THE SAME WAY ARE NUMBERS A READER HAS TO READ TO TELL
+   APART. These are WEIGHTS and not meanings: `subtle` is a light rule at the
+   data's own weight, for the line that closes a section; `strong` is a heavy
+   rule and bold, for the line that is the answer. A ledger calls them subtotal
+   and total; a fleet calls them per-region and total; the table calls them
+   neither. */
+.nd-table-row[data-nd-emphasis="subtle"] {
+  border-block-start: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+.nd-table-row[data-nd-emphasis="strong"] {
+  border-block-start: var(--noctua-border-strong) solid var(--nc-color-border-strong);
+  font-weight: var(--noctua-weight-semibold);
+}
+
+.nd-table tfoot .nd-table-row[data-nd-emphasis="subtle"] {
+  font-weight: var(--noctua-weight-regular);
+}
+
+/* --- More rows --- */
+
+.nd-table-more {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--noctua-space-2);
+}
+
+.nd-table-more[hidden] {
+  display: none;
+}
+
+/* --- Printing ---
+ *
+ * A table on paper has no toolbar to press, no box to scroll and no second
+ * page that remembers what the columns were called. All three are answered
+ * here, and the rows a filter hid stay hidden — what a reader printed is what
+ * they were looking at. */
+
+@media print {
+  .nd-table-tools,
+  .nd-table-more,
+  .nd-table-search,
+  .nd-table-export {
+    display: none;
+  }
+
+  .nd-table-scroll {
+    overflow: visible;
+    max-block-size: none;
+  }
+
+  .nd-table thead {
+    display: table-header-group;
+  }
+
+  .nd-table-row {
+    break-inside: avoid;
+  }
+
+  .nd-table-sort-glyph,
+  .nd-table-resize {
+    display: none;
+  }
+}
+
+/* --- The stacked layout --- */
+
+/* EVERY PART THAT CHANGES ITS `display` IS GIVEN ONE. This is the rule the
+   version before this one broke: the caption kept `display: table-caption`
+   inside a `block` parent and shrank to its own `min-content`. */
+.nd-table[data-nd-layout="stack"],
+.nd-table[data-nd-layout="auto"],
+.nd-table[data-nd-layout="stack"] > :is(thead, tbody, tfoot),
+.nd-table[data-nd-layout="auto"] > :is(thead, tbody, tfoot) {
+  display: block;
+}
+
+/* ONE DECLARATION, AND IT IS `display`. THE SECOND ONE COST EVERY TABLE ON THE
+ * SITE ITS TITLE.
+ *
+ * A caption the table asked to hide is taken out of the layout above, and this
+ * rule is later at the same specificity — so `inline-size: auto` handed a
+ * clipped, `nowrap` box its own sentence back as a width. Invisible, and a
+ * clipped box still counts towards the document's scroll width: 323px of
+ * pseudo-locale caption on a 320px screen.
+ *
+ * The repair was `:not([data-nd-caption-hidden="true"])`, and it is what broke
+ * the wide layout. It raised these two selectors to four class-level
+ * components, and the rule that hands `display: table-caption` back inside
+ * `@container` has three. A container query adds nothing to specificity, so the
+ * restore lost at every width, and a `display: block` child of a `display:
+ * table` parent is wrapped in an ANONYMOUS TABLE CELL. That is what shipped:
+ * the title and the note in a box the width of the first column, wrapping two
+ * words to the line, drawn UNDER the heading row because a header group is laid
+ * first whatever the source order says. Every table with a visible caption, at
+ * every width.
+ *
+ * So the guard goes and the declaration it was guarding goes with it. There is
+ * nothing to undo: `inline-size` is `auto` already unless the hidden rule says
+ * otherwise, and it only says so to captions this rule no longer needs to
+ * exclude. `display` is safe to hand a hidden caption because an absolutely
+ * positioned box is blockified whatever `display` asks for.
+ *
+ * The lesson is narrower than "watch specificity". A rule inside a container
+ * query is an override that cannot out-specify anything, so its pair outside
+ * the query must be written to lose on ORDER alone. */
+.nd-table[data-nd-layout="stack"] > .nd-table-caption,
+.nd-table[data-nd-layout="auto"] > .nd-table-caption,
+.nd-table[data-nd-layout="stack"] .nd-table-note,
+.nd-table[data-nd-layout="auto"] .nd-table-note {
+  display: block;
+}
+
+/* The heading row goes, because every value carries its own label — and it goes
+   off the screen rather than out of the layout, so a screen reader still
+   associates each cell with the column that named it. */
+.nd-table[data-nd-layout="stack"] > thead,
+.nd-table[data-nd-layout="auto"] > thead {
+  position: absolute;
+  inline-size: var(--noctua-border-hairline);
+  block-size: var(--noctua-border-hairline);
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.nd-table[data-nd-layout="stack"] .nd-table-row,
+.nd-table[data-nd-layout="auto"] .nd-table-row {
+  display: block;
+  padding-block: var(--noctua-space-3);
+  border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+.nd-table[data-nd-layout="stack"] :is(.nd-table-cell, .nd-table-header-cell),
+.nd-table[data-nd-layout="auto"] :is(.nd-table-cell, .nd-table-header-cell) {
+  display: block;
+  padding-inline: 0;
+  padding-block: var(--noctua-space-1);
+  border: 0;
+  text-align: start;
+  max-inline-size: none;
+}
+
+.nd-table[data-nd-layout="stack"] .nd-table-label,
+.nd-table[data-nd-layout="auto"] .nd-table-label {
+  display: block;
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-semibold);
+  letter-spacing: var(--noctua-tracking-caps);
+  text-transform: uppercase;
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-table[data-nd-layout="stack"] .nd-table-pinned,
+.nd-table[data-nd-layout="auto"] .nd-table-pinned {
+  position: static;
+  border-inline-end: 0;
+}
+
+/* The label belongs to the stacked layout alone: in a table with a heading row
+   it would be the column's name under the column's name. */
+.nd-table-label {
+  display: none;
+}
+
+/* `auto` IS THE STACK, UNDONE WHERE THERE IS ROOM — and the room is measured on
+   the CONTAINER rather than on the window, so a table inside a narrow column
+   stacks on a wide screen. That is the case a media query gets wrong every
+   time, and the case a documentation site is made of. */
+@container nd-table (min-width: 30rem) {
+  .nd-table[data-nd-layout="auto"] {
+    display: table;
+  }
+
+  .nd-table[data-nd-layout="auto"] > thead {
+    display: table-header-group;
+    position: static;
+    inline-size: auto;
+    block-size: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  .nd-table[data-nd-layout="auto"] > tbody {
+    display: table-row-group;
+  }
+
+  .nd-table[data-nd-layout="auto"] > tfoot {
+    display: table-footer-group;
+  }
+
+  .nd-table[data-nd-layout="auto"] > .nd-table-caption {
+    display: table-caption;
+  }
+
+  .nd-table[data-nd-layout="auto"] .nd-table-row {
+    display: table-row;
+    padding-block: 0;
+    border-block-end: 0;
+  }
+
+  .nd-table[data-nd-layout="auto"][data-nd-rules="rows"] tbody .nd-table-row,
+  .nd-table[data-nd-layout="auto"][data-nd-rules="grid"] tbody .nd-table-row {
+    border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
+  }
+
+  .nd-table[data-nd-layout="auto"] :is(.nd-table-cell, .nd-table-header-cell) {
+    display: table-cell;
+    padding-block: var(--noctua-space-3);
+    padding-inline: var(--noctua-space-4);
+  }
+
+  /* AND THE ALIGNMENT COMES BACK WITH THE COLUMN. The stacked form flattens
+     every cell to `start`, and that rule is a class and two attributes deep —
+     so it outranked `[data-nd-align]` at EVERY width, and `numeric` did
+     nothing anywhere. It was invisible because a heading is a flex column that
+     ends its own items: the words moved to the right, the values under them
+     did not, and a column of money read as a column that had come loose. This
+     block already restores `display`, `padding` and `position`; alignment
+     belongs on the same list. */
+  .nd-table[data-nd-layout="auto"] :is(.nd-table-cell, .nd-table-header-cell)[data-nd-align="end"],
+  .nd-table[data-nd-layout="auto"] :is(.nd-table-cell, .nd-table-header-cell)[data-nd-align="numeric"] {
+    text-align: end;
+  }
+
+  .nd-table[data-nd-layout="auto"] :is(.nd-table-cell, .nd-table-header-cell)[data-nd-align="center"] {
+    text-align: center;
+  }
+
+  .nd-table[data-nd-layout="auto"][data-nd-density="compact"]
+    :is(.nd-table-cell, .nd-table-header-cell) {
+    padding-block: var(--noctua-space-2);
+    padding-inline: var(--noctua-space-3);
+  }
+
+  .nd-table[data-nd-layout="auto"] .nd-table-label {
+    display: none;
+  }
+
+  .nd-table[data-nd-layout="auto"] .nd-table-pinned {
+    position: sticky;
+  }
+}

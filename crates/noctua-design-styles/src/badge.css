@@ -1,0 +1,94 @@
+
+
+/* --- Badge ----------------------------------------------------------------
+ *
+ * A corner, and it needs something to be a corner of. The wrapper is
+ * `inline-flex` so it takes exactly the size of what it marks — `inline-block`
+ * would add the line-box's descender space under an avatar and the mark would
+ * sit a few pixels off the corner it was placed on. */
+.nd-badge {
+  --nd-badge-inset: 0%;
+  position: relative;
+  display: inline-flex;
+}
+
+/* The mark itself. `min-inline-size` equal to its own height so a one-digit
+   badge is a circle and a three-digit one is a lozenge, rather than two shapes
+   that disagree about what a badge is. */
+.nd-badge-mark {
+  --nd-badge-size: var(--noctua-space-4);
+  position: absolute;
+  z-index: var(--noctua-layer-raised);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--nd-badge-size);
+  block-size: var(--nd-badge-size);
+  padding-inline: var(--noctua-space-1);
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  /* The mark sits ON the control, so it needs an edge against it — otherwise a
+     red dot on a red button is a red button. The surface, not a colour: it is
+     whatever the control is standing on. */
+  border: var(--noctua-border-hairline) solid var(--nc-color-surface);
+  border-radius: var(--noctua-radius-pill);
+}
+
+/* A dot says *something changed* and claims nothing about how much, so it has
+   no digits and no room for any. */
+.nd-badge[data-nd-dot="true"] .nd-badge-mark {
+  --nd-badge-size: var(--noctua-space-3);
+  min-inline-size: var(--nd-badge-size);
+  padding-inline: 0;
+}
+
+/* --- Where it sits ---
+ *
+ * Logical insets, so the badge moves to the other side of a right-to-left page
+ * with nothing being told to. The translation is half the mark's own size in
+ * each direction, plus the inset a round control needs. */
+.nd-badge[data-nd-placement="top-end"] .nd-badge-mark {
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  translate: calc(50% - var(--nd-badge-inset)) calc(-50% + var(--nd-badge-inset));
+}
+.nd-badge[data-nd-placement="top-start"] .nd-badge-mark {
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  translate: calc(-50% + var(--nd-badge-inset)) calc(-50% + var(--nd-badge-inset));
+}
+.nd-badge[data-nd-placement="bottom-end"] .nd-badge-mark {
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  translate: calc(50% - var(--nd-badge-inset)) calc(50% - var(--nd-badge-inset));
+}
+.nd-badge[data-nd-placement="bottom-start"] .nd-badge-mark {
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  translate: calc(-50% + var(--nd-badge-inset)) calc(50% - var(--nd-badge-inset));
+}
+
+/* A CIRCLE'S CORNER IS FURTHER IN THAN A SQUARE'S. 14.6% is where the corner of
+   the bounding box meets the circle — 1 − √2⁄2, over 2 — so a badge placed for
+   a button hangs off an avatar and one placed for an avatar eats into a button.
+   One number, stated once, rather than four placements written twice. */
+.nd-badge[data-nd-overlap="circle"] {
+  --nd-badge-inset: 14.6%;
+}
+
+/* --- Its colour ---
+ *
+ * One rule per state rather than one per tone, from the generated indirection.
+ * A badge with no tone is the danger one it used to default to: the badge
+ * asking to be dealt with is the overwhelmingly common badge. */
+.nd-badge .nd-badge-mark {
+  color: var(--nc-color-on-danger);
+  background: var(--nc-color-danger);
+}
+
+.nd-badge[data-nd-tone] .nd-badge-mark {
+  color: var(--nd-tone-on);
+  background: var(--nd-tone);
+}

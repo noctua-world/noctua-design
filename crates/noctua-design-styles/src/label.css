@@ -1,0 +1,45 @@
+
+
+/* --- Label ---------------------------------------------------------------- */
+
+/* THE ONE LABEL IN THE SYSTEM.
+ *
+ * `Field` drew a `<label>` and a `<legend>` of its own with a required marker
+ * beside them, and the settings panel drew a `<p>` shaped like both. Three
+ * drawings of one thing is the duplication that got `Choice` and `IconButton`
+ * deleted from this repository, so there is one now — and `kind` is what picks
+ * the element the thing being named requires.
+ *
+ * The name is a bare text node and the marker is the only child, so markup a
+ * script builds with this class is the same picture as markup the component
+ * renders. `color-picker.js` builds one. */
+.nd-label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--noctua-space-2);
+  margin: 0;
+  /* A `<legend>` is laid out by the browser rather than by its parent, so it
+     leaves the flex column unless it is told not to. */
+  float: none;
+  padding: 0;
+  font-size: var(--noctua-size-body);
+  font-weight: var(--noctua-weight-medium);
+  color: var(--nc-color-fg);
+}
+
+.nd-label[data-nd-size="small"] {
+  font-size: var(--noctua-size-small);
+}
+
+.nd-label[data-nd-size="large"] {
+  font-size: var(--noctua-size-lead);
+}
+
+/* The word, never an asterisk — see the contract. Muted and small, because it
+   qualifies the question rather than being part of it, and lighter than the
+   name so the two do not read as one phrase. */
+.nd-label-mark {
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-regular);
+  color: var(--nc-color-fg-muted);
+}

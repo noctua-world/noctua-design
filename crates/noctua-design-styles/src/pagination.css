@@ -1,0 +1,122 @@
+
+
+/* --- Pagination ----------------------------------------------------------- */
+
+/* LINKS, AND THEY LOOK LIKE LINKS THAT ARE ALSO A CONTROL.
+ *
+ * A transparent border on every one, so the page in force and the pointer both
+ * colour an edge that is already there — a border that appears with a state is
+ * a row of numbers that shifts as the reader moves along it. */
+.nd-pagination {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+  margin-block-start: var(--noctua-space-gap);
+}
+
+.nd-pagination-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--noctua-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nd-pagination-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Square, and 48px is `Button`'s medium — so a page number beside a button
+     is the same box rather than nearly the same one. */
+  min-inline-size: var(--noctua-space-12);
+  min-block-size: var(--noctua-space-12);
+  padding-inline: var(--noctua-space-3);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  text-decoration: none;
+  border: var(--noctua-border-hairline) solid transparent;
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-pagination-step {
+  font-weight: var(--noctua-weight-medium);
+}
+
+.nd-pagination-link:hover {
+  border-color: var(--nc-color-border-strong);
+}
+
+/* The page being read: a fill, a border AND a weight, because a step in a
+   sequence marked by colour alone is a step a dichromat cannot find. */
+.nd-pagination-link[aria-current="page"] {
+  background: color-mix(in oklab, var(--nc-color-accent) var(--nd-veil-checked), var(--nc-color-surface));
+  border-color: var(--nc-color-accent);
+  font-weight: var(--noctua-weight-semibold);
+}
+
+.nd-pagination-gap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--noctua-space-6);
+  color: var(--nc-color-fg-muted);
+}
+
+/* THE GAP THAT IS A CONTROL, AND THE CHARACTER IT REPLACES.
+ *
+ * Both ship: the inert `…` a page with no script keeps, and the button
+ * `dist/menu.js` reveals once it has found the menu it names. So the character
+ * steps aside exactly when the button stops being hidden, which is a question
+ * about the markup that `:has()` can ask and nothing else can. */
+.nd-pagination-gap:has(+ .nd-pagination-more:not([hidden])) {
+  display: none;
+}
+
+.nd-pagination-more {
+  font-weight: var(--noctua-weight-medium);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  cursor: pointer;
+}
+
+.nd-pagination-more[hidden] {
+  display: none;
+}
+
+.nd-pagination-more:hover {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
+/* A MENU OF NUMBERS, AND THE ONE THING THAT MAKES IT ONE.
+ *
+ * A gap can stand for twenty-five pages, so this is the longest menu on the
+ * site — and it needs no rule of its own for that, because `.nd-menu-scroll`
+ * already bounds every menu against the window. What it does need is figures
+ * that do not shuffle: a column of proportional digits puts each number at a
+ * different width, and a reader scanning down for one is reading an edge that
+ * moves. */
+.nd-pagination-menu .nd-menu-item {
+  font-variant-numeric: tabular-nums;
+}
+
+.nd-pagination-summary {
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-pagination[data-nd-size="small"] .nd-pagination-link {
+  min-inline-size: var(--noctua-space-8);
+  min-block-size: var(--noctua-space-8);
+  padding-inline: var(--noctua-space-2);
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-pagination[data-nd-size="large"] .nd-pagination-link {
+  min-inline-size: var(--noctua-space-16);
+  min-block-size: var(--noctua-space-16);
+  padding-inline: var(--noctua-space-4);
+  font-size: var(--noctua-size-body);
+}

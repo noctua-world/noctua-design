@@ -1,0 +1,32 @@
+
+
+/* --- The sidebar's contents ---------------------------------------------- */
+
+/* THE SPECIMEN'S DRAWN BOX. `Search`'s picture is a `<span>` wearing this
+   class rather than a live nameless `<input>`, and a span has no height of its
+   own — the real control takes one from its content. Element and class
+   together, so nothing here can reach the control it is a picture of. */
+span.nd-search-input {
+  display: block;
+  block-size: var(--noctua-space-6);
+}
+
+.nd-search-input {
+  inline-size: 100%;
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil), transparent);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-visually-hidden {
+  position: absolute;
+  inline-size: var(--noctua-border-hairline);
+  block-size: var(--noctua-border-hairline);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

@@ -1,0 +1,239 @@
+
+
+/* --- Meter and Progress ---------------------------------------------------
+ *
+ * TWO ELEMENTS, NOT ONE, and the stylesheet is where that costs something: a
+ * `<meter>` and a `<progress>` have entirely separate shadow trees and no
+ * engine agrees with another about their names. Blink and WebKit want
+ * `::-webkit-meter-bar` and three `-value` pseudo-elements chosen by the
+ * thresholds; Gecko wants `::-moz-meter-bar` and `:-moz-meter-optimum`. Both
+ * lists are written out below rather than reached for with a shorthand,
+ * because a pseudo-element an engine does not know invalidates the whole
+ * selector list it is in — one wrong name and the rule beside it disappears.
+ *
+ * `appearance: none` first, everywhere, or the platform's own bar is drawn
+ * under ours. */
+
+.nd-meter,
+.nd-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+  inline-size: 100%;
+}
+
+.nd-meter-line,
+.nd-progress-line {
+  display: flex;
+  gap: var(--noctua-space-3);
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: var(--noctua-size-small);
+}
+
+.nd-meter-label,
+.nd-progress-label {
+  color: var(--nc-color-fg);
+}
+
+/* The number, in tabular figures: a reading that changes should not make the
+   words beside it move. */
+.nd-meter-value,
+.nd-progress-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--nc-color-fg-muted);
+  white-space: nowrap;
+}
+
+/* Off the screen, still in the document — the case a removed label fails. */
+.nd-meter[data-nd-label-hidden="true"] .nd-meter-label,
+.nd-progress[data-nd-label-hidden="true"] .nd-progress-label {
+  position: absolute;
+  inline-size: var(--noctua-border-hairline);
+  block-size: var(--noctua-border-hairline);
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* NEVER `display: none` ON THE LINE. A hidden label that is not rendered is a
+   label a screen reader cannot read either, which is the exact promise
+   `hide_label` makes and the exact way it was breaking it — measured: the name
+   had no box at all. The label is taken off the screen and the line collapses
+   to nothing on its own, because an absolutely positioned child leaves no
+   height behind. */
+.nd-meter[data-nd-label-hidden="true"] .nd-meter-line,
+.nd-progress[data-nd-label-hidden="true"] .nd-progress-line {
+  min-block-size: 0;
+}
+
+/* A THIRD ITEM ON A `space-between` LINE MOVES THE SECOND ONE TO THE MIDDLE.
+   The reading belongs on the trailing edge whether or not an assistant's mark
+   is beside it, so a marked line pushes with a margin instead. */
+.nd-meter-line:has(.nd-ai-label),
+.nd-progress-line:has(.nd-ai-label) {
+  justify-content: flex-start;
+}
+
+.nd-meter-line:has(.nd-ai-label) > .nd-meter-label,
+.nd-progress-line:has(.nd-ai-label) > .nd-progress-label {
+  margin-inline-end: auto;
+}
+
+/* --- The bars themselves --- */
+
+.nd-meter-bar,
+.nd-progress-bar {
+  appearance: none;
+  inline-size: 100%;
+  block-size: var(--noctua-space-2);
+  border: 0;
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-surface-subtle);
+  color: var(--nc-color-accent);
+}
+
+.nd-meter[data-nd-size="small"] .nd-meter-bar,
+.nd-progress[data-nd-size="small"] .nd-progress-bar {
+  block-size: var(--noctua-space-1);
+}
+
+.nd-meter[data-nd-size="large"] .nd-meter-bar,
+.nd-progress[data-nd-size="large"] .nd-progress-bar {
+  block-size: var(--noctua-space-3);
+}
+
+/* A tone paints the fill, for the meter with no natural good end and for the
+   task that has gone wrong. Declared here so both engines' fills below can
+   read one name. */
+.nd-meter[data-nd-tone] .nd-meter-bar,
+.nd-progress[data-nd-tone] .nd-progress-bar {
+  color: var(--nd-tone);
+}
+
+/* --- Blink and WebKit --- */
+
+.nd-meter-bar::-webkit-meter-bar {
+  block-size: 100%;
+  border: 0;
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-surface-subtle);
+}
+
+/* THREE FILLS, CHOSEN BY THE PLATFORM. Which one applies is the browser's own
+   comparison of `value` against `low`, `high` and `optimum` — nothing here
+   writes a condition, and that is the argument for using the real element. */
+.nd-meter-bar::-webkit-meter-optimum-value {
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-success);
+}
+
+.nd-meter-bar::-webkit-meter-suboptimum-value {
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-warning);
+}
+
+.nd-meter-bar::-webkit-meter-even-less-good-value {
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-danger);
+}
+
+/* A meter with no thresholds has no judgement to make, so it is painted from
+   its own ink rather than green — green on a bar that cannot be bad is a
+   claim. */
+.nd-meter:not(:has([low], [high])) .nd-meter-bar::-webkit-meter-optimum-value {
+  background: currentcolor;
+}
+
+.nd-progress-bar::-webkit-progress-bar {
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-surface-subtle);
+}
+
+.nd-progress-bar::-webkit-progress-value {
+  border-radius: var(--noctua-radius-pill);
+  background: currentcolor;
+  transition: inline-size var(--noctua-duration-base) var(--noctua-easing-out);
+}
+
+/* --- Gecko --- */
+
+.nd-meter-bar::-moz-meter-bar {
+  border-radius: var(--noctua-radius-pill);
+  background: currentcolor;
+}
+
+.nd-meter-bar:-moz-meter-optimum::-moz-meter-bar {
+  background: var(--nc-color-success);
+}
+
+.nd-meter-bar:-moz-meter-sub-optimum::-moz-meter-bar {
+  background: var(--nc-color-warning);
+}
+
+.nd-meter-bar:-moz-meter-sub-sub-optimum::-moz-meter-bar {
+  background: var(--nc-color-danger);
+}
+
+.nd-progress-bar::-moz-progress-bar {
+  border-radius: var(--noctua-radius-pill);
+  background: currentcolor;
+}
+
+/* --- The indeterminate bar ---
+ *
+ * The sweep is the browser's on every engine that has one; what is added here
+ * is the shape of the track, so an indeterminate bar is the same box as a
+ * determinate one and a task that learns its size does not change height. */
+
+/* THE SWEEP IS DRAWN, AND THAT IS `appearance: none`'S BILL.
+ *
+ * Taking the platform's widget away takes its indeterminate animation with it —
+ * measured: an indeterminate `<progress>` with `appearance: none` renders as an
+ * empty track in Blink, which reads as a task that has not started. So the
+ * sweep is a gradient here, and the promise the platform would have kept for
+ * free is kept explicitly in the rule below it. */
+/* ON THE TRACK PSEUDO-ELEMENT, NOT ON THE ELEMENT. `::-webkit-progress-bar`
+   paints over the element's own background, so a sweep declared on the element
+   is a sweep nothing ever shows — measured as an empty track. */
+.nd-progress[data-nd-busy] .nd-progress-bar::-webkit-progress-bar,
+.nd-progress[data-nd-busy] .nd-progress-bar {
+  background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--nc-color-accent) 74%,
+      var(--nc-color-accent) 74%,
+      transparent 100%
+    )
+    no-repeat;
+  /* Two layers: the sweep over the track, so a busy bar is still a bar rather
+     than a stripe travelling across nothing. */
+  background-color: var(--nc-color-surface-subtle);
+  background-size: 40% 100%;
+  animation: nd-progress-sweep var(--noctua-duration-slow) var(--noctua-easing-in-out) infinite;
+}
+
+@keyframes nd-progress-sweep {
+  from {
+    background-position: -40% 0;
+  }
+  to {
+    background-position: 140% 0;
+  }
+}
+
+/* A READER WHO ASKED FOR LESS MOVEMENT GETS A STILL BAR THAT STILL SAYS
+   *working*. Nothing animating, and not an empty track either: the sweep parks
+   at the leading edge, which is where a task with no measurement is. */
+@media (prefers-reduced-motion: reduce) {
+  .nd-progress[data-nd-busy] .nd-progress-bar::-webkit-progress-bar,
+  .nd-progress[data-nd-busy] .nd-progress-bar {
+    animation: none;
+    background-position: 0 0;
+  }
+}
+
+.nd-progress[data-nd-busy] .nd-progress-value {
+  display: none;
+}

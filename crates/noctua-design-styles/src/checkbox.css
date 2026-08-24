@@ -1,0 +1,328 @@
+
+
+/* --- Checkbox, Radio and Fieldset ---------------------------------------- */
+
+/* THE SIZE IS THE FEATURE.
+ *
+ * A browser's own checkbox is about thirteen pixels of drawn box. This one is
+ * forty, and the thing a pointer has to hit is forty-four — WCAG 2.5.8's AAA
+ * target rather than its AA
+ * minimum of twenty-four. Both come out of this system's own spacing scale
+ * rather than arriving as literals, so a change to the scale reaches them:
+ *
+ *   large    space-8 + space-2   40px   (the default)
+ *   medium   space-8             32px
+ *   small    space-6             24px
+ *   target   space-8 + space-3   44px   at every one of the three
+ *
+ * The target does not shrink with the box. That is the whole reason `small`
+ * is safe to offer: it is a smaller drawing and never a smaller thing to
+ * press. */
+.nd-choice {
+  --nd-choice-box: calc(var(--noctua-space-8) + var(--noctua-space-2));
+  --nd-choice-dot: calc(var(--noctua-space-4) + var(--noctua-space-1));
+  --nd-choice-mark: var(--noctua-space-6);
+  --nd-choice-target: calc(var(--noctua-space-8) + var(--noctua-space-3));
+  position: relative;
+  display: grid;
+  /* The box, then everything that reads: the label on the first row and the
+     hint under it, both in the second column so they line up with each other
+     rather than with the box. */
+  /* AND A THIRD TRACK FOR THE ASSISTANT'S MARK. `auto` on an empty track is
+     zero wide, so a choice that carries no mark lays out exactly as it did. */
+  grid-template-columns: var(--nd-choice-box) minmax(0, 1fr) auto;
+  column-gap: var(--noctua-space-3);
+  align-items: start;
+}
+
+/* IN THE THIRD COLUMN, on the label's own row, and OUTSIDE the label. Every
+   press inside a `<label for>` activates the control it names, and the two
+   tracks between this and the box are what keep it clear of the 44 pixel
+   transparent target that overhangs the drawing. */
+.nd-choice-ai {
+  grid-area: 1 / 3;
+  align-self: center;
+  /* A grid item stretches its track by default, so the mark reported a box the
+     width of the leftover row even though the letters sat at its start. */
+  justify-self: start;
+}
+
+/* AND THE LABEL'S TRACK SHRINKS TO ITS WORDS WHEN A MARK FOLLOWS IT. At
+   `1fr` that track takes every pixel left in the row, so a mark after a
+   three-word label sat three hundred pixels away from it, against the far
+   edge of a question it was supposed to be beside. `max-content` is the
+   unwrapped width and the row is still the ceiling, so a long label wraps
+   exactly where it wrapped before. */
+.nd-choice:has(> .nd-choice-ai) {
+  grid-template-columns: var(--nd-choice-box) minmax(0, max-content) auto;
+}
+
+.nd-choice[data-nd-size="medium"] {
+  --nd-choice-box: var(--noctua-space-8);
+  --nd-choice-dot: var(--noctua-space-4);
+  --nd-choice-mark: var(--noctua-space-4);
+}
+
+.nd-choice[data-nd-size="small"] {
+  --nd-choice-box: var(--noctua-space-6);
+  --nd-choice-dot: var(--noctua-space-3);
+  --nd-choice-mark: var(--noctua-space-4);
+}
+
+/* TRANSPARENT AND 44 PIXELS SQUARE, over the box and centred on it.
+ *
+ * Not `display: none` and not `visibility: hidden`: either would take the
+ * control out of the accessibility tree along with the drawing, and what is
+ * left of a checkbox whose input is gone is a picture of one.
+ *
+ * `position: absolute` rather than a grid cell, so a 44px target over a 24px
+ * box does not push the row to 44px tall — the drawing is what sets the
+ * rhythm and the target is allowed to overhang it. */
+.nd-choice-input {
+  position: absolute;
+  inset-block-start: calc((var(--nd-choice-box) - var(--nd-choice-target)) / 2);
+  inset-inline-start: calc((var(--nd-choice-box) - var(--nd-choice-target)) / 2);
+  inline-size: var(--nd-choice-target);
+  block-size: var(--nd-choice-target);
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  /* Above the drawing it sits on, so a pointer meets the control. */
+  z-index: var(--noctua-layer-raised);
+}
+
+/* The drawing: a rounded square for a checkbox, a circle for a radio, and the
+   mark inside it either way. `pointer-events: none`, because the input above
+   is the thing to press and two overlapping hit areas is one of them winning
+   for reasons nobody can see. */
+.nd-choice-box {
+  grid-area: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--nd-choice-box);
+  block-size: var(--nd-choice-box);
+  border: var(--noctua-border-strong) solid var(--nc-color-border-strong);
+  border-radius: var(--noctua-radius-control);
+  background: var(--nc-color-surface);
+  pointer-events: none;
+  transition:
+    background-color var(--noctua-duration-fast) var(--noctua-easing-out),
+    border-color var(--noctua-duration-fast) var(--noctua-easing-out);
+}
+
+.nd-radio > .nd-choice-box {
+  border-radius: var(--noctua-radius-pill);
+}
+
+/* The tick is an icon from the set, never a shape built out of borders.
+   Drawn that way it is a 23×12 box with two five-pixel borders rotated 45
+   degrees: six raw lengths for one glyph, and none of them on any scale. */
+.nd-choice-box > .nd-icon-glyph[data-nd-size] {
+  font-size: var(--nd-choice-mark);
+  color: var(--nc-color-on-accent);
+  opacity: 0;
+  /* THICKER THAN EVERY OTHER GLYPH, AND FOR THE REASON THE SET IS THIN.
+     `spec/icons.toml` lightened the stroke to 1.75 because an icon BESIDE a
+     line of text reads heavier than the text it labels. A tick alone on a
+     filled square is the opposite case: nothing sits beside it, the fill is
+     solid, and at 1.75 it was a hairline in a forty-pixel box.
+
+     TWICE THE BOX'S OWN EDGE AND A HAIRLINE MORE, which is the third weight
+     this mark has carried and the one a reader stopped calling thin. The two
+     before it were the icon's own 1.75 and the edge plus a hairline, and both
+     read as a line drawn on the fill rather than as a mark stamped into it.
+     The ceiling is the drawing's own geometry: the two limbs meet at a right
+     angle and the short one is seven units long, so past six the notch between
+     them closes and the tick becomes a wedge. Five is under that with room to
+     spare, at all three sizes.
+
+     `stroke-width` is a geometry property, so a length in `px` here is one
+     unit of the drawing's own 24-unit grid rather than a device pixel — which
+     is why the border tokens are the right scale to read it from, and why one
+     number covers every size: the glyph scales and the grid does not. */
+  stroke-width: calc(var(--noctua-border-strong) * 2 + var(--noctua-border-hairline));
+}
+
+.nd-choice-dot {
+  inline-size: var(--nd-choice-dot);
+  block-size: var(--nd-choice-dot);
+  border-radius: var(--noctua-radius-pill);
+  background: var(--nc-color-accent);
+  opacity: 0;
+}
+
+/* Checked, drawn from `:checked` on the real input — so the state a screen
+   reader announces and the state a reader sees are one fact, not two kept in
+   step. A checkbox fills; a radio keeps its surface and shows the dot, which
+   is what makes the two tellable apart at a glance. */
+.nd-choice-input:checked ~ .nd-choice-box {
+  border-color: var(--nc-color-accent);
+}
+
+.nd-checkbox > .nd-choice-input:checked ~ .nd-choice-box {
+  background: var(--nc-color-accent);
+}
+
+.nd-choice-input:checked ~ .nd-choice-box > * {
+  opacity: 1;
+}
+
+.nd-choice:hover > .nd-choice-box {
+  border-color: var(--nc-color-fg-muted);
+}
+
+.nd-choice:hover > .nd-choice-input:checked ~ .nd-choice-box {
+  border-color: var(--nc-color-accent-hover);
+}
+
+.nd-checkbox:hover > .nd-choice-input:checked ~ .nd-choice-box {
+  background: var(--nc-color-accent-hover);
+}
+
+/* The ring goes on the drawing, because the control it belongs to is
+   invisible and an outline on an `opacity: 0` element is invisible with it. */
+.nd-choice-input:focus-visible ~ .nd-choice-box {
+  outline: var(--noctua-focus-width) solid var(--nc-color-accent);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-choice-input[aria-invalid="true"] ~ .nd-choice-box {
+  border-color: var(--nc-color-danger);
+}
+
+/* `:disabled` also matches every control inside a `<fieldset disabled>`, which
+   is why `Fieldset { disabled }` needs nothing here to walk its children. */
+.nd-choice-input:disabled {
+  cursor: not-allowed;
+}
+
+.nd-choice-input:disabled ~ .nd-choice-box,
+.nd-choice-input:disabled ~ .nd-choice-label,
+.nd-choice-input:disabled ~ .nd-choice-hint {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+.nd-choice-input:disabled ~ .nd-choice-box {
+  border-color: var(--nc-color-border-strong);
+}
+
+.nd-choice-label {
+  grid-area: 1 / 2;
+  /* Centred against the box rather than sitting on its top edge: a 40px box
+     beside a 24px line reads as two things at different heights otherwise. */
+  align-self: center;
+  min-block-size: var(--nd-choice-box);
+  display: flex;
+  align-items: center;
+  font-size: var(--noctua-size-body);
+  color: var(--nc-color-fg);
+  cursor: pointer;
+}
+
+/* CLIPPED, NOT REMOVED — the same recipe `.nd-visually-hidden` uses, written
+   here rather than by putting that class on the label, because the label is
+   also a grid item and a class the caller could remove is a name the control
+   could lose. The words stay in the accessible tree, so a box in a table's
+   heading still announces what checking it does. */
+.nd-choice-label[data-nd-hide-label="true"] {
+  position: absolute;
+  inline-size: var(--noctua-border-hairline);
+  block-size: var(--noctua-border-hairline);
+  min-block-size: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.nd-choice-hint {
+  grid-area: 2 / 2;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+/* The word between two runs of choices, such as `or`, above the answer that
+   is none of the ones before it. Centred over the width of the largest box, so
+   it lines up with the column of controls rather than with their labels. */
+.nd-choice-divider {
+  inline-size: calc(var(--noctua-space-8) + var(--noctua-space-2));
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+  text-align: center;
+}
+
+/* The conditional block: indented under the choice that reveals it, with a
+   rule down its edge, so it reads as belonging to the answer above it. */
+.nd-choice-reveal {
+  margin-inline-start: var(--noctua-space-4);
+  padding-inline-start: var(--noctua-space-4);
+  border-inline-start: var(--noctua-border-strong) solid var(--nc-color-border);
+}
+
+/* HIDDEN BY THE SCRIPT, and by nothing in this file.
+ *
+ * The attribute below is written by `shell.js` after it has read the control's
+ * state. With no script the block is in the page and readable, which is the
+ * only direction of this that degrades: hidden by CSS and revealed by script
+ * is a follow-up question that a reader without script never sees at all. */
+.nd-choice-reveal[data-nd-revealed="false"] {
+  display: none;
+}
+
+.nd-fieldset {
+  /* A `<fieldset>` refuses to shrink below its content's intrinsic width
+     unless it is told to, which is what makes one inside a 320px frame push a
+     horizontal scrollbar onto the whole page. */
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.nd-fieldset-legend {
+  padding: 0;
+  margin-block-end: var(--noctua-space-3);
+  font-size: var(--noctua-size-lead);
+  font-weight: var(--noctua-weight-semibold);
+  line-height: var(--noctua-leading-heading);
+  color: var(--nc-color-fg);
+}
+
+.nd-fieldset[data-nd-heading="true"] > .nd-fieldset-legend {
+  font-size: var(--noctua-size-h2);
+  margin-block-end: var(--noctua-space-4);
+}
+
+/* The legend is the page's heading here, so the heading takes the legend's
+   type rather than the other way round: the size is a decision about this
+   question, not about `<h1>`. */
+.nd-fieldset-heading {
+  margin: 0;
+  font: inherit;
+}
+
+.nd-fieldset-hint {
+  margin-block-end: var(--noctua-space-3);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-fieldset-error {
+  margin-block-end: var(--noctua-space-3);
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-semibold);
+  color: var(--nc-color-danger);
+}
+
+.nd-choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-4);
+}
+
+.nd-fieldset[data-nd-inline="true"] > .nd-choices {
+  flex-direction: row;
+  flex-wrap: wrap;
+  column-gap: var(--noctua-space-8);
+}

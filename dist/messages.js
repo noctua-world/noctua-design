@@ -62,6 +62,21 @@ export function plural(sentence, count) {
 }
 
 /**
+ * The two above, in the order every caller wants them.
+ *
+ * A caller filling a sentence that counts something has to choose the form
+ * BEFORE putting the values in, or `{count}` is substituted into a template
+ * that still holds every variant. Four enhancers each wrote that composition
+ * out; the documentation site's own script wrote a fifth copy with its own
+ * plural rule, which is the thing this file's header refuses.
+ *
+ * `count` of `null` means the sentence counts nothing and is only filled.
+ */
+export function message(sentence, holes = {}, count = null) {
+  return fill(count === null ? sentence : plural(sentence, count), holes);
+}
+
+/**
  * Puts one sentence in a live region, and never the same one twice running.
  *
  * Replacing text with identical text announces nothing in most screen readers,

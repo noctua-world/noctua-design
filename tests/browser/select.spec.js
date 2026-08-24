@@ -55,10 +55,17 @@ test("a select is the same box as a button, at every size", async ({ page }) => 
   // two of border, which is more than its own minimum. So the constants were
   // wrong and the stylesheet was right, and a test that says 32 would go on
   // being wrong every time the type scale moved. Both are read off the page.
+  // WITHIN THE PAGE'S OWN CONTENT, NOT THE SITE'S CHROME. The header carries a
+  // `Button` too — the drawer's toggle — and it is the first `medium` one in
+  // the document. It is `display: none` from `lg` up, which the shell has
+  // always said and only started doing when the component rules moved out of
+  // the shell's stylesheet: until then a component rule written later beat the
+  // rule hiding it. So this measured a zero-height button in the header and
+  // called it the component's height.
   const measure = (target, selector) =>
     target.evaluate((sel) => {
       const of = (size) => {
-        const el = document.querySelector(sel.replace("{size}", size));
+        const el = document.querySelector(`.nd-doc ${sel.replace("{size}", size)}`);
         return el ? Math.round(el.getBoundingClientRect().height) : null;
       };
       return { small: of("small"), medium: of("medium"), large: of("large") };

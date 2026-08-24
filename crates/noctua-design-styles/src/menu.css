@@ -1,0 +1,252 @@
+
+
+/* --- Menu -------------------------------------------------------------------
+ *
+ * The seventh floating surface, and the same three facts as the other six: it
+ * is `position: fixed` so nothing clips it, `anchor.js` writes where it hangs,
+ * and it carries no radius on anything that scrolls. What it adds is a list —
+ * so the surface clips and the items inside it are the things with padding. */
+.nd-menu {
+  --nd-anchor-block: 0;
+  --nd-anchor-inline: 0;
+  --nd-anchor-start: 0;
+
+  position: fixed;
+  inset-block-start: calc(var(--nd-anchor-block) + var(--noctua-space-1));
+  inset-block-end: auto;
+  /* The leading edge, like `Info` and unlike the five before it: a menu hanging
+     back across the button it belongs to covers the thing that opened it. */
+  inset-inline: var(--nd-anchor-start) auto;
+  z-index: var(--noctua-layer-popover);
+  display: flex;
+  flex-direction: column;
+  min-inline-size: var(--noctua-space-48);
+  max-inline-size: min(var(--noctua-measure-lead), calc(100vw - var(--noctua-space-8)));
+  /* AS TALL AS THE ANCHOR LEFT ROOM FOR, AND NO TALLER.
+     `anchor.js` writes `--nd-anchor-block` as the distance from the edge of
+     the window the menu hangs from, and flips the menu above its button when
+     there is more room up there — so one expression bounds both directions
+     and this is the same one `.nd-select-panel`, `.nd-date-input-panel` and
+     `.nd-color-picker-panel` are bounded by. Without it a menu longer than the
+     window simply ran off the bottom of it: measured on `/menu/` at a 520px
+     window as 1216px of surface with its last eighteen rows unreachable. */
+  max-block-size: calc(100vh - var(--nd-anchor-block) - var(--noctua-space-8));
+  /* The clipping context. Not `auto`: this element carries the radius, so it
+     is the one thing here that must never scroll. */
+  overflow: hidden;
+  padding-block: var(--noctua-space-1);
+  background: var(--nc-color-surface-raised);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  /* NO `box-shadow`. `NOCTUA.md §9.7` forbids an elevated surface anywhere in
+     this system, and a floating panel is exactly where the temptation is: the
+     raised surface colour and the hairline are what say it is above the page.
+     The other six say it the same way. */
+  border-radius: var(--noctua-radius-surface);
+}
+
+.nd-menu[data-nd-above] {
+  inset-block-start: auto;
+  inset-block-end: calc(var(--nd-anchor-block) + var(--noctua-space-1));
+}
+
+/* AND THE LIST INSIDE IT IS WHAT MOVES. It carries no radius, so a classic
+   scrollbar has a square edge to paint against, and `min-block-size: 0` is
+   what lets a flex item shrink below its own content — without it the surface
+   grows to the list and the `max-block-size` above buys nothing. */
+.nd-menu-scroll {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  overflow-y: auto;
+  /* Reaching the end of the menu must not start scrolling the page behind it. */
+  overscroll-behavior: contain;
+}
+
+.nd-menu[hidden] {
+  display: none;
+}
+
+/* `end` pins the trailing edges together, for a button at the far side of a
+   window where the leading edge would put the menu off the screen. */
+.nd-menu[data-nd-placement="end"] {
+  inset-inline: auto var(--nd-anchor-inline);
+}
+
+/* AND `auto` MEASURES, which is the whole of the difference between it and
+   `start`. `anchor.js` writes `data-nd-anchor` with the edge a measurement
+   picks, and only `auto` reads it: a stated edge is a decision, not a guess. */
+.nd-menu[data-nd-placement="auto"][data-nd-anchor="end"] {
+  inset-inline: auto var(--nd-anchor-inline);
+}
+
+.nd-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  inline-size: 100%;
+  padding-block: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-3);
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  text-align: start;
+  text-decoration: none;
+  color: var(--nc-color-fg);
+  cursor: pointer;
+}
+
+/* NO RADIUS ON THE ITEM, because the surface above it is what clips: a rounded
+   item inside a rounded surface draws two corners a pixel apart, which is the
+   defect `.nd-panel` and `.nd-codeblock` were split to avoid. */
+.nd-menu-item:hover {
+  background: var(--nc-color-surface-subtle);
+}
+
+.nd-menu-item:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
+/* REFUSED AND STILL THERE. `aria-disabled` keeps it in the arrow walk, so the
+   drawing has to say *unavailable* rather than *absent* — dimmed, and with the
+   pointer saying the same thing. */
+.nd-menu-item[aria-disabled="true"] {
+  color: var(--nc-color-fg-muted);
+  cursor: not-allowed;
+}
+
+.nd-menu-item[aria-disabled="true"]:hover {
+  background: none;
+}
+
+.nd-menu-item[data-nd-tone] {
+  color: var(--nd-tone);
+}
+
+.nd-menu-item[data-nd-tone]:hover {
+  background: var(--nd-tone-bg);
+}
+
+.nd-menu-item-text {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.nd-menu-item-detail {
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+/* --- The note beside a word, painted once ---
+ *
+ * TWO COMPONENTS OPEN THIS SURFACE: `Info`, beside a word it explains, and
+ * `AILabel`, beside a value an assistant wrote. Both write `nd-note` and their
+ * own part class on one element, which is the split `.nd-panel.nd-select-panel`
+ * already makes between a surface and the part that is it.
+ *
+ * The three placement rules keep their component prefix, because the attribute
+ * they read sits on each component's own root. */
+.nd-note {
+  --nd-anchor-block: 0;
+  --nd-anchor-inline: 0;
+  --nd-anchor-start: 0;
+
+  position: fixed;
+  inset-block-start: calc(var(--nd-anchor-block) + var(--noctua-space-1));
+  inset-block-end: auto;
+  /* THE LEADING EDGE, unlike the five panels that came before. A note beside a
+     word in running text hung from its trailing edge reaches back across the
+     sentence it is about; hung from its leading edge it starts where the
+     marker is, which is where a reader is already looking. */
+  inset-inline: var(--nd-anchor-start) auto;
+  z-index: var(--noctua-layer-popover);
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+  inline-size: min(var(--noctua-measure-lead), calc(100vw - var(--noctua-space-8)));
+  padding: var(--noctua-space-3);
+  background: var(--nc-color-surface-raised);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-surface);
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-regular);
+  letter-spacing: var(--noctua-tracking-normal);
+  text-transform: none;
+  text-align: start;
+  color: var(--nc-color-fg);
+}
+
+/* Hung from the control's top edge when the script found more room up than
+   down. `--nd-anchor-block` is the distance from the other edge of the window
+   in that case, so one property serves both directions. */
+.nd-note[data-nd-above] {
+  inset-block-start: auto;
+  inset-block-end: calc(var(--nd-anchor-block) + var(--noctua-space-1));
+}
+
+.nd-note[hidden] {
+  display: none;
+}
+
+/* `end` is the five-panel behaviour: the note's trailing edge on the marker's,
+   which is what a marker at the right edge of a table wants. */
+.nd-info[data-nd-placement="end"] .nd-note,
+.nd-ai-label[data-nd-placement="end"] .nd-note {
+  inset-inline: auto var(--nd-anchor-inline);
+}
+
+/* AND `auto` MEASURES, which is the whole of the difference between it and
+   `start`. `anchor.js` writes `data-nd-anchor` with the edge a measurement
+   picks, and only `auto` reads it: a stated edge is a decision, not a guess. */
+.nd-info[data-nd-placement="auto"] .nd-note[data-nd-anchor="end"],
+.nd-ai-label[data-nd-placement="auto"] .nd-note[data-nd-anchor="end"] {
+  inset-inline: auto var(--nd-anchor-inline);
+}
+
+/* Only `Info` has a heading, so only `Info` has this. */
+.nd-info-title {
+  font-weight: var(--noctua-weight-semibold);
+}
+
+.nd-note-body {
+  color: var(--nc-color-fg-muted);
+}
+
+/* The one control the markup does not ship, because with no script there is
+   nothing to close. */
+.nd-note-close {
+  position: absolute;
+  inset-block-start: var(--noctua-space-1);
+  inset-inline-end: var(--noctua-space-1);
+  inline-size: var(--noctua-space-6);
+  block-size: var(--noctua-space-6);
+  padding: 0;
+  border: 0;
+  border-radius: var(--noctua-radius-control);
+  background: none;
+  color: var(--nc-color-fg-muted);
+  cursor: pointer;
+}
+
+.nd-note-close::before {
+  content: "×";
+  font-size: var(--noctua-size-body);
+  line-height: 1;
+}
+
+.nd-note-close:hover {
+  color: var(--nc-color-fg);
+}
+
+.nd-note-close:focus-visible {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* Room for it, so a title does not run under the control. */
+.nd-note:has(> .nd-note-close) .nd-info-title,
+.nd-note:has(> .nd-note-close) .nd-note-body:first-child {
+  padding-inline-end: var(--noctua-space-6);
+}

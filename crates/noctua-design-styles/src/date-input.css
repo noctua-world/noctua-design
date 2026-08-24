@@ -1,0 +1,169 @@
+
+
+/* --- The date input ---------------------------------------------------------
+ *
+ * Three labelled boxes under one question — `DateInput`. The boxes are real
+ * bordered inputs (unlike the tag picker's naked composer), so the global
+ * focus ring lands on each box itself. The widths are character-derived: a day
+ * is two digits, a year is four, and a box sized to its answer is the
+ * affordance. */
+.nd-date-input {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+}
+
+/* Always rendered so the id it is announced by always exists; hidden while
+ * nobody — caller or validator — has a sentence for it. */
+
+.nd-date-input-row {
+  display: flex;
+  /* IT WRAPS, AND UNTIL AN ASSISTANT'S MARK JOINED IT NOTHING MADE IT NEED TO.
+     Three segments fit 320 with room; three segments and a mark do not, and in
+     `qps` the mark is three times its English width. A row that cannot wrap
+     scrolls the page sideways instead. */
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--noctua-space-4);
+}
+
+.nd-date-input-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-1);
+}
+
+.nd-date-input-label {
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-medium);
+}
+
+.nd-date-input-segment {
+  min-block-size: var(--noctua-space-12);
+  padding-block: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-3);
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border-strong);
+  border-radius: var(--noctua-radius-control);
+}
+
+/* A box sized to its answer. `ch` because the answer is a count of digits,
+ * not a length the spacing scale owns. */
+.nd-date-input-two {
+  inline-size: 5ch; /* allow-literal: two digits plus the box's own padding, in the digit's own unit */
+}
+
+.nd-date-input-four {
+  inline-size: 7ch; /* allow-literal: four digits plus the box's own padding, in the digit's own unit */
+}
+
+.nd-date-input-segment:hover {
+  border-color: var(--nc-color-fg-muted);
+}
+
+.nd-date-input-segment[aria-invalid="true"] {
+  border-color: var(--nc-color-danger);
+}
+
+.nd-date-input[data-nd-size="small"] .nd-date-input-segment,
+.nd-date-input[data-nd-size="small"] .nd-date-input-suggest-button {
+  min-block-size: var(--noctua-space-8);
+  padding-block: var(--noctua-space-1);
+  font-size: var(--noctua-size-caption);
+}
+
+.nd-date-input[data-nd-size="large"] .nd-date-input-segment,
+.nd-date-input[data-nd-size="large"] .nd-date-input-suggest-button {
+  min-block-size: var(--noctua-space-16);
+  padding-block: var(--noctua-space-3);
+  font-size: var(--noctua-size-body);
+}
+
+.nd-field:disabled .nd-date-input-segment,
+.nd-field:disabled .nd-date-input-label {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused field is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+.nd-date-input[data-nd-glass="true"] .nd-date-input-segment {
+  background: color-mix(in oklab, var(--nc-color-surface) var(--noctua-glass-opacity), transparent);
+}
+
+/* The suggestions control the script builds: a box like the boxes, holding
+ * the calendar glyph, sitting at the row's end. */
+.nd-date-input-suggest-button {
+  display: grid;
+  place-items: center;
+  min-block-size: var(--noctua-space-12);
+  padding-block: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-3);
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border-strong);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-date-input-suggest-button[aria-expanded="true"] {
+  border-color: var(--nc-color-accent);
+}
+
+/* The panel, `Select`'s own: fixed so no frame clips it, opaque so it reads
+ * over whatever the reader has done to the page behind it. */
+.nd-panel.nd-date-input-panel {
+  --nd-anchor-block: 0;
+  --nd-anchor-inline: 0;
+  position: fixed;
+  inset-block-start: calc(var(--nd-anchor-block) + var(--noctua-space-1));
+  inset-block-end: auto;
+  inset-inline: auto var(--nd-anchor-inline);
+  inline-size: min(calc(var(--noctua-breakpoint-sm) / 2), calc(100vw - var(--noctua-space-8)));
+  max-block-size: calc(100vh - var(--nd-anchor-block) - var(--noctua-space-8));
+  padding: var(--noctua-space-2);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--nc-color-surface-subtle);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-surface);
+}
+
+.nd-panel.nd-date-input-panel[data-nd-above] {
+  inset-block-start: auto;
+  inset-block-end: calc(var(--nd-anchor-block) + var(--noctua-space-1));
+}
+
+.nd-panel.nd-date-input-panel[hidden] {
+  display: none;
+}
+
+.nd-date-input-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  outline: none;
+}
+
+.nd-date-input-option {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--noctua-space-12);
+  padding-block: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-3);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+/* The highlight is the strong one, `Select`'s reasoning: a tint over a tinted
+ * panel is a keyboard nobody can follow. */
+.nd-date-input-option[data-nd-active] {
+  background: var(--nc-color-accent);
+  color: var(--nc-color-on-accent);
+}

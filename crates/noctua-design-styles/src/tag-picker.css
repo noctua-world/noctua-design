@@ -1,0 +1,214 @@
+
+
+/* --- TagPicker -------------------------------------------------------------
+ *
+ * A field that grows a row when the tags need one, which is the one place this
+ * control cannot line up with a `Button` — so it does not pretend to: the
+ * height is what the tags make it and the composer is what is left. */
+.nd-tag-picker {
+  --nd-tag-picker-height: var(--noctua-space-12);
+  /* Written by `shell.js` when the panel is anchored, and declared here so the
+     name exists whether or not that ever runs. */
+  --nd-tag-picker-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--noctua-space-2);
+  position: relative;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.nd-tag-picker[data-nd-size="small"] {
+  --nd-tag-picker-height: var(--noctua-space-8);
+}
+
+.nd-tag-picker[data-nd-size="large"] {
+  --nd-tag-picker-height: var(--noctua-space-16);
+}
+
+/* THE NATIVE CONTROL SCROLLS, SO IT IS SQUARE.
+ *
+ * A `<select multiple>` with no `size` is a four-row scrolling listbox, and a
+ * scrollable element never carries a radius: a classic scrollbar paints square
+ * straight through a rounded corner the moment a reader sets corners to
+ * `circular`. It is only visible with the script blocked — which is exactly why
+ * nothing caught it, because every sweep that asks this question runs with a
+ * script. `material.spec.js` asks it without one now. */
+.nd-tag-picker-native {
+  border-radius: var(--noctua-radius-none);
+}
+
+.nd-tag-picker-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  position: relative;
+  min-block-size: var(--nd-tag-picker-height);
+  padding: var(--noctua-space-1) var(--noctua-space-3);
+  background: color-mix(in oklab, var(--nc-color-surface-subtle) var(--nd-veil), transparent);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+}
+
+.nd-tag-picker-field:focus-within {
+  border-color: var(--nc-color-border-strong);
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+.nd-tag-picker[data-nd-invalid="true"] .nd-tag-picker-field {
+  border-color: var(--nc-color-danger);
+}
+
+/* ONE TAB STOP FOR EVERY TAG, NOT ONE EACH. Forty of them would be forty
+   presses between the composer and whatever is after it. */
+.nd-tag-picker-tags {
+  display: contents;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nd-tag-picker-tags > li {
+  display: inline-flex;
+  min-inline-size: 0;
+}
+
+/* The composer takes what is left of the row, and never less than enough to
+   type in: a field with nine tags in it must still be a field. */
+.nd-tag-picker-input {
+  flex: 1 1 var(--noctua-space-24);
+  min-inline-size: 0;
+  padding: 0;
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  background: none;
+  border: none;
+  outline: none;
+}
+
+.nd-tag-picker-input::placeholder {
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-tag-picker-clear {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--noctua-space-8);
+  block-size: var(--noctua-space-8);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: none;
+  border-radius: var(--noctua-radius-pill);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .nd-tag-picker-clear:hover {
+    color: var(--nc-color-fg);
+  }
+}
+
+/* A REFUSED PICKER LOOKS REFUSED, which the real attribute alone does not do. */
+.nd-tag-picker:has(.nd-tag-picker-input:disabled) .nd-tag-picker-field {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+.nd-tag-picker[data-nd-loading="true"] .nd-tag-picker-input {
+  cursor: progress;
+}
+
+/* --- The suggestions ---
+ *
+ * Two elements, because a scrollable element never carries a radius: the panel
+ * clips and the list inside it scrolls. `.nd-panel` already makes this split
+ * and it is repeated here for the reason it is repeated for `Select` — the
+ * panel is `position: absolute` from `30rem` up, and an absolutely positioned
+ * panel inside an example frame gets clipped by the frame. */
+.nd-panel.nd-tag-picker-panel {
+  --nd-anchor-block: 0;
+  --nd-anchor-inline: 0;
+  position: fixed;
+  inset-block-start: var(--nd-anchor-block, 100%);
+  inset-inline: 0;
+  z-index: var(--noctua-layer-popover);
+  max-block-size: min(var(--noctua-space-64), calc(100vh - var(--nd-anchor-block, 0px) - var(--noctua-space-8)));
+  overflow: hidden;
+  /* Opaque, whatever `glass` says: a list floating over the page it belongs to
+     has to be readable against whatever is behind it. */
+  background: var(--nc-color-surface);
+  border-block: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+.nd-panel.nd-tag-picker-panel[data-nd-above] {
+  inset-block: auto var(--nd-anchor-block, 100%);
+}
+
+@media (min-width: 30rem) {
+  .nd-panel.nd-tag-picker-panel {
+    inset-inline: auto var(--nd-anchor-inline, 0);
+    inline-size: var(--nd-tag-picker-width, 100%);
+    border: var(--noctua-border-hairline) solid var(--nc-color-border);
+    border-radius: var(--noctua-radius-surface);
+  }
+}
+
+.nd-tag-picker-list {
+  margin: 0;
+  padding: var(--noctua-space-1);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+
+.nd-tag-picker-item {
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-tag-picker-item[aria-selected="true"] {
+  color: var(--nc-color-on-accent);
+  background: var(--nc-color-accent);
+}
+
+.nd-tag-picker-item[data-nd-create] {
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-tag-picker-item[data-nd-create][aria-selected="true"] {
+  color: var(--nc-color-on-accent);
+}
+
+.nd-tag-picker-empty {
+  padding: var(--noctua-space-2) var(--noctua-space-3);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-tag-picker-empty:empty {
+  display: none;
+}
+
+/* The sentence, and the same one the live region says. Empty it takes no room:
+   a `role="status"` over nothing announces nothing. */
+.nd-tag-picker-note {
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-tag-picker-note:empty {
+  display: none;
+}
+
+/* --- Glass --- */
+.nd-tag-picker[data-nd-glass="true"] .nd-tag-picker-field {
+  background: color-mix(in oklab, var(--nc-color-surface) var(--noctua-glass-opacity), transparent);
+}
