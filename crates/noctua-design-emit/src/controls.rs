@@ -2185,7 +2185,7 @@ const SELECT_REACT: &str = r#"  const size_ = size ?? "medium";
       // The tick the enhanced list marks a chosen option with, in a template
       // for the script to clone: every drawing lives in the markup.
       h(
-        "template",
+        Template,
         { key: "t", "data-nd-glyph": "check" },
         h(Icon, { icon: check, size: "small" }),
       ),
@@ -2298,7 +2298,7 @@ const SELECT_OPTION_REACT: &str = r#"  const root = ["nd-select-option", classNa
     // drawing can sit next to an element that cannot contain one.
     icon
       ? h(
-          "template",
+          Template,
           { key: "g", "data-nd-glyph": icon },
           h(Icon, { icon, size: "small" }),
         )
@@ -2861,7 +2861,7 @@ const TABLE_REACT: &str = r#"  const density_ = density ?? "default";
       "data-nd-table-status": "",
     }),
     h(
-      "template",
+      Template,
       { key: "tpl", "data-nd-table-column-template": "" },
       h(
         "li",
@@ -5753,7 +5753,7 @@ const TAG_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
       "data-nd-tag-picker-status": "",
     }),
     h(
-      "template",
+      Template,
       { key: "p", "data-nd-tag-template": "" },
       h(Tag, { label: "", size: tagSize, removeLabel: "{label}" }),
     ),
@@ -6730,12 +6730,12 @@ const COLOR_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
       "data-nd-color-picker-status": "",
     }),
     h(
-      "template",
+      Template,
       { key: "1", "data-nd-chip-template": "" },
       h("span", { key: "c", className: "nd-color-picker-chip" }),
     ),
     h(
-      "template",
+      Template,
       { key: "2", "data-nd-swatch-template": "" },
       h(
         "li",
@@ -6749,7 +6749,7 @@ const COLOR_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
       ),
     ),
     h(
-      "template",
+      Template,
       { key: "3", "data-nd-committed-template": "" },
       h(
         "li",
@@ -6768,7 +6768,7 @@ const COLOR_PICKER_REACT: &str = r#"  const size_ = size ?? "medium";
       ),
     ),
     h(
-      "template",
+      Template,
       { key: "4", "data-nd-code-template": "" },
       h(
         "li",
@@ -8120,7 +8120,7 @@ const FILE_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
       // @ai nd-ai-slot-start,
     ),
     h(
-      "template",
+      Template,
       { key: "t", "data-nd-file-template": "" },
       h(
         "li",
@@ -8811,7 +8811,7 @@ const CAROUSEL_REACT: &str = r#"  const perView_ = perView ?? "1";
       "data-nd-carousel-status": "",
     }),
     h(
-      "template",
+      Template,
       { key: "m", "data-nd-dot-template": "" },
       h("button", {
         key: "b",
@@ -8958,20 +8958,23 @@ const ERROR_SUMMARY_REACT: &str = r##"  const root = ["nd-error-summary", classN
         children,
       ),
     ),
-    h(
-      "template",
-      { key: "m", "data-nd-error-summary-template": "" },
-      h(
-        "li",
-        { key: "i", className: "nd-error-summary-item" },
-        h("a", {
-          key: "a",
-          className: "nd-error-summary-link",
-          href: "#",
-          "data-nd-error-summary-link": "",
-        }),
-      ),
-    ),
+    // WRITTEN AS MARKUP, NOT AS CHILDREN, and that is not a style choice.
+    // A `<template>`'s contents belong to its `content` fragment and are inert
+    // — that is what a template IS — but React appends children as ordinary
+    // nodes, so the model row became a real empty link in the document: found
+    // by `querySelectorAll`, counted by anything walking the list, and offered
+    // to a screen reader. The Dioxus half is server-rendered and parsed, so it
+    // was correct; the two disagreed and only the conformance runner asked.
+    h(Template, {
+      key: "m",
+      "data-nd-error-summary-template": "",
+      dangerouslySetInnerHTML: {
+        __html:
+          '<li class="nd-error-summary-item">' +
+          '<a class="nd-error-summary-link" href="#" data-nd-error-summary-link=""></a>' +
+          "</li>",
+      },
+    }),
   );
 "##;
 
@@ -9381,7 +9384,7 @@ const DATE_INPUT_REACT: &str = r#"  const size_ = size ?? "medium";
       : null,
     suggestLabel
       ? h(
-          "template",
+          Template,
           { key: "t", "data-nd-date-input-glyph": "" },
           h(Icon, { icon: calendarIcon, size: "small" }),
         )
@@ -14156,7 +14159,7 @@ const DATE_PICKER_REACT: &str = r#"  const selection_ = selection ?? "single";
       }),
       fielded
         ? h(
-            "template",
+            Template,
             { key: "t", "data-nd-date-picker-glyph": "" },
             h(Icon, { icon: calendar, size: "small" }),
           )

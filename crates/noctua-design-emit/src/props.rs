@@ -84,6 +84,10 @@ pub fn emit(components: &[Component], drawings: &[Icon]) -> Vec<EmittedFile> {
         "packages/react/src/components/index.d.ts",
         ts_index(components),
     ));
+    files.push(EmittedFile::new(
+        "packages/react/src/components/template.js",
+        template_helper(),
+    ));
     files
 }
 
@@ -540,6 +544,15 @@ fn react(component: &Component, drawings: &[Icon]) -> String {
     // it reads its grammar tables at render time, so an absent import is not a
     // wrong icon, it is a `ReferenceError` on every block.
     out.push_str(&controls::react_imports(component));
+    // A body that draws a `<template>` needs the helper that puts its children
+    // in `content`, which is the one thing React will not do for a template.
+    let mut body = String::new();
+    if controls::is_custom(component) {
+        controls::react_body(&mut body, component);
+    }
+    if body.contains("Template,") || body.contains("h(Template") {
+        out.push_str("import { Template } from \"./template.js\";\n");
+    }
     // And the one a host gains from `[meta] ai`, which its body did not ask
     // for and cannot: the fragment is written by `controls::ai_block_react`.
     out.push_str(&controls::ai_imports_react(component));
@@ -719,6 +732,43 @@ fn js_index(components: &[Component]) -> String {
         )
         .expect("write");
     }
+    out
+}
+
+/// A `<template>` whose children end up where a template's children belong.
+///
+/// # The defect this exists for
+///
+/// React appends children to a `<template>` as ordinary child nodes. The HTML
+/// parser does not: it puts them in the element's `content` fragment, which is
+/// inert and is what `cloneNode` on a template is FOR. So ten components drew a
+/// model row that the Dioxus half kept inert and the React half put in the
+/// document — a real empty link a screen reader could reach, and, worse, a
+/// `content` that was empty, so every enhancer that cloned the model cloned
+/// nothing at all.
+///
+/// The move happens in a layout effect, before paint, for the reason
+/// `example-react.js` gives about its own: it is the moment the DOM exists and
+/// nothing has been shown yet.
+fn template_helper() -> String {
+    let mut out = header_from(CommentStyle::Line("//"), COMPONENT_SPEC);
+    out.push_str(
+        r#"
+import { createElement as h, useLayoutEffect, useRef } from "react";
+
+export function Template({ children, ...rest }) {
+  const host = useRef(null);
+  useLayoutEffect(() => {
+    const element = host.current;
+    if (!element) return;
+    // Into `content`, which is where the parser would have put them, and out
+    // of the document, which is where React put them.
+    while (element.firstChild) element.content.append(element.firstChild);
+  });
+  return h("template", { ...rest, ref: host }, children);
+}
+"#,
+    );
     out
 }
 

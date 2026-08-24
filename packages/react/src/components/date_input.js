@@ -16,6 +16,7 @@ import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
 import { calendar as calendarIcon } from "@noctua-world/design-tokens/icons/calendar.js";
+import { Template } from "./template.js";
 import { AILabel } from "./ai_label.js";
 export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint, error, errorLabel, value, min, max, required, disabled, size, order, bday, pad, expand, calendar, today, suggestLabel, previousLabel, nextLabel, requiredLabel, missingLabel, numberLabel, yearDigitsLabel, invalidLabel, minLabel, maxLabel, glass, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const size_ = size ?? "medium";
@@ -167,7 +168,7 @@ export function DateInput({ name, legend, dayLabel, monthLabel, yearLabel, hint,
       : null,
     suggestLabel
       ? h(
-          "template",
+          Template,
           { key: "t", "data-nd-date-input-glyph": "" },
           h(Icon, { icon: calendarIcon, size: "small" }),
         )

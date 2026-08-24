@@ -147,7 +147,13 @@ fn grid(
     out.push_str("]}]");
 }
 
-fn entry(out: &mut String, first: &mut bool, name: &str, nodes: &[Node], context: Context) {
+pub(crate) fn entry(
+    out: &mut String,
+    first: &mut bool,
+    name: &str,
+    nodes: &[Node],
+    context: Context,
+) {
     if !*first {
         out.push(',');
     }
@@ -216,7 +222,13 @@ fn one(out: &mut String, node: &Node, scope: Scope, first: &mut bool) {
                         .iter()
                         .any(|declared| declared.name == *prop && declared.kind == "bool")
                 });
-                value_json(out, value, scope, boolean);
+                // An icon prop carries a NAME on the Rust side and a DRAWING on
+                // the React one, so this is where the name becomes one.
+                if is_icon(name, prop) {
+                    drawing(out, &scope.text(value));
+                } else {
+                    value_json(out, value, scope, boolean);
+                }
             }
             out.push_str("},\"c\":");
             array(out, children, scope);
@@ -425,6 +437,44 @@ fn find<'a>(nodes: &'a [Node], subject: &str, scope: Scope) -> Option<(&'a Node,
         }
     }
     None
+}
+
+/// Whether a prop of this component carries an icon name.
+fn is_icon(component: &str, prop: &str) -> bool {
+    crate::generated::icon_props::ICON_PROPS
+        .iter()
+        .any(|(name, props)| *name == component && props.contains(&prop))
+}
+
+/// One icon, as the React half needs it: the drawing, not its name.
+///
+/// **Resolved here rather than in the browser.** React's `Icon` takes a
+/// drawing, by `NOCTUA.md §9.5`'s rule that one icon is one module and a table
+/// of every drawing is what made one icon cost all of them — so a name is not
+/// something the browser can turn into a drawing without importing one module
+/// per name. It was a name until 2026-08-24, and every React example carrying
+/// an icon threw `Icon needs a drawing` and drew nothing; the conformance
+/// runner is what finally asked.
+fn drawing(out: &mut String, name: &str) {
+    let Some(icon) = noctua_design_icons::IconDrawing::parse(name) else {
+        string(out, name);
+        return;
+    };
+    out.push('{');
+    string(out, "name");
+    out.push(':');
+    string(out, icon.name);
+    out.push(',');
+    string(out, "viewBox");
+    out.push(':');
+    string(out, icon.view_box);
+    out.push(',');
+    string(out, "filled");
+    out.push_str(if icon.filled { ":true," } else { ":false," });
+    string(out, "body");
+    out.push(':');
+    string(out, icon.body);
+    out.push('}');
 }
 
 #[cfg(test)]

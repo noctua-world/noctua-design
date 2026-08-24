@@ -15,6 +15,7 @@ import { Field } from "./field.js";
 import { Tag } from "./tag.js";
 
 import { Icon } from "./icon.js";
+import { Template } from "./template.js";
 import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
 export function TagPicker({ name, label, hint, error, placeholder, size, creatable, createLabel, separators, paste, duplicates, max, maxLabel, pattern, invalidLabel, clearable, clearLabel, removeLabel, addedLabel, removedLabel, status, emptyLabel, loading, loadingLabel, disabled, required, glass, aiMark, aiLabel, aiNote, className, children, ...rest }) {
@@ -141,7 +142,7 @@ export function TagPicker({ name, label, hint, error, placeholder, size, creatab
       "data-nd-tag-picker-status": "",
     }),
     h(
-      "template",
+      Template,
       { key: "p", "data-nd-tag-template": "" },
       h(Tag, { label: "", size: tagSize, removeLabel: "{label}" }),
     ),

@@ -13,6 +13,7 @@ import { createElement as h } from "react";
 
 import { Fragment } from "react";
 import { Icon } from "./icon.js";
+import { Template } from "./template.js";
 export function SelectOption({ value, label, detail, icon, swatch, selected, disabled, className, ...rest }) {
   const root = ["nd-select-option", className].filter(Boolean).join(" ");
   return h(
@@ -38,7 +39,7 @@ export function SelectOption({ value, label, detail, icon, swatch, selected, dis
     // drawing can sit next to an element that cannot contain one.
     icon
       ? h(
-          "template",
+          Template,
           { key: "g", "data-nd-glyph": icon },
           h(Icon, { icon, size: "small" }),
         )

@@ -14,6 +14,7 @@ import { createElement as h } from "react";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { Template } from "./template.js";
 import { AILabel } from "./ai_label.js";
 import { check } from "@noctua-world/design-tokens/icons/check.js";
 import { chevronDown } from "@noctua-world/design-tokens/icons/chevron-down.js";
@@ -117,7 +118,7 @@ export function Select({ name, label, hint, error, errorLabel, placeholder, requ
       // The tick the enhanced list marks a chosen option with, in a template
       // for the script to clone: every drawing lives in the markup.
       h(
-        "template",
+        Template,
         { key: "t", "data-nd-glyph": "check" },
         h(Icon, { icon: check, size: "small" }),
       ),

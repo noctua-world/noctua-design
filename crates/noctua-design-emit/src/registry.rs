@@ -59,10 +59,13 @@ const HEAVY: &[Chunk] = &[
 /// The registry, and the chunks it defers to.
 #[must_use]
 pub fn emit(components: &[Component]) -> Vec<EmittedFile> {
-    let mut files = vec![EmittedFile::new(
-        "docs-site/js/registry.js",
-        registry(components),
-    )];
+    let mut files = vec![
+        EmittedFile::new(
+            "docs-site/src/generated/icon_props.rs",
+            icon_props(components),
+        ),
+        EmittedFile::new("docs-site/js/registry.js", registry(components)),
+    ];
     files.extend(
         HEAVY.iter().map(|chunk| {
             EmittedFile::new(format!("docs-site/js/{}", chunk.file), chunk_file(chunk))
@@ -77,6 +80,40 @@ fn deferred(name: &str) -> bool {
 }
 
 /// The registry itself.
+/// Which props carry an icon, by component.
+///
+/// The serialiser needs it and the browser does not: a tree written for React
+/// carries the **drawing**, resolved here, rather than a name the browser would
+/// have to import — and importing one module per icon name would be 1,777
+/// dynamic imports in a bundle, which is the payload `NOCTUA.md §9.5` refuses.
+pub(crate) fn icon_props(components: &[Component]) -> String {
+    let mut out = header_from(CommentStyle::Line("//!"), COMPONENT_SPEC);
+    out.push_str(
+        "\n//! Which props take an icon, for the serialiser that has to resolve one.\n\n\
+         /// `(component, props)`, in catalogue order.\n\
+         pub(crate) const ICON_PROPS: &[(&str, &[&str])] = &[\n",
+    );
+    for component in components {
+        let props: Vec<&str> = component
+            .prop
+            .keys()
+            .filter(|name| crate::controls::dioxus_type(component, name).is_some())
+            .map(String::as_str)
+            .collect();
+        if props.is_empty() {
+            continue;
+        }
+        let listed = props
+            .iter()
+            .map(|name| format!("{name:?}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        let _ = writeln!(out, "    ({:?}, &[{listed}]),", component.meta.name);
+    }
+    out.push_str("];\n");
+    out
+}
+
 fn registry(components: &[Component]) -> String {
     let mut out = header_from(CommentStyle::Line("//"), COMPONENT_SPEC);
     out.push_str(

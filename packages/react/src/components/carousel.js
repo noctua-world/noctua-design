@@ -12,6 +12,7 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
+import { Template } from "./template.js";
 import { AILabel } from "./ai_label.js";
 import { chevronLeft } from "@noctua-world/design-tokens/icons/chevron-left.js";
 import { chevronRight } from "@noctua-world/design-tokens/icons/chevron-right.js";
@@ -155,7 +156,7 @@ export function Carousel({ name, label, perView, snap, orientation, controls, pr
       "data-nd-carousel-status": "",
     }),
     h(
-      "template",
+      Template,
       { key: "m", "data-nd-dot-template": "" },
       h("button", {
         key: "b",

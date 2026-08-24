@@ -14,6 +14,7 @@ import { createElement as h } from "react";
 import { Button } from "./button.js";
 
 import { Icon } from "./icon.js";
+import { Template } from "./template.js";
 import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
 import { columns2 } from "@noctua-world/design-tokens/icons/columns-2.js";
@@ -271,7 +272,7 @@ export function Table({ name, caption, hideCaption, note, density, rules, zebra,
       "data-nd-table-status": "",
     }),
     h(
-      "template",
+      Template,
       { key: "tpl", "data-nd-table-column-template": "" },
       h(
         "li",

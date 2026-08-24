@@ -15,6 +15,7 @@ import { Button } from "./button.js";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { Template } from "./template.js";
 import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
 import { upload } from "@noctua-world/design-tokens/icons/upload.js";
@@ -107,7 +108,7 @@ export function FileInput({ name, label, browseLabel, drop, dropLabel, accept, a
         : null,
     ),
     h(
-      "template",
+      Template,
       { key: "t", "data-nd-file-template": "" },
       h(
         "li",

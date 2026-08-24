@@ -11,6 +11,7 @@
 
 import { createElement as h } from "react";
 
+import { Template } from "./template.js";
 export function ErrorSummary({ name, title, description, focus, collect, form, titlePrefix, className, children, ...rest }) {
   const root = ["nd-error-summary", className].filter(Boolean).join(" ");
   const id = `nd-error-summary-${name}`;
@@ -45,19 +46,22 @@ export function ErrorSummary({ name, title, description, focus, collect, form, t
         children,
       ),
     ),
-    h(
-      "template",
-      { key: "m", "data-nd-error-summary-template": "" },
-      h(
-        "li",
-        { key: "i", className: "nd-error-summary-item" },
-        h("a", {
-          key: "a",
-          className: "nd-error-summary-link",
-          href: "#",
-          "data-nd-error-summary-link": "",
-        }),
-      ),
-    ),
+    // WRITTEN AS MARKUP, NOT AS CHILDREN, and that is not a style choice.
+    // A `<template>`'s contents belong to its `content` fragment and are inert
+    // — that is what a template IS — but React appends children as ordinary
+    // nodes, so the model row became a real empty link in the document: found
+    // by `querySelectorAll`, counted by anything walking the list, and offered
+    // to a screen reader. The Dioxus half is server-rendered and parsed, so it
+    // was correct; the two disagreed and only the conformance runner asked.
+    h(Template, {
+      key: "m",
+      "data-nd-error-summary-template": "",
+      dangerouslySetInnerHTML: {
+        __html:
+          '<li class="nd-error-summary-item">' +
+          '<a class="nd-error-summary-link" href="#" data-nd-error-summary-link=""></a>' +
+          "</li>",
+      },
+    }),
   );
 }

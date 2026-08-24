@@ -14,6 +14,7 @@ import { createElement as h } from "react";
 import { Field } from "./field.js";
 
 import { Icon } from "./icon.js";
+import { Template } from "./template.js";
 import { AILabel } from "./ai_label.js";
 import { calendar } from "@noctua-world/design-tokens/icons/calendar.js";
 import { chevronLeft } from "@noctua-world/design-tokens/icons/chevron-left.js";
@@ -438,7 +439,7 @@ export function DatePicker({ name, legend, month, monthLabel, secondMonthLabel, 
       }),
       fielded
         ? h(
-            "template",
+            Template,
             { key: "t", "data-nd-date-picker-glyph": "" },
             h(Icon, { icon: calendar, size: "small" }),
           )

@@ -19,6 +19,7 @@ import { Segmented } from "./segmented.js";
 import { SegmentedItem } from "./segmented_item.js";
 
 import { Icon } from "./icon.js";
+import { Template } from "./template.js";
 import { AILabel } from "./ai_label.js";
 import { check } from "@noctua-world/design-tokens/icons/check.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
@@ -362,12 +363,12 @@ export function ColorPicker({ name, label, value, hint, error, size, shape, trig
       "data-nd-color-picker-status": "",
     }),
     h(
-      "template",
+      Template,
       { key: "1", "data-nd-chip-template": "" },
       h("span", { key: "c", className: "nd-color-picker-chip" }),
     ),
     h(
-      "template",
+      Template,
       { key: "2", "data-nd-swatch-template": "" },
       h(
         "li",
@@ -381,7 +382,7 @@ export function ColorPicker({ name, label, value, hint, error, size, shape, trig
       ),
     ),
     h(
-      "template",
+      Template,
       { key: "3", "data-nd-committed-template": "" },
       h(
         "li",
@@ -400,7 +401,7 @@ export function ColorPicker({ name, label, value, hint, error, size, shape, trig
       ),
     ),
     h(
-      "template",
+      Template,
       { key: "4", "data-nd-code-template": "" },
       h(
         "li",
