@@ -1,0 +1,47 @@
+# What a `Switch` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "it is a switch, named, and off until it is turned on"
+note = "`role=\"switch\"` with `aria-checked` is the whole contract: a `Segmented` of Off and On tells a screen reader the wrong thing about what pressing it means, which is why this component exists."
+props = { name = "mail", label = "Send me mail", on = "on", off = "off" }
+expect = { attrs = { role = "switch", "aria-checked" = "false" }, text = "Send me mail" }
+
+[[case]]
+name = "a checked switch says so"
+note = "The state is `aria-checked` rather than a class, because a class is not something a screen reader reads."
+props = { name = "mail", label = "Send me mail", on = "on", off = "off", checked = true }
+expect = { attrs = { "aria-checked" = "true" } }
+
+[[case]]
+name = "Space turns it on, and Enter does too"
+note = "`[keyboard]` promises both, and it gets both by being a `<button>`. This case fails the day the element becomes a div with a role — which is how that promise is usually broken."
+props = { name = "mail", label = "Send me mail", on = "on", off = "off" }
+steps = ["focus", "key:Space"]
+expect = { attrs = { "aria-checked" = "true" }, focus = "root" }
+
+[[case]]
+name = "Enter turns it on as well"
+note = "Both keys, one control. Asserted separately because a handler that answers one and not the other passes a test that only presses the other."
+props = { name = "mail", label = "Send me mail", on = "on", off = "off" }
+steps = ["focus", "key:Enter"]
+expect = { attrs = { "aria-checked" = "true" } }
+
+[[case]]
+name = "pressing it twice puts it back"
+note = "A toggle that only toggles one way is a defect a single press cannot find."
+props = { name = "mail", label = "Send me mail", on = "on", off = "off" }
+steps = ["focus", "key:Space", "key:Space"]
+expect = { attrs = { "aria-checked" = "false" } }
+
+[[case]]
+name = "a disabled switch announces why rather than vanishing from the keyboard"
+note = "`aria-disabled` rather than `disabled`: the control keeps its tab stop, so a reader who tabs onto it hears what it is and that it cannot be used. A control that simply disappears from the walk is one they never learn about."
+props = { name = "mail", label = "Send me mail", on = "on", off = "off", disabled = true }
+expect = { attrs = { "aria-disabled" = "true" }, absent = ["disabled"] }
+
+[[case]]
+name = "a disabled switch does not change when pressed"
+note = "The other half of the rule above: it stays focusable, so it also has to stay inert."
+props = { name = "mail", label = "Send me mail", on = "on", off = "off", disabled = true }
+steps = ["focus", "key:Space"]
+expect = { attrs = { "aria-checked" = "false" } }

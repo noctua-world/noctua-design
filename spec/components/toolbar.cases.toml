@@ -1,0 +1,8 @@
+# What a `Toolbar` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "it is a toolbar, and it says which way it runs"
+note = "`role=\"toolbar\"` promises one tab stop and the arrow keys; `aria-orientation` says which arrows. `dist/roving.js` is what keeps both, and a bar that claims the role without them stops a keyboard reader on every control in it."
+props = { label = "Formatting" }
+children = "Controls go here."
+expect = { attrs = { role = "toolbar", "aria-label" = "Formatting", "aria-orientation" = "horizontal" } }

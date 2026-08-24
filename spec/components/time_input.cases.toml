@@ -1,0 +1,7 @@
+# What a `TimeInput` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "it is a fieldset with a legend, and boxes for the parts of a time"
+note = "The same argument `DateInput` makes: parts a reader can answer one at a time, named so a screen reader says which is which."
+props = { name = "start", legend = "Start time", hour_label = "Hour", minute_label = "Minute" }
+expect = { present = ["legend", "input"] }

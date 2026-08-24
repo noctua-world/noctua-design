@@ -1,0 +1,20 @@
+# What a `Toast` has to do, in both languages, in a real browser.
+#
+# A message that arrives on its own and leaves on its own. The timer is
+# `dist/toast.js`'s, and the rules it keeps are the ones a reader who cannot
+# read quickly depends on: it pauses under a pointer, under focus, and under a
+# hidden tab.
+
+[[case]]
+name = "it announces itself politely, and carries its title and its message"
+note = "`role=\"status\"` rather than `alert`: a toast is something that happened, not something a reader has to stop for. The title and the message are both in the region, so the announcement is the whole sentence rather than half of it."
+props = { name = "saved", title = "Saved" }
+children = "Your changes are saved."
+expect = { attrs = { role = "status", "data-nd-toast" = "saved" }, text = "SavedYour changes are saved." }
+
+[[case]]
+name = "a dismissible toast carries the control, and the control holds the timer"
+note = "`[keyboard]` says Tab moves onto that control and that the timer waits while the focus is there — which is what makes a toast readable by someone who reads slowly."
+props = { name = "saved", title = "Saved", dismissible = true, dismiss_label = "Dismiss", duration = "5000" }
+children = "Your changes are saved."
+expect = { attrs = { "data-nd-duration" = "5000", "data-nd-dismissible" = "true" } }

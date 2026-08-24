@@ -1,0 +1,64 @@
+# What a `Tabs` has to do, in both languages, in a real browser.
+#
+# With no script every panel is on the page and each tab is a link down to the
+# one it names — so nothing claims a role nothing can honour. `dist/tabs.js` is
+# what earns the roles, and `dist/roving.js` is the arrow walk it borrows.
+
+[[case]]
+name = "the strip becomes a tablist, and the chosen tab is the only one selected"
+note = "The roles are written by the script rather than by the markup, precisely so a page without it makes no promise it cannot keep."
+props = { name = "views", label = "Views" }
+expect = { attrs = { role = "tablist" }, visible = ["[role=tab][aria-selected=true]"] }
+
+[[case.child]]
+component = "Tab"
+props = { name = "views", value = "list", label = "List", selected = true }
+
+[[case.child]]
+component = "Tab"
+props = { name = "views", value = "board", label = "Board" }
+
+[[case]]
+name = "choosing a tab shows its panel and takes the other away"
+note = "The panel is hidden rather than moved off screen: a reader searching the page should not find text from a panel nobody is showing."
+props = { name = "views", label = "Views" }
+steps = ["click:[data-nd-value=board]"]
+expect = { visible = ["[data-nd-value=board][aria-selected=true]", "[data-nd-value=list][aria-selected=false]"] }
+
+[[case.child]]
+component = "Tab"
+props = { name = "views", value = "list", label = "List", selected = true }
+
+[[case.child]]
+component = "Tab"
+props = { name = "views", value = "board", label = "Board" }
+
+[[case]]
+name = "the arrows walk the strip, and under `automatic` they choose as they go"
+note = "`[keyboard]` says Left and Right move along a horizontal strip and that `automatic` shows the panel on arrival. `manual` is for a panel that costs something to show, and it is the one place selection may not follow focus."
+props = { name = "views", label = "Views" }
+steps = ["click:[data-nd-value=list]", "key:ArrowRight"]
+expect = { visible = ["[data-nd-value=board][aria-selected=true]"] }
+
+[[case.child]]
+component = "Tab"
+props = { name = "views", value = "list", label = "List", selected = true }
+
+[[case.child]]
+component = "Tab"
+props = { name = "views", value = "board", label = "Board" }
+
+[[case]]
+name = "a refused tab is announced and cannot be chosen"
+note = "`aria-disabled` keeps it in the walk so a reader learns it exists — a tab that vanishes from the strip is a view they never find out about."
+props = { name = "views", label = "Views" }
+steps = ["click:[data-nd-value=board]"]
+expect = { visible = ["[data-nd-value=list][aria-selected=true]", "[data-nd-value=board][aria-selected=false]"] }
+
+[[case.child]]
+component = "Tab"
+props = { name = "views", value = "list", label = "List", selected = true }
+
+[[case.child]]
+component = "Tab"
+props = { name = "views", value = "board", label = "Board", disabled = true }

@@ -1,0 +1,43 @@
+# What a `Radio` has to do, in both languages, in a real browser.
+#
+# The keyboard is the browser's: a real `<input type="radio">` in a named group
+# answers the arrows and Space because that is what a radio does. These cases
+# are what would fail the day it became something that only looks like one.
+
+[[case]]
+name = "it is a real radio, named and unchosen"
+note = "The name is the group and the value is the answer, so a page with no script still submits which one was chosen."
+props = { name = "size", value = "small", label = "Small" }
+expect = { text = "Small", visible = ["input[type=radio][name=size][value=small]"] }
+
+[[case]]
+name = "Space chooses the answer that has focus"
+note = "`[keyboard]` promises exactly this. A radio cannot be unchosen by pressing it again, which is the difference from a checkbox and the reason the two are separate components."
+props = { name = "size", value = "small", label = "Small" }
+steps = ["focus:input", "key:Space"]
+expect = { visible = ["input:checked"] }
+
+[[case]]
+name = "a chosen radio arrives chosen"
+note = "`checked` is the attribute rather than a class, so the answer survives with no script."
+props = { name = "size", value = "small", label = "Small", checked = true }
+expect = { visible = ["input:checked"] }
+
+[[case]]
+name = "a disabled radio refuses the keyboard"
+note = "`disabled` on a real input is the platform's refusal: it cannot be focused, so this presses the LABEL — the gesture a reader makes — and the answer stays unchosen. It is also what keeps the value out of the submission."
+props = { name = "size", value = "small", label = "Small", disabled = true }
+steps = ["click:label"]
+expect = { hidden = ["input:checked"], visible = ["input[disabled]"] }
+
+[[case]]
+name = "an answer that is wrong says so where a screen reader hears it"
+note = "`aria-invalid`, for the reason `NOCTUA.md §8.8.6` gives: a colour is never the only signal."
+props = { name = "size", value = "small", label = "Small", invalid = true }
+expect = { visible = ["input[aria-invalid=true]"] }
+
+[[case]]
+name = "a hint is joined to the answer rather than left beside it"
+note = "A sentence a reader can see and a screen reader cannot reach is a sentence that is not there. The hint is described by the input, which is what makes it read after the label."
+props = { name = "size", value = "small", label = "Small", hint = "Fits in a pocket" }
+expect = { visible = ["input[aria-describedby]"], text = "SmallFits in a pocket" }

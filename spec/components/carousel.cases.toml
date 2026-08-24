@@ -1,0 +1,21 @@
+# What a `Carousel` has to do, in both languages, in a real browser.
+#
+# It puts content off screen deliberately, which is the one thing `NOCTUA.md
+# §9.7` otherwise refuses — so everything about it exists to make that honest:
+# the slides are a real list in a real scroll box, and dragging, flicking, the
+# trackpad, the scrollbar, Home and End all keep working because none of them
+# was ever ours.
+
+[[case]]
+name = "it is a named region, so a reader can find it and skip it"
+note = "A carousel with no name is a piece of the page a screen reader cannot describe or jump over."
+props = { name = "shots", label = "Screenshots" }
+children = "Slides go here."
+expect = { attrs = { "data-nd-carousel" = "shots", "aria-label" = "Screenshots" } }
+
+[[case]]
+name = "it is not playing until something starts it, and nothing starts it on its own"
+note = "WCAG 2.2.2 made a CONDITION OF STARTING rather than a rule somebody remembers: `dist/carousel.js` refuses to begin without a named pause control, and never begins under `prefers-reduced-motion`. A carousel that moves is always one a reader can stop."
+props = { name = "shots", label = "Screenshots" }
+children = "Slides go here."
+expect = { absent = ["data-nd-playing"] }

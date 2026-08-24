@@ -45,6 +45,9 @@ fn report(path: &str, error: &noctua_design_spec::SpecError) -> String {
 /// # Errors
 ///
 /// Any problem in `spec/tokens.toml`.
+/// Every component's cases, by the component's name.
+type CaseSets = Vec<(String, noctua_design_spec::conformance::Cases)>;
+
 /// The components, and the message catalogue that half depends on them.
 ///
 /// Together because the order is load-bearing: a component's contract carries
@@ -58,6 +61,7 @@ fn words(
 ) -> Result<
     (
         Vec<noctua_design_spec::component::Component>,
+        CaseSets,
         noctua_design_spec::i18n::Catalogue,
     ),
     String,
@@ -70,6 +74,41 @@ fn words(
         "{} components, {} props in total",
         components.len(),
         components.iter().map(|c| c.prop.len()).sum::<usize>()
+    ));
+
+    let cases = noctua_design_spec::conformance::load_all(&components_path, &components)
+        .map_err(|error| report(&relative_to(root, &components_path), &error))?;
+    // A CONTRACT THAT PROMISES BEHAVIOUR OWES THE CASES THAT HOLD IT TO IT.
+    //
+    // `NOCTUA.md §9.3` Leg 3. A `[keyboard]` block or a `[state]` block is a
+    // promise to a reader, and a promise nothing checks is how `Switch` came to
+    // ship with no way to switch it. A component that declares neither owes
+    // nothing: there is nothing to drive.
+    let missing: Vec<&str> = components
+        .iter()
+        .filter(|component| noctua_design_spec::conformance::owed(component))
+        .filter(|component| {
+            !cases
+                .iter()
+                .any(|(name, set)| name == &component.meta.name && !set.case.is_empty())
+        })
+        .map(|component| component.meta.name.as_str())
+        .collect();
+    if !missing.is_empty() {
+        return Err(format!(
+            "these declare a keyboard or a state and have no cases file: {}\n                      write spec/components/<name>.cases.toml, or take the promise out of the contract",
+            missing.join(", ")
+        ));
+    }
+    let owed = components
+        .iter()
+        .filter(|component| noctua_design_spec::conformance::owed(component))
+        .count();
+    ui::detail(&format!(
+        "{} of them declare behaviour and answer to {} case(s) in {} file(s)",
+        owed,
+        cases.iter().map(|(_, set)| set.case.len()).sum::<usize>(),
+        cases.len()
     ));
 
     let messages = root.join("spec/i18n");
@@ -92,7 +131,7 @@ fn words(
         "{derived} of them derived from spec/components, and translated like any other"
     ));
 
-    Ok((components, catalogue))
+    Ok((components, cases, catalogue))
 }
 
 // One long function on purpose: it is the list of what the build reads, in the
@@ -159,7 +198,7 @@ pub(crate) fn artifacts(
         theme.global().count()
     ));
 
-    let (components, catalogue) = words(root)?;
+    let (components, cases, catalogue) = words(root)?;
 
     let icons_path = root.join("spec/icons.toml");
     let (icons, drawings) = noctua_design_spec::icons::load(&icons_path, root.join("assets/icons"))
@@ -243,6 +282,7 @@ pub(crate) fn artifacts(
         theme: &theme,
         catalogue: &catalogue,
         components: &components,
+        cases: &cases,
         sliced: &sliced,
         icons: &icons,
         drawings: &drawings,

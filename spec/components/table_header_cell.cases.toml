@@ -1,0 +1,22 @@
+# What a `TableHeaderCell` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "it is a real th, and it says what it is the header of"
+note = "`scope` is what joins a heading to its column or its row for a screen reader. A `<td>` in bold is a heading only to someone who can see it."
+props = { scope = "col" }
+children = "Invoice"
+expect = { attrs = { scope = "col" }, text = "Invoice" }
+
+[[case]]
+name = "a heading that is not sorted says nothing about sorting"
+note = "The same rule `Button` follows for `aria-pressed`: a state is written when it is true and left out when it is not. A table where every heading claims a sort is one a screen reader reads as sorted three ways at once."
+props = { scope = "col", sort = "none" }
+children = "Invoice"
+expect = { absent = ["aria-sort"] }
+
+[[case]]
+name = "a sorted heading says which way"
+note = "The direction is on the heading in force, and it is what a screen reader announces when a reader lands on the column."
+props = { scope = "col", sort = "ascending" }
+children = "Invoice"
+expect = { attrs = { "aria-sort" = "ascending" } }

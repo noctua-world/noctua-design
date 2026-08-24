@@ -1,0 +1,33 @@
+# What a `Tree` has to do, in both languages, in a real browser.
+#
+# With no script it is a nested list of links, which is honest. `dist/tree.js`
+# is what earns `role="tree"`: one tab stop, the arrows, and the type-ahead
+# those roles promise.
+
+[[case]]
+name = "it is a tree, named, and its items are treeitems"
+note = "A nested list announcing itself as a tree without answering the arrow keys is a promise the markup makes and nothing keeps — which is why the roles are written by the script."
+props = { name = "files", label = "Files" }
+expect = { attrs = { role = "tree" }, present = ["[role=treeitem]"] }
+
+[[case.child]]
+component = "TreeItem"
+props = { label = "src" }
+
+[[case.child]]
+component = "TreeItem"
+props = { label = "README.md" }
+
+[[case]]
+name = "a branch says whether it is open, and a leaf says nothing"
+note = "`aria-expanded` on a leaf tells a screen reader there is something inside to open. There is not."
+props = { name = "files", label = "Files" }
+expect = { present = ["[role=treeitem][aria-expanded]"] }
+
+[[case.child]]
+component = "TreeItem"
+props = { label = "src", branch = true }
+
+[[case.child]]
+component = "TreeItem"
+props = { label = "README.md" }

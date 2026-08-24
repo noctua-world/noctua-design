@@ -1,0 +1,13 @@
+# What a `Rating` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "every star is a real radio, so a rating submits with no script"
+note = "Stars drawn as buttons are a rating a server never hears about. Real radios in one group are what make the answer part of the form."
+props = { name = "score", label = "How was it?" }
+expect = { present = ["input[type=radio][name=score]"] }
+
+[[case]]
+name = "a read-only rating shows a value without offering to change it"
+note = "A rating that displays somebody else's score must not look like a question. `readonly` is the difference, and it is on the markup rather than in a script."
+props = { name = "score", label = "How was it?", value = "4", readonly = true }
+expect = { attrs = { "data-nd-readonly" = "true" } }

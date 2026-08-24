@@ -1,0 +1,23 @@
+# What a `Progress` has to do, in both languages, in a real browser.
+#
+# It is a real `<progress>`: a task that starts at nothing, only advances, and
+# finishes. `Meter` is the measurement, and screen readers announce the two
+# differently — which is the entire reason there are two components.
+
+[[case]]
+name = "it is a real progress bar, labelled, with the number written out"
+note = "The same rule `Meter` follows: a bar alone is a shape, so the value is in words too. The percentage is the `<progress>`'s own fallback, shown only where the bar is not drawn."
+props = { name = "upload", label = "Uploading", value = "7.4", max = "12", value_label = "7.4 of 12 MB" }
+expect = { present = ["progress[value='7.4'][max='12']", "label"], text = "Uploading7.4 of 12 MB62%" }
+
+[[case]]
+name = "a task with no number yet is busy, and the bar says so"
+note = "`data-nd-busy` is the indeterminate state, written empty because its presence is the state. The sweep is drawn rather than the platform's, because `appearance: none` takes the browser's animation away — and it stops under `prefers-reduced-motion`, which `progress.spec.js` is what checks."
+props = { name = "upload", label = "Uploading" }
+expect = { attrs = { "data-nd-busy" = "" }, present = ["progress:not([value])"] }
+
+[[case]]
+name = "the label points at the bar it labels"
+note = "`for` and `id`, joined by the platform rather than by being next to each other."
+props = { name = "upload", label = "Uploading", value = "7.4", max = "12" }
+expect = { present = ["label[for='nd-progress-upload']", "progress#nd-progress-upload"] }

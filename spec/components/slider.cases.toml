@@ -1,0 +1,14 @@
+# What a `Slider` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "it is a real range input, named, holding its value"
+note = "A real `<input type=range>` brings the arrow keys, Home and End, the announcement and the touch target with it. A div with a knob brings none of them."
+props = { name = "volume", label = "Volume", value = "40" }
+expect = { present = ["input[type=range][name=volume]"], value = "40" }
+
+[[case]]
+name = "the arrow keys move it, because the platform answers them"
+note = "This is the case that fails the day the element is replaced by something that only looks like a slider."
+props = { name = "volume", label = "Volume", value = "40", min = "0", max = "100", step = "5" }
+steps = ["focus:input", "key:ArrowRight"]
+expect = { value = "45" }

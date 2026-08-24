@@ -1,0 +1,13 @@
+# What a `FileInput` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "it is a real file input, named, and the browse control names itself"
+note = "The platform's own picker, so the file dialogue, the drag target and the accept filter are the platform's. A button that opens a picker by script is one a keyboard reader cannot always reach."
+props = { name = "attachment", label = "Attachment", browse_label = "Choose a file" }
+expect = { present = ["input[type=file][name=attachment]"] }
+
+[[case]]
+name = "what it accepts is on the element, so the picker filters before a reader chooses"
+note = "`accept` refuses in the dialogue rather than after the upload, which is the difference between a rule and a complaint."
+props = { name = "attachment", label = "Attachment", browse_label = "Choose a file", accept = ".pdf" }
+expect = { present = ["input[accept='.pdf']"] }

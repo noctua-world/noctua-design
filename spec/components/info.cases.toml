@@ -1,0 +1,28 @@
+# What an `Info` has to do, in both languages, in a real browser.
+#
+# A note opens on a press, never on a hover. A bubble that appears only under a
+# pointer does not exist on a telephone, cannot be reached with a keyboard, and
+# vanishes when a reader with a tremor drifts a pixel off the marker.
+
+[[case]]
+name = "the marker is a real button that announces a shut note"
+note = "`aria-expanded=\"false\"` on a control that opens something is TRUE rather than noise: it says the note is there and shut."
+props = { name = "why", label = "What this means" }
+children = "Because the rows are counted after the filter."
+expect = { visible = ["button[aria-expanded=false]"] }
+
+[[case]]
+name = "pressing it opens the note"
+note = "`[keyboard]` promises Enter or Space, and both reach a `<button>` as a click."
+props = { name = "why", label = "What this means" }
+children = "Because the rows are counted after the filter."
+steps = ["click:button"]
+expect = { visible = ["button[aria-expanded=true]"] }
+
+[[case]]
+name = "Escape closes it and puts the focus back on the marker"
+note = "A reader who opened a note and pressed Escape has to end up on the marker they pressed. `role=\"note\"` rather than a dialog is why nothing is trapped in the meantime."
+props = { name = "why", label = "What this means" }
+children = "Because the rows are counted after the filter."
+steps = ["click:button", "key:Escape"]
+expect = { visible = ["button[aria-expanded=false]"], focus = "button" }

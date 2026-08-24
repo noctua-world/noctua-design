@@ -1,0 +1,17 @@
+# What a `DateInput` has to do, in both languages, in a real browser.
+#
+# Three boxes rather than one, because a single box asks a reader to know which
+# order this page wants. `dist/date-input.js` is the stepping and the paste;
+# what the markup owes is a real fieldset whose parts submit.
+
+[[case]]
+name = "it is a fieldset with a legend, and three named boxes"
+note = "A group of boxes with no name is a group a screen reader announces as loose inputs, and the legend is the question."
+props = { name = "born", legend = "Date of birth", day_label = "Day", month_label = "Month", year_label = "Year" }
+expect = { present = ["legend", "input"] }
+
+[[case]]
+name = "the order the boxes are laid in is declared rather than assumed"
+note = "`data-nd-order` — on the field inside the `Field` that asks the question — says which order this page asks in — day first unless told otherwise — and the script re-lays them in the reader's own order when it can. A date field that assumes one order is one half the world gets backwards."
+props = { name = "born", legend = "Date of birth", day_label = "Day", month_label = "Month", year_label = "Year", order = "ymd" }
+expect = { present = ["[data-nd-order=ymd]"] }

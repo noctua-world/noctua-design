@@ -21,6 +21,7 @@ use noctua_design_spec::lineage::Cases;
 use noctua_design_spec::{Catalogue, Component, Fonts, Manifest, Spec, Syntax, Theme, Vendor};
 
 pub mod appearance;
+pub mod cases;
 pub mod component;
 pub mod controls;
 pub mod css;
@@ -102,6 +103,8 @@ pub struct Inputs<'a> {
     pub catalogue: &'a Catalogue,
     /// Every component's contract.
     pub components: &'a [Component],
+    /// The behavioural cases, for the components that declare behaviour.
+    pub cases: &'a [(String, noctua_design_spec::conformance::Cases)],
     /// Each sliced family's manifest, read from beside its slices.
     pub sliced: &'a [Manifest],
     /// The icon set's declaration.
@@ -142,6 +145,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
         theme,
         catalogue,
         components,
+        cases,
         sliced,
         icons,
         drawings,
@@ -157,6 +161,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
 
     let mut files = Vec::new();
     files.extend(appearance::emit(spec, theme));
+    files.extend(cases::emit(cases, components));
     files.extend(component::emit(theme));
     files.extend(css::emit(spec));
     files.extend(docs::emit(components));
@@ -343,6 +348,7 @@ mod tests {
 
     fn inputs(bundle: &Bundle) -> Inputs<'_> {
         Inputs {
+            cases: &[],
             spec: &bundle.0,
             fonts: &bundle.1,
             vendor: &bundle.2,

@@ -1,0 +1,36 @@
+# What a `Select` has to do, in both languages, in a real browser.
+#
+# With no script it is a real `<select>` and works completely. What
+# `dist/select.js` adds is the listbox: a filter, a second line per option, a
+# swatch, and the type-ahead a menu on a telephone does not have.
+
+[[case]]
+name = "the native control is what submits, and it keeps its name"
+note = "The listbox is drawn over a real `<select>` rather than instead of one, which is what makes the answer submit with the script blocked."
+props = { name = "palette", label = "Palette" }
+expect = { present = ["select[name=palette]"] }
+
+[[case.child]]
+component = "SelectOption"
+props = { value = "ochre", label = "Ochre" }
+
+[[case]]
+name = "once enhanced, the native control is hidden from the tree rather than from the eye alone"
+note = "`hidden`, never `aria-hidden`: a tabbable element carrying `aria-hidden` is the `aria-hidden-focus` violation, and `hidden` takes it out of the tree and the tab order at once."
+props = { name = "palette", label = "Palette" }
+expect = { present = ["select[hidden]"], visible = ["[aria-expanded]"] }
+
+[[case.child]]
+component = "SelectOption"
+props = { value = "ochre", label = "Ochre" }
+
+[[case]]
+name = "Escape closes the list without changing the answer"
+note = "`[keyboard]` is explicit: Escape closes, discards the filter, returns the focus, and never changes what was chosen. A list that chose what was merely highlighted is how a reader loses an answer by pressing the key that means *cancel*."
+props = { name = "palette", label = "Palette" }
+steps = ["click:[aria-expanded]", "key:Escape"]
+expect = { visible = ["[aria-expanded=false]"] }
+
+[[case.child]]
+component = "SelectOption"
+props = { value = "ochre", label = "Ochre" }

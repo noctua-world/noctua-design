@@ -1,0 +1,24 @@
+# What a `Meter` has to do, in both languages, in a real browser.
+#
+# It is a real `<meter>`, which is the whole point: the range, the announcement
+# and the colour come from the platform, and a reader's screen reader says
+# *measurement* rather than *loading*. `Progress` is the other one, and using
+# the wrong one is how a disk comes to be announced as a task.
+
+[[case]]
+name = "it is a real meter, labelled, with the number written out beside it"
+note = "A bar on its own is a shape a reader has to estimate from, so the value is always in words as well. The percentage at the end is the `<meter>`'s own fallback text, which a browser that draws the bar never shows and one that does not draw it reads out."
+props = { name = "storage", label = "Storage", value = "212", max = "256", unit = "GB", value_label = "212 of 256 GB used" }
+expect = { present = ["meter[value='212'][max='256']", "label"], text = "Storage212 of 256 GB used83%" }
+
+[[case]]
+name = "the level comes from the platform rather than from a condition somebody wrote"
+note = "`low`, `high` and `optimum` are what decide where trouble starts, and the platform applies them: 212 sits between `low` and `high`, so the level is `middle` — not because this component decided, but because that is what the range says. A component that computed the level would be a second opinion about the same numbers."
+props = { name = "storage", label = "Storage", value = "212", max = "256", low = "128", high = "230", optimum = "0" }
+expect = { attrs = { "data-nd-level" = "middle" } }
+
+[[case]]
+name = "the label points at the meter it labels"
+note = "`for` and `id`, so the two are joined by the platform rather than by proximity."
+props = { name = "storage", label = "Storage", value = "212", max = "256" }
+expect = { present = ["label[for='nd-meter-storage']", "meter#nd-meter-storage"] }

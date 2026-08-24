@@ -1,0 +1,18 @@
+# What a `DatePicker` has to do, in both languages, in a real browser.
+#
+# Every day is a real radio or checkbox, so a month works and submits with no
+# script at all — and a range is two ticked boxes the server reads as an
+# interval. That is the whole design, and these cases are what would fail the
+# day the grid became buttons and a script.
+
+[[case]]
+name = "the month is a fieldset with a legend, and every day is a real control"
+note = "A grid of buttons is a month a form never hears about. Radios in one group are what make the answer submit."
+props = { name = "when", legend = "When", month = "2026-03", month_label = "March 2026", monday_label = "Mo", tuesday_label = "Tu", wednesday_label = "We", thursday_label = "Th", friday_label = "Fr", saturday_label = "Sa", sunday_label = "Su" }
+expect = { present = ["legend", "input[type=radio]"] }
+
+[[case]]
+name = "a range asks for two ticks rather than a second widget"
+note = "`selection = \"range\"` makes the days checkboxes, and the server reads the interval from the two that are ticked. A second calendar for the end date is a second thing to keep in step with the first."
+props = { name = "when", legend = "When", month = "2026-03", selection = "range", month_label = "March 2026", monday_label = "Mo", tuesday_label = "Tu", wednesday_label = "We", thursday_label = "Th", friday_label = "Fr", saturday_label = "Sa", sunday_label = "Su" }
+expect = { present = ["input[type=checkbox]"] }

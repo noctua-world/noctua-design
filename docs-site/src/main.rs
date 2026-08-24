@@ -10,6 +10,7 @@
 //! What ships is HTML that is correct before any script runs. The script adds
 //! the settings; it does not construct the page.
 
+mod conformance;
 mod defaults;
 mod examples;
 mod generated;
@@ -102,6 +103,25 @@ fn main() -> Result<(), String> {
         )?;
         written += 1;
     }
+
+    // THE CONFORMANCE APPARATUS, which is not part of the site.
+    //
+    // One page carrying every case twice, and the trees the React half mounts
+    // from. It is in no index and no search; `docs-site/src/conformance.rs`
+    // says why it is a page at all.
+    write(
+        &out.join("conformance/index.html"),
+        &conformance::document(BASE_LINKS, BOOTSTRAP),
+    )?;
+    write(
+        &out.join("conformance/cases-trees.json"),
+        &serialise::cases_json(),
+    )?;
+    written += 2;
+    written += copy(
+        &root.join("docs-site/js/conformance-enhance.js"),
+        &out.join("conformance/enhance.js"),
+    )?;
 
     // The site root redirects to the default locale. A meta refresh rather than
     // a server rule, because the whole point of this build is a directory that

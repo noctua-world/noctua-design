@@ -1,0 +1,22 @@
+# What a `MessageBar` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "it announces itself as a status without interrupting"
+note = "`role=\"status\"` is polite: a screen reader finishes the sentence it is on before reading it. `alert` is the other one, and using it for anything that is not urgent is how a page becomes something a reader turns the announcements off for."
+props = { tone = "warning" }
+children = "The export is missing two columns."
+expect = { attrs = { role = "status" }, text = "The export is missing two columns." }
+
+[[case]]
+name = "a dismissible bar carries the control that takes it away"
+note = "`[keyboard]` promises Enter or Space on that control, and it gets both by being a `<button>`. `dist/message-bar.js` is what reveals it, so a page with no script shows no control it cannot honour."
+props = { tone = "warning", dismissible = true, dismiss_label = "Dismiss" }
+children = "The export is missing two columns."
+expect = { attrs = { "data-nd-dismissible" = "true" } }
+
+[[case]]
+name = "an alert interrupts, and says so"
+note = "The two live regions are different promises. A bar that says `alert` and means `status` interrupts a reader for nothing."
+props = { tone = "danger", alert = true }
+children = "The upload failed."
+expect = { attrs = { role = "alert" } }

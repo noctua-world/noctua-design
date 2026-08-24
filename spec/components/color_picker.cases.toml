@@ -1,0 +1,17 @@
+# What a `ColorPicker` has to do, in both languages, in a real browser.
+#
+# `dist/color-picker.js` is the behaviour, and it ships for the reason
+# `NOCTUA.md §9.4` gives: a colour picker that cannot pick a colour outside this
+# repository's own documentation site is not a colour picker.
+
+[[case]]
+name = "the value is a real input, so a chosen colour submits"
+note = "The panel is a control over a field rather than instead of one, which is what keeps the answer in the form."
+props = { name = "accent", label = "Accent", value = "#336699" }
+expect = { present = ["input[name=accent]"] }
+
+[[case]]
+name = "the panel is not on the page until it is opened"
+note = "`aria-expanded` on the control that opens it, and the surface shut. A picker whose panel ships open is a page with a colour wheel in the middle of it."
+props = { name = "accent", label = "Accent", value = "#336699" }
+expect = { present = ["[aria-expanded=false]"] }

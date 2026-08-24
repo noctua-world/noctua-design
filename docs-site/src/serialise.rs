@@ -477,6 +477,28 @@ fn drawing(out: &mut String, name: &str) {
     out.push('}');
 }
 
+/// Every conformance case's tree, keyed by the id its section carries.
+///
+/// Its own file rather than an entry in `examples-<locale>.json`, because the
+/// cases are not examples: nothing links to them, no reader switches them, and
+/// putting apparatus in the file every reader downloads would make every reader
+/// pay for it.
+#[must_use]
+pub(crate) fn cases_json() -> String {
+    let context = Context {
+        locale: noctua_design_i18n::Locale::En,
+        page: crate::site::THEME_SCOPE,
+    };
+    let mut out = String::with_capacity(64 * 1024);
+    out.push('{');
+    let mut first = true;
+    for (_, id, nodes) in crate::generated::cases::CASES {
+        entry(&mut out, &mut first, id, nodes, context);
+    }
+    out.push('}');
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

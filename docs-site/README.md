@@ -40,14 +40,11 @@ Past work is not recorded here and never will be; git holds it (`NOCTUA.md §0.5
 
 ## What is not real
 
-Three gaps, recorded because a reader would otherwise assume they are closed.
+Two gaps, recorded because a reader would otherwise assume they are closed.
 Verify one before relying on it. (Two different `dist/` directories appear below:
-`../dist/` is what the packages ship, `docs-site/dist/` is this site's own output.)
+`../dist/` is what the packages ship, `docs-site/dist/` is this site's own output,
+and `docs-site/dist/conformance/` is the apparatus `tests/conformance/` drives.)
 
-- **The shared behavioural cases are unwritten.** `spec/components/<name>.cases.toml`,
-  the one case set run against both implementations, is `NOCTUA.md §9.3` Leg 3 and
-  does not exist yet. Prop-surface parity is generated and enforced; behavioural
-  parity is demonstrated by the examples, not asserted from a case file.
 - **The React bundle is optional.** `cargo xtask docs` reports its absence and
   carries on, because the Rust half of this repository owes nothing to Node
   (`NOCTUA.md §9.11`). Without it the implementation switch reports a failed load and

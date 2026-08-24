@@ -133,10 +133,9 @@ spec/                   the only files a developer edits
   i18n/{en,pt-BR}.toml  every UI message, both locales
   icons.toml            the icon sources and the drawings this system renames
   lineage/cases.toml    the blessed layouts BOTH engines are checked against
-  components/           <name>.toml (contract). <name>.cases.toml — Leg 3 of the
-                        parity mechanism — is NOT written, and tests/conformance/
-                        is empty. What holds parity today is that both
-                        implementations are generated from one file
+  components/           <name>.toml (the contract) and <name>.cases.toml (Leg 3
+                        of the parity mechanism: what both implementations are
+                        driven through in a browser, by tests/conformance/)
 crates/
   noctua-design/        the Dioxus package. src/theme.rs is GENERATED
   noctua-design-runtime/ the browser behaviour this system SHIPS. HAND-WRITTEN
@@ -508,6 +507,7 @@ to change.** Each of these carries measured rules, not description:
 | a table | `crates/noctua-design-runtime/src/table.js` |
 | a menu | `crates/noctua-design-runtime/src/menu.js` |
 | a switch, a segmented choice — anything that answers a click by choosing | `crates/noctua-design-runtime/src/choice.js` |
+| what both implementations must *do* | `spec/components/<name>.cases.toml`, and `crates/noctua-design-spec/src/conformance.rs` for the vocabulary a step may use |
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
 | a source gate | `xtask/src/gates.rs` |
@@ -529,12 +529,16 @@ The recorded reason for holding `Search` back — an index fetched from a path
 this site decides — was false: `[prop.src]` writes `data-nd-src` and always
 did. A gap list rots the same way a count does, and that one had.
 
-One recorded gap, because a reader would otherwise assume it is closed.
+**Behavioural parity is demonstrated, not asserted.**
+`spec/components/<name>.cases.toml` is `NOCTUA.md §9.3` Leg 3, and
+`tests/conformance/cases.spec.js` drives every case against **both**
+implementations in a real browser, from that one file. A contract that declares
+a `[keyboard]` or a `[state]` and has no cases file fails `cargo xtask check`.
+It found three defects on the day it was built, which is what a leg is for.
 
-**`spec/components/<name>.cases.toml` is unwritten**, so behavioural parity is
-demonstrated by the examples rather than asserted (`NOCTUA.md §9.3` Leg 3).
+Recorded gaps, because a reader would otherwise assume they are closed.
 
-**And one loose end the styles move turned up**: `--noctua-font-ui` is declared
+**One loose end the styles move turned up**: `--noctua-font-ui` is declared
 in `dist/fonts.css` and read by nothing. The page's own typography is the
 documentation site's `body` rule, which stays in `docs-site/assets/shell.css`
 because a component library does not restyle a consumer's page — so components

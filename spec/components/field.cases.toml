@@ -1,0 +1,29 @@
+# What a `Field` has to do, in both languages, in a real browser.
+#
+# The question above a control: the words, the hint, the sentence that went
+# wrong. Five components drew this themselves and had begun to disagree about
+# it, which is why it is one component now.
+
+[[case]]
+name = "the label points at the control it is the question for"
+note = "`for` and `id` rather than proximity. A label that sits above a control and points at nothing is a label a screen reader never reads with it."
+props = { control = "subject", label = "Subject" }
+expect = { present = ["label[for=subject]"], text = "Subject" }
+
+[[case]]
+name = "a required question says so in words as well as in an attribute"
+note = "`NOCTUA.md §8.8.6`: never one signal. The asterisk is not a word, so the required label is what a screen reader reads."
+props = { control = "subject", label = "Subject", required = true, required_label = "required" }
+expect = { attrs = { "data-nd-required" = "true" }, text = "Subjectrequired" }
+
+[[case]]
+name = "a refusal is marked once, and the sentence is joined to the control"
+note = "The rule down the leading edge is the whole question's, and the sentence is derived as `{control}-error` so the control can point at it — a convention, which is why the browser suite asserts every describedby points at something."
+props = { control = "subject", label = "Subject", error = "Say what this is about." }
+expect = { attrs = { "data-nd-invalid" = "true" }, present = ["#subject-error"] }
+
+[[case]]
+name = "a group describes itself rather than making every box repeat it"
+note = "With `kind = \"group\"` the component is the `<fieldset>`, so the hint is pointed at once. A hint repeated on every box inside is a hint a reader hears four times."
+props = { control = "size", label = "Size", kind = "group", hint = "Pick one" }
+expect = { present = ["#size-hint"] }

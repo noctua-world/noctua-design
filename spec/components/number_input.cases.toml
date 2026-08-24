@@ -1,0 +1,13 @@
+# What a `NumberInput` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "it is a real number input, named, and it submits its value"
+note = "The platform's own control, so the keyboard, the step and the refusal are the platform's. A pair of buttons around a text box is a number field a phone shows the wrong keyboard for."
+props = { name = "quantity", label = "Quantity", value = "3" }
+expect = { present = ["input[name=quantity]"], value = "3" }
+
+[[case]]
+name = "the bounds are declared where the enhancement and the stylesheet can both read them"
+note = "The box is `type=\"text\"` with `inputmode=\"numeric\"` and a pattern, NOT `type=\"number\"` — a number field spelt the platform's way cannot show a thousands separator or a comma decimal, which most of the world writes. So the bounds are `data-nd-*` on the root and `dist/inputs.js` enforces them, which is the trade the contract makes deliberately."
+props = { name = "quantity", label = "Quantity", value = "3", min = "1", max = "9", step = "1" }
+expect = { present = ["[data-nd-min='1'][data-nd-max='9'][data-nd-step='1']", "input[inputmode=numeric]"] }

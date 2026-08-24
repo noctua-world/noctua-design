@@ -1,0 +1,28 @@
+# What a `Dialog` has to do, in both languages, in a real browser.
+#
+# It is the platform's own `<dialog>`, opened by `dist/dialog.js`. The modal
+# form gets Escape, the focus trap and the inert page from the browser, which is
+# the whole reason not to draw one.
+
+[[case]]
+name = "the control that opens it is a button, and the dialog is not open"
+note = "`[keyboard]` says Enter or Space open it, and both reach a `<button>` as a click."
+props = { name = "confirm", trigger_label = "Delete", heading = "Delete this?" }
+children = "It cannot be undone."
+expect = { visible = ["button"], absent = ["data-nd-open"] }
+
+[[case]]
+name = "pressing the control opens it"
+note = "This is the case that fails the day `dist/dialog.js` stops shipping — a control that announces a dialog and opens nothing. The attribute is written empty, because its presence is the state."
+props = { name = "confirm", trigger_label = "Delete", heading = "Delete this?" }
+children = "It cannot be undone."
+steps = ["click:button"]
+expect = { attrs = { "data-nd-open" = "" } }
+
+[[case]]
+name = "Escape closes a modal dialog, because the platform answers it"
+note = "The contract says the platform answers Escape for a modal surface and `dist/dialog.js` answers it for a non-modal one. Either way the reader gets the key."
+props = { name = "confirm", trigger_label = "Delete", heading = "Delete this?" }
+children = "It cannot be undone."
+steps = ["click:button", "key:Escape"]
+expect = { absent = ["data-nd-open"] }

@@ -1,0 +1,27 @@
+# What a `Textarea` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "it is a real textarea, named, holding what it was given"
+note = "The value of a `<textarea>` is its content rather than an attribute, which is exactly the difference this case would catch if it were ever rendered as an input."
+props = { name = "notes", label = "Notes", value = "Two lines" }
+expect = { present = ["textarea[name=notes]"], value = "Two lines" }
+
+[[case]]
+name = "typing reaches it"
+note = "A box that shows what was typed and holds something else is the defect a value assertion exists for."
+props = { name = "notes", label = "Notes" }
+steps = ["focus:textarea", "type:hello"]
+expect = { value = "hello" }
+
+[[case]]
+name = "a required textarea says so to the platform"
+note = "`required` on the element, so the refusal survives with no script."
+props = { name = "notes", label = "Notes", required = true }
+expect = { present = ["textarea[required]"] }
+
+[[case]]
+name = "a readonly textarea keeps its value and refuses the keyboard"
+note = "`readonly` rather than `disabled`, so the value is still submitted — the distinction `Input` documents and the one that loses data when it is got wrong."
+props = { name = "notes", label = "Notes", value = "Two lines", readonly = true }
+steps = ["focus:textarea", "type:more"]
+expect = { value = "Two lines" }

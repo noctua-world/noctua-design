@@ -1,0 +1,30 @@
+# What an `AILabel` has to do, in both languages, in a real browser.
+#
+# Two letters beside something an assistant touched, and the sentence behind
+# them. The mark is a control only when there is something to open — a mark that
+# looks pressable and opens nothing is worse than a mark that does not.
+
+[[case]]
+name = "a mark with no note is not a control"
+note = "`NOCTUA.md §9.12.1`: without a `note` the mark is a label, so it takes no tab stop and announces no expansion. The letters are drawn and the phrase is carried beside them for a screen reader, which is why the text is both."
+props = { mark = "AI", label = "Written by an assistant" }
+expect = { absent = ["aria-expanded"], text = "AIWritten by an assistant" }
+
+[[case]]
+name = "a mark with a note is a button that says the note is shut"
+note = "`aria-expanded=\"false\"` on a control that opens something is TRUE, and it is what tells a screen reader the sentence is there."
+props = { mark = "AI", label = "Written by an assistant", note = "Drafted from the last three reports." }
+expect = { visible = ["button[aria-expanded=false]"] }
+
+[[case]]
+name = "pressing it opens the note, and Escape puts the focus back"
+note = "`[keyboard]` promises both. A reader who opened a sentence and pressed Escape has to end up on the mark they pressed."
+props = { mark = "AI", label = "Written by an assistant", note = "Drafted from the last three reports." }
+steps = ["click:button", "key:Escape"]
+expect = { visible = ["button[aria-expanded=false]"], focus = "button" }
+
+[[case]]
+name = "the letters are hidden from a screen reader and the label is what it reads"
+note = "Two letters read aloud are two letters. The label is the whole phrase, which is why it is required."
+props = { mark = "AI", label = "Written by an assistant" }
+expect = { present = ["[aria-hidden=true]"] }

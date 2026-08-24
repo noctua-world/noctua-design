@@ -1,0 +1,35 @@
+# What a `Popover` has to do, in both languages, in a real browser.
+#
+# `dist/popover.js` is the behaviour. What the markup owes with no script is a
+# control that says what it opens and a surface that is not on the page yet.
+
+[[case]]
+name = "the control announces a surface that is shut"
+note = "`aria-expanded=\"false\"` is TRUE on a control that opens something: it has to say the surface is shut rather than say nothing, or a screen reader announces a plain button."
+props = { name = "filters", trigger_label = "Filters", heading = "Filters" }
+children = "Everything to narrow by."
+expect = { visible = ["button[aria-expanded=false]"] }
+
+[[case]]
+name = "pressing it opens the surface"
+note = "`[keyboard]` promises Enter or Space, and both reach a `<button>` as a click. This is the case that fails if `dist/popover.js` stops shipping."
+props = { name = "filters", trigger_label = "Filters", heading = "Filters" }
+children = "Everything to narrow by."
+steps = ["click:button"]
+expect = { visible = ["button[aria-expanded=true]"] }
+
+[[case]]
+name = "Escape closes it and gives the focus back"
+note = "A reader who opened something and pressed Escape must end up where they started. Anything else moves them without being asked."
+props = { name = "filters", trigger_label = "Filters", heading = "Filters" }
+children = "Everything to narrow by."
+steps = ["click:button", "key:Escape"]
+expect = { visible = ["button[aria-expanded=false]"], focus = "button" }
+
+[[case]]
+name = "pressing the control again closes it"
+note = "The contract says the same key opens and closes. A surface that only opens is one a pointer has to be found for."
+props = { name = "filters", trigger_label = "Filters", heading = "Filters" }
+children = "Everything to narrow by."
+steps = ["click:button", "click:button"]
+expect = { visible = ["button[aria-expanded=false]"] }

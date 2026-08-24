@@ -1,0 +1,50 @@
+# What a `Checkbox` has to do, in both languages, in a real browser.
+#
+# The keyboard is the browser's: the control is a real `<input type="checkbox">`
+# with a label around it, so Space checks it because that is what a checkbox
+# does. These cases are what would fail the day it became a `<div role>`.
+
+[[case]]
+name = "it is a real checkbox, named and unchecked"
+note = "The whole reason this component is markup rather than script: a real input submits with no JavaScript, and its name and value are what the server reads."
+props = { name = "terms", value = "yes", label = "I agree" }
+expect = { text = "I agree", visible = ["input[type=checkbox][name=terms][value=yes]"] }
+
+[[case]]
+name = "Space checks it, because it is a checkbox"
+note = "`[keyboard]` says this is the browser's own behaviour. Asserting it is how we find out the day the element is replaced by something that only looks like one."
+props = { name = "terms", value = "yes", label = "I agree" }
+steps = ["focus:input", "key:Space"]
+expect = { visible = ["input:checked"] }
+
+[[case]]
+name = "Space again unchecks it"
+note = "A box that only ticks is a box a reader cannot correct."
+props = { name = "terms", value = "yes", label = "I agree" }
+steps = ["focus:input", "key:Space", "key:Space"]
+expect = { hidden = ["input:checked"] }
+
+[[case]]
+name = "a checked box arrives checked"
+note = "`checked` is the attribute, so the state survives a page with no script at all."
+props = { name = "terms", value = "yes", label = "I agree", checked = true }
+expect = { visible = ["input:checked"] }
+
+[[case]]
+name = "a disabled box refuses the keyboard"
+note = "`disabled` on a real input is the platform's refusal: it cannot be focused at all, which is why this case presses the LABEL — the gesture a reader actually makes — rather than trying to put the keyboard somewhere the platform will not put it. A `Switch` does the opposite on purpose: it stays focusable and says `aria-disabled`, so a reader hears why. The two components differ for that reason."
+props = { name = "terms", value = "yes", label = "I agree", disabled = true }
+steps = ["click:label"]
+expect = { hidden = ["input:checked"], visible = ["input[disabled]"] }
+
+[[case]]
+name = "a box that is wrong says so where a screen reader hears it"
+note = "`aria-invalid` rather than a colour: `NOCTUA.md §8.8.6` says colour is never the only signal, and a reader who cannot see the rule down the edge needs the attribute."
+props = { name = "terms", value = "yes", label = "I agree", invalid = true }
+expect = { visible = ["input[aria-invalid=true]"] }
+
+[[case]]
+name = "hiding the label keeps the name"
+note = "The same rule `Button.hide_label` follows: hidden text is still the accessible name, and a box nobody can name is a box nobody can answer. The attribute is on the LABEL rather than on the root, because it is the label that gets hidden — a case asserting it on the root passed for the wrong reason until it was written down."
+props = { name = "terms", value = "yes", label = "I agree", hide_label = true }
+expect = { visible = ["label[data-nd-hide-label=true]"], text = "I agree" }

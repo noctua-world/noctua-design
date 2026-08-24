@@ -1,0 +1,13 @@
+# What a `Pagination` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "it is a named navigation whose pages are real links"
+note = "Real `<a href>`s, so a reader can open a page in a new tab, and a page with no script still walks. A row of buttons that fetch is a paginator that only works one way."
+props = { name = "invoices", label = "Invoices", page = "2", pages = "9", href = "?page={page}" }
+expect = { attrs = { "aria-label" = "Invoices" }, present = ["a[href]"] }
+
+[[case]]
+name = "the page in force is marked where a screen reader hears it"
+note = "`aria-current=\"page\"` rather than a class: a reader who cannot see which number is highlighted is told."
+props = { name = "invoices", label = "Invoices", page = "2", pages = "9", href = "?page={page}" }
+expect = { present = ["[aria-current=page]"] }

@@ -1,0 +1,16 @@
+# What a `TagPicker` has to do, in both languages, in a real browser.
+#
+# With no script it is a text field and a datalist — honest, and not what the
+# component announces. `dist/tag-picker.js` is what makes it the control.
+
+[[case]]
+name = "it is named, and the field a reader types in is a real input"
+note = "The name is what the tags submit under. A picker whose values live only in a script is a picker that submits nothing. The hook is inside rather than on the root, because the root is the `Field` that asks the question."
+props = { name = "topics", label = "Topics" }
+expect = { present = ["[data-nd-tag-picker=topics]", "input"] }
+
+[[case]]
+name = "the suggestions are not on the page until they are asked for"
+note = "A list of suggestions that ships open is a list in the way of the field it belongs to."
+props = { name = "topics", label = "Topics" }
+expect = { hidden = [".nd-tag-picker-list"] }

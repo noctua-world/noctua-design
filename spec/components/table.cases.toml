@@ -1,0 +1,24 @@
+# What a `Table` has to do, in both languages, in a real browser.
+#
+# **It is a table until something can be driven, and the switch is derived.**
+# `role="table"` leaves the arrow keys alone, because a screen reader's own
+# table navigation is better than anything a script offers. Declare a sortable
+# column or a row that can be chosen and the same markup becomes `role="grid"`.
+
+[[case]]
+name = "a reading table is a table, and its caption is its heading"
+note = "No `role=\"grid\"` on something with nothing to drive: taking the arrow keys from a reader who only wants to read is the mistake every data grid on the web has made."
+props = { name = "invoices", caption = "Invoices, March" }
+expect = { present = ["table[data-nd-table=invoices]", "caption"], text = "Invoices, March" }
+
+[[case]]
+name = "the caption is the table's own heading rather than a paragraph above it"
+note = "A `<caption>` is read by a screen reader as the table's name when the reader lands on it. A heading above the table is a heading next to it."
+props = { name = "invoices", caption = "Invoices, March", note = "Amounts include tax." }
+expect = { present = ["caption"] }
+
+[[case]]
+name = "density and zebra are attributes, so the stylesheet reads them rather than a class each"
+note = "One attribute per decision, which is what lets a consumer's own rule answer them without knowing this system's class names. They sit on the `<table>` rather than on the frame around it, because the frame is the scroll box and the table is the thing being described."
+props = { name = "invoices", caption = "Invoices, March", density = "compact", zebra = true }
+expect = { present = ["table[data-nd-density=compact][data-nd-zebra=true]"] }

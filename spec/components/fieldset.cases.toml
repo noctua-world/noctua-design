@@ -1,0 +1,22 @@
+# What a `Fieldset` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "it is a real fieldset with a legend"
+note = "The platform's own grouping: a screen reader reads the legend before each control inside, which is what makes a set of radios a question rather than a row of answers."
+props = { name = "size", legend = "Size" }
+children = "Answers go here."
+expect = { present = ["legend"], text = "SizeAnswers go here." }
+
+[[case]]
+name = "a disabled fieldset disables everything inside it"
+note = "`disabled` on a `<fieldset>` is the platform's, and it reaches every control inside — which is the reason to use the element rather than draw a box that looks like one."
+props = { name = "size", legend = "Size", disabled = true }
+children = "Answers go here."
+expect = { attrs = { disabled = "" } }
+
+[[case]]
+name = "a refused group says so where a screen reader hears it"
+note = "The sentence is the group's, and the group is what points at it."
+props = { name = "size", legend = "Size", error = "Choose a size." }
+children = "Answers go here."
+expect = { attrs = { "data-nd-invalid" = "true" } }

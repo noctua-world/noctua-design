@@ -1,0 +1,35 @@
+# What a `Disclosure` has to do, in both languages, in a real browser.
+#
+# It is a real `<details>`, so the open and closed states, the keyboard and the
+# announcement are the platform's. That is the whole design, and these cases are
+# what would fail the day it became a div with a click handler.
+
+[[case]]
+name = "it is a details with a summary, closed to begin with"
+note = "The platform's own element: it opens with no script, it prints open, and a reader searching the page finds text inside it."
+props = { summary = "What is inside" }
+children = "The answer."
+expect = { visible = ["summary"], absent = ["open"] }
+
+[[case]]
+name = "declaring it open renders it open"
+note = "`open` is the attribute the platform reads, so the state is in the markup rather than in a script that has to run first."
+props = { summary = "What is inside", open = true }
+children = "The answer."
+expect = { attrs = { open = "" } }
+
+[[case]]
+name = "Enter on the summary opens it"
+note = "`[keyboard]` says this is the browser's own behaviour. The case exists to catch the day it is not."
+props = { summary = "What is inside" }
+children = "The answer."
+steps = ["focus:summary", "key:Enter"]
+expect = { attrs = { open = "" } }
+
+[[case]]
+name = "pressing it again closes it"
+note = "A fold that only unfolds is a fold that grows the page and never gives the room back."
+props = { summary = "What is inside", open = true }
+children = "The answer."
+steps = ["focus:summary", "key:Enter"]
+expect = { absent = ["open"] }

@@ -1,0 +1,16 @@
+# What a `Search` has to do, in both languages, in a real browser.
+#
+# `dist/search.js` is the behaviour, and it was the last enhancer this system
+# kept to itself. With no script the box is a real field in a real form.
+
+[[case]]
+name = "it is named, and the box a reader types in is a real input"
+note = "A search whose value lives only in a script is a search that cannot be submitted, bookmarked or shared."
+props = { name = "docs", label = "Search" }
+expect = { attrs = { "data-nd-search" = "docs" }, present = ["input"] }
+
+[[case]]
+name = "the results surface says it is shut before anything is typed"
+note = "`aria-expanded` on the control, and no list on the page: a combobox that ships open is a page with a menu in the middle of it."
+props = { name = "docs", label = "Search" }
+expect = { present = ["[aria-expanded=false]"] }

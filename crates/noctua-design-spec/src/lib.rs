@@ -25,6 +25,7 @@
 //! This crate knows nothing about output formats. That is `noctua-design-emit`.
 
 pub mod component;
+pub mod conformance;
 pub mod error;
 pub mod fonts;
 pub mod grammar;

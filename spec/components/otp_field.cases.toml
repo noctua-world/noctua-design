@@ -1,0 +1,25 @@
+# What an `OtpField` has to do, in both languages, in a real browser.
+#
+# One code, several boxes, and every gesture a reader tries on one. The
+# behaviour ships in `dist/inputs.js`; what the markup owes is a real
+# `<fieldset>` with a legend, so the group has a name before any script runs.
+
+[[case]]
+name = "it is a fieldset with a legend, and one box per character"
+note = "A group of boxes with no name is a group a screen reader announces as loose inputs. The legend is the name, and it is markup rather than a script's job."
+props = { name = "code", legend = "One-time code", box_label = "Digit", length = "4" }
+expect = { present = ["legend", "input"] }
+
+[[case]]
+name = "typing a character fills the box and moves to the next"
+note = "`[keyboard]` promises it, and it is the gesture that makes several boxes bearable rather than tedious."
+props = { name = "code", legend = "One-time code", box_label = "Digit", length = "4" }
+steps = ["focus:input", "type:1"]
+expect = { value = "1" }
+
+[[case]]
+name = "Backspace in an empty box moves back, and then clears"
+note = "Typing moves on, so the box a reader lands in after one character is the NEXT one — empty. The contract says Backspace there moves back rather than doing nothing, which is the gesture every reader tries; the second press is what clears. Two presses to undo one character is the whole point, and a case that pressed once would have asserted the wrong thing and passed for the wrong reason."
+props = { name = "code", legend = "One-time code", box_label = "Digit", length = "4" }
+steps = ["focus:input", "type:1", "key:Backspace", "key:Backspace"]
+expect = { value = "" }

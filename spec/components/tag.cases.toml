@@ -1,0 +1,25 @@
+# What a `Tag` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "a plain tag is a word, not a control"
+note = "Most tags are labels. One that is focusable without doing anything is a tab stop a reader pays for and gets nothing from."
+props = { label = "overdue" }
+expect = { text = "overdue", absent = ["aria-pressed"] }
+
+[[case]]
+name = "a tone is a name from the colour system, and any of its families works"
+note = "`overdue`, `shipped`, `degraded` — 349 families, not four states. The name is checked at build time against the vendored palette, so a name nothing declares fails the build rather than painting nothing."
+props = { label = "shipped", tone = "shipped" }
+expect = { attrs = { "data-nd-tone" = "shipped" } }
+
+[[case]]
+name = "a toggle tag says whether it is pressed"
+note = "`aria-pressed` is what makes it a toggle rather than a word that happens to be clickable, and `[keyboard]` says Space presses it because the element underneath is a `<button>`. The prop is `off` and `on` rather than a bool, because a tag that is not a toggle at all is the third state."
+props = { label = "overdue", pressed = "off" }
+expect = { present = ["button[aria-pressed=false]"] }
+
+[[case]]
+name = "the remove control is its own tab stop with its own name"
+note = "`[keyboard]` says the tag and its remove control are two stops. A remove control with no name is an X a screen reader reads as *button*."
+props = { label = "overdue", remove_label = "Remove overdue" }
+expect = { present = ["button[aria-label='Remove overdue']"] }

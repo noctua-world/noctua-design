@@ -1,0 +1,18 @@
+# What a `TableRow` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "it is a real tr, and claims no ARIA state it has not been given"
+note = "The `data-nd-*` attributes are always written — they are what the stylesheet reads, and a rule cannot match an absence. What is NOT written is the ARIA: a row that says `aria-expanded` when nothing opens tells a screen reader about a control that is not there."
+expect = { attrs = { role = "row" }, absent = ["aria-expanded"] }
+
+[[case]]
+name = "an expandable row declares itself expandable in the markup"
+note = "`data-nd-expandable` is what the markup owes; `aria-expanded` is what `dist/table.js` writes once the table around it becomes a grid — `[state.expanded]` is that state, and a row on its own has no grid to be part of. The two are different moments, and a case that asked for the ARIA here would be asking the markup for something only the script can know."
+props = { expandable = true }
+expect = { attrs = { "data-nd-expandable" = "true" }, absent = ["aria-expanded"] }
+
+[[case]]
+name = "a chosen row says it is chosen"
+note = "`data-nd-selected` is the state the stylesheet paints and the script reads. A row marked only by a class is a row whose state nothing else can see."
+props = { select = "one", selected = true, select_label = "Choose this row", select_name = "rows" }
+expect = { attrs = { "data-nd-selected" = "true" } }

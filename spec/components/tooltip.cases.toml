@@ -1,0 +1,21 @@
+# What a `Tooltip` has to do, in both languages, in a real browser.
+#
+# A hint is not a label: the control it wraps keeps its own name and the hint is
+# read after it, which `dist/tooltip.js` arranges by pointing the control at the
+# bubble. What the MARKUP owes — and what these cases hold — is a bubble that
+# announces itself as one, carries an id to be pointed at, and is not on the
+# page until it is asked for.
+
+[[case]]
+name = "the bubble says it is a tooltip, and carries the id it will be pointed at by"
+note = "`role=\"tooltip\"` with an id is what lets the control it wraps be described by it rather than renamed. A bubble with no id is a sentence nothing can reach."
+props = { name = "why", text = "Only the rows you can see" }
+children = "Export"
+expect = { attrs = { "data-nd-tooltip" = "why" }, present = ["[role=tooltip][id]"] }
+
+[[case]]
+name = "the hint is not shown until it is asked for"
+note = "`hidden` on the bubble, and no `data-nd-shown` on the root. A hint that is on the page from the start is a sentence in the way of the one under it."
+props = { name = "why", text = "Only the rows you can see" }
+children = "Export"
+expect = { absent = ["data-nd-shown"], present = ["[role=tooltip]"], hidden = ["[role=tooltip]"] }

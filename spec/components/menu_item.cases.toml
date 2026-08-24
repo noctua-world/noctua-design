@@ -1,0 +1,13 @@
+# What a `MenuItem` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "it is a menuitem, named, and not a tab stop"
+note = "A menu owns the arrow keys, so a Tab per item is a menu a keyboard reader walks through rather than past — the fourth thing `menu.toml` says a menu never does."
+props = { label = "Duplicate" }
+expect = { attrs = { role = "menuitem" }, text = "Duplicate" }
+
+[[case]]
+name = "a refused item stays in the walk and says it is refused"
+note = "`aria-disabled` rather than `disabled`: an item that leaves the arrow walk is an action a reader concludes does not exist."
+props = { label = "Delete", disabled = true }
+expect = { attrs = { "aria-disabled" = "true" } }

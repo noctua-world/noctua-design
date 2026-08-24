@@ -8,7 +8,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "tests/browser",
+  // Both suites: the browser tests, and the conformance cases that drive both
+  // implementations from `spec/components/<name>.cases.toml`.
+  testDir: "tests",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,

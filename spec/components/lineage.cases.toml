@@ -1,0 +1,11 @@
+# What a `Lineage` has to do, in both languages, in a real browser.
+#
+# It draws its own layout, which makes it the one component where the design
+# system is also a drawing program. Both engines answer to
+# `spec/lineage/cases.toml`; what these cases hold is the markup around them.
+
+[[case]]
+name = "it is a named figure, and every piece is a real element rather than a picture"
+note = "`CSS3DRenderer` keeps real DOM in three dimensions precisely so the text stays selectable, searchable and reachable. A rasterised scene is a diagram a screen reader cannot enter."
+props = { name = "family", label = "A family", graph = "figure ada label=\"Ada\"\nfigure bob label=\"Bob\"" }
+expect = { attrs = { "data-nd-lineage" = "family" }, present = [".nd-lineage-piece", ".nd-lineage-name"] }

@@ -1,0 +1,33 @@
+# What an `ErrorSummary` has to do, in both languages, in a real browser.
+#
+# The box at the top of a refused form. Its entries are real links to the
+# controls that were refused, so following one is the browser's own behaviour
+# rather than a script's.
+
+[[case]]
+name = "it is named, and its entries are links to the controls they name"
+note = "A summary whose entries are not links is a list a keyboard reader cannot act on. `[keyboard]` says Enter follows one, and it is the element that keeps that promise."
+props = { name = "signup", title = "There are two problems" }
+expect = { attrs = { "data-nd-error-summary" = "signup" }, present = ["a[href='#email']"] }
+
+[[case.child]]
+component = "ErrorSummaryItem"
+props = { control = "email" }
+text = "Say where to write to you."
+
+[[case]]
+name = "the box is not a tab stop, and can still be focused"
+note = "`tabindex=\"-1\"` is the difference: a script may send the focus here after a refusal, and a reader tabbing through the form does not stop on it twice."
+props = { name = "signup", title = "There are two problems" }
+expect = { attrs = { tabindex = "-1" } }
+
+[[case.child]]
+component = "ErrorSummaryItem"
+props = { control = "email" }
+text = "Say where to write to you."
+
+[[case]]
+name = "a summary with nothing in it marks itself empty, so nothing draws an empty box"
+note = "`data-nd-empty` is a state `dist/error-summary.js` writes once it has looked, and it writes it at once — a heading over no list reads as a form that refused for reasons it will not give. The markup does not claim it in advance, which is why this case only holds after the script has run."
+props = { name = "signup", title = "There are two problems" }
+expect = { attrs = { "data-nd-empty" = "", "data-nd-focus" = "true" } }

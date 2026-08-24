@@ -1,0 +1,13 @@
+# What a `CodeBlock` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "the code is text in the markup, not something a script paints in"
+note = "`code` is a prop and the scanner runs at build time, so the code is on the page with no script at all — which is what makes it selectable, searchable and printable. The language is written above it, which is why the text is both."
+props = { code = "let x = 1;", language = "rust" }
+expect = { present = ["code"], text = "Rustlet x = 1;" }
+
+[[case]]
+name = "a collapsed block says how many lines it shows rather than hiding the rest silently"
+note = "`--nd-code-max` is a custom property the component writes into a style attribute, which is why it is declared where `gates::unknown_token` can see it: a `var()` naming a property nothing declares is dropped with no error anywhere."
+props = { code = "let x = 1;", language = "rust", max_lines = "3" }
+expect = { present = ["[style*='--nd-code-max']"] }

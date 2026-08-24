@@ -1,0 +1,29 @@
+# What a `Menu` has to do, in both languages, in a real browser.
+#
+# `dist/menu.js` is the behaviour, and `menu.toml` states the four things it
+# never does: it never opens on a hover, never traps focus, never leaves the
+# focus where the reader did not put it, and never makes an item a tab stop.
+
+[[case]]
+name = "it is a menu, named, and it is not on the page until it is opened"
+note = "`role=\"menu\"` with a name, hidden until asked for. A menu that ships visible is a list of actions in the way of the page."
+props = { name = "actions", label = "Actions" }
+expect = { attrs = { role = "menu", "aria-label" = "Actions" }, hidden = [".nd-menu-item"] }
+
+[[case.child]]
+component = "MenuItem"
+props = { label = "Duplicate" }
+
+[[case.child]]
+component = "MenuItem"
+props = { label = "Delete", tone = "danger" }
+
+[[case]]
+name = "an item is a menuitem and not a tab stop"
+note = "A menu owns the arrow keys; a Tab per item is a menu a keyboard reader walks THROUGH rather than past — which is the fourth thing `menu.toml` says it never does."
+props = { name = "actions", label = "Actions" }
+expect = { present = ["[role=menuitem]"] }
+
+[[case.child]]
+component = "MenuItem"
+props = { label = "Duplicate" }

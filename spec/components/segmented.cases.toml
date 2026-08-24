@@ -1,0 +1,49 @@
+# What a `Segmented` has to do, in both languages, in a real browser.
+#
+# A radiogroup is ONE tab stop: Tab enters it, the arrows move within it, Tab
+# leaves. `dist/roving.js` is what keeps that promise and `dist/choice.js` is
+# what makes moving also choose — which is what a radio group does anyway.
+
+[[case]]
+name = "it is a radiogroup, named, with the chosen item marked"
+note = "`role=\"radiogroup\"` with `aria-checked` on the items is the contract. A row of buttons with a class on one tells a screen reader nothing about what is in force."
+props = { name = "density", label = "Density" }
+expect = { attrs = { role = "radiogroup", "aria-label" = "Density" } }
+
+[[case.child]]
+component = "SegmentedItem"
+props = { value = "compact", label = "Compact", selected = true }
+
+[[case.child]]
+component = "SegmentedItem"
+props = { value = "cosy", label = "Cosy" }
+
+[[case]]
+name = "pressing an item chooses it, and unchooses the other"
+note = "One answer at a time is what a radiogroup means. `dist/choice.js` marks it; before that shipped, a `Segmented` outside this repository's own site chose nothing at all."
+props = { name = "density", label = "Density" }
+steps = ["click:[data-nd-value=cosy]"]
+expect = { visible = ["[data-nd-value=cosy][aria-checked=true]", "[data-nd-value=compact][aria-checked=false]"] }
+
+[[case.child]]
+component = "SegmentedItem"
+props = { value = "compact", label = "Compact", selected = true }
+
+[[case.child]]
+component = "SegmentedItem"
+props = { value = "cosy", label = "Cosy" }
+
+[[case]]
+name = "a refused item is reachable and still refuses"
+note = "`aria-disabled` rather than `disabled`, so a reader tabbing through hears that the answer exists and cannot be chosen — and pressing it changes nothing."
+props = { name = "density", label = "Density" }
+steps = ["click:[data-nd-value=cosy]"]
+expect = { visible = ["[data-nd-value=compact][aria-checked=true]", "[data-nd-value=cosy][aria-checked=false]"] }
+
+[[case.child]]
+component = "SegmentedItem"
+props = { value = "compact", label = "Compact", selected = true }
+
+[[case.child]]
+component = "SegmentedItem"
+props = { value = "cosy", label = "Cosy", disabled = true }

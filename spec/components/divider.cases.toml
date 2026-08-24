@@ -1,0 +1,12 @@
+# What a `Divider` has to do, in both languages, in a real browser.
+
+[[case]]
+name = "a plain divider is a real rule and announces nothing"
+note = "An `<hr>` is a separator to the platform already. A div with a border is a line a screen reader never mentions."
+expect = { attrs = { role = "separator" }, absent = ["data-nd-labelled"] }
+
+[[case]]
+name = "a divider with words says it is labelled, and the words are readable"
+note = "`[state.labelled]` is what the stylesheet reads to make room for the text. A rule with a word on it and no state is a word drawn on top of a line."
+props = { label = "or" }
+expect = { attrs = { "data-nd-labelled" = "", "aria-label" = "or" }, text = "or" }

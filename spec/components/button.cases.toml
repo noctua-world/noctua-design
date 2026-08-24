@@ -1,0 +1,57 @@
+# What a `Button` has to do, in both languages, in a real browser.
+#
+# `NOCTUA.md §9.3` Leg 3. The runner mounts each case twice — the Dioxus half
+# server-rendered, the React half mounted from the same tree — runs the steps on
+# each, and holds both to the expectation below. Neither implementation is
+# checked against the other alone: two halves that agree with each other and
+# disagree with this file is the failure that actually happens.
+
+[[case]]
+name = "a button is named by its label, and the name is the text"
+note = "`label` is required and is both. A button whose visible text and accessible name can disagree is the commonest defect in every button component anybody ships, and this is the case that would fail if they were ever separated."
+props = { label = "Save" }
+expect = { text = "Save", attrs = { type = "button" } }
+
+[[case]]
+name = "no false ARIA state is written on an ordinary button"
+note = "`aria-pressed` and `aria-expanded` are written only when true. An unpressed button that says `aria-pressed=\"false\"` tells a screen reader it is a toggle, which it is not."
+props = { label = "Save" }
+expect = { absent = ["aria-pressed", "aria-expanded", "aria-disabled"] }
+
+[[case]]
+name = "a pressed button says so"
+note = "The other half of the rule above: when the state is real it has to be announced, or a toggle is a button that changes nothing a reader can hear."
+props = { label = "Bold", pressed = "true" }
+expect = { attrs = { "aria-pressed" = "true" } }
+
+[[case]]
+name = "Space activates the button form"
+note = "`[keyboard]` promises Enter and Space. A `<button>` answers both by being a button — this is the case that fails the day the element is swapped for a `<div>` with a role, which is how that promise is usually broken."
+props = { label = "Save", action = "case" }
+steps = ["focus", "key:Space"]
+expect = { focus = "root" }
+
+[[case]]
+name = "Enter activates it too, and leaves the focus where it was"
+note = "A reader who acted and found themselves somewhere else was moved by the thing they were using."
+props = { label = "Save", action = "case" }
+steps = ["focus", "key:Enter"]
+expect = { focus = "root" }
+
+[[case]]
+name = "a disabled button keeps its name and loses its tab stop"
+note = "`disabled` drops the tab stop, which the contract says in `[a11y]`. What it must not drop is the name: a control a reader cannot use still has to be one they can identify."
+props = { label = "Save", disabled = "true" }
+expect = { text = "Save", attrs = { disabled = "" } }
+
+[[case]]
+name = "hiding the label keeps the accessible name"
+note = "`hide_label` hides the text without touching the name — it is what an icon-only button is, and forgetting the name is the defect it exists to prevent."
+props = { label = "Close", hide_label = "true", icon = "close" }
+expect = { attrs = { "aria-label" = "Close", "data-nd-hide-label" = "true" } }
+
+[[case]]
+name = "a link form is an anchor, and answers Enter alone"
+note = "`href` makes it an `<a>`, and an anchor answers Enter and not Space. The element is the contract: this case fails if `href` ever becomes a button that navigates by script."
+props = { label = "Read more", href = "#somewhere" }
+expect = { attrs = { href = "#somewhere" }, absent = ["type"] }

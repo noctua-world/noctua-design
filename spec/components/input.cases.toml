@@ -1,0 +1,37 @@
+# What an `Input` has to do, in both languages, in a real browser.
+#
+# It is a real `<input>` inside a `Field`, so the name, the value, the
+# submission and the platform's own refusals are the platform's. What this
+# component adds is the box's furniture: a prefix, a clear control, a counter,
+# and the Escape that empties it.
+
+[[case]]
+name = "it is a real input, named, and carrying what it was given"
+note = "The name is what the server reads and the value is what it reads under it. A box whose value lives only in a script is a box that submits nothing."
+props = { name = "subject", label = "Subject", value = "Publish" }
+expect = { present = ["input[name=subject][value=Publish]"] }
+
+[[case]]
+name = "the kind is the input's type, not a class"
+note = "`type=\"email\"` is what makes a telephone offer an at sign and a browser refuse a word with no domain. A component that painted an email box without saying `email` would look right and behave like text."
+props = { name = "address", label = "Address", kind = "email" }
+expect = { present = ["input[type=email]"] }
+
+[[case]]
+name = "a required box says so to the platform"
+note = "`required` on the element, so a page with no script still refuses to submit — which is the whole reason the validation is not a script's job."
+props = { name = "subject", label = "Subject", required = true }
+expect = { present = ["input[required]"] }
+
+[[case]]
+name = "a disabled box is refused by the platform and a readonly one is not"
+note = "The two are different and are confused constantly: `disabled` drops the value from the submission, `readonly` keeps it. A form that lost a field's value because it was shown as uneditable is the defect this distinction prevents."
+props = { name = "subject", label = "Subject", value = "Publish", readonly = true }
+expect = { present = ["input[readonly]:not([disabled])"] }
+
+[[case]]
+name = "Escape empties a clearable box"
+note = "`[keyboard]` promises exactly this, and `dist/inputs.js` is what keeps it. It does nothing when there is nothing to clear, which is the other half of the promise."
+props = { name = "subject", label = "Subject", value = "Publish", clearable = true, clear_label = "Clear" }
+steps = ["focus:input", "key:Escape"]
+expect = { value = "" }
