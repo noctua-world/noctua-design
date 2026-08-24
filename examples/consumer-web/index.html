@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en" data-palette="blue-balanced">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>A consumer of noctua-design, from outside the repository</title>
+
+    <!-- THE STYLESHEETS, IN THE ORDER dist/base.html PRESCRIBES.
+         Nine links and no build step: no Tailwind, no bundler, no
+         preprocessor. `components.css` is last of them, so a component rule
+         that ties with a theme rule on specificity wins — and anything this
+         page adds after them beats both, which is the point of the order.
+
+         The paths are what a checkout looks like. An installed consumer copies
+         `dist/`, `packages/tokens/vendor/css/` and the font files it wants into
+         one static directory and keeps the same shape; the repository's README
+         says which three. -->
+    <link rel="stylesheet" href="../../packages/tokens/vendor/css/ramp.css">
+    <link rel="stylesheet" href="../../dist/scope.css">
+    <link rel="stylesheet" href="../../packages/tokens/vendor/css/theme-blue-balanced.css" id="noctua-base-palette">
+    <link rel="stylesheet" href="../../dist/tokens.css">
+    <link rel="stylesheet" href="../../dist/tones.css">
+    <link rel="stylesheet" href="../../dist/syntax.css">
+    <link rel="stylesheet" href="../../dist/fonts.css">
+    <link rel="stylesheet" href="../../dist/theme.css">
+    <link rel="stylesheet" href="../../dist/components.css">
+
+    <style>
+      /* This page's own two rules, and they are this page's — a consumer's
+         layout is not the design system's business. */
+      body { margin: 0; padding: 2rem; font-family: var(--noctua-font-sans); }
+      .demo { display: flex; flex-direction: column; gap: 1.5rem; max-width: 40rem; }
+      .row { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="demo">
+      <h1 class="nd-heading" data-nd-size="h1" data-nd-tone="default" data-nd-balance="false">
+        A consumer, outside the repository
+      </h1>
+      <p class="nd-paragraph" data-nd-size="body" data-nd-tone="default">
+        Every rule on this page comes from <code class="nd-code-inline">dist/</code>, and every
+        behaviour from the modules beside it. Nothing here was built.
+      </p>
+
+      <div class="row">
+        <button class="nd-button" type="button" data-nd-variant="solid" data-nd-tone="accent" data-nd-size="medium" data-nd-shape="rounded" data-nd-glass="false" data-nd-justify="center" data-nd-wrap="false" data-nd-fill="false" data-nd-hide-label="false">
+          <span class="nd-button-text"><span class="nd-button-label">Save</span></span>
+        </button>
+        <button class="nd-button" type="button" data-nd-variant="outline" data-nd-tone="neutral" data-nd-size="medium" data-nd-shape="rounded" data-nd-glass="false" data-nd-justify="center" data-nd-wrap="false" data-nd-fill="false" data-nd-hide-label="false">
+          <span class="nd-button-text"><span class="nd-button-label">Cancel</span></span>
+        </button>
+        <span class="nd-tag" data-nd-tone="overdue" data-nd-variant="soft" data-nd-size="medium" data-nd-shape="pill" data-nd-glass="false" data-nd-tag="">
+          <span class="nd-tag-body"><span class="nd-tag-label">overdue</span></span>
+        </span>
+        <span class="nd-tag" data-nd-tone="shipped" data-nd-variant="soft" data-nd-size="medium" data-nd-shape="pill" data-nd-glass="false" data-nd-tag="">
+          <span class="nd-tag-body"><span class="nd-tag-label">shipped</span></span>
+        </span>
+      </div>
+
+      <!-- A TONE IS A NAME, AND A CONSUMER GETS ALL 349 OF THEM. `overdue` and
+           `shipped` above are not four states with different words; they are
+           the colour system's own families, and `tones.css` is why they paint. -->
+
+      <button class="nd-switch" type="button" role="switch" data-nd-group="mail" data-nd-on="on" data-nd-off="off" aria-checked="false" aria-disabled="false" data-nd-size="medium">
+        <span class="nd-switch-label">Send me mail</span>
+        <span class="nd-switch-track" aria-hidden="true" data-nd-glass="false"></span>
+      </button>
+
+      <!-- The tab strip is markup that WORKS WITH NO SCRIPT: every panel is on
+           the page and each tab is a link to the one it names. `tabs.js` below
+           is what earns it the roles, and it is loaded from `dist/`. -->
+      <div class="nd-tabs" data-nd-tabs="demo">
+        <a class="nd-tab" href="#panel-one" aria-controls="panel-one" data-nd-selected="true">First</a>
+        <a class="nd-tab" href="#panel-two" aria-controls="panel-two" data-nd-selected="false">Second</a>
+      </div>
+      <div class="nd-tab-panel" id="panel-one">
+        <p class="nd-paragraph" data-nd-size="body" data-nd-tone="default">The first panel.</p>
+      </div>
+      <div class="nd-tab-panel" id="panel-two">
+        <p class="nd-paragraph" data-nd-size="body" data-nd-tone="default">The second panel.</p>
+      </div>
+    </div>
+
+    <script type="module">
+      // The behaviour, from `dist/` and nothing else. A consumer imports what
+      // its markup needs; nothing here is bundled and nothing is transpiled.
+      import { enhanceTabs } from "../../dist/tabs.js";
+      import { enhanceRoving } from "../../dist/roving.js";
+      enhanceTabs();
+      enhanceRoving();
+    </script>
+  </body>
+</html>

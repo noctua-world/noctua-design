@@ -1,0 +1,18 @@
+# Deliberately outside the workspace. A sibling project is not a member of this
+# one, and if this example compiled only because the workspace resolved
+# something for it, it would prove nothing about what a consumer gets.
+[package]
+name = "consumer-rust"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[dependencies]
+# By path, because there is no URL yet (`NOCTUA.md §5.3`). The git-tag form is
+# one line and lives in the switch note in the repository's README:
+#   noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.1.0" }
+noctua-design = { path = "../../crates/noctua-design" }
+dioxus = { version = "0.7", default-features = false, features = ["macro", "html", "signals", "hooks"] }
+dioxus-ssr = "0.7"

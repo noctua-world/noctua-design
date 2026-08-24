@@ -55,10 +55,23 @@ export default defineConfig({
       },
     },
   ],
-  webServer: {
-    command: "python3 -m http.server 8731 --directory docs-site/dist",
-    url: "http://127.0.0.1:8731/en/intro/",
-    reuseExistingServer: true,
-    timeout: 30_000,
-  },
+  webServer: [
+    {
+      command: "python3 -m http.server 8731 --directory docs-site/dist",
+      url: "http://127.0.0.1:8731/en/intro/",
+      reuseExistingServer: true,
+      timeout: 30_000,
+    },
+    // The repository root, for `examples/consumer-web/`. Over HTTP rather than
+    // `file://` because that page imports the behaviour modules the way a
+    // consumer does, and a module script from `file://` has a null origin,
+    // which Chrome refuses — so the one thing the example exists to prove
+    // could not be proved.
+    {
+      command: "python3 -m http.server 8732 --directory .",
+      url: "http://127.0.0.1:8732/examples/consumer-web/index.html",
+      reuseExistingServer: true,
+      timeout: 30_000,
+    },
+  ],
 });

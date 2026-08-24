@@ -37,3 +37,9 @@ node_modules/
 # is a step that gets forgotten and a stray `shot.mjs` that gets committed.
 # One ignored directory instead.
 /probe/
+
+# The example consumers build outside this workspace, so `/target` above does
+# not cover them, and their lockfiles are a consumer's business rather than
+# this repository's.
+/examples/*/target/
+/examples/*/Cargo.lock

@@ -14,6 +14,7 @@ mod build;
 mod check;
 mod gates;
 mod references;
+mod release;
 mod ui;
 
 use std::path::{Path, PathBuf};
@@ -64,7 +65,10 @@ enum Command {
         /// Behind `docs` rather than a sixth verb, and opt-in rather than part
         /// of `check`, because it is the one thing here that needs a browser —
         /// and `NOCTUA.md §9.11` promises the Rust half builds and tests with
-        /// no Node installed. CI runs `cargo xtask docs --verify`.
+        /// no Node installed. **CI does not run it** — the `check` job has no
+        /// Node by design and the `pages` job builds the site without
+        /// verifying it, so this is a developer's command and the suite's
+        /// green is a claim about a machine somebody sat at.
         #[arg(long)]
         verify: bool,
     },
@@ -90,7 +94,7 @@ fn main() -> ExitCode {
         Command::Check { spec_only } => check::run(&root, &spec, spec_only),
         Command::Dev { port } => dev(&root, &spec, port),
         Command::Docs { verify } => docs(&root, verify),
-        Command::Release { version, dry_run } => release(&version, dry_run),
+        Command::Release { version, dry_run } => release::run(&root, &spec, &version, dry_run),
     };
 
     match outcome {
@@ -393,21 +397,6 @@ fn docs(root: &Path, verify: bool) -> Result<(), String> {
 ///
 /// The version is still validated, so the shape of the argument is settled now
 /// and a later stage inherits it.
-fn release(version: &str, _dry_run: bool) -> Result<(), String> {
-    let parts: Vec<&str> = version.split('.').collect();
-    if parts.len() != 3 || parts.iter().any(|p| p.parse::<u32>().is_err()) {
-        return Err(format!(
-            "`{version}` is not a version. Expected three numbers, such as 0.2.0"
-        ));
-    }
-    Err(
-        "nothing is published from this repository yet, so a version would name nothing. \
-         The packages and their registries are decided in a later stage (NOCTUA.md §5.3); \
-         this verb exists now so that stage adds behaviour rather than a sixth verb."
-            .to_owned(),
-    )
-}
-
 /// The repository root, found from this crate's location.
 ///
 /// Not the current directory: `cargo xtask` runs from wherever the developer

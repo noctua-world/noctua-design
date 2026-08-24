@@ -83,6 +83,15 @@ pub(crate) fn run(root: &Path, spec_path: &Path, spec_only: bool) -> Result<(), 
         failures.push(format!("{} generated file(s) out of sync", drifted.len()));
     }
 
+    // The consumer outside the workspace, run rather than built: what it
+    // asserts — that every root class it renders is painted by
+    // `dist/components.css` — only happens when `main` does. `cargo test` in
+    // this workspace can never reach it, because it is not a member.
+    if let Err(error) = outside_consumer(root) {
+        ui::failure(&error);
+        failures.push("the external consumer".to_owned());
+    }
+
     if spec_only {
         return finish(&failures);
     }
@@ -468,4 +477,44 @@ fn cargo(root: &Path, args: &[&str]) -> Result<(), String> {
         combined.push_str(&String::from_utf8_lossy(&output.stderr));
         Err(combined)
     }
+}
+
+/// Runs the example consumer, and reports what it said.
+fn outside_consumer(root: &Path) -> Result<(), String> {
+    let example = root.join("examples/consumer-rust");
+    if !example.is_dir() {
+        return Ok(());
+    }
+    ui::heading("the consumer outside this workspace");
+    let line = consumer(&example, &root.join("target/examples"))?;
+    ui::ok(&line);
+    ui::gap();
+    Ok(())
+}
+
+/// Builds and runs the example consumer, and returns what it reported.
+///
+/// Its own target directory: the example is a separate workspace, and letting
+/// it write into this one's `target/` makes two builds fight over one lock for
+/// no benefit.
+fn consumer(dir: &std::path::Path, target: &std::path::Path) -> Result<String, String> {
+    let output = std::process::Command::new("cargo")
+        .args(["run", "--quiet"])
+        .current_dir(dir)
+        .env("CARGO_TARGET_DIR", target)
+        .output()
+        .map_err(|error| format!("could not run the example consumer: {error}"))?;
+    if !output.status.success() {
+        return Err(format!(
+            "the example consumer failed:\n{}",
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+    let text = String::from_utf8_lossy(&output.stdout);
+    Ok(text
+        .lines()
+        .rev()
+        .find(|line| !line.trim().is_empty())
+        .unwrap_or("it ran")
+        .to_owned())
 }
