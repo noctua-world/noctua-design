@@ -27,6 +27,8 @@
 //! | `tree.js` | `enhanceTrees()` — the arrows, the type-ahead and the one tab stop a tree owes |
 //! | `tabs.js` | `enhanceTabs()` — the panel that shows and the ones that stop being on the page |
 //! | `date-input.js` | `enhanceDateInputs()` — the three boxes: stepping, paste, the locale's own order |
+//! | `choice.js` | `enhanceChoices()` — a switch turns on, an item in a group becomes the chosen one, and a `change` says so |
+//! | `search.js`, `search-match.js` | `enhanceSearches()` — the listbox, the hotkey, the recent queries, and the ranking behind them |
 //!
 //! # Why a crate holds JavaScript
 //!
@@ -48,9 +50,10 @@
 //! and `DateInput` were enhanced from `docs-site/assets/shell.js`, so a
 //! consumer who installed the packages got their roles — `listbox`, `tree`,
 //! `tablist` — and none of the keyboard those roles oblige. They are here now,
-//! and the site imports them back. `Search` is the one that has not moved: its
-//! index is fetched from a path the documentation site decides, and until that
-//! is a prop rather than a convention it would ship half a component.
+//! and the site imports them back. `Search` followed them on 2026-08-24, and the
+//! reason it had been left behind — an index fetched from a path the site
+//! decides — turned out to be false: `[prop.src]` writes `data-nd-src` and
+//! always did. **Nothing a component owes is enhanced from the site any more.**
 
 /// `anchor.js`, as written in generated headers and read by `xtask`.
 pub const ANCHOR_SOURCE: &str = "crates/noctua-design-runtime/src/anchor.js";
@@ -124,6 +127,15 @@ pub const TREE_SOURCE: &str = "crates/noctua-design-runtime/src/tree.js";
 /// `tabs.js`, likewise.
 pub const TABS_SOURCE: &str = "crates/noctua-design-runtime/src/tabs.js";
 
+/// `choice.js`, likewise — what a `Switch` and a `Segmented` do when pressed.
+pub const CHOICE_SOURCE: &str = "crates/noctua-design-runtime/src/choice.js";
+
+/// `search.js`, likewise — the last enhancer the documentation site kept.
+pub const SEARCH_SOURCE: &str = "crates/noctua-design-runtime/src/search.js";
+
+/// `search-match.js`, likewise — the ranking, which touches no DOM at all.
+pub const SEARCH_MATCH_SOURCE: &str = "crates/noctua-design-runtime/src/search-match.js";
+
 /// `date-input.js`, likewise — the three boxes, not the month behind them.
 pub const DATE_INPUT_SOURCE: &str = "crates/noctua-design-runtime/src/date-input.js";
 
@@ -134,7 +146,7 @@ pub const DATE_INPUT_SOURCE: &str = "crates/noctua-design-runtime/src/date-input
 /// `xtask` that runs and writes an empty artifact. The paths above are what
 /// name it; these are what it says.
 #[must_use]
-pub fn sources() -> [(&'static str, &'static str); 23] {
+pub fn sources() -> [(&'static str, &'static str); 26] {
     [
         (ANCHOR_SOURCE, include_str!("anchor.js")),
         (COLOR_SOURCE, include_str!("color.js")),
@@ -159,6 +171,9 @@ pub fn sources() -> [(&'static str, &'static str); 23] {
         (TREE_SOURCE, include_str!("tree.js")),
         (TABS_SOURCE, include_str!("tabs.js")),
         (DATE_INPUT_SOURCE, include_str!("date-input.js")),
+        (CHOICE_SOURCE, include_str!("choice.js")),
+        (SEARCH_SOURCE, include_str!("search.js")),
+        (SEARCH_MATCH_SOURCE, include_str!("search-match.js")),
     ]
 }
 

@@ -507,6 +507,7 @@ to change.** Each of these carries measured rules, not description:
 | an enhanced form control, or anything locale-shaped | `crates/noctua-design-runtime/src/inputs.js` |
 | a table | `crates/noctua-design-runtime/src/table.js` |
 | a menu | `crates/noctua-design-runtime/src/menu.js` |
+| a switch, a segmented choice — anything that answers a click by choosing | `crates/noctua-design-runtime/src/choice.js` |
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
 | a source gate | `xtask/src/gates.rs` |
@@ -518,15 +519,17 @@ to change.** Each of these carries measured rules, not description:
 | the page shape or the URL scheme | `docs-site/src/pages.rs` |
 | the site's scope, build, or its open gaps | `docs-site/README.md` |
 
-Two recorded gaps, because a reader would otherwise assume they are closed.
+**Nothing a component owes is enhanced from this site any more.** `Select`,
+`TagPicker`, `Tree`, `Tabs`, `DateInput` and `Search` all ship their behaviour
+from `dist/`, and `shell.js` imports it back. What is left in that file is the
+site's own furniture: the drawer, the settings panel, the example frames, the
+icon gallery.
 
-**`Search` is still enhanced from the site's script**, so a consumer taking the
-packages gets `role="combobox"` without the keyboard it obliges. The other five
-that were in this position — `Select`, `TagPicker`, `Tree`, `Tabs` and
-`DateInput` — ship now, and the site imports them back from `dist/`. `Search`
-did not move with them because its index is fetched from a path this site
-decides; until that is a prop rather than a convention, moving it would ship
-half a component.
+The recorded reason for holding `Search` back — an index fetched from a path
+this site decides — was false: `[prop.src]` writes `data-nd-src` and always
+did. A gap list rots the same way a count does, and that one had.
+
+One recorded gap, because a reader would otherwise assume it is closed.
 
 **`spec/components/<name>.cases.toml` is unwritten**, so behavioural parity is
 demonstrated by the examples rather than asserted (`NOCTUA.md §9.3` Leg 3).

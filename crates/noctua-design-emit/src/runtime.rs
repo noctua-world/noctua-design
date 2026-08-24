@@ -31,11 +31,11 @@
 use std::fmt::Write as _;
 
 use noctua_design_runtime::{
-    ANCHOR_SOURCE, CAROUSEL_SOURCE, COLOR_SOURCE, DATE_INPUT_SOURCE, DATE_PICKER_SOURCE,
-    DIALOG_SOURCE, INFO_SOURCE, INPUTS_SOURCE, MENU_SOURCE, MESSAGE_BAR_SOURCE, MESSAGES_SOURCE,
-    PANELS_SOURCE, PICKER_SOURCE, POPOVER_SOURCE, ROVING_SOURCE, SELECT_SOURCE, SUMMARY_SOURCE,
-    TABLE_SOURCE, TABS_SOURCE, TAG_PICKER_SOURCE, TOAST_SOURCE, TOOLTIP_SOURCE, TREE_SOURCE,
-    source,
+    ANCHOR_SOURCE, CAROUSEL_SOURCE, CHOICE_SOURCE, COLOR_SOURCE, DATE_INPUT_SOURCE,
+    DATE_PICKER_SOURCE, DIALOG_SOURCE, INFO_SOURCE, INPUTS_SOURCE, MENU_SOURCE, MESSAGE_BAR_SOURCE,
+    MESSAGES_SOURCE, PANELS_SOURCE, PICKER_SOURCE, POPOVER_SOURCE, ROVING_SOURCE,
+    SEARCH_MATCH_SOURCE, SEARCH_SOURCE, SELECT_SOURCE, SUMMARY_SOURCE, TABLE_SOURCE, TABS_SOURCE,
+    TAG_PICKER_SOURCE, TOAST_SOURCE, TOOLTIP_SOURCE, TREE_SOURCE, source,
 };
 use noctua_design_spec::Vendor;
 use noctua_design_spec::vendor::VENDOR;
@@ -69,6 +69,9 @@ pub fn emit(vendor: &Vendor) -> Vec<EmittedFile> {
         EmittedFile::new("dist/tree.js", copied(TREE_SOURCE)),
         EmittedFile::new("dist/tabs.js", copied(TABS_SOURCE)),
         EmittedFile::new("dist/date-input.js", copied(DATE_INPUT_SOURCE)),
+        EmittedFile::new("dist/choice.js", copied(CHOICE_SOURCE)),
+        EmittedFile::new("dist/search.js", copied(SEARCH_SOURCE)),
+        EmittedFile::new("dist/search-match.js", copied(SEARCH_MATCH_SOURCE)),
         EmittedFile::new("packages/tokens/color.js", copied(COLOR_SOURCE)),
         EmittedFile::new("packages/tokens/color.d.ts", color_types()),
     ];

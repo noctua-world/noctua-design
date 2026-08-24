@@ -454,6 +454,9 @@ mod tests {
                     noctua_design_runtime::TREE_SOURCE,
                     noctua_design_runtime::TABS_SOURCE,
                     noctua_design_runtime::DATE_INPUT_SOURCE,
+                    noctua_design_runtime::CHOICE_SOURCE,
+                    noctua_design_runtime::SEARCH_SOURCE,
+                    noctua_design_runtime::SEARCH_MATCH_SOURCE,
                     noctua_design_styles::SOURCE_DIR,
                     noctua_design_spec::vendor::VENDOR,
                 ]

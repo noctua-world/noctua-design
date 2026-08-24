@@ -565,6 +565,9 @@ fn copy_runtime(root: &Path, out: &Path) -> Result<usize, String> {
         "tree.js",
         "tabs.js",
         "date-input.js",
+        "choice.js",
+        "search.js",
+        "search-match.js",
     ] {
         count += copy(
             &root.join("dist").join(file),
@@ -651,13 +654,6 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
     count += copy(
         &root.join("docs-site/assets/model.js"),
         &out.join("assets/model.js"),
-    )?;
-    // The matcher, which `shell.js` imports. A file of its own because it
-    // touches no DOM and carries no word in any language — which is what will
-    // let it move into a behaviour package unchanged on the day there is one.
-    count += copy(
-        &root.join("docs-site/assets/search-match.js"),
-        &out.join("assets/search-match.js"),
     )?;
     // The rows the `deploys` example fetches when a reader asks for more. A
     // real file at a real address, because a *load more* whose next rows are

@@ -40,16 +40,10 @@ Past work is not recorded here and never will be; git holds it (`NOCTUA.md §0.5
 
 ## What is not real
 
-Four gaps, recorded because a reader would otherwise assume they are closed.
+Three gaps, recorded because a reader would otherwise assume they are closed.
 Verify one before relying on it. (Two different `dist/` directories appear below:
 `../dist/` is what the packages ship, `docs-site/dist/` is this site's own output.)
 
-- **`Search` is enhanced from this site's script**, not from `../dist/`, so a
-  consumer taking the packages gets `role="combobox"` and none of the keyboard it
-  obliges. The five that were in the same position — `Select`, `TagPicker`,
-  `Tree`, `Tabs` and `DateInput` — ship now, and `assets/shell.js` imports them
-  back. `Search` did not move with them because its index is fetched from a path
-  this site decides.
 - **The shared behavioural cases are unwritten.** `spec/components/<name>.cases.toml`,
   the one case set run against both implementations, is `NOCTUA.md §9.3` Leg 3 and
   does not exist yet. Prop-surface parity is generated and enforced; behavioural

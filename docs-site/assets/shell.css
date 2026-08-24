@@ -2307,26 +2307,6 @@ a {
    with `hide_label` while also being every other button on the site. Two
    components for one control was the duplication this repository is against. */
 
-.nd-search-recent-item {
-  display: block;
-  inline-size: 100%;
-  padding: var(--noctua-space-2) var(--noctua-space-3);
-  font: inherit;
-  font-size: var(--noctua-size-small);
-  text-align: start;
-  color: var(--nc-color-fg);
-  background: none;
-  border: none;
-  border-radius: var(--noctua-radius-control);
-  cursor: pointer;
-}
-@media (hover: hover) {
-  .nd-search-recent-item:hover {
-    background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
-  }
-}
-
-
 /* --- The glass test ------------------------------------------------------- */
 
 /* THE MATERIAL IS ONLY EVER WHAT IS BEHIND IT.

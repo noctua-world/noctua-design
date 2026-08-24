@@ -6983,6 +6983,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 
 .nd-search-recent { border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border); }
 
+.nd-search-recent-item,
 .nd-search-forget {
   display: block;
   inline-size: 100%;
@@ -7001,11 +7002,11 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   color: var(--nc-color-fg-muted);
 }
 @media (hover: hover) {
+  .nd-search-recent-item:hover,
   .nd-search-forget:hover {
     background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
   }
 }
-
 
 /* --- inline ---
  *
