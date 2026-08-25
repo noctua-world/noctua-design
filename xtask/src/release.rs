@@ -70,6 +70,9 @@ pub(crate) fn run(root: &Path, spec: &Path, version: &str, dry_run: bool) -> Res
     }
     ui::ok(&format!("{written} file(s) now say {version}"));
 
+    relock(root)?;
+    ui::ok("Cargo.lock names the new version");
+
     ui::gap();
     ui::detail("Then, with the key in the machine:");
     ui::detail(&format!("    git commit -am \"release: {version}\""));
@@ -106,6 +109,34 @@ fn plan(root: &Path, current: &str) -> Result<Vec<(String, usize)>, String> {
         out.push((path.to_owned(), count));
     }
     Ok(out)
+}
+
+/// Brings `Cargo.lock` to the version just written.
+///
+/// **The gate runs before the writes**, so it reads the old version and cannot
+/// see this: `v0.2.5` was tagged with a lockfile still naming `0.2.4`, and CI's
+/// determinism job — which builds and then asks whether anything changed — is
+/// what caught it, one push later. `cargo metadata` resolves the workspace and
+/// rewrites the lockfile without compiling anything, which is the cheapest
+/// thing that makes the tree consistent with itself.
+///
+/// # Errors
+///
+/// If cargo cannot be run, or refuses to resolve the workspace.
+fn relock(root: &Path) -> Result<(), String> {
+    let out = std::process::Command::new("cargo")
+        .args(["metadata", "--format-version", "1", "--offline"])
+        .current_dir(root)
+        .output()
+        .map_err(|error| format!("could not run cargo metadata: {error}"))?;
+    if out.status.success() {
+        return Ok(());
+    }
+    Err(format!(
+        "cargo metadata refused to resolve the workspace, so Cargo.lock still names the old \
+         version:\n{}",
+        String::from_utf8_lossy(&out.stderr).trim()
+    ))
 }
 
 /// The version inside `[workspace.package]`, which is the one that matters.
