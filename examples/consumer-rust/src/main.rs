@@ -51,6 +51,31 @@ fn main() {
     let sheet = std::fs::read_to_string(out.join("components.css"))
         .expect("components.css — the stylesheet a consumer links");
 
+    // Every sheet `base.html` names has to be beside it.
+    //
+    // `dist/` linked `tokens/css/ramp.css` and a `theme-<palette>.css` for a
+    // day without shipping either: inside the repository the documentation
+    // site copies them from `packages/tokens/vendor/`, so nothing noticed,
+    // while a consumer who installed the package had the first three sheets
+    // 404 and a page with **no palette at all**. Reading the list rather than
+    // naming the files is the point — a sheet added to `base.html` tomorrow is
+    // covered by this the day it is added.
+    let base = std::fs::read_to_string(out.join("base.html")).expect("base.html — the link list");
+    let mut linked = 0usize;
+    for line in base.lines().filter(|line| line.contains("<link")) {
+        let href = line
+            .split("href=\"")
+            .nth(1)
+            .and_then(|rest| rest.split('"').next())
+            .expect("a link with no href");
+        assert!(
+            out.join(href).exists(),
+            "base.html links {href} and the package does not carry it"
+        );
+        linked += 1;
+    }
+    assert!(linked > 0, "base.html linked nothing, so this proves nothing");
+
     // Every ROOT class this markup carries has to be painted by the sheet.
     //
     // Root classes rather than every class, because some are deliberately
@@ -90,7 +115,8 @@ fn main() {
         rendered.len()
     );
     println!(
-        "{painted} component(s) rendered, every root class painted, \
+        "{linked} sheet(s) linked and present, \
+         {painted} component(s) rendered, every root class painted, \
          {styled} of {} classes styled by the shipped components.css.",
         rendered.len()
     );

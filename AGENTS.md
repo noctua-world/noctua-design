@@ -203,8 +203,7 @@ the fonts and the vendored colour CSS, attests them, and attaches them. The
 registries are a separate act, run by hand — `cargo publish` and `pnpm publish`,
 in the order below.
 
-**What ships, and what does not.** Ten names are public as of `v0.2.0`, on
-2026-08-25: seven crates — the components, the five generated data crates they
+**What ships, and what does not.** Ten names are public since 2026-08-25: seven crates — the components, the five generated data crates they
 need, and `dist/` — and three npm packages. The compiler that produces all of it — `noctua-design-emit`, `-spec`, `-styles`,
 `-runtime`, `-i18n` and `xtask` — stays `publish = false`, because a consumer
 should inherit what the system *is*, never the thing that builds it.
@@ -237,6 +236,13 @@ sometimes created anyway — read the registry before assuming a retry is needed
 And an npm account with `two-factor auth: auth-and-writes` and a security key
 registered will refuse `--otp` codes outright: the publish has to run in a real
 terminal, where npm can open the browser.
+
+**A package is only proven from outside it.** `examples/consumer-rust` reads
+`base.html` and asserts every sheet it links is beside it, because `dist/` linked
+two it did not carry for a day: inside this repository the documentation site
+copies them from `packages/tokens/vendor/`, so every test here passed while a
+consumer who installed the package got a page with no palette at all. Anything
+the packages owe is checked from a project that has only the packages.
 
 **What is left, and it is on the two websites.** Register this repository as a
 trusted publisher for each name — crates.io against `release-crate.yml`, npm
