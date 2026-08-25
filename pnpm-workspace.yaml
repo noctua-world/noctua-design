@@ -11,5 +11,9 @@ packages:
   # as a consumer would — an example that reached into the source tree with
   # `../../packages/react/src` would be demonstrating something no user can do.
   - "docs-site"
+# esbuild compiles the React example into `docs-site/assets/react/`, and its
+# install script is what fetches the platform binary that does it. pnpm refuses
+# to run an install script nobody approved — as an error, not a warning, which
+# is why this line is a decision and not a formality.
 allowBuilds:
-  esbuild: set this to true or false
+  esbuild: true

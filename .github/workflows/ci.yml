@@ -37,6 +37,25 @@ jobs:
       # also asserts it structurally, so the promise is covered twice.
       - run: cargo xtask check
 
+  # The install the publish workflow does, on every push rather than once a tag
+  # exists. Two releases died here — a lockfile that did not know about a new
+  # package, then an install script nobody had approved — and both times the
+  # failure arrived after the tag was pushed, which is the one moment it cannot
+  # be fixed cheaply. Nothing else in CI runs pnpm, so nothing else could see it.
+  install:
+    name: pnpm install --frozen-lockfile
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+      - run: pnpm install --frozen-lockfile
+
   determinism:
     name: Two builds, byte-identical
     runs-on: ubuntu-latest
