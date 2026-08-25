@@ -3,20 +3,20 @@ resolver = "3"
 members = ["crates/*", "docs-site", "xtask"]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.85"
 license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
 # --- Workspace-internal ---
-noctua-design-tokens = { path = "crates/noctua-design-tokens", version = "0.1.0" }
-noctua-design-icons = { path = "crates/noctua-design-icons", version = "0.1.0" }
-noctua-design-grammars = { path = "crates/noctua-design-grammars", version = "0.1.0" }
-noctua-design-lineage = { path = "crates/noctua-design-lineage", version = "0.1.0" }
-noctua-design-theme = { path = "crates/noctua-design-theme", version = "0.1.0" }
-noctua-design-i18n = { path = "crates/noctua-design-i18n", version = "0.1.0" }
-noctua-design = { path = "crates/noctua-design", version = "0.1.0" }
+noctua-design-tokens = { path = "crates/noctua-design-tokens", version = "0.2.0" }
+noctua-design-icons = { path = "crates/noctua-design-icons", version = "0.2.0" }
+noctua-design-grammars = { path = "crates/noctua-design-grammars", version = "0.2.0" }
+noctua-design-lineage = { path = "crates/noctua-design-lineage", version = "0.2.0" }
+noctua-design-theme = { path = "crates/noctua-design-theme", version = "0.2.0" }
+noctua-design-i18n = { path = "crates/noctua-design-i18n", version = "0.2.0" }
+noctua-design = { path = "crates/noctua-design", version = "0.2.0" }
 
 # --- Third party ---
 # The Rust UI framework (`NOCTUA.md §4`), taken with `default-features = false`.

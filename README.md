@@ -98,22 +98,22 @@ package a file above the package directory:
 
 ```toml
 # Cargo.toml
-noctua-design = "0.1.0"
+noctua-design = "0.2.0"
 
 [build-dependencies]
-noctua-design-dist = "0.1.0"   # then: noctua_design_dist::write_to("static/dist")
+noctua-design-dist = "0.2.0"   # then: noctua_design_dist::write_to("static/dist")
 ```
 
 ```json
-"@noctua-world/design-react": "^0.1.0",
-"@noctua-world/design-dist": "^0.1.0"
+"@noctua-world/design-react": "^0.2.0",
+"@noctua-world/design-dist": "^0.2.0"
 ```
 
 The git-tag form works too, and is what a project inside this workspace uses
 while it is edited alongside the system:
 
 ```toml
-noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.1.0" }
+noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.2.0" }
 ```
 
 `examples/consumer-rust/` and `examples/consumer-web/` are both of those,
