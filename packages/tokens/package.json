@@ -1,6 +1,6 @@
 {
   "name": "@noctua-world/design-tokens",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "type": "module",
   "description": "The Noctua design tokens, generated from spec/.",
   "license": "MIT OR Apache-2.0",
