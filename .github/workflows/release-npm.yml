@@ -86,7 +86,11 @@ jobs:
           for pkg in tokens dist react; do
             echo "::group::@noctua-world/design-$pkg"
             (cd "packages/$pkg" && pnpm pack --pack-destination ../../packed)
-            tarball="$(ls packed/*design-$pkg-*.tgz)"
+            # `./` is load-bearing. A bare `packed/x.tgz` has a slash and no
+            # scheme, which npm reads as the GitHub shorthand `user/repo` — it
+            # answered `Refusing to fetch "github:packed/…"` and failed the
+            # release. A path has to look like a path.
+            tarball="./$(ls packed/*design-$pkg-*.tgz)"
             # Idempotent, so repeating a run that died after one package is
             # safe. npm refuses to republish a version and says so plainly;
             # anything else is a real failure and stops the job.
