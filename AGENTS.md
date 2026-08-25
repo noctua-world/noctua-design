@@ -244,11 +244,16 @@ copies them from `packages/tokens/vendor/`, so every test here passed while a
 consumer who installed the package got a page with no palette at all. Anything
 the packages owe is checked from a project that has only the packages.
 
-**What is left, and it is on the two websites.** Register this repository as a
-trusted publisher for each name — crates.io against `release-crate.yml`, npm
-against `release-npm.yml`, both by filename — and then the workflows lose their
-`workflow_dispatch` and take `on: push: tags: ["v*.*.*"]`. Nothing else in them
-changes, and no token is ever stored.
+**A tag publishes now.** All ten names carry this repository as a trusted
+publisher — crates.io against `release-crate.yml`, npm against `release-npm.yml`,
+both matched by filename — so `git push --follow-tags` is the whole release, no
+token is stored anywhere, and the commands above are the manual path for when
+something needs doing by hand. Renaming either workflow file silently breaks
+publishing, and the error does not mention the filename.
+
+Both are idempotent: a run that dies halfway can be repeated with
+`workflow_dispatch` for a tag that already exists, because "already published"
+is the one failure each tolerates.
 
 ## Commands
 

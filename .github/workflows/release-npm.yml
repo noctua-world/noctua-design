@@ -10,10 +10,8 @@
 # registered against `release-npm.yml` by name — renaming this file silently
 # breaks publishing, and the error does not mention the filename.
 #
-# **Dispatch-only, and deliberately**, for the same reason as `release-crate.yml`:
-# a trusted publisher is registered against a package that already exists, so
-# the first version of each name goes up by hand. The trigger becomes
-# `on: push: tags: ["v*.*.*"]` afterwards, and nothing else here changes.
+# A tag publishes, and `workflow_dispatch` stays beside it so a half-finished
+# run can be repeated for a tag that already exists.
 #
 # **Packed by pnpm, published by npm.** `@noctua-world/design-react` depends on
 # `@noctua-world/design-tokens` as `workspace:*`, which only pnpm knows how to
@@ -23,10 +21,12 @@
 name: Publish to npm
 
 on:
+  push:
+    tags: ["v*.*.*"]
   workflow_dispatch:
     inputs:
       tag:
-        description: "The tag to publish, e.g. v0.2.0"
+        description: "The tag to publish, e.g. v0.2.2"
         required: true
         type: string
 
@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ inputs.tag || github.ref_name }}
 
       - uses: pnpm/action-setup@v4
 
@@ -65,7 +65,7 @@ jobs:
       # an npm publish is permanent.
       - name: The tag and the packages must agree
         run: |
-          tag="${{ inputs.tag }}"
+          tag="${{ inputs.tag || github.ref_name }}"
           tag="${tag#v}"
           for pkg in dist tokens react; do
             version="$(node -p "require('./packages/$pkg/package.json').version")"
@@ -87,6 +87,20 @@ jobs:
             echo "::group::@noctua-world/design-$pkg"
             (cd "packages/$pkg" && pnpm pack --pack-destination ../../packed)
             tarball="$(ls packed/*design-$pkg-*.tgz)"
-            npm publish "$tarball" --provenance --access public
+            # Idempotent, so repeating a run that died after one package is
+            # safe. npm refuses to republish a version and says so plainly;
+            # anything else is a real failure and stops the job.
+            set +e
+            out="$(npm publish "$tarball" --provenance --access public 2>&1)"
+            status=$?
+            set -e
+            echo "$out"
             echo "::endgroup::"
+            if [ "$status" -ne 0 ]; then
+              if echo "$out" | grep -qiE "cannot publish over|previously published versions"; then
+                echo "::notice::@noctua-world/design-$pkg is already at this version"
+              else
+                exit "$status"
+              fi
+            fi
           done

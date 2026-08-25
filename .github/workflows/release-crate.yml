@@ -7,23 +7,18 @@
 # The filename is part of the configuration — crates.io registers the trusted
 # publisher against `release-crate.yml` by name.
 #
-# **Dispatch-only, and deliberately.** A trusted publisher can only be
-# registered against a crate that already exists, so the first version of each
-# name goes up by hand (`AGENTS.md`, Publishing). Once all seven are on the
-# index and each has this workflow registered, the trigger becomes:
-#
-#   on:
-#     push:
-#       tags: ["v*.*.*"]
-#
-# and nothing else here changes.
+# A tag publishes. `workflow_dispatch` stays beside it so a run that failed
+# halfway — a rate limit, a network — can be repeated for a tag that already
+# exists, which is safe because every publish below tolerates "already there".
 name: Publish crates
 
 on:
+  push:
+    tags: ["v*.*.*"]
   workflow_dispatch:
     inputs:
       tag:
-        description: "The tag to publish, e.g. v0.2.0"
+        description: "The tag to publish, e.g. v0.2.2"
         required: true
         type: string
 
@@ -40,7 +35,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.tag }}
+          # On a tag push `github.ref_name` is the tag; on a dispatch it is the
+          # branch the run was started from, which is why the typed input wins
+          # and why the order of this fallback is not arbitrary.
+          ref: ${{ inputs.tag || github.ref_name }}
 
       # rust-toolchain.toml decides the version and components; nothing is
       # named twice.
@@ -56,7 +54,7 @@ jobs:
       # manifest is `[workspace.package]`'s own.
       - name: The tag and the workspace version must agree
         run: |
-          tag="${{ inputs.tag }}"
+          tag="${{ inputs.tag || github.ref_name }}"
           tag="${tag#v}"
           version="$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)"
           if [ "$tag" != "$version" ]; then
