@@ -131,11 +131,11 @@ export default () => <Button label="Save" />;
 ```toml
 # Cargo.toml
 [dependencies]
-noctua-design = "0.2.6"
+noctua-design = "0.2.7"
 dioxus = { version = "0.7", default-features = false, features = ["macro", "html", "signals", "hooks"] }
 
 [build-dependencies]
-noctua-design-dist = "0.2.6"
+noctua-design-dist = "0.2.7"
 ```
 
 ```rust
@@ -192,7 +192,7 @@ The git-tag form is what a project inside this workspace uses while it is edited
 alongside the system:
 
 ```toml
-noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.2.6" }
+noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.2.7" }
 ```
 
 ### Switching from a path dependency to a tag
