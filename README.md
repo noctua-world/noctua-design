@@ -99,6 +99,14 @@ Then paste this file and open it. It is complete — nothing else is needed:
 </html>
 ```
 
+**One line adopts the typography.** No component sets a font — a design system
+does not restyle the page it is installed into — so the faces the stylesheets
+declare reach nothing until the page asks for them:
+
+```css
+body { font-family: var(--noctua-font-ui); }
+```
+
 **The two things that go wrong**, and they fail silently:
 
 1. **The link order is load-bearing.** `base.html` is that list, generated —

@@ -135,6 +135,14 @@ export function releaseTables(root = document) {
     tables.get(element)?.binding?.abort();
     tables.delete(element);
     delete element.dataset.ndEnhanced;
+    // What the grid quieted goes back to what it was, because a router that
+    // reuses this markup would otherwise leave a table nobody can Tab into.
+    for (const widget of element.querySelectorAll("[data-nd-grid-tabindex]")) {
+      const before = widget.getAttribute("data-nd-grid-tabindex");
+      widget.removeAttribute("data-nd-grid-tabindex");
+      if (before === "") widget.removeAttribute("tabindex");
+      else widget.setAttribute("tabindex", before);
+    }
   }
 }
 
@@ -1271,8 +1279,40 @@ function gridOf(table) {
     .map((row) => [...row.children].filter((cell) => !cell.hidden));
 }
 
+/// Everything inside a cell that a browser would stop on by itself.
+const CELL_WIDGET = "button, a[href], input, select, textarea, summary, [tabindex]";
+
+/** The widgets a reader can operate in this cell, in the order they are drawn. */
+function widgetsIn(cell) {
+  return [...cell.querySelectorAll(CELL_WIDGET)].filter(
+    (widget) => !widget.disabled && widget.getAttribute("aria-hidden") !== "true",
+  );
+}
+
 function wireGrid(state) {
   const { table } = state;
+
+  // ONE TAB STOP MEANS ONE, so the widgets inside cells lose theirs.
+  //
+  // A grid promises a reader that Tab skips it in a press and the arrows walk
+  // it. A row-select box and an expand control are focusable on their own, so
+  // before this a hundred-row table was two hundred and one stops — the
+  // promise the `role` makes and the keyboard did not keep. They are reached
+  // now by entering the cell: Enter, or F2 where Enter already means choose.
+  //
+  // The old value is kept rather than assumed: a cell may hold something that
+  // deliberately sat at `-1` already, and releasing has to put back what was
+  // there rather than what is usual.
+  const quiet = () => {
+    for (const cell of table.querySelectorAll("td, th")) {
+      if (cell.closest(".nd-table") !== table) continue;
+      for (const widget of widgetsIn(cell)) {
+        if (widget.hasAttribute("data-nd-grid-tabindex")) continue;
+        widget.setAttribute("data-nd-grid-tabindex", widget.getAttribute("tabindex") ?? "");
+        widget.setAttribute("tabindex", "-1");
+      }
+    }
+  };
   const place = (cell) => {
     for (const other of table.querySelectorAll("[tabindex='0']")) {
       if (other.closest(".nd-table") === table && other.matches("td, th")) {
@@ -1289,12 +1329,16 @@ function wireGrid(state) {
     // four hundred — and the stop is wherever the reader last was.
     const first = cells.find((row) => row.length > 0)?.[0];
     if (first) first.setAttribute("tabindex", "0");
+    // Rows arrive later — a filter clears, a row expands — and a widget that
+    // appeared after this ran would be a stop nobody asked for.
+    quiet();
   };
   paint();
 
   table.addEventListener("focusin", (event) => {
     const cell = event.target.closest?.("td, th");
     if (cell && cell.closest(".nd-table") === table) place(cell);
+    quiet();
   }, { signal: state.signal });
 
   table.addEventListener("keydown", (event) => {
@@ -1320,6 +1364,22 @@ function wireGrid(state) {
     if (!cell || cell.closest(".nd-table") !== table) return;
     if (event.altKey) return;
 
+    // INSIDE A CELL, THE WIDGET OWNS THE KEYS.
+    //
+    // A reader who entered a cell is typing in a field or walking a menu, and
+    // a grid that answered their arrows would be steering the table from under
+    // them. Escape is the way out and puts the focus back on the cell it came
+    // from, which is what makes entering safe to try.
+    const inside = event.target !== cell;
+    if (inside) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        place(cell);
+        cell.focus();
+      }
+      return;
+    }
+
     // ENTER AS WELL AS SPACE. The contract has always named both, and only
     // Space was read — so a reader who pressed the key the rest of the page
     // answers got nothing, on the one control where choosing is the point.
@@ -1329,6 +1389,18 @@ function wireGrid(state) {
         event.preventDefault();
         box.checked = !box.checked;
         box.dispatchEvent(new Event("change", { bubbles: true }));
+        return;
+      }
+    }
+
+    // AND THIS IS THE WAY IN. `F2` always, `Enter` when the cell has no chooser
+    // — the branch above answers Enter there, and a key that did two things
+    // depending on the column would be a key a reader cannot learn.
+    if (event.key === "F2" || event.key === "Enter") {
+      const [first] = widgetsIn(cell);
+      if (first) {
+        event.preventDefault();
+        first.focus();
         return;
       }
     }

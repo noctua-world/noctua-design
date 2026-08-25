@@ -14,7 +14,7 @@
 
 import { test, expect } from "@playwright/test";
 import { LOCALES, PAGE, url, showParts } from "./pages.js";
-import { extremes } from "./pixels.js";
+import { extremes, contrast } from "./pixels.js";
 
 const TAG = ".nd-tag";
 
@@ -293,5 +293,75 @@ test("no id appears twice on the new pages, in any locale", async ({ page }) => 
       });
       expect(twice, `${locale}/${slug}`).toEqual([]);
     }
+  }
+});
+
+test("the word is readable against every variant the contract declares", async ({ page }) => {
+  // READ FROM THE VARIANT GRID, NOT FROM A LIST HERE, and from pixels rather
+  // than from a computed style: a tint is a mix over whatever is behind it,
+  // which is the one thing a serialised style can never report.
+  //
+  // A SOLID FILL IS EXCLUDED, for the reason `ai-label.spec.js` gives at
+  // length: `on-<family>` over `<family>` is the palette's own pair and every
+  // solid-filled component in the catalogue sits on it.
+  //
+  // The tinted variant measured 2.06:1 on `warning` and on `overdue` in the
+  // light appearance — the tone's own ink over a tint of itself, two near
+  // neighbours — until it was repainted in the page's ink.
+  await page.setViewportSize({ width: 1120, height: 900 });
+  for (const mode of ["light", "dark"]) {
+    await page.goto(url(PAGE.tag));
+    await showParts(page);
+    await page.evaluate((m) => document.documentElement.setAttribute("data-theme", m), mode);
+
+    // THE WORD, NOT THE WHOLE PILL. A screenshot's darkest and lightest pixels
+    // are the measurement, and a pill may carry an image — the specimen with
+    // the site's own favicon in it reported the logo's blue as if it were ink.
+    // The label's box still shows the tint behind it, which is the pair being
+    // asked about.
+    // A SOLID FILL IS EXCLUDED — and a pressed toggle IS one, whatever variant
+    // it declares: the rule for `[aria-pressed="true"]` paints `on-<family>`
+    // over `<family>`, which is the palette's own pair and the same one the
+    // solid variant sits on. Excluding it by variant alone let it through.
+    // AND A REFUSED TAG IS EXCLUDED. `WCAG 1.4.3` exempts an inactive control,
+    // and this one is dimmed to half opacity by design — measuring it would be
+    // measuring the dimming, and the only way to pass would be to stop dimming.
+    const pills = page.locator(
+      `${TAG}:not([data-nd-variant='solid'])` +
+        `:not(:has([aria-pressed='true']))` +
+        `:not(:has(> .nd-tag-body[disabled]))` +
+        ` .nd-tag-label`,
+    );
+    const count = await pills.count();
+    expect(count, `no variant specimen was measured in ${mode}`).toBeGreaterThan(2);
+
+    const seen = new Set();
+    for (let i = 0; i < count; i += 1) {
+      const pill = pills.nth(i);
+      // CENTRED, not merely brought into view. This site has a bar pinned to
+      // the top, and a pill scrolled to just below the fold sits under it — a
+      // screenshot of the element's box then reports the bar's pixels, which
+      // measured 2.9:1 and had nothing to do with the pill.
+      await pill.evaluate((el) => el.scrollIntoView({ block: "center" }));
+      // The specimen, not just its shape: two pills can share a variant and a
+      // tone and differ in what they carry, and a failure that named only the
+      // shape sent the last reader looking through every one of them.
+      const shape = await pill.evaluate((el) => {
+        const root = el.closest(".nd-tag");
+        return `${root.getAttribute("data-nd-variant") ?? "none"}/${root.getAttribute("data-nd-tone") ?? "none"} ${root.outerHTML.slice(0, 120)}`;
+      });
+      seen.add(shape);
+      const { min, max } = await extremes(page, await pill.screenshot());
+      expect(
+        contrast(min, max),
+        `${shape} in ${mode} ranged ${min} to ${max}`,
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+    // A sweep that only met untoned pills would pass the pair this component
+    // was measured away from.
+    expect(
+      [...seen].some((shape) => !shape.endsWith("/none")),
+      `no toned pill in ${mode}`,
+    ).toBe(true);
   }
 });

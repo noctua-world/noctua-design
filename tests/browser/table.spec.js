@@ -1247,3 +1247,72 @@ test("an emphasised row is not one of the records a total is taken over", async 
   expect(Math.round(reckoned.said)).toBe(Math.round(reckoned.plain));
   expect(Math.round(reckoned.said)).not.toBe(Math.round(reckoned.every));
 });
+
+// --- One tab stop, and the way into a cell -----------------------------------
+//
+// A `role="grid"` promises that Tab skips the whole table in one press and the
+// arrows walk it. The row-select box and the expand control are focusable on
+// their own, so the promise was broken by the markup the component itself
+// writes: a hundred-row table was two hundred and one stops. These three say
+// the promise is kept, that a reader can still reach what is in a cell, and
+// that releasing puts back what it found.
+
+test("a grid is one tab stop, whatever the cells hold", async ({ page }) => {
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  const table = named(page, "team");
+  expect(await table.getAttribute("role")).toBe("grid");
+
+  const stops = await table.evaluate((el) =>
+    [...el.querySelectorAll("td, th, button, a[href], input, select, textarea")].filter(
+      (node) => (node.getAttribute("tabindex") ?? "0") === "0" && !node.disabled,
+    ).length,
+  );
+  expect(stops, "the grid offers more than one tab stop").toBe(1);
+});
+
+test("Enter goes into a cell and Escape comes back out", async ({ page }) => {
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  const table = named(page, "team");
+
+  // The cell that holds the row's own control, reached the way a reader would.
+  const cell = table.locator("tbody .nd-table-select").first();
+  await cell.focus();
+  await expect(cell).toBeFocused();
+
+  // Enter chooses the row here, because that is what the contract says Enter
+  // does in a cell with a chooser. F2 is the way in.
+  await page.keyboard.press("F2");
+  const box = cell.locator("input");
+  await expect(box).toBeFocused();
+
+  // And the arrows belong to what is inside now, not to the table.
+  const before = await rows(table);
+  await page.keyboard.press("ArrowDown");
+  await expect(box).toBeFocused();
+  expect(await rows(table)).toEqual(before);
+
+  await page.keyboard.press("Escape");
+  await expect(cell).toBeFocused();
+});
+
+test("releasing gives the cells' widgets their tab stops back", async ({ page }) => {
+  await page.goto(url(PAGE.tables));
+  await showParts(page);
+  const table = named(page, "team");
+  const quieted = await table.locator("[data-nd-grid-tabindex]").count();
+  expect(quieted, "nothing was quieted, so this proves nothing").toBeGreaterThan(0);
+
+  // Through the shell the page is already running, rather than a second URL
+  // written here: the site is served under a base path, and a second spelling
+  // of it is a second thing that can be wrong.
+  await page.evaluate(async () => {
+    const tag = document.querySelector('script[type="module"][src*="shell.js"]');
+    const shell = await import(tag.src);
+    shell.releaseAll(document.body);
+  });
+  await expect(table.locator("[data-nd-grid-tabindex]")).toHaveCount(0);
+  const box = table.locator("tbody .nd-table-select input").first();
+  expect(await box.getAttribute("tabindex")).toBe(null);
+});

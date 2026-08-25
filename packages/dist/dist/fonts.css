@@ -10,7 +10,19 @@
  
    Never name a family directly in a component. Use var(--noctua-font-*),
    or the interface-font setting cannot reach it and the fallback chain is
-   lost. A source gate enforces this. */
+   lost. A source gate enforces this.
+ 
+   THE ROLES ARE FOR THE PAGE TO READ, NOT FOR IT TO REDEFINE.
+   No component sets a family: a design system does not restyle the page it
+   is installed into, so components inherit whatever the host set. That
+   makes `--noctua-font-ui` and `--noctua-font-display` the handles a
+   consumer *reads* — `body { font-family: var(--noctua-font-ui); }` is
+   the one line that adopts this typography. Redefining one changes nothing
+   on its own, because nothing here reads it back.
+ 
+   `--noctua-font-mono` is the exception and is read by the components
+   that draw code, because a code block that inherited a proportional face
+   would stop being one. */
 
 @font-face {
   font-family: "Noto Sans";

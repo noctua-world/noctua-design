@@ -240,10 +240,11 @@
  * `--nc-color-fg` over the same tint measures 13.5:1. The family still says
  * which family it is, through the field and the hairline around it.
  *
- * `Tag` and `Badge` paint their own tinted variants the other way and measure
- * 2.1:1. That is worth a change of their own and is not one this component can
- * make: a mark that copied it would be a fifth measured thing agreeing with
- * four unmeasured ones. */
+ * `Tag` painted its tinted and outlined variants the other way and measured
+ * 2.06:1 until 2026-08-25, when it was repainted to match this. `Badge` never
+ * had a tinted variant: its mark is a solid fill, which is the palette's own
+ * pair. `tests/browser/tags.spec.js` measures the pills the way
+ * `ai-label.spec.js` measures these marks, so neither can drift back. */
 .nd-ai-label[data-nd-variant="soft"][data-nd-tone] .nd-ai-label-mark {
   color: var(--nc-color-fg);
   background: var(--nd-tone-bg, var(--nc-color-subtle-bg));

@@ -133,9 +133,21 @@
   border-color: var(--nc-color-border);
 }
 
+/* A TINTED FIELD TAKES THE PAGE'S OWN INK, NOT THE TONE'S.
+ *
+ * `--nc-color-<family>` is solved against the page and `-bg` is a tint of it,
+ * so the two are near neighbours: measured in a browser across the tones, this
+ * rule ran 2.06:1 on `warning` and `overdue` in the light appearance, against a
+ * 4.5:1 floor for text. The page's ink over the same tint clears it everywhere,
+ * and the family still says which family it is — through the field and the
+ * hairline around it, which is what the border below is for.
+ *
+ * `AILabel` was painted this way first and its comment named these two as the
+ * ones still wrong; they are not any more. */
 .nd-tag[data-nd-variant="soft"][data-nd-tone] {
-  color: var(--nd-tone);
+  color: var(--nc-color-fg);
   background: var(--nd-tone-bg);
+  border-color: var(--nd-tone-border);
 }
 
 .nd-tag[data-nd-variant="solid"][data-nd-tone] {
@@ -143,8 +155,12 @@
   background: var(--nd-tone);
 }
 
+/* AND AN OUTLINE TAKES IT TOO. The tone's ink on the page's own ground is the
+   same two-neighbours problem without even a tint between them: `accent`
+   measured 2.9:1 in the light appearance. The hairline is what says which
+   family it is, which is all an outline ever had to say. */
 .nd-tag[data-nd-variant="outline"][data-nd-tone] {
-  color: var(--nd-tone);
+  color: var(--nc-color-fg);
   border-color: var(--nd-tone-border);
 }
 

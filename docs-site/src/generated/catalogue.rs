@@ -12300,6 +12300,14 @@ pub(crate) const COMPONENTS: [DocComponent; 89] = [
                 action: Key::ComponentTableKeyEnterSpaceAction,
             },
             DocKey {
+                key: Key::ComponentTableKeyF2EnterName,
+                action: Key::ComponentTableKeyF2EnterAction,
+            },
+            DocKey {
+                key: Key::ComponentTableKeyEscapeName,
+                action: Key::ComponentTableKeyEscapeAction,
+            },
+            DocKey {
                 key: Key::ComponentTableKeyShiftArrowKeysName,
                 action: Key::ComponentTableKeyShiftArrowKeysAction,
             },

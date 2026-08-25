@@ -5386,6 +5386,14 @@ pub enum Key {
     ComponentTableKeyEnterSpaceName,
     /// `component.table.key.enter-space.action`
     ComponentTableKeyEnterSpaceAction,
+    /// `component.table.key.f2-enter.name`
+    ComponentTableKeyF2EnterName,
+    /// `component.table.key.f2-enter.action`
+    ComponentTableKeyF2EnterAction,
+    /// `component.table.key.escape.name`
+    ComponentTableKeyEscapeName,
+    /// `component.table.key.escape.action`
+    ComponentTableKeyEscapeAction,
     /// `component.table.key.shift-arrow-keys.name`
     ComponentTableKeyShiftArrowKeysName,
     /// `component.table.key.shift-arrow-keys.action`
@@ -6066,7 +6074,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2971] = [
+    pub const ALL: [Self; 2975] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -8700,6 +8708,10 @@ impl Key {
         Self::ComponentTableKeyPageUpPageDownAction,
         Self::ComponentTableKeyEnterSpaceName,
         Self::ComponentTableKeyEnterSpaceAction,
+        Self::ComponentTableKeyF2EnterName,
+        Self::ComponentTableKeyF2EnterAction,
+        Self::ComponentTableKeyEscapeName,
+        Self::ComponentTableKeyEscapeAction,
         Self::ComponentTableKeyShiftArrowKeysName,
         Self::ComponentTableKeyShiftArrowKeysAction,
         Self::ComponentTableKeyCtrlCmdAName,
@@ -12095,6 +12107,10 @@ impl Key {
             }
             Self::ComponentTableKeyEnterSpaceName => "component.table.key.enter-space.name",
             Self::ComponentTableKeyEnterSpaceAction => "component.table.key.enter-space.action",
+            Self::ComponentTableKeyF2EnterName => "component.table.key.f2-enter.name",
+            Self::ComponentTableKeyF2EnterAction => "component.table.key.f2-enter.action",
+            Self::ComponentTableKeyEscapeName => "component.table.key.escape.name",
+            Self::ComponentTableKeyEscapeAction => "component.table.key.escape.action",
             Self::ComponentTableKeyShiftArrowKeysName => {
                 "component.table.key.shift-arrow-keys.name"
             }
@@ -18353,6 +18369,14 @@ impl Locale {
                 Key::ComponentTableKeyEnterSpaceName => "Enter / Space",
                 Key::ComponentTableKeyEnterSpaceAction => {
                     "On a column heading, sorts by it: up, down, then back to document order. On a row, chooses it."
+                }
+                Key::ComponentTableKeyF2EnterName => "F2 / Enter",
+                Key::ComponentTableKeyF2EnterAction => {
+                    "Goes into the cell, to what it holds. Enter does it wherever Enter does not already choose."
+                }
+                Key::ComponentTableKeyEscapeName => "Escape",
+                Key::ComponentTableKeyEscapeAction => {
+                    "Comes back out of a cell, onto the cell. Inside one, the arrow keys belong to what is in it."
                 }
                 Key::ComponentTableKeyShiftArrowKeysName => "Shift + arrow keys",
                 Key::ComponentTableKeyShiftArrowKeysAction => {
@@ -25080,6 +25104,14 @@ impl Locale {
                 Key::ComponentTableKeyEnterSpaceName => "Enter / Espaço",
                 Key::ComponentTableKeyEnterSpaceAction => {
                     "Num título de coluna, ordena por ela: para cima, para baixo, e de volta à ordem do documento. Numa linha, escolhe-a."
+                }
+                Key::ComponentTableKeyF2EnterName => "F2 / Enter",
+                Key::ComponentTableKeyF2EnterAction => {
+                    "Entra na célula, no que ela contiver. Enter faz isso onde Enter ainda não significa escolher."
+                }
+                Key::ComponentTableKeyEscapeName => "Escape",
+                Key::ComponentTableKeyEscapeAction => {
+                    "Sai da célula, voltando para ela. Dentro de uma, as setas pertencem ao que está nela."
                 }
                 Key::ComponentTableKeyShiftArrowKeysName => "Shift + setas",
                 Key::ComponentTableKeyShiftArrowKeysAction => {
@@ -31967,6 +31999,14 @@ impl Locale {
                 Key::ComponentTableKeyEnterSpaceName => "⟦EEnteer / Spaacee⟧",
                 Key::ComponentTableKeyEnterSpaceAction => {
                     "⟦OOn aa cooluumn heeaadiing, soorts by iit: uup, doown, theen baack too doocuumeent oordeer. OOn aa roow, choooosees iit.⟧"
+                }
+                Key::ComponentTableKeyF2EnterName => "⟦F2 / EEnteer⟧",
+                Key::ComponentTableKeyF2EnterAction => {
+                    "⟦Gooees iintoo thee ceell, too whaat iit hoolds. EEnteer dooees iit wheereeveer EEnteer dooees noot aalreeaady choooosee.⟧"
+                }
+                Key::ComponentTableKeyEscapeName => "⟦EEscaapee⟧",
+                Key::ComponentTableKeyEscapeAction => {
+                    "⟦Coomees baack oouut oof aa ceell, oontoo thee ceell. IInsiidee oonee, thee aarroow keeys beeloong too whaat iis iin iit.⟧"
                 }
                 Key::ComponentTableKeyShiftArrowKeysName => "⟦Shiift + aarroow keeys⟧",
                 Key::ComponentTableKeyShiftArrowKeysAction => {

@@ -46,7 +46,19 @@ pub fn emit(
         \x20\n\
         \x20  Never name a family directly in a component. Use var(--{prefix}-font-*),\n\
         \x20  or the interface-font setting cannot reach it and the fallback chain is\n\
-        \x20  lost. A source gate enforces this. */\n"
+        \x20  lost. A source gate enforces this.\n\
+        \x20\n\
+        \x20  THE ROLES ARE FOR THE PAGE TO READ, NOT FOR IT TO REDEFINE.\n\
+        \x20  No component sets a family: a design system does not restyle the page it\n\
+        \x20  is installed into, so components inherit whatever the host set. That\n\
+        \x20  makes `--{prefix}-font-ui` and `--{prefix}-font-display` the handles a\n\
+        \x20  consumer *reads* — `body {{ font-family: var(--{prefix}-font-ui); }}` is\n\
+        \x20  the one line that adopts this typography. Redefining one changes nothing\n\
+        \x20  on its own, because nothing here reads it back.\n\
+        \x20\n\
+        \x20  `--{prefix}-font-mono` is the exception and is read by the components\n\
+        \x20  that draw code, because a code block that inherited a proportional face\n\
+        \x20  would stop being one. */\n"
     )
     .expect("write");
 

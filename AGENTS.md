@@ -606,34 +606,37 @@ It found three defects on the day it was built, which is what a leg is for.
 
 Recorded gaps, because a reader would otherwise assume they are closed.
 
-**One loose end the styles move turned up**: `--noctua-font-ui` is declared
-in `dist/fonts.css` and read by nothing. The page's own typography is the
-documentation site's `body` rule, which stays in `docs-site/assets/shell.css`
-because a component library does not restyle a consumer's page — so components
-inherit whatever font the host sets, which is right, and the token that looks
-like the way to change it does nothing, which is not.
+**A note opened inside a `Dialog` covers the dialog's own text, and that is the
+behaviour.** Every note here is a `position: fixed` panel anchored to the control
+that opened it, so a note opens over the page it is about, `Info` has always
+worked this way, and inside a modal it is the same gesture. It was recorded as a
+gap and reviewed on 2026-08-26: not one. Teaching `anchor.js` about the surface a
+note opened inside would change five other callers to solve a problem the reader
+does not have — they opened the note, and closing it puts the text back.
 
-**A `role="grid"` has one tab stop and three things sit in it.** `table.js`
-sets every cell to `-1` and the first to `0`, and sets nothing inside a cell —
-so the row-select box and the expand control are stops the comment above them
-says a grid does not have. Closing it needs a cell-entry gesture the runtime
-has no key for. Until then `TableCell` and `TableHeaderCell` host the quiet form
-of the assistant's mark, because a pressable one would be a stop per marked cell.
+**Three gaps closed on 2026-08-26**, named here because the reasoning outlived
+them:
 
-**A note opened inside a `Dialog` covers the dialog's own text.** Every note on
-this site is a `position: fixed` panel anchored to the control that opened it,
-and `Info` has always behaved this way — a note opens over the page it is about.
-Inside a modal that is worse than elsewhere, because the text it lands on is the
-one a reader most needs: a delete dialog's note covered its own irreversibility
-warning. Closing it means teaching `anchor.js` about the surface a note opened
-inside, which is a change to five other callers.
-
-**`Tag` and `Badge` paint a tinted variant in the tone's own ink**, which
-measures 2.1:1 in the light appearance. `--nc-color-<family>` is solved against
-the page and `-bg` is a tint of it, so the two are neighbours; the workspace's
-own `AGENTS.md` states the rule the other way round — a `-bg` field takes the
-page's ordinary ink and the family's border. `AILabel` is painted that way and
-measures 13.5:1. The other two are worth a change of their own.
+- **`Tag` painted its tinted and outlined variants in the tone's own ink**, which
+  measured 2.06:1 in the light appearance. Both take the page's ink now and say
+  which family they are through the field and the hairline, exactly as `AILabel`
+  does, and `tags.spec.js` measures every non-solid pill from pixels so it cannot
+  drift back. A solid fill and a pressed toggle are excluded there for the reason
+  `ai-label.spec.js` gives: `on-<family>` over `<family>` is the palette's own
+  pair. A refused tag is excluded because `WCAG 1.4.3` exempts an inactive
+  control, and dimming it is the point.
+- **A `role="grid"` had one tab stop and three things sitting in it.** Every
+  widget inside a cell is quieted to `-1` now and reached by entering the cell:
+  `F2` always, `Enter` where `Enter` does not already choose, `Escape` back out.
+  Inside a cell the arrow keys belong to what is in it. `TableCell` and
+  `TableHeaderCell` still host the quiet form of the assistant's mark, but the
+  reason changed: a pressable one would no longer be a stop per marked cell, so
+  that is now a design question rather than a keyboard one.
+- **`--noctua-font-ui` was declared and read by nothing.** It still is, and that
+  is right: no component sets a family, because a design system does not restyle
+  the page it is installed into. It is a handle the *page* reads —
+  `body { font-family: var(--noctua-font-ui); }` — and `dist/fonts.css` and the
+  README now say so, which is what was actually missing.
 
 ## Maintaining this file
 
