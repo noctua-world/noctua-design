@@ -1,6 +1,6 @@
 {
   "name": "@noctua-world/design-react",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "description": "The Noctua design system, as React components. ThemeScope is generated from spec/theme.toml.",
   "license": "MIT OR Apache-2.0",

@@ -1,6 +1,6 @@
 {
   "name": "@noctua-world/design-dist",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "description": "The Noctua design system's stylesheets, behaviour modules and theme data — the files a page links, with no build step.",
   "license": "MIT OR Apache-2.0",
