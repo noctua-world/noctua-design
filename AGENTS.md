@@ -255,6 +255,22 @@ Both are idempotent: a run that dies halfway can be repeated with
 `workflow_dispatch` for a tag that already exists, because "already published"
 is the one failure each tolerates.
 
+**What four tags cost, so nobody pays it twice.** The npm job failed three times
+for three unrelated reasons, and every one was invisible until a tag existed:
+`pnpm-lock.yaml` did not know about a package added five commits earlier; nobody
+had approved `esbuild`'s install script, which pnpm treats as an error and not a
+warning; and `npm publish packed/x.tgz` resolved its own argument as the GitHub
+shorthand `user/repo` — a relative path needs a leading dot-slash, which is why
+the same command worked by hand with an absolute one. The first two are checked now on every push,
+by `cargo xtask check` and by CI's `pnpm install --frozen-lockfile`. The third
+nothing here can check, because it is the behaviour of the publish command
+itself.
+
+**npm has no 0.2.2, 0.2.3 or 0.2.4.** Those tags published to crates.io, which
+had worked from the first, while the npm job was being repaired. A version that
+exists on one registry and not the other is untidy and harmless; inventing an
+npm release to fill the gap would have been neither.
+
 ## Commands
 
 ```bash
