@@ -421,7 +421,7 @@ dependencies = [
 
 [[package]]
 name = "docs-site"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "dioxus",
  "dioxus-ssr",
@@ -696,7 +696,7 @@ dependencies = [
 
 [[package]]
 name = "noctua-design"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "dioxus",
  "dioxus-ssr",
@@ -709,11 +709,11 @@ dependencies = [
 
 [[package]]
 name = "noctua-design-dist"
-version = "0.2.3"
+version = "0.2.4"
 
 [[package]]
 name = "noctua-design-emit"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "indexmap",
  "noctua-design-runtime",
@@ -723,30 +723,30 @@ dependencies = [
 
 [[package]]
 name = "noctua-design-grammars"
-version = "0.2.3"
+version = "0.2.4"
 
 [[package]]
 name = "noctua-design-i18n"
-version = "0.2.3"
+version = "0.2.4"
 
 [[package]]
 name = "noctua-design-icons"
-version = "0.2.3"
+version = "0.2.4"
 
 [[package]]
 name = "noctua-design-lineage"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "noctua-design-spec",
 ]
 
 [[package]]
 name = "noctua-design-runtime"
-version = "0.2.3"
+version = "0.2.4"
 
 [[package]]
 name = "noctua-design-spec"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "indexmap",
  "miette",
@@ -758,15 +758,15 @@ dependencies = [
 
 [[package]]
 name = "noctua-design-styles"
-version = "0.2.3"
+version = "0.2.4"
 
 [[package]]
 name = "noctua-design-theme"
-version = "0.2.3"
+version = "0.2.4"
 
 [[package]]
 name = "noctua-design-tokens"
-version = "0.2.3"
+version = "0.2.4"
 
 [[package]]
 name = "num-traits"
@@ -1275,7 +1275,7 @@ checksum = "23b97319f7b8343df12cc98938e5c3eb436064524c8d2b4e30a1d3a36eecdf81"
 
 [[package]]
 name = "xtask"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "anstream 0.6.21",
  "anstyle",

@@ -4,6 +4,15 @@
   "type": "module",
   "description": "The Noctua design system, as React components. ThemeScope is generated from spec/theme.toml.",
   "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noctua-world/noctua-design.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://noctua-world.github.io/noctua-design/",
+  "bugs": {
+    "url": "https://github.com/noctua-world/noctua-design/issues"
+  },
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "sideEffects": false,

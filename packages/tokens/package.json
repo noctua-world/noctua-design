@@ -4,6 +4,15 @@
   "type": "module",
   "description": "The Noctua design tokens, generated from spec/.",
   "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noctua-world/noctua-design.git",
+    "directory": "packages/tokens"
+  },
+  "homepage": "https://noctua-world.github.io/noctua-design/",
+  "bugs": {
+    "url": "https://github.com/noctua-world/noctua-design/issues"
+  },
   "sideEffects": false,
   "exports": {
     ".": "./index.js",
