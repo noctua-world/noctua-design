@@ -12,6 +12,10 @@
 //! because inside the repository the documentation site's own stylesheet is on
 //! every page.
 //!
+//! It asks it of `noctua-design-dist`, the package that carries those files to
+//! a registry — so what is checked here is the copy a consumer installs, not
+//! the directory this repository builds.
+//!
 //! # Why it renders to a string rather than to a browser
 //!
 //! Because what a browser would add here is paint, and paint is what
@@ -38,9 +42,14 @@ fn main() {
 
     println!("{markup}\n");
 
-    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let sheet = std::fs::read_to_string(root.join("dist/components.css"))
-        .expect("dist/components.css — the stylesheet a consumer links");
+    // The stylesheet, from the package — written out exactly as a consumer's
+    // `build.rs` would write it, and read back from where it landed. Reading
+    // `../../dist/components.css` would have been shorter and would have proved
+    // something no consumer can do.
+    let out = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("target/static");
+    noctua_design_dist::write_to(&out).expect("write the shipped files out");
+    let sheet = std::fs::read_to_string(out.join("components.css"))
+        .expect("components.css — the stylesheet a consumer links");
 
     // Every ROOT class this markup carries has to be painted by the sheet.
     //
@@ -64,7 +73,7 @@ fn main() {
         );
         assert!(
             sheet.contains(&format!(".{root}")),
-            "dist/components.css has no rule for .{root}, so a consumer gets it unstyled"
+            "components.css has no rule for .{root}, so a consumer gets it unstyled"
         );
         painted += 1;
     }
@@ -82,7 +91,7 @@ fn main() {
     );
     println!(
         "{painted} component(s) rendered, every root class painted, \
-         {styled} of {} classes styled by dist/components.css.",
+         {styled} of {} classes styled by the shipped components.css.",
         rendered.len()
     );
 }

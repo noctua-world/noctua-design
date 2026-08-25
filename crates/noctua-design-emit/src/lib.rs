@@ -25,6 +25,7 @@ pub mod cases;
 pub mod component;
 pub mod controls;
 pub mod css;
+pub mod dist;
 pub mod docs;
 pub mod fonts;
 pub mod grammar;
@@ -192,6 +193,11 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
     files.extend(theme::emit(theme, vendor));
     files.extend(tones::emit(vendor));
     files.extend(typescript::emit(spec));
+    // Last, and reading what the others just decided: the two packages that
+    // carry `dist/` to a registry are copies of it, so nothing may ship after
+    // this line. `dist.rs` says why they exist at all.
+    let carried = dist::emit(&files);
+    files.extend(carried);
     files.sort_by(|a, b| a.path.cmp(&b.path));
     files
 }
@@ -412,7 +418,7 @@ mod tests {
     fn every_file_carries_a_generated_header() {
         let bundle = shipped();
         for file in emit_all(inputs(&bundle)) {
-            if file.path.starts_with(VENDORED) {
+            if file.path.starts_with(VENDORED) || dist::is_mirror(&file.path) {
                 continue;
             }
             assert!(
@@ -564,7 +570,11 @@ mod tests {
             // `docs-site/js/` is emitted too now. It was `packages/` alone,
             // and `registry.js` sat outside it for a year with a generated
             // header and no generator, so nothing here ever read it as code.
-            let ours = file.path.starts_with("packages/") || file.path.starts_with("docs-site/js/");
+            // `packages/dist/` is `dist/` copied, and `dist/` is read where it
+            // is written. A copy read twice is one file with two verdicts.
+            let ours = (file.path.starts_with("packages/")
+                || file.path.starts_with("docs-site/js/"))
+                && !dist::is_mirror(&file.path);
             if !ours || !javascript {
                 continue;
             }

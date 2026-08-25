@@ -1,0 +1,92 @@
+# Publishes the three public npm packages.
+#
+# There is no NODE_AUTH_TOKEN here, and that is the entire point: npm trusted
+# publishing exchanges the workflow's OIDC identity for a short-lived credential,
+# so there is no long-lived secret to leak. npm's classic tokens were revoked in
+# December 2025 and granular tokens lose publish rights in January 2027, so this
+# is also the only path with a future.
+#
+# The filename is part of the configuration. npm's trusted publisher is
+# registered against `release-npm.yml` by name — renaming this file silently
+# breaks publishing, and the error does not mention the filename.
+#
+# **Dispatch-only, and deliberately**, for the same reason as `release-crate.yml`:
+# a trusted publisher is registered against a package that already exists, so
+# the first version of each name goes up by hand. The trigger becomes
+# `on: push: tags: ["v*.*.*"]` afterwards, and nothing else here changes.
+#
+# **Packed by pnpm, published by npm.** `@noctua-world/design-react` depends on
+# `@noctua-world/design-tokens` as `workspace:*`, which only pnpm knows how to
+# rewrite to a real version; trusted publishing and provenance are npm's. So
+# each package is packed by the tool that understands the workspace and uploaded
+# by the tool that understands the registry.
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The tag to publish, e.g. v0.2.0"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  publish:
+    name: npm publish
+    # Must be a GitHub-hosted runner. Trusted publishing and provenance both
+    # refuse self-hosted runners.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # OIDC, for both trusted publishing and the provenance attestation.
+      # Without it nothing here works.
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      # Trusted publishing needs npm >= 11.5.1, which is newer than what some
+      # Node images ship.
+      - name: Use a recent npm
+        run: npm install -g npm@latest
+
+      # A mistyped tag would publish the wrong version under the right name, and
+      # an npm publish is permanent.
+      - name: The tag and the packages must agree
+        run: |
+          tag="${{ inputs.tag }}"
+          tag="${tag#v}"
+          for pkg in dist tokens react; do
+            version="$(node -p "require('./packages/$pkg/package.json').version")"
+            if [ "$tag" != "$version" ]; then
+              echo "::error::tag v$tag does not match packages/$pkg $version"
+              exit 1
+            fi
+          done
+          echo "publishing $tag"
+
+      - run: pnpm install --frozen-lockfile
+
+      # Tokens first: the React package names it as a dependency, and a version
+      # that is not on the registry yet is a package nobody can install.
+      - name: Pack and publish
+        run: |
+          mkdir -p packed
+          for pkg in tokens dist react; do
+            echo "::group::@noctua-world/design-$pkg"
+            (cd "packages/$pkg" && pnpm pack --pack-destination ../../packed)
+            tarball="$(ls packed/*design-$pkg-*.tgz)"
+            npm publish "$tarball" --provenance --access public
+            echo "::endgroup::"
+          done

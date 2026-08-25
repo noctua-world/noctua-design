@@ -1,0 +1,108 @@
+# Publishes the seven public crates.
+#
+# Like the npm workflow, there is no stored token: crates.io trusted publishing
+# exchanges OIDC for a credential that lives about thirty minutes, and the auth
+# action's post step revokes it when the job ends.
+#
+# The filename is part of the configuration — crates.io registers the trusted
+# publisher against `release-crate.yml` by name.
+#
+# **Dispatch-only, and deliberately.** A trusted publisher can only be
+# registered against a crate that already exists, so the first version of each
+# name goes up by hand (`AGENTS.md`, Publishing). Once all seven are on the
+# index and each has this workflow registered, the trigger becomes:
+#
+#   on:
+#     push:
+#       tags: ["v*.*.*"]
+#
+# and nothing else here changes.
+name: Publish crates
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The tag to publish, e.g. v0.2.0"
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  publish:
+    name: cargo publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag }}
+
+      # rust-toolchain.toml decides the version and components; nothing is
+      # named twice.
+      - name: Install the pinned toolchain
+        run: rustup show
+
+      - uses: Swatinem/rust-cache@v2
+
+      # A mistyped tag would publish the wrong version under the right name, and
+      # a crates.io publish is permanent — `cargo yank` only stops *new*
+      # dependents. `grep` rather than a TOML parser: this job installs no
+      # toolchain beyond Rust, and the first `version = ` in the workspace
+      # manifest is `[workspace.package]`'s own.
+      - name: The tag and the workspace version must agree
+        run: |
+          tag="${{ inputs.tag }}"
+          tag="${tag#v}"
+          version="$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::tag v$tag does not match the workspace version $version"
+            exit 1
+          fi
+          echo "publishing $version"
+
+      # The whole gate, before anything irreversible.
+      - run: cargo xtask check
+
+      - uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+
+      # Order is not decoration. The five data crates have no dependants on the
+      # index until they are on it, so `noctua-design` cannot be verified before
+      # them. `noctua-design-dist` depends on nothing and could go anywhere.
+      #
+      # Idempotent, and the tolerance is on the *registry's* answer rather than a
+      # prior lookup: crates.io's read path can lag its write path, so "the API
+      # does not list this version" is not evidence that publishing will succeed.
+      - name: Publish, in dependency order
+        run: |
+          for crate in \
+            noctua-design-tokens \
+            noctua-design-icons \
+            noctua-design-grammars \
+            noctua-design-theme \
+            noctua-design-lineage \
+            noctua-design \
+            noctua-design-dist
+          do
+            echo "::group::$crate"
+            set +e
+            out="$(cargo publish -p "$crate" --locked 2>&1)"
+            status=$?
+            set -e
+            echo "$out"
+            echo "::endgroup::"
+            if [ "$status" -ne 0 ]; then
+              if echo "$out" | grep -qiE 'already (been )?uploaded|already exists'; then
+                echo "::notice::$crate is already on crates.io at this version; nothing to do"
+              else
+                exit "$status"
+              fi
+            fi
+          done
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}

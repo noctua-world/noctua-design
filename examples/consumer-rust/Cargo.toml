@@ -14,5 +14,9 @@ publish = false
 # one line and lives in the switch note in the repository's README:
 #   noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.1.0" }
 noctua-design = { path = "../../crates/noctua-design" }
+# The stylesheets, from the package that carries them rather than from the
+# repository. Reaching into `../../dist/` would prove something no consumer
+# can do, which is the mistake this example exists to avoid.
+noctua-design-dist = { path = "../../crates/noctua-design-dist" }
 dioxus = { version = "0.7", default-features = false, features = ["macro", "html", "signals", "hooks"] }
 dioxus-ssr = "0.7"

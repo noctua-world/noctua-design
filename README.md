@@ -50,6 +50,7 @@ suite. The Rust half of this repository builds and tests without it, and
 | `assets/fonts/` | The subset fonts, their licences, and a reproducible attribution |
 | `crates/noctua-design-styles/` | The component rules, hand-written. `sources()` is the order they load in |
 | `dist/` | **Generated, committed**: the CSS layers, `components.css`, the behaviour modules and their manifests |
+| `crates/noctua-design-dist/`, `packages/dist/` | **Generated**: `dist/` copied, because a registry cannot carry a file above a package |
 | `examples/` | Two consumers from outside the workspace, and [what each proves](examples/README.md) |
 | `docs-site/` | The documentation site, and [its own README](docs-site/README.md) |
 
@@ -64,7 +65,9 @@ stylesheets and the behaviour modules are generated, committed, and linked.
 
 ### The files, and where they go
 
-Three directories from this repository become one static directory of yours:
+Three directories from this repository become one static directory of yours —
+or, if you installed from a registry, `noctua-design-dist` is the first of them
+and writes itself out:
 
 | From | To | What it is |
 |---|---|---|
@@ -89,15 +92,28 @@ no palette at all, because this system's default palette is scope-anchored.
 
 ### The components
 
-A Rust consumer adds the crate; a JavaScript consumer adds the package:
+A Rust consumer adds the crate; a JavaScript consumer adds the package. Both
+also add the one that carries the files above, because neither registry will
+package a file above the package directory:
 
 ```toml
-# Cargo.toml — the git-tag form, once a tag exists
-noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.1.0" }
+# Cargo.toml
+noctua-design = "0.1.0"
+
+[build-dependencies]
+noctua-design-dist = "0.1.0"   # then: noctua_design_dist::write_to("static/dist")
 ```
 
 ```json
-"@noctua-world/design-react": "github:noctua-world/noctua-design#v0.1.0"
+"@noctua-world/design-react": "^0.1.0",
+"@noctua-world/design-dist": "^0.1.0"
+```
+
+The git-tag form works too, and is what a project inside this workspace uses
+while it is edited alongside the system:
+
+```toml
+noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.1.0" }
 ```
 
 `examples/consumer-rust/` and `examples/consumer-web/` are both of those,

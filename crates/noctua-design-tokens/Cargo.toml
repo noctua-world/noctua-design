@@ -1,10 +1,14 @@
 [package]
 name = "noctua-design-tokens"
+description = "The Noctua design system's tokens — spacing, radii, type, motion — as Rust constants. GENERATED from spec/; do not edit src/."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-publish = false
+repository = "https://github.com/noctua-world/noctua-design"
+readme = "README.md"
+keywords = ["design-tokens", "design-system", "constants", "ui", "theme"]
+categories = ["gui", "web-programming"]
 
 [lints]
 workspace = true

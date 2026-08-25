@@ -1,10 +1,14 @@
 [package]
 name = "noctua-design-icons"
+description = "The Noctua design system's icon drawings, one associated const each, so an application that draws one icon carries one drawing."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-publish = false
+repository = "https://github.com/noctua-world/noctua-design"
+readme = "README.md"
+keywords = ["icons", "svg", "design-system", "ui", "dioxus"]
+categories = ["gui", "web-programming"]
 
 [features]
 # `ALL` and `IconDrawing::parse`, the two things that name every icon.

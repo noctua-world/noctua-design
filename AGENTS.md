@@ -145,16 +145,19 @@ crates/
                         beside `layout.rs` is the same algorithm again
   noctua-design-emit/   the emitters. HAND-WRITTEN
   noctua-design-spec/   the contract reader and the prose register
+  noctua-design-dist/   dist/ COPIED, so crates.io can carry it. GENERATED
   noctua-design-{tokens,theme,i18n,icons,grammars}/  GENERATED. COMMITTED
 packages/
   react/                the React package. src/theme.js is GENERATED
   tokens/               GENERATED (TypeScript). COMMITTED
   tokens/vendor/        the color tokens, vendored from noctua-colors
+  dist/                 dist/ COPIED again, so npm can carry it. GENERATED
 assets/fonts/           copied from .TEMP/, + ATTRIBUTION.md + licences
 assets/icons/           upstream SVGs, pinned tag, licence, SHA256SUMS
 assets/vendor/          three.js and the owl model, each with ATTRIBUTION.md
 dist/                   GENERATED, COMMITTED: the CSS layers, the component
-                        rules and every shipped behaviour module
+                        rules and every shipped behaviour module. The two
+                        copies above are how it reaches a registry
 docs-site/              the docs app. src/ and assets/ are written; dist/ is
                         build output and is gitignored. Read its README.md
 xtask/                  the five verbs
@@ -193,15 +196,37 @@ forty-five times. `NOCTUA.md §9.12.1`. The list of hosts is never written down:
 
 ## Publishing
 
-**A tag cuts a GitHub Release and nothing else.** `.github/workflows/release.yml`
-packs `dist/`, the fonts and the vendored colour CSS, attests them, and attaches
-them. Nothing reaches npm or crates.io, and that is deliberate rather than
-unfinished: the stylesheets a consumer links live in `dist/`, at the repository
-root, which **Cargo cannot include from inside a package**. A crates.io consumer
-would install components and receive no rules — the exact defect
-`dist/components.css` exists to remove. Answer that first; the manifests are
-otherwise ready, and `publish = false` and `"private": true` are what hold the
-door.
+**A tag cuts a GitHub Release**: `.github/workflows/release.yml` packs `dist/`,
+the fonts and the vendored colour CSS, attests them, and attaches them. The
+registries are a separate act, run by hand — `cargo publish` and `pnpm publish`,
+in the order below.
+
+**What ships, and what does not.** Six crates and three packages are public: the
+components, the five generated data crates they need, and `dist/` itself. The
+compiler that produces all of it — `noctua-design-emit`, `-spec`, `-styles`,
+`-runtime`, `-i18n` and `xtask` — stays `publish = false`, because a consumer
+should inherit what the system *is*, never the thing that builds it.
+
+**`dist/` ships as its own package**, `noctua-design-dist` and
+`@noctua-world/design-dist`. Neither Cargo nor npm will package a file above the
+package directory, and `dist/` is at the repository root, where a consumer copying
+it wants it — so `crates/noctua-design-emit/src/dist.rs` copies it into both
+packages, byte for byte, and the drift check is what proves they agree. Do not
+hand-edit either copy; `cargo xtask build` writes them.
+
+**The order matters, once.** The five data crates have no dependants on the index
+until they are on it:
+
+```bash
+cargo publish -p noctua-design-tokens     # then icons, grammars, theme, lineage
+cargo publish -p noctua-design            # after all five are on the index
+cargo publish -p noctua-design-dist       # independent of the rest
+pnpm --filter @noctua-world/design-tokens publish   # then design-dist, then design-react
+```
+
+`pnpm` rewrites `workspace:*` to the real version on publish; `npm` does not, so
+publish the JavaScript half with `pnpm` or the React package ships a dependency
+nobody can resolve.
 
 ## Commands
 

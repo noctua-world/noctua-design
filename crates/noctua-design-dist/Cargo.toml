@@ -1,0 +1,20 @@
+[package]
+name = "noctua-design-dist"
+description = "The stylesheets, behaviour modules and theme data the Noctua design system ships, embedded, with one call that writes them out."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository = "https://github.com/noctua-world/noctua-design"
+readme = "README.md"
+keywords = ["design-system", "css", "assets", "dioxus", "web"]
+categories = ["web-programming", "gui"]
+
+# `dist/` here is a copy of `dist/` at the repository root, written by
+# `cargo xtask build` and never by hand. It is copied rather than referenced
+# because Cargo will not package a file above the package directory, which is
+# the whole reason this crate exists — `crates/noctua-design-emit/src/dist.rs`.
+include = ["src/**/*.rs", "dist/**", "README.md"]
+
+[lints]
+workspace = true

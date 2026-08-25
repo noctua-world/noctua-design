@@ -708,6 +708,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "noctua-design-dist"
+version = "0.1.0"
+
+[[package]]
 name = "noctua-design-emit"
 version = "0.1.0"
 dependencies = [

@@ -11,7 +11,8 @@
 //!
 //! Because a version is a promise about a state of the tree, and the cheapest
 //! moment to discover the tree is not in that state is before the number is
-//! written into eleven files. `noctua-colors` learned this in the same order.
+//! written into every manifest that names one — `plan` is the list.
+//! `noctua-colors` learned this in the same order.
 
 use std::path::Path;
 
@@ -86,7 +87,13 @@ fn plan(root: &Path, current: &str) -> Result<Vec<(String, usize)>, String> {
         "Cargo.toml",
         "packages/react/package.json",
         "packages/tokens/package.json",
+        "packages/dist/package.json",
         "docs-site/package.json",
+        // The install instructions. A reader copies these, so a stale one is an
+        // error from a registry — the worst place to learn a document rotted.
+        "README.md",
+        "crates/noctua-design/README.md",
+        "crates/noctua-design-dist/README.md",
     ] {
         let text = std::fs::read_to_string(root.join(path))
             .map_err(|error| format!("could not read {path}: {error}"))?;
@@ -126,36 +133,73 @@ fn workspace_version(text: &str) -> Result<String, String> {
 
 /// One file's text with the version moved on.
 ///
-/// The match is the whole quoted string, never the bare number: `0.1.0` appears
-/// inside a dependency's own version requirement and inside prose, and a blind
-/// replace would rewrite both.
+/// The match is always the whole quoted string, never the bare number: `0.1.0`
+/// appears inside a dependency's own version requirement and inside prose, and
+/// a blind replace would rewrite both — including a sentence about what
+/// happened at a version, which is history and must not move.
 fn rewrite(path: &str, text: &str, current: &str, next: &str) -> Result<String, String> {
     // By the manifest this is, not by an extension: the four paths are literals
     // a few lines up, and asking the filesystem's opinion about their spelling
     // would be a question nobody asked.
-    let (from, to) = if path.contains("package.json") {
-        (
+    let spellings: Vec<(String, String)> = if path.contains("package.json") {
+        vec![(
             format!("\"version\": \"{current}\""),
             format!("\"version\": \"{next}\""),
-        )
+        )]
+    } else if path.contains("README") {
+        // Prose names a version three ways and all three are instructions a
+        // reader copies: a Cargo requirement, an npm range, a git tag. Each is
+        // matched **quoted**, so a sentence recalling that `v0.1.0` was tagged
+        // on a Tuesday keeps saying so. By the file this is, not by its
+        // extension, for the same reason the branch above says so.
+        vec![
+            (format!("\"{current}\""), format!("\"{next}\"")),
+            (format!("\"^{current}\""), format!("\"^{next}\"")),
+            (format!("\"v{current}\""), format!("\"v{next}\"")),
+        ]
     } else {
-        (
+        vec![(
             format!("version = \"{current}\""),
             format!("version = \"{next}\""),
-        )
+        )]
     };
-    if !text.contains(&from) {
+    if !spellings.iter().any(|(from, _)| text.contains(from)) {
+        let from = &spellings[0].0;
         return Err(format!(
             "{path} does not contain `{from}` — its formatting moved, and this rewrite would \
              have silently done nothing"
         ));
     }
-    Ok(text.replace(&from, &to))
+    let mut out = text.to_owned();
+    for (from, to) in &spellings {
+        out = out.replace(from, to);
+    }
+    Ok(out)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// An install instruction moves; a sentence about the past does not.
+    ///
+    /// Both spellings sit in the same document, and telling them apart is the
+    /// only reason this function knows what a README is.
+    #[test]
+    fn prose_moves_its_instructions_and_keeps_its_history() {
+        let text = "noctua-design = \"0.1.0\"\n\
+                    \"@noctua-world/design-dist\": \"^0.1.0\"\n\
+                    tag = \"v0.1.0\"\n\
+                    The gate opened at v0.1.0, on a Tuesday.\n";
+        let out = rewrite("README.md", text, "0.1.0", "0.2.0").unwrap();
+        assert!(out.contains("noctua-design = \"0.2.0\""));
+        assert!(out.contains("\"^0.2.0\""));
+        assert!(out.contains("tag = \"v0.2.0\""));
+        assert!(
+            out.contains("The gate opened at v0.1.0, on a Tuesday."),
+            "history moved: {out}"
+        );
+    }
 
     #[test]
     fn the_workspace_version_is_read_from_its_own_table() {
