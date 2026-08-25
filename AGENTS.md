@@ -156,8 +156,10 @@ assets/fonts/           copied from .TEMP/, + ATTRIBUTION.md + licences
 assets/icons/           upstream SVGs, pinned tag, licence, SHA256SUMS
 assets/vendor/          three.js and the owl model, each with ATTRIBUTION.md
 dist/                   GENERATED, COMMITTED: the CSS layers, the component
-                        rules and every shipped behaviour module. The two
-                        copies above are how it reaches a registry
+                        rules, every shipped behaviour module, and tokens/css/
+                        — the colour sheets base.html links, without which a
+                        registry consumer's page has no palette. The two copies
+                        above are how it reaches a registry
 docs-site/              the docs app. src/ and assets/ are written; dist/ is
                         build output and is gitignored. Read its README.md
 xtask/                  the five verbs

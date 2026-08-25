@@ -20,6 +20,28 @@ use noctua_design_spec::{Theme, Vendor};
 
 use crate::{CommentStyle, EmittedFile, THEME_SPEC, camel, header_from, identifier};
 
+/// The colour sheets `base.html` links, shipped beside it.
+///
+/// **Why they are here and not only in `packages/tokens/vendor/`.** `base.html`
+/// links `tokens/css/ramp.css` and one `theme-<palette>.css`, relative to
+/// itself, and `spec/theme.toml`'s `stylesheet_base` — the same value the
+/// generated `STYLESHEET_BASE` carries — is where the bootstrap looks for the
+/// rest when a reader switches palette. A consumer who installed
+/// from a registry has `dist/` and nothing else — so without these the first
+/// three links 404 and the page has **no palette at all**, which is the failure
+/// the whole scope-anchored default is arranged around.
+///
+/// Copied, never rewritten: they are `noctua-colors`' output, and this system
+/// vendors that output rather than restating it (`NOCTUA.md §8.6`).
+#[must_use]
+pub fn palettes(theme: &Theme, sheets: &[(String, String)]) -> Vec<EmittedFile> {
+    let base = &theme.meta.stylesheet_base;
+    sheets
+        .iter()
+        .map(|(name, contents)| EmittedFile::new(format!("dist/{base}/{name}"), contents.clone()))
+        .collect()
+}
+
 /// Emits every form of the theme model.
 #[must_use]
 pub fn emit(theme: &Theme, vendor: &Vendor) -> Vec<EmittedFile> {

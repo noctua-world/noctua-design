@@ -259,6 +259,40 @@ pub(crate) fn artifacts(
             relative_to(root, &runtime_path)
         )
     })?;
+    // The colour sheets `base.html` links. `ramp.css` and the palettes only:
+    // `contexts.css` is replaced by `scope.css` (linking both would pay twice
+    // for the same declarations) and `palette/` is data no page links.
+    let vendor_css = root.join("packages/tokens/vendor/css");
+    let mut palettes: Vec<(String, String)> = Vec::new();
+    for entry in std::fs::read_dir(&vendor_css)
+        .map_err(|error| format!("could not read {}: {error}", relative_to(root, &vendor_css)))?
+    {
+        let path = entry
+            .map_err(|error| format!("could not read a palette: {error}"))?
+            .path();
+        let Some(name) = path.file_name().and_then(|name| name.to_str()) else {
+            continue;
+        };
+        // The ramp and the palettes. `contexts.css` is replaced by `scope.css`
+        // and `palette/` is data no page links, so neither ships.
+        let css = path
+            .extension()
+            .is_some_and(|kind| kind.eq_ignore_ascii_case("css"));
+        if !css || !(name == "ramp.css" || name.starts_with("theme-")) {
+            continue;
+        }
+        let contents = std::fs::read_to_string(&path)
+            .map_err(|error| format!("could not read {}: {error}", relative_to(root, &path)))?;
+        palettes.push((name.to_owned(), contents));
+    }
+    palettes.sort_by(|a, b| a.0.cmp(&b.0));
+    if palettes.is_empty() {
+        return Err(format!(
+            "{} carries no palette sheet, so `dist/` would ship links that 404",
+            relative_to(root, &vendor_css)
+        ));
+    }
+
     let three_path = root.join("assets/vendor/three/three-css3d.js");
     let three = std::fs::read_to_string(&three_path)
         .map_err(|error| format!("could not read {}: {error}", relative_to(root, &three_path)))?;
@@ -292,6 +326,7 @@ pub(crate) fn artifacts(
         lineage: &lineage,
         layout: &layout,
         runtime: &runtime,
+        palettes: &palettes,
         three: &three,
         three_licence: &three_licence,
     });

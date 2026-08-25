@@ -130,6 +130,12 @@ pub struct Inputs<'a> {
     /// The camera, the keyboard walk and the switches — everything a `Lineage`
     /// gains when a script is running. Read from beside the layout.
     pub runtime: &'a str,
+    /// The colour sheets `base.html` links: `ramp.css` and every palette.
+    ///
+    /// Vendored from `noctua-colors` by way of `packages/tokens/vendor/css/`,
+    /// and shipped inside `dist/` because a registry consumer has `dist/` and
+    /// nothing else. `(name, contents)`.
+    pub palettes: &'a [(String, String)],
     /// The vendored three.js bundle, and its licence.
     pub three: &'a str,
     /// Likewise.
@@ -156,6 +162,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
         lineage: lineage_cases,
         layout,
         runtime,
+        palettes,
         three,
         three_licence,
     } = inputs;
@@ -191,6 +198,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
     files.extend(styles::emit());
     files.extend(syntax::emit(syntax_layer));
     files.extend(theme::emit(theme, vendor));
+    files.extend(theme::palettes(theme, palettes));
     files.extend(tones::emit(vendor));
     files.extend(typescript::emit(spec));
     // Last, and reading what the others just decided: the two packages that
@@ -313,6 +321,8 @@ mod tests {
         let vendor2 = noctua_design_spec::vendor::load(&root).expect("vendor");
         let theme =
             noctua_design_spec::load_theme(root.join("spec/theme.toml"), &vendor).expect("theme");
+        let ramp = std::fs::read_to_string(root.join("packages/tokens/vendor/css/ramp.css"))
+            .expect("the colour ramp");
         (
             noctua_design_spec::load(root.join("spec/tokens.toml")).expect("tokens"),
             noctua_design_spec::load_fonts(root.join("spec/fonts.toml")).expect("fonts"),
@@ -336,6 +346,7 @@ mod tests {
                 .expect("syntax"),
             noctua_design_spec::lineage::load(root.join("spec/lineage/cases.toml"))
                 .expect("lineage cases"),
+            ("ramp.css".to_owned(), ramp),
         )
     }
 
@@ -350,11 +361,16 @@ mod tests {
         Vec<Grammar>,
         Syntax,
         Cases,
+        (String, String),
     );
 
     fn inputs(bundle: &Bundle) -> Inputs<'_> {
         Inputs {
             cases: &[],
+            // One sheet, not forty: this fixture is about the *prefix* those
+            // files ship under, and reading the whole set would be forty file
+            // reads in every test that builds it.
+            palettes: std::slice::from_ref(&bundle.10),
             spec: &bundle.0,
             fonts: &bundle.1,
             vendor: &bundle.2,
@@ -395,6 +411,13 @@ mod tests {
     /// below: they are their source, unchanged.
     const VENDORED: &str = "dist/vendor/";
 
+    /// `noctua-colors`' own sheets, shipped inside `dist/` so a registry
+    /// consumer's links resolve. `spec/theme.toml`'s `stylesheet_base` decides
+    /// the directory, and `every_file_carries_a_generated_header` asserts this
+    /// prefix still finds something — a base that moved would otherwise turn
+    /// this skip into a skip of nothing, silently.
+    const VENDORED_COLOURS: &str = "dist/tokens/";
+
     #[test]
     fn the_vendored_files_are_copies_and_nothing_else() {
         let bundle = shipped();
@@ -417,8 +440,22 @@ mod tests {
     #[test]
     fn every_file_carries_a_generated_header() {
         let bundle = shipped();
-        for file in emit_all(inputs(&bundle)) {
-            if file.path.starts_with(VENDORED) || dist::is_mirror(&file.path) {
+        let files = emit_all(inputs(&bundle));
+        assert!(
+            files
+                .iter()
+                .any(|file| file.path.starts_with(VENDORED_COLOURS)),
+            "nothing is under {VENDORED_COLOURS}, so the skip below hides nothing \
+             and the colour sheets are not shipping"
+        );
+        for file in files {
+            // Vendored bytes carry the vendor's own header or none, and a
+            // header this repository added would make the copy differ from
+            // what it copies. `dist/tokens/` is `noctua-colors`' output.
+            if file.path.starts_with(VENDORED)
+                || file.path.starts_with(VENDORED_COLOURS)
+                || dist::is_mirror(&file.path)
+            {
                 continue;
             }
             assert!(
@@ -511,12 +548,17 @@ mod tests {
             grammars,
             syntax_layer,
             lineage_cases,
+            ramp,
         ) = shipped();
         assert!(
             !appearance::emit(&spec, &theme_model).is_empty(),
             "appearance"
         );
         assert!(!component::emit(&theme_model).is_empty(), "component");
+        assert!(
+            !theme::palettes(&theme_model, std::slice::from_ref(&ramp)).is_empty(),
+            "palettes"
+        );
         assert!(!icons::emit(&icons, &drawings).is_empty(), "icons");
         assert!(!grammar::emit(&grammars, SCANNER).is_empty(), "grammar");
         assert!(

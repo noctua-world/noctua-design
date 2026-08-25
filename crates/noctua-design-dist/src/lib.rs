@@ -359,6 +359,226 @@ pub const FILES: &[(&str, &str)] = &[
         include_str!(concat!("../", "dist/", "base.html")),
     ),
     (
+        "tokens/css/ramp.css",
+        include_str!(concat!("../", "dist/", "tokens/css/ramp.css")),
+    ),
+    (
+        "tokens/css/theme-amber-balanced.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-amber-balanced.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-amber-sober.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-amber-sober.css")),
+    ),
+    (
+        "tokens/css/theme-amber-vivid.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-amber-vivid.css")),
+    ),
+    (
+        "tokens/css/theme-azure-balanced.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-azure-balanced.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-azure-sober.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-azure-sober.css")),
+    ),
+    (
+        "tokens/css/theme-azure-vivid.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-azure-vivid.css")),
+    ),
+    (
+        "tokens/css/theme-blue-balanced.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-blue-balanced.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-blue-sober.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-blue-sober.css")),
+    ),
+    (
+        "tokens/css/theme-blue-vivid.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-blue-vivid.css")),
+    ),
+    (
+        "tokens/css/theme-clay-balanced.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-clay-balanced.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-clay-sober.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-clay-sober.css")),
+    ),
+    (
+        "tokens/css/theme-clay-vivid.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-clay-vivid.css")),
+    ),
+    (
+        "tokens/css/theme-indigo-balanced.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-indigo-balanced.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-indigo-sober.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-indigo-sober.css")),
+    ),
+    (
+        "tokens/css/theme-indigo-vivid.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-indigo-vivid.css")),
+    ),
+    (
+        "tokens/css/theme-jade-balanced.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-jade-balanced.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-jade-sober.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-jade-sober.css")),
+    ),
+    (
+        "tokens/css/theme-jade-vivid.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-jade-vivid.css")),
+    ),
+    (
+        "tokens/css/theme-lime-balanced.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-lime-balanced.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-lime-sober.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-lime-sober.css")),
+    ),
+    (
+        "tokens/css/theme-lime-vivid.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-lime-vivid.css")),
+    ),
+    (
+        "tokens/css/theme-magenta-balanced.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-magenta-balanced.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-magenta-sober.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-magenta-sober.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-magenta-vivid.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-magenta-vivid.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-ochre-balanced.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-ochre-balanced.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-ochre-sober.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-ochre-sober.css")),
+    ),
+    (
+        "tokens/css/theme-ochre-vivid.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-ochre-vivid.css")),
+    ),
+    (
+        "tokens/css/theme-rose-balanced.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-rose-balanced.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-rose-sober.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-rose-sober.css")),
+    ),
+    (
+        "tokens/css/theme-rose-vivid.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-rose-vivid.css")),
+    ),
+    (
+        "tokens/css/theme-teal-balanced.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-teal-balanced.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-teal-sober.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-teal-sober.css")),
+    ),
+    (
+        "tokens/css/theme-teal-vivid.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-teal-vivid.css")),
+    ),
+    (
+        "tokens/css/theme-umber-balanced.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-umber-balanced.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-umber-sober.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-umber-sober.css")),
+    ),
+    (
+        "tokens/css/theme-umber-vivid.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-umber-vivid.css")),
+    ),
+    (
+        "tokens/css/theme-violet-balanced.css",
+        include_str!(concat!(
+            "../",
+            "dist/",
+            "tokens/css/theme-violet-balanced.css"
+        )),
+    ),
+    (
+        "tokens/css/theme-violet-sober.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-violet-sober.css")),
+    ),
+    (
+        "tokens/css/theme-violet-vivid.css",
+        include_str!(concat!("../", "dist/", "tokens/css/theme-violet-vivid.css")),
+    ),
+    (
         "tones.css",
         include_str!(concat!("../", "dist/", "tones.css")),
     ),

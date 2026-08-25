@@ -61,81 +61,131 @@ Generated directories are committed so every consumer works with no build step.
 ## Use it in your own project
 
 **There is no build step.** No Tailwind, no bundler, no preprocessor: the
-stylesheets and the behaviour modules are generated, committed, and linked.
+stylesheets and the behaviour modules are generated and committed, and a page
+links them.
 
-### The files, and where they go
+### 1. A page, in three steps
 
-Three directories from this repository become one static directory of yours —
-or, if you installed from a registry, `noctua-design-dist` is the first of them
-and writes itself out:
+```sh
+npm i @noctua-world/design-dist
+cp -r node_modules/@noctua-world/design-dist/dist static/dist
+```
 
-| From | To | What it is |
-|---|---|---|
-| `dist/` | `<static>/` | the stylesheets, the behaviour modules, and the palette and theme data they read |
-| `packages/tokens/vendor/css/` | `<static>/tokens/css/` | the colour tokens, from `noctua-colors` |
-| `assets/fonts/` | `<static>/assets/fonts/` | the faces `fonts.css` asks for — copy the ones you use |
+Then paste this file and open it. It is complete — nothing else is needed:
 
-`dist/fonts.css` reaches its faces at `../assets/fonts/…`, so `dist/` and
-`assets/` stay siblings. Nothing else in `dist/` looks outside itself.
+```html
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <!-- Copy these <link>s from static/dist/base.html. The ORDER MATTERS. -->
+    <link rel="stylesheet" href="static/dist/tokens/css/ramp.css" />
+    <link rel="stylesheet" href="static/dist/scope.css" />
+    <link rel="stylesheet" href="static/dist/tokens/css/theme-blue-balanced.css"
+          id="noctua-base-palette" />
+    <link rel="stylesheet" href="static/dist/tokens.css" />
+    <link rel="stylesheet" href="static/dist/tones.css" />
+    <link rel="stylesheet" href="static/dist/syntax.css" />
+    <link rel="stylesheet" href="static/dist/fonts.css" />
+    <link rel="stylesheet" href="static/dist/theme.css" />
+    <link rel="stylesheet" href="static/dist/components.css" />
+    <!-- Then paste the contents of static/dist/bootstrap.html here. -->
+  </head>
+  <body data-palette="blue-balanced" data-theme="dark">
+    <button class="nd-button" type="button">
+      <span class="nd-button-label">Save</span>
+    </button>
+  </body>
+</html>
+```
 
-### The links, in the one order that works
+**The two things that go wrong**, and they fail silently:
 
-`dist/base.html` is the list, generated, and it is the file to copy from rather
-than the paragraph to retype. It ends with `components.css`, and **the order is
-load-bearing**: the default palette has to precede anything that could tie with
-it, and the component rules come last so your own stylesheet — linked after
-them — wins.
+1. **The link order is load-bearing.** `base.html` is that list, generated —
+   copy from it rather than retyping. `components.css` is last so your own
+   stylesheet, linked after it, still wins.
+2. **`bootstrap.html` has to run**, inline, in `<head>`. It stamps the theme
+   attributes before the first paint. Without it — and without writing
+   `data-palette` yourself, as above — the page has **no palette at all**.
 
-**Run `dist/bootstrap.html` too.** It is an inline script that stamps the theme
-attributes before the first paint. Link the sheets without it and the page has
-no palette at all, because this system's default palette is scope-anchored.
+### 2. Components, if you use React or Rust
 
-### The components
+```sh
+npm i @noctua-world/design-react @noctua-world/design-dist
+```
 
-A Rust consumer adds the crate; a JavaScript consumer adds the package. Both
-also add the one that carries the files above, because neither registry will
-package a file above the package directory:
+```jsx
+import { Button } from "@noctua-world/design-react";
+
+export default () => <Button label="Save" />;
+```
 
 ```toml
 # Cargo.toml
-noctua-design = "0.2.0"
+[dependencies]
+noctua-design = "0.2.1"
+dioxus = { version = "0.7", default-features = false, features = ["macro", "html", "signals", "hooks"] }
 
 [build-dependencies]
-noctua-design-dist = "0.2.0"   # then: noctua_design_dist::write_to("static/dist")
+noctua-design-dist = "0.2.1"
 ```
 
-```json
-"@noctua-world/design-react": "^0.2.0",
-"@noctua-world/design-dist": "^0.2.0"
+```rust
+// build.rs — writes the files above into static/dist/
+fn main() -> std::io::Result<()> {
+    noctua_design_dist::write_to("static/dist")
+}
 ```
 
-The git-tag form works too, and is what a project inside this workspace uses
-while it is edited alongside the system:
-
-```toml
-noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.2.0" }
+```rust
+use noctua_design::components::Button;
+rsx! { Button { label: "Save" } }
 ```
 
 `examples/consumer-rust/` and `examples/consumer-web/` are both of those,
-working, from outside this workspace. Start there.
+working, from outside this workspace. Copy one and start there.
 
-### The behaviour
+### 3. Behaviour, when a component needs a keyboard
 
-Every module in `dist/` is an ES module a page imports directly:
+A `Tabs` announces a role that obliges arrow keys; the module that carries them
+is one import, and nothing pulls in the rest:
 
 ```html
 <script type="module">
-  import { enhanceTabs } from "./dist/tabs.js";
-  import { enhanceRoving } from "./dist/roving.js";
+  import { enhanceTabs } from "./static/dist/tabs.js";
   enhanceTabs();
-  enhanceRoving();
 </script>
 ```
 
-Import the two or three your markup needs; nothing pulls in the rest. Each
-module exports `enhanceX(root)` and `releaseX(root)`. A page with a client-side
-router calls the second one before it replaces markup — a behaviour that cannot
-be released is a defect for every consumer with a router.
+Each module exports `enhanceX(root)` and `releaseX(root)`. An app with a
+client-side router calls the second one before it replaces markup.
+
+### The one thing the package does not carry
+
+**The typefaces.** `fonts.css` asks for them at `../assets/fonts/`, beside the <!-- allow-reference: a URL relative to wherever the consumer put the sheet, not a path in this repository -->
+directory you copied, and 16 MB of faces in every install would be a poor
+trade. Without them the page uses your system font and nothing breaks. To have
+them, take `assets/fonts/` from this repository, or from the release archive:
+
+Every release attaches an archive carrying `dist/`, the faces and their
+licences: <https://github.com/noctua-world/noctua-design/releases/latest>.
+
+### Working from a clone instead
+
+Three directories become one static directory of yours — the same layout the
+package produces:
+
+| From | To | What it is |
+|---|---|---|
+| `dist/` | `<static>/dist/` | the stylesheets, the behaviour modules, the palettes and the theme data |
+| `assets/fonts/` | `<static>/assets/fonts/` | the faces `fonts.css` asks for — copy the ones you use |
+
+The git-tag form is what a project inside this workspace uses while it is edited
+alongside the system:
+
+```toml
+noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.2.1" }
+```
 
 ### Switching from a path dependency to a tag
 
