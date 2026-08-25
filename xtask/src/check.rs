@@ -141,9 +141,69 @@ pub(crate) fn run(root: &Path, spec_path: &Path, spec_only: bool) -> Result<(), 
         }
     }
 
+    lockfile(root, &mut failures);
     payload(root, &mut failures);
 
     finish(&failures)
+}
+
+/// Reports whether the lockfile has kept up with the workspace.
+fn lockfile(root: &Path, failures: &mut Vec<String>) {
+    match lockfile_names_every_package(root) {
+        Ok(count) => ui::ok(&format!("the lockfile names all {count} package(s)")),
+        Err(problem) => {
+            ui::failure(&problem);
+            failures.push("the pnpm lockfile is behind the workspace".to_owned());
+        }
+    }
+}
+
+/// Every package in this workspace is an importer in `pnpm-lock.yaml`.
+///
+/// **Read rather than run**, so a Rust-only contributor still runs this gate:
+/// the question is which names the file carries, and answering it does not need
+/// the tool that wrote it.
+///
+/// `packages/dist` was added and this file was not, which nothing here could
+/// have caught — no workflow ran `pnpm` at all — and the failure surfaced in the
+/// publish job, after the tag was pushed, which is the worst place to learn it.
+fn lockfile_names_every_package(root: &Path) -> Result<usize, String> {
+    let path = root.join("pnpm-lock.yaml");
+    let lock = std::fs::read_to_string(&path)
+        .map_err(|error| format!("could not read pnpm-lock.yaml: {error}"))?;
+
+    let packages = root.join("packages");
+    let entries = std::fs::read_dir(&packages)
+        .map_err(|error| format!("could not read packages/: {error}"))?;
+
+    let mut found = 0;
+    let mut missing = Vec::new();
+    for entry in entries {
+        let dir = entry
+            .map_err(|error| format!("could not read a package: {error}"))?
+            .path();
+        if !dir.join("package.json").exists() {
+            continue;
+        }
+        let Some(name) = dir.file_name().and_then(|name| name.to_str()) else {
+            continue;
+        };
+        found += 1;
+        // The importer key is the path from the root, exactly as pnpm writes it.
+        if !lock.contains(&format!("\n  packages/{name}:")) {
+            missing.push(format!("packages/{name}"));
+        }
+    }
+
+    if missing.is_empty() {
+        Ok(found)
+    } else {
+        Err(format!(
+            "pnpm-lock.yaml does not name {} — run `pnpm install --lockfile-only` and commit it, \
+             or the publish workflow's `--frozen-lockfile` fails after the tag is pushed",
+            missing.join(", ")
+        ))
+    }
 }
 
 /// Every path and every name a document cites, checked against what is here.
