@@ -201,9 +201,9 @@ the fonts and the vendored colour CSS, attests them, and attaches them. The
 registries are a separate act, run by hand — `cargo publish` and `pnpm publish`,
 in the order below.
 
-**What ships, and what does not.** Six crates and three packages are public: the
-components, the five generated data crates they need, and `dist/` itself. The
-compiler that produces all of it — `noctua-design-emit`, `-spec`, `-styles`,
+**What ships, and what does not.** Ten names are public as of `v0.2.0`, on
+2026-08-25: seven crates — the components, the five generated data crates they
+need, and `dist/` — and three npm packages. The compiler that produces all of it — `noctua-design-emit`, `-spec`, `-styles`,
 `-runtime`, `-i18n` and `xtask` — stays `publish = false`, because a consumer
 should inherit what the system *is*, never the thing that builds it.
 
@@ -225,8 +225,22 @@ pnpm --filter @noctua-world/design-tokens publish   # then design-dist, then des
 ```
 
 `pnpm` rewrites `workspace:*` to the real version on publish; `npm` does not, so
-publish the JavaScript half with `pnpm` or the React package ships a dependency
-nobody can resolve.
+**pack with `pnpm` and upload with `npm`** — or the React package ships a
+dependency nobody can resolve.
+
+**Two things about that first publish, both worth knowing before the next one.**
+crates.io rate-limits *new* names to roughly one per ten minutes, so seven names
+took three waits; a `429` there is a queue, not a refusal, and the crate is
+sometimes created anyway — read the registry before assuming a retry is needed.
+And an npm account with `two-factor auth: auth-and-writes` and a security key
+registered will refuse `--otp` codes outright: the publish has to run in a real
+terminal, where npm can open the browser.
+
+**What is left, and it is on the two websites.** Register this repository as a
+trusted publisher for each name — crates.io against `release-crate.yml`, npm
+against `release-npm.yml`, both by filename — and then the workflows lose their
+`workflow_dispatch` and take `on: push: tags: ["v*.*.*"]`. Nothing else in them
+changes, and no token is ever stored.
 
 ## Commands
 
