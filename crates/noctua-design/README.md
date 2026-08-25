@@ -6,10 +6,10 @@ other being `@noctua-world/design-react`.
 
 ```toml
 [dependencies]
-noctua-design = "0.2.2"
+noctua-design = "0.2.3"
 
 [build-dependencies]
-noctua-design-dist = "0.2.2"   # what the page links
+noctua-design-dist = "0.2.3"   # what the page links
 ```
 
 ```rust

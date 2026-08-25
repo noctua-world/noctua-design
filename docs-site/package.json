@@ -1,6 +1,6 @@
 {
   "name": "@noctua-world/docs-site",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": true,
   "type": "module",
   "description": "The documentation site's client-side module. The pages themselves are pre-rendered by the Rust binary in src/.",
