@@ -1358,9 +1358,10 @@ mod tests {
         assert!(block_comment_state("/* explaining 13px", false));
         assert!(block_comment_state("   and more prose", true));
         assert!(!block_comment_state("   and it ends */", true));
+        let seen = findings_for("/* padding: 13px is what this explains\n   and 13px again */");
         assert!(
-            findings_for("/* padding: 13px is what this explains\n   and 13px again */").is_empty(),
-            "a gate that flags its own documentation is a gate people learn to ignore"
+            seen.is_empty(),
+            "a gate that flags its own documentation is a gate people learn to ignore: {seen:?}"
         );
     }
 }

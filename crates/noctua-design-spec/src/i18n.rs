@@ -490,7 +490,8 @@ mod tests {
 
     #[test]
     fn placeholders_are_found() {
-        assert!(placeholders("no braces here").is_empty());
+        let left_over = placeholders("no braces here");
+        assert!(left_over.is_empty(), "{left_over:?}");
         assert_eq!(placeholders("{count} results").len(), 1);
         assert_eq!(placeholders("{a} and {b}").len(), 2);
     }

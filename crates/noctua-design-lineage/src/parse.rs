@@ -372,7 +372,7 @@ mod tests {
     #[test]
     fn a_bond_to_itself_is_not_a_bond() {
         let graph = parse("bond ada ada");
-        assert!(graph.bonds.is_empty());
+        assert!(graph.bonds.is_empty(), "{:?}", graph.bonds);
         assert_eq!(graph.skipped, 1);
     }
 

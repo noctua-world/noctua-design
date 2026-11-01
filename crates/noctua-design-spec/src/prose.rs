@@ -416,7 +416,8 @@ mod tests {
     fn the_register_the_developer_asked_for_passes() {
         // The sentence the developer wrote, verbatim, as the target.
         let wanted = "Let users select one or more options by using the checkboxes component.";
-        assert!(check(wanted, Kind::Summary, "checkbox", false).is_empty());
+        let seen = check(wanted, Kind::Summary, "checkbox", false);
+        assert!(seen.is_empty(), "{seen:?}");
     }
 
     #[test]
@@ -441,7 +442,8 @@ mod tests {
 
     #[test]
     fn an_acronym_is_a_name_and_a_shout_is_not() {
-        assert!(check("The role is ARIA `grid`.", Kind::Doc, "x", false).is_empty());
+        let seen = check("The role is ARIA `grid`.", Kind::Doc, "x", false);
+        assert!(seen.is_empty(), "{seen:?}");
         assert_eq!(
             check("On the BUTTON, not here.", Kind::Doc, "x", false).len(),
             1
@@ -466,15 +468,13 @@ mod tests {
             )
             .is_empty()
         );
-        assert!(
-            check(
-                "A segunda linha é buscada junto com o nome.",
-                Kind::Note,
-                "x",
-                true
-            )
-            .is_empty()
+        let seen = check(
+            "A segunda linha é buscada junto com o nome.",
+            Kind::Note,
+            "x",
+            true,
         );
+        assert!(seen.is_empty(), "{seen:?}");
     }
 
     /// A summary is written twice, and the two copies must say the same thing.
