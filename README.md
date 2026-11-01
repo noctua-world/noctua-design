@@ -11,7 +11,7 @@ Clone this **only** inside `noctua-workspace/repos/`, and start your agents
 ```sh
 cd path/to/noctua-workspace   # the directory holding the .noctua-workspace marker
 git clone <this repository> repos/noctua-design
-claude                       # from here — never from inside the repository
+claude                       # or whichever agent you use — from here, never from inside the repository
 ```
 
 Anywhere else, this repository cannot reach the shared documents or its sibling

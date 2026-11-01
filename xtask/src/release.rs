@@ -2,10 +2,10 @@
 //!
 //! # What this does not do
 //!
-//! It does not commit and it does not tag. Every commit in this fleet is signed
-//! with a hardware key that needs a physical touch, so a verb that tried would
-//! hang on a machine nobody is sitting at. It prints the three commands
-//! instead, in the order they have to run.
+//! It does not commit and it does not tag. What enters the history is the
+//! developer's decision (`NOCTUA.md §2.6`), and the commit and the tag are
+//! signed by whatever means the developer uses, which a verb cannot assume. It
+//! prints the three commands instead, in the order they have to run.
 //!
 //! # Why it runs the gate first
 //!

@@ -4,8 +4,7 @@
 >
 > Code, comments, identifiers, documentation, CLI help, error messages, test names, commit
 > messages, the docs site — all of it, always, **whatever language the developer writes to you
-> in.** The developer often writes Brazilian Portuguese. That changes nothing. You may *reply* in
-> Portuguese; you may not *produce artifacts* in it.
+> in.** You may *reply* in that language; you may not *produce artifacts* in it.
 >
 > **UI strings are the one exception.** They are i18n resources and exist in **both** English and
 > Brazilian Portuguese, in `spec/i18n/en.toml` and `spec/i18n/pt-BR.toml`. The keys and the code
