@@ -138,8 +138,11 @@ page-wide one. That trade is the reason they carry `swap` and not `optional`:
 
 ## How to regenerate them
 
-The inputs are the built faces in `noctua-fonts`, which is not published yet. Run
-from the **workspace root** with it in `repos/`, offline, with `fonttools` and
+The inputs are the built faces in `noctua-fonts`. They are not in its git
+history: they are published as release archives, and a clone fetches them with
+its own archive tool, which writes each font only when its SHA-256 matches the
+committed checksum list (its README says how). Run from the **workspace root**
+with it in `repos/` and its fonts fetched, then offline, with `fonttools` and
 `brotli` installed however you install Python tools.
 
 ```bash
