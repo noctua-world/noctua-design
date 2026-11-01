@@ -615,7 +615,7 @@ mod tests {
     #[test]
     fn the_shipped_vendor_is_valid() {
         let vendor = vendor();
-        assert!(!vendor.contract.is_empty());
+        assert_ne!(vendor.contract, [] as [(String, String); 0]);
         assert_eq!(
             vendor.themes.len(),
             vendor.accents.len() * vendor.saturations.len()

@@ -231,7 +231,7 @@ mod tests {
         let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../spec/tokens.toml");
         let spec = super::load(path).expect("the shipped spec parses");
         assert_eq!(spec.meta.prefix, "noctua");
-        assert!(!spec.space.steps.is_empty());
+        assert_ne!(spec.space.steps, [] as [u32; 0]);
         assert!(spec.r#type.measure.is_some());
     }
 
