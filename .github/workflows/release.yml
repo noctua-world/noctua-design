@@ -1,12 +1,9 @@
 # Cuts a GitHub Release when a version tag is pushed.
 #
-# WHAT IT DOES NOT DO: publish to npm or to crates.io. Nothing here is
-# published to a registry yet, and the reason is written down rather than
-# forgotten — the stylesheets a consumer links live in `dist/`, at the
-# repository root, which Cargo cannot include from inside a package. Until that
-# question is answered a registry consumer would install components and get no
-# rules, which is the exact defect `dist/components.css` was written to remove.
-# `AGENTS.md` carries the note; a tag is consumed by git today.
+# It archives `dist/`, the fonts and the vendored colour stylesheets, attests
+# them, and attaches them to the release. Publishing to crates.io and npm is
+# not this workflow's: `release-crate.yml` and `release-npm.yml` do it from the
+# same tag, and `AGENTS.md`, "Publishing", says what goes where.
 name: Release
 
 on:

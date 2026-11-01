@@ -67,11 +67,12 @@ They are fetched only when an icon codepoint actually renders, via
 
 ### What is deliberately absent
 
-No CJK (`NotoSansJP`, `KR`, `SC` — 15.15 MiB between them), and none of the
-other-script faces. `NOCTUA-PLAN.md` Stage 3 says to copy only what is needed,
-and nothing in this repository renders those scripts yet. They arrive with the
-content that needs them, unsubset, on the `unicode-range` mechanism that is
-already in place.
+Every face a page does not render. The other-script faces and the CJK families
+are here because the documentation site renders fourteen scripts
+(`NOCTUA.md §7.3`): each is fetched through `unicode-range` only when a codepoint
+inside its range is drawn, and none is preloaded — "Slicing the CJK families",
+below, says how the three CJK families are cut. A family nothing renders is not
+copied.
 
 **No licence is present for a family that was not copied**, and that is checked
 rather than trusted.
@@ -113,8 +114,7 @@ carries a `wdth` axis**, so none declares `font-stretch`. That is trap 2 of
 
 ### The default payload
 
-`NOCTUA-PLAN.md` Stage 3 sets a budget of **200 KB** for the faces preloaded at
-first paint. The five marked `preload = true` in `spec/fonts.toml` come to
+The faces preloaded at first paint have a budget of **200 KB**. The five marked `preload = true` in `spec/fonts.toml` come to
 **162.8 KB**, and a test asserts the budget so it cannot drift.
 
 | Preloaded | |

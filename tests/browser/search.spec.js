@@ -238,8 +238,9 @@ test("the letters that matched are the letters that are marked", async ({ page }
   await openPalette(page, "bg");
   const row = page.locator(PALETTE.rows).first();
   await expect(row.locator(".nd-search-result-label")).toHaveText("ButtonGroup");
-  // `NOCTUA.md §12.4`: "Do not color by prefix only; a fuzzy match that cannot
-  // show why it matched is confusing." Colouring the prefix would mark `B`
+  // `NOCTUA.md §12.4`: the matched positions are coloured, never a prefix alone,
+  // because a match that cannot show why it matched is confusing. Colouring the
+  // prefix would mark `B`
   // alone, and the concatenation would be `B` rather than `BG`.
   const marked = (await row.locator("[data-nd-hit]").allTextContents()).join("");
   expect(marked).toBe("BG");

@@ -62,8 +62,7 @@ fn the_directory_and_the_spec_agree() {
 /// Every family copied has its licence here, and no licence is here for a
 /// family that was not copied.
 ///
-/// `NOCTUA-PLAN.md` Stage 3, acceptance criterion 6 — and it is checked in
-/// *both* directions deliberately. A missing licence is a licence violation. A
+/// It is checked in *both* directions deliberately. A missing licence is a licence violation. A
 /// spare one is a claim that this repository ships a font it does not, which
 /// is how an audit ends up looking for a file that was never here.
 #[test]
@@ -230,9 +229,9 @@ fn the_attribution_is_reproducible() {
 
 /// A CJK face may be here, and may never be preloaded.
 ///
-/// Stage 3 banned them outright, because nothing rendered CJK and Group B was
-/// 15 MiB of fonts for no reader. Stage 6 renders fourteen scripts, so the ban
-/// is gone — but the reason behind it is not. These three faces are 11.3 MiB
+/// The documentation site renders fourteen scripts, so the CJK faces ship —
+/// but a preload would still cost every reader for the few pages that show a
+/// single Japanese character. These three faces are 11.3 MiB
 /// between them, and preloading even one would put it on every page in the
 /// system to serve the few that show a single Japanese character.
 ///

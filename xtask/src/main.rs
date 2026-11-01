@@ -8,7 +8,7 @@
 //! Several verbs are stubs at this stage. A stub here is not a placeholder for
 //! whoever notices — it is the verb surface being fixed *now*, while it is
 //! cheap, so that a later stage adds behaviour behind an existing name rather
-//! than adding a sixth verb. `NOCTUA-PLAN.md` Stage 3, scope 4.
+//! than adding a sixth verb.
 
 mod build;
 mod check;
@@ -106,11 +106,8 @@ fn main() -> ExitCode {
     }
 }
 
-/// `dev` — Stage 5 owns the docs site, so there is nothing to serve yet.
-///
-/// It builds and says so rather than starting a server on an empty directory:
-/// a server serving nothing looks like a broken build, and a developer would
-/// spend the next ten minutes finding out otherwise.
+/// `dev` — builds everything, then serves the documentation site it built and
+/// rebuilds it when its sources change.
 fn dev(root: &Path, spec: &Path, port: u16) -> Result<(), String> {
     build::run(root, spec)?;
     ui::gap();

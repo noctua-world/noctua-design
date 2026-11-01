@@ -25,10 +25,12 @@
 // the navigation and not the index because the two were normalised by different
 // rules, and a hit could never say *why* it was a hit.
 //
-// `NOCTUA.md §12.4` is the house doctrine and it is specific: "implement it as a
-// subsequence match with the matched positions returned, and color those
-// positions. Do not color by prefix only; a fuzzy match that cannot show why it
-// matched is confusing."
+// `NOCTUA.md §12.4` is the house doctrine: a subsequence match with the matched
+// positions returned and coloured, never a prefix alone, because "a match that
+// cannot show *why* it matched is confusing". The doctrine also splits the query
+// into words, each of which must match, and colours each word's positions in its
+// own tone; this runtime matches the query as one run in one tone until the
+// desktop interface's stage brings it to that rule (`NOCTUA-PLAN.md`, Stage 16).
 
 /** Separators. A run of them starts a word, and none of them is ever matched. */
 const SEPARATOR = /[\s\-_./:]/;

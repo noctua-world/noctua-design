@@ -161,10 +161,9 @@ pub fn emit(
 
 /// The `<link rel="preload">` tags the default payload needs.
 ///
-/// Emitted as a fragment rather than injected into a page, because this
-/// repository has no page yet — Stage 5 owns the docs site. Shipping the
-/// fragment now means that stage includes a file rather than reconstructing
-/// the list, and means the list has exactly one source.
+/// Emitted as a fragment rather than injected into a page, so a page — the
+/// documentation site's, or a consumer's — includes a file rather than
+/// reconstructing the list, and the list has exactly one source.
 #[must_use]
 pub fn preload_fragment(fonts: &Fonts) -> EmittedFile {
     let mut out = String::from(
@@ -366,7 +365,7 @@ mod tests {
 
     /// The default payload's budget, so it cannot drift.
     ///
-    /// `NOCTUA-PLAN.md` Stage 3, acceptance criterion 8. The number is the
+    /// `assets/fonts/ATTRIBUTION.md`, "The default payload". The number is the
     /// budget, not the current size: a build that comes in under it passes,
     /// and one that creeps over it fails and says by how much.
     #[test]

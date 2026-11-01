@@ -81,7 +81,7 @@ test("every accent swatch shows its own accent", async ({ page }) => {
   const count = await swatches.count();
   expect(count, "the accent row is empty").toBe(13);
 
-  // Read from PIXELS, never from a serialised string (`NOCTUA.md §9.7`, and
+  // Read from PIXELS, never from a serialised string (`NOCTUA.md §9.6`, and
   // the `color_read_from_dom` gate). Two accents that differ only in hue
   // serialise differently in every engine and the same in none.
   const painted = new Set();

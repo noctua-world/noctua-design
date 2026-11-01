@@ -31,7 +31,7 @@ cargo xtask build     # compile spec/ into tokens, icons and dist/
 cargo xtask dev       # ...and serve the docs site, rebuilding as sources change
 ```
 
-`cargo xtask check` also runs formatting, lints and tests, and is the same
+`cargo xtask check` also runs formatting, lints and tests, and it is the same
 command CI runs.
 
 **Node is optional.** It is needed only for the React package and the browser
@@ -56,7 +56,6 @@ suite. The Rust half of this repository builds and tests without it, and
 
 Generated directories are committed so every consumer works with no build step.
 `cargo xtask check` fails if one drifts from `spec/`.
-
 
 ## Use it in your own project
 
@@ -171,16 +170,15 @@ client-side router calls the second one before it replaces markup.
 ### The one thing the package does not carry
 
 **The typefaces.** `fonts.css` asks for them at `../assets/fonts/`, beside the <!-- allow-reference: a URL relative to wherever the consumer put the sheet, not a path in this repository -->
-directory you copied, and 16 MB of faces in every install would be a poor
+directory you copied, and megabytes of faces in every install would be a poor
 trade. Without them the page uses your system font and nothing breaks. To have
-them, take `assets/fonts/` from this repository, or from the release archive:
-
-Every release attaches an archive carrying `dist/`, the faces and their
-licences: <https://github.com/noctua-world/noctua-design/releases/latest>.
+them, take `assets/fonts/` from this repository, or from the archive every
+release attaches, which carries `dist/`, the faces and their licences:
+<https://github.com/noctua-world/noctua-design/releases/latest>.
 
 ### Working from a clone instead
 
-Three directories become one static directory of yours — the same layout the
+Two directories become one static directory of yours — the same layout the
 package produces:
 
 | From | To | What it is |
@@ -188,22 +186,20 @@ package produces:
 | `dist/` | `<static>/dist/` | the stylesheets, the behaviour modules, the palettes and the theme data |
 | `assets/fonts/` | `<static>/assets/fonts/` | the faces `fonts.css` asks for — copy the ones you use |
 
-The git-tag form is what a project inside this workspace uses while it is edited
-alongside the system:
+### A tagged commit instead of a release
+
+Cargo can take the crate straight from a tag:
 
 ```toml
 noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.2.7" }
 ```
 
-### Switching from a path dependency to a tag
-
-`noctua-central` develops against `path = "../noctua-design/crates/noctua-design"`
-(`NOCTUA.md §8.6`). Three lines change when it moves to a tag, and nothing else:
-
-1. `Cargo.toml` — the `path` becomes `git` + `tag`, as above.
-2. `package.json` — the `workspace:*` becomes the `github:` form, as above.
-3. Wherever the app copies `dist/` into its own static directory, the source
-   becomes the checkout Cargo made rather than the sibling working tree.
+A project inside the workspace, as `noctua-central` is, depends on
+`path = "../noctua-design/crates/noctua-design"` instead, so the two can be
+edited together, and keeps the tag form in a comment directly above it
+(`NOCTUA.md §9.14`). Moving to the tag changes that one line, and the source of
+`dist/` if the app copies it by hand: the checkout Cargo made, rather than the
+sibling working tree.
 
 ## Licence
 

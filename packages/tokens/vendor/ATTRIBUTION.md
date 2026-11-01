@@ -32,9 +32,9 @@ unused target is payload plus review surface.
 
 ## Why it is vendored rather than depended on
 
-`noctua-colors` has no published URL for a Rust consumer to depend on yet
-(`NOCTUA.md §5.3`), and even once it does, vendoring keeps this repository
-buildable with no network and no cross-repository version negotiation. The
+Vendoring keeps this repository buildable with no network and no
+cross-repository version negotiation, although `noctua-colors` is published
+(`NOCTUA.md §5.3`). The
 switch to a git-tag or registry dependency is a one-line change when it is
 worth making.
 
@@ -67,5 +67,4 @@ exactly this reason — see its `package.json` `files` allowlist.
 Dropping `json-ts` from this consumer's target list is a one-line change in
 `noctua-colors`' `specs/noctua.toml`, and it is additive to reverse if the
 documentation site later needs the palette as data. It is **not** made here:
-`NOCTUA-PLAN.md` Stage 3 lists `noctua-colors` under "must NOT be touched", and
 a target list is a decision for whoever owns that spec.
