@@ -169,7 +169,7 @@ docs-site/                the documentation site. src/ and assets/ are written; 
 tests/browser/            the browser suite (Playwright): geometry, paint, focus, accessibility
 tests/conformance/        the shared case runner (Leg 3)
 examples/                 two consumers that live outside the workspace
-assets/fonts/             copied from .TEMP/, with ATTRIBUTION.md and the licences
+assets/fonts/             subset by hand from noctua-fonts, with ATTRIBUTION.md and the licences
 assets/icons/<source>/    vendored drawings, the upstream licence, SHA256SUMS
 assets/vendor/            three.js and the owl model, each with ATTRIBUTION.md
 xtask/                    the verbs
@@ -559,8 +559,8 @@ The default is declared at `:where(:root)`, at zero specificity, so an explicit 
 `[data-palette="x"]:not(…):not(…)` both have specificity (0,3,0), so only source order separates
 them, and the default is linked first. `base.html` is the order.
 
-**Nothing a page is painted with moves.** There is no ambient animation, on the developer's
-instruction, and the emitter's test fails on any `animation:` or `@keyframes` in the appearance
+**Nothing a page is painted with moves.** There is no ambient animation, by
+decision, and the emitter's test fails on any `animation:` or `@keyframes` in the appearance
 sheet, so whoever animates a background next answers the reduced-motion question deliberately.
 The question is real: an infinite animation cannot reuse `[motion.duration]`, whose durations
 collapse under reduced motion, and `animation-duration: 0ms` on an infinite animation is not "no

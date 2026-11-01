@@ -138,35 +138,35 @@ page-wide one. That trade is the reason they carry `swap` and not `optional`:
 
 ## How to regenerate them
 
-One command, offline, no permanent dependency. Run from the **workspace root**
-with `.TEMP/` present.
+The inputs are the built faces in `noctua-fonts`, which is not published yet. Run
+from the **workspace root** with it in `repos/`, offline, with `fonttools` and
+`brotli` installed however you install Python tools.
 
 ```bash
-nix-shell -p python3Packages.fonttools python3Packages.brotli --run '
-  set -e
-  OUT=repos/noctua-design/assets/fonts
-  R="U+0020-007E,U+00A0-00FF,U+0100-017F,U+2010-2027,U+2030-205E,U+2070-209F,U+20A0-20BF,U+2122,U+2190-2199,U+21D0-21D2,U+2206,U+2212,U+2248,U+2260,U+2264-2265,U+25A0,U+25CF,U+2713,U+2717,U+FEFF,U+FFFD"
-  FLAGS="--flavor=woff2 --unicodes=$R --layout-features=kern,ccmp,mark,mkmk --desubroutinize --no-hinting --drop-tables+=DSIG"
+set -e
+F=repos/noctua-fonts
+OUT=repos/noctua-design/assets/fonts
+R="U+0020-007E,U+00A0-00FF,U+0100-017F,U+2010-2027,U+2030-205E,U+2070-209F,U+20A0-20BF,U+2122,U+2190-2199,U+21D0-21D2,U+2206,U+2212,U+2248,U+2260,U+2264-2265,U+25A0,U+25CF,U+2713,U+2717,U+FEFF,U+FFFD"
+FLAGS="--flavor=woff2 --unicodes=$R --layout-features=kern,ccmp,mark,mkmk --desubroutinize --no-hinting --drop-tables+=DSIG"
 
-  # The six Noto faces: pin the unused wdth axis, then subset.
-  for f in NotoSans NotoSans-Italic NotoSerif NotoSerif-Italic \
-           NotoSansDisplay NotoSansDisplay-Italic; do
-    fonttools varLib.instancer ".TEMP/noctua-noto/${f}-VariableFont_wdth,wght.woff2" \
-      wdth=100 -o "/tmp/${f}.ttf"
-    pyftsubset "/tmp/${f}.ttf" --output-file="$OUT/${f}.woff2" $FLAGS
-    rm -f "/tmp/${f}.ttf"
-  done
+# The six Noto faces: pin the unused wdth axis, then subset.
+for f in NotoSans NotoSans-Italic NotoSerif NotoSerif-Italic \
+         NotoSansDisplay NotoSansDisplay-Italic; do
+  fonttools varLib.instancer "$F/noctua-noto/${f}-VariableFont_wdth,wght.woff2" \
+    wdth=100 -o "/tmp/${f}.ttf"
+  pyftsubset "/tmp/${f}.ttf" --output-file="$OUT/${f}.woff2" $FLAGS
+  rm -f "/tmp/${f}.ttf"
+done
 
-  # The three Iosevka faces. Static, so there is nothing to pin.
-  for f in Regular Bold Italic; do
-    pyftsubset ".TEMP/noctua-iosevka/NoctuaIosevka-${f}.woff2" \
-      --output-file="$OUT/NoctuaIosevka-${f}.woff2" $FLAGS
-  done
+# The three Iosevka faces. Static, so there is nothing to pin.
+for f in Regular Bold Italic; do
+  pyftsubset "$F/noctua-iosevka/WOFF2/NoctuaIosevka-${f}.woff2" \
+    --output-file="$OUT/NoctuaIosevka-${f}.woff2" $FLAGS
+done
 
-  # The two symbols faces are copied whole — see above.
-  cp .TEMP/nerdfonts-symbols/SymbolsNerdFont-Regular.woff2 "$OUT/"
-  cp .TEMP/nerdfonts-symbols/SymbolsNerdFontMono-Regular.woff2 "$OUT/"
-'
+# The two symbols faces are copied whole — see above.
+cp "$F/symbols-nerd-font/SymbolsNerdFont-Regular.woff2" "$OUT/"
+cp "$F/symbols-nerd-font/SymbolsNerdFontMono-Regular.woff2" "$OUT/"
 ```
 
 ### The repertoire, and why each part of it

@@ -206,7 +206,9 @@ fn the_attribution_is_reproducible() {
         "varLib.instancer",
         "--unicodes=",
         "--layout-features=",
-        "nix-shell",
+        // The tools the recipe needs, named — not one way of installing them.
+        "fonttools",
+        "brotli",
     ] {
         assert!(
             text.contains(required),

@@ -73,7 +73,7 @@ enum Command {
         verify: bool,
     },
 
-    /// Prepare a version. Writes it; committing is left to a human.
+    /// Prepare a version. Writes it; it does not commit or tag.
     Release {
         /// The version to release, such as `0.2.0`.
         version: String,

@@ -14,8 +14,8 @@
 # Both are derived here from `axes`, and a test asserts the derivation. Neither
 # is something anyone has to remember.
 #
-# The files themselves are copied and subset from `.TEMP/` by hand — see
-# assets/fonts/ATTRIBUTION.md for the exact, reproducible invocation. They are
+# The files themselves are subset by hand from the built faces in `noctua-fonts`
+# — see assets/fonts/ATTRIBUTION.md for the exact, reproducible invocation. They are
 # NOT build output and `cargo xtask build` never rewrites them.
 
 # --- The stack -------------------------------------------------------------

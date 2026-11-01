@@ -22,6 +22,6 @@ dev port="8080":
 docs:
     cargo xtask docs
 
-# Prepare a release. Writes the version; committing is left to a human.
+# Prepare a release. Writes the version; it does not commit or tag.
 release version:
     cargo xtask release {{version}}
