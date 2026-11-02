@@ -99,7 +99,7 @@ other performance decision made anywhere in the design system.
 | `NotoSerif.woff2` | 796,044 | 52,828 | 15× |
 | `NotoSerif-Italic.woff2` | 1,041,492 | 68,960 | 15× |
 | `NotoSansDisplay.woff2` | 682,952 | 55,088 | 12× |
-| `NotoSansDisplay-Italic.woff2` | 750,132 | 59,460 | 12× |
+| `NotoSansDisplay-Italic.woff2` | 750,132 | 59,460 | 13× |
 | `NoctuaIosevka-Regular.woff2` | 1,619,328 | 17,528 | 92× |
 | `NoctuaIosevka-Bold.woff2` | 1,631,952 | 17,528 | 93× |
 | `NoctuaIosevka-Italic.woff2` | 1,753,356 | 20,280 | 86× |
