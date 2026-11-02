@@ -328,7 +328,12 @@ fn one_icon_is_one_icon(
         ],
     )?;
 
-    let binary = root.join("target/release/examples/one_icon");
+    // `.exe` on Windows, nothing elsewhere: the example is read as the file cargo
+    // wrote, and cargo names it by the target's convention.
+    let binary = root.join(format!(
+        "target/release/examples/one_icon{}",
+        std::env::consts::EXE_SUFFIX
+    ));
     let bytes = std::fs::read(&binary)
         .map_err(|error| format!("could not read {}: {error}", binary.display()))?;
     let holds = |needle: &str| {
