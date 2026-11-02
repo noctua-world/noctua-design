@@ -1,0 +1,8 @@
+# Every text file is checked out with LF line endings on every system, so the
+# generated files this repository compares byte for byte read the same on
+# Windows as on Linux and macOS. Git tells binaries by their content.
+* text=auto eol=lf
+
+# The fonts' licence texts are copied verbatim from upstream, CRLF line endings
+# included, and stay byte for byte as they were published.
+assets/fonts/OFL-*.txt -text
