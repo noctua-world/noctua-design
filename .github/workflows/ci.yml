@@ -15,9 +15,16 @@ on:
 permissions: {}
 
 jobs:
+  # The gate runs on Linux, macOS and Windows: both packages have to behave the
+  # same wherever they are built. A step that cannot run on a system says so by
+  # name in the gate's own output.
   check:
-    name: cargo xtask check
-    runs-on: ubuntu-latest
+    name: cargo xtask check (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: read
 
