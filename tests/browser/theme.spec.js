@@ -347,8 +347,17 @@ test("with no script the page is complete and follows the system", async ({ page
   // `system` is the ABSENCE of data-theme, so the cascade resolves the OS
   // preference with no script involved at all.
   expect(await noScript.locator("html").getAttribute("data-theme")).toBeNull();
-  const bg = await noScript.locator("html").evaluate((el) => getComputedStyle(el).backgroundColor); // allow-literal: read only to be painted into a canvas on the next line, which is the recipe the gate itself prescribes
-  const [r, g, b] = bg.match(/[\d.]+/g).map(Number);
+  // The background is painted into a canvas and read back as pixels, as every
+  // colour here is read. Its computed value is whatever the engine serialises
+  // (`oklch(…)` for this palette), and the numbers in that are not channels.
+  const [r, g, b] = await noScript.locator("html").evaluate((el) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = getComputedStyle(el).backgroundColor; // allow-literal: painted into the canvas on this line, the recipe the gate prescribes
+    ctx.fillRect(0, 0, 1, 1);
+    return [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3);
+  });
   expect(r + g + b, "OS dark did not reach a scriptless page").toBeLessThan(200);
   await context.close();
 });
