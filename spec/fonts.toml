@@ -110,7 +110,7 @@ icons = "U+2300-23FF, U+E000-F8FF, U+F0000-FFFFD"
 # The preloaded set is 162.8 KB, against a budget of 200 KB. Serif and Display
 # are deliberately outside it: both fall back to a preloaded family with close
 # metrics, so their `swap` costs a small reflow rather than a page-wide one,
-# and including them would put the budget at 393.5 KB.
+# and including them would put the budget at 393.6 KB.
 
 [[face]]
 family = "Noto Sans"

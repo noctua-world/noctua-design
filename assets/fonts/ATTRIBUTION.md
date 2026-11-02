@@ -100,10 +100,10 @@ other performance decision made anywhere in the design system.
 | `NotoSerif-Italic.woff2` | 1,041,492 | 68,960 | 15× |
 | `NotoSansDisplay.woff2` | 682,952 | 55,088 | 12× |
 | `NotoSansDisplay-Italic.woff2` | 750,132 | 59,460 | 12× |
-| `NoctuaIosevka-Regular.woff2` | 1,617,752 | 17,460 | 93× |
-| `NoctuaIosevka-Bold.woff2` | 1,630,316 | 17,496 | 93× |
-| `NoctuaIosevka-Italic.woff2` | 1,750,096 | 20,280 | 86× |
-| **total** | **10,176,148** | **402,968** | **25×** |
+| `NoctuaIosevka-Regular.woff2` | 1,619,328 | 17,528 | 92× |
+| `NoctuaIosevka-Bold.woff2` | 1,631,952 | 17,528 | 93× |
+| `NoctuaIosevka-Italic.woff2` | 1,753,356 | 20,280 | 86× |
+| **total** | **10,182,620** | **403,068** | **25×** |
 
 ### The `wdth` axis is pinned, and that is most of the saving
 
@@ -134,7 +134,7 @@ The faces preloaded at first paint have a budget of **200 KB**. The five marked 
 | **total** | **162.8 KB** |
 
 Serif and Display are **not** preloaded, deliberately. Including them would put
-the payload at 393.5 KB. Both fall back to a family that *is* preloaded and
+the payload at 393.6 KB. Both fall back to a family that *is* preloaded and
 whose metrics are close — Display's own stack names Noto Sans as its fallback —
 so their `font-display: swap` costs a small, local reflow rather than a
 page-wide one. That trade is the reason they carry `swap` and not `optional`:
