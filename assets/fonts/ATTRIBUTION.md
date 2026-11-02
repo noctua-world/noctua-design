@@ -53,7 +53,14 @@ Bold is not optional: a synthesised bold on a monospaced face looks broken.
 | `SymbolsNerdFontMono-Regular.woff2` | Symbols Nerd Font Mono | mono — every glyph exactly one em |
 
 Nerd Fonts 3.4.0 Symbols-Only, **MIT** (not OFL) —
-[`LICENSE-NerdFontsSymbolsOnly.txt`](LICENSE-NerdFontsSymbolsOnly.txt).
+[`LICENSE-NerdFontsSymbolsOnly.txt`](LICENSE-NerdFontsSymbolsOnly.txt). That
+is the only licence text Nerd Fonts ships with it, but the icon sets it
+gathers keep their own upstream licences, and not all of them are MIT:
+Codicons and Font Awesome are under CC BY 4.0, Material Design Icons under
+Apache 2.0, Pomicons and Weather Icons under the SIL Open Font License 1.1,
+and Font Logos under the Unlicense. The Nerd Fonts repository,
+<https://github.com/ryanoasis/nerd-fonts>, lists every set with its source and
+licence, in its license audit and in the README of its glyph sources.
 
 Its language coverage is **empty**: icons, no letters. That is what makes it
 safe as the last entry in every font stack — it can only ever supply a glyph
@@ -227,7 +234,8 @@ must travel wherever the fonts do. `NOCTUA.md §7.8`.
   The OFL requires the licence to accompany the fonts and forbids selling the
   fonts on their own.
 - **MIT** — Symbols Nerd Font. Requires the copyright notice and permission
-  notice to travel with it.
+  notice to travel with it. Its icon sets keep their own upstream terms (see
+  above); CC BY 4.0, for Codicons and Font Awesome, asks for attribution.
 
 ## The script faces
 

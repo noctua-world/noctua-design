@@ -7,9 +7,8 @@ Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in this project by you shall be dual licensed as above, without any
 additional terms or conditions.
 
-This file exists so that automated licence detection has a single conventional
-name to find. The two files it points at are the actual licence texts; if they
-ever disagree with this summary, they win.
+This file is a summary. The two files it points at hold the actual licence
+texts; if they ever disagree with this summary, they win.
 
 Four sets of vendored files carry their own terms, which apply to those files
 rather than to this project. Three of them reach a consumer; the fourth never
@@ -17,9 +16,12 @@ leaves the documentation site.
 
   * The typefaces under assets/fonts/ — Noto Sans, Noto Serif, Noto Sans
     Display and Noctua Iosevka under the SIL Open Font License 1.1, and
-    Symbols Nerd Font under the MIT license. Each licence sits beside the
-    files it covers, and the OFL requires it to keep travelling with them.
-    assets/fonts/ATTRIBUTION.md records what is here and why.
+    Symbols Nerd Font, which Nerd Fonts ships with its MIT license. The icon
+    sets Nerd Fonts gathers keep their own upstream licences, and not all of
+    them are MIT: Codicons and Font Awesome, for instance, are under CC BY
+    4.0. Each licence sits beside the files it covers, and the OFL requires it
+    to keep travelling with them. assets/fonts/ATTRIBUTION.md records what is
+    here and why, and where each icon set's terms are.
 
   * The icon drawings under assets/icons/ — Lucide under the ISC license, and
     Octicons under the MIT license, each with its licence in its directory.
