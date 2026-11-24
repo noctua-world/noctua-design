@@ -532,8 +532,8 @@ impl Work {
         for index in 0..graph.nodes.len() {
             self.group[index] = self.cluster[index];
         }
-        for index in 0..graph.nodes.len() {
-            self.order[index] = i32::try_from(index).unwrap_or(i32::MAX);
+        for (index, order) in self.order.iter_mut().enumerate().take(graph.nodes.len()) {
+            *order = i32::try_from(index).unwrap_or(i32::MAX);
         }
         let mut best = self.crossings(graph);
         let mut kept = self.order.clone();

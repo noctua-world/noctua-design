@@ -22,6 +22,10 @@ pub enum TruncateLines {
     _4,
 }
 
+#[allow(
+    clippy::used_underscore_items,
+    reason = "a value that begins with a digit has no other spelling as a variant"
+)]
 impl TruncateLines {
     /// Every value, in the order the spec declares them.
     pub const ALL: [Self; 4] = [Self::_1, Self::_2, Self::_3, Self::_4];
