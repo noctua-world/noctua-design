@@ -52,7 +52,7 @@
   display: none;
 }
 
-.nd-color-picker-trigger:focus-visible {
+.nd-color-picker-trigger:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -261,7 +261,7 @@ are one box
   white-space: nowrap;
 }
 
-.nd-color-picker-area:has(.nd-color-picker-axis:focus-visible) {
+.nd-color-picker-area:has(.nd-color-picker-axis:is(:focus-visible, [data-nd-seat-focus])) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -278,7 +278,7 @@ are one box
   cursor: pointer;
 }
 
-.nd-color-picker-track:focus-visible {
+.nd-color-picker-track:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -329,7 +329,7 @@ are one box
   cursor: pointer;
 }
 
-.nd-color-picker-swatch:focus-visible {
+.nd-color-picker-swatch:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -359,7 +359,7 @@ are one box
   border-radius: var(--noctua-radius-control);
 }
 
-.nd-color-picker-entry:focus-visible {
+.nd-color-picker-entry:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -416,7 +416,7 @@ are one box
   cursor: pointer;
 }
 
-.nd-color-picker-copy:focus-visible {
+.nd-color-picker-copy:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }

@@ -130,12 +130,12 @@
    does. It used to lighten only the OFF track's edge, which is a different
    gesture in each state on a control whose whole point is that the two states
    are one drawing. */
-.nd-switch:hover > .nd-switch-track {
+.nd-switch:is(:hover, [data-nd-seat-hover]) > .nd-switch-track {
   background: var(--nc-color-subtle-hover);
   border-color: var(--nc-color-subtle-hover);
 }
 
-.nd-switch[aria-checked="true"]:hover > .nd-switch-track {
+.nd-switch[aria-checked="true"]:is(:hover, [data-nd-seat-hover]) > .nd-switch-track {
   background: var(--nc-color-accent-hover);
   border-color: var(--nc-color-accent-hover);
 }

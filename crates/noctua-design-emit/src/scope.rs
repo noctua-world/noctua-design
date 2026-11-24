@@ -343,10 +343,13 @@ mod contrast {
         let grounds: Vec<(&str, String)> = [
             ("off", ".nd-switch-track"),
             ("on", ".nd-switch[aria-checked=\"true\"] > .nd-switch-track"),
-            ("off hovered", ".nd-switch:hover > .nd-switch-track"),
+            (
+                "off hovered",
+                ".nd-switch:is(:hover, [data-nd-seat-hover]) > .nd-switch-track",
+            ),
             (
                 "on hovered",
-                ".nd-switch[aria-checked=\"true\"]:hover > .nd-switch-track",
+                ".nd-switch[aria-checked=\"true\"]:is(:hover, [data-nd-seat-hover]) > .nd-switch-track",
             ),
         ]
         .into_iter()

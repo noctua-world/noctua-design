@@ -27,6 +27,7 @@ import { releaseTabs, enhanceTabs } from "../assets/tabs.js";
 import { enhanceDateInputs, releaseDateInputs } from "../assets/date-input.js";
 import { enhanceChoices, releaseChoices } from "../assets/choice.js";
 import { enhanceSearches, releaseSearches } from "../assets/search.js";
+import { enhanceSeats, releaseSeats } from "../assets/seats.js";
 
 /// Everything this system ships, turned on.
 export function enhance(root = document) {
@@ -51,6 +52,7 @@ export function enhance(root = document) {
   enhanceDateInputs(root);
   enhanceChoices(root);
   enhanceSearches(root);
+  enhanceSeats(root);
 }
 
 /// And off again.
@@ -78,4 +80,5 @@ export function release(root = document) {
   releaseDateInputs(root);
   releaseChoices(root);
   releaseSearches(root);
+  releaseSeats(root);
 }

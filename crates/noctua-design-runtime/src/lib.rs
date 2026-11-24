@@ -29,6 +29,7 @@
 //! | `date-input.js` | `enhanceDateInputs()` — the three boxes: stepping, paste, the locale's own order |
 //! | `choice.js` | `enhanceChoices()` — a switch turns on, an item in a group becomes the chosen one, and a `change` says so |
 //! | `search.js`, `search-match.js` | `enhanceSearches()` — the listbox, the hotkey, the recent queries, and the ranking behind them |
+//! | `seats.js` | `seatHover()`, `seatFocus()`, `seatPress()`, `seatDrag()` — a second seat's state, written as the attributes every state rule is twinned with |
 //!
 //! # Why a crate holds JavaScript
 //!
@@ -136,6 +137,10 @@ pub const SEARCH_SOURCE: &str = "crates/noctua-design-runtime/src/search.js";
 /// `search-match.js`, likewise — the ranking, which touches no DOM at all.
 pub const SEARCH_MATCH_SOURCE: &str = "crates/noctua-design-runtime/src/search-match.js";
 
+/// `seats.js`, likewise — the one file here that belongs to no component and
+/// to every one of them.
+pub const SEATS_SOURCE: &str = "crates/noctua-design-runtime/src/seats.js";
+
 /// `date-input.js`, likewise — the three boxes, not the month behind them.
 pub const DATE_INPUT_SOURCE: &str = "crates/noctua-design-runtime/src/date-input.js";
 
@@ -146,7 +151,7 @@ pub const DATE_INPUT_SOURCE: &str = "crates/noctua-design-runtime/src/date-input
 /// `xtask` that runs and writes an empty artifact. The paths above are what
 /// name it; these are what it says.
 #[must_use]
-pub fn sources() -> [(&'static str, &'static str); 26] {
+pub fn sources() -> [(&'static str, &'static str); 27] {
     [
         (ANCHOR_SOURCE, include_str!("anchor.js")),
         (COLOR_SOURCE, include_str!("color.js")),
@@ -174,6 +179,7 @@ pub fn sources() -> [(&'static str, &'static str); 26] {
         (CHOICE_SOURCE, include_str!("choice.js")),
         (SEARCH_SOURCE, include_str!("search.js")),
         (SEARCH_MATCH_SOURCE, include_str!("search-match.js")),
+        (SEATS_SOURCE, include_str!("seats.js")),
     ]
 }
 

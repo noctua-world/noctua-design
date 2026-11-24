@@ -63,7 +63,7 @@
 
 /* The whole row is the target, which is what makes a tree walkable with a
    thumb. The focus ring is on the `<li>` because that is what has focus. */
-.nd-tree-item:focus-visible {
+.nd-tree-item:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(-1 * var(--noctua-focus-width));
   border-radius: var(--noctua-radius-control);
@@ -161,6 +161,16 @@
   .nd-tree-toggle:hover {
     color: var(--nc-color-fg);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-tree-body[data-nd-seat-hover] {
+  color: var(--nc-color-accent);
+}
+
+.nd-tree-toggle[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
 }
 
 .nd-tree-item[aria-selected="true"] > .nd-tree-row {

@@ -8,6 +8,7 @@
 //! | `dist/inputs.js`, `dist/messages.js` | `enhanceInputs()`, and the sentence helpers both use |
 //! | `dist/select.js`, `dist/tag-picker.js`, `dist/tree.js`, `dist/tabs.js`, `dist/date-input.js` | the five that used to be enhanced from the documentation site alone |
 //! | `dist/panels.js`, `dist/roving.js` | what those five share: one open list, and one arrow walk |
+//! | `dist/seats.js` | a host showing a second pointer or keyboard in the same window |
 //! | `dist/palettes/*.json` | the Noctua tab, one file per palette, fetched on demand |
 //! | `packages/tokens/color.js` + `.d.ts` | the JavaScript package, and the Node test that checks the arithmetic |
 //!
@@ -34,8 +35,8 @@ use noctua_design_runtime::{
     ANCHOR_SOURCE, CAROUSEL_SOURCE, CHOICE_SOURCE, COLOR_SOURCE, DATE_INPUT_SOURCE,
     DATE_PICKER_SOURCE, DIALOG_SOURCE, INFO_SOURCE, INPUTS_SOURCE, MENU_SOURCE, MESSAGE_BAR_SOURCE,
     MESSAGES_SOURCE, PANELS_SOURCE, PICKER_SOURCE, POPOVER_SOURCE, ROVING_SOURCE,
-    SEARCH_MATCH_SOURCE, SEARCH_SOURCE, SELECT_SOURCE, SUMMARY_SOURCE, TABLE_SOURCE, TABS_SOURCE,
-    TAG_PICKER_SOURCE, TOAST_SOURCE, TOOLTIP_SOURCE, TREE_SOURCE, source,
+    SEARCH_MATCH_SOURCE, SEARCH_SOURCE, SEATS_SOURCE, SELECT_SOURCE, SUMMARY_SOURCE, TABLE_SOURCE,
+    TABS_SOURCE, TAG_PICKER_SOURCE, TOAST_SOURCE, TOOLTIP_SOURCE, TREE_SOURCE, source,
 };
 use noctua_design_spec::Vendor;
 use noctua_design_spec::vendor::VENDOR;
@@ -72,6 +73,7 @@ pub fn emit(vendor: &Vendor) -> Vec<EmittedFile> {
         EmittedFile::new("dist/choice.js", copied(CHOICE_SOURCE)),
         EmittedFile::new("dist/search.js", copied(SEARCH_SOURCE)),
         EmittedFile::new("dist/search-match.js", copied(SEARCH_MATCH_SOURCE)),
+        EmittedFile::new("dist/seats.js", copied(SEATS_SOURCE)),
         EmittedFile::new("packages/tokens/color.js", copied(COLOR_SOURCE)),
         EmittedFile::new("packages/tokens/color.d.ts", color_types()),
     ];

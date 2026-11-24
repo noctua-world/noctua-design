@@ -69,7 +69,7 @@
   display: none !important;
 }
 
-:focus-visible {
+:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-control);
@@ -280,12 +280,12 @@
    does. It used to lighten only the OFF track's edge, which is a different
    gesture in each state on a control whose whole point is that the two states
    are one drawing. */
-.nd-switch:hover > .nd-switch-track {
+.nd-switch:is(:hover, [data-nd-seat-hover]) > .nd-switch-track {
   background: var(--nc-color-subtle-hover);
   border-color: var(--nc-color-subtle-hover);
 }
 
-.nd-switch[aria-checked="true"]:hover > .nd-switch-track {
+.nd-switch[aria-checked="true"]:is(:hover, [data-nd-seat-hover]) > .nd-switch-track {
   background: var(--nc-color-accent-hover);
   border-color: var(--nc-color-accent-hover);
 }
@@ -487,21 +487,21 @@
   opacity: 1;
 }
 
-.nd-choice:hover > .nd-choice-box {
+.nd-choice:is(:hover, [data-nd-seat-hover]) > .nd-choice-box {
   border-color: var(--nc-color-fg-muted);
 }
 
-.nd-choice:hover > .nd-choice-input:checked ~ .nd-choice-box {
+.nd-choice:is(:hover, [data-nd-seat-hover]) > .nd-choice-input:checked ~ .nd-choice-box {
   border-color: var(--nc-color-accent-hover);
 }
 
-.nd-checkbox:hover > .nd-choice-input:checked ~ .nd-choice-box {
+.nd-checkbox:is(:hover, [data-nd-seat-hover]) > .nd-choice-input:checked ~ .nd-choice-box {
   background: var(--nc-color-accent-hover);
 }
 
 /* The ring goes on the drawing, because the control it belongs to is
    invisible and an outline on an `opacity: 0` element is invisible with it. */
-.nd-choice-input:focus-visible ~ .nd-choice-box {
+.nd-choice-input:is(:focus-visible, [data-nd-seat-focus]) ~ .nd-choice-box {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -850,8 +850,8 @@
   font-size: var(--noctua-size-body);
 }
 
-.nd-select-native:hover,
-.nd-select-control:hover {
+.nd-select-native:is(:hover, [data-nd-seat-hover]),
+.nd-select-control:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-fg-muted);
 }
 
@@ -908,7 +908,7 @@
   cursor: pointer;
 }
 
-.nd-select-clear:hover {
+.nd-select-clear:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
@@ -1148,7 +1148,7 @@
   inline-size: 7ch; /* allow-literal: four digits plus the box's own padding, in the digit's own unit */
 }
 
-.nd-date-input-segment:hover {
+.nd-date-input-segment:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-fg-muted);
 }
 
@@ -1447,7 +1447,7 @@
   font-size: var(--noctua-size-body);
 }
 
-.nd-date-picker-cell:hover {
+.nd-date-picker-cell:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
@@ -1465,7 +1465,7 @@
 
 /* THE INPUT IS CLIPPED, SO THE RING IS DRAWN ON THE DAY A READER CAN SEE.
  * `Rating`'s arrangement and its comment. */
-.nd-date-picker-input:focus-visible + .nd-date-picker-cell {
+.nd-date-picker-input:is(:focus-visible, [data-nd-seat-focus]) + .nd-date-picker-cell {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -1548,7 +1548,7 @@
   opacity: 0.5; /* allow-literal: a refused day is dimmed, and there is no color token for "the same color, less of it" */
 }
 
-.nd-date-picker-input:disabled + .nd-date-picker-cell:hover {
+.nd-date-picker-input:disabled + .nd-date-picker-cell:is(:hover, [data-nd-seat-hover]) {
   background: none;
 }
 
@@ -1566,7 +1566,7 @@
   cursor: pointer;
 }
 
-.nd-date-picker-control:hover {
+.nd-date-picker-control:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
@@ -1637,8 +1637,8 @@
 
 /* The one a reader is in draws its whole edge, over the edge beside it. */
 .nd-date-picker[data-nd-pair="attached"]
-  .nd-date-picker-box:has(.nd-date-picker-entry:focus-visible),
-.nd-date-picker[data-nd-pair="attached"] .nd-date-picker-box:hover {
+  .nd-date-picker-box:has(.nd-date-picker-entry:is(:focus-visible, [data-nd-seat-focus])),
+.nd-date-picker[data-nd-pair="attached"] .nd-date-picker-box:is(:hover, [data-nd-seat-hover]) {
   z-index: var(--noctua-layer-raised);
 }
 
@@ -1671,8 +1671,8 @@
 }
 
 .nd-date-picker[data-nd-pair="stacked"]
-  .nd-date-picker-box:has(.nd-date-picker-entry:focus-visible),
-.nd-date-picker[data-nd-pair="stacked"] .nd-date-picker-box:hover {
+  .nd-date-picker-box:has(.nd-date-picker-entry:is(:focus-visible, [data-nd-seat-focus])),
+.nd-date-picker[data-nd-pair="stacked"] .nd-date-picker-box:is(:hover, [data-nd-seat-hover]) {
   z-index: var(--noctua-layer-raised);
 }
 
@@ -1710,14 +1710,14 @@
   border-radius: var(--noctua-radius-control);
 }
 
-.nd-date-picker-box:hover {
+.nd-date-picker-box:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-fg-muted);
 }
 
 /* THE RING IS ON THE BOX, NOT ON THE TYPING. The box is what a reader sees as
  * the field, and a ring around the text alone leaves the control beside it
  * outside the thing that just took focus. */
-.nd-date-picker-box:has(.nd-date-picker-entry:focus-visible) {
+.nd-date-picker-box:has(.nd-date-picker-entry:is(:focus-visible, [data-nd-seat-focus])) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -1747,7 +1747,7 @@
 }
 
 /* Taken off the typing because it is drawn on the box above. */
-.nd-date-picker-entry:focus-visible {
+.nd-date-picker-entry:is(:focus-visible, [data-nd-seat-focus]) {
   outline: none;
 }
 
@@ -1986,7 +1986,7 @@
   font-size: var(--noctua-size-small);
 }
 
-.nd-segmented-item:hover {
+.nd-segmented-item:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
   border-color: var(--nc-color-border-strong);
 }
@@ -2021,7 +2021,7 @@
   opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
 }
 
-.nd-segmented-item[aria-disabled="true"]:hover {
+.nd-segmented-item[aria-disabled="true"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg-muted);
   border-color: var(--nc-color-border);
 }
@@ -2129,7 +2129,7 @@
 }
 
 /* The ring is drawn inside the item, or the cut takes half of it. */
-.nd-segmented[data-nd-shape="bevel"] > .nd-segmented-item:focus-visible {
+.nd-segmented[data-nd-shape="bevel"] > .nd-segmented-item:is(:focus-visible, [data-nd-seat-focus]) {
   outline-offset: calc(-1 * (var(--noctua-focus-width) + var(--noctua-focus-offset)));
 }
 
@@ -2170,8 +2170,8 @@
 
 /* The chosen and the focused item are drawn over their neighbours, or the ring
    is half hidden under the item the negative margin pulled on top of it. */
-.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:hover,
-.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:focus-visible,
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:is(:hover, [data-nd-seat-hover]),
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:is(:focus-visible, [data-nd-seat-focus]),
 .nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item[aria-checked="true"] {
   z-index: 1;
 }
@@ -2487,7 +2487,7 @@ span.nd-search-input {
 /* `clip-path` clips the focus ring with everything else, and a control whose
    focus is invisible is a control a keyboard cannot use. Drawn inside instead
    — far enough in that the whole ring survives the cut. */
-.nd-button[data-nd-shape="bevel"]:focus-visible {
+.nd-button[data-nd-shape="bevel"]:is(:focus-visible, [data-nd-seat-focus]) {
   outline-offset: calc(-1 * (var(--noctua-focus-width) + var(--noctua-focus-offset)));
 }
 
@@ -2577,7 +2577,7 @@ span.nd-search-input {
   border-color: var(--nc-color-accent);
 }
 
-.nd-button[data-nd-variant="solid"]:hover {
+.nd-button[data-nd-variant="solid"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-accent-hover);
   border-color: var(--nc-color-accent-hover);
 }
@@ -2588,7 +2588,7 @@ span.nd-search-input {
   border-color: var(--nc-color-subtle);
 }
 
-.nd-button[data-nd-variant="solid"][data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-variant="solid"][data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-hover);
   border-color: var(--nc-color-subtle-hover);
 }
@@ -2599,7 +2599,7 @@ span.nd-search-input {
   border-color: var(--nc-color-danger);
 }
 
-.nd-button[data-nd-variant="solid"][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-variant="solid"][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-danger-hover);
   border-color: var(--nc-color-danger-hover);
 }
@@ -2610,7 +2610,7 @@ span.nd-search-input {
   border-color: var(--nc-color-success);
 }
 
-.nd-button[data-nd-variant="solid"][data-nd-tone="success"]:hover {
+.nd-button[data-nd-variant="solid"][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-success-hover);
   border-color: var(--nc-color-success-hover);
 }
@@ -2623,7 +2623,7 @@ span.nd-search-input {
   border-color: var(--nc-color-accent-border);
 }
 
-.nd-button[data-nd-variant="outline"]:hover {
+.nd-button[data-nd-variant="outline"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-accent-bg);
 }
 
@@ -2632,7 +2632,7 @@ span.nd-search-input {
   border-color: var(--nc-color-border-strong);
 }
 
-.nd-button[data-nd-variant="outline"][data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-variant="outline"][data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
@@ -2641,7 +2641,7 @@ span.nd-search-input {
   border-color: var(--nc-color-danger-border);
 }
 
-.nd-button[data-nd-variant="outline"][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-variant="outline"][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-danger-bg);
 }
 
@@ -2650,7 +2650,7 @@ span.nd-search-input {
   border-color: var(--nc-color-success-border);
 }
 
-.nd-button[data-nd-variant="outline"][data-nd-tone="success"]:hover {
+.nd-button[data-nd-variant="outline"][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-success-bg);
 }
 
@@ -2670,7 +2670,7 @@ span.nd-search-input {
   border-color: transparent;
 }
 
-.nd-button[data-nd-variant="subtle"]:hover {
+.nd-button[data-nd-variant="subtle"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-accent-border);
 }
 
@@ -2678,7 +2678,7 @@ span.nd-search-input {
   background: var(--nc-color-subtle-bg);
 }
 
-.nd-button[data-nd-variant="subtle"][data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-variant="subtle"][data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-subtle-border);
 }
 
@@ -2686,7 +2686,7 @@ span.nd-search-input {
   background: var(--nc-color-danger-bg);
 }
 
-.nd-button[data-nd-variant="subtle"][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-variant="subtle"][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-danger-border);
 }
 
@@ -2694,7 +2694,7 @@ span.nd-search-input {
   background: var(--nc-color-success-bg);
 }
 
-.nd-button[data-nd-variant="subtle"][data-nd-tone="success"]:hover {
+.nd-button[data-nd-variant="subtle"][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-success-border);
 }
 
@@ -2709,7 +2709,7 @@ span.nd-search-input {
   border-color: transparent;
 }
 
-.nd-button[data-nd-variant="transparent"]:hover,
+.nd-button[data-nd-variant="transparent"]:is(:hover, [data-nd-seat-hover]),
 .nd-button[data-nd-variant="transparent"][aria-pressed="true"] {
   color: var(--nc-color-fg);
   background: color-mix(in oklab, var(--nc-color-subtle-bg) var(--nd-veil), transparent);
@@ -2719,7 +2719,7 @@ span.nd-search-input {
   color: var(--nc-color-danger);
 }
 
-.nd-button[data-nd-variant="transparent"][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-variant="transparent"][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-danger);
   background: var(--nc-color-danger-bg);
 }
@@ -2728,7 +2728,7 @@ span.nd-search-input {
   color: var(--nc-color-success);
 }
 
-.nd-button[data-nd-variant="transparent"][data-nd-tone="success"]:hover {
+.nd-button[data-nd-variant="transparent"][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-success);
   background: var(--nc-color-success-bg);
 }
@@ -2749,7 +2749,7 @@ span.nd-search-input {
   text-underline-offset: var(--noctua-space-1);
 }
 
-.nd-button[data-nd-variant="link"]:hover {
+.nd-button[data-nd-variant="link"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-accent-hover);
 }
 
@@ -2780,7 +2780,7 @@ span.nd-search-input {
   border-color: transparent;
 }
 
-.nd-button[data-nd-variant="nav"]:hover {
+.nd-button[data-nd-variant="nav"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
@@ -2797,12 +2797,12 @@ span.nd-search-input {
   opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" — the same exemption `.nd-icon-button` already carries */
 }
 
-.nd-button[disabled]:hover,
-.nd-button[aria-disabled="true"]:hover {
+.nd-button[disabled]:is(:hover, [data-nd-seat-hover]),
+.nd-button[aria-disabled="true"]:is(:hover, [data-nd-seat-hover]) {
   background: none;
 }
 
-.nd-button[data-nd-variant="solid"][disabled]:hover {
+.nd-button[data-nd-variant="solid"][disabled]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-accent);
 }
 /* --- crates/noctua-design-styles/src/button-group.css ---
@@ -2971,8 +2971,8 @@ span.nd-search-input {
 
 /* The focused member has to be drawn over its neighbours, or the ring is half
    hidden under the button the negative margin pulled on top of it. */
-.nd-button-group[data-nd-attached="true"] > .nd-button:hover,
-.nd-button-group[data-nd-attached="true"] > .nd-button:focus-visible {
+.nd-button-group[data-nd-attached="true"] > .nd-button:is(:hover, [data-nd-seat-hover]),
+.nd-button-group[data-nd-attached="true"] > .nd-button:is(:focus-visible, [data-nd-seat-focus]) {
   z-index: 1;
 }
 /* --- crates/noctua-design-styles/src/swatch.css ---
@@ -3187,12 +3187,12 @@ span.nd-search-input {
 /* THE RING GOES ON THE WRAPPER, NOT ON THE BODY. The body has no border and
    sits inside the pill; an outline on it would draw a rectangle through the
    rounded corners of the thing around it. */
-.nd-tag:has(> .nd-tag-body:focus-visible) {
+.nd-tag:has(> .nd-tag-body:is(:focus-visible, [data-nd-seat-focus])) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
 
-.nd-tag-body:focus-visible {
+.nd-tag-body:is(:focus-visible, [data-nd-seat-focus]) {
   outline: none;
 }
 
@@ -3200,6 +3200,12 @@ span.nd-search-input {
   .nd-tag:has(> .nd-tag-body:is(a, button):hover) {
     border-color: var(--nc-color-border-strong);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-tag:has(> .nd-tag-body:is(a, button)[data-nd-seat-hover]) {
+  border-color: var(--nc-color-border-strong);
 }
 
 /* Pressed is a state, and it is drawn as one: the tone at full strength, which
@@ -3484,6 +3490,12 @@ span.nd-search-input {
     border-color: var(--nc-color-border-strong);
   }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+a.nd-avatar[data-nd-seat-hover] {
+  border-color: var(--nc-color-border-strong);
+}
 /* --- crates/noctua-design-styles/src/avatar-group.css ---
    COPIED, NOT GENERATED. Edit the file named above. */
 
@@ -3603,6 +3615,12 @@ span.nd-search-input {
     color: var(--nc-color-fg);
   }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+a.nd-avatar-more-chip[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+}
 /* --- crates/noctua-design-styles/src/tag-picker.css ---
    COPIED, NOT GENERATED. Edit the file named above. */
 
@@ -3658,7 +3676,7 @@ span.nd-search-input {
   border-radius: var(--noctua-radius-control);
 }
 
-.nd-tag-picker-field:focus-within {
+.nd-tag-picker-field:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
   border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -3718,6 +3736,12 @@ span.nd-search-input {
   .nd-tag-picker-clear:hover {
     color: var(--nc-color-fg);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-tag-picker-clear[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
 }
 
 /* A REFUSED PICKER LOOKS REFUSED, which the real attribute alone does not do. */
@@ -3886,7 +3910,7 @@ span.nd-search-input {
 
 /* The whole row is the target, which is what makes a tree walkable with a
    thumb. The focus ring is on the `<li>` because that is what has focus. */
-.nd-tree-item:focus-visible {
+.nd-tree-item:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(-1 * var(--noctua-focus-width));
   border-radius: var(--noctua-radius-control);
@@ -3984,6 +4008,16 @@ span.nd-search-input {
   .nd-tree-toggle:hover {
     color: var(--nc-color-fg);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-tree-body[data-nd-seat-hover] {
+  color: var(--nc-color-accent);
+}
+
+.nd-tree-toggle[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
 }
 
 .nd-tree-item[aria-selected="true"] > .nd-tree-row {
@@ -4263,6 +4297,14 @@ span.nd-search-input {
     border-color: var(--nc-color-border);
   }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-codeblock-control[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border);
+}
+
 .nd-codeblock-control[aria-pressed="true"] {
   color: var(--nc-color-fg);
   border-color: var(--nc-color-border-strong);
@@ -4431,6 +4473,14 @@ span.nd-search-input {
     border-color: var(--nc-color-border-strong);
   }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-codeblock-expand[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
 /* Absent until the script caps the block. A control that offers to expand
    something already fully visible is a control that lies. */
 .nd-codeblock-figure:not(:has(> .nd-codeblock[data-nd-collapsed])) > .nd-codeblock-expand {
@@ -4640,7 +4690,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   clip-path: inset(50%);
   white-space: nowrap;
 }
-.nd-visually-hidden[data-nd-focusable="true"]:focus-within {
+.nd-visually-hidden[data-nd-focusable="true"]:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
   position: static;
   inline-size: auto;
   block-size: auto;
@@ -4694,7 +4744,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   font-weight: var(--noctua-weight-medium);
 }
 
-.nd-pagination-link:hover {
+.nd-pagination-link:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-border-strong);
 }
 
@@ -4735,7 +4785,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   display: none;
 }
 
-.nd-pagination-more:hover {
+.nd-pagination-more:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
   border-color: var(--nc-color-border-strong);
 }
@@ -4808,11 +4858,11 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   cursor: help;
 }
 
-.nd-info-marker:hover {
+.nd-info-marker:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-accent-hover);
 }
 
-.nd-info-marker:focus-visible {
+.nd-info-marker:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -4923,11 +4973,11 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 /* NO RADIUS ON THE ITEM, because the surface above it is what clips: a rounded
    item inside a rounded surface draws two corners a pixel apart, which is the
    defect `.nd-panel` and `.nd-codeblock` were split to avoid. */
-.nd-menu-item:hover {
+.nd-menu-item:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-surface-subtle);
 }
 
-.nd-menu-item:focus-visible {
+.nd-menu-item:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(-1 * var(--noctua-focus-width));
 }
@@ -4940,7 +4990,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   cursor: not-allowed;
 }
 
-.nd-menu-item[aria-disabled="true"]:hover {
+.nd-menu-item[aria-disabled="true"]:is(:hover, [data-nd-seat-hover]) {
   background: none;
 }
 
@@ -4948,7 +4998,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   color: var(--nd-tone);
 }
 
-.nd-menu-item[data-nd-tone]:hover {
+.nd-menu-item[data-nd-tone]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nd-tone-bg);
 }
 
@@ -5060,11 +5110,11 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   line-height: 1;
 }
 
-.nd-note-close:hover {
+.nd-note-close:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
-.nd-note-close:focus-visible {
+.nd-note-close:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -5359,7 +5409,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 /* THE RING GOES ON THE CONTROL, which is the thing that takes focus, and it
    repeats the mark's radius so the outline follows the corners underneath it
    rather than cutting a rectangle through them. */
-.nd-ai-label-control:focus-visible {
+.nd-ai-label-control:is(:focus-visible, [data-nd-seat-focus]) {
   border-radius: var(--noctua-radius-control);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -5369,6 +5419,12 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   .nd-ai-label-control:hover .nd-ai-label-mark {
     border-color: var(--nc-color-border-strong);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-ai-label-control[data-nd-seat-hover] .nd-ai-label-mark {
+  border-color: var(--nc-color-border-strong);
 }
 /* --- crates/noctua-design-styles/src/progress.css ---
    COPIED, NOT GENERATED. Edit the file named above. */
@@ -5656,7 +5712,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   border-radius: 0;
 }
 
-.nd-table-scroll:focus-visible {
+.nd-table-scroll:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -5806,7 +5862,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   display: none;
 }
 
-.nd-table-columns-summary:focus-visible {
+.nd-table-columns-summary:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -6037,7 +6093,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   background: var(--nc-color-surface-subtle);
 }
 
-.nd-table[data-nd-hover="true"] tbody .nd-table-row:hover {
+.nd-table[data-nd-hover="true"] tbody .nd-table-row:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
@@ -6136,11 +6192,11 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   cursor: pointer;
 }
 
-.nd-table-sort:hover {
+.nd-table-sort:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
-.nd-table-sort:focus-visible {
+.nd-table-sort:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-control);
@@ -6211,13 +6267,13 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   background: var(--nc-color-border);
 }
 
-.nd-table-resize:hover::before,
-.nd-table-resize:focus-visible::before {
+.nd-table-resize:is(:hover, [data-nd-seat-hover])::before,
+.nd-table-resize:is(:focus-visible, [data-nd-seat-focus])::before {
   background: var(--nc-color-accent);
   inset-block: 0;
 }
 
-.nd-table-resize:focus-visible {
+.nd-table-resize:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -6242,7 +6298,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 
 /* A cell is focusable only inside a grid, and the ring is on the cell rather
    than on what is in it — a reader walking cells needs to see which cell. */
-.nd-table[data-nd-interactive] :is(.nd-table-cell, .nd-table-header-cell):focus-visible {
+.nd-table[data-nd-interactive] :is(.nd-table-cell, .nd-table-header-cell):is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(var(--noctua-focus-offset) * -1);
 }
@@ -6292,7 +6348,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 /* THE RING IS ON THE BOX, NEVER ON WHAT IS IN IT. `Rating`'s rule and
    `Search`'s rule: the focus ring has to land on the thing the reader can see.
    The input and the two buttons give theirs up so this one is the only one. */
-.nd-table-search-field:focus-within {
+.nd-table-search-field:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
   border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -6320,6 +6376,13 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   .nd-table-search-clear:hover {
     color: var(--nc-color-fg);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-table-search-open[data-nd-seat-hover],
+.nd-table-search-clear[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
 }
 
 /* Open, the glass is no longer the thing to press first — it is where the box
@@ -6381,7 +6444,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   display: none;
 }
 
-.nd-table-export-summary:focus-visible {
+.nd-table-export-summary:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -6420,11 +6483,11 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   cursor: pointer;
 }
 
-.nd-table-export-item:hover {
+.nd-table-export-item:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
-.nd-table-export-item:focus-visible {
+.nd-table-export-item:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(var(--noctua-focus-offset) * -1);
 }
@@ -6450,7 +6513,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   cursor: pointer;
 }
 
-.nd-table-group-button:focus-visible {
+.nd-table-group-button:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-control);
@@ -6784,7 +6847,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   cursor: progress;
 }
 
-.nd-search-field:focus-within {
+.nd-search-field:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
   border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -6836,6 +6899,11 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 @media (hover: hover) {
   .nd-search-clear:hover { color: var(--nc-color-fg); }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-clear[data-nd-seat-hover] { color: var(--nc-color-fg); }
+
 /* Absent while there is nothing to clear: a control that empties an empty box
    is a control that does nothing, and a reader learns to distrust the row. */
 .nd-search:not([data-nd-has-query]) .nd-search-clear { display: none; }
@@ -6971,6 +7039,12 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   }
 }
 
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-result-link[data-nd-seat-hover] {
+  background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
+}
+
 /* THE ACTIVE ROW IS A FILL AND AN EDGE. Focus never leaves the box — the
    highlight travels by `aria-activedescendant` — so this is the only thing a
    sighted reader has to say which result Enter will follow, and a fill alone is
@@ -7023,6 +7097,13 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   .nd-search-forget:hover {
     background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-recent-item[data-nd-seat-hover],
+.nd-search-forget[data-nd-seat-hover] {
+  background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
 }
 
 /* --- inline ---
@@ -7145,6 +7226,13 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   }
 }
 
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-open[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
 /* `[open]`, AND THE SELECTOR IS THE WHOLE BUG.
  *
  * A closed `<dialog>` is `display: none` by the user-agent stylesheet, and that
@@ -7206,6 +7294,13 @@ dl.nd-list > .nd-list-item + .nd-list-term {
     color: var(--nc-color-fg);
     border-color: var(--nc-color-border-strong);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-close[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
 }
 
 /* SQUARE IS THE BASE AND ROUNDED IS THE OVERRIDE, like every other rule here.
@@ -7308,28 +7403,28 @@ dl.nd-list > .nd-list-item + .nd-list-term {
  * Every rule here carries one more attribute than the fill it replaces, so
  * specificity decides and not source order. */
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
   background: color-mix(in oklab, var(--nc-color-surface) var(--noctua-glass-opacity), transparent);
 }
 
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="accent"],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="accent"]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="accent"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-accent-border);
 }
 
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="neutral"],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-border-strong);
 }
 
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="danger"],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-danger-border);
 }
 
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="success"],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="success"]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-success-border);
 }
 
@@ -7337,7 +7432,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
    the specificity of its heaviest argument, so these are (0,4,0) and (0,5,0) —
    one above the fills they replace, on specificity rather than on order. */
 .nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="accent"],
-.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="accent"]:hover {
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="accent"]:is(:hover, [data-nd-seat-hover]) {
   background: color-mix(
     in oklab,
     color-mix(in oklab, var(--nc-color-accent) var(--nd-tint), var(--nc-color-surface))
@@ -7347,7 +7442,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 }
 
 .nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="neutral"],
-.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   background: color-mix(
     in oklab,
     color-mix(in oklab, var(--nc-color-subtle) var(--nd-tint), var(--nc-color-surface))
@@ -7357,7 +7452,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 }
 
 .nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="danger"],
-.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="danger"]:hover {
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   background: color-mix(
     in oklab,
     color-mix(in oklab, var(--nc-color-danger) var(--nd-tint), var(--nc-color-surface))
@@ -7367,7 +7462,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 }
 
 .nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="success"],
-.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="success"]:hover {
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   background: color-mix(
     in oklab,
     color-mix(in oklab, var(--nc-color-success) var(--nd-tint), var(--nc-color-surface))
@@ -7419,7 +7514,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 }
 
 .nd-switch[aria-checked="true"] > .nd-switch-track[data-nd-glass="true"][aria-hidden],
-.nd-switch[aria-checked="true"]:hover > .nd-switch-track[data-nd-glass="true"][aria-hidden] {
+.nd-switch[aria-checked="true"]:is(:hover, [data-nd-seat-hover]) > .nd-switch-track[data-nd-glass="true"][aria-hidden] {
   background-color: color-mix(
     in oklab,
     var(--nc-color-surface) var(--noctua-glass-opacity),
@@ -7683,7 +7778,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   overflow-y: auto;
 }
 
-.nd-lineage-field:focus-visible {
+.nd-lineage-field:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: calc(var(--noctua-focus-offset) * -1);
 }
@@ -7869,8 +7964,8 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   text-decoration: none;
 }
 
-a.nd-lineage-card:hover,
-a.nd-lineage-card:focus-visible {
+a.nd-lineage-card:is(:hover, [data-nd-seat-hover]),
+a.nd-lineage-card:is(:focus-visible, [data-nd-seat-focus]) {
   border-color: var(--nc-color-accent);
 }
 
@@ -8040,7 +8135,7 @@ a.nd-lineage-card:focus-visible {
   white-space: nowrap;
 }
 
-.nd-lineage-tie:focus-visible {
+.nd-lineage-tie:is(:focus-visible, [data-nd-seat-focus]) {
   position: fixed;
   inset-block-start: var(--noctua-space-4);
   inset-inline-start: var(--noctua-space-4);
@@ -8265,7 +8360,7 @@ a.nd-lineage-card:focus-visible {
     translate(-50%, var(--noctua-space-1));
 }
 
-.nd-lineage-pick:focus-visible ~ .nd-lineage-grip .nd-lineage-run {
+.nd-lineage-pick:is(:focus-visible, [data-nd-seat-focus]) ~ .nd-lineage-grip .nd-lineage-run {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8333,8 +8428,8 @@ a.nd-lineage-card:focus-visible {
   visibility: hidden;
 }
 
-.nd-lineage-bond:hover .nd-lineage-note,
-.nd-lineage-pick:focus-visible ~ .nd-lineage-note {
+.nd-lineage-bond:is(:hover, [data-nd-seat-hover]) .nd-lineage-note,
+.nd-lineage-pick:is(:focus-visible, [data-nd-seat-focus]) ~ .nd-lineage-note {
   visibility: visible;
 }
 
@@ -8488,7 +8583,7 @@ button.nd-lineage-figure {
   cursor: pointer;
 }
 
-.nd-lineage-figure:focus-visible {
+.nd-lineage-figure:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8537,7 +8632,7 @@ button.nd-lineage-figure {
   display: none;
 }
 
-.nd-lineage-piece:focus-visible .nd-lineage-card {
+.nd-lineage-piece:is(:focus-visible, [data-nd-seat-focus]) .nd-lineage-card {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8651,7 +8746,7 @@ button.nd-lineage-figure {
   display: none;
 }
 
-.nd-color-picker-trigger:focus-visible {
+.nd-color-picker-trigger:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8860,7 +8955,7 @@ are one box
   white-space: nowrap;
 }
 
-.nd-color-picker-area:has(.nd-color-picker-axis:focus-visible) {
+.nd-color-picker-area:has(.nd-color-picker-axis:is(:focus-visible, [data-nd-seat-focus])) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8877,7 +8972,7 @@ are one box
   cursor: pointer;
 }
 
-.nd-color-picker-track:focus-visible {
+.nd-color-picker-track:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8928,7 +9023,7 @@ are one box
   cursor: pointer;
 }
 
-.nd-color-picker-swatch:focus-visible {
+.nd-color-picker-swatch:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8958,7 +9053,7 @@ are one box
   border-radius: var(--noctua-radius-control);
 }
 
-.nd-color-picker-entry:focus-visible {
+.nd-color-picker-entry:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -9015,7 +9110,7 @@ are one box
   cursor: pointer;
 }
 
-.nd-color-picker-copy:focus-visible {
+.nd-color-picker-copy:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -9186,11 +9281,11 @@ are one box
  * backwards and matched nothing, ever. The one focusable thing in the control
  * showed no focus at all, which is WCAG 2.4.7 failed in silence by a rule that
  * looked right. `:has()` asks the question the markup can answer. */
-.nd-input:focus-within,
-.nd-number-input:focus-within,
-.nd-textarea:focus-within,
-.nd-time-input-segment:focus-visible,
-.nd-file-input:has(> .nd-file-input-native:focus-visible) > .nd-file-input-area {
+.nd-input:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])),
+.nd-number-input:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])),
+.nd-textarea:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])),
+.nd-time-input-segment:is(:focus-visible, [data-nd-seat-focus]),
+.nd-file-input:has(> .nd-file-input-native:is(:focus-visible, [data-nd-seat-focus])) > .nd-file-input-area {
   border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -9219,10 +9314,10 @@ are one box
   padding-block: var(--noctua-space-2);
 }
 
-.nd-input-box:focus,
-.nd-number-input-box:focus,
-.nd-textarea-box:focus,
-.nd-time-input-segment:focus {
+.nd-input-box:is(:focus, [data-nd-seat-focus]),
+.nd-number-input-box:is(:focus, [data-nd-seat-focus]),
+.nd-textarea-box:is(:focus, [data-nd-seat-focus]),
+.nd-time-input-segment:is(:focus, [data-nd-seat-focus]) {
   outline: none;
 }
 
@@ -9261,7 +9356,7 @@ are one box
   cursor: pointer;
 }
 
-.nd-input-control:focus-visible {
+.nd-input-control:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -9427,7 +9522,7 @@ are one box
 
 /* `:enabled`, because a stepper a `readonly` or `disabled` field refuses must
    not light up under the pointer as though it were about to do something. */
-.nd-number-input-step:enabled:hover {
+.nd-number-input-step:enabled:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
@@ -9456,7 +9551,7 @@ are one box
   border-radius: var(--noctua-radius-control);
 }
 
-.nd-number-input[data-nd-stepping="primary"] .nd-number-input-step:enabled:hover {
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-step:enabled:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-surface-subtle);
 }
 
@@ -9591,7 +9686,7 @@ which makes both of them items of the figure's row{
   cursor: pointer;
 }
 
-.nd-slider-track:focus-visible {
+.nd-slider-track:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-pill);
@@ -10012,7 +10107,7 @@ so
 
 /* The track is focusable only when nothing inside it is — otherwise it is one
    extra stop before every slide. The runtime decides; this draws the ring. */
-.nd-carousel-track:focus-visible {
+.nd-carousel-track:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -10037,7 +10132,7 @@ so
   display: none;
 }
 
-.nd-carousel-control:focus-visible {
+.nd-carousel-control:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -10119,7 +10214,7 @@ so
   inline-size: var(--noctua-space-4);
 }
 
-.nd-carousel-dot:focus-visible {
+.nd-carousel-dot:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-pill);
@@ -10160,7 +10255,7 @@ so
 
 /* Focusable, not a tab stop — so the ring only ever appears when focus was
    SENT here, which is the one moment it means something. */
-.nd-error-summary:focus-visible {
+.nd-error-summary:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -10203,7 +10298,7 @@ so
   text-underline-offset: var(--noctua-space-1);
 }
 
-.nd-error-summary-link:focus-visible {
+.nd-error-summary-link:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-control);
@@ -10527,7 +10622,7 @@ figure.nd-image {
   cursor: pointer;
 }
 
-.nd-message-bar-dismiss:focus-visible {
+.nd-message-bar-dismiss:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -10665,7 +10760,7 @@ figure.nd-image {
 
 /* The input is clipped rather than hidden, so the focus ring has to be drawn
    on the star the reader can actually see. */
-.nd-rating-input:focus-visible + .nd-rating-star {
+.nd-rating-input:is(:focus-visible, [data-nd-seat-focus]) + .nd-rating-star {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -10768,11 +10863,11 @@ and the row is the same shape
   font-size: var(--noctua-size-h3);
 }
 
-.nd-otp-field-input:hover {
+.nd-otp-field-input:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-fg-muted);
 }
 
-.nd-otp-field-input:focus-visible {
+.nd-otp-field-input:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -10907,11 +11002,11 @@ because a specimen of a `needs_name` component must not render a
   border-inline-end: var(--noctua-border-strong) solid transparent;
 }
 
-.nd-tab:hover {
+.nd-tab:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
-.nd-tab:focus-visible {
+.nd-tab:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -10954,7 +11049,7 @@ because a specimen of a `needs_name` component must not render a
   padding-block-start: var(--noctua-space-4);
 }
 
-.nd-tab-panel:focus-visible {
+.nd-tab-panel:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -11018,8 +11113,15 @@ because a specimen of a `needs_name` component must not render a
   }
 }
 
-.nd-dialog-open:focus-visible,
-.nd-popover-trigger:focus-visible {
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-dialog-open[data-nd-seat-hover],
+.nd-popover-trigger[data-nd-seat-hover] {
+  border-color: var(--nc-color-border-strong);
+}
+
+.nd-dialog-open:is(:focus-visible, [data-nd-seat-focus]),
+.nd-popover-trigger:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -11317,9 +11419,18 @@ because a specimen of a `needs_name` component must not render a
   }
 }
 
-.nd-dialog-close:focus-visible,
-.nd-popover-close:focus-visible,
-.nd-toast-dismiss:focus-visible {
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-dialog-close[data-nd-seat-hover],
+.nd-popover-close[data-nd-seat-hover],
+.nd-toast-dismiss[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface-subtle);
+}
+
+.nd-dialog-close:is(:focus-visible, [data-nd-seat-focus]),
+.nd-popover-close:is(:focus-visible, [data-nd-seat-focus]),
+.nd-toast-dismiss:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(-1 * var(--noctua-focus-width));
 }

@@ -156,6 +156,52 @@ export async function outside(page, before, after, rects) {
 }
 
 /**
+ * How many pixels differ between two screenshots, by any amount at all.
+ *
+ * `outside` forgives eight per channel and answers `Infinity` for two pictures
+ * that agree, because its question is where a change landed. This one's is
+ * whether two ways of reaching one state draw ONE picture — a pointer's hover
+ * and a second seat's — and there the only honest tolerance is none: both are
+ * the same rules on the same element, so nothing is left to antialias
+ * differently.
+ *
+ * `Infinity` for two pictures of different sizes, which are not the same
+ * picture whatever is in them.
+ */
+export async function differing(page, one, two) {
+  // The same bytes are the same pixels, and most comparisons end here.
+  if (one.equals(two)) return 0;
+  return page.evaluate(
+    async ([a, b]) => {
+      const read = async (data) => {
+        const blob = await (await fetch(`data:image/png;base64,${data}`)).blob();
+        const bitmap = await createImageBitmap(blob);
+        const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(bitmap, 0, 0);
+        return ctx.getImageData(0, 0, bitmap.width, bitmap.height).data;
+      };
+      const first = await read(a);
+      const second = await read(b);
+      if (first.length !== second.length) return Infinity;
+      let count = 0;
+      for (let i = 0; i < first.length; i += 4) {
+        if (
+          first[i] !== second[i] ||
+          first[i + 1] !== second[i + 1] ||
+          first[i + 2] !== second[i + 2] ||
+          first[i + 3] !== second[i + 3]
+        ) {
+          count += 1;
+        }
+      }
+      return count;
+    },
+    [one.toString("base64"), two.toString("base64")],
+  );
+}
+
+/**
  * How much of a screenshot is ink, as a fraction of its pixels.
  *
  * `extremes` answers *is anything here readable against anything else* and

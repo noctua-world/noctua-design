@@ -270,6 +270,7 @@ fn inspect(
     }
 
     cited_sources(file, text, findings);
+    seat_twin(file, text, findings);
 
     // Tracked across lines, because a CSS block comment's second line contains
     // no `/*` and a line-by-line strip would read its prose as code. Three of
@@ -680,6 +681,312 @@ fn translated_fragment(code: &str) -> Option<String> {
         }
     }
     None
+}
+
+/// Where the component rules live, which is where [`seat_twin`] reads.
+///
+/// The documentation site's own chrome is not here and is not held to it: no
+/// second seat ever points at this site's header.
+const SEATED: &str = "crates/noctua-design-styles/src/";
+
+/// Whether a repository-relative path is a component stylesheet.
+///
+/// [`seat_twin`] asks, and reads nothing else: [`inspect`] hands it every
+/// file, as it hands every file to every gate.
+fn is_seated(file: &str) -> bool {
+    file.starts_with(SEATED)
+        && Path::new(file)
+            .extension()
+            .is_some_and(|extension| extension == "css")
+}
+
+/// A native state pseudo-class, the form a selector writes it in, and the
+/// attribute selector that stands for it in a sibling rule.
+///
+/// Longest name first: `:focus` is a prefix of the two before it, and a scan
+/// that tried it first would read `:focus-visible` as `:focus` and a stray
+/// `-visible`.
+const SEAT_TWINS: [(&str, &str, &str); 5] = [
+    (
+        ":focus-visible",
+        ":is(:focus-visible, [data-nd-seat-focus])",
+        "[data-nd-seat-focus]",
+    ),
+    (
+        ":focus-within",
+        ":is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus]))",
+        ":is([data-nd-seat-focus], :has([data-nd-seat-focus]))",
+    ),
+    (
+        ":focus",
+        ":is(:focus, [data-nd-seat-focus])",
+        "[data-nd-seat-focus]",
+    ),
+    (
+        ":hover",
+        ":is(:hover, [data-nd-seat-hover])",
+        "[data-nd-seat-hover]",
+    ),
+    (
+        ":active",
+        ":is(:active, [data-nd-seat-active])",
+        "[data-nd-seat-active]",
+    ),
+];
+
+/// One style rule, as [`seat_twin`] compares it.
+#[derive(Debug)]
+struct StyleRule {
+    /// 1-indexed line its selector starts on, and the line its `{` is on.
+    lines: (usize, usize),
+    /// The selector list, comments removed and blank space collapsed.
+    selector: String,
+    /// The declarations, likewise.
+    declarations: String,
+    /// The at-rule preludes around it, outermost first, likewise.
+    context: Vec<String>,
+}
+
+/// Blank space collapsed to single spaces, so two spellings of one selector
+/// compare equal.
+fn collapse(text: &str) -> String {
+    text.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+/// Every style rule in a stylesheet, with the at-rules around each.
+///
+/// Not a CSS parser: it knows comments, strings and braces, which is all the
+/// question below needs, and it reads a rule nested in a rule as two rules.
+fn style_rules(text: &str) -> Vec<StyleRule> {
+    // One entry per open block: the at-rule prelude, or the index of the rule
+    // in `rules` whose declarations are being read.
+    enum Open {
+        At(String),
+        Rule(usize),
+    }
+
+    let chars: Vec<char> = text.chars().collect();
+    let mut rules: Vec<StyleRule> = Vec::new();
+    let mut open: Vec<Open> = Vec::new();
+    // What has been read since the last `{`, `}` or `;`, comments left out,
+    // and the line its first visible character was on.
+    let mut pending = String::new();
+    let mut pending_line = 0usize;
+    let mut line = 1usize;
+    let mut index = 0usize;
+
+    while index < chars.len() {
+        let here = chars[index];
+        if here == '/' && chars.get(index + 1) == Some(&'*') {
+            index += 2;
+            while index < chars.len()
+                && !(chars[index] == '*' && chars.get(index + 1) == Some(&'/'))
+            {
+                line += usize::from(chars[index] == '\n');
+                index += 1;
+            }
+            index += 2;
+            continue;
+        }
+        if here == '"' || here == '\'' {
+            if pending.trim().is_empty() {
+                pending_line = line;
+            }
+            pending.push(here);
+            index += 1;
+            while index < chars.len() && chars[index] != here {
+                if chars[index] == '\\' {
+                    pending.push(chars[index]);
+                    index += 1;
+                }
+                if let Some(inner) = chars.get(index) {
+                    line += usize::from(*inner == '\n');
+                    pending.push(*inner);
+                }
+                index += 1;
+            }
+            pending.push(here);
+            index += 1;
+            continue;
+        }
+        match here {
+            '{' => {
+                let prelude = collapse(&pending);
+                if prelude.starts_with('@') {
+                    open.push(Open::At(prelude));
+                } else {
+                    open.push(Open::Rule(rules.len()));
+                    rules.push(StyleRule {
+                        lines: (pending_line.max(1), line),
+                        selector: prelude,
+                        declarations: String::new(),
+                        context: open
+                            .iter()
+                            .filter_map(|block| match block {
+                                Open::At(prelude) => Some(prelude.clone()),
+                                Open::Rule(_) => None,
+                            })
+                            .collect(),
+                    });
+                }
+                pending.clear();
+            }
+            '}' | ';' => {
+                if let Some(Open::Rule(at)) = open.last() {
+                    let declaration = collapse(&pending);
+                    if !declaration.is_empty() {
+                        let into = &mut rules[*at].declarations;
+                        into.push_str(&declaration);
+                        into.push(';');
+                    }
+                }
+                if here == '}' {
+                    open.pop();
+                }
+                pending.clear();
+            }
+            _ => {
+                if pending.trim().is_empty() && !here.is_whitespace() {
+                    pending_line = line;
+                }
+                line += usize::from(here == '\n');
+                pending.push(here);
+            }
+        }
+        index += 1;
+    }
+    rules
+}
+
+/// Whether `text` starts with the pseudo-class `name` and not with a longer
+/// name that merely begins the same way.
+fn starts_pseudo(text: &str, name: &str) -> bool {
+    text.strip_prefix(name).is_some_and(|rest| {
+        !rest
+            .chars()
+            .next()
+            .is_some_and(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+    })
+}
+
+/// A selector's state pseudo-classes: how many it writes, how many of those
+/// are bare, and the selector a sibling rule must carry for the bare ones.
+fn seat_sibling(selector: &str) -> (usize, usize, String) {
+    let mut sibling = String::new();
+    let (mut written, mut bare) = (0usize, 0usize);
+    let mut rest = selector;
+    'scan: while let Some(here) = rest.chars().next() {
+        if here == ':' {
+            for (name, twinned, attribute) in SEAT_TWINS {
+                if rest.starts_with(twinned) {
+                    written += 1;
+                    sibling.push_str(twinned);
+                    rest = &rest[twinned.len()..];
+                    continue 'scan;
+                }
+                if starts_pseudo(rest, name) {
+                    written += 1;
+                    bare += 1;
+                    sibling.push_str(attribute);
+                    rest = &rest[name.len()..];
+                    continue 'scan;
+                }
+            }
+        }
+        sibling.push(here);
+        rest = &rest[here.len_utf8()..];
+    }
+    (written, bare, sibling)
+}
+
+/// Whether an at-rule prelude asks only whether the pointer can hover.
+fn is_hover_query(prelude: &str) -> bool {
+    prelude
+        .chars()
+        .filter(|c| !c.is_whitespace())
+        .collect::<String>()
+        == "@media(hover:hover)"
+}
+
+/// Every interactive state is reachable for a second seat.
+///
+/// # What it holds
+///
+/// `NOCTUA.md §9.7`: the system's own seat reaches a state through the native
+/// pseudo-class, and every other seat's state arrives as an attribute, styled
+/// exactly like it. A rule written on `:hover` alone looks finished, passes
+/// every test a single pointer can run, and cannot be shown for the second
+/// pointer in the same window.
+///
+/// So each `:hover`, `:focus-visible`, `:focus-within`, `:focus` and `:active`
+/// in a component stylesheet is written in one of two ways:
+///
+/// * **in the twin form** of [`SEAT_TWINS`], `:is(:hover, [data-nd-seat-hover])`.
+///   An attribute selector and a pseudo-class weigh the same and `:is()` weighs
+///   what its heaviest argument does, so the twin changes no specificity and no
+///   rule's place in the cascade;
+/// * **bare, with a sibling rule in the same file** whose selector is this one
+///   with the attribute in place of the pseudo-class and whose declarations are
+///   the same. That is the form for a rule inside `@media (hover: hover)`: the
+///   sibling stands outside that block, because the attribute is itself the
+///   proof of a pointer that hovers and the window's own pointer says nothing
+///   about a second seat's.
+///
+/// A PASS OF ITS OWN, BECAUSE IT READS THE STYLESHEET WHOLE. Whether a rule has
+/// its sibling is a question about two rules, and no line can answer it.
+///
+/// Returns how many state pseudo-classes it read, so a caller can tell a pass
+/// from a sweep that looked at nothing.
+fn seat_twin(file: &str, text: &str, findings: &mut Vec<Finding>) -> usize {
+    if !is_seated(file) {
+        return 0;
+    }
+    let rules = style_rules(text);
+    let lines: Vec<&str> = text.lines().collect();
+    let mut checked = 0usize;
+
+    for rule in &rules {
+        let (written, bare, sibling) = seat_sibling(&rule.selector);
+        checked += written;
+        if bare == 0 {
+            continue;
+        }
+        let (first, last) = rule.lines;
+        if lines
+            .get(first - 1..last)
+            .is_some_and(|prelude| prelude.iter().any(|line| line.contains(ALLOW)))
+        {
+            continue;
+        }
+        let context: Vec<&String> = rule
+            .context
+            .iter()
+            .filter(|prelude| !is_hover_query(prelude))
+            .collect();
+        let twinned = rules.iter().any(|other| {
+            other.selector == sibling
+                && other.declarations == rule.declarations
+                && other.context.iter().collect::<Vec<_>>() == context
+        });
+        if !twinned {
+            findings.push(Finding {
+                file: file.to_owned(),
+                line: first,
+                message: format!(
+                    "`{}` reaches a state through the native pseudo-class alone, so a second \
+                     seat's hover or focus cannot be shown (NOCTUA.md §9.7). Write the twin \
+                     form — `:is(:hover, [data-nd-seat-hover])`, `:is(:focus-visible, \
+                     [data-nd-seat-focus])`, `:is(:focus-within, [data-nd-seat-focus], \
+                     :has([data-nd-seat-focus]))`, `:is(:focus, [data-nd-seat-focus])`, \
+                     `:is(:active, [data-nd-seat-active])` — or, for a rule inside `@media \
+                     (hover: hover)`, add the sibling rule `{sibling}` outside that block, \
+                     in this file, with the same declarations",
+                    rule.selector
+                ),
+            });
+        }
+    }
+    checked
 }
 
 /// Whether the line leaves us inside a `/* … */` block.
@@ -1214,6 +1521,182 @@ mod tests {
         assert!(!fires(generated));
     }
 
+    /// What [`seat_twin`] says about one stylesheet: its findings, and how
+    /// many state pseudo-classes it read.
+    fn seats(text: &str) -> (Vec<Finding>, usize) {
+        let mut findings = Vec::new();
+        let checked = seat_twin(&format!("{SEATED}t.css"), text, &mut findings);
+        (findings, checked)
+    }
+
+    /// The defect the gate exists for: a state only the system's own pointer
+    /// or keyboard can reach.
+    #[test]
+    fn a_state_reached_only_through_the_pseudo_class_is_a_finding() {
+        for bare in [
+            ".a:hover { color: inherit; }",
+            ".a:focus-visible { outline: none; }",
+            ".a:focus-within { outline: none; }",
+            ".a:focus { outline: none; }",
+            ".a:active { color: inherit; }",
+            ".a:has(> .b:hover) { color: inherit; }",
+            ".a:hover::before { color: inherit; }",
+        ] {
+            let (findings, checked) = seats(bare);
+            assert_eq!(findings.len(), 1, "{bare}");
+            assert_eq!(checked, 1, "{bare}");
+        }
+    }
+
+    #[test]
+    fn the_twin_form_passes_and_is_counted() {
+        let (findings, checked) = seats(
+            ".a:is(:hover, [data-nd-seat-hover]) { color: inherit; }\n\
+             .a:is(:focus-visible, [data-nd-seat-focus]) > .b { outline: none; }\n\
+             .a:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) { outline: none; }\n\
+             .a:is(:focus, [data-nd-seat-focus]) { outline: none; }\n\
+             .a:is(:active, [data-nd-seat-active]) { color: inherit; }\n\
+             .a:has(> .b:is(:hover,\n   [data-nd-seat-hover])) { color: inherit; }",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 6);
+    }
+
+    /// A twin that names the wrong attribute is not a twin, and neither is
+    /// `:focus-within` without the `:has()` that makes it reach an ancestor.
+    #[test]
+    fn a_twin_form_with_the_wrong_partner_is_a_finding() {
+        for wrong in [
+            ".a:is(:hover, [data-nd-seat-focus]) { color: inherit; }",
+            ".a:is(:focus-within, [data-nd-seat-focus]) { outline: none; }",
+            ".a:is(:hover, .b) { color: inherit; }",
+        ] {
+            assert_eq!(seats(wrong).0.len(), 1, "{wrong}");
+        }
+    }
+
+    /// One selector of a list left bare is the whole rule left bare for the
+    /// state that selector names.
+    #[test]
+    fn one_bare_selector_in_a_list_is_a_finding() {
+        let (findings, checked) =
+            seats(".a:is(:hover, [data-nd-seat-hover]),\n.a:focus-visible { color: inherit; }");
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].line, 1);
+        assert_eq!(checked, 2);
+    }
+
+    #[test]
+    fn a_hover_query_rule_passes_with_its_sibling_outside_the_block() {
+        let (findings, checked) = seats(
+            "@media (hover: hover) {\n  .a:hover,\n  .b:hover {\n    color: inherit;\n  }\n}\n\
+             /* the twin */\n.a[data-nd-seat-hover],\n.b[data-nd-seat-hover] {\n  color:   inherit;\n}",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 2);
+    }
+
+    /// Each way a sibling can fail to be the same rule.
+    #[test]
+    fn a_sibling_that_differs_is_not_a_sibling() {
+        let bare = "@media (hover: hover) {\n  .a:hover { color: inherit; }\n}\n";
+        for (why, sibling) in [
+            ("no sibling at all", ""),
+            (
+                "other declarations",
+                ".a[data-nd-seat-hover] { color: unset; }",
+            ),
+            (
+                "another selector",
+                ".b[data-nd-seat-hover] { color: inherit; }",
+            ),
+            (
+                "still behind the hover query",
+                "@media (hover: hover) { .a[data-nd-seat-hover] { color: inherit; } }",
+            ),
+            (
+                "behind a query the rule is not behind",
+                "@media (min-width: 48rem) { .a[data-nd-seat-hover] { color: inherit; } }",
+            ),
+        ] {
+            let (findings, _) = seats(&format!("{bare}{sibling}"));
+            assert_eq!(findings.len(), 1, "{why}");
+            assert_eq!(findings[0].line, 2, "{why}");
+        }
+    }
+
+    /// A rule behind a width query as well keeps that query on its sibling.
+    #[test]
+    fn a_sibling_keeps_every_query_but_the_hover_one() {
+        let (findings, _) = seats(
+            "@media (min-width: 48rem) {\n  @media (hover: hover) {\n    .a:hover { color: inherit; }\n  }\n  \
+             .a[data-nd-seat-hover] { color: inherit; }\n}",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+    }
+
+    /// Prose about `:hover` is not a rule on it, a longer name that begins the
+    /// same way is not the state, and the escape hatch is the same one.
+    #[test]
+    fn what_is_not_a_state_selector_is_left_alone() {
+        let (findings, checked) = seats(
+            "/* `.a:hover` used to be here { and: this; } */\n\
+             .a { content: \":hover {\"; }\n\
+             .a:focus-visibly { color: inherit; }\n\
+             .a:hover { color: inherit; } /* allow-literal: the gate's own fixture */",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 1);
+    }
+
+    /// The gate is wired to the component stylesheets, and it reads them.
+    ///
+    /// Asked of the real tree, through [`inspect`] as `run` reaches it: a gate
+    /// that passed because it was handed no stylesheet, or because the rules
+    /// moved to a directory it does not name, would pass for ever.
+    #[test]
+    fn the_seat_gate_reads_the_component_stylesheets() {
+        let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/.."));
+        let (mut sheets, mut checked) = (0usize, 0usize);
+        for path in sources(&root).expect("sources") {
+            let relative = path
+                .strip_prefix(&root)
+                .expect("under the root")
+                .to_string_lossy()
+                .replace('\\', "/");
+            if !is_seated(&relative) {
+                continue;
+            }
+            let text = std::fs::read_to_string(&path).expect("readable");
+            sheets += 1;
+            let mut findings = Vec::new();
+            checked += seat_twin(&relative, &text, &mut findings);
+            assert!(findings.is_empty(), "{findings:?}");
+        }
+        assert!(sheets > 0, "no stylesheet under {SEATED}");
+        assert!(
+            checked > 0,
+            "the component stylesheets hold no state pseudo-class the gate could read"
+        );
+
+        // And `inspect` is what calls it, for a file where the rules live and
+        // for no other.
+        let bare = ".a:hover { color: inherit; }";
+        let reaches = |file: &str| {
+            let mut findings = Vec::new();
+            inspect(
+                file,
+                bare,
+                &[],
+                &std::collections::BTreeSet::new(),
+                &mut findings,
+            );
+            !findings.is_empty()
+        };
+        assert!(reaches(&format!("{SEATED}button.css")));
+        assert!(!reaches("docs-site/assets/shell.css"));
+    }
+
     /// A comment naming a gate must name one that exists.
     ///
     /// Three did not. `shell.css` named one gate after a scrollable corner,
@@ -1333,6 +1816,8 @@ mod tests {
                 finding.message
             );
         }
+        let (seated, _) = seats(".a:hover { color: inherit; }");
+        assert!(seated[0].message.len() > 40, "{}", seated[0].message);
     }
 
     /// A `/*` INSIDE A LINE COMMENT OPENS NOTHING.

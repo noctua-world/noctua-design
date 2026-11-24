@@ -152,7 +152,7 @@
   font-size: var(--noctua-size-small);
 }
 
-.nd-segmented-item:hover {
+.nd-segmented-item:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
   border-color: var(--nc-color-border-strong);
 }
@@ -187,7 +187,7 @@
   opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
 }
 
-.nd-segmented-item[aria-disabled="true"]:hover {
+.nd-segmented-item[aria-disabled="true"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg-muted);
   border-color: var(--nc-color-border);
 }
@@ -295,7 +295,7 @@
 }
 
 /* The ring is drawn inside the item, or the cut takes half of it. */
-.nd-segmented[data-nd-shape="bevel"] > .nd-segmented-item:focus-visible {
+.nd-segmented[data-nd-shape="bevel"] > .nd-segmented-item:is(:focus-visible, [data-nd-seat-focus]) {
   outline-offset: calc(-1 * (var(--noctua-focus-width) + var(--noctua-focus-offset)));
 }
 
@@ -336,8 +336,8 @@
 
 /* The chosen and the focused item are drawn over their neighbours, or the ring
    is half hidden under the item the negative margin pulled on top of it. */
-.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:hover,
-.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:focus-visible,
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:is(:hover, [data-nd-seat-hover]),
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:is(:focus-visible, [data-nd-seat-focus]),
 .nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item[aria-checked="true"] {
   z-index: 1;
 }

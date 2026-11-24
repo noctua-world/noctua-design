@@ -65,7 +65,7 @@
   inline-size: 7ch; /* allow-literal: four digits plus the box's own padding, in the digit's own unit */
 }
 
-.nd-date-input-segment:hover {
+.nd-date-input-segment:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-fg-muted);
 }
 

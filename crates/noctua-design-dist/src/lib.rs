@@ -171,6 +171,10 @@ pub const FILES: &[(&str, &str)] = &[
         include_str!(concat!("../", "dist/", "search-match.js")),
     ),
     (
+        "seats.js",
+        include_str!(concat!("../", "dist/", "seats.js")),
+    ),
+    (
         "palettes/ochre-balanced.json",
         include_str!(concat!("../", "dist/", "palettes/ochre-balanced.json")),
     ),

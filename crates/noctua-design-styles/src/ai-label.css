@@ -281,7 +281,7 @@
 /* THE RING GOES ON THE CONTROL, which is the thing that takes focus, and it
    repeats the mark's radius so the outline follows the corners underneath it
    rather than cutting a rectangle through them. */
-.nd-ai-label-control:focus-visible {
+.nd-ai-label-control:is(:focus-visible, [data-nd-seat-focus]) {
   border-radius: var(--noctua-radius-control);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -291,4 +291,10 @@
   .nd-ai-label-control:hover .nd-ai-label-mark {
     border-color: var(--nc-color-border-strong);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-ai-label-control[data-nd-seat-hover] .nd-ai-label-mark {
+  border-color: var(--nc-color-border-strong);
 }

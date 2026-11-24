@@ -41,7 +41,7 @@
   border-radius: 0;
 }
 
-.nd-table-scroll:focus-visible {
+.nd-table-scroll:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -191,7 +191,7 @@
   display: none;
 }
 
-.nd-table-columns-summary:focus-visible {
+.nd-table-columns-summary:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -422,7 +422,7 @@
   background: var(--nc-color-surface-subtle);
 }
 
-.nd-table[data-nd-hover="true"] tbody .nd-table-row:hover {
+.nd-table[data-nd-hover="true"] tbody .nd-table-row:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
@@ -521,11 +521,11 @@
   cursor: pointer;
 }
 
-.nd-table-sort:hover {
+.nd-table-sort:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
-.nd-table-sort:focus-visible {
+.nd-table-sort:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-control);
@@ -596,13 +596,13 @@
   background: var(--nc-color-border);
 }
 
-.nd-table-resize:hover::before,
-.nd-table-resize:focus-visible::before {
+.nd-table-resize:is(:hover, [data-nd-seat-hover])::before,
+.nd-table-resize:is(:focus-visible, [data-nd-seat-focus])::before {
   background: var(--nc-color-accent);
   inset-block: 0;
 }
 
-.nd-table-resize:focus-visible {
+.nd-table-resize:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -627,7 +627,7 @@
 
 /* A cell is focusable only inside a grid, and the ring is on the cell rather
    than on what is in it — a reader walking cells needs to see which cell. */
-.nd-table[data-nd-interactive] :is(.nd-table-cell, .nd-table-header-cell):focus-visible {
+.nd-table[data-nd-interactive] :is(.nd-table-cell, .nd-table-header-cell):is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(var(--noctua-focus-offset) * -1);
 }
@@ -677,7 +677,7 @@
 /* THE RING IS ON THE BOX, NEVER ON WHAT IS IN IT. `Rating`'s rule and
    `Search`'s rule: the focus ring has to land on the thing the reader can see.
    The input and the two buttons give theirs up so this one is the only one. */
-.nd-table-search-field:focus-within {
+.nd-table-search-field:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
   border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -705,6 +705,13 @@
   .nd-table-search-clear:hover {
     color: var(--nc-color-fg);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-table-search-open[data-nd-seat-hover],
+.nd-table-search-clear[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
 }
 
 /* Open, the glass is no longer the thing to press first — it is where the box
@@ -766,7 +773,7 @@
   display: none;
 }
 
-.nd-table-export-summary:focus-visible {
+.nd-table-export-summary:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -805,11 +812,11 @@
   cursor: pointer;
 }
 
-.nd-table-export-item:hover {
+.nd-table-export-item:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
-.nd-table-export-item:focus-visible {
+.nd-table-export-item:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(var(--noctua-focus-offset) * -1);
 }
@@ -835,7 +842,7 @@
   cursor: pointer;
 }
 
-.nd-table-group-button:focus-visible {
+.nd-table-group-button:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-control);

@@ -88,7 +88,7 @@
   cursor: pointer;
 }
 
-.nd-message-bar-dismiss:focus-visible {
+.nd-message-bar-dismiss:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }

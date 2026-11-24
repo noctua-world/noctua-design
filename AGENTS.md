@@ -282,7 +282,8 @@ palette colour, and are the worked case (see "Component rules").
 - **No layout shift, no flickering.**
 - **Every input and every seat.** Keyboard, pointer, touch and touchpad all work, and every
   interactive state is styled through the native pseudo-class **and** the seat attribute beside
-  it, so a second seat's hover or focus can be shown.
+  it, so a second seat's hover or focus can be shown. "Every state rule has its seat twin", under
+  "Styling", is how.
 
 ## Where the area-specific traps live
 
@@ -305,6 +306,7 @@ of these carries measured rules, not description:
 | a table | `crates/noctua-design-runtime/src/table.js` |
 | a menu | `crates/noctua-design-runtime/src/menu.js` |
 | a switch, a segmented choice — anything that answers a click by choosing | `crates/noctua-design-runtime/src/choice.js` |
+| a second seat's hover, focus, press or drag | `crates/noctua-design-runtime/src/seats.js` |
 | what both implementations must *do* | `spec/components/<name>.cases.toml`, and `crates/noctua-design-spec/src/conformance.rs` for the vocabulary a step may use |
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
@@ -417,8 +419,10 @@ component whose markup writes a role that promises a keyboard — `listbox`, `tr
 ships that keyboard: `Select`, `TagPicker`, `Tree`, `Tabs`, `DateInput`, `Search` and the rest.
 What they share ships with them: `anchor.js` places a floating panel against its control,
 `panels.js` decides which floating list is open, and `roving.js` is the one arrow walk for a radio
-group, a toolbar and a tab list. Every module exports an `enhanceX(root)` and a `releaseX(root)`,
-because a behaviour that cannot be taken back off leaks once per route. `Search` reads its index
+group, a toolbar and a tab list. `seats.js` belongs to no component and to all of them: it writes
+a second seat's state as the attributes every state rule is twinned with (see "Styling"). Every
+module exports an `enhanceX(root)` and a `releaseX(root)`, because a behaviour that cannot be
+taken back off leaks once per route. `Search` reads its index
 from the path its consumer gives it (`[prop.src]` writes `data-nd-src`), and it matches and
 colours by the fuzzy-finder doctrine (`NOCTUA.md §12.4`): every query word must match, and the
 matched characters are coloured by the word that matched them.
@@ -482,6 +486,35 @@ declared anywhere and reports any `var()` outside that set.
 gate cannot reach a prelude; `gates::media_prelude` rejects `max-width` outright and requires
 every `min-width` to equal a breakpoint declared in `spec/tokens.toml`. Write the narrow case
 unconditionally and override it upward.
+
+**Every state rule has its seat twin.** The engine keeps `:hover`, `:focus-visible` and `:active`
+for one pointer and one keyboard, so every other seat's state arrives as an attribute and is
+styled exactly like the pseudo-class (`NOCTUA.md §9.7`, §12.18):
+
+| Attribute | Stands for | Stamped on |
+|---|---|---|
+| `data-nd-seat-hover` | `:hover` | the element and every ancestor |
+| `data-nd-seat-focus` | `:focus-visible`, and `:focus` | the element alone |
+| `data-nd-seat-active` | `:active` | the element and every ancestor |
+| `data-nd-seat-drag` | what that seat is dragging | the element alone |
+
+The value is the ids of the seats in that state there, separated by spaces and sorted, and a rule
+asks only whether the attribute is present. In a component stylesheet a state pseudo-class is
+written in its twin form — `:is(:hover, [data-nd-seat-hover])`,
+`:is(:focus-visible, [data-nd-seat-focus])`, `:is(:focus, [data-nd-seat-focus])`,
+`:is(:active, [data-nd-seat-active])`, and
+`:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus]))` for the one that reaches
+an ancestor. An attribute selector weighs what a pseudo-class weighs and `:is()` weighs what its
+heaviest argument does, so the twin moves no rule in the cascade. **A rule inside
+`@media (hover: hover)` stays bare and has a sibling**: the same selector on the attribute, with
+the same declarations, in the same file and outside that block, because the attribute is itself
+the proof of a pointer that hovers. `gates::seat_twin` refuses a state pseudo-class written any
+other way, and `tests/browser/seats.spec.js` photographs every state both ways, on every page in
+`tests/browser/pages.js`, and requires the same pixels. **Nothing writes the attributes by hand**:
+`dist/seats.js` stamps them where the pseudo-class would match — `seatHover`, `seatFocus`,
+`seatPress`, `seatDrag` and `clearSeat`, or an `nd-seat` event for a host with no script of its
+own — and how a system delivers a second seat is the host's to know (`NOCTUA.md §5.12`). The
+documentation site's own chrome in `docs-site/assets/shell.css` is not held to the rule.
 
 **The source gates do not walk the compiler crates.** They are about component and styling
 source: a component hardcoding `13px` sits between two steps for ever, while a compiler that

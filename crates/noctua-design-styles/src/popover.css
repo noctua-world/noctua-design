@@ -125,9 +125,18 @@
   }
 }
 
-.nd-dialog-close:focus-visible,
-.nd-popover-close:focus-visible,
-.nd-toast-dismiss:focus-visible {
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-dialog-close[data-nd-seat-hover],
+.nd-popover-close[data-nd-seat-hover],
+.nd-toast-dismiss[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface-subtle);
+}
+
+.nd-dialog-close:is(:focus-visible, [data-nd-seat-focus]),
+.nd-popover-close:is(:focus-visible, [data-nd-seat-focus]),
+.nd-toast-dismiss:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(-1 * var(--noctua-focus-width));
 }

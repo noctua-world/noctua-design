@@ -169,12 +169,12 @@
 /* THE RING GOES ON THE WRAPPER, NOT ON THE BODY. The body has no border and
    sits inside the pill; an outline on it would draw a rectangle through the
    rounded corners of the thing around it. */
-.nd-tag:has(> .nd-tag-body:focus-visible) {
+.nd-tag:has(> .nd-tag-body:is(:focus-visible, [data-nd-seat-focus])) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
 
-.nd-tag-body:focus-visible {
+.nd-tag-body:is(:focus-visible, [data-nd-seat-focus]) {
   outline: none;
 }
 
@@ -182,6 +182,12 @@
   .nd-tag:has(> .nd-tag-body:is(a, button):hover) {
     border-color: var(--nc-color-border-strong);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-tag:has(> .nd-tag-body:is(a, button)[data-nd-seat-hover]) {
+  border-color: var(--nc-color-border-strong);
 }
 
 /* Pressed is a state, and it is drawn as one: the tone at full strength, which

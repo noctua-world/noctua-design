@@ -63,7 +63,7 @@
   cursor: progress;
 }
 
-.nd-search-field:focus-within {
+.nd-search-field:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
   border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -115,6 +115,11 @@
 @media (hover: hover) {
   .nd-search-clear:hover { color: var(--nc-color-fg); }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-clear[data-nd-seat-hover] { color: var(--nc-color-fg); }
+
 /* Absent while there is nothing to clear: a control that empties an empty box
    is a control that does nothing, and a reader learns to distrust the row. */
 .nd-search:not([data-nd-has-query]) .nd-search-clear { display: none; }
@@ -250,6 +255,12 @@
   }
 }
 
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-result-link[data-nd-seat-hover] {
+  background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
+}
+
 /* THE ACTIVE ROW IS A FILL AND AN EDGE. Focus never leaves the box — the
    highlight travels by `aria-activedescendant` — so this is the only thing a
    sighted reader has to say which result Enter will follow, and a fill alone is
@@ -302,6 +313,13 @@
   .nd-search-forget:hover {
     background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-recent-item[data-nd-seat-hover],
+.nd-search-forget[data-nd-seat-hover] {
+  background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
 }
 
 /* --- inline ---
@@ -424,6 +442,13 @@
   }
 }
 
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-open[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
 /* `[open]`, AND THE SELECTOR IS THE WHOLE BUG.
  *
  * A closed `<dialog>` is `display: none` by the user-agent stylesheet, and that
@@ -485,6 +510,13 @@
     color: var(--nc-color-fg);
     border-color: var(--nc-color-border-strong);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-close[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
 }
 
 /* SQUARE IS THE BASE AND ROUNDED IS THE OVERRIDE, like every other rule here.

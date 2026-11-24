@@ -21,7 +21,8 @@
 //! - `margin: 0` on `h1`–`h4`, `p`, `ul` and `figure`, on top of which each
 //!   component sets its own spacing.
 //! - `[hidden] { display: none !important }`, the one `!important` here.
-//! - a `:focus-visible` ring, which is every component's focus ring.
+//! - a `:focus-visible` ring, which is every component's focus ring, and the
+//!   same ring on `[data-nd-seat-focus]`, which is a second seat's.
 //!
 //! All four are low specificity and a consumer's own rules beat them. They are
 //! written down because they are the price of the components looking right, and

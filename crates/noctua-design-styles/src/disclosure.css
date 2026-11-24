@@ -75,28 +75,28 @@
  * Every rule here carries one more attribute than the fill it replaces, so
  * specificity decides and not source order. */
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
   background: color-mix(in oklab, var(--nc-color-surface) var(--noctua-glass-opacity), transparent);
 }
 
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="accent"],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="accent"]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="accent"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-accent-border);
 }
 
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="neutral"],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-border-strong);
 }
 
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="danger"],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-danger-border);
 }
 
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="success"],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="success"]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-success-border);
 }
 
@@ -104,7 +104,7 @@
    the specificity of its heaviest argument, so these are (0,4,0) and (0,5,0) —
    one above the fills they replace, on specificity rather than on order. */
 .nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="accent"],
-.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="accent"]:hover {
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="accent"]:is(:hover, [data-nd-seat-hover]) {
   background: color-mix(
     in oklab,
     color-mix(in oklab, var(--nc-color-accent) var(--nd-tint), var(--nc-color-surface))
@@ -114,7 +114,7 @@
 }
 
 .nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="neutral"],
-.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   background: color-mix(
     in oklab,
     color-mix(in oklab, var(--nc-color-subtle) var(--nd-tint), var(--nc-color-surface))
@@ -124,7 +124,7 @@
 }
 
 .nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="danger"],
-.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="danger"]:hover {
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   background: color-mix(
     in oklab,
     color-mix(in oklab, var(--nc-color-danger) var(--nd-tint), var(--nc-color-surface))
@@ -134,7 +134,7 @@
 }
 
 .nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="success"],
-.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="success"]:hover {
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   background: color-mix(
     in oklab,
     color-mix(in oklab, var(--nc-color-success) var(--nd-tint), var(--nc-color-surface))
@@ -186,7 +186,7 @@
 }
 
 .nd-switch[aria-checked="true"] > .nd-switch-track[data-nd-glass="true"][aria-hidden],
-.nd-switch[aria-checked="true"]:hover > .nd-switch-track[data-nd-glass="true"][aria-hidden] {
+.nd-switch[aria-checked="true"]:is(:hover, [data-nd-seat-hover]) > .nd-switch-track[data-nd-glass="true"][aria-hidden] {
   background-color: color-mix(
     in oklab,
     var(--nc-color-surface) var(--noctua-glass-opacity),
