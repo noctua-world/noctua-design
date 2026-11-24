@@ -493,9 +493,9 @@ styled exactly like the pseudo-class (`NOCTUA.md §9.7`, §12.18):
 
 | Attribute | Stands for | Stamped on |
 |---|---|---|
-| `data-nd-seat-hover` | `:hover` | the element and every ancestor |
+| `data-nd-seat-hover` | `:hover` | the element, every ancestor, and the control of a `<label>` among them |
 | `data-nd-seat-focus` | `:focus-visible`, and `:focus` | the element alone |
-| `data-nd-seat-active` | `:active` | the element and every ancestor |
+| `data-nd-seat-active` | `:active` | the element, every ancestor, and the control of a `<label>` among them |
 | `data-nd-seat-drag` | what that seat is dragging | the element alone |
 
 The value is the ids of the seats in that state there, separated by spaces and sorted, and a rule
@@ -508,13 +508,33 @@ an ancestor. An attribute selector weighs what a pseudo-class weighs and `:is()`
 heaviest argument does, so the twin moves no rule in the cascade. **A rule inside
 `@media (hover: hover)` stays bare and has a sibling**: the same selector on the attribute, with
 the same declarations, in the same file and outside that block, because the attribute is itself
-the proof of a pointer that hovers. `gates::seat_twin` refuses a state pseudo-class written any
-other way, and `tests/browser/seats.spec.js` photographs every state both ways, on every page in
-`tests/browser/pages.js`, and requires the same pixels. **Nothing writes the attributes by hand**:
-`dist/seats.js` stamps them where the pseudo-class would match — `seatHover`, `seatFocus`,
-`seatPress`, `seatDrag` and `clearSeat`, or an `nd-seat` event for a host with no script of its
-own — and how a system delivers a second seat is the host's to know (`NOCTUA.md §5.12`). The
-documentation site's own chrome in `docs-site/assets/shell.css` is not held to the rule.
+the proof of a pointer that hovers. No seat attribute is written inside that block in any form,
+and a rule asks only whether the attribute is present, never for a seat by its id.
+`gates::seat_twin` holds the rule from both sides: it refuses a state pseudo-class written any
+other way, a seat attribute inside `@media (hover: hover)`, and a seat attribute outside the twin
+form whose native rule, with the same declarations, is not in the file. `data-nd-seat-drag` stands
+for no pseudo-class and owes no native rule.
+
+**The pictures are the other half.** `tests/browser/seats.spec.js` reads the state selectors out
+of the built `components.css`, puts the pointer and then the keyboard on the elements each is
+about, on every page in `tests/browser/pages.js`, and requires the same pixels from the seat
+attribute. A panel that is shut is opened for the comparison by the spec itself. One test there
+holds what the sweeps reached to `UNSEEN`, the selectors no example renders, listed there by name:
+a state rule for something no example shows is added to that list or given an example, and the
+test fails until one is done. There is no sweep for `:active`, so the first rule on it fails
+there too and brings its sweep with it.
+
+**Nothing writes the attributes by hand**: `dist/seats.js` stamps them where the pseudo-class
+would match — `seatHover`, `seatFocus`, `seatPress`, `seatDrag` and `clearSeat`, or an `nd-seat`
+event for a host with no script of its own — and how a system delivers a second seat is the
+host's to know (`NOCTUA.md §5.12`). A seat id is a string or a number with no space in it, and
+anything else is refused.
+
+**Two things are outside the rule, and they are the whole list.** The documentation site's own
+chrome in `docs-site/assets/shell.css` is not held to it. And `::-webkit-scrollbar-thumb:hover`
+in `dist/theme.css` has no twin, because a scrollbar thumb is a part the engine draws and no
+element is there to carry an attribute; a test beside the gate fails on any other state rule in a
+shipped sheet that is not `components.css`.
 
 **The source gates do not walk the compiler crates.** They are about component and styling
 source: a component hardcoding `13px` sits between two steps for ever, while a compiler that

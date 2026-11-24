@@ -179,11 +179,19 @@ export async function differing(page, one, two) {
         const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
         const ctx = canvas.getContext("2d");
         ctx.drawImage(bitmap, 0, 0);
-        return ctx.getImageData(0, 0, bitmap.width, bitmap.height).data;
+        return {
+          data: ctx.getImageData(0, 0, bitmap.width, bitmap.height).data,
+          width: bitmap.width,
+          height: bitmap.height,
+        };
       };
-      const first = await read(a);
-      const second = await read(b);
-      if (first.length !== second.length) return Infinity;
+      const one = await read(a);
+      const two = await read(b);
+      // Both, and not the byte count: a picture and the same picture turned on
+      // its side hold as many bytes.
+      if (one.width !== two.width || one.height !== two.height) return Infinity;
+      const first = one.data;
+      const second = two.data;
       let count = 0;
       for (let i = 0; i < first.length; i += 4) {
         if (

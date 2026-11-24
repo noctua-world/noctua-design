@@ -22,6 +22,8 @@
 //   | `data-nd-seat-active` | `:active`                        | the element and above   |
 //   | `data-nd-seat-drag`   | what that seat is dragging       | the element alone       |
 //
+// "Above" is every ancestor, and the control of a `<label>` among them.
+//
 // The value is the seats in that state there, as ids separated by spaces and
 // sorted, and an element no seat is on carries no attribute at all. The
 // stylesheet asks only whether the attribute is PRESENT: every component rule
@@ -77,8 +79,15 @@ const CHAINED = new Set(["hover", "active"]);
  *
  * The value is a list separated by spaces, so an id holding one would be read
  * back as two seats, and an empty one as none.
+ *
+ * A string or a finite number, and nothing else. `String()` makes a word out
+ * of anything — a detail with no `seat` in it would stamp a seat called
+ * "undefined", and the page would show a pointer nobody has.
  */
 function seatId(seat) {
+  if (typeof seat !== "string" && !(typeof seat === "number" && Number.isFinite(seat))) {
+    throw new TypeError(`a seat id is a string or a number, and got ${seat === null ? "null" : typeof seat}`);
+  }
   const id = String(seat);
   if (!/^\S+$/.test(id)) {
     throw new TypeError(`a seat id is one word with no space in it, and got "${id}"`);
@@ -178,7 +187,12 @@ export function clearSeat(seat) {
 /** Every root this is installed on, so it is installed once. */
 const installed = new WeakMap();
 
-/** The events already answered, so a nested root does not answer twice. */
+/**
+ * The events already answered, so a nested root does not answer twice.
+ *
+ * Stamping twice writes nothing the second time, so this shows only where an
+ * event is refused: one bad event is one error reported, not one per root.
+ */
 const answered = new WeakSet();
 
 /**
@@ -188,6 +202,8 @@ const answered = new WeakSet();
  * one of `hover`, `focus`, `active` and `drag`, and `detail.on === false` takes
  * the state off instead. A detail that names no seat or an unknown state throws
  * rather than guessing: a typo there would otherwise draw nothing, silently.
+ * Thrown from a listener, it reaches the host as the window's `error` event and
+ * not as an exception out of `dispatchEvent`.
  */
 export function enhanceSeats(root = document) {
   if (installed.has(root)) return;

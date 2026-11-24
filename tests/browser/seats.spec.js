@@ -15,6 +15,21 @@
 // stage. A hand-written list of "the interactive components" would be a list
 // that is one component short the day one is added.
 //
+// WHAT IS SHUT IS OPENED FOR IT, BY THE SWEEP AND NOT BY THE COMPONENT. A menu's
+// items, a dialog's close control and a colour picker's sliders are in the page
+// and drawn nowhere until something opens the panel around them, and a sweep
+// that only photographed what was already showing never looked at a quarter of
+// the state rules. So an element that is not rendered has every `hidden` above
+// it taken off and every `<dialog>` and `<details>` above it opened, for the
+// two pictures and no longer. The component's own script is not asked to: what
+// is compared here is how a state is DRAWN, and a panel standing where the
+// script did not place it is drawn by the same rules in both pictures.
+//
+// AND WHAT WAS COMPARED IS COUNTED BY NAME. The test after the sweeps drives
+// every page the way they do and holds the state selectors nothing reached to
+// a list written out below, `UNSEEN`, one reason each. A selector the sweeps
+// stop reaching fails there, and so does a listed one they start to reach.
+//
 // THE COMPARISON IS WHOLE-VIEWPORT AND EXACT. A hover may repaint a child, a
 // sibling or the box around the control, so the control's own rectangle is the
 // wrong thing to compare; and the two pictures are the same declarations
@@ -158,7 +173,12 @@ async function prepare(page) {
           }
           if (!outer.trim() || /[>+~\s]$/.test(outer)) outer += "*";
           if (inner && /[>+~\s]$/.test(inner)) inner += "*";
-          found.set(`${hit[0]}|${outer}|${inner}`, [hit[0].slice(1), outer, inner, selector]);
+          // The name the selector goes by in `UNSEEN` and in a failure: the
+          // part before the state, then the state.
+          const name = inner
+            ? `${outer}:has(${inner.slice(":scope ".length)}${hit[0]})`
+            : `${outer}${hit[0]}`;
+          found.set(name, [hit[0].slice(1), outer, inner, selector, name]);
         }
       }
       return [...found.values()];
@@ -178,6 +198,79 @@ async function prepare(page) {
     const FOCUSABLE =
       'a[href], button, input, select, textarea, summary, [tabindex], [contenteditable="true"]';
 
+    // What a stylesheet keeps out of the page until its component has a reason
+    // to show it: a control that clears a box is absent while the box is empty.
+    // The part, the box it answers to, and the attribute that says there is
+    // something to clear.
+    const SHOWN_BY = [
+      [".nd-search-clear", ".nd-search", "data-nd-has-query", ""],
+      [".nd-select-clear", ".nd-select-field", "data-nd-filled", "true"],
+    ];
+
+    const rendered = (element) => element.checkVisibility({ visibilityProperty: true });
+
+    /**
+     * Opens what is shut around an element, and answers how to shut it again.
+     *
+     * Attributes only, and each put back as it was: nothing is focused, no
+     * `close` event fires, and the page after the two pictures is the page
+     * before them.
+     */
+    const reveal = (element) => {
+      const undo = [];
+      if (rendered(element)) return () => {};
+      const set = (at, name, value) => {
+        const was = at.getAttribute(name);
+        if (was === value) return;
+        if (value === null) at.removeAttribute(name);
+        else at.setAttribute(name, value);
+        undo.push(() => (was === null ? at.removeAttribute(name) : at.setAttribute(name, was)));
+      };
+      for (const [part, box, name, value] of SHOWN_BY) {
+        const holder = element.matches(part) ? element.closest(box) : null;
+        if (holder) set(holder, name, value);
+      }
+      for (let at = element; at && !at.matches(".nd-frame-stage"); at = at.parentElement) {
+        if (at.hasAttribute("hidden")) set(at, "hidden", null);
+        if (["dialog", "details"].includes(at.localName) && !at.hasAttribute("open")) {
+          set(at, "open", "");
+        }
+      }
+      return () => {
+        while (undo.length > 0) undo.pop()();
+      };
+    };
+
+    /**
+     * Scrolls until an element is in the viewport, and answers whether it is.
+     *
+     * A state on an element outside the picture is a state nobody
+     * photographed. And a floating panel is `position: fixed`, which no
+     * scrolling moves: one opened here rather than by its component was never
+     * placed against its control and stands wherever the flow left it, often
+     * outside the viewport. Such a panel is pinned to the viewport's corner
+     * instead, and `undo` is handed the way back.
+     */
+    const bring = (element, undo = []) => {
+      const inView = () => {
+        const box = element.getBoundingClientRect();
+        return (
+          box.width > 0 && box.height > 0 &&
+          box.bottom > 0 && box.right > 0 && box.top < innerHeight && box.left < innerWidth
+        );
+      };
+      element.scrollIntoView({ block: "center", inline: "center", behavior: "instant" });
+      if (inView()) return true;
+      for (let at = element; at && !at.matches(".nd-frame-stage"); at = at.parentElement) {
+        if (getComputedStyle(at).position !== "fixed") continue;
+        const was = at.getAttribute("style");
+        at.style.inset = "0 auto auto 0";
+        undo.push(() => (was === null ? at.removeAttribute("style") : at.setAttribute("style", was)));
+        break;
+      }
+      return inView();
+    };
+
     const chosen = [];
     window.__seatProbe = {
       seats,
@@ -186,10 +279,12 @@ async function prepare(page) {
       subjects,
       /**
        * Marks up to `limit` elements per selector for the wanted states and
-       * answers how many it marked. `ready` says whether one can be driven.
+       * answers how many it marked. `ready` says whether one can be driven,
+       * and is asked with whatever is shut around the element opened.
        */
       choose(states, limit, ready) {
-        for (const [state, outer, inner, selector] of stated()) {
+        chosen.length = 0;
+        for (const [state, outer, inner, selector, name] of stated()) {
           if (!states.includes(state)) continue;
           let taken = 0;
           for (let subject of subjects(outer, inner)) {
@@ -200,18 +295,78 @@ async function prepare(page) {
               subject = subject.querySelector(FOCUSABLE);
               if (!subject) continue;
             }
-            if (chosen.some((entry) => entry.element === subject)) {
+            // One element stands for every selector it is a subject of: the
+            // picture is of the whole viewport, so every rule on it is in it.
+            const already = chosen.find((entry) => entry.element === subject);
+            if (already) {
+              already.names.add(name);
               taken += 1;
               continue;
             }
-            if (!ready(subject)) continue;
-            chosen.push({ element: subject, selector });
+            const conceal = reveal(subject);
+            const fit = ready(subject);
+            conceal();
+            if (!fit) continue;
+            chosen.push({ element: subject, selector, names: new Set([name]) });
             taken += 1;
           }
         }
         return chosen.length;
       },
       at: (index) => chosen[index],
+      /**
+       * Opens what is shut around one of the chosen and brings it into the
+       * viewport, until `hide`. `entry.seen` says whether it got there.
+       */
+      show(index) {
+        const entry = chosen[index];
+        entry.opened = !rendered(entry.element);
+        const conceal = reveal(entry.element);
+        const placed = [];
+        entry.seen = bring(entry.element, placed);
+        entry.conceal = () => {
+          while (placed.length > 0) placed.pop()();
+          conceal();
+        };
+        return entry;
+      },
+      hide(index) {
+        chosen[index].conceal?.();
+        chosen[index].conceal = null;
+      },
+      /**
+       * Resolves once what `show` opened has finished arriving.
+       *
+       * OPENING IS NOT OVER WHEN THE ATTRIBUTE IS SET. A `<details>` fires its
+       * `toggle` from a task of its own, and what answers it may ask for a
+       * stylesheet: the frame's theme panel fetches one palette per accent
+       * swatch the first time it opens. A sheet landing between the two
+       * pictures repaints a swatch in one of them — measured on
+       * `/example-frame/` under a loaded machine, one swatch and 120 pixels —
+       * and two screenshots agreeing in a row says nothing about a request
+       * still in flight.
+       */
+      async settle(index) {
+        if (!chosen[index].opened) return;
+        await new Promise((done) => {
+          requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(done)));
+        });
+        const loading = [...document.querySelectorAll('link[rel~="stylesheet"]')].filter(
+          (link) => !link.sheet,
+        );
+        await Promise.all(
+          loading.map(
+            (link) =>
+              new Promise((done) => {
+                link.addEventListener("load", done, { once: true });
+                link.addEventListener("error", done, { once: true });
+              }),
+          ),
+        );
+      },
+      /** The selectors one of the chosen stands for. */
+      names: (index) => [...chosen[index].names],
+      rendered,
     };
   });
 }
@@ -287,6 +442,116 @@ async function expectSame(page, testInfo, native, seated, what) {
   expect(count, what).toBe(0);
 }
 
+/**
+ * Drives every hover the page's examples can show, and answers which state
+ * selectors that reached.
+ *
+ * `compare` is handed each element with the pointer already on it and takes
+ * the two pictures. The test after the sweeps passes none: it wants to know
+ * what the sweep reaches, by the sweep's own steps, without the photographs.
+ */
+async function hoverSweep(page, compare = async () => {}) {
+  const count = await page.evaluate(
+    (limit) => window.__seatProbe.choose(["hover"], limit, window.__seatProbe.rendered),
+    PER_SELECTOR,
+  );
+
+  const reached = new Set();
+  for (let index = 0; index < count; index += 1) {
+    // Brought to the middle, and asked for a point the pointer can actually
+    // reach it at: an element under another is not hovered by going there,
+    // and one with no box of its own — a `Lineage` bond is a group of placed
+    // parts — is hovered through a part. What is under that point is kept,
+    // because that is the element a host would name for a second pointer.
+    const point = await page.evaluate(async (at) => {
+      const entry = window.__seatProbe.show(at);
+      await window.__seatProbe.settle(at);
+      const { element } = entry;
+      for (const part of [element, ...[...element.querySelectorAll("*")].slice(0, 12)]) {
+        const box = part.getBoundingClientRect();
+        if (box.width === 0 || box.height === 0) continue;
+        for (const [fx, fy] of [[0.5, 0.5], [0.25, 0.5], [0.75, 0.5], [0.5, 0.25], [0.5, 0.75]]) {
+          const x = box.left + box.width * fx;
+          const y = box.top + box.height * fy;
+          const hit = document.elementFromPoint(x, y);
+          if (hit && element.contains(hit)) {
+            entry.under = hit;
+            return [x, y];
+          }
+        }
+      }
+      return null;
+    }, index);
+
+    if (point) {
+      const rest = await restingPoint(page);
+      await page.mouse.move(...point);
+      const hovered = await page.evaluate(
+        (at) => window.__seatProbe.at(at).element.matches(":hover"),
+        index,
+      );
+      if (hovered) {
+        const label = await page.evaluate((at) => {
+          const { element, selector } = window.__seatProbe.at(at);
+          return `${selector}  on  ${element.outerHTML.slice(0, 120)}`;
+        }, index);
+        await compare({ index, point, rest, label });
+        for (const name of await page.evaluate((at) => window.__seatProbe.names(at), index)) {
+          reached.add(name);
+        }
+      }
+      await page.mouse.move(...rest);
+    }
+    await page.evaluate((at) => window.__seatProbe.hide(at), index);
+  }
+  return { count, reached };
+}
+
+/**
+ * The same for the keyboard: every focus the page's examples can show.
+ *
+ * A KEY FIRST, AND NO POINTER PRESSED ANYWHERE. Whether a scripted `focus()`
+ * matches `:focus-visible` depends on what the reader last used, and after a
+ * key press it does. That is not assumed: an element is chosen only if it took
+ * the focus and matched, and the test after the sweeps fails if that stops
+ * being true of a plain button.
+ */
+async function focusSweep(page, compare = async () => {}) {
+  await page.keyboard.press("Shift");
+
+  const count = await page.evaluate(
+    (limit) =>
+      window.__seatProbe.choose(["focus-visible", "focus-within", "focus"], limit, (element) => {
+        if (!element.checkVisibility()) return false;
+        element.focus({ preventScroll: true });
+        const taken = document.activeElement === element && element.matches(":focus-visible");
+        element.blur();
+        return taken;
+      }),
+    PER_SELECTOR,
+  );
+
+  const reached = new Set();
+  for (let index = 0; index < count; index += 1) {
+    // In the picture, or not compared: two photographs of a viewport the
+    // element is outside of agree whatever its focus is drawn as.
+    const label = await page.evaluate(async (at) => {
+      const { element, selector, seen } = window.__seatProbe.show(at);
+      await window.__seatProbe.settle(at);
+      if (!seen) return null;
+      return `${selector}  on  ${element.outerHTML.slice(0, 120)}`;
+    }, index);
+    if (label !== null) {
+      await compare({ index, label });
+      for (const name of await page.evaluate((at) => window.__seatProbe.names(at), index)) {
+        reached.add(name);
+      }
+    }
+    await page.evaluate((at) => window.__seatProbe.hide(at), index);
+  }
+  return { count, reached };
+}
+
 for (const [name, path] of Object.entries(PAGE)) {
   test(`a second seat's hover is drawn like the pointer's on ${name}`, async ({ page }, testInfo) => {
     test.slow();
@@ -296,53 +561,7 @@ for (const [name, path] of Object.entries(PAGE)) {
     await page.goto(url(path));
     await prepare(page);
 
-    const count = await page.evaluate(
-      (limit) =>
-        window.__seatProbe.choose(["hover"], limit, (element) =>
-          element.checkVisibility({ visibilityProperty: true }),
-        ),
-      PER_SELECTOR,
-    );
-
-    let compared = 0;
-    for (let index = 0; index < count; index += 1) {
-      // Brought to the middle, and asked for a point the pointer can actually
-      // reach it at: an element under another is not hovered by going there,
-      // and one with no box of its own — a `Lineage` bond is a group of placed
-      // parts — is hovered through a part. What is under that point is kept,
-      // because that is the element a host would name for a second pointer.
-      const point = await page.evaluate((at) => {
-        const entry = window.__seatProbe.at(at);
-        const { element } = entry;
-        element.scrollIntoView({ block: "center", inline: "center", behavior: "instant" });
-        for (const part of [element, ...[...element.querySelectorAll("*")].slice(0, 12)]) {
-          const box = part.getBoundingClientRect();
-          if (box.width === 0 || box.height === 0) continue;
-          for (const [fx, fy] of [[0.5, 0.5], [0.25, 0.5], [0.75, 0.5], [0.5, 0.25], [0.5, 0.75]]) {
-            const x = box.left + box.width * fx;
-            const y = box.top + box.height * fy;
-            const hit = document.elementFromPoint(x, y);
-            if (hit && element.contains(hit)) {
-              entry.under = hit;
-              return [x, y];
-            }
-          }
-        }
-        return null;
-      }, index);
-      if (!point) continue;
-
-      const rest = await restingPoint(page);
-      await page.mouse.move(...point);
-      const hovered = await page.evaluate(
-        (at) => window.__seatProbe.at(at).element.matches(":hover"),
-        index,
-      );
-      if (!hovered) continue;
-      const label = await page.evaluate((at) => {
-        const { element, selector } = window.__seatProbe.at(at);
-        return `${selector}  on  ${element.outerHTML.slice(0, 120)}`;
-      }, index);
+    const { count, reached } = await hoverSweep(page, async ({ index, point, rest, label }) => {
       const [native, seated] = await bothWays(page, {
         enter: () => page.mouse.move(...point),
         leave: () => page.mouse.move(...rest),
@@ -353,7 +572,6 @@ for (const [name, path] of Object.entries(PAGE)) {
           }, index),
         unseat: () => page.evaluate(() => window.__seatProbe.seats.seatHover("second", null)),
       });
-
       await expectSame(
         page,
         testInfo,
@@ -361,12 +579,11 @@ for (const [name, path] of Object.entries(PAGE)) {
         seated,
         `pixels that differ between :hover and data-nd-seat-hover — ${label}`,
       );
-      compared += 1;
-    }
+    });
 
-    // Every element chosen was visible, so one that could not be hovered at
+    // Every element chosen was rendered, so one that could not be hovered at
     // all is rare; a page where none could is a sweep that looked at nothing.
-    if (count > 0) expect(compared, "no chosen element could be hovered").toBeGreaterThan(0);
+    if (count > 0) expect(reached.size, "no chosen element could be hovered").toBeGreaterThan(0);
   });
 
   test(`a second seat's focus is drawn like the keyboard's on ${name}`, async ({ page }, testInfo) => {
@@ -374,29 +591,8 @@ for (const [name, path] of Object.entries(PAGE)) {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(url(path));
     await prepare(page);
-    // A KEY FIRST, AND NO POINTER ANYWHERE IN THIS TEST. Whether a scripted
-    // `focus()` matches `:focus-visible` depends on what the reader last used,
-    // and after a key press it does — which is checked below, not assumed.
-    await page.keyboard.press("Shift");
 
-    const count = await page.evaluate(
-      (limit) =>
-        window.__seatProbe.choose(["focus-visible", "focus-within", "focus"], limit, (element) => {
-          if (!element.checkVisibility()) return false;
-          element.focus({ preventScroll: true });
-          const taken = document.activeElement === element && element.matches(":focus-visible");
-          element.blur();
-          return taken;
-        }),
-      PER_SELECTOR,
-    );
-
-    for (let index = 0; index < count; index += 1) {
-      const label = await page.evaluate((at) => {
-        const { element, selector } = window.__seatProbe.at(at);
-        element.scrollIntoView({ block: "center", inline: "center", behavior: "instant" });
-        return `${selector}  on  ${element.outerHTML.slice(0, 120)}`;
-      }, index);
+    const { count, reached } = await focusSweep(page, async ({ index, label }) => {
       const [native, seated] = await bothWays(page, {
         enter: () =>
           page.evaluate(
@@ -411,7 +607,6 @@ for (const [name, path] of Object.entries(PAGE)) {
           }, index),
         unseat: () => page.evaluate(() => window.__seatProbe.seats.seatFocus("second", null)),
       });
-
       await expectSame(
         page,
         testInfo,
@@ -419,41 +614,70 @@ for (const [name, path] of Object.entries(PAGE)) {
         seated,
         `pixels that differ between keyboard focus and data-nd-seat-focus — ${label}`,
       );
-    }
+    });
+
+    // Every element chosen took the focus, so one that could not be brought
+    // into the picture is rare; a page where none could compared nothing.
+    if (count > 0) expect(reached.size, "no chosen element was compared").toBeGreaterThan(0);
   });
 }
 
-test("the sweeps above have something to compare", async ({ page }) => {
+/**
+ * The state selectors of the shipped sheet that no sweep above compares.
+ *
+ * Written out, with the reason, so that "every state" is a claim with its
+ * exceptions beside it. The test below holds the sweeps to exactly this list.
+ *
+ * ONE REASON COVERS ALL OF THEM TODAY: no example on any page in `pages.js`
+ * renders an element the selector is about, so there is nothing to put a
+ * pointer or a keyboard on. `seat_twin` still holds each of these rules to its
+ * twin in the source; what is missing is the photograph. An entry leaves this
+ * list when an example that shows it arrives, and the test says so.
+ */
+const UNSEEN = [
+  // A combination of variant and tone no example asks for.
+  '.nd-button[data-nd-variant="outline"][data-nd-tone="danger"]:hover',
+  '.nd-button[data-nd-variant="outline"][data-nd-tone="success"]:hover',
+  '.nd-button[data-nd-variant="subtle"][data-nd-tone="neutral"]:hover',
+  '.nd-button[data-nd-variant="subtle"][data-nd-tone="success"]:hover',
+  '.nd-button[data-nd-variant="transparent"][data-nd-tone="danger"]:hover',
+  '.nd-button[data-nd-variant="transparent"][data-nd-tone="success"]:hover',
+  // No example refuses a button with `aria-disabled`, or attaches a group.
+  '.nd-button[aria-disabled="true"]:hover',
+  '.nd-button-group[data-nd-attached="true"] > .nd-button:hover',
+  '.nd-button-group[data-nd-attached="true"] > .nd-button:focus-visible',
+  // A recent search exists once a reader has searched, and no page starts so.
+  ".nd-search-recent-item:hover",
+  // No example holds a skip link, or a `Lineage` card that is a link.
+  '.nd-visually-hidden[data-nd-focusable="true"]:focus-within',
+  "a.nd-lineage-card:hover",
+  "a.nd-lineage-card:focus-visible",
+];
+
+test("the sweeps above compare every state selector but the ones listed", async ({ page }) => {
   // THE VACUITY GUARD. Each test above passes on a page with no state rule in
   // reach, which is right for a page of headings and would be just as green if
-  // the probe had stopped finding anything anywhere. So the probe is asked,
-  // across every page, how many of the sheet's state selectors it can reach —
-  // and the answer has to be most of them, and has to include a change a
-  // reader can see.
-  test.slow();
+  // the probe had stopped finding anything anywhere, or found elements it then
+  // could not drive. So every page is driven again here by the sweeps' own
+  // steps, the photographs left out, and what those steps reached is held
+  // against what the stylesheet has. An element being in the page is not
+  // counted: only one the pointer was on, or the keyboard.
+  test.setTimeout(600_000);
+  await page.emulateMedia({ reducedMotion: "reduce" });
   const reached = new Set();
-  let all = 0;
+  let all = [];
   for (const path of Object.values(PAGE)) {
     await page.goto(url(path));
     await prepare(page);
-    const here = await page.evaluate(() => {
-      const probe = window.__seatProbe;
-      const stated = probe.stated();
-      return {
-        all: stated.length,
-        reached: stated
-          .filter(([, outer, inner]) => probe.subjects(outer, inner).length > 0)
-          .map(([state, outer, inner]) => `${state}|${outer}|${inner}`),
-      };
-    });
-    all = here.all;
-    for (const key of here.reached) reached.add(key);
+    all = await page.evaluate(() => window.__seatProbe.stated().map((entry) => entry[4]));
+    for (const sweep of [hoverSweep, focusSweep]) {
+      for (const name of (await sweep(page)).reached) reached.add(name);
+    }
   }
-  expect(all, "the stylesheet has no state selector the probe can read").toBeGreaterThan(0);
-  // Not all: a rule for a combination no example renders — a refused glass
-  // button in the danger tone — is reached by nothing, and inventing an
-  // example for each would be writing the sweep's answer for it.
-  expect(reached.size / all, `${reached.size} of ${all} state selectors reached`).toBeGreaterThan(0.85);
+  expect(all.length, "the stylesheet has no state selector the probe can read").toBeGreaterThan(0);
+  expect(reached.size, "the sweeps reached no state selector at all").toBeGreaterThan(0);
+  const unseen = all.filter((name) => !reached.has(name)).sort();
+  expect(unseen, "the state selectors no sweep compared").toEqual([...UNSEEN].sort());
 
   // And a hover is a change. Two pictures that agree because NEITHER moved
   // would pass every comparison in this file.
@@ -463,7 +687,36 @@ test("the sweeps above have something to compare", async ({ page }) => {
   await button.scrollIntoViewIfNeeded();
   const resting = await picture(page);
   await button.evaluate((element) => window.__seatProbe.seats.seatHover("second", element));
-  expect(await differing(page, resting, await picture(page))).toBeGreaterThan(0);
+  expect(await differing(page, resting, await picture(page)), "a seat's hover draws nothing").toBeGreaterThan(0);
+  await button.evaluate(() => window.__seatProbe.seats.seatHover("second", null));
+  expect(await differing(page, resting, await picture(page)), "the seat left").toBe(0);
+
+  // So is a focus, and the keyboard's is one the sweep can produce: after a
+  // key, a scripted focus on a plain button is `:focus-visible`. If it were
+  // not, the focus sweep would choose nothing and compare nothing.
+  await page.keyboard.press("Shift");
+  const ringed = await button.evaluate((element) => {
+    element.focus({ preventScroll: true });
+    return document.activeElement === element && element.matches(":focus-visible");
+  });
+  expect(ringed, "a scripted focus after a key press is not :focus-visible").toBe(true);
+  const native = await picture(page);
+  expect(await differing(page, resting, native), "a keyboard focus draws nothing").toBeGreaterThan(0);
+  await button.evaluate((element) => {
+    element.blur();
+    window.__seatProbe.seats.seatFocus("second", element);
+  });
+  expect(await differing(page, native, await picture(page)), "a seat's focus is not the keyboard's").toBe(0);
+});
+
+test("two pictures of different shapes are never the same picture", async ({ page }) => {
+  // `differing` is what every comparison above rests on. The same number of
+  // pixels in another shape is another picture, whatever the bytes say.
+  await page.goto(url(PAGE.button));
+  const wide = await page.screenshot({ clip: { x: 0, y: 0, width: 40, height: 20 } });
+  const tall = await page.screenshot({ clip: { x: 0, y: 0, width: 20, height: 40 } });
+  expect(await differing(page, wide, tall)).toBe(Infinity);
+  expect(await differing(page, wide, wide)).toBe(0);
 });
 
 test("two seats on two controls are both drawn, each as its own pointer would", async ({ page }) => {
@@ -575,9 +828,15 @@ test("a seat's state moves with it, and is stamped where the pseudo-class would 
       "[data-nd-seat-hover], [data-nd-seat-focus], [data-nd-seat-active], [data-nd-seat-drag]",
     ).length;
 
-    // An id with a space in it would be read back as two seats.
+    // A number is an id as it stands.
+    seats.seatHover(3, label);
+    out.number = read(label, "hover");
+    seats.clearSeat(3);
+
+    // An id with a space in it would be read back as two seats, and a seat
+    // nobody named is not a seat called "undefined".
     out.refused = [];
-    for (const id of ["a b", "", " "]) {
+    for (const id of ["a b", "", " ", undefined, null, Number.NaN, true, {}]) {
       try {
         seats.seatHover(id, label);
         out.refused.push("accepted");
@@ -585,6 +844,13 @@ test("a seat's state moves with it, and is stamped where the pseudo-class would 
         out.refused.push(error.constructor.name);
       }
     }
+    try {
+      seats.clearSeat(undefined);
+      out.refused.push("accepted");
+    } catch (error) {
+      out.refused.push(error.constructor.name);
+    }
+    out.stamped = document.querySelectorAll("[data-nd-seat-hover]").length;
     return out;
   });
 
@@ -600,7 +866,9 @@ test("a seat's state moves with it, and is stamped where the pseudo-class would 
   expect(state.sorted).toBe("1 10 2");
   expect(state.cleared).toEqual(["1 10", 0]);
   expect(state.empty).toBe(0);
-  expect(state.refused).toEqual(["TypeError", "TypeError", "TypeError"]);
+  expect(state.number).toBe("3");
+  expect(state.refused).toEqual(Array(9).fill("TypeError"));
+  expect(state.stamped).toBe(0);
 });
 
 test("a host with no script of its own moves a seat by dispatching an event", async ({ page }) => {
@@ -620,7 +888,7 @@ test("a host with no script of its own moves a seat by dispatching an event", as
     out.before = read("hover");
 
     // Installed twice, on the document and on a subtree, as a host that
-    // enhances both does: one event is still one answer.
+    // enhances both does.
     seats.enhanceSeats(document);
     seats.enhanceSeats(button.parentElement);
     say(button, { seat: "7", state: "hover" });
@@ -638,6 +906,32 @@ test("a host with no script of its own moves a seat by dispatching an event", as
     say(document, { seat: "7", on: false });
     out.gone = ["hover", "focus", "active", "drag"].map(read);
 
+    // A detail that names no seat, or no state there is, is refused out loud:
+    // a listener's throw reaches the window as an `error` event. And one event
+    // is one answer however many roots heard it — two roots are installed
+    // here, and each bad event is still reported once.
+    const errors = [];
+    const note = (event) => {
+      errors.push(event.error?.constructor.name ?? "not an error");
+      event.preventDefault();
+    };
+    window.addEventListener("error", note);
+    for (const detail of [
+      { state: "hover" },
+      { seat: null, state: "hover" },
+      { on: false },
+      { seat: "7" },
+      { seat: "7", state: "hovering" },
+      null,
+    ]) {
+      say(button, detail);
+    }
+    window.removeEventListener("error", note);
+    out.errors = errors;
+    out.guessed = document.querySelectorAll(
+      "[data-nd-seat-hover], [data-nd-seat-focus], [data-nd-seat-active], [data-nd-seat-drag]",
+    ).length;
+
     seats.releaseSeats(document);
     seats.releaseSeats(button.parentElement);
     say(button, { seat: "7", state: "hover" });
@@ -650,5 +944,7 @@ test("a host with no script of its own moves a seat by dispatching an event", as
   expect(state.released).toBeNull();
   expect(state.away).toBeNull();
   expect(state.gone).toEqual([null, null, null, null]);
+  expect(state.errors).toEqual(Array(6).fill("TypeError"));
+  expect(state.guessed).toBe(0);
   expect(state.after).toBeNull();
 });
