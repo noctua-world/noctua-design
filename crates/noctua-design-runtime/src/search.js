@@ -13,15 +13,17 @@
 // it, which is the failure mode a gap list has.
 //
 // THE RANKING IS NOT WRITTEN HERE. `search-match.js` touches no DOM, carries no
-// word in any language and imports nothing — and its own header said it would
-// move into a behaviour package unchanged on the day one existed. It did.
+// word in any language and imports nothing: it is the fuzzy core's rule
+// (`NOCTUA.md §12.4`), held to the same corpus as the crate the daemon filters
+// with. A row is an item of that rule — its label a name, its keywords a tag —
+// and every word of the query must match one of the two.
 //
 // THE ANCHORING IS NOT WRITTEN HERE EITHER: `anchor.js` places the panel, as it
 // does for the six other floating surfaces.
 
 import { keepAnchored, releaseAnchor } from "./anchor.js";
 import { message } from "./messages.js";
-import { prepare, rank } from "./search-match.js";
+import { Item, Matcher, Query, QueryTooLong, Role } from "./search-match.js";
 
 
 // WHAT THIS REPLACES.
@@ -250,11 +252,7 @@ function childCandidates(state) {
       row,
       labelEl,
       text,
-      match: prepare(text),
-      // Matched but never drawn, and a row matched only on these is
-      // deliberately not highlighted: the letters that matched are not letters
-      // on the screen, and a highlight over the wrong ones is worse than none.
-      keywords: row.dataset.ndKeywords ? prepare(row.dataset.ndKeywords) : null,
+      match: prepare(text, row.dataset.ndKeywords),
       group: row.closest("[data-nd-search-group]") ?? null,
     };
   });
@@ -299,8 +297,8 @@ async function loadIndex(state) {
     state.candidates = (data.entries ?? []).map((entry) => ({
       entry,
       text: entry.label ?? "",
-      match: prepare(entry.label ?? ""),
-      keywords: entry.keywords ? prepare(entry.keywords) : null,
+      chars: [...(entry.label ?? "")],
+      match: prepare(entry.label ?? "", entry.keywords),
     }));
     state.loaded = true;
     // And the claim is over: whatever the caller said was on its way is here.
@@ -334,6 +332,49 @@ function setLoading(state, loading) {
 
 // --- Matching and drawing ---------------------------------------------------
 
+/** The label's place among a row's fields, which is the only one drawn. */
+const LABEL = 0;
+
+/** One matcher for every box on the page: it keeps nothing between two items. */
+const matcher = new Matcher();
+
+/**
+ * A row as the matcher reads it: its label a name, its keywords a tag.
+ *
+ * The keywords are matched but never drawn, and a word matched only on them is
+ * deliberately not highlighted: the letters that matched are not letters on the
+ * screen, and a highlight over the wrong ones is worse than none.
+ */
+function prepare(label, keywords) {
+  const fields = [[Role.Name, label]];
+  if (keywords) fields.push([Role.Tag, keywords]);
+  return new Item(fields);
+}
+
+/**
+ * What was typed, as the matcher's query, or `null` for one past its bound.
+ *
+ * A query the rule refuses finds nothing, and the box says so in the sentence
+ * it already has for that.
+ */
+function parsed(text) {
+  try {
+    return Query.parse(text);
+  } catch (error) {
+    if (error instanceof QueryTooLong) return null;
+    throw error;
+  }
+}
+
+/** The label's characters every word of `found` matched there, rising, each once. */
+function onLabel(found) {
+  return found.claims(LABEL).flatMap((run) => {
+    const positions = [];
+    for (let at = run.start; at < run.end; at += 1) positions.push(at);
+    return positions;
+  });
+}
+
 function runQuery(state) {
   const query = state.box.value.trim();
   if (state.src && !state.loaded && !state.failed) {
@@ -353,22 +394,19 @@ function runQuery(state) {
     state.hits = state.src ? [] : state.candidates.map((item) => ({ item, positions: [] }));
     state.total = state.hits.length;
   } else {
-    const { hits, total } = rank(query, state.candidates, state.cap);
-    // A row nothing matched by its label may still answer to its keywords, and
-    // then it is shown without a highlight.
-    const missed = [];
-    if (state.cap === 0 || hits.length < state.cap) {
-      const found = new Set(hits.map((hit) => hit.item));
-      for (const item of state.candidates) {
-        if (found.has(item) || !item.keywords) continue;
-        const hit = rank(query, [{ match: item.keywords }], 0).hits[0];
-        if (hit) missed.push({ item, positions: [], score: hit.score - 1_000_000 });
-      }
-    }
-    missed.sort((a, b) => b.score - a.score);
-    const room = state.cap > 0 ? Math.max(0, state.cap - hits.length) : missed.length;
-    state.hits = [...hits, ...missed.slice(0, room)];
-    state.total = total + missed.length;
+    // One ranking over the label and the keywords together: a word that
+    // matched the keywords alone still finds its row, which is then shown
+    // with no mark for that word.
+    const words = parsed(query);
+    const ranked = words
+      ? matcher.ranked(words, state.candidates.map((item) => item.match))
+      : [];
+    const hits = ranked.map(({ index, found }) => ({
+      item: state.candidates[index],
+      positions: onLabel(found),
+    }));
+    state.hits = state.cap > 0 ? hits.slice(0, state.cap) : hits;
+    state.total = hits.length;
   }
 
   state.active = -1;
@@ -401,7 +439,7 @@ function drawResults(state) {
       if (!slot) return;
       slot.row.hidden = false;
       slot.link.href = hit.item.entry.href ?? "";
-      paintLabel(slot.labelEl, hit.item.match.chars, hit.positions);
+      paintLabel(slot.labelEl, hit.item.chars, hit.positions);
       slot.detailEl.textContent = hit.item.entry.detail ?? hit.item.entry.group ?? "";
     });
     for (let index = state.hits.length; index < state.pool.length; index += 1) {
@@ -494,7 +532,10 @@ function filterAround(state, query) {
   if (!scope) return;
   for (const element of scope.querySelectorAll("[data-nd-index]")) {
     if (state.root.contains(element)) continue;
-    const hit = query === "" || rank(query, [{ match: prepare(element.dataset.ndIndex) }], 0).hits.length > 0;
+    const words = parsed(query);
+    const hit =
+      query === "" ||
+      (words !== null && matcher.matched(words, prepare(element.dataset.ndIndex)) !== null);
     const row = element.closest("li") ?? element;
     row.hidden = !hit;
   }

@@ -171,7 +171,8 @@ tests/conformance/        the shared case runner (Leg 3)
 examples/                 two consumers that live outside the workspace
 assets/fonts/             subset by hand from noctua-fonts, with ATTRIBUTION.md and the licences
 assets/icons/<source>/    vendored drawings, the upstream licence, SHA256SUMS
-assets/vendor/            three.js and the owl model, each with ATTRIBUTION.md
+assets/vendor/            three.js, the owl model and the fuzzy core's corpus, each with
+                          ATTRIBUTION.md
 xtask/                    the verbs
 .TEMP/                    staging area. Copy OUT of it; never modify it
 ```
@@ -307,6 +308,7 @@ of these carries measured rules, not description:
 | a menu | `crates/noctua-design-runtime/src/menu.js` |
 | a switch, a segmented choice — anything that answers a click by choosing | `crates/noctua-design-runtime/src/choice.js` |
 | a second seat's hover, focus, press or drag | `crates/noctua-design-runtime/src/seats.js` |
+| how a list filtered by typing matches, ranks or marks | `crates/noctua-design-runtime/src/search-match.js`, and "The fuzzy matcher" below |
 | what both implementations must *do* | `spec/components/<name>.cases.toml`, and `crates/noctua-design-spec/src/conformance.rs` for the vocabulary a step may use |
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
@@ -423,9 +425,49 @@ group, a toolbar and a tab list. `seats.js` belongs to no component and to all o
 a second seat's state as the attributes every state rule is twinned with (see "Styling"). Every
 module exports an `enhanceX(root)` and a `releaseX(root)`, because a behaviour that cannot be
 taken back off leaks once per route. `Search` reads its index
-from the path its consumer gives it (`[prop.src]` writes `data-nd-src`), and it matches and
-colours by the fuzzy-finder doctrine (`NOCTUA.md §12.4`): every query word must match, and the
-matched characters are coloured by the word that matched them.
+from the path its consumer gives it (`[prop.src]` writes `data-nd-src`), and it matches by the
+fuzzy core's rule (`NOCTUA.md §12.4`): a row's label is a name and its keywords are a tag, every
+query word must match one of the two, and only the characters matched on the label are marked.
+
+### The fuzzy matcher
+
+**`dist/search-match.js` is the second implementation of one rule, and the first is not here.**
+`noctua-central`'s `nc-fuzzy` crate is the matcher the daemon filters with, and every list the
+interface filters by typing goes through this file. It is a port, section by section — `fold`,
+`query`, `score`, `align`, `rank` — with the crate's names in this language's case, so the two are
+compared side by side. It has no dependency and touches no DOM.
+
+**The two are held to one case file, never to each other.**
+`assets/vendor/nc-fuzzy/fuzzy-corpus.tsv` is the rule as rows, copied from the crate.
+`tests/browser/fuzzy-corpus.spec.js` replays every row through the module that ships and fails
+naming the line of each row that differs; it opens no browser, and `cargo xtask docs --verify`
+runs it with the rest of that directory. `cargo xtask check` holds the copy to
+`assets/vendor/nc-fuzzy/SHA256SUMS` and fails on any other byte, without Node.
+
+**The corpus is never edited here, and the matcher never changes alone.** A change to the rule is
+made in `nc-fuzzy`, with its rows. Then, from the repository root, with `noctua-central` beside
+this repository:
+
+```sh
+git -C ../noctua-central show dev:crates/nc-fuzzy/tests/fuzzy-corpus.tsv \
+  > assets/vendor/nc-fuzzy/fuzzy-corpus.tsv
+( cd assets/vendor/nc-fuzzy && sha256sum fuzzy-corpus.tsv > SHA256SUMS )
+```
+
+Record the commit in `assets/vendor/nc-fuzzy/ATTRIBUTION.md`, run `cargo xtask docs --verify`,
+and change the section of `search-match.js` named like the module that changed until every row
+passes. The copy, its record and the matcher land in one commit.
+
+**The mirror gate is `noctua-central`'s.** Its own check is to hold its corpus to the checksum
+recorded here, so a row changed there fails there until this copy is refreshed. That gate arrives
+with the desktop interface (`NOCTUA-PLAN.md`, Stage 16). Until it does, a change there is not
+seen here, and this procedure is all that keeps the two files one.
+
+**A position is a code point, never a UTF-16 unit.** Every index the matcher returns counts what
+spreading a string counts, so a surface slices `[...text]` and never `text.slice()`. A `Hit` is one
+query word's field, `positions` and `ranges()`; `Match.claims(field)` is that field's matched
+characters as runs that do not overlap, each naming the first word that claimed it, which is what
+a list reads to tone the first word, the second and every later one differently.
 
 ## Styling
 

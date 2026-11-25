@@ -83,6 +83,8 @@ pub(crate) fn run(root: &Path, spec_path: &Path, spec_only: bool) -> Result<(), 
         failures.push(format!("{} generated file(s) out of sync", drifted.len()));
     }
 
+    vendored_corpus(root, &mut failures);
+
     // The consumer outside the workspace, run rather than built: what it
     // asserts — that every root class it renders is painted by
     // `dist/components.css` — only happens when `main` does. `cargo test` in
@@ -145,6 +147,82 @@ pub(crate) fn run(root: &Path, spec_path: &Path, spec_only: bool) -> Result<(), 
     payload(root, &mut failures);
 
     finish(&failures)
+}
+
+/// Where the fuzzy core's corpus is vendored, from the repository root.
+const CORPUS_DIRECTORY: &str = "assets/vendor/nc-fuzzy";
+
+/// The one file vendored there, which the matcher's suite replays row by row.
+const CORPUS_FILE: &str = "fuzzy-corpus.tsv";
+
+/// Reports whether the vendored fuzzy corpus is still the copy that was recorded.
+fn vendored_corpus(root: &Path, failures: &mut Vec<String>) {
+    ui::gap();
+    ui::heading("vendored corpus");
+    let directory = root.join(CORPUS_DIRECTORY);
+    let list = std::fs::read_to_string(directory.join("SHA256SUMS")).ok();
+    let corpus = std::fs::read(directory.join(CORPUS_FILE)).ok();
+    match corpus_is_as_recorded(list.as_deref(), corpus.as_deref()) {
+        Ok(sum) => ui::ok(&format!(
+            "{CORPUS_DIRECTORY}/{CORPUS_FILE} is the copy recorded ({})",
+            &sum[..12]
+        )),
+        Err(problem) => {
+            ui::failure(&problem);
+            ui::detail(
+                "the corpus is never edited here: change the rule in `nc-fuzzy`, then \
+                 refresh the copy and its record together, as AGENTS.md says under \
+                 \"The fuzzy matcher\"",
+            );
+            failures.push("the vendored fuzzy corpus drifted from its record".to_owned());
+        }
+    }
+}
+
+/// The corpus's checksum, when it is the one `SHA256SUMS` records for it.
+///
+/// **The record is read, never rewritten.** A gate that computed the list from
+/// what it found would hold the file to itself: an edit to a row would pass,
+/// and the matcher here would be held to a rule `noctua-central` does not
+/// have. The copy is only ever replaced whole, with its record, from the
+/// crate that owns it.
+///
+/// `list` and `corpus` are the two files' contents, `None` for one that is not
+/// there, so the rule is tested without a directory.
+///
+/// # Errors
+///
+/// A sentence naming what differs: a missing file, a record that does not name
+/// the corpus exactly once and nothing else, or a checksum that is not the
+/// recorded one.
+fn corpus_is_as_recorded(list: Option<&str>, corpus: Option<&[u8]>) -> Result<String, String> {
+    let list =
+        list.ok_or_else(|| format!("{CORPUS_DIRECTORY}/SHA256SUMS is missing or not text"))?;
+    let corpus = corpus.ok_or_else(|| format!("{CORPUS_DIRECTORY}/{CORPUS_FILE} is missing"))?;
+    let mut recorded = None;
+    for line in list.lines().filter(|line| !line.trim().is_empty()) {
+        // `sha256sum`'s own line: the sum, two spaces, the name.
+        match line.split_once("  ") {
+            Some((sum, CORPUS_FILE)) if recorded.is_none() => recorded = Some(sum),
+            _ => {
+                return Err(format!(
+                    "{CORPUS_DIRECTORY}/SHA256SUMS holds a line that is not the one record of \
+                     {CORPUS_FILE}: `{line}`"
+                ));
+            }
+        }
+    }
+    let recorded = recorded
+        .ok_or_else(|| format!("{CORPUS_DIRECTORY}/SHA256SUMS does not record {CORPUS_FILE}"))?;
+    let actual = noctua_design_spec::sha256::hex(corpus);
+    if actual == recorded {
+        Ok(actual)
+    } else {
+        Err(format!(
+            "{CORPUS_DIRECTORY}/{CORPUS_FILE} has checksum {actual}, and SHA256SUMS records \
+             {recorded}"
+        ))
+    }
 }
 
 /// Reports whether the lockfile has kept up with the workspace.
@@ -582,4 +660,72 @@ fn consumer(dir: &std::path::Path, target: &std::path::Path) -> Result<String, S
         .find(|line| !line.trim().is_empty())
         .unwrap_or("it ran")
         .to_owned())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{CORPUS_DIRECTORY, CORPUS_FILE, corpus_is_as_recorded};
+
+    /// The record `sha256sum` writes for `corpus`.
+    fn record(corpus: &[u8]) -> String {
+        format!(
+            "{}  {CORPUS_FILE}\n",
+            noctua_design_spec::sha256::hex(corpus)
+        )
+    }
+
+    #[test]
+    fn the_corpus_is_held_to_the_checksum_recorded_for_it() {
+        let corpus = b"match\tab\tlab Ab\t4-5\n";
+        let list = record(corpus);
+        assert_eq!(
+            corpus_is_as_recorded(Some(&list), Some(corpus)),
+            Ok(noctua_design_spec::sha256::hex(corpus))
+        );
+        // One row edited, the record left as it was: the drift the gate is for.
+        let edited = b"match\tab\tlab Ab\t1-2\n";
+        let problem = corpus_is_as_recorded(Some(&list), Some(edited)).unwrap_err();
+        assert!(problem.contains("has checksum"), "{problem}");
+        assert!(
+            problem.contains(&noctua_design_spec::sha256::hex(edited)),
+            "{problem}"
+        );
+    }
+
+    #[test]
+    fn a_record_that_does_not_name_the_corpus_alone_is_refused() {
+        let corpus = b"fold\ta\ta\n";
+        let good = record(corpus);
+        for (list, why) in [
+            (String::new(), "does not record"),
+            (
+                good.replace(CORPUS_FILE, "another.tsv"),
+                "not the one record",
+            ),
+            (format!("{good}{good}"), "not the one record"),
+            (good.replace("  ", " "), "not the one record"),
+        ] {
+            let problem = corpus_is_as_recorded(Some(&list), Some(corpus)).unwrap_err();
+            assert!(problem.contains(why), "{list:?}: {problem}");
+        }
+        for (list, found, why) in [
+            (None, Some(&corpus[..]), "SHA256SUMS is missing"),
+            (Some(good.as_str()), None, "fuzzy-corpus.tsv is missing"),
+        ] {
+            let problem = corpus_is_as_recorded(list, found).unwrap_err();
+            assert!(problem.contains(why), "{problem}");
+        }
+    }
+
+    #[test]
+    fn the_vendored_corpus_is_the_one_recorded_beside_it() {
+        // The gate's own two files, so `cargo test` alone says what `check` says.
+        let directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join(CORPUS_DIRECTORY);
+        let list = std::fs::read_to_string(directory.join("SHA256SUMS")).ok();
+        let corpus = std::fs::read(directory.join(CORPUS_FILE)).ok();
+        let held = corpus_is_as_recorded(list.as_deref(), corpus.as_deref());
+        assert!(held.is_ok(), "{held:?}");
+    }
 }

@@ -134,7 +134,7 @@ pub const CHOICE_SOURCE: &str = "crates/noctua-design-runtime/src/choice.js";
 /// `search.js`, likewise — the last enhancer the documentation site kept.
 pub const SEARCH_SOURCE: &str = "crates/noctua-design-runtime/src/search.js";
 
-/// `search-match.js`, likewise — the ranking, which touches no DOM at all.
+/// `search-match.js`, likewise — the fuzzy core's rule, which touches no DOM at all.
 pub const SEARCH_MATCH_SOURCE: &str = "crates/noctua-design-runtime/src/search-match.js";
 
 /// `seats.js`, likewise — the one file here that belongs to no component and

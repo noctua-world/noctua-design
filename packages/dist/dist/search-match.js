@@ -8,260 +8,824 @@
 
 // COPIED, NOT GENERATED. Edit the file named above.
 
-// Ranking one query against one name, and saying which letters matched.
+// The one fuzzy matcher every list filtered by typing goes through, in JavaScript.
 //
-// WHY THIS IS A FILE OF ITS OWN.
+// WHAT THIS IS A COPY OF.
 //
-// It touches no DOM, carries no word in any language, and imports nothing. That
-// was the graduation condition this file set for itself, and it has graduated:
-// it lives in the behaviour crate now, ships to `dist/`, and `search.js` beside
-// it is the only thing that imports it. It arrived unchanged, which is what the
-// condition was for.
+// `noctua-central`'s `nc-fuzzy` crate is the rule (`NOCTUA.md §12.4`): the
+// daemon filters with it for the CLI and for MCP, and the interface filters
+// every list with this file. The two are not held to each other. Each replays
+// one case file, `assets/vendor/nc-fuzzy/fuzzy-corpus.tsv`, row by row —
+// `tests/browser/fuzzy-corpus.spec.js` does it here — so two implementations
+// that are wrong the same way still fail.
 //
-// WHAT IT REPLACES.
+// HOW IT IS LAID OUT, AND WHY.
 //
-// `dataset.ndIndex.toLowerCase().includes(needle)` — one contiguous substring,
-// no ranking, no reason. `space heading` found nothing, `button-group` matched
-// the navigation and not the index because the two were normalised by different
-// rules, and a hit could never say *why* it was a hit.
+// One file, because `dist/` ships it as one module with no import. Inside it,
+// one section per module of the crate, in the crate's order of dependence —
+// `fold`, `query`, `score`, `align`, `rank` — and every function, constant and
+// type keeps the crate's name in this language's case: `best_run` is `bestRun`
+// and `is_separator` is `isSeparator`. A reader with the two side by side
+// compares them section by section. **A change to the rule is made in the
+// crate first, arrives here as a changed row of the corpus, and is then made
+// in the section of the same name.**
 //
-// `NOCTUA.md §12.4` is the house doctrine: a subsequence match with the matched
-// positions returned and coloured, never a prefix alone, because "a match that
-// cannot show *why* it matched is confusing". The doctrine also splits the query
-// into words, each of which must match, and colours each word's positions in its
-// own tone; this runtime matches the query as one run in one tone until the
-// desktop interface's stage brings it to that rule (`NOCTUA-PLAN.md`, Stage 16).
+// THE RULE.
+//
+// - Characters are compared folded, one to one (`fold`): lower case first, then
+//   the base letter, so `configuracoes` finds `Configurações`.
+// - A query is split into words at spaces (`isSpace`). A separator inside a
+//   word (`isSeparator`) is dropped, and no separator in a field is ever
+//   matched. An empty query matches every item, in the order given.
+// - Every word must match some field as a subsequence of its characters, or the
+//   item is not found. Words are independent: each picks its own field and its
+//   own positions, two words may claim the same character, and the order they
+//   are typed in changes neither what is found nor its score.
+// - A word lies in a field at one of four tiers, highest first: the whole
+//   field, a run of consecutive characters opening a word of the field, a run
+//   anywhere else, and scattered.
+// - Ranking compares, in order: the tier, the role (`Role.Name` before
+//   `Role.Tag`), the characters on word starts, the consecutive characters, how
+//   early the word begins and how short the field is — each summed over the
+//   words (`Score`). Equal scores keep the order the items were given in.
+//
+// THE COORDINATES.
+//
+// A position is a code point index into the original text of the field its
+// `Hit` names: what spreading a string counts, and never a UTF-16 index, which
+// `text[at]` and `text.slice()` take. Folding keeps every index, and the copy
+// without separators the matcher walks maps each of its own indices back before
+// one is returned.
+//
+// WHAT A SURFACE DRAWS FROM IT.
+//
+// One `Hit` per word of the query, in the order the words were typed, each with
+// its field, its `positions` and the same positions as `ranges()`. A list that
+// tones the first word, the second and every later one differently reads
+// `Match.claims(field)`: the field's matched characters as runs that do not
+// overlap, each naming the first word that claimed it.
+//
+// THE BOUNDS.
+//
+// A query holds at most `QUERY_CHARS_MAX` characters and is refused past that
+// before anything is matched; a field is read to `FIELD_CHARS_MAX` characters
+// and no further; and a scattered word costs one table of at most the product
+// of the two. There is no regular expression over a caller's text beyond one
+// character at a time, and nothing here touches the DOM, carries a word in any
+// language or imports anything.
 
-/** Separators. A run of them starts a word, and none of them is ever matched. */
-const SEPARATOR = /[\s\-_./:]/;
-
-/** How far apart the tiers are. Every tie-break below is bounded well under it. */
-const TIER = 200_000;
-
-/** exact › prefix › word boundary › substring › subsequence. */
-const EXACT = TIER * 5;
-const PREFIX = TIER * 4;
-const WORD = TIER * 3;
-const SUBSTRING = TIER * 2;
-const SUBSEQUENCE = TIER;
+/** The most characters a query may hold, its spaces and separators included. */
+export const QUERY_CHARS_MAX = 64;
 
 /**
- * A subsequence whose every letter landed on a word start: `bg` → `ButtonGroup`.
+ * The most words a query can hold, which follows from its bound.
  *
- * Deliberately inside tier 5 rather than lifting it into tier 4. A literal
- * substring beats an acronym, because a reader who typed letters that are
- * actually adjacent meant them adjacent.
+ * Two words need a space between them, so a query of the bound holds at most
+ * half that many, rounded up. The score's widths are summed over this many.
  */
-const ACRONYM = 150_000;
+export const WORDS_MAX = Math.ceil(QUERY_CHARS_MAX / 2);
 
 /**
- * A one-character query is a prefix, not a fuzzy query.
+ * How many characters of a field the matcher reads.
  *
- * `a` as a subsequence matches most of any index, and a list of most of an index
- * is a list of none of it.
+ * The rest of a longer text is never read: no match, position or score depends
+ * on it, and a field cut there is never matched whole.
  */
-const FUZZY_FROM = 2;
+export const FIELD_CHARS_MAX = 128;
 
-/**
- * One code point, cased down and stripped of its accent, **still one code
- * point**.
- *
- * Never `text.toLowerCase()` over a whole string: that is not length-preserving
- * — `İ` lowercases to two code points — and a fold that changes the length
- * changes the indices, which are the only thing the highlight has. The base
- * letter is the first code point of the canonical decomposition, so `é` folds to
- * `e` followed by a combining acute and `[0]` is the letter.
- *
- * `normalize` rather than the Latin-1 table in `site::collate`: that table is a
- * sort key for two languages, and this has to fold whatever a reader types. It
- * is a built-in and not a dependency (`NOCTUA.md §2.3`).
- */
-function foldChar(ch) {
-  if (ch.length !== 1) return ch;
-  return ch.toLowerCase().normalize("NFD")[0] ?? ch;
+/** The last index a field's read characters can have. */
+const LAST = FIELD_CHARS_MAX - 1;
+
+// --- fold -------------------------------------------------------------------
+//
+// One character folded, the characters a match never claims, and where a word
+// opens. Each is a function of one character, or of a character and the one
+// before it, so a text keeps its length through all three and an index into
+// the folded text is an index into the original. A string-level lower case
+// would not: `İ` lowercases to two characters, and every position after it
+// would move.
+
+/** The first precomposed Hangul syllable. */
+const HANGUL_FIRST = 0xac00;
+
+/** The last precomposed Hangul syllable. */
+const HANGUL_LAST = 0xd7a3;
+
+/** The first code point of `text` as a string, or `undefined` for the empty one. */
+function first(text) {
+  const point = text.codePointAt(0);
+  return point === undefined ? undefined : String.fromCodePoint(point);
 }
 
-const isUpper = (ch) => ch !== ch.toLowerCase() && ch === ch.toUpperCase();
+/**
+ * The character a match compares in place of `c`: lower case first, then its
+ * base letter.
+ *
+ * `c` is one code point. The base letter is the first code point of the
+ * canonical decomposition, so `é` is `e`, `ç` is `c`, `ã` is `a` and `İ` is
+ * `i`; a letter with no decomposition stays itself, so `ß`, `ø`, `æ` and `ł`
+ * are not folded to anything they merely resemble. There is no smart case:
+ * matching never depends on how the query was capitalised.
+ *
+ * **A Hangul syllable is not folded.** Its decomposition begins with its
+ * leading consonant, so folding it would let one syllable typed find every
+ * syllable that opens with the same consonant.
+ */
+export function fold(c) {
+  const lower = first(c.toLowerCase()) ?? c;
+  const point = lower.codePointAt(0);
+  if (point >= HANGUL_FIRST && point <= HANGUL_LAST) return lower;
+  return first(lower.normalize("NFD")) ?? lower;
+}
 
 /**
- * A candidate, prepared once: its folded letters, where its words start, and the
- * same letters with the separators gone.
+ * Whether `c` splits a query into words.
  *
- * The tight form is what lets `button group` reach `button-group` as an **exact**
- * match rather than as a scattered subsequence, and `tightAt` maps back to the
- * real indices — which is what the highlight needs, because the highlight is
- * drawn on the string the reader can see.
+ * Unicode's white space, which includes the no-break space, and the byte-order
+ * mark: what `\s` matches, and the next-line control U+0085, which `\s` does
+ * not.
  */
-export function prepare(text) {
-  const chars = [...text];
-  const folded = chars.map(foldChar);
-  const starts = chars.map((ch, at) => {
-    if (at === 0) return true;
-    if (SEPARATOR.test(chars[at - 1])) return true;
-    // The capital in `ButtonGroup`, read off the RAW characters: folding has
-    // already thrown the case away.
-    return isUpper(ch) && !isUpper(chars[at - 1]);
-  });
-  const tight = [];
-  const tightAt = [];
-  for (let at = 0; at < chars.length; at += 1) {
-    if (SEPARATOR.test(chars[at])) continue;
-    tight.push(folded[at]);
-    tightAt.push(at);
+export function isSpace(c) {
+  return /^[\s\u0085]$/u.test(c);
+}
+
+/**
+ * Whether a match skips `c` in a field, and drops it inside a query word.
+ *
+ * A space, or a character a name is joined with: `buttongroup` finds
+ * `button-group`, and `verify` finds `journal.verify`, because each of them is
+ * skipped.
+ */
+export function isSeparator(c) {
+  return isSpace(c) || c === "-" || c === "_" || c === "." || c === "/" || c === ":";
+}
+
+/**
+ * Whether `c`, read after `previous`, opens a word of a field's text.
+ *
+ * The first character does (`previous` is `null`), and so does one after a
+ * separator, and a capital after anything that is not one — so `ButtonGroup`
+ * opens two words and `HTTPServer` one. Read on the original characters, since
+ * folding has already forgotten which were capitals.
+ */
+function opensAWord(previous, c) {
+  if (previous === null) return true;
+  return isSeparator(previous) || (isUpper(c) && !isUpper(previous));
+}
+
+/**
+ * Whether `c` is a capital.
+ *
+ * A character its lower case changes and its upper case keeps — so a
+ * title-case letter such as `ǅ` is not one, and neither is a letter of a script
+ * without case.
+ */
+function isUpper(c) {
+  return c.toLowerCase() !== c && c.toUpperCase() === c;
+}
+
+// --- query ------------------------------------------------------------------
+//
+// What a person typed, as the words the matcher looks for.
+
+/** A query holding more characters than `QUERY_CHARS_MAX`. */
+export class QueryTooLong extends Error {
+  constructor() {
+    super(`a query holds at most ${QUERY_CHARS_MAX} characters; shorten it`);
+    this.name = "QueryTooLong";
   }
-  return { text, chars, folded, starts, tight, tightAt };
 }
 
-/** The query, folded and with its separators dropped. */
-export function fold(query) {
-  return [...query].map(foldChar).filter((ch) => !SEPARATOR.test(ch));
-}
+/**
+ * A query read into its words, each folded, with its separators dropped.
+ *
+ * Built only by `Query.parse`, so every query a `Matcher` is handed is within
+ * `QUERY_CHARS_MAX` — which is what the score's widths are proven against.
+ */
+export class Query {
+  /** Each word's folded characters, in the order they were typed. */
+  #words;
 
-/** Where `needle` occurs in `hay` as a run, or -1. */
-function runAt(hay, needle, from) {
-  outer: for (let at = from; at + needle.length <= hay.length; at += 1) {
-    for (let i = 0; i < needle.length; i += 1) {
-      if (hay[at + i] !== needle[i]) continue outer;
+  constructor(words) {
+    this.#words = words;
+  }
+
+  /**
+   * Reads `text` into its words.
+   *
+   * Words are split at `isSpace`; a separator inside a word is dropped, and a
+   * word left empty is no word, so `"  - "` is the empty query, which matches
+   * every item.
+   *
+   * Throws `QueryTooLong` when `text` holds more than `QUERY_CHARS_MAX`
+   * characters. Only that many are counted, so a longer text costs no more to
+   * refuse.
+   */
+  static parse(text) {
+    let count = 0;
+    for (const _ of text) {
+      count += 1;
+      if (count > QUERY_CHARS_MAX) throw new QueryTooLong();
     }
-    return at;
+    const words = [];
+    let word = [];
+    for (const c of text) {
+      if (isSpace(c)) {
+        if (word.length > 0) words.push(word);
+        word = [];
+      } else if (!isSeparator(c)) {
+        word.push(fold(c));
+      }
+    }
+    if (word.length > 0) words.push(word);
+    return new Query(words);
   }
-  return -1;
+
+  /** Each word's folded characters, in the order they were typed. */
+  words() {
+    return this.#words;
+  }
+
+  /** Whether the query holds no word, and so matches every item. */
+  isEmpty() {
+    return this.#words.length === 0;
+  }
+}
+
+// --- score ------------------------------------------------------------------
+//
+// How a match ranks, and the integer it packs into. A word's score is six
+// components, compared in the order `Score` declares them, and an item's is the
+// sum of its words', component by component. Each component is packed into
+// bits of its own, as wide as its largest sum needs, so the packed integer
+// orders exactly as the components do: no number of word starts lifts a match
+// past one whose tier is higher, by construction rather than by a constant
+// chosen large enough.
+
+/** The tier of a word that is the whole field. */
+const EXACT = 3;
+
+/** The tier of a run of consecutive characters that opens a word of the field. */
+const AT_A_START = 2;
+
+/** The tier of a run of consecutive characters anywhere else. */
+const INSIDE = 1;
+
+/** The tier of a word whose characters are scattered. */
+const SCATTERED = 0;
+
+/** How many bits a value up to `largest` needs. */
+const bits = (largest) => 32 - Math.clz32(largest);
+
+/** The largest tier sum: every word the whole of a field. */
+const TIERS_LARGEST = EXACT * WORDS_MAX;
+
+/** The largest sum of names: every word on a name. */
+const NAMES_LARGEST = WORDS_MAX;
+
+/** The largest sum of word starts: every character of every word on one. */
+const STARTS_LARGEST = QUERY_CHARS_MAX;
+
+/** The largest sum of consecutive pairs: one word of the bound, all of it a run. */
+const CONSECUTIVE_LARGEST = QUERY_CHARS_MAX - 1;
+
+/** The largest earliness one word can have: its first character the field's first. */
+const EARLINESS_LARGEST = FIELD_CHARS_MAX - 1;
+
+/** The largest sum of earliness, and of shortness, whose largest per word is the same. */
+const PER_FIELD_LARGEST = WORDS_MAX * EARLINESS_LARGEST;
+
+/** Where shortness sits: the lowest bits, since it is compared last. */
+const SHORTNESS_AT = 0;
+
+/** Where earliness sits. */
+const EARLINESS_AT = SHORTNESS_AT + bits(PER_FIELD_LARGEST);
+
+/** Where the consecutive pairs sit. */
+const CONSECUTIVE_AT = EARLINESS_AT + bits(PER_FIELD_LARGEST);
+
+/** Where the word starts sit. */
+const STARTS_AT = CONSECUTIVE_AT + bits(CONSECUTIVE_LARGEST);
+
+/** Where the names sit. */
+const NAMES_AT = STARTS_AT + bits(STARTS_LARGEST);
+
+/** Where the tiers sit: the highest bits, since they are compared first. */
+const TIERS_AT = NAMES_AT + bits(NAMES_LARGEST);
+
+/** Every bit the packed score can use. */
+const TOTAL_BITS = TIERS_AT + bits(TIERS_LARGEST);
+
+// A score is below `2^53`, so a number holds it exactly. The crate proves the
+// same in `const`; a bound raised past it stops this module loading.
+if (TOTAL_BITS > 53) throw new RangeError("the packed score no longer fits a number");
+
+/**
+ * How well a query matched an item, compared component by component in the
+ * order written.
+ *
+ * Every component is a sum over the query's words: the tiers, the words that
+ * matched a name rather than a tag, the characters on word starts, the adjacent
+ * pairs of characters, how early each word begins — the field's last index less
+ * its first position — and how short each field is — the field bound less the
+ * field's characters, separators aside.
+ */
+export class Score {
+  constructor(tiers, names, starts, consecutive, earliness, shortness) {
+    /** The sum of the words' tiers. */
+    this.tiers = tiers;
+    /** How many words matched a name. */
+    this.names = names;
+    /** How many matched characters open a word of their field. */
+    this.starts = starts;
+    /** How many matched characters follow the one before them directly. */
+    this.consecutive = consecutive;
+    /** How early the words begin in their fields. */
+    this.earliness = earliness;
+    /** How short the words' fields are. */
+    this.shortness = shortness;
+    Object.freeze(this);
+  }
+
+  /** One word's score, from its parts. */
+  static ofWord(tier, name, [starts, consecutive, earliness], shortness) {
+    return new Score(tier, name ? 1 : 0, starts, consecutive, earliness, shortness);
+  }
+
+  /** This score and another's, component by component. */
+  plus(other) {
+    return new Score(
+      this.tiers + other.tiers,
+      this.names + other.names,
+      this.starts + other.starts,
+      this.consecutive + other.consecutive,
+      this.earliness + other.earliness,
+      this.shortness + other.shortness,
+    );
+  }
+
+  /**
+   * The score as one integer below `2^53`, ordered exactly as the score is.
+   *
+   * By multiplication and never by a shift, which works on thirty-two bits.
+   */
+  packed() {
+    return (
+      this.tiers * 2 ** TIERS_AT +
+      this.names * 2 ** NAMES_AT +
+      this.starts * 2 ** STARTS_AT +
+      this.consecutive * 2 ** CONSECUTIVE_AT +
+      this.earliness * 2 ** EARLINESS_AT +
+      this.shortness * 2 ** SHORTNESS_AT
+    );
+  }
+
+  /** Below zero when this score ranks under `other`, above when over, zero when equal. */
+  compare(other) {
+    return (
+      this.tiers - other.tiers ||
+      this.names - other.names ||
+      this.starts - other.starts ||
+      this.consecutive - other.consecutive ||
+      this.earliness - other.earliness ||
+      this.shortness - other.shortness
+    );
+  }
+}
+
+/** The score of the empty query, which matches every item equally. */
+Score.ZERO = new Score(0, 0, 0, 0, 0, 0);
+
+// --- align ------------------------------------------------------------------
+//
+// Where one word lies in one field, and how well. A field is read once, into
+// the folded copy without separators the matcher walks — the *tight* copy —
+// with each tight index's original index beside it and whether it opens a word.
+// A word then lies in it at the best of four tiers: the whole field; the best
+// run of consecutive characters, every occurrence weighed; or, when there is no
+// run, the best scattered alignment a dynamic program finds, its leftmost one
+// among equals.
+//
+// **Tight indices never leave this section.** Every position handed out is
+// mapped back to the field's original text first, so a run that crosses a
+// separator reports the characters a reader sees on either side of it.
+
+/**
+ * What a field is to the ranking: a name, or a tag.
+ *
+ * At an equal tier a word on a name ranks before the same word on a tag, so a
+ * command found by what it is called comes before one found by a synonym.
+ */
+export const Role = Object.freeze({
+  /** What the item is called: its name, or its display name in a language. */
+  Name: "name",
+  /** A word the item is also found by: a tag or a synonym, in any language. */
+  Tag: "tag",
+});
+
+/**
+ * One thing a list shows, read once into the fields a query is matched against.
+ *
+ * Built once and matched on every keystroke: everything the matcher needs of a
+ * field's text is prepared here, and only the first `FIELD_CHARS_MAX`
+ * characters of each are read.
+ */
+export class Item {
+  /** The fields, in the order they were given — the order a `Hit` names them by. */
+  #fields;
+
+  /** Reads each field's text, with its role: `fields` yields `[role, text]` pairs. */
+  constructor(fields) {
+    this.#fields = Array.from(fields, ([role, text]) => Field.read(role, text));
+  }
+
+  /** How many fields the item has. */
+  get length() {
+    return this.#fields.length;
+  }
+
+  /** Whether the item has no field, and so is found only by the empty query. */
+  isEmpty() {
+    return this.#fields.length === 0;
+  }
+
+  /** The fields, in the order they were given. For the matcher alone. */
+  fields() {
+    return this.#fields;
+  }
+}
+
+/** One field of an item, as the matcher walks it. */
+class Field {
+  constructor(role, tight, raw, starts, whole, shortness) {
+    /** Whether it is a name or a tag. */
+    this.role = role;
+    /** The folded characters read, separators left out. */
+    this.tight = tight;
+    /** Each tight index's index in the original text. */
+    this.raw = raw;
+    /** Whether each tight index opens a word of the original text. */
+    this.starts = starts;
+    /** Whether the text was read to its end, which a whole match needs. */
+    this.whole = whole;
+    /** The field bound less the tight length, which ranks a shorter field first. */
+    this.shortness = shortness;
+  }
+
+  /** Reads `text` up to the field bound. */
+  static read(role, text) {
+    const tight = [];
+    const raw = [];
+    const starts = [];
+    let shortness = LAST + 1;
+    let previous = null;
+    let index = 0;
+    let whole = true;
+    for (const c of text) {
+      // The character past the bound is seen and never read: it is what says
+      // the field was cut.
+      if (index > LAST) {
+        whole = false;
+        break;
+      }
+      if (!isSeparator(c)) {
+        tight.push(fold(c));
+        raw.push(index);
+        starts.push(opensAWord(previous, c));
+        shortness -= 1;
+      }
+      previous = c;
+      index += 1;
+    }
+    return new Field(role, tight, raw, starts, whole, shortness);
+  }
+
+  /** The original indices of tight `positions`. */
+  original(positions) {
+    return positions.map((at) => this.raw[at]);
+  }
+
+  /**
+   * Word starts, adjacent pairs and earliness of tight `positions`, in that order.
+   *
+   * The quality a word is ranked by within its tier, counted the one way for
+   * every tier, so a score always says what its positions show.
+   */
+  quality(positions) {
+    let starts = 0;
+    let consecutive = 0;
+    let earliness = 0;
+    let before = null;
+    for (const at of positions) {
+      starts += this.starts[at] ? 1 : 0;
+      if (before === null) earliness = LAST - this.raw[at];
+      else consecutive += at === before + 1 ? 1 : 0;
+      before = at;
+    }
+    return [starts, consecutive, earliness];
+  }
+}
+
+/** One adjacent pair's weight in the table: past every earliness. */
+const NEXT = 2 ** bits(FIELD_CHARS_MAX - 1);
+
+/** One word start's weight in the table: past every count of adjacent pairs. */
+const START = NEXT * 2 ** bits(QUERY_CHARS_MAX - 1);
+
+/**
+ * A word's quality as one integer: word starts, then adjacent pairs, then
+ * earliness.
+ *
+ * A word holds at most `QUERY_CHARS_MAX` characters and its first position is
+ * at most `LAST`, so each part has bits of its own and the integer orders as
+ * the three do.
+ */
+function packed([starts, consecutive, earliness]) {
+  return starts * START + consecutive * NEXT + earliness;
+}
+
+/** The tight positions `from` up to, and not including, `to`. */
+function span(from, to) {
+  const out = [];
+  for (let at = from; at < to; at += 1) out.push(at);
+  return out;
 }
 
 /**
- * Every letter in order, choosing the assignment a reader would call the match.
+ * Lays `word` in `field` at its best, writing its tight positions into
+ * `positions`.
  *
- * NOT PLAIN GREEDY. Greedy answers `bu` on `b-u… but…` with the leftmost `u`,
- * spanning the whole string and highlighting two letters a paragraph apart.
- * Restarting from each occurrence of the query's first letter — typically one to
- * three — and keeping the best costs almost nothing and is the difference
- * between a highlight that explains itself and one that reads as noise.
+ * `null` when the word is not a subsequence of the field, which is found by one
+ * pass before anything else is asked; `table` is the scratch the scattered
+ * tier fills.
  */
-function subsequence(hay, query, starts) {
+function aligned(field, word, table, positions) {
+  positions.length = 0;
+  if (word.length === 0 || !holds(field.tight, word)) return null;
+  let tier;
+  let at = null;
+  if (field.whole && field.tight.length === word.length && same(field.tight, 0, word)) {
+    positions.push(...span(0, word.length));
+    tier = EXACT;
+  } else if ((at = bestRun(field, word)) !== null) {
+    positions.push(...span(at, at + word.length));
+    tier = field.starts[at] ? AT_A_START : INSIDE;
+  } else {
+    scattered(field, word, table, positions);
+    tier = SCATTERED;
+  }
+  return Score.ofWord(tier, field.role === Role.Name, field.quality(positions), field.shortness);
+}
+
+/** Whether `word` stands in `tight` as a run beginning at `at`. */
+function same(tight, at, word) {
+  if (at + word.length > tight.length) return false;
+  for (let k = 0; k < word.length; k += 1) {
+    if (tight[at + k] !== word[k]) return false;
+  }
+  return true;
+}
+
+/** Whether `word` is a subsequence of `tight`, taking each character as early as it comes. */
+function holds(tight, word) {
+  let wanted = 0;
+  for (const c of tight) {
+    if (wanted < word.length && word[wanted] === c) wanted += 1;
+  }
+  return wanted === word.length;
+}
+
+/**
+ * The best occurrence of `word` as a run in `field`, or `null`.
+ *
+ * Every occurrence is weighed, not the first: one that opens a word ranks above
+ * one inside a word wherever it is, then more word starts, then the earlier.
+ */
+function bestRun(field, word) {
   let best = null;
-  for (let from = 0; from + query.length <= hay.length; from += 1) {
-    if (hay[from] !== query[0]) continue;
-    const found = [from];
-    let at = from + 1;
-    for (let i = 1; i < query.length; i += 1) {
-      while (at < hay.length && hay[at] !== query[i]) at += 1;
-      // No assignment exists from here, and none exists from any later start
-      // either: a later start can only need the same letters further right.
-      if (at === hay.length) return best;
-      found.push(at);
-      at += 1;
+  for (let at = 0; at <= Math.max(0, field.tight.length - word.length); at += 1) {
+    if (!same(field.tight, at, word)) continue;
+    const tier = field.starts[at] ? AT_A_START : INSIDE;
+    const quality = packed(field.quality(span(at, at + word.length)));
+    if (best === null || tier > best.tier || (tier === best.tier && quality > best.quality)) {
+      best = { tier, quality, at };
     }
-    best = better(best, found, starts);
   }
-  return best;
-}
-
-/** More letters on word starts wins, then the tighter span, then the earlier. */
-function better(a, b, starts) {
-  if (!a) return b;
-  const on = (list) => list.reduce((n, at) => n + (starts[at] ? 1 : 0), 0);
-  if (on(b) !== on(a)) return on(b) > on(a) ? b : a;
-  const span = (list) => list[list.length - 1] - list[0];
-  if (span(b) !== span(a)) return span(b) < span(a) ? b : a;
-  return b[0] < a[0] ? b : a;
+  return best === null ? null : best.at;
 }
 
 /**
- * The score, and the positions the highlight will use.
+ * Writes into `positions` the scattered alignment of `word` in `field` with the
+ * best quality.
  *
- * EVERY BONUS IS BOUNDED, and their sum is smaller than the gap between two
- * tiers — so no amount of tie-breaking can lift a candidate out of its tier.
- * That is a property worth asserting directly rather than through an example
- * that happens to hold, and `search.spec.js` does.
+ * `table[k * n + i]` holds one more than the best quality the word's characters
+ * from `k` on can add when character `k` sits at tight index `i`, or zero when
+ * they cannot be laid from there — earliness aside, which only the first
+ * character has. It is filled from the last character back, each row reading
+ * the next at `i + 1`, which adds an adjacent pair, and at the best cell past
+ * it. The first character's place is the best total with its earliness, and
+ * every later one the first index that reaches what the cell before it
+ * promised: of the alignments with the best quality, the leftmost. The table
+ * holds at most `QUERY_CHARS_MAX` rows of `FIELD_CHARS_MAX` cells, and is the
+ * `Matcher`'s, kept from one word to the next.
  */
-function score(tier, positions, cand) {
-  const first = positions[0];
-  const span = positions[positions.length - 1] - first + 1;
-  const starts = positions.reduce((n, at) => n + (cand.starts[at] ? 1 : 0), 0);
-  const acronym = tier === SUBSEQUENCE && starts === positions.length ? ACRONYM : 0;
-  return (
-    tier +
-    acronym +
-    // Earlier is better.
-    (2000 - Math.min(2000, first * 20)) +
-    // Tighter is better: the excess of the span over the letters it holds.
-    (1000 - Math.min(1000, (span - positions.length) * 25)) +
-    // More of the letters on a word start is better.
-    starts * 100 +
-    // And a short name beats a long one that merely contains it.
-    Math.max(0, 200 - cand.folded.length)
-  );
+function scattered(field, word, table, positions) {
+  const tight = field.tight;
+  const n = tight.length;
+  const m = word.length;
+  table.length = 0;
+  for (let cell = 0; cell < n * m; cell += 1) table.push(0);
+  const startAt = (i) => (field.starts[i] ? START : 0);
+  for (let i = 0; i < n; i += 1) {
+    if (tight[i] === word[m - 1]) table[(m - 1) * n + i] = startAt(i) + 1;
+  }
+  for (let k = m - 2; k >= 0; k -= 1) {
+    const next = (k + 1) * n;
+    let further = 0;
+    for (let i = n - 1; i >= 0; i -= 1) {
+      if (i + 2 < n) further = Math.max(further, table[next + i + 2]);
+      if (tight[i] !== word[k]) continue;
+      const cell = i + 1 < n ? table[next + i + 1] : 0;
+      const adjacent = cell > 0 ? cell + NEXT : 0;
+      const best = Math.max(adjacent, further);
+      if (best > 0) table[k * n + i] = best + startAt(i);
+    }
+  }
+  let first = null;
+  for (let i = 0; i < n; i += 1) {
+    const cell = table[i];
+    if (cell === 0) continue;
+    const total = cell + (LAST - field.raw[i]);
+    if (first === null || total > first.total) first = { total, at: i };
+  }
+  if (first === null) return;
+  let at = first.at;
+  positions.push(at);
+  for (let k = 1; k < m; k += 1) {
+    const promised = table[(k - 1) * n + at] - startAt(at);
+    const row = k * n;
+    let found = -1;
+    for (let i = at + 1; i < n; i += 1) {
+      const cell = table[row + i];
+      if (cell > 0 && cell + (i === at + 1 ? NEXT : 0) === promised) {
+        found = i;
+        break;
+      }
+    }
+    if (found < 0) return;
+    positions.push(found);
+    at = found;
+  }
 }
 
-/** A run of `length` positions from `at`. */
-const run = (at, length) => Array.from({ length }, (_, i) => at + i);
+// --- rank -------------------------------------------------------------------
+//
+// Which items a query finds, each word's field and positions, and their order.
 
 /**
- * Ranks one already-prepared candidate against an already-folded query.
+ * The matcher, holding the scratch it reuses from one item to the next.
  *
- * Returns `null`, or `{score, positions}` where the positions are **code point
- * indices into the candidate's own text** — never into the folded or tightened
- * forms, which the reader never sees.
+ * Make one and keep it: the table it lays scattered words in is filled anew
+ * for each, and carries nothing from one item to the next.
  */
-export function matchPrepared(query, cand) {
-  if (query.length === 0) return null;
+export class Matcher {
+  /** The dynamic program's table, filled per word and field. */
+  #table = [];
 
-  // Exact, whole or tight. `button group` reaching `button-group` is this line.
-  const whole = cand.folded.join("");
-  const tight = cand.tight.join("");
-  const needle = query.join("");
-  if (whole === needle) {
-    return { score: score(EXACT, run(0, cand.folded.length), cand), positions: run(0, cand.chars.length) };
-  }
-  if (tight === needle) {
-    return { score: score(EXACT, cand.tightAt, cand), positions: [...cand.tightAt] };
+  /**
+   * How `query` matches `item`, or `null` when one of its words matches none of
+   * its fields.
+   *
+   * Each word takes the field it matches best — by tier, then role, then the
+   * rest of `Score`'s order, the lowest field among equals — independently of
+   * every other word. The empty query matches every item with `Score.ZERO` and
+   * no hit.
+   */
+  matched(query, item) {
+    let score = Score.ZERO;
+    const hits = [];
+    const fields = item.fields();
+    for (const word of query.words()) {
+      let chosen = null;
+      const trial = [];
+      for (let index = 0; index < fields.length; index += 1) {
+        const fit = aligned(fields[index], word, this.#table, trial);
+        if (fit === null) continue;
+        if (chosen === null || fit.compare(chosen.fit) > 0) {
+          chosen = { fit, index, best: [...trial] };
+        }
+      }
+      if (chosen === null) return null;
+      score = score.plus(chosen.fit);
+      hits.push(new Hit(chosen.index, fields[chosen.index].original(chosen.best)));
+    }
+    return new Match(score, hits);
   }
 
-  const at = runAt(cand.folded, query, 0);
-  if (at === 0) {
-    return { score: score(PREFIX, run(0, query.length), cand), positions: run(0, query.length) };
+  /**
+   * Every item `query` matches, best first, with its place in `items`.
+   *
+   * Not cut to any length: a caller that shows a page takes it, and a count of
+   * everything found is the list's length. Equal scores keep the order the
+   * items were given in, so the list is stable while a person types.
+   */
+  ranked(query, items) {
+    const found = [];
+    items.forEach((item, index) => {
+      const match = this.matched(query, item);
+      if (match !== null) found.push(new Ranked(index, match));
+    });
+    found.sort(
+      (left, right) => right.found.score.compare(left.found.score) || left.index - right.index,
+    );
+    return found;
   }
-  if (at > 0) {
-    const positions = run(at, query.length);
-    const tier = cand.starts[at] ? WORD : SUBSTRING;
-    return { score: score(tier, positions, cand), positions };
-  }
-
-  // The same run, ignoring the candidate's own separators — `buttongroup`
-  // finding `button-group`.
-  const tightHit = runAt(cand.tight, query, 0);
-  if (tightHit >= 0) {
-    const positions = cand.tightAt.slice(tightHit, tightHit + query.length);
-    const tier = cand.starts[positions[0]] ? WORD : SUBSTRING;
-    return { score: score(tier, positions, cand), positions };
-  }
-
-  if (query.length < FUZZY_FROM) return null;
-  const found = subsequence(cand.folded, query, cand.starts);
-  if (!found) return null;
-  return { score: score(SUBSEQUENCE, found, cand), positions: found };
 }
 
-/** The same, from raw strings. For a caller with one candidate and no index. */
-export function match(query, text) {
-  return matchPrepared(fold(query), prepare(text));
+/** How a query matched one item: its score, and each word's hit. */
+export class Match {
+  constructor(score, hits) {
+    /** The sum of every word's score. */
+    this.score = score;
+    /**
+     * One hit per word of the query, in the order the words were typed.
+     *
+     * Two hits may name the same field and share positions: words are matched
+     * independently, and a surface colours a character by the first word that
+     * claims it, which is what `claims` answers.
+     */
+    this.hits = hits;
+    Object.freeze(this);
+  }
+
+  /**
+   * The matched characters of one field as runs that do not overlap, in order.
+   *
+   * Each is `{ start, end, word }`: code point indices into the field's
+   * original text, `end` not included, and the index of the first word of the
+   * query that claimed those characters — `0` for the first word typed. Two
+   * neighbouring characters claimed by different words are two runs, so a
+   * surface that tones the first word, the second and every later one
+   * differently draws one element per run.
+   */
+  claims(field) {
+    const owner = new Map();
+    this.hits.forEach((hit, word) => {
+      if (hit.field !== field) return;
+      for (const at of hit.positions) {
+        if (!owner.has(at)) owner.set(at, word);
+      }
+    });
+    const runs = [];
+    for (const at of [...owner.keys()].sort((a, b) => a - b)) {
+      const word = owner.get(at);
+      const last = runs[runs.length - 1];
+      if (last && last.end === at && last.word === word) last.end = at + 1;
+      else runs.push({ start: at, end: at + 1, word });
+    }
+    return runs;
+  }
 }
 
-/**
- * Ranks a prepared list, sorted, capped, with the total kept.
- *
- * `sort` has been stable since ES2019, so equal scores keep the order the index
- * was built in — which is deterministic, and is why nothing here ever compares
- * two strings to break a tie.
- */
-export function rank(query, candidates, cap = 0) {
-  const folded = fold(query);
-  if (folded.length === 0) return { hits: [], total: 0 };
-  const hits = [];
-  for (const cand of candidates) {
-    const found = matchPrepared(folded, cand.match ?? cand);
-    if (found) hits.push({ item: cand, ...found });
+/** Where one word of a query matched: a field of the item, and its characters there. */
+export class Hit {
+  constructor(field, positions) {
+    /** The field's index, in the order the item was built with. */
+    this.field = field;
+    /**
+     * The matched characters' indices in the field's original text, rising.
+     *
+     * One per character of the word, each a code point index — never a UTF-16
+     * index, and never an index into the folded text without separators.
+     */
+    this.positions = positions;
+    Object.freeze(this);
   }
-  hits.sort((a, b) => b.score - a.score);
-  return { hits: cap > 0 ? hits.slice(0, cap) : hits, total: hits.length };
+
+  /**
+   * The same positions as runs: `{ start, end }`, `end` not included.
+   *
+   * What the corpus writes as `0-6,8-13` is two runs here, `{0, 7}` and
+   * `{8, 14}`.
+   */
+  ranges() {
+    const runs = [];
+    for (const at of this.positions) {
+      const last = runs[runs.length - 1];
+      if (last && last.end === at) last.end = at + 1;
+      else runs.push({ start: at, end: at + 1 });
+    }
+    return runs;
+  }
+}
+
+/** One item a query found, with its place in the list it was found in. */
+export class Ranked {
+  constructor(index, found) {
+    /** The item's index in the list handed to `Matcher.ranked`. */
+    this.index = index;
+    /** How the query matched it. */
+    this.found = found;
+    Object.freeze(this);
+  }
 }
