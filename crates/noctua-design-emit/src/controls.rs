@@ -11731,7 +11731,7 @@ const IMAGE_REACT: &str = r#"  const fit_ = fit ?? "cover";
 /// `data-nd-tone` paints from `dist/tones.css` and nothing else depends on it.
 /// The words, the title and the icon are what carry the meaning (`§8.8.6`),
 /// which is why `icon` is the caller's choice rather than a map from the tone
-/// name: this system has 351 tones and no opinion about what most of them mean.
+/// name: this system has 354 tones and no opinion about what most of them mean.
 ///
 /// # And the icon is a drawing, not a word
 ///

@@ -50,7 +50,7 @@ doc = "Whether the tag is switched on, for the filter-chip shape. **Setting it a
 [prop.tone]
 type = "text"
 attribute = "data-nd-tone"
-doc = "Which of the colour system's tones the tag is painted from. The palette declares 349 semantic families, so `overdue` is as valid as `danger`. A name no family declares fails the build. Without it the tag is neutral."
+doc = "Which of the colour system's tones the tag is painted from. The palette declares 352 semantic families, so `overdue` is as valid as `danger`. A name no family declares fails the build. Without it the tag is neutral."
 
 [prop.variant]
 type = "enum"

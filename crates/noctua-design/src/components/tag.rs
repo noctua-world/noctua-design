@@ -132,7 +132,7 @@ pub fn Tag(
     href: Option<String>,
     /// Whether the tag is switched on, for the filter-chip shape. **Setting it at all** makes the tag a real `<button aria-pressed>`. Leaving it out leaves a label that is not a control.
     pressed: Option<TagPressed>,
-    /// Which of the colour system's tones the tag is painted from. The palette declares 349 semantic families, so `overdue` is as valid as `danger`. A name no family declares fails the build. Without it the tag is neutral.
+    /// Which of the colour system's tones the tag is painted from. The palette declares 352 semantic families, so `overdue` is as valid as `danger`. A name no family declares fails the build. Without it the tag is neutral.
     tone: Option<String>,
     /// How strongly the tag is painted. `soft` is a tinted field, `solid` is the tone at full strength, and `outline` is a hairline with no fill. `soft` by default.
     #[props(default)]

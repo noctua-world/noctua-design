@@ -15355,7 +15355,7 @@ impl Locale {
                     "Whether a count of zero is drawn. Off by default, so nothing to report draws no badge at all. Turn it on for a dashboard, where a zero is a real answer and a missing badge would be read as a failure to load."
                 }
                 Key::ComponentBadgePropToneDoc => {
-                    "Which of the colour system's tones the badge is painted from, named rather than chosen from a closed list. A name no family declares fails the build. The 349 families are in `noctua_design::tones`, plus `neutral` and `muted`."
+                    "Which of the colour system's tones the badge is painted from, named rather than chosen from a closed list. A name no family declares fails the build. The 352 families are in `noctua_design::tones`, plus `neutral` and `muted`."
                 }
                 Key::ComponentBadgePropPlacementDoc => {
                     "Which corner the mark sits on. The values are logical rather than left and right, so the mark moves to the other corner in a right-to-left page."
@@ -18495,7 +18495,7 @@ impl Locale {
                     "Where the words sit in the cell. **Match the column below it**, and use `numeric` over a column of numbers so the heading lines up with the values."
                 }
                 Key::ComponentTableHeaderCellPropToneDoc => {
-                    "Which of the colour system's tones the heading is painted from. The palette declares 349 semantic families, and a name none of them declares fails the build. Without it no attribute is written."
+                    "Which of the colour system's tones the heading is painted from. The palette declares 352 semantic families, and a name none of them declares fails the build. Without it no attribute is written."
                 }
                 Key::ComponentTableHeaderCellPropWrapDoc => {
                     "What a long heading does. `nowrap` by default, the opposite of a cell's default, so the head stays one line tall. Use `wrap` for a long heading over a narrow column."
@@ -18530,7 +18530,7 @@ impl Locale {
                     "The identifier for this row, in the markup. The detail row and the choice control derive their ids from it, so a row that opens or can be chosen needs one."
                 }
                 Key::ComponentTableRowPropToneDoc => {
-                    "Which of the colour system's tones this row is painted from. Any of the 349 semantic families, so `overdue` is as valid as `danger`, plus this system's own `neutral` and `muted`. A name no family declares fails the build. **Never colour alone.**"
+                    "Which of the colour system's tones this row is painted from. Any of the 352 semantic families, so `overdue` is as valid as `danger`, plus this system's own `neutral` and `muted`. A name no family declares fails the build. **Never colour alone.**"
                 }
                 Key::ComponentTableRowPropSelectDoc => {
                     "Whether this row can be chosen. `one` draws a real radio, `many` a real checkbox. `all` goes in the heading row and marks or clears every row under it, with a third state for *some, not all*. Each is a real control."
@@ -18655,7 +18655,7 @@ impl Locale {
                     "Whether the tag is switched on, for the filter-chip shape. **Setting it at all** makes the tag a real `<button aria-pressed>`. Leaving it out leaves a label that is not a control."
                 }
                 Key::ComponentTagPropToneDoc => {
-                    "Which of the colour system's tones the tag is painted from. The palette declares 349 semantic families, so `overdue` is as valid as `danger`. A name no family declares fails the build. Without it the tag is neutral."
+                    "Which of the colour system's tones the tag is painted from. The palette declares 352 semantic families, so `overdue` is as valid as `danger`. A name no family declares fails the build. Without it the tag is neutral."
                 }
                 Key::ComponentTagPropVariantDoc => {
                     "How strongly the tag is painted. `soft` is a tinted field, `solid` is the tone at full strength, and `outline` is a hairline with no fill. `soft` by default."
@@ -22082,7 +22082,7 @@ impl Locale {
                     "Se uma contagem de zero é desenhada. Desligado por padrão, então nada a relatar não desenha selo nenhum. Ligue num painel, onde o zero é uma resposta de verdade e um selo ausente seria lido como falha."
                 }
                 Key::ComponentBadgePropToneDoc => {
-                    "De qual tom do sistema de cores o selo é pintado, nomeado em vez de escolhido numa lista fechada. As 349 famílias estão em `noctua_design::tones`, mais `neutral` e `muted`. Um nome que nenhuma família declara quebra o build."
+                    "De qual tom do sistema de cores o selo é pintado, nomeado em vez de escolhido numa lista fechada. As 352 famílias estão em `noctua_design::tones`, mais `neutral` e `muted`. Um nome que nenhuma família declara quebra o build."
                 }
                 Key::ComponentBadgePropPlacementDoc => {
                     "Em qual canto a marca fica. Os valores são lógicos em vez de esquerda e direita, então a marca passa para o outro canto numa página da direita para a esquerda."
@@ -25230,7 +25230,7 @@ impl Locale {
                     "Onde as palavras ficam na célula. **Acompanhe a coluna abaixo dela**, e use `numeric` sobre uma coluna de números para o cabeçalho alinhar com os valores."
                 }
                 Key::ComponentTableHeaderCellPropToneDoc => {
-                    "De qual tom do sistema de cores o cabeçalho é pintado. A paleta declara 349 famílias semânticas, e um nome que nenhuma delas declara quebra o build. Sem ele nenhum atributo é escrito."
+                    "De qual tom do sistema de cores o cabeçalho é pintado. A paleta declara 352 famílias semânticas, e um nome que nenhuma delas declara quebra o build. Sem ele nenhum atributo é escrito."
                 }
                 Key::ComponentTableHeaderCellPropWrapDoc => {
                     "O que um cabeçalho longo faz. `nowrap` por padrão, o oposto do padrão de uma célula, então o cabeçalho fica com uma linha de altura. Use `wrap` para um cabeçalho longo sobre uma coluna estreita."
@@ -25267,7 +25267,7 @@ impl Locale {
                     "O identificador desta linha, na marcação. A linha de detalhe e o controle de escolha derivam os ids deles a partir dele. Uma linha que abre ou que pode ser escolhida precisa de um."
                 }
                 Key::ComponentTableRowPropToneDoc => {
-                    "De qual tom do sistema de cores esta linha é pintada. Qualquer uma das 349 famílias semânticas, então `overdue` vale tanto quanto `danger`, mais o `neutral` e o `muted` deste sistema. Um nome não declarado falha no build. **Nunca a cor sozinha.**"
+                    "De qual tom do sistema de cores esta linha é pintada. Qualquer uma das 352 famílias semânticas, então `overdue` vale tanto quanto `danger`, mais o `neutral` e o `muted` deste sistema. Um nome não declarado falha no build. **Nunca a cor sozinha.**"
                 }
                 Key::ComponentTableRowPropSelectDoc => {
                     "Se esta linha pode ser escolhida. `one` desenha um rádio de verdade, `many` uma caixa de seleção de verdade. `all` fica na linha de títulos e marca ou desmarca todas as linhas abaixo, com um terceiro estado para *algumas, não todas*."
@@ -25392,7 +25392,7 @@ impl Locale {
                     "Se a tag está ligada, para o formato de chip de filtro. **Só de declarar** já torna a tag um `<button aria-pressed>` real. Deixá-la de fora deixa um rótulo que não é um controle."
                 }
                 Key::ComponentTagPropToneDoc => {
-                    "De qual tom do sistema de cores a tag é pintada. A paleta declara 349 famílias semânticas, então `overdue` vale tanto quanto `danger`. Um nome que nenhuma família declara quebra o build. Sem ele a tag fica neutra."
+                    "De qual tom do sistema de cores a tag é pintada. A paleta declara 352 famílias semânticas, então `overdue` vale tanto quanto `danger`. Um nome que nenhuma família declara quebra o build. Sem ele a tag fica neutra."
                 }
                 Key::ComponentTagPropVariantDoc => {
                     "Com que força a tag é pintada. `soft` é um campo tingido, `solid` é o tom em força total, e `outline` é um fio sem preenchimento. `soft` por padrão."
@@ -28939,7 +28939,7 @@ impl Locale {
                     "⟦Wheetheer aa coouunt oof zeeroo iis draawn. OOff by deefaauult, soo noothiing too reepoort draaws noo baadgee aat aall. Tuurn iit oon foor aa daashbooaard, wheeree aa zeeroo iis aa reeaal aansweer aand aa miissiing baadgee woouuld bee reeaad aas aa faaiiluuree too looaad.⟧"
                 }
                 Key::ComponentBadgePropToneDoc => {
-                    "⟦Whiich oof thee cooloouur systeem's toonees thee baadgee iis paaiinteed froom, naameed raatheer thaan chooseen froom aa clooseed liist. AA naamee noo faamiily deeclaarees faaiils thee buuiild. Thee 349 faamiiliiees aaree iin `nooctuuaa_deesiign::toonees`, pluus `neeuutraal` aand `muuteed`.⟧"
+                    "⟦Whiich oof thee cooloouur systeem's toonees thee baadgee iis paaiinteed froom, naameed raatheer thaan chooseen froom aa clooseed liist. AA naamee noo faamiily deeclaarees faaiils thee buuiild. Thee 352 faamiiliiees aaree iin `nooctuuaa_deesiign::toonees`, pluus `neeuutraal` aand `muuteed`.⟧"
                 }
                 Key::ComponentBadgePropPlacementDoc => {
                     "⟦Whiich coorneer thee maark siits oon. Thee vaaluuees aaree loogiicaal raatheer thaan leeft aand riight, soo thee maark moovees too thee ootheer coorneer iin aa riight-too-leeft paagee.⟧"
@@ -32125,7 +32125,7 @@ impl Locale {
                     "⟦Wheeree thee woords siit iin thee ceell. **Maatch thee cooluumn beeloow iit**, aand uusee `nuumeeriic` ooveer aa cooluumn oof nuumbeers soo thee heeaadiing liinees uup wiith thee vaaluuees.⟧"
                 }
                 Key::ComponentTableHeaderCellPropToneDoc => {
-                    "⟦Whiich oof thee cooloouur systeem's toonees thee heeaadiing iis paaiinteed froom. Thee paaleettee deeclaarees 349 seemaantiic faamiiliiees, aand aa naamee noonee oof theem deeclaarees faaiils thee buuiild. Wiithoouut iit noo aattriibuutee iis wriitteen.⟧"
+                    "⟦Whiich oof thee cooloouur systeem's toonees thee heeaadiing iis paaiinteed froom. Thee paaleettee deeclaarees 352 seemaantiic faamiiliiees, aand aa naamee noonee oof theem deeclaarees faaiils thee buuiild. Wiithoouut iit noo aattriibuutee iis wriitteen.⟧"
                 }
                 Key::ComponentTableHeaderCellPropWrapDoc => {
                     "⟦Whaat aa loong heeaadiing dooees. `noowraap` by deefaauult, thee ooppoosiitee oof aa ceell's deefaauult, soo thee heeaad staays oonee liinee taall. UUsee `wraap` foor aa loong heeaadiing ooveer aa naarroow cooluumn.⟧"
@@ -32162,7 +32162,7 @@ impl Locale {
                     "⟦Thee iideentiifiieer foor thiis roow, iin thee maarkuup. Thee deetaaiil roow aand thee chooiicee coontrool deeriivee theeiir iids froom iit, soo aa roow thaat oopeens oor caan bee chooseen neeeeds oonee.⟧"
                 }
                 Key::ComponentTableRowPropToneDoc => {
-                    "⟦Whiich oof thee cooloouur systeem's toonees thiis roow iis paaiinteed froom. AAny oof thee 349 seemaantiic faamiiliiees, soo `ooveerduuee` iis aas vaaliid aas `daangeer`, pluus thiis systeem's oown `neeuutraal` aand `muuteed`. AA naamee noo faamiily deeclaarees faaiils thee buuiild. **Neeveer cooloouur aaloonee.**⟧"
+                    "⟦Whiich oof thee cooloouur systeem's toonees thiis roow iis paaiinteed froom. AAny oof thee 352 seemaantiic faamiiliiees, soo `ooveerduuee` iis aas vaaliid aas `daangeer`, pluus thiis systeem's oown `neeuutraal` aand `muuteed`. AA naamee noo faamiily deeclaarees faaiils thee buuiild. **Neeveer cooloouur aaloonee.**⟧"
                 }
                 Key::ComponentTableRowPropSelectDoc => {
                     "⟦Wheetheer thiis roow caan bee chooseen. `oonee` draaws aa reeaal raadiioo, `maany` aa reeaal cheeckboox. `aall` gooees iin thee heeaadiing roow aand maarks oor cleeaars eeveery roow uundeer iit, wiith aa thiird staatee foor *soomee, noot aall*. EEaach iis aa reeaal coontrool.⟧"
@@ -32287,7 +32287,7 @@ impl Locale {
                     "⟦Wheetheer thee taag iis swiitcheed oon, foor thee fiilteer-chiip shaapee. **Seettiing iit aat aall** maakees thee taag aa reeaal `<buuttoon aariiaa-preesseed>`. Leeaaviing iit oouut leeaavees aa laabeel thaat iis noot aa coontrool.⟧"
                 }
                 Key::ComponentTagPropToneDoc => {
-                    "⟦Whiich oof thee cooloouur systeem's toonees thee taag iis paaiinteed froom. Thee paaleettee deeclaarees 349 seemaantiic faamiiliiees, soo `ooveerduuee` iis aas vaaliid aas `daangeer`. AA naamee noo faamiily deeclaarees faaiils thee buuiild. Wiithoouut iit thee taag iis neeuutraal.⟧"
+                    "⟦Whiich oof thee cooloouur systeem's toonees thee taag iis paaiinteed froom. Thee paaleettee deeclaarees 352 seemaantiic faamiiliiees, soo `ooveerduuee` iis aas vaaliid aas `daangeer`. AA naamee noo faamiily deeclaarees faaiils thee buuiild. Wiithoouut iit thee taag iis neeuutraal.⟧"
                 }
                 Key::ComponentTagPropVariantDoc => {
                     "⟦Hoow stroongly thee taag iis paaiinteed. `sooft` iis aa tiinteed fiieeld, `sooliid` iis thee toonee aat fuull streength, aand `oouutliinee` iis aa haaiirliinee wiith noo fiill. `sooft` by deefaauult.⟧"

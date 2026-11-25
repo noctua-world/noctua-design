@@ -18,7 +18,7 @@ export interface TableHeaderCellProps {
   scope?: TableHeaderCellScope;
   /** Where the words sit in the cell. **Match the column below it**, and use `numeric` over a column of numbers so the heading lines up with the values. */
   align?: TableHeaderCellAlign;
-  /** Which of the colour system's tones the heading is painted from. The palette declares 349 semantic families, and a name none of them declares fails the build. Without it no attribute is written. */
+  /** Which of the colour system's tones the heading is painted from. The palette declares 352 semantic families, and a name none of them declares fails the build. Without it no attribute is written. */
   tone?: string;
   /** What a long heading does. `nowrap` by default, the opposite of a cell's default, so the head stays one line tall. Use `wrap` for a long heading over a narrow column. */
   wrap?: TableHeaderCellWrap;

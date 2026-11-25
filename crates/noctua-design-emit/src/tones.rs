@@ -2,7 +2,7 @@
 //!
 //! # The problem this fixes
 //!
-//! The vendored palette ships **349 semantic families** — `danger`, `warning`,
+//! The vendored palette ships **352 semantic families** — `danger`, `warning`,
 //! `info`, `pending`, `approved`, `shipped`, `overdue`, `degraded`, `canary`,
 //! `chargeback` — each with a foreground, a `-bg`, a `-border`, a `-hover` and
 //! an `on-`. The component layer used **nine** of them. Every component that
@@ -12,7 +12,7 @@
 //! `success` and lose the distinction the palette had already drawn.
 //!
 //! Opening the enum is not enough on its own: a component's stylesheet would
-//! then need 349 rules, one per name, per surface it paints — and it would have
+//! then need 352 rules, one per name, per surface it paints — and it would have
 //! to be rewritten every time the palette gains a word.
 //!
 //! # The shape
@@ -325,6 +325,64 @@ mod tests {
         for (name, _) in STRUCTURAL {
             assert_ne!(name, "default");
         }
+    }
+
+    /// Every number written directly before the word *families*, in `text`.
+    ///
+    /// The count is written `352 semantic families`, `352 families` and
+    /// `352 famílias`, so the word is looked for one and two words on.
+    fn stated_counts(text: &str) -> Vec<usize> {
+        let words: Vec<&str> = text.split_whitespace().collect();
+        let mut counts = Vec::new();
+        for (at, word) in words.iter().enumerate() {
+            let Ok(count) = word.trim_matches(|c: char| !c.is_alphanumeric()).parse() else {
+                continue;
+            };
+            let names_families = words[at + 1..].iter().take(2).any(|next| {
+                let next = next.trim_start_matches(|c: char| !c.is_alphabetic());
+                next.starts_with("famil") || next.starts_with("famíl")
+            });
+            if names_families {
+                counts.push(count);
+            }
+        }
+        counts
+    }
+
+    #[test]
+    fn every_stated_family_count_is_the_vendors() {
+        // A prop's doc says how many families a `tone` may name, in both
+        // locales, and the number is the vendor's, which moves with every
+        // release of the colour system. Nothing else reads those sentences, so
+        // a stale one reaches a reader as a fact.
+        let root = noctua_design_spec::vendor::repository_root();
+        let live = families(&vendor()).len();
+
+        let mut files = vec![
+            root.join("spec/i18n/pt-BR.toml"),
+            root.join("crates/noctua-design-emit/src/tones.rs"),
+        ];
+        for entry in std::fs::read_dir(root.join("spec/components")).expect("the contracts") {
+            files.push(entry.expect("a contract").path());
+        }
+
+        let mut stated = 0;
+        for file in files {
+            let text = std::fs::read_to_string(&file).expect("a readable file");
+            for count in stated_counts(&text) {
+                stated += 1;
+                assert_eq!(
+                    count,
+                    live,
+                    "{} says {count} families and the vendored palette declares {live}",
+                    file.display()
+                );
+            }
+        }
+        assert!(
+            stated > 0,
+            "no file states a family count, so this test reads nothing"
+        );
     }
 
     #[test]

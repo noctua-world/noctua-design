@@ -88,7 +88,7 @@ pub fn Badge(
     /// Whether a count of zero is drawn. Off by default, so nothing to report draws no badge at all. Turn it on for a dashboard, where a zero is a real answer and a missing badge would be read as a failure to load.
     #[props(default = false)]
     show_zero: bool,
-    /// Which of the colour system's tones the badge is painted from, named rather than chosen from a closed list. A name no family declares fails the build. The 349 families are in `noctua_design::tones`, plus `neutral` and `muted`.
+    /// Which of the colour system's tones the badge is painted from, named rather than chosen from a closed list. A name no family declares fails the build. The 352 families are in `noctua_design::tones`, plus `neutral` and `muted`.
     tone: Option<String>,
     /// Which corner the mark sits on. The values are logical rather than left and right, so the mark moves to the other corner in a right-to-left page.
     #[props(default)]

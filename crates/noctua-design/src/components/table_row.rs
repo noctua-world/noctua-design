@@ -79,7 +79,7 @@ impl TableRowEmphasis {
 pub fn TableRow(
     /// The identifier for this row, in the markup. The detail row and the choice control derive their ids from it, so a row that opens or can be chosen needs one.
     name: Option<String>,
-    /// Which of the colour system's tones this row is painted from. Any of the 349 semantic families, so `overdue` is as valid as `danger`, plus this system's own `neutral` and `muted`. A name no family declares fails the build. **Never colour alone.**
+    /// Which of the colour system's tones this row is painted from. Any of the 352 semantic families, so `overdue` is as valid as `danger`, plus this system's own `neutral` and `muted`. A name no family declares fails the build. **Never colour alone.**
     tone: Option<String>,
     /// Whether this row can be chosen. `one` draws a real radio, `many` a real checkbox. `all` goes in the heading row and marks or clears every row under it, with a third state for *some, not all*. Each is a real control.
     #[props(default)]
