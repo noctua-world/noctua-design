@@ -41,7 +41,9 @@
 // A SAMPLE, AND SAID TO BE ONE: `PER_SELECTOR` elements a page for each
 // selector, the first the page has that the selector draws on. A defect that
 // shows only on a later one — a third variant of a control that the rule's own
-// selector does not tell apart — is not photographed.
+// selector does not tell apart — is not photographed. A selector whose rule
+// shows on none of its sample is given a longer one (`DEEPER`), and one no
+// element shows at all is listed as compared and blind (`BLIND`).
 //
 // THE COMPARISON IS WHOLE-VIEWPORT AND EXACT. A hover may repaint a child, a
 // sibling or the box around the control, so the control's own rectangle is the
@@ -76,6 +78,61 @@ test.use({
     use({ ...launchOptions, args: [...(launchOptions.args ?? []), "--disable-partial-raster"] }),
 });
 
+// AND THE PAGE'S CLOCK IS STOPPED BEFORE ANYTHING IS PHOTOGRAPHED. An example
+// may keep time: the toast on `/toast/` counts its six seconds down from the
+// moment the page loads, one redraw a second, and then takes itself away. A
+// tick that lands between the native picture and the seat's is counted as a
+// seat that drew something else — measured on `/toast/` under a loaded machine,
+// "6 seconds left" in one picture and "5 seconds left" in the other, 61 pixels,
+// on a button whose hover was the same in both — and two screenshots agreeing
+// in a row cannot see a change that comes once a second. Reduced motion does
+// not stop a timer, and a list of the pages that have one would be a list that
+// is a page short the day an example starts to count.
+//
+// So every page this file opens is given this before any script of its own
+// runs: the three ways a page asks to be called back later, kept track of
+// until `stop`, which takes back every call still waiting and refuses every
+// one asked for after it. The page runs as it likes until `prepare` has what
+// it needs and stands still from then on. `real` is the engine's own, for the
+// probe: waiting for a frame is how it knows that what it opened has arrived.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    const real = {
+      setTimeout: window.setTimeout.bind(window),
+      setInterval: window.setInterval.bind(window),
+      requestAnimationFrame: window.requestAnimationFrame.bind(window),
+    };
+    const waiting = { setTimeout: new Set(), setInterval: new Set(), requestAnimationFrame: new Set() };
+    let stopped = false;
+    for (const name of Object.keys(real)) {
+      window[name] = (...args) => {
+        // Zero is the one id no engine hands out, so clearing it clears nothing.
+        if (stopped) return 0;
+        const id = real[name](...args);
+        waiting[name].add(id);
+        return id;
+      };
+    }
+    window.__seatClock = {
+      real,
+      /** How many calls the page still had waiting when it was stopped. */
+      stop() {
+        stopped = true;
+        let taken = 0;
+        for (const id of waiting.setTimeout) window.clearTimeout(id);
+        for (const id of waiting.setInterval) window.clearInterval(id);
+        for (const id of waiting.requestAnimationFrame) window.cancelAnimationFrame(id);
+        for (const ids of Object.values(waiting)) {
+          taken += ids.size;
+          ids.clear();
+        }
+        return taken;
+      },
+      stopped: () => stopped,
+    };
+  });
+});
+
 /**
  * Every page the site builds, as the path `url` takes.
  *
@@ -94,6 +151,24 @@ const SWEPT = readdirSync(BUILT, { withFileTypes: true })
 
 /** How many elements one selector is asked about on one page. */
 const PER_SELECTOR = 2;
+
+/**
+ * The selectors that are asked about more elements than that, and how many.
+ *
+ * A PHOTOGRAPH THAT CANNOT FAIL IS NOT A COMPARISON. A rule may change no
+ * pixel on the first elements it matches and change some on a later one, and
+ * then the two pictures of the first agree with the rule's twin deleted. The
+ * test after the sweeps measures that — each selector's rule taken away with
+ * the element in the state — and a selector it finds blind on its sample is
+ * given a longer one here, until an element shows the rule.
+ */
+const DEEPER = {
+  // Declares `z-index: 1` and nothing else: it lifts the focused button over
+  // the neighbour whose border overlaps its own, and on the first two buttons
+  // of `/button-group/` nothing overlaps differently for being lifted. The
+  // third is the first whose ring is drawn over a neighbour: four pixels.
+  '.nd-button-group[data-nd-attached="true"] > .nd-button:focus-visible': 3,
+};
 
 /**
  * Loads `seats.js` beside the running shell and installs the probe.
@@ -181,13 +256,25 @@ async function prepare(page) {
       const out = [];
       const walk = (list) => {
         for (const rule of list) {
-          if (rule.selectorText) out.push(rule.selectorText);
+          if (rule.selectorText) out.push(rule);
           if (rule.cssRules?.length) walk(rule.cssRules);
         }
       };
       walk(sheet.cssRules);
       return out;
     };
+
+    /**
+     * A selector list with the twin form folded back to the bare pseudo-class,
+     * so a rule reads the same whichever of the two ways the stylesheet wrote
+     * it, and split into its selectors.
+     */
+    const folded = (list) =>
+      split(
+        list
+          .replace(/:is\(:focus-within, \[data-nd-seat-focus\], :has\(\[data-nd-seat-focus\]\)\)/g, ":focus-within")
+          .replace(/:is\(:(hover|focus-visible|focus|active), \[data-nd-seat-\w+\]\)/g, ":$1"),
+      );
 
     const STATE = /:(?:hover|focus-visible|focus-within|focus|active)(?![-\w])/;
     const STATES = new RegExp(STATE.source, "g");
@@ -204,17 +291,11 @@ async function prepare(page) {
      * are found (`outer`, and `inner` for a state inside `:has(`), and three
      * spellings of the whole of it: as the sheet has it, as a query can ask it,
      * and with `MARK` where the state was.
-     *
-     * The twin form is folded back to the bare pseudo-class first, so a rule
-     * reads the same here whichever of the two ways the stylesheet wrote it.
      */
     const stated = () => {
       const found = new Map();
-      for (const list of rules()) {
-        const bare = list
-          .replace(/:is\(:focus-within, \[data-nd-seat-focus\], :has\(\[data-nd-seat-focus\]\)\)/g, ":focus-within")
-          .replace(/:is\(:(hover|focus-visible|focus|active), \[data-nd-seat-\w+\]\)/g, ":$1");
-        for (const selector of split(bare)) {
+      for (const rule of rules()) {
+        for (const selector of folded(rule.selectorText)) {
           const hit = STATE.exec(selector);
           if (!hit) continue;
           const before = selector.slice(0, hit.index);
@@ -371,25 +452,35 @@ async function prepare(page) {
     };
 
     const chosen = [];
+    // The rules `mute` has taken out of the cascade, each with its selector.
+    const muted = [];
+    const { real } = window.__seatClock;
+    /** Two frames and a task, by the engine's own clock: the page's is stopped. */
+    const frames = () =>
+      new Promise((done) => {
+        real.requestAnimationFrame(() => real.requestAnimationFrame(() => real.setTimeout(done)));
+      });
     window.__seatProbe = {
       seats,
       /** Every state selector the sheet has, for the sweep that counts them. */
       stated,
       subjects,
       /**
-       * Marks up to `limit` elements per selector for the wanted states and
-       * answers how many it marked. `ready` says whether one can be driven,
-       * and is asked with whatever is shut around the element opened.
+       * Marks up to `limit` elements per selector for the wanted states — or
+       * as many as `deeper` names for that selector — and answers how many it
+       * marked. `ready` says whether one can be driven, and is asked with
+       * whatever is shut around the element opened.
        *
        * The `limit` is spent only on elements the whole selector draws on.
        */
-      choose(states, limit, ready) {
+      choose(states, limit, deeper, ready) {
         chosen.length = 0;
         for (const { state, outer, inner, name, live, marked, unplaced } of stated()) {
           if (unplaced || !states.includes(state)) continue;
+          const most = deeper[name] ?? limit;
           let taken = 0;
           for (let subject of subjects(outer, inner)) {
-            if (taken === limit) break;
+            if (taken === most) break;
             if (!draws(subject, marked)) continue;
             // `:focus-within` is reached from inside: the thing to focus is the
             // first control in the box, or the box itself where it is one.
@@ -455,9 +546,7 @@ async function prepare(page) {
        * frames.
        */
       async settle() {
-        await new Promise((done) => {
-          requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(done)));
-        });
+        await frames();
         const arriving = [
           ...[...document.querySelectorAll('link[rel~="stylesheet"]')].filter((link) => !link.sheet),
           ...[...document.images].filter((image) => !image.complete),
@@ -471,11 +560,7 @@ async function prepare(page) {
               }),
           ),
         );
-        if (arriving.length > 0) {
-          await new Promise((done) => {
-            requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(done)));
-          });
-        }
+        if (arriving.length > 0) await frames();
       },
       /**
        * The selectors one of the chosen is drawn by AT THIS MOMENT: asked with
@@ -486,8 +571,36 @@ async function prepare(page) {
         [...chosen[index].names]
           .filter(([, live]) => document.querySelector(live) !== null)
           .map(([name]) => name),
+      /**
+       * Takes every rule that holds a selector out of the cascade, until
+       * `unmute`, and answers how many rules that was.
+       *
+       * What a page looks like with a state rule's twin deleted is what it
+       * looks like, in the native state, with the rule gone: so this is how
+       * the test after the sweeps asks whether a photograph could have failed.
+       */
+      mute(name) {
+        for (const rule of rules()) {
+          if (!folded(rule.selectorText).includes(name)) continue;
+          muted.push([rule, rule.selectorText]);
+          rule.selectorText = ":not(*)";
+        }
+        return muted.length;
+      },
+      unmute() {
+        while (muted.length > 0) {
+          const [rule, text] = muted.pop();
+          rule.selectorText = text;
+        }
+      },
       rendered,
     };
+
+    // AND FROM HERE THE PAGE STANDS STILL (see `__seatClock`, at the top of
+    // this file). Whatever the page asked for while it loaded is given two
+    // frames to finish first: what is stopped is a page that has drawn itself.
+    await frames();
+    window.__seatClock.stop();
   });
 }
 
@@ -572,8 +685,9 @@ async function expectSame(page, testInfo, native, seated, what) {
  */
 async function hoverSweep(page, compare = async () => {}) {
   const count = await page.evaluate(
-    (limit) => window.__seatProbe.choose(["hover"], limit, window.__seatProbe.rendered),
-    PER_SELECTOR,
+    ([limit, deeper]) =>
+      window.__seatProbe.choose(["hover"], limit, deeper, window.__seatProbe.rendered),
+    [PER_SELECTOR, DEEPER],
   );
 
   const reached = new Set();
@@ -641,15 +755,20 @@ async function focusSweep(page, compare = async () => {}) {
   await page.keyboard.press("Shift");
 
   const count = await page.evaluate(
-    (limit) =>
-      window.__seatProbe.choose(["focus-visible", "focus-within", "focus"], limit, (element) => {
-        if (!element.checkVisibility()) return false;
-        element.focus({ preventScroll: true });
-        const taken = document.activeElement === element && element.matches(":focus-visible");
-        element.blur();
-        return taken;
-      }),
-    PER_SELECTOR,
+    ([limit, deeper]) =>
+      window.__seatProbe.choose(
+        ["focus-visible", "focus-within", "focus"],
+        limit,
+        deeper,
+        (element) => {
+          if (!element.checkVisibility()) return false;
+          element.focus({ preventScroll: true });
+          const taken = document.activeElement === element && element.matches(":focus-visible");
+          element.blur();
+          return taken;
+        },
+      ),
+    [PER_SELECTOR, DEEPER],
   );
 
   const reached = new Set();
@@ -680,12 +799,36 @@ async function focusSweep(page, compare = async () => {}) {
   return { count, reached };
 }
 
+/**
+ * Asks, of the element the pointer or the keyboard is on, which of the
+ * selectors drawn there a photograph could tell from nothing: the picture
+ * with each one's rule taken away, held against the picture with it.
+ *
+ * `shown` collects the selectors that changed a pixel, on any element, and one
+ * already in it is not asked again.
+ */
+async function sensitivity(page, index, shown) {
+  const names = (await page.evaluate((at) => window.__seatProbe.drawn(at), index)).filter(
+    (name) => !shown.has(name),
+  );
+  if (names.length === 0) return;
+  const whole = await picture(page);
+  for (const name of names) {
+    const rules = await page.evaluate((selector) => window.__seatProbe.mute(selector), name);
+    expect(rules, `no rule of the sheet holds ${name}`).toBeGreaterThan(0);
+    const without = await picture(page);
+    await page.evaluate(() => window.__seatProbe.unmute());
+    if ((await differing(page, whole, without)) > 0) shown.add(name);
+  }
+}
+
 for (const path of SWEPT) {
   const name = path.slice(0, -1);
   test(`a second seat's hover is drawn like the pointer's on ${name}`, async ({ page }, testInfo) => {
     test.slow();
     // No autoplay and no sweep: a page that moves by itself differs from
-    // itself, and no comparison of two moments of it means anything.
+    // itself, and no comparison of two moments of it means anything. What
+    // moves by a timer instead is stopped by `prepare`.
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(url(path));
     await prepare(page);
@@ -786,6 +929,31 @@ const UNSEEN = [
   "a.nd-lineage-card:focus-visible",
 ];
 
+/**
+ * The state selectors the sweeps reach and whose photographs cannot fail.
+ *
+ * Each is compared, and counted as compared, and the two pictures would agree
+ * with its twin deleted: taking the rule away changes no pixel on any element
+ * the sweeps photograph for it, on any page. Listed with the reason, so that
+ * "compared" is not read as "held by a picture" for these; `seat_twin` alone
+ * holds their twins. The test below holds the sweeps to exactly this list: a
+ * selector that turns out blind is given a longer sample in `DEEPER` or a line
+ * here, and one listed here that starts to show leaves.
+ */
+const BLIND = [
+  // `background: none`, and on both disabled buttons of `/button/` a heavier
+  // rule decides the background whether this one is there or not: the solid
+  // one's own disabled rule, and the outline one's rule for its tone.
+  ".nd-button[disabled]:hover",
+  // The ring every focused element is given by the sheet's rule on the bare
+  // state, declared again for the figure: the same outline with or without it.
+  ".nd-lineage-figure:focus-visible",
+  // A colour, and the rule that shows the control once its field is filled is
+  // heavier and names another: while the control can be hovered at all, this
+  // rule decides nothing.
+  ".nd-select-clear:hover",
+];
+
 test("the sweeps above compare every state selector but the ones listed", async ({ page }) => {
   // THE VACUITY GUARD. Each test above passes on a page with no state rule in
   // reach, which is right for a page of headings and would be just as green if
@@ -797,6 +965,9 @@ test("the sweeps above compare every state selector but the ones listed", async 
   test.setTimeout(600_000);
   await page.emulateMedia({ reducedMotion: "reduce" });
   const reached = new Set();
+  // The selectors whose rule, taken away, changed a pixel under the pointer
+  // or the keyboard.
+  const shown = new Set();
   let all = [];
   // The sweeps walk the built site, and that is every page a spec can name.
   expect(SWEPT.length, "the built site has no page at all").toBeGreaterThan(0);
@@ -805,14 +976,28 @@ test("the sweeps above compare every state selector but the ones listed", async 
     await page.goto(url(path));
     await prepare(page);
     all = await page.evaluate(() => window.__seatProbe.stated().map((entry) => entry.name));
-    for (const sweep of [hoverSweep, focusSweep]) {
-      for (const name of (await sweep(page)).reached) reached.add(name);
-    }
+    const hovered = await hoverSweep(page, ({ index }) => sensitivity(page, index, shown));
+    const focused = await focusSweep(page, async ({ index }) => {
+      await page.evaluate(
+        (at) => window.__seatProbe.at(at).element.focus({ preventScroll: true }),
+        index,
+      );
+      await sensitivity(page, index, shown);
+      await page.evaluate((at) => window.__seatProbe.at(at).element.blur(), index);
+    });
+    for (const name of [...hovered.reached, ...focused.reached]) reached.add(name);
   }
   expect(all.length, "the stylesheet has no state selector the probe can read").toBeGreaterThan(0);
   expect(reached.size, "the sweeps reached no state selector at all").toBeGreaterThan(0);
   const unseen = all.filter((name) => !reached.has(name)).sort();
   expect(unseen, "the state selectors no sweep compared").toEqual([...UNSEEN].sort());
+
+  // AND A COMPARISON THAT COULD NOT HAVE FAILED IS NAMED AS ONE. A selector is
+  // reached when its element was in the state; whether the two pictures of it
+  // would differ with the twin gone is another question, and `sensitivity`
+  // asked it of every element the sweeps photograph.
+  const blind = [...reached].filter((name) => !shown.has(name)).sort();
+  expect(blind, "the state selectors whose photographs cannot fail").toEqual([...BLIND].sort());
 
   // AND A STATE THE PROBE CANNOT PLACE IS STILL COUNTED. Three rules are put
   // into the sheet as it stands in this page, one for each place `stated`
@@ -860,6 +1045,43 @@ test("the sweeps above compare every state selector but the ones listed", async 
     window.__seatProbe.seats.seatFocus("second", element);
   });
   expect(await differing(page, native, await picture(page)), "a seat's focus is not the keyboard's").toBe(0);
+});
+
+test("a page that keeps time stands still once it is prepared", async ({ page }) => {
+  // The toast counts down from the moment its page loads, one redraw a second
+  // (`toast.js`), and every comparison above is two moments of a page. Asked
+  // of what the reader is shown and of the clock itself: a sweep that passed
+  // because no tick happened to land between its two pictures has to fail
+  // here, where a tick has a second and a half to land in.
+  await page.goto(url("toast/"));
+  const clock = page.locator(".nd-frame-stage .nd-toast-countdown").first();
+  await expect(clock, "no example on the toast page counts down").toHaveText(/\d/);
+  await prepare(page);
+  const state = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll(".nd-frame-stage .nd-toast")].map(
+        (toast) => `${toast.textContent}|${toast.hidden}|${toast.getAttributeNames().sort()}`,
+      ),
+    );
+  const before = await state();
+  await page.waitForTimeout(1500);
+  expect(await state(), "a toast moved after the page was prepared").toEqual(before);
+
+  // And nothing the page asks for from here on is ever called.
+  const called = await page.evaluate(async () => {
+    const calls = [];
+    const ids = [
+      setTimeout(() => calls.push("timeout")),
+      setInterval(() => calls.push("interval")),
+      requestAnimationFrame(() => calls.push("frame")),
+    ];
+    const { real } = window.__seatClock;
+    await new Promise((done) => {
+      real.requestAnimationFrame(() => real.requestAnimationFrame(() => real.setTimeout(done, 50)));
+    });
+    return { calls, ids, stopped: window.__seatClock.stopped() };
+  });
+  expect(called).toEqual({ calls: [], ids: [0, 0, 0], stopped: true });
 });
 
 test("two pictures of different shapes are never the same picture", async ({ page }) => {

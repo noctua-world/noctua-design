@@ -512,10 +512,17 @@ that hovers. **The siblings stand directly after the block, in the order of its 
 bare rules are the last rules in the block: a rule of the same weight between a state and its
 sibling, or siblings in another order, lets the seat win a tie in the cascade that the pointer
 loses. No seat attribute is written inside that block in any form, and a rule asks only whether
-the attribute is present, never for a seat by its id.
+the attribute is present, never for a seat by its id. **Only `:hover` is written behind the hover
+query**: no other attribute proves a pointer that hovers, so the sibling of a `:focus-visible` or
+an `:active` there would draw a seat where the window's own keyboard or pointer is not drawn.
+**And a selector holds at most one bare state**: a sibling swaps every bare state at once, so
+beside `.a:hover:focus-visible` it matches neither mixed case — one seat's hover on what another's
+keyboard has focused — which the twin form matches. Write the other states in the twin form,
+outside the block, or split the rule.
 `gates::seat_twin` holds the rule from both sides: it refuses a state pseudo-class written any
-other way, a seat attribute inside `@media (hover: hover)`, a sibling that is not where its
-native rule puts it, and a seat attribute outside the twin form with no native rule before it.
+other way, a seat attribute inside `@media (hover: hover)`, any state but `:hover` there, two bare
+states in one selector, a sibling that is not where its native rule puts it, and a seat attribute
+outside the twin form with no native rule before it.
 `data-nd-seat-drag` stands for no pseudo-class and owes no native rule.
 
 **Two places take no twin at all, and the gate refuses both.** `:focus-within` is never written
@@ -551,6 +558,16 @@ sweep and fails the same way.
 **It is a sample**: two elements a page for each selector, the first the selector draws on, so a
 defect only a later element shows is not photographed. There is no sweep for `:active`, so the
 first rule on it fails there too and brings its sweep with it.
+**And a photograph that cannot fail is named as one.** The same test takes each reached selector's
+rule away with its element in the state and asks whether a pixel changed, which is what the two
+pictures would show with the twin deleted. A selector blind on its sample is given a longer one in
+`DEEPER` — the attached button group's focus rule, which lifts a button and shows on the third —
+or, where no element shows the rule at all, a line with its reason in `BLIND`, which the test
+holds exactly as it holds `UNSEEN`; `seat_twin` alone holds those twins.
+**The page's clock is stopped before anything is photographed.** An example that keeps time — a
+toast counting its seconds down — differs from itself between the two pictures, so the spec takes
+back every timer and frame callback a page has waiting once it is prepared and refuses the rest;
+an example may count, and no page is left out of the sweep for it.
 
 **Nothing writes the attributes by hand**: `dist/seats.js` stamps them where the pseudo-class
 would match — `seatHover`, `seatFocus`, `seatPress`, `seatDrag` and `clearSeat`, or an `nd-seat`
