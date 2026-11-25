@@ -452,7 +452,7 @@ async function prepare(page) {
     };
 
     const chosen = [];
-    // The rules `mute` has taken out of the cascade, each with its selector.
+    // The rules `mute` has taken a selector out of, each with its whole list.
     const muted = [];
     const { real } = window.__seatClock;
     /** Two frames and a task, by the engine's own clock: the page's is stopped. */
@@ -572,18 +572,30 @@ async function prepare(page) {
           .filter(([, live]) => document.querySelector(live) !== null)
           .map(([name]) => name),
       /**
-       * Takes every rule that holds a selector out of the cascade, until
-       * `unmute`, and answers how many rules that was.
+       * Takes one selector out of every rule that lists it, until `unmute`,
+       * and answers how many rules that was.
        *
-       * What a page looks like with a state rule's twin deleted is what it
-       * looks like, in the native state, with the rule gone: so this is how
-       * the test after the sweeps asks whether a photograph could have failed.
+       * What a page looks like with a state selector's twin deleted is what
+       * it looks like, in the native state, with that selector gone: so this
+       * is how the test after the sweeps asks whether a photograph could have
+       * failed.
+       *
+       * THE SELECTOR, AND NOT THE RULE IT STANDS IN. A rule may list the
+       * element at rest beside the element in the state — `.x, .x:hover`,
+       * written twice over for its weight — and deleting the twin there
+       * leaves the first selector drawing every declaration. Taken away
+       * whole, such a rule changed the picture at rest and its state selector
+       * was counted as one a photograph holds: six were, and none is. The
+       * other selectors of the list stay; a rule with no other matches
+       * nothing.
        */
       mute(name) {
         for (const rule of rules()) {
-          if (!folded(rule.selectorText).includes(name)) continue;
+          const parts = split(rule.selectorText);
+          const kept = parts.filter((part) => !folded(part).includes(name));
+          if (kept.length === parts.length) continue;
           muted.push([rule, rule.selectorText]);
-          rule.selectorText = ":not(*)";
+          rule.selectorText = kept.length > 0 ? kept.join(", ") : ":not(*)";
         }
         return muted.length;
       },
@@ -802,7 +814,7 @@ async function focusSweep(page, compare = async () => {}) {
 /**
  * Asks, of the element the pointer or the keyboard is on, which of the
  * selectors drawn there a photograph could tell from nothing: the picture
- * with each one's rule taken away, held against the picture with it.
+ * with each one taken out of its rule, held against the picture with it.
  *
  * `shown` collects the selectors that changed a pixel, on any element, and one
  * already in it is not asked again.
@@ -933,7 +945,7 @@ const UNSEEN = [
  * The state selectors the sweeps reach and whose photographs cannot fail.
  *
  * Each is compared, and counted as compared, and the two pictures would agree
- * with its twin deleted: taking the rule away changes no pixel on any element
+ * with its twin deleted: taking the selector away changes no pixel on any element
  * the sweeps photograph for it, on any page. Listed with the reason, so that
  * "compared" is not read as "held by a picture" for these; `seat_twin` alone
  * holds their twins. The test below holds the sweeps to exactly this list: a
@@ -952,6 +964,21 @@ const BLIND = [
   // heavier and names another: while the control can be hovered at all, this
   // rule decides nothing.
   ".nd-select-clear:hover",
+  // THE REST OF THIS LIST IS ONE REASON SIX TIMES: the selector stands in its
+  // rule beside the same element at rest, and that one draws every declaration
+  // whether the pointer is there or not. The hover half is written for its
+  // weight alone — it outweighs the hover rule of the plain control, which
+  // would otherwise repaint a glass one — so with it gone the element under
+  // the pointer is drawn by the half that stays.
+  //
+  // A glass button's ground, and each tone's, which no hover changes.
+  '.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone]:hover',
+  '.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="accent"]:hover',
+  '.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="neutral"]:hover',
+  '.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="danger"]:hover',
+  '.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="success"]:hover',
+  // And a checked glass switch's track.
+  '.nd-switch[aria-checked="true"]:hover > .nd-switch-track[data-nd-glass="true"][aria-hidden]',
 ];
 
 test("the sweeps above compare every state selector but the ones listed", async ({ page }) => {
@@ -996,6 +1023,8 @@ test("the sweeps above compare every state selector but the ones listed", async 
   // reached when its element was in the state; whether the two pictures of it
   // would differ with the twin gone is another question, and `sensitivity`
   // asked it of every element the sweeps photograph.
+  // Each taken out of its rule ALONE: see `mute` for the six a rule taken
+  // away whole counted as shown.
   const blind = [...reached].filter((name) => !shown.has(name)).sort();
   expect(blind, "the state selectors whose photographs cannot fail").toEqual([...BLIND].sort());
 

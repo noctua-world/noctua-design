@@ -924,22 +924,78 @@ fn starts_pseudo(text: &str, name: &str) -> bool {
     })
 }
 
+/// The bare states one way of matching a selector asks for together, in the
+/// order written.
+type Together = Vec<&'static str>;
+
+/// One selector list being read by [`seat_sibling`]: a rule's own, or the
+/// argument of a functional pseudo-class.
+struct Alternatives {
+    /// The ways of matching the selectors of the list already read to their
+    /// comma.
+    done: Vec<Together>,
+    /// The ways of matching the selector being read, as far as it is read.
+    current: Vec<Together>,
+}
+
+impl Alternatives {
+    fn new() -> Self {
+        Self {
+            done: Vec::new(),
+            current: vec![Vec::new()],
+        }
+    }
+
+    /// Ends the selector being read, at a comma or at the end of the list.
+    fn part(&mut self) {
+        let finished = std::mem::replace(&mut self.current, vec![Vec::new()]);
+        for way in finished {
+            if !self.done.contains(&way) {
+                self.done.push(way);
+            }
+        }
+    }
+
+    /// Reads a whole inner list into the selector being read: every way of
+    /// matching that selector so far goes on through each way of matching the
+    /// list.
+    fn through(&mut self, mut inner: Self) {
+        inner.part();
+        let mut ways: Vec<Together> = Vec::new();
+        for before in &self.current {
+            for after in &inner.done {
+                let way: Together = before.iter().chain(after).copied().collect();
+                if !ways.contains(&way) {
+                    ways.push(way);
+                }
+            }
+        }
+        self.current = ways;
+    }
+}
+
 /// A selector list's state pseudo-classes: how many it writes, the ones among
-/// those that are bare, in the order written and one list for each selector of
-/// the list that has any, and the selector a sibling rule must carry for the
+/// those that are bare, and the selector a sibling rule must carry for the
 /// bare ones.
 ///
-/// The selectors of a list part at the commas outside every bracket and every
-/// quoted string: `.a:hover, .b:hover` is two selectors with one state each,
-/// and `.a:is(:hover, .b)` is one.
-fn seat_sibling(selector: &str) -> (usize, Vec<Vec<&'static str>>, String) {
+/// THE BARE ONES COME BACK AS THE WAYS OF MATCHING THAT ASK FOR ANY, one list
+/// for each: the states an element has to be in TOGETHER for the rule to match
+/// that way, in the order written. A selector matches one way unless it holds
+/// a list, and then it matches through any one selector of that list:
+/// `.a:hover .b:active` is one way that asks for two states, and
+/// `.x:has(.b:hover, .c:active)` is two ways that ask for one each. Every bare
+/// state the list writes is in at least one of them.
+///
+/// The selectors of a list part at the commas outside every square bracket and
+/// every quoted string, the rule's own list and a functional pseudo-class's
+/// alike: `.a:hover, .b:hover` is two selectors with one state each.
+fn seat_sibling(selector: &str) -> (usize, Vec<Together>, String) {
     let mut sibling = String::new();
     let mut written = 0usize;
-    let mut bare: Vec<Vec<&'static str>> = Vec::new();
-    // The bare states of the selector being read, how deep in brackets the
-    // scan is, and the quote it is inside.
-    let mut here_bare: Vec<&'static str> = Vec::new();
-    let mut depth = 0usize;
+    // The rule's own list first, then one for each round bracket the scan is
+    // inside; how deep in square brackets it is, and the quote it is inside.
+    let mut lists = vec![Alternatives::new()];
+    let mut square = 0usize;
     let mut quote = None;
     let mut rest = selector;
     'scan: while let Some(here) = rest.chars().next() {
@@ -953,7 +1009,11 @@ fn seat_sibling(selector: &str) -> (usize, Vec<Vec<&'static str>>, String) {
                 }
                 if starts_pseudo(rest, name) {
                     written += 1;
-                    here_bare.push(name);
+                    if let Some(list) = lists.last_mut() {
+                        for way in &mut list.current {
+                            way.push(name);
+                        }
+                    }
                     sibling.push_str(attribute);
                     rest = &rest[name.len()..];
                     continue 'scan;
@@ -963,19 +1023,35 @@ fn seat_sibling(selector: &str) -> (usize, Vec<Vec<&'static str>>, String) {
         match (quote, here) {
             (Some(open), _) if here == open => quote = None,
             (None, '"' | '\'') => quote = Some(here),
-            (None, '(' | '[') => depth += 1,
-            (None, ')' | ']') => depth = depth.saturating_sub(1),
-            (None, ',') if depth == 0 && !here_bare.is_empty() => {
-                bare.push(std::mem::take(&mut here_bare));
+            (None, '[') => square += 1,
+            (None, ']') => square = square.saturating_sub(1),
+            (None, '(') if square == 0 => lists.push(Alternatives::new()),
+            (None, ')') if square == 0 && lists.len() > 1 => {
+                if let (Some(inner), Some(outer)) = (lists.pop(), lists.last_mut()) {
+                    outer.through(inner);
+                }
+            }
+            (None, ',') if square == 0 => {
+                if let Some(list) = lists.last_mut() {
+                    list.part();
+                }
             }
             (Some(_) | None, _) => {}
         }
         sibling.push(here);
         rest = &rest[here.len_utf8()..];
     }
-    if !here_bare.is_empty() {
-        bare.push(here_bare);
+    // A bracket left open ends with the selector.
+    while lists.len() > 1 {
+        if let (Some(inner), Some(outer)) = (lists.pop(), lists.last_mut()) {
+            outer.through(inner);
+        }
     }
+    let mut bare = lists.pop().map_or_else(Vec::new, |mut list| {
+        list.part();
+        list.done
+    });
+    bare.retain(|way| !way.is_empty());
     (written, bare, sibling)
 }
 
@@ -1347,7 +1423,7 @@ fn seat_waiting(rule: &StyleRule) -> Option<String> {
 
 /// What keeps a bare rule from having a sibling at all, if anything does: a
 /// state other than `:hover` behind the hover query, or more than one bare
-/// state in one selector of the list (`bare` is [`seat_sibling`]'s lists).
+/// state asked for together (`bare` is [`seat_sibling`]'s lists).
 ///
 /// Both are rules whose sibling has the right text and is not their twin. The
 /// sibling of a rule behind `@media (hover: hover)` stands outside it because
@@ -1360,6 +1436,13 @@ fn seat_waiting(rule: &StyleRule) -> Option<String> {
 /// system's keyboard has focused, or the reverse — which the twin form of the
 /// same selector does match. One bare state among twinned ones is whole: the
 /// rule and its sibling between them cover every combination.
+///
+/// TOGETHER, AND NOT MERELY IN ONE SELECTOR. Two bare states in two selectors
+/// of one `:has(` or `:is(` list are alternatives: `.x:has(.b:hover,
+/// .c:focus-visible)` matches through either alone, its sibling
+/// `.x:has(.b[data-nd-seat-hover], .c[data-nd-seat-focus])` likewise, and
+/// there is no mixed case for the pair to miss. A state outside the list
+/// beside one inside it is asked for with it, and is refused.
 fn seat_unpaired(rule: &StyleRule, bare: &[Vec<&'static str>]) -> Option<String> {
     let behind_hover = rule.context.iter().any(|prelude| is_hover_query(prelude));
     if let Some(name) = bare
@@ -1378,8 +1461,8 @@ fn seat_unpaired(rule: &StyleRule, bare: &[Vec<&'static str>]) -> Option<String>
     }
     if let Some(bare) = bare.iter().find(|states| states.len() > 1) {
         return Some(format!(
-            "`{}` reaches {} states through bare pseudo-classes in one selector ({}). One sibling rule swaps \
-             them all for attributes at once, so it matches neither mixed case: a second \
+            "`{}` asks for {} states together through bare pseudo-classes ({}). One sibling \
+             rule swaps them all for attributes at once, so it matches neither mixed case: a second \
              seat in one state on an element the system's own pointer or keyboard holds in \
              the other (NOCTUA.md §9.7). Leave at most one state bare: write the others in \
              the twin form, outside `@media (hover: hover)`, or split the rule so that each \
@@ -2691,6 +2774,91 @@ mod tests {
              .a[data-nd-seat-hover], .b[data-x=\"a, b\"][data-nd-seat-active] { outline: none; }",
         );
         assert!(findings.is_empty(), "{findings:?}");
+    }
+
+    /// Two bare states in two selectors of one `:has(` or `:is(` list are
+    /// alternatives, not a pair: the rule matches through either alone and so
+    /// does its sibling, and no mixed case is left out. A state outside the
+    /// list is asked for together with whichever one inside it matched.
+    #[test]
+    fn two_bare_states_in_two_branches_of_one_list_pass() {
+        for (native, sibling, states) in [
+            (
+                ".x:has(.b:hover, .c:focus-visible)",
+                ".x:has(.b[data-nd-seat-hover], .c[data-nd-seat-focus])",
+                2,
+            ),
+            (
+                ".x:is(.b:hover, .c:active)",
+                ".x:is(.b[data-nd-seat-hover], .c[data-nd-seat-active])",
+                2,
+            ),
+            (
+                ".x:has(.b:hover, .c[data-x=\"(, \"]:active, .d) > .e:is(.f, .g)",
+                ".x:has(.b[data-nd-seat-hover], .c[data-x=\"(, \"][data-nd-seat-active], .d) > .e:is(.f, .g)",
+                2,
+            ),
+            (
+                ".x:is(.a, .b:hover) .y:is(:focus-visible, [data-nd-seat-focus])",
+                ".x:is(.a, .b[data-nd-seat-hover]) .y:is(:focus-visible, [data-nd-seat-focus])",
+                3,
+            ),
+        ] {
+            let (findings, checked) = seats(&format!(
+                "{native} {{ color: inherit; }}\n{sibling} {{ color: inherit; }}"
+            ));
+            assert!(findings.is_empty(), "{native}: {findings:?}");
+            assert_eq!(checked, states, "{native}");
+        }
+
+        // Asked for together: a state outside the list beside one inside it,
+        // two in one branch, and one in each of two lists.
+        for (native, sibling) in [
+            (
+                ".x:hover:has(.b:hover, .c:focus-visible)",
+                ".x[data-nd-seat-hover]:has(.b[data-nd-seat-hover], .c[data-nd-seat-focus])",
+            ),
+            (
+                ".x:has(.b:hover, .c) > .d:active",
+                ".x:has(.b[data-nd-seat-hover], .c) > .d[data-nd-seat-active]",
+            ),
+            (
+                ".x:has(.a, .b:hover:focus-visible)",
+                ".x:has(.a, .b[data-nd-seat-hover][data-nd-seat-focus])",
+            ),
+            (
+                ".x:has(.b:hover, .c):is(.d, .e:active)",
+                ".x:has(.b[data-nd-seat-hover], .c):is(.d, .e[data-nd-seat-active])",
+            ),
+            (
+                ".x:has(.a:is(.b:hover, .c) .d:active)",
+                ".x:has(.a:is(.b[data-nd-seat-hover], .c) .d[data-nd-seat-active])",
+            ),
+        ] {
+            let (findings, _) = seats(&format!(
+                "{native} {{ color: inherit; }}\n{sibling} {{ color: inherit; }}"
+            ));
+            let lines: Vec<usize> = findings.iter().map(|finding| finding.line).collect();
+            assert_eq!(lines, [1], "{native}");
+            assert!(
+                findings[0].message.contains("states together"),
+                "{native}: {}",
+                findings[0].message
+            );
+        }
+
+        // And every bare state is still read behind the hover query, in
+        // whichever branch it stands.
+        let (findings, _) = seats(
+            "@media (hover: hover) { .x:has(.b:hover, .c:focus-visible) { color: inherit; } }\n\
+             .x:has(.b[data-nd-seat-hover], .c[data-nd-seat-focus]) { color: inherit; }",
+        );
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert!(
+            findings[0].message.contains("Only `:hover` is written"),
+            "{}",
+            findings[0].message
+        );
     }
 
     /// The rule read from the attribute's side: a sibling is a sibling OF
