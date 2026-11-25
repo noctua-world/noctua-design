@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 import type { IconDrawing } from "@noctua-world/design-tokens/icons.js";
 
 export type MessageBarLive = "polite" | "assertive" | "off";
+export type MessageBarPresentation = "bar" | "line";
 
 export interface MessageBarProps {
   /** Which of the colour system's tones the bar is painted from. The tones live in `noctua_design::tones`. **Never the only signal** (`NOCTUA.md §8.8.6`): the words and the icon carry the meaning. */
@@ -24,6 +25,16 @@ export interface MessageBarProps {
   dismissible?: boolean;
   /** The name of the control that takes the bar away, such as *Dismiss this message*. Wanted in practice by `dismissible`, because that control is a glyph and this is the only name it has. */
   dismissLabel?: string;
+  /** How the message is drawn. `bar` is a block in the page, beside what happened. `line` is a row along a window's bottom edge, filled with the tone, that the window places last so it covers nothing. */
+  presentation?: MessageBarPresentation;
+  /** When the event the message announces happens, in milliseconds since the Unix epoch. `dist/message-bar.js` draws the whole seconds left until it, and follows a new value the caller writes. */
+  deadline?: string;
+  /** What the message says about the time left, with a `{count}` hole, such as *Restoring in 9 seconds*. Write both forms as `one:…|other:…`. Without it the seconds are written by `Intl` in the document's language. */
+  countdownLabel?: string;
+  /** The words on a control at the end of the row, such as *Restore now*. Setting it draws the control, a `<button>` in the message's own ink. */
+  actionLabel?: string;
+  /** A name a script finds the control by, written as `data-nd-action` on it. Wanted with `action_label`, because the press is the caller's own code. */
+  action?: string;
   /** The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means. */
   aiMark?: string;
   /** What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads. */

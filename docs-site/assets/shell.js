@@ -1676,6 +1676,7 @@ export function enhanceAll(root = document) {
   enhanceTooltips(root);
   enhanceToasts(root);
   enhanceToastReplays(root);
+  enhanceCountdowns(root);
   enhanceDrawerWindows(root);
   enhanceTabs(root);
   enhanceLineages(root);
@@ -1785,6 +1786,51 @@ function releaseToastReplays(root = document) {
   }
 }
 
+// --- Writing an example's deadline ------------------------------------------
+//
+// THIS IS APPARATUS, AND IT SHIPS NOWHERE. A `MessageBar`'s `deadline` is its
+// caller's: the interface writes one when it loses its server, and keeps the
+// timer that acts on it. On this site the caller is the example, and an
+// example is a tree with no code in it, so the deadline it carries is an
+// instant long past. The page plays the caller's part, as it does for a toast
+// raised again: it writes a deadline `data-nd-seconds` ahead of now into every
+// bar in the example when the page is enhanced, and again when the control
+// marked `countdown-again` is pressed. What the component owes is in
+// `dist/message-bar.js` and is untouched: it follows the new value.
+//
+// KNOWN BY A MAP AND NOT BY `data-nd-enhanced`, because an example of the
+// alert line is also a window, and `enhanceDrawerWindows` stamps that flag on
+// every window first.
+
+/** Every example whose deadline the page writes, so a subtree can be released. */
+const countdowns = new WeakMap();
+
+function enhanceCountdowns(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-countdown")) {
+    if (countdowns.has(stage)) continue;
+    const binding = new AbortController();
+    countdowns.set(stage, binding);
+    const seconds = Number.parseInt(stage.getAttribute("data-nd-seconds") ?? "", 10) || 10;
+    const arm = () => {
+      const at = String(Date.now() + seconds * 1000);
+      for (const bar of stage.querySelectorAll(".nd-message-bar[data-nd-deadline]")) {
+        bar.setAttribute("data-nd-deadline", at);
+      }
+    };
+    stage.addEventListener("click", (event) => {
+      if (event.target.closest?.('[data-nd-action="countdown-again"]')) arm();
+    }, { signal: binding.signal });
+    arm();
+  }
+}
+
+function releaseCountdowns(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-countdown")) {
+    countdowns.get(stage)?.abort();
+    countdowns.delete(stage);
+  }
+}
+
 // --- Turning an example's drawer ----------------------------------------------
 //
 // THIS IS APPARATUS, AND IT SHIPS NOWHERE. A `Drawer` is turned by its caller:
@@ -1853,6 +1899,7 @@ export function releaseAll(root = document) {
   releaseLineages(root);
   releaseTabs(root);
   releaseDrawerWindows(root);
+  releaseCountdowns(root);
   releaseToastReplays(root);
   releaseToasts(root);
   releaseTooltips(root);

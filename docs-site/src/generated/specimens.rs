@@ -6512,6 +6512,75 @@ const LIST_SPACING_LOOSE: &[Node] = &[Node::Element {
     ],
 }];
 
+/// `MessageBar.presentation` at `bar`.
+const MESSAGE_BAR_PRESENTATION_BAR: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("presentation")),
+                ("data-nd-slug", Value::Text("message-bar")),
+            ],
+            children: &[Node::Component {
+                name: "MessageBar",
+                props: &[("presentation", Value::Text("bar"))],
+                children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-message-bar-presentation-bar")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("bar"))],
+            }],
+        },
+    ],
+}];
+
+/// `MessageBar.presentation` at `line`.
+const MESSAGE_BAR_PRESENTATION_LINE: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("presentation")),
+                ("data-nd-slug", Value::Text("message-bar")),
+            ],
+            children: &[Node::Component {
+                name: "MessageBar",
+                props: &[("presentation", Value::Text("line"))],
+                children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                (
+                    "id",
+                    Value::Text("nd-variant-message-bar-presentation-line"),
+                ),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("line"))],
+            }],
+        },
+    ],
+}];
+
 /// `Meter.size` at `small`.
 const METER_SIZE_SMALL: &[Node] = &[Node::Element {
     tag: "figure",
@@ -14239,6 +14308,8 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("List", "spacing", "tight") => LIST_SPACING_TIGHT,
         ("List", "spacing", "default") => LIST_SPACING_DEFAULT,
         ("List", "spacing", "loose") => LIST_SPACING_LOOSE,
+        ("MessageBar", "presentation", "bar") => MESSAGE_BAR_PRESENTATION_BAR,
+        ("MessageBar", "presentation", "line") => MESSAGE_BAR_PRESENTATION_LINE,
         ("Meter", "size", "small") => METER_SIZE_SMALL,
         ("Meter", "size", "medium") => METER_SIZE_MEDIUM,
         ("Meter", "size", "large") => METER_SIZE_LARGE,

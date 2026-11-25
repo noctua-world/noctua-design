@@ -1,4 +1,5 @@
-// Everything a `MessageBar` does once a script is running, which is one thing.
+// Everything a `MessageBar` does once a script is running: the control that
+// takes a bar away, and the seconds left until a deadline.
 //
 // IT SHIPS, for `ColorPicker`'s reason: a component whose consumer cannot use
 // it is a component that lies. `dismissible` renders a control, and a control
@@ -9,6 +10,25 @@
 // arrangement and it is the same argument here: with no script there is
 // nothing to take the bar away, so a page that loaded without one carries no
 // button at all rather than a button that does nothing when it is pressed.
+//
+// THE COUNTDOWN IS DRAWN FROM THE CALLER'S DEADLINE AND KEEPS NO CLOCK.
+// `deadline` is an instant, in milliseconds since the epoch, and the time left
+// is worked out from `Date.now()` on every tick rather than counted down from
+// a number, so a tab the engine throttled draws the right second when it
+// wakes, and a caller who writes a new deadline is followed at once. What
+// happens at the deadline is the caller's: the interface restores its daemon
+// from its own timer, and this draws the same instant it does.
+//
+// IT IS FROZEN BY THE PAGE'S CLOCK AND BY NOTHING ELSE. Every reading of the
+// time is `Date.now()` and every wait is the page's own timer, so a test that
+// installs a clock (Playwright's `page.clock`) stops the countdown where it
+// wants it. No prop exists only for a test.
+//
+// IT SPEAKS RARELY. The number on the screen is a `role="timer"`, which does
+// not announce, and it changes every second. The polite region beside it is
+// written when the count starts, at every ten seconds left and at five: a
+// screen reader read a number a second cannot get past the message to the
+// control that answers it.
 //
 // WHAT IT NEVER DOES:
 //
@@ -22,16 +42,35 @@
 // 3. It never announces the dismissal. A reader who pressed the control knows
 //    what they pressed, and a live region saying so is the page talking about
 //    itself.
+// 4. It never acts at the deadline. It draws a time that reaches nothing and
+//    stays there, and the caller decides what the deadline does.
+
+import { plural } from "./messages.js";
 
 /** The attribute the stylesheet reads, and the one thing this script writes. */
 const DISMISSED = "data-nd-dismissed";
 
+/** The instant the countdown counts to, as the caller wrote it. */
+const DEADLINE = "data-nd-deadline";
+
+/** The caller's sentence for the time left. */
+const SENTENCE = "data-nd-countdown-label";
+
 /**
- * Reveals the dismiss control on every bar that has one, and wires it.
+ * How often the time left is read, in milliseconds.
  *
- * Idempotent, like every other `enhance*` here: a page that re-renders part of
- * itself calls this again, and a bar already wired is left alone.
+ * A quarter of a second rather than a second, because an interval that starts
+ * just after a whole second would draw each number up to a second late: the
+ * reading is cheap, and a number is only written when it changed.
  */
+const TICK = 250;
+
+/** The time left is said at every multiple of this many seconds. */
+const SAY_EVERY = 10;
+
+/** And once more at this many, the last count a reader can still act on. */
+const SAY_AT = 5;
+
 /** Every enhanced bar's teardown, so a subtree can be released. */
 const bars = new WeakMap();
 
@@ -39,28 +78,47 @@ const bars = new WeakMap();
  * Takes the behaviour back off every bar under `root`.
  *
  * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
- * CLIENT-SIDE ROUTER. This bar binds one listener to its own control, so what
- * it leaks is small. It is here anyway, because the barrel that releases a
- * subtree may not have a hole in it: a list with one name missing is a list a
- * reader has to check rather than read.
+ * CLIENT-SIDE ROUTER. What a bar leaks is an INTERVAL and an observer: the
+ * countdown reads the time four times a second, and a bar unmounted while it
+ * counts would hold its detached subtree for as long as the tab is open.
  *
- * The control goes back to hidden, which is the state the markup ships. A
- * control revealed by a script that is no longer running is a control that
- * closes nothing.
+ * The controls go back to what the markup ships: the dismiss control hidden,
+ * and the countdown hidden and empty. A control revealed by a script that is
+ * no longer running is a control that closes nothing, and a number that has
+ * stopped is a deadline nothing is drawing.
  */
 export function releaseMessageBars(root = document) {
-  for (const element of root.querySelectorAll(".nd-message-bar[data-nd-dismissible='true']")) {
+  for (const element of root.querySelectorAll(".nd-message-bar")) {
     if (element.dataset.ndEnhanced !== "message-bar") continue;
     const control = element.querySelector("[data-nd-dismiss]");
     if (control) control.hidden = true;
+    const clock = element.querySelector("[data-nd-message-bar-countdown]");
+    if (clock) {
+      clock.hidden = true;
+      clock.textContent = "";
+    }
+    const said = element.querySelector("[data-nd-message-bar-said]");
+    if (said) said.textContent = "";
     bars.get(element)?.abort();
     bars.delete(element);
     delete element.dataset.ndEnhanced;
   }
 }
 
+/**
+ * Reveals the dismiss control on every bar that has one, wires it, and starts
+ * the countdown on every bar that has a deadline.
+ *
+ * Idempotent, like every other `enhance*` here: a page that re-renders part of
+ * itself calls this again, and a bar already wired is left alone.
+ *
+ * EVERY BAR, and not only the ones with something to do today. A caller that
+ * renders the interface as a view writes `deadline` when the daemon goes, onto
+ * a bar that may have been enhanced before it had one, and the observer below
+ * is what follows it.
+ */
 export function enhanceMessageBars(root = document) {
-  // THE CLASS IS PART OF THE SELECTOR, and it had to become part of it.
+  // THE CLASS IS THE SELECTOR, and it had to become part of it.
   //
   // `[data-nd-dismissible='true']` alone was true of a bar and of nothing else
   // until `Dialog`, `Popover` and `Toast` arrived carrying the same attribute
@@ -68,12 +126,13 @@ export function enhanceMessageBars(root = document) {
   // all four, and the three real enhancers then skipped every element it had
   // touched — so a dialog opened nothing and a toast never started its timer.
   // Nothing errored, in the browser or in the build.
-  for (const element of root.querySelectorAll(".nd-message-bar[data-nd-dismissible='true']")) {
+  for (const element of root.querySelectorAll(".nd-message-bar")) {
     if (element.dataset.ndEnhanced) continue;
     element.dataset.ndEnhanced = "message-bar";
     const binding = new AbortController();
     bars.set(element, binding);
     enhance(element, binding.signal);
+    count(element, binding.signal);
   }
 }
 
@@ -104,4 +163,117 @@ function enhance(bar, signal) {
   // Both keys, because the control is a real `<button>` and the platform
   // already answers both. Nothing is added here, and that is the claim the
   // contract's `[keyboard]` table is making.
+}
+
+/**
+ * The seconds left until the bar's deadline, drawn and now and then said.
+ *
+ * A bar with no countdown in its markup has nothing to draw into, and its
+ * observer still runs: the markup is the caller's, and a framework that adds
+ * the deadline re-renders the two elements this reads.
+ */
+function count(bar, signal) {
+  let ticking = null;
+  /** The whole seconds last drawn, so a number is written once. */
+  let drawn = null;
+  /** Whether the next number drawn is the first since the count started. */
+  let first = true;
+
+  const clock = () => bar.querySelector("[data-nd-message-bar-countdown]");
+  const said = () => bar.querySelector("[data-nd-message-bar-said]");
+
+  function stop() {
+    clearInterval(ticking);
+    ticking = null;
+  }
+
+  /** The instant counted to, or `null` where the attribute is not one. */
+  function deadline() {
+    const raw = bar.getAttribute(DEADLINE);
+    if (raw === null || raw.trim() === "") return null;
+    const at = Number(raw);
+    return Number.isFinite(at) ? at : null;
+  }
+
+  /**
+   * The caller's sentence for a number of seconds, or `Intl`'s words for it.
+   *
+   * THE FALLBACK IS THE PLATFORM'S, NOT THIS FILE'S. A published component
+   * carries no word in any language (`NOCTUA.md §9.9`), and `Intl` writes
+   * *9 seconds* and *9 segundos* in the document's own language.
+   */
+  function words(left) {
+    const sentence = bar.getAttribute(SENTENCE);
+    if (sentence) return plural(sentence, left);
+    const locale = document.documentElement.lang || undefined;
+    return new Intl.NumberFormat(locale, {
+      style: "unit",
+      unit: "second",
+      unitDisplay: "long",
+    }).format(left);
+  }
+
+  function draw() {
+    const box = clock();
+    const at = deadline();
+    // EVERY WAY A BAR ENDS PASSES THROUGH THIS ATTRIBUTE, and a bar a reader
+    // took away has no time left to show.
+    if (!box || at === null || bar.hasAttribute(DISMISSED)) {
+      stop();
+      if (box) {
+        box.hidden = true;
+        box.textContent = "";
+      }
+      return;
+    }
+    // Rounded up, because a reader who is told one second has one second.
+    // `Math.max` keeps a deadline that has passed from drawing a negative.
+    const left = Math.max(0, Math.ceil((at - Date.now()) / 1000));
+    if (left === drawn) return;
+    drawn = left;
+    const text = words(left);
+    box.hidden = false;
+    box.textContent = text;
+    if (first || (left > 0 && (left % SAY_EVERY === 0 || left === SAY_AT))) say(text);
+    first = false;
+    // Nothing is left to count, and the number stays where it stopped.
+    if (left === 0) stop();
+  }
+
+  /**
+   * Writes the polite region, one frame after the number is drawn.
+   *
+   * A frame later, because a region written in the same task that put it in
+   * the document announces nothing in most engines: the bar arriving with a
+   * deadline is exactly that task.
+   */
+  function say(text) {
+    requestAnimationFrame(() => {
+      const region = said();
+      if (region && !signal.aborted) region.textContent = text;
+    });
+  }
+
+  function start() {
+    stop();
+    drawn = null;
+    first = true;
+    draw();
+    if (deadline() !== null && clock() && !bar.hasAttribute(DISMISSED)) {
+      ticking = setInterval(draw, TICK);
+    }
+  }
+
+  // A NEW DEADLINE IS A NEW COUNT, said again from its first number. The
+  // sentence and the dismissal are read on every tick, so a change to either
+  // is drawn by the next one; they are observed as well so a stopped count
+  // answers them.
+  const observer = new MutationObserver(start);
+  observer.observe(bar, { attributes: true, attributeFilter: [DEADLINE, SENTENCE, DISMISSED] });
+
+  start();
+  signal.addEventListener("abort", () => {
+    stop();
+    observer.disconnect();
+  });
 }

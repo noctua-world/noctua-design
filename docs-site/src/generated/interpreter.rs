@@ -36,12 +36,12 @@ use noctua_design::components::{
     LineageLine, LineagePick, LineageReach, LineageRoute, LineageSize, LineageThickness,
     LineageTilt, LineageView, Link, LinkTone, List, ListItem, ListKind, ListMarker, ListSpacing,
     Log, LogLine, Mark, MatchText, Menu, MenuItem, MenuPlacement, MessageBar, MessageBarLive,
-    Meter, MeterSize, NumberInput, NumberInputSize, NumberInputStepping, OptionGroup, OptionItem,
-    OptionList, OptionListLayout, OptionListSize, OtpField, OtpFieldKind, OtpFieldSize, Pagination,
-    PaginationSize, PaginationSpread, Paragraph, ParagraphSize, ParagraphTone, Popover,
-    PopoverPlacement, Progress, ProgressSize, Prompt, Prose, ProseMeasure, Radio, RadioSize,
-    Rating, RatingSize, Search, SearchGroup, SearchPresentation, SearchResult, SearchSize,
-    Segmented, SegmentedAppearance, SegmentedFill, SegmentedItem, SegmentedOrientation,
+    MessageBarPresentation, Meter, MeterSize, NumberInput, NumberInputSize, NumberInputStepping,
+    OptionGroup, OptionItem, OptionList, OptionListLayout, OptionListSize, OtpField, OtpFieldKind,
+    OtpFieldSize, Pagination, PaginationSize, PaginationSpread, Paragraph, ParagraphSize,
+    ParagraphTone, Popover, PopoverPlacement, Progress, ProgressSize, Prompt, Prose, ProseMeasure,
+    Radio, RadioSize, Rating, RatingSize, Search, SearchGroup, SearchPresentation, SearchResult,
+    SearchSize, Segmented, SegmentedAppearance, SegmentedFill, SegmentedItem, SegmentedOrientation,
     SegmentedSelection, SegmentedShape, SegmentedSize, Select, SelectGroup, SelectOption,
     SelectSize, Slider, SliderSize, SliderTone, Split, SplitCollapse, SplitHandle, SplitPane,
     SplitPaneSide, Strong, Swatch, SwatchShape, SwatchSize, Switch, SwitchSize, Tab, TabPanel,
@@ -2553,6 +2553,18 @@ fn message_bar(
     let live_ = scope.pick(props, "live", &MessageBarLive::ALL, MessageBarLive::as_str);
     let dismissible_ = scope.flag(props, "dismissible").unwrap_or(false);
     let dismiss_label_ = scope.find(props, "dismiss_label");
+    let presentation_ = scope
+        .pick(
+            props,
+            "presentation",
+            &MessageBarPresentation::ALL,
+            MessageBarPresentation::as_str,
+        )
+        .unwrap_or_default();
+    let deadline_ = scope.find(props, "deadline");
+    let countdown_label_ = scope.find(props, "countdown_label");
+    let action_label_ = scope.find(props, "action_label");
+    let action_ = scope.find(props, "action");
     let ai_mark_ = scope.find(props, "ai_mark");
     let ai_label_ = scope.find(props, "ai_label");
     let ai_note_ = scope.find(props, "ai_note");
@@ -2567,6 +2579,11 @@ fn message_bar(
             live: live_,
             dismissible: dismissible_,
             dismiss_label: dismiss_label_,
+            presentation: presentation_,
+            deadline: deadline_,
+            countdown_label: countdown_label_,
+            action_label: action_label_,
+            action: action_,
             ai_mark: ai_mark_,
             ai_label: ai_label_,
             ai_note: ai_note_,

@@ -12966,8 +12966,19 @@ const IMAGE_REACT: &str = r#"  const fit_ = fit ?? "cover";
 /// name nothing declares rendered *nothing* in Dioxus and *threw* in React,
 /// which is the one behaviour `NOCTUA.md §9.3` says the two may not have.
 /// Typed, neither language can be given a name that is not an icon.
+///
+/// # And the time left is said twice, to two different readers
+///
+/// `deadline` renders a `role="timer"` that `dist/message-bar.js` fills every
+/// second. A timer is a live region that does not speak, and it says so with
+/// `aria-live="off"` written out: inside a `role="alert"`, which is atomic, an
+/// implicit value is the one assistive technology honours least. Beside it is
+/// a visually hidden polite region the script writes far less often, so a
+/// screen reader hears the time left without hearing every second of it.
+/// Both ship empty: with no script nothing is counting.
 const MESSAGE_BAR_DIOXUS: &str = r#"    let root = format!("nd-message-bar {class}");
     let root = root.trim().to_owned();
+    let counted = deadline.is_some();
 
     rsx! {
         div {
@@ -12978,6 +12989,9 @@ const MESSAGE_BAR_DIOXUS: &str = r#"    let root = format!("nd-message-bar {clas
             // the role's own value, which is the right one both times.
             "aria-live": live.map(MessageBarLive::as_str),
             "data-nd-tone": tone,
+            "data-nd-presentation": presentation.as_str(),
+            "data-nd-deadline": deadline,
+            "data-nd-countdown-label": countdown_label,
             "data-nd-dismissible": if dismissible { "true" } else { "false" },
 
             if let Some(icon) = icon {
@@ -12996,6 +13010,36 @@ const MESSAGE_BAR_DIOXUS: &str = r#"    let root = format!("nd-message-bar {clas
                     strong { class: "nd-message-bar-title", "{title}" }
                 }
                 div { class: "nd-message-bar-body", {children} }
+                // THE TIME LEFT, AFTER THE MESSAGE IT IS ABOUT. See the header.
+                if counted {
+                    span {
+                        class: "nd-message-bar-countdown",
+                        role: "timer",
+                        "aria-live": "off",
+                        "data-nd-message-bar-countdown": "",
+                        hidden: true,
+                    }
+                    span {
+                        class: "nd-visually-hidden",
+                        "aria-live": "polite",
+                        "aria-atomic": "true",
+                        "data-nd-message-bar-said": "",
+                    }
+                }
+                // WHAT A READER DOES ABOUT IT, LAST AMONG THE WORDS. Visible
+                // from the first paint, because the press is the caller's code
+                // and not this package's script: `Button { action }`'s
+                // arrangement. Inside the text rather than beside it, so a
+                // narrow window wraps it onto a row of its own instead of
+                // squeezing the message beside it.
+                if let Some(words) = action_label {
+                    button {
+                        class: "nd-message-bar-action",
+                        r#type: "button",
+                        "data-nd-action": action,
+                        "{words}"
+                    }
+                }
             }
 
             // IN THE BAR'S ROW, before the dismiss control. The row aligns to
@@ -13024,6 +13068,7 @@ const MESSAGE_BAR_DIOXUS: &str = r#"    let root = format!("nd-message-bar {clas
 /// The same message, in React.
 const MESSAGE_BAR_REACT: &str = r#"  const alert_ = alert ?? false;
   const dismissible_ = dismissible ?? false;
+  const presentation_ = presentation ?? "bar";
   const root = ["nd-message-bar", className].filter(Boolean).join(" ");
 
   return h(
@@ -13035,6 +13080,9 @@ const MESSAGE_BAR_REACT: &str = r#"  const alert_ = alert ?? false;
       role: alert_ ? "alert" : "status",
       "aria-live": live,
       "data-nd-tone": tone,
+      "data-nd-presentation": presentation_,
+      "data-nd-deadline": deadline,
+      "data-nd-countdown-label": countdownLabel,
       "data-nd-dismissible": String(dismissible_),
       ...rest,
     },
@@ -13050,6 +13098,35 @@ const MESSAGE_BAR_REACT: &str = r#"  const alert_ = alert ?? false;
       { key: "t", className: "nd-message-bar-text" },
       title ? h("strong", { key: "h", className: "nd-message-bar-title" }, title) : null,
       h("div", { key: "b", className: "nd-message-bar-body" }, children),
+      // See the Dioxus half: a timer that does not speak, and a polite region
+      // the script writes far less often. Both empty until it counts.
+      deadline
+        ? h("span", {
+            key: "c",
+            className: "nd-message-bar-countdown",
+            role: "timer",
+            "aria-live": "off",
+            "data-nd-message-bar-countdown": "",
+            hidden: true,
+          })
+        : null,
+      deadline
+        ? h("span", {
+            key: "s",
+            className: "nd-visually-hidden",
+            "aria-live": "polite",
+            "aria-atomic": "true",
+            "data-nd-message-bar-said": "",
+          })
+        : null,
+      // See the Dioxus half: the caller's control, last among the words.
+      actionLabel
+        ? h(
+            "button",
+            { key: "a", className: "nd-message-bar-action", type: "button", "data-nd-action": action },
+            actionLabel,
+          )
+        : null,
     ),
     // @ai nd-ai-slot-line,
     dismissible_

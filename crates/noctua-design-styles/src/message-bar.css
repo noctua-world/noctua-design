@@ -93,6 +93,154 @@
   outline-offset: var(--noctua-focus-offset);
 }
 
+/* THE TIME LEFT, under the message in a bar and after it in a line. Tabular
+   figures, so a second going by moves no letter beside it. It wraps like the
+   sentence it is, because the caller's words for it run long in Portuguese. */
+.nd-message-bar-countdown {
+  align-self: flex-start;
+  font-size: var(--noctua-size-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--nc-color-fg-muted);
+  overflow-wrap: anywhere;
+}
+
+.nd-message-bar-countdown[hidden] {
+  display: none;
+}
+
+/* WHAT A READER DOES ABOUT IT, drawn in the message's own ink: a hairline in
+   that ink and no fill, so the control reads on a tint, on a fill of the tone
+   and on no tone at all. Its box clears the target floor in both forms.
+   Under the words in a bar, and after them in a line. */
+.nd-message-bar-action {
+  flex: 0 1 auto;
+  align-self: flex-start;
+  max-inline-size: 100%;
+  margin-block-start: var(--noctua-space-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-inline-size: var(--noctua-target-min);
+  min-block-size: max(var(--noctua-space-8), var(--noctua-target-min));
+  padding-block: 0;
+  padding-inline: var(--noctua-space-3);
+  border: var(--noctua-border-hairline) solid currentColor;
+  border-radius: var(--noctua-radius-control);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-semibold);
+  text-align: center;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .nd-message-bar-action:hover {
+    background: color-mix(in oklab, currentColor var(--nd-veil-checked), transparent);
+  }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-message-bar-action[data-nd-seat-hover] {
+  background: color-mix(in oklab, currentColor var(--nd-veil-checked), transparent);
+}
+
+.nd-message-bar-action:is(:focus-visible, [data-nd-seat-focus]) {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* --- The line --------------------------------------------------------------
+ *
+ * `presentation: line` is the interface's alert line (`NOCTUA.md §12.17`): one
+ * row along a window's bottom edge, under the footer and the drawer.
+ *
+ * IN THE FLOW, AND THE WINDOW PLACES IT LAST. A line fixed over the bottom of
+ * the window would cover the footer's last line and whatever the keyboard is
+ * on there (WCAG 2.4.11), so it takes a row of its own, as the footer does.
+ *
+ * A FOOTER LINE'S HEIGHT AND TYPE, so the two meet as one edge: caption text
+ * at the body leading and the smallest padding, which is
+ * `--noctua-shell-line`. It is at least that tall and it WRAPS rather than
+ * cuts, because what an alert says is what a reader has to act on.
+ *
+ * FILLED WITH THE TONE, IN THE TONE'S OWN INK. `--nd-tone` and `--nd-tone-on`
+ * are the palette's solved pair, and everything in the line, the icon, the
+ * action and the rings, is drawn in that ink. The words and the icon still
+ * carry the meaning (`NOCTUA.md §8.8.6`). */
+.nd-message-bar[data-nd-presentation="line"] {
+  align-items: center;
+  gap: var(--noctua-space-3);
+  box-sizing: border-box;
+  min-block-size: var(--noctua-shell-line);
+  padding-block: var(--noctua-space-1);
+  padding-inline: var(--noctua-space-3);
+  border: 0;
+  border-radius: 0;
+  font-size: var(--noctua-size-caption);
+  line-height: var(--noctua-leading-body);
+}
+
+.nd-message-bar[data-nd-presentation="line"][data-nd-tone] {
+  background: var(--nd-tone);
+  color: var(--nd-tone-on);
+}
+
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-icon {
+  color: inherit;
+}
+
+/* One row of words: the title, the message and the time left, wrapping as a
+   sentence does when the window is narrow. */
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-text {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--noctua-space-3);
+  row-gap: var(--noctua-space-1);
+}
+
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-countdown {
+  align-self: baseline;
+  font-size: inherit;
+  font-weight: var(--noctua-weight-semibold);
+  color: inherit;
+}
+
+/* AT THE FAR END OF THE ROW, and of the row it wraps onto in a narrow window.
+   An automatic margin takes whatever the words leave. */
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-action {
+  align-self: center;
+  min-block-size: var(--noctua-target-min);
+  margin-block-start: 0;
+  margin-inline-start: auto;
+  font-size: inherit;
+}
+
+/* The dismiss control keeps the target floor and gives up the rest, so a line
+   holding it is still one line tall. */
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-dismiss {
+  inline-size: var(--noctua-target-min);
+  block-size: var(--noctua-target-min);
+}
+
+/* EVERY RING IN A LINE IS IN THE LINE'S INK AND INSIDE ITS CONTROL. The ring
+   colour is not a pair measured against a fill of the tone, and a ring drawn
+   outside the control would hang over the footer above the line. */
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-action:is(:focus-visible, [data-nd-seat-focus]) {
+  outline-color: currentColor;
+  outline-offset: calc(-2 * var(--noctua-focus-width));
+}
+
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-dismiss:is(:focus-visible, [data-nd-seat-focus]) {
+  outline-color: currentColor;
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
 /* Taken away by a reader. The element stays in the document so its live region
    keeps working, and the layout stops giving it room. */
 .nd-message-bar[data-nd-dismissed] {

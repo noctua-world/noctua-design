@@ -1095,6 +1095,31 @@ const MESSAGE_BAR: &[Example] = &[
         r"MessageBar { ai_mark, ai_label, ai_note }",
         Key::ExampleAiCaption
     ),
+    // THE ALERT LINE (`NOCTUA.md §12.17`), last in its window, under the
+    // footer. The deadline is the caller's, and on this site the caller is
+    // the page: `shell.js` writes one ten seconds ahead when the page loads
+    // and when the control in the window is pressed. The tree's own deadline
+    // is an instant long past, which is all a tree with no code can know.
+    example!(
+        r#"MessageBar { presentation: Line, alert: true, tone: "danger", deadline, countdown_label, action_label, action, … } — the deadline written by the page"#,
+        Key::ExampleMessageBarNoteLine
+    ),
+    // STOPPED ON PURPOSE. Nothing counts, and the action starts it again.
+    example!(
+        r#"MessageBar { presentation: Line, tone: "danger", action_label, action, … }"#,
+        Key::ExampleMessageBarNoteStopped
+    ),
+    // NO TONE, AND A READER MAY TAKE IT AWAY: a line about the window that is
+    // not an alarm, on the subtle surface, its control at the end of the row.
+    example!(
+        r"MessageBar { presentation: Line, dismissible: true, dismiss_label, … }",
+        Key::ExampleMessageBarNoteQuiet
+    ),
+    // A COUNTDOWN IN A BAR, under the message it is about.
+    example!(
+        r#"MessageBar { tone: "warning", deadline, countdown_label, action_label, … } — the deadline written by the page"#,
+        Key::ExampleMessageBarNoteCountdown
+    ),
 ];
 
 // --- Dialog -----------------------------------------------------------------

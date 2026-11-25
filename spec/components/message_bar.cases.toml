@@ -20,3 +20,24 @@ note = "The two live regions are different promises. A bar that says `alert` and
 props = { tone = "danger", alert = true }
 children = "The upload failed."
 expect = { attrs = { role = "alert" } }
+
+[[case]]
+name = "a line says it is one, and the time left is drawn only by a script counting"
+note = "`presentation` is what the stylesheet draws a line from. A deadline that has passed is the one a case can freeze: the script draws no time left and stops there, and the polite region is in the document from the start, because a region written in the task that inserted it announces nothing."
+props = { presentation = "line", tone = "danger", alert = true, deadline = "0", countdown_label = "one:{count} second left|other:{count} seconds left" }
+children = "The local server is not running."
+expect = { attrs = { "data-nd-presentation" = "line", role = "alert", "data-nd-deadline" = "0" }, visible = ["[data-nd-message-bar-countdown]"], present = ["[data-nd-message-bar-said]"] }
+
+[[case]]
+name = "with no deadline there is nothing to count"
+note = "The countdown and its region are rendered only where a deadline is, so a bar that counts nothing carries no empty timer for a screen reader to land on."
+props = { presentation = "line", tone = "danger" }
+children = "The local server is stopped."
+expect = { attrs = { "data-nd-presentation" = "line" }, absent = ["data-nd-deadline"], hidden = ["[data-nd-message-bar-countdown]", "[data-nd-message-bar-said]"] }
+
+[[case]]
+name = "the action is a button carrying the caller's hook"
+note = "The press is the caller's own code, so the control is found by `data-nd-action`, as a `Button` with an `action` is. It is visible with or without this package's script, because nothing here answers it."
+props = { presentation = "line", tone = "danger", action_label = "Restore now", action = "restore" }
+children = "The local server is not running."
+expect = { visible = ["button.nd-message-bar-action[data-nd-action='restore']"] }

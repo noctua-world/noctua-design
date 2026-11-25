@@ -177,7 +177,7 @@ pub use mark::Mark;
 pub use match_text::MatchText;
 pub use menu::{Menu, MenuPlacement};
 pub use menu_item::MenuItem;
-pub use message_bar::{MessageBar, MessageBarLive};
+pub use message_bar::{MessageBar, MessageBarLive, MessageBarPresentation};
 pub use meter::{Meter, MeterSize};
 pub use number_input::{NumberInput, NumberInputSize, NumberInputStepping};
 pub use option_group::OptionGroup;

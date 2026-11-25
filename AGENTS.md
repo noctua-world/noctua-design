@@ -315,6 +315,7 @@ of these carries measured rules, not description:
 | a split: the line between two panes, its keys and its drag | `crates/noctua-design-runtime/src/split.js` |
 | a control that records a shortcut: the keys it takes, the order a chord is written in, a key's label | `crates/noctua-design-runtime/src/key-capture.js` |
 | a log: the end it follows, and what stops it | `crates/noctua-design-runtime/src/log.js` |
+| a message's countdown: the deadline it draws to, how it is frozen, and when the time left is said | `crates/noctua-design-runtime/src/message-bar.js` |
 | what both implementations must *do* | `spec/components/<name>.cases.toml`, and `crates/noctua-design-spec/src/conformance.rs` for the vocabulary a step may use |
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
@@ -1039,6 +1040,34 @@ the region, because a control inside a `role="log"` would be read as a line. The
 **A line is inline parts a space apart**, so a selection copies one line of text a line and
 nothing a stylesheet draws. Its level is a word in a box tinted with its tone, in the page's own
 ink, and its source is a name, marked `nd-identifier`.
+
+### The alert line
+
+**A line is a `MessageBar` drawn as one row along a window's bottom edge, never a fourth
+component.** `MessageBar { presentation: line }` is the interface's alert line
+(`NOCTUA.md §12.17`): a row filled with its tone, in the tone's own ink, `--noctua-shell-line`
+tall at least, with a footer line's type. **It is in the flow and the window places it last**, so
+it covers neither the footer above it nor the control the keyboard is on there (WCAG 2.4.11); the
+section's "fixed" is the window's layout, not `position: fixed`. A line wraps rather than cuts,
+because what an alert says is what a reader has to act on. Every ring in it is drawn inside its
+control and in the line's ink, because the ring colour is not a pair measured against a fill of
+the tone.
+
+**The caller keeps the clock, and the bar draws the same instant.** `deadline` is milliseconds
+since the epoch, and `dist/message-bar.js` works out the whole seconds left from `Date.now()` on
+every tick, so a throttled tab wakes to the right number and a deadline the caller writes again is
+followed at once. It never acts at the deadline. It reads time only through `Date.now()` and the
+page's timers, so a test freezes it by installing a clock (`page.clock`), and no prop exists for
+a test. The number is a `role="timer"` with `aria-live="off"` written out, because an implicit
+value inside an atomic `role="alert"` is the one assistive technology honours least. A visually
+hidden polite region beside it is written when the count starts, at every ten seconds left and at
+five. Without `countdown_label` the seconds are `Intl`'s, in the document's language.
+
+**What a reader does about it is the bar's own control**, `action_label` and `action`, drawn in
+the message's ink and last among its words, so a narrow window wraps it onto a row of its own.
+A `Button` in `children` would paint its own ink on a fill nobody measured it against. On this
+site the page writes each example's deadline ahead of now (`shell.js`), because a tree with no
+code in it can only carry an instant long past.
 
 ### Tones, bars, carousels, spectra
 

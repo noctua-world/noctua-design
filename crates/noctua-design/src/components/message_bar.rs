@@ -37,11 +37,35 @@ impl MessageBarLive {
     }
 }
 
+/// How the message is drawn. `bar` is a block in the page, beside what happened. `line` is a row along a window's bottom edge, filled with the tone, that the window places last so it covers nothing.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum MessageBarPresentation {
+    #[default]
+    /// `bar`
+    Bar,
+    /// `line`
+    Line,
+}
+
+impl MessageBarPresentation {
+    /// Every value, in the order the spec declares them.
+    pub const ALL: [Self; 2] = [Self::Bar, Self::Line];
+
+    /// The value as it appears in the DOM.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Bar => "bar",
+            Self::Line => "line",
+        }
+    }
+}
+
 /// Tell users what happened, in a bar that stays where the thing happened.
 ///
 /// # Accessibility
 ///
-/// The bar is a `role="status"` until `alert` is turned on, and a status waits for a pause instead of cutting in. The icon is `aria-hidden`, and the tone is never the only signal.
+/// A `role="status"` until `alert` is on. The time left is a silent `role="timer"`, and a polite region says it when the count starts, every ten seconds and at five. The icon is `aria-hidden`.
 #[component]
 pub fn MessageBar(
     /// Which of the colour system's tones the bar is painted from. The tones live in `noctua_design::tones`. **Never the only signal** (`NOCTUA.md §8.8.6`): the words and the icon carry the meaning.
@@ -60,6 +84,17 @@ pub fn MessageBar(
     dismissible: bool,
     /// The name of the control that takes the bar away, such as *Dismiss this message*. Wanted in practice by `dismissible`, because that control is a glyph and this is the only name it has.
     dismiss_label: Option<String>,
+    /// How the message is drawn. `bar` is a block in the page, beside what happened. `line` is a row along a window's bottom edge, filled with the tone, that the window places last so it covers nothing.
+    #[props(default)]
+    presentation: MessageBarPresentation,
+    /// When the event the message announces happens, in milliseconds since the Unix epoch. `dist/message-bar.js` draws the whole seconds left until it, and follows a new value the caller writes.
+    deadline: Option<String>,
+    /// What the message says about the time left, with a `{count}` hole, such as *Restoring in 9 seconds*. Write both forms as `one:…|other:…`. Without it the seconds are written by `Intl` in the document's language.
+    countdown_label: Option<String>,
+    /// The words on a control at the end of the row, such as *Restore now*. Setting it draws the control, a `<button>` in the message's own ink.
+    action_label: Option<String>,
+    /// A name a script finds the control by, written as `data-nd-action` on it. Wanted with `action_label`, because the press is the caller's own code.
+    action: Option<String>,
     /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
     ai_mark: Option<String>,
     /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
@@ -74,6 +109,7 @@ pub fn MessageBar(
 ) -> Element {
     let root = format!("nd-message-bar {class}");
     let root = root.trim().to_owned();
+    let counted = deadline.is_some();
 
     rsx! {
         div {
@@ -84,6 +120,9 @@ pub fn MessageBar(
             // the role's own value, which is the right one both times.
             "aria-live": live.map(MessageBarLive::as_str),
             "data-nd-tone": tone,
+            "data-nd-presentation": presentation.as_str(),
+            "data-nd-deadline": deadline,
+            "data-nd-countdown-label": countdown_label,
             "data-nd-dismissible": if dismissible { "true" } else { "false" },
 
             if let Some(icon) = icon {
@@ -102,6 +141,36 @@ pub fn MessageBar(
                     strong { class: "nd-message-bar-title", "{title}" }
                 }
                 div { class: "nd-message-bar-body", {children} }
+                // THE TIME LEFT, AFTER THE MESSAGE IT IS ABOUT. See the header.
+                if counted {
+                    span {
+                        class: "nd-message-bar-countdown",
+                        role: "timer",
+                        "aria-live": "off",
+                        "data-nd-message-bar-countdown": "",
+                        hidden: true,
+                    }
+                    span {
+                        class: "nd-visually-hidden",
+                        "aria-live": "polite",
+                        "aria-atomic": "true",
+                        "data-nd-message-bar-said": "",
+                    }
+                }
+                // WHAT A READER DOES ABOUT IT, LAST AMONG THE WORDS. Visible
+                // from the first paint, because the press is the caller's code
+                // and not this package's script: `Button { action }`'s
+                // arrangement. Inside the text rather than beside it, so a
+                // narrow window wraps it onto a row of its own instead of
+                // squeezing the message beside it.
+                if let Some(words) = action_label {
+                    button {
+                        class: "nd-message-bar-action",
+                        r#type: "button",
+                        "data-nd-action": action,
+                        "{words}"
+                    }
+                }
             }
 
             // IN THE BAR'S ROW, before the dismiss control. The row aligns to

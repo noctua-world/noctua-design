@@ -11,7 +11,11 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `MessageBar` example. 5 of them.
+/// An instant long past, in milliseconds since the epoch: the deadline a tree
+/// with no code in it can know. The page writes the real one (`shell.js`).
+const PAST: &str = "1767225600000";
+
+/// Every `MessageBar` example. 9 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // THE DEFAULT, AND THE QUIET ONE. A status waits for a pause instead of
     // cutting a screen reader off, which is right about something that worked.
@@ -86,6 +90,135 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                 ("title", Value::Message(Key::ExampleMessageBarSavedTitle)),
             ],
             children: &[Node::Text(Value::Message(Key::ExampleMessageBarSaved))],
+        }],
+    ),
+    // THE ALERT LINE (`NOCTUA.md §12.17`), last in its window, under the
+    // footer. The deadline is the caller's, and on this site the caller is
+    // the page: `shell.js` writes one ten seconds ahead when the page loads
+    // and when the control in the window is pressed. The tree's own deadline
+    // is an instant long past, which is all a tree with no code can know.
+    (
+        r#"MessageBar { presentation: Line, alert: true, tone: "danger", deadline, countdown_label, action_label, action, … } — the deadline written by the page"#,
+        &[Node::Element {
+            tag: "div",
+            attributes: &[
+                (
+                    "class",
+                    Value::Text("nd-example-window nd-example-countdown"),
+                ),
+                ("data-nd-seconds", Value::Text("10")),
+            ],
+            children: &[
+                Node::Element {
+                    tag: "div",
+                    attributes: &[("class", Value::Text("nd-example-work"))],
+                    children: &[Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("label", Value::Message(Key::ExampleMessageBarAgain)),
+                            ("action", Value::Text("countdown-again")),
+                            ("variant", Value::Text("outline")),
+                            ("tone", Value::Text("neutral")),
+                            ("size", Value::Text("small")),
+                            ("icon", Value::Text("rotate-ccw")),
+                        ],
+                        children: &[],
+                    }],
+                },
+                Node::Component {
+                    name: "Footer",
+                    props: &[("label", Value::Message(Key::ExampleFooterLabel))],
+                    children: &[Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("modeline"))],
+                        children: &[Node::Element {
+                            tag: "span",
+                            attributes: &[],
+                            children: &[Node::Text(Value::Message(Key::ExampleFooterPage))],
+                        }],
+                    }],
+                },
+                Node::Component {
+                    name: "MessageBar",
+                    props: &[
+                        ("presentation", Value::Text("line")),
+                        ("alert", Value::Bool(true)),
+                        ("tone", Value::Text("danger")),
+                        ("icon", Value::Text("alert")),
+                        ("deadline", Value::Text(PAST)),
+                        (
+                            "countdown_label",
+                            Value::Message(Key::ExampleMessageBarRestoring),
+                        ),
+                        (
+                            "action_label",
+                            Value::Message(Key::ExampleMessageBarRestore),
+                        ),
+                        ("action", Value::Text("restore")),
+                    ],
+                    children: &[Node::Text(Value::Message(Key::ExampleMessageBarLost))],
+                },
+            ],
+        }],
+    ),
+    // STOPPED ON PURPOSE. Nothing counts, and the action starts it again.
+    (
+        r#"MessageBar { presentation: Line, tone: "danger", action_label, action, … }"#,
+        &[Node::Component {
+            name: "MessageBar",
+            props: &[
+                ("presentation", Value::Text("line")),
+                ("tone", Value::Text("danger")),
+                ("icon", Value::Text("alert")),
+                ("action_label", Value::Message(Key::ExampleMessageBarStart)),
+                ("action", Value::Text("start")),
+            ],
+            children: &[Node::Text(Value::Message(Key::ExampleMessageBarStopped))],
+        }],
+    ),
+    // NO TONE, AND A READER MAY TAKE IT AWAY: a line about the window that is
+    // not an alarm, on the subtle surface, its control at the end of the row.
+    (
+        r"MessageBar { presentation: Line, dismissible: true, dismiss_label, … }",
+        &[Node::Component {
+            name: "MessageBar",
+            props: &[
+                ("presentation", Value::Text("line")),
+                ("icon", Value::Text("wifi-off")),
+                ("dismissible", Value::Bool(true)),
+                (
+                    "dismiss_label",
+                    Value::Message(Key::ExampleMessageBarDismiss),
+                ),
+            ],
+            children: &[Node::Text(Value::Message(Key::ExampleMessageBarOffline))],
+        }],
+    ),
+    // A COUNTDOWN IN A BAR, under the message it is about.
+    (
+        r#"MessageBar { tone: "warning", deadline, countdown_label, action_label, … } — the deadline written by the page"#,
+        &[Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-example-countdown")),
+                ("data-nd-seconds", Value::Text("60")),
+            ],
+            children: &[Node::Component {
+                name: "MessageBar",
+                props: &[
+                    ("tone", Value::Text("warning")),
+                    ("icon", Value::Text("warning")),
+                    ("title", Value::Message(Key::ExampleMessageBarExpiringTitle)),
+                    ("deadline", Value::Text(PAST)),
+                    (
+                        "countdown_label",
+                        Value::Message(Key::ExampleMessageBarEnds),
+                    ),
+                    ("action_label", Value::Message(Key::ExampleMessageBarStay)),
+                    ("action", Value::Text("stay")),
+                ],
+                children: &[Node::Text(Value::Message(Key::ExampleMessageBarSave))],
+            }],
         }],
     ),
 ];

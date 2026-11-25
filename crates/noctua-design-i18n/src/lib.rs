@@ -3166,6 +3166,34 @@ pub enum Key {
     ExampleMessageBarNoteDismiss,
     /// `example.message-bar.note-plain`
     ExampleMessageBarNotePlain,
+    /// `example.message-bar.lost`
+    ExampleMessageBarLost,
+    /// `example.message-bar.restoring`
+    ExampleMessageBarRestoring,
+    /// `example.message-bar.restore`
+    ExampleMessageBarRestore,
+    /// `example.message-bar.again`
+    ExampleMessageBarAgain,
+    /// `example.message-bar.stopped`
+    ExampleMessageBarStopped,
+    /// `example.message-bar.start`
+    ExampleMessageBarStart,
+    /// `example.message-bar.save`
+    ExampleMessageBarSave,
+    /// `example.message-bar.ends`
+    ExampleMessageBarEnds,
+    /// `example.message-bar.stay`
+    ExampleMessageBarStay,
+    /// `example.message-bar.note-line`
+    ExampleMessageBarNoteLine,
+    /// `example.message-bar.offline`
+    ExampleMessageBarOffline,
+    /// `example.message-bar.note-quiet`
+    ExampleMessageBarNoteQuiet,
+    /// `example.message-bar.note-stopped`
+    ExampleMessageBarNoteStopped,
+    /// `example.message-bar.note-countdown`
+    ExampleMessageBarNoteCountdown,
     /// `example.overview.divider.pay`
     ExampleOverviewDividerPay,
     /// `example.overview.divider.pay-body`
@@ -5062,10 +5090,24 @@ pub enum Key {
     ComponentMessageBarPropDismissibleDoc,
     /// `component.message-bar.prop.dismiss_label.doc`
     ComponentMessageBarPropDismissLabelDoc,
+    /// `component.message-bar.prop.presentation.doc`
+    ComponentMessageBarPropPresentationDoc,
+    /// `component.message-bar.prop.deadline.doc`
+    ComponentMessageBarPropDeadlineDoc,
+    /// `component.message-bar.prop.countdown_label.doc`
+    ComponentMessageBarPropCountdownLabelDoc,
+    /// `component.message-bar.prop.action_label.doc`
+    ComponentMessageBarPropActionLabelDoc,
+    /// `component.message-bar.prop.action.doc`
+    ComponentMessageBarPropActionDoc,
     /// `component.message-bar.prop.children.doc`
     ComponentMessageBarPropChildrenDoc,
     /// `component.message-bar.state.dismissed.doc`
     ComponentMessageBarStateDismissedDoc,
+    /// `component.message-bar.key.tab.name`
+    ComponentMessageBarKeyTabName,
+    /// `component.message-bar.key.tab.action`
+    ComponentMessageBarKeyTabAction,
     /// `component.message-bar.key.enter-or-space.name`
     ComponentMessageBarKeyEnterOrSpaceName,
     /// `component.message-bar.key.enter-or-space.action`
@@ -6798,7 +6840,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3337] = [
+    pub const ALL: [Self; 3358] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -8322,6 +8364,20 @@ impl Key {
         Self::ExampleMessageBarNoteAlert,
         Self::ExampleMessageBarNoteDismiss,
         Self::ExampleMessageBarNotePlain,
+        Self::ExampleMessageBarLost,
+        Self::ExampleMessageBarRestoring,
+        Self::ExampleMessageBarRestore,
+        Self::ExampleMessageBarAgain,
+        Self::ExampleMessageBarStopped,
+        Self::ExampleMessageBarStart,
+        Self::ExampleMessageBarSave,
+        Self::ExampleMessageBarEnds,
+        Self::ExampleMessageBarStay,
+        Self::ExampleMessageBarNoteLine,
+        Self::ExampleMessageBarOffline,
+        Self::ExampleMessageBarNoteQuiet,
+        Self::ExampleMessageBarNoteStopped,
+        Self::ExampleMessageBarNoteCountdown,
         Self::ExampleOverviewDividerPay,
         Self::ExampleOverviewDividerPayBody,
         Self::ExampleOverviewDividerInvoice,
@@ -9270,8 +9326,15 @@ impl Key {
         Self::ComponentMessageBarPropLiveDoc,
         Self::ComponentMessageBarPropDismissibleDoc,
         Self::ComponentMessageBarPropDismissLabelDoc,
+        Self::ComponentMessageBarPropPresentationDoc,
+        Self::ComponentMessageBarPropDeadlineDoc,
+        Self::ComponentMessageBarPropCountdownLabelDoc,
+        Self::ComponentMessageBarPropActionLabelDoc,
+        Self::ComponentMessageBarPropActionDoc,
         Self::ComponentMessageBarPropChildrenDoc,
         Self::ComponentMessageBarStateDismissedDoc,
+        Self::ComponentMessageBarKeyTabName,
+        Self::ComponentMessageBarKeyTabAction,
         Self::ComponentMessageBarKeyEnterOrSpaceName,
         Self::ComponentMessageBarKeyEnterOrSpaceAction,
         Self::ComponentMeterGuidance,
@@ -11667,6 +11730,20 @@ impl Key {
             Self::ExampleMessageBarNoteAlert => "example.message-bar.note-alert",
             Self::ExampleMessageBarNoteDismiss => "example.message-bar.note-dismiss",
             Self::ExampleMessageBarNotePlain => "example.message-bar.note-plain",
+            Self::ExampleMessageBarLost => "example.message-bar.lost",
+            Self::ExampleMessageBarRestoring => "example.message-bar.restoring",
+            Self::ExampleMessageBarRestore => "example.message-bar.restore",
+            Self::ExampleMessageBarAgain => "example.message-bar.again",
+            Self::ExampleMessageBarStopped => "example.message-bar.stopped",
+            Self::ExampleMessageBarStart => "example.message-bar.start",
+            Self::ExampleMessageBarSave => "example.message-bar.save",
+            Self::ExampleMessageBarEnds => "example.message-bar.ends",
+            Self::ExampleMessageBarStay => "example.message-bar.stay",
+            Self::ExampleMessageBarNoteLine => "example.message-bar.note-line",
+            Self::ExampleMessageBarOffline => "example.message-bar.offline",
+            Self::ExampleMessageBarNoteQuiet => "example.message-bar.note-quiet",
+            Self::ExampleMessageBarNoteStopped => "example.message-bar.note-stopped",
+            Self::ExampleMessageBarNoteCountdown => "example.message-bar.note-countdown",
             Self::ExampleOverviewDividerPay => "example.overview.divider.pay",
             Self::ExampleOverviewDividerPayBody => "example.overview.divider.pay-body",
             Self::ExampleOverviewDividerInvoice => "example.overview.divider.invoice",
@@ -12949,10 +13026,23 @@ impl Key {
             Self::ComponentMessageBarPropDismissLabelDoc => {
                 "component.message-bar.prop.dismiss_label.doc"
             }
+            Self::ComponentMessageBarPropPresentationDoc => {
+                "component.message-bar.prop.presentation.doc"
+            }
+            Self::ComponentMessageBarPropDeadlineDoc => "component.message-bar.prop.deadline.doc",
+            Self::ComponentMessageBarPropCountdownLabelDoc => {
+                "component.message-bar.prop.countdown_label.doc"
+            }
+            Self::ComponentMessageBarPropActionLabelDoc => {
+                "component.message-bar.prop.action_label.doc"
+            }
+            Self::ComponentMessageBarPropActionDoc => "component.message-bar.prop.action.doc",
             Self::ComponentMessageBarPropChildrenDoc => "component.message-bar.prop.children.doc",
             Self::ComponentMessageBarStateDismissedDoc => {
                 "component.message-bar.state.dismissed.doc"
             }
+            Self::ComponentMessageBarKeyTabName => "component.message-bar.key.tab.name",
+            Self::ComponentMessageBarKeyTabAction => "component.message-bar.key.tab.action",
             Self::ComponentMessageBarKeyEnterOrSpaceName => {
                 "component.message-bar.key.enter-or-space.name"
             }
@@ -16870,6 +16960,34 @@ impl Locale {
                 Key::ExampleMessageBarNotePlain => {
                     "No tone at all, which is the absence of the attribute rather than a name. The words carry the message on their own."
                 }
+                Key::ExampleMessageBarLost => "The local server is not running.",
+                Key::ExampleMessageBarRestoring => {
+                    "one:Restoring it in {count} second|other:Restoring it in {count} seconds"
+                }
+                Key::ExampleMessageBarRestore => "Restore now",
+                Key::ExampleMessageBarAgain => "Count down again",
+                Key::ExampleMessageBarStopped => "The local server is stopped.",
+                Key::ExampleMessageBarStart => "Start it",
+                Key::ExampleMessageBarSave => "Save what you are working on before then.",
+                Key::ExampleMessageBarEnds => {
+                    "one:Signing you out in {count} second|other:Signing you out in {count} seconds"
+                }
+                Key::ExampleMessageBarStay => "Stay signed in",
+                Key::ExampleMessageBarNoteLine => {
+                    "The line closes the window, under its footer. The page writes a deadline ten seconds ahead, as the interface does when it loses its server."
+                }
+                Key::ExampleMessageBarOffline => {
+                    "You are working offline. Changes are kept here until the connection comes back."
+                }
+                Key::ExampleMessageBarNoteQuiet => {
+                    "A line with no tone is drawn on the subtle surface. One a reader may take away ends with its control."
+                }
+                Key::ExampleMessageBarNoteStopped => {
+                    "Stopped on purpose, the line counts nothing down. Its action starts the server again."
+                }
+                Key::ExampleMessageBarNoteCountdown => {
+                    "A bar counts down too, under its message. The time left is said as the count starts, every ten seconds and at five."
+                }
                 Key::ExampleOverviewDividerPay => "Pay by card",
                 Key::ExampleOverviewDividerPayBody => "We take Visa, Mastercard and Elo.",
                 Key::ExampleOverviewDividerInvoice => "Ask for an invoice",
@@ -19310,10 +19428,10 @@ impl Locale {
                     "Runs the item and closes the menu. The link form answers Enter alone."
                 }
                 Key::ComponentMessageBarGuidance => {
-                    "Use a message bar for something that happened, shown in place and left on the page. For one refused field, use `Field`. For everything wrong in a form at once, use `ErrorSummary`."
+                    "Use a message bar for something that happened, shown in place and left on the page. Use the `line` form for a state of the whole window, such as a program it has lost. For one refused field, use `Field`."
                 }
                 Key::ComponentMessageBarA11yNotes => {
-                    "The bar is a `role=\"status\"` until `alert` is turned on, and a status waits for a pause instead of cutting in. The icon is `aria-hidden`, and the tone is never the only signal."
+                    "A `role=\"status\"` until `alert` is on. The time left is a silent `role=\"timer\"`, and a polite region says it when the count starts, every ten seconds and at five. The icon is `aria-hidden`."
                 }
                 Key::ComponentMessageBarPropToneDoc => {
                     "Which of the colour system's tones the bar is painted from. The tones live in `noctua_design::tones`. **Never the only signal** (`NOCTUA.md §8.8.6`): the words and the icon carry the meaning."
@@ -19336,15 +19454,34 @@ impl Locale {
                 Key::ComponentMessageBarPropDismissLabelDoc => {
                     "The name of the control that takes the bar away, such as *Dismiss this message*. Wanted in practice by `dismissible`, because that control is a glyph and this is the only name it has."
                 }
+                Key::ComponentMessageBarPropPresentationDoc => {
+                    "How the message is drawn. `bar` is a block in the page, beside what happened. `line` is a row along a window's bottom edge, filled with the tone, that the window places last so it covers nothing."
+                }
+                Key::ComponentMessageBarPropDeadlineDoc => {
+                    "When the event the message announces happens, in milliseconds since the Unix epoch. `dist/message-bar.js` draws the whole seconds left until it, and follows a new value the caller writes."
+                }
+                Key::ComponentMessageBarPropCountdownLabelDoc => {
+                    "What the message says about the time left, with a `{count}` hole, such as *Restoring in 9 seconds*. Write both forms as `one:…|other:…`. Without it the seconds are written by `Intl` in the document's language."
+                }
+                Key::ComponentMessageBarPropActionLabelDoc => {
+                    "The words on a control at the end of the row, such as *Restore now*. Setting it draws the control, a `<button>` in the message's own ink."
+                }
+                Key::ComponentMessageBarPropActionDoc => {
+                    "A name a script finds the control by, written as `data-nd-action` on it. Wanted with `action_label`, because the press is the caller's own code."
+                }
                 Key::ComponentMessageBarPropChildrenDoc => {
                     "The message, as one or two sentences. It may hold a `Link` to whatever a reader has to do about it."
                 }
                 Key::ComponentMessageBarStateDismissedDoc => {
                     "Set on a bar a reader has taken away. The stylesheet takes it out of the layout from there, so the element stays in the document and its live region keeps working."
                 }
+                Key::ComponentMessageBarKeyTabName => "Tab",
+                Key::ComponentMessageBarKeyTabAction => {
+                    "Moves onto the action, then onto the control that dismisses the bar."
+                }
                 Key::ComponentMessageBarKeyEnterOrSpaceName => "Enter or Space",
                 Key::ComponentMessageBarKeyEnterOrSpaceAction => {
-                    "Takes the bar away, on the control that dismisses it. Both keys work, because that control is a `<button>`."
+                    "Presses the control the focus is on. Both keys work, because each control is a `<button>`."
                 }
                 Key::ComponentMeterGuidance => {
                     "Use a meter for how much of a known total is used: 41 GB of a 50 GB disk, 68% of a budget. For a task that starts at nothing and finishes, use `Progress`. `low`, `high` and `optimum` colour the bar, and `value_label` is the sentence beside it."
@@ -24477,6 +24614,34 @@ impl Locale {
                 Key::ExampleMessageBarNotePlain => {
                     "Nenhum tom, que é a ausência do atributo e não um nome. As palavras carregam a mensagem sozinhas."
                 }
+                Key::ExampleMessageBarLost => "O servidor local não está rodando.",
+                Key::ExampleMessageBarRestoring => {
+                    "one:Restaurando em {count} segundo|other:Restaurando em {count} segundos"
+                }
+                Key::ExampleMessageBarRestore => "Restaurar agora",
+                Key::ExampleMessageBarAgain => "Contar de novo",
+                Key::ExampleMessageBarStopped => "O servidor local está parado.",
+                Key::ExampleMessageBarStart => "Iniciar",
+                Key::ExampleMessageBarSave => "Salve o que você está fazendo antes disso.",
+                Key::ExampleMessageBarEnds => {
+                    "one:Desconectando você em {count} segundo|other:Desconectando você em {count} segundos"
+                }
+                Key::ExampleMessageBarStay => "Continuar conectado",
+                Key::ExampleMessageBarNoteLine => {
+                    "A linha fecha a janela, abaixo do rodapé. A página escreve um prazo dez segundos à frente, como a interface faz ao perder o servidor."
+                }
+                Key::ExampleMessageBarOffline => {
+                    "Você está trabalhando sem conexão. As mudanças ficam guardadas aqui até a conexão voltar."
+                }
+                Key::ExampleMessageBarNoteQuiet => {
+                    "Uma linha sem tom é desenhada na superfície sutil. Uma que a pessoa pode dispensar termina com o controle dela."
+                }
+                Key::ExampleMessageBarNoteStopped => {
+                    "Parado de propósito, a linha não conta nada. A ação dela inicia o servidor de novo."
+                }
+                Key::ExampleMessageBarNoteCountdown => {
+                    "Uma barra também conta, abaixo da mensagem. O tempo que falta é anunciado no início, a cada dez segundos e aos cinco."
+                }
                 Key::ExampleOverviewDividerPay => "Pagar com cartão",
                 Key::ExampleOverviewDividerPayBody => "Aceitamos Visa, Mastercard e Elo.",
                 Key::ExampleOverviewDividerInvoice => "Pedir uma nota fiscal",
@@ -26925,10 +27090,10 @@ impl Locale {
                     "Aciona o item e fecha o menu. A forma de link responde só ao Enter."
                 }
                 Key::ComponentMessageBarGuidance => {
-                    "Use uma barra de mensagem para algo que aconteceu, mostrada no lugar e deixada na página. Para um campo recusado, use `Field`. Para tudo o que está errado num formulário de uma vez, use `ErrorSummary`."
+                    "Use uma barra de mensagem para algo que aconteceu, mostrada no lugar e deixada na página. Use a forma `line` para um estado da janela inteira, como um programa que ela perdeu. Para um campo recusado, use `Field`."
                 }
                 Key::ComponentMessageBarA11yNotes => {
-                    "A barra é um `role=\"status\"` até `alert` ser ligado, e um status espera uma pausa em vez de cortar a fala. O ícone é `aria-hidden`, e o tom nunca é o único sinal."
+                    "Um `role=\"status\"` até `alert` ser ligado. O tempo que falta é um `role=\"timer\"` silencioso, e uma região `polite` o anuncia quando a contagem começa, a cada dez segundos e aos cinco. O ícone é `aria-hidden`."
                 }
                 Key::ComponentMessageBarPropToneDoc => {
                     "De qual tom do sistema de cores a barra é pintada. Os tons ficam em `noctua_design::tones`. **Nunca o único sinal** (`NOCTUA.md §8.8.6`): as palavras e o ícone carregam o significado."
@@ -26951,15 +27116,34 @@ impl Locale {
                 Key::ComponentMessageBarPropDismissLabelDoc => {
                     "O nome do controle que tira a barra dali, como *Dispensar esta mensagem*. Necessário na prática pelo `dismissible`, porque esse controle é um glifo e este é o único nome que ele tem."
                 }
+                Key::ComponentMessageBarPropPresentationDoc => {
+                    "Como a mensagem é desenhada. `bar` é um bloco na página, ao lado do que aconteceu. `line` é uma fileira na borda de baixo de uma janela, preenchida com o tom, que a janela põe por último para não cobrir nada."
+                }
+                Key::ComponentMessageBarPropDeadlineDoc => {
+                    "Quando acontece o evento que a mensagem anuncia, em milissegundos desde a época Unix. O `dist/message-bar.js` desenha os segundos inteiros que faltam até ele e acompanha um valor novo escrito por quem chama."
+                }
+                Key::ComponentMessageBarPropCountdownLabelDoc => {
+                    "O que a mensagem diz sobre o tempo que falta, com um espaço `{count}`, como *Restaurando em 9 segundos*. Escreva as duas formas como `one:…|other:…`. Sem ele, os segundos são escritos pelo `Intl` na língua do documento."
+                }
+                Key::ComponentMessageBarPropActionLabelDoc => {
+                    "As palavras de um controle no fim da fileira, como *Restaurar agora*. Defini-lo desenha o controle, um `<button>` na tinta da própria mensagem."
+                }
+                Key::ComponentMessageBarPropActionDoc => {
+                    "Um nome pelo qual um script encontra o controle, escrito nele como `data-nd-action`. Necessário com `action_label`, porque o clique é código de quem chama."
+                }
                 Key::ComponentMessageBarPropChildrenDoc => {
                     "A mensagem, em uma ou duas frases. Ela pode conter um `Link` para o que a pessoa precisa fazer a respeito."
                 }
                 Key::ComponentMessageBarStateDismissedDoc => {
                     "Definido numa barra que a pessoa tirou dali. A folha de estilo a tira do layout a partir daí, então o elemento continua no documento e a região viva dele segue funcionando."
                 }
+                Key::ComponentMessageBarKeyTabName => "Tab",
+                Key::ComponentMessageBarKeyTabAction => {
+                    "Vai para a ação e depois para o controle que dispensa a barra."
+                }
                 Key::ComponentMessageBarKeyEnterOrSpaceName => "Enter ou Espaço",
                 Key::ComponentMessageBarKeyEnterOrSpaceAction => {
-                    "Tira a barra dali, no controle que a dispensa. As duas teclas funcionam, porque esse controle é um `<button>`."
+                    "Aciona o controle em que está o foco. As duas teclas funcionam, porque cada controle é um `<button>`."
                 }
                 Key::ComponentMeterGuidance => {
                     "Use um medidor para quanto de um total conhecido está em uso: 41 GB de um disco de 50 GB, 68% de um orçamento. Para uma tarefa que começa do nada e termina, use `Progress`. `low`, `high` e `optimum` colorem a barra, e `value_label` é a frase ao lado."
@@ -32202,6 +32386,36 @@ impl Locale {
                 Key::ExampleMessageBarNotePlain => {
                     "⟦Noo toonee aat aall, whiich iis thee aabseencee oof thee aattriibuutee raatheer thaan aa naamee. Thee woords caarry thee meessaagee oon theeiir oown.⟧"
                 }
+                Key::ExampleMessageBarLost => "⟦Thee loocaal seerveer iis noot ruunniing.⟧",
+                Key::ExampleMessageBarRestoring => {
+                    "one:⟦Reestooriing iit iin {count} seecoond⟧|other:⟦Reestooriing iit iin {count} seecoonds⟧"
+                }
+                Key::ExampleMessageBarRestore => "⟦Reestooree noow⟧",
+                Key::ExampleMessageBarAgain => "⟦Coouunt doown aagaaiin⟧",
+                Key::ExampleMessageBarStopped => "⟦Thee loocaal seerveer iis stooppeed.⟧",
+                Key::ExampleMessageBarStart => "⟦Staart iit⟧",
+                Key::ExampleMessageBarSave => {
+                    "⟦Saavee whaat yoouu aaree woorkiing oon beefooree theen.⟧"
+                }
+                Key::ExampleMessageBarEnds => {
+                    "one:⟦Siigniing yoouu oouut iin {count} seecoond⟧|other:⟦Siigniing yoouu oouut iin {count} seecoonds⟧"
+                }
+                Key::ExampleMessageBarStay => "⟦Staay siigneed iin⟧",
+                Key::ExampleMessageBarNoteLine => {
+                    "⟦Thee liinee cloosees thee wiindoow, uundeer iits fooooteer. Thee paagee wriitees aa deeaadliinee teen seecoonds aaheeaad, aas thee iinteerfaacee dooees wheen iit loosees iits seerveer.⟧"
+                }
+                Key::ExampleMessageBarOffline => {
+                    "⟦Yoouu aaree woorkiing ooffliinee. Chaangees aaree keept heeree uuntiil thee coonneectiioon coomees baack.⟧"
+                }
+                Key::ExampleMessageBarNoteQuiet => {
+                    "⟦AA liinee wiith noo toonee iis draawn oon thee suubtlee suurfaacee. OOnee aa reeaadeer maay taakee aawaay eends wiith iits coontrool.⟧"
+                }
+                Key::ExampleMessageBarNoteStopped => {
+                    "⟦Stooppeed oon puurpoosee, thee liinee coouunts noothiing doown. IIts aactiioon staarts thee seerveer aagaaiin.⟧"
+                }
+                Key::ExampleMessageBarNoteCountdown => {
+                    "⟦AA baar coouunts doown toooo, uundeer iits meessaagee. Thee tiimee leeft iis saaiid aas thee coouunt staarts, eeveery teen seecoonds aand aat fiivee.⟧"
+                }
                 Key::ExampleOverviewDividerPay => "⟦Paay by caard⟧",
                 Key::ExampleOverviewDividerPayBody => {
                     "⟦Wee taakee Viisaa, Maasteercaard aand EEloo.⟧"
@@ -34696,10 +34910,10 @@ impl Locale {
                     "⟦Ruuns thee iiteem aand cloosees thee meenuu. Thee liink foorm aansweers EEnteer aaloonee.⟧"
                 }
                 Key::ComponentMessageBarGuidance => {
-                    "⟦UUsee aa meessaagee baar foor soomeethiing thaat haappeeneed, shoown iin plaacee aand leeft oon thee paagee. Foor oonee reefuuseed fiieeld, uusee `Fiieeld`. Foor eeveerythiing wroong iin aa foorm aat ooncee, uusee `EErroorSuummaary`.⟧"
+                    "⟦UUsee aa meessaagee baar foor soomeethiing thaat haappeeneed, shoown iin plaacee aand leeft oon thee paagee. UUsee thee `liinee` foorm foor aa staatee oof thee whoolee wiindoow, suuch aas aa proograam iit haas loost. Foor oonee reefuuseed fiieeld, uusee `Fiieeld`.⟧"
                 }
                 Key::ComponentMessageBarA11yNotes => {
-                    "⟦Thee baar iis aa `roolee=\"staatuus\"` uuntiil `aaleert` iis tuurneed oon, aand aa staatuus waaiits foor aa paauusee iinsteeaad oof cuuttiing iin. Thee iicoon iis `aariiaa-hiiddeen`, aand thee toonee iis neeveer thee oonly siignaal.⟧"
+                    "⟦AA `roolee=\"staatuus\"` uuntiil `aaleert` iis oon. Thee tiimee leeft iis aa siileent `roolee=\"tiimeer\"`, aand aa pooliitee reegiioon saays iit wheen thee coouunt staarts, eeveery teen seecoonds aand aat fiivee. Thee iicoon iis `aariiaa-hiiddeen`.⟧"
                 }
                 Key::ComponentMessageBarPropToneDoc => {
                     "⟦Whiich oof thee cooloouur systeem's toonees thee baar iis paaiinteed froom. Thee toonees liivee iin `nooctuuaa_deesiign::toonees`. **Neeveer thee oonly siignaal** (`NOOCTUUAA.md §8.8.6`): thee woords aand thee iicoon caarry thee meeaaniing.⟧"
@@ -34722,15 +34936,34 @@ impl Locale {
                 Key::ComponentMessageBarPropDismissLabelDoc => {
                     "⟦Thee naamee oof thee coontrool thaat taakees thee baar aawaay, suuch aas *Diismiiss thiis meessaagee*. Waanteed iin praactiicee by `diismiissiiblee`, beecaauusee thaat coontrool iis aa glyph aand thiis iis thee oonly naamee iit haas.⟧"
                 }
+                Key::ComponentMessageBarPropPresentationDoc => {
+                    "⟦Hoow thee meessaagee iis draawn. `baar` iis aa bloock iin thee paagee, beesiidee whaat haappeeneed. `liinee` iis aa roow aaloong aa wiindoow's boottoom eedgee, fiilleed wiith thee toonee, thaat thee wiindoow plaacees laast soo iit cooveers noothiing.⟧"
+                }
+                Key::ComponentMessageBarPropDeadlineDoc => {
+                    "⟦Wheen thee eeveent thee meessaagee aannoouuncees haappeens, iin miilliiseecoonds siincee thee UUniix eepooch. `diist/meessaagee-baar.js` draaws thee whoolee seecoonds leeft uuntiil iit, aand foolloows aa neew vaaluuee thee caalleer wriitees.⟧"
+                }
+                Key::ComponentMessageBarPropCountdownLabelDoc => {
+                    "⟦Whaat thee meessaagee saays aaboouut thee tiimee leeft, wiith aa `{count}` hoolee, suuch aas *Reestooriing iin 9 seecoonds*. Wriitee booth foorms aas `oonee:…|ootheer:…`. Wiithoouut iit thee seecoonds aaree wriitteen by `IIntl` iin thee doocuumeent's laanguuaagee.⟧"
+                }
+                Key::ComponentMessageBarPropActionLabelDoc => {
+                    "⟦Thee woords oon aa coontrool aat thee eend oof thee roow, suuch aas *Reestooree noow*. Seettiing iit draaws thee coontrool, aa `<buuttoon>` iin thee meessaagee's oown iink.⟧"
+                }
+                Key::ComponentMessageBarPropActionDoc => {
+                    "⟦AA naamee aa scriipt fiinds thee coontrool by, wriitteen aas `daataa-nd-aactiioon` oon iit. Waanteed wiith `aactiioon_laabeel`, beecaauusee thee preess iis thee caalleer's oown coodee.⟧"
+                }
                 Key::ComponentMessageBarPropChildrenDoc => {
                     "⟦Thee meessaagee, aas oonee oor twoo seenteencees. IIt maay hoold aa `Liink` too whaateeveer aa reeaadeer haas too doo aaboouut iit.⟧"
                 }
                 Key::ComponentMessageBarStateDismissedDoc => {
                     "⟦Seet oon aa baar aa reeaadeer haas taakeen aawaay. Thee styleesheeeet taakees iit oouut oof thee laayoouut froom theeree, soo thee eeleemeent staays iin thee doocuumeent aand iits liivee reegiioon keeeeps woorkiing.⟧"
                 }
+                Key::ComponentMessageBarKeyTabName => "⟦Taab⟧",
+                Key::ComponentMessageBarKeyTabAction => {
+                    "⟦Moovees oontoo thee aactiioon, theen oontoo thee coontrool thaat diismiissees thee baar.⟧"
+                }
                 Key::ComponentMessageBarKeyEnterOrSpaceName => "⟦EEnteer oor Spaacee⟧",
                 Key::ComponentMessageBarKeyEnterOrSpaceAction => {
-                    "⟦Taakees thee baar aawaay, oon thee coontrool thaat diismiissees iit. Booth keeys woork, beecaauusee thaat coontrool iis aa `<buuttoon>`.⟧"
+                    "⟦Preessees thee coontrool thee foocuus iis oon. Booth keeys woork, beecaauusee eeaach coontrool iis aa `<buuttoon>`.⟧"
                 }
                 Key::ComponentMeterGuidance => {
                     "⟦UUsee aa meeteer foor hoow muuch oof aa knoown tootaal iis uuseed: 41 GB oof aa 50 GB diisk, 68% oof aa buudgeet. Foor aa taask thaat staarts aat noothiing aand fiiniishees, uusee `Proogreess`. `loow`, `hiigh` aand `ooptiimuum` cooloouur thee baar, aand `vaaluuee_laabeel` iis thee seenteencee beesiidee iit.⟧"

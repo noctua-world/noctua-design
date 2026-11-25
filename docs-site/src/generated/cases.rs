@@ -1595,6 +1595,50 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "MessageBar",
+        "case-message-bar-3",
+        &[Node::Component {
+            name: "MessageBar",
+            props: &[
+                ("alert", Value::Bool(true)),
+                (
+                    "countdown_label",
+                    Value::Data("one:{count} second left|other:{count} seconds left"),
+                ),
+                ("deadline", Value::Data("0")),
+                ("presentation", Value::Text("line")),
+                ("tone", Value::Data("danger")),
+            ],
+            children: &[Node::Text(Value::Data("The local server is not running."))],
+        }],
+    ),
+    (
+        "MessageBar",
+        "case-message-bar-4",
+        &[Node::Component {
+            name: "MessageBar",
+            props: &[
+                ("presentation", Value::Text("line")),
+                ("tone", Value::Data("danger")),
+            ],
+            children: &[Node::Text(Value::Data("The local server is stopped."))],
+        }],
+    ),
+    (
+        "MessageBar",
+        "case-message-bar-5",
+        &[Node::Component {
+            name: "MessageBar",
+            props: &[
+                ("action", Value::Data("restore")),
+                ("action_label", Value::Data("Restore now")),
+                ("presentation", Value::Text("line")),
+                ("tone", Value::Data("danger")),
+            ],
+            children: &[Node::Text(Value::Data("The local server is not running."))],
+        }],
+    ),
+    (
         "Meter",
         "case-meter-0",
         &[Node::Component {
