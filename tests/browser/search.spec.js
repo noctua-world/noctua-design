@@ -427,6 +427,35 @@ test("a refused box looks refused", async ({ page }) => {
 
 // --- Filtering, and what it must not touch ----------------------------------
 
+test("separators alone ask for nothing, as the empty box does", async ({ page }) => {
+  // A hyphen is not empty text, yet it holds no word, and the query with no
+  // word matches every item: the palette drew the head of its whole index for
+  // it, unmarked and in index order, under a sentence counting all of it.
+  await page.goto(url(ANY));
+  await showParts(page);
+  await openPalette(page, "button");
+  const box = page.locator(PALETTE.box);
+  for (const separators of ["-", ".", "/ :"]) {
+    await box.fill(separators);
+    await expect(page.locator(PALETTE.rows), `\`${separators}\``).toHaveCount(0);
+    await expect(page.locator(PALETTE.status), `\`${separators}\``).toHaveText("");
+    // And a word after them is still a question, so the box was not disabled.
+    await box.fill(`${separators}button`);
+    await expect(page.locator(PALETTE.rows).first()).toBeVisible();
+  }
+
+  // The children form shows every row for the empty box, in the author's
+  // order and with no sentence; so it does for separators alone.
+  await page.goto(url(PAGE.search));
+  await showParts(page);
+  const authored = await labels(page, CHILDREN.rows);
+  await page.locator(CHILDREN.box).fill("b");
+  await expect(page.locator(CHILDREN.status)).not.toHaveText("");
+  await page.locator(CHILDREN.box).fill("-");
+  await expect(page.locator(CHILDREN.status)).toHaveText("");
+  expect(await labels(page, CHILDREN.rows)).toEqual(authored);
+});
+
 test("filtering reaches the page around the box and stops there", async ({ page }) => {
   await page.goto(url(PAGE.search));
   await showParts(page);

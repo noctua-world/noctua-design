@@ -23,9 +23,9 @@
   color: var(--nc-color-fg);
 }
 
-/* All 351 names, through one indirection. `dist/tones.css` declares the four
-   custom properties for every family the palette has, so a tone added upstream
-   works here with nothing edited. */
+/* Every tone, through one indirection: the palette's 352 families and the two
+   names this system adds. `dist/tones.css` declares the four custom properties
+   for each, so a tone added upstream works here with nothing edited. */
 .nd-message-bar[data-nd-tone] {
   border-color: var(--nd-tone-border);
   border-inline-start-color: var(--nd-tone);

@@ -110,7 +110,7 @@
  * THREE RULES, NOT TWELVE — AND EVERY TONE IN THE PALETTE RATHER THAN FOUR.
  *
  * `dist/tones.css` declares `--nd-tone`, `--nd-tone-bg`, `--nd-tone-border` and
- * `--nd-tone-on` once per family, generated from the colour system's own 349.
+ * `--nd-tone-on` once per family, generated from the colour system's own 352 families.
  * A tag therefore says *the tone's background* and gets `overdue`, `shipped`,
  * `degraded` and the three hundred others for free — including the ones the
  * palette gains after this file was written.

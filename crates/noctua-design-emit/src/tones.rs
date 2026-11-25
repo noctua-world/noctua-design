@@ -329,8 +329,9 @@ mod tests {
 
     /// Every number written directly before the word *families*, in `text`.
     ///
-    /// The count is written `352 semantic families`, `352 families` and
-    /// `352 famílias`, so the word is looked for one and two words on.
+    /// The count is written `352 semantic families`, `352 families`,
+    /// `352 FAMILIES` and `352 famílias`, so the word is looked for one and two
+    /// words on, in either case.
     fn stated_counts(text: &str) -> Vec<usize> {
         let words: Vec<&str> = text.split_whitespace().collect();
         let mut counts = Vec::new();
@@ -339,7 +340,9 @@ mod tests {
                 continue;
             };
             let names_families = words[at + 1..].iter().take(2).any(|next| {
-                let next = next.trim_start_matches(|c: char| !c.is_alphabetic());
+                let next = next
+                    .trim_start_matches(|c: char| !c.is_alphabetic())
+                    .to_lowercase();
                 next.starts_with("famil") || next.starts_with("famíl")
             });
             if names_families {
@@ -355,34 +358,52 @@ mod tests {
         // locales, and the number is the vendor's, which moves with every
         // release of the colour system. Nothing else reads those sentences, so
         // a stale one reaches a reader as a fact.
+        //
+        // And so do the comments of the stylesheets and of the consumer's
+        // example, which a consumer reads in `dist/components.css` and in the
+        // page they copy from. THEY SAY THE NUMBER BEFORE THE WORD, because
+        // that is the only shape this test reads: `all 349 of them` and
+        // `351 names` were both stale for a release with this test green.
         let root = noctua_design_spec::vendor::repository_root();
         let live = families(&vendor()).len();
 
-        let mut files = vec![
-            root.join("spec/i18n/pt-BR.toml"),
-            root.join("crates/noctua-design-emit/src/tones.rs"),
+        // The files known to state it, each of which must still be found
+        // stating it: a sentence reworded out of the shape read is unguarded.
+        let known = [
+            "spec/i18n/pt-BR.toml",
+            "crates/noctua-design-styles/src/message-bar.css",
+            "crates/noctua-design-styles/src/tag.css",
+            "examples/consumer-web/index.html",
         ];
-        for entry in std::fs::read_dir(root.join("spec/components")).expect("the contracts") {
-            files.push(entry.expect("a contract").path());
+        let mut files: Vec<_> = known.iter().map(|file| root.join(file)).collect();
+        files.push(root.join("crates/noctua-design-emit/src/tones.rs"));
+        for directory in ["spec/components", "crates/noctua-design-styles/src"] {
+            for entry in std::fs::read_dir(root.join(directory)).expect("a directory") {
+                let path = entry.expect("an entry").path();
+                if path.is_file() && !files.contains(&path) {
+                    files.push(path);
+                }
+            }
         }
 
-        let mut stated = 0;
-        for file in files {
-            let text = std::fs::read_to_string(&file).expect("a readable file");
-            for count in stated_counts(&text) {
-                stated += 1;
+        for file in &files {
+            let text = std::fs::read_to_string(file).expect("a readable file");
+            let counts = stated_counts(&text);
+            for count in &counts {
                 assert_eq!(
-                    count,
+                    *count,
                     live,
                     "{} says {count} families and the vendored palette declares {live}",
                     file.display()
                 );
             }
+            let is_known = known.iter().any(|name| file.ends_with(name));
+            assert!(
+                !is_known || !counts.is_empty(),
+                "{} no longer states a family count in the shape this test reads",
+                file.display()
+            );
         }
-        assert!(
-            stated > 0,
-            "no file states a family count, so this test reads nothing"
-        );
     }
 
     #[test]

@@ -385,8 +385,24 @@ function onLabel(found) {
   });
 }
 
+/**
+ * What the box asks for: its text trimmed, or nothing when it holds no word.
+ *
+ * SEPARATORS ALONE ASK FOR NOTHING. `-`, `.` and `/ :` are not empty text, yet
+ * they parse to the empty query, which matches every item: read as a question,
+ * one hyphen drew the head of the whole index in the palette, unmarked and in
+ * index order, where the empty box draws none. So such a box is the empty box
+ * everywhere the two are told apart: the rows, the sentence and the recents.
+ */
+function asked(state) {
+  const text = state.box.value.trim();
+  if (text === "") return "";
+  const words = parsed(text);
+  return words !== null && words.isEmpty() ? "" : text;
+}
+
 function runQuery(state) {
-  const query = state.box.value.trim();
+  const query = asked(state);
   if (state.src && !state.loaded && !state.failed) {
     if (query) loadIndex(state);
     // AN EMPTY BOX IS EXACTLY WHEN THE RECENTS ARE WORTH SHOWING, and this
@@ -440,7 +456,7 @@ function schedule(state) {
 }
 
 function drawResults(state) {
-  const query = state.box.value.trim();
+  const query = asked(state);
   const shown = new Set(state.hits.map((hit) => hit.item));
 
   if (state.src) {
@@ -877,7 +893,7 @@ function recentQueries(state) {
 }
 
 function rememberQuery(state) {
-  const query = state.box.value.trim();
+  const query = asked(state);
   if (!state.recentKey || query === "") return;
   const kept = [query, ...recentQueries(state).filter((entry) => entry !== query)];
   try {
@@ -898,7 +914,7 @@ function forgetQueries(state) {
 
 function showRecent(state) {
   if (!state.recentBox || !state.recentList) return;
-  const queries = state.box.value.trim() === "" ? recentQueries(state) : [];
+  const queries = asked(state) === "" ? recentQueries(state) : [];
   state.recentBox.hidden = queries.length === 0;
   state.recentList.textContent = "";
   for (const query of queries) {
