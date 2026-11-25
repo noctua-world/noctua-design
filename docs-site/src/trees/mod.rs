@@ -102,6 +102,9 @@ mod select;
 mod select_group;
 mod select_option;
 mod slider;
+mod split;
+mod split_handle;
+mod split_pane;
 mod strong;
 mod swatch;
 mod switch;
@@ -225,6 +228,9 @@ pub(crate) fn for_component(name: &str) -> &'static [Tree] {
         "SelectGroup" => select_group::EXAMPLES,
         "SelectOption" => select_option::EXAMPLES,
         "Slider" => slider::EXAMPLES,
+        "Split" => split::EXAMPLES,
+        "SplitHandle" => split_handle::EXAMPLES,
+        "SplitPane" => split_pane::EXAMPLES,
         "Strong" => strong::EXAMPLES,
         "Swatch" => swatch::EXAMPLES,
         "Switch" => switch::EXAMPLES,

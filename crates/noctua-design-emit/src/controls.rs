@@ -316,6 +316,9 @@ pub fn is_custom(component: &Component) -> bool {
             | "Prompt"
             | "Toolbar"
             | "Drawer"
+            | "Split"
+            | "SplitPane"
+            | "SplitHandle"
     )
 }
 
@@ -366,6 +369,9 @@ pub fn dioxus_body(sink: &mut String, component: &Component) {
         "OptionItem" => out.push_str(OPTION_ITEM_DIOXUS),
         "FooterLine" => out.push_str(FOOTER_LINE_DIOXUS),
         "Drawer" => out.push_str(DRAWER_DIOXUS),
+        "Split" => out.push_str(SPLIT_DIOXUS),
+        "SplitPane" => out.push_str(SPLIT_PANE_DIOXUS),
+        "SplitHandle" => out.push_str(SPLIT_HANDLE_DIOXUS),
         "Prompt" => out.push_str(PROMPT_DIOXUS),
         "Menu" => out.push_str(MENU_DIOXUS),
         "MenuItem" => out.push_str(MENU_ITEM_DIOXUS),
@@ -459,6 +465,9 @@ pub fn react_body(sink: &mut String, component: &Component) {
         "OptionItem" => out.push_str(OPTION_ITEM_REACT),
         "FooterLine" => out.push_str(FOOTER_LINE_REACT),
         "Drawer" => out.push_str(DRAWER_REACT),
+        "Split" => out.push_str(SPLIT_REACT),
+        "SplitPane" => out.push_str(SPLIT_PANE_REACT),
+        "SplitHandle" => out.push_str(SPLIT_HANDLE_REACT),
         "Prompt" => out.push_str(PROMPT_REACT),
         "Menu" => out.push_str(MENU_REACT),
         "MenuItem" => out.push_str(MENU_ITEM_REACT),
@@ -4255,6 +4264,134 @@ const DRAWER_REACT: &str = r#"  const root = ["nd-drawer", className].filter(Boo
     },
     // See the Dioxus half: the one thing in the track that slides.
     h("div", { className: "nd-drawer-panel" }, children),
+  );
+"#;
+
+// --- Split, SplitPane and SplitHandle -------------------------------------------
+
+/// Two panes that share one box.
+///
+/// # Why there are two boxes
+///
+/// What a narrow split does is asked of the split's own width, by a container
+/// query, and an element that establishes a query container is not its own:
+/// a rule about it would be answered for the container above. So the root is
+/// the container and the track inside it is what the query lays out.
+///
+/// # The share is written twice
+///
+/// `data-nd-value` is what `dist/split.js` reads, and `--nd-split-value` is
+/// what the stylesheet divides the track by. A page with no script draws the
+/// split at its `value` from the second alone.
+const SPLIT_DIOXUS: &str = r#"    let root = format!("nd-split {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        div {
+            class: "{root}",
+            "data-nd-split": "{name}",
+            "data-nd-value": "{value}",
+            "data-nd-min": "{min}",
+            "data-nd-max": "{max}",
+            "data-nd-collapse": collapse.as_str(),
+            style: "--nd-split-value: {value}",
+            div { class: "nd-split-track", {children} }
+        }
+    }
+"#;
+
+/// The same split, in React.
+const SPLIT_REACT: &str = r#"  const value_ = value ?? "50";
+  const root = ["nd-split", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      "data-nd-split": name,
+      "data-nd-value": value_,
+      "data-nd-min": min ?? "20",
+      "data-nd-max": max ?? "80",
+      "data-nd-collapse": collapse ?? "stack",
+      // See the Dioxus half: the share, where the stylesheet reads it.
+      style: { "--nd-split-value": value_ },
+      ...rest,
+    },
+    h("div", { className: "nd-split-track" }, children),
+  );
+"#;
+
+/// One half of a split.
+///
+/// Written for its id, which is two props joined: the split's `name` and the
+/// pane's own `side`. `SplitHandle` joins the same two words for
+/// `aria-controls`, so the pair cannot drift.
+const SPLIT_PANE_DIOXUS: &str = r#"    let root = format!("nd-split-pane {class}");
+    let root = root.trim().to_owned();
+    let id = format!("nd-split-{name}-{}", side.as_str());
+
+    rsx! {
+        div { class: "{root}", id: "{id}", "data-nd-side": side.as_str(), {children} }
+    }
+"#;
+
+/// The same pane, in React.
+const SPLIT_PANE_REACT: &str = r#"  const side_ = side ?? "start";
+  const root = ["nd-split-pane", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    { className: root, id: `nd-split-${name}-${side_}`, "data-nd-side": side_, ...rest },
+    children,
+  );
+"#;
+
+/// The line between two panes.
+///
+/// # What is not written here
+///
+/// No `tabindex` and no `aria-valuenow`. A separator with neither is a line
+/// between two things, which is all the markup can honour. `dist/split.js`
+/// writes both, with the keys and the drag that keep them.
+///
+/// # The line has a box of its own
+///
+/// The handle is as wide as the smallest target and the line in it is a
+/// hairline. The line is an element so that a rule about the handle's state
+/// has something to draw on.
+const SPLIT_HANDLE_DIOXUS: &str = r#"    let root = format!("nd-split-handle {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        div {
+            class: "{root}",
+            role: "separator",
+            // The line stands upright between two panes side by side.
+            "aria-orientation": "vertical",
+            "aria-controls": "nd-split-{name}-start",
+            "aria-label": "{label}",
+            "data-nd-split-handle": "{name}",
+            span { class: "nd-split-handle-line" }
+        }
+    }
+"#;
+
+/// The same line, in React.
+const SPLIT_HANDLE_REACT: &str = r#"  const root = ["nd-split-handle", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      role: "separator",
+      // See the Dioxus half: the line stands upright.
+      "aria-orientation": "vertical",
+      "aria-controls": `nd-split-${name}-start`,
+      "aria-label": label,
+      "data-nd-split-handle": name,
+      ...rest,
+    },
+    h("span", { className: "nd-split-handle-line" }),
   );
 "#;
 

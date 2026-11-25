@@ -1,0 +1,111 @@
+guidance = """
+Use a split for two panes side by side that share one box, such as a list and
+what is chosen in it. A `SplitHandle` between the panes lets a reader move the
+line between them. For a panel that opens and shuts, use `Drawer`.
+"""
+
+[meta]
+name = "Split"
+element = "div"
+class = "nd-split"
+page = "split"
+summary = "Divide a box between two panes, with a line between them a reader can move."
+
+# TWO PANES, AND ONE NUMBER BETWEEN THEM.
+#
+# `value` is the share of the box the `start` pane takes, from 0 to 100, and
+# the `end` pane takes the rest. It is written on the root twice: as
+# `data-nd-value`, which a script reads, and as `--nd-split-value`, which the
+# stylesheet divides the box by. `min` and `max` are the least and the most
+# that share may be, so neither pane can be dragged to nothing by accident.
+#
+# THE PARTS ARE WRITTEN IN THE ORDER THEY STAND: a `SplitPane`, a `SplitHandle`
+# and a `SplitPane` with `side` set to `end`. The handle is a part of its own
+# because a component cannot put an element between two of its children, and
+# because the keyboard has to reach the handle after the first pane and before
+# the second.
+#
+# A SPLIT WITH NO HANDLE IS FIXED. Its panes take `value` and the rest, nothing
+# is focusable, and no script is needed.
+#
+# WHAT A NARROW BOX DOES IS DECLARED, AND IT IS ASKED OF THE SPLIT'S OWN BOX.
+# `collapse` is read by a container query, so a split in a narrow column
+# collapses on a wide screen. Below the `sm` breakpoint the panes stack, or one
+# of them is left out, and the handle goes with the line it moved. `none` keeps
+# the panes side by side at every width.
+#
+# A SPLIT IS AS WIDE AS THE BOX IT IS GIVEN, AND HAS NO WIDTH OF ITS OWN. A
+# query container cannot be sized by what is in it, so a split in a box that
+# takes its width from its content, such as a row that hugs its items, is as
+# wide as nothing. Give it a column, a pane or a window.
+#
+# THE KEYBOARD IS THE ONE THE ROLE NAMES. A separator a reader can move is the
+# window splitter of the ARIA practices: the arrow keys move it, Home and End
+# take it to its limits, and Enter takes the first pane to its least and brings
+# it back. Where that pattern is silent, the reading taken is a slider's: one
+# point for an arrow key and ten for Page Up and Page Down.
+#
+# A PANE TAKEN TO NOTHING IS PUT AWAY. With a `min` of 0 or a `max` of 100 the
+# line can take a pane to no width at all, which is the window splitter's
+# collapse. Such a pane is `visibility: hidden`, read off the handle's
+# `aria-valuenow`, so nothing in it stays in the tab order. Stacked panes take
+# no share, and both are drawn.
+#
+# STACKED PANES IN A BOX WITH A HEIGHT SCROLL TOGETHER. One above the other they
+# are each as tall as what is in them, and the track between the root and the
+# panes scrolls what the box cannot hold.
+#
+# THE SCRIPT MOVES THE LINE, AND SAYS SO. A drag has to follow the pointer in
+# the frame it moves in, so `dist/split.js` writes the new share itself and
+# says `nd-split-resize` with the split's `name`, the `value`, and whether a
+# pointer is still dragging. A caller that keeps the share writes it back as
+# `value`, and the script draws whatever `value` says.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-split"
+doc = "What this split is, as a script finds it, and the root of both panes' ids. Every `SplitPane` and the `SplitHandle` repeat it. Required."
+
+[prop.value]
+type = "text"
+default = "50"
+attribute = "data-nd-value"
+doc = "The share of the box the `start` pane takes, as a number from 0 to 100. The `end` pane takes the rest. It is held between `min` and `max`."
+
+[prop.min]
+type = "text"
+default = "20"
+attribute = "data-nd-min"
+doc = "The least `value` may be, as a number from 0 to 100. It becomes `aria-valuemin` on the handle. Enter takes the `start` pane to it."
+
+[prop.max]
+type = "text"
+default = "80"
+attribute = "data-nd-max"
+doc = "The most `value` may be, as a number from 0 to 100. It becomes `aria-valuemax` on the handle."
+
+[prop.collapse]
+type = "enum"
+values = ["stack", "hide-start", "hide-end", "none"]
+default = "stack"
+attribute = "data-nd-collapse"
+# What a NARROW box does. A picture of one split at one width shows one of the
+# two states, so the four values draw two pictures between them.
+variants = false
+doc = "What the split does in a box narrower than the `sm` breakpoint. `stack` puts the panes one above the other. `hide-start` and `hide-end` leave one pane out. `none` keeps them side by side."
+
+[prop.children]
+type = "children"
+doc = "The parts, in the order they stand: a `SplitPane`, a `SplitHandle`, and a `SplitPane` with `side` set to `end`. Leave the handle out for a split whose panes keep their shares."
+
+[a11y]
+notes = """
+The split has no role. The handle between its panes is a `role="separator"` that names the `start` pane in `aria-controls`. Once a script runs, the handle is focusable and carries `aria-valuenow`, `aria-valuemin` and `aria-valuemax`.
+"""
+
+[keyboard]
+"Arrow keys" = "Left and Right move the line by one point, toward the side the key names. The `start` pane grows or shrinks with it."
+"Page Up / Page Down" = "Grows or shrinks the `start` pane by ten points."
+"Home / End" = "Takes the `start` pane to `min` or to `max`."
+Enter = "Takes the `start` pane to `min`. Pressed again, it brings the pane back to where it was."

@@ -176,6 +176,10 @@ pub enum Key {
     PageDrawerSummary,
     /// `page.drawer.body`
     PageDrawerBody,
+    /// `page.split.summary`
+    PageSplitSummary,
+    /// `page.split.body`
+    PageSplitBody,
     /// `page.option-list.summary`
     PageOptionListSummary,
     /// `page.option-list.body`
@@ -626,6 +630,12 @@ pub enum Key {
     ComponentDrawerSummary,
     /// `component.drawer-rail.summary`
     ComponentDrawerRailSummary,
+    /// `component.split.summary`
+    ComponentSplitSummary,
+    /// `component.split-pane.summary`
+    ComponentSplitPaneSummary,
+    /// `component.split-handle.summary`
+    ComponentSplitHandleSummary,
     /// `component.prompt.summary`
     ComponentPromptSummary,
     /// `component.option-group.summary`
@@ -1452,6 +1462,36 @@ pub enum Key {
     ExampleDrawerLongTwo,
     /// `example.drawer.long-three`
     ExampleDrawerLongThree,
+    /// `example.split.overview`
+    ExampleSplitOverview,
+    /// `example.split.basic`
+    ExampleSplitBasic,
+    /// `example.split.limits`
+    ExampleSplitLimits,
+    /// `example.split.stack`
+    ExampleSplitStack,
+    /// `example.split.hide`
+    ExampleSplitHide,
+    /// `example.split.none`
+    ExampleSplitNone,
+    /// `example.split-pane.sides`
+    ExampleSplitPaneSides,
+    /// `example.split-pane.scroll`
+    ExampleSplitPaneScroll,
+    /// `example.split-pane.content`
+    ExampleSplitPaneContent,
+    /// `example.split-pane.nested`
+    ExampleSplitPaneNested,
+    /// `example.split-handle.basic`
+    ExampleSplitHandleBasic,
+    /// `example.split-handle.least`
+    ExampleSplitHandleLeast,
+    /// `example.split-handle.away`
+    ExampleSplitHandleAway,
+    /// `example.split-handle.mirrored`
+    ExampleSplitHandleMirrored,
+    /// `example.split.handle`
+    ExampleSplitHandle,
     /// `example.prompt.overview`
     ExamplePromptOverview,
     /// `example.prompt.basic`
@@ -5656,6 +5696,58 @@ pub enum Key {
     ComponentSliderKeyHomeEndName,
     /// `component.slider.key.home-end.action`
     ComponentSliderKeyHomeEndAction,
+    /// `component.split.guidance`
+    ComponentSplitGuidance,
+    /// `component.split.a11y-notes`
+    ComponentSplitA11yNotes,
+    /// `component.split.prop.name.doc`
+    ComponentSplitPropNameDoc,
+    /// `component.split.prop.value.doc`
+    ComponentSplitPropValueDoc,
+    /// `component.split.prop.min.doc`
+    ComponentSplitPropMinDoc,
+    /// `component.split.prop.max.doc`
+    ComponentSplitPropMaxDoc,
+    /// `component.split.prop.collapse.doc`
+    ComponentSplitPropCollapseDoc,
+    /// `component.split.prop.children.doc`
+    ComponentSplitPropChildrenDoc,
+    /// `component.split.key.arrow-keys.name`
+    ComponentSplitKeyArrowKeysName,
+    /// `component.split.key.arrow-keys.action`
+    ComponentSplitKeyArrowKeysAction,
+    /// `component.split.key.page-up-page-down.name`
+    ComponentSplitKeyPageUpPageDownName,
+    /// `component.split.key.page-up-page-down.action`
+    ComponentSplitKeyPageUpPageDownAction,
+    /// `component.split.key.home-end.name`
+    ComponentSplitKeyHomeEndName,
+    /// `component.split.key.home-end.action`
+    ComponentSplitKeyHomeEndAction,
+    /// `component.split.key.enter.name`
+    ComponentSplitKeyEnterName,
+    /// `component.split.key.enter.action`
+    ComponentSplitKeyEnterAction,
+    /// `component.split-handle.guidance`
+    ComponentSplitHandleGuidance,
+    /// `component.split-handle.a11y-notes`
+    ComponentSplitHandleA11yNotes,
+    /// `component.split-handle.prop.name.doc`
+    ComponentSplitHandlePropNameDoc,
+    /// `component.split-handle.prop.label.doc`
+    ComponentSplitHandlePropLabelDoc,
+    /// `component.split-handle.state.dragging.doc`
+    ComponentSplitHandleStateDraggingDoc,
+    /// `component.split-pane.guidance`
+    ComponentSplitPaneGuidance,
+    /// `component.split-pane.a11y-notes`
+    ComponentSplitPaneA11yNotes,
+    /// `component.split-pane.prop.name.doc`
+    ComponentSplitPanePropNameDoc,
+    /// `component.split-pane.prop.side.doc`
+    ComponentSplitPanePropSideDoc,
+    /// `component.split-pane.prop.children.doc`
+    ComponentSplitPanePropChildrenDoc,
     /// `component.strong.prop.children.doc`
     ComponentStrongPropChildrenDoc,
     /// `component.swatch.guidance`
@@ -6526,7 +6618,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3201] = [
+    pub const ALL: [Self; 3247] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -6555,6 +6647,8 @@ impl Key {
         Self::PageFooterBody,
         Self::PageDrawerSummary,
         Self::PageDrawerBody,
+        Self::PageSplitSummary,
+        Self::PageSplitBody,
         Self::PageOptionListSummary,
         Self::PageOptionListBody,
         Self::PageTreeSummary,
@@ -6780,6 +6874,9 @@ impl Key {
         Self::ComponentFooterLineSummary,
         Self::ComponentDrawerSummary,
         Self::ComponentDrawerRailSummary,
+        Self::ComponentSplitSummary,
+        Self::ComponentSplitPaneSummary,
+        Self::ComponentSplitHandleSummary,
         Self::ComponentPromptSummary,
         Self::ComponentOptionGroupSummary,
         Self::ComponentOptionItemSummary,
@@ -7193,6 +7290,21 @@ impl Key {
         Self::ExampleDrawerLongOne,
         Self::ExampleDrawerLongTwo,
         Self::ExampleDrawerLongThree,
+        Self::ExampleSplitOverview,
+        Self::ExampleSplitBasic,
+        Self::ExampleSplitLimits,
+        Self::ExampleSplitStack,
+        Self::ExampleSplitHide,
+        Self::ExampleSplitNone,
+        Self::ExampleSplitPaneSides,
+        Self::ExampleSplitPaneScroll,
+        Self::ExampleSplitPaneContent,
+        Self::ExampleSplitPaneNested,
+        Self::ExampleSplitHandleBasic,
+        Self::ExampleSplitHandleLeast,
+        Self::ExampleSplitHandleAway,
+        Self::ExampleSplitHandleMirrored,
+        Self::ExampleSplitHandle,
         Self::ExamplePromptOverview,
         Self::ExamplePromptBasic,
         Self::ExamplePromptGrows,
@@ -9295,6 +9407,32 @@ impl Key {
         Self::ComponentSliderKeyPageUpPageDownAction,
         Self::ComponentSliderKeyHomeEndName,
         Self::ComponentSliderKeyHomeEndAction,
+        Self::ComponentSplitGuidance,
+        Self::ComponentSplitA11yNotes,
+        Self::ComponentSplitPropNameDoc,
+        Self::ComponentSplitPropValueDoc,
+        Self::ComponentSplitPropMinDoc,
+        Self::ComponentSplitPropMaxDoc,
+        Self::ComponentSplitPropCollapseDoc,
+        Self::ComponentSplitPropChildrenDoc,
+        Self::ComponentSplitKeyArrowKeysName,
+        Self::ComponentSplitKeyArrowKeysAction,
+        Self::ComponentSplitKeyPageUpPageDownName,
+        Self::ComponentSplitKeyPageUpPageDownAction,
+        Self::ComponentSplitKeyHomeEndName,
+        Self::ComponentSplitKeyHomeEndAction,
+        Self::ComponentSplitKeyEnterName,
+        Self::ComponentSplitKeyEnterAction,
+        Self::ComponentSplitHandleGuidance,
+        Self::ComponentSplitHandleA11yNotes,
+        Self::ComponentSplitHandlePropNameDoc,
+        Self::ComponentSplitHandlePropLabelDoc,
+        Self::ComponentSplitHandleStateDraggingDoc,
+        Self::ComponentSplitPaneGuidance,
+        Self::ComponentSplitPaneA11yNotes,
+        Self::ComponentSplitPanePropNameDoc,
+        Self::ComponentSplitPanePropSideDoc,
+        Self::ComponentSplitPanePropChildrenDoc,
         Self::ComponentStrongPropChildrenDoc,
         Self::ComponentSwatchGuidance,
         Self::ComponentSwatchA11yNotes,
@@ -9762,6 +9900,8 @@ impl Key {
             Self::PageFooterBody => "page.footer.body",
             Self::PageDrawerSummary => "page.drawer.summary",
             Self::PageDrawerBody => "page.drawer.body",
+            Self::PageSplitSummary => "page.split.summary",
+            Self::PageSplitBody => "page.split.body",
             Self::PageOptionListSummary => "page.option-list.summary",
             Self::PageOptionListBody => "page.option-list.body",
             Self::PageTreeSummary => "page.tree.summary",
@@ -9987,6 +10127,9 @@ impl Key {
             Self::ComponentFooterLineSummary => "component.footer-line.summary",
             Self::ComponentDrawerSummary => "component.drawer.summary",
             Self::ComponentDrawerRailSummary => "component.drawer-rail.summary",
+            Self::ComponentSplitSummary => "component.split.summary",
+            Self::ComponentSplitPaneSummary => "component.split-pane.summary",
+            Self::ComponentSplitHandleSummary => "component.split-handle.summary",
             Self::ComponentPromptSummary => "component.prompt.summary",
             Self::ComponentOptionGroupSummary => "component.option-group.summary",
             Self::ComponentOptionItemSummary => "component.option-item.summary",
@@ -10400,6 +10543,21 @@ impl Key {
             Self::ExampleDrawerLongOne => "example.drawer.long-one",
             Self::ExampleDrawerLongTwo => "example.drawer.long-two",
             Self::ExampleDrawerLongThree => "example.drawer.long-three",
+            Self::ExampleSplitOverview => "example.split.overview",
+            Self::ExampleSplitBasic => "example.split.basic",
+            Self::ExampleSplitLimits => "example.split.limits",
+            Self::ExampleSplitStack => "example.split.stack",
+            Self::ExampleSplitHide => "example.split.hide",
+            Self::ExampleSplitNone => "example.split.none",
+            Self::ExampleSplitPaneSides => "example.split-pane.sides",
+            Self::ExampleSplitPaneScroll => "example.split-pane.scroll",
+            Self::ExampleSplitPaneContent => "example.split-pane.content",
+            Self::ExampleSplitPaneNested => "example.split-pane.nested",
+            Self::ExampleSplitHandleBasic => "example.split-handle.basic",
+            Self::ExampleSplitHandleLeast => "example.split-handle.least",
+            Self::ExampleSplitHandleAway => "example.split-handle.away",
+            Self::ExampleSplitHandleMirrored => "example.split-handle.mirrored",
+            Self::ExampleSplitHandle => "example.split.handle",
             Self::ExamplePromptOverview => "example.prompt.overview",
             Self::ExamplePromptBasic => "example.prompt.basic",
             Self::ExamplePromptGrows => "example.prompt.grows",
@@ -12932,6 +13090,38 @@ impl Key {
             }
             Self::ComponentSliderKeyHomeEndName => "component.slider.key.home-end.name",
             Self::ComponentSliderKeyHomeEndAction => "component.slider.key.home-end.action",
+            Self::ComponentSplitGuidance => "component.split.guidance",
+            Self::ComponentSplitA11yNotes => "component.split.a11y-notes",
+            Self::ComponentSplitPropNameDoc => "component.split.prop.name.doc",
+            Self::ComponentSplitPropValueDoc => "component.split.prop.value.doc",
+            Self::ComponentSplitPropMinDoc => "component.split.prop.min.doc",
+            Self::ComponentSplitPropMaxDoc => "component.split.prop.max.doc",
+            Self::ComponentSplitPropCollapseDoc => "component.split.prop.collapse.doc",
+            Self::ComponentSplitPropChildrenDoc => "component.split.prop.children.doc",
+            Self::ComponentSplitKeyArrowKeysName => "component.split.key.arrow-keys.name",
+            Self::ComponentSplitKeyArrowKeysAction => "component.split.key.arrow-keys.action",
+            Self::ComponentSplitKeyPageUpPageDownName => {
+                "component.split.key.page-up-page-down.name"
+            }
+            Self::ComponentSplitKeyPageUpPageDownAction => {
+                "component.split.key.page-up-page-down.action"
+            }
+            Self::ComponentSplitKeyHomeEndName => "component.split.key.home-end.name",
+            Self::ComponentSplitKeyHomeEndAction => "component.split.key.home-end.action",
+            Self::ComponentSplitKeyEnterName => "component.split.key.enter.name",
+            Self::ComponentSplitKeyEnterAction => "component.split.key.enter.action",
+            Self::ComponentSplitHandleGuidance => "component.split-handle.guidance",
+            Self::ComponentSplitHandleA11yNotes => "component.split-handle.a11y-notes",
+            Self::ComponentSplitHandlePropNameDoc => "component.split-handle.prop.name.doc",
+            Self::ComponentSplitHandlePropLabelDoc => "component.split-handle.prop.label.doc",
+            Self::ComponentSplitHandleStateDraggingDoc => {
+                "component.split-handle.state.dragging.doc"
+            }
+            Self::ComponentSplitPaneGuidance => "component.split-pane.guidance",
+            Self::ComponentSplitPaneA11yNotes => "component.split-pane.a11y-notes",
+            Self::ComponentSplitPanePropNameDoc => "component.split-pane.prop.name.doc",
+            Self::ComponentSplitPanePropSideDoc => "component.split-pane.prop.side.doc",
+            Self::ComponentSplitPanePropChildrenDoc => "component.split-pane.prop.children.doc",
             Self::ComponentStrongPropChildrenDoc => "component.strong.prop.children.doc",
             Self::ComponentSwatchGuidance => "component.swatch.guidance",
             Self::ComponentSwatchA11yNotes => "component.swatch.a11y-notes",
@@ -13583,6 +13773,12 @@ impl Locale {
                 Key::PageDrawerBody => {
                     "The drawer and the rail down a side of it. A drawer is in the flow of its window and is not modal. It opens as far as its content, up to a share of the window. The caller opens and shuts it."
                 }
+                Key::PageSplitSummary => {
+                    "Divide a box between two panes, with a line between them a reader can move."
+                }
+                Key::PageSplitBody => {
+                    "The split, one pane and the handle between two. The share of the first pane is one number. A narrow box stacks the panes or leaves one out, and it is the split's own box that is measured."
+                }
                 Key::PageOptionListSummary => {
                     "Let users walk a list of options with the keyboard and choose one."
                 }
@@ -13981,6 +14177,15 @@ impl Locale {
                 }
                 Key::ComponentDrawerRailSummary => {
                     "Place a column of controls or of tabs down one side of a drawer."
+                }
+                Key::ComponentSplitSummary => {
+                    "Divide a box between two panes, with a line between them a reader can move."
+                }
+                Key::ComponentSplitPaneSummary => {
+                    "Hold one of the two halves of a split, and scroll what does not fit."
+                }
+                Key::ComponentSplitHandleSummary => {
+                    "Let a reader move the line between two panes, by pointer, touch or keyboard."
                 }
                 Key::ComponentPromptSummary => {
                     "Let users type on a line with a block cursor, and send what they typed."
@@ -14755,6 +14960,49 @@ impl Locale {
                 Key::ExampleDrawerLongThree => {
                     "Collapsing the drawer keeps every page that is open in it."
                 }
+                Key::ExampleSplitOverview => {
+                    "A list and what is chosen in it. Drag the line between them, or move the focus to it and press the arrow keys."
+                }
+                Key::ExampleSplitBasic => {
+                    "Two panes share the box in halves. The handle between them is one tab stop."
+                }
+                Key::ExampleSplitLimits => {
+                    "`value` is where the line starts. `min` and `max` are as far as it goes either way."
+                }
+                Key::ExampleSplitStack => {
+                    "In a box narrower than the `sm` breakpoint the panes stack and the handle is gone. The box measured is the split's own."
+                }
+                Key::ExampleSplitHide => {
+                    "`hide-start` and `hide-end` leave one pane out of a narrow box. The other takes all of it."
+                }
+                Key::ExampleSplitNone => {
+                    "`none` keeps the panes side by side in the narrowest box, and the handle with them."
+                }
+                Key::ExampleSplitPaneSides => {
+                    "Two panes and no handle keep their shares. Nothing here is a control."
+                }
+                Key::ExampleSplitPaneScroll => {
+                    "Side by side, a pane is as tall as the split and scrolls what is taller. The other pane stays where it is."
+                }
+                Key::ExampleSplitPaneContent => {
+                    "A pane has no padding of its own. What it holds brings its own."
+                }
+                Key::ExampleSplitPaneNested => {
+                    "A pane holds a split of its own, for three columns. Each split is measured by its own box."
+                }
+                Key::ExampleSplitHandleBasic => {
+                    "The handle is as wide as the smallest target and draws a hairline. An arrow key moves it one point, and a page key ten."
+                }
+                Key::ExampleSplitHandleLeast => {
+                    "This pane starts at its least. Enter brings it to the middle of what it may be, and Enter again puts it back."
+                }
+                Key::ExampleSplitHandleAway => {
+                    "With limits of 0 and 100, Home and Enter put the first pane away entirely. End does the same to the second."
+                }
+                Key::ExampleSplitHandleMirrored => {
+                    "Read from the right, the first pane is on the right. The arrow keys still move the line the way they point."
+                }
+                Key::ExampleSplitHandle => "Resize the list",
                 Key::ExamplePromptOverview => {
                     "The prompt is the last line of a footer. Type in it, then press Enter or the control at its end."
                 }
@@ -19603,6 +19851,74 @@ impl Locale {
                 Key::ComponentSliderKeyHomeEndAction => {
                     "Moves the thumb to `min` or `max`. This is the browser's own behaviour."
                 }
+                Key::ComponentSplitGuidance => {
+                    "Use a split for two panes side by side that share one box, such as a list and what is chosen in it. A `SplitHandle` between the panes lets a reader move the line between them. For a panel that opens and shuts, use `Drawer`."
+                }
+                Key::ComponentSplitA11yNotes => {
+                    "The split has no role. The handle between its panes is a `role=\"separator\"` that names the `start` pane in `aria-controls`. Once a script runs, the handle is focusable and carries `aria-valuenow`, `aria-valuemin` and `aria-valuemax`."
+                }
+                Key::ComponentSplitPropNameDoc => {
+                    "What this split is, as a script finds it, and the root of both panes' ids. Every `SplitPane` and the `SplitHandle` repeat it. Required."
+                }
+                Key::ComponentSplitPropValueDoc => {
+                    "The share of the box the `start` pane takes, as a number from 0 to 100. The `end` pane takes the rest. It is held between `min` and `max`."
+                }
+                Key::ComponentSplitPropMinDoc => {
+                    "The least `value` may be, as a number from 0 to 100. It becomes `aria-valuemin` on the handle. Enter takes the `start` pane to it."
+                }
+                Key::ComponentSplitPropMaxDoc => {
+                    "The most `value` may be, as a number from 0 to 100. It becomes `aria-valuemax` on the handle."
+                }
+                Key::ComponentSplitPropCollapseDoc => {
+                    "What the split does in a box narrower than the `sm` breakpoint. `stack` puts the panes one above the other. `hide-start` and `hide-end` leave one pane out. `none` keeps them side by side."
+                }
+                Key::ComponentSplitPropChildrenDoc => {
+                    "The parts, in the order they stand: a `SplitPane`, a `SplitHandle`, and a `SplitPane` with `side` set to `end`. Leave the handle out for a split whose panes keep their shares."
+                }
+                Key::ComponentSplitKeyArrowKeysName => "Arrow keys",
+                Key::ComponentSplitKeyArrowKeysAction => {
+                    "Left and Right move the line by one point, toward the side the key names. The `start` pane grows or shrinks with it."
+                }
+                Key::ComponentSplitKeyPageUpPageDownName => "Page Up / Page Down",
+                Key::ComponentSplitKeyPageUpPageDownAction => {
+                    "Grows or shrinks the `start` pane by ten points."
+                }
+                Key::ComponentSplitKeyHomeEndName => "Home / End",
+                Key::ComponentSplitKeyHomeEndAction => {
+                    "Takes the `start` pane to `min` or to `max`."
+                }
+                Key::ComponentSplitKeyEnterName => "Enter",
+                Key::ComponentSplitKeyEnterAction => {
+                    "Takes the `start` pane to `min`. Pressed again, it brings the pane back to where it was."
+                }
+                Key::ComponentSplitHandleGuidance => {
+                    "Use a split handle between the two panes of a `Split`, for a line a reader can move. Leave it out where the two panes keep their shares."
+                }
+                Key::ComponentSplitHandleA11yNotes => {
+                    "The handle is a `role=\"separator\"` with `aria-orientation=\"vertical\"`, named by `label`. It names the `start` pane in `aria-controls`. A script makes it focusable and writes its value. It is at least 24 pixels wide, as WCAG 2.5.8 asks."
+                }
+                Key::ComponentSplitHandlePropNameDoc => {
+                    "The `Split` this belongs to. Required, and it must match the split's own `name`, because the pane it names in `aria-controls` is derived from it."
+                }
+                Key::ComponentSplitHandlePropLabelDoc => {
+                    "The name of the handle, in the reader's language, such as *Resize the list*. It names what is resized. Required."
+                }
+                Key::ComponentSplitHandleStateDraggingDoc => {
+                    "Set on the handle while a pointer is dragging it. The stylesheet draws the line as it does under a pointer."
+                }
+                Key::ComponentSplitPaneGuidance => {
+                    "Use a split pane for each of the two halves of a `Split`. `side` says which half it is, and the pane scrolls what does not fit in it."
+                }
+                Key::ComponentSplitPaneA11yNotes => {
+                    "The pane has no role. Its id is `nd-split-`, the split's `name`, a hyphen and its `side`, which is what the handle's `aria-controls` names. Side by side, a pane whose share is 0 is hidden, so nothing in it can take the focus."
+                }
+                Key::ComponentSplitPanePropNameDoc => {
+                    "The `Split` this belongs to. Required, and it must match the split's own `name`, because the pane's id is derived from it."
+                }
+                Key::ComponentSplitPanePropSideDoc => {
+                    "Which half this is: `start` or `end`. The `start` pane takes the split's `value` and the `end` pane takes the rest. A split holds one of each."
+                }
+                Key::ComponentSplitPanePropChildrenDoc => "What the pane holds.",
                 Key::ComponentStrongPropChildrenDoc => "The important text.",
                 Key::ComponentSwatchGuidance => {
                     "Use a swatch to show a colour beside the word that names it. Never use it on its own, because the chip has no accessible name of its own."
@@ -20820,6 +21136,12 @@ impl Locale {
                 Key::PageDrawerBody => {
                     "A gaveta e o trilho que desce por um lado dela. A gaveta fica no fluxo da janela e não é modal. Ela abre até o tamanho do conteúdo, no máximo uma fração da janela. Quem chama a abre e a fecha."
                 }
+                Key::PageSplitSummary => {
+                    "Divida uma caixa entre dois painéis, com uma linha entre eles que a pessoa pode mover."
+                }
+                Key::PageSplitBody => {
+                    "A divisão, um painel e a alça entre dois. A fração do primeiro painel é um número só. Uma caixa estreita empilha os painéis ou deixa um de fora, e o que se mede é a caixa da própria divisão."
+                }
                 Key::PageOptionListSummary => {
                     "Deixe a pessoa percorrer uma lista de opções com o teclado e escolher uma."
                 }
@@ -21228,6 +21550,15 @@ impl Locale {
                 }
                 Key::ComponentDrawerRailSummary => {
                     "Ponha uma coluna de controles ou de abas num lado de uma gaveta."
+                }
+                Key::ComponentSplitSummary => {
+                    "Divida uma caixa entre dois painéis, com uma linha entre eles que a pessoa pode mover."
+                }
+                Key::ComponentSplitPaneSummary => {
+                    "Guarde uma das duas metades de uma divisão, e role o que não couber."
+                }
+                Key::ComponentSplitHandleSummary => {
+                    "Deixe a pessoa mover a linha entre dois painéis, por ponteiro, toque ou teclado."
                 }
                 Key::ComponentPromptSummary => {
                     "Deixe a pessoa digitar numa linha com cursor em bloco e enviar o que digitou."
@@ -22014,6 +22345,49 @@ impl Locale {
                     "Uma página se adapta ao espaço menor, ou traz uma visão feita para ele."
                 }
                 Key::ExampleDrawerLongThree => "Recolher a gaveta mantém toda página aberta nela.",
+                Key::ExampleSplitOverview => {
+                    "Uma lista e o que está escolhido nela. Arraste a linha entre as duas, ou leve o foco até ela e use as setas."
+                }
+                Key::ExampleSplitBasic => {
+                    "Dois painéis dividem a caixa ao meio. A alça entre eles é uma parada de tabulação."
+                }
+                Key::ExampleSplitLimits => {
+                    "`value` é onde a linha começa. `min` e `max` são até onde ela vai para cada lado."
+                }
+                Key::ExampleSplitStack => {
+                    "Numa caixa mais estreita que o ponto de quebra `sm` os painéis se empilham e a alça some. A caixa medida é a da própria divisão."
+                }
+                Key::ExampleSplitHide => {
+                    "`hide-start` e `hide-end` deixam um painel de fora de uma caixa estreita. O outro fica com tudo."
+                }
+                Key::ExampleSplitNone => {
+                    "`none` mantém os painéis lado a lado na caixa mais estreita, e a alça junto."
+                }
+                Key::ExampleSplitPaneSides => {
+                    "Dois painéis sem alça mantêm as frações. Nada aqui é um controle."
+                }
+                Key::ExampleSplitPaneScroll => {
+                    "Lado a lado, um painel tem a altura da divisão e rola o que for mais alto. O outro painel fica onde está."
+                }
+                Key::ExampleSplitPaneContent => {
+                    "Um painel não tem espaçamento interno próprio. O que ele guarda traz o seu."
+                }
+                Key::ExampleSplitPaneNested => {
+                    "Um painel guarda uma divisão própria, para três colunas. Cada divisão é medida pela própria caixa."
+                }
+                Key::ExampleSplitHandleBasic => {
+                    "A alça tem a largura do menor alvo e desenha um fio. Uma seta a move um ponto, e uma tecla de página, dez."
+                }
+                Key::ExampleSplitHandleLeast => {
+                    "Este painel começa no mínimo. Enter o leva ao meio do que ele pode ter, e Enter de novo o devolve."
+                }
+                Key::ExampleSplitHandleAway => {
+                    "Com limites de 0 e 100, Home e Enter guardam o primeiro painel por inteiro. End faz o mesmo com o segundo."
+                }
+                Key::ExampleSplitHandleMirrored => {
+                    "Lido da direita, o primeiro painel fica à direita. As setas continuam movendo a linha para onde apontam."
+                }
+                Key::ExampleSplitHandle => "Redimensionar a lista",
                 Key::ExamplePromptOverview => {
                     "O prompt é a última linha de um rodapé. Digite nele, depois pressione Enter ou o controle no fim."
                 }
@@ -26888,6 +27262,72 @@ impl Locale {
                 Key::ComponentSliderKeyHomeEndAction => {
                     "Move a alça para `min` ou `max`. É o comportamento próprio do navegador."
                 }
+                Key::ComponentSplitGuidance => {
+                    "Use uma divisão para dois painéis lado a lado que dividem uma caixa, como uma lista e o que está escolhido nela. Um `SplitHandle` entre os painéis deixa a pessoa mover a linha entre eles. Para um painel que abre e fecha, use `Drawer`."
+                }
+                Key::ComponentSplitA11yNotes => {
+                    "A divisão não tem papel. A alça entre os painéis é um `role=\"separator\"` que nomeia o painel `start` em `aria-controls`. Com um script rodando, a alça recebe foco e leva `aria-valuenow`, `aria-valuemin` e `aria-valuemax`."
+                }
+                Key::ComponentSplitPropNameDoc => {
+                    "O que é esta divisão, como um script a encontra, e a raiz dos ids dos dois painéis. Todo `SplitPane` e o `SplitHandle` o repetem. Obrigatório."
+                }
+                Key::ComponentSplitPropValueDoc => {
+                    "A fração da caixa que o painel `start` ocupa, como um número de 0 a 100. O painel `end` fica com o resto. Ela é mantida entre `min` e `max`."
+                }
+                Key::ComponentSplitPropMinDoc => {
+                    "O mínimo que `value` pode ter, como um número de 0 a 100. Vira `aria-valuemin` na alça. Enter leva o painel `start` até ele."
+                }
+                Key::ComponentSplitPropMaxDoc => {
+                    "O máximo que `value` pode ter, como um número de 0 a 100. Vira `aria-valuemax` na alça."
+                }
+                Key::ComponentSplitPropCollapseDoc => {
+                    "O que a divisão faz numa caixa mais estreita que o ponto de quebra `sm`. `stack` põe um painel acima do outro. `hide-start` e `hide-end` deixam um painel de fora. `none` os mantém lado a lado."
+                }
+                Key::ComponentSplitPropChildrenDoc => {
+                    "As partes, na ordem em que ficam: um `SplitPane`, um `SplitHandle` e um `SplitPane` com `side` em `end`. Deixe a alça de fora numa divisão cujos painéis mantêm as frações."
+                }
+                Key::ComponentSplitKeyArrowKeysName => "Setas",
+                Key::ComponentSplitKeyArrowKeysAction => {
+                    "Esquerda e Direita movem a linha um ponto, para o lado que a tecla nomeia. O painel `start` cresce ou encolhe com ela."
+                }
+                Key::ComponentSplitKeyPageUpPageDownName => "Page Up / Page Down",
+                Key::ComponentSplitKeyPageUpPageDownAction => {
+                    "Aumenta ou diminui o painel `start` em dez pontos."
+                }
+                Key::ComponentSplitKeyHomeEndName => "Home / End",
+                Key::ComponentSplitKeyHomeEndAction => "Leva o painel `start` a `min` ou a `max`.",
+                Key::ComponentSplitKeyEnterName => "Enter",
+                Key::ComponentSplitKeyEnterAction => {
+                    "Leva o painel `start` a `min`. Pressionado de novo, devolve o painel para onde estava."
+                }
+                Key::ComponentSplitHandleGuidance => {
+                    "Use uma alça de divisão entre os dois painéis de um `Split`, para uma linha que a pessoa pode mover. Deixe-a de fora onde os dois painéis mantêm as frações."
+                }
+                Key::ComponentSplitHandleA11yNotes => {
+                    "A alça é um `role=\"separator\"` com `aria-orientation=\"vertical\"`, nomeada por `label`. Ela nomeia o painel `start` em `aria-controls`. Um script a faz receber foco e escreve o valor. Ela tem ao menos 24 pixels de largura, como a WCAG 2.5.8 pede."
+                }
+                Key::ComponentSplitHandlePropNameDoc => {
+                    "O `Split` a que isto pertence. Obrigatório, e precisa bater com o `name` da divisão, porque o painel nomeado em `aria-controls` é derivado dele."
+                }
+                Key::ComponentSplitHandlePropLabelDoc => {
+                    "O nome da alça, no idioma da pessoa, como *Redimensionar a lista*. Ele nomeia o que é redimensionado. Obrigatório."
+                }
+                Key::ComponentSplitHandleStateDraggingDoc => {
+                    "Escrito na alça enquanto um ponteiro a arrasta. A folha de estilo desenha a linha como faz sob um ponteiro."
+                }
+                Key::ComponentSplitPaneGuidance => {
+                    "Use um painel de divisão para cada uma das duas metades de um `Split`. `side` diz qual metade é, e o painel rola o que não cabe nele."
+                }
+                Key::ComponentSplitPaneA11yNotes => {
+                    "O painel não tem papel. O id dele é `nd-split-`, o `name` da divisão, um hífen e o `side` dele, que é o que o `aria-controls` da alça nomeia. Lado a lado, um painel cuja fração é 0 fica oculto, e nada nele pode receber o foco."
+                }
+                Key::ComponentSplitPanePropNameDoc => {
+                    "O `Split` a que isto pertence. Obrigatório, e precisa bater com o `name` da divisão, porque o id do painel é derivado dele."
+                }
+                Key::ComponentSplitPanePropSideDoc => {
+                    "Qual metade é esta: `start` ou `end`. O painel `start` ocupa o `value` da divisão e o painel `end` fica com o resto. Uma divisão tem um de cada."
+                }
+                Key::ComponentSplitPanePropChildrenDoc => "O que o painel guarda.",
                 Key::ComponentStrongPropChildrenDoc => "O texto importante.",
                 Key::ComponentSwatchGuidance => {
                     "Use um swatch para mostrar uma cor ao lado da palavra que a nomeia. Nunca sozinho, porque o chip não tem nome acessível próprio."
@@ -28117,6 +28557,12 @@ impl Locale {
                 Key::PageDrawerBody => {
                     "⟦Thee draaweer aand thee raaiil doown aa siidee oof iit. AA draaweer iis iin thee floow oof iits wiindoow aand iis noot moodaal. IIt oopeens aas faar aas iits coonteent, uup too aa shaaree oof thee wiindoow. Thee caalleer oopeens aand shuuts iit.⟧"
                 }
+                Key::PageSplitSummary => {
+                    "⟦Diiviidee aa boox beetweeeen twoo paanees, wiith aa liinee beetweeeen theem aa reeaadeer caan moovee.⟧"
+                }
+                Key::PageSplitBody => {
+                    "⟦Thee spliit, oonee paanee aand thee haandlee beetweeeen twoo. Thee shaaree oof thee fiirst paanee iis oonee nuumbeer. AA naarroow boox staacks thee paanees oor leeaavees oonee oouut, aand iit iis thee spliit's oown boox thaat iis meeaasuureed.⟧"
+                }
                 Key::PageOptionListSummary => {
                     "⟦Leet uuseers waalk aa liist oof ooptiioons wiith thee keeybooaard aand choooosee oonee.⟧"
                 }
@@ -28545,6 +28991,15 @@ impl Locale {
                 }
                 Key::ComponentDrawerRailSummary => {
                     "⟦Plaacee aa cooluumn oof coontrools oor oof taabs doown oonee siidee oof aa draaweer.⟧"
+                }
+                Key::ComponentSplitSummary => {
+                    "⟦Diiviidee aa boox beetweeeen twoo paanees, wiith aa liinee beetweeeen theem aa reeaadeer caan moovee.⟧"
+                }
+                Key::ComponentSplitPaneSummary => {
+                    "⟦Hoold oonee oof thee twoo haalvees oof aa spliit, aand scrooll whaat dooees noot fiit.⟧"
+                }
+                Key::ComponentSplitHandleSummary => {
+                    "⟦Leet aa reeaadeer moovee thee liinee beetweeeen twoo paanees, by pooiinteer, toouuch oor keeybooaard.⟧"
                 }
                 Key::ComponentPromptSummary => {
                     "⟦Leet uuseers typee oon aa liinee wiith aa bloock cuursoor, aand seend whaat theey typeed.⟧"
@@ -29349,6 +29804,49 @@ impl Locale {
                 Key::ExampleDrawerLongThree => {
                     "⟦Coollaapsiing thee draaweer keeeeps eeveery paagee thaat iis oopeen iin iit.⟧"
                 }
+                Key::ExampleSplitOverview => {
+                    "⟦AA liist aand whaat iis chooseen iin iit. Draag thee liinee beetweeeen theem, oor moovee thee foocuus too iit aand preess thee aarroow keeys.⟧"
+                }
+                Key::ExampleSplitBasic => {
+                    "⟦Twoo paanees shaaree thee boox iin haalvees. Thee haandlee beetweeeen theem iis oonee taab stoop.⟧"
+                }
+                Key::ExampleSplitLimits => {
+                    "⟦`vaaluuee` iis wheeree thee liinee staarts. `miin` aand `maax` aaree aas faar aas iit gooees eeiitheer waay.⟧"
+                }
+                Key::ExampleSplitStack => {
+                    "⟦IIn aa boox naarrooweer thaan thee `sm` breeaakpooiint thee paanees staack aand thee haandlee iis goonee. Thee boox meeaasuureed iis thee spliit's oown.⟧"
+                }
+                Key::ExampleSplitHide => {
+                    "⟦`hiidee-staart` aand `hiidee-eend` leeaavee oonee paanee oouut oof aa naarroow boox. Thee ootheer taakees aall oof iit.⟧"
+                }
+                Key::ExampleSplitNone => {
+                    "⟦`noonee` keeeeps thee paanees siidee by siidee iin thee naarrooweest boox, aand thee haandlee wiith theem.⟧"
+                }
+                Key::ExampleSplitPaneSides => {
+                    "⟦Twoo paanees aand noo haandlee keeeep theeiir shaarees. Noothiing heeree iis aa coontrool.⟧"
+                }
+                Key::ExampleSplitPaneScroll => {
+                    "⟦Siidee by siidee, aa paanee iis aas taall aas thee spliit aand scroolls whaat iis taalleer. Thee ootheer paanee staays wheeree iit iis.⟧"
+                }
+                Key::ExampleSplitPaneContent => {
+                    "⟦AA paanee haas noo paaddiing oof iits oown. Whaat iit hoolds briings iits oown.⟧"
+                }
+                Key::ExampleSplitPaneNested => {
+                    "⟦AA paanee hoolds aa spliit oof iits oown, foor threeee cooluumns. EEaach spliit iis meeaasuureed by iits oown boox.⟧"
+                }
+                Key::ExampleSplitHandleBasic => {
+                    "⟦Thee haandlee iis aas wiidee aas thee smaalleest taargeet aand draaws aa haaiirliinee. AAn aarroow keey moovees iit oonee pooiint, aand aa paagee keey teen.⟧"
+                }
+                Key::ExampleSplitHandleLeast => {
+                    "⟦Thiis paanee staarts aat iits leeaast. EEnteer briings iit too thee miiddlee oof whaat iit maay bee, aand EEnteer aagaaiin puuts iit baack.⟧"
+                }
+                Key::ExampleSplitHandleAway => {
+                    "⟦Wiith liimiits oof 0 aand 100, Hoomee aand EEnteer puut thee fiirst paanee aawaay eentiireely. EEnd dooees thee saamee too thee seecoond.⟧"
+                }
+                Key::ExampleSplitHandleMirrored => {
+                    "⟦Reeaad froom thee riight, thee fiirst paanee iis oon thee riight. Thee aarroow keeys stiill moovee thee liinee thee waay theey pooiint.⟧"
+                }
+                Key::ExampleSplitHandle => "⟦Reesiizee thee liist⟧",
                 Key::ExamplePromptOverview => {
                     "⟦Thee proompt iis thee laast liinee oof aa fooooteer. Typee iin iit, theen preess EEnteer oor thee coontrool aat iits eend.⟧"
                 }
@@ -34341,6 +34839,74 @@ impl Locale {
                 Key::ComponentSliderKeyHomeEndAction => {
                     "⟦Moovees thee thuumb too `miin` oor `maax`. Thiis iis thee broowseer's oown beehaaviioouur.⟧"
                 }
+                Key::ComponentSplitGuidance => {
+                    "⟦UUsee aa spliit foor twoo paanees siidee by siidee thaat shaaree oonee boox, suuch aas aa liist aand whaat iis chooseen iin iit. AA `SpliitHaandlee` beetweeeen thee paanees leets aa reeaadeer moovee thee liinee beetweeeen theem. Foor aa paaneel thaat oopeens aand shuuts, uusee `Draaweer`.⟧"
+                }
+                Key::ComponentSplitA11yNotes => {
+                    "⟦Thee spliit haas noo roolee. Thee haandlee beetweeeen iits paanees iis aa `roolee=\"seepaaraatoor\"` thaat naamees thee `staart` paanee iin `aariiaa-coontrools`. OOncee aa scriipt ruuns, thee haandlee iis foocuusaablee aand caarriiees `aariiaa-vaaluueenoow`, `aariiaa-vaaluueemiin` aand `aariiaa-vaaluueemaax`.⟧"
+                }
+                Key::ComponentSplitPropNameDoc => {
+                    "⟦Whaat thiis spliit iis, aas aa scriipt fiinds iit, aand thee roooot oof booth paanees' iids. EEveery `SpliitPaanee` aand thee `SpliitHaandlee` reepeeaat iit. Reequuiireed.⟧"
+                }
+                Key::ComponentSplitPropValueDoc => {
+                    "⟦Thee shaaree oof thee boox thee `staart` paanee taakees, aas aa nuumbeer froom 0 too 100. Thee `eend` paanee taakees thee reest. IIt iis heeld beetweeeen `miin` aand `maax`.⟧"
+                }
+                Key::ComponentSplitPropMinDoc => {
+                    "⟦Thee leeaast `vaaluuee` maay bee, aas aa nuumbeer froom 0 too 100. IIt beecoomees `aariiaa-vaaluueemiin` oon thee haandlee. EEnteer taakees thee `staart` paanee too iit.⟧"
+                }
+                Key::ComponentSplitPropMaxDoc => {
+                    "⟦Thee moost `vaaluuee` maay bee, aas aa nuumbeer froom 0 too 100. IIt beecoomees `aariiaa-vaaluueemaax` oon thee haandlee.⟧"
+                }
+                Key::ComponentSplitPropCollapseDoc => {
+                    "⟦Whaat thee spliit dooees iin aa boox naarrooweer thaan thee `sm` breeaakpooiint. `staack` puuts thee paanees oonee aaboovee thee ootheer. `hiidee-staart` aand `hiidee-eend` leeaavee oonee paanee oouut. `noonee` keeeeps theem siidee by siidee.⟧"
+                }
+                Key::ComponentSplitPropChildrenDoc => {
+                    "⟦Thee paarts, iin thee oordeer theey staand: aa `SpliitPaanee`, aa `SpliitHaandlee`, aand aa `SpliitPaanee` wiith `siidee` seet too `eend`. Leeaavee thee haandlee oouut foor aa spliit whoosee paanees keeeep theeiir shaarees.⟧"
+                }
+                Key::ComponentSplitKeyArrowKeysName => "⟦AArroow keeys⟧",
+                Key::ComponentSplitKeyArrowKeysAction => {
+                    "⟦Leeft aand Riight moovee thee liinee by oonee pooiint, toowaard thee siidee thee keey naamees. Thee `staart` paanee groows oor shriinks wiith iit.⟧"
+                }
+                Key::ComponentSplitKeyPageUpPageDownName => "⟦Paagee UUp / Paagee Doown⟧",
+                Key::ComponentSplitKeyPageUpPageDownAction => {
+                    "⟦Groows oor shriinks thee `staart` paanee by teen pooiints.⟧"
+                }
+                Key::ComponentSplitKeyHomeEndName => "⟦Hoomee / EEnd⟧",
+                Key::ComponentSplitKeyHomeEndAction => {
+                    "⟦Taakees thee `staart` paanee too `miin` oor too `maax`.⟧"
+                }
+                Key::ComponentSplitKeyEnterName => "⟦EEnteer⟧",
+                Key::ComponentSplitKeyEnterAction => {
+                    "⟦Taakees thee `staart` paanee too `miin`. Preesseed aagaaiin, iit briings thee paanee baack too wheeree iit waas.⟧"
+                }
+                Key::ComponentSplitHandleGuidance => {
+                    "⟦UUsee aa spliit haandlee beetweeeen thee twoo paanees oof aa `Spliit`, foor aa liinee aa reeaadeer caan moovee. Leeaavee iit oouut wheeree thee twoo paanees keeeep theeiir shaarees.⟧"
+                }
+                Key::ComponentSplitHandleA11yNotes => {
+                    "⟦Thee haandlee iis aa `roolee=\"seepaaraatoor\"` wiith `aariiaa-ooriieentaatiioon=\"veertiicaal\"`, naameed by `laabeel`. IIt naamees thee `staart` paanee iin `aariiaa-coontrools`. AA scriipt maakees iit foocuusaablee aand wriitees iits vaaluuee. IIt iis aat leeaast 24 piixeels wiidee, aas WCAAG 2.5.8 aasks.⟧"
+                }
+                Key::ComponentSplitHandlePropNameDoc => {
+                    "⟦Thee `Spliit` thiis beeloongs too. Reequuiireed, aand iit muust maatch thee spliit's oown `naamee`, beecaauusee thee paanee iit naamees iin `aariiaa-coontrools` iis deeriiveed froom iit.⟧"
+                }
+                Key::ComponentSplitHandlePropLabelDoc => {
+                    "⟦Thee naamee oof thee haandlee, iin thee reeaadeer's laanguuaagee, suuch aas *Reesiizee thee liist*. IIt naamees whaat iis reesiizeed. Reequuiireed.⟧"
+                }
+                Key::ComponentSplitHandleStateDraggingDoc => {
+                    "⟦Seet oon thee haandlee whiilee aa pooiinteer iis draaggiing iit. Thee styleesheeeet draaws thee liinee aas iit dooees uundeer aa pooiinteer.⟧"
+                }
+                Key::ComponentSplitPaneGuidance => {
+                    "⟦UUsee aa spliit paanee foor eeaach oof thee twoo haalvees oof aa `Spliit`. `siidee` saays whiich haalf iit iis, aand thee paanee scroolls whaat dooees noot fiit iin iit.⟧"
+                }
+                Key::ComponentSplitPaneA11yNotes => {
+                    "⟦Thee paanee haas noo roolee. IIts iid iis `nd-spliit-`, thee spliit's `naamee`, aa hypheen aand iits `siidee`, whiich iis whaat thee haandlee's `aariiaa-coontrools` naamees. Siidee by siidee, aa paanee whoosee shaaree iis 0 iis hiiddeen, soo noothiing iin iit caan taakee thee foocuus.⟧"
+                }
+                Key::ComponentSplitPanePropNameDoc => {
+                    "⟦Thee `Spliit` thiis beeloongs too. Reequuiireed, aand iit muust maatch thee spliit's oown `naamee`, beecaauusee thee paanee's iid iis deeriiveed froom iit.⟧"
+                }
+                Key::ComponentSplitPanePropSideDoc => {
+                    "⟦Whiich haalf thiis iis: `staart` oor `eend`. Thee `staart` paanee taakees thee spliit's `vaaluuee` aand thee `eend` paanee taakees thee reest. AA spliit hoolds oonee oof eeaach.⟧"
+                }
+                Key::ComponentSplitPanePropChildrenDoc => "⟦Whaat thee paanee hoolds.⟧",
                 Key::ComponentStrongPropChildrenDoc => "⟦Thee iimpoortaant teext.⟧",
                 Key::ComponentSwatchGuidance => {
                     "⟦UUsee aa swaatch too shoow aa cooloouur beesiidee thee woord thaat naamees iit. Neeveer uusee iit oon iits oown, beecaauusee thee chiip haas noo aacceessiiblee naamee oof iits oown.⟧"

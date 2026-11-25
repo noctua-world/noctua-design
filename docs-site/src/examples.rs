@@ -498,6 +498,17 @@ ToolbarGroup { align: ToolbarGroupAlign::End, … }"#
         ),
     ),
     (
+        "split",
+        example!(
+            r#"Split { name: "…",
+    SplitPane { name: "…", … }
+    SplitHandle { name: "…", label: "…" }
+    SplitPane { name: "…", side: SplitPaneSide::End, … }
+}"#,
+            Key::ExampleSplitOverview
+        ),
+    ),
+    (
         "option-list",
         example!(
             r#"OptionList { name: "…", label: "…", empty_label: "…",
@@ -735,6 +746,9 @@ pub(crate) fn for_component(name: &str) -> &'static [Example] {
         "Drawer" => DRAWER,
         "DrawerRail" => DRAWER_RAIL,
         "Footer" => FOOTER,
+        "Split" => SPLIT,
+        "SplitPane" => SPLIT_PANE,
+        "SplitHandle" => SPLIT_HANDLE,
         "FooterLine" => FOOTER_LINE,
         "FooterCorner" => FOOTER_CORNER,
         "ListItem" => LIST_ITEM,
@@ -2372,6 +2386,74 @@ const DRAWER_RAIL: &[Example] = &[
     example!(
         r"DrawerRail { … } with more controls than the drawer is tall",
         Key::ExampleDrawerRailScroll
+    ),
+];
+
+// --- Split, SplitPane and SplitHandle ---------------------------------------
+//
+// SIDE BY SIDE NEEDS ROOM. A split collapses by its own width, so an example
+// drawn in a narrow stage shows the collapsed half of whatever it declares.
+// The ones about collapsing stand in `.nd-example-narrow` to show it at every
+// width, and the ones about a pane's height stand in `.nd-example-window`.
+
+const SPLIT: &[Example] = &[
+    example!(
+        r#"Split { name: "…", SplitPane { … } SplitHandle { label: "…" } SplitPane { side: SplitPaneSide::End, … } }"#,
+        Key::ExampleSplitBasic
+    ),
+    example!(
+        r#"Split { value: "30", min: "20", max: "60", … }"#,
+        Key::ExampleSplitLimits
+    ),
+    example!(
+        r"Split { collapse: SplitCollapse::Stack, … } in a narrow column",
+        Key::ExampleSplitStack
+    ),
+    example!(
+        r"Split { collapse: SplitCollapse::HideStart, … } / Split { collapse: SplitCollapse::HideEnd, … } in a narrow column",
+        Key::ExampleSplitHide
+    ),
+    example!(
+        r"Split { collapse: SplitCollapse::None, … } in a narrow column",
+        Key::ExampleSplitNone
+    ),
+];
+
+const SPLIT_PANE: &[Example] = &[
+    example!(
+        r#"SplitPane { name: "…", … } / SplitPane { name: "…", side: SplitPaneSide::End, … }"#,
+        Key::ExampleSplitPaneSides
+    ),
+    example!(
+        r"SplitPane { … } with more in it than the split is tall",
+        Key::ExampleSplitPaneScroll
+    ),
+    example!(
+        r"SplitPane { Heading { … } Paragraph { … } }",
+        Key::ExampleSplitPaneContent
+    ),
+    example!(
+        r"SplitPane { side: SplitPaneSide::End, Split { … } }",
+        Key::ExampleSplitPaneNested
+    ),
+];
+
+const SPLIT_HANDLE: &[Example] = &[
+    example!(
+        r#"SplitHandle { name: "…", label: "…" }"#,
+        Key::ExampleSplitHandleBasic
+    ),
+    example!(
+        r#"SplitHandle { … } in a Split { value: "20", min: "20", … }"#,
+        Key::ExampleSplitHandleLeast
+    ),
+    example!(
+        r#"SplitHandle { … } in a Split { min: "0", max: "100", … }"#,
+        Key::ExampleSplitHandleAway
+    ),
+    example!(
+        r"SplitHandle { … } in a split read from the right",
+        Key::ExampleSplitHandleMirrored
     ),
 ];
 

@@ -876,6 +876,123 @@ Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#,
         }],
     ),
     (
+        "split",
+        r#"Split { name: "…",
+    SplitPane { name: "…", … }
+    SplitHandle { name: "…", label: "…" }
+    SplitPane { name: "…", side: SplitPaneSide::End, … }
+}"#,
+        // A LIST AND WHAT IS CHOSEN IN IT, in a window, so each pane is as tall
+        // as the split and scrolls by itself.
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-window"))],
+            children: &[Node::Component {
+                name: "Split",
+                props: &[
+                    ("name", Value::Text("overview-split")),
+                    ("value", Value::Text("35")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "SplitPane",
+                        props: &[("name", Value::Text("overview-split"))],
+                        children: &[Node::Element {
+                            tag: "div",
+                            attributes: &[("class", Value::Text("nd-example-pane"))],
+                            children: &[
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailCommands,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailSettings,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailRegistries,
+                                    ))],
+                                },
+                            ],
+                        }],
+                    },
+                    Node::Component {
+                        name: "SplitHandle",
+                        props: &[
+                            ("name", Value::Text("overview-split")),
+                            ("label", Value::Message(Key::ExampleSplitHandle)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SplitPane",
+                        props: &[
+                            ("name", Value::Text("overview-split")),
+                            ("side", Value::Text("end")),
+                        ],
+                        children: &[Node::Element {
+                            tag: "div",
+                            attributes: &[("class", Value::Text("nd-example-pane"))],
+                            children: &[
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailCommandsBody,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailSettingsBody,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailRegistriesBody,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleDrawerLongOne,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleDrawerLongTwo,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleDrawerLongThree,
+                                    ))],
+                                },
+                            ],
+                        }],
+                    },
+                ],
+            }],
+        }],
+    ),
+    (
         "option-list",
         r#"OptionList { name: "…", label: "…", empty_label: "…",
     OptionGroup { label: "…",

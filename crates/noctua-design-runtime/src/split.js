@@ -1,0 +1,233 @@
+// Everything a `Split` does once a script is running.
+//
+// IT SHIPS, for the reason `menu.js` gives: a component whose consumer cannot
+// use it is a component that lies.
+//
+// WHAT THE MARKUP CLAIMS AND WHAT THIS ADDS.
+//
+// With no script a split is two panes at the share its `value` names, and the
+// handle between them is a `role="separator"` with no `tabindex` and no value:
+// a line between two things, which is all the markup can honour. This is what
+// makes the line a control. It writes the `tabindex` and the three
+// `aria-value` attributes together, and with them the keys and the drag a
+// focusable separator owes.
+//
+// ONE NUMBER, AND THREE PLACES IT IS WRITTEN. The share of the box the first
+// pane takes is `data-nd-value` on the split, which is the caller's prop and
+// what this file reads. `--nd-split-value` on the same element is what the
+// stylesheet divides the box by, and `aria-valuenow` on the handle is what a
+// screen reader is told. `draw` makes the second and the third say what the
+// first says, held between the split's `min` and `max`, and an observer calls
+// it whenever a caller writes `value`, `min` or `max`. The stylesheet also
+// reads `aria-valuenow`: the first pane is put away where it says 0 and the
+// second where it says 100, so the number written there is always the one
+// drawn, never the caller's number past a limit.
+//
+// THE KEYS ARE THE WINDOW SPLITTER'S, from the ARIA practices: Left and Right
+// move the line, Home and End take it to its limits, and Enter takes the first
+// pane to its least and brings it back. The practices name no distance, so the
+// reading taken is a slider's: one point for an arrow, ten for a page key. The
+// arrows move the LINE, so they are mirrored where the page reads from the
+// right.
+//
+// WHAT IT NEVER DOES:
+//
+// 1. It never keeps the share. It moves the line, because a drag has to follow
+//    the pointer in the frame it moves in, and says `nd-split-resize` with the
+//    split's name, the value, and whether a pointer still holds the line. A
+//    caller that keeps the share writes it back as `value`.
+// 2. It never takes the keys from anything else. A key held with Control, Alt
+//    or the system key is somebody else's chord.
+// 3. It never touches a split with no handle. Two panes that keep their shares
+//    are a layout, and nothing in a layout is a control.
+
+/** How far one arrow key moves the line, in points of a hundred. */
+const STEP = 1;
+
+/** How far a page key moves it. */
+const PAGE = 10;
+
+/** Every enhanced split's teardown, so a subtree can be released. */
+const splits = new WeakMap();
+
+export function enhanceSplits(root = document) {
+  for (const split of root.querySelectorAll("[data-nd-split]")) {
+    if (split.dataset.ndEnhanced) continue;
+    const handle = split.querySelector(":scope > .nd-split-track > .nd-split-handle");
+    if (!handle) continue;
+    split.dataset.ndEnhanced = "split";
+    splits.set(split, enhance(split, handle));
+  }
+}
+
+/**
+ * Takes the behaviour back off every split under `root`.
+ *
+ * A BEHAVIOUR THAT CANNOT BE RELEASED IS A DEFECT FOR EVERY CONSUMER WITH A
+ * CLIENT-SIDE ROUTER. The `tabindex` and the value go back with the listeners,
+ * because a separator still focusable and still announcing a value, with
+ * nothing answering its keys, is the promise this file refuses to make without
+ * keeping. The share stays where the reader left it.
+ */
+export function releaseSplits(root = document) {
+  for (const split of root.querySelectorAll("[data-nd-split]")) {
+    if (split.dataset.ndEnhanced !== "split") continue;
+    splits.get(split)?.();
+    splits.delete(split);
+    delete split.dataset.ndEnhanced;
+  }
+}
+
+const clamp = (value, least, most) => Math.min(Math.max(value, least), most);
+
+/** Two decimals: a drag lands between points, and a longer number says nothing more. */
+const rounded = (value) => Math.round(value * 100) / 100;
+
+function enhance(split, handle) {
+  const binding = new AbortController();
+  const { signal } = binding;
+  const name = split.getAttribute("data-nd-split");
+
+  /** An attribute of the split as a number, or `otherwise` where it is not one. */
+  const number = (attribute, otherwise) => {
+    const read = Number.parseFloat(split.getAttribute(attribute));
+    return Number.isFinite(read) ? read : otherwise;
+  };
+
+  /** The least and the most the share may be. A most under the least is the least. */
+  const limits = () => {
+    const least = clamp(number("data-nd-min", 0), 0, 100);
+    return { least, most: Math.max(least, clamp(number("data-nd-max", 100), 0, 100)) };
+  };
+
+  /** The share as it stands, held between the limits. */
+  const share = () => {
+    const { least, most } = limits();
+    return clamp(number("data-nd-value", 50), least, most);
+  };
+
+  /** Where the first pane was before Enter took it to its least. */
+  let before = null;
+
+  /** Makes the track and the handle say what the split's attributes say. */
+  function draw() {
+    const { least, most } = limits();
+    const value = share();
+    handle.setAttribute("aria-valuemin", String(least));
+    handle.setAttribute("aria-valuemax", String(most));
+    handle.setAttribute("aria-valuenow", String(value));
+    split.style.setProperty("--nd-split-value", String(value));
+  }
+
+  function say(dragging) {
+    split.dispatchEvent(
+      new CustomEvent("nd-split-resize", {
+        bubbles: true,
+        detail: { name, value: share(), dragging },
+      }),
+    );
+  }
+
+  /** Moves the line, and says so if it moved. */
+  function move(to, dragging = false) {
+    const { least, most } = limits();
+    const value = rounded(clamp(to, least, most));
+    if (value === share()) return;
+    split.setAttribute("data-nd-value", String(value));
+    draw();
+    say(dragging);
+  }
+
+  handle.addEventListener("keydown", (event) => {
+    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+    // THE ARROWS MOVE THE LINE, AND THE LINE IS WHERE THE PAGE PUTS IT. Read
+    // from the right, the first pane is on the right, so the line moving left
+    // makes it larger.
+    const toward = getComputedStyle(split).direction === "rtl" ? -1 : 1;
+    const { least, most } = limits();
+    const now = share();
+    let to;
+    switch (event.key) {
+      case "ArrowRight": to = now + STEP * toward; break;
+      case "ArrowLeft": to = now - STEP * toward; break;
+      case "PageUp": to = now + PAGE; break;
+      case "PageDown": to = now - PAGE; break;
+      case "Home": to = least; break;
+      case "End": to = most; break;
+      case "Enter":
+        // To its least, remembering where it was, and back from there. A pane
+        // already at its least with nowhere remembered goes to the middle of
+        // what it is allowed.
+        if (now > least) {
+          before = now;
+          to = least;
+        } else {
+          to = before ?? (least + most) / 2;
+          before = null;
+        }
+        break;
+      default: return;
+    }
+    // Taken even at a limit, where nothing moves: Home on a line that is
+    // already at its least must not scroll the page instead.
+    event.preventDefault();
+    move(to);
+  }, { signal });
+
+  handle.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0 || !event.isPrimary) return;
+    // Refused, so the press selects no text in the panes it is dragged over.
+    // That also keeps a mouse from focusing the handle, so the focus is given.
+    event.preventDefault();
+    handle.focus({ preventScroll: true });
+
+    const drag = new AbortController();
+    const track = handle.parentElement.getBoundingClientRect();
+    const own = handle.getBoundingClientRect();
+    // What the two panes share is the track less the handle, and the pointer
+    // keeps the place in the handle it took hold of.
+    const room = track.width - own.width;
+    const held = event.clientX - own.left;
+    const mirrored = getComputedStyle(split).direction === "rtl";
+
+    handle.setPointerCapture(event.pointerId);
+    handle.setAttribute("data-nd-dragging", "");
+
+    handle.addEventListener("pointermove", (moved) => {
+      if (room <= 0) return;
+      const from = moved.clientX - held - track.left;
+      move(((mirrored ? room - from : from) / room) * 100, true);
+    }, { signal: drag.signal });
+
+    const done = () => {
+      drag.abort();
+      handle.removeAttribute("data-nd-dragging");
+      // Said once more with the pointer gone, which is the value to keep.
+      say(false);
+    };
+    for (const end of ["pointerup", "pointercancel", "lostpointercapture"]) {
+      handle.addEventListener(end, done, { signal: drag.signal });
+    }
+    // A split released mid-drag takes the drag's listeners with it.
+    signal.addEventListener("abort", () => drag.abort(), { signal: drag.signal });
+  }, { signal });
+
+  const observer = new MutationObserver(draw);
+  observer.observe(split, {
+    attributes: true,
+    attributeFilter: ["data-nd-value", "data-nd-min", "data-nd-max"],
+  });
+
+  handle.tabIndex = 0;
+  draw();
+
+  return () => {
+    observer.disconnect();
+    binding.abort();
+    handle.removeAttribute("tabindex");
+    handle.removeAttribute("aria-valuenow");
+    handle.removeAttribute("aria-valuemin");
+    handle.removeAttribute("aria-valuemax");
+    handle.removeAttribute("data-nd-dragging");
+  };
+}

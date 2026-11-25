@@ -1,0 +1,17 @@
+# What a `SplitHandle` has to be, in both languages, in a real browser.
+#
+# The keys are the split's, and `spec/components/split.cases.toml` holds them.
+# What is asked here is what a handle claims with no split around it, which is
+# the same thing it claims with no script: a line between two things.
+
+[[case]]
+name = "it is a named separator that stands upright and names the first pane"
+note = "`aria-orientation` names the line and not the way it moves. A line between two panes side by side is vertical."
+props = { name = "mail", label = "Resize the list" }
+expect = { attrs = { role = "separator", "aria-orientation" = "vertical", "aria-controls" = "nd-split-mail-start", "aria-label" = "Resize the list", "data-nd-split-handle" = "mail" }, present = [":scope > .nd-split-handle-line"] }
+
+[[case]]
+name = "with no split around it, it is not a control"
+note = "A separator that is focusable and has a value promises keys. Nothing answers them outside a split, so neither attribute is written, and nothing says it is being dragged."
+props = { name = "mail", label = "Resize the list" }
+expect = { absent = ["tabindex", "aria-valuenow", "aria-valuemin", "aria-valuemax", "data-nd-dragging"] }

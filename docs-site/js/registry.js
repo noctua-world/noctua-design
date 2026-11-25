@@ -83,6 +83,9 @@ import { Select } from "@noctua-world/design-react/components/select.js";
 import { SelectGroup } from "@noctua-world/design-react/components/select_group.js";
 import { SelectOption } from "@noctua-world/design-react/components/select_option.js";
 import { Slider } from "@noctua-world/design-react/components/slider.js";
+import { Split } from "@noctua-world/design-react/components/split.js";
+import { SplitHandle } from "@noctua-world/design-react/components/split_handle.js";
+import { SplitPane } from "@noctua-world/design-react/components/split_pane.js";
 import { Strong } from "@noctua-world/design-react/components/strong.js";
 import { Swatch } from "@noctua-world/design-react/components/swatch.js";
 import { Switch } from "@noctua-world/design-react/components/switch.js";
@@ -182,6 +185,9 @@ export const COMPONENTS = {
   SelectGroup,
   SelectOption,
   Slider,
+  Split,
+  SplitHandle,
+  SplitPane,
   Strong,
   Swatch,
   Switch,

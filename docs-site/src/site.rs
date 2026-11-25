@@ -363,6 +363,18 @@ pub(crate) const DRAWER: Page = Page {
     component: None,
 };
 
+/// Two panes that share a box, one pane, and the line between them.
+///
+/// A collection for the reason `TABS` is one: a `SplitPane` outside a `Split`
+/// has no share to take, and a `SplitHandle` outside one has no line to move.
+pub(crate) const SPLIT: Page = Page {
+    slug: "split",
+    title: Title::Name("Split"),
+    summary: Key::PageSplitSummary,
+    kind: Kind::Component,
+    component: None,
+};
+
 /// The list a reader walks with the keyboard, a named run of it, and one option.
 ///
 /// A collection for the reason `TREE` is one: an `OptionItem` outside an
@@ -536,7 +548,7 @@ pub(crate) struct Collection {
 /// `page.component.is_some()`, so nobody could search for `spread` or
 /// `current_label`. It reads `documented_on` now, so a component on a shared
 /// page is as findable as one with a page of its own.
-pub(crate) const COLLECTIONS: [Collection; 17] = [
+pub(crate) const COLLECTIONS: [Collection; 18] = [
     Collection {
         page: LINEAGE,
         parts: &["Lineage", "LineageFigure"],
@@ -573,6 +585,12 @@ pub(crate) const COLLECTIONS: [Collection; 17] = [
         page: DRAWER,
         parts: &["Drawer", "DrawerRail"],
         body: Key::PageDrawerBody,
+    },
+    Collection {
+        // The split, then its halves, then what stands between them.
+        page: SPLIT,
+        parts: &["Split", "SplitPane", "SplitHandle"],
+        body: Key::PageSplitBody,
     },
     Collection {
         // The list, then the run, then one option: outside in, which is the

@@ -12495,3 +12495,169 @@ because a specimen of a `needs_name` component must not render a
   border-inline-end-color: transparent;
   border-inline-start-color: var(--nc-color-accent);
 }
+
+/* --- crates/noctua-design-styles/src/split.css ---
+   COPIED, NOT GENERATED. Edit the file named above. */
+/* --- Split, SplitPane and SplitHandle ----------------------------------------
+ *
+ * Two panes that share one box, and the line between them a reader can move.
+ *
+ * ONE NUMBER DIVIDES THE BOX. `--nd-split-value` is the share the first pane
+ * takes, from 0 to 100, written on the root by the markup and again by
+ * `dist/split.js` when the line moves. Each pane grows from nothing by its
+ * share, so the two are in that proportion whatever the handle between them
+ * takes.
+ *
+ * WHAT A NARROW BOX DOES IS ASKED OF THE SPLIT, NOT OF THE WINDOW. The root is
+ * a query container and the track inside it is what the query lays out,
+ * because an element that establishes a container is not its own. A split in a
+ * narrow column collapses on a wide screen.
+ *
+ * THE NARROW LAYOUT IS WRITTEN FIRST AND THE WIDE ONE RESTORES IT, at the
+ * weight of the rules it restores: a container query adds nothing to a rule's
+ * weight, so each selector inside it names `[data-nd-collapse]` and
+ * `[data-nd-side]` where the narrow rule names a value of them. */
+.nd-split {
+  --nd-split-value: 50;
+
+  container: nd-split / inline-size;
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  box-sizing: border-box;
+  /* A query container has no width of its own content's, so it is given the
+     box it is in. */
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+/* NARROW: ONE ABOVE THE OTHER, each as tall as what is in it, and no handle.
+   There is no line to move between two panes that are not side by side.
+   Two panes stacked in a box with a height of its own, such as a window, are
+   taller than it, so the track scrolls them: a box that cut them off would
+   leave the end of the second pane where nothing reaches it. Side by side
+   each pane scrolls itself and the track has nothing to scroll. */
+.nd-split-track {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: auto;
+}
+
+.nd-split-pane {
+  flex: none;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: auto;
+}
+
+.nd-split[data-nd-collapse="hide-start"] > .nd-split-track > .nd-split-pane[data-nd-side="start"],
+.nd-split[data-nd-collapse="hide-end"] > .nd-split-track > .nd-split-pane[data-nd-side="end"] {
+  display: none;
+}
+
+/* THE HANDLE: A TARGET OF THE SMALLEST SIZE, AND A LINE DRAWN THINNER
+ * (WCAG 2.5.8). `touch-action: none` is what lets a finger drag it: without it
+ * the engine takes the gesture for a scroll and the handle never hears it.
+ *
+ * The line is the strong border colour, because it is all that says a control
+ * is there. */
+.nd-split-handle {
+  display: none;
+  flex: none;
+  justify-content: center;
+  box-sizing: border-box;
+  inline-size: var(--noctua-target-min);
+  touch-action: none;
+}
+
+.nd-split-handle-line {
+  flex: none;
+  inline-size: var(--noctua-border-hairline);
+  background: var(--nc-color-border-strong);
+}
+
+/* SIDE BY SIDE, AT EVERY WIDTH, for a split that says it never collapses. The
+   same four rules stand in the query below for every other split, where the
+   split's own box is wide enough. */
+.nd-split[data-nd-collapse="none"] > .nd-split-track {
+  flex-direction: row;
+}
+
+.nd-split[data-nd-collapse="none"] > .nd-split-track > .nd-split-pane[data-nd-side="start"] {
+  flex: var(--nd-split-value) 1 0;
+}
+
+.nd-split[data-nd-collapse="none"] > .nd-split-track > .nd-split-pane[data-nd-side="end"] {
+  flex: calc(100 - var(--nd-split-value)) 1 0;
+}
+
+.nd-split[data-nd-collapse="none"] > .nd-split-track > .nd-split-handle {
+  display: flex;
+}
+
+/* A PANE THE LINE HAS PUT AWAY IS NOT ON THE PAGE. With a `min` of 0 or a
+   `max` of 100 the line can take one pane to nothing, which is the window
+   splitter's collapse, and a pane drawn as nothing still holds whatever the
+   keyboard could reach in it. So a pane whose share is nothing is
+   `visibility: hidden`, which takes it out of the tab order and the
+   accessibility tree. The number read is the handle's `aria-valuenow`,
+   because that is the share the script has drawn, held between the limits.
+   Only side by side: stacked panes do not take shares, and both are drawn. */
+.nd-split[data-nd-collapse="none"] > .nd-split-track > .nd-split-pane[data-nd-side="start"]:has(+ .nd-split-handle[aria-valuenow="0"]),
+.nd-split[data-nd-collapse="none"] > .nd-split-track > .nd-split-handle[aria-valuenow="100"] + .nd-split-pane[data-nd-side="end"] {
+  visibility: hidden;
+}
+
+@container nd-split (min-width: 30rem) {
+  .nd-split[data-nd-collapse] > .nd-split-track {
+    flex-direction: row;
+  }
+
+  .nd-split[data-nd-collapse] > .nd-split-track > .nd-split-pane[data-nd-side="start"] {
+    display: block;
+    flex: var(--nd-split-value) 1 0;
+  }
+
+  .nd-split[data-nd-collapse] > .nd-split-track > .nd-split-pane[data-nd-side="end"] {
+    display: block;
+    flex: calc(100 - var(--nd-split-value)) 1 0;
+  }
+
+  .nd-split[data-nd-collapse] > .nd-split-track > .nd-split-handle {
+    display: flex;
+  }
+
+  .nd-split[data-nd-collapse] > .nd-split-track > .nd-split-pane[data-nd-side="start"]:has(+ .nd-split-handle[aria-valuenow="0"]),
+  .nd-split[data-nd-collapse] > .nd-split-track > .nd-split-handle[aria-valuenow="100"] + .nd-split-pane[data-nd-side="end"] {
+    visibility: hidden;
+  }
+}
+
+/* A CONTROL ONLY ONCE A SCRIPT HAS MADE IT ONE. The `tabindex` arrives with the
+   keys and the drag, so the cursor and the answer to a pointer wait for it: a
+   line that looked movable with nothing to move it would be a control that
+   does nothing. */
+.nd-split-handle[tabindex] {
+  cursor: col-resize;
+}
+
+.nd-split-handle[tabindex]:is(:hover, [data-nd-seat-hover]) > .nd-split-handle-line,
+.nd-split-handle:is([data-nd-dragging], [data-nd-seat-drag]) > .nd-split-handle-line {
+  inline-size: var(--noctua-border-strong);
+  background: var(--nc-color-accent);
+}
+
+/* The ring is drawn inside the handle's own box, which touches a pane on each
+   side, and the line takes the accent with it. */
+.nd-split-handle:is(:focus-visible, [data-nd-seat-focus]) {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
+.nd-split-handle:is(:focus-visible, [data-nd-seat-focus]) > .nd-split-handle-line {
+  inline-size: var(--noctua-border-strong);
+  background: var(--nc-color-accent);
+}

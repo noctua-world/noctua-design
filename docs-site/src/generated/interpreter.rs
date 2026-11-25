@@ -43,18 +43,18 @@ use noctua_design::components::{
     Rating, RatingSize, Search, SearchGroup, SearchPresentation, SearchResult, SearchSize,
     Segmented, SegmentedAppearance, SegmentedFill, SegmentedItem, SegmentedOrientation,
     SegmentedSelection, SegmentedShape, SegmentedSize, Select, SelectGroup, SelectOption,
-    SelectSize, Slider, SliderSize, SliderTone, Strong, Swatch, SwatchShape, SwatchSize, Switch,
-    SwitchSize, Tab, TabPanel, Table, TableCell, TableCellAggregate, TableCellAggregateOver,
-    TableCellAlign, TableCellWrap, TableColumn, TableColumnSortAs, TableColumnWidth, TableDensity,
-    TableHeaderCell, TableHeaderCellAlign, TableHeaderCellScope, TableHeaderCellSort,
-    TableHeaderCellWrap, TableHeight, TableLayout, TableRow, TableRowEmphasis, TableRowSelect,
-    TableRules, TableSection, TableSectionKind, TableWidth, Tabs, TabsActivation, TabsAppearance,
-    TabsFill, TabsOrientation, TabsSize, Tag, TagPicker, TagPickerSize, TagPressed, TagShape,
-    TagSize, TagVariant, Text, TextSize, TextTone, TextWeight, Textarea, TextareaResize,
-    TextareaSize, Time, TimeInput, TimeInputClock, TimeInputSize, Toast, ToastLive, ToastPlacement,
-    Toolbar, ToolbarDensity, ToolbarGroup, ToolbarGroupAlign, ToolbarOrientation, Tooltip,
-    TooltipDelay, TooltipPlacement, Tree, TreeItem, TreeSelection, TreeSize, Truncate,
-    TruncateLines, VisuallyHidden,
+    SelectSize, Slider, SliderSize, SliderTone, Split, SplitCollapse, SplitHandle, SplitPane,
+    SplitPaneSide, Strong, Swatch, SwatchShape, SwatchSize, Switch, SwitchSize, Tab, TabPanel,
+    Table, TableCell, TableCellAggregate, TableCellAggregateOver, TableCellAlign, TableCellWrap,
+    TableColumn, TableColumnSortAs, TableColumnWidth, TableDensity, TableHeaderCell,
+    TableHeaderCellAlign, TableHeaderCellScope, TableHeaderCellSort, TableHeaderCellWrap,
+    TableHeight, TableLayout, TableRow, TableRowEmphasis, TableRowSelect, TableRules, TableSection,
+    TableSectionKind, TableWidth, Tabs, TabsActivation, TabsAppearance, TabsFill, TabsOrientation,
+    TabsSize, Tag, TagPicker, TagPickerSize, TagPressed, TagShape, TagSize, TagVariant, Text,
+    TextSize, TextTone, TextWeight, Textarea, TextareaResize, TextareaSize, Time, TimeInput,
+    TimeInputClock, TimeInputSize, Toast, ToastLive, ToastPlacement, Toolbar, ToolbarDensity,
+    ToolbarGroup, ToolbarGroupAlign, ToolbarOrientation, Tooltip, TooltipDelay, TooltipPlacement,
+    Tree, TreeItem, TreeSelection, TreeSize, Truncate, TruncateLines, VisuallyHidden,
 };
 
 use crate::tree::{Node, Scope, Value, render};
@@ -144,6 +144,9 @@ pub(crate) fn component(
         "SelectGroup" => select_group(props, children, scope),
         "SelectOption" => select_option(props, children, scope),
         "Slider" => slider(props, children, scope),
+        "Split" => split(props, children, scope),
+        "SplitHandle" => split_handle(props, children, scope),
+        "SplitPane" => split_pane(props, children, scope),
         "Strong" => strong(props, children, scope),
         "Swatch" => swatch(props, children, scope),
         "Switch" => switch(props, children, scope),
@@ -3578,6 +3581,90 @@ fn slider(
             ai_label: ai_label_,
             ai_note: ai_note_,
             class: class_,
+        }
+    }
+}
+
+/// `Split`, from a tree.
+fn split(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("Split.name is required and this tree does not set it");
+    let value_ = scope
+        .find(props, "value")
+        .unwrap_or_else(|| "50".to_owned());
+    let min_ = scope.find(props, "min").unwrap_or_else(|| "20".to_owned());
+    let max_ = scope.find(props, "max").unwrap_or_else(|| "80".to_owned());
+    let collapse_ = scope
+        .pick(
+            props,
+            "collapse",
+            &SplitCollapse::ALL,
+            SplitCollapse::as_str,
+        )
+        .unwrap_or_default();
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        Split {
+            name: name_,
+            value: value_,
+            min: min_,
+            max: max_,
+            collapse: collapse_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `SplitHandle`, from a tree.
+fn split_handle(
+    props: &'static [(&'static str, Value)],
+    _children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("SplitHandle.name is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("SplitHandle.label is required and this tree does not set it");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        SplitHandle {
+            name: name_,
+            label: label_,
+            class: class_,
+        }
+    }
+}
+
+/// `SplitPane`, from a tree.
+fn split_pane(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("SplitPane.name is required and this tree does not set it");
+    let side_ = scope
+        .pick(props, "side", &SplitPaneSide::ALL, SplitPaneSide::as_str)
+        .unwrap_or_default();
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        SplitPane {
+            name: name_,
+            side: side_,
+            class: class_,
+            {render(children, scope)}
         }
     }
 }

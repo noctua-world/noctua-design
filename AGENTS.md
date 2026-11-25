@@ -312,6 +312,7 @@ of these carries measured rules, not description:
 | a list walked by the keyboard, its active option, or the control that drives one | `crates/noctua-design-runtime/src/option-list.js` |
 | the prompt, its block cursor, or anything drawn over a text control | `crates/noctua-design-runtime/src/prompt.js` |
 | a drawer: what a collapsed one owes the keyboard, and what Escape says | `crates/noctua-design-runtime/src/drawer.js` |
+| a split: the line between two panes, its keys and its drag | `crates/noctua-design-runtime/src/split.js` |
 | what both implementations must *do* | `spec/components/<name>.cases.toml`, and `crates/noctua-design-spec/src/conformance.rs` for the vocabulary a step may use |
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
@@ -959,6 +960,41 @@ closes is the caller's to decide, and so is where the keyboard goes when a drawe
 **A drawer and a rail stand at the side they name, wherever they are written.** `side` is `order`
 in the row. The keyboard follows the order they are written in, so the `start` is written before
 what it stands beside and the `end` after it.
+
+### The split
+
+**One number divides the box, and it is written in three places.** `Split` holds a `SplitPane`, a
+`SplitHandle` and a `SplitPane`, in the order they stand. `value` is the share of the box the
+`start` pane takes: `data-nd-value` on the root is the caller's prop and what `dist/split.js`
+reads, `--nd-split-value` on the same element is what the stylesheet grows each pane by, and
+`aria-valuenow` on the handle is what a screen reader is told. The script makes the second and the
+third say what the first says, held between `min` and `max`, whenever the caller writes `value`,
+`min` or `max`, so a value the caller writes back is drawn and announced.
+
+**The handle is a line until a script makes it a control.** The markup writes `role="separator"`
+with a name and no more. `dist/split.js` adds the `tabindex` and the three `aria-value` attributes
+together with what keeps them: the window splitter's keys from the ARIA practices, with a slider's
+reading where the practices name no distance, and a drag that follows a pointer or a finger. The
+cursor and the answer to a pointer are written against `[tabindex]`, so a line nothing moves does
+not offer to be moved. The arrows move the line the way they point, so the script mirrors them
+where the page reads from the right. It moves the line itself, because a drag has to follow the
+pointer in the frame it moves in, and says `nd-split-resize` with the name, the value and whether
+a pointer still holds the line. It keeps nothing.
+
+**What a narrow box does is asked of the split's own box.** The root is a query container and
+`.nd-split-track` inside it is what the query lays out, because an element that establishes a
+container is not its own. The narrow layout is written first and the wide one restores it inside
+`@container`, at the weight of the rules it restores: each selector there names
+`[data-nd-collapse]` and `[data-nd-side]` where a narrow rule names a value of them. A stacked or
+hidden pane takes its handle with it, and a handle that is not drawn is not a tab stop. Stacked
+panes are each as tall as what is in them, so the track scrolls them where the box has a height
+of its own: a window would otherwise cut the second one off out of every reader's reach.
+
+**A pane the line takes to nothing is put away.** With a `min` of 0 or a `max` of 100 the line can
+collapse a pane, as the window splitter's Enter does, and a pane drawn as nothing still holds
+whatever the keyboard could reach in it. Side by side, the stylesheet makes it
+`visibility: hidden`, read off the handle's `aria-valuenow`, which is the share the script drew
+held between the limits, so `data-nd-value` written past a limit hides nothing it does not draw.
 
 ### Tones, bars, carousels, spectra
 

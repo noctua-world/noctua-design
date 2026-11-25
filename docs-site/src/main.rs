@@ -586,6 +586,7 @@ fn copy_runtime(root: &Path, out: &Path) -> Result<usize, String> {
         "option-list.js",
         "prompt.js",
         "drawer.js",
+        "split.js",
         "tabs.js",
         "date-input.js",
         "choice.js",

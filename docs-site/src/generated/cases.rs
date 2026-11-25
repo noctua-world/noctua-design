@@ -2277,6 +2277,331 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Split",
+        "case-split-0",
+        &[Node::Component {
+            name: "Split",
+            props: &[("name", Value::Data("mail"))],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-1",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("name", Value::Data("mail")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-2",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("name", Value::Data("mail")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-3",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("name", Value::Data("mail")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-4",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("max", Value::Data("70")),
+                ("name", Value::Data("mail")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-5",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("min", Value::Data("30")),
+                ("name", Value::Data("mail")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-6",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("name", Value::Data("mail")),
+                ("value", Value::Data("45")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-7",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("name", Value::Data("mail")),
+                ("value", Value::Data("45")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-8",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("name", Value::Data("mail")),
+                ("value", Value::Data("95")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-9",
+        &[Node::Component {
+            name: "Split",
+            props: &[("name", Value::Data("mail")), ("value", Value::Data("30"))],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "SplitHandle",
+        "case-split-handle-0",
+        &[Node::Component {
+            name: "SplitHandle",
+            props: &[
+                ("label", Value::Data("Resize the list")),
+                ("name", Value::Data("mail")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "SplitHandle",
+        "case-split-handle-1",
+        &[Node::Component {
+            name: "SplitHandle",
+            props: &[
+                ("label", Value::Data("Resize the list")),
+                ("name", Value::Data("mail")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
         "Switch",
         "case-switch-0",
         &[Node::Component {

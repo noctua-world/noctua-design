@@ -1623,6 +1623,12 @@ a {
   border: var(--noctua-border-hairline) solid var(--nc-color-border);
 }
 
+/* A split in a window is the window's work, and takes all of it. The class a
+   caller would give a split in its own layout, written here for the example. */
+.nd-example-window > .nd-split {
+  flex: 1 1 auto;
+}
+
 /* The same window with its parts side by side, for a drawer at a side. */
 .nd-example-window-row {
   flex-direction: row;
