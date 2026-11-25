@@ -56,8 +56,12 @@ import { fileURLToPath } from "node:url";
 
 import { expect, test } from "@playwright/test";
 
-import { PAGE, showParts, url } from "./pages.js";
+import { PAGE, showParts, url, walker } from "./pages.js";
 import { differing } from "./pixels.js";
+
+// Every walk in this file declares its tests through this line, so that a
+// report names this file rather than `pages.js` (`walker` says why).
+const walk = walker((title, fn) => test(title, fn));
 
 // EVERY PICTURE IS RASTERISED WHOLE, AND WITHOUT THAT THIS FILE CANNOT BE
 // EXACT. The engine otherwise redraws only the rectangle a state change
@@ -148,6 +152,9 @@ const SWEPT = readdirSync(BUILT, { withFileTypes: true })
   .filter((entry) => entry.isDirectory() && existsSync(`${BUILT}${entry.name}/index.html`))
   .map((entry) => `${entry.name}/`)
   .sort();
+
+/** The same, as the `[name, path]` pairs a walk takes. */
+const SWEPT_PAGES = SWEPT.map((path) => [path.slice(0, -1), path]);
 
 /** How many elements one selector is asked about on one page. */
 const PER_SELECTOR = 2;
@@ -834,9 +841,10 @@ async function sensitivity(page, index, shown) {
   }
 }
 
-for (const path of SWEPT) {
-  const name = path.slice(0, -1);
-  test(`a second seat's hover is drawn like the pointer's on ${name}`, async ({ page }, testInfo) => {
+walk(
+  "a second seat's hover is drawn like the pointer's",
+  { pages: SWEPT_PAGES },
+  async ({ page, info: testInfo, path }) => {
     test.slow();
     // No autoplay and no sweep: a page that moves by itself differs from
     // itself, and no comparison of two moments of it means anything. What
@@ -868,9 +876,13 @@ for (const path of SWEPT) {
     // Every element chosen was rendered, so one that could not be hovered at
     // all is rare; a page where none could is a sweep that looked at nothing.
     if (count > 0) expect(reached.size, "no chosen element could be hovered").toBeGreaterThan(0);
-  });
+  },
+);
 
-  test(`a second seat's focus is drawn like the keyboard's on ${name}`, async ({ page }, testInfo) => {
+walk(
+  "a second seat's focus is drawn like the keyboard's",
+  { pages: SWEPT_PAGES },
+  async ({ page, info: testInfo, path }) => {
     test.slow();
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(url(path));
@@ -903,8 +915,8 @@ for (const path of SWEPT) {
     // Every element chosen took the focus, so one that could not be brought
     // into the picture is rare; a page where none could compared nothing.
     if (count > 0) expect(reached.size, "no chosen element was compared").toBeGreaterThan(0);
-  });
-}
+  },
+);
 
 /**
  * The state selectors of the shipped sheet that no sweep above compares.
@@ -977,28 +989,57 @@ const BLIND = [
   '.nd-switch[aria-checked="true"]:hover > .nd-switch-track[data-nd-glass="true"][aria-hidden]',
 ];
 
-test("the sweeps above compare every state selector but the ones listed", async ({ page }) => {
-  // THE VACUITY GUARD. Each test above passes on a page with no state rule in
-  // reach, which is right for a page of headings and would be just as green if
-  // the probe had stopped finding anything anywhere, or found elements it then
-  // could not drive. So every page is driven again here by the sweeps' own
-  // steps, the photographs left out, and what those steps reached is held
-  // against what the stylesheet has. An element being in the page is not
-  // counted: only one the pointer was on, or the keyboard.
-  test.setTimeout(600_000);
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  const reached = new Set();
-  // The selectors whose rule, taken away, changed a pixel under the pointer
-  // or the keyboard.
-  const shown = new Set();
-  let all = [];
-  // The sweeps walk the built site, and that is every page a spec can name.
-  expect(SWEPT.length, "the built site has no page at all").toBeGreaterThan(0);
-  expect(SWEPT).toEqual(expect.arrayContaining(Object.values(PAGE)));
-  for (const path of SWEPT) {
+// THE VACUITY GUARD. Each test above passes on a page with no state rule in
+// reach, which is right for a page of headings and would be just as green if
+// the probe had stopped finding anything anywhere, or found elements it then
+// could not drive. So every page is driven again here by the sweeps' own
+// steps, the photographs left out, and what those steps reached is held
+// against what the stylesheet has. An element being in the page is not
+// counted: only one the pointer was on, or the keyboard.
+//
+// ONE TEST A PAGE, AND THE CLAIM AFTER THE LAST. It was one test with ten
+// minutes to itself; what it holds is a union over the whole site, so the
+// pages run in order on one worker and the comparison is made once every page
+// has reported (`walker` in `pages.js`), with each page its own budget.
+//
+// The selectors whose rule, taken away, changed a pixel under the pointer or
+// the keyboard — on any page so far, because the pages run in order and one
+// already shown is not asked again (`sensitivity`).
+const shown = new Set();
+
+walk(
+  "the sweeps above compare every state selector but the ones listed",
+  {
+    pages: SWEPT_PAGES,
+    tally: (pages) => {
+      // One stylesheet on every page, read on the last one as it always was.
+      const all = pages.at(-1).all;
+      const reached = new Set(pages.flatMap((one) => one.reached));
+      expect(
+        all.length,
+        "the stylesheet has no state selector the probe can read",
+      ).toBeGreaterThan(0);
+      expect(reached.size, "the sweeps reached no state selector at all").toBeGreaterThan(0);
+      const unseen = all.filter((name) => !reached.has(name)).sort();
+      expect(unseen, "the state selectors no sweep compared").toEqual([...UNSEEN].sort());
+
+      // AND A COMPARISON THAT COULD NOT HAVE FAILED IS NAMED AS ONE. A selector
+      // is reached when its element was in the state; whether the two pictures
+      // of it would differ with the twin gone is another question, and
+      // `sensitivity` asked it of every element the sweeps photograph.
+      // Each taken out of its rule ALONE: see `mute` for the six a rule taken
+      // away whole counted as shown.
+      const blind = [...reached].filter((name) => !shown.has(name)).sort();
+      expect(blind, "the state selectors whose photographs cannot fail").toEqual([...BLIND].sort());
+    },
+  },
+  async ({ page, path }) => {
+    // The sweeps' own budget, for the sweeps' own steps.
+    test.slow();
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(url(path));
     await prepare(page);
-    all = await page.evaluate(() => window.__seatProbe.stated().map((entry) => entry.name));
+    const all = await page.evaluate(() => window.__seatProbe.stated().map((entry) => entry.name));
     const hovered = await hoverSweep(page, ({ index }) => sensitivity(page, index, shown));
     const focused = await focusSweep(page, async ({ index }) => {
       await page.evaluate(
@@ -1008,26 +1049,23 @@ test("the sweeps above compare every state selector but the ones listed", async 
       await sensitivity(page, index, shown);
       await page.evaluate((at) => window.__seatProbe.at(at).element.blur(), index);
     });
-    for (const name of [...hovered.reached, ...focused.reached]) reached.add(name);
-  }
-  expect(all.length, "the stylesheet has no state selector the probe can read").toBeGreaterThan(0);
-  expect(reached.size, "the sweeps reached no state selector at all").toBeGreaterThan(0);
-  const unseen = all.filter((name) => !reached.has(name)).sort();
-  expect(unseen, "the state selectors no sweep compared").toEqual([...UNSEEN].sort());
+    return { all, reached: [...hovered.reached, ...focused.reached] };
+  },
+);
 
-  // AND A COMPARISON THAT COULD NOT HAVE FAILED IS NAMED AS ONE. A selector is
-  // reached when its element was in the state; whether the two pictures of it
-  // would differ with the twin gone is another question, and `sensitivity`
-  // asked it of every element the sweeps photograph.
-  // Each taken out of its rule ALONE: see `mute` for the six a rule taken
-  // away whole counted as shown.
-  const blind = [...reached].filter((name) => !shown.has(name)).sort();
-  expect(blind, "the state selectors whose photographs cannot fail").toEqual([...BLIND].sort());
+test("the probe names what it cannot place, and a seat's state is a change", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  // The sweeps walk the built site, and that is every page a spec can name.
+  expect(SWEPT.length, "the built site has no page at all").toBeGreaterThan(0);
+  expect(SWEPT).toEqual(expect.arrayContaining(Object.values(PAGE)));
 
   // AND A STATE THE PROBE CANNOT PLACE IS STILL COUNTED. Three rules are put
-  // into the sheet as it stands in this page, one for each place `stated`
-  // gives up on, and each has to come back by name: that is what makes the
-  // comparison above fail on the first such rule the stylesheet ships.
+  // into the sheet as it stands in a page — the one the walk above ends on —
+  // one for each place `stated` gives up on, and each has to come back by
+  // name: that is what makes the comparison above fail on the first such rule
+  // the stylesheet ships.
+  await page.goto(url(SWEPT.at(-1)));
+  await prepare(page);
   const strays = [
     ".nd-button:not(:hover)",
     ".nd-button:is(.nd-stray, :focus-visible)",

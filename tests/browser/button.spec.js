@@ -7,7 +7,11 @@
 // class was nearest.
 
 import { test, expect } from "@playwright/test";
-import { LOCALES, PAGE, showParts, url } from "./pages.js";
+import { LOCALES, PAGE, showParts, url, walker } from "./pages.js";
+
+// Every walk in this file declares its tests through this line, so that a
+// report names this file rather than `pages.js` (`walker` says why).
+const walk = walker((title, fn) => test(title, fn));
 
 const BUTTONS = "button/";
 // The split button lives here, and this page is not in `PAGE`.
@@ -34,17 +38,15 @@ test("no control anywhere on the button page is nameless", async ({ page }) => {
   }
 });
 
-test("no button anywhere is left without a type", async ({ page }) => {
-  for (const [, path] of Object.entries(PAGE)) {
-    await page.goto(url(path));
-    const typeless = await page.evaluate(
-      () => [...document.querySelectorAll("button:not([type])")].map((el) => el.className),
-    );
-    // An unset `type` inside a form is `submit`, which is how a button that
-    // meant to do something else sends the page. Nothing here is in a form
-    // today, and "today" is the word that makes it worth writing down.
-    expect(typeless, "a button with no type").toEqual([]);
-  }
+walk("no button anywhere is left without a type", {}, async ({ page, path }) => {
+  await page.goto(url(path));
+  const typeless = await page.evaluate(
+    () => [...document.querySelectorAll("button:not([type])")].map((el) => el.className),
+  );
+  // An unset `type` inside a form is `submit`, which is how a button that
+  // meant to do something else sends the page. Nothing here is in a form
+  // today, and "today" is the word that makes it worth writing down.
+  expect(typeless, "a button with no type").toEqual([]);
 });
 
 test("a link-form button is a link, and a menu button says it opens one", async ({ page }) => {
@@ -91,8 +93,10 @@ test("no false ARIA state is written on any button", async ({ page }) => {
   expect(lying, "a button announcing a state it does not have").toEqual([]);
 });
 
-test("every radio group on every page announces exactly one chosen", async ({ page }) => {
-  for (const [name, path] of Object.entries(PAGE)) {
+walk(
+  "every radio group on every page announces exactly one chosen",
+  {},
+  async ({ page, name, path }) => {
     await page.goto(url(path));
     const wrong = await page.evaluate(() =>
       [...document.querySelectorAll('[role="radiogroup"]')]
@@ -120,11 +124,14 @@ test("every radio group on every page announces exactly one chosen", async ({ pa
     // `false` on all thirteen and rely on a script to repair it. Two chosen is
     // wrong everywhere, including in a question.
     expect(wrong, `${name}: a group with no single chosen option`).toEqual([]);
-  }
-});
+  },
+);
 
-test("no button anywhere draws the same chevron twice", async ({ page }) => {
-  for (const [name, path] of [...Object.entries(PAGE), ["buttonGroup", GROUPS]]) {
+walk(
+  "no button anywhere draws the same chevron twice",
+  // Every page, and the button group's, which is not one of them.
+  { pages: [...Object.entries(PAGE), ["buttonGroup", GROUPS]] },
+  async ({ page, name, path }) => {
     await page.goto(url(path));
     await showParts(page);
     const doubled = await page.evaluate(() =>
@@ -137,8 +144,8 @@ test("no button anywhere draws the same chevron twice", async ({ page }) => {
     // this page and the one in the `ButtonGroup` hero each asked for a chevron
     // beside `menu` and each shipped a control with two of them side by side.
     expect(doubled, `${name}: a button drawing two chevrons`).toEqual([]);
-  }
-});
+  },
+);
 
 test("an attached group keeps its outer corners and squares every shared edge", async ({
   page,

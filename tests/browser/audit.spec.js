@@ -15,7 +15,11 @@
 
 import { expect, test } from "@playwright/test";
 
-import { PAGE, showParts, url } from "./pages.js";
+import { PAGE, showParts, url, walker } from "./pages.js";
+
+// Every walk in this file declares its tests through this line, so that a
+// report names this file rather than `pages.js` (`walker` says why).
+const walk = walker((title, fn) => test(title, fn));
 
 /** The widths every page is measured at: the floor, a tablet, a laptop. */
 const WIDTHS = [320, 768, 1120];
@@ -46,8 +50,10 @@ const BLOCKS =
   /^(block|flow-root|flex|grid|list-item|table|table-row|table-row-group|table-header-group|table-footer-group|table-cell|table-caption)$/;
 
 test.describe("one page shape", () => {
-  for (const [name, path] of Object.entries(PAGE)) {
-    test(`${name} is built from the same parts as every other page`, async ({ page }) => {
+  walk(
+    "every page is built from the same parts as every other page",
+    {},
+    async ({ page, path }) => {
       await page.goto(url(path));
       const shape = await page.evaluate(() => {
         const doc = document.querySelector(".nd-doc");
@@ -86,24 +92,27 @@ test.describe("one page shape", () => {
       if (shape.sections > 1) {
         expect(shape.index, "a page of several sections has no index").toBe(true);
       }
-    });
-  }
+    },
+  );
 
-  test("every jump in every index lands on something that exists", async ({ page }) => {
-    // A jump index on fifty-six pages is fifty-six chances to point at nothing,
-    // and a link that scrolls nowhere reads as a page that is broken.
-    const broken = [];
-    for (const [name, path] of Object.entries(PAGE)) {
+  walk(
+    "every jump in every index lands on something that exists",
+    {},
+    async ({ page, name, path }) => {
+      // A jump index on fifty-six pages is fifty-six chances to point at
+      // nothing, and a link that scrolls nowhere reads as a page that is broken.
       await page.goto(url(path));
       const dead = await page.evaluate(() =>
         [...document.querySelectorAll(".nd-doc-index-list a")]
           .map((link) => link.getAttribute("href"))
           .filter((href) => href?.startsWith("#") && !document.getElementById(href.slice(1))),
       );
-      for (const href of dead) broken.push(`${name}: ${href}`);
-    }
-    expect(broken, "a jump index points at nothing").toEqual([]);
-  });
+      expect(
+        dead.map((href) => `${name}: ${href}`),
+        "a jump index points at nothing",
+      ).toEqual([]);
+    },
+  );
 
   test("a folded section still has its heading in the outline", async ({ page }) => {
     // THE WHOLE RISK OF FOLDING. Closed, a section's title is the only thing
@@ -333,50 +342,56 @@ const SWEEP = ([SCROLLS_SOURCE, CONTROLS_SELECTOR, BLOCKS_SOURCE]) => {
 };
 
 test.describe("nothing is drawn wrong", () => {
-  for (const width of WIDTHS) {
-    test(`nothing is clipped, overlapping or invisible at ${width}px`, async ({ page }) => {
+  walk(
+    "nothing is clipped, overlapping or invisible",
+    {
+      axes: { width: WIDTHS },
+      title: ({ width }) => `nothing is clipped, overlapping or invisible at ${width}px`,
+    },
+    async ({ page, width, name, path }) => {
       await page.setViewportSize({ width, height: 900 });
       const found = [];
-      for (const [name, path] of Object.entries(PAGE)) {
-        await page.goto(url(path));
-        // ONE PAGE IS TWO PAGES, and this sweep used to see only the first.
-        // Every variant grid and every contract table ships behind a fold,
-        // and a reader opens it. Across the site that is 313 folds holding
-        // 361 of the 702 stages. The empty-stage check above steps over every
-        // one of them while the fold is shut, so it saw half the site.
-        //
-        // The other four checks do reach inside a shut fold in this browser.
-        // Chrome lays out a `content-visibility: hidden` subtree as soon as
-        // anything measures it, so the 83,866 elements the site keeps folded
-        // answer with a real box. That is the engine's choice rather than
-        // this suite's, and it is not what the coverage should rest on.
-        //
-        // The state rides along in the finding. A report of "clipped at
-        // 320px" is not actionable until you know whether a reader had to
-        // open something first.
-        for (const state of ["as shipped", "folds opened"]) {
-          if (state === "folds opened") await showParts(page);
-          const bad = await page.evaluate(SWEEP, [SCROLLS.source, CONTROLS, BLOCKS.source]);
-          for (const one of bad) found.push(`${name} [${state}] — ${one}`);
-        }
+      await page.goto(url(path));
+      // ONE PAGE IS TWO PAGES, and this sweep used to see only the first.
+      // Every variant grid and every contract table ships behind a fold, and a
+      // reader opens it. Across the site that is 313 folds holding 361 of the
+      // 702 stages. The empty-stage check above steps over every one of them
+      // while the fold is shut, so it saw half the site.
+      //
+      // The other four checks do reach inside a shut fold in this browser.
+      // Chrome lays out a `content-visibility: hidden` subtree as soon as
+      // anything measures it, so the 83,866 elements the site keeps folded
+      // answer with a real box. That is the engine's choice rather than this
+      // suite's, and it is not what the coverage should rest on.
+      //
+      // The state rides along in the finding. A report of "clipped at 320px"
+      // is not actionable until you know whether a reader had to open
+      // something first.
+      for (const state of ["as shipped", "folds opened"]) {
+        if (state === "folds opened") await showParts(page);
+        const bad = await page.evaluate(SWEEP, [SCROLLS.source, CONTROLS, BLOCKS.source]);
+        for (const one of bad) found.push(`${name} [${state}] — ${one}`);
       }
       expect(found, `drawn wrong at ${width}px`).toEqual([]);
-    });
-  }
+    },
+  );
 });
 
-test("an example spends one strip on its own apparatus, and it is narrow", async ({ page }) => {
-  // THE NUMBER THE DEVELOPER WAS REACTING TO. Every example carried a
-  // permanent six-control bar across the top: measured at 1120px, `/button/`
-  // spent 1,416px on twenty-two of them against 1,543px of actual example.
-  // Folding it behind a gear traded that for a control you had to press to
-  // find the controls, which was worse.
-  //
-  // The strip is a rail down the frame's trailing edge now, so it spends WIDTH
-  // — of which every frame has 413 to 815px going unused — rather than height,
-  // which every frame is short of. The budget moves to the other axis with it.
-  const heavy = [];
-  for (const [name, path] of Object.entries(PAGE)) {
+walk(
+  "an example spends one strip on its own apparatus, and it is narrow",
+  {},
+  async ({ page, name, path }) => {
+    // THE NUMBER THE DEVELOPER WAS REACTING TO. Every example carried a
+    // permanent six-control bar across the top: measured at 1120px, `/button/`
+    // spent 1,416px on twenty-two of them against 1,543px of actual example.
+    // Folding it behind a gear traded that for a control you had to press to
+    // find the controls, which was worse.
+    //
+    // The strip is a rail down the frame's trailing edge now, so it spends
+    // WIDTH — of which every frame has 413 to 815px going unused — rather than
+    // height, which every frame is short of. The budget moves to the other
+    // axis with it.
+    const heavy = [];
     await page.goto(url(path));
     const frames = await page.evaluate(() =>
       [...document.querySelectorAll(".nd-frame")].map((frame) => {
@@ -384,10 +399,9 @@ test("an example spends one strip on its own apparatus, and it is narrow", async
         return {
           strips: frame.querySelectorAll(":scope > .nd-frame-bar").length,
           wide: rail ? Math.round(rail.getBoundingClientRect().width) : 0,
-          // Every control in it is a real target at the 24-pixel floor. The rail
-      // is the one place on
-          // this site where a row of small controls sits beside content, so it
-          // is the one most likely to shrink them.
+          // Every control in it is a real target at the 24-pixel floor. The
+          // rail is the one place on this site where a row of small controls
+          // sits beside content, so it is the one most likely to shrink them.
           small: rail
             ? [...rail.querySelectorAll(":scope > button, :scope > details > summary")].filter(
                 (el) => {
@@ -409,28 +423,37 @@ test("an example spends one strip on its own apparatus, and it is narrow", async
       if (frame.wide > 128) heavy.push(`${name}: the rail is ${frame.wide}px wide`);
       if (frame.small) heavy.push(`${name}: ${frame.small} rail control(s) too small`);
     }
-  }
-  expect(heavy, "a frame spends too much of itself on its own furniture").toEqual([]);
-});
+    expect(heavy, "a frame spends too much of itself on its own furniture").toEqual([]);
+  },
+);
 
 // --- Four contracts that named something nothing did -------------------------
 
-test("a list restates the role its own stylesheet takes away", async ({ page }) => {
-  // `list.toml` has always said the role is restated explicitly, and nothing
-  // emitted `role="list"` — while the stylesheet does both things that drop it:
-  // every list is a flex column and `marker: none` removes the marker. So a
-  // reader was told "three items" by the markup and nothing by the browser.
-  //
-  // NOT THE VARIANT GRID, for the reason `segmented.spec.js` gives about
-  // radiogroups: a specimen whose contract carries MARKUP is the contract's
-  // element with that markup inside, drawn to be looked at rather than a
-  // component that rendered itself. Those pictures deliberately carry no ARIA
-  // at all — `aria-sort="none"` on eight still `<th>` pictures is what
-  // inventing it cost last time — so asking one to restate a role is asking
-  // the wrong element. `/list/` is where this shows: seven real lists on it
-  // claim the role, and eight pictures of a list do not.
-  let seen = 0;
-  for (const path of Object.values(PAGE)) {
+walk(
+  "a list restates the role its own stylesheet takes away",
+  {
+    // The floor is the whole site's, so this walk runs its pages in order and
+    // counts after the last (`walker` in `pages.js` says how).
+    tally: (lists) => {
+      const seen = lists.reduce((sum, one) => sum + one, 0);
+      expect(seen, "no list anywhere on the site").toBeGreaterThan(0);
+    },
+  },
+  async ({ page, path }) => {
+    // `list.toml` has always said the role is restated explicitly, and nothing
+    // emitted `role="list"` — while the stylesheet does both things that drop
+    // it: every list is a flex column and `marker: none` removes the marker.
+    // So a reader was told "three items" by the markup and nothing by the
+    // browser.
+    //
+    // NOT THE VARIANT GRID, for the reason `segmented.spec.js` gives about
+    // radiogroups: a specimen whose contract carries MARKUP is the contract's
+    // element with that markup inside, drawn to be looked at rather than a
+    // component that rendered itself. Those pictures deliberately carry no
+    // ARIA at all — `aria-sort="none"` on eight still `<th>` pictures is what
+    // inventing it cost last time — so asking one to restate a role is asking
+    // the wrong element. `/list/` is where this shows: seven real lists on it
+    // claim the role, and eight pictures of a list do not.
     await page.goto(url(path));
     const wrong = await page.evaluate(() => {
       const out = { lists: 0, unnamed: 0, items: 0, unnamedItems: 0 };
@@ -447,12 +470,11 @@ test("a list restates the role its own stylesheet takes away", async ({ page }) 
       }
       return out;
     });
-    seen += wrong.lists;
     expect(wrong.unnamed, `${path} has a list that claims no role`).toBe(0);
     expect(wrong.unnamedItems, `${path} has an item that claims no role`).toBe(0);
-  }
-  expect(seen, "no list anywhere on the site").toBeGreaterThan(0);
-});
+    return wrong.lists;
+  },
+);
 
 test("a specimen is named only where the component owes a name", async ({ page }) => {
   // `Truncate` declared `needs_name` on a role-less `<span>` with no naming
@@ -469,12 +491,14 @@ test("a specimen is named only where the component owes a name", async ({ page }
   expect(named).toBe(0);
 });
 
-test("no variant grid renders a live control nothing has named", async ({ page }) => {
-  // `TagPicker` recorded `needs_name: false` and its specimen was a real
-  // `<input>`, so its grid shipped three focusable text boxes with no `name`,
-  // no `id`, no label and no `aria-label` — the only nameless live control in
-  // the system, on the page of a component that needs a name.
-  for (const path of Object.values(PAGE)) {
+walk(
+  "no variant grid renders a live control nothing has named",
+  {},
+  async ({ page, path }) => {
+    // `TagPicker` recorded `needs_name: false` and its specimen was a real
+    // `<input>`, so its grid shipped three focusable text boxes with no
+    // `name`, no `id`, no label and no `aria-label` — the only nameless live
+    // control in the system, on the page of a component that needs a name.
     await page.goto(url(path));
     const nameless = await page.evaluate(() =>
       [...document.querySelectorAll(".nd-variant-stage input, .nd-variant-stage select")]
@@ -495,8 +519,8 @@ test("no variant grid renders a live control nothing has named", async ({ page }
         .map((el) => el.className),
     );
     expect(nameless, path).toEqual([]);
-  }
-});
+  },
+);
 
 test("opening a disclosure turns its chevron and never the caller's icon", async ({ page }) => {
   await page.goto(url("disclosure/"));

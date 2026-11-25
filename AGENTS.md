@@ -324,6 +324,7 @@ of these carries measured rules, not description:
 | the shell's layout, paint order, or a radius | `docs-site/assets/shell.css` |
 | the page shape or the URL scheme | `docs-site/src/pages.rs` |
 | the site's scope, build, or its open gaps | `docs-site/README.md` |
+| a browser test that asks something of every page | `tests/browser/pages.js` (`walker`) |
 
 ## How a component is built
 
@@ -1534,6 +1535,14 @@ which pixel a corner paints — never the property.
 every new one by restoring the defect it was written for, in the artefact that actually ships, and
 watching it fail. Under heavy machine load the browser suite can fail a spec that passes alone:
 run that spec by itself before calling it a regression.
+
+**A question asked of every page is one test per page, never a loop inside one test.** The budget
+is per test, so a loop over the site loses margin with every page added and every process the
+machine runs, and then fails as a timeout on whichever page the clock ran out on. `walker` in
+`tests/browser/pages.js` declares one test per page (and per locale or width, when the walk has
+those), keeps a floor over the whole site by running that walk's pages in order and counting after
+the last, and adds a test that fails when what was generated is not the page list times the axes,
+or is missing a page of `PAGE`. Raising a timeout is not the fix.
 
 ## No other design system is named as a source
 

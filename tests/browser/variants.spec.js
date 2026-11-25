@@ -19,7 +19,11 @@
 
 import { expect, test } from "@playwright/test";
 
-import { PAGE, url, showParts } from "./pages.js";
+import { PAGE, url, showParts, walker } from "./pages.js";
+
+// Every walk in this file declares its tests through this line, so that a
+// report names this file rather than `pages.js` (`walker` says why).
+const walk = walker((title, fn) => test(title, fn));
 
 /**
  * Everything about how one specimen looks, as a string.
@@ -100,8 +104,10 @@ const FINGERPRINT = `(root) => {
     .join("\\n");
 }`;
 
-for (const [name, path] of Object.entries(PAGE)) {
-  test(`no two values of one prop draw the same picture on ${name}`, async ({ page }) => {
+walk(
+  "no two values of one prop draw the same picture",
+  {},
+  async ({ page, path }) => {
     await page.goto(url(path));
     await showParts(page);
     const twins = await page.evaluate((source) => {
@@ -138,8 +144,8 @@ for (const [name, path] of Object.entries(PAGE)) {
     }, FINGERPRINT);
 
     expect(twins, "a variant grid lies about its own prop").toEqual([]);
-  });
-}
+  },
+);
 
 test("the grids are actually there to be checked", async ({ page }) => {
   // THE SWEEP ABOVE PASSES ON A PAGE WITH NO GRIDS AT ALL, which is how a test
@@ -158,9 +164,20 @@ test("the grids are actually there to be checked", async ({ page }) => {
 // component ever wrote, and a table specimen squeezed to nothing lost half its
 // picture off the edge of the stage.
 
-test("every cell draws something", async ({ page }) => {
-  let drawn = 0;
-  for (const [name, path] of Object.entries(PAGE)) {
+/** How many cells a walk's pages read between them, which is what its floor counts. */
+const total = (counts) => counts.reduce((sum, one) => sum + one, 0);
+
+// THE THREE WALKS BELOW EACH CARRY A FLOOR OVER THE WHOLE SITE, so each runs
+// its pages one after another and counts after the last (`walker` in
+// `pages.js`), with every page its own test and its own budget.
+
+walk(
+  "every cell draws something",
+  {
+    tally: (drawn) =>
+      expect(total(drawn), "the sweep found almost no grid to read").toBeGreaterThan(200),
+  },
+  async ({ page, name, path }) => {
     await page.goto(url(path));
     await showParts(page);
     const empty = await page.evaluate(() => {
@@ -179,24 +196,25 @@ test("every cell draws something", async ({ page }) => {
       return out;
     });
     expect(empty, name).toEqual([]);
-    drawn += await page.evaluate(
-      () => document.querySelectorAll(".nd-variant-stage[data-nd-prop]").length,
-    );
-  }
-  expect(drawn, "the sweep found almost no grid to read").toBeGreaterThan(200);
-});
+    return page.evaluate(() => document.querySelectorAll(".nd-variant-stage[data-nd-prop]").length);
+  },
+);
 
-test("every cell carries the value its caption names", async ({ page }) => {
-  // THE CAPTION IS A CLAIM ABOUT THE MARKUP. A grid that draws the default
-  // under every caption is the `data-nd-tone` failure again from the other
-  // side: the picture is right and the label is a lie, or the other way round.
-  //
-  // Only where the prop HAS an attribute — `Field.kind` and `List.kind` choose
-  // the element instead, and `Tabs.orientation` writes `aria-orientation` —
-  // and only that SOME element in the cell carries it, because a cell holds
-  // whole components that carry attributes of their own.
-  let checked = 0;
-  for (const [name, path] of Object.entries(PAGE)) {
+// THE CAPTION IS A CLAIM ABOUT THE MARKUP. A grid that draws the default under
+// every caption is the `data-nd-tone` failure again from the other side: the
+// picture is right and the label is a lie, or the other way round.
+//
+// Only where the prop HAS an attribute — `Field.kind` and `List.kind` choose the
+// element instead, and `Tabs.orientation` writes `aria-orientation` — and only
+// that SOME element in the cell carries it, because a cell holds whole
+// components that carry attributes of their own.
+walk(
+  "every cell carries the value its caption names",
+  {
+    tally: (checked) =>
+      expect(total(checked), "no cell in the whole site carried its own prop").toBeGreaterThan(150),
+  },
+  async ({ page, name, path }) => {
     await page.goto(url(path));
     await showParts(page);
     const [wrong, seen] = await page.evaluate(() => {
@@ -219,19 +237,21 @@ test("every cell carries the value its caption names", async ({ page }) => {
       return [out, read];
     });
     expect(wrong, name).toEqual([]);
-    checked += seen;
-  }
-  expect(checked, "no cell in the whole site carried its own prop").toBeGreaterThan(150);
-});
+    return seen;
+  },
+);
 
-test("a grid is legible at the narrowest width, and stays in its frame", async ({ browser }) => {
-  // 320 IS THE WIDTH THE ROWS HAVE TO SURVIVE. A row wraps rather than
-  // scrolling, so the failure here is a cell wider than the stage holding it —
-  // which is a picture with its far side beyond where a reader can reach.
-  const context = await browser.newContext({ viewport: { width: 320, height: 900 } });
-  const page = await context.newPage();
-  let checked = 0;
-  for (const [name, path] of Object.entries(PAGE)) {
+// 320 IS THE WIDTH THE ROWS HAVE TO SURVIVE. A row wraps rather than scrolling,
+// so the failure here is a cell wider than the stage holding it — which is a
+// picture with its far side beyond where a reader can reach.
+walk(
+  "a grid is legible at the narrowest width, and stays in its frame",
+  {
+    tally: (checked) =>
+      expect(total(checked), "the narrow sweep read no grid at all").toBeGreaterThan(200),
+  },
+  async ({ page, name, path }) => {
+    await page.setViewportSize({ width: 320, height: 900 });
     await page.goto(url(path));
     await showParts(page);
     const over = await page.evaluate(() => {
@@ -258,10 +278,6 @@ test("a grid is legible at the narrowest width, and stays in its frame", async (
       return out;
     });
     expect(over, name).toEqual([]);
-    checked += await page.evaluate(
-      () => document.querySelectorAll(".nd-variant-stage[data-nd-prop]").length,
-    );
-  }
-  await context.close();
-  expect(checked, "the narrow sweep read no grid at all").toBeGreaterThan(200);
-});
+    return page.evaluate(() => document.querySelectorAll(".nd-variant-stage[data-nd-prop]").length);
+  },
+);

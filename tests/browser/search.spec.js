@@ -14,7 +14,11 @@
 // caught its shipped `id="nd-search-"` the day it landed.
 
 import { test, expect } from "@playwright/test";
-import { ANY, LOCALES, OFFERED, PAGE, url, showParts } from "./pages.js";
+import { ANY, LOCALES, OFFERED, PAGE, url, showParts, walker } from "./pages.js";
+
+// Every walk in this file declares its tests through this line, so that a
+// report names this file rather than `pages.js` (`walker` says why).
+const walk = walker((title, fn) => test(title, fn));
 
 /** The site's own palette, which is the `dialog` presentation with an index. */
 const PALETTE = {
@@ -604,30 +608,33 @@ test("what it remembers can be forgotten, in the place it is shown", async ({ pa
 
 // --- Across every page and locale -------------------------------------------
 
-test("no id appears twice on any page, in any locale", async ({ page }) => {
-  // TEN LINES THAT CATCH THIS ACROSS EVERY COMPONENT, and they would have
-  // caught the shipped defect the day it landed: the search this replaces built
-  // its id from an OPTIONAL name, so the four examples on its own page all
-  // carried `id="nd-search-"` and four `<label for>` pointed at whichever the
-  // browser resolved first. `name` is required now, which is the fix; this is
-  // the guard that says so.
-  for (const locale of LOCALES) {
-    for (const slug of Object.values(PAGE)) {
-      await page.goto(url(slug, locale));
-      await showParts(page);
-      const duplicates = await page.evaluate(() => {
-        const seen = new Set();
-        const twice = [];
-        for (const element of document.querySelectorAll("[id]")) {
-          if (seen.has(element.id)) twice.push(element.id);
-          seen.add(element.id);
-        }
-        return twice;
-      });
-      expect(duplicates, `${locale}/${slug}`).toEqual([]);
-    }
-  }
-});
+// TEN LINES THAT CATCH THIS ACROSS EVERY COMPONENT, and they would have caught
+// the shipped defect the day it landed: the search this replaces built its id
+// from an OPTIONAL name, so the four examples on its own page all carried
+// `id="nd-search-"` and four `<label for>` pointed at whichever the browser
+// resolved first. `name` is required now, which is the fix; this is the guard
+// that says so.
+walk(
+  "no id appears twice on any page, in any locale",
+  {
+    axes: { locale: LOCALES },
+    title: ({ locale }) => `no id appears twice on any page, in ${locale}`,
+  },
+  async ({ page, locale, path: slug }) => {
+    await page.goto(url(slug, locale));
+    await showParts(page);
+    const duplicates = await page.evaluate(() => {
+      const seen = new Set();
+      const twice = [];
+      for (const element of document.querySelectorAll("[id]")) {
+        if (seen.has(element.id)) twice.push(element.id);
+        seen.add(element.id);
+      }
+      return twice;
+    });
+    expect(duplicates, `${locale}/${slug}`).toEqual([]);
+  },
+);
 
 test("every offered locale searches in its own words", async ({ page }) => {
   for (const locale of OFFERED) {

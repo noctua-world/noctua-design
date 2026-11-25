@@ -18,39 +18,44 @@
 // are the breakpoints either side of the sidebar docking.
 
 import { test, expect } from "@playwright/test";
-import { LOCALES, PAGE, url } from "./pages.js";
+import { LOCALES, url, walker } from "./pages.js";
+
+// Every walk in this file declares its tests through this line, so that a
+// report names this file rather than `pages.js` (`walker` says why).
+const walk = walker((title, fn) => test(title, fn));
 
 // 1024 IS NOT DECORATION. It is the first width where the sidebar is docked
 // AND the column beside it is tight, and skipping it is how three pages came to
 // scroll sideways on every laptop without anybody noticing.
 const WIDTHS = [320, 390, 768, 1024, 1440];
 
-for (const locale of LOCALES) {
-  for (const [name, page_] of Object.entries(PAGE)) {
-    for (const width of WIDTHS) {
-      test(`${locale} ${name} does not scroll sideways at ${width}px`, async ({ page }) => {
-        await page.setViewportSize({ width, height: 900 });
-        await page.goto(url(page_, locale));
+walk(
+  "no page scrolls sideways",
+  {
+    axes: { locale: LOCALES, width: WIDTHS },
+    title: ({ locale, width }) => `${locale} does not scroll sideways at ${width}px`,
+  },
+  async ({ page, locale, width, path }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(url(path, locale));
 
-        const overflow = await page.evaluate(() => {
-          const root = document.documentElement;
-          if (root.scrollWidth <= root.clientWidth + 1) return null;
-          // Name the element that did it, not just the fact. A failure that
-          // says "the page is 69px too wide" costs an afternoon; one that says
-          // `.nd-button-detail` costs a minute.
-          const worst = [...document.querySelectorAll(".nd-main *")]
-            .map((el) => {
-              const box = el.getBoundingClientRect();
-              const parent = el.parentElement.getBoundingClientRect();
-              return { name: String(el.className), by: Math.round(box.width - parent.width) };
-            })
-            .filter((row) => row.by > 2)
-            .sort((a, b) => b.by - a.by)[0];
-          return { page: root.scrollWidth - root.clientWidth, worst };
-        });
+    const overflow = await page.evaluate(() => {
+      const root = document.documentElement;
+      if (root.scrollWidth <= root.clientWidth + 1) return null;
+      // Name the element that did it, not just the fact. A failure that says
+      // "the page is 69px too wide" costs an afternoon; one that says
+      // `.nd-button-detail` costs a minute.
+      const worst = [...document.querySelectorAll(".nd-main *")]
+        .map((el) => {
+          const box = el.getBoundingClientRect();
+          const parent = el.parentElement.getBoundingClientRect();
+          return { name: String(el.className), by: Math.round(box.width - parent.width) };
+        })
+        .filter((row) => row.by > 2)
+        .sort((a, b) => b.by - a.by)[0];
+      return { page: root.scrollWidth - root.clientWidth, worst };
+    });
 
-        expect(overflow, "something is wider than the page").toBeNull();
-      });
-    }
-  }
-}
+    expect(overflow, "something is wider than the page").toBeNull();
+  },
+);
