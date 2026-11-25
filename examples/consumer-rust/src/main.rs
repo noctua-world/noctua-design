@@ -74,7 +74,40 @@ fn main() {
         );
         linked += 1;
     }
-    assert!(linked > 0, "base.html linked nothing, so this proves nothing");
+    assert!(
+        linked > 0,
+        "base.html linked nothing, so this proves nothing"
+    );
+
+    // The Tailwind bridge is in the package, and every semantic colour it maps
+    // a utility onto is one `scope.css`, written out beside it, declares.
+    //
+    // An application that composes its layout with Tailwind installs this
+    // package and has nothing else, so the mapping is owed here. Inside the
+    // repository it also sits under `packages/tokens/vendor/`, where every
+    // test would find it whether or not it shipped.
+    //
+    // Read from the package's own list and not from `out`, which keeps what an
+    // earlier run wrote there: a bridge that stopped shipping would still be
+    // found on disk.
+    let (_, bridge) = noctua_design_dist::FILES
+        .iter()
+        .find(|(name, _)| *name == "tailwind/bridge.css")
+        .expect("tailwind/bridge.css — the mapping a Tailwind consumer imports");
+    let scope = std::fs::read_to_string(out.join("scope.css")).expect("scope.css");
+    let mut mapped = 0usize;
+    for reference in bridge.split("var(--nc-color-").skip(1) {
+        let name = reference.split(')').next().expect("a closed reference");
+        assert!(
+            scope.contains(&format!("--nc-color-{name}:")),
+            "the bridge maps a utility onto --nc-color-{name}, which scope.css does not declare"
+        );
+        mapped += 1;
+    }
+    assert!(
+        mapped > 0,
+        "the bridge maps nothing, so this proves nothing"
+    );
 
     // Every ROOT class this markup carries has to be painted by the sheet.
     //
@@ -115,7 +148,7 @@ fn main() {
         rendered.len()
     );
     println!(
-        "{linked} sheet(s) linked and present, \
+        "{linked} sheet(s) linked and present, {mapped} colour(s) bridged to Tailwind, \
          {painted} component(s) rendered, every root class painted, \
          {styled} of {} classes styled by the shipped components.css.",
         rendered.len()

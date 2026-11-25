@@ -583,6 +583,10 @@ pub const FILES: &[(&str, &str)] = &[
         include_str!(concat!("../", "dist/", "tokens/css/theme-violet-vivid.css")),
     ),
     (
+        "tailwind/bridge.css",
+        include_str!(concat!("../", "dist/", "tailwind/bridge.css")),
+    ),
+    (
         "tones.css",
         include_str!(concat!("../", "dist/", "tones.css")),
     ),

@@ -293,6 +293,15 @@ pub(crate) fn artifacts(
         ));
     }
 
+    // The Tailwind bridge, shipped beside the sheets it points at.
+    let tailwind_path = root.join("packages/tokens/vendor/tailwind/bridge.css");
+    let tailwind = std::fs::read_to_string(&tailwind_path).map_err(|error| {
+        format!(
+            "could not read {}: {error}",
+            relative_to(root, &tailwind_path)
+        )
+    })?;
+
     let three_path = root.join("assets/vendor/three/three-css3d.js");
     let three = std::fs::read_to_string(&three_path)
         .map_err(|error| format!("could not read {}: {error}", relative_to(root, &three_path)))?;
@@ -327,6 +336,7 @@ pub(crate) fn artifacts(
         layout: &layout,
         runtime: &runtime,
         palettes: &palettes,
+        tailwind: &tailwind,
         three: &three,
         three_licence: &three_licence,
     });

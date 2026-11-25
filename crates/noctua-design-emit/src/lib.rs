@@ -136,6 +136,13 @@ pub struct Inputs<'a> {
     /// and shipped inside `dist/` because a registry consumer has `dist/` and
     /// nothing else. `(name, contents)`.
     pub palettes: &'a [(String, String)],
+    /// The Tailwind bridge: `noctua-colors`' mapping of every `--color-*`
+    /// utility name onto the token behind it.
+    ///
+    /// Vendored at `packages/tokens/vendor/tailwind/bridge.css` and shipped
+    /// inside `dist/` for the reason the colour sheets are: a registry
+    /// consumer has `dist/` and nothing else.
+    pub tailwind: &'a str,
     /// The vendored three.js bundle, and its licence.
     pub three: &'a str,
     /// Likewise.
@@ -163,6 +170,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
         layout,
         runtime,
         palettes,
+        tailwind,
         three,
         three_licence,
     } = inputs;
@@ -199,6 +207,7 @@ pub fn emit_all(inputs: Inputs<'_>) -> Vec<EmittedFile> {
     files.extend(syntax::emit(syntax_layer));
     files.extend(theme::emit(theme, vendor));
     files.extend(theme::palettes(theme, palettes));
+    files.push(theme::tailwind_bridge(tailwind));
     files.extend(tones::emit(vendor));
     files.extend(typescript::emit(spec));
     // Last, and reading what the others just decided: the two packages that
@@ -386,10 +395,14 @@ mod tests {
             lineage: &bundle.9,
             layout: LAYOUT,
             runtime: RUNTIME,
+            tailwind: TAILWIND,
             three: THREE,
             three_licence: THREE_LICENCE,
         }
     }
+
+    /// The vendored Tailwind bridge, read the way `xtask` reads it.
+    const TAILWIND: &str = include_str!("../../../packages/tokens/vendor/tailwind/bridge.css");
 
     /// The JavaScript half, read the way `xtask` reads it.
     const SCANNER: &str = include_str!("../../noctua-design-grammars/src/scan.js");
@@ -437,6 +450,81 @@ mod tests {
         assert_eq!(found, 2, "the vendored set changed without this test");
     }
 
+    /// The Tailwind bridge ships, as the vendor wrote it, in `dist/` and in
+    /// both packages that carry `dist/` to a registry, and the crate's
+    /// `FILES` names it.
+    ///
+    /// The central application composes its layout with Tailwind and installs
+    /// this system from a tag, so the package is the only place it can find
+    /// the mapping. A bridge that stayed under `packages/tokens/vendor/` is one
+    /// a consumer does not have.
+    #[test]
+    fn the_tailwind_bridge_ships_in_every_copy_of_dist() {
+        let bundle = shipped();
+        let files = emit_all(inputs(&bundle));
+        for path in [
+            "dist/tailwind/bridge.css",
+            "crates/noctua-design-dist/dist/tailwind/bridge.css",
+            "packages/dist/dist/tailwind/bridge.css",
+        ] {
+            let file = files
+                .iter()
+                .find(|file| file.path == path)
+                .unwrap_or_else(|| panic!("{path} is not emitted"));
+            assert_eq!(file.contents, TAILWIND, "{path} is not the vendor's bridge");
+        }
+        let library = files
+            .iter()
+            .find(|file| file.path == "crates/noctua-design-dist/src/lib.rs")
+            .expect("the crate's library");
+        assert!(
+            library
+                .contents
+                .contains("(\"tailwind/bridge.css\", include_str!("),
+            "FILES does not name the bridge, so `write_to` never writes it"
+        );
+    }
+
+    /// Every token the bridge points a utility at is one the shipped sheets
+    /// declare.
+    ///
+    /// The bridge declares no colour, so on its own it maps utilities onto
+    /// nothing. What makes it usable from `dist/` alone is that `scope.css`
+    /// carries the whole semantic contract and every palette sheet carries
+    /// every other name. A `var()` naming a token neither declares is dropped
+    /// with no error, and the utility paints nothing.
+    #[test]
+    fn the_tailwind_bridge_names_only_tokens_dist_declares() {
+        let bundle = shipped();
+        let vendor = &bundle.2;
+        let contract: std::collections::BTreeSet<&str> = vendor
+            .contract
+            .iter()
+            .map(|(name, _)| name.as_str())
+            .collect();
+
+        let mut read = 0usize;
+        // `var(--`, because the bridge's own comment says `var()` in prose.
+        for reference in TAILWIND.split("var(--").skip(1) {
+            let name = reference
+                .split([')', ','])
+                .next()
+                .expect("a reference names something")
+                .trim();
+            let name = format!("--{name}");
+            read += 1;
+            assert!(
+                contract.contains(name.as_str()) || vendor.declared.contains(&name),
+                "the bridge points at {name}, which no sheet in dist/ declares"
+            );
+        }
+        assert!(
+            read > contract.len(),
+            "the bridge names {read} tokens and the contract alone has {}",
+            contract.len()
+        );
+    }
+
     #[test]
     fn every_file_carries_a_generated_header() {
         let bundle = shipped();
@@ -454,6 +542,7 @@ mod tests {
             // what it copies. `dist/tokens/` is `noctua-colors`' output.
             if file.path.starts_with(VENDORED)
                 || file.path.starts_with(VENDORED_COLOURS)
+                || file.path == theme::TAILWIND_BRIDGE
                 || dist::is_mirror(&file.path)
             {
                 continue;

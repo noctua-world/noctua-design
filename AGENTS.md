@@ -439,7 +439,11 @@ bypass the token layer.
 
 **What `dist/` carries**: the token layer, the faces, the appearance layer, the scoped semantic
 contract and `components.css`, plus every behaviour module and the palette and theme data they
-read. `ls dist/` is the inventory, and `cargo xtask build` writes it.
+read. `ls dist/` is the inventory, and `cargo xtask build` writes it. It also carries
+`dist/tailwind/bridge.css`, the vendored mapping of Tailwind's colour utilities onto the `--nc-*`
+tokens, copied as the colour sheets are: this system writes no Tailwind class, and an application
+that composes its own layout with Tailwind finds the mapping in the package it installed. A test
+holds every token the bridge names to the sheets `dist/` declares them in.
 
 **The component rules are hand-written and copied, never generated.**
 `crates/noctua-design-styles/src/` holds one stylesheet per family, and **`sources()` there is the
