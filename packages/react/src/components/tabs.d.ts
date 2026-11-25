@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 
 export type TabsActivation = "automatic" | "manual";
 export type TabsOrientation = "horizontal" | "vertical";
-export type TabsAppearance = "underline" | "enclosed";
+export type TabsAppearance = "underline" | "enclosed" | "rail";
 export type TabsSize = "small" | "medium" | "large";
 export type TabsFill = "hug" | "equal" | "stretch";
 
@@ -40,13 +40,13 @@ export interface TabsProps {
   /**
    * Which way the strip runs, and therefore which arrow keys move along it. It is
    * written to `aria-orientation`, so assistive technology reports the axis as well
-   * as the stylesheet drawing it.
+   * as the stylesheet drawing it. A `rail` is `vertical` whatever this says.
    */
   orientation?: TabsOrientation;
   /**
-   * How the chosen tab is marked. `underline` draws a rule under it and a hairline
-   * under the whole strip. `enclosed` gives each tab its own box, which survives a
-   * strip that wraps onto two lines.
+   * How the chosen tab is marked. `underline` draws a rule under it. `enclosed`
+   * gives each tab its own box, which survives a strip that wraps. `rail` is a
+   * column one rail wide, where a tab shows its icon and keeps its label as its name.
    */
   appearance?: TabsAppearance;
   /** The size of a tab. All three clear WCAG 2.5.8's 24px minimum target, and `large` also meets the 44px enhanced target. */

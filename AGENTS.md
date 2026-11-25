@@ -832,6 +832,30 @@ are drawn apart, a bar and a fill against a tick, and the fill is the neutral ra
 marked letters in the row stay legible on it. The empty sentence is shown by the stylesheet alone,
 from `:has()`, so a list a framework re-renders says it with no script noticing.
 
+### Rails
+
+**A rail is a `Toolbar` or a `Tabs` drawn one rail wide, never a third component.**
+`Toolbar { density: rail }` is the controls rail of `NOCTUA.md §12.11` and `Tabs { appearance: rail }`
+its tabs rail: each keeps its role, its one tab stop and its arrow walk, and is
+`--noctua-shell-rail` wide, the width of a footer's corner. Both bodies write
+`aria-orientation="vertical"` for a rail whatever `orientation` says, because `dist/roving.js`
+picks the arrows from that attribute. A rail of controls holds two icon-only controls to a row, so
+`dist/roving.js` walks it with all four arrows, in the order the controls are written, and a
+control that shows words takes a whole row. A rail tab draws its `icon` and keeps its `label` as
+its name without drawing it. A tab with no icon keeps its words.
+
+**A rail's names are drawn by `Tooltip`, and said once.** An icon-only control has a name nobody
+sees, and a `Tooltip` whose `text` is that same name is how a rail shows it. `dist/tooltip.js`
+writes no `aria-describedby` where the hint is the control's `aria-label` or all of its text, and
+hides that bubble from assistive technology: described by its own name a control is read out
+twice, and a bubble in the accessibility tree would be a child a `role="tablist"` may not have.
+Every ring in a rail is drawn inside its control, as in a footer.
+
+**Half a rail is the smallest target only at the default root size.** `--noctua-shell-rail` is in
+`rem` and `--noctua-target-min` in `px`, so under a root below sixteen pixels a control in a rail
+of two is narrower than WCAG 2.5.8 asks. The rail keeps the corner's width, which
+`NOCTUA.md §12.11` requires exactly.
+
 ### The window's footer
 
 **A footer is lines told apart by shade, and nothing draws a border.** `Footer`, `FooterLine` and

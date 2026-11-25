@@ -257,3 +257,68 @@ because a specimen of a `needs_name` component must not render a
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
+
+/* A RAIL: ONE RAIL WIDE, AND A TAB IS ITS ICON (`NOCTUA.md §12.11`).
+ *
+ * The strip is the column the vertical rules above already make, as wide as
+ * `--noctua-shell-rail`. The contract writes `aria-orientation="vertical"` for
+ * a rail, so those rules apply, and these come after them to win at the same
+ * weight. The chosen tab keeps the vertical strip's rule down its edge and
+ * takes the page's own surface, which shows on the shade a rail stands on.
+ *
+ * A border of the same width stands on the other edge and never takes a
+ * colour: it is what keeps the icon on the rail's centre line. */
+.nd-tabs[data-nd-appearance="rail"] {
+  gap: 0;
+  box-sizing: border-box;
+  inline-size: var(--noctua-shell-rail);
+  border-inline-end: 0;
+}
+
+.nd-tabs[data-nd-appearance="rail"] .nd-tab {
+  position: relative;
+  justify-content: center;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  padding: 0;
+  border-inline: var(--noctua-border-strong) solid transparent;
+}
+
+.nd-tabs[data-nd-appearance="rail"] .nd-tab[data-nd-selected="true"],
+.nd-tabs[data-nd-appearance="rail"] .nd-tab[aria-selected="true"] {
+  background: var(--nc-color-surface);
+}
+
+/* THE NAME IS KEPT AND NOT DRAWN, where there is an icon to draw instead. The
+   label and the count stay in the tab, so they stay its accessible name. A tab
+   with no icon keeps its words, cut at the rail's width: a blank square is a
+   tab nobody can tell from the next one. */
+.nd-tabs[data-nd-appearance="rail"] .nd-tab:has(> .nd-icon-glyph) > :is(.nd-tab-text, .nd-tab-count) {
+  position: absolute;
+  inline-size: var(--noctua-border-hairline);
+  block-size: var(--noctua-border-hairline);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.nd-tabs[data-nd-appearance="rail"] .nd-tab-text {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A `Tooltip` around a tab draws the name. Its box is the tab's. */
+.nd-tabs[data-nd-appearance="rail"] > .nd-tooltip {
+  display: flex;
+}
+
+.nd-tabs[data-nd-appearance="rail"] > .nd-tooltip > .nd-tab {
+  flex: 1 1 auto;
+}
+
+/* The ring is drawn inside the tab's own box, as in a rail of controls. */
+.nd-tabs[data-nd-appearance="rail"] .nd-tab:is(:focus-visible, [data-nd-seat-focus]) {
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}

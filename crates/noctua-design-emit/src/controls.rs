@@ -314,6 +314,7 @@ pub fn is_custom(component: &Component) -> bool {
             | "OptionItem"
             | "FooterLine"
             | "Prompt"
+            | "Toolbar"
     )
 }
 
@@ -399,6 +400,7 @@ pub fn dioxus_body(sink: &mut String, component: &Component) {
         "Rating" => out.push_str(RATING_DIOXUS),
         "OtpField" => out.push_str(OTP_FIELD_DIOXUS),
         "Tabs" => out.push_str(TABS_DIOXUS),
+        "Toolbar" => out.push_str(TOOLBAR_DIOXUS),
         "Tab" => out.push_str(TAB_DIOXUS),
         "TabPanel" => out.push_str(TAB_PANEL_DIOXUS),
         "Dialog" => out.push_str(DIALOG_DIOXUS),
@@ -490,6 +492,7 @@ pub fn react_body(sink: &mut String, component: &Component) {
         "Rating" => out.push_str(RATING_REACT),
         "OtpField" => out.push_str(OTP_FIELD_REACT),
         "Tabs" => out.push_str(TABS_REACT),
+        "Toolbar" => out.push_str(TOOLBAR_REACT),
         "Tab" => out.push_str(TAB_REACT),
         "TabPanel" => out.push_str(TAB_PANEL_REACT),
         "Dialog" => out.push_str(DIALOG_REACT),
@@ -13121,8 +13124,19 @@ const OTP_FIELD_REACT: &str = r#"  const size_ = size ?? "medium";
 /// nothing. A screen reader is told which of the two it is looking at, and
 /// `segmented.toml` already refused `role="tablist"` on the grounds that it
 /// promises panels that change.
+///
+/// # A rail is vertical
+///
+/// `appearance = "rail"` draws a column, so the axis the markup announces is
+/// `vertical` whatever `orientation` says. An axis left to the caller would be
+/// a column whose arrows are Left and Right for whoever forgot the second prop.
 const TABS_DIOXUS: &str = r#"    let root = format!("nd-tabs {class}");
     let root = root.trim().to_owned();
+    let axis = if appearance == TabsAppearance::Rail {
+        TabsOrientation::Vertical
+    } else {
+        orientation
+    };
 
     rsx! {
         div {
@@ -13135,7 +13149,7 @@ const TABS_DIOXUS: &str = r#"    let root = format!("nd-tabs {class}");
             "data-nd-size": size.as_str(),
             "data-nd-fill": fill.as_str(),
             // Announced as well as drawn, and it decides which arrows move.
-            "aria-orientation": orientation.as_str(),
+            "aria-orientation": axis.as_str(),
             // One or the other names the strip once it has a role.
             "aria-label": label,
             "aria-labelledby": labelledby,
@@ -13149,7 +13163,8 @@ const TABS_REACT: &str = r#"  const activation_ = activation ?? "automatic";
   const appearance_ = appearance ?? "underline";
   const size_ = size ?? "medium";
   const fill_ = fill ?? "hug";
-  const orientation_ = orientation ?? "horizontal";
+  // See the Dioxus half: a rail is vertical whatever the caller said.
+  const orientation_ = appearance_ === "rail" ? "vertical" : (orientation ?? "horizontal");
   const root = ["nd-tabs", className].filter(Boolean).join(" ");
 
   return h(
@@ -13165,6 +13180,61 @@ const TABS_REACT: &str = r#"  const activation_ = activation ?? "automatic";
       "aria-orientation": orientation_,
       "aria-label": label,
       "aria-labelledby": labelledby,
+      ...rest,
+    },
+    children,
+  );
+"#;
+
+// --- Toolbar ------------------------------------------------------------------
+
+/// The bar, written for one line: a rail is vertical.
+///
+/// Every attribute here is a prop under its own name, which is what a derived
+/// body writes. The one that is not is `aria-orientation`: `density = "rail"`
+/// draws a column, so the axis the markup announces is `vertical` whatever
+/// `orientation` says. `dist/roving.js` reads that attribute to pick the arrows,
+/// and a rail announced as horizontal would be walked with the wrong pair.
+const TOOLBAR_DIOXUS: &str = r#"    let root = format!("nd-toolbar {class}");
+    let root = root.trim().to_owned();
+    let axis = if density == ToolbarDensity::Rail {
+        ToolbarOrientation::Vertical
+    } else {
+        orientation
+    };
+
+    rsx! {
+        div {
+            class: "{root}",
+            role: "toolbar",
+            "aria-label": label,
+            "aria-labelledby": labelledby,
+            "aria-orientation": axis.as_str(),
+            "data-nd-wrap": if wrap { "true" } else { "false" },
+            "data-nd-density": density.as_str(),
+            "data-nd-glass": if glass { "true" } else { "false" },
+            {children}
+        }
+    }
+"#;
+
+/// The same bar, in React.
+const TOOLBAR_REACT: &str = r#"  const density_ = density ?? "comfortable";
+  // See the Dioxus half: a rail is vertical whatever the caller said.
+  const orientation_ = density_ === "rail" ? "vertical" : (orientation ?? "horizontal");
+  const root = ["nd-toolbar", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      role: "toolbar",
+      "aria-label": label,
+      "aria-labelledby": labelledby,
+      "aria-orientation": orientation_,
+      "data-nd-wrap": String(wrap ?? true),
+      "data-nd-density": density_,
+      "data-nd-glass": String(glass ?? false),
       ...rest,
     },
     children,

@@ -88,18 +88,24 @@ attribute = "aria-orientation"
 doc = """
 Which way the strip runs, and therefore which arrow keys move along it. It is
 written to `aria-orientation`, so assistive technology reports the axis as well
-as the stylesheet drawing it.
+as the stylesheet drawing it. A `rail` is `vertical` whatever this says.
 """
 
+# A RAIL IS A THIRD APPEARANCE. The tabs rail of a drawer (`NOCTUA.md §12.11`)
+# is a tab list: one stop, the arrows, a panel for each tab. What differs is
+# the box. A rail is `--noctua-shell-rail` wide, each tab shows its `icon` and
+# keeps its `label` as its name without drawing it, and the chosen tab is a
+# rule down one edge and the page's own surface. A `Tooltip` around a tab
+# draws the name for a reader who sees the rail.
 [prop.appearance]
 type = "enum"
-values = ["underline", "enclosed"]
+values = ["underline", "enclosed", "rail"]
 default = "underline"
 attribute = "data-nd-appearance"
 doc = """
-How the chosen tab is marked. `underline` draws a rule under it and a hairline
-under the whole strip. `enclosed` gives each tab its own box, which survives a
-strip that wraps onto two lines.
+How the chosen tab is marked. `underline` draws a rule under it. `enclosed`
+gives each tab its own box, which survives a strip that wraps. `rail` is a
+column one rail wide, where a tab shows its icon and keeps its label as its name.
 """
 
 [prop.size]

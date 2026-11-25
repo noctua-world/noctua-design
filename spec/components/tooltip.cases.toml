@@ -19,3 +19,23 @@ note = "`hidden` on the bubble, and no `data-nd-shown` on the root. A hint that 
 props = { name = "why", text = "Only the rows you can see" }
 children = "Export"
 expect = { absent = ["data-nd-shown"], present = ["[role=tooltip]"], hidden = ["[role=tooltip]"] }
+
+[[case]]
+name = "a hint that repeats the control's name is drawn and not announced"
+note = "An icon-only control in a rail shows its name in a tooltip. Described by its own name it would be read out twice, so the script writes no description and hides the bubble from assistive technology."
+props = { name = "close", text = "Close the page" }
+expect = { present = ["[role=tooltip][aria-hidden=true]", "button[aria-label='Close the page']"], hidden = ["button[aria-describedby]"] }
+
+[[case.child]]
+component = "Button"
+props = { label = "Close the page", hide_label = true, icon = "close" }
+
+[[case]]
+name = "a hint that says more than the name describes the control"
+note = "The other half of the rule above. A hint with words of its own is a description, and a bubble hidden from assistive technology there would be a sentence only a pointer could read."
+props = { name = "close", text = "Closes the page and keeps its place in the history" }
+expect = { present = ["button[aria-describedby=nd-tooltip-close]"], hidden = ["[role=tooltip][aria-hidden]"] }
+
+[[case.child]]
+component = "Button"
+props = { label = "Close the page", hide_label = true, icon = "close" }

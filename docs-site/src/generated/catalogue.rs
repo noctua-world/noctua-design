@@ -13902,7 +13902,7 @@ pub(crate) const COMPONENTS: [DocComponent; 97] = [
             DocProp {
                 name: "appearance",
                 kind: "enum",
-                values: &["underline", "enclosed"],
+                values: &["underline", "enclosed", "rail"],
                 elements: &[],
                 default: Some("underline"),
                 attribute: Some("data-nd-appearance"),
@@ -15731,7 +15731,7 @@ pub(crate) const COMPONENTS: [DocComponent; 97] = [
             DocProp {
                 name: "density",
                 kind: "enum",
-                values: &["comfortable", "compact"],
+                values: &["comfortable", "compact", "rail"],
                 elements: &[],
                 default: Some("comfortable"),
                 attribute: Some("data-nd-density"),
@@ -15774,6 +15774,10 @@ pub(crate) const COMPONENTS: [DocComponent; 97] = [
             DocKey {
                 key: Key::ComponentToolbarKeyArrowKeysName,
                 action: Key::ComponentToolbarKeyArrowKeysAction,
+            },
+            DocKey {
+                key: Key::ComponentToolbarKeyArrowKeysInARailName,
+                action: Key::ComponentToolbarKeyArrowKeysInARailAction,
             },
             DocKey {
                 key: Key::ComponentToolbarKeyHomeName,

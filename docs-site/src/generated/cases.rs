@@ -2527,6 +2527,41 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Tabs",
+        "case-tabs-4",
+        &[Node::Component {
+            name: "Tabs",
+            props: &[
+                ("appearance", Value::Text("rail")),
+                ("label", Value::Data("Views")),
+                ("name", Value::Data("views")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "Tab",
+                    props: &[
+                        ("icon", Value::Data("list")),
+                        ("label", Value::Data("List")),
+                        ("name", Value::Data("views")),
+                        ("selected", Value::Bool(true)),
+                        ("value", Value::Data("list")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Tab",
+                    props: &[
+                        ("icon", Value::Data("database")),
+                        ("label", Value::Data("Board")),
+                        ("name", Value::Data("views")),
+                        ("value", Value::Data("board")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
         "Tag",
         "case-tag-0",
         &[Node::Component {
@@ -2698,6 +2733,62 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Toolbar",
+        "case-toolbar-1",
+        &[Node::Component {
+            name: "Toolbar",
+            props: &[
+                ("density", Value::Text("rail")),
+                ("label", Value::Data("Drawer controls")),
+            ],
+            children: &[Node::Text(Value::Data("Controls go here."))],
+        }],
+    ),
+    (
+        "Toolbar",
+        "case-toolbar-2",
+        &[Node::Component {
+            name: "Toolbar",
+            props: &[
+                ("density", Value::Text("rail")),
+                ("label", Value::Data("Drawer controls")),
+            ],
+            children: &[Node::Component {
+                name: "ToolbarGroup",
+                props: &[],
+                children: &[
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("hide_label", Value::Bool(true)),
+                            ("icon", Value::Data("chevrons-down")),
+                            ("label", Value::Data("Collapse")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("hide_label", Value::Bool(true)),
+                            ("icon", Value::Data("close")),
+                            ("label", Value::Data("Close")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("hide_label", Value::Bool(true)),
+                            ("icon", Value::Data("arrow-up-down")),
+                            ("label", Value::Data("Swap")),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        }],
+    ),
+    (
         "Tooltip",
         "case-tooltip-0",
         &[Node::Component {
@@ -2719,6 +2810,49 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
                 ("text", Value::Data("Only the rows you can see")),
             ],
             children: &[Node::Text(Value::Data("Export"))],
+        }],
+    ),
+    (
+        "Tooltip",
+        "case-tooltip-2",
+        &[Node::Component {
+            name: "Tooltip",
+            props: &[
+                ("name", Value::Data("close")),
+                ("text", Value::Data("Close the page")),
+            ],
+            children: &[Node::Component {
+                name: "Button",
+                props: &[
+                    ("hide_label", Value::Bool(true)),
+                    ("icon", Value::Data("close")),
+                    ("label", Value::Data("Close the page")),
+                ],
+                children: &[],
+            }],
+        }],
+    ),
+    (
+        "Tooltip",
+        "case-tooltip-3",
+        &[Node::Component {
+            name: "Tooltip",
+            props: &[
+                ("name", Value::Data("close")),
+                (
+                    "text",
+                    Value::Data("Closes the page and keeps its place in the history"),
+                ),
+            ],
+            children: &[Node::Component {
+                name: "Button",
+                props: &[
+                    ("hide_label", Value::Bool(true)),
+                    ("icon", Value::Data("close")),
+                    ("label", Value::Data("Close the page")),
+                ],
+                children: &[],
+            }],
         }],
     ),
     (

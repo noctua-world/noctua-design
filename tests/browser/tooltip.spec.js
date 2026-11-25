@@ -49,20 +49,55 @@ test("it describes the control and never names it", async ({ page }) => {
         const bubble = el.querySelector(".nd-tooltip-bubble");
         const control = el.querySelector("a[href], button, input, select, textarea, [tabindex]");
         if (!bubble || !control) return `${el.dataset.ndTooltip}: no control`;
-        if (control.getAttribute("aria-describedby") !== bubble.id) {
-          return `${el.dataset.ndTooltip}: not described by its own bubble`;
-        }
         // The two ways a hint could become the name, and both are refused.
         if ((control.getAttribute("aria-labelledby") ?? "").includes(bubble.id)) {
           return `${el.dataset.ndTooltip}: the hint is the accessible name`;
         }
         const own = control.getAttribute("aria-label") ?? control.textContent.trim();
         if (!own) return `${el.dataset.ndTooltip}: the control has no name of its own`;
+        // A HINT THAT REPEATS THE NAME IS ITS DRAWING, which is what a rail of
+        // icons uses one for. The name is still the control's own, and a
+        // description there would say it twice, so the two halves of the rule
+        // swap: no description, and a bubble no screen reader meets.
+        const said = (text) => text.replace(/\s+/gu, " ").trim();
+        if (said(bubble.textContent) === said(own)) {
+          if (control.hasAttribute("aria-describedby")) {
+            return `${el.dataset.ndTooltip}: described by its own name`;
+          }
+          if (bubble.getAttribute("aria-hidden") !== "true") {
+            return `${el.dataset.ndTooltip}: a bubble that repeats the name is announced`;
+          }
+          return null;
+        }
+        if (control.getAttribute("aria-describedby") !== bubble.id) {
+          return `${el.dataset.ndTooltip}: not described by its own bubble`;
+        }
+        if (bubble.hasAttribute("aria-hidden")) {
+          return `${el.dataset.ndTooltip}: a description is hidden from the reader it is for`;
+        }
         return null;
       })
       .filter(Boolean),
   );
   expect(wrong, "a tooltip is doing a name's job").toEqual([]);
+});
+
+test("a hint that repeats the name is shown to a pointer and said once", async ({ page }) => {
+  await tooltips(page);
+  // The sweep above would pass on a page with no such tooltip at all, so this
+  // one is asked for by name.
+  const root = named(page, "tooltip-name");
+  const button = root.locator("button");
+  const bubble = root.locator(".nd-tooltip-bubble");
+  const name = await button.getAttribute("aria-label");
+  expect(name, "the control lost its own name").toBeTruthy();
+  expect(await button.getAttribute("aria-describedby")).toBeNull();
+  expect(await bubble.getAttribute("aria-hidden")).toBe("true");
+
+  // Drawn all the same: the name is what a reader who sees the icon is shown.
+  await button.focus();
+  await expect(bubble).toBeVisible();
+  expect((await bubble.textContent()).trim()).toBe(name);
 });
 
 test("nothing inside a bubble can be reached", async ({ page }) => {

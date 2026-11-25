@@ -70,9 +70,9 @@ impl TooltipDelay {
 ///
 /// # Accessibility
 ///
-/// The bubble is a `role="tooltip"` and the control points at it with
-/// `aria-describedby`. It is never the control's accessible name, it holds nothing
-/// focusable, and Escape hides it without moving the focus.
+/// The bubble is a `role="tooltip"`, named in the control's `aria-describedby`.
+/// It holds nothing focusable, and Escape hides it without moving the focus. A
+/// hint that repeats the control's name is `aria-hidden` and describes nothing.
 #[component]
 pub fn Tooltip(
     /// What this hint belongs to, as a script finds it, and the root of the id here.

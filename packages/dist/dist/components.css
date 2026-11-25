@@ -146,6 +146,66 @@
   margin-inline-start: 0;
   margin-block-start: auto;
 }
+
+/* A RAIL: ONE RAIL WIDE, AND TWO CONTROLS TO A ROW (`NOCTUA.md §12.11`).
+ *
+ * The bar is the column the vertical rule above already makes, as wide as
+ * `--noctua-shell-rail`, which is the width of a footer's corner. Each group is
+ * a grid of two columns, so an icon-only control is half a rail wide, and
+ * `--noctua-shell-rail` is twice `--noctua-target-min` at the default root
+ * size: the glyph is drawn smaller than the box a pointer is asked to hit.
+ *
+ * It comes after `wrap`, which it has to beat at the same weight: a rail never
+ * wraps into a second column of groups. */
+.nd-toolbar[data-nd-density="rail"] {
+  flex-wrap: nowrap;
+  gap: var(--noctua-space-2);
+  box-sizing: border-box;
+  inline-size: var(--noctua-shell-rail);
+}
+
+.nd-toolbar[data-nd-density="rail"] > .nd-toolbar-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+}
+
+/* A CONTROL THAT SHOWS WORDS TAKES A WHOLE ROW. Half a rail holds a glyph and
+   no word, so everything in a group spans both columns, and the rule after
+   this one gives a half back to what is only a glyph: an icon-only `Button`,
+   and the `Tooltip` that draws its name. */
+.nd-toolbar[data-nd-density="rail"] > .nd-toolbar-group > * {
+  grid-column: 1 / -1;
+  min-inline-size: 0;
+}
+
+.nd-toolbar[data-nd-density="rail"] > .nd-toolbar-group > .nd-button[data-nd-hide-label="true"],
+.nd-toolbar[data-nd-density="rail"] > .nd-toolbar-group > .nd-tooltip:has(> .nd-button[data-nd-hide-label="true"]) {
+  grid-column: auto;
+}
+
+/* The control fills its cell, whatever width its own size would give it, and
+   is never shorter than the smallest target. The second selector is the first
+   again at the weight of the rule that gives an icon-only `Button` of a stated
+   size its width, which this has to beat wherever the two sheets fall. */
+.nd-toolbar[data-nd-density="rail"] .nd-tooltip {
+  display: flex;
+}
+
+.nd-toolbar[data-nd-density="rail"] .nd-button,
+.nd-toolbar[data-nd-density="rail"] .nd-button[data-nd-hide-label="true"][data-nd-size] {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: max(var(--noctua-shell-rail) / 2, var(--noctua-target-min));
+}
+
+/* THE RING IS DRAWN INSIDE THE CONTROL'S OWN BOX. A rail stands at the edge of
+   a window or of a drawer that cuts what hangs out of it, and the two controls
+   of a row touch. */
+.nd-toolbar[data-nd-density="rail"] :is(:focus-visible, [data-nd-seat-focus]) {
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
 /* --- crates/noctua-design-styles/src/switch.css ---
    COPIED, NOT GENERATED. Edit the file named above. */
 
@@ -11041,6 +11101,72 @@ because a specimen of a `needs_name` component must not render a
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
+
+/* A RAIL: ONE RAIL WIDE, AND A TAB IS ITS ICON (`NOCTUA.md §12.11`).
+ *
+ * The strip is the column the vertical rules above already make, as wide as
+ * `--noctua-shell-rail`. The contract writes `aria-orientation="vertical"` for
+ * a rail, so those rules apply, and these come after them to win at the same
+ * weight. The chosen tab keeps the vertical strip's rule down its edge and
+ * takes the page's own surface, which shows on the shade a rail stands on.
+ *
+ * A border of the same width stands on the other edge and never takes a
+ * colour: it is what keeps the icon on the rail's centre line. */
+.nd-tabs[data-nd-appearance="rail"] {
+  gap: 0;
+  box-sizing: border-box;
+  inline-size: var(--noctua-shell-rail);
+  border-inline-end: 0;
+}
+
+.nd-tabs[data-nd-appearance="rail"] .nd-tab {
+  position: relative;
+  justify-content: center;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  padding: 0;
+  border-inline: var(--noctua-border-strong) solid transparent;
+}
+
+.nd-tabs[data-nd-appearance="rail"] .nd-tab[data-nd-selected="true"],
+.nd-tabs[data-nd-appearance="rail"] .nd-tab[aria-selected="true"] {
+  background: var(--nc-color-surface);
+}
+
+/* THE NAME IS KEPT AND NOT DRAWN, where there is an icon to draw instead. The
+   label and the count stay in the tab, so they stay its accessible name. A tab
+   with no icon keeps its words, cut at the rail's width: a blank square is a
+   tab nobody can tell from the next one. */
+.nd-tabs[data-nd-appearance="rail"] .nd-tab:has(> .nd-icon-glyph) > :is(.nd-tab-text, .nd-tab-count) {
+  position: absolute;
+  inline-size: var(--noctua-border-hairline);
+  block-size: var(--noctua-border-hairline);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.nd-tabs[data-nd-appearance="rail"] .nd-tab-text {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A `Tooltip` around a tab draws the name. Its box is the tab's. */
+.nd-tabs[data-nd-appearance="rail"] > .nd-tooltip {
+  display: flex;
+}
+
+.nd-tabs[data-nd-appearance="rail"] > .nd-tooltip > .nd-tab {
+  flex: 1 1 auto;
+}
+
+/* The ring is drawn inside the tab's own box, as in a rail of controls. */
+.nd-tabs[data-nd-appearance="rail"] .nd-tab:is(:focus-visible, [data-nd-seat-focus]) {
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
 /* --- crates/noctua-design-styles/src/dialog.css ---
    COPIED, NOT GENERATED. Edit the file named above. */
 

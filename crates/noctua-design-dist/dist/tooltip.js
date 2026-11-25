@@ -44,6 +44,16 @@
 //    beside the description this already provides.
 // 3. It never names the control. `aria-describedby` is a description, and
 //    assistive technology may read it late or skip it on a reader's setting.
+//
+// A HINT THAT REPEATS THE NAME IS DRAWN AND NOT ANNOUNCED.
+//
+// A control that shows an icon and no words has a name nobody sees, and a
+// tooltip holding that same name is how a rail shows it. Described by its own
+// name, the control would be read out twice. So where the bubble's text is the
+// control's `aria-label`, or all of its text, no description is written and the
+// bubble is `aria-hidden`: the name is already the control's, and the bubble is
+// its drawing. That also keeps a bubble out of a `role="tablist"`, which may
+// hold tabs and nothing else.
 
 import { keepAnchored, releaseAnchor } from "./anchor.js";
 
@@ -90,6 +100,8 @@ export function releaseTooltips(root = document) {
     if (bubble && control?.getAttribute("aria-describedby") === bubble.id) {
       control.removeAttribute("aria-describedby");
     }
+    // And what was written on the bubble for a hint that repeats a name.
+    bubble?.removeAttribute("aria-hidden");
     tooltips.get(element)?.abort();
     tooltips.delete(element);
     delete element.dataset.ndEnhanced;
@@ -109,14 +121,36 @@ function waitFor(root) {
   return Number.isFinite(ms) ? ms : 0;
 }
 
+/** One run of text as a reader hears it: no space at either end, one between words. */
+const said = (text) => (text ?? "").replace(/\s+/gu, " ").trim();
+
+/**
+ * Whether the hint says nothing but the control's own name.
+ *
+ * The name is the `aria-label` where there is one, and the control's text
+ * otherwise. Nothing here computes a name as a browser does: a control named
+ * some third way gets a description, which is what it got before this was
+ * asked.
+ */
+function repeatsName(bubble, control) {
+  const hint = said(bubble.textContent);
+  if (hint === "") return false;
+  const label = control.getAttribute("aria-label");
+  return hint === said(label === null ? control.textContent : label);
+}
+
 function enhance(root, signal) {
   const bubble = root.querySelector(".nd-tooltip-bubble");
   const control = root.querySelector(CONTROL);
   if (!bubble || !control || !bubble.id) return;
 
-  // A control that already has a description keeps it. Two hints about one
-  // control is a caller saying something this file cannot arbitrate.
-  if (!control.hasAttribute("aria-describedby")) {
+  // See the header: a hint that only repeats the control's name is its
+  // drawing, and a description would say the name a second time.
+  if (repeatsName(bubble, control)) {
+    bubble.setAttribute("aria-hidden", "true");
+  } else if (!control.hasAttribute("aria-describedby")) {
+    // A control that already has a description keeps it. Two hints about one
+    // control is a caller saying something this file cannot arbitrate.
     control.setAttribute("aria-describedby", bubble.id);
   }
 

@@ -16,7 +16,8 @@ export function Tabs({ name, label, labelledby, activation, orientation, appeara
   const appearance_ = appearance ?? "underline";
   const size_ = size ?? "medium";
   const fill_ = fill ?? "hug";
-  const orientation_ = orientation ?? "horizontal";
+  // See the Dioxus half: a rail is vertical whatever the caller said.
+  const orientation_ = appearance_ === "rail" ? "vertical" : (orientation ?? "horizontal");
   const root = ["nd-tabs", className].filter(Boolean).join(" ");
 
   return h(

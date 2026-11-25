@@ -51,7 +51,7 @@ pub(crate) const PANELS: &[Node] = &[
     },
 ];
 
-/// Every `Tabs` example. 4 of them.
+/// Every `Tabs` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // ONE STRIP, THREE PANELS. With no script every panel is on the page and
     // each tab is a link down to the one it names.
@@ -293,6 +293,129 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         Value::Message(Key::ExampleTabsPaymentBody),
                     ]]),
                     body: PANELS,
+                },
+            ],
+        }],
+    ),
+    (
+        r"Tabs { appearance: Rail } / Tooltip { text } / Tab { icon }",
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-row"))],
+            children: &[
+                Node::Component {
+                    name: "Tabs",
+                    props: &[
+                        ("name", Value::Text("tabs-rail")),
+                        ("label", Value::Message(Key::ExampleRailPages)),
+                        ("appearance", Value::Text("rail")),
+                        ("size", Value::Text("small")),
+                    ],
+                    children: &[
+                        Node::Component {
+                            name: "Tooltip",
+                            props: &[
+                                ("name", Value::Text("tabs-rail-commands")),
+                                ("text", Value::Message(Key::ExampleRailCommands)),
+                                ("placement", Value::Text("end")),
+                            ],
+                            children: &[Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("tabs-rail")),
+                                    ("value", Value::Text("commands")),
+                                    ("icon", Value::Text("terminal")),
+                                    ("label", Value::Message(Key::ExampleRailCommands)),
+                                    ("selected", Value::Bool(true)),
+                                ],
+                                children: &[],
+                            }],
+                        },
+                        Node::Component {
+                            name: "Tooltip",
+                            props: &[
+                                ("name", Value::Text("tabs-rail-settings")),
+                                ("text", Value::Message(Key::ExampleRailSettings)),
+                                ("placement", Value::Text("end")),
+                            ],
+                            children: &[Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("tabs-rail")),
+                                    ("value", Value::Text("settings")),
+                                    ("icon", Value::Text("settings")),
+                                    ("label", Value::Message(Key::ExampleRailSettings)),
+                                ],
+                                children: &[],
+                            }],
+                        },
+                        Node::Component {
+                            name: "Tooltip",
+                            props: &[
+                                ("name", Value::Text("tabs-rail-registries")),
+                                ("text", Value::Message(Key::ExampleRailRegistries)),
+                                ("placement", Value::Text("end")),
+                            ],
+                            children: &[Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("tabs-rail")),
+                                    ("value", Value::Text("registries")),
+                                    ("icon", Value::Text("database")),
+                                    ("label", Value::Message(Key::ExampleRailRegistries)),
+                                ],
+                                children: &[],
+                            }],
+                        },
+                    ],
+                },
+                Node::Element {
+                    tag: "div",
+                    attributes: &[],
+                    children: &[
+                        Node::Component {
+                            name: "TabPanel",
+                            props: &[
+                                ("name", Value::Text("tabs-rail")),
+                                ("value", Value::Text("commands")),
+                            ],
+                            children: &[Node::Component {
+                                name: "Paragraph",
+                                props: &[],
+                                children: &[Node::Text(Value::Message(
+                                    Key::ExampleRailCommandsBody,
+                                ))],
+                            }],
+                        },
+                        Node::Component {
+                            name: "TabPanel",
+                            props: &[
+                                ("name", Value::Text("tabs-rail")),
+                                ("value", Value::Text("settings")),
+                            ],
+                            children: &[Node::Component {
+                                name: "Paragraph",
+                                props: &[],
+                                children: &[Node::Text(Value::Message(
+                                    Key::ExampleRailSettingsBody,
+                                ))],
+                            }],
+                        },
+                        Node::Component {
+                            name: "TabPanel",
+                            props: &[
+                                ("name", Value::Text("tabs-rail")),
+                                ("value", Value::Text("registries")),
+                            ],
+                            children: &[Node::Component {
+                                name: "Paragraph",
+                                props: &[],
+                                children: &[Node::Text(Value::Message(
+                                    Key::ExampleRailRegistriesBody,
+                                ))],
+                            }],
+                        },
+                    ],
                 },
             ],
         }],

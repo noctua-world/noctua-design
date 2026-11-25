@@ -8,7 +8,7 @@
 
 use dioxus::prelude::*;
 
-/// Which way the controls run, and therefore which arrow keys walk them. It is written to `aria-orientation`, so assistive technology reports the axis as well.
+/// Which way the controls run, and therefore which arrow keys walk them. It is written to `aria-orientation`, so assistive technology reports the axis as well. A `rail` is `vertical` whatever this says.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ToolbarOrientation {
     #[default]
@@ -32,7 +32,7 @@ impl ToolbarOrientation {
     }
 }
 
-/// The gap between its groups. `compact` is for a bar inside something else, where the surrounding padding already separates it.
+/// The gap between its groups. `compact` is for a bar inside something else. `rail` is a column one rail wide with two icon-only controls to a row, and it is always vertical.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ToolbarDensity {
     #[default]
@@ -40,11 +40,13 @@ pub enum ToolbarDensity {
     Comfortable,
     /// `compact`
     Compact,
+    /// `rail`
+    Rail,
 }
 
 impl ToolbarDensity {
     /// Every value, in the order the spec declares them.
-    pub const ALL: [Self; 2] = [Self::Comfortable, Self::Compact];
+    pub const ALL: [Self; 3] = [Self::Comfortable, Self::Compact, Self::Rail];
 
     /// The value as it appears in the DOM.
     #[must_use]
@@ -52,6 +54,7 @@ impl ToolbarDensity {
         match self {
             Self::Comfortable => "comfortable",
             Self::Compact => "compact",
+            Self::Rail => "rail",
         }
     }
 }
@@ -69,13 +72,13 @@ pub fn Toolbar(
     label: Option<String>,
     /// The id of the element that names this toolbar, when the name is already visible on the page.
     labelledby: Option<String>,
-    /// Which way the controls run, and therefore which arrow keys walk them. It is written to `aria-orientation`, so assistive technology reports the axis as well.
+    /// Which way the controls run, and therefore which arrow keys walk them. It is written to `aria-orientation`, so assistive technology reports the axis as well. A `rail` is `vertical` whatever this says.
     #[props(default)]
     orientation: ToolbarOrientation,
     /// Whether the bar wraps onto more lines when it runs out of room. On by default, so that the last control is still reachable at 320px.
     #[props(default = true)]
     wrap: bool,
-    /// The gap between its groups. `compact` is for a bar inside something else, where the surrounding padding already separates it.
+    /// The gap between its groups. `compact` is for a bar inside something else. `rail` is a column one rail wide with two icon-only controls to a row, and it is always vertical.
     #[props(default)]
     density: ToolbarDensity,
     /// Frosts the bar. Use it for a bar that scrolls over the content it controls, which is what shows through.
@@ -89,6 +92,11 @@ pub fn Toolbar(
 ) -> Element {
     let root = format!("nd-toolbar {class}");
     let root = root.trim().to_owned();
+    let axis = if density == ToolbarDensity::Rail {
+        ToolbarOrientation::Vertical
+    } else {
+        orientation
+    };
 
     rsx! {
         div {
@@ -96,7 +104,7 @@ pub fn Toolbar(
             role: "toolbar",
             "aria-label": label,
             "aria-labelledby": labelledby,
-            "aria-orientation": orientation.as_str(),
+            "aria-orientation": axis.as_str(),
             "data-nd-wrap": if wrap { "true" } else { "false" },
             "data-nd-density": density.as_str(),
             "data-nd-glass": if glass { "true" } else { "false" },

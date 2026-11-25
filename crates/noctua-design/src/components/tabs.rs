@@ -36,7 +36,7 @@ impl TabsActivation {
 
 /// Which way the strip runs, and therefore which arrow keys move along it. It is
 /// written to `aria-orientation`, so assistive technology reports the axis as well
-/// as the stylesheet drawing it.
+/// as the stylesheet drawing it. A `rail` is `vertical` whatever this says.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TabsOrientation {
     #[default]
@@ -60,9 +60,9 @@ impl TabsOrientation {
     }
 }
 
-/// How the chosen tab is marked. `underline` draws a rule under it and a hairline
-/// under the whole strip. `enclosed` gives each tab its own box, which survives a
-/// strip that wraps onto two lines.
+/// How the chosen tab is marked. `underline` draws a rule under it. `enclosed`
+/// gives each tab its own box, which survives a strip that wraps. `rail` is a
+/// column one rail wide, where a tab shows its icon and keeps its label as its name.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TabsAppearance {
     #[default]
@@ -70,11 +70,13 @@ pub enum TabsAppearance {
     Underline,
     /// `enclosed`
     Enclosed,
+    /// `rail`
+    Rail,
 }
 
 impl TabsAppearance {
     /// Every value, in the order the spec declares them.
-    pub const ALL: [Self; 2] = [Self::Underline, Self::Enclosed];
+    pub const ALL: [Self; 3] = [Self::Underline, Self::Enclosed, Self::Rail];
 
     /// The value as it appears in the DOM.
     #[must_use]
@@ -82,6 +84,7 @@ impl TabsAppearance {
         match self {
             Self::Underline => "underline",
             Self::Enclosed => "enclosed",
+            Self::Rail => "rail",
         }
     }
 }
@@ -170,12 +173,12 @@ pub fn Tabs(
     activation: TabsActivation,
     /// Which way the strip runs, and therefore which arrow keys move along it. It is
     /// written to `aria-orientation`, so assistive technology reports the axis as well
-    /// as the stylesheet drawing it.
+    /// as the stylesheet drawing it. A `rail` is `vertical` whatever this says.
     #[props(default)]
     orientation: TabsOrientation,
-    /// How the chosen tab is marked. `underline` draws a rule under it and a hairline
-    /// under the whole strip. `enclosed` gives each tab its own box, which survives a
-    /// strip that wraps onto two lines.
+    /// How the chosen tab is marked. `underline` draws a rule under it. `enclosed`
+    /// gives each tab its own box, which survives a strip that wraps. `rail` is a
+    /// column one rail wide, where a tab shows its icon and keeps its label as its name.
     #[props(default)]
     appearance: TabsAppearance,
     /// The size of a tab. All three clear WCAG 2.5.8's 24px minimum target, and `large` also meets the 44px enhanced target.
@@ -194,6 +197,11 @@ pub fn Tabs(
 ) -> Element {
     let root = format!("nd-tabs {class}");
     let root = root.trim().to_owned();
+    let axis = if appearance == TabsAppearance::Rail {
+        TabsOrientation::Vertical
+    } else {
+        orientation
+    };
 
     rsx! {
         div {
@@ -206,7 +214,7 @@ pub fn Tabs(
             "data-nd-size": size.as_str(),
             "data-nd-fill": fill.as_str(),
             // Announced as well as drawn, and it decides which arrows move.
-            "aria-orientation": orientation.as_str(),
+            "aria-orientation": axis.as_str(),
             // One or the other names the strip once it has a role.
             "aria-label": label,
             "aria-labelledby": labelledby,

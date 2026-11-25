@@ -851,6 +851,12 @@ const TABS: &[Example] = &[
         Key::ExampleTabsNoteVertical
     ),
     example!(r"Tabs { fill: Equal }", Key::ExampleTabsNoteFill),
+    // THE RAIL. Each tab is its icon, its label is still its name, and the
+    // `Tooltip` around it draws that name without saying it twice.
+    example!(
+        r"Tabs { appearance: Rail } / Tooltip { text } / Tab { icon }",
+        Key::ExampleTabsNoteRail
+    ),
 ];
 
 // --- Tab --------------------------------------------------------------------
@@ -1117,6 +1123,12 @@ const TOOLTIP: &[Example] = &[
         r"Tooltip { delay: TooltipDelay::None, … Button { hide_label: true } }",
         Key::ExampleTooltipNoteNone
     ),
+    // THE NAME, DRAWN. The one case where the hint and the name are the same
+    // words, which is every control in a rail of icons.
+    example!(
+        r#"Tooltip { text: "…", Button { hide_label: true, label: "…" } } with one sentence for both"#,
+        Key::ExampleTooltipNoteName
+    ),
 ];
 
 // --- Toast ------------------------------------------------------------------
@@ -1375,6 +1387,13 @@ const TOOLBAR: &[Example] = &[
     example!(
         r"Toolbar { density: ToolbarDensity::Compact, wrap: false, … }",
         Key::ExampleToolbarDensity
+    ),
+    // THE RAIL, WITH ITS NAMES. The walk over every density above draws a rail
+    // too, and what it cannot show is a second group and a name for each
+    // control: the two things a rail of icons owes a reader.
+    example!(
+        r#"Toolbar { density: ToolbarDensity::Rail, Tooltip { text: "…", Button { hide_label: true, … } } }"#,
+        Key::ExampleToolbarRail
     ),
     example!(r#"Toolbar { labelledby: "…", … }"#),
     example!(r"Toolbar { glass: true, … }", Key::ExampleGlassBehind),

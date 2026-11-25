@@ -11811,6 +11811,103 @@ const TABS_APPEARANCE_ENCLOSED: &[Node] = &[Node::Element {
     ],
 }];
 
+/// `Tabs.appearance` at `rail`.
+const TABS_APPEARANCE_RAIL: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("appearance")),
+                ("data-nd-slug", Value::Text("tabs")),
+            ],
+            children: &[Node::Element {
+                tag: "div",
+                attributes: &[],
+                children: &[
+                    Node::Component {
+                        name: "Tabs",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                            ("appearance", Value::Text("rail")),
+                        ],
+                        children: &[
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                                    ("value", Value::Text("Aa")),
+                                    ("label", Value::Data("Aa")),
+                                    ("selected", Value::Bool(true)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                                    ("value", Value::Text("Bbbb")),
+                                    ("label", Value::Data("Bbbb")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                                    ("value", Value::Text("Cc")),
+                                    ("label", Value::Data("Cc")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                            ("value", Value::Text("Aa")),
+                        ],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                            ("value", Value::Text("Cc")),
+                        ],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-tabs-appearance-rail")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("rail"))],
+            }],
+        },
+    ],
+}];
+
 /// `Tabs.size` at `small`.
 const TABS_SIZE_SMALL: &[Node] = &[Node::Element {
     tag: "figure",
@@ -13632,6 +13729,63 @@ const TOOLBAR_DENSITY_COMPACT: &[Node] = &[Node::Element {
     ],
 }];
 
+/// `Toolbar.density` at `rail`.
+const TOOLBAR_DENSITY_RAIL: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("density")),
+                ("data-nd-slug", Value::Text("toolbar")),
+            ],
+            children: &[Node::Component {
+                name: "Toolbar",
+                props: &[
+                    ("labelledby", Value::Text("nd-variant-toolbar-density-rail")),
+                    ("density", Value::Text("rail")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("transparent")),
+                            ("tone", Value::Text("neutral")),
+                            ("size", Value::Text("small")),
+                            ("label", Value::Data("Aa")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("transparent")),
+                            ("tone", Value::Text("neutral")),
+                            ("size", Value::Text("small")),
+                            ("label", Value::Data("Bbbb")),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-toolbar-density-rail")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("rail"))],
+            }],
+        },
+    ],
+}];
+
 /// `Tree.size` at `small`.
 const TREE_SIZE_SMALL: &[Node] = &[Node::Element {
     tag: "figure",
@@ -14183,6 +14337,7 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("Tabs", "orientation", "vertical") => TABS_ORIENTATION_VERTICAL,
         ("Tabs", "appearance", "underline") => TABS_APPEARANCE_UNDERLINE,
         ("Tabs", "appearance", "enclosed") => TABS_APPEARANCE_ENCLOSED,
+        ("Tabs", "appearance", "rail") => TABS_APPEARANCE_RAIL,
         ("Tabs", "size", "small") => TABS_SIZE_SMALL,
         ("Tabs", "size", "medium") => TABS_SIZE_MEDIUM,
         ("Tabs", "size", "large") => TABS_SIZE_LARGE,
@@ -14219,6 +14374,7 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("Toolbar", "orientation", "vertical") => TOOLBAR_ORIENTATION_VERTICAL,
         ("Toolbar", "density", "comfortable") => TOOLBAR_DENSITY_COMFORTABLE,
         ("Toolbar", "density", "compact") => TOOLBAR_DENSITY_COMPACT,
+        ("Toolbar", "density", "rail") => TOOLBAR_DENSITY_RAIL,
         ("Tree", "size", "small") => TREE_SIZE_SMALL,
         ("Tree", "size", "medium") => TREE_SIZE_MEDIUM,
         ("Tree", "size", "large") => TREE_SIZE_LARGE,

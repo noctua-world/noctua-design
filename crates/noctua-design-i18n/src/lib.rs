@@ -1548,6 +1548,30 @@ pub enum Key {
     ExampleToolbarVertical,
     /// `example.toolbar.density`
     ExampleToolbarDensity,
+    /// `example.toolbar.rail`
+    ExampleToolbarRail,
+    /// `example.rail.controls`
+    ExampleRailControls,
+    /// `example.rail.pages`
+    ExampleRailPages,
+    /// `example.rail.collapse`
+    ExampleRailCollapse,
+    /// `example.rail.close`
+    ExampleRailClose,
+    /// `example.rail.direction`
+    ExampleRailDirection,
+    /// `example.rail.commands`
+    ExampleRailCommands,
+    /// `example.rail.settings`
+    ExampleRailSettings,
+    /// `example.rail.registries`
+    ExampleRailRegistries,
+    /// `example.rail.commands-body`
+    ExampleRailCommandsBody,
+    /// `example.rail.settings-body`
+    ExampleRailSettingsBody,
+    /// `example.rail.registries-body`
+    ExampleRailRegistriesBody,
     /// `example.time.machine`
     ExampleTimeMachine,
     /// `example.time.aligned`
@@ -3062,6 +3086,8 @@ pub enum Key {
     ExampleTabsNoteVertical,
     /// `example.tabs.note-fill`
     ExampleTabsNoteFill,
+    /// `example.tabs.note-rail`
+    ExampleTabsNoteRail,
     /// `example.tab.settings`
     ExampleTabSettings,
     /// `example.tab.people`
@@ -3216,6 +3242,8 @@ pub enum Key {
     ExampleTooltipNoteEnd,
     /// `example.tooltip.note-none`
     ExampleTooltipNoteNone,
+    /// `example.tooltip.note-name`
+    ExampleTooltipNoteName,
     /// `example.toast.saved-title`
     ExampleToastSavedTitle,
     /// `example.toast.saved`
@@ -6256,6 +6284,10 @@ pub enum Key {
     ComponentToolbarKeyArrowKeysName,
     /// `component.toolbar.key.arrow-keys.action`
     ComponentToolbarKeyArrowKeysAction,
+    /// `component.toolbar.key.arrow-keys-in-a-rail.name`
+    ComponentToolbarKeyArrowKeysInARailName,
+    /// `component.toolbar.key.arrow-keys-in-a-rail.action`
+    ComponentToolbarKeyArrowKeysInARailAction,
     /// `component.toolbar.key.home.name`
     ComponentToolbarKeyHomeName,
     /// `component.toolbar.key.home.action`
@@ -6418,7 +6450,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3147] = [
+    pub const ALL: [Self; 3163] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -7133,6 +7165,18 @@ impl Key {
         Self::ExampleToolbarAlignRest,
         Self::ExampleToolbarVertical,
         Self::ExampleToolbarDensity,
+        Self::ExampleToolbarRail,
+        Self::ExampleRailControls,
+        Self::ExampleRailPages,
+        Self::ExampleRailCollapse,
+        Self::ExampleRailClose,
+        Self::ExampleRailDirection,
+        Self::ExampleRailCommands,
+        Self::ExampleRailSettings,
+        Self::ExampleRailRegistries,
+        Self::ExampleRailCommandsBody,
+        Self::ExampleRailSettingsBody,
+        Self::ExampleRailRegistriesBody,
         Self::ExampleTimeMachine,
         Self::ExampleTimeAligned,
         Self::ExampleMenuLabel,
@@ -7890,6 +7934,7 @@ impl Key {
         Self::ExampleTabsNoteManual,
         Self::ExampleTabsNoteVertical,
         Self::ExampleTabsNoteFill,
+        Self::ExampleTabsNoteRail,
         Self::ExampleTabSettings,
         Self::ExampleTabPeople,
         Self::ExampleTabBilling,
@@ -7967,6 +8012,7 @@ impl Key {
         Self::ExampleTooltipNoteLong,
         Self::ExampleTooltipNoteEnd,
         Self::ExampleTooltipNoteNone,
+        Self::ExampleTooltipNoteName,
         Self::ExampleToastSavedTitle,
         Self::ExampleToastSaved,
         Self::ExampleToastDismiss,
@@ -9487,6 +9533,8 @@ impl Key {
         Self::ComponentToolbarKeyTabAction,
         Self::ComponentToolbarKeyArrowKeysName,
         Self::ComponentToolbarKeyArrowKeysAction,
+        Self::ComponentToolbarKeyArrowKeysInARailName,
+        Self::ComponentToolbarKeyArrowKeysInARailAction,
         Self::ComponentToolbarKeyHomeName,
         Self::ComponentToolbarKeyHomeAction,
         Self::ComponentToolbarKeyEndName,
@@ -10286,6 +10334,18 @@ impl Key {
             Self::ExampleToolbarAlignRest => "example.toolbar.align-rest",
             Self::ExampleToolbarVertical => "example.toolbar.vertical",
             Self::ExampleToolbarDensity => "example.toolbar.density",
+            Self::ExampleToolbarRail => "example.toolbar.rail",
+            Self::ExampleRailControls => "example.rail.controls",
+            Self::ExampleRailPages => "example.rail.pages",
+            Self::ExampleRailCollapse => "example.rail.collapse",
+            Self::ExampleRailClose => "example.rail.close",
+            Self::ExampleRailDirection => "example.rail.direction",
+            Self::ExampleRailCommands => "example.rail.commands",
+            Self::ExampleRailSettings => "example.rail.settings",
+            Self::ExampleRailRegistries => "example.rail.registries",
+            Self::ExampleRailCommandsBody => "example.rail.commands-body",
+            Self::ExampleRailSettingsBody => "example.rail.settings-body",
+            Self::ExampleRailRegistriesBody => "example.rail.registries-body",
             Self::ExampleTimeMachine => "example.time.machine",
             Self::ExampleTimeAligned => "example.time.aligned",
             Self::ExampleMenuLabel => "example.menu.label",
@@ -11045,6 +11105,7 @@ impl Key {
             Self::ExampleTabsNoteManual => "example.tabs.note-manual",
             Self::ExampleTabsNoteVertical => "example.tabs.note-vertical",
             Self::ExampleTabsNoteFill => "example.tabs.note-fill",
+            Self::ExampleTabsNoteRail => "example.tabs.note-rail",
             Self::ExampleTabSettings => "example.tab.settings",
             Self::ExampleTabPeople => "example.tab.people",
             Self::ExampleTabBilling => "example.tab.billing",
@@ -11122,6 +11183,7 @@ impl Key {
             Self::ExampleTooltipNoteLong => "example.tooltip.note-long",
             Self::ExampleTooltipNoteEnd => "example.tooltip.note-end",
             Self::ExampleTooltipNoteNone => "example.tooltip.note-none",
+            Self::ExampleTooltipNoteName => "example.tooltip.note-name",
             Self::ExampleToastSavedTitle => "example.toast.saved-title",
             Self::ExampleToastSaved => "example.toast.saved",
             Self::ExampleToastDismiss => "example.toast.dismiss",
@@ -13208,6 +13270,12 @@ impl Key {
             Self::ComponentToolbarKeyTabAction => "component.toolbar.key.tab.action",
             Self::ComponentToolbarKeyArrowKeysName => "component.toolbar.key.arrow-keys.name",
             Self::ComponentToolbarKeyArrowKeysAction => "component.toolbar.key.arrow-keys.action",
+            Self::ComponentToolbarKeyArrowKeysInARailName => {
+                "component.toolbar.key.arrow-keys-in-a-rail.name"
+            }
+            Self::ComponentToolbarKeyArrowKeysInARailAction => {
+                "component.toolbar.key.arrow-keys-in-a-rail.action"
+            }
             Self::ComponentToolbarKeyHomeName => "component.toolbar.key.home.name",
             Self::ComponentToolbarKeyHomeAction => "component.toolbar.key.home.action",
             Self::ComponentToolbarKeyEndName => "component.toolbar.key.end.name",
@@ -14629,6 +14697,24 @@ impl Locale {
                 Key::ExampleToolbarDensity => {
                     "`density` sets the padding, for a bar inside something that already has padding of its own."
                 }
+                Key::ExampleToolbarRail => {
+                    "A rail is one rail wide and holds two controls to a row. Each `Tooltip` draws the name its control already has."
+                }
+                Key::ExampleRailControls => "Drawer controls",
+                Key::ExampleRailPages => "Pages in the drawer",
+                Key::ExampleRailCollapse => "Collapse the drawer",
+                Key::ExampleRailClose => "Close the page",
+                Key::ExampleRailDirection => "Open the next page in the drawer",
+                Key::ExampleRailCommands => "Commands",
+                Key::ExampleRailSettings => "Settings",
+                Key::ExampleRailRegistries => "Registries",
+                Key::ExampleRailCommandsBody => {
+                    "Every command the window can run, filtered as you type."
+                }
+                Key::ExampleRailSettingsBody => "One page for each setting.",
+                Key::ExampleRailRegistriesBody => {
+                    "What is installed, and where each entry came from."
+                }
                 Key::ExampleTimeMachine => {
                     "The visible text is what is announced. `datetime` is the machine-readable value."
                 }
@@ -15946,6 +16032,9 @@ impl Locale {
                 Key::ExampleTabsNoteFill => {
                     "`equal` gives every tab the width of the widest, so translating one word does not re-flow the strip."
                 }
+                Key::ExampleTabsNoteRail => {
+                    "`rail` shows each tab as its icon. The label is still the tab's name, and the `Tooltip` draws it."
+                }
                 Key::ExampleTabSettings => "Settings",
                 Key::ExampleTabPeople => "People",
                 Key::ExampleTabBilling => "Billing",
@@ -16084,6 +16173,9 @@ impl Locale {
                 }
                 Key::ExampleTooltipNoteNone => {
                     "An icon-only control, where `label` is still the name and the hint only describes. `none` opens it as soon as a pointer arrives."
+                }
+                Key::ExampleTooltipNoteName => {
+                    "The hint and the name are the same words here. The script writes no description, so the name is read out once."
                 }
                 Key::ExampleToastSavedTitle => "Saved",
                 Key::ExampleToastSaved => {
@@ -19746,10 +19838,10 @@ impl Locale {
                     "Whether an arrow key also chooses. `automatic` shows the panel a reader moves to, which suits panels that are already loaded. `manual` moves the focus only and waits for Space or Enter, which suits panels that cost something to show."
                 }
                 Key::ComponentTabsPropOrientationDoc => {
-                    "Which way the strip runs, and therefore which arrow keys move along it. It is written to `aria-orientation`, so assistive technology reports the axis as well as the stylesheet drawing it."
+                    "Which way the strip runs, and therefore which arrow keys move along it. It is written to `aria-orientation`, so assistive technology reports the axis as well as the stylesheet drawing it. A `rail` is `vertical` whatever this says."
                 }
                 Key::ComponentTabsPropAppearanceDoc => {
-                    "How the chosen tab is marked. `underline` draws a rule under it and a hairline under the whole strip. `enclosed` gives each tab its own box, which survives a strip that wraps onto two lines."
+                    "How the chosen tab is marked. `underline` draws a rule under it. `enclosed` gives each tab its own box, which survives a strip that wraps. `rail` is a column one rail wide, where a tab shows its icon and keeps its label as its name."
                 }
                 Key::ComponentTabsPropSizeDoc => {
                     "The size of a tab. All three clear WCAG 2.5.8's 24px minimum target, and `large` also meets the 44px enhanced target."
@@ -20213,13 +20305,13 @@ impl Locale {
                     "The id of the element that names this toolbar, when the name is already visible on the page."
                 }
                 Key::ComponentToolbarPropOrientationDoc => {
-                    "Which way the controls run, and therefore which arrow keys walk them. It is written to `aria-orientation`, so assistive technology reports the axis as well."
+                    "Which way the controls run, and therefore which arrow keys walk them. It is written to `aria-orientation`, so assistive technology reports the axis as well. A `rail` is `vertical` whatever this says."
                 }
                 Key::ComponentToolbarPropWrapDoc => {
                     "Whether the bar wraps onto more lines when it runs out of room. On by default, so that the last control is still reachable at 320px."
                 }
                 Key::ComponentToolbarPropDensityDoc => {
-                    "The gap between its groups. `compact` is for a bar inside something else, where the surrounding padding already separates it."
+                    "The gap between its groups. `compact` is for a bar inside something else. `rail` is a column one rail wide with two icon-only controls to a row, and it is always vertical."
                 }
                 Key::ComponentToolbarPropChildrenDoc => "The groups of controls.",
                 Key::ComponentToolbarPropGlassDoc => {
@@ -20231,7 +20323,11 @@ impl Locale {
                 }
                 Key::ComponentToolbarKeyArrowKeysName => "Arrow keys",
                 Key::ComponentToolbarKeyArrowKeysAction => {
-                    "Moves to the next or previous control, choosing it if it is a radio. Left and Right, or Up and Down when vertical."
+                    "Moves to the next or previous control, choosing a radio. Left and Right, or Up and Down when vertical."
+                }
+                Key::ComponentToolbarKeyArrowKeysInARailName => "Arrow keys in a rail",
+                Key::ComponentToolbarKeyArrowKeysInARailAction => {
+                    "All four arrows move, in the order the controls are written. A rail holds two controls to a row."
                 }
                 Key::ComponentToolbarKeyHomeName => "Home",
                 Key::ComponentToolbarKeyHomeAction => "Moves to the first control.",
@@ -20254,7 +20350,7 @@ impl Locale {
                     "Use a tooltip for a short hint about the control it wraps, never for that control's only name. If every reader needs the sentence, write it into the page. For an explanation of a word in running text, use `Info`."
                 }
                 Key::ComponentTooltipA11yNotes => {
-                    "The bubble is a `role=\"tooltip\"` and the control points at it with `aria-describedby`. It is never the control's accessible name, it holds nothing focusable, and Escape hides it without moving the focus."
+                    "The bubble is a `role=\"tooltip\"`, named in the control's `aria-describedby`. It holds nothing focusable, and Escape hides it without moving the focus. A hint that repeats the control's name is `aria-hidden` and describes nothing."
                 }
                 Key::ComponentTooltipPropNameDoc => {
                     "What this hint belongs to, as a script finds it, and the root of the id here. **Required**, because an id derived from an absent name collides the moment a page carries two."
@@ -21760,6 +21856,24 @@ impl Locale {
                 Key::ExampleToolbarDensity => {
                     "`density` define o espaçamento interno, para uma barra dentro de algo que já tem o seu."
                 }
+                Key::ExampleToolbarRail => {
+                    "Um trilho tem a largura de um trilho e guarda dois controles por linha. Cada `Tooltip` desenha o nome que o controle já tem."
+                }
+                Key::ExampleRailControls => "Controles da gaveta",
+                Key::ExampleRailPages => "Páginas na gaveta",
+                Key::ExampleRailCollapse => "Recolher a gaveta",
+                Key::ExampleRailClose => "Fechar a página",
+                Key::ExampleRailDirection => "Abrir a próxima página na gaveta",
+                Key::ExampleRailCommands => "Comandos",
+                Key::ExampleRailSettings => "Configurações",
+                Key::ExampleRailRegistries => "Registros",
+                Key::ExampleRailCommandsBody => {
+                    "Todo comando que a janela executa, filtrado enquanto você digita."
+                }
+                Key::ExampleRailSettingsBody => "Uma página para cada configuração.",
+                Key::ExampleRailRegistriesBody => {
+                    "O que está instalado, e de onde veio cada entrada."
+                }
                 Key::ExampleTimeMachine => {
                     "O texto visível é o que é anunciado. `datetime` é o valor legível por máquina."
                 }
@@ -23095,6 +23209,9 @@ impl Locale {
                 Key::ExampleTabsNoteFill => {
                     "`equal` dá a toda aba a largura da mais larga, então traduzir uma palavra não refaz a tira."
                 }
+                Key::ExampleTabsNoteRail => {
+                    "`rail` mostra cada aba como o ícone dela. O rótulo continua sendo o nome da aba, e o `Tooltip` o desenha."
+                }
                 Key::ExampleTabSettings => "Ajustes",
                 Key::ExampleTabPeople => "Pessoas",
                 Key::ExampleTabBilling => "Cobrança",
@@ -23235,6 +23352,9 @@ impl Locale {
                 }
                 Key::ExampleTooltipNoteNone => {
                     "Um controle só com ícone, onde `label` continua sendo o nome e a dica só descreve. `none` abre assim que o ponteiro chega."
+                }
+                Key::ExampleTooltipNoteName => {
+                    "Aqui a dica e o nome são as mesmas palavras. O script não escreve descrição, então o nome é lido uma vez só."
                 }
                 Key::ExampleToastSavedTitle => "Salvo",
                 Key::ExampleToastSaved => {
@@ -26909,10 +27029,10 @@ impl Locale {
                     "Se uma seta também escolhe. `automatic` mostra o painel para onde a pessoa se move, o que serve a painéis já carregados. `manual` move só o foco e espera Espaço ou Enter, o que serve a painéis que custam algo."
                 }
                 Key::ComponentTabsPropOrientationDoc => {
-                    "Para que lado a tira corre, e portanto quais setas andam por ela. É escrito em `aria-orientation`, então a tecnologia assistiva também relata o eixo, além de a folha de estilo o desenhar."
+                    "Para que lado a tira corre, e portanto quais setas andam por ela. É escrito em `aria-orientation`, então a tecnologia assistiva também relata o eixo, além de a folha de estilo o desenhar. Um `rail` é `vertical`, diga isto o que disser."
                 }
                 Key::ComponentTabsPropAppearanceDoc => {
-                    "Como a aba escolhida é marcada. `underline` desenha um traço embaixo dela e um fio embaixo da tira inteira. `enclosed` dá a cada aba a própria caixa, o que sobrevive a uma tira que quebra em duas linhas."
+                    "Como a aba escolhida é marcada. `underline` desenha um traço sob ela. `enclosed` dá a cada aba a própria caixa, que resiste a uma tira que quebra. `rail` é uma coluna da largura de um trilho, onde a aba mostra o ícone e mantém o rótulo como nome."
                 }
                 Key::ComponentTabsPropSizeDoc => {
                     "O tamanho de uma aba. Os três passam do mínimo de 24px da WCAG 2.5.8, e `large` também atinge o alvo ampliado de 44px."
@@ -27384,13 +27504,13 @@ impl Locale {
                     "O id do elemento que nomeia esta toolbar, quando o nome já está visível na página."
                 }
                 Key::ComponentToolbarPropOrientationDoc => {
-                    "Para que lado os controles correm, e portanto que setas os percorrem. É escrito em `aria-orientation`, então a tecnologia assistiva também informa o eixo."
+                    "Para que lado os controles correm, e portanto que setas os percorrem. É escrito em `aria-orientation`, então a tecnologia assistiva também informa o eixo. Um `rail` é `vertical`, diga isto o que disser."
                 }
                 Key::ComponentToolbarPropWrapDoc => {
                     "Se a barra quebra em mais linhas quando falta espaço. Ligado por padrão, para que o último controle continue alcançável em 320px."
                 }
                 Key::ComponentToolbarPropDensityDoc => {
-                    "O espaço entre os grupos dela. `compact` é para uma barra dentro de outra coisa, onde o espaçamento ao redor já a separa."
+                    "O espaço entre os grupos dela. `compact` é para uma barra dentro de outra coisa. `rail` é uma coluna da largura de um trilho, com dois controles só de ícone por linha, e é sempre vertical."
                 }
                 Key::ComponentToolbarPropChildrenDoc => "Os grupos de controles.",
                 Key::ComponentToolbarPropGlassDoc => {
@@ -27402,7 +27522,11 @@ impl Locale {
                 }
                 Key::ComponentToolbarKeyArrowKeysName => "Setas",
                 Key::ComponentToolbarKeyArrowKeysAction => {
-                    "Vai para o controle seguinte ou anterior, escolhendo-o se for um radio. Esquerda e Direita, ou Cima e Baixo na vertical."
+                    "Vai para o controle seguinte ou anterior, escolhendo um radio. Esquerda e Direita, ou Cima e Baixo na vertical."
+                }
+                Key::ComponentToolbarKeyArrowKeysInARailName => "Setas num trilho",
+                Key::ComponentToolbarKeyArrowKeysInARailAction => {
+                    "As quatro setas andam, na ordem em que os controles são escritos. Um trilho guarda dois controles por linha."
                 }
                 Key::ComponentToolbarKeyHomeName => "Home",
                 Key::ComponentToolbarKeyHomeAction => "Vai para o primeiro controle.",
@@ -27425,7 +27549,7 @@ impl Locale {
                     "Use um balão para uma dica curta sobre o controle que ele envolve, nunca como o único nome desse controle. Se toda pessoa precisa da frase, escreva-a na página. Para explicar uma palavra no texto corrido, use `Info`."
                 }
                 Key::ComponentTooltipA11yNotes => {
-                    "A bolha é um `role=\"tooltip\"` e o controle aponta para ela com `aria-describedby`. Ela nunca é o nome acessível do controle, não guarda nada focalizável, e Escape a esconde sem mover o foco."
+                    "A bolha é um `role=\"tooltip\"`, nomeada no `aria-describedby` do controle. Ela não guarda nada focalizável, e Escape a esconde sem mover o foco. Uma dica que repete o nome do controle fica `aria-hidden` e não descreve nada."
                 }
                 Key::ComponentTooltipPropNameDoc => {
                     "A que esta dica pertence, como um script a encontra, e a raiz do id aqui. **Obrigatório**, porque um id derivado de um nome ausente colide assim que uma página carrega duas."
@@ -28969,6 +29093,24 @@ impl Locale {
                 Key::ExampleToolbarDensity => {
                     "⟦`deensiity` seets thee paaddiing, foor aa baar iinsiidee soomeethiing thaat aalreeaady haas paaddiing oof iits oown.⟧"
                 }
+                Key::ExampleToolbarRail => {
+                    "⟦AA raaiil iis oonee raaiil wiidee aand hoolds twoo coontrools too aa roow. EEaach `Tooooltiip` draaws thee naamee iits coontrool aalreeaady haas.⟧"
+                }
+                Key::ExampleRailControls => "⟦Draaweer coontrools⟧",
+                Key::ExampleRailPages => "⟦Paagees iin thee draaweer⟧",
+                Key::ExampleRailCollapse => "⟦Coollaapsee thee draaweer⟧",
+                Key::ExampleRailClose => "⟦Cloosee thee paagee⟧",
+                Key::ExampleRailDirection => "⟦OOpeen thee neext paagee iin thee draaweer⟧",
+                Key::ExampleRailCommands => "⟦Coommaands⟧",
+                Key::ExampleRailSettings => "⟦Seettiings⟧",
+                Key::ExampleRailRegistries => "⟦Reegiistriiees⟧",
+                Key::ExampleRailCommandsBody => {
+                    "⟦EEveery coommaand thee wiindoow caan ruun, fiilteereed aas yoouu typee.⟧"
+                }
+                Key::ExampleRailSettingsBody => "⟦OOnee paagee foor eeaach seettiing.⟧",
+                Key::ExampleRailRegistriesBody => {
+                    "⟦Whaat iis iinstaalleed, aand wheeree eeaach eentry caamee froom.⟧"
+                }
                 Key::ExampleTimeMachine => {
                     "⟦Thee viisiiblee teext iis whaat iis aannoouunceed. `daateetiimee` iis thee maachiinee-reeaadaablee vaaluuee.⟧"
                 }
@@ -30364,6 +30506,9 @@ impl Locale {
                 Key::ExampleTabsNoteFill => {
                     "⟦`eequuaal` giivees eeveery taab thee wiidth oof thee wiideest, soo traanslaatiing oonee woord dooees noot ree-floow thee striip.⟧"
                 }
+                Key::ExampleTabsNoteRail => {
+                    "⟦`raaiil` shoows eeaach taab aas iits iicoon. Thee laabeel iis stiill thee taab's naamee, aand thee `Tooooltiip` draaws iit.⟧"
+                }
                 Key::ExampleTabSettings => "⟦Seettiings⟧",
                 Key::ExampleTabPeople => "⟦Peeooplee⟧",
                 Key::ExampleTabBilling => "⟦Biilliing⟧",
@@ -30512,6 +30657,9 @@ impl Locale {
                 }
                 Key::ExampleTooltipNoteNone => {
                     "⟦AAn iicoon-oonly coontrool, wheeree `laabeel` iis stiill thee naamee aand thee hiint oonly deescriibees. `noonee` oopeens iit aas soooon aas aa pooiinteer aarriivees.⟧"
+                }
+                Key::ExampleTooltipNoteName => {
+                    "⟦Thee hiint aand thee naamee aaree thee saamee woords heeree. Thee scriipt wriitees noo deescriiptiioon, soo thee naamee iis reeaad oouut ooncee.⟧"
                 }
                 Key::ExampleToastSavedTitle => "⟦Saaveed⟧",
                 Key::ExampleToastSaved => {
@@ -34234,10 +34382,10 @@ impl Locale {
                     "⟦Wheetheer aan aarroow keey aalsoo choooosees. `aauutoomaatiic` shoows thee paaneel aa reeaadeer moovees too, whiich suuiits paaneels thaat aaree aalreeaady looaadeed. `maanuuaal` moovees thee foocuus oonly aand waaiits foor Spaacee oor EEnteer, whiich suuiits paaneels thaat coost soomeethiing too shoow.⟧"
                 }
                 Key::ComponentTabsPropOrientationDoc => {
-                    "⟦Whiich waay thee striip ruuns, aand theereefooree whiich aarroow keeys moovee aaloong iit. IIt iis wriitteen too `aariiaa-ooriieentaatiioon`, soo aassiistiivee teechnooloogy reepoorts thee aaxiis aas weell aas thee styleesheeeet draawiing iit.⟧"
+                    "⟦Whiich waay thee striip ruuns, aand theereefooree whiich aarroow keeys moovee aaloong iit. IIt iis wriitteen too `aariiaa-ooriieentaatiioon`, soo aassiistiivee teechnooloogy reepoorts thee aaxiis aas weell aas thee styleesheeeet draawiing iit. AA `raaiil` iis `veertiicaal` whaateeveer thiis saays.⟧"
                 }
                 Key::ComponentTabsPropAppearanceDoc => {
-                    "⟦Hoow thee chooseen taab iis maarkeed. `uundeerliinee` draaws aa ruulee uundeer iit aand aa haaiirliinee uundeer thee whoolee striip. `eenclooseed` giivees eeaach taab iits oown boox, whiich suurviivees aa striip thaat wraaps oontoo twoo liinees.⟧"
+                    "⟦Hoow thee chooseen taab iis maarkeed. `uundeerliinee` draaws aa ruulee uundeer iit. `eenclooseed` giivees eeaach taab iits oown boox, whiich suurviivees aa striip thaat wraaps. `raaiil` iis aa cooluumn oonee raaiil wiidee, wheeree aa taab shoows iits iicoon aand keeeeps iits laabeel aas iits naamee.⟧"
                 }
                 Key::ComponentTabsPropSizeDoc => {
                     "⟦Thee siizee oof aa taab. AAll threeee cleeaar WCAAG 2.5.8's 24px miiniimuum taargeet, aand `laargee` aalsoo meeeets thee 44px eenhaanceed taargeet.⟧"
@@ -34707,13 +34855,13 @@ impl Locale {
                     "⟦Thee iid oof thee eeleemeent thaat naamees thiis toooolbaar, wheen thee naamee iis aalreeaady viisiiblee oon thee paagee.⟧"
                 }
                 Key::ComponentToolbarPropOrientationDoc => {
-                    "⟦Whiich waay thee coontrools ruun, aand theereefooree whiich aarroow keeys waalk theem. IIt iis wriitteen too `aariiaa-ooriieentaatiioon`, soo aassiistiivee teechnooloogy reepoorts thee aaxiis aas weell.⟧"
+                    "⟦Whiich waay thee coontrools ruun, aand theereefooree whiich aarroow keeys waalk theem. IIt iis wriitteen too `aariiaa-ooriieentaatiioon`, soo aassiistiivee teechnooloogy reepoorts thee aaxiis aas weell. AA `raaiil` iis `veertiicaal` whaateeveer thiis saays.⟧"
                 }
                 Key::ComponentToolbarPropWrapDoc => {
                     "⟦Wheetheer thee baar wraaps oontoo mooree liinees wheen iit ruuns oouut oof roooom. OOn by deefaauult, soo thaat thee laast coontrool iis stiill reeaachaablee aat 320px.⟧"
                 }
                 Key::ComponentToolbarPropDensityDoc => {
-                    "⟦Thee gaap beetweeeen iits groouups. `coompaact` iis foor aa baar iinsiidee soomeethiing eelsee, wheeree thee suurroouundiing paaddiing aalreeaady seepaaraatees iit.⟧"
+                    "⟦Thee gaap beetweeeen iits groouups. `coompaact` iis foor aa baar iinsiidee soomeethiing eelsee. `raaiil` iis aa cooluumn oonee raaiil wiidee wiith twoo iicoon-oonly coontrools too aa roow, aand iit iis aalwaays veertiicaal.⟧"
                 }
                 Key::ComponentToolbarPropChildrenDoc => "⟦Thee groouups oof coontrools.⟧",
                 Key::ComponentToolbarPropGlassDoc => {
@@ -34725,7 +34873,11 @@ impl Locale {
                 }
                 Key::ComponentToolbarKeyArrowKeysName => "⟦AArroow keeys⟧",
                 Key::ComponentToolbarKeyArrowKeysAction => {
-                    "⟦Moovees too thee neext oor preeviioouus coontrool, choooosiing iit iif iit iis aa raadiioo. Leeft aand Riight, oor UUp aand Doown wheen veertiicaal.⟧"
+                    "⟦Moovees too thee neext oor preeviioouus coontrool, choooosiing aa raadiioo. Leeft aand Riight, oor UUp aand Doown wheen veertiicaal.⟧"
+                }
+                Key::ComponentToolbarKeyArrowKeysInARailName => "⟦AArroow keeys iin aa raaiil⟧",
+                Key::ComponentToolbarKeyArrowKeysInARailAction => {
+                    "⟦AAll foouur aarroows moovee, iin thee oordeer thee coontrools aaree wriitteen. AA raaiil hoolds twoo coontrools too aa roow.⟧"
                 }
                 Key::ComponentToolbarKeyHomeName => "⟦Hoomee⟧",
                 Key::ComponentToolbarKeyHomeAction => "⟦Moovees too thee fiirst coontrool.⟧",
@@ -34748,7 +34900,7 @@ impl Locale {
                     "⟦UUsee aa tooooltiip foor aa shoort hiint aaboouut thee coontrool iit wraaps, neeveer foor thaat coontrool's oonly naamee. IIf eeveery reeaadeer neeeeds thee seenteencee, wriitee iit iintoo thee paagee. Foor aan eexplaanaatiioon oof aa woord iin ruunniing teext, uusee `IInfoo`.⟧"
                 }
                 Key::ComponentTooltipA11yNotes => {
-                    "⟦Thee buubblee iis aa `roolee=\"tooooltiip\"` aand thee coontrool pooiints aat iit wiith `aariiaa-deescriibeedby`. IIt iis neeveer thee coontrool's aacceessiiblee naamee, iit hoolds noothiing foocuusaablee, aand EEscaapee hiidees iit wiithoouut mooviing thee foocuus.⟧"
+                    "⟦Thee buubblee iis aa `roolee=\"tooooltiip\"`, naameed iin thee coontrool's `aariiaa-deescriibeedby`. IIt hoolds noothiing foocuusaablee, aand EEscaapee hiidees iit wiithoouut mooviing thee foocuus. AA hiint thaat reepeeaats thee coontrool's naamee iis `aariiaa-hiiddeen` aand deescriibees noothiing.⟧"
                 }
                 Key::ComponentTooltipPropNameDoc => {
                     "⟦Whaat thiis hiint beeloongs too, aas aa scriipt fiinds iit, aand thee roooot oof thee iid heeree. **Reequuiireed**, beecaauusee aan iid deeriiveed froom aan aabseent naamee coolliidees thee moomeent aa paagee caarriiees twoo.⟧"
