@@ -338,6 +338,19 @@ pub(crate) const MENU: Page = Page {
     component: None,
 };
 
+/// The lines at the bottom of a window, one line, and one corner.
+///
+/// A collection for the reason `OPTION_LIST` is one: a `FooterLine` outside a
+/// `Footer` has no type size and no neighbour to be told from, and a
+/// `FooterCorner` outside one has no end to stand at.
+pub(crate) const FOOTER: Page = Page {
+    slug: "footer",
+    title: Title::Name("Footer"),
+    summary: Key::PageFooterSummary,
+    kind: Kind::Component,
+    component: None,
+};
+
 /// The list a reader walks with the keyboard, a named run of it, and one option.
 ///
 /// A collection for the reason `TREE` is one: an `OptionItem` outside an
@@ -511,7 +524,7 @@ pub(crate) struct Collection {
 /// `page.component.is_some()`, so nobody could search for `spread` or
 /// `current_label`. It reads `documented_on` now, so a component on a shared
 /// page is as findable as one with a page of its own.
-pub(crate) const COLLECTIONS: [Collection; 15] = [
+pub(crate) const COLLECTIONS: [Collection; 16] = [
     Collection {
         page: LINEAGE,
         parts: &["Lineage", "LineageFigure"],
@@ -536,6 +549,12 @@ pub(crate) const COLLECTIONS: [Collection; 15] = [
         page: MENU,
         parts: &["Menu", "MenuItem"],
         body: Key::PageMenuBody,
+    },
+    Collection {
+        // The footer, then what it stacks, then what stands at its ends.
+        page: FOOTER,
+        parts: &["Footer", "FooterLine", "FooterCorner"],
+        body: Key::PageFooterBody,
     },
     Collection {
         // The list, then the run, then one option: outside in, which is the

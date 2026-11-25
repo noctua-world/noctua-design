@@ -660,6 +660,138 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Footer",
+        "case-footer-0",
+        &[Node::Component {
+            name: "Footer",
+            props: &[("label", Value::Data("Window footer"))],
+            children: &[Node::Component {
+                name: "FooterLine",
+                props: &[],
+                children: &[Node::Text(Value::Data("Registries"))],
+            }],
+        }],
+    ),
+    (
+        "Footer",
+        "case-footer-1",
+        &[Node::Component {
+            name: "Footer",
+            props: &[
+                ("label", Value::Data("Window footer")),
+                ("shown", Value::Bool(true)),
+                ("visibility", Value::Text("auto")),
+            ],
+            children: &[Node::Component {
+                name: "FooterLine",
+                props: &[],
+                children: &[Node::Text(Value::Data("Registries"))],
+            }],
+        }],
+    ),
+    (
+        "Footer",
+        "case-footer-2",
+        &[Node::Component {
+            name: "Footer",
+            props: &[("label", Value::Data("Window footer"))],
+            children: &[
+                Node::Component {
+                    name: "FooterCorner",
+                    props: &[],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "FooterLine",
+                    props: &[],
+                    children: &[Node::Text(Value::Data("Registries"))],
+                },
+                Node::Component {
+                    name: "FooterCorner",
+                    props: &[("side", Value::Text("end"))],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "FooterLine",
+        "case-footer-line-0",
+        &[Node::Component {
+            name: "FooterLine",
+            props: &[("kind", Value::Text("info"))],
+            children: &[Node::Text(Value::Data("Saved."))],
+        }],
+    ),
+    (
+        "FooterLine",
+        "case-footer-line-1",
+        &[Node::Component {
+            name: "FooterLine",
+            props: &[
+                ("action", Value::Data("expand")),
+                ("collapse_label", Value::Data("Show one line")),
+                ("expand_label", Value::Data("Show all of it")),
+                ("expandable", Value::Bool(true)),
+                ("kind", Value::Text("info")),
+            ],
+            children: &[Node::Text(Value::Data("Saved."))],
+        }],
+    ),
+    (
+        "FooterLine",
+        "case-footer-line-2",
+        &[Node::Component {
+            name: "FooterLine",
+            props: &[
+                ("collapse_label", Value::Data("Show one line")),
+                ("expand_label", Value::Data("Show all of it")),
+                ("expandable", Value::Bool(true)),
+                ("expanded", Value::Bool(true)),
+                ("kind", Value::Text("info")),
+            ],
+            children: &[Node::Text(Value::Data("Saved."))],
+        }],
+    ),
+    (
+        "FooterLine",
+        "case-footer-line-3",
+        &[Node::Component {
+            name: "FooterLine",
+            props: &[
+                ("collapse_label", Value::Data("Show one line")),
+                ("expand_label", Value::Data("Show all of it")),
+                ("expandable", Value::Bool(true)),
+                ("kind", Value::Text("info")),
+            ],
+            children: &[Node::Text(Value::Data("Saved."))],
+        }],
+    ),
+    (
+        "FooterLine",
+        "case-footer-line-4",
+        &[Node::Component {
+            name: "FooterLine",
+            props: &[
+                ("collapse_label", Value::Data("Show one line")),
+                ("expand_label", Value::Data("Show all of it")),
+                ("expandable", Value::Bool(true)),
+                ("kind", Value::Text("info")),
+                ("live", Value::Bool(true)),
+            ],
+            children: &[Node::Text(Value::Data("Saved."))],
+        }],
+    ),
+    (
+        "FooterLine",
+        "case-footer-line-5",
+        &[Node::Component {
+            name: "FooterLine",
+            props: &[("kind", Value::Text("info"))],
+            children: &[Node::Text(Value::Data("Saved."))],
+        }],
+    ),
+    (
         "Info",
         "case-info-0",
         &[Node::Component {

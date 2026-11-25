@@ -51,6 +51,9 @@ mod error_summary_item;
 mod field;
 mod fieldset;
 mod file_input;
+mod footer;
+mod footer_corner;
+mod footer_line;
 mod heading;
 mod icon;
 mod image;
@@ -169,6 +172,9 @@ pub(crate) fn for_component(name: &str) -> &'static [Tree] {
         "Field" => field::EXAMPLES,
         "Fieldset" => fieldset::EXAMPLES,
         "FileInput" => file_input::EXAMPLES,
+        "Footer" => footer::EXAMPLES,
+        "FooterCorner" => footer_corner::EXAMPLES,
+        "FooterLine" => footer_line::EXAMPLES,
         "Heading" => heading::EXAMPLES,
         "Icon" => icon::EXAMPLES,
         "Image" => image::EXAMPLES,

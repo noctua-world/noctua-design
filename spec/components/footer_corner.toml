@@ -1,0 +1,34 @@
+guidance = """
+Use a footer corner for the square at one end of a `Footer`. It holds controls
+that show an icon and no words, or nothing at all.
+"""
+
+[meta]
+name = "FooterCorner"
+element = "div"
+class = "nd-footer-corner"
+page = "footer"
+summary = "Place a corner at one end of a footer, as tall as all its lines."
+
+# AS WIDE AS A RAIL, AND AS TALL AS THE FOOTER. `--noctua-shell-rail` is the
+# width of an icon-only `Button`, so one control fills the corner from side to
+# side. The corner adds no role: what is inside it keeps its own.
+
+[prop.side]
+type = "enum"
+values = ["start", "end"]
+default = "start"
+attribute = "data-nd-side"
+# A corner stands at an end of a FOOTER. A picture of one corner alone has no
+# footer to stand at either end of, so both values draw the same box.
+variants = false
+doc = "Which end of the footer the corner stands at: `start` or `end`. A footer holds one corner at each end at most."
+
+[prop.children]
+type = "children"
+doc = "The controls in the corner. Each is a `Button` with `hide_label`, so each has a name and shows only its icon."
+
+[a11y]
+notes = """
+The corner has no role, so an empty corner is not announced. A control inside it is a `Button` with its own name.
+"""

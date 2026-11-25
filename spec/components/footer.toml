@@ -1,0 +1,57 @@
+guidance = """
+Use a footer for the lines an application window keeps at its bottom edge.
+They are a line of controls, a line of status and a line to type in. For the
+controls of one page, use `Toolbar`.
+"""
+
+[meta]
+name = "Footer"
+element = "footer"
+class = "nd-footer"
+page = "footer"
+summary = "Hold the lines a window keeps at its bottom edge, with a corner at each end."
+
+# LINES STACKED, AND A CORNER AT EACH END AS TALL AS ALL OF THEM.
+#
+# The lines are the footer's children in the order they are written, each a
+# `FooterLine`. A `FooterCorner` is a child too, and the stylesheet stands it at
+# its end of the footer for the footer's whole height, so a line that grows
+# takes its corners with it and nothing counts lines.
+#
+# NO BORDER ANYWHERE. A line is told from its neighbour by its own shade, and
+# the three shades and the corners' are the colour system's (`NOCTUA.md §12.3`).
+#
+# A `<footer>` IS A LANDMARK ONLY WHERE NO SECTION IS AROUND IT, so the role it
+# would have depends on where an application mounts it. `group` is the one role
+# the element may carry that takes a name, and it says the same thing wherever
+# the footer stands.
+
+[prop.label]
+type = "text"
+required = true
+attribute = "aria-label"
+doc = "The name of the footer, in the reader's language. It becomes `aria-label` on the `group`. Required."
+
+[prop.visibility]
+type = "enum"
+values = ["always", "auto"]
+default = "always"
+attribute = "data-nd-visibility"
+doc = "When the footer shows: `always`, or `auto`, which folds it to a strip along its edge. The strip opens under a pointer, while the focus is inside it, and while `shown` is set."
+
+[prop.shown]
+type = "bool"
+default = "false"
+attribute = "data-nd-shown"
+doc = "Whether a folded footer is open. The caller sets it for what the footer cannot see, such as a key pressed elsewhere or a pointer at the window's edge. Needs `auto`."
+
+[prop.children]
+type = "children"
+doc = "The lines, top to bottom, and the corners: `FooterLine`s and up to two `FooterCorner`s."
+
+[a11y]
+needs_name = true
+role = "group"
+notes = """
+The footer is a `<footer>` with `role="group"`, named by `label`. A folded footer stays in the tab order, and it opens when the focus enters it, so no focused control is hidden. It opens in the flow of the page and covers nothing.
+"""

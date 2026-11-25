@@ -1,0 +1,68 @@
+guidance = """
+Use a footer line for one line of a `Footer`. `kind` says which of the three it
+is, and the kind decides its shade and whether it stays one line tall.
+"""
+
+[meta]
+name = "FooterLine"
+element = "div"
+class = "nd-footer-line"
+page = "footer"
+summary = "Place one line in a footer: controls, status, or the line to type in."
+
+# ONE LINE TALL, AND WHAT DOES NOT FIT IS CUT.
+#
+# A `modeline` and an `info` line are `--noctua-shell-line` tall and no taller:
+# their content is cut at the line's end. An `info` line that is `expanded`
+# wraps and grows, and a `prompt` line is as tall as the `Prompt` inside it.
+#
+# THE TOGGLE IS A BARE `<button>` AND NOT A `Button`. It has to say
+# `aria-expanded="false"` while the line is one line tall, and `Button` writes
+# `aria-expanded` only when it is true.
+#
+# THE CALLER TURNS IT. The line ships no script: `expanded` is a prop, and the
+# press reaches the caller through `action`.
+
+[prop.kind]
+type = "enum"
+values = ["modeline", "info", "prompt"]
+default = "modeline"
+attribute = "data-nd-kind"
+doc = "Which line this is: `modeline`, for controls, `info`, for status, or `prompt`, for the line to type in. Each has its own shade, and `prompt` has the page's own."
+
+[prop.expandable]
+type = "bool"
+default = "false"
+doc = "Whether the line ends in a control that expands it. The control shows while a pointer is over the line or the focus is inside it. On a touch screen it always shows."
+
+[prop.expanded]
+type = "bool"
+default = "false"
+attribute = "data-nd-expanded"
+doc = "Whether the line wraps and grows to show all its content. Off, the line is one line tall and its content is cut to fit."
+
+[prop.expand_label]
+type = "text"
+doc = "The name of the control while the line is one line tall, such as *Show all*. Wanted in practice by `expandable`."
+
+[prop.collapse_label]
+type = "text"
+doc = "The name of the control while the line is expanded, such as *Show less*. Wanted in practice by `expandable`."
+
+[prop.action]
+type = "text"
+doc = "What a script finds the expanding control by. It becomes `data-nd-action` on that control."
+
+[prop.live]
+type = "bool"
+default = "false"
+doc = "Whether a change to the line's content is announced. On, the content is a `role=\"status\"`. Turn it on for a line that shows notices, and leave it off for one that follows a pointer."
+
+[prop.children]
+type = "children"
+doc = "What the line holds. Every drawing in it is an `Icon`."
+
+[a11y]
+notes = """
+The expanding control is a real `<button>` with `aria-expanded`, written as `true` or `false`. It is at least 24 pixels square, as WCAG 2.5.8 asks. With `live`, the content is a `role="status"`, and the control stays outside it.
+"""

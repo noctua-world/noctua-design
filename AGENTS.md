@@ -831,6 +831,33 @@ are drawn apart, a bar and a fill against a tick, and the fill is the neutral ra
 marked letters in the row stay legible on it. The empty sentence is shown by the stylesheet alone,
 from `:has()`, so a list a framework re-renders says it with no script noticing.
 
+### The window's footer
+
+**A footer is lines told apart by shade, and nothing draws a border.** `Footer`, `FooterLine` and
+`FooterCorner` are the stacked lines at the bottom of an application window
+(`NOCTUA.md §12.3`): a `modeline`, an `info` line and a `prompt` line, each
+`--noctua-shell-line` tall, on the colour system's `modeline` and `infoline` surfaces and the
+page's own, with a corner on the `corner` surface at each end. A corner is `--noctua-shell-rail`
+wide and stands in the footer's own padding for its whole height, so nothing counts lines and a
+line that grows takes its corners with it. **A line is one line**: what does not fit is cut at the
+line's end, and only an `expanded` line or a `prompt` line grows. Every ring inside a footer is
+drawn inside its control, because the lines touch and each paints over what the one above it
+hangs out.
+
+**The footer ships no script, and the caller turns every state.** `expanded` and `shown` are
+props, and the control that expands a line reaches the caller through `action`. That control is a
+bare `<button>` because it says `aria-expanded="false"`, which `Button` never writes. It is hidden
+only behind `@media (hover: hover)`, and a pointer on the line or the focus inside it shows it,
+so a touch screen and a keyboard both reach it.
+
+**A folded footer opens in the flow.** `visibility="auto"` folds it to a strip along its own edge,
+and a pointer on the strip, the focus inside it or `shown` opens it. It stays in the tab order
+while folded, and it takes its height from what is above it: a footer that opened over the page
+could cover the control the keyboard is on (WCAG 2.4.11). The strip is where the footer is, so a
+pointer at the window's edge under an open drawer is the caller's to see, and `shown` is how it
+says so. The footer is a `<footer>` with `role="group"`, since the element is a landmark only
+where no section is around it and the role would otherwise depend on where it is mounted.
+
 ### Tones, bars, carousels, spectra
 
 **A tone is a name, not a list of four.** The vendored palette declares hundreds of semantic

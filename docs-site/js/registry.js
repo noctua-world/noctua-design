@@ -39,6 +39,9 @@ import { ErrorSummaryItem } from "@noctua-world/design-react/components/error_su
 import { Field } from "@noctua-world/design-react/components/field.js";
 import { Fieldset } from "@noctua-world/design-react/components/fieldset.js";
 import { FileInput } from "@noctua-world/design-react/components/file_input.js";
+import { Footer } from "@noctua-world/design-react/components/footer.js";
+import { FooterCorner } from "@noctua-world/design-react/components/footer_corner.js";
+import { FooterLine } from "@noctua-world/design-react/components/footer_line.js";
 import { Heading } from "@noctua-world/design-react/components/heading.js";
 import { Icon } from "@noctua-world/design-react/components/icon.js";
 import { Image } from "@noctua-world/design-react/components/image.js";
@@ -132,6 +135,9 @@ export const COMPONENTS = {
   Field,
   Fieldset,
   FileInput,
+  Footer,
+  FooterCorner,
+  FooterLine,
   Heading,
   Icon,
   Image,

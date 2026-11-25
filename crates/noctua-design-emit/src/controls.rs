@@ -312,6 +312,7 @@ pub fn is_custom(component: &Component) -> bool {
             | "OptionList"
             | "OptionGroup"
             | "OptionItem"
+            | "FooterLine"
     )
 }
 
@@ -360,6 +361,7 @@ pub fn dioxus_body(sink: &mut String, component: &Component) {
         "OptionList" => out.push_str(OPTION_LIST_DIOXUS),
         "OptionGroup" => out.push_str(OPTION_GROUP_DIOXUS),
         "OptionItem" => out.push_str(OPTION_ITEM_DIOXUS),
+        "FooterLine" => out.push_str(FOOTER_LINE_DIOXUS),
         "Menu" => out.push_str(MENU_DIOXUS),
         "MenuItem" => out.push_str(MENU_ITEM_DIOXUS),
         "Meter" => out.push_str(METER_DIOXUS),
@@ -449,6 +451,7 @@ pub fn react_body(sink: &mut String, component: &Component) {
         "OptionList" => out.push_str(OPTION_LIST_REACT),
         "OptionGroup" => out.push_str(OPTION_GROUP_REACT),
         "OptionItem" => out.push_str(OPTION_ITEM_REACT),
+        "FooterLine" => out.push_str(FOOTER_LINE_REACT),
         "Menu" => out.push_str(MENU_REACT),
         "MenuItem" => out.push_str(MENU_ITEM_REACT),
         "Meter" => out.push_str(METER_REACT),
@@ -3956,6 +3959,100 @@ const OPTION_ITEM_REACT: &str = r#"  const root = ["nd-option-item", className].
   );
 "#;
 
+// --- FooterLine -------------------------------------------------------------
+
+/// One line of a footer.
+///
+/// `Footer` and `FooterCorner` are derived from their contracts. This one is
+/// written, because its expanding control is a second element with a state of
+/// its own.
+///
+/// # The content has a box of its own
+///
+/// The line is a row of two things: what the caller put in it, and the control
+/// that expands it. The content's box is what is cut at one line, and with
+/// `live` it is the `status`, so a press on the control is never read out as a
+/// change to the line.
+///
+/// # A bare `<button>`, for one attribute
+///
+/// The control says `aria-expanded="false"` while the line is one line tall: a
+/// control that opens something opens it whether or not it is open now.
+/// `Button` writes the attribute only when it is true, so this is the element
+/// itself, as `TreeItem`'s toggle is. Its name is whichever of the two labels
+/// is true now.
+const FOOTER_LINE_DIOXUS: &str = r#"    let root = format!("nd-footer-line {class}");
+    let root = root.trim().to_owned();
+    let toggle = if expanded {
+        collapse_label
+    } else {
+        expand_label
+    }
+    .unwrap_or_default();
+
+    rsx! {
+        div {
+            class: "{root}",
+            "data-nd-kind": kind.as_str(),
+            "data-nd-expanded": expanded.then_some("true"),
+            div { class: "nd-footer-line-content", role: live.then_some("status"), {children} }
+            if expandable {
+                button {
+                    class: "nd-footer-line-toggle",
+                    r#type: "button",
+                    "aria-expanded": if expanded { "true" } else { "false" },
+                    "aria-label": "{toggle}",
+                    "data-nd-action": action,
+                    // The footer is at the bottom of its window, so a line
+                    // grows upward and the glyph points the way it will go.
+                    if expanded {
+                        Icon { icon: IconDrawing::CHEVRON_DOWN, size: IconSize::Small }
+                    } else {
+                        Icon { icon: IconDrawing::CHEVRON_UP, size: IconSize::Small }
+                    }
+                }
+            }
+        }
+    }
+"#;
+
+/// The same line, in React.
+const FOOTER_LINE_REACT: &str = r#"  const kind_ = kind ?? "modeline";
+  const root = ["nd-footer-line", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      "data-nd-kind": kind_,
+      "data-nd-expanded": expanded ? "true" : undefined,
+      ...rest,
+    },
+    h(
+      "div",
+      { key: "c", className: "nd-footer-line-content", role: live ? "status" : undefined },
+      children,
+    ),
+    expandable
+      ? h(
+          "button",
+          {
+            key: "t",
+            className: "nd-footer-line-toggle",
+            type: "button",
+            "aria-expanded": expanded ? "true" : "false",
+            "aria-label": (expanded ? collapseLabel : expandLabel) ?? "",
+            "data-nd-action": action,
+          },
+          // See the Dioxus half: the glyph points the way the line will go.
+          expanded
+            ? h(Icon, { icon: chevronDown, size: "small" })
+            : h(Icon, { icon: chevronUp, size: "small" }),
+        )
+      : null,
+  );
+"#;
+
 // --- Menu and MenuItem ------------------------------------------------------
 
 /// The surface a button opens, and the actions on it.
@@ -4890,7 +4987,7 @@ pub fn dioxus_imports(component: &Component) -> String {
         // A field, a fieldset and the one drawing a rating is made of. A tab
         // wants the same drawing at a size it names.
         "Rating" => beside_icon("Field, FieldKind, FieldSize, Icon"),
-        "Tab" => beside_icon("Icon, IconSize"),
+        "Tab" | "FooterLine" => beside_icon("Icon, IconSize"),
         // `SelectOption` needs both for a reason worth writing down: the name
         // becomes `data-nd-icon` on the option, and the drawing goes in a
         // `<template>` beside it for the enhanced list to clone.
@@ -5044,7 +5141,7 @@ pub fn react_imports(component: &Component) -> String {
         // are imported unevenly there; in JavaScript an icon is an icon.
         "Button" | "Link" | "SegmentedItem" | "Disclosure" | "Search" | "SearchResult"
         | "Avatar" | "Carousel" | "Info" | "MenuItem" | "MessageBar" | "Tab" | "Dialog"
-        | "Popover" | "Toast" => REACT_ICON.to_owned(),
+        | "Popover" | "Toast" | "FooterLine" => REACT_ICON.to_owned(),
         // The chip is a `Swatch` and the remove control is a `Button`; see the
         // Dioxus half.
         "Tag" => concat!(

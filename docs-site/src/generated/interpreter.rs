@@ -27,9 +27,10 @@ use noctua_design::components::{
     DatePickerMonths, DatePickerOrder, DatePickerPair, DatePickerSelection, DatePickerSize, Del,
     Dialog, DialogSize, Disclosure, DisclosureHeading, Divider, DividerOrientation, DividerSpacing,
     DividerWeight, Em, ErrorSummary, ErrorSummaryItem, Field, FieldKind, FieldSize, Fieldset,
-    FileInput, FileInputSize, Heading, HeadingLevel, HeadingSize, HeadingTone, Icon, IconSize,
-    Image, ImageFit, ImageLoading, ImageRatio, Info, InfoPlacement, Input, InputKind, InputSize,
-    Ins, Kbd, KbdSize, Label, LabelKind, LabelSize, Lineage, LineageFigure, LineageFigureParallax,
+    FileInput, FileInputSize, Footer, FooterCorner, FooterCornerSide, FooterLine, FooterLineKind,
+    FooterVisibility, Heading, HeadingLevel, HeadingSize, HeadingTone, Icon, IconSize, Image,
+    ImageFit, ImageLoading, ImageRatio, Info, InfoPlacement, Input, InputKind, InputSize, Ins, Kbd,
+    KbdSize, Label, LabelKind, LabelSize, Lineage, LineageFigure, LineageFigureParallax,
     LineageFigureShape, LineageFigureTone, LineageFilterMode, LineageHeight, LineageLettering,
     LineageLine, LineagePick, LineageReach, LineageRoute, LineageSize, LineageThickness,
     LineageTilt, LineageView, Link, LinkTone, List, ListItem, ListKind, ListMarker, ListSpacing,
@@ -91,6 +92,9 @@ pub(crate) fn component(
         "Field" => field(props, children, scope),
         "Fieldset" => fieldset(props, children, scope),
         "FileInput" => file_input(props, children, scope),
+        "Footer" => footer(props, children, scope),
+        "FooterCorner" => footer_corner(props, children, scope),
+        "FooterLine" => footer_line(props, children, scope),
         "Heading" => heading(props, children, scope),
         "Icon" => icon(props, children, scope),
         "Image" => image(props, children, scope),
@@ -1597,6 +1601,94 @@ fn file_input(
             ai_label: ai_label_,
             ai_note: ai_note_,
             class: class_,
+        }
+    }
+}
+
+/// `Footer`, from a tree.
+fn footer(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let label_ = scope
+        .find(props, "label")
+        .expect("Footer.label is required and this tree does not set it");
+    let visibility_ = scope
+        .pick(
+            props,
+            "visibility",
+            &FooterVisibility::ALL,
+            FooterVisibility::as_str,
+        )
+        .unwrap_or_default();
+    let shown_ = scope.flag(props, "shown").unwrap_or(false);
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        Footer {
+            label: label_,
+            visibility: visibility_,
+            shown: shown_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `FooterCorner`, from a tree.
+fn footer_corner(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let side_ = scope
+        .pick(
+            props,
+            "side",
+            &FooterCornerSide::ALL,
+            FooterCornerSide::as_str,
+        )
+        .unwrap_or_default();
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        FooterCorner {
+            side: side_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `FooterLine`, from a tree.
+fn footer_line(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let kind_ = scope
+        .pick(props, "kind", &FooterLineKind::ALL, FooterLineKind::as_str)
+        .unwrap_or_default();
+    let expandable_ = scope.flag(props, "expandable").unwrap_or(false);
+    let expanded_ = scope.flag(props, "expanded").unwrap_or(false);
+    let expand_label_ = scope.find(props, "expand_label");
+    let collapse_label_ = scope.find(props, "collapse_label");
+    let action_ = scope.find(props, "action");
+    let live_ = scope.flag(props, "live").unwrap_or(false);
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        FooterLine {
+            kind: kind_,
+            expandable: expandable_,
+            expanded: expanded_,
+            expand_label: expand_label_,
+            collapse_label: collapse_label_,
+            action: action_,
+            live: live_,
+            class: class_,
+            {render(children, scope)}
         }
     }
 }

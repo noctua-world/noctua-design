@@ -461,6 +461,19 @@ ToolbarGroup { align: ToolbarGroupAlign::End, … }"#
         ),
     ),
     (
+        "footer",
+        example!(
+            r#"Footer { label: "…",
+    FooterCorner { side: FooterCornerSide::Start }
+    FooterLine { kind: FooterLineKind::Modeline, … }
+    FooterLine { kind: FooterLineKind::Info, expandable: true, expand_label: "…", collapse_label: "…", action: "…", … }
+    FooterLine { kind: FooterLineKind::Prompt, … }
+    FooterCorner { side: FooterCornerSide::End }
+}"#,
+            Key::ExampleFooterOverview
+        ),
+    ),
+    (
         "option-list",
         example!(
             r#"OptionList { name: "…", label: "…", empty_label: "…",
@@ -691,6 +704,9 @@ pub(crate) fn for_component(name: &str) -> &'static [Example] {
         "Kbd" => KBD,
         "Link" => LINK,
         "List" => LIST,
+        "Footer" => FOOTER,
+        "FooterLine" => FOOTER_LINE,
+        "FooterCorner" => FOOTER_CORNER,
         "ListItem" => LIST_ITEM,
         "Mark" => MARK,
         "MatchText" => MATCH_TEXT,
@@ -2177,6 +2193,65 @@ const MARK: &[Example] = &[
     example!(r"Two hits in one line", Key::ExampleMarkSearch),
     example!(r"Mark inside a heading"),
     example!(r"Mark inside a list"),
+];
+
+// --- Footer, FooterLine and FooterCorner ------------------------------------
+
+const FOOTER: &[Example] = &[
+    example!(
+        r#"Footer { label: "…", FooterLine { … } FooterLine { … } FooterLine { … } }"#,
+        Key::ExampleFooterLines
+    ),
+    example!(
+        r"Footer { visibility: FooterVisibility::Auto, … }",
+        Key::ExampleFooterAuto
+    ),
+    example!(
+        r"Footer { visibility: FooterVisibility::Auto, shown: true, … }",
+        Key::ExampleFooterShown
+    ),
+    example!(
+        r#"Footer { label: "…", … } in a narrow window"#,
+        Key::ExampleFooterNarrow
+    ),
+];
+
+const FOOTER_LINE: &[Example] = &[
+    example!(
+        r"FooterLine { kind: FooterLineKind::Modeline } / FooterLine { kind: FooterLineKind::Info } / FooterLine { kind: FooterLineKind::Prompt }",
+        Key::ExampleFooterLineKinds
+    ),
+    example!(
+        r#"FooterLine { kind: FooterLineKind::Info, expandable: true, expand_label: "…", collapse_label: "…", action: "…" }"#,
+        Key::ExampleFooterLineCut
+    ),
+    example!(
+        r"FooterLine { kind: FooterLineKind::Info, expandable: true, expanded: true, … }",
+        Key::ExampleFooterLineExpanded
+    ),
+    example!(
+        r"FooterLine { kind: FooterLineKind::Info, live: true }",
+        Key::ExampleFooterLineLive
+    ),
+];
+
+const FOOTER_CORNER: &[Example] = &[
+    example!(
+        r"FooterCorner { side: FooterCornerSide::Start } / FooterCorner { side: FooterCornerSide::End }",
+        Key::ExampleFooterCornerSides
+    ),
+    example!(
+        r#"FooterCorner { Button { hide_label: true, icon: …, label: "…" } }"#,
+        Key::ExampleFooterCornerControl
+    ),
+    example!(
+        r"FooterCorner { side: FooterCornerSide::End } alone",
+        Key::ExampleFooterCornerAlone
+    ),
+    example!(
+        r"FooterCorner { Button { … } Button { … } }",
+        Key::ExampleFooterCornerTwo
+    ),
 ];
 
 // --- OptionList, OptionGroup and OptionItem ---------------------------------

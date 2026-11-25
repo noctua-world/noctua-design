@@ -232,6 +232,10 @@ export const PAGE = {
   // only multi-column box in the system, so the width x locale sweep and the
   // 320px audit have a layout here that changes its own column count.
   optionList: "option-list/",
+  // The footer of an application window. On this list because it is the one
+  // component drawn edge to edge in four shades of one colour, and the only
+  // one whose corners take a fixed width out of a 320px line.
+  footer: "footer/",
 };
 
 /**

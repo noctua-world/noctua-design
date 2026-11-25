@@ -33,6 +33,9 @@ export { ErrorSummaryItem, type ErrorSummaryItemProps } from "./error_summary_it
 export { Field, type FieldProps } from "./field.js";
 export { Fieldset, type FieldsetProps } from "./fieldset.js";
 export { FileInput, type FileInputProps } from "./file_input.js";
+export { Footer, type FooterProps } from "./footer.js";
+export { FooterCorner, type FooterCornerProps } from "./footer_corner.js";
+export { FooterLine, type FooterLineProps } from "./footer_line.js";
 export { Heading, type HeadingProps } from "./heading.js";
 export { Icon, type IconProps } from "./icon.js";
 export { Image, type ImageProps } from "./image.js";

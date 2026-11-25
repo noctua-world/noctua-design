@@ -3420,6 +3420,229 @@ const FIELD_SIZE_LARGE: &[Node] = &[Node::Element {
     ],
 }];
 
+/// `Footer.visibility` at `always`.
+const FOOTER_VISIBILITY_ALWAYS: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("visibility")),
+                ("data-nd-slug", Value::Text("footer")),
+            ],
+            children: &[Node::Component {
+                name: "Footer",
+                props: &[
+                    ("label", Value::Text("Footer")),
+                    ("visibility", Value::Text("always")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "FooterCorner",
+                        props: &[("side", Value::Text("start"))],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("modeline"))],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("info"))],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("prompt"))],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
+                    Node::Component {
+                        name: "FooterCorner",
+                        props: &[("side", Value::Text("end"))],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-footer-visibility-always")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("always"))],
+            }],
+        },
+    ],
+}];
+
+/// `Footer.visibility` at `auto`.
+const FOOTER_VISIBILITY_AUTO: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("visibility")),
+                ("data-nd-slug", Value::Text("footer")),
+            ],
+            children: &[Node::Component {
+                name: "Footer",
+                props: &[
+                    ("label", Value::Text("Footer")),
+                    ("visibility", Value::Text("auto")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "FooterCorner",
+                        props: &[("side", Value::Text("start"))],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("modeline"))],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("info"))],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("prompt"))],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
+                    Node::Component {
+                        name: "FooterCorner",
+                        props: &[("side", Value::Text("end"))],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-footer-visibility-auto")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("auto"))],
+            }],
+        },
+    ],
+}];
+
+/// `FooterLine.kind` at `modeline`.
+const FOOTER_LINE_KIND_MODELINE: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("kind")),
+                ("data-nd-slug", Value::Text("footer-line")),
+            ],
+            children: &[Node::Component {
+                name: "FooterLine",
+                props: &[("kind", Value::Text("modeline"))],
+                children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-footer-line-kind-modeline")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("modeline"))],
+            }],
+        },
+    ],
+}];
+
+/// `FooterLine.kind` at `info`.
+const FOOTER_LINE_KIND_INFO: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("kind")),
+                ("data-nd-slug", Value::Text("footer-line")),
+            ],
+            children: &[Node::Component {
+                name: "FooterLine",
+                props: &[("kind", Value::Text("info"))],
+                children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-footer-line-kind-info")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("info"))],
+            }],
+        },
+    ],
+}];
+
+/// `FooterLine.kind` at `prompt`.
+const FOOTER_LINE_KIND_PROMPT: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("kind")),
+                ("data-nd-slug", Value::Text("footer-line")),
+            ],
+            children: &[Node::Component {
+                name: "FooterLine",
+                props: &[("kind", Value::Text("prompt"))],
+                children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-footer-line-kind-prompt")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("prompt"))],
+            }],
+        },
+    ],
+}];
+
 /// `Heading.size` at `display`.
 const HEADING_SIZE_DISPLAY: &[Node] = &[Node::Element {
     tag: "figure",
@@ -13790,6 +14013,11 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("Field", "size", "small") => FIELD_SIZE_SMALL,
         ("Field", "size", "medium") => FIELD_SIZE_MEDIUM,
         ("Field", "size", "large") => FIELD_SIZE_LARGE,
+        ("Footer", "visibility", "always") => FOOTER_VISIBILITY_ALWAYS,
+        ("Footer", "visibility", "auto") => FOOTER_VISIBILITY_AUTO,
+        ("FooterLine", "kind", "modeline") => FOOTER_LINE_KIND_MODELINE,
+        ("FooterLine", "kind", "info") => FOOTER_LINE_KIND_INFO,
+        ("FooterLine", "kind", "prompt") => FOOTER_LINE_KIND_PROMPT,
         ("Heading", "size", "display") => HEADING_SIZE_DISPLAY,
         ("Heading", "size", "h1") => HEADING_SIZE_H1,
         ("Heading", "size", "h2") => HEADING_SIZE_H2,

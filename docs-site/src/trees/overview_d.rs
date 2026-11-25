@@ -394,6 +394,144 @@ Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#,
         }],
     ),
     (
+        "footer",
+        r#"Footer { label: "…",
+    FooterCorner { side: FooterCornerSide::Start }
+    FooterLine { kind: FooterLineKind::Modeline, … }
+    FooterLine { kind: FooterLineKind::Info, expandable: true, expand_label: "…", collapse_label: "…", action: "…", … }
+    FooterLine { kind: FooterLineKind::Prompt, … }
+    FooterCorner { side: FooterCornerSide::End }
+}"#,
+        // THE FOOTER OF `NOCTUA.md §12.3`, WHOLE: the three lines in their
+        // order and a corner at each end. The line a reader types in holds
+        // words here and a `Prompt` in an application.
+        &[Node::Component {
+            name: "Footer",
+            props: &[("label", Value::Message(Key::ExampleFooterLabel))],
+            children: &[
+                Node::Component {
+                    name: "FooterCorner",
+                    props: &[("side", Value::Text("start"))],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "FooterLine",
+                    props: &[("kind", Value::Text("modeline"))],
+                    children: &[
+                        Node::Component {
+                            name: "Button",
+                            props: &[
+                                ("hide_label", Value::Bool(true)),
+                                ("icon", Value::Text("panel-left")),
+                                ("variant", Value::Text("transparent")),
+                                ("tone", Value::Text("neutral")),
+                                ("size", Value::Text("small")),
+                                ("label", Value::Message(Key::ExampleFooterSidebar)),
+                            ],
+                            children: &[],
+                        },
+                        Node::Component {
+                            name: "Icon",
+                            props: &[
+                                ("icon", Value::Text("file-text")),
+                                ("size", Value::Text("small")),
+                            ],
+                            children: &[],
+                        },
+                        Node::Element {
+                            tag: "span",
+                            attributes: &[],
+                            children: &[Node::Text(Value::Message(Key::ExampleFooterPage))],
+                        },
+                        Node::Element {
+                            tag: "span",
+                            attributes: &[("class", Value::Text("nd-example-end"))],
+                            children: &[
+                                Node::Element {
+                                    tag: "span",
+                                    attributes: &[("class", Value::Text("nd-identifier"))],
+                                    children: &[Node::Text(Value::Data("home / ana"))],
+                                },
+                                Node::Component {
+                                    name: "Icon",
+                                    props: &[
+                                        ("icon", Value::Text("wifi-off")),
+                                        ("size", Value::Text("small")),
+                                    ],
+                                    children: &[],
+                                },
+                                Node::Element {
+                                    tag: "span",
+                                    attributes: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleFooterOffline,
+                                    ))],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                Node::Component {
+                    name: "FooterLine",
+                    props: &[
+                        ("kind", Value::Text("info")),
+                        ("expandable", Value::Bool(true)),
+                        ("expand_label", Value::Message(Key::ExampleFooterExpand)),
+                        ("collapse_label", Value::Message(Key::ExampleFooterCollapse)),
+                        ("action", Value::Text("overview-footer-expand")),
+                    ],
+                    children: &[
+                        Node::Component {
+                            name: "Icon",
+                            props: &[
+                                ("icon", Value::Text("info")),
+                                ("size", Value::Text("small")),
+                            ],
+                            children: &[],
+                        },
+                        Node::Component {
+                            name: "Icon",
+                            props: &[
+                                ("icon", Value::Text("mouse-pointer")),
+                                ("size", Value::Text("small")),
+                            ],
+                            children: &[],
+                        },
+                        Node::Element {
+                            tag: "span",
+                            attributes: &[],
+                            children: &[Node::Text(Value::Message(Key::ExampleFooterHover))],
+                        },
+                    ],
+                },
+                Node::Component {
+                    name: "FooterLine",
+                    props: &[("kind", Value::Text("prompt"))],
+                    children: &[
+                        Node::Component {
+                            name: "Icon",
+                            props: &[
+                                ("icon", Value::Text("chevron-right")),
+                                ("size", Value::Text("small")),
+                            ],
+                            children: &[],
+                        },
+                        Node::Element {
+                            tag: "span",
+                            attributes: &[],
+                            children: &[Node::Text(Value::Message(Key::ExampleFooterTyped))],
+                        },
+                    ],
+                },
+                Node::Component {
+                    name: "FooterCorner",
+                    props: &[("side", Value::Text("end"))],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
         "option-list",
         r#"OptionList { name: "…", label: "…", empty_label: "…",
     OptionGroup { label: "…",

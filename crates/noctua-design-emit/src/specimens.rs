@@ -568,6 +568,27 @@ fn itself(component: &Component, prop_name: &str, value: &str, caption: &str) ->
                 })
                 .collect(),
         ),
+        // THE LINES AND THE CORNERS COME WITH THE FOOTER. An empty one is a box
+        // with no height, and what `visibility` folds is the three lines.
+        "Footer" => Drawn::names().inside(vec![
+            component_node("FooterCorner", &[("side", text("start"))], &[]),
+            component_node(
+                "FooterLine",
+                &[("kind", text("modeline"))],
+                &[node_text(&data(WORDS[0]))],
+            ),
+            component_node(
+                "FooterLine",
+                &[("kind", text("info"))],
+                &[node_text(&data(WORDS[1]))],
+            ),
+            component_node(
+                "FooterLine",
+                &[("kind", text("prompt"))],
+                &[node_text(&data(WORDS[2]))],
+            ),
+            component_node("FooterCorner", &[("side", text("end"))], &[]),
+        ]),
         "Label" => Drawn::names().prop("text", data(WORDS[0])),
         "List" => Drawn::names().inside(
             WORDS

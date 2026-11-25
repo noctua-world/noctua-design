@@ -168,6 +168,10 @@ pub enum Key {
     PageMenuSummary,
     /// `page.menu.body`
     PageMenuBody,
+    /// `page.footer.summary`
+    PageFooterSummary,
+    /// `page.footer.body`
+    PageFooterBody,
     /// `page.option-list.summary`
     PageOptionListSummary,
     /// `page.option-list.body`
@@ -608,6 +612,12 @@ pub enum Key {
     ComponentMarkSummary,
     /// `component.match-text.summary`
     ComponentMatchTextSummary,
+    /// `component.footer.summary`
+    ComponentFooterSummary,
+    /// `component.footer-corner.summary`
+    ComponentFooterCornerSummary,
+    /// `component.footer-line.summary`
+    ComponentFooterLineSummary,
     /// `component.option-group.summary`
     ComponentOptionGroupSummary,
     /// `component.option-item.summary`
@@ -1342,6 +1352,58 @@ pub enum Key {
     ExampleMarkWord,
     /// `example.mark.search`
     ExampleMarkSearch,
+    /// `example.footer.overview`
+    ExampleFooterOverview,
+    /// `example.footer.lines`
+    ExampleFooterLines,
+    /// `example.footer.auto`
+    ExampleFooterAuto,
+    /// `example.footer.shown`
+    ExampleFooterShown,
+    /// `example.footer.narrow`
+    ExampleFooterNarrow,
+    /// `example.footer-corner.alone`
+    ExampleFooterCornerAlone,
+    /// `example.footer-corner.two`
+    ExampleFooterCornerTwo,
+    /// `example.footer-line.kinds`
+    ExampleFooterLineKinds,
+    /// `example.footer-line.cut`
+    ExampleFooterLineCut,
+    /// `example.footer-line.expanded`
+    ExampleFooterLineExpanded,
+    /// `example.footer-line.live`
+    ExampleFooterLineLive,
+    /// `example.footer-corner.sides`
+    ExampleFooterCornerSides,
+    /// `example.footer-corner.control`
+    ExampleFooterCornerControl,
+    /// `example.footer.label`
+    ExampleFooterLabel,
+    /// `example.footer.sidebar`
+    ExampleFooterSidebar,
+    /// `example.footer.page`
+    ExampleFooterPage,
+    /// `example.footer.offline`
+    ExampleFooterOffline,
+    /// `example.footer.hover`
+    ExampleFooterHover,
+    /// `example.footer.selection`
+    ExampleFooterSelection,
+    /// `example.footer.expand`
+    ExampleFooterExpand,
+    /// `example.footer.collapse`
+    ExampleFooterCollapse,
+    /// `example.footer.notice`
+    ExampleFooterNotice,
+    /// `example.footer.typed`
+    ExampleFooterTyped,
+    /// `example.footer.modeline`
+    ExampleFooterModeline,
+    /// `example.footer.info`
+    ExampleFooterInfo,
+    /// `example.footer.prompt`
+    ExampleFooterPrompt,
     /// `example.option-list.overview`
     ExampleOptionListOverview,
     /// `example.option-list.walk`
@@ -4188,6 +4250,46 @@ pub enum Key {
     ComponentFileInputKeyDeleteOrBackspaceName,
     /// `component.file-input.key.delete-or-backspace.action`
     ComponentFileInputKeyDeleteOrBackspaceAction,
+    /// `component.footer.guidance`
+    ComponentFooterGuidance,
+    /// `component.footer.a11y-notes`
+    ComponentFooterA11yNotes,
+    /// `component.footer.prop.label.doc`
+    ComponentFooterPropLabelDoc,
+    /// `component.footer.prop.visibility.doc`
+    ComponentFooterPropVisibilityDoc,
+    /// `component.footer.prop.shown.doc`
+    ComponentFooterPropShownDoc,
+    /// `component.footer.prop.children.doc`
+    ComponentFooterPropChildrenDoc,
+    /// `component.footer-corner.guidance`
+    ComponentFooterCornerGuidance,
+    /// `component.footer-corner.a11y-notes`
+    ComponentFooterCornerA11yNotes,
+    /// `component.footer-corner.prop.side.doc`
+    ComponentFooterCornerPropSideDoc,
+    /// `component.footer-corner.prop.children.doc`
+    ComponentFooterCornerPropChildrenDoc,
+    /// `component.footer-line.guidance`
+    ComponentFooterLineGuidance,
+    /// `component.footer-line.a11y-notes`
+    ComponentFooterLineA11yNotes,
+    /// `component.footer-line.prop.kind.doc`
+    ComponentFooterLinePropKindDoc,
+    /// `component.footer-line.prop.expandable.doc`
+    ComponentFooterLinePropExpandableDoc,
+    /// `component.footer-line.prop.expanded.doc`
+    ComponentFooterLinePropExpandedDoc,
+    /// `component.footer-line.prop.expand_label.doc`
+    ComponentFooterLinePropExpandLabelDoc,
+    /// `component.footer-line.prop.collapse_label.doc`
+    ComponentFooterLinePropCollapseLabelDoc,
+    /// `component.footer-line.prop.action.doc`
+    ComponentFooterLinePropActionDoc,
+    /// `component.footer-line.prop.live.doc`
+    ComponentFooterLinePropLiveDoc,
+    /// `component.footer-line.prop.children.doc`
+    ComponentFooterLinePropChildrenDoc,
     /// `component.heading.a11y-notes`
     ComponentHeadingA11yNotes,
     /// `component.heading.prop.level.doc`
@@ -6256,7 +6358,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3066] = [
+    pub const ALL: [Self; 3117] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -6281,6 +6383,8 @@ impl Key {
         Self::PageIntroBody,
         Self::PageMenuSummary,
         Self::PageMenuBody,
+        Self::PageFooterSummary,
+        Self::PageFooterBody,
         Self::PageOptionListSummary,
         Self::PageOptionListBody,
         Self::PageTreeSummary,
@@ -6501,6 +6605,9 @@ impl Key {
         Self::ComponentListItemSummary,
         Self::ComponentMarkSummary,
         Self::ComponentMatchTextSummary,
+        Self::ComponentFooterSummary,
+        Self::ComponentFooterCornerSummary,
+        Self::ComponentFooterLineSummary,
         Self::ComponentOptionGroupSummary,
         Self::ComponentOptionItemSummary,
         Self::ComponentOptionListSummary,
@@ -6868,6 +6975,32 @@ impl Key {
         Self::ExampleMarkLead,
         Self::ExampleMarkWord,
         Self::ExampleMarkSearch,
+        Self::ExampleFooterOverview,
+        Self::ExampleFooterLines,
+        Self::ExampleFooterAuto,
+        Self::ExampleFooterShown,
+        Self::ExampleFooterNarrow,
+        Self::ExampleFooterCornerAlone,
+        Self::ExampleFooterCornerTwo,
+        Self::ExampleFooterLineKinds,
+        Self::ExampleFooterLineCut,
+        Self::ExampleFooterLineExpanded,
+        Self::ExampleFooterLineLive,
+        Self::ExampleFooterCornerSides,
+        Self::ExampleFooterCornerControl,
+        Self::ExampleFooterLabel,
+        Self::ExampleFooterSidebar,
+        Self::ExampleFooterPage,
+        Self::ExampleFooterOffline,
+        Self::ExampleFooterHover,
+        Self::ExampleFooterSelection,
+        Self::ExampleFooterExpand,
+        Self::ExampleFooterCollapse,
+        Self::ExampleFooterNotice,
+        Self::ExampleFooterTyped,
+        Self::ExampleFooterModeline,
+        Self::ExampleFooterInfo,
+        Self::ExampleFooterPrompt,
         Self::ExampleOptionListOverview,
         Self::ExampleOptionListWalk,
         Self::ExampleOptionListColumns,
@@ -8291,6 +8424,26 @@ impl Key {
         Self::ComponentFileInputKeyEnterOrSpaceAction,
         Self::ComponentFileInputKeyDeleteOrBackspaceName,
         Self::ComponentFileInputKeyDeleteOrBackspaceAction,
+        Self::ComponentFooterGuidance,
+        Self::ComponentFooterA11yNotes,
+        Self::ComponentFooterPropLabelDoc,
+        Self::ComponentFooterPropVisibilityDoc,
+        Self::ComponentFooterPropShownDoc,
+        Self::ComponentFooterPropChildrenDoc,
+        Self::ComponentFooterCornerGuidance,
+        Self::ComponentFooterCornerA11yNotes,
+        Self::ComponentFooterCornerPropSideDoc,
+        Self::ComponentFooterCornerPropChildrenDoc,
+        Self::ComponentFooterLineGuidance,
+        Self::ComponentFooterLineA11yNotes,
+        Self::ComponentFooterLinePropKindDoc,
+        Self::ComponentFooterLinePropExpandableDoc,
+        Self::ComponentFooterLinePropExpandedDoc,
+        Self::ComponentFooterLinePropExpandLabelDoc,
+        Self::ComponentFooterLinePropCollapseLabelDoc,
+        Self::ComponentFooterLinePropActionDoc,
+        Self::ComponentFooterLinePropLiveDoc,
+        Self::ComponentFooterLinePropChildrenDoc,
         Self::ComponentHeadingA11yNotes,
         Self::ComponentHeadingPropLevelDoc,
         Self::ComponentHeadingPropSizeDoc,
@@ -9353,6 +9506,8 @@ impl Key {
             Self::PageIntroBody => "page.intro.body",
             Self::PageMenuSummary => "page.menu.summary",
             Self::PageMenuBody => "page.menu.body",
+            Self::PageFooterSummary => "page.footer.summary",
+            Self::PageFooterBody => "page.footer.body",
             Self::PageOptionListSummary => "page.option-list.summary",
             Self::PageOptionListBody => "page.option-list.body",
             Self::PageTreeSummary => "page.tree.summary",
@@ -9573,6 +9728,9 @@ impl Key {
             Self::ComponentListItemSummary => "component.list-item.summary",
             Self::ComponentMarkSummary => "component.mark.summary",
             Self::ComponentMatchTextSummary => "component.match-text.summary",
+            Self::ComponentFooterSummary => "component.footer.summary",
+            Self::ComponentFooterCornerSummary => "component.footer-corner.summary",
+            Self::ComponentFooterLineSummary => "component.footer-line.summary",
             Self::ComponentOptionGroupSummary => "component.option-group.summary",
             Self::ComponentOptionItemSummary => "component.option-item.summary",
             Self::ComponentOptionListSummary => "component.option-list.summary",
@@ -9940,6 +10098,32 @@ impl Key {
             Self::ExampleMarkLead => "example.mark.lead",
             Self::ExampleMarkWord => "example.mark.word",
             Self::ExampleMarkSearch => "example.mark.search",
+            Self::ExampleFooterOverview => "example.footer.overview",
+            Self::ExampleFooterLines => "example.footer.lines",
+            Self::ExampleFooterAuto => "example.footer.auto",
+            Self::ExampleFooterShown => "example.footer.shown",
+            Self::ExampleFooterNarrow => "example.footer.narrow",
+            Self::ExampleFooterCornerAlone => "example.footer-corner.alone",
+            Self::ExampleFooterCornerTwo => "example.footer-corner.two",
+            Self::ExampleFooterLineKinds => "example.footer-line.kinds",
+            Self::ExampleFooterLineCut => "example.footer-line.cut",
+            Self::ExampleFooterLineExpanded => "example.footer-line.expanded",
+            Self::ExampleFooterLineLive => "example.footer-line.live",
+            Self::ExampleFooterCornerSides => "example.footer-corner.sides",
+            Self::ExampleFooterCornerControl => "example.footer-corner.control",
+            Self::ExampleFooterLabel => "example.footer.label",
+            Self::ExampleFooterSidebar => "example.footer.sidebar",
+            Self::ExampleFooterPage => "example.footer.page",
+            Self::ExampleFooterOffline => "example.footer.offline",
+            Self::ExampleFooterHover => "example.footer.hover",
+            Self::ExampleFooterSelection => "example.footer.selection",
+            Self::ExampleFooterExpand => "example.footer.expand",
+            Self::ExampleFooterCollapse => "example.footer.collapse",
+            Self::ExampleFooterNotice => "example.footer.notice",
+            Self::ExampleFooterTyped => "example.footer.typed",
+            Self::ExampleFooterModeline => "example.footer.modeline",
+            Self::ExampleFooterInfo => "example.footer.info",
+            Self::ExampleFooterPrompt => "example.footer.prompt",
             Self::ExampleOptionListOverview => "example.option-list.overview",
             Self::ExampleOptionListWalk => "example.option-list.walk",
             Self::ExampleOptionListColumns => "example.option-list.columns",
@@ -11641,6 +11825,34 @@ impl Key {
             Self::ComponentFileInputKeyDeleteOrBackspaceAction => {
                 "component.file-input.key.delete-or-backspace.action"
             }
+            Self::ComponentFooterGuidance => "component.footer.guidance",
+            Self::ComponentFooterA11yNotes => "component.footer.a11y-notes",
+            Self::ComponentFooterPropLabelDoc => "component.footer.prop.label.doc",
+            Self::ComponentFooterPropVisibilityDoc => "component.footer.prop.visibility.doc",
+            Self::ComponentFooterPropShownDoc => "component.footer.prop.shown.doc",
+            Self::ComponentFooterPropChildrenDoc => "component.footer.prop.children.doc",
+            Self::ComponentFooterCornerGuidance => "component.footer-corner.guidance",
+            Self::ComponentFooterCornerA11yNotes => "component.footer-corner.a11y-notes",
+            Self::ComponentFooterCornerPropSideDoc => "component.footer-corner.prop.side.doc",
+            Self::ComponentFooterCornerPropChildrenDoc => {
+                "component.footer-corner.prop.children.doc"
+            }
+            Self::ComponentFooterLineGuidance => "component.footer-line.guidance",
+            Self::ComponentFooterLineA11yNotes => "component.footer-line.a11y-notes",
+            Self::ComponentFooterLinePropKindDoc => "component.footer-line.prop.kind.doc",
+            Self::ComponentFooterLinePropExpandableDoc => {
+                "component.footer-line.prop.expandable.doc"
+            }
+            Self::ComponentFooterLinePropExpandedDoc => "component.footer-line.prop.expanded.doc",
+            Self::ComponentFooterLinePropExpandLabelDoc => {
+                "component.footer-line.prop.expand_label.doc"
+            }
+            Self::ComponentFooterLinePropCollapseLabelDoc => {
+                "component.footer-line.prop.collapse_label.doc"
+            }
+            Self::ComponentFooterLinePropActionDoc => "component.footer-line.prop.action.doc",
+            Self::ComponentFooterLinePropLiveDoc => "component.footer-line.prop.live.doc",
+            Self::ComponentFooterLinePropChildrenDoc => "component.footer-line.prop.children.doc",
             Self::ComponentHeadingA11yNotes => "component.heading.a11y-notes",
             Self::ComponentHeadingPropLevelDoc => "component.heading.prop.level.doc",
             Self::ComponentHeadingPropSizeDoc => "component.heading.prop.size.doc",
@@ -13015,6 +13227,12 @@ impl Locale {
                 Key::PageMenuBody => {
                     "A menu and its items. The button that opens one is a `Button` with `menu` and `controls`. Everything after the press is `dist/menu.js`: the anchoring, the arrow walk, the letter that jumps, Escape, and the focus returning to the button."
                 }
+                Key::PageFooterSummary => {
+                    "Hold the lines a window keeps at its bottom edge, with a corner at each end."
+                }
+                Key::PageFooterBody => {
+                    "The footer, one line of it, and one corner. The lines are told apart by shade and no border is drawn. A corner is as tall as all the lines together. The footer ships no script."
+                }
                 Key::PageOptionListSummary => {
                     "Let users walk a list of options with the keyboard and choose one."
                 }
@@ -13398,6 +13616,15 @@ impl Locale {
                 }
                 Key::ComponentMatchTextSummary => {
                     "Show a name with the characters a query matched marked, one style for each word of the query."
+                }
+                Key::ComponentFooterSummary => {
+                    "Hold the lines a window keeps at its bottom edge, with a corner at each end."
+                }
+                Key::ComponentFooterCornerSummary => {
+                    "Place a corner at one end of a footer, as tall as all its lines."
+                }
+                Key::ComponentFooterLineSummary => {
+                    "Place one line in a footer: controls, status, or the line to type in."
                 }
                 Key::ComponentOptionGroupSummary => "Name a run of options inside an option list.",
                 Key::ComponentOptionItemSummary => {
@@ -14070,6 +14297,60 @@ impl Locale {
                 Key::ExampleMarkSearch => {
                     "The weight changes as well as the background, so a hit can be found without relying on colour."
                 }
+                Key::ExampleFooterOverview => {
+                    "Three lines and two corners, told apart by shade alone. The middle line is cut to fit, and the control at its end expands it."
+                }
+                Key::ExampleFooterLines => {
+                    "The lines stack in the order they are written. No border is drawn between them."
+                }
+                Key::ExampleFooterAuto => {
+                    "`auto` folds the footer to a strip along its edge. Point at the strip, or move the focus into it, and it opens."
+                }
+                Key::ExampleFooterShown => {
+                    "`shown` opens a folded footer from outside it, for a key pressed elsewhere in the window."
+                }
+                Key::ExampleFooterNarrow => {
+                    "In a narrow window the lines keep their height. What does not fit on a line is cut at its end."
+                }
+                Key::ExampleFooterCornerAlone => {
+                    "A footer with one corner gives its lines the room of the other."
+                }
+                Key::ExampleFooterCornerTwo => {
+                    "Two controls stand one above the other. A corner is cut at the footer's height."
+                }
+                Key::ExampleFooterLineKinds => {
+                    "Each kind has its own shade. `prompt` has the page's own."
+                }
+                Key::ExampleFooterLineCut => {
+                    "Content longer than the line is cut. The control at the end shows under a pointer or the focus."
+                }
+                Key::ExampleFooterLineExpanded => {
+                    "Expanded, the line wraps and grows, and the control stays showing."
+                }
+                Key::ExampleFooterLineLive => {
+                    "`live` makes the content a `role=\"status\"`, so a notice is announced when it arrives."
+                }
+                Key::ExampleFooterCornerSides => {
+                    "A corner is as wide as a rail and as tall as the footer."
+                }
+                Key::ExampleFooterCornerControl => {
+                    "A control in a corner shows its icon and keeps its name."
+                }
+                Key::ExampleFooterLabel => "Window footer",
+                Key::ExampleFooterSidebar => "Open the sidebar",
+                Key::ExampleFooterPage => "Registries",
+                Key::ExampleFooterOffline => "Offline",
+                Key::ExampleFooterHover => {
+                    "Closes the focused page and returns the focus to the page before it."
+                }
+                Key::ExampleFooterSelection => "Opens the settings, one page for each setting.",
+                Key::ExampleFooterExpand => "Show all of it",
+                Key::ExampleFooterCollapse => "Show one line",
+                Key::ExampleFooterNotice => "The setting was saved.",
+                Key::ExampleFooterTyped => "close the page",
+                Key::ExampleFooterModeline => "Modeline",
+                Key::ExampleFooterInfo => "Info line",
+                Key::ExampleFooterPrompt => "Prompt line",
                 Key::ExampleOptionListOverview => {
                     "The words `win clo` were typed. Each row marks what each word matched on its name, and the bar is where the keyboard is."
                 }
@@ -17091,6 +17372,66 @@ impl Locale {
                 Key::ComponentFileInputKeyDeleteOrBackspaceAction => {
                     "Removes the file whose remove control has focus."
                 }
+                Key::ComponentFooterGuidance => {
+                    "Use a footer for the lines an application window keeps at its bottom edge. They are a line of controls, a line of status and a line to type in. For the controls of one page, use `Toolbar`."
+                }
+                Key::ComponentFooterA11yNotes => {
+                    "The footer is a `<footer>` with `role=\"group\"`, named by `label`. A folded footer stays in the tab order, and it opens when the focus enters it, so no focused control is hidden. It opens in the flow of the page and covers nothing."
+                }
+                Key::ComponentFooterPropLabelDoc => {
+                    "The name of the footer, in the reader's language. It becomes `aria-label` on the `group`. Required."
+                }
+                Key::ComponentFooterPropVisibilityDoc => {
+                    "When the footer shows: `always`, or `auto`, which folds it to a strip along its edge. The strip opens under a pointer, while the focus is inside it, and while `shown` is set."
+                }
+                Key::ComponentFooterPropShownDoc => {
+                    "Whether a folded footer is open. The caller sets it for what the footer cannot see, such as a key pressed elsewhere or a pointer at the window's edge. Needs `auto`."
+                }
+                Key::ComponentFooterPropChildrenDoc => {
+                    "The lines, top to bottom, and the corners: `FooterLine`s and up to two `FooterCorner`s."
+                }
+                Key::ComponentFooterCornerGuidance => {
+                    "Use a footer corner for the square at one end of a `Footer`. It holds controls that show an icon and no words, or nothing at all."
+                }
+                Key::ComponentFooterCornerA11yNotes => {
+                    "The corner has no role, so an empty corner is not announced. A control inside it is a `Button` with its own name."
+                }
+                Key::ComponentFooterCornerPropSideDoc => {
+                    "Which end of the footer the corner stands at: `start` or `end`. A footer holds one corner at each end at most."
+                }
+                Key::ComponentFooterCornerPropChildrenDoc => {
+                    "The controls in the corner. Each is a `Button` with `hide_label`, so each has a name and shows only its icon."
+                }
+                Key::ComponentFooterLineGuidance => {
+                    "Use a footer line for one line of a `Footer`. `kind` says which of the three it is, and the kind decides its shade and whether it stays one line tall."
+                }
+                Key::ComponentFooterLineA11yNotes => {
+                    "The expanding control is a real `<button>` with `aria-expanded`, written as `true` or `false`. It is at least 24 pixels square, as WCAG 2.5.8 asks. With `live`, the content is a `role=\"status\"`, and the control stays outside it."
+                }
+                Key::ComponentFooterLinePropKindDoc => {
+                    "Which line this is: `modeline`, for controls, `info`, for status, or `prompt`, for the line to type in. Each has its own shade, and `prompt` has the page's own."
+                }
+                Key::ComponentFooterLinePropExpandableDoc => {
+                    "Whether the line ends in a control that expands it. The control shows while a pointer is over the line or the focus is inside it. On a touch screen it always shows."
+                }
+                Key::ComponentFooterLinePropExpandedDoc => {
+                    "Whether the line wraps and grows to show all its content. Off, the line is one line tall and its content is cut to fit."
+                }
+                Key::ComponentFooterLinePropExpandLabelDoc => {
+                    "The name of the control while the line is one line tall, such as *Show all*. Wanted in practice by `expandable`."
+                }
+                Key::ComponentFooterLinePropCollapseLabelDoc => {
+                    "The name of the control while the line is expanded, such as *Show less*. Wanted in practice by `expandable`."
+                }
+                Key::ComponentFooterLinePropActionDoc => {
+                    "What a script finds the expanding control by. It becomes `data-nd-action` on that control."
+                }
+                Key::ComponentFooterLinePropLiveDoc => {
+                    "Whether a change to the line's content is announced. On, the content is a `role=\"status\"`. Turn it on for a line that shows notices, and leave it off for one that follows a pointer."
+                }
+                Key::ComponentFooterLinePropChildrenDoc => {
+                    "What the line holds. Every drawing in it is an `Icon`."
+                }
                 Key::ComponentHeadingA11yNotes => {
                     "The level must not skip. An `<h2>` followed by an `<h4>` leaves a gap in the outline a screen reader navigates by. Choose the level from the document and the size from the design."
                 }
@@ -19919,6 +20260,12 @@ impl Locale {
                 Key::PageMenuBody => {
                     "Um menu e os itens dele. O botão que abre um menu é um `Button` com `menu` e `controls`. Tudo depois do toque é o `dist/menu.js`: a ancoragem, o caminho das setas, a letra que salta, o Esc e o foco voltando para o botão."
                 }
+                Key::PageFooterSummary => {
+                    "Mantenha as linhas que uma janela guarda na borda de baixo, com um canto em cada ponta."
+                }
+                Key::PageFooterBody => {
+                    "O rodapé, uma linha dele e um canto. As linhas se distinguem pelo tom e nenhuma borda é desenhada. Um canto tem a altura de todas as linhas juntas. O rodapé não traz script."
+                }
                 Key::PageOptionListSummary => {
                     "Deixe a pessoa percorrer uma lista de opções com o teclado e escolher uma."
                 }
@@ -20312,6 +20659,15 @@ impl Locale {
                 }
                 Key::ComponentMatchTextSummary => {
                     "Mostre um nome com os caracteres casados por uma consulta marcados, um estilo por palavra."
+                }
+                Key::ComponentFooterSummary => {
+                    "Mantenha as linhas que uma janela guarda na borda de baixo, com um canto em cada ponta."
+                }
+                Key::ComponentFooterCornerSummary => {
+                    "Ponha um canto numa ponta de um rodapé, com a altura de todas as linhas dele."
+                }
+                Key::ComponentFooterLineSummary => {
+                    "Ponha uma linha num rodapé: controles, estado ou a linha para digitar."
                 }
                 Key::ComponentOptionGroupSummary => {
                     "Dê nome a um grupo de opções dentro de uma lista de opções."
@@ -20994,6 +21350,62 @@ impl Locale {
                 Key::ExampleMarkSearch => {
                     "O peso muda além do fundo, então uma ocorrência pode ser encontrada sem depender da cor."
                 }
+                Key::ExampleFooterOverview => {
+                    "Três linhas e dois cantos, distinguidos só pelo tom. A linha do meio é cortada para caber, e o controle no fim dela a expande."
+                }
+                Key::ExampleFooterLines => {
+                    "As linhas se empilham na ordem em que são escritas. Nenhuma borda é desenhada entre elas."
+                }
+                Key::ExampleFooterAuto => {
+                    "`auto` dobra o rodapé numa faixa junto à borda. Aponte para a faixa, ou leve o foco para dentro dela, e ele abre."
+                }
+                Key::ExampleFooterShown => {
+                    "`shown` abre de fora um rodapé dobrado, para uma tecla pressionada em outro ponto da janela."
+                }
+                Key::ExampleFooterNarrow => {
+                    "Numa janela estreita as linhas mantêm a altura. O que não cabe numa linha é cortado no fim dela."
+                }
+                Key::ExampleFooterCornerAlone => {
+                    "Um rodapé com um canto só dá às linhas o espaço do outro."
+                }
+                Key::ExampleFooterCornerTwo => {
+                    "Dois controles ficam um acima do outro. Um canto é cortado na altura do rodapé."
+                }
+                Key::ExampleFooterLineKinds => {
+                    "Cada tipo tem o próprio tom. `prompt` tem o da página."
+                }
+                Key::ExampleFooterLineCut => {
+                    "O conteúdo mais longo que a linha é cortado. O controle no fim aparece sob um ponteiro ou com o foco."
+                }
+                Key::ExampleFooterLineExpanded => {
+                    "Expandida, a linha quebra e cresce, e o controle continua à mostra."
+                }
+                Key::ExampleFooterLineLive => {
+                    "`live` faz do conteúdo um `role=\"status\"`, então um aviso é anunciado quando chega."
+                }
+                Key::ExampleFooterCornerSides => {
+                    "Um canto tem a largura de um trilho e a altura do rodapé."
+                }
+                Key::ExampleFooterCornerControl => {
+                    "Um controle num canto mostra o ícone e mantém o nome."
+                }
+                Key::ExampleFooterLabel => "Rodapé da janela",
+                Key::ExampleFooterSidebar => "Abrir a barra lateral",
+                Key::ExampleFooterPage => "Registros",
+                Key::ExampleFooterOffline => "Sem conexão",
+                Key::ExampleFooterHover => {
+                    "Fecha a página em foco e devolve o foco para a página anterior."
+                }
+                Key::ExampleFooterSelection => {
+                    "Abre as configurações, uma página para cada configuração."
+                }
+                Key::ExampleFooterExpand => "Mostrar tudo",
+                Key::ExampleFooterCollapse => "Mostrar uma linha",
+                Key::ExampleFooterNotice => "A configuração foi salva.",
+                Key::ExampleFooterTyped => "fechar a página",
+                Key::ExampleFooterModeline => "Linha de modo",
+                Key::ExampleFooterInfo => "Linha de informação",
+                Key::ExampleFooterPrompt => "Linha de comando",
                 Key::ExampleOptionListOverview => {
                     "As palavras `win clo` foram digitadas. Cada linha marca o que cada palavra casou no nome, e a barra é onde o teclado está."
                 }
@@ -24039,6 +24451,66 @@ impl Locale {
                 Key::ComponentFileInputKeyDeleteOrBackspaceAction => {
                     "Remove o arquivo cujo controle de remover está com o foco."
                 }
+                Key::ComponentFooterGuidance => {
+                    "Use um rodapé para as linhas que a janela de um aplicativo mantém na borda de baixo. São uma linha de controles, uma de estado e uma para digitar. Para os controles de uma página, use `Toolbar`."
+                }
+                Key::ComponentFooterA11yNotes => {
+                    "O rodapé é um `<footer>` com `role=\"group\"`, nomeado por `label`. Um rodapé dobrado continua na ordem de tabulação e abre quando o foco entra nele, então nenhum controle em foco fica escondido. Ele abre no fluxo da página e não cobre nada."
+                }
+                Key::ComponentFooterPropLabelDoc => {
+                    "O nome do rodapé, no idioma da pessoa. Vira `aria-label` no `group`. Obrigatório."
+                }
+                Key::ComponentFooterPropVisibilityDoc => {
+                    "Quando o rodapé aparece: `always`, ou `auto`, que o dobra numa faixa junto à borda. A faixa abre sob um ponteiro, enquanto o foco está dentro dela e enquanto `shown` está ligado."
+                }
+                Key::ComponentFooterPropShownDoc => {
+                    "Se um rodapé dobrado está aberto. Quem chama liga para o que o rodapé não vê, como uma tecla pressionada em outro lugar ou um ponteiro na borda da janela. Precisa de `auto`."
+                }
+                Key::ComponentFooterPropChildrenDoc => {
+                    "As linhas, de cima para baixo, e os cantos: `FooterLine`s e até dois `FooterCorner`s."
+                }
+                Key::ComponentFooterCornerGuidance => {
+                    "Use um canto de rodapé para o quadrado numa ponta de um `Footer`. Ele contém controles que mostram um ícone e nenhuma palavra, ou nada."
+                }
+                Key::ComponentFooterCornerA11yNotes => {
+                    "O canto não tem papel, então um canto vazio não é anunciado. Um controle dentro dele é um `Button` com o próprio nome."
+                }
+                Key::ComponentFooterCornerPropSideDoc => {
+                    "Em qual ponta do rodapé o canto fica: `start` ou `end`. Um rodapé tem no máximo um canto em cada ponta."
+                }
+                Key::ComponentFooterCornerPropChildrenDoc => {
+                    "Os controles no canto. Cada um é um `Button` com `hide_label`, então cada um tem nome e mostra só o ícone."
+                }
+                Key::ComponentFooterLineGuidance => {
+                    "Use uma linha de rodapé para uma linha de um `Footer`. `kind` diz qual das três ela é, e o tipo decide o tom dela e se ela fica com uma linha de altura."
+                }
+                Key::ComponentFooterLineA11yNotes => {
+                    "O controle que expande é um `<button>` de verdade com `aria-expanded`, escrito como `true` ou `false`. Ele tem pelo menos 24 pixels de lado, como pede a WCAG 2.5.8. Com `live`, o conteúdo é um `role=\"status\"`, e o controle fica fora dele."
+                }
+                Key::ComponentFooterLinePropKindDoc => {
+                    "Qual linha é esta: `modeline`, para controles, `info`, para estado, ou `prompt`, para a linha de digitar. Cada uma tem o próprio tom, e `prompt` tem o da página."
+                }
+                Key::ComponentFooterLinePropExpandableDoc => {
+                    "Se a linha termina num controle que a expande. O controle aparece enquanto um ponteiro está sobre a linha ou o foco está dentro dela. Numa tela de toque ele aparece sempre."
+                }
+                Key::ComponentFooterLinePropExpandedDoc => {
+                    "Se a linha quebra e cresce para mostrar todo o conteúdo. Desligado, a linha tem uma linha de altura e o conteúdo é cortado para caber."
+                }
+                Key::ComponentFooterLinePropExpandLabelDoc => {
+                    "O nome do controle enquanto a linha tem uma linha de altura, como *Mostrar tudo*. Na prática, `expandable` pede este."
+                }
+                Key::ComponentFooterLinePropCollapseLabelDoc => {
+                    "O nome do controle enquanto a linha está expandida, como *Mostrar menos*. Na prática, `expandable` pede este."
+                }
+                Key::ComponentFooterLinePropActionDoc => {
+                    "Como um script encontra o controle que expande. Vira `data-nd-action` nesse controle."
+                }
+                Key::ComponentFooterLinePropLiveDoc => {
+                    "Se uma mudança no conteúdo da linha é anunciada. Ligado, o conteúdo é um `role=\"status\"`. Ligue numa linha que mostra avisos, e deixe desligado numa que segue um ponteiro."
+                }
+                Key::ComponentFooterLinePropChildrenDoc => {
+                    "O que a linha contém. Todo desenho nela é um `Icon`."
+                }
                 Key::ComponentHeadingA11yNotes => {
                     "O nível não pode pular. Um `<h2>` seguido de um `<h4>` deixa um buraco no sumário pelo qual um leitor de tela navega. Escolha o nível pelo documento e o tamanho pelo desenho."
                 }
@@ -26881,6 +27353,12 @@ impl Locale {
                 Key::PageMenuBody => {
                     "⟦AA meenuu aand iits iiteems. Thee buuttoon thaat oopeens oonee iis aa `Buuttoon` wiith `meenuu` aand `coontrools`. EEveerythiing aafteer thee preess iis `diist/meenuu.js`: thee aanchooriing, thee aarroow waalk, thee leetteer thaat juumps, EEscaapee, aand thee foocuus reetuurniing too thee buuttoon.⟧"
                 }
+                Key::PageFooterSummary => {
+                    "⟦Hoold thee liinees aa wiindoow keeeeps aat iits boottoom eedgee, wiith aa coorneer aat eeaach eend.⟧"
+                }
+                Key::PageFooterBody => {
+                    "⟦Thee fooooteer, oonee liinee oof iit, aand oonee coorneer. Thee liinees aaree toold aapaart by shaadee aand noo boordeer iis draawn. AA coorneer iis aas taall aas aall thee liinees toogeetheer. Thee fooooteer shiips noo scriipt.⟧"
+                }
                 Key::PageOptionListSummary => {
                     "⟦Leet uuseers waalk aa liist oof ooptiioons wiith thee keeybooaard aand choooosee oonee.⟧"
                 }
@@ -27294,6 +27772,15 @@ impl Locale {
                 }
                 Key::ComponentMatchTextSummary => {
                     "⟦Shoow aa naamee wiith thee chaaraacteers aa quueery maatcheed maarkeed, oonee stylee foor eeaach woord oof thee quueery.⟧"
+                }
+                Key::ComponentFooterSummary => {
+                    "⟦Hoold thee liinees aa wiindoow keeeeps aat iits boottoom eedgee, wiith aa coorneer aat eeaach eend.⟧"
+                }
+                Key::ComponentFooterCornerSummary => {
+                    "⟦Plaacee aa coorneer aat oonee eend oof aa fooooteer, aas taall aas aall iits liinees.⟧"
+                }
+                Key::ComponentFooterLineSummary => {
+                    "⟦Plaacee oonee liinee iin aa fooooteer: coontrools, staatuus, oor thee liinee too typee iin.⟧"
                 }
                 Key::ComponentOptionGroupSummary => {
                     "⟦Naamee aa ruun oof ooptiioons iinsiidee aan ooptiioon liist.⟧"
@@ -27990,6 +28477,62 @@ impl Locale {
                 Key::ExampleMarkSearch => {
                     "⟦Thee weeiight chaangees aas weell aas thee baackgroouund, soo aa hiit caan bee foouund wiithoouut reelyiing oon cooloouur.⟧"
                 }
+                Key::ExampleFooterOverview => {
+                    "⟦Threeee liinees aand twoo coorneers, toold aapaart by shaadee aaloonee. Thee miiddlee liinee iis cuut too fiit, aand thee coontrool aat iits eend eexpaands iit.⟧"
+                }
+                Key::ExampleFooterLines => {
+                    "⟦Thee liinees staack iin thee oordeer theey aaree wriitteen. Noo boordeer iis draawn beetweeeen theem.⟧"
+                }
+                Key::ExampleFooterAuto => {
+                    "⟦`aauutoo` foolds thee fooooteer too aa striip aaloong iits eedgee. Pooiint aat thee striip, oor moovee thee foocuus iintoo iit, aand iit oopeens.⟧"
+                }
+                Key::ExampleFooterShown => {
+                    "⟦`shoown` oopeens aa fooldeed fooooteer froom oouutsiidee iit, foor aa keey preesseed eelseewheeree iin thee wiindoow.⟧"
+                }
+                Key::ExampleFooterNarrow => {
+                    "⟦IIn aa naarroow wiindoow thee liinees keeeep theeiir heeiight. Whaat dooees noot fiit oon aa liinee iis cuut aat iits eend.⟧"
+                }
+                Key::ExampleFooterCornerAlone => {
+                    "⟦AA fooooteer wiith oonee coorneer giivees iits liinees thee roooom oof thee ootheer.⟧"
+                }
+                Key::ExampleFooterCornerTwo => {
+                    "⟦Twoo coontrools staand oonee aaboovee thee ootheer. AA coorneer iis cuut aat thee fooooteer's heeiight.⟧"
+                }
+                Key::ExampleFooterLineKinds => {
+                    "⟦EEaach kiind haas iits oown shaadee. `proompt` haas thee paagee's oown.⟧"
+                }
+                Key::ExampleFooterLineCut => {
+                    "⟦Coonteent loongeer thaan thee liinee iis cuut. Thee coontrool aat thee eend shoows uundeer aa pooiinteer oor thee foocuus.⟧"
+                }
+                Key::ExampleFooterLineExpanded => {
+                    "⟦EExpaandeed, thee liinee wraaps aand groows, aand thee coontrool staays shoowiing.⟧"
+                }
+                Key::ExampleFooterLineLive => {
+                    "⟦`liivee` maakees thee coonteent aa `roolee=\"staatuus\"`, soo aa nootiicee iis aannoouunceed wheen iit aarriivees.⟧"
+                }
+                Key::ExampleFooterCornerSides => {
+                    "⟦AA coorneer iis aas wiidee aas aa raaiil aand aas taall aas thee fooooteer.⟧"
+                }
+                Key::ExampleFooterCornerControl => {
+                    "⟦AA coontrool iin aa coorneer shoows iits iicoon aand keeeeps iits naamee.⟧"
+                }
+                Key::ExampleFooterLabel => "⟦Wiindoow fooooteer⟧",
+                Key::ExampleFooterSidebar => "⟦OOpeen thee siideebaar⟧",
+                Key::ExampleFooterPage => "⟦Reegiistriiees⟧",
+                Key::ExampleFooterOffline => "⟦OOffliinee⟧",
+                Key::ExampleFooterHover => {
+                    "⟦Cloosees thee foocuuseed paagee aand reetuurns thee foocuus too thee paagee beefooree iit.⟧"
+                }
+                Key::ExampleFooterSelection => {
+                    "⟦OOpeens thee seettiings, oonee paagee foor eeaach seettiing.⟧"
+                }
+                Key::ExampleFooterExpand => "⟦Shoow aall oof iit⟧",
+                Key::ExampleFooterCollapse => "⟦Shoow oonee liinee⟧",
+                Key::ExampleFooterNotice => "⟦Thee seettiing waas saaveed.⟧",
+                Key::ExampleFooterTyped => "⟦cloosee thee paagee⟧",
+                Key::ExampleFooterModeline => "⟦Moodeeliinee⟧",
+                Key::ExampleFooterInfo => "⟦IInfoo liinee⟧",
+                Key::ExampleFooterPrompt => "⟦Proompt liinee⟧",
                 Key::ExampleOptionListOverview => {
                     "⟦Thee woords `wiin cloo` weeree typeed. EEaach roow maarks whaat eeaach woord maatcheed oon iits naamee, aand thee baar iis wheeree thee keeybooaard iis.⟧"
                 }
@@ -31126,6 +31669,66 @@ impl Locale {
                 Key::ComponentFileInputKeyDeleteOrBackspaceName => "⟦Deeleetee oor Baackspaacee⟧",
                 Key::ComponentFileInputKeyDeleteOrBackspaceAction => {
                     "⟦Reemoovees thee fiilee whoosee reemoovee coontrool haas foocuus.⟧"
+                }
+                Key::ComponentFooterGuidance => {
+                    "⟦UUsee aa fooooteer foor thee liinees aan aappliicaatiioon wiindoow keeeeps aat iits boottoom eedgee. Theey aaree aa liinee oof coontrools, aa liinee oof staatuus aand aa liinee too typee iin. Foor thee coontrools oof oonee paagee, uusee `Toooolbaar`.⟧"
+                }
+                Key::ComponentFooterA11yNotes => {
+                    "⟦Thee fooooteer iis aa `<fooooteer>` wiith `roolee=\"groouup\"`, naameed by `laabeel`. AA fooldeed fooooteer staays iin thee taab oordeer, aand iit oopeens wheen thee foocuus eenteers iit, soo noo foocuuseed coontrool iis hiiddeen. IIt oopeens iin thee floow oof thee paagee aand cooveers noothiing.⟧"
+                }
+                Key::ComponentFooterPropLabelDoc => {
+                    "⟦Thee naamee oof thee fooooteer, iin thee reeaadeer's laanguuaagee. IIt beecoomees `aariiaa-laabeel` oon thee `groouup`. Reequuiireed.⟧"
+                }
+                Key::ComponentFooterPropVisibilityDoc => {
+                    "⟦Wheen thee fooooteer shoows: `aalwaays`, oor `aauutoo`, whiich foolds iit too aa striip aaloong iits eedgee. Thee striip oopeens uundeer aa pooiinteer, whiilee thee foocuus iis iinsiidee iit, aand whiilee `shoown` iis seet.⟧"
+                }
+                Key::ComponentFooterPropShownDoc => {
+                    "⟦Wheetheer aa fooldeed fooooteer iis oopeen. Thee caalleer seets iit foor whaat thee fooooteer caannoot seeee, suuch aas aa keey preesseed eelseewheeree oor aa pooiinteer aat thee wiindoow's eedgee. Neeeeds `aauutoo`.⟧"
+                }
+                Key::ComponentFooterPropChildrenDoc => {
+                    "⟦Thee liinees, toop too boottoom, aand thee coorneers: `FooooteerLiinee`s aand uup too twoo `FooooteerCoorneer`s.⟧"
+                }
+                Key::ComponentFooterCornerGuidance => {
+                    "⟦UUsee aa fooooteer coorneer foor thee squuaaree aat oonee eend oof aa `Fooooteer`. IIt hoolds coontrools thaat shoow aan iicoon aand noo woords, oor noothiing aat aall.⟧"
+                }
+                Key::ComponentFooterCornerA11yNotes => {
+                    "⟦Thee coorneer haas noo roolee, soo aan eempty coorneer iis noot aannoouunceed. AA coontrool iinsiidee iit iis aa `Buuttoon` wiith iits oown naamee.⟧"
+                }
+                Key::ComponentFooterCornerPropSideDoc => {
+                    "⟦Whiich eend oof thee fooooteer thee coorneer staands aat: `staart` oor `eend`. AA fooooteer hoolds oonee coorneer aat eeaach eend aat moost.⟧"
+                }
+                Key::ComponentFooterCornerPropChildrenDoc => {
+                    "⟦Thee coontrools iin thee coorneer. EEaach iis aa `Buuttoon` wiith `hiidee_laabeel`, soo eeaach haas aa naamee aand shoows oonly iits iicoon.⟧"
+                }
+                Key::ComponentFooterLineGuidance => {
+                    "⟦UUsee aa fooooteer liinee foor oonee liinee oof aa `Fooooteer`. `kiind` saays whiich oof thee threeee iit iis, aand thee kiind deeciidees iits shaadee aand wheetheer iit staays oonee liinee taall.⟧"
+                }
+                Key::ComponentFooterLineA11yNotes => {
+                    "⟦Thee eexpaandiing coontrool iis aa reeaal `<buuttoon>` wiith `aariiaa-eexpaandeed`, wriitteen aas `truuee` oor `faalsee`. IIt iis aat leeaast 24 piixeels squuaaree, aas WCAAG 2.5.8 aasks. Wiith `liivee`, thee coonteent iis aa `roolee=\"staatuus\"`, aand thee coontrool staays oouutsiidee iit.⟧"
+                }
+                Key::ComponentFooterLinePropKindDoc => {
+                    "⟦Whiich liinee thiis iis: `moodeeliinee`, foor coontrools, `iinfoo`, foor staatuus, oor `proompt`, foor thee liinee too typee iin. EEaach haas iits oown shaadee, aand `proompt` haas thee paagee's oown.⟧"
+                }
+                Key::ComponentFooterLinePropExpandableDoc => {
+                    "⟦Wheetheer thee liinee eends iin aa coontrool thaat eexpaands iit. Thee coontrool shoows whiilee aa pooiinteer iis ooveer thee liinee oor thee foocuus iis iinsiidee iit. OOn aa toouuch screeeen iit aalwaays shoows.⟧"
+                }
+                Key::ComponentFooterLinePropExpandedDoc => {
+                    "⟦Wheetheer thee liinee wraaps aand groows too shoow aall iits coonteent. OOff, thee liinee iis oonee liinee taall aand iits coonteent iis cuut too fiit.⟧"
+                }
+                Key::ComponentFooterLinePropExpandLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool whiilee thee liinee iis oonee liinee taall, suuch aas *Shoow aall*. Waanteed iin praactiicee by `eexpaandaablee`.⟧"
+                }
+                Key::ComponentFooterLinePropCollapseLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool whiilee thee liinee iis eexpaandeed, suuch aas *Shoow leess*. Waanteed iin praactiicee by `eexpaandaablee`.⟧"
+                }
+                Key::ComponentFooterLinePropActionDoc => {
+                    "⟦Whaat aa scriipt fiinds thee eexpaandiing coontrool by. IIt beecoomees `daataa-nd-aactiioon` oon thaat coontrool.⟧"
+                }
+                Key::ComponentFooterLinePropLiveDoc => {
+                    "⟦Wheetheer aa chaangee too thee liinee's coonteent iis aannoouunceed. OOn, thee coonteent iis aa `roolee=\"staatuus\"`. Tuurn iit oon foor aa liinee thaat shoows nootiicees, aand leeaavee iit ooff foor oonee thaat foolloows aa pooiinteer.⟧"
+                }
+                Key::ComponentFooterLinePropChildrenDoc => {
+                    "⟦Whaat thee liinee hoolds. EEveery draawiing iin iit iis aan `IIcoon`.⟧"
                 }
                 Key::ComponentHeadingA11yNotes => {
                     "⟦Thee leeveel muust noot skiip. AAn `<h2>` foollooweed by aan `<h4>` leeaavees aa gaap iin thee oouutliinee aa screeeen reeaadeer naaviigaatees by. Choooosee thee leeveel froom thee doocuumeent aand thee siizee froom thee deesiign.⟧"

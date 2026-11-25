@@ -1586,6 +1586,27 @@ a {
   inline-size: min(var(--noctua-space-64), 100%);
 }
 
+/* The far end of a footer line: the items an application's own layout pushes
+   to the end of its modeline. The design system ships no layout for it, so the
+   example carries the one rule an application would write. */
+.nd-example-end {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  margin-inline-start: auto;
+}
+
+/* A glyph and the sentence it marks, kept together when a line wraps. It
+   keeps its own width, so a line of one line cuts it at the line's end, and it
+   is never wider than the line, so an expanded line wraps the sentence. */
+.nd-example-run {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  max-inline-size: 100%;
+}
+
 /* A row inside one example — several controls that only mean something beside
    each other. Centred rather than baseline-aligned: these are boxes, and boxes
    of three different heights on one baseline read as three mistakes. */

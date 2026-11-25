@@ -172,13 +172,19 @@ const SWEEP = ([SCROLLS_SOURCE, CONTROLS_SELECTOR, BLOCKS_SOURCE]) => {
     // 1. TEXT CUT OFF BY A BOX THAT DOES NOT SCROLL. `Truncate` and the code
     //    block clip on purpose and say so with a line clamp; everything else
     //    that clips is losing a word.
+    //
+    //    A FOOTER LINE CLIPS ON PURPOSE TOO, and has no property to say so
+    //    with: it is a row of controls and glyphs, and neither a clamp nor an
+    //    ellipsis applies to a row. `NOCTUA.md §12.6` asks for the cut, and
+    //    `footer.spec.js` holds it to one line and to the line's own end.
     if (
       scrolls.test(style.overflowX) &&
       style.overflowX !== "auto" &&
       style.overflowX !== "scroll" &&
       el.scrollWidth > el.clientWidth + 1 &&
       style.webkitLineClamp === "none" &&
-      style.textOverflow !== "ellipsis"
+      style.textOverflow !== "ellipsis" &&
+      !el.matches(".nd-footer-line-content")
     ) {
       out.push(`clipped: ${where(el)} (${el.scrollWidth} in ${el.clientWidth})`);
     }
