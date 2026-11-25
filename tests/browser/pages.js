@@ -261,6 +261,10 @@ export const PAGE = {
   // caller's sentences in it run longest in `qps`, so the width x locale sweep
   // has a row here that must break rather than spill.
   keyCapture: "key-capture/",
+  // The log. On this list because it is the one region whose height is the
+  // box around it and whose scroll position a script keeps at the end, so the
+  // width x locale sweep has lines here that must wrap inside a window.
+  log: "log/",
 };
 
 /**

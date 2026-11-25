@@ -1,0 +1,53 @@
+guidance = """
+Use a log line for each line of a `Log`. It says when the line was written,
+how much it matters, where it came from and what it says.
+"""
+
+[meta]
+name = "LogLine"
+element = "div"
+class = "nd-log-line"
+page = "log"
+summary = "Show one line of a log: its time, its level, its source and its message."
+
+# FOUR PARTS IN ONE RUN OF TEXT, a space between each two. The line is a block
+# and its parts are inline, so a selection across lines copies one line of text
+# for each, its parts in the order they stand and a space between them, and
+# nothing the stylesheet draws is copied.
+#
+# THE LEVEL IS A WORD, AND THE TONE SAYS IT AGAIN. `level` is drawn in a box
+# tinted with `tone`, with a rule down its leading edge, and the ink stays the
+# page's own. The word is the signal, because the palette cannot keep two
+# families apart for every reader (`NOCTUA.md §8.8.6`).
+#
+# THE TIME AND THE SOURCE ARE THE CALLER'S AS THEY ARE. A time is a `<time>`, a
+# source is a name and never translated, and both are quieter than the message.
+#
+# THE MESSAGE KEEPS ITS SPACES AND ITS LINE BREAKS, and a word longer than the
+# line breaks inside itself rather than pushing the log sideways.
+
+[a11y]
+notes = """
+The line has no role. Its level is a word, so the tone is never the only signal. Its source is a name, marked `nd-identifier`.
+"""
+
+[prop.tone]
+type = "text"
+attribute = "data-nd-tone"
+doc = "Which of the colour system's tones the level is painted from, such as `danger` or `warning`. A name no family declares fails the build. **Never the only signal**: the `level` word carries it. Needs `level`."
+
+[prop.level]
+type = "text"
+doc = "How much the line matters, as a word, such as *error* or *warning*. It is drawn before the message, in a box of the line's `tone`."
+
+[prop.time]
+type = "text"
+doc = "When the line was written, such as `12:04:31.207`. It is a `<time>`, so write it as HTML writes a time."
+
+[prop.source]
+type = "text"
+doc = "Where the line came from, such as `nc-kernel`. A name, drawn as it is written and never translated."
+
+[prop.children]
+type = "children"
+doc = "The message. Plain text, or a `MatchText` where a filter matched it."

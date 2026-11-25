@@ -10,6 +10,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Hero;
 use crate::trees::lineage::DOE;
+use crate::trees::log::DAEMON;
 use crate::trees::select::{AMBER_DETAILED, CLAY_DETAILED, OCHRE_DETAILED, TEAL_DETAILED};
 use crate::trees::table::{AURORA, BRACKEN, CINTRA, INVOICE_ROW};
 
@@ -1510,6 +1511,28 @@ KeyCapture { name: "…", label: "…", value: "KeyH", … }"#,
                     children: &[],
                 },
             ],
+        }],
+    ),
+    (
+        "log",
+        r#"Log { name: "…", label: "…", resume_label: "…",
+    LogLine { time: "…", tone: "…", level: "…", source: "…", "…" }
+    …
+}"#,
+        // A DAEMON'S LOG AS IT RUNS, in a window: it opens at its newest line
+        // and follows until the reader scrolls away.
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-window"))],
+            children: &[Node::Component {
+                name: "Log",
+                props: &[
+                    ("name", Value::Text("overview-log")),
+                    ("label", Value::Message(Key::ExampleLogLabel)),
+                    ("resume_label", Value::Message(Key::ExampleLogResume)),
+                ],
+                children: DAEMON,
+            }],
         }],
     ),
 ];

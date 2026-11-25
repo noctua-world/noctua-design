@@ -375,6 +375,18 @@ pub(crate) const SPLIT: Page = Page {
     component: None,
 };
 
+/// Lines as they arrive, and one line.
+///
+/// A collection for the reason `SPLIT` is one: a `LogLine` outside a `Log` is a
+/// line of no log, with no end to follow.
+pub(crate) const LOG: Page = Page {
+    slug: "log",
+    title: Title::Name("Log"),
+    summary: Key::PageLogSummary,
+    kind: Kind::Component,
+    component: None,
+};
+
 /// The list a reader walks with the keyboard, a named run of it, and one option.
 ///
 /// A collection for the reason `TREE` is one: an `OptionItem` outside an
@@ -548,7 +560,7 @@ pub(crate) struct Collection {
 /// `page.component.is_some()`, so nobody could search for `spread` or
 /// `current_label`. It reads `documented_on` now, so a component on a shared
 /// page is as findable as one with a page of its own.
-pub(crate) const COLLECTIONS: [Collection; 18] = [
+pub(crate) const COLLECTIONS: [Collection; 19] = [
     Collection {
         page: LINEAGE,
         parts: &["Lineage", "LineageFigure"],
@@ -591,6 +603,12 @@ pub(crate) const COLLECTIONS: [Collection; 18] = [
         page: SPLIT,
         parts: &["Split", "SplitPane", "SplitHandle"],
         body: Key::PageSplitBody,
+    },
+    Collection {
+        // The log, then one line of it.
+        page: LOG,
+        parts: &["Log", "LogLine"],
+        body: Key::PageLogBody,
     },
     Collection {
         // The list, then the run, then one option: outside in, which is the

@@ -595,6 +595,7 @@ mod tests {
                     noctua_design_runtime::DRAWER_SOURCE,
                     noctua_design_runtime::SPLIT_SOURCE,
                     noctua_design_runtime::KEY_CAPTURE_SOURCE,
+                    noctua_design_runtime::LOG_SOURCE,
                     noctua_design_runtime::TABS_SOURCE,
                     noctua_design_runtime::DATE_INPUT_SOURCE,
                     noctua_design_runtime::CHOICE_SOURCE,

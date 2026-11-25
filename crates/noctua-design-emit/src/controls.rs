@@ -328,6 +328,8 @@ pub fn is_custom(component: &Component) -> bool {
             | "SplitPane"
             | "SplitHandle"
             | "KeyCapture"
+            | "Log"
+            | "LogLine"
     )
 }
 
@@ -382,6 +384,8 @@ pub fn dioxus_body(sink: &mut String, component: &Component) {
         "SplitPane" => out.push_str(SPLIT_PANE_DIOXUS),
         "SplitHandle" => out.push_str(SPLIT_HANDLE_DIOXUS),
         "KeyCapture" => out.push_str(KEY_CAPTURE_DIOXUS),
+        "Log" => out.push_str(LOG_DIOXUS),
+        "LogLine" => out.push_str(LOG_LINE_DIOXUS),
         "Prompt" => out.push_str(PROMPT_DIOXUS),
         "Menu" => out.push_str(MENU_DIOXUS),
         "MenuItem" => out.push_str(MENU_ITEM_DIOXUS),
@@ -479,6 +483,8 @@ pub fn react_body(sink: &mut String, component: &Component) {
         "SplitPane" => out.push_str(SPLIT_PANE_REACT),
         "SplitHandle" => out.push_str(SPLIT_HANDLE_REACT),
         "KeyCapture" => out.push_str(KEY_CAPTURE_REACT),
+        "Log" => out.push_str(LOG_REACT),
+        "LogLine" => out.push_str(LOG_LINE_REACT),
         "Prompt" => out.push_str(PROMPT_REACT),
         "Menu" => out.push_str(MENU_REACT),
         "MenuItem" => out.push_str(MENU_ITEM_REACT),
@@ -4646,6 +4652,158 @@ const KEY_CAPTURE_REACT: &str = r#"  const keyboard_ = keyboard ?? "linux";
   );
 "#;
 
+// --- Log and LogLine ----------------------------------------------------------
+
+/// Lines as they arrive, in a region that scrolls.
+///
+/// # Two boxes
+///
+/// The root holds the region of lines and the control that goes back to the
+/// newest one. The control is the region's sibling, because a control inside a
+/// `role="log"` would be read as a line.
+///
+/// # The region is a tab stop
+///
+/// A region that scrolls has to scroll from the keyboard, and the engine scrolls
+/// the one that has the focus.
+///
+/// # The lines have a box of their own inside it
+///
+/// `.nd-log-content` is as tall as the lines, so `dist/log.js` can watch its
+/// height. A face that loads late or a window that narrows makes every line
+/// taller with no line added, and a log that follows has to follow that too.
+///
+/// # The resume control ships hidden
+///
+/// `dist/log.js` shows it while following has stopped. With the script blocked
+/// nothing follows, so there is nowhere to resume. `Toast`'s arrangement for its
+/// dismiss control, for its reason.
+const LOG_DIOXUS: &str = r#"    let root = format!("nd-log {class}");
+    let root = root.trim().to_owned();
+    let id = format!("nd-log-{name}");
+
+    rsx! {
+        div {
+            class: "{root}",
+            "data-nd-log": "{name}",
+            "data-nd-follow": if follow { "true" } else { "false" },
+            div {
+                class: "nd-log-lines",
+                id: "{id}",
+                role: "log",
+                "aria-label": "{label}",
+                tabindex: "0",
+                div { class: "nd-log-content", {children} }
+            }
+            if let Some(resume) = resume_label {
+                button {
+                    class: "nd-log-resume",
+                    r#type: "button",
+                    "aria-controls": "{id}",
+                    hidden: true,
+                    Icon { icon: IconDrawing::ARROW_DOWN, size: IconSize::Small }
+                    span { "{resume}" }
+                }
+            }
+        }
+    }
+"#;
+
+/// The same log, in React.
+const LOG_REACT: &str = r#"  const root = ["nd-log", className].filter(Boolean).join(" ");
+  const id = `nd-log-${name}`;
+
+  return h(
+    "div",
+    {
+      className: root,
+      "data-nd-log": name,
+      "data-nd-follow": String(follow ?? true),
+      ...rest,
+    },
+    h(
+      "div",
+      {
+        key: "l",
+        className: "nd-log-lines",
+        id,
+        role: "log",
+        "aria-label": label,
+        tabIndex: "0",
+      },
+      // See the Dioxus half: the box the lines are measured by.
+      h("div", { className: "nd-log-content" }, children),
+    ),
+    resumeLabel
+      ? h(
+          "button",
+          {
+            key: "r",
+            className: "nd-log-resume",
+            type: "button",
+            "aria-controls": id,
+            // See the Dioxus half: shown by the script.
+            hidden: true,
+          },
+          h(Icon, { icon: arrowDown, size: "small" }),
+          h("span", null, resumeLabel),
+        )
+      : null,
+  );
+"#;
+
+/// One line of a log.
+///
+/// # Inline parts, a space between each two
+///
+/// The line is a block and its parts are inline, with a space the markup
+/// writes after each part that is there. A selection across the log copies
+/// one line of text for each line, and a part left out leaves no space.
+///
+/// # The source is a name
+///
+/// It is marked `nd-identifier`, as an affix is: a module or a program, the
+/// same in every language.
+const LOG_LINE_DIOXUS: &str = r#"    let root = format!("nd-log-line {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        div { class: "{root}", "data-nd-tone": tone,
+            if let Some(at) = time {
+                time { class: "nd-log-line-time", "{at}" }
+                " "
+            }
+            if let Some(level) = level {
+                span { class: "nd-log-line-level", "{level}" }
+                " "
+            }
+            if let Some(source) = source {
+                span { class: "nd-log-line-source nd-identifier", "{source}" }
+                " "
+            }
+            span { class: "nd-log-line-text", {children} }
+        }
+    }
+"#;
+
+/// The same line, in React.
+const LOG_LINE_REACT: &str = r#"  const root = ["nd-log-line", className].filter(Boolean).join(" ");
+  // See the Dioxus half: each part that is there, and a space after it.
+  const parts = [];
+  if (time) parts.push(h("time", { key: "t", className: "nd-log-line-time" }, time), " ");
+  if (level) parts.push(h("span", { key: "l", className: "nd-log-line-level" }, level), " ");
+  if (source) {
+    parts.push(h("span", { key: "s", className: "nd-log-line-source nd-identifier" }, source), " ");
+  }
+
+  return h(
+    "div",
+    { className: root, "data-nd-tone": tone, ...rest },
+    ...parts,
+    h("span", { key: "m", className: "nd-log-line-text" }, children),
+  );
+"#;
+
 // --- Menu and MenuItem ------------------------------------------------------
 
 /// The surface a button opens, and the actions on it.
@@ -5580,7 +5738,7 @@ pub fn dioxus_imports(component: &Component) -> String {
         // A field, a fieldset and the one drawing a rating is made of. A tab
         // wants the same drawing at a size it names.
         "Rating" => beside_icon("Field, FieldKind, FieldSize, Icon"),
-        "Tab" | "FooterLine" => beside_icon("Icon, IconSize"),
+        "Tab" | "FooterLine" | "Log" => beside_icon("Icon, IconSize"),
         // THE SEND CONTROL IS A `Button`, and the glyph a prompt starts with is
         // an `Icon`: a prompt is not the place to grow a second of either.
         "Prompt" => beside_icon("Button, ButtonSize, ButtonTone, ButtonVariant, Icon, IconSize"),
@@ -5739,7 +5897,7 @@ pub fn react_imports(component: &Component) -> String {
         // are imported unevenly there; in JavaScript an icon is an icon.
         "Button" | "Link" | "SegmentedItem" | "Disclosure" | "Search" | "SearchResult"
         | "Avatar" | "Carousel" | "Info" | "MenuItem" | "MessageBar" | "Tab" | "Dialog"
-        | "Popover" | "Toast" | "FooterLine" => REACT_ICON.to_owned(),
+        | "Popover" | "Toast" | "FooterLine" | "Log" => REACT_ICON.to_owned(),
         // The chip is a `Swatch` and the remove control is a `Button`; see the
         // Dioxus half.
         "Tag" => concat!(

@@ -1629,6 +1629,11 @@ a {
   flex: 1 1 auto;
 }
 
+/* A log in a window is the window's work, and takes all of it, as a split does. */
+.nd-example-window > .nd-log {
+  flex: 1 1 auto;
+}
+
 /* The same window with its parts side by side, for a drawer at a side. */
 .nd-example-window-row {
   flex-direction: row;

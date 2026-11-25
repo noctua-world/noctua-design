@@ -1292,6 +1292,121 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Log",
+        "case-log-0",
+        &[Node::Component {
+            name: "Log",
+            props: &[
+                ("label", Value::Data("Build log")),
+                ("name", Value::Data("build")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Log",
+        "case-log-1",
+        &[Node::Component {
+            name: "Log",
+            props: &[
+                ("label", Value::Data("Build log")),
+                ("name", Value::Data("build")),
+                ("resume_label", Value::Data("Go to the newest")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Log",
+        "case-log-2",
+        &[Node::Component {
+            name: "Log",
+            props: &[
+                ("follow", Value::Bool(false)),
+                ("label", Value::Data("Journal")),
+                ("name", Value::Data("record")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Log",
+        "case-log-3",
+        &[Node::Component {
+            name: "Log",
+            props: &[
+                ("label", Value::Data("Build log")),
+                ("name", Value::Data("build")),
+                ("resume_label", Value::Data("Go to the newest")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Log",
+        "case-log-4",
+        &[Node::Component {
+            name: "Log",
+            props: &[
+                ("label", Value::Data("Build log")),
+                ("name", Value::Data("build")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "LogLine",
+                    props: &[
+                        ("level", Value::Data("info")),
+                        ("source", Value::Data("nc-kernel")),
+                        ("time", Value::Data("12:04:31")),
+                    ],
+                    children: &[Node::Text(Value::Data("Started."))],
+                },
+                Node::Component {
+                    name: "LogLine",
+                    props: &[
+                        ("level", Value::Data("error")),
+                        ("source", Value::Data("nc-store")),
+                        ("time", Value::Data("12:04:32")),
+                        ("tone", Value::Data("danger")),
+                    ],
+                    children: &[Node::Text(Value::Data("Refused."))],
+                },
+            ],
+        }],
+    ),
+    (
+        "LogLine",
+        "case-log-line-0",
+        &[Node::Component {
+            name: "LogLine",
+            props: &[
+                ("level", Value::Data("warning")),
+                ("source", Value::Data("nc-kernel")),
+                ("time", Value::Data("12:04:31.207")),
+                ("tone", Value::Data("warning")),
+            ],
+            children: &[Node::Text(Value::Data("Slow answer."))],
+        }],
+    ),
+    (
+        "LogLine",
+        "case-log-line-1",
+        &[Node::Component {
+            name: "LogLine",
+            props: &[],
+            children: &[Node::Text(Value::Data("Started."))],
+        }],
+    ),
+    (
+        "LogLine",
+        "case-log-line-2",
+        &[Node::Component {
+            name: "LogLine",
+            props: &[("level", Value::Data("debug"))],
+            children: &[Node::Text(Value::Data("Read 3 entries."))],
+        }],
+    ),
+    (
         "MatchText",
         "case-match-text-0",
         &[Node::Component {

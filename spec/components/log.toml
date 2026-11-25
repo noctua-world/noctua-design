@@ -1,0 +1,81 @@
+guidance = """
+Use a log for lines that arrive while a reader watches, such as what a program
+writes as it runs. It keeps the newest line in view until the reader scrolls
+away. For a list a reader filters and chooses from, use `OptionList`.
+"""
+
+[meta]
+name = "Log"
+element = "div"
+class = "nd-log"
+page = "log"
+summary = "Show lines as they arrive, and keep the newest in view until the reader scrolls away."
+
+# A REGION THAT GROWS AT ITS END, AND EVERY LINE IS IN THE DOCUMENT.
+#
+# The lines are a `role="log"`: a polite live region that reads a line when it
+# is added (WAI-ARIA's log role). Nothing is virtualised, so finding in the page,
+# selecting, copying and a screen reader's own reading reach every line, and
+# the caller bounds how many lines it renders, as a ring of the newest does.
+#
+# IT SCROLLS INSIDE THE BOX IT IS GIVEN. A log is as tall as the box around it
+# and scrolls what does not fit, so that box needs a height of its own: a
+# window, a pane of a `Split`, a drawer. A log in a box as tall as its content
+# grows with every line and has no end to follow.
+#
+# FOLLOWING THE END. With `follow`, `dist/log.js` keeps the newest line in view
+# as lines arrive. A reader who scrolls away from the end stops it, and so does
+# a selection inside the log when a line arrives, so the text being read or
+# copied does not move. Back at the end it follows again, and the control named
+# by `resume_label` takes the reader there. The script says `nd-log-follow`,
+# with the log's `name` and whether it now follows, each time that changes.
+#
+# THE LINES ARE A TAB STOP, because a region that scrolls has to be scrollable
+# from the keyboard. The keys are the engine's own: the arrows, the page keys,
+# Home and End.
+#
+# THE RESUME CONTROL IS OUTSIDE THE REGION. A control appearing inside a
+# `role="log"` would be read as a line. It stands over the end of the log's
+# inline end, and ships `hidden`, because with the script blocked nothing
+# follows and there is nowhere to resume.
+#
+# WITH THE SCRIPT BLOCKED it is a region that scrolls, opened at its first line.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-log"
+doc = "What this log is, as a script finds it. The region of lines takes the id `nd-log-` followed by this name. **Required**."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The name of the log, in the reader's language, such as *Daemon log*. It becomes `aria-label` on the region of lines. Required."
+
+[prop.follow]
+type = "bool"
+default = "true"
+attribute = "data-nd-follow"
+doc = "Whether the newest line is kept in view as lines arrive. On by default. Off, the log stays where the reader puts it, as a record does."
+
+[prop.resume_label]
+type = "text"
+doc = "The name of the control that goes to the newest line and follows again, such as *Go to the newest*. It shows while following has stopped. Needs `follow`."
+
+[prop.children]
+type = "children"
+doc = "The lines, oldest first: a `LogLine` each."
+
+[state.paused]
+attribute = "data-nd-paused"
+doc = "Set by the script while following has stopped, because the reader scrolled away from the end or held a selection as a line arrived. The resume control shows."
+
+[a11y]
+needs_name = true
+notes = """
+The lines are a `role="log"` named by `label`, a polite live region that reads each line added. It is a tab stop, so the keyboard can scroll it. The resume control is a `<button>` outside it.
+"""
+
+[keyboard]
+"Arrow keys / Page Up / Page Down" = "Scroll the lines while the log has the focus. Leaving the end stops following."
+"Home / End" = "Go to the oldest line or the newest. At the newest, the log follows again."

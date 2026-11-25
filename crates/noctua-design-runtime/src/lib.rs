@@ -30,6 +30,7 @@
 //! | `drawer.js` | `enhanceDrawers()` — `inert` on a collapsed `Drawer`, the focus given back when one shuts around it, and the event Escape says |
 //! | `split.js` | `enhanceSplits()` — the keys and the drag that move the line between a `Split`'s two panes, and the event that says where it is |
 //! | `key-capture.js` | `enhanceKeyCaptures()` — listening for a shortcut, recording it as a chord of physical keys, the labels the layout prints, and the event that says what was recorded |
+//! | `log.js` | `enhanceLogs()` — keeping a `Log`'s newest line in view, stopping when the reader scrolls away or holds a selection, and the event that says which |
 //! | `tabs.js` | `enhanceTabs()` — the panel that shows and the ones that stop being on the page |
 //! | `date-input.js` | `enhanceDateInputs()` — the three boxes: stepping, paste, the locale's own order |
 //! | `choice.js` | `enhanceChoices()` — a switch turns on, an item in a group becomes the chosen one, and a `change` says so |
@@ -148,6 +149,9 @@ pub const SPLIT_SOURCE: &str = "crates/noctua-design-runtime/src/split.js";
 /// `key-capture.js`: the shortcut a `KeyCapture` listens for and records.
 pub const KEY_CAPTURE_SOURCE: &str = "crates/noctua-design-runtime/src/key-capture.js";
 
+/// `log.js`: the end a `Log` follows, and where it stops.
+pub const LOG_SOURCE: &str = "crates/noctua-design-runtime/src/log.js";
+
 /// `tabs.js`, likewise.
 pub const TABS_SOURCE: &str = "crates/noctua-design-runtime/src/tabs.js";
 
@@ -174,7 +178,7 @@ pub const DATE_INPUT_SOURCE: &str = "crates/noctua-design-runtime/src/date-input
 /// `xtask` that runs and writes an empty artifact. The paths above are what
 /// name it; these are what it says.
 #[must_use]
-pub fn sources() -> [(&'static str, &'static str); 32] {
+pub fn sources() -> [(&'static str, &'static str); 33] {
     [
         (ANCHOR_SOURCE, include_str!("anchor.js")),
         (COLOR_SOURCE, include_str!("color.js")),
@@ -202,6 +206,7 @@ pub fn sources() -> [(&'static str, &'static str); 32] {
         (DRAWER_SOURCE, include_str!("drawer.js")),
         (SPLIT_SOURCE, include_str!("split.js")),
         (KEY_CAPTURE_SOURCE, include_str!("key-capture.js")),
+        (LOG_SOURCE, include_str!("log.js")),
         (TABS_SOURCE, include_str!("tabs.js")),
         (DATE_INPUT_SOURCE, include_str!("date-input.js")),
         (CHOICE_SOURCE, include_str!("choice.js")),

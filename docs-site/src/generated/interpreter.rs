@@ -35,9 +35,9 @@ use noctua_design::components::{
     LineageFigureShape, LineageFigureTone, LineageFilterMode, LineageHeight, LineageLettering,
     LineageLine, LineagePick, LineageReach, LineageRoute, LineageSize, LineageThickness,
     LineageTilt, LineageView, Link, LinkTone, List, ListItem, ListKind, ListMarker, ListSpacing,
-    Mark, MatchText, Menu, MenuItem, MenuPlacement, MessageBar, MessageBarLive, Meter, MeterSize,
-    NumberInput, NumberInputSize, NumberInputStepping, OptionGroup, OptionItem, OptionList,
-    OptionListLayout, OptionListSize, OtpField, OtpFieldKind, OtpFieldSize, Pagination,
+    Log, LogLine, Mark, MatchText, Menu, MenuItem, MenuPlacement, MessageBar, MessageBarLive,
+    Meter, MeterSize, NumberInput, NumberInputSize, NumberInputStepping, OptionGroup, OptionItem,
+    OptionList, OptionListLayout, OptionListSize, OtpField, OtpFieldKind, OtpFieldSize, Pagination,
     PaginationSize, PaginationSpread, Paragraph, ParagraphSize, ParagraphTone, Popover,
     PopoverPlacement, Progress, ProgressSize, Prompt, Prose, ProseMeasure, Radio, RadioSize,
     Rating, RatingSize, Search, SearchGroup, SearchPresentation, SearchResult, SearchSize,
@@ -117,6 +117,8 @@ pub(crate) fn component(
         "Link" => link(props, children, scope),
         "List" => list(props, children, scope),
         "ListItem" => list_item(props, children, scope),
+        "Log" => log(props, children, scope),
+        "LogLine" => log_line(props, children, scope),
         "Mark" => mark(props, children, scope),
         "MatchText" => match_text(props, children, scope),
         "Menu" => menu(props, children, scope),
@@ -2369,6 +2371,58 @@ fn list_item(
             ai_mark: ai_mark_,
             ai_label: ai_label_,
             ai_note: ai_note_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `Log`, from a tree.
+fn log(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("Log.name is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("Log.label is required and this tree does not set it");
+    let follow_ = scope.flag(props, "follow").unwrap_or(true);
+    let resume_label_ = scope.find(props, "resume_label");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        Log {
+            name: name_,
+            label: label_,
+            follow: follow_,
+            resume_label: resume_label_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `LogLine`, from a tree.
+fn log_line(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let tone_ = scope.find(props, "tone");
+    let level_ = scope.find(props, "level");
+    let time_ = scope.find(props, "time");
+    let source_ = scope.find(props, "source");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        LogLine {
+            tone: tone_,
+            level: level_,
+            time: time_,
+            source: source_,
             class: class_,
             {render(children, scope)}
         }

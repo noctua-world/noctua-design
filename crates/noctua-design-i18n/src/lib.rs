@@ -180,6 +180,10 @@ pub enum Key {
     PageSplitSummary,
     /// `page.split.body`
     PageSplitBody,
+    /// `page.log.summary`
+    PageLogSummary,
+    /// `page.log.body`
+    PageLogBody,
     /// `page.option-list.summary`
     PageOptionListSummary,
     /// `page.option-list.body`
@@ -638,6 +642,10 @@ pub enum Key {
     ComponentSplitHandleSummary,
     /// `component.key-capture.summary`
     ComponentKeyCaptureSummary,
+    /// `component.log.summary`
+    ComponentLogSummary,
+    /// `component.log-line.summary`
+    ComponentLogLineSummary,
     /// `component.prompt.summary`
     ComponentPromptSummary,
     /// `component.option-group.summary`
@@ -1522,6 +1530,66 @@ pub enum Key {
     ExampleKeyCaptureClear,
     /// `example.key-capture.refusal`
     ExampleKeyCaptureRefusal,
+    /// `example.log.overview`
+    ExampleLogOverview,
+    /// `example.log.follows`
+    ExampleLogFollows,
+    /// `example.log.still`
+    ExampleLogStill,
+    /// `example.log.narrow`
+    ExampleLogNarrow,
+    /// `example.log.roomy`
+    ExampleLogRoomy,
+    /// `example.log-line.levels`
+    ExampleLogLineLevels,
+    /// `example.log-line.parts`
+    ExampleLogLineParts,
+    /// `example.log-line.long`
+    ExampleLogLineLong,
+    /// `example.log-line.filtered`
+    ExampleLogLineFiltered,
+    /// `example.log.label`
+    ExampleLogLabel,
+    /// `example.log.record`
+    ExampleLogRecord,
+    /// `example.log.resume`
+    ExampleLogResume,
+    /// `example.log.level-debug`
+    ExampleLogLevelDebug,
+    /// `example.log.level-info`
+    ExampleLogLevelInfo,
+    /// `example.log.level-warning`
+    ExampleLogLevelWarning,
+    /// `example.log.level-error`
+    ExampleLogLevelError,
+    /// `example.log.started`
+    ExampleLogStarted,
+    /// `example.log.store`
+    ExampleLogStore,
+    /// `example.log.catalog`
+    ExampleLogCatalog,
+    /// `example.log.socket`
+    ExampleLogSocket,
+    /// `example.log.attached`
+    ExampleLogAttached,
+    /// `example.log.slow`
+    ExampleLogSlow,
+    /// `example.log.ran`
+    ExampleLogRan,
+    /// `example.log.refused`
+    ExampleLogRefused,
+    /// `example.log.journal`
+    ExampleLogJournal,
+    /// `example.log.snapshot`
+    ExampleLogSnapshot,
+    /// `example.log.full`
+    ExampleLogFull,
+    /// `example.log.heartbeat`
+    ExampleLogHeartbeat,
+    /// `example.log.lost`
+    ExampleLogLost,
+    /// `example.log.memory`
+    ExampleLogMemory,
     /// `example.prompt.overview`
     ExamplePromptOverview,
     /// `example.prompt.basic`
@@ -4860,6 +4928,44 @@ pub enum Key {
     ComponentListItemPropTermDoc,
     /// `component.list-item.prop.children.doc`
     ComponentListItemPropChildrenDoc,
+    /// `component.log.guidance`
+    ComponentLogGuidance,
+    /// `component.log.a11y-notes`
+    ComponentLogA11yNotes,
+    /// `component.log.prop.name.doc`
+    ComponentLogPropNameDoc,
+    /// `component.log.prop.label.doc`
+    ComponentLogPropLabelDoc,
+    /// `component.log.prop.follow.doc`
+    ComponentLogPropFollowDoc,
+    /// `component.log.prop.resume_label.doc`
+    ComponentLogPropResumeLabelDoc,
+    /// `component.log.prop.children.doc`
+    ComponentLogPropChildrenDoc,
+    /// `component.log.state.paused.doc`
+    ComponentLogStatePausedDoc,
+    /// `component.log.key.arrow-keys-page-up-page-down.name`
+    ComponentLogKeyArrowKeysPageUpPageDownName,
+    /// `component.log.key.arrow-keys-page-up-page-down.action`
+    ComponentLogKeyArrowKeysPageUpPageDownAction,
+    /// `component.log.key.home-end.name`
+    ComponentLogKeyHomeEndName,
+    /// `component.log.key.home-end.action`
+    ComponentLogKeyHomeEndAction,
+    /// `component.log-line.guidance`
+    ComponentLogLineGuidance,
+    /// `component.log-line.a11y-notes`
+    ComponentLogLineA11yNotes,
+    /// `component.log-line.prop.tone.doc`
+    ComponentLogLinePropToneDoc,
+    /// `component.log-line.prop.level.doc`
+    ComponentLogLinePropLevelDoc,
+    /// `component.log-line.prop.time.doc`
+    ComponentLogLinePropTimeDoc,
+    /// `component.log-line.prop.source.doc`
+    ComponentLogLinePropSourceDoc,
+    /// `component.log-line.prop.children.doc`
+    ComponentLogLinePropChildrenDoc,
     /// `component.mark.a11y-notes`
     ComponentMarkA11yNotes,
     /// `component.mark.prop.children.doc`
@@ -6692,7 +6798,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3284] = [
+    pub const ALL: [Self; 3337] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -6723,6 +6829,8 @@ impl Key {
         Self::PageDrawerBody,
         Self::PageSplitSummary,
         Self::PageSplitBody,
+        Self::PageLogSummary,
+        Self::PageLogBody,
         Self::PageOptionListSummary,
         Self::PageOptionListBody,
         Self::PageTreeSummary,
@@ -6952,6 +7060,8 @@ impl Key {
         Self::ComponentSplitPaneSummary,
         Self::ComponentSplitHandleSummary,
         Self::ComponentKeyCaptureSummary,
+        Self::ComponentLogSummary,
+        Self::ComponentLogLineSummary,
         Self::ComponentPromptSummary,
         Self::ComponentOptionGroupSummary,
         Self::ComponentOptionItemSummary,
@@ -7394,6 +7504,36 @@ impl Key {
         Self::ExampleKeyCaptureEmpty,
         Self::ExampleKeyCaptureClear,
         Self::ExampleKeyCaptureRefusal,
+        Self::ExampleLogOverview,
+        Self::ExampleLogFollows,
+        Self::ExampleLogStill,
+        Self::ExampleLogNarrow,
+        Self::ExampleLogRoomy,
+        Self::ExampleLogLineLevels,
+        Self::ExampleLogLineParts,
+        Self::ExampleLogLineLong,
+        Self::ExampleLogLineFiltered,
+        Self::ExampleLogLabel,
+        Self::ExampleLogRecord,
+        Self::ExampleLogResume,
+        Self::ExampleLogLevelDebug,
+        Self::ExampleLogLevelInfo,
+        Self::ExampleLogLevelWarning,
+        Self::ExampleLogLevelError,
+        Self::ExampleLogStarted,
+        Self::ExampleLogStore,
+        Self::ExampleLogCatalog,
+        Self::ExampleLogSocket,
+        Self::ExampleLogAttached,
+        Self::ExampleLogSlow,
+        Self::ExampleLogRan,
+        Self::ExampleLogRefused,
+        Self::ExampleLogJournal,
+        Self::ExampleLogSnapshot,
+        Self::ExampleLogFull,
+        Self::ExampleLogHeartbeat,
+        Self::ExampleLogLost,
+        Self::ExampleLogMemory,
         Self::ExamplePromptOverview,
         Self::ExamplePromptBasic,
         Self::ExamplePromptGrows,
@@ -9063,6 +9203,25 @@ impl Key {
         Self::ComponentListItemA11yNotes,
         Self::ComponentListItemPropTermDoc,
         Self::ComponentListItemPropChildrenDoc,
+        Self::ComponentLogGuidance,
+        Self::ComponentLogA11yNotes,
+        Self::ComponentLogPropNameDoc,
+        Self::ComponentLogPropLabelDoc,
+        Self::ComponentLogPropFollowDoc,
+        Self::ComponentLogPropResumeLabelDoc,
+        Self::ComponentLogPropChildrenDoc,
+        Self::ComponentLogStatePausedDoc,
+        Self::ComponentLogKeyArrowKeysPageUpPageDownName,
+        Self::ComponentLogKeyArrowKeysPageUpPageDownAction,
+        Self::ComponentLogKeyHomeEndName,
+        Self::ComponentLogKeyHomeEndAction,
+        Self::ComponentLogLineGuidance,
+        Self::ComponentLogLineA11yNotes,
+        Self::ComponentLogLinePropToneDoc,
+        Self::ComponentLogLinePropLevelDoc,
+        Self::ComponentLogLinePropTimeDoc,
+        Self::ComponentLogLinePropSourceDoc,
+        Self::ComponentLogLinePropChildrenDoc,
         Self::ComponentMarkA11yNotes,
         Self::ComponentMarkPropChildrenDoc,
         Self::ComponentMatchTextGuidance,
@@ -10013,6 +10172,8 @@ impl Key {
             Self::PageDrawerBody => "page.drawer.body",
             Self::PageSplitSummary => "page.split.summary",
             Self::PageSplitBody => "page.split.body",
+            Self::PageLogSummary => "page.log.summary",
+            Self::PageLogBody => "page.log.body",
             Self::PageOptionListSummary => "page.option-list.summary",
             Self::PageOptionListBody => "page.option-list.body",
             Self::PageTreeSummary => "page.tree.summary",
@@ -10242,6 +10403,8 @@ impl Key {
             Self::ComponentSplitPaneSummary => "component.split-pane.summary",
             Self::ComponentSplitHandleSummary => "component.split-handle.summary",
             Self::ComponentKeyCaptureSummary => "component.key-capture.summary",
+            Self::ComponentLogSummary => "component.log.summary",
+            Self::ComponentLogLineSummary => "component.log-line.summary",
             Self::ComponentPromptSummary => "component.prompt.summary",
             Self::ComponentOptionGroupSummary => "component.option-group.summary",
             Self::ComponentOptionItemSummary => "component.option-item.summary",
@@ -10684,6 +10847,36 @@ impl Key {
             Self::ExampleKeyCaptureEmpty => "example.key-capture.empty",
             Self::ExampleKeyCaptureClear => "example.key-capture.clear",
             Self::ExampleKeyCaptureRefusal => "example.key-capture.refusal",
+            Self::ExampleLogOverview => "example.log.overview",
+            Self::ExampleLogFollows => "example.log.follows",
+            Self::ExampleLogStill => "example.log.still",
+            Self::ExampleLogNarrow => "example.log.narrow",
+            Self::ExampleLogRoomy => "example.log.roomy",
+            Self::ExampleLogLineLevels => "example.log-line.levels",
+            Self::ExampleLogLineParts => "example.log-line.parts",
+            Self::ExampleLogLineLong => "example.log-line.long",
+            Self::ExampleLogLineFiltered => "example.log-line.filtered",
+            Self::ExampleLogLabel => "example.log.label",
+            Self::ExampleLogRecord => "example.log.record",
+            Self::ExampleLogResume => "example.log.resume",
+            Self::ExampleLogLevelDebug => "example.log.level-debug",
+            Self::ExampleLogLevelInfo => "example.log.level-info",
+            Self::ExampleLogLevelWarning => "example.log.level-warning",
+            Self::ExampleLogLevelError => "example.log.level-error",
+            Self::ExampleLogStarted => "example.log.started",
+            Self::ExampleLogStore => "example.log.store",
+            Self::ExampleLogCatalog => "example.log.catalog",
+            Self::ExampleLogSocket => "example.log.socket",
+            Self::ExampleLogAttached => "example.log.attached",
+            Self::ExampleLogSlow => "example.log.slow",
+            Self::ExampleLogRan => "example.log.ran",
+            Self::ExampleLogRefused => "example.log.refused",
+            Self::ExampleLogJournal => "example.log.journal",
+            Self::ExampleLogSnapshot => "example.log.snapshot",
+            Self::ExampleLogFull => "example.log.full",
+            Self::ExampleLogHeartbeat => "example.log.heartbeat",
+            Self::ExampleLogLost => "example.log.lost",
+            Self::ExampleLogMemory => "example.log.memory",
             Self::ExamplePromptOverview => "example.prompt.overview",
             Self::ExamplePromptBasic => "example.prompt.basic",
             Self::ExamplePromptGrows => "example.prompt.grows",
@@ -12675,6 +12868,29 @@ impl Key {
             Self::ComponentListItemA11yNotes => "component.list-item.a11y-notes",
             Self::ComponentListItemPropTermDoc => "component.list-item.prop.term.doc",
             Self::ComponentListItemPropChildrenDoc => "component.list-item.prop.children.doc",
+            Self::ComponentLogGuidance => "component.log.guidance",
+            Self::ComponentLogA11yNotes => "component.log.a11y-notes",
+            Self::ComponentLogPropNameDoc => "component.log.prop.name.doc",
+            Self::ComponentLogPropLabelDoc => "component.log.prop.label.doc",
+            Self::ComponentLogPropFollowDoc => "component.log.prop.follow.doc",
+            Self::ComponentLogPropResumeLabelDoc => "component.log.prop.resume_label.doc",
+            Self::ComponentLogPropChildrenDoc => "component.log.prop.children.doc",
+            Self::ComponentLogStatePausedDoc => "component.log.state.paused.doc",
+            Self::ComponentLogKeyArrowKeysPageUpPageDownName => {
+                "component.log.key.arrow-keys-page-up-page-down.name"
+            }
+            Self::ComponentLogKeyArrowKeysPageUpPageDownAction => {
+                "component.log.key.arrow-keys-page-up-page-down.action"
+            }
+            Self::ComponentLogKeyHomeEndName => "component.log.key.home-end.name",
+            Self::ComponentLogKeyHomeEndAction => "component.log.key.home-end.action",
+            Self::ComponentLogLineGuidance => "component.log-line.guidance",
+            Self::ComponentLogLineA11yNotes => "component.log-line.a11y-notes",
+            Self::ComponentLogLinePropToneDoc => "component.log-line.prop.tone.doc",
+            Self::ComponentLogLinePropLevelDoc => "component.log-line.prop.level.doc",
+            Self::ComponentLogLinePropTimeDoc => "component.log-line.prop.time.doc",
+            Self::ComponentLogLinePropSourceDoc => "component.log-line.prop.source.doc",
+            Self::ComponentLogLinePropChildrenDoc => "component.log-line.prop.children.doc",
             Self::ComponentMarkA11yNotes => "component.mark.a11y-notes",
             Self::ComponentMarkPropChildrenDoc => "component.mark.prop.children.doc",
             Self::ComponentMatchTextGuidance => "component.match-text.guidance",
@@ -13943,6 +14159,12 @@ impl Locale {
                 Key::PageSplitBody => {
                     "The split, one pane and the handle between two. The share of the first pane is one number. A narrow box stacks the panes or leaves one out, and it is the split's own box that is measured."
                 }
+                Key::PageLogSummary => {
+                    "Show lines as they arrive, and keep the newest in view until the reader scrolls away."
+                }
+                Key::PageLogBody => {
+                    "The log and one line of it. A log follows its newest line until the reader scrolls away, and follows again at the end. Every line is in the document, and the caller bounds how many."
+                }
                 Key::PageOptionListSummary => {
                     "Let users walk a list of options with the keyboard and choose one."
                 }
@@ -14353,6 +14575,12 @@ impl Locale {
                 }
                 Key::ComponentKeyCaptureSummary => {
                     "Let users record a shortcut by pressing its keys, and show it as those keys."
+                }
+                Key::ComponentLogSummary => {
+                    "Show lines as they arrive, and keep the newest in view until the reader scrolls away."
+                }
+                Key::ComponentLogLineSummary => {
+                    "Show one line of a log: its time, its level, its source and its message."
                 }
                 Key::ComponentPromptSummary => {
                     "Let users type on a line with a block cursor, and send what they typed."
@@ -15200,6 +15428,54 @@ impl Locale {
                 Key::ExampleKeyCaptureRefusal => {
                     "The production channel already uses this shortcut."
                 }
+                Key::ExampleLogOverview => {
+                    "A daemon's log as it runs. Scroll up and it stops following, and the control at its end takes you back to the newest line."
+                }
+                Key::ExampleLogFollows => {
+                    "The log opens at its newest line and keeps it in view. Scrolled away, it stays where you are until you return to the end."
+                }
+                Key::ExampleLogStill => {
+                    "With `follow` off, the log opens at its first line and stays where the reader puts it."
+                }
+                Key::ExampleLogNarrow => {
+                    "In a narrow window each line wraps under itself. Nothing scrolls sideways."
+                }
+                Key::ExampleLogRoomy => {
+                    "With room for every line, the log is at its first line and its end at once. Nothing offers to resume."
+                }
+                Key::ExampleLogLineLevels => {
+                    "Each level is a word in a tinted box. The tone says the level again, never alone."
+                }
+                Key::ExampleLogLineParts => {
+                    "A part left out leaves no space behind. A level with no tone is drawn in the page's own shade."
+                }
+                Key::ExampleLogLineLong => {
+                    "A path has no space to break at, so it breaks inside itself. A line break in the message is kept."
+                }
+                Key::ExampleLogLineFiltered => {
+                    "Filtered from the prompt line, the message is a `MatchText`, each word of the query marked in its own tone."
+                }
+                Key::ExampleLogLabel => "Daemon log",
+                Key::ExampleLogRecord => "Journal",
+                Key::ExampleLogResume => "Go to the newest",
+                Key::ExampleLogLevelDebug => "debug",
+                Key::ExampleLogLevelInfo => "info",
+                Key::ExampleLogLevelWarning => "warning",
+                Key::ExampleLogLevelError => "error",
+                Key::ExampleLogStarted => "Started, channel development.",
+                Key::ExampleLogStore => "Opened the local store.",
+                Key::ExampleLogCatalog => "Read 42 commands from the catalog.",
+                Key::ExampleLogSocket => "Listening on the local socket.",
+                Key::ExampleLogAttached => "A window attached.",
+                Key::ExampleLogSlow => "A client was slow to answer the heartbeat.",
+                Key::ExampleLogRan => "Ran a command for the window.",
+                Key::ExampleLogRefused => "A plugin was refused: its capability is not granted.",
+                Key::ExampleLogJournal => "The refusal was written to the journal.",
+                Key::ExampleLogSnapshot => "Saved the interface's state.",
+                Key::ExampleLogFull => "The store is nine tenths full.",
+                Key::ExampleLogHeartbeat => "Heartbeat.",
+                Key::ExampleLogLost => "A window stopped answering.",
+                Key::ExampleLogMemory => "A plugin is near its memory limit.",
                 Key::ExamplePromptOverview => {
                     "The prompt is the last line of a footer. Type in it, then press Enter or the control at its end."
                 }
@@ -18881,6 +19157,59 @@ impl Locale {
                 Key::ComponentListItemPropChildrenDoc => {
                     "The item, or the description of the term."
                 }
+                Key::ComponentLogGuidance => {
+                    "Use a log for lines that arrive while a reader watches, such as what a program writes as it runs. It keeps the newest line in view until the reader scrolls away. For a list a reader filters and chooses from, use `OptionList`."
+                }
+                Key::ComponentLogA11yNotes => {
+                    "The lines are a `role=\"log\"` named by `label`, a polite live region that reads each line added. It is a tab stop, so the keyboard can scroll it. The resume control is a `<button>` outside it."
+                }
+                Key::ComponentLogPropNameDoc => {
+                    "What this log is, as a script finds it. The region of lines takes the id `nd-log-` followed by this name. **Required**."
+                }
+                Key::ComponentLogPropLabelDoc => {
+                    "The name of the log, in the reader's language, such as *Daemon log*. It becomes `aria-label` on the region of lines. Required."
+                }
+                Key::ComponentLogPropFollowDoc => {
+                    "Whether the newest line is kept in view as lines arrive. On by default. Off, the log stays where the reader puts it, as a record does."
+                }
+                Key::ComponentLogPropResumeLabelDoc => {
+                    "The name of the control that goes to the newest line and follows again, such as *Go to the newest*. It shows while following has stopped. Needs `follow`."
+                }
+                Key::ComponentLogPropChildrenDoc => "The lines, oldest first: a `LogLine` each.",
+                Key::ComponentLogStatePausedDoc => {
+                    "Set by the script while following has stopped, because the reader scrolled away from the end or held a selection as a line arrived. The resume control shows."
+                }
+                Key::ComponentLogKeyArrowKeysPageUpPageDownName => {
+                    "Arrow keys / Page Up / Page Down"
+                }
+                Key::ComponentLogKeyArrowKeysPageUpPageDownAction => {
+                    "Scroll the lines while the log has the focus. Leaving the end stops following."
+                }
+                Key::ComponentLogKeyHomeEndName => "Home / End",
+                Key::ComponentLogKeyHomeEndAction => {
+                    "Go to the oldest line or the newest. At the newest, the log follows again."
+                }
+                Key::ComponentLogLineGuidance => {
+                    "Use a log line for each line of a `Log`. It says when the line was written, how much it matters, where it came from and what it says."
+                }
+                Key::ComponentLogLineA11yNotes => {
+                    "The line has no role. Its level is a word, so the tone is never the only signal. Its source is a name, marked `nd-identifier`."
+                }
+                Key::ComponentLogLinePropToneDoc => {
+                    "Which of the colour system's tones the level is painted from, such as `danger` or `warning`. A name no family declares fails the build. **Never the only signal**: the `level` word carries it. Needs `level`."
+                }
+                Key::ComponentLogLinePropLevelDoc => {
+                    "How much the line matters, as a word, such as *error* or *warning*. It is drawn before the message, in a box of the line's `tone`."
+                }
+                Key::ComponentLogLinePropTimeDoc => {
+                    "When the line was written, such as `12:04:31.207`. It is a `<time>`, so write it as HTML writes a time."
+                }
+                Key::ComponentLogLinePropSourceDoc => {
+                    "Where the line came from, such as `nc-kernel`. A name, drawn as it is written and never translated."
+                }
+                Key::ComponentLogLinePropChildrenDoc => {
+                    "The message. Plain text, or a `MatchText` where a filter matched it."
+                }
                 Key::ComponentMarkA11yNotes => {
                     "A highlight that carries meaning needs more than a background colour. Colour alone is invisible to a reader who cannot distinguish it, so this also changes the text weight."
                 }
@@ -21399,6 +21728,12 @@ impl Locale {
                 Key::PageSplitBody => {
                     "A divisão, um painel e a alça entre dois. A fração do primeiro painel é um número só. Uma caixa estreita empilha os painéis ou deixa um de fora, e o que se mede é a caixa da própria divisão."
                 }
+                Key::PageLogSummary => {
+                    "Mostre linhas à medida que chegam, e mantenha a mais nova à vista até a pessoa rolar para longe."
+                }
+                Key::PageLogBody => {
+                    "O registro e uma linha dele. Um registro acompanha a linha mais nova até a pessoa rolar para longe, e volta a acompanhar no fim. Toda linha está no documento, e quem chama limita quantas."
+                }
                 Key::PageOptionListSummary => {
                     "Deixe a pessoa percorrer uma lista de opções com o teclado e escolher uma."
                 }
@@ -21819,6 +22154,12 @@ impl Locale {
                 }
                 Key::ComponentKeyCaptureSummary => {
                     "Deixe a pessoa gravar um atalho pressionando as teclas dele, e mostre-o como essas teclas."
+                }
+                Key::ComponentLogSummary => {
+                    "Mostre linhas à medida que chegam, e mantenha a mais nova à vista até a pessoa rolar para longe."
+                }
+                Key::ComponentLogLineSummary => {
+                    "Mostre uma linha de um registro: a hora, o nível, a origem e a mensagem."
                 }
                 Key::ComponentPromptSummary => {
                     "Deixe a pessoa digitar numa linha com cursor em bloco e enviar o que digitou."
@@ -22676,6 +23017,56 @@ impl Locale {
                 Key::ExampleKeyCaptureEmpty => "Nenhum",
                 Key::ExampleKeyCaptureClear => "Remover o atalho",
                 Key::ExampleKeyCaptureRefusal => "O canal de produção já usa este atalho.",
+                Key::ExampleLogOverview => {
+                    "O registro de um daemon enquanto roda. Role para cima e ele para de acompanhar, e o controle no fim leva de volta à linha mais nova."
+                }
+                Key::ExampleLogFollows => {
+                    "O registro abre na linha mais nova e a mantém à vista. Rolado para longe, fica onde você está até voltar ao fim."
+                }
+                Key::ExampleLogStill => {
+                    "Com `follow` desligado, o registro abre na primeira linha e fica onde a pessoa o deixa."
+                }
+                Key::ExampleLogNarrow => {
+                    "Numa janela estreita cada linha quebra sob si mesma. Nada rola para o lado."
+                }
+                Key::ExampleLogRoomy => {
+                    "Com espaço para todas as linhas, o registro está na primeira e no fim ao mesmo tempo. Nada oferece retomar."
+                }
+                Key::ExampleLogLineLevels => {
+                    "Cada nível é uma palavra numa caixa tingida. O tom repete o nível, nunca sozinho."
+                }
+                Key::ExampleLogLineParts => {
+                    "Uma parte deixada de fora não deixa espaço para trás. Um nível sem tom é desenhado no tom da própria página."
+                }
+                Key::ExampleLogLineLong => {
+                    "Um caminho não tem espaço onde quebrar, então quebra dentro de si. Uma quebra de linha na mensagem é mantida."
+                }
+                Key::ExampleLogLineFiltered => {
+                    "Filtrada pela linha de prompt, a mensagem é um `MatchText`, cada palavra da consulta marcada no próprio tom."
+                }
+                Key::ExampleLogLabel => "Registro do daemon",
+                Key::ExampleLogRecord => "Diário",
+                Key::ExampleLogResume => "Ir para a mais nova",
+                Key::ExampleLogLevelDebug => "depuração",
+                Key::ExampleLogLevelInfo => "info",
+                Key::ExampleLogLevelWarning => "aviso",
+                Key::ExampleLogLevelError => "erro",
+                Key::ExampleLogStarted => "Iniciado, canal de desenvolvimento.",
+                Key::ExampleLogStore => "Abriu o armazenamento local.",
+                Key::ExampleLogCatalog => "Leu 42 comandos do catálogo.",
+                Key::ExampleLogSocket => "Escutando no socket local.",
+                Key::ExampleLogAttached => "Uma janela se conectou.",
+                Key::ExampleLogSlow => "Um cliente demorou a responder ao sinal de vida.",
+                Key::ExampleLogRan => "Executou um comando para a janela.",
+                Key::ExampleLogRefused => {
+                    "Um plugin foi recusado: a capacidade dele não foi concedida."
+                }
+                Key::ExampleLogJournal => "A recusa foi escrita no diário.",
+                Key::ExampleLogSnapshot => "Salvou o estado da interface.",
+                Key::ExampleLogFull => "O armazenamento está nove décimos cheio.",
+                Key::ExampleLogHeartbeat => "Sinal de vida.",
+                Key::ExampleLogLost => "Uma janela parou de responder.",
+                Key::ExampleLogMemory => "Um plugin está perto do limite de memória.",
                 Key::ExamplePromptOverview => {
                     "O prompt é a última linha de um rodapé. Digite nele, depois pressione Enter ou o controle no fim."
                 }
@@ -26379,6 +26770,59 @@ impl Locale {
                     "A coisa que está sendo descrita. A presença dele troca o item de `<li>` para um `<dt>` e um `<dd>`, que é do que uma lista de descrição é feita."
                 }
                 Key::ComponentListItemPropChildrenDoc => "O item, ou a descrição do termo.",
+                Key::ComponentLogGuidance => {
+                    "Use um registro para linhas que chegam enquanto a pessoa observa, como o que um programa escreve ao rodar. Ele mantém a mais nova à vista até a pessoa rolar para longe. Para uma lista filtrada e escolhida, use `OptionList`."
+                }
+                Key::ComponentLogA11yNotes => {
+                    "As linhas são um `role=\"log\"` nomeado por `label`, uma região dinâmica educada que lê cada linha adicionada. É uma parada de tabulação, então o teclado pode rolá-la. O controle de retomar é um `<button>` fora dela."
+                }
+                Key::ComponentLogPropNameDoc => {
+                    "O que é este registro, como um script o encontra. A região das linhas recebe o id `nd-log-` seguido deste nome. **Obrigatório**."
+                }
+                Key::ComponentLogPropLabelDoc => {
+                    "O nome do registro, no idioma da pessoa, como *Registro do daemon*. Vira `aria-label` na região das linhas. Obrigatório."
+                }
+                Key::ComponentLogPropFollowDoc => {
+                    "Se a linha mais nova fica à vista à medida que as linhas chegam. Ligado por padrão. Desligado, o registro fica onde a pessoa o deixa, como um histórico."
+                }
+                Key::ComponentLogPropResumeLabelDoc => {
+                    "O nome do controle que vai para a linha mais nova e volta a acompanhar, como *Ir para a mais nova*. Ele aparece enquanto o acompanhamento está parado. Precisa de `follow`."
+                }
+                Key::ComponentLogPropChildrenDoc => {
+                    "As linhas, da mais antiga para a mais nova: um `LogLine` cada."
+                }
+                Key::ComponentLogStatePausedDoc => {
+                    "Escrito pelo script enquanto o acompanhamento está parado, porque a pessoa rolou para longe do fim ou manteve uma seleção quando uma linha chegou. O controle de retomar aparece."
+                }
+                Key::ComponentLogKeyArrowKeysPageUpPageDownName => "Setas / Page Up / Page Down",
+                Key::ComponentLogKeyArrowKeysPageUpPageDownAction => {
+                    "Rolam as linhas enquanto o registro tem o foco. Sair do fim para o acompanhamento."
+                }
+                Key::ComponentLogKeyHomeEndName => "Home / End",
+                Key::ComponentLogKeyHomeEndAction => {
+                    "Vão para a linha mais antiga ou para a mais nova. Na mais nova, o registro volta a acompanhar."
+                }
+                Key::ComponentLogLineGuidance => {
+                    "Use uma linha de registro para cada linha de um `Log`. Ela diz quando a linha foi escrita, o quanto importa, de onde veio e o que diz."
+                }
+                Key::ComponentLogLineA11yNotes => {
+                    "A linha não tem papel. O nível é uma palavra, então o tom nunca é o único sinal. A origem é um nome, marcado `nd-identifier`."
+                }
+                Key::ComponentLogLinePropToneDoc => {
+                    "Com qual tom do sistema de cores o nível é pintado, como `danger` ou `warning`. Um nome que nenhuma família declara faz o build falhar. **Nunca o único sinal**: a palavra de `level` o carrega. Precisa de `level`."
+                }
+                Key::ComponentLogLinePropLevelDoc => {
+                    "O quanto a linha importa, numa palavra, como *erro* ou *aviso*. É desenhado antes da mensagem, numa caixa do `tone` da linha."
+                }
+                Key::ComponentLogLinePropTimeDoc => {
+                    "Quando a linha foi escrita, como `12:04:31.207`. É um `<time>`, então escreva como o HTML escreve uma hora."
+                }
+                Key::ComponentLogLinePropSourceDoc => {
+                    "De onde a linha veio, como `nc-kernel`. Um nome, desenhado como está escrito e nunca traduzido."
+                }
+                Key::ComponentLogLinePropChildrenDoc => {
+                    "A mensagem. Texto simples, ou um `MatchText` onde um filtro a encontrou."
+                }
                 Key::ComponentMarkA11yNotes => {
                     "Um realce que carrega sentido precisa de mais do que uma cor de fundo. A cor sozinha é invisível para quem não a distingue, então isto também muda o peso do texto."
                 }
@@ -28911,6 +29355,12 @@ impl Locale {
                 Key::PageSplitBody => {
                     "⟦Thee spliit, oonee paanee aand thee haandlee beetweeeen twoo. Thee shaaree oof thee fiirst paanee iis oonee nuumbeer. AA naarroow boox staacks thee paanees oor leeaavees oonee oouut, aand iit iis thee spliit's oown boox thaat iis meeaasuureed.⟧"
                 }
+                Key::PageLogSummary => {
+                    "⟦Shoow liinees aas theey aarriivee, aand keeeep thee neeweest iin viieew uuntiil thee reeaadeer scroolls aawaay.⟧"
+                }
+                Key::PageLogBody => {
+                    "⟦Thee loog aand oonee liinee oof iit. AA loog foolloows iits neeweest liinee uuntiil thee reeaadeer scroolls aawaay, aand foolloows aagaaiin aat thee eend. EEveery liinee iis iin thee doocuumeent, aand thee caalleer boouunds hoow maany.⟧"
+                }
                 Key::PageOptionListSummary => {
                     "⟦Leet uuseers waalk aa liist oof ooptiioons wiith thee keeybooaard aand choooosee oonee.⟧"
                 }
@@ -29351,6 +29801,12 @@ impl Locale {
                 }
                 Key::ComponentKeyCaptureSummary => {
                     "⟦Leet uuseers reecoord aa shoortcuut by preessiing iits keeys, aand shoow iit aas thoosee keeys.⟧"
+                }
+                Key::ComponentLogSummary => {
+                    "⟦Shoow liinees aas theey aarriivee, aand keeeep thee neeweest iin viieew uuntiil thee reeaadeer scroolls aawaay.⟧"
+                }
+                Key::ComponentLogLineSummary => {
+                    "⟦Shoow oonee liinee oof aa loog: iits tiimee, iits leeveel, iits soouurcee aand iits meessaagee.⟧"
                 }
                 Key::ComponentPromptSummary => {
                     "⟦Leet uuseers typee oon aa liinee wiith aa bloock cuursoor, aand seend whaat theey typeed.⟧"
@@ -30228,6 +30684,56 @@ impl Locale {
                 Key::ExampleKeyCaptureRefusal => {
                     "⟦Thee prooduuctiioon chaanneel aalreeaady uusees thiis shoortcuut.⟧"
                 }
+                Key::ExampleLogOverview => {
+                    "⟦AA daaeemoon's loog aas iit ruuns. Scrooll uup aand iit stoops foolloowiing, aand thee coontrool aat iits eend taakees yoouu baack too thee neeweest liinee.⟧"
+                }
+                Key::ExampleLogFollows => {
+                    "⟦Thee loog oopeens aat iits neeweest liinee aand keeeeps iit iin viieew. Scroolleed aawaay, iit staays wheeree yoouu aaree uuntiil yoouu reetuurn too thee eend.⟧"
+                }
+                Key::ExampleLogStill => {
+                    "⟦Wiith `foolloow` ooff, thee loog oopeens aat iits fiirst liinee aand staays wheeree thee reeaadeer puuts iit.⟧"
+                }
+                Key::ExampleLogNarrow => {
+                    "⟦IIn aa naarroow wiindoow eeaach liinee wraaps uundeer iitseelf. Noothiing scroolls siideewaays.⟧"
+                }
+                Key::ExampleLogRoomy => {
+                    "⟦Wiith roooom foor eeveery liinee, thee loog iis aat iits fiirst liinee aand iits eend aat ooncee. Noothiing ooffeers too reesuumee.⟧"
+                }
+                Key::ExampleLogLineLevels => {
+                    "⟦EEaach leeveel iis aa woord iin aa tiinteed boox. Thee toonee saays thee leeveel aagaaiin, neeveer aaloonee.⟧"
+                }
+                Key::ExampleLogLineParts => {
+                    "⟦AA paart leeft oouut leeaavees noo spaacee beehiind. AA leeveel wiith noo toonee iis draawn iin thee paagee's oown shaadee.⟧"
+                }
+                Key::ExampleLogLineLong => {
+                    "⟦AA paath haas noo spaacee too breeaak aat, soo iit breeaaks iinsiidee iitseelf. AA liinee breeaak iin thee meessaagee iis keept.⟧"
+                }
+                Key::ExampleLogLineFiltered => {
+                    "⟦Fiilteereed froom thee proompt liinee, thee meessaagee iis aa `MaatchTeext`, eeaach woord oof thee quueery maarkeed iin iits oown toonee.⟧"
+                }
+                Key::ExampleLogLabel => "⟦Daaeemoon loog⟧",
+                Key::ExampleLogRecord => "⟦Joouurnaal⟧",
+                Key::ExampleLogResume => "⟦Goo too thee neeweest⟧",
+                Key::ExampleLogLevelDebug => "⟦deebuug⟧",
+                Key::ExampleLogLevelInfo => "⟦iinfoo⟧",
+                Key::ExampleLogLevelWarning => "⟦waarniing⟧",
+                Key::ExampleLogLevelError => "⟦eerroor⟧",
+                Key::ExampleLogStarted => "⟦Staarteed, chaanneel deeveeloopmeent.⟧",
+                Key::ExampleLogStore => "⟦OOpeeneed thee loocaal stooree.⟧",
+                Key::ExampleLogCatalog => "⟦Reeaad 42 coommaands froom thee caataaloog.⟧",
+                Key::ExampleLogSocket => "⟦Liisteeniing oon thee loocaal soockeet.⟧",
+                Key::ExampleLogAttached => "⟦AA wiindoow aattaacheed.⟧",
+                Key::ExampleLogSlow => "⟦AA cliieent waas sloow too aansweer thee heeaartbeeaat.⟧",
+                Key::ExampleLogRan => "⟦Raan aa coommaand foor thee wiindoow.⟧",
+                Key::ExampleLogRefused => {
+                    "⟦AA pluugiin waas reefuuseed: iits caapaabiiliity iis noot graanteed.⟧"
+                }
+                Key::ExampleLogJournal => "⟦Thee reefuusaal waas wriitteen too thee joouurnaal.⟧",
+                Key::ExampleLogSnapshot => "⟦Saaveed thee iinteerfaacee's staatee.⟧",
+                Key::ExampleLogFull => "⟦Thee stooree iis niinee teenths fuull.⟧",
+                Key::ExampleLogHeartbeat => "⟦Heeaartbeeaat.⟧",
+                Key::ExampleLogLost => "⟦AA wiindoow stooppeed aansweeriing.⟧",
+                Key::ExampleLogMemory => "⟦AA pluugiin iis neeaar iits meemoory liimiit.⟧",
                 Key::ExamplePromptOverview => {
                     "⟦Thee proompt iis thee laast liinee oof aa fooooteer. Typee iin iit, theen preess EEnteer oor thee coontrool aat iits eend.⟧"
                 }
@@ -34032,6 +34538,61 @@ impl Locale {
                 }
                 Key::ComponentListItemPropChildrenDoc => {
                     "⟦Thee iiteem, oor thee deescriiptiioon oof thee teerm.⟧"
+                }
+                Key::ComponentLogGuidance => {
+                    "⟦UUsee aa loog foor liinees thaat aarriivee whiilee aa reeaadeer waatchees, suuch aas whaat aa proograam wriitees aas iit ruuns. IIt keeeeps thee neeweest liinee iin viieew uuntiil thee reeaadeer scroolls aawaay. Foor aa liist aa reeaadeer fiilteers aand choooosees froom, uusee `OOptiioonLiist`.⟧"
+                }
+                Key::ComponentLogA11yNotes => {
+                    "⟦Thee liinees aaree aa `roolee=\"loog\"` naameed by `laabeel`, aa pooliitee liivee reegiioon thaat reeaads eeaach liinee aaddeed. IIt iis aa taab stoop, soo thee keeybooaard caan scrooll iit. Thee reesuumee coontrool iis aa `<buuttoon>` oouutsiidee iit.⟧"
+                }
+                Key::ComponentLogPropNameDoc => {
+                    "⟦Whaat thiis loog iis, aas aa scriipt fiinds iit. Thee reegiioon oof liinees taakees thee iid `nd-loog-` foollooweed by thiis naamee. **Reequuiireed**.⟧"
+                }
+                Key::ComponentLogPropLabelDoc => {
+                    "⟦Thee naamee oof thee loog, iin thee reeaadeer's laanguuaagee, suuch aas *Daaeemoon loog*. IIt beecoomees `aariiaa-laabeel` oon thee reegiioon oof liinees. Reequuiireed.⟧"
+                }
+                Key::ComponentLogPropFollowDoc => {
+                    "⟦Wheetheer thee neeweest liinee iis keept iin viieew aas liinees aarriivee. OOn by deefaauult. OOff, thee loog staays wheeree thee reeaadeer puuts iit, aas aa reecoord dooees.⟧"
+                }
+                Key::ComponentLogPropResumeLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool thaat gooees too thee neeweest liinee aand foolloows aagaaiin, suuch aas *Goo too thee neeweest*. IIt shoows whiilee foolloowiing haas stooppeed. Neeeeds `foolloow`.⟧"
+                }
+                Key::ComponentLogPropChildrenDoc => {
+                    "⟦Thee liinees, ooldeest fiirst: aa `LoogLiinee` eeaach.⟧"
+                }
+                Key::ComponentLogStatePausedDoc => {
+                    "⟦Seet by thee scriipt whiilee foolloowiing haas stooppeed, beecaauusee thee reeaadeer scroolleed aawaay froom thee eend oor heeld aa seeleectiioon aas aa liinee aarriiveed. Thee reesuumee coontrool shoows.⟧"
+                }
+                Key::ComponentLogKeyArrowKeysPageUpPageDownName => {
+                    "⟦AArroow keeys / Paagee UUp / Paagee Doown⟧"
+                }
+                Key::ComponentLogKeyArrowKeysPageUpPageDownAction => {
+                    "⟦Scrooll thee liinees whiilee thee loog haas thee foocuus. Leeaaviing thee eend stoops foolloowiing.⟧"
+                }
+                Key::ComponentLogKeyHomeEndName => "⟦Hoomee / EEnd⟧",
+                Key::ComponentLogKeyHomeEndAction => {
+                    "⟦Goo too thee ooldeest liinee oor thee neeweest. AAt thee neeweest, thee loog foolloows aagaaiin.⟧"
+                }
+                Key::ComponentLogLineGuidance => {
+                    "⟦UUsee aa loog liinee foor eeaach liinee oof aa `Loog`. IIt saays wheen thee liinee waas wriitteen, hoow muuch iit maatteers, wheeree iit caamee froom aand whaat iit saays.⟧"
+                }
+                Key::ComponentLogLineA11yNotes => {
+                    "⟦Thee liinee haas noo roolee. IIts leeveel iis aa woord, soo thee toonee iis neeveer thee oonly siignaal. IIts soouurcee iis aa naamee, maarkeed `nd-iideentiifiieer`.⟧"
+                }
+                Key::ComponentLogLinePropToneDoc => {
+                    "⟦Whiich oof thee cooloouur systeem's toonees thee leeveel iis paaiinteed froom, suuch aas `daangeer` oor `waarniing`. AA naamee noo faamiily deeclaarees faaiils thee buuiild. **Neeveer thee oonly siignaal**: thee `leeveel` woord caarriiees iit. Neeeeds `leeveel`.⟧"
+                }
+                Key::ComponentLogLinePropLevelDoc => {
+                    "⟦Hoow muuch thee liinee maatteers, aas aa woord, suuch aas *eerroor* oor *waarniing*. IIt iis draawn beefooree thee meessaagee, iin aa boox oof thee liinee's `toonee`.⟧"
+                }
+                Key::ComponentLogLinePropTimeDoc => {
+                    "⟦Wheen thee liinee waas wriitteen, suuch aas `12:04:31.207`. IIt iis aa `<tiimee>`, soo wriitee iit aas HTML wriitees aa tiimee.⟧"
+                }
+                Key::ComponentLogLinePropSourceDoc => {
+                    "⟦Wheeree thee liinee caamee froom, suuch aas `nc-keerneel`. AA naamee, draawn aas iit iis wriitteen aand neeveer traanslaateed.⟧"
+                }
+                Key::ComponentLogLinePropChildrenDoc => {
+                    "⟦Thee meessaagee. Plaaiin teext, oor aa `MaatchTeext` wheeree aa fiilteer maatcheed iit.⟧"
                 }
                 Key::ComponentMarkA11yNotes => {
                     "⟦AA hiighliight thaat caarriiees meeaaniing neeeeds mooree thaan aa baackgroouund cooloouur. Cooloouur aaloonee iis iinviisiiblee too aa reeaadeer whoo caannoot diistiinguuiish iit, soo thiis aalsoo chaangees thee teext weeiight.⟧"

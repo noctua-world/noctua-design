@@ -173,6 +173,7 @@ pub const FILES: &[(&str, &str)] = &[
         "key-capture.js",
         include_str!(concat!("../", "dist/", "key-capture.js")),
     ),
+    ("log.js", include_str!(concat!("../", "dist/", "log.js"))),
     ("tabs.js", include_str!(concat!("../", "dist/", "tabs.js"))),
     (
         "date-input.js",

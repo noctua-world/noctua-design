@@ -314,6 +314,7 @@ of these carries measured rules, not description:
 | a drawer: what a collapsed one owes the keyboard, and what Escape says | `crates/noctua-design-runtime/src/drawer.js` |
 | a split: the line between two panes, its keys and its drag | `crates/noctua-design-runtime/src/split.js` |
 | a control that records a shortcut: the keys it takes, the order a chord is written in, a key's label | `crates/noctua-design-runtime/src/key-capture.js` |
+| a log: the end it follows, and what stops it | `crates/noctua-design-runtime/src/log.js` |
 | what both implementations must *do* | `spec/components/<name>.cases.toml`, and `crates/noctua-design-spec/src/conformance.rs` for the vocabulary a step may use |
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
@@ -1020,6 +1021,24 @@ script carry it, and the cases hold the three to one answer. The script relabels
 prints a character for the layout in use where the engine can say what it prints, and otherwise
 takes a captured key's own character when neither Alt nor Shift changed it. The caller's keys and
 the keys the script heard are two runs, and the script writes only the second.
+
+### The log
+
+**Every line is in the document, and the caller bounds how many.** `Log` is a `role="log"`
+region of `LogLine`s, oldest first, and nothing is virtualised, so finding in the page, selecting,
+copying and a screen reader's own reading reach every line. It is as tall as the box around it
+and scrolls what does not fit, so that box needs a height of its own, as a drawer's does.
+
+**It follows its end until the reader leaves it.** With `follow`, `dist/log.js` brings each line
+added into view. A reader who scrolls away from the end stops it, and so does a selection held
+inside the log when a line arrives, so the text being read or copied does not move. Back at the
+end it follows again, and the resume control takes the reader there. That control stands outside
+the region, because a control inside a `role="log"` would be read as a line. The script says
+`nd-log-follow` each time following changes, and never adds, removes or rewrites a line.
+
+**A line is inline parts a space apart**, so a selection copies one line of text a line and
+nothing a stylesheet draws. Its level is a word in a box tinted with its tone, in the page's own
+ink, and its source is a name, marked `nd-identifier`.
 
 ### Tones, bars, carousels, spectra
 

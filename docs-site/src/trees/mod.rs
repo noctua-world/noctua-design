@@ -70,6 +70,8 @@ mod lineage_figure;
 mod link;
 mod list;
 mod list_item;
+mod log;
+mod log_line;
 mod mark;
 mod match_text;
 mod menu;
@@ -202,6 +204,8 @@ pub(crate) fn for_component(name: &str) -> &'static [Tree] {
         "Link" => link::EXAMPLES,
         "List" => list::EXAMPLES,
         "ListItem" => list_item::EXAMPLES,
+        "Log" => log::EXAMPLES,
+        "LogLine" => log_line::EXAMPLES,
         "Mark" => mark::EXAMPLES,
         "MatchText" => match_text::EXAMPLES,
         "Menu" => menu::EXAMPLES,

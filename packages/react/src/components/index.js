@@ -52,6 +52,8 @@ export { LineageFigure } from "./lineage_figure.js";
 export { Link } from "./link.js";
 export { List } from "./list.js";
 export { ListItem } from "./list_item.js";
+export { Log } from "./log.js";
+export { LogLine } from "./log_line.js";
 export { Mark } from "./mark.js";
 export { MatchText } from "./match_text.js";
 export { Menu } from "./menu.js";

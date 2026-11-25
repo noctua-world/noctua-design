@@ -518,6 +518,16 @@ KeyCapture { name: "…", label: "…", value: "KeyH", … }"#,
         ),
     ),
     (
+        "log",
+        example!(
+            r#"Log { name: "…", label: "…", resume_label: "…",
+    LogLine { time: "…", tone: "…", level: "…", source: "…", "…" }
+    …
+}"#,
+            Key::ExampleLogOverview
+        ),
+    ),
+    (
         "option-list",
         example!(
             r#"OptionList { name: "…", label: "…", empty_label: "…",
@@ -759,6 +769,8 @@ pub(crate) fn for_component(name: &str) -> &'static [Example] {
         "SplitPane" => SPLIT_PANE,
         "SplitHandle" => SPLIT_HANDLE,
         "KeyCapture" => KEY_CAPTURE,
+        "Log" => LOG,
+        "LogLine" => LOG_LINE,
         "FooterLine" => FOOTER_LINE,
         "FooterCorner" => FOOTER_CORNER,
         "ListItem" => LIST_ITEM,
@@ -2493,6 +2505,41 @@ const KEY_CAPTURE: &[Example] = &[
     example!(
         r"KeyCapture { disabled: true, … }",
         Key::ExampleKeyCaptureLocked
+    ),
+];
+
+// --- Log and LogLine --------------------------------------------------------
+//
+// A LOG FOLLOWS ITS END ONLY IN A BOX WITH ONE. The logs stand in
+// `.nd-example-window`, so each is bounded and has an end to follow. The lines
+// alone stand in logs that do not follow, as tall as what is in them.
+
+const LOG: &[Example] = &[
+    example!(
+        r#"Log { name: "…", label: "…", resume_label: "…", LogLine { … } … }"#,
+        Key::ExampleLogFollows
+    ),
+    example!(r"Log { follow: false, … }", Key::ExampleLogStill),
+    example!(r"Log { … } in a narrow window", Key::ExampleLogNarrow),
+    example!(r"Log { … } with room for every line", Key::ExampleLogRoomy),
+];
+
+const LOG_LINE: &[Example] = &[
+    example!(
+        r#"LogLine { time: "…", tone: "…", level: "…", source: "…", "…" }"#,
+        Key::ExampleLogLineLevels
+    ),
+    example!(
+        r#"LogLine { level: "…", "…" } / LogLine { "…" }"#,
+        Key::ExampleLogLineParts
+    ),
+    example!(
+        r"LogLine { … } with a word longer than the line, and a line break",
+        Key::ExampleLogLineLong
+    ),
+    example!(
+        r#"LogLine { MatchText { text: "…", hits: "…" } }"#,
+        Key::ExampleLogLineFiltered
     ),
 ];
 

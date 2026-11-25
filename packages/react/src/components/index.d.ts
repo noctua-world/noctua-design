@@ -52,6 +52,8 @@ export { LineageFigure, type LineageFigureProps } from "./lineage_figure.js";
 export { Link, type LinkProps } from "./link.js";
 export { List, type ListProps } from "./list.js";
 export { ListItem, type ListItemProps } from "./list_item.js";
+export { Log, type LogProps } from "./log.js";
+export { LogLine, type LogLineProps } from "./log_line.js";
 export { Mark, type MarkProps } from "./mark.js";
 export { MatchText, type MatchTextProps } from "./match_text.js";
 export { Menu, type MenuProps } from "./menu.js";

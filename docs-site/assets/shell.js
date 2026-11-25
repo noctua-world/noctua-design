@@ -159,6 +159,7 @@ import { enhancePrompts, releasePrompts } from "./prompt.js";
 import { enhanceDrawers, releaseDrawers } from "./drawer.js";
 import { enhanceSplits, releaseSplits } from "./split.js";
 import { enhanceKeyCaptures, releaseKeyCaptures } from "./key-capture.js";
+import { enhanceLogs, releaseLogs } from "./log.js";
 import { enhanceTabs, releaseTabs } from "./tabs.js";
 import { enhanceDateInputs, releaseDateInputs } from "./date-input.js";
 import { enhanceSearches, releaseSearches } from "./search.js";
@@ -1658,6 +1659,7 @@ export function enhanceAll(root = document) {
   enhanceDrawers(root);
   enhanceSplits(root);
   enhanceKeyCaptures(root);
+  enhanceLogs(root);
   collapseBlocks(root);
   enhanceDateInputs(root);
   enhanceDatePickers(root);
@@ -1870,6 +1872,7 @@ export function releaseAll(root = document) {
   // nothing: it reads the declared cap and writes one attribute on the block,
   // which goes when the block does. The gap is named here rather than filled
   // with an empty function, so the two lists still read against each other.
+  releaseLogs(root);
   releaseKeyCaptures(root);
   releaseSplits(root);
   releaseDrawers(root);

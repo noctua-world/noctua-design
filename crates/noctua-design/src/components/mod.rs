@@ -55,6 +55,8 @@ mod lineage_figure;
 mod link;
 mod list;
 mod list_item;
+mod log;
+mod log_line;
 mod mark;
 mod match_text;
 mod menu;
@@ -169,6 +171,8 @@ pub use lineage_figure::{
 pub use link::{Link, LinkTone};
 pub use list::{List, ListKind, ListMarker, ListSpacing};
 pub use list_item::ListItem;
+pub use log::Log;
+pub use log_line::LogLine;
 pub use mark::Mark;
 pub use match_text::MatchText;
 pub use menu::{Menu, MenuPlacement};
