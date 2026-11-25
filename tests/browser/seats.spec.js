@@ -15,6 +15,14 @@
 // stage. A hand-written list of "the interactive components" would be a list
 // that is one component short the day one is added.
 //
+// AND AN ELEMENT IS TAKEN FOR A SELECTOR ONLY IF THE WHOLE SELECTOR DRAWS ON
+// SOMETHING WHEN THAT ELEMENT IS IN THE STATE. `.nd-switch[aria-checked="true"]
+// :hover > .nd-switch-track[data-nd-glass="true"]` is about the one checked
+// switch that is glass, not the first two that are checked: the part after the
+// state is part of the rule, and two rules that differ only there are two
+// rules. So a selector is known here by its whole text, and it counts as
+// compared only once it matched while the pointer or the keyboard was there.
+//
 // WHAT IS SHUT IS OPENED FOR IT, BY THE SWEEP AND NOT BY THE COMPONENT. A menu's
 // items, a dialog's close control and a colour picker's sliders are in the page
 // and drawn nowhere until something opens the panel around them, and a sweep
@@ -29,6 +37,11 @@
 // every page the way they do and holds the state selectors nothing reached to
 // a list written out below, `UNSEEN`, one reason each. A selector the sweeps
 // stop reaching fails there, and so does a listed one they start to reach.
+//
+// A SAMPLE, AND SAID TO BE ONE: `PER_SELECTOR` elements a page for each
+// selector, the first the page has that the selector draws on. A defect that
+// shows only on a later one — a third variant of a control that the rule's own
+// selector does not tell apart — is not photographed.
 //
 // THE COMPARISON IS WHOLE-VIEWPORT AND EXACT. A hover may repaint a child, a
 // sibling or the box around the control, so the control's own rectangle is the
@@ -86,6 +99,30 @@ async function prepare(page) {
   await page.addStyleTag({
     content: 'input, textarea, [contenteditable="true"] { will-change: transform; }',
   });
+  // AND EVERY IMAGE IS IN BEFORE ANYTHING IS PHOTOGRAPHED. The examples'
+  // portraits are `loading="lazy"`, so opening a fold or scrolling a control
+  // to the middle STARTS a request, and the picture that lands between the
+  // native photograph and the seat's is counted as a seat that drew something
+  // else: measured on `/avatars/` under a loaded machine, two initials in one
+  // picture and two portraits in the other, 3084 pixels, on a focus ring that
+  // was the same in both. Nothing is lazy from here on, and nothing is still
+  // arriving. A portrait that fails to load has failed in both pictures.
+  await page.evaluate(async () => {
+    const images = [...document.images];
+    for (const image of images) image.loading = "eager";
+    await Promise.all(
+      images.map(async (image) => {
+        if (!image.complete) {
+          await new Promise((done) => {
+            image.addEventListener("load", done, { once: true });
+            image.addEventListener("error", done, { once: true });
+          });
+        }
+        await image.decode().catch(() => {});
+      }),
+    );
+    await document.fonts.ready;
+  });
   await page.evaluate(async () => {
     const tag = document.querySelector('script[type="module"][src*="shell.js"]');
     const seats = await import(new URL("seats.js", tag.src).href);
@@ -136,9 +173,20 @@ async function prepare(page) {
     };
 
     const STATE = /:(?:hover|focus-visible|focus-within|focus|active)(?![-\w])/;
+    const STATES = new RegExp(STATE.source, "g");
+
+    // What stands for "this element, in the state" while a selector is asked
+    // whether it would draw on anything then.
+    const MARK = "data-nd-seat-probe";
+
+    /** A selector without the pseudo-element it ends in, which no query takes. */
+    const queryable = (selector) => selector.replace(/::[\w-]+(?:\([^()]*\))?$/, "");
 
     /**
-     * The selectors that reach a state, as `[state, target selector, whole]`.
+     * The selectors that reach a state, each as its state, where its subjects
+     * are found (`outer`, and `inner` for a state inside `:has(`), and three
+     * spellings of the whole of it: as the sheet has it, as a query can ask it,
+     * and with `MARK` where the state was.
      *
      * The twin form is folded back to the bare pseudo-class first, so a rule
      * reads the same here whichever of the two ways the stylesheet wrote it.
@@ -173,15 +221,40 @@ async function prepare(page) {
           }
           if (!outer.trim() || /[>+~\s]$/.test(outer)) outer += "*";
           if (inner && /[>+~\s]$/.test(inner)) inner += "*";
-          // The name the selector goes by in `UNSEEN` and in a failure: the
-          // part before the state, then the state.
-          const name = inner
-            ? `${outer}:has(${inner.slice(":scope ".length)}${hit[0]})`
-            : `${outer}${hit[0]}`;
-          found.set(name, [hit[0].slice(1), outer, inner, selector, name]);
+          // THE WHOLE SELECTOR IS ITS NAME, in `UNSEEN` and in a failure. Up to
+          // the state, two rules that part ways after it were one name and one
+          // of them was never asked about.
+          const after = selector.slice(hit.index + hit[0].length).replace(STATES, "");
+          found.set(selector, {
+            state: hit[0].slice(1),
+            outer,
+            inner,
+            name: selector,
+            live: queryable(selector),
+            marked: queryable(`${before}[${MARK}]${after}`),
+          });
         }
       }
       return [...found.values()];
+    };
+
+    /**
+     * Whether a selector would draw on anything with `subject` in the state.
+     *
+     * Asked of the page as it stands, with the mark on the subject where the
+     * state was: `.nd-lineage-pick:focus-visible ~ .nd-lineage-note` draws only
+     * for a pick that has a note after it. A selector the mark makes unreadable
+     * is not refused an element on that account.
+     */
+    const draws = (subject, marked) => {
+      subject.setAttribute(MARK, "");
+      try {
+        return document.querySelector(marked) !== null;
+      } catch {
+        return true;
+      } finally {
+        subject.removeAttribute(MARK);
+      }
     };
 
     /** The elements a state selector is about, inside an example's stage. */
@@ -281,14 +354,17 @@ async function prepare(page) {
        * Marks up to `limit` elements per selector for the wanted states and
        * answers how many it marked. `ready` says whether one can be driven,
        * and is asked with whatever is shut around the element opened.
+       *
+       * The `limit` is spent only on elements the whole selector draws on.
        */
       choose(states, limit, ready) {
         chosen.length = 0;
-        for (const [state, outer, inner, selector, name] of stated()) {
+        for (const { state, outer, inner, name, live, marked } of stated()) {
           if (!states.includes(state)) continue;
           let taken = 0;
           for (let subject of subjects(outer, inner)) {
             if (taken === limit) break;
+            if (!draws(subject, marked)) continue;
             // `:focus-within` is reached from inside: the thing to focus is the
             // first control in the box, or the box itself where it is one.
             if (state === "focus-within" && !subject.matches(FOCUSABLE)) {
@@ -299,7 +375,7 @@ async function prepare(page) {
             // picture is of the whole viewport, so every rule on it is in it.
             const already = chosen.find((entry) => entry.element === subject);
             if (already) {
-              already.names.add(name);
+              already.names.set(name, live);
               taken += 1;
               continue;
             }
@@ -307,7 +383,7 @@ async function prepare(page) {
             const fit = ready(subject);
             conceal();
             if (!fit) continue;
-            chosen.push({ element: subject, selector, names: new Set([name]) });
+            chosen.push({ element: subject, selector: name, names: new Map([[name, live]]) });
             taken += 1;
           }
         }
@@ -320,7 +396,6 @@ async function prepare(page) {
        */
       show(index) {
         const entry = chosen[index];
-        entry.opened = !rendered(entry.element);
         const conceal = reveal(entry.element);
         const placed = [];
         entry.seen = bring(entry.element, placed);
@@ -335,7 +410,7 @@ async function prepare(page) {
         chosen[index].conceal = null;
       },
       /**
-       * Resolves once what `show` opened has finished arriving.
+       * Resolves once whatever `show` set off has finished arriving.
        *
        * OPENING IS NOT OVER WHEN THE ATTRIBUTE IS SET. A `<details>` fires its
        * `toggle` from a task of its own, and what answers it may ask for a
@@ -345,27 +420,46 @@ async function prepare(page) {
        * `/example-frame/` under a loaded machine, one swatch and 120 pixels —
        * and two screenshots agreeing in a row says nothing about a request
        * still in flight.
+       *
+       * ASKED EVERY TIME, opened or not. Scrolling an element to the middle
+       * is enough to set a request off, and which elements that is true of is
+       * not something to keep a list of; what is waited for is whatever the
+       * page says it has not got yet — a stylesheet with no sheet, an image
+       * that is not complete — and on a page that has everything this is two
+       * frames.
        */
-      async settle(index) {
-        if (!chosen[index].opened) return;
+      async settle() {
         await new Promise((done) => {
           requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(done)));
         });
-        const loading = [...document.querySelectorAll('link[rel~="stylesheet"]')].filter(
-          (link) => !link.sheet,
-        );
+        const arriving = [
+          ...[...document.querySelectorAll('link[rel~="stylesheet"]')].filter((link) => !link.sheet),
+          ...[...document.images].filter((image) => !image.complete),
+        ];
         await Promise.all(
-          loading.map(
-            (link) =>
+          arriving.map(
+            (part) =>
               new Promise((done) => {
-                link.addEventListener("load", done, { once: true });
-                link.addEventListener("error", done, { once: true });
+                part.addEventListener("load", done, { once: true });
+                part.addEventListener("error", done, { once: true });
               }),
           ),
         );
+        if (arriving.length > 0) {
+          await new Promise((done) => {
+            requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(done)));
+          });
+        }
       },
-      /** The selectors one of the chosen stands for. */
-      names: (index) => [...chosen[index].names],
+      /**
+       * The selectors one of the chosen is drawn by AT THIS MOMENT: asked with
+       * the pointer or the keyboard on it, each whole selector either matches
+       * something now or was not compared.
+       */
+      drawn: (index) =>
+        [...chosen[index].names]
+          .filter(([, live]) => document.querySelector(live) !== null)
+          .map(([name]) => name),
       rendered,
     };
   });
@@ -495,10 +589,11 @@ async function hoverSweep(page, compare = async () => {}) {
           const { element, selector } = window.__seatProbe.at(at);
           return `${selector}  on  ${element.outerHTML.slice(0, 120)}`;
         }, index);
+        // Asked now, while the pointer is there, and before the comparison
+        // moves it.
+        const drawn = await page.evaluate((at) => window.__seatProbe.drawn(at), index);
         await compare({ index, point, rest, label });
-        for (const name of await page.evaluate((at) => window.__seatProbe.names(at), index)) {
-          reached.add(name);
-        }
+        for (const name of drawn) reached.add(name);
       }
       await page.mouse.move(...rest);
     }
@@ -542,10 +637,17 @@ async function focusSweep(page, compare = async () => {}) {
       return `${selector}  on  ${element.outerHTML.slice(0, 120)}`;
     }, index);
     if (label !== null) {
+      // The keyboard is put there once to ask which rules draw then, and taken
+      // away again: the comparison starts from rest.
+      const drawn = await page.evaluate((at) => {
+        const { element } = window.__seatProbe.at(at);
+        element.focus({ preventScroll: true });
+        const names = element.matches(":focus-visible") ? window.__seatProbe.drawn(at) : [];
+        element.blur();
+        return names;
+      }, index);
       await compare({ index, label });
-      for (const name of await page.evaluate((at) => window.__seatProbe.names(at), index)) {
-        reached.add(name);
-      }
+      for (const name of drawn) reached.add(name);
     }
     await page.evaluate((at) => window.__seatProbe.hide(at), index);
   }
@@ -629,8 +731,9 @@ for (const [name, path] of Object.entries(PAGE)) {
  * exceptions beside it. The test below holds the sweeps to exactly this list.
  *
  * ONE REASON COVERS ALL OF THEM TODAY: no example on any page in `pages.js`
- * renders an element the selector is about, so there is nothing to put a
- * pointer or a keyboard on. `seat_twin` still holds each of these rules to its
+ * renders an element the whole selector draws on, so there is nothing to put a
+ * pointer or a keyboard on. Each is listed by its whole text, as the sheet has
+ * it with the twin folded back to the pseudo-class. `seat_twin` still holds each of these rules to its
  * twin in the source; what is missing is the photograph. An entry leaves this
  * list when an example that shows it arrives, and the test says so.
  */
@@ -669,7 +772,7 @@ test("the sweeps above compare every state selector but the ones listed", async 
   for (const path of Object.values(PAGE)) {
     await page.goto(url(path));
     await prepare(page);
-    all = await page.evaluate(() => window.__seatProbe.stated().map((entry) => entry[4]));
+    all = await page.evaluate(() => window.__seatProbe.stated().map((entry) => entry.name));
     for (const sweep of [hoverSweep, focusSweep]) {
       for (const name of (await sweep(page)).reached) reached.add(name);
     }

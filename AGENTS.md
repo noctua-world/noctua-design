@@ -513,16 +513,25 @@ and a rule asks only whether the attribute is present, never for a seat by its i
 `gates::seat_twin` holds the rule from both sides: it refuses a state pseudo-class written any
 other way, a seat attribute inside `@media (hover: hover)`, and a seat attribute outside the twin
 form whose native rule, with the same declarations, is not in the file. `data-nd-seat-drag` stands
-for no pseudo-class and owes no native rule.
+for no pseudo-class and owes no native rule. **The gate reads text, so two spellings are fixed.**
+The hover query is written exactly `@media (hover: hover)`: a state rule or a seat attribute behind
+any other question about hovering (`(hover)`, `(any-hover: hover)`, `(hover: hover) and
+(pointer: fine)`) is refused, and a second condition is a second `@media` around the first. And a
+state pseudo-class and a seat attribute are written lower-case with no blank space inside the
+brackets; `:HOVER` and `[ data-nd-seat-hover]` mean the same to an engine and are refused.
 
 **The pictures are the other half.** `tests/browser/seats.spec.js` reads the state selectors out
 of the built `components.css`, puts the pointer and then the keyboard on the elements each is
 about, on every page in `tests/browser/pages.js`, and requires the same pixels from the seat
-attribute. A panel that is shut is opened for the comparison by the spec itself. One test there
-holds what the sweeps reached to `UNSEEN`, the selectors no example renders, listed there by name:
-a state rule for something no example shows is added to that list or given an example, and the
-test fails until one is done. There is no sweep for `:active`, so the first rule on it fails
-there too and brings its sweep with it.
+attribute. A panel that is shut is opened for the comparison by the spec itself. A selector is
+known there by its whole text: an element is taken for it only if the whole selector, tail
+included, draws on something with that element in the state, and it counts as compared only if it
+matched while the pointer or the keyboard was there. One test holds what the sweeps reached to
+`UNSEEN`, the selectors no example renders, listed there by name: a state rule for something no
+example shows is added to that list or given an example, and the test fails until one is done.
+**It is a sample**: two elements a page for each selector, the first the selector draws on, so a
+defect only a later element shows is not photographed. There is no sweep for `:active`, so the
+first rule on it fails there too and brings its sweep with it.
 
 **Nothing writes the attributes by hand**: `dist/seats.js` stamps them where the pseudo-class
 would match — `seatHover`, `seatFocus`, `seatPress`, `seatDrag` and `clearSeat`, or an `nd-seat`

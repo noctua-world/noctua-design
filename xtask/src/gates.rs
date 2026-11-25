@@ -977,13 +977,50 @@ fn seat_native(selector: &str) -> (usize, Vec<String>) {
     }
 }
 
-/// Whether an at-rule prelude asks only whether the pointer can hover.
+/// Whether an at-rule prelude asks only whether the pointer can hover, in the
+/// one spelling a component stylesheet writes that in.
 fn is_hover_query(prelude: &str) -> bool {
     prelude
         .chars()
         .filter(|c| !c.is_whitespace())
         .collect::<String>()
-        == "@media(hover:hover)"
+        .eq_ignore_ascii_case("@media(hover:hover)")
+}
+
+/// Whether a media query asks anything at all about hovering: `hover` or
+/// `any-hover`, with a value or without, alone or among other features.
+///
+/// Read by its text, because every spelling of the question has the word in
+/// it and no other media feature does.
+fn asks_about_hover(prelude: &str) -> bool {
+    let prelude = prelude.to_ascii_lowercase();
+    prelude.starts_with("@media") && prelude.contains("hover")
+}
+
+/// How many state pseudo-classes and how many seat attributes a selector
+/// holds, read without regard to case.
+///
+/// The count [`seat_sibling`] and [`seat_native`] are held to. Both read the
+/// exact text, and CSS does not: `:HOVER` is `:hover` to an engine, and so is
+/// `[ data-nd-seat-hover]` the attribute. A spelling the exact readers pass
+/// over is a state nobody checked, so [`seat_twin`] refuses any selector in
+/// which this finds more than they did.
+fn seat_mentions(selector: &str) -> (usize, usize) {
+    let lower = selector.to_ascii_lowercase();
+    let mut states = 0usize;
+    let mut rest = lower.as_str();
+    'scan: while let Some(at) = rest.find(':') {
+        rest = &rest[at..];
+        for (name, _, _) in SEAT_TWINS {
+            if starts_pseudo(rest, name) {
+                states += 1;
+                rest = &rest[name.len()..];
+                continue 'scan;
+            }
+        }
+        rest = &rest[1..];
+    }
+    (states, lower.matches(&SEAT_ATTRIBUTE[1..]).count())
 }
 
 /// What is wrong with a rule on a seat attribute outside the twin form, if
@@ -1020,6 +1057,33 @@ fn seat_orphan(rule: &StyleRule, rules: &[StyleRule], natives: &[String]) -> Opt
     ))
 }
 
+/// What keeps [`seat_twin`] from reading a rule at all, if anything does: a
+/// state or a seat attribute in a spelling its exact readers pass over
+/// (`mentions` is [`seat_mentions`]'s count, `written` is [`seat_sibling`]'s),
+/// or a question about hovering around it that is not [`is_hover_query`]'s.
+fn seat_unread(rule: &StyleRule, written: usize, mentions: (usize, usize)) -> Option<String> {
+    let (states, attributes) = mentions;
+    if states != written || attributes != rule.selector.matches(SEAT_ATTRIBUTE).count() {
+        return Some(format!(
+            "`{}` spells a state pseudo-class or a seat attribute in a way this gate does not \
+             read, so nothing holds it to its twin (NOCTUA.md §9.7). Write the names lower-case \
+             and with no blank space inside the brackets: `:hover`, `[data-nd-seat-hover]`",
+            rule.selector
+        ));
+    }
+    let query = rule
+        .context
+        .iter()
+        .find(|prelude| asks_about_hover(prelude) && !is_hover_query(prelude))?;
+    Some(format!(
+        "`{}` stands behind `{query}`, a question about hovering this gate cannot hold a \
+         seat's rule to: a seat attribute inside it waits on the window's own pointer \
+         (NOCTUA.md §9.7). Write the query as exactly `@media (hover: hover)`, with any other \
+         condition in a `@media` of its own around it",
+        rule.selector
+    ))
+}
+
 /// Every interactive state is reachable for a second seat.
 ///
 /// # What it holds
@@ -1048,7 +1112,12 @@ fn seat_orphan(rule: &StyleRule, rules: &[StyleRule], natives: &[String]) -> Opt
 /// a rule. No seat attribute stands inside `@media (hover: hover)` in either
 /// form, because there the second seat's state waits on the window's own
 /// pointer, which is the one thing the sibling exists to be free of — and a
-/// desktop browser, where that query always matches, cannot show it. And an
+/// desktop browser, where that query always matches, cannot show it. THAT
+/// QUERY HAS ONE SPELLING HERE, so that this can be read off the text: a state
+/// rule or a seat attribute behind any other question about hovering —
+/// `(hover)`, `(any-hover: hover)`, `(hover: hover) and (pointer: fine)` — is
+/// refused whatever is inside, and a second condition is a second `@media`
+/// around the first. And an
 /// attribute outside the twin form has its native rule: the same selector on
 /// the pseudo-class, the same declarations, in this file. A sibling whose
 /// native rule was deleted, or an attribute rule written alone, draws a seat
@@ -1056,6 +1125,10 @@ fn seat_orphan(rule: &StyleRule, rules: &[StyleRule], natives: &[String]) -> Opt
 ///
 /// A PASS OF ITS OWN, BECAUSE IT READS THE STYLESHEET WHOLE. Whether a rule has
 /// its sibling is a question about two rules, and no line can answer it.
+///
+/// THE NAMES ARE READ AS WRITTEN HERE, LOWER-CASE AND WITHOUT BLANK SPACE, and
+/// a selector that spells a state or a seat attribute any other way an engine
+/// would still accept is refused rather than passed unread ([`seat_mentions`]).
 ///
 /// Returns how many state pseudo-classes it read, so a caller can tell a pass
 /// from a sweep that looked at nothing.
@@ -1069,9 +1142,10 @@ fn seat_twin(file: &str, text: &str, findings: &mut Vec<Finding>) -> usize {
 
     for rule in &rules {
         let (written, bare, sibling) = seat_sibling(&rule.selector);
-        checked += written;
+        let (states, attributes) = seat_mentions(&rule.selector);
+        checked += states;
         let (loose, natives) = seat_native(&rule.selector);
-        if bare == 0 && loose == 0 && !rule.selector.contains(SEAT_ATTRIBUTE) {
+        if states == 0 && attributes == 0 {
             continue;
         }
         let (first, last) = rule.lines;
@@ -1079,6 +1153,14 @@ fn seat_twin(file: &str, text: &str, findings: &mut Vec<Finding>) -> usize {
             .get(first - 1..last)
             .is_some_and(|prelude| prelude.iter().any(|line| line.contains(ALLOW)))
         {
+            continue;
+        }
+        if let Some(message) = seat_unread(rule, written, (states, attributes)) {
+            findings.push(Finding {
+                file: file.to_owned(),
+                line: first,
+                message,
+            });
             continue;
         }
         if rule.selector.contains(SEAT_ATTRIBUTE)
@@ -1791,6 +1873,93 @@ mod tests {
             assert_eq!(lines, expected, "{why}");
             assert!(findings[0].message.contains("pseudo-class alone"), "{why}");
         }
+    }
+
+    /// Every other way of asking whether a pointer hovers is refused where a
+    /// state rule or a seat attribute stands behind it, because the reader of
+    /// the hover query knows one spelling: under any of these a twin form, or
+    /// a bare rule with its sibling beside it, would otherwise pass with the
+    /// seat's state waiting on the window's own pointer.
+    #[test]
+    fn a_hover_query_in_another_spelling_is_a_finding() {
+        const TWIN: &str = ".a:is(:hover, [data-nd-seat-hover]) { color: inherit; }";
+        const PAIR: &str =
+            ".a:hover { color: inherit; }\n  .a[data-nd-seat-hover] { color: inherit; }";
+        for (query, inside, expected) in [
+            ("@media (hover)", TWIN, vec![2]),
+            ("@media (any-hover: hover)", TWIN, vec![2]),
+            ("@media screen and (hover: hover)", TWIN, vec![2]),
+            ("@media (hover: hover) and (pointer: fine)", TWIN, vec![2]),
+            (
+                "@media (hover: hover) and (min-width: 48rem)",
+                TWIN,
+                vec![2],
+            ),
+            (
+                "@media (HOVER: HOVER) and (min-width: 48rem)",
+                TWIN,
+                vec![2],
+            ),
+            ("@media (hover: none)", TWIN, vec![2]),
+            (
+                "@media (hover: hover) and (pointer: fine)",
+                PAIR,
+                vec![2, 3],
+            ),
+            ("@media (any-hover: hover)", PAIR, vec![2, 3]),
+        ] {
+            let (findings, checked) = seats(&format!("{query} {{\n  {inside}\n}}"));
+            let lines: Vec<usize> = findings.iter().map(|finding| finding.line).collect();
+            assert_eq!(lines, expected, "{query}");
+            assert_eq!(checked, 1, "{query}");
+            for finding in &findings {
+                assert!(
+                    finding.message.contains("question about hovering"),
+                    "{query}: {}",
+                    finding.message
+                );
+            }
+        }
+        // The one spelling, nested in the other condition, is the way to write
+        // it, and a rule with no state in it is nobody's concern here.
+        let (findings, checked) = seats(
+            "@media (min-width: 48rem) {\n  @media (hover: hover) {\n    .a:hover { color: inherit; }\n  }\n  \
+             .a[data-nd-seat-hover] { color: inherit; }\n}\n\
+             @media (hover: hover) and (pointer: fine) {\n  .a { color: inherit; }\n}",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 1);
+    }
+
+    /// An engine reads a pseudo-class without regard to case and allows blank
+    /// space inside the brackets; the gate reads exact text. What it would
+    /// pass over unread is refused, and counted.
+    #[test]
+    fn a_state_or_an_attribute_in_a_spelling_the_gate_does_not_read_is_a_finding() {
+        for (wrong, counted) in [
+            (".a:HOVER { color: inherit; }", 1),
+            (".a:Focus-Visible { outline: none; }", 1),
+            (".a:is(:HOVER, [data-nd-seat-hover]) { color: inherit; }", 1),
+            (".a[ data-nd-seat-hover] { color: inherit; }", 0),
+            (".a[DATA-ND-SEAT-HOVER] { color: inherit; }", 0),
+            (
+                ".a:is(:hover, [ data-nd-seat-hover ]) { color: inherit; }",
+                1,
+            ),
+        ] {
+            let (findings, checked) = seats(wrong);
+            assert_eq!(findings.len(), 1, "{wrong}: {findings:?}");
+            assert!(
+                findings[0].message.contains("does not read"),
+                "{wrong}: {}",
+                findings[0].message
+            );
+            assert_eq!(checked, counted, "{wrong}");
+        }
+        // A class that merely contains the word is not a state.
+        let (findings, checked) = seats(".a-hover, .HOVER { color: inherit; }");
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 0);
     }
 
     /// The hover query is the window's own pointer speaking, and a seat

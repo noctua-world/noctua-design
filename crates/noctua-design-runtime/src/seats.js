@@ -27,9 +27,12 @@
 // of it, and the control a `<label>` among them names — `.nd-switch:hover >
 // .nd-switch-track` is a rule on the PARENT of what the pointer is over — so
 // those two are stamped up the whole chain. `:focus-visible` matches one
-// element, and its ancestors are reached by `:focus-within`, whose twin is
-// `:has([data-nd-seat-focus])`: stamping the chain there would draw a focus ring
-// round every box between the control and the document.
+// element, and its ancestors are reached by `:focus-within`, which matches the
+// focused element as well as everything above it. So that one's twin asks for
+// the attribute on the element or on anything inside it —
+// `:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus]))` —
+// and nothing is stamped up the chain: that would draw a focus ring round
+// every box between the control and the document.
 //
 // WHAT IT DOES NOT DO: find the seats. How a system delivers a second pointer
 // is the host's to know (`NOCTUA.md §5.12`); the host calls these with the
