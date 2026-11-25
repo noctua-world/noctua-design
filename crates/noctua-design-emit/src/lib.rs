@@ -591,6 +591,7 @@ mod tests {
                     noctua_design_runtime::TAG_PICKER_SOURCE,
                     noctua_design_runtime::TREE_SOURCE,
                     noctua_design_runtime::OPTION_LIST_SOURCE,
+                    noctua_design_runtime::PROMPT_SOURCE,
                     noctua_design_runtime::TABS_SOURCE,
                     noctua_design_runtime::DATE_INPUT_SOURCE,
                     noctua_design_runtime::CHOICE_SOURCE,

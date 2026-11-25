@@ -195,6 +195,8 @@ pub mod duration {
     pub const BASE: &str = "var(--noctua-duration-base)";
     /// `280ms` normally, `0ms` under reduced motion.
     pub const SLOW: &str = "var(--noctua-duration-slow)";
+    /// `1000ms` normally, `0ms` under reduced motion.
+    pub const BLINK: &str = "var(--noctua-duration-blink)";
 }
 
 /// Easing curves.

@@ -313,6 +313,7 @@ pub fn is_custom(component: &Component) -> bool {
             | "OptionGroup"
             | "OptionItem"
             | "FooterLine"
+            | "Prompt"
     )
 }
 
@@ -362,6 +363,7 @@ pub fn dioxus_body(sink: &mut String, component: &Component) {
         "OptionGroup" => out.push_str(OPTION_GROUP_DIOXUS),
         "OptionItem" => out.push_str(OPTION_ITEM_DIOXUS),
         "FooterLine" => out.push_str(FOOTER_LINE_DIOXUS),
+        "Prompt" => out.push_str(PROMPT_DIOXUS),
         "Menu" => out.push_str(MENU_DIOXUS),
         "MenuItem" => out.push_str(MENU_ITEM_DIOXUS),
         "Meter" => out.push_str(METER_DIOXUS),
@@ -452,6 +454,7 @@ pub fn react_body(sink: &mut String, component: &Component) {
         "OptionGroup" => out.push_str(OPTION_GROUP_REACT),
         "OptionItem" => out.push_str(OPTION_ITEM_REACT),
         "FooterLine" => out.push_str(FOOTER_LINE_REACT),
+        "Prompt" => out.push_str(PROMPT_REACT),
         "Menu" => out.push_str(MENU_REACT),
         "MenuItem" => out.push_str(MENU_ITEM_REACT),
         "Meter" => out.push_str(METER_REACT),
@@ -4053,6 +4056,144 @@ const FOOTER_LINE_REACT: &str = r#"  const kind_ = kind ?? "modeline";
   );
 "#;
 
+// --- Prompt -----------------------------------------------------------------
+
+/// The line a reader types on, with a block for a cursor.
+///
+/// # Three things in a row
+///
+/// The glyph a prompt starts with, the text, and the send control it ends in
+/// (`NOCTUA.md §12.7`). The glyph is decoration and hidden from a screen
+/// reader, and the send control is a real `Button` that shows only its icon.
+///
+/// # Two boxes in one cell
+///
+/// The textarea and the mirror share a grid cell, textarea first, so the
+/// mirror paints over it and the block covers the letter it stands on. The
+/// mirror ships empty: `dist/prompt.js` fills it, and its header is the
+/// technique. The mirror is `aria-hidden`, so the text is read once.
+///
+/// # `dir="auto"` on both
+///
+/// A reader who types in a script written from the right gets the line laid
+/// out from the right. Both boxes take their direction from the same text, so
+/// they agree without either being told.
+///
+/// # The list it drives is named on the textarea
+///
+/// `aria-controls` is what `dist/option-list.js` finds a control by, and
+/// `aria-autocomplete="list"` says what typing does to that list. The role
+/// stays `textbox`: see the contract.
+const PROMPT_DIOXUS: &str = r#"    let root = format!("nd-prompt {class}");
+    let root = root.trim().to_owned();
+    let id = format!("nd-prompt-{name}");
+    let listed = controls.is_some();
+
+    rsx! {
+        div {
+            class: "{root}",
+            "data-nd-prompt": "{name}",
+            "data-nd-disabled": disabled.then_some("true"),
+            "data-nd-readonly": readonly.then_some("true"),
+            span { class: "nd-prompt-glyph", "aria-hidden": "true",
+                Icon { icon: IconDrawing::CHEVRON_RIGHT, size: IconSize::Small }
+            }
+            div { class: "nd-prompt-stack",
+                textarea {
+                    class: "nd-prompt-input",
+                    id: "{id}",
+                    name: "{name}",
+                    rows: "1",
+                    dir: "auto",
+                    autocomplete: "off",
+                    autocapitalize: "off",
+                    spellcheck: "false",
+                    disabled,
+                    readonly,
+                    "aria-label": "{label}",
+                    "aria-controls": controls,
+                    "aria-autocomplete": listed.then_some("list"),
+                    "aria-activedescendant": active,
+                    // THE VALUE IS THE CONTENT, as it is in `Textarea`.
+                    {value.unwrap_or_default()}
+                }
+                div { class: "nd-prompt-mirror", dir: "auto", "aria-hidden": "true" }
+            }
+            if let Some(send) = send_label {
+                Button {
+                    class: "nd-prompt-send",
+                    variant: ButtonVariant::Transparent,
+                    tone: ButtonTone::Neutral,
+                    size: ButtonSize::Small,
+                    hide_label: true,
+                    icon: IconDrawing::SEND,
+                    label: send,
+                    action,
+                    disabled: disabled || readonly,
+                }
+            }
+        }
+    }
+"#;
+
+/// The same prompt, in React.
+const PROMPT_REACT: &str = r#"  const root = ["nd-prompt", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      "data-nd-prompt": name,
+      "data-nd-disabled": disabled ? "true" : undefined,
+      "data-nd-readonly": readonly ? "true" : undefined,
+      ...rest,
+    },
+    h(
+      "span",
+      { key: "g", className: "nd-prompt-glyph", "aria-hidden": "true" },
+      h(Icon, { icon: chevronRight, size: "small" }),
+    ),
+    h(
+      "div",
+      { key: "s", className: "nd-prompt-stack" },
+      h("textarea", {
+        key: "x",
+        className: "nd-prompt-input",
+        id: `nd-prompt-${name}`,
+        name,
+        rows: "1",
+        dir: "auto",
+        autoComplete: "off",
+        autoCapitalize: "off",
+        spellCheck: "false",
+        disabled,
+        readOnly: readonly,
+        "aria-label": label,
+        "aria-controls": controls,
+        "aria-autocomplete": controls ? "list" : undefined,
+        "aria-activedescendant": active,
+        // See the Dioxus half: the value is the content.
+        defaultValue: value,
+      }),
+      h("div", { key: "m", className: "nd-prompt-mirror", dir: "auto", "aria-hidden": "true" }),
+    ),
+    sendLabel
+      ? h(Button, {
+          key: "b",
+          className: "nd-prompt-send",
+          variant: "transparent",
+          tone: "neutral",
+          size: "small",
+          hideLabel: true,
+          icon: send,
+          label: sendLabel,
+          action,
+          disabled: Boolean(disabled || readonly),
+        })
+      : null,
+  );
+"#;
+
 // --- Menu and MenuItem ------------------------------------------------------
 
 /// The surface a button opens, and the actions on it.
@@ -4988,6 +5129,9 @@ pub fn dioxus_imports(component: &Component) -> String {
         // wants the same drawing at a size it names.
         "Rating" => beside_icon("Field, FieldKind, FieldSize, Icon"),
         "Tab" | "FooterLine" => beside_icon("Icon, IconSize"),
+        // THE SEND CONTROL IS A `Button`, and the glyph a prompt starts with is
+        // an `Icon`: a prompt is not the place to grow a second of either.
+        "Prompt" => beside_icon("Button, ButtonSize, ButtonTone, ButtonVariant, Icon, IconSize"),
         // `SelectOption` needs both for a reason worth writing down: the name
         // becomes `data-nd-icon` on the option, and the drawing goes in a
         // `<template>` beside it for the enhanced list to clone.
@@ -5164,7 +5308,9 @@ pub fn react_imports(component: &Component) -> String {
         "OptionItem" => REACT_MATCH_ICON.to_owned(),
         // The same menu in the other language — see the Dioxus half.
         "Pagination" => REACT_MENU.to_owned(),
-        "Table" => concat!(
+        // A `Button` and a drawing: a table's own controls, and the control a
+        // prompt is sent by.
+        "Table" | "Prompt" => concat!(
             "import { Button } from \"./button.js\";\n",
             "\n",
             "import { Icon } from \"./icon.js\";\n"

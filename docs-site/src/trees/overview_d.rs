@@ -399,12 +399,11 @@ Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#,
     FooterCorner { side: FooterCornerSide::Start }
     FooterLine { kind: FooterLineKind::Modeline, … }
     FooterLine { kind: FooterLineKind::Info, expandable: true, expand_label: "…", collapse_label: "…", action: "…", … }
-    FooterLine { kind: FooterLineKind::Prompt, … }
+    FooterLine { kind: FooterLineKind::Prompt, Prompt { name: "…", label: "…", send_label: "…" } }
     FooterCorner { side: FooterCornerSide::End }
 }"#,
         // THE FOOTER OF `NOCTUA.md §12.3`, WHOLE: the three lines in their
-        // order and a corner at each end. The line a reader types in holds
-        // words here and a `Prompt` in an application.
+        // order and a corner at each end, and a `Prompt` on the last line.
         &[Node::Component {
             name: "Footer",
             props: &[("label", Value::Message(Key::ExampleFooterLabel))],
@@ -507,11 +506,47 @@ Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#,
                 Node::Component {
                     name: "FooterLine",
                     props: &[("kind", Value::Text("prompt"))],
+                    children: &[Node::Component {
+                        name: "Prompt",
+                        props: &[
+                            ("name", Value::Text("overview-footer-prompt")),
+                            ("label", Value::Message(Key::ExamplePromptLabel)),
+                            ("send_label", Value::Message(Key::ExamplePromptSend)),
+                        ],
+                        children: &[],
+                    }],
+                },
+                Node::Component {
+                    name: "FooterCorner",
+                    props: &[("side", Value::Text("end"))],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "prompt",
+        r#"Footer { label: "…",
+    FooterLine { kind: FooterLineKind::Modeline, … }
+    FooterLine { kind: FooterLineKind::Info, … }
+    FooterLine { kind: FooterLineKind::Prompt,
+        Prompt { name: "…", label: "…", send_label: "…", action: "…" }
+    }
+}"#,
+        // WHERE A PROMPT LIVES: the last line of a footer, under the line that
+        // says what the keyboard is on.
+        &[Node::Component {
+            name: "Footer",
+            props: &[("label", Value::Message(Key::ExampleFooterLabel))],
+            children: &[
+                Node::Component {
+                    name: "FooterLine",
+                    props: &[("kind", Value::Text("modeline"))],
                     children: &[
                         Node::Component {
                             name: "Icon",
                             props: &[
-                                ("icon", Value::Text("chevron-right")),
+                                ("icon", Value::Text("file-text")),
                                 ("size", Value::Text("small")),
                             ],
                             children: &[],
@@ -519,14 +554,50 @@ Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#,
                         Node::Element {
                             tag: "span",
                             attributes: &[],
-                            children: &[Node::Text(Value::Message(Key::ExampleFooterTyped))],
+                            children: &[Node::Text(Value::Message(Key::ExampleFooterPage))],
                         },
                     ],
                 },
                 Node::Component {
-                    name: "FooterCorner",
-                    props: &[("side", Value::Text("end"))],
-                    children: &[],
+                    name: "FooterLine",
+                    props: &[("kind", Value::Text("info"))],
+                    children: &[
+                        Node::Component {
+                            name: "Icon",
+                            props: &[
+                                ("icon", Value::Text("info")),
+                                ("size", Value::Text("small")),
+                            ],
+                            children: &[],
+                        },
+                        Node::Component {
+                            name: "Icon",
+                            props: &[
+                                ("icon", Value::Text("keyboard")),
+                                ("size", Value::Text("small")),
+                            ],
+                            children: &[],
+                        },
+                        Node::Element {
+                            tag: "span",
+                            attributes: &[],
+                            children: &[Node::Text(Value::Message(Key::ExampleFooterSelection))],
+                        },
+                    ],
+                },
+                Node::Component {
+                    name: "FooterLine",
+                    props: &[("kind", Value::Text("prompt"))],
+                    children: &[Node::Component {
+                        name: "Prompt",
+                        props: &[
+                            ("name", Value::Text("overview-prompt")),
+                            ("label", Value::Message(Key::ExamplePromptLabel)),
+                            ("send_label", Value::Message(Key::ExamplePromptSend)),
+                            ("action", Value::Text("overview-prompt-send")),
+                        ],
+                        children: &[],
+                    }],
                 },
             ],
         }],

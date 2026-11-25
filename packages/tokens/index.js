@@ -101,6 +101,7 @@ export const duration = {
   fast: "var(--noctua-duration-fast)",
   base: "var(--noctua-duration-base)",
   slow: "var(--noctua-duration-slow)",
+  blink: "var(--noctua-duration-blink)",
 };
 
 export const easing = {

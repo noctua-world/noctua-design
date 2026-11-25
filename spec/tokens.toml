@@ -155,6 +155,11 @@ instant = { normal = "70ms", reduced = "70ms" }
 fast = { normal = "120ms", reduced = "70ms" }
 base = { normal = "180ms", reduced = "0ms" }
 slow = { normal = "280ms", reduced = "0ms" }
+# One turn of a blinking text cursor: half of it showing, half not. It
+# collapses to nothing, and a rule that blinks also says `animation: none`
+# under the preference: an animation that repeats has no zero-length form, it
+# restarts every frame.
+blink = { normal = "1000ms", reduced = "0ms" }
 
 [motion.easing]
 # The standard pair. `out` for things entering or responding to input — it

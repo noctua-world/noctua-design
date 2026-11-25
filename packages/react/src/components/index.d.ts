@@ -64,6 +64,7 @@ export { Pagination, type PaginationProps } from "./pagination.js";
 export { Paragraph, type ParagraphProps } from "./paragraph.js";
 export { Popover, type PopoverProps } from "./popover.js";
 export { Progress, type ProgressProps } from "./progress.js";
+export { Prompt, type PromptProps } from "./prompt.js";
 export { Prose, type ProseProps } from "./prose.js";
 export { Radio, type RadioProps } from "./radio.js";
 export { Rating, type RatingProps } from "./rating.js";

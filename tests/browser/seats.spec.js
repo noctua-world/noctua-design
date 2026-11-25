@@ -953,10 +953,6 @@ const UNSEEN = [
  * here, and one listed here that starts to show leaves.
  */
 const BLIND = [
-  // `background: none`, and on both disabled buttons of `/button/` a heavier
-  // rule decides the background whether this one is there or not: the solid
-  // one's own disabled rule, and the outline one's rule for its tone.
-  ".nd-button[disabled]:hover",
   // The ring every focused element is given by the sheet's rule on the bare
   // state, declared again for the figure: the same outline with or without it.
   ".nd-lineage-figure:focus-visible",

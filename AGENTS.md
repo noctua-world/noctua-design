@@ -310,6 +310,7 @@ of these carries measured rules, not description:
 | a second seat's hover, focus, press or drag | `crates/noctua-design-runtime/src/seats.js` |
 | how a list filtered by typing matches, ranks or marks | `crates/noctua-design-runtime/src/search-match.js`, and "The fuzzy matcher" below |
 | a list walked by the keyboard, its active option, or the control that drives one | `crates/noctua-design-runtime/src/option-list.js` |
+| the prompt, its block cursor, or anything drawn over a text control | `crates/noctua-design-runtime/src/prompt.js` |
 | what both implementations must *do* | `spec/components/<name>.cases.toml`, and `crates/noctua-design-spec/src/conformance.rs` for the vocabulary a step may use |
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
@@ -642,7 +643,7 @@ lists the element at rest beside the element in the state (`.x, .x:hover`, the s
 its weight), the first still draws every declaration. A selector blind on its sample is given a
 longer one in `DEEPER` — the attached button group's focus rule, which lifts a button and shows
 on the third — or, where no element shows it at all, a line with its reason in `BLIND`, which the
-test holds exactly as it holds `UNSEEN`: nine selectors today, six of them the hover half of such
+test holds exactly as it holds `UNSEEN`: eight selectors today, six of them the hover half of such
 a rule on a glass button or a glass switch. `seat_twin` alone holds those twins.
 **The page's clock is stopped before anything is photographed.** An example that keeps time — a
 toast counting its seconds down — differs from itself between the two pictures, so the spec takes
@@ -857,6 +858,47 @@ could cover the control the keyboard is on (WCAG 2.4.11). The strip is where the
 pointer at the window's edge under an open drawer is the caller's to see, and `shown` is how it
 says so. The footer is a `<footer>` with `role="group"`, since the element is a landmark only
 where no section is around it and the role would otherwise depend on where it is mounted.
+
+### The prompt
+
+**The text is the engine's, and this system draws one thing over it: the block.** `Prompt` is a
+real `<textarea>`, so the selection, an input method's composition, the clipboard, undo and the
+name a screen reader reads are the platform's (`NOCTUA.md §12.7`). Its caret is transparent, and a
+second box, the mirror, lies over it holding the same text with everything invisible but one
+`<span>` around the cluster the caret stands before. `dist/prompt.js` keeps the two in step and
+its header is the technique. No position is measured: two boxes that lay one text out by one set
+of rules put each character in one place.
+
+**Every property that places a character is declared for the two boxes together**, in one rule
+of `crates/noctua-design-styles/src/prompt.css`. A property given to one alone is a cursor that
+drifts off its letter, in the one script nobody on the team reads. Three of them fail silently:
+both boxes keep the scrollbar's room from the first line (`scrollbar-gutter: stable`), or the
+ninth line narrows one of them and every line turns in a different place; both take their
+direction from the text (`dir="auto"`); and the block at the end of a line takes no room in it,
+or the mirror turns a full line the textarea does not.
+
+**The mirror is also how the prompt grows.** The two share a grid cell, so the cell is as tall as
+the mirror's text, up to `--noctua-shell-prompt-max` lines, and then the textarea scrolls and the
+mirror follows it.
+
+**The block gives way to what the engine draws better.** A selection and a composition hide it,
+and while an input method composes the engine's own caret is back, because the candidate window
+stands against it. Enter that confirms a composition sends nothing. The block is filled and
+blinking with the focus, an outline without it or in a read-only prompt, and absent in a disabled
+one. It blinks on `--noctua-duration-blink`, and under `prefers-reduced-motion` the stylesheet
+says `animation: none`: a repeating animation has no zero-length form.
+
+**It sends nothing itself.** Enter and the send control say `nd-prompt-send`, with the prompt's
+name and text, and the text afterwards is the caller's to set. A value the caller writes is drawn
+like one that was typed, because the script wraps the element's `value`. A prompt that names a
+list in `controls` gets its arrow walk from `dist/option-list.js` and keeps Enter: one key is one
+event, and the caller knows which option is active. **It stays a `textbox` there**: HTML allows a
+`<textarea>` no other role, and a `combobox` is one line.
+
+**Its caret is tested from pixels, with the engine's scrollbars on.** `tests/browser/prompt.spec.js`
+takes the block away, gives the engine's caret its colour back and reads where it was drawn. A
+second layout of the text would be the technique agreeing with itself. The runner hides every
+scrollbar by default, so that file leaves them on.
 
 ### Tones, bars, carousels, spectra
 

@@ -151,9 +151,16 @@ for (const scheme of ["light", "dark"]) {
         expect(contrast(shades[one], shades[other]), `${one} against ${other}`).toBeLessThan(1.5);
       }
     }
-    // And the words on each line are readable on its shade.
-    for (const kind of ["modeline", "info", "prompt"]) {
-      const text = footer.locator(`.nd-footer-line[data-nd-kind="${kind}"] .nd-footer-line-content > span`).first();
+    // And the words on each line are readable on its shade. The last line's
+    // are typed: it is a `Prompt`, and the page's own surface is under them.
+    await footer.locator(".nd-prompt-input").fill("close the page");
+    await page.locator("h1").first().click();
+    for (const [kind, words] of [
+      ["modeline", ".nd-footer-line-content > span"],
+      ["info", ".nd-footer-line-content > span"],
+      ["prompt", ".nd-prompt-input"],
+    ]) {
+      const text = footer.locator(`.nd-footer-line[data-nd-kind="${kind}"] ${words}`).first();
       const { min, max } = await extremes(page, await text.screenshot());
       expect(contrast(min, max), `the words on the ${kind} line, ${scheme}`).toBeGreaterThanOrEqual(4.5);
     }

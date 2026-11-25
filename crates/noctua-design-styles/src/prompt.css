@@ -1,0 +1,181 @@
+
+
+/* --- Prompt ----------------------------------------------------------------
+ *
+ * The line a reader types on (`NOCTUA.md §12.7`): a glyph, the text, and the
+ * control that sends it. The text's cursor is a block.
+ *
+ * ONE LINE IS `--noctua-shell-line` TALL. The type is the footer's own, caption
+ * size at the body leading, and the padding above and below is the smallest
+ * step, so a prompt of one line is exactly as tall as the lines above it and
+ * its glyph and its control stand on one centre line with theirs.
+ *
+ * THE TEXTAREA AND THE MIRROR ARE ONE BOX, TWICE. `dist/prompt.js` puts the
+ * same text in both, and the block is where the caret is only because every
+ * property that places a character is declared for the two together, in the
+ * one rule below. A property added to one of them alone is a cursor that
+ * drifts off its letter. */
+.nd-prompt {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: flex-start;
+  gap: var(--noctua-space-2);
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  font-size: var(--noctua-size-caption);
+  line-height: var(--noctua-leading-body);
+  color: var(--nc-color-fg);
+}
+
+/* The glyph stays on the first line when the prompt grows. */
+.nd-prompt-glyph {
+  display: flex;
+  flex: none;
+  align-items: center;
+  block-size: var(--noctua-shell-line);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-prompt-send {
+  flex: none;
+}
+
+/* ONE CELL. The mirror's text sizes it, the textarea fills it, and the mirror
+   is second in the markup so it paints over the textarea. */
+.nd-prompt-stack {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1fr);
+  min-inline-size: 0;
+}
+
+.nd-prompt-input,
+.nd-prompt-mirror {
+  grid-area: 1 / 1;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: var(--noctua-shell-line);
+  /* IT GROWS TO THIS MANY LINES AND THEN SCROLLS. The count is a token with no
+     unit, and a line is whatever this text's line is. */
+  max-block-size: calc(var(--noctua-shell-prompt-max) * 1lh + 2 * var(--noctua-space-1));
+  margin: 0;
+  /* THE LEADING ROOM IS THE RING'S, which is drawn inside this box and would
+     otherwise lie across the first letter of every line. THE TRAILING ROOM IS
+     THE BLOCK'S: at the end of a line the caret stands before no character,
+     and the block drawn there is one `ch` wide. */
+  padding-block: var(--noctua-space-1);
+  padding-inline: var(--noctua-space-1) 1ch;
+  border: 0;
+  border-radius: var(--noctua-radius-none);
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: start;
+  text-indent: 0;
+  text-transform: none;
+  word-spacing: normal;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  tab-size: 4;
+  /* THE SCROLLBAR'S ROOM IS ALWAYS KEPT, IN BOTH. A bar that arrived with the
+     ninth line would narrow the textarea and not the mirror, and every line
+     after the first wrap would break in a different place. */
+  scrollbar-gutter: stable;
+}
+
+.nd-prompt-input {
+  display: block;
+  overflow: hidden auto;
+  resize: none;
+  background: none;
+  color: inherit;
+  /* Inside its own box, as every ring in a footer is: the prompt is the last
+     line of one, and a ring outside it would be cut at the window's edge. */
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
+/* THE ENGINE'S CARET IS HIDDEN ONLY ONCE THE BLOCK IS BEING DRAWN. With the
+   script blocked the attribute never arrives and the prompt is a textarea with
+   a caret. `transparent` is a keyword, not a colour of this system's. */
+.nd-prompt[data-nd-enhanced] .nd-prompt-input {
+  caret-color: transparent;
+}
+
+/* WHILE AN INPUT METHOD COMPOSES, THE CARET IS THE ENGINE'S AGAIN, in the
+   cursor's colour. The composition's underline and its candidate window are
+   placed by the engine against its own caret. */
+.nd-prompt[data-nd-composing] .nd-prompt-input {
+  caret-color: var(--nc-color-cursor);
+}
+
+.nd-prompt-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+/* EVERYTHING IN THE MIRROR IS INVISIBLE BUT THE BLOCK. Invisible and not
+   transparent: an invisible box paints nothing, a selection included, and takes
+   no pointer. */
+.nd-prompt-mirror {
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* THE BLOCK, AT REST: AN OUTLINE. A prompt without the focus shows where its
+   caret is and not that it is listening, and the difference is a shape, not a
+   shade. The letter under it is the textarea's own, showing through. */
+.nd-prompt-cursor {
+  visibility: visible;
+  color: transparent;
+  outline: var(--noctua-border-hairline) solid var(--nc-color-cursor);
+  outline-offset: calc(-1 * var(--noctua-border-hairline));
+}
+
+/* BEFORE NO CHARACTER, IT TAKES NO ROOM. The padding is what is painted and
+   the margin takes it back, so the block is a `ch` wide and the line is no
+   longer than the textarea's own. */
+.nd-prompt-cursor[data-nd-at="end"] {
+  padding-inline-end: 1ch;
+  margin-inline-end: -1ch;
+}
+
+/* WITH THE FOCUS: FILLED, THE LETTER DRAWN AGAIN IN THE COLOUR MADE FOR IT,
+ * AND BLINKING. `step-end` holds each half of the turn, so the block is there
+ * or not and never fading. A new block starts the turn again, so it is there
+ * while a reader types.
+ *
+ * A prompt that cannot be typed in keeps the outline, with the focus or
+ * without: a filled, blinking block says *type here*. */
+.nd-prompt:not([data-nd-readonly="true"]):is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus]))
+  .nd-prompt-cursor {
+  color: var(--nc-color-on-cursor);
+  background: var(--nc-color-cursor);
+  animation: nd-prompt-blink var(--noctua-duration-blink) step-end infinite;
+}
+
+@keyframes nd-prompt-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* A READER WHO ASKED FOR LESS MOVEMENT GETS A BLOCK THAT STAYS
+   (`NOCTUA.md §12.7`). Said outright and not left to the duration: a turn of
+   no length does not stop an animation that repeats. */
+@media (prefers-reduced-motion: reduce) {
+  .nd-prompt .nd-prompt-stack .nd-prompt-mirror .nd-prompt-cursor.nd-prompt-cursor {
+    animation: none;
+  }
+}
+
+/* A SELECTION AND A COMPOSITION ARE THE ENGINE'S TO DRAW, and a disabled
+   prompt has no caret to show. After the rules above, which they outweigh. */
+.nd-prompt[data-nd-selecting] .nd-prompt-stack .nd-prompt-mirror .nd-prompt-cursor.nd-prompt-cursor,
+.nd-prompt[data-nd-composing] .nd-prompt-stack .nd-prompt-mirror .nd-prompt-cursor.nd-prompt-cursor,
+.nd-prompt[data-nd-disabled="true"] .nd-prompt-stack .nd-prompt-mirror .nd-prompt-cursor.nd-prompt-cursor {
+  visibility: hidden;
+}

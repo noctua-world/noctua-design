@@ -64,6 +64,7 @@ export { Pagination } from "./pagination.js";
 export { Paragraph } from "./paragraph.js";
 export { Popover } from "./popover.js";
 export { Progress } from "./progress.js";
+export { Prompt } from "./prompt.js";
 export { Prose } from "./prose.js";
 export { Radio } from "./radio.js";
 export { Rating } from "./rating.js";

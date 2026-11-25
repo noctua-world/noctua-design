@@ -98,6 +98,7 @@ export declare const duration: {
   readonly fast: string;
   readonly base: string;
   readonly slow: string;
+  readonly blink: string;
 };
 
 export declare const easing: {

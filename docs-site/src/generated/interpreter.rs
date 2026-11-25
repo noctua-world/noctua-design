@@ -38,21 +38,22 @@ use noctua_design::components::{
     NumberInput, NumberInputSize, NumberInputStepping, OptionGroup, OptionItem, OptionList,
     OptionListLayout, OptionListSize, OtpField, OtpFieldKind, OtpFieldSize, Pagination,
     PaginationSize, PaginationSpread, Paragraph, ParagraphSize, ParagraphTone, Popover,
-    PopoverPlacement, Progress, ProgressSize, Prose, ProseMeasure, Radio, RadioSize, Rating,
-    RatingSize, Search, SearchGroup, SearchPresentation, SearchResult, SearchSize, Segmented,
-    SegmentedAppearance, SegmentedFill, SegmentedItem, SegmentedOrientation, SegmentedSelection,
-    SegmentedShape, SegmentedSize, Select, SelectGroup, SelectOption, SelectSize, Slider,
-    SliderSize, SliderTone, Strong, Swatch, SwatchShape, SwatchSize, Switch, SwitchSize, Tab,
-    TabPanel, Table, TableCell, TableCellAggregate, TableCellAggregateOver, TableCellAlign,
-    TableCellWrap, TableColumn, TableColumnSortAs, TableColumnWidth, TableDensity, TableHeaderCell,
-    TableHeaderCellAlign, TableHeaderCellScope, TableHeaderCellSort, TableHeaderCellWrap,
-    TableHeight, TableLayout, TableRow, TableRowEmphasis, TableRowSelect, TableRules, TableSection,
-    TableSectionKind, TableWidth, Tabs, TabsActivation, TabsAppearance, TabsFill, TabsOrientation,
-    TabsSize, Tag, TagPicker, TagPickerSize, TagPressed, TagShape, TagSize, TagVariant, Text,
-    TextSize, TextTone, TextWeight, Textarea, TextareaResize, TextareaSize, Time, TimeInput,
-    TimeInputClock, TimeInputSize, Toast, ToastLive, ToastPlacement, Toolbar, ToolbarDensity,
-    ToolbarGroup, ToolbarGroupAlign, ToolbarOrientation, Tooltip, TooltipDelay, TooltipPlacement,
-    Tree, TreeItem, TreeSelection, TreeSize, Truncate, TruncateLines, VisuallyHidden,
+    PopoverPlacement, Progress, ProgressSize, Prompt, Prose, ProseMeasure, Radio, RadioSize,
+    Rating, RatingSize, Search, SearchGroup, SearchPresentation, SearchResult, SearchSize,
+    Segmented, SegmentedAppearance, SegmentedFill, SegmentedItem, SegmentedOrientation,
+    SegmentedSelection, SegmentedShape, SegmentedSize, Select, SelectGroup, SelectOption,
+    SelectSize, Slider, SliderSize, SliderTone, Strong, Swatch, SwatchShape, SwatchSize, Switch,
+    SwitchSize, Tab, TabPanel, Table, TableCell, TableCellAggregate, TableCellAggregateOver,
+    TableCellAlign, TableCellWrap, TableColumn, TableColumnSortAs, TableColumnWidth, TableDensity,
+    TableHeaderCell, TableHeaderCellAlign, TableHeaderCellScope, TableHeaderCellSort,
+    TableHeaderCellWrap, TableHeight, TableLayout, TableRow, TableRowEmphasis, TableRowSelect,
+    TableRules, TableSection, TableSectionKind, TableWidth, Tabs, TabsActivation, TabsAppearance,
+    TabsFill, TabsOrientation, TabsSize, Tag, TagPicker, TagPickerSize, TagPressed, TagShape,
+    TagSize, TagVariant, Text, TextSize, TextTone, TextWeight, Textarea, TextareaResize,
+    TextareaSize, Time, TimeInput, TimeInputClock, TimeInputSize, Toast, ToastLive, ToastPlacement,
+    Toolbar, ToolbarDensity, ToolbarGroup, ToolbarGroupAlign, ToolbarOrientation, Tooltip,
+    TooltipDelay, TooltipPlacement, Tree, TreeItem, TreeSelection, TreeSize, Truncate,
+    TruncateLines, VisuallyHidden,
 };
 
 use crate::tree::{Node, Scope, Value, render};
@@ -123,6 +124,7 @@ pub(crate) fn component(
         "Paragraph" => paragraph(props, children, scope),
         "Popover" => popover(props, children, scope),
         "Progress" => progress(props, children, scope),
+        "Prompt" => prompt(props, children, scope),
         "Prose" => prose(props, children, scope),
         "Radio" => radio(props, children, scope),
         "Rating" => rating(props, children, scope),
@@ -2903,6 +2905,43 @@ fn progress(
             ai_mark: ai_mark_,
             ai_label: ai_label_,
             ai_note: ai_note_,
+            class: class_,
+        }
+    }
+}
+
+/// `Prompt`, from a tree.
+fn prompt(
+    props: &'static [(&'static str, Value)],
+    _children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("Prompt.name is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("Prompt.label is required and this tree does not set it");
+    let value_ = scope.find(props, "value");
+    let send_label_ = scope.find(props, "send_label");
+    let action_ = scope.find(props, "action");
+    let controls_ = scope.find(props, "controls");
+    let active_ = scope.find(props, "active");
+    let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
+    let readonly_ = scope.flag(props, "readonly").unwrap_or(false);
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        Prompt {
+            name: name_,
+            label: label_,
+            value: value_,
+            send_label: send_label_,
+            action: action_,
+            controls: controls_,
+            active: active_,
+            disabled: disabled_,
+            readonly: readonly_,
             class: class_,
         }
     }

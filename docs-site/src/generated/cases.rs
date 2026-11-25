@@ -1756,6 +1756,137 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Prompt",
+        "case-prompt-0",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+                ("value", Value::Data("close")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-1",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+                ("value", Value::Data("close")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-2",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-3",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-4",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-5",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("active", Value::Data("option-2")),
+                ("controls", Value::Data("nd-option-list-commands")),
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-6",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-7",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("action", Value::Data("send")),
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+                ("send_label", Value::Data("Send")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-8",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+                ("readonly", Value::Bool(true)),
+                ("send_label", Value::Data("Send")),
+                ("value", Value::Data("close")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-9",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("disabled", Value::Bool(true)),
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+                ("send_label", Value::Data("Send")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
         "Radio",
         "case-radio-0",
         &[Node::Component {

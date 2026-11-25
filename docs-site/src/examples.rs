@@ -467,10 +467,23 @@ ToolbarGroup { align: ToolbarGroupAlign::End, … }"#
     FooterCorner { side: FooterCornerSide::Start }
     FooterLine { kind: FooterLineKind::Modeline, … }
     FooterLine { kind: FooterLineKind::Info, expandable: true, expand_label: "…", collapse_label: "…", action: "…", … }
-    FooterLine { kind: FooterLineKind::Prompt, … }
+    FooterLine { kind: FooterLineKind::Prompt, Prompt { name: "…", label: "…", send_label: "…" } }
     FooterCorner { side: FooterCornerSide::End }
 }"#,
             Key::ExampleFooterOverview
+        ),
+    ),
+    (
+        "prompt",
+        example!(
+            r#"Footer { label: "…",
+    FooterLine { kind: FooterLineKind::Modeline, … }
+    FooterLine { kind: FooterLineKind::Info, … }
+    FooterLine { kind: FooterLineKind::Prompt,
+        Prompt { name: "…", label: "…", send_label: "…", action: "…" }
+    }
+}"#,
+            Key::ExamplePromptOverview
         ),
     ),
     (
@@ -714,6 +727,7 @@ pub(crate) fn for_component(name: &str) -> &'static [Example] {
         "OptionGroup" => OPTION_GROUP,
         "OptionItem" => OPTION_ITEM,
         "Paragraph" => PARAGRAPH,
+        "Prompt" => PROMPT,
         "Prose" => PROSE,
         "Search" => SEARCH,
         "SearchGroup" => SEARCH_GROUP,
@@ -2251,6 +2265,32 @@ const FOOTER_CORNER: &[Example] = &[
     example!(
         r"FooterCorner { Button { … } Button { … } }",
         Key::ExampleFooterCornerTwo
+    ),
+];
+
+// --- Prompt -----------------------------------------------------------------
+
+const PROMPT: &[Example] = &[
+    example!(
+        r#"Prompt { name: "…", label: "…", send_label: "…", action: "…" }"#,
+        Key::ExamplePromptBasic
+    ),
+    example!(r#"Prompt { value: "…" }"#, Key::ExamplePromptGrows),
+    example!(
+        r#"Prompt { controls: "nd-option-list-…" } beside OptionList { focusable: false }"#,
+        Key::ExamplePromptDriven
+    ),
+    example!(
+        r#"Prompt { controls: "…", active: "…" } beside OptionItem { id: "…", active: true }"#,
+        Key::ExamplePromptActive
+    ),
+    example!(
+        r#"Prompt { readonly: true, value: "…", send_label: "…" }"#,
+        Key::ExamplePromptReadonly
+    ),
+    example!(
+        r#"Prompt { disabled: true, send_label: "…" }"#,
+        Key::ExamplePromptDisabled
     ),
 ];
 

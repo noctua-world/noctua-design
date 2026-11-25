@@ -157,6 +157,10 @@ pub const FILES: &[(&str, &str)] = &[
         "option-list.js",
         include_str!(concat!("../", "dist/", "option-list.js")),
     ),
+    (
+        "prompt.js",
+        include_str!(concat!("../", "dist/", "prompt.js")),
+    ),
     ("tabs.js", include_str!(concat!("../", "dist/", "tabs.js"))),
     (
         "date-input.js",

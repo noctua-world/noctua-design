@@ -86,6 +86,7 @@ mod pagination;
 mod paragraph;
 mod popover;
 mod progress;
+mod prompt;
 mod prose;
 mod radio;
 mod rating;
@@ -203,6 +204,7 @@ pub(crate) fn for_component(name: &str) -> &'static [Tree] {
         "Paragraph" => paragraph::EXAMPLES,
         "Popover" => popover::EXAMPLES,
         "Progress" => progress::EXAMPLES,
+        "Prompt" => prompt::EXAMPLES,
         "Prose" => prose::EXAMPLES,
         "Radio" => radio::EXAMPLES,
         "Rating" => rating::EXAMPLES,

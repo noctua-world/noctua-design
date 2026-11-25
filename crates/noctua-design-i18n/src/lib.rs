@@ -618,6 +618,8 @@ pub enum Key {
     ComponentFooterCornerSummary,
     /// `component.footer-line.summary`
     ComponentFooterLineSummary,
+    /// `component.prompt.summary`
+    ComponentPromptSummary,
     /// `component.option-group.summary`
     ComponentOptionGroupSummary,
     /// `component.option-item.summary`
@@ -1404,6 +1406,26 @@ pub enum Key {
     ExampleFooterInfo,
     /// `example.footer.prompt`
     ExampleFooterPrompt,
+    /// `example.prompt.overview`
+    ExamplePromptOverview,
+    /// `example.prompt.basic`
+    ExamplePromptBasic,
+    /// `example.prompt.grows`
+    ExamplePromptGrows,
+    /// `example.prompt.driven`
+    ExamplePromptDriven,
+    /// `example.prompt.active`
+    ExamplePromptActive,
+    /// `example.prompt.readonly`
+    ExamplePromptReadonly,
+    /// `example.prompt.disabled`
+    ExamplePromptDisabled,
+    /// `example.prompt.label`
+    ExamplePromptLabel,
+    /// `example.prompt.send`
+    ExamplePromptSend,
+    /// `example.prompt.running`
+    ExamplePromptRunning,
     /// `example.option-list.overview`
     ExampleOptionListOverview,
     /// `example.option-list.walk`
@@ -5058,6 +5080,44 @@ pub enum Key {
     ComponentProgressPropHideLabelDoc,
     /// `component.progress.state.busy.doc`
     ComponentProgressStateBusyDoc,
+    /// `component.prompt.guidance`
+    ComponentPromptGuidance,
+    /// `component.prompt.a11y-notes`
+    ComponentPromptA11yNotes,
+    /// `component.prompt.prop.name.doc`
+    ComponentPromptPropNameDoc,
+    /// `component.prompt.prop.label.doc`
+    ComponentPromptPropLabelDoc,
+    /// `component.prompt.prop.value.doc`
+    ComponentPromptPropValueDoc,
+    /// `component.prompt.prop.send_label.doc`
+    ComponentPromptPropSendLabelDoc,
+    /// `component.prompt.prop.action.doc`
+    ComponentPromptPropActionDoc,
+    /// `component.prompt.prop.controls.doc`
+    ComponentPromptPropControlsDoc,
+    /// `component.prompt.prop.active.doc`
+    ComponentPromptPropActiveDoc,
+    /// `component.prompt.prop.disabled.doc`
+    ComponentPromptPropDisabledDoc,
+    /// `component.prompt.prop.readonly.doc`
+    ComponentPromptPropReadonlyDoc,
+    /// `component.prompt.state.composing.doc`
+    ComponentPromptStateComposingDoc,
+    /// `component.prompt.state.selecting.doc`
+    ComponentPromptStateSelectingDoc,
+    /// `component.prompt.key.enter.name`
+    ComponentPromptKeyEnterName,
+    /// `component.prompt.key.enter.action`
+    ComponentPromptKeyEnterAction,
+    /// `component.prompt.key.shift-enter.name`
+    ComponentPromptKeyShiftEnterName,
+    /// `component.prompt.key.shift-enter.action`
+    ComponentPromptKeyShiftEnterAction,
+    /// `component.prompt.key.down-arrow-up-arrow.name`
+    ComponentPromptKeyDownArrowUpArrowName,
+    /// `component.prompt.key.down-arrow-up-arrow.action`
+    ComponentPromptKeyDownArrowUpArrowAction,
     /// `component.prose.prop.measure.doc`
     ComponentProsePropMeasureDoc,
     /// `component.prose.prop.children.doc`
@@ -6358,7 +6418,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3117] = [
+    pub const ALL: [Self; 3147] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -6608,6 +6668,7 @@ impl Key {
         Self::ComponentFooterSummary,
         Self::ComponentFooterCornerSummary,
         Self::ComponentFooterLineSummary,
+        Self::ComponentPromptSummary,
         Self::ComponentOptionGroupSummary,
         Self::ComponentOptionItemSummary,
         Self::ComponentOptionListSummary,
@@ -7001,6 +7062,16 @@ impl Key {
         Self::ExampleFooterModeline,
         Self::ExampleFooterInfo,
         Self::ExampleFooterPrompt,
+        Self::ExamplePromptOverview,
+        Self::ExamplePromptBasic,
+        Self::ExamplePromptGrows,
+        Self::ExamplePromptDriven,
+        Self::ExamplePromptActive,
+        Self::ExamplePromptReadonly,
+        Self::ExamplePromptDisabled,
+        Self::ExamplePromptLabel,
+        Self::ExamplePromptSend,
+        Self::ExamplePromptRunning,
         Self::ExampleOptionListOverview,
         Self::ExampleOptionListWalk,
         Self::ExampleOptionListColumns,
@@ -8828,6 +8899,25 @@ impl Key {
         Self::ComponentProgressPropSizeDoc,
         Self::ComponentProgressPropHideLabelDoc,
         Self::ComponentProgressStateBusyDoc,
+        Self::ComponentPromptGuidance,
+        Self::ComponentPromptA11yNotes,
+        Self::ComponentPromptPropNameDoc,
+        Self::ComponentPromptPropLabelDoc,
+        Self::ComponentPromptPropValueDoc,
+        Self::ComponentPromptPropSendLabelDoc,
+        Self::ComponentPromptPropActionDoc,
+        Self::ComponentPromptPropControlsDoc,
+        Self::ComponentPromptPropActiveDoc,
+        Self::ComponentPromptPropDisabledDoc,
+        Self::ComponentPromptPropReadonlyDoc,
+        Self::ComponentPromptStateComposingDoc,
+        Self::ComponentPromptStateSelectingDoc,
+        Self::ComponentPromptKeyEnterName,
+        Self::ComponentPromptKeyEnterAction,
+        Self::ComponentPromptKeyShiftEnterName,
+        Self::ComponentPromptKeyShiftEnterAction,
+        Self::ComponentPromptKeyDownArrowUpArrowName,
+        Self::ComponentPromptKeyDownArrowUpArrowAction,
         Self::ComponentProsePropMeasureDoc,
         Self::ComponentProsePropChildrenDoc,
         Self::ComponentRadioGuidance,
@@ -9731,6 +9821,7 @@ impl Key {
             Self::ComponentFooterSummary => "component.footer.summary",
             Self::ComponentFooterCornerSummary => "component.footer-corner.summary",
             Self::ComponentFooterLineSummary => "component.footer-line.summary",
+            Self::ComponentPromptSummary => "component.prompt.summary",
             Self::ComponentOptionGroupSummary => "component.option-group.summary",
             Self::ComponentOptionItemSummary => "component.option-item.summary",
             Self::ComponentOptionListSummary => "component.option-list.summary",
@@ -10124,6 +10215,16 @@ impl Key {
             Self::ExampleFooterModeline => "example.footer.modeline",
             Self::ExampleFooterInfo => "example.footer.info",
             Self::ExampleFooterPrompt => "example.footer.prompt",
+            Self::ExamplePromptOverview => "example.prompt.overview",
+            Self::ExamplePromptBasic => "example.prompt.basic",
+            Self::ExamplePromptGrows => "example.prompt.grows",
+            Self::ExamplePromptDriven => "example.prompt.driven",
+            Self::ExamplePromptActive => "example.prompt.active",
+            Self::ExamplePromptReadonly => "example.prompt.readonly",
+            Self::ExamplePromptDisabled => "example.prompt.disabled",
+            Self::ExamplePromptLabel => "example.prompt.label",
+            Self::ExamplePromptSend => "example.prompt.send",
+            Self::ExamplePromptRunning => "example.prompt.running",
             Self::ExampleOptionListOverview => "example.option-list.overview",
             Self::ExampleOptionListWalk => "example.option-list.walk",
             Self::ExampleOptionListColumns => "example.option-list.columns",
@@ -12339,6 +12440,29 @@ impl Key {
             Self::ComponentProgressPropSizeDoc => "component.progress.prop.size.doc",
             Self::ComponentProgressPropHideLabelDoc => "component.progress.prop.hide_label.doc",
             Self::ComponentProgressStateBusyDoc => "component.progress.state.busy.doc",
+            Self::ComponentPromptGuidance => "component.prompt.guidance",
+            Self::ComponentPromptA11yNotes => "component.prompt.a11y-notes",
+            Self::ComponentPromptPropNameDoc => "component.prompt.prop.name.doc",
+            Self::ComponentPromptPropLabelDoc => "component.prompt.prop.label.doc",
+            Self::ComponentPromptPropValueDoc => "component.prompt.prop.value.doc",
+            Self::ComponentPromptPropSendLabelDoc => "component.prompt.prop.send_label.doc",
+            Self::ComponentPromptPropActionDoc => "component.prompt.prop.action.doc",
+            Self::ComponentPromptPropControlsDoc => "component.prompt.prop.controls.doc",
+            Self::ComponentPromptPropActiveDoc => "component.prompt.prop.active.doc",
+            Self::ComponentPromptPropDisabledDoc => "component.prompt.prop.disabled.doc",
+            Self::ComponentPromptPropReadonlyDoc => "component.prompt.prop.readonly.doc",
+            Self::ComponentPromptStateComposingDoc => "component.prompt.state.composing.doc",
+            Self::ComponentPromptStateSelectingDoc => "component.prompt.state.selecting.doc",
+            Self::ComponentPromptKeyEnterName => "component.prompt.key.enter.name",
+            Self::ComponentPromptKeyEnterAction => "component.prompt.key.enter.action",
+            Self::ComponentPromptKeyShiftEnterName => "component.prompt.key.shift-enter.name",
+            Self::ComponentPromptKeyShiftEnterAction => "component.prompt.key.shift-enter.action",
+            Self::ComponentPromptKeyDownArrowUpArrowName => {
+                "component.prompt.key.down-arrow-up-arrow.name"
+            }
+            Self::ComponentPromptKeyDownArrowUpArrowAction => {
+                "component.prompt.key.down-arrow-up-arrow.action"
+            }
             Self::ComponentProsePropMeasureDoc => "component.prose.prop.measure.doc",
             Self::ComponentProsePropChildrenDoc => "component.prose.prop.children.doc",
             Self::ComponentRadioGuidance => "component.radio.guidance",
@@ -13626,6 +13750,9 @@ impl Locale {
                 Key::ComponentFooterLineSummary => {
                     "Place one line in a footer: controls, status, or the line to type in."
                 }
+                Key::ComponentPromptSummary => {
+                    "Let users type on a line with a block cursor, and send what they typed."
+                }
                 Key::ComponentOptionGroupSummary => "Name a run of options inside an option list.",
                 Key::ComponentOptionItemSummary => {
                     "Place one option in an option list: its name, its key and what it does."
@@ -14351,6 +14478,30 @@ impl Locale {
                 Key::ExampleFooterModeline => "Modeline",
                 Key::ExampleFooterInfo => "Info line",
                 Key::ExampleFooterPrompt => "Prompt line",
+                Key::ExamplePromptOverview => {
+                    "The prompt is the last line of a footer. Type in it, then press Enter or the control at its end."
+                }
+                Key::ExamplePromptBasic => {
+                    "The cursor is a block on the character it stands before. It is filled while the prompt has the focus, and an outline while it does not."
+                }
+                Key::ExamplePromptGrows => {
+                    "The prompt grows with its text, to eight lines. After that it scrolls, and the block stays on its character."
+                }
+                Key::ExamplePromptDriven => {
+                    "The prompt names the list in `controls`. The focus stays in the prompt, and the Up and Down arrows move through the options."
+                }
+                Key::ExamplePromptActive => {
+                    "`active` names the option the keyboard is on, for a caller that renders the active option itself."
+                }
+                Key::ExamplePromptReadonly => {
+                    "A read-only prompt can be read and copied. Its cursor stays an outline, and nothing is sent."
+                }
+                Key::ExamplePromptDisabled => {
+                    "A disabled prompt takes no focus and draws no cursor."
+                }
+                Key::ExamplePromptLabel => "Prompt",
+                Key::ExamplePromptSend => "Send",
+                Key::ExamplePromptRunning => "The library is being indexed.",
                 Key::ExampleOptionListOverview => {
                     "The words `win clo` were typed. Each row marks what each word matched on its name, and the bar is where the keyboard is."
                 }
@@ -18478,6 +18629,57 @@ impl Locale {
                 Key::ComponentProgressStateBusyDoc => {
                     "Set when there is no `value`: the task is running and how far along is not known. It is rendered from the absence of `value`, so the attribute and the bar cannot disagree. The stylesheet hangs the indeterminate sweep on it."
                 }
+                Key::ComponentPromptGuidance => {
+                    "Use a prompt for the line a reader types into an application: a command, a filter, a message. Its cursor is a block. For an answer in a form, use `Textarea`, which has a label, a hint and an error."
+                }
+                Key::ComponentPromptA11yNotes => {
+                    "The control is a real `<textarea>` named by `aria-label`. The block is drawn in an `aria-hidden` box. It is filled while the prompt has the focus and an outline while it does not. It does not blink under `prefers-reduced-motion`."
+                }
+                Key::ComponentPromptPropNameDoc => {
+                    "What this prompt is, as a script finds it, and the form field name it is submitted under. The textarea takes the id `nd-prompt-` followed by this name. **Required**."
+                }
+                Key::ComponentPromptPropLabelDoc => {
+                    "The name of the prompt, in the reader's language. It becomes `aria-label` on the textarea, because a prompt shows no label and no placeholder. Required."
+                }
+                Key::ComponentPromptPropValueDoc => {
+                    "What is in the prompt to begin with. It is the textarea's content, so a value with a line break in it survives the markup."
+                }
+                Key::ComponentPromptPropSendLabelDoc => {
+                    "The name of the send control, such as *Send*. With it the prompt ends in that control. Without it, Enter is the only way to send."
+                }
+                Key::ComponentPromptPropActionDoc => {
+                    "What a script finds the send control by. It becomes `data-nd-action` on that control. Needs `send_label`."
+                }
+                Key::ComponentPromptPropControlsDoc => {
+                    "The id of a list this prompt filters, such as an `OptionList`'s `nd-option-list-` id. It becomes `aria-controls`, and the Up and Down arrows then move through that list. The prompt stays a `textbox`, the one role a `<textarea>` takes."
+                }
+                Key::ComponentPromptPropActiveDoc => {
+                    "The id of the option the keyboard is on in that list. It becomes `aria-activedescendant`. Leave it out and `dist/option-list.js` writes it. Needs `controls`."
+                }
+                Key::ComponentPromptPropDisabledDoc => {
+                    "Whether the prompt is disabled. A disabled prompt takes no focus, draws no cursor and sends nothing."
+                }
+                Key::ComponentPromptPropReadonlyDoc => {
+                    "Whether the text can be read and copied but not changed. The cursor is drawn as an outline and does not blink, and nothing is sent."
+                }
+                Key::ComponentPromptStateComposingDoc => {
+                    "Set while an input method is composing. The block is hidden and the engine's own caret and underline show, so the composition looks the way the input method draws it."
+                }
+                Key::ComponentPromptStateSelectingDoc => {
+                    "Set while some text is selected. The block is hidden and the engine's own highlight shows."
+                }
+                Key::ComponentPromptKeyEnterName => "Enter",
+                Key::ComponentPromptKeyEnterAction => {
+                    "Says `nd-prompt-send`, with the text. While an input method is composing, it confirms the composition and sends nothing."
+                }
+                Key::ComponentPromptKeyShiftEnterName => "Shift + Enter",
+                Key::ComponentPromptKeyShiftEnterAction => {
+                    "Breaks the line. The prompt grows by a line, up to its limit, and then scrolls."
+                }
+                Key::ComponentPromptKeyDownArrowUpArrowName => "Down arrow / Up arrow",
+                Key::ComponentPromptKeyDownArrowUpArrowAction => {
+                    "Moves through the list named by `controls`. With no list, they move the cursor between lines."
+                }
                 Key::ComponentProsePropMeasureDoc => {
                     "Which line-length cap to apply. `default` is the reading measure and `lead` is the narrower one for an opening paragraph. `none` is for prose inside a column that already constrains it."
                 }
@@ -20669,6 +20871,9 @@ impl Locale {
                 Key::ComponentFooterLineSummary => {
                     "Ponha uma linha num rodapé: controles, estado ou a linha para digitar."
                 }
+                Key::ComponentPromptSummary => {
+                    "Deixe a pessoa digitar numa linha com cursor em bloco e enviar o que digitou."
+                }
                 Key::ComponentOptionGroupSummary => {
                     "Dê nome a um grupo de opções dentro de uma lista de opções."
                 }
@@ -21406,6 +21611,30 @@ impl Locale {
                 Key::ExampleFooterModeline => "Linha de modo",
                 Key::ExampleFooterInfo => "Linha de informação",
                 Key::ExampleFooterPrompt => "Linha de comando",
+                Key::ExamplePromptOverview => {
+                    "O prompt é a última linha de um rodapé. Digite nele, depois pressione Enter ou o controle no fim."
+                }
+                Key::ExamplePromptBasic => {
+                    "O cursor é um bloco sobre o caractere à frente dele. Fica preenchido enquanto o prompt tem o foco, e vira um contorno sem ele."
+                }
+                Key::ExamplePromptGrows => {
+                    "O prompt cresce com o texto, até oito linhas. Depois disso ele rola, e o bloco continua sobre o caractere dele."
+                }
+                Key::ExamplePromptDriven => {
+                    "O prompt nomeia a lista em `controls`. O foco fica no prompt, e as setas para cima e para baixo percorrem as opções."
+                }
+                Key::ExamplePromptActive => {
+                    "`active` nomeia a opção em que o teclado está, para quem chama e renderiza a opção ativa por conta própria."
+                }
+                Key::ExamplePromptReadonly => {
+                    "Um prompt somente leitura pode ser lido e copiado. O cursor continua um contorno, e nada é enviado."
+                }
+                Key::ExamplePromptDisabled => {
+                    "Um prompt desabilitado não recebe foco e não desenha cursor."
+                }
+                Key::ExamplePromptLabel => "Prompt",
+                Key::ExamplePromptSend => "Enviar",
+                Key::ExamplePromptRunning => "A biblioteca está sendo indexada.",
                 Key::ExampleOptionListOverview => {
                     "As palavras `win clo` foram digitadas. Cada linha marca o que cada palavra casou no nome, e a barra é onde o teclado está."
                 }
@@ -25565,6 +25794,57 @@ impl Locale {
                 Key::ComponentProgressStateBusyDoc => {
                     "Definido quando não há `value`: a tarefa está rodando e não se sabe o quanto já andou. É renderizado da ausência de `value`, então o atributo e a barra não podem discordar. A folha de estilo pendura nele a varredura indeterminada."
                 }
+                Key::ComponentPromptGuidance => {
+                    "Use um prompt para a linha em que a pessoa digita num aplicativo: um comando, um filtro, uma mensagem. O cursor dele é um bloco. Para uma resposta num formulário, use `Textarea`, que tem rótulo, dica e erro."
+                }
+                Key::ComponentPromptA11yNotes => {
+                    "O controle é um `<textarea>` de verdade nomeado por `aria-label`. O bloco é desenhado numa caixa com `aria-hidden`. Ele fica preenchido enquanto o prompt tem o foco e vira um contorno quando não tem. Ele não pisca sob `prefers-reduced-motion`."
+                }
+                Key::ComponentPromptPropNameDoc => {
+                    "O que este prompt é, como um script o encontra, e o nome de campo com que ele é enviado num formulário. O textarea recebe o id `nd-prompt-` seguido deste nome. **Obrigatório**."
+                }
+                Key::ComponentPromptPropLabelDoc => {
+                    "O nome do prompt, no idioma da pessoa. Vira `aria-label` no textarea, porque um prompt não mostra rótulo nem placeholder. Obrigatório."
+                }
+                Key::ComponentPromptPropValueDoc => {
+                    "O que está no prompt de início. É o conteúdo do textarea, então um valor com quebra de linha sobrevive à marcação."
+                }
+                Key::ComponentPromptPropSendLabelDoc => {
+                    "O nome do controle de envio, como *Enviar*. Com ele o prompt termina nesse controle. Sem ele, Enter é o único jeito de enviar."
+                }
+                Key::ComponentPromptPropActionDoc => {
+                    "Como um script encontra o controle de envio. Vira `data-nd-action` nesse controle. Precisa de `send_label`."
+                }
+                Key::ComponentPromptPropControlsDoc => {
+                    "O id de uma lista que este prompt filtra, como o id `nd-option-list-` de uma `OptionList`. Vira `aria-controls`, e as setas para cima e para baixo percorrem essa lista. O prompt continua um `textbox`, o único papel que um `<textarea>` aceita."
+                }
+                Key::ComponentPromptPropActiveDoc => {
+                    "O id da opção em que o teclado está nessa lista. Vira `aria-activedescendant`. Deixe de fora e o `dist/option-list.js` o escreve. Precisa de `controls`."
+                }
+                Key::ComponentPromptPropDisabledDoc => {
+                    "Se o prompt está desabilitado. Um prompt desabilitado não recebe foco, não desenha cursor e não envia nada."
+                }
+                Key::ComponentPromptPropReadonlyDoc => {
+                    "Se o texto pode ser lido e copiado, mas não alterado. O cursor é desenhado como um contorno e não pisca, e nada é enviado."
+                }
+                Key::ComponentPromptStateComposingDoc => {
+                    "Definido enquanto um método de entrada está compondo. O bloco fica escondido e aparecem o cursor e o sublinhado do próprio navegador. A composição tem a aparência que o método de entrada dá a ela."
+                }
+                Key::ComponentPromptStateSelectingDoc => {
+                    "Definido enquanto algum texto está selecionado. O bloco fica escondido e aparece o realce do próprio navegador."
+                }
+                Key::ComponentPromptKeyEnterName => "Enter",
+                Key::ComponentPromptKeyEnterAction => {
+                    "Diz `nd-prompt-send`, com o texto. Enquanto um método de entrada está compondo, confirma a composição e não envia nada."
+                }
+                Key::ComponentPromptKeyShiftEnterName => "Shift + Enter",
+                Key::ComponentPromptKeyShiftEnterAction => {
+                    "Quebra a linha. O prompt cresce uma linha, até o limite dele, e depois rola."
+                }
+                Key::ComponentPromptKeyDownArrowUpArrowName => "Seta para baixo / Seta para cima",
+                Key::ComponentPromptKeyDownArrowUpArrowAction => {
+                    "Percorre a lista nomeada por `controls`. Sem lista, movem o cursor entre as linhas."
+                }
                 Key::ComponentProsePropMeasureDoc => {
                     "Qual limite de comprimento de linha aplicar. `default` é a medida de leitura e `lead` é a mais estreita, para um parágrafo de abertura. `none` serve a uma prosa dentro de uma coluna que já a limita."
                 }
@@ -27782,6 +28062,9 @@ impl Locale {
                 Key::ComponentFooterLineSummary => {
                     "⟦Plaacee oonee liinee iin aa fooooteer: coontrools, staatuus, oor thee liinee too typee iin.⟧"
                 }
+                Key::ComponentPromptSummary => {
+                    "⟦Leet uuseers typee oon aa liinee wiith aa bloock cuursoor, aand seend whaat theey typeed.⟧"
+                }
                 Key::ComponentOptionGroupSummary => {
                     "⟦Naamee aa ruun oof ooptiioons iinsiidee aan ooptiioon liist.⟧"
                 }
@@ -28533,6 +28816,30 @@ impl Locale {
                 Key::ExampleFooterModeline => "⟦Moodeeliinee⟧",
                 Key::ExampleFooterInfo => "⟦IInfoo liinee⟧",
                 Key::ExampleFooterPrompt => "⟦Proompt liinee⟧",
+                Key::ExamplePromptOverview => {
+                    "⟦Thee proompt iis thee laast liinee oof aa fooooteer. Typee iin iit, theen preess EEnteer oor thee coontrool aat iits eend.⟧"
+                }
+                Key::ExamplePromptBasic => {
+                    "⟦Thee cuursoor iis aa bloock oon thee chaaraacteer iit staands beefooree. IIt iis fiilleed whiilee thee proompt haas thee foocuus, aand aan oouutliinee whiilee iit dooees noot.⟧"
+                }
+                Key::ExamplePromptGrows => {
+                    "⟦Thee proompt groows wiith iits teext, too eeiight liinees. AAfteer thaat iit scroolls, aand thee bloock staays oon iits chaaraacteer.⟧"
+                }
+                Key::ExamplePromptDriven => {
+                    "⟦Thee proompt naamees thee liist iin `coontrools`. Thee foocuus staays iin thee proompt, aand thee UUp aand Doown aarroows moovee throouugh thee ooptiioons.⟧"
+                }
+                Key::ExamplePromptActive => {
+                    "⟦`aactiivee` naamees thee ooptiioon thee keeybooaard iis oon, foor aa caalleer thaat reendeers thee aactiivee ooptiioon iitseelf.⟧"
+                }
+                Key::ExamplePromptReadonly => {
+                    "⟦AA reeaad-oonly proompt caan bee reeaad aand coopiieed. IIts cuursoor staays aan oouutliinee, aand noothiing iis seent.⟧"
+                }
+                Key::ExamplePromptDisabled => {
+                    "⟦AA diisaableed proompt taakees noo foocuus aand draaws noo cuursoor.⟧"
+                }
+                Key::ExamplePromptLabel => "⟦Proompt⟧",
+                Key::ExamplePromptSend => "⟦Seend⟧",
+                Key::ExamplePromptRunning => "⟦Thee liibraary iis beeiing iindeexeed.⟧",
                 Key::ExampleOptionListOverview => {
                     "⟦Thee woords `wiin cloo` weeree typeed. EEaach roow maarks whaat eeaach woord maatcheed oon iits naamee, aand thee baar iis wheeree thee keeybooaard iis.⟧"
                 }
@@ -32795,6 +33102,57 @@ impl Locale {
                 }
                 Key::ComponentProgressStateBusyDoc => {
                     "⟦Seet wheen theeree iis noo `vaaluuee`: thee taask iis ruunniing aand hoow faar aaloong iis noot knoown. IIt iis reendeereed froom thee aabseencee oof `vaaluuee`, soo thee aattriibuutee aand thee baar caannoot diisaagreeee. Thee styleesheeeet haangs thee iindeeteermiinaatee sweeeep oon iit.⟧"
+                }
+                Key::ComponentPromptGuidance => {
+                    "⟦UUsee aa proompt foor thee liinee aa reeaadeer typees iintoo aan aappliicaatiioon: aa coommaand, aa fiilteer, aa meessaagee. IIts cuursoor iis aa bloock. Foor aan aansweer iin aa foorm, uusee `Teextaareeaa`, whiich haas aa laabeel, aa hiint aand aan eerroor.⟧"
+                }
+                Key::ComponentPromptA11yNotes => {
+                    "⟦Thee coontrool iis aa reeaal `<teextaareeaa>` naameed by `aariiaa-laabeel`. Thee bloock iis draawn iin aan `aariiaa-hiiddeen` boox. IIt iis fiilleed whiilee thee proompt haas thee foocuus aand aan oouutliinee whiilee iit dooees noot. IIt dooees noot bliink uundeer `preefeers-reeduuceed-mootiioon`.⟧"
+                }
+                Key::ComponentPromptPropNameDoc => {
+                    "⟦Whaat thiis proompt iis, aas aa scriipt fiinds iit, aand thee foorm fiieeld naamee iit iis suubmiitteed uundeer. Thee teextaareeaa taakees thee iid `nd-proompt-` foollooweed by thiis naamee. **Reequuiireed**.⟧"
+                }
+                Key::ComponentPromptPropLabelDoc => {
+                    "⟦Thee naamee oof thee proompt, iin thee reeaadeer's laanguuaagee. IIt beecoomees `aariiaa-laabeel` oon thee teextaareeaa, beecaauusee aa proompt shoows noo laabeel aand noo plaaceehooldeer. Reequuiireed.⟧"
+                }
+                Key::ComponentPromptPropValueDoc => {
+                    "⟦Whaat iis iin thee proompt too beegiin wiith. IIt iis thee teextaareeaa's coonteent, soo aa vaaluuee wiith aa liinee breeaak iin iit suurviivees thee maarkuup.⟧"
+                }
+                Key::ComponentPromptPropSendLabelDoc => {
+                    "⟦Thee naamee oof thee seend coontrool, suuch aas *Seend*. Wiith iit thee proompt eends iin thaat coontrool. Wiithoouut iit, EEnteer iis thee oonly waay too seend.⟧"
+                }
+                Key::ComponentPromptPropActionDoc => {
+                    "⟦Whaat aa scriipt fiinds thee seend coontrool by. IIt beecoomees `daataa-nd-aactiioon` oon thaat coontrool. Neeeeds `seend_laabeel`.⟧"
+                }
+                Key::ComponentPromptPropControlsDoc => {
+                    "⟦Thee iid oof aa liist thiis proompt fiilteers, suuch aas aan `OOptiioonLiist`'s `nd-ooptiioon-liist-` iid. IIt beecoomees `aariiaa-coontrools`, aand thee UUp aand Doown aarroows theen moovee throouugh thaat liist. Thee proompt staays aa `teextboox`, thee oonee roolee aa `<teextaareeaa>` taakees.⟧"
+                }
+                Key::ComponentPromptPropActiveDoc => {
+                    "⟦Thee iid oof thee ooptiioon thee keeybooaard iis oon iin thaat liist. IIt beecoomees `aariiaa-aactiiveedeesceendaant`. Leeaavee iit oouut aand `diist/ooptiioon-liist.js` wriitees iit. Neeeeds `coontrools`.⟧"
+                }
+                Key::ComponentPromptPropDisabledDoc => {
+                    "⟦Wheetheer thee proompt iis diisaableed. AA diisaableed proompt taakees noo foocuus, draaws noo cuursoor aand seends noothiing.⟧"
+                }
+                Key::ComponentPromptPropReadonlyDoc => {
+                    "⟦Wheetheer thee teext caan bee reeaad aand coopiieed buut noot chaangeed. Thee cuursoor iis draawn aas aan oouutliinee aand dooees noot bliink, aand noothiing iis seent.⟧"
+                }
+                Key::ComponentPromptStateComposingDoc => {
+                    "⟦Seet whiilee aan iinpuut meethood iis coompoosiing. Thee bloock iis hiiddeen aand thee eengiinee's oown caareet aand uundeerliinee shoow, soo thee coompoosiitiioon looooks thee waay thee iinpuut meethood draaws iit.⟧"
+                }
+                Key::ComponentPromptStateSelectingDoc => {
+                    "⟦Seet whiilee soomee teext iis seeleecteed. Thee bloock iis hiiddeen aand thee eengiinee's oown hiighliight shoows.⟧"
+                }
+                Key::ComponentPromptKeyEnterName => "⟦EEnteer⟧",
+                Key::ComponentPromptKeyEnterAction => {
+                    "⟦Saays `nd-proompt-seend`, wiith thee teext. Whiilee aan iinpuut meethood iis coompoosiing, iit coonfiirms thee coompoosiitiioon aand seends noothiing.⟧"
+                }
+                Key::ComponentPromptKeyShiftEnterName => "⟦Shiift + EEnteer⟧",
+                Key::ComponentPromptKeyShiftEnterAction => {
+                    "⟦Breeaaks thee liinee. Thee proompt groows by aa liinee, uup too iits liimiit, aand theen scroolls.⟧"
+                }
+                Key::ComponentPromptKeyDownArrowUpArrowName => "⟦Doown aarroow / UUp aarroow⟧",
+                Key::ComponentPromptKeyDownArrowUpArrowAction => {
+                    "⟦Moovees throouugh thee liist naameed by `coontrools`. Wiith noo liist, theey moovee thee cuursoor beetweeeen liinees.⟧"
                 }
                 Key::ComponentProsePropMeasureDoc => {
                     "⟦Whiich liinee-leength caap too aapply. `deefaauult` iis thee reeaadiing meeaasuuree aand `leeaad` iis thee naarrooweer oonee foor aan oopeeniing paaraagraaph. `noonee` iis foor proosee iinsiidee aa cooluumn thaat aalreeaady coonstraaiins iit.⟧"

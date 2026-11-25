@@ -236,6 +236,10 @@ export const PAGE = {
   // component drawn edge to edge in four shades of one colour, and the only
   // one whose corners take a fixed width out of a 320px line.
   footer: "footer/",
+  // The line a reader types on. On this list because it is the one control
+  // whose cursor this system draws, over a second copy of its own text, so the
+  // width x locale sweep has a box here whose two layers must wrap as one.
+  prompt: "prompt/",
 };
 
 /**

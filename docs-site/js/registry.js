@@ -68,6 +68,7 @@ import { Pagination } from "@noctua-world/design-react/components/pagination.js"
 import { Paragraph } from "@noctua-world/design-react/components/paragraph.js";
 import { Popover } from "@noctua-world/design-react/components/popover.js";
 import { Progress } from "@noctua-world/design-react/components/progress.js";
+import { Prompt } from "@noctua-world/design-react/components/prompt.js";
 import { Prose } from "@noctua-world/design-react/components/prose.js";
 import { Radio } from "@noctua-world/design-react/components/radio.js";
 import { Rating } from "@noctua-world/design-react/components/rating.js";
@@ -164,6 +165,7 @@ export const COMPONENTS = {
   Paragraph,
   Popover,
   Progress,
+  Prompt,
   Prose,
   Radio,
   Rating,
