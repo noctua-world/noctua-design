@@ -123,7 +123,8 @@ fn write_scales(out: &mut String, spec: &Spec, prefix: &str) {
     }
 }
 
-/// Durations, easings, layers and the focus ring.
+/// Durations, easings, layers, the focus ring, targets, the shell and the
+/// scene.
 fn write_motion_and_layers(out: &mut String, spec: &Spec, prefix: &str) {
     section(out, "Motion");
     for (name, duration) in &spec.motion.duration {
@@ -151,6 +152,16 @@ fn write_motion_and_layers(out: &mut String, spec: &Spec, prefix: &str) {
     section(out, "Focus ring geometry");
     for (name, value) in &spec.focus {
         writeln!(out, "  --{prefix}-focus-{name}: {value};").expect("string write");
+    }
+
+    section(out, "Targets: the smallest box a pointer is asked to hit");
+    for (name, value) in &spec.target {
+        writeln!(out, "  --{prefix}-target-{name}: {value};").expect("string write");
+    }
+
+    section(out, "The shell: what an application window is measured in");
+    for (name, value) in &spec.shell {
+        writeln!(out, "  --{prefix}-shell-{name}: {value};").expect("string write");
     }
 
     section(out, "The scene: what a Lineage cell is worth");
@@ -331,6 +342,53 @@ mod tests {
             css.contains("--noctua-space-gap: var(--noctua-space-4);"),
             "{css}"
         );
+    }
+
+    /// The shell and the target floor reach the sheet under their own groups,
+    /// and the count stays a bare number a `calc()` can multiply by.
+    #[test]
+    fn the_shell_and_the_target_floor_are_emitted() {
+        let css = css();
+        for declaration in [
+            "--noctua-target-min: 24px;",
+            "--noctua-shell-line: 2rem;",
+            "--noctua-shell-rail: 3rem;",
+            "--noctua-shell-prompt-max: 8;",
+            "--noctua-shell-drawer-max: 40%;",
+        ] {
+            assert!(css.contains(declaration), "{declaration} is missing");
+        }
+    }
+
+    /// `shell.line` and `shell.rail` are named after two boxes `Button` draws:
+    /// the small button's height and the icon-only button's width. The spec
+    /// test holds them to the scale, and this holds the scale steps to the
+    /// rules that draw those boxes.
+    #[test]
+    fn the_shell_is_measured_in_the_buttons_own_boxes() {
+        let spec = shipped();
+        let button = std::fs::read_to_string(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../noctua-design-styles/src/button.css"
+        ))
+        .expect("the button's rules");
+        let rule = |selector: &str| {
+            let from = button
+                .find(&format!("\n{selector} {{"))
+                .unwrap_or_else(|| panic!("no rule for {selector}"));
+            let to = from + button[from..].find('}').expect("the rule closes");
+            &button[from..to]
+        };
+        assert!(
+            rule(".nd-button[data-nd-size=\"small\"]")
+                .contains("min-block-size: var(--noctua-space-8);")
+        );
+        assert_eq!(spec.shell["line"], multiply(&spec.space.base, 8));
+        assert!(
+            rule(".nd-button[data-nd-hide-label=\"true\"]")
+                .contains("inline-size: var(--noctua-space-12);")
+        );
+        assert_eq!(spec.shell["rail"], multiply(&spec.space.base, 12));
     }
 
     #[test]

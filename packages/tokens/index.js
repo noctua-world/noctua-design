@@ -71,6 +71,17 @@ export const focus = {
   offset: "var(--noctua-focus-offset)",
 };
 
+export const target = {
+  min: "var(--noctua-target-min)",
+};
+
+export const shell = {
+  line: "var(--noctua-shell-line)",
+  rail: "var(--noctua-shell-rail)",
+  promptMax: "var(--noctua-shell-prompt-max)",
+  drawerMax: "var(--noctua-shell-drawer-max)",
+};
+
 export const leading = {
   tight: 1.15,
   heading: 1.25,

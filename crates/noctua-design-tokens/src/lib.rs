@@ -167,6 +167,24 @@ pub mod focus {
     pub const OFFSET: &str = "var(--noctua-focus-offset)";
 }
 
+/// Pointer-target sizes: the smallest box a pointer is asked to hit.
+pub mod target {
+    /// `24px`.
+    pub const MIN: &str = "var(--noctua-target-min)";
+}
+
+/// What an application window is measured in: a footer line, an icon rail, and how far a prompt and a drawer may grow.
+pub mod shell {
+    /// `2rem`.
+    pub const LINE: &str = "var(--noctua-shell-line)";
+    /// `3rem`.
+    pub const RAIL: &str = "var(--noctua-shell-rail)";
+    /// `8`.
+    pub const PROMPT_MAX: &str = "var(--noctua-shell-prompt-max)";
+    /// `40%`.
+    pub const DRAWER_MAX: &str = "var(--noctua-shell-drawer-max)";
+}
+
 /// Motion durations. Each is the ordinary value; the reduced-motion collapse lives in CSS, where the media query can reach it.
 pub mod duration {
     /// `70ms` normally, `70ms` under reduced motion.

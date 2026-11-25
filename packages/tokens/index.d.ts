@@ -68,6 +68,17 @@ export declare const focus: {
   readonly offset: string;
 };
 
+export declare const target: {
+  readonly min: string;
+};
+
+export declare const shell: {
+  readonly line: string;
+  readonly rail: string;
+  readonly promptMax: string;
+  readonly drawerMax: string;
+};
+
 export declare const leading: {
   readonly tight: number;
   readonly heading: number;

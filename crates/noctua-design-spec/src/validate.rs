@@ -19,6 +19,7 @@ pub(crate) fn check(spec: &Spec) -> Vec<Problem> {
     check_type(spec, &mut problems);
     check_motion(spec, &mut problems);
     check_units(spec, &mut problems);
+    check_counts(spec, &mut problems);
 
     problems
 }
@@ -206,12 +207,40 @@ fn check_units(spec: &Spec, problems: &mut Vec<Problem>) {
             .map(|(k, v)| (format!("breakpoint.{k}"), v)),
     );
     lengths.extend(spec.focus.iter().map(|(k, v)| (format!("focus.{k}"), v)));
+    lengths.extend(spec.target.iter().map(|(k, v)| (format!("target.{k}"), v)));
+    lengths.extend(
+        spec.shell
+            .iter()
+            .filter(|(k, _)| !SHELL_COUNTS.contains(&k.as_str()))
+            .map(|(k, v)| (format!("shell.{k}"), v)),
+    );
 
     for (path, value) in lengths {
         if !is_length(value) {
             problems.push(
                 Problem::whole_file(format!("{path} is `{value}`, which is not a length"))
                     .fix("give it a unit — `0.5rem`, `2px`, `9999px` — or write a bare `0`"),
+            );
+        }
+    }
+}
+
+/// The `[shell]` names that are a count of something and carry no unit.
+///
+/// Every other name in the table is a length. `prompt-max` counts lines, so a
+/// unit on it would multiply a line's height by a length, and the browser
+/// drops that declaration without a word.
+const SHELL_COUNTS: [&str; 1] = ["prompt-max"];
+
+/// A count is a whole number of at least one, with no unit.
+fn check_counts(spec: &Spec, problems: &mut Vec<Problem>) {
+    for name in SHELL_COUNTS {
+        if let Some(value) = spec.shell.get(name)
+            && !value.trim().parse::<u32>().is_ok_and(|count| count > 0)
+        {
+            problems.push(
+                Problem::whole_file(format!("shell.{name} is `{value}`, which is not a count"))
+                    .fix("give it a whole number of at least one and no unit, as in `8`"),
             );
         }
     }

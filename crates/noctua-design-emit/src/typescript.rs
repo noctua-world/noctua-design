@@ -60,6 +60,8 @@ fn index_js(spec: &Spec) -> String {
         "tracking",
     );
     var_object(&mut out, "focus", &spec.focus, prefix, "focus");
+    var_object(&mut out, "target", &spec.target, prefix, "target");
+    var_object(&mut out, "shell", &spec.shell, prefix, "shell");
 
     writeln!(out, "export const leading = {{").expect("write");
     for (name, value) in &spec.r#type.leading {
@@ -144,6 +146,8 @@ fn index_d_ts(spec: &Spec) -> String {
     declare(&mut out, "size", spec.r#type.size.keys(), "string");
     declare(&mut out, "tracking", spec.r#type.tracking.keys(), "string");
     declare(&mut out, "focus", spec.focus.keys(), "string");
+    declare(&mut out, "target", spec.target.keys(), "string");
+    declare(&mut out, "shell", spec.shell.keys(), "string");
     declare(&mut out, "leading", spec.r#type.leading.keys(), "number");
     declare(&mut out, "weight", spec.r#type.weight.keys(), "number");
     declare(&mut out, "duration", spec.motion.duration.keys(), "string");
@@ -241,6 +245,22 @@ mod tests {
     fn tokens_reference_the_custom_property() {
         let (js, _) = files();
         assert!(js.contains(r#"gap: "var(--noctua-space-gap)","#), "{js}");
+    }
+
+    #[test]
+    fn the_shell_and_the_target_floor_are_exported_and_declared() {
+        let (js, dts) = files();
+        for entry in [
+            r#"min: "var(--noctua-target-min)","#,
+            r#"line: "var(--noctua-shell-line)","#,
+            r#"rail: "var(--noctua-shell-rail)","#,
+            r#"promptMax: "var(--noctua-shell-prompt-max)","#,
+            r#"drawerMax: "var(--noctua-shell-drawer-max)","#,
+        ] {
+            assert!(js.contains(entry), "{entry} is missing");
+        }
+        assert!(dts.contains("readonly promptMax: string;"), "{dts}");
+        assert!(dts.contains("readonly drawerMax: string;"), "{dts}");
     }
 
     #[test]

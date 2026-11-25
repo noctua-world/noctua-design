@@ -230,6 +230,43 @@ strong = "2px"
 rule = "5px"
 
 
+# --- Targets --------------------------------------------------------------
+#
+# The smallest box a pointer is asked to hit.
+
+[target]
+# WCAG 2.2, 2.5.8: a target is at least 24 by 24 CSS pixels. In `px` and not on
+# the spacing scale, because the criterion is written in CSS pixels and a `rem`
+# shrinks below it for a reader whose root size is under sixteen. It is the
+# floor: a control is drawn at its own size and never under this one.
+min = "24px"
+
+
+# --- The shell ------------------------------------------------------------
+#
+# What an application window is measured in: its footer lines, its icon rails,
+# its prompt and its drawers. Declared here so every window, and every example
+# of one, agrees on the four numbers.
+
+[shell]
+# The height of one footer line: one line of text and the smallest padding
+# above and below it. The text is the small control's, `size.caption` at
+# `leading.body`, which is 1.5rem. The padding is step 1 of the spacing scale
+# on each side. The sum is step 8, the height of a small `Button`, so a control
+# in a footer line fills it exactly. A test asserts the sum.
+line = "2rem"
+# The width of an icon rail: step 12 of the spacing scale, the inline size of
+# an icon-only `Button` at its default size, so one button is one rail wide.
+rail = "3rem"
+# The most lines a prompt grows to before it scrolls. A count, with no unit:
+# the height is this many lines of whatever text the prompt sets.
+prompt-max = "8"
+# The largest share of the window a drawer takes, on the axis it opens along.
+# A percentage, so it resolves against the window and a drawer on a narrow
+# window stays narrow.
+drawer-max = "40%"
+
+
 # --- The scene ------------------------------------------------------------
 #
 # What a `Lineage` cell is worth. The layout engine

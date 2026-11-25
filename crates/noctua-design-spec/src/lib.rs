@@ -322,6 +322,88 @@ mod tests {
         assert!(error.problems()[0].help().contains("overlap"));
     }
 
+    /// A count with a unit multiplies a line's height by a length, which the
+    /// browser drops, and a count of nothing is a prompt with no height.
+    #[test]
+    fn a_count_is_a_whole_number_with_no_unit() {
+        for bad in ["8rem", "0", "2.5", "eight"] {
+            let error = super::parse("t.toml", &format!("[shell]\nprompt-max = \"{bad}\"\n"))
+                .expect_err("must fail");
+            assert!(
+                error.problems()[0].message().contains("not a count"),
+                "{bad:?} was rejected, but not for the reason we meant"
+            );
+        }
+        super::parse("t.toml", "[shell]\nprompt-max = \"8\"\n").expect("a count is valid");
+    }
+
+    /// Every other shell value, and every target size, is a length.
+    #[test]
+    fn a_shell_length_and_a_target_carry_a_unit() {
+        for bad in [
+            "[shell]\nline = \"2\"\n",
+            "[shell]\ndrawer-max = \"40\"\n",
+            "[target]\nmin = \"24\"\n",
+        ] {
+            let error = super::parse("t.toml", bad).expect_err("must fail");
+            assert!(
+                error.problems().iter().any(|p| p.help().contains("unit")),
+                "{bad:?} was rejected, but not for the reason we meant"
+            );
+        }
+    }
+
+    /// A length in `rem`, as a number.
+    fn rem(value: &str) -> f64 {
+        value
+            .strip_suffix("rem")
+            .and_then(|number| number.parse().ok())
+            .unwrap_or_else(|| panic!("`{value}` is not in rem"))
+    }
+
+    /// The shell's two lengths are sums the spec's comments state, and both
+    /// land on the spacing scale. Moving the scale, the caption size or the
+    /// body leading without moving these would leave a footer line that no
+    /// longer fits the control standing in it.
+    #[test]
+    fn the_shell_stands_on_the_scale() {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../spec/tokens.toml");
+        let spec = super::load(path).expect("the shipped spec parses");
+        let base = rem(&spec.space.base);
+        let step = |step: u32| {
+            assert!(
+                spec.space.steps.contains(&step),
+                "step {step} left the scale"
+            );
+            base * f64::from(step)
+        };
+        let near = |a: f64, b: f64| (a - b).abs() < 1e-9;
+
+        let line = rem(&spec.shell["line"]);
+        let text = rem(&spec.r#type.size["caption"]) * spec.r#type.leading["body"];
+        assert!(
+            near(line, text + 2.0 * step(1)),
+            "shell.line is {line}rem, and one caption line with step 1 above and below is {}rem",
+            text + 2.0 * step(1)
+        );
+        assert!(near(line, step(8)), "shell.line is not step 8");
+        assert!(
+            near(rem(&spec.shell["rail"]), step(12)),
+            "shell.rail is not step 12"
+        );
+
+        // The floor holds inside a footer line at the default root size: the
+        // text line alone is as tall as the smallest target.
+        let min = spec.target["min"]
+            .strip_suffix("px")
+            .and_then(|number| number.parse::<f64>().ok())
+            .expect("target.min is in px");
+        assert!(
+            text * 16.0 >= min,
+            "a footer line's text is shorter than the smallest target"
+        );
+    }
+
     /// Every problem in one pass, not one per edit.
     #[test]
     fn every_problem_is_reported_at_once() {

@@ -105,6 +105,15 @@
   --noctua-focus-width: 2px;
   --noctua-focus-offset: 2px;
 
+  /* Targets: the smallest box a pointer is asked to hit. */
+  --noctua-target-min: 24px;
+
+  /* The shell: what an application window is measured in. */
+  --noctua-shell-line: 2rem;
+  --noctua-shell-rail: 3rem;
+  --noctua-shell-prompt-max: 8;
+  --noctua-shell-drawer-max: 40%;
+
   /* The scene: what a Lineage cell is worth. */
   --noctua-scene-cell: 9rem;
   --noctua-scene-squeeze: 0.85;
