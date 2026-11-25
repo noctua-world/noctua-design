@@ -109,7 +109,7 @@ pub(crate) struct DocComponent {
 }
 
 /// Every component, in the order `spec/components/` is read.
-pub(crate) const COMPONENTS: [DocComponent; 89] = [
+pub(crate) const COMPONENTS: [DocComponent; 90] = [
     DocComponent {
         name: "Abbr",
         slug: "abbr",
@@ -7265,6 +7265,47 @@ pub(crate) const COMPONENTS: [DocComponent; 89] = [
         role: None,
         needs_name: false,
         a11y_notes: Some(Key::ComponentMarkA11yNotes),
+    },
+    DocComponent {
+        name: "MatchText",
+        slug: "match-text",
+        page: None,
+        summary: Key::ComponentMatchTextSummary,
+        element: "span",
+        class: Some("nd-match-text"),
+        guidance: Some(Key::ComponentMatchTextGuidance),
+        specimen: None,
+        props: &[
+            DocProp {
+                name: "text",
+                kind: "text",
+                values: &[],
+                elements: &[],
+                default: None,
+                attribute: None,
+                required: true,
+                variants: true,
+                specimen: None,
+                doc: Key::ComponentMatchTextPropTextDoc,
+            },
+            DocProp {
+                name: "hits",
+                kind: "text",
+                values: &[],
+                elements: &[],
+                default: None,
+                attribute: None,
+                required: false,
+                variants: true,
+                specimen: None,
+                doc: Key::ComponentMatchTextPropHitsDoc,
+            },
+        ],
+        states: &[],
+        keyboard: &[],
+        role: None,
+        needs_name: false,
+        a11y_notes: Some(Key::ComponentMatchTextA11yNotes),
     },
     DocComponent {
         name: "Menu",

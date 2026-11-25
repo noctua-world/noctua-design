@@ -461,6 +461,14 @@ ToolbarGroup { align: ToolbarGroupAlign::End, … }"#
         ),
     ),
     (
+        "match-text",
+        example!(
+            r#"MatchText { text: "ButtonGroup", hits: "6-8|2|0" }
+MatchText { text: "ToolbarGroup", hits: "7-9|0|4" }"#,
+            Key::ExampleMatchTextQuery
+        ),
+    ),
+    (
         "button-group",
         example!(
             r#"ButtonGroup { label: "Publishing", … }
@@ -672,6 +680,7 @@ pub(crate) fn for_component(name: &str) -> &'static [Example] {
         "List" => LIST,
         "ListItem" => LIST_ITEM,
         "Mark" => MARK,
+        "MatchText" => MATCH_TEXT,
         "Paragraph" => PARAGRAPH,
         "Prose" => PROSE,
         "Search" => SEARCH,
@@ -2152,6 +2161,33 @@ const MARK: &[Example] = &[
     example!(r"Two hits in one line", Key::ExampleMarkSearch),
     example!(r"Mark inside a heading"),
     example!(r"Mark inside a list"),
+];
+
+// --- MatchText --------------------------------------------------------------
+
+// ONE NAME, CUT FIVE WAYS. The text never changes, so what differs between two
+// pictures is what `hits` said and nothing else.
+const MATCH_TEXT: &[Example] = &[
+    example!(
+        r#"MatchText { text: "ButtonGroup", hits: "0-5" }"#,
+        Key::ExampleMatchTextOne
+    ),
+    example!(
+        r#"MatchText { text: "ButtonGroup", hits: "0-2|6-8|9-10" }"#,
+        Key::ExampleMatchTextWords
+    ),
+    example!(
+        r#"MatchText { text: "ButtonGroup", hits: "0-5|3-8" }"#,
+        Key::ExampleMatchTextShared
+    ),
+    example!(
+        r#"MatchText { text: "ButtonGroup", hits: "|6-10" }"#,
+        Key::ExampleMatchTextElsewhere
+    ),
+    example!(
+        r#"MatchText { text: "ButtonGroup" }"#,
+        Key::ExampleMatchTextPlain
+    ),
 ];
 
 // --- Paragraph and Prose ----------------------------------------------------

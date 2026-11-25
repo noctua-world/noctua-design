@@ -291,6 +291,7 @@ pub fn is_custom(component: &Component) -> bool {
             | "Toast"
             | "AILabel"
             | "Truncate"
+            | "MatchText"
     )
 }
 
@@ -335,6 +336,7 @@ pub fn dioxus_body(sink: &mut String, component: &Component) {
         "Info" => out.push_str(INFO_DIOXUS),
         "AILabel" => out.push_str(AI_LABEL_DIOXUS),
         "Truncate" => out.push_str(TRUNCATE_DIOXUS),
+        "MatchText" => out.push_str(MATCH_TEXT_DIOXUS),
         "Menu" => out.push_str(MENU_DIOXUS),
         "MenuItem" => out.push_str(MENU_ITEM_DIOXUS),
         "Meter" => out.push_str(METER_DIOXUS),
@@ -420,6 +422,7 @@ pub fn react_body(sink: &mut String, component: &Component) {
         "Info" => out.push_str(INFO_REACT),
         "AILabel" => out.push_str(AI_LABEL_REACT),
         "Truncate" => out.push_str(TRUNCATE_REACT),
+        "MatchText" => out.push_str(MATCH_TEXT_REACT),
         "Menu" => out.push_str(MENU_REACT),
         "MenuItem" => out.push_str(MENU_ITEM_REACT),
         "Meter" => out.push_str(METER_REACT),
@@ -3586,6 +3589,136 @@ const TRUNCATE_REACT: &str = r#"  const lines_ = lines ?? "1";
     // See the Dioxus half: the clamp moves down one element when marked.
     marked ? h("span", { key: "t", className: "nd-truncate-text" }, children) : children,
     // @ai nd-ai-slot-apart,
+  );
+"#;
+
+// --- MatchText --------------------------------------------------------------
+
+/// A name, cut into the runs a query matched and the runs it did not.
+///
+/// # Why this is written and not derived
+///
+/// A derived body is one element holding its children. This one reads two
+/// strings and draws a list of elements from them, and the reading is the
+/// component: which word claimed each character, and where one run ends.
+///
+/// # The grammar, and what both halves do with a piece outside it
+///
+/// `hits` is one slot for each word of the query, joined by `|`. A slot is
+/// pieces joined by commas, and a piece is an index or two indices around a
+/// hyphen, the second included. An index is one to nine ASCII digits and
+/// nothing else: no sign, no space. **A piece that is anything else is
+/// skipped**, and a position past the end of the text marks nothing, so a stale
+/// answer draws too little and never throws. The two halves are written to the
+/// same sentence on purpose: Rust's own integer parser takes a leading `+` and
+/// JavaScript's takes `1e3`, and a body that leaned on either would mark
+/// different characters from the same prop.
+///
+/// # A character belongs to the first word that claims it
+///
+/// The matcher lets two words share a character (`NOCTUA.md §12.4`), and the
+/// first word's tone is the one drawn. `Match.claims` in `dist/search-match.js`
+/// answers the same question the same way.
+///
+/// # Three tones, and the third is shared
+///
+/// `data-nd-word` is `1`, `2` or `3`, and `3` is the third word and every later
+/// one. Neighbouring characters of one tone are one `<mark>`, so the fourth
+/// word's run beside the third's is one element.
+const MATCH_TEXT_DIOXUS: &str = r#"    let root = format!("nd-match-text {class}");
+    let root = root.trim().to_owned();
+
+    // Which word claimed each character, the first to ask keeping it.
+    let chars: Vec<char> = text.chars().collect();
+    let mut owner: Vec<Option<usize>> = vec![None; chars.len()];
+    let index = |digits: &str| {
+        let plain = !digits.is_empty()
+            && digits.len() <= 9
+            && digits.bytes().all(|byte| byte.is_ascii_digit());
+        plain.then(|| digits.parse::<usize>().ok()).flatten()
+    };
+    for (word, slot) in hits.as_deref().unwrap_or_default().split('|').enumerate() {
+        for piece in slot.split(',') {
+            let (first, last) = piece.split_once('-').unwrap_or((piece, piece));
+            let (Some(first), Some(last)) = (index(first), index(last)) else {
+                continue;
+            };
+            for at in first..=last {
+                // Past the end of the text there is nothing to mark, and
+                // nothing after it either.
+                let Some(claimed) = owner.get_mut(at) else {
+                    break;
+                };
+                claimed.get_or_insert(word);
+            }
+        }
+    }
+
+    // The runs: neighbouring characters of one tone, or of none.
+    let mut runs: Vec<(Option<&'static str>, String)> = Vec::new();
+    for (at, character) in chars.iter().enumerate() {
+        let tone = owner[at].map(|word| match word {
+            0 => "1",
+            1 => "2",
+            _ => "3",
+        });
+        match runs.last_mut() {
+            Some((last, run)) if *last == tone => run.push(*character),
+            _ => runs.push((tone, character.to_string())),
+        }
+    }
+
+    rsx! {
+        span { class: "{root}",
+            for (tone , run) in runs {
+                if let Some(tone) = tone {
+                    mark { class: "nd-match", "data-nd-word": tone, "{run}" }
+                } else {
+                    "{run}"
+                }
+            }
+        }
+    }
+"#;
+
+/// The same cut, in React. Read it beside `MATCH_TEXT_DIOXUS`.
+const MATCH_TEXT_REACT: &str = r#"  const root = ["nd-match-text", className].filter(Boolean).join(" ");
+
+  // Which word claimed each character, the first to ask keeping it. A spread
+  // counts code points, which is what a position is.
+  const chars = [...(text ?? "")];
+  const owner = new Array(chars.length).fill(null);
+  const index = (digits) => (/^[0-9]{1,9}$/.test(digits) ? Number(digits) : null);
+  (hits ?? "").split("|").forEach((slot, word) => {
+    for (const piece of slot.split(",")) {
+      const dash = piece.indexOf("-");
+      const first = index(dash < 0 ? piece : piece.slice(0, dash));
+      const last = index(dash < 0 ? piece : piece.slice(dash + 1));
+      if (first === null || last === null) continue;
+      // Past the end of the text there is nothing to mark.
+      for (let at = first; at <= last && at < chars.length; at += 1) {
+        if (owner[at] === null) owner[at] = word;
+      }
+    }
+  });
+
+  // The runs: neighbouring characters of one tone, or of none.
+  const runs = [];
+  chars.forEach((character, at) => {
+    const tone = owner[at] === null ? null : owner[at] === 0 ? "1" : owner[at] === 1 ? "2" : "3";
+    const last = runs[runs.length - 1];
+    if (last && last.tone === tone) last.text += character;
+    else runs.push({ tone, text: character });
+  });
+
+  return h(
+    "span",
+    { className: root, ...rest },
+    runs.map((run, at) =>
+      run.tone
+        ? h("mark", { key: at, className: "nd-match", "data-nd-word": run.tone }, run.text)
+        : run.text,
+    ),
   );
 "#;
 

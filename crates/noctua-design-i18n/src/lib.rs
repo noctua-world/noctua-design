@@ -602,6 +602,8 @@ pub enum Key {
     ComponentListItemSummary,
     /// `component.mark.summary`
     ComponentMarkSummary,
+    /// `component.match-text.summary`
+    ComponentMatchTextSummary,
     /// `component.paragraph.summary`
     ComponentParagraphSummary,
     /// `component.prose.summary`
@@ -1330,6 +1332,18 @@ pub enum Key {
     ExampleMarkWord,
     /// `example.mark.search`
     ExampleMarkSearch,
+    /// `example.match-text.query`
+    ExampleMatchTextQuery,
+    /// `example.match-text.one`
+    ExampleMatchTextOne,
+    /// `example.match-text.words`
+    ExampleMatchTextWords,
+    /// `example.match-text.shared`
+    ExampleMatchTextShared,
+    /// `example.match-text.elsewhere`
+    ExampleMatchTextElsewhere,
+    /// `example.match-text.plain`
+    ExampleMatchTextPlain,
     /// `example.paragraph.lead`
     ExampleParagraphLead,
     /// `example.prose.measure`
@@ -4428,6 +4442,14 @@ pub enum Key {
     ComponentMarkA11yNotes,
     /// `component.mark.prop.children.doc`
     ComponentMarkPropChildrenDoc,
+    /// `component.match-text.guidance`
+    ComponentMatchTextGuidance,
+    /// `component.match-text.a11y-notes`
+    ComponentMatchTextA11yNotes,
+    /// `component.match-text.prop.text.doc`
+    ComponentMatchTextPropTextDoc,
+    /// `component.match-text.prop.hits.doc`
+    ComponentMatchTextPropHitsDoc,
     /// `component.menu.guidance`
     ComponentMenuGuidance,
     /// `component.menu.a11y-notes`
@@ -6074,7 +6096,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2975] = [
+    pub const ALL: [Self; 2986] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -6316,6 +6338,7 @@ impl Key {
         Self::ComponentListSummary,
         Self::ComponentListItemSummary,
         Self::ComponentMarkSummary,
+        Self::ComponentMatchTextSummary,
         Self::ComponentParagraphSummary,
         Self::ComponentProseSummary,
         Self::ComponentStrongSummary,
@@ -6680,6 +6703,12 @@ impl Key {
         Self::ExampleMarkLead,
         Self::ExampleMarkWord,
         Self::ExampleMarkSearch,
+        Self::ExampleMatchTextQuery,
+        Self::ExampleMatchTextOne,
+        Self::ExampleMatchTextWords,
+        Self::ExampleMatchTextShared,
+        Self::ExampleMatchTextElsewhere,
+        Self::ExampleMatchTextPlain,
         Self::ExampleParagraphLead,
         Self::ExampleProseMeasure,
         Self::ExampleProseNone,
@@ -8229,6 +8258,10 @@ impl Key {
         Self::ComponentListItemPropChildrenDoc,
         Self::ComponentMarkA11yNotes,
         Self::ComponentMarkPropChildrenDoc,
+        Self::ComponentMatchTextGuidance,
+        Self::ComponentMatchTextA11yNotes,
+        Self::ComponentMatchTextPropTextDoc,
+        Self::ComponentMatchTextPropHitsDoc,
         Self::ComponentMenuGuidance,
         Self::ComponentMenuA11yNotes,
         Self::ComponentMenuPropNameDoc,
@@ -9297,6 +9330,7 @@ impl Key {
             Self::ComponentListSummary => "component.list.summary",
             Self::ComponentListItemSummary => "component.list-item.summary",
             Self::ComponentMarkSummary => "component.mark.summary",
+            Self::ComponentMatchTextSummary => "component.match-text.summary",
             Self::ComponentParagraphSummary => "component.paragraph.summary",
             Self::ComponentProseSummary => "component.prose.summary",
             Self::ComponentStrongSummary => "component.strong.summary",
@@ -9661,6 +9695,12 @@ impl Key {
             Self::ExampleMarkLead => "example.mark.lead",
             Self::ExampleMarkWord => "example.mark.word",
             Self::ExampleMarkSearch => "example.mark.search",
+            Self::ExampleMatchTextQuery => "example.match-text.query",
+            Self::ExampleMatchTextOne => "example.match-text.one",
+            Self::ExampleMatchTextWords => "example.match-text.words",
+            Self::ExampleMatchTextShared => "example.match-text.shared",
+            Self::ExampleMatchTextElsewhere => "example.match-text.elsewhere",
+            Self::ExampleMatchTextPlain => "example.match-text.plain",
             Self::ExampleParagraphLead => "example.paragraph.lead",
             Self::ExampleProseMeasure => "example.prose.measure",
             Self::ExampleProseNone => "example.prose.none",
@@ -11508,6 +11548,10 @@ impl Key {
             Self::ComponentListItemPropChildrenDoc => "component.list-item.prop.children.doc",
             Self::ComponentMarkA11yNotes => "component.mark.a11y-notes",
             Self::ComponentMarkPropChildrenDoc => "component.mark.prop.children.doc",
+            Self::ComponentMatchTextGuidance => "component.match-text.guidance",
+            Self::ComponentMatchTextA11yNotes => "component.match-text.a11y-notes",
+            Self::ComponentMatchTextPropTextDoc => "component.match-text.prop.text.doc",
+            Self::ComponentMatchTextPropHitsDoc => "component.match-text.prop.hits.doc",
             Self::ComponentMenuGuidance => "component.menu.guidance",
             Self::ComponentMenuA11yNotes => "component.menu.a11y-notes",
             Self::ComponentMenuPropNameDoc => "component.menu.prop.name.doc",
@@ -13004,6 +13048,9 @@ impl Locale {
                 Key::ComponentMarkSummary => {
                     "Highlight text for what the reader is doing now, such as a search hit."
                 }
+                Key::ComponentMatchTextSummary => {
+                    "Show a name with the characters a query matched marked, one style for each word of the query."
+                }
                 Key::ComponentParagraphSummary => "Render a paragraph of prose.",
                 Key::ComponentProseSummary => {
                     "Holds long-form text in a column that caps its own line length."
@@ -13668,6 +13715,20 @@ impl Locale {
                 Key::ExampleMarkSearch => {
                     "The weight changes as well as the background, so a hit can be found without relying on colour."
                 }
+                Key::ExampleMatchTextQuery => {
+                    "The query `gro t b` found both names. Each word of it marks its own characters, in its own tone."
+                }
+                Key::ExampleMatchTextOne => "One word, and the run it matched.",
+                Key::ExampleMatchTextWords => {
+                    "Three words. The first is underlined solid, the second dashed and the third dotted, so no tone depends on colour."
+                }
+                Key::ExampleMatchTextShared => {
+                    "Two words claim characters 3 to 5. The first word keeps them."
+                }
+                Key::ExampleMatchTextElsewhere => {
+                    "An empty slot is a word that matched another field, so the second word's tone is the only one drawn."
+                }
+                Key::ExampleMatchTextPlain => "With no `hits` it is the name alone.",
                 Key::ExampleParagraphLead => {
                     "Use the lead size for the opening sentence under a title."
                 }
@@ -17065,6 +17126,18 @@ impl Locale {
                     "A highlight that carries meaning needs more than a background colour. Colour alone is invisible to a reader who cannot distinguish it, so this also changes the text weight."
                 }
                 Key::ComponentMarkPropChildrenDoc => "The highlighted text.",
+                Key::ComponentMatchTextGuidance => {
+                    "Use match text for a name in a list filtered by typing, to show which characters each word of the query matched. For a highlighted phrase in prose, use `Mark`."
+                }
+                Key::ComponentMatchTextA11yNotes => {
+                    "Each run is a real `<mark>`, and the whole name stays in the accessible tree as one text. The first word is underlined solid, the second dashed and every later word dotted, so the three are told apart without colour, as WCAG 1.4.1 asks."
+                }
+                Key::ComponentMatchTextPropTextDoc => {
+                    "The whole name, as the list shows it. **Required**. Text and not children, because every position in `hits` is an index into it."
+                }
+                Key::ComponentMatchTextPropHitsDoc => {
+                    "The matched characters, one slot for each word of the query, joined by `|`. A slot holds indices and inclusive ranges joined by commas, as in `0-2,5|7-9`. An empty slot is a word that matched elsewhere."
+                }
                 Key::ComponentMenuGuidance => {
                     "Use a menu for the actions a button opens, such as *Duplicate*, *Rename* and *Delete*. Each item runs an action and closes the menu. To choose a value from a list, use `Segmented` or `Select`. Neither the menu nor its button renders without a script."
                 }
@@ -19707,6 +19780,9 @@ impl Locale {
                 Key::ComponentMarkSummary => {
                     "Realce um texto para o que a pessoa está fazendo agora, como um resultado de busca."
                 }
+                Key::ComponentMatchTextSummary => {
+                    "Mostre um nome com os caracteres casados por uma consulta marcados, um estilo por palavra."
+                }
                 Key::ComponentParagraphSummary => "Renderize um parágrafo de prosa.",
                 Key::ComponentProseSummary => {
                     "Guarda texto longo numa coluna que limita o próprio comprimento de linha."
@@ -20379,6 +20455,20 @@ impl Locale {
                 Key::ExampleMarkSearch => {
                     "O peso muda além do fundo, então uma ocorrência pode ser encontrada sem depender da cor."
                 }
+                Key::ExampleMatchTextQuery => {
+                    "A consulta `gro t b` encontrou os dois nomes. Cada palavra dela marca os próprios caracteres, no próprio tom."
+                }
+                Key::ExampleMatchTextOne => "Uma palavra, e o trecho que ela casou.",
+                Key::ExampleMatchTextWords => {
+                    "Três palavras. A primeira tem sublinhado contínuo, a segunda tracejado e a terceira pontilhado, então nenhum tom depende da cor."
+                }
+                Key::ExampleMatchTextShared => {
+                    "Duas palavras reivindicam os caracteres 3 a 5. A primeira palavra fica com eles."
+                }
+                Key::ExampleMatchTextElsewhere => {
+                    "Um espaço vazio é uma palavra que casou em outro campo, então o tom da segunda palavra é o único desenhado."
+                }
+                Key::ExampleMatchTextPlain => "Sem `hits` é só o nome.",
                 Key::ExampleParagraphLead => {
                     "Use o tamanho de abertura para a primeira frase abaixo de um título."
                 }
@@ -23798,6 +23888,18 @@ impl Locale {
                     "Um realce que carrega sentido precisa de mais do que uma cor de fundo. A cor sozinha é invisível para quem não a distingue, então isto também muda o peso do texto."
                 }
                 Key::ComponentMarkPropChildrenDoc => "O texto realçado.",
+                Key::ComponentMatchTextGuidance => {
+                    "Use o texto com casamentos para um nome numa lista filtrada por digitação, para mostrar quais caracteres cada palavra da consulta casou. Para uma frase realçada em prosa, use `Mark`."
+                }
+                Key::ComponentMatchTextA11yNotes => {
+                    "Cada trecho é um `<mark>` de verdade, e o nome fica na árvore de acessibilidade como um só texto. A primeira palavra tem sublinhado contínuo, a segunda tracejado e as seguintes pontilhado. As três se distinguem sem cor, como pede a WCAG 1.4.1."
+                }
+                Key::ComponentMatchTextPropTextDoc => {
+                    "O nome inteiro, como a lista o mostra. **Obrigatório**. Texto e não filhos, porque toda posição em `hits` é um índice nele."
+                }
+                Key::ComponentMatchTextPropHitsDoc => {
+                    "Os caracteres casados, um espaço para cada palavra da consulta, unidos por `|`. Um espaço guarda índices e intervalos inclusivos unidos por vírgulas, como em `0-2,5|7-9`. Um espaço vazio é uma palavra que casou em outro lugar."
+                }
                 Key::ComponentMenuGuidance => {
                     "Use um menu para as ações que um botão abre, como *Duplicar*, *Renomear* e *Excluir*. Cada item executa uma ação e fecha o menu. Para escolher um valor de uma lista, use `Segmented` ou `Select`. Nem o menu nem o botão dele renderizam sem script."
                 }
@@ -26472,6 +26574,9 @@ impl Locale {
                 Key::ComponentMarkSummary => {
                     "⟦Hiighliight teext foor whaat thee reeaadeer iis dooiing noow, suuch aas aa seeaarch hiit.⟧"
                 }
+                Key::ComponentMatchTextSummary => {
+                    "⟦Shoow aa naamee wiith thee chaaraacteers aa quueery maatcheed maarkeed, oonee stylee foor eeaach woord oof thee quueery.⟧"
+                }
                 Key::ComponentParagraphSummary => "⟦Reendeer aa paaraagraaph oof proosee.⟧",
                 Key::ComponentProseSummary => {
                     "⟦Hoolds loong-foorm teext iin aa cooluumn thaat caaps iits oown liinee leength.⟧"
@@ -27158,6 +27263,20 @@ impl Locale {
                 Key::ExampleMarkSearch => {
                     "⟦Thee weeiight chaangees aas weell aas thee baackgroouund, soo aa hiit caan bee foouund wiithoouut reelyiing oon cooloouur.⟧"
                 }
+                Key::ExampleMatchTextQuery => {
+                    "⟦Thee quueery `groo t b` foouund booth naamees. EEaach woord oof iit maarks iits oown chaaraacteers, iin iits oown toonee.⟧"
+                }
+                Key::ExampleMatchTextOne => "⟦OOnee woord, aand thee ruun iit maatcheed.⟧",
+                Key::ExampleMatchTextWords => {
+                    "⟦Threeee woords. Thee fiirst iis uundeerliineed sooliid, thee seecoond daasheed aand thee thiird dootteed, soo noo toonee deepeends oon cooloouur.⟧"
+                }
+                Key::ExampleMatchTextShared => {
+                    "⟦Twoo woords claaiim chaaraacteers 3 too 5. Thee fiirst woord keeeeps theem.⟧"
+                }
+                Key::ExampleMatchTextElsewhere => {
+                    "⟦AAn eempty sloot iis aa woord thaat maatcheed aanootheer fiieeld, soo thee seecoond woord's toonee iis thee oonly oonee draawn.⟧"
+                }
+                Key::ExampleMatchTextPlain => "⟦Wiith noo `hiits` iit iis thee naamee aaloonee.⟧",
                 Key::ExampleParagraphLead => {
                     "⟦UUsee thee leeaad siizee foor thee oopeeniing seenteencee uundeer aa tiitlee.⟧"
                 }
@@ -30677,6 +30796,18 @@ impl Locale {
                     "⟦AA hiighliight thaat caarriiees meeaaniing neeeeds mooree thaan aa baackgroouund cooloouur. Cooloouur aaloonee iis iinviisiiblee too aa reeaadeer whoo caannoot diistiinguuiish iit, soo thiis aalsoo chaangees thee teext weeiight.⟧"
                 }
                 Key::ComponentMarkPropChildrenDoc => "⟦Thee hiighliighteed teext.⟧",
+                Key::ComponentMatchTextGuidance => {
+                    "⟦UUsee maatch teext foor aa naamee iin aa liist fiilteereed by typiing, too shoow whiich chaaraacteers eeaach woord oof thee quueery maatcheed. Foor aa hiighliighteed phraasee iin proosee, uusee `Maark`.⟧"
+                }
+                Key::ComponentMatchTextA11yNotes => {
+                    "⟦EEaach ruun iis aa reeaal `<maark>`, aand thee whoolee naamee staays iin thee aacceessiiblee treeee aas oonee teext. Thee fiirst woord iis uundeerliineed sooliid, thee seecoond daasheed aand eeveery laateer woord dootteed, soo thee threeee aaree toold aapaart wiithoouut cooloouur, aas WCAAG 1.4.1 aasks.⟧"
+                }
+                Key::ComponentMatchTextPropTextDoc => {
+                    "⟦Thee whoolee naamee, aas thee liist shoows iit. **Reequuiireed**. Teext aand noot chiildreen, beecaauusee eeveery poosiitiioon iin `hiits` iis aan iindeex iintoo iit.⟧"
+                }
+                Key::ComponentMatchTextPropHitsDoc => {
+                    "⟦Thee maatcheed chaaraacteers, oonee sloot foor eeaach woord oof thee quueery, jooiineed by `|`. AA sloot hoolds iindiicees aand iincluusiivee raangees jooiineed by coommaas, aas iin `0-2,5|7-9`. AAn eempty sloot iis aa woord thaat maatcheed eelseewheeree.⟧"
+                }
                 Key::ComponentMenuGuidance => {
                     "⟦UUsee aa meenuu foor thee aactiioons aa buuttoon oopeens, suuch aas *Duupliicaatee*, *Reenaamee* aand *Deeleetee*. EEaach iiteem ruuns aan aactiioon aand cloosees thee meenuu. Too choooosee aa vaaluuee froom aa liist, uusee `Seegmeenteed` oor `Seeleect`. Neeiitheer thee meenuu noor iits buuttoon reendeers wiithoouut aa scriipt.⟧"
                 }

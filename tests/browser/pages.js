@@ -224,6 +224,10 @@ export const PAGE = {
   // x locale sweep and the 320px audit have indentation here that nothing else
   // on the site can give them.
   list: "list/",
+  // The name a query matched. On this list because it is the one component
+  // whose whole drawing is a run of letters inside a word, so the readability
+  // sweep has three tints here with ink on each that nothing else gives it.
+  matchText: "match-text/",
 };
 
 /**

@@ -469,6 +469,14 @@ query word's field, `positions` and `ranges()`; `Match.claims(field)` is that fi
 characters as runs that do not overlap, each naming the first word that claimed it, which is what
 a list reads to tone the first word, the second and every later one differently.
 
+**`hits` is the corpus's grammar for one field**: a slot for each word of the query, joined by `|`,
+each holding indices and inclusive ranges joined by commas, and an empty slot for a word that
+matched another field. The two bodies of `MatchText` parse it to one sentence, written above them
+in `crates/noctua-design-emit/src/controls.rs`, and `spec/components/match_text.cases.toml` holds
+both to it: a piece outside the grammar is skipped, never guessed at. A position is a code point,
+and a caller that must not split a base letter from its combining mark widens the range before it
+passes it. Neither body knows what a grapheme is.
+
 ## Styling
 
 How the styling is built and how it reaches a consumer (`NOCTUA.md §9.4`, §9.11.1).

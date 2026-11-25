@@ -394,6 +394,37 @@ Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#,
         }],
     ),
     (
+        "match-text",
+        r#"MatchText { text: "ButtonGroup", hits: "6-8|2|0" }
+MatchText { text: "ToolbarGroup", hits: "7-9|0|4" }"#,
+        // TWO NAMES ONE QUERY FOUND, each word of it in its own tone. The
+        // names are data, because a position is an index into them.
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-stack"))],
+            children: &[
+                Node::Component {
+                    name: "MatchText",
+                    props: &[
+                        ("class", Value::Text("nd-identifier")),
+                        ("text", Value::Data("ButtonGroup")),
+                        ("hits", Value::Text("6-8|2|0")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "MatchText",
+                    props: &[
+                        ("class", Value::Text("nd-identifier")),
+                        ("text", Value::Data("ToolbarGroup")),
+                        ("hits", Value::Text("7-9|0|4")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
         "link",
         r#"Link { href: "…", external: true, rel: "noreferrer", "…" }
 Link { href: "…", "…" }"#,

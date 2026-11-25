@@ -65,6 +65,7 @@ mod link;
 mod list;
 mod list_item;
 mod mark;
+mod match_text;
 mod menu;
 mod menu_item;
 mod message_bar;
@@ -179,6 +180,7 @@ pub(crate) fn for_component(name: &str) -> &'static [Tree] {
         "List" => list::EXAMPLES,
         "ListItem" => list_item::EXAMPLES,
         "Mark" => mark::EXAMPLES,
+        "MatchText" => match_text::EXAMPLES,
         "Menu" => menu::EXAMPLES,
         "MenuItem" => menu_item::EXAMPLES,
         "MessageBar" => message_bar::EXAMPLES,

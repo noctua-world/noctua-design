@@ -51,6 +51,7 @@ import { Link } from "@noctua-world/design-react/components/link.js";
 import { List } from "@noctua-world/design-react/components/list.js";
 import { ListItem } from "@noctua-world/design-react/components/list_item.js";
 import { Mark } from "@noctua-world/design-react/components/mark.js";
+import { MatchText } from "@noctua-world/design-react/components/match_text.js";
 import { Menu } from "@noctua-world/design-react/components/menu.js";
 import { MenuItem } from "@noctua-world/design-react/components/menu_item.js";
 import { MessageBar } from "@noctua-world/design-react/components/message_bar.js";
@@ -140,6 +141,7 @@ export const COMPONENTS = {
   List,
   ListItem,
   Mark,
+  MatchText,
   Menu,
   MenuItem,
   MessageBar,

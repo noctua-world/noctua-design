@@ -47,6 +47,7 @@ export { Link } from "./link.js";
 export { List } from "./list.js";
 export { ListItem } from "./list_item.js";
 export { Mark } from "./mark.js";
+export { MatchText } from "./match_text.js";
 export { Menu } from "./menu.js";
 export { MenuItem } from "./menu_item.js";
 export { MessageBar } from "./message_bar.js";

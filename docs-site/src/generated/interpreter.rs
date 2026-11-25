@@ -33,9 +33,9 @@ use noctua_design::components::{
     LineageFigureShape, LineageFigureTone, LineageFilterMode, LineageHeight, LineageLettering,
     LineageLine, LineagePick, LineageReach, LineageRoute, LineageSize, LineageThickness,
     LineageTilt, LineageView, Link, LinkTone, List, ListItem, ListKind, ListMarker, ListSpacing,
-    Mark, Menu, MenuItem, MenuPlacement, MessageBar, MessageBarLive, Meter, MeterSize, NumberInput,
-    NumberInputSize, NumberInputStepping, OtpField, OtpFieldKind, OtpFieldSize, Pagination,
-    PaginationSize, PaginationSpread, Paragraph, ParagraphSize, ParagraphTone, Popover,
+    Mark, MatchText, Menu, MenuItem, MenuPlacement, MessageBar, MessageBarLive, Meter, MeterSize,
+    NumberInput, NumberInputSize, NumberInputStepping, OtpField, OtpFieldKind, OtpFieldSize,
+    Pagination, PaginationSize, PaginationSpread, Paragraph, ParagraphSize, ParagraphTone, Popover,
     PopoverPlacement, Progress, ProgressSize, Prose, ProseMeasure, Radio, RadioSize, Rating,
     RatingSize, Search, SearchGroup, SearchPresentation, SearchResult, SearchSize, Segmented,
     SegmentedAppearance, SegmentedFill, SegmentedItem, SegmentedOrientation, SegmentedSelection,
@@ -104,6 +104,7 @@ pub(crate) fn component(
         "List" => list(props, children, scope),
         "ListItem" => list_item(props, children, scope),
         "Mark" => mark(props, children, scope),
+        "MatchText" => match_text(props, children, scope),
         "Menu" => menu(props, children, scope),
         "MenuItem" => menu_item(props, children, scope),
         "MessageBar" => message_bar(props, children, scope),
@@ -2179,6 +2180,27 @@ fn mark(
         Mark {
             class: class_,
             {render(children, scope)}
+        }
+    }
+}
+
+/// `MatchText`, from a tree.
+fn match_text(
+    props: &'static [(&'static str, Value)],
+    _children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let text_ = scope
+        .find(props, "text")
+        .expect("MatchText.text is required and this tree does not set it");
+    let hits_ = scope.find(props, "hits");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        MatchText {
+            text: text_,
+            hits: hits_,
+            class: class_,
         }
     }
 }

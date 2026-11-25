@@ -47,6 +47,7 @@ export { Link, type LinkProps } from "./link.js";
 export { List, type ListProps } from "./list.js";
 export { ListItem, type ListItemProps } from "./list_item.js";
 export { Mark, type MarkProps } from "./mark.js";
+export { MatchText, type MatchTextProps } from "./match_text.js";
 export { Menu, type MenuProps } from "./menu.js";
 export { MenuItem, type MenuItemProps } from "./menu_item.js";
 export { MessageBar, type MessageBarProps } from "./message_bar.js";

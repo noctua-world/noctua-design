@@ -57,7 +57,7 @@ pub const SOURCE_DIR: &str = "crates/noctua-design-styles/src/";
     clippy::too_many_lines,
     reason = "one line per stylesheet, and the order is the point"
 )]
-pub fn sources() -> [(&'static str, &'static str); 50] {
+pub fn sources() -> [(&'static str, &'static str); 51] {
     [
         (
             "crates/noctua-design-styles/src/base.css",
@@ -259,11 +259,15 @@ pub fn sources() -> [(&'static str, &'static str); 50] {
             "crates/noctua-design-styles/src/toast.css",
             include_str!("toast.css"),
         ),
+        (
+            "crates/noctua-design-styles/src/match-text.css",
+            include_str!("match-text.css"),
+        ),
     ]
 }
 
 /// How many stylesheets ship.
-pub const COUNT: usize = 50;
+pub const COUNT: usize = 51;
 
 #[cfg(test)]
 mod tests {
