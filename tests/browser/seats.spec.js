@@ -49,7 +49,8 @@
 // reached two ways, so any tolerance at all would be room for a rule that is
 // almost the same.
 
-import { writeFileSync } from "node:fs";
+import { existsSync, readdirSync, writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 import { expect, test } from "@playwright/test";
 
@@ -74,6 +75,22 @@ test.use({
   launchOptions: async ({ launchOptions }, use) =>
     use({ ...launchOptions, args: [...(launchOptions.args ?? []), "--disable-partial-raster"] }),
 });
+
+/**
+ * Every page the site builds, as the path `url` takes.
+ *
+ * READ OFF THE BUILT SITE, NOT OFF `PAGE`. That list is written by hand and is
+ * eleven pages short of the site, and two of the eleven hold the only examples
+ * of three state rules: the attached button group and the skip link. Swept
+ * from `PAGE`, those rules were listed below as rendered by no example. The
+ * directory is the one `playwright.config.js` serves, so a page that exists is
+ * a page swept, and a new one is swept the day it is built.
+ */
+const BUILT = fileURLToPath(new URL("../../docs-site/dist/en/", import.meta.url));
+const SWEPT = readdirSync(BUILT, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory() && existsSync(`${BUILT}${entry.name}/index.html`))
+  .map((entry) => `${entry.name}/`)
+  .sort();
 
 /** How many elements one selector is asked about on one page. */
 const PER_SELECTOR = 2;
@@ -215,7 +232,16 @@ async function prepare(page) {
           let outer = before;
           let inner = null;
           if (depth > 0) {
-            if (depth !== 1 || !before.slice(0, open).endsWith(":has")) continue;
+            // ANYWHERE ELSE THE PROBE CANNOT SAY WHAT TO POINT AT, AND SAYS SO.
+            // A state inside `:not(`, `:is(` or two brackets deep is still a
+            // state rule of the sheet: it is kept by name with nothing to
+            // choose, so no sweep reaches it and the test after the sweeps
+            // fails on it. Skipped, it would be in neither list, and that
+            // test would stay green over a rule nobody photographed.
+            if (depth !== 1 || !before.slice(0, open).endsWith(":has")) {
+              found.set(selector, { state: hit[0].slice(1), name: selector, unplaced: true });
+              continue;
+            }
             outer = before.slice(0, open - ":has".length);
             inner = `:scope ${before.slice(open + 1)}`;
           }
@@ -359,8 +385,8 @@ async function prepare(page) {
        */
       choose(states, limit, ready) {
         chosen.length = 0;
-        for (const { state, outer, inner, name, live, marked } of stated()) {
-          if (!states.includes(state)) continue;
+        for (const { state, outer, inner, name, live, marked, unplaced } of stated()) {
+          if (unplaced || !states.includes(state)) continue;
           let taken = 0;
           for (let subject of subjects(outer, inner)) {
             if (taken === limit) break;
@@ -654,7 +680,8 @@ async function focusSweep(page, compare = async () => {}) {
   return { count, reached };
 }
 
-for (const [name, path] of Object.entries(PAGE)) {
+for (const path of SWEPT) {
+  const name = path.slice(0, -1);
   test(`a second seat's hover is drawn like the pointer's on ${name}`, async ({ page }, testInfo) => {
     test.slow();
     // No autoplay and no sweep: a page that moves by itself differs from
@@ -730,12 +757,17 @@ for (const [name, path] of Object.entries(PAGE)) {
  * Written out, with the reason, so that "every state" is a claim with its
  * exceptions beside it. The test below holds the sweeps to exactly this list.
  *
- * ONE REASON COVERS ALL OF THEM TODAY: no example on any page in `pages.js`
- * renders an element the whole selector draws on, so there is nothing to put a
- * pointer or a keyboard on. Each is listed by its whole text, as the sheet has
- * it with the twin folded back to the pseudo-class. `seat_twin` still holds each of these rules to its
- * twin in the source; what is missing is the photograph. An entry leaves this
- * list when an example that shows it arrives, and the test says so.
+ * ONE REASON COVERS ALL OF THEM TODAY: no example on any page the site builds
+ * (`SWEPT`) renders an element the whole selector draws on, so there is
+ * nothing to put a pointer or a keyboard on. Each is listed by its whole text, as the
+ * sheet has it with the twin folded back to the pseudo-class. `seat_twin`
+ * still holds each of these rules to its twin in the source; what is missing
+ * is the photograph. An entry leaves this list when an example that shows it
+ * arrives, and the test says so.
+ *
+ * A second reason is waiting: a selector whose state stands where the probe
+ * cannot tell what to point at (`stated` marks it `unplaced`) is reached by no
+ * sweep either, and lands here by name until the probe learns to place it.
  */
 const UNSEEN = [
   // A combination of variant and tone no example asks for.
@@ -745,14 +777,11 @@ const UNSEEN = [
   '.nd-button[data-nd-variant="subtle"][data-nd-tone="success"]:hover',
   '.nd-button[data-nd-variant="transparent"][data-nd-tone="danger"]:hover',
   '.nd-button[data-nd-variant="transparent"][data-nd-tone="success"]:hover',
-  // No example refuses a button with `aria-disabled`, or attaches a group.
+  // No example refuses a button with `aria-disabled`.
   '.nd-button[aria-disabled="true"]:hover',
-  '.nd-button-group[data-nd-attached="true"] > .nd-button:hover',
-  '.nd-button-group[data-nd-attached="true"] > .nd-button:focus-visible',
   // A recent search exists once a reader has searched, and no page starts so.
   ".nd-search-recent-item:hover",
-  // No example holds a skip link, or a `Lineage` card that is a link.
-  '.nd-visually-hidden[data-nd-focusable="true"]:focus-within',
+  // No example holds a `Lineage` card that is a link.
   "a.nd-lineage-card:hover",
   "a.nd-lineage-card:focus-visible",
 ];
@@ -769,7 +798,10 @@ test("the sweeps above compare every state selector but the ones listed", async 
   await page.emulateMedia({ reducedMotion: "reduce" });
   const reached = new Set();
   let all = [];
-  for (const path of Object.values(PAGE)) {
+  // The sweeps walk the built site, and that is every page a spec can name.
+  expect(SWEPT.length, "the built site has no page at all").toBeGreaterThan(0);
+  expect(SWEPT).toEqual(expect.arrayContaining(Object.values(PAGE)));
+  for (const path of SWEPT) {
     await page.goto(url(path));
     await prepare(page);
     all = await page.evaluate(() => window.__seatProbe.stated().map((entry) => entry.name));
@@ -781,6 +813,24 @@ test("the sweeps above compare every state selector but the ones listed", async 
   expect(reached.size, "the sweeps reached no state selector at all").toBeGreaterThan(0);
   const unseen = all.filter((name) => !reached.has(name)).sort();
   expect(unseen, "the state selectors no sweep compared").toEqual([...UNSEEN].sort());
+
+  // AND A STATE THE PROBE CANNOT PLACE IS STILL COUNTED. Three rules are put
+  // into the sheet as it stands in this page, one for each place `stated`
+  // gives up on, and each has to come back by name: that is what makes the
+  // comparison above fail on the first such rule the stylesheet ships.
+  const strays = [
+    ".nd-button:not(:hover)",
+    ".nd-button:is(.nd-stray, :focus-visible)",
+    ".nd-stack:has(.nd-button:not(:active))",
+  ];
+  const named = await page.evaluate((selectors) => {
+    const sheet = [...document.styleSheets].find((s) => s.href?.endsWith("/components.css"));
+    for (const selector of selectors) sheet.insertRule(`${selector} {}`, sheet.cssRules.length);
+    const entries = window.__seatProbe.stated();
+    for (const _ of selectors) sheet.deleteRule(sheet.cssRules.length - 1);
+    return selectors.map((selector) => entries.find((entry) => entry.name === selector)?.unplaced);
+  }, strays);
+  expect(named, "a state the probe cannot place was dropped").toEqual(strays.map(() => true));
 
   // And a hover is a change. Two pictures that agree because NEITHER moved
   // would pass every comparison in this file.

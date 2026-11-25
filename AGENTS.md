@@ -507,28 +507,47 @@ written in its twin form — `:is(:hover, [data-nd-seat-hover])`,
 an ancestor. An attribute selector weighs what a pseudo-class weighs and `:is()` weighs what its
 heaviest argument does, so the twin moves no rule in the cascade. **A rule inside
 `@media (hover: hover)` stays bare and has a sibling**: the same selector on the attribute, with
-the same declarations, in the same file and outside that block, because the attribute is itself
-the proof of a pointer that hovers. No seat attribute is written inside that block in any form,
-and a rule asks only whether the attribute is present, never for a seat by its id.
+the same declarations, outside that block, because the attribute is itself the proof of a pointer
+that hovers. **The siblings stand directly after the block, in the order of its rules**, and the
+bare rules are the last rules in the block: a rule of the same weight between a state and its
+sibling, or siblings in another order, lets the seat win a tie in the cascade that the pointer
+loses. No seat attribute is written inside that block in any form, and a rule asks only whether
+the attribute is present, never for a seat by its id.
 `gates::seat_twin` holds the rule from both sides: it refuses a state pseudo-class written any
-other way, a seat attribute inside `@media (hover: hover)`, and a seat attribute outside the twin
-form whose native rule, with the same declarations, is not in the file. `data-nd-seat-drag` stands
-for no pseudo-class and owes no native rule. **The gate reads text, so two spellings are fixed.**
+other way, a seat attribute inside `@media (hover: hover)`, a sibling that is not where its
+native rule puts it, and a seat attribute outside the twin form with no native rule before it.
+`data-nd-seat-drag` stands for no pseudo-class and owes no native rule.
+
+**Two places take no twin at all, and the gate refuses both.** `:focus-within` is never written
+inside `:has(`, twinned or bare: `:has()` does not nest, so an engine drops the
+`:has([data-nd-seat-focus])` branch and a seat's focus stops reaching the ancestor; restructure
+the rule so `:focus-within` stands outside. And a negated state is written in the twin form,
+`:not(:is(:hover, [data-nd-seat-hover]))`, never bare with a sibling: an element a second seat
+hovers still matches `:not(:hover)`.
+
+**The gate reads text, so what it cannot read whole is refused.**
 The hover query is written exactly `@media (hover: hover)`: a state rule or a seat attribute behind
-any other question about hovering (`(hover)`, `(any-hover: hover)`, `(hover: hover) and
-(pointer: fine)`) is refused, and a second condition is a second `@media` around the first. And a
-state pseudo-class and a seat attribute are written lower-case with no blank space inside the
-brackets; `:HOVER` and `[ data-nd-seat-hover]` mean the same to an engine and are refused.
+any other question about hovering or the pointer (`(hover)`, `(any-hover: hover)`,
+`(pointer: fine)`, `(hover: hover) and (pointer: fine)`) is refused, and a second condition is a
+second `@media` around the first. A state pseudo-class and a seat attribute are written lower-case
+with no blank space inside the brackets; `:HOVER` and `[ data-nd-seat-hover]` mean the same to an
+engine and are refused. No selector and no at-rule prelude in a component stylesheet holds a CSS
+escape (`:h\6fver` is `:hover`). A state is written in a rule's selector, never in an at-rule's
+prelude (`@scope (.a:hover)`). And a state rule is flat: it nests no block and is nested in no
+rule, because the gate does not read what a nested block declares.
 
 **The pictures are the other half.** `tests/browser/seats.spec.js` reads the state selectors out
 of the built `components.css`, puts the pointer and then the keyboard on the elements each is
-about, on every page in `tests/browser/pages.js`, and requires the same pixels from the seat
+about, on every page the site builds — read off `docs-site/dist/en/`, not off the hand-written
+list in `tests/browser/pages.js` — and requires the same pixels from the seat
 attribute. A panel that is shut is opened for the comparison by the spec itself. A selector is
 known there by its whole text: an element is taken for it only if the whole selector, tail
 included, draws on something with that element in the state, and it counts as compared only if it
 matched while the pointer or the keyboard was there. One test holds what the sweeps reached to
 `UNSEEN`, the selectors no example renders, listed there by name: a state rule for something no
-example shows is added to that list or given an example, and the test fails until one is done.
+example shows is added to that list or given an example, and the test fails until one is done. A
+state the probe cannot place — inside `:not(` or `:is(`, or two brackets deep — is reached by no
+sweep and fails the same way.
 **It is a sample**: two elements a page for each selector, the first the selector draws on, so a
 defect only a later element shows is not photographed. There is no sweep for `:active`, so the
 first rule on it fails there too and brings its sweep with it.
