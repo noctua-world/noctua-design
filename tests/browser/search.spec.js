@@ -246,6 +246,64 @@ test("the letters that matched are the letters that are marked", async ({ page }
   expect(marked).toBe("BG");
 });
 
+test("each word of the query marks its own letters, in its own tone", async ({ page }) => {
+  // BOTH SUPPLY FORMS, because they are two painters: the palette rebuilds a
+  // label the script owns, and the children form wraps runs of a label the
+  // page shipped.
+  await page.goto(url(ANY));
+  await showParts(page);
+  await openPalette(page, "gro but");
+  const row = page.locator(PALETTE.rows).first();
+  await expect(row.locator(".nd-search-result-label")).toHaveText("ButtonGroup");
+  // `NOCTUA.md §12.4`: the first word typed takes the first tone wherever its
+  // letters are in the name, so the order is the query's and not the label's.
+  await expect(row.locator('mark.nd-match[data-nd-word="1"]')).toHaveText("Gro");
+  await expect(row.locator('mark.nd-match[data-nd-word="2"]')).toHaveText("But");
+
+  await page.goto(url(PAGE.search));
+  await showParts(page);
+  await page.locator(CHILDREN.box).fill("mar s z");
+  const name = page.locator(`${CHILDREN.rows} .nd-search-result-label`).first();
+  await expect(name).toHaveText("San Marzano");
+  await expect(name.locator('mark[data-nd-word="1"]')).toHaveText("Mar");
+  await expect(name.locator('mark[data-nd-word="2"]')).toHaveText("S");
+  // The third word and every later one share a tone, and no fourth exists.
+  await expect(name.locator('mark[data-nd-word="3"]')).toHaveText("z");
+  await page.locator(CHILDREN.box).fill("mar s z n");
+  await expect(name.locator('mark[data-nd-word="3"]')).toHaveText(["n", "z"]);
+  await expect(name.locator('mark[data-nd-word="4"]')).toHaveCount(0);
+});
+
+test("a letter two words claim is drawn in the first word's tone", async ({ page }) => {
+  await page.goto(url(PAGE.search));
+  await showParts(page);
+  await page.locator(CHILDREN.box).fill("san sa");
+  const name = page.locator(`${CHILDREN.rows} .nd-search-result-label`).first();
+  await expect(name).toHaveText("San Marzano");
+  // The second word matched `Sa` as well, and the first had it already.
+  await expect(name.locator('mark[data-nd-word="1"]')).toHaveText("San");
+  await expect(name.locator('mark[data-nd-word="2"]')).toHaveCount(0);
+});
+
+test("a search marks a match with the element every list draws", async ({ page }) => {
+  await page.goto(url(PAGE.search));
+  await showParts(page);
+  await page.locator(CHILDREN.box).fill("san");
+  const hit = page.locator(`${CHILDREN.root} [data-nd-hit]`).first();
+  await expect(hit).toBeVisible();
+  // One drawing of a match in the system: no padding tearing a gap into the
+  // name, and a line under the letters that is there without the colour.
+  const drawn = await hit.evaluate((mark) => {
+    const style = getComputedStyle(mark);
+    return {
+      match: mark.matches("mark.nd-match[data-nd-word]"),
+      padding: style.paddingInlineStart,
+      line: style.textDecorationLine,
+    };
+  });
+  expect(drawn).toEqual({ match: true, padding: "0px", line: "underline" });
+});
+
 test("a highlight never destroys the label it came from", async ({ page }) => {
   await page.goto(url(PAGE.search));
   await showParts(page);

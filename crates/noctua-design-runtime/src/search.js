@@ -366,14 +366,32 @@ function parsed(text) {
   }
 }
 
-/** The label's characters every word of `found` matched there, rising, each once. */
+/**
+ * The tone a word of the query is drawn in: `1`, `2`, and `3` for the third
+ * word and every later one (`NOCTUA.md §12.4`).
+ *
+ * `MatchText` writes the same three values from the same rule, and the
+ * stylesheet has one rule for each: `.nd-match[data-nd-word]`.
+ */
+const toneOf = (word) => String(Math.min(word, 2) + 1);
+
+/**
+ * The label's matched characters, each with the tone of the word that claimed
+ * it: a `Map` from a code point index to a tone, in rising order.
+ *
+ * `claims` is the matcher's own answer to which word a shared character
+ * belongs to. It is the first that claimed it.
+ */
 function onLabel(found) {
-  return found.claims(LABEL).flatMap((run) => {
-    const positions = [];
-    for (let at = run.start; at < run.end; at += 1) positions.push(at);
-    return positions;
-  });
+  const tones = new Map();
+  for (const run of found.claims(LABEL)) {
+    for (let at = run.start; at < run.end; at += 1) tones.set(at, toneOf(run.word));
+  }
+  return tones;
 }
+
+/** No character marked: an unfiltered row, or one matched on its keywords alone. */
+const UNMARKED = new Map();
 
 /**
  * What the box asks for: its text trimmed, or nothing when it holds no word.
@@ -407,7 +425,7 @@ function runQuery(state) {
   if (!state.candidates) return;
 
   if (query === "") {
-    state.hits = state.src ? [] : state.candidates.map((item) => ({ item, positions: [] }));
+    state.hits = state.src ? [] : state.candidates.map((item) => ({ item, tones: UNMARKED }));
     state.total = state.hits.length;
   } else {
     // One ranking over the label and the keywords together: a word that
@@ -419,7 +437,7 @@ function runQuery(state) {
       : [];
     const hits = ranked.map(({ index, found }) => ({
       item: state.candidates[index],
-      positions: onLabel(found),
+      tones: onLabel(found),
     }));
     state.hits = state.cap > 0 ? hits.slice(0, state.cap) : hits;
     state.total = hits.length;
@@ -455,7 +473,7 @@ function drawResults(state) {
       if (!slot) return;
       slot.row.hidden = false;
       slot.link.href = hit.item.entry.href ?? "";
-      paintLabel(slot.labelEl, hit.item.chars, hit.positions);
+      paintLabel(slot.labelEl, hit.item.chars, hit.tones);
       slot.detailEl.textContent = hit.item.entry.detail ?? hit.item.entry.group ?? "";
     });
     for (let index = state.hits.length; index < state.pool.length; index += 1) {
@@ -470,7 +488,7 @@ function drawResults(state) {
     // shown: the rest keep the author's order, which is also the order they
     // have with no script.
     for (const hit of state.hits) {
-      if (hit.positions.length) markInPlace(hit.item.labelEl, hit.positions);
+      if (hit.tones.size) markInPlace(hit.item.labelEl, hit.tones);
       else clearMarks(hit.item.labelEl);
       if (hit.item.group) {
         hit.item.group.hidden = false;
@@ -559,27 +577,39 @@ function filterAround(state, query) {
 
 // --- The highlight ----------------------------------------------------------
 
-// `<mark class="nd-mark">`, which is the component whose summary is literally
-// "Text highlighted for the reader's current purpose, such as a search hit".
+// `<mark class="nd-match" data-nd-word>`, which is the element `MatchText`
+// draws: one run for each stretch of characters a word of the query claimed,
+// toned by which word it was. The first word is `1`, the second `2`, and the
+// third and every later one `3`, and `match-text.css` gives each a line of its
+// own style under the letters, so no tone is told by colour alone.
 //
-// The CSS Custom Highlight API would do this without touching the DOM and is
-// rejected anyway: a highlight pseudo-element accepts no layout-affecting
-// property, so it cannot set `font-weight` — and `Mark`'s own accessibility
-// note says the weight is why the highlight is legible to a reader who cannot
-// distinguish the colour. It would render a `Mark` that fails `Mark`'s contract.
+// ONE DRAWING OF A MATCH IN THE SYSTEM. This file wrote `Mark`'s class and one
+// tone for every word, so a result matched by `button group` could not say
+// which letters answered which word. It writes what every other list filtered
+// by typing draws now (`NOCTUA.md §12.4`).
+//
+// `data-nd-hit` STAYS, and it is this file's own: it says *the script put this
+// here*, which is how `clearMarks` takes its marks back out and leaves a
+// caller's own `Mark` or `MatchText` in a label alone.
+
+/** One matched run, as the element every list draws it with. */
+function matchMark(tone) {
+  const mark = document.createElement("mark");
+  mark.className = "nd-match";
+  mark.dataset.ndHit = "";
+  mark.dataset.ndWord = tone;
+  return mark;
+}
 
 /** A label the script owns, rebuilt with the matched runs marked. */
-function paintLabel(into, chars, positions) {
+function paintLabel(into, chars, tones) {
   into.textContent = "";
-  const wanted = new Set(positions);
   let run = [];
-  let marked = false;
+  let tone = null;
   const flush = () => {
     if (run.length === 0) return;
-    if (marked) {
-      const mark = document.createElement("mark");
-      mark.className = "nd-mark";
-      mark.dataset.ndHit = "";
+    if (tone) {
+      const mark = matchMark(tone);
       mark.textContent = run.join("");
       into.append(mark);
     } else {
@@ -588,10 +618,10 @@ function paintLabel(into, chars, positions) {
     run = [];
   };
   for (let index = 0; index < chars.length; index += 1) {
-    const on = wanted.has(index);
-    if (on !== marked) {
+    const here = tones.get(index) ?? null;
+    if (here !== tone) {
       flush();
-      marked = on;
+      tone = here;
     }
     run.push(chars[index]);
   }
@@ -605,35 +635,35 @@ function paintLabel(into, chars, positions) {
  * attached. Splitting the text nodes and undoing with `normalize()` — which
  * merges them back — leaves every element untouched.
  */
-function markInPlace(label, positions) {
+function markInPlace(label, tones) {
   if (!label) return;
   clearMarks(label);
-  if (positions.length === 0) return;
-  const wanted = [...positions].sort((a, b) => a - b);
+  if (tones.size === 0) return;
   const walker = document.createTreeWalker(label, NodeFilter.SHOW_TEXT);
   const jobs = [];
+  // A position counts code points across every text node of the label, and a
+  // range counts UTF-16 units inside one node. `seen` is the first, `unit` the
+  // second.
   let seen = 0;
-  let next = 0;
-  for (let node = walker.nextNode(); node && next < wanted.length; node = walker.nextNode()) {
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
     const chars = [...node.data];
     let unit = 0;
-    let start = -1;
-    let units = 0;
+    let open = null;
+    const close = () => {
+      if (open) jobs.push({ node, start: open.start, end: open.start + open.units, tone: open.tone });
+      open = null;
+    };
     for (let index = 0; index < chars.length; index += 1) {
-      if (next < wanted.length && wanted[next] === seen + index) {
-        if (start < 0) {
-          start = unit;
-          units = 0;
-        }
-        units += chars[index].length;
-        next += 1;
-      } else if (start >= 0) {
-        jobs.push({ node, start, end: start + units });
-        start = -1;
+      const here = tones.get(seen + index) ?? null;
+      // A run ends where the tone changes, to another word's or to none.
+      if (open && open.tone !== here) close();
+      if (here) {
+        open ??= { start: unit, units: 0, tone: here };
+        open.units += chars[index].length;
       }
       unit += chars[index].length;
     }
-    if (start >= 0) jobs.push({ node, start, end: start + units });
+    close();
     seen += chars.length;
   }
   // Back to front, so splitting an earlier run cannot move a later offset.
@@ -641,10 +671,7 @@ function markInPlace(label, positions) {
     const range = document.createRange();
     range.setStart(job.node, job.start);
     range.setEnd(job.node, job.end);
-    const mark = document.createElement("mark");
-    mark.className = "nd-mark";
-    mark.dataset.ndHit = "";
-    range.surroundContents(mark);
+    range.surroundContents(matchMark(job.tone));
   }
 }
 

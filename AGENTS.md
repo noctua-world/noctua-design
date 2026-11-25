@@ -428,7 +428,8 @@ module exports an `enhanceX(root)` and a `releaseX(root)`, because a behaviour t
 taken back off leaks once per route. `Search` reads its index
 from the path its consumer gives it (`[prop.src]` writes `data-nd-src`), and it matches by the
 fuzzy core's rule (`NOCTUA.md §12.4`): a row's label is a name and its keywords are a tag, every
-query word must match one of the two, and only the characters matched on the label are marked.
+query word must match one of the two, and only the characters matched on the label are marked,
+each in the tone of the word that matched it.
 
 ### The fuzzy matcher
 
@@ -469,6 +470,16 @@ spreading a string counts, so a surface slices `[...text]` and never `text.slice
 query word's field, `positions` and `ranges()`; `Match.claims(field)` is that field's matched
 characters as runs that do not overlap, each naming the first word that claimed it, which is what
 a list reads to tone the first word, the second and every later one differently.
+
+**One element draws a match, and three places write it.** `<mark class="nd-match" data-nd-word>`,
+with `1` for the first word of the query, `2` for the second and `3` for the third and every later
+one, is styled once, in `crates/noctua-design-styles/src/match-text.css`: a tint and a solid line,
+a dashed line, a dotted line, always in the page's own ink. The line's style is the signal, because
+the palette cannot keep two colours apart for every reader (`NOCTUA.md §8.8.6`), and the ink is the
+page's because the match colour on its own tint is not readable text. `MatchText` writes the
+element from its `hits` prop, in both packages, `OptionItem` renders a `MatchText` for its name and
+for its second line, and `dist/search.js` writes it over a result's label from `Match.claims`. A
+list that marks a match any other way is a second drawing of one thing.
 
 **`hits` is the corpus's grammar for one field**: a slot for each word of the query, joined by `|`,
 each holding indices and inclusive ranges joined by commas, and an empty slot for a word that
