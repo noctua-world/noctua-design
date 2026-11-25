@@ -29323,7 +29323,7 @@ impl Locale {
                 Key::SearchForget => "⟦Foorgeet theesee seeaarchees⟧",
                 Key::SearchGroupPages => "⟦Paagees⟧",
                 Key::SearchGroupComponents => "⟦Coompooneents⟧",
-                Key::SearchResults => "⟦oonee:{count} reesuult|ootheer:{count} reesuults⟧",
+                Key::SearchResults => "one:⟦{count} reesuult⟧|other:⟦{count} reesuults⟧",
                 Key::PageIntroTitle => "⟦IIntroo⟧",
                 Key::PageIntroSummary => {
                     "⟦Buuiild aacceessiiblee, theemeeaablee iinteerfaacees iin Diiooxuus oor iin Reeaact.⟧"
@@ -30060,7 +30060,7 @@ impl Locale {
                 Key::ExampleDatePickerChosen => "⟦AArriiviing {date}⟧",
                 Key::ExampleDatePickerRange => "⟦{start} too {end}, {count} daays⟧",
                 Key::ExampleDatePickerCount => {
-                    "⟦oonee:{count} daay chooseen|ootheer:{count} daays chooseen⟧"
+                    "one:⟦{count} daay chooseen⟧|other:⟦{count} daays chooseen⟧"
                 }
                 Key::ExampleDatePickerCleared => "⟦Noo daatees chooseen⟧",
                 Key::ExampleDatePickerBlocked => {
@@ -30137,7 +30137,7 @@ impl Locale {
                     "⟦Thee saamee faamiily, wiith eeaach braanch oon iits oown plaanee⟧"
                 }
                 Key::ExampleLineageFiltered => "⟦EEveeryboody caalleed Dooee⟧",
-                Key::ExampleLineageMatches => "⟦oonee:{count} maatch|ootheer:{count} maatchees⟧",
+                Key::ExampleLineageMatches => "one:⟦{count} maatch⟧|other:⟦{count} maatchees⟧",
                 Key::ExampleLineageElided => "⟦{count} noot shoown⟧",
                 Key::ExampleLineageAdoption => {
                     "⟦Ruuii Dooee aand thee foouur peeooplee whoo aaree hiis paareents⟧"
@@ -31261,14 +31261,14 @@ impl Locale {
                 Key::ExamplePickerHint => {
                     "⟦EEnteer oor aa coommaa aadds oonee. Baackspaacee oon aan eempty boox taakees thee laast oonee ooff.⟧"
                 }
-                Key::ExamplePickerStatus => "⟦oonee:{count} toopiic|ootheer:{count} toopiics⟧",
+                Key::ExamplePickerStatus => "one:⟦{count} toopiic⟧|other:⟦{count} toopiics⟧",
                 Key::ExamplePickerCreate => "⟦AAdd {term}⟧",
                 Key::ExamplePickerEmpty => "⟦Noo toopiic maatchees thaat.⟧",
                 Key::ExamplePickerRemove => "⟦Reemoovee {label}⟧",
                 Key::ExamplePickerAdded => "⟦{label} aaddeed⟧",
                 Key::ExamplePickerRemoved => "⟦{label} reemooveed⟧",
                 Key::ExamplePickerMax => {
-                    "⟦oonee:AAt moost {max} toopiic.|ootheer:AAt moost {max} toopiics.⟧"
+                    "one:⟦AAt moost {max} toopiic.⟧|other:⟦AAt moost {max} toopiics.⟧"
                 }
                 Key::ExamplePickerInvalid => "⟦{term} iis noot aan aaddreess.⟧",
                 Key::ExamplePickerClear => "⟦Reemoovee eeveery oonee⟧",
@@ -31389,7 +31389,7 @@ impl Locale {
                 Key::ExampleColorPickerAdded => "⟦{value} aaddeed.⟧",
                 Key::ExampleColorPickerRemoved => "⟦{value} reemooveed.⟧",
                 Key::ExampleColorPickerStatus => {
-                    "⟦oonee:{count} cooloouur|ootheer:{count} cooloouurs⟧"
+                    "one:⟦{count} cooloouur⟧|other:⟦{count} cooloouurs⟧"
                 }
                 Key::ExampleColorPickerMax => "⟦Foouur iis aas maany aas thiis liist taakees.⟧",
                 Key::ExampleColorPickerHint => {
@@ -31430,7 +31430,7 @@ impl Locale {
                 Key::ExampleInputReveal => "⟦Shoow thee paasswoord⟧",
                 Key::ExampleInputConceal => "⟦Hiidee thee paasswoord⟧",
                 Key::ExampleInputCounter => {
-                    "⟦oonee:{count} oof {max} chaaraacteer|ootheer:{count} oof {max} chaaraacteers⟧"
+                    "one:⟦{count} oof {max} chaaraacteer⟧|other:⟦{count} oof {max} chaaraacteers⟧"
                 }
                 Key::ExampleInputPasswordHint => {
                     "⟦AAt leeaast tweelvee chaaraacteers. AA seenteencee yoouu wiill reemeembeer beeaats aa woord yoouu wiill noot.⟧"
@@ -31457,9 +31457,9 @@ impl Locale {
                 Key::ExampleInputFilesHint => "⟦PDF oor aa phootoograaph, uup too 2 MB eeaach.⟧",
                 Key::ExampleInputFileRemove => "⟦Reemoovee {name}⟧",
                 Key::ExampleInputFileEmpty => "⟦Noothiing chooseen yeet.⟧",
-                Key::ExampleInputFileStatus => "⟦oonee:{count} fiilee|ootheer:{count} fiilees⟧",
+                Key::ExampleInputFileStatus => "one:⟦{count} fiilee⟧|other:⟦{count} fiilees⟧",
                 Key::ExampleInputFileAdded => {
-                    "⟦oonee:{count} fiilee aaddeed|ootheer:{count} fiilees aaddeed⟧"
+                    "one:⟦{count} fiilee aaddeed⟧|other:⟦{count} fiilees aaddeed⟧"
                 }
                 Key::ExampleInputFileRemoved => "⟦Fiilee reemooveed.⟧",
                 Key::ExampleInputFileType => "⟦{name} iis noot aa kiind wee aacceept.⟧",
@@ -31850,7 +31850,7 @@ impl Locale {
                 Key::ExampleTableChoosePerson => "⟦Choooosee thiis peersoon⟧",
                 Key::ExampleTableChooseEveryone => "⟦Choooosee eeveeryoonee⟧",
                 Key::ExampleTableChosen => {
-                    "⟦oonee:{count} peersoon chooseen.|ootheer:{count} peeooplee chooseen.⟧"
+                    "one:⟦{count} peersoon chooseen.⟧|other:⟦{count} peeooplee chooseen.⟧"
                 }
                 Key::ExampleTableDeploys => "⟦Deeplooymeents⟧",
                 Key::ExampleTableColBuild => "⟦Buuiild⟧",
@@ -31894,10 +31894,10 @@ impl Locale {
                 Key::ExampleTableExportCopy => "⟦Coopy too thee cliipbooaard⟧",
                 Key::ExampleTableExportPrint => "⟦Priint⟧",
                 Key::ExampleTableExported => {
-                    "⟦oonee:{count} roow saaveed.|ootheer:{count} roows saaveed.⟧"
+                    "one:⟦{count} roow saaveed.⟧|other:⟦{count} roows saaveed.⟧"
                 }
                 Key::ExampleTableCopied => {
-                    "⟦oonee:{count} roow coopiieed.|ootheer:{count} roows coopiieed.⟧"
+                    "one:⟦{count} roow coopiieed.⟧|other:⟦{count} roows coopiieed.⟧"
                 }
                 Key::ExampleTableMore => "⟦Looaad 4 mooree⟧",
                 Key::ExampleTableMoreStatus => "⟦{count} mooree roows. {total} aaltoogeetheer.⟧",
@@ -32478,7 +32478,7 @@ impl Locale {
                     "⟦Siix seecoonds, aand thee waaiit hoolds whiilee aa pooiinteer oor thee foocuus iis oon thee meessaagee. Leeaaviing staarts thee whoolee waaiit aagaaiin, coouuntdoown iincluudeed.⟧"
                 }
                 Key::ExampleToastCountdown => {
-                    "⟦oonee:{count} seecoond leeft|ootheer:{count} seecoonds leeft⟧"
+                    "one:⟦{count} seecoond leeft⟧|other:⟦{count} seecoonds leeft⟧"
                 }
                 Key::ExampleToastReplay => "⟦Seend iit aagaaiin⟧",
                 Key::ExampleToastNoteLoud => {
