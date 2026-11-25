@@ -228,6 +228,10 @@ export const PAGE = {
   // whose whole drawing is a run of letters inside a word, so the readability
   // sweep has three tints here with ink on each that nothing else gives it.
   matchText: "match-text/",
+  // The list a reader walks with the keyboard. On this list because it is the
+  // only multi-column box in the system, so the width x locale sweep and the
+  // 320px audit have a layout here that changes its own column count.
+  optionList: "option-list/",
 };
 
 /**

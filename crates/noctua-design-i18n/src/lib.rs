@@ -168,6 +168,10 @@ pub enum Key {
     PageMenuSummary,
     /// `page.menu.body`
     PageMenuBody,
+    /// `page.option-list.summary`
+    PageOptionListSummary,
+    /// `page.option-list.body`
+    PageOptionListBody,
     /// `page.tree.summary`
     PageTreeSummary,
     /// `page.tree.body`
@@ -604,6 +608,12 @@ pub enum Key {
     ComponentMarkSummary,
     /// `component.match-text.summary`
     ComponentMatchTextSummary,
+    /// `component.option-group.summary`
+    ComponentOptionGroupSummary,
+    /// `component.option-item.summary`
+    ComponentOptionItemSummary,
+    /// `component.option-list.summary`
+    ComponentOptionListSummary,
     /// `component.paragraph.summary`
     ComponentParagraphSummary,
     /// `component.prose.summary`
@@ -1332,6 +1342,76 @@ pub enum Key {
     ExampleMarkWord,
     /// `example.mark.search`
     ExampleMarkSearch,
+    /// `example.option-list.overview`
+    ExampleOptionListOverview,
+    /// `example.option-list.walk`
+    ExampleOptionListWalk,
+    /// `example.option-list.columns`
+    ExampleOptionListColumns,
+    /// `example.option-list.driven`
+    ExampleOptionListDriven,
+    /// `example.option-list.nothing`
+    ExampleOptionListNothing,
+    /// `example.option-group.run`
+    ExampleOptionGroupRun,
+    /// `example.option-item.row`
+    ExampleOptionItemRow,
+    /// `example.option-item.hits`
+    ExampleOptionItemHits,
+    /// `example.option-item.detail-hits`
+    ExampleOptionItemDetailHits,
+    /// `example.option-item.shortcut`
+    ExampleOptionItemShortcut,
+    /// `example.option-item.states`
+    ExampleOptionItemStates,
+    /// `example.option-list.key-space`
+    ExampleOptionListKeySpace,
+    /// `example.option-list.key-s`
+    ExampleOptionListKeyS,
+    /// `example.option-list.key-h`
+    ExampleOptionListKeyH,
+    /// `example.option-list.key-d`
+    ExampleOptionListKeyD,
+    /// `example.option-list.key-q`
+    ExampleOptionListKeyQ,
+    /// `example.option-group.mixed`
+    ExampleOptionGroupMixed,
+    /// `example.option-group.columns`
+    ExampleOptionGroupColumns,
+    /// `example.option-group.filtered`
+    ExampleOptionGroupFiltered,
+    /// `example.option-list.commands`
+    ExampleOptionListCommands,
+    /// `example.option-list.menu`
+    ExampleOptionListMenu,
+    /// `example.option-list.filter`
+    ExampleOptionListFilter,
+    /// `example.option-list.empty`
+    ExampleOptionListEmpty,
+    /// `example.option-list.settings`
+    ExampleOptionListSettings,
+    /// `example.option-list.settings-detail`
+    ExampleOptionListSettingsDetail,
+    /// `example.option-list.help`
+    ExampleOptionListHelp,
+    /// `example.option-list.help-detail`
+    ExampleOptionListHelpDetail,
+    /// `example.option-list.sidebar`
+    ExampleOptionListSidebar,
+    /// `example.option-list.dev`
+    ExampleOptionListDev,
+    /// `example.option-list.shortcuts`
+    ExampleOptionListShortcuts,
+    /// `example.option-list.group-window`
+    ExampleOptionListGroupWindow,
+    /// `example.option-list.group-page`
+    ExampleOptionListGroupPage,
+    /// `example.option-list.close-window`
+    ExampleOptionListCloseWindow,
+    /// `example.option-list.hide-window`
+    ExampleOptionListHideWindow,
+    /// `example.option-list.close-page`
+    ExampleOptionListClosePage,
     /// `example.match-text.query`
     ExampleMatchTextQuery,
     /// `example.match-text.one`
@@ -4646,6 +4726,86 @@ pub enum Key {
     ComponentNumberInputKeyHomeEndName,
     /// `component.number-input.key.home-end.action`
     ComponentNumberInputKeyHomeEndAction,
+    /// `component.option-group.guidance`
+    ComponentOptionGroupGuidance,
+    /// `component.option-group.a11y-notes`
+    ComponentOptionGroupA11yNotes,
+    /// `component.option-group.prop.label.doc`
+    ComponentOptionGroupPropLabelDoc,
+    /// `component.option-group.prop.children.doc`
+    ComponentOptionGroupPropChildrenDoc,
+    /// `component.option-item.guidance`
+    ComponentOptionItemGuidance,
+    /// `component.option-item.a11y-notes`
+    ComponentOptionItemA11yNotes,
+    /// `component.option-item.prop.value.doc`
+    ComponentOptionItemPropValueDoc,
+    /// `component.option-item.prop.label.doc`
+    ComponentOptionItemPropLabelDoc,
+    /// `component.option-item.prop.hits.doc`
+    ComponentOptionItemPropHitsDoc,
+    /// `component.option-item.prop.detail.doc`
+    ComponentOptionItemPropDetailDoc,
+    /// `component.option-item.prop.detail_hits.doc`
+    ComponentOptionItemPropDetailHitsDoc,
+    /// `component.option-item.prop.shortcut.doc`
+    ComponentOptionItemPropShortcutDoc,
+    /// `component.option-item.prop.icon.doc`
+    ComponentOptionItemPropIconDoc,
+    /// `component.option-item.prop.id.doc`
+    ComponentOptionItemPropIdDoc,
+    /// `component.option-item.prop.active.doc`
+    ComponentOptionItemPropActiveDoc,
+    /// `component.option-item.prop.selected.doc`
+    ComponentOptionItemPropSelectedDoc,
+    /// `component.option-item.prop.disabled.doc`
+    ComponentOptionItemPropDisabledDoc,
+    /// `component.option-list.guidance`
+    ComponentOptionListGuidance,
+    /// `component.option-list.a11y-notes`
+    ComponentOptionListA11yNotes,
+    /// `component.option-list.prop.name.doc`
+    ComponentOptionListPropNameDoc,
+    /// `component.option-list.prop.label.doc`
+    ComponentOptionListPropLabelDoc,
+    /// `component.option-list.prop.layout.doc`
+    ComponentOptionListPropLayoutDoc,
+    /// `component.option-list.prop.size.doc`
+    ComponentOptionListPropSizeDoc,
+    /// `component.option-list.prop.focusable.doc`
+    ComponentOptionListPropFocusableDoc,
+    /// `component.option-list.prop.empty_label.doc`
+    ComponentOptionListPropEmptyLabelDoc,
+    /// `component.option-list.prop.children.doc`
+    ComponentOptionListPropChildrenDoc,
+    /// `component.option-list.key.down-arrow-up-arrow.name`
+    ComponentOptionListKeyDownArrowUpArrowName,
+    /// `component.option-list.key.down-arrow-up-arrow.action`
+    ComponentOptionListKeyDownArrowUpArrowAction,
+    /// `component.option-list.key.left-arrow-right-arrow.name`
+    ComponentOptionListKeyLeftArrowRightArrowName,
+    /// `component.option-list.key.left-arrow-right-arrow.action`
+    ComponentOptionListKeyLeftArrowRightArrowAction,
+    /// `component.option-list.key.home-end.name`
+    ComponentOptionListKeyHomeEndName,
+    /// `component.option-list.key.home-end.action`
+    ComponentOptionListKeyHomeEndAction,
+    /// `component.option-list.key.page-up-page-down.name`
+    ComponentOptionListKeyPageUpPageDownName,
+    /// `component.option-list.key.page-up-page-down.action`
+    ComponentOptionListKeyPageUpPageDownAction,
+    /// `component.option-list.key.enter.name`
+    ComponentOptionListKeyEnterName,
+    /// `component.option-list.key.enter.action`
+    ComponentOptionListKeyEnterAction,
+    /// `component.option-list.key.space.name`
+    ComponentOptionListKeySpaceName,
+    /// `component.option-list.key.space.action`
+    ComponentOptionListKeySpaceAction,
+    /// `component.option-list.key.a-printable-character.name`
+    ComponentOptionListKeyAPrintableCharacterName,
+    /// `component.option-list.key.a-printable-character.action`
+    ComponentOptionListKeyAPrintableCharacterAction,
     /// `component.otp-field.guidance`
     ComponentOtpFieldGuidance,
     /// `component.otp-field.a11y-notes`
@@ -6096,7 +6256,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2986] = [
+    pub const ALL: [Self; 3066] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -6121,6 +6281,8 @@ impl Key {
         Self::PageIntroBody,
         Self::PageMenuSummary,
         Self::PageMenuBody,
+        Self::PageOptionListSummary,
+        Self::PageOptionListBody,
         Self::PageTreeSummary,
         Self::PageTreeBody,
         Self::PageTabsSummary,
@@ -6339,6 +6501,9 @@ impl Key {
         Self::ComponentListItemSummary,
         Self::ComponentMarkSummary,
         Self::ComponentMatchTextSummary,
+        Self::ComponentOptionGroupSummary,
+        Self::ComponentOptionItemSummary,
+        Self::ComponentOptionListSummary,
         Self::ComponentParagraphSummary,
         Self::ComponentProseSummary,
         Self::ComponentStrongSummary,
@@ -6703,6 +6868,41 @@ impl Key {
         Self::ExampleMarkLead,
         Self::ExampleMarkWord,
         Self::ExampleMarkSearch,
+        Self::ExampleOptionListOverview,
+        Self::ExampleOptionListWalk,
+        Self::ExampleOptionListColumns,
+        Self::ExampleOptionListDriven,
+        Self::ExampleOptionListNothing,
+        Self::ExampleOptionGroupRun,
+        Self::ExampleOptionItemRow,
+        Self::ExampleOptionItemHits,
+        Self::ExampleOptionItemDetailHits,
+        Self::ExampleOptionItemShortcut,
+        Self::ExampleOptionItemStates,
+        Self::ExampleOptionListKeySpace,
+        Self::ExampleOptionListKeyS,
+        Self::ExampleOptionListKeyH,
+        Self::ExampleOptionListKeyD,
+        Self::ExampleOptionListKeyQ,
+        Self::ExampleOptionGroupMixed,
+        Self::ExampleOptionGroupColumns,
+        Self::ExampleOptionGroupFiltered,
+        Self::ExampleOptionListCommands,
+        Self::ExampleOptionListMenu,
+        Self::ExampleOptionListFilter,
+        Self::ExampleOptionListEmpty,
+        Self::ExampleOptionListSettings,
+        Self::ExampleOptionListSettingsDetail,
+        Self::ExampleOptionListHelp,
+        Self::ExampleOptionListHelpDetail,
+        Self::ExampleOptionListSidebar,
+        Self::ExampleOptionListDev,
+        Self::ExampleOptionListShortcuts,
+        Self::ExampleOptionListGroupWindow,
+        Self::ExampleOptionListGroupPage,
+        Self::ExampleOptionListCloseWindow,
+        Self::ExampleOptionListHideWindow,
+        Self::ExampleOptionListClosePage,
         Self::ExampleMatchTextQuery,
         Self::ExampleMatchTextOne,
         Self::ExampleMatchTextWords,
@@ -8360,6 +8560,46 @@ impl Key {
         Self::ComponentNumberInputKeyPageUpPageDownAction,
         Self::ComponentNumberInputKeyHomeEndName,
         Self::ComponentNumberInputKeyHomeEndAction,
+        Self::ComponentOptionGroupGuidance,
+        Self::ComponentOptionGroupA11yNotes,
+        Self::ComponentOptionGroupPropLabelDoc,
+        Self::ComponentOptionGroupPropChildrenDoc,
+        Self::ComponentOptionItemGuidance,
+        Self::ComponentOptionItemA11yNotes,
+        Self::ComponentOptionItemPropValueDoc,
+        Self::ComponentOptionItemPropLabelDoc,
+        Self::ComponentOptionItemPropHitsDoc,
+        Self::ComponentOptionItemPropDetailDoc,
+        Self::ComponentOptionItemPropDetailHitsDoc,
+        Self::ComponentOptionItemPropShortcutDoc,
+        Self::ComponentOptionItemPropIconDoc,
+        Self::ComponentOptionItemPropIdDoc,
+        Self::ComponentOptionItemPropActiveDoc,
+        Self::ComponentOptionItemPropSelectedDoc,
+        Self::ComponentOptionItemPropDisabledDoc,
+        Self::ComponentOptionListGuidance,
+        Self::ComponentOptionListA11yNotes,
+        Self::ComponentOptionListPropNameDoc,
+        Self::ComponentOptionListPropLabelDoc,
+        Self::ComponentOptionListPropLayoutDoc,
+        Self::ComponentOptionListPropSizeDoc,
+        Self::ComponentOptionListPropFocusableDoc,
+        Self::ComponentOptionListPropEmptyLabelDoc,
+        Self::ComponentOptionListPropChildrenDoc,
+        Self::ComponentOptionListKeyDownArrowUpArrowName,
+        Self::ComponentOptionListKeyDownArrowUpArrowAction,
+        Self::ComponentOptionListKeyLeftArrowRightArrowName,
+        Self::ComponentOptionListKeyLeftArrowRightArrowAction,
+        Self::ComponentOptionListKeyHomeEndName,
+        Self::ComponentOptionListKeyHomeEndAction,
+        Self::ComponentOptionListKeyPageUpPageDownName,
+        Self::ComponentOptionListKeyPageUpPageDownAction,
+        Self::ComponentOptionListKeyEnterName,
+        Self::ComponentOptionListKeyEnterAction,
+        Self::ComponentOptionListKeySpaceName,
+        Self::ComponentOptionListKeySpaceAction,
+        Self::ComponentOptionListKeyAPrintableCharacterName,
+        Self::ComponentOptionListKeyAPrintableCharacterAction,
         Self::ComponentOtpFieldGuidance,
         Self::ComponentOtpFieldA11yNotes,
         Self::ComponentOtpFieldPropNameDoc,
@@ -9113,6 +9353,8 @@ impl Key {
             Self::PageIntroBody => "page.intro.body",
             Self::PageMenuSummary => "page.menu.summary",
             Self::PageMenuBody => "page.menu.body",
+            Self::PageOptionListSummary => "page.option-list.summary",
+            Self::PageOptionListBody => "page.option-list.body",
             Self::PageTreeSummary => "page.tree.summary",
             Self::PageTreeBody => "page.tree.body",
             Self::PageTabsSummary => "page.tabs.summary",
@@ -9331,6 +9573,9 @@ impl Key {
             Self::ComponentListItemSummary => "component.list-item.summary",
             Self::ComponentMarkSummary => "component.mark.summary",
             Self::ComponentMatchTextSummary => "component.match-text.summary",
+            Self::ComponentOptionGroupSummary => "component.option-group.summary",
+            Self::ComponentOptionItemSummary => "component.option-item.summary",
+            Self::ComponentOptionListSummary => "component.option-list.summary",
             Self::ComponentParagraphSummary => "component.paragraph.summary",
             Self::ComponentProseSummary => "component.prose.summary",
             Self::ComponentStrongSummary => "component.strong.summary",
@@ -9695,6 +9940,41 @@ impl Key {
             Self::ExampleMarkLead => "example.mark.lead",
             Self::ExampleMarkWord => "example.mark.word",
             Self::ExampleMarkSearch => "example.mark.search",
+            Self::ExampleOptionListOverview => "example.option-list.overview",
+            Self::ExampleOptionListWalk => "example.option-list.walk",
+            Self::ExampleOptionListColumns => "example.option-list.columns",
+            Self::ExampleOptionListDriven => "example.option-list.driven",
+            Self::ExampleOptionListNothing => "example.option-list.nothing",
+            Self::ExampleOptionGroupRun => "example.option-group.run",
+            Self::ExampleOptionItemRow => "example.option-item.row",
+            Self::ExampleOptionItemHits => "example.option-item.hits",
+            Self::ExampleOptionItemDetailHits => "example.option-item.detail-hits",
+            Self::ExampleOptionItemShortcut => "example.option-item.shortcut",
+            Self::ExampleOptionItemStates => "example.option-item.states",
+            Self::ExampleOptionListKeySpace => "example.option-list.key-space",
+            Self::ExampleOptionListKeyS => "example.option-list.key-s",
+            Self::ExampleOptionListKeyH => "example.option-list.key-h",
+            Self::ExampleOptionListKeyD => "example.option-list.key-d",
+            Self::ExampleOptionListKeyQ => "example.option-list.key-q",
+            Self::ExampleOptionGroupMixed => "example.option-group.mixed",
+            Self::ExampleOptionGroupColumns => "example.option-group.columns",
+            Self::ExampleOptionGroupFiltered => "example.option-group.filtered",
+            Self::ExampleOptionListCommands => "example.option-list.commands",
+            Self::ExampleOptionListMenu => "example.option-list.menu",
+            Self::ExampleOptionListFilter => "example.option-list.filter",
+            Self::ExampleOptionListEmpty => "example.option-list.empty",
+            Self::ExampleOptionListSettings => "example.option-list.settings",
+            Self::ExampleOptionListSettingsDetail => "example.option-list.settings-detail",
+            Self::ExampleOptionListHelp => "example.option-list.help",
+            Self::ExampleOptionListHelpDetail => "example.option-list.help-detail",
+            Self::ExampleOptionListSidebar => "example.option-list.sidebar",
+            Self::ExampleOptionListDev => "example.option-list.dev",
+            Self::ExampleOptionListShortcuts => "example.option-list.shortcuts",
+            Self::ExampleOptionListGroupWindow => "example.option-list.group-window",
+            Self::ExampleOptionListGroupPage => "example.option-list.group-page",
+            Self::ExampleOptionListCloseWindow => "example.option-list.close-window",
+            Self::ExampleOptionListHideWindow => "example.option-list.hide-window",
+            Self::ExampleOptionListClosePage => "example.option-list.close-page",
             Self::ExampleMatchTextQuery => "example.match-text.query",
             Self::ExampleMatchTextOne => "example.match-text.one",
             Self::ExampleMatchTextWords => "example.match-text.words",
@@ -11690,6 +11970,68 @@ impl Key {
             Self::ComponentNumberInputKeyHomeEndAction => {
                 "component.number-input.key.home-end.action"
             }
+            Self::ComponentOptionGroupGuidance => "component.option-group.guidance",
+            Self::ComponentOptionGroupA11yNotes => "component.option-group.a11y-notes",
+            Self::ComponentOptionGroupPropLabelDoc => "component.option-group.prop.label.doc",
+            Self::ComponentOptionGroupPropChildrenDoc => "component.option-group.prop.children.doc",
+            Self::ComponentOptionItemGuidance => "component.option-item.guidance",
+            Self::ComponentOptionItemA11yNotes => "component.option-item.a11y-notes",
+            Self::ComponentOptionItemPropValueDoc => "component.option-item.prop.value.doc",
+            Self::ComponentOptionItemPropLabelDoc => "component.option-item.prop.label.doc",
+            Self::ComponentOptionItemPropHitsDoc => "component.option-item.prop.hits.doc",
+            Self::ComponentOptionItemPropDetailDoc => "component.option-item.prop.detail.doc",
+            Self::ComponentOptionItemPropDetailHitsDoc => {
+                "component.option-item.prop.detail_hits.doc"
+            }
+            Self::ComponentOptionItemPropShortcutDoc => "component.option-item.prop.shortcut.doc",
+            Self::ComponentOptionItemPropIconDoc => "component.option-item.prop.icon.doc",
+            Self::ComponentOptionItemPropIdDoc => "component.option-item.prop.id.doc",
+            Self::ComponentOptionItemPropActiveDoc => "component.option-item.prop.active.doc",
+            Self::ComponentOptionItemPropSelectedDoc => "component.option-item.prop.selected.doc",
+            Self::ComponentOptionItemPropDisabledDoc => "component.option-item.prop.disabled.doc",
+            Self::ComponentOptionListGuidance => "component.option-list.guidance",
+            Self::ComponentOptionListA11yNotes => "component.option-list.a11y-notes",
+            Self::ComponentOptionListPropNameDoc => "component.option-list.prop.name.doc",
+            Self::ComponentOptionListPropLabelDoc => "component.option-list.prop.label.doc",
+            Self::ComponentOptionListPropLayoutDoc => "component.option-list.prop.layout.doc",
+            Self::ComponentOptionListPropSizeDoc => "component.option-list.prop.size.doc",
+            Self::ComponentOptionListPropFocusableDoc => "component.option-list.prop.focusable.doc",
+            Self::ComponentOptionListPropEmptyLabelDoc => {
+                "component.option-list.prop.empty_label.doc"
+            }
+            Self::ComponentOptionListPropChildrenDoc => "component.option-list.prop.children.doc",
+            Self::ComponentOptionListKeyDownArrowUpArrowName => {
+                "component.option-list.key.down-arrow-up-arrow.name"
+            }
+            Self::ComponentOptionListKeyDownArrowUpArrowAction => {
+                "component.option-list.key.down-arrow-up-arrow.action"
+            }
+            Self::ComponentOptionListKeyLeftArrowRightArrowName => {
+                "component.option-list.key.left-arrow-right-arrow.name"
+            }
+            Self::ComponentOptionListKeyLeftArrowRightArrowAction => {
+                "component.option-list.key.left-arrow-right-arrow.action"
+            }
+            Self::ComponentOptionListKeyHomeEndName => "component.option-list.key.home-end.name",
+            Self::ComponentOptionListKeyHomeEndAction => {
+                "component.option-list.key.home-end.action"
+            }
+            Self::ComponentOptionListKeyPageUpPageDownName => {
+                "component.option-list.key.page-up-page-down.name"
+            }
+            Self::ComponentOptionListKeyPageUpPageDownAction => {
+                "component.option-list.key.page-up-page-down.action"
+            }
+            Self::ComponentOptionListKeyEnterName => "component.option-list.key.enter.name",
+            Self::ComponentOptionListKeyEnterAction => "component.option-list.key.enter.action",
+            Self::ComponentOptionListKeySpaceName => "component.option-list.key.space.name",
+            Self::ComponentOptionListKeySpaceAction => "component.option-list.key.space.action",
+            Self::ComponentOptionListKeyAPrintableCharacterName => {
+                "component.option-list.key.a-printable-character.name"
+            }
+            Self::ComponentOptionListKeyAPrintableCharacterAction => {
+                "component.option-list.key.a-printable-character.action"
+            }
             Self::ComponentOtpFieldGuidance => "component.otp-field.guidance",
             Self::ComponentOtpFieldA11yNotes => "component.otp-field.a11y-notes",
             Self::ComponentOtpFieldPropNameDoc => "component.otp-field.prop.name.doc",
@@ -12673,6 +13015,12 @@ impl Locale {
                 Key::PageMenuBody => {
                     "A menu and its items. The button that opens one is a `Button` with `menu` and `controls`. Everything after the press is `dist/menu.js`: the anchoring, the arrow walk, the letter that jumps, Escape, and the focus returning to the button."
                 }
+                Key::PageOptionListSummary => {
+                    "Let users walk a list of options with the keyboard and choose one."
+                }
+                Key::PageOptionListBody => {
+                    "The list, a named run of options, and one option. The focus stays on one element and `aria-activedescendant` names the active option. The list chooses nothing itself. It says which option was asked for, in an event."
+                }
                 Key::PageTreeSummary => {
                     "Let users walk a hierarchy, opening, closing and choosing nodes in it."
                 }
@@ -13050,6 +13398,13 @@ impl Locale {
                 }
                 Key::ComponentMatchTextSummary => {
                     "Show a name with the characters a query matched marked, one style for each word of the query."
+                }
+                Key::ComponentOptionGroupSummary => "Name a run of options inside an option list.",
+                Key::ComponentOptionItemSummary => {
+                    "Place one option in an option list: its name, its key and what it does."
+                }
+                Key::ComponentOptionListSummary => {
+                    "Let users walk a list of options with the keyboard and choose one."
                 }
                 Key::ComponentParagraphSummary => "Render a paragraph of prose.",
                 Key::ComponentProseSummary => {
@@ -13715,6 +14070,71 @@ impl Locale {
                 Key::ExampleMarkSearch => {
                     "The weight changes as well as the background, so a hit can be found without relying on colour."
                 }
+                Key::ExampleOptionListOverview => {
+                    "The words `win clo` were typed. Each row marks what each word matched on its name, and the bar is where the keyboard is."
+                }
+                Key::ExampleOptionListWalk => {
+                    "Tab to the list, then use the arrows. Enter chooses, and the list says so in an `nd-option-choose` event."
+                }
+                Key::ExampleOptionListColumns => {
+                    "`columns` fills the width, down and then across. Each entry is a key and a name, with nothing drawn around them."
+                }
+                Key::ExampleOptionListDriven => {
+                    "The box names the list in `aria-controls`. The focus stays in the box, and its arrows move through the options."
+                }
+                Key::ExampleOptionListNothing => {
+                    "A list with no option shows `empty_label`, in a `role=\"status\"`."
+                }
+                Key::ExampleOptionGroupRun => {
+                    "A group is a `role=\"group\"` named by its label. Its options are still the options of the one list."
+                }
+                Key::ExampleOptionItemRow => {
+                    "`detail` is a second line under the name, and part of what a screen reader reads for the option."
+                }
+                Key::ExampleOptionItemHits => {
+                    "`hits` marks the characters of the name a query matched, in the grammar of `MatchText`."
+                }
+                Key::ExampleOptionItemDetailHits => {
+                    "The query was `win ex`. The second word matched a tag, so the tags are the second line and `detail_hits` marks them."
+                }
+                Key::ExampleOptionItemShortcut => {
+                    "`shortcut` is plain monospace text. It is first in the markup, so it is read before the name."
+                }
+                Key::ExampleOptionItemStates => {
+                    "`active` is where the keyboard is, `selected` is the answer and draws a tick, and `disabled` is reached and not chosen."
+                }
+                Key::ExampleOptionListKeySpace => "Space",
+                Key::ExampleOptionListKeyS => "s",
+                Key::ExampleOptionListKeyH => "h",
+                Key::ExampleOptionListKeyD => "d",
+                Key::ExampleOptionListKeyQ => "q",
+                Key::ExampleOptionGroupMixed => {
+                    "Options outside any group sit beside the groups, in the order they are written."
+                }
+                Key::ExampleOptionGroupColumns => {
+                    "In columns a group's name stays with its first option, at the head of the same column."
+                }
+                Key::ExampleOptionGroupFiltered => {
+                    "A group draws only the options its caller rendered. One with none showing takes no room."
+                }
+                Key::ExampleOptionListCommands => "Commands",
+                Key::ExampleOptionListMenu => "Shortcuts",
+                Key::ExampleOptionListFilter => "Filter the commands",
+                Key::ExampleOptionListEmpty => "No command matches.",
+                Key::ExampleOptionListSettings => "Settings",
+                Key::ExampleOptionListSettingsDetail => {
+                    "Change how the interface looks and behaves."
+                }
+                Key::ExampleOptionListHelp => "Help",
+                Key::ExampleOptionListHelpDetail => "Read how each part of the interface works.",
+                Key::ExampleOptionListSidebar => "Sidebar",
+                Key::ExampleOptionListDev => "Developer tools",
+                Key::ExampleOptionListShortcuts => "This page’s shortcuts",
+                Key::ExampleOptionListGroupWindow => "Window",
+                Key::ExampleOptionListGroupPage => "Page",
+                Key::ExampleOptionListCloseWindow => "Close the window",
+                Key::ExampleOptionListHideWindow => "Hide the window",
+                Key::ExampleOptionListClosePage => "Close the page",
                 Key::ExampleMatchTextQuery => {
                     "The query `gro t b` found both names. Each word of it marks its own characters, in its own tone."
                 }
@@ -17408,6 +17828,110 @@ impl Locale {
                 Key::ComponentNumberInputKeyHomeEndAction => {
                     "Moves to `min` and to `max`, where those are declared."
                 }
+                Key::ComponentOptionGroupGuidance => {
+                    "Use an option group for a named run of options inside an `OptionList`, such as the commands of one plugin. A group with no option showing takes no room."
+                }
+                Key::ComponentOptionGroupA11yNotes => {
+                    "The group is a `role=\"group\"` named by `aria-label`. The visible name carries `aria-hidden`, so a screen reader reads it once, as the group's name."
+                }
+                Key::ComponentOptionGroupPropLabelDoc => {
+                    "The name of the group, shown above its options and read as the group's name. Required."
+                }
+                Key::ComponentOptionGroupPropChildrenDoc => "The `OptionItem`s in the group.",
+                Key::ComponentOptionItemGuidance => {
+                    "Use an option item for one row of an `OptionList`: a name, and what a reader needs beside it to choose. **Its name is a prop**, so the matched characters can be marked without touching anything else in the row."
+                }
+                Key::ComponentOptionItemA11yNotes => {
+                    "The row is a `role=\"option\"`, and its name is the key, the name and the second line read in that order. The active row is drawn with a bar on its leading edge as well as a fill, and the selected row with a tick."
+                }
+                Key::ComponentOptionItemPropValueDoc => {
+                    "What this option *is*, as a script finds it. The list's events carry it, and it is never translated. **Required**."
+                }
+                Key::ComponentOptionItemPropLabelDoc => {
+                    "The option's name. Text and not children, because `hits` marks characters in it by position. Required."
+                }
+                Key::ComponentOptionItemPropHitsDoc => {
+                    "The characters of `label` a query matched, in `MatchText`'s grammar: one slot for each word, joined by `|`. Leave it out for a list that is not filtered."
+                }
+                Key::ComponentOptionItemPropDetailDoc => {
+                    "A second, smaller line under the name, saying what the option does. It is part of the option's accessible name."
+                }
+                Key::ComponentOptionItemPropDetailHitsDoc => {
+                    "The characters of `detail` a query matched, in the same grammar as `hits`. Use it where the second line is the field a word matched."
+                }
+                Key::ComponentOptionItemPropShortcutDoc => {
+                    "The key that acts on this option, as plain text in the monospace face. It is a hint. The caller binds the key."
+                }
+                Key::ComponentOptionItemPropIconDoc => {
+                    "A drawing before the name. It is decorative, and the name beside it is what a screen reader reads."
+                }
+                Key::ComponentOptionItemPropIdDoc => {
+                    "The option's id, for a caller that writes `aria-activedescendant` itself. Leave it out and the script numbers the options."
+                }
+                Key::ComponentOptionItemPropActiveDoc => {
+                    "Whether the keyboard is on this option. One option of a list at most. The script moves it on the arrow keys and points `aria-activedescendant` at it."
+                }
+                Key::ComponentOptionItemPropSelectedDoc => {
+                    "Whether this option is the answer the list holds. It writes `aria-selected` and draws a tick, so the choice is not shown by colour alone."
+                }
+                Key::ComponentOptionItemPropDisabledDoc => {
+                    "Stops the option being chosen and keeps it in the arrow walk. It writes `aria-disabled`, so the option is announced as unavailable instead of missing."
+                }
+                Key::ComponentOptionListGuidance => {
+                    "Use an option list for a list users walk and act on with the keyboard. A list of commands and a menu of shortcuts are two. For a value in a form, use `Select`. For a list of pages, use `Search`, whose rows are links."
+                }
+                Key::ComponentOptionListA11yNotes => {
+                    "The list is a `role=\"listbox\"` and each option a `role=\"option\"`. The active option is named by `aria-activedescendant` on whatever holds the focus, so the focus never moves into the list. The empty sentence is a `role=\"status\"`."
+                }
+                Key::ComponentOptionListPropNameDoc => {
+                    "What this list is of, as a script finds it. The listbox takes the id `nd-option-list-` followed by this name, which is what another control writes in `aria-controls`. **Required**."
+                }
+                Key::ComponentOptionListPropLabelDoc => {
+                    "The name of the list. Required, because a `listbox` with no name gives a screen reader only the word *list box*."
+                }
+                Key::ComponentOptionListPropLayoutDoc => {
+                    "How the options are laid out: `rows`, one under another, or `columns`, which fills the width with as many columns as fit. `columns` suits a menu of short entries, each a key and a name."
+                }
+                Key::ComponentOptionListPropSizeDoc => {
+                    "The height of an option: `small`, `medium` or `large`. Options are targets, so all three clear WCAG 2.5.8's 24px minimum."
+                }
+                Key::ComponentOptionListPropFocusableDoc => {
+                    "Whether the list is a tab stop. Turn it off where another control keeps the focus and names this list in `aria-controls`. That control's arrow keys then move through the options."
+                }
+                Key::ComponentOptionListPropEmptyLabelDoc => {
+                    "What the list says when it holds no option. Set it wherever the list is filtered, because a filter that leaves an empty space has not said that nothing matched."
+                }
+                Key::ComponentOptionListPropChildrenDoc => {
+                    "The options: `OptionItem`s, `OptionGroup`s, or both."
+                }
+                Key::ComponentOptionListKeyDownArrowUpArrowName => "Down arrow / Up arrow",
+                Key::ComponentOptionListKeyDownArrowUpArrowAction => {
+                    "Moves to the next and the previous option, and stops at the ends. The focus stays where it is."
+                }
+                Key::ComponentOptionListKeyLeftArrowRightArrowName => "Left arrow / Right arrow",
+                Key::ComponentOptionListKeyLeftArrowRightArrowAction => {
+                    "Moves to the option beside the active one, in the next column. Needs `columns` and the focus in the list."
+                }
+                Key::ComponentOptionListKeyHomeEndName => "Home / End",
+                Key::ComponentOptionListKeyHomeEndAction => {
+                    "Moves to the first and the last option. From another control, hold Control or Command as well."
+                }
+                Key::ComponentOptionListKeyPageUpPageDownName => "Page Up / Page Down",
+                Key::ComponentOptionListKeyPageUpPageDownAction => {
+                    "Moves one measured page of options, and stops at the ends."
+                }
+                Key::ComponentOptionListKeyEnterName => "Enter",
+                Key::ComponentOptionListKeyEnterAction => {
+                    "Chooses the active option. A disabled option stays active and is not chosen."
+                }
+                Key::ComponentOptionListKeySpaceName => "Space",
+                Key::ComponentOptionListKeySpaceAction => {
+                    "Chooses the active option. Needs the focus in the list, since in another control it types a space."
+                }
+                Key::ComponentOptionListKeyAPrintableCharacterName => "A printable character",
+                Key::ComponentOptionListKeyAPrintableCharacterAction => {
+                    "Jumps to the next option whose name starts with the letters typed. Needs the focus in the list."
+                }
                 Key::ComponentOtpFieldGuidance => {
                     "Use this for a short code a reader copies from somewhere else, such as the six digits in a text message. For anything a reader composes, use `Input`. The boxes are a picture of the code and never a shape it has to be typed into."
                 }
@@ -19395,6 +19919,12 @@ impl Locale {
                 Key::PageMenuBody => {
                     "Um menu e os itens dele. O botão que abre um menu é um `Button` com `menu` e `controls`. Tudo depois do toque é o `dist/menu.js`: a ancoragem, o caminho das setas, a letra que salta, o Esc e o foco voltando para o botão."
                 }
+                Key::PageOptionListSummary => {
+                    "Deixe a pessoa percorrer uma lista de opções com o teclado e escolher uma."
+                }
+                Key::PageOptionListBody => {
+                    "A lista, um grupo nomeado de opções e uma opção. O foco fica num só elemento e `aria-activedescendant` nomeia a opção ativa. A lista não escolhe nada sozinha. Ela diz qual opção foi pedida, num evento."
+                }
                 Key::PageTreeSummary => {
                     "Deixe a pessoa percorrer uma hierarquia, abrindo, fechando e escolhendo nós nela."
                 }
@@ -19782,6 +20312,15 @@ impl Locale {
                 }
                 Key::ComponentMatchTextSummary => {
                     "Mostre um nome com os caracteres casados por uma consulta marcados, um estilo por palavra."
+                }
+                Key::ComponentOptionGroupSummary => {
+                    "Dê nome a um grupo de opções dentro de uma lista de opções."
+                }
+                Key::ComponentOptionItemSummary => {
+                    "Ponha uma opção numa lista de opções: o nome dela, a tecla e o que ela faz."
+                }
+                Key::ComponentOptionListSummary => {
+                    "Deixe a pessoa percorrer uma lista de opções com o teclado e escolher uma."
                 }
                 Key::ComponentParagraphSummary => "Renderize um parágrafo de prosa.",
                 Key::ComponentProseSummary => {
@@ -20455,6 +20994,71 @@ impl Locale {
                 Key::ExampleMarkSearch => {
                     "O peso muda além do fundo, então uma ocorrência pode ser encontrada sem depender da cor."
                 }
+                Key::ExampleOptionListOverview => {
+                    "As palavras `win clo` foram digitadas. Cada linha marca o que cada palavra casou no nome, e a barra é onde o teclado está."
+                }
+                Key::ExampleOptionListWalk => {
+                    "Vá até a lista com Tab e use as setas. Enter escolhe, e a lista diz isso num evento `nd-option-choose`."
+                }
+                Key::ExampleOptionListColumns => {
+                    "`columns` preenche a largura, para baixo e depois para o lado. Cada entrada é uma tecla e um nome, sem nada em volta."
+                }
+                Key::ExampleOptionListDriven => {
+                    "A caixa nomeia a lista em `aria-controls`. O foco fica na caixa, e as setas dela percorrem as opções."
+                }
+                Key::ExampleOptionListNothing => {
+                    "Uma lista sem nenhuma opção mostra `empty_label`, num `role=\"status\"`."
+                }
+                Key::ExampleOptionGroupRun => {
+                    "Um grupo é um `role=\"group\"` nomeado pelo rótulo. As opções dele continuam sendo opções da mesma lista."
+                }
+                Key::ExampleOptionItemRow => {
+                    "`detail` é uma segunda linha embaixo do nome, e parte do que o leitor de tela lê para a opção."
+                }
+                Key::ExampleOptionItemHits => {
+                    "`hits` marca os caracteres do nome que uma consulta casou, na gramática do `MatchText`."
+                }
+                Key::ExampleOptionItemDetailHits => {
+                    "A consulta foi `win ex`. A segunda palavra casou uma etiqueta, então elas são a segunda linha e `detail_hits` as marca."
+                }
+                Key::ExampleOptionItemShortcut => {
+                    "`shortcut` é texto monoespaçado simples. Vem primeiro na marcação, então é lido antes do nome."
+                }
+                Key::ExampleOptionItemStates => {
+                    "`active` é onde o teclado está, `selected` é a resposta e desenha um tique, e `disabled` é alcançada e não escolhida."
+                }
+                Key::ExampleOptionListKeySpace => "Espaço",
+                Key::ExampleOptionListKeyS => "s",
+                Key::ExampleOptionListKeyH => "h",
+                Key::ExampleOptionListKeyD => "d",
+                Key::ExampleOptionListKeyQ => "q",
+                Key::ExampleOptionGroupMixed => {
+                    "Opções fora de qualquer grupo ficam ao lado dos grupos, na ordem em que são escritas."
+                }
+                Key::ExampleOptionGroupColumns => {
+                    "Em colunas o nome de um grupo fica com a primeira opção dele, no topo da mesma coluna."
+                }
+                Key::ExampleOptionGroupFiltered => {
+                    "Um grupo desenha só as opções que quem chama renderizou. Um grupo sem nenhuma à mostra não ocupa espaço."
+                }
+                Key::ExampleOptionListCommands => "Comandos",
+                Key::ExampleOptionListMenu => "Atalhos",
+                Key::ExampleOptionListFilter => "Filtre os comandos",
+                Key::ExampleOptionListEmpty => "Nenhum comando casa.",
+                Key::ExampleOptionListSettings => "Configurações",
+                Key::ExampleOptionListSettingsDetail => {
+                    "Mude a aparência e o comportamento da interface."
+                }
+                Key::ExampleOptionListHelp => "Ajuda",
+                Key::ExampleOptionListHelpDetail => "Leia como cada parte da interface funciona.",
+                Key::ExampleOptionListSidebar => "Barra lateral",
+                Key::ExampleOptionListDev => "Ferramentas de desenvolvimento",
+                Key::ExampleOptionListShortcuts => "Atalhos desta página",
+                Key::ExampleOptionListGroupWindow => "Janela",
+                Key::ExampleOptionListGroupPage => "Página",
+                Key::ExampleOptionListCloseWindow => "Fechar a janela",
+                Key::ExampleOptionListHideWindow => "Ocultar a janela",
+                Key::ExampleOptionListClosePage => "Fechar a página",
                 Key::ExampleMatchTextQuery => {
                     "A consulta `gro t b` encontrou os dois nomes. Cada palavra dela marca os próprios caracteres, no próprio tom."
                 }
@@ -24174,6 +24778,114 @@ impl Locale {
                 Key::ComponentNumberInputKeyHomeEndAction => {
                     "Vai ao `min` e ao `max`, onde eles são declarados."
                 }
+                Key::ComponentOptionGroupGuidance => {
+                    "Use um grupo de opções para um trecho nomeado de opções dentro de uma `OptionList`, como os comandos de um plugin. Um grupo sem nenhuma opção à mostra não ocupa espaço."
+                }
+                Key::ComponentOptionGroupA11yNotes => {
+                    "O grupo é um `role=\"group\"` nomeado por `aria-label`. O nome visível leva `aria-hidden`, então o leitor de tela o lê uma vez, como o nome do grupo."
+                }
+                Key::ComponentOptionGroupPropLabelDoc => {
+                    "O nome do grupo, mostrado acima das opções dele e lido como o nome do grupo. Obrigatório."
+                }
+                Key::ComponentOptionGroupPropChildrenDoc => "Os `OptionItem`s do grupo.",
+                Key::ComponentOptionItemGuidance => {
+                    "Use um item de opção para uma linha de uma `OptionList`: um nome, e o que a pessoa precisa ao lado dele para escolher. **O nome é uma prop**, para que os caracteres casados sejam marcados sem tocar em mais nada na linha."
+                }
+                Key::ComponentOptionItemA11yNotes => {
+                    "A linha é um `role=\"option\"`, e o nome dela é a tecla, o nome e a segunda linha lidos nessa ordem. A linha ativa é desenhada com uma barra na borda inicial além de um preenchimento, e a linha selecionada com um tique."
+                }
+                Key::ComponentOptionItemPropValueDoc => {
+                    "O que esta opção *é*, como um script a encontra. Os eventos da lista o carregam, e ele nunca é traduzido. **Obrigatório**."
+                }
+                Key::ComponentOptionItemPropLabelDoc => {
+                    "O nome da opção. Texto e não filhos, porque `hits` marca caracteres nele por posição. Obrigatório."
+                }
+                Key::ComponentOptionItemPropHitsDoc => {
+                    "Os caracteres de `label` que uma consulta casou, na gramática do `MatchText`: um espaço para cada palavra, unidos por `|`. Deixe de fora numa lista que não é filtrada."
+                }
+                Key::ComponentOptionItemPropDetailDoc => {
+                    "Uma segunda linha, menor, embaixo do nome, dizendo o que a opção faz. Ela faz parte do nome acessível da opção."
+                }
+                Key::ComponentOptionItemPropDetailHitsDoc => {
+                    "Os caracteres de `detail` que uma consulta casou, na mesma gramática de `hits`. Use onde a segunda linha é o campo que uma palavra casou."
+                }
+                Key::ComponentOptionItemPropShortcutDoc => {
+                    "A tecla que aciona esta opção, como texto simples na fonte monoespaçada. É uma dica. Quem chama liga a tecla."
+                }
+                Key::ComponentOptionItemPropIconDoc => {
+                    "Um desenho antes do nome. É decorativo, e o nome ao lado é o que o leitor de tela lê."
+                }
+                Key::ComponentOptionItemPropIdDoc => {
+                    "O id da opção, para quem chama e escreve `aria-activedescendant` por conta própria. Deixe de fora e o script numera as opções."
+                }
+                Key::ComponentOptionItemPropActiveDoc => {
+                    "Se o teclado está nesta opção. No máximo uma opção por lista. O script a move com as setas e aponta `aria-activedescendant` para ela."
+                }
+                Key::ComponentOptionItemPropSelectedDoc => {
+                    "Se esta opção é a resposta que a lista guarda. Escreve `aria-selected` e desenha um tique, então a escolha não é mostrada só pela cor."
+                }
+                Key::ComponentOptionItemPropDisabledDoc => {
+                    "Impede que a opção seja escolhida e a mantém no percurso das setas. Escreve `aria-disabled`, então a opção é anunciada como indisponível em vez de ausente."
+                }
+                Key::ComponentOptionListGuidance => {
+                    "Use uma lista de opções para uma lista que a pessoa percorre e aciona pelo teclado. Uma lista de comandos e um menu de atalhos são duas. Para um valor num formulário, use `Select`. Para uma lista de páginas, use `Search`, cujas linhas são links."
+                }
+                Key::ComponentOptionListA11yNotes => {
+                    "A lista é um `role=\"listbox\"` e cada opção um `role=\"option\"`. A opção ativa é nomeada por `aria-activedescendant` em quem tem o foco, então o foco nunca entra na lista. A frase de lista vazia é um `role=\"status\"`."
+                }
+                Key::ComponentOptionListPropNameDoc => {
+                    "Do que esta lista é, como um script a encontra. O listbox recebe o id `nd-option-list-` seguido deste nome, que é o que outro controle escreve em `aria-controls`. **Obrigatório**."
+                }
+                Key::ComponentOptionListPropLabelDoc => {
+                    "O nome da lista. Obrigatório, porque um `listbox` sem nome dá ao leitor de tela só as palavras *caixa de listagem*."
+                }
+                Key::ComponentOptionListPropLayoutDoc => {
+                    "Como as opções são dispostas: `rows`, uma embaixo da outra, ou `columns`, que preenche a largura com quantas colunas couberem. `columns` serve a um menu de entradas curtas, cada uma com uma tecla e um nome."
+                }
+                Key::ComponentOptionListPropSizeDoc => {
+                    "A altura de uma opção: `small`, `medium` ou `large`. Opções são alvos, então os três valores passam do mínimo de 24px da WCAG 2.5.8."
+                }
+                Key::ComponentOptionListPropFocusableDoc => {
+                    "Se a lista é uma parada de tabulação. Desligue onde outro controle mantém o foco e nomeia esta lista em `aria-controls`. As setas desse controle passam então a percorrer as opções."
+                }
+                Key::ComponentOptionListPropEmptyLabelDoc => {
+                    "O que a lista diz quando não tem nenhuma opção. Defina onde a lista é filtrada, porque um filtro que deixa um espaço vazio não disse que nada casou."
+                }
+                Key::ComponentOptionListPropChildrenDoc => {
+                    "As opções: `OptionItem`s, `OptionGroup`s, ou os dois."
+                }
+                Key::ComponentOptionListKeyDownArrowUpArrowName => {
+                    "Seta para baixo / Seta para cima"
+                }
+                Key::ComponentOptionListKeyDownArrowUpArrowAction => {
+                    "Vai para a opção seguinte e a anterior, e para nas pontas. O foco fica onde está."
+                }
+                Key::ComponentOptionListKeyLeftArrowRightArrowName => {
+                    "Seta para a esquerda / Seta para a direita"
+                }
+                Key::ComponentOptionListKeyLeftArrowRightArrowAction => {
+                    "Vai para a opção ao lado da ativa, na coluna seguinte. Precisa de `columns` e do foco na lista."
+                }
+                Key::ComponentOptionListKeyHomeEndName => "Home / End",
+                Key::ComponentOptionListKeyHomeEndAction => {
+                    "Vai para a primeira e a última opção. A partir de outro controle, segure também Control ou Command."
+                }
+                Key::ComponentOptionListKeyPageUpPageDownName => "Page Up / Page Down",
+                Key::ComponentOptionListKeyPageUpPageDownAction => {
+                    "Move uma página medida de opções, e para nas pontas."
+                }
+                Key::ComponentOptionListKeyEnterName => "Enter",
+                Key::ComponentOptionListKeyEnterAction => {
+                    "Escolhe a opção ativa. Uma opção desabilitada continua ativa e não é escolhida."
+                }
+                Key::ComponentOptionListKeySpaceName => "Espaço",
+                Key::ComponentOptionListKeySpaceAction => {
+                    "Escolhe a opção ativa. Precisa do foco na lista, já que em outro controle digita um espaço."
+                }
+                Key::ComponentOptionListKeyAPrintableCharacterName => "Um caractere imprimível",
+                Key::ComponentOptionListKeyAPrintableCharacterAction => {
+                    "Pula para a próxima opção cujo nome começa com as letras digitadas. Precisa do foco na lista."
+                }
                 Key::ComponentOtpFieldGuidance => {
                     "Use um campo de código para um código curto que a pessoa copia de outro lugar, como os seis dígitos de uma mensagem. Para algo que ela redige, use `Input`. As caixas são um retrato do código, nunca uma forma obrigatória."
                 }
@@ -26169,6 +26881,12 @@ impl Locale {
                 Key::PageMenuBody => {
                     "⟦AA meenuu aand iits iiteems. Thee buuttoon thaat oopeens oonee iis aa `Buuttoon` wiith `meenuu` aand `coontrools`. EEveerythiing aafteer thee preess iis `diist/meenuu.js`: thee aanchooriing, thee aarroow waalk, thee leetteer thaat juumps, EEscaapee, aand thee foocuus reetuurniing too thee buuttoon.⟧"
                 }
+                Key::PageOptionListSummary => {
+                    "⟦Leet uuseers waalk aa liist oof ooptiioons wiith thee keeybooaard aand choooosee oonee.⟧"
+                }
+                Key::PageOptionListBody => {
+                    "⟦Thee liist, aa naameed ruun oof ooptiioons, aand oonee ooptiioon. Thee foocuus staays oon oonee eeleemeent aand `aariiaa-aactiiveedeesceendaant` naamees thee aactiivee ooptiioon. Thee liist choooosees noothiing iitseelf. IIt saays whiich ooptiioon waas aaskeed foor, iin aan eeveent.⟧"
+                }
                 Key::PageTreeSummary => {
                     "⟦Leet uuseers waalk aa hiieeraarchy, oopeeniing, cloosiing aand choooosiing noodees iin iit.⟧"
                 }
@@ -26576,6 +27294,15 @@ impl Locale {
                 }
                 Key::ComponentMatchTextSummary => {
                     "⟦Shoow aa naamee wiith thee chaaraacteers aa quueery maatcheed maarkeed, oonee stylee foor eeaach woord oof thee quueery.⟧"
+                }
+                Key::ComponentOptionGroupSummary => {
+                    "⟦Naamee aa ruun oof ooptiioons iinsiidee aan ooptiioon liist.⟧"
+                }
+                Key::ComponentOptionItemSummary => {
+                    "⟦Plaacee oonee ooptiioon iin aan ooptiioon liist: iits naamee, iits keey aand whaat iit dooees.⟧"
+                }
+                Key::ComponentOptionListSummary => {
+                    "⟦Leet uuseers waalk aa liist oof ooptiioons wiith thee keeybooaard aand choooosee oonee.⟧"
                 }
                 Key::ComponentParagraphSummary => "⟦Reendeer aa paaraagraaph oof proosee.⟧",
                 Key::ComponentProseSummary => {
@@ -27263,6 +27990,73 @@ impl Locale {
                 Key::ExampleMarkSearch => {
                     "⟦Thee weeiight chaangees aas weell aas thee baackgroouund, soo aa hiit caan bee foouund wiithoouut reelyiing oon cooloouur.⟧"
                 }
+                Key::ExampleOptionListOverview => {
+                    "⟦Thee woords `wiin cloo` weeree typeed. EEaach roow maarks whaat eeaach woord maatcheed oon iits naamee, aand thee baar iis wheeree thee keeybooaard iis.⟧"
+                }
+                Key::ExampleOptionListWalk => {
+                    "⟦Taab too thee liist, theen uusee thee aarroows. EEnteer choooosees, aand thee liist saays soo iin aan `nd-ooptiioon-choooosee` eeveent.⟧"
+                }
+                Key::ExampleOptionListColumns => {
+                    "⟦`cooluumns` fiills thee wiidth, doown aand theen aacrooss. EEaach eentry iis aa keey aand aa naamee, wiith noothiing draawn aaroouund theem.⟧"
+                }
+                Key::ExampleOptionListDriven => {
+                    "⟦Thee boox naamees thee liist iin `aariiaa-coontrools`. Thee foocuus staays iin thee boox, aand iits aarroows moovee throouugh thee ooptiioons.⟧"
+                }
+                Key::ExampleOptionListNothing => {
+                    "⟦AA liist wiith noo ooptiioon shoows `eempty_laabeel`, iin aa `roolee=\"staatuus\"`.⟧"
+                }
+                Key::ExampleOptionGroupRun => {
+                    "⟦AA groouup iis aa `roolee=\"groouup\"` naameed by iits laabeel. IIts ooptiioons aaree stiill thee ooptiioons oof thee oonee liist.⟧"
+                }
+                Key::ExampleOptionItemRow => {
+                    "⟦`deetaaiil` iis aa seecoond liinee uundeer thee naamee, aand paart oof whaat aa screeeen reeaadeer reeaads foor thee ooptiioon.⟧"
+                }
+                Key::ExampleOptionItemHits => {
+                    "⟦`hiits` maarks thee chaaraacteers oof thee naamee aa quueery maatcheed, iin thee graammaar oof `MaatchTeext`.⟧"
+                }
+                Key::ExampleOptionItemDetailHits => {
+                    "⟦Thee quueery waas `wiin eex`. Thee seecoond woord maatcheed aa taag, soo thee taags aaree thee seecoond liinee aand `deetaaiil_hiits` maarks theem.⟧"
+                }
+                Key::ExampleOptionItemShortcut => {
+                    "⟦`shoortcuut` iis plaaiin moonoospaacee teext. IIt iis fiirst iin thee maarkuup, soo iit iis reeaad beefooree thee naamee.⟧"
+                }
+                Key::ExampleOptionItemStates => {
+                    "⟦`aactiivee` iis wheeree thee keeybooaard iis, `seeleecteed` iis thee aansweer aand draaws aa tiick, aand `diisaableed` iis reeaacheed aand noot chooseen.⟧"
+                }
+                Key::ExampleOptionListKeySpace => "⟦Spaacee⟧",
+                Key::ExampleOptionListKeyS => "⟦s⟧",
+                Key::ExampleOptionListKeyH => "⟦h⟧",
+                Key::ExampleOptionListKeyD => "⟦d⟧",
+                Key::ExampleOptionListKeyQ => "⟦q⟧",
+                Key::ExampleOptionGroupMixed => {
+                    "⟦OOptiioons oouutsiidee aany groouup siit beesiidee thee groouups, iin thee oordeer theey aaree wriitteen.⟧"
+                }
+                Key::ExampleOptionGroupColumns => {
+                    "⟦IIn cooluumns aa groouup's naamee staays wiith iits fiirst ooptiioon, aat thee heeaad oof thee saamee cooluumn.⟧"
+                }
+                Key::ExampleOptionGroupFiltered => {
+                    "⟦AA groouup draaws oonly thee ooptiioons iits caalleer reendeereed. OOnee wiith noonee shoowiing taakees noo roooom.⟧"
+                }
+                Key::ExampleOptionListCommands => "⟦Coommaands⟧",
+                Key::ExampleOptionListMenu => "⟦Shoortcuuts⟧",
+                Key::ExampleOptionListFilter => "⟦Fiilteer thee coommaands⟧",
+                Key::ExampleOptionListEmpty => "⟦Noo coommaand maatchees.⟧",
+                Key::ExampleOptionListSettings => "⟦Seettiings⟧",
+                Key::ExampleOptionListSettingsDetail => {
+                    "⟦Chaangee hoow thee iinteerfaacee looooks aand beehaavees.⟧"
+                }
+                Key::ExampleOptionListHelp => "⟦Heelp⟧",
+                Key::ExampleOptionListHelpDetail => {
+                    "⟦Reeaad hoow eeaach paart oof thee iinteerfaacee woorks.⟧"
+                }
+                Key::ExampleOptionListSidebar => "⟦Siideebaar⟧",
+                Key::ExampleOptionListDev => "⟦Deeveeloopeer tooools⟧",
+                Key::ExampleOptionListShortcuts => "⟦Thiis paagee’s shoortcuuts⟧",
+                Key::ExampleOptionListGroupWindow => "⟦Wiindoow⟧",
+                Key::ExampleOptionListGroupPage => "⟦Paagee⟧",
+                Key::ExampleOptionListCloseWindow => "⟦Cloosee thee wiindoow⟧",
+                Key::ExampleOptionListHideWindow => "⟦Hiidee thee wiindoow⟧",
+                Key::ExampleOptionListClosePage => "⟦Cloosee thee paagee⟧",
                 Key::ExampleMatchTextQuery => {
                     "⟦Thee quueery `groo t b` foouund booth naamees. EEaach woord oof iit maarks iits oown chaaraacteers, iin iits oown toonee.⟧"
                 }
@@ -31079,6 +31873,116 @@ impl Locale {
                 Key::ComponentNumberInputKeyHomeEndName => "⟦Hoomee / EEnd⟧",
                 Key::ComponentNumberInputKeyHomeEndAction => {
                     "⟦Moovees too `miin` aand too `maax`, wheeree thoosee aaree deeclaareed.⟧"
+                }
+                Key::ComponentOptionGroupGuidance => {
+                    "⟦UUsee aan ooptiioon groouup foor aa naameed ruun oof ooptiioons iinsiidee aan `OOptiioonLiist`, suuch aas thee coommaands oof oonee pluugiin. AA groouup wiith noo ooptiioon shoowiing taakees noo roooom.⟧"
+                }
+                Key::ComponentOptionGroupA11yNotes => {
+                    "⟦Thee groouup iis aa `roolee=\"groouup\"` naameed by `aariiaa-laabeel`. Thee viisiiblee naamee caarriiees `aariiaa-hiiddeen`, soo aa screeeen reeaadeer reeaads iit ooncee, aas thee groouup's naamee.⟧"
+                }
+                Key::ComponentOptionGroupPropLabelDoc => {
+                    "⟦Thee naamee oof thee groouup, shoown aaboovee iits ooptiioons aand reeaad aas thee groouup's naamee. Reequuiireed.⟧"
+                }
+                Key::ComponentOptionGroupPropChildrenDoc => {
+                    "⟦Thee `OOptiioonIIteem`s iin thee groouup.⟧"
+                }
+                Key::ComponentOptionItemGuidance => {
+                    "⟦UUsee aan ooptiioon iiteem foor oonee roow oof aan `OOptiioonLiist`: aa naamee, aand whaat aa reeaadeer neeeeds beesiidee iit too choooosee. **IIts naamee iis aa proop**, soo thee maatcheed chaaraacteers caan bee maarkeed wiithoouut toouuchiing aanythiing eelsee iin thee roow.⟧"
+                }
+                Key::ComponentOptionItemA11yNotes => {
+                    "⟦Thee roow iis aa `roolee=\"ooptiioon\"`, aand iits naamee iis thee keey, thee naamee aand thee seecoond liinee reeaad iin thaat oordeer. Thee aactiivee roow iis draawn wiith aa baar oon iits leeaadiing eedgee aas weell aas aa fiill, aand thee seeleecteed roow wiith aa tiick.⟧"
+                }
+                Key::ComponentOptionItemPropValueDoc => {
+                    "⟦Whaat thiis ooptiioon *iis*, aas aa scriipt fiinds iit. Thee liist's eeveents caarry iit, aand iit iis neeveer traanslaateed. **Reequuiireed**.⟧"
+                }
+                Key::ComponentOptionItemPropLabelDoc => {
+                    "⟦Thee ooptiioon's naamee. Teext aand noot chiildreen, beecaauusee `hiits` maarks chaaraacteers iin iit by poosiitiioon. Reequuiireed.⟧"
+                }
+                Key::ComponentOptionItemPropHitsDoc => {
+                    "⟦Thee chaaraacteers oof `laabeel` aa quueery maatcheed, iin `MaatchTeext`'s graammaar: oonee sloot foor eeaach woord, jooiineed by `|`. Leeaavee iit oouut foor aa liist thaat iis noot fiilteereed.⟧"
+                }
+                Key::ComponentOptionItemPropDetailDoc => {
+                    "⟦AA seecoond, smaalleer liinee uundeer thee naamee, saayiing whaat thee ooptiioon dooees. IIt iis paart oof thee ooptiioon's aacceessiiblee naamee.⟧"
+                }
+                Key::ComponentOptionItemPropDetailHitsDoc => {
+                    "⟦Thee chaaraacteers oof `deetaaiil` aa quueery maatcheed, iin thee saamee graammaar aas `hiits`. UUsee iit wheeree thee seecoond liinee iis thee fiieeld aa woord maatcheed.⟧"
+                }
+                Key::ComponentOptionItemPropShortcutDoc => {
+                    "⟦Thee keey thaat aacts oon thiis ooptiioon, aas plaaiin teext iin thee moonoospaacee faacee. IIt iis aa hiint. Thee caalleer biinds thee keey.⟧"
+                }
+                Key::ComponentOptionItemPropIconDoc => {
+                    "⟦AA draawiing beefooree thee naamee. IIt iis deecooraatiivee, aand thee naamee beesiidee iit iis whaat aa screeeen reeaadeer reeaads.⟧"
+                }
+                Key::ComponentOptionItemPropIdDoc => {
+                    "⟦Thee ooptiioon's iid, foor aa caalleer thaat wriitees `aariiaa-aactiiveedeesceendaant` iitseelf. Leeaavee iit oouut aand thee scriipt nuumbeers thee ooptiioons.⟧"
+                }
+                Key::ComponentOptionItemPropActiveDoc => {
+                    "⟦Wheetheer thee keeybooaard iis oon thiis ooptiioon. OOnee ooptiioon oof aa liist aat moost. Thee scriipt moovees iit oon thee aarroow keeys aand pooiints `aariiaa-aactiiveedeesceendaant` aat iit.⟧"
+                }
+                Key::ComponentOptionItemPropSelectedDoc => {
+                    "⟦Wheetheer thiis ooptiioon iis thee aansweer thee liist hoolds. IIt wriitees `aariiaa-seeleecteed` aand draaws aa tiick, soo thee chooiicee iis noot shoown by cooloouur aaloonee.⟧"
+                }
+                Key::ComponentOptionItemPropDisabledDoc => {
+                    "⟦Stoops thee ooptiioon beeiing chooseen aand keeeeps iit iin thee aarroow waalk. IIt wriitees `aariiaa-diisaableed`, soo thee ooptiioon iis aannoouunceed aas uunaavaaiilaablee iinsteeaad oof miissiing.⟧"
+                }
+                Key::ComponentOptionListGuidance => {
+                    "⟦UUsee aan ooptiioon liist foor aa liist uuseers waalk aand aact oon wiith thee keeybooaard. AA liist oof coommaands aand aa meenuu oof shoortcuuts aaree twoo. Foor aa vaaluuee iin aa foorm, uusee `Seeleect`. Foor aa liist oof paagees, uusee `Seeaarch`, whoosee roows aaree liinks.⟧"
+                }
+                Key::ComponentOptionListA11yNotes => {
+                    "⟦Thee liist iis aa `roolee=\"liistboox\"` aand eeaach ooptiioon aa `roolee=\"ooptiioon\"`. Thee aactiivee ooptiioon iis naameed by `aariiaa-aactiiveedeesceendaant` oon whaateeveer hoolds thee foocuus, soo thee foocuus neeveer moovees iintoo thee liist. Thee eempty seenteencee iis aa `roolee=\"staatuus\"`.⟧"
+                }
+                Key::ComponentOptionListPropNameDoc => {
+                    "⟦Whaat thiis liist iis oof, aas aa scriipt fiinds iit. Thee liistboox taakees thee iid `nd-ooptiioon-liist-` foollooweed by thiis naamee, whiich iis whaat aanootheer coontrool wriitees iin `aariiaa-coontrools`. **Reequuiireed**.⟧"
+                }
+                Key::ComponentOptionListPropLabelDoc => {
+                    "⟦Thee naamee oof thee liist. Reequuiireed, beecaauusee aa `liistboox` wiith noo naamee giivees aa screeeen reeaadeer oonly thee woord *liist boox*.⟧"
+                }
+                Key::ComponentOptionListPropLayoutDoc => {
+                    "⟦Hoow thee ooptiioons aaree laaiid oouut: `roows`, oonee uundeer aanootheer, oor `cooluumns`, whiich fiills thee wiidth wiith aas maany cooluumns aas fiit. `cooluumns` suuiits aa meenuu oof shoort eentriiees, eeaach aa keey aand aa naamee.⟧"
+                }
+                Key::ComponentOptionListPropSizeDoc => {
+                    "⟦Thee heeiight oof aan ooptiioon: `smaall`, `meediiuum` oor `laargee`. OOptiioons aaree taargeets, soo aall threeee cleeaar WCAAG 2.5.8's 24px miiniimuum.⟧"
+                }
+                Key::ComponentOptionListPropFocusableDoc => {
+                    "⟦Wheetheer thee liist iis aa taab stoop. Tuurn iit ooff wheeree aanootheer coontrool keeeeps thee foocuus aand naamees thiis liist iin `aariiaa-coontrools`. Thaat coontrool's aarroow keeys theen moovee throouugh thee ooptiioons.⟧"
+                }
+                Key::ComponentOptionListPropEmptyLabelDoc => {
+                    "⟦Whaat thee liist saays wheen iit hoolds noo ooptiioon. Seet iit wheereeveer thee liist iis fiilteereed, beecaauusee aa fiilteer thaat leeaavees aan eempty spaacee haas noot saaiid thaat noothiing maatcheed.⟧"
+                }
+                Key::ComponentOptionListPropChildrenDoc => {
+                    "⟦Thee ooptiioons: `OOptiioonIIteem`s, `OOptiioonGroouup`s, oor booth.⟧"
+                }
+                Key::ComponentOptionListKeyDownArrowUpArrowName => "⟦Doown aarroow / UUp aarroow⟧",
+                Key::ComponentOptionListKeyDownArrowUpArrowAction => {
+                    "⟦Moovees too thee neext aand thee preeviioouus ooptiioon, aand stoops aat thee eends. Thee foocuus staays wheeree iit iis.⟧"
+                }
+                Key::ComponentOptionListKeyLeftArrowRightArrowName => {
+                    "⟦Leeft aarroow / Riight aarroow⟧"
+                }
+                Key::ComponentOptionListKeyLeftArrowRightArrowAction => {
+                    "⟦Moovees too thee ooptiioon beesiidee thee aactiivee oonee, iin thee neext cooluumn. Neeeeds `cooluumns` aand thee foocuus iin thee liist.⟧"
+                }
+                Key::ComponentOptionListKeyHomeEndName => "⟦Hoomee / EEnd⟧",
+                Key::ComponentOptionListKeyHomeEndAction => {
+                    "⟦Moovees too thee fiirst aand thee laast ooptiioon. Froom aanootheer coontrool, hoold Coontrool oor Coommaand aas weell.⟧"
+                }
+                Key::ComponentOptionListKeyPageUpPageDownName => "⟦Paagee UUp / Paagee Doown⟧",
+                Key::ComponentOptionListKeyPageUpPageDownAction => {
+                    "⟦Moovees oonee meeaasuureed paagee oof ooptiioons, aand stoops aat thee eends.⟧"
+                }
+                Key::ComponentOptionListKeyEnterName => "⟦EEnteer⟧",
+                Key::ComponentOptionListKeyEnterAction => {
+                    "⟦Choooosees thee aactiivee ooptiioon. AA diisaableed ooptiioon staays aactiivee aand iis noot chooseen.⟧"
+                }
+                Key::ComponentOptionListKeySpaceName => "⟦Spaacee⟧",
+                Key::ComponentOptionListKeySpaceAction => {
+                    "⟦Choooosees thee aactiivee ooptiioon. Neeeeds thee foocuus iin thee liist, siincee iin aanootheer coontrool iit typees aa spaacee.⟧"
+                }
+                Key::ComponentOptionListKeyAPrintableCharacterName => {
+                    "⟦AA priintaablee chaaraacteer⟧"
+                }
+                Key::ComponentOptionListKeyAPrintableCharacterAction => {
+                    "⟦Juumps too thee neext ooptiioon whoosee naamee staarts wiith thee leetteers typeed. Neeeeds thee foocuus iin thee liist.⟧"
                 }
                 Key::ComponentOtpFieldGuidance => {
                     "⟦UUsee thiis foor aa shoort coodee aa reeaadeer coopiiees froom soomeewheeree eelsee, suuch aas thee siix diigiits iin aa teext meessaagee. Foor aanythiing aa reeaadeer coompoosees, uusee `IInpuut`. Thee booxees aaree aa piictuuree oof thee coodee aand neeveer aa shaapee iit haas too bee typeed iintoo.⟧"

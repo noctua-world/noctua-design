@@ -57,6 +57,9 @@ import { MenuItem } from "@noctua-world/design-react/components/menu_item.js";
 import { MessageBar } from "@noctua-world/design-react/components/message_bar.js";
 import { Meter } from "@noctua-world/design-react/components/meter.js";
 import { NumberInput } from "@noctua-world/design-react/components/number_input.js";
+import { OptionGroup } from "@noctua-world/design-react/components/option_group.js";
+import { OptionItem } from "@noctua-world/design-react/components/option_item.js";
+import { OptionList } from "@noctua-world/design-react/components/option_list.js";
 import { OtpField } from "@noctua-world/design-react/components/otp_field.js";
 import { Pagination } from "@noctua-world/design-react/components/pagination.js";
 import { Paragraph } from "@noctua-world/design-react/components/paragraph.js";
@@ -147,6 +150,9 @@ export const COMPONENTS = {
   MessageBar,
   Meter,
   NumberInput,
+  OptionGroup,
+  OptionItem,
+  OptionList,
   OtpField,
   Pagination,
   Paragraph,

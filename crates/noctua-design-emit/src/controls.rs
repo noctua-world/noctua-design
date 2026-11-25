@@ -40,6 +40,23 @@ const PLAIN_ICON: &str = "use noctua_design_icons::IconDrawing;\n\nuse crate::co
 /// The same, in JavaScript, where an icon is only ever an icon.
 const REACT_ICON: &str = "import { Icon } from \"./icon.js\";\n";
 
+/// A `MatchText` and a drawing, for the row whose name is one and whose tick
+/// is the other.
+const REACT_MATCH_ICON: &str = concat!(
+    "import { MatchText } from \"./match_text.js\";\n",
+    "\n",
+    "import { Icon } from \"./icon.js\";\n"
+);
+
+/// The menu and its item, for the control whose gap opens one.
+///
+/// A constant for the reason `REACT_SEGMENTED` is: the arm that wants it is one
+/// line long, in a match a lint already holds to a hundred.
+const REACT_MENU: &str = concat!(
+    "import { Menu } from \"./menu.js\";\n",
+    "import { MenuItem } from \"./menu_item.js\";\n"
+);
+
 /// A field that is a `<fieldset>`, for the two controls that are groups.
 const FIELD_GROUP: &str = "use crate::components::{Field, FieldKind, FieldSize};\n";
 
@@ -292,6 +309,9 @@ pub fn is_custom(component: &Component) -> bool {
             | "AILabel"
             | "Truncate"
             | "MatchText"
+            | "OptionList"
+            | "OptionGroup"
+            | "OptionItem"
     )
 }
 
@@ -337,6 +357,9 @@ pub fn dioxus_body(sink: &mut String, component: &Component) {
         "AILabel" => out.push_str(AI_LABEL_DIOXUS),
         "Truncate" => out.push_str(TRUNCATE_DIOXUS),
         "MatchText" => out.push_str(MATCH_TEXT_DIOXUS),
+        "OptionList" => out.push_str(OPTION_LIST_DIOXUS),
+        "OptionGroup" => out.push_str(OPTION_GROUP_DIOXUS),
+        "OptionItem" => out.push_str(OPTION_ITEM_DIOXUS),
         "Menu" => out.push_str(MENU_DIOXUS),
         "MenuItem" => out.push_str(MENU_ITEM_DIOXUS),
         "Meter" => out.push_str(METER_DIOXUS),
@@ -423,6 +446,9 @@ pub fn react_body(sink: &mut String, component: &Component) {
         "AILabel" => out.push_str(AI_LABEL_REACT),
         "Truncate" => out.push_str(TRUNCATE_REACT),
         "MatchText" => out.push_str(MATCH_TEXT_REACT),
+        "OptionList" => out.push_str(OPTION_LIST_REACT),
+        "OptionGroup" => out.push_str(OPTION_GROUP_REACT),
+        "OptionItem" => out.push_str(OPTION_ITEM_REACT),
         "Menu" => out.push_str(MENU_REACT),
         "MenuItem" => out.push_str(MENU_ITEM_REACT),
         "Meter" => out.push_str(METER_REACT),
@@ -3722,6 +3748,214 @@ const MATCH_TEXT_REACT: &str = r#"  const root = ["nd-match-text", className].fi
   );
 "#;
 
+// --- OptionList, OptionGroup and OptionItem ---------------------------------
+
+/// The list a reader walks with the keyboard and acts on.
+///
+/// # A `<div>` around the listbox
+///
+/// The root holds two things: the `role="listbox"` and the sentence a list
+/// with nothing in it says. A `<ul>` may hold neither a `<p>` nor a `status`,
+/// so the sentence is the listbox's sibling. The stylesheet shows it when no
+/// option is showing, and the `status` is on the page the whole time, so the
+/// sentence arriving in it is announced.
+///
+/// # The id is derived, and it is the caller's hook
+///
+/// `nd-option-list-{name}` is what a control that keeps the focus writes in
+/// `aria-controls`, and `dist/option-list.js` finds that control by it.
+///
+/// # `tabindex` is the `focusable` prop
+///
+/// A list that is its own tab stop carries `tabindex="0"` and no option does:
+/// the active option is named by `aria-activedescendant`, which the script
+/// writes. A list another control drives carries none, so a Tab walks past it.
+const OPTION_LIST_DIOXUS: &str = r#"    let root = format!("nd-option-list {class}");
+    let root = root.trim().to_owned();
+    let id = format!("nd-option-list-{name}");
+
+    rsx! {
+        div {
+            class: "{root}",
+            "data-nd-option-list": "{name}",
+            "data-nd-layout": layout.as_str(),
+            "data-nd-size": size.as_str(),
+            ul {
+                class: "nd-option-list-items",
+                id: "{id}",
+                role: "listbox",
+                "aria-label": "{label}",
+                tabindex: focusable.then_some("0"),
+                {children}
+            }
+            // On the page whether or not there is a sentence in it: a live
+            // region that arrives with its text is one nothing announces.
+            p { class: "nd-option-list-note", role: "status",
+                if let Some(words) = empty_label {
+                    span { class: "nd-option-list-empty", "{words}" }
+                }
+            }
+        }
+    }
+"#;
+
+/// The same list, in React.
+const OPTION_LIST_REACT: &str = r#"  const layout_ = layout ?? "rows";
+  const size_ = size ?? "medium";
+  const root = ["nd-option-list", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      "data-nd-option-list": name,
+      "data-nd-layout": layout_,
+      "data-nd-size": size_,
+      ...rest,
+    },
+    h(
+      "ul",
+      {
+        key: "l",
+        className: "nd-option-list-items",
+        id: `nd-option-list-${name}`,
+        role: "listbox",
+        "aria-label": label,
+        tabIndex: (focusable ?? true) ? 0 : undefined,
+      },
+      children,
+    ),
+    // See the Dioxus half: the region is there before its sentence is.
+    h(
+      "p",
+      { key: "n", className: "nd-option-list-note", role: "status" },
+      emptyLabel ? h("span", { className: "nd-option-list-empty" }, emptyLabel) : null,
+    ),
+  );
+"#;
+
+/// A named run of options.
+///
+/// `SearchGroup`'s shape, with the roles in the markup: the `<li>` is the
+/// `group` and carries the name, the inner list is `none`, and the words a
+/// sighted reader sees are hidden from the accessible tree so the name is read
+/// once rather than twice.
+const OPTION_GROUP_DIOXUS: &str = r#"    let root = format!("nd-option-group {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        li { class: "{root}", role: "group", "aria-label": "{label}",
+            p { class: "nd-option-group-label", "aria-hidden": "true", "{label}" }
+            ul { class: "nd-option-group-list", role: "none", {children} }
+        }
+    }
+"#;
+
+/// The same group, in React.
+const OPTION_GROUP_REACT: &str = r#"  return h(
+    "li",
+    {
+      className: ["nd-option-group", className].filter(Boolean).join(" "),
+      role: "group",
+      "aria-label": label,
+      ...rest,
+    },
+    h("p", { key: "l", className: "nd-option-group-label", "aria-hidden": "true" }, label),
+    h("ul", { key: "u", className: "nd-option-group-list", role: "none" }, children),
+  );
+"#;
+
+/// One option.
+///
+/// # The key comes first in the markup
+///
+/// An option's accessible name is its content, in order, so the key is read
+/// before the name: *s, Settings*. A list laid out in rows draws the key at the
+/// trailing edge, and the stylesheet does that with `order`, which moves what a
+/// reader sees and leaves what a screen reader hears.
+///
+/// # The name is a `MatchText`, always
+///
+/// With no `hits` it draws the name alone. One element whether or not the list
+/// is filtered means typing the first letter of a query changes what is marked
+/// and never what the row is built from.
+///
+/// # The tick is in the markup only while the option is selected
+///
+/// A list of four hundred commands has no selected row and owes no four
+/// hundred hidden drawings. Selection is the caller's to render, so the tick
+/// arrives with the prop.
+const OPTION_ITEM_DIOXUS: &str = r#"    let root = format!("nd-option-item {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        li {
+            class: "{root}",
+            role: "option",
+            id,
+            "data-nd-value": "{value}",
+            "data-nd-active": active.then_some("true"),
+            "aria-selected": selected.then_some("true"),
+            "aria-disabled": disabled.then_some("true"),
+            if let Some(shortcut) = shortcut {
+                span { class: "nd-option-item-shortcut", "{shortcut}" }
+            }
+            if let Some(icon) = icon {
+                Icon { icon, size: IconSize::Small }
+            }
+            span { class: "nd-option-item-text",
+                MatchText { class: "nd-option-item-label", text: label, hits }
+                if let Some(detail) = detail {
+                    MatchText { class: "nd-option-item-detail", text: detail, hits: detail_hits }
+                }
+            }
+            if selected {
+                // The half of `aria-selected` that is not a colour.
+                span { class: "nd-option-item-mark",
+                    Icon { icon: IconDrawing::CHECK, size: IconSize::Small }
+                }
+            }
+        }
+    }
+"#;
+
+/// The same option, in React.
+const OPTION_ITEM_REACT: &str = r#"  const root = ["nd-option-item", className].filter(Boolean).join(" ");
+
+  return h(
+    "li",
+    {
+      className: root,
+      role: "option",
+      id,
+      "data-nd-value": value,
+      "data-nd-active": active ? "true" : undefined,
+      "aria-selected": selected ? "true" : undefined,
+      "aria-disabled": disabled ? "true" : undefined,
+      ...rest,
+    },
+    shortcut ? h("span", { key: "k", className: "nd-option-item-shortcut" }, shortcut) : null,
+    icon ? h(Icon, { key: "i", icon, size: "small" }) : null,
+    h(
+      "span",
+      { key: "t", className: "nd-option-item-text" },
+      h(MatchText, { key: "l", className: "nd-option-item-label", text: label, hits }),
+      detail
+        ? h(MatchText, {
+            key: "d",
+            className: "nd-option-item-detail",
+            text: detail,
+            hits: detailHits,
+          })
+        : null,
+    ),
+    // See the Dioxus half: the half of `aria-selected` that is not a colour.
+    selected
+      ? h("span", { key: "m", className: "nd-option-item-mark" }, h(Icon, { icon: check, size: "small" }))
+      : null,
+  );
+"#;
+
 // --- Menu and MenuItem ------------------------------------------------------
 
 /// The surface a button opens, and the actions on it.
@@ -4698,6 +4932,10 @@ pub fn dioxus_imports(component: &Component) -> String {
         // hidden and nameless — its name arrives from the tree's own
         // `expand_label` once the script knows which state it is in.
         "TreeItem" => beside_icon("Icon, Tag, TagSize, TagVariant"),
+        // A ROW RENDERS A COMPONENT: its name is a real `MatchText`, so the one
+        // primitive that cuts a name into matched runs is the one every list
+        // draws with (`NOCTUA.md §12.4`).
+        "OptionItem" => beside_icon("Icon, IconSize, MatchText"),
         // IT SHIPS A `Tag` FOR THE SCRIPT TO CLONE. A second place that knows
         // what a tag's markup looks like would drift from the emitter, which
         // is the whole thing this generator exists to prevent — so the picker
@@ -4826,12 +5064,9 @@ pub fn react_imports(component: &Component) -> String {
             "import { Icon } from \"./icon.js\";\n"
         )
         .to_owned(),
+        "OptionItem" => REACT_MATCH_ICON.to_owned(),
         // The same menu in the other language — see the Dioxus half.
-        "Pagination" => concat!(
-            "import { Menu } from \"./menu.js\";\n",
-            "import { MenuItem } from \"./menu_item.js\";\n"
-        )
-        .to_owned(),
+        "Pagination" => REACT_MENU.to_owned(),
         "Table" => concat!(
             "import { Button } from \"./button.js\";\n",
             "\n",
@@ -4942,8 +5177,9 @@ pub fn react_imports(component: &Component) -> String {
 /// through `IconDrawing::parse` and rendered nothing for a name nothing declares;
 /// React handed the string to `Icon`, which throws. One list, so a component
 /// cannot be in two of the three.
-const TYPED_ICONS: [&str; 12] = [
+const TYPED_ICONS: [&str; 13] = [
     "Button",
+    "OptionItem",
     // IT WAS THE LAST ONE HOLDING A NAME. `MenuItem.icon` was a `String` run
     // through `IconDrawing::parse` at render time, so a name nothing declares
     // drew nothing and said nothing — the exact failure the type exists to make

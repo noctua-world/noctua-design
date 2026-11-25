@@ -154,6 +154,7 @@ import { enhanceModels, releaseModels } from "./model.js";
 import { enhanceSelects, releaseSelects } from "./select.js";
 import { enhanceTagPickers, releaseTagPickers } from "./tag-picker.js";
 import { enhanceTrees, releaseTrees } from "./tree.js";
+import { enhanceOptionLists, releaseOptionLists } from "./option-list.js";
 import { enhanceTabs, releaseTabs } from "./tabs.js";
 import { enhanceDateInputs, releaseDateInputs } from "./date-input.js";
 import { enhanceSearches, releaseSearches } from "./search.js";
@@ -1648,6 +1649,7 @@ export function enhanceAll(root = document) {
   enhanceSearches(root);
   enhanceTagPickers(root);
   enhanceTrees(root);
+  enhanceOptionLists(root);
   collapseBlocks(root);
   enhanceDateInputs(root);
   enhanceDatePickers(root);
@@ -1815,6 +1817,7 @@ export function releaseAll(root = document) {
   // nothing: it reads the declared cap and writes one attribute on the block,
   // which goes when the block does. The gap is named here rather than filled
   // with an empty function, so the two lists still read against each other.
+  releaseOptionLists(root);
   releaseTrees(root);
   releaseTagPickers(root);
   releaseSearches(root);

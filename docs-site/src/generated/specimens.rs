@@ -6608,6 +6608,346 @@ const NUMBER_INPUT_SIZE_LARGE: &[Node] = &[Node::Element {
     ],
 }];
 
+/// `OptionList.layout` at `rows`.
+const OPTION_LIST_LAYOUT_ROWS: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("layout")),
+                ("data-nd-slug", Value::Text("option-list")),
+            ],
+            children: &[Node::Component {
+                name: "OptionList",
+                props: &[
+                    ("name", Value::Text("nd-variant-option-list-layout-rows")),
+                    ("label", Value::Text("OptionList")),
+                    ("layout", Value::Text("rows")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("shortcut", Value::Data("A")),
+                            ("active", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("shortcut", Value::Data("B")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("shortcut", Value::Data("C")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-option-list-layout-rows")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("rows"))],
+            }],
+        },
+    ],
+}];
+
+/// `OptionList.layout` at `columns`.
+const OPTION_LIST_LAYOUT_COLUMNS: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("layout")),
+                ("data-nd-slug", Value::Text("option-list")),
+            ],
+            children: &[Node::Component {
+                name: "OptionList",
+                props: &[
+                    ("name", Value::Text("nd-variant-option-list-layout-columns")),
+                    ("label", Value::Text("OptionList")),
+                    ("layout", Value::Text("columns")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("shortcut", Value::Data("A")),
+                            ("active", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("shortcut", Value::Data("B")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("shortcut", Value::Data("C")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-option-list-layout-columns")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("columns"))],
+            }],
+        },
+    ],
+}];
+
+/// `OptionList.size` at `small`.
+const OPTION_LIST_SIZE_SMALL: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("size")),
+                ("data-nd-slug", Value::Text("option-list")),
+            ],
+            children: &[Node::Component {
+                name: "OptionList",
+                props: &[
+                    ("name", Value::Text("nd-variant-option-list-size-small")),
+                    ("label", Value::Text("OptionList")),
+                    ("size", Value::Text("small")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("shortcut", Value::Data("A")),
+                            ("active", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("shortcut", Value::Data("B")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("shortcut", Value::Data("C")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-option-list-size-small")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("small"))],
+            }],
+        },
+    ],
+}];
+
+/// `OptionList.size` at `medium`.
+const OPTION_LIST_SIZE_MEDIUM: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("size")),
+                ("data-nd-slug", Value::Text("option-list")),
+            ],
+            children: &[Node::Component {
+                name: "OptionList",
+                props: &[
+                    ("name", Value::Text("nd-variant-option-list-size-medium")),
+                    ("label", Value::Text("OptionList")),
+                    ("size", Value::Text("medium")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("shortcut", Value::Data("A")),
+                            ("active", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("shortcut", Value::Data("B")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("shortcut", Value::Data("C")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-option-list-size-medium")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("medium"))],
+            }],
+        },
+    ],
+}];
+
+/// `OptionList.size` at `large`.
+const OPTION_LIST_SIZE_LARGE: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("size")),
+                ("data-nd-slug", Value::Text("option-list")),
+            ],
+            children: &[Node::Component {
+                name: "OptionList",
+                props: &[
+                    ("name", Value::Text("nd-variant-option-list-size-large")),
+                    ("label", Value::Text("OptionList")),
+                    ("size", Value::Text("large")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("shortcut", Value::Data("A")),
+                            ("active", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("shortcut", Value::Data("B")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("shortcut", Value::Data("C")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-option-list-size-large")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("large"))],
+            }],
+        },
+    ],
+}];
+
 /// `OtpField.kind` at `numeric`.
 const OTP_FIELD_KIND_NUMERIC: &[Node] = &[Node::Element {
     tag: "figure",
@@ -13525,6 +13865,11 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("NumberInput", "size", "small") => NUMBER_INPUT_SIZE_SMALL,
         ("NumberInput", "size", "medium") => NUMBER_INPUT_SIZE_MEDIUM,
         ("NumberInput", "size", "large") => NUMBER_INPUT_SIZE_LARGE,
+        ("OptionList", "layout", "rows") => OPTION_LIST_LAYOUT_ROWS,
+        ("OptionList", "layout", "columns") => OPTION_LIST_LAYOUT_COLUMNS,
+        ("OptionList", "size", "small") => OPTION_LIST_SIZE_SMALL,
+        ("OptionList", "size", "medium") => OPTION_LIST_SIZE_MEDIUM,
+        ("OptionList", "size", "large") => OPTION_LIST_SIZE_LARGE,
         ("OtpField", "kind", "numeric") => OTP_FIELD_KIND_NUMERIC,
         ("OtpField", "kind", "alphanumeric") => OTP_FIELD_KIND_ALPHANUMERIC,
         ("OtpField", "size", "small") => OTP_FIELD_SIZE_SMALL,

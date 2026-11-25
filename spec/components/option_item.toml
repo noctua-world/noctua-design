@@ -1,0 +1,82 @@
+guidance = """
+Use an option item for one row of an `OptionList`: a name, and what a reader
+needs beside it to choose. **Its name is a prop**, so the matched characters can
+be marked without touching anything else in the row.
+"""
+
+[meta]
+name = "OptionItem"
+element = "li"
+class = "nd-option-item"
+page = "option-list"
+summary = "Place one option in an option list: its name, its key and what it does."
+
+# THE ACTIVE OPTION AND THE SELECTED OPTION ARE TWO THINGS.
+#
+# `active` is where the keyboard is, and it moves on every arrow. `selected` is
+# the answer the list holds, and it moves when the caller says so. A list of
+# commands has an active row and no selected one. A list of settings pages has
+# one of each, usually on different rows. Painting them alike makes moving look
+# like choosing, which is the misreading `Select` draws them apart to prevent.
+#
+# AN OPTION HOLDS NO CONTROL. A `role="option"` is driven by
+# `aria-activedescendant`, so nothing inside it can ever take the focus.
+
+[prop.value]
+type = "text"
+required = true
+attribute = "data-nd-value"
+doc = "What this option *is*, as a script finds it. The list's events carry it, and it is never translated. **Required**."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The option's name. Text and not children, because `hits` marks characters in it by position. Required."
+
+[prop.hits]
+type = "text"
+doc = "The characters of `label` a query matched, in `MatchText`'s grammar: one slot for each word, joined by `|`. Leave it out for a list that is not filtered."
+
+[prop.detail]
+type = "text"
+doc = "A second, smaller line under the name, saying what the option does. It is part of the option's accessible name."
+
+[prop.detail_hits]
+type = "text"
+doc = "The characters of `detail` a query matched, in the same grammar as `hits`. Use it where the second line is the field a word matched."
+
+[prop.shortcut]
+type = "text"
+doc = "The key that acts on this option, as plain text in the monospace face. It is a hint. The caller binds the key."
+
+[prop.icon]
+type = "text"
+doc = "A drawing before the name. It is decorative, and the name beside it is what a screen reader reads."
+
+[prop.id]
+type = "text"
+attribute = "id"
+doc = "The option's id, for a caller that writes `aria-activedescendant` itself. Leave it out and the script numbers the options."
+
+[prop.active]
+type = "bool"
+default = "false"
+attribute = "data-nd-active"
+doc = "Whether the keyboard is on this option. One option of a list at most. The script moves it on the arrow keys and points `aria-activedescendant` at it."
+
+[prop.selected]
+type = "bool"
+default = "false"
+attribute = "aria-selected"
+doc = "Whether this option is the answer the list holds. It writes `aria-selected` and draws a tick, so the choice is not shown by colour alone."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "aria-disabled"
+doc = "Stops the option being chosen and keeps it in the arrow walk. It writes `aria-disabled`, so the option is announced as unavailable instead of missing."
+
+[a11y]
+notes = """
+The row is a `role="option"`, and its name is the key, the name and the second line read in that order. The active row is drawn with a bar on its leading edge as well as a fill, and the selected row with a tick.
+"""

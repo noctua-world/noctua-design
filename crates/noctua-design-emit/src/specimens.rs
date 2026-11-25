@@ -596,6 +596,27 @@ fn itself(component: &Component, prop_name: &str, value: &str, caption: &str) ->
             .prop("max", text("12"))
             .prop("value_label", message("SpecimenBarValue")),
         "NumberInput" => Drawn::names().prop("value", data("42")),
+        // THE OPTIONS COME WITH THE LIST, and the first is the active one, so a
+        // cell shows the bar a size has to leave room for. Each carries a key,
+        // because where the key sits is what `layout` moves.
+        "OptionList" => Drawn::names().inside(
+            WORDS
+                .iter()
+                .enumerate()
+                .map(|(at, word)| {
+                    component_node(
+                        "OptionItem",
+                        &[
+                            ("value", text(word)),
+                            ("label", data(word)),
+                            ("shortcut", data(&word[..1])),
+                            ("active", flag(at == 0)),
+                        ],
+                        &[],
+                    )
+                })
+                .collect(),
+        ),
         "OtpField" => Drawn::names()
             .prop("length", text("3"))
             .prop("value", data("421")),

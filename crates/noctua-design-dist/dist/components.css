@@ -11674,3 +11674,187 @@ because a specimen of a `needs_name` component must not render a
   text-decoration-style: dotted;
   text-decoration-color: var(--nc-color-match-rest);
 }
+
+/* --- crates/noctua-design-styles/src/option-list.css ---
+   COPIED, NOT GENERATED. Edit the file named above. */
+
+
+/* --- OptionList ------------------------------------------------------------
+ *
+ * The list a reader walks with the keyboard: the command list and the leader
+ * menu of `NOCTUA.md §12.9`, and any list of things to choose among. It sits
+ * directly on the background, with no border, no box and no shadow.
+ *
+ * THE ROW'S HEIGHT IS DECLARED, because a row is a target and a target that is
+ * its font size and padding added up agrees with its neighbour by accident.
+ * A size is the floor and the air together: a line of text is taller than the
+ * two smaller floors, so a floor alone drew `small` and `medium` as one row. */
+.nd-option-list {
+  --nd-option-row: var(--noctua-space-8);
+  --nd-option-air: var(--noctua-space-1);
+  /* IT FILLS THE LINE IT IS GIVEN, wherever it is put. A list that shrank to
+     its longest name inside a flex parent would draw the active row's fill as
+     wide as that name, and would measure its columns against a width that
+     holds one. */
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.nd-option-list[data-nd-size="small"] {
+  --nd-option-row: var(--noctua-space-6);
+  --nd-option-air: var(--noctua-space-0);
+  font-size: var(--noctua-size-small);
+}
+
+.nd-option-list[data-nd-size="large"] {
+  --nd-option-row: var(--noctua-space-12);
+  --nd-option-air: var(--noctua-space-3);
+}
+
+.nd-option-list-items,
+.nd-option-group-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The ring is drawn inside the list's own box, so a list at the edge of a
+   drawer does not lose half of it to the clip. */
+.nd-option-list-items {
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
+/* COLUMNS ARE THE PLATFORM'S, NOT A GRID. A multi-column box fills down and
+   then across, which is the order the arrows walk and the order a screen
+   reader reads, so the Down arrow never moves the mark sideways. It makes as
+   many columns as the width holds and one where it holds one, with nothing to
+   decide at a breakpoint. */
+.nd-option-list[data-nd-layout="columns"] > .nd-option-list-items {
+  column-width: var(--noctua-space-64);
+  column-gap: var(--noctua-space-6);
+}
+
+.nd-option-item {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-3);
+  min-block-size: max(var(--nd-option-row), var(--noctua-target-min));
+  padding-block: var(--nd-option-air);
+  padding-inline: var(--noctua-space-3);
+  /* THE BAR'S ROOM IS ALWAYS THERE. The active row draws a bar down its
+     leading edge, and a border that arrived with the state would move every
+     name in the row by its width on every arrow. */
+  border-inline-start: var(--noctua-border-rule) solid transparent;
+  color: var(--nc-color-fg);
+  cursor: pointer;
+  break-inside: avoid;
+}
+
+.nd-option-item:is(:hover, [data-nd-seat-hover]) {
+  background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
+}
+
+/* WHERE THE KEYBOARD IS: A FILL AND A BAR. The focus never enters the list,
+ * so this is all a sighted reader has to say which option Enter will choose.
+ * The fill is the neutral raised surface and never a tint of the accent,
+ * because the matched characters in the row are drawn in the accent and have
+ * to stay legible on it (`NOCTUA.md §12.4`). The bar is the half that is not a
+ * colour.
+ *
+ * After the hover rule, so a row that is both reads as active. */
+.nd-option-item[data-nd-active="true"] {
+  background: var(--nc-color-surface-raised);
+  border-inline-start-color: var(--nc-color-selected);
+}
+
+.nd-option-item[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused option is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+/* THE KEY, AS PLAIN TEXT. No box, no border and no background: the leader
+   menu is a key and a name and nothing drawn around either. */
+.nd-option-item-shortcut {
+  flex: none;
+  font-family: var(--noctua-font-mono);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+/* In rows the key is a hint at the trailing edge. It stays first in the
+   markup, so it is still read before the name. */
+.nd-option-list[data-nd-layout="rows"] .nd-option-item-shortcut {
+  order: 1;
+}
+
+/* In columns it leads, at one width, so the names under each other line up. */
+.nd-option-list[data-nd-layout="columns"] .nd-option-item-shortcut {
+  min-inline-size: var(--noctua-space-12);
+}
+
+.nd-option-item-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.nd-option-item-label,
+.nd-option-item-detail {
+  overflow-wrap: anywhere;
+}
+
+.nd-option-item-detail {
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+/* The tick: what was chosen, said by a shape. After the key in a row. */
+.nd-option-item-mark {
+  display: flex;
+  flex: none;
+  order: 2;
+  color: var(--nc-color-selected);
+}
+
+.nd-option-group-label {
+  padding-block: var(--noctua-space-2);
+  /* Under the names, not under the bar: the leading inset is an option's own,
+     its padding and the room its bar keeps. */
+  padding-inline: calc(var(--noctua-space-3) + var(--noctua-border-rule)) var(--noctua-space-3);
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-semibold);
+  letter-spacing: var(--noctua-tracking-caps);
+  text-transform: uppercase;
+  color: var(--nc-color-fg-muted);
+  /* A name at the foot of one column and its options at the head of the next
+     is a name over nothing. */
+  break-after: avoid;
+}
+
+/* A group with no option showing is a name over nothing, too. */
+.nd-option-group:not(:has(.nd-option-item:not([hidden]))) {
+  display: none;
+}
+
+/* NOTHING TO CHOOSE: THE SENTENCE, AND NO LISTBOX.
+ *
+ * The sentence is in the markup from the start and shown by this rule alone,
+ * so a list a framework re-renders says it without a script noticing. The
+ * listbox goes with it: an empty `role="listbox"` is a tab stop onto nothing
+ * and a container that owes options it does not have. */
+.nd-option-list-empty {
+  display: none;
+  padding-block: var(--noctua-space-2);
+  padding-inline: calc(var(--noctua-space-3) + var(--noctua-border-rule)) var(--noctua-space-3);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-option-list:not(:has(.nd-option-item:not([hidden]))) .nd-option-list-empty {
+  display: block;
+}
+
+.nd-option-list:not(:has(.nd-option-item:not([hidden]))) > .nd-option-list-items {
+  display: none;
+}

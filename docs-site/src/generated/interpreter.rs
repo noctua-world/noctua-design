@@ -34,8 +34,9 @@ use noctua_design::components::{
     LineageLine, LineagePick, LineageReach, LineageRoute, LineageSize, LineageThickness,
     LineageTilt, LineageView, Link, LinkTone, List, ListItem, ListKind, ListMarker, ListSpacing,
     Mark, MatchText, Menu, MenuItem, MenuPlacement, MessageBar, MessageBarLive, Meter, MeterSize,
-    NumberInput, NumberInputSize, NumberInputStepping, OtpField, OtpFieldKind, OtpFieldSize,
-    Pagination, PaginationSize, PaginationSpread, Paragraph, ParagraphSize, ParagraphTone, Popover,
+    NumberInput, NumberInputSize, NumberInputStepping, OptionGroup, OptionItem, OptionList,
+    OptionListLayout, OptionListSize, OtpField, OtpFieldKind, OtpFieldSize, Pagination,
+    PaginationSize, PaginationSpread, Paragraph, ParagraphSize, ParagraphTone, Popover,
     PopoverPlacement, Progress, ProgressSize, Prose, ProseMeasure, Radio, RadioSize, Rating,
     RatingSize, Search, SearchGroup, SearchPresentation, SearchResult, SearchSize, Segmented,
     SegmentedAppearance, SegmentedFill, SegmentedItem, SegmentedOrientation, SegmentedSelection,
@@ -110,6 +111,9 @@ pub(crate) fn component(
         "MessageBar" => message_bar(props, children, scope),
         "Meter" => meter(props, children, scope),
         "NumberInput" => number_input(props, children, scope),
+        "OptionGroup" => option_group(props, children, scope),
+        "OptionItem" => option_item(props, children, scope),
+        "OptionList" => option_list(props, children, scope),
         "OtpField" => otp_field(props, children, scope),
         "Pagination" => pagination(props, children, scope),
         "Paragraph" => paragraph(props, children, scope),
@@ -2463,6 +2467,108 @@ fn number_input(
             ai_label: ai_label_,
             ai_note: ai_note_,
             class: class_,
+        }
+    }
+}
+
+/// `OptionGroup`, from a tree.
+fn option_group(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let label_ = scope
+        .find(props, "label")
+        .expect("OptionGroup.label is required and this tree does not set it");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        OptionGroup {
+            label: label_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `OptionItem`, from a tree.
+fn option_item(
+    props: &'static [(&'static str, Value)],
+    _children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let value_ = scope
+        .find(props, "value")
+        .expect("OptionItem.value is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("OptionItem.label is required and this tree does not set it");
+    let hits_ = scope.find(props, "hits");
+    let detail_ = scope.find(props, "detail");
+    let detail_hits_ = scope.find(props, "detail_hits");
+    let shortcut_ = scope.find(props, "shortcut");
+    let icon_ = scope.icon(props, "icon");
+    let id_ = scope.find(props, "id");
+    let active_ = scope.flag(props, "active").unwrap_or(false);
+    let selected_ = scope.flag(props, "selected").unwrap_or(false);
+    let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        OptionItem {
+            value: value_,
+            label: label_,
+            hits: hits_,
+            detail: detail_,
+            detail_hits: detail_hits_,
+            shortcut: shortcut_,
+            icon: icon_,
+            id: id_,
+            active: active_,
+            selected: selected_,
+            disabled: disabled_,
+            class: class_,
+        }
+    }
+}
+
+/// `OptionList`, from a tree.
+fn option_list(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("OptionList.name is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("OptionList.label is required and this tree does not set it");
+    let layout_ = scope
+        .pick(
+            props,
+            "layout",
+            &OptionListLayout::ALL,
+            OptionListLayout::as_str,
+        )
+        .unwrap_or_default();
+    let size_ = scope
+        .pick(props, "size", &OptionListSize::ALL, OptionListSize::as_str)
+        .unwrap_or_default();
+    let focusable_ = scope.flag(props, "focusable").unwrap_or(true);
+    let empty_label_ = scope.find(props, "empty_label");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        OptionList {
+            name: name_,
+            label: label_,
+            layout: layout_,
+            size: size_,
+            focusable: focusable_,
+            empty_label: empty_label_,
+            class: class_,
+            {render(children, scope)}
         }
     }
 }

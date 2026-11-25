@@ -394,6 +394,75 @@ Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#,
         }],
     ),
     (
+        "option-list",
+        r#"OptionList { name: "…", label: "…", empty_label: "…",
+    OptionGroup { label: "…",
+        OptionItem { value, label: "window.close", hits: "0-2|7-9", detail: "…", shortcut: "q", active: true }
+        OptionItem { value, label: "window.hide", hits: "0-2|", detail: "…" }
+    }
+    OptionGroup { label: "…", OptionItem { value, label: "page.close", hits: "|5-7", detail: "…" } }
+}"#,
+        // THE COMMAND LIST OF `NOCTUA.md §12.9`, AS ONE QUERY LEFT IT. Two
+        // words were typed, `win` and `clo`: the first row matched both, and
+        // each of the others matched one of them on its name and the other on
+        // a field that is not drawn.
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("name", Value::Text("overview-commands")),
+                ("label", Value::Message(Key::ExampleOptionListCommands)),
+                ("empty_label", Value::Message(Key::ExampleOptionListEmpty)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionGroup",
+                    props: &[("label", Value::Message(Key::ExampleOptionListGroupWindow))],
+                    children: &[
+                        Node::Component {
+                            name: "OptionItem",
+                            props: &[
+                                ("class", Value::Text("nd-identifier")),
+                                ("value", Value::Text("window.close")),
+                                ("label", Value::Data("window.close")),
+                                ("hits", Value::Text("0-2|7-9")),
+                                ("detail", Value::Message(Key::ExampleOptionListCloseWindow)),
+                                ("shortcut", Value::Message(Key::ExampleOptionListKeyQ)),
+                                ("active", Value::Bool(true)),
+                            ],
+                            children: &[],
+                        },
+                        Node::Component {
+                            name: "OptionItem",
+                            props: &[
+                                ("class", Value::Text("nd-identifier")),
+                                ("value", Value::Text("window.hide")),
+                                ("label", Value::Data("window.hide")),
+                                ("hits", Value::Text("0-2|")),
+                                ("detail", Value::Message(Key::ExampleOptionListHideWindow)),
+                            ],
+                            children: &[],
+                        },
+                    ],
+                },
+                Node::Component {
+                    name: "OptionGroup",
+                    props: &[("label", Value::Message(Key::ExampleOptionListGroupPage))],
+                    children: &[Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("class", Value::Text("nd-identifier")),
+                            ("value", Value::Text("page.close")),
+                            ("label", Value::Data("page.close")),
+                            ("hits", Value::Text("|5-7")),
+                            ("detail", Value::Message(Key::ExampleOptionListClosePage)),
+                        ],
+                        children: &[],
+                    }],
+                },
+            ],
+        }],
+    ),
+    (
         "match-text",
         r#"MatchText { text: "ButtonGroup", hits: "6-8|2|0" }
 MatchText { text: "ToolbarGroup", hits: "7-9|0|4" }"#,

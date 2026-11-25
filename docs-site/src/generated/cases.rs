@@ -1050,6 +1050,415 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "OptionList",
+        "case-option-list-0",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-1",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-2",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Pages")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("selected", Value::Bool(true)),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-3",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-4",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-5",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Save")),
+                        ("value", Value::Data("save")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-6",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("shortcut", Value::Data("s")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Save")),
+                        ("value", Value::Data("save")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-7",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("disabled", Value::Bool(true)),
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-8",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-9",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("focusable", Value::Bool(false)),
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[Node::Component {
+                name: "OptionItem",
+                props: &[
+                    ("label", Value::Data("Open")),
+                    ("value", Value::Data("open")),
+                ],
+                children: &[],
+            }],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-10",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("active", Value::Bool(true)),
+                        ("id", Value::Data("second")),
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-11",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("empty_label", Value::Data("No command matches.")),
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-12",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("empty_label", Value::Data("No command matches.")),
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[Node::Component {
+                name: "OptionItem",
+                props: &[
+                    ("label", Value::Data("Open")),
+                    ("value", Value::Data("open")),
+                ],
+                children: &[],
+            }],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-13",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[Node::Component {
+                name: "OptionGroup",
+                props: &[("label", Value::Data("Files"))],
+                children: &[Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                }],
+            }],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-14",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[Node::Component {
+                name: "OptionItem",
+                props: &[
+                    ("detail", Value::Data("Opens a file.")),
+                    ("hits", Value::Data("0-1")),
+                    ("label", Value::Data("Open")),
+                    ("shortcut", Value::Data("o")),
+                    ("value", Value::Data("open")),
+                ],
+                children: &[],
+            }],
+        }],
+    ),
+    (
         "OtpField",
         "case-otp-field-0",
         &[Node::Component {

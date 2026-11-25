@@ -71,6 +71,9 @@ mod menu_item;
 mod message_bar;
 mod meter;
 mod number_input;
+mod option_group;
+mod option_item;
+mod option_list;
 mod otp_field;
 mod overview_a;
 mod overview_b;
@@ -186,6 +189,9 @@ pub(crate) fn for_component(name: &str) -> &'static [Tree] {
         "MessageBar" => message_bar::EXAMPLES,
         "Meter" => meter::EXAMPLES,
         "NumberInput" => number_input::EXAMPLES,
+        "OptionGroup" => option_group::EXAMPLES,
+        "OptionItem" => option_item::EXAMPLES,
+        "OptionList" => option_list::EXAMPLES,
         "OtpField" => otp_field::EXAMPLES,
         "Pagination" => pagination::EXAMPLES,
         "Paragraph" => paragraph::EXAMPLES,

@@ -309,6 +309,7 @@ of these carries measured rules, not description:
 | a switch, a segmented choice — anything that answers a click by choosing | `crates/noctua-design-runtime/src/choice.js` |
 | a second seat's hover, focus, press or drag | `crates/noctua-design-runtime/src/seats.js` |
 | how a list filtered by typing matches, ranks or marks | `crates/noctua-design-runtime/src/search-match.js`, and "The fuzzy matcher" below |
+| a list walked by the keyboard, its active option, or the control that drives one | `crates/noctua-design-runtime/src/option-list.js` |
 | what both implementations must *do* | `spec/components/<name>.cases.toml`, and `crates/noctua-design-spec/src/conformance.rs` for the vocabulary a step may use |
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
@@ -805,6 +806,19 @@ button. **A menu item is `aria-disabled`, never `disabled`**, because an item th
 walk is an action a reader concludes does not exist; and **`aria-expanded="false"` is true on a
 menu button**, because a control that opens something opens it whether or not it is open now, so
 the attribute's absence would be the false statement.
+
+**A list walked by the keyboard moves a mark, never the focus.** `OptionList`, `OptionGroup` and
+`OptionItem` are a `role="listbox"`, and the focus stays on one element: the list, or a control
+that names the list in `aria-controls` and goes on being typed in. The active option is
+`data-nd-active` on the option and `aria-activedescendant` on whatever holds the focus, and
+`dist/option-list.js` answers the keys from either. **It chooses nothing**: it says
+`nd-option-active` and `nd-option-choose`, each with the list's name and the option's value, and
+what is `selected` afterwards is the caller's to render. **And the caller may move the mark
+itself**: an interface that is a view renders `OptionItem { active }`, and the script takes the
+option that gained the attribute last as the active one. Where the keyboard is and what was chosen
+are drawn apart, a bar and a fill against a tick, and the fill is the neutral raised surface so the
+marked letters in the row stay legible on it. The empty sentence is shown by the stylesheet alone,
+from `:has()`, so a list a framework re-renders says it with no script noticing.
 
 ### Tones, bars, carousels, spectra
 

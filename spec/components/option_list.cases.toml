@@ -1,0 +1,216 @@
+# What an `OptionList` has to do, in both languages, in a real browser.
+#
+# The markup writes `role="listbox"`, and `dist/option-list.js` is the keyboard
+# that role owes. The focus stays on the list the whole time, so every case
+# about a key ends by asking where the focus is as well as which option is
+# active. The keys a control that names the list answers are asked in
+# `tests/browser/option-list.spec.js`, because a case has one root and that
+# arrangement has two.
+
+[[case]]
+name = "it is a named listbox and its rows are options"
+note = "A listbox with no name gives a screen reader two words and nothing to tell two lists apart by."
+props = { name = "commands", label = "Commands" }
+expect = { attrs = { "data-nd-option-list" = "commands" }, present = ["ul#nd-option-list-commands[role=listbox][aria-label=Commands][tabindex='0']", "li[role=option][data-nd-value=open]"] }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open" }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "close", label = "Close" }
+
+[[case]]
+name = "taking the focus puts the keyboard on the first option, and the focus stays on the list"
+note = "A tab stop that shows no active option is a list a sighted keyboard reader cannot tell they have reached."
+props = { name = "commands", label = "Commands" }
+steps = ["focus:.nd-option-list-items"]
+expect = { focus = ".nd-option-list-items", present = ["[data-nd-value=open][data-nd-active=true]", ".nd-option-list-items[aria-activedescendant]"] }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open" }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "close", label = "Close" }
+
+[[case]]
+name = "taking the focus starts on the selected option"
+note = "A reader returning to a list of settings pages starts from the page they are on, not from the top."
+props = { name = "pages", label = "Pages" }
+steps = ["focus:.nd-option-list-items"]
+expect = { present = ["[data-nd-value=close][data-nd-active=true][aria-selected=true]"], hidden = ["[data-nd-value=open][data-nd-active]"] }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open" }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "close", label = "Close", selected = true }
+
+[[case]]
+name = "the Down arrow moves the active option and never the focus"
+note = "The whole pattern: one tab stop, and `aria-activedescendant` naming the option the keyboard is on."
+props = { name = "commands", label = "Commands" }
+steps = ["focus:.nd-option-list-items", "key:ArrowDown"]
+expect = { focus = ".nd-option-list-items", present = ["[data-nd-value=close][data-nd-active=true]"], hidden = ["[data-nd-value=open][data-nd-active]"] }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open" }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "close", label = "Close" }
+
+[[case]]
+name = "the Down arrow stops at the last option"
+note = "A walk that wraps hides where the list ends. Stopping is how a reader holding the key learns it has."
+props = { name = "commands", label = "Commands" }
+# Two presses, and an even count would hide a wrap: with two options a walk that
+# wrapped is back on the last one after three.
+steps = ["focus:.nd-option-list-items", "key:ArrowDown", "key:ArrowDown"]
+expect = { present = ["[data-nd-value=close][data-nd-active=true]"], hidden = ["[data-nd-value=open][data-nd-active]"] }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open" }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "close", label = "Close" }
+
+[[case]]
+name = "End goes to the last option and Home comes back"
+note = "A list of every command is hundreds of rows, and the two ends are the only places reachable in one key."
+props = { name = "commands", label = "Commands" }
+steps = ["focus:.nd-option-list-items", "key:End", "key:Home", "key:End"]
+expect = { present = ["[data-nd-value=save][data-nd-active=true]"] }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open" }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "close", label = "Close" }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "save", label = "Save" }
+
+[[case]]
+name = "a typed letter jumps to the option that starts with it"
+note = "The keyboard a listbox owes besides the arrows. It reads the name and never the key hint beside it."
+props = { name = "commands", label = "Commands" }
+steps = ["focus:.nd-option-list-items", "type:s"]
+expect = { present = ["[data-nd-value=save][data-nd-active=true]"] }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open", shortcut = "s" }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "close", label = "Close" }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "save", label = "Save" }
+
+[[case]]
+name = "a disabled option is reached, and says it is disabled"
+note = "An option the arrows skip is an option a reader concludes does not exist."
+props = { name = "commands", label = "Commands" }
+steps = ["focus:.nd-option-list-items", "key:ArrowDown"]
+expect = { present = ["[data-nd-value=close][data-nd-active=true][aria-disabled=true]"] }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open" }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "close", label = "Close", disabled = true }
+
+[[case]]
+name = "a press makes an option the active one"
+note = "A pointer and a keyboard share one mark. Two marks would be two answers to which option Enter chooses."
+props = { name = "commands", label = "Commands" }
+steps = ["focus:.nd-option-list-items", "click:[data-nd-value=close]"]
+expect = { present = ["[data-nd-value=close][data-nd-active=true]"], hidden = ["[data-nd-value=open][data-nd-active]"] }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open" }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "close", label = "Close" }
+
+[[case]]
+name = "a list another control drives is not a tab stop"
+note = "Two tab stops for one walk is a reader tabbing into a list whose keys are answered somewhere else."
+props = { name = "commands", label = "Commands", focusable = false }
+expect = { present = ["ul[role=listbox]:not([tabindex])"] }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open" }
+
+[[case]]
+name = "an option the caller marked active is the one the list names"
+note = "An interface that is a view renders the active option itself, and the list has to point at that one."
+props = { name = "commands", label = "Commands" }
+expect = { present = ["#second[data-nd-active=true]", ".nd-option-list-items[aria-activedescendant=second]"] }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open" }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "close", label = "Close", id = "second", active = true }
+
+[[case]]
+name = "a list with no option says so, and is no tab stop"
+note = "A filter that leaves an empty space has not said that nothing matched, and an empty listbox is a stop onto nothing."
+props = { name = "commands", label = "Commands", empty_label = "No command matches." }
+expect = { visible = [".nd-option-list-empty"], hidden = [".nd-option-list-items"], present = ["p[role=status]"] }
+
+[[case]]
+name = "a list with an option keeps the sentence to itself"
+note = "The sentence is in the markup the whole time. Shown beside options, it contradicts them."
+props = { name = "commands", label = "Commands", empty_label = "No command matches." }
+expect = { visible = ["[role=option]"], hidden = [".nd-option-list-empty"] }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open" }
+
+[[case]]
+name = "a group is named, and its options are still the listbox's"
+note = "A listbox holds groups and options and nothing else, so the inner list gives up its own role."
+props = { name = "commands", label = "Commands" }
+expect = { present = ["li[role=group][aria-label=Files] > ul[role=none] > li[role=option]", "p[aria-hidden=true]"] }
+
+[[case.child]]
+component = "OptionGroup"
+props = { label = "Files" }
+
+[[case.child.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open" }
+
+[[case]]
+name = "an option draws its key, its name with the matched run marked, and its second line"
+note = "The row a command list is made of. The key is first in the markup, so it is read before the name."
+props = { name = "commands", label = "Commands" }
+expect = { present = ["li > .nd-option-item-shortcut:first-child", ".nd-option-item-label mark[data-nd-word='1']", ".nd-option-item-detail"] }
+
+[[case.child]]
+component = "OptionItem"
+props = { value = "open", label = "Open", hits = "0-1", shortcut = "o", detail = "Opens a file." }

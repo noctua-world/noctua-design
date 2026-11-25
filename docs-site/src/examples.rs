@@ -461,6 +461,19 @@ ToolbarGroup { align: ToolbarGroupAlign::End, … }"#
         ),
     ),
     (
+        "option-list",
+        example!(
+            r#"OptionList { name: "…", label: "…", empty_label: "…",
+    OptionGroup { label: "…",
+        OptionItem { value, label: "window.close", hits: "0-2|7-9", detail: "…", shortcut: "q", active: true }
+        OptionItem { value, label: "window.hide", hits: "0-2|", detail: "…" }
+    }
+    OptionGroup { label: "…", OptionItem { value, label: "page.close", hits: "|5-7", detail: "…" } }
+}"#,
+            Key::ExampleOptionListOverview
+        ),
+    ),
+    (
         "match-text",
         example!(
             r#"MatchText { text: "ButtonGroup", hits: "6-8|2|0" }
@@ -681,6 +694,9 @@ pub(crate) fn for_component(name: &str) -> &'static [Example] {
         "ListItem" => LIST_ITEM,
         "Mark" => MARK,
         "MatchText" => MATCH_TEXT,
+        "OptionList" => OPTION_LIST,
+        "OptionGroup" => OPTION_GROUP,
+        "OptionItem" => OPTION_ITEM,
         "Paragraph" => PARAGRAPH,
         "Prose" => PROSE,
         "Search" => SEARCH,
@@ -2161,6 +2177,72 @@ const MARK: &[Example] = &[
     example!(r"Two hits in one line", Key::ExampleMarkSearch),
     example!(r"Mark inside a heading"),
     example!(r"Mark inside a list"),
+];
+
+// --- OptionList, OptionGroup and OptionItem ---------------------------------
+
+const OPTION_LIST: &[Example] = &[
+    example!(
+        r#"OptionList { name: "…", label: "…", OptionItem { value: "…", label: "…" } }"#,
+        Key::ExampleOptionListWalk
+    ),
+    example!(
+        r"OptionList { layout: OptionListLayout::Columns, size: OptionListSize::Small }",
+        Key::ExampleOptionListColumns
+    ),
+    example!(r"OptionList { size: OptionListSize::Large }"),
+    example!(
+        r#"OptionList { focusable: false } beside <input aria-controls="nd-option-list-…">"#,
+        Key::ExampleOptionListDriven
+    ),
+    example!(
+        r#"OptionList { empty_label: "…" }"#,
+        Key::ExampleOptionListNothing
+    ),
+];
+
+const OPTION_GROUP: &[Example] = &[
+    example!(
+        r#"OptionGroup { label: "…", OptionItem { … } }"#,
+        Key::ExampleOptionGroupRun
+    ),
+    example!(
+        r"OptionItem { … } beside OptionGroup { … }",
+        Key::ExampleOptionGroupMixed
+    ),
+    example!(
+        r"OptionList { layout: OptionListLayout::Columns, OptionGroup { … } }",
+        Key::ExampleOptionGroupColumns
+    ),
+    example!(
+        r#"OptionGroup { label: "…", OptionItem { hits: "…" } }"#,
+        Key::ExampleOptionGroupFiltered
+    ),
+];
+
+// A MARKED NAME IS A DOTTED NAME. See `trees::option_item`: positions are
+// indices into the text, so a marked name is one no locale changes.
+const OPTION_ITEM: &[Example] = &[
+    example!(
+        r#"OptionItem { value: "…", label: "…", detail: "…" }"#,
+        Key::ExampleOptionItemRow
+    ),
+    example!(
+        r#"OptionItem { label: "window.close", hits: "7-9" }"#,
+        Key::ExampleOptionItemHits
+    ),
+    example!(
+        r#"OptionItem { label: "window.close", hits: "0-2|", detail: "close quit exit", detail_hits: "|11-12" }"#,
+        Key::ExampleOptionItemDetailHits
+    ),
+    example!(
+        r#"OptionItem { shortcut: "s", icon }"#,
+        Key::ExampleOptionItemShortcut
+    ),
+    example!(
+        r#"OptionItem { id: "…", active: true } / OptionItem { selected: true } / OptionItem { disabled: true }"#,
+        Key::ExampleOptionItemStates
+    ),
 ];
 
 // --- MatchText --------------------------------------------------------------

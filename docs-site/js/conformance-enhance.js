@@ -23,6 +23,7 @@ import { enhanceRoving } from "../assets/roving.js";
 import { enhanceSelects, releaseSelects } from "../assets/select.js";
 import { enhanceTagPickers, releaseTagPickers } from "../assets/tag-picker.js";
 import { enhanceTrees, releaseTrees } from "../assets/tree.js";
+import { enhanceOptionLists, releaseOptionLists } from "../assets/option-list.js";
 import { releaseTabs, enhanceTabs } from "../assets/tabs.js";
 import { enhanceDateInputs, releaseDateInputs } from "../assets/date-input.js";
 import { enhanceChoices, releaseChoices } from "../assets/choice.js";
@@ -48,6 +49,7 @@ export function enhance(root = document) {
   enhanceSelects(root);
   enhanceTagPickers(root);
   enhanceTrees(root);
+  enhanceOptionLists(root);
   enhanceTabs(root);
   enhanceDateInputs(root);
   enhanceChoices(root);
@@ -76,6 +78,7 @@ export function release(root = document) {
   releaseSelects(root);
   releaseTagPickers(root);
   releaseTrees(root);
+  releaseOptionLists(root);
   releaseTabs(root);
   releaseDateInputs(root);
   releaseChoices(root);

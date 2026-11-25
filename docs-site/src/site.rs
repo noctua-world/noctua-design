@@ -338,6 +338,19 @@ pub(crate) const MENU: Page = Page {
     component: None,
 };
 
+/// The list a reader walks with the keyboard, a named run of it, and one option.
+///
+/// A collection for the reason `TREE` is one: an `OptionItem` outside an
+/// `OptionList` is a `role="option"` no listbox owns, and three sidebar rows for
+/// one idea is three places a reader has to look for it.
+pub(crate) const OPTION_LIST: Page = Page {
+    slug: "option-list",
+    title: Title::Name("OptionList"),
+    summary: Key::PageOptionListSummary,
+    kind: Kind::Component,
+    component: None,
+};
+
 /// A collection by the rule below, and its slug is the component's own — the
 /// same collision `search` has, and allowed for the same reason: there is one
 /// page at `/tree/` and it is the one the component points at.
@@ -498,7 +511,7 @@ pub(crate) struct Collection {
 /// `page.component.is_some()`, so nobody could search for `spread` or
 /// `current_label`. It reads `documented_on` now, so a component on a shared
 /// page is as findable as one with a page of its own.
-pub(crate) const COLLECTIONS: [Collection; 14] = [
+pub(crate) const COLLECTIONS: [Collection; 15] = [
     Collection {
         page: LINEAGE,
         parts: &["Lineage", "LineageFigure"],
@@ -523,6 +536,13 @@ pub(crate) const COLLECTIONS: [Collection; 14] = [
         page: MENU,
         parts: &["Menu", "MenuItem"],
         body: Key::PageMenuBody,
+    },
+    Collection {
+        // The list, then the run, then one option: outside in, which is the
+        // order they nest and not the order they sort in.
+        page: OPTION_LIST,
+        parts: &["OptionList", "OptionGroup", "OptionItem"],
+        body: Key::PageOptionListBody,
     },
     Collection {
         // The strip first, then one tab, then one panel: the order a caller
