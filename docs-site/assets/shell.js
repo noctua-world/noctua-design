@@ -156,6 +156,7 @@ import { enhanceTagPickers, releaseTagPickers } from "./tag-picker.js";
 import { enhanceTrees, releaseTrees } from "./tree.js";
 import { enhanceOptionLists, releaseOptionLists } from "./option-list.js";
 import { enhancePrompts, releasePrompts } from "./prompt.js";
+import { enhanceDrawers, releaseDrawers } from "./drawer.js";
 import { enhanceTabs, releaseTabs } from "./tabs.js";
 import { enhanceDateInputs, releaseDateInputs } from "./date-input.js";
 import { enhanceSearches, releaseSearches } from "./search.js";
@@ -1652,6 +1653,7 @@ export function enhanceAll(root = document) {
   enhanceTrees(root);
   enhanceOptionLists(root);
   enhancePrompts(root);
+  enhanceDrawers(root);
   collapseBlocks(root);
   enhanceDateInputs(root);
   enhanceDatePickers(root);
@@ -1668,6 +1670,7 @@ export function enhanceAll(root = document) {
   enhanceTooltips(root);
   enhanceToasts(root);
   enhanceToastReplays(root);
+  enhanceDrawerWindows(root);
   enhanceTabs(root);
   enhanceLineages(root);
   enhanceModels(root);
@@ -1776,6 +1779,49 @@ function releaseToastReplays(root = document) {
   }
 }
 
+// --- Turning an example's drawer ----------------------------------------------
+//
+// THIS IS APPARATUS, AND IT SHIPS NOWHERE. A `Drawer` is turned by its caller:
+// `collapsed` is a prop, and Escape reaches the caller as `nd-drawer-dismiss`.
+// On this site the caller is the example, and an example is a tree with no
+// code in it. So the page plays the caller's part, as it does for a toast that
+// has to be raised again: a control marked `drawer-toggle` turns the drawer in
+// its own window, and the drawer's own event shuts it. What the component owes
+// is in `dist/drawer.js` and is untouched: `inert`, and the focus it gives back.
+
+/** Every example window already wired, so a subtree can be released. */
+const drawerWindows = new WeakMap();
+
+function enhanceDrawerWindows(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-window")) {
+    if (stage.dataset.ndEnhanced) continue;
+    stage.dataset.ndEnhanced = "drawer-window";
+    const binding = new AbortController();
+    drawerWindows.set(stage, binding);
+    // The window this control is in, never the page: two drawers on one page
+    // would otherwise each be turned by the other's control.
+    const turn = (collapsed) => {
+      const drawer = stage.querySelector("[data-nd-drawer]");
+      if (!drawer) return;
+      const next = collapsed ?? drawer.getAttribute("data-nd-collapsed") !== "true";
+      drawer.setAttribute("data-nd-collapsed", String(next));
+    };
+    stage.addEventListener("click", (event) => {
+      if (event.target.closest?.('[data-nd-action="drawer-toggle"]')) turn();
+    }, { signal: binding.signal });
+    stage.addEventListener("nd-drawer-dismiss", () => turn(true), { signal: binding.signal });
+  }
+}
+
+function releaseDrawerWindows(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-window")) {
+    if (stage.dataset.ndEnhanced !== "drawer-window") continue;
+    drawerWindows.get(stage)?.abort();
+    drawerWindows.delete(stage);
+    delete stage.dataset.ndEnhanced;
+  }
+}
+
 /**
  * Takes every one of them back off again.
  *
@@ -1800,6 +1846,7 @@ export function releaseAll(root = document) {
   releaseModels(root);
   releaseLineages(root);
   releaseTabs(root);
+  releaseDrawerWindows(root);
   releaseToastReplays(root);
   releaseToasts(root);
   releaseTooltips(root);
@@ -1819,6 +1866,7 @@ export function releaseAll(root = document) {
   // nothing: it reads the declared cap and writes one attribute on the block,
   // which goes when the block does. The gap is named here rather than filled
   // with an empty function, so the two lists still read against each other.
+  releaseDrawers(root);
   releasePrompts(root);
   releaseOptionLists(root);
   releaseTrees(root);

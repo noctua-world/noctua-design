@@ -27,6 +27,8 @@ export { Del } from "./del.js";
 export { Dialog } from "./dialog.js";
 export { Disclosure } from "./disclosure.js";
 export { Divider } from "./divider.js";
+export { Drawer } from "./drawer.js";
+export { DrawerRail } from "./drawer_rail.js";
 export { Em } from "./em.js";
 export { ErrorSummary } from "./error_summary.js";
 export { ErrorSummaryItem } from "./error_summary_item.js";

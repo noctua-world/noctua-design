@@ -27,6 +27,7 @@
 //! | `tree.js` | `enhanceTrees()` — the arrows, the type-ahead and the one tab stop a tree owes |
 //! | `option-list.js` | `enhanceOptionLists()` — the active option, the keys that move it from the list or from the control that names the list, and the two events that say so |
 //! | `prompt.js` | `enhancePrompts()` — the block cursor a `Prompt` draws over its own textarea, the growth that follows the text, and the event that says it was sent |
+//! | `drawer.js` | `enhanceDrawers()` — `inert` on a collapsed `Drawer`, the focus given back when one shuts around it, and the event Escape says |
 //! | `tabs.js` | `enhanceTabs()` — the panel that shows and the ones that stop being on the page |
 //! | `date-input.js` | `enhanceDateInputs()` — the three boxes: stepping, paste, the locale's own order |
 //! | `choice.js` | `enhanceChoices()` — a switch turns on, an item in a group becomes the chosen one, and a `change` says so |
@@ -134,6 +135,10 @@ pub const OPTION_LIST_SOURCE: &str = "crates/noctua-design-runtime/src/option-li
 /// `prompt.js`: the block cursor a `Prompt` draws, and the one event it says.
 pub const PROMPT_SOURCE: &str = "crates/noctua-design-runtime/src/prompt.js";
 
+/// `drawer.js`: what a collapsed `Drawer` owes the keyboard, and the one
+/// event it says.
+pub const DRAWER_SOURCE: &str = "crates/noctua-design-runtime/src/drawer.js";
+
 /// `tabs.js`, likewise.
 pub const TABS_SOURCE: &str = "crates/noctua-design-runtime/src/tabs.js";
 
@@ -160,7 +165,7 @@ pub const DATE_INPUT_SOURCE: &str = "crates/noctua-design-runtime/src/date-input
 /// `xtask` that runs and writes an empty artifact. The paths above are what
 /// name it; these are what it says.
 #[must_use]
-pub fn sources() -> [(&'static str, &'static str); 29] {
+pub fn sources() -> [(&'static str, &'static str); 30] {
     [
         (ANCHOR_SOURCE, include_str!("anchor.js")),
         (COLOR_SOURCE, include_str!("color.js")),
@@ -185,6 +190,7 @@ pub fn sources() -> [(&'static str, &'static str); 29] {
         (TREE_SOURCE, include_str!("tree.js")),
         (OPTION_LIST_SOURCE, include_str!("option-list.js")),
         (PROMPT_SOURCE, include_str!("prompt.js")),
+        (DRAWER_SOURCE, include_str!("drawer.js")),
         (TABS_SOURCE, include_str!("tabs.js")),
         (DATE_INPUT_SOURCE, include_str!("date-input.js")),
         (CHOICE_SOURCE, include_str!("choice.js")),

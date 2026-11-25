@@ -351,6 +351,18 @@ pub(crate) const FOOTER: Page = Page {
     component: None,
 };
 
+/// The panel along one edge of a window, and the rail down a side of it.
+///
+/// A collection for the reason `FOOTER` is one: a `DrawerRail` outside a
+/// `Drawer` has no side to stand at and no height to take.
+pub(crate) const DRAWER: Page = Page {
+    slug: "drawer",
+    title: Title::Name("Drawer"),
+    summary: Key::PageDrawerSummary,
+    kind: Kind::Component,
+    component: None,
+};
+
 /// The list a reader walks with the keyboard, a named run of it, and one option.
 ///
 /// A collection for the reason `TREE` is one: an `OptionItem` outside an
@@ -524,7 +536,7 @@ pub(crate) struct Collection {
 /// `page.component.is_some()`, so nobody could search for `spread` or
 /// `current_label`. It reads `documented_on` now, so a component on a shared
 /// page is as findable as one with a page of its own.
-pub(crate) const COLLECTIONS: [Collection; 16] = [
+pub(crate) const COLLECTIONS: [Collection; 17] = [
     Collection {
         page: LINEAGE,
         parts: &["Lineage", "LineageFigure"],
@@ -555,6 +567,12 @@ pub(crate) const COLLECTIONS: [Collection; 16] = [
         page: FOOTER,
         parts: &["Footer", "FooterLine", "FooterCorner"],
         body: Key::PageFooterBody,
+    },
+    Collection {
+        // The drawer, then what stands down its sides.
+        page: DRAWER,
+        parts: &["Drawer", "DrawerRail"],
+        body: Key::PageDrawerBody,
     },
     Collection {
         // The list, then the run, then one option: outside in, which is the

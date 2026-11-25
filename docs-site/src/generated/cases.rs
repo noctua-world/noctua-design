@@ -498,6 +498,87 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Drawer",
+        "case-drawer-0",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[Node::Text(Value::Data("Commands"))],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-1",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("collapsed", Value::Bool(true)),
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[Node::Component {
+                name: "Button",
+                props: &[("label", Value::Data("Close the page"))],
+                children: &[],
+            }],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-2",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Sidebar")),
+                ("name", Value::Data("pages")),
+                ("side", Value::Text("start")),
+            ],
+            children: &[Node::Text(Value::Data("Pages"))],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-3",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "DrawerRail",
+                    props: &[],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "DrawerRail",
+                    props: &[("side", Value::Text("end"))],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-4",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[Node::Component {
+                name: "Button",
+                props: &[("label", Value::Data("Close the page"))],
+                children: &[],
+            }],
+        }],
+    ),
+    (
         "ErrorSummary",
         "case-error-summary-0",
         &[Node::Component {

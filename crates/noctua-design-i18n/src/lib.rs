@@ -172,6 +172,10 @@ pub enum Key {
     PageFooterSummary,
     /// `page.footer.body`
     PageFooterBody,
+    /// `page.drawer.summary`
+    PageDrawerSummary,
+    /// `page.drawer.body`
+    PageDrawerBody,
     /// `page.option-list.summary`
     PageOptionListSummary,
     /// `page.option-list.body`
@@ -618,6 +622,10 @@ pub enum Key {
     ComponentFooterCornerSummary,
     /// `component.footer-line.summary`
     ComponentFooterLineSummary,
+    /// `component.drawer.summary`
+    ComponentDrawerSummary,
+    /// `component.drawer-rail.summary`
+    ComponentDrawerRailSummary,
     /// `component.prompt.summary`
     ComponentPromptSummary,
     /// `component.option-group.summary`
@@ -1406,6 +1414,44 @@ pub enum Key {
     ExampleFooterInfo,
     /// `example.footer.prompt`
     ExampleFooterPrompt,
+    /// `example.drawer.overview`
+    ExampleDrawerOverview,
+    /// `example.drawer.basic`
+    ExampleDrawerBasic,
+    /// `example.drawer.collapsed`
+    ExampleDrawerCollapsed,
+    /// `example.drawer.side`
+    ExampleDrawerSide,
+    /// `example.drawer.scroll`
+    ExampleDrawerScroll,
+    /// `example.drawer-rail.controls`
+    ExampleDrawerRailControls,
+    /// `example.drawer-rail.tabs`
+    ExampleDrawerRailTabs,
+    /// `example.drawer-rail.both`
+    ExampleDrawerRailBoth,
+    /// `example.drawer-rail.scroll`
+    ExampleDrawerRailScroll,
+    /// `example.drawer.label`
+    ExampleDrawerLabel,
+    /// `example.drawer.sidebar`
+    ExampleDrawerSidebar,
+    /// `example.drawer.details`
+    ExampleDrawerDetails,
+    /// `example.drawer.toggle`
+    ExampleDrawerToggle,
+    /// `example.drawer.work`
+    ExampleDrawerWork,
+    /// `example.drawer.work-shut`
+    ExampleDrawerWorkShut,
+    /// `example.drawer.work-side`
+    ExampleDrawerWorkSide,
+    /// `example.drawer.long-one`
+    ExampleDrawerLongOne,
+    /// `example.drawer.long-two`
+    ExampleDrawerLongTwo,
+    /// `example.drawer.long-three`
+    ExampleDrawerLongThree,
     /// `example.prompt.overview`
     ExamplePromptOverview,
     /// `example.prompt.basic`
@@ -4138,6 +4184,36 @@ pub enum Key {
     ComponentDividerPropDecorativeDoc,
     /// `component.divider.state.labelled.doc`
     ComponentDividerStateLabelledDoc,
+    /// `component.drawer.guidance`
+    ComponentDrawerGuidance,
+    /// `component.drawer.a11y-notes`
+    ComponentDrawerA11yNotes,
+    /// `component.drawer.prop.name.doc`
+    ComponentDrawerPropNameDoc,
+    /// `component.drawer.prop.label.doc`
+    ComponentDrawerPropLabelDoc,
+    /// `component.drawer.prop.side.doc`
+    ComponentDrawerPropSideDoc,
+    /// `component.drawer.prop.collapsed.doc`
+    ComponentDrawerPropCollapsedDoc,
+    /// `component.drawer.prop.children.doc`
+    ComponentDrawerPropChildrenDoc,
+    /// `component.drawer.key.tab.name`
+    ComponentDrawerKeyTabName,
+    /// `component.drawer.key.tab.action`
+    ComponentDrawerKeyTabAction,
+    /// `component.drawer.key.escape.name`
+    ComponentDrawerKeyEscapeName,
+    /// `component.drawer.key.escape.action`
+    ComponentDrawerKeyEscapeAction,
+    /// `component.drawer-rail.guidance`
+    ComponentDrawerRailGuidance,
+    /// `component.drawer-rail.a11y-notes`
+    ComponentDrawerRailA11yNotes,
+    /// `component.drawer-rail.prop.side.doc`
+    ComponentDrawerRailPropSideDoc,
+    /// `component.drawer-rail.prop.children.doc`
+    ComponentDrawerRailPropChildrenDoc,
     /// `component.em.a11y-notes`
     ComponentEmA11yNotes,
     /// `component.em.prop.children.doc`
@@ -6450,7 +6526,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3163] = [
+    pub const ALL: [Self; 3201] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -6477,6 +6553,8 @@ impl Key {
         Self::PageMenuBody,
         Self::PageFooterSummary,
         Self::PageFooterBody,
+        Self::PageDrawerSummary,
+        Self::PageDrawerBody,
         Self::PageOptionListSummary,
         Self::PageOptionListBody,
         Self::PageTreeSummary,
@@ -6700,6 +6778,8 @@ impl Key {
         Self::ComponentFooterSummary,
         Self::ComponentFooterCornerSummary,
         Self::ComponentFooterLineSummary,
+        Self::ComponentDrawerSummary,
+        Self::ComponentDrawerRailSummary,
         Self::ComponentPromptSummary,
         Self::ComponentOptionGroupSummary,
         Self::ComponentOptionItemSummary,
@@ -7094,6 +7174,25 @@ impl Key {
         Self::ExampleFooterModeline,
         Self::ExampleFooterInfo,
         Self::ExampleFooterPrompt,
+        Self::ExampleDrawerOverview,
+        Self::ExampleDrawerBasic,
+        Self::ExampleDrawerCollapsed,
+        Self::ExampleDrawerSide,
+        Self::ExampleDrawerScroll,
+        Self::ExampleDrawerRailControls,
+        Self::ExampleDrawerRailTabs,
+        Self::ExampleDrawerRailBoth,
+        Self::ExampleDrawerRailScroll,
+        Self::ExampleDrawerLabel,
+        Self::ExampleDrawerSidebar,
+        Self::ExampleDrawerDetails,
+        Self::ExampleDrawerToggle,
+        Self::ExampleDrawerWork,
+        Self::ExampleDrawerWorkShut,
+        Self::ExampleDrawerWorkSide,
+        Self::ExampleDrawerLongOne,
+        Self::ExampleDrawerLongTwo,
+        Self::ExampleDrawerLongThree,
         Self::ExamplePromptOverview,
         Self::ExamplePromptBasic,
         Self::ExamplePromptGrows,
@@ -8460,6 +8559,21 @@ impl Key {
         Self::ComponentDividerPropWeightDoc,
         Self::ComponentDividerPropDecorativeDoc,
         Self::ComponentDividerStateLabelledDoc,
+        Self::ComponentDrawerGuidance,
+        Self::ComponentDrawerA11yNotes,
+        Self::ComponentDrawerPropNameDoc,
+        Self::ComponentDrawerPropLabelDoc,
+        Self::ComponentDrawerPropSideDoc,
+        Self::ComponentDrawerPropCollapsedDoc,
+        Self::ComponentDrawerPropChildrenDoc,
+        Self::ComponentDrawerKeyTabName,
+        Self::ComponentDrawerKeyTabAction,
+        Self::ComponentDrawerKeyEscapeName,
+        Self::ComponentDrawerKeyEscapeAction,
+        Self::ComponentDrawerRailGuidance,
+        Self::ComponentDrawerRailA11yNotes,
+        Self::ComponentDrawerRailPropSideDoc,
+        Self::ComponentDrawerRailPropChildrenDoc,
         Self::ComponentEmA11yNotes,
         Self::ComponentEmPropChildrenDoc,
         Self::ComponentErrorSummaryGuidance,
@@ -9646,6 +9760,8 @@ impl Key {
             Self::PageMenuBody => "page.menu.body",
             Self::PageFooterSummary => "page.footer.summary",
             Self::PageFooterBody => "page.footer.body",
+            Self::PageDrawerSummary => "page.drawer.summary",
+            Self::PageDrawerBody => "page.drawer.body",
             Self::PageOptionListSummary => "page.option-list.summary",
             Self::PageOptionListBody => "page.option-list.body",
             Self::PageTreeSummary => "page.tree.summary",
@@ -9869,6 +9985,8 @@ impl Key {
             Self::ComponentFooterSummary => "component.footer.summary",
             Self::ComponentFooterCornerSummary => "component.footer-corner.summary",
             Self::ComponentFooterLineSummary => "component.footer-line.summary",
+            Self::ComponentDrawerSummary => "component.drawer.summary",
+            Self::ComponentDrawerRailSummary => "component.drawer-rail.summary",
             Self::ComponentPromptSummary => "component.prompt.summary",
             Self::ComponentOptionGroupSummary => "component.option-group.summary",
             Self::ComponentOptionItemSummary => "component.option-item.summary",
@@ -10263,6 +10381,25 @@ impl Key {
             Self::ExampleFooterModeline => "example.footer.modeline",
             Self::ExampleFooterInfo => "example.footer.info",
             Self::ExampleFooterPrompt => "example.footer.prompt",
+            Self::ExampleDrawerOverview => "example.drawer.overview",
+            Self::ExampleDrawerBasic => "example.drawer.basic",
+            Self::ExampleDrawerCollapsed => "example.drawer.collapsed",
+            Self::ExampleDrawerSide => "example.drawer.side",
+            Self::ExampleDrawerScroll => "example.drawer.scroll",
+            Self::ExampleDrawerRailControls => "example.drawer-rail.controls",
+            Self::ExampleDrawerRailTabs => "example.drawer-rail.tabs",
+            Self::ExampleDrawerRailBoth => "example.drawer-rail.both",
+            Self::ExampleDrawerRailScroll => "example.drawer-rail.scroll",
+            Self::ExampleDrawerLabel => "example.drawer.label",
+            Self::ExampleDrawerSidebar => "example.drawer.sidebar",
+            Self::ExampleDrawerDetails => "example.drawer.details",
+            Self::ExampleDrawerToggle => "example.drawer.toggle",
+            Self::ExampleDrawerWork => "example.drawer.work",
+            Self::ExampleDrawerWorkShut => "example.drawer.work-shut",
+            Self::ExampleDrawerWorkSide => "example.drawer.work-side",
+            Self::ExampleDrawerLongOne => "example.drawer.long-one",
+            Self::ExampleDrawerLongTwo => "example.drawer.long-two",
+            Self::ExampleDrawerLongThree => "example.drawer.long-three",
             Self::ExamplePromptOverview => "example.prompt.overview",
             Self::ExamplePromptBasic => "example.prompt.basic",
             Self::ExamplePromptGrows => "example.prompt.grows",
@@ -11873,6 +12010,21 @@ impl Key {
             Self::ComponentDividerPropWeightDoc => "component.divider.prop.weight.doc",
             Self::ComponentDividerPropDecorativeDoc => "component.divider.prop.decorative.doc",
             Self::ComponentDividerStateLabelledDoc => "component.divider.state.labelled.doc",
+            Self::ComponentDrawerGuidance => "component.drawer.guidance",
+            Self::ComponentDrawerA11yNotes => "component.drawer.a11y-notes",
+            Self::ComponentDrawerPropNameDoc => "component.drawer.prop.name.doc",
+            Self::ComponentDrawerPropLabelDoc => "component.drawer.prop.label.doc",
+            Self::ComponentDrawerPropSideDoc => "component.drawer.prop.side.doc",
+            Self::ComponentDrawerPropCollapsedDoc => "component.drawer.prop.collapsed.doc",
+            Self::ComponentDrawerPropChildrenDoc => "component.drawer.prop.children.doc",
+            Self::ComponentDrawerKeyTabName => "component.drawer.key.tab.name",
+            Self::ComponentDrawerKeyTabAction => "component.drawer.key.tab.action",
+            Self::ComponentDrawerKeyEscapeName => "component.drawer.key.escape.name",
+            Self::ComponentDrawerKeyEscapeAction => "component.drawer.key.escape.action",
+            Self::ComponentDrawerRailGuidance => "component.drawer-rail.guidance",
+            Self::ComponentDrawerRailA11yNotes => "component.drawer-rail.a11y-notes",
+            Self::ComponentDrawerRailPropSideDoc => "component.drawer-rail.prop.side.doc",
+            Self::ComponentDrawerRailPropChildrenDoc => "component.drawer-rail.prop.children.doc",
             Self::ComponentEmA11yNotes => "component.em.a11y-notes",
             Self::ComponentEmPropChildrenDoc => "component.em.prop.children.doc",
             Self::ComponentErrorSummaryGuidance => "component.error-summary.guidance",
@@ -13425,6 +13577,12 @@ impl Locale {
                 Key::PageFooterBody => {
                     "The footer, one line of it, and one corner. The lines are told apart by shade and no border is drawn. A corner is as tall as all the lines together. The footer ships no script."
                 }
+                Key::PageDrawerSummary => {
+                    "Open a panel along one edge of a window, beside the work and never over it."
+                }
+                Key::PageDrawerBody => {
+                    "The drawer and the rail down a side of it. A drawer is in the flow of its window and is not modal. It opens as far as its content, up to a share of the window. The caller opens and shuts it."
+                }
                 Key::PageOptionListSummary => {
                     "Let users walk a list of options with the keyboard and choose one."
                 }
@@ -13817,6 +13975,12 @@ impl Locale {
                 }
                 Key::ComponentFooterLineSummary => {
                     "Place one line in a footer: controls, status, or the line to type in."
+                }
+                Key::ComponentDrawerSummary => {
+                    "Open a panel along one edge of a window, beside the work and never over it."
+                }
+                Key::ComponentDrawerRailSummary => {
+                    "Place a column of controls or of tabs down one side of a drawer."
                 }
                 Key::ComponentPromptSummary => {
                     "Let users type on a line with a block cursor, and send what they typed."
@@ -14546,6 +14710,51 @@ impl Locale {
                 Key::ExampleFooterModeline => "Modeline",
                 Key::ExampleFooterInfo => "Info line",
                 Key::ExampleFooterPrompt => "Prompt line",
+                Key::ExampleDrawerOverview => {
+                    "A drawer under a footer. Its two rails continue the footer's corners, and the control at the end of the modeline shuts and opens it."
+                }
+                Key::ExampleDrawerBasic => {
+                    "A drawer is as tall as what is in it. It takes its room from the work above and covers none of it."
+                }
+                Key::ExampleDrawerCollapsed => {
+                    "`collapsed` keeps what is in the drawer and shows none of it. Open it, move the focus inside and press Escape."
+                }
+                Key::ExampleDrawerSide => {
+                    "A drawer at a side grows across the window, to the same share of it, and is as tall as its side."
+                }
+                Key::ExampleDrawerScroll => {
+                    "Past its share of the window the content scrolls. The rail stays where it is."
+                }
+                Key::ExampleDrawerRailControls => {
+                    "A rail is as wide as a footer's corner and as tall as the drawer. It holds a `Toolbar` drawn as a rail."
+                }
+                Key::ExampleDrawerRailTabs => {
+                    "A rail at the `end` holds the tabs. The chosen tab is marked on the edge that faces the content."
+                }
+                Key::ExampleDrawerRailBoth => {
+                    "A rail at each side, and the content between them. The keyboard reaches them in the order they are written."
+                }
+                Key::ExampleDrawerRailScroll => {
+                    "A rail taller than its drawer scrolls, with no scrollbar. Moving along it with the arrows brings each control into view."
+                }
+                Key::ExampleDrawerLabel => "Drawer",
+                Key::ExampleDrawerSidebar => "Sidebar",
+                Key::ExampleDrawerDetails => "Details",
+                Key::ExampleDrawerToggle => "Show or hide the drawer",
+                Key::ExampleDrawerWork => {
+                    "The workspace area. The drawer below takes its room from here."
+                }
+                Key::ExampleDrawerWorkShut => "The drawer below is shut. What is in it is kept.",
+                Key::ExampleDrawerWorkSide => "The workspace area, between a drawer at each side.",
+                Key::ExampleDrawerLongOne => {
+                    "Every page works in the workspace area and in the drawer."
+                }
+                Key::ExampleDrawerLongTwo => {
+                    "A page adapts to the smaller space, or provides a view made for it."
+                }
+                Key::ExampleDrawerLongThree => {
+                    "Collapsing the drawer keeps every page that is open in it."
+                }
                 Key::ExamplePromptOverview => {
                     "The prompt is the last line of a footer. Type in it, then press Enter or the control at its end."
                 }
@@ -17381,6 +17590,47 @@ impl Locale {
                 }
                 Key::ComponentDividerStateLabelledDoc => {
                     "Set when a `label` was given, on the `<div>` that stands in for the `<hr>`. The stylesheet hangs the two half-rules and the gap around the word on it."
+                }
+                Key::ComponentDrawerGuidance => {
+                    "Use a drawer for a panel that opens along one edge of a window and stays beside the work. Nothing behind it is inert and the focus is never held in it. For a surface that must be answered first, use `Dialog`."
+                }
+                Key::ComponentDrawerA11yNotes => {
+                    "The drawer is a `role=\"region\"`, named by `label`. It is not modal: nothing behind it is inert and Tab leaves it. Collapsed, it is hidden and `inert`. It opens in the flow of the window and covers nothing."
+                }
+                Key::ComponentDrawerPropNameDoc => {
+                    "What this drawer is, as a script finds it. It is the `name` in `nd-drawer-dismiss`. Required."
+                }
+                Key::ComponentDrawerPropLabelDoc => {
+                    "The name of the drawer, in the reader's language. It becomes `aria-label` on the `region`. Required."
+                }
+                Key::ComponentDrawerPropSideDoc => {
+                    "Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in."
+                }
+                Key::ComponentDrawerPropCollapsedDoc => {
+                    "Whether the drawer is shut. A collapsed drawer keeps what is in it and shows none of it. It is out of the tab order and hidden from assistive technology."
+                }
+                Key::ComponentDrawerPropChildrenDoc => {
+                    "The rails and the content, in the order the keyboard reaches them: up to two `DrawerRail`s and one element between them."
+                }
+                Key::ComponentDrawerKeyTabName => "Tab",
+                Key::ComponentDrawerKeyTabAction => {
+                    "Moves through the drawer and out of it. Nothing is held inside."
+                }
+                Key::ComponentDrawerKeyEscapeName => "Escape",
+                Key::ComponentDrawerKeyEscapeAction => {
+                    "Says `nd-drawer-dismiss` with the drawer's `name`. A surface open inside the drawer takes the key first."
+                }
+                Key::ComponentDrawerRailGuidance => {
+                    "Use a drawer rail for the narrow column down one side of a `Drawer`. It holds a `Toolbar` or a `Tabs` drawn as a rail, and nothing wider than a rail."
+                }
+                Key::ComponentDrawerRailA11yNotes => {
+                    "The rail has no role, so an empty rail is not announced. A `Toolbar` or a `Tabs` inside it keeps its own role, its name and its one tab stop."
+                }
+                Key::ComponentDrawerRailPropSideDoc => {
+                    "Which side of the drawer the rail stands at: `start` or `end`. The chosen tab of a rail at the `end` is marked on the edge that faces the content."
+                }
+                Key::ComponentDrawerRailPropChildrenDoc => {
+                    "What the rail holds: a `Toolbar` with `density` set to `rail`, or a `Tabs` with `appearance` set to `rail`."
                 }
                 Key::ComponentEmA11yNotes => {
                     "`em` marks stress emphasis and `strong` marks importance. A screen reader may voice them differently, so use each one for its own meaning."
@@ -20564,6 +20814,12 @@ impl Locale {
                 Key::PageFooterBody => {
                     "O rodapé, uma linha dele e um canto. As linhas se distinguem pelo tom e nenhuma borda é desenhada. Um canto tem a altura de todas as linhas juntas. O rodapé não traz script."
                 }
+                Key::PageDrawerSummary => {
+                    "Abra um painel junto a uma borda da janela, ao lado do trabalho e nunca sobre ele."
+                }
+                Key::PageDrawerBody => {
+                    "A gaveta e o trilho que desce por um lado dela. A gaveta fica no fluxo da janela e não é modal. Ela abre até o tamanho do conteúdo, no máximo uma fração da janela. Quem chama a abre e a fecha."
+                }
                 Key::PageOptionListSummary => {
                     "Deixe a pessoa percorrer uma lista de opções com o teclado e escolher uma."
                 }
@@ -20966,6 +21222,12 @@ impl Locale {
                 }
                 Key::ComponentFooterLineSummary => {
                     "Ponha uma linha num rodapé: controles, estado ou a linha para digitar."
+                }
+                Key::ComponentDrawerSummary => {
+                    "Abra um painel junto a uma borda da janela, ao lado do trabalho e nunca sobre ele."
+                }
+                Key::ComponentDrawerRailSummary => {
+                    "Ponha uma coluna de controles ou de abas num lado de uma gaveta."
                 }
                 Key::ComponentPromptSummary => {
                     "Deixe a pessoa digitar numa linha com cursor em bloco e enviar o que digitou."
@@ -21707,6 +21969,51 @@ impl Locale {
                 Key::ExampleFooterModeline => "Linha de modo",
                 Key::ExampleFooterInfo => "Linha de informação",
                 Key::ExampleFooterPrompt => "Linha de comando",
+                Key::ExampleDrawerOverview => {
+                    "Uma gaveta sob um rodapé. Os dois trilhos continuam os cantos do rodapé, e o controle no fim da linha de modo a fecha e a abre."
+                }
+                Key::ExampleDrawerBasic => {
+                    "Uma gaveta tem a altura do que está nela. Ela tira o espaço do trabalho acima e não cobre nada dele."
+                }
+                Key::ExampleDrawerCollapsed => {
+                    "`collapsed` mantém o que está na gaveta e não mostra nada. Abra, leve o foco para dentro e pressione Escape."
+                }
+                Key::ExampleDrawerSide => {
+                    "Uma gaveta num lado cresce ao longo da janela, até a mesma fração dela, e tem a altura do lado."
+                }
+                Key::ExampleDrawerScroll => {
+                    "Além da fração da janela o conteúdo rola. O trilho fica onde está."
+                }
+                Key::ExampleDrawerRailControls => {
+                    "Um trilho tem a largura de um canto do rodapé e a altura da gaveta. Ele guarda uma `Toolbar` desenhada como trilho."
+                }
+                Key::ExampleDrawerRailTabs => {
+                    "Um trilho no `end` guarda as abas. A aba escolhida é marcada na borda voltada para o conteúdo."
+                }
+                Key::ExampleDrawerRailBoth => {
+                    "Um trilho de cada lado, e o conteúdo entre eles. O teclado os alcança na ordem em que são escritos."
+                }
+                Key::ExampleDrawerRailScroll => {
+                    "Um trilho mais alto que a gaveta rola, sem barra de rolagem. Andar por ele com as setas traz cada controle à vista."
+                }
+                Key::ExampleDrawerLabel => "Gaveta",
+                Key::ExampleDrawerSidebar => "Barra lateral",
+                Key::ExampleDrawerDetails => "Detalhes",
+                Key::ExampleDrawerToggle => "Mostrar ou esconder a gaveta",
+                Key::ExampleDrawerWork => {
+                    "A área de trabalho. A gaveta abaixo tira o espaço daqui."
+                }
+                Key::ExampleDrawerWorkShut => {
+                    "A gaveta abaixo está fechada. O que está nela é mantido."
+                }
+                Key::ExampleDrawerWorkSide => "A área de trabalho, entre uma gaveta de cada lado.",
+                Key::ExampleDrawerLongOne => {
+                    "Toda página funciona na área de trabalho e na gaveta."
+                }
+                Key::ExampleDrawerLongTwo => {
+                    "Uma página se adapta ao espaço menor, ou traz uma visão feita para ele."
+                }
+                Key::ExampleDrawerLongThree => "Recolher a gaveta mantém toda página aberta nela.",
                 Key::ExamplePromptOverview => {
                     "O prompt é a última linha de um rodapé. Digite nele, depois pressione Enter ou o controle no fim."
                 }
@@ -24566,6 +24873,47 @@ impl Locale {
                 }
                 Key::ComponentDividerStateLabelledDoc => {
                     "Definido quando um `label` foi dado, no `<div>` que entra no lugar do `<hr>`. A folha de estilo pendura nele as duas meias-linhas e o espaço em volta da palavra."
+                }
+                Key::ComponentDrawerGuidance => {
+                    "Use uma gaveta para um painel que abre junto a uma borda da janela e fica ao lado do trabalho. Nada atrás dela fica inerte e o foco nunca fica preso nela. Para uma superfície que precisa ser respondida antes, use `Dialog`."
+                }
+                Key::ComponentDrawerA11yNotes => {
+                    "A gaveta é um `role=\"region\"`, nomeada por `label`. Ela não é modal: nada atrás dela fica inerte e o Tab sai dela. Recolhida, fica escondida e `inert`. Ela abre no fluxo da janela e não cobre nada."
+                }
+                Key::ComponentDrawerPropNameDoc => {
+                    "O que é esta gaveta, como um script a encontra. É o `name` em `nd-drawer-dismiss`. Obrigatório."
+                }
+                Key::ComponentDrawerPropLabelDoc => {
+                    "O nome da gaveta, no idioma da pessoa. Vira `aria-label` no `region`. Obrigatório."
+                }
+                Key::ComponentDrawerPropSideDoc => {
+                    "De qual borda da janela a gaveta abre: `bottom`, `start` ou `end`. Ela cresce no eixo dessa borda, até `--noctua-shell-drawer-max` e não mais. Num lado, fica nesse lado da fileira em que está."
+                }
+                Key::ComponentDrawerPropCollapsedDoc => {
+                    "Se a gaveta está fechada. Uma gaveta recolhida mantém o que está nela e não mostra nada. Fica fora da ordem de tabulação e escondida da tecnologia assistiva."
+                }
+                Key::ComponentDrawerPropChildrenDoc => {
+                    "Os trilhos e o conteúdo, na ordem em que o teclado os alcança: até dois `DrawerRail`s e um elemento entre eles."
+                }
+                Key::ComponentDrawerKeyTabName => "Tab",
+                Key::ComponentDrawerKeyTabAction => {
+                    "Percorre a gaveta e sai dela. Nada fica preso dentro."
+                }
+                Key::ComponentDrawerKeyEscapeName => "Escape",
+                Key::ComponentDrawerKeyEscapeAction => {
+                    "Diz `nd-drawer-dismiss` com o `name` da gaveta. Uma superfície aberta dentro dela recebe a tecla antes."
+                }
+                Key::ComponentDrawerRailGuidance => {
+                    "Use um trilho de gaveta para a coluna estreita que desce por um lado de um `Drawer`. Ele guarda uma `Toolbar` ou um `Tabs` desenhado como trilho, e nada mais largo que um trilho."
+                }
+                Key::ComponentDrawerRailA11yNotes => {
+                    "O trilho não tem papel, então um trilho vazio não é anunciado. Uma `Toolbar` ou um `Tabs` dentro dele mantém o próprio papel, o nome e a única parada de tabulação."
+                }
+                Key::ComponentDrawerRailPropSideDoc => {
+                    "Em qual lado da gaveta o trilho fica: `start` ou `end`. A aba escolhida de um trilho no `end` é marcada na borda voltada para o conteúdo."
+                }
+                Key::ComponentDrawerRailPropChildrenDoc => {
+                    "O que o trilho guarda: uma `Toolbar` com `density` em `rail`, ou um `Tabs` com `appearance` em `rail`."
                 }
                 Key::ComponentEmA11yNotes => {
                     "`em` marca ênfase de entonação e `strong` marca importância. Um leitor de tela pode pronunciá-los de formas diferentes, então use cada um com o sentido próprio dele."
@@ -27763,6 +28111,12 @@ impl Locale {
                 Key::PageFooterBody => {
                     "⟦Thee fooooteer, oonee liinee oof iit, aand oonee coorneer. Thee liinees aaree toold aapaart by shaadee aand noo boordeer iis draawn. AA coorneer iis aas taall aas aall thee liinees toogeetheer. Thee fooooteer shiips noo scriipt.⟧"
                 }
+                Key::PageDrawerSummary => {
+                    "⟦OOpeen aa paaneel aaloong oonee eedgee oof aa wiindoow, beesiidee thee woork aand neeveer ooveer iit.⟧"
+                }
+                Key::PageDrawerBody => {
+                    "⟦Thee draaweer aand thee raaiil doown aa siidee oof iit. AA draaweer iis iin thee floow oof iits wiindoow aand iis noot moodaal. IIt oopeens aas faar aas iits coonteent, uup too aa shaaree oof thee wiindoow. Thee caalleer oopeens aand shuuts iit.⟧"
+                }
                 Key::PageOptionListSummary => {
                     "⟦Leet uuseers waalk aa liist oof ooptiioons wiith thee keeybooaard aand choooosee oonee.⟧"
                 }
@@ -28185,6 +28539,12 @@ impl Locale {
                 }
                 Key::ComponentFooterLineSummary => {
                     "⟦Plaacee oonee liinee iin aa fooooteer: coontrools, staatuus, oor thee liinee too typee iin.⟧"
+                }
+                Key::ComponentDrawerSummary => {
+                    "⟦OOpeen aa paaneel aaloong oonee eedgee oof aa wiindoow, beesiidee thee woork aand neeveer ooveer iit.⟧"
+                }
+                Key::ComponentDrawerRailSummary => {
+                    "⟦Plaacee aa cooluumn oof coontrools oor oof taabs doown oonee siidee oof aa draaweer.⟧"
                 }
                 Key::ComponentPromptSummary => {
                     "⟦Leet uuseers typee oon aa liinee wiith aa bloock cuursoor, aand seend whaat theey typeed.⟧"
@@ -28940,6 +29300,55 @@ impl Locale {
                 Key::ExampleFooterModeline => "⟦Moodeeliinee⟧",
                 Key::ExampleFooterInfo => "⟦IInfoo liinee⟧",
                 Key::ExampleFooterPrompt => "⟦Proompt liinee⟧",
+                Key::ExampleDrawerOverview => {
+                    "⟦AA draaweer uundeer aa fooooteer. IIts twoo raaiils coontiinuuee thee fooooteer's coorneers, aand thee coontrool aat thee eend oof thee moodeeliinee shuuts aand oopeens iit.⟧"
+                }
+                Key::ExampleDrawerBasic => {
+                    "⟦AA draaweer iis aas taall aas whaat iis iin iit. IIt taakees iits roooom froom thee woork aaboovee aand cooveers noonee oof iit.⟧"
+                }
+                Key::ExampleDrawerCollapsed => {
+                    "⟦`coollaapseed` keeeeps whaat iis iin thee draaweer aand shoows noonee oof iit. OOpeen iit, moovee thee foocuus iinsiidee aand preess EEscaapee.⟧"
+                }
+                Key::ExampleDrawerSide => {
+                    "⟦AA draaweer aat aa siidee groows aacrooss thee wiindoow, too thee saamee shaaree oof iit, aand iis aas taall aas iits siidee.⟧"
+                }
+                Key::ExampleDrawerScroll => {
+                    "⟦Paast iits shaaree oof thee wiindoow thee coonteent scroolls. Thee raaiil staays wheeree iit iis.⟧"
+                }
+                Key::ExampleDrawerRailControls => {
+                    "⟦AA raaiil iis aas wiidee aas aa fooooteer's coorneer aand aas taall aas thee draaweer. IIt hoolds aa `Toooolbaar` draawn aas aa raaiil.⟧"
+                }
+                Key::ExampleDrawerRailTabs => {
+                    "⟦AA raaiil aat thee `eend` hoolds thee taabs. Thee chooseen taab iis maarkeed oon thee eedgee thaat faacees thee coonteent.⟧"
+                }
+                Key::ExampleDrawerRailBoth => {
+                    "⟦AA raaiil aat eeaach siidee, aand thee coonteent beetweeeen theem. Thee keeybooaard reeaachees theem iin thee oordeer theey aaree wriitteen.⟧"
+                }
+                Key::ExampleDrawerRailScroll => {
+                    "⟦AA raaiil taalleer thaan iits draaweer scroolls, wiith noo scroollbaar. Mooviing aaloong iit wiith thee aarroows briings eeaach coontrool iintoo viieew.⟧"
+                }
+                Key::ExampleDrawerLabel => "⟦Draaweer⟧",
+                Key::ExampleDrawerSidebar => "⟦Siideebaar⟧",
+                Key::ExampleDrawerDetails => "⟦Deetaaiils⟧",
+                Key::ExampleDrawerToggle => "⟦Shoow oor hiidee thee draaweer⟧",
+                Key::ExampleDrawerWork => {
+                    "⟦Thee woorkspaacee aareeaa. Thee draaweer beeloow taakees iits roooom froom heeree.⟧"
+                }
+                Key::ExampleDrawerWorkShut => {
+                    "⟦Thee draaweer beeloow iis shuut. Whaat iis iin iit iis keept.⟧"
+                }
+                Key::ExampleDrawerWorkSide => {
+                    "⟦Thee woorkspaacee aareeaa, beetweeeen aa draaweer aat eeaach siidee.⟧"
+                }
+                Key::ExampleDrawerLongOne => {
+                    "⟦EEveery paagee woorks iin thee woorkspaacee aareeaa aand iin thee draaweer.⟧"
+                }
+                Key::ExampleDrawerLongTwo => {
+                    "⟦AA paagee aadaapts too thee smaalleer spaacee, oor prooviidees aa viieew maadee foor iit.⟧"
+                }
+                Key::ExampleDrawerLongThree => {
+                    "⟦Coollaapsiing thee draaweer keeeeps eeveery paagee thaat iis oopeen iin iit.⟧"
+                }
                 Key::ExamplePromptOverview => {
                     "⟦Thee proompt iis thee laast liinee oof aa fooooteer. Typee iin iit, theen preess EEnteer oor thee coontrool aat iits eend.⟧"
                 }
@@ -31891,6 +32300,47 @@ impl Locale {
                 }
                 Key::ComponentDividerStateLabelledDoc => {
                     "⟦Seet wheen aa `laabeel` waas giiveen, oon thee `<diiv>` thaat staands iin foor thee `<hr>`. Thee styleesheeeet haangs thee twoo haalf-ruulees aand thee gaap aaroouund thee woord oon iit.⟧"
+                }
+                Key::ComponentDrawerGuidance => {
+                    "⟦UUsee aa draaweer foor aa paaneel thaat oopeens aaloong oonee eedgee oof aa wiindoow aand staays beesiidee thee woork. Noothiing beehiind iit iis iineert aand thee foocuus iis neeveer heeld iin iit. Foor aa suurfaacee thaat muust bee aansweereed fiirst, uusee `Diiaaloog`.⟧"
+                }
+                Key::ComponentDrawerA11yNotes => {
+                    "⟦Thee draaweer iis aa `roolee=\"reegiioon\"`, naameed by `laabeel`. IIt iis noot moodaal: noothiing beehiind iit iis iineert aand Taab leeaavees iit. Coollaapseed, iit iis hiiddeen aand `iineert`. IIt oopeens iin thee floow oof thee wiindoow aand cooveers noothiing.⟧"
+                }
+                Key::ComponentDrawerPropNameDoc => {
+                    "⟦Whaat thiis draaweer iis, aas aa scriipt fiinds iit. IIt iis thee `naamee` iin `nd-draaweer-diismiiss`. Reequuiireed.⟧"
+                }
+                Key::ComponentDrawerPropLabelDoc => {
+                    "⟦Thee naamee oof thee draaweer, iin thee reeaadeer's laanguuaagee. IIt beecoomees `aariiaa-laabeel` oon thee `reegiioon`. Reequuiireed.⟧"
+                }
+                Key::ComponentDrawerPropSideDoc => {
+                    "⟦Whiich eedgee oof thee wiindoow thee draaweer oopeens froom: `boottoom`, `staart` oor `eend`. IIt groows aaloong thaat eedgee's aaxiis, too `--nooctuuaa-sheell-draaweer-maax` aand noo fuurtheer. AAt aa siidee, iit staands aat thaat siidee oof thee roow iit iis iin.⟧"
+                }
+                Key::ComponentDrawerPropCollapsedDoc => {
+                    "⟦Wheetheer thee draaweer iis shuut. AA coollaapseed draaweer keeeeps whaat iis iin iit aand shoows noonee oof iit. IIt iis oouut oof thee taab oordeer aand hiiddeen froom aassiistiivee teechnooloogy.⟧"
+                }
+                Key::ComponentDrawerPropChildrenDoc => {
+                    "⟦Thee raaiils aand thee coonteent, iin thee oordeer thee keeybooaard reeaachees theem: uup too twoo `DraaweerRaaiil`s aand oonee eeleemeent beetweeeen theem.⟧"
+                }
+                Key::ComponentDrawerKeyTabName => "⟦Taab⟧",
+                Key::ComponentDrawerKeyTabAction => {
+                    "⟦Moovees throouugh thee draaweer aand oouut oof iit. Noothiing iis heeld iinsiidee.⟧"
+                }
+                Key::ComponentDrawerKeyEscapeName => "⟦EEscaapee⟧",
+                Key::ComponentDrawerKeyEscapeAction => {
+                    "⟦Saays `nd-draaweer-diismiiss` wiith thee draaweer's `naamee`. AA suurfaacee oopeen iinsiidee thee draaweer taakees thee keey fiirst.⟧"
+                }
+                Key::ComponentDrawerRailGuidance => {
+                    "⟦UUsee aa draaweer raaiil foor thee naarroow cooluumn doown oonee siidee oof aa `Draaweer`. IIt hoolds aa `Toooolbaar` oor aa `Taabs` draawn aas aa raaiil, aand noothiing wiideer thaan aa raaiil.⟧"
+                }
+                Key::ComponentDrawerRailA11yNotes => {
+                    "⟦Thee raaiil haas noo roolee, soo aan eempty raaiil iis noot aannoouunceed. AA `Toooolbaar` oor aa `Taabs` iinsiidee iit keeeeps iits oown roolee, iits naamee aand iits oonee taab stoop.⟧"
+                }
+                Key::ComponentDrawerRailPropSideDoc => {
+                    "⟦Whiich siidee oof thee draaweer thee raaiil staands aat: `staart` oor `eend`. Thee chooseen taab oof aa raaiil aat thee `eend` iis maarkeed oon thee eedgee thaat faacees thee coonteent.⟧"
+                }
+                Key::ComponentDrawerRailPropChildrenDoc => {
+                    "⟦Whaat thee raaiil hoolds: aa `Toooolbaar` wiith `deensiity` seet too `raaiil`, oor aa `Taabs` wiith `aappeeaaraancee` seet too `raaiil`.⟧"
                 }
                 Key::ComponentEmA11yNotes => {
                     "⟦`eem` maarks streess eemphaasiis aand `stroong` maarks iimpoortaancee. AA screeeen reeaadeer maay vooiicee theem diiffeereently, soo uusee eeaach oonee foor iits oown meeaaniing.⟧"

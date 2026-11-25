@@ -311,6 +311,7 @@ of these carries measured rules, not description:
 | how a list filtered by typing matches, ranks or marks | `crates/noctua-design-runtime/src/search-match.js`, and "The fuzzy matcher" below |
 | a list walked by the keyboard, its active option, or the control that drives one | `crates/noctua-design-runtime/src/option-list.js` |
 | the prompt, its block cursor, or anything drawn over a text control | `crates/noctua-design-runtime/src/prompt.js` |
+| a drawer: what a collapsed one owes the keyboard, and what Escape says | `crates/noctua-design-runtime/src/drawer.js` |
 | what both implementations must *do* | `spec/components/<name>.cases.toml`, and `crates/noctua-design-spec/src/conformance.rs` for the vocabulary a step may use |
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
@@ -924,6 +925,41 @@ takes the block away, gives the engine's caret its colour back and reads where i
 second layout of the text would be the technique agreeing with itself. The runner hides every
 scrollbar by default, so that file leaves them on.
 
+### The drawer
+
+**A drawer is in the flow of its window, and never over the work.** `Drawer` is the region below a
+footer, or a panel at a side (`NOCTUA.md §12.11`, §12.14): a `role="region"` that takes its room
+from what is beside it, so nothing it opens can cover the control the keyboard is on (WCAG 2.4.11).
+It is not modal. Nothing behind it is inert and Tab leaves it. `DrawerRail` is the column down a
+side of it, `--noctua-shell-rail` wide, on the footer corners' own shade, holding a `Toolbar` or a
+`Tabs` drawn as a rail. A drawer at the bottom is on the page's own surface, as the footer's last
+line is, and one at a side is on the subtle surface, which is all that tells it from the work.
+
+**It opens to a share of the box around it, so that box needs a size.** A drawer is as large as
+its content, up to `--noctua-shell-drawer-max`. That is a percentage, and it resolves only where
+the element around the drawer has a size of its own on that axis: a window has, and a box as tall
+as its content has not. Every example therefore stands in `.nd-example-window`, the site's
+stand-in for a window.
+
+**It slides by a grid track, and the hiding is the stylesheet's.** No engine moves a box between
+nothing and the size of its content, so the root is a grid of one track and `.nd-drawer-panel` is
+the one thing in it, with a floor of nothing on both axes. The rails and the content each scroll
+what does not fit, which is what keeps them inside a drawer partway shut. `collapsed` takes the
+track to nothing and sets `visibility: hidden`, at the end of the slide on the way shut and at the
+start on the way open, so a collapsed drawer is out of the tab order and the accessibility tree
+with no script.
+
+**The caller turns it, and `dist/drawer.js` does three things.** It writes `inert` the moment
+`collapsed` is written, for the time the drawer is still drawn. It gives the focus back to where
+it came in from when a drawer collapses around it, and leaves a reader who had left alone. And
+Escape with the focus inside says `nd-drawer-dismiss` with the drawer's `name`, after any surface
+open inside the drawer has had the key. It never opens, shuts or takes the focus in: what Escape
+closes is the caller's to decide, and so is where the keyboard goes when a drawer opens.
+
+**A drawer and a rail stand at the side they name, wherever they are written.** `side` is `order`
+in the row. The keyboard follows the order they are written in, so the `start` is written before
+what it stands beside and the `end` after it.
+
 ### Tones, bars, carousels, spectra
 
 **A tone is a name, not a list of four.** The vendored palette declares hundreds of semantic
@@ -1147,10 +1183,13 @@ means. A page that needs a control never gets a `<button>` with a class on it, n
 component for a control that exists: `Button { hide_label }` is the icon button.
 
 **What a component owes its consumer ships from `dist/`, and `shell.js` imports it back.** What
-stays in `docs-site/assets/shell.js` is the site's own furniture — the drawer, the settings panel,
-the example frames with their viewport rig and implementation switch, the icon gallery — and it
-ships nowhere. A countdown that a message owes every reader is the component's; a control that
-raises the same message again is the page's (`spec/components/toast.toml` records the split).
+stays in `docs-site/assets/shell.js` is the site's own furniture — the sidebar's own drawer, the
+settings panel, the example frames with their viewport rig and implementation switch, the icon
+gallery — and it ships nowhere. A countdown that a message owes every reader is the component's; a
+control that raises the same message again is the page's (`spec/components/toast.toml` records the
+split). The same line runs through a `Drawer`: `inert` and the focus it gives back are the
+component's, and the control that turns an example's drawer is the page's, because the caller of a
+component on this site is the page.
 
 **The header is one line at 320px.** It holds the controls that are not settings — the drawer,
 the repository, the language, the implementation switch — and the one theme menu behind a palette

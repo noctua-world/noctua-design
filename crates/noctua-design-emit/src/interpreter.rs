@@ -41,8 +41,16 @@ pub fn emit(components: &[Component]) -> Vec<EmittedFile> {
     )]
 }
 
-/// Clippy's ceiling for one function, in the dispatch's own arms.
+/// Clippy's ceiling for one function, in lines.
 const LONG: usize = 100;
+
+/// The lines of the dispatch that are not a component's arm: the `match`, the
+/// arm for a name nothing declares, and the brace that closes it.
+///
+/// The ceiling is on the whole body, so counting the arms alone left the
+/// dispatch without its allow for exactly the three components that took it
+/// from ninety-eight arms to a hundred.
+const AROUND: usize = 3;
 
 /// How many props make a component's function long enough to need the allow.
 const LONG_ENOUGH: usize = 20;
@@ -114,7 +122,7 @@ fn dispatch(out: &mut String, components: &[Component]) {
     }
 
     out.push_str("/// Renders one component of a tree.\n");
-    if arms.lines().count() > LONG {
+    if arms.lines().count() + AROUND > LONG {
         out.push_str(
             "#[allow(\n    clippy::too_many_lines,\n    reason = \"one arm per component, \
              and the component set is the point\"\n)]\n",

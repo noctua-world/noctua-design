@@ -26,15 +26,16 @@ use noctua_design::components::{
     DatePickerDay, DatePickerDayKind, DatePickerFirstDay, DatePickerForm, DatePickerLabels,
     DatePickerMonths, DatePickerOrder, DatePickerPair, DatePickerSelection, DatePickerSize, Del,
     Dialog, DialogSize, Disclosure, DisclosureHeading, Divider, DividerOrientation, DividerSpacing,
-    DividerWeight, Em, ErrorSummary, ErrorSummaryItem, Field, FieldKind, FieldSize, Fieldset,
-    FileInput, FileInputSize, Footer, FooterCorner, FooterCornerSide, FooterLine, FooterLineKind,
-    FooterVisibility, Heading, HeadingLevel, HeadingSize, HeadingTone, Icon, IconSize, Image,
-    ImageFit, ImageLoading, ImageRatio, Info, InfoPlacement, Input, InputKind, InputSize, Ins, Kbd,
-    KbdSize, Label, LabelKind, LabelSize, Lineage, LineageFigure, LineageFigureParallax,
-    LineageFigureShape, LineageFigureTone, LineageFilterMode, LineageHeight, LineageLettering,
-    LineageLine, LineagePick, LineageReach, LineageRoute, LineageSize, LineageThickness,
-    LineageTilt, LineageView, Link, LinkTone, List, ListItem, ListKind, ListMarker, ListSpacing,
-    Mark, MatchText, Menu, MenuItem, MenuPlacement, MessageBar, MessageBarLive, Meter, MeterSize,
+    DividerWeight, Drawer, DrawerRail, DrawerRailSide, DrawerSide, Em, ErrorSummary,
+    ErrorSummaryItem, Field, FieldKind, FieldSize, Fieldset, FileInput, FileInputSize, Footer,
+    FooterCorner, FooterCornerSide, FooterLine, FooterLineKind, FooterVisibility, Heading,
+    HeadingLevel, HeadingSize, HeadingTone, Icon, IconSize, Image, ImageFit, ImageLoading,
+    ImageRatio, Info, InfoPlacement, Input, InputKind, InputSize, Ins, Kbd, KbdSize, Label,
+    LabelKind, LabelSize, Lineage, LineageFigure, LineageFigureParallax, LineageFigureShape,
+    LineageFigureTone, LineageFilterMode, LineageHeight, LineageLettering, LineageLine,
+    LineagePick, LineageReach, LineageRoute, LineageSize, LineageThickness, LineageTilt,
+    LineageView, Link, LinkTone, List, ListItem, ListKind, ListMarker, ListSpacing, Mark,
+    MatchText, Menu, MenuItem, MenuPlacement, MessageBar, MessageBarLive, Meter, MeterSize,
     NumberInput, NumberInputSize, NumberInputStepping, OptionGroup, OptionItem, OptionList,
     OptionListLayout, OptionListSize, OtpField, OtpFieldKind, OtpFieldSize, Pagination,
     PaginationSize, PaginationSpread, Paragraph, ParagraphSize, ParagraphTone, Popover,
@@ -59,6 +60,10 @@ use noctua_design::components::{
 use crate::tree::{Node, Scope, Value, render};
 
 /// Renders one component of a tree.
+#[allow(
+    clippy::too_many_lines,
+    reason = "one arm per component, and the component set is the point"
+)]
 pub(crate) fn component(
     name: &str,
     props: &'static [(&'static str, Value)],
@@ -87,6 +92,8 @@ pub(crate) fn component(
         "Dialog" => dialog(props, children, scope),
         "Disclosure" => disclosure(props, children, scope),
         "Divider" => divider(props, children, scope),
+        "Drawer" => drawer(props, children, scope),
+        "DrawerRail" => drawer_rail(props, children, scope),
         "Em" => em(props, children, scope),
         "ErrorSummary" => error_summary(props, children, scope),
         "ErrorSummaryItem" => error_summary_item(props, children, scope),
@@ -1368,6 +1375,56 @@ fn divider(
             weight: weight_,
             decorative: decorative_,
             class: class_,
+        }
+    }
+}
+
+/// `Drawer`, from a tree.
+fn drawer(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("Drawer.name is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("Drawer.label is required and this tree does not set it");
+    let side_ = scope
+        .pick(props, "side", &DrawerSide::ALL, DrawerSide::as_str)
+        .unwrap_or_default();
+    let collapsed_ = scope.flag(props, "collapsed").unwrap_or(false);
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        Drawer {
+            name: name_,
+            label: label_,
+            side: side_,
+            collapsed: collapsed_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `DrawerRail`, from a tree.
+fn drawer_rail(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let side_ = scope
+        .pick(props, "side", &DrawerRailSide::ALL, DrawerRailSide::as_str)
+        .unwrap_or_default();
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        DrawerRail {
+            side: side_,
+            class: class_,
+            {render(children, scope)}
         }
     }
 }

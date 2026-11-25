@@ -33,6 +33,8 @@ import { Del } from "@noctua-world/design-react/components/del.js";
 import { Dialog } from "@noctua-world/design-react/components/dialog.js";
 import { Disclosure } from "@noctua-world/design-react/components/disclosure.js";
 import { Divider } from "@noctua-world/design-react/components/divider.js";
+import { Drawer } from "@noctua-world/design-react/components/drawer.js";
+import { DrawerRail } from "@noctua-world/design-react/components/drawer_rail.js";
 import { Em } from "@noctua-world/design-react/components/em.js";
 import { ErrorSummary } from "@noctua-world/design-react/components/error_summary.js";
 import { ErrorSummaryItem } from "@noctua-world/design-react/components/error_summary_item.js";
@@ -130,6 +132,8 @@ export const COMPONENTS = {
   Dialog,
   Disclosure,
   Divider,
+  Drawer,
+  DrawerRail,
   Em,
   ErrorSummary,
   ErrorSummaryItem,

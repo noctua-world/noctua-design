@@ -315,6 +315,7 @@ pub fn is_custom(component: &Component) -> bool {
             | "FooterLine"
             | "Prompt"
             | "Toolbar"
+            | "Drawer"
     )
 }
 
@@ -364,6 +365,7 @@ pub fn dioxus_body(sink: &mut String, component: &Component) {
         "OptionGroup" => out.push_str(OPTION_GROUP_DIOXUS),
         "OptionItem" => out.push_str(OPTION_ITEM_DIOXUS),
         "FooterLine" => out.push_str(FOOTER_LINE_DIOXUS),
+        "Drawer" => out.push_str(DRAWER_DIOXUS),
         "Prompt" => out.push_str(PROMPT_DIOXUS),
         "Menu" => out.push_str(MENU_DIOXUS),
         "MenuItem" => out.push_str(MENU_ITEM_DIOXUS),
@@ -456,6 +458,7 @@ pub fn react_body(sink: &mut String, component: &Component) {
         "OptionGroup" => out.push_str(OPTION_GROUP_REACT),
         "OptionItem" => out.push_str(OPTION_ITEM_REACT),
         "FooterLine" => out.push_str(FOOTER_LINE_REACT),
+        "Drawer" => out.push_str(DRAWER_REACT),
         "Prompt" => out.push_str(PROMPT_REACT),
         "Menu" => out.push_str(MENU_REACT),
         "MenuItem" => out.push_str(MENU_ITEM_REACT),
@@ -4194,6 +4197,64 @@ const PROMPT_REACT: &str = r#"  const root = ["nd-prompt", className].filter(Boo
           disabled: Boolean(disabled || readonly),
         })
       : null,
+  );
+"#;
+
+// --- Drawer -------------------------------------------------------------------
+
+/// The panel along one edge of a window.
+///
+/// `DrawerRail` is derived from its contract. This one is written, for one
+/// element: the box inside the root.
+///
+/// # Why there are two boxes
+///
+/// A drawer slides, and no engine moves a box between nothing and the height of
+/// its content: there is no number to move toward. A grid track can be moved
+/// between no share and a whole one, so the root is a grid of one track and the
+/// panel is the one thing in it. The panel is what holds the rails and the
+/// content side by side, each of which scrolls what the closing track leaves
+/// no room for.
+///
+/// # What is not written here
+///
+/// No `inert`. A collapsed drawer is hidden by the stylesheet, which takes it
+/// out of the tab order and the accessibility tree with no script.
+/// `dist/drawer.js` writes `inert` beside that for the time the drawer takes to
+/// slide shut, and an attribute both this body and a script wrote would be one
+/// a re-render takes back.
+const DRAWER_DIOXUS: &str = r#"    let root = format!("nd-drawer {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        div {
+            class: "{root}",
+            role: "region",
+            "aria-label": "{label}",
+            "data-nd-drawer": "{name}",
+            "data-nd-side": side.as_str(),
+            "data-nd-collapsed": if collapsed { "true" } else { "false" },
+            div { class: "nd-drawer-panel", {children} }
+        }
+    }
+"#;
+
+/// The same panel, in React.
+const DRAWER_REACT: &str = r#"  const root = ["nd-drawer", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      role: "region",
+      "aria-label": label,
+      "data-nd-drawer": name,
+      "data-nd-side": side ?? "bottom",
+      "data-nd-collapsed": String(collapsed ?? false),
+      ...rest,
+    },
+    // See the Dioxus half: the one thing in the track that slides.
+    h("div", { className: "nd-drawer-panel" }, children),
   );
 "#;
 

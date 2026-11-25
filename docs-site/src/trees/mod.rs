@@ -45,6 +45,8 @@ mod del;
 mod dialog;
 mod disclosure;
 mod divider;
+mod drawer;
+mod drawer_rail;
 mod em;
 mod error_summary;
 mod error_summary_item;
@@ -144,6 +146,10 @@ pub(crate) type Hero = (&'static str, &'static str, &'static [Node]);
 /// An empty slice means none has been written yet, which is a state the
 /// migration passes through and `every_example_has_a_tree` refuses at the end.
 #[must_use]
+#[allow(
+    clippy::too_many_lines,
+    reason = "one line per component, and the component set is the point"
+)]
 pub(crate) fn for_component(name: &str) -> &'static [Tree] {
     match name {
         "Abbr" => abbr::EXAMPLES,
@@ -167,6 +173,8 @@ pub(crate) fn for_component(name: &str) -> &'static [Tree] {
         "Dialog" => dialog::EXAMPLES,
         "Disclosure" => disclosure::EXAMPLES,
         "Divider" => divider::EXAMPLES,
+        "Drawer" => drawer::EXAMPLES,
+        "DrawerRail" => drawer_rail::EXAMPLES,
         "Em" => em::EXAMPLES,
         "ErrorSummary" => error_summary::EXAMPLES,
         "ErrorSummaryItem" => error_summary_item::EXAMPLES,

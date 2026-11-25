@@ -603,6 +603,279 @@ Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#,
         }],
     ),
     (
+        "drawer",
+        r#"Drawer { name: "…", label: "…",
+    DrawerRail { Toolbar { density: ToolbarDensity::Rail, … } }
+    …
+    DrawerRail { side: DrawerRailSide::End, Tabs { appearance: TabsAppearance::Rail, … } }
+}"#,
+        // THE DRAWER OF `NOCTUA.md §12.11`, WHOLE, UNDER THE FOOTER IT BELONGS
+        // TO: a rail of controls, the page in focus, a rail of tabs, and the
+        // work above all of it. The two rails continue the footer's corners.
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-window"))],
+            children: &[
+                Node::Element {
+                    tag: "div",
+                    attributes: &[("class", Value::Text("nd-example-work"))],
+                    children: &[Node::Component {
+                        name: "Paragraph",
+                        props: &[],
+                        children: &[Node::Text(Value::Message(Key::ExampleDrawerWork))],
+                    }],
+                },
+                Node::Component {
+                    name: "Footer",
+                    props: &[("label", Value::Message(Key::ExampleFooterLabel))],
+                    children: &[
+                        Node::Component {
+                            name: "FooterCorner",
+                            props: &[("side", Value::Text("start"))],
+                            children: &[],
+                        },
+                        Node::Component {
+                            name: "FooterLine",
+                            props: &[("kind", Value::Text("modeline"))],
+                            children: &[
+                                Node::Component {
+                                    name: "Icon",
+                                    props: &[
+                                        ("icon", Value::Text("terminal")),
+                                        ("size", Value::Text("small")),
+                                    ],
+                                    children: &[],
+                                },
+                                Node::Element {
+                                    tag: "span",
+                                    attributes: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailCommands,
+                                    ))],
+                                },
+                                Node::Element {
+                                    tag: "span",
+                                    attributes: &[("class", Value::Text("nd-example-end"))],
+                                    children: &[Node::Component {
+                                        name: "Button",
+                                        props: &[
+                                            ("hide_label", Value::Bool(true)),
+                                            ("icon", Value::Text("panel-bottom")),
+                                            ("variant", Value::Text("transparent")),
+                                            ("tone", Value::Text("neutral")),
+                                            ("size", Value::Text("small")),
+                                            ("action", Value::Text("drawer-toggle")),
+                                            ("label", Value::Message(Key::ExampleDrawerToggle)),
+                                        ],
+                                        children: &[],
+                                    }],
+                                },
+                            ],
+                        },
+                        Node::Component {
+                            name: "FooterCorner",
+                            props: &[("side", Value::Text("end"))],
+                            children: &[],
+                        },
+                    ],
+                },
+                Node::Component {
+                    name: "Drawer",
+                    props: &[
+                        ("name", Value::Text("overview-drawer")),
+                        ("label", Value::Message(Key::ExampleDrawerLabel)),
+                    ],
+                    children: &[
+                        Node::Component {
+                            name: "DrawerRail",
+                            props: &[("side", Value::Text("start"))],
+                            children: &[Node::Component {
+                                name: "Toolbar",
+                                props: &[
+                                    ("density", Value::Text("rail")),
+                                    ("label", Value::Message(Key::ExampleRailControls)),
+                                ],
+                                children: &[
+                                    Node::Component {
+                                        name: "ToolbarGroup",
+                                        props: &[],
+                                        children: &[
+                                            Node::Component {
+                                                name: "Tooltip",
+                                                props: &[
+                                                    (
+                                                        "name",
+                                                        Value::Text("overview-drawer-collapse"),
+                                                    ),
+                                                    (
+                                                        "text",
+                                                        Value::Message(Key::ExampleRailCollapse),
+                                                    ),
+                                                ],
+                                                children: &[Node::Component {
+                                                    name: "Button",
+                                                    props: &[
+                                                        ("variant", Value::Text("transparent")),
+                                                        ("tone", Value::Text("neutral")),
+                                                        ("size", Value::Text("small")),
+                                                        ("hide_label", Value::Bool(true)),
+                                                        ("icon", Value::Text("chevrons-down")),
+                                                        (
+                                                            "label",
+                                                            Value::Message(
+                                                                Key::ExampleRailCollapse,
+                                                            ),
+                                                        ),
+                                                        ("action", Value::Text("drawer-toggle")),
+                                                    ],
+                                                    children: &[],
+                                                }],
+                                            },
+                                            Node::Component {
+                                                name: "Tooltip",
+                                                props: &[
+                                                    ("name", Value::Text("overview-drawer-close")),
+                                                    ("text", Value::Message(Key::ExampleRailClose)),
+                                                ],
+                                                children: &[Node::Component {
+                                                    name: "Button",
+                                                    props: &[
+                                                        ("variant", Value::Text("transparent")),
+                                                        ("tone", Value::Text("neutral")),
+                                                        ("size", Value::Text("small")),
+                                                        ("hide_label", Value::Bool(true)),
+                                                        ("icon", Value::Text("close")),
+                                                        (
+                                                            "label",
+                                                            Value::Message(Key::ExampleRailClose),
+                                                        ),
+                                                    ],
+                                                    children: &[],
+                                                }],
+                                            },
+                                        ],
+                                    },
+                                    Node::Component {
+                                        name: "ToolbarGroup",
+                                        props: &[],
+                                        children: &[Node::Component {
+                                            name: "Tooltip",
+                                            props: &[
+                                                ("name", Value::Text("overview-drawer-direction")),
+                                                ("text", Value::Message(Key::ExampleRailDirection)),
+                                            ],
+                                            children: &[Node::Component {
+                                                name: "Button",
+                                                props: &[
+                                                    ("variant", Value::Text("transparent")),
+                                                    ("tone", Value::Text("neutral")),
+                                                    ("size", Value::Text("small")),
+                                                    ("hide_label", Value::Bool(true)),
+                                                    ("icon", Value::Text("arrow-up-down")),
+                                                    (
+                                                        "label",
+                                                        Value::Message(Key::ExampleRailDirection),
+                                                    ),
+                                                ],
+                                                children: &[],
+                                            }],
+                                        }],
+                                    },
+                                ],
+                            }],
+                        },
+                        Node::Element {
+                            tag: "div",
+                            attributes: &[("class", Value::Text("nd-example-pane"))],
+                            children: &[
+                                Node::Component {
+                                    name: "TabPanel",
+                                    props: &[
+                                        ("name", Value::Text("overview-drawer-pages")),
+                                        ("value", Value::Text("commands")),
+                                    ],
+                                    children: &[Node::Component {
+                                        name: "Paragraph",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Message(
+                                            Key::ExampleRailCommandsBody,
+                                        ))],
+                                    }],
+                                },
+                                Node::Component {
+                                    name: "TabPanel",
+                                    props: &[
+                                        ("name", Value::Text("overview-drawer-pages")),
+                                        ("value", Value::Text("settings")),
+                                    ],
+                                    children: &[Node::Component {
+                                        name: "Paragraph",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Message(
+                                            Key::ExampleRailSettingsBody,
+                                        ))],
+                                    }],
+                                },
+                            ],
+                        },
+                        Node::Component {
+                            name: "DrawerRail",
+                            props: &[("side", Value::Text("end"))],
+                            children: &[Node::Component {
+                                name: "Tabs",
+                                props: &[
+                                    ("name", Value::Text("overview-drawer-pages")),
+                                    ("label", Value::Message(Key::ExampleRailPages)),
+                                    ("appearance", Value::Text("rail")),
+                                    ("size", Value::Text("small")),
+                                ],
+                                children: &[
+                                    Node::Component {
+                                        name: "Tooltip",
+                                        props: &[
+                                            ("name", Value::Text("overview-drawer-pages-commands")),
+                                            ("text", Value::Message(Key::ExampleRailCommands)),
+                                            ("placement", Value::Text("end")),
+                                        ],
+                                        children: &[Node::Component {
+                                            name: "Tab",
+                                            props: &[
+                                                ("name", Value::Text("overview-drawer-pages")),
+                                                ("value", Value::Text("commands")),
+                                                ("icon", Value::Text("terminal")),
+                                                ("label", Value::Message(Key::ExampleRailCommands)),
+                                                ("selected", Value::Bool(true)),
+                                            ],
+                                            children: &[],
+                                        }],
+                                    },
+                                    Node::Component {
+                                        name: "Tooltip",
+                                        props: &[
+                                            ("name", Value::Text("overview-drawer-pages-settings")),
+                                            ("text", Value::Message(Key::ExampleRailSettings)),
+                                            ("placement", Value::Text("end")),
+                                        ],
+                                        children: &[Node::Component {
+                                            name: "Tab",
+                                            props: &[
+                                                ("name", Value::Text("overview-drawer-pages")),
+                                                ("value", Value::Text("settings")),
+                                                ("icon", Value::Text("settings")),
+                                                ("label", Value::Message(Key::ExampleRailSettings)),
+                                            ],
+                                            children: &[],
+                                        }],
+                                    },
+                                ],
+                            }],
+                        },
+                    ],
+                },
+            ],
+        }],
+    ),
+    (
         "option-list",
         r#"OptionList { name: "…", label: "…", empty_label: "…",
     OptionGroup { label: "…",

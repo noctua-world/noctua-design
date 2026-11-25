@@ -1,0 +1,91 @@
+guidance = """
+Use a drawer for a panel that opens along one edge of a window and stays beside
+the work. Nothing behind it is inert and the focus is never held in it. For a
+surface that must be answered first, use `Dialog`.
+"""
+
+[meta]
+name = "Drawer"
+element = "div"
+class = "nd-drawer"
+page = "drawer"
+summary = "Open a panel along one edge of a window, beside the work and never over it."
+
+# A REGION BESIDE THE WORK, NOT A SURFACE OVER IT.
+#
+# The drawer of an application window is the region below its footer
+# (`NOCTUA.md §12.11`). It is in the flow of the window: opening it takes room
+# from what is above it and covers nothing, so no control the keyboard is on is
+# ever hidden behind it (WCAG 2.4.11). It is not modal. Nothing behind it is
+# inert, the focus walks in and out with Tab, and no key is taken from the
+# window but Escape while the focus is inside.
+#
+# HOW FAR IT OPENS. Along the edge it opens from, a drawer is as large as what
+# is in it and never larger than `--noctua-shell-drawer-max`, a share of the
+# window. That is a percentage, so the element around a drawer needs a size of
+# its own on that axis: a window is one, and a box as tall as its content is
+# not. Past the share, the content scrolls and the rails stay.
+#
+# WHAT IS IN IT. Up to two `DrawerRail`s and one element of content, in the
+# order the keyboard should reach them. The content is the caller's own
+# element. It scrolls when it is taller than the drawer, so content with
+# nothing focusable in it needs a `tabindex` of the caller's to be scrolled
+# from the keyboard.
+#
+# COLLAPSED, IT IS OUT OF EVERYTHING, AND WHAT IS IN IT IS KEPT. The stylesheet
+# takes it to nothing along its edge and hides it, which takes it out of the
+# tab order and out of the accessibility tree with no script at all.
+# `dist/drawer.js` writes `inert` as well, so nothing in it can be reached
+# while it slides shut.
+#
+# THE CALLER TURNS IT, AND THE SCRIPT SAYS ONE THING. `collapsed` is a prop.
+# Escape with the focus inside says `nd-drawer-dismiss` with the drawer's
+# `name`, and what that closes is the caller's to decide: the page in focus, a
+# step back in it, or the whole drawer. The script moves the focus once: out of
+# a drawer that collapses around it, to where the focus was before it came in.
+# It never moves the focus in. Where the specification is silent, that is the
+# reading taken: opening a region is not a reason to take the keyboard from
+# what the reader was typing in.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-drawer"
+doc = "What this drawer is, as a script finds it. It is the `name` in `nd-drawer-dismiss`. Required."
+
+[prop.label]
+type = "text"
+required = true
+attribute = "aria-label"
+doc = "The name of the drawer, in the reader's language. It becomes `aria-label` on the `region`. Required."
+
+[prop.side]
+type = "enum"
+values = ["bottom", "start", "end"]
+default = "bottom"
+attribute = "data-nd-side"
+# A drawer opens to a share of the WINDOW around it. A picture of one alone has
+# no window, so no share is taken and the three values draw one box.
+variants = false
+doc = "Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in."
+
+[prop.collapsed]
+type = "bool"
+default = "false"
+attribute = "data-nd-collapsed"
+doc = "Whether the drawer is shut. A collapsed drawer keeps what is in it and shows none of it. It is out of the tab order and hidden from assistive technology."
+
+[prop.children]
+type = "children"
+doc = "The rails and the content, in the order the keyboard reaches them: up to two `DrawerRail`s and one element between them."
+
+[a11y]
+needs_name = true
+role = "region"
+notes = """
+The drawer is a `role="region"`, named by `label`. It is not modal: nothing behind it is inert and Tab leaves it. Collapsed, it is hidden and `inert`. It opens in the flow of the window and covers nothing.
+"""
+
+[keyboard]
+Tab = "Moves through the drawer and out of it. Nothing is held inside."
+Escape = "Says `nd-drawer-dismiss` with the drawer's `name`. A surface open inside the drawer takes the key first."

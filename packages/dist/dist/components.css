@@ -12354,3 +12354,144 @@ because a specimen of a `needs_name` component must not render a
 .nd-prompt[data-nd-disabled="true"] .nd-prompt-stack .nd-prompt-mirror .nd-prompt-cursor.nd-prompt-cursor {
   visibility: hidden;
 }
+
+/* --- crates/noctua-design-styles/src/drawer.css ---
+   COPIED, NOT GENERATED. Edit the file named above. */
+/* --- Drawer and DrawerRail ---------------------------------------------------
+ *
+ * A panel along one edge of an application window, and the rail down each side
+ * of it (`NOCTUA.md §12.11`).
+ *
+ * IN THE FLOW, AND NEVER OVER THE WORK. A drawer takes its room from what is
+ * beside it. Nothing here is positioned, so nothing it opens can cover the
+ * control the keyboard is on (WCAG 2.4.11).
+ *
+ * HOW IT SLIDES. No engine moves a box between nothing and the size of its
+ * content, and a grid track moves between no share and a whole one. So the
+ * root is a grid of one track, the panel is the one thing in it, and
+ * `collapsed` takes the track to nothing. The duration is a token, and under
+ * `prefers-reduced-motion` the token is nothing: the drawer is open or shut.
+ *
+ * HOW FAR IT OPENS. As far as its content, and never past
+ * `--noctua-shell-drawer-max` of the box around it. That is a percentage, so it
+ * holds only where that box has a size of its own on the axis. A window has. */
+.nd-drawer {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  flex: none;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  max-block-size: var(--noctua-shell-drawer-max);
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface);
+  transition:
+    grid-template-rows var(--noctua-duration-base) var(--noctua-easing-out),
+    grid-template-columns var(--noctua-duration-base) var(--noctua-easing-out),
+    visibility var(--noctua-duration-base) step-start;
+}
+
+/* A drawer at a side grows across the window and is as tall as its side.
+
+   IT STANDS ON THE SUBTLE SURFACE. A drawer at the bottom is under a footer,
+   whose last line is the page's own colour, and continues it. One at a side
+   has the work beside it and no line between them, so its shade is what tells
+   the two apart. No border is drawn. */
+.nd-drawer[data-nd-side="start"],
+.nd-drawer[data-nd-side="end"] {
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: 1fr;
+  max-block-size: none;
+  max-inline-size: var(--noctua-shell-drawer-max);
+  background: var(--nc-color-surface-subtle);
+}
+
+/* AND IT STANDS AT THE SIDE IT NAMES, in the row it is in, wherever it is
+   written. The keyboard follows the order it is written in, so a caller writes
+   a drawer at the `start` before the work and one at the `end` after it. */
+.nd-drawer[data-nd-side="start"] {
+  order: -1;
+}
+
+.nd-drawer[data-nd-side="end"] {
+  order: 1;
+}
+
+/* SHUT, IT IS NOTHING ALONG ITS EDGE AND OUT OF EVERYTHING. `visibility` is
+   what takes it out of the tab order and the accessibility tree, with no
+   script. It turns at the END of the slide on the way shut and at the START on
+   the way open, which is the two step functions: a drawer hidden at once would
+   slide shut empty. */
+.nd-drawer[data-nd-collapsed="true"] {
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition:
+    grid-template-rows var(--noctua-duration-base) var(--noctua-easing-out),
+    grid-template-columns var(--noctua-duration-base) var(--noctua-easing-out),
+    visibility var(--noctua-duration-base) step-end;
+}
+
+.nd-drawer[data-nd-collapsed="true"]:is([data-nd-side="start"], [data-nd-side="end"]) {
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: 0fr;
+}
+
+/* THE RAILS AND THE CONTENT, SIDE BY SIDE. The floor of nothing on both axes
+   is what lets the track above close on the panel, and the same floor on each
+   thing in it is what lets the panel close on them: a rail and the content
+   each scroll what does not fit, so nothing hangs out of a drawer partway
+   shut. */
+.nd-drawer-panel {
+  display: flex;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+/* THE CONTENT TAKES WHAT THE RAILS LEAVE, AND SCROLLS. It is the caller's own
+   element, so it is named by what it is not. Past the drawer's limit it is the
+   content that scrolls, and the rails stay where they are. */
+.nd-drawer-panel > :not(.nd-drawer-rail) {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow-y: auto;
+}
+
+/* A RAIL: AS WIDE AS A FOOTER'S CORNER, ON THE CORNER'S OWN SHADE, AND AS TALL
+   AS THE DRAWER. Under a footer the two rails continue its corners downward,
+   so the width and the shade are the corner's. No border is drawn.
+
+   Taller than its drawer, a rail scrolls with no scrollbar: a rail has no room
+   for one, and the focus moving along it brings each control into view. */
+.nd-drawer-rail {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  box-sizing: border-box;
+  inline-size: var(--noctua-shell-rail);
+  min-block-size: 0;
+  overflow-x: clip;
+  overflow-y: auto;
+  scrollbar-width: none;
+  background: var(--nc-color-corner);
+}
+
+/* A RAIL STANDS AT THE SIDE IT NAMES, wherever it is written. The keyboard
+   follows the order it is written in, so a caller writes the `start` rail
+   before the content and the `end` rail after it. */
+.nd-drawer-rail[data-nd-side="start"] {
+  order: -1;
+}
+
+.nd-drawer-rail[data-nd-side="end"] {
+  order: 1;
+}
+
+/* THE CHOSEN TAB OF A RAIL AT THE END IS MARKED ON THE EDGE THAT FACES THE
+   CONTENT. A strip of tabs marks the edge its panels are beyond, and the
+   panels of a rail at the end are before it. */
+.nd-drawer-rail[data-nd-side="end"] .nd-tabs[data-nd-appearance="rail"] .nd-tab[data-nd-selected="true"],
+.nd-drawer-rail[data-nd-side="end"] .nd-tabs[data-nd-appearance="rail"] .nd-tab[aria-selected="true"] {
+  border-inline-end-color: transparent;
+  border-inline-start-color: var(--nc-color-accent);
+}

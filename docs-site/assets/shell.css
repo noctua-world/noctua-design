@@ -1607,6 +1607,48 @@ a {
   max-inline-size: 100%;
 }
 
+/* A WINDOW, FOR WHAT IS MEASURED AGAINST ONE. A `Drawer` opens to a share of
+   the box around it, and a `Split` divides the box it is given. A stage is as
+   tall as its content, which is no size to take a share of, so these examples
+   stand in a box with a height of its own: the work, and what opens beside it.
+   The hairline is the window's edge and not the component's. Nothing in it
+   draws a border. */
+.nd-example-window {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  box-sizing: border-box;
+  block-size: calc(var(--noctua-space-64) + var(--noctua-space-32));
+  overflow: hidden;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+/* The same window with its parts side by side, for a drawer at a side. */
+.nd-example-window-row {
+  flex-direction: row;
+}
+
+/* The work: whatever the window is for, taking the room a drawer leaves. */
+.nd-example-work {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: var(--noctua-space-3);
+  align-items: start;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  min-block-size: 0;
+  padding: var(--noctua-space-4);
+  overflow: auto;
+}
+
+/* What a page puts in a drawer or a pane: its own padding, which neither
+   component gives it, because content that is a list brings its own. */
+.nd-example-pane {
+  box-sizing: border-box;
+  padding: var(--noctua-space-3) var(--noctua-space-4);
+}
+
 /* A row inside one example — several controls that only mean something beside
    each other. Centred rather than baseline-aligned: these are boxes, and boxes
    of three different heights on one baseline read as three mistakes. */

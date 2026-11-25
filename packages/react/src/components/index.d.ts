@@ -27,6 +27,8 @@ export { Del, type DelProps } from "./del.js";
 export { Dialog, type DialogProps } from "./dialog.js";
 export { Disclosure, type DisclosureProps } from "./disclosure.js";
 export { Divider, type DividerProps } from "./divider.js";
+export { Drawer, type DrawerProps } from "./drawer.js";
+export { DrawerRail, type DrawerRailProps } from "./drawer_rail.js";
 export { Em, type EmProps } from "./em.js";
 export { ErrorSummary, type ErrorSummaryProps } from "./error_summary.js";
 export { ErrorSummaryItem, type ErrorSummaryItemProps } from "./error_summary_item.js";

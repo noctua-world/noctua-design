@@ -107,7 +107,10 @@ fn catalogue(components: &[Component]) -> String {
     let _ = writeln!(
         out,
         "/// Every component, in the order `spec/components/` is read.\n\
-         pub(crate) const COMPONENTS: [DocComponent; {}] = [",
+         ///\n\
+         /// A `static`, because a `const` this size is written out again at every\n\
+         /// place that names it.\n\
+         pub(crate) static COMPONENTS: [DocComponent; {}] = [",
         components.len()
     );
     for component in components {

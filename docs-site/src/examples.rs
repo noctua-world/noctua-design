@@ -487,6 +487,17 @@ ToolbarGroup { align: ToolbarGroupAlign::End, … }"#
         ),
     ),
     (
+        "drawer",
+        example!(
+            r#"Drawer { name: "…", label: "…",
+    DrawerRail { Toolbar { density: ToolbarDensity::Rail, … } }
+    …
+    DrawerRail { side: DrawerRailSide::End, Tabs { appearance: TabsAppearance::Rail, … } }
+}"#,
+            Key::ExampleDrawerOverview
+        ),
+    ),
+    (
         "option-list",
         example!(
             r#"OptionList { name: "…", label: "…", empty_label: "…",
@@ -644,6 +655,10 @@ Label { kind: Name, for_control } / Segmented { labelledby }"
 /// below is what makes that true: a component added to `spec/components/`
 /// fails `cargo xtask check` until somebody shows how it is used.
 #[must_use]
+#[allow(
+    clippy::too_many_lines,
+    reason = "one line per component, and the component set is the point"
+)]
 pub(crate) fn for_component(name: &str) -> &'static [Example] {
     match name {
         "Abbr" => ABBR,
@@ -717,6 +732,8 @@ pub(crate) fn for_component(name: &str) -> &'static [Example] {
         "Kbd" => KBD,
         "Link" => LINK,
         "List" => LIST,
+        "Drawer" => DRAWER,
+        "DrawerRail" => DRAWER_RAIL,
         "Footer" => FOOTER,
         "FooterLine" => FOOTER_LINE,
         "FooterCorner" => FOOTER_CORNER,
@@ -2310,6 +2327,51 @@ const PROMPT: &[Example] = &[
     example!(
         r#"Prompt { disabled: true, send_label: "…" }"#,
         Key::ExamplePromptDisabled
+    ),
+];
+
+// --- Drawer and DrawerRail --------------------------------------------------
+//
+// EVERY ONE IS IN A WINDOW. A drawer opens to a share of the box around it, and
+// a share of a box as tall as its content is no limit at all. So each example
+// stands in `.nd-example-window`, the site's stand-in for a window: a box with
+// a height of its own, the work above and the drawer below.
+
+const DRAWER: &[Example] = &[
+    example!(
+        r#"Drawer { name: "…", label: "…", … }"#,
+        Key::ExampleDrawerBasic
+    ),
+    example!(
+        r"Drawer { collapsed: true, … }",
+        Key::ExampleDrawerCollapsed
+    ),
+    example!(
+        r"Drawer { side: DrawerSide::Start, … } / Drawer { side: DrawerSide::End, … }",
+        Key::ExampleDrawerSide
+    ),
+    example!(
+        r"Drawer { … } with more in it than its share of the window",
+        Key::ExampleDrawerScroll
+    ),
+];
+
+const DRAWER_RAIL: &[Example] = &[
+    example!(
+        r"DrawerRail { Toolbar { density: ToolbarDensity::Rail, … } }",
+        Key::ExampleDrawerRailControls
+    ),
+    example!(
+        r"DrawerRail { side: DrawerRailSide::End, Tabs { appearance: TabsAppearance::Rail, … } }",
+        Key::ExampleDrawerRailTabs
+    ),
+    example!(
+        r"DrawerRail { … } / DrawerRail { side: DrawerRailSide::End, … }",
+        Key::ExampleDrawerRailBoth
+    ),
+    example!(
+        r"DrawerRail { … } with more controls than the drawer is tall",
+        Key::ExampleDrawerRailScroll
     ),
 ];
 
