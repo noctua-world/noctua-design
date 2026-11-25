@@ -256,6 +256,11 @@ export const PAGE = {
   // whose cursor this system draws, over a second copy of its own text, so the
   // width x locale sweep has a box here whose two layers must wrap as one.
   prompt: "prompt/",
+  // The control that records a shortcut. On this list because its label, its
+  // box of key caps and its remove control share one row that wraps, and the
+  // caller's sentences in it run longest in `qps`, so the width x locale sweep
+  // has a row here that must break rather than spill.
+  keyCapture: "key-capture/",
 };
 
 /**

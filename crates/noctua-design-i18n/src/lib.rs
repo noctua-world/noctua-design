@@ -636,6 +636,8 @@ pub enum Key {
     ComponentSplitPaneSummary,
     /// `component.split-handle.summary`
     ComponentSplitHandleSummary,
+    /// `component.key-capture.summary`
+    ComponentKeyCaptureSummary,
     /// `component.prompt.summary`
     ComponentPromptSummary,
     /// `component.option-group.summary`
@@ -1492,6 +1494,34 @@ pub enum Key {
     ExampleSplitHandleMirrored,
     /// `example.split.handle`
     ExampleSplitHandle,
+    /// `example.key-capture.overview`
+    ExampleKeyCaptureOverview,
+    /// `example.key-capture.basic`
+    ExampleKeyCaptureBasic,
+    /// `example.key-capture.keyboards`
+    ExampleKeyCaptureKeyboards,
+    /// `example.key-capture.removable`
+    ExampleKeyCaptureRemovable,
+    /// `example.key-capture.unset`
+    ExampleKeyCaptureUnset,
+    /// `example.key-capture.refused`
+    ExampleKeyCaptureRefused,
+    /// `example.key-capture.locked`
+    ExampleKeyCaptureLocked,
+    /// `example.key-capture.leader`
+    ExampleKeyCaptureLeader,
+    /// `example.key-capture.settings`
+    ExampleKeyCaptureSettings,
+    /// `example.key-capture.help`
+    ExampleKeyCaptureHelp,
+    /// `example.key-capture.capture`
+    ExampleKeyCaptureCapture,
+    /// `example.key-capture.empty`
+    ExampleKeyCaptureEmpty,
+    /// `example.key-capture.clear`
+    ExampleKeyCaptureClear,
+    /// `example.key-capture.refusal`
+    ExampleKeyCaptureRefusal,
     /// `example.prompt.overview`
     ExamplePromptOverview,
     /// `example.prompt.basic`
@@ -4608,6 +4638,50 @@ pub enum Key {
     ComponentKbdPropSizeDoc,
     /// `component.kbd.prop.children.doc`
     ComponentKbdPropChildrenDoc,
+    /// `component.key-capture.guidance`
+    ComponentKeyCaptureGuidance,
+    /// `component.key-capture.a11y-notes`
+    ComponentKeyCaptureA11yNotes,
+    /// `component.key-capture.prop.name.doc`
+    ComponentKeyCapturePropNameDoc,
+    /// `component.key-capture.prop.label.doc`
+    ComponentKeyCapturePropLabelDoc,
+    /// `component.key-capture.prop.value.doc`
+    ComponentKeyCapturePropValueDoc,
+    /// `component.key-capture.prop.keyboard.doc`
+    ComponentKeyCapturePropKeyboardDoc,
+    /// `component.key-capture.prop.capture_label.doc`
+    ComponentKeyCapturePropCaptureLabelDoc,
+    /// `component.key-capture.prop.empty_label.doc`
+    ComponentKeyCapturePropEmptyLabelDoc,
+    /// `component.key-capture.prop.clear_label.doc`
+    ComponentKeyCapturePropClearLabelDoc,
+    /// `component.key-capture.prop.refusal.doc`
+    ComponentKeyCapturePropRefusalDoc,
+    /// `component.key-capture.prop.disabled.doc`
+    ComponentKeyCapturePropDisabledDoc,
+    /// `component.key-capture.state.listening.doc`
+    ComponentKeyCaptureStateListeningDoc,
+    /// `component.key-capture.state.captured.doc`
+    ComponentKeyCaptureStateCapturedDoc,
+    /// `component.key-capture.state.refused.doc`
+    ComponentKeyCaptureStateRefusedDoc,
+    /// `component.key-capture.key.enter-space.name`
+    ComponentKeyCaptureKeyEnterSpaceName,
+    /// `component.key-capture.key.enter-space.action`
+    ComponentKeyCaptureKeyEnterSpaceAction,
+    /// `component.key-capture.key.a-key-with-modifiers-held.name`
+    ComponentKeyCaptureKeyAKeyWithModifiersHeldName,
+    /// `component.key-capture.key.a-key-with-modifiers-held.action`
+    ComponentKeyCaptureKeyAKeyWithModifiersHeldAction,
+    /// `component.key-capture.key.tab.name`
+    ComponentKeyCaptureKeyTabName,
+    /// `component.key-capture.key.tab.action`
+    ComponentKeyCaptureKeyTabAction,
+    /// `component.key-capture.key.escape.name`
+    ComponentKeyCaptureKeyEscapeName,
+    /// `component.key-capture.key.escape.action`
+    ComponentKeyCaptureKeyEscapeAction,
     /// `component.label.guidance`
     ComponentLabelGuidance,
     /// `component.label.a11y-notes`
@@ -6618,7 +6692,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3247] = [
+    pub const ALL: [Self; 3284] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -6877,6 +6951,7 @@ impl Key {
         Self::ComponentSplitSummary,
         Self::ComponentSplitPaneSummary,
         Self::ComponentSplitHandleSummary,
+        Self::ComponentKeyCaptureSummary,
         Self::ComponentPromptSummary,
         Self::ComponentOptionGroupSummary,
         Self::ComponentOptionItemSummary,
@@ -7305,6 +7380,20 @@ impl Key {
         Self::ExampleSplitHandleAway,
         Self::ExampleSplitHandleMirrored,
         Self::ExampleSplitHandle,
+        Self::ExampleKeyCaptureOverview,
+        Self::ExampleKeyCaptureBasic,
+        Self::ExampleKeyCaptureKeyboards,
+        Self::ExampleKeyCaptureRemovable,
+        Self::ExampleKeyCaptureUnset,
+        Self::ExampleKeyCaptureRefused,
+        Self::ExampleKeyCaptureLocked,
+        Self::ExampleKeyCaptureLeader,
+        Self::ExampleKeyCaptureSettings,
+        Self::ExampleKeyCaptureHelp,
+        Self::ExampleKeyCaptureCapture,
+        Self::ExampleKeyCaptureEmpty,
+        Self::ExampleKeyCaptureClear,
+        Self::ExampleKeyCaptureRefusal,
         Self::ExamplePromptOverview,
         Self::ExamplePromptBasic,
         Self::ExamplePromptGrows,
@@ -8863,6 +8952,28 @@ impl Key {
         Self::ComponentInsPropChildrenDoc,
         Self::ComponentKbdPropSizeDoc,
         Self::ComponentKbdPropChildrenDoc,
+        Self::ComponentKeyCaptureGuidance,
+        Self::ComponentKeyCaptureA11yNotes,
+        Self::ComponentKeyCapturePropNameDoc,
+        Self::ComponentKeyCapturePropLabelDoc,
+        Self::ComponentKeyCapturePropValueDoc,
+        Self::ComponentKeyCapturePropKeyboardDoc,
+        Self::ComponentKeyCapturePropCaptureLabelDoc,
+        Self::ComponentKeyCapturePropEmptyLabelDoc,
+        Self::ComponentKeyCapturePropClearLabelDoc,
+        Self::ComponentKeyCapturePropRefusalDoc,
+        Self::ComponentKeyCapturePropDisabledDoc,
+        Self::ComponentKeyCaptureStateListeningDoc,
+        Self::ComponentKeyCaptureStateCapturedDoc,
+        Self::ComponentKeyCaptureStateRefusedDoc,
+        Self::ComponentKeyCaptureKeyEnterSpaceName,
+        Self::ComponentKeyCaptureKeyEnterSpaceAction,
+        Self::ComponentKeyCaptureKeyAKeyWithModifiersHeldName,
+        Self::ComponentKeyCaptureKeyAKeyWithModifiersHeldAction,
+        Self::ComponentKeyCaptureKeyTabName,
+        Self::ComponentKeyCaptureKeyTabAction,
+        Self::ComponentKeyCaptureKeyEscapeName,
+        Self::ComponentKeyCaptureKeyEscapeAction,
         Self::ComponentLabelGuidance,
         Self::ComponentLabelA11yNotes,
         Self::ComponentLabelPropTextDoc,
@@ -10130,6 +10241,7 @@ impl Key {
             Self::ComponentSplitSummary => "component.split.summary",
             Self::ComponentSplitPaneSummary => "component.split-pane.summary",
             Self::ComponentSplitHandleSummary => "component.split-handle.summary",
+            Self::ComponentKeyCaptureSummary => "component.key-capture.summary",
             Self::ComponentPromptSummary => "component.prompt.summary",
             Self::ComponentOptionGroupSummary => "component.option-group.summary",
             Self::ComponentOptionItemSummary => "component.option-item.summary",
@@ -10558,6 +10670,20 @@ impl Key {
             Self::ExampleSplitHandleAway => "example.split-handle.away",
             Self::ExampleSplitHandleMirrored => "example.split-handle.mirrored",
             Self::ExampleSplitHandle => "example.split.handle",
+            Self::ExampleKeyCaptureOverview => "example.key-capture.overview",
+            Self::ExampleKeyCaptureBasic => "example.key-capture.basic",
+            Self::ExampleKeyCaptureKeyboards => "example.key-capture.keyboards",
+            Self::ExampleKeyCaptureRemovable => "example.key-capture.removable",
+            Self::ExampleKeyCaptureUnset => "example.key-capture.unset",
+            Self::ExampleKeyCaptureRefused => "example.key-capture.refused",
+            Self::ExampleKeyCaptureLocked => "example.key-capture.locked",
+            Self::ExampleKeyCaptureLeader => "example.key-capture.leader",
+            Self::ExampleKeyCaptureSettings => "example.key-capture.settings",
+            Self::ExampleKeyCaptureHelp => "example.key-capture.help",
+            Self::ExampleKeyCaptureCapture => "example.key-capture.capture",
+            Self::ExampleKeyCaptureEmpty => "example.key-capture.empty",
+            Self::ExampleKeyCaptureClear => "example.key-capture.clear",
+            Self::ExampleKeyCaptureRefusal => "example.key-capture.refusal",
             Self::ExamplePromptOverview => "example.prompt.overview",
             Self::ExamplePromptBasic => "example.prompt.basic",
             Self::ExamplePromptGrows => "example.prompt.grows",
@@ -12402,6 +12528,44 @@ impl Key {
             Self::ComponentInsPropChildrenDoc => "component.ins.prop.children.doc",
             Self::ComponentKbdPropSizeDoc => "component.kbd.prop.size.doc",
             Self::ComponentKbdPropChildrenDoc => "component.kbd.prop.children.doc",
+            Self::ComponentKeyCaptureGuidance => "component.key-capture.guidance",
+            Self::ComponentKeyCaptureA11yNotes => "component.key-capture.a11y-notes",
+            Self::ComponentKeyCapturePropNameDoc => "component.key-capture.prop.name.doc",
+            Self::ComponentKeyCapturePropLabelDoc => "component.key-capture.prop.label.doc",
+            Self::ComponentKeyCapturePropValueDoc => "component.key-capture.prop.value.doc",
+            Self::ComponentKeyCapturePropKeyboardDoc => "component.key-capture.prop.keyboard.doc",
+            Self::ComponentKeyCapturePropCaptureLabelDoc => {
+                "component.key-capture.prop.capture_label.doc"
+            }
+            Self::ComponentKeyCapturePropEmptyLabelDoc => {
+                "component.key-capture.prop.empty_label.doc"
+            }
+            Self::ComponentKeyCapturePropClearLabelDoc => {
+                "component.key-capture.prop.clear_label.doc"
+            }
+            Self::ComponentKeyCapturePropRefusalDoc => "component.key-capture.prop.refusal.doc",
+            Self::ComponentKeyCapturePropDisabledDoc => "component.key-capture.prop.disabled.doc",
+            Self::ComponentKeyCaptureStateListeningDoc => {
+                "component.key-capture.state.listening.doc"
+            }
+            Self::ComponentKeyCaptureStateCapturedDoc => "component.key-capture.state.captured.doc",
+            Self::ComponentKeyCaptureStateRefusedDoc => "component.key-capture.state.refused.doc",
+            Self::ComponentKeyCaptureKeyEnterSpaceName => {
+                "component.key-capture.key.enter-space.name"
+            }
+            Self::ComponentKeyCaptureKeyEnterSpaceAction => {
+                "component.key-capture.key.enter-space.action"
+            }
+            Self::ComponentKeyCaptureKeyAKeyWithModifiersHeldName => {
+                "component.key-capture.key.a-key-with-modifiers-held.name"
+            }
+            Self::ComponentKeyCaptureKeyAKeyWithModifiersHeldAction => {
+                "component.key-capture.key.a-key-with-modifiers-held.action"
+            }
+            Self::ComponentKeyCaptureKeyTabName => "component.key-capture.key.tab.name",
+            Self::ComponentKeyCaptureKeyTabAction => "component.key-capture.key.tab.action",
+            Self::ComponentKeyCaptureKeyEscapeName => "component.key-capture.key.escape.name",
+            Self::ComponentKeyCaptureKeyEscapeAction => "component.key-capture.key.escape.action",
             Self::ComponentLabelGuidance => "component.label.guidance",
             Self::ComponentLabelA11yNotes => "component.label.a11y-notes",
             Self::ComponentLabelPropTextDoc => "component.label.prop.text.doc",
@@ -14187,6 +14351,9 @@ impl Locale {
                 Key::ComponentSplitHandleSummary => {
                     "Let a reader move the line between two panes, by pointer, touch or keyboard."
                 }
+                Key::ComponentKeyCaptureSummary => {
+                    "Let users record a shortcut by pressing its keys, and show it as those keys."
+                }
                 Key::ComponentPromptSummary => {
                     "Let users type on a line with a block cursor, and send what they typed."
                 }
@@ -15003,6 +15170,36 @@ impl Locale {
                     "Read from the right, the first pane is on the right. The arrow keys still move the line the way they point."
                 }
                 Key::ExampleSplitHandle => "Resize the list",
+                Key::ExampleKeyCaptureOverview => {
+                    "Each control holds one shortcut. Press it, then the keys. Escape keeps the shortcut it had."
+                }
+                Key::ExampleKeyCaptureBasic => {
+                    "The keys are drawn by the labels on them. Press the control to listen, and the next key with its modifiers is recorded."
+                }
+                Key::ExampleKeyCaptureKeyboards => {
+                    "One chord on three keyboards. Only the names of the modifiers change."
+                }
+                Key::ExampleKeyCaptureRemovable => {
+                    "The control after the box removes the shortcut. It shows only while there is one to remove."
+                }
+                Key::ExampleKeyCaptureUnset => {
+                    "With no shortcut, the box says so in the caller's words."
+                }
+                Key::ExampleKeyCaptureRefused => {
+                    "The caller refused the last chord. Its sentence is under the box, and a rule runs down the leading edge."
+                }
+                Key::ExampleKeyCaptureLocked => {
+                    "A disabled control stays in the tab order and says what it holds. Pressing it starts nothing."
+                }
+                Key::ExampleKeyCaptureLeader => "Leader",
+                Key::ExampleKeyCaptureSettings => "Open the settings",
+                Key::ExampleKeyCaptureHelp => "Open the help",
+                Key::ExampleKeyCaptureCapture => "Press the new keys, or Escape",
+                Key::ExampleKeyCaptureEmpty => "None",
+                Key::ExampleKeyCaptureClear => "Remove the shortcut",
+                Key::ExampleKeyCaptureRefusal => {
+                    "The production channel already uses this shortcut."
+                }
                 Key::ExamplePromptOverview => {
                     "The prompt is the last line of a footer. Type in it, then press Enter or the control at its end."
                 }
@@ -18381,6 +18578,66 @@ impl Locale {
                 Key::ComponentInsPropChildrenDoc => "The added text.",
                 Key::ComponentKbdPropSizeDoc => "The size: `small` or `body`. Defaults to `small`.",
                 Key::ComponentKbdPropChildrenDoc => "The key name, such as `Ctrl` or `Esc`.",
+                Key::ComponentKeyCaptureGuidance => {
+                    "Use a key capture for a setting whose value is a shortcut, such as the Leader or a key in a menu. The reader presses the keys and the control records them. For a shortcut shown beside an action, use `Kbd`."
+                }
+                Key::ComponentKeyCaptureA11yNotes => {
+                    "The control is a `<button>` named by `label` and the keys it holds, through `aria-labelledby`. A refusal sets `aria-invalid` and describes the button. A polite `role=\"status\"` says what to press and what was recorded."
+                }
+                Key::ComponentKeyCapturePropNameDoc => {
+                    "What this control is, as a script finds it, and the form field name the chord is submitted under. The button takes the id `nd-key-capture-` followed by this name. **Required**."
+                }
+                Key::ComponentKeyCapturePropLabelDoc => {
+                    "What the shortcut is for, in the reader's language, such as *Leader*. It is drawn as the control's `<label>` and opens its accessible name, which the keys complete. Required."
+                }
+                Key::ComponentKeyCapturePropValueDoc => {
+                    "The shortcut in force, written as `Alt+Shift+KeyK`: the modifiers in the order Control, Alt, Shift, Super, then the key's `KeyboardEvent.code`. Empty means none. It is the hidden input's value."
+                }
+                Key::ComponentKeyCapturePropKeyboardDoc => {
+                    "Whose labels the modifiers are drawn with. `linux` writes Ctrl, Alt, Shift and Super. `windows` writes Win for Super. `mac` writes Control, Option, Shift and Command."
+                }
+                Key::ComponentKeyCapturePropCaptureLabelDoc => {
+                    "What the control says while it listens, such as *Press the new keys, or Escape*. It is said politely when listening starts. Required."
+                }
+                Key::ComponentKeyCapturePropEmptyLabelDoc => {
+                    "What the control shows when no shortcut is set, such as *None*. It is part of the accessible name then. Required."
+                }
+                Key::ComponentKeyCapturePropClearLabelDoc => {
+                    "The name of the control that removes the shortcut, such as *Remove the shortcut*. With it a second control is drawn after the first. Without it a shortcut can be replaced and not removed."
+                }
+                Key::ComponentKeyCapturePropRefusalDoc => {
+                    "Why the last shortcut was refused, in the caller's own words. It is drawn under the control, marks it `aria-invalid` and describes it. A sentence written here after the page loaded is said politely."
+                }
+                Key::ComponentKeyCapturePropDisabledDoc => {
+                    "Whether changing the shortcut is refused. A disabled control is `aria-disabled`, so it stays in the tab order and says what it holds, and pressing it starts nothing."
+                }
+                Key::ComponentKeyCaptureStateListeningDoc => {
+                    "Set while the control listens for a shortcut. It shows `capture_label` and the modifiers held so far, with a dashed edge."
+                }
+                Key::ComponentKeyCaptureStateCapturedDoc => {
+                    "Set once a shortcut is recorded and the control is not listening, until the caller writes a new `value`. The keys drawn are the recorded ones."
+                }
+                Key::ComponentKeyCaptureStateRefusedDoc => {
+                    "Set while `refusal` is. A rule runs down the leading edge, the control's edge takes the danger tone, and the sentence is under it."
+                }
+                Key::ComponentKeyCaptureKeyEnterSpaceName => "Enter / Space",
+                Key::ComponentKeyCaptureKeyEnterSpaceAction => {
+                    "Starts listening. While it listens, both are keys like any other and are recorded."
+                }
+                Key::ComponentKeyCaptureKeyAKeyWithModifiersHeldName => {
+                    "A key, with modifiers held"
+                }
+                Key::ComponentKeyCaptureKeyAKeyWithModifiersHeldAction => {
+                    "While it listens, records that key with the modifiers held and stops listening. A modifier alone records nothing."
+                }
+                Key::ComponentKeyCaptureKeyTabName => "Tab",
+                Key::ComponentKeyCaptureKeyTabAction => {
+                    "While it listens, is recorded like any other key. Listening then ends, so the next Tab leaves the control."
+                }
+                Key::ComponentKeyCaptureKeyEscapeName => "Escape",
+                Key::ComponentKeyCaptureKeyEscapeAction => {
+                    "While it listens, stops listening and keeps the shortcut in force. Otherwise it is left to what is around the control."
+                }
                 Key::ComponentLabelGuidance => {
                     "Use a label for the visible name of a control, a group of controls or a region. `Field` draws one already for the control it wraps. Reach for this where there is no field, beside a `Segmented` or over a `Toolbar`."
                 }
@@ -21560,6 +21817,9 @@ impl Locale {
                 Key::ComponentSplitHandleSummary => {
                     "Deixe a pessoa mover a linha entre dois painéis, por ponteiro, toque ou teclado."
                 }
+                Key::ComponentKeyCaptureSummary => {
+                    "Deixe a pessoa gravar um atalho pressionando as teclas dele, e mostre-o como essas teclas."
+                }
                 Key::ComponentPromptSummary => {
                     "Deixe a pessoa digitar numa linha com cursor em bloco e enviar o que digitou."
                 }
@@ -22388,6 +22648,34 @@ impl Locale {
                     "Lido da direita, o primeiro painel fica à direita. As setas continuam movendo a linha para onde apontam."
                 }
                 Key::ExampleSplitHandle => "Redimensionar a lista",
+                Key::ExampleKeyCaptureOverview => {
+                    "Cada controle guarda um atalho. Pressione-o, depois as teclas. Escape mantém o atalho que ele tinha."
+                }
+                Key::ExampleKeyCaptureBasic => {
+                    "As teclas são desenhadas pelos rótulos delas. Pressione o controle para escutar, e a próxima tecla com os modificadores é gravada."
+                }
+                Key::ExampleKeyCaptureKeyboards => {
+                    "Um atalho em três teclados. Só os nomes dos modificadores mudam."
+                }
+                Key::ExampleKeyCaptureRemovable => {
+                    "O controle depois da caixa remove o atalho. Ele só aparece enquanto há um para remover."
+                }
+                Key::ExampleKeyCaptureUnset => {
+                    "Sem atalho, a caixa diz isso nas palavras de quem chama."
+                }
+                Key::ExampleKeyCaptureRefused => {
+                    "Quem chama recusou o último atalho. A frase fica sob a caixa, e um traço desce pela borda inicial."
+                }
+                Key::ExampleKeyCaptureLocked => {
+                    "Um controle desativado continua na ordem de tabulação e diz o que guarda. Pressioná-lo não inicia nada."
+                }
+                Key::ExampleKeyCaptureLeader => "Leader",
+                Key::ExampleKeyCaptureSettings => "Abrir as configurações",
+                Key::ExampleKeyCaptureHelp => "Abrir a ajuda",
+                Key::ExampleKeyCaptureCapture => "Pressione as novas teclas, ou Escape",
+                Key::ExampleKeyCaptureEmpty => "Nenhum",
+                Key::ExampleKeyCaptureClear => "Remover o atalho",
+                Key::ExampleKeyCaptureRefusal => "O canal de produção já usa este atalho.",
                 Key::ExamplePromptOverview => {
                     "O prompt é a última linha de um rodapé. Digite nele, depois pressione Enter ou o controle no fim."
                 }
@@ -25790,6 +26078,66 @@ impl Locale {
                 Key::ComponentInsPropChildrenDoc => "O texto acrescentado.",
                 Key::ComponentKbdPropSizeDoc => "O tamanho: `small` ou `body`. Padrão `small`.",
                 Key::ComponentKbdPropChildrenDoc => "O nome da tecla, como `Ctrl` ou `Esc`.",
+                Key::ComponentKeyCaptureGuidance => {
+                    "Use uma captura de teclas para uma configuração cujo valor é um atalho, como o Leader ou uma tecla num menu. A pessoa pressiona as teclas e o controle as grava. Para um atalho mostrado ao lado de uma ação, use `Kbd`."
+                }
+                Key::ComponentKeyCaptureA11yNotes => {
+                    "O controle é um `<button>` nomeado por `label` e pelas teclas que guarda, via `aria-labelledby`. Uma recusa escreve `aria-invalid` e descreve o botão. Um `role=\"status\"` educado diz o que pressionar e o que foi gravado."
+                }
+                Key::ComponentKeyCapturePropNameDoc => {
+                    "O que é este controle, como um script o encontra, e o nome do campo de formulário sob o qual o atalho é enviado. O botão recebe o id `nd-key-capture-` seguido deste nome. **Obrigatório**."
+                }
+                Key::ComponentKeyCapturePropLabelDoc => {
+                    "Para que serve o atalho, no idioma da pessoa, como *Leader*. É desenhado como o `<label>` do controle e abre o nome acessível dele, que as teclas completam. Obrigatório."
+                }
+                Key::ComponentKeyCapturePropValueDoc => {
+                    "O atalho em vigor, escrito como `Alt+Shift+KeyK`: os modificadores na ordem Control, Alt, Shift, Super, depois o `KeyboardEvent.code` da tecla. Vazio quer dizer nenhum. É o valor do campo oculto."
+                }
+                Key::ComponentKeyCapturePropKeyboardDoc => {
+                    "Com os rótulos de qual teclado os modificadores são desenhados. `linux` escreve Ctrl, Alt, Shift e Super. `windows` escreve Win no lugar de Super. `mac` escreve Control, Option, Shift e Command."
+                }
+                Key::ComponentKeyCapturePropCaptureLabelDoc => {
+                    "O que o controle diz enquanto escuta, como *Pressione as novas teclas, ou Escape*. É dito de forma educada quando a escuta começa. Obrigatório."
+                }
+                Key::ComponentKeyCapturePropEmptyLabelDoc => {
+                    "O que o controle mostra quando nenhum atalho está definido, como *Nenhum*. Nesse caso faz parte do nome acessível. Obrigatório."
+                }
+                Key::ComponentKeyCapturePropClearLabelDoc => {
+                    "O nome do controle que remove o atalho, como *Remover o atalho*. Com ele, um segundo controle é desenhado depois do primeiro. Sem ele, um atalho pode ser trocado e não removido."
+                }
+                Key::ComponentKeyCapturePropRefusalDoc => {
+                    "Por que o último atalho foi recusado, nas palavras de quem chama. Fica desenhado sob o controle, marca-o com `aria-invalid` e o descreve. Uma frase escrita aqui depois que a página carregou é dita de forma educada."
+                }
+                Key::ComponentKeyCapturePropDisabledDoc => {
+                    "Se mudar o atalho é recusado. Um controle desativado leva `aria-disabled`, então continua na ordem de tabulação e diz o que guarda, e pressioná-lo não inicia nada."
+                }
+                Key::ComponentKeyCaptureStateListeningDoc => {
+                    "Escrito enquanto o controle escuta um atalho. Ele mostra `capture_label` e os modificadores pressionados até então, com uma borda tracejada."
+                }
+                Key::ComponentKeyCaptureStateCapturedDoc => {
+                    "Escrito quando um atalho é gravado e o controle não está escutando, até quem chama escrever um novo `value`. As teclas desenhadas são as gravadas."
+                }
+                Key::ComponentKeyCaptureStateRefusedDoc => {
+                    "Escrito enquanto `refusal` estiver. Um traço desce pela borda inicial, a borda do controle fica no tom de perigo, e a frase fica embaixo dele."
+                }
+                Key::ComponentKeyCaptureKeyEnterSpaceName => "Enter / Espaço",
+                Key::ComponentKeyCaptureKeyEnterSpaceAction => {
+                    "Começa a escutar. Enquanto escuta, as duas são teclas como as outras e são gravadas."
+                }
+                Key::ComponentKeyCaptureKeyAKeyWithModifiersHeldName => {
+                    "Uma tecla, com modificadores pressionados"
+                }
+                Key::ComponentKeyCaptureKeyAKeyWithModifiersHeldAction => {
+                    "Enquanto escuta, grava essa tecla com os modificadores pressionados e para. Um modificador sozinho não grava nada."
+                }
+                Key::ComponentKeyCaptureKeyTabName => "Tab",
+                Key::ComponentKeyCaptureKeyTabAction => {
+                    "Enquanto escuta, é gravada como qualquer outra tecla. A escuta então termina, e o Tab seguinte sai do controle."
+                }
+                Key::ComponentKeyCaptureKeyEscapeName => "Escape",
+                Key::ComponentKeyCaptureKeyEscapeAction => {
+                    "Enquanto escuta, para de escutar e mantém o atalho em vigor. Fora disso, fica para o que está em volta do controle."
+                }
                 Key::ComponentLabelGuidance => {
                     "Use um rótulo para o nome visível de um controle, de um grupo de controles ou de uma região. O `Field` já desenha um para o controle que ele envolve. Use este onde não há campo, ao lado de um `Segmented` ou sobre um `Toolbar`."
                 }
@@ -29001,6 +29349,9 @@ impl Locale {
                 Key::ComponentSplitHandleSummary => {
                     "⟦Leet aa reeaadeer moovee thee liinee beetweeeen twoo paanees, by pooiinteer, toouuch oor keeybooaard.⟧"
                 }
+                Key::ComponentKeyCaptureSummary => {
+                    "⟦Leet uuseers reecoord aa shoortcuut by preessiing iits keeys, aand shoow iit aas thoosee keeys.⟧"
+                }
                 Key::ComponentPromptSummary => {
                     "⟦Leet uuseers typee oon aa liinee wiith aa bloock cuursoor, aand seend whaat theey typeed.⟧"
                 }
@@ -29847,6 +30198,36 @@ impl Locale {
                     "⟦Reeaad froom thee riight, thee fiirst paanee iis oon thee riight. Thee aarroow keeys stiill moovee thee liinee thee waay theey pooiint.⟧"
                 }
                 Key::ExampleSplitHandle => "⟦Reesiizee thee liist⟧",
+                Key::ExampleKeyCaptureOverview => {
+                    "⟦EEaach coontrool hoolds oonee shoortcuut. Preess iit, theen thee keeys. EEscaapee keeeeps thee shoortcuut iit haad.⟧"
+                }
+                Key::ExampleKeyCaptureBasic => {
+                    "⟦Thee keeys aaree draawn by thee laabeels oon theem. Preess thee coontrool too liisteen, aand thee neext keey wiith iits moodiifiieers iis reecoordeed.⟧"
+                }
+                Key::ExampleKeyCaptureKeyboards => {
+                    "⟦OOnee choord oon threeee keeybooaards. OOnly thee naamees oof thee moodiifiieers chaangee.⟧"
+                }
+                Key::ExampleKeyCaptureRemovable => {
+                    "⟦Thee coontrool aafteer thee boox reemoovees thee shoortcuut. IIt shoows oonly whiilee theeree iis oonee too reemoovee.⟧"
+                }
+                Key::ExampleKeyCaptureUnset => {
+                    "⟦Wiith noo shoortcuut, thee boox saays soo iin thee caalleer's woords.⟧"
+                }
+                Key::ExampleKeyCaptureRefused => {
+                    "⟦Thee caalleer reefuuseed thee laast choord. IIts seenteencee iis uundeer thee boox, aand aa ruulee ruuns doown thee leeaadiing eedgee.⟧"
+                }
+                Key::ExampleKeyCaptureLocked => {
+                    "⟦AA diisaableed coontrool staays iin thee taab oordeer aand saays whaat iit hoolds. Preessiing iit staarts noothiing.⟧"
+                }
+                Key::ExampleKeyCaptureLeader => "⟦Leeaadeer⟧",
+                Key::ExampleKeyCaptureSettings => "⟦OOpeen thee seettiings⟧",
+                Key::ExampleKeyCaptureHelp => "⟦OOpeen thee heelp⟧",
+                Key::ExampleKeyCaptureCapture => "⟦Preess thee neew keeys, oor EEscaapee⟧",
+                Key::ExampleKeyCaptureEmpty => "⟦Noonee⟧",
+                Key::ExampleKeyCaptureClear => "⟦Reemoovee thee shoortcuut⟧",
+                Key::ExampleKeyCaptureRefusal => {
+                    "⟦Thee prooduuctiioon chaanneel aalreeaady uusees thiis shoortcuut.⟧"
+                }
                 Key::ExamplePromptOverview => {
                     "⟦Thee proompt iis thee laast liinee oof aa fooooteer. Typee iin iit, theen preess EEnteer oor thee coontrool aat iits eend.⟧"
                 }
@@ -33346,6 +33727,66 @@ impl Locale {
                 }
                 Key::ComponentKbdPropChildrenDoc => {
                     "⟦Thee keey naamee, suuch aas `Ctrl` oor `EEsc`.⟧"
+                }
+                Key::ComponentKeyCaptureGuidance => {
+                    "⟦UUsee aa keey caaptuuree foor aa seettiing whoosee vaaluuee iis aa shoortcuut, suuch aas thee Leeaadeer oor aa keey iin aa meenuu. Thee reeaadeer preessees thee keeys aand thee coontrool reecoords theem. Foor aa shoortcuut shoown beesiidee aan aactiioon, uusee `Kbd`.⟧"
+                }
+                Key::ComponentKeyCaptureA11yNotes => {
+                    "⟦Thee coontrool iis aa `<buuttoon>` naameed by `laabeel` aand thee keeys iit hoolds, throouugh `aariiaa-laabeelleedby`. AA reefuusaal seets `aariiaa-iinvaaliid` aand deescriibees thee buuttoon. AA pooliitee `roolee=\"staatuus\"` saays whaat too preess aand whaat waas reecoordeed.⟧"
+                }
+                Key::ComponentKeyCapturePropNameDoc => {
+                    "⟦Whaat thiis coontrool iis, aas aa scriipt fiinds iit, aand thee foorm fiieeld naamee thee choord iis suubmiitteed uundeer. Thee buuttoon taakees thee iid `nd-keey-caaptuuree-` foollooweed by thiis naamee. **Reequuiireed**.⟧"
+                }
+                Key::ComponentKeyCapturePropLabelDoc => {
+                    "⟦Whaat thee shoortcuut iis foor, iin thee reeaadeer's laanguuaagee, suuch aas *Leeaadeer*. IIt iis draawn aas thee coontrool's `<laabeel>` aand oopeens iits aacceessiiblee naamee, whiich thee keeys coompleetee. Reequuiireed.⟧"
+                }
+                Key::ComponentKeyCapturePropValueDoc => {
+                    "⟦Thee shoortcuut iin foorcee, wriitteen aas `AAlt+Shiift+KeeyK`: thee moodiifiieers iin thee oordeer Coontrool, AAlt, Shiift, Suupeer, theen thee keey's `KeeybooaardEEveent.coodee`. EEmpty meeaans noonee. IIt iis thee hiiddeen iinpuut's vaaluuee.⟧"
+                }
+                Key::ComponentKeyCapturePropKeyboardDoc => {
+                    "⟦Whoosee laabeels thee moodiifiieers aaree draawn wiith. `liinuux` wriitees Ctrl, AAlt, Shiift aand Suupeer. `wiindoows` wriitees Wiin foor Suupeer. `maac` wriitees Coontrool, OOptiioon, Shiift aand Coommaand.⟧"
+                }
+                Key::ComponentKeyCapturePropCaptureLabelDoc => {
+                    "⟦Whaat thee coontrool saays whiilee iit liisteens, suuch aas *Preess thee neew keeys, oor EEscaapee*. IIt iis saaiid pooliiteely wheen liisteeniing staarts. Reequuiireed.⟧"
+                }
+                Key::ComponentKeyCapturePropEmptyLabelDoc => {
+                    "⟦Whaat thee coontrool shoows wheen noo shoortcuut iis seet, suuch aas *Noonee*. IIt iis paart oof thee aacceessiiblee naamee theen. Reequuiireed.⟧"
+                }
+                Key::ComponentKeyCapturePropClearLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool thaat reemoovees thee shoortcuut, suuch aas *Reemoovee thee shoortcuut*. Wiith iit aa seecoond coontrool iis draawn aafteer thee fiirst. Wiithoouut iit aa shoortcuut caan bee reeplaaceed aand noot reemooveed.⟧"
+                }
+                Key::ComponentKeyCapturePropRefusalDoc => {
+                    "⟦Why thee laast shoortcuut waas reefuuseed, iin thee caalleer's oown woords. IIt iis draawn uundeer thee coontrool, maarks iit `aariiaa-iinvaaliid` aand deescriibees iit. AA seenteencee wriitteen heeree aafteer thee paagee looaadeed iis saaiid pooliiteely.⟧"
+                }
+                Key::ComponentKeyCapturePropDisabledDoc => {
+                    "⟦Wheetheer chaangiing thee shoortcuut iis reefuuseed. AA diisaableed coontrool iis `aariiaa-diisaableed`, soo iit staays iin thee taab oordeer aand saays whaat iit hoolds, aand preessiing iit staarts noothiing.⟧"
+                }
+                Key::ComponentKeyCaptureStateListeningDoc => {
+                    "⟦Seet whiilee thee coontrool liisteens foor aa shoortcuut. IIt shoows `caaptuuree_laabeel` aand thee moodiifiieers heeld soo faar, wiith aa daasheed eedgee.⟧"
+                }
+                Key::ComponentKeyCaptureStateCapturedDoc => {
+                    "⟦Seet ooncee aa shoortcuut iis reecoordeed aand thee coontrool iis noot liisteeniing, uuntiil thee caalleer wriitees aa neew `vaaluuee`. Thee keeys draawn aaree thee reecoordeed oonees.⟧"
+                }
+                Key::ComponentKeyCaptureStateRefusedDoc => {
+                    "⟦Seet whiilee `reefuusaal` iis. AA ruulee ruuns doown thee leeaadiing eedgee, thee coontrool's eedgee taakees thee daangeer toonee, aand thee seenteencee iis uundeer iit.⟧"
+                }
+                Key::ComponentKeyCaptureKeyEnterSpaceName => "⟦EEnteer / Spaacee⟧",
+                Key::ComponentKeyCaptureKeyEnterSpaceAction => {
+                    "⟦Staarts liisteeniing. Whiilee iit liisteens, booth aaree keeys liikee aany ootheer aand aaree reecoordeed.⟧"
+                }
+                Key::ComponentKeyCaptureKeyAKeyWithModifiersHeldName => {
+                    "⟦AA keey, wiith moodiifiieers heeld⟧"
+                }
+                Key::ComponentKeyCaptureKeyAKeyWithModifiersHeldAction => {
+                    "⟦Whiilee iit liisteens, reecoords thaat keey wiith thee moodiifiieers heeld aand stoops liisteeniing. AA moodiifiieer aaloonee reecoords noothiing.⟧"
+                }
+                Key::ComponentKeyCaptureKeyTabName => "⟦Taab⟧",
+                Key::ComponentKeyCaptureKeyTabAction => {
+                    "⟦Whiilee iit liisteens, iis reecoordeed liikee aany ootheer keey. Liisteeniing theen eends, soo thee neext Taab leeaavees thee coontrool.⟧"
+                }
+                Key::ComponentKeyCaptureKeyEscapeName => "⟦EEscaapee⟧",
+                Key::ComponentKeyCaptureKeyEscapeAction => {
+                    "⟦Whiilee iit liisteens, stoops liisteeniing aand keeeeps thee shoortcuut iin foorcee. OOtheerwiisee iit iis leeft too whaat iis aaroouund thee coontrool.⟧"
                 }
                 Key::ComponentLabelGuidance => {
                     "⟦UUsee aa laabeel foor thee viisiiblee naamee oof aa coontrool, aa groouup oof coontrools oor aa reegiioon. `Fiieeld` draaws oonee aalreeaady foor thee coontrool iit wraaps. Reeaach foor thiis wheeree theeree iis noo fiieeld, beesiidee aa `Seegmeenteed` oor ooveer aa `Toooolbaar`.⟧"

@@ -12,6 +12,7 @@
 //! | `dist/prompt.js` | `enhancePrompts()` — the block cursor over a `Prompt`'s own textarea, and `nd-prompt-send` |
 //! | `dist/drawer.js` | `enhanceDrawers()` — `inert` on a collapsed `Drawer`, the focus it gives back, and `nd-drawer-dismiss` |
 //! | `dist/split.js` | `enhanceSplits()` — the keys and the drag that move a `Split`'s line, and `nd-split-resize` |
+//! | `dist/key-capture.js` | `enhanceKeyCaptures()` — the shortcut a `KeyCapture` records, and `nd-key-capture-change` |
 //! | `dist/seats.js` | a host showing a second pointer or keyboard in the same window |
 //! | `dist/palettes/*.json` | the Noctua tab, one file per palette, fetched on demand |
 //! | `packages/tokens/color.js` + `.d.ts` | the JavaScript package, and the Node test that checks the arithmetic |
@@ -37,11 +38,12 @@ use std::fmt::Write as _;
 
 use noctua_design_runtime::{
     ANCHOR_SOURCE, CAROUSEL_SOURCE, CHOICE_SOURCE, COLOR_SOURCE, DATE_INPUT_SOURCE,
-    DATE_PICKER_SOURCE, DIALOG_SOURCE, DRAWER_SOURCE, INFO_SOURCE, INPUTS_SOURCE, MENU_SOURCE,
-    MESSAGE_BAR_SOURCE, MESSAGES_SOURCE, OPTION_LIST_SOURCE, PANELS_SOURCE, PICKER_SOURCE,
-    POPOVER_SOURCE, PROMPT_SOURCE, ROVING_SOURCE, SEARCH_MATCH_SOURCE, SEARCH_SOURCE, SEATS_SOURCE,
-    SELECT_SOURCE, SPLIT_SOURCE, SUMMARY_SOURCE, TABLE_SOURCE, TABS_SOURCE, TAG_PICKER_SOURCE,
-    TOAST_SOURCE, TOOLTIP_SOURCE, TREE_SOURCE, source,
+    DATE_PICKER_SOURCE, DIALOG_SOURCE, DRAWER_SOURCE, INFO_SOURCE, INPUTS_SOURCE,
+    KEY_CAPTURE_SOURCE, MENU_SOURCE, MESSAGE_BAR_SOURCE, MESSAGES_SOURCE, OPTION_LIST_SOURCE,
+    PANELS_SOURCE, PICKER_SOURCE, POPOVER_SOURCE, PROMPT_SOURCE, ROVING_SOURCE,
+    SEARCH_MATCH_SOURCE, SEARCH_SOURCE, SEATS_SOURCE, SELECT_SOURCE, SPLIT_SOURCE, SUMMARY_SOURCE,
+    TABLE_SOURCE, TABS_SOURCE, TAG_PICKER_SOURCE, TOAST_SOURCE, TOOLTIP_SOURCE, TREE_SOURCE,
+    source,
 };
 use noctua_design_spec::Vendor;
 use noctua_design_spec::vendor::VENDOR;
@@ -77,6 +79,7 @@ pub fn emit(vendor: &Vendor) -> Vec<EmittedFile> {
         EmittedFile::new("dist/prompt.js", copied(PROMPT_SOURCE)),
         EmittedFile::new("dist/drawer.js", copied(DRAWER_SOURCE)),
         EmittedFile::new("dist/split.js", copied(SPLIT_SOURCE)),
+        EmittedFile::new("dist/key-capture.js", copied(KEY_CAPTURE_SOURCE)),
         EmittedFile::new("dist/tabs.js", copied(TABS_SOURCE)),
         EmittedFile::new("dist/date-input.js", copied(DATE_INPUT_SOURCE)),
         EmittedFile::new("dist/choice.js", copied(CHOICE_SOURCE)),

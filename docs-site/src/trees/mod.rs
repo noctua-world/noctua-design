@@ -63,6 +63,7 @@ mod info;
 mod input;
 mod ins;
 mod kbd;
+mod key_capture;
 mod label;
 mod lineage;
 mod lineage_figure;
@@ -194,6 +195,7 @@ pub(crate) fn for_component(name: &str) -> &'static [Tree] {
         "Input" => input::EXAMPLES,
         "Ins" => ins::EXAMPLES,
         "Kbd" => kbd::EXAMPLES,
+        "KeyCapture" => key_capture::EXAMPLES,
         "Label" => label::EXAMPLES,
         "Lineage" => lineage::EXAMPLES,
         "LineageFigure" => lineage_figure::EXAMPLES,

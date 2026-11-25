@@ -48,6 +48,14 @@ const REACT_MATCH_ICON: &str = concat!(
     "import { Icon } from \"./icon.js\";\n"
 );
 
+/// The one label in the system and a drawing, for the control that records a
+/// shortcut: its question is a `Label` and its remove control a glyph.
+const REACT_LABEL_ICON: &str = concat!(
+    "import { Label } from \"./label.js\";\n",
+    "\n",
+    "import { Icon } from \"./icon.js\";\n"
+);
+
 /// The menu and its item, for the control whose gap opens one.
 ///
 /// A constant for the reason `REACT_SEGMENTED` is: the arm that wants it is one
@@ -319,6 +327,7 @@ pub fn is_custom(component: &Component) -> bool {
             | "Split"
             | "SplitPane"
             | "SplitHandle"
+            | "KeyCapture"
     )
 }
 
@@ -372,6 +381,7 @@ pub fn dioxus_body(sink: &mut String, component: &Component) {
         "Split" => out.push_str(SPLIT_DIOXUS),
         "SplitPane" => out.push_str(SPLIT_PANE_DIOXUS),
         "SplitHandle" => out.push_str(SPLIT_HANDLE_DIOXUS),
+        "KeyCapture" => out.push_str(KEY_CAPTURE_DIOXUS),
         "Prompt" => out.push_str(PROMPT_DIOXUS),
         "Menu" => out.push_str(MENU_DIOXUS),
         "MenuItem" => out.push_str(MENU_ITEM_DIOXUS),
@@ -468,6 +478,7 @@ pub fn react_body(sink: &mut String, component: &Component) {
         "Split" => out.push_str(SPLIT_REACT),
         "SplitPane" => out.push_str(SPLIT_PANE_REACT),
         "SplitHandle" => out.push_str(SPLIT_HANDLE_REACT),
+        "KeyCapture" => out.push_str(KEY_CAPTURE_REACT),
         "Prompt" => out.push_str(PROMPT_REACT),
         "Menu" => out.push_str(MENU_REACT),
         "MenuItem" => out.push_str(MENU_ITEM_REACT),
@@ -4395,6 +4406,246 @@ const SPLIT_HANDLE_REACT: &str = r#"  const root = ["nd-split-handle", className
   );
 "#;
 
+// --- KeyCapture ---------------------------------------------------------------
+
+/// A control that records a shortcut, and the keys it holds.
+///
+/// # The keys are labelled here, in both halves, by one table
+///
+/// A chord is written as `nc_schema::keys` writes it, `Control+Alt+KeyK`, and
+/// drawn as the keyboard prints it, `Ctrl+Alt+K`. The labels are that
+/// module's: the modifiers by the keyboard named, a Mac's own names for Enter,
+/// Backspace and Delete, and every other key by its place on a US board.
+/// `dist/key-capture.js` draws a recorded chord from the same table, and
+/// relabels a key that prints a character for the layout in use. The cases in
+/// `spec/components/key_capture.cases.toml` hold the three to one answer.
+///
+/// # Two runs of keys, and the script writes only the second
+///
+/// `.nd-key-capture-keys` is the caller's `value`, drawn here.
+/// `.nd-key-capture-taken` ships empty, and the script draws what it heard in
+/// it, so a re-render never meets an element a script rebuilt. The stylesheet
+/// shows one of the two. The button is named through their parent, so the run
+/// that is not drawn is not read.
+///
+/// # `disabled` is the script's, and `aria-disabled` is the caller's
+///
+/// With the script blocked the button answers nothing, so the markup writes
+/// `disabled` and the script takes it off. The `disabled` prop is
+/// `aria-disabled`, which keeps a refused control in the tab order.
+///
+/// # Two live regions
+///
+/// The refusal is the caller's sentence, in a `status` on the page from the
+/// start. What the script says is a second `status`, visually hidden, because
+/// a region both a caller and a script write into is one a re-render empties.
+const KEY_CAPTURE_DIOXUS: &str = r#"    // The label a keyboard prints on a key, as `nc_schema::keys` gives it.
+    fn label_of<'a>(part: &'a str, keyboard: &str) -> &'a str {
+        match (part, keyboard) {
+            ("Control", "linux" | "windows") => "Ctrl",
+            ("Alt", "mac") => "Option",
+            ("Super", "mac") => "Command",
+            ("Super", "windows") => "Win",
+            ("Enter", "mac") => "Return",
+            ("Backspace", "mac") => "Delete",
+            ("Delete", "mac") => "Forward Delete",
+            ("ArrowUp", _) => "Up",
+            ("ArrowDown", _) => "Down",
+            ("ArrowLeft", _) => "Left",
+            ("ArrowRight", _) => "Right",
+            ("Minus", _) => "-",
+            ("Equal", _) => "=",
+            ("BracketLeft", _) => "[",
+            ("BracketRight", _) => "]",
+            ("Backslash", _) => "\\",
+            ("Semicolon", _) => ";",
+            ("Quote", _) => "'",
+            ("Backquote", _) => "`",
+            ("Comma", _) => ",",
+            ("Period", _) => ".",
+            ("Slash", _) => "/",
+            _ => {
+                let letter = part
+                    .strip_prefix("Key")
+                    .filter(|rest| rest.len() == 1 && rest.bytes().all(|byte| byte.is_ascii_uppercase()));
+                let digit = part
+                    .strip_prefix("Digit")
+                    .filter(|rest| rest.len() == 1 && rest.bytes().all(|byte| byte.is_ascii_digit()));
+                letter.or(digit).unwrap_or(part)
+            }
+        }
+    }
+
+    let root = format!("nd-key-capture {class}");
+    let root = root.trim().to_owned();
+    let id = format!("nd-key-capture-{name}");
+    let held = value.unwrap_or_default();
+    // Each key, whether a `+` goes before it, and the label it is drawn with.
+    let keys: Vec<(bool, String, String)> = held
+        .split('+')
+        .filter(|part| !part.is_empty())
+        .enumerate()
+        .map(|(at, part)| (at > 0, part.to_owned(), label_of(part, keyboard.as_str()).to_owned()))
+        .collect();
+    let refused = refusal.is_some();
+
+    rsx! {
+        div {
+            class: "{root}",
+            "data-nd-key-capture": "{name}",
+            "data-nd-value": "{held}",
+            "data-nd-keyboard": keyboard.as_str(),
+            "data-nd-capture-label": "{capture_label}",
+            "data-nd-empty-label": "{empty_label}",
+            "data-nd-refused": refused.then_some("true"),
+            "data-nd-disabled": disabled.then_some("true"),
+            Label { text: label, for_control: id.clone() }
+            button {
+                class: "nd-key-capture-control",
+                id: "{id}",
+                r#type: "button",
+                // Taken off by the script. See the header.
+                disabled: true,
+                "aria-labelledby": "{id}-label {id}-chord",
+                "aria-describedby": "{id}-refusal",
+                "aria-invalid": refused.then_some("true"),
+                "aria-disabled": disabled.then_some("true"),
+                span { class: "nd-key-capture-chord", id: "{id}-chord",
+                    span { class: "nd-key-capture-keys",
+                        if keys.is_empty() {
+                            span { class: "nd-key-capture-empty", "{empty_label}" }
+                        }
+                        for (joined , code , shown) in keys {
+                            if joined {
+                                "+"
+                            }
+                            kbd {
+                                class: "nd-kbd",
+                                "data-nd-size": "small",
+                                "data-nd-code": "{code}",
+                                "{shown}"
+                            }
+                        }
+                    }
+                    span { class: "nd-key-capture-taken" }
+                }
+            }
+            input { r#type: "hidden", name: "{name}", value: "{held}", disabled }
+            if let Some(clear) = clear_label {
+                // RENDERED HIDDEN, revealed by the script while there is a
+                // shortcut to remove: `Toast`'s arrangement for its dismiss
+                // control, for its reason.
+                button {
+                    class: "nd-key-capture-clear",
+                    r#type: "button",
+                    "aria-label": "{clear}",
+                    hidden: true,
+                    Icon { icon: IconDrawing::CLOSE, size: IconSize::Small }
+                }
+            }
+            p { class: "nd-key-capture-refusal", id: "{id}-refusal", role: "status",
+                if let Some(refusal) = refusal {
+                    "{refusal}"
+                }
+            }
+            span { class: "nd-key-capture-said nd-visually-hidden", role: "status" }
+        }
+    }
+"#;
+
+/// The same control, in React. Read it beside `KEY_CAPTURE_DIOXUS`.
+const KEY_CAPTURE_REACT: &str = r#"  const keyboard_ = keyboard ?? "linux";
+  const held = value ?? "";
+  const id = `nd-key-capture-${name}`;
+  const root = ["nd-key-capture", className].filter(Boolean).join(" ");
+  const refused = refusal != null;
+
+  // The label a keyboard prints on a key, as `nc_schema::keys` gives it. See
+  // the Dioxus half, which is the same table.
+  const mac = keyboard_ === "mac";
+  const PRINTED = new Map([
+    ["ArrowUp", "Up"], ["ArrowDown", "Down"], ["ArrowLeft", "Left"], ["ArrowRight", "Right"],
+    ["Minus", "-"], ["Equal", "="], ["BracketLeft", "["], ["BracketRight", "]"],
+    ["Backslash", "\\"], ["Semicolon", ";"], ["Quote", "'"], ["Backquote", "`"],
+    ["Comma", ","], ["Period", "."], ["Slash", "/"],
+  ]);
+  const MAC = new Map([["Enter", "Return"], ["Backspace", "Delete"], ["Delete", "Forward Delete"]]);
+  const labelOf = (part) => {
+    if (part === "Control") return mac ? part : "Ctrl";
+    if (part === "Alt") return mac ? "Option" : part;
+    if (part === "Super") return mac ? "Command" : keyboard_ === "windows" ? "Win" : part;
+    if (mac && MAC.has(part)) return MAC.get(part);
+    if (/^(Key[A-Z]|Digit[0-9])$/.test(part)) return part.slice(-1);
+    return PRINTED.get(part) ?? part;
+  };
+  const keys = held
+    .split("+")
+    .filter(Boolean)
+    .flatMap((part, at) => [
+      at > 0 ? "+" : null,
+      h("kbd", { key: `k${at}`, className: "nd-kbd", "data-nd-size": "small", "data-nd-code": part }, labelOf(part)),
+    ])
+    .filter((one) => one !== null);
+
+  return h(
+    "div",
+    {
+      className: root,
+      "data-nd-key-capture": name,
+      "data-nd-value": held,
+      "data-nd-keyboard": keyboard_,
+      "data-nd-capture-label": captureLabel,
+      "data-nd-empty-label": emptyLabel,
+      "data-nd-refused": refused ? "true" : undefined,
+      "data-nd-disabled": disabled ? "true" : undefined,
+      ...rest,
+    },
+    h(Label, { key: "l", text: label, forControl: id }),
+    h(
+      "button",
+      {
+        key: "c",
+        className: "nd-key-capture-control",
+        id,
+        type: "button",
+        // See the Dioxus half: taken off by the script.
+        disabled: true,
+        "aria-labelledby": `${id}-label ${id}-chord`,
+        "aria-describedby": `${id}-refusal`,
+        "aria-invalid": refused ? "true" : undefined,
+        "aria-disabled": disabled ? "true" : undefined,
+      },
+      h(
+        "span",
+        { className: "nd-key-capture-chord", id: `${id}-chord` },
+        h(
+          "span",
+          { key: "k", className: "nd-key-capture-keys" },
+          keys.length === 0 ? h("span", { className: "nd-key-capture-empty" }, emptyLabel) : keys,
+        ),
+        h("span", { key: "t", className: "nd-key-capture-taken" }),
+      ),
+    ),
+    h("input", { key: "i", type: "hidden", name, defaultValue: held, disabled }),
+    clearLabel
+      ? h(
+          "button",
+          {
+            key: "x",
+            className: "nd-key-capture-clear",
+            type: "button",
+            "aria-label": clearLabel,
+            // See the Dioxus half: revealed by the script.
+            hidden: true,
+          },
+          h(Icon, { icon: close, size: "small" }),
+        )
+      : null,
+    h("p", { key: "r", className: "nd-key-capture-refusal", id: `${id}-refusal`, role: "status" }, refusal),
+    h("span", { key: "s", className: "nd-key-capture-said nd-visually-hidden", role: "status" }),
+  );
+"#;
+
 // --- Menu and MenuItem ------------------------------------------------------
 
 /// The surface a button opens, and the actions on it.
@@ -5333,6 +5584,8 @@ pub fn dioxus_imports(component: &Component) -> String {
         // THE SEND CONTROL IS A `Button`, and the glyph a prompt starts with is
         // an `Icon`: a prompt is not the place to grow a second of either.
         "Prompt" => beside_icon("Button, ButtonSize, ButtonTone, ButtonVariant, Icon, IconSize"),
+        // THE ONE LABEL IN THE SYSTEM, and the glyph the remove control draws.
+        "KeyCapture" => beside_icon("Icon, IconSize, Label"),
         // `SelectOption` needs both for a reason worth writing down: the name
         // becomes `data-nd-icon` on the option, and the drawing goes in a
         // `<template>` beside it for the enhanced list to clone.
@@ -5507,6 +5760,8 @@ pub fn react_imports(component: &Component) -> String {
         )
         .to_owned(),
         "OptionItem" => REACT_MATCH_ICON.to_owned(),
+        // The same label and glyph as the Dioxus half.
+        "KeyCapture" => REACT_LABEL_ICON.to_owned(),
         // The same menu in the other language — see the Dioxus half.
         "Pagination" => REACT_MENU.to_owned(),
         // A `Button` and a drawing: a table's own controls, and the control a

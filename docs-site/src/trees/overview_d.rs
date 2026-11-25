@@ -1455,4 +1455,61 @@ Label { kind: Name, for_control } / Segmented { labelledby }",
             ],
         }],
     ),
+    (
+        "key-capture",
+        r#"KeyCapture { name: "…", label: "…", value: "Alt+Super+Space", clear_label: "…", … }
+KeyCapture { name: "…", label: "…", value: "KeyS", … }
+KeyCapture { name: "…", label: "…", value: "KeyH", … }"#,
+        // A SETTINGS PAGE'S SHORTCUTS: the Leader, then two keys of its menu,
+        // each a control of its own.
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-stack"))],
+            children: &[
+                Node::Component {
+                    name: "KeyCapture",
+                    props: &[
+                        ("name", Value::Text("overview-key-capture-leader")),
+                        ("label", Value::Message(Key::ExampleKeyCaptureLeader)),
+                        ("value", Value::Text("Alt+Super+Space")),
+                        (
+                            "capture_label",
+                            Value::Message(Key::ExampleKeyCaptureCapture),
+                        ),
+                        ("empty_label", Value::Message(Key::ExampleKeyCaptureEmpty)),
+                        ("clear_label", Value::Message(Key::ExampleKeyCaptureClear)),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "KeyCapture",
+                    props: &[
+                        ("name", Value::Text("overview-key-capture-settings")),
+                        ("label", Value::Message(Key::ExampleKeyCaptureSettings)),
+                        ("value", Value::Text("KeyS")),
+                        (
+                            "capture_label",
+                            Value::Message(Key::ExampleKeyCaptureCapture),
+                        ),
+                        ("empty_label", Value::Message(Key::ExampleKeyCaptureEmpty)),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "KeyCapture",
+                    props: &[
+                        ("name", Value::Text("overview-key-capture-help")),
+                        ("label", Value::Message(Key::ExampleKeyCaptureHelp)),
+                        ("value", Value::Text("KeyH")),
+                        (
+                            "capture_label",
+                            Value::Message(Key::ExampleKeyCaptureCapture),
+                        ),
+                        ("empty_label", Value::Message(Key::ExampleKeyCaptureEmpty)),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
 ];

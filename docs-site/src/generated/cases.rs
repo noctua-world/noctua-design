@@ -983,6 +983,299 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "KeyCapture",
+        "case-key-capture-0",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-1",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Control+Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-2",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("keyboard", Value::Text("mac")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Control+Alt+Super+Enter")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-3",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("keyboard", Value::Text("windows")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Super+KeyK")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-4",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Go")),
+                ("name", Value::Data("go")),
+                ("value", Value::Data("Shift+Digit1")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-5",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Wider")),
+                ("name", Value::Data("wider")),
+                ("value", Value::Data("Alt+Equal")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-6",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Menu key")),
+                ("name", Value::Data("menu")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-7",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-8",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-9",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-10",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-11",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-12",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-13",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-14",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("disabled", Value::Bool(true)),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-15",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                (
+                    "refusal",
+                    Value::Data("Another channel uses this shortcut."),
+                ),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-16",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-17",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("clear_label", Value::Data("Remove the shortcut")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-18",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("clear_label", Value::Data("Remove the shortcut")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
         "Lineage",
         "case-lineage-0",
         &[Node::Component {

@@ -45,6 +45,7 @@ export { Info, type InfoProps } from "./info.js";
 export { Input, type InputProps } from "./input.js";
 export { Ins, type InsProps } from "./ins.js";
 export { Kbd, type KbdProps } from "./kbd.js";
+export { KeyCapture, type KeyCaptureProps } from "./key_capture.js";
 export { Label, type LabelProps } from "./label.js";
 export { Lineage, type LineageProps } from "./lineage.js";
 export { LineageFigure, type LineageFigureProps } from "./lineage_figure.js";

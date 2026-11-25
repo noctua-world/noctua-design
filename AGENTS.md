@@ -313,6 +313,7 @@ of these carries measured rules, not description:
 | the prompt, its block cursor, or anything drawn over a text control | `crates/noctua-design-runtime/src/prompt.js` |
 | a drawer: what a collapsed one owes the keyboard, and what Escape says | `crates/noctua-design-runtime/src/drawer.js` |
 | a split: the line between two panes, its keys and its drag | `crates/noctua-design-runtime/src/split.js` |
+| a control that records a shortcut: the keys it takes, the order a chord is written in, a key's label | `crates/noctua-design-runtime/src/key-capture.js` |
 | what both implementations must *do* | `spec/components/<name>.cases.toml`, and `crates/noctua-design-spec/src/conformance.rs` for the vocabulary a step may use |
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
@@ -996,6 +997,29 @@ collapse a pane, as the window splitter's Enter does, and a pane drawn as nothin
 whatever the keyboard could reach in it. Side by side, the stylesheet makes it
 `visibility: hidden`, read off the handle's `aria-valuenow`, which is the share the script drew
 held between the limits, so `data-nd-value` written past a limit hides nothing it does not draw.
+
+### The key capture
+
+**It records a chord and judges nothing.** `KeyCapture` is a `<button>` that listens once
+pressed: the next key, with the modifiers held, is the shortcut, written as `nc_schema::keys`
+writes a chord, the modifiers in the order Control, Alt, Shift, Super and the key's
+`KeyboardEvent.code`. A modifier alone records nothing. Whether the chord is in the vocabulary
+or collides is the caller's to ask, and a refusal comes back as `refusal`, the caller's sentence
+in a `role="status"` that is on the page from the start. `dist/key-capture.js` says
+`nd-key-capture-change` and keeps nothing.
+
+**No key holds the focus for more than one press.** While it listens every key is recorded, Tab,
+Enter and Space among them, because a binding may hold any of them, and listening ends with the
+first. Escape, a second press and the focus leaving stop it with the shortcut kept, and Escape is
+kept from what is around the control only while it listens.
+
+**A key is drawn by the label on it, from one table written three times.** The modifiers take
+the names the `keyboard` prop's keyboard prints and every other key its US board's label, the
+table `nc_schema::keys` holds. Both bodies in `crates/noctua-design-emit/src/controls.rs` and the
+script carry it, and the cases hold the three to one answer. The script relabels a key that
+prints a character for the layout in use where the engine can say what it prints, and otherwise
+takes a captured key's own character when neither Alt nor Shift changed it. The caller's keys and
+the keys the script heard are two runs, and the script writes only the second.
 
 ### Tones, bars, carousels, spectra
 

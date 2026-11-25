@@ -30,12 +30,12 @@ use noctua_design::components::{
     ErrorSummaryItem, Field, FieldKind, FieldSize, Fieldset, FileInput, FileInputSize, Footer,
     FooterCorner, FooterCornerSide, FooterLine, FooterLineKind, FooterVisibility, Heading,
     HeadingLevel, HeadingSize, HeadingTone, Icon, IconSize, Image, ImageFit, ImageLoading,
-    ImageRatio, Info, InfoPlacement, Input, InputKind, InputSize, Ins, Kbd, KbdSize, Label,
-    LabelKind, LabelSize, Lineage, LineageFigure, LineageFigureParallax, LineageFigureShape,
-    LineageFigureTone, LineageFilterMode, LineageHeight, LineageLettering, LineageLine,
-    LineagePick, LineageReach, LineageRoute, LineageSize, LineageThickness, LineageTilt,
-    LineageView, Link, LinkTone, List, ListItem, ListKind, ListMarker, ListSpacing, Mark,
-    MatchText, Menu, MenuItem, MenuPlacement, MessageBar, MessageBarLive, Meter, MeterSize,
+    ImageRatio, Info, InfoPlacement, Input, InputKind, InputSize, Ins, Kbd, KbdSize, KeyCapture,
+    KeyCaptureKeyboard, Label, LabelKind, LabelSize, Lineage, LineageFigure, LineageFigureParallax,
+    LineageFigureShape, LineageFigureTone, LineageFilterMode, LineageHeight, LineageLettering,
+    LineageLine, LineagePick, LineageReach, LineageRoute, LineageSize, LineageThickness,
+    LineageTilt, LineageView, Link, LinkTone, List, ListItem, ListKind, ListMarker, ListSpacing,
+    Mark, MatchText, Menu, MenuItem, MenuPlacement, MessageBar, MessageBarLive, Meter, MeterSize,
     NumberInput, NumberInputSize, NumberInputStepping, OptionGroup, OptionItem, OptionList,
     OptionListLayout, OptionListSize, OtpField, OtpFieldKind, OtpFieldSize, Pagination,
     PaginationSize, PaginationSpread, Paragraph, ParagraphSize, ParagraphTone, Popover,
@@ -110,6 +110,7 @@ pub(crate) fn component(
         "Input" => input(props, children, scope),
         "Ins" => ins(props, children, scope),
         "Kbd" => kbd(props, children, scope),
+        "KeyCapture" => key_capture(props, children, scope),
         "Label" => label(props, children, scope),
         "Lineage" => lineage(props, children, scope),
         "LineageFigure" => lineage_figure(props, children, scope),
@@ -2023,6 +2024,54 @@ fn kbd(
             size: size_,
             class: class_,
             {render(children, scope)}
+        }
+    }
+}
+
+/// `KeyCapture`, from a tree.
+fn key_capture(
+    props: &'static [(&'static str, Value)],
+    _children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("KeyCapture.name is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("KeyCapture.label is required and this tree does not set it");
+    let value_ = scope.find(props, "value");
+    let keyboard_ = scope
+        .pick(
+            props,
+            "keyboard",
+            &KeyCaptureKeyboard::ALL,
+            KeyCaptureKeyboard::as_str,
+        )
+        .unwrap_or_default();
+    let capture_label_ = scope
+        .find(props, "capture_label")
+        .expect("KeyCapture.capture_label is required and this tree does not set it");
+    let empty_label_ = scope
+        .find(props, "empty_label")
+        .expect("KeyCapture.empty_label is required and this tree does not set it");
+    let clear_label_ = scope.find(props, "clear_label");
+    let refusal_ = scope.find(props, "refusal");
+    let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        KeyCapture {
+            name: name_,
+            label: label_,
+            value: value_,
+            keyboard: keyboard_,
+            capture_label: capture_label_,
+            empty_label: empty_label_,
+            clear_label: clear_label_,
+            refusal: refusal_,
+            disabled: disabled_,
+            class: class_,
         }
     }
 }

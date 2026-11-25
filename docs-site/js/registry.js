@@ -51,6 +51,7 @@ import { Info } from "@noctua-world/design-react/components/info.js";
 import { Input } from "@noctua-world/design-react/components/input.js";
 import { Ins } from "@noctua-world/design-react/components/ins.js";
 import { Kbd } from "@noctua-world/design-react/components/kbd.js";
+import { KeyCapture } from "@noctua-world/design-react/components/key_capture.js";
 import { Label } from "@noctua-world/design-react/components/label.js";
 import { Link } from "@noctua-world/design-react/components/link.js";
 import { List } from "@noctua-world/design-react/components/list.js";
@@ -153,6 +154,7 @@ export const COMPONENTS = {
   Input,
   Ins,
   Kbd,
+  KeyCapture,
   Label,
   Link,
   List,

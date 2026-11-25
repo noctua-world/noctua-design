@@ -509,6 +509,15 @@ ToolbarGroup { align: ToolbarGroupAlign::End, … }"#
         ),
     ),
     (
+        "key-capture",
+        example!(
+            r#"KeyCapture { name: "…", label: "…", value: "Alt+Super+Space", clear_label: "…", … }
+KeyCapture { name: "…", label: "…", value: "KeyS", … }
+KeyCapture { name: "…", label: "…", value: "KeyH", … }"#,
+            Key::ExampleKeyCaptureOverview
+        ),
+    ),
+    (
         "option-list",
         example!(
             r#"OptionList { name: "…", label: "…", empty_label: "…",
@@ -749,6 +758,7 @@ pub(crate) fn for_component(name: &str) -> &'static [Example] {
         "Split" => SPLIT,
         "SplitPane" => SPLIT_PANE,
         "SplitHandle" => SPLIT_HANDLE,
+        "KeyCapture" => KEY_CAPTURE,
         "FooterLine" => FOOTER_LINE,
         "FooterCorner" => FOOTER_CORNER,
         "ListItem" => LIST_ITEM,
@@ -2454,6 +2464,35 @@ const SPLIT_HANDLE: &[Example] = &[
     example!(
         r"SplitHandle { … } in a split read from the right",
         Key::ExampleSplitHandleMirrored
+    ),
+];
+
+// --- KeyCapture -------------------------------------------------------------
+
+const KEY_CAPTURE: &[Example] = &[
+    example!(
+        r#"KeyCapture { name: "…", label: "…", value: "Alt+Space", capture_label: "…", empty_label: "…" }"#,
+        Key::ExampleKeyCaptureBasic
+    ),
+    example!(
+        r#"KeyCapture { keyboard: KeyCaptureKeyboard::Linux | Windows | Mac, value: "Alt+Super+Space", … }"#,
+        Key::ExampleKeyCaptureKeyboards
+    ),
+    example!(
+        r#"KeyCapture { clear_label: "…", … }"#,
+        Key::ExampleKeyCaptureRemovable
+    ),
+    example!(
+        r"KeyCapture { … } with no value",
+        Key::ExampleKeyCaptureUnset
+    ),
+    example!(
+        r#"KeyCapture { refusal: "…", … }"#,
+        Key::ExampleKeyCaptureRefused
+    ),
+    example!(
+        r"KeyCapture { disabled: true, … }",
+        Key::ExampleKeyCaptureLocked
     ),
 ];
 

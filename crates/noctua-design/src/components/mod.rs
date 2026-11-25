@@ -48,6 +48,7 @@ mod info;
 mod input;
 mod ins;
 mod kbd;
+mod key_capture;
 mod label;
 mod lineage;
 mod lineage_figure;
@@ -156,6 +157,7 @@ pub use info::{Info, InfoPlacement};
 pub use input::{Input, InputKind, InputSize};
 pub use ins::Ins;
 pub use kbd::{Kbd, KbdSize};
+pub use key_capture::{KeyCapture, KeyCaptureKeyboard};
 pub use label::{Label, LabelKind, LabelSize};
 pub use lineage::{
     Lineage, LineageFilterMode, LineageHeight, LineageLettering, LineageLine, LineagePick,

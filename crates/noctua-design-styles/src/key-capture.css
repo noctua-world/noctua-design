@@ -1,0 +1,151 @@
+/* --- KeyCapture ---------------------------------------------------------------
+ *
+ * A control that records a shortcut, drawn as the keys it is pressed with.
+ *
+ * ONE ROW THAT WRAPS: the label, the control and the control that removes the
+ * shortcut, with the refusal on a row of its own under them. At 320px the label
+ * takes a row and the control the next.
+ *
+ * THE CONTROL IS A BOX LIKE A TEXT BOX, at the medium `Button`'s height, because
+ * it holds a value and sits in a row of controls on a settings page. The keys
+ * in it are the `Kbd` caps.
+ *
+ * TWO RUNS OF KEYS, AND ONE IS DRAWN. `.nd-key-capture-keys` is the caller's
+ * `value` and `.nd-key-capture-taken` is what the script heard. The second is
+ * drawn while the control listens or holds a recorded chord, and the first the
+ * rest of the time.
+ *
+ * NO STATE IS SAID BY COLOUR ALONE. Listening is a dashed edge and the words
+ * `capture_label` says. A refusal is a rule down the leading edge and the
+ * caller's sentence under the control, as `Field` marks a wrong answer. */
+.nd-key-capture {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--noctua-space-1) var(--noctua-space-3);
+  min-inline-size: 0;
+}
+
+.nd-key-capture-control {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  box-sizing: border-box;
+  min-block-size: var(--noctua-space-12);
+  max-inline-size: 100%;
+  margin: 0;
+  padding-block: var(--noctua-space-1);
+  padding-inline: var(--noctua-space-3);
+  /* A form control does not take the page's face on its own. */
+  font-family: var(--noctua-font-sans);
+  font-size: var(--noctua-size-body);
+  line-height: var(--noctua-leading-body);
+  color: var(--nc-color-fg);
+  text-align: start;
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+/* Refused by the caller, or by a page with no script to answer it. */
+.nd-key-capture-control:disabled,
+.nd-key-capture-control[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it", the exemption `.nd-button` carries */
+}
+
+.nd-key-capture-chord,
+.nd-key-capture-keys,
+.nd-key-capture-taken {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--noctua-space-1);
+  min-inline-size: 0;
+}
+
+.nd-key-capture-taken {
+  display: none;
+}
+
+.nd-key-capture:is([data-nd-listening], [data-nd-captured]) .nd-key-capture-keys {
+  display: none;
+}
+
+.nd-key-capture:is([data-nd-listening], [data-nd-captured]) .nd-key-capture-taken {
+  display: inline-flex;
+}
+
+/* The words in the box that are not keys: no shortcut, and what to press. */
+.nd-key-capture-empty,
+.nd-key-capture-prompt {
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-key-capture-control:not([aria-disabled="true"]):is(:hover, [data-nd-seat-hover]) {
+  border-color: var(--nc-color-border-strong);
+}
+
+.nd-key-capture-control:is(:focus-visible, [data-nd-seat-focus]) {
+  border-color: var(--nc-color-border-strong);
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* LISTENING: A DASHED EDGE IN THE ACCENT. The dash is the signal and the colour
+   says it again. After the hover rule, which it outweighs on order alone. */
+.nd-key-capture[data-nd-listening] .nd-key-capture-control {
+  border-style: dashed;
+  border-color: var(--nc-color-accent);
+}
+
+/* REFUSED: `Field`'s mark for a wrong answer, down the leading edge of the
+   whole control, and the control's own edge in the danger tone. */
+.nd-key-capture[data-nd-refused="true"] {
+  padding-inline-start: var(--noctua-space-4);
+  border-inline-start: var(--noctua-border-rule) solid var(--nc-color-danger);
+}
+
+.nd-key-capture[data-nd-refused="true"]:not([data-nd-listening]) .nd-key-capture-control {
+  border-color: var(--nc-color-danger);
+}
+
+/* THE SENTENCE IS ON A ROW OF ITS OWN, and on the page from the start so a
+   sentence written into it later is read. Empty, it is a line of no height. */
+.nd-key-capture-refusal {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-semibold);
+  color: var(--nc-color-danger);
+}
+
+/* THE CONTROL THAT REMOVES THE SHORTCUT. A glyph in a target of the smallest
+   size, beside the box it empties (WCAG 2.5.8). */
+.nd-key-capture-clear {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-inline-size: var(--noctua-target-min);
+  min-block-size: var(--noctua-target-min);
+  margin: 0;
+  padding: var(--noctua-space-1);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-key-capture-clear:is(:hover, [data-nd-seat-hover]) {
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface-subtle);
+}
+
+.nd-key-capture-clear:is(:focus-visible, [data-nd-seat-focus]) {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}

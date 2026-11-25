@@ -1,0 +1,128 @@
+# What a `KeyCapture` has to do, in both languages, in a real browser.
+#
+# A case presses one key at a time, so a chord with a modifier held is asked of
+# `tests/browser/key-capture.spec.js`, and so is the announcement. What is held
+# here is the markup, the four states, and the keys one at a time.
+
+[[case]]
+name = "it is a labelled button named by its label and its keys"
+note = "The accessible name is the label and the keys together, so the visible keys are part of the name a voice command says (WCAG 2.5.3). A `<label for>` alone would name it by the label and drop the keys."
+props = { name = "leader", label = "Leader", value = "Alt+Space", capture_label = "Press the keys", empty_label = "None" }
+expect = { attrs = { "data-nd-key-capture" = "leader", "data-nd-value" = "Alt+Space", "data-nd-keyboard" = "linux" }, present = [":scope > label.nd-label[for='nd-key-capture-leader'][id='nd-key-capture-leader-label']", ":scope > button.nd-key-capture-control[type='button'][aria-labelledby='nd-key-capture-leader-label nd-key-capture-leader-chord'][aria-describedby='nd-key-capture-leader-refusal']", ":scope > input[type='hidden'][name='leader']"], absent = ["data-nd-listening", "data-nd-captured", "data-nd-refused"], text = "LeaderAlt+Space", value = "Alt+Space" }
+
+[[case]]
+name = "each key is a key cap with its physical code"
+note = "The label is what a reader sees and the code is what a script reads back, so a key relabelled for a layout keeps the key it is."
+props = { name = "leader", label = "Leader", value = "Control+Alt+Space", capture_label = "Press the keys", empty_label = "None" }
+expect = { present = ["kbd.nd-kbd[data-nd-code='Control']", "kbd.nd-kbd[data-nd-code='Alt']", "kbd.nd-kbd[data-nd-code='Space']"], text = "LeaderCtrl+Alt+Space" }
+
+[[case]]
+name = "a Mac keyboard names its own modifiers"
+note = "Control, Option and Command are what a Mac prints, and Return is its Enter. The chord written is the same on every keyboard, only the labels change."
+props = { name = "leader", label = "Leader", value = "Control+Alt+Super+Enter", keyboard = "mac", capture_label = "Press the keys", empty_label = "None" }
+expect = { attrs = { "data-nd-keyboard" = "mac" }, text = "LeaderControl+Option+Command+Return" }
+
+[[case]]
+name = "a Windows keyboard calls Super Win"
+note = "The fourth modifier is one key with three names, and Windows prints Win on it."
+props = { name = "leader", label = "Leader", value = "Super+KeyK", keyboard = "windows", capture_label = "Press the keys", empty_label = "None" }
+expect = { text = "LeaderWin+K" }
+
+[[case]]
+name = "keys are labelled by their place on a US board"
+note = "A digit, a punctuation key and an arrow, each drawn with the label `nc_schema::keys` gives it, so the help pages and this control name one key one way."
+props = { name = "go", label = "Go", value = "Shift+Digit1", capture_label = "Press the keys", empty_label = "None" }
+expect = { text = "GoShift+1" }
+
+[[case]]
+name = "punctuation is drawn as the character it prints"
+note = "`Equal` is the code and `=` is what is printed on the key."
+props = { name = "wider", label = "Wider", value = "Alt+Equal", capture_label = "Press the keys", empty_label = "None" }
+expect = { text = "WiderAlt+=" }
+
+[[case]]
+name = "no shortcut says so in the caller's words"
+note = "An empty control would be a button named by its label alone, with nothing to see where the keys go."
+props = { name = "menu", label = "Menu key", capture_label = "Press the keys", empty_label = "None" }
+expect = { text = "Menu keyNone", value = "", present = [".nd-key-capture-empty"] }
+
+[[case]]
+name = "Enter starts listening"
+note = "The control is a `<button>`, so Enter presses it, and pressing it is what starts listening."
+props = { name = "leader", label = "Leader", value = "Alt+Space", capture_label = "Press the keys", empty_label = "None" }
+steps = ["focus:.nd-key-capture-control", "key:Enter"]
+expect = { attrs = { "data-nd-listening" = "true" }, absent = ["data-nd-captured"], focus = ".nd-key-capture-control" }
+
+[[case]]
+name = "Space starts listening, and Space is then recorded"
+note = "Space presses the button on its way up. While the control listens, Space is a key a binding may hold, and the press that records it presses nothing."
+props = { name = "leader", label = "Leader", value = "Alt+Space", capture_label = "Press the keys", empty_label = "None" }
+steps = ["focus:.nd-key-capture-control", "key:Space", "key:Space"]
+expect = { attrs = { "data-nd-captured" = "true" }, absent = ["data-nd-listening"], value = "Space" }
+
+[[case]]
+name = "the next key is recorded by its physical code"
+note = "The chord is written as the grammar writes it, so a K is `KeyK` whatever the layout prints on it."
+props = { name = "leader", label = "Leader", value = "Alt+Space", capture_label = "Press the keys", empty_label = "None" }
+steps = ["focus:.nd-key-capture-control", "key:Enter", "key:KeyK"]
+expect = { attrs = { "data-nd-captured" = "true" }, absent = ["data-nd-listening"], value = "KeyK", focus = ".nd-key-capture-control", present = [".nd-key-capture-taken kbd[data-nd-code='KeyK']"] }
+
+[[case]]
+name = "Enter is recorded while listening, and presses nothing"
+note = "A second Enter is a key, not a second press of the button. Were it a press, the control would stop listening and record nothing."
+props = { name = "leader", label = "Leader", value = "Alt+Space", capture_label = "Press the keys", empty_label = "None" }
+steps = ["focus:.nd-key-capture-control", "key:Enter", "key:Enter"]
+expect = { attrs = { "data-nd-captured" = "true" }, value = "Enter" }
+
+[[case]]
+name = "Escape stops listening and keeps the shortcut in force"
+note = "Escape is the way out that is always there. The hidden input and the keys drawn are what they were before the control listened."
+props = { name = "leader", label = "Leader", value = "Alt+Space", capture_label = "Press the keys", empty_label = "None" }
+steps = ["focus:.nd-key-capture-control", "key:Enter", "key:Escape"]
+expect = { absent = ["data-nd-listening", "data-nd-captured"], value = "Alt+Space", text = "LeaderAlt+Space", focus = ".nd-key-capture-control" }
+
+[[case]]
+name = "Tab is recorded while listening, and the focus stays"
+note = "A binding may hold Tab. Listening ends with it, so one press is all it takes from the reader."
+props = { name = "leader", label = "Leader", value = "Alt+Space", capture_label = "Press the keys", empty_label = "None" }
+steps = ["focus:.nd-key-capture-control", "key:Enter", "key:Tab"]
+expect = { attrs = { "data-nd-captured" = "true" }, value = "Tab", focus = ".nd-key-capture-control" }
+
+[[case]]
+name = "the focus leaving stops listening"
+note = "A control that kept listening after the reader had gone would record the next key pressed anywhere it got the focus back."
+props = { name = "leader", label = "Leader", value = "Alt+Space", capture_label = "Press the keys", empty_label = "None" }
+steps = ["focus:.nd-key-capture-control", "key:Enter", "blur"]
+expect = { absent = ["data-nd-listening", "data-nd-captured"], value = "Alt+Space" }
+
+[[case]]
+name = "a disabled control stays in the tab order and does not listen"
+note = "`aria-disabled` keeps it reachable, so a reader hears the shortcut and that it cannot be changed. Pressing it starts nothing."
+props = { name = "leader", label = "Leader", value = "Alt+Space", capture_label = "Press the keys", empty_label = "None", disabled = true }
+steps = ["focus:.nd-key-capture-control", "key:Enter"]
+expect = { attrs = { "data-nd-disabled" = "true" }, absent = ["data-nd-listening"], present = [".nd-key-capture-control[aria-disabled='true']"], focus = ".nd-key-capture-control" }
+
+[[case]]
+name = "a refusal marks the control and says why"
+note = "The sentence is the caller's, and it is the signal. The rule and the tone beside it say the same thing again, never alone."
+props = { name = "leader", label = "Leader", value = "Alt+Space", capture_label = "Press the keys", empty_label = "None", refusal = "Another channel uses this shortcut." }
+expect = { attrs = { "data-nd-refused" = "true" }, present = [".nd-key-capture-control[aria-invalid='true']", ".nd-key-capture-refusal[role='status'][id='nd-key-capture-leader-refusal']"], text = "LeaderAlt+SpaceAnother channel uses this shortcut." }
+
+[[case]]
+name = "with no refusal the status is on the page and empty"
+note = "A sentence written into a live region already on the page is read, and one that arrives with its region is not."
+props = { name = "leader", label = "Leader", value = "Alt+Space", capture_label = "Press the keys", empty_label = "None" }
+expect = { present = [".nd-key-capture-refusal[role='status']", ".nd-key-capture-said[role='status']"], absent = ["data-nd-refused"] }
+
+[[case]]
+name = "the remove control appears once a script can answer it"
+note = "It ships hidden, and the script reveals it while there is a shortcut to remove."
+props = { name = "leader", label = "Leader", value = "Alt+Space", capture_label = "Press the keys", empty_label = "None", clear_label = "Remove the shortcut" }
+expect = { visible = [".nd-key-capture-clear[aria-label='Remove the shortcut']"] }
+
+[[case]]
+name = "the remove control empties the shortcut"
+note = "An empty shortcut is a binding removed, which the caller then saves or refuses like any other."
+props = { name = "leader", label = "Leader", value = "Alt+Space", capture_label = "Press the keys", empty_label = "None", clear_label = "Remove the shortcut" }
+steps = ["click:.nd-key-capture-clear"]
+expect = { attrs = { "data-nd-captured" = "true" }, value = "", present = [".nd-key-capture-taken .nd-key-capture-empty"] }

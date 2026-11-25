@@ -45,6 +45,7 @@ export { Info } from "./info.js";
 export { Input } from "./input.js";
 export { Ins } from "./ins.js";
 export { Kbd } from "./kbd.js";
+export { KeyCapture } from "./key_capture.js";
 export { Label } from "./label.js";
 export { Lineage } from "./lineage.js";
 export { LineageFigure } from "./lineage_figure.js";

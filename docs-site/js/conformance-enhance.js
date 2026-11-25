@@ -27,6 +27,7 @@ import { enhanceOptionLists, releaseOptionLists } from "../assets/option-list.js
 import { enhancePrompts, releasePrompts } from "../assets/prompt.js";
 import { enhanceDrawers, releaseDrawers } from "../assets/drawer.js";
 import { enhanceSplits, releaseSplits } from "../assets/split.js";
+import { enhanceKeyCaptures, releaseKeyCaptures } from "../assets/key-capture.js";
 import { releaseTabs, enhanceTabs } from "../assets/tabs.js";
 import { enhanceDateInputs, releaseDateInputs } from "../assets/date-input.js";
 import { enhanceChoices, releaseChoices } from "../assets/choice.js";
@@ -56,6 +57,7 @@ export function enhance(root = document) {
   enhancePrompts(root);
   enhanceDrawers(root);
   enhanceSplits(root);
+  enhanceKeyCaptures(root);
   enhanceTabs(root);
   enhanceDateInputs(root);
   enhanceChoices(root);
@@ -88,6 +90,7 @@ export function release(root = document) {
   releasePrompts(root);
   releaseDrawers(root);
   releaseSplits(root);
+  releaseKeyCaptures(root);
   releaseTabs(root);
   releaseDateInputs(root);
   releaseChoices(root);
