@@ -88,7 +88,9 @@ test.describe("one page shape", () => {
           h1: document.querySelectorAll("h1.nd-title").length,
           titleInHead: !!head?.querySelector("h1.nd-title"),
           leadInHead: !!head?.querySelector("p.nd-lead"),
-          // Sections carry the scroll margin that clears the sticky header.
+          // Sections are what the index jumps to. The root's
+          // `scroll-padding-block-start` is what clears the sticky header,
+          // and the fragment test in `navigation.spec.js` holds it there.
           sections: document.querySelectorAll(".nd-doc-section").length,
           // A page of several sections says so at the top. A page of one has
           // nothing to offer an index that the page itself does not.

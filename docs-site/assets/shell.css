@@ -1726,22 +1726,6 @@ a {
    a block of code. Every one of those is a component with a page of its own,
    and the typography page is the scale, the families and the scripts. */
 
-/* A row of links, wrapping. Not a grid: the names are of very different
-   lengths, and a grid of them leaves a ragged column of white space that reads
-   as a mistake. */
-/* A JUMP LANDS UNDER A STICKY HEADER UNLESS IT IS TOLD NOT TO.
- *
- * The inline-text page is ten sections and an index that jumps to them, and the
- * header is `position: sticky` at the top — so `#kbd` scrolled the section to
- * y=0 and the header sat on its name. One property, the header's own height,
- * and a step of air so the heading is not flush against it. */
-/* AND IT CARRIES THE PAGE'S RHYTHM, because it is a page within a page.
- *
- * `.nd-main` is a flex column with a paragraph of gap between its children, and
- * a section inside it is one child — so everything the section holds fell back
- * to the global `margin: 0` reset. A component's summary and the sentence about
- * when to reach for it were one block of text with no seam between them, which
- * reads as a paragraph that lost its break rather than as two paragraphs. */
 /* ONE PAGE SHAPE, AND EVERY PAGE KEEPS IT.
  *
  * The article is the page's rhythm: a head, an index, and the sections. The
@@ -1792,6 +1776,9 @@ a {
   border-block-end: var(--noctua-border-hairline) solid var(--nc-color-border);
 }
 
+/* A row of links, wrapping. Not a grid: the names are of very different
+   lengths, and a grid of them leaves a ragged column of white space that reads
+   as a mistake. */
 .nd-doc-index-list {
   display: flex;
   flex-wrap: wrap;
@@ -1804,13 +1791,19 @@ a {
 
 /* A section of a page, and the anchor a jump link lands on.
  *
- * `.nd-doc` is a flex column with a gap between its children, and a section
- * inside it is one child — so everything the section holds fell back to the
- * global `margin: 0` reset, and a heading sat against its own paragraph with
- * no seam. */
+ * A JUMP STOPS BELOW THE STICKY HEADER, AND THE ROOT IS WHAT SAYS SO. The
+ * header's height is the root's `scroll-padding-block-start` (`:root`, at the
+ * top of this file), which holds for every jump the engine makes, so a section's
+ * own scroll margin adds only the breath above its heading. A margin that also
+ * counted the header would count it twice. `tests/browser/navigation.spec.js`
+ * holds a fragment's target to that breath below the header, and fails both
+ * with the root's padding gone and with the header counted here again.
+ *
+ * AND IT CARRIES THE PAGE'S RHYTHM. `.nd-doc` is a flex column with a gap
+ * between its children, and a section inside it is one child, so everything
+ * the section holds fell back to the global `margin: 0` reset, and a heading
+ * sat against its own paragraph with no seam. */
 .nd-doc-section {
-  /* The header is the window's own scroll padding (`:root`), so a jump to a
-     section adds only the breath above its heading. */
   scroll-margin-block-start: var(--noctua-space-4);
   display: flex;
   flex-direction: column;
