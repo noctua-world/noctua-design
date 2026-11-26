@@ -3116,7 +3116,7 @@ fn prompt(
     let send_label_ = scope.find(props, "send_label");
     let action_ = scope.find(props, "action");
     let controls_ = scope.find(props, "controls");
-    let active_ = scope.find(props, "active");
+    let active_option_ = scope.find(props, "active_option");
     let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
     let readonly_ = scope.flag(props, "readonly").unwrap_or(false);
     let class_ = scope.find(props, "class").unwrap_or_default();
@@ -3129,7 +3129,7 @@ fn prompt(
             send_label: send_label_,
             action: action_,
             controls: controls_,
-            active: active_,
+            active_option: active_option_,
             disabled: disabled_,
             readonly: readonly_,
             class: class_,

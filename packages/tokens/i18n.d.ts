@@ -2719,7 +2719,7 @@ export type MessageKey =
   | "component.prompt.prop.send_label.doc"
   | "component.prompt.prop.action.doc"
   | "component.prompt.prop.controls.doc"
-  | "component.prompt.prop.active.doc"
+  | "component.prompt.prop.active_option.doc"
   | "component.prompt.prop.disabled.doc"
   | "component.prompt.prop.readonly.doc"
   | "component.prompt.state.composing.doc"

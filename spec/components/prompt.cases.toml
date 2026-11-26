@@ -44,8 +44,8 @@ expect = { absent = ["data-nd-selecting", "data-nd-composing"], attrs = { "data-
 [[case]]
 name = "a prompt that drives a list says so on a textbox"
 note = "HTML allows a `<textarea>` no other role, so the list is named on the textbox and no `combobox` is claimed."
-props = { name = "ask", label = "Prompt", controls = "nd-option-list-commands", active = "option-2" }
-expect = { present = ["textarea[aria-controls=nd-option-list-commands][aria-autocomplete=list][aria-activedescendant=option-2]"], hidden = ["[role]"] }
+props = { name = "ask", label = "Prompt", controls = "commands", active_option = "option-2" }
+expect = { present = ["textarea[aria-controls=commands][aria-autocomplete=list][aria-activedescendant=option-2]"], hidden = ["[role]"] }
 
 [[case]]
 name = "a prompt with no list names none"

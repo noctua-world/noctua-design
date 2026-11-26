@@ -45,7 +45,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         }],
     ),
     (
-        r#"Prompt { controls: "nd-option-list-…" } beside OptionList { focusable: false }"#,
+        r#"Prompt { controls: "…" } beside OptionList { name: "…", focusable: false }"#,
         &[Node::Element {
             tag: "div",
             attributes: &[(
@@ -58,7 +58,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     props: &[
                         ("name", Value::Text("example-prompt-driven")),
                         ("label", Value::Message(Key::ExamplePromptLabel)),
-                        ("controls", Value::Text("nd-option-list-prompt-commands")),
+                        ("controls", Value::Text("prompt-commands")),
                     ],
                     children: &[],
                 },
@@ -100,7 +100,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         }],
     ),
     (
-        r#"Prompt { controls: "…", active: "…" } beside OptionItem { id: "…", active: true }"#,
+        r#"Prompt { controls: "…", active_option: "…" } beside OptionItem { id: "…", active: true }"#,
         &[Node::Element {
             tag: "div",
             attributes: &[(
@@ -113,8 +113,8 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     props: &[
                         ("name", Value::Text("example-prompt-active")),
                         ("label", Value::Message(Key::ExamplePromptLabel)),
-                        ("controls", Value::Text("nd-option-list-prompt-pages")),
-                        ("active", Value::Text("example-prompt-option-help")),
+                        ("controls", Value::Text("prompt-pages")),
+                        ("active_option", Value::Text("example-prompt-option-help")),
                     ],
                     children: &[],
                 },

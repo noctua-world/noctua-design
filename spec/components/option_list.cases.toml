@@ -11,7 +11,7 @@
 name = "it is a named listbox and its rows are options"
 note = "A listbox with no name gives a screen reader two words and nothing to tell two lists apart by."
 props = { name = "commands", label = "Commands" }
-expect = { attrs = { "data-nd-option-list" = "commands" }, present = ["ul#nd-option-list-commands[role=listbox][aria-label=Commands][tabindex='0']", "li[role=option][data-nd-value=open]"] }
+expect = { attrs = { "data-nd-option-list" = "commands" }, present = ["ul#commands[role=listbox][aria-label=Commands][tabindex='0']", "li[role=option][data-nd-value=open]"] }
 
 [[case.child]]
 component = "OptionItem"

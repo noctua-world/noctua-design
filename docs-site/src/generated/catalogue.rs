@@ -10388,7 +10388,7 @@ pub(crate) static COMPONENTS: [DocComponent; 105] = [
                 doc: Key::ComponentPromptPropControlsDoc,
             },
             DocProp {
-                name: "active",
+                name: "active_option",
                 kind: "text",
                 values: &[],
                 elements: &[],
@@ -10397,7 +10397,7 @@ pub(crate) static COMPONENTS: [DocComponent; 105] = [
                 required: false,
                 variants: true,
                 specimen: None,
-                doc: Key::ComponentPromptPropActiveDoc,
+                doc: Key::ComponentPromptPropActiveOptionDoc,
             },
             DocProp {
                 name: "disabled",

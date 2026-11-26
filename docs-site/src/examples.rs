@@ -2387,11 +2387,11 @@ const PROMPT: &[Example] = &[
     ),
     example!(r#"Prompt { value: "…" }"#, Key::ExamplePromptGrows),
     example!(
-        r#"Prompt { controls: "nd-option-list-…" } beside OptionList { focusable: false }"#,
+        r#"Prompt { controls: "…" } beside OptionList { name: "…", focusable: false }"#,
         Key::ExamplePromptDriven
     ),
     example!(
-        r#"Prompt { controls: "…", active: "…" } beside OptionItem { id: "…", active: true }"#,
+        r#"Prompt { controls: "…", active_option: "…" } beside OptionItem { id: "…", active: true }"#,
         Key::ExamplePromptActive
     ),
     example!(
@@ -2594,7 +2594,7 @@ const OPTION_LIST: &[Example] = &[
     ),
     example!(r"OptionList { size: OptionListSize::Large }"),
     example!(
-        r#"OptionList { focusable: false } beside <input aria-controls="nd-option-list-…">"#,
+        r#"OptionList { name: "…", focusable: false } beside <input aria-controls="…">"#,
         Key::ExampleOptionListDriven
     ),
     example!(

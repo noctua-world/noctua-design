@@ -30,7 +30,7 @@ export function OptionList({ name, label, layout, size, focusable, emptyLabel, c
       {
         key: "l",
         className: "nd-option-list-items",
-        id: `nd-option-list-${name}`,
+        id: name,
         role: "listbox",
         "aria-label": label,
         tabIndex: (focusable ?? true) ? 0 : undefined,

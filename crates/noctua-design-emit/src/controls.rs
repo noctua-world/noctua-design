@@ -3805,10 +3805,13 @@ const MATCH_TEXT_REACT: &str = r#"  const root = ["nd-match-text", className].fi
 /// option is showing, and the `status` is on the page the whole time, so the
 /// sentence arriving in it is announced.
 ///
-/// # The id is derived, and it is the caller's hook
+/// # The name is the id, and it is the caller's hook
 ///
-/// `nd-option-list-{name}` is what a control that keeps the focus writes in
-/// `aria-controls`, and `dist/option-list.js` finds that control by it.
+/// A control that keeps the focus writes the list's id in `aria-controls`, and
+/// `dist/option-list.js` finds that control by it. The caller writes the name
+/// on one component and `controls` on the other, so the id is the name itself,
+/// for `Menu`'s reason: a derivation they cannot see is one they will get
+/// wrong.
 ///
 /// # `tabindex` is the `focusable` prop
 ///
@@ -3817,7 +3820,6 @@ const MATCH_TEXT_REACT: &str = r#"  const root = ["nd-match-text", className].fi
 /// writes. A list another control drives carries none, so a Tab walks past it.
 const OPTION_LIST_DIOXUS: &str = r#"    let root = format!("nd-option-list {class}");
     let root = root.trim().to_owned();
-    let id = format!("nd-option-list-{name}");
 
     rsx! {
         div {
@@ -3827,7 +3829,7 @@ const OPTION_LIST_DIOXUS: &str = r#"    let root = format!("nd-option-list {clas
             "data-nd-size": size.as_str(),
             ul {
                 class: "nd-option-list-items",
-                id: "{id}",
+                id: "{name}",
                 role: "listbox",
                 "aria-label": "{label}",
                 tabindex: focusable.then_some("0"),
@@ -3863,7 +3865,7 @@ const OPTION_LIST_REACT: &str = r#"  const layout_ = layout ?? "rows";
       {
         key: "l",
         className: "nd-option-list-items",
-        id: `nd-option-list-${name}`,
+        id: name,
         role: "listbox",
         "aria-label": label,
         tabIndex: (focusable ?? true) ? 0 : undefined,
@@ -4152,7 +4154,7 @@ const PROMPT_DIOXUS: &str = r#"    let root = format!("nd-prompt {class}");
                     "aria-label": "{label}",
                     "aria-controls": controls,
                     "aria-autocomplete": listed.then_some("list"),
-                    "aria-activedescendant": active,
+                    "aria-activedescendant": active_option,
                     // THE VALUE IS THE CONTENT, as it is in `Textarea`.
                     {value.unwrap_or_default()}
                 }
@@ -4210,7 +4212,7 @@ const PROMPT_REACT: &str = r#"  const root = ["nd-prompt", className].filter(Boo
         "aria-label": label,
         "aria-controls": controls,
         "aria-autocomplete": controls ? "list" : undefined,
-        "aria-activedescendant": active,
+        "aria-activedescendant": activeOption,
         // See the Dioxus half: the value is the content.
         defaultValue: value,
       }),

@@ -1138,8 +1138,12 @@ fn call(
             // the prop under test is a row where two values painted alike still
             // measure apart, and `variants.spec.js` reads exactly that
             // measurement. A `name` is never drawn, so it is exempt.
+            //
+            // A NAME IS NOT THE CAPTION'S ID. The caption is the figure's, and
+            // a component whose name is also its id, as `OptionList`'s is,
+            // would carry the same id as the caption under it.
             if name == "name" {
-                props.push((name, text(caption)));
+                props.push((name, text(&format!("{caption}-specimen"))));
             } else {
                 props.push((name, text(&component.meta.name)));
             }

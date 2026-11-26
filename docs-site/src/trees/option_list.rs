@@ -155,7 +155,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
         }],
     ),
     (
-        r#"OptionList { focusable: false } beside <input aria-controls="nd-option-list-…">"#,
+        r#"OptionList { name: "…", focusable: false } beside <input aria-controls="…">"#,
         &[Node::Element {
             tag: "div",
             attributes: &[("class", Value::Text("nd-example-stack"))],
@@ -180,7 +180,7 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                         ("role", Value::Text("combobox")),
                         ("aria-expanded", Value::Text("true")),
                         ("aria-autocomplete", Value::Text("list")),
-                        ("aria-controls", Value::Text("nd-option-list-driven")),
+                        ("aria-controls", Value::Text("driven")),
                         ("autocomplete", Value::Text("off")),
                     ],
                     children: &[],

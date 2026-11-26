@@ -28,10 +28,10 @@ pub fn Prompt(
     send_label: Option<String>,
     /// What a script finds the send control by. It becomes `data-nd-action` on that control. Needs `send_label`.
     action: Option<String>,
-    /// The id of a list this prompt filters, such as an `OptionList`'s `nd-option-list-` id. It becomes `aria-controls`, and the Up and Down arrows then move through that list. The prompt stays a `textbox`, the one role a `<textarea>` takes.
+    /// The id of a list this prompt filters, such as an `OptionList`'s `name`, which is its id. It becomes `aria-controls`, and the Up and Down arrows then move through that list. The prompt stays a `textbox`, the one role a `<textarea>` takes.
     controls: Option<String>,
     /// The id of the option the keyboard is on in that list. It becomes `aria-activedescendant`. Leave it out and `dist/option-list.js` writes it. Needs `controls`.
-    active: Option<String>,
+    active_option: Option<String>,
     /// Whether the prompt is disabled. A disabled prompt takes no focus, draws no cursor and sends nothing.
     #[props(default = false)]
     disabled: bool,
@@ -71,7 +71,7 @@ pub fn Prompt(
                     "aria-label": "{label}",
                     "aria-controls": controls,
                     "aria-autocomplete": listed.then_some("list"),
-                    "aria-activedescendant": active,
+                    "aria-activedescendant": active_option,
                     // THE VALUE IS THE CONTENT, as it is in `Textarea`.
                     {value.unwrap_or_default()}
                 }

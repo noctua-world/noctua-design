@@ -5542,8 +5542,8 @@ pub enum Key {
     ComponentPromptPropActionDoc,
     /// `component.prompt.prop.controls.doc`
     ComponentPromptPropControlsDoc,
-    /// `component.prompt.prop.active.doc`
-    ComponentPromptPropActiveDoc,
+    /// `component.prompt.prop.active_option.doc`
+    ComponentPromptPropActiveOptionDoc,
     /// `component.prompt.prop.disabled.doc`
     ComponentPromptPropDisabledDoc,
     /// `component.prompt.prop.readonly.doc`
@@ -9634,7 +9634,7 @@ impl Key {
         Self::ComponentPromptPropSendLabelDoc,
         Self::ComponentPromptPropActionDoc,
         Self::ComponentPromptPropControlsDoc,
-        Self::ComponentPromptPropActiveDoc,
+        Self::ComponentPromptPropActiveOptionDoc,
         Self::ComponentPromptPropDisabledDoc,
         Self::ComponentPromptPropReadonlyDoc,
         Self::ComponentPromptStateComposingDoc,
@@ -13455,7 +13455,7 @@ impl Key {
             Self::ComponentPromptPropSendLabelDoc => "component.prompt.prop.send_label.doc",
             Self::ComponentPromptPropActionDoc => "component.prompt.prop.action.doc",
             Self::ComponentPromptPropControlsDoc => "component.prompt.prop.controls.doc",
-            Self::ComponentPromptPropActiveDoc => "component.prompt.prop.active.doc",
+            Self::ComponentPromptPropActiveOptionDoc => "component.prompt.prop.active_option.doc",
             Self::ComponentPromptPropDisabledDoc => "component.prompt.prop.disabled.doc",
             Self::ComponentPromptPropReadonlyDoc => "component.prompt.prop.readonly.doc",
             Self::ComponentPromptStateComposingDoc => "component.prompt.state.composing.doc",
@@ -19923,7 +19923,7 @@ impl Locale {
                     "The list is a `role=\"listbox\"` and each option a `role=\"option\"`. The active option is named by `aria-activedescendant` on whatever holds the focus, so the focus never moves into the list. The empty sentence is a `role=\"status\"`."
                 }
                 Key::ComponentOptionListPropNameDoc => {
-                    "What this list is of, as a script finds it. The listbox takes the id `nd-option-list-` followed by this name, which is what another control writes in `aria-controls`. **Required**."
+                    "What this list is of, as a script finds it. It is also the listbox's id, which is what another control writes in `aria-controls`. **Required**."
                 }
                 Key::ComponentOptionListPropLabelDoc => {
                     "The name of the list. Required, because a `listbox` with no name gives a screen reader only the word *list box*."
@@ -20198,9 +20198,9 @@ impl Locale {
                     "What a script finds the send control by. It becomes `data-nd-action` on that control. Needs `send_label`."
                 }
                 Key::ComponentPromptPropControlsDoc => {
-                    "The id of a list this prompt filters, such as an `OptionList`'s `nd-option-list-` id. It becomes `aria-controls`, and the Up and Down arrows then move through that list. The prompt stays a `textbox`, the one role a `<textarea>` takes."
+                    "The id of a list this prompt filters, such as an `OptionList`'s `name`, which is its id. It becomes `aria-controls`, and the Up and Down arrows then move through that list. The prompt stays a `textbox`, the one role a `<textarea>` takes."
                 }
-                Key::ComponentPromptPropActiveDoc => {
+                Key::ComponentPromptPropActiveOptionDoc => {
                     "The id of the option the keyboard is on in that list. It becomes `aria-activedescendant`. Leave it out and `dist/option-list.js` writes it. Needs `controls`."
                 }
                 Key::ComponentPromptPropDisabledDoc => {
@@ -27660,7 +27660,7 @@ impl Locale {
                     "A lista é um `role=\"listbox\"` e cada opção um `role=\"option\"`. A opção ativa é nomeada por `aria-activedescendant` em quem tem o foco, então o foco nunca entra na lista. A frase de lista vazia é um `role=\"status\"`."
                 }
                 Key::ComponentOptionListPropNameDoc => {
-                    "Do que esta lista é, como um script a encontra. O listbox recebe o id `nd-option-list-` seguido deste nome, que é o que outro controle escreve em `aria-controls`. **Obrigatório**."
+                    "Do que esta lista é, como um script a encontra. É também o id do listbox, que é o que outro controle escreve em `aria-controls`. **Obrigatório**."
                 }
                 Key::ComponentOptionListPropLabelDoc => {
                     "O nome da lista. Obrigatório, porque um `listbox` sem nome dá ao leitor de tela só as palavras *caixa de listagem*."
@@ -27941,9 +27941,9 @@ impl Locale {
                     "Como um script encontra o controle de envio. Vira `data-nd-action` nesse controle. Precisa de `send_label`."
                 }
                 Key::ComponentPromptPropControlsDoc => {
-                    "O id de uma lista que este prompt filtra, como o id `nd-option-list-` de uma `OptionList`. Vira `aria-controls`, e as setas para cima e para baixo percorrem essa lista. O prompt continua um `textbox`, o único papel que um `<textarea>` aceita."
+                    "O id de uma lista que este prompt filtra, como o `name` de uma `OptionList`, que é o id dela. Vira `aria-controls`, e as setas para cima e para baixo percorrem essa lista. O prompt continua um `textbox`, o único papel que um `<textarea>` aceita."
                 }
-                Key::ComponentPromptPropActiveDoc => {
+                Key::ComponentPromptPropActiveOptionDoc => {
                     "O id da opção em que o teclado está nessa lista. Vira `aria-activedescendant`. Deixe de fora e o `dist/option-list.js` o escreve. Precisa de `controls`."
                 }
                 Key::ComponentPromptPropDisabledDoc => {
@@ -35555,7 +35555,7 @@ impl Locale {
                     "⟦Thee liist iis aa `roolee=\"liistboox\"` aand eeaach ooptiioon aa `roolee=\"ooptiioon\"`. Thee aactiivee ooptiioon iis naameed by `aariiaa-aactiiveedeesceendaant` oon whaateeveer hoolds thee foocuus, soo thee foocuus neeveer moovees iintoo thee liist. Thee eempty seenteencee iis aa `roolee=\"staatuus\"`.⟧"
                 }
                 Key::ComponentOptionListPropNameDoc => {
-                    "⟦Whaat thiis liist iis oof, aas aa scriipt fiinds iit. Thee liistboox taakees thee iid `nd-ooptiioon-liist-` foollooweed by thiis naamee, whiich iis whaat aanootheer coontrool wriitees iin `aariiaa-coontrools`. **Reequuiireed**.⟧"
+                    "⟦Whaat thiis liist iis oof, aas aa scriipt fiinds iit. IIt iis aalsoo thee liistboox's iid, whiich iis whaat aanootheer coontrool wriitees iin `aariiaa-coontrools`. **Reequuiireed**.⟧"
                 }
                 Key::ComponentOptionListPropLabelDoc => {
                     "⟦Thee naamee oof thee liist. Reequuiireed, beecaauusee aa `liistboox` wiith noo naamee giivees aa screeeen reeaadeer oonly thee woord *liist boox*.⟧"
@@ -35838,9 +35838,9 @@ impl Locale {
                     "⟦Whaat aa scriipt fiinds thee seend coontrool by. IIt beecoomees `daataa-nd-aactiioon` oon thaat coontrool. Neeeeds `seend_laabeel`.⟧"
                 }
                 Key::ComponentPromptPropControlsDoc => {
-                    "⟦Thee iid oof aa liist thiis proompt fiilteers, suuch aas aan `OOptiioonLiist`'s `nd-ooptiioon-liist-` iid. IIt beecoomees `aariiaa-coontrools`, aand thee UUp aand Doown aarroows theen moovee throouugh thaat liist. Thee proompt staays aa `teextboox`, thee oonee roolee aa `<teextaareeaa>` taakees.⟧"
+                    "⟦Thee iid oof aa liist thiis proompt fiilteers, suuch aas aan `OOptiioonLiist`'s `naamee`, whiich iis iits iid. IIt beecoomees `aariiaa-coontrools`, aand thee UUp aand Doown aarroows theen moovee throouugh thaat liist. Thee proompt staays aa `teextboox`, thee oonee roolee aa `<teextaareeaa>` taakees.⟧"
                 }
-                Key::ComponentPromptPropActiveDoc => {
+                Key::ComponentPromptPropActiveOptionDoc => {
                     "⟦Thee iid oof thee ooptiioon thee keeybooaard iis oon iin thaat liist. IIt beecoomees `aariiaa-aactiiveedeesceendaant`. Leeaavee iit oouut aand `diist/ooptiioon-liist.js` wriitees iit. Neeeeds `coontrools`.⟧"
                 }
                 Key::ComponentPromptPropDisabledDoc => {

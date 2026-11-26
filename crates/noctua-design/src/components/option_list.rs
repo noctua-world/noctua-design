@@ -66,7 +66,7 @@ impl OptionListSize {
 /// The list is a `role="listbox"` and each option a `role="option"`. The active option is named by `aria-activedescendant` on whatever holds the focus, so the focus never moves into the list. The empty sentence is a `role="status"`.
 #[component]
 pub fn OptionList(
-    /// What this list is of, as a script finds it. The listbox takes the id `nd-option-list-` followed by this name, which is what another control writes in `aria-controls`. **Required**.
+    /// What this list is of, as a script finds it. It is also the listbox's id, which is what another control writes in `aria-controls`. **Required**.
     name: String,
     /// The name of the list. Required, because a `listbox` with no name gives a screen reader only the word *list box*.
     label: String,
@@ -89,7 +89,6 @@ pub fn OptionList(
 ) -> Element {
     let root = format!("nd-option-list {class}");
     let root = root.trim().to_owned();
-    let id = format!("nd-option-list-{name}");
 
     rsx! {
         div {
@@ -99,7 +98,7 @@ pub fn OptionList(
             "data-nd-size": size.as_str(),
             ul {
                 class: "nd-option-list-items",
-                id: "{id}",
+                id: "{name}",
                 role: "listbox",
                 "aria-label": "{label}",
                 tabindex: focusable.then_some("0"),

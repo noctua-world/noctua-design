@@ -2438,8 +2438,8 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         &[Node::Component {
             name: "Prompt",
             props: &[
-                ("active", Value::Data("option-2")),
-                ("controls", Value::Data("nd-option-list-commands")),
+                ("active_option", Value::Data("option-2")),
+                ("controls", Value::Data("commands")),
                 ("label", Value::Data("Prompt")),
                 ("name", Value::Data("ask")),
             ],

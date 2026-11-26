@@ -10,7 +10,7 @@ export type OptionListLayout = "rows" | "columns";
 export type OptionListSize = "small" | "medium" | "large";
 
 export interface OptionListProps {
-  /** What this list is of, as a script finds it. The listbox takes the id `nd-option-list-` followed by this name, which is what another control writes in `aria-controls`. **Required**. */
+  /** What this list is of, as a script finds it. It is also the listbox's id, which is what another control writes in `aria-controls`. **Required**. */
   name: string;
   /** The name of the list. Required, because a `listbox` with no name gives a screen reader only the word *list box*. */
   label: string;

@@ -2572,7 +2572,10 @@ const CHECKBOX_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Checkbox",
                 props: &[
-                    ("name", Value::Text("nd-variant-checkbox-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-checkbox-size-small-specimen"),
+                    ),
                     ("value", Value::Text("on")),
                     ("label", Value::Data("Aa")),
                     ("size", Value::Text("small")),
@@ -2610,7 +2613,10 @@ const CHECKBOX_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Checkbox",
                 props: &[
-                    ("name", Value::Text("nd-variant-checkbox-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-checkbox-size-medium-specimen"),
+                    ),
                     ("value", Value::Text("on")),
                     ("label", Value::Data("Aa")),
                     ("size", Value::Text("medium")),
@@ -2648,7 +2654,10 @@ const CHECKBOX_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Checkbox",
                 props: &[
-                    ("name", Value::Text("nd-variant-checkbox-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-checkbox-size-large-specimen"),
+                    ),
                     ("value", Value::Text("on")),
                     ("label", Value::Data("Aa")),
                     ("size", Value::Text("large")),
@@ -2752,7 +2761,10 @@ const COLOR_PICKER_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "ColorPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-color-picker-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-color-picker-size-small-specimen"),
+                    ),
                     ("label", Value::Text("ColorPicker")),
                     ("size", Value::Text("small")),
                     ("area_label", Value::Message(Key::ExampleColorPickerArea)),
@@ -2791,7 +2803,10 @@ const COLOR_PICKER_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "ColorPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-color-picker-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-color-picker-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("ColorPicker")),
                     ("size", Value::Text("medium")),
                     ("area_label", Value::Message(Key::ExampleColorPickerArea)),
@@ -2830,7 +2845,10 @@ const COLOR_PICKER_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "ColorPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-color-picker-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-color-picker-size-large-specimen"),
+                    ),
                     ("label", Value::Text("ColorPicker")),
                     ("size", Value::Text("large")),
                     ("area_label", Value::Message(Key::ExampleColorPickerArea)),
@@ -2869,7 +2887,10 @@ const COLOR_PICKER_SHAPE_PILL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "ColorPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-color-picker-shape-pill")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-color-picker-shape-pill-specimen"),
+                    ),
                     ("label", Value::Text("ColorPicker")),
                     ("shape", Value::Text("pill")),
                     ("area_label", Value::Message(Key::ExampleColorPickerArea)),
@@ -2908,7 +2929,10 @@ const COLOR_PICKER_SHAPE_ROUNDED: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "ColorPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-color-picker-shape-rounded")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-color-picker-shape-rounded-specimen"),
+                    ),
                     ("label", Value::Text("ColorPicker")),
                     ("shape", Value::Text("rounded")),
                     ("area_label", Value::Message(Key::ExampleColorPickerArea)),
@@ -2947,7 +2971,10 @@ const COLOR_PICKER_SHAPE_SQUARE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "ColorPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-color-picker-shape-square")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-color-picker-shape-square-specimen"),
+                    ),
                     ("label", Value::Text("ColorPicker")),
                     ("shape", Value::Text("square")),
                     ("area_label", Value::Message(Key::ExampleColorPickerArea)),
@@ -4211,7 +4238,7 @@ const INPUT_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Input",
                 props: &[
-                    ("name", Value::Text("nd-variant-input-size-small")),
+                    ("name", Value::Text("nd-variant-input-size-small-specimen")),
                     ("label", Value::Text("Input")),
                     ("value", Value::Data("Aa")),
                     ("size", Value::Text("small")),
@@ -4249,7 +4276,7 @@ const INPUT_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Input",
                 props: &[
-                    ("name", Value::Text("nd-variant-input-size-medium")),
+                    ("name", Value::Text("nd-variant-input-size-medium-specimen")),
                     ("label", Value::Text("Input")),
                     ("value", Value::Data("Aa")),
                     ("size", Value::Text("medium")),
@@ -4287,7 +4314,7 @@ const INPUT_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Input",
                 props: &[
-                    ("name", Value::Text("nd-variant-input-size-large")),
+                    ("name", Value::Text("nd-variant-input-size-large-specimen")),
                     ("label", Value::Text("Input")),
                     ("value", Value::Data("Aa")),
                     ("size", Value::Text("large")),
@@ -6596,7 +6623,7 @@ const METER_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Meter",
                 props: &[
-                    ("name", Value::Text("nd-variant-meter-size-small")),
+                    ("name", Value::Text("nd-variant-meter-size-small-specimen")),
                     ("label", Value::Text("Meter")),
                     ("value", Value::Text("41.2")),
                     ("max", Value::Text("50")),
@@ -6636,7 +6663,7 @@ const METER_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Meter",
                 props: &[
-                    ("name", Value::Text("nd-variant-meter-size-medium")),
+                    ("name", Value::Text("nd-variant-meter-size-medium-specimen")),
                     ("label", Value::Text("Meter")),
                     ("value", Value::Text("41.2")),
                     ("max", Value::Text("50")),
@@ -6676,7 +6703,7 @@ const METER_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Meter",
                 props: &[
-                    ("name", Value::Text("nd-variant-meter-size-large")),
+                    ("name", Value::Text("nd-variant-meter-size-large-specimen")),
                     ("label", Value::Text("Meter")),
                     ("value", Value::Text("41.2")),
                     ("max", Value::Text("50")),
@@ -6718,7 +6745,7 @@ const NUMBER_INPUT_STEPPING_ASSIST: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-number-input-stepping-assist"),
+                        Value::Text("nd-variant-number-input-stepping-assist-specimen"),
                     ),
                     ("label", Value::Text("NumberInput")),
                     ("value", Value::Data("42")),
@@ -6759,7 +6786,7 @@ const NUMBER_INPUT_STEPPING_PRIMARY: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-number-input-stepping-primary"),
+                        Value::Text("nd-variant-number-input-stepping-primary-specimen"),
                     ),
                     ("label", Value::Text("NumberInput")),
                     ("value", Value::Data("42")),
@@ -6801,7 +6828,10 @@ const NUMBER_INPUT_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "NumberInput",
                 props: &[
-                    ("name", Value::Text("nd-variant-number-input-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-number-input-size-small-specimen"),
+                    ),
                     ("label", Value::Text("NumberInput")),
                     ("value", Value::Data("42")),
                     ("size", Value::Text("small")),
@@ -6839,7 +6869,10 @@ const NUMBER_INPUT_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "NumberInput",
                 props: &[
-                    ("name", Value::Text("nd-variant-number-input-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-number-input-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("NumberInput")),
                     ("value", Value::Data("42")),
                     ("size", Value::Text("medium")),
@@ -6877,7 +6910,10 @@ const NUMBER_INPUT_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "NumberInput",
                 props: &[
-                    ("name", Value::Text("nd-variant-number-input-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-number-input-size-large-specimen"),
+                    ),
                     ("label", Value::Text("NumberInput")),
                     ("value", Value::Data("42")),
                     ("size", Value::Text("large")),
@@ -6915,7 +6951,10 @@ const OPTION_LIST_LAYOUT_ROWS: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "OptionList",
                 props: &[
-                    ("name", Value::Text("nd-variant-option-list-layout-rows")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-option-list-layout-rows-specimen"),
+                    ),
                     ("label", Value::Text("OptionList")),
                     ("layout", Value::Text("rows")),
                 ],
@@ -6983,7 +7022,10 @@ const OPTION_LIST_LAYOUT_COLUMNS: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "OptionList",
                 props: &[
-                    ("name", Value::Text("nd-variant-option-list-layout-columns")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-option-list-layout-columns-specimen"),
+                    ),
                     ("label", Value::Text("OptionList")),
                     ("layout", Value::Text("columns")),
                 ],
@@ -7051,7 +7093,10 @@ const OPTION_LIST_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "OptionList",
                 props: &[
-                    ("name", Value::Text("nd-variant-option-list-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-option-list-size-small-specimen"),
+                    ),
                     ("label", Value::Text("OptionList")),
                     ("size", Value::Text("small")),
                 ],
@@ -7119,7 +7164,10 @@ const OPTION_LIST_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "OptionList",
                 props: &[
-                    ("name", Value::Text("nd-variant-option-list-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-option-list-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("OptionList")),
                     ("size", Value::Text("medium")),
                 ],
@@ -7187,7 +7235,10 @@ const OPTION_LIST_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "OptionList",
                 props: &[
-                    ("name", Value::Text("nd-variant-option-list-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-option-list-size-large-specimen"),
+                    ),
                     ("label", Value::Text("OptionList")),
                     ("size", Value::Text("large")),
                 ],
@@ -7255,7 +7306,10 @@ const OTP_FIELD_KIND_NUMERIC: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "OtpField",
                 props: &[
-                    ("name", Value::Text("nd-variant-otp-field-kind-numeric")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-otp-field-kind-numeric-specimen"),
+                    ),
                     ("legend", Value::Text("OtpField")),
                     ("box_label", Value::Text("OtpField")),
                     ("length", Value::Text("3")),
@@ -7297,7 +7351,7 @@ const OTP_FIELD_KIND_ALPHANUMERIC: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-otp-field-kind-alphanumeric"),
+                        Value::Text("nd-variant-otp-field-kind-alphanumeric-specimen"),
                     ),
                     ("legend", Value::Text("OtpField")),
                     ("box_label", Value::Text("OtpField")),
@@ -7338,7 +7392,10 @@ const OTP_FIELD_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "OtpField",
                 props: &[
-                    ("name", Value::Text("nd-variant-otp-field-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-otp-field-size-small-specimen"),
+                    ),
                     ("legend", Value::Text("OtpField")),
                     ("box_label", Value::Text("OtpField")),
                     ("length", Value::Text("3")),
@@ -7378,7 +7435,10 @@ const OTP_FIELD_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "OtpField",
                 props: &[
-                    ("name", Value::Text("nd-variant-otp-field-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-otp-field-size-medium-specimen"),
+                    ),
                     ("legend", Value::Text("OtpField")),
                     ("box_label", Value::Text("OtpField")),
                     ("length", Value::Text("3")),
@@ -7418,7 +7478,10 @@ const OTP_FIELD_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "OtpField",
                 props: &[
-                    ("name", Value::Text("nd-variant-otp-field-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-otp-field-size-large-specimen"),
+                    ),
                     ("legend", Value::Text("OtpField")),
                     ("box_label", Value::Text("OtpField")),
                     ("length", Value::Text("3")),
@@ -7458,7 +7521,10 @@ const PAGINATION_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Pagination",
                 props: &[
-                    ("name", Value::Text("nd-variant-pagination-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-pagination-size-small-specimen"),
+                    ),
                     ("label", Value::Text("Pagination")),
                     ("page", Value::Text("2")),
                     ("pages", Value::Text("3")),
@@ -7498,7 +7564,10 @@ const PAGINATION_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Pagination",
                 props: &[
-                    ("name", Value::Text("nd-variant-pagination-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-pagination-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("Pagination")),
                     ("page", Value::Text("2")),
                     ("pages", Value::Text("3")),
@@ -7538,7 +7607,10 @@ const PAGINATION_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Pagination",
                 props: &[
-                    ("name", Value::Text("nd-variant-pagination-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-pagination-size-large-specimen"),
+                    ),
                     ("label", Value::Text("Pagination")),
                     ("page", Value::Text("2")),
                     ("pages", Value::Text("3")),
@@ -7743,7 +7815,10 @@ const PROGRESS_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Progress",
                 props: &[
-                    ("name", Value::Text("nd-variant-progress-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-progress-size-small-specimen"),
+                    ),
                     ("label", Value::Text("Progress")),
                     ("value", Value::Text("7")),
                     ("max", Value::Text("12")),
@@ -7783,7 +7858,10 @@ const PROGRESS_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Progress",
                 props: &[
-                    ("name", Value::Text("nd-variant-progress-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-progress-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("Progress")),
                     ("value", Value::Text("7")),
                     ("max", Value::Text("12")),
@@ -7823,7 +7901,10 @@ const PROGRESS_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Progress",
                 props: &[
-                    ("name", Value::Text("nd-variant-progress-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-progress-size-large-specimen"),
+                    ),
                     ("label", Value::Text("Progress")),
                     ("value", Value::Text("7")),
                     ("max", Value::Text("12")),
@@ -7995,7 +8076,7 @@ const RADIO_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Radio",
                 props: &[
-                    ("name", Value::Text("nd-variant-radio-size-small")),
+                    ("name", Value::Text("nd-variant-radio-size-small-specimen")),
                     ("value", Value::Text("on")),
                     ("label", Value::Data("Aa")),
                     ("size", Value::Text("small")),
@@ -8033,7 +8114,7 @@ const RADIO_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Radio",
                 props: &[
-                    ("name", Value::Text("nd-variant-radio-size-medium")),
+                    ("name", Value::Text("nd-variant-radio-size-medium-specimen")),
                     ("value", Value::Text("on")),
                     ("label", Value::Data("Aa")),
                     ("size", Value::Text("medium")),
@@ -8071,7 +8152,7 @@ const RADIO_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Radio",
                 props: &[
-                    ("name", Value::Text("nd-variant-radio-size-large")),
+                    ("name", Value::Text("nd-variant-radio-size-large-specimen")),
                     ("value", Value::Text("on")),
                     ("label", Value::Data("Aa")),
                     ("size", Value::Text("large")),
@@ -8109,7 +8190,7 @@ const RATING_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Rating",
                 props: &[
-                    ("name", Value::Text("nd-variant-rating-size-small")),
+                    ("name", Value::Text("nd-variant-rating-size-small-specimen")),
                     ("label", Value::Text("Rating")),
                     ("value", Value::Text("3")),
                     ("readonly", Value::Bool(true)),
@@ -8148,7 +8229,10 @@ const RATING_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Rating",
                 props: &[
-                    ("name", Value::Text("nd-variant-rating-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-rating-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("Rating")),
                     ("value", Value::Text("3")),
                     ("readonly", Value::Bool(true)),
@@ -8187,7 +8271,7 @@ const RATING_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Rating",
                 props: &[
-                    ("name", Value::Text("nd-variant-rating-size-large")),
+                    ("name", Value::Text("nd-variant-rating-size-large-specimen")),
                     ("label", Value::Text("Rating")),
                     ("value", Value::Text("3")),
                     ("readonly", Value::Bool(true)),
@@ -8226,7 +8310,7 @@ const SEARCH_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Search",
                 props: &[
-                    ("name", Value::Text("nd-variant-search-size-small")),
+                    ("name", Value::Text("nd-variant-search-size-small-specimen")),
                     ("label", Value::Text("Search")),
                     ("value", Value::Data("Aa")),
                     ("size", Value::Text("small")),
@@ -8264,7 +8348,10 @@ const SEARCH_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Search",
                 props: &[
-                    ("name", Value::Text("nd-variant-search-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-search-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("Search")),
                     ("value", Value::Data("Aa")),
                     ("size", Value::Text("medium")),
@@ -8302,7 +8389,7 @@ const SEARCH_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Search",
                 props: &[
-                    ("name", Value::Text("nd-variant-search-size-large")),
+                    ("name", Value::Text("nd-variant-search-size-large-specimen")),
                     ("label", Value::Text("Search")),
                     ("value", Value::Data("Aa")),
                     ("size", Value::Text("large")),
@@ -8342,7 +8429,7 @@ const SEGMENTED_APPEARANCE_JOINED: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-segmented-appearance-joined"),
+                        Value::Text("nd-variant-segmented-appearance-joined-specimen"),
                     ),
                     (
                         "labelledby",
@@ -8413,7 +8500,7 @@ const SEGMENTED_APPEARANCE_SPREAD: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-segmented-appearance-spread"),
+                        Value::Text("nd-variant-segmented-appearance-spread-specimen"),
                     ),
                     (
                         "labelledby",
@@ -8482,7 +8569,10 @@ const SEGMENTED_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-size-small-specimen"),
+                    ),
                     ("labelledby", Value::Text("nd-variant-segmented-size-small")),
                     ("size", Value::Text("small")),
                 ],
@@ -8547,7 +8637,10 @@ const SEGMENTED_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-size-medium-specimen"),
+                    ),
                     (
                         "labelledby",
                         Value::Text("nd-variant-segmented-size-medium"),
@@ -8615,7 +8708,10 @@ const SEGMENTED_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-size-large-specimen"),
+                    ),
                     ("labelledby", Value::Text("nd-variant-segmented-size-large")),
                     ("size", Value::Text("large")),
                 ],
@@ -8680,7 +8776,10 @@ const SEGMENTED_SHAPE_ROUNDED: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-shape-rounded")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-shape-rounded-specimen"),
+                    ),
                     (
                         "labelledby",
                         Value::Text("nd-variant-segmented-shape-rounded"),
@@ -8748,7 +8847,10 @@ const SEGMENTED_SHAPE_PILL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-shape-pill")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-shape-pill-specimen"),
+                    ),
                     ("labelledby", Value::Text("nd-variant-segmented-shape-pill")),
                     ("shape", Value::Text("pill")),
                 ],
@@ -8813,7 +8915,10 @@ const SEGMENTED_SHAPE_SQUARE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-shape-square")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-shape-square-specimen"),
+                    ),
                     (
                         "labelledby",
                         Value::Text("nd-variant-segmented-shape-square"),
@@ -8881,7 +8986,10 @@ const SEGMENTED_SHAPE_BEVEL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-shape-bevel")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-shape-bevel-specimen"),
+                    ),
                     (
                         "labelledby",
                         Value::Text("nd-variant-segmented-shape-bevel"),
@@ -8951,7 +9059,7 @@ const SEGMENTED_ORIENTATION_HORIZONTAL: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-segmented-orientation-horizontal"),
+                        Value::Text("nd-variant-segmented-orientation-horizontal-specimen"),
                     ),
                     (
                         "labelledby",
@@ -9025,7 +9133,7 @@ const SEGMENTED_ORIENTATION_VERTICAL: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-segmented-orientation-vertical"),
+                        Value::Text("nd-variant-segmented-orientation-vertical-specimen"),
                     ),
                     (
                         "labelledby",
@@ -9097,7 +9205,10 @@ const SEGMENTED_SELECTION_ACCENT: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-selection-accent")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-selection-accent-specimen"),
+                    ),
                     (
                         "labelledby",
                         Value::Text("nd-variant-segmented-selection-accent"),
@@ -9165,7 +9276,10 @@ const SEGMENTED_SELECTION_QUIET: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-selection-quiet")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-selection-quiet-specimen"),
+                    ),
                     (
                         "labelledby",
                         Value::Text("nd-variant-segmented-selection-quiet"),
@@ -9233,7 +9347,7 @@ const SELECT_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Select",
                 props: &[
-                    ("name", Value::Text("nd-variant-select-size-small")),
+                    ("name", Value::Text("nd-variant-select-size-small-specimen")),
                     ("label", Value::Text("Select")),
                     ("size", Value::Text("small")),
                 ],
@@ -9298,7 +9412,10 @@ const SELECT_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Select",
                 props: &[
-                    ("name", Value::Text("nd-variant-select-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-select-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("Select")),
                     ("size", Value::Text("medium")),
                 ],
@@ -9363,7 +9480,7 @@ const SELECT_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Select",
                 props: &[
-                    ("name", Value::Text("nd-variant-select-size-large")),
+                    ("name", Value::Text("nd-variant-select-size-large-specimen")),
                     ("label", Value::Text("Select")),
                     ("size", Value::Text("large")),
                 ],
@@ -9626,7 +9743,7 @@ const SWITCH_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Switch",
                 props: &[
-                    ("name", Value::Text("nd-variant-switch-size-small")),
+                    ("name", Value::Text("nd-variant-switch-size-small-specimen")),
                     ("label", Value::Text("Switch")),
                     ("on", Value::Text("Switch")),
                     ("off", Value::Text("Switch")),
@@ -9665,7 +9782,10 @@ const SWITCH_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Switch",
                 props: &[
-                    ("name", Value::Text("nd-variant-switch-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-switch-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("Switch")),
                     ("on", Value::Text("Switch")),
                     ("off", Value::Text("Switch")),
@@ -9707,7 +9827,10 @@ const TABLE_DENSITY_COMPACT: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-density-compact")),
+                        (
+                            "name",
+                            Value::Text("nd-variant-table-density-compact-specimen"),
+                        ),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("density", Value::Text("compact")),
@@ -9802,7 +9925,10 @@ const TABLE_DENSITY_DEFAULT: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-density-default")),
+                        (
+                            "name",
+                            Value::Text("nd-variant-table-density-default-specimen"),
+                        ),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("density", Value::Text("default")),
@@ -9897,7 +10023,10 @@ const TABLE_DENSITY_COMFORTABLE: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-density-comfortable")),
+                        (
+                            "name",
+                            Value::Text("nd-variant-table-density-comfortable-specimen"),
+                        ),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("density", Value::Text("comfortable")),
@@ -9992,7 +10121,7 @@ const TABLE_RULES_ROWS: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-rules-rows")),
+                        ("name", Value::Text("nd-variant-table-rules-rows-specimen")),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("rules", Value::Text("rows")),
@@ -10087,7 +10216,10 @@ const TABLE_RULES_COLUMNS: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-rules-columns")),
+                        (
+                            "name",
+                            Value::Text("nd-variant-table-rules-columns-specimen"),
+                        ),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("rules", Value::Text("columns")),
@@ -10182,7 +10314,7 @@ const TABLE_RULES_GRID: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-rules-grid")),
+                        ("name", Value::Text("nd-variant-table-rules-grid-specimen")),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("rules", Value::Text("grid")),
@@ -10277,7 +10409,7 @@ const TABLE_RULES_NONE: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-rules-none")),
+                        ("name", Value::Text("nd-variant-table-rules-none-specimen")),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("rules", Value::Text("none")),
@@ -10694,7 +10826,10 @@ const TABLE_COLUMN_WIDTH_AUTO: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "TableColumn",
                         props: &[
-                            ("name", Value::Text("nd-variant-table-column-width-auto")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-table-column-width-auto-specimen"),
+                            ),
                             ("width", Value::Text("auto")),
                         ],
                         children: &[],
@@ -10756,7 +10891,10 @@ const TABLE_COLUMN_WIDTH_NARROW: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "TableColumn",
                         props: &[
-                            ("name", Value::Text("nd-variant-table-column-width-narrow")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-table-column-width-narrow-specimen"),
+                            ),
                             ("width", Value::Text("narrow")),
                         ],
                         children: &[],
@@ -10818,7 +10956,10 @@ const TABLE_COLUMN_WIDTH_MEDIUM: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "TableColumn",
                         props: &[
-                            ("name", Value::Text("nd-variant-table-column-width-medium")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-table-column-width-medium-specimen"),
+                            ),
                             ("width", Value::Text("medium")),
                         ],
                         children: &[],
@@ -10880,7 +11021,10 @@ const TABLE_COLUMN_WIDTH_WIDE: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "TableColumn",
                         props: &[
-                            ("name", Value::Text("nd-variant-table-column-width-wide")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-table-column-width-wide-specimen"),
+                            ),
                             ("width", Value::Text("wide")),
                         ],
                         children: &[],
@@ -10942,7 +11086,10 @@ const TABLE_COLUMN_WIDTH_FIT: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "TableColumn",
                         props: &[
-                            ("name", Value::Text("nd-variant-table-column-width-fit")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-table-column-width-fit-specimen"),
+                            ),
                             ("width", Value::Text("fit")),
                         ],
                         children: &[],
@@ -11492,7 +11639,7 @@ const TABS_ORIENTATION_HORIZONTAL: &[Node] = &[Node::Element {
                         props: &[
                             (
                                 "name",
-                                Value::Text("nd-variant-tabs-orientation-horizontal"),
+                                Value::Text("nd-variant-tabs-orientation-horizontal-specimen"),
                             ),
                             ("orientation", Value::Text("horizontal")),
                         ],
@@ -11608,7 +11755,10 @@ const TABS_ORIENTATION_VERTICAL: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-orientation-vertical")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-tabs-orientation-vertical-specimen"),
+                            ),
                             ("orientation", Value::Text("vertical")),
                         ],
                         children: &[
@@ -11705,7 +11855,10 @@ const TABS_APPEARANCE_UNDERLINE: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-appearance-underline")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-tabs-appearance-underline-specimen"),
+                            ),
                             ("appearance", Value::Text("underline")),
                         ],
                         children: &[
@@ -11802,7 +11955,10 @@ const TABS_APPEARANCE_ENCLOSED: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-appearance-enclosed")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-tabs-appearance-enclosed-specimen"),
+                            ),
                             ("appearance", Value::Text("enclosed")),
                         ],
                         children: &[
@@ -11899,7 +12055,10 @@ const TABS_APPEARANCE_RAIL: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-tabs-appearance-rail-specimen"),
+                            ),
                             ("appearance", Value::Text("rail")),
                         ],
                         children: &[
@@ -11996,7 +12155,7 @@ const TABS_SIZE_SMALL: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-size-small")),
+                            ("name", Value::Text("nd-variant-tabs-size-small-specimen")),
                             ("size", Value::Text("small")),
                         ],
                         children: &[
@@ -12093,7 +12252,7 @@ const TABS_SIZE_MEDIUM: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-size-medium")),
+                            ("name", Value::Text("nd-variant-tabs-size-medium-specimen")),
                             ("size", Value::Text("medium")),
                         ],
                         children: &[
@@ -12190,7 +12349,7 @@ const TABS_SIZE_LARGE: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-size-large")),
+                            ("name", Value::Text("nd-variant-tabs-size-large-specimen")),
                             ("size", Value::Text("large")),
                         ],
                         children: &[
@@ -12287,7 +12446,7 @@ const TABS_FILL_HUG: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-fill-hug")),
+                            ("name", Value::Text("nd-variant-tabs-fill-hug-specimen")),
                             ("fill", Value::Text("hug")),
                         ],
                         children: &[
@@ -12384,7 +12543,7 @@ const TABS_FILL_EQUAL: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-fill-equal")),
+                            ("name", Value::Text("nd-variant-tabs-fill-equal-specimen")),
                             ("fill", Value::Text("equal")),
                         ],
                         children: &[
@@ -12481,7 +12640,7 @@ const TABS_FILL_STRETCH: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-fill-stretch")),
+                            ("name", Value::Text("nd-variant-tabs-fill-stretch-specimen")),
                             ("fill", Value::Text("stretch")),
                         ],
                         children: &[
@@ -12898,7 +13057,10 @@ const TAG_PICKER_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "TagPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-tag-picker-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-tag-picker-size-small-specimen"),
+                    ),
                     ("label", Value::Text("TagPicker")),
                     ("size", Value::Text("small")),
                 ],
@@ -12963,7 +13125,10 @@ const TAG_PICKER_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "TagPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-tag-picker-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-tag-picker-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("TagPicker")),
                     ("size", Value::Text("medium")),
                 ],
@@ -13028,7 +13193,10 @@ const TAG_PICKER_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "TagPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-tag-picker-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-tag-picker-size-large-specimen"),
+                    ),
                     ("label", Value::Text("TagPicker")),
                     ("size", Value::Text("large")),
                 ],
@@ -13456,7 +13624,10 @@ const TEXTAREA_RESIZE_NONE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Textarea",
                 props: &[
-                    ("name", Value::Text("nd-variant-textarea-resize-none")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-textarea-resize-none-specimen"),
+                    ),
                     ("label", Value::Text("Textarea")),
                     ("value", Value::Data("Aa")),
                     ("resize", Value::Text("none")),
@@ -13494,7 +13665,10 @@ const TEXTAREA_RESIZE_VERTICAL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Textarea",
                 props: &[
-                    ("name", Value::Text("nd-variant-textarea-resize-vertical")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-textarea-resize-vertical-specimen"),
+                    ),
                     ("label", Value::Text("Textarea")),
                     ("value", Value::Data("Aa")),
                     ("resize", Value::Text("vertical")),
@@ -13532,7 +13706,10 @@ const TEXTAREA_RESIZE_BOTH: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Textarea",
                 props: &[
-                    ("name", Value::Text("nd-variant-textarea-resize-both")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-textarea-resize-both-specimen"),
+                    ),
                     ("label", Value::Text("Textarea")),
                     ("value", Value::Data("Aa")),
                     ("resize", Value::Text("both")),
@@ -13870,7 +14047,7 @@ const TREE_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Tree",
                 props: &[
-                    ("name", Value::Text("nd-variant-tree-size-small")),
+                    ("name", Value::Text("nd-variant-tree-size-small-specimen")),
                     ("label", Value::Text("Tree")),
                     ("size", Value::Text("small")),
                 ],
@@ -13923,7 +14100,7 @@ const TREE_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Tree",
                 props: &[
-                    ("name", Value::Text("nd-variant-tree-size-medium")),
+                    ("name", Value::Text("nd-variant-tree-size-medium-specimen")),
                     ("label", Value::Text("Tree")),
                     ("size", Value::Text("medium")),
                 ],
@@ -13976,7 +14153,7 @@ const TREE_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Tree",
                 props: &[
-                    ("name", Value::Text("nd-variant-tree-size-large")),
+                    ("name", Value::Text("nd-variant-tree-size-large-specimen")),
                     ("label", Value::Text("Tree")),
                     ("size", Value::Text("large")),
                 ],

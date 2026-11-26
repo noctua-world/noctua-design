@@ -32,7 +32,7 @@ summary = "Let users walk a list of options with the keyboard and choose one."
 type = "text"
 required = true
 attribute = "data-nd-option-list"
-doc = "What this list is of, as a script finds it. The listbox takes the id `nd-option-list-` followed by this name, which is what another control writes in `aria-controls`. **Required**."
+doc = "What this list is of, as a script finds it. It is also the listbox's id, which is what another control writes in `aria-controls`. **Required**."
 
 [prop.label]
 type = "text"

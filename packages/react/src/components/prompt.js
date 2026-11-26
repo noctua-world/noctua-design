@@ -16,7 +16,7 @@ import { Button } from "./button.js";
 import { Icon } from "./icon.js";
 import { chevronRight } from "@noctua-world/design-tokens/icons/chevron-right.js";
 import { send } from "@noctua-world/design-tokens/icons/send.js";
-export function Prompt({ name, label, value, sendLabel, action, controls, active, disabled, readonly, className, ...rest }) {
+export function Prompt({ name, label, value, sendLabel, action, controls, activeOption, disabled, readonly, className, ...rest }) {
   const root = ["nd-prompt", className].filter(Boolean).join(" ");
 
   return h(
@@ -51,7 +51,7 @@ export function Prompt({ name, label, value, sendLabel, action, controls, active
         "aria-label": label,
         "aria-controls": controls,
         "aria-autocomplete": controls ? "list" : undefined,
-        "aria-activedescendant": active,
+        "aria-activedescendant": activeOption,
         // See the Dioxus half: the value is the content.
         defaultValue: value,
       }),

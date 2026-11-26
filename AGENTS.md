@@ -840,12 +840,13 @@ the attribute's absence would be the false statement.
 `OptionItem` are a `role="listbox"`, and the focus stays on one element: the list, or a control
 that names the list in `aria-controls` and goes on being typed in. The active option is
 `data-nd-active` on the option and `aria-activedescendant` on whatever holds the focus, and
-`dist/option-list.js` answers the keys from either. A key with Shift or Alt held, a key an input
-method is using (`isComposing`, or `keyCode` 229, which is how WebKit sends the key that commits
-a composition), and Enter or an arrow with Control or Command are the control's and never the
-list's. **It never moves the page**: the active option is shown by scrolling the nearest box that
-scrolls it, and an option already active when the list is enhanced is left where the page put it.
-**It chooses nothing**: it says
+`dist/option-list.js` answers the keys from either. The list's `name` is its listbox's id, for
+`Menu`'s reason: the caller writes it on one component and `controls` on the other. A key with
+Shift or Alt held, a key an input method is using (`isComposing`, or `keyCode` 229, which is how
+WebKit sends the key that commits a composition), and Enter or an arrow with Control or Command
+are the control's and never the list's. **It never moves the page**: the active option is shown by
+scrolling the nearest box that scrolls it, and an option already active when the list is enhanced
+is left where the page put it. **It chooses nothing**: it says
 `nd-option-active` and `nd-option-choose`, each with the list's name and the option's value, and
 what is `selected` afterwards is the caller's to render. **And the caller may move the mark
 itself**: an interface that is a view renders `OptionItem { active }`, and the script takes the

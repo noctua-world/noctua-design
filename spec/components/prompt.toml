@@ -56,9 +56,12 @@ doc = "What a script finds the send control by. It becomes `data-nd-action` on t
 
 [prop.controls]
 type = "text"
-doc = "The id of a list this prompt filters, such as an `OptionList`'s `nd-option-list-` id. It becomes `aria-controls`, and the Up and Down arrows then move through that list. The prompt stays a `textbox`, the one role a `<textarea>` takes."
+doc = "The id of a list this prompt filters, such as an `OptionList`'s `name`, which is its id. It becomes `aria-controls`, and the Up and Down arrows then move through that list. The prompt stays a `textbox`, the one role a `<textarea>` takes."
 
-[prop.active]
+# AN OPTION'S ID, AND NOT A FLAG. `OptionItem.active` says on the option that
+# it is the active one, and this says on the prompt which option that is, so
+# the two are named apart.
+[prop.active_option]
 type = "text"
 doc = "The id of the option the keyboard is on in that list. It becomes `aria-activedescendant`. Leave it out and `dist/option-list.js` writes it. Needs `controls`."
 

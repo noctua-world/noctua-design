@@ -18,10 +18,10 @@ export interface PromptProps {
   sendLabel?: string;
   /** What a script finds the send control by. It becomes `data-nd-action` on that control. Needs `send_label`. */
   action?: string;
-  /** The id of a list this prompt filters, such as an `OptionList`'s `nd-option-list-` id. It becomes `aria-controls`, and the Up and Down arrows then move through that list. The prompt stays a `textbox`, the one role a `<textarea>` takes. */
+  /** The id of a list this prompt filters, such as an `OptionList`'s `name`, which is its id. It becomes `aria-controls`, and the Up and Down arrows then move through that list. The prompt stays a `textbox`, the one role a `<textarea>` takes. */
   controls?: string;
   /** The id of the option the keyboard is on in that list. It becomes `aria-activedescendant`. Leave it out and `dist/option-list.js` writes it. Needs `controls`. */
-  active?: string;
+  activeOption?: string;
   /** Whether the prompt is disabled. A disabled prompt takes no focus, draws no cursor and sends nothing. */
   disabled?: boolean;
   /** Whether the text can be read and copied but not changed. The cursor is drawn as an outline and does not blink, and nothing is sent. */
