@@ -134,3 +134,33 @@ test("without flow the column keeps its one gap", async ({ page }) => {
   expect(gaps.length).toBeGreaterThan(0);
   for (const gap of gaps) expect(Math.abs(gap - room)).toBeLessThanOrEqual(0.5);
 });
+
+test("a first or second level heading in a flow has a section's room above it", async ({ page }) => {
+  // THE FIXTURE CANNOT HOLD ONE. The page has its own first and second level
+  // headings, so the subset's `#` and `##` are drawn a level down there, and a
+  // rule for the two levels nobody draws on this page is a rule nothing
+  // measures. So the flow is given one of each, in place of a heading it
+  // already has, with the same classes and attributes.
+  await page.goto(url(PAGE));
+  const section = await token(page, "--noctua-space-section");
+  const below = await token(page, "--noctua-space-gap");
+  expect(section, "the page declares no section room").toBeGreaterThan(0);
+  for (const level of ["h1", "h2"]) {
+    const room = await page.locator(FLOW).first().evaluate((flow, tag) => {
+      const old = flow.querySelector(":scope > .nd-heading:not(:first-child)");
+      const heading = document.createElement(tag);
+      for (const { name, value } of old.attributes) heading.setAttribute(name, value);
+      heading.textContent = old.textContent;
+      old.replaceWith(heading);
+      const at = heading.getBoundingClientRect();
+      const room = {
+        over: at.top - heading.previousElementSibling.getBoundingClientRect().bottom,
+        under: heading.nextElementSibling.getBoundingClientRect().top - at.bottom,
+      };
+      heading.replaceWith(old);
+      return room;
+    }, level);
+    expect(Math.abs(room.over - section), `the room above an ${level} is not a section's`).toBeLessThanOrEqual(1);
+    expect(Math.abs(room.under - below), `the room under an ${level} is not a gap's`).toBeLessThanOrEqual(1);
+  }
+});
