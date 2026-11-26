@@ -1062,7 +1062,8 @@ page's timers, so a test freezes it by installing a clock (`page.clock`), and no
 a test. The number is a `role="timer"` with `aria-live="off"` written out, because an implicit
 value inside an atomic `role="alert"` is the one assistive technology honours least. A visually
 hidden polite region beside it is written when the count starts, at every ten seconds left and at
-five. Without `countdown_label` the seconds are `Intl`'s, in the document's language.
+five, and emptied at the next second drawn and when the count stops, so the line holds one count
+for a reader who goes back over it or copies it. Without `countdown_label` the seconds are `Intl`'s, in the document's language.
 
 **What a reader does about it is the bar's own control**, `action_label` and `action`, drawn in
 the message's ink and last among its words, so a narrow window wraps it onto a row of its own.

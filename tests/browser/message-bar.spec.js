@@ -220,10 +220,13 @@ async function frozen(page, locale = "en", seconds = 10) {
   await page.clock.pauseAt(new Date("2026-11-25T12:05:00Z"));
   const line = page.locator(LINE).first();
   await line.evaluate((el, ahead) => {
-    // Every sentence written into the polite region, in order.
+    // Every sentence written into the polite region, in order. The region is
+    // emptied after each, which says nothing and is not recorded.
     window.__said = [];
     const region = el.querySelector("[data-nd-message-bar-said]");
-    new MutationObserver(() => window.__said.push(region.textContent)).observe(region, {
+    new MutationObserver(() => {
+      if (region.textContent !== "") window.__said.push(region.textContent);
+    }).observe(region, {
       childList: true,
       characterData: true,
       subtree: true,
@@ -328,6 +331,30 @@ test("the countdown draws the whole seconds left, and says them only now and the
   // NOT EVERY SECOND. Twelve seconds of a ten-second count said two things:
   // the count starting and five seconds left.
   expect(await said(page)).toEqual(["Restoring it in 10 seconds", "Restoring it in 5 seconds"]);
+});
+
+test("the line holds one count, and the polite region does not keep what it said", async ({ page }) => {
+  const line = await frozen(page);
+  const clock = line.locator(COUNTDOWN);
+  const region = line.locator(SAID);
+  // Said as the count starts, the sentence is the number on the screen.
+  await expect(region).toHaveText("Restoring it in 10 seconds");
+  // AND A SECOND LATER IT IS GONE. A reader who goes back over the line, or
+  // copies it, finds one number and not the one the region said a while ago.
+  await page.clock.runFor(3000);
+  await expect(clock).toHaveText("Restoring it in 7 seconds");
+  await expect(region).toHaveText("");
+  const counts = (text) => [...text.matchAll(/\d+/g)].map(([number]) => number);
+  expect(counts(await line.innerText()), "the line holds two counts").toEqual(["7"]);
+  expect(await line.ariaSnapshot(), "the line reads out an old count").not.toContain("10 seconds");
+  // Said again at five, and gone again by the end, when the count stops.
+  await page.clock.runFor(2000);
+  await page.clock.runFor(50);
+  await expect(region).toHaveText("Restoring it in 5 seconds");
+  await page.clock.runFor(7000);
+  await expect(clock).toHaveText("Restoring it in 0 seconds");
+  await expect(region, "the count stopped with a sentence left in the region").toHaveText("");
+  expect(counts(await line.innerText())).toEqual(["0"]);
 });
 
 test("a longer count is said every ten seconds, and the singular is the caller's", async ({

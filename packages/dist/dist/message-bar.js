@@ -40,6 +40,10 @@
 // never at nothing left: a screen reader read a number a second cannot get
 // past the message to the control that answers it.
 //
+// AND IT DOES NOT KEEP WHAT IT SAID. The region is emptied at the next second
+// drawn and when the count stops, so a reader who goes back over the line, or
+// copies it, finds one number in it and not the one it held a while ago.
+//
 // WHAT IT NEVER DOES:
 //
 // 1. It never removes the element. The bar is a live region, and a live region
@@ -230,6 +234,7 @@ function count(bar, signal) {
     // took away has no time left to show.
     if (!box || at === null || bar.hasAttribute(DISMISSED)) {
       stop();
+      quiet();
       if (box) {
         box.hidden = true;
         box.textContent = "";
@@ -248,6 +253,7 @@ function count(bar, signal) {
     // run to its end, has nothing a reader can still act on, and the caller
     // is already doing what the deadline was for.
     if (left > 0 && (first || left % SAY_EVERY === 0 || left === SAY_AT)) say(text);
+    else quiet();
     first = false;
     // Nothing is left to count, and the number stays where it stopped.
     if (left === 0) stop();
@@ -265,6 +271,15 @@ function count(bar, signal) {
       const region = said();
       if (region && !signal.aborted) region.textContent = text;
     });
+  }
+
+  /**
+   * Empties the polite region. A second after it was written the sentence has
+   * been heard, and emptying a region announces nothing.
+   */
+  function quiet() {
+    const region = said();
+    if (region && region.textContent !== "") region.textContent = "";
   }
 
   function start() {
