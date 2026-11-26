@@ -733,6 +733,20 @@ test("a prompt that names a list walks it and keeps the focus, and Enter is stil
     ["nd-option-active", "help"],
     ["nd-prompt-send", "se"],
   ]);
+
+  // A KEY WITH A MODIFIER IS THE TEXT'S, list or no list. Shift with Enter
+  // breaks the line, Shift with an arrow selects, and Control with Enter is
+  // somebody's shortcut: none of them chooses an option or moves the mark.
+  await page.evaluate(() => {
+    window.heard = [];
+  });
+  await page.keyboard.press("Shift+Enter");
+  await expect(box, "Shift+Enter did not break the line").toHaveValue("se\n");
+  await page.keyboard.press("Shift+ArrowUp");
+  expect(await box.evaluate((el) => el.selectionEnd - el.selectionStart), "Shift+Up selected nothing").toBeGreaterThan(0);
+  await page.keyboard.press("Control+Enter");
+  expect(await page.evaluate(() => window.heard), "a key with a modifier walked or chose").toEqual([]);
+  await expect(active).toHaveAttribute("data-nd-value", "help");
 });
 
 test("a released prompt is a textarea again, and can be enhanced again", async ({ page }) => {

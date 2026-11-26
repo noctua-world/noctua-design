@@ -371,6 +371,14 @@ test.describe("nothing is drawn wrong", () => {
       const at = height === 900 ? `${width}px` : `${width} by ${height}`;
       const found = [];
       await page.goto(url(path));
+      // A PAGE OPENS AT ITS TOP. A component enhanced as the page loads may
+      // not move the reader: a list with an option already active once
+      // scrolled `/prompt/` to the middle of itself in every window. Asked
+      // two frames after the load, once every enhancer has run.
+      await page.evaluate(
+        () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+      );
+      expect(await page.evaluate(() => window.scrollY), `${name} opened scrolled, at ${at}`).toBe(0);
       // ONE PAGE IS TWO PAGES, and this sweep used to see only the first.
       // Every variant grid and every contract table ships behind a fold, and a
       // reader opens it. Across the site that is 313 folds holding 361 of the

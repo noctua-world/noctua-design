@@ -58,6 +58,11 @@
 //    tab stop leaves the focus in the control the reader was typing in.
 // 4. It never filters. The caller holds the matcher's answer and renders the
 //    options it found, with `hits` on each (`NOCTUA.md §12.4`).
+// 5. It never scrolls the page. The active option is shown by moving the
+//    nearest box that scrolls it, and an option already active when the list
+//    is enhanced is left where the page put it.
+// 6. It never answers a key an input method is using, or a key with Shift or
+//    Alt held on a control that names the list.
 
 /** Every enhanced list, by its root. */
 const lists = new Map();
@@ -130,7 +135,7 @@ function buildList(root_) {
     choose(state);
   }, { signal });
 
-  state.observer = new MutationObserver(() => adopt(state));
+  state.observer = new MutationObserver(() => adopt(state, true));
   state.observer.observe(list, {
     childList: true,
     subtree: true,
@@ -138,7 +143,10 @@ function buildList(root_) {
     attributeFilter: ["data-nd-active", "hidden"],
   });
 
-  adopt(state);
+  // THE PAGE IS WHERE ITS READER LEFT IT. An option the caller rendered as
+  // active is the active one from the start, and it is not brought into view:
+  // a list enhanced as a page loads would otherwise scroll the page to itself.
+  adopt(state, false);
   root_.dataset.ndEnhanced = "true";
   return state;
 }
@@ -180,13 +188,14 @@ function point(state) {
 
 /**
  * Takes the list as it now is: what the page shipped, or what a caller just
- * rendered.
+ * rendered, which `show` says, and brings an option that became active into
+ * view.
  *
  * AN OPTION THAT GAINED THE ATTRIBUTE FROM OUTSIDE IS THE ACTIVE ONE. Where two
  * carry it, one of them is the one this file last wrote and the other is the
  * caller's newer answer.
  */
-function adopt(state) {
+function adopt(state, show) {
   number(state);
   const marked = options(state).filter((option) => option.dataset.ndActive === "true");
   const next = marked.find((option) => option !== state.active) ?? marked[0] ?? null;
@@ -196,9 +205,40 @@ function adopt(state) {
   const moved = next !== state.active;
   state.active = next;
   point(state);
-  if (moved) next?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  if (moved && show) reveal(next);
   // Its own writes, read back so the observer does not report them to itself.
   state.observer.takeRecords();
+}
+
+/**
+ * The box that scrolls an option, short of the page: the list, or a drawer or
+ * a panel it stands in. `null` where nothing but the page scrolls it.
+ */
+function scroller(option) {
+  for (let box = option.parentElement; box && box !== document.body; box = box.parentElement) {
+    if (box === document.documentElement) return null;
+    const { overflowY } = getComputedStyle(box);
+    if ((overflowY === "auto" || overflowY === "scroll") && box.scrollHeight > box.clientHeight) return box;
+  }
+  return null;
+}
+
+/**
+ * Brings an option into the view of the box that scrolls it, the least way.
+ *
+ * NEVER THE PAGE. `scrollIntoView` scrolls every box around the option up to
+ * the document, so a reader walking a list in a drawer had the whole window
+ * moved under them, and a list enhanced with an option already active scrolled
+ * the page to itself as it loaded. Only the nearest box that scrolls is moved.
+ */
+function reveal(option) {
+  const box = option ? scroller(option) : null;
+  if (!box) return;
+  const at = option.getBoundingClientRect();
+  const top = box.getBoundingClientRect().top + box.clientTop;
+  const bottom = top + box.clientHeight;
+  if (at.top < top) box.scrollTop -= top - at.top;
+  else if (at.bottom > bottom) box.scrollTop += at.bottom - bottom;
 }
 
 function say(state, type, option) {
@@ -218,7 +258,7 @@ function setActive(state, option) {
   if (option) option.dataset.ndActive = "true";
   state.active = option ?? null;
   point(state);
-  option?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  reveal(option);
   state.observer.takeRecords();
   say(state, "nd-option-active", option);
 }
@@ -348,8 +388,18 @@ function walk(state, event) {
   }
 }
 
+/**
+ * Whether an input method has the key. `isComposing` is the standard's word
+ * for it, and 229 is what an engine reports for a key the input method took
+ * before the event was made: WebKit sends the Enter that commits a
+ * composition after `compositionend`, not composing, with that code.
+ */
+function composing(event) {
+  return event.isComposing || event.keyCode === 229;
+}
+
 function onListKey(state, event) {
-  if (event.defaultPrevented || event.isComposing || event.target !== state.list) return;
+  if (event.defaultPrevented || composing(event) || event.target !== state.list) return;
   let answered = walk(state, event);
   if (!answered) {
     const plain = !event.ctrlKey && !event.metaKey && !event.altKey;
@@ -378,19 +428,27 @@ function onListKey(state, event) {
 // arrive after the list, be rendered again, or name another list on the next
 // keystroke, and a listener bound to an element is a listener on the element
 // that was there. `aria-controls` is read when the key is pressed.
+//
+// A KEY WITH A MODIFIER IS ANOTHER KEY, and it stays the control's. Shift with
+// Enter breaks a prompt's line and Shift with an arrow selects, Alt is the
+// system's, and Control or Command with Enter or an arrow is a shortcut. Home
+// and End belong to the caret there, so the list takes the pair only with
+// Control or Command.
 document.addEventListener("keydown", (event) => {
-  if (event.defaultPrevented || event.isComposing) return;
+  if (event.defaultPrevented || composing(event) || event.shiftKey || event.altKey) return;
   const named = event.target?.getAttribute?.("aria-controls");
   if (!named) return;
   const ids = named.split(/\s+/);
   for (const state of lists.values()) {
     if (!ids.includes(state.id) || state.list.contains(event.target)) continue;
-    // Home and End belong to the caret there, so the list takes the pair only
-    // with Control or Command.
-    let answered = walk(state, event);
-    if (!answered && (event.ctrlKey || event.metaKey) && (event.key === "Home" || event.key === "End")) {
-      edge(state, event.key === "End");
-      answered = true;
+    let answered = false;
+    if (event.ctrlKey || event.metaKey) {
+      if (event.key === "Home" || event.key === "End") {
+        edge(state, event.key === "End");
+        answered = true;
+      }
+    } else {
+      answered = walk(state, event);
     }
     if (answered) event.preventDefault();
     return;

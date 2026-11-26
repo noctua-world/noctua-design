@@ -304,6 +304,74 @@ test("an empty list shows its sentence in every locale, and a group with nothing
   await expect(box(page, "walk")).toBeHidden();
 });
 
+test("a key an input method is using walks nothing and chooses nothing", async ({ page }) => {
+  await open(page);
+  await listen(page);
+  // THE KEYS AS AN INPUT METHOD SENDS THEM: marked as composing, or with the
+  // code an engine reports for a key the input method took. WebKit, the
+  // engine of the interface's window, sends the Enter that commits a
+  // composition after `compositionend`, not composing, with that code.
+  const composed = (el) => {
+    let prevented = 0;
+    for (const init of [
+      { key: "Enter", keyCode: 229 },
+      { key: "Enter", isComposing: true },
+      { key: "ArrowDown", keyCode: 229 },
+    ]) {
+      const event = new KeyboardEvent("keydown", { ...init, bubbles: true, cancelable: true });
+      el.dispatchEvent(event);
+      if (event.defaultPrevented) prevented += 1;
+    }
+    return prevented;
+  };
+
+  // FROM A CONTROL THAT NAMES THE LIST, with an option active.
+  const input = page.locator("#example-option-list-box");
+  await input.focus();
+  await input.press("ArrowDown");
+  expect(await input.evaluate(composed), "a key the input method had was taken from it").toBe(0);
+  await expect(active(page, "driven")).toHaveAttribute("data-nd-value", "settings");
+
+  // AND FROM THE LIST ITSELF.
+  await box(page, "walk").focus();
+  const from = await active(page, "walk").getAttribute("data-nd-value");
+  expect(await box(page, "walk").evaluate(composed), "a key the input method had was taken from it").toBe(0);
+  await expect(active(page, "walk")).toHaveAttribute("data-nd-value", from);
+  expect(
+    (await page.evaluate(() => window.heard)).filter(([type]) => type === "nd-option-choose"),
+    "an input method's Enter chose an option",
+  ).toEqual([]);
+});
+
+test("walking a list moves the box that scrolls it, and never the page", async ({ page }) => {
+  await open(page);
+  const items = box(page, "walk");
+  // A LIST TALLER THAN ITS BOX, as a command list in a drawer is, and a page
+  // scrolled so that only the top of that box is in the window.
+  await items.evaluate((el) => {
+    el.style.maxBlockSize = "var(--noctua-space-16)";
+    el.style.overflowY = "auto";
+  });
+  await items.focus();
+  await page.evaluate(() => {
+    const box = document.querySelector('[data-nd-option-list="walk"] .nd-option-list-items');
+    window.scrollTo(0, box.getBoundingClientRect().top + window.scrollY - window.innerHeight + 12);
+  });
+  const before = await page.evaluate(() => window.scrollY);
+  await page.keyboard.press("End");
+  await expect(active(page, "walk")).toHaveCount(1);
+  expect(await page.evaluate(() => window.scrollY), "walking the list scrolled the page").toBe(before);
+  // The box was scrolled to the option instead, and the option is in it.
+  const inside = await items.evaluate((el) => {
+    const frame = el.getBoundingClientRect();
+    const option = el.querySelector('[data-nd-active="true"]').getBoundingClientRect();
+    return { scrolled: el.scrollTop, top: option.top - frame.top, bottom: frame.bottom - option.bottom };
+  });
+  expect(inside.scrolled, "the list's own box did not scroll to the option").toBeGreaterThan(0);
+  expect(inside.top).toBeGreaterThanOrEqual(-0.5);
+  expect(inside.bottom).toBeGreaterThanOrEqual(-0.5);
+});
+
 test("a released list answers no key, and can be enhanced again", async ({ page }) => {
   await open(page);
   await page.evaluate(async () => {
