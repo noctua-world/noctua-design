@@ -45,6 +45,15 @@ const BASE_LINKS: &str = include_str!("../../dist/base.html");
 /// The pre-paint script, likewise taken whole.
 const BOOTSTRAP: &str = include_str!("../../dist/bootstrap.html");
 
+/// The faces of the default payload, preloaded, likewise taken whole.
+///
+/// Every one of them is `font-display: optional`, which draws a face only if it
+/// is ready by the first paint and never swaps it in afterwards. Without these
+/// links nothing asks for a face until a stylesheet has been read and a line
+/// laid out, which is after the first paint, so a first visit was drawn in
+/// the machine's own face for the life of the page.
+const PRELOAD: &str = include_str!("../../dist/preload.html");
+
 fn main() -> Result<(), String> {
     let root = PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/.."));
     let out = root.join("docs-site/dist");
@@ -223,6 +232,9 @@ fn document(locale: Locale, page: Page) -> String {
         "<link rel=\"icon\" href=\"{}favicon.svg\" type=\"image/svg+xml\">",
         site::BASE
     );
+    // Before the stylesheets, so the faces are on their way while the sheets
+    // that name them are still being read.
+    html.push_str(&rebase(&from_site_root(PRELOAD)));
     html.push_str(&rebase(BASE_LINKS));
     let _ = writeln!(
         html,
@@ -496,6 +508,19 @@ fn is_document_relative(href: &str) -> bool {
     !(scheme > 0 && href[scheme..].starts_with(':'))
 }
 
+/// A generated file's face URLs, as the site root reaches the faces.
+///
+/// `dist/` and `assets/` are siblings where they are generated, so `fonts.css`
+/// asks for `url("../assets/fonts/…")` and `preload.html` for
+/// `href="../assets/fonts/…"`. Here the generated files sit at the site root
+/// beside `assets/`, so the `../` has to go, or every face would be requested
+/// from above the root. Both files go through this one rewrite, because a
+/// preload whose URL is not exactly the one its `@font-face` asks for is a
+/// second download that draws nothing.
+fn from_site_root(text: &str) -> String {
+    text.replace("\"../assets/fonts/", "\"assets/fonts/")
+}
+
 /// The root document, which sends a reader to their language.
 ///
 /// The `<meta refresh>` still names the default locale, because that is the
@@ -624,16 +649,9 @@ fn copy_assets(root: &Path, out: &Path) -> Result<usize, String> {
         count += copy(&root.join("dist").join(name), &out.join(name))?;
     }
 
-    // `fonts.css` reaches its files with `url("../assets/fonts/…")`, which is
-    // correct where it is generated — `dist/` and `assets/` are siblings there.
-    // Here it sits at the site root, so the `../` has to go or every face would
-    // be requested from above the root.
     let fonts = std::fs::read_to_string(root.join("dist/fonts.css"))
         .map_err(|e| format!("could not read dist/fonts.css: {e}"))?;
-    write(
-        &out.join("fonts.css"),
-        &fonts.replace("url(\"../assets/fonts/", "url(\"assets/fonts/"),
-    )?;
+    write(&out.join("fonts.css"), &from_site_root(&fonts))?;
     count += 1;
 
     // The vendored color output, under the path `spec/theme.toml` declares.
@@ -1428,6 +1446,60 @@ mod tests {
                             "{dir} links to {href}, which is not a page the build writes"
                         );
                     }
+                }
+            }
+        }
+    }
+
+    /// Every page preloads every face of the default payload, at the URL
+    /// `fonts.css` asks for it.
+    ///
+    /// `font-display: optional` draws a face only if it is ready by the first
+    /// paint, so a page that preloads none is drawn in the machine's face on
+    /// every first visit, and a preload at any other URL than its `@font-face`
+    /// is a second download that draws nothing. A browser reports neither. The
+    /// browser suite asks the first of them of the pixels as well
+    /// (`scripts.spec.js`).
+    #[test]
+    fn every_page_preloads_the_faces_fonts_css_asks_for() {
+        // What `fonts.css` asks for, as the site writes it to its root.
+        let sheet = from_site_root(include_str!("../../dist/fonts.css"));
+        let asked: Vec<String> = sheet
+            .split("url(\"")
+            .skip(1)
+            .filter_map(|rest| rest.split('"').next())
+            .filter_map(|href| resolve_from("", href))
+            .collect();
+        let wanted = PRELOAD.matches("<link rel=\"preload\"").count();
+        assert!(
+            wanted > 0,
+            "dist/preload.html preloads nothing, so this proves nothing"
+        );
+        for locale in Locale::ALL {
+            for page in site::pages() {
+                let html = document(locale, page);
+                let dir = format!("{}/{}", locale.tag(), page.slug);
+                let head = &html[..html.find("</head>").expect("a document has a head")];
+                let preloaded: Vec<String> = head
+                    .split("<link rel=\"preload\"")
+                    .skip(1)
+                    .filter_map(|tag| hrefs(tag).into_iter().next())
+                    .map(|href| {
+                        resolve_from(&dir, &href)
+                            .unwrap_or_else(|| panic!("{dir} preloads {href}, above the site"))
+                    })
+                    .collect();
+                assert_eq!(
+                    preloaded.len(),
+                    wanted,
+                    "{dir} preloads {} of the {wanted} faces of the default payload",
+                    preloaded.len()
+                );
+                for face in &preloaded {
+                    assert!(
+                        asked.contains(face),
+                        "{dir} preloads {face}, which no @font-face in fonts.css asks for"
+                    );
                 }
             }
         }
