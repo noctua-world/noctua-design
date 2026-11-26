@@ -1153,6 +1153,19 @@ const DIALOG: &[Example] = &[
         r"Dialog { ai_mark, ai_label, ai_note }",
         Key::ExampleAiCaption
     ),
+    // AN ANSWER THAT CANNOT BE TAKEN BACK: the alert dialog, its mark and its
+    // two answers, the focus on the one that changes nothing.
+    example!(
+        r"Dialog { alert: true, irreversible_label, confirm_label, decline_label, … }",
+        Key::ExampleDialogNoteAlert
+    ),
+    // THE INTERFACE'S CONFIRMATION, opened because the program asked. `shown`
+    // is the caller's, and on this site the caller is the page: a control
+    // writes it, and the answer the dialog reports is written under it.
+    example!(
+        r"Dialog { alert: true, shown, requester, dismissible: false, … } — shown by the page",
+        Key::ExampleDialogNoteShown
+    ),
 ];
 
 // --- Popover ----------------------------------------------------------------

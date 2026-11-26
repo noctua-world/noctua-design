@@ -435,3 +435,183 @@ for (const scheme of ["light", "dark"]) {
     expect(veiled, `the page behind the dialog is still readable in ${scheme}`).toBeLessThan(3);
   });
 }
+
+// --- The confirmation ---------------------------------------------------------
+//
+// `alert`, the requester, the mark and the two answers: the surface the
+// interface asks a person to confirm a command that cannot be undone on. The
+// answers are submit controls of a `<form method="dialog">`, so closing on an
+// answer is the platform's, and `dist/dialog.js` reports it as
+// `nd-dialog-close` with the answer.
+
+/** Every `nd-dialog-close` the page hears from now on, as `name:answer`. */
+async function answers(page) {
+  await page.evaluate(() => {
+    window.__answers = [];
+    document.addEventListener("nd-dialog-close", (event) => {
+      window.__answers.push(`${event.detail.name}:${event.detail.answer}`);
+    });
+  });
+  return () => page.evaluate(() => window.__answers.slice());
+}
+
+test("an alert dialog takes the focus on its decline, and a press beside it is no answer", async ({
+  page,
+}) => {
+  await dialogs(page);
+  const heard = await answers(page);
+  const root = named(page, "dialog-delete");
+  const surface = root.locator(".nd-dialog-surface");
+  await root.locator(".nd-dialog-open").click();
+  await expect(surface).toBeVisible();
+  expect(await surface.getAttribute("role")).toBe("alertdialog");
+
+  // THE LEAST DESTRUCTIVE ANSWER HAS THE FOCUS, so a stray Enter declines.
+  await expect(root.locator(".nd-dialog-decline")).toBeFocused();
+
+  // DESCRIBED BY WHAT IS ASKED AND BY THE MARK, and every id resolves.
+  const described = await surface.evaluate((el) =>
+    (el.getAttribute("aria-describedby") ?? "")
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((id) => document.getElementById(id)?.className ?? null),
+  );
+  expect(described).toEqual(["nd-dialog-note", "nd-dialog-mark"]);
+
+  // A PRESS ON THE BACKDROP, which closes an ordinary modal dialog.
+  await page.mouse.click(4, 4);
+  await expect(surface, "a press beside an alert dialog answered it").toBeVisible();
+
+  // ESCAPE LEAVES IT, as a decline.
+  await page.keyboard.press("Escape");
+  await expect(surface).toBeHidden();
+  await expect.poll(heard).toEqual(["dialog-delete:decline"]);
+});
+
+test("each answer closes the surface and says which it was", async ({ page }) => {
+  await dialogs(page);
+  const heard = await answers(page);
+  const root = named(page, "dialog-delete");
+  const surface = root.locator(".nd-dialog-surface");
+
+  await root.locator(".nd-dialog-open").click();
+  await root.locator(".nd-dialog-confirm").click();
+  await expect(surface).toBeHidden();
+  await expect.poll(heard).toEqual(["dialog-delete:confirm"]);
+
+  // An answer is per opening: the next one starts with none.
+  await root.locator(".nd-dialog-open").click();
+  await expect(surface).toBeVisible();
+  expect(await surface.evaluate((el) => el.returnValue)).toBe("");
+  await page.keyboard.press("Enter");
+  await expect(surface).toBeHidden();
+  await expect.poll(heard).toEqual(["dialog-delete:confirm", "dialog-delete:decline"]);
+});
+
+test("the mark is words beside a glyph, and the confirm control is painted from it", async ({
+  page,
+}) => {
+  await dialogs(page);
+  const root = named(page, "dialog-delete");
+  await root.locator(".nd-dialog-open").click();
+  const mark = root.locator(".nd-dialog-mark");
+  await expect(mark).toBeVisible();
+  expect((await mark.textContent()).trim()).toMatch(/\S\s\S/);
+  expect(await mark.locator(".nd-dialog-mark-icon").getAttribute("aria-hidden")).toBe("true");
+  // THE TONE IS THE SECOND SIGNAL, the words the first (`NOCTUA.md §8.8.6`).
+  expect(await root.locator(".nd-dialog-confirm").getAttribute("data-nd-tone")).toBe("danger");
+  // Both answers clear the target floor.
+  for (const answer of [".nd-dialog-decline", ".nd-dialog-confirm"]) {
+    const box = await root.locator(answer).boundingBox();
+    expect(box.height).toBeGreaterThanOrEqual(24);
+    expect(box.width).toBeGreaterThanOrEqual(24);
+  }
+});
+
+test("a dialog its caller shows opens and closes when the caller writes it", async ({ page }) => {
+  await dialogs(page);
+  const heard = await answers(page);
+  const root = named(page, "dialog-confirm");
+  const surface = root.locator(".nd-dialog-surface");
+
+  // NO TRIGGER, AND NO LINE KEPT FOR ONE.
+  await expect(root.locator(".nd-dialog-open")).toHaveCount(0);
+  const held = await root.evaluate((el) => Number.parseFloat(getComputedStyle(el).minBlockSize) || 0);
+  expect(held, "a dialog with no trigger holds a line for one").toBe(0);
+
+  // THE PAGE PLAYS THE CALLER: its control writes `shown`.
+  await page.locator('[data-nd-action="dialog-show"]').click();
+  await expect(surface).toBeVisible();
+  await expect(root.locator(".nd-dialog-decline")).toBeFocused();
+  await root.locator(".nd-dialog-confirm").click();
+  await expect(surface).toBeHidden();
+  await expect.poll(heard).toEqual(["dialog-confirm:confirm"]);
+  // And writes the answer it heard under it, then `shown` back to false.
+  await expect(page.locator(".nd-example-answer")).toContainText("confirm");
+  await expect(root).toHaveAttribute("data-nd-shown", "false");
+
+  // A CALLER THAT CLOSES ITS OWN DIALOG is told, with no answer.
+  await root.evaluate((el) => el.setAttribute("data-nd-shown", "true"));
+  await expect(surface).toBeVisible();
+  await root.evaluate((el) => el.setAttribute("data-nd-shown", "false"));
+  await expect(surface).toBeHidden();
+  await expect.poll(heard).toEqual(["dialog-confirm:confirm", "dialog-confirm:"]);
+});
+
+for (const locale of ["en", "pt-BR", "qps"]) {
+  test(`the confirmation fits a 320 by 240 window in ${locale}, and nothing in it is cut off`, async ({
+    page,
+  }) => {
+    // THE INTERFACE'S SMALLEST WINDOW (`NOCTUA.md §12.19`). A head, a
+    // description and two answers that wrap onto two rows are taller than it,
+    // so below the `sm` step the surface scrolls as one: a part that does not
+    // scroll is a part cut off.
+    await page.setViewportSize({ width: 320, height: 240 });
+    await page.goto(url(PAGE.dialog, locale));
+    const root = named(page, "dialog-confirm");
+    await root.evaluate((el) => el.setAttribute("data-nd-shown", "true"));
+    const surface = root.locator(".nd-dialog-surface");
+    await expect(surface).toBeVisible();
+
+    const seen = await surface.evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      const style = getComputedStyle(el);
+      const cut = [];
+      for (const part of el.querySelectorAll("*")) {
+        const s = getComputedStyle(part);
+        if (/^(hidden|clip)$/.test(s.overflowX) && part.scrollWidth > part.clientWidth + 1) {
+          cut.push(`${part.className} across`);
+        }
+        if (/^(hidden|clip)$/.test(s.overflowY) && part.scrollHeight > part.clientHeight + 1) {
+          cut.push(`${part.className} down`);
+        }
+      }
+      return {
+        top: box.top,
+        bottom: box.bottom,
+        left: box.left,
+        right: box.right,
+        across: el.scrollWidth - el.clientWidth,
+        // What the surface holds below its own edge, and whether a reader can
+        // scroll to it.
+        below: el.scrollHeight - el.clientHeight,
+        scrolls: style.overflowY === "auto" || style.overflowY === "scroll",
+        cut,
+      };
+    });
+    expect(seen.top).toBeGreaterThanOrEqual(0);
+    expect(seen.bottom).toBeLessThanOrEqual(240);
+    expect(seen.left).toBeGreaterThanOrEqual(0);
+    expect(seen.right).toBeLessThanOrEqual(320);
+    expect(seen.across, "the surface holds something wider than itself").toBeLessThanOrEqual(1);
+    if (seen.below > 1) expect(seen.scrolls, "the surface cuts off what does not fit").toBe(true);
+    expect(seen.cut, "a part of the surface is cut off by a box that does not scroll").toEqual([]);
+
+    // AND THE FOCUS IS WHERE A READER CAN SEE IT.
+    const decline = root.locator(".nd-dialog-decline");
+    await expect(decline).toBeFocused();
+    const box = await decline.boundingBox();
+    expect(box.y).toBeGreaterThanOrEqual(seen.top - 1);
+    expect(box.y + box.height).toBeLessThanOrEqual(seen.bottom + 1);
+  });
+}

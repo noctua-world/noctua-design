@@ -1677,6 +1677,7 @@ export function enhanceAll(root = document) {
   enhanceToasts(root);
   enhanceToastReplays(root);
   enhanceCountdowns(root);
+  enhanceDialogShows(root);
   enhanceDrawerWindows(root);
   enhanceTabs(root);
   enhanceLineages(root);
@@ -1831,6 +1832,51 @@ function releaseCountdowns(root = document) {
   }
 }
 
+// --- Showing an example's confirmation --------------------------------------
+//
+// THIS IS APPARATUS, AND IT SHIPS NOWHERE. A confirmation opens because the
+// program asked, through `Dialog { shown }`, and the program hears the answer
+// as `nd-dialog-close`. On this site the program is the page: a control marked
+// `dialog-show` writes `shown` on the dialog beside it, and the answer is
+// written into the status under it, from the sentence that status carries,
+// before `shown` is written back. What the component owes is in
+// `dist/dialog.js` and is untouched.
+
+/** Every example whose dialog the page shows, so a subtree can be released. */
+const dialogShows = new WeakMap();
+
+function enhanceDialogShows(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-confirm")) {
+    if (dialogShows.has(stage)) continue;
+    const binding = new AbortController();
+    dialogShows.set(stage, binding);
+    const dialog = () => stage.querySelector("[data-nd-dialog]");
+    const status = () => stage.querySelector(".nd-example-answer");
+    stage.addEventListener("click", (event) => {
+      if (!event.target.closest?.('[data-nd-action="dialog-show"]')) return;
+      const said = status();
+      if (said) said.textContent = "";
+      dialog()?.setAttribute("data-nd-shown", "true");
+    }, { signal: binding.signal });
+    stage.addEventListener("nd-dialog-close", (event) => {
+      const said = status();
+      if (said && event.detail.answer) {
+        said.textContent = message(said.getAttribute("data-nd-sentence"), {
+          answer: event.detail.answer,
+        });
+      }
+      dialog()?.setAttribute("data-nd-shown", "false");
+    }, { signal: binding.signal });
+  }
+}
+
+function releaseDialogShows(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-confirm")) {
+    dialogShows.get(stage)?.abort();
+    dialogShows.delete(stage);
+  }
+}
+
 // --- Turning an example's drawer ----------------------------------------------
 //
 // THIS IS APPARATUS, AND IT SHIPS NOWHERE. A `Drawer` is turned by its caller:
@@ -1899,6 +1945,7 @@ export function releaseAll(root = document) {
   releaseLineages(root);
   releaseTabs(root);
   releaseDrawerWindows(root);
+  releaseDialogShows(root);
   releaseCountdowns(root);
   releaseToastReplays(root);
   releaseToasts(root);

@@ -5796,9 +5796,12 @@ pub fn dioxus_imports(component: &Component) -> String {
         // Everything whose body draws one glyph at a size it names: the `i`,
         // a menu row's icon, a bar's dismiss control, and the three floating
         // surfaces whose way out is a close control.
-        "Info" | "MenuItem" | "MessageBar" | "Dialog" | "Popover" | "Toast" => {
-            SIZED_ICON.to_owned()
-        }
+        "Info" | "MenuItem" | "MessageBar" | "Popover" | "Toast" => SIZED_ICON.to_owned(),
+        // THE ANSWERS ARE `Button`s, and the close control and the mark are
+        // drawings: a dialog is not the place to grow a second button.
+        "Dialog" => beside_icon(
+            "Button, ButtonSubmit, ButtonTone, ButtonVariant, Icon, IconSize",
+        ),
         "Field" => LABEL_IMPORT.to_owned(),
         // THE GAP OPENS THE MENU THIS SYSTEM ALREADY HAS. A second surface with
         // its own arrow walk would be a second thing to keep in step with
@@ -5896,8 +5899,8 @@ pub fn react_imports(component: &Component) -> String {
         // splits these across several arms because `IconDrawing` and `IconSize`
         // are imported unevenly there; in JavaScript an icon is an icon.
         "Button" | "Link" | "SegmentedItem" | "Disclosure" | "Search" | "SearchResult"
-        | "Avatar" | "Carousel" | "Info" | "MenuItem" | "MessageBar" | "Tab" | "Dialog"
-        | "Popover" | "Toast" | "FooterLine" | "Log" => REACT_ICON.to_owned(),
+        | "Avatar" | "Carousel" | "Info" | "MenuItem" | "MessageBar" | "Tab" | "Popover"
+        | "Toast" | "FooterLine" | "Log" => REACT_ICON.to_owned(),
         // The chip is a `Swatch` and the remove control is a `Button`; see the
         // Dioxus half.
         "Tag" => concat!(
@@ -5922,9 +5925,9 @@ pub fn react_imports(component: &Component) -> String {
         "KeyCapture" => REACT_LABEL_ICON.to_owned(),
         // The same menu in the other language — see the Dioxus half.
         "Pagination" => REACT_MENU.to_owned(),
-        // A `Button` and a drawing: a table's own controls, and the control a
-        // prompt is sent by.
-        "Table" | "Prompt" => concat!(
+        // A `Button` and a drawing: a table's own controls, the control a
+        // prompt is sent by, and a dialog's answers.
+        "Table" | "Prompt" | "Dialog" => concat!(
             "import { Button } from \"./button.js\";\n",
             "\n",
             "import { Icon } from \"./icon.js\";\n"
@@ -14069,16 +14072,48 @@ const TAB_PANEL_REACT: &str = r#"  const root = ["nd-tab-panel", className].filt
 /// `aria-labelledby`. `label` is written only when there is no heading, because
 /// a name a reader can see and a name only a screen reader hears will drift the
 /// moment either is edited.
+///
+/// # And the confirmation is the same surface, asking for an answer
+///
+/// `alert` makes it the WAI-ARIA alert dialog: `role="alertdialog"` on the
+/// surface, described by what is asked, who asks and whether the answer can be
+/// taken back, in that order. The answers are `Button`s that submit a
+/// `<form method="dialog">`, so closing the surface with the answer is the
+/// platform's, and their `value` is what `dist/dialog.js` reports. Where the
+/// focus starts is the script's too: `autofocus` written by React's `autoFocus`
+/// is a `focus()` call on mount rather than an attribute, so the two halves
+/// could not write it alike, and the script puts it on the decline control.
 const DIALOG_DIOXUS: &str = r#"    let root = format!("nd-dialog {class}");
     let root = root.trim().to_owned();
     let id = format!("nd-dialog-{name}");
     let surface_id = format!("{id}-surface");
     let title_id = format!("{id}-title");
     let note_id = format!("{id}-note");
+    let asker_id = format!("{id}-asker");
+    let mark_id = format!("{id}-mark");
     let titled = heading.as_ref().map(|_| title_id.clone());
     let named = if heading.is_some() { None } else { label.clone() };
-    let described = description.as_ref().map(|_| note_id.clone());
+    // WHAT DESCRIBES IT, IN THE ORDER A SCREEN READER READS IT AFTER THE NAME:
+    // what is asked, who asks, and whether the answer can be taken back.
+    let described = [
+        description.as_ref().map(|_| note_id.clone()),
+        requester.as_ref().map(|_| asker_id.clone()),
+        irreversible_label.as_ref().map(|_| mark_id.clone()),
+    ]
+    .into_iter()
+    .flatten()
+    .collect::<Vec<_>>()
+    .join(" ");
+    let described = (!described.is_empty()).then_some(described);
     let head = heading.is_some() || dismissible;
+    let answers = confirm_label.is_some() || decline_label.is_some();
+    // AN ANSWER THAT CANNOT BE TAKEN BACK IS PAINTED AS ONE. The mark says it
+    // in words beside a glyph, so the tone is never the only signal.
+    let confirm_tone = if irreversible_label.is_some() {
+        ButtonTone::Danger
+    } else {
+        ButtonTone::Accent
+    };
 
     rsx! {
         div {
@@ -14087,22 +14122,28 @@ const DIALOG_DIOXUS: &str = r#"    let root = format!("nd-dialog {class}");
             "data-nd-modal": if modal { "true" } else { "false" },
             "data-nd-size": size.as_str(),
             "data-nd-dismissible": if dismissible { "true" } else { "false" },
+            "data-nd-shown": if shown { "true" } else { "false" },
 
             // RENDERED HIDDEN, revealed by `dist/dialog.js`. See the header,
             // and note that the stylesheet holds this box from the first paint
             // so revealing it moves nothing (`NOCTUA.md §9.6`).
-            button {
-                class: "nd-dialog-open",
-                id: "{id}",
-                r#type: "button",
-                "aria-haspopup": "dialog",
+            if let Some(trigger) = trigger_label {
+                button {
+                    class: "nd-dialog-open",
+                    id: "{id}",
+                    r#type: "button",
+                    "aria-haspopup": "dialog",
                     hidden: true,
-                "{trigger_label}"
+                    "{trigger}"
+                }
             }
 
             dialog {
                 class: "nd-dialog-surface",
                 id: "{surface_id}",
+                // The `<dialog>`'s own role, unless the dialog demands an
+                // answer. See the contract.
+                role: alert.then_some("alertdialog"),
                 // One or the other, never both. See the header.
                 "aria-label": named,
                 "aria-labelledby": titled,
@@ -14126,13 +14167,57 @@ const DIALOG_DIOXUS: &str = r#"    let root = format!("nd-dialog {class}");
                         }
                     }
                 }
-                if let Some(description) = description {
-                    p { class: "nd-dialog-note", id: "{note_id}", "{description}" }
-                }
                 // THE SCROLLER, AND IT IS ITS OWN ELEMENT. The surface clips and
                 // carries the radius; this scrolls and carries none. `.nd-panel`
-                // is two elements for exactly this reason.
-                div { class: "nd-dialog-body", {children} }
+                // is two elements for exactly this reason. The description is
+                // its first line, so a short window scrolls it rather than
+                // cutting it off above the answers.
+                div { class: "nd-dialog-body",
+                    if let Some(description) = description {
+                        p { class: "nd-dialog-note", id: "{note_id}", "{description}" }
+                    }
+                    if let Some(who) = requester {
+                        p { class: "nd-dialog-requester", id: "{asker_id}", "{who}" }
+                    }
+                    if let Some(mark) = irreversible_label {
+                        p { class: "nd-dialog-mark", id: "{mark_id}",
+                            // `aria-hidden`: the words say what the glyph says.
+                            span { class: "nd-dialog-mark-icon", "aria-hidden": "true",
+                                Icon { icon: IconDrawing::WARNING, size: IconSize::Small }
+                            }
+                            span { "{mark}" }
+                        }
+                    }
+                    {children}
+                }
+                // THE ANSWERS, OUTSIDE THE SCROLLER, so a short window scrolls
+                // the question and never them. Submit controls of a
+                // `<form method="dialog">`: the platform closes the surface with
+                // the answer as its `returnValue`. The decline control comes
+                // first, which is where the focus starts.
+                if answers {
+                    form { class: "nd-dialog-actions", method: "dialog",
+                        if let Some(no) = decline_label {
+                            Button {
+                                class: "nd-dialog-decline",
+                                label: no,
+                                variant: ButtonVariant::Outline,
+                                tone: ButtonTone::Neutral,
+                                submit: ButtonSubmit::Submit,
+                                value: "decline",
+                            }
+                        }
+                        if let Some(yes) = confirm_label {
+                            Button {
+                                class: "nd-dialog-confirm",
+                                label: yes,
+                                tone: confirm_tone,
+                                submit: ButtonSubmit::Submit,
+                                value: "confirm",
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -14142,11 +14227,20 @@ const DIALOG_DIOXUS: &str = r#"    let root = format!("nd-dialog {class}");
 const DIALOG_REACT: &str = r#"  const modal_ = modal ?? true;
   const size_ = size ?? "medium";
   const dismissible_ = dismissible ?? true;
+  const shown_ = shown ?? false;
   const root = ["nd-dialog", className].filter(Boolean).join(" ");
   const id = `nd-dialog-${name}`;
   const titleId = `${id}-title`;
   const noteId = `${id}-note`;
+  const askerId = `${id}-asker`;
+  const markId = `${id}-mark`;
   const head = Boolean(heading) || dismissible_;
+  // See the Dioxus half: what is asked, who asks, and whether it can be undone.
+  const described =
+    [description ? noteId : null, requester ? askerId : null, irreversibleLabel ? markId : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
+  const answers = Boolean(confirmLabel) || Boolean(declineLabel);
 
   return h(
     "div",
@@ -14156,31 +14250,35 @@ const DIALOG_REACT: &str = r#"  const modal_ = modal ?? true;
       "data-nd-modal": String(modal_),
       "data-nd-size": size_,
       "data-nd-dismissible": String(dismissible_),
+      "data-nd-shown": String(shown_),
       ...rest,
     },
-    h(
-      "button",
-      {
-        key: "o",
-        className: "nd-dialog-open",
-        id,
-        type: "button",
-        "aria-haspopup": "dialog",
-          // See the Dioxus half: revealed by the script.
-        hidden: true,
-      },
-      triggerLabel,
-    ),
+    triggerLabel
+      ? h(
+          "button",
+          {
+            key: "o",
+            className: "nd-dialog-open",
+            id,
+            type: "button",
+            "aria-haspopup": "dialog",
+            // See the Dioxus half: revealed by the script.
+            hidden: true,
+          },
+          triggerLabel,
+        )
+      : null,
     h(
       "dialog",
       {
         key: "s",
         className: "nd-dialog-surface",
         id: `${id}-surface`,
+        role: alert ? "alertdialog" : undefined,
         // See the Dioxus half: one name or the other, never both.
         "aria-label": heading ? undefined : label,
         "aria-labelledby": heading ? titleId : undefined,
-        "aria-describedby": description ? noteId : undefined,
+        "aria-describedby": described,
       },
       head
         ? h(
@@ -14203,8 +14301,56 @@ const DIALOG_REACT: &str = r#"  const modal_ = modal ?? true;
               : null,
           )
         : null,
-      description ? h("p", { key: "n", className: "nd-dialog-note", id: noteId }, description) : null,
-      h("div", { key: "b", className: "nd-dialog-body" }, children),
+      h(
+        "div",
+        { key: "b", className: "nd-dialog-body" },
+        // See the Dioxus half: the description is the scroller's first line.
+        description ? h("p", { key: "n", className: "nd-dialog-note", id: noteId }, description) : null,
+        requester
+          ? h("p", { key: "r", className: "nd-dialog-requester", id: askerId }, requester)
+          : null,
+        irreversibleLabel
+          ? h(
+              "p",
+              { key: "m", className: "nd-dialog-mark", id: markId },
+              h(
+                "span",
+                { key: "i", className: "nd-dialog-mark-icon", "aria-hidden": "true" },
+                h(Icon, { icon: warning, size: "small" }),
+              ),
+              h("span", { key: "w" }, irreversibleLabel),
+            )
+          : null,
+        children,
+      ),
+      // See the Dioxus half: the answers, outside the scroller, decline first.
+      answers
+        ? h(
+            "form",
+            { key: "a", className: "nd-dialog-actions", method: "dialog" },
+            declineLabel
+              ? h(Button, {
+                  key: "d",
+                  className: "nd-dialog-decline",
+                  label: declineLabel,
+                  variant: "outline",
+                  tone: "neutral",
+                  submit: "submit",
+                  value: "decline",
+                })
+              : null,
+            confirmLabel
+              ? h(Button, {
+                  key: "c",
+                  className: "nd-dialog-confirm",
+                  label: confirmLabel,
+                  tone: irreversibleLabel ? "danger" : "accent",
+                  submit: "submit",
+                  value: "confirm",
+                })
+              : null,
+          )
+        : null,
     ),
   );
 "#;

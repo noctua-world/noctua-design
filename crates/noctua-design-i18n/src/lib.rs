@@ -3388,6 +3388,26 @@ pub enum Key {
     ExampleDialogNoteBeside,
     /// `example.dialog.note-wide`
     ExampleDialogNoteWide,
+    /// `example.dialog.irreversible`
+    ExampleDialogIrreversible,
+    /// `example.dialog.files`
+    ExampleDialogFiles,
+    /// `example.dialog.ask`
+    ExampleDialogAsk,
+    /// `example.dialog.realm-heading`
+    ExampleDialogRealmHeading,
+    /// `example.dialog.realm-description`
+    ExampleDialogRealmDescription,
+    /// `example.dialog.realm-requester`
+    ExampleDialogRealmRequester,
+    /// `example.dialog.realm-confirm`
+    ExampleDialogRealmConfirm,
+    /// `example.dialog.answer`
+    ExampleDialogAnswer,
+    /// `example.dialog.note-alert`
+    ExampleDialogNoteAlert,
+    /// `example.dialog.note-shown`
+    ExampleDialogNoteShown,
     /// `example.dialog.note-plain`
     ExampleDialogNotePlain,
     /// `example.popover.open`
@@ -4294,6 +4314,18 @@ pub enum Key {
     ComponentDialogPropDismissibleDoc,
     /// `component.dialog.prop.close_label.doc`
     ComponentDialogPropCloseLabelDoc,
+    /// `component.dialog.prop.shown.doc`
+    ComponentDialogPropShownDoc,
+    /// `component.dialog.prop.alert.doc`
+    ComponentDialogPropAlertDoc,
+    /// `component.dialog.prop.requester.doc`
+    ComponentDialogPropRequesterDoc,
+    /// `component.dialog.prop.irreversible_label.doc`
+    ComponentDialogPropIrreversibleLabelDoc,
+    /// `component.dialog.prop.confirm_label.doc`
+    ComponentDialogPropConfirmLabelDoc,
+    /// `component.dialog.prop.decline_label.doc`
+    ComponentDialogPropDeclineLabelDoc,
     /// `component.dialog.prop.children.doc`
     ComponentDialogPropChildrenDoc,
     /// `component.dialog.state.open.doc`
@@ -6840,7 +6872,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3358] = [
+    pub const ALL: [Self; 3374] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -8475,6 +8507,16 @@ impl Key {
         Self::ExampleDialogNoteModal,
         Self::ExampleDialogNoteBeside,
         Self::ExampleDialogNoteWide,
+        Self::ExampleDialogIrreversible,
+        Self::ExampleDialogFiles,
+        Self::ExampleDialogAsk,
+        Self::ExampleDialogRealmHeading,
+        Self::ExampleDialogRealmDescription,
+        Self::ExampleDialogRealmRequester,
+        Self::ExampleDialogRealmConfirm,
+        Self::ExampleDialogAnswer,
+        Self::ExampleDialogNoteAlert,
+        Self::ExampleDialogNoteShown,
         Self::ExampleDialogNotePlain,
         Self::ExamplePopoverOpen,
         Self::ExamplePopoverHeading,
@@ -8928,6 +8970,12 @@ impl Key {
         Self::ComponentDialogPropSizeDoc,
         Self::ComponentDialogPropDismissibleDoc,
         Self::ComponentDialogPropCloseLabelDoc,
+        Self::ComponentDialogPropShownDoc,
+        Self::ComponentDialogPropAlertDoc,
+        Self::ComponentDialogPropRequesterDoc,
+        Self::ComponentDialogPropIrreversibleLabelDoc,
+        Self::ComponentDialogPropConfirmLabelDoc,
+        Self::ComponentDialogPropDeclineLabelDoc,
         Self::ComponentDialogPropChildrenDoc,
         Self::ComponentDialogStateOpenDoc,
         Self::ComponentDialogKeyEnterOrSpaceName,
@@ -11841,6 +11889,16 @@ impl Key {
             Self::ExampleDialogNoteModal => "example.dialog.note-modal",
             Self::ExampleDialogNoteBeside => "example.dialog.note-beside",
             Self::ExampleDialogNoteWide => "example.dialog.note-wide",
+            Self::ExampleDialogIrreversible => "example.dialog.irreversible",
+            Self::ExampleDialogFiles => "example.dialog.files",
+            Self::ExampleDialogAsk => "example.dialog.ask",
+            Self::ExampleDialogRealmHeading => "example.dialog.realm-heading",
+            Self::ExampleDialogRealmDescription => "example.dialog.realm-description",
+            Self::ExampleDialogRealmRequester => "example.dialog.realm-requester",
+            Self::ExampleDialogRealmConfirm => "example.dialog.realm-confirm",
+            Self::ExampleDialogAnswer => "example.dialog.answer",
+            Self::ExampleDialogNoteAlert => "example.dialog.note-alert",
+            Self::ExampleDialogNoteShown => "example.dialog.note-shown",
             Self::ExampleDialogNotePlain => "example.dialog.note-plain",
             Self::ExamplePopoverOpen => "example.popover.open",
             Self::ExamplePopoverHeading => "example.popover.heading",
@@ -12530,6 +12588,14 @@ impl Key {
             Self::ComponentDialogPropSizeDoc => "component.dialog.prop.size.doc",
             Self::ComponentDialogPropDismissibleDoc => "component.dialog.prop.dismissible.doc",
             Self::ComponentDialogPropCloseLabelDoc => "component.dialog.prop.close_label.doc",
+            Self::ComponentDialogPropShownDoc => "component.dialog.prop.shown.doc",
+            Self::ComponentDialogPropAlertDoc => "component.dialog.prop.alert.doc",
+            Self::ComponentDialogPropRequesterDoc => "component.dialog.prop.requester.doc",
+            Self::ComponentDialogPropIrreversibleLabelDoc => {
+                "component.dialog.prop.irreversible_label.doc"
+            }
+            Self::ComponentDialogPropConfirmLabelDoc => "component.dialog.prop.confirm_label.doc",
+            Self::ComponentDialogPropDeclineLabelDoc => "component.dialog.prop.decline_label.doc",
             Self::ComponentDialogPropChildrenDoc => "component.dialog.prop.children.doc",
             Self::ComponentDialogStateOpenDoc => "component.dialog.state.open.doc",
             Self::ComponentDialogKeyEnterOrSpaceName => "component.dialog.key.enter-or-space.name",
@@ -17165,6 +17231,24 @@ impl Locale {
                 Key::ExampleDialogNoteWide => {
                     "No close control at all. Escape and a press on the backdrop are still the way out, and both are the platform's."
                 }
+                Key::ExampleDialogIrreversible => "This cannot be undone.",
+                Key::ExampleDialogFiles => "Three files are attached, and they go with the draft.",
+                Key::ExampleDialogAsk => "Ask for a confirmation",
+                Key::ExampleDialogRealmHeading => "Delete the realm home?",
+                Key::ExampleDialogRealmDescription => {
+                    "Every record, file and setting in it is deleted, on this machine and everywhere it is kept."
+                }
+                Key::ExampleDialogRealmRequester => {
+                    "Asked by the assistant, in the session named Cleanup."
+                }
+                Key::ExampleDialogRealmConfirm => "Delete the realm",
+                Key::ExampleDialogAnswer => "The dialog answered {answer}.",
+                Key::ExampleDialogNoteAlert => {
+                    "An alert dialog asks for an answer. The focus starts on the one that changes nothing, and a press beside it is not an answer."
+                }
+                Key::ExampleDialogNoteShown => {
+                    "The interface opens this when a command that cannot be undone asks to run. Here the page opens it, and writes the answer under it."
+                }
                 Key::ExampleDialogNotePlain => {
                     "With no heading, `label` names the surface. Prefer a heading where there is room, because a reader can check it."
                 }
@@ -18324,16 +18408,16 @@ impl Locale {
                 }
                 Key::ComponentDelPropChildrenDoc => "The removed text.",
                 Key::ComponentDialogGuidance => {
-                    "Use a dialog for one thing a reader has to settle before carrying on. For a message left where it happened, use `MessageBar`. For a note hanging off a control, use `Popover`. A surface that only shows something is a page section."
+                    "Use a dialog for one thing a reader has to settle before carrying on. Use its `alert` form to confirm an answer that cannot be taken back. For a message left where it happened, use `MessageBar`. For a note on a control, use `Popover`."
                 }
                 Key::ComponentDialogA11yNotes => {
-                    "The `<dialog>` element carries the role, so none is written. `showModal` marks it modal and the document behind it inert, so no focus trap is written either. A non-modal one is a plain dialog beside the page."
+                    "The `<dialog>` element carries the role, or `role=\"alertdialog\"` with `alert`. `showModal` makes the page behind it inert, so no focus trap is written. The description, requester and mark describe it."
                 }
                 Key::ComponentDialogPropNameDoc => {
                     "What this dialog is, as a script finds it, and the root of every id here. **Required**, because ids derived from an absent name collide the moment a page carries two."
                 }
                 Key::ComponentDialogPropTriggerLabelDoc => {
-                    "The words on the control that opens it. **Required**: a surface that opens from a script and has no control pointing at it is a surface a reader cannot reach."
+                    "The words on the control that opens it. Absent for a dialog its caller opens with `shown`. A dialog with neither is a surface a reader cannot reach."
                 }
                 Key::ComponentDialogPropHeadingDoc => {
                     "A title inside the surface. It names the dialog through `aria-labelledby`, so prefer it to `label`. A name a reader can see is a name they can check against what is being asked."
@@ -18356,19 +18440,37 @@ impl Locale {
                 Key::ComponentDialogPropCloseLabelDoc => {
                     "The name of the control that closes it. Wanted in practice by `dismissible`, because that control is a glyph and this is the only name it has."
                 }
+                Key::ComponentDialogPropShownDoc => {
+                    "Whether the surface is showing, for a caller that renders the interface as a view. `dist/dialog.js` opens or closes it whenever the caller writes it, and a reader who closes it is reported with `nd-dialog-close`."
+                }
+                Key::ComponentDialogPropAlertDoc => {
+                    "Whether the dialog demands an answer. The surface becomes a `role=\"alertdialog\"` and a press on the backdrop does not close it. Give it a `description`."
+                }
+                Key::ComponentDialogPropRequesterDoc => {
+                    "Who is asking, as a sentence such as *Asked by the assistant in session 4*. It opens the body and describes the surface after the description."
+                }
+                Key::ComponentDialogPropIrreversibleLabelDoc => {
+                    "A mark saying the answer cannot be taken back, such as *This cannot be undone*. It is drawn with a warning glyph, describes the surface, and paints the confirm control in the danger tone."
+                }
+                Key::ComponentDialogPropConfirmLabelDoc => {
+                    "The words on the control that says yes, such as *Delete the realm*. It closes the surface with the answer `confirm`."
+                }
+                Key::ComponentDialogPropDeclineLabelDoc => {
+                    "The words on the control that says no, such as *Keep it*. It closes the surface with the answer `decline`, and the focus starts on it."
+                }
                 Key::ComponentDialogPropChildrenDoc => {
-                    "What the dialog asks and the controls that answer it. A `Button` that acts on the answer belongs here, at the end."
+                    "What the dialog asks, after the requester and the mark. A control that answers it belongs here only where `confirm_label` and `decline_label` cannot say it."
                 }
                 Key::ComponentDialogStateOpenDoc => {
                     "Set on the root while the surface is showing. The `<dialog>` carries its own `open` attribute, and this is the one a stylesheet outside it can act on."
                 }
                 Key::ComponentDialogKeyEnterOrSpaceName => "Enter or Space",
                 Key::ComponentDialogKeyEnterOrSpaceAction => {
-                    "Opens the dialog, on the control that opens it. Both keys work, because that control is a `<button>`."
+                    "Presses the control the focus is on, which opens the dialog or answers it. Each is a `<button>`."
                 }
                 Key::ComponentDialogKeyEscapeName => "Escape",
                 Key::ComponentDialogKeyEscapeAction => {
-                    "Closes it. The platform answers this for a modal surface, and `dist/dialog.js` answers it for a non-modal one."
+                    "Closes it, as `decline` where there is a decline control. `dist/dialog.js` answers it for a non-modal surface."
                 }
                 Key::ComponentDialogKeyTabName => "Tab",
                 Key::ComponentDialogKeyTabAction => {
@@ -24821,6 +24923,26 @@ impl Locale {
                 Key::ExampleDialogNoteWide => {
                     "Nenhum controle de fechar. Escape e um toque no fundo continuam sendo a saída, e os dois são da plataforma."
                 }
+                Key::ExampleDialogIrreversible => "Isto não pode ser desfeito.",
+                Key::ExampleDialogFiles => {
+                    "Três arquivos estão anexados, e eles vão junto com o rascunho."
+                }
+                Key::ExampleDialogAsk => "Pedir uma confirmação",
+                Key::ExampleDialogRealmHeading => "Apagar o realm home?",
+                Key::ExampleDialogRealmDescription => {
+                    "Todo registro, arquivo e configuração nele é apagado, nesta máquina e em todo lugar onde está guardado."
+                }
+                Key::ExampleDialogRealmRequester => {
+                    "Pedido pelo assistente, na sessão chamada Limpeza."
+                }
+                Key::ExampleDialogRealmConfirm => "Apagar o realm",
+                Key::ExampleDialogAnswer => "O diálogo respondeu {answer}.",
+                Key::ExampleDialogNoteAlert => {
+                    "Um diálogo de alerta pede uma resposta. O foco começa naquela que não muda nada, e um toque ao lado não é uma resposta."
+                }
+                Key::ExampleDialogNoteShown => {
+                    "A interface abre isto quando um comando que não se desfaz pede para rodar. Aqui é a página que o abre e escreve a resposta abaixo dele."
+                }
                 Key::ExampleDialogNotePlain => {
                     "Sem título, o `label` nomeia a superfície. Prefira um título quando houver espaço, porque a pessoa pode conferir."
                 }
@@ -25986,16 +26108,16 @@ impl Locale {
                 }
                 Key::ComponentDelPropChildrenDoc => "O texto removido.",
                 Key::ComponentDialogGuidance => {
-                    "Use um diálogo para uma coisa que a pessoa precisa resolver antes de seguir. Para uma mensagem deixada onde aconteceu, use `MessageBar`. Para uma nota presa a um controle, use `Popover`. Uma superfície que só mostra algo é uma seção de página."
+                    "Use um diálogo para algo que a pessoa precisa resolver antes de seguir. Use a forma `alert` para confirmar uma resposta que não se desfaz. Para uma mensagem deixada onde aconteceu, use `MessageBar`. Para uma nota num controle, use `Popover`."
                 }
                 Key::ComponentDialogA11yNotes => {
-                    "O elemento `<dialog>` carrega o papel, então nenhum é escrito. `showModal` o marca como modal e deixa inerte o documento atrás dele, então também não se escreve armadilha de foco. Um não modal é um diálogo comum ao lado da página."
+                    "O elemento `<dialog>` carrega o papel, ou `role=\"alertdialog\"` com `alert`. `showModal` deixa inerte a página atrás dele, então não se escreve armadilha de foco. A descrição, quem pede e a marca o descrevem."
                 }
                 Key::ComponentDialogPropNameDoc => {
                     "O que é este diálogo, como um script o encontra, e a raiz de todo id aqui. **Obrigatório**, porque ids derivados de um nome ausente colidem assim que uma página carrega dois."
                 }
                 Key::ComponentDialogPropTriggerLabelDoc => {
-                    "As palavras no controle que o abre. **Obrigatório**: uma superfície que só abre por script e não tem controle apontando para ela é uma superfície inalcançável."
+                    "As palavras no controle que o abre. Ausente num diálogo que quem chama abre com `shown`. Um diálogo sem nenhum dos dois é uma superfície inalcançável."
                 }
                 Key::ComponentDialogPropHeadingDoc => {
                     "Um título dentro da superfície. Ele nomeia o diálogo por `aria-labelledby`, então prefira-o a `label`. Um nome que a pessoa vê é um nome que ela pode conferir com o que está sendo perguntado."
@@ -26018,19 +26140,37 @@ impl Locale {
                 Key::ComponentDialogPropCloseLabelDoc => {
                     "O nome do controle que fecha. Necessário na prática pelo `dismissible`, porque esse controle é um glifo e este é o único nome que ele tem."
                 }
+                Key::ComponentDialogPropShownDoc => {
+                    "Se a superfície está aberta, para quem chama e desenha a interface como uma visão. O `dist/dialog.js` a abre ou fecha sempre que quem chama o escreve, e avisa com `nd-dialog-close` quando a pessoa a fecha."
+                }
+                Key::ComponentDialogPropAlertDoc => {
+                    "Se o diálogo exige uma resposta. A superfície vira um `role=\"alertdialog\"` e um toque no fundo não a fecha. Dê a ela uma `description`."
+                }
+                Key::ComponentDialogPropRequesterDoc => {
+                    "Quem está pedindo, numa frase como *Pedido pelo assistente na sessão 4*. Ela abre o corpo e descreve a superfície depois da descrição."
+                }
+                Key::ComponentDialogPropIrreversibleLabelDoc => {
+                    "Uma marca dizendo que a resposta não pode ser desfeita, como *Isto não pode ser desfeito*. É desenhada com um glifo de aviso, descreve a superfície e pinta o controle de confirmar no tom de perigo."
+                }
+                Key::ComponentDialogPropConfirmLabelDoc => {
+                    "As palavras no controle que diz sim, como *Apagar o realm*. Ele fecha a superfície com a resposta `confirm`."
+                }
+                Key::ComponentDialogPropDeclineLabelDoc => {
+                    "As palavras no controle que diz não, como *Manter*. Ele fecha a superfície com a resposta `decline`, e o foco começa nele."
+                }
                 Key::ComponentDialogPropChildrenDoc => {
-                    "O que o diálogo pergunta e os controles que respondem. Um `Button` que age sobre a resposta fica aqui, no fim."
+                    "O que o diálogo pergunta, depois de quem pede e da marca. Um controle que responde só fica aqui onde `confirm_label` e `decline_label` não conseguem dizê-lo."
                 }
                 Key::ComponentDialogStateOpenDoc => {
                     "Definido na raiz enquanto a superfície está aberta. O `<dialog>` carrega o próprio atributo `open`, e este é o que uma folha de estilo fora dele consegue usar."
                 }
                 Key::ComponentDialogKeyEnterOrSpaceName => "Enter ou Espaço",
                 Key::ComponentDialogKeyEnterOrSpaceAction => {
-                    "Abre o diálogo, no controle que o abre. As duas teclas funcionam, porque esse controle é um `<button>`."
+                    "Aciona o controle em que está o foco, que abre o diálogo ou responde a ele. Cada um é um `<button>`."
                 }
                 Key::ComponentDialogKeyEscapeName => "Escape",
                 Key::ComponentDialogKeyEscapeAction => {
-                    "Fecha. A plataforma responde a isso numa superfície modal, e o `dist/dialog.js` responde numa não modal."
+                    "Fecha, como `decline` onde há um controle de recusar. O `dist/dialog.js` responde a ele numa superfície não modal."
                 }
                 Key::ComponentDialogKeyTabName => "Tab",
                 Key::ComponentDialogKeyTabAction => {
@@ -32605,6 +32745,26 @@ impl Locale {
                 Key::ExampleDialogNoteWide => {
                     "⟦Noo cloosee coontrool aat aall. EEscaapee aand aa preess oon thee baackdroop aaree stiill thee waay oouut, aand booth aaree thee plaatfoorm's.⟧"
                 }
+                Key::ExampleDialogIrreversible => "⟦Thiis caannoot bee uundoonee.⟧",
+                Key::ExampleDialogFiles => {
+                    "⟦Threeee fiilees aaree aattaacheed, aand theey goo wiith thee draaft.⟧"
+                }
+                Key::ExampleDialogAsk => "⟦AAsk foor aa coonfiirmaatiioon⟧",
+                Key::ExampleDialogRealmHeading => "⟦Deeleetee thee reeaalm hoomee?⟧",
+                Key::ExampleDialogRealmDescription => {
+                    "⟦EEveery reecoord, fiilee aand seettiing iin iit iis deeleeteed, oon thiis maachiinee aand eeveerywheeree iit iis keept.⟧"
+                }
+                Key::ExampleDialogRealmRequester => {
+                    "⟦AAskeed by thee aassiistaant, iin thee seessiioon naameed Cleeaanuup.⟧"
+                }
+                Key::ExampleDialogRealmConfirm => "⟦Deeleetee thee reeaalm⟧",
+                Key::ExampleDialogAnswer => "⟦Thee diiaaloog aansweereed {answer}.⟧",
+                Key::ExampleDialogNoteAlert => {
+                    "⟦AAn aaleert diiaaloog aasks foor aan aansweer. Thee foocuus staarts oon thee oonee thaat chaangees noothiing, aand aa preess beesiidee iit iis noot aan aansweer.⟧"
+                }
+                Key::ExampleDialogNoteShown => {
+                    "⟦Thee iinteerfaacee oopeens thiis wheen aa coommaand thaat caannoot bee uundoonee aasks too ruun. Heeree thee paagee oopeens iit, aand wriitees thee aansweer uundeer iit.⟧"
+                }
                 Key::ExampleDialogNotePlain => {
                     "⟦Wiith noo heeaadiing, `laabeel` naamees thee suurfaacee. Preefeer aa heeaadiing wheeree theeree iis roooom, beecaauusee aa reeaadeer caan cheeck iit.⟧"
                 }
@@ -33794,16 +33954,16 @@ impl Locale {
                 }
                 Key::ComponentDelPropChildrenDoc => "⟦Thee reemooveed teext.⟧",
                 Key::ComponentDialogGuidance => {
-                    "⟦UUsee aa diiaaloog foor oonee thiing aa reeaadeer haas too seettlee beefooree caarryiing oon. Foor aa meessaagee leeft wheeree iit haappeeneed, uusee `MeessaageeBaar`. Foor aa nootee haangiing ooff aa coontrool, uusee `Poopooveer`. AA suurfaacee thaat oonly shoows soomeethiing iis aa paagee seectiioon.⟧"
+                    "⟦UUsee aa diiaaloog foor oonee thiing aa reeaadeer haas too seettlee beefooree caarryiing oon. UUsee iits `aaleert` foorm too coonfiirm aan aansweer thaat caannoot bee taakeen baack. Foor aa meessaagee leeft wheeree iit haappeeneed, uusee `MeessaageeBaar`. Foor aa nootee oon aa coontrool, uusee `Poopooveer`.⟧"
                 }
                 Key::ComponentDialogA11yNotes => {
-                    "⟦Thee `<diiaaloog>` eeleemeent caarriiees thee roolee, soo noonee iis wriitteen. `shoowMoodaal` maarks iit moodaal aand thee doocuumeent beehiind iit iineert, soo noo foocuus traap iis wriitteen eeiitheer. AA noon-moodaal oonee iis aa plaaiin diiaaloog beesiidee thee paagee.⟧"
+                    "⟦Thee `<diiaaloog>` eeleemeent caarriiees thee roolee, oor `roolee=\"aaleertdiiaaloog\"` wiith `aaleert`. `shoowMoodaal` maakees thee paagee beehiind iit iineert, soo noo foocuus traap iis wriitteen. Thee deescriiptiioon, reequueesteer aand maark deescriibee iit.⟧"
                 }
                 Key::ComponentDialogPropNameDoc => {
                     "⟦Whaat thiis diiaaloog iis, aas aa scriipt fiinds iit, aand thee roooot oof eeveery iid heeree. **Reequuiireed**, beecaauusee iids deeriiveed froom aan aabseent naamee coolliidee thee moomeent aa paagee caarriiees twoo.⟧"
                 }
                 Key::ComponentDialogPropTriggerLabelDoc => {
-                    "⟦Thee woords oon thee coontrool thaat oopeens iit. **Reequuiireed**: aa suurfaacee thaat oopeens froom aa scriipt aand haas noo coontrool pooiintiing aat iit iis aa suurfaacee aa reeaadeer caannoot reeaach.⟧"
+                    "⟦Thee woords oon thee coontrool thaat oopeens iit. AAbseent foor aa diiaaloog iits caalleer oopeens wiith `shoown`. AA diiaaloog wiith neeiitheer iis aa suurfaacee aa reeaadeer caannoot reeaach.⟧"
                 }
                 Key::ComponentDialogPropHeadingDoc => {
                     "⟦AA tiitlee iinsiidee thee suurfaacee. IIt naamees thee diiaaloog throouugh `aariiaa-laabeelleedby`, soo preefeer iit too `laabeel`. AA naamee aa reeaadeer caan seeee iis aa naamee theey caan cheeck aagaaiinst whaat iis beeiing aaskeed.⟧"
@@ -33826,19 +33986,37 @@ impl Locale {
                 Key::ComponentDialogPropCloseLabelDoc => {
                     "⟦Thee naamee oof thee coontrool thaat cloosees iit. Waanteed iin praactiicee by `diismiissiiblee`, beecaauusee thaat coontrool iis aa glyph aand thiis iis thee oonly naamee iit haas.⟧"
                 }
+                Key::ComponentDialogPropShownDoc => {
+                    "⟦Wheetheer thee suurfaacee iis shoowiing, foor aa caalleer thaat reendeers thee iinteerfaacee aas aa viieew. `diist/diiaaloog.js` oopeens oor cloosees iit wheeneeveer thee caalleer wriitees iit, aand aa reeaadeer whoo cloosees iit iis reepoorteed wiith `nd-diiaaloog-cloosee`.⟧"
+                }
+                Key::ComponentDialogPropAlertDoc => {
+                    "⟦Wheetheer thee diiaaloog deemaands aan aansweer. Thee suurfaacee beecoomees aa `roolee=\"aaleertdiiaaloog\"` aand aa preess oon thee baackdroop dooees noot cloosee iit. Giivee iit aa `deescriiptiioon`.⟧"
+                }
+                Key::ComponentDialogPropRequesterDoc => {
+                    "⟦Whoo iis aaskiing, aas aa seenteencee suuch aas *AAskeed by thee aassiistaant iin seessiioon 4*. IIt oopeens thee boody aand deescriibees thee suurfaacee aafteer thee deescriiptiioon.⟧"
+                }
+                Key::ComponentDialogPropIrreversibleLabelDoc => {
+                    "⟦AA maark saayiing thee aansweer caannoot bee taakeen baack, suuch aas *Thiis caannoot bee uundoonee*. IIt iis draawn wiith aa waarniing glyph, deescriibees thee suurfaacee, aand paaiints thee coonfiirm coontrool iin thee daangeer toonee.⟧"
+                }
+                Key::ComponentDialogPropConfirmLabelDoc => {
+                    "⟦Thee woords oon thee coontrool thaat saays yees, suuch aas *Deeleetee thee reeaalm*. IIt cloosees thee suurfaacee wiith thee aansweer `coonfiirm`.⟧"
+                }
+                Key::ComponentDialogPropDeclineLabelDoc => {
+                    "⟦Thee woords oon thee coontrool thaat saays noo, suuch aas *Keeeep iit*. IIt cloosees thee suurfaacee wiith thee aansweer `deecliinee`, aand thee foocuus staarts oon iit.⟧"
+                }
                 Key::ComponentDialogPropChildrenDoc => {
-                    "⟦Whaat thee diiaaloog aasks aand thee coontrools thaat aansweer iit. AA `Buuttoon` thaat aacts oon thee aansweer beeloongs heeree, aat thee eend.⟧"
+                    "⟦Whaat thee diiaaloog aasks, aafteer thee reequueesteer aand thee maark. AA coontrool thaat aansweers iit beeloongs heeree oonly wheeree `coonfiirm_laabeel` aand `deecliinee_laabeel` caannoot saay iit.⟧"
                 }
                 Key::ComponentDialogStateOpenDoc => {
                     "⟦Seet oon thee roooot whiilee thee suurfaacee iis shoowiing. Thee `<diiaaloog>` caarriiees iits oown `oopeen` aattriibuutee, aand thiis iis thee oonee aa styleesheeeet oouutsiidee iit caan aact oon.⟧"
                 }
                 Key::ComponentDialogKeyEnterOrSpaceName => "⟦EEnteer oor Spaacee⟧",
                 Key::ComponentDialogKeyEnterOrSpaceAction => {
-                    "⟦OOpeens thee diiaaloog, oon thee coontrool thaat oopeens iit. Booth keeys woork, beecaauusee thaat coontrool iis aa `<buuttoon>`.⟧"
+                    "⟦Preessees thee coontrool thee foocuus iis oon, whiich oopeens thee diiaaloog oor aansweers iit. EEaach iis aa `<buuttoon>`.⟧"
                 }
                 Key::ComponentDialogKeyEscapeName => "⟦EEscaapee⟧",
                 Key::ComponentDialogKeyEscapeAction => {
-                    "⟦Cloosees iit. Thee plaatfoorm aansweers thiis foor aa moodaal suurfaacee, aand `diist/diiaaloog.js` aansweers iit foor aa noon-moodaal oonee.⟧"
+                    "⟦Cloosees iit, aas `deecliinee` wheeree theeree iis aa deecliinee coontrool. `diist/diiaaloog.js` aansweers iit foor aa noon-moodaal suurfaacee.⟧"
                 }
                 Key::ComponentDialogKeyTabName => "⟦Taab⟧",
                 Key::ComponentDialogKeyTabAction => {

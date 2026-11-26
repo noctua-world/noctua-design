@@ -1634,6 +1634,19 @@ a {
   flex: 1 1 auto;
 }
 
+/* A confirmation the page asks for: the control that asks, the dialog, and
+   the answer it reported, one under the other. */
+.nd-example-confirm {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--noctua-space-3);
+}
+
+.nd-example-answer {
+  margin: 0;
+}
+
 /* The same window with its parts side by side, for a drawer at a side. */
 .nd-example-window-row {
   flex-direction: row;

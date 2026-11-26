@@ -316,6 +316,7 @@ of these carries measured rules, not description:
 | a control that records a shortcut: the keys it takes, the order a chord is written in, a key's label | `crates/noctua-design-runtime/src/key-capture.js` |
 | a log: the end it follows, and what stops it | `crates/noctua-design-runtime/src/log.js` |
 | a message's countdown: the deadline it draws to, how it is frozen, and when the time left is said | `crates/noctua-design-runtime/src/message-bar.js` |
+| a dialog that asks for an answer: where the focus starts, what Escape answers, and `shown` | `crates/noctua-design-runtime/src/dialog.js` |
 | what both implementations must *do* | `spec/components/<name>.cases.toml`, and `crates/noctua-design-spec/src/conformance.rs` for the vocabulary a step may use |
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
@@ -1068,6 +1069,36 @@ the message's ink and last among its words, so a narrow window wraps it onto a r
 A `Button` in `children` would paint its own ink on a fill nobody measured it against. On this
 site the page writes each example's deadline ahead of now (`shell.js`), because a tree with no
 code in it can only carry an instant long past.
+
+### The confirmation
+
+**A confirmation is a `Dialog` that demands an answer, never a fifth surface.**
+`Dialog { alert }` is the WAI-ARIA alert dialog the interface asks a person to confirm an
+irreversible command on (`NOCTUA.md §11.1`): `role="alertdialog"` on the `<dialog>`, described
+by what is asked, who asks (`requester`) and whether the answer can be taken back
+(`irreversible_label`, a warning glyph and words, which also paint the confirm control in the
+danger tone), in that order. A press on its backdrop is not an answer.
+
+**The answers are the platform's, and the script reports them.** `confirm_label` and
+`decline_label` are `Button`s that submit a `<form method="dialog">`, so the platform closes the
+surface with the answer as its `returnValue`, and `dist/dialog.js` says `nd-dialog-close` with
+the dialog's name and the answer: `confirm`, `decline`, or nothing. Escape and the close control
+are `decline` where there is a decline control, because a reader who leaves a confirmation has
+declined it. **The focus starts on the decline control**, the least destructive answer, and the
+script writes it as `autofocus` so the platform's own focusing steps put it there: React's
+`autoFocus` is a `focus()` on mount rather than an attribute, so the two bodies could not write it
+alike.
+
+**A program opens it, through `shown`.** A confirmation opens because the program asked, so
+`trigger_label` is optional and `shown` is the caller's: the script opens or closes the surface
+whenever it is written and never writes it back. A dialog with neither is a surface a reader
+cannot reach.
+
+**The description is the scroller's first line, and below `sm` the surface scrolls as one.** The
+head and the answers stay put from the `sm` step up, and what is between them scrolls. Below it
+a head and two answers that wrap onto two rows can be taller than the interface's smallest
+window (320 by 240, `NOCTUA.md §12.19`), so the surface scrolls as one, which a surface with no
+radius may. The gap above the surface is the smaller of sixteen steps and a share of the window.
 
 ### Tones, bars, carousels, spectra
 

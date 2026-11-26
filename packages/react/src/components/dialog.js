@@ -11,18 +11,30 @@
 
 import { createElement as h } from "react";
 
+import { Button } from "./button.js";
+
 import { Icon } from "./icon.js";
 import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
-export function Dialog({ name, triggerLabel, heading, label, description, modal, size, dismissible, closeLabel, aiMark, aiLabel, aiNote, className, children, ...rest }) {
+import { warning } from "@noctua-world/design-tokens/icons/warning.js";
+export function Dialog({ name, triggerLabel, heading, label, description, modal, size, dismissible, closeLabel, shown, alert, requester, irreversibleLabel, confirmLabel, declineLabel, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const modal_ = modal ?? true;
   const size_ = size ?? "medium";
   const dismissible_ = dismissible ?? true;
+  const shown_ = shown ?? false;
   const root = ["nd-dialog", className].filter(Boolean).join(" ");
   const id = `nd-dialog-${name}`;
   const titleId = `${id}-title`;
   const noteId = `${id}-note`;
+  const askerId = `${id}-asker`;
+  const markId = `${id}-mark`;
   const head = Boolean(heading) || dismissible_;
+  // See the Dioxus half: what is asked, who asks, and whether it can be undone.
+  const described =
+    [description ? noteId : null, requester ? askerId : null, irreversibleLabel ? markId : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
+  const answers = Boolean(confirmLabel) || Boolean(declineLabel);
 
   return h(
     "div",
@@ -32,31 +44,35 @@ export function Dialog({ name, triggerLabel, heading, label, description, modal,
       "data-nd-modal": String(modal_),
       "data-nd-size": size_,
       "data-nd-dismissible": String(dismissible_),
+      "data-nd-shown": String(shown_),
       ...rest,
     },
-    h(
-      "button",
-      {
-        key: "o",
-        className: "nd-dialog-open",
-        id,
-        type: "button",
-        "aria-haspopup": "dialog",
-          // See the Dioxus half: revealed by the script.
-        hidden: true,
-      },
-      triggerLabel,
-    ),
+    triggerLabel
+      ? h(
+          "button",
+          {
+            key: "o",
+            className: "nd-dialog-open",
+            id,
+            type: "button",
+            "aria-haspopup": "dialog",
+            // See the Dioxus half: revealed by the script.
+            hidden: true,
+          },
+          triggerLabel,
+        )
+      : null,
     h(
       "dialog",
       {
         key: "s",
         className: "nd-dialog-surface",
         id: `${id}-surface`,
+        role: alert ? "alertdialog" : undefined,
         // See the Dioxus half: one name or the other, never both.
         "aria-label": heading ? undefined : label,
         "aria-labelledby": heading ? titleId : undefined,
-        "aria-describedby": description ? noteId : undefined,
+        "aria-describedby": described,
       },
       head
         ? h(
@@ -81,8 +97,56 @@ export function Dialog({ name, triggerLabel, heading, label, description, modal,
               : null,
           )
         : null,
-      description ? h("p", { key: "n", className: "nd-dialog-note", id: noteId }, description) : null,
-      h("div", { key: "b", className: "nd-dialog-body" }, children),
+      h(
+        "div",
+        { key: "b", className: "nd-dialog-body" },
+        // See the Dioxus half: the description is the scroller's first line.
+        description ? h("p", { key: "n", className: "nd-dialog-note", id: noteId }, description) : null,
+        requester
+          ? h("p", { key: "r", className: "nd-dialog-requester", id: askerId }, requester)
+          : null,
+        irreversibleLabel
+          ? h(
+              "p",
+              { key: "m", className: "nd-dialog-mark", id: markId },
+              h(
+                "span",
+                { key: "i", className: "nd-dialog-mark-icon", "aria-hidden": "true" },
+                h(Icon, { icon: warning, size: "small" }),
+              ),
+              h("span", { key: "w" }, irreversibleLabel),
+            )
+          : null,
+        children,
+      ),
+      // See the Dioxus half: the answers, outside the scroller, decline first.
+      answers
+        ? h(
+            "form",
+            { key: "a", className: "nd-dialog-actions", method: "dialog" },
+            declineLabel
+              ? h(Button, {
+                  key: "d",
+                  className: "nd-dialog-decline",
+                  label: declineLabel,
+                  variant: "outline",
+                  tone: "neutral",
+                  submit: "submit",
+                  value: "decline",
+                })
+              : null,
+            confirmLabel
+              ? h(Button, {
+                  key: "c",
+                  className: "nd-dialog-confirm",
+                  label: confirmLabel,
+                  tone: irreversibleLabel ? "danger" : "accent",
+                  submit: "submit",
+                  value: "confirm",
+                })
+              : null,
+          )
+        : null,
     ),
   );
 }

@@ -22,20 +22,45 @@
 // `::backdrop` all come with `showModal()`. `Search { presentation: dialog }`
 // established that in this repository and the reasoning stands: a hand-written
 // trap around a platform trap is a second implementation of the half that goes
-// wrong first, and it is the half a keyboard reader is standing in.
+// wrong first, and it is the half a keyboard reader is standing in. So does
+// closing on an answer: the answers are submit controls of a
+// `<form method="dialog">`, and the platform closes the surface with the
+// answer's `value` as its `returnValue`.
+//
+// WHAT IT ADDS:
+//
+// 1. The opening, from the trigger or from `shown`, which the caller writes
+//    when the interface is a view: a confirmation opens because the program
+//    asked, not because a reader pressed something.
+// 2. Escape for a NON-modal surface, which the platform answers only for a
+//    modal one.
+// 3. WHERE THE FOCUS STARTS, ON THE DECLINE CONTROL. It is written as
+//    `autofocus` before the surface opens, and the platform's own dialog
+//    focusing steps put the focus there: the least destructive answer is the
+//    one a stray Enter gives (WAI-ARIA's alert dialog pattern).
+// 4. `nd-dialog-close`, with the dialog's name and the answer: `confirm`,
+//    `decline`, or nothing for a dialog closed with neither. Escape and the
+//    close control are `decline` where there is a decline control, so a
+//    reader who leaves a confirmation has declined it.
 //
 // WHAT IT NEVER DOES:
 //
-// 1. It never traps focus. See above. The one thing it adds is Escape for a
-//    NON-modal surface, which the platform answers only for a modal one.
+// 1. It never traps focus. See above.
 // 2. It never removes the element. A caller who closed a dialog has closed it,
 //    and a surface taken out of the document is one nothing can reopen.
 // 3. It never moves focus on open. `showModal()` already puts it inside, and a
 //    second `focus()` on top of that lands wherever this file guessed rather
 //    than where the platform put it.
+// 4. It never writes `shown`. The attribute says what the caller said, and a
+//    caller told that the reader closed the surface writes `false` itself.
+// 5. It never closes an alert dialog on a press on its backdrop. A question
+//    that demands an answer is not answered by a press beside it.
 
 /** The attribute a stylesheet outside the surface can act on. */
 const OPEN = "data-nd-open";
+
+/** The caller's own wish, for a dialog with no trigger. */
+const SHOWN = "data-nd-shown";
 
 /** Every enhanced dialog's teardown, so a subtree can be released. */
 const dialogs = new WeakMap();
@@ -63,6 +88,10 @@ export function enhanceDialogs(root = document) {
 export function releaseDialogs(root = document) {
   for (const element of root.querySelectorAll("[data-nd-dialog]")) {
     if (element.dataset.ndEnhanced !== "dialog") continue;
+    // The listeners go first, so closing the surface here says nothing: a
+    // dialog taken down by its page was answered by nobody.
+    dialogs.get(element)?.abort();
+    dialogs.delete(element);
     const surface = element.querySelector(".nd-dialog-surface");
     if (surface?.open) surface.close();
     element.removeAttribute(OPEN);
@@ -70,8 +99,7 @@ export function releaseDialogs(root = document) {
     // control that opens nothing is the defect this file exists to avoid.
     const trigger = element.querySelector(".nd-dialog-open");
     if (trigger) trigger.hidden = true;
-    dialogs.get(element)?.abort();
-    dialogs.delete(element);
+    element.querySelector(".nd-dialog-decline")?.removeAttribute("autofocus");
     delete element.dataset.ndEnhanced;
   }
 }
@@ -79,37 +107,60 @@ export function releaseDialogs(root = document) {
 function enhance(root, signal) {
   const trigger = root.querySelector(".nd-dialog-open");
   const surface = root.querySelector(".nd-dialog-surface");
-  if (!trigger || !surface) return;
+  if (!surface) return;
 
   // `showModal()` or `show()`, and the two differ in the accessibility tree
   // rather than only on the screen: the first marks the document behind it
   // inert and the second leaves it reachable.
   const modal = root.getAttribute("data-nd-modal") !== "false";
+  // A question that demands an answer, read off the role the markup wrote.
+  const alerting = surface.getAttribute("role") === "alertdialog";
+  const decline = surface.querySelector(".nd-dialog-decline");
+  // What leaving without an answer means: declining, where there is a decline.
+  const leaving = decline ? "decline" : "";
+  /** Whether the surface is closing on the platform's Escape. */
+  let cancelled = false;
+
+  // THE FOCUS STARTS ON THE DECLINE CONTROL, and the platform puts it there:
+  // the dialog focusing steps take the first `autofocus` descendant.
+  decline?.setAttribute("autofocus", "");
 
   // REVEALED, NEVER BUILT. The markup ships hidden so a page with no script
   // carries no control that opens nothing, and the stylesheet holds its box
   // from the first paint so the page does not move when this line runs.
-  trigger.hidden = false;
+  if (trigger) trigger.hidden = false;
 
   function open() {
-    if (surface.open) return;
+    if (surface.open || !root.isConnected) return;
+    // An answer is per opening: the last one must not be reported again.
+    surface.returnValue = "";
+    cancelled = false;
     root.setAttribute(OPEN, "");
     if (modal) surface.showModal();
     else surface.show();
   }
 
-  function close() {
-    if (surface.open) surface.close();
+  function close(answer = leaving) {
+    if (surface.open) surface.close(answer);
   }
 
-  trigger.addEventListener("click", open, { signal });
-  root.querySelector("[data-nd-dialog-close]")?.addEventListener("click", close, { signal });
+  trigger?.addEventListener("click", open, { signal });
+  root.querySelector("[data-nd-dialog-close]")?.addEventListener("click", () => close(), { signal });
 
   // THE BACKDROP IS THE `<dialog>` ITSELF, which is where a press on it lands.
   // Only for a modal surface: a non-modal one has no backdrop at all, so the
-  // same test would close it on a press against its own padding.
+  // same test would close it on a press against its own padding. And never
+  // for an alert dialog, whose question is not answered by a press beside it.
   surface.addEventListener("click", (event) => {
-    if (modal && event.target === surface) close();
+    if (modal && !alerting && event.target === surface) close();
+  }, { signal });
+
+  // ESCAPE ON A MODAL SURFACE IS THE PLATFORM'S, and what it leaves in
+  // `returnValue` is the engine's to choose. So the key is remembered here and
+  // the answer decided on `close`: a reader who leaves a confirmation has
+  // declined it.
+  surface.addEventListener("cancel", () => {
+    cancelled = true;
   }, { signal });
 
   // ESCAPE, FOR THE HALF THE PLATFORM LEAVES OUT. `showModal()` answers it and
@@ -138,6 +189,26 @@ function enhance(root, signal) {
     // them back. `show()` records nothing, so focus falls to `<body>` and the
     // next Tab restarts at the top of the document — which is the one thing
     // this file exists to prevent everywhere else.
-    if (!modal && document.activeElement === document.body) trigger.focus();
+    if (!modal && document.activeElement === document.body) trigger?.focus();
+    const answer = cancelled ? leaving : surface.returnValue;
+    cancelled = false;
+    root.dispatchEvent(
+      new CustomEvent("nd-dialog-close", {
+        bubbles: true,
+        detail: { name: root.getAttribute("data-nd-dialog"), answer },
+      }),
+    );
   }, { signal });
+
+  // `shown`, WRITTEN BY THE CALLER, opens and closes it. A caller that closes
+  // its own dialog is told as a reader would be, with no answer.
+  const follow = () => {
+    if (root.getAttribute(SHOWN) === "true") open();
+    else if (surface.open) close("");
+  };
+  const observer = new MutationObserver(follow);
+  observer.observe(root, { attributes: true, attributeFilter: [SHOWN] });
+  signal.addEventListener("abort", () => observer.disconnect());
+  // Shown from the start: a confirmation already waiting when the window drew.
+  if (root.getAttribute(SHOWN) === "true") open();
 }

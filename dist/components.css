@@ -11346,8 +11346,9 @@ because a specimen of a `needs_name` component must not render a
 
 /* `data-nd-scripting` is stamped by the inline head script, so the slot exists
    from the first paint on a page that will have a trigger, and never on a page
-   that will not. */
-:root[data-nd-scripting] .nd-dialog {
+   that will not. Nor for a dialog with no trigger at all, which its caller
+   opens with `shown`: a slot there would hold an empty line in the page. */
+:root[data-nd-scripting] .nd-dialog:has(> .nd-dialog-open) {
   min-block-size: var(--nd-dialog-trigger-h);
 }
 
@@ -11400,17 +11401,30 @@ because a specimen of a `needs_name` component must not render a
   --nd-dialog-w: calc(var(--noctua-space-64) * 2 + var(--noctua-space-48));
 }
 
+/* THE GAP ABOVE IT SHRINKS WITH A SHORT WINDOW. A fixed sixteen steps took a
+   quarter of a 240-pixel window (the interface's smallest, `NOCTUA.md §12.19`)
+   before the surface began, so the gap is the smaller of that and a share of
+   the window, and the surface may be as tall as the window less a gap at each
+   end. Above 800 pixels both are what they were. */
 .nd-dialog-surface[open] {
+  --nd-dialog-gap: min(var(--noctua-space-16), 8vh);
+
   inline-size: min(var(--nd-dialog-w), calc(100vw - var(--noctua-space-6)));
-  max-block-size: min(var(--noctua-space-64) * 2, calc(100vh - var(--noctua-space-16)));
-  margin-block-start: var(--noctua-space-16);
+  max-block-size: min(var(--noctua-space-64) * 2, calc(100vh - 2 * var(--nd-dialog-gap)));
+  margin-block-start: var(--nd-dialog-gap);
   margin-inline: auto;
   padding: 0;
   display: flex;
   flex-direction: column;
-  /* The clipping context. Not `auto`: this element must never scroll — the
-     body inside it does. */
-  overflow: hidden;
+  /* IN A NARROW WINDOW THE SURFACE SCROLLS AS ONE, AND IT CARRIES NO RADIUS
+     THERE. Below the `sm` step a head, a description and two answers that wrap
+     onto two rows can be taller than a 240-pixel window by themselves (the
+     interface's smallest, `NOCTUA.md §12.19`), and a part that does not scroll
+     is a part cut off. Square is what lets it scroll: no scrollbar paints
+     through a corner that is not round. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-block: contain;
   color: var(--nc-color-fg);
   background: var(--nc-color-surface-raised);
   border: var(--noctua-border-hairline) solid var(--nc-color-border);
@@ -11419,8 +11433,13 @@ because a specimen of a `needs_name` component must not render a
   border-radius: 0;
 }
 
+/* From the `sm` step up the surface is round, so it clips and the body inside
+   it scrolls: the clipping context, which must never scroll itself. */
 @media (min-width: 30rem) {
-  .nd-dialog-surface[open] { border-radius: var(--noctua-radius-surface); }
+  .nd-dialog-surface[open] {
+    overflow: hidden;
+    border-radius: var(--noctua-radius-surface);
+  }
 }
 
 /* THE PAGE FADES TOWARD ITS OWN GROUND, and that is one rule for both
@@ -11519,7 +11538,6 @@ because a specimen of a `needs_name` component must not render a
    there. The gutter is the panel's own padding, plus the control, plus the gap
    the head keeps between a title and the `×` — so a sentence stops where it
    would have stopped beside a heading rather than running under the glyph. */
-.nd-dialog-head:not(:has(> .nd-dialog-title)) ~ .nd-dialog-note,
 .nd-dialog-head:not(:has(> .nd-dialog-title)) ~ .nd-dialog-body {
   padding-inline-end: calc(var(--noctua-space-4) + var(--noctua-space-8) + var(--noctua-space-3));
 }
@@ -11531,27 +11549,88 @@ because a specimen of a `needs_name` component must not render a
   line-height: var(--noctua-leading-tight);
 }
 
+/* THE DESCRIPTION, THE SCROLLER'S FIRST LINE. Under a title it keeps the two
+   steps between them it had when it stood outside the scroller, and the body's
+   gap is what stands under it. */
 .nd-dialog-note {
   margin: 0;
-  padding-inline: var(--noctua-space-4);
-  padding-block-start: var(--noctua-space-2);
   font-size: var(--noctua-size-small);
   color: var(--nc-color-fg-muted);
 }
 
-/* THE SCROLLER, AND IT CARRIES NO RADIUS. The surface above it clips and holds
-   the corners; this holds the overflow. `.nd-panel` is two elements for exactly
-   this reason, and a classic scrollbar painting straight through a rounded
-   corner is what both of them are avoiding. */
+.nd-dialog-head:has(> .nd-dialog-title) + .nd-dialog-body:has(> .nd-dialog-note:first-child) {
+  padding-block-start: var(--noctua-space-2);
+}
+
+/* THE SCROLLER FROM THE `sm` STEP UP, AND IT CARRIES NO RADIUS. The surface
+   above it clips and holds the corners; this holds the overflow. `.nd-panel`
+   is two elements for exactly this reason, and a classic scrollbar painting
+   straight through a rounded corner is what both of them are avoiding. Below
+   that step the surface scrolls and this is as tall as what is in it, so it
+   cannot shrink to nothing inside a surface that is also scrolling. */
 .nd-dialog-body {
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  flex: 0 0 auto;
   border-radius: 0;
   padding: var(--noctua-space-4);
   display: flex;
   flex-direction: column;
   gap: var(--noctua-space-4);
 }
+
+@media (min-width: 30rem) {
+  .nd-dialog-body {
+    flex: 0 1 auto;
+    overflow-y: auto;
+    overscroll-behavior-block: contain;
+  }
+}
+
+/* --- The confirmation ----------------------------------------------------
+ *
+ * `alert`, `requester`, `irreversible_label` and the two answers: the surface
+ * the interface asks a person to confirm on (`NOCTUA.md §11.1`). */
+
+/* WHO ASKS, quiet, opening the body. */
+.nd-dialog-requester {
+  margin: 0;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+/* THAT THE ANSWER CANNOT BE TAKEN BACK. The words in the page's ink, at a
+   weight that stands out, and a warning glyph in the danger tone beside them:
+   the words carry it and the glyph is the second signal (`NOCTUA.md §8.8.6`).
+   The glyph sits on the first line's centre, as `MessageBar`'s icon does. */
+.nd-dialog-mark {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--noctua-space-2);
+  margin: 0;
+  font-weight: var(--noctua-weight-semibold);
+}
+
+.nd-dialog-mark-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  block-size: 1lh;
+  color: var(--nc-color-danger);
+}
+
+/* THE ANSWERS, UNDER THE SCROLLER AND NEVER IN IT, so a short window scrolls
+   the question and keeps them in view. Decline first, at the start of the row:
+   content sits to the left (`NOCTUA.md §9.7`). The body's padding is the room
+   above them. */
+.nd-dialog-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: var(--noctua-space-3);
+  margin: 0;
+  padding: var(--noctua-space-4);
+  padding-block-start: 0;
+}
+
 /* --- crates/noctua-design-styles/src/popover.css ---
    COPIED, NOT GENERATED. Edit the file named above. */
 

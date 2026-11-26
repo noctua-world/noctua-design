@@ -16,7 +16,7 @@
 //! | `menu.js` | `enhanceMenus()` — the list of actions a button opens, and every key a menu owes |
 //! | `message-bar.js` | `enhanceMessageBars()` — revealing the control that takes a bar away, and taking it, and the seconds left until a bar's deadline |
 //! | `date-picker.js` | `enhanceDatePickers()` — the month a reader presses days in, the arrows that walk it, and the panel it folds into |
-//! | `dialog.js` | `enhanceDialogs()` — opening the platform's `<dialog>`, and the Escape a non-modal one is owed |
+//! | `dialog.js` | `enhanceDialogs()` — opening the platform's `<dialog>` from its trigger or from `shown`, the Escape a non-modal one is owed, the focus on a confirmation's decline, and the answer `nd-dialog-close` reports |
 //! | `popover.js` | `enhancePopovers()` — the named surface a control opens, and every way out of it |
 //! | `tooltip.js` | `enhanceTooltips()` — the hint a control gains on hover, on focus and under a held finger |
 //! | `toast.js` | `enhanceToasts()` — the timer that pauses, and the live region a message arrives in |

@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Dialog` example. 5 of them.
+/// Every `Dialog` example. 7 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // THE ORDINARY ONE, AND EVERY NAMING PROP AT ONCE: a visible heading names
     // the surface, a sentence describes it, and the way out has a name.
@@ -162,6 +162,101 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                             children: &[],
                         },
                     ],
+                },
+            ],
+        }],
+    ),
+    // AN ANSWER THAT CANNOT BE TAKEN BACK: the alert dialog, its mark and its
+    // two answers, the focus on the one that changes nothing.
+    (
+        r"Dialog { alert: true, irreversible_label, confirm_label, decline_label, … }",
+        &[Node::Component {
+            name: "Dialog",
+            props: &[
+                ("name", Value::Text("dialog-delete")),
+                ("alert", Value::Bool(true)),
+                ("trigger_label", Value::Message(Key::ExampleDialogOpen)),
+                ("heading", Value::Message(Key::ExampleDialogHeading)),
+                ("description", Value::Message(Key::ExampleDialogDescription)),
+                (
+                    "irreversible_label",
+                    Value::Message(Key::ExampleDialogIrreversible),
+                ),
+                ("confirm_label", Value::Message(Key::ExampleDialogConfirm)),
+                ("decline_label", Value::Message(Key::ExampleDialogCancel)),
+                ("close_label", Value::Message(Key::ExampleDialogClose)),
+            ],
+            children: &[Node::Component {
+                name: "Paragraph",
+                props: &[],
+                children: &[Node::Text(Value::Message(Key::ExampleDialogFiles))],
+            }],
+        }],
+    ),
+    // THE INTERFACE'S CONFIRMATION, opened because the program asked. `shown`
+    // is the caller's, and on this site the caller is the page: a control
+    // writes it, and the answer the dialog reports is written under it.
+    (
+        r"Dialog { alert: true, shown, requester, dismissible: false, … } — shown by the page",
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-confirm"))],
+            children: &[
+                Node::Component {
+                    name: "Button",
+                    props: &[
+                        ("label", Value::Message(Key::ExampleDialogAsk)),
+                        ("action", Value::Text("dialog-show")),
+                        ("variant", Value::Text("outline")),
+                        ("tone", Value::Text("neutral")),
+                        ("size", Value::Text("small")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Dialog",
+                    props: &[
+                        ("name", Value::Text("dialog-confirm")),
+                        ("alert", Value::Bool(true)),
+                        ("shown", Value::Bool(false)),
+                        ("dismissible", Value::Bool(false)),
+                        ("heading", Value::Message(Key::ExampleDialogRealmHeading)),
+                        (
+                            "description",
+                            Value::Message(Key::ExampleDialogRealmDescription),
+                        ),
+                        (
+                            "requester",
+                            Value::Message(Key::ExampleDialogRealmRequester),
+                        ),
+                        (
+                            "irreversible_label",
+                            Value::Message(Key::ExampleDialogIrreversible),
+                        ),
+                        (
+                            "confirm_label",
+                            Value::Message(Key::ExampleDialogRealmConfirm),
+                        ),
+                        ("decline_label", Value::Message(Key::ExampleDialogCancel)),
+                    ],
+                    children: &[Node::Component {
+                        name: "Paragraph",
+                        props: &[],
+                        children: &[Node::Component {
+                            name: "Code",
+                            props: &[("class", Value::Text("nd-identifier"))],
+                            children: &[Node::Text(Value::Data("realm.delete name=home"))],
+                        }],
+                    }],
+                },
+                Node::Element {
+                    tag: "p",
+                    attributes: &[
+                        ("class", Value::Text("nd-example-answer")),
+                        ("role", Value::Text("status")),
+                        ("data-nd-sentence", Value::Message(Key::ExampleDialogAnswer)),
+                    ],
+                    children: &[],
                 },
             ],
         }],

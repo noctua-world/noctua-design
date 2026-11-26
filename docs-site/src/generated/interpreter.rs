@@ -1264,9 +1264,7 @@ fn dialog(
     let name_ = scope
         .find(props, "name")
         .expect("Dialog.name is required and this tree does not set it");
-    let trigger_label_ = scope
-        .find(props, "trigger_label")
-        .expect("Dialog.trigger_label is required and this tree does not set it");
+    let trigger_label_ = scope.find(props, "trigger_label");
     let heading_ = scope.find(props, "heading");
     let label_ = scope.find(props, "label");
     let description_ = scope.find(props, "description");
@@ -1276,6 +1274,12 @@ fn dialog(
         .unwrap_or_default();
     let dismissible_ = scope.flag(props, "dismissible").unwrap_or(true);
     let close_label_ = scope.find(props, "close_label");
+    let shown_ = scope.flag(props, "shown").unwrap_or(false);
+    let alert_ = scope.flag(props, "alert").unwrap_or(false);
+    let requester_ = scope.find(props, "requester");
+    let irreversible_label_ = scope.find(props, "irreversible_label");
+    let confirm_label_ = scope.find(props, "confirm_label");
+    let decline_label_ = scope.find(props, "decline_label");
     let ai_mark_ = scope.find(props, "ai_mark");
     let ai_label_ = scope.find(props, "ai_label");
     let ai_note_ = scope.find(props, "ai_note");
@@ -1292,6 +1296,12 @@ fn dialog(
             size: size_,
             dismissible: dismissible_,
             close_label: close_label_,
+            shown: shown_,
+            alert: alert_,
+            requester: requester_,
+            irreversible_label: irreversible_label_,
+            confirm_label: confirm_label_,
+            decline_label: decline_label_,
             ai_mark: ai_mark_,
             ai_label: ai_label_,
             ai_note: ai_note_,

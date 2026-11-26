@@ -16,10 +16,10 @@ export interface DialogProps {
    */
   name: string;
   /**
-   * The words on the control that opens it. **Required**: a surface that opens from
-   * a script and has no control pointing at it is a surface a reader cannot reach.
+   * The words on the control that opens it. Absent for a dialog its caller opens
+   * with `shown`. A dialog with neither is a surface a reader cannot reach.
    */
-  triggerLabel: string;
+  triggerLabel?: string;
   /**
    * A title inside the surface. It names the dialog through `aria-labelledby`, so
    * prefer it to `label`. A name a reader can see is a name they can check against
@@ -60,6 +60,38 @@ export interface DialogProps {
    * because that control is a glyph and this is the only name it has.
    */
   closeLabel?: string;
+  /**
+   * Whether the surface is showing, for a caller that renders the interface as a
+   * view. `dist/dialog.js` opens or closes it whenever the caller writes it, and a
+   * reader who closes it is reported with `nd-dialog-close`.
+   */
+  shown?: boolean;
+  /**
+   * Whether the dialog demands an answer. The surface becomes a `role="alertdialog"`
+   * and a press on the backdrop does not close it. Give it a `description`.
+   */
+  alert?: boolean;
+  /**
+   * Who is asking, as a sentence such as *Asked by the assistant in session 4*. It
+   * opens the body and describes the surface after the description.
+   */
+  requester?: string;
+  /**
+   * A mark saying the answer cannot be taken back, such as *This cannot be undone*.
+   * It is drawn with a warning glyph, describes the surface, and paints the confirm
+   * control in the danger tone.
+   */
+  irreversibleLabel?: string;
+  /**
+   * The words on the control that says yes, such as *Delete the realm*. It closes
+   * the surface with the answer `confirm`.
+   */
+  confirmLabel?: string;
+  /**
+   * The words on the control that says no, such as *Keep it*. It closes the surface
+   * with the answer `decline`, and the focus starts on it.
+   */
+  declineLabel?: string;
   /** The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means. */
   aiMark?: string;
   /** What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads. */

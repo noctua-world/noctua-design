@@ -438,6 +438,76 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Dialog",
+        "case-dialog-3",
+        &[Node::Component {
+            name: "Dialog",
+            props: &[
+                ("alert", Value::Bool(true)),
+                ("confirm_label", Value::Data("Delete it")),
+                ("decline_label", Value::Data("Keep it")),
+                ("description", Value::Data("The draft and its files go.")),
+                ("heading", Value::Data("Delete this?")),
+                ("irreversible_label", Value::Data("This cannot be undone.")),
+                ("name", Value::Data("confirm")),
+                ("requester", Value::Data("Asked by the assistant.")),
+                ("trigger_label", Value::Data("Delete")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Dialog",
+        "case-dialog-4",
+        &[Node::Component {
+            name: "Dialog",
+            props: &[
+                ("alert", Value::Bool(true)),
+                ("confirm_label", Value::Data("Delete it")),
+                ("decline_label", Value::Data("Keep it")),
+                ("description", Value::Data("The draft and its files go.")),
+                ("heading", Value::Data("Delete this?")),
+                ("name", Value::Data("confirm")),
+                ("trigger_label", Value::Data("Delete")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Dialog",
+        "case-dialog-5",
+        &[Node::Component {
+            name: "Dialog",
+            props: &[
+                ("alert", Value::Bool(true)),
+                ("confirm_label", Value::Data("Delete it")),
+                ("decline_label", Value::Data("Keep it")),
+                ("description", Value::Data("The draft and its files go.")),
+                ("heading", Value::Data("Delete this?")),
+                ("name", Value::Data("confirm")),
+                ("trigger_label", Value::Data("Delete")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Dialog",
+        "case-dialog-6",
+        &[Node::Component {
+            name: "Dialog",
+            props: &[
+                ("alert", Value::Bool(true)),
+                ("confirm_label", Value::Data("Run it")),
+                ("decline_label", Value::Data("Do not run it")),
+                ("description", Value::Data("It deletes the realm.")),
+                ("heading", Value::Data("Run this command?")),
+                ("name", Value::Data("asked")),
+                ("shown", Value::Bool(true)),
+            ],
+            children: &[],
+        }],
+    ),
+    (
         "Disclosure",
         "case-disclosure-0",
         &[Node::Component {
