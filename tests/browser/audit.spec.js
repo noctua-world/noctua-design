@@ -21,8 +21,21 @@ import { PAGE, showParts, url, walker } from "./pages.js";
 // report names this file rather than `pages.js` (`walker` says why).
 const walk = walker((title, fn) => test(title, fn));
 
-/** The widths every page is measured at: the floor, a tablet, a laptop. */
-const WIDTHS = [320, 768, 1120];
+/**
+ * The windows every page is measured in: the floor, a tablet and a laptop, each
+ * 900 pixels tall, and the interface's smallest window.
+ *
+ * 320 BY 240 IS THE DESKTOP INTERFACE'S SMALLEST WINDOW (`NOCTUA.md §12.19`),
+ * and the components it is built from are documented here. Its height is what
+ * the three widths never asked about: anything sized by the window rather than
+ * by its content, a floating panel and the sticky header among them.
+ */
+const WINDOWS = [
+  [320, 900],
+  [768, 900],
+  [1120, 900],
+  [320, 240],
+];
 
 /**
  * Elements allowed to reach past the page's content box.
@@ -345,11 +358,17 @@ test.describe("nothing is drawn wrong", () => {
   walk(
     "nothing is clipped, overlapping or invisible",
     {
-      axes: { width: WIDTHS },
-      title: ({ width }) => `nothing is clipped, overlapping or invisible at ${width}px`,
+      axes: { window: WINDOWS },
+      // The three widths keep the titles they had. The smallest window is
+      // named by both of its sides.
+      title: ({ window: [width, height] }) =>
+        height === 900
+          ? `nothing is clipped, overlapping or invisible at ${width}px`
+          : `nothing is clipped, overlapping or invisible in a ${width} by ${height} window`,
     },
-    async ({ page, width, name, path }) => {
-      await page.setViewportSize({ width, height: 900 });
+    async ({ page, window: [width, height], name, path }) => {
+      await page.setViewportSize({ width, height });
+      const at = height === 900 ? `${width}px` : `${width} by ${height}`;
       const found = [];
       await page.goto(url(path));
       // ONE PAGE IS TWO PAGES, and this sweep used to see only the first.
@@ -372,7 +391,7 @@ test.describe("nothing is drawn wrong", () => {
         const bad = await page.evaluate(SWEEP, [SCROLLS.source, CONTROLS, BLOCKS.source]);
         for (const one of bad) found.push(`${name} [${state}] — ${one}`);
       }
-      expect(found, `drawn wrong at ${width}px`).toEqual([]);
+      expect(found, `drawn wrong at ${at}`).toEqual([]);
     },
   );
 });
@@ -544,3 +563,105 @@ test("opening a disclosure turns its chevron and never the caller's icon", async
   });
   expect(turned).toEqual([]);
 });
+
+// --- The interface's smallest window ------------------------------------------
+
+/**
+ * The components the desktop interface is built from, by the root each draws,
+ * and the stand-in for a window their examples stand in.
+ */
+const SHELL = [
+  ".nd-example-window",
+  ".nd-match-text",
+  ".nd-option-list",
+  ".nd-footer",
+  ".nd-prompt",
+  ".nd-toolbar[data-nd-density='rail']",
+  ".nd-tabs[data-nd-appearance='rail']",
+  ".nd-drawer",
+  ".nd-split",
+  ".nd-key-capture",
+  ".nd-log",
+  ".nd-message-bar",
+  ".nd-dialog",
+  ".nd-prose-block[data-nd-flow='true']",
+].join(", ");
+
+walk(
+  "nothing the interface's components hold is cut off in its smallest window",
+  {
+    axes: { locale: ["en", "qps"] },
+    title: ({ locale }) =>
+      `nothing the interface's components hold is cut off in a 320 by 240 window, in ${locale}`,
+    // A walk that found none of the components it is about passes on every
+    // page, so the site as a whole has to have shown it some.
+    tally: (roots) => {
+      const seen = roots.reduce((sum, one) => sum + one, 0);
+      expect(seen, "no component of the interface was found to look inside").toBeGreaterThan(40);
+    },
+  },
+  async ({ page, locale, name, path }) => {
+    // THE OTHER AXIS. The sweep above asks whether anything is cut off
+    // ACROSS, because across is where a page fails, and on most of this site a
+    // box that cuts its content off DOWN is a technique: a stacked table's
+    // heading row, a scene's ties, a caption. In the interface's components it
+    // is not. A footer line that grows takes its corners with it, a line wraps
+    // rather than cuts, and a window that is too short scrolls what it holds.
+    // So this asks it of them alone, in the window the interface is promised to
+    // work in (`NOCTUA.md §12.19`), and in the locale that runs longest.
+    await page.setViewportSize({ width: 320, height: 240 });
+    await page.goto(url(path, locale));
+    const { cut, roots } = await page.evaluate((shell) => {
+      const out = [];
+      let roots = 0;
+      const where = (el) =>
+        `${el.tagName.toLowerCase()}.${String(el.className).split(" ").filter(Boolean).slice(0, 2).join(".")}`;
+      const scrolls = (el) => /^(auto|scroll)$/.test(getComputedStyle(el).overflowY);
+      const boxes = new Set();
+      for (const root of document.querySelectorAll(shell)) {
+        if (root.closest(".nd-variant-stage")) continue;
+        roots += 1;
+        boxes.add(root);
+        for (const inside of root.querySelectorAll("*")) boxes.add(inside);
+      }
+      for (const box of boxes) {
+        const style = getComputedStyle(box);
+        if (!/^(hidden|clip)$/.test(style.overflowY)) continue;
+        if (style.webkitLineClamp !== "none" || style.clipPath !== "none") continue;
+        if (!box.checkVisibility({ visibilityProperty: true })) continue;
+        if (box.closest(".nd-visually-hidden, [aria-hidden='true']")) continue;
+        // A FOLDED FOOTER IS A STRIP ON PURPOSE, and a pointer or the focus
+        // opens it (`footer.spec.js` holds the fold).
+        if (box.matches(".nd-footer[data-nd-visibility='auto']")) continue;
+        const edge = box.getBoundingClientRect();
+        if (edge.width < 1 || edge.height < 1) continue;
+        for (const el of box.querySelectorAll("*")) {
+          if (!el.checkVisibility({ visibilityProperty: true, opacityProperty: true })) continue;
+          if (/^(absolute|fixed)$/.test(getComputedStyle(el).position)) continue;
+          // What a scroller inside the box holds is that scroller's to show.
+          let held = false;
+          for (let up = el.parentElement; up && up !== box; up = up.parentElement) {
+            if (scrolls(up)) {
+              held = true;
+              break;
+            }
+          }
+          if (held) continue;
+          const r = el.getBoundingClientRect();
+          if (r.width < 1 || r.height < 1) continue;
+          const by = Math.max(r.bottom - edge.bottom, edge.top - r.top);
+          if (by > 1) {
+            out.push(`${where(box)} cuts ${where(el)} off by ${Math.round(by)}px`);
+            break;
+          }
+        }
+      }
+      return { cut: out, roots };
+    }, SHELL);
+    expect(
+      cut.map((one) => `${name}: ${one}`),
+      `cut off in a 320 by 240 window in ${locale}`,
+    ).toEqual([]);
+    return roots;
+  },
+);

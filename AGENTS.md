@@ -1348,6 +1348,13 @@ icon, which holds at least the mode (light, dark or system), the accent, the sat
 interface-font toggle (`NOCTUA.md §7.7`). They are icons rather than words, and every one has an
 accessible name.
 
+**Every page is also audited in a 320 by 240 window**, the desktop interface's smallest
+(`NOCTUA.md §12.19`). There the interface's own components, and the window stand-ins their
+examples sit in, are asked one more thing: whether a box that does not scroll cuts what they hold
+off downward. Elsewhere on the site that is a technique (a stacked table's heading row, a scene's
+ties), so the question is theirs alone. `tests/browser/touch.spec.js` holds every control they
+draw, a focusable separator and region included, to `--noctua-target-min`.
+
 **No page may scroll sideways at 320px, and the components bend to that budget.** `Segmented`
 makes an icon-only item square, which is right everywhere except the header, where square items
 push the row past 320px; so the header's bar states the exception — narrower, never shorter,
