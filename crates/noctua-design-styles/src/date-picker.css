@@ -424,10 +424,16 @@
 
 /* A LABEL INSIDE THE BOX, BEFORE THE TYPING. It keeps its own column so the
  * two dates line up under each other, and the column is a spacing step rather
- * than a measurement of the longest word in one language. */
+ * than a measurement of the longest word in one language.
+ *
+ * AND A LABEL WIDER THAN ITS COLUMN WRAPS DOWN TO IT. It used to keep its
+ * whole width, which in a box with no room for it pushed the control that
+ * opens the month past the box's end: six pixels at 320px in the
+ * pseudo-locale, in a face as wide as DejaVu Sans. */
 .nd-date-picker[data-nd-labels="inside"] .nd-date-picker-box .nd-date-picker-field-label {
-  flex: none;
+  flex: 0 1 auto;
   min-inline-size: var(--noctua-space-24);
+  overflow-wrap: anywhere;
   padding-inline-start: var(--noctua-space-3);
   font-size: var(--noctua-size-caption);
   color: var(--nc-color-fg-muted);

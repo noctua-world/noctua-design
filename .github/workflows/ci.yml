@@ -115,7 +115,9 @@ jobs:
       # them. A preload that loses the race on a loaded runner leaves the page
       # in whatever the machine calls "Noto Sans" for its lifetime, and a bare
       # runner has none and falls through the stack to DejaVu Sans, which is
-      # wider: four geometry specs failed on it and on nothing else.
+      # wider: four geometry specs failed on it and on nothing else. And
+      # DejaVu Sans has to be there: `responsive.spec.js` measures every page
+      # in it, and fails rather than measures without it.
       #
       # ONLY THE LATIN FACES, taken out of Ubuntu's package rather than the
       # whole package installed. `scripts.spec.js` proves the site's own Thai,
@@ -135,6 +137,10 @@ jobs:
              ~/.local/share/fonts/
           fc-cache -f
           fc-match "Noto Sans"
+          if ! fc-list "DejaVu Sans" family | grep -q .; then
+            echo "::error::DejaVu Sans is not installed, so responsive.spec.js cannot measure in a wide face"
+            exit 1
+          fi
           if fc-list :lang=th family | grep -q .; then
             echo "::error::a Thai face is installed, so scripts.spec.js cannot see tofu"
             exit 1

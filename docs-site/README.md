@@ -104,7 +104,10 @@ context, which every test is, paints in them; `scripts.spec.js` asks Chrome whic
 face drew a first visit. A preload that loses the race on a loaded machine leaves
 the page in the machine's face for its lifetime, so install Noto Sans as well, or
 a stray geometry failure measures whatever the stack falls through to: on Ubuntu,
-DejaVu Sans, which is wider. The scripts are the other way round:
+DejaVu Sans, which is wider. One walk measures in DejaVu Sans on purpose:
+`responsive.spec.js` asks every page at 320px in it, because a reader whose preload
+lost is drawn in such a face, and it fails rather than measures where the face is
+not installed. The scripts are the other way round:
 `scripts.spec.js` measures each one against the browser's fallback, which is tofu
 only on a machine with no face for that script, so a script face installed
 system-wide can fail it for a font the site never served.

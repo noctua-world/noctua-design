@@ -1415,7 +1415,11 @@ draw, a focusable separator and region included, to `--noctua-target-min`.
 **No page may scroll sideways at 320px, and the components bend to that budget.** `Segmented`
 makes an icon-only item square, which is right everywhere except the header, where square items
 push the row past 320px; so the header's bar states the exception — narrower, never shorter,
-because the height keeps every control in the row on one centre line.
+because the height keeps every control in the row on one centre line. **And not in a wider face
+either**: a reader whose preload lost the race to the first paint is drawn in what the machine
+falls back to, so `responsive.spec.js` walks every page at 320px in DejaVu Sans, and asks as
+well that no row in the main column push what it holds past its own end, which a frame cuts off
+rather than scrolls.
 
 **One theme menu, and nothing duplicates it.** The example frame opens the *same component* to
 theme its own stage, on the same floating surface. `position: fixed` is what escapes the frame's
@@ -1693,6 +1697,10 @@ anything.
   runs with a script. Ask again with the script blocked, as `material.spec.js` does.
 - **`ch` is not a character.** It is the advance of `0`, so a fourteen-character word can be wider
   than `14ch`.
+- **A flex item is never narrower than its longest word.** Its automatic minimum is its
+  min-content width, so a row of words beside a marker pushes the marker past the row's end
+  instead of wrapping, the day the words are drawn in a wider face or a longer language. Let the
+  words break (`overflow-wrap: anywhere` lowers that minimum as well) or let the row wrap.
 - **A control whose height is not declared is its font size, line height and padding added up**,
   so two controls side by side agree only by accident, and a screenshot of either one cannot show
   it. Declare the height on the row, and measure the row rather than the control.
