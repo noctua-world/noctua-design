@@ -130,11 +130,11 @@ export default () => <Button label="Save" />;
 ```toml
 # Cargo.toml
 [dependencies]
-noctua-design = "0.2.7"
+noctua-design = "0.3.0"
 dioxus = { version = "0.7", default-features = false, features = ["macro", "html", "signals", "hooks"] }
 
 [build-dependencies]
-noctua-design-dist = "0.2.7"
+noctua-design-dist = "0.3.0"
 ```
 
 ```rust
@@ -206,7 +206,7 @@ package produces:
 Cargo can take the crate straight from a tag:
 
 ```toml
-noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.2.7" }
+noctua-design = { git = "https://github.com/noctua-world/noctua-design", tag = "v0.3.0" }
 ```
 
 A project inside the workspace, as `noctua-central` is, depends on
