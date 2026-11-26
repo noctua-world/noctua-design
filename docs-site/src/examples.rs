@@ -2699,6 +2699,14 @@ const PROSE: &[Example] = &[
         Key::ExampleProseNone
     ),
     example!(r"A whole reading column"),
+    // THE CLOSED MARKDOWN SUBSET, EVERY CONSTRUCT OF IT, as the interface draws
+    // a help page: headings, paragraphs, emphasis, strong, inline code, a link,
+    // a nested list, a quotation, a block of code, a table and a break. It is
+    // the fixture a change to any of them is looked at against.
+    example!(
+        r"Prose { flow: true, … } — every construct of the Markdown subset",
+        Key::ExampleProseNoteFlow
+    ),
 ];
 const SEARCH: &[Example] = &[
     example!(

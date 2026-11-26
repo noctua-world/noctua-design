@@ -10477,6 +10477,18 @@ pub(crate) static COMPONENTS: [DocComponent; 105] = [
                 doc: Key::ComponentProsePropMeasureDoc,
             },
             DocProp {
+                name: "flow",
+                kind: "bool",
+                values: &[],
+                elements: &[],
+                default: Some("false"),
+                attribute: Some("data-nd-flow"),
+                required: false,
+                variants: true,
+                specimen: None,
+                doc: Key::ComponentProsePropFlowDoc,
+            },
+            DocProp {
                 name: "children",
                 kind: "children",
                 values: &[],

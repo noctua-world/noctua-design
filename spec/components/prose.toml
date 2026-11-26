@@ -16,6 +16,19 @@ default = "default"
 attribute = "data-nd-measure"
 doc = "Which line-length cap to apply. `default` is the reading measure and `lead` is the narrower one for an opening paragraph. `none` is for prose inside a column that already constrains it."
 
+# A DOCUMENT'S RHYTHM, FOR PROSE A PROGRAM WROTE. Without it a column puts one
+# gap between every two blocks and leaves each heading its own room above. A
+# help page drawn from Markdown (`NOCTUA.md §12.16`) is a run of blocks nobody
+# spaced by hand, so the column spaces them: a heading starts a section and
+# sits nearer what it heads than what it ends, and the first block starts at
+# the top. Margins rather than the gap, because a gap cannot tell a heading's
+# two sides apart.
+[prop.flow]
+type = "bool"
+default = "false"
+attribute = "data-nd-flow"
+doc = """Spaces the blocks inside as a document. A heading gets more room above it than below, the first block none, and a break keeps its own. Use it for prose a program wrote, such as a page drawn from Markdown."""
+
 [prop.children]
 type = "children"
 doc = "The content."

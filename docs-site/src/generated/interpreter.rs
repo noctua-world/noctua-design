@@ -3146,11 +3146,13 @@ fn prose(
     let measure_ = scope
         .pick(props, "measure", &ProseMeasure::ALL, ProseMeasure::as_str)
         .unwrap_or_default();
+    let flow_ = scope.flag(props, "flow").unwrap_or(false);
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
         Prose {
             measure: measure_,
+            flow: flow_,
             class: class_,
             {render(children, scope)}
         }

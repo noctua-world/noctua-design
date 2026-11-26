@@ -1694,6 +1694,52 @@ pub enum Key {
     ExampleMatchTextPlain,
     /// `example.paragraph.lead`
     ExampleParagraphLead,
+    /// `example.prose.flow-heading`
+    ExampleProseFlowHeading,
+    /// `example.prose.flow-press`
+    ExampleProseFlowPress,
+    /// `example.prose.flow-quick`
+    ExampleProseFlowQuick,
+    /// `example.prose.flow-quick-em`
+    ExampleProseFlowQuickEm,
+    /// `example.prose.flow-escape`
+    ExampleProseFlowEscape,
+    /// `example.prose.flow-escape-strong`
+    ExampleProseFlowEscapeStrong,
+    /// `example.prose.flow-link-lead`
+    ExampleProseFlowLinkLead,
+    /// `example.prose.flow-link`
+    ExampleProseFlowLink,
+    /// `example.prose.flow-menu`
+    ExampleProseFlowMenu,
+    /// `example.prose.flow-help`
+    ExampleProseFlowHelp,
+    /// `example.prose.flow-dev`
+    ExampleProseFlowDev,
+    /// `example.prose.flow-logs`
+    ExampleProseFlowLogs,
+    /// `example.prose.flow-registries`
+    ExampleProseFlowRegistries,
+    /// `example.prose.flow-close`
+    ExampleProseFlowClose,
+    /// `example.prose.flow-quote`
+    ExampleProseFlowQuote,
+    /// `example.prose.flow-caption`
+    ExampleProseFlowCaption,
+    /// `example.prose.flow-col-key`
+    ExampleProseFlowColKey,
+    /// `example.prose.flow-col-opens`
+    ExampleProseFlowColOpens,
+    /// `example.prose.flow-help-page`
+    ExampleProseFlowHelpPage,
+    /// `example.prose.flow-dev-pages`
+    ExampleProseFlowDevPages,
+    /// `example.prose.flow-close-page`
+    ExampleProseFlowClosePage,
+    /// `example.prose.flow-end`
+    ExampleProseFlowEnd,
+    /// `example.prose.note-flow`
+    ExampleProseNoteFlow,
     /// `example.prose.measure`
     ExampleProseMeasure,
     /// `example.prose.none`
@@ -5518,6 +5564,8 @@ pub enum Key {
     ComponentPromptKeyDownArrowUpArrowAction,
     /// `component.prose.prop.measure.doc`
     ComponentProsePropMeasureDoc,
+    /// `component.prose.prop.flow.doc`
+    ComponentProsePropFlowDoc,
     /// `component.prose.prop.children.doc`
     ComponentProsePropChildrenDoc,
     /// `component.radio.guidance`
@@ -6872,7 +6920,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3374] = [
+    pub const ALL: [Self; 3398] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -7660,6 +7708,29 @@ impl Key {
         Self::ExampleMatchTextElsewhere,
         Self::ExampleMatchTextPlain,
         Self::ExampleParagraphLead,
+        Self::ExampleProseFlowHeading,
+        Self::ExampleProseFlowPress,
+        Self::ExampleProseFlowQuick,
+        Self::ExampleProseFlowQuickEm,
+        Self::ExampleProseFlowEscape,
+        Self::ExampleProseFlowEscapeStrong,
+        Self::ExampleProseFlowLinkLead,
+        Self::ExampleProseFlowLink,
+        Self::ExampleProseFlowMenu,
+        Self::ExampleProseFlowHelp,
+        Self::ExampleProseFlowDev,
+        Self::ExampleProseFlowLogs,
+        Self::ExampleProseFlowRegistries,
+        Self::ExampleProseFlowClose,
+        Self::ExampleProseFlowQuote,
+        Self::ExampleProseFlowCaption,
+        Self::ExampleProseFlowColKey,
+        Self::ExampleProseFlowColOpens,
+        Self::ExampleProseFlowHelpPage,
+        Self::ExampleProseFlowDevPages,
+        Self::ExampleProseFlowClosePage,
+        Self::ExampleProseFlowEnd,
+        Self::ExampleProseNoteFlow,
         Self::ExampleProseMeasure,
         Self::ExampleProseNone,
         Self::ExampleQuote,
@@ -9572,6 +9643,7 @@ impl Key {
         Self::ComponentPromptKeyDownArrowUpArrowName,
         Self::ComponentPromptKeyDownArrowUpArrowAction,
         Self::ComponentProsePropMeasureDoc,
+        Self::ComponentProsePropFlowDoc,
         Self::ComponentProsePropChildrenDoc,
         Self::ComponentRadioGuidance,
         Self::ComponentRadioA11yNotes,
@@ -11040,6 +11112,29 @@ impl Key {
             Self::ExampleMatchTextElsewhere => "example.match-text.elsewhere",
             Self::ExampleMatchTextPlain => "example.match-text.plain",
             Self::ExampleParagraphLead => "example.paragraph.lead",
+            Self::ExampleProseFlowHeading => "example.prose.flow-heading",
+            Self::ExampleProseFlowPress => "example.prose.flow-press",
+            Self::ExampleProseFlowQuick => "example.prose.flow-quick",
+            Self::ExampleProseFlowQuickEm => "example.prose.flow-quick-em",
+            Self::ExampleProseFlowEscape => "example.prose.flow-escape",
+            Self::ExampleProseFlowEscapeStrong => "example.prose.flow-escape-strong",
+            Self::ExampleProseFlowLinkLead => "example.prose.flow-link-lead",
+            Self::ExampleProseFlowLink => "example.prose.flow-link",
+            Self::ExampleProseFlowMenu => "example.prose.flow-menu",
+            Self::ExampleProseFlowHelp => "example.prose.flow-help",
+            Self::ExampleProseFlowDev => "example.prose.flow-dev",
+            Self::ExampleProseFlowLogs => "example.prose.flow-logs",
+            Self::ExampleProseFlowRegistries => "example.prose.flow-registries",
+            Self::ExampleProseFlowClose => "example.prose.flow-close",
+            Self::ExampleProseFlowQuote => "example.prose.flow-quote",
+            Self::ExampleProseFlowCaption => "example.prose.flow-caption",
+            Self::ExampleProseFlowColKey => "example.prose.flow-col-key",
+            Self::ExampleProseFlowColOpens => "example.prose.flow-col-opens",
+            Self::ExampleProseFlowHelpPage => "example.prose.flow-help-page",
+            Self::ExampleProseFlowDevPages => "example.prose.flow-dev-pages",
+            Self::ExampleProseFlowClosePage => "example.prose.flow-close-page",
+            Self::ExampleProseFlowEnd => "example.prose.flow-end",
+            Self::ExampleProseNoteFlow => "example.prose.note-flow",
             Self::ExampleProseMeasure => "example.prose.measure",
             Self::ExampleProseNone => "example.prose.none",
             Self::ExampleQuote => "example.quote",
@@ -13372,6 +13467,7 @@ impl Key {
                 "component.prompt.key.down-arrow-up-arrow.action"
             }
             Self::ComponentProsePropMeasureDoc => "component.prose.prop.measure.doc",
+            Self::ComponentProsePropFlowDoc => "component.prose.prop.flow.doc",
             Self::ComponentProsePropChildrenDoc => "component.prose.prop.children.doc",
             Self::ComponentRadioGuidance => "component.radio.guidance",
             Self::ComponentRadioA11yNotes => "component.radio.a11y-notes",
@@ -15737,6 +15833,35 @@ impl Locale {
                 Key::ExampleMatchTextPlain => "With no `hits` it is the name alone.",
                 Key::ExampleParagraphLead => {
                     "Use the lead size for the opening sentence under a title."
+                }
+                Key::ExampleProseFlowHeading => "Leader keys",
+                Key::ExampleProseFlowPress => "Press the Leader, then a letter, such as",
+                Key::ExampleProseFlowQuick => "A letter pressed quickly acts",
+                Key::ExampleProseFlowQuickEm => "before the menu is drawn",
+                Key::ExampleProseFlowEscape => "One key is never a binding:",
+                Key::ExampleProseFlowEscapeStrong => "Escape always closes",
+                Key::ExampleProseFlowLinkLead => "A binding is changed with",
+                Key::ExampleProseFlowLink => "the control that records a shortcut",
+                Key::ExampleProseFlowMenu => "In the menu",
+                Key::ExampleProseFlowHelp => "opens help.",
+                Key::ExampleProseFlowDev => "opens the dev pages:",
+                Key::ExampleProseFlowLogs => "the live logs",
+                Key::ExampleProseFlowRegistries => "the registries",
+                Key::ExampleProseFlowClose => "closes the page in front.",
+                Key::ExampleProseFlowQuote => {
+                    "A key a binding takes is taken from the whole window, not from one page."
+                }
+                Key::ExampleProseFlowCaption => "What each letter opens",
+                Key::ExampleProseFlowColKey => "Key",
+                Key::ExampleProseFlowColOpens => "Opens",
+                Key::ExampleProseFlowHelpPage => "Help",
+                Key::ExampleProseFlowDevPages => "The dev pages",
+                Key::ExampleProseFlowClosePage => "Nothing. It closes the page.",
+                Key::ExampleProseFlowEnd => {
+                    "Everything above is a construct of the Markdown the interface reads, and nothing outside it is."
+                }
+                Key::ExampleProseNoteFlow => {
+                    "Every construct of the closed Markdown subset, as components. A heading has more room above it than below, and the first block none."
                 }
                 Key::ExampleProseMeasure => {
                     "`Prose` caps the line length of everything inside it, so the paragraphs stay at a readable measure."
@@ -20098,6 +20223,9 @@ impl Locale {
                 Key::ComponentProsePropMeasureDoc => {
                     "Which line-length cap to apply. `default` is the reading measure and `lead` is the narrower one for an opening paragraph. `none` is for prose inside a column that already constrains it."
                 }
+                Key::ComponentProsePropFlowDoc => {
+                    "Spaces the blocks inside as a document. A heading gets more room above it than below, the first block none, and a break keeps its own. Use it for prose a program wrote, such as a page drawn from Markdown."
+                }
                 Key::ComponentProsePropChildrenDoc => "The content.",
                 Key::ComponentRadioGuidance => {
                     "Use a radio when users pick exactly one answer and every answer should stay on the page. For one option out of many, use `Select`. For switching a view, use `Segmented`."
@@ -23411,6 +23539,35 @@ impl Locale {
                 Key::ExampleMatchTextPlain => "Sem `hits` é só o nome.",
                 Key::ExampleParagraphLead => {
                     "Use o tamanho de abertura para a primeira frase abaixo de um título."
+                }
+                Key::ExampleProseFlowHeading => "Teclas do Leader",
+                Key::ExampleProseFlowPress => "Aperte o Leader e depois uma letra, como",
+                Key::ExampleProseFlowQuick => "Uma letra apertada rápido age",
+                Key::ExampleProseFlowQuickEm => "antes de o menu aparecer",
+                Key::ExampleProseFlowEscape => "Uma tecla nunca é atalho:",
+                Key::ExampleProseFlowEscapeStrong => "Escape sempre fecha",
+                Key::ExampleProseFlowLinkLead => "Um atalho é mudado com",
+                Key::ExampleProseFlowLink => "o controle que grava um atalho",
+                Key::ExampleProseFlowMenu => "No menu",
+                Key::ExampleProseFlowHelp => "abre a ajuda.",
+                Key::ExampleProseFlowDev => "abre as páginas de desenvolvimento:",
+                Key::ExampleProseFlowLogs => "os logs ao vivo",
+                Key::ExampleProseFlowRegistries => "os registros",
+                Key::ExampleProseFlowClose => "fecha a página da frente.",
+                Key::ExampleProseFlowQuote => {
+                    "Uma tecla que um atalho usa é tirada da janela inteira, e não de uma página."
+                }
+                Key::ExampleProseFlowCaption => "O que cada letra abre",
+                Key::ExampleProseFlowColKey => "Tecla",
+                Key::ExampleProseFlowColOpens => "Abre",
+                Key::ExampleProseFlowHelpPage => "A ajuda",
+                Key::ExampleProseFlowDevPages => "As páginas de desenvolvimento",
+                Key::ExampleProseFlowClosePage => "Nada. Ela fecha a página.",
+                Key::ExampleProseFlowEnd => {
+                    "Tudo acima é uma construção do Markdown que a interface lê, e nada fora dele é."
+                }
+                Key::ExampleProseNoteFlow => {
+                    "Toda construção do subconjunto fechado de Markdown, em componentes. Um título tem mais espaço acima que abaixo, e o primeiro bloco nenhum."
                 }
                 Key::ExampleProseMeasure => {
                     "`Prose` limita o comprimento da linha de tudo que está dentro, então os parágrafos ficam numa medida legível."
@@ -27806,6 +27963,9 @@ impl Locale {
                 Key::ComponentProsePropMeasureDoc => {
                     "Qual limite de comprimento de linha aplicar. `default` é a medida de leitura e `lead` é a mais estreita, para um parágrafo de abertura. `none` serve a uma prosa dentro de uma coluna que já a limita."
                 }
+                Key::ComponentProsePropFlowDoc => {
+                    "Espaça os blocos de dentro como um documento. Um título ganha mais espaço acima do que abaixo, o primeiro bloco nenhum, e uma quebra mantém o próprio. Use para prosa escrita por um programa, como uma página desenhada a partir de Markdown."
+                }
                 Key::ComponentProsePropChildrenDoc => "O conteúdo.",
                 Key::ComponentRadioGuidance => {
                     "Use um radio quando a pessoa escolhe exatamente uma resposta e todas devem ficar visíveis na página. Para uma opção entre muitas, use `Select`. Para trocar de visualização, use `Segmented`."
@@ -31165,6 +31325,37 @@ impl Locale {
                 Key::ExampleMatchTextPlain => "⟦Wiith noo `hiits` iit iis thee naamee aaloonee.⟧",
                 Key::ExampleParagraphLead => {
                     "⟦UUsee thee leeaad siizee foor thee oopeeniing seenteencee uundeer aa tiitlee.⟧"
+                }
+                Key::ExampleProseFlowHeading => "⟦Leeaadeer keeys⟧",
+                Key::ExampleProseFlowPress => {
+                    "⟦Preess thee Leeaadeer, theen aa leetteer, suuch aas⟧"
+                }
+                Key::ExampleProseFlowQuick => "⟦AA leetteer preesseed quuiickly aacts⟧",
+                Key::ExampleProseFlowQuickEm => "⟦beefooree thee meenuu iis draawn⟧",
+                Key::ExampleProseFlowEscape => "⟦OOnee keey iis neeveer aa biindiing:⟧",
+                Key::ExampleProseFlowEscapeStrong => "⟦EEscaapee aalwaays cloosees⟧",
+                Key::ExampleProseFlowLinkLead => "⟦AA biindiing iis chaangeed wiith⟧",
+                Key::ExampleProseFlowLink => "⟦thee coontrool thaat reecoords aa shoortcuut⟧",
+                Key::ExampleProseFlowMenu => "⟦IIn thee meenuu⟧",
+                Key::ExampleProseFlowHelp => "⟦oopeens heelp.⟧",
+                Key::ExampleProseFlowDev => "⟦oopeens thee deev paagees:⟧",
+                Key::ExampleProseFlowLogs => "⟦thee liivee loogs⟧",
+                Key::ExampleProseFlowRegistries => "⟦thee reegiistriiees⟧",
+                Key::ExampleProseFlowClose => "⟦cloosees thee paagee iin froont.⟧",
+                Key::ExampleProseFlowQuote => {
+                    "⟦AA keey aa biindiing taakees iis taakeen froom thee whoolee wiindoow, noot froom oonee paagee.⟧"
+                }
+                Key::ExampleProseFlowCaption => "⟦Whaat eeaach leetteer oopeens⟧",
+                Key::ExampleProseFlowColKey => "⟦Keey⟧",
+                Key::ExampleProseFlowColOpens => "⟦OOpeens⟧",
+                Key::ExampleProseFlowHelpPage => "⟦Heelp⟧",
+                Key::ExampleProseFlowDevPages => "⟦Thee deev paagees⟧",
+                Key::ExampleProseFlowClosePage => "⟦Noothiing. IIt cloosees thee paagee.⟧",
+                Key::ExampleProseFlowEnd => {
+                    "⟦EEveerythiing aaboovee iis aa coonstruuct oof thee Maarkdoown thee iinteerfaacee reeaads, aand noothiing oouutsiidee iit iis.⟧"
+                }
+                Key::ExampleProseNoteFlow => {
+                    "⟦EEveery coonstruuct oof thee clooseed Maarkdoown suubseet, aas coompooneents. AA heeaadiing haas mooree roooom aaboovee iit thaan beeloow, aand thee fiirst bloock noonee.⟧"
                 }
                 Key::ExampleProseMeasure => {
                     "⟦`Proosee` caaps thee liinee leength oof eeveerythiing iinsiidee iit, soo thee paaraagraaphs staay aat aa reeaadaablee meeaasuuree.⟧"
@@ -35665,6 +35856,9 @@ impl Locale {
                 }
                 Key::ComponentProsePropMeasureDoc => {
                     "⟦Whiich liinee-leength caap too aapply. `deefaauult` iis thee reeaadiing meeaasuuree aand `leeaad` iis thee naarrooweer oonee foor aan oopeeniing paaraagraaph. `noonee` iis foor proosee iinsiidee aa cooluumn thaat aalreeaady coonstraaiins iit.⟧"
+                }
+                Key::ComponentProsePropFlowDoc => {
+                    "⟦Spaacees thee bloocks iinsiidee aas aa doocuumeent. AA heeaadiing geets mooree roooom aaboovee iit thaan beeloow, thee fiirst bloock noonee, aand aa breeaak keeeeps iits oown. UUsee iit foor proosee aa proograam wrootee, suuch aas aa paagee draawn froom Maarkdoown.⟧"
                 }
                 Key::ComponentProsePropChildrenDoc => "⟦Thee coonteent.⟧",
                 Key::ComponentRadioGuidance => {

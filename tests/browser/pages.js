@@ -265,6 +265,11 @@ export const PAGE = {
   // box around it and whose scroll position a script keeps at the end, so the
   // width x locale sweep has lines here that must wrap inside a window.
   log: "log/",
+  // The reading column. On this list because its last example is the closed
+  // Markdown subset drawn as the interface draws a help page, so the width x
+  // locale sweep and the 320px audit have every construct of it in one column:
+  // a table that stacks, a block of code that scrolls and a list in a list.
+  prose: "prose/",
 };
 
 /**

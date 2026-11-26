@@ -1100,6 +1100,17 @@ a head and two answers that wrap onto two rows can be taller than the interface'
 window (320 by 240, `NOCTUA.md §12.19`), so the surface scrolls as one, which a surface with no
 radius may. The gap above the surface is the smaller of sixteen steps and a share of the window.
 
+### The reading column
+
+**A help page drawn from Markdown is a `Prose { flow }`, and no Markdown component exists.** The
+interface's closed subset maps onto the catalogue construct by construct: `Heading`, `Paragraph`,
+`Em`, `Strong`, `Code`, `Link`, `List` in `ListItem`, `Blockquote`, `CodeBlock`, the `Table` family
+and `Divider`. What a column of blocks nobody spaced by hand lacked is the rhythm, so `flow`
+replaces the column's one gap with margins: a paragraph's room between blocks, a section's above a
+first or second level heading and a heading's above a deeper one, a gap's under any heading,
+nothing above the first block, and at least a paragraph's room around a break. The last example
+on `/prose/` is every construct of the subset, and `tests/browser/prose.spec.js` holds it to that.
+
 ### Tones, bars, carousels, spectra
 
 **A tone is a name, not a list of four.** The vendored palette declares hundreds of semantic

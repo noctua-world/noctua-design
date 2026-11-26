@@ -11,10 +11,12 @@
 
 import { createElement as h } from "react";
 
-export function Prose({ measure, className, children, ...rest }) {
+export function Prose({ measure, flow, className, children, ...rest }) {
   const measure_ = measure ?? "default";
+  const flow_ = flow ?? "false";
   const root = ["nd-prose-block", className].filter(Boolean).join(" ");
   const props = { className: root, ...rest };
   if (measure_ !== undefined) props["data-nd-measure"] = String(measure_);
+  if (flow_ !== undefined) props["data-nd-flow"] = String(flow_);
   return h("div", props, children);
 }
