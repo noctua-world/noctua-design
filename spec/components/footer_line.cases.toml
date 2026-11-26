@@ -1,0 +1,48 @@
+# What a `FooterLine` has to be, in both languages, in a real browser.
+#
+# The line ships no script: the caller turns `expanded`, and the press reaches
+# it through `action`. So a case asks what the markup says in each state, and
+# that a press on the control changes nothing by itself.
+
+[[case]]
+name = "a line with nothing to expand has no control"
+note = "A control that expands a line with no more to show is a tab stop onto nothing."
+props = { kind = "info" }
+children = "Saved."
+expect = { attrs = { "data-nd-kind" = "info" }, absent = ["data-nd-expanded"], present = [".nd-footer-line-content"], hidden = ["button"] }
+
+[[case]]
+name = "the control says the line is not expanded, and is named for what it will do"
+note = "A control that opens something opens it whether or not it is open now, so `aria-expanded` is written as `false` and never left out."
+props = { kind = "info", expandable = true, expand_label = "Show all of it", collapse_label = "Show one line", action = "expand" }
+children = "Saved."
+expect = { absent = ["data-nd-expanded"], present = ["button.nd-footer-line-toggle[type=button][aria-expanded=false][aria-label='Show all of it'][data-nd-action=expand]"] }
+
+[[case]]
+name = "an expanded line says so twice, and the control takes the other name"
+note = "The stylesheet wraps the line on `data-nd-expanded`, and a screen reader hears `aria-expanded`. One without the other is a line that looks open and is announced shut."
+props = { kind = "info", expandable = true, expanded = true, expand_label = "Show all of it", collapse_label = "Show one line" }
+children = "Saved."
+expect = { attrs = { "data-nd-expanded" = "true" }, present = ["button.nd-footer-line-toggle[aria-expanded=true][aria-label='Show one line']"] }
+
+[[case]]
+name = "a press on the control turns nothing by itself"
+note = "The caller holds the state. A script here that turned the line would be a second copy of it."
+props = { kind = "info", expandable = true, expand_label = "Show all of it", collapse_label = "Show one line" }
+children = "Saved."
+steps = ["click:button"]
+expect = { absent = ["data-nd-expanded"], focus = "button", present = ["button[aria-expanded=false]"] }
+
+[[case]]
+name = "a live line is a status, and the control is outside it"
+note = "A notice has to be announced when it arrives, and a press on the control must not be read out as a change to the line."
+props = { kind = "info", live = true, expandable = true, expand_label = "Show all of it", collapse_label = "Show one line" }
+children = "Saved."
+expect = { present = [".nd-footer-line-content[role=status]", ":scope > button.nd-footer-line-toggle"], hidden = ["[role=status] button"] }
+
+[[case]]
+name = "a line that is not live is no status"
+note = "A line that follows a pointer changes on every movement, and a live region there would read every one."
+props = { kind = "info" }
+children = "Saved."
+expect = { hidden = [".nd-footer-line-content[role]"] }

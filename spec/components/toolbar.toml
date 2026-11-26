@@ -51,7 +51,7 @@ type = "enum"
 values = ["horizontal", "vertical"]
 default = "horizontal"
 attribute = "aria-orientation"
-doc = "Which way the controls run, and therefore which arrow keys walk them. It is written to `aria-orientation`, so assistive technology reports the axis as well."
+doc = "Which way the controls run, and therefore which arrow keys walk them. It is written to `aria-orientation`, so assistive technology reports the axis as well. A `rail` is `vertical` whatever this says."
 
 [prop.wrap]
 type = "bool"
@@ -59,12 +59,23 @@ default = "true"
 attribute = "data-nd-wrap"
 doc = "Whether the bar wraps onto more lines when it runs out of room. On by default, so that the last control is still reachable at 320px."
 
+# A RAIL IS A THIRD DENSITY, NOT A SECOND COMPONENT.
+#
+# The controls rail of a drawer (`NOCTUA.md §12.11`) is a toolbar: one tab
+# stop, the arrows, a name. What differs is the box. A rail is
+# `--noctua-shell-rail` wide and holds its icon-only controls two to a row, so
+# each is half a rail wide, which is `--noctua-target-min` at the default root
+# size. A control that shows words takes a whole row.
+#
+# A rail runs down, so `rail` writes `aria-orientation="vertical"` whatever
+# `orientation` says. Two controls stand side by side in it, so `dist/roving.js`
+# walks a rail with all four arrows.
 [prop.density]
 type = "enum"
-values = ["comfortable", "compact"]
+values = ["comfortable", "compact", "rail"]
 default = "comfortable"
 attribute = "data-nd-density"
-doc = "The gap between its groups. `compact` is for a bar inside something else, where the surrounding padding already separates it."
+doc = "The gap between its groups. `compact` is for a bar inside something else. `rail` is a column one rail wide with two icon-only controls to a row, and it is always vertical."
 
 [prop.children]
 type = "children"
@@ -86,6 +97,7 @@ doc = "Frosts the bar. Use it for a bar that scrolls over the content it control
 
 [keyboard]
 Tab = "Moves into the bar at the control last used, once a script places the roving stop. Otherwise it stops on each one."
-"Arrow keys" = "Moves to the next or previous control, choosing it if it is a radio. Left and Right, or Up and Down when vertical."
+"Arrow keys" = "Moves to the next or previous control, choosing a radio. Left and Right, or Up and Down when vertical."
+"Arrow keys in a rail" = "All four arrows move, in the order the controls are written. A rail holds two controls to a row."
 Home = "Moves to the first control."
 End = "Moves to the last control."

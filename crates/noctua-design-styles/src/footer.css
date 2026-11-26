@@ -1,0 +1,202 @@
+
+
+/* --- Footer ----------------------------------------------------------------
+ *
+ * The lines an application window keeps at its bottom edge, and the corner at
+ * each end of them (`NOCTUA.md §12.3`).
+ *
+ * NO BORDER, AND NO GAP. A line is told from the one above it by its shade
+ * alone, and the three shades and the corners' are the colour system's:
+ * `modeline`, `infoline`, `corner`, and the page's own surface for the line a
+ * reader types in.
+ *
+ * THE HEIGHT OF A LINE IS DECLARED, as `--noctua-shell-line`: one line of
+ * caption text at the body leading, and the smallest padding above and below.
+ * It is the small `Button`'s height, so a control in a line fills it. */
+.nd-footer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  font-size: var(--noctua-size-caption);
+  line-height: var(--noctua-leading-body);
+  color: var(--nc-color-fg);
+}
+
+/* THE CORNERS STAND IN THE FOOTER'S OWN PADDING, for its whole height. Nothing
+   counts lines: a line that grows makes the footer taller, and a corner that is
+   as tall as the footer is as tall as all of them. The room is made only where
+   a corner is, so a footer with one corner, or none, gives its lines the rest. */
+.nd-footer:has(> .nd-footer-corner[data-nd-side="start"]) {
+  padding-inline-start: var(--noctua-shell-rail);
+}
+
+.nd-footer:has(> .nd-footer-corner[data-nd-side="end"]) {
+  padding-inline-end: var(--noctua-shell-rail);
+}
+
+.nd-footer-corner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  inline-size: var(--noctua-shell-rail);
+  /* A control taller than a footer of one line is cut, not hung over the page
+     above the footer. */
+  overflow: clip;
+  background: var(--nc-color-corner);
+}
+
+.nd-footer > .nd-footer-corner {
+  position: absolute;
+  inset-block: 0;
+  inset-inline: 0 auto;
+}
+
+.nd-footer > .nd-footer-corner[data-nd-side="end"] {
+  inset-inline: auto 0;
+}
+
+/* A FOLDED FOOTER IS A STRIP ALONG ITS OWN EDGE, AND IT OPENS IN THE FLOW.
+ *
+ * The strip is what a pointer reaching the bottom of the window lands on, and
+ * the three rules after it are what opens it: a pointer over it, the focus
+ * inside it, and the caller's own `shown` for everything the footer cannot see.
+ * It stays in the tab order while folded, so the Tab key opens it too.
+ *
+ * It takes its height from what is above it and never lies over it: a footer
+ * that opened on top of the page could cover the control the keyboard is on
+ * (WCAG 2.4.11). */
+.nd-footer[data-nd-visibility="auto"] {
+  block-size: var(--noctua-space-1);
+  overflow: clip;
+}
+
+.nd-footer[data-nd-visibility="auto"][data-nd-shown="true"],
+.nd-footer[data-nd-visibility="auto"]:is(:hover, [data-nd-seat-hover]),
+.nd-footer[data-nd-visibility="auto"]:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
+  block-size: auto;
+  overflow: visible;
+}
+
+/* THE RING IS DRAWN INSIDE THE CONTROL'S OWN BOX. The lines touch, and each
+   cuts its content at its own edge, so a ring drawn outside a control would be
+   cut by the line it is in and painted over by the line below. */
+.nd-footer :is(:focus-visible, [data-nd-seat-focus]) {
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
+.nd-footer-line {
+  display: flex;
+  flex: none;
+  min-inline-size: 0;
+  min-block-size: var(--noctua-shell-line);
+  background: var(--nc-color-modeline);
+}
+
+.nd-footer-line[data-nd-kind="info"] {
+  background: var(--nc-color-infoline);
+}
+
+/* The line a reader types in is the page's own colour (`NOCTUA.md §12.3`). */
+.nd-footer-line[data-nd-kind="prompt"] {
+  background: var(--nc-color-surface);
+}
+
+/* ONE LINE, AND WHAT DOES NOT FIT IS CUT. The box has the line's height and
+   not its content's, and its children keep their own widths, so the last of
+   them is cut at the line's end and nothing wraps under it. */
+.nd-footer-line-content {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  box-sizing: border-box;
+  min-inline-size: 0;
+  block-size: var(--noctua-shell-line);
+  padding-inline: var(--noctua-space-2);
+  overflow: clip;
+  white-space: nowrap;
+}
+
+/* EXPANDED, IT WRAPS AND GROWS, and the height it had becomes its floor. */
+.nd-footer-line[data-nd-expanded="true"] > .nd-footer-line-content {
+  flex-wrap: wrap;
+  block-size: auto;
+  min-block-size: var(--noctua-shell-line);
+  overflow: visible;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+/* The line a reader types in is as tall as what is in it, which grows and
+   stops at its own limit. */
+.nd-footer-line[data-nd-kind="prompt"] > .nd-footer-line-content {
+  block-size: auto;
+  min-block-size: var(--noctua-shell-line);
+  overflow: visible;
+  white-space: normal;
+}
+
+/* A CONTROL AND A GLYPH KEEP THEIR SIZE. When a line is too narrow for what is
+   in it, the words give way and are cut. A control squeezed under its own
+   width would be a target under the floor. */
+.nd-footer-line-content > :is(.nd-button, .nd-icon-glyph) {
+  flex: none;
+}
+
+/* THE CONTROL THAT EXPANDS A LINE. A square one line tall, which clears the
+   smallest target, and it stays on the first line when the line grows. */
+.nd-footer-line-toggle {
+  display: flex;
+  flex: none;
+  align-items: center;
+  align-self: flex-start;
+  justify-content: center;
+  box-sizing: border-box;
+  inline-size: max(var(--noctua-shell-line), var(--noctua-target-min));
+  block-size: max(var(--noctua-shell-line), var(--noctua-target-min));
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--nc-color-fg-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* THE GLYPH POINTS THE WAY THE LINE WILL GO: up while it is one line tall,
+   and down once it has grown. Both bodies draw one chevron, and this turns it
+   from the attribute that says the state. */
+.nd-footer-line-toggle[aria-expanded="true"] > .nd-icon-glyph {
+  transform: rotate(180deg);
+}
+
+/* The transparent `Button`'s own hover, so the control beside the ones a
+   caller puts in a line answers a pointer as they do. The ink changes as well
+   as the ground: on the info line the ground alone is a shade nobody sees. */
+.nd-footer-line-toggle:is(:hover, [data-nd-seat-hover]) {
+  color: var(--nc-color-fg);
+  background: color-mix(in oklab, var(--nc-color-subtle-bg) var(--nd-veil), transparent);
+}
+
+/* IT SHOWS WHILE THE LINE IS HOVERED OR HOLDS THE FOCUS (`NOCTUA.md §12.6`),
+ * and only a window with a pointer that hovers hides it at all: on a touch
+ * screen nothing would ever bring it back. Hidden, it is still in the tab
+ * order, and reaching it shows it.
+ *
+ * An expanded line keeps it showing, because the way back is not something a
+ * reader should have to find again. */
+@media (hover: hover) {
+  .nd-footer-line-toggle {
+    opacity: 0;
+  }
+}
+
+.nd-footer-line:is(:hover, [data-nd-seat-hover]) > .nd-footer-line-toggle,
+.nd-footer-line:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) > .nd-footer-line-toggle,
+.nd-footer-line[data-nd-expanded="true"] > .nd-footer-line-toggle {
+  opacity: 1;
+}

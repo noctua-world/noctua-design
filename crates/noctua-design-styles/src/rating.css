@@ -124,7 +124,7 @@
 
 /* The input is clipped rather than hidden, so the focus ring has to be drawn
    on the star the reader can actually see. */
-.nd-rating-input:focus-visible + .nd-rating-star {
+.nd-rating-input:is(:focus-visible, [data-nd-seat-focus]) + .nd-rating-star {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }

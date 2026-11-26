@@ -171,7 +171,8 @@ tests/conformance/        the shared case runner (Leg 3)
 examples/                 two consumers that live outside the workspace
 assets/fonts/             subset by hand from noctua-fonts, with ATTRIBUTION.md and the licences
 assets/icons/<source>/    vendored drawings, the upstream licence, SHA256SUMS
-assets/vendor/            three.js and the owl model, each with ATTRIBUTION.md
+assets/vendor/            three.js, the owl model and the fuzzy core's corpus, each with
+                          ATTRIBUTION.md
 xtask/                    the verbs
 .TEMP/                    staging area. Copy OUT of it; never modify it
 ```
@@ -197,8 +198,13 @@ cargo xtask release   # prepare a version
 
 **One verb per intent, and the surface does not grow**: new capability goes behind an existing
 verb or it does not ship. `cargo xtask check` is exactly what CI runs — the same command, not a
-reimplementation in YAML, which is how the two would drift apart. `just <verb>` is a one-word
-alias for each, and never the only path.
+reimplementation in YAML, which is how the two would drift apart — and `cargo xtask docs --verify`
+is exactly what its `browser` job runs, on Linux, split into parts by `NOCTUA_SHARD`. `just <verb>`
+is a one-word alias for each, and never the only path.
+
+**Retry a flaky browser spec by rerunning its part of `browser`, never the Linux `check` job.** The
+site's deploy hangs off `check` and nothing else, and rerunning a job reruns its dependents: on
+`main` that redeploys Pages, and a second rerun fails on a duplicate `github-pages` artifact.
 
 > ⚠️ **`cargo xtask dev` runs the code it started with.** It is a long-running
 > `target/debug/xtask`, so editing an emitter does not change the emitter it uses. It watches
@@ -282,7 +288,8 @@ palette colour, and are the worked case (see "Component rules").
 - **No layout shift, no flickering.**
 - **Every input and every seat.** Keyboard, pointer, touch and touchpad all work, and every
   interactive state is styled through the native pseudo-class **and** the seat attribute beside
-  it, so a second seat's hover or focus can be shown.
+  it, so a second seat's hover or focus can be shown. "Every state rule has its seat twin", under
+  "Styling", is how.
 
 ## Where the area-specific traps live
 
@@ -305,6 +312,16 @@ of these carries measured rules, not description:
 | a table | `crates/noctua-design-runtime/src/table.js` |
 | a menu | `crates/noctua-design-runtime/src/menu.js` |
 | a switch, a segmented choice — anything that answers a click by choosing | `crates/noctua-design-runtime/src/choice.js` |
+| a second seat's hover, focus, press or drag | `crates/noctua-design-runtime/src/seats.js` |
+| how a list filtered by typing matches, ranks or marks | `crates/noctua-design-runtime/src/search-match.js`, and "The fuzzy matcher" below |
+| a list walked by the keyboard, its active option, or the control that drives one | `crates/noctua-design-runtime/src/option-list.js` |
+| the prompt, its block cursor, or anything drawn over a text control | `crates/noctua-design-runtime/src/prompt.js` |
+| a drawer: what a collapsed one owes the keyboard, and what Escape says | `crates/noctua-design-runtime/src/drawer.js` |
+| a split: the line between two panes, its keys and its drag | `crates/noctua-design-runtime/src/split.js` |
+| a control that records a shortcut: the keys it takes, the order a chord is written in, a key's label | `crates/noctua-design-runtime/src/key-capture.js` |
+| a log: the end it follows, and what stops it | `crates/noctua-design-runtime/src/log.js` |
+| a message's countdown: the deadline it draws to, how it is frozen, and when the time left is said | `crates/noctua-design-runtime/src/message-bar.js` |
+| a dialog that asks for an answer: where the focus starts, what Escape answers, and `shown` | `crates/noctua-design-runtime/src/dialog.js` |
 | what both implementations must *do* | `spec/components/<name>.cases.toml`, and `crates/noctua-design-spec/src/conformance.rs` for the vocabulary a step may use |
 | `Lineage`, or anything in three dimensions | `crates/noctua-design-lineage/src/lib.rs` |
 | reader-facing prose, or the Portuguese | `crates/noctua-design-spec/src/prose.rs` |
@@ -316,6 +333,7 @@ of these carries measured rules, not description:
 | the shell's layout, paint order, or a radius | `docs-site/assets/shell.css` |
 | the page shape or the URL scheme | `docs-site/src/pages.rs` |
 | the site's scope, build, or its open gaps | `docs-site/README.md` |
+| a browser test that asks something of every page | `tests/browser/pages.js` (`walker`) |
 
 ## How a component is built
 
@@ -417,11 +435,74 @@ component whose markup writes a role that promises a keyboard — `listbox`, `tr
 ships that keyboard: `Select`, `TagPicker`, `Tree`, `Tabs`, `DateInput`, `Search` and the rest.
 What they share ships with them: `anchor.js` places a floating panel against its control,
 `panels.js` decides which floating list is open, and `roving.js` is the one arrow walk for a radio
-group, a toolbar and a tab list. Every module exports an `enhanceX(root)` and a `releaseX(root)`,
-because a behaviour that cannot be taken back off leaks once per route. `Search` reads its index
-from the path its consumer gives it (`[prop.src]` writes `data-nd-src`), and it matches and
-colours by the fuzzy-finder doctrine (`NOCTUA.md §12.4`): every query word must match, and the
-matched characters are coloured by the word that matched them.
+group, a toolbar and a tab list. `seats.js` belongs to no component and to all of them: it writes
+a second seat's state as the attributes every state rule is twinned with (see "Styling"). Every
+module exports an `enhanceX(root)` and a `releaseX(root)`, because a behaviour that cannot be
+taken back off leaks once per route. `Search` reads its index
+from the path its consumer gives it (`[prop.src]` writes `data-nd-src`), and it matches by the
+fuzzy core's rule (`NOCTUA.md §12.4`): a row's label is a name and its keywords are a tag, every
+query word must match one of the two, and only the characters matched on the label are marked,
+each in the tone of the word that matched it.
+
+### The fuzzy matcher
+
+**`dist/search-match.js` is the second implementation of one rule, and the first is not here.**
+`noctua-central`'s `nc-fuzzy` crate is the matcher the daemon filters with, and every list the
+interface filters by typing goes through this file. It is a port, section by section — `fold`,
+`query`, `score`, `align`, `rank` — with the crate's names in this language's case, so the two are
+compared side by side. It has no dependency and touches no DOM.
+
+**The two are held to one case file, never to each other.**
+`assets/vendor/nc-fuzzy/fuzzy-corpus.tsv` is the rule as rows, copied from the crate.
+`tests/browser/fuzzy-corpus.spec.js` replays every row through the module that ships and fails
+naming the line of each row that differs; it opens no browser, and `cargo xtask docs --verify`
+runs it with the rest of that directory. `cargo xtask check` holds the copy to
+`assets/vendor/nc-fuzzy/SHA256SUMS` and fails on any other byte, without Node.
+
+**The corpus is never edited here, and the matcher never changes alone.** A change to the rule is
+made in `nc-fuzzy`, with its rows. Then, from the repository root, with `noctua-central` beside
+this repository:
+
+```sh
+git -C ../noctua-central show dev:crates/nc-fuzzy/tests/fuzzy-corpus.tsv \
+  > assets/vendor/nc-fuzzy/fuzzy-corpus.tsv
+( cd assets/vendor/nc-fuzzy && sha256sum fuzzy-corpus.tsv > SHA256SUMS )
+```
+
+Record the commit in `assets/vendor/nc-fuzzy/ATTRIBUTION.md`, run `cargo xtask docs --verify`,
+and change the section of `search-match.js` named like the module that changed until every row
+passes. The copy, its record and the matcher land in one commit.
+
+**The mirror gate is `noctua-central`'s.** Its own check is to hold its corpus to the checksum
+recorded here, so a row changed there fails there until this copy is refreshed. That gate arrives
+with the desktop interface (`NOCTUA-PLAN.md`, Stage 16). Until it does, a change there is not
+seen here, and this procedure is all that keeps the two files one.
+
+**A position is a code point, never a UTF-16 unit.** Every index the matcher returns counts what
+spreading a string counts, so a surface slices `[...text]` and never `text.slice()`. A `Hit` is one
+query word's field, `positions` and `ranges()`; `Match.claims(field)` is that field's matched
+characters as runs that do not overlap, each naming the first word that claimed it, which is what
+a list reads to tone the first word, the second and every later one differently.
+
+**One element draws a match, and three places write it.** `<mark class="nd-match" role="none"
+data-nd-word>`, with `1` for the first word of the query, `2` for the second and `3` for the third
+and every later one, is styled once, in `crates/noctua-design-styles/src/match-text.css`: a tint and a solid line,
+a dashed line, a dotted line, always in the page's own ink. The line's style is the signal, because
+the palette cannot keep two colours apart for every reader (`NOCTUA.md §8.8.6`), and the ink is the
+page's because the match colour on its own tint is not readable text. `MatchText` writes the
+element from its `hits` prop, in both packages, `OptionItem` renders a `MatchText` for its name and
+for its second line, and `dist/search.js` writes it over a result's label from `Match.claims`. A
+list that marks a match any other way is a second drawing of one thing. **The runs are a drawing
+and not a part of the name**: `role="none"` keeps a `<mark>` from being a `mark` to assistive
+technology, so the name is one text there, and `Mark` is for a phrase in prose.
+
+**`hits` is the corpus's grammar for one field**: a slot for each word of the query, joined by `|`,
+each holding indices and inclusive ranges joined by commas, and an empty slot for a word that
+matched another field. The two bodies of `MatchText` parse it to one sentence, written above them
+in `crates/noctua-design-emit/src/controls.rs`, and `spec/components/match_text.cases.toml` holds
+both to it: a piece outside the grammar is skipped, never guessed at. A position is a code point,
+and a caller that must not split a base letter from its combining mark widens the range before it
+passes it. Neither body knows what a grapheme is.
 
 ## Styling
 
@@ -435,7 +516,11 @@ bypass the token layer.
 
 **What `dist/` carries**: the token layer, the faces, the appearance layer, the scoped semantic
 contract and `components.css`, plus every behaviour module and the palette and theme data they
-read. `ls dist/` is the inventory, and `cargo xtask build` writes it.
+read. `ls dist/` is the inventory, and `cargo xtask build` writes it. It also carries
+`dist/tailwind/bridge.css`, the vendored mapping of Tailwind's colour utilities onto the `--nc-*`
+tokens, copied as the colour sheets are: this system writes no Tailwind class, and an application
+that composes its own layout with Tailwind finds the mapping in the package it installed. A test
+holds every token the bridge names to the sheets `dist/` declares them in.
 
 **The component rules are hand-written and copied, never generated.**
 `crates/noctua-design-styles/src/` holds one stylesheet per family, and **`sources()` there is the
@@ -453,6 +538,17 @@ consumer outside this repository gets styled components, not merely themed ones.
 **Two token namespaces.** This repository emits `--noctua-*`; `noctua-colors` emits `--nc-*`. A
 shared prefix would make "which repository owns this name" unanswerable and let a design token
 shadow a colour token, so the spec rejects `nc` as a prefix.
+
+**A window is measured in the shell tokens, and a target has a floor.** `[shell]` in
+`spec/tokens.toml` holds what an application window is built from: `--noctua-shell-line`, the
+height of one footer line, `--noctua-shell-rail`, the width of an icon rail,
+`--noctua-shell-prompt-max`, a count of lines with no unit, `--noctua-shell-prompt-share`, the
+most of the window's height a prompt grows to whatever its count, and `--noctua-shell-drawer-max`,
+a percentage of the window. The line and the rail are the small `Button`'s height and the icon-only
+`Button`'s width, so a control in either fills it, and two tests hold them to the spacing scale
+and to the rules that draw those two boxes. `--noctua-target-min` is the smallest box a pointer is
+asked to hit (WCAG 2.5.8), in `px` because the criterion is: a component that draws a smaller
+control gives it a target of at least this size.
 
 **`--nd-*` is public surface, not a token.** These are the properties the component rules read —
 a veil ratio, a tint, the height a fixed panel hangs from — declared in `base.css`, because a
@@ -482,6 +578,112 @@ declared anywhere and reports any `var()` outside that set.
 gate cannot reach a prelude; `gates::media_prelude` rejects `max-width` outright and requires
 every `min-width` to equal a breakpoint declared in `spec/tokens.toml`. Write the narrow case
 unconditionally and override it upward.
+
+**Every state rule has its seat twin.** The engine keeps `:hover`, `:focus-visible` and `:active`
+for one pointer and one keyboard, so every other seat's state arrives as an attribute and is
+styled exactly like the pseudo-class (`NOCTUA.md §9.7`, §12.18):
+
+| Attribute | Stands for | Stamped on |
+|---|---|---|
+| `data-nd-seat-hover` | `:hover` | the element, every ancestor, and the control of a `<label>` among them |
+| `data-nd-seat-focus` | `:focus-visible`, and `:focus` | the element alone |
+| `data-nd-seat-active` | `:active` | the element, every ancestor, and the control of a `<label>` among them |
+| `data-nd-seat-drag` | what that seat is dragging | the element alone |
+
+The value is the ids of the seats in that state there, separated by spaces and sorted, and a rule
+asks only whether the attribute is present. In a component stylesheet a state pseudo-class is
+written in its twin form — `:is(:hover, [data-nd-seat-hover])`,
+`:is(:focus-visible, [data-nd-seat-focus])`, `:is(:focus, [data-nd-seat-focus])`,
+`:is(:active, [data-nd-seat-active])`, and
+`:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus]))` for the one that reaches
+an ancestor. An attribute selector weighs what a pseudo-class weighs and `:is()` weighs what its
+heaviest argument does, so the twin moves no rule in the cascade. **A rule inside
+`@media (hover: hover)` stays bare and has a sibling**: the same selector on the attribute, with
+the same declarations, outside that block, because the attribute is itself the proof of a pointer
+that hovers. **The siblings stand directly after the block, in the order of its rules**, and the
+bare rules are the last rules in the block: a rule of the same weight between a state and its
+sibling, or siblings in another order, lets the seat win a tie in the cascade that the pointer
+loses. No seat attribute is written inside that block in any form, and a rule asks only whether
+the attribute is present, never for a seat by its id. **Only `:hover` is written behind the hover
+query**: no other attribute proves a pointer that hovers, so the sibling of a `:focus-visible` or
+an `:active` there would draw a seat where the window's own keyboard or pointer is not drawn.
+**And a selector asks for at most one bare state at a time**: a sibling swaps every bare state at
+once, so beside `.a:hover:focus-visible` it matches neither mixed case — one seat's hover on what
+another's keyboard has focused — which the twin form matches. Write the other states in the twin
+form, outside the block, or split the rule. Two bare states in two selectors of one `:has(` or
+`:is(` list are alternatives and pass: each matches alone, in the rule and in its sibling.
+`gates::seat_twin` holds the rule from both sides: it refuses a state pseudo-class written any
+other way, a seat attribute inside `@media (hover: hover)`, any state but `:hover` there, two bare
+states asked for together, a sibling that is not where its native rule puts it, and a seat attribute
+outside the twin form with no native rule before it.
+`data-nd-seat-drag` stands for no pseudo-class and owes no native rule.
+
+**A state drawn in colour is drawn again under forced colours.** There the system paints every
+fill as the window and every border, a transparent one included, in the text colour, so a state
+told by a fill or by a border kept transparent until it arrives is drawn like no state at all.
+Such a component names the state again inside `@media (forced-colors: active)`, in the system
+colours forced colours keep (`Canvas`, `CanvasText`, `Highlight`): they are the platform's and
+no colour of this system's, and they are written nowhere else. `tests/browser/forced-colors.spec.js`
+asks it of a list's active option, a split's line and a rail's chosen tab, in pixels.
+
+**Two places take no twin at all, and the gate refuses both.** `:focus-within` is never written
+inside `:has(`, twinned or bare: `:has()` does not nest, so an engine drops the
+`:has([data-nd-seat-focus])` branch and a seat's focus stops reaching the ancestor; restructure
+the rule so `:focus-within` stands outside. And a negated state is written in the twin form,
+`:not(:is(:hover, [data-nd-seat-hover]))`, never bare with a sibling: an element a second seat
+hovers still matches `:not(:hover)`.
+
+**The gate reads text, so what it cannot read whole is refused.**
+The hover query is written exactly `@media (hover: hover)`: a state rule or a seat attribute behind
+any other question about hovering or the pointer (`(hover)`, `(any-hover: hover)`,
+`(pointer: fine)`, `(hover: hover) and (pointer: fine)`) is refused, and a second condition is a
+second `@media` around the first. A state pseudo-class and a seat attribute are written lower-case
+with no blank space inside the brackets; `:HOVER` and `[ data-nd-seat-hover]` mean the same to an
+engine and are refused. No selector and no at-rule prelude in a component stylesheet holds a CSS
+escape (`:h\6fver` is `:hover`). A state is written in a rule's selector, never in an at-rule's
+prelude (`@scope (.a:hover)`). And a state rule is flat: it nests no block and is nested in no
+rule, because the gate does not read what a nested block declares.
+
+**The pictures are the other half.** `tests/browser/seats.spec.js` reads the state selectors out
+of the built `components.css`, puts the pointer and then the keyboard on the elements each is
+about, on every page the site builds — read off `docs-site/dist/en/`, not off the hand-written
+list in `tests/browser/pages.js` — and requires the same pixels from the seat
+attribute. A panel that is shut is opened for the comparison by the spec itself. A selector is
+known there by its whole text: an element is taken for it only if the whole selector, tail
+included, draws on something with that element in the state, and it counts as compared only if it
+matched while the pointer or the keyboard was there. One test holds what the sweeps reached to
+`UNSEEN`, the selectors no example renders, listed there by name: a state rule for something no
+example shows is added to that list or given an example, and the test fails until one is done. A
+state the probe cannot place — inside `:not(` or `:is(`, or two brackets deep — is reached by no
+sweep and fails the same way.
+**It is a sample**: two elements a page for each selector, the first the selector draws on, so a
+defect only a later element shows is not photographed. There is no sweep for `:active`, so the
+first rule on it fails there too and brings its sweep with it.
+**And a photograph that cannot fail is named as one.** The same test takes each reached selector
+out of its rule with its element in the state and asks whether a pixel changed, which is what the
+two pictures would show with the twin deleted. The selector alone, and not the rule: where a rule
+lists the element at rest beside the element in the state (`.x, .x:hover`, the second written for
+its weight), the first still draws every declaration. A selector blind on its sample is given a
+longer one in `DEEPER` — the attached button group's focus rule, which lifts a button and shows
+on the third — or, where no element shows it at all, a line with its reason in `BLIND`, which the
+test holds exactly as it holds `UNSEEN`: eight selectors today, six of them the hover half of such
+a rule on a glass button or a glass switch. `seat_twin` alone holds those twins.
+**The page's clock is stopped before anything is photographed.** An example that keeps time — a
+toast counting its seconds down — differs from itself between the two pictures, so the spec takes
+back every timer and frame callback a page has waiting once it is prepared and refuses the rest;
+an example may count, and no page is left out of the sweep for it.
+
+**Nothing writes the attributes by hand**: `dist/seats.js` stamps them where the pseudo-class
+would match — `seatHover`, `seatFocus`, `seatPress`, `seatDrag` and `clearSeat`, or an `nd-seat`
+event for a host with no script of its own — and how a system delivers a second seat is the
+host's to know (`NOCTUA.md §5.12`). A seat id is a string or a number with no space in it, and
+anything else is refused.
+
+**Two things are outside the rule, and they are the whole list.** The documentation site's own
+chrome in `docs-site/assets/shell.css` is not held to it. And `::-webkit-scrollbar-thumb:hover`
+in `dist/theme.css` has no twin, because a scrollbar thumb is a part the engine draws and no
+element is there to carry an attribute; a test beside the gate fails on any other state rule in a
+shipped sheet that is not `components.css`.
 
 **The source gates do not walk the compiler crates.** They are about component and styling
 source: a component hardcoding `13px` sits between two steps for ever, while a compiler that
@@ -639,6 +841,328 @@ button. **A menu item is `aria-disabled`, never `disabled`**, because an item th
 walk is an action a reader concludes does not exist; and **`aria-expanded="false"` is true on a
 menu button**, because a control that opens something opens it whether or not it is open now, so
 the attribute's absence would be the false statement.
+
+**A list walked by the keyboard moves a mark, never the focus.** `OptionList`, `OptionGroup` and
+`OptionItem` are a `role="listbox"`, and the focus stays on one element: the list, or a control
+that names the list in `aria-controls` and goes on being typed in. The active option is
+`data-nd-active` on the option and `aria-activedescendant` on whatever holds the focus, and
+`dist/option-list.js` answers the keys from either. The list's `name` is its listbox's id, for
+`Menu`'s reason: the caller writes it on one component and `controls` on the other. A key with
+Shift or Alt held, a key an input method is using (`isComposing`, or `keyCode` 229, which is how
+WebKit sends the key that commits a composition), and Enter or an arrow with Control or Command
+are the control's and never the list's. **It moves the page only as far as the active option
+needs**: a move scrolls the box that holds the option and, where the option would otherwise leave
+the window, the page, each the least way, because with the focus held elsewhere the active option
+is the only sign of where the keyboard is. An option already active when the list is enhanced is
+left where the page put it, so a page opens at its top. **It chooses nothing**: it says
+`nd-option-active` and `nd-option-choose`, each with the list's name and the option's value, and
+what is `selected` afterwards is the caller's to render. **And the caller may move the mark
+itself**: an interface that is a view renders `OptionItem { active }`, and the script takes the
+option that gained the attribute last as the active one. Where the keyboard is and what was chosen
+are drawn apart, a bar and a fill against a tick, and the fill is the neutral raised surface so the
+marked letters in the row stay legible on it. The empty sentence is shown by the stylesheet alone,
+from `:has()`, so a list a framework re-renders says it with no script noticing.
+
+### Rails
+
+**A rail is a `Toolbar` or a `Tabs` drawn one rail wide, never a third component.**
+`Toolbar { density: rail }` is the controls rail of `NOCTUA.md §12.11` and `Tabs { appearance: rail }`
+its tabs rail: each keeps its role, its one tab stop and its arrow walk, and is
+`--noctua-shell-rail` wide, the width of a footer's corner. Both bodies write
+`aria-orientation="vertical"` for a rail whatever `orientation` says, because `dist/roving.js`
+picks the arrows from that attribute. A rail of controls holds two icon-only controls to a row, so
+`dist/roving.js` walks it with all four arrows, in the order the controls are written, and a
+control that shows words takes a whole row. A rail tab draws its `icon` and keeps its `label` as
+its name without drawing it. A tab with no icon keeps its words.
+
+**A rail's names are drawn by `Tooltip`, and said once.** An icon-only control has a name nobody
+sees, and a `Tooltip` whose `text` is that same name is how a rail shows it. `dist/tooltip.js`
+writes no `aria-describedby` where the hint is the control's `aria-label` or all of its text, and
+hides that bubble from assistive technology: described by its own name a control is read out
+twice, and a bubble in the accessibility tree would be a child a `role="tablist"` may not have.
+Every ring in a rail is drawn inside its control, as in a footer.
+
+**Half a rail is the smallest target only at the default root size.** `--noctua-shell-rail` is in
+`rem` and `--noctua-target-min` in `px`, so under a root below sixteen pixels a control in a rail
+of two is narrower than WCAG 2.5.8 asks. The rail keeps the corner's width, which
+`NOCTUA.md §12.11` requires exactly.
+
+### The window's footer
+
+**A footer is lines told apart by shade, and nothing draws a border.** `Footer`, `FooterLine` and
+`FooterCorner` are the stacked lines at the bottom of an application window
+(`NOCTUA.md §12.3`): a `modeline`, an `info` line and a `prompt` line, each
+`--noctua-shell-line` tall, on the colour system's `modeline` and `infoline` surfaces and the
+page's own, with a corner on the `corner` surface at each end. A corner is `--noctua-shell-rail`
+wide and stands in the footer's own padding for its whole height, so nothing counts lines and a
+line that grows takes its corners with it. **A line is one line**: what does not fit is cut at the
+line's end, and only an `expanded` line or a `prompt` line grows. Every ring inside a footer is
+drawn inside its control, because the lines touch and each paints over what the one above it
+hangs out.
+
+**The footer ships no script, and the caller turns every state.** `expanded` and `shown` are
+props, and the control that expands a line reaches the caller through `action`. Its one chevron is
+turned by the stylesheet from `aria-expanded`, so the glyph is drawn from the attribute that says
+the state. On this site the page is the caller and turns a line in an example marked
+`nd-example-expand`, which carries the control's two names (`shell.js`). That control is a
+bare `<button>` because it says `aria-expanded="false"`, which `Button` never writes. It is hidden
+only behind `@media (hover: hover)`, and a pointer on the line or the focus inside it shows it,
+so a touch screen and a keyboard both reach it.
+
+**A folded footer opens in the flow.** `visibility="auto"` folds it to a strip along its own edge,
+and a pointer on the strip, the focus inside it or `shown` opens it. It stays in the tab order
+while folded, and it takes its height from what is above it: a footer that opened over the page
+could cover the control the keyboard is on (WCAG 2.4.11). The strip is where the footer is, so a
+pointer at the window's edge under an open drawer is the caller's to see, and `shown` is how it
+says so. The footer is a `<footer>` with `role="group"`, since the element is a landmark only
+where no section is around it and the role would otherwise depend on where it is mounted.
+
+### The prompt
+
+**The text is the engine's, and this system draws one thing over it: the block.** `Prompt` is a
+real `<textarea>`, so the selection, an input method's composition, the clipboard, undo and the
+name a screen reader reads are the platform's (`NOCTUA.md §12.7`). Its caret is transparent, and a
+second box, the mirror, lies over it holding the same text with everything invisible but one
+`<span>` around the cluster the caret stands before. `dist/prompt.js` keeps the two in step and
+its header is the technique. The layout places the block: two boxes that lay one text out by one
+set of rules put each character in one place.
+
+**Every property that places a character is declared for the two boxes together**, in one rule
+of `crates/noctua-design-styles/src/prompt.css`. A property given to one alone is a cursor that
+drifts off its letter, in the one script nobody on the team reads. Three of them fail silently:
+both boxes keep the scrollbar's room from the first line (`scrollbar-gutter: stable`), or the
+ninth line narrows one of them and every line turns in a different place; each paragraph of both
+takes its own direction from its own text (`dir="auto"` and `unicode-bidi: plaintext`, which the
+engine gives a textarea and not a `<div>`); and the block at the end of a line takes no room in
+it, or the mirror turns a full line the textarea does not. A block before no character is pointed
+the way its own paragraph runs, because its room is given back on its inline end.
+
+**The mirror is also how the prompt grows.** The two share a grid cell, so the cell is as tall as
+the mirror's text, up to `--noctua-shell-prompt-max` lines and never past
+`--noctua-shell-prompt-share` of the window, and then the textarea scrolls and the mirror follows
+it.
+
+**Two places on a line are one offset, and the script says which.** Where a line turns with no
+break in it, the end of the upper line and the start of the lower are one offset, and the engine
+draws its caret at the end only when End, a vertical arrow or a press put it there. The script
+keeps what moved the caret last and asks the mirror whether the characters on either side are on
+two lines. A press is read by the draw that sees the caret land, never earlier: the engine moves
+the caret after the focus a press brings, and on a touch screen after the finger lifts, so a press
+into a prompt without the focus is drawn where it landed and not where the caret was. Spaces that
+hang past the edge hold the block at the edge, where the engine keeps its caret. The turn and the
+edge are all it measures. **What the block does not follow** is the caret at the
+boundary of two runs written in opposite directions inside one line: it covers the next character
+in the text, which the engine draws at the far end of the other run. `dist/prompt.js` has the
+detail.
+
+**The block gives way to what the engine draws better.** A selection and a composition hide it,
+and while an input method composes the engine's own caret is back, because the candidate window
+stands against it. Under forced colours the engine forces a colour onto the caret, so the block
+is hidden there and the engine's caret is the one cursor. Enter that confirms a composition sends
+nothing. The block is filled and blinking with the focus in the text, an outline without it, with
+the focus on the send control, or in a read-only prompt, and absent in a disabled one. It blinks on `--noctua-duration-blink`, and under `prefers-reduced-motion` the stylesheet
+says `animation: none`: a repeating animation has no zero-length form.
+
+**It sends nothing itself.** Enter and the send control say `nd-prompt-send`, with the prompt's
+name and text, and the text afterwards is the caller's to set. A value the caller writes is drawn
+like one that was typed, because the script wraps the element's `value`. A prompt that names a
+list in `controls` gets its arrow walk from `dist/option-list.js` and keeps Enter: one key is one
+event, and the caller knows which option is active. Shift with Enter still breaks the line there.
+The option the keyboard is on is `active_option`, an id, and not `OptionItem`'s `active`, a flag
+on the option itself. **It stays a `textbox` there**: HTML allows a
+`<textarea>` no other role, and a `combobox` is one line.
+
+**Its caret is tested from pixels, with the engine's scrollbars on.** `tests/browser/prompt.spec.js`
+takes the block away, gives the engine's caret its colour back and reads where it was drawn. A
+second layout of the text would be the technique agreeing with itself. The runner hides every
+scrollbar by default, so that file leaves them on.
+
+### The drawer
+
+**A drawer is in the flow of its window, and never over the work.** `Drawer` is the region below a
+footer, or a panel at a side (`NOCTUA.md §12.11`, §12.14): a `role="region"` that takes its room
+from what is beside it, so nothing it opens can cover the control the keyboard is on (WCAG 2.4.11).
+It is not modal. Nothing behind it is inert and Tab leaves it. `DrawerRail` is the column down a
+side of it, `--noctua-shell-rail` wide, on the footer corners' own shade, holding a `Toolbar` or a
+`Tabs` drawn as a rail. A drawer at the bottom is on the page's own surface, as the footer's last
+line is, and one at a side is on the subtle surface, which is all that tells it from the work.
+
+**It opens to a share of the box around it, so that box needs a size.** A drawer is as large as
+its content, up to `--noctua-shell-drawer-max`. That is a percentage, and it resolves only where
+the element around the drawer has a size of its own on that axis: a window has, and a box as tall
+as its content has not. Every example therefore stands in `.nd-example-window`, the site's
+stand-in for a window.
+
+**It slides by a grid track, and the hiding is the stylesheet's.** No engine moves a box between
+nothing and the size of its content, so the root is a grid of one track and `.nd-drawer-panel` is
+the one thing in it, with a floor of nothing on both axes. The rails and the content each scroll
+what does not fit, which is what keeps them inside a drawer partway shut. `collapsed` takes the
+track to nothing and sets `visibility: hidden`, at the end of the slide on the way shut and at the
+start on the way open, so a collapsed drawer is out of the tab order and the accessibility tree
+with no script.
+
+**The control that turns it names it.** `id` is the drawer's id, for that control's `controls`,
+and the control says in `aria-expanded` whether the drawer is open. `Button` writes the attribute
+only when it is true, so on this site the page writes it on every example's toggle, open or shut.
+
+**The caller turns it, and `dist/drawer.js` does three things.** It writes `inert` the moment
+`collapsed` is written, for the time the drawer is still drawn. It gives the focus back to where
+it came in from when a drawer collapses around it, and leaves a reader who had left alone. And
+Escape with the focus inside says `nd-drawer-dismiss` with the drawer's `name`, after any surface
+open inside the drawer has had the key, and never for an Escape an input method is using. It never opens, shuts or takes the focus in: what Escape
+closes is the caller's to decide, and so is where the keyboard goes when a drawer opens.
+
+**A drawer and a rail stand at the side they name, wherever they are written.** `side` is `order`
+in the row. The keyboard follows the order they are written in, so the `start` is written before
+what it stands beside and the `end` after it.
+
+### The split
+
+**One number divides the box, and it is written in three places.** `Split` holds a `SplitPane`, a
+`SplitHandle` and a `SplitPane`, in the order they stand. `value` is the share of the box the
+`start` pane takes: `data-nd-value` on the root is the caller's prop and what `dist/split.js`
+reads, `--nd-split-value` on the same element is what the stylesheet grows each pane by, and
+`aria-valuenow` on the handle is what a screen reader is told. The script makes the second and the
+third say what the first says, held between `min` and `max`, whenever the caller writes `value`,
+`min` or `max`, so a value the caller writes back is drawn and announced.
+
+**The handle is a line until a script makes it a control.** The markup writes `role="separator"`
+with a name and no more. `dist/split.js` adds the `tabindex` and the three `aria-value` attributes
+together with what keeps them: the window splitter's keys from the ARIA practices, with a slider's
+reading where the practices name no distance, and a drag that follows a pointer or a finger. The
+cursor and the answer to a pointer are written against `[tabindex]`, so a line nothing moves does
+not offer to be moved. The arrows move the line the way they point, so the script mirrors them
+where the page reads from the right. It moves the line itself, because a drag has to follow the
+pointer in the frame it moves in, and says `nd-split-resize` with the name, the value and whether
+a pointer still holds the line. It keeps nothing.
+
+**What a narrow box does is asked of the split's own box.** The root is a query container and
+`.nd-split-track` inside it is what the query lays out, because an element that establishes a
+container is not its own. The narrow layout is written first and the wide one restores it inside
+`@container`, at the weight of the rules it restores: each selector there names
+`[data-nd-collapse]` and `[data-nd-side]` where a narrow rule names a value of them. A stacked or
+hidden pane takes its handle with it, and a handle that is not drawn is not a tab stop. Stacked
+panes are each as tall as what is in them, so the track scrolls them where the box has a height
+of its own: a window would otherwise cut the second one off out of every reader's reach.
+
+**A pane the line takes to nothing is put away.** With a `min` of 0 or a `max` of 100 the line can
+collapse a pane, as the window splitter's Enter does, and a pane drawn as nothing still holds
+whatever the keyboard could reach in it. Side by side, the stylesheet makes it
+`visibility: hidden`, read off the handle's `aria-valuenow`, which is the share the script drew
+held between the limits, so `data-nd-value` written past a limit hides nothing it does not draw.
+
+### The key capture
+
+**It records a chord and judges nothing.** `KeyCapture` is a `<button>` that listens once
+pressed: the next key, with the modifiers held, is the shortcut, written as `nc_schema::keys`
+writes a chord, the modifiers in the order Control, Alt, Shift, Super and the key's
+`KeyboardEvent.code`. A modifier alone records nothing. Whether the chord is in the vocabulary
+or collides is the caller's to ask, and a refusal comes back as `refusal`, the caller's sentence
+in a `role="status"` that is on the page from the start. `dist/key-capture.js` says
+`nd-key-capture-change` and keeps nothing.
+
+**No key holds the focus for more than one press.** While it listens every key is recorded, Tab,
+Enter and Space among them, because a binding may hold any of them, and listening ends with the
+first. Escape, a second press and the focus leaving stop it with the shortcut kept, and Escape is
+kept from what is around the control only while it listens.
+
+**A key is drawn by the label on it, from one table written three times.** The modifiers take
+the names the `keyboard` prop's keyboard prints and every other key its US board's label, the
+table `nc_schema::keys` holds. Both bodies in `crates/noctua-design-emit/src/controls.rs` and the
+script carry it, and the cases hold the three to one answer. The script relabels a key that
+prints a character for the layout in use where the engine can say what it prints, and otherwise
+takes a captured key's own character when neither Alt nor Shift changed it. The caller's keys and
+the keys the script heard are two runs, and the script writes only the second.
+
+### The log
+
+**Every line is in the document, and the caller bounds how many.** `Log` is a `role="log"`
+region of `LogLine`s, oldest first, and nothing is virtualised, so finding in the page, selecting,
+copying and a screen reader's own reading reach every line. It is as tall as the box around it
+and scrolls what does not fit, so that box needs a height of its own, as a drawer's does.
+
+**It follows its end until the reader leaves it.** With `follow`, `dist/log.js` brings each line
+added into view. A reader who scrolls away from the end stops it, and so does a selection held
+inside the log when a line arrives, so the text being read or copied does not move. Back at the
+end it follows again, and the resume control takes the reader there. That control stands outside
+the region, because a control inside a `role="log"` would be read as a line. The script says
+`nd-log-follow` each time following changes, and never adds, removes or rewrites a line.
+
+**A line is inline parts a space apart**, so a selection copies one line of text a line and
+nothing a stylesheet draws. Its level is a word in a box tinted with its tone, in the page's own
+ink, and its source is a name, marked `nd-identifier`.
+
+### The alert line
+
+**A line is a `MessageBar` drawn as one row along a window's bottom edge, never a fourth
+component.** `MessageBar { presentation: line }` is the interface's alert line
+(`NOCTUA.md §12.17`): a row filled with its tone, in the tone's own ink, `--noctua-shell-line`
+tall at least, with a footer line's type. **It is in the flow and the window places it last**, so
+it covers neither the footer above it nor the control the keyboard is on there (WCAG 2.4.11); the
+section's "fixed" is the window's layout, not `position: fixed`. A line wraps rather than cuts,
+because what an alert says is what a reader has to act on. Every ring in it is drawn inside its
+control and in the line's ink, because the ring colour is not a pair measured against a fill of
+the tone.
+
+**The caller keeps the clock, and the bar draws the same instant.** `deadline` is milliseconds
+since the epoch, and `dist/message-bar.js` works out the whole seconds left from `Date.now()` on
+every tick, so a throttled tab wakes to the right number and a deadline the caller writes again is
+followed at once. It never acts at the deadline. It reads time only through `Date.now()` and the
+page's timers, so a test freezes it by installing a clock (`page.clock`), and no prop exists for
+a test. The number is a `role="timer"` with `aria-live="off"` written out, because an implicit
+value inside an atomic `role="alert"` is the one assistive technology honours least. A visually
+hidden polite region beside it is written when the count starts, at every ten seconds left and at
+five, and emptied at the next second drawn and when the count stops, so the line holds one count
+for a reader who goes back over it or copies it. Without `countdown_label` the seconds are `Intl`'s, in the document's language.
+
+**What a reader does about it is the bar's own control**, `action_label` and `action`, drawn in
+the message's ink and last among its words, so a narrow window wraps it onto a row of its own.
+A `Button` in `children` would paint its own ink on a fill nobody measured it against. On this
+site the page writes each example's deadline ahead of now (`shell.js`), because a tree with no
+code in it can only carry an instant long past.
+
+### The confirmation
+
+**A confirmation is a `Dialog` that demands an answer, never a fifth surface.**
+`Dialog { alert }` is the WAI-ARIA alert dialog the interface asks a person to confirm an
+irreversible command on (`NOCTUA.md §11.1`): `role="alertdialog"` on the `<dialog>`, described
+by what is asked, who asks (`requester`) and whether the answer can be taken back
+(`irreversible_label`, a warning glyph and words, which also paint the confirm control in the
+danger tone), in that order. A press on its backdrop is not an answer.
+
+**The answers are the platform's, and the script reports them.** `confirm_label` and
+`decline_label` are `Button`s that submit a `<form method="dialog">`, so the platform closes the
+surface with the answer as its `returnValue`, and `dist/dialog.js` says `nd-dialog-close` with
+the dialog's name and the answer: `confirm`, `decline`, or nothing. Escape and the close control
+are `decline` where there is a decline control, because a reader who leaves a confirmation has
+declined it. **The focus starts on the decline control**, the least destructive answer, and the
+script writes it as `autofocus` so the platform's own focusing steps put it there: React's
+`autoFocus` is a `focus()` on mount rather than an attribute, so the two bodies could not write it
+alike.
+
+**A program opens it, through `shown`.** A confirmation opens because the program asked, so
+`trigger_label` is optional and `shown` is the caller's: the script opens or closes the surface
+whenever it is written and never writes it back. A dialog with neither is a surface a reader
+cannot reach.
+
+**The description is the scroller's first line, and below `sm` the surface scrolls as one.** The
+head and the answers stay put from the `sm` step up, and what is between them scrolls. Below it
+a head and two answers that wrap onto two rows can be taller than the interface's smallest
+window (320 by 240, `NOCTUA.md §12.19`), so the surface scrolls as one, which a surface with no
+radius may, and the answers stick to its foot. The platform scrolls a surface to the control it
+focuses, and with the answers at the end of what scrolls a confirmation opened on them with the
+question above its top edge. The gap above the surface is the smaller of sixteen steps and a share of the window.
+
+### The reading column
+
+**A help page drawn from Markdown is a `Prose { flow }`, and no Markdown component exists.** The
+interface's closed subset maps onto the catalogue construct by construct: `Heading`, `Paragraph`,
+`Em`, `Strong`, `Code`, `Link`, `List` in `ListItem`, `Blockquote`, `CodeBlock`, the `Table` family
+and `Divider`. What a column of blocks nobody spaced by hand lacked is the rhythm, so `flow`
+replaces the column's one gap with margins: a paragraph's room between blocks, a section's above a
+first or second level heading and a heading's above a deeper one, a gap's under any heading,
+nothing above the first block, and at least a paragraph's room around a break. The last example
+on `/prose/` is every construct of the subset, and `tests/browser/prose.spec.js` holds it to that.
 
 ### Tones, bars, carousels, spectra
 
@@ -863,16 +1387,29 @@ means. A page that needs a control never gets a `<button>` with a class on it, n
 component for a control that exists: `Button { hide_label }` is the icon button.
 
 **What a component owes its consumer ships from `dist/`, and `shell.js` imports it back.** What
-stays in `docs-site/assets/shell.js` is the site's own furniture — the drawer, the settings panel,
-the example frames with their viewport rig and implementation switch, the icon gallery — and it
-ships nowhere. A countdown that a message owes every reader is the component's; a control that
-raises the same message again is the page's (`spec/components/toast.toml` records the split).
+stays in `docs-site/assets/shell.js` is the site's own furniture — the sidebar's own drawer, the
+settings panel, the example frames with their viewport rig and implementation switch, the icon
+gallery — and it ships nowhere. A countdown that a message owes every reader is the component's; a
+control that raises the same message again is the page's (`spec/components/toast.toml` records the
+split). The same line runs through a `Drawer`: `inert` and the focus it gives back are the
+component's, and the control that turns an example's drawer is the page's, because the caller of a
+component on this site is the page.
 
 **The header is one line at 320px.** It holds the controls that are not settings — the drawer,
 the repository, the language, the implementation switch — and the one theme menu behind a palette
 icon, which holds at least the mode (light, dark or system), the accent, the saturation and the
 interface-font toggle (`NOCTUA.md §7.7`). They are icons rather than words, and every one has an
-accessible name.
+accessible name. **It sticks to the top of the window, and the window is told so**: the root's
+`scroll-padding-block-start` is the header's height, so a fragment's target, a control the focus
+moves to and an option a list's keyboard walked to all stop below it, and a section's own scroll
+margin is only the breath above its heading.
+
+**Every page is also audited in a 320 by 240 window**, the desktop interface's smallest
+(`NOCTUA.md §12.19`). There the interface's own components, and the window stand-ins their
+examples sit in, are asked one more thing: whether a box that does not scroll cuts what they hold
+off downward. Elsewhere on the site that is a technique (a stacked table's heading row, a scene's
+ties), so the question is theirs alone. `tests/browser/touch.spec.js` holds every control they
+draw, a focusable separator and region included, to `--noctua-target-min`.
 
 **No page may scroll sideways at 320px, and the components bend to that budget.** `Segmented`
 makes an icon-only item square, which is right everywhere except the header, where square items
@@ -1175,6 +1712,14 @@ which pixel a corner paints — never the property.
 every new one by restoring the defect it was written for, in the artefact that actually ships, and
 watching it fail. Under heavy machine load the browser suite can fail a spec that passes alone:
 run that spec by itself before calling it a regression.
+
+**A question asked of every page is one test per page, never a loop inside one test.** The budget
+is per test, so a loop over the site loses margin with every page added and every process the
+machine runs, and then fails as a timeout on whichever page the clock ran out on. `walker` in
+`tests/browser/pages.js` declares one test per page (and per locale or width, when the walk has
+those), keeps a floor over the whole site by running that walk's pages in order and counting after
+the last, and adds a test that fails when what was generated is not the page list times the axes,
+or is missing a page of `PAGE`. Raising a timeout is not the fix.
 
 ## No other design system is named as a source
 

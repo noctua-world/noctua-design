@@ -1,0 +1,44 @@
+guidance = """
+Use match text for a name in a list filtered by typing, to show which characters
+each word of the query matched. For a highlighted phrase in prose, use `Mark`.
+"""
+
+[meta]
+name = "MatchText"
+element = "span"
+class = "nd-match-text"
+summary = "Show a name with the characters a query matched marked, one style for each word of the query."
+
+# THE TEXT IS A PROP, BECAUSE THE BODY CUTS IT.
+#
+# A position is an index into the text, and a Dioxus component cannot look
+# inside its own children, so the text arrives as a string and both bodies cut
+# it the same way. `SearchResult.label` is text for the same reason.
+[prop.text]
+type = "text"
+required = true
+doc = "The whole name, as the list shows it. **Required**. Text and not children, because every position in `hits` is an index into it."
+
+# THE CORPUS'S OWN GRAMMAR, FOR ONE FIELD.
+#
+# `assets/vendor/nc-fuzzy/fuzzy-corpus.tsv` writes a match as one hit for each
+# word of the query, joined by `|`, each a list of indices and inclusive ranges
+# joined by commas. This is that grammar with the field prefix left out, since
+# one `MatchText` draws one field. A caller holding the matcher's answer writes
+# each word's positions for this field and leaves a slot empty where the word
+# matched another field.
+#
+# A POSITION IS A CODE POINT, as the matcher counts them: what spreading a
+# string counts in JavaScript and what `chars()` counts in Rust.
+#
+# A PIECE THAT IS NOT IN THE GRAMMAR IS SKIPPED, and a position past the end of
+# the text marks nothing. A list drawn from a stale answer shows too little
+# rather than failing to draw.
+[prop.hits]
+type = "text"
+doc = "The matched characters, one slot for each word of the query, joined by `|`. A slot holds indices and inclusive ranges joined by commas, as in `0-2,5|7-9`. An empty slot is a word that matched elsewhere."
+
+[a11y]
+notes = """
+Each run is a `<mark>` with `role="none"`, so the name is one text in the accessible tree. The first word is underlined solid, the second dashed and every later word dotted, so the three are told apart without colour, as WCAG 1.4.1 asks.
+"""

@@ -54,6 +54,21 @@ enhanceTabs();
 Import the two or three your markup needs; nothing pulls in the rest. An app with
 a client-side router calls `releaseX` before it replaces markup.
 
+## With Tailwind
+
+Nothing here needs Tailwind, and an application built on this system may use it.
+`dist/tailwind/bridge.css` maps every Tailwind v4 colour utility onto the token
+behind it and declares no colour. Link the sheets from `base.html` as above, then
+import the bridge after Tailwind in the entry stylesheet:
+
+```css
+@import "tailwindcss";
+@import "./static/dist/tailwind/bridge.css";
+```
+
+`bg-surface`, `text-fg` and `border-border` then follow the palette, the mode and
+a theme scope exactly as the components do.
+
 ## The components
 
 This package is only what a page links. The React components are

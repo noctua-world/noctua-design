@@ -82,6 +82,7 @@
   --noctua-duration-fast: 120ms;
   --noctua-duration-base: 180ms;
   --noctua-duration-slow: 280ms;
+  --noctua-duration-blink: 1000ms;
   --noctua-easing-out: cubic-bezier(0.16, 1, 0.3, 1);
   --noctua-easing-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --noctua-easing-linear: linear;
@@ -104,6 +105,16 @@
   /* Focus ring geometry. */
   --noctua-focus-width: 2px;
   --noctua-focus-offset: 2px;
+
+  /* Targets: the smallest box a pointer is asked to hit. */
+  --noctua-target-min: 24px;
+
+  /* The shell: what an application window is measured in. */
+  --noctua-shell-line: 2rem;
+  --noctua-shell-rail: 3rem;
+  --noctua-shell-prompt-max: 8;
+  --noctua-shell-prompt-share: 30vh;
+  --noctua-shell-drawer-max: 40%;
 
   /* The scene: what a Lineage cell is worth. */
   --noctua-scene-cell: 9rem;
@@ -142,6 +153,7 @@
     --noctua-duration-fast: 70ms;
     --noctua-duration-base: 0ms;
     --noctua-duration-slow: 0ms;
+    --noctua-duration-blink: 0ms;
   }
 }
 

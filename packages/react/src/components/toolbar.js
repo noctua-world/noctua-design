@@ -12,18 +12,24 @@
 import { createElement as h } from "react";
 
 export function Toolbar({ label, labelledby, orientation, wrap, density, glass, className, children, ...rest }) {
-  const orientation_ = orientation ?? "horizontal";
-  const wrap_ = wrap ?? "true";
   const density_ = density ?? "comfortable";
-  const glass_ = glass ?? "false";
+  // See the Dioxus half: a rail is vertical whatever the caller said.
+  const orientation_ = density_ === "rail" ? "vertical" : (orientation ?? "horizontal");
   const root = ["nd-toolbar", className].filter(Boolean).join(" ");
-  const props = { className: root, ...rest };
-  props.role = "toolbar";
-  if (label !== undefined) props["aria-label"] = String(label);
-  if (labelledby !== undefined) props["aria-labelledby"] = String(labelledby);
-  if (orientation_ !== undefined) props["aria-orientation"] = String(orientation_);
-  if (wrap_ !== undefined) props["data-nd-wrap"] = String(wrap_);
-  if (density_ !== undefined) props["data-nd-density"] = String(density_);
-  if (glass_ !== undefined) props["data-nd-glass"] = String(glass_);
-  return h("div", props, children);
+
+  return h(
+    "div",
+    {
+      className: root,
+      role: "toolbar",
+      "aria-label": label,
+      "aria-labelledby": labelledby,
+      "aria-orientation": orientation_,
+      "data-nd-wrap": String(wrap ?? true),
+      "data-nd-density": density_,
+      "data-nd-glass": String(glass ?? false),
+      ...rest,
+    },
+    children,
+  );
 }

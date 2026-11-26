@@ -69,7 +69,7 @@
   display: none !important;
 }
 
-:focus-visible {
+:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-control);
@@ -146,6 +146,66 @@
   margin-inline-start: 0;
   margin-block-start: auto;
 }
+
+/* A RAIL: ONE RAIL WIDE, AND TWO CONTROLS TO A ROW (`NOCTUA.md §12.11`).
+ *
+ * The bar is the column the vertical rule above already makes, as wide as
+ * `--noctua-shell-rail`, which is the width of a footer's corner. Each group is
+ * a grid of two columns, so an icon-only control is half a rail wide, and
+ * `--noctua-shell-rail` is twice `--noctua-target-min` at the default root
+ * size: the glyph is drawn smaller than the box a pointer is asked to hit.
+ *
+ * It comes after `wrap`, which it has to beat at the same weight: a rail never
+ * wraps into a second column of groups. */
+.nd-toolbar[data-nd-density="rail"] {
+  flex-wrap: nowrap;
+  gap: var(--noctua-space-2);
+  box-sizing: border-box;
+  inline-size: var(--noctua-shell-rail);
+}
+
+.nd-toolbar[data-nd-density="rail"] > .nd-toolbar-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+}
+
+/* A CONTROL THAT SHOWS WORDS TAKES A WHOLE ROW. Half a rail holds a glyph and
+   no word, so everything in a group spans both columns, and the rule after
+   this one gives a half back to what is only a glyph: an icon-only `Button`,
+   and the `Tooltip` that draws its name. */
+.nd-toolbar[data-nd-density="rail"] > .nd-toolbar-group > * {
+  grid-column: 1 / -1;
+  min-inline-size: 0;
+}
+
+.nd-toolbar[data-nd-density="rail"] > .nd-toolbar-group > .nd-button[data-nd-hide-label="true"],
+.nd-toolbar[data-nd-density="rail"] > .nd-toolbar-group > .nd-tooltip:has(> .nd-button[data-nd-hide-label="true"]) {
+  grid-column: auto;
+}
+
+/* The control fills its cell, whatever width its own size would give it, and
+   is never shorter than the smallest target. The second selector is the first
+   again at the weight of the rule that gives an icon-only `Button` of a stated
+   size its width, which this has to beat wherever the two sheets fall. */
+.nd-toolbar[data-nd-density="rail"] .nd-tooltip {
+  display: flex;
+}
+
+.nd-toolbar[data-nd-density="rail"] .nd-button,
+.nd-toolbar[data-nd-density="rail"] .nd-button[data-nd-hide-label="true"][data-nd-size] {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: max(var(--noctua-shell-rail) / 2, var(--noctua-target-min));
+}
+
+/* THE RING IS DRAWN INSIDE THE CONTROL'S OWN BOX. A rail stands at the edge of
+   a window or of a drawer that cuts what hangs out of it, and the two controls
+   of a row touch. */
+.nd-toolbar[data-nd-density="rail"] :is(:focus-visible, [data-nd-seat-focus]) {
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
 /* --- crates/noctua-design-styles/src/switch.css ---
    COPIED, NOT GENERATED. Edit the file named above. */
 
@@ -280,12 +340,12 @@
    does. It used to lighten only the OFF track's edge, which is a different
    gesture in each state on a control whose whole point is that the two states
    are one drawing. */
-.nd-switch:hover > .nd-switch-track {
+.nd-switch:is(:hover, [data-nd-seat-hover]) > .nd-switch-track {
   background: var(--nc-color-subtle-hover);
   border-color: var(--nc-color-subtle-hover);
 }
 
-.nd-switch[aria-checked="true"]:hover > .nd-switch-track {
+.nd-switch[aria-checked="true"]:is(:hover, [data-nd-seat-hover]) > .nd-switch-track {
   background: var(--nc-color-accent-hover);
   border-color: var(--nc-color-accent-hover);
 }
@@ -487,21 +547,21 @@
   opacity: 1;
 }
 
-.nd-choice:hover > .nd-choice-box {
+.nd-choice:is(:hover, [data-nd-seat-hover]) > .nd-choice-box {
   border-color: var(--nc-color-fg-muted);
 }
 
-.nd-choice:hover > .nd-choice-input:checked ~ .nd-choice-box {
+.nd-choice:is(:hover, [data-nd-seat-hover]) > .nd-choice-input:checked ~ .nd-choice-box {
   border-color: var(--nc-color-accent-hover);
 }
 
-.nd-checkbox:hover > .nd-choice-input:checked ~ .nd-choice-box {
+.nd-checkbox:is(:hover, [data-nd-seat-hover]) > .nd-choice-input:checked ~ .nd-choice-box {
   background: var(--nc-color-accent-hover);
 }
 
 /* The ring goes on the drawing, because the control it belongs to is
    invisible and an outline on an `opacity: 0` element is invisible with it. */
-.nd-choice-input:focus-visible ~ .nd-choice-box {
+.nd-choice-input:is(:focus-visible, [data-nd-seat-focus]) ~ .nd-choice-box {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -850,8 +910,8 @@
   font-size: var(--noctua-size-body);
 }
 
-.nd-select-native:hover,
-.nd-select-control:hover {
+.nd-select-native:is(:hover, [data-nd-seat-hover]),
+.nd-select-control:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-fg-muted);
 }
 
@@ -908,7 +968,7 @@
   cursor: pointer;
 }
 
-.nd-select-clear:hover {
+.nd-select-clear:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
@@ -1148,7 +1208,7 @@
   inline-size: 7ch; /* allow-literal: four digits plus the box's own padding, in the digit's own unit */
 }
 
-.nd-date-input-segment:hover {
+.nd-date-input-segment:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-fg-muted);
 }
 
@@ -1447,7 +1507,7 @@
   font-size: var(--noctua-size-body);
 }
 
-.nd-date-picker-cell:hover {
+.nd-date-picker-cell:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
@@ -1465,7 +1525,7 @@
 
 /* THE INPUT IS CLIPPED, SO THE RING IS DRAWN ON THE DAY A READER CAN SEE.
  * `Rating`'s arrangement and its comment. */
-.nd-date-picker-input:focus-visible + .nd-date-picker-cell {
+.nd-date-picker-input:is(:focus-visible, [data-nd-seat-focus]) + .nd-date-picker-cell {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -1548,7 +1608,7 @@
   opacity: 0.5; /* allow-literal: a refused day is dimmed, and there is no color token for "the same color, less of it" */
 }
 
-.nd-date-picker-input:disabled + .nd-date-picker-cell:hover {
+.nd-date-picker-input:disabled + .nd-date-picker-cell:is(:hover, [data-nd-seat-hover]) {
   background: none;
 }
 
@@ -1566,7 +1626,7 @@
   cursor: pointer;
 }
 
-.nd-date-picker-control:hover {
+.nd-date-picker-control:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
@@ -1637,8 +1697,8 @@
 
 /* The one a reader is in draws its whole edge, over the edge beside it. */
 .nd-date-picker[data-nd-pair="attached"]
-  .nd-date-picker-box:has(.nd-date-picker-entry:focus-visible),
-.nd-date-picker[data-nd-pair="attached"] .nd-date-picker-box:hover {
+  .nd-date-picker-box:has(.nd-date-picker-entry:is(:focus-visible, [data-nd-seat-focus])),
+.nd-date-picker[data-nd-pair="attached"] .nd-date-picker-box:is(:hover, [data-nd-seat-hover]) {
   z-index: var(--noctua-layer-raised);
 }
 
@@ -1671,8 +1731,8 @@
 }
 
 .nd-date-picker[data-nd-pair="stacked"]
-  .nd-date-picker-box:has(.nd-date-picker-entry:focus-visible),
-.nd-date-picker[data-nd-pair="stacked"] .nd-date-picker-box:hover {
+  .nd-date-picker-box:has(.nd-date-picker-entry:is(:focus-visible, [data-nd-seat-focus])),
+.nd-date-picker[data-nd-pair="stacked"] .nd-date-picker-box:is(:hover, [data-nd-seat-hover]) {
   z-index: var(--noctua-layer-raised);
 }
 
@@ -1710,14 +1770,14 @@
   border-radius: var(--noctua-radius-control);
 }
 
-.nd-date-picker-box:hover {
+.nd-date-picker-box:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-fg-muted);
 }
 
 /* THE RING IS ON THE BOX, NOT ON THE TYPING. The box is what a reader sees as
  * the field, and a ring around the text alone leaves the control beside it
  * outside the thing that just took focus. */
-.nd-date-picker-box:has(.nd-date-picker-entry:focus-visible) {
+.nd-date-picker-box:has(.nd-date-picker-entry:is(:focus-visible, [data-nd-seat-focus])) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -1747,7 +1807,7 @@
 }
 
 /* Taken off the typing because it is drawn on the box above. */
-.nd-date-picker-entry:focus-visible {
+.nd-date-picker-entry:is(:focus-visible, [data-nd-seat-focus]) {
   outline: none;
 }
 
@@ -1986,7 +2046,7 @@
   font-size: var(--noctua-size-small);
 }
 
-.nd-segmented-item:hover {
+.nd-segmented-item:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
   border-color: var(--nc-color-border-strong);
 }
@@ -2021,7 +2081,7 @@
   opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
 }
 
-.nd-segmented-item[aria-disabled="true"]:hover {
+.nd-segmented-item[aria-disabled="true"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg-muted);
   border-color: var(--nc-color-border);
 }
@@ -2129,7 +2189,7 @@
 }
 
 /* The ring is drawn inside the item, or the cut takes half of it. */
-.nd-segmented[data-nd-shape="bevel"] > .nd-segmented-item:focus-visible {
+.nd-segmented[data-nd-shape="bevel"] > .nd-segmented-item:is(:focus-visible, [data-nd-seat-focus]) {
   outline-offset: calc(-1 * (var(--noctua-focus-width) + var(--noctua-focus-offset)));
 }
 
@@ -2170,8 +2230,8 @@
 
 /* The chosen and the focused item are drawn over their neighbours, or the ring
    is half hidden under the item the negative margin pulled on top of it. */
-.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:hover,
-.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:focus-visible,
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:is(:hover, [data-nd-seat-hover]),
+.nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item:is(:focus-visible, [data-nd-seat-focus]),
 .nd-segmented:not([data-nd-appearance="spread"]) > .nd-segmented-item[aria-checked="true"] {
   z-index: 1;
 }
@@ -2487,7 +2547,7 @@ span.nd-search-input {
 /* `clip-path` clips the focus ring with everything else, and a control whose
    focus is invisible is a control a keyboard cannot use. Drawn inside instead
    — far enough in that the whole ring survives the cut. */
-.nd-button[data-nd-shape="bevel"]:focus-visible {
+.nd-button[data-nd-shape="bevel"]:is(:focus-visible, [data-nd-seat-focus]) {
   outline-offset: calc(-1 * (var(--noctua-focus-width) + var(--noctua-focus-offset)));
 }
 
@@ -2577,7 +2637,7 @@ span.nd-search-input {
   border-color: var(--nc-color-accent);
 }
 
-.nd-button[data-nd-variant="solid"]:hover {
+.nd-button[data-nd-variant="solid"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-accent-hover);
   border-color: var(--nc-color-accent-hover);
 }
@@ -2588,7 +2648,7 @@ span.nd-search-input {
   border-color: var(--nc-color-subtle);
 }
 
-.nd-button[data-nd-variant="solid"][data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-variant="solid"][data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-hover);
   border-color: var(--nc-color-subtle-hover);
 }
@@ -2599,7 +2659,7 @@ span.nd-search-input {
   border-color: var(--nc-color-danger);
 }
 
-.nd-button[data-nd-variant="solid"][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-variant="solid"][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-danger-hover);
   border-color: var(--nc-color-danger-hover);
 }
@@ -2610,7 +2670,7 @@ span.nd-search-input {
   border-color: var(--nc-color-success);
 }
 
-.nd-button[data-nd-variant="solid"][data-nd-tone="success"]:hover {
+.nd-button[data-nd-variant="solid"][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-success-hover);
   border-color: var(--nc-color-success-hover);
 }
@@ -2623,7 +2683,7 @@ span.nd-search-input {
   border-color: var(--nc-color-accent-border);
 }
 
-.nd-button[data-nd-variant="outline"]:hover {
+.nd-button[data-nd-variant="outline"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-accent-bg);
 }
 
@@ -2632,7 +2692,7 @@ span.nd-search-input {
   border-color: var(--nc-color-border-strong);
 }
 
-.nd-button[data-nd-variant="outline"][data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-variant="outline"][data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
@@ -2641,7 +2701,7 @@ span.nd-search-input {
   border-color: var(--nc-color-danger-border);
 }
 
-.nd-button[data-nd-variant="outline"][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-variant="outline"][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-danger-bg);
 }
 
@@ -2650,7 +2710,7 @@ span.nd-search-input {
   border-color: var(--nc-color-success-border);
 }
 
-.nd-button[data-nd-variant="outline"][data-nd-tone="success"]:hover {
+.nd-button[data-nd-variant="outline"][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-success-bg);
 }
 
@@ -2670,7 +2730,7 @@ span.nd-search-input {
   border-color: transparent;
 }
 
-.nd-button[data-nd-variant="subtle"]:hover {
+.nd-button[data-nd-variant="subtle"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-accent-border);
 }
 
@@ -2678,7 +2738,7 @@ span.nd-search-input {
   background: var(--nc-color-subtle-bg);
 }
 
-.nd-button[data-nd-variant="subtle"][data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-variant="subtle"][data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-subtle-border);
 }
 
@@ -2686,7 +2746,7 @@ span.nd-search-input {
   background: var(--nc-color-danger-bg);
 }
 
-.nd-button[data-nd-variant="subtle"][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-variant="subtle"][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-danger-border);
 }
 
@@ -2694,7 +2754,7 @@ span.nd-search-input {
   background: var(--nc-color-success-bg);
 }
 
-.nd-button[data-nd-variant="subtle"][data-nd-tone="success"]:hover {
+.nd-button[data-nd-variant="subtle"][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-success-border);
 }
 
@@ -2709,7 +2769,7 @@ span.nd-search-input {
   border-color: transparent;
 }
 
-.nd-button[data-nd-variant="transparent"]:hover,
+.nd-button[data-nd-variant="transparent"]:is(:hover, [data-nd-seat-hover]),
 .nd-button[data-nd-variant="transparent"][aria-pressed="true"] {
   color: var(--nc-color-fg);
   background: color-mix(in oklab, var(--nc-color-subtle-bg) var(--nd-veil), transparent);
@@ -2719,7 +2779,7 @@ span.nd-search-input {
   color: var(--nc-color-danger);
 }
 
-.nd-button[data-nd-variant="transparent"][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-variant="transparent"][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-danger);
   background: var(--nc-color-danger-bg);
 }
@@ -2728,7 +2788,7 @@ span.nd-search-input {
   color: var(--nc-color-success);
 }
 
-.nd-button[data-nd-variant="transparent"][data-nd-tone="success"]:hover {
+.nd-button[data-nd-variant="transparent"][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-success);
   background: var(--nc-color-success-bg);
 }
@@ -2749,7 +2809,7 @@ span.nd-search-input {
   text-underline-offset: var(--noctua-space-1);
 }
 
-.nd-button[data-nd-variant="link"]:hover {
+.nd-button[data-nd-variant="link"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-accent-hover);
 }
 
@@ -2780,7 +2840,7 @@ span.nd-search-input {
   border-color: transparent;
 }
 
-.nd-button[data-nd-variant="nav"]:hover {
+.nd-button[data-nd-variant="nav"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
@@ -2797,12 +2857,12 @@ span.nd-search-input {
   opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" — the same exemption `.nd-icon-button` already carries */
 }
 
-.nd-button[disabled]:hover,
-.nd-button[aria-disabled="true"]:hover {
+.nd-button[disabled]:is(:hover, [data-nd-seat-hover]),
+.nd-button[aria-disabled="true"]:is(:hover, [data-nd-seat-hover]) {
   background: none;
 }
 
-.nd-button[data-nd-variant="solid"][disabled]:hover {
+.nd-button[data-nd-variant="solid"][disabled]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-accent);
 }
 /* --- crates/noctua-design-styles/src/button-group.css ---
@@ -2971,8 +3031,8 @@ span.nd-search-input {
 
 /* The focused member has to be drawn over its neighbours, or the ring is half
    hidden under the button the negative margin pulled on top of it. */
-.nd-button-group[data-nd-attached="true"] > .nd-button:hover,
-.nd-button-group[data-nd-attached="true"] > .nd-button:focus-visible {
+.nd-button-group[data-nd-attached="true"] > .nd-button:is(:hover, [data-nd-seat-hover]),
+.nd-button-group[data-nd-attached="true"] > .nd-button:is(:focus-visible, [data-nd-seat-focus]) {
   z-index: 1;
 }
 /* --- crates/noctua-design-styles/src/swatch.css ---
@@ -3128,7 +3188,7 @@ span.nd-search-input {
  * THREE RULES, NOT TWELVE — AND EVERY TONE IN THE PALETTE RATHER THAN FOUR.
  *
  * `dist/tones.css` declares `--nd-tone`, `--nd-tone-bg`, `--nd-tone-border` and
- * `--nd-tone-on` once per family, generated from the colour system's own 349.
+ * `--nd-tone-on` once per family, generated from the colour system's own 352 families.
  * A tag therefore says *the tone's background* and gets `overdue`, `shipped`,
  * `degraded` and the three hundred others for free — including the ones the
  * palette gains after this file was written.
@@ -3187,12 +3247,12 @@ span.nd-search-input {
 /* THE RING GOES ON THE WRAPPER, NOT ON THE BODY. The body has no border and
    sits inside the pill; an outline on it would draw a rectangle through the
    rounded corners of the thing around it. */
-.nd-tag:has(> .nd-tag-body:focus-visible) {
+.nd-tag:has(> .nd-tag-body:is(:focus-visible, [data-nd-seat-focus])) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
 
-.nd-tag-body:focus-visible {
+.nd-tag-body:is(:focus-visible, [data-nd-seat-focus]) {
   outline: none;
 }
 
@@ -3200,6 +3260,12 @@ span.nd-search-input {
   .nd-tag:has(> .nd-tag-body:is(a, button):hover) {
     border-color: var(--nc-color-border-strong);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-tag:has(> .nd-tag-body:is(a, button)[data-nd-seat-hover]) {
+  border-color: var(--nc-color-border-strong);
 }
 
 /* Pressed is a state, and it is drawn as one: the tone at full strength, which
@@ -3484,6 +3550,12 @@ span.nd-search-input {
     border-color: var(--nc-color-border-strong);
   }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+a.nd-avatar[data-nd-seat-hover] {
+  border-color: var(--nc-color-border-strong);
+}
 /* --- crates/noctua-design-styles/src/avatar-group.css ---
    COPIED, NOT GENERATED. Edit the file named above. */
 
@@ -3603,6 +3675,12 @@ span.nd-search-input {
     color: var(--nc-color-fg);
   }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+a.nd-avatar-more-chip[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+}
 /* --- crates/noctua-design-styles/src/tag-picker.css ---
    COPIED, NOT GENERATED. Edit the file named above. */
 
@@ -3658,7 +3736,7 @@ span.nd-search-input {
   border-radius: var(--noctua-radius-control);
 }
 
-.nd-tag-picker-field:focus-within {
+.nd-tag-picker-field:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
   border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -3718,6 +3796,12 @@ span.nd-search-input {
   .nd-tag-picker-clear:hover {
     color: var(--nc-color-fg);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-tag-picker-clear[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
 }
 
 /* A REFUSED PICKER LOOKS REFUSED, which the real attribute alone does not do. */
@@ -3886,7 +3970,7 @@ span.nd-search-input {
 
 /* The whole row is the target, which is what makes a tree walkable with a
    thumb. The focus ring is on the `<li>` because that is what has focus. */
-.nd-tree-item:focus-visible {
+.nd-tree-item:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(-1 * var(--noctua-focus-width));
   border-radius: var(--noctua-radius-control);
@@ -3984,6 +4068,16 @@ span.nd-search-input {
   .nd-tree-toggle:hover {
     color: var(--nc-color-fg);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-tree-body[data-nd-seat-hover] {
+  color: var(--nc-color-accent);
+}
+
+.nd-tree-toggle[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
 }
 
 .nd-tree-item[aria-selected="true"] > .nd-tree-row {
@@ -4110,6 +4204,45 @@ span.nd-search-input {
   display: flex;
   flex-direction: column;
   gap: var(--noctua-space-paragraph);
+}
+
+/* FLOW: A DOCUMENT'S RHYTHM, for prose a program wrote, such as a help page
+   drawn from Markdown. The gap goes, because a gap cannot tell a heading's two
+   sides apart, and every block takes a paragraph's room above it instead.
+   A heading starts a section: a section's room above a first or second level
+   and a heading's above a deeper one, and a gap's below, so it sits nearer what
+   it heads than what it ends. Nothing is above the first block. A break keeps
+   at least a paragraph's room on each side, and its own where that is more. */
+.nd-prose-block[data-nd-flow="true"] {
+  gap: 0;
+}
+
+.nd-prose-block[data-nd-flow="true"] > * {
+  margin-block: 0;
+}
+
+.nd-prose-block[data-nd-flow="true"] > * + * {
+  margin-block-start: var(--noctua-space-paragraph);
+}
+
+.nd-prose-block[data-nd-flow="true"] > :is(h1, h2).nd-heading:not(:first-child) {
+  margin-block-start: var(--noctua-space-section);
+}
+
+.nd-prose-block[data-nd-flow="true"] > :is(h3, h4, h5, h6).nd-heading:not(:first-child) {
+  margin-block-start: var(--noctua-space-heading);
+}
+
+.nd-prose-block[data-nd-flow="true"] > .nd-heading + * {
+  margin-block-start: var(--noctua-space-gap);
+}
+
+.nd-prose-block[data-nd-flow="true"] > .nd-divider[data-nd-orientation="horizontal"] {
+  margin-block: max(var(--noctua-space-paragraph), var(--nd-divider-gap));
+}
+
+.nd-prose-block[data-nd-flow="true"] > .nd-divider + * {
+  margin-block-start: 0;
 }
 
 .nd-a { color: var(--nc-color-accent); text-underline-offset: var(--noctua-space-1); }
@@ -4263,6 +4396,14 @@ span.nd-search-input {
     border-color: var(--nc-color-border);
   }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-codeblock-control[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border);
+}
+
 .nd-codeblock-control[aria-pressed="true"] {
   color: var(--nc-color-fg);
   border-color: var(--nc-color-border-strong);
@@ -4431,6 +4572,14 @@ span.nd-search-input {
     border-color: var(--nc-color-border-strong);
   }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-codeblock-expand[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
 /* Absent until the script caps the block. A control that offers to expand
    something already fully visible is a control that lies. */
 .nd-codeblock-figure:not(:has(> .nd-codeblock[data-nd-collapsed])) > .nd-codeblock-expand {
@@ -4640,7 +4789,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   clip-path: inset(50%);
   white-space: nowrap;
 }
-.nd-visually-hidden[data-nd-focusable="true"]:focus-within {
+.nd-visually-hidden[data-nd-focusable="true"]:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
   position: static;
   inline-size: auto;
   block-size: auto;
@@ -4694,7 +4843,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   font-weight: var(--noctua-weight-medium);
 }
 
-.nd-pagination-link:hover {
+.nd-pagination-link:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-border-strong);
 }
 
@@ -4735,7 +4884,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   display: none;
 }
 
-.nd-pagination-more:hover {
+.nd-pagination-more:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
   border-color: var(--nc-color-border-strong);
 }
@@ -4808,11 +4957,11 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   cursor: help;
 }
 
-.nd-info-marker:hover {
+.nd-info-marker:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-accent-hover);
 }
 
-.nd-info-marker:focus-visible {
+.nd-info-marker:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -4923,11 +5072,11 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 /* NO RADIUS ON THE ITEM, because the surface above it is what clips: a rounded
    item inside a rounded surface draws two corners a pixel apart, which is the
    defect `.nd-panel` and `.nd-codeblock` were split to avoid. */
-.nd-menu-item:hover {
+.nd-menu-item:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-surface-subtle);
 }
 
-.nd-menu-item:focus-visible {
+.nd-menu-item:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(-1 * var(--noctua-focus-width));
 }
@@ -4940,7 +5089,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   cursor: not-allowed;
 }
 
-.nd-menu-item[aria-disabled="true"]:hover {
+.nd-menu-item[aria-disabled="true"]:is(:hover, [data-nd-seat-hover]) {
   background: none;
 }
 
@@ -4948,7 +5097,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   color: var(--nd-tone);
 }
 
-.nd-menu-item[data-nd-tone]:hover {
+.nd-menu-item[data-nd-tone]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nd-tone-bg);
 }
 
@@ -5060,11 +5209,11 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   line-height: 1;
 }
 
-.nd-note-close:hover {
+.nd-note-close:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
-.nd-note-close:focus-visible {
+.nd-note-close:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -5359,7 +5508,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 /* THE RING GOES ON THE CONTROL, which is the thing that takes focus, and it
    repeats the mark's radius so the outline follows the corners underneath it
    rather than cutting a rectangle through them. */
-.nd-ai-label-control:focus-visible {
+.nd-ai-label-control:is(:focus-visible, [data-nd-seat-focus]) {
   border-radius: var(--noctua-radius-control);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -5369,6 +5518,12 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   .nd-ai-label-control:hover .nd-ai-label-mark {
     border-color: var(--nc-color-border-strong);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-ai-label-control[data-nd-seat-hover] .nd-ai-label-mark {
+  border-color: var(--nc-color-border-strong);
 }
 /* --- crates/noctua-design-styles/src/progress.css ---
    COPIED, NOT GENERATED. Edit the file named above. */
@@ -5656,7 +5811,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   border-radius: 0;
 }
 
-.nd-table-scroll:focus-visible {
+.nd-table-scroll:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -5806,7 +5961,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   display: none;
 }
 
-.nd-table-columns-summary:focus-visible {
+.nd-table-columns-summary:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -6037,7 +6192,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   background: var(--nc-color-surface-subtle);
 }
 
-.nd-table[data-nd-hover="true"] tbody .nd-table-row:hover {
+.nd-table[data-nd-hover="true"] tbody .nd-table-row:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
@@ -6136,11 +6291,11 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   cursor: pointer;
 }
 
-.nd-table-sort:hover {
+.nd-table-sort:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
-.nd-table-sort:focus-visible {
+.nd-table-sort:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-control);
@@ -6211,13 +6366,13 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   background: var(--nc-color-border);
 }
 
-.nd-table-resize:hover::before,
-.nd-table-resize:focus-visible::before {
+.nd-table-resize:is(:hover, [data-nd-seat-hover])::before,
+.nd-table-resize:is(:focus-visible, [data-nd-seat-focus])::before {
   background: var(--nc-color-accent);
   inset-block: 0;
 }
 
-.nd-table-resize:focus-visible {
+.nd-table-resize:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -6242,7 +6397,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 
 /* A cell is focusable only inside a grid, and the ring is on the cell rather
    than on what is in it — a reader walking cells needs to see which cell. */
-.nd-table[data-nd-interactive] :is(.nd-table-cell, .nd-table-header-cell):focus-visible {
+.nd-table[data-nd-interactive] :is(.nd-table-cell, .nd-table-header-cell):is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(var(--noctua-focus-offset) * -1);
 }
@@ -6292,7 +6447,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 /* THE RING IS ON THE BOX, NEVER ON WHAT IS IN IT. `Rating`'s rule and
    `Search`'s rule: the focus ring has to land on the thing the reader can see.
    The input and the two buttons give theirs up so this one is the only one. */
-.nd-table-search-field:focus-within {
+.nd-table-search-field:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
   border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -6320,6 +6475,13 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   .nd-table-search-clear:hover {
     color: var(--nc-color-fg);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-table-search-open[data-nd-seat-hover],
+.nd-table-search-clear[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
 }
 
 /* Open, the glass is no longer the thing to press first — it is where the box
@@ -6381,7 +6543,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   display: none;
 }
 
-.nd-table-export-summary:focus-visible {
+.nd-table-export-summary:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -6420,11 +6582,11 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   cursor: pointer;
 }
 
-.nd-table-export-item:hover {
+.nd-table-export-item:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
-.nd-table-export-item:focus-visible {
+.nd-table-export-item:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(var(--noctua-focus-offset) * -1);
 }
@@ -6450,7 +6612,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   cursor: pointer;
 }
 
-.nd-table-group-button:focus-visible {
+.nd-table-group-button:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-control);
@@ -6784,7 +6946,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   cursor: progress;
 }
 
-.nd-search-field:focus-within {
+.nd-search-field:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
   border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -6836,6 +6998,11 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 @media (hover: hover) {
   .nd-search-clear:hover { color: var(--nc-color-fg); }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-clear[data-nd-seat-hover] { color: var(--nc-color-fg); }
+
 /* Absent while there is nothing to clear: a control that empties an empty box
    is a control that does nothing, and a reader learns to distrust the row. */
 .nd-search:not([data-nd-has-query]) .nd-search-clear { display: none; }
@@ -6892,25 +7059,13 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   display: none;
 }
 
-/* A HIT INSIDE A WORD CARRIES NO PADDING.
- *
- * `Mark`'s own rule pads it — right for a highlighted phrase in a paragraph,
- * where the tint needs air around it. Wrong here, and visibly so: `bg` matched
- * `ButtonGroup` on its two capitals and the row read `B utton G roup`, two
- * gaps torn into the middle of a name by a rule written for prose. A search
- * hit is a run of letters *inside* a word, so it keeps the tint, keeps the
- * weight, and gives up the box.
- *
- * `[data-nd-hit]` rather than `.nd-mark`, because a caller's own `Mark` may be
- * sitting in a result's label and this is not about that one. */
-.nd-search [data-nd-hit] {
-  padding: 0;
-  border-radius: 0;
-  /* The tint alone is thin on a one-letter run; the underline is what makes it
-     findable without colour, which `NOCTUA.md §9.8` asks of every signal. */
-  text-decoration: underline;
-  text-underline-offset: var(--noctua-space-1);
-}
+/* A HIT IS DRAWN BY `match-text.css`, NOT HERE. The script writes
+ * `<mark class="nd-match" data-nd-word>` over the letters each word of the
+ * query matched, which is the element `MatchText` draws, so a result is marked
+ * exactly as every other list filtered by typing is. That rule carries no
+ * padding, for the reason this one used to give: `bg` matched `ButtonGroup` on
+ * its two capitals, and a padded mark tore two gaps into the middle of a
+ * name. */
 
 /* --- The panel --- */
 .nd-search-panel {
@@ -6971,6 +7126,12 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   }
 }
 
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-result-link[data-nd-seat-hover] {
+  background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
+}
+
 /* THE ACTIVE ROW IS A FILL AND AN EDGE. Focus never leaves the box — the
    highlight travels by `aria-activedescendant` — so this is the only thing a
    sighted reader has to say which result Enter will follow, and a fill alone is
@@ -7023,6 +7184,13 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   .nd-search-forget:hover {
     background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-recent-item[data-nd-seat-hover],
+.nd-search-forget[data-nd-seat-hover] {
+  background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
 }
 
 /* --- inline ---
@@ -7145,6 +7313,13 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   }
 }
 
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-open[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
 /* `[open]`, AND THE SELECTOR IS THE WHOLE BUG.
  *
  * A closed `<dialog>` is `display: none` by the user-agent stylesheet, and that
@@ -7206,6 +7381,13 @@ dl.nd-list > .nd-list-item + .nd-list-term {
     color: var(--nc-color-fg);
     border-color: var(--nc-color-border-strong);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-close[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
 }
 
 /* SQUARE IS THE BASE AND ROUNDED IS THE OVERRIDE, like every other rule here.
@@ -7308,28 +7490,28 @@ dl.nd-list > .nd-list-item + .nd-list-term {
  * Every rule here carries one more attribute than the fill it replaces, so
  * specificity decides and not source order. */
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
   background: color-mix(in oklab, var(--nc-color-surface) var(--noctua-glass-opacity), transparent);
 }
 
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="accent"],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="accent"]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="accent"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-accent-border);
 }
 
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="neutral"],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-border-strong);
 }
 
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="danger"],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-danger-border);
 }
 
 .nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="success"],
-.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="success"]:hover {
+.nd-button[data-nd-glass="true"][data-nd-variant][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-success-border);
 }
 
@@ -7337,7 +7519,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
    the specificity of its heaviest argument, so these are (0,4,0) and (0,5,0) —
    one above the fills they replace, on specificity rather than on order. */
 .nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="accent"],
-.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="accent"]:hover {
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="accent"]:is(:hover, [data-nd-seat-hover]) {
   background: color-mix(
     in oklab,
     color-mix(in oklab, var(--nc-color-accent) var(--nd-tint), var(--nc-color-surface))
@@ -7347,7 +7529,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 }
 
 .nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="neutral"],
-.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   background: color-mix(
     in oklab,
     color-mix(in oklab, var(--nc-color-subtle) var(--nd-tint), var(--nc-color-surface))
@@ -7357,7 +7539,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 }
 
 .nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="danger"],
-.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="danger"]:hover {
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   background: color-mix(
     in oklab,
     color-mix(in oklab, var(--nc-color-danger) var(--nd-tint), var(--nc-color-surface))
@@ -7367,7 +7549,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 }
 
 .nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="success"],
-.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="success"]:hover {
+.nd-button[data-nd-glass="true"]:is([data-nd-variant="solid"], [data-nd-variant="subtle"])[data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   background: color-mix(
     in oklab,
     color-mix(in oklab, var(--nc-color-success) var(--nd-tint), var(--nc-color-surface))
@@ -7419,7 +7601,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
 }
 
 .nd-switch[aria-checked="true"] > .nd-switch-track[data-nd-glass="true"][aria-hidden],
-.nd-switch[aria-checked="true"]:hover > .nd-switch-track[data-nd-glass="true"][aria-hidden] {
+.nd-switch[aria-checked="true"]:is(:hover, [data-nd-seat-hover]) > .nd-switch-track[data-nd-glass="true"][aria-hidden] {
   background-color: color-mix(
     in oklab,
     var(--nc-color-surface) var(--noctua-glass-opacity),
@@ -7683,7 +7865,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   overflow-y: auto;
 }
 
-.nd-lineage-field:focus-visible {
+.nd-lineage-field:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: calc(var(--noctua-focus-offset) * -1);
 }
@@ -7869,8 +8051,8 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   text-decoration: none;
 }
 
-a.nd-lineage-card:hover,
-a.nd-lineage-card:focus-visible {
+a.nd-lineage-card:is(:hover, [data-nd-seat-hover]),
+a.nd-lineage-card:is(:focus-visible, [data-nd-seat-focus]) {
   border-color: var(--nc-color-accent);
 }
 
@@ -8040,7 +8222,7 @@ a.nd-lineage-card:focus-visible {
   white-space: nowrap;
 }
 
-.nd-lineage-tie:focus-visible {
+.nd-lineage-tie:is(:focus-visible, [data-nd-seat-focus]) {
   position: fixed;
   inset-block-start: var(--noctua-space-4);
   inset-inline-start: var(--noctua-space-4);
@@ -8265,7 +8447,7 @@ a.nd-lineage-card:focus-visible {
     translate(-50%, var(--noctua-space-1));
 }
 
-.nd-lineage-pick:focus-visible ~ .nd-lineage-grip .nd-lineage-run {
+.nd-lineage-pick:is(:focus-visible, [data-nd-seat-focus]) ~ .nd-lineage-grip .nd-lineage-run {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8333,8 +8515,8 @@ a.nd-lineage-card:focus-visible {
   visibility: hidden;
 }
 
-.nd-lineage-bond:hover .nd-lineage-note,
-.nd-lineage-pick:focus-visible ~ .nd-lineage-note {
+.nd-lineage-bond:is(:hover, [data-nd-seat-hover]) .nd-lineage-note,
+.nd-lineage-pick:is(:focus-visible, [data-nd-seat-focus]) ~ .nd-lineage-note {
   visibility: visible;
 }
 
@@ -8488,7 +8670,7 @@ button.nd-lineage-figure {
   cursor: pointer;
 }
 
-.nd-lineage-figure:focus-visible {
+.nd-lineage-figure:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8537,7 +8719,7 @@ button.nd-lineage-figure {
   display: none;
 }
 
-.nd-lineage-piece:focus-visible .nd-lineage-card {
+.nd-lineage-piece:is(:focus-visible, [data-nd-seat-focus]) .nd-lineage-card {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8651,7 +8833,7 @@ button.nd-lineage-figure {
   display: none;
 }
 
-.nd-color-picker-trigger:focus-visible {
+.nd-color-picker-trigger:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8860,7 +9042,7 @@ are one box
   white-space: nowrap;
 }
 
-.nd-color-picker-area:has(.nd-color-picker-axis:focus-visible) {
+.nd-color-picker-area:has(.nd-color-picker-axis:is(:focus-visible, [data-nd-seat-focus])) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8877,7 +9059,7 @@ are one box
   cursor: pointer;
 }
 
-.nd-color-picker-track:focus-visible {
+.nd-color-picker-track:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8928,7 +9110,7 @@ are one box
   cursor: pointer;
 }
 
-.nd-color-picker-swatch:focus-visible {
+.nd-color-picker-swatch:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -8958,7 +9140,7 @@ are one box
   border-radius: var(--noctua-radius-control);
 }
 
-.nd-color-picker-entry:focus-visible {
+.nd-color-picker-entry:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -9015,7 +9197,7 @@ are one box
   cursor: pointer;
 }
 
-.nd-color-picker-copy:focus-visible {
+.nd-color-picker-copy:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -9186,11 +9368,11 @@ are one box
  * backwards and matched nothing, ever. The one focusable thing in the control
  * showed no focus at all, which is WCAG 2.4.7 failed in silence by a rule that
  * looked right. `:has()` asks the question the markup can answer. */
-.nd-input:focus-within,
-.nd-number-input:focus-within,
-.nd-textarea:focus-within,
-.nd-time-input-segment:focus-visible,
-.nd-file-input:has(> .nd-file-input-native:focus-visible) > .nd-file-input-area {
+.nd-input:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])),
+.nd-number-input:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])),
+.nd-textarea:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])),
+.nd-time-input-segment:is(:focus-visible, [data-nd-seat-focus]),
+.nd-file-input:has(> .nd-file-input-native:is(:focus-visible, [data-nd-seat-focus])) > .nd-file-input-area {
   border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -9219,10 +9401,10 @@ are one box
   padding-block: var(--noctua-space-2);
 }
 
-.nd-input-box:focus,
-.nd-number-input-box:focus,
-.nd-textarea-box:focus,
-.nd-time-input-segment:focus {
+.nd-input-box:is(:focus, [data-nd-seat-focus]),
+.nd-number-input-box:is(:focus, [data-nd-seat-focus]),
+.nd-textarea-box:is(:focus, [data-nd-seat-focus]),
+.nd-time-input-segment:is(:focus, [data-nd-seat-focus]) {
   outline: none;
 }
 
@@ -9261,7 +9443,7 @@ are one box
   cursor: pointer;
 }
 
-.nd-input-control:focus-visible {
+.nd-input-control:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -9427,7 +9609,7 @@ are one box
 
 /* `:enabled`, because a stepper a `readonly` or `disabled` field refuses must
    not light up under the pointer as though it were about to do something. */
-.nd-number-input-step:enabled:hover {
+.nd-number-input-step:enabled:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
@@ -9456,7 +9638,7 @@ are one box
   border-radius: var(--noctua-radius-control);
 }
 
-.nd-number-input[data-nd-stepping="primary"] .nd-number-input-step:enabled:hover {
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-step:enabled:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-surface-subtle);
 }
 
@@ -9591,7 +9773,7 @@ which makes both of them items of the figure's row{
   cursor: pointer;
 }
 
-.nd-slider-track:focus-visible {
+.nd-slider-track:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-pill);
@@ -10012,7 +10194,7 @@ so
 
 /* The track is focusable only when nothing inside it is — otherwise it is one
    extra stop before every slide. The runtime decides; this draws the ring. */
-.nd-carousel-track:focus-visible {
+.nd-carousel-track:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -10037,7 +10219,7 @@ so
   display: none;
 }
 
-.nd-carousel-control:focus-visible {
+.nd-carousel-control:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -10119,7 +10301,7 @@ so
   inline-size: var(--noctua-space-4);
 }
 
-.nd-carousel-dot:focus-visible {
+.nd-carousel-dot:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-pill);
@@ -10160,7 +10342,7 @@ so
 
 /* Focusable, not a tab stop — so the ring only ever appears when focus was
    SENT here, which is the one moment it means something. */
-.nd-error-summary:focus-visible {
+.nd-error-summary:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -10203,7 +10385,7 @@ so
   text-underline-offset: var(--noctua-space-1);
 }
 
-.nd-error-summary-link:focus-visible {
+.nd-error-summary-link:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-control);
@@ -10462,9 +10644,9 @@ figure.nd-image {
   color: var(--nc-color-fg);
 }
 
-/* All 351 names, through one indirection. `dist/tones.css` declares the four
-   custom properties for every family the palette has, so a tone added upstream
-   works here with nothing edited. */
+/* Every tone, through one indirection: the palette's 352 families and the two
+   names this system adds. `dist/tones.css` declares the four custom properties
+   for each, so a tone added upstream works here with nothing edited. */
 .nd-message-bar[data-nd-tone] {
   border-color: var(--nd-tone-border);
   border-inline-start-color: var(--nd-tone);
@@ -10527,9 +10709,156 @@ figure.nd-image {
   cursor: pointer;
 }
 
-.nd-message-bar-dismiss:focus-visible {
+.nd-message-bar-dismiss:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
+}
+
+/* THE TIME LEFT, under the message in a bar and after it in a line. Tabular
+   figures, so a second going by moves no letter beside it. It wraps like the
+   sentence it is, because the caller's words for it run long in Portuguese. */
+.nd-message-bar-countdown {
+  align-self: flex-start;
+  font-size: var(--noctua-size-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--nc-color-fg-muted);
+  overflow-wrap: anywhere;
+}
+
+.nd-message-bar-countdown[hidden] {
+  display: none;
+}
+
+/* WHAT A READER DOES ABOUT IT, drawn in the message's own ink: a hairline in
+   that ink and no fill, so the control reads on a tint, on a fill of the tone
+   and on no tone at all. Its box clears the target floor in both forms.
+   Under the words in a bar, and after them in a line. */
+.nd-message-bar-action {
+  flex: 0 1 auto;
+  align-self: flex-start;
+  max-inline-size: 100%;
+  margin-block-start: var(--noctua-space-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-inline-size: var(--noctua-target-min);
+  min-block-size: max(var(--noctua-space-8), var(--noctua-target-min));
+  padding-block: 0;
+  padding-inline: var(--noctua-space-3);
+  border: var(--noctua-border-hairline) solid currentColor;
+  border-radius: var(--noctua-radius-control);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-semibold);
+  text-align: center;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .nd-message-bar-action:hover {
+    background: color-mix(in oklab, currentColor var(--nd-veil-checked), transparent);
+  }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-message-bar-action[data-nd-seat-hover] {
+  background: color-mix(in oklab, currentColor var(--nd-veil-checked), transparent);
+}
+
+/* ITS RING IS THE ONE EVERY FOCUSED ELEMENT IS GIVEN, in `base.css`. A rule of
+   its own here drew the same outline again, and the seats sweep found it
+   could not fail. In a line the ring takes the line's ink, below. */
+
+/* --- The line --------------------------------------------------------------
+ *
+ * `presentation: line` is the interface's alert line (`NOCTUA.md §12.17`): one
+ * row along a window's bottom edge, under the footer and the drawer.
+ *
+ * IN THE FLOW, AND THE WINDOW PLACES IT LAST. A line fixed over the bottom of
+ * the window would cover the footer's last line and whatever the keyboard is
+ * on there (WCAG 2.4.11), so it takes a row of its own, as the footer does.
+ *
+ * A FOOTER LINE'S HEIGHT AND TYPE, so the two meet as one edge: caption text
+ * at the body leading and the smallest padding, which is
+ * `--noctua-shell-line`. It is at least that tall and it WRAPS rather than
+ * cuts, because what an alert says is what a reader has to act on.
+ *
+ * FILLED WITH THE TONE, IN THE TONE'S OWN INK. `--nd-tone` and `--nd-tone-on`
+ * are the palette's solved pair, and everything in the line, the icon, the
+ * action and the rings, is drawn in that ink. The words and the icon still
+ * carry the meaning (`NOCTUA.md §8.8.6`). */
+.nd-message-bar[data-nd-presentation="line"] {
+  align-items: center;
+  gap: var(--noctua-space-3);
+  box-sizing: border-box;
+  min-block-size: var(--noctua-shell-line);
+  padding-block: var(--noctua-space-1);
+  padding-inline: var(--noctua-space-3);
+  border: 0;
+  border-radius: 0;
+  font-size: var(--noctua-size-caption);
+  line-height: var(--noctua-leading-body);
+}
+
+.nd-message-bar[data-nd-presentation="line"][data-nd-tone] {
+  background: var(--nd-tone);
+  color: var(--nd-tone-on);
+}
+
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-icon {
+  color: inherit;
+}
+
+/* One row of words: the title, the message and the time left, wrapping as a
+   sentence does when the window is narrow. */
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-text {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--noctua-space-3);
+  row-gap: var(--noctua-space-1);
+}
+
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-countdown {
+  align-self: baseline;
+  font-size: inherit;
+  font-weight: var(--noctua-weight-semibold);
+  color: inherit;
+}
+
+/* AT THE FAR END OF THE ROW, and of the row it wraps onto in a narrow window.
+   An automatic margin takes whatever the words leave. */
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-action {
+  align-self: center;
+  min-block-size: var(--noctua-target-min);
+  margin-block-start: 0;
+  margin-inline-start: auto;
+  font-size: inherit;
+}
+
+/* The dismiss control keeps the target floor and gives up the rest, so a line
+   holding it is still one line tall. */
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-dismiss {
+  inline-size: var(--noctua-target-min);
+  block-size: var(--noctua-target-min);
+}
+
+/* EVERY RING IN A LINE IS IN THE LINE'S INK AND INSIDE ITS CONTROL. The ring
+   colour is not a pair measured against a fill of the tone, and a ring drawn
+   outside the control would hang over the footer above the line. */
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-action:is(:focus-visible, [data-nd-seat-focus]) {
+  outline-color: currentColor;
+  outline-offset: calc(-2 * var(--noctua-focus-width));
+}
+
+.nd-message-bar[data-nd-presentation="line"] .nd-message-bar-dismiss:is(:focus-visible, [data-nd-seat-focus]) {
+  outline-color: currentColor;
+  outline-offset: calc(-1 * var(--noctua-focus-width));
 }
 
 /* Taken away by a reader. The element stays in the document so its live region
@@ -10665,7 +10994,7 @@ figure.nd-image {
 
 /* The input is clipped rather than hidden, so the focus ring has to be drawn
    on the star the reader can actually see. */
-.nd-rating-input:focus-visible + .nd-rating-star {
+.nd-rating-input:is(:focus-visible, [data-nd-seat-focus]) + .nd-rating-star {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -10768,11 +11097,11 @@ and the row is the same shape
   font-size: var(--noctua-size-h3);
 }
 
-.nd-otp-field-input:hover {
+.nd-otp-field-input:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-fg-muted);
 }
 
-.nd-otp-field-input:focus-visible {
+.nd-otp-field-input:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -10907,11 +11236,11 @@ because a specimen of a `needs_name` component must not render a
   border-inline-end: var(--noctua-border-strong) solid transparent;
 }
 
-.nd-tab:hover {
+.nd-tab:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
-.nd-tab:focus-visible {
+.nd-tab:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -10954,10 +11283,91 @@ because a specimen of a `needs_name` component must not render a
   padding-block-start: var(--noctua-space-4);
 }
 
-.nd-tab-panel:focus-visible {
+.nd-tab-panel:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
+
+/* A RAIL: ONE RAIL WIDE, AND A TAB IS ITS ICON (`NOCTUA.md §12.11`).
+ *
+ * The strip is the column the vertical rules above already make, as wide as
+ * `--noctua-shell-rail`. The contract writes `aria-orientation="vertical"` for
+ * a rail, so those rules apply, and these come after them to win at the same
+ * weight. The chosen tab keeps the vertical strip's rule down its edge and
+ * takes the page's own surface, which shows on the shade a rail stands on.
+ *
+ * A border of the same width stands on the other edge and never takes a
+ * colour: it is what keeps the icon on the rail's centre line. */
+.nd-tabs[data-nd-appearance="rail"] {
+  gap: 0;
+  box-sizing: border-box;
+  inline-size: var(--noctua-shell-rail);
+  border-inline-end: 0;
+}
+
+.nd-tabs[data-nd-appearance="rail"] .nd-tab {
+  position: relative;
+  justify-content: center;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  padding: 0;
+  border-inline: var(--noctua-border-strong) solid transparent;
+}
+
+.nd-tabs[data-nd-appearance="rail"] .nd-tab[data-nd-selected="true"],
+.nd-tabs[data-nd-appearance="rail"] .nd-tab[aria-selected="true"] {
+  background: var(--nc-color-surface);
+}
+
+/* UNDER FORCED COLOURS EVERY EDGE OF A RAIL IS DRAWN IN THE TEXT COLOUR, and
+   the chosen tab's shade is gone with every other fill, so the edges are
+   named in the system's colours: the window's own on every tab, and the
+   highlight on the chosen one. */
+@media (forced-colors: active) {
+  .nd-tabs[data-nd-appearance="rail"] .nd-tab {
+    border-inline-color: Canvas;
+  }
+
+  .nd-tabs[data-nd-appearance="rail"] .nd-tab[data-nd-selected="true"],
+  .nd-tabs[data-nd-appearance="rail"] .nd-tab[aria-selected="true"] {
+    border-inline-end-color: Highlight;
+  }
+}
+
+/* THE NAME IS KEPT AND NOT DRAWN, where there is an icon to draw instead. The
+   label and the count stay in the tab, so they stay its accessible name. A tab
+   with no icon keeps its words, cut at the rail's width: a blank square is a
+   tab nobody can tell from the next one. */
+.nd-tabs[data-nd-appearance="rail"] .nd-tab:has(> .nd-icon-glyph) > :is(.nd-tab-text, .nd-tab-count) {
+  position: absolute;
+  inline-size: var(--noctua-border-hairline);
+  block-size: var(--noctua-border-hairline);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.nd-tabs[data-nd-appearance="rail"] .nd-tab-text {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A `Tooltip` around a tab draws the name. Its box is the tab's. */
+.nd-tabs[data-nd-appearance="rail"] > .nd-tooltip {
+  display: flex;
+}
+
+.nd-tabs[data-nd-appearance="rail"] > .nd-tooltip > .nd-tab {
+  flex: 1 1 auto;
+}
+
+/* The ring is drawn inside the tab's own box, as in a rail of controls. */
+.nd-tabs[data-nd-appearance="rail"] .nd-tab:is(:focus-visible, [data-nd-seat-focus]) {
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
 /* --- crates/noctua-design-styles/src/dialog.css ---
    COPIED, NOT GENERATED. Edit the file named above. */
 
@@ -10989,8 +11399,9 @@ because a specimen of a `needs_name` component must not render a
 
 /* `data-nd-scripting` is stamped by the inline head script, so the slot exists
    from the first paint on a page that will have a trigger, and never on a page
-   that will not. */
-:root[data-nd-scripting] .nd-dialog {
+   that will not. Nor for a dialog with no trigger at all, which its caller
+   opens with `shown`: a slot there would hold an empty line in the page. */
+:root[data-nd-scripting] .nd-dialog:has(> .nd-dialog-open) {
   min-block-size: var(--nd-dialog-trigger-h);
 }
 
@@ -11018,8 +11429,15 @@ because a specimen of a `needs_name` component must not render a
   }
 }
 
-.nd-dialog-open:focus-visible,
-.nd-popover-trigger:focus-visible {
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-dialog-open[data-nd-seat-hover],
+.nd-popover-trigger[data-nd-seat-hover] {
+  border-color: var(--nc-color-border-strong);
+}
+
+.nd-dialog-open:is(:focus-visible, [data-nd-seat-focus]),
+.nd-popover-trigger:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -11036,17 +11454,30 @@ because a specimen of a `needs_name` component must not render a
   --nd-dialog-w: calc(var(--noctua-space-64) * 2 + var(--noctua-space-48));
 }
 
+/* THE GAP ABOVE IT SHRINKS WITH A SHORT WINDOW. A fixed sixteen steps took a
+   quarter of a 240-pixel window (the interface's smallest, `NOCTUA.md §12.19`)
+   before the surface began, so the gap is the smaller of that and a share of
+   the window, and the surface may be as tall as the window less a gap at each
+   end. Above 800 pixels both are what they were. */
 .nd-dialog-surface[open] {
+  --nd-dialog-gap: min(var(--noctua-space-16), 8vh);
+
   inline-size: min(var(--nd-dialog-w), calc(100vw - var(--noctua-space-6)));
-  max-block-size: min(var(--noctua-space-64) * 2, calc(100vh - var(--noctua-space-16)));
-  margin-block-start: var(--noctua-space-16);
+  max-block-size: min(var(--noctua-space-64) * 2, calc(100vh - 2 * var(--nd-dialog-gap)));
+  margin-block-start: var(--nd-dialog-gap);
   margin-inline: auto;
   padding: 0;
   display: flex;
   flex-direction: column;
-  /* The clipping context. Not `auto`: this element must never scroll — the
-     body inside it does. */
-  overflow: hidden;
+  /* IN A NARROW WINDOW THE SURFACE SCROLLS AS ONE, AND IT CARRIES NO RADIUS
+     THERE. Below the `sm` step a head, a description and two answers that wrap
+     onto two rows can be taller than a 240-pixel window by themselves (the
+     interface's smallest, `NOCTUA.md §12.19`), and a part that does not scroll
+     is a part cut off. Square is what lets it scroll: no scrollbar paints
+     through a corner that is not round. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-block: contain;
   color: var(--nc-color-fg);
   background: var(--nc-color-surface-raised);
   border: var(--noctua-border-hairline) solid var(--nc-color-border);
@@ -11055,8 +11486,13 @@ because a specimen of a `needs_name` component must not render a
   border-radius: 0;
 }
 
+/* From the `sm` step up the surface is round, so it clips and the body inside
+   it scrolls: the clipping context, which must never scroll itself. */
 @media (min-width: 30rem) {
-  .nd-dialog-surface[open] { border-radius: var(--noctua-radius-surface); }
+  .nd-dialog-surface[open] {
+    overflow: hidden;
+    border-radius: var(--noctua-radius-surface);
+  }
 }
 
 /* THE PAGE FADES TOWARD ITS OWN GROUND, and that is one rule for both
@@ -11155,7 +11591,6 @@ because a specimen of a `needs_name` component must not render a
    there. The gutter is the panel's own padding, plus the control, plus the gap
    the head keeps between a title and the `×` — so a sentence stops where it
    would have stopped beside a heading rather than running under the glyph. */
-.nd-dialog-head:not(:has(> .nd-dialog-title)) ~ .nd-dialog-note,
 .nd-dialog-head:not(:has(> .nd-dialog-title)) ~ .nd-dialog-body {
   padding-inline-end: calc(var(--noctua-space-4) + var(--noctua-space-8) + var(--noctua-space-3));
 }
@@ -11167,27 +11602,100 @@ because a specimen of a `needs_name` component must not render a
   line-height: var(--noctua-leading-tight);
 }
 
+/* THE DESCRIPTION, THE SCROLLER'S FIRST LINE. Under a title it keeps the two
+   steps between them it had when it stood outside the scroller, and the body's
+   gap is what stands under it. */
 .nd-dialog-note {
   margin: 0;
-  padding-inline: var(--noctua-space-4);
-  padding-block-start: var(--noctua-space-2);
   font-size: var(--noctua-size-small);
   color: var(--nc-color-fg-muted);
 }
 
-/* THE SCROLLER, AND IT CARRIES NO RADIUS. The surface above it clips and holds
-   the corners; this holds the overflow. `.nd-panel` is two elements for exactly
-   this reason, and a classic scrollbar painting straight through a rounded
-   corner is what both of them are avoiding. */
+.nd-dialog-head:has(> .nd-dialog-title) + .nd-dialog-body:has(> .nd-dialog-note:first-child) {
+  padding-block-start: var(--noctua-space-2);
+}
+
+/* THE SCROLLER FROM THE `sm` STEP UP, AND IT CARRIES NO RADIUS. The surface
+   above it clips and holds the corners; this holds the overflow. `.nd-panel`
+   is two elements for exactly this reason, and a classic scrollbar painting
+   straight through a rounded corner is what both of them are avoiding. Below
+   that step the surface scrolls and this is as tall as what is in it, so it
+   cannot shrink to nothing inside a surface that is also scrolling. */
 .nd-dialog-body {
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  flex: 0 0 auto;
   border-radius: 0;
   padding: var(--noctua-space-4);
   display: flex;
   flex-direction: column;
   gap: var(--noctua-space-4);
 }
+
+@media (min-width: 30rem) {
+  .nd-dialog-body {
+    flex: 0 1 auto;
+    overflow-y: auto;
+    overscroll-behavior-block: contain;
+  }
+}
+
+/* --- The confirmation ----------------------------------------------------
+ *
+ * `alert`, `requester`, `irreversible_label` and the two answers: the surface
+ * the interface asks a person to confirm on (`NOCTUA.md §11.1`). */
+
+/* WHO ASKS, quiet, opening the body. */
+.nd-dialog-requester {
+  margin: 0;
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+/* THAT THE ANSWER CANNOT BE TAKEN BACK. The words in the page's ink, at a
+   weight that stands out, and a warning glyph in the danger tone beside them:
+   the words carry it and the glyph is the second signal (`NOCTUA.md §8.8.6`).
+   The glyph sits on the first line's centre, as `MessageBar`'s icon does. */
+.nd-dialog-mark {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--noctua-space-2);
+  margin: 0;
+  font-weight: var(--noctua-weight-semibold);
+}
+
+.nd-dialog-mark-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  block-size: 1lh;
+  color: var(--nc-color-danger);
+}
+
+/* THE ANSWERS, UNDER THE SCROLLER AND NEVER IN IT, so a short window scrolls
+   the question and keeps them in view. Decline first, at the start of the row:
+   content sits to the left (`NOCTUA.md §9.7`). The body's padding is the room
+   above them.
+
+   BELOW `sm`, WHERE THE SURFACE SCROLLS AS ONE, THEY STICK TO ITS FOOT. The
+   focus opens on the decline control, and the platform scrolls a surface to
+   the control it focuses: with the answers at the end of what scrolls, a
+   window 240 pixels tall opened on them with the question above the top
+   edge. Stuck to the foot they are in view from the first line, so the
+   surface opens at its head and the question is read before the answer. They
+   take the surface's own fill, so what scrolls under them is not read through
+   them. From `sm` up nothing around them scrolls and sticking does nothing. */
+.nd-dialog-actions {
+  position: sticky;
+  inset-block-end: 0;
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: var(--noctua-space-3);
+  margin: 0;
+  padding: var(--noctua-space-4);
+  padding-block-start: 0;
+  background: var(--nc-color-surface-raised);
+}
+
 /* --- crates/noctua-design-styles/src/popover.css ---
    COPIED, NOT GENERATED. Edit the file named above. */
 
@@ -11317,9 +11825,18 @@ because a specimen of a `needs_name` component must not render a
   }
 }
 
-.nd-dialog-close:focus-visible,
-.nd-popover-close:focus-visible,
-.nd-toast-dismiss:focus-visible {
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-dialog-close[data-nd-seat-hover],
+.nd-popover-close[data-nd-seat-hover],
+.nd-toast-dismiss[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface-subtle);
+}
+
+.nd-dialog-close:is(:focus-visible, [data-nd-seat-focus]),
+.nd-popover-close:is(:focus-visible, [data-nd-seat-focus]),
+.nd-toast-dismiss:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: calc(-1 * var(--noctua-focus-width));
 }
@@ -11499,4 +12016,1290 @@ because a specimen of a `needs_name` component must not render a
 
 .nd-toast-countdown[hidden] {
   display: none;
+}
+/* --- crates/noctua-design-styles/src/match-text.css ---
+   COPIED, NOT GENERATED. Edit the file named above. */
+
+
+/* --- MatchText -------------------------------------------------------------
+ *
+ * A name in a list filtered by typing, with the characters each word of the
+ * query matched marked (`NOCTUA.md §12.4`). Three tones: the first word, the
+ * second, and one shared by the third and every later word.
+ *
+ * NEVER BY COLOUR ALONE. The palette cannot keep two colours apart for every
+ * reader (`NOCTUA.md §8.8.6`), so each tone is a line under the letters in a
+ * style of its own: solid, dashed, dotted. The style is the signal.
+ *
+ * NO WEIGHT AND NO PADDING. A match is a run of letters inside a word, and it
+ * changes on every keystroke: a heavier face or a padded box moves the letters
+ * after it each time, in a list a reader is trying to read. `Mark` does both,
+ * rightly, for a phrase in prose.
+ *
+ * `.nd-match` IS NOT ONLY THIS COMPONENT'S. `dist/search.js` writes the same
+ * element over a result's label, so `Search` draws a match exactly as every
+ * other list does. */
+.nd-match {
+  padding: 0;
+  border-radius: 0;
+  font: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: var(--noctua-border-strong);
+  text-underline-offset: var(--noctua-space-1);
+  /* A dash that stops for every descender is a dash a reader cannot count. */
+  text-decoration-skip-ink: none;
+}
+
+/* THE INK IS THE PAGE'S, IN EVERY TONE. The match colour as ink on the match
+ * tint measured 3.2:1 in the default palette, which is not text a reader can
+ * read in a list of small names, and the `match` context declares no ink of
+ * its own for its tint. So the letters keep the ink they had, and the tone is
+ * what is drawn around them: a tint and a line, a line, a quieter line. */
+
+/* The first word, the strongest: the match tint, over a solid line. */
+.nd-match[data-nd-word="1"] {
+  background: var(--nc-color-match-bg);
+  color: var(--nc-color-fg);
+  text-decoration-style: solid;
+  text-decoration-color: var(--nc-color-match);
+}
+
+/* The second, softer: the same line colour broken into dashes, and no tint. */
+.nd-match[data-nd-word="2"] {
+  background: none;
+  color: var(--nc-color-fg);
+  text-decoration-style: dashed;
+  text-decoration-color: var(--nc-color-match);
+}
+
+/* The third and every later word, the discreet one: a dotted line in the
+   neutral the palette keeps for them. */
+.nd-match[data-nd-word="3"] {
+  background: none;
+  color: var(--nc-color-fg);
+  text-decoration-style: dotted;
+  text-decoration-color: var(--nc-color-match-rest);
+}
+
+/* --- crates/noctua-design-styles/src/option-list.css ---
+   COPIED, NOT GENERATED. Edit the file named above. */
+
+
+/* --- OptionList ------------------------------------------------------------
+ *
+ * The list a reader walks with the keyboard: the command list and the leader
+ * menu of `NOCTUA.md §12.9`, and any list of things to choose among. It sits
+ * directly on the background, with no border, no box and no shadow.
+ *
+ * THE ROW'S HEIGHT IS DECLARED, because a row is a target and a target that is
+ * its font size and padding added up agrees with its neighbour by accident.
+ * A size is the floor and the air together: a line of text is taller than the
+ * two smaller floors, so a floor alone drew `small` and `medium` as one row. */
+.nd-option-list {
+  --nd-option-row: var(--noctua-space-8);
+  --nd-option-air: var(--noctua-space-1);
+  /* IT FILLS THE LINE IT IS GIVEN, wherever it is put. A list that shrank to
+     its longest name inside a flex parent would draw the active row's fill as
+     wide as that name, and would measure its columns against a width that
+     holds one. */
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.nd-option-list[data-nd-size="small"] {
+  --nd-option-row: var(--noctua-space-6);
+  --nd-option-air: var(--noctua-space-0);
+  font-size: var(--noctua-size-small);
+}
+
+.nd-option-list[data-nd-size="large"] {
+  --nd-option-row: var(--noctua-space-12);
+  --nd-option-air: var(--noctua-space-3);
+}
+
+.nd-option-list-items,
+.nd-option-group-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The ring is drawn inside the list's own box, so a list at the edge of a
+   drawer does not lose half of it to the clip. */
+.nd-option-list-items {
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
+/* COLUMNS ARE THE PLATFORM'S, NOT A GRID. A multi-column box fills down and
+   then across, which is the order the arrows walk and the order a screen
+   reader reads, so the Down arrow never moves the mark sideways. It makes as
+   many columns as the width holds and one where it holds one, with nothing to
+   decide at a breakpoint. */
+.nd-option-list[data-nd-layout="columns"] > .nd-option-list-items {
+  column-width: var(--noctua-space-64);
+  column-gap: var(--noctua-space-6);
+}
+
+.nd-option-item {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-3);
+  min-block-size: max(var(--nd-option-row), var(--noctua-target-min));
+  padding-block: var(--nd-option-air);
+  padding-inline: var(--noctua-space-3);
+  /* THE BAR'S ROOM IS ALWAYS THERE. The active row draws a bar down its
+     leading edge, and a border that arrived with the state would move every
+     name in the row by its width on every arrow. */
+  border-inline-start: var(--noctua-border-rule) solid transparent;
+  color: var(--nc-color-fg);
+  cursor: pointer;
+  break-inside: avoid;
+}
+
+.nd-option-item:is(:hover, [data-nd-seat-hover]) {
+  background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
+}
+
+/* WHERE THE KEYBOARD IS: A FILL AND A BAR. The focus never enters the list,
+ * so this is all a sighted reader has to say which option Enter will choose.
+ * The fill is the neutral raised surface and never a tint of the accent,
+ * because the matched characters in the row are drawn in the accent and have
+ * to stay legible on it (`NOCTUA.md §12.4`). The bar is the half that is not a
+ * colour.
+ *
+ * After the hover rule, so a row that is both reads as active. */
+.nd-option-item[data-nd-active="true"] {
+  background: var(--nc-color-surface-raised);
+  border-inline-start-color: var(--nc-color-selected);
+}
+
+/* UNDER FORCED COLOURS THE BAR IS ALL THAT IS LEFT, SO IT IS NAMED IN THE
+ * SYSTEM'S OWN COLOURS. The system paints every fill as the window and every
+ * border as the text, so the room each row keeps for the bar became a bar on
+ * every row, and the active row looked like the rest. A system colour is the
+ * one value forced colours keep: the window's own, where the keyboard is not,
+ * and the highlight where it is. */
+@media (forced-colors: active) {
+  .nd-option-item {
+    border-inline-start-color: Canvas;
+  }
+
+  .nd-option-item[data-nd-active="true"] {
+    border-inline-start-color: Highlight;
+  }
+}
+
+.nd-option-item[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused option is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+/* THE KEY, AS PLAIN TEXT. No box, no border and no background: the leader
+   menu is a key and a name and nothing drawn around either. */
+.nd-option-item-shortcut {
+  flex: none;
+  font-family: var(--noctua-font-mono);
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+/* In rows the key is a hint at the trailing edge. It stays first in the
+   markup, so it is still read before the name. */
+.nd-option-list[data-nd-layout="rows"] .nd-option-item-shortcut {
+  order: 1;
+}
+
+/* In columns it leads, at one width, so the names under each other line up. */
+.nd-option-list[data-nd-layout="columns"] .nd-option-item-shortcut {
+  min-inline-size: var(--noctua-space-12);
+}
+
+.nd-option-item-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.nd-option-item-label,
+.nd-option-item-detail {
+  overflow-wrap: anywhere;
+}
+
+.nd-option-item-detail {
+  font-size: var(--noctua-size-caption);
+  color: var(--nc-color-fg-muted);
+}
+
+/* The tick: what was chosen, said by a shape. After the key in a row. */
+.nd-option-item-mark {
+  display: flex;
+  flex: none;
+  order: 2;
+  color: var(--nc-color-selected);
+}
+
+.nd-option-group-label {
+  padding-block: var(--noctua-space-2);
+  /* Under the names, not under the bar: the leading inset is an option's own,
+     its padding and the room its bar keeps. */
+  padding-inline: calc(var(--noctua-space-3) + var(--noctua-border-rule)) var(--noctua-space-3);
+  font-size: var(--noctua-size-caption);
+  font-weight: var(--noctua-weight-semibold);
+  letter-spacing: var(--noctua-tracking-caps);
+  text-transform: uppercase;
+  color: var(--nc-color-fg-muted);
+  /* A name at the foot of one column and its options at the head of the next
+     is a name over nothing. */
+  break-after: avoid;
+}
+
+/* A group with no option showing is a name over nothing, too. */
+.nd-option-group:not(:has(.nd-option-item:not([hidden]))) {
+  display: none;
+}
+
+/* NOTHING TO CHOOSE: THE SENTENCE, AND NO LISTBOX.
+ *
+ * The sentence is in the markup from the start and shown by this rule alone,
+ * so a list a framework re-renders says it without a script noticing. The
+ * listbox goes with it: an empty `role="listbox"` is a tab stop onto nothing
+ * and a container that owes options it does not have. */
+.nd-option-list-empty {
+  display: none;
+  padding-block: var(--noctua-space-2);
+  padding-inline: calc(var(--noctua-space-3) + var(--noctua-border-rule)) var(--noctua-space-3);
+  font-size: var(--noctua-size-small);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-option-list:not(:has(.nd-option-item:not([hidden]))) .nd-option-list-empty {
+  display: block;
+}
+
+.nd-option-list:not(:has(.nd-option-item:not([hidden]))) > .nd-option-list-items {
+  display: none;
+}
+
+/* --- crates/noctua-design-styles/src/footer.css ---
+   COPIED, NOT GENERATED. Edit the file named above. */
+
+
+/* --- Footer ----------------------------------------------------------------
+ *
+ * The lines an application window keeps at its bottom edge, and the corner at
+ * each end of them (`NOCTUA.md §12.3`).
+ *
+ * NO BORDER, AND NO GAP. A line is told from the one above it by its shade
+ * alone, and the three shades and the corners' are the colour system's:
+ * `modeline`, `infoline`, `corner`, and the page's own surface for the line a
+ * reader types in.
+ *
+ * THE HEIGHT OF A LINE IS DECLARED, as `--noctua-shell-line`: one line of
+ * caption text at the body leading, and the smallest padding above and below.
+ * It is the small `Button`'s height, so a control in a line fills it. */
+.nd-footer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  font-size: var(--noctua-size-caption);
+  line-height: var(--noctua-leading-body);
+  color: var(--nc-color-fg);
+}
+
+/* THE CORNERS STAND IN THE FOOTER'S OWN PADDING, for its whole height. Nothing
+   counts lines: a line that grows makes the footer taller, and a corner that is
+   as tall as the footer is as tall as all of them. The room is made only where
+   a corner is, so a footer with one corner, or none, gives its lines the rest. */
+.nd-footer:has(> .nd-footer-corner[data-nd-side="start"]) {
+  padding-inline-start: var(--noctua-shell-rail);
+}
+
+.nd-footer:has(> .nd-footer-corner[data-nd-side="end"]) {
+  padding-inline-end: var(--noctua-shell-rail);
+}
+
+.nd-footer-corner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  inline-size: var(--noctua-shell-rail);
+  /* A control taller than a footer of one line is cut, not hung over the page
+     above the footer. */
+  overflow: clip;
+  background: var(--nc-color-corner);
+}
+
+.nd-footer > .nd-footer-corner {
+  position: absolute;
+  inset-block: 0;
+  inset-inline: 0 auto;
+}
+
+.nd-footer > .nd-footer-corner[data-nd-side="end"] {
+  inset-inline: auto 0;
+}
+
+/* A FOLDED FOOTER IS A STRIP ALONG ITS OWN EDGE, AND IT OPENS IN THE FLOW.
+ *
+ * The strip is what a pointer reaching the bottom of the window lands on, and
+ * the three rules after it are what opens it: a pointer over it, the focus
+ * inside it, and the caller's own `shown` for everything the footer cannot see.
+ * It stays in the tab order while folded, so the Tab key opens it too.
+ *
+ * It takes its height from what is above it and never lies over it: a footer
+ * that opened on top of the page could cover the control the keyboard is on
+ * (WCAG 2.4.11). */
+.nd-footer[data-nd-visibility="auto"] {
+  block-size: var(--noctua-space-1);
+  overflow: clip;
+}
+
+.nd-footer[data-nd-visibility="auto"][data-nd-shown="true"],
+.nd-footer[data-nd-visibility="auto"]:is(:hover, [data-nd-seat-hover]),
+.nd-footer[data-nd-visibility="auto"]:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
+  block-size: auto;
+  overflow: visible;
+}
+
+/* THE RING IS DRAWN INSIDE THE CONTROL'S OWN BOX. The lines touch, and each
+   cuts its content at its own edge, so a ring drawn outside a control would be
+   cut by the line it is in and painted over by the line below. */
+.nd-footer :is(:focus-visible, [data-nd-seat-focus]) {
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
+.nd-footer-line {
+  display: flex;
+  flex: none;
+  min-inline-size: 0;
+  min-block-size: var(--noctua-shell-line);
+  background: var(--nc-color-modeline);
+}
+
+.nd-footer-line[data-nd-kind="info"] {
+  background: var(--nc-color-infoline);
+}
+
+/* The line a reader types in is the page's own colour (`NOCTUA.md §12.3`). */
+.nd-footer-line[data-nd-kind="prompt"] {
+  background: var(--nc-color-surface);
+}
+
+/* ONE LINE, AND WHAT DOES NOT FIT IS CUT. The box has the line's height and
+   not its content's, and its children keep their own widths, so the last of
+   them is cut at the line's end and nothing wraps under it. */
+.nd-footer-line-content {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  box-sizing: border-box;
+  min-inline-size: 0;
+  block-size: var(--noctua-shell-line);
+  padding-inline: var(--noctua-space-2);
+  overflow: clip;
+  white-space: nowrap;
+}
+
+/* EXPANDED, IT WRAPS AND GROWS, and the height it had becomes its floor. */
+.nd-footer-line[data-nd-expanded="true"] > .nd-footer-line-content {
+  flex-wrap: wrap;
+  block-size: auto;
+  min-block-size: var(--noctua-shell-line);
+  overflow: visible;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+/* The line a reader types in is as tall as what is in it, which grows and
+   stops at its own limit. */
+.nd-footer-line[data-nd-kind="prompt"] > .nd-footer-line-content {
+  block-size: auto;
+  min-block-size: var(--noctua-shell-line);
+  overflow: visible;
+  white-space: normal;
+}
+
+/* A CONTROL AND A GLYPH KEEP THEIR SIZE. When a line is too narrow for what is
+   in it, the words give way and are cut. A control squeezed under its own
+   width would be a target under the floor. */
+.nd-footer-line-content > :is(.nd-button, .nd-icon-glyph) {
+  flex: none;
+}
+
+/* THE CONTROL THAT EXPANDS A LINE. A square one line tall, which clears the
+   smallest target, and it stays on the first line when the line grows. */
+.nd-footer-line-toggle {
+  display: flex;
+  flex: none;
+  align-items: center;
+  align-self: flex-start;
+  justify-content: center;
+  box-sizing: border-box;
+  inline-size: max(var(--noctua-shell-line), var(--noctua-target-min));
+  block-size: max(var(--noctua-shell-line), var(--noctua-target-min));
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--nc-color-fg-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* THE GLYPH POINTS THE WAY THE LINE WILL GO: up while it is one line tall,
+   and down once it has grown. Both bodies draw one chevron, and this turns it
+   from the attribute that says the state. */
+.nd-footer-line-toggle[aria-expanded="true"] > .nd-icon-glyph {
+  transform: rotate(180deg);
+}
+
+/* The transparent `Button`'s own hover, so the control beside the ones a
+   caller puts in a line answers a pointer as they do. The ink changes as well
+   as the ground: on the info line the ground alone is a shade nobody sees. */
+.nd-footer-line-toggle:is(:hover, [data-nd-seat-hover]) {
+  color: var(--nc-color-fg);
+  background: color-mix(in oklab, var(--nc-color-subtle-bg) var(--nd-veil), transparent);
+}
+
+/* IT SHOWS WHILE THE LINE IS HOVERED OR HOLDS THE FOCUS (`NOCTUA.md §12.6`),
+ * and only a window with a pointer that hovers hides it at all: on a touch
+ * screen nothing would ever bring it back. Hidden, it is still in the tab
+ * order, and reaching it shows it.
+ *
+ * An expanded line keeps it showing, because the way back is not something a
+ * reader should have to find again. */
+@media (hover: hover) {
+  .nd-footer-line-toggle {
+    opacity: 0;
+  }
+}
+
+.nd-footer-line:is(:hover, [data-nd-seat-hover]) > .nd-footer-line-toggle,
+.nd-footer-line:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) > .nd-footer-line-toggle,
+.nd-footer-line[data-nd-expanded="true"] > .nd-footer-line-toggle {
+  opacity: 1;
+}
+
+/* --- crates/noctua-design-styles/src/prompt.css ---
+   COPIED, NOT GENERATED. Edit the file named above. */
+
+
+/* --- Prompt ----------------------------------------------------------------
+ *
+ * The line a reader types on (`NOCTUA.md §12.7`): a glyph, the text, and the
+ * control that sends it. The text's cursor is a block.
+ *
+ * ONE LINE IS `--noctua-shell-line` TALL. The type is the footer's own, caption
+ * size at the body leading, and the padding above and below is the smallest
+ * step, so a prompt of one line is exactly as tall as the lines above it and
+ * its glyph and its control stand on one centre line with theirs.
+ *
+ * THE TEXTAREA AND THE MIRROR ARE ONE BOX, TWICE. `dist/prompt.js` puts the
+ * same text in both, and the block is where the caret is only because every
+ * property that places a character is declared for the two together, in the
+ * one rule below. A property added to one of them alone is a cursor that
+ * drifts off its letter. */
+.nd-prompt {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: flex-start;
+  gap: var(--noctua-space-2);
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  font-size: var(--noctua-size-caption);
+  line-height: var(--noctua-leading-body);
+  color: var(--nc-color-fg);
+}
+
+/* The glyph stays on the first line when the prompt grows. */
+.nd-prompt-glyph {
+  display: flex;
+  flex: none;
+  align-items: center;
+  block-size: var(--noctua-shell-line);
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-prompt-send {
+  flex: none;
+}
+
+/* ONE CELL. The mirror's text sizes it, the textarea fills it, and the mirror
+   is second in the markup so it paints over the textarea. */
+.nd-prompt-stack {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1fr);
+  min-inline-size: 0;
+}
+
+.nd-prompt-input,
+.nd-prompt-mirror {
+  grid-area: 1 / 1;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: var(--noctua-shell-line);
+  /* IT GROWS TO THIS MANY LINES AND THEN SCROLLS. The count is a token with no
+     unit, and a line is whatever this text's line is. AND NEVER PAST A SHARE
+     OF THE WINDOW: eight lines are taller than a footer leaves in the
+     interface's smallest window (`NOCTUA.md §12.19`), and the room is taken
+     from the work above it. */
+  max-block-size: min(
+    calc(var(--noctua-shell-prompt-max) * 1lh + 2 * var(--noctua-space-1)),
+    var(--noctua-shell-prompt-share)
+  );
+  margin: 0;
+  /* THE LEADING ROOM IS THE RING'S, which is drawn inside this box and would
+     otherwise lie across the first letter of every line. THE TRAILING ROOM IS
+     THE BLOCK'S: at the end of a line the caret stands before no character,
+     and the block drawn there is one `ch` wide. */
+  padding-block: var(--noctua-space-1);
+  padding-inline: var(--noctua-space-1) 1ch;
+  border: 0;
+  border-radius: var(--noctua-radius-none);
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: start;
+  text-indent: 0;
+  text-transform: none;
+  word-spacing: normal;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  tab-size: 4;
+  /* EACH PARAGRAPH TAKES ITS OWN DIRECTION, IN BOTH. The engine gives a
+     textarea with `dir="auto"` this value and a `<div>` with it `isolate`,
+     which takes one direction for the whole text: a second line written the
+     other way round would be laid out mirrored in one box and not the other. */
+  unicode-bidi: plaintext;
+  /* THE SCROLLBAR'S ROOM IS ALWAYS KEPT, IN BOTH. A bar that arrived with the
+     ninth line would narrow the textarea and not the mirror, and every line
+     after the first wrap would break in a different place. */
+  scrollbar-gutter: stable;
+}
+
+.nd-prompt-input {
+  display: block;
+  overflow: hidden auto;
+  resize: none;
+  background: none;
+  color: inherit;
+  /* Inside its own box, as every ring in a footer is: the prompt is the last
+     line of one, and a ring outside it would be cut at the window's edge. */
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
+/* THE ENGINE'S CARET IS HIDDEN ONLY ONCE THE BLOCK IS BEING DRAWN. With the
+   script blocked the attribute never arrives and the prompt is a textarea with
+   a caret. `transparent` is a keyword, not a colour of this system's. */
+.nd-prompt[data-nd-enhanced] .nd-prompt-input {
+  caret-color: transparent;
+}
+
+/* WHILE AN INPUT METHOD COMPOSES, THE CARET IS THE ENGINE'S AGAIN, in the
+   cursor's colour. The composition's underline and its candidate window are
+   placed by the engine against its own caret. */
+.nd-prompt[data-nd-composing] .nd-prompt-input {
+  caret-color: var(--nc-color-cursor);
+}
+
+.nd-prompt-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" */
+}
+
+/* EVERYTHING IN THE MIRROR IS INVISIBLE BUT THE BLOCK. Invisible and not
+   transparent: an invisible box paints nothing, a selection included, and takes
+   no pointer. */
+.nd-prompt-mirror {
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* THE BLOCK, AT REST: AN OUTLINE. A prompt without the focus shows where its
+   caret is and not that it is listening, and the difference is a shape, not a
+   shade. The letter under it is the textarea's own, showing through. */
+.nd-prompt-cursor {
+  /* Relative, so `dist/prompt.js` can hold a block on a space that hangs past
+     the line's edge at the edge, where the engine keeps its caret. */
+  position: relative;
+  visibility: visible;
+  color: transparent;
+  outline: var(--noctua-border-hairline) solid var(--nc-color-cursor);
+  outline-offset: calc(-1 * var(--noctua-border-hairline));
+}
+
+/* BEFORE NO CHARACTER, IT TAKES NO ROOM. The padding is what is painted and
+   the margin takes it back, so the block is a `ch` wide and the line is no
+   longer than the textarea's own. */
+.nd-prompt-cursor[data-nd-at="end"] {
+  padding-inline-end: 1ch;
+  margin-inline-end: -1ch;
+}
+
+/* WITH THE FOCUS IN THE TEXT: FILLED, THE LETTER DRAWN AGAIN IN THE COLOUR
+ * MADE FOR IT, AND BLINKING. `step-end` holds each half of the turn, so the
+ * block is there or not and never fading. A new block starts the turn again,
+ * so it is there while a reader types.
+ *
+ * The textarea's own focus, and not the prompt's: with the focus on the send
+ * control, typing goes nowhere near the text, and the block says so. The
+ * mirror follows the textarea, so the state is asked of its sibling.
+ *
+ * A prompt that cannot be typed in keeps the outline, with the focus or
+ * without: a filled, blinking block says *type here*. */
+.nd-prompt:not([data-nd-readonly="true"]) .nd-prompt-input:is(:focus, [data-nd-seat-focus]) + .nd-prompt-mirror
+  .nd-prompt-cursor {
+  color: var(--nc-color-on-cursor);
+  background: var(--nc-color-cursor);
+  animation: nd-prompt-blink var(--noctua-duration-blink) step-end infinite;
+}
+
+@keyframes nd-prompt-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* A READER WHO ASKED FOR LESS MOVEMENT GETS A BLOCK THAT STAYS
+   (`NOCTUA.md §12.7`). Said outright and not left to the duration: a turn of
+   no length does not stop an animation that repeats. */
+@media (prefers-reduced-motion: reduce) {
+  .nd-prompt.nd-prompt .nd-prompt-stack .nd-prompt-input + .nd-prompt-mirror .nd-prompt-cursor.nd-prompt-cursor {
+    animation: none;
+  }
+}
+
+/* UNDER FORCED COLOURS THE CARET IS THE ENGINE'S. The engine forces a colour
+   onto `caret-color`, so the caret the rules above made transparent is drawn
+   again, and a block beside it would be a second cursor. The block gives way,
+   as it does to a composition. */
+@media (forced-colors: active) {
+  .nd-prompt .nd-prompt-stack .nd-prompt-mirror .nd-prompt-cursor.nd-prompt-cursor {
+    visibility: hidden;
+  }
+}
+
+/* A SELECTION AND A COMPOSITION ARE THE ENGINE'S TO DRAW, and a disabled
+   prompt has no caret to show. After the rules above, which they outweigh. */
+.nd-prompt[data-nd-selecting] .nd-prompt-stack .nd-prompt-mirror .nd-prompt-cursor.nd-prompt-cursor,
+.nd-prompt[data-nd-composing] .nd-prompt-stack .nd-prompt-mirror .nd-prompt-cursor.nd-prompt-cursor,
+.nd-prompt[data-nd-disabled="true"] .nd-prompt-stack .nd-prompt-mirror .nd-prompt-cursor.nd-prompt-cursor {
+  visibility: hidden;
+}
+
+/* --- crates/noctua-design-styles/src/drawer.css ---
+   COPIED, NOT GENERATED. Edit the file named above. */
+/* --- Drawer and DrawerRail ---------------------------------------------------
+ *
+ * A panel along one edge of an application window, and the rail down each side
+ * of it (`NOCTUA.md §12.11`).
+ *
+ * IN THE FLOW, AND NEVER OVER THE WORK. A drawer takes its room from what is
+ * beside it. Nothing here is positioned, so nothing it opens can cover the
+ * control the keyboard is on (WCAG 2.4.11).
+ *
+ * HOW IT SLIDES. No engine moves a box between nothing and the size of its
+ * content, and a grid track moves between no share and a whole one. So the
+ * root is a grid of one track, the panel is the one thing in it, and
+ * `collapsed` takes the track to nothing. The duration is a token, and under
+ * `prefers-reduced-motion` the token is nothing: the drawer is open or shut.
+ *
+ * HOW FAR IT OPENS. As far as its content, and never past
+ * `--noctua-shell-drawer-max` of the box around it. That is a percentage, so it
+ * holds only where that box has a size of its own on the axis. A window has. */
+.nd-drawer {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  flex: none;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  max-block-size: var(--noctua-shell-drawer-max);
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface);
+  transition:
+    grid-template-rows var(--noctua-duration-base) var(--noctua-easing-out),
+    grid-template-columns var(--noctua-duration-base) var(--noctua-easing-out),
+    visibility var(--noctua-duration-base) step-start;
+}
+
+/* A drawer at a side grows across the window and is as tall as its side.
+
+   IT STANDS ON THE SUBTLE SURFACE. A drawer at the bottom is under a footer,
+   whose last line is the page's own colour, and continues it. One at a side
+   has the work beside it and no line between them, so its shade is what tells
+   the two apart. No border is drawn. */
+.nd-drawer[data-nd-side="start"],
+.nd-drawer[data-nd-side="end"] {
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: 1fr;
+  max-block-size: none;
+  max-inline-size: var(--noctua-shell-drawer-max);
+  background: var(--nc-color-surface-subtle);
+}
+
+/* AND IT STANDS AT THE SIDE IT NAMES, in the row it is in, wherever it is
+   written. The keyboard follows the order it is written in, so a caller writes
+   a drawer at the `start` before the work and one at the `end` after it. */
+.nd-drawer[data-nd-side="start"] {
+  order: -1;
+}
+
+.nd-drawer[data-nd-side="end"] {
+  order: 1;
+}
+
+/* SHUT, IT IS NOTHING ALONG ITS EDGE AND OUT OF EVERYTHING. `visibility` is
+   what takes it out of the tab order and the accessibility tree, with no
+   script. It turns at the END of the slide on the way shut and at the START on
+   the way open, which is the two step functions: a drawer hidden at once would
+   slide shut empty. */
+.nd-drawer[data-nd-collapsed="true"] {
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition:
+    grid-template-rows var(--noctua-duration-base) var(--noctua-easing-out),
+    grid-template-columns var(--noctua-duration-base) var(--noctua-easing-out),
+    visibility var(--noctua-duration-base) step-end;
+}
+
+.nd-drawer[data-nd-collapsed="true"]:is([data-nd-side="start"], [data-nd-side="end"]) {
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: 0fr;
+}
+
+/* THE RAILS AND THE CONTENT, SIDE BY SIDE. The floor of nothing on both axes
+   is what lets the track above close on the panel, and the same floor on each
+   thing in it is what lets the panel close on them: a rail and the content
+   each scroll what does not fit, so nothing hangs out of a drawer partway
+   shut. */
+.nd-drawer-panel {
+  display: flex;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+/* THE CONTENT TAKES WHAT THE RAILS LEAVE, AND SCROLLS. It is the caller's own
+   element, so it is named by what it is not. Past the drawer's limit it is the
+   content that scrolls, and the rails stay where they are. */
+.nd-drawer-panel > :not(.nd-drawer-rail) {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow-y: auto;
+}
+
+/* A RAIL: AS WIDE AS A FOOTER'S CORNER, ON THE CORNER'S OWN SHADE, AND AS TALL
+   AS THE DRAWER. Under a footer the two rails continue its corners downward,
+   so the width and the shade are the corner's. No border is drawn.
+
+   Taller than its drawer, a rail scrolls with no scrollbar: a rail has no room
+   for one, and the focus moving along it brings each control into view. */
+.nd-drawer-rail {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  box-sizing: border-box;
+  inline-size: var(--noctua-shell-rail);
+  min-block-size: 0;
+  overflow-x: clip;
+  overflow-y: auto;
+  scrollbar-width: none;
+  background: var(--nc-color-corner);
+}
+
+/* A RAIL STANDS AT THE SIDE IT NAMES, wherever it is written. The keyboard
+   follows the order it is written in, so a caller writes the `start` rail
+   before the content and the `end` rail after it. */
+.nd-drawer-rail[data-nd-side="start"] {
+  order: -1;
+}
+
+.nd-drawer-rail[data-nd-side="end"] {
+  order: 1;
+}
+
+/* THE CHOSEN TAB OF A RAIL AT THE END IS MARKED ON THE EDGE THAT FACES THE
+   CONTENT. A strip of tabs marks the edge its panels are beyond, and the
+   panels of a rail at the end are before it. */
+.nd-drawer-rail[data-nd-side="end"] .nd-tabs[data-nd-appearance="rail"] .nd-tab[data-nd-selected="true"],
+.nd-drawer-rail[data-nd-side="end"] .nd-tabs[data-nd-appearance="rail"] .nd-tab[aria-selected="true"] {
+  border-inline-end-color: transparent;
+  border-inline-start-color: var(--nc-color-accent);
+}
+
+/* And under forced colours, in the system's colours, as the tabs rail is. */
+@media (forced-colors: active) {
+  .nd-drawer-rail[data-nd-side="end"] .nd-tabs[data-nd-appearance="rail"] .nd-tab[data-nd-selected="true"],
+  .nd-drawer-rail[data-nd-side="end"] .nd-tabs[data-nd-appearance="rail"] .nd-tab[aria-selected="true"] {
+    border-inline-end-color: Canvas;
+    border-inline-start-color: Highlight;
+  }
+}
+
+/* --- crates/noctua-design-styles/src/split.css ---
+   COPIED, NOT GENERATED. Edit the file named above. */
+/* --- Split, SplitPane and SplitHandle ----------------------------------------
+ *
+ * Two panes that share one box, and the line between them a reader can move.
+ *
+ * ONE NUMBER DIVIDES THE BOX. `--nd-split-value` is the share the first pane
+ * takes, from 0 to 100, written on the root by the markup and again by
+ * `dist/split.js` when the line moves. Each pane grows from nothing by its
+ * share, so the two are in that proportion whatever the handle between them
+ * takes.
+ *
+ * WHAT A NARROW BOX DOES IS ASKED OF THE SPLIT, NOT OF THE WINDOW. The root is
+ * a query container and the track inside it is what the query lays out,
+ * because an element that establishes a container is not its own. A split in a
+ * narrow column collapses on a wide screen.
+ *
+ * THE NARROW LAYOUT IS WRITTEN FIRST AND THE WIDE ONE RESTORES IT, at the
+ * weight of the rules it restores: a container query adds nothing to a rule's
+ * weight, so each selector inside it names `[data-nd-collapse]` and
+ * `[data-nd-side]` where the narrow rule names a value of them. */
+.nd-split {
+  --nd-split-value: 50;
+
+  container: nd-split / inline-size;
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  box-sizing: border-box;
+  /* A query container has no width of its own content's, so it is given the
+     box it is in. */
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+/* NARROW: ONE ABOVE THE OTHER, each as tall as what is in it, and no handle.
+   There is no line to move between two panes that are not side by side.
+   Two panes stacked in a box with a height of its own, such as a window, are
+   taller than it, so the track scrolls them: a box that cut them off would
+   leave the end of the second pane where nothing reaches it. Side by side
+   each pane scrolls itself and the track has nothing to scroll. */
+.nd-split-track {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: auto;
+}
+
+.nd-split-pane {
+  flex: none;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: auto;
+}
+
+.nd-split[data-nd-collapse="hide-start"] > .nd-split-track > .nd-split-pane[data-nd-side="start"],
+.nd-split[data-nd-collapse="hide-end"] > .nd-split-track > .nd-split-pane[data-nd-side="end"] {
+  display: none;
+}
+
+/* THE HANDLE: A TARGET OF THE SMALLEST SIZE, AND A LINE DRAWN THINNER
+ * (WCAG 2.5.8). `touch-action: none` is what lets a finger drag it: without it
+ * the engine takes the gesture for a scroll and the handle never hears it.
+ *
+ * The line is the strong border colour, because it is all that says a control
+ * is there. */
+.nd-split-handle {
+  display: none;
+  flex: none;
+  justify-content: center;
+  box-sizing: border-box;
+  inline-size: var(--noctua-target-min);
+  touch-action: none;
+}
+
+.nd-split-handle-line {
+  flex: none;
+  inline-size: var(--noctua-border-hairline);
+  background: var(--nc-color-border-strong);
+}
+
+/* UNDER FORCED COLOURS THE LINE IS A BORDER. The system paints every
+   background as the window, so a line drawn as one is gone, and it is all
+   that says a control is there. A border is drawn in the text colour, and the
+   wider line a pointer or the keyboard brings keeps it. */
+@media (forced-colors: active) {
+  .nd-split-handle-line {
+    box-sizing: border-box;
+    border-inline-start: var(--noctua-border-hairline) solid CanvasText;
+  }
+}
+
+/* SIDE BY SIDE, AT EVERY WIDTH, for a split that says it never collapses. The
+   same four rules stand in the query below for every other split, where the
+   split's own box is wide enough. */
+.nd-split[data-nd-collapse="none"] > .nd-split-track {
+  flex-direction: row;
+}
+
+.nd-split[data-nd-collapse="none"] > .nd-split-track > .nd-split-pane[data-nd-side="start"] {
+  flex: var(--nd-split-value) 1 0;
+}
+
+.nd-split[data-nd-collapse="none"] > .nd-split-track > .nd-split-pane[data-nd-side="end"] {
+  flex: calc(100 - var(--nd-split-value)) 1 0;
+}
+
+.nd-split[data-nd-collapse="none"] > .nd-split-track > .nd-split-handle {
+  display: flex;
+}
+
+/* A PANE THE LINE HAS PUT AWAY IS NOT ON THE PAGE. With a `min` of 0 or a
+   `max` of 100 the line can take one pane to nothing, which is the window
+   splitter's collapse, and a pane drawn as nothing still holds whatever the
+   keyboard could reach in it. So a pane whose share is nothing is
+   `visibility: hidden`, which takes it out of the tab order and the
+   accessibility tree. The number read is the handle's `aria-valuenow`,
+   because that is the share the script has drawn, held between the limits.
+   Only side by side: stacked panes do not take shares, and both are drawn. */
+.nd-split[data-nd-collapse="none"] > .nd-split-track > .nd-split-pane[data-nd-side="start"]:has(+ .nd-split-handle[aria-valuenow="0"]),
+.nd-split[data-nd-collapse="none"] > .nd-split-track > .nd-split-handle[aria-valuenow="100"] + .nd-split-pane[data-nd-side="end"] {
+  visibility: hidden;
+}
+
+@container nd-split (min-width: 30rem) {
+  .nd-split[data-nd-collapse] > .nd-split-track {
+    flex-direction: row;
+  }
+
+  .nd-split[data-nd-collapse] > .nd-split-track > .nd-split-pane[data-nd-side="start"] {
+    display: block;
+    flex: var(--nd-split-value) 1 0;
+  }
+
+  .nd-split[data-nd-collapse] > .nd-split-track > .nd-split-pane[data-nd-side="end"] {
+    display: block;
+    flex: calc(100 - var(--nd-split-value)) 1 0;
+  }
+
+  .nd-split[data-nd-collapse] > .nd-split-track > .nd-split-handle {
+    display: flex;
+  }
+
+  .nd-split[data-nd-collapse] > .nd-split-track > .nd-split-pane[data-nd-side="start"]:has(+ .nd-split-handle[aria-valuenow="0"]),
+  .nd-split[data-nd-collapse] > .nd-split-track > .nd-split-handle[aria-valuenow="100"] + .nd-split-pane[data-nd-side="end"] {
+    visibility: hidden;
+  }
+}
+
+/* A CONTROL ONLY ONCE A SCRIPT HAS MADE IT ONE. The `tabindex` arrives with the
+   keys and the drag, so the cursor and the answer to a pointer wait for it: a
+   line that looked movable with nothing to move it would be a control that
+   does nothing. */
+.nd-split-handle[tabindex] {
+  cursor: col-resize;
+}
+
+.nd-split-handle[tabindex]:is(:hover, [data-nd-seat-hover]) > .nd-split-handle-line,
+.nd-split-handle:is([data-nd-dragging], [data-nd-seat-drag]) > .nd-split-handle-line {
+  inline-size: var(--noctua-border-strong);
+  background: var(--nc-color-accent);
+}
+
+/* The ring is drawn inside the handle's own box, which touches a pane on each
+   side, and the line takes the accent with it. */
+.nd-split-handle:is(:focus-visible, [data-nd-seat-focus]) {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
+.nd-split-handle:is(:focus-visible, [data-nd-seat-focus]) > .nd-split-handle-line {
+  inline-size: var(--noctua-border-strong);
+  background: var(--nc-color-accent);
+}
+
+/* --- crates/noctua-design-styles/src/key-capture.css ---
+   COPIED, NOT GENERATED. Edit the file named above. */
+/* --- KeyCapture ---------------------------------------------------------------
+ *
+ * A control that records a shortcut, drawn as the keys it is pressed with.
+ *
+ * ONE ROW THAT WRAPS: the label, the control and the control that removes the
+ * shortcut, with the refusal on a row of its own under them. At 320px the label
+ * takes a row and the control the next.
+ *
+ * THE CONTROL IS A BOX LIKE A TEXT BOX, at the medium `Button`'s height, because
+ * it holds a value and sits in a row of controls on a settings page. The keys
+ * in it are the `Kbd` caps.
+ *
+ * TWO RUNS OF KEYS, AND ONE IS DRAWN. `.nd-key-capture-keys` is the caller's
+ * `value` and `.nd-key-capture-taken` is what the script heard. The second is
+ * drawn while the control listens or holds a recorded chord, and the first the
+ * rest of the time.
+ *
+ * NO STATE IS SAID BY COLOUR ALONE. Listening is a dashed edge and the words
+ * `capture_label` says. A refusal is a rule down the leading edge and the
+ * caller's sentence under the control, as `Field` marks a wrong answer. */
+.nd-key-capture {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--noctua-space-1) var(--noctua-space-3);
+  min-inline-size: 0;
+}
+
+.nd-key-capture-control {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  box-sizing: border-box;
+  min-block-size: var(--noctua-space-12);
+  max-inline-size: 100%;
+  margin: 0;
+  padding-block: var(--noctua-space-1);
+  padding-inline: var(--noctua-space-3);
+  /* A form control does not take the page's face on its own, so it is told
+     to: the page's face is the interface-font setting's (`NOCTUA.md §7.7`),
+     and a face named here would not follow it. Before the size and the
+     leading, which the shorthand resets. */
+  font: inherit;
+  font-size: var(--noctua-size-body);
+  line-height: var(--noctua-leading-body);
+  color: var(--nc-color-fg);
+  text-align: start;
+  background: var(--nc-color-surface);
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+/* Refused by the caller, or by a page with no script to answer it. */
+.nd-key-capture-control:disabled,
+.nd-key-capture-control[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it", the exemption `.nd-button` carries */
+}
+
+.nd-key-capture-chord,
+.nd-key-capture-keys,
+.nd-key-capture-taken {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--noctua-space-1);
+  min-inline-size: 0;
+}
+
+.nd-key-capture-taken {
+  display: none;
+}
+
+.nd-key-capture:is([data-nd-listening], [data-nd-captured]) .nd-key-capture-keys {
+  display: none;
+}
+
+.nd-key-capture:is([data-nd-listening], [data-nd-captured]) .nd-key-capture-taken {
+  display: inline-flex;
+}
+
+/* The words in the box that are not keys: no shortcut, and what to press. */
+.nd-key-capture-empty,
+.nd-key-capture-prompt {
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-key-capture-control:not([aria-disabled="true"]):is(:hover, [data-nd-seat-hover]) {
+  border-color: var(--nc-color-border-strong);
+}
+
+.nd-key-capture-control:is(:focus-visible, [data-nd-seat-focus]) {
+  border-color: var(--nc-color-border-strong);
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* LISTENING: A DASHED EDGE IN THE ACCENT. The dash is the signal and the colour
+   says it again. After the hover rule, which it outweighs on order alone. */
+.nd-key-capture[data-nd-listening] .nd-key-capture-control {
+  border-style: dashed;
+  border-color: var(--nc-color-accent);
+}
+
+/* REFUSED: `Field`'s mark for a wrong answer, down the leading edge of the
+   whole control, and the control's own edge in the danger tone. */
+.nd-key-capture[data-nd-refused="true"] {
+  padding-inline-start: var(--noctua-space-4);
+  border-inline-start: var(--noctua-border-rule) solid var(--nc-color-danger);
+}
+
+.nd-key-capture[data-nd-refused="true"]:not([data-nd-listening]) .nd-key-capture-control {
+  border-color: var(--nc-color-danger);
+}
+
+/* THE SENTENCE IS ON A ROW OF ITS OWN, and on the page from the start so a
+   sentence written into it later is read. Empty, it is a line of no height. */
+.nd-key-capture-refusal {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: var(--noctua-size-small);
+  font-weight: var(--noctua-weight-semibold);
+  color: var(--nc-color-danger);
+}
+
+/* THE CONTROL THAT REMOVES THE SHORTCUT. A glyph in a target of the smallest
+   size, beside the box it empties (WCAG 2.5.8). */
+.nd-key-capture-clear {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-inline-size: var(--noctua-target-min);
+  min-block-size: var(--noctua-target-min);
+  margin: 0;
+  padding: var(--noctua-space-1);
+  color: var(--nc-color-fg-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-key-capture-clear:is(:hover, [data-nd-seat-hover]) {
+  color: var(--nc-color-fg);
+  background: var(--nc-color-surface-subtle);
+}
+
+.nd-key-capture-clear:is(:focus-visible, [data-nd-seat-focus]) {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}
+
+/* --- crates/noctua-design-styles/src/log.css ---
+   COPIED, NOT GENERATED. Edit the file named above. */
+/* --- Log and LogLine -----------------------------------------------------------
+ *
+ * Lines as they arrive, newest last, in a region that scrolls.
+ *
+ * THE LOG IS AS TALL AS THE BOX AROUND IT. Its region of lines takes what the
+ * box leaves and scrolls the rest, so a log in a window, a pane or a drawer is
+ * bounded by it. A box as tall as its content gives it no bound at all.
+ *
+ * ONE LINE IS ONE BLOCK OF INLINE PARTS. The parts are inline, with the spaces
+ * the markup writes between them, so a selection across the log copies one line
+ * of text for each line and nothing the stylesheet draws. Nothing draws a
+ * border between two lines.
+ *
+ * THE LEVEL IS A WORD IN A TINTED BOX with a rule down its leading edge, in the
+ * line's tone, and the ink is the page's own: the word is the signal and the
+ * tone says it again (`NOCTUA.md §8.8.6`). */
+.nd-log {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  min-block-size: 0;
+  max-block-size: 100%;
+}
+
+.nd-log-lines {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  min-block-size: 0;
+  overflow: auto;
+  /* A reader scrolling the log to its end does not scroll the page behind it.
+     The block axis alone, because the lines wrap and nothing scrolls across. */
+  overscroll-behavior-block: contain;
+  padding-block: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-3);
+  font-family: var(--noctua-font-mono);
+  font-size: var(--noctua-size-small);
+  line-height: var(--noctua-leading-body);
+  color: var(--nc-color-fg);
+}
+
+/* WHILE A LOG FOLLOWS, ITS SCRIPT KEEPS ITS PLACE, and the engine does not. An
+   engine keeps a line in place when the lines above it grow, which moves the
+   region away from its end. Stopped, the reader's place is kept that way, so
+   lines leaving the top do not move the one being read. */
+.nd-log[data-nd-follow="true"]:not([data-nd-paused]) > .nd-log-lines {
+  overflow-anchor: none;
+}
+
+/* The ring is drawn inside the region, whose edges the box around it may cut. */
+.nd-log-lines:is(:focus-visible, [data-nd-seat-focus]) {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
+.nd-log-line {
+  margin: 0;
+  /* A word longer than the line breaks inside itself rather than pushing the
+     log sideways. */
+  overflow-wrap: anywhere;
+}
+
+.nd-log-line-time,
+.nd-log-line-source {
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-log-line-level {
+  padding-inline: var(--noctua-space-1);
+  background: var(--nc-color-surface-subtle);
+  border-inline-start: var(--noctua-border-rule) solid var(--nc-color-border-strong);
+}
+
+.nd-log-line[data-nd-tone] > .nd-log-line-level {
+  background: var(--nd-tone-bg);
+  border-inline-start-color: var(--nd-tone);
+}
+
+/* The message keeps the spaces and the line breaks it was written with. */
+.nd-log-line-text {
+  white-space: pre-wrap;
+}
+
+/* THE CONTROL THAT GOES BACK TO THE NEWEST LINE. It stands over the end of the
+   region, clear of its scrollbar, while following has stopped. It is a solid
+   control, because what is under it is text. */
+.nd-log-resume {
+  position: absolute;
+  inset-block-end: var(--noctua-space-2);
+  inset-inline-end: var(--noctua-space-6);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--noctua-space-1);
+  box-sizing: border-box;
+  min-block-size: var(--noctua-space-8);
+  margin: 0;
+  padding-inline: var(--noctua-space-3);
+  /* The page's face, which follows the interface-font setting
+     (`NOCTUA.md §7.7`): a button does not take it on its own. Before the size
+     and the leading, which the shorthand resets. */
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  line-height: var(--noctua-leading-body);
+  color: var(--nc-color-on-accent);
+  background: var(--nc-color-accent);
+  border: 0;
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-log-resume:is(:hover, [data-nd-seat-hover]) {
+  background: var(--nc-color-accent-hover);
+}
+
+.nd-log-resume:is(:focus-visible, [data-nd-seat-focus]) {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
 }

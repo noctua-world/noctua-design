@@ -338,6 +338,68 @@ pub(crate) const MENU: Page = Page {
     component: None,
 };
 
+/// The lines at the bottom of a window, one line, and one corner.
+///
+/// A collection for the reason `OPTION_LIST` is one: a `FooterLine` outside a
+/// `Footer` has no type size and no neighbour to be told from, and a
+/// `FooterCorner` outside one has no end to stand at.
+pub(crate) const FOOTER: Page = Page {
+    slug: "footer",
+    title: Title::Name("Footer"),
+    summary: Key::PageFooterSummary,
+    kind: Kind::Component,
+    component: None,
+};
+
+/// The panel along one edge of a window, and the rail down a side of it.
+///
+/// A collection for the reason `FOOTER` is one: a `DrawerRail` outside a
+/// `Drawer` has no side to stand at and no height to take.
+pub(crate) const DRAWER: Page = Page {
+    slug: "drawer",
+    title: Title::Name("Drawer"),
+    summary: Key::PageDrawerSummary,
+    kind: Kind::Component,
+    component: None,
+};
+
+/// Two panes that share a box, one pane, and the line between them.
+///
+/// A collection for the reason `TABS` is one: a `SplitPane` outside a `Split`
+/// has no share to take, and a `SplitHandle` outside one has no line to move.
+pub(crate) const SPLIT: Page = Page {
+    slug: "split",
+    title: Title::Name("Split"),
+    summary: Key::PageSplitSummary,
+    kind: Kind::Component,
+    component: None,
+};
+
+/// Lines as they arrive, and one line.
+///
+/// A collection for the reason `SPLIT` is one: a `LogLine` outside a `Log` is a
+/// line of no log, with no end to follow.
+pub(crate) const LOG: Page = Page {
+    slug: "log",
+    title: Title::Name("Log"),
+    summary: Key::PageLogSummary,
+    kind: Kind::Component,
+    component: None,
+};
+
+/// The list a reader walks with the keyboard, a named run of it, and one option.
+///
+/// A collection for the reason `TREE` is one: an `OptionItem` outside an
+/// `OptionList` is a `role="option"` no listbox owns, and three sidebar rows for
+/// one idea is three places a reader has to look for it.
+pub(crate) const OPTION_LIST: Page = Page {
+    slug: "option-list",
+    title: Title::Name("OptionList"),
+    summary: Key::PageOptionListSummary,
+    kind: Kind::Component,
+    component: None,
+};
+
 /// A collection by the rule below, and its slug is the component's own — the
 /// same collision `search` has, and allowed for the same reason: there is one
 /// page at `/tree/` and it is the one the component points at.
@@ -498,7 +560,7 @@ pub(crate) struct Collection {
 /// `page.component.is_some()`, so nobody could search for `spread` or
 /// `current_label`. It reads `documented_on` now, so a component on a shared
 /// page is as findable as one with a page of its own.
-pub(crate) const COLLECTIONS: [Collection; 14] = [
+pub(crate) const COLLECTIONS: [Collection; 19] = [
     Collection {
         page: LINEAGE,
         parts: &["Lineage", "LineageFigure"],
@@ -523,6 +585,37 @@ pub(crate) const COLLECTIONS: [Collection; 14] = [
         page: MENU,
         parts: &["Menu", "MenuItem"],
         body: Key::PageMenuBody,
+    },
+    Collection {
+        // The footer, then what it stacks, then what stands at its ends.
+        page: FOOTER,
+        parts: &["Footer", "FooterLine", "FooterCorner"],
+        body: Key::PageFooterBody,
+    },
+    Collection {
+        // The drawer, then what stands down its sides.
+        page: DRAWER,
+        parts: &["Drawer", "DrawerRail"],
+        body: Key::PageDrawerBody,
+    },
+    Collection {
+        // The split, then its halves, then what stands between them.
+        page: SPLIT,
+        parts: &["Split", "SplitPane", "SplitHandle"],
+        body: Key::PageSplitBody,
+    },
+    Collection {
+        // The log, then one line of it.
+        page: LOG,
+        parts: &["Log", "LogLine"],
+        body: Key::PageLogBody,
+    },
+    Collection {
+        // The list, then the run, then one option: outside in, which is the
+        // order they nest and not the order they sort in.
+        page: OPTION_LIST,
+        parts: &["OptionList", "OptionGroup", "OptionItem"],
+        body: Key::PageOptionListBody,
     },
     Collection {
         // The strip first, then one tab, then one panel: the order a caller

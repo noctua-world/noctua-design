@@ -235,7 +235,7 @@
   overflow-y: auto;
 }
 
-.nd-lineage-field:focus-visible {
+.nd-lineage-field:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: calc(var(--noctua-focus-offset) * -1);
 }
@@ -421,8 +421,8 @@
   text-decoration: none;
 }
 
-a.nd-lineage-card:hover,
-a.nd-lineage-card:focus-visible {
+a.nd-lineage-card:is(:hover, [data-nd-seat-hover]),
+a.nd-lineage-card:is(:focus-visible, [data-nd-seat-focus]) {
   border-color: var(--nc-color-accent);
 }
 
@@ -592,7 +592,7 @@ a.nd-lineage-card:focus-visible {
   white-space: nowrap;
 }
 
-.nd-lineage-tie:focus-visible {
+.nd-lineage-tie:is(:focus-visible, [data-nd-seat-focus]) {
   position: fixed;
   inset-block-start: var(--noctua-space-4);
   inset-inline-start: var(--noctua-space-4);
@@ -817,7 +817,7 @@ a.nd-lineage-card:focus-visible {
     translate(-50%, var(--noctua-space-1));
 }
 
-.nd-lineage-pick:focus-visible ~ .nd-lineage-grip .nd-lineage-run {
+.nd-lineage-pick:is(:focus-visible, [data-nd-seat-focus]) ~ .nd-lineage-grip .nd-lineage-run {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -885,8 +885,8 @@ a.nd-lineage-card:focus-visible {
   visibility: hidden;
 }
 
-.nd-lineage-bond:hover .nd-lineage-note,
-.nd-lineage-pick:focus-visible ~ .nd-lineage-note {
+.nd-lineage-bond:is(:hover, [data-nd-seat-hover]) .nd-lineage-note,
+.nd-lineage-pick:is(:focus-visible, [data-nd-seat-focus]) ~ .nd-lineage-note {
   visibility: visible;
 }
 
@@ -1040,7 +1040,7 @@ button.nd-lineage-figure {
   cursor: pointer;
 }
 
-.nd-lineage-figure:focus-visible {
+.nd-lineage-figure:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -1089,7 +1089,7 @@ button.nd-lineage-figure {
   display: none;
 }
 
-.nd-lineage-piece:focus-visible .nd-lineage-card {
+.nd-lineage-piece:is(:focus-visible, [data-nd-seat-focus]) .nd-lineage-card {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
 }

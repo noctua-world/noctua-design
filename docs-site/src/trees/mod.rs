@@ -45,12 +45,17 @@ mod del;
 mod dialog;
 mod disclosure;
 mod divider;
+mod drawer;
+mod drawer_rail;
 mod em;
 mod error_summary;
 mod error_summary_item;
 mod field;
 mod fieldset;
 mod file_input;
+mod footer;
+mod footer_corner;
+mod footer_line;
 mod heading;
 mod icon;
 mod image;
@@ -58,18 +63,25 @@ mod info;
 mod input;
 mod ins;
 mod kbd;
+mod key_capture;
 mod label;
 mod lineage;
 mod lineage_figure;
 mod link;
 mod list;
 mod list_item;
+mod log;
+mod log_line;
 mod mark;
+mod match_text;
 mod menu;
 mod menu_item;
 mod message_bar;
 mod meter;
 mod number_input;
+mod option_group;
+mod option_item;
+mod option_list;
 mod otp_field;
 mod overview_a;
 mod overview_b;
@@ -79,6 +91,7 @@ mod pagination;
 mod paragraph;
 mod popover;
 mod progress;
+mod prompt;
 mod prose;
 mod radio;
 mod rating;
@@ -92,6 +105,9 @@ mod select;
 mod select_group;
 mod select_option;
 mod slider;
+mod split;
+mod split_handle;
+mod split_pane;
 mod strong;
 mod swatch;
 mod switch;
@@ -136,6 +152,10 @@ pub(crate) type Hero = (&'static str, &'static str, &'static [Node]);
 /// An empty slice means none has been written yet, which is a state the
 /// migration passes through and `every_example_has_a_tree` refuses at the end.
 #[must_use]
+#[allow(
+    clippy::too_many_lines,
+    reason = "one line per component, and the component set is the point"
+)]
 pub(crate) fn for_component(name: &str) -> &'static [Tree] {
     match name {
         "Abbr" => abbr::EXAMPLES,
@@ -159,12 +179,17 @@ pub(crate) fn for_component(name: &str) -> &'static [Tree] {
         "Dialog" => dialog::EXAMPLES,
         "Disclosure" => disclosure::EXAMPLES,
         "Divider" => divider::EXAMPLES,
+        "Drawer" => drawer::EXAMPLES,
+        "DrawerRail" => drawer_rail::EXAMPLES,
         "Em" => em::EXAMPLES,
         "ErrorSummary" => error_summary::EXAMPLES,
         "ErrorSummaryItem" => error_summary_item::EXAMPLES,
         "Field" => field::EXAMPLES,
         "Fieldset" => fieldset::EXAMPLES,
         "FileInput" => file_input::EXAMPLES,
+        "Footer" => footer::EXAMPLES,
+        "FooterCorner" => footer_corner::EXAMPLES,
+        "FooterLine" => footer_line::EXAMPLES,
         "Heading" => heading::EXAMPLES,
         "Icon" => icon::EXAMPLES,
         "Image" => image::EXAMPLES,
@@ -172,23 +197,31 @@ pub(crate) fn for_component(name: &str) -> &'static [Tree] {
         "Input" => input::EXAMPLES,
         "Ins" => ins::EXAMPLES,
         "Kbd" => kbd::EXAMPLES,
+        "KeyCapture" => key_capture::EXAMPLES,
         "Label" => label::EXAMPLES,
         "Lineage" => lineage::EXAMPLES,
         "LineageFigure" => lineage_figure::EXAMPLES,
         "Link" => link::EXAMPLES,
         "List" => list::EXAMPLES,
         "ListItem" => list_item::EXAMPLES,
+        "Log" => log::EXAMPLES,
+        "LogLine" => log_line::EXAMPLES,
         "Mark" => mark::EXAMPLES,
+        "MatchText" => match_text::EXAMPLES,
         "Menu" => menu::EXAMPLES,
         "MenuItem" => menu_item::EXAMPLES,
         "MessageBar" => message_bar::EXAMPLES,
         "Meter" => meter::EXAMPLES,
         "NumberInput" => number_input::EXAMPLES,
+        "OptionGroup" => option_group::EXAMPLES,
+        "OptionItem" => option_item::EXAMPLES,
+        "OptionList" => option_list::EXAMPLES,
         "OtpField" => otp_field::EXAMPLES,
         "Pagination" => pagination::EXAMPLES,
         "Paragraph" => paragraph::EXAMPLES,
         "Popover" => popover::EXAMPLES,
         "Progress" => progress::EXAMPLES,
+        "Prompt" => prompt::EXAMPLES,
         "Prose" => prose::EXAMPLES,
         "Radio" => radio::EXAMPLES,
         "Rating" => rating::EXAMPLES,
@@ -201,6 +234,9 @@ pub(crate) fn for_component(name: &str) -> &'static [Tree] {
         "SelectGroup" => select_group::EXAMPLES,
         "SelectOption" => select_option::EXAMPLES,
         "Slider" => slider::EXAMPLES,
+        "Split" => split::EXAMPLES,
+        "SplitHandle" => split_handle::EXAMPLES,
+        "SplitPane" => split_pane::EXAMPLES,
         "Strong" => strong::EXAMPLES,
         "Swatch" => swatch::EXAMPLES,
         "Switch" => switch::EXAMPLES,

@@ -568,6 +568,27 @@ fn itself(component: &Component, prop_name: &str, value: &str, caption: &str) ->
                 })
                 .collect(),
         ),
+        // THE LINES AND THE CORNERS COME WITH THE FOOTER. An empty one is a box
+        // with no height, and what `visibility` folds is the three lines.
+        "Footer" => Drawn::names().inside(vec![
+            component_node("FooterCorner", &[("side", text("start"))], &[]),
+            component_node(
+                "FooterLine",
+                &[("kind", text("modeline"))],
+                &[node_text(&data(WORDS[0]))],
+            ),
+            component_node(
+                "FooterLine",
+                &[("kind", text("info"))],
+                &[node_text(&data(WORDS[1]))],
+            ),
+            component_node(
+                "FooterLine",
+                &[("kind", text("prompt"))],
+                &[node_text(&data(WORDS[2]))],
+            ),
+            component_node("FooterCorner", &[("side", text("end"))], &[]),
+        ]),
         "Label" => Drawn::names().prop("text", data(WORDS[0])),
         "List" => Drawn::names().inside(
             WORDS
@@ -596,6 +617,27 @@ fn itself(component: &Component, prop_name: &str, value: &str, caption: &str) ->
             .prop("max", text("12"))
             .prop("value_label", message("SpecimenBarValue")),
         "NumberInput" => Drawn::names().prop("value", data("42")),
+        // THE OPTIONS COME WITH THE LIST, and the first is the active one, so a
+        // cell shows the bar a size has to leave room for. Each carries a key,
+        // because where the key sits is what `layout` moves.
+        "OptionList" => Drawn::names().inside(
+            WORDS
+                .iter()
+                .enumerate()
+                .map(|(at, word)| {
+                    component_node(
+                        "OptionItem",
+                        &[
+                            ("value", text(word)),
+                            ("label", data(word)),
+                            ("shortcut", data(&word[..1])),
+                            ("active", flag(at == 0)),
+                        ],
+                        &[],
+                    )
+                })
+                .collect(),
+        ),
         "OtpField" => Drawn::names()
             .prop("length", text("3"))
             .prop("value", data("421")),
@@ -1096,8 +1138,12 @@ fn call(
             // the prop under test is a row where two values painted alike still
             // measure apart, and `variants.spec.js` reads exactly that
             // measurement. A `name` is never drawn, so it is exempt.
+            //
+            // A NAME IS NOT THE CAPTION'S ID. The caption is the figure's, and
+            // a component whose name is also its id, as `OptionList`'s is,
+            // would carry the same id as the caption under it.
             if name == "name" {
-                props.push((name, text(caption)));
+                props.push((name, text(&format!("{caption}-specimen"))));
             } else {
                 props.push((name, text(&component.meta.name)));
             }

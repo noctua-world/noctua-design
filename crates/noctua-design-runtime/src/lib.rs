@@ -14,9 +14,9 @@
 //! | `table.js` | `enhanceTables()` — sorting, filtering, resizing, pinning, grouping, export, and the aggregates a filter recounts |
 //! | `info.js` | `enhanceInfos()` — the note beside a word or beside an assistant's mark, on a press and never on a hover |
 //! | `menu.js` | `enhanceMenus()` — the list of actions a button opens, and every key a menu owes |
-//! | `message-bar.js` | `enhanceMessageBars()` — revealing the control that takes a bar away, and taking it |
+//! | `message-bar.js` | `enhanceMessageBars()` — revealing the control that takes a bar away, and taking it, and the seconds left until a bar's deadline |
 //! | `date-picker.js` | `enhanceDatePickers()` — the month a reader presses days in, the arrows that walk it, and the panel it folds into |
-//! | `dialog.js` | `enhanceDialogs()` — opening the platform's `<dialog>`, and the Escape a non-modal one is owed |
+//! | `dialog.js` | `enhanceDialogs()` — opening the platform's `<dialog>` from its trigger or from `shown`, the Escape a non-modal one is owed, the focus on a confirmation's decline, and the answer `nd-dialog-close` reports |
 //! | `popover.js` | `enhancePopovers()` — the named surface a control opens, and every way out of it |
 //! | `tooltip.js` | `enhanceTooltips()` — the hint a control gains on hover, on focus and under a held finger |
 //! | `toast.js` | `enhanceToasts()` — the timer that pauses, and the live region a message arrives in |
@@ -25,10 +25,17 @@
 //! | `select.js` | `enhanceSelects()` — the listbox, the filter and the type-ahead a `Select` gains |
 //! | `tag-picker.js` | `enhanceTagPickers()` — the suggestions, and the tags a reader adds and takes back |
 //! | `tree.js` | `enhanceTrees()` — the arrows, the type-ahead and the one tab stop a tree owes |
+//! | `option-list.js` | `enhanceOptionLists()` — the active option, the keys that move it from the list or from the control that names the list, and the two events that say so |
+//! | `prompt.js` | `enhancePrompts()` — the block cursor a `Prompt` draws over its own textarea, the growth that follows the text, and the event that says it was sent |
+//! | `drawer.js` | `enhanceDrawers()` — `inert` on a collapsed `Drawer`, the focus given back when one shuts around it, and the event Escape says |
+//! | `split.js` | `enhanceSplits()` — the keys and the drag that move the line between a `Split`'s two panes, and the event that says where it is |
+//! | `key-capture.js` | `enhanceKeyCaptures()` — listening for a shortcut, recording it as a chord of physical keys, the labels the layout prints, and the event that says what was recorded |
+//! | `log.js` | `enhanceLogs()` — keeping a `Log`'s newest line in view, stopping when the reader scrolls away or holds a selection, and the event that says which |
 //! | `tabs.js` | `enhanceTabs()` — the panel that shows and the ones that stop being on the page |
 //! | `date-input.js` | `enhanceDateInputs()` — the three boxes: stepping, paste, the locale's own order |
 //! | `choice.js` | `enhanceChoices()` — a switch turns on, an item in a group becomes the chosen one, and a `change` says so |
 //! | `search.js`, `search-match.js` | `enhanceSearches()` — the listbox, the hotkey, the recent queries, and the ranking behind them |
+//! | `seats.js` | `seatHover()`, `seatFocus()`, `seatPress()`, `seatDrag()` — a second seat's state, written as the attributes every state rule is twinned with |
 //!
 //! # Why a crate holds JavaScript
 //!
@@ -124,6 +131,27 @@ pub const TAG_PICKER_SOURCE: &str = "crates/noctua-design-runtime/src/tag-picker
 /// `tree.js`, likewise.
 pub const TREE_SOURCE: &str = "crates/noctua-design-runtime/src/tree.js";
 
+/// `option-list.js`: the listbox an `OptionList` is, driven from itself or
+/// from the control that names it.
+pub const OPTION_LIST_SOURCE: &str = "crates/noctua-design-runtime/src/option-list.js";
+
+/// `prompt.js`: the block cursor a `Prompt` draws, and the one event it says.
+pub const PROMPT_SOURCE: &str = "crates/noctua-design-runtime/src/prompt.js";
+
+/// `drawer.js`: what a collapsed `Drawer` owes the keyboard, and the one
+/// event it says.
+pub const DRAWER_SOURCE: &str = "crates/noctua-design-runtime/src/drawer.js";
+
+/// `split.js`: the line between a `Split`'s two panes, moved by the keyboard
+/// and by a pointer.
+pub const SPLIT_SOURCE: &str = "crates/noctua-design-runtime/src/split.js";
+
+/// `key-capture.js`: the shortcut a `KeyCapture` listens for and records.
+pub const KEY_CAPTURE_SOURCE: &str = "crates/noctua-design-runtime/src/key-capture.js";
+
+/// `log.js`: the end a `Log` follows, and where it stops.
+pub const LOG_SOURCE: &str = "crates/noctua-design-runtime/src/log.js";
+
 /// `tabs.js`, likewise.
 pub const TABS_SOURCE: &str = "crates/noctua-design-runtime/src/tabs.js";
 
@@ -133,8 +161,12 @@ pub const CHOICE_SOURCE: &str = "crates/noctua-design-runtime/src/choice.js";
 /// `search.js`, likewise — the last enhancer the documentation site kept.
 pub const SEARCH_SOURCE: &str = "crates/noctua-design-runtime/src/search.js";
 
-/// `search-match.js`, likewise — the ranking, which touches no DOM at all.
+/// `search-match.js`, likewise — the fuzzy core's rule, which touches no DOM at all.
 pub const SEARCH_MATCH_SOURCE: &str = "crates/noctua-design-runtime/src/search-match.js";
+
+/// `seats.js`, likewise — the one file here that belongs to no component and
+/// to every one of them.
+pub const SEATS_SOURCE: &str = "crates/noctua-design-runtime/src/seats.js";
 
 /// `date-input.js`, likewise — the three boxes, not the month behind them.
 pub const DATE_INPUT_SOURCE: &str = "crates/noctua-design-runtime/src/date-input.js";
@@ -146,7 +178,7 @@ pub const DATE_INPUT_SOURCE: &str = "crates/noctua-design-runtime/src/date-input
 /// `xtask` that runs and writes an empty artifact. The paths above are what
 /// name it; these are what it says.
 #[must_use]
-pub fn sources() -> [(&'static str, &'static str); 26] {
+pub fn sources() -> [(&'static str, &'static str); 33] {
     [
         (ANCHOR_SOURCE, include_str!("anchor.js")),
         (COLOR_SOURCE, include_str!("color.js")),
@@ -169,11 +201,18 @@ pub fn sources() -> [(&'static str, &'static str); 26] {
         (SELECT_SOURCE, include_str!("select.js")),
         (TAG_PICKER_SOURCE, include_str!("tag-picker.js")),
         (TREE_SOURCE, include_str!("tree.js")),
+        (OPTION_LIST_SOURCE, include_str!("option-list.js")),
+        (PROMPT_SOURCE, include_str!("prompt.js")),
+        (DRAWER_SOURCE, include_str!("drawer.js")),
+        (SPLIT_SOURCE, include_str!("split.js")),
+        (KEY_CAPTURE_SOURCE, include_str!("key-capture.js")),
+        (LOG_SOURCE, include_str!("log.js")),
         (TABS_SOURCE, include_str!("tabs.js")),
         (DATE_INPUT_SOURCE, include_str!("date-input.js")),
         (CHOICE_SOURCE, include_str!("choice.js")),
         (SEARCH_SOURCE, include_str!("search.js")),
         (SEARCH_MATCH_SOURCE, include_str!("search-match.js")),
+        (SEATS_SOURCE, include_str!("seats.js")),
     ]
 }
 

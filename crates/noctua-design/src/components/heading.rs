@@ -26,6 +26,10 @@ pub enum HeadingLevel {
     _6,
 }
 
+#[allow(
+    clippy::used_underscore_items,
+    reason = "a value that begins with a digit has no other spelling as a variant"
+)]
 impl HeadingLevel {
     /// Every value, in the order the spec declares them.
     pub const ALL: [Self; 6] = [Self::_1, Self::_2, Self::_3, Self::_4, Self::_5, Self::_6];

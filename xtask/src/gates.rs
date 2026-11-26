@@ -270,6 +270,7 @@ fn inspect(
     }
 
     cited_sources(file, text, findings);
+    seat_twin(file, text, findings);
 
     // Tracked across lines, because a CSS block comment's second line contains
     // no `/*` and a line-by-line strip would read its prose as code. Three of
@@ -680,6 +681,978 @@ fn translated_fragment(code: &str) -> Option<String> {
         }
     }
     None
+}
+
+/// Where the component rules live, which is where [`seat_twin`] reads.
+///
+/// The documentation site's own chrome is not here and is not held to it: no
+/// second seat ever points at this site's header.
+const SEATED: &str = "crates/noctua-design-styles/src/";
+
+/// Whether a repository-relative path is a component stylesheet.
+///
+/// [`seat_twin`] asks, and reads nothing else: [`inspect`] hands it every
+/// file, as it hands every file to every gate.
+fn is_seated(file: &str) -> bool {
+    file.starts_with(SEATED)
+        && Path::new(file)
+            .extension()
+            .is_some_and(|extension| extension == "css")
+}
+
+/// A native state pseudo-class, the form a selector writes it in, and the
+/// attribute selector that stands for it in a sibling rule.
+///
+/// Longest name first: `:focus` is a prefix of the two before it, and a scan
+/// that tried it first would read `:focus-visible` as `:focus` and a stray
+/// `-visible`.
+const SEAT_TWINS: [(&str, &str, &str); 5] = [
+    (
+        ":focus-visible",
+        ":is(:focus-visible, [data-nd-seat-focus])",
+        "[data-nd-seat-focus]",
+    ),
+    (
+        ":focus-within",
+        ":is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus]))",
+        ":is([data-nd-seat-focus], :has([data-nd-seat-focus]))",
+    ),
+    (
+        ":focus",
+        ":is(:focus, [data-nd-seat-focus])",
+        "[data-nd-seat-focus]",
+    ),
+    (
+        ":hover",
+        ":is(:hover, [data-nd-seat-hover])",
+        "[data-nd-seat-hover]",
+    ),
+    (
+        ":active",
+        ":is(:active, [data-nd-seat-active])",
+        "[data-nd-seat-active]",
+    ),
+];
+
+/// One style rule, as [`seat_twin`] compares it.
+#[derive(Debug)]
+struct StyleRule {
+    /// 1-indexed line its selector starts on, and the line its `{` is on.
+    lines: (usize, usize),
+    /// The selector list, comments removed and blank space collapsed.
+    selector: String,
+    /// The declarations, likewise.
+    declarations: String,
+    /// The at-rule preludes around it, outermost first, likewise.
+    context: Vec<String>,
+    /// Whether a block opens inside it, or it opens inside another style
+    /// rule: CSS nesting, which [`style_rules`] does not put back together.
+    nesting: bool,
+}
+
+/// One at-rule that has a block, as [`seat_twin`] reads it.
+#[derive(Debug)]
+struct AtRule {
+    /// 1-indexed line its prelude starts on.
+    line: usize,
+    /// The prelude, comments removed and blank space collapsed.
+    prelude: String,
+}
+
+/// A stylesheet as [`style_rules`] reads it: the style rules in source order,
+/// and the at-rules that have a block.
+#[derive(Debug)]
+struct Sheet {
+    rules: Vec<StyleRule>,
+    queries: Vec<AtRule>,
+}
+
+/// Blank space collapsed to single spaces, so two spellings of one selector
+/// compare equal.
+fn collapse(text: &str) -> String {
+    text.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+/// A block [`style_rules`] is inside: an at-rule by its prelude, or the index
+/// of the style rule whose declarations are being read.
+enum OpenBlock {
+    At(String),
+    Rule(usize),
+}
+
+/// Records the block that opens after `prelude`, which started on `first` and
+/// whose `{` is on `line`, as an at-rule or as a style rule behind the
+/// at-rules open around it.
+fn open_block(
+    prelude: String,
+    (first, line): (usize, usize),
+    sheet: &mut Sheet,
+    open: &mut Vec<OpenBlock>,
+) {
+    let mut nested = false;
+    for block in open.iter() {
+        if let OpenBlock::Rule(at) = block {
+            sheet.rules[*at].nesting = true;
+            nested = true;
+        }
+    }
+    if prelude.starts_with('@') {
+        sheet.queries.push(AtRule {
+            line: first,
+            prelude: prelude.clone(),
+        });
+        open.push(OpenBlock::At(prelude));
+        return;
+    }
+    let context = open
+        .iter()
+        .filter_map(|block| match block {
+            OpenBlock::At(prelude) => Some(prelude.clone()),
+            OpenBlock::Rule(_) => None,
+        })
+        .collect();
+    open.push(OpenBlock::Rule(sheet.rules.len()));
+    sheet.rules.push(StyleRule {
+        lines: (first, line),
+        selector: prelude,
+        declarations: String::new(),
+        context,
+        nesting: nested,
+    });
+}
+
+/// Every style rule in a stylesheet, with the at-rules around each.
+///
+/// Not a CSS parser: it knows comments, strings and braces, which is all the
+/// question below needs. It reads a rule nested in a rule as two rules and
+/// drops what an at-rule nested in a rule declares, and marks every rule on
+/// either side of a nesting so that a reader who needs the whole rule can
+/// refuse it.
+fn style_rules(text: &str) -> Sheet {
+    let chars: Vec<char> = text.chars().collect();
+    let mut sheet = Sheet {
+        rules: Vec::new(),
+        queries: Vec::new(),
+    };
+    let mut open: Vec<OpenBlock> = Vec::new();
+    // What has been read since the last `{`, `}` or `;`, comments left out,
+    // and the line its first visible character was on.
+    let mut pending = String::new();
+    let mut pending_line = 0usize;
+    let mut line = 1usize;
+    let mut index = 0usize;
+
+    while index < chars.len() {
+        let here = chars[index];
+        if here == '/' && chars.get(index + 1) == Some(&'*') {
+            index += 2;
+            while index < chars.len()
+                && !(chars[index] == '*' && chars.get(index + 1) == Some(&'/'))
+            {
+                line += usize::from(chars[index] == '\n');
+                index += 1;
+            }
+            index += 2;
+            continue;
+        }
+        if here == '"' || here == '\'' {
+            if pending.trim().is_empty() {
+                pending_line = line;
+            }
+            pending.push(here);
+            index += 1;
+            while index < chars.len() && chars[index] != here {
+                if chars[index] == '\\' {
+                    pending.push(chars[index]);
+                    index += 1;
+                }
+                if let Some(inner) = chars.get(index) {
+                    line += usize::from(*inner == '\n');
+                    pending.push(*inner);
+                }
+                index += 1;
+            }
+            pending.push(here);
+            index += 1;
+            continue;
+        }
+        match here {
+            '{' => {
+                open_block(
+                    collapse(&pending),
+                    (pending_line.max(1), line),
+                    &mut sheet,
+                    &mut open,
+                );
+                pending.clear();
+            }
+            '}' | ';' => {
+                if let Some(OpenBlock::Rule(at)) = open.last() {
+                    let declaration = collapse(&pending);
+                    if !declaration.is_empty() {
+                        let into = &mut sheet.rules[*at].declarations;
+                        into.push_str(&declaration);
+                        into.push(';');
+                    }
+                }
+                if here == '}' {
+                    open.pop();
+                }
+                pending.clear();
+            }
+            _ => {
+                if pending.trim().is_empty() && !here.is_whitespace() {
+                    pending_line = line;
+                }
+                line += usize::from(here == '\n');
+                pending.push(here);
+            }
+        }
+        index += 1;
+    }
+    sheet
+}
+
+/// Whether `text` starts with the pseudo-class `name` and not with a longer
+/// name that merely begins the same way.
+fn starts_pseudo(text: &str, name: &str) -> bool {
+    text.strip_prefix(name).is_some_and(|rest| {
+        !rest
+            .chars()
+            .next()
+            .is_some_and(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+    })
+}
+
+/// The bare states one way of matching a selector asks for together, in the
+/// order written.
+type Together = Vec<&'static str>;
+
+/// One selector list being read by [`seat_sibling`]: a rule's own, or the
+/// argument of a functional pseudo-class.
+struct Alternatives {
+    /// The ways of matching the selectors of the list already read to their
+    /// comma.
+    done: Vec<Together>,
+    /// The ways of matching the selector being read, as far as it is read.
+    current: Vec<Together>,
+}
+
+impl Alternatives {
+    fn new() -> Self {
+        Self {
+            done: Vec::new(),
+            current: vec![Vec::new()],
+        }
+    }
+
+    /// Ends the selector being read, at a comma or at the end of the list.
+    fn part(&mut self) {
+        let finished = std::mem::replace(&mut self.current, vec![Vec::new()]);
+        for way in finished {
+            if !self.done.contains(&way) {
+                self.done.push(way);
+            }
+        }
+    }
+
+    /// Reads a whole inner list into the selector being read: every way of
+    /// matching that selector so far goes on through each way of matching the
+    /// list.
+    fn through(&mut self, mut inner: Self) {
+        inner.part();
+        let mut ways: Vec<Together> = Vec::new();
+        for before in &self.current {
+            for after in &inner.done {
+                let way: Together = before.iter().chain(after).copied().collect();
+                if !ways.contains(&way) {
+                    ways.push(way);
+                }
+            }
+        }
+        self.current = ways;
+    }
+}
+
+/// A selector list's state pseudo-classes: how many it writes, the ones among
+/// those that are bare, and the selector a sibling rule must carry for the
+/// bare ones.
+///
+/// THE BARE ONES COME BACK AS THE WAYS OF MATCHING THAT ASK FOR ANY, one list
+/// for each: the states an element has to be in TOGETHER for the rule to match
+/// that way, in the order written. A selector matches one way unless it holds
+/// a list, and then it matches through any one selector of that list:
+/// `.a:hover .b:active` is one way that asks for two states, and
+/// `.x:has(.b:hover, .c:active)` is two ways that ask for one each. Every bare
+/// state the list writes is in at least one of them.
+///
+/// The selectors of a list part at the commas outside every square bracket and
+/// every quoted string, the rule's own list and a functional pseudo-class's
+/// alike: `.a:hover, .b:hover` is two selectors with one state each.
+fn seat_sibling(selector: &str) -> (usize, Vec<Together>, String) {
+    let mut sibling = String::new();
+    let mut written = 0usize;
+    // The rule's own list first, then one for each round bracket the scan is
+    // inside; how deep in square brackets it is, and the quote it is inside.
+    let mut lists = vec![Alternatives::new()];
+    let mut square = 0usize;
+    let mut quote = None;
+    let mut rest = selector;
+    'scan: while let Some(here) = rest.chars().next() {
+        if here == ':' {
+            for (name, twinned, attribute) in SEAT_TWINS {
+                if rest.starts_with(twinned) {
+                    written += 1;
+                    sibling.push_str(twinned);
+                    rest = &rest[twinned.len()..];
+                    continue 'scan;
+                }
+                if starts_pseudo(rest, name) {
+                    written += 1;
+                    if let Some(list) = lists.last_mut() {
+                        for way in &mut list.current {
+                            way.push(name);
+                        }
+                    }
+                    sibling.push_str(attribute);
+                    rest = &rest[name.len()..];
+                    continue 'scan;
+                }
+            }
+        }
+        match (quote, here) {
+            (Some(open), _) if here == open => quote = None,
+            (None, '"' | '\'') => quote = Some(here),
+            (None, '[') => square += 1,
+            (None, ']') => square = square.saturating_sub(1),
+            (None, '(') if square == 0 => lists.push(Alternatives::new()),
+            (None, ')') if square == 0 && lists.len() > 1 => {
+                if let (Some(inner), Some(outer)) = (lists.pop(), lists.last_mut()) {
+                    outer.through(inner);
+                }
+            }
+            (None, ',') if square == 0 => {
+                if let Some(list) = lists.last_mut() {
+                    list.part();
+                }
+            }
+            (Some(_) | None, _) => {}
+        }
+        sibling.push(here);
+        rest = &rest[here.len_utf8()..];
+    }
+    // A bracket left open ends with the selector.
+    while lists.len() > 1 {
+        if let (Some(inner), Some(outer)) = (lists.pop(), lists.last_mut()) {
+            outer.through(inner);
+        }
+    }
+    let mut bare = lists.pop().map_or_else(Vec::new, |mut list| {
+        list.part();
+        list.done
+    });
+    bare.retain(|way| !way.is_empty());
+    (written, bare, sibling)
+}
+
+/// The attribute a seat's state is written as, up to the state's name.
+const SEAT_ATTRIBUTE: &str = "[data-nd-seat-";
+
+/// The sibling of a bare `:focus-within`, which [`SEAT_TWINS`] also names.
+const SEAT_WITHIN: &str = ":is([data-nd-seat-focus], :has([data-nd-seat-focus]))";
+
+/// A selector's seat attributes that stand outside the twin form: how many it
+/// writes, and the selectors a native rule may carry for them.
+///
+/// The reverse of [`seat_sibling`]. `[data-nd-seat-focus]` stands for two
+/// pseudo-classes, so there are two candidates and either is the native rule.
+/// `[data-nd-seat-drag]` stands for none and is left as written: no engine has
+/// a pseudo-class for what a pointer is dragging. A seat attribute in any other
+/// spelling — one that asks for a seat by its id, say — has no native rule to
+/// be the twin of, and the candidates come back empty.
+fn seat_native(selector: &str) -> (usize, Vec<String>) {
+    let mut natives = [String::new(), String::new()];
+    let mut loose = 0usize;
+    let mut unknown = false;
+    let mut rest = selector;
+    'scan: while let Some(here) = rest.chars().next() {
+        if here == ':' {
+            for (_, twinned, _) in SEAT_TWINS {
+                if rest.starts_with(twinned) {
+                    for native in &mut natives {
+                        native.push_str(twinned);
+                    }
+                    rest = &rest[twinned.len()..];
+                    continue 'scan;
+                }
+            }
+            if rest.starts_with(SEAT_WITHIN) {
+                loose += 1;
+                for native in &mut natives {
+                    native.push_str(":focus-within");
+                }
+                rest = &rest[SEAT_WITHIN.len()..];
+                continue 'scan;
+            }
+        }
+        if rest.starts_with(SEAT_ATTRIBUTE) {
+            for (attribute, first, second) in [
+                ("[data-nd-seat-hover]", ":hover", ":hover"),
+                ("[data-nd-seat-active]", ":active", ":active"),
+                ("[data-nd-seat-focus]", ":focus-visible", ":focus"),
+                (
+                    "[data-nd-seat-drag]",
+                    "[data-nd-seat-drag]",
+                    "[data-nd-seat-drag]",
+                ),
+            ] {
+                if rest.starts_with(attribute) {
+                    loose += usize::from(attribute != first);
+                    natives[0].push_str(first);
+                    natives[1].push_str(second);
+                    rest = &rest[attribute.len()..];
+                    continue 'scan;
+                }
+            }
+            loose += 1;
+            unknown = true;
+        }
+        for native in &mut natives {
+            native.push(here);
+        }
+        rest = &rest[here.len_utf8()..];
+    }
+    if unknown {
+        return (loose, Vec::new());
+    }
+    let [first, second] = natives;
+    if first == second {
+        (loose, vec![first])
+    } else {
+        (loose, vec![first, second])
+    }
+}
+
+/// Whether an at-rule prelude asks only whether the pointer can hover, in the
+/// one spelling a component stylesheet writes that in.
+fn is_hover_query(prelude: &str) -> bool {
+    prelude
+        .chars()
+        .filter(|c| !c.is_whitespace())
+        .collect::<String>()
+        .eq_ignore_ascii_case("@media(hover:hover)")
+}
+
+/// Whether a media query asks anything at all about the window's own pointer:
+/// `hover` or `any-hover`, `pointer` or `any-pointer`, with a value or
+/// without, alone or among other features.
+///
+/// Read by its text, because every spelling of either question has its word
+/// in it and no other media feature does.
+fn asks_about_hover(prelude: &str) -> bool {
+    let prelude = prelude.to_ascii_lowercase();
+    prelude.starts_with("@media") && (prelude.contains("hover") || prelude.contains("pointer"))
+}
+
+/// Whether a selector or an at-rule prelude holds a CSS escape: a backslash
+/// outside a quoted string.
+///
+/// `:h\6fver` is `:hover` to an engine and is no state to a reader of text,
+/// and there is no end to the ways an escape can spell a name. No component
+/// stylesheet needs one, so [`seat_twin`] refuses them all.
+fn has_escape(text: &str) -> bool {
+    let mut quote = None;
+    let mut chars = text.chars();
+    while let Some(here) = chars.next() {
+        match quote {
+            Some(_) if here == '\\' => {
+                chars.next();
+            }
+            Some(open) if here == open => quote = None,
+            None if here == '"' || here == '\'' => quote = Some(here),
+            None if here == '\\' => return true,
+            Some(_) | None => {}
+        }
+    }
+    false
+}
+
+/// What is wrong with where a selector puts a state, if anything is: a
+/// `:focus-within` inside `:has(`, or a bare state pseudo-class inside
+/// `:not(`.
+///
+/// Both are places where the text of a twin is right and what an engine does
+/// with it is not. `:has()` does not nest, so inside one the engine drops the
+/// `:has([data-nd-seat-focus])` that carries a seat's focus up to an ancestor,
+/// and the seat's focus stops matching where the keyboard's still does. And
+/// the sibling of `:not(:hover)` is not `:not([data-nd-seat-hover])`: an
+/// element a second seat hovers still matches the native rule, so it is drawn
+/// as not hovered. Only `:not(:is(:hover, [data-nd-seat-hover]))` says "no
+/// seat at all".
+fn seat_misplaced(selector: &str) -> Option<String> {
+    // The functional pseudo-classes open at this point, lower-cased, each as
+    // `:name`.
+    let mut inside: Vec<String> = Vec::new();
+    let mut quote = None;
+    let mut rest = selector;
+    'scan: while let Some(here) = rest.chars().next() {
+        if let Some(open) = quote {
+            if here == '\\' {
+                rest = &rest[1..];
+            } else if here == open {
+                quote = None;
+            }
+            let step = rest.chars().next().map_or(0, char::len_utf8);
+            rest = &rest[step..];
+            continue;
+        }
+        let within_has = inside.iter().any(|name| name == ":has");
+        if here == ':' {
+            if within_has
+                && (starts_pseudo(rest, ":focus-within")
+                    || rest.starts_with(":is(:focus-within,")
+                    || rest.starts_with(SEAT_WITHIN))
+            {
+                return Some(format!(
+                    "`{selector}` reaches `:focus-within` inside `:has(`. `:has()` does not \
+                     nest, so an engine drops the `:has([data-nd-seat-focus])` that carries a \
+                     second seat's focus up to an ancestor, and the seat is not drawn where the \
+                     keyboard is (NOCTUA.md §9.7). Restructure the rule so that `:focus-within` \
+                     stands outside every `:has(`"
+                ));
+            }
+            for (name, twinned, _) in SEAT_TWINS {
+                if rest.starts_with(twinned) {
+                    rest = &rest[twinned.len()..];
+                    continue 'scan;
+                }
+                if starts_pseudo(rest, name) && inside.iter().any(|name| name == ":not") {
+                    return Some(format!(
+                        "`{selector}` negates a bare `{name}`. Its sibling on the attribute \
+                         would still match an element a second seat is on, so that seat is \
+                         drawn as absent (NOCTUA.md §9.7). Inside `:not(` write the twin form, \
+                         `:not({twinned})`"
+                    ));
+                }
+            }
+        }
+        match here {
+            '"' | '\'' => quote = Some(here),
+            '(' => {
+                let before = &selector[..selector.len() - rest.len()];
+                let name = before
+                    .rfind(|c: char| !(c.is_ascii_alphanumeric() || c == '-' || c == '_'))
+                    .map_or(before, |at| &before[at..]);
+                inside.push(name.to_ascii_lowercase());
+            }
+            ')' => {
+                inside.pop();
+            }
+            _ => {}
+        }
+        rest = &rest[here.len_utf8()..];
+    }
+    None
+}
+
+/// How many state pseudo-classes and how many seat attributes a selector
+/// holds, read without regard to case.
+///
+/// The count [`seat_sibling`] and [`seat_native`] are held to. Both read the
+/// exact text, and CSS does not: `:HOVER` is `:hover` to an engine, and so is
+/// `[ data-nd-seat-hover]` the attribute. A spelling the exact readers pass
+/// over is a state nobody checked, so [`seat_twin`] refuses any selector in
+/// which this finds more than they did.
+fn seat_mentions(selector: &str) -> (usize, usize) {
+    let lower = selector.to_ascii_lowercase();
+    let mut states = 0usize;
+    let mut rest = lower.as_str();
+    'scan: while let Some(at) = rest.find(':') {
+        rest = &rest[at..];
+        for (name, _, _) in SEAT_TWINS {
+            if starts_pseudo(rest, name) {
+                states += 1;
+                rest = &rest[name.len()..];
+                continue 'scan;
+            }
+        }
+        rest = &rest[1..];
+    }
+    (states, lower.matches(&SEAT_ATTRIBUTE[1..]).count())
+}
+
+/// Where the sibling of each bare state rule has to stand, by its index in
+/// `rules`; `None` for a rule that is not bare (`bare[index]` says which are).
+///
+/// DIRECTLY AFTER THE RUN OF BARE RULES IT IS IN, AND IN THE RUN'S ORDER. A
+/// run is bare state rules one after another behind the same queries — what a
+/// `@media (hover: hover)` block holds — and the first rule after it is the
+/// first one's sibling, the second the second's. Anywhere else, a rule of the
+/// same weight can stand between a native rule and its sibling, or the
+/// siblings can stand in another order than their native rules, and then the
+/// native state loses a tie in the cascade that the seat's state wins: the
+/// same declarations, drawn differently.
+fn seat_places(rules: &[StyleRule], bare: &[bool]) -> Vec<Option<usize>> {
+    let mut places = vec![None; rules.len()];
+    let mut start = 0usize;
+    while start < rules.len() {
+        if !bare[start] {
+            start += 1;
+            continue;
+        }
+        let mut end = start + 1;
+        while end < rules.len() && bare[end] && rules[end].context == rules[start].context {
+            end += 1;
+        }
+        for (offset, place) in places[start..end].iter_mut().enumerate() {
+            *place = Some(end + offset);
+        }
+        start = end;
+    }
+    places
+}
+
+/// Whether `sibling` can be the sibling rule of the bare rule `native`: the
+/// same declarations, behind the queries `native` is behind less the hover
+/// query. The selector is the caller's to compare.
+fn seat_pairs(native: &StyleRule, sibling: &StyleRule) -> bool {
+    native.declarations == sibling.declarations
+        && native
+            .context
+            .iter()
+            .filter(|prelude| !is_hover_query(prelude))
+            .eq(sibling.context.iter())
+}
+
+/// What is wrong with the rule at `index`, on a seat attribute outside the
+/// twin form, if anything is: no native rule among `rules` for
+/// [`seat_native`]'s candidates, with its declarations, behind the queries it
+/// is behind and at most a hover query more, has this rule's place as its
+/// sibling's ([`seat_places`]).
+fn seat_orphan(
+    index: usize,
+    rules: &[StyleRule],
+    places: &[Option<usize>],
+    natives: &[String],
+) -> Option<String> {
+    let rule = &rules[index];
+    let native = rules.iter().zip(places).any(|(other, place)| {
+        *place == Some(index) && natives.contains(&other.selector) && seat_pairs(other, rule)
+    });
+    if native {
+        return None;
+    }
+    let remedy = match natives {
+        [] => "A rule asks only whether a seat attribute is present, written \
+               `[data-nd-seat-hover]`, `[data-nd-seat-focus]`, `[data-nd-seat-active]` or \
+               `[data-nd-seat-drag]`"
+            .to_owned(),
+        [one, ..] => format!(
+            "Write the twin form, or keep the native rule `{one}` with the same declarations \
+             directly before it, with only the other rules of that hover block and their \
+             siblings, in the block's order, between the two"
+        ),
+    };
+    Some(format!(
+        "`{}` reaches a state through the seat attribute alone, so a second seat is drawn as \
+         the system's own pointer or keyboard never is (NOCTUA.md §9.7). {remedy}",
+        rule.selector
+    ))
+}
+
+/// What keeps [`seat_twin`] from reading a rule at all, if anything does: a
+/// state or a seat attribute in a spelling its exact readers pass over
+/// (`mentions` is [`seat_mentions`]'s count, `written` is [`seat_sibling`]'s),
+/// a CSS escape, which can spell either, CSS nesting on either side of the
+/// rule, or a question about the window's pointer around it that is not
+/// [`is_hover_query`]'s.
+fn seat_unread(rule: &StyleRule, written: usize, mentions: (usize, usize)) -> Option<String> {
+    let (states, attributes) = mentions;
+    if has_escape(&rule.selector)
+        || states != written
+        || attributes != rule.selector.matches(SEAT_ATTRIBUTE).count()
+    {
+        return Some(format!(
+            "`{}` spells a state pseudo-class or a seat attribute in a way this gate does not \
+             read, or holds a CSS escape that could spell one, so nothing holds it to its twin \
+             (NOCTUA.md §9.7). Write the names lower-case, with no blank space inside the \
+             brackets and no backslash: `:hover`, `[data-nd-seat-hover]`",
+            rule.selector
+        ));
+    }
+    if rule.nesting {
+        return Some(format!(
+            "`{}` is a state rule that nests a block or is nested in a rule, and this gate \
+             reads neither whole: what a nested block declares, and the query it declares it \
+             behind, would go unheld to the twin (NOCTUA.md §9.7). Write a state rule flat, \
+             with its queries around it",
+            rule.selector
+        ));
+    }
+    let query = rule
+        .context
+        .iter()
+        .find(|prelude| asks_about_hover(prelude) && !is_hover_query(prelude))?;
+    Some(format!(
+        "`{}` stands behind `{query}`, a question about the window's own pointer this gate \
+         cannot hold a seat's rule to: a seat attribute inside it waits on that pointer \
+         (NOCTUA.md §9.7). Write the query as exactly `@media (hover: hover)`, with any other \
+         condition in a `@media` of its own around it, and keep a state rule out of a \
+         `pointer` query altogether",
+        rule.selector
+    ))
+}
+
+/// What is wrong with a rule that names a seat attribute behind the hover
+/// query, in either form, if it does: there the seat's state waits on the
+/// window's own pointer.
+fn seat_waiting(rule: &StyleRule) -> Option<String> {
+    if !rule.selector.contains(SEAT_ATTRIBUTE)
+        || !rule.context.iter().any(|prelude| is_hover_query(prelude))
+    {
+        return None;
+    }
+    Some(format!(
+        "`{}` names a seat attribute inside `@media (hover: hover)`, so a second seat's state \
+         is drawn only where the window's own pointer can hover (NOCTUA.md §9.7). Leave the \
+         rule in that block bare and write its sibling on the attribute outside the block, in \
+         this file, with the same declarations",
+        rule.selector
+    ))
+}
+
+/// What keeps a bare rule from having a sibling at all, if anything does: a
+/// state other than `:hover` behind the hover query, or more than one bare
+/// state asked for together (`bare` is [`seat_sibling`]'s lists).
+///
+/// Both are rules whose sibling has the right text and is not their twin. The
+/// sibling of a rule behind `@media (hover: hover)` stands outside it because
+/// `data-nd-seat-hover` is itself the proof of a pointer that hovers; no other
+/// attribute proves that, so the sibling of `.a:focus-visible` in that block
+/// draws a seat's focus in a window where the keyboard's own is not drawn. And
+/// a sibling swaps every bare state at once: beside `.a:hover:focus-visible`,
+/// `.a[data-nd-seat-hover][data-nd-seat-focus]` matches the two seats' states
+/// together and neither mixed case — a second seat's hover on what the
+/// system's keyboard has focused, or the reverse — which the twin form of the
+/// same selector does match. One bare state among twinned ones is whole: the
+/// rule and its sibling between them cover every combination.
+///
+/// TOGETHER, AND NOT MERELY IN ONE SELECTOR. Two bare states in two selectors
+/// of one `:has(` or `:is(` list are alternatives: `.x:has(.b:hover,
+/// .c:focus-visible)` matches through either alone, its sibling
+/// `.x:has(.b[data-nd-seat-hover], .c[data-nd-seat-focus])` likewise, and
+/// there is no mixed case for the pair to miss. A state outside the list
+/// beside one inside it is asked for with it, and is refused.
+fn seat_unpaired(rule: &StyleRule, bare: &[Vec<&'static str>]) -> Option<String> {
+    let behind_hover = rule.context.iter().any(|prelude| is_hover_query(prelude));
+    if let Some(name) = bare
+        .iter()
+        .flatten()
+        .find(|name| behind_hover && **name != ":hover")
+    {
+        return Some(format!(
+            "`{}` reaches `{name}` inside `@media (hover: hover)`. Its sibling stands outside \
+             that block, and only `[data-nd-seat-hover]` is the proof of a pointer that hovers: \
+             a window whose own pointer cannot hover would draw a second seat in this state \
+             and never the system's own keyboard or pointer (NOCTUA.md §9.7). Only `:hover` is \
+             written behind the hover query; write this state outside it, in the twin form",
+            rule.selector
+        ));
+    }
+    if let Some(bare) = bare.iter().find(|states| states.len() > 1) {
+        return Some(format!(
+            "`{}` asks for {} states together through bare pseudo-classes ({}). One sibling \
+             rule swaps them all for attributes at once, so it matches neither mixed case: a second \
+             seat in one state on an element the system's own pointer or keyboard holds in \
+             the other (NOCTUA.md §9.7). Leave at most one state bare: write the others in \
+             the twin form, outside `@media (hover: hover)`, or split the rule so that each \
+             reaches one state",
+            rule.selector,
+            bare.len(),
+            bare.iter()
+                .map(|name| format!("`{name}`"))
+                .collect::<Vec<_>>()
+                .join(", ")
+        ));
+    }
+    None
+}
+
+/// What is wrong with an at-rule's prelude, if anything is: a CSS escape, or,
+/// in an at-rule that is not `@media`, a state pseudo-class or a seat
+/// attribute.
+///
+/// `@scope (.a:hover)` puts a state in front of every rule inside it, and no
+/// reader of selectors sees it there. A `@media` prelude holds no selector —
+/// `(hover:hover)` is a feature and its value — so only its escapes are
+/// asked about: `(h\6fver: hover)` is the hover query to an engine.
+fn seat_prelude(prelude: &str) -> Option<String> {
+    if has_escape(prelude) {
+        return Some(format!(
+            "`{prelude}` holds a CSS escape, which can spell a state or a hover query in a way \
+             this gate does not read (NOCTUA.md §9.7). Write it without the backslash"
+        ));
+    }
+    if prelude.to_ascii_lowercase().starts_with("@media") || seat_mentions(prelude) == (0, 0) {
+        return None;
+    }
+    Some(format!(
+        "`{prelude}` names a state or a seat attribute in an at-rule's prelude, where this \
+         gate does not read it and nothing holds it to its twin (NOCTUA.md §9.7). Write the \
+         state in the selector of each rule, in the twin form"
+    ))
+}
+
+/// Every interactive state is reachable for a second seat.
+///
+/// # What it holds
+///
+/// `NOCTUA.md §9.7`: the system's own seat reaches a state through the native
+/// pseudo-class, and every other seat's state arrives as an attribute, styled
+/// exactly like it. A rule written on `:hover` alone looks finished, passes
+/// every test a single pointer can run, and cannot be shown for the second
+/// pointer in the same window.
+///
+/// So each `:hover`, `:focus-visible`, `:focus-within`, `:focus` and `:active`
+/// in a component stylesheet is written in one of two ways:
+///
+/// * **in the twin form** of [`SEAT_TWINS`], `:is(:hover, [data-nd-seat-hover])`.
+///   An attribute selector and a pseudo-class weigh the same and `:is()` weighs
+///   what its heaviest argument does, so the twin changes no specificity and no
+///   rule's place in the cascade;
+/// * **bare, with a sibling rule directly after it** whose selector is this
+///   one with the attribute in place of the pseudo-class and whose declarations
+///   are the same. That is the form for a rule inside `@media (hover: hover)`:
+///   the sibling stands outside that block, because the attribute is itself
+///   the proof of a pointer that hovers and the window's own pointer says
+///   nothing about a second seat's. The siblings of a run of bare rules follow
+///   the run at once and in its order ([`seat_places`]), so that no rule of
+///   the same weight stands between a state and its twin in the cascade. Only
+///   `:hover` is written behind that query, and a bare rule holds one bare
+///   state ([`seat_unpaired`]): a sibling for anything else is not a twin.
+///
+/// AND IT IS HELD FROM THE ATTRIBUTE'S SIDE AS WELL, or the rule would be half
+/// a rule. No seat attribute stands inside `@media (hover: hover)` in either
+/// form, because there the second seat's state waits on the window's own
+/// pointer, which is the one thing the sibling exists to be free of — and a
+/// desktop browser, where that query always matches, cannot show it. THAT
+/// QUERY HAS ONE SPELLING HERE, so that this can be read off the text: a state
+/// rule or a seat attribute behind any other question about the window's
+/// pointer — `(hover)`, `(any-hover: hover)`, `(pointer: fine)`,
+/// `(hover: hover) and (pointer: fine)` — is refused whatever is inside, and a
+/// second condition is a second `@media` around the first. And an
+/// attribute outside the twin form has its native rule: the same selector on
+/// the pseudo-class, the same declarations, in this file. A sibling whose
+/// native rule was deleted, or an attribute rule written alone, draws a seat
+/// as no pointer of the system's own is ever drawn.
+///
+/// A PASS OF ITS OWN, BECAUSE IT READS THE STYLESHEET WHOLE. Whether a rule has
+/// its sibling is a question about two rules, and no line can answer it.
+///
+/// THE NAMES ARE READ AS WRITTEN HERE, LOWER-CASE AND WITHOUT BLANK SPACE, and
+/// a selector that spells a state or a seat attribute any other way an engine
+/// would still accept is refused rather than passed unread ([`seat_mentions`]).
+/// So is every place the text cannot be read whole: a CSS escape in a selector
+/// or a prelude ([`has_escape`]), a state in the prelude of an at-rule
+/// ([`seat_prelude`]), and a state rule on either side of CSS nesting.
+///
+/// AND TWO PLACES WHERE THE TWIN'S TEXT IS RIGHT AND ITS MEANING IS NOT are
+/// refused by name ([`seat_misplaced`]): `:focus-within` inside `:has(`, and a
+/// bare state inside `:not(`.
+///
+/// Returns how many state pseudo-classes it read, so a caller can tell a pass
+/// from a sweep that looked at nothing.
+fn seat_twin(file: &str, text: &str, findings: &mut Vec<Finding>) -> usize {
+    if !is_seated(file) {
+        return 0;
+    }
+    let Sheet { rules, queries } = style_rules(text);
+    let lines: Vec<&str> = text.lines().collect();
+    let mut checked = 0usize;
+    let mut report = |line: usize, message: String| {
+        findings.push(Finding {
+            file: file.to_owned(),
+            line,
+            message,
+        });
+    };
+
+    for query in &queries {
+        if !query.prelude.to_ascii_lowercase().starts_with("@media") {
+            checked += seat_mentions(&query.prelude).0;
+        }
+        let allowed = lines
+            .get(query.line - 1)
+            .is_some_and(|line| line.contains(ALLOW));
+        if let Some(message) = seat_prelude(&query.prelude).filter(|_| !allowed) {
+            report(query.line, message);
+        }
+    }
+
+    let read: Vec<(usize, Vec<Vec<&'static str>>, String)> = rules
+        .iter()
+        .map(|rule| seat_sibling(&rule.selector))
+        .collect();
+    let bare: Vec<bool> = read.iter().map(|(_, bare, _)| !bare.is_empty()).collect();
+    let places = seat_places(&rules, &bare);
+
+    for (index, rule) in rules.iter().enumerate() {
+        let (written, bare, sibling) = &read[index];
+        let written = *written;
+        let (states, attributes) = seat_mentions(&rule.selector);
+        checked += states;
+        let (loose, natives) = seat_native(&rule.selector);
+        if states == 0 && attributes == 0 && !has_escape(&rule.selector) {
+            continue;
+        }
+        let (first, last) = rule.lines;
+        if lines
+            .get(first - 1..last)
+            .is_some_and(|prelude| prelude.iter().any(|line| line.contains(ALLOW)))
+        {
+            continue;
+        }
+        if let Some(message) = seat_unread(rule, written, (states, attributes)) {
+            report(first, message);
+            continue;
+        }
+        if let Some(message) = seat_waiting(rule)
+            .or_else(|| seat_misplaced(&rule.selector))
+            .or_else(|| seat_unpaired(rule, bare))
+        {
+            report(first, message);
+            continue;
+        }
+        if loose > 0
+            && let Some(message) = seat_orphan(index, &rules, &places, &natives)
+        {
+            report(first, message);
+        }
+        if bare.is_empty() {
+            continue;
+        }
+        let twinned = places[index]
+            .and_then(|place| rules.get(place))
+            .is_some_and(|other| other.selector == *sibling && seat_pairs(rule, other));
+        if !twinned {
+            report(
+                first,
+                format!(
+                    "`{}` reaches a state through the native pseudo-class alone, so a second \
+                     seat's hover or focus cannot be shown (NOCTUA.md §9.7). Write the twin \
+                     form — `:is(:hover, [data-nd-seat-hover])`, `:is(:focus-visible, \
+                     [data-nd-seat-focus])`, `:is(:focus-within, [data-nd-seat-focus], \
+                     :has([data-nd-seat-focus]))`, `:is(:focus, [data-nd-seat-focus])`, \
+                     `:is(:active, [data-nd-seat-active])` — or, for a rule inside `@media \
+                     (hover: hover)`, add the sibling rule `{sibling}` with the same \
+                     declarations directly after that block: the siblings of a block follow \
+                     it at once, in the order of its rules",
+                    rule.selector
+                ),
+            );
+        }
+    }
+    checked
 }
 
 /// Whether the line leaves us inside a `/* … */` block.
@@ -1214,6 +2187,849 @@ mod tests {
         assert!(!fires(generated));
     }
 
+    /// What [`seat_twin`] says about one stylesheet: its findings, and how
+    /// many state pseudo-classes it read.
+    fn seats(text: &str) -> (Vec<Finding>, usize) {
+        let mut findings = Vec::new();
+        let checked = seat_twin(&format!("{SEATED}t.css"), text, &mut findings);
+        (findings, checked)
+    }
+
+    /// The defect the gate exists for: a state only the system's own pointer
+    /// or keyboard can reach.
+    #[test]
+    fn a_state_reached_only_through_the_pseudo_class_is_a_finding() {
+        for bare in [
+            ".a:hover { color: inherit; }",
+            ".a:focus-visible { outline: none; }",
+            ".a:focus-within { outline: none; }",
+            ".a:focus { outline: none; }",
+            ".a:active { color: inherit; }",
+            ".a:has(> .b:hover) { color: inherit; }",
+            ".a:hover::before { color: inherit; }",
+        ] {
+            let (findings, checked) = seats(bare);
+            assert_eq!(findings.len(), 1, "{bare}");
+            assert_eq!(checked, 1, "{bare}");
+        }
+    }
+
+    #[test]
+    fn the_twin_form_passes_and_is_counted() {
+        let (findings, checked) = seats(
+            ".a:is(:hover, [data-nd-seat-hover]) { color: inherit; }\n\
+             .a:is(:focus-visible, [data-nd-seat-focus]) > .b { outline: none; }\n\
+             .a:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) { outline: none; }\n\
+             .a:is(:focus, [data-nd-seat-focus]) { outline: none; }\n\
+             .a:is(:active, [data-nd-seat-active]) { color: inherit; }\n\
+             .a:has(> .b:is(:hover,\n   [data-nd-seat-hover])) { color: inherit; }",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 6);
+    }
+
+    /// A twin that names the wrong attribute is not a twin, and neither is
+    /// `:focus-within` without the `:has()` that makes it reach an ancestor.
+    ///
+    /// Two findings where the partner is a seat attribute: the pseudo-class has
+    /// no twin, and the attribute beside it no native rule.
+    #[test]
+    fn a_twin_form_with_the_wrong_partner_is_a_finding() {
+        for (wrong, count) in [
+            (".a:is(:hover, [data-nd-seat-focus]) { color: inherit; }", 2),
+            (
+                ".a:is(:focus-within, [data-nd-seat-focus]) { outline: none; }",
+                2,
+            ),
+            (".a:is(:hover, .b) { color: inherit; }", 1),
+        ] {
+            let (findings, _) = seats(wrong);
+            assert_eq!(findings.len(), count, "{wrong}");
+            assert!(
+                findings
+                    .iter()
+                    .any(|finding| finding.message.contains("pseudo-class alone")),
+                "{wrong}"
+            );
+        }
+    }
+
+    /// One selector of a list left bare is the whole rule left bare for the
+    /// state that selector names.
+    #[test]
+    fn one_bare_selector_in_a_list_is_a_finding() {
+        let (findings, checked) =
+            seats(".a:is(:hover, [data-nd-seat-hover]),\n.a:focus-visible { color: inherit; }");
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].line, 1);
+        assert_eq!(checked, 2);
+    }
+
+    #[test]
+    fn a_hover_query_rule_passes_with_its_sibling_outside_the_block() {
+        let (findings, checked) = seats(
+            "@media (hover: hover) {\n  .a:hover,\n  .b:hover {\n    color: inherit;\n  }\n}\n\
+             /* the twin */\n.a[data-nd-seat-hover],\n.b[data-nd-seat-hover] {\n  color:   inherit;\n}",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 2);
+    }
+
+    /// Each way a sibling can fail to be the same rule.
+    ///
+    /// A sibling that is there and differs is two rules without each other:
+    /// the native one has no sibling, and the attribute one no native rule.
+    #[test]
+    fn a_sibling_that_differs_is_not_a_sibling() {
+        let bare = "@media (hover: hover) {\n  .a:hover { color: inherit; }\n}\n";
+        for (why, sibling, expected) in [
+            ("no sibling at all", "", vec![2]),
+            (
+                "other declarations",
+                ".a[data-nd-seat-hover] { color: unset; }",
+                vec![2, 4],
+            ),
+            (
+                "another selector",
+                ".b[data-nd-seat-hover] { color: inherit; }",
+                vec![2, 4],
+            ),
+            (
+                "behind a query the rule is not behind",
+                "@media (min-width: 48rem) { .a[data-nd-seat-hover] { color: inherit; } }",
+                vec![2, 4],
+            ),
+        ] {
+            let (findings, _) = seats(&format!("{bare}{sibling}"));
+            let lines: Vec<usize> = findings.iter().map(|finding| finding.line).collect();
+            assert_eq!(lines, expected, "{why}");
+            assert!(findings[0].message.contains("pseudo-class alone"), "{why}");
+        }
+    }
+
+    /// Every other way of asking whether a pointer hovers is refused where a
+    /// state rule or a seat attribute stands behind it, because the reader of
+    /// the hover query knows one spelling: under any of these a twin form, or
+    /// a bare rule with its sibling beside it, would otherwise pass with the
+    /// seat's state waiting on the window's own pointer.
+    #[test]
+    fn a_hover_query_in_another_spelling_is_a_finding() {
+        const TWIN: &str = ".a:is(:hover, [data-nd-seat-hover]) { color: inherit; }";
+        const PAIR: &str =
+            ".a:hover { color: inherit; }\n  .a[data-nd-seat-hover] { color: inherit; }";
+        for (query, inside, expected) in [
+            ("@media (hover)", TWIN, vec![2]),
+            ("@media (any-hover: hover)", TWIN, vec![2]),
+            ("@media screen and (hover: hover)", TWIN, vec![2]),
+            ("@media (hover: hover) and (pointer: fine)", TWIN, vec![2]),
+            (
+                "@media (hover: hover) and (min-width: 48rem)",
+                TWIN,
+                vec![2],
+            ),
+            (
+                "@media (HOVER: HOVER) and (min-width: 48rem)",
+                TWIN,
+                vec![2],
+            ),
+            ("@media (hover: none)", TWIN, vec![2]),
+            (
+                "@media (hover: hover) and (pointer: fine)",
+                PAIR,
+                vec![2, 3],
+            ),
+            ("@media (any-hover: hover)", PAIR, vec![2, 3]),
+            // The pointer's kind is the same pointer speaking.
+            ("@media (pointer: fine)", TWIN, vec![2]),
+            ("@media (any-pointer: fine)", TWIN, vec![2]),
+            ("@media (POINTER: coarse)", TWIN, vec![2]),
+            ("@media (pointer: fine)", PAIR, vec![2, 3]),
+        ] {
+            let (findings, checked) = seats(&format!("{query} {{\n  {inside}\n}}"));
+            let lines: Vec<usize> = findings.iter().map(|finding| finding.line).collect();
+            assert_eq!(lines, expected, "{query}");
+            assert_eq!(checked, 1, "{query}");
+            for finding in &findings {
+                assert!(
+                    finding
+                        .message
+                        .contains("question about the window's own pointer"),
+                    "{query}: {}",
+                    finding.message
+                );
+            }
+        }
+        // The one spelling, nested in the other condition, is the way to write
+        // it, and a rule with no state in it is nobody's concern here.
+        let (findings, checked) = seats(
+            "@media (min-width: 48rem) {\n  @media (hover: hover) {\n    .a:hover { color: inherit; }\n  }\n  \
+             .a[data-nd-seat-hover] { color: inherit; }\n}\n\
+             @media (hover: hover) and (pointer: fine) {\n  .a { color: inherit; }\n}",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 1);
+    }
+
+    /// An engine reads a pseudo-class without regard to case and allows blank
+    /// space inside the brackets; the gate reads exact text. What it would
+    /// pass over unread is refused, and counted.
+    #[test]
+    fn a_state_or_an_attribute_in_a_spelling_the_gate_does_not_read_is_a_finding() {
+        for (wrong, counted) in [
+            (".a:HOVER { color: inherit; }", 1),
+            (".a:Focus-Visible { outline: none; }", 1),
+            (".a:is(:HOVER, [data-nd-seat-hover]) { color: inherit; }", 1),
+            (".a[ data-nd-seat-hover] { color: inherit; }", 0),
+            (".a[DATA-ND-SEAT-HOVER] { color: inherit; }", 0),
+            (
+                ".a:is(:hover, [ data-nd-seat-hover ]) { color: inherit; }",
+                1,
+            ),
+            // An escape spells a name no reader of text sees, so a selector
+            // holding one is refused whatever it spells.
+            (".a:h\\6fver { color: inherit; }", 0),
+            (
+                ".a:is(:hover, [data-nd-seat-h\\6fver]) { color: inherit; }",
+                1,
+            ),
+            (".a\\:b { color: inherit; }", 0),
+            ("@media (h\\6fver: hover) {\n  .a { color: inherit; }\n}", 0),
+            // And a state in front of a block of rules is a state.
+            ("@scope (.a:hover) {\n  .b { color: inherit; }\n}", 1),
+            (
+                "@scope (.a[data-nd-seat-hover]) {\n  .b { color: inherit; }\n}",
+                0,
+            ),
+            (
+                "@scope (.a:is(:hover, [data-nd-seat-hover])) {\n  .b { color: inherit; }\n}",
+                1,
+            ),
+        ] {
+            let (findings, checked) = seats(wrong);
+            assert_eq!(findings.len(), 1, "{wrong}: {findings:?}");
+            assert!(
+                findings[0].message.contains("does not read"),
+                "{wrong}: {}",
+                findings[0].message
+            );
+            assert_eq!(checked, counted, "{wrong}");
+        }
+        // A class that merely contains the word is not a state, a backslash
+        // in a string is not an escape in a name, and the hover query written
+        // without its space is a feature and a value, not a pseudo-class.
+        let (findings, checked) = seats(
+            ".a-hover, .HOVER { color: inherit; }\n\
+             .a[title=\"a\\\"b\"]::before { content: \"\\201c\"; }\n\
+             @media (hover:hover) {\n  .a { color: inherit; }\n}\n\
+             @scope (.a) {\n  .b { color: inherit; }\n}",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 0);
+    }
+
+    /// `:has()` does not nest, so an engine drops the branch of the twin that
+    /// carries a seat's focus to an ancestor, and the bare form's sibling has
+    /// the same branch. Both pass every reading of the text.
+    #[test]
+    fn focus_within_inside_has_is_a_finding() {
+        for (wrong, expected) in [
+            (
+                ".a:has(.b:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus]))) { outline: none; }",
+                vec![1],
+            ),
+            (
+                ".a:HAS(> .c .b:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus]))) { outline: none; }",
+                vec![1],
+            ),
+            (
+                ".a:has(.b:focus-within) { outline: none; }\n\
+                 .a:has(.b:is([data-nd-seat-focus], :has([data-nd-seat-focus]))) { outline: none; }",
+                vec![1, 2],
+            ),
+        ] {
+            let (findings, checked) = seats(wrong);
+            let lines: Vec<usize> = findings.iter().map(|finding| finding.line).collect();
+            assert_eq!(lines, expected, "{wrong}");
+            assert_eq!(checked, 1, "{wrong}");
+            for finding in &findings {
+                assert!(
+                    finding.message.contains("does not nest"),
+                    "{wrong}: {}",
+                    finding.message
+                );
+            }
+        }
+        // Outside every `:has(`, and beside one that is closed, it is the twin.
+        let (findings, checked) = seats(
+            ".a:has(> .b):is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) { outline: none; }\n\
+             .a:not(:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus]))) { outline: none; }\n\
+             .a:has(.b:is(:focus-visible, [data-nd-seat-focus])) { outline: none; }",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 3);
+    }
+
+    /// The sibling of a negated state is not the negated attribute: an element
+    /// a second seat hovers is still `:not(:hover)`.
+    #[test]
+    fn a_bare_state_inside_not_is_a_finding() {
+        for (wrong, expected) in [
+            (
+                ".a:not(:hover) { color: inherit; }\n.a:not([data-nd-seat-hover]) { color: inherit; }",
+                vec![1],
+            ),
+            (
+                "@media (hover: hover) {\n  .a:not(:hover) { color: inherit; }\n}\n\
+                 .a:not([data-nd-seat-hover]) { color: inherit; }",
+                vec![2],
+            ),
+            (
+                ".a:NOT(.b, :is(.c, :focus-visible)) { outline: none; }\n\
+                 .a:NOT(.b, :is(.c, [data-nd-seat-focus])) { outline: none; }",
+                vec![1],
+            ),
+        ] {
+            let (findings, checked) = seats(wrong);
+            let lines: Vec<usize> = findings.iter().map(|finding| finding.line).collect();
+            assert_eq!(lines, expected, "{wrong}");
+            assert_eq!(checked, 1, "{wrong}");
+            assert!(
+                findings[0].message.contains("negates a bare"),
+                "{wrong}: {}",
+                findings[0].message
+            );
+        }
+        let (findings, checked) = seats(
+            ".a:not(:is(:hover, [data-nd-seat-hover])) { color: inherit; }\n\
+             .a:not(.b):is(:active, [data-nd-seat-active]) { color: inherit; }\n\
+             .a[title=\":not(\"]:focus { outline: none; }\n\
+             .a[title=\":not(\"][data-nd-seat-focus] { outline: none; }",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 3);
+    }
+
+    /// What a nested block declares is not in the rule this gate compares,
+    /// and the query it declares it behind is not in the rule's context: a
+    /// twin form with its declarations in a nested hover query would pass,
+    /// and so would two siblings that differ only there.
+    #[test]
+    fn a_state_rule_on_either_side_of_css_nesting_is_a_finding() {
+        for (wrong, expected, counted) in [
+            (
+                ".a:is(:hover, [data-nd-seat-hover]) {\n  @media (hover: hover) {\n    color: inherit;\n  }\n}",
+                vec![1],
+                1,
+            ),
+            (
+                "@media (hover: hover) {\n  .a:hover {\n    @media print { color: inherit; }\n  }\n}\n\
+                 .a[data-nd-seat-hover] {\n  @media print { color: unset; }\n}",
+                vec![2, 6],
+                1,
+            ),
+            (
+                ".a:is(:hover, [data-nd-seat-hover]) {\n  .b { color: inherit; }\n}",
+                vec![1],
+                1,
+            ),
+            (
+                ".a {\n  &:is(:hover, [data-nd-seat-hover]) { color: inherit; }\n}",
+                vec![2],
+                1,
+            ),
+            (
+                ".a:is(:hover, [data-nd-seat-hover]) {\n  .b {\n    @media (hover: hover) { color: inherit; }\n  }\n}",
+                vec![1],
+                1,
+            ),
+        ] {
+            let (findings, checked) = seats(wrong);
+            let lines: Vec<usize> = findings.iter().map(|finding| finding.line).collect();
+            assert_eq!(lines, expected, "{wrong}");
+            assert_eq!(checked, counted, "{wrong}");
+            for finding in &findings {
+                assert!(
+                    finding.message.contains("nests a block or is nested"),
+                    "{wrong}: {}",
+                    finding.message
+                );
+            }
+        }
+        // Nesting with no state on either side is nobody's concern here, and
+        // a state rule inside an at-rule is not nested in a rule.
+        let (findings, checked) = seats(
+            ".a {\n  .b { color: inherit; }\n  @media print { color: unset; }\n}\n\
+             @media print {\n  .a:is(:hover, [data-nd-seat-hover]) { color: inherit; }\n}",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 1);
+    }
+
+    /// A sibling anywhere else in the file is the same declarations at another
+    /// place in the cascade: a rule of the same weight between the two, or
+    /// siblings in another order than their native rules, and the seat wins a
+    /// tie the pointer loses.
+    #[test]
+    fn a_sibling_that_does_not_directly_follow_is_not_a_sibling() {
+        for (why, wrong, expected) in [
+            (
+                "a rule between the block and the sibling",
+                "@media (hover: hover) {\n  .a:hover { color: inherit; }\n}\n\
+                 .a.b { color: unset; }\n.a[data-nd-seat-hover] { color: inherit; }",
+                vec![2, 5],
+            ),
+            (
+                "the sibling before the block",
+                ".a[data-nd-seat-hover] { color: inherit; }\n.a.b { color: unset; }\n\
+                 @media (hover: hover) {\n  .a:hover { color: inherit; }\n}",
+                vec![1, 4],
+            ),
+            (
+                "the sibling directly before the block",
+                ".a[data-nd-seat-hover] { color: inherit; }\n\
+                 @media (hover: hover) {\n  .a:hover { color: inherit; }\n}",
+                vec![1, 3],
+            ),
+            (
+                "the siblings in another order than the block's rules",
+                "@media (hover: hover) {\n  .a:hover { color: inherit; }\n  .b:hover { color: unset; }\n}\n\
+                 .b[data-nd-seat-hover] { color: unset; }\n.a[data-nd-seat-hover] { color: inherit; }",
+                vec![2, 3, 5, 6],
+            ),
+            (
+                "a rule with no state after the bare ones, inside the block",
+                "@media (hover: hover) {\n  .a:hover { color: inherit; }\n  .a.b { color: unset; }\n}\n\
+                 .a[data-nd-seat-hover] { color: inherit; }",
+                vec![2, 5],
+            ),
+            (
+                "a bare rule outside any block, its sibling one rule late",
+                ".a:focus { outline: none; }\n.a.b { outline: unset; }\n\
+                 .a[data-nd-seat-focus] { outline: none; }",
+                vec![1, 3],
+            ),
+        ] {
+            let (findings, checked) = seats(wrong);
+            let lines: Vec<usize> = findings.iter().map(|finding| finding.line).collect();
+            assert_eq!(lines, expected, "{why}");
+            assert!(checked > 0, "{why}");
+        }
+        // The block's rules, then their siblings in the same order, with a
+        // rule that has no state standing before the bare ones.
+        let (findings, checked) = seats(
+            "@media (hover: hover) {\n  .c { color: unset; }\n  .a:hover { color: inherit; }\n  \
+             .b:hover { color: unset; }\n}\n\
+             .a[data-nd-seat-hover] { color: inherit; }\n.b[data-nd-seat-hover] { color: unset; }",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 2);
+    }
+
+    /// The hover query is the window's own pointer speaking, and a seat
+    /// attribute behind it waits on a pointer that is not its seat's. Desktop
+    /// Chrome matches the query, so no browser test here can see this one.
+    #[test]
+    fn a_seat_attribute_inside_the_hover_query_is_a_finding() {
+        for (why, inside, expected) in [
+            (
+                "the twin form",
+                "@media (hover: hover) {\n  .a:is(:hover, [data-nd-seat-hover]) { color: inherit; }\n}",
+                vec![2],
+            ),
+            (
+                "the twin form of another state",
+                "@media (hover: hover) {\n  .a:is(:focus-visible, [data-nd-seat-focus]) { color: inherit; }\n}",
+                vec![2],
+            ),
+            (
+                "under a second query",
+                "@media (min-width: 48rem) {\n  @media (hover:hover) {\n    .a:is(:hover, [data-nd-seat-hover]) { color: inherit; }\n  }\n}",
+                vec![3],
+            ),
+            (
+                // Two findings: the native rule has no sibling outside, and
+                // the one it was given is where it cannot be.
+                "the sibling left inside",
+                "@media (hover: hover) {\n  .a:hover { color: inherit; }\n  .a[data-nd-seat-hover] { color: inherit; }\n}",
+                vec![2, 3],
+            ),
+        ] {
+            let (findings, _) = seats(inside);
+            let lines: Vec<usize> = findings.iter().map(|finding| finding.line).collect();
+            assert_eq!(lines, expected, "{why}");
+        }
+        let (findings, _) = seats(
+            "@media (hover: hover) {\n  .a:is(:hover, [data-nd-seat-hover]) { color: inherit; }\n}",
+        );
+        assert!(
+            findings[0]
+                .message
+                .contains("inside `@media (hover: hover)`")
+        );
+
+        // The same rule outside the block is the rule as it should be.
+        let (findings, _) = seats(".a:is(:hover, [data-nd-seat-hover]) { color: inherit; }");
+        assert!(findings.is_empty(), "{findings:?}");
+    }
+
+    /// The attribute proves a pointer that hovers only when it is the hover
+    /// attribute. Any other state behind the hover query has a sibling that
+    /// draws a seat where the window's own keyboard or pointer is not drawn,
+    /// and desktop Chrome, which matches the query, cannot show it.
+    #[test]
+    fn a_state_other_than_hover_inside_the_hover_query_is_a_finding() {
+        for (inside, sibling) in [
+            (".a:focus-visible", ".a[data-nd-seat-focus]"),
+            (".a:focus", ".a[data-nd-seat-focus]"),
+            (".a:active", ".a[data-nd-seat-active]"),
+            (
+                ".a:focus-within",
+                ".a:is([data-nd-seat-focus], :has([data-nd-seat-focus]))",
+            ),
+            (
+                ".a:hover > .b:active",
+                ".a[data-nd-seat-hover] > .b[data-nd-seat-active]",
+            ),
+        ] {
+            let text = format!(
+                "@media (hover: hover) {{\n  {inside} {{ outline: none; }}\n}}\n\
+                 {sibling} {{ outline: none; }}"
+            );
+            let (findings, checked) = seats(&text);
+            let lines: Vec<usize> = findings.iter().map(|finding| finding.line).collect();
+            assert_eq!(lines, [2], "{inside}");
+            assert!(
+                findings[0].message.contains("Only `:hover` is written"),
+                "{inside}: {}",
+                findings[0].message
+            );
+            assert!(checked > 0, "{inside}");
+
+            // The same pair outside the block is a rule and its sibling.
+            let (findings, _) = seats(&format!(
+                "{inside} {{ outline: none; }}\n{sibling} {{ outline: none; }}"
+            ));
+            assert_eq!(
+                findings.is_empty(),
+                !inside.contains(" > "),
+                "{inside}: {findings:?}"
+            );
+        }
+    }
+
+    /// One sibling swaps every bare state at once, so beside a rule with two
+    /// of them it leaves the mixed cases unmatched, which the twin form of the
+    /// same selector matches. One bare state among twinned ones is whole.
+    #[test]
+    fn two_bare_states_in_one_selector_are_a_finding() {
+        for (native, sibling) in [
+            (
+                ".a:hover:focus-visible",
+                ".a[data-nd-seat-hover][data-nd-seat-focus]",
+            ),
+            (
+                ".a:hover .b:focus-visible",
+                ".a[data-nd-seat-hover] .b[data-nd-seat-focus]",
+            ),
+            (
+                ".a:hover ~ .b:hover",
+                ".a[data-nd-seat-hover] ~ .b[data-nd-seat-hover]",
+            ),
+        ] {
+            for text in [
+                format!("{native} {{ color: inherit; }}\n{sibling} {{ color: inherit; }}"),
+                format!(
+                    "@media (hover: hover) {{ {native} {{ color: inherit; }} }}\n\
+                     {sibling} {{ color: inherit; }}"
+                ),
+            ] {
+                let (findings, checked) = seats(&text);
+                let lines: Vec<usize> = findings.iter().map(|finding| finding.line).collect();
+                assert_eq!(lines, [1], "{text}");
+                assert_eq!(checked, 2, "{text}");
+            }
+        }
+        let (findings, _) = seats(
+            ".a:hover:focus-visible { color: inherit; }\n\
+             .a[data-nd-seat-hover][data-nd-seat-focus] { color: inherit; }",
+        );
+        assert!(
+            findings[0].message.contains("Leave at most one state bare"),
+            "{}",
+            findings[0].message
+        );
+
+        // One bare state beside a twinned one: the rule and its sibling cover
+        // every combination between them.
+        let (findings, checked) = seats(
+            ".a:hover:is(:focus-visible, [data-nd-seat-focus]) { color: inherit; }\n\
+             .a[data-nd-seat-hover]:is(:focus-visible, [data-nd-seat-focus]) { color: inherit; }",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 3);
+
+        // And two selectors of one list with a state each are two selectors.
+        let (findings, _) = seats(
+            ".a:hover, .b[data-x=\"a, b\"]:active { outline: none; }\n\
+             .a[data-nd-seat-hover], .b[data-x=\"a, b\"][data-nd-seat-active] { outline: none; }",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+    }
+
+    /// Two bare states in two selectors of one `:has(` or `:is(` list are
+    /// alternatives, not a pair: the rule matches through either alone and so
+    /// does its sibling, and no mixed case is left out. A state outside the
+    /// list is asked for together with whichever one inside it matched.
+    #[test]
+    fn two_bare_states_in_two_branches_of_one_list_pass() {
+        for (native, sibling, states) in [
+            (
+                ".x:has(.b:hover, .c:focus-visible)",
+                ".x:has(.b[data-nd-seat-hover], .c[data-nd-seat-focus])",
+                2,
+            ),
+            (
+                ".x:is(.b:hover, .c:active)",
+                ".x:is(.b[data-nd-seat-hover], .c[data-nd-seat-active])",
+                2,
+            ),
+            (
+                ".x:has(.b:hover, .c[data-x=\"(, \"]:active, .d) > .e:is(.f, .g)",
+                ".x:has(.b[data-nd-seat-hover], .c[data-x=\"(, \"][data-nd-seat-active], .d) > .e:is(.f, .g)",
+                2,
+            ),
+            (
+                ".x:is(.a, .b:hover) .y:is(:focus-visible, [data-nd-seat-focus])",
+                ".x:is(.a, .b[data-nd-seat-hover]) .y:is(:focus-visible, [data-nd-seat-focus])",
+                3,
+            ),
+        ] {
+            let (findings, checked) = seats(&format!(
+                "{native} {{ color: inherit; }}\n{sibling} {{ color: inherit; }}"
+            ));
+            assert!(findings.is_empty(), "{native}: {findings:?}");
+            assert_eq!(checked, states, "{native}");
+        }
+
+        // Asked for together: a state outside the list beside one inside it,
+        // two in one branch, and one in each of two lists.
+        for (native, sibling) in [
+            (
+                ".x:hover:has(.b:hover, .c:focus-visible)",
+                ".x[data-nd-seat-hover]:has(.b[data-nd-seat-hover], .c[data-nd-seat-focus])",
+            ),
+            (
+                ".x:has(.b:hover, .c) > .d:active",
+                ".x:has(.b[data-nd-seat-hover], .c) > .d[data-nd-seat-active]",
+            ),
+            (
+                ".x:has(.a, .b:hover:focus-visible)",
+                ".x:has(.a, .b[data-nd-seat-hover][data-nd-seat-focus])",
+            ),
+            (
+                ".x:has(.b:hover, .c):is(.d, .e:active)",
+                ".x:has(.b[data-nd-seat-hover], .c):is(.d, .e[data-nd-seat-active])",
+            ),
+            (
+                ".x:has(.a:is(.b:hover, .c) .d:active)",
+                ".x:has(.a:is(.b[data-nd-seat-hover], .c) .d[data-nd-seat-active])",
+            ),
+        ] {
+            let (findings, _) = seats(&format!(
+                "{native} {{ color: inherit; }}\n{sibling} {{ color: inherit; }}"
+            ));
+            let lines: Vec<usize> = findings.iter().map(|finding| finding.line).collect();
+            assert_eq!(lines, [1], "{native}");
+            assert!(
+                findings[0].message.contains("states together"),
+                "{native}: {}",
+                findings[0].message
+            );
+        }
+
+        // And every bare state is still read behind the hover query, in
+        // whichever branch it stands.
+        let (findings, _) = seats(
+            "@media (hover: hover) { .x:has(.b:hover, .c:focus-visible) { color: inherit; } }\n\
+             .x:has(.b[data-nd-seat-hover], .c[data-nd-seat-focus]) { color: inherit; }",
+        );
+        assert_eq!(findings.len(), 1, "{findings:?}");
+        assert!(
+            findings[0].message.contains("Only `:hover` is written"),
+            "{}",
+            findings[0].message
+        );
+    }
+
+    /// The rule read from the attribute's side: a sibling is a sibling OF
+    /// something, and one whose native rule is gone draws a seat alone.
+    #[test]
+    fn a_seat_attribute_with_no_native_rule_is_a_finding() {
+        for (orphan, line) in [
+            (".a[data-nd-seat-hover] { color: inherit; }", 1),
+            (".a[data-nd-seat-focus] { outline: none; }", 1),
+            (".a[data-nd-seat-active] > .b { color: inherit; }", 1),
+            (
+                ".a:is([data-nd-seat-focus], :has([data-nd-seat-focus])) { outline: none; }",
+                1,
+            ),
+            // The native rule exists and says something else.
+            (
+                "@media (hover: hover) {\n  .a:hover { color: unset; }\n}\n.a[data-nd-seat-hover] { color: unset; }\n\
+                 .a[data-nd-seat-hover] { color: inherit; }",
+                5,
+            ),
+            // A rule may ask whether a seat is there, never which one.
+            (".a[data-nd-seat-hover~=\"2\"] { color: inherit; }", 1),
+            (".a[data-nd-seat-hover=\"2\"] { color: inherit; }", 1),
+        ] {
+            let (findings, _) = seats(orphan);
+            let lines: Vec<usize> = findings.iter().map(|finding| finding.line).collect();
+            assert_eq!(lines, [line], "{orphan}");
+            assert!(
+                findings[0].message.contains("seat attribute alone"),
+                "{orphan}"
+            );
+        }
+    }
+
+    /// Either pseudo-class `[data-nd-seat-focus]` stands for is its native
+    /// rule, with or without the hover query around it; and a drag has no
+    /// pseudo-class, so a rule on it owes nothing.
+    #[test]
+    fn a_seat_attribute_beside_its_native_rule_passes() {
+        for paired in [
+            "@media (hover: hover) { .a:hover { color: inherit; } }\n.a[data-nd-seat-hover] { color: inherit; }",
+            ".a:focus-visible { outline: none; }\n.a[data-nd-seat-focus] { outline: none; }",
+            ".a:focus { outline: none; }\n.a[data-nd-seat-focus] { outline: none; }",
+            ".a:focus-within { outline: none; }\n\
+             .a:is([data-nd-seat-focus], :has([data-nd-seat-focus])) { outline: none; }",
+            ".a[data-nd-seat-drag] { opacity: 1; }",
+        ] {
+            let (findings, _) = seats(paired);
+            assert!(findings.is_empty(), "{paired}: {findings:?}");
+        }
+    }
+
+    /// A rule behind a width query as well keeps that query on its sibling.
+    #[test]
+    fn a_sibling_keeps_every_query_but_the_hover_one() {
+        let (findings, _) = seats(
+            "@media (min-width: 48rem) {\n  @media (hover: hover) {\n    .a:hover { color: inherit; }\n  }\n  \
+             .a[data-nd-seat-hover] { color: inherit; }\n}",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+    }
+
+    /// Prose about `:hover` is not a rule on it, a longer name that begins the
+    /// same way is not the state, and the escape hatch is the same one.
+    #[test]
+    fn what_is_not_a_state_selector_is_left_alone() {
+        let (findings, checked) = seats(
+            "/* `.a:hover` used to be here { and: this; } */\n\
+             .a { content: \":hover {\"; }\n\
+             .a:focus-visibly { color: inherit; }\n\
+             .a:hover { color: inherit; } /* allow-literal: the gate's own fixture */",
+        );
+        assert!(findings.is_empty(), "{findings:?}");
+        assert_eq!(checked, 1);
+    }
+
+    /// The gate is wired to the component stylesheets, and it reads them.
+    ///
+    /// Asked of the real tree, through [`inspect`] as `run` reaches it: a gate
+    /// that passed because it was handed no stylesheet, or because the rules
+    /// moved to a directory it does not name, would pass for ever.
+    #[test]
+    fn the_seat_gate_reads_the_component_stylesheets() {
+        let root = std::path::PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/.."));
+        let (mut sheets, mut checked) = (0usize, 0usize);
+        for path in sources(&root).expect("sources") {
+            let relative = path
+                .strip_prefix(&root)
+                .expect("under the root")
+                .to_string_lossy()
+                .replace('\\', "/");
+            if !is_seated(&relative) {
+                continue;
+            }
+            let text = std::fs::read_to_string(&path).expect("readable");
+            sheets += 1;
+            let mut findings = Vec::new();
+            checked += seat_twin(&relative, &text, &mut findings);
+            assert!(findings.is_empty(), "{findings:?}");
+        }
+        assert!(sheets > 0, "no stylesheet under {SEATED}");
+        assert!(
+            checked > 0,
+            "the component stylesheets hold no state pseudo-class the gate could read"
+        );
+
+        // And `inspect` is what calls it, for a file where the rules live and
+        // for no other.
+        let bare = ".a:hover { color: inherit; }";
+        let reaches = |file: &str| {
+            let mut findings = Vec::new();
+            inspect(
+                file,
+                bare,
+                &[],
+                &std::collections::BTreeSet::new(),
+                &mut findings,
+            );
+            !findings.is_empty()
+        };
+        assert!(reaches(&format!("{SEATED}button.css")));
+        assert!(!reaches("docs-site/assets/shell.css"));
+    }
+
+    /// The component sheet is the only shipped sheet with a state rule in it,
+    /// but for one the rule cannot reach.
+    ///
+    /// [`seat_twin`] reads the component sources, and the other sheets in
+    /// `dist/` are written by emitters it never sees. One of them does hold a
+    /// state rule: the hover of `::-webkit-scrollbar-thumb`, in `theme.css`.
+    /// That is a part the engine draws, with no element behind it to carry an
+    /// attribute, so no seat can be shown there and it is the named exception.
+    /// Anything else arriving in an emitted sheet would be a state no gate held
+    /// to the rule.
+    #[test]
+    fn no_other_shipped_sheet_holds_a_state_a_seat_could_reach() {
+        fn sheets(directory: &Path, into: &mut Vec<PathBuf>) {
+            for entry in std::fs::read_dir(directory).expect("readable") {
+                let path = entry.expect("an entry").path();
+                if path.is_dir() {
+                    sheets(&path, into);
+                } else if path.extension().is_some_and(|extension| extension == "css") {
+                    into.push(path);
+                }
+            }
+        }
+
+        let dist = PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../dist"));
+        let mut found = Vec::new();
+        sheets(&dist, &mut found);
+        assert!(found.len() > 1, "no stylesheet under dist/");
+
+        let (mut stated, mut components) = (Vec::new(), 0usize);
+        for path in &found {
+            let text = std::fs::read_to_string(path).expect("readable");
+            for rule in style_rules(&text).rules {
+                if seat_sibling(&rule.selector).0 == 0 {
+                    continue;
+                }
+                if path.ends_with("dist/components.css") {
+                    components += 1;
+                } else {
+                    stated.push(rule.selector);
+                }
+            }
+        }
+        // The reading is live: the sheet that is all state rules shows them.
+        assert!(components > 0, "no state rule read out of components.css");
+        assert_eq!(stated, ["::-webkit-scrollbar-thumb:hover"]);
+    }
+
     /// A comment naming a gate must name one that exists.
     ///
     /// Three did not. `shell.css` named one gate after a scrollable corner,
@@ -1333,6 +3149,8 @@ mod tests {
                 finding.message
             );
         }
+        let (seated, _) = seats(".a:hover { color: inherit; }");
+        assert!(seated[0].message.len() > 40, "{}", seated[0].message);
     }
 
     /// A `/*` INSIDE A LINE COMMENT OPENS NOTHING.

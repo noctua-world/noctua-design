@@ -21,6 +21,10 @@ pub enum TimeInputClock {
     _24,
 }
 
+#[allow(
+    clippy::used_underscore_items,
+    reason = "a value that begins with a digit has no other spelling as a variant"
+)]
 impl TimeInputClock {
     /// Every value, in the order the spec declares them.
     pub const ALL: [Self; 3] = [Self::Auto, Self::_12, Self::_24];

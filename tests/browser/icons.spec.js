@@ -12,21 +12,25 @@
 
 import { test, expect } from "@playwright/test";
 import { modeControl } from "./pages.js";
-import { ANY, LOCALES, PAGE, url } from "./pages.js";
+import { ANY, LOCALES, PAGE, url, walker } from "./pages.js";
 
-test("no icon anywhere is empty", async ({ page }) => {
-  for (const locale of LOCALES) {
-    for (const name of Object.values(PAGE)) {
-      await page.goto(url(name, locale));
-      const empty = await page.evaluate(() =>
-        [...document.querySelectorAll("svg")]
-          .filter((svg) => svg.children.length === 0 || svg.innerHTML.includes('d=""'))
-          .map((svg) => svg.getAttribute("data-nd-icon") ?? "(unnamed)"),
-      );
-      expect(empty, `${locale}/${name} renders an icon that draws nothing`).toEqual([]);
-    }
-  }
-});
+// Every walk in this file declares its tests through this line, so that a
+// report names this file rather than `pages.js` (`walker` says why).
+const walk = walker((title, fn) => test(title, fn));
+
+walk(
+  "no icon anywhere is empty",
+  { axes: { locale: LOCALES }, title: ({ locale }) => `no icon anywhere is empty, in ${locale}` },
+  async ({ page, locale, path }) => {
+    await page.goto(url(path, locale));
+    const empty = await page.evaluate(() =>
+      [...document.querySelectorAll("svg")]
+        .filter((svg) => svg.children.length === 0 || svg.innerHTML.includes('d=""'))
+        .map((svg) => svg.getAttribute("data-nd-icon") ?? "(unnamed)"),
+    );
+    expect(empty, `${locale}/${path} renders an icon that draws nothing`).toEqual([]);
+  },
+);
 
 test("a control that is only an icon still has a name", async ({ page }) => {
   await page.goto(url(ANY));

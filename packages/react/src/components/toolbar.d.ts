@@ -7,18 +7,18 @@
 import type { ReactNode } from "react";
 
 export type ToolbarOrientation = "horizontal" | "vertical";
-export type ToolbarDensity = "comfortable" | "compact";
+export type ToolbarDensity = "comfortable" | "compact" | "rail";
 
 export interface ToolbarProps {
   /** The toolbar's accessible name, saying what the bar of controls is for. Required unless `labelledby` names it instead, because a `role="toolbar"` with no name gives a screen reader only the word `toolbar`. */
   label?: string;
   /** The id of the element that names this toolbar, when the name is already visible on the page. */
   labelledby?: string;
-  /** Which way the controls run, and therefore which arrow keys walk them. It is written to `aria-orientation`, so assistive technology reports the axis as well. */
+  /** Which way the controls run, and therefore which arrow keys walk them. It is written to `aria-orientation`, so assistive technology reports the axis as well. A `rail` is `vertical` whatever this says. */
   orientation?: ToolbarOrientation;
   /** Whether the bar wraps onto more lines when it runs out of room. On by default, so that the last control is still reachable at 320px. */
   wrap?: boolean;
-  /** The gap between its groups. `compact` is for a bar inside something else, where the surrounding padding already separates it. */
+  /** The gap between its groups. `compact` is for a bar inside something else. `rail` is a column one rail wide with two icon-only controls to a row, and it is always vertical. */
   density?: ToolbarDensity;
   /** Frosts the bar. Use it for a bar that scrolls over the content it controls, which is what shows through. */
   glass?: boolean;

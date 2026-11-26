@@ -583,11 +583,18 @@ fn copy_runtime(root: &Path, out: &Path) -> Result<usize, String> {
         "select.js",
         "tag-picker.js",
         "tree.js",
+        "option-list.js",
+        "prompt.js",
+        "drawer.js",
+        "split.js",
+        "key-capture.js",
+        "log.js",
         "tabs.js",
         "date-input.js",
         "choice.js",
         "search.js",
         "search-match.js",
+        "seats.js",
     ] {
         count += copy(
             &root.join("dist").join(file),

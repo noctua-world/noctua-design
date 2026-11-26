@@ -43,7 +43,7 @@ pub(crate) const CONTROLS: &[Node] = &[
     },
 ];
 
-/// Every `Toolbar` example. 5 of them.
+/// Every `Toolbar` example. 6 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     (
         r#"Toolbar { label: "…", ToolbarGroup { … } }"#,
@@ -152,6 +152,85 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     ],
                 }],
             }],
+        }],
+    ),
+    (
+        r#"Toolbar { density: ToolbarDensity::Rail, Tooltip { text: "…", Button { hide_label: true, … } } }"#,
+        &[Node::Component {
+            name: "Toolbar",
+            props: &[
+                ("density", Value::Text("rail")),
+                ("label", Value::Message(Key::ExampleRailControls)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "ToolbarGroup",
+                    props: &[],
+                    children: &[
+                        Node::Component {
+                            name: "Tooltip",
+                            props: &[
+                                ("name", Value::Text("toolbar-rail-collapse")),
+                                ("text", Value::Message(Key::ExampleRailCollapse)),
+                            ],
+                            children: &[Node::Component {
+                                name: "Button",
+                                props: &[
+                                    ("variant", Value::Text("transparent")),
+                                    ("tone", Value::Text("neutral")),
+                                    ("size", Value::Text("small")),
+                                    ("hide_label", Value::Bool(true)),
+                                    ("icon", Value::Text("chevrons-down")),
+                                    ("label", Value::Message(Key::ExampleRailCollapse)),
+                                ],
+                                children: &[],
+                            }],
+                        },
+                        Node::Component {
+                            name: "Tooltip",
+                            props: &[
+                                ("name", Value::Text("toolbar-rail-close")),
+                                ("text", Value::Message(Key::ExampleRailClose)),
+                            ],
+                            children: &[Node::Component {
+                                name: "Button",
+                                props: &[
+                                    ("variant", Value::Text("transparent")),
+                                    ("tone", Value::Text("neutral")),
+                                    ("size", Value::Text("small")),
+                                    ("hide_label", Value::Bool(true)),
+                                    ("icon", Value::Text("close")),
+                                    ("label", Value::Message(Key::ExampleRailClose)),
+                                ],
+                                children: &[],
+                            }],
+                        },
+                    ],
+                },
+                Node::Component {
+                    name: "ToolbarGroup",
+                    props: &[],
+                    children: &[Node::Component {
+                        name: "Tooltip",
+                        props: &[
+                            ("name", Value::Text("toolbar-rail-direction")),
+                            ("text", Value::Message(Key::ExampleRailDirection)),
+                        ],
+                        children: &[Node::Component {
+                            name: "Button",
+                            props: &[
+                                ("variant", Value::Text("transparent")),
+                                ("tone", Value::Text("neutral")),
+                                ("size", Value::Text("small")),
+                                ("hide_label", Value::Bool(true)),
+                                ("icon", Value::Text("arrow-up-down")),
+                                ("label", Value::Message(Key::ExampleRailDirection)),
+                            ],
+                            children: &[],
+                        }],
+                    }],
+                },
+            ],
         }],
     ),
     (

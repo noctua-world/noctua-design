@@ -201,8 +201,8 @@
   font-size: var(--noctua-size-body);
 }
 
-.nd-select-native:hover,
-.nd-select-control:hover {
+.nd-select-native:is(:hover, [data-nd-seat-hover]),
+.nd-select-control:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-fg-muted);
 }
 
@@ -259,7 +259,7 @@
   cursor: pointer;
 }
 
-.nd-select-clear:hover {
+.nd-select-clear:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 

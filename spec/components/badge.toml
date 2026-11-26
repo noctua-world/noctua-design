@@ -38,7 +38,7 @@ doc = "Whether a count of zero is drawn. Off by default, so nothing to report dr
 [prop.tone]
 type = "text"
 attribute = "data-nd-tone"
-doc = "Which of the colour system's tones the badge is painted from, named rather than chosen from a closed list. A name no family declares fails the build. The 349 families are in `noctua_design::tones`, plus `neutral` and `muted`."
+doc = "Which of the colour system's tones the badge is painted from, named rather than chosen from a closed list. A name no family declares fails the build. The 352 families are in `noctua_design::tones`, plus `neutral` and `muted`."
 
 [prop.placement]
 type = "enum"

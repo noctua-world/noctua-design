@@ -11,7 +11,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Node, Value};
 use crate::trees::Tree;
 
-/// Every `Tooltip` example. 4 of them.
+/// Every `Tooltip` example. 5 of them.
 pub(crate) const EXAMPLES: &[Tree] = &[
     // THE HINT IS NEVER THE NAME. The button says `Copy` on it, and the hint
     // narrows what gets copied.
@@ -100,6 +100,27 @@ pub(crate) const EXAMPLES: &[Tree] = &[
                     ("icon", Value::Text("eye")),
                     ("hide_label", Value::Bool(true)),
                     ("label", Value::Message(Key::ExampleTooltipLock)),
+                ],
+                children: &[],
+            }],
+        }],
+    ),
+    (
+        r#"Tooltip { text: "…", Button { hide_label: true, label: "…" } } with one sentence for both"#,
+        &[Node::Component {
+            name: "Tooltip",
+            props: &[
+                ("name", Value::Text("tooltip-name")),
+                ("text", Value::Message(Key::ExampleRailClose)),
+            ],
+            children: &[Node::Component {
+                name: "Button",
+                props: &[
+                    ("variant", Value::Text("outline")),
+                    ("tone", Value::Text("neutral")),
+                    ("hide_label", Value::Bool(true)),
+                    ("icon", Value::Text("close")),
+                    ("label", Value::Message(Key::ExampleRailClose)),
                 ],
                 children: &[],
             }],

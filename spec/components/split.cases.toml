@@ -1,0 +1,209 @@
+# What a `Split` has to do, in both languages, in a real browser.
+#
+# The markup claims a separator and nothing else. `dist/split.js` is what makes
+# the separator a control, and the keys below are the ones the role names.
+# Every case that presses a key sets `collapse` to `none`, so the handle is on
+# the page whatever width the case is drawn at. Where the line is drawn, and
+# what a pointer does to it, are asked in `tests/browser/split.spec.js`.
+
+[[case]]
+name = "the markup holds two panes with derived ids and a separator that names the first"
+note = "Both ids come from `name` and `side`, and the handle derives the same string for `aria-controls`. A handle that named nothing would be a separator between two things nobody can find."
+props = { name = "mail" }
+expect = { attrs = { "data-nd-split" = "mail", "data-nd-value" = "50", "data-nd-min" = "20", "data-nd-max" = "80", "data-nd-collapse" = "stack" }, present = [":scope > .nd-split-track > #nd-split-mail-start.nd-split-pane[data-nd-side=start]", ":scope > .nd-split-track > #nd-split-mail-end.nd-split-pane[data-nd-side=end]", "[role=separator][aria-orientation=vertical][aria-controls=nd-split-mail-start][aria-label='Resize the list']"] }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail" }
+text = "Inbox"
+
+[[case.child]]
+component = "SplitHandle"
+props = { name = "mail", label = "Resize the list" }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail", side = "end" }
+text = "A message"
+
+[[case]]
+name = "the script makes the separator a control that says its value and its limits"
+note = "A focusable separator is a range: it owes `aria-valuenow`, and the limits a reader will meet. They are written with the `tabindex`, never before it."
+props = { name = "mail", collapse = "none" }
+expect = { present = ["[role=separator][tabindex='0'][aria-valuenow='50'][aria-valuemin='20'][aria-valuemax='80']"] }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail" }
+text = "Inbox"
+
+[[case.child]]
+component = "SplitHandle"
+props = { name = "mail", label = "Resize the list" }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail", side = "end" }
+text = "A message"
+
+[[case]]
+name = "Right moves the line toward the end by one point"
+note = "The line moves the way the key points, so the pane before it grows. One point is the slider's reading of an arrow key."
+props = { name = "mail", collapse = "none" }
+steps = ["focus:[role=separator]", "key:ArrowRight"]
+expect = { attrs = { "data-nd-value" = "51" }, present = ["[role=separator][aria-valuenow='51']"], focus = "[role=separator]" }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail" }
+text = "Inbox"
+
+[[case.child]]
+component = "SplitHandle"
+props = { name = "mail", label = "Resize the list" }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail", side = "end" }
+text = "A message"
+
+[[case]]
+name = "Left moves it back, and Page Down takes ten points"
+note = "Two keys in one case, because the second has to start from where the first left the line and not from the markup."
+props = { name = "mail", collapse = "none" }
+steps = ["focus:[role=separator]", "key:ArrowLeft", "key:PageDown"]
+expect = { attrs = { "data-nd-value" = "39" }, present = ["[role=separator][aria-valuenow='39']"] }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail" }
+text = "Inbox"
+
+[[case.child]]
+component = "SplitHandle"
+props = { name = "mail", label = "Resize the list" }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail", side = "end" }
+text = "A message"
+
+[[case]]
+name = "End takes the first pane to its most, and no key takes it further"
+note = "`max` is a limit and not a suggestion. Page Up at the limit leaves the line where it is."
+props = { name = "mail", collapse = "none", max = "70" }
+steps = ["focus:[role=separator]", "key:End", "key:PageUp", "key:ArrowRight"]
+expect = { attrs = { "data-nd-value" = "70" }, present = ["[role=separator][aria-valuenow='70'][aria-valuemax='70']"] }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail" }
+text = "Inbox"
+
+[[case.child]]
+component = "SplitHandle"
+props = { name = "mail", label = "Resize the list" }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail", side = "end" }
+text = "A message"
+
+[[case]]
+name = "Home takes the first pane to its least"
+note = "The other limit, by the other key."
+props = { name = "mail", collapse = "none", min = "30" }
+steps = ["focus:[role=separator]", "key:Home", "key:ArrowLeft"]
+expect = { attrs = { "data-nd-value" = "30" }, present = ["[role=separator][aria-valuenow='30'][aria-valuemin='30']"] }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail" }
+text = "Inbox"
+
+[[case.child]]
+component = "SplitHandle"
+props = { name = "mail", label = "Resize the list" }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail", side = "end" }
+text = "A message"
+
+[[case]]
+name = "Enter takes the first pane to its least"
+note = "The window splitter's own key: one press puts the first pane away as far as it goes."
+props = { name = "mail", collapse = "none", value = "45" }
+steps = ["focus:[role=separator]", "key:Enter"]
+expect = { attrs = { "data-nd-value" = "20" }, present = ["[role=separator][aria-valuenow='20']"] }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail" }
+text = "Inbox"
+
+[[case.child]]
+component = "SplitHandle"
+props = { name = "mail", label = "Resize the list" }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail", side = "end" }
+text = "A message"
+
+[[case]]
+name = "Enter pressed again brings the pane back to where it was"
+note = "The second half of that key. A pane that came back to the middle, or to its default, would lose the width a reader had chosen."
+props = { name = "mail", collapse = "none", value = "45" }
+steps = ["focus:[role=separator]", "key:Enter", "key:Enter"]
+expect = { attrs = { "data-nd-value" = "45" }, present = ["[role=separator][aria-valuenow='45']"] }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail" }
+text = "Inbox"
+
+[[case.child]]
+component = "SplitHandle"
+props = { name = "mail", label = "Resize the list" }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail", side = "end" }
+text = "A message"
+
+[[case]]
+name = "a value past a limit is announced at the limit"
+note = "The stylesheet would draw ninety-five, and a reader would be told ninety-five about a line that the first key press moves to eighty."
+props = { name = "mail", collapse = "none", value = "95" }
+expect = { present = ["[role=separator][aria-valuenow='80']"] }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail" }
+text = "Inbox"
+
+[[case.child]]
+component = "SplitHandle"
+props = { name = "mail", label = "Resize the list" }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail", side = "end" }
+text = "A message"
+
+[[case]]
+name = "a split with no handle has nothing to focus"
+note = "Two panes that keep their shares are a layout. Nothing in it is a control, so nothing in it is a tab stop."
+props = { name = "mail", value = "30" }
+expect = { attrs = { "data-nd-value" = "30" }, hidden = ["[tabindex]", "[role=separator]"] }
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail" }
+text = "Inbox"
+
+[[case.child]]
+component = "SplitPane"
+props = { name = "mail", side = "end" }
+text = "A message"

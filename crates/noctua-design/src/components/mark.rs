@@ -4,11 +4,11 @@
 //!
 //! Edits to this file will be overwritten. Change the spec instead.
 //!
-//! Highlight text for what the reader is doing now, such as a search hit.
+//! Highlight a phrase in running text that matters to what the reader is doing now.
 
 use dioxus::prelude::*;
 
-/// Highlight text for what the reader is doing now, such as a search hit.
+/// Highlight a phrase in running text that matters to what the reader is doing now.
 ///
 /// # Accessibility
 ///

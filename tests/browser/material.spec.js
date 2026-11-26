@@ -8,7 +8,11 @@
 // last thing a compiler can.
 
 import { test, expect } from "@playwright/test";
-import { ANY, PAGE, SCOPED, url } from "./pages.js";
+import { ANY, PAGE, SCOPED, url, walker } from "./pages.js";
+
+// Every walk in this file declares its tests through this line, so that a
+// report names this file rather than `pages.js` (`walker` says why).
+const walk = walker((title, fn) => test(title, fn));
 
 /** Opens the settings panel without depending on where its summary sits. */
 const openSettings = (page) =>
@@ -79,15 +83,17 @@ test("a scrollable element never carries a radius", async ({ page }) => {
 test.describe("with the script blocked", () => {
   test.use({ javaScriptEnabled: false });
 
-  test("a scrollable element never carries a radius there either", async ({ page }) => {
-    // THE SWEEP THAT FOUND THIS RAN WITHOUT A SCRIPT AND THIS SUITE DID NOT.
-    //
-    // `TagPicker`'s native `<select multiple>` is a four-row scrolling listbox
-    // and it is `hidden` the moment the script enhances the control — so every
-    // test asking this question saw nothing, and the one state a reader could
-    // actually meet it in was the one nobody looked at. Half of what a
-    // no-script page shows is a control some enhanced page hides.
-    for (const slug of Object.values(PAGE)) {
+  walk(
+    "a scrollable element never carries a radius there either",
+    {},
+    async ({ page, path: slug }) => {
+      // THE SWEEP THAT FOUND THIS RAN WITHOUT A SCRIPT AND THIS SUITE DID NOT.
+      //
+      // `TagPicker`'s native `<select multiple>` is a four-row scrolling
+      // listbox and it is `hidden` the moment the script enhances the control —
+      // so every test asking this question saw nothing, and the one state a
+      // reader could actually meet it in was the one nobody looked at. Half of
+      // what a no-script page shows is a control some enhanced page hides.
       await page.goto(url(slug));
       await page.evaluate(() =>
         document.documentElement.setAttribute("data-noctua-radius", "circular"),
@@ -105,8 +111,8 @@ test.describe("with the script blocked", () => {
           .map((el) => `${el.className || el.tagName}: ${getComputedStyle(el).borderRadius}`),
       );
       expect(offenders, `${slug}: a scrollbar will paint over these corners`).toEqual([]);
-    }
-  });
+    },
+  );
 });
 
 test("the settings panel clips its own scroller", async ({ page }) => {

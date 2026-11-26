@@ -1,0 +1,82 @@
+guidance = """
+Use an option list for a list users walk and act on with the keyboard. A list
+of commands and a menu of shortcuts are two. For a value in a form, use
+`Select`. For a list of pages, use `Search`, whose rows are links.
+"""
+
+[meta]
+name = "OptionList"
+element = "div"
+class = "nd-option-list"
+page = "option-list"
+summary = "Let users walk a list of options with the keyboard and choose one."
+
+# A LISTBOX, AND THE ACTIVE OPTION IS NAMED RATHER THAN FOCUSED.
+#
+# The focus stays on one element the whole time: the list, or the control
+# another component keeps the focus in while this list is filtered. Which option
+# the keyboard is on travels by `aria-activedescendant`, the pattern the WAI-ARIA
+# Authoring Practices give for a listbox and for the popup of a combobox, and the
+# one `Search` and `Select` already follow.
+#
+# THE ROOT IS A `<div>` AND THE LISTBOX IS INSIDE IT, because a list with
+# nothing in it owes a sentence, and a sentence is not a child a `<ul>` or a
+# `listbox` may have.
+#
+# IT CHOOSES NOTHING ITSELF. Enter says which option was chosen, in an
+# `nd-option-choose` event, and what is marked `selected` afterwards is the
+# caller's to render. A list of commands has no chosen row, and a list of
+# settings has one the caller already knows.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-option-list"
+doc = "What this list is of, as a script finds it. It is also the listbox's id, which is what another control writes in `aria-controls`. **Required**."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The name of the list. Required, because a `listbox` with no name gives a screen reader only the word *list box*."
+
+[prop.layout]
+type = "enum"
+values = ["rows", "columns"]
+default = "rows"
+attribute = "data-nd-layout"
+doc = "How the options are laid out: `rows`, one under another, or `columns`, which fills the width with as many columns as fit. `columns` suits a menu of short entries, each a key and a name."
+
+[prop.size]
+type = "enum"
+values = ["small", "medium", "large"]
+default = "medium"
+attribute = "data-nd-size"
+doc = "The height of an option: `small`, `medium` or `large`. Options are targets, so all three clear WCAG 2.5.8's 24px minimum."
+
+# NO ATTRIBUTE OF ITS OWN: it is whether the listbox carries `tabindex="0"`.
+[prop.focusable]
+type = "bool"
+default = "true"
+doc = "Whether the list is a tab stop. Turn it off where another control keeps the focus and names this list in `aria-controls`. That control's arrow keys then move through the options."
+
+[prop.empty_label]
+type = "text"
+doc = "What the list says when it holds no option. Set it wherever the list is filtered, because a filter that leaves an empty space has not said that nothing matched."
+
+[prop.children]
+type = "children"
+doc = "The options: `OptionItem`s, `OptionGroup`s, or both."
+
+[keyboard]
+"Down arrow / Up arrow" = "Moves to the next and the previous option, and stops at the ends. The focus stays where it is."
+"Left arrow / Right arrow" = "Moves to the option beside the active one, in the next column. Needs `columns` and the focus in the list."
+"Home / End" = "Moves to the first and the last option. From another control, hold Control or Command as well."
+"Page Up / Page Down" = "Moves one measured page of options, and stops at the ends."
+"Enter" = "Chooses the active option. A disabled option stays active and is not chosen."
+"Space" = "Chooses the active option. Needs the focus in the list, since in another control it types a space."
+"A printable character" = "Jumps to the next option whose name starts with the letters typed. Needs the focus in the list."
+
+[a11y]
+notes = """
+The list is a `role="listbox"` and each option a `role="option"`. The active option is named by `aria-activedescendant` on whatever holds the focus, so the focus never moves into the list. The empty sentence is a `role="status"`.
+"""

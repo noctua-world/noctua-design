@@ -153,6 +153,27 @@ pub const FILES: &[(&str, &str)] = &[
         include_str!(concat!("../", "dist/", "tag-picker.js")),
     ),
     ("tree.js", include_str!(concat!("../", "dist/", "tree.js"))),
+    (
+        "option-list.js",
+        include_str!(concat!("../", "dist/", "option-list.js")),
+    ),
+    (
+        "prompt.js",
+        include_str!(concat!("../", "dist/", "prompt.js")),
+    ),
+    (
+        "drawer.js",
+        include_str!(concat!("../", "dist/", "drawer.js")),
+    ),
+    (
+        "split.js",
+        include_str!(concat!("../", "dist/", "split.js")),
+    ),
+    (
+        "key-capture.js",
+        include_str!(concat!("../", "dist/", "key-capture.js")),
+    ),
+    ("log.js", include_str!(concat!("../", "dist/", "log.js"))),
     ("tabs.js", include_str!(concat!("../", "dist/", "tabs.js"))),
     (
         "date-input.js",
@@ -169,6 +190,10 @@ pub const FILES: &[(&str, &str)] = &[
     (
         "search-match.js",
         include_str!(concat!("../", "dist/", "search-match.js")),
+    ),
+    (
+        "seats.js",
+        include_str!(concat!("../", "dist/", "seats.js")),
     ),
     (
         "palettes/ochre-balanced.json",
@@ -577,6 +602,10 @@ pub const FILES: &[(&str, &str)] = &[
     (
         "tokens/css/theme-violet-vivid.css",
         include_str!(concat!("../", "dist/", "tokens/css/theme-violet-vivid.css")),
+    ),
+    (
+        "tailwind/bridge.css",
+        include_str!(concat!("../", "dist/", "tailwind/bridge.css")),
     ),
     (
         "tones.css",

@@ -59,6 +59,45 @@
   gap: var(--noctua-space-paragraph);
 }
 
+/* FLOW: A DOCUMENT'S RHYTHM, for prose a program wrote, such as a help page
+   drawn from Markdown. The gap goes, because a gap cannot tell a heading's two
+   sides apart, and every block takes a paragraph's room above it instead.
+   A heading starts a section: a section's room above a first or second level
+   and a heading's above a deeper one, and a gap's below, so it sits nearer what
+   it heads than what it ends. Nothing is above the first block. A break keeps
+   at least a paragraph's room on each side, and its own where that is more. */
+.nd-prose-block[data-nd-flow="true"] {
+  gap: 0;
+}
+
+.nd-prose-block[data-nd-flow="true"] > * {
+  margin-block: 0;
+}
+
+.nd-prose-block[data-nd-flow="true"] > * + * {
+  margin-block-start: var(--noctua-space-paragraph);
+}
+
+.nd-prose-block[data-nd-flow="true"] > :is(h1, h2).nd-heading:not(:first-child) {
+  margin-block-start: var(--noctua-space-section);
+}
+
+.nd-prose-block[data-nd-flow="true"] > :is(h3, h4, h5, h6).nd-heading:not(:first-child) {
+  margin-block-start: var(--noctua-space-heading);
+}
+
+.nd-prose-block[data-nd-flow="true"] > .nd-heading + * {
+  margin-block-start: var(--noctua-space-gap);
+}
+
+.nd-prose-block[data-nd-flow="true"] > .nd-divider[data-nd-orientation="horizontal"] {
+  margin-block: max(var(--noctua-space-paragraph), var(--nd-divider-gap));
+}
+
+.nd-prose-block[data-nd-flow="true"] > .nd-divider + * {
+  margin-block-start: 0;
+}
+
 .nd-a { color: var(--nc-color-accent); text-underline-offset: var(--noctua-space-1); }
 .nd-a[data-nd-tone="inherit"] { color: inherit; }
 /* The external affordance is a mark, not only a color: color alone is

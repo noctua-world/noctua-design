@@ -1,0 +1,61 @@
+# What a `MatchText` has to draw, in both languages, in a real browser.
+#
+# It answers no key and holds no state, so it owes no case. These are here
+# because the component is a parser written twice, once in each language, and
+# two parsers are held to one file or they are held to nothing: Rust's integer
+# parser and JavaScript's disagree about `+1` and `1e1`, and a body leaning on
+# either marks other letters from the same prop.
+
+[[case]]
+name = "each word of the query marks its own run, in its own tone"
+note = "The whole component. The first word is `1`, the second `2`, and what is not matched is plain text between them."
+props = { text = "ButtonGroup", hits = "0-2|6-8" }
+expect = { text = "ButtonGroup", present = ["mark.nd-match[data-nd-word='1']", "mark.nd-match[data-nd-word='2']"], hidden = ["[data-nd-word='3']"] }
+
+[[case]]
+name = "a run is a drawing, not a part of the name"
+note = "A `mark` is a role of its own, and a name in three runs reached a screen reader in six pieces. `role=none` keeps the name one text."
+props = { text = "ButtonGroup", hits = "0-2|6-8" }
+expect = { present = ["mark.nd-match[role=none][data-nd-word='1']", "mark.nd-match[role=none][data-nd-word='2']"], hidden = ["mark:not([role=none])"] }
+
+[[case]]
+name = "the third word and every later one share a tone"
+note = "`NOCTUA.md §12.4` gives the third and later words one colour, so a fourth word must not ask for a tone no rule draws."
+props = { text = "ButtonGroup", hits = "0|1|2|3" }
+expect = { present = ["[data-nd-word='3']"], hidden = ["[data-nd-word='4']"] }
+
+[[case]]
+name = "a character two words claim is the first word's"
+note = "Words are matched independently and may share a character. Drawn in the later word's tone, typing a second word would recolour what the first had already explained."
+props = { text = "ButtonGroup", hits = "0-10|0-10" }
+expect = { present = ["[data-nd-word='1']"], hidden = ["[data-nd-word='2']"] }
+
+[[case]]
+name = "an empty slot keeps the next word's tone"
+note = "A word that matched another field still counts as a word. Dropping the empty slot would draw the second word in the first word's tone."
+props = { text = "ButtonGroup", hits = "|6-10" }
+expect = { present = ["[data-nd-word='2']"], hidden = ["[data-nd-word='1']"] }
+
+[[case]]
+name = "a piece outside the grammar marks nothing"
+note = "One half's integer parser takes a sign and the other's takes an exponent. Neither is an index here, and a stale position past the end is no position."
+props = { text = "ButtonGroup", hits = "+1,1e1, 2,3-,-4,5-6-7,99,0x1" }
+expect = { text = "ButtonGroup", hidden = ["mark"] }
+
+[[case]]
+name = "a range that runs past the end stops at the end"
+note = "An answer computed for a longer name still marks the part of it that is there."
+props = { text = "Tag", hits = "1-99" }
+expect = { text = "Tag", present = ["mark[data-nd-word='1']"] }
+
+[[case]]
+name = "a position counts a character, not a code unit"
+note = "The matcher counts code points. A letter outside the basic plane is two units in JavaScript and one position, so the mark must land on the letter after it."
+props = { text = "𐐀b", hits = "1" }
+expect = { text = "𐐀b", present = ["mark[data-nd-word='1']"] }
+
+[[case]]
+name = "with no hits it is the name alone"
+note = "An unfiltered list draws every name through this component too, and none of them may carry a mark."
+props = { text = "ButtonGroup" }
+expect = { text = "ButtonGroup", hidden = ["mark"] }

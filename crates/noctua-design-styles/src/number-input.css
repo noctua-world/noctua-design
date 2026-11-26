@@ -35,7 +35,7 @@
 
 /* `:enabled`, because a stepper a `readonly` or `disabled` field refuses must
    not light up under the pointer as though it were about to do something. */
-.nd-number-input-step:enabled:hover {
+.nd-number-input-step:enabled:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
@@ -64,7 +64,7 @@
   border-radius: var(--noctua-radius-control);
 }
 
-.nd-number-input[data-nd-stepping="primary"] .nd-number-input-step:enabled:hover {
+.nd-number-input[data-nd-stepping="primary"] .nd-number-input-step:enabled:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-surface-subtle);
 }
 
@@ -199,7 +199,7 @@ which makes both of them items of the figure's row{
   cursor: pointer;
 }
 
-.nd-slider-track:focus-visible {
+.nd-slider-track:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-pill);

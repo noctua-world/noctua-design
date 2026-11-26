@@ -1,0 +1,95 @@
+guidance = """
+Use a prompt for the line a reader types into an application: a command, a
+filter, a message. Its cursor is a block. For an answer in a form, use
+`Textarea`, which has a label, a hint and an error.
+"""
+
+[meta]
+name = "Prompt"
+element = "div"
+class = "nd-prompt"
+summary = "Let users type on a line with a block cursor, and send what they typed."
+
+# A REAL `<textarea>`, AND A MIRROR THAT DRAWS ONE THING.
+#
+# The text, the selection, the input method's composition, the clipboard and
+# the name a screen reader reads are the textarea's own. The engine's caret is
+# transparent, and a second box over the textarea holds the same text with
+# everything invisible but the block: one `<span>` around the cluster the caret
+# stands before. `dist/prompt.js` keeps the two in step, and its header is the
+# whole technique.
+#
+# WITH THE SCRIPT BLOCKED IT IS A TEXTAREA with the engine's own caret. The
+# caret is hidden only once the script has said it is drawing the block.
+#
+# IT STAYS A `textbox` WHEN IT DRIVES A LIST. HTML allows a `<textarea>` no
+# other role, and a `combobox` is one line where this is several. A `textbox`
+# takes `aria-controls`, `aria-activedescendant` and `aria-autocomplete`, which
+# is everything the pattern needs to say which option the keyboard is on.
+#
+# IT SENDS NOTHING ITSELF. Enter and the send control say `nd-prompt-send`,
+# with the prompt's name and its text, and the text afterwards is the caller's
+# to set.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-prompt"
+doc = "What this prompt is, as a script finds it, and the form field name it is submitted under. The textarea takes the id `nd-prompt-` followed by this name. **Required**."
+
+[prop.label]
+type = "text"
+required = true
+doc = "The name of the prompt, in the reader's language. It becomes `aria-label` on the textarea, because a prompt shows no label and no placeholder. Required."
+
+[prop.value]
+type = "text"
+doc = "What is in the prompt to begin with. It is the textarea's content, so a value with a line break in it survives the markup."
+
+[prop.send_label]
+type = "text"
+doc = "The name of the send control, such as *Send*. With it the prompt ends in that control. Without it, Enter is the only way to send."
+
+[prop.action]
+type = "text"
+doc = "What a script finds the send control by. It becomes `data-nd-action` on that control. Needs `send_label`."
+
+[prop.controls]
+type = "text"
+doc = "The id of a list this prompt filters, such as an `OptionList`'s `name`, which is its id. It becomes `aria-controls`, and the Up and Down arrows then move through that list. The prompt stays a `textbox`, the one role a `<textarea>` takes."
+
+# AN OPTION'S ID, AND NOT A FLAG. `OptionItem.active` says on the option that
+# it is the active one, and this says on the prompt which option that is, so
+# the two are named apart.
+[prop.active_option]
+type = "text"
+doc = "The id of the option the keyboard is on in that list. It becomes `aria-activedescendant`. Leave it out and `dist/option-list.js` writes it. Needs `controls`."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+doc = "Whether the prompt is disabled. A disabled prompt takes no focus, draws no cursor and sends nothing."
+
+[prop.readonly]
+type = "bool"
+default = "false"
+doc = "Whether the text can be read and copied but not changed. The cursor is drawn as an outline and does not blink, and nothing is sent."
+
+[state.composing]
+attribute = "data-nd-composing"
+doc = "Set while an input method is composing. The block is hidden and the engine's own caret and underline show, so the composition looks the way the input method draws it."
+
+[state.selecting]
+attribute = "data-nd-selecting"
+doc = "Set while some text is selected. The block is hidden and the engine's own highlight shows."
+
+[keyboard]
+"Enter" = "Says `nd-prompt-send`, with the text. While an input method is composing, it confirms the composition and sends nothing."
+"Shift + Enter" = "Breaks the line. The prompt grows by a line, up to its limit, and then scrolls."
+"Down arrow / Up arrow" = "Moves through the list named by `controls`. With no list, they move the cursor between lines."
+
+[a11y]
+needs_name = true
+notes = """
+The control is a real `<textarea>` named by `aria-label`. The block is drawn in an `aria-hidden` box. It is filled while the text has the focus and an outline while it does not. It does not blink under `prefers-reduced-motion`.
+"""

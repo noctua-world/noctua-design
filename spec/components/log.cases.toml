@@ -1,0 +1,47 @@
+# What a `Log` has to do, in both languages, in a real browser.
+#
+# A case has no box with a height, so nothing here scrolls. Following the end,
+# stopping when the reader scrolls away and a selection held as a line arrives
+# are asked of `tests/browser/log.spec.js`. What is held here is the markup,
+# and that a log with room for all of its lines is at its end.
+
+[[case]]
+name = "the lines are a named log the keyboard can reach"
+note = "A region that scrolls has to be reachable from the keyboard, or its lines past the box are reachable by pointer alone. The role is what makes a screen reader read a line as it arrives."
+props = { name = "build", label = "Build log" }
+expect = { attrs = { "data-nd-log" = "build", "data-nd-follow" = "true" }, present = [":scope > .nd-log-lines[role='log'][aria-label='Build log'][tabindex='0'][id='nd-log-build']"], absent = ["data-nd-paused", "role"] }
+
+[[case]]
+name = "the resume control ships hidden, outside the region, and stays hidden at the end"
+note = "A control inside a `role=\"log\"` would be read as a line. With the script blocked nothing follows, so there is nothing to resume, and a log at its end has nothing to go back to."
+props = { name = "build", label = "Build log", resume_label = "Go to the newest" }
+expect = { present = [":scope > .nd-log-resume[type='button'][aria-controls='nd-log-build']"], hidden = [":scope > .nd-log-resume"] }
+
+[[case]]
+name = "a log that does not follow says so"
+note = "Off, the log stays where the reader puts it. The attribute is what the script reads."
+props = { name = "record", label = "Journal", follow = false }
+expect = { attrs = { "data-nd-follow" = "false" } }
+
+[[case]]
+name = "a log with room for every line is at its end whatever key is pressed"
+note = "Home and End move nothing in a box that holds everything, so nothing a reader did took the log away from its newest line."
+props = { name = "build", label = "Build log", resume_label = "Go to the newest" }
+steps = ["focus:.nd-log-lines", "key:Home", "key:End"]
+expect = { absent = ["data-nd-paused"], hidden = [":scope > .nd-log-resume"], focus = ".nd-log-lines" }
+
+[[case]]
+name = "its lines are in the region, in the order they were written"
+note = "Oldest first, newest last, and every one in the document. Nothing is virtualised away."
+props = { name = "build", label = "Build log" }
+[[case.child]]
+component = "LogLine"
+props = { time = "12:04:31", level = "info", source = "nc-kernel" }
+text = "Started."
+[[case.child]]
+component = "LogLine"
+props = { time = "12:04:32", level = "error", source = "nc-store", tone = "danger" }
+text = "Refused."
+[case.expect]
+text = "12:04:31 info nc-kernel Started.12:04:32 error nc-store Refused."
+present = [":scope > .nd-log-lines > .nd-log-content > .nd-log-line + .nd-log-line[data-nd-tone='danger']"]

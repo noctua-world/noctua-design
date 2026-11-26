@@ -1,0 +1,46 @@
+guidance = """
+Use a split pane for each of the two halves of a `Split`. `side` says which half
+it is, and the pane scrolls what does not fit in it.
+"""
+
+[meta]
+name = "SplitPane"
+element = "div"
+class = "nd-split-pane"
+page = "split"
+summary = "Hold one of the two halves of a split, and scroll what does not fit."
+
+# ITS ID IS DERIVED, from the split's `name` and its own `side`, as a `Tab`'s is
+# from two words. The `SplitHandle` derives the same string for
+# `aria-controls`, so there is nothing to wire and nothing to keep in step.
+#
+# IT HAS NO PADDING. What a pane holds is the caller's, and content that is a
+# list brings its own.
+#
+# IT SCROLLS. Side by side, a pane is as tall as the split and scrolls what is
+# taller. A pane with nothing focusable in it needs a `tabindex` of the
+# caller's on its content to be scrolled from the keyboard.
+
+[prop.name]
+type = "text"
+required = true
+doc = "The `Split` this belongs to. Required, and it must match the split's own `name`, because the pane's id is derived from it."
+
+[prop.side]
+type = "enum"
+values = ["start", "end"]
+default = "start"
+attribute = "data-nd-side"
+# A pane is a share of a SPLIT. A picture of one pane alone has nothing to share
+# a box with, so both values draw the same box.
+variants = false
+doc = "Which half this is: `start` or `end`. The `start` pane takes the split's `value` and the `end` pane takes the rest. A split holds one of each."
+
+[prop.children]
+type = "children"
+doc = "What the pane holds."
+
+[a11y]
+notes = """
+The pane has no role. Its id is `nd-split-`, the split's `name`, a hyphen and its `side`, which is what the handle's `aria-controls` names. Side by side, a pane whose share is 0 is hidden, so nothing in it can take the focus.
+"""

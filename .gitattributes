@@ -6,3 +6,7 @@
 # The fonts' licence texts are copied verbatim from upstream, CRLF line endings
 # included, and stay byte for byte as they were published.
 assets/fonts/OFL-*.txt -text
+
+# The fuzzy corpus is another repository's file, held to a recorded checksum:
+# it stays byte for byte as it was copied.
+assets/vendor/nc-fuzzy/fuzzy-corpus.tsv -text

@@ -34,11 +34,11 @@
   cursor: help;
 }
 
-.nd-info-marker:hover {
+.nd-info-marker:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-accent-hover);
 }
 
-.nd-info-marker:focus-visible {
+.nd-info-marker:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }

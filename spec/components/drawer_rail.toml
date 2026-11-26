@@ -1,0 +1,40 @@
+guidance = """
+Use a drawer rail for the narrow column down one side of a `Drawer`. It holds a
+`Toolbar` or a `Tabs` drawn as a rail, and nothing wider than a rail.
+"""
+
+[meta]
+name = "DrawerRail"
+element = "div"
+class = "nd-drawer-rail"
+page = "drawer"
+summary = "Place a column of controls or of tabs down one side of a drawer."
+
+# AS WIDE AS A FOOTER'S CORNER, AND AS TALL AS THE DRAWER. `--noctua-shell-rail`
+# is the one width: a drawer under a footer continues the footer's corners
+# downward (`NOCTUA.md §12.11`), and it stands on the corners' own shade for the
+# same reason. The rail adds no role. What is inside it keeps its own:
+# `Toolbar { density: rail }` is a toolbar and `Tabs { appearance: rail }` a tab
+# list.
+#
+# A RAIL TALLER THAN ITS DRAWER SCROLLS, with no scrollbar drawn: a rail has no
+# room for one, and the focus moving along it brings each control into view.
+
+[prop.side]
+type = "enum"
+values = ["start", "end"]
+default = "start"
+attribute = "data-nd-side"
+# A rail stands at a side of a DRAWER. A picture of one rail alone has no
+# drawer to stand at either side of, so both values draw the same box.
+variants = false
+doc = "Which side of the drawer the rail stands at: `start` or `end`. The chosen tab of a rail at the `end` is marked on the edge that faces the content."
+
+[prop.children]
+type = "children"
+doc = "What the rail holds: a `Toolbar` with `density` set to `rail`, or a `Tabs` with `appearance` set to `rail`."
+
+[a11y]
+notes = """
+The rail has no role, so an empty rail is not announced. A `Toolbar` or a `Tabs` inside it keeps its own role, its name and its one tab stop.
+"""

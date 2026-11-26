@@ -23,15 +23,17 @@
 // it, which is the failure mode a gap list has.
 //
 // THE RANKING IS NOT WRITTEN HERE. `search-match.js` touches no DOM, carries no
-// word in any language and imports nothing — and its own header said it would
-// move into a behaviour package unchanged on the day one existed. It did.
+// word in any language and imports nothing: it is the fuzzy core's rule
+// (`NOCTUA.md §12.4`), held to the same corpus as the crate the daemon filters
+// with. A row is an item of that rule — its label a name, its keywords a tag —
+// and every word of the query must match one of the two.
 //
 // THE ANCHORING IS NOT WRITTEN HERE EITHER: `anchor.js` places the panel, as it
 // does for the six other floating surfaces.
 
 import { keepAnchored, releaseAnchor } from "./anchor.js";
 import { message } from "./messages.js";
-import { prepare, rank } from "./search-match.js";
+import { Item, Matcher, Query, QueryTooLong, Role } from "./search-match.js";
 
 
 // WHAT THIS REPLACES.
@@ -260,11 +262,7 @@ function childCandidates(state) {
       row,
       labelEl,
       text,
-      match: prepare(text),
-      // Matched but never drawn, and a row matched only on these is
-      // deliberately not highlighted: the letters that matched are not letters
-      // on the screen, and a highlight over the wrong ones is worse than none.
-      keywords: row.dataset.ndKeywords ? prepare(row.dataset.ndKeywords) : null,
+      match: prepare(text, row.dataset.ndKeywords),
       group: row.closest("[data-nd-search-group]") ?? null,
     };
   });
@@ -309,8 +307,8 @@ async function loadIndex(state) {
     state.candidates = (data.entries ?? []).map((entry) => ({
       entry,
       text: entry.label ?? "",
-      match: prepare(entry.label ?? ""),
-      keywords: entry.keywords ? prepare(entry.keywords) : null,
+      chars: [...(entry.label ?? "")],
+      match: prepare(entry.label ?? "", entry.keywords),
     }));
     state.loaded = true;
     // And the claim is over: whatever the caller said was on its way is here.
@@ -344,8 +342,85 @@ function setLoading(state, loading) {
 
 // --- Matching and drawing ---------------------------------------------------
 
+/** The label's place among a row's fields, which is the only one drawn. */
+const LABEL = 0;
+
+/** One matcher for every box on the page: it keeps nothing between two items. */
+const matcher = new Matcher();
+
+/**
+ * A row as the matcher reads it: its label a name, its keywords a tag.
+ *
+ * The keywords are matched but never drawn, and a word matched only on them is
+ * deliberately not highlighted: the letters that matched are not letters on the
+ * screen, and a highlight over the wrong ones is worse than none.
+ */
+function prepare(label, keywords) {
+  const fields = [[Role.Name, label]];
+  if (keywords) fields.push([Role.Tag, keywords]);
+  return new Item(fields);
+}
+
+/**
+ * What was typed, as the matcher's query, or `null` for one past its bound.
+ *
+ * A query the rule refuses finds nothing, and the box says so in the sentence
+ * it already has for that.
+ */
+function parsed(text) {
+  try {
+    return Query.parse(text);
+  } catch (error) {
+    if (error instanceof QueryTooLong) return null;
+    throw error;
+  }
+}
+
+/**
+ * The tone a word of the query is drawn in: `1`, `2`, and `3` for the third
+ * word and every later one (`NOCTUA.md §12.4`).
+ *
+ * `MatchText` writes the same three values from the same rule, and the
+ * stylesheet has one rule for each: `.nd-match[data-nd-word]`.
+ */
+const toneOf = (word) => String(Math.min(word, 2) + 1);
+
+/**
+ * The label's matched characters, each with the tone of the word that claimed
+ * it: a `Map` from a code point index to a tone, in rising order.
+ *
+ * `claims` is the matcher's own answer to which word a shared character
+ * belongs to. It is the first that claimed it.
+ */
+function onLabel(found) {
+  const tones = new Map();
+  for (const run of found.claims(LABEL)) {
+    for (let at = run.start; at < run.end; at += 1) tones.set(at, toneOf(run.word));
+  }
+  return tones;
+}
+
+/** No character marked: an unfiltered row, or one matched on its keywords alone. */
+const UNMARKED = new Map();
+
+/**
+ * What the box asks for: its text trimmed, or nothing when it holds no word.
+ *
+ * SEPARATORS ALONE ASK FOR NOTHING. `-`, `.` and `/ :` are not empty text, yet
+ * they parse to the empty query, which matches every item: read as a question,
+ * one hyphen drew the head of the whole index in the palette, unmarked and in
+ * index order, where the empty box draws none. So such a box is the empty box
+ * everywhere the two are told apart: the rows, the sentence and the recents.
+ */
+function asked(state) {
+  const text = state.box.value.trim();
+  if (text === "") return "";
+  const words = parsed(text);
+  return words !== null && words.isEmpty() ? "" : text;
+}
+
 function runQuery(state) {
-  const query = state.box.value.trim();
+  const query = asked(state);
   if (state.src && !state.loaded && !state.failed) {
     if (query) loadIndex(state);
     // AN EMPTY BOX IS EXACTLY WHEN THE RECENTS ARE WORTH SHOWING, and this
@@ -360,25 +435,22 @@ function runQuery(state) {
   if (!state.candidates) return;
 
   if (query === "") {
-    state.hits = state.src ? [] : state.candidates.map((item) => ({ item, positions: [] }));
+    state.hits = state.src ? [] : state.candidates.map((item) => ({ item, tones: UNMARKED }));
     state.total = state.hits.length;
   } else {
-    const { hits, total } = rank(query, state.candidates, state.cap);
-    // A row nothing matched by its label may still answer to its keywords, and
-    // then it is shown without a highlight.
-    const missed = [];
-    if (state.cap === 0 || hits.length < state.cap) {
-      const found = new Set(hits.map((hit) => hit.item));
-      for (const item of state.candidates) {
-        if (found.has(item) || !item.keywords) continue;
-        const hit = rank(query, [{ match: item.keywords }], 0).hits[0];
-        if (hit) missed.push({ item, positions: [], score: hit.score - 1_000_000 });
-      }
-    }
-    missed.sort((a, b) => b.score - a.score);
-    const room = state.cap > 0 ? Math.max(0, state.cap - hits.length) : missed.length;
-    state.hits = [...hits, ...missed.slice(0, room)];
-    state.total = total + missed.length;
+    // One ranking over the label and the keywords together: a word that
+    // matched the keywords alone still finds its row, which is then shown
+    // with no mark for that word.
+    const words = parsed(query);
+    const ranked = words
+      ? matcher.ranked(words, state.candidates.map((item) => item.match))
+      : [];
+    const hits = ranked.map(({ index, found }) => ({
+      item: state.candidates[index],
+      tones: onLabel(found),
+    }));
+    state.hits = state.cap > 0 ? hits.slice(0, state.cap) : hits;
+    state.total = hits.length;
   }
 
   state.active = -1;
@@ -402,7 +474,7 @@ function schedule(state) {
 }
 
 function drawResults(state) {
-  const query = state.box.value.trim();
+  const query = asked(state);
   const shown = new Set(state.hits.map((hit) => hit.item));
 
   if (state.src) {
@@ -411,7 +483,7 @@ function drawResults(state) {
       if (!slot) return;
       slot.row.hidden = false;
       slot.link.href = hit.item.entry.href ?? "";
-      paintLabel(slot.labelEl, hit.item.match.chars, hit.positions);
+      paintLabel(slot.labelEl, hit.item.chars, hit.tones);
       slot.detailEl.textContent = hit.item.entry.detail ?? hit.item.entry.group ?? "";
     });
     for (let index = state.hits.length; index < state.pool.length; index += 1) {
@@ -426,7 +498,7 @@ function drawResults(state) {
     // shown: the rest keep the author's order, which is also the order they
     // have with no script.
     for (const hit of state.hits) {
-      if (hit.positions.length) markInPlace(hit.item.labelEl, hit.positions);
+      if (hit.tones.size) markInPlace(hit.item.labelEl, hit.tones);
       else clearMarks(hit.item.labelEl);
       if (hit.item.group) {
         hit.item.group.hidden = false;
@@ -504,7 +576,10 @@ function filterAround(state, query) {
   if (!scope) return;
   for (const element of scope.querySelectorAll("[data-nd-index]")) {
     if (state.root.contains(element)) continue;
-    const hit = query === "" || rank(query, [{ match: prepare(element.dataset.ndIndex) }], 0).hits.length > 0;
+    const words = parsed(query);
+    const hit =
+      query === "" ||
+      (words !== null && matcher.matched(words, prepare(element.dataset.ndIndex)) !== null);
     const row = element.closest("li") ?? element;
     row.hidden = !hit;
   }
@@ -512,27 +587,43 @@ function filterAround(state, query) {
 
 // --- The highlight ----------------------------------------------------------
 
-// `<mark class="nd-mark">`, which is the component whose summary is literally
-// "Text highlighted for the reader's current purpose, such as a search hit".
+// `<mark class="nd-match" data-nd-word>`, which is the element `MatchText`
+// draws: one run for each stretch of characters a word of the query claimed,
+// toned by which word it was. The first word is `1`, the second `2`, and the
+// third and every later one `3`, and `match-text.css` gives each a line of its
+// own style under the letters, so no tone is told by colour alone.
 //
-// The CSS Custom Highlight API would do this without touching the DOM and is
-// rejected anyway: a highlight pseudo-element accepts no layout-affecting
-// property, so it cannot set `font-weight` — and `Mark`'s own accessibility
-// note says the weight is why the highlight is legible to a reader who cannot
-// distinguish the colour. It would render a `Mark` that fails `Mark`'s contract.
+// ONE DRAWING OF A MATCH IN THE SYSTEM. This file wrote `Mark`'s class and one
+// tone for every word, so a result matched by `button group` could not say
+// which letters answered which word. It writes what every other list filtered
+// by typing draws now (`NOCTUA.md §12.4`).
+//
+// `data-nd-hit` STAYS, and it is this file's own: it says *the script put this
+// here*, which is how `clearMarks` takes its marks back out and leaves a
+// caller's own `Mark` or `MatchText` in a label alone.
+//
+// `role="none"`, as `MatchText` writes it: the runs are a drawing over the
+// label, and a `mark` each would read the label out in pieces.
+
+/** One matched run, as the element every list draws it with. */
+function matchMark(tone) {
+  const mark = document.createElement("mark");
+  mark.className = "nd-match";
+  mark.setAttribute("role", "none");
+  mark.dataset.ndHit = "";
+  mark.dataset.ndWord = tone;
+  return mark;
+}
 
 /** A label the script owns, rebuilt with the matched runs marked. */
-function paintLabel(into, chars, positions) {
+function paintLabel(into, chars, tones) {
   into.textContent = "";
-  const wanted = new Set(positions);
   let run = [];
-  let marked = false;
+  let tone = null;
   const flush = () => {
     if (run.length === 0) return;
-    if (marked) {
-      const mark = document.createElement("mark");
-      mark.className = "nd-mark";
-      mark.dataset.ndHit = "";
+    if (tone) {
+      const mark = matchMark(tone);
       mark.textContent = run.join("");
       into.append(mark);
     } else {
@@ -541,10 +632,10 @@ function paintLabel(into, chars, positions) {
     run = [];
   };
   for (let index = 0; index < chars.length; index += 1) {
-    const on = wanted.has(index);
-    if (on !== marked) {
+    const here = tones.get(index) ?? null;
+    if (here !== tone) {
       flush();
-      marked = on;
+      tone = here;
     }
     run.push(chars[index]);
   }
@@ -558,35 +649,35 @@ function paintLabel(into, chars, positions) {
  * attached. Splitting the text nodes and undoing with `normalize()` — which
  * merges them back — leaves every element untouched.
  */
-function markInPlace(label, positions) {
+function markInPlace(label, tones) {
   if (!label) return;
   clearMarks(label);
-  if (positions.length === 0) return;
-  const wanted = [...positions].sort((a, b) => a - b);
+  if (tones.size === 0) return;
   const walker = document.createTreeWalker(label, NodeFilter.SHOW_TEXT);
   const jobs = [];
+  // A position counts code points across every text node of the label, and a
+  // range counts UTF-16 units inside one node. `seen` is the first, `unit` the
+  // second.
   let seen = 0;
-  let next = 0;
-  for (let node = walker.nextNode(); node && next < wanted.length; node = walker.nextNode()) {
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
     const chars = [...node.data];
     let unit = 0;
-    let start = -1;
-    let units = 0;
+    let open = null;
+    const close = () => {
+      if (open) jobs.push({ node, start: open.start, end: open.start + open.units, tone: open.tone });
+      open = null;
+    };
     for (let index = 0; index < chars.length; index += 1) {
-      if (next < wanted.length && wanted[next] === seen + index) {
-        if (start < 0) {
-          start = unit;
-          units = 0;
-        }
-        units += chars[index].length;
-        next += 1;
-      } else if (start >= 0) {
-        jobs.push({ node, start, end: start + units });
-        start = -1;
+      const here = tones.get(seen + index) ?? null;
+      // A run ends where the tone changes, to another word's or to none.
+      if (open && open.tone !== here) close();
+      if (here) {
+        open ??= { start: unit, units: 0, tone: here };
+        open.units += chars[index].length;
       }
       unit += chars[index].length;
     }
-    if (start >= 0) jobs.push({ node, start, end: start + units });
+    close();
     seen += chars.length;
   }
   // Back to front, so splitting an earlier run cannot move a later offset.
@@ -594,10 +685,7 @@ function markInPlace(label, positions) {
     const range = document.createRange();
     range.setStart(job.node, job.start);
     range.setEnd(job.node, job.end);
-    const mark = document.createElement("mark");
-    mark.className = "nd-mark";
-    mark.dataset.ndHit = "";
-    range.surroundContents(mark);
+    range.surroundContents(matchMark(job.tone));
   }
 }
 
@@ -836,7 +924,7 @@ function recentQueries(state) {
 }
 
 function rememberQuery(state) {
-  const query = state.box.value.trim();
+  const query = asked(state);
   if (!state.recentKey || query === "") return;
   const kept = [query, ...recentQueries(state).filter((entry) => entry !== query)];
   try {
@@ -857,7 +945,7 @@ function forgetQueries(state) {
 
 function showRecent(state) {
   if (!state.recentBox || !state.recentList) return;
-  const queries = state.box.value.trim() === "" ? recentQueries(state) : [];
+  const queries = asked(state) === "" ? recentQueries(state) : [];
   state.recentBox.hidden = queries.length === 0;
   state.recentList.textContent = "";
   for (const query of queries) {

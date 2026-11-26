@@ -6,3 +6,32 @@ note = "`role=\"toolbar\"` promises one tab stop and the arrow keys; `aria-orien
 props = { label = "Formatting" }
 children = "Controls go here."
 expect = { attrs = { role = "toolbar", "aria-label" = "Formatting", "aria-orientation" = "horizontal" } }
+
+[[case]]
+name = "a rail is vertical whatever the caller said"
+note = "`density = \"rail\"` draws a column. `dist/roving.js` picks the arrows from `aria-orientation`, so a rail announced as horizontal would be a column walked with Left and Right alone."
+props = { label = "Drawer controls", density = "rail" }
+children = "Controls go here."
+expect = { attrs = { role = "toolbar", "data-nd-density" = "rail", "aria-orientation" = "vertical" } }
+
+[[case]]
+name = "all four arrows walk a rail, in the order its controls are written"
+note = "A rail holds two controls to a row, so a control has a neighbour across as well as one below. Right from the first of a row reaches the second, and Down from there reaches the third."
+props = { label = "Drawer controls", density = "rail" }
+steps = ["focus:button[aria-label=Collapse]", "key:ArrowRight", "key:ArrowDown"]
+expect = { focus = "button[aria-label=Swap]" }
+
+[[case.child]]
+component = "ToolbarGroup"
+
+[[case.child.child]]
+component = "Button"
+props = { label = "Collapse", hide_label = true, icon = "chevrons-down" }
+
+[[case.child.child]]
+component = "Button"
+props = { label = "Close", hide_label = true, icon = "close" }
+
+[[case.child.child]]
+component = "Button"
+props = { label = "Swap", hide_label = true, icon = "arrow-up-down" }

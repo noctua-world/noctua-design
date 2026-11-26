@@ -41,6 +41,9 @@ pub fn Prose(
     /// Which line-length cap to apply. `default` is the reading measure and `lead` is the narrower one for an opening paragraph. `none` is for prose inside a column that already constrains it.
     #[props(default)]
     measure: ProseMeasure,
+    /// Spaces the blocks inside as a document. A heading gets more room above it than below, the first block none, and a break keeps its own. Use it for prose a program wrote, such as a page drawn from Markdown.
+    #[props(default = false)]
+    flow: bool,
     /// Extra classes for the root element.
     #[props(default)]
     class: String,
@@ -54,6 +57,7 @@ pub fn Prose(
         div {
             class: "{root}",
             "data-nd-measure": measure.as_str(),
+            "data-nd-flow": if flow { "true" } else { "false" },
             {children}
         }
     }

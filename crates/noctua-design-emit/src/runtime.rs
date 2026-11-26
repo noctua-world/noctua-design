@@ -8,6 +8,13 @@
 //! | `dist/inputs.js`, `dist/messages.js` | `enhanceInputs()`, and the sentence helpers both use |
 //! | `dist/select.js`, `dist/tag-picker.js`, `dist/tree.js`, `dist/tabs.js`, `dist/date-input.js` | the five that used to be enhanced from the documentation site alone |
 //! | `dist/panels.js`, `dist/roving.js` | what those five share: one open list, and one arrow walk |
+//! | `dist/option-list.js` | `enhanceOptionLists()` — the keyboard a `role="listbox"` owes, from the list or from the control that names it |
+//! | `dist/prompt.js` | `enhancePrompts()` — the block cursor over a `Prompt`'s own textarea, and `nd-prompt-send` |
+//! | `dist/drawer.js` | `enhanceDrawers()` — `inert` on a collapsed `Drawer`, the focus it gives back, and `nd-drawer-dismiss` |
+//! | `dist/split.js` | `enhanceSplits()` — the keys and the drag that move a `Split`'s line, and `nd-split-resize` |
+//! | `dist/key-capture.js` | `enhanceKeyCaptures()` — the shortcut a `KeyCapture` records, and `nd-key-capture-change` |
+//! | `dist/log.js` | `enhanceLogs()` — the end a `Log` follows, and `nd-log-follow` |
+//! | `dist/seats.js` | a host showing a second pointer or keyboard in the same window |
 //! | `dist/palettes/*.json` | the Noctua tab, one file per palette, fetched on demand |
 //! | `packages/tokens/color.js` + `.d.ts` | the JavaScript package, and the Node test that checks the arithmetic |
 //!
@@ -32,10 +39,12 @@ use std::fmt::Write as _;
 
 use noctua_design_runtime::{
     ANCHOR_SOURCE, CAROUSEL_SOURCE, CHOICE_SOURCE, COLOR_SOURCE, DATE_INPUT_SOURCE,
-    DATE_PICKER_SOURCE, DIALOG_SOURCE, INFO_SOURCE, INPUTS_SOURCE, MENU_SOURCE, MESSAGE_BAR_SOURCE,
-    MESSAGES_SOURCE, PANELS_SOURCE, PICKER_SOURCE, POPOVER_SOURCE, ROVING_SOURCE,
-    SEARCH_MATCH_SOURCE, SEARCH_SOURCE, SELECT_SOURCE, SUMMARY_SOURCE, TABLE_SOURCE, TABS_SOURCE,
-    TAG_PICKER_SOURCE, TOAST_SOURCE, TOOLTIP_SOURCE, TREE_SOURCE, source,
+    DATE_PICKER_SOURCE, DIALOG_SOURCE, DRAWER_SOURCE, INFO_SOURCE, INPUTS_SOURCE,
+    KEY_CAPTURE_SOURCE, LOG_SOURCE, MENU_SOURCE, MESSAGE_BAR_SOURCE, MESSAGES_SOURCE,
+    OPTION_LIST_SOURCE, PANELS_SOURCE, PICKER_SOURCE, POPOVER_SOURCE, PROMPT_SOURCE, ROVING_SOURCE,
+    SEARCH_MATCH_SOURCE, SEARCH_SOURCE, SEATS_SOURCE, SELECT_SOURCE, SPLIT_SOURCE, SUMMARY_SOURCE,
+    TABLE_SOURCE, TABS_SOURCE, TAG_PICKER_SOURCE, TOAST_SOURCE, TOOLTIP_SOURCE, TREE_SOURCE,
+    source,
 };
 use noctua_design_spec::Vendor;
 use noctua_design_spec::vendor::VENDOR;
@@ -67,11 +76,18 @@ pub fn emit(vendor: &Vendor) -> Vec<EmittedFile> {
         EmittedFile::new("dist/select.js", copied(SELECT_SOURCE)),
         EmittedFile::new("dist/tag-picker.js", copied(TAG_PICKER_SOURCE)),
         EmittedFile::new("dist/tree.js", copied(TREE_SOURCE)),
+        EmittedFile::new("dist/option-list.js", copied(OPTION_LIST_SOURCE)),
+        EmittedFile::new("dist/prompt.js", copied(PROMPT_SOURCE)),
+        EmittedFile::new("dist/drawer.js", copied(DRAWER_SOURCE)),
+        EmittedFile::new("dist/split.js", copied(SPLIT_SOURCE)),
+        EmittedFile::new("dist/key-capture.js", copied(KEY_CAPTURE_SOURCE)),
+        EmittedFile::new("dist/log.js", copied(LOG_SOURCE)),
         EmittedFile::new("dist/tabs.js", copied(TABS_SOURCE)),
         EmittedFile::new("dist/date-input.js", copied(DATE_INPUT_SOURCE)),
         EmittedFile::new("dist/choice.js", copied(CHOICE_SOURCE)),
         EmittedFile::new("dist/search.js", copied(SEARCH_SOURCE)),
         EmittedFile::new("dist/search-match.js", copied(SEARCH_MATCH_SOURCE)),
+        EmittedFile::new("dist/seats.js", copied(SEATS_SOURCE)),
         EmittedFile::new("packages/tokens/color.js", copied(COLOR_SOURCE)),
         EmittedFile::new("packages/tokens/color.d.ts", color_types()),
     ];

@@ -12,7 +12,7 @@
    palette works, including the ones added after the component was.
    Derived from packages/tokens/vendor/css/contexts.css.
  
-   349 families from the colour system, plus neutral and muted, which
+   352 families from the colour system, plus neutral and muted, which
    the palette does not declare and this system has always meant by
    "quieter than the text around it".
  
@@ -200,6 +200,27 @@
   --nd-tone-bg: var(--nc-color-paused-bg);
   --nd-tone-border: var(--nc-color-paused-border);
   --nd-tone-on: var(--nc-color-on-paused);
+}
+
+[data-nd-tone="cursor"] {
+  --nd-tone: var(--nc-color-cursor);
+  --nd-tone-bg: var(--nc-color-cursor-bg);
+  --nd-tone-border: var(--nc-color-cursor-border);
+  --nd-tone-on: var(--nc-color-on-cursor);
+}
+
+[data-nd-tone="match"] {
+  --nd-tone: var(--nc-color-match);
+  --nd-tone-bg: var(--nc-color-match-bg);
+  --nd-tone-border: var(--nc-color-match-border);
+  --nd-tone-on: var(--nc-color-on-match);
+}
+
+[data-nd-tone="match-rest"] {
+  --nd-tone: var(--nc-color-match-rest);
+  --nd-tone-bg: var(--nc-color-match-rest-bg);
+  --nd-tone-border: var(--nc-color-match-rest-border);
+  --nd-tone-on: var(--nc-color-on-match-rest);
 }
 
 [data-nd-tone="sent"] {

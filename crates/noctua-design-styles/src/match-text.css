@@ -1,0 +1,61 @@
+
+
+/* --- MatchText -------------------------------------------------------------
+ *
+ * A name in a list filtered by typing, with the characters each word of the
+ * query matched marked (`NOCTUA.md §12.4`). Three tones: the first word, the
+ * second, and one shared by the third and every later word.
+ *
+ * NEVER BY COLOUR ALONE. The palette cannot keep two colours apart for every
+ * reader (`NOCTUA.md §8.8.6`), so each tone is a line under the letters in a
+ * style of its own: solid, dashed, dotted. The style is the signal.
+ *
+ * NO WEIGHT AND NO PADDING. A match is a run of letters inside a word, and it
+ * changes on every keystroke: a heavier face or a padded box moves the letters
+ * after it each time, in a list a reader is trying to read. `Mark` does both,
+ * rightly, for a phrase in prose.
+ *
+ * `.nd-match` IS NOT ONLY THIS COMPONENT'S. `dist/search.js` writes the same
+ * element over a result's label, so `Search` draws a match exactly as every
+ * other list does. */
+.nd-match {
+  padding: 0;
+  border-radius: 0;
+  font: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: var(--noctua-border-strong);
+  text-underline-offset: var(--noctua-space-1);
+  /* A dash that stops for every descender is a dash a reader cannot count. */
+  text-decoration-skip-ink: none;
+}
+
+/* THE INK IS THE PAGE'S, IN EVERY TONE. The match colour as ink on the match
+ * tint measured 3.2:1 in the default palette, which is not text a reader can
+ * read in a list of small names, and the `match` context declares no ink of
+ * its own for its tint. So the letters keep the ink they had, and the tone is
+ * what is drawn around them: a tint and a line, a line, a quieter line. */
+
+/* The first word, the strongest: the match tint, over a solid line. */
+.nd-match[data-nd-word="1"] {
+  background: var(--nc-color-match-bg);
+  color: var(--nc-color-fg);
+  text-decoration-style: solid;
+  text-decoration-color: var(--nc-color-match);
+}
+
+/* The second, softer: the same line colour broken into dashes, and no tint. */
+.nd-match[data-nd-word="2"] {
+  background: none;
+  color: var(--nc-color-fg);
+  text-decoration-style: dashed;
+  text-decoration-color: var(--nc-color-match);
+}
+
+/* The third and every later word, the discreet one: a dotted line in the
+   neutral the palette keeps for them. */
+.nd-match[data-nd-word="3"] {
+  background: none;
+  color: var(--nc-color-fg);
+  text-decoration-style: dotted;
+  text-decoration-color: var(--nc-color-match-rest);
+}

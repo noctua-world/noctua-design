@@ -59,7 +59,7 @@
   display: none !important;
 }
 
-:focus-visible {
+:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-accent);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-control);

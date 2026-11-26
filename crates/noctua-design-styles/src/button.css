@@ -123,7 +123,7 @@
 /* `clip-path` clips the focus ring with everything else, and a control whose
    focus is invisible is a control a keyboard cannot use. Drawn inside instead
    — far enough in that the whole ring survives the cut. */
-.nd-button[data-nd-shape="bevel"]:focus-visible {
+.nd-button[data-nd-shape="bevel"]:is(:focus-visible, [data-nd-seat-focus]) {
   outline-offset: calc(-1 * (var(--noctua-focus-width) + var(--noctua-focus-offset)));
 }
 
@@ -213,7 +213,7 @@
   border-color: var(--nc-color-accent);
 }
 
-.nd-button[data-nd-variant="solid"]:hover {
+.nd-button[data-nd-variant="solid"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-accent-hover);
   border-color: var(--nc-color-accent-hover);
 }
@@ -224,7 +224,7 @@
   border-color: var(--nc-color-subtle);
 }
 
-.nd-button[data-nd-variant="solid"][data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-variant="solid"][data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-hover);
   border-color: var(--nc-color-subtle-hover);
 }
@@ -235,7 +235,7 @@
   border-color: var(--nc-color-danger);
 }
 
-.nd-button[data-nd-variant="solid"][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-variant="solid"][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-danger-hover);
   border-color: var(--nc-color-danger-hover);
 }
@@ -246,7 +246,7 @@
   border-color: var(--nc-color-success);
 }
 
-.nd-button[data-nd-variant="solid"][data-nd-tone="success"]:hover {
+.nd-button[data-nd-variant="solid"][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-success-hover);
   border-color: var(--nc-color-success-hover);
 }
@@ -259,7 +259,7 @@
   border-color: var(--nc-color-accent-border);
 }
 
-.nd-button[data-nd-variant="outline"]:hover {
+.nd-button[data-nd-variant="outline"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-accent-bg);
 }
 
@@ -268,7 +268,7 @@
   border-color: var(--nc-color-border-strong);
 }
 
-.nd-button[data-nd-variant="outline"][data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-variant="outline"][data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
@@ -277,7 +277,7 @@
   border-color: var(--nc-color-danger-border);
 }
 
-.nd-button[data-nd-variant="outline"][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-variant="outline"][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-danger-bg);
 }
 
@@ -286,7 +286,7 @@
   border-color: var(--nc-color-success-border);
 }
 
-.nd-button[data-nd-variant="outline"][data-nd-tone="success"]:hover {
+.nd-button[data-nd-variant="outline"][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-success-bg);
 }
 
@@ -306,7 +306,7 @@
   border-color: transparent;
 }
 
-.nd-button[data-nd-variant="subtle"]:hover {
+.nd-button[data-nd-variant="subtle"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-accent-border);
 }
 
@@ -314,7 +314,7 @@
   background: var(--nc-color-subtle-bg);
 }
 
-.nd-button[data-nd-variant="subtle"][data-nd-tone="neutral"]:hover {
+.nd-button[data-nd-variant="subtle"][data-nd-tone="neutral"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-subtle-border);
 }
 
@@ -322,7 +322,7 @@
   background: var(--nc-color-danger-bg);
 }
 
-.nd-button[data-nd-variant="subtle"][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-variant="subtle"][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-danger-border);
 }
 
@@ -330,7 +330,7 @@
   background: var(--nc-color-success-bg);
 }
 
-.nd-button[data-nd-variant="subtle"][data-nd-tone="success"]:hover {
+.nd-button[data-nd-variant="subtle"][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-success-border);
 }
 
@@ -345,7 +345,7 @@
   border-color: transparent;
 }
 
-.nd-button[data-nd-variant="transparent"]:hover,
+.nd-button[data-nd-variant="transparent"]:is(:hover, [data-nd-seat-hover]),
 .nd-button[data-nd-variant="transparent"][aria-pressed="true"] {
   color: var(--nc-color-fg);
   background: color-mix(in oklab, var(--nc-color-subtle-bg) var(--nd-veil), transparent);
@@ -355,7 +355,7 @@
   color: var(--nc-color-danger);
 }
 
-.nd-button[data-nd-variant="transparent"][data-nd-tone="danger"]:hover {
+.nd-button[data-nd-variant="transparent"][data-nd-tone="danger"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-danger);
   background: var(--nc-color-danger-bg);
 }
@@ -364,7 +364,7 @@
   color: var(--nc-color-success);
 }
 
-.nd-button[data-nd-variant="transparent"][data-nd-tone="success"]:hover {
+.nd-button[data-nd-variant="transparent"][data-nd-tone="success"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-success);
   background: var(--nc-color-success-bg);
 }
@@ -385,7 +385,7 @@
   text-underline-offset: var(--noctua-space-1);
 }
 
-.nd-button[data-nd-variant="link"]:hover {
+.nd-button[data-nd-variant="link"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-accent-hover);
 }
 
@@ -416,7 +416,7 @@
   border-color: transparent;
 }
 
-.nd-button[data-nd-variant="nav"]:hover {
+.nd-button[data-nd-variant="nav"]:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
 }
 
@@ -433,11 +433,11 @@
   opacity: 0.5; /* allow-literal: a refused control is dimmed, and there is no color token for "the same color, less of it" — the same exemption `.nd-icon-button` already carries */
 }
 
-.nd-button[disabled]:hover,
-.nd-button[aria-disabled="true"]:hover {
+.nd-button[disabled]:is(:hover, [data-nd-seat-hover]),
+.nd-button[aria-disabled="true"]:is(:hover, [data-nd-seat-hover]) {
   background: none;
 }
 
-.nd-button[data-nd-variant="solid"][disabled]:hover {
+.nd-button[data-nd-variant="solid"][disabled]:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-accent);
 }

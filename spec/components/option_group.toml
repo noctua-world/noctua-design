@@ -1,0 +1,30 @@
+guidance = """
+Use an option group for a named run of options inside an `OptionList`, such as
+the commands of one plugin. A group with no option showing takes no room.
+"""
+
+[meta]
+name = "OptionGroup"
+element = "li"
+class = "nd-option-group"
+page = "option-list"
+summary = "Name a run of options inside an option list."
+
+# AN `<li>` HOLDING A `<p>` AND A `<ul>`, as `SearchGroup` is and for its reason:
+# an `<li>` cannot hold an `<li>`. The `<li>` is the `role="group"` and carries
+# the name, the inner list is `role="none"`, and the visible words are hidden
+# from the accessible tree so the name is read once.
+
+[prop.label]
+type = "text"
+required = true
+doc = "The name of the group, shown above its options and read as the group's name. Required."
+
+[prop.children]
+type = "children"
+doc = "The `OptionItem`s in the group."
+
+[a11y]
+notes = """
+The group is a `role="group"` named by `aria-label`. The visible name carries `aria-hidden`, so a screen reader reads it once, as the group's name.
+"""

@@ -76,7 +76,7 @@
 
 /* The track is focusable only when nothing inside it is — otherwise it is one
    extra stop before every slide. The runtime decides; this draws the ring. */
-.nd-carousel-track:focus-visible {
+.nd-carousel-track:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -101,7 +101,7 @@
   display: none;
 }
 
-.nd-carousel-control:focus-visible {
+.nd-carousel-control:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -183,7 +183,7 @@
   inline-size: var(--noctua-space-4);
 }
 
-.nd-carousel-dot:focus-visible {
+.nd-carousel-dot:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-pill);

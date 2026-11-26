@@ -16,7 +16,7 @@
 
 /* Focusable, not a tab stop — so the ring only ever appears when focus was
    SENT here, which is the one moment it means something. */
-.nd-error-summary:focus-visible {
+.nd-error-summary:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -59,7 +59,7 @@
   text-underline-offset: var(--noctua-space-1);
 }
 
-.nd-error-summary-link:focus-visible {
+.nd-error-summary-link:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
   border-radius: var(--noctua-radius-control);

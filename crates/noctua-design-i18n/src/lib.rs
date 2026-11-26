@@ -168,6 +168,26 @@ pub enum Key {
     PageMenuSummary,
     /// `page.menu.body`
     PageMenuBody,
+    /// `page.footer.summary`
+    PageFooterSummary,
+    /// `page.footer.body`
+    PageFooterBody,
+    /// `page.drawer.summary`
+    PageDrawerSummary,
+    /// `page.drawer.body`
+    PageDrawerBody,
+    /// `page.split.summary`
+    PageSplitSummary,
+    /// `page.split.body`
+    PageSplitBody,
+    /// `page.log.summary`
+    PageLogSummary,
+    /// `page.log.body`
+    PageLogBody,
+    /// `page.option-list.summary`
+    PageOptionListSummary,
+    /// `page.option-list.body`
+    PageOptionListBody,
     /// `page.tree.summary`
     PageTreeSummary,
     /// `page.tree.body`
@@ -602,6 +622,38 @@ pub enum Key {
     ComponentListItemSummary,
     /// `component.mark.summary`
     ComponentMarkSummary,
+    /// `component.match-text.summary`
+    ComponentMatchTextSummary,
+    /// `component.footer.summary`
+    ComponentFooterSummary,
+    /// `component.footer-corner.summary`
+    ComponentFooterCornerSummary,
+    /// `component.footer-line.summary`
+    ComponentFooterLineSummary,
+    /// `component.drawer.summary`
+    ComponentDrawerSummary,
+    /// `component.drawer-rail.summary`
+    ComponentDrawerRailSummary,
+    /// `component.split.summary`
+    ComponentSplitSummary,
+    /// `component.split-pane.summary`
+    ComponentSplitPaneSummary,
+    /// `component.split-handle.summary`
+    ComponentSplitHandleSummary,
+    /// `component.key-capture.summary`
+    ComponentKeyCaptureSummary,
+    /// `component.log.summary`
+    ComponentLogSummary,
+    /// `component.log-line.summary`
+    ComponentLogLineSummary,
+    /// `component.prompt.summary`
+    ComponentPromptSummary,
+    /// `component.option-group.summary`
+    ComponentOptionGroupSummary,
+    /// `component.option-item.summary`
+    ComponentOptionItemSummary,
+    /// `component.option-list.summary`
+    ComponentOptionListSummary,
     /// `component.paragraph.summary`
     ComponentParagraphSummary,
     /// `component.prose.summary`
@@ -1330,8 +1382,364 @@ pub enum Key {
     ExampleMarkWord,
     /// `example.mark.search`
     ExampleMarkSearch,
+    /// `example.footer.overview`
+    ExampleFooterOverview,
+    /// `example.footer.lines`
+    ExampleFooterLines,
+    /// `example.footer.auto`
+    ExampleFooterAuto,
+    /// `example.footer.shown`
+    ExampleFooterShown,
+    /// `example.footer.narrow`
+    ExampleFooterNarrow,
+    /// `example.footer-corner.alone`
+    ExampleFooterCornerAlone,
+    /// `example.footer-corner.two`
+    ExampleFooterCornerTwo,
+    /// `example.footer-line.kinds`
+    ExampleFooterLineKinds,
+    /// `example.footer-line.cut`
+    ExampleFooterLineCut,
+    /// `example.footer-line.expanded`
+    ExampleFooterLineExpanded,
+    /// `example.footer-line.live`
+    ExampleFooterLineLive,
+    /// `example.footer-corner.sides`
+    ExampleFooterCornerSides,
+    /// `example.footer-corner.control`
+    ExampleFooterCornerControl,
+    /// `example.footer.label`
+    ExampleFooterLabel,
+    /// `example.footer.sidebar`
+    ExampleFooterSidebar,
+    /// `example.footer.page`
+    ExampleFooterPage,
+    /// `example.footer.offline`
+    ExampleFooterOffline,
+    /// `example.footer.hover`
+    ExampleFooterHover,
+    /// `example.footer.selection`
+    ExampleFooterSelection,
+    /// `example.footer.expand`
+    ExampleFooterExpand,
+    /// `example.footer.collapse`
+    ExampleFooterCollapse,
+    /// `example.footer.notice`
+    ExampleFooterNotice,
+    /// `example.footer.typed`
+    ExampleFooterTyped,
+    /// `example.footer.modeline`
+    ExampleFooterModeline,
+    /// `example.footer.info`
+    ExampleFooterInfo,
+    /// `example.footer.prompt`
+    ExampleFooterPrompt,
+    /// `example.drawer.overview`
+    ExampleDrawerOverview,
+    /// `example.drawer.basic`
+    ExampleDrawerBasic,
+    /// `example.drawer.collapsed`
+    ExampleDrawerCollapsed,
+    /// `example.drawer.side`
+    ExampleDrawerSide,
+    /// `example.drawer.scroll`
+    ExampleDrawerScroll,
+    /// `example.drawer-rail.controls`
+    ExampleDrawerRailControls,
+    /// `example.drawer-rail.tabs`
+    ExampleDrawerRailTabs,
+    /// `example.drawer-rail.both`
+    ExampleDrawerRailBoth,
+    /// `example.drawer-rail.scroll`
+    ExampleDrawerRailScroll,
+    /// `example.drawer.label`
+    ExampleDrawerLabel,
+    /// `example.drawer.sidebar`
+    ExampleDrawerSidebar,
+    /// `example.drawer.details`
+    ExampleDrawerDetails,
+    /// `example.drawer.toggle`
+    ExampleDrawerToggle,
+    /// `example.drawer.work`
+    ExampleDrawerWork,
+    /// `example.drawer.work-shut`
+    ExampleDrawerWorkShut,
+    /// `example.drawer.work-side`
+    ExampleDrawerWorkSide,
+    /// `example.drawer.long-one`
+    ExampleDrawerLongOne,
+    /// `example.drawer.long-two`
+    ExampleDrawerLongTwo,
+    /// `example.drawer.long-three`
+    ExampleDrawerLongThree,
+    /// `example.split.overview`
+    ExampleSplitOverview,
+    /// `example.split.basic`
+    ExampleSplitBasic,
+    /// `example.split.limits`
+    ExampleSplitLimits,
+    /// `example.split.stack`
+    ExampleSplitStack,
+    /// `example.split.hide`
+    ExampleSplitHide,
+    /// `example.split.none`
+    ExampleSplitNone,
+    /// `example.split-pane.sides`
+    ExampleSplitPaneSides,
+    /// `example.split-pane.scroll`
+    ExampleSplitPaneScroll,
+    /// `example.split-pane.content`
+    ExampleSplitPaneContent,
+    /// `example.split-pane.nested`
+    ExampleSplitPaneNested,
+    /// `example.split-handle.basic`
+    ExampleSplitHandleBasic,
+    /// `example.split-handle.least`
+    ExampleSplitHandleLeast,
+    /// `example.split-handle.away`
+    ExampleSplitHandleAway,
+    /// `example.split-handle.mirrored`
+    ExampleSplitHandleMirrored,
+    /// `example.split.handle`
+    ExampleSplitHandle,
+    /// `example.key-capture.overview`
+    ExampleKeyCaptureOverview,
+    /// `example.key-capture.basic`
+    ExampleKeyCaptureBasic,
+    /// `example.key-capture.keyboards`
+    ExampleKeyCaptureKeyboards,
+    /// `example.key-capture.removable`
+    ExampleKeyCaptureRemovable,
+    /// `example.key-capture.unset`
+    ExampleKeyCaptureUnset,
+    /// `example.key-capture.refused`
+    ExampleKeyCaptureRefused,
+    /// `example.key-capture.locked`
+    ExampleKeyCaptureLocked,
+    /// `example.key-capture.leader`
+    ExampleKeyCaptureLeader,
+    /// `example.key-capture.settings`
+    ExampleKeyCaptureSettings,
+    /// `example.key-capture.help`
+    ExampleKeyCaptureHelp,
+    /// `example.key-capture.capture`
+    ExampleKeyCaptureCapture,
+    /// `example.key-capture.empty`
+    ExampleKeyCaptureEmpty,
+    /// `example.key-capture.clear`
+    ExampleKeyCaptureClear,
+    /// `example.key-capture.refusal`
+    ExampleKeyCaptureRefusal,
+    /// `example.log.overview`
+    ExampleLogOverview,
+    /// `example.log.follows`
+    ExampleLogFollows,
+    /// `example.log.still`
+    ExampleLogStill,
+    /// `example.log.narrow`
+    ExampleLogNarrow,
+    /// `example.log.roomy`
+    ExampleLogRoomy,
+    /// `example.log-line.levels`
+    ExampleLogLineLevels,
+    /// `example.log-line.parts`
+    ExampleLogLineParts,
+    /// `example.log-line.long`
+    ExampleLogLineLong,
+    /// `example.log-line.filtered`
+    ExampleLogLineFiltered,
+    /// `example.log.label`
+    ExampleLogLabel,
+    /// `example.log.record`
+    ExampleLogRecord,
+    /// `example.log.resume`
+    ExampleLogResume,
+    /// `example.log.level-debug`
+    ExampleLogLevelDebug,
+    /// `example.log.level-info`
+    ExampleLogLevelInfo,
+    /// `example.log.level-warning`
+    ExampleLogLevelWarning,
+    /// `example.log.level-error`
+    ExampleLogLevelError,
+    /// `example.log.started`
+    ExampleLogStarted,
+    /// `example.log.store`
+    ExampleLogStore,
+    /// `example.log.catalog`
+    ExampleLogCatalog,
+    /// `example.log.socket`
+    ExampleLogSocket,
+    /// `example.log.attached`
+    ExampleLogAttached,
+    /// `example.log.slow`
+    ExampleLogSlow,
+    /// `example.log.ran`
+    ExampleLogRan,
+    /// `example.log.refused`
+    ExampleLogRefused,
+    /// `example.log.journal`
+    ExampleLogJournal,
+    /// `example.log.snapshot`
+    ExampleLogSnapshot,
+    /// `example.log.full`
+    ExampleLogFull,
+    /// `example.log.heartbeat`
+    ExampleLogHeartbeat,
+    /// `example.log.lost`
+    ExampleLogLost,
+    /// `example.log.memory`
+    ExampleLogMemory,
+    /// `example.prompt.overview`
+    ExamplePromptOverview,
+    /// `example.prompt.basic`
+    ExamplePromptBasic,
+    /// `example.prompt.grows`
+    ExamplePromptGrows,
+    /// `example.prompt.driven`
+    ExamplePromptDriven,
+    /// `example.prompt.active`
+    ExamplePromptActive,
+    /// `example.prompt.readonly`
+    ExamplePromptReadonly,
+    /// `example.prompt.disabled`
+    ExamplePromptDisabled,
+    /// `example.prompt.label`
+    ExamplePromptLabel,
+    /// `example.prompt.send`
+    ExamplePromptSend,
+    /// `example.prompt.running`
+    ExamplePromptRunning,
+    /// `example.option-list.overview`
+    ExampleOptionListOverview,
+    /// `example.option-list.walk`
+    ExampleOptionListWalk,
+    /// `example.option-list.columns`
+    ExampleOptionListColumns,
+    /// `example.option-list.driven`
+    ExampleOptionListDriven,
+    /// `example.option-list.nothing`
+    ExampleOptionListNothing,
+    /// `example.option-group.run`
+    ExampleOptionGroupRun,
+    /// `example.option-item.row`
+    ExampleOptionItemRow,
+    /// `example.option-item.hits`
+    ExampleOptionItemHits,
+    /// `example.option-item.detail-hits`
+    ExampleOptionItemDetailHits,
+    /// `example.option-item.shortcut`
+    ExampleOptionItemShortcut,
+    /// `example.option-item.states`
+    ExampleOptionItemStates,
+    /// `example.option-list.key-space`
+    ExampleOptionListKeySpace,
+    /// `example.option-list.key-s`
+    ExampleOptionListKeyS,
+    /// `example.option-list.key-h`
+    ExampleOptionListKeyH,
+    /// `example.option-list.key-d`
+    ExampleOptionListKeyD,
+    /// `example.option-list.key-q`
+    ExampleOptionListKeyQ,
+    /// `example.option-group.mixed`
+    ExampleOptionGroupMixed,
+    /// `example.option-group.columns`
+    ExampleOptionGroupColumns,
+    /// `example.option-group.filtered`
+    ExampleOptionGroupFiltered,
+    /// `example.option-list.commands`
+    ExampleOptionListCommands,
+    /// `example.option-list.menu`
+    ExampleOptionListMenu,
+    /// `example.option-list.filter`
+    ExampleOptionListFilter,
+    /// `example.option-list.empty`
+    ExampleOptionListEmpty,
+    /// `example.option-list.settings`
+    ExampleOptionListSettings,
+    /// `example.option-list.settings-detail`
+    ExampleOptionListSettingsDetail,
+    /// `example.option-list.help`
+    ExampleOptionListHelp,
+    /// `example.option-list.help-detail`
+    ExampleOptionListHelpDetail,
+    /// `example.option-list.sidebar`
+    ExampleOptionListSidebar,
+    /// `example.option-list.dev`
+    ExampleOptionListDev,
+    /// `example.option-list.shortcuts`
+    ExampleOptionListShortcuts,
+    /// `example.option-list.group-window`
+    ExampleOptionListGroupWindow,
+    /// `example.option-list.group-page`
+    ExampleOptionListGroupPage,
+    /// `example.option-list.close-window`
+    ExampleOptionListCloseWindow,
+    /// `example.option-list.hide-window`
+    ExampleOptionListHideWindow,
+    /// `example.option-list.close-page`
+    ExampleOptionListClosePage,
+    /// `example.match-text.query`
+    ExampleMatchTextQuery,
+    /// `example.match-text.one`
+    ExampleMatchTextOne,
+    /// `example.match-text.words`
+    ExampleMatchTextWords,
+    /// `example.match-text.shared`
+    ExampleMatchTextShared,
+    /// `example.match-text.elsewhere`
+    ExampleMatchTextElsewhere,
+    /// `example.match-text.plain`
+    ExampleMatchTextPlain,
     /// `example.paragraph.lead`
     ExampleParagraphLead,
+    /// `example.prose.flow-heading`
+    ExampleProseFlowHeading,
+    /// `example.prose.flow-press`
+    ExampleProseFlowPress,
+    /// `example.prose.flow-quick`
+    ExampleProseFlowQuick,
+    /// `example.prose.flow-quick-em`
+    ExampleProseFlowQuickEm,
+    /// `example.prose.flow-escape`
+    ExampleProseFlowEscape,
+    /// `example.prose.flow-escape-strong`
+    ExampleProseFlowEscapeStrong,
+    /// `example.prose.flow-link-lead`
+    ExampleProseFlowLinkLead,
+    /// `example.prose.flow-link`
+    ExampleProseFlowLink,
+    /// `example.prose.flow-menu`
+    ExampleProseFlowMenu,
+    /// `example.prose.flow-help`
+    ExampleProseFlowHelp,
+    /// `example.prose.flow-dev`
+    ExampleProseFlowDev,
+    /// `example.prose.flow-logs`
+    ExampleProseFlowLogs,
+    /// `example.prose.flow-registries`
+    ExampleProseFlowRegistries,
+    /// `example.prose.flow-close`
+    ExampleProseFlowClose,
+    /// `example.prose.flow-quote`
+    ExampleProseFlowQuote,
+    /// `example.prose.flow-caption`
+    ExampleProseFlowCaption,
+    /// `example.prose.flow-col-key`
+    ExampleProseFlowColKey,
+    /// `example.prose.flow-col-opens`
+    ExampleProseFlowColOpens,
+    /// `example.prose.flow-help-page`
+    ExampleProseFlowHelpPage,
+    /// `example.prose.flow-dev-pages`
+    ExampleProseFlowDevPages,
+    /// `example.prose.flow-close-page`
+    ExampleProseFlowClosePage,
+    /// `example.prose.flow-end`
+    ExampleProseFlowEnd,
+    /// `example.prose.note-flow`
+    ExampleProseNoteFlow,
     /// `example.prose.measure`
     ExampleProseMeasure,
     /// `example.prose.none`
@@ -1370,6 +1778,30 @@ pub enum Key {
     ExampleToolbarVertical,
     /// `example.toolbar.density`
     ExampleToolbarDensity,
+    /// `example.toolbar.rail`
+    ExampleToolbarRail,
+    /// `example.rail.controls`
+    ExampleRailControls,
+    /// `example.rail.pages`
+    ExampleRailPages,
+    /// `example.rail.collapse`
+    ExampleRailCollapse,
+    /// `example.rail.close`
+    ExampleRailClose,
+    /// `example.rail.direction`
+    ExampleRailDirection,
+    /// `example.rail.commands`
+    ExampleRailCommands,
+    /// `example.rail.settings`
+    ExampleRailSettings,
+    /// `example.rail.registries`
+    ExampleRailRegistries,
+    /// `example.rail.commands-body`
+    ExampleRailCommandsBody,
+    /// `example.rail.settings-body`
+    ExampleRailSettingsBody,
+    /// `example.rail.registries-body`
+    ExampleRailRegistriesBody,
     /// `example.time.machine`
     ExampleTimeMachine,
     /// `example.time.aligned`
@@ -2780,6 +3212,34 @@ pub enum Key {
     ExampleMessageBarNoteDismiss,
     /// `example.message-bar.note-plain`
     ExampleMessageBarNotePlain,
+    /// `example.message-bar.lost`
+    ExampleMessageBarLost,
+    /// `example.message-bar.restoring`
+    ExampleMessageBarRestoring,
+    /// `example.message-bar.restore`
+    ExampleMessageBarRestore,
+    /// `example.message-bar.again`
+    ExampleMessageBarAgain,
+    /// `example.message-bar.stopped`
+    ExampleMessageBarStopped,
+    /// `example.message-bar.start`
+    ExampleMessageBarStart,
+    /// `example.message-bar.save`
+    ExampleMessageBarSave,
+    /// `example.message-bar.ends`
+    ExampleMessageBarEnds,
+    /// `example.message-bar.stay`
+    ExampleMessageBarStay,
+    /// `example.message-bar.note-line`
+    ExampleMessageBarNoteLine,
+    /// `example.message-bar.offline`
+    ExampleMessageBarOffline,
+    /// `example.message-bar.note-quiet`
+    ExampleMessageBarNoteQuiet,
+    /// `example.message-bar.note-stopped`
+    ExampleMessageBarNoteStopped,
+    /// `example.message-bar.note-countdown`
+    ExampleMessageBarNoteCountdown,
     /// `example.overview.divider.pay`
     ExampleOverviewDividerPay,
     /// `example.overview.divider.pay-body`
@@ -2884,6 +3344,8 @@ pub enum Key {
     ExampleTabsNoteVertical,
     /// `example.tabs.note-fill`
     ExampleTabsNoteFill,
+    /// `example.tabs.note-rail`
+    ExampleTabsNoteRail,
     /// `example.tab.settings`
     ExampleTabSettings,
     /// `example.tab.people`
@@ -2972,6 +3434,26 @@ pub enum Key {
     ExampleDialogNoteBeside,
     /// `example.dialog.note-wide`
     ExampleDialogNoteWide,
+    /// `example.dialog.irreversible`
+    ExampleDialogIrreversible,
+    /// `example.dialog.files`
+    ExampleDialogFiles,
+    /// `example.dialog.ask`
+    ExampleDialogAsk,
+    /// `example.dialog.realm-heading`
+    ExampleDialogRealmHeading,
+    /// `example.dialog.realm-description`
+    ExampleDialogRealmDescription,
+    /// `example.dialog.realm-requester`
+    ExampleDialogRealmRequester,
+    /// `example.dialog.realm-confirm`
+    ExampleDialogRealmConfirm,
+    /// `example.dialog.answer`
+    ExampleDialogAnswer,
+    /// `example.dialog.note-alert`
+    ExampleDialogNoteAlert,
+    /// `example.dialog.note-shown`
+    ExampleDialogNoteShown,
     /// `example.dialog.note-plain`
     ExampleDialogNotePlain,
     /// `example.popover.open`
@@ -3038,6 +3520,8 @@ pub enum Key {
     ExampleTooltipNoteEnd,
     /// `example.tooltip.note-none`
     ExampleTooltipNoteNone,
+    /// `example.tooltip.note-name`
+    ExampleTooltipNoteName,
     /// `example.toast.saved-title`
     ExampleToastSavedTitle,
     /// `example.toast.saved`
@@ -3876,6 +4360,18 @@ pub enum Key {
     ComponentDialogPropDismissibleDoc,
     /// `component.dialog.prop.close_label.doc`
     ComponentDialogPropCloseLabelDoc,
+    /// `component.dialog.prop.shown.doc`
+    ComponentDialogPropShownDoc,
+    /// `component.dialog.prop.alert.doc`
+    ComponentDialogPropAlertDoc,
+    /// `component.dialog.prop.requester.doc`
+    ComponentDialogPropRequesterDoc,
+    /// `component.dialog.prop.irreversible_label.doc`
+    ComponentDialogPropIrreversibleLabelDoc,
+    /// `component.dialog.prop.confirm_label.doc`
+    ComponentDialogPropConfirmLabelDoc,
+    /// `component.dialog.prop.decline_label.doc`
+    ComponentDialogPropDeclineLabelDoc,
     /// `component.dialog.prop.children.doc`
     ComponentDialogPropChildrenDoc,
     /// `component.dialog.state.open.doc`
@@ -3932,6 +4428,38 @@ pub enum Key {
     ComponentDividerPropDecorativeDoc,
     /// `component.divider.state.labelled.doc`
     ComponentDividerStateLabelledDoc,
+    /// `component.drawer.guidance`
+    ComponentDrawerGuidance,
+    /// `component.drawer.a11y-notes`
+    ComponentDrawerA11yNotes,
+    /// `component.drawer.prop.name.doc`
+    ComponentDrawerPropNameDoc,
+    /// `component.drawer.prop.id.doc`
+    ComponentDrawerPropIdDoc,
+    /// `component.drawer.prop.label.doc`
+    ComponentDrawerPropLabelDoc,
+    /// `component.drawer.prop.side.doc`
+    ComponentDrawerPropSideDoc,
+    /// `component.drawer.prop.collapsed.doc`
+    ComponentDrawerPropCollapsedDoc,
+    /// `component.drawer.prop.children.doc`
+    ComponentDrawerPropChildrenDoc,
+    /// `component.drawer.key.tab.name`
+    ComponentDrawerKeyTabName,
+    /// `component.drawer.key.tab.action`
+    ComponentDrawerKeyTabAction,
+    /// `component.drawer.key.escape.name`
+    ComponentDrawerKeyEscapeName,
+    /// `component.drawer.key.escape.action`
+    ComponentDrawerKeyEscapeAction,
+    /// `component.drawer-rail.guidance`
+    ComponentDrawerRailGuidance,
+    /// `component.drawer-rail.a11y-notes`
+    ComponentDrawerRailA11yNotes,
+    /// `component.drawer-rail.prop.side.doc`
+    ComponentDrawerRailPropSideDoc,
+    /// `component.drawer-rail.prop.children.doc`
+    ComponentDrawerRailPropChildrenDoc,
     /// `component.em.a11y-notes`
     ComponentEmA11yNotes,
     /// `component.em.prop.children.doc`
@@ -4094,6 +4622,46 @@ pub enum Key {
     ComponentFileInputKeyDeleteOrBackspaceName,
     /// `component.file-input.key.delete-or-backspace.action`
     ComponentFileInputKeyDeleteOrBackspaceAction,
+    /// `component.footer.guidance`
+    ComponentFooterGuidance,
+    /// `component.footer.a11y-notes`
+    ComponentFooterA11yNotes,
+    /// `component.footer.prop.label.doc`
+    ComponentFooterPropLabelDoc,
+    /// `component.footer.prop.visibility.doc`
+    ComponentFooterPropVisibilityDoc,
+    /// `component.footer.prop.shown.doc`
+    ComponentFooterPropShownDoc,
+    /// `component.footer.prop.children.doc`
+    ComponentFooterPropChildrenDoc,
+    /// `component.footer-corner.guidance`
+    ComponentFooterCornerGuidance,
+    /// `component.footer-corner.a11y-notes`
+    ComponentFooterCornerA11yNotes,
+    /// `component.footer-corner.prop.side.doc`
+    ComponentFooterCornerPropSideDoc,
+    /// `component.footer-corner.prop.children.doc`
+    ComponentFooterCornerPropChildrenDoc,
+    /// `component.footer-line.guidance`
+    ComponentFooterLineGuidance,
+    /// `component.footer-line.a11y-notes`
+    ComponentFooterLineA11yNotes,
+    /// `component.footer-line.prop.kind.doc`
+    ComponentFooterLinePropKindDoc,
+    /// `component.footer-line.prop.expandable.doc`
+    ComponentFooterLinePropExpandableDoc,
+    /// `component.footer-line.prop.expanded.doc`
+    ComponentFooterLinePropExpandedDoc,
+    /// `component.footer-line.prop.expand_label.doc`
+    ComponentFooterLinePropExpandLabelDoc,
+    /// `component.footer-line.prop.collapse_label.doc`
+    ComponentFooterLinePropCollapseLabelDoc,
+    /// `component.footer-line.prop.action.doc`
+    ComponentFooterLinePropActionDoc,
+    /// `component.footer-line.prop.live.doc`
+    ComponentFooterLinePropLiveDoc,
+    /// `component.footer-line.prop.children.doc`
+    ComponentFooterLinePropChildrenDoc,
     /// `component.heading.a11y-notes`
     ComponentHeadingA11yNotes,
     /// `component.heading.prop.level.doc`
@@ -4246,6 +4814,50 @@ pub enum Key {
     ComponentKbdPropSizeDoc,
     /// `component.kbd.prop.children.doc`
     ComponentKbdPropChildrenDoc,
+    /// `component.key-capture.guidance`
+    ComponentKeyCaptureGuidance,
+    /// `component.key-capture.a11y-notes`
+    ComponentKeyCaptureA11yNotes,
+    /// `component.key-capture.prop.name.doc`
+    ComponentKeyCapturePropNameDoc,
+    /// `component.key-capture.prop.label.doc`
+    ComponentKeyCapturePropLabelDoc,
+    /// `component.key-capture.prop.value.doc`
+    ComponentKeyCapturePropValueDoc,
+    /// `component.key-capture.prop.keyboard.doc`
+    ComponentKeyCapturePropKeyboardDoc,
+    /// `component.key-capture.prop.capture_label.doc`
+    ComponentKeyCapturePropCaptureLabelDoc,
+    /// `component.key-capture.prop.empty_label.doc`
+    ComponentKeyCapturePropEmptyLabelDoc,
+    /// `component.key-capture.prop.clear_label.doc`
+    ComponentKeyCapturePropClearLabelDoc,
+    /// `component.key-capture.prop.refusal.doc`
+    ComponentKeyCapturePropRefusalDoc,
+    /// `component.key-capture.prop.disabled.doc`
+    ComponentKeyCapturePropDisabledDoc,
+    /// `component.key-capture.state.listening.doc`
+    ComponentKeyCaptureStateListeningDoc,
+    /// `component.key-capture.state.captured.doc`
+    ComponentKeyCaptureStateCapturedDoc,
+    /// `component.key-capture.state.refused.doc`
+    ComponentKeyCaptureStateRefusedDoc,
+    /// `component.key-capture.key.enter-space.name`
+    ComponentKeyCaptureKeyEnterSpaceName,
+    /// `component.key-capture.key.enter-space.action`
+    ComponentKeyCaptureKeyEnterSpaceAction,
+    /// `component.key-capture.key.a-key-with-modifiers-held.name`
+    ComponentKeyCaptureKeyAKeyWithModifiersHeldName,
+    /// `component.key-capture.key.a-key-with-modifiers-held.action`
+    ComponentKeyCaptureKeyAKeyWithModifiersHeldAction,
+    /// `component.key-capture.key.tab.name`
+    ComponentKeyCaptureKeyTabName,
+    /// `component.key-capture.key.tab.action`
+    ComponentKeyCaptureKeyTabAction,
+    /// `component.key-capture.key.escape.name`
+    ComponentKeyCaptureKeyEscapeName,
+    /// `component.key-capture.key.escape.action`
+    ComponentKeyCaptureKeyEscapeAction,
     /// `component.label.guidance`
     ComponentLabelGuidance,
     /// `component.label.a11y-notes`
@@ -4424,10 +5036,58 @@ pub enum Key {
     ComponentListItemPropTermDoc,
     /// `component.list-item.prop.children.doc`
     ComponentListItemPropChildrenDoc,
+    /// `component.log.guidance`
+    ComponentLogGuidance,
+    /// `component.log.a11y-notes`
+    ComponentLogA11yNotes,
+    /// `component.log.prop.name.doc`
+    ComponentLogPropNameDoc,
+    /// `component.log.prop.label.doc`
+    ComponentLogPropLabelDoc,
+    /// `component.log.prop.follow.doc`
+    ComponentLogPropFollowDoc,
+    /// `component.log.prop.resume_label.doc`
+    ComponentLogPropResumeLabelDoc,
+    /// `component.log.prop.children.doc`
+    ComponentLogPropChildrenDoc,
+    /// `component.log.state.paused.doc`
+    ComponentLogStatePausedDoc,
+    /// `component.log.key.arrow-keys-page-up-page-down.name`
+    ComponentLogKeyArrowKeysPageUpPageDownName,
+    /// `component.log.key.arrow-keys-page-up-page-down.action`
+    ComponentLogKeyArrowKeysPageUpPageDownAction,
+    /// `component.log.key.home-end.name`
+    ComponentLogKeyHomeEndName,
+    /// `component.log.key.home-end.action`
+    ComponentLogKeyHomeEndAction,
+    /// `component.log-line.guidance`
+    ComponentLogLineGuidance,
+    /// `component.log-line.a11y-notes`
+    ComponentLogLineA11yNotes,
+    /// `component.log-line.prop.tone.doc`
+    ComponentLogLinePropToneDoc,
+    /// `component.log-line.prop.level.doc`
+    ComponentLogLinePropLevelDoc,
+    /// `component.log-line.prop.time.doc`
+    ComponentLogLinePropTimeDoc,
+    /// `component.log-line.prop.source.doc`
+    ComponentLogLinePropSourceDoc,
+    /// `component.log-line.prop.children.doc`
+    ComponentLogLinePropChildrenDoc,
+    /// `component.mark.guidance`
+    ComponentMarkGuidance,
     /// `component.mark.a11y-notes`
     ComponentMarkA11yNotes,
     /// `component.mark.prop.children.doc`
     ComponentMarkPropChildrenDoc,
+    /// `component.match-text.guidance`
+    ComponentMatchTextGuidance,
+    /// `component.match-text.a11y-notes`
+    ComponentMatchTextA11yNotes,
+    /// `component.match-text.prop.text.doc`
+    ComponentMatchTextPropTextDoc,
+    /// `component.match-text.prop.hits.doc`
+    ComponentMatchTextPropHitsDoc,
     /// `component.menu.guidance`
     ComponentMenuGuidance,
     /// `component.menu.a11y-notes`
@@ -4512,10 +5172,24 @@ pub enum Key {
     ComponentMessageBarPropDismissibleDoc,
     /// `component.message-bar.prop.dismiss_label.doc`
     ComponentMessageBarPropDismissLabelDoc,
+    /// `component.message-bar.prop.presentation.doc`
+    ComponentMessageBarPropPresentationDoc,
+    /// `component.message-bar.prop.deadline.doc`
+    ComponentMessageBarPropDeadlineDoc,
+    /// `component.message-bar.prop.countdown_label.doc`
+    ComponentMessageBarPropCountdownLabelDoc,
+    /// `component.message-bar.prop.action_label.doc`
+    ComponentMessageBarPropActionLabelDoc,
+    /// `component.message-bar.prop.action.doc`
+    ComponentMessageBarPropActionDoc,
     /// `component.message-bar.prop.children.doc`
     ComponentMessageBarPropChildrenDoc,
     /// `component.message-bar.state.dismissed.doc`
     ComponentMessageBarStateDismissedDoc,
+    /// `component.message-bar.key.tab.name`
+    ComponentMessageBarKeyTabName,
+    /// `component.message-bar.key.tab.action`
+    ComponentMessageBarKeyTabAction,
     /// `component.message-bar.key.enter-or-space.name`
     ComponentMessageBarKeyEnterOrSpaceName,
     /// `component.message-bar.key.enter-or-space.action`
@@ -4624,6 +5298,86 @@ pub enum Key {
     ComponentNumberInputKeyHomeEndName,
     /// `component.number-input.key.home-end.action`
     ComponentNumberInputKeyHomeEndAction,
+    /// `component.option-group.guidance`
+    ComponentOptionGroupGuidance,
+    /// `component.option-group.a11y-notes`
+    ComponentOptionGroupA11yNotes,
+    /// `component.option-group.prop.label.doc`
+    ComponentOptionGroupPropLabelDoc,
+    /// `component.option-group.prop.children.doc`
+    ComponentOptionGroupPropChildrenDoc,
+    /// `component.option-item.guidance`
+    ComponentOptionItemGuidance,
+    /// `component.option-item.a11y-notes`
+    ComponentOptionItemA11yNotes,
+    /// `component.option-item.prop.value.doc`
+    ComponentOptionItemPropValueDoc,
+    /// `component.option-item.prop.label.doc`
+    ComponentOptionItemPropLabelDoc,
+    /// `component.option-item.prop.hits.doc`
+    ComponentOptionItemPropHitsDoc,
+    /// `component.option-item.prop.detail.doc`
+    ComponentOptionItemPropDetailDoc,
+    /// `component.option-item.prop.detail_hits.doc`
+    ComponentOptionItemPropDetailHitsDoc,
+    /// `component.option-item.prop.shortcut.doc`
+    ComponentOptionItemPropShortcutDoc,
+    /// `component.option-item.prop.icon.doc`
+    ComponentOptionItemPropIconDoc,
+    /// `component.option-item.prop.id.doc`
+    ComponentOptionItemPropIdDoc,
+    /// `component.option-item.prop.active.doc`
+    ComponentOptionItemPropActiveDoc,
+    /// `component.option-item.prop.selected.doc`
+    ComponentOptionItemPropSelectedDoc,
+    /// `component.option-item.prop.disabled.doc`
+    ComponentOptionItemPropDisabledDoc,
+    /// `component.option-list.guidance`
+    ComponentOptionListGuidance,
+    /// `component.option-list.a11y-notes`
+    ComponentOptionListA11yNotes,
+    /// `component.option-list.prop.name.doc`
+    ComponentOptionListPropNameDoc,
+    /// `component.option-list.prop.label.doc`
+    ComponentOptionListPropLabelDoc,
+    /// `component.option-list.prop.layout.doc`
+    ComponentOptionListPropLayoutDoc,
+    /// `component.option-list.prop.size.doc`
+    ComponentOptionListPropSizeDoc,
+    /// `component.option-list.prop.focusable.doc`
+    ComponentOptionListPropFocusableDoc,
+    /// `component.option-list.prop.empty_label.doc`
+    ComponentOptionListPropEmptyLabelDoc,
+    /// `component.option-list.prop.children.doc`
+    ComponentOptionListPropChildrenDoc,
+    /// `component.option-list.key.down-arrow-up-arrow.name`
+    ComponentOptionListKeyDownArrowUpArrowName,
+    /// `component.option-list.key.down-arrow-up-arrow.action`
+    ComponentOptionListKeyDownArrowUpArrowAction,
+    /// `component.option-list.key.left-arrow-right-arrow.name`
+    ComponentOptionListKeyLeftArrowRightArrowName,
+    /// `component.option-list.key.left-arrow-right-arrow.action`
+    ComponentOptionListKeyLeftArrowRightArrowAction,
+    /// `component.option-list.key.home-end.name`
+    ComponentOptionListKeyHomeEndName,
+    /// `component.option-list.key.home-end.action`
+    ComponentOptionListKeyHomeEndAction,
+    /// `component.option-list.key.page-up-page-down.name`
+    ComponentOptionListKeyPageUpPageDownName,
+    /// `component.option-list.key.page-up-page-down.action`
+    ComponentOptionListKeyPageUpPageDownAction,
+    /// `component.option-list.key.enter.name`
+    ComponentOptionListKeyEnterName,
+    /// `component.option-list.key.enter.action`
+    ComponentOptionListKeyEnterAction,
+    /// `component.option-list.key.space.name`
+    ComponentOptionListKeySpaceName,
+    /// `component.option-list.key.space.action`
+    ComponentOptionListKeySpaceAction,
+    /// `component.option-list.key.a-printable-character.name`
+    ComponentOptionListKeyAPrintableCharacterName,
+    /// `component.option-list.key.a-printable-character.action`
+    ComponentOptionListKeyAPrintableCharacterAction,
     /// `component.otp-field.guidance`
     ComponentOtpFieldGuidance,
     /// `component.otp-field.a11y-notes`
@@ -4774,8 +5528,48 @@ pub enum Key {
     ComponentProgressPropHideLabelDoc,
     /// `component.progress.state.busy.doc`
     ComponentProgressStateBusyDoc,
+    /// `component.prompt.guidance`
+    ComponentPromptGuidance,
+    /// `component.prompt.a11y-notes`
+    ComponentPromptA11yNotes,
+    /// `component.prompt.prop.name.doc`
+    ComponentPromptPropNameDoc,
+    /// `component.prompt.prop.label.doc`
+    ComponentPromptPropLabelDoc,
+    /// `component.prompt.prop.value.doc`
+    ComponentPromptPropValueDoc,
+    /// `component.prompt.prop.send_label.doc`
+    ComponentPromptPropSendLabelDoc,
+    /// `component.prompt.prop.action.doc`
+    ComponentPromptPropActionDoc,
+    /// `component.prompt.prop.controls.doc`
+    ComponentPromptPropControlsDoc,
+    /// `component.prompt.prop.active_option.doc`
+    ComponentPromptPropActiveOptionDoc,
+    /// `component.prompt.prop.disabled.doc`
+    ComponentPromptPropDisabledDoc,
+    /// `component.prompt.prop.readonly.doc`
+    ComponentPromptPropReadonlyDoc,
+    /// `component.prompt.state.composing.doc`
+    ComponentPromptStateComposingDoc,
+    /// `component.prompt.state.selecting.doc`
+    ComponentPromptStateSelectingDoc,
+    /// `component.prompt.key.enter.name`
+    ComponentPromptKeyEnterName,
+    /// `component.prompt.key.enter.action`
+    ComponentPromptKeyEnterAction,
+    /// `component.prompt.key.shift-enter.name`
+    ComponentPromptKeyShiftEnterName,
+    /// `component.prompt.key.shift-enter.action`
+    ComponentPromptKeyShiftEnterAction,
+    /// `component.prompt.key.down-arrow-up-arrow.name`
+    ComponentPromptKeyDownArrowUpArrowName,
+    /// `component.prompt.key.down-arrow-up-arrow.action`
+    ComponentPromptKeyDownArrowUpArrowAction,
     /// `component.prose.prop.measure.doc`
     ComponentProsePropMeasureDoc,
+    /// `component.prose.prop.flow.doc`
+    ComponentProsePropFlowDoc,
     /// `component.prose.prop.children.doc`
     ComponentProsePropChildrenDoc,
     /// `component.radio.guidance`
@@ -5208,6 +6002,58 @@ pub enum Key {
     ComponentSliderKeyHomeEndName,
     /// `component.slider.key.home-end.action`
     ComponentSliderKeyHomeEndAction,
+    /// `component.split.guidance`
+    ComponentSplitGuidance,
+    /// `component.split.a11y-notes`
+    ComponentSplitA11yNotes,
+    /// `component.split.prop.name.doc`
+    ComponentSplitPropNameDoc,
+    /// `component.split.prop.value.doc`
+    ComponentSplitPropValueDoc,
+    /// `component.split.prop.min.doc`
+    ComponentSplitPropMinDoc,
+    /// `component.split.prop.max.doc`
+    ComponentSplitPropMaxDoc,
+    /// `component.split.prop.collapse.doc`
+    ComponentSplitPropCollapseDoc,
+    /// `component.split.prop.children.doc`
+    ComponentSplitPropChildrenDoc,
+    /// `component.split.key.arrow-keys.name`
+    ComponentSplitKeyArrowKeysName,
+    /// `component.split.key.arrow-keys.action`
+    ComponentSplitKeyArrowKeysAction,
+    /// `component.split.key.page-up-page-down.name`
+    ComponentSplitKeyPageUpPageDownName,
+    /// `component.split.key.page-up-page-down.action`
+    ComponentSplitKeyPageUpPageDownAction,
+    /// `component.split.key.home-end.name`
+    ComponentSplitKeyHomeEndName,
+    /// `component.split.key.home-end.action`
+    ComponentSplitKeyHomeEndAction,
+    /// `component.split.key.enter.name`
+    ComponentSplitKeyEnterName,
+    /// `component.split.key.enter.action`
+    ComponentSplitKeyEnterAction,
+    /// `component.split-handle.guidance`
+    ComponentSplitHandleGuidance,
+    /// `component.split-handle.a11y-notes`
+    ComponentSplitHandleA11yNotes,
+    /// `component.split-handle.prop.name.doc`
+    ComponentSplitHandlePropNameDoc,
+    /// `component.split-handle.prop.label.doc`
+    ComponentSplitHandlePropLabelDoc,
+    /// `component.split-handle.state.dragging.doc`
+    ComponentSplitHandleStateDraggingDoc,
+    /// `component.split-pane.guidance`
+    ComponentSplitPaneGuidance,
+    /// `component.split-pane.a11y-notes`
+    ComponentSplitPaneA11yNotes,
+    /// `component.split-pane.prop.name.doc`
+    ComponentSplitPanePropNameDoc,
+    /// `component.split-pane.prop.side.doc`
+    ComponentSplitPanePropSideDoc,
+    /// `component.split-pane.prop.children.doc`
+    ComponentSplitPanePropChildrenDoc,
     /// `component.strong.prop.children.doc`
     ComponentStrongPropChildrenDoc,
     /// `component.swatch.guidance`
@@ -5912,6 +6758,10 @@ pub enum Key {
     ComponentToolbarKeyArrowKeysName,
     /// `component.toolbar.key.arrow-keys.action`
     ComponentToolbarKeyArrowKeysAction,
+    /// `component.toolbar.key.arrow-keys-in-a-rail.name`
+    ComponentToolbarKeyArrowKeysInARailName,
+    /// `component.toolbar.key.arrow-keys-in-a-rail.action`
+    ComponentToolbarKeyArrowKeysInARailAction,
     /// `component.toolbar.key.home.name`
     ComponentToolbarKeyHomeName,
     /// `component.toolbar.key.home.action`
@@ -6074,7 +6924,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 2975] = [
+    pub const ALL: [Self; 3400] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -6099,6 +6949,16 @@ impl Key {
         Self::PageIntroBody,
         Self::PageMenuSummary,
         Self::PageMenuBody,
+        Self::PageFooterSummary,
+        Self::PageFooterBody,
+        Self::PageDrawerSummary,
+        Self::PageDrawerBody,
+        Self::PageSplitSummary,
+        Self::PageSplitBody,
+        Self::PageLogSummary,
+        Self::PageLogBody,
+        Self::PageOptionListSummary,
+        Self::PageOptionListBody,
         Self::PageTreeSummary,
         Self::PageTreeBody,
         Self::PageTabsSummary,
@@ -6316,6 +7176,22 @@ impl Key {
         Self::ComponentListSummary,
         Self::ComponentListItemSummary,
         Self::ComponentMarkSummary,
+        Self::ComponentMatchTextSummary,
+        Self::ComponentFooterSummary,
+        Self::ComponentFooterCornerSummary,
+        Self::ComponentFooterLineSummary,
+        Self::ComponentDrawerSummary,
+        Self::ComponentDrawerRailSummary,
+        Self::ComponentSplitSummary,
+        Self::ComponentSplitPaneSummary,
+        Self::ComponentSplitHandleSummary,
+        Self::ComponentKeyCaptureSummary,
+        Self::ComponentLogSummary,
+        Self::ComponentLogLineSummary,
+        Self::ComponentPromptSummary,
+        Self::ComponentOptionGroupSummary,
+        Self::ComponentOptionItemSummary,
+        Self::ComponentOptionListSummary,
         Self::ComponentParagraphSummary,
         Self::ComponentProseSummary,
         Self::ComponentStrongSummary,
@@ -6680,7 +7556,185 @@ impl Key {
         Self::ExampleMarkLead,
         Self::ExampleMarkWord,
         Self::ExampleMarkSearch,
+        Self::ExampleFooterOverview,
+        Self::ExampleFooterLines,
+        Self::ExampleFooterAuto,
+        Self::ExampleFooterShown,
+        Self::ExampleFooterNarrow,
+        Self::ExampleFooterCornerAlone,
+        Self::ExampleFooterCornerTwo,
+        Self::ExampleFooterLineKinds,
+        Self::ExampleFooterLineCut,
+        Self::ExampleFooterLineExpanded,
+        Self::ExampleFooterLineLive,
+        Self::ExampleFooterCornerSides,
+        Self::ExampleFooterCornerControl,
+        Self::ExampleFooterLabel,
+        Self::ExampleFooterSidebar,
+        Self::ExampleFooterPage,
+        Self::ExampleFooterOffline,
+        Self::ExampleFooterHover,
+        Self::ExampleFooterSelection,
+        Self::ExampleFooterExpand,
+        Self::ExampleFooterCollapse,
+        Self::ExampleFooterNotice,
+        Self::ExampleFooterTyped,
+        Self::ExampleFooterModeline,
+        Self::ExampleFooterInfo,
+        Self::ExampleFooterPrompt,
+        Self::ExampleDrawerOverview,
+        Self::ExampleDrawerBasic,
+        Self::ExampleDrawerCollapsed,
+        Self::ExampleDrawerSide,
+        Self::ExampleDrawerScroll,
+        Self::ExampleDrawerRailControls,
+        Self::ExampleDrawerRailTabs,
+        Self::ExampleDrawerRailBoth,
+        Self::ExampleDrawerRailScroll,
+        Self::ExampleDrawerLabel,
+        Self::ExampleDrawerSidebar,
+        Self::ExampleDrawerDetails,
+        Self::ExampleDrawerToggle,
+        Self::ExampleDrawerWork,
+        Self::ExampleDrawerWorkShut,
+        Self::ExampleDrawerWorkSide,
+        Self::ExampleDrawerLongOne,
+        Self::ExampleDrawerLongTwo,
+        Self::ExampleDrawerLongThree,
+        Self::ExampleSplitOverview,
+        Self::ExampleSplitBasic,
+        Self::ExampleSplitLimits,
+        Self::ExampleSplitStack,
+        Self::ExampleSplitHide,
+        Self::ExampleSplitNone,
+        Self::ExampleSplitPaneSides,
+        Self::ExampleSplitPaneScroll,
+        Self::ExampleSplitPaneContent,
+        Self::ExampleSplitPaneNested,
+        Self::ExampleSplitHandleBasic,
+        Self::ExampleSplitHandleLeast,
+        Self::ExampleSplitHandleAway,
+        Self::ExampleSplitHandleMirrored,
+        Self::ExampleSplitHandle,
+        Self::ExampleKeyCaptureOverview,
+        Self::ExampleKeyCaptureBasic,
+        Self::ExampleKeyCaptureKeyboards,
+        Self::ExampleKeyCaptureRemovable,
+        Self::ExampleKeyCaptureUnset,
+        Self::ExampleKeyCaptureRefused,
+        Self::ExampleKeyCaptureLocked,
+        Self::ExampleKeyCaptureLeader,
+        Self::ExampleKeyCaptureSettings,
+        Self::ExampleKeyCaptureHelp,
+        Self::ExampleKeyCaptureCapture,
+        Self::ExampleKeyCaptureEmpty,
+        Self::ExampleKeyCaptureClear,
+        Self::ExampleKeyCaptureRefusal,
+        Self::ExampleLogOverview,
+        Self::ExampleLogFollows,
+        Self::ExampleLogStill,
+        Self::ExampleLogNarrow,
+        Self::ExampleLogRoomy,
+        Self::ExampleLogLineLevels,
+        Self::ExampleLogLineParts,
+        Self::ExampleLogLineLong,
+        Self::ExampleLogLineFiltered,
+        Self::ExampleLogLabel,
+        Self::ExampleLogRecord,
+        Self::ExampleLogResume,
+        Self::ExampleLogLevelDebug,
+        Self::ExampleLogLevelInfo,
+        Self::ExampleLogLevelWarning,
+        Self::ExampleLogLevelError,
+        Self::ExampleLogStarted,
+        Self::ExampleLogStore,
+        Self::ExampleLogCatalog,
+        Self::ExampleLogSocket,
+        Self::ExampleLogAttached,
+        Self::ExampleLogSlow,
+        Self::ExampleLogRan,
+        Self::ExampleLogRefused,
+        Self::ExampleLogJournal,
+        Self::ExampleLogSnapshot,
+        Self::ExampleLogFull,
+        Self::ExampleLogHeartbeat,
+        Self::ExampleLogLost,
+        Self::ExampleLogMemory,
+        Self::ExamplePromptOverview,
+        Self::ExamplePromptBasic,
+        Self::ExamplePromptGrows,
+        Self::ExamplePromptDriven,
+        Self::ExamplePromptActive,
+        Self::ExamplePromptReadonly,
+        Self::ExamplePromptDisabled,
+        Self::ExamplePromptLabel,
+        Self::ExamplePromptSend,
+        Self::ExamplePromptRunning,
+        Self::ExampleOptionListOverview,
+        Self::ExampleOptionListWalk,
+        Self::ExampleOptionListColumns,
+        Self::ExampleOptionListDriven,
+        Self::ExampleOptionListNothing,
+        Self::ExampleOptionGroupRun,
+        Self::ExampleOptionItemRow,
+        Self::ExampleOptionItemHits,
+        Self::ExampleOptionItemDetailHits,
+        Self::ExampleOptionItemShortcut,
+        Self::ExampleOptionItemStates,
+        Self::ExampleOptionListKeySpace,
+        Self::ExampleOptionListKeyS,
+        Self::ExampleOptionListKeyH,
+        Self::ExampleOptionListKeyD,
+        Self::ExampleOptionListKeyQ,
+        Self::ExampleOptionGroupMixed,
+        Self::ExampleOptionGroupColumns,
+        Self::ExampleOptionGroupFiltered,
+        Self::ExampleOptionListCommands,
+        Self::ExampleOptionListMenu,
+        Self::ExampleOptionListFilter,
+        Self::ExampleOptionListEmpty,
+        Self::ExampleOptionListSettings,
+        Self::ExampleOptionListSettingsDetail,
+        Self::ExampleOptionListHelp,
+        Self::ExampleOptionListHelpDetail,
+        Self::ExampleOptionListSidebar,
+        Self::ExampleOptionListDev,
+        Self::ExampleOptionListShortcuts,
+        Self::ExampleOptionListGroupWindow,
+        Self::ExampleOptionListGroupPage,
+        Self::ExampleOptionListCloseWindow,
+        Self::ExampleOptionListHideWindow,
+        Self::ExampleOptionListClosePage,
+        Self::ExampleMatchTextQuery,
+        Self::ExampleMatchTextOne,
+        Self::ExampleMatchTextWords,
+        Self::ExampleMatchTextShared,
+        Self::ExampleMatchTextElsewhere,
+        Self::ExampleMatchTextPlain,
         Self::ExampleParagraphLead,
+        Self::ExampleProseFlowHeading,
+        Self::ExampleProseFlowPress,
+        Self::ExampleProseFlowQuick,
+        Self::ExampleProseFlowQuickEm,
+        Self::ExampleProseFlowEscape,
+        Self::ExampleProseFlowEscapeStrong,
+        Self::ExampleProseFlowLinkLead,
+        Self::ExampleProseFlowLink,
+        Self::ExampleProseFlowMenu,
+        Self::ExampleProseFlowHelp,
+        Self::ExampleProseFlowDev,
+        Self::ExampleProseFlowLogs,
+        Self::ExampleProseFlowRegistries,
+        Self::ExampleProseFlowClose,
+        Self::ExampleProseFlowQuote,
+        Self::ExampleProseFlowCaption,
+        Self::ExampleProseFlowColKey,
+        Self::ExampleProseFlowColOpens,
+        Self::ExampleProseFlowHelpPage,
+        Self::ExampleProseFlowDevPages,
+        Self::ExampleProseFlowClosePage,
+        Self::ExampleProseFlowEnd,
+        Self::ExampleProseNoteFlow,
         Self::ExampleProseMeasure,
         Self::ExampleProseNone,
         Self::ExampleQuote,
@@ -6700,6 +7754,18 @@ impl Key {
         Self::ExampleToolbarAlignRest,
         Self::ExampleToolbarVertical,
         Self::ExampleToolbarDensity,
+        Self::ExampleToolbarRail,
+        Self::ExampleRailControls,
+        Self::ExampleRailPages,
+        Self::ExampleRailCollapse,
+        Self::ExampleRailClose,
+        Self::ExampleRailDirection,
+        Self::ExampleRailCommands,
+        Self::ExampleRailSettings,
+        Self::ExampleRailRegistries,
+        Self::ExampleRailCommandsBody,
+        Self::ExampleRailSettingsBody,
+        Self::ExampleRailRegistriesBody,
         Self::ExampleTimeMachine,
         Self::ExampleTimeAligned,
         Self::ExampleMenuLabel,
@@ -7405,6 +8471,20 @@ impl Key {
         Self::ExampleMessageBarNoteAlert,
         Self::ExampleMessageBarNoteDismiss,
         Self::ExampleMessageBarNotePlain,
+        Self::ExampleMessageBarLost,
+        Self::ExampleMessageBarRestoring,
+        Self::ExampleMessageBarRestore,
+        Self::ExampleMessageBarAgain,
+        Self::ExampleMessageBarStopped,
+        Self::ExampleMessageBarStart,
+        Self::ExampleMessageBarSave,
+        Self::ExampleMessageBarEnds,
+        Self::ExampleMessageBarStay,
+        Self::ExampleMessageBarNoteLine,
+        Self::ExampleMessageBarOffline,
+        Self::ExampleMessageBarNoteQuiet,
+        Self::ExampleMessageBarNoteStopped,
+        Self::ExampleMessageBarNoteCountdown,
         Self::ExampleOverviewDividerPay,
         Self::ExampleOverviewDividerPayBody,
         Self::ExampleOverviewDividerInvoice,
@@ -7457,6 +8537,7 @@ impl Key {
         Self::ExampleTabsNoteManual,
         Self::ExampleTabsNoteVertical,
         Self::ExampleTabsNoteFill,
+        Self::ExampleTabsNoteRail,
         Self::ExampleTabSettings,
         Self::ExampleTabPeople,
         Self::ExampleTabBilling,
@@ -7501,6 +8582,16 @@ impl Key {
         Self::ExampleDialogNoteModal,
         Self::ExampleDialogNoteBeside,
         Self::ExampleDialogNoteWide,
+        Self::ExampleDialogIrreversible,
+        Self::ExampleDialogFiles,
+        Self::ExampleDialogAsk,
+        Self::ExampleDialogRealmHeading,
+        Self::ExampleDialogRealmDescription,
+        Self::ExampleDialogRealmRequester,
+        Self::ExampleDialogRealmConfirm,
+        Self::ExampleDialogAnswer,
+        Self::ExampleDialogNoteAlert,
+        Self::ExampleDialogNoteShown,
         Self::ExampleDialogNotePlain,
         Self::ExamplePopoverOpen,
         Self::ExamplePopoverHeading,
@@ -7534,6 +8625,7 @@ impl Key {
         Self::ExampleTooltipNoteLong,
         Self::ExampleTooltipNoteEnd,
         Self::ExampleTooltipNoteNone,
+        Self::ExampleTooltipNoteName,
         Self::ExampleToastSavedTitle,
         Self::ExampleToastSaved,
         Self::ExampleToastDismiss,
@@ -7953,6 +9045,12 @@ impl Key {
         Self::ComponentDialogPropSizeDoc,
         Self::ComponentDialogPropDismissibleDoc,
         Self::ComponentDialogPropCloseLabelDoc,
+        Self::ComponentDialogPropShownDoc,
+        Self::ComponentDialogPropAlertDoc,
+        Self::ComponentDialogPropRequesterDoc,
+        Self::ComponentDialogPropIrreversibleLabelDoc,
+        Self::ComponentDialogPropConfirmLabelDoc,
+        Self::ComponentDialogPropDeclineLabelDoc,
         Self::ComponentDialogPropChildrenDoc,
         Self::ComponentDialogStateOpenDoc,
         Self::ComponentDialogKeyEnterOrSpaceName,
@@ -7981,6 +9079,22 @@ impl Key {
         Self::ComponentDividerPropWeightDoc,
         Self::ComponentDividerPropDecorativeDoc,
         Self::ComponentDividerStateLabelledDoc,
+        Self::ComponentDrawerGuidance,
+        Self::ComponentDrawerA11yNotes,
+        Self::ComponentDrawerPropNameDoc,
+        Self::ComponentDrawerPropIdDoc,
+        Self::ComponentDrawerPropLabelDoc,
+        Self::ComponentDrawerPropSideDoc,
+        Self::ComponentDrawerPropCollapsedDoc,
+        Self::ComponentDrawerPropChildrenDoc,
+        Self::ComponentDrawerKeyTabName,
+        Self::ComponentDrawerKeyTabAction,
+        Self::ComponentDrawerKeyEscapeName,
+        Self::ComponentDrawerKeyEscapeAction,
+        Self::ComponentDrawerRailGuidance,
+        Self::ComponentDrawerRailA11yNotes,
+        Self::ComponentDrawerRailPropSideDoc,
+        Self::ComponentDrawerRailPropChildrenDoc,
         Self::ComponentEmA11yNotes,
         Self::ComponentEmPropChildrenDoc,
         Self::ComponentErrorSummaryGuidance,
@@ -8062,6 +9176,26 @@ impl Key {
         Self::ComponentFileInputKeyEnterOrSpaceAction,
         Self::ComponentFileInputKeyDeleteOrBackspaceName,
         Self::ComponentFileInputKeyDeleteOrBackspaceAction,
+        Self::ComponentFooterGuidance,
+        Self::ComponentFooterA11yNotes,
+        Self::ComponentFooterPropLabelDoc,
+        Self::ComponentFooterPropVisibilityDoc,
+        Self::ComponentFooterPropShownDoc,
+        Self::ComponentFooterPropChildrenDoc,
+        Self::ComponentFooterCornerGuidance,
+        Self::ComponentFooterCornerA11yNotes,
+        Self::ComponentFooterCornerPropSideDoc,
+        Self::ComponentFooterCornerPropChildrenDoc,
+        Self::ComponentFooterLineGuidance,
+        Self::ComponentFooterLineA11yNotes,
+        Self::ComponentFooterLinePropKindDoc,
+        Self::ComponentFooterLinePropExpandableDoc,
+        Self::ComponentFooterLinePropExpandedDoc,
+        Self::ComponentFooterLinePropExpandLabelDoc,
+        Self::ComponentFooterLinePropCollapseLabelDoc,
+        Self::ComponentFooterLinePropActionDoc,
+        Self::ComponentFooterLinePropLiveDoc,
+        Self::ComponentFooterLinePropChildrenDoc,
         Self::ComponentHeadingA11yNotes,
         Self::ComponentHeadingPropLevelDoc,
         Self::ComponentHeadingPropSizeDoc,
@@ -8138,6 +9272,28 @@ impl Key {
         Self::ComponentInsPropChildrenDoc,
         Self::ComponentKbdPropSizeDoc,
         Self::ComponentKbdPropChildrenDoc,
+        Self::ComponentKeyCaptureGuidance,
+        Self::ComponentKeyCaptureA11yNotes,
+        Self::ComponentKeyCapturePropNameDoc,
+        Self::ComponentKeyCapturePropLabelDoc,
+        Self::ComponentKeyCapturePropValueDoc,
+        Self::ComponentKeyCapturePropKeyboardDoc,
+        Self::ComponentKeyCapturePropCaptureLabelDoc,
+        Self::ComponentKeyCapturePropEmptyLabelDoc,
+        Self::ComponentKeyCapturePropClearLabelDoc,
+        Self::ComponentKeyCapturePropRefusalDoc,
+        Self::ComponentKeyCapturePropDisabledDoc,
+        Self::ComponentKeyCaptureStateListeningDoc,
+        Self::ComponentKeyCaptureStateCapturedDoc,
+        Self::ComponentKeyCaptureStateRefusedDoc,
+        Self::ComponentKeyCaptureKeyEnterSpaceName,
+        Self::ComponentKeyCaptureKeyEnterSpaceAction,
+        Self::ComponentKeyCaptureKeyAKeyWithModifiersHeldName,
+        Self::ComponentKeyCaptureKeyAKeyWithModifiersHeldAction,
+        Self::ComponentKeyCaptureKeyTabName,
+        Self::ComponentKeyCaptureKeyTabAction,
+        Self::ComponentKeyCaptureKeyEscapeName,
+        Self::ComponentKeyCaptureKeyEscapeAction,
         Self::ComponentLabelGuidance,
         Self::ComponentLabelA11yNotes,
         Self::ComponentLabelPropTextDoc,
@@ -8227,8 +9383,32 @@ impl Key {
         Self::ComponentListItemA11yNotes,
         Self::ComponentListItemPropTermDoc,
         Self::ComponentListItemPropChildrenDoc,
+        Self::ComponentLogGuidance,
+        Self::ComponentLogA11yNotes,
+        Self::ComponentLogPropNameDoc,
+        Self::ComponentLogPropLabelDoc,
+        Self::ComponentLogPropFollowDoc,
+        Self::ComponentLogPropResumeLabelDoc,
+        Self::ComponentLogPropChildrenDoc,
+        Self::ComponentLogStatePausedDoc,
+        Self::ComponentLogKeyArrowKeysPageUpPageDownName,
+        Self::ComponentLogKeyArrowKeysPageUpPageDownAction,
+        Self::ComponentLogKeyHomeEndName,
+        Self::ComponentLogKeyHomeEndAction,
+        Self::ComponentLogLineGuidance,
+        Self::ComponentLogLineA11yNotes,
+        Self::ComponentLogLinePropToneDoc,
+        Self::ComponentLogLinePropLevelDoc,
+        Self::ComponentLogLinePropTimeDoc,
+        Self::ComponentLogLinePropSourceDoc,
+        Self::ComponentLogLinePropChildrenDoc,
+        Self::ComponentMarkGuidance,
         Self::ComponentMarkA11yNotes,
         Self::ComponentMarkPropChildrenDoc,
+        Self::ComponentMatchTextGuidance,
+        Self::ComponentMatchTextA11yNotes,
+        Self::ComponentMatchTextPropTextDoc,
+        Self::ComponentMatchTextPropHitsDoc,
         Self::ComponentMenuGuidance,
         Self::ComponentMenuA11yNotes,
         Self::ComponentMenuPropNameDoc,
@@ -8271,8 +9451,15 @@ impl Key {
         Self::ComponentMessageBarPropLiveDoc,
         Self::ComponentMessageBarPropDismissibleDoc,
         Self::ComponentMessageBarPropDismissLabelDoc,
+        Self::ComponentMessageBarPropPresentationDoc,
+        Self::ComponentMessageBarPropDeadlineDoc,
+        Self::ComponentMessageBarPropCountdownLabelDoc,
+        Self::ComponentMessageBarPropActionLabelDoc,
+        Self::ComponentMessageBarPropActionDoc,
         Self::ComponentMessageBarPropChildrenDoc,
         Self::ComponentMessageBarStateDismissedDoc,
+        Self::ComponentMessageBarKeyTabName,
+        Self::ComponentMessageBarKeyTabAction,
         Self::ComponentMessageBarKeyEnterOrSpaceName,
         Self::ComponentMessageBarKeyEnterOrSpaceAction,
         Self::ComponentMeterGuidance,
@@ -8327,6 +9514,46 @@ impl Key {
         Self::ComponentNumberInputKeyPageUpPageDownAction,
         Self::ComponentNumberInputKeyHomeEndName,
         Self::ComponentNumberInputKeyHomeEndAction,
+        Self::ComponentOptionGroupGuidance,
+        Self::ComponentOptionGroupA11yNotes,
+        Self::ComponentOptionGroupPropLabelDoc,
+        Self::ComponentOptionGroupPropChildrenDoc,
+        Self::ComponentOptionItemGuidance,
+        Self::ComponentOptionItemA11yNotes,
+        Self::ComponentOptionItemPropValueDoc,
+        Self::ComponentOptionItemPropLabelDoc,
+        Self::ComponentOptionItemPropHitsDoc,
+        Self::ComponentOptionItemPropDetailDoc,
+        Self::ComponentOptionItemPropDetailHitsDoc,
+        Self::ComponentOptionItemPropShortcutDoc,
+        Self::ComponentOptionItemPropIconDoc,
+        Self::ComponentOptionItemPropIdDoc,
+        Self::ComponentOptionItemPropActiveDoc,
+        Self::ComponentOptionItemPropSelectedDoc,
+        Self::ComponentOptionItemPropDisabledDoc,
+        Self::ComponentOptionListGuidance,
+        Self::ComponentOptionListA11yNotes,
+        Self::ComponentOptionListPropNameDoc,
+        Self::ComponentOptionListPropLabelDoc,
+        Self::ComponentOptionListPropLayoutDoc,
+        Self::ComponentOptionListPropSizeDoc,
+        Self::ComponentOptionListPropFocusableDoc,
+        Self::ComponentOptionListPropEmptyLabelDoc,
+        Self::ComponentOptionListPropChildrenDoc,
+        Self::ComponentOptionListKeyDownArrowUpArrowName,
+        Self::ComponentOptionListKeyDownArrowUpArrowAction,
+        Self::ComponentOptionListKeyLeftArrowRightArrowName,
+        Self::ComponentOptionListKeyLeftArrowRightArrowAction,
+        Self::ComponentOptionListKeyHomeEndName,
+        Self::ComponentOptionListKeyHomeEndAction,
+        Self::ComponentOptionListKeyPageUpPageDownName,
+        Self::ComponentOptionListKeyPageUpPageDownAction,
+        Self::ComponentOptionListKeyEnterName,
+        Self::ComponentOptionListKeyEnterAction,
+        Self::ComponentOptionListKeySpaceName,
+        Self::ComponentOptionListKeySpaceAction,
+        Self::ComponentOptionListKeyAPrintableCharacterName,
+        Self::ComponentOptionListKeyAPrintableCharacterAction,
         Self::ComponentOtpFieldGuidance,
         Self::ComponentOtpFieldA11yNotes,
         Self::ComponentOtpFieldPropNameDoc,
@@ -8402,7 +9629,27 @@ impl Key {
         Self::ComponentProgressPropSizeDoc,
         Self::ComponentProgressPropHideLabelDoc,
         Self::ComponentProgressStateBusyDoc,
+        Self::ComponentPromptGuidance,
+        Self::ComponentPromptA11yNotes,
+        Self::ComponentPromptPropNameDoc,
+        Self::ComponentPromptPropLabelDoc,
+        Self::ComponentPromptPropValueDoc,
+        Self::ComponentPromptPropSendLabelDoc,
+        Self::ComponentPromptPropActionDoc,
+        Self::ComponentPromptPropControlsDoc,
+        Self::ComponentPromptPropActiveOptionDoc,
+        Self::ComponentPromptPropDisabledDoc,
+        Self::ComponentPromptPropReadonlyDoc,
+        Self::ComponentPromptStateComposingDoc,
+        Self::ComponentPromptStateSelectingDoc,
+        Self::ComponentPromptKeyEnterName,
+        Self::ComponentPromptKeyEnterAction,
+        Self::ComponentPromptKeyShiftEnterName,
+        Self::ComponentPromptKeyShiftEnterAction,
+        Self::ComponentPromptKeyDownArrowUpArrowName,
+        Self::ComponentPromptKeyDownArrowUpArrowAction,
         Self::ComponentProsePropMeasureDoc,
+        Self::ComponentProsePropFlowDoc,
         Self::ComponentProsePropChildrenDoc,
         Self::ComponentRadioGuidance,
         Self::ComponentRadioA11yNotes,
@@ -8619,6 +9866,32 @@ impl Key {
         Self::ComponentSliderKeyPageUpPageDownAction,
         Self::ComponentSliderKeyHomeEndName,
         Self::ComponentSliderKeyHomeEndAction,
+        Self::ComponentSplitGuidance,
+        Self::ComponentSplitA11yNotes,
+        Self::ComponentSplitPropNameDoc,
+        Self::ComponentSplitPropValueDoc,
+        Self::ComponentSplitPropMinDoc,
+        Self::ComponentSplitPropMaxDoc,
+        Self::ComponentSplitPropCollapseDoc,
+        Self::ComponentSplitPropChildrenDoc,
+        Self::ComponentSplitKeyArrowKeysName,
+        Self::ComponentSplitKeyArrowKeysAction,
+        Self::ComponentSplitKeyPageUpPageDownName,
+        Self::ComponentSplitKeyPageUpPageDownAction,
+        Self::ComponentSplitKeyHomeEndName,
+        Self::ComponentSplitKeyHomeEndAction,
+        Self::ComponentSplitKeyEnterName,
+        Self::ComponentSplitKeyEnterAction,
+        Self::ComponentSplitHandleGuidance,
+        Self::ComponentSplitHandleA11yNotes,
+        Self::ComponentSplitHandlePropNameDoc,
+        Self::ComponentSplitHandlePropLabelDoc,
+        Self::ComponentSplitHandleStateDraggingDoc,
+        Self::ComponentSplitPaneGuidance,
+        Self::ComponentSplitPaneA11yNotes,
+        Self::ComponentSplitPanePropNameDoc,
+        Self::ComponentSplitPanePropSideDoc,
+        Self::ComponentSplitPanePropChildrenDoc,
         Self::ComponentStrongPropChildrenDoc,
         Self::ComponentSwatchGuidance,
         Self::ComponentSwatchA11yNotes,
@@ -8971,6 +10244,8 @@ impl Key {
         Self::ComponentToolbarKeyTabAction,
         Self::ComponentToolbarKeyArrowKeysName,
         Self::ComponentToolbarKeyArrowKeysAction,
+        Self::ComponentToolbarKeyArrowKeysInARailName,
+        Self::ComponentToolbarKeyArrowKeysInARailAction,
         Self::ComponentToolbarKeyHomeName,
         Self::ComponentToolbarKeyHomeAction,
         Self::ComponentToolbarKeyEndName,
@@ -9080,6 +10355,16 @@ impl Key {
             Self::PageIntroBody => "page.intro.body",
             Self::PageMenuSummary => "page.menu.summary",
             Self::PageMenuBody => "page.menu.body",
+            Self::PageFooterSummary => "page.footer.summary",
+            Self::PageFooterBody => "page.footer.body",
+            Self::PageDrawerSummary => "page.drawer.summary",
+            Self::PageDrawerBody => "page.drawer.body",
+            Self::PageSplitSummary => "page.split.summary",
+            Self::PageSplitBody => "page.split.body",
+            Self::PageLogSummary => "page.log.summary",
+            Self::PageLogBody => "page.log.body",
+            Self::PageOptionListSummary => "page.option-list.summary",
+            Self::PageOptionListBody => "page.option-list.body",
             Self::PageTreeSummary => "page.tree.summary",
             Self::PageTreeBody => "page.tree.body",
             Self::PageTabsSummary => "page.tabs.summary",
@@ -9297,6 +10582,22 @@ impl Key {
             Self::ComponentListSummary => "component.list.summary",
             Self::ComponentListItemSummary => "component.list-item.summary",
             Self::ComponentMarkSummary => "component.mark.summary",
+            Self::ComponentMatchTextSummary => "component.match-text.summary",
+            Self::ComponentFooterSummary => "component.footer.summary",
+            Self::ComponentFooterCornerSummary => "component.footer-corner.summary",
+            Self::ComponentFooterLineSummary => "component.footer-line.summary",
+            Self::ComponentDrawerSummary => "component.drawer.summary",
+            Self::ComponentDrawerRailSummary => "component.drawer-rail.summary",
+            Self::ComponentSplitSummary => "component.split.summary",
+            Self::ComponentSplitPaneSummary => "component.split-pane.summary",
+            Self::ComponentSplitHandleSummary => "component.split-handle.summary",
+            Self::ComponentKeyCaptureSummary => "component.key-capture.summary",
+            Self::ComponentLogSummary => "component.log.summary",
+            Self::ComponentLogLineSummary => "component.log-line.summary",
+            Self::ComponentPromptSummary => "component.prompt.summary",
+            Self::ComponentOptionGroupSummary => "component.option-group.summary",
+            Self::ComponentOptionItemSummary => "component.option-item.summary",
+            Self::ComponentOptionListSummary => "component.option-list.summary",
             Self::ComponentParagraphSummary => "component.paragraph.summary",
             Self::ComponentProseSummary => "component.prose.summary",
             Self::ComponentStrongSummary => "component.strong.summary",
@@ -9661,7 +10962,185 @@ impl Key {
             Self::ExampleMarkLead => "example.mark.lead",
             Self::ExampleMarkWord => "example.mark.word",
             Self::ExampleMarkSearch => "example.mark.search",
+            Self::ExampleFooterOverview => "example.footer.overview",
+            Self::ExampleFooterLines => "example.footer.lines",
+            Self::ExampleFooterAuto => "example.footer.auto",
+            Self::ExampleFooterShown => "example.footer.shown",
+            Self::ExampleFooterNarrow => "example.footer.narrow",
+            Self::ExampleFooterCornerAlone => "example.footer-corner.alone",
+            Self::ExampleFooterCornerTwo => "example.footer-corner.two",
+            Self::ExampleFooterLineKinds => "example.footer-line.kinds",
+            Self::ExampleFooterLineCut => "example.footer-line.cut",
+            Self::ExampleFooterLineExpanded => "example.footer-line.expanded",
+            Self::ExampleFooterLineLive => "example.footer-line.live",
+            Self::ExampleFooterCornerSides => "example.footer-corner.sides",
+            Self::ExampleFooterCornerControl => "example.footer-corner.control",
+            Self::ExampleFooterLabel => "example.footer.label",
+            Self::ExampleFooterSidebar => "example.footer.sidebar",
+            Self::ExampleFooterPage => "example.footer.page",
+            Self::ExampleFooterOffline => "example.footer.offline",
+            Self::ExampleFooterHover => "example.footer.hover",
+            Self::ExampleFooterSelection => "example.footer.selection",
+            Self::ExampleFooterExpand => "example.footer.expand",
+            Self::ExampleFooterCollapse => "example.footer.collapse",
+            Self::ExampleFooterNotice => "example.footer.notice",
+            Self::ExampleFooterTyped => "example.footer.typed",
+            Self::ExampleFooterModeline => "example.footer.modeline",
+            Self::ExampleFooterInfo => "example.footer.info",
+            Self::ExampleFooterPrompt => "example.footer.prompt",
+            Self::ExampleDrawerOverview => "example.drawer.overview",
+            Self::ExampleDrawerBasic => "example.drawer.basic",
+            Self::ExampleDrawerCollapsed => "example.drawer.collapsed",
+            Self::ExampleDrawerSide => "example.drawer.side",
+            Self::ExampleDrawerScroll => "example.drawer.scroll",
+            Self::ExampleDrawerRailControls => "example.drawer-rail.controls",
+            Self::ExampleDrawerRailTabs => "example.drawer-rail.tabs",
+            Self::ExampleDrawerRailBoth => "example.drawer-rail.both",
+            Self::ExampleDrawerRailScroll => "example.drawer-rail.scroll",
+            Self::ExampleDrawerLabel => "example.drawer.label",
+            Self::ExampleDrawerSidebar => "example.drawer.sidebar",
+            Self::ExampleDrawerDetails => "example.drawer.details",
+            Self::ExampleDrawerToggle => "example.drawer.toggle",
+            Self::ExampleDrawerWork => "example.drawer.work",
+            Self::ExampleDrawerWorkShut => "example.drawer.work-shut",
+            Self::ExampleDrawerWorkSide => "example.drawer.work-side",
+            Self::ExampleDrawerLongOne => "example.drawer.long-one",
+            Self::ExampleDrawerLongTwo => "example.drawer.long-two",
+            Self::ExampleDrawerLongThree => "example.drawer.long-three",
+            Self::ExampleSplitOverview => "example.split.overview",
+            Self::ExampleSplitBasic => "example.split.basic",
+            Self::ExampleSplitLimits => "example.split.limits",
+            Self::ExampleSplitStack => "example.split.stack",
+            Self::ExampleSplitHide => "example.split.hide",
+            Self::ExampleSplitNone => "example.split.none",
+            Self::ExampleSplitPaneSides => "example.split-pane.sides",
+            Self::ExampleSplitPaneScroll => "example.split-pane.scroll",
+            Self::ExampleSplitPaneContent => "example.split-pane.content",
+            Self::ExampleSplitPaneNested => "example.split-pane.nested",
+            Self::ExampleSplitHandleBasic => "example.split-handle.basic",
+            Self::ExampleSplitHandleLeast => "example.split-handle.least",
+            Self::ExampleSplitHandleAway => "example.split-handle.away",
+            Self::ExampleSplitHandleMirrored => "example.split-handle.mirrored",
+            Self::ExampleSplitHandle => "example.split.handle",
+            Self::ExampleKeyCaptureOverview => "example.key-capture.overview",
+            Self::ExampleKeyCaptureBasic => "example.key-capture.basic",
+            Self::ExampleKeyCaptureKeyboards => "example.key-capture.keyboards",
+            Self::ExampleKeyCaptureRemovable => "example.key-capture.removable",
+            Self::ExampleKeyCaptureUnset => "example.key-capture.unset",
+            Self::ExampleKeyCaptureRefused => "example.key-capture.refused",
+            Self::ExampleKeyCaptureLocked => "example.key-capture.locked",
+            Self::ExampleKeyCaptureLeader => "example.key-capture.leader",
+            Self::ExampleKeyCaptureSettings => "example.key-capture.settings",
+            Self::ExampleKeyCaptureHelp => "example.key-capture.help",
+            Self::ExampleKeyCaptureCapture => "example.key-capture.capture",
+            Self::ExampleKeyCaptureEmpty => "example.key-capture.empty",
+            Self::ExampleKeyCaptureClear => "example.key-capture.clear",
+            Self::ExampleKeyCaptureRefusal => "example.key-capture.refusal",
+            Self::ExampleLogOverview => "example.log.overview",
+            Self::ExampleLogFollows => "example.log.follows",
+            Self::ExampleLogStill => "example.log.still",
+            Self::ExampleLogNarrow => "example.log.narrow",
+            Self::ExampleLogRoomy => "example.log.roomy",
+            Self::ExampleLogLineLevels => "example.log-line.levels",
+            Self::ExampleLogLineParts => "example.log-line.parts",
+            Self::ExampleLogLineLong => "example.log-line.long",
+            Self::ExampleLogLineFiltered => "example.log-line.filtered",
+            Self::ExampleLogLabel => "example.log.label",
+            Self::ExampleLogRecord => "example.log.record",
+            Self::ExampleLogResume => "example.log.resume",
+            Self::ExampleLogLevelDebug => "example.log.level-debug",
+            Self::ExampleLogLevelInfo => "example.log.level-info",
+            Self::ExampleLogLevelWarning => "example.log.level-warning",
+            Self::ExampleLogLevelError => "example.log.level-error",
+            Self::ExampleLogStarted => "example.log.started",
+            Self::ExampleLogStore => "example.log.store",
+            Self::ExampleLogCatalog => "example.log.catalog",
+            Self::ExampleLogSocket => "example.log.socket",
+            Self::ExampleLogAttached => "example.log.attached",
+            Self::ExampleLogSlow => "example.log.slow",
+            Self::ExampleLogRan => "example.log.ran",
+            Self::ExampleLogRefused => "example.log.refused",
+            Self::ExampleLogJournal => "example.log.journal",
+            Self::ExampleLogSnapshot => "example.log.snapshot",
+            Self::ExampleLogFull => "example.log.full",
+            Self::ExampleLogHeartbeat => "example.log.heartbeat",
+            Self::ExampleLogLost => "example.log.lost",
+            Self::ExampleLogMemory => "example.log.memory",
+            Self::ExamplePromptOverview => "example.prompt.overview",
+            Self::ExamplePromptBasic => "example.prompt.basic",
+            Self::ExamplePromptGrows => "example.prompt.grows",
+            Self::ExamplePromptDriven => "example.prompt.driven",
+            Self::ExamplePromptActive => "example.prompt.active",
+            Self::ExamplePromptReadonly => "example.prompt.readonly",
+            Self::ExamplePromptDisabled => "example.prompt.disabled",
+            Self::ExamplePromptLabel => "example.prompt.label",
+            Self::ExamplePromptSend => "example.prompt.send",
+            Self::ExamplePromptRunning => "example.prompt.running",
+            Self::ExampleOptionListOverview => "example.option-list.overview",
+            Self::ExampleOptionListWalk => "example.option-list.walk",
+            Self::ExampleOptionListColumns => "example.option-list.columns",
+            Self::ExampleOptionListDriven => "example.option-list.driven",
+            Self::ExampleOptionListNothing => "example.option-list.nothing",
+            Self::ExampleOptionGroupRun => "example.option-group.run",
+            Self::ExampleOptionItemRow => "example.option-item.row",
+            Self::ExampleOptionItemHits => "example.option-item.hits",
+            Self::ExampleOptionItemDetailHits => "example.option-item.detail-hits",
+            Self::ExampleOptionItemShortcut => "example.option-item.shortcut",
+            Self::ExampleOptionItemStates => "example.option-item.states",
+            Self::ExampleOptionListKeySpace => "example.option-list.key-space",
+            Self::ExampleOptionListKeyS => "example.option-list.key-s",
+            Self::ExampleOptionListKeyH => "example.option-list.key-h",
+            Self::ExampleOptionListKeyD => "example.option-list.key-d",
+            Self::ExampleOptionListKeyQ => "example.option-list.key-q",
+            Self::ExampleOptionGroupMixed => "example.option-group.mixed",
+            Self::ExampleOptionGroupColumns => "example.option-group.columns",
+            Self::ExampleOptionGroupFiltered => "example.option-group.filtered",
+            Self::ExampleOptionListCommands => "example.option-list.commands",
+            Self::ExampleOptionListMenu => "example.option-list.menu",
+            Self::ExampleOptionListFilter => "example.option-list.filter",
+            Self::ExampleOptionListEmpty => "example.option-list.empty",
+            Self::ExampleOptionListSettings => "example.option-list.settings",
+            Self::ExampleOptionListSettingsDetail => "example.option-list.settings-detail",
+            Self::ExampleOptionListHelp => "example.option-list.help",
+            Self::ExampleOptionListHelpDetail => "example.option-list.help-detail",
+            Self::ExampleOptionListSidebar => "example.option-list.sidebar",
+            Self::ExampleOptionListDev => "example.option-list.dev",
+            Self::ExampleOptionListShortcuts => "example.option-list.shortcuts",
+            Self::ExampleOptionListGroupWindow => "example.option-list.group-window",
+            Self::ExampleOptionListGroupPage => "example.option-list.group-page",
+            Self::ExampleOptionListCloseWindow => "example.option-list.close-window",
+            Self::ExampleOptionListHideWindow => "example.option-list.hide-window",
+            Self::ExampleOptionListClosePage => "example.option-list.close-page",
+            Self::ExampleMatchTextQuery => "example.match-text.query",
+            Self::ExampleMatchTextOne => "example.match-text.one",
+            Self::ExampleMatchTextWords => "example.match-text.words",
+            Self::ExampleMatchTextShared => "example.match-text.shared",
+            Self::ExampleMatchTextElsewhere => "example.match-text.elsewhere",
+            Self::ExampleMatchTextPlain => "example.match-text.plain",
             Self::ExampleParagraphLead => "example.paragraph.lead",
+            Self::ExampleProseFlowHeading => "example.prose.flow-heading",
+            Self::ExampleProseFlowPress => "example.prose.flow-press",
+            Self::ExampleProseFlowQuick => "example.prose.flow-quick",
+            Self::ExampleProseFlowQuickEm => "example.prose.flow-quick-em",
+            Self::ExampleProseFlowEscape => "example.prose.flow-escape",
+            Self::ExampleProseFlowEscapeStrong => "example.prose.flow-escape-strong",
+            Self::ExampleProseFlowLinkLead => "example.prose.flow-link-lead",
+            Self::ExampleProseFlowLink => "example.prose.flow-link",
+            Self::ExampleProseFlowMenu => "example.prose.flow-menu",
+            Self::ExampleProseFlowHelp => "example.prose.flow-help",
+            Self::ExampleProseFlowDev => "example.prose.flow-dev",
+            Self::ExampleProseFlowLogs => "example.prose.flow-logs",
+            Self::ExampleProseFlowRegistries => "example.prose.flow-registries",
+            Self::ExampleProseFlowClose => "example.prose.flow-close",
+            Self::ExampleProseFlowQuote => "example.prose.flow-quote",
+            Self::ExampleProseFlowCaption => "example.prose.flow-caption",
+            Self::ExampleProseFlowColKey => "example.prose.flow-col-key",
+            Self::ExampleProseFlowColOpens => "example.prose.flow-col-opens",
+            Self::ExampleProseFlowHelpPage => "example.prose.flow-help-page",
+            Self::ExampleProseFlowDevPages => "example.prose.flow-dev-pages",
+            Self::ExampleProseFlowClosePage => "example.prose.flow-close-page",
+            Self::ExampleProseFlowEnd => "example.prose.flow-end",
+            Self::ExampleProseNoteFlow => "example.prose.note-flow",
             Self::ExampleProseMeasure => "example.prose.measure",
             Self::ExampleProseNone => "example.prose.none",
             Self::ExampleQuote => "example.quote",
@@ -9681,6 +11160,18 @@ impl Key {
             Self::ExampleToolbarAlignRest => "example.toolbar.align-rest",
             Self::ExampleToolbarVertical => "example.toolbar.vertical",
             Self::ExampleToolbarDensity => "example.toolbar.density",
+            Self::ExampleToolbarRail => "example.toolbar.rail",
+            Self::ExampleRailControls => "example.rail.controls",
+            Self::ExampleRailPages => "example.rail.pages",
+            Self::ExampleRailCollapse => "example.rail.collapse",
+            Self::ExampleRailClose => "example.rail.close",
+            Self::ExampleRailDirection => "example.rail.direction",
+            Self::ExampleRailCommands => "example.rail.commands",
+            Self::ExampleRailSettings => "example.rail.settings",
+            Self::ExampleRailRegistries => "example.rail.registries",
+            Self::ExampleRailCommandsBody => "example.rail.commands-body",
+            Self::ExampleRailSettingsBody => "example.rail.settings-body",
+            Self::ExampleRailRegistriesBody => "example.rail.registries-body",
             Self::ExampleTimeMachine => "example.time.machine",
             Self::ExampleTimeAligned => "example.time.aligned",
             Self::ExampleMenuLabel => "example.menu.label",
@@ -10388,6 +11879,20 @@ impl Key {
             Self::ExampleMessageBarNoteAlert => "example.message-bar.note-alert",
             Self::ExampleMessageBarNoteDismiss => "example.message-bar.note-dismiss",
             Self::ExampleMessageBarNotePlain => "example.message-bar.note-plain",
+            Self::ExampleMessageBarLost => "example.message-bar.lost",
+            Self::ExampleMessageBarRestoring => "example.message-bar.restoring",
+            Self::ExampleMessageBarRestore => "example.message-bar.restore",
+            Self::ExampleMessageBarAgain => "example.message-bar.again",
+            Self::ExampleMessageBarStopped => "example.message-bar.stopped",
+            Self::ExampleMessageBarStart => "example.message-bar.start",
+            Self::ExampleMessageBarSave => "example.message-bar.save",
+            Self::ExampleMessageBarEnds => "example.message-bar.ends",
+            Self::ExampleMessageBarStay => "example.message-bar.stay",
+            Self::ExampleMessageBarNoteLine => "example.message-bar.note-line",
+            Self::ExampleMessageBarOffline => "example.message-bar.offline",
+            Self::ExampleMessageBarNoteQuiet => "example.message-bar.note-quiet",
+            Self::ExampleMessageBarNoteStopped => "example.message-bar.note-stopped",
+            Self::ExampleMessageBarNoteCountdown => "example.message-bar.note-countdown",
             Self::ExampleOverviewDividerPay => "example.overview.divider.pay",
             Self::ExampleOverviewDividerPayBody => "example.overview.divider.pay-body",
             Self::ExampleOverviewDividerInvoice => "example.overview.divider.invoice",
@@ -10440,6 +11945,7 @@ impl Key {
             Self::ExampleTabsNoteManual => "example.tabs.note-manual",
             Self::ExampleTabsNoteVertical => "example.tabs.note-vertical",
             Self::ExampleTabsNoteFill => "example.tabs.note-fill",
+            Self::ExampleTabsNoteRail => "example.tabs.note-rail",
             Self::ExampleTabSettings => "example.tab.settings",
             Self::ExampleTabPeople => "example.tab.people",
             Self::ExampleTabBilling => "example.tab.billing",
@@ -10484,6 +11990,16 @@ impl Key {
             Self::ExampleDialogNoteModal => "example.dialog.note-modal",
             Self::ExampleDialogNoteBeside => "example.dialog.note-beside",
             Self::ExampleDialogNoteWide => "example.dialog.note-wide",
+            Self::ExampleDialogIrreversible => "example.dialog.irreversible",
+            Self::ExampleDialogFiles => "example.dialog.files",
+            Self::ExampleDialogAsk => "example.dialog.ask",
+            Self::ExampleDialogRealmHeading => "example.dialog.realm-heading",
+            Self::ExampleDialogRealmDescription => "example.dialog.realm-description",
+            Self::ExampleDialogRealmRequester => "example.dialog.realm-requester",
+            Self::ExampleDialogRealmConfirm => "example.dialog.realm-confirm",
+            Self::ExampleDialogAnswer => "example.dialog.answer",
+            Self::ExampleDialogNoteAlert => "example.dialog.note-alert",
+            Self::ExampleDialogNoteShown => "example.dialog.note-shown",
             Self::ExampleDialogNotePlain => "example.dialog.note-plain",
             Self::ExamplePopoverOpen => "example.popover.open",
             Self::ExamplePopoverHeading => "example.popover.heading",
@@ -10517,6 +12033,7 @@ impl Key {
             Self::ExampleTooltipNoteLong => "example.tooltip.note-long",
             Self::ExampleTooltipNoteEnd => "example.tooltip.note-end",
             Self::ExampleTooltipNoteNone => "example.tooltip.note-none",
+            Self::ExampleTooltipNoteName => "example.tooltip.note-name",
             Self::ExampleToastSavedTitle => "example.toast.saved-title",
             Self::ExampleToastSaved => "example.toast.saved",
             Self::ExampleToastDismiss => "example.toast.dismiss",
@@ -11172,6 +12689,14 @@ impl Key {
             Self::ComponentDialogPropSizeDoc => "component.dialog.prop.size.doc",
             Self::ComponentDialogPropDismissibleDoc => "component.dialog.prop.dismissible.doc",
             Self::ComponentDialogPropCloseLabelDoc => "component.dialog.prop.close_label.doc",
+            Self::ComponentDialogPropShownDoc => "component.dialog.prop.shown.doc",
+            Self::ComponentDialogPropAlertDoc => "component.dialog.prop.alert.doc",
+            Self::ComponentDialogPropRequesterDoc => "component.dialog.prop.requester.doc",
+            Self::ComponentDialogPropIrreversibleLabelDoc => {
+                "component.dialog.prop.irreversible_label.doc"
+            }
+            Self::ComponentDialogPropConfirmLabelDoc => "component.dialog.prop.confirm_label.doc",
+            Self::ComponentDialogPropDeclineLabelDoc => "component.dialog.prop.decline_label.doc",
             Self::ComponentDialogPropChildrenDoc => "component.dialog.prop.children.doc",
             Self::ComponentDialogStateOpenDoc => "component.dialog.state.open.doc",
             Self::ComponentDialogKeyEnterOrSpaceName => "component.dialog.key.enter-or-space.name",
@@ -11206,6 +12731,22 @@ impl Key {
             Self::ComponentDividerPropWeightDoc => "component.divider.prop.weight.doc",
             Self::ComponentDividerPropDecorativeDoc => "component.divider.prop.decorative.doc",
             Self::ComponentDividerStateLabelledDoc => "component.divider.state.labelled.doc",
+            Self::ComponentDrawerGuidance => "component.drawer.guidance",
+            Self::ComponentDrawerA11yNotes => "component.drawer.a11y-notes",
+            Self::ComponentDrawerPropNameDoc => "component.drawer.prop.name.doc",
+            Self::ComponentDrawerPropIdDoc => "component.drawer.prop.id.doc",
+            Self::ComponentDrawerPropLabelDoc => "component.drawer.prop.label.doc",
+            Self::ComponentDrawerPropSideDoc => "component.drawer.prop.side.doc",
+            Self::ComponentDrawerPropCollapsedDoc => "component.drawer.prop.collapsed.doc",
+            Self::ComponentDrawerPropChildrenDoc => "component.drawer.prop.children.doc",
+            Self::ComponentDrawerKeyTabName => "component.drawer.key.tab.name",
+            Self::ComponentDrawerKeyTabAction => "component.drawer.key.tab.action",
+            Self::ComponentDrawerKeyEscapeName => "component.drawer.key.escape.name",
+            Self::ComponentDrawerKeyEscapeAction => "component.drawer.key.escape.action",
+            Self::ComponentDrawerRailGuidance => "component.drawer-rail.guidance",
+            Self::ComponentDrawerRailA11yNotes => "component.drawer-rail.a11y-notes",
+            Self::ComponentDrawerRailPropSideDoc => "component.drawer-rail.prop.side.doc",
+            Self::ComponentDrawerRailPropChildrenDoc => "component.drawer-rail.prop.children.doc",
             Self::ComponentEmA11yNotes => "component.em.a11y-notes",
             Self::ComponentEmPropChildrenDoc => "component.em.prop.children.doc",
             Self::ComponentErrorSummaryGuidance => "component.error-summary.guidance",
@@ -11321,6 +12862,34 @@ impl Key {
             Self::ComponentFileInputKeyDeleteOrBackspaceAction => {
                 "component.file-input.key.delete-or-backspace.action"
             }
+            Self::ComponentFooterGuidance => "component.footer.guidance",
+            Self::ComponentFooterA11yNotes => "component.footer.a11y-notes",
+            Self::ComponentFooterPropLabelDoc => "component.footer.prop.label.doc",
+            Self::ComponentFooterPropVisibilityDoc => "component.footer.prop.visibility.doc",
+            Self::ComponentFooterPropShownDoc => "component.footer.prop.shown.doc",
+            Self::ComponentFooterPropChildrenDoc => "component.footer.prop.children.doc",
+            Self::ComponentFooterCornerGuidance => "component.footer-corner.guidance",
+            Self::ComponentFooterCornerA11yNotes => "component.footer-corner.a11y-notes",
+            Self::ComponentFooterCornerPropSideDoc => "component.footer-corner.prop.side.doc",
+            Self::ComponentFooterCornerPropChildrenDoc => {
+                "component.footer-corner.prop.children.doc"
+            }
+            Self::ComponentFooterLineGuidance => "component.footer-line.guidance",
+            Self::ComponentFooterLineA11yNotes => "component.footer-line.a11y-notes",
+            Self::ComponentFooterLinePropKindDoc => "component.footer-line.prop.kind.doc",
+            Self::ComponentFooterLinePropExpandableDoc => {
+                "component.footer-line.prop.expandable.doc"
+            }
+            Self::ComponentFooterLinePropExpandedDoc => "component.footer-line.prop.expanded.doc",
+            Self::ComponentFooterLinePropExpandLabelDoc => {
+                "component.footer-line.prop.expand_label.doc"
+            }
+            Self::ComponentFooterLinePropCollapseLabelDoc => {
+                "component.footer-line.prop.collapse_label.doc"
+            }
+            Self::ComponentFooterLinePropActionDoc => "component.footer-line.prop.action.doc",
+            Self::ComponentFooterLinePropLiveDoc => "component.footer-line.prop.live.doc",
+            Self::ComponentFooterLinePropChildrenDoc => "component.footer-line.prop.children.doc",
             Self::ComponentHeadingA11yNotes => "component.heading.a11y-notes",
             Self::ComponentHeadingPropLevelDoc => "component.heading.prop.level.doc",
             Self::ComponentHeadingPropSizeDoc => "component.heading.prop.size.doc",
@@ -11397,6 +12966,44 @@ impl Key {
             Self::ComponentInsPropChildrenDoc => "component.ins.prop.children.doc",
             Self::ComponentKbdPropSizeDoc => "component.kbd.prop.size.doc",
             Self::ComponentKbdPropChildrenDoc => "component.kbd.prop.children.doc",
+            Self::ComponentKeyCaptureGuidance => "component.key-capture.guidance",
+            Self::ComponentKeyCaptureA11yNotes => "component.key-capture.a11y-notes",
+            Self::ComponentKeyCapturePropNameDoc => "component.key-capture.prop.name.doc",
+            Self::ComponentKeyCapturePropLabelDoc => "component.key-capture.prop.label.doc",
+            Self::ComponentKeyCapturePropValueDoc => "component.key-capture.prop.value.doc",
+            Self::ComponentKeyCapturePropKeyboardDoc => "component.key-capture.prop.keyboard.doc",
+            Self::ComponentKeyCapturePropCaptureLabelDoc => {
+                "component.key-capture.prop.capture_label.doc"
+            }
+            Self::ComponentKeyCapturePropEmptyLabelDoc => {
+                "component.key-capture.prop.empty_label.doc"
+            }
+            Self::ComponentKeyCapturePropClearLabelDoc => {
+                "component.key-capture.prop.clear_label.doc"
+            }
+            Self::ComponentKeyCapturePropRefusalDoc => "component.key-capture.prop.refusal.doc",
+            Self::ComponentKeyCapturePropDisabledDoc => "component.key-capture.prop.disabled.doc",
+            Self::ComponentKeyCaptureStateListeningDoc => {
+                "component.key-capture.state.listening.doc"
+            }
+            Self::ComponentKeyCaptureStateCapturedDoc => "component.key-capture.state.captured.doc",
+            Self::ComponentKeyCaptureStateRefusedDoc => "component.key-capture.state.refused.doc",
+            Self::ComponentKeyCaptureKeyEnterSpaceName => {
+                "component.key-capture.key.enter-space.name"
+            }
+            Self::ComponentKeyCaptureKeyEnterSpaceAction => {
+                "component.key-capture.key.enter-space.action"
+            }
+            Self::ComponentKeyCaptureKeyAKeyWithModifiersHeldName => {
+                "component.key-capture.key.a-key-with-modifiers-held.name"
+            }
+            Self::ComponentKeyCaptureKeyAKeyWithModifiersHeldAction => {
+                "component.key-capture.key.a-key-with-modifiers-held.action"
+            }
+            Self::ComponentKeyCaptureKeyTabName => "component.key-capture.key.tab.name",
+            Self::ComponentKeyCaptureKeyTabAction => "component.key-capture.key.tab.action",
+            Self::ComponentKeyCaptureKeyEscapeName => "component.key-capture.key.escape.name",
+            Self::ComponentKeyCaptureKeyEscapeAction => "component.key-capture.key.escape.action",
             Self::ComponentLabelGuidance => "component.label.guidance",
             Self::ComponentLabelA11yNotes => "component.label.a11y-notes",
             Self::ComponentLabelPropTextDoc => "component.label.prop.text.doc",
@@ -11506,8 +13113,36 @@ impl Key {
             Self::ComponentListItemA11yNotes => "component.list-item.a11y-notes",
             Self::ComponentListItemPropTermDoc => "component.list-item.prop.term.doc",
             Self::ComponentListItemPropChildrenDoc => "component.list-item.prop.children.doc",
+            Self::ComponentLogGuidance => "component.log.guidance",
+            Self::ComponentLogA11yNotes => "component.log.a11y-notes",
+            Self::ComponentLogPropNameDoc => "component.log.prop.name.doc",
+            Self::ComponentLogPropLabelDoc => "component.log.prop.label.doc",
+            Self::ComponentLogPropFollowDoc => "component.log.prop.follow.doc",
+            Self::ComponentLogPropResumeLabelDoc => "component.log.prop.resume_label.doc",
+            Self::ComponentLogPropChildrenDoc => "component.log.prop.children.doc",
+            Self::ComponentLogStatePausedDoc => "component.log.state.paused.doc",
+            Self::ComponentLogKeyArrowKeysPageUpPageDownName => {
+                "component.log.key.arrow-keys-page-up-page-down.name"
+            }
+            Self::ComponentLogKeyArrowKeysPageUpPageDownAction => {
+                "component.log.key.arrow-keys-page-up-page-down.action"
+            }
+            Self::ComponentLogKeyHomeEndName => "component.log.key.home-end.name",
+            Self::ComponentLogKeyHomeEndAction => "component.log.key.home-end.action",
+            Self::ComponentLogLineGuidance => "component.log-line.guidance",
+            Self::ComponentLogLineA11yNotes => "component.log-line.a11y-notes",
+            Self::ComponentLogLinePropToneDoc => "component.log-line.prop.tone.doc",
+            Self::ComponentLogLinePropLevelDoc => "component.log-line.prop.level.doc",
+            Self::ComponentLogLinePropTimeDoc => "component.log-line.prop.time.doc",
+            Self::ComponentLogLinePropSourceDoc => "component.log-line.prop.source.doc",
+            Self::ComponentLogLinePropChildrenDoc => "component.log-line.prop.children.doc",
+            Self::ComponentMarkGuidance => "component.mark.guidance",
             Self::ComponentMarkA11yNotes => "component.mark.a11y-notes",
             Self::ComponentMarkPropChildrenDoc => "component.mark.prop.children.doc",
+            Self::ComponentMatchTextGuidance => "component.match-text.guidance",
+            Self::ComponentMatchTextA11yNotes => "component.match-text.a11y-notes",
+            Self::ComponentMatchTextPropTextDoc => "component.match-text.prop.text.doc",
+            Self::ComponentMatchTextPropHitsDoc => "component.match-text.prop.hits.doc",
             Self::ComponentMenuGuidance => "component.menu.guidance",
             Self::ComponentMenuA11yNotes => "component.menu.a11y-notes",
             Self::ComponentMenuPropNameDoc => "component.menu.prop.name.doc",
@@ -11560,10 +13195,23 @@ impl Key {
             Self::ComponentMessageBarPropDismissLabelDoc => {
                 "component.message-bar.prop.dismiss_label.doc"
             }
+            Self::ComponentMessageBarPropPresentationDoc => {
+                "component.message-bar.prop.presentation.doc"
+            }
+            Self::ComponentMessageBarPropDeadlineDoc => "component.message-bar.prop.deadline.doc",
+            Self::ComponentMessageBarPropCountdownLabelDoc => {
+                "component.message-bar.prop.countdown_label.doc"
+            }
+            Self::ComponentMessageBarPropActionLabelDoc => {
+                "component.message-bar.prop.action_label.doc"
+            }
+            Self::ComponentMessageBarPropActionDoc => "component.message-bar.prop.action.doc",
             Self::ComponentMessageBarPropChildrenDoc => "component.message-bar.prop.children.doc",
             Self::ComponentMessageBarStateDismissedDoc => {
                 "component.message-bar.state.dismissed.doc"
             }
+            Self::ComponentMessageBarKeyTabName => "component.message-bar.key.tab.name",
+            Self::ComponentMessageBarKeyTabAction => "component.message-bar.key.tab.action",
             Self::ComponentMessageBarKeyEnterOrSpaceName => {
                 "component.message-bar.key.enter-or-space.name"
             }
@@ -11645,6 +13293,68 @@ impl Key {
             Self::ComponentNumberInputKeyHomeEndName => "component.number-input.key.home-end.name",
             Self::ComponentNumberInputKeyHomeEndAction => {
                 "component.number-input.key.home-end.action"
+            }
+            Self::ComponentOptionGroupGuidance => "component.option-group.guidance",
+            Self::ComponentOptionGroupA11yNotes => "component.option-group.a11y-notes",
+            Self::ComponentOptionGroupPropLabelDoc => "component.option-group.prop.label.doc",
+            Self::ComponentOptionGroupPropChildrenDoc => "component.option-group.prop.children.doc",
+            Self::ComponentOptionItemGuidance => "component.option-item.guidance",
+            Self::ComponentOptionItemA11yNotes => "component.option-item.a11y-notes",
+            Self::ComponentOptionItemPropValueDoc => "component.option-item.prop.value.doc",
+            Self::ComponentOptionItemPropLabelDoc => "component.option-item.prop.label.doc",
+            Self::ComponentOptionItemPropHitsDoc => "component.option-item.prop.hits.doc",
+            Self::ComponentOptionItemPropDetailDoc => "component.option-item.prop.detail.doc",
+            Self::ComponentOptionItemPropDetailHitsDoc => {
+                "component.option-item.prop.detail_hits.doc"
+            }
+            Self::ComponentOptionItemPropShortcutDoc => "component.option-item.prop.shortcut.doc",
+            Self::ComponentOptionItemPropIconDoc => "component.option-item.prop.icon.doc",
+            Self::ComponentOptionItemPropIdDoc => "component.option-item.prop.id.doc",
+            Self::ComponentOptionItemPropActiveDoc => "component.option-item.prop.active.doc",
+            Self::ComponentOptionItemPropSelectedDoc => "component.option-item.prop.selected.doc",
+            Self::ComponentOptionItemPropDisabledDoc => "component.option-item.prop.disabled.doc",
+            Self::ComponentOptionListGuidance => "component.option-list.guidance",
+            Self::ComponentOptionListA11yNotes => "component.option-list.a11y-notes",
+            Self::ComponentOptionListPropNameDoc => "component.option-list.prop.name.doc",
+            Self::ComponentOptionListPropLabelDoc => "component.option-list.prop.label.doc",
+            Self::ComponentOptionListPropLayoutDoc => "component.option-list.prop.layout.doc",
+            Self::ComponentOptionListPropSizeDoc => "component.option-list.prop.size.doc",
+            Self::ComponentOptionListPropFocusableDoc => "component.option-list.prop.focusable.doc",
+            Self::ComponentOptionListPropEmptyLabelDoc => {
+                "component.option-list.prop.empty_label.doc"
+            }
+            Self::ComponentOptionListPropChildrenDoc => "component.option-list.prop.children.doc",
+            Self::ComponentOptionListKeyDownArrowUpArrowName => {
+                "component.option-list.key.down-arrow-up-arrow.name"
+            }
+            Self::ComponentOptionListKeyDownArrowUpArrowAction => {
+                "component.option-list.key.down-arrow-up-arrow.action"
+            }
+            Self::ComponentOptionListKeyLeftArrowRightArrowName => {
+                "component.option-list.key.left-arrow-right-arrow.name"
+            }
+            Self::ComponentOptionListKeyLeftArrowRightArrowAction => {
+                "component.option-list.key.left-arrow-right-arrow.action"
+            }
+            Self::ComponentOptionListKeyHomeEndName => "component.option-list.key.home-end.name",
+            Self::ComponentOptionListKeyHomeEndAction => {
+                "component.option-list.key.home-end.action"
+            }
+            Self::ComponentOptionListKeyPageUpPageDownName => {
+                "component.option-list.key.page-up-page-down.name"
+            }
+            Self::ComponentOptionListKeyPageUpPageDownAction => {
+                "component.option-list.key.page-up-page-down.action"
+            }
+            Self::ComponentOptionListKeyEnterName => "component.option-list.key.enter.name",
+            Self::ComponentOptionListKeyEnterAction => "component.option-list.key.enter.action",
+            Self::ComponentOptionListKeySpaceName => "component.option-list.key.space.name",
+            Self::ComponentOptionListKeySpaceAction => "component.option-list.key.space.action",
+            Self::ComponentOptionListKeyAPrintableCharacterName => {
+                "component.option-list.key.a-printable-character.name"
+            }
+            Self::ComponentOptionListKeyAPrintableCharacterAction => {
+                "component.option-list.key.a-printable-character.action"
             }
             Self::ComponentOtpFieldGuidance => "component.otp-field.guidance",
             Self::ComponentOtpFieldA11yNotes => "component.otp-field.a11y-notes",
@@ -11741,7 +13451,31 @@ impl Key {
             Self::ComponentProgressPropSizeDoc => "component.progress.prop.size.doc",
             Self::ComponentProgressPropHideLabelDoc => "component.progress.prop.hide_label.doc",
             Self::ComponentProgressStateBusyDoc => "component.progress.state.busy.doc",
+            Self::ComponentPromptGuidance => "component.prompt.guidance",
+            Self::ComponentPromptA11yNotes => "component.prompt.a11y-notes",
+            Self::ComponentPromptPropNameDoc => "component.prompt.prop.name.doc",
+            Self::ComponentPromptPropLabelDoc => "component.prompt.prop.label.doc",
+            Self::ComponentPromptPropValueDoc => "component.prompt.prop.value.doc",
+            Self::ComponentPromptPropSendLabelDoc => "component.prompt.prop.send_label.doc",
+            Self::ComponentPromptPropActionDoc => "component.prompt.prop.action.doc",
+            Self::ComponentPromptPropControlsDoc => "component.prompt.prop.controls.doc",
+            Self::ComponentPromptPropActiveOptionDoc => "component.prompt.prop.active_option.doc",
+            Self::ComponentPromptPropDisabledDoc => "component.prompt.prop.disabled.doc",
+            Self::ComponentPromptPropReadonlyDoc => "component.prompt.prop.readonly.doc",
+            Self::ComponentPromptStateComposingDoc => "component.prompt.state.composing.doc",
+            Self::ComponentPromptStateSelectingDoc => "component.prompt.state.selecting.doc",
+            Self::ComponentPromptKeyEnterName => "component.prompt.key.enter.name",
+            Self::ComponentPromptKeyEnterAction => "component.prompt.key.enter.action",
+            Self::ComponentPromptKeyShiftEnterName => "component.prompt.key.shift-enter.name",
+            Self::ComponentPromptKeyShiftEnterAction => "component.prompt.key.shift-enter.action",
+            Self::ComponentPromptKeyDownArrowUpArrowName => {
+                "component.prompt.key.down-arrow-up-arrow.name"
+            }
+            Self::ComponentPromptKeyDownArrowUpArrowAction => {
+                "component.prompt.key.down-arrow-up-arrow.action"
+            }
             Self::ComponentProsePropMeasureDoc => "component.prose.prop.measure.doc",
+            Self::ComponentProsePropFlowDoc => "component.prose.prop.flow.doc",
             Self::ComponentProsePropChildrenDoc => "component.prose.prop.children.doc",
             Self::ComponentRadioGuidance => "component.radio.guidance",
             Self::ComponentRadioA11yNotes => "component.radio.a11y-notes",
@@ -11996,6 +13730,38 @@ impl Key {
             }
             Self::ComponentSliderKeyHomeEndName => "component.slider.key.home-end.name",
             Self::ComponentSliderKeyHomeEndAction => "component.slider.key.home-end.action",
+            Self::ComponentSplitGuidance => "component.split.guidance",
+            Self::ComponentSplitA11yNotes => "component.split.a11y-notes",
+            Self::ComponentSplitPropNameDoc => "component.split.prop.name.doc",
+            Self::ComponentSplitPropValueDoc => "component.split.prop.value.doc",
+            Self::ComponentSplitPropMinDoc => "component.split.prop.min.doc",
+            Self::ComponentSplitPropMaxDoc => "component.split.prop.max.doc",
+            Self::ComponentSplitPropCollapseDoc => "component.split.prop.collapse.doc",
+            Self::ComponentSplitPropChildrenDoc => "component.split.prop.children.doc",
+            Self::ComponentSplitKeyArrowKeysName => "component.split.key.arrow-keys.name",
+            Self::ComponentSplitKeyArrowKeysAction => "component.split.key.arrow-keys.action",
+            Self::ComponentSplitKeyPageUpPageDownName => {
+                "component.split.key.page-up-page-down.name"
+            }
+            Self::ComponentSplitKeyPageUpPageDownAction => {
+                "component.split.key.page-up-page-down.action"
+            }
+            Self::ComponentSplitKeyHomeEndName => "component.split.key.home-end.name",
+            Self::ComponentSplitKeyHomeEndAction => "component.split.key.home-end.action",
+            Self::ComponentSplitKeyEnterName => "component.split.key.enter.name",
+            Self::ComponentSplitKeyEnterAction => "component.split.key.enter.action",
+            Self::ComponentSplitHandleGuidance => "component.split-handle.guidance",
+            Self::ComponentSplitHandleA11yNotes => "component.split-handle.a11y-notes",
+            Self::ComponentSplitHandlePropNameDoc => "component.split-handle.prop.name.doc",
+            Self::ComponentSplitHandlePropLabelDoc => "component.split-handle.prop.label.doc",
+            Self::ComponentSplitHandleStateDraggingDoc => {
+                "component.split-handle.state.dragging.doc"
+            }
+            Self::ComponentSplitPaneGuidance => "component.split-pane.guidance",
+            Self::ComponentSplitPaneA11yNotes => "component.split-pane.a11y-notes",
+            Self::ComponentSplitPanePropNameDoc => "component.split-pane.prop.name.doc",
+            Self::ComponentSplitPanePropSideDoc => "component.split-pane.prop.side.doc",
+            Self::ComponentSplitPanePropChildrenDoc => "component.split-pane.prop.children.doc",
             Self::ComponentStrongPropChildrenDoc => "component.strong.prop.children.doc",
             Self::ComponentSwatchGuidance => "component.swatch.guidance",
             Self::ComponentSwatchA11yNotes => "component.swatch.a11y-notes",
@@ -12486,6 +14252,12 @@ impl Key {
             Self::ComponentToolbarKeyTabAction => "component.toolbar.key.tab.action",
             Self::ComponentToolbarKeyArrowKeysName => "component.toolbar.key.arrow-keys.name",
             Self::ComponentToolbarKeyArrowKeysAction => "component.toolbar.key.arrow-keys.action",
+            Self::ComponentToolbarKeyArrowKeysInARailName => {
+                "component.toolbar.key.arrow-keys-in-a-rail.name"
+            }
+            Self::ComponentToolbarKeyArrowKeysInARailAction => {
+                "component.toolbar.key.arrow-keys-in-a-rail.action"
+            }
             Self::ComponentToolbarKeyHomeName => "component.toolbar.key.home.name",
             Self::ComponentToolbarKeyHomeAction => "component.toolbar.key.home.action",
             Self::ComponentToolbarKeyEndName => "component.toolbar.key.end.name",
@@ -12628,6 +14400,36 @@ impl Locale {
                 Key::PageMenuSummary => "Let users choose an action from the list a button opens.",
                 Key::PageMenuBody => {
                     "A menu and its items. The button that opens one is a `Button` with `menu` and `controls`. Everything after the press is `dist/menu.js`: the anchoring, the arrow walk, the letter that jumps, Escape, and the focus returning to the button."
+                }
+                Key::PageFooterSummary => {
+                    "Hold the lines a window keeps at its bottom edge, with a corner at each end."
+                }
+                Key::PageFooterBody => {
+                    "The footer, one line of it, and one corner. The lines are told apart by shade and no border is drawn. A corner is as tall as all the lines together. The footer ships no script."
+                }
+                Key::PageDrawerSummary => {
+                    "Open a panel along one edge of a window, beside the work and never over it."
+                }
+                Key::PageDrawerBody => {
+                    "The drawer and the rail down a side of it. A drawer is in the flow of its window and is not modal. It opens as far as its content, up to a share of the window. The caller opens and shuts it."
+                }
+                Key::PageSplitSummary => {
+                    "Divide a box between two panes, with a line between them a reader can move."
+                }
+                Key::PageSplitBody => {
+                    "The split, one pane and the handle between two. The share of the first pane is one number. A narrow box stacks the panes or leaves one out, and it is the split's own box that is measured."
+                }
+                Key::PageLogSummary => {
+                    "Show lines as they arrive, and keep the newest in view until the reader scrolls away."
+                }
+                Key::PageLogBody => {
+                    "The log and one line of it. A log follows its newest line until the reader scrolls away, and follows again at the end. Every line is in the document, and the caller bounds how many."
+                }
+                Key::PageOptionListSummary => {
+                    "Let users walk a list of options with the keyboard and choose one."
+                }
+                Key::PageOptionListBody => {
+                    "The list, a named run of options, and one option. The focus stays on one element and `aria-activedescendant` names the active option. The list chooses nothing itself. It says which option was asked for, in an event."
                 }
                 Key::PageTreeSummary => {
                     "Let users walk a hierarchy, opening, closing and choosing nodes in it."
@@ -13002,7 +14804,53 @@ impl Locale {
                     "Show one item of a list, or one term and its description."
                 }
                 Key::ComponentMarkSummary => {
-                    "Highlight text for what the reader is doing now, such as a search hit."
+                    "Highlight a phrase in running text that matters to what the reader is doing now."
+                }
+                Key::ComponentMatchTextSummary => {
+                    "Show a name with the characters a query matched marked, one style for each word of the query."
+                }
+                Key::ComponentFooterSummary => {
+                    "Hold the lines a window keeps at its bottom edge, with a corner at each end."
+                }
+                Key::ComponentFooterCornerSummary => {
+                    "Place a corner at one end of a footer, as tall as all its lines."
+                }
+                Key::ComponentFooterLineSummary => {
+                    "Place one line in a footer: controls, status, or the line to type in."
+                }
+                Key::ComponentDrawerSummary => {
+                    "Open a panel along one edge of a window, beside the work and never over it."
+                }
+                Key::ComponentDrawerRailSummary => {
+                    "Place a column of controls or of tabs down one side of a drawer."
+                }
+                Key::ComponentSplitSummary => {
+                    "Divide a box between two panes, with a line between them a reader can move."
+                }
+                Key::ComponentSplitPaneSummary => {
+                    "Hold one of the two halves of a split, and scroll what does not fit."
+                }
+                Key::ComponentSplitHandleSummary => {
+                    "Let a reader move the line between two panes, by pointer, touch or keyboard."
+                }
+                Key::ComponentKeyCaptureSummary => {
+                    "Let users record a shortcut by pressing its keys, and show it as those keys."
+                }
+                Key::ComponentLogSummary => {
+                    "Show lines as they arrive, and keep the newest in view until the reader scrolls away."
+                }
+                Key::ComponentLogLineSummary => {
+                    "Show one line of a log: its time, its level, its source and its message."
+                }
+                Key::ComponentPromptSummary => {
+                    "Let users type on a line with a block cursor, and send what they typed."
+                }
+                Key::ComponentOptionGroupSummary => "Name a run of options inside an option list.",
+                Key::ComponentOptionItemSummary => {
+                    "Place one option in an option list: its name, its key and what it does."
+                }
+                Key::ComponentOptionListSummary => {
+                    "Let users walk a list of options with the keyboard and choose one."
                 }
                 Key::ComponentParagraphSummary => "Render a paragraph of prose.",
                 Key::ComponentProseSummary => {
@@ -13668,8 +15516,360 @@ impl Locale {
                 Key::ExampleMarkSearch => {
                     "The weight changes as well as the background, so a hit can be found without relying on colour."
                 }
+                Key::ExampleFooterOverview => {
+                    "Three lines and two corners, told apart by shade alone. The middle line is cut to fit, and the control at its end expands it."
+                }
+                Key::ExampleFooterLines => {
+                    "The lines stack in the order they are written. No border is drawn between them."
+                }
+                Key::ExampleFooterAuto => {
+                    "`auto` folds the footer to a strip along its edge. Point at the strip, or move the focus into it, and it opens."
+                }
+                Key::ExampleFooterShown => {
+                    "`shown` opens a folded footer from outside it, for a key pressed elsewhere in the window."
+                }
+                Key::ExampleFooterNarrow => {
+                    "In a narrow window the lines keep their height. What does not fit on a line is cut at its end."
+                }
+                Key::ExampleFooterCornerAlone => {
+                    "A footer with one corner gives its lines the room of the other."
+                }
+                Key::ExampleFooterCornerTwo => {
+                    "Two controls stand one above the other. A corner is cut at the footer's height."
+                }
+                Key::ExampleFooterLineKinds => {
+                    "Each kind has its own shade. `prompt` has the page's own."
+                }
+                Key::ExampleFooterLineCut => {
+                    "Content longer than the line is cut. The control at the end shows under a pointer or the focus."
+                }
+                Key::ExampleFooterLineExpanded => {
+                    "Expanded, the line wraps and grows, and the control stays showing."
+                }
+                Key::ExampleFooterLineLive => {
+                    "`live` makes the content a `role=\"status\"`, so a notice is announced when it arrives."
+                }
+                Key::ExampleFooterCornerSides => {
+                    "A corner is as wide as a rail and as tall as the footer."
+                }
+                Key::ExampleFooterCornerControl => {
+                    "A control in a corner shows its icon and keeps its name."
+                }
+                Key::ExampleFooterLabel => "Window footer",
+                Key::ExampleFooterSidebar => "Open the sidebar",
+                Key::ExampleFooterPage => "Registries",
+                Key::ExampleFooterOffline => "Offline",
+                Key::ExampleFooterHover => {
+                    "Closes the focused page and returns the focus to the page before it."
+                }
+                Key::ExampleFooterSelection => "Opens the settings, one page for each setting.",
+                Key::ExampleFooterExpand => "Show all of it",
+                Key::ExampleFooterCollapse => "Show one line",
+                Key::ExampleFooterNotice => "The setting was saved.",
+                Key::ExampleFooterTyped => "close the page",
+                Key::ExampleFooterModeline => "Modeline",
+                Key::ExampleFooterInfo => "Info line",
+                Key::ExampleFooterPrompt => "Prompt line",
+                Key::ExampleDrawerOverview => {
+                    "A drawer under a footer. Its two rails continue the footer's corners, and the control at the end of the modeline shuts and opens it."
+                }
+                Key::ExampleDrawerBasic => {
+                    "A drawer is as tall as what is in it. It takes its room from the work above and covers none of it."
+                }
+                Key::ExampleDrawerCollapsed => {
+                    "`collapsed` keeps what is in the drawer and shows none of it. Open it, move the focus inside and press Escape."
+                }
+                Key::ExampleDrawerSide => {
+                    "A drawer at a side grows across the window, to the same share of it, and is as tall as its side."
+                }
+                Key::ExampleDrawerScroll => {
+                    "Past its share of the window the content scrolls. The rail stays where it is."
+                }
+                Key::ExampleDrawerRailControls => {
+                    "A rail is as wide as a footer's corner and as tall as the drawer. It holds a `Toolbar` drawn as a rail."
+                }
+                Key::ExampleDrawerRailTabs => {
+                    "A rail at the `end` holds the tabs. The chosen tab is marked on the edge that faces the content."
+                }
+                Key::ExampleDrawerRailBoth => {
+                    "A rail at each side, and the content between them. The keyboard reaches them in the order they are written."
+                }
+                Key::ExampleDrawerRailScroll => {
+                    "A rail taller than its drawer scrolls, with no scrollbar. Moving along it with the arrows brings each control into view."
+                }
+                Key::ExampleDrawerLabel => "Drawer",
+                Key::ExampleDrawerSidebar => "Sidebar",
+                Key::ExampleDrawerDetails => "Details",
+                Key::ExampleDrawerToggle => "Show or hide the drawer",
+                Key::ExampleDrawerWork => {
+                    "The workspace area. The drawer below takes its room from here."
+                }
+                Key::ExampleDrawerWorkShut => "The drawer below is shut. What is in it is kept.",
+                Key::ExampleDrawerWorkSide => "The workspace area, between a drawer at each side.",
+                Key::ExampleDrawerLongOne => {
+                    "Every page works in the workspace area and in the drawer."
+                }
+                Key::ExampleDrawerLongTwo => {
+                    "A page adapts to the smaller space, or provides a view made for it."
+                }
+                Key::ExampleDrawerLongThree => {
+                    "Collapsing the drawer keeps every page that is open in it."
+                }
+                Key::ExampleSplitOverview => {
+                    "A list and what is chosen in it. Drag the line between them, or move the focus to it and press the arrow keys."
+                }
+                Key::ExampleSplitBasic => {
+                    "Two panes share the box in halves. The handle between them is one tab stop."
+                }
+                Key::ExampleSplitLimits => {
+                    "`value` is where the line starts. `min` and `max` are as far as it goes either way."
+                }
+                Key::ExampleSplitStack => {
+                    "In a box narrower than the `sm` breakpoint the panes stack and the handle is gone. The box measured is the split's own."
+                }
+                Key::ExampleSplitHide => {
+                    "`hide-start` and `hide-end` leave one pane out of a narrow box. The other takes all of it."
+                }
+                Key::ExampleSplitNone => {
+                    "`none` keeps the panes side by side in the narrowest box, and the handle with them."
+                }
+                Key::ExampleSplitPaneSides => {
+                    "Two panes and no handle keep their shares. Nothing here is a control."
+                }
+                Key::ExampleSplitPaneScroll => {
+                    "Side by side, a pane is as tall as the split and scrolls what is taller. The other pane stays where it is."
+                }
+                Key::ExampleSplitPaneContent => {
+                    "A pane has no padding of its own. What it holds brings its own."
+                }
+                Key::ExampleSplitPaneNested => {
+                    "A pane holds a split of its own, for three columns. Each split is measured by its own box."
+                }
+                Key::ExampleSplitHandleBasic => {
+                    "The handle is as wide as the smallest target and draws a hairline. An arrow key moves it one point, and a page key ten."
+                }
+                Key::ExampleSplitHandleLeast => {
+                    "This pane starts at its least. Enter brings it to the middle of what it may be, and Enter again puts it back."
+                }
+                Key::ExampleSplitHandleAway => {
+                    "With limits of 0 and 100, Home and Enter put the first pane away entirely. End does the same to the second."
+                }
+                Key::ExampleSplitHandleMirrored => {
+                    "Read from the right, the first pane is on the right. The arrow keys still move the line the way they point."
+                }
+                Key::ExampleSplitHandle => "Resize the list",
+                Key::ExampleKeyCaptureOverview => {
+                    "Each control holds one shortcut. Press it, then the keys. Escape keeps the shortcut it had."
+                }
+                Key::ExampleKeyCaptureBasic => {
+                    "The keys are drawn by the labels on them. Press the control to listen, and the next key with its modifiers is recorded."
+                }
+                Key::ExampleKeyCaptureKeyboards => {
+                    "One chord on three keyboards. Only the names of the modifiers change."
+                }
+                Key::ExampleKeyCaptureRemovable => {
+                    "The control after the box removes the shortcut. It shows only while there is one to remove."
+                }
+                Key::ExampleKeyCaptureUnset => {
+                    "With no shortcut, the box says so in the caller's words."
+                }
+                Key::ExampleKeyCaptureRefused => {
+                    "The caller refused the last chord. Its sentence is under the box, and a rule runs down the leading edge."
+                }
+                Key::ExampleKeyCaptureLocked => {
+                    "A disabled control stays in the tab order and says what it holds. Pressing it starts nothing."
+                }
+                Key::ExampleKeyCaptureLeader => "Leader",
+                Key::ExampleKeyCaptureSettings => "Open the settings",
+                Key::ExampleKeyCaptureHelp => "Open the help",
+                Key::ExampleKeyCaptureCapture => "Press the new keys, or Escape",
+                Key::ExampleKeyCaptureEmpty => "None",
+                Key::ExampleKeyCaptureClear => "Remove the shortcut",
+                Key::ExampleKeyCaptureRefusal => {
+                    "The production channel already uses this shortcut."
+                }
+                Key::ExampleLogOverview => {
+                    "A daemon's log as it runs. Scroll up and it stops following, and the control at its end takes you back to the newest line."
+                }
+                Key::ExampleLogFollows => {
+                    "The log opens at its newest line and keeps it in view. Scrolled away, it stays where you are until you return to the end."
+                }
+                Key::ExampleLogStill => {
+                    "With `follow` off, the log opens at its first line and stays where the reader puts it."
+                }
+                Key::ExampleLogNarrow => {
+                    "In a narrow window each line wraps under itself. Nothing scrolls sideways."
+                }
+                Key::ExampleLogRoomy => {
+                    "With room for every line, the log is at its first line and its end at once. Nothing offers to resume."
+                }
+                Key::ExampleLogLineLevels => {
+                    "Each level is a word in a tinted box. The tone says the level again, never alone."
+                }
+                Key::ExampleLogLineParts => {
+                    "A part left out leaves no space behind. A level with no tone is drawn in the page's own shade."
+                }
+                Key::ExampleLogLineLong => {
+                    "A path has no space to break at, so it breaks inside itself. A line break in the message is kept."
+                }
+                Key::ExampleLogLineFiltered => {
+                    "Filtered from the prompt line, the message is a `MatchText`, each word of the query marked in its own tone."
+                }
+                Key::ExampleLogLabel => "Daemon log",
+                Key::ExampleLogRecord => "Journal",
+                Key::ExampleLogResume => "Go to the newest",
+                Key::ExampleLogLevelDebug => "debug",
+                Key::ExampleLogLevelInfo => "info",
+                Key::ExampleLogLevelWarning => "warning",
+                Key::ExampleLogLevelError => "error",
+                Key::ExampleLogStarted => "Started, channel development.",
+                Key::ExampleLogStore => "Opened the local store.",
+                Key::ExampleLogCatalog => "Read 42 commands from the catalog.",
+                Key::ExampleLogSocket => "Listening on the local socket.",
+                Key::ExampleLogAttached => "A window attached.",
+                Key::ExampleLogSlow => "A client was slow to answer the heartbeat.",
+                Key::ExampleLogRan => "Ran a command for the window.",
+                Key::ExampleLogRefused => "A plugin was refused: its capability is not granted.",
+                Key::ExampleLogJournal => "The refusal was written to the journal.",
+                Key::ExampleLogSnapshot => "Saved the interface's state.",
+                Key::ExampleLogFull => "The store is nine tenths full.",
+                Key::ExampleLogHeartbeat => "Heartbeat.",
+                Key::ExampleLogLost => "A window stopped answering.",
+                Key::ExampleLogMemory => "A plugin is near its memory limit.",
+                Key::ExamplePromptOverview => {
+                    "The prompt is the last line of a footer. Type in it, then press Enter or the control at its end."
+                }
+                Key::ExamplePromptBasic => {
+                    "The cursor is a block on the character it stands before. It is filled while the prompt has the focus, and an outline while it does not."
+                }
+                Key::ExamplePromptGrows => {
+                    "The prompt grows with its text, to eight lines. After that it scrolls, and the block stays on its character."
+                }
+                Key::ExamplePromptDriven => {
+                    "The prompt names the list in `controls`. The focus stays in the prompt, and the Up and Down arrows move through the options."
+                }
+                Key::ExamplePromptActive => {
+                    "`active` names the option the keyboard is on, for a caller that renders the active option itself."
+                }
+                Key::ExamplePromptReadonly => {
+                    "A read-only prompt can be read and copied. Its cursor stays an outline, and nothing is sent."
+                }
+                Key::ExamplePromptDisabled => {
+                    "A disabled prompt takes no focus and draws no cursor."
+                }
+                Key::ExamplePromptLabel => "Prompt",
+                Key::ExamplePromptSend => "Send",
+                Key::ExamplePromptRunning => "The library is being indexed.",
+                Key::ExampleOptionListOverview => {
+                    "The words `win clo` were typed. Each row marks what each word matched on its name, and the bar is where the keyboard is."
+                }
+                Key::ExampleOptionListWalk => {
+                    "Tab to the list, then use the arrows. Enter chooses, and the list says so in an `nd-option-choose` event."
+                }
+                Key::ExampleOptionListColumns => {
+                    "`columns` fills the width, down and then across. Each entry is a key and a name, with nothing drawn around them."
+                }
+                Key::ExampleOptionListDriven => {
+                    "The box names the list in `aria-controls`. The focus stays in the box, and its arrows move through the options."
+                }
+                Key::ExampleOptionListNothing => {
+                    "A list with no option shows `empty_label`, in a `role=\"status\"`."
+                }
+                Key::ExampleOptionGroupRun => {
+                    "A group is a `role=\"group\"` named by its label. Its options are still the options of the one list."
+                }
+                Key::ExampleOptionItemRow => {
+                    "`detail` is a second line under the name, and part of what a screen reader reads for the option."
+                }
+                Key::ExampleOptionItemHits => {
+                    "`hits` marks the characters of the name a query matched, in the grammar of `MatchText`."
+                }
+                Key::ExampleOptionItemDetailHits => {
+                    "The query was `win ex`. The second word matched a tag, so the tags are the second line and `detail_hits` marks them."
+                }
+                Key::ExampleOptionItemShortcut => {
+                    "`shortcut` is plain monospace text. It is first in the markup, so it is read before the name."
+                }
+                Key::ExampleOptionItemStates => {
+                    "`active` is where the keyboard is, `selected` is the answer and draws a tick, and `disabled` is reached and not chosen."
+                }
+                Key::ExampleOptionListKeySpace => "Space",
+                Key::ExampleOptionListKeyS => "s",
+                Key::ExampleOptionListKeyH => "h",
+                Key::ExampleOptionListKeyD => "d",
+                Key::ExampleOptionListKeyQ => "q",
+                Key::ExampleOptionGroupMixed => {
+                    "Options outside any group sit beside the groups, in the order they are written."
+                }
+                Key::ExampleOptionGroupColumns => {
+                    "In columns a group's name stays with its first option, at the head of the same column."
+                }
+                Key::ExampleOptionGroupFiltered => {
+                    "A group draws only the options its caller rendered. One with none showing takes no room."
+                }
+                Key::ExampleOptionListCommands => "Commands",
+                Key::ExampleOptionListMenu => "Shortcuts",
+                Key::ExampleOptionListFilter => "Filter the commands",
+                Key::ExampleOptionListEmpty => "No command matches.",
+                Key::ExampleOptionListSettings => "Settings",
+                Key::ExampleOptionListSettingsDetail => {
+                    "Change how the interface looks and behaves."
+                }
+                Key::ExampleOptionListHelp => "Help",
+                Key::ExampleOptionListHelpDetail => "Read how each part of the interface works.",
+                Key::ExampleOptionListSidebar => "Sidebar",
+                Key::ExampleOptionListDev => "Developer tools",
+                Key::ExampleOptionListShortcuts => "This page’s shortcuts",
+                Key::ExampleOptionListGroupWindow => "Window",
+                Key::ExampleOptionListGroupPage => "Page",
+                Key::ExampleOptionListCloseWindow => "Close the window",
+                Key::ExampleOptionListHideWindow => "Hide the window",
+                Key::ExampleOptionListClosePage => "Close the page",
+                Key::ExampleMatchTextQuery => {
+                    "The query `gro t b` found both names. Each word of it marks its own characters, in its own tone."
+                }
+                Key::ExampleMatchTextOne => "One word, and the run it matched.",
+                Key::ExampleMatchTextWords => {
+                    "Three words. The first is underlined solid, the second dashed and the third dotted, so no tone depends on colour."
+                }
+                Key::ExampleMatchTextShared => {
+                    "Two words claim characters 3 to 5. The first word keeps them."
+                }
+                Key::ExampleMatchTextElsewhere => {
+                    "An empty slot is a word that matched another field, so the second word's tone is the only one drawn."
+                }
+                Key::ExampleMatchTextPlain => "With no `hits` it is the name alone.",
                 Key::ExampleParagraphLead => {
                     "Use the lead size for the opening sentence under a title."
+                }
+                Key::ExampleProseFlowHeading => "Leader keys",
+                Key::ExampleProseFlowPress => "Press the Leader, then a letter, such as",
+                Key::ExampleProseFlowQuick => "A letter pressed quickly acts",
+                Key::ExampleProseFlowQuickEm => "before the menu is drawn",
+                Key::ExampleProseFlowEscape => "One key is never a binding:",
+                Key::ExampleProseFlowEscapeStrong => "Escape always closes",
+                Key::ExampleProseFlowLinkLead => "A binding is changed with",
+                Key::ExampleProseFlowLink => "the control that records a shortcut",
+                Key::ExampleProseFlowMenu => "In the menu",
+                Key::ExampleProseFlowHelp => "opens help.",
+                Key::ExampleProseFlowDev => "opens the dev pages:",
+                Key::ExampleProseFlowLogs => "the live logs",
+                Key::ExampleProseFlowRegistries => "the registries",
+                Key::ExampleProseFlowClose => "closes the page in front.",
+                Key::ExampleProseFlowQuote => {
+                    "A key a binding takes is taken from the whole window, not from one page."
+                }
+                Key::ExampleProseFlowCaption => "What each letter opens",
+                Key::ExampleProseFlowColKey => "Key",
+                Key::ExampleProseFlowColOpens => "Opens",
+                Key::ExampleProseFlowHelpPage => "Help",
+                Key::ExampleProseFlowDevPages => "The dev pages",
+                Key::ExampleProseFlowClosePage => "Nothing. It closes the page.",
+                Key::ExampleProseFlowEnd => {
+                    "Everything above is a construct of the Markdown the interface reads, and nothing outside it is."
+                }
+                Key::ExampleProseNoteFlow => {
+                    "Every construct of the closed Markdown subset, as components. A heading has more room above it than below, and the first block none."
                 }
                 Key::ExampleProseMeasure => {
                     "`Prose` caps the line length of everything inside it, so the paragraphs stay at a readable measure."
@@ -13715,6 +15915,24 @@ impl Locale {
                 }
                 Key::ExampleToolbarDensity => {
                     "`density` sets the padding, for a bar inside something that already has padding of its own."
+                }
+                Key::ExampleToolbarRail => {
+                    "A rail is one rail wide and holds two controls to a row. Each `Tooltip` draws the name its control already has."
+                }
+                Key::ExampleRailControls => "Drawer controls",
+                Key::ExampleRailPages => "Pages in the drawer",
+                Key::ExampleRailCollapse => "Collapse the drawer",
+                Key::ExampleRailClose => "Close the page",
+                Key::ExampleRailDirection => "Open the next page in the drawer",
+                Key::ExampleRailCommands => "Commands",
+                Key::ExampleRailSettings => "Settings",
+                Key::ExampleRailRegistries => "Registries",
+                Key::ExampleRailCommandsBody => {
+                    "Every command the window can run, filtered as you type."
+                }
+                Key::ExampleRailSettingsBody => "One page for each setting.",
+                Key::ExampleRailRegistriesBody => {
+                    "What is installed, and where each entry came from."
                 }
                 Key::ExampleTimeMachine => {
                     "The visible text is what is announced. `datetime` is the machine-readable value."
@@ -14941,6 +17159,34 @@ impl Locale {
                 Key::ExampleMessageBarNotePlain => {
                     "No tone at all, which is the absence of the attribute rather than a name. The words carry the message on their own."
                 }
+                Key::ExampleMessageBarLost => "The local server is not running.",
+                Key::ExampleMessageBarRestoring => {
+                    "one:Restoring it in {count} second|other:Restoring it in {count} seconds"
+                }
+                Key::ExampleMessageBarRestore => "Restore now",
+                Key::ExampleMessageBarAgain => "Count down again",
+                Key::ExampleMessageBarStopped => "The local server is stopped.",
+                Key::ExampleMessageBarStart => "Start it",
+                Key::ExampleMessageBarSave => "Save what you are working on before then.",
+                Key::ExampleMessageBarEnds => {
+                    "one:Signing you out in {count} second|other:Signing you out in {count} seconds"
+                }
+                Key::ExampleMessageBarStay => "Stay signed in",
+                Key::ExampleMessageBarNoteLine => {
+                    "The line closes the window, under its footer. The page writes a deadline ten seconds ahead, as the interface does when it loses its server."
+                }
+                Key::ExampleMessageBarOffline => {
+                    "You are working offline. Changes are kept here until the connection comes back."
+                }
+                Key::ExampleMessageBarNoteQuiet => {
+                    "A line with no tone is drawn on the subtle surface. One a reader may take away ends with its control."
+                }
+                Key::ExampleMessageBarNoteStopped => {
+                    "Stopped on purpose, the line counts nothing down. Its action starts the server again."
+                }
+                Key::ExampleMessageBarNoteCountdown => {
+                    "A bar counts down too, under its message. The time left is said as the count starts, every ten seconds and at five."
+                }
                 Key::ExampleOverviewDividerPay => "Pay by card",
                 Key::ExampleOverviewDividerPayBody => "We take Visa, Mastercard and Elo.",
                 Key::ExampleOverviewDividerInvoice => "Ask for an invoice",
@@ -15033,6 +17279,9 @@ impl Locale {
                 Key::ExampleTabsNoteFill => {
                     "`equal` gives every tab the width of the widest, so translating one word does not re-flow the strip."
                 }
+                Key::ExampleTabsNoteRail => {
+                    "`rail` shows each tab as its icon. The label is still the tab's name, and the `Tooltip` draws it."
+                }
                 Key::ExampleTabSettings => "Settings",
                 Key::ExampleTabPeople => "People",
                 Key::ExampleTabBilling => "Billing",
@@ -15115,6 +17364,24 @@ impl Locale {
                 Key::ExampleDialogNoteWide => {
                     "No close control at all. Escape and a press on the backdrop are still the way out, and both are the platform's."
                 }
+                Key::ExampleDialogIrreversible => "This cannot be undone.",
+                Key::ExampleDialogFiles => "Three files are attached, and they go with the draft.",
+                Key::ExampleDialogAsk => "Ask for a confirmation",
+                Key::ExampleDialogRealmHeading => "Delete the realm home?",
+                Key::ExampleDialogRealmDescription => {
+                    "Every record, file and setting in it is deleted, on this machine and everywhere it is kept."
+                }
+                Key::ExampleDialogRealmRequester => {
+                    "Asked by the assistant, in the session named Cleanup."
+                }
+                Key::ExampleDialogRealmConfirm => "Delete the realm",
+                Key::ExampleDialogAnswer => "The dialog answered {answer}.",
+                Key::ExampleDialogNoteAlert => {
+                    "An alert dialog asks for an answer. The focus starts on the one that changes nothing, and a press beside it is not an answer."
+                }
+                Key::ExampleDialogNoteShown => {
+                    "The interface opens this when a command that cannot be undone asks to run. Here the page opens it, and writes the answer under it."
+                }
                 Key::ExampleDialogNotePlain => {
                     "With no heading, `label` names the surface. Prefer a heading where there is room, because a reader can check it."
                 }
@@ -15171,6 +17438,9 @@ impl Locale {
                 }
                 Key::ExampleTooltipNoteNone => {
                     "An icon-only control, where `label` is still the name and the hint only describes. `none` opens it as soon as a pointer arrives."
+                }
+                Key::ExampleTooltipNoteName => {
+                    "The hint and the name are the same words here. The script writes no description, so the name is read out once."
                 }
                 Key::ExampleToastSavedTitle => "Saved",
                 Key::ExampleToastSaved => {
@@ -15355,7 +17625,7 @@ impl Locale {
                     "Whether a count of zero is drawn. Off by default, so nothing to report draws no badge at all. Turn it on for a dashboard, where a zero is a real answer and a missing badge would be read as a failure to load."
                 }
                 Key::ComponentBadgePropToneDoc => {
-                    "Which of the colour system's tones the badge is painted from, named rather than chosen from a closed list. A name no family declares fails the build. The 349 families are in `noctua_design::tones`, plus `neutral` and `muted`."
+                    "Which of the colour system's tones the badge is painted from, named rather than chosen from a closed list. A name no family declares fails the build. The 352 families are in `noctua_design::tones`, plus `neutral` and `muted`."
                 }
                 Key::ComponentBadgePropPlacementDoc => {
                     "Which corner the mark sits on. The values are logical rather than left and right, so the mark moves to the other corner in a right-to-left page."
@@ -16271,16 +18541,16 @@ impl Locale {
                 }
                 Key::ComponentDelPropChildrenDoc => "The removed text.",
                 Key::ComponentDialogGuidance => {
-                    "Use a dialog for one thing a reader has to settle before carrying on. For a message left where it happened, use `MessageBar`. For a note hanging off a control, use `Popover`. A surface that only shows something is a page section."
+                    "Use a dialog for one thing a reader has to settle before carrying on. Use its `alert` form to confirm an answer that cannot be taken back. For a message left where it happened, use `MessageBar`. For a note on a control, use `Popover`."
                 }
                 Key::ComponentDialogA11yNotes => {
-                    "The `<dialog>` element carries the role, so none is written. `showModal` marks it modal and the document behind it inert, so no focus trap is written either. A non-modal one is a plain dialog beside the page."
+                    "The `<dialog>` element carries the role, or `role=\"alertdialog\"` with `alert`. `showModal` makes the page behind it inert, so no focus trap is written. The description, requester and mark describe it."
                 }
                 Key::ComponentDialogPropNameDoc => {
                     "What this dialog is, as a script finds it, and the root of every id here. **Required**, because ids derived from an absent name collide the moment a page carries two."
                 }
                 Key::ComponentDialogPropTriggerLabelDoc => {
-                    "The words on the control that opens it. **Required**: a surface that opens from a script and has no control pointing at it is a surface a reader cannot reach."
+                    "The words on the control that opens it. Absent for a dialog its caller opens with `shown`. A dialog with neither is a surface a reader cannot reach."
                 }
                 Key::ComponentDialogPropHeadingDoc => {
                     "A title inside the surface. It names the dialog through `aria-labelledby`, so prefer it to `label`. A name a reader can see is a name they can check against what is being asked."
@@ -16303,19 +18573,37 @@ impl Locale {
                 Key::ComponentDialogPropCloseLabelDoc => {
                     "The name of the control that closes it. Wanted in practice by `dismissible`, because that control is a glyph and this is the only name it has."
                 }
+                Key::ComponentDialogPropShownDoc => {
+                    "Whether the surface is showing, for a caller that renders the interface as a view. `dist/dialog.js` opens or closes it whenever the caller writes it, and a reader who closes it is reported with `nd-dialog-close`."
+                }
+                Key::ComponentDialogPropAlertDoc => {
+                    "Whether the dialog demands an answer. The surface becomes a `role=\"alertdialog\"` and a press on the backdrop does not close it. Give it a `description`."
+                }
+                Key::ComponentDialogPropRequesterDoc => {
+                    "Who is asking, as a sentence such as *Asked by the assistant in session 4*. It opens the body and describes the surface after the description."
+                }
+                Key::ComponentDialogPropIrreversibleLabelDoc => {
+                    "A mark saying the answer cannot be taken back, such as *This cannot be undone*. It is drawn with a warning glyph, describes the surface, and paints the confirm control in the danger tone."
+                }
+                Key::ComponentDialogPropConfirmLabelDoc => {
+                    "The words on the control that says yes, such as *Delete the realm*. It closes the surface with the answer `confirm`."
+                }
+                Key::ComponentDialogPropDeclineLabelDoc => {
+                    "The words on the control that says no, such as *Keep it*. It closes the surface with the answer `decline`, and the focus starts on it."
+                }
                 Key::ComponentDialogPropChildrenDoc => {
-                    "What the dialog asks and the controls that answer it. A `Button` that acts on the answer belongs here, at the end."
+                    "What the dialog asks, after the requester and the mark. A control that answers it belongs here only where `confirm_label` and `decline_label` cannot say it."
                 }
                 Key::ComponentDialogStateOpenDoc => {
                     "Set on the root while the surface is showing. The `<dialog>` carries its own `open` attribute, and this is the one a stylesheet outside it can act on."
                 }
                 Key::ComponentDialogKeyEnterOrSpaceName => "Enter or Space",
                 Key::ComponentDialogKeyEnterOrSpaceAction => {
-                    "Opens the dialog, on the control that opens it. Both keys work, because that control is a `<button>`."
+                    "Presses the control the focus is on, which opens the dialog or answers it. Each is a `<button>`."
                 }
                 Key::ComponentDialogKeyEscapeName => "Escape",
                 Key::ComponentDialogKeyEscapeAction => {
-                    "Closes it. The platform answers this for a modal surface, and `dist/dialog.js` answers it for a non-modal one."
+                    "Closes it, as `decline` where there is a decline control. `dist/dialog.js` answers it for a non-modal surface."
                 }
                 Key::ComponentDialogKeyTabName => "Tab",
                 Key::ComponentDialogKeyTabAction => {
@@ -16376,6 +18664,50 @@ impl Locale {
                 }
                 Key::ComponentDividerStateLabelledDoc => {
                     "Set when a `label` was given, on the `<div>` that stands in for the `<hr>`. The stylesheet hangs the two half-rules and the gap around the word on it."
+                }
+                Key::ComponentDrawerGuidance => {
+                    "Use a drawer for a panel that opens along one edge of a window and stays beside the work. Nothing behind it is inert and the focus is never held in it. For a surface that must be answered first, use `Dialog`."
+                }
+                Key::ComponentDrawerA11yNotes => {
+                    "The drawer is a `role=\"region\"`, named by `label`. It is not modal: nothing behind it is inert and Tab leaves it. Collapsed, it is hidden and `inert`. It opens in the flow of the window and covers nothing."
+                }
+                Key::ComponentDrawerPropNameDoc => {
+                    "What this drawer is, as a script finds it. It is the `name` in `nd-drawer-dismiss`. Required."
+                }
+                Key::ComponentDrawerPropIdDoc => {
+                    "The drawer's id, for the control that opens and shuts it to name in `controls`."
+                }
+                Key::ComponentDrawerPropLabelDoc => {
+                    "The name of the drawer, in the reader's language. It becomes `aria-label` on the `region`. Required."
+                }
+                Key::ComponentDrawerPropSideDoc => {
+                    "Which edge of the window the drawer opens from: `bottom`, `start` or `end`. It grows along that edge's axis, to `--noctua-shell-drawer-max` and no further. At a side, it stands at that side of the row it is in."
+                }
+                Key::ComponentDrawerPropCollapsedDoc => {
+                    "Whether the drawer is shut. A collapsed drawer keeps what is in it and shows none of it. It is out of the tab order and hidden from assistive technology."
+                }
+                Key::ComponentDrawerPropChildrenDoc => {
+                    "The rails and the content, in the order the keyboard reaches them: up to two `DrawerRail`s and one element between them."
+                }
+                Key::ComponentDrawerKeyTabName => "Tab",
+                Key::ComponentDrawerKeyTabAction => {
+                    "Moves through the drawer and out of it. Nothing is held inside."
+                }
+                Key::ComponentDrawerKeyEscapeName => "Escape",
+                Key::ComponentDrawerKeyEscapeAction => {
+                    "Says `nd-drawer-dismiss` with the drawer's `name`. A surface open inside the drawer takes the key first."
+                }
+                Key::ComponentDrawerRailGuidance => {
+                    "Use a drawer rail for the narrow column down one side of a `Drawer`. It holds a `Toolbar` or a `Tabs` drawn as a rail, and nothing wider than a rail."
+                }
+                Key::ComponentDrawerRailA11yNotes => {
+                    "The rail has no role, so an empty rail is not announced. A `Toolbar` or a `Tabs` inside it keeps its own role, its name and its one tab stop."
+                }
+                Key::ComponentDrawerRailPropSideDoc => {
+                    "Which side of the drawer the rail stands at: `start` or `end`. The chosen tab of a rail at the `end` is marked on the edge that faces the content."
+                }
+                Key::ComponentDrawerRailPropChildrenDoc => {
+                    "What the rail holds: a `Toolbar` with `density` set to `rail`, or a `Tabs` with `appearance` set to `rail`."
                 }
                 Key::ComponentEmA11yNotes => {
                     "`em` marks stress emphasis and `strong` marks importance. A screen reader may voice them differently, so use each one for its own meaning."
@@ -16610,6 +18942,66 @@ impl Locale {
                 Key::ComponentFileInputKeyDeleteOrBackspaceAction => {
                     "Removes the file whose remove control has focus."
                 }
+                Key::ComponentFooterGuidance => {
+                    "Use a footer for the lines an application window keeps at its bottom edge. They are a line of controls, a line of status and a line to type in. For the controls of one page, use `Toolbar`."
+                }
+                Key::ComponentFooterA11yNotes => {
+                    "The footer is a `<footer>` with `role=\"group\"`, named by `label`. A folded footer stays in the tab order, and it opens when the focus enters it, so no focused control is hidden. It opens in the flow of the page and covers nothing."
+                }
+                Key::ComponentFooterPropLabelDoc => {
+                    "The name of the footer, in the reader's language. It becomes `aria-label` on the `group`. Required."
+                }
+                Key::ComponentFooterPropVisibilityDoc => {
+                    "When the footer shows: `always`, or `auto`, which folds it to a strip along its edge. The strip opens under a pointer, while the focus is inside it, and while `shown` is set."
+                }
+                Key::ComponentFooterPropShownDoc => {
+                    "Whether a folded footer is open. The caller sets it for what the footer cannot see, such as a key pressed elsewhere or a pointer at the window's edge. Needs `auto`."
+                }
+                Key::ComponentFooterPropChildrenDoc => {
+                    "The lines, top to bottom, and the corners: `FooterLine`s and up to two `FooterCorner`s."
+                }
+                Key::ComponentFooterCornerGuidance => {
+                    "Use a footer corner for the square at one end of a `Footer`. It holds controls that show an icon and no words, or nothing at all."
+                }
+                Key::ComponentFooterCornerA11yNotes => {
+                    "The corner has no role, so an empty corner is not announced. A control inside it is a `Button` with its own name."
+                }
+                Key::ComponentFooterCornerPropSideDoc => {
+                    "Which end of the footer the corner stands at: `start` or `end`. A footer holds one corner at each end at most."
+                }
+                Key::ComponentFooterCornerPropChildrenDoc => {
+                    "The controls in the corner. Each is a `Button` with `hide_label`, so each has a name and shows only its icon."
+                }
+                Key::ComponentFooterLineGuidance => {
+                    "Use a footer line for one line of a `Footer`. `kind` says which of the three it is, and the kind decides its shade and whether it stays one line tall."
+                }
+                Key::ComponentFooterLineA11yNotes => {
+                    "The expanding control is a real `<button>` with `aria-expanded`, written as `true` or `false`. It is at least 24 pixels square, as WCAG 2.5.8 asks. With `live`, the content is a `role=\"status\"`, and the control stays outside it."
+                }
+                Key::ComponentFooterLinePropKindDoc => {
+                    "Which line this is: `modeline`, for controls, `info`, for status, or `prompt`, for the line to type in. Each has its own shade, and `prompt` has the page's own."
+                }
+                Key::ComponentFooterLinePropExpandableDoc => {
+                    "Whether the line ends in a control that expands it. The control shows while a pointer is over the line or the focus is inside it. On a touch screen it always shows."
+                }
+                Key::ComponentFooterLinePropExpandedDoc => {
+                    "Whether the line wraps and grows to show all its content. Off, the line is one line tall and its content is cut to fit."
+                }
+                Key::ComponentFooterLinePropExpandLabelDoc => {
+                    "The name of the control while the line is one line tall, such as *Show all*. Wanted in practice by `expandable`."
+                }
+                Key::ComponentFooterLinePropCollapseLabelDoc => {
+                    "The name of the control while the line is expanded, such as *Show less*. Wanted in practice by `expandable`."
+                }
+                Key::ComponentFooterLinePropActionDoc => {
+                    "What a script finds the expanding control by. It becomes `data-nd-action` on that control."
+                }
+                Key::ComponentFooterLinePropLiveDoc => {
+                    "Whether a change to the line's content is announced. On, the content is a `role=\"status\"`. Turn it on for a line that shows notices, and leave it off for one that follows a pointer."
+                }
+                Key::ComponentFooterLinePropChildrenDoc => {
+                    "What the line holds. Every drawing in it is an `Icon`."
+                }
                 Key::ComponentHeadingA11yNotes => {
                     "The level must not skip. An `<h2>` followed by an `<h4>` leaves a gap in the outline a screen reader navigates by. Choose the level from the document and the size from the design."
                 }
@@ -16818,6 +19210,66 @@ impl Locale {
                 Key::ComponentInsPropChildrenDoc => "The added text.",
                 Key::ComponentKbdPropSizeDoc => "The size: `small` or `body`. Defaults to `small`.",
                 Key::ComponentKbdPropChildrenDoc => "The key name, such as `Ctrl` or `Esc`.",
+                Key::ComponentKeyCaptureGuidance => {
+                    "Use a key capture for a setting whose value is a shortcut, such as the Leader or a key in a menu. The reader presses the keys and the control records them. For a shortcut shown beside an action, use `Kbd`."
+                }
+                Key::ComponentKeyCaptureA11yNotes => {
+                    "The control is a `<button>` named by `label` and the keys it holds, through `aria-labelledby`. A refusal sets `aria-invalid` and describes the button. A polite `role=\"status\"` says what to press and what was recorded."
+                }
+                Key::ComponentKeyCapturePropNameDoc => {
+                    "What this control is, as a script finds it, and the form field name the chord is submitted under. The button takes the id `nd-key-capture-` followed by this name. **Required**."
+                }
+                Key::ComponentKeyCapturePropLabelDoc => {
+                    "What the shortcut is for, in the reader's language, such as *Leader*. It is drawn as the control's `<label>` and opens its accessible name, which the keys complete. Required."
+                }
+                Key::ComponentKeyCapturePropValueDoc => {
+                    "The shortcut in force, written as `Alt+Shift+KeyK`: the modifiers in the order Control, Alt, Shift, Super, then the key's `KeyboardEvent.code`. Empty means none. It is the hidden input's value."
+                }
+                Key::ComponentKeyCapturePropKeyboardDoc => {
+                    "Whose labels the modifiers are drawn with. `linux` writes Ctrl, Alt, Shift and Super. `windows` writes Win for Super. `mac` writes Control, Option, Shift and Command."
+                }
+                Key::ComponentKeyCapturePropCaptureLabelDoc => {
+                    "What the control says while it listens, such as *Press the new keys, or Escape*. It is said politely when listening starts. Required."
+                }
+                Key::ComponentKeyCapturePropEmptyLabelDoc => {
+                    "What the control shows when no shortcut is set, such as *None*. It is part of the accessible name then. Required."
+                }
+                Key::ComponentKeyCapturePropClearLabelDoc => {
+                    "The name of the control that removes the shortcut, such as *Remove the shortcut*. With it a second control is drawn after the first. Without it a shortcut can be replaced and not removed."
+                }
+                Key::ComponentKeyCapturePropRefusalDoc => {
+                    "Why the last shortcut was refused, in the caller's own words. It is drawn under the control, marks it `aria-invalid` and describes it. A sentence written here after the page loaded is said politely."
+                }
+                Key::ComponentKeyCapturePropDisabledDoc => {
+                    "Whether changing the shortcut is refused. A disabled control is `aria-disabled`, so it stays in the tab order and says what it holds, and pressing it starts nothing."
+                }
+                Key::ComponentKeyCaptureStateListeningDoc => {
+                    "Set while the control listens for a shortcut. It shows `capture_label` and the modifiers held so far, with a dashed edge."
+                }
+                Key::ComponentKeyCaptureStateCapturedDoc => {
+                    "Set once a shortcut is recorded and the control is not listening, until the caller writes a new `value`. The keys drawn are the recorded ones."
+                }
+                Key::ComponentKeyCaptureStateRefusedDoc => {
+                    "Set while `refusal` is. A rule runs down the leading edge, the control's edge takes the danger tone, and the sentence is under it."
+                }
+                Key::ComponentKeyCaptureKeyEnterSpaceName => "Enter / Space",
+                Key::ComponentKeyCaptureKeyEnterSpaceAction => {
+                    "Starts listening. While it listens, both are keys like any other and are recorded."
+                }
+                Key::ComponentKeyCaptureKeyAKeyWithModifiersHeldName => {
+                    "A key, with modifiers held"
+                }
+                Key::ComponentKeyCaptureKeyAKeyWithModifiersHeldAction => {
+                    "While it listens, records that key with the modifiers held and stops listening. A modifier alone records nothing."
+                }
+                Key::ComponentKeyCaptureKeyTabName => "Tab",
+                Key::ComponentKeyCaptureKeyTabAction => {
+                    "While it listens, is recorded like any other key. Listening then ends, so the next Tab leaves the control."
+                }
+                Key::ComponentKeyCaptureKeyEscapeName => "Escape",
+                Key::ComponentKeyCaptureKeyEscapeAction => {
+                    "While it listens, stops listening and keeps the shortcut in force. Otherwise it is left to what is around the control."
+                }
                 Key::ComponentLabelGuidance => {
                     "Use a label for the visible name of a control, a group of controls or a region. `Field` draws one already for the control it wraps. Reach for this where there is no field, beside a `Segmented` or over a `Toolbar`."
                 }
@@ -17061,10 +19513,78 @@ impl Locale {
                 Key::ComponentListItemPropChildrenDoc => {
                     "The item, or the description of the term."
                 }
+                Key::ComponentLogGuidance => {
+                    "Use a log for lines that arrive while a reader watches, such as what a program writes as it runs. It keeps the newest line in view until the reader scrolls away. For a list a reader filters and chooses from, use `OptionList`."
+                }
+                Key::ComponentLogA11yNotes => {
+                    "The lines are a `role=\"log\"` named by `label`, a polite live region that reads each line added. It is a tab stop, so the keyboard can scroll it. The resume control is a `<button>` outside it."
+                }
+                Key::ComponentLogPropNameDoc => {
+                    "What this log is, as a script finds it. The region of lines takes the id `nd-log-` followed by this name. **Required**."
+                }
+                Key::ComponentLogPropLabelDoc => {
+                    "The name of the log, in the reader's language, such as *Daemon log*. It becomes `aria-label` on the region of lines. Required."
+                }
+                Key::ComponentLogPropFollowDoc => {
+                    "Whether the newest line is kept in view as lines arrive. On by default. Off, the log stays where the reader puts it, as a record does."
+                }
+                Key::ComponentLogPropResumeLabelDoc => {
+                    "The name of the control that goes to the newest line and follows again, such as *Go to the newest*. It shows while following has stopped. Needs `follow`."
+                }
+                Key::ComponentLogPropChildrenDoc => "The lines, oldest first: a `LogLine` each.",
+                Key::ComponentLogStatePausedDoc => {
+                    "Set by the script while following has stopped, because the reader scrolled away from the end or held a selection as a line arrived. The resume control shows."
+                }
+                Key::ComponentLogKeyArrowKeysPageUpPageDownName => {
+                    "Arrow keys / Page Up / Page Down"
+                }
+                Key::ComponentLogKeyArrowKeysPageUpPageDownAction => {
+                    "Scroll the lines while the log has the focus. Leaving the end stops following."
+                }
+                Key::ComponentLogKeyHomeEndName => "Home / End",
+                Key::ComponentLogKeyHomeEndAction => {
+                    "Go to the oldest line or the newest. At the newest, the log follows again."
+                }
+                Key::ComponentLogLineGuidance => {
+                    "Use a log line for each line of a `Log`. It says when the line was written, how much it matters, where it came from and what it says."
+                }
+                Key::ComponentLogLineA11yNotes => {
+                    "The line has no role. Its level is a word, so the tone is never the only signal. Its source is a name, marked `nd-identifier`."
+                }
+                Key::ComponentLogLinePropToneDoc => {
+                    "Which of the colour system's tones the level is painted from, such as `danger` or `warning`. A name no family declares fails the build. **Never the only signal**: the `level` word carries it. Needs `level`."
+                }
+                Key::ComponentLogLinePropLevelDoc => {
+                    "How much the line matters, as a word, such as *error* or *warning*. It is drawn before the message, in a box of the line's `tone`."
+                }
+                Key::ComponentLogLinePropTimeDoc => {
+                    "When the line was written, such as `12:04:31.207`. It is a `<time>`, so write it as HTML writes a time."
+                }
+                Key::ComponentLogLinePropSourceDoc => {
+                    "Where the line came from, such as `nc-kernel`. A name, drawn as it is written and never translated."
+                }
+                Key::ComponentLogLinePropChildrenDoc => {
+                    "The message. Plain text, or a `MatchText` where a filter matched it."
+                }
+                Key::ComponentMarkGuidance => {
+                    "Use a mark for a phrase in prose, such as the words a quoted passage was chosen for. For the characters a query matched in a filtered list, use `MatchText`."
+                }
                 Key::ComponentMarkA11yNotes => {
                     "A highlight that carries meaning needs more than a background colour. Colour alone is invisible to a reader who cannot distinguish it, so this also changes the text weight."
                 }
                 Key::ComponentMarkPropChildrenDoc => "The highlighted text.",
+                Key::ComponentMatchTextGuidance => {
+                    "Use match text for a name in a list filtered by typing, to show which characters each word of the query matched. For a highlighted phrase in prose, use `Mark`."
+                }
+                Key::ComponentMatchTextA11yNotes => {
+                    "Each run is a `<mark>` with `role=\"none\"`, so the name is one text in the accessible tree. The first word is underlined solid, the second dashed and every later word dotted, so the three are told apart without colour, as WCAG 1.4.1 asks."
+                }
+                Key::ComponentMatchTextPropTextDoc => {
+                    "The whole name, as the list shows it. **Required**. Text and not children, because every position in `hits` is an index into it."
+                }
+                Key::ComponentMatchTextPropHitsDoc => {
+                    "The matched characters, one slot for each word of the query, joined by `|`. A slot holds indices and inclusive ranges joined by commas, as in `0-2,5|7-9`. An empty slot is a word that matched elsewhere."
+                }
                 Key::ComponentMenuGuidance => {
                     "Use a menu for the actions a button opens, such as *Duplicate*, *Rename* and *Delete*. Each item runs an action and closes the menu. To choose a value from a list, use `Segmented` or `Select`. Neither the menu nor its button renders without a script."
                 }
@@ -17149,10 +19669,10 @@ impl Locale {
                     "Runs the item and closes the menu. The link form answers Enter alone."
                 }
                 Key::ComponentMessageBarGuidance => {
-                    "Use a message bar for something that happened, shown in place and left on the page. For one refused field, use `Field`. For everything wrong in a form at once, use `ErrorSummary`."
+                    "Use a message bar for something that happened, shown in place and left on the page. Use the `line` form for a state of the whole window, such as a program it has lost. For one refused field, use `Field`."
                 }
                 Key::ComponentMessageBarA11yNotes => {
-                    "The bar is a `role=\"status\"` until `alert` is turned on, and a status waits for a pause instead of cutting in. The icon is `aria-hidden`, and the tone is never the only signal."
+                    "A `role=\"status\"` until `alert` is on. The time left is a silent `role=\"timer\"`, and a polite region says it when the count starts, every ten seconds and at five. The icon is `aria-hidden`."
                 }
                 Key::ComponentMessageBarPropToneDoc => {
                     "Which of the colour system's tones the bar is painted from. The tones live in `noctua_design::tones`. **Never the only signal** (`NOCTUA.md §8.8.6`): the words and the icon carry the meaning."
@@ -17175,15 +19695,34 @@ impl Locale {
                 Key::ComponentMessageBarPropDismissLabelDoc => {
                     "The name of the control that takes the bar away, such as *Dismiss this message*. Wanted in practice by `dismissible`, because that control is a glyph and this is the only name it has."
                 }
+                Key::ComponentMessageBarPropPresentationDoc => {
+                    "How the message is drawn. `bar` is a block in the page, beside what happened. `line` is a row along a window's bottom edge, filled with the tone, that the window places last so it covers nothing."
+                }
+                Key::ComponentMessageBarPropDeadlineDoc => {
+                    "When the event the message announces happens, in milliseconds since the Unix epoch. `dist/message-bar.js` draws the whole seconds left until it, and follows a new value the caller writes."
+                }
+                Key::ComponentMessageBarPropCountdownLabelDoc => {
+                    "What the message says about the time left, with a `{count}` hole, such as *Restoring in 9 seconds*. Write both forms as `one:…|other:…`. Without it the seconds are written by `Intl` in the document's language."
+                }
+                Key::ComponentMessageBarPropActionLabelDoc => {
+                    "The words on a control at the end of the row, such as *Restore now*. Setting it draws the control, a `<button>` in the message's own ink."
+                }
+                Key::ComponentMessageBarPropActionDoc => {
+                    "A name a script finds the control by, written as `data-nd-action` on it. Wanted with `action_label`, because the press is the caller's own code."
+                }
                 Key::ComponentMessageBarPropChildrenDoc => {
                     "The message, as one or two sentences. It may hold a `Link` to whatever a reader has to do about it."
                 }
                 Key::ComponentMessageBarStateDismissedDoc => {
                     "Set on a bar a reader has taken away. The stylesheet takes it out of the layout from there, so the element stays in the document and its live region keeps working."
                 }
+                Key::ComponentMessageBarKeyTabName => "Tab",
+                Key::ComponentMessageBarKeyTabAction => {
+                    "Moves onto the action, then onto the control that dismisses the bar."
+                }
                 Key::ComponentMessageBarKeyEnterOrSpaceName => "Enter or Space",
                 Key::ComponentMessageBarKeyEnterOrSpaceAction => {
-                    "Takes the bar away, on the control that dismisses it. Both keys work, because that control is a `<button>`."
+                    "Presses the control the focus is on. Both keys work, because each control is a `<button>`."
                 }
                 Key::ComponentMeterGuidance => {
                     "Use a meter for how much of a known total is used: 41 GB of a 50 GB disk, 68% of a budget. For a task that starts at nothing and finishes, use `Progress`. `low`, `high` and `optimum` colour the bar, and `value_label` is the sentence beside it."
@@ -17334,6 +19873,110 @@ impl Locale {
                 Key::ComponentNumberInputKeyHomeEndName => "Home / End",
                 Key::ComponentNumberInputKeyHomeEndAction => {
                     "Moves to `min` and to `max`, where those are declared."
+                }
+                Key::ComponentOptionGroupGuidance => {
+                    "Use an option group for a named run of options inside an `OptionList`, such as the commands of one plugin. A group with no option showing takes no room."
+                }
+                Key::ComponentOptionGroupA11yNotes => {
+                    "The group is a `role=\"group\"` named by `aria-label`. The visible name carries `aria-hidden`, so a screen reader reads it once, as the group's name."
+                }
+                Key::ComponentOptionGroupPropLabelDoc => {
+                    "The name of the group, shown above its options and read as the group's name. Required."
+                }
+                Key::ComponentOptionGroupPropChildrenDoc => "The `OptionItem`s in the group.",
+                Key::ComponentOptionItemGuidance => {
+                    "Use an option item for one row of an `OptionList`: a name, and what a reader needs beside it to choose. **Its name is a prop**, so the matched characters can be marked without touching anything else in the row."
+                }
+                Key::ComponentOptionItemA11yNotes => {
+                    "The row is a `role=\"option\"`, and its name is the key, the name and the second line read in that order. The active row is drawn with a bar on its leading edge as well as a fill, and the selected row with a tick."
+                }
+                Key::ComponentOptionItemPropValueDoc => {
+                    "What this option *is*, as a script finds it. The list's events carry it, and it is never translated. **Required**."
+                }
+                Key::ComponentOptionItemPropLabelDoc => {
+                    "The option's name. Text and not children, because `hits` marks characters in it by position. Required."
+                }
+                Key::ComponentOptionItemPropHitsDoc => {
+                    "The characters of `label` a query matched, in `MatchText`'s grammar: one slot for each word, joined by `|`. Leave it out for a list that is not filtered."
+                }
+                Key::ComponentOptionItemPropDetailDoc => {
+                    "A second, smaller line under the name, saying what the option does. It is part of the option's accessible name."
+                }
+                Key::ComponentOptionItemPropDetailHitsDoc => {
+                    "The characters of `detail` a query matched, in the same grammar as `hits`. Use it where the second line is the field a word matched."
+                }
+                Key::ComponentOptionItemPropShortcutDoc => {
+                    "The key that acts on this option, as plain text in the monospace face. It is a hint. The caller binds the key."
+                }
+                Key::ComponentOptionItemPropIconDoc => {
+                    "A drawing before the name. It is decorative, and the name beside it is what a screen reader reads."
+                }
+                Key::ComponentOptionItemPropIdDoc => {
+                    "The option's id, for a caller that writes `aria-activedescendant` itself. Leave it out and the script numbers the options."
+                }
+                Key::ComponentOptionItemPropActiveDoc => {
+                    "Whether the keyboard is on this option. One option of a list at most. The script moves it on the arrow keys and points `aria-activedescendant` at it."
+                }
+                Key::ComponentOptionItemPropSelectedDoc => {
+                    "Whether this option is the answer the list holds. It writes `aria-selected` and draws a tick, so the choice is not shown by colour alone."
+                }
+                Key::ComponentOptionItemPropDisabledDoc => {
+                    "Stops the option being chosen and keeps it in the arrow walk. It writes `aria-disabled`, so the option is announced as unavailable instead of missing."
+                }
+                Key::ComponentOptionListGuidance => {
+                    "Use an option list for a list users walk and act on with the keyboard. A list of commands and a menu of shortcuts are two. For a value in a form, use `Select`. For a list of pages, use `Search`, whose rows are links."
+                }
+                Key::ComponentOptionListA11yNotes => {
+                    "The list is a `role=\"listbox\"` and each option a `role=\"option\"`. The active option is named by `aria-activedescendant` on whatever holds the focus, so the focus never moves into the list. The empty sentence is a `role=\"status\"`."
+                }
+                Key::ComponentOptionListPropNameDoc => {
+                    "What this list is of, as a script finds it. It is also the listbox's id, which is what another control writes in `aria-controls`. **Required**."
+                }
+                Key::ComponentOptionListPropLabelDoc => {
+                    "The name of the list. Required, because a `listbox` with no name gives a screen reader only the word *list box*."
+                }
+                Key::ComponentOptionListPropLayoutDoc => {
+                    "How the options are laid out: `rows`, one under another, or `columns`, which fills the width with as many columns as fit. `columns` suits a menu of short entries, each a key and a name."
+                }
+                Key::ComponentOptionListPropSizeDoc => {
+                    "The height of an option: `small`, `medium` or `large`. Options are targets, so all three clear WCAG 2.5.8's 24px minimum."
+                }
+                Key::ComponentOptionListPropFocusableDoc => {
+                    "Whether the list is a tab stop. Turn it off where another control keeps the focus and names this list in `aria-controls`. That control's arrow keys then move through the options."
+                }
+                Key::ComponentOptionListPropEmptyLabelDoc => {
+                    "What the list says when it holds no option. Set it wherever the list is filtered, because a filter that leaves an empty space has not said that nothing matched."
+                }
+                Key::ComponentOptionListPropChildrenDoc => {
+                    "The options: `OptionItem`s, `OptionGroup`s, or both."
+                }
+                Key::ComponentOptionListKeyDownArrowUpArrowName => "Down arrow / Up arrow",
+                Key::ComponentOptionListKeyDownArrowUpArrowAction => {
+                    "Moves to the next and the previous option, and stops at the ends. The focus stays where it is."
+                }
+                Key::ComponentOptionListKeyLeftArrowRightArrowName => "Left arrow / Right arrow",
+                Key::ComponentOptionListKeyLeftArrowRightArrowAction => {
+                    "Moves to the option beside the active one, in the next column. Needs `columns` and the focus in the list."
+                }
+                Key::ComponentOptionListKeyHomeEndName => "Home / End",
+                Key::ComponentOptionListKeyHomeEndAction => {
+                    "Moves to the first and the last option. From another control, hold Control or Command as well."
+                }
+                Key::ComponentOptionListKeyPageUpPageDownName => "Page Up / Page Down",
+                Key::ComponentOptionListKeyPageUpPageDownAction => {
+                    "Moves one measured page of options, and stops at the ends."
+                }
+                Key::ComponentOptionListKeyEnterName => "Enter",
+                Key::ComponentOptionListKeyEnterAction => {
+                    "Chooses the active option. A disabled option stays active and is not chosen."
+                }
+                Key::ComponentOptionListKeySpaceName => "Space",
+                Key::ComponentOptionListKeySpaceAction => {
+                    "Chooses the active option. Needs the focus in the list, since in another control it types a space."
+                }
+                Key::ComponentOptionListKeyAPrintableCharacterName => "A printable character",
+                Key::ComponentOptionListKeyAPrintableCharacterAction => {
+                    "Jumps to the next option whose name starts with the letters typed. Needs the focus in the list."
                 }
                 Key::ComponentOtpFieldGuidance => {
                     "Use this for a short code a reader copies from somewhere else, such as the six digits in a text message. For anything a reader composes, use `Input`. The boxes are a picture of the code and never a shape it has to be typed into."
@@ -17540,8 +20183,62 @@ impl Locale {
                 Key::ComponentProgressStateBusyDoc => {
                     "Set when there is no `value`: the task is running and how far along is not known. It is rendered from the absence of `value`, so the attribute and the bar cannot disagree. The stylesheet hangs the indeterminate sweep on it."
                 }
+                Key::ComponentPromptGuidance => {
+                    "Use a prompt for the line a reader types into an application: a command, a filter, a message. Its cursor is a block. For an answer in a form, use `Textarea`, which has a label, a hint and an error."
+                }
+                Key::ComponentPromptA11yNotes => {
+                    "The control is a real `<textarea>` named by `aria-label`. The block is drawn in an `aria-hidden` box. It is filled while the text has the focus and an outline while it does not. It does not blink under `prefers-reduced-motion`."
+                }
+                Key::ComponentPromptPropNameDoc => {
+                    "What this prompt is, as a script finds it, and the form field name it is submitted under. The textarea takes the id `nd-prompt-` followed by this name. **Required**."
+                }
+                Key::ComponentPromptPropLabelDoc => {
+                    "The name of the prompt, in the reader's language. It becomes `aria-label` on the textarea, because a prompt shows no label and no placeholder. Required."
+                }
+                Key::ComponentPromptPropValueDoc => {
+                    "What is in the prompt to begin with. It is the textarea's content, so a value with a line break in it survives the markup."
+                }
+                Key::ComponentPromptPropSendLabelDoc => {
+                    "The name of the send control, such as *Send*. With it the prompt ends in that control. Without it, Enter is the only way to send."
+                }
+                Key::ComponentPromptPropActionDoc => {
+                    "What a script finds the send control by. It becomes `data-nd-action` on that control. Needs `send_label`."
+                }
+                Key::ComponentPromptPropControlsDoc => {
+                    "The id of a list this prompt filters, such as an `OptionList`'s `name`, which is its id. It becomes `aria-controls`, and the Up and Down arrows then move through that list. The prompt stays a `textbox`, the one role a `<textarea>` takes."
+                }
+                Key::ComponentPromptPropActiveOptionDoc => {
+                    "The id of the option the keyboard is on in that list. It becomes `aria-activedescendant`. Leave it out and `dist/option-list.js` writes it. Needs `controls`."
+                }
+                Key::ComponentPromptPropDisabledDoc => {
+                    "Whether the prompt is disabled. A disabled prompt takes no focus, draws no cursor and sends nothing."
+                }
+                Key::ComponentPromptPropReadonlyDoc => {
+                    "Whether the text can be read and copied but not changed. The cursor is drawn as an outline and does not blink, and nothing is sent."
+                }
+                Key::ComponentPromptStateComposingDoc => {
+                    "Set while an input method is composing. The block is hidden and the engine's own caret and underline show, so the composition looks the way the input method draws it."
+                }
+                Key::ComponentPromptStateSelectingDoc => {
+                    "Set while some text is selected. The block is hidden and the engine's own highlight shows."
+                }
+                Key::ComponentPromptKeyEnterName => "Enter",
+                Key::ComponentPromptKeyEnterAction => {
+                    "Says `nd-prompt-send`, with the text. While an input method is composing, it confirms the composition and sends nothing."
+                }
+                Key::ComponentPromptKeyShiftEnterName => "Shift + Enter",
+                Key::ComponentPromptKeyShiftEnterAction => {
+                    "Breaks the line. The prompt grows by a line, up to its limit, and then scrolls."
+                }
+                Key::ComponentPromptKeyDownArrowUpArrowName => "Down arrow / Up arrow",
+                Key::ComponentPromptKeyDownArrowUpArrowAction => {
+                    "Moves through the list named by `controls`. With no list, they move the cursor between lines."
+                }
                 Key::ComponentProsePropMeasureDoc => {
                     "Which line-length cap to apply. `default` is the reading measure and `lead` is the narrower one for an opening paragraph. `none` is for prose inside a column that already constrains it."
+                }
+                Key::ComponentProsePropFlowDoc => {
+                    "Spaces the blocks inside as a document. A heading gets more room above it than below, the first block none, and a break keeps its own. Use it for prose a program wrote, such as a page drawn from Markdown."
                 }
                 Key::ComponentProsePropChildrenDoc => "The content.",
                 Key::ComponentRadioGuidance => {
@@ -18121,6 +20818,74 @@ impl Locale {
                 Key::ComponentSliderKeyHomeEndAction => {
                     "Moves the thumb to `min` or `max`. This is the browser's own behaviour."
                 }
+                Key::ComponentSplitGuidance => {
+                    "Use a split for two panes side by side that share one box, such as a list and what is chosen in it. A `SplitHandle` between the panes lets a reader move the line between them. For a panel that opens and shuts, use `Drawer`."
+                }
+                Key::ComponentSplitA11yNotes => {
+                    "The split has no role. The handle between its panes is a `role=\"separator\"` that names the `start` pane in `aria-controls`. Once a script runs, the handle is focusable and carries `aria-valuenow`, `aria-valuemin` and `aria-valuemax`."
+                }
+                Key::ComponentSplitPropNameDoc => {
+                    "What this split is, as a script finds it, and the root of both panes' ids. Every `SplitPane` and the `SplitHandle` repeat it. Required."
+                }
+                Key::ComponentSplitPropValueDoc => {
+                    "The share of the box the `start` pane takes, as a number from 0 to 100. The `end` pane takes the rest. It is held between `min` and `max`."
+                }
+                Key::ComponentSplitPropMinDoc => {
+                    "The least `value` may be, as a number from 0 to 100. It becomes `aria-valuemin` on the handle. Enter takes the `start` pane to it."
+                }
+                Key::ComponentSplitPropMaxDoc => {
+                    "The most `value` may be, as a number from 0 to 100. It becomes `aria-valuemax` on the handle."
+                }
+                Key::ComponentSplitPropCollapseDoc => {
+                    "What the split does in a box narrower than the `sm` breakpoint. `stack` puts the panes one above the other. `hide-start` and `hide-end` leave one pane out. `none` keeps them side by side."
+                }
+                Key::ComponentSplitPropChildrenDoc => {
+                    "The parts, in the order they stand: a `SplitPane`, a `SplitHandle`, and a `SplitPane` with `side` set to `end`. Leave the handle out for a split whose panes keep their shares."
+                }
+                Key::ComponentSplitKeyArrowKeysName => "Arrow keys",
+                Key::ComponentSplitKeyArrowKeysAction => {
+                    "Left and Right move the line by one point, toward the side the key names. The `start` pane grows or shrinks with it."
+                }
+                Key::ComponentSplitKeyPageUpPageDownName => "Page Up / Page Down",
+                Key::ComponentSplitKeyPageUpPageDownAction => {
+                    "Grows or shrinks the `start` pane by ten points."
+                }
+                Key::ComponentSplitKeyHomeEndName => "Home / End",
+                Key::ComponentSplitKeyHomeEndAction => {
+                    "Takes the `start` pane to `min` or to `max`."
+                }
+                Key::ComponentSplitKeyEnterName => "Enter",
+                Key::ComponentSplitKeyEnterAction => {
+                    "Takes the `start` pane to `min`. Pressed again, it brings the pane back to where it was."
+                }
+                Key::ComponentSplitHandleGuidance => {
+                    "Use a split handle between the two panes of a `Split`, for a line a reader can move. Leave it out where the two panes keep their shares."
+                }
+                Key::ComponentSplitHandleA11yNotes => {
+                    "The handle is a `role=\"separator\"` with `aria-orientation=\"vertical\"`, named by `label`. It names the `start` pane in `aria-controls`. A script makes it focusable and writes its value. It is at least 24 pixels wide, as WCAG 2.5.8 asks."
+                }
+                Key::ComponentSplitHandlePropNameDoc => {
+                    "The `Split` this belongs to. Required, and it must match the split's own `name`, because the pane it names in `aria-controls` is derived from it."
+                }
+                Key::ComponentSplitHandlePropLabelDoc => {
+                    "The name of the handle, in the reader's language, such as *Resize the list*. It names what is resized. Required."
+                }
+                Key::ComponentSplitHandleStateDraggingDoc => {
+                    "Set on the handle while a pointer is dragging it. The stylesheet draws the line as it does under a pointer."
+                }
+                Key::ComponentSplitPaneGuidance => {
+                    "Use a split pane for each of the two halves of a `Split`. `side` says which half it is, and the pane scrolls what does not fit in it."
+                }
+                Key::ComponentSplitPaneA11yNotes => {
+                    "The pane has no role. Its id is `nd-split-`, the split's `name`, a hyphen and its `side`, which is what the handle's `aria-controls` names. Side by side, a pane whose share is 0 is hidden, so nothing in it can take the focus."
+                }
+                Key::ComponentSplitPanePropNameDoc => {
+                    "The `Split` this belongs to. Required, and it must match the split's own `name`, because the pane's id is derived from it."
+                }
+                Key::ComponentSplitPanePropSideDoc => {
+                    "Which half this is: `start` or `end`. The `start` pane takes the split's `value` and the `end` pane takes the rest. A split holds one of each."
+                }
+                Key::ComponentSplitPanePropChildrenDoc => "What the pane holds.",
                 Key::ComponentStrongPropChildrenDoc => "The important text.",
                 Key::ComponentSwatchGuidance => {
                     "Use a swatch to show a colour beside the word that names it. Never use it on its own, because the chip has no accessible name of its own."
@@ -18495,7 +21260,7 @@ impl Locale {
                     "Where the words sit in the cell. **Match the column below it**, and use `numeric` over a column of numbers so the heading lines up with the values."
                 }
                 Key::ComponentTableHeaderCellPropToneDoc => {
-                    "Which of the colour system's tones the heading is painted from. The palette declares 349 semantic families, and a name none of them declares fails the build. Without it no attribute is written."
+                    "Which of the colour system's tones the heading is painted from. The palette declares 352 semantic families, and a name none of them declares fails the build. Without it no attribute is written."
                 }
                 Key::ComponentTableHeaderCellPropWrapDoc => {
                     "What a long heading does. `nowrap` by default, the opposite of a cell's default, so the head stays one line tall. Use `wrap` for a long heading over a narrow column."
@@ -18530,7 +21295,7 @@ impl Locale {
                     "The identifier for this row, in the markup. The detail row and the choice control derive their ids from it, so a row that opens or can be chosen needs one."
                 }
                 Key::ComponentTableRowPropToneDoc => {
-                    "Which of the colour system's tones this row is painted from. Any of the 349 semantic families, so `overdue` is as valid as `danger`, plus this system's own `neutral` and `muted`. A name no family declares fails the build. **Never colour alone.**"
+                    "Which of the colour system's tones this row is painted from. Any of the 352 semantic families, so `overdue` is as valid as `danger`, plus this system's own `neutral` and `muted`. A name no family declares fails the build. **Never colour alone.**"
                 }
                 Key::ComponentTableRowPropSelectDoc => {
                     "Whether this row can be chosen. `one` draws a real radio, `many` a real checkbox. `all` goes in the heading row and marks or clears every row under it, with a third state for *some, not all*. Each is a real control."
@@ -18606,10 +21371,10 @@ impl Locale {
                     "Whether an arrow key also chooses. `automatic` shows the panel a reader moves to, which suits panels that are already loaded. `manual` moves the focus only and waits for Space or Enter, which suits panels that cost something to show."
                 }
                 Key::ComponentTabsPropOrientationDoc => {
-                    "Which way the strip runs, and therefore which arrow keys move along it. It is written to `aria-orientation`, so assistive technology reports the axis as well as the stylesheet drawing it."
+                    "Which way the strip runs, and therefore which arrow keys move along it. It is written to `aria-orientation`, so assistive technology reports the axis as well as the stylesheet drawing it. A `rail` is `vertical` whatever this says."
                 }
                 Key::ComponentTabsPropAppearanceDoc => {
-                    "How the chosen tab is marked. `underline` draws a rule under it and a hairline under the whole strip. `enclosed` gives each tab its own box, which survives a strip that wraps onto two lines."
+                    "How the chosen tab is marked. `underline` draws a rule under it. `enclosed` gives each tab its own box, which survives a strip that wraps. `rail` is a column one rail wide, where a tab shows its icon and keeps its label as its name."
                 }
                 Key::ComponentTabsPropSizeDoc => {
                     "The size of a tab. All three clear WCAG 2.5.8's 24px minimum target, and `large` also meets the 44px enhanced target."
@@ -18655,7 +21420,7 @@ impl Locale {
                     "Whether the tag is switched on, for the filter-chip shape. **Setting it at all** makes the tag a real `<button aria-pressed>`. Leaving it out leaves a label that is not a control."
                 }
                 Key::ComponentTagPropToneDoc => {
-                    "Which of the colour system's tones the tag is painted from. The palette declares 349 semantic families, so `overdue` is as valid as `danger`. A name no family declares fails the build. Without it the tag is neutral."
+                    "Which of the colour system's tones the tag is painted from. The palette declares 352 semantic families, so `overdue` is as valid as `danger`. A name no family declares fails the build. Without it the tag is neutral."
                 }
                 Key::ComponentTagPropVariantDoc => {
                     "How strongly the tag is painted. `soft` is a tinted field, `solid` is the tone at full strength, and `outline` is a hairline with no fill. `soft` by default."
@@ -19073,13 +21838,13 @@ impl Locale {
                     "The id of the element that names this toolbar, when the name is already visible on the page."
                 }
                 Key::ComponentToolbarPropOrientationDoc => {
-                    "Which way the controls run, and therefore which arrow keys walk them. It is written to `aria-orientation`, so assistive technology reports the axis as well."
+                    "Which way the controls run, and therefore which arrow keys walk them. It is written to `aria-orientation`, so assistive technology reports the axis as well. A `rail` is `vertical` whatever this says."
                 }
                 Key::ComponentToolbarPropWrapDoc => {
                     "Whether the bar wraps onto more lines when it runs out of room. On by default, so that the last control is still reachable at 320px."
                 }
                 Key::ComponentToolbarPropDensityDoc => {
-                    "The gap between its groups. `compact` is for a bar inside something else, where the surrounding padding already separates it."
+                    "The gap between its groups. `compact` is for a bar inside something else. `rail` is a column one rail wide with two icon-only controls to a row, and it is always vertical."
                 }
                 Key::ComponentToolbarPropChildrenDoc => "The groups of controls.",
                 Key::ComponentToolbarPropGlassDoc => {
@@ -19091,7 +21856,11 @@ impl Locale {
                 }
                 Key::ComponentToolbarKeyArrowKeysName => "Arrow keys",
                 Key::ComponentToolbarKeyArrowKeysAction => {
-                    "Moves to the next or previous control, choosing it if it is a radio. Left and Right, or Up and Down when vertical."
+                    "Moves to the next or previous control, choosing a radio. Left and Right, or Up and Down when vertical."
+                }
+                Key::ComponentToolbarKeyArrowKeysInARailName => "Arrow keys in a rail",
+                Key::ComponentToolbarKeyArrowKeysInARailAction => {
+                    "All four arrows move, in the order the controls are written. A rail holds two controls to a row."
                 }
                 Key::ComponentToolbarKeyHomeName => "Home",
                 Key::ComponentToolbarKeyHomeAction => "Moves to the first control.",
@@ -19114,7 +21883,7 @@ impl Locale {
                     "Use a tooltip for a short hint about the control it wraps, never for that control's only name. If every reader needs the sentence, write it into the page. For an explanation of a word in running text, use `Info`."
                 }
                 Key::ComponentTooltipA11yNotes => {
-                    "The bubble is a `role=\"tooltip\"` and the control points at it with `aria-describedby`. It is never the control's accessible name, it holds nothing focusable, and Escape hides it without moving the focus."
+                    "The bubble is a `role=\"tooltip\"`, named in the control's `aria-describedby`. It holds nothing focusable, and Escape hides it without moving the focus. A hint that repeats the control's name is `aria-hidden` and describes nothing."
                 }
                 Key::ComponentTooltipPropNameDoc => {
                     "What this hint belongs to, as a script finds it, and the root of the id here. **Required**, because an id derived from an absent name collides the moment a page carries two."
@@ -19321,6 +22090,36 @@ impl Locale {
                 }
                 Key::PageMenuBody => {
                     "Um menu e os itens dele. O botão que abre um menu é um `Button` com `menu` e `controls`. Tudo depois do toque é o `dist/menu.js`: a ancoragem, o caminho das setas, a letra que salta, o Esc e o foco voltando para o botão."
+                }
+                Key::PageFooterSummary => {
+                    "Mantenha as linhas que uma janela guarda na borda de baixo, com um canto em cada ponta."
+                }
+                Key::PageFooterBody => {
+                    "O rodapé, uma linha dele e um canto. As linhas se distinguem pelo tom e nenhuma borda é desenhada. Um canto tem a altura de todas as linhas juntas. O rodapé não traz script."
+                }
+                Key::PageDrawerSummary => {
+                    "Abra um painel junto a uma borda da janela, ao lado do trabalho e nunca sobre ele."
+                }
+                Key::PageDrawerBody => {
+                    "A gaveta e o trilho que desce por um lado dela. A gaveta fica no fluxo da janela e não é modal. Ela abre até o tamanho do conteúdo, no máximo uma fração da janela. Quem chama a abre e a fecha."
+                }
+                Key::PageSplitSummary => {
+                    "Divida uma caixa entre dois painéis, com uma linha entre eles que a pessoa pode mover."
+                }
+                Key::PageSplitBody => {
+                    "A divisão, um painel e a alça entre dois. A fração do primeiro painel é um número só. Uma caixa estreita empilha os painéis ou deixa um de fora, e o que se mede é a caixa da própria divisão."
+                }
+                Key::PageLogSummary => {
+                    "Mostre linhas à medida que chegam, e mantenha a mais nova à vista até a pessoa rolar para longe."
+                }
+                Key::PageLogBody => {
+                    "O registro e uma linha dele. Um registro acompanha a linha mais nova até a pessoa rolar para longe, e volta a acompanhar no fim. Toda linha está no documento, e quem chama limita quantas."
+                }
+                Key::PageOptionListSummary => {
+                    "Deixe a pessoa percorrer uma lista de opções com o teclado e escolher uma."
+                }
+                Key::PageOptionListBody => {
+                    "A lista, um grupo nomeado de opções e uma opção. O foco fica num só elemento e `aria-activedescendant` nomeia a opção ativa. A lista não escolhe nada sozinha. Ela diz qual opção foi pedida, num evento."
                 }
                 Key::PageTreeSummary => {
                     "Deixe a pessoa percorrer uma hierarquia, abrindo, fechando e escolhendo nós nela."
@@ -19705,7 +22504,55 @@ impl Locale {
                     "Mostre um item de uma lista, ou um termo e a descrição dele."
                 }
                 Key::ComponentMarkSummary => {
-                    "Realce um texto para o que a pessoa está fazendo agora, como um resultado de busca."
+                    "Realce um trecho de um texto corrido que importa para o que a pessoa está fazendo agora."
+                }
+                Key::ComponentMatchTextSummary => {
+                    "Mostre um nome com os caracteres casados por uma consulta marcados, um estilo por palavra."
+                }
+                Key::ComponentFooterSummary => {
+                    "Mantenha as linhas que uma janela guarda na borda de baixo, com um canto em cada ponta."
+                }
+                Key::ComponentFooterCornerSummary => {
+                    "Ponha um canto numa ponta de um rodapé, com a altura de todas as linhas dele."
+                }
+                Key::ComponentFooterLineSummary => {
+                    "Ponha uma linha num rodapé: controles, estado ou a linha para digitar."
+                }
+                Key::ComponentDrawerSummary => {
+                    "Abra um painel junto a uma borda da janela, ao lado do trabalho e nunca sobre ele."
+                }
+                Key::ComponentDrawerRailSummary => {
+                    "Ponha uma coluna de controles ou de abas num lado de uma gaveta."
+                }
+                Key::ComponentSplitSummary => {
+                    "Divida uma caixa entre dois painéis, com uma linha entre eles que a pessoa pode mover."
+                }
+                Key::ComponentSplitPaneSummary => {
+                    "Guarde uma das duas metades de uma divisão, e role o que não couber."
+                }
+                Key::ComponentSplitHandleSummary => {
+                    "Deixe a pessoa mover a linha entre dois painéis, por ponteiro, toque ou teclado."
+                }
+                Key::ComponentKeyCaptureSummary => {
+                    "Deixe a pessoa gravar um atalho pressionando as teclas dele, e mostre-o como essas teclas."
+                }
+                Key::ComponentLogSummary => {
+                    "Mostre linhas à medida que chegam, e mantenha a mais nova à vista até a pessoa rolar para longe."
+                }
+                Key::ComponentLogLineSummary => {
+                    "Mostre uma linha de um registro: a hora, o nível, a origem e a mensagem."
+                }
+                Key::ComponentPromptSummary => {
+                    "Deixe a pessoa digitar numa linha com cursor em bloco e enviar o que digitou."
+                }
+                Key::ComponentOptionGroupSummary => {
+                    "Dê nome a um grupo de opções dentro de uma lista de opções."
+                }
+                Key::ComponentOptionItemSummary => {
+                    "Ponha uma opção numa lista de opções: o nome dela, a tecla e o que ela faz."
+                }
+                Key::ComponentOptionListSummary => {
+                    "Deixe a pessoa percorrer uma lista de opções com o teclado e escolher uma."
                 }
                 Key::ComponentParagraphSummary => "Renderize um parágrafo de prosa.",
                 Key::ComponentProseSummary => {
@@ -20379,8 +23226,362 @@ impl Locale {
                 Key::ExampleMarkSearch => {
                     "O peso muda além do fundo, então uma ocorrência pode ser encontrada sem depender da cor."
                 }
+                Key::ExampleFooterOverview => {
+                    "Três linhas e dois cantos, distinguidos só pelo tom. A linha do meio é cortada para caber, e o controle no fim dela a expande."
+                }
+                Key::ExampleFooterLines => {
+                    "As linhas se empilham na ordem em que são escritas. Nenhuma borda é desenhada entre elas."
+                }
+                Key::ExampleFooterAuto => {
+                    "`auto` dobra o rodapé numa faixa junto à borda. Aponte para a faixa, ou leve o foco para dentro dela, e ele abre."
+                }
+                Key::ExampleFooterShown => {
+                    "`shown` abre de fora um rodapé dobrado, para uma tecla pressionada em outro ponto da janela."
+                }
+                Key::ExampleFooterNarrow => {
+                    "Numa janela estreita as linhas mantêm a altura. O que não cabe numa linha é cortado no fim dela."
+                }
+                Key::ExampleFooterCornerAlone => {
+                    "Um rodapé com um canto só dá às linhas o espaço do outro."
+                }
+                Key::ExampleFooterCornerTwo => {
+                    "Dois controles ficam um acima do outro. Um canto é cortado na altura do rodapé."
+                }
+                Key::ExampleFooterLineKinds => {
+                    "Cada tipo tem o próprio tom. `prompt` tem o da página."
+                }
+                Key::ExampleFooterLineCut => {
+                    "O conteúdo mais longo que a linha é cortado. O controle no fim aparece sob um ponteiro ou com o foco."
+                }
+                Key::ExampleFooterLineExpanded => {
+                    "Expandida, a linha quebra e cresce, e o controle continua à mostra."
+                }
+                Key::ExampleFooterLineLive => {
+                    "`live` faz do conteúdo um `role=\"status\"`, então um aviso é anunciado quando chega."
+                }
+                Key::ExampleFooterCornerSides => {
+                    "Um canto tem a largura de um trilho e a altura do rodapé."
+                }
+                Key::ExampleFooterCornerControl => {
+                    "Um controle num canto mostra o ícone e mantém o nome."
+                }
+                Key::ExampleFooterLabel => "Rodapé da janela",
+                Key::ExampleFooterSidebar => "Abrir a barra lateral",
+                Key::ExampleFooterPage => "Registros",
+                Key::ExampleFooterOffline => "Sem conexão",
+                Key::ExampleFooterHover => {
+                    "Fecha a página em foco e devolve o foco para a página anterior."
+                }
+                Key::ExampleFooterSelection => {
+                    "Abre as configurações, uma página para cada configuração."
+                }
+                Key::ExampleFooterExpand => "Mostrar tudo",
+                Key::ExampleFooterCollapse => "Mostrar uma linha",
+                Key::ExampleFooterNotice => "A configuração foi salva.",
+                Key::ExampleFooterTyped => "fechar a página",
+                Key::ExampleFooterModeline => "Linha de modo",
+                Key::ExampleFooterInfo => "Linha de informação",
+                Key::ExampleFooterPrompt => "Linha de comando",
+                Key::ExampleDrawerOverview => {
+                    "Uma gaveta sob um rodapé. Os dois trilhos continuam os cantos do rodapé, e o controle no fim da linha de modo a fecha e a abre."
+                }
+                Key::ExampleDrawerBasic => {
+                    "Uma gaveta tem a altura do que está nela. Ela tira o espaço do trabalho acima e não cobre nada dele."
+                }
+                Key::ExampleDrawerCollapsed => {
+                    "`collapsed` mantém o que está na gaveta e não mostra nada. Abra, leve o foco para dentro e pressione Escape."
+                }
+                Key::ExampleDrawerSide => {
+                    "Uma gaveta num lado cresce ao longo da janela, até a mesma fração dela, e tem a altura do lado."
+                }
+                Key::ExampleDrawerScroll => {
+                    "Além da fração da janela o conteúdo rola. O trilho fica onde está."
+                }
+                Key::ExampleDrawerRailControls => {
+                    "Um trilho tem a largura de um canto do rodapé e a altura da gaveta. Ele guarda uma `Toolbar` desenhada como trilho."
+                }
+                Key::ExampleDrawerRailTabs => {
+                    "Um trilho no `end` guarda as abas. A aba escolhida é marcada na borda voltada para o conteúdo."
+                }
+                Key::ExampleDrawerRailBoth => {
+                    "Um trilho de cada lado, e o conteúdo entre eles. O teclado os alcança na ordem em que são escritos."
+                }
+                Key::ExampleDrawerRailScroll => {
+                    "Um trilho mais alto que a gaveta rola, sem barra de rolagem. Andar por ele com as setas traz cada controle à vista."
+                }
+                Key::ExampleDrawerLabel => "Gaveta",
+                Key::ExampleDrawerSidebar => "Barra lateral",
+                Key::ExampleDrawerDetails => "Detalhes",
+                Key::ExampleDrawerToggle => "Mostrar ou esconder a gaveta",
+                Key::ExampleDrawerWork => {
+                    "A área de trabalho. A gaveta abaixo tira o espaço daqui."
+                }
+                Key::ExampleDrawerWorkShut => {
+                    "A gaveta abaixo está fechada. O que está nela é mantido."
+                }
+                Key::ExampleDrawerWorkSide => "A área de trabalho, entre uma gaveta de cada lado.",
+                Key::ExampleDrawerLongOne => {
+                    "Toda página funciona na área de trabalho e na gaveta."
+                }
+                Key::ExampleDrawerLongTwo => {
+                    "Uma página se adapta ao espaço menor, ou traz uma visão feita para ele."
+                }
+                Key::ExampleDrawerLongThree => "Recolher a gaveta mantém toda página aberta nela.",
+                Key::ExampleSplitOverview => {
+                    "Uma lista e o que está escolhido nela. Arraste a linha entre as duas, ou leve o foco até ela e use as setas."
+                }
+                Key::ExampleSplitBasic => {
+                    "Dois painéis dividem a caixa ao meio. A alça entre eles é uma parada de tabulação."
+                }
+                Key::ExampleSplitLimits => {
+                    "`value` é onde a linha começa. `min` e `max` são até onde ela vai para cada lado."
+                }
+                Key::ExampleSplitStack => {
+                    "Numa caixa mais estreita que o ponto de quebra `sm` os painéis se empilham e a alça some. A caixa medida é a da própria divisão."
+                }
+                Key::ExampleSplitHide => {
+                    "`hide-start` e `hide-end` deixam um painel de fora de uma caixa estreita. O outro fica com tudo."
+                }
+                Key::ExampleSplitNone => {
+                    "`none` mantém os painéis lado a lado na caixa mais estreita, e a alça junto."
+                }
+                Key::ExampleSplitPaneSides => {
+                    "Dois painéis sem alça mantêm as frações. Nada aqui é um controle."
+                }
+                Key::ExampleSplitPaneScroll => {
+                    "Lado a lado, um painel tem a altura da divisão e rola o que for mais alto. O outro painel fica onde está."
+                }
+                Key::ExampleSplitPaneContent => {
+                    "Um painel não tem espaçamento interno próprio. O que ele guarda traz o seu."
+                }
+                Key::ExampleSplitPaneNested => {
+                    "Um painel guarda uma divisão própria, para três colunas. Cada divisão é medida pela própria caixa."
+                }
+                Key::ExampleSplitHandleBasic => {
+                    "A alça tem a largura do menor alvo e desenha um fio. Uma seta a move um ponto, e uma tecla de página, dez."
+                }
+                Key::ExampleSplitHandleLeast => {
+                    "Este painel começa no mínimo. Enter o leva ao meio do que ele pode ter, e Enter de novo o devolve."
+                }
+                Key::ExampleSplitHandleAway => {
+                    "Com limites de 0 e 100, Home e Enter guardam o primeiro painel por inteiro. End faz o mesmo com o segundo."
+                }
+                Key::ExampleSplitHandleMirrored => {
+                    "Lido da direita, o primeiro painel fica à direita. As setas continuam movendo a linha para onde apontam."
+                }
+                Key::ExampleSplitHandle => "Redimensionar a lista",
+                Key::ExampleKeyCaptureOverview => {
+                    "Cada controle guarda um atalho. Pressione-o, depois as teclas. Escape mantém o atalho que ele tinha."
+                }
+                Key::ExampleKeyCaptureBasic => {
+                    "As teclas são desenhadas pelos rótulos delas. Pressione o controle para escutar, e a próxima tecla com os modificadores é gravada."
+                }
+                Key::ExampleKeyCaptureKeyboards => {
+                    "Um atalho em três teclados. Só os nomes dos modificadores mudam."
+                }
+                Key::ExampleKeyCaptureRemovable => {
+                    "O controle depois da caixa remove o atalho. Ele só aparece enquanto há um para remover."
+                }
+                Key::ExampleKeyCaptureUnset => {
+                    "Sem atalho, a caixa diz isso nas palavras de quem chama."
+                }
+                Key::ExampleKeyCaptureRefused => {
+                    "Quem chama recusou o último atalho. A frase fica sob a caixa, e um traço desce pela borda inicial."
+                }
+                Key::ExampleKeyCaptureLocked => {
+                    "Um controle desativado continua na ordem de tabulação e diz o que guarda. Pressioná-lo não inicia nada."
+                }
+                Key::ExampleKeyCaptureLeader => "Leader",
+                Key::ExampleKeyCaptureSettings => "Abrir as configurações",
+                Key::ExampleKeyCaptureHelp => "Abrir a ajuda",
+                Key::ExampleKeyCaptureCapture => "Pressione as novas teclas, ou Escape",
+                Key::ExampleKeyCaptureEmpty => "Nenhum",
+                Key::ExampleKeyCaptureClear => "Remover o atalho",
+                Key::ExampleKeyCaptureRefusal => "O canal de produção já usa este atalho.",
+                Key::ExampleLogOverview => {
+                    "O registro de um daemon enquanto roda. Role para cima e ele para de acompanhar, e o controle no fim leva de volta à linha mais nova."
+                }
+                Key::ExampleLogFollows => {
+                    "O registro abre na linha mais nova e a mantém à vista. Rolado para longe, fica onde você está até voltar ao fim."
+                }
+                Key::ExampleLogStill => {
+                    "Com `follow` desligado, o registro abre na primeira linha e fica onde a pessoa o deixa."
+                }
+                Key::ExampleLogNarrow => {
+                    "Numa janela estreita cada linha quebra sob si mesma. Nada rola para o lado."
+                }
+                Key::ExampleLogRoomy => {
+                    "Com espaço para todas as linhas, o registro está na primeira e no fim ao mesmo tempo. Nada oferece retomar."
+                }
+                Key::ExampleLogLineLevels => {
+                    "Cada nível é uma palavra numa caixa tingida. O tom repete o nível, nunca sozinho."
+                }
+                Key::ExampleLogLineParts => {
+                    "Uma parte deixada de fora não deixa espaço para trás. Um nível sem tom é desenhado no tom da própria página."
+                }
+                Key::ExampleLogLineLong => {
+                    "Um caminho não tem espaço onde quebrar, então quebra dentro de si. Uma quebra de linha na mensagem é mantida."
+                }
+                Key::ExampleLogLineFiltered => {
+                    "Filtrada pela linha de prompt, a mensagem é um `MatchText`, cada palavra da consulta marcada no próprio tom."
+                }
+                Key::ExampleLogLabel => "Registro do daemon",
+                Key::ExampleLogRecord => "Diário",
+                Key::ExampleLogResume => "Ir para a mais nova",
+                Key::ExampleLogLevelDebug => "depuração",
+                Key::ExampleLogLevelInfo => "info",
+                Key::ExampleLogLevelWarning => "aviso",
+                Key::ExampleLogLevelError => "erro",
+                Key::ExampleLogStarted => "Iniciado, canal de desenvolvimento.",
+                Key::ExampleLogStore => "Abriu o armazenamento local.",
+                Key::ExampleLogCatalog => "Leu 42 comandos do catálogo.",
+                Key::ExampleLogSocket => "Escutando no socket local.",
+                Key::ExampleLogAttached => "Uma janela se conectou.",
+                Key::ExampleLogSlow => "Um cliente demorou a responder ao sinal de vida.",
+                Key::ExampleLogRan => "Executou um comando para a janela.",
+                Key::ExampleLogRefused => {
+                    "Um plugin foi recusado: a capacidade dele não foi concedida."
+                }
+                Key::ExampleLogJournal => "A recusa foi escrita no diário.",
+                Key::ExampleLogSnapshot => "Salvou o estado da interface.",
+                Key::ExampleLogFull => "O armazenamento está nove décimos cheio.",
+                Key::ExampleLogHeartbeat => "Sinal de vida.",
+                Key::ExampleLogLost => "Uma janela parou de responder.",
+                Key::ExampleLogMemory => "Um plugin está perto do limite de memória.",
+                Key::ExamplePromptOverview => {
+                    "O prompt é a última linha de um rodapé. Digite nele, depois pressione Enter ou o controle no fim."
+                }
+                Key::ExamplePromptBasic => {
+                    "O cursor é um bloco sobre o caractere à frente dele. Fica preenchido enquanto o prompt tem o foco, e vira um contorno sem ele."
+                }
+                Key::ExamplePromptGrows => {
+                    "O prompt cresce com o texto, até oito linhas. Depois disso ele rola, e o bloco continua sobre o caractere dele."
+                }
+                Key::ExamplePromptDriven => {
+                    "O prompt nomeia a lista em `controls`. O foco fica no prompt, e as setas para cima e para baixo percorrem as opções."
+                }
+                Key::ExamplePromptActive => {
+                    "`active` nomeia a opção em que o teclado está, para quem chama e renderiza a opção ativa por conta própria."
+                }
+                Key::ExamplePromptReadonly => {
+                    "Um prompt somente leitura pode ser lido e copiado. O cursor continua um contorno, e nada é enviado."
+                }
+                Key::ExamplePromptDisabled => {
+                    "Um prompt desabilitado não recebe foco e não desenha cursor."
+                }
+                Key::ExamplePromptLabel => "Prompt",
+                Key::ExamplePromptSend => "Enviar",
+                Key::ExamplePromptRunning => "A biblioteca está sendo indexada.",
+                Key::ExampleOptionListOverview => {
+                    "As palavras `win clo` foram digitadas. Cada linha marca o que cada palavra casou no nome, e a barra é onde o teclado está."
+                }
+                Key::ExampleOptionListWalk => {
+                    "Vá até a lista com Tab e use as setas. Enter escolhe, e a lista diz isso num evento `nd-option-choose`."
+                }
+                Key::ExampleOptionListColumns => {
+                    "`columns` preenche a largura, para baixo e depois para o lado. Cada entrada é uma tecla e um nome, sem nada em volta."
+                }
+                Key::ExampleOptionListDriven => {
+                    "A caixa nomeia a lista em `aria-controls`. O foco fica na caixa, e as setas dela percorrem as opções."
+                }
+                Key::ExampleOptionListNothing => {
+                    "Uma lista sem nenhuma opção mostra `empty_label`, num `role=\"status\"`."
+                }
+                Key::ExampleOptionGroupRun => {
+                    "Um grupo é um `role=\"group\"` nomeado pelo rótulo. As opções dele continuam sendo opções da mesma lista."
+                }
+                Key::ExampleOptionItemRow => {
+                    "`detail` é uma segunda linha embaixo do nome, e parte do que o leitor de tela lê para a opção."
+                }
+                Key::ExampleOptionItemHits => {
+                    "`hits` marca os caracteres do nome que uma consulta casou, na gramática do `MatchText`."
+                }
+                Key::ExampleOptionItemDetailHits => {
+                    "A consulta foi `win ex`. A segunda palavra casou uma etiqueta, então elas são a segunda linha e `detail_hits` as marca."
+                }
+                Key::ExampleOptionItemShortcut => {
+                    "`shortcut` é texto monoespaçado simples. Vem primeiro na marcação, então é lido antes do nome."
+                }
+                Key::ExampleOptionItemStates => {
+                    "`active` é onde o teclado está, `selected` é a resposta e desenha um tique, e `disabled` é alcançada e não escolhida."
+                }
+                Key::ExampleOptionListKeySpace => "Espaço",
+                Key::ExampleOptionListKeyS => "s",
+                Key::ExampleOptionListKeyH => "h",
+                Key::ExampleOptionListKeyD => "d",
+                Key::ExampleOptionListKeyQ => "q",
+                Key::ExampleOptionGroupMixed => {
+                    "Opções fora de qualquer grupo ficam ao lado dos grupos, na ordem em que são escritas."
+                }
+                Key::ExampleOptionGroupColumns => {
+                    "Em colunas o nome de um grupo fica com a primeira opção dele, no topo da mesma coluna."
+                }
+                Key::ExampleOptionGroupFiltered => {
+                    "Um grupo desenha só as opções que quem chama renderizou. Um grupo sem nenhuma à mostra não ocupa espaço."
+                }
+                Key::ExampleOptionListCommands => "Comandos",
+                Key::ExampleOptionListMenu => "Atalhos",
+                Key::ExampleOptionListFilter => "Filtre os comandos",
+                Key::ExampleOptionListEmpty => "Nenhum comando casa.",
+                Key::ExampleOptionListSettings => "Configurações",
+                Key::ExampleOptionListSettingsDetail => {
+                    "Mude a aparência e o comportamento da interface."
+                }
+                Key::ExampleOptionListHelp => "Ajuda",
+                Key::ExampleOptionListHelpDetail => "Leia como cada parte da interface funciona.",
+                Key::ExampleOptionListSidebar => "Barra lateral",
+                Key::ExampleOptionListDev => "Ferramentas de desenvolvimento",
+                Key::ExampleOptionListShortcuts => "Atalhos desta página",
+                Key::ExampleOptionListGroupWindow => "Janela",
+                Key::ExampleOptionListGroupPage => "Página",
+                Key::ExampleOptionListCloseWindow => "Fechar a janela",
+                Key::ExampleOptionListHideWindow => "Ocultar a janela",
+                Key::ExampleOptionListClosePage => "Fechar a página",
+                Key::ExampleMatchTextQuery => {
+                    "A consulta `gro t b` encontrou os dois nomes. Cada palavra dela marca os próprios caracteres, no próprio tom."
+                }
+                Key::ExampleMatchTextOne => "Uma palavra, e o trecho que ela casou.",
+                Key::ExampleMatchTextWords => {
+                    "Três palavras. A primeira tem sublinhado contínuo, a segunda tracejado e a terceira pontilhado, então nenhum tom depende da cor."
+                }
+                Key::ExampleMatchTextShared => {
+                    "Duas palavras reivindicam os caracteres 3 a 5. A primeira palavra fica com eles."
+                }
+                Key::ExampleMatchTextElsewhere => {
+                    "Um espaço vazio é uma palavra que casou em outro campo, então o tom da segunda palavra é o único desenhado."
+                }
+                Key::ExampleMatchTextPlain => "Sem `hits` é só o nome.",
                 Key::ExampleParagraphLead => {
                     "Use o tamanho de abertura para a primeira frase abaixo de um título."
+                }
+                Key::ExampleProseFlowHeading => "Teclas do Leader",
+                Key::ExampleProseFlowPress => "Aperte o Leader e depois uma letra, como",
+                Key::ExampleProseFlowQuick => "Uma letra apertada rápido age",
+                Key::ExampleProseFlowQuickEm => "antes de o menu aparecer",
+                Key::ExampleProseFlowEscape => "Uma tecla nunca é atalho:",
+                Key::ExampleProseFlowEscapeStrong => "Escape sempre fecha",
+                Key::ExampleProseFlowLinkLead => "Um atalho é mudado com",
+                Key::ExampleProseFlowLink => "o controle que grava um atalho",
+                Key::ExampleProseFlowMenu => "No menu",
+                Key::ExampleProseFlowHelp => "abre a ajuda.",
+                Key::ExampleProseFlowDev => "abre as páginas de desenvolvimento:",
+                Key::ExampleProseFlowLogs => "os logs ao vivo",
+                Key::ExampleProseFlowRegistries => "os registros",
+                Key::ExampleProseFlowClose => "fecha a página da frente.",
+                Key::ExampleProseFlowQuote => {
+                    "Uma tecla que um atalho usa é tirada da janela inteira, e não de uma página."
+                }
+                Key::ExampleProseFlowCaption => "O que cada letra abre",
+                Key::ExampleProseFlowColKey => "Tecla",
+                Key::ExampleProseFlowColOpens => "Abre",
+                Key::ExampleProseFlowHelpPage => "A ajuda",
+                Key::ExampleProseFlowDevPages => "As páginas de desenvolvimento",
+                Key::ExampleProseFlowClosePage => "Nada. Ela fecha a página.",
+                Key::ExampleProseFlowEnd => {
+                    "Tudo acima é uma construção do Markdown que a interface lê, e nada fora dele é."
+                }
+                Key::ExampleProseNoteFlow => {
+                    "Toda construção do subconjunto fechado de Markdown, em componentes. Um título tem mais espaço acima que abaixo, e o primeiro bloco nenhum."
                 }
                 Key::ExampleProseMeasure => {
                     "`Prose` limita o comprimento da linha de tudo que está dentro, então os parágrafos ficam numa medida legível."
@@ -20424,6 +23625,24 @@ impl Locale {
                 }
                 Key::ExampleToolbarDensity => {
                     "`density` define o espaçamento interno, para uma barra dentro de algo que já tem o seu."
+                }
+                Key::ExampleToolbarRail => {
+                    "Um trilho tem a largura de um trilho e guarda dois controles por linha. Cada `Tooltip` desenha o nome que o controle já tem."
+                }
+                Key::ExampleRailControls => "Controles da gaveta",
+                Key::ExampleRailPages => "Páginas na gaveta",
+                Key::ExampleRailCollapse => "Recolher a gaveta",
+                Key::ExampleRailClose => "Fechar a página",
+                Key::ExampleRailDirection => "Abrir a próxima página na gaveta",
+                Key::ExampleRailCommands => "Comandos",
+                Key::ExampleRailSettings => "Configurações",
+                Key::ExampleRailRegistries => "Registros",
+                Key::ExampleRailCommandsBody => {
+                    "Todo comando que a janela executa, filtrado enquanto você digita."
+                }
+                Key::ExampleRailSettingsBody => "Uma página para cada configuração.",
+                Key::ExampleRailRegistriesBody => {
+                    "O que está instalado, e de onde veio cada entrada."
                 }
                 Key::ExampleTimeMachine => {
                     "O texto visível é o que é anunciado. `datetime` é o valor legível por máquina."
@@ -21668,6 +24887,34 @@ impl Locale {
                 Key::ExampleMessageBarNotePlain => {
                     "Nenhum tom, que é a ausência do atributo e não um nome. As palavras carregam a mensagem sozinhas."
                 }
+                Key::ExampleMessageBarLost => "O servidor local não está rodando.",
+                Key::ExampleMessageBarRestoring => {
+                    "one:Restaurando em {count} segundo|other:Restaurando em {count} segundos"
+                }
+                Key::ExampleMessageBarRestore => "Restaurar agora",
+                Key::ExampleMessageBarAgain => "Contar de novo",
+                Key::ExampleMessageBarStopped => "O servidor local está parado.",
+                Key::ExampleMessageBarStart => "Iniciar",
+                Key::ExampleMessageBarSave => "Salve o que você está fazendo antes disso.",
+                Key::ExampleMessageBarEnds => {
+                    "one:Desconectando você em {count} segundo|other:Desconectando você em {count} segundos"
+                }
+                Key::ExampleMessageBarStay => "Continuar conectado",
+                Key::ExampleMessageBarNoteLine => {
+                    "A linha fecha a janela, abaixo do rodapé. A página escreve um prazo dez segundos à frente, como a interface faz ao perder o servidor."
+                }
+                Key::ExampleMessageBarOffline => {
+                    "Você está trabalhando sem conexão. As mudanças ficam guardadas aqui até a conexão voltar."
+                }
+                Key::ExampleMessageBarNoteQuiet => {
+                    "Uma linha sem tom é desenhada na superfície sutil. Uma que a pessoa pode dispensar termina com o controle dela."
+                }
+                Key::ExampleMessageBarNoteStopped => {
+                    "Parado de propósito, a linha não conta nada. A ação dela inicia o servidor de novo."
+                }
+                Key::ExampleMessageBarNoteCountdown => {
+                    "Uma barra também conta, abaixo da mensagem. O tempo que falta é anunciado no início, a cada dez segundos e aos cinco."
+                }
                 Key::ExampleOverviewDividerPay => "Pagar com cartão",
                 Key::ExampleOverviewDividerPayBody => "Aceitamos Visa, Mastercard e Elo.",
                 Key::ExampleOverviewDividerInvoice => "Pedir uma nota fiscal",
@@ -21760,6 +25007,9 @@ impl Locale {
                 Key::ExampleTabsNoteFill => {
                     "`equal` dá a toda aba a largura da mais larga, então traduzir uma palavra não refaz a tira."
                 }
+                Key::ExampleTabsNoteRail => {
+                    "`rail` mostra cada aba como o ícone dela. O rótulo continua sendo o nome da aba, e o `Tooltip` o desenha."
+                }
                 Key::ExampleTabSettings => "Ajustes",
                 Key::ExampleTabPeople => "Pessoas",
                 Key::ExampleTabBilling => "Cobrança",
@@ -21844,6 +25094,26 @@ impl Locale {
                 Key::ExampleDialogNoteWide => {
                     "Nenhum controle de fechar. Escape e um toque no fundo continuam sendo a saída, e os dois são da plataforma."
                 }
+                Key::ExampleDialogIrreversible => "Isto não pode ser desfeito.",
+                Key::ExampleDialogFiles => {
+                    "Três arquivos estão anexados, e eles vão junto com o rascunho."
+                }
+                Key::ExampleDialogAsk => "Pedir uma confirmação",
+                Key::ExampleDialogRealmHeading => "Apagar o realm home?",
+                Key::ExampleDialogRealmDescription => {
+                    "Todo registro, arquivo e configuração nele é apagado, nesta máquina e em todo lugar onde está guardado."
+                }
+                Key::ExampleDialogRealmRequester => {
+                    "Pedido pelo assistente, na sessão chamada Limpeza."
+                }
+                Key::ExampleDialogRealmConfirm => "Apagar o realm",
+                Key::ExampleDialogAnswer => "O diálogo respondeu {answer}.",
+                Key::ExampleDialogNoteAlert => {
+                    "Um diálogo de alerta pede uma resposta. O foco começa naquela que não muda nada, e um toque ao lado não é uma resposta."
+                }
+                Key::ExampleDialogNoteShown => {
+                    "A interface abre isto quando um comando que não se desfaz pede para rodar. Aqui é a página que o abre e escreve a resposta abaixo dele."
+                }
                 Key::ExampleDialogNotePlain => {
                     "Sem título, o `label` nomeia a superfície. Prefira um título quando houver espaço, porque a pessoa pode conferir."
                 }
@@ -21900,6 +25170,9 @@ impl Locale {
                 }
                 Key::ExampleTooltipNoteNone => {
                     "Um controle só com ícone, onde `label` continua sendo o nome e a dica só descreve. `none` abre assim que o ponteiro chega."
+                }
+                Key::ExampleTooltipNoteName => {
+                    "Aqui a dica e o nome são as mesmas palavras. O script não escreve descrição, então o nome é lido uma vez só."
                 }
                 Key::ExampleToastSavedTitle => "Salvo",
                 Key::ExampleToastSaved => {
@@ -22082,7 +25355,7 @@ impl Locale {
                     "Se uma contagem de zero é desenhada. Desligado por padrão, então nada a relatar não desenha selo nenhum. Ligue num painel, onde o zero é uma resposta de verdade e um selo ausente seria lido como falha."
                 }
                 Key::ComponentBadgePropToneDoc => {
-                    "De qual tom do sistema de cores o selo é pintado, nomeado em vez de escolhido numa lista fechada. As 349 famílias estão em `noctua_design::tones`, mais `neutral` e `muted`. Um nome que nenhuma família declara quebra o build."
+                    "De qual tom do sistema de cores o selo é pintado, nomeado em vez de escolhido numa lista fechada. As 352 famílias estão em `noctua_design::tones`, mais `neutral` e `muted`. Um nome que nenhuma família declara quebra o build."
                 }
                 Key::ComponentBadgePropPlacementDoc => {
                     "Em qual canto a marca fica. Os valores são lógicos em vez de esquerda e direita, então a marca passa para o outro canto numa página da direita para a esquerda."
@@ -23006,16 +26279,16 @@ impl Locale {
                 }
                 Key::ComponentDelPropChildrenDoc => "O texto removido.",
                 Key::ComponentDialogGuidance => {
-                    "Use um diálogo para uma coisa que a pessoa precisa resolver antes de seguir. Para uma mensagem deixada onde aconteceu, use `MessageBar`. Para uma nota presa a um controle, use `Popover`. Uma superfície que só mostra algo é uma seção de página."
+                    "Use um diálogo para algo que a pessoa precisa resolver antes de seguir. Use a forma `alert` para confirmar uma resposta que não se desfaz. Para uma mensagem deixada onde aconteceu, use `MessageBar`. Para uma nota num controle, use `Popover`."
                 }
                 Key::ComponentDialogA11yNotes => {
-                    "O elemento `<dialog>` carrega o papel, então nenhum é escrito. `showModal` o marca como modal e deixa inerte o documento atrás dele, então também não se escreve armadilha de foco. Um não modal é um diálogo comum ao lado da página."
+                    "O elemento `<dialog>` carrega o papel, ou `role=\"alertdialog\"` com `alert`. `showModal` deixa inerte a página atrás dele, então não se escreve armadilha de foco. A descrição, quem pede e a marca o descrevem."
                 }
                 Key::ComponentDialogPropNameDoc => {
                     "O que é este diálogo, como um script o encontra, e a raiz de todo id aqui. **Obrigatório**, porque ids derivados de um nome ausente colidem assim que uma página carrega dois."
                 }
                 Key::ComponentDialogPropTriggerLabelDoc => {
-                    "As palavras no controle que o abre. **Obrigatório**: uma superfície que só abre por script e não tem controle apontando para ela é uma superfície inalcançável."
+                    "As palavras no controle que o abre. Ausente num diálogo que quem chama abre com `shown`. Um diálogo sem nenhum dos dois é uma superfície inalcançável."
                 }
                 Key::ComponentDialogPropHeadingDoc => {
                     "Um título dentro da superfície. Ele nomeia o diálogo por `aria-labelledby`, então prefira-o a `label`. Um nome que a pessoa vê é um nome que ela pode conferir com o que está sendo perguntado."
@@ -23038,19 +26311,37 @@ impl Locale {
                 Key::ComponentDialogPropCloseLabelDoc => {
                     "O nome do controle que fecha. Necessário na prática pelo `dismissible`, porque esse controle é um glifo e este é o único nome que ele tem."
                 }
+                Key::ComponentDialogPropShownDoc => {
+                    "Se a superfície está aberta, para quem chama e desenha a interface como uma visão. O `dist/dialog.js` a abre ou fecha sempre que quem chama o escreve, e avisa com `nd-dialog-close` quando a pessoa a fecha."
+                }
+                Key::ComponentDialogPropAlertDoc => {
+                    "Se o diálogo exige uma resposta. A superfície vira um `role=\"alertdialog\"` e um toque no fundo não a fecha. Dê a ela uma `description`."
+                }
+                Key::ComponentDialogPropRequesterDoc => {
+                    "Quem está pedindo, numa frase como *Pedido pelo assistente na sessão 4*. Ela abre o corpo e descreve a superfície depois da descrição."
+                }
+                Key::ComponentDialogPropIrreversibleLabelDoc => {
+                    "Uma marca dizendo que a resposta não pode ser desfeita, como *Isto não pode ser desfeito*. É desenhada com um glifo de aviso, descreve a superfície e pinta o controle de confirmar no tom de perigo."
+                }
+                Key::ComponentDialogPropConfirmLabelDoc => {
+                    "As palavras no controle que diz sim, como *Apagar o realm*. Ele fecha a superfície com a resposta `confirm`."
+                }
+                Key::ComponentDialogPropDeclineLabelDoc => {
+                    "As palavras no controle que diz não, como *Manter*. Ele fecha a superfície com a resposta `decline`, e o foco começa nele."
+                }
                 Key::ComponentDialogPropChildrenDoc => {
-                    "O que o diálogo pergunta e os controles que respondem. Um `Button` que age sobre a resposta fica aqui, no fim."
+                    "O que o diálogo pergunta, depois de quem pede e da marca. Um controle que responde só fica aqui onde `confirm_label` e `decline_label` não conseguem dizê-lo."
                 }
                 Key::ComponentDialogStateOpenDoc => {
                     "Definido na raiz enquanto a superfície está aberta. O `<dialog>` carrega o próprio atributo `open`, e este é o que uma folha de estilo fora dele consegue usar."
                 }
                 Key::ComponentDialogKeyEnterOrSpaceName => "Enter ou Espaço",
                 Key::ComponentDialogKeyEnterOrSpaceAction => {
-                    "Abre o diálogo, no controle que o abre. As duas teclas funcionam, porque esse controle é um `<button>`."
+                    "Aciona o controle em que está o foco, que abre o diálogo ou responde a ele. Cada um é um `<button>`."
                 }
                 Key::ComponentDialogKeyEscapeName => "Escape",
                 Key::ComponentDialogKeyEscapeAction => {
-                    "Fecha. A plataforma responde a isso numa superfície modal, e o `dist/dialog.js` responde numa não modal."
+                    "Fecha, como `decline` onde há um controle de recusar. O `dist/dialog.js` responde a ele numa superfície não modal."
                 }
                 Key::ComponentDialogKeyTabName => "Tab",
                 Key::ComponentDialogKeyTabAction => {
@@ -23111,6 +26402,50 @@ impl Locale {
                 }
                 Key::ComponentDividerStateLabelledDoc => {
                     "Definido quando um `label` foi dado, no `<div>` que entra no lugar do `<hr>`. A folha de estilo pendura nele as duas meias-linhas e o espaço em volta da palavra."
+                }
+                Key::ComponentDrawerGuidance => {
+                    "Use uma gaveta para um painel que abre junto a uma borda da janela e fica ao lado do trabalho. Nada atrás dela fica inerte e o foco nunca fica preso nela. Para uma superfície que precisa ser respondida antes, use `Dialog`."
+                }
+                Key::ComponentDrawerA11yNotes => {
+                    "A gaveta é um `role=\"region\"`, nomeada por `label`. Ela não é modal: nada atrás dela fica inerte e o Tab sai dela. Recolhida, fica escondida e `inert`. Ela abre no fluxo da janela e não cobre nada."
+                }
+                Key::ComponentDrawerPropNameDoc => {
+                    "O que é esta gaveta, como um script a encontra. É o `name` em `nd-drawer-dismiss`. Obrigatório."
+                }
+                Key::ComponentDrawerPropIdDoc => {
+                    "O id da gaveta, para o controle que a abre e fecha nomeá-la em `controls`."
+                }
+                Key::ComponentDrawerPropLabelDoc => {
+                    "O nome da gaveta, no idioma da pessoa. Vira `aria-label` no `region`. Obrigatório."
+                }
+                Key::ComponentDrawerPropSideDoc => {
+                    "De qual borda da janela a gaveta abre: `bottom`, `start` ou `end`. Ela cresce no eixo dessa borda, até `--noctua-shell-drawer-max` e não mais. Num lado, fica nesse lado da fileira em que está."
+                }
+                Key::ComponentDrawerPropCollapsedDoc => {
+                    "Se a gaveta está fechada. Uma gaveta recolhida mantém o que está nela e não mostra nada. Fica fora da ordem de tabulação e escondida da tecnologia assistiva."
+                }
+                Key::ComponentDrawerPropChildrenDoc => {
+                    "Os trilhos e o conteúdo, na ordem em que o teclado os alcança: até dois `DrawerRail`s e um elemento entre eles."
+                }
+                Key::ComponentDrawerKeyTabName => "Tab",
+                Key::ComponentDrawerKeyTabAction => {
+                    "Percorre a gaveta e sai dela. Nada fica preso dentro."
+                }
+                Key::ComponentDrawerKeyEscapeName => "Escape",
+                Key::ComponentDrawerKeyEscapeAction => {
+                    "Diz `nd-drawer-dismiss` com o `name` da gaveta. Uma superfície aberta dentro dela recebe a tecla antes."
+                }
+                Key::ComponentDrawerRailGuidance => {
+                    "Use um trilho de gaveta para a coluna estreita que desce por um lado de um `Drawer`. Ele guarda uma `Toolbar` ou um `Tabs` desenhado como trilho, e nada mais largo que um trilho."
+                }
+                Key::ComponentDrawerRailA11yNotes => {
+                    "O trilho não tem papel, então um trilho vazio não é anunciado. Uma `Toolbar` ou um `Tabs` dentro dele mantém o próprio papel, o nome e a única parada de tabulação."
+                }
+                Key::ComponentDrawerRailPropSideDoc => {
+                    "Em qual lado da gaveta o trilho fica: `start` ou `end`. A aba escolhida de um trilho no `end` é marcada na borda voltada para o conteúdo."
+                }
+                Key::ComponentDrawerRailPropChildrenDoc => {
+                    "O que o trilho guarda: uma `Toolbar` com `density` em `rail`, ou um `Tabs` com `appearance` em `rail`."
                 }
                 Key::ComponentEmA11yNotes => {
                     "`em` marca ênfase de entonação e `strong` marca importância. Um leitor de tela pode pronunciá-los de formas diferentes, então use cada um com o sentido próprio dele."
@@ -23345,6 +26680,66 @@ impl Locale {
                 Key::ComponentFileInputKeyDeleteOrBackspaceAction => {
                     "Remove o arquivo cujo controle de remover está com o foco."
                 }
+                Key::ComponentFooterGuidance => {
+                    "Use um rodapé para as linhas que a janela de um aplicativo mantém na borda de baixo. São uma linha de controles, uma de estado e uma para digitar. Para os controles de uma página, use `Toolbar`."
+                }
+                Key::ComponentFooterA11yNotes => {
+                    "O rodapé é um `<footer>` com `role=\"group\"`, nomeado por `label`. Um rodapé dobrado continua na ordem de tabulação e abre quando o foco entra nele, então nenhum controle em foco fica escondido. Ele abre no fluxo da página e não cobre nada."
+                }
+                Key::ComponentFooterPropLabelDoc => {
+                    "O nome do rodapé, no idioma da pessoa. Vira `aria-label` no `group`. Obrigatório."
+                }
+                Key::ComponentFooterPropVisibilityDoc => {
+                    "Quando o rodapé aparece: `always`, ou `auto`, que o dobra numa faixa junto à borda. A faixa abre sob um ponteiro, enquanto o foco está dentro dela e enquanto `shown` está ligado."
+                }
+                Key::ComponentFooterPropShownDoc => {
+                    "Se um rodapé dobrado está aberto. Quem chama liga para o que o rodapé não vê, como uma tecla pressionada em outro lugar ou um ponteiro na borda da janela. Precisa de `auto`."
+                }
+                Key::ComponentFooterPropChildrenDoc => {
+                    "As linhas, de cima para baixo, e os cantos: `FooterLine`s e até dois `FooterCorner`s."
+                }
+                Key::ComponentFooterCornerGuidance => {
+                    "Use um canto de rodapé para o quadrado numa ponta de um `Footer`. Ele contém controles que mostram um ícone e nenhuma palavra, ou nada."
+                }
+                Key::ComponentFooterCornerA11yNotes => {
+                    "O canto não tem papel, então um canto vazio não é anunciado. Um controle dentro dele é um `Button` com o próprio nome."
+                }
+                Key::ComponentFooterCornerPropSideDoc => {
+                    "Em qual ponta do rodapé o canto fica: `start` ou `end`. Um rodapé tem no máximo um canto em cada ponta."
+                }
+                Key::ComponentFooterCornerPropChildrenDoc => {
+                    "Os controles no canto. Cada um é um `Button` com `hide_label`, então cada um tem nome e mostra só o ícone."
+                }
+                Key::ComponentFooterLineGuidance => {
+                    "Use uma linha de rodapé para uma linha de um `Footer`. `kind` diz qual das três ela é, e o tipo decide o tom dela e se ela fica com uma linha de altura."
+                }
+                Key::ComponentFooterLineA11yNotes => {
+                    "O controle que expande é um `<button>` de verdade com `aria-expanded`, escrito como `true` ou `false`. Ele tem pelo menos 24 pixels de lado, como pede a WCAG 2.5.8. Com `live`, o conteúdo é um `role=\"status\"`, e o controle fica fora dele."
+                }
+                Key::ComponentFooterLinePropKindDoc => {
+                    "Qual linha é esta: `modeline`, para controles, `info`, para estado, ou `prompt`, para a linha de digitar. Cada uma tem o próprio tom, e `prompt` tem o da página."
+                }
+                Key::ComponentFooterLinePropExpandableDoc => {
+                    "Se a linha termina num controle que a expande. O controle aparece enquanto um ponteiro está sobre a linha ou o foco está dentro dela. Numa tela de toque ele aparece sempre."
+                }
+                Key::ComponentFooterLinePropExpandedDoc => {
+                    "Se a linha quebra e cresce para mostrar todo o conteúdo. Desligado, a linha tem uma linha de altura e o conteúdo é cortado para caber."
+                }
+                Key::ComponentFooterLinePropExpandLabelDoc => {
+                    "O nome do controle enquanto a linha tem uma linha de altura, como *Mostrar tudo*. Na prática, `expandable` pede este."
+                }
+                Key::ComponentFooterLinePropCollapseLabelDoc => {
+                    "O nome do controle enquanto a linha está expandida, como *Mostrar menos*. Na prática, `expandable` pede este."
+                }
+                Key::ComponentFooterLinePropActionDoc => {
+                    "Como um script encontra o controle que expande. Vira `data-nd-action` nesse controle."
+                }
+                Key::ComponentFooterLinePropLiveDoc => {
+                    "Se uma mudança no conteúdo da linha é anunciada. Ligado, o conteúdo é um `role=\"status\"`. Ligue numa linha que mostra avisos, e deixe desligado numa que segue um ponteiro."
+                }
+                Key::ComponentFooterLinePropChildrenDoc => {
+                    "O que a linha contém. Todo desenho nela é um `Icon`."
+                }
                 Key::ComponentHeadingA11yNotes => {
                     "O nível não pode pular. Um `<h2>` seguido de um `<h4>` deixa um buraco no sumário pelo qual um leitor de tela navega. Escolha o nível pelo documento e o tamanho pelo desenho."
                 }
@@ -23553,6 +26948,66 @@ impl Locale {
                 Key::ComponentInsPropChildrenDoc => "O texto acrescentado.",
                 Key::ComponentKbdPropSizeDoc => "O tamanho: `small` ou `body`. Padrão `small`.",
                 Key::ComponentKbdPropChildrenDoc => "O nome da tecla, como `Ctrl` ou `Esc`.",
+                Key::ComponentKeyCaptureGuidance => {
+                    "Use uma captura de teclas para uma configuração cujo valor é um atalho, como o Leader ou uma tecla num menu. A pessoa pressiona as teclas e o controle as grava. Para um atalho mostrado ao lado de uma ação, use `Kbd`."
+                }
+                Key::ComponentKeyCaptureA11yNotes => {
+                    "O controle é um `<button>` nomeado por `label` e pelas teclas que guarda, via `aria-labelledby`. Uma recusa escreve `aria-invalid` e descreve o botão. Um `role=\"status\"` educado diz o que pressionar e o que foi gravado."
+                }
+                Key::ComponentKeyCapturePropNameDoc => {
+                    "O que é este controle, como um script o encontra, e o nome do campo de formulário sob o qual o atalho é enviado. O botão recebe o id `nd-key-capture-` seguido deste nome. **Obrigatório**."
+                }
+                Key::ComponentKeyCapturePropLabelDoc => {
+                    "Para que serve o atalho, no idioma da pessoa, como *Leader*. É desenhado como o `<label>` do controle e abre o nome acessível dele, que as teclas completam. Obrigatório."
+                }
+                Key::ComponentKeyCapturePropValueDoc => {
+                    "O atalho em vigor, escrito como `Alt+Shift+KeyK`: os modificadores na ordem Control, Alt, Shift, Super, depois o `KeyboardEvent.code` da tecla. Vazio quer dizer nenhum. É o valor do campo oculto."
+                }
+                Key::ComponentKeyCapturePropKeyboardDoc => {
+                    "Com os rótulos de qual teclado os modificadores são desenhados. `linux` escreve Ctrl, Alt, Shift e Super. `windows` escreve Win no lugar de Super. `mac` escreve Control, Option, Shift e Command."
+                }
+                Key::ComponentKeyCapturePropCaptureLabelDoc => {
+                    "O que o controle diz enquanto escuta, como *Pressione as novas teclas, ou Escape*. É dito de forma educada quando a escuta começa. Obrigatório."
+                }
+                Key::ComponentKeyCapturePropEmptyLabelDoc => {
+                    "O que o controle mostra quando nenhum atalho está definido, como *Nenhum*. Nesse caso faz parte do nome acessível. Obrigatório."
+                }
+                Key::ComponentKeyCapturePropClearLabelDoc => {
+                    "O nome do controle que remove o atalho, como *Remover o atalho*. Com ele, um segundo controle é desenhado depois do primeiro. Sem ele, um atalho pode ser trocado e não removido."
+                }
+                Key::ComponentKeyCapturePropRefusalDoc => {
+                    "Por que o último atalho foi recusado, nas palavras de quem chama. Fica desenhado sob o controle, marca-o com `aria-invalid` e o descreve. Uma frase escrita aqui depois que a página carregou é dita de forma educada."
+                }
+                Key::ComponentKeyCapturePropDisabledDoc => {
+                    "Se mudar o atalho é recusado. Um controle desativado leva `aria-disabled`, então continua na ordem de tabulação e diz o que guarda, e pressioná-lo não inicia nada."
+                }
+                Key::ComponentKeyCaptureStateListeningDoc => {
+                    "Escrito enquanto o controle escuta um atalho. Ele mostra `capture_label` e os modificadores pressionados até então, com uma borda tracejada."
+                }
+                Key::ComponentKeyCaptureStateCapturedDoc => {
+                    "Escrito quando um atalho é gravado e o controle não está escutando, até quem chama escrever um novo `value`. As teclas desenhadas são as gravadas."
+                }
+                Key::ComponentKeyCaptureStateRefusedDoc => {
+                    "Escrito enquanto `refusal` estiver. Um traço desce pela borda inicial, a borda do controle fica no tom de perigo, e a frase fica embaixo dele."
+                }
+                Key::ComponentKeyCaptureKeyEnterSpaceName => "Enter / Espaço",
+                Key::ComponentKeyCaptureKeyEnterSpaceAction => {
+                    "Começa a escutar. Enquanto escuta, as duas são teclas como as outras e são gravadas."
+                }
+                Key::ComponentKeyCaptureKeyAKeyWithModifiersHeldName => {
+                    "Uma tecla, com modificadores pressionados"
+                }
+                Key::ComponentKeyCaptureKeyAKeyWithModifiersHeldAction => {
+                    "Enquanto escuta, grava essa tecla com os modificadores pressionados e para. Um modificador sozinho não grava nada."
+                }
+                Key::ComponentKeyCaptureKeyTabName => "Tab",
+                Key::ComponentKeyCaptureKeyTabAction => {
+                    "Enquanto escuta, é gravada como qualquer outra tecla. A escuta então termina, e o Tab seguinte sai do controle."
+                }
+                Key::ComponentKeyCaptureKeyEscapeName => "Escape",
+                Key::ComponentKeyCaptureKeyEscapeAction => {
+                    "Enquanto escuta, para de escutar e mantém o atalho em vigor. Fora disso, fica para o que está em volta do controle."
+                }
                 Key::ComponentLabelGuidance => {
                     "Use um rótulo para o nome visível de um controle, de um grupo de controles ou de uma região. O `Field` já desenha um para o controle que ele envolve. Use este onde não há campo, ao lado de um `Segmented` ou sobre um `Toolbar`."
                 }
@@ -23794,10 +27249,78 @@ impl Locale {
                     "A coisa que está sendo descrita. A presença dele troca o item de `<li>` para um `<dt>` e um `<dd>`, que é do que uma lista de descrição é feita."
                 }
                 Key::ComponentListItemPropChildrenDoc => "O item, ou a descrição do termo.",
+                Key::ComponentLogGuidance => {
+                    "Use um registro para linhas que chegam enquanto a pessoa observa, como o que um programa escreve ao rodar. Ele mantém a mais nova à vista até a pessoa rolar para longe. Para uma lista filtrada e escolhida, use `OptionList`."
+                }
+                Key::ComponentLogA11yNotes => {
+                    "As linhas são um `role=\"log\"` nomeado por `label`, uma região dinâmica educada que lê cada linha adicionada. É uma parada de tabulação, então o teclado pode rolá-la. O controle de retomar é um `<button>` fora dela."
+                }
+                Key::ComponentLogPropNameDoc => {
+                    "O que é este registro, como um script o encontra. A região das linhas recebe o id `nd-log-` seguido deste nome. **Obrigatório**."
+                }
+                Key::ComponentLogPropLabelDoc => {
+                    "O nome do registro, no idioma da pessoa, como *Registro do daemon*. Vira `aria-label` na região das linhas. Obrigatório."
+                }
+                Key::ComponentLogPropFollowDoc => {
+                    "Se a linha mais nova fica à vista à medida que as linhas chegam. Ligado por padrão. Desligado, o registro fica onde a pessoa o deixa, como um histórico."
+                }
+                Key::ComponentLogPropResumeLabelDoc => {
+                    "O nome do controle que vai para a linha mais nova e volta a acompanhar, como *Ir para a mais nova*. Ele aparece enquanto o acompanhamento está parado. Precisa de `follow`."
+                }
+                Key::ComponentLogPropChildrenDoc => {
+                    "As linhas, da mais antiga para a mais nova: um `LogLine` cada."
+                }
+                Key::ComponentLogStatePausedDoc => {
+                    "Escrito pelo script enquanto o acompanhamento está parado, porque a pessoa rolou para longe do fim ou manteve uma seleção quando uma linha chegou. O controle de retomar aparece."
+                }
+                Key::ComponentLogKeyArrowKeysPageUpPageDownName => "Setas / Page Up / Page Down",
+                Key::ComponentLogKeyArrowKeysPageUpPageDownAction => {
+                    "Rolam as linhas enquanto o registro tem o foco. Sair do fim para o acompanhamento."
+                }
+                Key::ComponentLogKeyHomeEndName => "Home / End",
+                Key::ComponentLogKeyHomeEndAction => {
+                    "Vão para a linha mais antiga ou para a mais nova. Na mais nova, o registro volta a acompanhar."
+                }
+                Key::ComponentLogLineGuidance => {
+                    "Use uma linha de registro para cada linha de um `Log`. Ela diz quando a linha foi escrita, o quanto importa, de onde veio e o que diz."
+                }
+                Key::ComponentLogLineA11yNotes => {
+                    "A linha não tem papel. O nível é uma palavra, então o tom nunca é o único sinal. A origem é um nome, marcado `nd-identifier`."
+                }
+                Key::ComponentLogLinePropToneDoc => {
+                    "Com qual tom do sistema de cores o nível é pintado, como `danger` ou `warning`. Um nome que nenhuma família declara faz o build falhar. **Nunca o único sinal**: a palavra de `level` o carrega. Precisa de `level`."
+                }
+                Key::ComponentLogLinePropLevelDoc => {
+                    "O quanto a linha importa, numa palavra, como *erro* ou *aviso*. É desenhado antes da mensagem, numa caixa do `tone` da linha."
+                }
+                Key::ComponentLogLinePropTimeDoc => {
+                    "Quando a linha foi escrita, como `12:04:31.207`. É um `<time>`, então escreva como o HTML escreve uma hora."
+                }
+                Key::ComponentLogLinePropSourceDoc => {
+                    "De onde a linha veio, como `nc-kernel`. Um nome, desenhado como está escrito e nunca traduzido."
+                }
+                Key::ComponentLogLinePropChildrenDoc => {
+                    "A mensagem. Texto simples, ou um `MatchText` onde um filtro a encontrou."
+                }
+                Key::ComponentMarkGuidance => {
+                    "Use uma marca para um trecho de prosa, como as palavras pelas quais uma citação foi escolhida. Para os caracteres que uma busca casou numa lista filtrada, use `MatchText`."
+                }
                 Key::ComponentMarkA11yNotes => {
                     "Um realce que carrega sentido precisa de mais do que uma cor de fundo. A cor sozinha é invisível para quem não a distingue, então isto também muda o peso do texto."
                 }
                 Key::ComponentMarkPropChildrenDoc => "O texto realçado.",
+                Key::ComponentMatchTextGuidance => {
+                    "Use o texto com casamentos para um nome numa lista filtrada por digitação, para mostrar quais caracteres cada palavra da consulta casou. Para uma frase realçada em prosa, use `Mark`."
+                }
+                Key::ComponentMatchTextA11yNotes => {
+                    "Cada trecho é um `<mark>` com `role=\"none\"`, então o nome é um só texto na árvore de acessibilidade. A primeira palavra tem sublinhado contínuo, a segunda tracejado e as seguintes pontilhado. As três se distinguem sem cor, como pede a WCAG 1.4.1."
+                }
+                Key::ComponentMatchTextPropTextDoc => {
+                    "O nome inteiro, como a lista o mostra. **Obrigatório**. Texto e não filhos, porque toda posição em `hits` é um índice nele."
+                }
+                Key::ComponentMatchTextPropHitsDoc => {
+                    "Os caracteres casados, um espaço para cada palavra da consulta, unidos por `|`. Um espaço guarda índices e intervalos inclusivos unidos por vírgulas, como em `0-2,5|7-9`. Um espaço vazio é uma palavra que casou em outro lugar."
+                }
                 Key::ComponentMenuGuidance => {
                     "Use um menu para as ações que um botão abre, como *Duplicar*, *Renomear* e *Excluir*. Cada item executa uma ação e fecha o menu. Para escolher um valor de uma lista, use `Segmented` ou `Select`. Nem o menu nem o botão dele renderizam sem script."
                 }
@@ -23884,10 +27407,10 @@ impl Locale {
                     "Aciona o item e fecha o menu. A forma de link responde só ao Enter."
                 }
                 Key::ComponentMessageBarGuidance => {
-                    "Use uma barra de mensagem para algo que aconteceu, mostrada no lugar e deixada na página. Para um campo recusado, use `Field`. Para tudo o que está errado num formulário de uma vez, use `ErrorSummary`."
+                    "Use uma barra de mensagem para algo que aconteceu, mostrada no lugar e deixada na página. Use a forma `line` para um estado da janela inteira, como um programa que ela perdeu. Para um campo recusado, use `Field`."
                 }
                 Key::ComponentMessageBarA11yNotes => {
-                    "A barra é um `role=\"status\"` até `alert` ser ligado, e um status espera uma pausa em vez de cortar a fala. O ícone é `aria-hidden`, e o tom nunca é o único sinal."
+                    "Um `role=\"status\"` até `alert` ser ligado. O tempo que falta é um `role=\"timer\"` silencioso, e uma região `polite` o anuncia quando a contagem começa, a cada dez segundos e aos cinco. O ícone é `aria-hidden`."
                 }
                 Key::ComponentMessageBarPropToneDoc => {
                     "De qual tom do sistema de cores a barra é pintada. Os tons ficam em `noctua_design::tones`. **Nunca o único sinal** (`NOCTUA.md §8.8.6`): as palavras e o ícone carregam o significado."
@@ -23910,15 +27433,34 @@ impl Locale {
                 Key::ComponentMessageBarPropDismissLabelDoc => {
                     "O nome do controle que tira a barra dali, como *Dispensar esta mensagem*. Necessário na prática pelo `dismissible`, porque esse controle é um glifo e este é o único nome que ele tem."
                 }
+                Key::ComponentMessageBarPropPresentationDoc => {
+                    "Como a mensagem é desenhada. `bar` é um bloco na página, ao lado do que aconteceu. `line` é uma fileira na borda de baixo de uma janela, preenchida com o tom, que a janela põe por último para não cobrir nada."
+                }
+                Key::ComponentMessageBarPropDeadlineDoc => {
+                    "Quando acontece o evento que a mensagem anuncia, em milissegundos desde a época Unix. O `dist/message-bar.js` desenha os segundos inteiros que faltam até ele e acompanha um valor novo escrito por quem chama."
+                }
+                Key::ComponentMessageBarPropCountdownLabelDoc => {
+                    "O que a mensagem diz sobre o tempo que falta, com um espaço `{count}`, como *Restaurando em 9 segundos*. Escreva as duas formas como `one:…|other:…`. Sem ele, os segundos são escritos pelo `Intl` na língua do documento."
+                }
+                Key::ComponentMessageBarPropActionLabelDoc => {
+                    "As palavras de um controle no fim da fileira, como *Restaurar agora*. Defini-lo desenha o controle, um `<button>` na tinta da própria mensagem."
+                }
+                Key::ComponentMessageBarPropActionDoc => {
+                    "Um nome pelo qual um script encontra o controle, escrito nele como `data-nd-action`. Necessário com `action_label`, porque o clique é código de quem chama."
+                }
                 Key::ComponentMessageBarPropChildrenDoc => {
                     "A mensagem, em uma ou duas frases. Ela pode conter um `Link` para o que a pessoa precisa fazer a respeito."
                 }
                 Key::ComponentMessageBarStateDismissedDoc => {
                     "Definido numa barra que a pessoa tirou dali. A folha de estilo a tira do layout a partir daí, então o elemento continua no documento e a região viva dele segue funcionando."
                 }
+                Key::ComponentMessageBarKeyTabName => "Tab",
+                Key::ComponentMessageBarKeyTabAction => {
+                    "Vai para a ação e depois para o controle que dispensa a barra."
+                }
                 Key::ComponentMessageBarKeyEnterOrSpaceName => "Enter ou Espaço",
                 Key::ComponentMessageBarKeyEnterOrSpaceAction => {
-                    "Tira a barra dali, no controle que a dispensa. As duas teclas funcionam, porque esse controle é um `<button>`."
+                    "Aciona o controle em que está o foco. As duas teclas funcionam, porque cada controle é um `<button>`."
                 }
                 Key::ComponentMeterGuidance => {
                     "Use um medidor para quanto de um total conhecido está em uso: 41 GB de um disco de 50 GB, 68% de um orçamento. Para uma tarefa que começa do nada e termina, use `Progress`. `low`, `high` e `optimum` colorem a barra, e `value_label` é a frase ao lado."
@@ -24071,6 +27613,114 @@ impl Locale {
                 Key::ComponentNumberInputKeyHomeEndName => "Home / End",
                 Key::ComponentNumberInputKeyHomeEndAction => {
                     "Vai ao `min` e ao `max`, onde eles são declarados."
+                }
+                Key::ComponentOptionGroupGuidance => {
+                    "Use um grupo de opções para um trecho nomeado de opções dentro de uma `OptionList`, como os comandos de um plugin. Um grupo sem nenhuma opção à mostra não ocupa espaço."
+                }
+                Key::ComponentOptionGroupA11yNotes => {
+                    "O grupo é um `role=\"group\"` nomeado por `aria-label`. O nome visível leva `aria-hidden`, então o leitor de tela o lê uma vez, como o nome do grupo."
+                }
+                Key::ComponentOptionGroupPropLabelDoc => {
+                    "O nome do grupo, mostrado acima das opções dele e lido como o nome do grupo. Obrigatório."
+                }
+                Key::ComponentOptionGroupPropChildrenDoc => "Os `OptionItem`s do grupo.",
+                Key::ComponentOptionItemGuidance => {
+                    "Use um item de opção para uma linha de uma `OptionList`: um nome, e o que a pessoa precisa ao lado dele para escolher. **O nome é uma prop**, para que os caracteres casados sejam marcados sem tocar em mais nada na linha."
+                }
+                Key::ComponentOptionItemA11yNotes => {
+                    "A linha é um `role=\"option\"`, e o nome dela é a tecla, o nome e a segunda linha lidos nessa ordem. A linha ativa é desenhada com uma barra na borda inicial além de um preenchimento, e a linha selecionada com um tique."
+                }
+                Key::ComponentOptionItemPropValueDoc => {
+                    "O que esta opção *é*, como um script a encontra. Os eventos da lista o carregam, e ele nunca é traduzido. **Obrigatório**."
+                }
+                Key::ComponentOptionItemPropLabelDoc => {
+                    "O nome da opção. Texto e não filhos, porque `hits` marca caracteres nele por posição. Obrigatório."
+                }
+                Key::ComponentOptionItemPropHitsDoc => {
+                    "Os caracteres de `label` que uma consulta casou, na gramática do `MatchText`: um espaço para cada palavra, unidos por `|`. Deixe de fora numa lista que não é filtrada."
+                }
+                Key::ComponentOptionItemPropDetailDoc => {
+                    "Uma segunda linha, menor, embaixo do nome, dizendo o que a opção faz. Ela faz parte do nome acessível da opção."
+                }
+                Key::ComponentOptionItemPropDetailHitsDoc => {
+                    "Os caracteres de `detail` que uma consulta casou, na mesma gramática de `hits`. Use onde a segunda linha é o campo que uma palavra casou."
+                }
+                Key::ComponentOptionItemPropShortcutDoc => {
+                    "A tecla que aciona esta opção, como texto simples na fonte monoespaçada. É uma dica. Quem chama liga a tecla."
+                }
+                Key::ComponentOptionItemPropIconDoc => {
+                    "Um desenho antes do nome. É decorativo, e o nome ao lado é o que o leitor de tela lê."
+                }
+                Key::ComponentOptionItemPropIdDoc => {
+                    "O id da opção, para quem chama e escreve `aria-activedescendant` por conta própria. Deixe de fora e o script numera as opções."
+                }
+                Key::ComponentOptionItemPropActiveDoc => {
+                    "Se o teclado está nesta opção. No máximo uma opção por lista. O script a move com as setas e aponta `aria-activedescendant` para ela."
+                }
+                Key::ComponentOptionItemPropSelectedDoc => {
+                    "Se esta opção é a resposta que a lista guarda. Escreve `aria-selected` e desenha um tique, então a escolha não é mostrada só pela cor."
+                }
+                Key::ComponentOptionItemPropDisabledDoc => {
+                    "Impede que a opção seja escolhida e a mantém no percurso das setas. Escreve `aria-disabled`, então a opção é anunciada como indisponível em vez de ausente."
+                }
+                Key::ComponentOptionListGuidance => {
+                    "Use uma lista de opções para uma lista que a pessoa percorre e aciona pelo teclado. Uma lista de comandos e um menu de atalhos são duas. Para um valor num formulário, use `Select`. Para uma lista de páginas, use `Search`, cujas linhas são links."
+                }
+                Key::ComponentOptionListA11yNotes => {
+                    "A lista é um `role=\"listbox\"` e cada opção um `role=\"option\"`. A opção ativa é nomeada por `aria-activedescendant` em quem tem o foco, então o foco nunca entra na lista. A frase de lista vazia é um `role=\"status\"`."
+                }
+                Key::ComponentOptionListPropNameDoc => {
+                    "Do que esta lista é, como um script a encontra. É também o id do listbox, que é o que outro controle escreve em `aria-controls`. **Obrigatório**."
+                }
+                Key::ComponentOptionListPropLabelDoc => {
+                    "O nome da lista. Obrigatório, porque um `listbox` sem nome dá ao leitor de tela só as palavras *caixa de listagem*."
+                }
+                Key::ComponentOptionListPropLayoutDoc => {
+                    "Como as opções são dispostas: `rows`, uma embaixo da outra, ou `columns`, que preenche a largura com quantas colunas couberem. `columns` serve a um menu de entradas curtas, cada uma com uma tecla e um nome."
+                }
+                Key::ComponentOptionListPropSizeDoc => {
+                    "A altura de uma opção: `small`, `medium` ou `large`. Opções são alvos, então os três valores passam do mínimo de 24px da WCAG 2.5.8."
+                }
+                Key::ComponentOptionListPropFocusableDoc => {
+                    "Se a lista é uma parada de tabulação. Desligue onde outro controle mantém o foco e nomeia esta lista em `aria-controls`. As setas desse controle passam então a percorrer as opções."
+                }
+                Key::ComponentOptionListPropEmptyLabelDoc => {
+                    "O que a lista diz quando não tem nenhuma opção. Defina onde a lista é filtrada, porque um filtro que deixa um espaço vazio não disse que nada casou."
+                }
+                Key::ComponentOptionListPropChildrenDoc => {
+                    "As opções: `OptionItem`s, `OptionGroup`s, ou os dois."
+                }
+                Key::ComponentOptionListKeyDownArrowUpArrowName => {
+                    "Seta para baixo / Seta para cima"
+                }
+                Key::ComponentOptionListKeyDownArrowUpArrowAction => {
+                    "Vai para a opção seguinte e a anterior, e para nas pontas. O foco fica onde está."
+                }
+                Key::ComponentOptionListKeyLeftArrowRightArrowName => {
+                    "Seta para a esquerda / Seta para a direita"
+                }
+                Key::ComponentOptionListKeyLeftArrowRightArrowAction => {
+                    "Vai para a opção ao lado da ativa, na coluna seguinte. Precisa de `columns` e do foco na lista."
+                }
+                Key::ComponentOptionListKeyHomeEndName => "Home / End",
+                Key::ComponentOptionListKeyHomeEndAction => {
+                    "Vai para a primeira e a última opção. A partir de outro controle, segure também Control ou Command."
+                }
+                Key::ComponentOptionListKeyPageUpPageDownName => "Page Up / Page Down",
+                Key::ComponentOptionListKeyPageUpPageDownAction => {
+                    "Move uma página medida de opções, e para nas pontas."
+                }
+                Key::ComponentOptionListKeyEnterName => "Enter",
+                Key::ComponentOptionListKeyEnterAction => {
+                    "Escolhe a opção ativa. Uma opção desabilitada continua ativa e não é escolhida."
+                }
+                Key::ComponentOptionListKeySpaceName => "Espaço",
+                Key::ComponentOptionListKeySpaceAction => {
+                    "Escolhe a opção ativa. Precisa do foco na lista, já que em outro controle digita um espaço."
+                }
+                Key::ComponentOptionListKeyAPrintableCharacterName => "Um caractere imprimível",
+                Key::ComponentOptionListKeyAPrintableCharacterAction => {
+                    "Pula para a próxima opção cujo nome começa com as letras digitadas. Precisa do foco na lista."
                 }
                 Key::ComponentOtpFieldGuidance => {
                     "Use um campo de código para um código curto que a pessoa copia de outro lugar, como os seis dígitos de uma mensagem. Para algo que ela redige, use `Input`. As caixas são um retrato do código, nunca uma forma obrigatória."
@@ -24279,8 +27929,62 @@ impl Locale {
                 Key::ComponentProgressStateBusyDoc => {
                     "Definido quando não há `value`: a tarefa está rodando e não se sabe o quanto já andou. É renderizado da ausência de `value`, então o atributo e a barra não podem discordar. A folha de estilo pendura nele a varredura indeterminada."
                 }
+                Key::ComponentPromptGuidance => {
+                    "Use um prompt para a linha em que a pessoa digita num aplicativo: um comando, um filtro, uma mensagem. O cursor dele é um bloco. Para uma resposta num formulário, use `Textarea`, que tem rótulo, dica e erro."
+                }
+                Key::ComponentPromptA11yNotes => {
+                    "O controle é um `<textarea>` de verdade nomeado por `aria-label`. O bloco é desenhado numa caixa com `aria-hidden`. Ele fica preenchido enquanto o texto tem o foco e vira um contorno quando não tem. Ele não pisca sob `prefers-reduced-motion`."
+                }
+                Key::ComponentPromptPropNameDoc => {
+                    "O que este prompt é, como um script o encontra, e o nome de campo com que ele é enviado num formulário. O textarea recebe o id `nd-prompt-` seguido deste nome. **Obrigatório**."
+                }
+                Key::ComponentPromptPropLabelDoc => {
+                    "O nome do prompt, no idioma da pessoa. Vira `aria-label` no textarea, porque um prompt não mostra rótulo nem placeholder. Obrigatório."
+                }
+                Key::ComponentPromptPropValueDoc => {
+                    "O que está no prompt de início. É o conteúdo do textarea, então um valor com quebra de linha sobrevive à marcação."
+                }
+                Key::ComponentPromptPropSendLabelDoc => {
+                    "O nome do controle de envio, como *Enviar*. Com ele o prompt termina nesse controle. Sem ele, Enter é o único jeito de enviar."
+                }
+                Key::ComponentPromptPropActionDoc => {
+                    "Como um script encontra o controle de envio. Vira `data-nd-action` nesse controle. Precisa de `send_label`."
+                }
+                Key::ComponentPromptPropControlsDoc => {
+                    "O id de uma lista que este prompt filtra, como o `name` de uma `OptionList`, que é o id dela. Vira `aria-controls`, e as setas para cima e para baixo percorrem essa lista. O prompt continua um `textbox`, o único papel que um `<textarea>` aceita."
+                }
+                Key::ComponentPromptPropActiveOptionDoc => {
+                    "O id da opção em que o teclado está nessa lista. Vira `aria-activedescendant`. Deixe de fora e o `dist/option-list.js` o escreve. Precisa de `controls`."
+                }
+                Key::ComponentPromptPropDisabledDoc => {
+                    "Se o prompt está desabilitado. Um prompt desabilitado não recebe foco, não desenha cursor e não envia nada."
+                }
+                Key::ComponentPromptPropReadonlyDoc => {
+                    "Se o texto pode ser lido e copiado, mas não alterado. O cursor é desenhado como um contorno e não pisca, e nada é enviado."
+                }
+                Key::ComponentPromptStateComposingDoc => {
+                    "Definido enquanto um método de entrada está compondo. O bloco fica escondido e aparecem o cursor e o sublinhado do próprio navegador. A composição tem a aparência que o método de entrada dá a ela."
+                }
+                Key::ComponentPromptStateSelectingDoc => {
+                    "Definido enquanto algum texto está selecionado. O bloco fica escondido e aparece o realce do próprio navegador."
+                }
+                Key::ComponentPromptKeyEnterName => "Enter",
+                Key::ComponentPromptKeyEnterAction => {
+                    "Diz `nd-prompt-send`, com o texto. Enquanto um método de entrada está compondo, confirma a composição e não envia nada."
+                }
+                Key::ComponentPromptKeyShiftEnterName => "Shift + Enter",
+                Key::ComponentPromptKeyShiftEnterAction => {
+                    "Quebra a linha. O prompt cresce uma linha, até o limite dele, e depois rola."
+                }
+                Key::ComponentPromptKeyDownArrowUpArrowName => "Seta para baixo / Seta para cima",
+                Key::ComponentPromptKeyDownArrowUpArrowAction => {
+                    "Percorre a lista nomeada por `controls`. Sem lista, movem o cursor entre as linhas."
+                }
                 Key::ComponentProsePropMeasureDoc => {
                     "Qual limite de comprimento de linha aplicar. `default` é a medida de leitura e `lead` é a mais estreita, para um parágrafo de abertura. `none` serve a uma prosa dentro de uma coluna que já a limita."
+                }
+                Key::ComponentProsePropFlowDoc => {
+                    "Espaça os blocos de dentro como um documento. Um título ganha mais espaço acima do que abaixo, o primeiro bloco nenhum, e uma quebra mantém o próprio. Use para prosa escrita por um programa, como uma página desenhada a partir de Markdown."
                 }
                 Key::ComponentProsePropChildrenDoc => "O conteúdo.",
                 Key::ComponentRadioGuidance => {
@@ -24854,6 +28558,72 @@ impl Locale {
                 Key::ComponentSliderKeyHomeEndAction => {
                     "Move a alça para `min` ou `max`. É o comportamento próprio do navegador."
                 }
+                Key::ComponentSplitGuidance => {
+                    "Use uma divisão para dois painéis lado a lado que dividem uma caixa, como uma lista e o que está escolhido nela. Um `SplitHandle` entre os painéis deixa a pessoa mover a linha entre eles. Para um painel que abre e fecha, use `Drawer`."
+                }
+                Key::ComponentSplitA11yNotes => {
+                    "A divisão não tem papel. A alça entre os painéis é um `role=\"separator\"` que nomeia o painel `start` em `aria-controls`. Com um script rodando, a alça recebe foco e leva `aria-valuenow`, `aria-valuemin` e `aria-valuemax`."
+                }
+                Key::ComponentSplitPropNameDoc => {
+                    "O que é esta divisão, como um script a encontra, e a raiz dos ids dos dois painéis. Todo `SplitPane` e o `SplitHandle` o repetem. Obrigatório."
+                }
+                Key::ComponentSplitPropValueDoc => {
+                    "A fração da caixa que o painel `start` ocupa, como um número de 0 a 100. O painel `end` fica com o resto. Ela é mantida entre `min` e `max`."
+                }
+                Key::ComponentSplitPropMinDoc => {
+                    "O mínimo que `value` pode ter, como um número de 0 a 100. Vira `aria-valuemin` na alça. Enter leva o painel `start` até ele."
+                }
+                Key::ComponentSplitPropMaxDoc => {
+                    "O máximo que `value` pode ter, como um número de 0 a 100. Vira `aria-valuemax` na alça."
+                }
+                Key::ComponentSplitPropCollapseDoc => {
+                    "O que a divisão faz numa caixa mais estreita que o ponto de quebra `sm`. `stack` põe um painel acima do outro. `hide-start` e `hide-end` deixam um painel de fora. `none` os mantém lado a lado."
+                }
+                Key::ComponentSplitPropChildrenDoc => {
+                    "As partes, na ordem em que ficam: um `SplitPane`, um `SplitHandle` e um `SplitPane` com `side` em `end`. Deixe a alça de fora numa divisão cujos painéis mantêm as frações."
+                }
+                Key::ComponentSplitKeyArrowKeysName => "Setas",
+                Key::ComponentSplitKeyArrowKeysAction => {
+                    "Esquerda e Direita movem a linha um ponto, para o lado que a tecla nomeia. O painel `start` cresce ou encolhe com ela."
+                }
+                Key::ComponentSplitKeyPageUpPageDownName => "Page Up / Page Down",
+                Key::ComponentSplitKeyPageUpPageDownAction => {
+                    "Aumenta ou diminui o painel `start` em dez pontos."
+                }
+                Key::ComponentSplitKeyHomeEndName => "Home / End",
+                Key::ComponentSplitKeyHomeEndAction => "Leva o painel `start` a `min` ou a `max`.",
+                Key::ComponentSplitKeyEnterName => "Enter",
+                Key::ComponentSplitKeyEnterAction => {
+                    "Leva o painel `start` a `min`. Pressionado de novo, devolve o painel para onde estava."
+                }
+                Key::ComponentSplitHandleGuidance => {
+                    "Use uma alça de divisão entre os dois painéis de um `Split`, para uma linha que a pessoa pode mover. Deixe-a de fora onde os dois painéis mantêm as frações."
+                }
+                Key::ComponentSplitHandleA11yNotes => {
+                    "A alça é um `role=\"separator\"` com `aria-orientation=\"vertical\"`, nomeada por `label`. Ela nomeia o painel `start` em `aria-controls`. Um script a faz receber foco e escreve o valor. Ela tem ao menos 24 pixels de largura, como a WCAG 2.5.8 pede."
+                }
+                Key::ComponentSplitHandlePropNameDoc => {
+                    "O `Split` a que isto pertence. Obrigatório, e precisa bater com o `name` da divisão, porque o painel nomeado em `aria-controls` é derivado dele."
+                }
+                Key::ComponentSplitHandlePropLabelDoc => {
+                    "O nome da alça, no idioma da pessoa, como *Redimensionar a lista*. Ele nomeia o que é redimensionado. Obrigatório."
+                }
+                Key::ComponentSplitHandleStateDraggingDoc => {
+                    "Escrito na alça enquanto um ponteiro a arrasta. A folha de estilo desenha a linha como faz sob um ponteiro."
+                }
+                Key::ComponentSplitPaneGuidance => {
+                    "Use um painel de divisão para cada uma das duas metades de um `Split`. `side` diz qual metade é, e o painel rola o que não cabe nele."
+                }
+                Key::ComponentSplitPaneA11yNotes => {
+                    "O painel não tem papel. O id dele é `nd-split-`, o `name` da divisão, um hífen e o `side` dele, que é o que o `aria-controls` da alça nomeia. Lado a lado, um painel cuja fração é 0 fica oculto, e nada nele pode receber o foco."
+                }
+                Key::ComponentSplitPanePropNameDoc => {
+                    "O `Split` a que isto pertence. Obrigatório, e precisa bater com o `name` da divisão, porque o id do painel é derivado dele."
+                }
+                Key::ComponentSplitPanePropSideDoc => {
+                    "Qual metade é esta: `start` ou `end`. O painel `start` ocupa o `value` da divisão e o painel `end` fica com o resto. Uma divisão tem um de cada."
+                }
+                Key::ComponentSplitPanePropChildrenDoc => "O que o painel guarda.",
                 Key::ComponentStrongPropChildrenDoc => "O texto importante.",
                 Key::ComponentSwatchGuidance => {
                     "Use um swatch para mostrar uma cor ao lado da palavra que a nomeia. Nunca sozinho, porque o chip não tem nome acessível próprio."
@@ -25230,7 +29000,7 @@ impl Locale {
                     "Onde as palavras ficam na célula. **Acompanhe a coluna abaixo dela**, e use `numeric` sobre uma coluna de números para o cabeçalho alinhar com os valores."
                 }
                 Key::ComponentTableHeaderCellPropToneDoc => {
-                    "De qual tom do sistema de cores o cabeçalho é pintado. A paleta declara 349 famílias semânticas, e um nome que nenhuma delas declara quebra o build. Sem ele nenhum atributo é escrito."
+                    "De qual tom do sistema de cores o cabeçalho é pintado. A paleta declara 352 famílias semânticas, e um nome que nenhuma delas declara quebra o build. Sem ele nenhum atributo é escrito."
                 }
                 Key::ComponentTableHeaderCellPropWrapDoc => {
                     "O que um cabeçalho longo faz. `nowrap` por padrão, o oposto do padrão de uma célula, então o cabeçalho fica com uma linha de altura. Use `wrap` para um cabeçalho longo sobre uma coluna estreita."
@@ -25267,7 +29037,7 @@ impl Locale {
                     "O identificador desta linha, na marcação. A linha de detalhe e o controle de escolha derivam os ids deles a partir dele. Uma linha que abre ou que pode ser escolhida precisa de um."
                 }
                 Key::ComponentTableRowPropToneDoc => {
-                    "De qual tom do sistema de cores esta linha é pintada. Qualquer uma das 349 famílias semânticas, então `overdue` vale tanto quanto `danger`, mais o `neutral` e o `muted` deste sistema. Um nome não declarado falha no build. **Nunca a cor sozinha.**"
+                    "De qual tom do sistema de cores esta linha é pintada. Qualquer uma das 352 famílias semânticas, então `overdue` vale tanto quanto `danger`, mais o `neutral` e o `muted` deste sistema. Um nome não declarado falha no build. **Nunca a cor sozinha.**"
                 }
                 Key::ComponentTableRowPropSelectDoc => {
                     "Se esta linha pode ser escolhida. `one` desenha um rádio de verdade, `many` uma caixa de seleção de verdade. `all` fica na linha de títulos e marca ou desmarca todas as linhas abaixo, com um terceiro estado para *algumas, não todas*."
@@ -25343,10 +29113,10 @@ impl Locale {
                     "Se uma seta também escolhe. `automatic` mostra o painel para onde a pessoa se move, o que serve a painéis já carregados. `manual` move só o foco e espera Espaço ou Enter, o que serve a painéis que custam algo."
                 }
                 Key::ComponentTabsPropOrientationDoc => {
-                    "Para que lado a tira corre, e portanto quais setas andam por ela. É escrito em `aria-orientation`, então a tecnologia assistiva também relata o eixo, além de a folha de estilo o desenhar."
+                    "Para que lado a tira corre, e portanto quais setas andam por ela. É escrito em `aria-orientation`, então a tecnologia assistiva também relata o eixo, além de a folha de estilo o desenhar. Um `rail` é `vertical`, diga isto o que disser."
                 }
                 Key::ComponentTabsPropAppearanceDoc => {
-                    "Como a aba escolhida é marcada. `underline` desenha um traço embaixo dela e um fio embaixo da tira inteira. `enclosed` dá a cada aba a própria caixa, o que sobrevive a uma tira que quebra em duas linhas."
+                    "Como a aba escolhida é marcada. `underline` desenha um traço sob ela. `enclosed` dá a cada aba a própria caixa, que resiste a uma tira que quebra. `rail` é uma coluna da largura de um trilho, onde a aba mostra o ícone e mantém o rótulo como nome."
                 }
                 Key::ComponentTabsPropSizeDoc => {
                     "O tamanho de uma aba. Os três passam do mínimo de 24px da WCAG 2.5.8, e `large` também atinge o alvo ampliado de 44px."
@@ -25392,7 +29162,7 @@ impl Locale {
                     "Se a tag está ligada, para o formato de chip de filtro. **Só de declarar** já torna a tag um `<button aria-pressed>` real. Deixá-la de fora deixa um rótulo que não é um controle."
                 }
                 Key::ComponentTagPropToneDoc => {
-                    "De qual tom do sistema de cores a tag é pintada. A paleta declara 349 famílias semânticas, então `overdue` vale tanto quanto `danger`. Um nome que nenhuma família declara quebra o build. Sem ele a tag fica neutra."
+                    "De qual tom do sistema de cores a tag é pintada. A paleta declara 352 famílias semânticas, então `overdue` vale tanto quanto `danger`. Um nome que nenhuma família declara quebra o build. Sem ele a tag fica neutra."
                 }
                 Key::ComponentTagPropVariantDoc => {
                     "Com que força a tag é pintada. `soft` é um campo tingido, `solid` é o tom em força total, e `outline` é um fio sem preenchimento. `soft` por padrão."
@@ -25818,13 +29588,13 @@ impl Locale {
                     "O id do elemento que nomeia esta toolbar, quando o nome já está visível na página."
                 }
                 Key::ComponentToolbarPropOrientationDoc => {
-                    "Para que lado os controles correm, e portanto que setas os percorrem. É escrito em `aria-orientation`, então a tecnologia assistiva também informa o eixo."
+                    "Para que lado os controles correm, e portanto que setas os percorrem. É escrito em `aria-orientation`, então a tecnologia assistiva também informa o eixo. Um `rail` é `vertical`, diga isto o que disser."
                 }
                 Key::ComponentToolbarPropWrapDoc => {
                     "Se a barra quebra em mais linhas quando falta espaço. Ligado por padrão, para que o último controle continue alcançável em 320px."
                 }
                 Key::ComponentToolbarPropDensityDoc => {
-                    "O espaço entre os grupos dela. `compact` é para uma barra dentro de outra coisa, onde o espaçamento ao redor já a separa."
+                    "O espaço entre os grupos dela. `compact` é para uma barra dentro de outra coisa. `rail` é uma coluna da largura de um trilho, com dois controles só de ícone por linha, e é sempre vertical."
                 }
                 Key::ComponentToolbarPropChildrenDoc => "Os grupos de controles.",
                 Key::ComponentToolbarPropGlassDoc => {
@@ -25836,7 +29606,11 @@ impl Locale {
                 }
                 Key::ComponentToolbarKeyArrowKeysName => "Setas",
                 Key::ComponentToolbarKeyArrowKeysAction => {
-                    "Vai para o controle seguinte ou anterior, escolhendo-o se for um radio. Esquerda e Direita, ou Cima e Baixo na vertical."
+                    "Vai para o controle seguinte ou anterior, escolhendo um radio. Esquerda e Direita, ou Cima e Baixo na vertical."
+                }
+                Key::ComponentToolbarKeyArrowKeysInARailName => "Setas num trilho",
+                Key::ComponentToolbarKeyArrowKeysInARailAction => {
+                    "As quatro setas andam, na ordem em que os controles são escritos. Um trilho guarda dois controles por linha."
                 }
                 Key::ComponentToolbarKeyHomeName => "Home",
                 Key::ComponentToolbarKeyHomeAction => "Vai para o primeiro controle.",
@@ -25859,7 +29633,7 @@ impl Locale {
                     "Use um balão para uma dica curta sobre o controle que ele envolve, nunca como o único nome desse controle. Se toda pessoa precisa da frase, escreva-a na página. Para explicar uma palavra no texto corrido, use `Info`."
                 }
                 Key::ComponentTooltipA11yNotes => {
-                    "A bolha é um `role=\"tooltip\"` e o controle aponta para ela com `aria-describedby`. Ela nunca é o nome acessível do controle, não guarda nada focalizável, e Escape a esconde sem mover o foco."
+                    "A bolha é um `role=\"tooltip\"`, nomeada no `aria-describedby` do controle. Ela não guarda nada focalizável, e Escape a esconde sem mover o foco. Uma dica que repete o nome do controle fica `aria-hidden` e não descreve nada."
                 }
                 Key::ComponentTooltipPropNameDoc => {
                     "A que esta dica pertence, como um script a encontra, e a raiz do id aqui. **Obrigatório**, porque um id derivado de um nome ausente colide assim que uma página carrega duas."
@@ -26053,7 +29827,7 @@ impl Locale {
                 Key::SearchForget => "⟦Foorgeet theesee seeaarchees⟧",
                 Key::SearchGroupPages => "⟦Paagees⟧",
                 Key::SearchGroupComponents => "⟦Coompooneents⟧",
-                Key::SearchResults => "⟦oonee:{count} reesuult|ootheer:{count} reesuults⟧",
+                Key::SearchResults => "one:⟦{count} reesuult⟧|other:⟦{count} reesuults⟧",
                 Key::PageIntroTitle => "⟦IIntroo⟧",
                 Key::PageIntroSummary => {
                     "⟦Buuiild aacceessiiblee, theemeeaablee iinteerfaacees iin Diiooxuus oor iin Reeaact.⟧"
@@ -26066,6 +29840,36 @@ impl Locale {
                 }
                 Key::PageMenuBody => {
                     "⟦AA meenuu aand iits iiteems. Thee buuttoon thaat oopeens oonee iis aa `Buuttoon` wiith `meenuu` aand `coontrools`. EEveerythiing aafteer thee preess iis `diist/meenuu.js`: thee aanchooriing, thee aarroow waalk, thee leetteer thaat juumps, EEscaapee, aand thee foocuus reetuurniing too thee buuttoon.⟧"
+                }
+                Key::PageFooterSummary => {
+                    "⟦Hoold thee liinees aa wiindoow keeeeps aat iits boottoom eedgee, wiith aa coorneer aat eeaach eend.⟧"
+                }
+                Key::PageFooterBody => {
+                    "⟦Thee fooooteer, oonee liinee oof iit, aand oonee coorneer. Thee liinees aaree toold aapaart by shaadee aand noo boordeer iis draawn. AA coorneer iis aas taall aas aall thee liinees toogeetheer. Thee fooooteer shiips noo scriipt.⟧"
+                }
+                Key::PageDrawerSummary => {
+                    "⟦OOpeen aa paaneel aaloong oonee eedgee oof aa wiindoow, beesiidee thee woork aand neeveer ooveer iit.⟧"
+                }
+                Key::PageDrawerBody => {
+                    "⟦Thee draaweer aand thee raaiil doown aa siidee oof iit. AA draaweer iis iin thee floow oof iits wiindoow aand iis noot moodaal. IIt oopeens aas faar aas iits coonteent, uup too aa shaaree oof thee wiindoow. Thee caalleer oopeens aand shuuts iit.⟧"
+                }
+                Key::PageSplitSummary => {
+                    "⟦Diiviidee aa boox beetweeeen twoo paanees, wiith aa liinee beetweeeen theem aa reeaadeer caan moovee.⟧"
+                }
+                Key::PageSplitBody => {
+                    "⟦Thee spliit, oonee paanee aand thee haandlee beetweeeen twoo. Thee shaaree oof thee fiirst paanee iis oonee nuumbeer. AA naarroow boox staacks thee paanees oor leeaavees oonee oouut, aand iit iis thee spliit's oown boox thaat iis meeaasuureed.⟧"
+                }
+                Key::PageLogSummary => {
+                    "⟦Shoow liinees aas theey aarriivee, aand keeeep thee neeweest iin viieew uuntiil thee reeaadeer scroolls aawaay.⟧"
+                }
+                Key::PageLogBody => {
+                    "⟦Thee loog aand oonee liinee oof iit. AA loog foolloows iits neeweest liinee uuntiil thee reeaadeer scroolls aawaay, aand foolloows aagaaiin aat thee eend. EEveery liinee iis iin thee doocuumeent, aand thee caalleer boouunds hoow maany.⟧"
+                }
+                Key::PageOptionListSummary => {
+                    "⟦Leet uuseers waalk aa liist oof ooptiioons wiith thee keeybooaard aand choooosee oonee.⟧"
+                }
+                Key::PageOptionListBody => {
+                    "⟦Thee liist, aa naameed ruun oof ooptiioons, aand oonee ooptiioon. Thee foocuus staays oon oonee eeleemeent aand `aariiaa-aactiiveedeesceendaant` naamees thee aactiivee ooptiioon. Thee liist choooosees noothiing iitseelf. IIt saays whiich ooptiioon waas aaskeed foor, iin aan eeveent.⟧"
                 }
                 Key::PageTreeSummary => {
                     "⟦Leet uuseers waalk aa hiieeraarchy, oopeeniing, cloosiing aand choooosiing noodees iin iit.⟧"
@@ -26470,7 +30274,55 @@ impl Locale {
                     "⟦Shoow oonee iiteem oof aa liist, oor oonee teerm aand iits deescriiptiioon.⟧"
                 }
                 Key::ComponentMarkSummary => {
-                    "⟦Hiighliight teext foor whaat thee reeaadeer iis dooiing noow, suuch aas aa seeaarch hiit.⟧"
+                    "⟦Hiighliight aa phraasee iin ruunniing teext thaat maatteers too whaat thee reeaadeer iis dooiing noow.⟧"
+                }
+                Key::ComponentMatchTextSummary => {
+                    "⟦Shoow aa naamee wiith thee chaaraacteers aa quueery maatcheed maarkeed, oonee stylee foor eeaach woord oof thee quueery.⟧"
+                }
+                Key::ComponentFooterSummary => {
+                    "⟦Hoold thee liinees aa wiindoow keeeeps aat iits boottoom eedgee, wiith aa coorneer aat eeaach eend.⟧"
+                }
+                Key::ComponentFooterCornerSummary => {
+                    "⟦Plaacee aa coorneer aat oonee eend oof aa fooooteer, aas taall aas aall iits liinees.⟧"
+                }
+                Key::ComponentFooterLineSummary => {
+                    "⟦Plaacee oonee liinee iin aa fooooteer: coontrools, staatuus, oor thee liinee too typee iin.⟧"
+                }
+                Key::ComponentDrawerSummary => {
+                    "⟦OOpeen aa paaneel aaloong oonee eedgee oof aa wiindoow, beesiidee thee woork aand neeveer ooveer iit.⟧"
+                }
+                Key::ComponentDrawerRailSummary => {
+                    "⟦Plaacee aa cooluumn oof coontrools oor oof taabs doown oonee siidee oof aa draaweer.⟧"
+                }
+                Key::ComponentSplitSummary => {
+                    "⟦Diiviidee aa boox beetweeeen twoo paanees, wiith aa liinee beetweeeen theem aa reeaadeer caan moovee.⟧"
+                }
+                Key::ComponentSplitPaneSummary => {
+                    "⟦Hoold oonee oof thee twoo haalvees oof aa spliit, aand scrooll whaat dooees noot fiit.⟧"
+                }
+                Key::ComponentSplitHandleSummary => {
+                    "⟦Leet aa reeaadeer moovee thee liinee beetweeeen twoo paanees, by pooiinteer, toouuch oor keeybooaard.⟧"
+                }
+                Key::ComponentKeyCaptureSummary => {
+                    "⟦Leet uuseers reecoord aa shoortcuut by preessiing iits keeys, aand shoow iit aas thoosee keeys.⟧"
+                }
+                Key::ComponentLogSummary => {
+                    "⟦Shoow liinees aas theey aarriivee, aand keeeep thee neeweest iin viieew uuntiil thee reeaadeer scroolls aawaay.⟧"
+                }
+                Key::ComponentLogLineSummary => {
+                    "⟦Shoow oonee liinee oof aa loog: iits tiimee, iits leeveel, iits soouurcee aand iits meessaagee.⟧"
+                }
+                Key::ComponentPromptSummary => {
+                    "⟦Leet uuseers typee oon aa liinee wiith aa bloock cuursoor, aand seend whaat theey typeed.⟧"
+                }
+                Key::ComponentOptionGroupSummary => {
+                    "⟦Naamee aa ruun oof ooptiioons iinsiidee aan ooptiioon liist.⟧"
+                }
+                Key::ComponentOptionItemSummary => {
+                    "⟦Plaacee oonee ooptiioon iin aan ooptiioon liist: iits naamee, iits keey aand whaat iit dooees.⟧"
+                }
+                Key::ComponentOptionListSummary => {
+                    "⟦Leet uuseers waalk aa liist oof ooptiioons wiith thee keeybooaard aand choooosee oonee.⟧"
                 }
                 Key::ComponentParagraphSummary => "⟦Reendeer aa paaraagraaph oof proosee.⟧",
                 Key::ComponentProseSummary => {
@@ -26712,7 +30564,7 @@ impl Locale {
                 Key::ExampleDatePickerChosen => "⟦AArriiviing {date}⟧",
                 Key::ExampleDatePickerRange => "⟦{start} too {end}, {count} daays⟧",
                 Key::ExampleDatePickerCount => {
-                    "⟦oonee:{count} daay chooseen|ootheer:{count} daays chooseen⟧"
+                    "one:⟦{count} daay chooseen⟧|other:⟦{count} daays chooseen⟧"
                 }
                 Key::ExampleDatePickerCleared => "⟦Noo daatees chooseen⟧",
                 Key::ExampleDatePickerBlocked => {
@@ -26789,7 +30641,7 @@ impl Locale {
                     "⟦Thee saamee faamiily, wiith eeaach braanch oon iits oown plaanee⟧"
                 }
                 Key::ExampleLineageFiltered => "⟦EEveeryboody caalleed Dooee⟧",
-                Key::ExampleLineageMatches => "⟦oonee:{count} maatch|ootheer:{count} maatchees⟧",
+                Key::ExampleLineageMatches => "one:⟦{count} maatch⟧|other:⟦{count} maatchees⟧",
                 Key::ExampleLineageElided => "⟦{count} noot shoown⟧",
                 Key::ExampleLineageAdoption => {
                     "⟦Ruuii Dooee aand thee foouur peeooplee whoo aaree hiis paareents⟧"
@@ -27158,8 +31010,372 @@ impl Locale {
                 Key::ExampleMarkSearch => {
                     "⟦Thee weeiight chaangees aas weell aas thee baackgroouund, soo aa hiit caan bee foouund wiithoouut reelyiing oon cooloouur.⟧"
                 }
+                Key::ExampleFooterOverview => {
+                    "⟦Threeee liinees aand twoo coorneers, toold aapaart by shaadee aaloonee. Thee miiddlee liinee iis cuut too fiit, aand thee coontrool aat iits eend eexpaands iit.⟧"
+                }
+                Key::ExampleFooterLines => {
+                    "⟦Thee liinees staack iin thee oordeer theey aaree wriitteen. Noo boordeer iis draawn beetweeeen theem.⟧"
+                }
+                Key::ExampleFooterAuto => {
+                    "⟦`aauutoo` foolds thee fooooteer too aa striip aaloong iits eedgee. Pooiint aat thee striip, oor moovee thee foocuus iintoo iit, aand iit oopeens.⟧"
+                }
+                Key::ExampleFooterShown => {
+                    "⟦`shoown` oopeens aa fooldeed fooooteer froom oouutsiidee iit, foor aa keey preesseed eelseewheeree iin thee wiindoow.⟧"
+                }
+                Key::ExampleFooterNarrow => {
+                    "⟦IIn aa naarroow wiindoow thee liinees keeeep theeiir heeiight. Whaat dooees noot fiit oon aa liinee iis cuut aat iits eend.⟧"
+                }
+                Key::ExampleFooterCornerAlone => {
+                    "⟦AA fooooteer wiith oonee coorneer giivees iits liinees thee roooom oof thee ootheer.⟧"
+                }
+                Key::ExampleFooterCornerTwo => {
+                    "⟦Twoo coontrools staand oonee aaboovee thee ootheer. AA coorneer iis cuut aat thee fooooteer's heeiight.⟧"
+                }
+                Key::ExampleFooterLineKinds => {
+                    "⟦EEaach kiind haas iits oown shaadee. `proompt` haas thee paagee's oown.⟧"
+                }
+                Key::ExampleFooterLineCut => {
+                    "⟦Coonteent loongeer thaan thee liinee iis cuut. Thee coontrool aat thee eend shoows uundeer aa pooiinteer oor thee foocuus.⟧"
+                }
+                Key::ExampleFooterLineExpanded => {
+                    "⟦EExpaandeed, thee liinee wraaps aand groows, aand thee coontrool staays shoowiing.⟧"
+                }
+                Key::ExampleFooterLineLive => {
+                    "⟦`liivee` maakees thee coonteent aa `roolee=\"staatuus\"`, soo aa nootiicee iis aannoouunceed wheen iit aarriivees.⟧"
+                }
+                Key::ExampleFooterCornerSides => {
+                    "⟦AA coorneer iis aas wiidee aas aa raaiil aand aas taall aas thee fooooteer.⟧"
+                }
+                Key::ExampleFooterCornerControl => {
+                    "⟦AA coontrool iin aa coorneer shoows iits iicoon aand keeeeps iits naamee.⟧"
+                }
+                Key::ExampleFooterLabel => "⟦Wiindoow fooooteer⟧",
+                Key::ExampleFooterSidebar => "⟦OOpeen thee siideebaar⟧",
+                Key::ExampleFooterPage => "⟦Reegiistriiees⟧",
+                Key::ExampleFooterOffline => "⟦OOffliinee⟧",
+                Key::ExampleFooterHover => {
+                    "⟦Cloosees thee foocuuseed paagee aand reetuurns thee foocuus too thee paagee beefooree iit.⟧"
+                }
+                Key::ExampleFooterSelection => {
+                    "⟦OOpeens thee seettiings, oonee paagee foor eeaach seettiing.⟧"
+                }
+                Key::ExampleFooterExpand => "⟦Shoow aall oof iit⟧",
+                Key::ExampleFooterCollapse => "⟦Shoow oonee liinee⟧",
+                Key::ExampleFooterNotice => "⟦Thee seettiing waas saaveed.⟧",
+                Key::ExampleFooterTyped => "⟦cloosee thee paagee⟧",
+                Key::ExampleFooterModeline => "⟦Moodeeliinee⟧",
+                Key::ExampleFooterInfo => "⟦IInfoo liinee⟧",
+                Key::ExampleFooterPrompt => "⟦Proompt liinee⟧",
+                Key::ExampleDrawerOverview => {
+                    "⟦AA draaweer uundeer aa fooooteer. IIts twoo raaiils coontiinuuee thee fooooteer's coorneers, aand thee coontrool aat thee eend oof thee moodeeliinee shuuts aand oopeens iit.⟧"
+                }
+                Key::ExampleDrawerBasic => {
+                    "⟦AA draaweer iis aas taall aas whaat iis iin iit. IIt taakees iits roooom froom thee woork aaboovee aand cooveers noonee oof iit.⟧"
+                }
+                Key::ExampleDrawerCollapsed => {
+                    "⟦`coollaapseed` keeeeps whaat iis iin thee draaweer aand shoows noonee oof iit. OOpeen iit, moovee thee foocuus iinsiidee aand preess EEscaapee.⟧"
+                }
+                Key::ExampleDrawerSide => {
+                    "⟦AA draaweer aat aa siidee groows aacrooss thee wiindoow, too thee saamee shaaree oof iit, aand iis aas taall aas iits siidee.⟧"
+                }
+                Key::ExampleDrawerScroll => {
+                    "⟦Paast iits shaaree oof thee wiindoow thee coonteent scroolls. Thee raaiil staays wheeree iit iis.⟧"
+                }
+                Key::ExampleDrawerRailControls => {
+                    "⟦AA raaiil iis aas wiidee aas aa fooooteer's coorneer aand aas taall aas thee draaweer. IIt hoolds aa `Toooolbaar` draawn aas aa raaiil.⟧"
+                }
+                Key::ExampleDrawerRailTabs => {
+                    "⟦AA raaiil aat thee `eend` hoolds thee taabs. Thee chooseen taab iis maarkeed oon thee eedgee thaat faacees thee coonteent.⟧"
+                }
+                Key::ExampleDrawerRailBoth => {
+                    "⟦AA raaiil aat eeaach siidee, aand thee coonteent beetweeeen theem. Thee keeybooaard reeaachees theem iin thee oordeer theey aaree wriitteen.⟧"
+                }
+                Key::ExampleDrawerRailScroll => {
+                    "⟦AA raaiil taalleer thaan iits draaweer scroolls, wiith noo scroollbaar. Mooviing aaloong iit wiith thee aarroows briings eeaach coontrool iintoo viieew.⟧"
+                }
+                Key::ExampleDrawerLabel => "⟦Draaweer⟧",
+                Key::ExampleDrawerSidebar => "⟦Siideebaar⟧",
+                Key::ExampleDrawerDetails => "⟦Deetaaiils⟧",
+                Key::ExampleDrawerToggle => "⟦Shoow oor hiidee thee draaweer⟧",
+                Key::ExampleDrawerWork => {
+                    "⟦Thee woorkspaacee aareeaa. Thee draaweer beeloow taakees iits roooom froom heeree.⟧"
+                }
+                Key::ExampleDrawerWorkShut => {
+                    "⟦Thee draaweer beeloow iis shuut. Whaat iis iin iit iis keept.⟧"
+                }
+                Key::ExampleDrawerWorkSide => {
+                    "⟦Thee woorkspaacee aareeaa, beetweeeen aa draaweer aat eeaach siidee.⟧"
+                }
+                Key::ExampleDrawerLongOne => {
+                    "⟦EEveery paagee woorks iin thee woorkspaacee aareeaa aand iin thee draaweer.⟧"
+                }
+                Key::ExampleDrawerLongTwo => {
+                    "⟦AA paagee aadaapts too thee smaalleer spaacee, oor prooviidees aa viieew maadee foor iit.⟧"
+                }
+                Key::ExampleDrawerLongThree => {
+                    "⟦Coollaapsiing thee draaweer keeeeps eeveery paagee thaat iis oopeen iin iit.⟧"
+                }
+                Key::ExampleSplitOverview => {
+                    "⟦AA liist aand whaat iis chooseen iin iit. Draag thee liinee beetweeeen theem, oor moovee thee foocuus too iit aand preess thee aarroow keeys.⟧"
+                }
+                Key::ExampleSplitBasic => {
+                    "⟦Twoo paanees shaaree thee boox iin haalvees. Thee haandlee beetweeeen theem iis oonee taab stoop.⟧"
+                }
+                Key::ExampleSplitLimits => {
+                    "⟦`vaaluuee` iis wheeree thee liinee staarts. `miin` aand `maax` aaree aas faar aas iit gooees eeiitheer waay.⟧"
+                }
+                Key::ExampleSplitStack => {
+                    "⟦IIn aa boox naarrooweer thaan thee `sm` breeaakpooiint thee paanees staack aand thee haandlee iis goonee. Thee boox meeaasuureed iis thee spliit's oown.⟧"
+                }
+                Key::ExampleSplitHide => {
+                    "⟦`hiidee-staart` aand `hiidee-eend` leeaavee oonee paanee oouut oof aa naarroow boox. Thee ootheer taakees aall oof iit.⟧"
+                }
+                Key::ExampleSplitNone => {
+                    "⟦`noonee` keeeeps thee paanees siidee by siidee iin thee naarrooweest boox, aand thee haandlee wiith theem.⟧"
+                }
+                Key::ExampleSplitPaneSides => {
+                    "⟦Twoo paanees aand noo haandlee keeeep theeiir shaarees. Noothiing heeree iis aa coontrool.⟧"
+                }
+                Key::ExampleSplitPaneScroll => {
+                    "⟦Siidee by siidee, aa paanee iis aas taall aas thee spliit aand scroolls whaat iis taalleer. Thee ootheer paanee staays wheeree iit iis.⟧"
+                }
+                Key::ExampleSplitPaneContent => {
+                    "⟦AA paanee haas noo paaddiing oof iits oown. Whaat iit hoolds briings iits oown.⟧"
+                }
+                Key::ExampleSplitPaneNested => {
+                    "⟦AA paanee hoolds aa spliit oof iits oown, foor threeee cooluumns. EEaach spliit iis meeaasuureed by iits oown boox.⟧"
+                }
+                Key::ExampleSplitHandleBasic => {
+                    "⟦Thee haandlee iis aas wiidee aas thee smaalleest taargeet aand draaws aa haaiirliinee. AAn aarroow keey moovees iit oonee pooiint, aand aa paagee keey teen.⟧"
+                }
+                Key::ExampleSplitHandleLeast => {
+                    "⟦Thiis paanee staarts aat iits leeaast. EEnteer briings iit too thee miiddlee oof whaat iit maay bee, aand EEnteer aagaaiin puuts iit baack.⟧"
+                }
+                Key::ExampleSplitHandleAway => {
+                    "⟦Wiith liimiits oof 0 aand 100, Hoomee aand EEnteer puut thee fiirst paanee aawaay eentiireely. EEnd dooees thee saamee too thee seecoond.⟧"
+                }
+                Key::ExampleSplitHandleMirrored => {
+                    "⟦Reeaad froom thee riight, thee fiirst paanee iis oon thee riight. Thee aarroow keeys stiill moovee thee liinee thee waay theey pooiint.⟧"
+                }
+                Key::ExampleSplitHandle => "⟦Reesiizee thee liist⟧",
+                Key::ExampleKeyCaptureOverview => {
+                    "⟦EEaach coontrool hoolds oonee shoortcuut. Preess iit, theen thee keeys. EEscaapee keeeeps thee shoortcuut iit haad.⟧"
+                }
+                Key::ExampleKeyCaptureBasic => {
+                    "⟦Thee keeys aaree draawn by thee laabeels oon theem. Preess thee coontrool too liisteen, aand thee neext keey wiith iits moodiifiieers iis reecoordeed.⟧"
+                }
+                Key::ExampleKeyCaptureKeyboards => {
+                    "⟦OOnee choord oon threeee keeybooaards. OOnly thee naamees oof thee moodiifiieers chaangee.⟧"
+                }
+                Key::ExampleKeyCaptureRemovable => {
+                    "⟦Thee coontrool aafteer thee boox reemoovees thee shoortcuut. IIt shoows oonly whiilee theeree iis oonee too reemoovee.⟧"
+                }
+                Key::ExampleKeyCaptureUnset => {
+                    "⟦Wiith noo shoortcuut, thee boox saays soo iin thee caalleer's woords.⟧"
+                }
+                Key::ExampleKeyCaptureRefused => {
+                    "⟦Thee caalleer reefuuseed thee laast choord. IIts seenteencee iis uundeer thee boox, aand aa ruulee ruuns doown thee leeaadiing eedgee.⟧"
+                }
+                Key::ExampleKeyCaptureLocked => {
+                    "⟦AA diisaableed coontrool staays iin thee taab oordeer aand saays whaat iit hoolds. Preessiing iit staarts noothiing.⟧"
+                }
+                Key::ExampleKeyCaptureLeader => "⟦Leeaadeer⟧",
+                Key::ExampleKeyCaptureSettings => "⟦OOpeen thee seettiings⟧",
+                Key::ExampleKeyCaptureHelp => "⟦OOpeen thee heelp⟧",
+                Key::ExampleKeyCaptureCapture => "⟦Preess thee neew keeys, oor EEscaapee⟧",
+                Key::ExampleKeyCaptureEmpty => "⟦Noonee⟧",
+                Key::ExampleKeyCaptureClear => "⟦Reemoovee thee shoortcuut⟧",
+                Key::ExampleKeyCaptureRefusal => {
+                    "⟦Thee prooduuctiioon chaanneel aalreeaady uusees thiis shoortcuut.⟧"
+                }
+                Key::ExampleLogOverview => {
+                    "⟦AA daaeemoon's loog aas iit ruuns. Scrooll uup aand iit stoops foolloowiing, aand thee coontrool aat iits eend taakees yoouu baack too thee neeweest liinee.⟧"
+                }
+                Key::ExampleLogFollows => {
+                    "⟦Thee loog oopeens aat iits neeweest liinee aand keeeeps iit iin viieew. Scroolleed aawaay, iit staays wheeree yoouu aaree uuntiil yoouu reetuurn too thee eend.⟧"
+                }
+                Key::ExampleLogStill => {
+                    "⟦Wiith `foolloow` ooff, thee loog oopeens aat iits fiirst liinee aand staays wheeree thee reeaadeer puuts iit.⟧"
+                }
+                Key::ExampleLogNarrow => {
+                    "⟦IIn aa naarroow wiindoow eeaach liinee wraaps uundeer iitseelf. Noothiing scroolls siideewaays.⟧"
+                }
+                Key::ExampleLogRoomy => {
+                    "⟦Wiith roooom foor eeveery liinee, thee loog iis aat iits fiirst liinee aand iits eend aat ooncee. Noothiing ooffeers too reesuumee.⟧"
+                }
+                Key::ExampleLogLineLevels => {
+                    "⟦EEaach leeveel iis aa woord iin aa tiinteed boox. Thee toonee saays thee leeveel aagaaiin, neeveer aaloonee.⟧"
+                }
+                Key::ExampleLogLineParts => {
+                    "⟦AA paart leeft oouut leeaavees noo spaacee beehiind. AA leeveel wiith noo toonee iis draawn iin thee paagee's oown shaadee.⟧"
+                }
+                Key::ExampleLogLineLong => {
+                    "⟦AA paath haas noo spaacee too breeaak aat, soo iit breeaaks iinsiidee iitseelf. AA liinee breeaak iin thee meessaagee iis keept.⟧"
+                }
+                Key::ExampleLogLineFiltered => {
+                    "⟦Fiilteereed froom thee proompt liinee, thee meessaagee iis aa `MaatchTeext`, eeaach woord oof thee quueery maarkeed iin iits oown toonee.⟧"
+                }
+                Key::ExampleLogLabel => "⟦Daaeemoon loog⟧",
+                Key::ExampleLogRecord => "⟦Joouurnaal⟧",
+                Key::ExampleLogResume => "⟦Goo too thee neeweest⟧",
+                Key::ExampleLogLevelDebug => "⟦deebuug⟧",
+                Key::ExampleLogLevelInfo => "⟦iinfoo⟧",
+                Key::ExampleLogLevelWarning => "⟦waarniing⟧",
+                Key::ExampleLogLevelError => "⟦eerroor⟧",
+                Key::ExampleLogStarted => "⟦Staarteed, chaanneel deeveeloopmeent.⟧",
+                Key::ExampleLogStore => "⟦OOpeeneed thee loocaal stooree.⟧",
+                Key::ExampleLogCatalog => "⟦Reeaad 42 coommaands froom thee caataaloog.⟧",
+                Key::ExampleLogSocket => "⟦Liisteeniing oon thee loocaal soockeet.⟧",
+                Key::ExampleLogAttached => "⟦AA wiindoow aattaacheed.⟧",
+                Key::ExampleLogSlow => "⟦AA cliieent waas sloow too aansweer thee heeaartbeeaat.⟧",
+                Key::ExampleLogRan => "⟦Raan aa coommaand foor thee wiindoow.⟧",
+                Key::ExampleLogRefused => {
+                    "⟦AA pluugiin waas reefuuseed: iits caapaabiiliity iis noot graanteed.⟧"
+                }
+                Key::ExampleLogJournal => "⟦Thee reefuusaal waas wriitteen too thee joouurnaal.⟧",
+                Key::ExampleLogSnapshot => "⟦Saaveed thee iinteerfaacee's staatee.⟧",
+                Key::ExampleLogFull => "⟦Thee stooree iis niinee teenths fuull.⟧",
+                Key::ExampleLogHeartbeat => "⟦Heeaartbeeaat.⟧",
+                Key::ExampleLogLost => "⟦AA wiindoow stooppeed aansweeriing.⟧",
+                Key::ExampleLogMemory => "⟦AA pluugiin iis neeaar iits meemoory liimiit.⟧",
+                Key::ExamplePromptOverview => {
+                    "⟦Thee proompt iis thee laast liinee oof aa fooooteer. Typee iin iit, theen preess EEnteer oor thee coontrool aat iits eend.⟧"
+                }
+                Key::ExamplePromptBasic => {
+                    "⟦Thee cuursoor iis aa bloock oon thee chaaraacteer iit staands beefooree. IIt iis fiilleed whiilee thee proompt haas thee foocuus, aand aan oouutliinee whiilee iit dooees noot.⟧"
+                }
+                Key::ExamplePromptGrows => {
+                    "⟦Thee proompt groows wiith iits teext, too eeiight liinees. AAfteer thaat iit scroolls, aand thee bloock staays oon iits chaaraacteer.⟧"
+                }
+                Key::ExamplePromptDriven => {
+                    "⟦Thee proompt naamees thee liist iin `coontrools`. Thee foocuus staays iin thee proompt, aand thee UUp aand Doown aarroows moovee throouugh thee ooptiioons.⟧"
+                }
+                Key::ExamplePromptActive => {
+                    "⟦`aactiivee` naamees thee ooptiioon thee keeybooaard iis oon, foor aa caalleer thaat reendeers thee aactiivee ooptiioon iitseelf.⟧"
+                }
+                Key::ExamplePromptReadonly => {
+                    "⟦AA reeaad-oonly proompt caan bee reeaad aand coopiieed. IIts cuursoor staays aan oouutliinee, aand noothiing iis seent.⟧"
+                }
+                Key::ExamplePromptDisabled => {
+                    "⟦AA diisaableed proompt taakees noo foocuus aand draaws noo cuursoor.⟧"
+                }
+                Key::ExamplePromptLabel => "⟦Proompt⟧",
+                Key::ExamplePromptSend => "⟦Seend⟧",
+                Key::ExamplePromptRunning => "⟦Thee liibraary iis beeiing iindeexeed.⟧",
+                Key::ExampleOptionListOverview => {
+                    "⟦Thee woords `wiin cloo` weeree typeed. EEaach roow maarks whaat eeaach woord maatcheed oon iits naamee, aand thee baar iis wheeree thee keeybooaard iis.⟧"
+                }
+                Key::ExampleOptionListWalk => {
+                    "⟦Taab too thee liist, theen uusee thee aarroows. EEnteer choooosees, aand thee liist saays soo iin aan `nd-ooptiioon-choooosee` eeveent.⟧"
+                }
+                Key::ExampleOptionListColumns => {
+                    "⟦`cooluumns` fiills thee wiidth, doown aand theen aacrooss. EEaach eentry iis aa keey aand aa naamee, wiith noothiing draawn aaroouund theem.⟧"
+                }
+                Key::ExampleOptionListDriven => {
+                    "⟦Thee boox naamees thee liist iin `aariiaa-coontrools`. Thee foocuus staays iin thee boox, aand iits aarroows moovee throouugh thee ooptiioons.⟧"
+                }
+                Key::ExampleOptionListNothing => {
+                    "⟦AA liist wiith noo ooptiioon shoows `eempty_laabeel`, iin aa `roolee=\"staatuus\"`.⟧"
+                }
+                Key::ExampleOptionGroupRun => {
+                    "⟦AA groouup iis aa `roolee=\"groouup\"` naameed by iits laabeel. IIts ooptiioons aaree stiill thee ooptiioons oof thee oonee liist.⟧"
+                }
+                Key::ExampleOptionItemRow => {
+                    "⟦`deetaaiil` iis aa seecoond liinee uundeer thee naamee, aand paart oof whaat aa screeeen reeaadeer reeaads foor thee ooptiioon.⟧"
+                }
+                Key::ExampleOptionItemHits => {
+                    "⟦`hiits` maarks thee chaaraacteers oof thee naamee aa quueery maatcheed, iin thee graammaar oof `MaatchTeext`.⟧"
+                }
+                Key::ExampleOptionItemDetailHits => {
+                    "⟦Thee quueery waas `wiin eex`. Thee seecoond woord maatcheed aa taag, soo thee taags aaree thee seecoond liinee aand `deetaaiil_hiits` maarks theem.⟧"
+                }
+                Key::ExampleOptionItemShortcut => {
+                    "⟦`shoortcuut` iis plaaiin moonoospaacee teext. IIt iis fiirst iin thee maarkuup, soo iit iis reeaad beefooree thee naamee.⟧"
+                }
+                Key::ExampleOptionItemStates => {
+                    "⟦`aactiivee` iis wheeree thee keeybooaard iis, `seeleecteed` iis thee aansweer aand draaws aa tiick, aand `diisaableed` iis reeaacheed aand noot chooseen.⟧"
+                }
+                Key::ExampleOptionListKeySpace => "⟦Spaacee⟧",
+                Key::ExampleOptionListKeyS => "⟦s⟧",
+                Key::ExampleOptionListKeyH => "⟦h⟧",
+                Key::ExampleOptionListKeyD => "⟦d⟧",
+                Key::ExampleOptionListKeyQ => "⟦q⟧",
+                Key::ExampleOptionGroupMixed => {
+                    "⟦OOptiioons oouutsiidee aany groouup siit beesiidee thee groouups, iin thee oordeer theey aaree wriitteen.⟧"
+                }
+                Key::ExampleOptionGroupColumns => {
+                    "⟦IIn cooluumns aa groouup's naamee staays wiith iits fiirst ooptiioon, aat thee heeaad oof thee saamee cooluumn.⟧"
+                }
+                Key::ExampleOptionGroupFiltered => {
+                    "⟦AA groouup draaws oonly thee ooptiioons iits caalleer reendeereed. OOnee wiith noonee shoowiing taakees noo roooom.⟧"
+                }
+                Key::ExampleOptionListCommands => "⟦Coommaands⟧",
+                Key::ExampleOptionListMenu => "⟦Shoortcuuts⟧",
+                Key::ExampleOptionListFilter => "⟦Fiilteer thee coommaands⟧",
+                Key::ExampleOptionListEmpty => "⟦Noo coommaand maatchees.⟧",
+                Key::ExampleOptionListSettings => "⟦Seettiings⟧",
+                Key::ExampleOptionListSettingsDetail => {
+                    "⟦Chaangee hoow thee iinteerfaacee looooks aand beehaavees.⟧"
+                }
+                Key::ExampleOptionListHelp => "⟦Heelp⟧",
+                Key::ExampleOptionListHelpDetail => {
+                    "⟦Reeaad hoow eeaach paart oof thee iinteerfaacee woorks.⟧"
+                }
+                Key::ExampleOptionListSidebar => "⟦Siideebaar⟧",
+                Key::ExampleOptionListDev => "⟦Deeveeloopeer tooools⟧",
+                Key::ExampleOptionListShortcuts => "⟦Thiis paagee’s shoortcuuts⟧",
+                Key::ExampleOptionListGroupWindow => "⟦Wiindoow⟧",
+                Key::ExampleOptionListGroupPage => "⟦Paagee⟧",
+                Key::ExampleOptionListCloseWindow => "⟦Cloosee thee wiindoow⟧",
+                Key::ExampleOptionListHideWindow => "⟦Hiidee thee wiindoow⟧",
+                Key::ExampleOptionListClosePage => "⟦Cloosee thee paagee⟧",
+                Key::ExampleMatchTextQuery => {
+                    "⟦Thee quueery `groo t b` foouund booth naamees. EEaach woord oof iit maarks iits oown chaaraacteers, iin iits oown toonee.⟧"
+                }
+                Key::ExampleMatchTextOne => "⟦OOnee woord, aand thee ruun iit maatcheed.⟧",
+                Key::ExampleMatchTextWords => {
+                    "⟦Threeee woords. Thee fiirst iis uundeerliineed sooliid, thee seecoond daasheed aand thee thiird dootteed, soo noo toonee deepeends oon cooloouur.⟧"
+                }
+                Key::ExampleMatchTextShared => {
+                    "⟦Twoo woords claaiim chaaraacteers 3 too 5. Thee fiirst woord keeeeps theem.⟧"
+                }
+                Key::ExampleMatchTextElsewhere => {
+                    "⟦AAn eempty sloot iis aa woord thaat maatcheed aanootheer fiieeld, soo thee seecoond woord's toonee iis thee oonly oonee draawn.⟧"
+                }
+                Key::ExampleMatchTextPlain => "⟦Wiith noo `hiits` iit iis thee naamee aaloonee.⟧",
                 Key::ExampleParagraphLead => {
                     "⟦UUsee thee leeaad siizee foor thee oopeeniing seenteencee uundeer aa tiitlee.⟧"
+                }
+                Key::ExampleProseFlowHeading => "⟦Leeaadeer keeys⟧",
+                Key::ExampleProseFlowPress => {
+                    "⟦Preess thee Leeaadeer, theen aa leetteer, suuch aas⟧"
+                }
+                Key::ExampleProseFlowQuick => "⟦AA leetteer preesseed quuiickly aacts⟧",
+                Key::ExampleProseFlowQuickEm => "⟦beefooree thee meenuu iis draawn⟧",
+                Key::ExampleProseFlowEscape => "⟦OOnee keey iis neeveer aa biindiing:⟧",
+                Key::ExampleProseFlowEscapeStrong => "⟦EEscaapee aalwaays cloosees⟧",
+                Key::ExampleProseFlowLinkLead => "⟦AA biindiing iis chaangeed wiith⟧",
+                Key::ExampleProseFlowLink => "⟦thee coontrool thaat reecoords aa shoortcuut⟧",
+                Key::ExampleProseFlowMenu => "⟦IIn thee meenuu⟧",
+                Key::ExampleProseFlowHelp => "⟦oopeens heelp.⟧",
+                Key::ExampleProseFlowDev => "⟦oopeens thee deev paagees:⟧",
+                Key::ExampleProseFlowLogs => "⟦thee liivee loogs⟧",
+                Key::ExampleProseFlowRegistries => "⟦thee reegiistriiees⟧",
+                Key::ExampleProseFlowClose => "⟦cloosees thee paagee iin froont.⟧",
+                Key::ExampleProseFlowQuote => {
+                    "⟦AA keey aa biindiing taakees iis taakeen froom thee whoolee wiindoow, noot froom oonee paagee.⟧"
+                }
+                Key::ExampleProseFlowCaption => "⟦Whaat eeaach leetteer oopeens⟧",
+                Key::ExampleProseFlowColKey => "⟦Keey⟧",
+                Key::ExampleProseFlowColOpens => "⟦OOpeens⟧",
+                Key::ExampleProseFlowHelpPage => "⟦Heelp⟧",
+                Key::ExampleProseFlowDevPages => "⟦Thee deev paagees⟧",
+                Key::ExampleProseFlowClosePage => "⟦Noothiing. IIt cloosees thee paagee.⟧",
+                Key::ExampleProseFlowEnd => {
+                    "⟦EEveerythiing aaboovee iis aa coonstruuct oof thee Maarkdoown thee iinteerfaacee reeaads, aand noothiing oouutsiidee iit iis.⟧"
+                }
+                Key::ExampleProseNoteFlow => {
+                    "⟦EEveery coonstruuct oof thee clooseed Maarkdoown suubseet, aas coompooneents. AA heeaadiing haas mooree roooom aaboovee iit thaan beeloow, aand thee fiirst bloock noonee.⟧"
                 }
                 Key::ExampleProseMeasure => {
                     "⟦`Proosee` caaps thee liinee leength oof eeveerythiing iinsiidee iit, soo thee paaraagraaphs staay aat aa reeaadaablee meeaasuuree.⟧"
@@ -27205,6 +31421,24 @@ impl Locale {
                 }
                 Key::ExampleToolbarDensity => {
                     "⟦`deensiity` seets thee paaddiing, foor aa baar iinsiidee soomeethiing thaat aalreeaady haas paaddiing oof iits oown.⟧"
+                }
+                Key::ExampleToolbarRail => {
+                    "⟦AA raaiil iis oonee raaiil wiidee aand hoolds twoo coontrools too aa roow. EEaach `Tooooltiip` draaws thee naamee iits coontrool aalreeaady haas.⟧"
+                }
+                Key::ExampleRailControls => "⟦Draaweer coontrools⟧",
+                Key::ExampleRailPages => "⟦Paagees iin thee draaweer⟧",
+                Key::ExampleRailCollapse => "⟦Coollaapsee thee draaweer⟧",
+                Key::ExampleRailClose => "⟦Cloosee thee paagee⟧",
+                Key::ExampleRailDirection => "⟦OOpeen thee neext paagee iin thee draaweer⟧",
+                Key::ExampleRailCommands => "⟦Coommaands⟧",
+                Key::ExampleRailSettings => "⟦Seettiings⟧",
+                Key::ExampleRailRegistries => "⟦Reegiistriiees⟧",
+                Key::ExampleRailCommandsBody => {
+                    "⟦EEveery coommaand thee wiindoow caan ruun, fiilteereed aas yoouu typee.⟧"
+                }
+                Key::ExampleRailSettingsBody => "⟦OOnee paagee foor eeaach seettiing.⟧",
+                Key::ExampleRailRegistriesBody => {
+                    "⟦Whaat iis iinstaalleed, aand wheeree eeaach eentry caamee froom.⟧"
                 }
                 Key::ExampleTimeMachine => {
                     "⟦Thee viisiiblee teext iis whaat iis aannoouunceed. `daateetiimee` iis thee maachiinee-reeaadaablee vaaluuee.⟧"
@@ -27562,14 +31796,14 @@ impl Locale {
                 Key::ExamplePickerHint => {
                     "⟦EEnteer oor aa coommaa aadds oonee. Baackspaacee oon aan eempty boox taakees thee laast oonee ooff.⟧"
                 }
-                Key::ExamplePickerStatus => "⟦oonee:{count} toopiic|ootheer:{count} toopiics⟧",
+                Key::ExamplePickerStatus => "one:⟦{count} toopiic⟧|other:⟦{count} toopiics⟧",
                 Key::ExamplePickerCreate => "⟦AAdd {term}⟧",
                 Key::ExamplePickerEmpty => "⟦Noo toopiic maatchees thaat.⟧",
                 Key::ExamplePickerRemove => "⟦Reemoovee {label}⟧",
                 Key::ExamplePickerAdded => "⟦{label} aaddeed⟧",
                 Key::ExamplePickerRemoved => "⟦{label} reemooveed⟧",
                 Key::ExamplePickerMax => {
-                    "⟦oonee:AAt moost {max} toopiic.|ootheer:AAt moost {max} toopiics.⟧"
+                    "one:⟦AAt moost {max} toopiic.⟧|other:⟦AAt moost {max} toopiics.⟧"
                 }
                 Key::ExamplePickerInvalid => "⟦{term} iis noot aan aaddreess.⟧",
                 Key::ExamplePickerClear => "⟦Reemoovee eeveery oonee⟧",
@@ -27690,7 +31924,7 @@ impl Locale {
                 Key::ExampleColorPickerAdded => "⟦{value} aaddeed.⟧",
                 Key::ExampleColorPickerRemoved => "⟦{value} reemooveed.⟧",
                 Key::ExampleColorPickerStatus => {
-                    "⟦oonee:{count} cooloouur|ootheer:{count} cooloouurs⟧"
+                    "one:⟦{count} cooloouur⟧|other:⟦{count} cooloouurs⟧"
                 }
                 Key::ExampleColorPickerMax => "⟦Foouur iis aas maany aas thiis liist taakees.⟧",
                 Key::ExampleColorPickerHint => {
@@ -27731,7 +31965,7 @@ impl Locale {
                 Key::ExampleInputReveal => "⟦Shoow thee paasswoord⟧",
                 Key::ExampleInputConceal => "⟦Hiidee thee paasswoord⟧",
                 Key::ExampleInputCounter => {
-                    "⟦oonee:{count} oof {max} chaaraacteer|ootheer:{count} oof {max} chaaraacteers⟧"
+                    "one:⟦{count} oof {max} chaaraacteer⟧|other:⟦{count} oof {max} chaaraacteers⟧"
                 }
                 Key::ExampleInputPasswordHint => {
                     "⟦AAt leeaast tweelvee chaaraacteers. AA seenteencee yoouu wiill reemeembeer beeaats aa woord yoouu wiill noot.⟧"
@@ -27758,9 +31992,9 @@ impl Locale {
                 Key::ExampleInputFilesHint => "⟦PDF oor aa phootoograaph, uup too 2 MB eeaach.⟧",
                 Key::ExampleInputFileRemove => "⟦Reemoovee {name}⟧",
                 Key::ExampleInputFileEmpty => "⟦Noothiing chooseen yeet.⟧",
-                Key::ExampleInputFileStatus => "⟦oonee:{count} fiilee|ootheer:{count} fiilees⟧",
+                Key::ExampleInputFileStatus => "one:⟦{count} fiilee⟧|other:⟦{count} fiilees⟧",
                 Key::ExampleInputFileAdded => {
-                    "⟦oonee:{count} fiilee aaddeed|ootheer:{count} fiilees aaddeed⟧"
+                    "one:⟦{count} fiilee aaddeed⟧|other:⟦{count} fiilees aaddeed⟧"
                 }
                 Key::ExampleInputFileRemoved => "⟦Fiilee reemooveed.⟧",
                 Key::ExampleInputFileType => "⟦{name} iis noot aa kiind wee aacceept.⟧",
@@ -28151,7 +32385,7 @@ impl Locale {
                 Key::ExampleTableChoosePerson => "⟦Choooosee thiis peersoon⟧",
                 Key::ExampleTableChooseEveryone => "⟦Choooosee eeveeryoonee⟧",
                 Key::ExampleTableChosen => {
-                    "⟦oonee:{count} peersoon chooseen.|ootheer:{count} peeooplee chooseen.⟧"
+                    "one:⟦{count} peersoon chooseen.⟧|other:⟦{count} peeooplee chooseen.⟧"
                 }
                 Key::ExampleTableDeploys => "⟦Deeplooymeents⟧",
                 Key::ExampleTableColBuild => "⟦Buuiild⟧",
@@ -28195,10 +32429,10 @@ impl Locale {
                 Key::ExampleTableExportCopy => "⟦Coopy too thee cliipbooaard⟧",
                 Key::ExampleTableExportPrint => "⟦Priint⟧",
                 Key::ExampleTableExported => {
-                    "⟦oonee:{count} roow saaveed.|ootheer:{count} roows saaveed.⟧"
+                    "one:⟦{count} roow saaveed.⟧|other:⟦{count} roows saaveed.⟧"
                 }
                 Key::ExampleTableCopied => {
-                    "⟦oonee:{count} roow coopiieed.|ootheer:{count} roows coopiieed.⟧"
+                    "one:⟦{count} roow coopiieed.⟧|other:⟦{count} roows coopiieed.⟧"
                 }
                 Key::ExampleTableMore => "⟦Looaad 4 mooree⟧",
                 Key::ExampleTableMoreStatus => "⟦{count} mooree roows. {total} aaltoogeetheer.⟧",
@@ -28503,6 +32737,36 @@ impl Locale {
                 Key::ExampleMessageBarNotePlain => {
                     "⟦Noo toonee aat aall, whiich iis thee aabseencee oof thee aattriibuutee raatheer thaan aa naamee. Thee woords caarry thee meessaagee oon theeiir oown.⟧"
                 }
+                Key::ExampleMessageBarLost => "⟦Thee loocaal seerveer iis noot ruunniing.⟧",
+                Key::ExampleMessageBarRestoring => {
+                    "one:⟦Reestooriing iit iin {count} seecoond⟧|other:⟦Reestooriing iit iin {count} seecoonds⟧"
+                }
+                Key::ExampleMessageBarRestore => "⟦Reestooree noow⟧",
+                Key::ExampleMessageBarAgain => "⟦Coouunt doown aagaaiin⟧",
+                Key::ExampleMessageBarStopped => "⟦Thee loocaal seerveer iis stooppeed.⟧",
+                Key::ExampleMessageBarStart => "⟦Staart iit⟧",
+                Key::ExampleMessageBarSave => {
+                    "⟦Saavee whaat yoouu aaree woorkiing oon beefooree theen.⟧"
+                }
+                Key::ExampleMessageBarEnds => {
+                    "one:⟦Siigniing yoouu oouut iin {count} seecoond⟧|other:⟦Siigniing yoouu oouut iin {count} seecoonds⟧"
+                }
+                Key::ExampleMessageBarStay => "⟦Staay siigneed iin⟧",
+                Key::ExampleMessageBarNoteLine => {
+                    "⟦Thee liinee cloosees thee wiindoow, uundeer iits fooooteer. Thee paagee wriitees aa deeaadliinee teen seecoonds aaheeaad, aas thee iinteerfaacee dooees wheen iit loosees iits seerveer.⟧"
+                }
+                Key::ExampleMessageBarOffline => {
+                    "⟦Yoouu aaree woorkiing ooffliinee. Chaangees aaree keept heeree uuntiil thee coonneectiioon coomees baack.⟧"
+                }
+                Key::ExampleMessageBarNoteQuiet => {
+                    "⟦AA liinee wiith noo toonee iis draawn oon thee suubtlee suurfaacee. OOnee aa reeaadeer maay taakee aawaay eends wiith iits coontrool.⟧"
+                }
+                Key::ExampleMessageBarNoteStopped => {
+                    "⟦Stooppeed oon puurpoosee, thee liinee coouunts noothiing doown. IIts aactiioon staarts thee seerveer aagaaiin.⟧"
+                }
+                Key::ExampleMessageBarNoteCountdown => {
+                    "⟦AA baar coouunts doown toooo, uundeer iits meessaagee. Thee tiimee leeft iis saaiid aas thee coouunt staarts, eeveery teen seecoonds aand aat fiivee.⟧"
+                }
                 Key::ExampleOverviewDividerPay => "⟦Paay by caard⟧",
                 Key::ExampleOverviewDividerPayBody => {
                     "⟦Wee taakee Viisaa, Maasteercaard aand EEloo.⟧"
@@ -28601,6 +32865,9 @@ impl Locale {
                 Key::ExampleTabsNoteFill => {
                     "⟦`eequuaal` giivees eeveery taab thee wiidth oof thee wiideest, soo traanslaatiing oonee woord dooees noot ree-floow thee striip.⟧"
                 }
+                Key::ExampleTabsNoteRail => {
+                    "⟦`raaiil` shoows eeaach taab aas iits iicoon. Thee laabeel iis stiill thee taab's naamee, aand thee `Tooooltiip` draaws iit.⟧"
+                }
                 Key::ExampleTabSettings => "⟦Seettiings⟧",
                 Key::ExampleTabPeople => "⟦Peeooplee⟧",
                 Key::ExampleTabBilling => "⟦Biilliing⟧",
@@ -28689,6 +32956,26 @@ impl Locale {
                 Key::ExampleDialogNoteWide => {
                     "⟦Noo cloosee coontrool aat aall. EEscaapee aand aa preess oon thee baackdroop aaree stiill thee waay oouut, aand booth aaree thee plaatfoorm's.⟧"
                 }
+                Key::ExampleDialogIrreversible => "⟦Thiis caannoot bee uundoonee.⟧",
+                Key::ExampleDialogFiles => {
+                    "⟦Threeee fiilees aaree aattaacheed, aand theey goo wiith thee draaft.⟧"
+                }
+                Key::ExampleDialogAsk => "⟦AAsk foor aa coonfiirmaatiioon⟧",
+                Key::ExampleDialogRealmHeading => "⟦Deeleetee thee reeaalm hoomee?⟧",
+                Key::ExampleDialogRealmDescription => {
+                    "⟦EEveery reecoord, fiilee aand seettiing iin iit iis deeleeteed, oon thiis maachiinee aand eeveerywheeree iit iis keept.⟧"
+                }
+                Key::ExampleDialogRealmRequester => {
+                    "⟦AAskeed by thee aassiistaant, iin thee seessiioon naameed Cleeaanuup.⟧"
+                }
+                Key::ExampleDialogRealmConfirm => "⟦Deeleetee thee reeaalm⟧",
+                Key::ExampleDialogAnswer => "⟦Thee diiaaloog aansweereed {answer}.⟧",
+                Key::ExampleDialogNoteAlert => {
+                    "⟦AAn aaleert diiaaloog aasks foor aan aansweer. Thee foocuus staarts oon thee oonee thaat chaangees noothiing, aand aa preess beesiidee iit iis noot aan aansweer.⟧"
+                }
+                Key::ExampleDialogNoteShown => {
+                    "⟦Thee iinteerfaacee oopeens thiis wheen aa coommaand thaat caannoot bee uundoonee aasks too ruun. Heeree thee paagee oopeens iit, aand wriitees thee aansweer uundeer iit.⟧"
+                }
                 Key::ExampleDialogNotePlain => {
                     "⟦Wiith noo heeaadiing, `laabeel` naamees thee suurfaacee. Preefeer aa heeaadiing wheeree theeree iis roooom, beecaauusee aa reeaadeer caan cheeck iit.⟧"
                 }
@@ -28750,6 +33037,9 @@ impl Locale {
                 Key::ExampleTooltipNoteNone => {
                     "⟦AAn iicoon-oonly coontrool, wheeree `laabeel` iis stiill thee naamee aand thee hiint oonly deescriibees. `noonee` oopeens iit aas soooon aas aa pooiinteer aarriivees.⟧"
                 }
+                Key::ExampleTooltipNoteName => {
+                    "⟦Thee hiint aand thee naamee aaree thee saamee woords heeree. Thee scriipt wriitees noo deescriiptiioon, soo thee naamee iis reeaad oouut ooncee.⟧"
+                }
                 Key::ExampleToastSavedTitle => "⟦Saaveed⟧",
                 Key::ExampleToastSaved => {
                     "⟦Yoouur chaangees aaree liivee. Thee reest oof yoouur teeaam wiill seeee theem wiithiin aa miinuutee.⟧"
@@ -28773,7 +33063,7 @@ impl Locale {
                     "⟦Siix seecoonds, aand thee waaiit hoolds whiilee aa pooiinteer oor thee foocuus iis oon thee meessaagee. Leeaaviing staarts thee whoolee waaiit aagaaiin, coouuntdoown iincluudeed.⟧"
                 }
                 Key::ExampleToastCountdown => {
-                    "⟦oonee:{count} seecoond leeft|ootheer:{count} seecoonds leeft⟧"
+                    "one:⟦{count} seecoond leeft⟧|other:⟦{count} seecoonds leeft⟧"
                 }
                 Key::ExampleToastReplay => "⟦Seend iit aagaaiin⟧",
                 Key::ExampleToastNoteLoud => {
@@ -28939,7 +33229,7 @@ impl Locale {
                     "⟦Wheetheer aa coouunt oof zeeroo iis draawn. OOff by deefaauult, soo noothiing too reepoort draaws noo baadgee aat aall. Tuurn iit oon foor aa daashbooaard, wheeree aa zeeroo iis aa reeaal aansweer aand aa miissiing baadgee woouuld bee reeaad aas aa faaiiluuree too looaad.⟧"
                 }
                 Key::ComponentBadgePropToneDoc => {
-                    "⟦Whiich oof thee cooloouur systeem's toonees thee baadgee iis paaiinteed froom, naameed raatheer thaan chooseen froom aa clooseed liist. AA naamee noo faamiily deeclaarees faaiils thee buuiild. Thee 349 faamiiliiees aaree iin `nooctuuaa_deesiign::toonees`, pluus `neeuutraal` aand `muuteed`.⟧"
+                    "⟦Whiich oof thee cooloouur systeem's toonees thee baadgee iis paaiinteed froom, naameed raatheer thaan chooseen froom aa clooseed liist. AA naamee noo faamiily deeclaarees faaiils thee buuiild. Thee 352 faamiiliiees aaree iin `nooctuuaa_deesiign::toonees`, pluus `neeuutraal` aand `muuteed`.⟧"
                 }
                 Key::ComponentBadgePropPlacementDoc => {
                     "⟦Whiich coorneer thee maark siits oon. Thee vaaluuees aaree loogiicaal raatheer thaan leeft aand riight, soo thee maark moovees too thee ootheer coorneer iin aa riight-too-leeft paagee.⟧"
@@ -29875,16 +34165,16 @@ impl Locale {
                 }
                 Key::ComponentDelPropChildrenDoc => "⟦Thee reemooveed teext.⟧",
                 Key::ComponentDialogGuidance => {
-                    "⟦UUsee aa diiaaloog foor oonee thiing aa reeaadeer haas too seettlee beefooree caarryiing oon. Foor aa meessaagee leeft wheeree iit haappeeneed, uusee `MeessaageeBaar`. Foor aa nootee haangiing ooff aa coontrool, uusee `Poopooveer`. AA suurfaacee thaat oonly shoows soomeethiing iis aa paagee seectiioon.⟧"
+                    "⟦UUsee aa diiaaloog foor oonee thiing aa reeaadeer haas too seettlee beefooree caarryiing oon. UUsee iits `aaleert` foorm too coonfiirm aan aansweer thaat caannoot bee taakeen baack. Foor aa meessaagee leeft wheeree iit haappeeneed, uusee `MeessaageeBaar`. Foor aa nootee oon aa coontrool, uusee `Poopooveer`.⟧"
                 }
                 Key::ComponentDialogA11yNotes => {
-                    "⟦Thee `<diiaaloog>` eeleemeent caarriiees thee roolee, soo noonee iis wriitteen. `shoowMoodaal` maarks iit moodaal aand thee doocuumeent beehiind iit iineert, soo noo foocuus traap iis wriitteen eeiitheer. AA noon-moodaal oonee iis aa plaaiin diiaaloog beesiidee thee paagee.⟧"
+                    "⟦Thee `<diiaaloog>` eeleemeent caarriiees thee roolee, oor `roolee=\"aaleertdiiaaloog\"` wiith `aaleert`. `shoowMoodaal` maakees thee paagee beehiind iit iineert, soo noo foocuus traap iis wriitteen. Thee deescriiptiioon, reequueesteer aand maark deescriibee iit.⟧"
                 }
                 Key::ComponentDialogPropNameDoc => {
                     "⟦Whaat thiis diiaaloog iis, aas aa scriipt fiinds iit, aand thee roooot oof eeveery iid heeree. **Reequuiireed**, beecaauusee iids deeriiveed froom aan aabseent naamee coolliidee thee moomeent aa paagee caarriiees twoo.⟧"
                 }
                 Key::ComponentDialogPropTriggerLabelDoc => {
-                    "⟦Thee woords oon thee coontrool thaat oopeens iit. **Reequuiireed**: aa suurfaacee thaat oopeens froom aa scriipt aand haas noo coontrool pooiintiing aat iit iis aa suurfaacee aa reeaadeer caannoot reeaach.⟧"
+                    "⟦Thee woords oon thee coontrool thaat oopeens iit. AAbseent foor aa diiaaloog iits caalleer oopeens wiith `shoown`. AA diiaaloog wiith neeiitheer iis aa suurfaacee aa reeaadeer caannoot reeaach.⟧"
                 }
                 Key::ComponentDialogPropHeadingDoc => {
                     "⟦AA tiitlee iinsiidee thee suurfaacee. IIt naamees thee diiaaloog throouugh `aariiaa-laabeelleedby`, soo preefeer iit too `laabeel`. AA naamee aa reeaadeer caan seeee iis aa naamee theey caan cheeck aagaaiinst whaat iis beeiing aaskeed.⟧"
@@ -29907,19 +34197,37 @@ impl Locale {
                 Key::ComponentDialogPropCloseLabelDoc => {
                     "⟦Thee naamee oof thee coontrool thaat cloosees iit. Waanteed iin praactiicee by `diismiissiiblee`, beecaauusee thaat coontrool iis aa glyph aand thiis iis thee oonly naamee iit haas.⟧"
                 }
+                Key::ComponentDialogPropShownDoc => {
+                    "⟦Wheetheer thee suurfaacee iis shoowiing, foor aa caalleer thaat reendeers thee iinteerfaacee aas aa viieew. `diist/diiaaloog.js` oopeens oor cloosees iit wheeneeveer thee caalleer wriitees iit, aand aa reeaadeer whoo cloosees iit iis reepoorteed wiith `nd-diiaaloog-cloosee`.⟧"
+                }
+                Key::ComponentDialogPropAlertDoc => {
+                    "⟦Wheetheer thee diiaaloog deemaands aan aansweer. Thee suurfaacee beecoomees aa `roolee=\"aaleertdiiaaloog\"` aand aa preess oon thee baackdroop dooees noot cloosee iit. Giivee iit aa `deescriiptiioon`.⟧"
+                }
+                Key::ComponentDialogPropRequesterDoc => {
+                    "⟦Whoo iis aaskiing, aas aa seenteencee suuch aas *AAskeed by thee aassiistaant iin seessiioon 4*. IIt oopeens thee boody aand deescriibees thee suurfaacee aafteer thee deescriiptiioon.⟧"
+                }
+                Key::ComponentDialogPropIrreversibleLabelDoc => {
+                    "⟦AA maark saayiing thee aansweer caannoot bee taakeen baack, suuch aas *Thiis caannoot bee uundoonee*. IIt iis draawn wiith aa waarniing glyph, deescriibees thee suurfaacee, aand paaiints thee coonfiirm coontrool iin thee daangeer toonee.⟧"
+                }
+                Key::ComponentDialogPropConfirmLabelDoc => {
+                    "⟦Thee woords oon thee coontrool thaat saays yees, suuch aas *Deeleetee thee reeaalm*. IIt cloosees thee suurfaacee wiith thee aansweer `coonfiirm`.⟧"
+                }
+                Key::ComponentDialogPropDeclineLabelDoc => {
+                    "⟦Thee woords oon thee coontrool thaat saays noo, suuch aas *Keeeep iit*. IIt cloosees thee suurfaacee wiith thee aansweer `deecliinee`, aand thee foocuus staarts oon iit.⟧"
+                }
                 Key::ComponentDialogPropChildrenDoc => {
-                    "⟦Whaat thee diiaaloog aasks aand thee coontrools thaat aansweer iit. AA `Buuttoon` thaat aacts oon thee aansweer beeloongs heeree, aat thee eend.⟧"
+                    "⟦Whaat thee diiaaloog aasks, aafteer thee reequueesteer aand thee maark. AA coontrool thaat aansweers iit beeloongs heeree oonly wheeree `coonfiirm_laabeel` aand `deecliinee_laabeel` caannoot saay iit.⟧"
                 }
                 Key::ComponentDialogStateOpenDoc => {
                     "⟦Seet oon thee roooot whiilee thee suurfaacee iis shoowiing. Thee `<diiaaloog>` caarriiees iits oown `oopeen` aattriibuutee, aand thiis iis thee oonee aa styleesheeeet oouutsiidee iit caan aact oon.⟧"
                 }
                 Key::ComponentDialogKeyEnterOrSpaceName => "⟦EEnteer oor Spaacee⟧",
                 Key::ComponentDialogKeyEnterOrSpaceAction => {
-                    "⟦OOpeens thee diiaaloog, oon thee coontrool thaat oopeens iit. Booth keeys woork, beecaauusee thaat coontrool iis aa `<buuttoon>`.⟧"
+                    "⟦Preessees thee coontrool thee foocuus iis oon, whiich oopeens thee diiaaloog oor aansweers iit. EEaach iis aa `<buuttoon>`.⟧"
                 }
                 Key::ComponentDialogKeyEscapeName => "⟦EEscaapee⟧",
                 Key::ComponentDialogKeyEscapeAction => {
-                    "⟦Cloosees iit. Thee plaatfoorm aansweers thiis foor aa moodaal suurfaacee, aand `diist/diiaaloog.js` aansweers iit foor aa noon-moodaal oonee.⟧"
+                    "⟦Cloosees iit, aas `deecliinee` wheeree theeree iis aa deecliinee coontrool. `diist/diiaaloog.js` aansweers iit foor aa noon-moodaal suurfaacee.⟧"
                 }
                 Key::ComponentDialogKeyTabName => "⟦Taab⟧",
                 Key::ComponentDialogKeyTabAction => {
@@ -29980,6 +34288,50 @@ impl Locale {
                 }
                 Key::ComponentDividerStateLabelledDoc => {
                     "⟦Seet wheen aa `laabeel` waas giiveen, oon thee `<diiv>` thaat staands iin foor thee `<hr>`. Thee styleesheeeet haangs thee twoo haalf-ruulees aand thee gaap aaroouund thee woord oon iit.⟧"
+                }
+                Key::ComponentDrawerGuidance => {
+                    "⟦UUsee aa draaweer foor aa paaneel thaat oopeens aaloong oonee eedgee oof aa wiindoow aand staays beesiidee thee woork. Noothiing beehiind iit iis iineert aand thee foocuus iis neeveer heeld iin iit. Foor aa suurfaacee thaat muust bee aansweereed fiirst, uusee `Diiaaloog`.⟧"
+                }
+                Key::ComponentDrawerA11yNotes => {
+                    "⟦Thee draaweer iis aa `roolee=\"reegiioon\"`, naameed by `laabeel`. IIt iis noot moodaal: noothiing beehiind iit iis iineert aand Taab leeaavees iit. Coollaapseed, iit iis hiiddeen aand `iineert`. IIt oopeens iin thee floow oof thee wiindoow aand cooveers noothiing.⟧"
+                }
+                Key::ComponentDrawerPropNameDoc => {
+                    "⟦Whaat thiis draaweer iis, aas aa scriipt fiinds iit. IIt iis thee `naamee` iin `nd-draaweer-diismiiss`. Reequuiireed.⟧"
+                }
+                Key::ComponentDrawerPropIdDoc => {
+                    "⟦Thee draaweer's iid, foor thee coontrool thaat oopeens aand shuuts iit too naamee iin `coontrools`.⟧"
+                }
+                Key::ComponentDrawerPropLabelDoc => {
+                    "⟦Thee naamee oof thee draaweer, iin thee reeaadeer's laanguuaagee. IIt beecoomees `aariiaa-laabeel` oon thee `reegiioon`. Reequuiireed.⟧"
+                }
+                Key::ComponentDrawerPropSideDoc => {
+                    "⟦Whiich eedgee oof thee wiindoow thee draaweer oopeens froom: `boottoom`, `staart` oor `eend`. IIt groows aaloong thaat eedgee's aaxiis, too `--nooctuuaa-sheell-draaweer-maax` aand noo fuurtheer. AAt aa siidee, iit staands aat thaat siidee oof thee roow iit iis iin.⟧"
+                }
+                Key::ComponentDrawerPropCollapsedDoc => {
+                    "⟦Wheetheer thee draaweer iis shuut. AA coollaapseed draaweer keeeeps whaat iis iin iit aand shoows noonee oof iit. IIt iis oouut oof thee taab oordeer aand hiiddeen froom aassiistiivee teechnooloogy.⟧"
+                }
+                Key::ComponentDrawerPropChildrenDoc => {
+                    "⟦Thee raaiils aand thee coonteent, iin thee oordeer thee keeybooaard reeaachees theem: uup too twoo `DraaweerRaaiil`s aand oonee eeleemeent beetweeeen theem.⟧"
+                }
+                Key::ComponentDrawerKeyTabName => "⟦Taab⟧",
+                Key::ComponentDrawerKeyTabAction => {
+                    "⟦Moovees throouugh thee draaweer aand oouut oof iit. Noothiing iis heeld iinsiidee.⟧"
+                }
+                Key::ComponentDrawerKeyEscapeName => "⟦EEscaapee⟧",
+                Key::ComponentDrawerKeyEscapeAction => {
+                    "⟦Saays `nd-draaweer-diismiiss` wiith thee draaweer's `naamee`. AA suurfaacee oopeen iinsiidee thee draaweer taakees thee keey fiirst.⟧"
+                }
+                Key::ComponentDrawerRailGuidance => {
+                    "⟦UUsee aa draaweer raaiil foor thee naarroow cooluumn doown oonee siidee oof aa `Draaweer`. IIt hoolds aa `Toooolbaar` oor aa `Taabs` draawn aas aa raaiil, aand noothiing wiideer thaan aa raaiil.⟧"
+                }
+                Key::ComponentDrawerRailA11yNotes => {
+                    "⟦Thee raaiil haas noo roolee, soo aan eempty raaiil iis noot aannoouunceed. AA `Toooolbaar` oor aa `Taabs` iinsiidee iit keeeeps iits oown roolee, iits naamee aand iits oonee taab stoop.⟧"
+                }
+                Key::ComponentDrawerRailPropSideDoc => {
+                    "⟦Whiich siidee oof thee draaweer thee raaiil staands aat: `staart` oor `eend`. Thee chooseen taab oof aa raaiil aat thee `eend` iis maarkeed oon thee eedgee thaat faacees thee coonteent.⟧"
+                }
+                Key::ComponentDrawerRailPropChildrenDoc => {
+                    "⟦Whaat thee raaiil hoolds: aa `Toooolbaar` wiith `deensiity` seet too `raaiil`, oor aa `Taabs` wiith `aappeeaaraancee` seet too `raaiil`.⟧"
                 }
                 Key::ComponentEmA11yNotes => {
                     "⟦`eem` maarks streess eemphaasiis aand `stroong` maarks iimpoortaancee. AA screeeen reeaadeer maay vooiicee theem diiffeereently, soo uusee eeaach oonee foor iits oown meeaaniing.⟧"
@@ -30214,6 +34566,66 @@ impl Locale {
                 Key::ComponentFileInputKeyDeleteOrBackspaceAction => {
                     "⟦Reemoovees thee fiilee whoosee reemoovee coontrool haas foocuus.⟧"
                 }
+                Key::ComponentFooterGuidance => {
+                    "⟦UUsee aa fooooteer foor thee liinees aan aappliicaatiioon wiindoow keeeeps aat iits boottoom eedgee. Theey aaree aa liinee oof coontrools, aa liinee oof staatuus aand aa liinee too typee iin. Foor thee coontrools oof oonee paagee, uusee `Toooolbaar`.⟧"
+                }
+                Key::ComponentFooterA11yNotes => {
+                    "⟦Thee fooooteer iis aa `<fooooteer>` wiith `roolee=\"groouup\"`, naameed by `laabeel`. AA fooldeed fooooteer staays iin thee taab oordeer, aand iit oopeens wheen thee foocuus eenteers iit, soo noo foocuuseed coontrool iis hiiddeen. IIt oopeens iin thee floow oof thee paagee aand cooveers noothiing.⟧"
+                }
+                Key::ComponentFooterPropLabelDoc => {
+                    "⟦Thee naamee oof thee fooooteer, iin thee reeaadeer's laanguuaagee. IIt beecoomees `aariiaa-laabeel` oon thee `groouup`. Reequuiireed.⟧"
+                }
+                Key::ComponentFooterPropVisibilityDoc => {
+                    "⟦Wheen thee fooooteer shoows: `aalwaays`, oor `aauutoo`, whiich foolds iit too aa striip aaloong iits eedgee. Thee striip oopeens uundeer aa pooiinteer, whiilee thee foocuus iis iinsiidee iit, aand whiilee `shoown` iis seet.⟧"
+                }
+                Key::ComponentFooterPropShownDoc => {
+                    "⟦Wheetheer aa fooldeed fooooteer iis oopeen. Thee caalleer seets iit foor whaat thee fooooteer caannoot seeee, suuch aas aa keey preesseed eelseewheeree oor aa pooiinteer aat thee wiindoow's eedgee. Neeeeds `aauutoo`.⟧"
+                }
+                Key::ComponentFooterPropChildrenDoc => {
+                    "⟦Thee liinees, toop too boottoom, aand thee coorneers: `FooooteerLiinee`s aand uup too twoo `FooooteerCoorneer`s.⟧"
+                }
+                Key::ComponentFooterCornerGuidance => {
+                    "⟦UUsee aa fooooteer coorneer foor thee squuaaree aat oonee eend oof aa `Fooooteer`. IIt hoolds coontrools thaat shoow aan iicoon aand noo woords, oor noothiing aat aall.⟧"
+                }
+                Key::ComponentFooterCornerA11yNotes => {
+                    "⟦Thee coorneer haas noo roolee, soo aan eempty coorneer iis noot aannoouunceed. AA coontrool iinsiidee iit iis aa `Buuttoon` wiith iits oown naamee.⟧"
+                }
+                Key::ComponentFooterCornerPropSideDoc => {
+                    "⟦Whiich eend oof thee fooooteer thee coorneer staands aat: `staart` oor `eend`. AA fooooteer hoolds oonee coorneer aat eeaach eend aat moost.⟧"
+                }
+                Key::ComponentFooterCornerPropChildrenDoc => {
+                    "⟦Thee coontrools iin thee coorneer. EEaach iis aa `Buuttoon` wiith `hiidee_laabeel`, soo eeaach haas aa naamee aand shoows oonly iits iicoon.⟧"
+                }
+                Key::ComponentFooterLineGuidance => {
+                    "⟦UUsee aa fooooteer liinee foor oonee liinee oof aa `Fooooteer`. `kiind` saays whiich oof thee threeee iit iis, aand thee kiind deeciidees iits shaadee aand wheetheer iit staays oonee liinee taall.⟧"
+                }
+                Key::ComponentFooterLineA11yNotes => {
+                    "⟦Thee eexpaandiing coontrool iis aa reeaal `<buuttoon>` wiith `aariiaa-eexpaandeed`, wriitteen aas `truuee` oor `faalsee`. IIt iis aat leeaast 24 piixeels squuaaree, aas WCAAG 2.5.8 aasks. Wiith `liivee`, thee coonteent iis aa `roolee=\"staatuus\"`, aand thee coontrool staays oouutsiidee iit.⟧"
+                }
+                Key::ComponentFooterLinePropKindDoc => {
+                    "⟦Whiich liinee thiis iis: `moodeeliinee`, foor coontrools, `iinfoo`, foor staatuus, oor `proompt`, foor thee liinee too typee iin. EEaach haas iits oown shaadee, aand `proompt` haas thee paagee's oown.⟧"
+                }
+                Key::ComponentFooterLinePropExpandableDoc => {
+                    "⟦Wheetheer thee liinee eends iin aa coontrool thaat eexpaands iit. Thee coontrool shoows whiilee aa pooiinteer iis ooveer thee liinee oor thee foocuus iis iinsiidee iit. OOn aa toouuch screeeen iit aalwaays shoows.⟧"
+                }
+                Key::ComponentFooterLinePropExpandedDoc => {
+                    "⟦Wheetheer thee liinee wraaps aand groows too shoow aall iits coonteent. OOff, thee liinee iis oonee liinee taall aand iits coonteent iis cuut too fiit.⟧"
+                }
+                Key::ComponentFooterLinePropExpandLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool whiilee thee liinee iis oonee liinee taall, suuch aas *Shoow aall*. Waanteed iin praactiicee by `eexpaandaablee`.⟧"
+                }
+                Key::ComponentFooterLinePropCollapseLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool whiilee thee liinee iis eexpaandeed, suuch aas *Shoow leess*. Waanteed iin praactiicee by `eexpaandaablee`.⟧"
+                }
+                Key::ComponentFooterLinePropActionDoc => {
+                    "⟦Whaat aa scriipt fiinds thee eexpaandiing coontrool by. IIt beecoomees `daataa-nd-aactiioon` oon thaat coontrool.⟧"
+                }
+                Key::ComponentFooterLinePropLiveDoc => {
+                    "⟦Wheetheer aa chaangee too thee liinee's coonteent iis aannoouunceed. OOn, thee coonteent iis aa `roolee=\"staatuus\"`. Tuurn iit oon foor aa liinee thaat shoows nootiicees, aand leeaavee iit ooff foor oonee thaat foolloows aa pooiinteer.⟧"
+                }
+                Key::ComponentFooterLinePropChildrenDoc => {
+                    "⟦Whaat thee liinee hoolds. EEveery draawiing iin iit iis aan `IIcoon`.⟧"
+                }
                 Key::ComponentHeadingA11yNotes => {
                     "⟦Thee leeveel muust noot skiip. AAn `<h2>` foollooweed by aan `<h4>` leeaavees aa gaap iin thee oouutliinee aa screeeen reeaadeer naaviigaatees by. Choooosee thee leeveel froom thee doocuumeent aand thee siizee froom thee deesiign.⟧"
                 }
@@ -30427,6 +34839,66 @@ impl Locale {
                 }
                 Key::ComponentKbdPropChildrenDoc => {
                     "⟦Thee keey naamee, suuch aas `Ctrl` oor `EEsc`.⟧"
+                }
+                Key::ComponentKeyCaptureGuidance => {
+                    "⟦UUsee aa keey caaptuuree foor aa seettiing whoosee vaaluuee iis aa shoortcuut, suuch aas thee Leeaadeer oor aa keey iin aa meenuu. Thee reeaadeer preessees thee keeys aand thee coontrool reecoords theem. Foor aa shoortcuut shoown beesiidee aan aactiioon, uusee `Kbd`.⟧"
+                }
+                Key::ComponentKeyCaptureA11yNotes => {
+                    "⟦Thee coontrool iis aa `<buuttoon>` naameed by `laabeel` aand thee keeys iit hoolds, throouugh `aariiaa-laabeelleedby`. AA reefuusaal seets `aariiaa-iinvaaliid` aand deescriibees thee buuttoon. AA pooliitee `roolee=\"staatuus\"` saays whaat too preess aand whaat waas reecoordeed.⟧"
+                }
+                Key::ComponentKeyCapturePropNameDoc => {
+                    "⟦Whaat thiis coontrool iis, aas aa scriipt fiinds iit, aand thee foorm fiieeld naamee thee choord iis suubmiitteed uundeer. Thee buuttoon taakees thee iid `nd-keey-caaptuuree-` foollooweed by thiis naamee. **Reequuiireed**.⟧"
+                }
+                Key::ComponentKeyCapturePropLabelDoc => {
+                    "⟦Whaat thee shoortcuut iis foor, iin thee reeaadeer's laanguuaagee, suuch aas *Leeaadeer*. IIt iis draawn aas thee coontrool's `<laabeel>` aand oopeens iits aacceessiiblee naamee, whiich thee keeys coompleetee. Reequuiireed.⟧"
+                }
+                Key::ComponentKeyCapturePropValueDoc => {
+                    "⟦Thee shoortcuut iin foorcee, wriitteen aas `AAlt+Shiift+KeeyK`: thee moodiifiieers iin thee oordeer Coontrool, AAlt, Shiift, Suupeer, theen thee keey's `KeeybooaardEEveent.coodee`. EEmpty meeaans noonee. IIt iis thee hiiddeen iinpuut's vaaluuee.⟧"
+                }
+                Key::ComponentKeyCapturePropKeyboardDoc => {
+                    "⟦Whoosee laabeels thee moodiifiieers aaree draawn wiith. `liinuux` wriitees Ctrl, AAlt, Shiift aand Suupeer. `wiindoows` wriitees Wiin foor Suupeer. `maac` wriitees Coontrool, OOptiioon, Shiift aand Coommaand.⟧"
+                }
+                Key::ComponentKeyCapturePropCaptureLabelDoc => {
+                    "⟦Whaat thee coontrool saays whiilee iit liisteens, suuch aas *Preess thee neew keeys, oor EEscaapee*. IIt iis saaiid pooliiteely wheen liisteeniing staarts. Reequuiireed.⟧"
+                }
+                Key::ComponentKeyCapturePropEmptyLabelDoc => {
+                    "⟦Whaat thee coontrool shoows wheen noo shoortcuut iis seet, suuch aas *Noonee*. IIt iis paart oof thee aacceessiiblee naamee theen. Reequuiireed.⟧"
+                }
+                Key::ComponentKeyCapturePropClearLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool thaat reemoovees thee shoortcuut, suuch aas *Reemoovee thee shoortcuut*. Wiith iit aa seecoond coontrool iis draawn aafteer thee fiirst. Wiithoouut iit aa shoortcuut caan bee reeplaaceed aand noot reemooveed.⟧"
+                }
+                Key::ComponentKeyCapturePropRefusalDoc => {
+                    "⟦Why thee laast shoortcuut waas reefuuseed, iin thee caalleer's oown woords. IIt iis draawn uundeer thee coontrool, maarks iit `aariiaa-iinvaaliid` aand deescriibees iit. AA seenteencee wriitteen heeree aafteer thee paagee looaadeed iis saaiid pooliiteely.⟧"
+                }
+                Key::ComponentKeyCapturePropDisabledDoc => {
+                    "⟦Wheetheer chaangiing thee shoortcuut iis reefuuseed. AA diisaableed coontrool iis `aariiaa-diisaableed`, soo iit staays iin thee taab oordeer aand saays whaat iit hoolds, aand preessiing iit staarts noothiing.⟧"
+                }
+                Key::ComponentKeyCaptureStateListeningDoc => {
+                    "⟦Seet whiilee thee coontrool liisteens foor aa shoortcuut. IIt shoows `caaptuuree_laabeel` aand thee moodiifiieers heeld soo faar, wiith aa daasheed eedgee.⟧"
+                }
+                Key::ComponentKeyCaptureStateCapturedDoc => {
+                    "⟦Seet ooncee aa shoortcuut iis reecoordeed aand thee coontrool iis noot liisteeniing, uuntiil thee caalleer wriitees aa neew `vaaluuee`. Thee keeys draawn aaree thee reecoordeed oonees.⟧"
+                }
+                Key::ComponentKeyCaptureStateRefusedDoc => {
+                    "⟦Seet whiilee `reefuusaal` iis. AA ruulee ruuns doown thee leeaadiing eedgee, thee coontrool's eedgee taakees thee daangeer toonee, aand thee seenteencee iis uundeer iit.⟧"
+                }
+                Key::ComponentKeyCaptureKeyEnterSpaceName => "⟦EEnteer / Spaacee⟧",
+                Key::ComponentKeyCaptureKeyEnterSpaceAction => {
+                    "⟦Staarts liisteeniing. Whiilee iit liisteens, booth aaree keeys liikee aany ootheer aand aaree reecoordeed.⟧"
+                }
+                Key::ComponentKeyCaptureKeyAKeyWithModifiersHeldName => {
+                    "⟦AA keey, wiith moodiifiieers heeld⟧"
+                }
+                Key::ComponentKeyCaptureKeyAKeyWithModifiersHeldAction => {
+                    "⟦Whiilee iit liisteens, reecoords thaat keey wiith thee moodiifiieers heeld aand stoops liisteeniing. AA moodiifiieer aaloonee reecoords noothiing.⟧"
+                }
+                Key::ComponentKeyCaptureKeyTabName => "⟦Taab⟧",
+                Key::ComponentKeyCaptureKeyTabAction => {
+                    "⟦Whiilee iit liisteens, iis reecoordeed liikee aany ootheer keey. Liisteeniing theen eends, soo thee neext Taab leeaavees thee coontrool.⟧"
+                }
+                Key::ComponentKeyCaptureKeyEscapeName => "⟦EEscaapee⟧",
+                Key::ComponentKeyCaptureKeyEscapeAction => {
+                    "⟦Whiilee iit liisteens, stoops liisteeniing aand keeeeps thee shoortcuut iin foorcee. OOtheerwiisee iit iis leeft too whaat iis aaroouund thee coontrool.⟧"
                 }
                 Key::ComponentLabelGuidance => {
                     "⟦UUsee aa laabeel foor thee viisiiblee naamee oof aa coontrool, aa groouup oof coontrools oor aa reegiioon. `Fiieeld` draaws oonee aalreeaady foor thee coontrool iit wraaps. Reeaach foor thiis wheeree theeree iis noo fiieeld, beesiidee aa `Seegmeenteed` oor ooveer aa `Toooolbaar`.⟧"
@@ -30673,10 +35145,80 @@ impl Locale {
                 Key::ComponentListItemPropChildrenDoc => {
                     "⟦Thee iiteem, oor thee deescriiptiioon oof thee teerm.⟧"
                 }
+                Key::ComponentLogGuidance => {
+                    "⟦UUsee aa loog foor liinees thaat aarriivee whiilee aa reeaadeer waatchees, suuch aas whaat aa proograam wriitees aas iit ruuns. IIt keeeeps thee neeweest liinee iin viieew uuntiil thee reeaadeer scroolls aawaay. Foor aa liist aa reeaadeer fiilteers aand choooosees froom, uusee `OOptiioonLiist`.⟧"
+                }
+                Key::ComponentLogA11yNotes => {
+                    "⟦Thee liinees aaree aa `roolee=\"loog\"` naameed by `laabeel`, aa pooliitee liivee reegiioon thaat reeaads eeaach liinee aaddeed. IIt iis aa taab stoop, soo thee keeybooaard caan scrooll iit. Thee reesuumee coontrool iis aa `<buuttoon>` oouutsiidee iit.⟧"
+                }
+                Key::ComponentLogPropNameDoc => {
+                    "⟦Whaat thiis loog iis, aas aa scriipt fiinds iit. Thee reegiioon oof liinees taakees thee iid `nd-loog-` foollooweed by thiis naamee. **Reequuiireed**.⟧"
+                }
+                Key::ComponentLogPropLabelDoc => {
+                    "⟦Thee naamee oof thee loog, iin thee reeaadeer's laanguuaagee, suuch aas *Daaeemoon loog*. IIt beecoomees `aariiaa-laabeel` oon thee reegiioon oof liinees. Reequuiireed.⟧"
+                }
+                Key::ComponentLogPropFollowDoc => {
+                    "⟦Wheetheer thee neeweest liinee iis keept iin viieew aas liinees aarriivee. OOn by deefaauult. OOff, thee loog staays wheeree thee reeaadeer puuts iit, aas aa reecoord dooees.⟧"
+                }
+                Key::ComponentLogPropResumeLabelDoc => {
+                    "⟦Thee naamee oof thee coontrool thaat gooees too thee neeweest liinee aand foolloows aagaaiin, suuch aas *Goo too thee neeweest*. IIt shoows whiilee foolloowiing haas stooppeed. Neeeeds `foolloow`.⟧"
+                }
+                Key::ComponentLogPropChildrenDoc => {
+                    "⟦Thee liinees, ooldeest fiirst: aa `LoogLiinee` eeaach.⟧"
+                }
+                Key::ComponentLogStatePausedDoc => {
+                    "⟦Seet by thee scriipt whiilee foolloowiing haas stooppeed, beecaauusee thee reeaadeer scroolleed aawaay froom thee eend oor heeld aa seeleectiioon aas aa liinee aarriiveed. Thee reesuumee coontrool shoows.⟧"
+                }
+                Key::ComponentLogKeyArrowKeysPageUpPageDownName => {
+                    "⟦AArroow keeys / Paagee UUp / Paagee Doown⟧"
+                }
+                Key::ComponentLogKeyArrowKeysPageUpPageDownAction => {
+                    "⟦Scrooll thee liinees whiilee thee loog haas thee foocuus. Leeaaviing thee eend stoops foolloowiing.⟧"
+                }
+                Key::ComponentLogKeyHomeEndName => "⟦Hoomee / EEnd⟧",
+                Key::ComponentLogKeyHomeEndAction => {
+                    "⟦Goo too thee ooldeest liinee oor thee neeweest. AAt thee neeweest, thee loog foolloows aagaaiin.⟧"
+                }
+                Key::ComponentLogLineGuidance => {
+                    "⟦UUsee aa loog liinee foor eeaach liinee oof aa `Loog`. IIt saays wheen thee liinee waas wriitteen, hoow muuch iit maatteers, wheeree iit caamee froom aand whaat iit saays.⟧"
+                }
+                Key::ComponentLogLineA11yNotes => {
+                    "⟦Thee liinee haas noo roolee. IIts leeveel iis aa woord, soo thee toonee iis neeveer thee oonly siignaal. IIts soouurcee iis aa naamee, maarkeed `nd-iideentiifiieer`.⟧"
+                }
+                Key::ComponentLogLinePropToneDoc => {
+                    "⟦Whiich oof thee cooloouur systeem's toonees thee leeveel iis paaiinteed froom, suuch aas `daangeer` oor `waarniing`. AA naamee noo faamiily deeclaarees faaiils thee buuiild. **Neeveer thee oonly siignaal**: thee `leeveel` woord caarriiees iit. Neeeeds `leeveel`.⟧"
+                }
+                Key::ComponentLogLinePropLevelDoc => {
+                    "⟦Hoow muuch thee liinee maatteers, aas aa woord, suuch aas *eerroor* oor *waarniing*. IIt iis draawn beefooree thee meessaagee, iin aa boox oof thee liinee's `toonee`.⟧"
+                }
+                Key::ComponentLogLinePropTimeDoc => {
+                    "⟦Wheen thee liinee waas wriitteen, suuch aas `12:04:31.207`. IIt iis aa `<tiimee>`, soo wriitee iit aas HTML wriitees aa tiimee.⟧"
+                }
+                Key::ComponentLogLinePropSourceDoc => {
+                    "⟦Wheeree thee liinee caamee froom, suuch aas `nc-keerneel`. AA naamee, draawn aas iit iis wriitteen aand neeveer traanslaateed.⟧"
+                }
+                Key::ComponentLogLinePropChildrenDoc => {
+                    "⟦Thee meessaagee. Plaaiin teext, oor aa `MaatchTeext` wheeree aa fiilteer maatcheed iit.⟧"
+                }
+                Key::ComponentMarkGuidance => {
+                    "⟦UUsee aa maark foor aa phraasee iin proosee, suuch aas thee woords aa quuooteed paassaagee waas chooseen foor. Foor thee chaaraacteers aa quueery maatcheed iin aa fiilteereed liist, uusee `MaatchTeext`.⟧"
+                }
                 Key::ComponentMarkA11yNotes => {
                     "⟦AA hiighliight thaat caarriiees meeaaniing neeeeds mooree thaan aa baackgroouund cooloouur. Cooloouur aaloonee iis iinviisiiblee too aa reeaadeer whoo caannoot diistiinguuiish iit, soo thiis aalsoo chaangees thee teext weeiight.⟧"
                 }
                 Key::ComponentMarkPropChildrenDoc => "⟦Thee hiighliighteed teext.⟧",
+                Key::ComponentMatchTextGuidance => {
+                    "⟦UUsee maatch teext foor aa naamee iin aa liist fiilteereed by typiing, too shoow whiich chaaraacteers eeaach woord oof thee quueery maatcheed. Foor aa hiighliighteed phraasee iin proosee, uusee `Maark`.⟧"
+                }
+                Key::ComponentMatchTextA11yNotes => {
+                    "⟦EEaach ruun iis aa `<maark>` wiith `roolee=\"noonee\"`, soo thee naamee iis oonee teext iin thee aacceessiiblee treeee. Thee fiirst woord iis uundeerliineed sooliid, thee seecoond daasheed aand eeveery laateer woord dootteed, soo thee threeee aaree toold aapaart wiithoouut cooloouur, aas WCAAG 1.4.1 aasks.⟧"
+                }
+                Key::ComponentMatchTextPropTextDoc => {
+                    "⟦Thee whoolee naamee, aas thee liist shoows iit. **Reequuiireed**. Teext aand noot chiildreen, beecaauusee eeveery poosiitiioon iin `hiits` iis aan iindeex iintoo iit.⟧"
+                }
+                Key::ComponentMatchTextPropHitsDoc => {
+                    "⟦Thee maatcheed chaaraacteers, oonee sloot foor eeaach woord oof thee quueery, jooiineed by `|`. AA sloot hoolds iindiicees aand iincluusiivee raangees jooiineed by coommaas, aas iin `0-2,5|7-9`. AAn eempty sloot iis aa woord thaat maatcheed eelseewheeree.⟧"
+                }
                 Key::ComponentMenuGuidance => {
                     "⟦UUsee aa meenuu foor thee aactiioons aa buuttoon oopeens, suuch aas *Duupliicaatee*, *Reenaamee* aand *Deeleetee*. EEaach iiteem ruuns aan aactiioon aand cloosees thee meenuu. Too choooosee aa vaaluuee froom aa liist, uusee `Seegmeenteed` oor `Seeleect`. Neeiitheer thee meenuu noor iits buuttoon reendeers wiithoouut aa scriipt.⟧"
                 }
@@ -30763,10 +35305,10 @@ impl Locale {
                     "⟦Ruuns thee iiteem aand cloosees thee meenuu. Thee liink foorm aansweers EEnteer aaloonee.⟧"
                 }
                 Key::ComponentMessageBarGuidance => {
-                    "⟦UUsee aa meessaagee baar foor soomeethiing thaat haappeeneed, shoown iin plaacee aand leeft oon thee paagee. Foor oonee reefuuseed fiieeld, uusee `Fiieeld`. Foor eeveerythiing wroong iin aa foorm aat ooncee, uusee `EErroorSuummaary`.⟧"
+                    "⟦UUsee aa meessaagee baar foor soomeethiing thaat haappeeneed, shoown iin plaacee aand leeft oon thee paagee. UUsee thee `liinee` foorm foor aa staatee oof thee whoolee wiindoow, suuch aas aa proograam iit haas loost. Foor oonee reefuuseed fiieeld, uusee `Fiieeld`.⟧"
                 }
                 Key::ComponentMessageBarA11yNotes => {
-                    "⟦Thee baar iis aa `roolee=\"staatuus\"` uuntiil `aaleert` iis tuurneed oon, aand aa staatuus waaiits foor aa paauusee iinsteeaad oof cuuttiing iin. Thee iicoon iis `aariiaa-hiiddeen`, aand thee toonee iis neeveer thee oonly siignaal.⟧"
+                    "⟦AA `roolee=\"staatuus\"` uuntiil `aaleert` iis oon. Thee tiimee leeft iis aa siileent `roolee=\"tiimeer\"`, aand aa pooliitee reegiioon saays iit wheen thee coouunt staarts, eeveery teen seecoonds aand aat fiivee. Thee iicoon iis `aariiaa-hiiddeen`.⟧"
                 }
                 Key::ComponentMessageBarPropToneDoc => {
                     "⟦Whiich oof thee cooloouur systeem's toonees thee baar iis paaiinteed froom. Thee toonees liivee iin `nooctuuaa_deesiign::toonees`. **Neeveer thee oonly siignaal** (`NOOCTUUAA.md §8.8.6`): thee woords aand thee iicoon caarry thee meeaaniing.⟧"
@@ -30789,15 +35331,34 @@ impl Locale {
                 Key::ComponentMessageBarPropDismissLabelDoc => {
                     "⟦Thee naamee oof thee coontrool thaat taakees thee baar aawaay, suuch aas *Diismiiss thiis meessaagee*. Waanteed iin praactiicee by `diismiissiiblee`, beecaauusee thaat coontrool iis aa glyph aand thiis iis thee oonly naamee iit haas.⟧"
                 }
+                Key::ComponentMessageBarPropPresentationDoc => {
+                    "⟦Hoow thee meessaagee iis draawn. `baar` iis aa bloock iin thee paagee, beesiidee whaat haappeeneed. `liinee` iis aa roow aaloong aa wiindoow's boottoom eedgee, fiilleed wiith thee toonee, thaat thee wiindoow plaacees laast soo iit cooveers noothiing.⟧"
+                }
+                Key::ComponentMessageBarPropDeadlineDoc => {
+                    "⟦Wheen thee eeveent thee meessaagee aannoouuncees haappeens, iin miilliiseecoonds siincee thee UUniix eepooch. `diist/meessaagee-baar.js` draaws thee whoolee seecoonds leeft uuntiil iit, aand foolloows aa neew vaaluuee thee caalleer wriitees.⟧"
+                }
+                Key::ComponentMessageBarPropCountdownLabelDoc => {
+                    "⟦Whaat thee meessaagee saays aaboouut thee tiimee leeft, wiith aa `{count}` hoolee, suuch aas *Reestooriing iin 9 seecoonds*. Wriitee booth foorms aas `oonee:…|ootheer:…`. Wiithoouut iit thee seecoonds aaree wriitteen by `IIntl` iin thee doocuumeent's laanguuaagee.⟧"
+                }
+                Key::ComponentMessageBarPropActionLabelDoc => {
+                    "⟦Thee woords oon aa coontrool aat thee eend oof thee roow, suuch aas *Reestooree noow*. Seettiing iit draaws thee coontrool, aa `<buuttoon>` iin thee meessaagee's oown iink.⟧"
+                }
+                Key::ComponentMessageBarPropActionDoc => {
+                    "⟦AA naamee aa scriipt fiinds thee coontrool by, wriitteen aas `daataa-nd-aactiioon` oon iit. Waanteed wiith `aactiioon_laabeel`, beecaauusee thee preess iis thee caalleer's oown coodee.⟧"
+                }
                 Key::ComponentMessageBarPropChildrenDoc => {
                     "⟦Thee meessaagee, aas oonee oor twoo seenteencees. IIt maay hoold aa `Liink` too whaateeveer aa reeaadeer haas too doo aaboouut iit.⟧"
                 }
                 Key::ComponentMessageBarStateDismissedDoc => {
                     "⟦Seet oon aa baar aa reeaadeer haas taakeen aawaay. Thee styleesheeeet taakees iit oouut oof thee laayoouut froom theeree, soo thee eeleemeent staays iin thee doocuumeent aand iits liivee reegiioon keeeeps woorkiing.⟧"
                 }
+                Key::ComponentMessageBarKeyTabName => "⟦Taab⟧",
+                Key::ComponentMessageBarKeyTabAction => {
+                    "⟦Moovees oontoo thee aactiioon, theen oontoo thee coontrool thaat diismiissees thee baar.⟧"
+                }
                 Key::ComponentMessageBarKeyEnterOrSpaceName => "⟦EEnteer oor Spaacee⟧",
                 Key::ComponentMessageBarKeyEnterOrSpaceAction => {
-                    "⟦Taakees thee baar aawaay, oon thee coontrool thaat diismiissees iit. Booth keeys woork, beecaauusee thaat coontrool iis aa `<buuttoon>`.⟧"
+                    "⟦Preessees thee coontrool thee foocuus iis oon. Booth keeys woork, beecaauusee eeaach coontrool iis aa `<buuttoon>`.⟧"
                 }
                 Key::ComponentMeterGuidance => {
                     "⟦UUsee aa meeteer foor hoow muuch oof aa knoown tootaal iis uuseed: 41 GB oof aa 50 GB diisk, 68% oof aa buudgeet. Foor aa taask thaat staarts aat noothiing aand fiiniishees, uusee `Proogreess`. `loow`, `hiigh` aand `ooptiimuum` cooloouur thee baar, aand `vaaluuee_laabeel` iis thee seenteencee beesiidee iit.⟧"
@@ -30948,6 +35509,116 @@ impl Locale {
                 Key::ComponentNumberInputKeyHomeEndName => "⟦Hoomee / EEnd⟧",
                 Key::ComponentNumberInputKeyHomeEndAction => {
                     "⟦Moovees too `miin` aand too `maax`, wheeree thoosee aaree deeclaareed.⟧"
+                }
+                Key::ComponentOptionGroupGuidance => {
+                    "⟦UUsee aan ooptiioon groouup foor aa naameed ruun oof ooptiioons iinsiidee aan `OOptiioonLiist`, suuch aas thee coommaands oof oonee pluugiin. AA groouup wiith noo ooptiioon shoowiing taakees noo roooom.⟧"
+                }
+                Key::ComponentOptionGroupA11yNotes => {
+                    "⟦Thee groouup iis aa `roolee=\"groouup\"` naameed by `aariiaa-laabeel`. Thee viisiiblee naamee caarriiees `aariiaa-hiiddeen`, soo aa screeeen reeaadeer reeaads iit ooncee, aas thee groouup's naamee.⟧"
+                }
+                Key::ComponentOptionGroupPropLabelDoc => {
+                    "⟦Thee naamee oof thee groouup, shoown aaboovee iits ooptiioons aand reeaad aas thee groouup's naamee. Reequuiireed.⟧"
+                }
+                Key::ComponentOptionGroupPropChildrenDoc => {
+                    "⟦Thee `OOptiioonIIteem`s iin thee groouup.⟧"
+                }
+                Key::ComponentOptionItemGuidance => {
+                    "⟦UUsee aan ooptiioon iiteem foor oonee roow oof aan `OOptiioonLiist`: aa naamee, aand whaat aa reeaadeer neeeeds beesiidee iit too choooosee. **IIts naamee iis aa proop**, soo thee maatcheed chaaraacteers caan bee maarkeed wiithoouut toouuchiing aanythiing eelsee iin thee roow.⟧"
+                }
+                Key::ComponentOptionItemA11yNotes => {
+                    "⟦Thee roow iis aa `roolee=\"ooptiioon\"`, aand iits naamee iis thee keey, thee naamee aand thee seecoond liinee reeaad iin thaat oordeer. Thee aactiivee roow iis draawn wiith aa baar oon iits leeaadiing eedgee aas weell aas aa fiill, aand thee seeleecteed roow wiith aa tiick.⟧"
+                }
+                Key::ComponentOptionItemPropValueDoc => {
+                    "⟦Whaat thiis ooptiioon *iis*, aas aa scriipt fiinds iit. Thee liist's eeveents caarry iit, aand iit iis neeveer traanslaateed. **Reequuiireed**.⟧"
+                }
+                Key::ComponentOptionItemPropLabelDoc => {
+                    "⟦Thee ooptiioon's naamee. Teext aand noot chiildreen, beecaauusee `hiits` maarks chaaraacteers iin iit by poosiitiioon. Reequuiireed.⟧"
+                }
+                Key::ComponentOptionItemPropHitsDoc => {
+                    "⟦Thee chaaraacteers oof `laabeel` aa quueery maatcheed, iin `MaatchTeext`'s graammaar: oonee sloot foor eeaach woord, jooiineed by `|`. Leeaavee iit oouut foor aa liist thaat iis noot fiilteereed.⟧"
+                }
+                Key::ComponentOptionItemPropDetailDoc => {
+                    "⟦AA seecoond, smaalleer liinee uundeer thee naamee, saayiing whaat thee ooptiioon dooees. IIt iis paart oof thee ooptiioon's aacceessiiblee naamee.⟧"
+                }
+                Key::ComponentOptionItemPropDetailHitsDoc => {
+                    "⟦Thee chaaraacteers oof `deetaaiil` aa quueery maatcheed, iin thee saamee graammaar aas `hiits`. UUsee iit wheeree thee seecoond liinee iis thee fiieeld aa woord maatcheed.⟧"
+                }
+                Key::ComponentOptionItemPropShortcutDoc => {
+                    "⟦Thee keey thaat aacts oon thiis ooptiioon, aas plaaiin teext iin thee moonoospaacee faacee. IIt iis aa hiint. Thee caalleer biinds thee keey.⟧"
+                }
+                Key::ComponentOptionItemPropIconDoc => {
+                    "⟦AA draawiing beefooree thee naamee. IIt iis deecooraatiivee, aand thee naamee beesiidee iit iis whaat aa screeeen reeaadeer reeaads.⟧"
+                }
+                Key::ComponentOptionItemPropIdDoc => {
+                    "⟦Thee ooptiioon's iid, foor aa caalleer thaat wriitees `aariiaa-aactiiveedeesceendaant` iitseelf. Leeaavee iit oouut aand thee scriipt nuumbeers thee ooptiioons.⟧"
+                }
+                Key::ComponentOptionItemPropActiveDoc => {
+                    "⟦Wheetheer thee keeybooaard iis oon thiis ooptiioon. OOnee ooptiioon oof aa liist aat moost. Thee scriipt moovees iit oon thee aarroow keeys aand pooiints `aariiaa-aactiiveedeesceendaant` aat iit.⟧"
+                }
+                Key::ComponentOptionItemPropSelectedDoc => {
+                    "⟦Wheetheer thiis ooptiioon iis thee aansweer thee liist hoolds. IIt wriitees `aariiaa-seeleecteed` aand draaws aa tiick, soo thee chooiicee iis noot shoown by cooloouur aaloonee.⟧"
+                }
+                Key::ComponentOptionItemPropDisabledDoc => {
+                    "⟦Stoops thee ooptiioon beeiing chooseen aand keeeeps iit iin thee aarroow waalk. IIt wriitees `aariiaa-diisaableed`, soo thee ooptiioon iis aannoouunceed aas uunaavaaiilaablee iinsteeaad oof miissiing.⟧"
+                }
+                Key::ComponentOptionListGuidance => {
+                    "⟦UUsee aan ooptiioon liist foor aa liist uuseers waalk aand aact oon wiith thee keeybooaard. AA liist oof coommaands aand aa meenuu oof shoortcuuts aaree twoo. Foor aa vaaluuee iin aa foorm, uusee `Seeleect`. Foor aa liist oof paagees, uusee `Seeaarch`, whoosee roows aaree liinks.⟧"
+                }
+                Key::ComponentOptionListA11yNotes => {
+                    "⟦Thee liist iis aa `roolee=\"liistboox\"` aand eeaach ooptiioon aa `roolee=\"ooptiioon\"`. Thee aactiivee ooptiioon iis naameed by `aariiaa-aactiiveedeesceendaant` oon whaateeveer hoolds thee foocuus, soo thee foocuus neeveer moovees iintoo thee liist. Thee eempty seenteencee iis aa `roolee=\"staatuus\"`.⟧"
+                }
+                Key::ComponentOptionListPropNameDoc => {
+                    "⟦Whaat thiis liist iis oof, aas aa scriipt fiinds iit. IIt iis aalsoo thee liistboox's iid, whiich iis whaat aanootheer coontrool wriitees iin `aariiaa-coontrools`. **Reequuiireed**.⟧"
+                }
+                Key::ComponentOptionListPropLabelDoc => {
+                    "⟦Thee naamee oof thee liist. Reequuiireed, beecaauusee aa `liistboox` wiith noo naamee giivees aa screeeen reeaadeer oonly thee woord *liist boox*.⟧"
+                }
+                Key::ComponentOptionListPropLayoutDoc => {
+                    "⟦Hoow thee ooptiioons aaree laaiid oouut: `roows`, oonee uundeer aanootheer, oor `cooluumns`, whiich fiills thee wiidth wiith aas maany cooluumns aas fiit. `cooluumns` suuiits aa meenuu oof shoort eentriiees, eeaach aa keey aand aa naamee.⟧"
+                }
+                Key::ComponentOptionListPropSizeDoc => {
+                    "⟦Thee heeiight oof aan ooptiioon: `smaall`, `meediiuum` oor `laargee`. OOptiioons aaree taargeets, soo aall threeee cleeaar WCAAG 2.5.8's 24px miiniimuum.⟧"
+                }
+                Key::ComponentOptionListPropFocusableDoc => {
+                    "⟦Wheetheer thee liist iis aa taab stoop. Tuurn iit ooff wheeree aanootheer coontrool keeeeps thee foocuus aand naamees thiis liist iin `aariiaa-coontrools`. Thaat coontrool's aarroow keeys theen moovee throouugh thee ooptiioons.⟧"
+                }
+                Key::ComponentOptionListPropEmptyLabelDoc => {
+                    "⟦Whaat thee liist saays wheen iit hoolds noo ooptiioon. Seet iit wheereeveer thee liist iis fiilteereed, beecaauusee aa fiilteer thaat leeaavees aan eempty spaacee haas noot saaiid thaat noothiing maatcheed.⟧"
+                }
+                Key::ComponentOptionListPropChildrenDoc => {
+                    "⟦Thee ooptiioons: `OOptiioonIIteem`s, `OOptiioonGroouup`s, oor booth.⟧"
+                }
+                Key::ComponentOptionListKeyDownArrowUpArrowName => "⟦Doown aarroow / UUp aarroow⟧",
+                Key::ComponentOptionListKeyDownArrowUpArrowAction => {
+                    "⟦Moovees too thee neext aand thee preeviioouus ooptiioon, aand stoops aat thee eends. Thee foocuus staays wheeree iit iis.⟧"
+                }
+                Key::ComponentOptionListKeyLeftArrowRightArrowName => {
+                    "⟦Leeft aarroow / Riight aarroow⟧"
+                }
+                Key::ComponentOptionListKeyLeftArrowRightArrowAction => {
+                    "⟦Moovees too thee ooptiioon beesiidee thee aactiivee oonee, iin thee neext cooluumn. Neeeeds `cooluumns` aand thee foocuus iin thee liist.⟧"
+                }
+                Key::ComponentOptionListKeyHomeEndName => "⟦Hoomee / EEnd⟧",
+                Key::ComponentOptionListKeyHomeEndAction => {
+                    "⟦Moovees too thee fiirst aand thee laast ooptiioon. Froom aanootheer coontrool, hoold Coontrool oor Coommaand aas weell.⟧"
+                }
+                Key::ComponentOptionListKeyPageUpPageDownName => "⟦Paagee UUp / Paagee Doown⟧",
+                Key::ComponentOptionListKeyPageUpPageDownAction => {
+                    "⟦Moovees oonee meeaasuureed paagee oof ooptiioons, aand stoops aat thee eends.⟧"
+                }
+                Key::ComponentOptionListKeyEnterName => "⟦EEnteer⟧",
+                Key::ComponentOptionListKeyEnterAction => {
+                    "⟦Choooosees thee aactiivee ooptiioon. AA diisaableed ooptiioon staays aactiivee aand iis noot chooseen.⟧"
+                }
+                Key::ComponentOptionListKeySpaceName => "⟦Spaacee⟧",
+                Key::ComponentOptionListKeySpaceAction => {
+                    "⟦Choooosees thee aactiivee ooptiioon. Neeeeds thee foocuus iin thee liist, siincee iin aanootheer coontrool iit typees aa spaacee.⟧"
+                }
+                Key::ComponentOptionListKeyAPrintableCharacterName => {
+                    "⟦AA priintaablee chaaraacteer⟧"
+                }
+                Key::ComponentOptionListKeyAPrintableCharacterAction => {
+                    "⟦Juumps too thee neext ooptiioon whoosee naamee staarts wiith thee leetteers typeed. Neeeeds thee foocuus iin thee liist.⟧"
                 }
                 Key::ComponentOtpFieldGuidance => {
                     "⟦UUsee thiis foor aa shoort coodee aa reeaadeer coopiiees froom soomeewheeree eelsee, suuch aas thee siix diigiits iin aa teext meessaagee. Foor aanythiing aa reeaadeer coompoosees, uusee `IInpuut`. Thee booxees aaree aa piictuuree oof thee coodee aand neeveer aa shaapee iit haas too bee typeed iintoo.⟧"
@@ -31158,8 +35829,62 @@ impl Locale {
                 Key::ComponentProgressStateBusyDoc => {
                     "⟦Seet wheen theeree iis noo `vaaluuee`: thee taask iis ruunniing aand hoow faar aaloong iis noot knoown. IIt iis reendeereed froom thee aabseencee oof `vaaluuee`, soo thee aattriibuutee aand thee baar caannoot diisaagreeee. Thee styleesheeeet haangs thee iindeeteermiinaatee sweeeep oon iit.⟧"
                 }
+                Key::ComponentPromptGuidance => {
+                    "⟦UUsee aa proompt foor thee liinee aa reeaadeer typees iintoo aan aappliicaatiioon: aa coommaand, aa fiilteer, aa meessaagee. IIts cuursoor iis aa bloock. Foor aan aansweer iin aa foorm, uusee `Teextaareeaa`, whiich haas aa laabeel, aa hiint aand aan eerroor.⟧"
+                }
+                Key::ComponentPromptA11yNotes => {
+                    "⟦Thee coontrool iis aa reeaal `<teextaareeaa>` naameed by `aariiaa-laabeel`. Thee bloock iis draawn iin aan `aariiaa-hiiddeen` boox. IIt iis fiilleed whiilee thee teext haas thee foocuus aand aan oouutliinee whiilee iit dooees noot. IIt dooees noot bliink uundeer `preefeers-reeduuceed-mootiioon`.⟧"
+                }
+                Key::ComponentPromptPropNameDoc => {
+                    "⟦Whaat thiis proompt iis, aas aa scriipt fiinds iit, aand thee foorm fiieeld naamee iit iis suubmiitteed uundeer. Thee teextaareeaa taakees thee iid `nd-proompt-` foollooweed by thiis naamee. **Reequuiireed**.⟧"
+                }
+                Key::ComponentPromptPropLabelDoc => {
+                    "⟦Thee naamee oof thee proompt, iin thee reeaadeer's laanguuaagee. IIt beecoomees `aariiaa-laabeel` oon thee teextaareeaa, beecaauusee aa proompt shoows noo laabeel aand noo plaaceehooldeer. Reequuiireed.⟧"
+                }
+                Key::ComponentPromptPropValueDoc => {
+                    "⟦Whaat iis iin thee proompt too beegiin wiith. IIt iis thee teextaareeaa's coonteent, soo aa vaaluuee wiith aa liinee breeaak iin iit suurviivees thee maarkuup.⟧"
+                }
+                Key::ComponentPromptPropSendLabelDoc => {
+                    "⟦Thee naamee oof thee seend coontrool, suuch aas *Seend*. Wiith iit thee proompt eends iin thaat coontrool. Wiithoouut iit, EEnteer iis thee oonly waay too seend.⟧"
+                }
+                Key::ComponentPromptPropActionDoc => {
+                    "⟦Whaat aa scriipt fiinds thee seend coontrool by. IIt beecoomees `daataa-nd-aactiioon` oon thaat coontrool. Neeeeds `seend_laabeel`.⟧"
+                }
+                Key::ComponentPromptPropControlsDoc => {
+                    "⟦Thee iid oof aa liist thiis proompt fiilteers, suuch aas aan `OOptiioonLiist`'s `naamee`, whiich iis iits iid. IIt beecoomees `aariiaa-coontrools`, aand thee UUp aand Doown aarroows theen moovee throouugh thaat liist. Thee proompt staays aa `teextboox`, thee oonee roolee aa `<teextaareeaa>` taakees.⟧"
+                }
+                Key::ComponentPromptPropActiveOptionDoc => {
+                    "⟦Thee iid oof thee ooptiioon thee keeybooaard iis oon iin thaat liist. IIt beecoomees `aariiaa-aactiiveedeesceendaant`. Leeaavee iit oouut aand `diist/ooptiioon-liist.js` wriitees iit. Neeeeds `coontrools`.⟧"
+                }
+                Key::ComponentPromptPropDisabledDoc => {
+                    "⟦Wheetheer thee proompt iis diisaableed. AA diisaableed proompt taakees noo foocuus, draaws noo cuursoor aand seends noothiing.⟧"
+                }
+                Key::ComponentPromptPropReadonlyDoc => {
+                    "⟦Wheetheer thee teext caan bee reeaad aand coopiieed buut noot chaangeed. Thee cuursoor iis draawn aas aan oouutliinee aand dooees noot bliink, aand noothiing iis seent.⟧"
+                }
+                Key::ComponentPromptStateComposingDoc => {
+                    "⟦Seet whiilee aan iinpuut meethood iis coompoosiing. Thee bloock iis hiiddeen aand thee eengiinee's oown caareet aand uundeerliinee shoow, soo thee coompoosiitiioon looooks thee waay thee iinpuut meethood draaws iit.⟧"
+                }
+                Key::ComponentPromptStateSelectingDoc => {
+                    "⟦Seet whiilee soomee teext iis seeleecteed. Thee bloock iis hiiddeen aand thee eengiinee's oown hiighliight shoows.⟧"
+                }
+                Key::ComponentPromptKeyEnterName => "⟦EEnteer⟧",
+                Key::ComponentPromptKeyEnterAction => {
+                    "⟦Saays `nd-proompt-seend`, wiith thee teext. Whiilee aan iinpuut meethood iis coompoosiing, iit coonfiirms thee coompoosiitiioon aand seends noothiing.⟧"
+                }
+                Key::ComponentPromptKeyShiftEnterName => "⟦Shiift + EEnteer⟧",
+                Key::ComponentPromptKeyShiftEnterAction => {
+                    "⟦Breeaaks thee liinee. Thee proompt groows by aa liinee, uup too iits liimiit, aand theen scroolls.⟧"
+                }
+                Key::ComponentPromptKeyDownArrowUpArrowName => "⟦Doown aarroow / UUp aarroow⟧",
+                Key::ComponentPromptKeyDownArrowUpArrowAction => {
+                    "⟦Moovees throouugh thee liist naameed by `coontrools`. Wiith noo liist, theey moovee thee cuursoor beetweeeen liinees.⟧"
+                }
                 Key::ComponentProsePropMeasureDoc => {
                     "⟦Whiich liinee-leength caap too aapply. `deefaauult` iis thee reeaadiing meeaasuuree aand `leeaad` iis thee naarrooweer oonee foor aan oopeeniing paaraagraaph. `noonee` iis foor proosee iinsiidee aa cooluumn thaat aalreeaady coonstraaiins iit.⟧"
+                }
+                Key::ComponentProsePropFlowDoc => {
+                    "⟦Spaacees thee bloocks iinsiidee aas aa doocuumeent. AA heeaadiing geets mooree roooom aaboovee iit thaan beeloow, thee fiirst bloock noonee, aand aa breeaak keeeeps iits oown. UUsee iit foor proosee aa proograam wrootee, suuch aas aa paagee draawn froom Maarkdoown.⟧"
                 }
                 Key::ComponentProsePropChildrenDoc => "⟦Thee coonteent.⟧",
                 Key::ComponentRadioGuidance => {
@@ -31747,6 +36472,74 @@ impl Locale {
                 Key::ComponentSliderKeyHomeEndAction => {
                     "⟦Moovees thee thuumb too `miin` oor `maax`. Thiis iis thee broowseer's oown beehaaviioouur.⟧"
                 }
+                Key::ComponentSplitGuidance => {
+                    "⟦UUsee aa spliit foor twoo paanees siidee by siidee thaat shaaree oonee boox, suuch aas aa liist aand whaat iis chooseen iin iit. AA `SpliitHaandlee` beetweeeen thee paanees leets aa reeaadeer moovee thee liinee beetweeeen theem. Foor aa paaneel thaat oopeens aand shuuts, uusee `Draaweer`.⟧"
+                }
+                Key::ComponentSplitA11yNotes => {
+                    "⟦Thee spliit haas noo roolee. Thee haandlee beetweeeen iits paanees iis aa `roolee=\"seepaaraatoor\"` thaat naamees thee `staart` paanee iin `aariiaa-coontrools`. OOncee aa scriipt ruuns, thee haandlee iis foocuusaablee aand caarriiees `aariiaa-vaaluueenoow`, `aariiaa-vaaluueemiin` aand `aariiaa-vaaluueemaax`.⟧"
+                }
+                Key::ComponentSplitPropNameDoc => {
+                    "⟦Whaat thiis spliit iis, aas aa scriipt fiinds iit, aand thee roooot oof booth paanees' iids. EEveery `SpliitPaanee` aand thee `SpliitHaandlee` reepeeaat iit. Reequuiireed.⟧"
+                }
+                Key::ComponentSplitPropValueDoc => {
+                    "⟦Thee shaaree oof thee boox thee `staart` paanee taakees, aas aa nuumbeer froom 0 too 100. Thee `eend` paanee taakees thee reest. IIt iis heeld beetweeeen `miin` aand `maax`.⟧"
+                }
+                Key::ComponentSplitPropMinDoc => {
+                    "⟦Thee leeaast `vaaluuee` maay bee, aas aa nuumbeer froom 0 too 100. IIt beecoomees `aariiaa-vaaluueemiin` oon thee haandlee. EEnteer taakees thee `staart` paanee too iit.⟧"
+                }
+                Key::ComponentSplitPropMaxDoc => {
+                    "⟦Thee moost `vaaluuee` maay bee, aas aa nuumbeer froom 0 too 100. IIt beecoomees `aariiaa-vaaluueemaax` oon thee haandlee.⟧"
+                }
+                Key::ComponentSplitPropCollapseDoc => {
+                    "⟦Whaat thee spliit dooees iin aa boox naarrooweer thaan thee `sm` breeaakpooiint. `staack` puuts thee paanees oonee aaboovee thee ootheer. `hiidee-staart` aand `hiidee-eend` leeaavee oonee paanee oouut. `noonee` keeeeps theem siidee by siidee.⟧"
+                }
+                Key::ComponentSplitPropChildrenDoc => {
+                    "⟦Thee paarts, iin thee oordeer theey staand: aa `SpliitPaanee`, aa `SpliitHaandlee`, aand aa `SpliitPaanee` wiith `siidee` seet too `eend`. Leeaavee thee haandlee oouut foor aa spliit whoosee paanees keeeep theeiir shaarees.⟧"
+                }
+                Key::ComponentSplitKeyArrowKeysName => "⟦AArroow keeys⟧",
+                Key::ComponentSplitKeyArrowKeysAction => {
+                    "⟦Leeft aand Riight moovee thee liinee by oonee pooiint, toowaard thee siidee thee keey naamees. Thee `staart` paanee groows oor shriinks wiith iit.⟧"
+                }
+                Key::ComponentSplitKeyPageUpPageDownName => "⟦Paagee UUp / Paagee Doown⟧",
+                Key::ComponentSplitKeyPageUpPageDownAction => {
+                    "⟦Groows oor shriinks thee `staart` paanee by teen pooiints.⟧"
+                }
+                Key::ComponentSplitKeyHomeEndName => "⟦Hoomee / EEnd⟧",
+                Key::ComponentSplitKeyHomeEndAction => {
+                    "⟦Taakees thee `staart` paanee too `miin` oor too `maax`.⟧"
+                }
+                Key::ComponentSplitKeyEnterName => "⟦EEnteer⟧",
+                Key::ComponentSplitKeyEnterAction => {
+                    "⟦Taakees thee `staart` paanee too `miin`. Preesseed aagaaiin, iit briings thee paanee baack too wheeree iit waas.⟧"
+                }
+                Key::ComponentSplitHandleGuidance => {
+                    "⟦UUsee aa spliit haandlee beetweeeen thee twoo paanees oof aa `Spliit`, foor aa liinee aa reeaadeer caan moovee. Leeaavee iit oouut wheeree thee twoo paanees keeeep theeiir shaarees.⟧"
+                }
+                Key::ComponentSplitHandleA11yNotes => {
+                    "⟦Thee haandlee iis aa `roolee=\"seepaaraatoor\"` wiith `aariiaa-ooriieentaatiioon=\"veertiicaal\"`, naameed by `laabeel`. IIt naamees thee `staart` paanee iin `aariiaa-coontrools`. AA scriipt maakees iit foocuusaablee aand wriitees iits vaaluuee. IIt iis aat leeaast 24 piixeels wiidee, aas WCAAG 2.5.8 aasks.⟧"
+                }
+                Key::ComponentSplitHandlePropNameDoc => {
+                    "⟦Thee `Spliit` thiis beeloongs too. Reequuiireed, aand iit muust maatch thee spliit's oown `naamee`, beecaauusee thee paanee iit naamees iin `aariiaa-coontrools` iis deeriiveed froom iit.⟧"
+                }
+                Key::ComponentSplitHandlePropLabelDoc => {
+                    "⟦Thee naamee oof thee haandlee, iin thee reeaadeer's laanguuaagee, suuch aas *Reesiizee thee liist*. IIt naamees whaat iis reesiizeed. Reequuiireed.⟧"
+                }
+                Key::ComponentSplitHandleStateDraggingDoc => {
+                    "⟦Seet oon thee haandlee whiilee aa pooiinteer iis draaggiing iit. Thee styleesheeeet draaws thee liinee aas iit dooees uundeer aa pooiinteer.⟧"
+                }
+                Key::ComponentSplitPaneGuidance => {
+                    "⟦UUsee aa spliit paanee foor eeaach oof thee twoo haalvees oof aa `Spliit`. `siidee` saays whiich haalf iit iis, aand thee paanee scroolls whaat dooees noot fiit iin iit.⟧"
+                }
+                Key::ComponentSplitPaneA11yNotes => {
+                    "⟦Thee paanee haas noo roolee. IIts iid iis `nd-spliit-`, thee spliit's `naamee`, aa hypheen aand iits `siidee`, whiich iis whaat thee haandlee's `aariiaa-coontrools` naamees. Siidee by siidee, aa paanee whoosee shaaree iis 0 iis hiiddeen, soo noothiing iin iit caan taakee thee foocuus.⟧"
+                }
+                Key::ComponentSplitPanePropNameDoc => {
+                    "⟦Thee `Spliit` thiis beeloongs too. Reequuiireed, aand iit muust maatch thee spliit's oown `naamee`, beecaauusee thee paanee's iid iis deeriiveed froom iit.⟧"
+                }
+                Key::ComponentSplitPanePropSideDoc => {
+                    "⟦Whiich haalf thiis iis: `staart` oor `eend`. Thee `staart` paanee taakees thee spliit's `vaaluuee` aand thee `eend` paanee taakees thee reest. AA spliit hoolds oonee oof eeaach.⟧"
+                }
+                Key::ComponentSplitPanePropChildrenDoc => "⟦Whaat thee paanee hoolds.⟧",
                 Key::ComponentStrongPropChildrenDoc => "⟦Thee iimpoortaant teext.⟧",
                 Key::ComponentSwatchGuidance => {
                     "⟦UUsee aa swaatch too shoow aa cooloouur beesiidee thee woord thaat naamees iit. Neeveer uusee iit oon iits oown, beecaauusee thee chiip haas noo aacceessiiblee naamee oof iits oown.⟧"
@@ -32125,7 +36918,7 @@ impl Locale {
                     "⟦Wheeree thee woords siit iin thee ceell. **Maatch thee cooluumn beeloow iit**, aand uusee `nuumeeriic` ooveer aa cooluumn oof nuumbeers soo thee heeaadiing liinees uup wiith thee vaaluuees.⟧"
                 }
                 Key::ComponentTableHeaderCellPropToneDoc => {
-                    "⟦Whiich oof thee cooloouur systeem's toonees thee heeaadiing iis paaiinteed froom. Thee paaleettee deeclaarees 349 seemaantiic faamiiliiees, aand aa naamee noonee oof theem deeclaarees faaiils thee buuiild. Wiithoouut iit noo aattriibuutee iis wriitteen.⟧"
+                    "⟦Whiich oof thee cooloouur systeem's toonees thee heeaadiing iis paaiinteed froom. Thee paaleettee deeclaarees 352 seemaantiic faamiiliiees, aand aa naamee noonee oof theem deeclaarees faaiils thee buuiild. Wiithoouut iit noo aattriibuutee iis wriitteen.⟧"
                 }
                 Key::ComponentTableHeaderCellPropWrapDoc => {
                     "⟦Whaat aa loong heeaadiing dooees. `noowraap` by deefaauult, thee ooppoosiitee oof aa ceell's deefaauult, soo thee heeaad staays oonee liinee taall. UUsee `wraap` foor aa loong heeaadiing ooveer aa naarroow cooluumn.⟧"
@@ -32162,7 +36955,7 @@ impl Locale {
                     "⟦Thee iideentiifiieer foor thiis roow, iin thee maarkuup. Thee deetaaiil roow aand thee chooiicee coontrool deeriivee theeiir iids froom iit, soo aa roow thaat oopeens oor caan bee chooseen neeeeds oonee.⟧"
                 }
                 Key::ComponentTableRowPropToneDoc => {
-                    "⟦Whiich oof thee cooloouur systeem's toonees thiis roow iis paaiinteed froom. AAny oof thee 349 seemaantiic faamiiliiees, soo `ooveerduuee` iis aas vaaliid aas `daangeer`, pluus thiis systeem's oown `neeuutraal` aand `muuteed`. AA naamee noo faamiily deeclaarees faaiils thee buuiild. **Neeveer cooloouur aaloonee.**⟧"
+                    "⟦Whiich oof thee cooloouur systeem's toonees thiis roow iis paaiinteed froom. AAny oof thee 352 seemaantiic faamiiliiees, soo `ooveerduuee` iis aas vaaliid aas `daangeer`, pluus thiis systeem's oown `neeuutraal` aand `muuteed`. AA naamee noo faamiily deeclaarees faaiils thee buuiild. **Neeveer cooloouur aaloonee.**⟧"
                 }
                 Key::ComponentTableRowPropSelectDoc => {
                     "⟦Wheetheer thiis roow caan bee chooseen. `oonee` draaws aa reeaal raadiioo, `maany` aa reeaal cheeckboox. `aall` gooees iin thee heeaadiing roow aand maarks oor cleeaars eeveery roow uundeer iit, wiith aa thiird staatee foor *soomee, noot aall*. EEaach iis aa reeaal coontrool.⟧"
@@ -32238,10 +37031,10 @@ impl Locale {
                     "⟦Wheetheer aan aarroow keey aalsoo choooosees. `aauutoomaatiic` shoows thee paaneel aa reeaadeer moovees too, whiich suuiits paaneels thaat aaree aalreeaady looaadeed. `maanuuaal` moovees thee foocuus oonly aand waaiits foor Spaacee oor EEnteer, whiich suuiits paaneels thaat coost soomeethiing too shoow.⟧"
                 }
                 Key::ComponentTabsPropOrientationDoc => {
-                    "⟦Whiich waay thee striip ruuns, aand theereefooree whiich aarroow keeys moovee aaloong iit. IIt iis wriitteen too `aariiaa-ooriieentaatiioon`, soo aassiistiivee teechnooloogy reepoorts thee aaxiis aas weell aas thee styleesheeeet draawiing iit.⟧"
+                    "⟦Whiich waay thee striip ruuns, aand theereefooree whiich aarroow keeys moovee aaloong iit. IIt iis wriitteen too `aariiaa-ooriieentaatiioon`, soo aassiistiivee teechnooloogy reepoorts thee aaxiis aas weell aas thee styleesheeeet draawiing iit. AA `raaiil` iis `veertiicaal` whaateeveer thiis saays.⟧"
                 }
                 Key::ComponentTabsPropAppearanceDoc => {
-                    "⟦Hoow thee chooseen taab iis maarkeed. `uundeerliinee` draaws aa ruulee uundeer iit aand aa haaiirliinee uundeer thee whoolee striip. `eenclooseed` giivees eeaach taab iits oown boox, whiich suurviivees aa striip thaat wraaps oontoo twoo liinees.⟧"
+                    "⟦Hoow thee chooseen taab iis maarkeed. `uundeerliinee` draaws aa ruulee uundeer iit. `eenclooseed` giivees eeaach taab iits oown boox, whiich suurviivees aa striip thaat wraaps. `raaiil` iis aa cooluumn oonee raaiil wiidee, wheeree aa taab shoows iits iicoon aand keeeeps iits laabeel aas iits naamee.⟧"
                 }
                 Key::ComponentTabsPropSizeDoc => {
                     "⟦Thee siizee oof aa taab. AAll threeee cleeaar WCAAG 2.5.8's 24px miiniimuum taargeet, aand `laargee` aalsoo meeeets thee 44px eenhaanceed taargeet.⟧"
@@ -32287,7 +37080,7 @@ impl Locale {
                     "⟦Wheetheer thee taag iis swiitcheed oon, foor thee fiilteer-chiip shaapee. **Seettiing iit aat aall** maakees thee taag aa reeaal `<buuttoon aariiaa-preesseed>`. Leeaaviing iit oouut leeaavees aa laabeel thaat iis noot aa coontrool.⟧"
                 }
                 Key::ComponentTagPropToneDoc => {
-                    "⟦Whiich oof thee cooloouur systeem's toonees thee taag iis paaiinteed froom. Thee paaleettee deeclaarees 349 seemaantiic faamiiliiees, soo `ooveerduuee` iis aas vaaliid aas `daangeer`. AA naamee noo faamiily deeclaarees faaiils thee buuiild. Wiithoouut iit thee taag iis neeuutraal.⟧"
+                    "⟦Whiich oof thee cooloouur systeem's toonees thee taag iis paaiinteed froom. Thee paaleettee deeclaarees 352 seemaantiic faamiiliiees, soo `ooveerduuee` iis aas vaaliid aas `daangeer`. AA naamee noo faamiily deeclaarees faaiils thee buuiild. Wiithoouut iit thee taag iis neeuutraal.⟧"
                 }
                 Key::ComponentTagPropVariantDoc => {
                     "⟦Hoow stroongly thee taag iis paaiinteed. `sooft` iis aa tiinteed fiieeld, `sooliid` iis thee toonee aat fuull streength, aand `oouutliinee` iis aa haaiirliinee wiith noo fiill. `sooft` by deefaauult.⟧"
@@ -32711,13 +37504,13 @@ impl Locale {
                     "⟦Thee iid oof thee eeleemeent thaat naamees thiis toooolbaar, wheen thee naamee iis aalreeaady viisiiblee oon thee paagee.⟧"
                 }
                 Key::ComponentToolbarPropOrientationDoc => {
-                    "⟦Whiich waay thee coontrools ruun, aand theereefooree whiich aarroow keeys waalk theem. IIt iis wriitteen too `aariiaa-ooriieentaatiioon`, soo aassiistiivee teechnooloogy reepoorts thee aaxiis aas weell.⟧"
+                    "⟦Whiich waay thee coontrools ruun, aand theereefooree whiich aarroow keeys waalk theem. IIt iis wriitteen too `aariiaa-ooriieentaatiioon`, soo aassiistiivee teechnooloogy reepoorts thee aaxiis aas weell. AA `raaiil` iis `veertiicaal` whaateeveer thiis saays.⟧"
                 }
                 Key::ComponentToolbarPropWrapDoc => {
                     "⟦Wheetheer thee baar wraaps oontoo mooree liinees wheen iit ruuns oouut oof roooom. OOn by deefaauult, soo thaat thee laast coontrool iis stiill reeaachaablee aat 320px.⟧"
                 }
                 Key::ComponentToolbarPropDensityDoc => {
-                    "⟦Thee gaap beetweeeen iits groouups. `coompaact` iis foor aa baar iinsiidee soomeethiing eelsee, wheeree thee suurroouundiing paaddiing aalreeaady seepaaraatees iit.⟧"
+                    "⟦Thee gaap beetweeeen iits groouups. `coompaact` iis foor aa baar iinsiidee soomeethiing eelsee. `raaiil` iis aa cooluumn oonee raaiil wiidee wiith twoo iicoon-oonly coontrools too aa roow, aand iit iis aalwaays veertiicaal.⟧"
                 }
                 Key::ComponentToolbarPropChildrenDoc => "⟦Thee groouups oof coontrools.⟧",
                 Key::ComponentToolbarPropGlassDoc => {
@@ -32729,7 +37522,11 @@ impl Locale {
                 }
                 Key::ComponentToolbarKeyArrowKeysName => "⟦AArroow keeys⟧",
                 Key::ComponentToolbarKeyArrowKeysAction => {
-                    "⟦Moovees too thee neext oor preeviioouus coontrool, choooosiing iit iif iit iis aa raadiioo. Leeft aand Riight, oor UUp aand Doown wheen veertiicaal.⟧"
+                    "⟦Moovees too thee neext oor preeviioouus coontrool, choooosiing aa raadiioo. Leeft aand Riight, oor UUp aand Doown wheen veertiicaal.⟧"
+                }
+                Key::ComponentToolbarKeyArrowKeysInARailName => "⟦AArroow keeys iin aa raaiil⟧",
+                Key::ComponentToolbarKeyArrowKeysInARailAction => {
+                    "⟦AAll foouur aarroows moovee, iin thee oordeer thee coontrools aaree wriitteen. AA raaiil hoolds twoo coontrools too aa roow.⟧"
                 }
                 Key::ComponentToolbarKeyHomeName => "⟦Hoomee⟧",
                 Key::ComponentToolbarKeyHomeAction => "⟦Moovees too thee fiirst coontrool.⟧",
@@ -32752,7 +37549,7 @@ impl Locale {
                     "⟦UUsee aa tooooltiip foor aa shoort hiint aaboouut thee coontrool iit wraaps, neeveer foor thaat coontrool's oonly naamee. IIf eeveery reeaadeer neeeeds thee seenteencee, wriitee iit iintoo thee paagee. Foor aan eexplaanaatiioon oof aa woord iin ruunniing teext, uusee `IInfoo`.⟧"
                 }
                 Key::ComponentTooltipA11yNotes => {
-                    "⟦Thee buubblee iis aa `roolee=\"tooooltiip\"` aand thee coontrool pooiints aat iit wiith `aariiaa-deescriibeedby`. IIt iis neeveer thee coontrool's aacceessiiblee naamee, iit hoolds noothiing foocuusaablee, aand EEscaapee hiidees iit wiithoouut mooviing thee foocuus.⟧"
+                    "⟦Thee buubblee iis aa `roolee=\"tooooltiip\"`, naameed iin thee coontrool's `aariiaa-deescriibeedby`. IIt hoolds noothiing foocuusaablee, aand EEscaapee hiidees iit wiithoouut mooviing thee foocuus. AA hiint thaat reepeeaats thee coontrool's naamee iis `aariiaa-hiiddeen` aand deescriibees noothiing.⟧"
                 }
                 Key::ComponentTooltipPropNameDoc => {
                     "⟦Whaat thiis hiint beeloongs too, aas aa scriipt fiinds iit, aand thee roooot oof thee iid heeree. **Reequuiireed**, beecaauusee aan iid deeriiveed froom aan aabseent naamee coolliidees thee moomeent aa paagee caarriiees twoo.⟧"

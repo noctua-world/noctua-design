@@ -65,10 +65,10 @@ enum Command {
         /// Behind `docs` rather than a sixth verb, and opt-in rather than part
         /// of `check`, because it is the one thing here that needs a browser —
         /// and `NOCTUA.md §9.11` promises the Rust half builds and tests with
-        /// no Node installed. **CI does not run it** — the `check` job has no
-        /// Node by design and the `pages` job builds the site without
-        /// verifying it, so this is a developer's command and the suite's
-        /// green is a claim about a machine somebody sat at.
+        /// no Node installed. CI runs it in a job of its own, `browser`, on
+        /// Linux: the `check` matrix has no Node by design, and the `pages`
+        /// job, which builds the site again to publish it, does not wait for
+        /// the suite, so retrying a flaky spec never republishes the site.
         #[arg(long)]
         verify: bool,
     },

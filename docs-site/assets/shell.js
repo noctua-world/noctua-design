@@ -154,6 +154,12 @@ import { enhanceModels, releaseModels } from "./model.js";
 import { enhanceSelects, releaseSelects } from "./select.js";
 import { enhanceTagPickers, releaseTagPickers } from "./tag-picker.js";
 import { enhanceTrees, releaseTrees } from "./tree.js";
+import { enhanceOptionLists, releaseOptionLists } from "./option-list.js";
+import { enhancePrompts, releasePrompts } from "./prompt.js";
+import { enhanceDrawers, releaseDrawers } from "./drawer.js";
+import { enhanceSplits, releaseSplits } from "./split.js";
+import { enhanceKeyCaptures, releaseKeyCaptures } from "./key-capture.js";
+import { enhanceLogs, releaseLogs } from "./log.js";
 import { enhanceTabs, releaseTabs } from "./tabs.js";
 import { enhanceDateInputs, releaseDateInputs } from "./date-input.js";
 import { enhanceSearches, releaseSearches } from "./search.js";
@@ -1648,6 +1654,12 @@ export function enhanceAll(root = document) {
   enhanceSearches(root);
   enhanceTagPickers(root);
   enhanceTrees(root);
+  enhanceOptionLists(root);
+  enhancePrompts(root);
+  enhanceDrawers(root);
+  enhanceSplits(root);
+  enhanceKeyCaptures(root);
+  enhanceLogs(root);
   collapseBlocks(root);
   enhanceDateInputs(root);
   enhanceDatePickers(root);
@@ -1664,6 +1676,10 @@ export function enhanceAll(root = document) {
   enhanceTooltips(root);
   enhanceToasts(root);
   enhanceToastReplays(root);
+  enhanceCountdowns(root);
+  enhanceDialogShows(root);
+  enhanceDrawerWindows(root);
+  enhanceLineExpanders(root);
   enhanceTabs(root);
   enhanceLineages(root);
   enhanceModels(root);
@@ -1772,6 +1788,194 @@ function releaseToastReplays(root = document) {
   }
 }
 
+// --- Writing an example's deadline ------------------------------------------
+//
+// THIS IS APPARATUS, AND IT SHIPS NOWHERE. A `MessageBar`'s `deadline` is its
+// caller's: the interface writes one when it loses its server, and keeps the
+// timer that acts on it. On this site the caller is the example, and an
+// example is a tree with no code in it, so the deadline it carries is an
+// instant long past. The page plays the caller's part, as it does for a toast
+// raised again: it writes a deadline `data-nd-seconds` ahead of now into every
+// bar in the example when the page is enhanced, and again when the control
+// marked `countdown-again` is pressed. What the component owes is in
+// `dist/message-bar.js` and is untouched: it follows the new value.
+//
+// KNOWN BY A MAP AND NOT BY `data-nd-enhanced`, because an example of the
+// alert line is also a window, and `enhanceDrawerWindows` stamps that flag on
+// every window first.
+
+/** Every example whose deadline the page writes, so a subtree can be released. */
+const countdowns = new WeakMap();
+
+function enhanceCountdowns(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-countdown")) {
+    if (countdowns.has(stage)) continue;
+    const binding = new AbortController();
+    countdowns.set(stage, binding);
+    const seconds = Number.parseInt(stage.getAttribute("data-nd-seconds") ?? "", 10) || 10;
+    const arm = () => {
+      const at = String(Date.now() + seconds * 1000);
+      for (const bar of stage.querySelectorAll(".nd-message-bar[data-nd-deadline]")) {
+        bar.setAttribute("data-nd-deadline", at);
+      }
+    };
+    stage.addEventListener("click", (event) => {
+      if (event.target.closest?.('[data-nd-action="countdown-again"]')) arm();
+    }, { signal: binding.signal });
+    arm();
+  }
+}
+
+function releaseCountdowns(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-countdown")) {
+    countdowns.get(stage)?.abort();
+    countdowns.delete(stage);
+  }
+}
+
+// --- Showing an example's confirmation --------------------------------------
+//
+// THIS IS APPARATUS, AND IT SHIPS NOWHERE. A confirmation opens because the
+// program asked, through `Dialog { shown }`, and the program hears the answer
+// as `nd-dialog-close`. On this site the program is the page: a control marked
+// `dialog-show` writes `shown` on the dialog beside it, and the answer is
+// written into the status under it, from the sentence that status carries,
+// before `shown` is written back. What the component owes is in
+// `dist/dialog.js` and is untouched.
+
+/** Every example whose dialog the page shows, so a subtree can be released. */
+const dialogShows = new WeakMap();
+
+function enhanceDialogShows(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-confirm")) {
+    if (dialogShows.has(stage)) continue;
+    const binding = new AbortController();
+    dialogShows.set(stage, binding);
+    const dialog = () => stage.querySelector("[data-nd-dialog]");
+    const status = () => stage.querySelector(".nd-example-answer");
+    stage.addEventListener("click", (event) => {
+      if (!event.target.closest?.('[data-nd-action="dialog-show"]')) return;
+      const said = status();
+      if (said) said.textContent = "";
+      dialog()?.setAttribute("data-nd-shown", "true");
+    }, { signal: binding.signal });
+    stage.addEventListener("nd-dialog-close", (event) => {
+      const said = status();
+      if (said && event.detail.answer) {
+        said.textContent = message(said.getAttribute("data-nd-sentence"), {
+          answer: event.detail.answer,
+        });
+      }
+      dialog()?.setAttribute("data-nd-shown", "false");
+    }, { signal: binding.signal });
+  }
+}
+
+function releaseDialogShows(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-confirm")) {
+    dialogShows.get(stage)?.abort();
+    dialogShows.delete(stage);
+  }
+}
+
+// --- Turning an example's drawer ----------------------------------------------
+//
+// THIS IS APPARATUS, AND IT SHIPS NOWHERE. A `Drawer` is turned by its caller:
+// `collapsed` is a prop, and Escape reaches the caller as `nd-drawer-dismiss`.
+// On this site the caller is the example, and an example is a tree with no
+// code in it. So the page plays the caller's part, as it does for a toast that
+// has to be raised again: a control marked `drawer-toggle` turns the drawer in
+// its own window, and the drawer's own event shuts it. What the component owes
+// is in `dist/drawer.js` and is untouched: `inert`, and the focus it gives back.
+//
+// AND THE CONTROL SAYS WHAT IT TURNED. A control that names the drawer in
+// `aria-controls` is told in `aria-expanded` whether the drawer is open, as a
+// caller rendering `Button { expanded }` again would tell it, and from the
+// start: `Button` writes the attribute only when it is true, and a toggle with
+// none says nothing about a drawer that is shut.
+
+/** Every example window already wired, so a subtree can be released. */
+const drawerWindows = new WeakMap();
+
+function enhanceDrawerWindows(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-window")) {
+    if (stage.dataset.ndEnhanced) continue;
+    stage.dataset.ndEnhanced = "drawer-window";
+    const binding = new AbortController();
+    drawerWindows.set(stage, binding);
+    // The window this control is in, never the page: two drawers on one page
+    // would otherwise each be turned by the other's control.
+    const say = (drawer) => {
+      const open = drawer.getAttribute("data-nd-collapsed") !== "true";
+      for (const control of stage.querySelectorAll('[data-nd-action="drawer-toggle"][aria-controls]')) {
+        control.setAttribute("aria-expanded", String(open));
+      }
+    };
+    const turn = (collapsed) => {
+      const drawer = stage.querySelector("[data-nd-drawer]");
+      if (!drawer) return;
+      const next = collapsed ?? drawer.getAttribute("data-nd-collapsed") !== "true";
+      drawer.setAttribute("data-nd-collapsed", String(next));
+      say(drawer);
+    };
+    const drawer = stage.querySelector("[data-nd-drawer]");
+    if (drawer) say(drawer);
+    stage.addEventListener("click", (event) => {
+      if (event.target.closest?.('[data-nd-action="drawer-toggle"]')) turn();
+    }, { signal: binding.signal });
+    stage.addEventListener("nd-drawer-dismiss", () => turn(true), { signal: binding.signal });
+  }
+}
+
+// --- Expanding an example's footer line ---------------------------------------
+//
+// THIS IS APPARATUS, AND IT SHIPS NOWHERE. A `FooterLine` ships no script: its
+// caller turns `expanded`, and the press on the line's control reaches the
+// caller through `action`. On this site the caller is the example, so the page
+// plays its part, as it does for a drawer: a press on the control of a line in
+// an example marked `nd-example-expand` writes what a caller rendering the line
+// again would write. The line's attribute, the control's `aria-expanded`, and
+// the control's name for what a press does next, taken from the two the
+// example carries. The glyph turns with `aria-expanded`, in `footer.css`.
+
+/** Every example whose footer lines the page turns, so a subtree can be released. */
+const lineExpanders = new WeakMap();
+
+function enhanceLineExpanders(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-expand")) {
+    if (lineExpanders.has(stage)) continue;
+    const binding = new AbortController();
+    lineExpanders.set(stage, binding);
+    stage.addEventListener("click", (event) => {
+      const control = event.target.closest?.(".nd-footer-line-toggle");
+      const line = control?.closest(".nd-footer-line");
+      if (!line || !stage.contains(line)) return;
+      const expanded = line.getAttribute("data-nd-expanded") !== "true";
+      if (expanded) line.setAttribute("data-nd-expanded", "true");
+      else line.removeAttribute("data-nd-expanded");
+      control.setAttribute("aria-expanded", String(expanded));
+      const name = stage.getAttribute(expanded ? "data-nd-collapse-label" : "data-nd-expand-label");
+      if (name) control.setAttribute("aria-label", name);
+    }, { signal: binding.signal });
+  }
+}
+
+function releaseLineExpanders(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-expand")) {
+    lineExpanders.get(stage)?.abort();
+    lineExpanders.delete(stage);
+  }
+}
+
+function releaseDrawerWindows(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-window")) {
+    if (stage.dataset.ndEnhanced !== "drawer-window") continue;
+    drawerWindows.get(stage)?.abort();
+    drawerWindows.delete(stage);
+    delete stage.dataset.ndEnhanced;
+  }
+}
+
 /**
  * Takes every one of them back off again.
  *
@@ -1796,6 +2000,10 @@ export function releaseAll(root = document) {
   releaseModels(root);
   releaseLineages(root);
   releaseTabs(root);
+  releaseLineExpanders(root);
+  releaseDrawerWindows(root);
+  releaseDialogShows(root);
+  releaseCountdowns(root);
   releaseToastReplays(root);
   releaseToasts(root);
   releaseTooltips(root);
@@ -1815,6 +2023,12 @@ export function releaseAll(root = document) {
   // nothing: it reads the declared cap and writes one attribute on the block,
   // which goes when the block does. The gap is named here rather than filled
   // with an empty function, so the two lists still read against each other.
+  releaseLogs(root);
+  releaseKeyCaptures(root);
+  releaseSplits(root);
+  releaseDrawers(root);
+  releasePrompts(root);
+  releaseOptionLists(root);
   releaseTrees(root);
   releaseTagPickers(root);
   releaseSearches(root);

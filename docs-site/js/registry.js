@@ -33,12 +33,17 @@ import { Del } from "@noctua-world/design-react/components/del.js";
 import { Dialog } from "@noctua-world/design-react/components/dialog.js";
 import { Disclosure } from "@noctua-world/design-react/components/disclosure.js";
 import { Divider } from "@noctua-world/design-react/components/divider.js";
+import { Drawer } from "@noctua-world/design-react/components/drawer.js";
+import { DrawerRail } from "@noctua-world/design-react/components/drawer_rail.js";
 import { Em } from "@noctua-world/design-react/components/em.js";
 import { ErrorSummary } from "@noctua-world/design-react/components/error_summary.js";
 import { ErrorSummaryItem } from "@noctua-world/design-react/components/error_summary_item.js";
 import { Field } from "@noctua-world/design-react/components/field.js";
 import { Fieldset } from "@noctua-world/design-react/components/fieldset.js";
 import { FileInput } from "@noctua-world/design-react/components/file_input.js";
+import { Footer } from "@noctua-world/design-react/components/footer.js";
+import { FooterCorner } from "@noctua-world/design-react/components/footer_corner.js";
+import { FooterLine } from "@noctua-world/design-react/components/footer_line.js";
 import { Heading } from "@noctua-world/design-react/components/heading.js";
 import { Icon } from "@noctua-world/design-react/components/icon.js";
 import { Image } from "@noctua-world/design-react/components/image.js";
@@ -46,21 +51,29 @@ import { Info } from "@noctua-world/design-react/components/info.js";
 import { Input } from "@noctua-world/design-react/components/input.js";
 import { Ins } from "@noctua-world/design-react/components/ins.js";
 import { Kbd } from "@noctua-world/design-react/components/kbd.js";
+import { KeyCapture } from "@noctua-world/design-react/components/key_capture.js";
 import { Label } from "@noctua-world/design-react/components/label.js";
 import { Link } from "@noctua-world/design-react/components/link.js";
 import { List } from "@noctua-world/design-react/components/list.js";
 import { ListItem } from "@noctua-world/design-react/components/list_item.js";
+import { Log } from "@noctua-world/design-react/components/log.js";
+import { LogLine } from "@noctua-world/design-react/components/log_line.js";
 import { Mark } from "@noctua-world/design-react/components/mark.js";
+import { MatchText } from "@noctua-world/design-react/components/match_text.js";
 import { Menu } from "@noctua-world/design-react/components/menu.js";
 import { MenuItem } from "@noctua-world/design-react/components/menu_item.js";
 import { MessageBar } from "@noctua-world/design-react/components/message_bar.js";
 import { Meter } from "@noctua-world/design-react/components/meter.js";
 import { NumberInput } from "@noctua-world/design-react/components/number_input.js";
+import { OptionGroup } from "@noctua-world/design-react/components/option_group.js";
+import { OptionItem } from "@noctua-world/design-react/components/option_item.js";
+import { OptionList } from "@noctua-world/design-react/components/option_list.js";
 import { OtpField } from "@noctua-world/design-react/components/otp_field.js";
 import { Pagination } from "@noctua-world/design-react/components/pagination.js";
 import { Paragraph } from "@noctua-world/design-react/components/paragraph.js";
 import { Popover } from "@noctua-world/design-react/components/popover.js";
 import { Progress } from "@noctua-world/design-react/components/progress.js";
+import { Prompt } from "@noctua-world/design-react/components/prompt.js";
 import { Prose } from "@noctua-world/design-react/components/prose.js";
 import { Radio } from "@noctua-world/design-react/components/radio.js";
 import { Rating } from "@noctua-world/design-react/components/rating.js";
@@ -73,6 +86,9 @@ import { Select } from "@noctua-world/design-react/components/select.js";
 import { SelectGroup } from "@noctua-world/design-react/components/select_group.js";
 import { SelectOption } from "@noctua-world/design-react/components/select_option.js";
 import { Slider } from "@noctua-world/design-react/components/slider.js";
+import { Split } from "@noctua-world/design-react/components/split.js";
+import { SplitHandle } from "@noctua-world/design-react/components/split_handle.js";
+import { SplitPane } from "@noctua-world/design-react/components/split_pane.js";
 import { Strong } from "@noctua-world/design-react/components/strong.js";
 import { Swatch } from "@noctua-world/design-react/components/swatch.js";
 import { Switch } from "@noctua-world/design-react/components/switch.js";
@@ -122,12 +138,17 @@ export const COMPONENTS = {
   Dialog,
   Disclosure,
   Divider,
+  Drawer,
+  DrawerRail,
   Em,
   ErrorSummary,
   ErrorSummaryItem,
   Field,
   Fieldset,
   FileInput,
+  Footer,
+  FooterCorner,
+  FooterLine,
   Heading,
   Icon,
   Image,
@@ -135,21 +156,29 @@ export const COMPONENTS = {
   Input,
   Ins,
   Kbd,
+  KeyCapture,
   Label,
   Link,
   List,
   ListItem,
+  Log,
+  LogLine,
   Mark,
+  MatchText,
   Menu,
   MenuItem,
   MessageBar,
   Meter,
   NumberInput,
+  OptionGroup,
+  OptionItem,
+  OptionList,
   OtpField,
   Pagination,
   Paragraph,
   Popover,
   Progress,
+  Prompt,
   Prose,
   Radio,
   Rating,
@@ -162,6 +191,9 @@ export const COMPONENTS = {
   SelectGroup,
   SelectOption,
   Slider,
+  Split,
+  SplitHandle,
+  SplitPane,
   Strong,
   Swatch,
   Switch,

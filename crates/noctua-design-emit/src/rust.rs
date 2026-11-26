@@ -178,6 +178,23 @@ fn write_value_modules(out: &mut String, spec: &Spec, prefix: &str) {
         &spec.focus,
         prefix,
     );
+    string_module(
+        out,
+        spec,
+        "target",
+        "Pointer-target sizes: the smallest box a pointer is asked to hit.",
+        &spec.target,
+        prefix,
+    );
+    string_module(
+        out,
+        spec,
+        "shell",
+        "What an application window is measured in: a footer line, an icon \
+         rail, and how far a prompt and a drawer may grow.",
+        &spec.shell,
+        prefix,
+    );
 
     module(
         out,
@@ -354,6 +371,23 @@ mod tests {
     #[test]
     fn breakpoints_carry_their_value_because_a_media_query_needs_it() {
         assert!(source().contains(r#"pub const MD: &str = "48rem";"#));
+    }
+
+    #[test]
+    fn the_shell_and_the_target_floor_are_modules() {
+        let source = source();
+        for constant in [
+            r#"pub const MIN: &str = "var(--noctua-target-min)";"#,
+            r#"pub const LINE: &str = "var(--noctua-shell-line)";"#,
+            r#"pub const RAIL: &str = "var(--noctua-shell-rail)";"#,
+            r#"pub const PROMPT_MAX: &str = "var(--noctua-shell-prompt-max)";"#,
+            r#"pub const PROMPT_SHARE: &str = "var(--noctua-shell-prompt-share)";"#,
+            r#"pub const DRAWER_MAX: &str = "var(--noctua-shell-drawer-max)";"#,
+        ] {
+            assert!(source.contains(constant), "{constant} is missing");
+        }
+        assert!(source.contains("pub mod target {"), "{source}");
+        assert!(source.contains("pub mod shell {"), "{source}");
     }
 
     #[test]

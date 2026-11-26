@@ -1,0 +1,73 @@
+# What a `Prompt` has to do, in both languages, in a real browser.
+#
+# The control is a real `<textarea>`, so most of what a prompt does is the
+# engine's and is not asked here. These cases hold what the markup says and
+# what `dist/prompt.js` adds: Enter, the two states it writes, and the block.
+# Where the block is drawn, a selection, Shift with Enter, an input method's
+# composition, the clipboard and the growth are asked in
+# `tests/browser/prompt.spec.js`, because a case has no word for a position, a
+# chord, a composition or a height.
+
+[[case]]
+name = "it is a real textarea, named, holding what it was given"
+note = "The value of a `<textarea>` is its content, and its name is the only label a prompt has."
+props = { name = "ask", label = "Prompt", value = "close" }
+expect = { attrs = { "data-nd-prompt" = "ask" }, present = ["textarea#nd-prompt-ask[name=ask][aria-label=Prompt][rows='1']"], hidden = ["[role=combobox]", "button"], value = "close" }
+
+[[case]]
+name = "the block is drawn in a box a screen reader never reads"
+note = "The mirror holds the prompt's text a second time. Read aloud, every prompt would say its text twice."
+props = { name = "ask", label = "Prompt", value = "close" }
+expect = { present = [".nd-prompt-mirror[aria-hidden=true] > .nd-prompt-cursor"], visible = [".nd-prompt-cursor"] }
+
+[[case]]
+name = "what is typed is in the textarea"
+note = "The mirror lies over the textarea, and a box that took the pointer or the keys would leave a prompt nobody can type in."
+props = { name = "ask", label = "Prompt" }
+steps = ["click:.nd-prompt-stack", "type:close"]
+expect = { focus = "textarea", value = "close" }
+
+[[case]]
+name = "Enter sends and breaks no line"
+note = "Enter is the send key. A line break left behind by it would be in the text the caller is handed next."
+props = { name = "ask", label = "Prompt" }
+steps = ["focus:textarea", "type:ab", "key:Enter", "type:c"]
+expect = { focus = "textarea", value = "abc" }
+
+[[case]]
+name = "typing leaves no state behind on the root"
+note = "The two attributes hide the block. One that was set by a keystroke and never taken off would hide it for the rest of the visit."
+props = { name = "ask", label = "Prompt" }
+steps = ["focus:textarea", "type:ab"]
+expect = { absent = ["data-nd-selecting", "data-nd-composing"], attrs = { "data-nd-enhanced" = "true" } }
+
+[[case]]
+name = "a prompt that drives a list says so on a textbox"
+note = "HTML allows a `<textarea>` no other role, so the list is named on the textbox and no `combobox` is claimed."
+props = { name = "ask", label = "Prompt", controls = "commands", active_option = "option-2" }
+expect = { present = ["textarea[aria-controls=commands][aria-autocomplete=list][aria-activedescendant=option-2]"], hidden = ["[role]"] }
+
+[[case]]
+name = "a prompt with no list names none"
+note = "`aria-autocomplete` on a box that completes nothing tells a screen reader to expect suggestions that never come."
+props = { name = "ask", label = "Prompt" }
+expect = { hidden = ["textarea[aria-controls]", "textarea[aria-autocomplete]", "textarea[aria-activedescendant]"] }
+
+[[case]]
+name = "the send control is a named button a script can find"
+note = "Enter is one way to send, and a reader on a touch screen needs one that is on the screen."
+props = { name = "ask", label = "Prompt", send_label = "Send", action = "send" }
+expect = { present = ["button.nd-prompt-send[type=button][data-nd-action=send]:not([disabled])"], absent = ["data-nd-readonly", "data-nd-disabled"] }
+
+[[case]]
+name = "a read-only prompt keeps its text and its control sends nothing"
+note = "Read-only is focusable and copyable. A send control left live beside it would send text the reader could not change."
+props = { name = "ask", label = "Prompt", value = "close", readonly = true, send_label = "Send" }
+steps = ["focus:textarea", "type:more"]
+expect = { attrs = { "data-nd-readonly" = "true" }, focus = "textarea", present = ["textarea[readonly]", "button.nd-prompt-send[disabled]"], value = "close" }
+
+[[case]]
+name = "a disabled prompt is disabled on the control itself"
+note = "The stylesheet hides the block on the root's attribute, and the browser refuses the keys on the textarea's. One without the other is a prompt that looks off and still types."
+props = { name = "ask", label = "Prompt", disabled = true, send_label = "Send" }
+expect = { attrs = { "data-nd-disabled" = "true" }, present = ["textarea[disabled]", "button.nd-prompt-send[disabled]"] }

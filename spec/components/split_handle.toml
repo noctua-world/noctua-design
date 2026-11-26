@@ -1,0 +1,54 @@
+guidance = """
+Use a split handle between the two panes of a `Split`, for a line a reader can
+move. Leave it out where the two panes keep their shares.
+"""
+
+[meta]
+name = "SplitHandle"
+element = "div"
+class = "nd-split-handle"
+page = "split"
+summary = "Let a reader move the line between two panes, by pointer, touch or keyboard."
+
+# A SEPARATOR, AND NOTHING MORE UNTIL A SCRIPT CAN KEEP MORE. `role="separator"`
+# with no `tabindex` and no value is a line between two things, which is true
+# of the markup alone. `dist/split.js` adds the `tabindex` and the three
+# `aria-value` attributes together with the keys and the drag that honour
+# them: a separator that is focusable and has a value is a control, and a
+# control nothing answers is the one thing this system does not render.
+#
+# IT IS `aria-orientation="vertical"`, because the line stands upright between
+# two panes that are side by side. The attribute names the line, not the
+# direction it moves in.
+#
+# A TARGET OF THE SMALLEST SIZE, AND A LINE DRAWN THINNER. The handle is
+# `--noctua-target-min` wide (WCAG 2.5.8) and draws a hairline down its middle,
+# in the strong border colour, because the line is all that says a control is
+# there. Under a pointer, with the focus and while it is dragged the line is
+# thicker and takes the accent.
+#
+# IT NEEDS A NAME. A focusable separator is announced by its name and its
+# value, and with no name a reader hears a number about nothing.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-split-handle"
+doc = "The `Split` this belongs to. Required, and it must match the split's own `name`, because the pane it names in `aria-controls` is derived from it."
+
+[prop.label]
+type = "text"
+required = true
+attribute = "aria-label"
+doc = "The name of the handle, in the reader's language, such as *Resize the list*. It names what is resized. Required."
+
+[state.dragging]
+attribute = "data-nd-dragging"
+doc = "Set on the handle while a pointer is dragging it. The stylesheet draws the line as it does under a pointer."
+
+[a11y]
+needs_name = true
+role = "separator"
+notes = """
+The handle is a `role="separator"` with `aria-orientation="vertical"`, named by `label`. It names the `start` pane in `aria-controls`. A script makes it focusable and writes its value. It is at least 24 pixels wide, as WCAG 2.5.8 asks.
+"""

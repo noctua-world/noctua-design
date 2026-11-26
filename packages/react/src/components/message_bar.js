@@ -14,9 +14,10 @@ import { createElement as h } from "react";
 import { Icon } from "./icon.js";
 import { AILabel } from "./ai_label.js";
 import { close } from "@noctua-world/design-tokens/icons/close.js";
-export function MessageBar({ tone, title, icon, alert, live, dismissible, dismissLabel, aiMark, aiLabel, aiNote, className, children, ...rest }) {
+export function MessageBar({ tone, title, icon, alert, live, dismissible, dismissLabel, presentation, deadline, countdownLabel, actionLabel, action, aiMark, aiLabel, aiNote, className, children, ...rest }) {
   const alert_ = alert ?? false;
   const dismissible_ = dismissible ?? false;
+  const presentation_ = presentation ?? "bar";
   const root = ["nd-message-bar", className].filter(Boolean).join(" ");
 
   return h(
@@ -28,6 +29,9 @@ export function MessageBar({ tone, title, icon, alert, live, dismissible, dismis
       role: alert_ ? "alert" : "status",
       "aria-live": live,
       "data-nd-tone": tone,
+      "data-nd-presentation": presentation_,
+      "data-nd-deadline": deadline,
+      "data-nd-countdown-label": countdownLabel,
       "data-nd-dismissible": String(dismissible_),
       ...rest,
     },
@@ -43,6 +47,35 @@ export function MessageBar({ tone, title, icon, alert, live, dismissible, dismis
       { key: "t", className: "nd-message-bar-text" },
       title ? h("strong", { key: "h", className: "nd-message-bar-title" }, title) : null,
       h("div", { key: "b", className: "nd-message-bar-body" }, children),
+      // See the Dioxus half: a timer that does not speak, and a polite region
+      // the script writes far less often. Both empty until it counts.
+      deadline
+        ? h("span", {
+            key: "c",
+            className: "nd-message-bar-countdown",
+            role: "timer",
+            "aria-live": "off",
+            "data-nd-message-bar-countdown": "",
+            hidden: true,
+          })
+        : null,
+      deadline
+        ? h("span", {
+            key: "s",
+            className: "nd-visually-hidden",
+            "aria-live": "polite",
+            "aria-atomic": "true",
+            "data-nd-message-bar-said": "",
+          })
+        : null,
+      // See the Dioxus half: the caller's control, last among the words.
+      actionLabel
+        ? h(
+            "button",
+            { key: "a", className: "nd-message-bar-action", type: "button", "data-nd-action": action },
+            actionLabel,
+          )
+        : null,
     ),
     aiMark && aiLabel
       ? h(AILabel, { key: "ai", className: "nd-ai-slot nd-ai-slot-line", mark: aiMark, label: aiLabel, note: aiNote })

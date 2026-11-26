@@ -15,6 +15,7 @@ pub(crate) const ICON_PROPS: &[(&str, &[&str])] = &[
     ("Input", &["icon"]),
     ("MenuItem", &["icon"]),
     ("MessageBar", &["icon"]),
+    ("OptionItem", &["icon"]),
     ("SegmentedItem", &["icon"]),
     ("SelectOption", &["icon"]),
     ("Tab", &["icon"]),

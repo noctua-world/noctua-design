@@ -26,3 +26,30 @@ props = { name = "confirm", trigger_label = "Delete", heading = "Delete this?" }
 children = "It cannot be undone."
 steps = ["click:button", "key:Escape"]
 expect = { absent = ["data-nd-open"] }
+
+[[case]]
+name = "an alert dialog is an alertdialog, and the focus starts on the decline control"
+note = "The WAI-ARIA alert dialog puts the focus on the least destructive answer, so a stray Enter declines. The script writes `autofocus` on it and the platform's own dialog focusing steps move the focus there."
+props = { name = "confirm", trigger_label = "Delete", alert = true, heading = "Delete this?", description = "The draft and its files go.", requester = "Asked by the assistant.", irreversible_label = "This cannot be undone.", confirm_label = "Delete it", decline_label = "Keep it" }
+steps = ["click:button"]
+expect = { attrs = { "data-nd-open" = "" }, focus = ".nd-dialog-decline", visible = [".nd-dialog-surface[role='alertdialog']", ".nd-dialog-mark", ".nd-dialog-confirm"] }
+
+[[case]]
+name = "an answer closes the surface"
+note = "The answers are submit controls of a `<form method=\"dialog\">`, so the platform closes the surface with the answer as its `returnValue`, and the state comes off on `close`."
+props = { name = "confirm", trigger_label = "Delete", alert = true, heading = "Delete this?", description = "The draft and its files go.", confirm_label = "Delete it", decline_label = "Keep it" }
+steps = ["click:button", "click:.nd-dialog-confirm"]
+expect = { absent = ["data-nd-open"] }
+
+[[case]]
+name = "Escape leaves an alert dialog, as a decline"
+note = "An alert dialog demands an answer, and the WAI-ARIA pattern still lets Escape close it. Leaving a confirmation is declining it, which the browser test reads off the event."
+props = { name = "confirm", trigger_label = "Delete", alert = true, heading = "Delete this?", description = "The draft and its files go.", confirm_label = "Delete it", decline_label = "Keep it" }
+steps = ["click:button", "key:Escape"]
+expect = { absent = ["data-nd-open"] }
+
+[[case]]
+name = "a dialog its caller shows is open with no control to open it"
+note = "A confirmation opens because the program asked. `shown` is the caller's, and the script opens the surface for it, so no trigger is drawn and none is needed. Where the focus lands is the browser test's, because both halves open at load and the second takes it."
+props = { name = "asked", shown = true, alert = true, heading = "Run this command?", description = "It deletes the realm.", confirm_label = "Run it", decline_label = "Do not run it" }
+expect = { attrs = { "data-nd-open" = "", "data-nd-shown" = "true" }, hidden = [".nd-dialog-open"], visible = [".nd-dialog-surface"] }

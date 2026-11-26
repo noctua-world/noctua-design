@@ -63,7 +63,7 @@
   cursor: progress;
 }
 
-.nd-search-field:focus-within {
+.nd-search-field:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
   border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -115,6 +115,11 @@
 @media (hover: hover) {
   .nd-search-clear:hover { color: var(--nc-color-fg); }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-clear[data-nd-seat-hover] { color: var(--nc-color-fg); }
+
 /* Absent while there is nothing to clear: a control that empties an empty box
    is a control that does nothing, and a reader learns to distrust the row. */
 .nd-search:not([data-nd-has-query]) .nd-search-clear { display: none; }
@@ -171,25 +176,13 @@
   display: none;
 }
 
-/* A HIT INSIDE A WORD CARRIES NO PADDING.
- *
- * `Mark`'s own rule pads it — right for a highlighted phrase in a paragraph,
- * where the tint needs air around it. Wrong here, and visibly so: `bg` matched
- * `ButtonGroup` on its two capitals and the row read `B utton G roup`, two
- * gaps torn into the middle of a name by a rule written for prose. A search
- * hit is a run of letters *inside* a word, so it keeps the tint, keeps the
- * weight, and gives up the box.
- *
- * `[data-nd-hit]` rather than `.nd-mark`, because a caller's own `Mark` may be
- * sitting in a result's label and this is not about that one. */
-.nd-search [data-nd-hit] {
-  padding: 0;
-  border-radius: 0;
-  /* The tint alone is thin on a one-letter run; the underline is what makes it
-     findable without colour, which `NOCTUA.md §9.8` asks of every signal. */
-  text-decoration: underline;
-  text-underline-offset: var(--noctua-space-1);
-}
+/* A HIT IS DRAWN BY `match-text.css`, NOT HERE. The script writes
+ * `<mark class="nd-match" data-nd-word>` over the letters each word of the
+ * query matched, which is the element `MatchText` draws, so a result is marked
+ * exactly as every other list filtered by typing is. That rule carries no
+ * padding, for the reason this one used to give: `bg` matched `ButtonGroup` on
+ * its two capitals, and a padded mark tore two gaps into the middle of a
+ * name. */
 
 /* --- The panel --- */
 .nd-search-panel {
@@ -250,6 +243,12 @@
   }
 }
 
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-result-link[data-nd-seat-hover] {
+  background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
+}
+
 /* THE ACTIVE ROW IS A FILL AND AN EDGE. Focus never leaves the box — the
    highlight travels by `aria-activedescendant` — so this is the only thing a
    sighted reader has to say which result Enter will follow, and a fill alone is
@@ -302,6 +301,13 @@
   .nd-search-forget:hover {
     background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-recent-item[data-nd-seat-hover],
+.nd-search-forget[data-nd-seat-hover] {
+  background: color-mix(in oklab, var(--nc-color-surface-raised) var(--nd-veil), transparent);
 }
 
 /* --- inline ---
@@ -424,6 +430,13 @@
   }
 }
 
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-open[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
 /* `[open]`, AND THE SELECTOR IS THE WHOLE BUG.
  *
  * A closed `<dialog>` is `display: none` by the user-agent stylesheet, and that
@@ -485,6 +498,13 @@
     color: var(--nc-color-fg);
     border-color: var(--nc-color-border-strong);
   }
+}
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-search-close[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
 }
 
 /* SQUARE IS THE BASE AND ROUNDED IS THE OVERRIDE, like every other rule here.

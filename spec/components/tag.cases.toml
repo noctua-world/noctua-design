@@ -8,7 +8,7 @@ expect = { text = "overdue", absent = ["aria-pressed"] }
 
 [[case]]
 name = "a tone is a name from the colour system, and any of its families works"
-note = "`overdue`, `shipped`, `degraded` — 349 families, not four states. The name is checked at build time against the vendored palette, so a name nothing declares fails the build rather than painting nothing."
+note = "`overdue`, `shipped`, `degraded` — 352 families, not four states. The name is checked at build time against the vendored palette, so a name nothing declares fails the build rather than painting nothing."
 props = { label = "shipped", tone = "shipped" }
 expect = { attrs = { "data-nd-tone" = "shipped" } }
 

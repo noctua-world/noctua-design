@@ -1,0 +1,134 @@
+guidance = """
+Use a key capture for a setting whose value is a shortcut, such as the Leader
+or a key in a menu. The reader presses the keys and the control records them.
+For a shortcut shown beside an action, use `Kbd`.
+"""
+
+[meta]
+name = "KeyCapture"
+element = "div"
+class = "nd-key-capture"
+summary = "Let users record a shortcut by pressing its keys, and show it as those keys."
+
+# A BUTTON THAT LISTENS, AND A HIDDEN INPUT THAT HOLDS WHAT IT HEARD.
+#
+# The control is a real `<button>`: pressing it starts listening, and the next
+# key pressed with whatever modifiers are held is the shortcut. A modifier
+# alone is not a shortcut, so the control waits for a key. Escape stops
+# listening and keeps the shortcut in force, and so does the focus leaving.
+#
+# A SHORTCUT IS WRITTEN AS `nc_schema::keys` WRITES A CHORD: the modifiers held,
+# in the order Control, Alt, Shift, Super, each once, then the key as
+# `KeyboardEvent.code` names it, all joined by `+` (`NOCTUA.md §12.8`). A key is
+# a physical key, so neither Shift nor a keyboard layout turns one into another.
+# This system does not judge the chord. Whether it is in the vocabulary, and
+# whether it collides with another, is the caller's to ask, and a chord it
+# refuses comes back as `refusal`.
+#
+# IT IS DRAWN BY THE LABELS ON THE KEYS. The modifiers take the names the
+# keyboard named by `keyboard` prints, and every other key the label of its
+# place on a US board, as `nc_schema::keys` labels it. Where the engine can say
+# which layout is in use, `dist/key-capture.js` relabels a key that prints a
+# character with the character this layout prints on it. Where it cannot, it
+# takes the character a captured key typed, when no modifier changed it.
+#
+# TAB IS A KEY LIKE ANY OTHER WHILE THE CONTROL LISTENS, because a binding may
+# hold it (`NOCTUA.md §12.9`). Listening ends with the first key recorded, so
+# the next Tab leaves the control, and Escape leaves it at once. No key holds
+# the focus in for longer than one press.
+#
+# WITH THE SCRIPT BLOCKED IT SHOWS THE SHORTCUT AND IS DISABLED. A control
+# that nothing answers is not rendered, so the markup writes `disabled` on the
+# button and `dist/key-capture.js` takes it off. The `disabled` prop is
+# `aria-disabled`, which keeps a refused control in the tab order.
+#
+# FOUR STATES. Idle is none of the three attributes below. Listening and
+# captured are written by the script, and refused by the markup, from
+# `refusal`. A refusal stays drawn while the reader listens again, because it
+# still says why the last chord was refused.
+#
+# IT RECORDS AND NEVER SAVES. A recorded chord is written into the hidden input
+# and said as `nd-key-capture-change`, with the control's `name` and the chord
+# as `value`. What is in force afterwards is the caller's to render as `value`,
+# or to refuse with `refusal`.
+#
+# THE ANNOUNCEMENTS ARE POLITE. One `role="status"` the script writes says
+# `capture_label` when listening starts and the recorded keys when it ends. The
+# refusal is a second one, on the page from the start, so a sentence the
+# caller writes into it later is read.
+
+[prop.name]
+type = "text"
+required = true
+attribute = "data-nd-key-capture"
+doc = "What this control is, as a script finds it, and the form field name the chord is submitted under. The button takes the id `nd-key-capture-` followed by this name. **Required**."
+
+[prop.label]
+type = "text"
+required = true
+doc = "What the shortcut is for, in the reader's language, such as *Leader*. It is drawn as the control's `<label>` and opens its accessible name, which the keys complete. Required."
+
+[prop.value]
+type = "text"
+attribute = "data-nd-value"
+doc = "The shortcut in force, written as `Alt+Shift+KeyK`: the modifiers in the order Control, Alt, Shift, Super, then the key's `KeyboardEvent.code`. Empty means none. It is the hidden input's value."
+
+[prop.keyboard]
+type = "enum"
+values = ["linux", "windows", "mac"]
+default = "linux"
+attribute = "data-nd-keyboard"
+# A picture of one control shows one chord, and a chord with no modifier draws
+# the same keys on all three. An example draws the three side by side.
+variants = false
+doc = "Whose labels the modifiers are drawn with. `linux` writes Ctrl, Alt, Shift and Super. `windows` writes Win for Super. `mac` writes Control, Option, Shift and Command."
+
+[prop.capture_label]
+type = "text"
+required = true
+attribute = "data-nd-capture-label"
+doc = "What the control says while it listens, such as *Press the new keys, or Escape*. It is said politely when listening starts. Required."
+
+[prop.empty_label]
+type = "text"
+required = true
+attribute = "data-nd-empty-label"
+doc = "What the control shows when no shortcut is set, such as *None*. It is part of the accessible name then. Required."
+
+[prop.clear_label]
+type = "text"
+doc = "The name of the control that removes the shortcut, such as *Remove the shortcut*. With it a second control is drawn after the first. Without it a shortcut can be replaced and not removed."
+
+[prop.refusal]
+type = "text"
+doc = "Why the last shortcut was refused, in the caller's own words. It is drawn under the control, marks it `aria-invalid` and describes it. A sentence written here after the page loaded is said politely."
+
+[prop.disabled]
+type = "bool"
+default = "false"
+attribute = "data-nd-disabled"
+doc = "Whether changing the shortcut is refused. A disabled control is `aria-disabled`, so it stays in the tab order and says what it holds, and pressing it starts nothing."
+
+[state.listening]
+attribute = "data-nd-listening"
+doc = "Set while the control listens for a shortcut. It shows `capture_label` and the modifiers held so far, with a dashed edge."
+
+[state.captured]
+attribute = "data-nd-captured"
+doc = "Set once a shortcut is recorded and the control is not listening, until the caller writes a new `value`. The keys drawn are the recorded ones."
+
+[state.refused]
+attribute = "data-nd-refused"
+doc = "Set while `refusal` is. A rule runs down the leading edge, the control's edge takes the danger tone, and the sentence is under it."
+
+[a11y]
+needs_name = true
+notes = """
+The control is a `<button>` named by `label` and the keys it holds, through `aria-labelledby`. A refusal sets `aria-invalid` and describes the button. A polite `role="status"` says what to press and what was recorded.
+"""
+
+[keyboard]
+"Enter / Space" = "Starts listening. While it listens, both are keys like any other and are recorded."
+"A key, with modifiers held" = "While it listens, records that key with the modifiers held and stops listening. A modifier alone records nothing."
+Tab = "While it listens, is recorded like any other key. Listening then ends, so the next Tab leaves the control."
+Escape = "While it listens, stops listening and keeps the shortcut in force. Otherwise it is left to what is around the control."

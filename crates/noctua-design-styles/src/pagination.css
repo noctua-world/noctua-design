@@ -44,7 +44,7 @@
   font-weight: var(--noctua-weight-medium);
 }
 
-.nd-pagination-link:hover {
+.nd-pagination-link:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-border-strong);
 }
 
@@ -85,7 +85,7 @@
   display: none;
 }
 
-.nd-pagination-more:hover {
+.nd-pagination-more:is(:hover, [data-nd-seat-hover]) {
   color: var(--nc-color-fg);
   border-color: var(--nc-color-border-strong);
 }

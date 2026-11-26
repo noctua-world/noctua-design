@@ -23,10 +23,17 @@ import { enhanceRoving } from "../assets/roving.js";
 import { enhanceSelects, releaseSelects } from "../assets/select.js";
 import { enhanceTagPickers, releaseTagPickers } from "../assets/tag-picker.js";
 import { enhanceTrees, releaseTrees } from "../assets/tree.js";
+import { enhanceOptionLists, releaseOptionLists } from "../assets/option-list.js";
+import { enhancePrompts, releasePrompts } from "../assets/prompt.js";
+import { enhanceDrawers, releaseDrawers } from "../assets/drawer.js";
+import { enhanceSplits, releaseSplits } from "../assets/split.js";
+import { enhanceKeyCaptures, releaseKeyCaptures } from "../assets/key-capture.js";
+import { enhanceLogs, releaseLogs } from "../assets/log.js";
 import { releaseTabs, enhanceTabs } from "../assets/tabs.js";
 import { enhanceDateInputs, releaseDateInputs } from "../assets/date-input.js";
 import { enhanceChoices, releaseChoices } from "../assets/choice.js";
 import { enhanceSearches, releaseSearches } from "../assets/search.js";
+import { enhanceSeats, releaseSeats } from "../assets/seats.js";
 
 /// Everything this system ships, turned on.
 export function enhance(root = document) {
@@ -47,10 +54,17 @@ export function enhance(root = document) {
   enhanceSelects(root);
   enhanceTagPickers(root);
   enhanceTrees(root);
+  enhanceOptionLists(root);
+  enhancePrompts(root);
+  enhanceDrawers(root);
+  enhanceSplits(root);
+  enhanceKeyCaptures(root);
+  enhanceLogs(root);
   enhanceTabs(root);
   enhanceDateInputs(root);
   enhanceChoices(root);
   enhanceSearches(root);
+  enhanceSeats(root);
 }
 
 /// And off again.
@@ -74,8 +88,15 @@ export function release(root = document) {
   releaseSelects(root);
   releaseTagPickers(root);
   releaseTrees(root);
+  releaseOptionLists(root);
+  releasePrompts(root);
+  releaseDrawers(root);
+  releaseSplits(root);
+  releaseKeyCaptures(root);
+  releaseLogs(root);
   releaseTabs(root);
   releaseDateInputs(root);
   releaseChoices(root);
   releaseSearches(root);
+  releaseSeats(root);
 }

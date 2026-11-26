@@ -1,0 +1,25 @@
+# What a `LogLine` has to be, in both languages, in a real browser.
+#
+# A line declares no keys and no state, so it owes no cases. These hold its
+# text to what a selection copies: its parts in the order they stand, a space
+# between each two, and nothing a stylesheet draws.
+
+[[case]]
+name = "a line is its parts, a space between each two"
+note = "A selection across the log copies this text. Parts joined with nothing between them would copy as one word."
+props = { time = "12:04:31.207", level = "warning", source = "nc-kernel", tone = "warning" }
+children = "Slow answer."
+expect = { attrs = { "data-nd-tone" = "warning" }, text = "12:04:31.207 warning nc-kernel Slow answer.", present = [":scope > time.nd-log-line-time", ":scope > .nd-log-line-level", ":scope > .nd-log-line-source.nd-identifier", ":scope > .nd-log-line-text"] }
+
+[[case]]
+name = "a part left out leaves no space behind"
+note = "A line with only a message copies as the message, with nothing in front of it."
+children = "Started."
+expect = { text = "Started.", absent = ["data-nd-tone"], hidden = [":scope > time", ":scope > .nd-log-line-level", ":scope > .nd-log-line-source"] }
+
+[[case]]
+name = "the level is the signal, and the tone says it again"
+note = "Without a tone the level is still drawn, in the page's own shade. A tone with no word would be colour alone."
+props = { level = "debug" }
+children = "Read 3 entries."
+expect = { text = "debug Read 3 entries.", absent = ["data-nd-tone"], visible = [":scope > .nd-log-line-level"] }

@@ -1,9 +1,9 @@
 # When to reach for it, and when not to. Top-level rather than inside
 # [meta], because a bare key after a table header belongs to that table.
 guidance = """
-Use a dialog for one thing a reader has to settle before carrying on. For a
-message left where it happened, use `MessageBar`. For a note hanging off a
-control, use `Popover`. A surface that only shows something is a page section.
+Use a dialog for one thing a reader has to settle before carrying on. Use its
+`alert` form to confirm an answer that cannot be taken back. For a message left
+where it happened, use `MessageBar`. For a note on a control, use `Popover`.
 """
 
 [meta]
@@ -54,12 +54,15 @@ What this dialog is, as a script finds it, and the root of every id here.
 carries two.
 """
 
+# NOT REQUIRED ANY MORE, AND `shown` IS WHY. A confirmation the program asks
+# for opens because the program asked, and a control that opens it would be a
+# second way in to a question nobody chose to ask. A dialog with neither a
+# trigger nor `shown` is one a reader cannot reach, and the doc says so.
 [prop.trigger_label]
 type = "text"
-required = true
 doc = """
-The words on the control that opens it. **Required**: a surface that opens from
-a script and has no control pointing at it is a surface a reader cannot reach.
+The words on the control that opens it. Absent for a dialog its caller opens
+with `shown`. A dialog with neither is a surface a reader cannot reach.
 """
 
 [prop.heading]
@@ -129,9 +132,73 @@ The name of the control that closes it. Wanted in practice by `dismissible`,
 because that control is a glyph and this is the only name it has.
 """
 
+# THE CONTROL THE CALLER TURNS, for an interface that is a view. The script
+# opens or closes the surface whenever this is written, and a reader who closes
+# it is reported with `nd-dialog-close`, after which the caller writes `false`.
+# Nothing here writes it back: the caller's attribute says what the caller
+# said, as `Drawer { collapsed }` does.
+[prop.shown]
+type = "bool"
+default = "false"
+attribute = "data-nd-shown"
+# A shown dialog is in the top layer, over every specimen in the grid.
+variants = false
+doc = """
+Whether the surface is showing, for a caller that renders the interface as a
+view. `dist/dialog.js` opens or closes it whenever the caller writes it, and a
+reader who closes it is reported with `nd-dialog-close`.
+"""
+
+# THE CONFIRMATION SURFACE (`NOCTUA.md §11.1`, §12.17's neighbour in the
+# interface). An irreversible command runs only with a confirmation the person
+# gave in the window, and this is where they give it: who asks, what, whether it
+# can be taken back, and the two answers. It is the WAI-ARIA alert dialog:
+# `role="alertdialog"`, named by its title, described by what it asks, with the
+# focus on the least destructive answer. The answers are submit controls of a
+# `<form method="dialog">`, so the platform closes the surface with the answer
+# as its `returnValue`, and the script reports that value.
+[prop.alert]
+type = "bool"
+default = "false"
+# NO ATTRIBUTE. What it decides is the `role` on the surface and what a press on
+# the backdrop does, and the script reads the role.
+doc = """
+Whether the dialog demands an answer. The surface becomes a `role="alertdialog"`
+and a press on the backdrop does not close it. Give it a `description`.
+"""
+
+[prop.requester]
+type = "text"
+doc = """
+Who is asking, as a sentence such as *Asked by the assistant in session 4*. It
+opens the body and describes the surface after the description.
+"""
+
+[prop.irreversible_label]
+type = "text"
+doc = """
+A mark saying the answer cannot be taken back, such as *This cannot be undone*.
+It is drawn with a warning glyph, describes the surface, and paints the confirm
+control in the danger tone.
+"""
+
+[prop.confirm_label]
+type = "text"
+doc = """
+The words on the control that says yes, such as *Delete the realm*. It closes
+the surface with the answer `confirm`.
+"""
+
+[prop.decline_label]
+type = "text"
+doc = """
+The words on the control that says no, such as *Keep it*. It closes the surface
+with the answer `decline`, and the focus starts on it.
+"""
+
 [prop.children]
 type = "children"
-doc = "What the dialog asks and the controls that answer it. A `Button` that acts on the answer belongs here, at the end."
+doc = "What the dialog asks, after the requester and the mark. A control that answers it belongs here only where `confirm_label` and `decline_label` cannot say it."
 
 [state.open]
 attribute = "data-nd-open"
@@ -140,12 +207,12 @@ doc = "Set on the root while the surface is showing. The `<dialog>` carries its 
 [a11y]
 needs_name = true
 notes = """
-The `<dialog>` element carries the role, so none is written. `showModal` marks
-it modal and the document behind it inert, so no focus trap is written either.
-A non-modal one is a plain dialog beside the page.
+The `<dialog>` element carries the role, or `role="alertdialog"` with `alert`.
+`showModal` makes the page behind it inert, so no focus trap is written. The
+description, requester and mark describe it.
 """
 
 [keyboard]
-"Enter or Space" = "Opens the dialog, on the control that opens it. Both keys work, because that control is a `<button>`."
-Escape = "Closes it. The platform answers this for a modal surface, and `dist/dialog.js` answers it for a non-modal one."
+"Enter or Space" = "Presses the control the focus is on, which opens the dialog or answers it. Each is a `<button>`."
+Escape = "Closes it, as `decline` where there is a decline control. `dist/dialog.js` answers it for a non-modal surface."
 Tab = "Cycles inside a modal surface, which the browser does on its own. It walks out of a non-modal one and leaves it open."

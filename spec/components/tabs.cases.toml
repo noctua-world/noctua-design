@@ -62,3 +62,18 @@ props = { name = "views", value = "list", label = "List", selected = true }
 [[case.child]]
 component = "Tab"
 props = { name = "views", value = "board", label = "Board", disabled = true }
+
+[[case]]
+name = "a rail is vertical whatever the caller said, and Down walks it"
+note = "`appearance = \"rail\"` draws a column, so the axis is written as `vertical` for it. A rail left horizontal would be a column whose arrows are Left and Right."
+props = { name = "views", label = "Views", appearance = "rail" }
+steps = ["click:[data-nd-value=list]", "key:ArrowDown"]
+expect = { attrs = { "aria-orientation" = "vertical", "data-nd-appearance" = "rail" }, visible = ["[data-nd-value=board][aria-selected=true]"] }
+
+[[case.child]]
+component = "Tab"
+props = { name = "views", value = "list", label = "List", icon = "list", selected = true }
+
+[[case.child]]
+component = "Tab"
+props = { name = "views", value = "board", label = "Board", icon = "database" }

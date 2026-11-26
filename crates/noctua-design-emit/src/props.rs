@@ -231,6 +231,17 @@ fn rust_enum(out: &mut String, component: &str, prop: &str, spec: &Prop) {
     }
     out.push_str("}\n\n");
 
+    // A VALUE THAT BEGINS WITH A DIGIT IS A VARIANT THAT BEGINS WITH `_`:
+    // `Heading.level` is `1` to `6`, and `HeadingLevel::1` is not Rust. Clippy
+    // reads a leading underscore as "meant to be unused" and, from 1.100,
+    // refuses the `ALL` below for naming one. The name is public and is the
+    // only spelling the value has, so the lint is answered where it fires
+    // rather than by renaming what consumers already write.
+    if spec.values.iter().any(|v| pascal(v).starts_with('_')) {
+        out.push_str(
+            "#[allow(\n    clippy::used_underscore_items,\n    reason = \"a value that begins with a digit has no other spelling as a variant\"\n)]\n",
+        );
+    }
     writeln!(out, "impl {ty} {{").expect("write");
     writeln!(
         out,

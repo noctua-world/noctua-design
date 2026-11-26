@@ -35,8 +35,12 @@
 
 import { expect, test } from "@playwright/test";
 
-import { LOCALES, PAGE, url, showParts } from "./pages.js";
+import { LOCALES, PAGE, url, showParts, walker } from "./pages.js";
 import { outside } from "./pixels.js";
+
+// Every walk in this file declares its tests through this line, so that a
+// report names this file rather than `pages.js` (`walker` says why).
+const walk = walker((title, fn) => test(title, fn));
 
 /** Every box under the main column, as integers, marks excluded. */
 const geometry = () =>
@@ -47,105 +51,107 @@ const geometry = () =>
       return [Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height)];
     });
 
-for (const width of [320, 1120]) {
-  for (const locale of LOCALES) {
-    test(`hiding the mark moves nothing, in ${locale} at ${width}px`, async ({ page }) => {
-      // A WHOLE-SITE SWEEP, DECLARED AS ONE. Fifty pages a run, six runs, and
-      // the site's other whole-site sweep does a third of that in one locale.
-      // Under eight workers this passes the default ceiling and fails as a
-      // timeout, which reads as a defect in the mark rather than in the clock.
-      test.slow();
-      await page.setViewportSize({ width, height: 900 });
-      let swept = 0;
+/** How many of a walk's pages reported something, which is what a floor counts. */
+const total = (counts) => counts.reduce((sum, one) => sum + one, 0);
 
-      for (const [name, path] of Object.entries(PAGE)) {
-        await page.goto(url(path, locale));
-        await showParts(page);
-        if (!(await page.locator(".nd-ai-label").count())) continue;
-        swept += 1;
+// A WHOLE-SITE SWEEP, ONE TEST A PAGE. Every page a run and six runs, which as
+// one test a run passed the default ceiling under eight workers and failed as
+// a timeout — read as a defect in the mark rather than in the clock. Each page
+// has the budget to itself now, and the floor below is asserted once the last
+// page of its run has reported (`walker` in `pages.js`).
+walk(
+  "hiding the mark moves nothing",
+  {
+    axes: { width: [320, 1120], locale: LOCALES },
+    title: ({ width, locale }) => `hiding the mark moves nothing, in ${locale} at ${width}px`,
+    // A FLOOR, BECAUSE A SWEEP THAT FOUND NOTHING PASSES. Forty-five
+    // components host a mark and every one of them shows it in an example, so
+    // a run that visited fewer pages than this visited a site where the marks
+    // had stopped rendering.
+    tally: (swept, { locale }) =>
+      expect(total(swept), `no page in ${locale} carries a mark`).toBeGreaterThan(30),
+  },
+  async ({ page, width, locale, name, path }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(url(path, locale));
+    await showParts(page);
+    if (!(await page.locator(".nd-ai-label").count())) return 0;
 
-        const before = await page.evaluate(geometry);
-        await page.addStyleTag({ content: ".nd-ai-label { visibility: hidden !important; }" });
-        const after = await page.evaluate(geometry);
-        expect(after, `${name}: hiding the mark moved something else`).toEqual(before);
-      }
+    const before = await page.evaluate(geometry);
+    await page.addStyleTag({ content: ".nd-ai-label { visibility: hidden !important; }" });
+    const after = await page.evaluate(geometry);
+    expect(after, `${name}: hiding the mark moved something else`).toEqual(before);
+    return 1;
+  },
+);
 
-      // A FLOOR, BECAUSE A SWEEP THAT FOUND NOTHING PASSES. Forty-five
-      // components host a mark and every one of them shows it in an example,
-      // so a run that visited fewer pages than this visited a site where the
-      // marks had stopped rendering.
-      expect(swept, `no page in ${locale} carries a mark`).toBeGreaterThan(30);
-    });
-  }
-}
-
-for (const locale of LOCALES) {
-  test(`the mark paints inside its own box, in ${locale}`, async ({ page }) => {
-    // Two screenshots per mark, sixty-odd marks. See above.
-    test.slow();
+walk(
+  "the mark paints inside its own box",
+  {
+    axes: { locale: LOCALES },
+    title: ({ locale }) => `the mark paints inside its own box, in ${locale}`,
+    tally: (swept, { locale }) =>
+      expect(total(swept), `no mark was measured in ${locale}`).toBeGreaterThan(40),
+  },
+  async ({ page, locale, name, path }) => {
+    // Two screenshots per mark, which across the site was what put this walk
+    // past its budget as one test. One page's marks are well inside it.
     await page.setViewportSize({ width: 1120, height: 900 });
     let swept = 0;
 
-    for (const [name, path] of Object.entries(PAGE)) {
-      await page.goto(url(path, locale));
-      await showParts(page);
-      const marks = page.locator(".nd-ai-label");
-      const count = await marks.count();
+    await page.goto(url(path, locale));
+    await showParts(page);
+    const marks = page.locator(".nd-ai-label");
+    const count = await marks.count();
 
-      for (let i = 0; i < count; i += 1) {
-        const mark = marks.nth(i);
-        // A MARK INSIDE SOMETHING SHUT IS NOT A MARK PAINTING ANYWHERE. A
-        // dialog's surface, a popover's panel and a toast all ship hidden, and
-        // the marks in them have no boxes at all until something opens them.
-        if (!(await mark.isVisible())) continue;
-        await mark.scrollIntoViewIfNeeded();
-        const rects = await mark.evaluate((el) =>
-          [...el.getClientRects()].map((r) => [r.left, r.top, r.right, r.bottom]),
-        );
-        if (!rects.length) continue;
+    for (let i = 0; i < count; i += 1) {
+      const mark = marks.nth(i);
+      // A MARK INSIDE SOMETHING SHUT IS NOT A MARK PAINTING ANYWHERE. A
+      // dialog's surface, a popover's panel and a toast all ship hidden, and
+      // the marks in them have no boxes at all until something opens them.
+      if (!(await mark.isVisible())) continue;
+      await mark.scrollIntoViewIfNeeded();
+      const rects = await mark.evaluate((el) =>
+        [...el.getClientRects()].map((r) => [r.left, r.top, r.right, r.bottom]),
+      );
+      if (!rects.length) continue;
 
-        // A window around it, so the loop reads thousands of pixels rather
-        // than millions and still covers everything the mark could reach.
-        const clip = await mark.evaluate((el) => {
-          const r = el.getBoundingClientRect();
-          const pad = 160;
-          const x = Math.max(0, r.left - pad);
-          const y = Math.max(0, r.top - pad);
-          return {
-            x,
-            y,
-            width: Math.min(window.innerWidth - x, r.width + pad * 2),
-            height: Math.min(window.innerHeight - y, r.height + pad * 2),
-          };
-        });
-        if (clip.width < 8 || clip.height < 8) continue;
+      // A window around it, so the loop reads thousands of pixels rather than
+      // millions and still covers everything the mark could reach.
+      const clip = await mark.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const pad = 160;
+        const x = Math.max(0, r.left - pad);
+        const y = Math.max(0, r.top - pad);
+        return {
+          x,
+          y,
+          width: Math.min(window.innerWidth - x, r.width + pad * 2),
+          height: Math.min(window.innerHeight - y, r.height + pad * 2),
+        };
+      });
+      if (clip.width < 8 || clip.height < 8) continue;
 
-        const shown = await page.screenshot({ clip });
-        await mark.evaluate((el) => {
-          el.style.visibility = "hidden";
-        });
-        const gone = await page.screenshot({ clip });
-        await mark.evaluate((el) => {
-          el.style.visibility = "";
-        });
+      const shown = await page.screenshot({ clip });
+      await mark.evaluate((el) => {
+        el.style.visibility = "hidden";
+      });
+      const gone = await page.screenshot({ clip });
+      await mark.evaluate((el) => {
+        el.style.visibility = "";
+      });
 
-        // The rectangles are in viewport coordinates and the shots are in the
-        // clip's, so the clip's origin comes off them.
-        const local = rects.map(([l, t, r, b]) => [
-          l - clip.x,
-          t - clip.y,
-          r - clip.x,
-          b - clip.y,
-        ]);
-        const strays = await outside(page, shown, gone, local);
-        expect(strays, `${name}: mark ${i} painted outside its own box`).toBe(0);
-        swept += 1;
-      }
+      // The rectangles are in viewport coordinates and the shots are in the
+      // clip's, so the clip's origin comes off them.
+      const local = rects.map(([l, t, r, b]) => [l - clip.x, t - clip.y, r - clip.x, b - clip.y]);
+      const strays = await outside(page, shown, gone, local);
+      expect(strays, `${name}: mark ${i} painted outside its own box`).toBe(0);
+      swept += 1;
     }
 
-    expect(swept, `no mark was measured in ${locale}`).toBeGreaterThan(40);
-  });
-}
+    return swept;
+  },
+);
 
 test("no mark overlaps the run of text it stands beside", async ({ page }) => {
   // RANGE RECTANGLES, NOT ELEMENT BOXES, for the reason in this file's header:

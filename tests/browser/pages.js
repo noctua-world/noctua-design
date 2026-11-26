@@ -9,6 +9,14 @@
 // a door, not a page — and a spec that navigates to it loses its execution
 // context the moment the meta refresh fires, which surfaces as the useless
 // "Execution context was destroyed" rather than as anything about the site.
+//
+// And the walks over all of it, `walker` at the bottom, so that "every page"
+// is written in one place too.
+
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+import { expect, test } from "@playwright/test";
 
 /** The locales that are built, including the pseudo-locale. */
 export const LOCALES = ["en", "pt-BR", "qps"];
@@ -224,6 +232,44 @@ export const PAGE = {
   // x locale sweep and the 320px audit have indentation here that nothing else
   // on the site can give them.
   list: "list/",
+  // The name a query matched. On this list because it is the one component
+  // whose whole drawing is a run of letters inside a word, so the readability
+  // sweep has three tints here with ink on each that nothing else gives it.
+  matchText: "match-text/",
+  // The list a reader walks with the keyboard. On this list because it is the
+  // only multi-column box in the system, so the width x locale sweep and the
+  // 320px audit have a layout here that changes its own column count.
+  optionList: "option-list/",
+  // The footer of an application window. On this list because it is the one
+  // component drawn edge to edge in four shades of one colour, and the only
+  // one whose corners take a fixed width out of a 320px line.
+  footer: "footer/",
+  // The drawer of an application window. On this list because it is the one
+  // component whose size is a share of the box around it, and the one whose
+  // two rails take a fixed width out of a 320px window from both sides.
+  drawer: "drawer/",
+  // The split. On this list because it is the one component laid out by a
+  // query on its own box, so the width x locale sweep has a layout here that
+  // changes with the column it is in and not with the window.
+  split: "split/",
+  // The line a reader types on. On this list because it is the one control
+  // whose cursor this system draws, over a second copy of its own text, so the
+  // width x locale sweep has a box here whose two layers must wrap as one.
+  prompt: "prompt/",
+  // The control that records a shortcut. On this list because its label, its
+  // box of key caps and its remove control share one row that wraps, and the
+  // caller's sentences in it run longest in `qps`, so the width x locale sweep
+  // has a row here that must break rather than spill.
+  keyCapture: "key-capture/",
+  // The log. On this list because it is the one region whose height is the
+  // box around it and whose scroll position a script keeps at the end, so the
+  // width x locale sweep has lines here that must wrap inside a window.
+  log: "log/",
+  // The reading column. On this list because its last example is the closed
+  // Markdown subset drawn as the interface draws a help page, so the width x
+  // locale sweep and the 320px audit have every construct of it in one column:
+  // a table that stacks, a block of code that scrolls and a list in a list.
+  prose: "prose/",
 };
 
 /**
@@ -246,6 +292,44 @@ export const url = (page, locale = "en") => `/${locale}/${page}`;
  * of everything else.
  */
 export const ANY = PAGE.intro;
+
+/**
+ * Every link the built sidebar carries, per locale, as `[slug, href]` pairs.
+ *
+ * READ FROM THE FILE THE SERVER HANDS THE BROWSER — the built `ANY` page, out
+ * of the directory `playwright.config.js` serves — because a walk over the
+ * sidebar is generated as one test per link, and the tests have to exist
+ * before any browser does. The walk that uses it holds this list against the
+ * sidebar the browser actually reads, so a link this misreads is a failing
+ * test rather than a link nobody walks.
+ *
+ * A site that was never built reads as no links at all, and a walk's guard
+ * refuses a walk with nothing to visit, so that is a failure that says what it
+ * is rather than a file that will not load.
+ */
+export const SIDEBAR = Object.fromEntries(LOCALES.map((locale) => [locale, sidebar(locale)]));
+
+function sidebar(locale) {
+  const file = fileURLToPath(
+    new URL(`../../docs-site/dist/${locale}/${ANY}index.html`, import.meta.url),
+  );
+  let html;
+  try {
+    html = readFileSync(file, "utf8");
+  } catch {
+    return [];
+  }
+  const links = [];
+  // Each tag on its own and each attribute by name, so the order a renderer
+  // writes them in is not part of the claim.
+  for (const [tag] of html.matchAll(/<a\b[^>]*>/g)) {
+    const classes = (/\sclass="([^"]*)"/.exec(tag)?.[1] ?? "").split(/\s+/);
+    const href = /\shref="([^"]*)"/.exec(tag)?.[1];
+    if (!classes.includes("nd-nav-link") || href === undefined) continue;
+    links.push([href.replace(/^(\.\.\/)+/, "").replace(/\/$/, "") || href, href]);
+  }
+  return links;
+}
 
 /**
  * The page's theme menu, opened.
@@ -335,4 +419,136 @@ export async function closeTheme(page) {
   if ((await panel.getAttribute("open")) !== null) {
     await panel.locator("summary").click();
   }
+}
+
+// --- Whole-site walks ---------------------------------------------------------
+
+/**
+ * A question asked of every page, declared as one test per page.
+ *
+ * A WALK WAS ONE TEST WITH A LOOP IN IT, and the budget is per test. Every
+ * page — or every page three times, one round per locale — shared thirty
+ * seconds, so every page added took margin from the rest, and every process
+ * the machine was running took more. The walk then failed as a timeout on
+ * whichever page the clock ran out on, which reads as a defect in that page and
+ * is not one. One test per page gives every page the whole budget, and gives
+ * the workers the walk to share.
+ *
+ * - `name` is the walk's own title. `title` gives each combination of `axes`
+ *   its heading, which by default is `name`: the tests are grouped under the
+ *   title the walk had as one test, so a grep for it still finds all of them.
+ * - `axes` are crossed with every page: `{ locale: LOCALES }` is one test per
+ *   page per locale. `body` receives each axis by its name, beside `page`,
+ *   `info` (the test's info), and `name` and `path` of the page it is on.
+ * - `pages` is what the walk visits, as `[name, path]` pairs, or a function of
+ *   one combination of axes returning them. Left out, it is every page in
+ *   `PAGE`. It is the walk's CLAIM as well as its list: what the guard below
+ *   holds the generated tests to. It may add pages to `PAGE` and never takes
+ *   one away: a path may be written relative (`../icons/`, as a sidebar
+ *   writes it) and is read as the page it names.
+ * - `tally`, when a claim is about the site rather than about any one page —
+ *   a floor, mostly, and `NOCTUA.md §19.5` is why a walk keeps one: the count
+ *   of things examined is itself an assertion. It receives every page's
+ *   `body` result, in page order, and asserts. A floor needs every page's
+ *   number, so a combination with a tally runs its pages one after another on
+ *   one worker and asserts after the last — in order, never in one test: each
+ *   page still has the whole budget to itself.
+ *
+ * AND THE WALK IS HELD TO ITS CLAIM. A page dropped from a loop is a line
+ * somebody can read; a page dropped from a generated set is a test that was
+ * never made, which nobody sees at all. So every walk carries one more test,
+ * which counts the tests that were actually registered, as they were
+ * registered, against the claim's size times the product of the axes — worked
+ * out again from the declarations rather than from the loop that did the
+ * registering — and then holds every combination to every page it names, by
+ * name, and to every page of `PAGE`, by path.
+ *
+ * A spec gets its `walk` from `walker`, once, by handing it a function of its
+ * own that declares a test:
+ *
+ *     const walk = walker((title, fn) => test(title, fn));
+ *
+ * BECAUSE A TEST IS LOCATED WHERE `test` WAS CALLED. Playwright takes the
+ * frame that called it, and called from here every walk in the suite reported
+ * itself as a line of this file — in the list, in a failure's heading and in
+ * the annotation CI writes. Called through a line of the spec, it is the spec
+ * that is named.
+ */
+export function walker(declare) {
+  return (name, options, body) => walk(declare, name, options, body);
+}
+
+function walk(declare, name, options, body) {
+  const { axes = {}, title = () => name, pages = null, tally = null } = options;
+  const claim = (combo) =>
+    typeof pages === "function" ? pages(combo) : (pages ?? Object.entries(PAGE));
+  const combos = Object.entries(axes).reduce(
+    (all, [axis, values]) =>
+      all.flatMap((combo) => values.map((value) => ({ ...combo, [axis]: value }))),
+    [{}],
+  );
+
+  // What was declared, by heading, as `[name, path]`. Written straight after
+  // the call that declares a test and nowhere else, so a page that never
+  // reached that call is a page missing here.
+  const made = new Map();
+  for (const combo of combos) {
+    const heading = title(combo);
+    const declared = [];
+    made.set(heading, declared);
+    test.describe(heading, () => {
+      if (tally) test.describe.configure({ mode: "serial" });
+      const results = [];
+      for (const [page_, path] of claim(combo)) {
+        declare(page_, async ({ page }, info) => {
+          results.push(await body({ ...combo, page, info, name: page_, path }));
+        });
+        declared.push([page_, path]);
+      }
+      if (tally) {
+        declare("across every page", async () => {
+          expect(results.length, "a page of the walk did not report").toBe(declared.length);
+          await tally(results, combo);
+        });
+      }
+    });
+  }
+
+  declare(`the walk "${name}" leaves no page out`, async () => {
+    // The combinations, counted from the axes as declared.
+    const product = Object.values(axes).reduce((count, values) => count * values.length, 1);
+    expect(made.size, "a combination of the walk's axes was never generated").toBe(product);
+
+    let claimed = 0;
+    for (const combo of combos) {
+      const heading = title(combo);
+      const want = claim(combo).map(([page_]) => page_);
+      const got = made.get(heading) ?? [];
+      expect(want.length, `${heading} has no page to visit`).toBeGreaterThan(0);
+      expect(
+        got.map(([page_]) => page_),
+        `${heading} did not generate one test per page it names`,
+      ).toEqual(want);
+      // AND WHATEVER ELSE A WALK NAMES, IT NAMES THE SITE. Every walk here is a
+      // walk over every page of `PAGE` and sometimes more — the built
+      // directory, the sidebar, a page `PAGE` leaves out on purpose — so a
+      // walk handed a list with a page taken out of it is a walk that left
+      // that page out, whatever its own list says.
+      const walked = new Set(got.map(([, path]) => String(path).replace(/^(\.\.\/)+/, "")));
+      expect(
+        Object.values(PAGE).filter((path) => !walked.has(path)),
+        `${heading} leaves out pages the site has`,
+      ).toEqual([]);
+      claimed += want.length;
+    }
+
+    // And the number the claim comes to: its size times the axes.
+    const generated = [...made.values()].reduce((count, declared) => count + declared.length, 0);
+    expect(generated, "the tests generated are not one per page per combination").toBe(claimed);
+    if (typeof pages !== "function") {
+      expect(generated, "the tests generated are not the page list times the axes").toBe(
+        product * (pages ?? Object.keys(PAGE)).length,
+      );
+    }
+  });
 }

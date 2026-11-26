@@ -110,6 +110,13 @@
      which is exactly how the settings gear ended up half the size of the
      link beside it. */
   --nd-control-h: var(--noctua-space-12);
+  /* THE HEADER STICKS TO THE TOP OF THE WINDOW, AND THE WINDOW IS TOLD SO.
+     Whatever the engine brings into view (a fragment's target, a control the
+     focus moves to, the option a list's keyboard walked to) stops below the
+     header and not under it. Without it a walk up a list scrolled each option
+     exactly to the top of the window, where the header covered the one sign
+     of where the keyboard was. */
+  scroll-padding-block-start: var(--nd-header-h);
 
 }
 
@@ -1586,6 +1593,101 @@ a {
   inline-size: min(var(--noctua-space-64), 100%);
 }
 
+/* The far end of a footer line: the items an application's own layout pushes
+   to the end of its modeline. The design system ships no layout for it, so the
+   example carries the one rule an application would write. */
+.nd-example-end {
+  display: flex;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  margin-inline-start: auto;
+}
+
+/* A glyph and the sentence it marks, kept together when a line wraps. It
+   keeps its own width, so a line of one line cuts it at the line's end, and it
+   is never wider than the line, so an expanded line wraps the sentence. */
+.nd-example-run {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--noctua-space-2);
+  max-inline-size: 100%;
+}
+
+/* A footer the page turns the lines of (`enhanceLineExpanders` in `shell.js`).
+   It takes the stage's width, as the footer it holds would standing there
+   alone, so a line still has a width to be cut at. */
+.nd-example-expand {
+  align-self: stretch;
+  min-inline-size: 0;
+}
+
+/* A WINDOW, FOR WHAT IS MEASURED AGAINST ONE. A `Drawer` opens to a share of
+   the box around it, and a `Split` divides the box it is given. A stage is as
+   tall as its content, which is no size to take a share of, so these examples
+   stand in a box with a height of its own: the work, and what opens beside it.
+   The hairline is the window's edge and not the component's. Nothing in it
+   draws a border. */
+.nd-example-window {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  box-sizing: border-box;
+  block-size: calc(var(--noctua-space-64) + var(--noctua-space-32));
+  overflow: hidden;
+  border: var(--noctua-border-hairline) solid var(--nc-color-border);
+}
+
+/* A split in a window is the window's work, and takes all of it. The class a
+   caller would give a split in its own layout, written here for the example. */
+.nd-example-window > .nd-split {
+  flex: 1 1 auto;
+}
+
+/* A log in a window is the window's work, and takes all of it, as a split does. */
+.nd-example-window > .nd-log {
+  flex: 1 1 auto;
+}
+
+/* A confirmation the page asks for: the control that asks, the dialog, and
+   the answer it reported, one under the other. */
+.nd-example-confirm {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--noctua-space-3);
+}
+
+.nd-example-answer {
+  margin: 0;
+}
+
+/* The same window with its parts side by side, for a drawer at a side. */
+.nd-example-window-row {
+  flex-direction: row;
+}
+
+/* The work: whatever the window is for, taking the room a drawer leaves. */
+.nd-example-work {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: var(--noctua-space-3);
+  align-items: start;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  min-block-size: 0;
+  padding: var(--noctua-space-4);
+  overflow: auto;
+}
+
+/* What a page puts in a drawer or a pane: its own padding, which neither
+   component gives it, because content that is a list brings its own. */
+.nd-example-pane {
+  box-sizing: border-box;
+  padding: var(--noctua-space-3) var(--noctua-space-4);
+}
+
 /* A row inside one example — several controls that only mean something beside
    each other. Centred rather than baseline-aligned: these are boxes, and boxes
    of three different heights on one baseline read as three mistakes. */
@@ -1707,7 +1809,9 @@ a {
  * global `margin: 0` reset, and a heading sat against its own paragraph with
  * no seam. */
 .nd-doc-section {
-  scroll-margin-block-start: calc(var(--nd-header-h) + var(--noctua-space-4));
+  /* The header is the window's own scroll padding (`:root`), so a jump to a
+     section adds only the breath above its heading. */
+  scroll-margin-block-start: var(--noctua-space-4);
   display: flex;
   flex-direction: column;
   gap: var(--noctua-space-paragraph);

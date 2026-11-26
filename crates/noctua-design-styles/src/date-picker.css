@@ -193,7 +193,7 @@
   font-size: var(--noctua-size-body);
 }
 
-.nd-date-picker-cell:hover {
+.nd-date-picker-cell:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
@@ -211,7 +211,7 @@
 
 /* THE INPUT IS CLIPPED, SO THE RING IS DRAWN ON THE DAY A READER CAN SEE.
  * `Rating`'s arrangement and its comment. */
-.nd-date-picker-input:focus-visible + .nd-date-picker-cell {
+.nd-date-picker-input:is(:focus-visible, [data-nd-seat-focus]) + .nd-date-picker-cell {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -294,7 +294,7 @@
   opacity: 0.5; /* allow-literal: a refused day is dimmed, and there is no color token for "the same color, less of it" */
 }
 
-.nd-date-picker-input:disabled + .nd-date-picker-cell:hover {
+.nd-date-picker-input:disabled + .nd-date-picker-cell:is(:hover, [data-nd-seat-hover]) {
   background: none;
 }
 
@@ -312,7 +312,7 @@
   cursor: pointer;
 }
 
-.nd-date-picker-control:hover {
+.nd-date-picker-control:is(:hover, [data-nd-seat-hover]) {
   background: var(--nc-color-subtle-bg);
 }
 
@@ -383,8 +383,8 @@
 
 /* The one a reader is in draws its whole edge, over the edge beside it. */
 .nd-date-picker[data-nd-pair="attached"]
-  .nd-date-picker-box:has(.nd-date-picker-entry:focus-visible),
-.nd-date-picker[data-nd-pair="attached"] .nd-date-picker-box:hover {
+  .nd-date-picker-box:has(.nd-date-picker-entry:is(:focus-visible, [data-nd-seat-focus])),
+.nd-date-picker[data-nd-pair="attached"] .nd-date-picker-box:is(:hover, [data-nd-seat-hover]) {
   z-index: var(--noctua-layer-raised);
 }
 
@@ -417,8 +417,8 @@
 }
 
 .nd-date-picker[data-nd-pair="stacked"]
-  .nd-date-picker-box:has(.nd-date-picker-entry:focus-visible),
-.nd-date-picker[data-nd-pair="stacked"] .nd-date-picker-box:hover {
+  .nd-date-picker-box:has(.nd-date-picker-entry:is(:focus-visible, [data-nd-seat-focus])),
+.nd-date-picker[data-nd-pair="stacked"] .nd-date-picker-box:is(:hover, [data-nd-seat-hover]) {
   z-index: var(--noctua-layer-raised);
 }
 
@@ -456,14 +456,14 @@
   border-radius: var(--noctua-radius-control);
 }
 
-.nd-date-picker-box:hover {
+.nd-date-picker-box:is(:hover, [data-nd-seat-hover]) {
   border-color: var(--nc-color-fg-muted);
 }
 
 /* THE RING IS ON THE BOX, NOT ON THE TYPING. The box is what a reader sees as
  * the field, and a ring around the text alone leaves the control beside it
  * outside the thing that just took focus. */
-.nd-date-picker-box:has(.nd-date-picker-entry:focus-visible) {
+.nd-date-picker-box:has(.nd-date-picker-entry:is(:focus-visible, [data-nd-seat-focus])) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }
@@ -493,7 +493,7 @@
 }
 
 /* Taken off the typing because it is drawn on the box above. */
-.nd-date-picker-entry:focus-visible {
+.nd-date-picker-entry:is(:focus-visible, [data-nd-seat-focus]) {
   outline: none;
 }
 

@@ -1,0 +1,67 @@
+# What a `Drawer` has to be, in both languages, in a real browser.
+#
+# The caller turns it: `collapsed` is a prop, and Escape reaches the caller as
+# an event. So a case asks what the markup says in each state, what the script
+# writes on a collapsed drawer, and that Escape turns nothing by itself. How
+# far a drawer opens, where its rails stand and where the focus goes when it
+# shuts are asked in `tests/browser/drawer.spec.js`.
+
+[[case]]
+name = "it is a named region, open, at the bottom"
+note = "A region with no name is one a screen reader lists by its role alone, and the stylesheet opens the drawer along the edge `data-nd-side` names."
+props = { name = "pages", label = "Drawer" }
+children = "Commands"
+expect = { attrs = { role = "region", "aria-label" = "Drawer", "data-nd-drawer" = "pages", "data-nd-side" = "bottom", "data-nd-collapsed" = "false" }, absent = ["inert"], present = [":scope > .nd-drawer-panel"] }
+
+[[case]]
+name = "a drawer takes the id a control names it by, and writes none of its own"
+note = "The control that opens and shuts a drawer names it in `aria-controls`, which takes an id. Without `id` there is none, because an id two drawers both derived would be one id twice."
+props = { name = "pages", label = "Drawer", id = "pages-drawer" }
+expect = { attrs = { id = "pages-drawer", "data-nd-drawer" = "pages" } }
+
+[[case]]
+name = "a drawer with no id carries none"
+note = "An empty `id` is an invalid one, and a body that wrote one for a missing prop would put it on every drawer."
+props = { name = "pages", label = "Drawer" }
+expect = { absent = ["id"] }
+
+[[case]]
+name = "a collapsed drawer says so, and nothing in it can be reached"
+note = "The stylesheet hides a collapsed drawer by `data-nd-collapsed`. The script writes `inert` beside it, so a control inside cannot take the focus while the drawer slides shut."
+props = { name = "pages", label = "Drawer", collapsed = true }
+expect = { attrs = { "data-nd-collapsed" = "true", inert = "" }, present = ["button"], hidden = ["button"] }
+
+[[case.child]]
+component = "Button"
+props = { label = "Close the page" }
+
+[[case]]
+name = "it opens from the side it names"
+note = "A drawer at a side grows across the window and one at the bottom grows up it, so a side that did not reach the markup would be a drawer capped on the wrong axis."
+props = { name = "pages", label = "Sidebar", side = "start" }
+children = "Pages"
+expect = { attrs = { "data-nd-side" = "start" } }
+
+[[case]]
+name = "a rail at each side carries its side"
+note = "The stylesheet stands a rail at the side it names, and marks a chosen tab on the edge that faces the content."
+props = { name = "pages", label = "Drawer" }
+expect = { present = [".nd-drawer-panel > .nd-drawer-rail[data-nd-side=start]", ".nd-drawer-panel > .nd-drawer-rail[data-nd-side=end]"] }
+
+[[case.child]]
+component = "DrawerRail"
+
+[[case.child]]
+component = "DrawerRail"
+props = { side = "end" }
+
+[[case]]
+name = "Escape turns nothing by itself"
+note = "The caller holds the state. Escape says `nd-drawer-dismiss`, and a script here that collapsed the drawer would close a whole drawer where the caller meant to go back one page."
+props = { name = "pages", label = "Drawer" }
+steps = ["focus:button", "key:Escape"]
+expect = { attrs = { "data-nd-collapsed" = "false" }, absent = ["inert"], focus = "button" }
+
+[[case.child]]
+component = "Button"
+props = { label = "Close the page" }

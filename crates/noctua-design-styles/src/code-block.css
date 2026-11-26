@@ -108,6 +108,14 @@
     border-color: var(--nc-color-border);
   }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-codeblock-control[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border);
+}
+
 .nd-codeblock-control[aria-pressed="true"] {
   color: var(--nc-color-fg);
   border-color: var(--nc-color-border-strong);
@@ -276,6 +284,14 @@
     border-color: var(--nc-color-border-strong);
   }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+.nd-codeblock-expand[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+  border-color: var(--nc-color-border-strong);
+}
+
 /* Absent until the script caps the block. A control that offers to expand
    something already fully visible is a control that lies. */
 .nd-codeblock-figure:not(:has(> .nd-codeblock[data-nd-collapsed])) > .nd-codeblock-expand {
@@ -485,7 +501,7 @@ dl.nd-list > .nd-list-item + .nd-list-term {
   clip-path: inset(50%);
   white-space: nowrap;
 }
-.nd-visually-hidden[data-nd-focusable="true"]:focus-within {
+.nd-visually-hidden[data-nd-focusable="true"]:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])) {
   position: static;
   inline-size: auto;
   block-size: auto;

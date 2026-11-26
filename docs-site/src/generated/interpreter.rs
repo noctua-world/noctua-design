@@ -26,23 +26,27 @@ use noctua_design::components::{
     DatePickerDay, DatePickerDayKind, DatePickerFirstDay, DatePickerForm, DatePickerLabels,
     DatePickerMonths, DatePickerOrder, DatePickerPair, DatePickerSelection, DatePickerSize, Del,
     Dialog, DialogSize, Disclosure, DisclosureHeading, Divider, DividerOrientation, DividerSpacing,
-    DividerWeight, Em, ErrorSummary, ErrorSummaryItem, Field, FieldKind, FieldSize, Fieldset,
-    FileInput, FileInputSize, Heading, HeadingLevel, HeadingSize, HeadingTone, Icon, IconSize,
-    Image, ImageFit, ImageLoading, ImageRatio, Info, InfoPlacement, Input, InputKind, InputSize,
-    Ins, Kbd, KbdSize, Label, LabelKind, LabelSize, Lineage, LineageFigure, LineageFigureParallax,
+    DividerWeight, Drawer, DrawerRail, DrawerRailSide, DrawerSide, Em, ErrorSummary,
+    ErrorSummaryItem, Field, FieldKind, FieldSize, Fieldset, FileInput, FileInputSize, Footer,
+    FooterCorner, FooterCornerSide, FooterLine, FooterLineKind, FooterVisibility, Heading,
+    HeadingLevel, HeadingSize, HeadingTone, Icon, IconSize, Image, ImageFit, ImageLoading,
+    ImageRatio, Info, InfoPlacement, Input, InputKind, InputSize, Ins, Kbd, KbdSize, KeyCapture,
+    KeyCaptureKeyboard, Label, LabelKind, LabelSize, Lineage, LineageFigure, LineageFigureParallax,
     LineageFigureShape, LineageFigureTone, LineageFilterMode, LineageHeight, LineageLettering,
     LineageLine, LineagePick, LineageReach, LineageRoute, LineageSize, LineageThickness,
     LineageTilt, LineageView, Link, LinkTone, List, ListItem, ListKind, ListMarker, ListSpacing,
-    Mark, Menu, MenuItem, MenuPlacement, MessageBar, MessageBarLive, Meter, MeterSize, NumberInput,
-    NumberInputSize, NumberInputStepping, OtpField, OtpFieldKind, OtpFieldSize, Pagination,
-    PaginationSize, PaginationSpread, Paragraph, ParagraphSize, ParagraphTone, Popover,
-    PopoverPlacement, Progress, ProgressSize, Prose, ProseMeasure, Radio, RadioSize, Rating,
-    RatingSize, Search, SearchGroup, SearchPresentation, SearchResult, SearchSize, Segmented,
-    SegmentedAppearance, SegmentedFill, SegmentedItem, SegmentedOrientation, SegmentedSelection,
-    SegmentedShape, SegmentedSize, Select, SelectGroup, SelectOption, SelectSize, Slider,
-    SliderSize, SliderTone, Strong, Swatch, SwatchShape, SwatchSize, Switch, SwitchSize, Tab,
-    TabPanel, Table, TableCell, TableCellAggregate, TableCellAggregateOver, TableCellAlign,
-    TableCellWrap, TableColumn, TableColumnSortAs, TableColumnWidth, TableDensity, TableHeaderCell,
+    Log, LogLine, Mark, MatchText, Menu, MenuItem, MenuPlacement, MessageBar, MessageBarLive,
+    MessageBarPresentation, Meter, MeterSize, NumberInput, NumberInputSize, NumberInputStepping,
+    OptionGroup, OptionItem, OptionList, OptionListLayout, OptionListSize, OtpField, OtpFieldKind,
+    OtpFieldSize, Pagination, PaginationSize, PaginationSpread, Paragraph, ParagraphSize,
+    ParagraphTone, Popover, PopoverPlacement, Progress, ProgressSize, Prompt, Prose, ProseMeasure,
+    Radio, RadioSize, Rating, RatingSize, Search, SearchGroup, SearchPresentation, SearchResult,
+    SearchSize, Segmented, SegmentedAppearance, SegmentedFill, SegmentedItem, SegmentedOrientation,
+    SegmentedSelection, SegmentedShape, SegmentedSize, Select, SelectGroup, SelectOption,
+    SelectSize, Slider, SliderSize, SliderTone, Split, SplitCollapse, SplitHandle, SplitPane,
+    SplitPaneSide, Strong, Swatch, SwatchShape, SwatchSize, Switch, SwitchSize, Tab, TabPanel,
+    Table, TableCell, TableCellAggregate, TableCellAggregateOver, TableCellAlign, TableCellWrap,
+    TableColumn, TableColumnSortAs, TableColumnWidth, TableDensity, TableHeaderCell,
     TableHeaderCellAlign, TableHeaderCellScope, TableHeaderCellSort, TableHeaderCellWrap,
     TableHeight, TableLayout, TableRow, TableRowEmphasis, TableRowSelect, TableRules, TableSection,
     TableSectionKind, TableWidth, Tabs, TabsActivation, TabsAppearance, TabsFill, TabsOrientation,
@@ -56,6 +60,10 @@ use noctua_design::components::{
 use crate::tree::{Node, Scope, Value, render};
 
 /// Renders one component of a tree.
+#[allow(
+    clippy::too_many_lines,
+    reason = "one arm per component, and the component set is the point"
+)]
 pub(crate) fn component(
     name: &str,
     props: &'static [(&'static str, Value)],
@@ -84,12 +92,17 @@ pub(crate) fn component(
         "Dialog" => dialog(props, children, scope),
         "Disclosure" => disclosure(props, children, scope),
         "Divider" => divider(props, children, scope),
+        "Drawer" => drawer(props, children, scope),
+        "DrawerRail" => drawer_rail(props, children, scope),
         "Em" => em(props, children, scope),
         "ErrorSummary" => error_summary(props, children, scope),
         "ErrorSummaryItem" => error_summary_item(props, children, scope),
         "Field" => field(props, children, scope),
         "Fieldset" => fieldset(props, children, scope),
         "FileInput" => file_input(props, children, scope),
+        "Footer" => footer(props, children, scope),
+        "FooterCorner" => footer_corner(props, children, scope),
+        "FooterLine" => footer_line(props, children, scope),
         "Heading" => heading(props, children, scope),
         "Icon" => icon(props, children, scope),
         "Image" => image(props, children, scope),
@@ -97,23 +110,31 @@ pub(crate) fn component(
         "Input" => input(props, children, scope),
         "Ins" => ins(props, children, scope),
         "Kbd" => kbd(props, children, scope),
+        "KeyCapture" => key_capture(props, children, scope),
         "Label" => label(props, children, scope),
         "Lineage" => lineage(props, children, scope),
         "LineageFigure" => lineage_figure(props, children, scope),
         "Link" => link(props, children, scope),
         "List" => list(props, children, scope),
         "ListItem" => list_item(props, children, scope),
+        "Log" => log(props, children, scope),
+        "LogLine" => log_line(props, children, scope),
         "Mark" => mark(props, children, scope),
+        "MatchText" => match_text(props, children, scope),
         "Menu" => menu(props, children, scope),
         "MenuItem" => menu_item(props, children, scope),
         "MessageBar" => message_bar(props, children, scope),
         "Meter" => meter(props, children, scope),
         "NumberInput" => number_input(props, children, scope),
+        "OptionGroup" => option_group(props, children, scope),
+        "OptionItem" => option_item(props, children, scope),
+        "OptionList" => option_list(props, children, scope),
         "OtpField" => otp_field(props, children, scope),
         "Pagination" => pagination(props, children, scope),
         "Paragraph" => paragraph(props, children, scope),
         "Popover" => popover(props, children, scope),
         "Progress" => progress(props, children, scope),
+        "Prompt" => prompt(props, children, scope),
         "Prose" => prose(props, children, scope),
         "Radio" => radio(props, children, scope),
         "Rating" => rating(props, children, scope),
@@ -126,6 +147,9 @@ pub(crate) fn component(
         "SelectGroup" => select_group(props, children, scope),
         "SelectOption" => select_option(props, children, scope),
         "Slider" => slider(props, children, scope),
+        "Split" => split(props, children, scope),
+        "SplitHandle" => split_handle(props, children, scope),
+        "SplitPane" => split_pane(props, children, scope),
         "Strong" => strong(props, children, scope),
         "Swatch" => swatch(props, children, scope),
         "Switch" => switch(props, children, scope),
@@ -1240,9 +1264,7 @@ fn dialog(
     let name_ = scope
         .find(props, "name")
         .expect("Dialog.name is required and this tree does not set it");
-    let trigger_label_ = scope
-        .find(props, "trigger_label")
-        .expect("Dialog.trigger_label is required and this tree does not set it");
+    let trigger_label_ = scope.find(props, "trigger_label");
     let heading_ = scope.find(props, "heading");
     let label_ = scope.find(props, "label");
     let description_ = scope.find(props, "description");
@@ -1252,6 +1274,12 @@ fn dialog(
         .unwrap_or_default();
     let dismissible_ = scope.flag(props, "dismissible").unwrap_or(true);
     let close_label_ = scope.find(props, "close_label");
+    let shown_ = scope.flag(props, "shown").unwrap_or(false);
+    let alert_ = scope.flag(props, "alert").unwrap_or(false);
+    let requester_ = scope.find(props, "requester");
+    let irreversible_label_ = scope.find(props, "irreversible_label");
+    let confirm_label_ = scope.find(props, "confirm_label");
+    let decline_label_ = scope.find(props, "decline_label");
     let ai_mark_ = scope.find(props, "ai_mark");
     let ai_label_ = scope.find(props, "ai_label");
     let ai_note_ = scope.find(props, "ai_note");
@@ -1268,6 +1296,12 @@ fn dialog(
             size: size_,
             dismissible: dismissible_,
             close_label: close_label_,
+            shown: shown_,
+            alert: alert_,
+            requester: requester_,
+            irreversible_label: irreversible_label_,
+            confirm_label: confirm_label_,
+            decline_label: decline_label_,
             ai_mark: ai_mark_,
             ai_label: ai_label_,
             ai_note: ai_note_,
@@ -1357,6 +1391,58 @@ fn divider(
             weight: weight_,
             decorative: decorative_,
             class: class_,
+        }
+    }
+}
+
+/// `Drawer`, from a tree.
+fn drawer(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("Drawer.name is required and this tree does not set it");
+    let id_ = scope.find(props, "id");
+    let label_ = scope
+        .find(props, "label")
+        .expect("Drawer.label is required and this tree does not set it");
+    let side_ = scope
+        .pick(props, "side", &DrawerSide::ALL, DrawerSide::as_str)
+        .unwrap_or_default();
+    let collapsed_ = scope.flag(props, "collapsed").unwrap_or(false);
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        Drawer {
+            name: name_,
+            id: id_,
+            label: label_,
+            side: side_,
+            collapsed: collapsed_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `DrawerRail`, from a tree.
+fn drawer_rail(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let side_ = scope
+        .pick(props, "side", &DrawerRailSide::ALL, DrawerRailSide::as_str)
+        .unwrap_or_default();
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        DrawerRail {
+            side: side_,
+            class: class_,
+            {render(children, scope)}
         }
     }
 }
@@ -1592,6 +1678,94 @@ fn file_input(
             ai_label: ai_label_,
             ai_note: ai_note_,
             class: class_,
+        }
+    }
+}
+
+/// `Footer`, from a tree.
+fn footer(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let label_ = scope
+        .find(props, "label")
+        .expect("Footer.label is required and this tree does not set it");
+    let visibility_ = scope
+        .pick(
+            props,
+            "visibility",
+            &FooterVisibility::ALL,
+            FooterVisibility::as_str,
+        )
+        .unwrap_or_default();
+    let shown_ = scope.flag(props, "shown").unwrap_or(false);
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        Footer {
+            label: label_,
+            visibility: visibility_,
+            shown: shown_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `FooterCorner`, from a tree.
+fn footer_corner(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let side_ = scope
+        .pick(
+            props,
+            "side",
+            &FooterCornerSide::ALL,
+            FooterCornerSide::as_str,
+        )
+        .unwrap_or_default();
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        FooterCorner {
+            side: side_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `FooterLine`, from a tree.
+fn footer_line(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let kind_ = scope
+        .pick(props, "kind", &FooterLineKind::ALL, FooterLineKind::as_str)
+        .unwrap_or_default();
+    let expandable_ = scope.flag(props, "expandable").unwrap_or(false);
+    let expanded_ = scope.flag(props, "expanded").unwrap_or(false);
+    let expand_label_ = scope.find(props, "expand_label");
+    let collapse_label_ = scope.find(props, "collapse_label");
+    let action_ = scope.find(props, "action");
+    let live_ = scope.flag(props, "live").unwrap_or(false);
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        FooterLine {
+            kind: kind_,
+            expandable: expandable_,
+            expanded: expanded_,
+            expand_label: expand_label_,
+            collapse_label: collapse_label_,
+            action: action_,
+            live: live_,
+            class: class_,
+            {render(children, scope)}
         }
     }
 }
@@ -1864,6 +2038,54 @@ fn kbd(
             size: size_,
             class: class_,
             {render(children, scope)}
+        }
+    }
+}
+
+/// `KeyCapture`, from a tree.
+fn key_capture(
+    props: &'static [(&'static str, Value)],
+    _children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("KeyCapture.name is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("KeyCapture.label is required and this tree does not set it");
+    let value_ = scope.find(props, "value");
+    let keyboard_ = scope
+        .pick(
+            props,
+            "keyboard",
+            &KeyCaptureKeyboard::ALL,
+            KeyCaptureKeyboard::as_str,
+        )
+        .unwrap_or_default();
+    let capture_label_ = scope
+        .find(props, "capture_label")
+        .expect("KeyCapture.capture_label is required and this tree does not set it");
+    let empty_label_ = scope
+        .find(props, "empty_label")
+        .expect("KeyCapture.empty_label is required and this tree does not set it");
+    let clear_label_ = scope.find(props, "clear_label");
+    let refusal_ = scope.find(props, "refusal");
+    let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        KeyCapture {
+            name: name_,
+            label: label_,
+            value: value_,
+            keyboard: keyboard_,
+            capture_label: capture_label_,
+            empty_label: empty_label_,
+            clear_label: clear_label_,
+            refusal: refusal_,
+            disabled: disabled_,
+            class: class_,
         }
     }
 }
@@ -2167,6 +2389,58 @@ fn list_item(
     }
 }
 
+/// `Log`, from a tree.
+fn log(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("Log.name is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("Log.label is required and this tree does not set it");
+    let follow_ = scope.flag(props, "follow").unwrap_or(true);
+    let resume_label_ = scope.find(props, "resume_label");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        Log {
+            name: name_,
+            label: label_,
+            follow: follow_,
+            resume_label: resume_label_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `LogLine`, from a tree.
+fn log_line(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let tone_ = scope.find(props, "tone");
+    let level_ = scope.find(props, "level");
+    let time_ = scope.find(props, "time");
+    let source_ = scope.find(props, "source");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        LogLine {
+            tone: tone_,
+            level: level_,
+            time: time_,
+            source: source_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
 /// `Mark`, from a tree.
 fn mark(
     props: &'static [(&'static str, Value)],
@@ -2179,6 +2453,27 @@ fn mark(
         Mark {
             class: class_,
             {render(children, scope)}
+        }
+    }
+}
+
+/// `MatchText`, from a tree.
+fn match_text(
+    props: &'static [(&'static str, Value)],
+    _children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let text_ = scope
+        .find(props, "text")
+        .expect("MatchText.text is required and this tree does not set it");
+    let hits_ = scope.find(props, "hits");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        MatchText {
+            text: text_,
+            hits: hits_,
+            class: class_,
         }
     }
 }
@@ -2270,6 +2565,18 @@ fn message_bar(
     let live_ = scope.pick(props, "live", &MessageBarLive::ALL, MessageBarLive::as_str);
     let dismissible_ = scope.flag(props, "dismissible").unwrap_or(false);
     let dismiss_label_ = scope.find(props, "dismiss_label");
+    let presentation_ = scope
+        .pick(
+            props,
+            "presentation",
+            &MessageBarPresentation::ALL,
+            MessageBarPresentation::as_str,
+        )
+        .unwrap_or_default();
+    let deadline_ = scope.find(props, "deadline");
+    let countdown_label_ = scope.find(props, "countdown_label");
+    let action_label_ = scope.find(props, "action_label");
+    let action_ = scope.find(props, "action");
     let ai_mark_ = scope.find(props, "ai_mark");
     let ai_label_ = scope.find(props, "ai_label");
     let ai_note_ = scope.find(props, "ai_note");
@@ -2284,6 +2591,11 @@ fn message_bar(
             live: live_,
             dismissible: dismissible_,
             dismiss_label: dismiss_label_,
+            presentation: presentation_,
+            deadline: deadline_,
+            countdown_label: countdown_label_,
+            action_label: action_label_,
+            action: action_,
             ai_mark: ai_mark_,
             ai_label: ai_label_,
             ai_note: ai_note_,
@@ -2441,6 +2753,108 @@ fn number_input(
             ai_label: ai_label_,
             ai_note: ai_note_,
             class: class_,
+        }
+    }
+}
+
+/// `OptionGroup`, from a tree.
+fn option_group(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let label_ = scope
+        .find(props, "label")
+        .expect("OptionGroup.label is required and this tree does not set it");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        OptionGroup {
+            label: label_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `OptionItem`, from a tree.
+fn option_item(
+    props: &'static [(&'static str, Value)],
+    _children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let value_ = scope
+        .find(props, "value")
+        .expect("OptionItem.value is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("OptionItem.label is required and this tree does not set it");
+    let hits_ = scope.find(props, "hits");
+    let detail_ = scope.find(props, "detail");
+    let detail_hits_ = scope.find(props, "detail_hits");
+    let shortcut_ = scope.find(props, "shortcut");
+    let icon_ = scope.icon(props, "icon");
+    let id_ = scope.find(props, "id");
+    let active_ = scope.flag(props, "active").unwrap_or(false);
+    let selected_ = scope.flag(props, "selected").unwrap_or(false);
+    let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        OptionItem {
+            value: value_,
+            label: label_,
+            hits: hits_,
+            detail: detail_,
+            detail_hits: detail_hits_,
+            shortcut: shortcut_,
+            icon: icon_,
+            id: id_,
+            active: active_,
+            selected: selected_,
+            disabled: disabled_,
+            class: class_,
+        }
+    }
+}
+
+/// `OptionList`, from a tree.
+fn option_list(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("OptionList.name is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("OptionList.label is required and this tree does not set it");
+    let layout_ = scope
+        .pick(
+            props,
+            "layout",
+            &OptionListLayout::ALL,
+            OptionListLayout::as_str,
+        )
+        .unwrap_or_default();
+    let size_ = scope
+        .pick(props, "size", &OptionListSize::ALL, OptionListSize::as_str)
+        .unwrap_or_default();
+    let focusable_ = scope.flag(props, "focusable").unwrap_or(true);
+    let empty_label_ = scope.find(props, "empty_label");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        OptionList {
+            name: name_,
+            label: label_,
+            layout: layout_,
+            size: size_,
+            focusable: focusable_,
+            empty_label: empty_label_,
+            class: class_,
+            {render(children, scope)}
         }
     }
 }
@@ -2688,6 +3102,43 @@ fn progress(
     }
 }
 
+/// `Prompt`, from a tree.
+fn prompt(
+    props: &'static [(&'static str, Value)],
+    _children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("Prompt.name is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("Prompt.label is required and this tree does not set it");
+    let value_ = scope.find(props, "value");
+    let send_label_ = scope.find(props, "send_label");
+    let action_ = scope.find(props, "action");
+    let controls_ = scope.find(props, "controls");
+    let active_option_ = scope.find(props, "active_option");
+    let disabled_ = scope.flag(props, "disabled").unwrap_or(false);
+    let readonly_ = scope.flag(props, "readonly").unwrap_or(false);
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        Prompt {
+            name: name_,
+            label: label_,
+            value: value_,
+            send_label: send_label_,
+            action: action_,
+            controls: controls_,
+            active_option: active_option_,
+            disabled: disabled_,
+            readonly: readonly_,
+            class: class_,
+        }
+    }
+}
+
 /// `Prose`, from a tree.
 fn prose(
     props: &'static [(&'static str, Value)],
@@ -2697,11 +3148,13 @@ fn prose(
     let measure_ = scope
         .pick(props, "measure", &ProseMeasure::ALL, ProseMeasure::as_str)
         .unwrap_or_default();
+    let flow_ = scope.flag(props, "flow").unwrap_or(false);
     let class_ = scope.find(props, "class").unwrap_or_default();
 
     rsx! {
         Prose {
             measure: measure_,
+            flow: flow_,
             class: class_,
             {render(children, scope)}
         }
@@ -3262,6 +3715,90 @@ fn slider(
             ai_label: ai_label_,
             ai_note: ai_note_,
             class: class_,
+        }
+    }
+}
+
+/// `Split`, from a tree.
+fn split(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("Split.name is required and this tree does not set it");
+    let value_ = scope
+        .find(props, "value")
+        .unwrap_or_else(|| "50".to_owned());
+    let min_ = scope.find(props, "min").unwrap_or_else(|| "20".to_owned());
+    let max_ = scope.find(props, "max").unwrap_or_else(|| "80".to_owned());
+    let collapse_ = scope
+        .pick(
+            props,
+            "collapse",
+            &SplitCollapse::ALL,
+            SplitCollapse::as_str,
+        )
+        .unwrap_or_default();
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        Split {
+            name: name_,
+            value: value_,
+            min: min_,
+            max: max_,
+            collapse: collapse_,
+            class: class_,
+            {render(children, scope)}
+        }
+    }
+}
+
+/// `SplitHandle`, from a tree.
+fn split_handle(
+    props: &'static [(&'static str, Value)],
+    _children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("SplitHandle.name is required and this tree does not set it");
+    let label_ = scope
+        .find(props, "label")
+        .expect("SplitHandle.label is required and this tree does not set it");
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        SplitHandle {
+            name: name_,
+            label: label_,
+            class: class_,
+        }
+    }
+}
+
+/// `SplitPane`, from a tree.
+fn split_pane(
+    props: &'static [(&'static str, Value)],
+    children: &'static [Node],
+    scope: Scope,
+) -> Element {
+    let name_ = scope
+        .find(props, "name")
+        .expect("SplitPane.name is required and this tree does not set it");
+    let side_ = scope
+        .pick(props, "side", &SplitPaneSide::ALL, SplitPaneSide::as_str)
+        .unwrap_or_default();
+    let class_ = scope.find(props, "class").unwrap_or_default();
+
+    rsx! {
+        SplitPane {
+            name: name_,
+            side: side_,
+            class: class_,
+            {render(children, scope)}
         }
     }
 }

@@ -10,6 +10,7 @@ use noctua_design_i18n::Key;
 use crate::tree::{Each, Node, Value};
 use crate::trees::Hero;
 use crate::trees::lineage::DOE;
+use crate::trees::log::DAEMON;
 use crate::trees::select::{AMBER_DETAILED, CLAY_DETAILED, OCHRE_DETAILED, TEAL_DETAILED};
 use crate::trees::table::{AURORA, BRACKEN, CINTRA, INVOICE_ROW};
 
@@ -394,6 +395,712 @@ Switch { name: "overview-pattern", on: "on", off: "off", label: "…" }"#,
         }],
     ),
     (
+        "footer",
+        r#"Footer { label: "…",
+    FooterCorner { side: FooterCornerSide::Start }
+    FooterLine { kind: FooterLineKind::Modeline, … }
+    FooterLine { kind: FooterLineKind::Info, expandable: true, expand_label: "…", collapse_label: "…", action: "…", … }
+    FooterLine { kind: FooterLineKind::Prompt, Prompt { name: "…", label: "…", send_label: "…" } }
+    FooterCorner { side: FooterCornerSide::End }
+}"#,
+        // THE FOOTER OF `NOCTUA.md §12.3`, WHOLE: the three lines in their
+        // order and a corner at each end, and a `Prompt` on the last line.
+        &[Node::Element {
+            tag: "div",
+            attributes: super::footer_line::EXPAND,
+            children: &[Node::Component {
+                name: "Footer",
+                props: &[("label", Value::Message(Key::ExampleFooterLabel))],
+                children: &[
+                    Node::Component {
+                        name: "FooterCorner",
+                        props: &[("side", Value::Text("start"))],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("modeline"))],
+                        children: &[
+                            Node::Component {
+                                name: "Button",
+                                props: &[
+                                    ("hide_label", Value::Bool(true)),
+                                    ("icon", Value::Text("panel-left")),
+                                    ("variant", Value::Text("transparent")),
+                                    ("tone", Value::Text("neutral")),
+                                    ("size", Value::Text("small")),
+                                    ("label", Value::Message(Key::ExampleFooterSidebar)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Icon",
+                                props: &[
+                                    ("icon", Value::Text("file-text")),
+                                    ("size", Value::Text("small")),
+                                ],
+                                children: &[],
+                            },
+                            Node::Element {
+                                tag: "span",
+                                attributes: &[],
+                                children: &[Node::Text(Value::Message(Key::ExampleFooterPage))],
+                            },
+                            Node::Element {
+                                tag: "span",
+                                attributes: &[("class", Value::Text("nd-example-end"))],
+                                children: &[
+                                    Node::Element {
+                                        tag: "span",
+                                        attributes: &[("class", Value::Text("nd-identifier"))],
+                                        children: &[Node::Text(Value::Data("home / ana"))],
+                                    },
+                                    Node::Component {
+                                        name: "Icon",
+                                        props: &[
+                                            ("icon", Value::Text("wifi-off")),
+                                            ("size", Value::Text("small")),
+                                        ],
+                                        children: &[],
+                                    },
+                                    Node::Element {
+                                        tag: "span",
+                                        attributes: &[],
+                                        children: &[Node::Text(Value::Message(
+                                            Key::ExampleFooterOffline,
+                                        ))],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[
+                            ("kind", Value::Text("info")),
+                            ("expandable", Value::Bool(true)),
+                            ("expand_label", Value::Message(Key::ExampleFooterExpand)),
+                            ("collapse_label", Value::Message(Key::ExampleFooterCollapse)),
+                            ("action", Value::Text("overview-footer-expand")),
+                        ],
+                        children: &[
+                            Node::Component {
+                                name: "Icon",
+                                props: &[
+                                    ("icon", Value::Text("info")),
+                                    ("size", Value::Text("small")),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Icon",
+                                props: &[
+                                    ("icon", Value::Text("mouse-pointer")),
+                                    ("size", Value::Text("small")),
+                                ],
+                                children: &[],
+                            },
+                            Node::Element {
+                                tag: "span",
+                                attributes: &[],
+                                children: &[Node::Text(Value::Message(Key::ExampleFooterHover))],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("prompt"))],
+                        children: &[Node::Component {
+                            name: "Prompt",
+                            props: &[
+                                ("name", Value::Text("overview-footer-prompt")),
+                                ("label", Value::Message(Key::ExamplePromptLabel)),
+                                ("send_label", Value::Message(Key::ExamplePromptSend)),
+                            ],
+                            children: &[],
+                        }],
+                    },
+                    Node::Component {
+                        name: "FooterCorner",
+                        props: &[("side", Value::Text("end"))],
+                        children: &[],
+                    },
+                ],
+            }],
+        }],
+    ),
+    (
+        "prompt",
+        r#"Footer { label: "…",
+    FooterLine { kind: FooterLineKind::Modeline, … }
+    FooterLine { kind: FooterLineKind::Info, … }
+    FooterLine { kind: FooterLineKind::Prompt,
+        Prompt { name: "…", label: "…", send_label: "…", action: "…" }
+    }
+}"#,
+        // WHERE A PROMPT LIVES: the last line of a footer, under the line that
+        // says what the keyboard is on.
+        &[Node::Component {
+            name: "Footer",
+            props: &[("label", Value::Message(Key::ExampleFooterLabel))],
+            children: &[
+                Node::Component {
+                    name: "FooterLine",
+                    props: &[("kind", Value::Text("modeline"))],
+                    children: &[
+                        Node::Component {
+                            name: "Icon",
+                            props: &[
+                                ("icon", Value::Text("file-text")),
+                                ("size", Value::Text("small")),
+                            ],
+                            children: &[],
+                        },
+                        Node::Element {
+                            tag: "span",
+                            attributes: &[],
+                            children: &[Node::Text(Value::Message(Key::ExampleFooterPage))],
+                        },
+                    ],
+                },
+                Node::Component {
+                    name: "FooterLine",
+                    props: &[("kind", Value::Text("info"))],
+                    children: &[
+                        Node::Component {
+                            name: "Icon",
+                            props: &[
+                                ("icon", Value::Text("info")),
+                                ("size", Value::Text("small")),
+                            ],
+                            children: &[],
+                        },
+                        Node::Component {
+                            name: "Icon",
+                            props: &[
+                                ("icon", Value::Text("keyboard")),
+                                ("size", Value::Text("small")),
+                            ],
+                            children: &[],
+                        },
+                        Node::Element {
+                            tag: "span",
+                            attributes: &[],
+                            children: &[Node::Text(Value::Message(Key::ExampleFooterSelection))],
+                        },
+                    ],
+                },
+                Node::Component {
+                    name: "FooterLine",
+                    props: &[("kind", Value::Text("prompt"))],
+                    children: &[Node::Component {
+                        name: "Prompt",
+                        props: &[
+                            ("name", Value::Text("overview-prompt")),
+                            ("label", Value::Message(Key::ExamplePromptLabel)),
+                            ("send_label", Value::Message(Key::ExamplePromptSend)),
+                            ("action", Value::Text("overview-prompt-send")),
+                        ],
+                        children: &[],
+                    }],
+                },
+            ],
+        }],
+    ),
+    (
+        "drawer",
+        r#"Drawer { name: "…", id: "…", label: "…",
+    DrawerRail { Toolbar { density: ToolbarDensity::Rail, … } }
+    …
+    DrawerRail { side: DrawerRailSide::End, Tabs { appearance: TabsAppearance::Rail, … } }
+}"#,
+        // THE DRAWER OF `NOCTUA.md §12.11`, WHOLE, UNDER THE FOOTER IT BELONGS
+        // TO: a rail of controls, the page in focus, a rail of tabs, and the
+        // work above all of it. The two rails continue the footer's corners.
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-window"))],
+            children: &[
+                Node::Element {
+                    tag: "div",
+                    attributes: &[("class", Value::Text("nd-example-work"))],
+                    children: &[Node::Component {
+                        name: "Paragraph",
+                        props: &[],
+                        children: &[Node::Text(Value::Message(Key::ExampleDrawerWork))],
+                    }],
+                },
+                Node::Component {
+                    name: "Footer",
+                    props: &[("label", Value::Message(Key::ExampleFooterLabel))],
+                    children: &[
+                        Node::Component {
+                            name: "FooterCorner",
+                            props: &[("side", Value::Text("start"))],
+                            children: &[],
+                        },
+                        Node::Component {
+                            name: "FooterLine",
+                            props: &[("kind", Value::Text("modeline"))],
+                            children: &[
+                                Node::Component {
+                                    name: "Icon",
+                                    props: &[
+                                        ("icon", Value::Text("terminal")),
+                                        ("size", Value::Text("small")),
+                                    ],
+                                    children: &[],
+                                },
+                                Node::Element {
+                                    tag: "span",
+                                    attributes: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailCommands,
+                                    ))],
+                                },
+                                Node::Element {
+                                    tag: "span",
+                                    attributes: &[("class", Value::Text("nd-example-end"))],
+                                    children: &[Node::Component {
+                                        name: "Button",
+                                        props: &[
+                                            ("hide_label", Value::Bool(true)),
+                                            ("icon", Value::Text("panel-bottom")),
+                                            ("variant", Value::Text("transparent")),
+                                            ("tone", Value::Text("neutral")),
+                                            ("size", Value::Text("small")),
+                                            ("action", Value::Text("drawer-toggle")),
+                                            ("expanded", Value::Bool(true)),
+                                            ("controls", Value::Text("overview-drawer")),
+                                            ("label", Value::Message(Key::ExampleDrawerToggle)),
+                                        ],
+                                        children: &[],
+                                    }],
+                                },
+                            ],
+                        },
+                        Node::Component {
+                            name: "FooterCorner",
+                            props: &[("side", Value::Text("end"))],
+                            children: &[],
+                        },
+                    ],
+                },
+                Node::Component {
+                    name: "Drawer",
+                    props: &[
+                        ("name", Value::Text("overview-drawer")),
+                        ("id", Value::Text("overview-drawer")),
+                        ("label", Value::Message(Key::ExampleDrawerLabel)),
+                    ],
+                    children: &[
+                        Node::Component {
+                            name: "DrawerRail",
+                            props: &[("side", Value::Text("start"))],
+                            children: &[Node::Component {
+                                name: "Toolbar",
+                                props: &[
+                                    ("density", Value::Text("rail")),
+                                    ("label", Value::Message(Key::ExampleRailControls)),
+                                ],
+                                children: &[
+                                    Node::Component {
+                                        name: "ToolbarGroup",
+                                        props: &[],
+                                        children: &[
+                                            Node::Component {
+                                                name: "Tooltip",
+                                                props: &[
+                                                    (
+                                                        "name",
+                                                        Value::Text("overview-drawer-collapse"),
+                                                    ),
+                                                    (
+                                                        "text",
+                                                        Value::Message(Key::ExampleRailCollapse),
+                                                    ),
+                                                ],
+                                                children: &[Node::Component {
+                                                    name: "Button",
+                                                    props: &[
+                                                        ("variant", Value::Text("transparent")),
+                                                        ("tone", Value::Text("neutral")),
+                                                        ("size", Value::Text("small")),
+                                                        ("hide_label", Value::Bool(true)),
+                                                        ("icon", Value::Text("chevrons-down")),
+                                                        (
+                                                            "label",
+                                                            Value::Message(
+                                                                Key::ExampleRailCollapse,
+                                                            ),
+                                                        ),
+                                                        ("action", Value::Text("drawer-toggle")),
+                                                    ],
+                                                    children: &[],
+                                                }],
+                                            },
+                                            Node::Component {
+                                                name: "Tooltip",
+                                                props: &[
+                                                    ("name", Value::Text("overview-drawer-close")),
+                                                    ("text", Value::Message(Key::ExampleRailClose)),
+                                                ],
+                                                children: &[Node::Component {
+                                                    name: "Button",
+                                                    props: &[
+                                                        ("variant", Value::Text("transparent")),
+                                                        ("tone", Value::Text("neutral")),
+                                                        ("size", Value::Text("small")),
+                                                        ("hide_label", Value::Bool(true)),
+                                                        ("icon", Value::Text("close")),
+                                                        (
+                                                            "label",
+                                                            Value::Message(Key::ExampleRailClose),
+                                                        ),
+                                                    ],
+                                                    children: &[],
+                                                }],
+                                            },
+                                        ],
+                                    },
+                                    Node::Component {
+                                        name: "ToolbarGroup",
+                                        props: &[],
+                                        children: &[Node::Component {
+                                            name: "Tooltip",
+                                            props: &[
+                                                ("name", Value::Text("overview-drawer-direction")),
+                                                ("text", Value::Message(Key::ExampleRailDirection)),
+                                            ],
+                                            children: &[Node::Component {
+                                                name: "Button",
+                                                props: &[
+                                                    ("variant", Value::Text("transparent")),
+                                                    ("tone", Value::Text("neutral")),
+                                                    ("size", Value::Text("small")),
+                                                    ("hide_label", Value::Bool(true)),
+                                                    ("icon", Value::Text("arrow-up-down")),
+                                                    (
+                                                        "label",
+                                                        Value::Message(Key::ExampleRailDirection),
+                                                    ),
+                                                ],
+                                                children: &[],
+                                            }],
+                                        }],
+                                    },
+                                ],
+                            }],
+                        },
+                        Node::Element {
+                            tag: "div",
+                            attributes: &[("class", Value::Text("nd-example-pane"))],
+                            children: &[
+                                Node::Component {
+                                    name: "TabPanel",
+                                    props: &[
+                                        ("name", Value::Text("overview-drawer-pages")),
+                                        ("value", Value::Text("commands")),
+                                    ],
+                                    children: &[Node::Component {
+                                        name: "Paragraph",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Message(
+                                            Key::ExampleRailCommandsBody,
+                                        ))],
+                                    }],
+                                },
+                                Node::Component {
+                                    name: "TabPanel",
+                                    props: &[
+                                        ("name", Value::Text("overview-drawer-pages")),
+                                        ("value", Value::Text("settings")),
+                                    ],
+                                    children: &[Node::Component {
+                                        name: "Paragraph",
+                                        props: &[],
+                                        children: &[Node::Text(Value::Message(
+                                            Key::ExampleRailSettingsBody,
+                                        ))],
+                                    }],
+                                },
+                            ],
+                        },
+                        Node::Component {
+                            name: "DrawerRail",
+                            props: &[("side", Value::Text("end"))],
+                            children: &[Node::Component {
+                                name: "Tabs",
+                                props: &[
+                                    ("name", Value::Text("overview-drawer-pages")),
+                                    ("label", Value::Message(Key::ExampleRailPages)),
+                                    ("appearance", Value::Text("rail")),
+                                    ("size", Value::Text("small")),
+                                ],
+                                children: &[
+                                    Node::Component {
+                                        name: "Tooltip",
+                                        props: &[
+                                            ("name", Value::Text("overview-drawer-pages-commands")),
+                                            ("text", Value::Message(Key::ExampleRailCommands)),
+                                            ("placement", Value::Text("end")),
+                                        ],
+                                        children: &[Node::Component {
+                                            name: "Tab",
+                                            props: &[
+                                                ("name", Value::Text("overview-drawer-pages")),
+                                                ("value", Value::Text("commands")),
+                                                ("icon", Value::Text("terminal")),
+                                                ("label", Value::Message(Key::ExampleRailCommands)),
+                                                ("selected", Value::Bool(true)),
+                                            ],
+                                            children: &[],
+                                        }],
+                                    },
+                                    Node::Component {
+                                        name: "Tooltip",
+                                        props: &[
+                                            ("name", Value::Text("overview-drawer-pages-settings")),
+                                            ("text", Value::Message(Key::ExampleRailSettings)),
+                                            ("placement", Value::Text("end")),
+                                        ],
+                                        children: &[Node::Component {
+                                            name: "Tab",
+                                            props: &[
+                                                ("name", Value::Text("overview-drawer-pages")),
+                                                ("value", Value::Text("settings")),
+                                                ("icon", Value::Text("settings")),
+                                                ("label", Value::Message(Key::ExampleRailSettings)),
+                                            ],
+                                            children: &[],
+                                        }],
+                                    },
+                                ],
+                            }],
+                        },
+                    ],
+                },
+            ],
+        }],
+    ),
+    (
+        "split",
+        r#"Split { name: "…",
+    SplitPane { name: "…", … }
+    SplitHandle { name: "…", label: "…" }
+    SplitPane { name: "…", side: SplitPaneSide::End, … }
+}"#,
+        // A LIST AND WHAT IS CHOSEN IN IT, in a window, so each pane is as tall
+        // as the split and scrolls by itself.
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-window"))],
+            children: &[Node::Component {
+                name: "Split",
+                props: &[
+                    ("name", Value::Text("overview-split")),
+                    ("value", Value::Text("35")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "SplitPane",
+                        props: &[("name", Value::Text("overview-split"))],
+                        children: &[Node::Element {
+                            tag: "div",
+                            attributes: &[("class", Value::Text("nd-example-pane"))],
+                            children: &[
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailCommands,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailSettings,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailRegistries,
+                                    ))],
+                                },
+                            ],
+                        }],
+                    },
+                    Node::Component {
+                        name: "SplitHandle",
+                        props: &[
+                            ("name", Value::Text("overview-split")),
+                            ("label", Value::Message(Key::ExampleSplitHandle)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "SplitPane",
+                        props: &[
+                            ("name", Value::Text("overview-split")),
+                            ("side", Value::Text("end")),
+                        ],
+                        children: &[Node::Element {
+                            tag: "div",
+                            attributes: &[("class", Value::Text("nd-example-pane"))],
+                            children: &[
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailCommandsBody,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailSettingsBody,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleRailRegistriesBody,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleDrawerLongOne,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleDrawerLongTwo,
+                                    ))],
+                                },
+                                Node::Component {
+                                    name: "Paragraph",
+                                    props: &[],
+                                    children: &[Node::Text(Value::Message(
+                                        Key::ExampleDrawerLongThree,
+                                    ))],
+                                },
+                            ],
+                        }],
+                    },
+                ],
+            }],
+        }],
+    ),
+    (
+        "option-list",
+        r#"OptionList { name: "…", label: "…", empty_label: "…",
+    OptionGroup { label: "…",
+        OptionItem { value, label: "window.close", hits: "0-2|7-9", detail: "…", shortcut: "q", active: true }
+        OptionItem { value, label: "window.hide", hits: "0-2|", detail: "…" }
+    }
+    OptionGroup { label: "…", OptionItem { value, label: "page.close", hits: "|5-7", detail: "…" } }
+}"#,
+        // THE COMMAND LIST OF `NOCTUA.md §12.9`, AS ONE QUERY LEFT IT. Two
+        // words were typed, `win` and `clo`: the first row matched both, and
+        // each of the others matched one of them on its name and the other on
+        // a field that is not drawn.
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("name", Value::Text("overview-commands")),
+                ("label", Value::Message(Key::ExampleOptionListCommands)),
+                ("empty_label", Value::Message(Key::ExampleOptionListEmpty)),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionGroup",
+                    props: &[("label", Value::Message(Key::ExampleOptionListGroupWindow))],
+                    children: &[
+                        Node::Component {
+                            name: "OptionItem",
+                            props: &[
+                                ("class", Value::Text("nd-identifier")),
+                                ("value", Value::Text("window.close")),
+                                ("label", Value::Data("window.close")),
+                                ("hits", Value::Text("0-2|7-9")),
+                                ("detail", Value::Message(Key::ExampleOptionListCloseWindow)),
+                                ("shortcut", Value::Message(Key::ExampleOptionListKeyQ)),
+                                ("active", Value::Bool(true)),
+                            ],
+                            children: &[],
+                        },
+                        Node::Component {
+                            name: "OptionItem",
+                            props: &[
+                                ("class", Value::Text("nd-identifier")),
+                                ("value", Value::Text("window.hide")),
+                                ("label", Value::Data("window.hide")),
+                                ("hits", Value::Text("0-2|")),
+                                ("detail", Value::Message(Key::ExampleOptionListHideWindow)),
+                            ],
+                            children: &[],
+                        },
+                    ],
+                },
+                Node::Component {
+                    name: "OptionGroup",
+                    props: &[("label", Value::Message(Key::ExampleOptionListGroupPage))],
+                    children: &[Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("class", Value::Text("nd-identifier")),
+                            ("value", Value::Text("page.close")),
+                            ("label", Value::Data("page.close")),
+                            ("hits", Value::Text("|5-7")),
+                            ("detail", Value::Message(Key::ExampleOptionListClosePage)),
+                        ],
+                        children: &[],
+                    }],
+                },
+            ],
+        }],
+    ),
+    (
+        "match-text",
+        r#"MatchText { text: "ButtonGroup", hits: "6-8|2|0" }
+MatchText { text: "ToolbarGroup", hits: "7-9|0|4" }"#,
+        // TWO NAMES ONE QUERY FOUND, each word of it in its own tone. The
+        // names are data, because a position is an index into them.
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-stack"))],
+            children: &[
+                Node::Component {
+                    name: "MatchText",
+                    props: &[
+                        ("class", Value::Text("nd-identifier")),
+                        ("text", Value::Data("ButtonGroup")),
+                        ("hits", Value::Text("6-8|2|0")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "MatchText",
+                    props: &[
+                        ("class", Value::Text("nd-identifier")),
+                        ("text", Value::Data("ToolbarGroup")),
+                        ("hits", Value::Text("7-9|0|4")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
         "link",
         r#"Link { href: "…", external: true, rel: "noreferrer", "…" }
 Link { href: "…", "…" }"#,
@@ -754,6 +1461,85 @@ Label { kind: Name, for_control } / Segmented { labelledby }",
                     children: &[],
                 },
             ],
+        }],
+    ),
+    (
+        "key-capture",
+        r#"KeyCapture { name: "…", label: "…", value: "Alt+Super+Space", clear_label: "…", … }
+KeyCapture { name: "…", label: "…", value: "KeyS", … }
+KeyCapture { name: "…", label: "…", value: "KeyH", … }"#,
+        // A SETTINGS PAGE'S SHORTCUTS: the Leader, then two keys of its menu,
+        // each a control of its own.
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-stack"))],
+            children: &[
+                Node::Component {
+                    name: "KeyCapture",
+                    props: &[
+                        ("name", Value::Text("overview-key-capture-leader")),
+                        ("label", Value::Message(Key::ExampleKeyCaptureLeader)),
+                        ("value", Value::Text("Alt+Super+Space")),
+                        (
+                            "capture_label",
+                            Value::Message(Key::ExampleKeyCaptureCapture),
+                        ),
+                        ("empty_label", Value::Message(Key::ExampleKeyCaptureEmpty)),
+                        ("clear_label", Value::Message(Key::ExampleKeyCaptureClear)),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "KeyCapture",
+                    props: &[
+                        ("name", Value::Text("overview-key-capture-settings")),
+                        ("label", Value::Message(Key::ExampleKeyCaptureSettings)),
+                        ("value", Value::Text("KeyS")),
+                        (
+                            "capture_label",
+                            Value::Message(Key::ExampleKeyCaptureCapture),
+                        ),
+                        ("empty_label", Value::Message(Key::ExampleKeyCaptureEmpty)),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "KeyCapture",
+                    props: &[
+                        ("name", Value::Text("overview-key-capture-help")),
+                        ("label", Value::Message(Key::ExampleKeyCaptureHelp)),
+                        ("value", Value::Text("KeyH")),
+                        (
+                            "capture_label",
+                            Value::Message(Key::ExampleKeyCaptureCapture),
+                        ),
+                        ("empty_label", Value::Message(Key::ExampleKeyCaptureEmpty)),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "log",
+        r#"Log { name: "…", label: "…", resume_label: "…",
+    LogLine { time: "…", tone: "…", level: "…", source: "…", "…" }
+    …
+}"#,
+        // A DAEMON'S LOG AS IT RUNS, in a window: it opens at its newest line
+        // and follows until the reader scrolls away.
+        &[Node::Element {
+            tag: "div",
+            attributes: &[("class", Value::Text("nd-example-window"))],
+            children: &[Node::Component {
+                name: "Log",
+                props: &[
+                    ("name", Value::Text("overview-log")),
+                    ("label", Value::Message(Key::ExampleLogLabel)),
+                    ("resume_label", Value::Message(Key::ExampleLogResume)),
+                ],
+                children: DAEMON,
+            }],
         }],
     ),
 ];

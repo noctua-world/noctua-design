@@ -2,8 +2,8 @@
 # [meta], because a bare key after a table header belongs to that table.
 guidance = """
 Use a message bar for something that happened, shown in place and left on the
-page. For one refused field, use `Field`. For everything wrong in a form at
-once, use `ErrorSummary`.
+page. Use the `line` form for a state of the whole window, such as a program it
+has lost. For one refused field, use `Field`.
 """
 
 [meta]
@@ -71,6 +71,54 @@ type = "text"
 # in the markup would be a second copy to keep in step.
 doc = "The name of the control that takes the bar away, such as *Dismiss this message*. Wanted in practice by `dismissible`, because that control is a glyph and this is the only name it has."
 
+# THE LINE FORM IS THE INTERFACE'S ALERT LINE (`NOCTUA.md §12.17`), and it is
+# in the flow of its window like the footer above it. The section asks for a
+# line "fixed and always visible" at the very bottom; a line that floated there
+# would cover the footer's last line and whatever control the keyboard is on
+# (WCAG 2.4.11), so the window places it last and gives it its own row. That
+# is `Drawer`'s and `Footer`'s answer to the same question.
+#
+# A LINE GROWS RATHER THAN CUTS. A footer line is cut at its end, because what
+# it holds is repeated elsewhere. What an alert says is the one thing a reader
+# has to act on, so at 320px the line wraps onto a second row.
+[prop.presentation]
+type = "enum"
+values = ["bar", "line"]
+default = "bar"
+attribute = "data-nd-presentation"
+doc = """How the message is drawn. `bar` is a block in the page, beside what happened. `line` is a row along a window's bottom edge, filled with the tone, that the window places last so it covers nothing."""
+
+# THE CALLER KEEPS THE CLOCK. The interface restores the daemon when the
+# deadline passes, and that is a timer in the caller's own code. What this
+# draws is display only, read from the one number both sides agree on, so the
+# two cannot disagree about when the deadline is. A number of seconds left
+# would be a second clock, restarted by every render.
+[prop.deadline]
+type = "text"
+attribute = "data-nd-deadline"
+doc = """When the event the message announces happens, in milliseconds since the Unix epoch. `dist/message-bar.js` draws the whole seconds left until it, and follows a new value the caller writes."""
+
+[prop.countdown_label]
+type = "text"
+attribute = "data-nd-countdown-label"
+doc = """What the message says about the time left, with a `{count}` hole, such as *Restoring in 9 seconds*. Write both forms as `one:…|other:…`. Without it the seconds are written by `Intl` in the document's language."""
+
+# A CONTROL OF THE BAR'S OWN, AND NOT A `Button` IN `children`. Two reasons,
+# and both are about the line form. A `Button` paints its own ink and fill,
+# which on a line filled with the danger tone is a pair nobody measured, while
+# this control is drawn in the line's own ink. And the row ends with what a
+# reader does about the message, after the time left, which a child inside the
+# body could not reach.
+[prop.action_label]
+type = "text"
+doc = """The words on a control at the end of the row, such as *Restore now*. Setting it draws the control, a `<button>` in the message's own ink."""
+
+[prop.action]
+type = "text"
+# Written on the control, not on the root: it is the control a caller's script
+# finds, as it finds a `Button` by the same attribute.
+doc = """A name a script finds the control by, written as `data-nd-action` on it. Wanted with `action_label`, because the press is the caller's own code."""
+
 [prop.children]
 type = "children"
 doc = "The message, as one or two sentences. It may hold a `Link` to whatever a reader has to do about it."
@@ -81,7 +129,8 @@ doc = "Set on a bar a reader has taken away. The stylesheet takes it out of the 
 
 [a11y]
 role = "status"
-notes = """The bar is a `role="status"` until `alert` is turned on, and a status waits for a pause instead of cutting in. The icon is `aria-hidden`, and the tone is never the only signal."""
+notes = """A `role="status"` until `alert` is on. The time left is a silent `role="timer"`, and a polite region says it when the count starts, every ten seconds and at five. The icon is `aria-hidden`."""
 
 [keyboard]
-"Enter or Space" = "Takes the bar away, on the control that dismisses it. Both keys work, because that control is a `<button>`."
+Tab = "Moves onto the action, then onto the control that dismisses the bar."
+"Enter or Space" = "Presses the control the focus is on. Both keys work, because each control is a `<button>`."

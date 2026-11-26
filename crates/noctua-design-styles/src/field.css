@@ -137,11 +137,11 @@
  * backwards and matched nothing, ever. The one focusable thing in the control
  * showed no focus at all, which is WCAG 2.4.7 failed in silence by a rule that
  * looked right. `:has()` asks the question the markup can answer. */
-.nd-input:focus-within,
-.nd-number-input:focus-within,
-.nd-textarea:focus-within,
-.nd-time-input-segment:focus-visible,
-.nd-file-input:has(> .nd-file-input-native:focus-visible) > .nd-file-input-area {
+.nd-input:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])),
+.nd-number-input:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])),
+.nd-textarea:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus])),
+.nd-time-input-segment:is(:focus-visible, [data-nd-seat-focus]),
+.nd-file-input:has(> .nd-file-input-native:is(:focus-visible, [data-nd-seat-focus])) > .nd-file-input-area {
   border-color: var(--nc-color-border-strong);
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
@@ -170,10 +170,10 @@
   padding-block: var(--noctua-space-2);
 }
 
-.nd-input-box:focus,
-.nd-number-input-box:focus,
-.nd-textarea-box:focus,
-.nd-time-input-segment:focus {
+.nd-input-box:is(:focus, [data-nd-seat-focus]),
+.nd-number-input-box:is(:focus, [data-nd-seat-focus]),
+.nd-textarea-box:is(:focus, [data-nd-seat-focus]),
+.nd-time-input-segment:is(:focus, [data-nd-seat-focus]) {
   outline: none;
 }
 
@@ -212,7 +212,7 @@
   cursor: pointer;
 }
 
-.nd-input-control:focus-visible {
+.nd-input-control:is(:focus-visible, [data-nd-seat-focus]) {
   outline: var(--noctua-focus-width) solid var(--nc-color-ring);
   outline-offset: var(--noctua-focus-offset);
 }

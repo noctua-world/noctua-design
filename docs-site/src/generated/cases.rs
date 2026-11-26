@@ -438,6 +438,76 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Dialog",
+        "case-dialog-3",
+        &[Node::Component {
+            name: "Dialog",
+            props: &[
+                ("alert", Value::Bool(true)),
+                ("confirm_label", Value::Data("Delete it")),
+                ("decline_label", Value::Data("Keep it")),
+                ("description", Value::Data("The draft and its files go.")),
+                ("heading", Value::Data("Delete this?")),
+                ("irreversible_label", Value::Data("This cannot be undone.")),
+                ("name", Value::Data("confirm")),
+                ("requester", Value::Data("Asked by the assistant.")),
+                ("trigger_label", Value::Data("Delete")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Dialog",
+        "case-dialog-4",
+        &[Node::Component {
+            name: "Dialog",
+            props: &[
+                ("alert", Value::Bool(true)),
+                ("confirm_label", Value::Data("Delete it")),
+                ("decline_label", Value::Data("Keep it")),
+                ("description", Value::Data("The draft and its files go.")),
+                ("heading", Value::Data("Delete this?")),
+                ("name", Value::Data("confirm")),
+                ("trigger_label", Value::Data("Delete")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Dialog",
+        "case-dialog-5",
+        &[Node::Component {
+            name: "Dialog",
+            props: &[
+                ("alert", Value::Bool(true)),
+                ("confirm_label", Value::Data("Delete it")),
+                ("decline_label", Value::Data("Keep it")),
+                ("description", Value::Data("The draft and its files go.")),
+                ("heading", Value::Data("Delete this?")),
+                ("name", Value::Data("confirm")),
+                ("trigger_label", Value::Data("Delete")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Dialog",
+        "case-dialog-6",
+        &[Node::Component {
+            name: "Dialog",
+            props: &[
+                ("alert", Value::Bool(true)),
+                ("confirm_label", Value::Data("Run it")),
+                ("decline_label", Value::Data("Do not run it")),
+                ("description", Value::Data("It deletes the realm.")),
+                ("heading", Value::Data("Run this command?")),
+                ("name", Value::Data("asked")),
+                ("shown", Value::Bool(true)),
+            ],
+            children: &[],
+        }],
+    ),
+    (
         "Disclosure",
         "case-disclosure-0",
         &[Node::Component {
@@ -495,6 +565,112 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
             name: "Divider",
             props: &[("label", Value::Data("or"))],
             children: &[],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-0",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[Node::Text(Value::Data("Commands"))],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-1",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("id", Value::Data("pages-drawer")),
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-2",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-3",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("collapsed", Value::Bool(true)),
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[Node::Component {
+                name: "Button",
+                props: &[("label", Value::Data("Close the page"))],
+                children: &[],
+            }],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-4",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Sidebar")),
+                ("name", Value::Data("pages")),
+                ("side", Value::Text("start")),
+            ],
+            children: &[Node::Text(Value::Data("Pages"))],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-5",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "DrawerRail",
+                    props: &[],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "DrawerRail",
+                    props: &[("side", Value::Text("end"))],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "Drawer",
+        "case-drawer-6",
+        &[Node::Component {
+            name: "Drawer",
+            props: &[
+                ("label", Value::Data("Drawer")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[Node::Component {
+                name: "Button",
+                props: &[("label", Value::Data("Close the page"))],
+                children: &[],
+            }],
         }],
     ),
     (
@@ -660,6 +836,138 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Footer",
+        "case-footer-0",
+        &[Node::Component {
+            name: "Footer",
+            props: &[("label", Value::Data("Window footer"))],
+            children: &[Node::Component {
+                name: "FooterLine",
+                props: &[],
+                children: &[Node::Text(Value::Data("Registries"))],
+            }],
+        }],
+    ),
+    (
+        "Footer",
+        "case-footer-1",
+        &[Node::Component {
+            name: "Footer",
+            props: &[
+                ("label", Value::Data("Window footer")),
+                ("shown", Value::Bool(true)),
+                ("visibility", Value::Text("auto")),
+            ],
+            children: &[Node::Component {
+                name: "FooterLine",
+                props: &[],
+                children: &[Node::Text(Value::Data("Registries"))],
+            }],
+        }],
+    ),
+    (
+        "Footer",
+        "case-footer-2",
+        &[Node::Component {
+            name: "Footer",
+            props: &[("label", Value::Data("Window footer"))],
+            children: &[
+                Node::Component {
+                    name: "FooterCorner",
+                    props: &[],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "FooterLine",
+                    props: &[],
+                    children: &[Node::Text(Value::Data("Registries"))],
+                },
+                Node::Component {
+                    name: "FooterCorner",
+                    props: &[("side", Value::Text("end"))],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "FooterLine",
+        "case-footer-line-0",
+        &[Node::Component {
+            name: "FooterLine",
+            props: &[("kind", Value::Text("info"))],
+            children: &[Node::Text(Value::Data("Saved."))],
+        }],
+    ),
+    (
+        "FooterLine",
+        "case-footer-line-1",
+        &[Node::Component {
+            name: "FooterLine",
+            props: &[
+                ("action", Value::Data("expand")),
+                ("collapse_label", Value::Data("Show one line")),
+                ("expand_label", Value::Data("Show all of it")),
+                ("expandable", Value::Bool(true)),
+                ("kind", Value::Text("info")),
+            ],
+            children: &[Node::Text(Value::Data("Saved."))],
+        }],
+    ),
+    (
+        "FooterLine",
+        "case-footer-line-2",
+        &[Node::Component {
+            name: "FooterLine",
+            props: &[
+                ("collapse_label", Value::Data("Show one line")),
+                ("expand_label", Value::Data("Show all of it")),
+                ("expandable", Value::Bool(true)),
+                ("expanded", Value::Bool(true)),
+                ("kind", Value::Text("info")),
+            ],
+            children: &[Node::Text(Value::Data("Saved."))],
+        }],
+    ),
+    (
+        "FooterLine",
+        "case-footer-line-3",
+        &[Node::Component {
+            name: "FooterLine",
+            props: &[
+                ("collapse_label", Value::Data("Show one line")),
+                ("expand_label", Value::Data("Show all of it")),
+                ("expandable", Value::Bool(true)),
+                ("kind", Value::Text("info")),
+            ],
+            children: &[Node::Text(Value::Data("Saved."))],
+        }],
+    ),
+    (
+        "FooterLine",
+        "case-footer-line-4",
+        &[Node::Component {
+            name: "FooterLine",
+            props: &[
+                ("collapse_label", Value::Data("Show one line")),
+                ("expand_label", Value::Data("Show all of it")),
+                ("expandable", Value::Bool(true)),
+                ("kind", Value::Text("info")),
+                ("live", Value::Bool(true)),
+            ],
+            children: &[Node::Text(Value::Data("Saved."))],
+        }],
+    ),
+    (
+        "FooterLine",
+        "case-footer-line-5",
+        &[Node::Component {
+            name: "FooterLine",
+            props: &[("kind", Value::Text("info"))],
+            children: &[Node::Text(Value::Data("Saved."))],
+        }],
+    ),
+    (
         "Info",
         "case-info-0",
         &[Node::Component {
@@ -770,6 +1078,299 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "KeyCapture",
+        "case-key-capture-0",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-1",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Control+Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-2",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("keyboard", Value::Text("mac")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Control+Alt+Super+Enter")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-3",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("keyboard", Value::Text("windows")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Super+KeyK")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-4",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Go")),
+                ("name", Value::Data("go")),
+                ("value", Value::Data("Shift+Digit1")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-5",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Wider")),
+                ("name", Value::Data("wider")),
+                ("value", Value::Data("Alt+Equal")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-6",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Menu key")),
+                ("name", Value::Data("menu")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-7",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-8",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-9",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-10",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-11",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-12",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-13",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-14",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("disabled", Value::Bool(true)),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-15",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                (
+                    "refusal",
+                    Value::Data("Another channel uses this shortcut."),
+                ),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-16",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-17",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("clear_label", Value::Data("Remove the shortcut")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "KeyCapture",
+        "case-key-capture-18",
+        &[Node::Component {
+            name: "KeyCapture",
+            props: &[
+                ("capture_label", Value::Data("Press the keys")),
+                ("clear_label", Value::Data("Remove the shortcut")),
+                ("empty_label", Value::Data("None")),
+                ("label", Value::Data("Leader")),
+                ("name", Value::Data("leader")),
+                ("value", Value::Data("Alt+Space")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
         "Lineage",
         "case-lineage-0",
         &[Node::Component {
@@ -782,6 +1383,220 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
                 ("label", Value::Data("A family")),
                 ("name", Value::Data("family")),
             ],
+            children: &[],
+        }],
+    ),
+    (
+        "Log",
+        "case-log-0",
+        &[Node::Component {
+            name: "Log",
+            props: &[
+                ("label", Value::Data("Build log")),
+                ("name", Value::Data("build")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Log",
+        "case-log-1",
+        &[Node::Component {
+            name: "Log",
+            props: &[
+                ("label", Value::Data("Build log")),
+                ("name", Value::Data("build")),
+                ("resume_label", Value::Data("Go to the newest")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Log",
+        "case-log-2",
+        &[Node::Component {
+            name: "Log",
+            props: &[
+                ("follow", Value::Bool(false)),
+                ("label", Value::Data("Journal")),
+                ("name", Value::Data("record")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Log",
+        "case-log-3",
+        &[Node::Component {
+            name: "Log",
+            props: &[
+                ("label", Value::Data("Build log")),
+                ("name", Value::Data("build")),
+                ("resume_label", Value::Data("Go to the newest")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Log",
+        "case-log-4",
+        &[Node::Component {
+            name: "Log",
+            props: &[
+                ("label", Value::Data("Build log")),
+                ("name", Value::Data("build")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "LogLine",
+                    props: &[
+                        ("level", Value::Data("info")),
+                        ("source", Value::Data("nc-kernel")),
+                        ("time", Value::Data("12:04:31")),
+                    ],
+                    children: &[Node::Text(Value::Data("Started."))],
+                },
+                Node::Component {
+                    name: "LogLine",
+                    props: &[
+                        ("level", Value::Data("error")),
+                        ("source", Value::Data("nc-store")),
+                        ("time", Value::Data("12:04:32")),
+                        ("tone", Value::Data("danger")),
+                    ],
+                    children: &[Node::Text(Value::Data("Refused."))],
+                },
+            ],
+        }],
+    ),
+    (
+        "LogLine",
+        "case-log-line-0",
+        &[Node::Component {
+            name: "LogLine",
+            props: &[
+                ("level", Value::Data("warning")),
+                ("source", Value::Data("nc-kernel")),
+                ("time", Value::Data("12:04:31.207")),
+                ("tone", Value::Data("warning")),
+            ],
+            children: &[Node::Text(Value::Data("Slow answer."))],
+        }],
+    ),
+    (
+        "LogLine",
+        "case-log-line-1",
+        &[Node::Component {
+            name: "LogLine",
+            props: &[],
+            children: &[Node::Text(Value::Data("Started."))],
+        }],
+    ),
+    (
+        "LogLine",
+        "case-log-line-2",
+        &[Node::Component {
+            name: "LogLine",
+            props: &[("level", Value::Data("debug"))],
+            children: &[Node::Text(Value::Data("Read 3 entries."))],
+        }],
+    ),
+    (
+        "MatchText",
+        "case-match-text-0",
+        &[Node::Component {
+            name: "MatchText",
+            props: &[
+                ("hits", Value::Data("0-2|6-8")),
+                ("text", Value::Data("ButtonGroup")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "MatchText",
+        "case-match-text-1",
+        &[Node::Component {
+            name: "MatchText",
+            props: &[
+                ("hits", Value::Data("0-2|6-8")),
+                ("text", Value::Data("ButtonGroup")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "MatchText",
+        "case-match-text-2",
+        &[Node::Component {
+            name: "MatchText",
+            props: &[
+                ("hits", Value::Data("0|1|2|3")),
+                ("text", Value::Data("ButtonGroup")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "MatchText",
+        "case-match-text-3",
+        &[Node::Component {
+            name: "MatchText",
+            props: &[
+                ("hits", Value::Data("0-10|0-10")),
+                ("text", Value::Data("ButtonGroup")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "MatchText",
+        "case-match-text-4",
+        &[Node::Component {
+            name: "MatchText",
+            props: &[
+                ("hits", Value::Data("|6-10")),
+                ("text", Value::Data("ButtonGroup")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "MatchText",
+        "case-match-text-5",
+        &[Node::Component {
+            name: "MatchText",
+            props: &[
+                ("hits", Value::Data("+1,1e1, 2,3-,-4,5-6-7,99,0x1")),
+                ("text", Value::Data("ButtonGroup")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "MatchText",
+        "case-match-text-6",
+        &[Node::Component {
+            name: "MatchText",
+            props: &[("hits", Value::Data("1-99")), ("text", Value::Data("Tag"))],
+            children: &[],
+        }],
+    ),
+    (
+        "MatchText",
+        "case-match-text-7",
+        &[Node::Component {
+            name: "MatchText",
+            props: &[("hits", Value::Data("1")), ("text", Value::Data("𐐀b"))],
+            children: &[],
+        }],
+    ),
+    (
+        "MatchText",
+        "case-match-text-8",
+        &[Node::Component {
+            name: "MatchText",
+            props: &[("text", Value::Data("ButtonGroup"))],
             children: &[],
         }],
     ),
@@ -887,6 +1702,50 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "MessageBar",
+        "case-message-bar-3",
+        &[Node::Component {
+            name: "MessageBar",
+            props: &[
+                ("alert", Value::Bool(true)),
+                (
+                    "countdown_label",
+                    Value::Data("one:{count} second left|other:{count} seconds left"),
+                ),
+                ("deadline", Value::Data("0")),
+                ("presentation", Value::Text("line")),
+                ("tone", Value::Data("danger")),
+            ],
+            children: &[Node::Text(Value::Data("The local server is not running."))],
+        }],
+    ),
+    (
+        "MessageBar",
+        "case-message-bar-4",
+        &[Node::Component {
+            name: "MessageBar",
+            props: &[
+                ("presentation", Value::Text("line")),
+                ("tone", Value::Data("danger")),
+            ],
+            children: &[Node::Text(Value::Data("The local server is stopped."))],
+        }],
+    ),
+    (
+        "MessageBar",
+        "case-message-bar-5",
+        &[Node::Component {
+            name: "MessageBar",
+            props: &[
+                ("action", Value::Data("restore")),
+                ("action_label", Value::Data("Restore now")),
+                ("presentation", Value::Text("line")),
+                ("tone", Value::Data("danger")),
+            ],
+            children: &[Node::Text(Value::Data("The local server is not running."))],
+        }],
+    ),
+    (
         "Meter",
         "case-meter-0",
         &[Node::Component {
@@ -960,6 +1819,415 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
                 ("value", Value::Data("3")),
             ],
             children: &[],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-0",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-1",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-2",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Pages")),
+                ("name", Value::Data("pages")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("selected", Value::Bool(true)),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-3",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-4",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-5",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Save")),
+                        ("value", Value::Data("save")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-6",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("shortcut", Value::Data("s")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Save")),
+                        ("value", Value::Data("save")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-7",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("disabled", Value::Bool(true)),
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-8",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-9",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("focusable", Value::Bool(false)),
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[Node::Component {
+                name: "OptionItem",
+                props: &[
+                    ("label", Value::Data("Open")),
+                    ("value", Value::Data("open")),
+                ],
+                children: &[],
+            }],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-10",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("active", Value::Bool(true)),
+                        ("id", Value::Data("second")),
+                        ("label", Value::Data("Close")),
+                        ("value", Value::Data("close")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-11",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("empty_label", Value::Data("No command matches.")),
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-12",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("empty_label", Value::Data("No command matches.")),
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[Node::Component {
+                name: "OptionItem",
+                props: &[
+                    ("label", Value::Data("Open")),
+                    ("value", Value::Data("open")),
+                ],
+                children: &[],
+            }],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-13",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[Node::Component {
+                name: "OptionGroup",
+                props: &[("label", Value::Data("Files"))],
+                children: &[Node::Component {
+                    name: "OptionItem",
+                    props: &[
+                        ("label", Value::Data("Open")),
+                        ("value", Value::Data("open")),
+                    ],
+                    children: &[],
+                }],
+            }],
+        }],
+    ),
+    (
+        "OptionList",
+        "case-option-list-14",
+        &[Node::Component {
+            name: "OptionList",
+            props: &[
+                ("label", Value::Data("Commands")),
+                ("name", Value::Data("commands")),
+            ],
+            children: &[Node::Component {
+                name: "OptionItem",
+                props: &[
+                    ("detail", Value::Data("Opens a file.")),
+                    ("hits", Value::Data("0-1")),
+                    ("label", Value::Data("Open")),
+                    ("shortcut", Value::Data("o")),
+                    ("value", Value::Data("open")),
+                ],
+                children: &[],
+            }],
         }],
     ),
     (
@@ -1123,6 +2391,137 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
                 ("max", Value::Data("12")),
                 ("name", Value::Data("upload")),
                 ("value", Value::Data("7.4")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-0",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+                ("value", Value::Data("close")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-1",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+                ("value", Value::Data("close")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-2",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-3",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-4",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-5",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("active_option", Value::Data("option-2")),
+                ("controls", Value::Data("commands")),
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-6",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-7",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("action", Value::Data("send")),
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+                ("send_label", Value::Data("Send")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-8",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+                ("readonly", Value::Bool(true)),
+                ("send_label", Value::Data("Send")),
+                ("value", Value::Data("close")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Prompt",
+        "case-prompt-9",
+        &[Node::Component {
+            name: "Prompt",
+            props: &[
+                ("disabled", Value::Bool(true)),
+                ("label", Value::Data("Prompt")),
+                ("name", Value::Data("ask")),
+                ("send_label", Value::Data("Send")),
             ],
             children: &[],
         }],
@@ -1432,6 +2831,331 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
                 ("name", Value::Data("volume")),
                 ("step", Value::Data("5")),
                 ("value", Value::Data("40")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-0",
+        &[Node::Component {
+            name: "Split",
+            props: &[("name", Value::Data("mail"))],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-1",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("name", Value::Data("mail")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-2",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("name", Value::Data("mail")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-3",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("name", Value::Data("mail")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-4",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("max", Value::Data("70")),
+                ("name", Value::Data("mail")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-5",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("min", Value::Data("30")),
+                ("name", Value::Data("mail")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-6",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("name", Value::Data("mail")),
+                ("value", Value::Data("45")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-7",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("name", Value::Data("mail")),
+                ("value", Value::Data("45")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-8",
+        &[Node::Component {
+            name: "Split",
+            props: &[
+                ("collapse", Value::Text("none")),
+                ("name", Value::Data("mail")),
+                ("value", Value::Data("95")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitHandle",
+                    props: &[
+                        ("label", Value::Data("Resize the list")),
+                        ("name", Value::Data("mail")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "Split",
+        "case-split-9",
+        &[Node::Component {
+            name: "Split",
+            props: &[("name", Value::Data("mail")), ("value", Value::Data("30"))],
+            children: &[
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail"))],
+                    children: &[Node::Text(Value::Data("Inbox"))],
+                },
+                Node::Component {
+                    name: "SplitPane",
+                    props: &[("name", Value::Data("mail")), ("side", Value::Text("end"))],
+                    children: &[Node::Text(Value::Data("A message"))],
+                },
+            ],
+        }],
+    ),
+    (
+        "SplitHandle",
+        "case-split-handle-0",
+        &[Node::Component {
+            name: "SplitHandle",
+            props: &[
+                ("label", Value::Data("Resize the list")),
+                ("name", Value::Data("mail")),
+            ],
+            children: &[],
+        }],
+    ),
+    (
+        "SplitHandle",
+        "case-split-handle-1",
+        &[Node::Component {
+            name: "SplitHandle",
+            props: &[
+                ("label", Value::Data("Resize the list")),
+                ("name", Value::Data("mail")),
             ],
             children: &[],
         }],
@@ -1768,6 +3492,41 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Tabs",
+        "case-tabs-4",
+        &[Node::Component {
+            name: "Tabs",
+            props: &[
+                ("appearance", Value::Text("rail")),
+                ("label", Value::Data("Views")),
+                ("name", Value::Data("views")),
+            ],
+            children: &[
+                Node::Component {
+                    name: "Tab",
+                    props: &[
+                        ("icon", Value::Data("list")),
+                        ("label", Value::Data("List")),
+                        ("name", Value::Data("views")),
+                        ("selected", Value::Bool(true)),
+                        ("value", Value::Data("list")),
+                    ],
+                    children: &[],
+                },
+                Node::Component {
+                    name: "Tab",
+                    props: &[
+                        ("icon", Value::Data("database")),
+                        ("label", Value::Data("Board")),
+                        ("name", Value::Data("views")),
+                        ("value", Value::Data("board")),
+                    ],
+                    children: &[],
+                },
+            ],
+        }],
+    ),
+    (
         "Tag",
         "case-tag-0",
         &[Node::Component {
@@ -1939,6 +3698,62 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         }],
     ),
     (
+        "Toolbar",
+        "case-toolbar-1",
+        &[Node::Component {
+            name: "Toolbar",
+            props: &[
+                ("density", Value::Text("rail")),
+                ("label", Value::Data("Drawer controls")),
+            ],
+            children: &[Node::Text(Value::Data("Controls go here."))],
+        }],
+    ),
+    (
+        "Toolbar",
+        "case-toolbar-2",
+        &[Node::Component {
+            name: "Toolbar",
+            props: &[
+                ("density", Value::Text("rail")),
+                ("label", Value::Data("Drawer controls")),
+            ],
+            children: &[Node::Component {
+                name: "ToolbarGroup",
+                props: &[],
+                children: &[
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("hide_label", Value::Bool(true)),
+                            ("icon", Value::Data("chevrons-down")),
+                            ("label", Value::Data("Collapse")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("hide_label", Value::Bool(true)),
+                            ("icon", Value::Data("close")),
+                            ("label", Value::Data("Close")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("hide_label", Value::Bool(true)),
+                            ("icon", Value::Data("arrow-up-down")),
+                            ("label", Value::Data("Swap")),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        }],
+    ),
+    (
         "Tooltip",
         "case-tooltip-0",
         &[Node::Component {
@@ -1960,6 +3775,49 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
                 ("text", Value::Data("Only the rows you can see")),
             ],
             children: &[Node::Text(Value::Data("Export"))],
+        }],
+    ),
+    (
+        "Tooltip",
+        "case-tooltip-2",
+        &[Node::Component {
+            name: "Tooltip",
+            props: &[
+                ("name", Value::Data("close")),
+                ("text", Value::Data("Close the page")),
+            ],
+            children: &[Node::Component {
+                name: "Button",
+                props: &[
+                    ("hide_label", Value::Bool(true)),
+                    ("icon", Value::Data("close")),
+                    ("label", Value::Data("Close the page")),
+                ],
+                children: &[],
+            }],
+        }],
+    ),
+    (
+        "Tooltip",
+        "case-tooltip-3",
+        &[Node::Component {
+            name: "Tooltip",
+            props: &[
+                ("name", Value::Data("close")),
+                (
+                    "text",
+                    Value::Data("Closes the page and keeps its place in the history"),
+                ),
+            ],
+            children: &[Node::Component {
+                name: "Button",
+                props: &[
+                    ("hide_label", Value::Bool(true)),
+                    ("icon", Value::Data("close")),
+                    ("label", Value::Data("Close the page")),
+                ],
+                children: &[],
+            }],
         }],
     ),
     (

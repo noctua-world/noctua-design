@@ -1,0 +1,119 @@
+/* --- Log and LogLine -----------------------------------------------------------
+ *
+ * Lines as they arrive, newest last, in a region that scrolls.
+ *
+ * THE LOG IS AS TALL AS THE BOX AROUND IT. Its region of lines takes what the
+ * box leaves and scrolls the rest, so a log in a window, a pane or a drawer is
+ * bounded by it. A box as tall as its content gives it no bound at all.
+ *
+ * ONE LINE IS ONE BLOCK OF INLINE PARTS. The parts are inline, with the spaces
+ * the markup writes between them, so a selection across the log copies one line
+ * of text for each line and nothing the stylesheet draws. Nothing draws a
+ * border between two lines.
+ *
+ * THE LEVEL IS A WORD IN A TINTED BOX with a rule down its leading edge, in the
+ * line's tone, and the ink is the page's own: the word is the signal and the
+ * tone says it again (`NOCTUA.md §8.8.6`). */
+.nd-log {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-inline-size: 0;
+  min-block-size: 0;
+  max-block-size: 100%;
+}
+
+.nd-log-lines {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  min-block-size: 0;
+  overflow: auto;
+  /* A reader scrolling the log to its end does not scroll the page behind it.
+     The block axis alone, because the lines wrap and nothing scrolls across. */
+  overscroll-behavior-block: contain;
+  padding-block: var(--noctua-space-2);
+  padding-inline: var(--noctua-space-3);
+  font-family: var(--noctua-font-mono);
+  font-size: var(--noctua-size-small);
+  line-height: var(--noctua-leading-body);
+  color: var(--nc-color-fg);
+}
+
+/* WHILE A LOG FOLLOWS, ITS SCRIPT KEEPS ITS PLACE, and the engine does not. An
+   engine keeps a line in place when the lines above it grow, which moves the
+   region away from its end. Stopped, the reader's place is kept that way, so
+   lines leaving the top do not move the one being read. */
+.nd-log[data-nd-follow="true"]:not([data-nd-paused]) > .nd-log-lines {
+  overflow-anchor: none;
+}
+
+/* The ring is drawn inside the region, whose edges the box around it may cut. */
+.nd-log-lines:is(:focus-visible, [data-nd-seat-focus]) {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: calc(-1 * var(--noctua-focus-width));
+}
+
+.nd-log-line {
+  margin: 0;
+  /* A word longer than the line breaks inside itself rather than pushing the
+     log sideways. */
+  overflow-wrap: anywhere;
+}
+
+.nd-log-line-time,
+.nd-log-line-source {
+  color: var(--nc-color-fg-muted);
+}
+
+.nd-log-line-level {
+  padding-inline: var(--noctua-space-1);
+  background: var(--nc-color-surface-subtle);
+  border-inline-start: var(--noctua-border-rule) solid var(--nc-color-border-strong);
+}
+
+.nd-log-line[data-nd-tone] > .nd-log-line-level {
+  background: var(--nd-tone-bg);
+  border-inline-start-color: var(--nd-tone);
+}
+
+/* The message keeps the spaces and the line breaks it was written with. */
+.nd-log-line-text {
+  white-space: pre-wrap;
+}
+
+/* THE CONTROL THAT GOES BACK TO THE NEWEST LINE. It stands over the end of the
+   region, clear of its scrollbar, while following has stopped. It is a solid
+   control, because what is under it is text. */
+.nd-log-resume {
+  position: absolute;
+  inset-block-end: var(--noctua-space-2);
+  inset-inline-end: var(--noctua-space-6);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--noctua-space-1);
+  box-sizing: border-box;
+  min-block-size: var(--noctua-space-8);
+  margin: 0;
+  padding-inline: var(--noctua-space-3);
+  /* The page's face, which follows the interface-font setting
+     (`NOCTUA.md §7.7`): a button does not take it on its own. Before the size
+     and the leading, which the shorthand resets. */
+  font: inherit;
+  font-size: var(--noctua-size-small);
+  line-height: var(--noctua-leading-body);
+  color: var(--nc-color-on-accent);
+  background: var(--nc-color-accent);
+  border: 0;
+  border-radius: var(--noctua-radius-control);
+  cursor: pointer;
+}
+
+.nd-log-resume:is(:hover, [data-nd-seat-hover]) {
+  background: var(--nc-color-accent-hover);
+}
+
+.nd-log-resume:is(:focus-visible, [data-nd-seat-focus]) {
+  outline: var(--noctua-focus-width) solid var(--nc-color-ring);
+  outline-offset: var(--noctua-focus-offset);
+}

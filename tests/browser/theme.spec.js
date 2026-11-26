@@ -5,7 +5,11 @@
 // declared. Every test here is that claim or that hazard.
 
 import { test, expect } from "@playwright/test";
-import { ANY, LOCALES, PAGE, SCOPED, url } from "./pages.js";
+import { ANY, LOCALES, PAGE, SCOPED, SIDEBAR, url, walker } from "./pages.js";
+
+// Every walk in this file declares its tests through this line, so that a
+// report names this file rather than `pages.js` (`walker` says why).
+const walk = walker((title, fn) => test(title, fn));
 
 /** A color, read as PIXELS. Never `getComputedStyle(…).color`. */
 async function paint(page, value) {
@@ -223,37 +227,52 @@ test("forced colours leaves no ambient image, not even the grain", async ({ page
 const storePalette = (page, palette) =>
   page.addInitScript((p) => localStorage.setItem("noctua-palette", p), palette);
 
-test("no page asks for a file that is not there", async ({ page }) => {
-  const missing = [];
-  // No exclusions. There was one — /favicon.ico, which the browser asks for
-  // unprompted and the site did not have — and it is gone because the site has
-  // a favicon now. An exclusion is a 404 somebody decided to stop looking at.
-  page.on("response", (r) => {
-    if (r.status() >= 400) missing.push(`${r.status()} ${r.url()}`);
-  });
-  // A non-default palette, so the on-demand stylesheet is exercised too.
-  await storePalette(page, "jade-vivid");
+// ONE TEST PER LINK IN EVERY LOCALE'S SIDEBAR, and every link of it is walked:
+// taken from the sidebar rather than from `PAGE` — a page this misses is a page
+// nothing links to — so the walk is generated from the built sidebar
+// (`SIDEBAR`), and each test holds that list against the one the browser reads
+// before it follows its own link. A walk with no link to follow in a locale is
+// refused by the walk's own guard, which is what "has no navigation" used to
+// say.
+walk(
+  "no page asks for a file that is not there",
+  {
+    axes: { locale: LOCALES },
+    title: ({ locale }) => `no page asks for a file that is not there, in ${locale}`,
+    pages: ({ locale }) => SIDEBAR[locale],
+  },
+  async ({ page, locale, path: href }) => {
+    const missing = [];
+    // No exclusions. There was one — /favicon.ico, which the browser asks for
+    // unprompted and the site did not have — and it is gone because the site
+    // has a favicon now. An exclusion is a 404 somebody decided to stop
+    // looking at.
+    page.on("response", (r) => {
+      if (r.status() >= 400) missing.push(`${r.status()} ${r.url()}`);
+    });
+    // A non-default palette, so the on-demand stylesheet is exercised too.
+    await storePalette(page, "jade-vivid");
 
-  for (const locale of LOCALES) {
     await page.goto(url(ANY, locale));
-    // Taken from the sidebar rather than hardcoded — a page this misses is a
-    // page nothing links to — and resolved the way the BROWSER resolves it,
-    // via `.href`, not by joining strings here. Joining them here would test
-    // my arithmetic; `.href` tests the site's.
-    const targets = await page.evaluate(() =>
-      [...document.querySelectorAll(".nd-nav-link")].map((a) => a.href),
+    // Resolved the way the BROWSER resolves it, via `.href`, not by joining
+    // strings here. Joining them here would test my arithmetic; `.href` tests
+    // the site's.
+    const links = await page.evaluate(() =>
+      [...document.querySelectorAll(".nd-nav-link")].map((a) => [a.getAttribute("href"), a.href]),
     );
-    expect(targets.length, `${locale} has no navigation`).toBeGreaterThan(0);
-    for (const target of targets) {
-      expect(target, "a link a reader can see shows a file name").not.toContain(".html");
-      await page.goto(target);
-    }
-  }
+    expect(
+      links.map(([written]) => written),
+      `the sidebar ${locale} serves is not the one its walk was made from`,
+    ).toEqual(SIDEBAR[locale].map(([, written]) => written));
+    const target = links.find(([written]) => written === href)[1];
+    expect(target, "a link a reader can see shows a file name").not.toContain(".html");
+    await page.goto(target);
 
-  // Silence is how this fails: a stylesheet that 404s reports nothing, paints
-  // nothing, and leaves the page looking merely wrong.
-  expect(missing, "requests that 404ed").toEqual([]);
-});
+    // Silence is how this fails: a stylesheet that 404s reports nothing,
+    // paints nothing, and leaves the page looking merely wrong.
+    expect(missing, "requests that 404ed").toEqual([]);
+  },
+);
 
 test("the palette stylesheet the bootstrap injects actually loads", async ({ page }) => {
   // The deferred module links the palette too, correctly. Blocking it is what

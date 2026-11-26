@@ -115,3 +115,9 @@
     color: var(--nc-color-fg);
   }
 }
+
+/* The same, for a seat whose hover arrives as an attribute: the attribute is
+   the proof of a hovering pointer, so no media query stands in front of it. */
+a.nd-avatar-more-chip[data-nd-seat-hover] {
+  color: var(--nc-color-fg);
+}

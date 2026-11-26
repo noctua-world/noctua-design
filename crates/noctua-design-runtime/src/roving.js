@@ -123,11 +123,15 @@ document.addEventListener("keydown", (event) => {
   const container = nearest.closest('[role="toolbar"]') ?? nearest;
 
   const vertical = container.getAttribute("aria-orientation") === "vertical";
+  // A RAIL IS TWO CONTROLS WIDE, so it has a neighbour across as well as one
+  // below. All four arrows walk it, in the one order the controls are written
+  // in: a reader who presses Right on the first of a row expects the second.
+  const rail = container.getAttribute("data-nd-density") === "rail";
   // The axis is honoured rather than ignored: a horizontal bar that answered
   // Up and Down would swallow the keys the reader uses to scroll past it.
   const step = {
-    ArrowRight: vertical ? 0 : 1,
-    ArrowLeft: vertical ? 0 : -1,
+    ArrowRight: vertical && !rail ? 0 : 1,
+    ArrowLeft: vertical && !rail ? 0 : -1,
     ArrowDown: vertical ? 1 : 0,
     ArrowUp: vertical ? -1 : 0,
   }[event.key];

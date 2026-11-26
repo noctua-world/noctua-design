@@ -115,24 +115,33 @@ fn plan(root: &Path, current: &str) -> Result<Vec<(String, usize)>, String> {
 /// **The gate runs before the writes**, so it reads the old version and cannot
 /// see this: `v0.2.5` was tagged with a lockfile still naming `0.2.4`, and CI's
 /// determinism job — which builds and then asks whether anything changed — is
-/// what caught it, one push later. `cargo metadata` resolves the workspace and
-/// rewrites the lockfile without compiling anything, which is the cheapest
-/// thing that makes the tree consistent with itself.
+/// what caught it, one push later. `cargo update --workspace` moves the
+/// workspace's own entries and leaves every other one where it is, compiling
+/// nothing and reading only the registry's index, which is the cheapest thing
+/// that makes the tree consistent with itself.
+///
+/// **Not `cargo metadata`, which this used to be.** Metadata describes every
+/// package in the graph, so it has to unpack the source of each one, including
+/// the ones only the WebAssembly target uses and a host build never fetches.
+/// Offline, on a machine whose cache lacked `js-sys`, it failed after the
+/// manifests were written, and the release stopped on an error instead of
+/// printing its next steps. Given only the index and an empty package cache,
+/// it fails the same way, and this writes the lockfile it would have.
 ///
 /// # Errors
 ///
 /// If cargo cannot be run, or refuses to resolve the workspace.
 fn relock(root: &Path) -> Result<(), String> {
     let out = std::process::Command::new("cargo")
-        .args(["metadata", "--format-version", "1", "--offline"])
+        .args(["update", "--workspace", "--offline"])
         .current_dir(root)
         .output()
-        .map_err(|error| format!("could not run cargo metadata: {error}"))?;
+        .map_err(|error| format!("could not run cargo update: {error}"))?;
     if out.status.success() {
         return Ok(());
     }
     Err(format!(
-        "cargo metadata refused to resolve the workspace, so Cargo.lock still names the old \
+        "cargo update refused to resolve the workspace, so Cargo.lock still names the old \
          version:\n{}",
         String::from_utf8_lossy(&out.stderr).trim()
     ))

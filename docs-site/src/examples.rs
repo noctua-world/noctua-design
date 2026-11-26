@@ -461,6 +461,94 @@ ToolbarGroup { align: ToolbarGroupAlign::End, … }"#
         ),
     ),
     (
+        "footer",
+        example!(
+            r#"Footer { label: "…",
+    FooterCorner { side: FooterCornerSide::Start }
+    FooterLine { kind: FooterLineKind::Modeline, … }
+    FooterLine { kind: FooterLineKind::Info, expandable: true, expand_label: "…", collapse_label: "…", action: "…", … }
+    FooterLine { kind: FooterLineKind::Prompt, Prompt { name: "…", label: "…", send_label: "…" } }
+    FooterCorner { side: FooterCornerSide::End }
+}"#,
+            Key::ExampleFooterOverview
+        ),
+    ),
+    (
+        "prompt",
+        example!(
+            r#"Footer { label: "…",
+    FooterLine { kind: FooterLineKind::Modeline, … }
+    FooterLine { kind: FooterLineKind::Info, … }
+    FooterLine { kind: FooterLineKind::Prompt,
+        Prompt { name: "…", label: "…", send_label: "…", action: "…" }
+    }
+}"#,
+            Key::ExamplePromptOverview
+        ),
+    ),
+    (
+        "drawer",
+        example!(
+            r#"Drawer { name: "…", id: "…", label: "…",
+    DrawerRail { Toolbar { density: ToolbarDensity::Rail, … } }
+    …
+    DrawerRail { side: DrawerRailSide::End, Tabs { appearance: TabsAppearance::Rail, … } }
+}"#,
+            Key::ExampleDrawerOverview
+        ),
+    ),
+    (
+        "split",
+        example!(
+            r#"Split { name: "…",
+    SplitPane { name: "…", … }
+    SplitHandle { name: "…", label: "…" }
+    SplitPane { name: "…", side: SplitPaneSide::End, … }
+}"#,
+            Key::ExampleSplitOverview
+        ),
+    ),
+    (
+        "key-capture",
+        example!(
+            r#"KeyCapture { name: "…", label: "…", value: "Alt+Super+Space", clear_label: "…", … }
+KeyCapture { name: "…", label: "…", value: "KeyS", … }
+KeyCapture { name: "…", label: "…", value: "KeyH", … }"#,
+            Key::ExampleKeyCaptureOverview
+        ),
+    ),
+    (
+        "log",
+        example!(
+            r#"Log { name: "…", label: "…", resume_label: "…",
+    LogLine { time: "…", tone: "…", level: "…", source: "…", "…" }
+    …
+}"#,
+            Key::ExampleLogOverview
+        ),
+    ),
+    (
+        "option-list",
+        example!(
+            r#"OptionList { name: "…", label: "…", empty_label: "…",
+    OptionGroup { label: "…",
+        OptionItem { value, label: "window.close", hits: "0-2|7-9", detail: "…", shortcut: "q", active: true }
+        OptionItem { value, label: "window.hide", hits: "0-2|", detail: "…" }
+    }
+    OptionGroup { label: "…", OptionItem { value, label: "page.close", hits: "|5-7", detail: "…" } }
+}"#,
+            Key::ExampleOptionListOverview
+        ),
+    ),
+    (
+        "match-text",
+        example!(
+            r#"MatchText { text: "ButtonGroup", hits: "6-8|2|0" }
+MatchText { text: "ToolbarGroup", hits: "7-9|0|4" }"#,
+            Key::ExampleMatchTextQuery
+        ),
+    ),
+    (
         "button-group",
         example!(
             r#"ButtonGroup { label: "Publishing", … }
@@ -597,6 +685,10 @@ Label { kind: Name, for_control } / Segmented { labelledby }"
 /// below is what makes that true: a component added to `spec/components/`
 /// fails `cargo xtask check` until somebody shows how it is used.
 #[must_use]
+#[allow(
+    clippy::too_many_lines,
+    reason = "one line per component, and the component set is the point"
+)]
 pub(crate) fn for_component(name: &str) -> &'static [Example] {
     match name {
         "Abbr" => ABBR,
@@ -670,9 +762,25 @@ pub(crate) fn for_component(name: &str) -> &'static [Example] {
         "Kbd" => KBD,
         "Link" => LINK,
         "List" => LIST,
+        "Drawer" => DRAWER,
+        "DrawerRail" => DRAWER_RAIL,
+        "Footer" => FOOTER,
+        "Split" => SPLIT,
+        "SplitPane" => SPLIT_PANE,
+        "SplitHandle" => SPLIT_HANDLE,
+        "KeyCapture" => KEY_CAPTURE,
+        "Log" => LOG,
+        "LogLine" => LOG_LINE,
+        "FooterLine" => FOOTER_LINE,
+        "FooterCorner" => FOOTER_CORNER,
         "ListItem" => LIST_ITEM,
         "Mark" => MARK,
+        "MatchText" => MATCH_TEXT,
+        "OptionList" => OPTION_LIST,
+        "OptionGroup" => OPTION_GROUP,
+        "OptionItem" => OPTION_ITEM,
         "Paragraph" => PARAGRAPH,
+        "Prompt" => PROMPT,
         "Prose" => PROSE,
         "Search" => SEARCH,
         "SearchGroup" => SEARCH_GROUP,
@@ -796,6 +904,12 @@ const TABS: &[Example] = &[
         Key::ExampleTabsNoteVertical
     ),
     example!(r"Tabs { fill: Equal }", Key::ExampleTabsNoteFill),
+    // THE RAIL. Each tab is its icon, its label is still its name, and the
+    // `Tooltip` around it draws that name without saying it twice.
+    example!(
+        r"Tabs { appearance: Rail } / Tooltip { text } / Tab { icon }",
+        Key::ExampleTabsNoteRail
+    ),
 ];
 
 // --- Tab --------------------------------------------------------------------
@@ -981,6 +1095,31 @@ const MESSAGE_BAR: &[Example] = &[
         r"MessageBar { ai_mark, ai_label, ai_note }",
         Key::ExampleAiCaption
     ),
+    // THE ALERT LINE (`NOCTUA.md §12.17`), last in its window, under the
+    // footer. The deadline is the caller's, and on this site the caller is
+    // the page: `shell.js` writes one ten seconds ahead when the page loads
+    // and when the control in the window is pressed. The tree's own deadline
+    // is an instant long past, which is all a tree with no code can know.
+    example!(
+        r#"MessageBar { presentation: Line, alert: true, tone: "danger", deadline, countdown_label, action_label, action, … } — the deadline written by the page"#,
+        Key::ExampleMessageBarNoteLine
+    ),
+    // STOPPED ON PURPOSE. Nothing counts, and the action starts it again.
+    example!(
+        r#"MessageBar { presentation: Line, tone: "danger", action_label, action, … }"#,
+        Key::ExampleMessageBarNoteStopped
+    ),
+    // NO TONE, AND A READER MAY TAKE IT AWAY: a line about the window that is
+    // not an alarm, on the subtle surface, its control at the end of the row.
+    example!(
+        r"MessageBar { presentation: Line, dismissible: true, dismiss_label, … }",
+        Key::ExampleMessageBarNoteQuiet
+    ),
+    // A COUNTDOWN IN A BAR, under the message it is about.
+    example!(
+        r#"MessageBar { tone: "warning", deadline, countdown_label, action_label, … } — the deadline written by the page"#,
+        Key::ExampleMessageBarNoteCountdown
+    ),
 ];
 
 // --- Dialog -----------------------------------------------------------------
@@ -1013,6 +1152,19 @@ const DIALOG: &[Example] = &[
     example!(
         r"Dialog { ai_mark, ai_label, ai_note }",
         Key::ExampleAiCaption
+    ),
+    // AN ANSWER THAT CANNOT BE TAKEN BACK: the alert dialog, its mark and its
+    // two answers, the focus on the one that changes nothing.
+    example!(
+        r"Dialog { alert: true, irreversible_label, confirm_label, decline_label, … }",
+        Key::ExampleDialogNoteAlert
+    ),
+    // THE INTERFACE'S CONFIRMATION, opened because the program asked. `shown`
+    // is the caller's, and on this site the caller is the page: a control
+    // writes it, and the answer the dialog reports is written under it.
+    example!(
+        r"Dialog { alert: true, shown, requester, dismissible: false, … } — shown by the page",
+        Key::ExampleDialogNoteShown
     ),
 ];
 
@@ -1061,6 +1213,12 @@ const TOOLTIP: &[Example] = &[
     example!(
         r"Tooltip { delay: TooltipDelay::None, … Button { hide_label: true } }",
         Key::ExampleTooltipNoteNone
+    ),
+    // THE NAME, DRAWN. The one case where the hint and the name are the same
+    // words, which is every control in a rail of icons.
+    example!(
+        r#"Tooltip { text: "…", Button { hide_label: true, label: "…" } } with one sentence for both"#,
+        Key::ExampleTooltipNoteName
     ),
 ];
 
@@ -1320,6 +1478,13 @@ const TOOLBAR: &[Example] = &[
     example!(
         r"Toolbar { density: ToolbarDensity::Compact, wrap: false, … }",
         Key::ExampleToolbarDensity
+    ),
+    // THE RAIL, WITH ITS NAMES. The walk over every density above draws a rail
+    // too, and what it cannot show is a second group and a name for each
+    // control: the two things a rail of icons owes a reader.
+    example!(
+        r#"Toolbar { density: ToolbarDensity::Rail, Tooltip { text: "…", Button { hide_label: true, … } } }"#,
+        Key::ExampleToolbarRail
     ),
     example!(r#"Toolbar { labelledby: "…", … }"#),
     example!(r"Toolbar { glass: true, … }", Key::ExampleGlassBehind),
@@ -2154,6 +2319,361 @@ const MARK: &[Example] = &[
     example!(r"Mark inside a list"),
 ];
 
+// --- Footer, FooterLine and FooterCorner ------------------------------------
+
+const FOOTER: &[Example] = &[
+    example!(
+        r#"Footer { label: "…", FooterLine { … } FooterLine { … } FooterLine { … } }"#,
+        Key::ExampleFooterLines
+    ),
+    example!(
+        r"Footer { visibility: FooterVisibility::Auto, … }",
+        Key::ExampleFooterAuto
+    ),
+    example!(
+        r"Footer { visibility: FooterVisibility::Auto, shown: true, … }",
+        Key::ExampleFooterShown
+    ),
+    example!(
+        r#"Footer { label: "…", … } in a narrow window"#,
+        Key::ExampleFooterNarrow
+    ),
+];
+
+const FOOTER_LINE: &[Example] = &[
+    example!(
+        r"FooterLine { kind: FooterLineKind::Modeline } / FooterLine { kind: FooterLineKind::Info } / FooterLine { kind: FooterLineKind::Prompt }",
+        Key::ExampleFooterLineKinds
+    ),
+    example!(
+        r#"FooterLine { kind: FooterLineKind::Info, expandable: true, expand_label: "…", collapse_label: "…", action: "…" }"#,
+        Key::ExampleFooterLineCut
+    ),
+    example!(
+        r"FooterLine { kind: FooterLineKind::Info, expandable: true, expanded: true, … }",
+        Key::ExampleFooterLineExpanded
+    ),
+    example!(
+        r"FooterLine { kind: FooterLineKind::Info, live: true }",
+        Key::ExampleFooterLineLive
+    ),
+];
+
+const FOOTER_CORNER: &[Example] = &[
+    example!(
+        r"FooterCorner { side: FooterCornerSide::Start } / FooterCorner { side: FooterCornerSide::End }",
+        Key::ExampleFooterCornerSides
+    ),
+    example!(
+        r#"FooterCorner { Button { hide_label: true, icon: …, label: "…" } }"#,
+        Key::ExampleFooterCornerControl
+    ),
+    example!(
+        r"FooterCorner { side: FooterCornerSide::End } alone",
+        Key::ExampleFooterCornerAlone
+    ),
+    example!(
+        r"FooterCorner { Button { … } Button { … } }",
+        Key::ExampleFooterCornerTwo
+    ),
+];
+
+// --- Prompt -----------------------------------------------------------------
+
+const PROMPT: &[Example] = &[
+    example!(
+        r#"Prompt { name: "…", label: "…", send_label: "…", action: "…" }"#,
+        Key::ExamplePromptBasic
+    ),
+    example!(r#"Prompt { value: "…" }"#, Key::ExamplePromptGrows),
+    example!(
+        r#"Prompt { controls: "…" } beside OptionList { name: "…", focusable: false }"#,
+        Key::ExamplePromptDriven
+    ),
+    example!(
+        r#"Prompt { controls: "…", active_option: "…" } beside OptionItem { id: "…", active: true }"#,
+        Key::ExamplePromptActive
+    ),
+    example!(
+        r#"Prompt { readonly: true, value: "…", send_label: "…" }"#,
+        Key::ExamplePromptReadonly
+    ),
+    example!(
+        r#"Prompt { disabled: true, send_label: "…" }"#,
+        Key::ExamplePromptDisabled
+    ),
+];
+
+// --- Drawer and DrawerRail --------------------------------------------------
+//
+// EVERY ONE IS IN A WINDOW. A drawer opens to a share of the box around it, and
+// a share of a box as tall as its content is no limit at all. So each example
+// stands in `.nd-example-window`, the site's stand-in for a window: a box with
+// a height of its own, the work above and the drawer below.
+
+const DRAWER: &[Example] = &[
+    example!(
+        r#"Drawer { name: "…", label: "…", … }"#,
+        Key::ExampleDrawerBasic
+    ),
+    example!(
+        r#"Drawer { id: "…", collapsed: true, … } beside Button { controls: "…" }"#,
+        Key::ExampleDrawerCollapsed
+    ),
+    example!(
+        r"Drawer { side: DrawerSide::Start, … } / Drawer { side: DrawerSide::End, … }",
+        Key::ExampleDrawerSide
+    ),
+    example!(
+        r"Drawer { … } with more in it than its share of the window",
+        Key::ExampleDrawerScroll
+    ),
+];
+
+const DRAWER_RAIL: &[Example] = &[
+    example!(
+        r"DrawerRail { Toolbar { density: ToolbarDensity::Rail, … } }",
+        Key::ExampleDrawerRailControls
+    ),
+    example!(
+        r"DrawerRail { side: DrawerRailSide::End, Tabs { appearance: TabsAppearance::Rail, … } }",
+        Key::ExampleDrawerRailTabs
+    ),
+    example!(
+        r"DrawerRail { … } / DrawerRail { side: DrawerRailSide::End, … }",
+        Key::ExampleDrawerRailBoth
+    ),
+    example!(
+        r"DrawerRail { … } with more controls than the drawer is tall",
+        Key::ExampleDrawerRailScroll
+    ),
+];
+
+// --- Split, SplitPane and SplitHandle ---------------------------------------
+//
+// SIDE BY SIDE NEEDS ROOM. A split collapses by its own width, so an example
+// drawn in a narrow stage shows the collapsed half of whatever it declares.
+// The ones about collapsing stand in `.nd-example-narrow` to show it at every
+// width, and the ones about a pane's height stand in `.nd-example-window`.
+
+const SPLIT: &[Example] = &[
+    example!(
+        r#"Split { name: "…", SplitPane { … } SplitHandle { label: "…" } SplitPane { side: SplitPaneSide::End, … } }"#,
+        Key::ExampleSplitBasic
+    ),
+    example!(
+        r#"Split { value: "30", min: "20", max: "60", … }"#,
+        Key::ExampleSplitLimits
+    ),
+    example!(
+        r"Split { collapse: SplitCollapse::Stack, … } in a narrow column",
+        Key::ExampleSplitStack
+    ),
+    example!(
+        r"Split { collapse: SplitCollapse::HideStart, … } / Split { collapse: SplitCollapse::HideEnd, … } in a narrow column",
+        Key::ExampleSplitHide
+    ),
+    example!(
+        r"Split { collapse: SplitCollapse::None, … } in a narrow column",
+        Key::ExampleSplitNone
+    ),
+];
+
+const SPLIT_PANE: &[Example] = &[
+    example!(
+        r#"SplitPane { name: "…", … } / SplitPane { name: "…", side: SplitPaneSide::End, … }"#,
+        Key::ExampleSplitPaneSides
+    ),
+    example!(
+        r"SplitPane { … } with more in it than the split is tall",
+        Key::ExampleSplitPaneScroll
+    ),
+    example!(
+        r"SplitPane { Heading { … } Paragraph { … } }",
+        Key::ExampleSplitPaneContent
+    ),
+    example!(
+        r"SplitPane { side: SplitPaneSide::End, Split { … } }",
+        Key::ExampleSplitPaneNested
+    ),
+];
+
+const SPLIT_HANDLE: &[Example] = &[
+    example!(
+        r#"SplitHandle { name: "…", label: "…" }"#,
+        Key::ExampleSplitHandleBasic
+    ),
+    example!(
+        r#"SplitHandle { … } in a Split { value: "20", min: "20", … }"#,
+        Key::ExampleSplitHandleLeast
+    ),
+    example!(
+        r#"SplitHandle { … } in a Split { min: "0", max: "100", … }"#,
+        Key::ExampleSplitHandleAway
+    ),
+    example!(
+        r"SplitHandle { … } in a split read from the right",
+        Key::ExampleSplitHandleMirrored
+    ),
+];
+
+// --- KeyCapture -------------------------------------------------------------
+
+const KEY_CAPTURE: &[Example] = &[
+    example!(
+        r#"KeyCapture { name: "…", label: "…", value: "Alt+Space", capture_label: "…", empty_label: "…" }"#,
+        Key::ExampleKeyCaptureBasic
+    ),
+    example!(
+        r#"KeyCapture { keyboard: KeyCaptureKeyboard::Linux | Windows | Mac, value: "Alt+Super+Space", … }"#,
+        Key::ExampleKeyCaptureKeyboards
+    ),
+    example!(
+        r#"KeyCapture { clear_label: "…", … }"#,
+        Key::ExampleKeyCaptureRemovable
+    ),
+    example!(
+        r"KeyCapture { … } with no value",
+        Key::ExampleKeyCaptureUnset
+    ),
+    example!(
+        r#"KeyCapture { refusal: "…", … }"#,
+        Key::ExampleKeyCaptureRefused
+    ),
+    example!(
+        r"KeyCapture { disabled: true, … }",
+        Key::ExampleKeyCaptureLocked
+    ),
+];
+
+// --- Log and LogLine --------------------------------------------------------
+//
+// A LOG FOLLOWS ITS END ONLY IN A BOX WITH ONE. The logs stand in
+// `.nd-example-window`, so each is bounded and has an end to follow. The lines
+// alone stand in logs that do not follow, as tall as what is in them.
+
+const LOG: &[Example] = &[
+    example!(
+        r#"Log { name: "…", label: "…", resume_label: "…", LogLine { … } … }"#,
+        Key::ExampleLogFollows
+    ),
+    example!(r"Log { follow: false, … }", Key::ExampleLogStill),
+    example!(r"Log { … } in a narrow window", Key::ExampleLogNarrow),
+    example!(r"Log { … } with room for every line", Key::ExampleLogRoomy),
+];
+
+const LOG_LINE: &[Example] = &[
+    example!(
+        r#"LogLine { time: "…", tone: "…", level: "…", source: "…", "…" }"#,
+        Key::ExampleLogLineLevels
+    ),
+    example!(
+        r#"LogLine { level: "…", "…" } / LogLine { "…" }"#,
+        Key::ExampleLogLineParts
+    ),
+    example!(
+        r"LogLine { … } with a word longer than the line, and a line break",
+        Key::ExampleLogLineLong
+    ),
+    example!(
+        r#"LogLine { MatchText { text: "…", hits: "…" } }"#,
+        Key::ExampleLogLineFiltered
+    ),
+];
+
+// --- OptionList, OptionGroup and OptionItem ---------------------------------
+
+const OPTION_LIST: &[Example] = &[
+    example!(
+        r#"OptionList { name: "…", label: "…", OptionItem { value: "…", label: "…" } }"#,
+        Key::ExampleOptionListWalk
+    ),
+    example!(
+        r"OptionList { layout: OptionListLayout::Columns, size: OptionListSize::Small }",
+        Key::ExampleOptionListColumns
+    ),
+    example!(r"OptionList { size: OptionListSize::Large }"),
+    example!(
+        r#"OptionList { name: "…", focusable: false } beside <input aria-controls="…">"#,
+        Key::ExampleOptionListDriven
+    ),
+    example!(
+        r#"OptionList { empty_label: "…" }"#,
+        Key::ExampleOptionListNothing
+    ),
+];
+
+const OPTION_GROUP: &[Example] = &[
+    example!(
+        r#"OptionGroup { label: "…", OptionItem { … } }"#,
+        Key::ExampleOptionGroupRun
+    ),
+    example!(
+        r"OptionItem { … } beside OptionGroup { … }",
+        Key::ExampleOptionGroupMixed
+    ),
+    example!(
+        r"OptionList { layout: OptionListLayout::Columns, OptionGroup { … } }",
+        Key::ExampleOptionGroupColumns
+    ),
+    example!(
+        r#"OptionGroup { label: "…", OptionItem { hits: "…" } }"#,
+        Key::ExampleOptionGroupFiltered
+    ),
+];
+
+// A MARKED NAME IS A DOTTED NAME. See `trees::option_item`: positions are
+// indices into the text, so a marked name is one no locale changes.
+const OPTION_ITEM: &[Example] = &[
+    example!(
+        r#"OptionItem { value: "…", label: "…", detail: "…" }"#,
+        Key::ExampleOptionItemRow
+    ),
+    example!(
+        r#"OptionItem { label: "window.close", hits: "7-9" }"#,
+        Key::ExampleOptionItemHits
+    ),
+    example!(
+        r#"OptionItem { label: "window.close", hits: "0-2|", detail: "close quit exit", detail_hits: "|11-12" }"#,
+        Key::ExampleOptionItemDetailHits
+    ),
+    example!(
+        r#"OptionItem { shortcut: "s", icon }"#,
+        Key::ExampleOptionItemShortcut
+    ),
+    example!(
+        r#"OptionItem { id: "…", active: true } / OptionItem { selected: true } / OptionItem { disabled: true }"#,
+        Key::ExampleOptionItemStates
+    ),
+];
+
+// --- MatchText --------------------------------------------------------------
+
+// ONE NAME, CUT FIVE WAYS. The text never changes, so what differs between two
+// pictures is what `hits` said and nothing else.
+const MATCH_TEXT: &[Example] = &[
+    example!(
+        r#"MatchText { text: "ButtonGroup", hits: "0-5" }"#,
+        Key::ExampleMatchTextOne
+    ),
+    example!(
+        r#"MatchText { text: "ButtonGroup", hits: "0-2|6-8|9-10" }"#,
+        Key::ExampleMatchTextWords
+    ),
+    example!(
+        r#"MatchText { text: "ButtonGroup", hits: "0-5|3-8" }"#,
+        Key::ExampleMatchTextShared
+    ),
+    example!(
+        r#"MatchText { text: "ButtonGroup", hits: "|6-10" }"#,
+        Key::ExampleMatchTextElsewhere
+    ),
+    example!(
+        r#"MatchText { text: "ButtonGroup" }"#,
+        Key::ExampleMatchTextPlain
+    ),
+];
+
 // --- Paragraph and Prose ----------------------------------------------------
 
 const PARAGRAPH: &[Example] = &[
@@ -2179,6 +2699,14 @@ const PROSE: &[Example] = &[
         Key::ExampleProseNone
     ),
     example!(r"A whole reading column"),
+    // THE CLOSED MARKDOWN SUBSET, EVERY CONSTRUCT OF IT, as the interface draws
+    // a help page: headings, paragraphs, emphasis, strong, inline code, a link,
+    // a nested list, a quotation, a block of code, a table and a break. It is
+    // the fixture a change to any of them is looked at against.
+    example!(
+        r"Prose { flow: true, … } — every construct of the Markdown subset",
+        Key::ExampleProseNoteFlow
+    ),
 ];
 const SEARCH: &[Example] = &[
     example!(

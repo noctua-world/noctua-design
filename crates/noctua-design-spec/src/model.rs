@@ -73,6 +73,18 @@ pub struct Spec {
     /// once, which is the whole reason the engine never sees a length.
     #[serde(default)]
     pub scene: IndexMap<String, String>,
+
+    /// What an application window is measured in: the height of a footer
+    /// line, the width of an icon rail, and how far a prompt and a drawer may
+    /// grow.
+    ///
+    /// Every value is a length except `prompt-max`, which is a count of lines.
+    #[serde(default)]
+    pub shell: IndexMap<String, String>,
+
+    /// Pointer-target sizes: the smallest box a pointer is asked to hit.
+    #[serde(default)]
+    pub target: IndexMap<String, String>,
 }
 
 /// The named presets a reader chooses between.

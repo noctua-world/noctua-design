@@ -42,6 +42,16 @@ summary = "Explain a control with a short hint, shown on hover and on focus."
 #    when the pointer leaves, so a link inside it is a link that cannot be
 #    reached. `Popover` is the component for a surface with controls in it.
 #
+# THE ONE CASE WHERE THE HINT IS THE NAME'S OWN WORDS.
+#
+# A control that shows an icon and no words has a name nobody sees, and a rail
+# of such controls (`NOCTUA.md §12.11`) shows each name in a tooltip. Rule 1
+# still holds there: the name is the control's own `label`. What changes is the
+# description. Pointed at a bubble holding its own name, the control would be
+# read out twice, so `dist/tooltip.js` writes no `aria-describedby` and hides
+# the bubble from assistive technology. The bubble is then a drawing of the
+# name and nothing else.
+#
 # AND IT IS NOT `title`.
 #
 # The platform's own tooltip cannot be styled, cannot be selected or copied,
@@ -102,9 +112,9 @@ doc = "Set on the root while the bubble is open. The bubble itself is hidden by 
 
 [a11y]
 notes = """
-The bubble is a `role="tooltip"` and the control points at it with
-`aria-describedby`. It is never the control's accessible name, it holds nothing
-focusable, and Escape hides it without moving the focus.
+The bubble is a `role="tooltip"`, named in the control's `aria-describedby`.
+It holds nothing focusable, and Escape hides it without moving the focus. A
+hint that repeats the control's name is `aria-hidden` and describes nothing.
 """
 
 [keyboard]

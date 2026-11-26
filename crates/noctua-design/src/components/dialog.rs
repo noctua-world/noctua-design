@@ -9,7 +9,7 @@
 use dioxus::prelude::*;
 use noctua_design_icons::IconDrawing;
 
-use crate::components::{Icon, IconSize};
+use crate::components::{Button, ButtonSubmit, ButtonTone, ButtonVariant, Icon, IconSize};
 
 /// How wide the surface may grow. `small` suits a question with two answers,
 /// `medium` a short form, `large` a table a reader has to read. The window caps all
@@ -44,18 +44,18 @@ impl DialogSize {
 ///
 /// # Accessibility
 ///
-/// The `<dialog>` element carries the role, so none is written. `showModal` marks
-/// it modal and the document behind it inert, so no focus trap is written either.
-/// A non-modal one is a plain dialog beside the page.
+/// The `<dialog>` element carries the role, or `role="alertdialog"` with `alert`.
+/// `showModal` makes the page behind it inert, so no focus trap is written. The
+/// description, requester and mark describe it.
 #[component]
 pub fn Dialog(
     /// What this dialog is, as a script finds it, and the root of every id here.
     /// **Required**, because ids derived from an absent name collide the moment a page
     /// carries two.
     name: String,
-    /// The words on the control that opens it. **Required**: a surface that opens from
-    /// a script and has no control pointing at it is a surface a reader cannot reach.
-    trigger_label: String,
+    /// The words on the control that opens it. Absent for a dialog its caller opens
+    /// with `shown`. A dialog with neither is a surface a reader cannot reach.
+    trigger_label: Option<String>,
     /// A title inside the surface. It names the dialog through `aria-labelledby`, so
     /// prefer it to `label`. A name a reader can see is a name they can check against
     /// what is being asked.
@@ -85,6 +85,28 @@ pub fn Dialog(
     /// The name of the control that closes it. Wanted in practice by `dismissible`,
     /// because that control is a glyph and this is the only name it has.
     close_label: Option<String>,
+    /// Whether the surface is showing, for a caller that renders the interface as a
+    /// view. `dist/dialog.js` opens or closes it whenever the caller writes it, and a
+    /// reader who closes it is reported with `nd-dialog-close`.
+    #[props(default = false)]
+    shown: bool,
+    /// Whether the dialog demands an answer. The surface becomes a `role="alertdialog"`
+    /// and a press on the backdrop does not close it. Give it a `description`.
+    #[props(default = false)]
+    alert: bool,
+    /// Who is asking, as a sentence such as *Asked by the assistant in session 4*. It
+    /// opens the body and describes the surface after the description.
+    requester: Option<String>,
+    /// A mark saying the answer cannot be taken back, such as *This cannot be undone*.
+    /// It is drawn with a warning glyph, describes the surface, and paints the confirm
+    /// control in the danger tone.
+    irreversible_label: Option<String>,
+    /// The words on the control that says yes, such as *Delete the realm*. It closes
+    /// the surface with the answer `confirm`.
+    confirm_label: Option<String>,
+    /// The words on the control that says no, such as *Keep it*. It closes the surface
+    /// with the answer `decline`, and the focus starts on it.
+    decline_label: Option<String>,
     /// The two letters an assistant's mark draws, in the reader's language. Setting it is what draws the mark, and `ai_label` has to say what it means.
     ai_mark: Option<String>,
     /// What the mark means, as a whole phrase. Wanted whenever `ai_mark` is set, because the letters carry `aria-hidden` and this is what a screen reader reads.
@@ -103,14 +125,35 @@ pub fn Dialog(
     let surface_id = format!("{id}-surface");
     let title_id = format!("{id}-title");
     let note_id = format!("{id}-note");
+    let asker_id = format!("{id}-asker");
+    let mark_id = format!("{id}-mark");
     let titled = heading.as_ref().map(|_| title_id.clone());
     let named = if heading.is_some() {
         None
     } else {
         label.clone()
     };
-    let described = description.as_ref().map(|_| note_id.clone());
+    // WHAT DESCRIBES IT, IN THE ORDER A SCREEN READER READS IT AFTER THE NAME:
+    // what is asked, who asks, and whether the answer can be taken back.
+    let described = [
+        description.as_ref().map(|_| note_id.clone()),
+        requester.as_ref().map(|_| asker_id.clone()),
+        irreversible_label.as_ref().map(|_| mark_id.clone()),
+    ]
+    .into_iter()
+    .flatten()
+    .collect::<Vec<_>>()
+    .join(" ");
+    let described = (!described.is_empty()).then_some(described);
     let head = heading.is_some() || dismissible;
+    let answers = confirm_label.is_some() || decline_label.is_some();
+    // AN ANSWER THAT CANNOT BE TAKEN BACK IS PAINTED AS ONE. The mark says it
+    // in words beside a glyph, so the tone is never the only signal.
+    let confirm_tone = if irreversible_label.is_some() {
+        ButtonTone::Danger
+    } else {
+        ButtonTone::Accent
+    };
 
     rsx! {
         div {
@@ -119,22 +162,28 @@ pub fn Dialog(
             "data-nd-modal": if modal { "true" } else { "false" },
             "data-nd-size": size.as_str(),
             "data-nd-dismissible": if dismissible { "true" } else { "false" },
+            "data-nd-shown": if shown { "true" } else { "false" },
 
             // RENDERED HIDDEN, revealed by `dist/dialog.js`. See the header,
             // and note that the stylesheet holds this box from the first paint
             // so revealing it moves nothing (`NOCTUA.md §9.6`).
-            button {
-                class: "nd-dialog-open",
-                id: "{id}",
-                r#type: "button",
-                "aria-haspopup": "dialog",
+            if let Some(trigger) = trigger_label {
+                button {
+                    class: "nd-dialog-open",
+                    id: "{id}",
+                    r#type: "button",
+                    "aria-haspopup": "dialog",
                     hidden: true,
-                "{trigger_label}"
+                    "{trigger}"
+                }
             }
 
             dialog {
                 class: "nd-dialog-surface",
                 id: "{surface_id}",
+                // The `<dialog>`'s own role, unless the dialog demands an
+                // answer. See the contract.
+                role: alert.then_some("alertdialog"),
                 // One or the other, never both. See the header.
                 "aria-label": named,
                 "aria-labelledby": titled,
@@ -168,13 +217,57 @@ pub fn Dialog(
                         }
                     }
                 }
-                if let Some(description) = description {
-                    p { class: "nd-dialog-note", id: "{note_id}", "{description}" }
-                }
                 // THE SCROLLER, AND IT IS ITS OWN ELEMENT. The surface clips and
                 // carries the radius; this scrolls and carries none. `.nd-panel`
-                // is two elements for exactly this reason.
-                div { class: "nd-dialog-body", {children} }
+                // is two elements for exactly this reason. The description is
+                // its first line, so a short window scrolls it rather than
+                // cutting it off above the answers.
+                div { class: "nd-dialog-body",
+                    if let Some(description) = description {
+                        p { class: "nd-dialog-note", id: "{note_id}", "{description}" }
+                    }
+                    if let Some(who) = requester {
+                        p { class: "nd-dialog-requester", id: "{asker_id}", "{who}" }
+                    }
+                    if let Some(mark) = irreversible_label {
+                        p { class: "nd-dialog-mark", id: "{mark_id}",
+                            // `aria-hidden`: the words say what the glyph says.
+                            span { class: "nd-dialog-mark-icon", "aria-hidden": "true",
+                                Icon { icon: IconDrawing::WARNING, size: IconSize::Small }
+                            }
+                            span { "{mark}" }
+                        }
+                    }
+                    {children}
+                }
+                // THE ANSWERS, OUTSIDE THE SCROLLER, so a short window scrolls
+                // the question and never them. Submit controls of a
+                // `<form method="dialog">`: the platform closes the surface with
+                // the answer as its `returnValue`. The decline control comes
+                // first, which is where the focus starts.
+                if answers {
+                    form { class: "nd-dialog-actions", method: "dialog",
+                        if let Some(no) = decline_label {
+                            Button {
+                                class: "nd-dialog-decline",
+                                label: no,
+                                variant: ButtonVariant::Outline,
+                                tone: ButtonTone::Neutral,
+                                submit: ButtonSubmit::Submit,
+                                value: "decline",
+                            }
+                        }
+                        if let Some(yes) = confirm_label {
+                            Button {
+                                class: "nd-dialog-confirm",
+                                label: yes,
+                                tone: confirm_tone,
+                                submit: ButtonSubmit::Submit,
+                                value: "confirm",
+                            }
+                        }
+                    }
+                }
             }
         }
     }

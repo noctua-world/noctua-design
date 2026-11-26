@@ -71,6 +71,18 @@ export const focus = {
   offset: "var(--noctua-focus-offset)",
 };
 
+export const target = {
+  min: "var(--noctua-target-min)",
+};
+
+export const shell = {
+  line: "var(--noctua-shell-line)",
+  rail: "var(--noctua-shell-rail)",
+  promptMax: "var(--noctua-shell-prompt-max)",
+  promptShare: "var(--noctua-shell-prompt-share)",
+  drawerMax: "var(--noctua-shell-drawer-max)",
+};
+
 export const leading = {
   tight: 1.15,
   heading: 1.25,
@@ -90,6 +102,7 @@ export const duration = {
   fast: "var(--noctua-duration-fast)",
   base: "var(--noctua-duration-base)",
   slow: "var(--noctua-duration-slow)",
+  blink: "var(--noctua-duration-blink)",
 };
 
 export const easing = {

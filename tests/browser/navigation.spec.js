@@ -204,6 +204,18 @@ test("a fragment on the page showing is the browser's, not the router's", async 
 
   await page.evaluate((hash) => { location.hash = hash; }, id);
   await expect(page).toHaveURL(new RegExp(`#${id}$`));
+  // AND IT LANDS BELOW THE HEADER THAT STICKS TO THE WINDOW, by the breath
+  // above a heading: the window's scroll padding is the header, and the
+  // section's own margin is the breath, so neither is counted twice.
+  const landed = await page.evaluate((hash) => {
+    const header = document.querySelector(".nd-header").getBoundingClientRect().bottom;
+    const breath = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+    return { gap: document.getElementById(hash).getBoundingClientRect().top - header, breath };
+  }, id);
+  expect(landed.gap, "the section landed under the header").toBeGreaterThanOrEqual(0);
+  expect(landed.gap, "the section landed further below the header than its breath").toBeLessThanOrEqual(
+    landed.breath + 1,
+  );
 
   // Going back from a fragment is a `popstate` for a page already on the
   // screen. Refetching there would throw away every fold the reader opened to

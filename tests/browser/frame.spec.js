@@ -670,7 +670,15 @@ test("no stage holds anything below its own bottom edge", async ({ page }) => {
     await page.goto(url(PAGE.dialog));
     await showParts(page);
     for (const root of await page.locator("[data-nd-dialog]").all()) {
-      await root.locator(".nd-dialog-open").click();
+      // A DIALOG ITS CALLER SHOWS HAS NO TRIGGER, and pressing the trigger it
+      // does not have waited out the test's whole budget. It is opened the
+      // way its caller opens it.
+      const trigger = root.locator(".nd-dialog-open");
+      if ((await trigger.count()) === 0) {
+        await root.evaluate((el) => el.setAttribute("data-nd-shown", "true"));
+      } else {
+        await trigger.click();
+      }
       // A modal one is in the top layer, where no stage can hold it, and it
       // makes the page behind it inert — so it is put away before the next
       // trigger is pressed. A non-modal one is left open, which is the case

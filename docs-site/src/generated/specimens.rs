@@ -2572,7 +2572,10 @@ const CHECKBOX_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Checkbox",
                 props: &[
-                    ("name", Value::Text("nd-variant-checkbox-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-checkbox-size-small-specimen"),
+                    ),
                     ("value", Value::Text("on")),
                     ("label", Value::Data("Aa")),
                     ("size", Value::Text("small")),
@@ -2610,7 +2613,10 @@ const CHECKBOX_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Checkbox",
                 props: &[
-                    ("name", Value::Text("nd-variant-checkbox-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-checkbox-size-medium-specimen"),
+                    ),
                     ("value", Value::Text("on")),
                     ("label", Value::Data("Aa")),
                     ("size", Value::Text("medium")),
@@ -2648,7 +2654,10 @@ const CHECKBOX_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Checkbox",
                 props: &[
-                    ("name", Value::Text("nd-variant-checkbox-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-checkbox-size-large-specimen"),
+                    ),
                     ("value", Value::Text("on")),
                     ("label", Value::Data("Aa")),
                     ("size", Value::Text("large")),
@@ -2752,7 +2761,10 @@ const COLOR_PICKER_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "ColorPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-color-picker-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-color-picker-size-small-specimen"),
+                    ),
                     ("label", Value::Text("ColorPicker")),
                     ("size", Value::Text("small")),
                     ("area_label", Value::Message(Key::ExampleColorPickerArea)),
@@ -2791,7 +2803,10 @@ const COLOR_PICKER_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "ColorPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-color-picker-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-color-picker-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("ColorPicker")),
                     ("size", Value::Text("medium")),
                     ("area_label", Value::Message(Key::ExampleColorPickerArea)),
@@ -2830,7 +2845,10 @@ const COLOR_PICKER_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "ColorPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-color-picker-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-color-picker-size-large-specimen"),
+                    ),
                     ("label", Value::Text("ColorPicker")),
                     ("size", Value::Text("large")),
                     ("area_label", Value::Message(Key::ExampleColorPickerArea)),
@@ -2869,7 +2887,10 @@ const COLOR_PICKER_SHAPE_PILL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "ColorPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-color-picker-shape-pill")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-color-picker-shape-pill-specimen"),
+                    ),
                     ("label", Value::Text("ColorPicker")),
                     ("shape", Value::Text("pill")),
                     ("area_label", Value::Message(Key::ExampleColorPickerArea)),
@@ -2908,7 +2929,10 @@ const COLOR_PICKER_SHAPE_ROUNDED: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "ColorPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-color-picker-shape-rounded")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-color-picker-shape-rounded-specimen"),
+                    ),
                     ("label", Value::Text("ColorPicker")),
                     ("shape", Value::Text("rounded")),
                     ("area_label", Value::Message(Key::ExampleColorPickerArea)),
@@ -2947,7 +2971,10 @@ const COLOR_PICKER_SHAPE_SQUARE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "ColorPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-color-picker-shape-square")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-color-picker-shape-square-specimen"),
+                    ),
                     ("label", Value::Text("ColorPicker")),
                     ("shape", Value::Text("square")),
                     ("area_label", Value::Message(Key::ExampleColorPickerArea)),
@@ -3415,6 +3442,229 @@ const FIELD_SIZE_LARGE: &[Node] = &[Node::Element {
                 name: "Code",
                 props: &[("class", Value::Text("nd-identifier"))],
                 children: &[Node::Text(Value::Text("large"))],
+            }],
+        },
+    ],
+}];
+
+/// `Footer.visibility` at `always`.
+const FOOTER_VISIBILITY_ALWAYS: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("visibility")),
+                ("data-nd-slug", Value::Text("footer")),
+            ],
+            children: &[Node::Component {
+                name: "Footer",
+                props: &[
+                    ("label", Value::Text("Footer")),
+                    ("visibility", Value::Text("always")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "FooterCorner",
+                        props: &[("side", Value::Text("start"))],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("modeline"))],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("info"))],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("prompt"))],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
+                    Node::Component {
+                        name: "FooterCorner",
+                        props: &[("side", Value::Text("end"))],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-footer-visibility-always")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("always"))],
+            }],
+        },
+    ],
+}];
+
+/// `Footer.visibility` at `auto`.
+const FOOTER_VISIBILITY_AUTO: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("visibility")),
+                ("data-nd-slug", Value::Text("footer")),
+            ],
+            children: &[Node::Component {
+                name: "Footer",
+                props: &[
+                    ("label", Value::Text("Footer")),
+                    ("visibility", Value::Text("auto")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "FooterCorner",
+                        props: &[("side", Value::Text("start"))],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("modeline"))],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("info"))],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "FooterLine",
+                        props: &[("kind", Value::Text("prompt"))],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
+                    Node::Component {
+                        name: "FooterCorner",
+                        props: &[("side", Value::Text("end"))],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-footer-visibility-auto")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("auto"))],
+            }],
+        },
+    ],
+}];
+
+/// `FooterLine.kind` at `modeline`.
+const FOOTER_LINE_KIND_MODELINE: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("kind")),
+                ("data-nd-slug", Value::Text("footer-line")),
+            ],
+            children: &[Node::Component {
+                name: "FooterLine",
+                props: &[("kind", Value::Text("modeline"))],
+                children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-footer-line-kind-modeline")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("modeline"))],
+            }],
+        },
+    ],
+}];
+
+/// `FooterLine.kind` at `info`.
+const FOOTER_LINE_KIND_INFO: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("kind")),
+                ("data-nd-slug", Value::Text("footer-line")),
+            ],
+            children: &[Node::Component {
+                name: "FooterLine",
+                props: &[("kind", Value::Text("info"))],
+                children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-footer-line-kind-info")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("info"))],
+            }],
+        },
+    ],
+}];
+
+/// `FooterLine.kind` at `prompt`.
+const FOOTER_LINE_KIND_PROMPT: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("kind")),
+                ("data-nd-slug", Value::Text("footer-line")),
+            ],
+            children: &[Node::Component {
+                name: "FooterLine",
+                props: &[("kind", Value::Text("prompt"))],
+                children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-footer-line-kind-prompt")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("prompt"))],
             }],
         },
     ],
@@ -3988,7 +4238,7 @@ const INPUT_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Input",
                 props: &[
-                    ("name", Value::Text("nd-variant-input-size-small")),
+                    ("name", Value::Text("nd-variant-input-size-small-specimen")),
                     ("label", Value::Text("Input")),
                     ("value", Value::Data("Aa")),
                     ("size", Value::Text("small")),
@@ -4026,7 +4276,7 @@ const INPUT_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Input",
                 props: &[
-                    ("name", Value::Text("nd-variant-input-size-medium")),
+                    ("name", Value::Text("nd-variant-input-size-medium-specimen")),
                     ("label", Value::Text("Input")),
                     ("value", Value::Data("Aa")),
                     ("size", Value::Text("medium")),
@@ -4064,7 +4314,7 @@ const INPUT_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Input",
                 props: &[
-                    ("name", Value::Text("nd-variant-input-size-large")),
+                    ("name", Value::Text("nd-variant-input-size-large-specimen")),
                     ("label", Value::Text("Input")),
                     ("value", Value::Data("Aa")),
                     ("size", Value::Text("large")),
@@ -6289,6 +6539,75 @@ const LIST_SPACING_LOOSE: &[Node] = &[Node::Element {
     ],
 }];
 
+/// `MessageBar.presentation` at `bar`.
+const MESSAGE_BAR_PRESENTATION_BAR: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("presentation")),
+                ("data-nd-slug", Value::Text("message-bar")),
+            ],
+            children: &[Node::Component {
+                name: "MessageBar",
+                props: &[("presentation", Value::Text("bar"))],
+                children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-message-bar-presentation-bar")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("bar"))],
+            }],
+        },
+    ],
+}];
+
+/// `MessageBar.presentation` at `line`.
+const MESSAGE_BAR_PRESENTATION_LINE: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage")),
+                ("data-nd-prop", Value::Text("presentation")),
+                ("data-nd-slug", Value::Text("message-bar")),
+            ],
+            children: &[Node::Component {
+                name: "MessageBar",
+                props: &[("presentation", Value::Text("line"))],
+                children: &[Node::Text(Value::Message(Key::TypeSpecimenLine))],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                (
+                    "id",
+                    Value::Text("nd-variant-message-bar-presentation-line"),
+                ),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("line"))],
+            }],
+        },
+    ],
+}];
+
 /// `Meter.size` at `small`.
 const METER_SIZE_SMALL: &[Node] = &[Node::Element {
     tag: "figure",
@@ -6304,7 +6623,7 @@ const METER_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Meter",
                 props: &[
-                    ("name", Value::Text("nd-variant-meter-size-small")),
+                    ("name", Value::Text("nd-variant-meter-size-small-specimen")),
                     ("label", Value::Text("Meter")),
                     ("value", Value::Text("41.2")),
                     ("max", Value::Text("50")),
@@ -6344,7 +6663,7 @@ const METER_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Meter",
                 props: &[
-                    ("name", Value::Text("nd-variant-meter-size-medium")),
+                    ("name", Value::Text("nd-variant-meter-size-medium-specimen")),
                     ("label", Value::Text("Meter")),
                     ("value", Value::Text("41.2")),
                     ("max", Value::Text("50")),
@@ -6384,7 +6703,7 @@ const METER_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Meter",
                 props: &[
-                    ("name", Value::Text("nd-variant-meter-size-large")),
+                    ("name", Value::Text("nd-variant-meter-size-large-specimen")),
                     ("label", Value::Text("Meter")),
                     ("value", Value::Text("41.2")),
                     ("max", Value::Text("50")),
@@ -6426,7 +6745,7 @@ const NUMBER_INPUT_STEPPING_ASSIST: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-number-input-stepping-assist"),
+                        Value::Text("nd-variant-number-input-stepping-assist-specimen"),
                     ),
                     ("label", Value::Text("NumberInput")),
                     ("value", Value::Data("42")),
@@ -6467,7 +6786,7 @@ const NUMBER_INPUT_STEPPING_PRIMARY: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-number-input-stepping-primary"),
+                        Value::Text("nd-variant-number-input-stepping-primary-specimen"),
                     ),
                     ("label", Value::Text("NumberInput")),
                     ("value", Value::Data("42")),
@@ -6509,7 +6828,10 @@ const NUMBER_INPUT_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "NumberInput",
                 props: &[
-                    ("name", Value::Text("nd-variant-number-input-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-number-input-size-small-specimen"),
+                    ),
                     ("label", Value::Text("NumberInput")),
                     ("value", Value::Data("42")),
                     ("size", Value::Text("small")),
@@ -6547,7 +6869,10 @@ const NUMBER_INPUT_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "NumberInput",
                 props: &[
-                    ("name", Value::Text("nd-variant-number-input-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-number-input-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("NumberInput")),
                     ("value", Value::Data("42")),
                     ("size", Value::Text("medium")),
@@ -6585,7 +6910,10 @@ const NUMBER_INPUT_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "NumberInput",
                 props: &[
-                    ("name", Value::Text("nd-variant-number-input-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-number-input-size-large-specimen"),
+                    ),
                     ("label", Value::Text("NumberInput")),
                     ("value", Value::Data("42")),
                     ("size", Value::Text("large")),
@@ -6598,6 +6926,361 @@ const NUMBER_INPUT_SIZE_LARGE: &[Node] = &[Node::Element {
             attributes: &[
                 ("class", Value::Text("nd-variant-label")),
                 ("id", Value::Text("nd-variant-number-input-size-large")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("large"))],
+            }],
+        },
+    ],
+}];
+
+/// `OptionList.layout` at `rows`.
+const OPTION_LIST_LAYOUT_ROWS: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("layout")),
+                ("data-nd-slug", Value::Text("option-list")),
+            ],
+            children: &[Node::Component {
+                name: "OptionList",
+                props: &[
+                    (
+                        "name",
+                        Value::Text("nd-variant-option-list-layout-rows-specimen"),
+                    ),
+                    ("label", Value::Text("OptionList")),
+                    ("layout", Value::Text("rows")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("shortcut", Value::Data("A")),
+                            ("active", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("shortcut", Value::Data("B")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("shortcut", Value::Data("C")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-option-list-layout-rows")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("rows"))],
+            }],
+        },
+    ],
+}];
+
+/// `OptionList.layout` at `columns`.
+const OPTION_LIST_LAYOUT_COLUMNS: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("layout")),
+                ("data-nd-slug", Value::Text("option-list")),
+            ],
+            children: &[Node::Component {
+                name: "OptionList",
+                props: &[
+                    (
+                        "name",
+                        Value::Text("nd-variant-option-list-layout-columns-specimen"),
+                    ),
+                    ("label", Value::Text("OptionList")),
+                    ("layout", Value::Text("columns")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("shortcut", Value::Data("A")),
+                            ("active", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("shortcut", Value::Data("B")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("shortcut", Value::Data("C")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-option-list-layout-columns")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("columns"))],
+            }],
+        },
+    ],
+}];
+
+/// `OptionList.size` at `small`.
+const OPTION_LIST_SIZE_SMALL: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("size")),
+                ("data-nd-slug", Value::Text("option-list")),
+            ],
+            children: &[Node::Component {
+                name: "OptionList",
+                props: &[
+                    (
+                        "name",
+                        Value::Text("nd-variant-option-list-size-small-specimen"),
+                    ),
+                    ("label", Value::Text("OptionList")),
+                    ("size", Value::Text("small")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("shortcut", Value::Data("A")),
+                            ("active", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("shortcut", Value::Data("B")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("shortcut", Value::Data("C")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-option-list-size-small")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("small"))],
+            }],
+        },
+    ],
+}];
+
+/// `OptionList.size` at `medium`.
+const OPTION_LIST_SIZE_MEDIUM: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("size")),
+                ("data-nd-slug", Value::Text("option-list")),
+            ],
+            children: &[Node::Component {
+                name: "OptionList",
+                props: &[
+                    (
+                        "name",
+                        Value::Text("nd-variant-option-list-size-medium-specimen"),
+                    ),
+                    ("label", Value::Text("OptionList")),
+                    ("size", Value::Text("medium")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("shortcut", Value::Data("A")),
+                            ("active", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("shortcut", Value::Data("B")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("shortcut", Value::Data("C")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-option-list-size-medium")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("medium"))],
+            }],
+        },
+    ],
+}];
+
+/// `OptionList.size` at `large`.
+const OPTION_LIST_SIZE_LARGE: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("size")),
+                ("data-nd-slug", Value::Text("option-list")),
+            ],
+            children: &[Node::Component {
+                name: "OptionList",
+                props: &[
+                    (
+                        "name",
+                        Value::Text("nd-variant-option-list-size-large-specimen"),
+                    ),
+                    ("label", Value::Text("OptionList")),
+                    ("size", Value::Text("large")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Aa")),
+                            ("label", Value::Data("Aa")),
+                            ("shortcut", Value::Data("A")),
+                            ("active", Value::Bool(true)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Bbbb")),
+                            ("label", Value::Data("Bbbb")),
+                            ("shortcut", Value::Data("B")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "OptionItem",
+                        props: &[
+                            ("value", Value::Text("Cc")),
+                            ("label", Value::Data("Cc")),
+                            ("shortcut", Value::Data("C")),
+                            ("active", Value::Bool(false)),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-option-list-size-large")),
             ],
             children: &[Node::Component {
                 name: "Code",
@@ -6623,7 +7306,10 @@ const OTP_FIELD_KIND_NUMERIC: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "OtpField",
                 props: &[
-                    ("name", Value::Text("nd-variant-otp-field-kind-numeric")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-otp-field-kind-numeric-specimen"),
+                    ),
                     ("legend", Value::Text("OtpField")),
                     ("box_label", Value::Text("OtpField")),
                     ("length", Value::Text("3")),
@@ -6665,7 +7351,7 @@ const OTP_FIELD_KIND_ALPHANUMERIC: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-otp-field-kind-alphanumeric"),
+                        Value::Text("nd-variant-otp-field-kind-alphanumeric-specimen"),
                     ),
                     ("legend", Value::Text("OtpField")),
                     ("box_label", Value::Text("OtpField")),
@@ -6706,7 +7392,10 @@ const OTP_FIELD_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "OtpField",
                 props: &[
-                    ("name", Value::Text("nd-variant-otp-field-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-otp-field-size-small-specimen"),
+                    ),
                     ("legend", Value::Text("OtpField")),
                     ("box_label", Value::Text("OtpField")),
                     ("length", Value::Text("3")),
@@ -6746,7 +7435,10 @@ const OTP_FIELD_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "OtpField",
                 props: &[
-                    ("name", Value::Text("nd-variant-otp-field-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-otp-field-size-medium-specimen"),
+                    ),
                     ("legend", Value::Text("OtpField")),
                     ("box_label", Value::Text("OtpField")),
                     ("length", Value::Text("3")),
@@ -6786,7 +7478,10 @@ const OTP_FIELD_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "OtpField",
                 props: &[
-                    ("name", Value::Text("nd-variant-otp-field-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-otp-field-size-large-specimen"),
+                    ),
                     ("legend", Value::Text("OtpField")),
                     ("box_label", Value::Text("OtpField")),
                     ("length", Value::Text("3")),
@@ -6826,7 +7521,10 @@ const PAGINATION_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Pagination",
                 props: &[
-                    ("name", Value::Text("nd-variant-pagination-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-pagination-size-small-specimen"),
+                    ),
                     ("label", Value::Text("Pagination")),
                     ("page", Value::Text("2")),
                     ("pages", Value::Text("3")),
@@ -6866,7 +7564,10 @@ const PAGINATION_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Pagination",
                 props: &[
-                    ("name", Value::Text("nd-variant-pagination-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-pagination-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("Pagination")),
                     ("page", Value::Text("2")),
                     ("pages", Value::Text("3")),
@@ -6906,7 +7607,10 @@ const PAGINATION_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Pagination",
                 props: &[
-                    ("name", Value::Text("nd-variant-pagination-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-pagination-size-large-specimen"),
+                    ),
                     ("label", Value::Text("Pagination")),
                     ("page", Value::Text("2")),
                     ("pages", Value::Text("3")),
@@ -7111,7 +7815,10 @@ const PROGRESS_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Progress",
                 props: &[
-                    ("name", Value::Text("nd-variant-progress-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-progress-size-small-specimen"),
+                    ),
                     ("label", Value::Text("Progress")),
                     ("value", Value::Text("7")),
                     ("max", Value::Text("12")),
@@ -7151,7 +7858,10 @@ const PROGRESS_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Progress",
                 props: &[
-                    ("name", Value::Text("nd-variant-progress-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-progress-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("Progress")),
                     ("value", Value::Text("7")),
                     ("max", Value::Text("12")),
@@ -7191,7 +7901,10 @@ const PROGRESS_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Progress",
                 props: &[
-                    ("name", Value::Text("nd-variant-progress-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-progress-size-large-specimen"),
+                    ),
                     ("label", Value::Text("Progress")),
                     ("value", Value::Text("7")),
                     ("max", Value::Text("12")),
@@ -7363,7 +8076,7 @@ const RADIO_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Radio",
                 props: &[
-                    ("name", Value::Text("nd-variant-radio-size-small")),
+                    ("name", Value::Text("nd-variant-radio-size-small-specimen")),
                     ("value", Value::Text("on")),
                     ("label", Value::Data("Aa")),
                     ("size", Value::Text("small")),
@@ -7401,7 +8114,7 @@ const RADIO_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Radio",
                 props: &[
-                    ("name", Value::Text("nd-variant-radio-size-medium")),
+                    ("name", Value::Text("nd-variant-radio-size-medium-specimen")),
                     ("value", Value::Text("on")),
                     ("label", Value::Data("Aa")),
                     ("size", Value::Text("medium")),
@@ -7439,7 +8152,7 @@ const RADIO_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Radio",
                 props: &[
-                    ("name", Value::Text("nd-variant-radio-size-large")),
+                    ("name", Value::Text("nd-variant-radio-size-large-specimen")),
                     ("value", Value::Text("on")),
                     ("label", Value::Data("Aa")),
                     ("size", Value::Text("large")),
@@ -7477,7 +8190,7 @@ const RATING_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Rating",
                 props: &[
-                    ("name", Value::Text("nd-variant-rating-size-small")),
+                    ("name", Value::Text("nd-variant-rating-size-small-specimen")),
                     ("label", Value::Text("Rating")),
                     ("value", Value::Text("3")),
                     ("readonly", Value::Bool(true)),
@@ -7516,7 +8229,10 @@ const RATING_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Rating",
                 props: &[
-                    ("name", Value::Text("nd-variant-rating-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-rating-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("Rating")),
                     ("value", Value::Text("3")),
                     ("readonly", Value::Bool(true)),
@@ -7555,7 +8271,7 @@ const RATING_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Rating",
                 props: &[
-                    ("name", Value::Text("nd-variant-rating-size-large")),
+                    ("name", Value::Text("nd-variant-rating-size-large-specimen")),
                     ("label", Value::Text("Rating")),
                     ("value", Value::Text("3")),
                     ("readonly", Value::Bool(true)),
@@ -7594,7 +8310,7 @@ const SEARCH_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Search",
                 props: &[
-                    ("name", Value::Text("nd-variant-search-size-small")),
+                    ("name", Value::Text("nd-variant-search-size-small-specimen")),
                     ("label", Value::Text("Search")),
                     ("value", Value::Data("Aa")),
                     ("size", Value::Text("small")),
@@ -7632,7 +8348,10 @@ const SEARCH_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Search",
                 props: &[
-                    ("name", Value::Text("nd-variant-search-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-search-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("Search")),
                     ("value", Value::Data("Aa")),
                     ("size", Value::Text("medium")),
@@ -7670,7 +8389,7 @@ const SEARCH_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Search",
                 props: &[
-                    ("name", Value::Text("nd-variant-search-size-large")),
+                    ("name", Value::Text("nd-variant-search-size-large-specimen")),
                     ("label", Value::Text("Search")),
                     ("value", Value::Data("Aa")),
                     ("size", Value::Text("large")),
@@ -7710,7 +8429,7 @@ const SEGMENTED_APPEARANCE_JOINED: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-segmented-appearance-joined"),
+                        Value::Text("nd-variant-segmented-appearance-joined-specimen"),
                     ),
                     (
                         "labelledby",
@@ -7781,7 +8500,7 @@ const SEGMENTED_APPEARANCE_SPREAD: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-segmented-appearance-spread"),
+                        Value::Text("nd-variant-segmented-appearance-spread-specimen"),
                     ),
                     (
                         "labelledby",
@@ -7850,7 +8569,10 @@ const SEGMENTED_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-size-small-specimen"),
+                    ),
                     ("labelledby", Value::Text("nd-variant-segmented-size-small")),
                     ("size", Value::Text("small")),
                 ],
@@ -7915,7 +8637,10 @@ const SEGMENTED_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-size-medium-specimen"),
+                    ),
                     (
                         "labelledby",
                         Value::Text("nd-variant-segmented-size-medium"),
@@ -7983,7 +8708,10 @@ const SEGMENTED_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-size-large-specimen"),
+                    ),
                     ("labelledby", Value::Text("nd-variant-segmented-size-large")),
                     ("size", Value::Text("large")),
                 ],
@@ -8048,7 +8776,10 @@ const SEGMENTED_SHAPE_ROUNDED: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-shape-rounded")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-shape-rounded-specimen"),
+                    ),
                     (
                         "labelledby",
                         Value::Text("nd-variant-segmented-shape-rounded"),
@@ -8116,7 +8847,10 @@ const SEGMENTED_SHAPE_PILL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-shape-pill")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-shape-pill-specimen"),
+                    ),
                     ("labelledby", Value::Text("nd-variant-segmented-shape-pill")),
                     ("shape", Value::Text("pill")),
                 ],
@@ -8181,7 +8915,10 @@ const SEGMENTED_SHAPE_SQUARE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-shape-square")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-shape-square-specimen"),
+                    ),
                     (
                         "labelledby",
                         Value::Text("nd-variant-segmented-shape-square"),
@@ -8249,7 +8986,10 @@ const SEGMENTED_SHAPE_BEVEL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-shape-bevel")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-shape-bevel-specimen"),
+                    ),
                     (
                         "labelledby",
                         Value::Text("nd-variant-segmented-shape-bevel"),
@@ -8319,7 +9059,7 @@ const SEGMENTED_ORIENTATION_HORIZONTAL: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-segmented-orientation-horizontal"),
+                        Value::Text("nd-variant-segmented-orientation-horizontal-specimen"),
                     ),
                     (
                         "labelledby",
@@ -8393,7 +9133,7 @@ const SEGMENTED_ORIENTATION_VERTICAL: &[Node] = &[Node::Element {
                 props: &[
                     (
                         "name",
-                        Value::Text("nd-variant-segmented-orientation-vertical"),
+                        Value::Text("nd-variant-segmented-orientation-vertical-specimen"),
                     ),
                     (
                         "labelledby",
@@ -8465,7 +9205,10 @@ const SEGMENTED_SELECTION_ACCENT: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-selection-accent")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-selection-accent-specimen"),
+                    ),
                     (
                         "labelledby",
                         Value::Text("nd-variant-segmented-selection-accent"),
@@ -8533,7 +9276,10 @@ const SEGMENTED_SELECTION_QUIET: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Segmented",
                 props: &[
-                    ("name", Value::Text("nd-variant-segmented-selection-quiet")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-segmented-selection-quiet-specimen"),
+                    ),
                     (
                         "labelledby",
                         Value::Text("nd-variant-segmented-selection-quiet"),
@@ -8601,7 +9347,7 @@ const SELECT_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Select",
                 props: &[
-                    ("name", Value::Text("nd-variant-select-size-small")),
+                    ("name", Value::Text("nd-variant-select-size-small-specimen")),
                     ("label", Value::Text("Select")),
                     ("size", Value::Text("small")),
                 ],
@@ -8666,7 +9412,10 @@ const SELECT_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Select",
                 props: &[
-                    ("name", Value::Text("nd-variant-select-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-select-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("Select")),
                     ("size", Value::Text("medium")),
                 ],
@@ -8731,7 +9480,7 @@ const SELECT_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Select",
                 props: &[
-                    ("name", Value::Text("nd-variant-select-size-large")),
+                    ("name", Value::Text("nd-variant-select-size-large-specimen")),
                     ("label", Value::Text("Select")),
                     ("size", Value::Text("large")),
                 ],
@@ -8994,7 +9743,7 @@ const SWITCH_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Switch",
                 props: &[
-                    ("name", Value::Text("nd-variant-switch-size-small")),
+                    ("name", Value::Text("nd-variant-switch-size-small-specimen")),
                     ("label", Value::Text("Switch")),
                     ("on", Value::Text("Switch")),
                     ("off", Value::Text("Switch")),
@@ -9033,7 +9782,10 @@ const SWITCH_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Switch",
                 props: &[
-                    ("name", Value::Text("nd-variant-switch-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-switch-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("Switch")),
                     ("on", Value::Text("Switch")),
                     ("off", Value::Text("Switch")),
@@ -9075,7 +9827,10 @@ const TABLE_DENSITY_COMPACT: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-density-compact")),
+                        (
+                            "name",
+                            Value::Text("nd-variant-table-density-compact-specimen"),
+                        ),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("density", Value::Text("compact")),
@@ -9170,7 +9925,10 @@ const TABLE_DENSITY_DEFAULT: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-density-default")),
+                        (
+                            "name",
+                            Value::Text("nd-variant-table-density-default-specimen"),
+                        ),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("density", Value::Text("default")),
@@ -9265,7 +10023,10 @@ const TABLE_DENSITY_COMFORTABLE: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-density-comfortable")),
+                        (
+                            "name",
+                            Value::Text("nd-variant-table-density-comfortable-specimen"),
+                        ),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("density", Value::Text("comfortable")),
@@ -9360,7 +10121,7 @@ const TABLE_RULES_ROWS: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-rules-rows")),
+                        ("name", Value::Text("nd-variant-table-rules-rows-specimen")),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("rules", Value::Text("rows")),
@@ -9455,7 +10216,10 @@ const TABLE_RULES_COLUMNS: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-rules-columns")),
+                        (
+                            "name",
+                            Value::Text("nd-variant-table-rules-columns-specimen"),
+                        ),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("rules", Value::Text("columns")),
@@ -9550,7 +10314,7 @@ const TABLE_RULES_GRID: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-rules-grid")),
+                        ("name", Value::Text("nd-variant-table-rules-grid-specimen")),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("rules", Value::Text("grid")),
@@ -9645,7 +10409,7 @@ const TABLE_RULES_NONE: &[Node] = &[Node::Element {
                 children: &[Node::Component {
                     name: "Table",
                     props: &[
-                        ("name", Value::Text("nd-variant-table-rules-none")),
+                        ("name", Value::Text("nd-variant-table-rules-none-specimen")),
                         ("caption", Value::Text("Table")),
                         ("hide_caption", Value::Bool(true)),
                         ("rules", Value::Text("none")),
@@ -10062,7 +10826,10 @@ const TABLE_COLUMN_WIDTH_AUTO: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "TableColumn",
                         props: &[
-                            ("name", Value::Text("nd-variant-table-column-width-auto")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-table-column-width-auto-specimen"),
+                            ),
                             ("width", Value::Text("auto")),
                         ],
                         children: &[],
@@ -10124,7 +10891,10 @@ const TABLE_COLUMN_WIDTH_NARROW: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "TableColumn",
                         props: &[
-                            ("name", Value::Text("nd-variant-table-column-width-narrow")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-table-column-width-narrow-specimen"),
+                            ),
                             ("width", Value::Text("narrow")),
                         ],
                         children: &[],
@@ -10186,7 +10956,10 @@ const TABLE_COLUMN_WIDTH_MEDIUM: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "TableColumn",
                         props: &[
-                            ("name", Value::Text("nd-variant-table-column-width-medium")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-table-column-width-medium-specimen"),
+                            ),
                             ("width", Value::Text("medium")),
                         ],
                         children: &[],
@@ -10248,7 +11021,10 @@ const TABLE_COLUMN_WIDTH_WIDE: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "TableColumn",
                         props: &[
-                            ("name", Value::Text("nd-variant-table-column-width-wide")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-table-column-width-wide-specimen"),
+                            ),
                             ("width", Value::Text("wide")),
                         ],
                         children: &[],
@@ -10310,7 +11086,10 @@ const TABLE_COLUMN_WIDTH_FIT: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "TableColumn",
                         props: &[
-                            ("name", Value::Text("nd-variant-table-column-width-fit")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-table-column-width-fit-specimen"),
+                            ),
                             ("width", Value::Text("fit")),
                         ],
                         children: &[],
@@ -10860,7 +11639,7 @@ const TABS_ORIENTATION_HORIZONTAL: &[Node] = &[Node::Element {
                         props: &[
                             (
                                 "name",
-                                Value::Text("nd-variant-tabs-orientation-horizontal"),
+                                Value::Text("nd-variant-tabs-orientation-horizontal-specimen"),
                             ),
                             ("orientation", Value::Text("horizontal")),
                         ],
@@ -10976,7 +11755,10 @@ const TABS_ORIENTATION_VERTICAL: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-orientation-vertical")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-tabs-orientation-vertical-specimen"),
+                            ),
                             ("orientation", Value::Text("vertical")),
                         ],
                         children: &[
@@ -11073,7 +11855,10 @@ const TABS_APPEARANCE_UNDERLINE: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-appearance-underline")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-tabs-appearance-underline-specimen"),
+                            ),
                             ("appearance", Value::Text("underline")),
                         ],
                         children: &[
@@ -11170,7 +11955,10 @@ const TABS_APPEARANCE_ENCLOSED: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-appearance-enclosed")),
+                            (
+                                "name",
+                                Value::Text("nd-variant-tabs-appearance-enclosed-specimen"),
+                            ),
                             ("appearance", Value::Text("enclosed")),
                         ],
                         children: &[
@@ -11248,6 +12036,106 @@ const TABS_APPEARANCE_ENCLOSED: &[Node] = &[Node::Element {
     ],
 }];
 
+/// `Tabs.appearance` at `rail`.
+const TABS_APPEARANCE_RAIL: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("appearance")),
+                ("data-nd-slug", Value::Text("tabs")),
+            ],
+            children: &[Node::Element {
+                tag: "div",
+                attributes: &[],
+                children: &[
+                    Node::Component {
+                        name: "Tabs",
+                        props: &[
+                            (
+                                "name",
+                                Value::Text("nd-variant-tabs-appearance-rail-specimen"),
+                            ),
+                            ("appearance", Value::Text("rail")),
+                        ],
+                        children: &[
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                                    ("value", Value::Text("Aa")),
+                                    ("label", Value::Data("Aa")),
+                                    ("selected", Value::Bool(true)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                                    ("value", Value::Text("Bbbb")),
+                                    ("label", Value::Data("Bbbb")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                            Node::Component {
+                                name: "Tab",
+                                props: &[
+                                    ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                                    ("value", Value::Text("Cc")),
+                                    ("label", Value::Data("Cc")),
+                                    ("selected", Value::Bool(false)),
+                                ],
+                                children: &[],
+                            },
+                        ],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                            ("value", Value::Text("Aa")),
+                        ],
+                        children: &[Node::Text(Value::Data("Aa"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                            ("value", Value::Text("Bbbb")),
+                        ],
+                        children: &[Node::Text(Value::Data("Bbbb"))],
+                    },
+                    Node::Component {
+                        name: "TabPanel",
+                        props: &[
+                            ("name", Value::Text("nd-variant-tabs-appearance-rail")),
+                            ("value", Value::Text("Cc")),
+                        ],
+                        children: &[Node::Text(Value::Data("Cc"))],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-tabs-appearance-rail")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("rail"))],
+            }],
+        },
+    ],
+}];
+
 /// `Tabs.size` at `small`.
 const TABS_SIZE_SMALL: &[Node] = &[Node::Element {
     tag: "figure",
@@ -11267,7 +12155,7 @@ const TABS_SIZE_SMALL: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-size-small")),
+                            ("name", Value::Text("nd-variant-tabs-size-small-specimen")),
                             ("size", Value::Text("small")),
                         ],
                         children: &[
@@ -11364,7 +12252,7 @@ const TABS_SIZE_MEDIUM: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-size-medium")),
+                            ("name", Value::Text("nd-variant-tabs-size-medium-specimen")),
                             ("size", Value::Text("medium")),
                         ],
                         children: &[
@@ -11461,7 +12349,7 @@ const TABS_SIZE_LARGE: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-size-large")),
+                            ("name", Value::Text("nd-variant-tabs-size-large-specimen")),
                             ("size", Value::Text("large")),
                         ],
                         children: &[
@@ -11558,7 +12446,7 @@ const TABS_FILL_HUG: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-fill-hug")),
+                            ("name", Value::Text("nd-variant-tabs-fill-hug-specimen")),
                             ("fill", Value::Text("hug")),
                         ],
                         children: &[
@@ -11655,7 +12543,7 @@ const TABS_FILL_EQUAL: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-fill-equal")),
+                            ("name", Value::Text("nd-variant-tabs-fill-equal-specimen")),
                             ("fill", Value::Text("equal")),
                         ],
                         children: &[
@@ -11752,7 +12640,7 @@ const TABS_FILL_STRETCH: &[Node] = &[Node::Element {
                     Node::Component {
                         name: "Tabs",
                         props: &[
-                            ("name", Value::Text("nd-variant-tabs-fill-stretch")),
+                            ("name", Value::Text("nd-variant-tabs-fill-stretch-specimen")),
                             ("fill", Value::Text("stretch")),
                         ],
                         children: &[
@@ -12169,7 +13057,10 @@ const TAG_PICKER_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "TagPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-tag-picker-size-small")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-tag-picker-size-small-specimen"),
+                    ),
                     ("label", Value::Text("TagPicker")),
                     ("size", Value::Text("small")),
                 ],
@@ -12234,7 +13125,10 @@ const TAG_PICKER_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "TagPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-tag-picker-size-medium")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-tag-picker-size-medium-specimen"),
+                    ),
                     ("label", Value::Text("TagPicker")),
                     ("size", Value::Text("medium")),
                 ],
@@ -12299,7 +13193,10 @@ const TAG_PICKER_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "TagPicker",
                 props: &[
-                    ("name", Value::Text("nd-variant-tag-picker-size-large")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-tag-picker-size-large-specimen"),
+                    ),
                     ("label", Value::Text("TagPicker")),
                     ("size", Value::Text("large")),
                 ],
@@ -12727,7 +13624,10 @@ const TEXTAREA_RESIZE_NONE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Textarea",
                 props: &[
-                    ("name", Value::Text("nd-variant-textarea-resize-none")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-textarea-resize-none-specimen"),
+                    ),
                     ("label", Value::Text("Textarea")),
                     ("value", Value::Data("Aa")),
                     ("resize", Value::Text("none")),
@@ -12765,7 +13665,10 @@ const TEXTAREA_RESIZE_VERTICAL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Textarea",
                 props: &[
-                    ("name", Value::Text("nd-variant-textarea-resize-vertical")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-textarea-resize-vertical-specimen"),
+                    ),
                     ("label", Value::Text("Textarea")),
                     ("value", Value::Data("Aa")),
                     ("resize", Value::Text("vertical")),
@@ -12803,7 +13706,10 @@ const TEXTAREA_RESIZE_BOTH: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Textarea",
                 props: &[
-                    ("name", Value::Text("nd-variant-textarea-resize-both")),
+                    (
+                        "name",
+                        Value::Text("nd-variant-textarea-resize-both-specimen"),
+                    ),
                     ("label", Value::Text("Textarea")),
                     ("value", Value::Data("Aa")),
                     ("resize", Value::Text("both")),
@@ -13069,6 +13975,63 @@ const TOOLBAR_DENSITY_COMPACT: &[Node] = &[Node::Element {
     ],
 }];
 
+/// `Toolbar.density` at `rail`.
+const TOOLBAR_DENSITY_RAIL: &[Node] = &[Node::Element {
+    tag: "figure",
+    attributes: &[("class", Value::Text("nd-variant-item"))],
+    children: &[
+        Node::Element {
+            tag: "div",
+            attributes: &[
+                ("class", Value::Text("nd-variant-stage nd-identifier")),
+                ("data-nd-prop", Value::Text("density")),
+                ("data-nd-slug", Value::Text("toolbar")),
+            ],
+            children: &[Node::Component {
+                name: "Toolbar",
+                props: &[
+                    ("labelledby", Value::Text("nd-variant-toolbar-density-rail")),
+                    ("density", Value::Text("rail")),
+                ],
+                children: &[
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("transparent")),
+                            ("tone", Value::Text("neutral")),
+                            ("size", Value::Text("small")),
+                            ("label", Value::Data("Aa")),
+                        ],
+                        children: &[],
+                    },
+                    Node::Component {
+                        name: "Button",
+                        props: &[
+                            ("variant", Value::Text("transparent")),
+                            ("tone", Value::Text("neutral")),
+                            ("size", Value::Text("small")),
+                            ("label", Value::Data("Bbbb")),
+                        ],
+                        children: &[],
+                    },
+                ],
+            }],
+        },
+        Node::Element {
+            tag: "figcaption",
+            attributes: &[
+                ("class", Value::Text("nd-variant-label")),
+                ("id", Value::Text("nd-variant-toolbar-density-rail")),
+            ],
+            children: &[Node::Component {
+                name: "Code",
+                props: &[("class", Value::Text("nd-identifier"))],
+                children: &[Node::Text(Value::Text("rail"))],
+            }],
+        },
+    ],
+}];
+
 /// `Tree.size` at `small`.
 const TREE_SIZE_SMALL: &[Node] = &[Node::Element {
     tag: "figure",
@@ -13084,7 +14047,7 @@ const TREE_SIZE_SMALL: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Tree",
                 props: &[
-                    ("name", Value::Text("nd-variant-tree-size-small")),
+                    ("name", Value::Text("nd-variant-tree-size-small-specimen")),
                     ("label", Value::Text("Tree")),
                     ("size", Value::Text("small")),
                 ],
@@ -13137,7 +14100,7 @@ const TREE_SIZE_MEDIUM: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Tree",
                 props: &[
-                    ("name", Value::Text("nd-variant-tree-size-medium")),
+                    ("name", Value::Text("nd-variant-tree-size-medium-specimen")),
                     ("label", Value::Text("Tree")),
                     ("size", Value::Text("medium")),
                 ],
@@ -13190,7 +14153,7 @@ const TREE_SIZE_LARGE: &[Node] = &[Node::Element {
             children: &[Node::Component {
                 name: "Tree",
                 props: &[
-                    ("name", Value::Text("nd-variant-tree-size-large")),
+                    ("name", Value::Text("nd-variant-tree-size-large-specimen")),
                     ("label", Value::Text("Tree")),
                     ("size", Value::Text("large")),
                 ],
@@ -13450,6 +14413,11 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("Field", "size", "small") => FIELD_SIZE_SMALL,
         ("Field", "size", "medium") => FIELD_SIZE_MEDIUM,
         ("Field", "size", "large") => FIELD_SIZE_LARGE,
+        ("Footer", "visibility", "always") => FOOTER_VISIBILITY_ALWAYS,
+        ("Footer", "visibility", "auto") => FOOTER_VISIBILITY_AUTO,
+        ("FooterLine", "kind", "modeline") => FOOTER_LINE_KIND_MODELINE,
+        ("FooterLine", "kind", "info") => FOOTER_LINE_KIND_INFO,
+        ("FooterLine", "kind", "prompt") => FOOTER_LINE_KIND_PROMPT,
         ("Heading", "size", "display") => HEADING_SIZE_DISPLAY,
         ("Heading", "size", "h1") => HEADING_SIZE_H1,
         ("Heading", "size", "h2") => HEADING_SIZE_H2,
@@ -13517,6 +14485,8 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("List", "spacing", "tight") => LIST_SPACING_TIGHT,
         ("List", "spacing", "default") => LIST_SPACING_DEFAULT,
         ("List", "spacing", "loose") => LIST_SPACING_LOOSE,
+        ("MessageBar", "presentation", "bar") => MESSAGE_BAR_PRESENTATION_BAR,
+        ("MessageBar", "presentation", "line") => MESSAGE_BAR_PRESENTATION_LINE,
         ("Meter", "size", "small") => METER_SIZE_SMALL,
         ("Meter", "size", "medium") => METER_SIZE_MEDIUM,
         ("Meter", "size", "large") => METER_SIZE_LARGE,
@@ -13525,6 +14495,11 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("NumberInput", "size", "small") => NUMBER_INPUT_SIZE_SMALL,
         ("NumberInput", "size", "medium") => NUMBER_INPUT_SIZE_MEDIUM,
         ("NumberInput", "size", "large") => NUMBER_INPUT_SIZE_LARGE,
+        ("OptionList", "layout", "rows") => OPTION_LIST_LAYOUT_ROWS,
+        ("OptionList", "layout", "columns") => OPTION_LIST_LAYOUT_COLUMNS,
+        ("OptionList", "size", "small") => OPTION_LIST_SIZE_SMALL,
+        ("OptionList", "size", "medium") => OPTION_LIST_SIZE_MEDIUM,
+        ("OptionList", "size", "large") => OPTION_LIST_SIZE_LARGE,
         ("OtpField", "kind", "numeric") => OTP_FIELD_KIND_NUMERIC,
         ("OtpField", "kind", "alphanumeric") => OTP_FIELD_KIND_ALPHANUMERIC,
         ("OtpField", "size", "small") => OTP_FIELD_SIZE_SMALL,
@@ -13610,6 +14585,7 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("Tabs", "orientation", "vertical") => TABS_ORIENTATION_VERTICAL,
         ("Tabs", "appearance", "underline") => TABS_APPEARANCE_UNDERLINE,
         ("Tabs", "appearance", "enclosed") => TABS_APPEARANCE_ENCLOSED,
+        ("Tabs", "appearance", "rail") => TABS_APPEARANCE_RAIL,
         ("Tabs", "size", "small") => TABS_SIZE_SMALL,
         ("Tabs", "size", "medium") => TABS_SIZE_MEDIUM,
         ("Tabs", "size", "large") => TABS_SIZE_LARGE,
@@ -13646,6 +14622,7 @@ pub(crate) fn nodes(component: &str, prop: &str, value: &str) -> &'static [Node]
         ("Toolbar", "orientation", "vertical") => TOOLBAR_ORIENTATION_VERTICAL,
         ("Toolbar", "density", "comfortable") => TOOLBAR_DENSITY_COMFORTABLE,
         ("Toolbar", "density", "compact") => TOOLBAR_DENSITY_COMPACT,
+        ("Toolbar", "density", "rail") => TOOLBAR_DENSITY_RAIL,
         ("Tree", "size", "small") => TREE_SIZE_SMALL,
         ("Tree", "size", "medium") => TREE_SIZE_MEDIUM,
         ("Tree", "size", "large") => TREE_SIZE_LARGE,

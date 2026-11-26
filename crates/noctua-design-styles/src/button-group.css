@@ -162,7 +162,7 @@
 
 /* The focused member has to be drawn over its neighbours, or the ring is half
    hidden under the button the negative margin pulled on top of it. */
-.nd-button-group[data-nd-attached="true"] > .nd-button:hover,
-.nd-button-group[data-nd-attached="true"] > .nd-button:focus-visible {
+.nd-button-group[data-nd-attached="true"] > .nd-button:is(:hover, [data-nd-seat-hover]),
+.nd-button-group[data-nd-attached="true"] > .nd-button:is(:focus-visible, [data-nd-seat-focus]) {
   z-index: 1;
 }

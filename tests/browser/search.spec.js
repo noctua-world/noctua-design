@@ -14,7 +14,11 @@
 // caught its shipped `id="nd-search-"` the day it landed.
 
 import { test, expect } from "@playwright/test";
-import { ANY, LOCALES, OFFERED, PAGE, url, showParts } from "./pages.js";
+import { ANY, LOCALES, OFFERED, PAGE, url, showParts, walker } from "./pages.js";
+
+// Every walk in this file declares its tests through this line, so that a
+// report names this file rather than `pages.js` (`walker` says why).
+const walk = walker((title, fn) => test(title, fn));
 
 /** The site's own palette, which is the `dialog` presentation with an index. */
 const PALETTE = {
@@ -246,6 +250,67 @@ test("the letters that matched are the letters that are marked", async ({ page }
   expect(marked).toBe("BG");
 });
 
+test("each word of the query marks its own letters, in its own tone", async ({ page }) => {
+  // BOTH SUPPLY FORMS, because they are two painters: the palette rebuilds a
+  // label the script owns, and the children form wraps runs of a label the
+  // page shipped.
+  await page.goto(url(ANY));
+  await showParts(page);
+  await openPalette(page, "gro but");
+  const row = page.locator(PALETTE.rows).first();
+  await expect(row.locator(".nd-search-result-label")).toHaveText("ButtonGroup");
+  // `NOCTUA.md §12.4`: the first word typed takes the first tone wherever its
+  // letters are in the name, so the order is the query's and not the label's.
+  await expect(row.locator('mark.nd-match[data-nd-word="1"]')).toHaveText("Gro");
+  await expect(row.locator('mark.nd-match[data-nd-word="2"]')).toHaveText("But");
+  // THE RUNS ARE A DRAWING, as `MatchText` draws them: the label is one text
+  // to a screen reader, and no run is announced as a highlight.
+  expect((await row.locator(".nd-search-result-label").ariaSnapshot()).trim()).toBe("- text: ButtonGroup");
+
+  await page.goto(url(PAGE.search));
+  await showParts(page);
+  await page.locator(CHILDREN.box).fill("mar s z");
+  const name = page.locator(`${CHILDREN.rows} .nd-search-result-label`).first();
+  await expect(name).toHaveText("San Marzano");
+  await expect(name.locator('mark[data-nd-word="1"]')).toHaveText("Mar");
+  await expect(name.locator('mark[data-nd-word="2"]')).toHaveText("S");
+  // The third word and every later one share a tone, and no fourth exists.
+  await expect(name.locator('mark[data-nd-word="3"]')).toHaveText("z");
+  await page.locator(CHILDREN.box).fill("mar s z n");
+  await expect(name.locator('mark[data-nd-word="3"]')).toHaveText(["n", "z"]);
+  await expect(name.locator('mark[data-nd-word="4"]')).toHaveCount(0);
+});
+
+test("a letter two words claim is drawn in the first word's tone", async ({ page }) => {
+  await page.goto(url(PAGE.search));
+  await showParts(page);
+  await page.locator(CHILDREN.box).fill("san sa");
+  const name = page.locator(`${CHILDREN.rows} .nd-search-result-label`).first();
+  await expect(name).toHaveText("San Marzano");
+  // The second word matched `Sa` as well, and the first had it already.
+  await expect(name.locator('mark[data-nd-word="1"]')).toHaveText("San");
+  await expect(name.locator('mark[data-nd-word="2"]')).toHaveCount(0);
+});
+
+test("a search marks a match with the element every list draws", async ({ page }) => {
+  await page.goto(url(PAGE.search));
+  await showParts(page);
+  await page.locator(CHILDREN.box).fill("san");
+  const hit = page.locator(`${CHILDREN.root} [data-nd-hit]`).first();
+  await expect(hit).toBeVisible();
+  // One drawing of a match in the system: no padding tearing a gap into the
+  // name, and a line under the letters that is there without the colour.
+  const drawn = await hit.evaluate((mark) => {
+    const style = getComputedStyle(mark);
+    return {
+      match: mark.matches("mark.nd-match[data-nd-word]"),
+      padding: style.paddingInlineStart,
+      line: style.textDecorationLine,
+    };
+  });
+  expect(drawn).toEqual({ match: true, padding: "0px", line: "underline" });
+});
+
 test("a highlight never destroys the label it came from", async ({ page }) => {
   await page.goto(url(PAGE.search));
   await showParts(page);
@@ -427,6 +492,35 @@ test("a refused box looks refused", async ({ page }) => {
 
 // --- Filtering, and what it must not touch ----------------------------------
 
+test("separators alone ask for nothing, as the empty box does", async ({ page }) => {
+  // A hyphen is not empty text, yet it holds no word, and the query with no
+  // word matches every item: the palette drew the head of its whole index for
+  // it, unmarked and in index order, under a sentence counting all of it.
+  await page.goto(url(ANY));
+  await showParts(page);
+  await openPalette(page, "button");
+  const box = page.locator(PALETTE.box);
+  for (const separators of ["-", ".", "/ :"]) {
+    await box.fill(separators);
+    await expect(page.locator(PALETTE.rows), `\`${separators}\``).toHaveCount(0);
+    await expect(page.locator(PALETTE.status), `\`${separators}\``).toHaveText("");
+    // And a word after them is still a question, so the box was not disabled.
+    await box.fill(`${separators}button`);
+    await expect(page.locator(PALETTE.rows).first()).toBeVisible();
+  }
+
+  // The children form shows every row for the empty box, in the author's
+  // order and with no sentence; so it does for separators alone.
+  await page.goto(url(PAGE.search));
+  await showParts(page);
+  const authored = await labels(page, CHILDREN.rows);
+  await page.locator(CHILDREN.box).fill("b");
+  await expect(page.locator(CHILDREN.status)).not.toHaveText("");
+  await page.locator(CHILDREN.box).fill("-");
+  await expect(page.locator(CHILDREN.status)).toHaveText("");
+  expect(await labels(page, CHILDREN.rows)).toEqual(authored);
+});
+
 test("filtering reaches the page around the box and stops there", async ({ page }) => {
   await page.goto(url(PAGE.search));
   await showParts(page);
@@ -517,30 +611,33 @@ test("what it remembers can be forgotten, in the place it is shown", async ({ pa
 
 // --- Across every page and locale -------------------------------------------
 
-test("no id appears twice on any page, in any locale", async ({ page }) => {
-  // TEN LINES THAT CATCH THIS ACROSS EVERY COMPONENT, and they would have
-  // caught the shipped defect the day it landed: the search this replaces built
-  // its id from an OPTIONAL name, so the four examples on its own page all
-  // carried `id="nd-search-"` and four `<label for>` pointed at whichever the
-  // browser resolved first. `name` is required now, which is the fix; this is
-  // the guard that says so.
-  for (const locale of LOCALES) {
-    for (const slug of Object.values(PAGE)) {
-      await page.goto(url(slug, locale));
-      await showParts(page);
-      const duplicates = await page.evaluate(() => {
-        const seen = new Set();
-        const twice = [];
-        for (const element of document.querySelectorAll("[id]")) {
-          if (seen.has(element.id)) twice.push(element.id);
-          seen.add(element.id);
-        }
-        return twice;
-      });
-      expect(duplicates, `${locale}/${slug}`).toEqual([]);
-    }
-  }
-});
+// TEN LINES THAT CATCH THIS ACROSS EVERY COMPONENT, and they would have caught
+// the shipped defect the day it landed: the search this replaces built its id
+// from an OPTIONAL name, so the four examples on its own page all carried
+// `id="nd-search-"` and four `<label for>` pointed at whichever the browser
+// resolved first. `name` is required now, which is the fix; this is the guard
+// that says so.
+walk(
+  "no id appears twice on any page, in any locale",
+  {
+    axes: { locale: LOCALES },
+    title: ({ locale }) => `no id appears twice on any page, in ${locale}`,
+  },
+  async ({ page, locale, path: slug }) => {
+    await page.goto(url(slug, locale));
+    await showParts(page);
+    const duplicates = await page.evaluate(() => {
+      const seen = new Set();
+      const twice = [];
+      for (const element of document.querySelectorAll("[id]")) {
+        if (seen.has(element.id)) twice.push(element.id);
+        seen.add(element.id);
+      }
+      return twice;
+    });
+    expect(duplicates, `${locale}/${slug}`).toEqual([]);
+  },
+);
 
 test("every offered locale searches in its own words", async ({ page }) => {
   for (const locale of OFFERED) {

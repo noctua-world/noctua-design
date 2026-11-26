@@ -12,7 +12,7 @@
 //! rather than against nothing.
 
 /// Every tone name, in the order the palette declares them.
-pub const ALL: [&str; 351] = [
+pub const ALL: [&str; 354] = [
     "neutral",
     "muted",
     "accent",
@@ -39,6 +39,9 @@ pub const ALL: [&str; 351] = [
     "draft",
     "archived",
     "paused",
+    "cursor",
+    "match",
+    "match-rest",
     "sent",
     "received",
     "critical",

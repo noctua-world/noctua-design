@@ -40,6 +40,31 @@ const PLAIN_ICON: &str = "use noctua_design_icons::IconDrawing;\n\nuse crate::co
 /// The same, in JavaScript, where an icon is only ever an icon.
 const REACT_ICON: &str = "import { Icon } from \"./icon.js\";\n";
 
+/// A `MatchText` and a drawing, for the row whose name is one and whose tick
+/// is the other.
+const REACT_MATCH_ICON: &str = concat!(
+    "import { MatchText } from \"./match_text.js\";\n",
+    "\n",
+    "import { Icon } from \"./icon.js\";\n"
+);
+
+/// The one label in the system and a drawing, for the control that records a
+/// shortcut: its question is a `Label` and its remove control a glyph.
+const REACT_LABEL_ICON: &str = concat!(
+    "import { Label } from \"./label.js\";\n",
+    "\n",
+    "import { Icon } from \"./icon.js\";\n"
+);
+
+/// The menu and its item, for the control whose gap opens one.
+///
+/// A constant for the reason `REACT_SEGMENTED` is: the arm that wants it is one
+/// line long, in a match a lint already holds to a hundred.
+const REACT_MENU: &str = concat!(
+    "import { Menu } from \"./menu.js\";\n",
+    "import { MenuItem } from \"./menu_item.js\";\n"
+);
+
 /// A field that is a `<fieldset>`, for the two controls that are groups.
 const FIELD_GROUP: &str = "use crate::components::{Field, FieldKind, FieldSize};\n";
 
@@ -291,6 +316,20 @@ pub fn is_custom(component: &Component) -> bool {
             | "Toast"
             | "AILabel"
             | "Truncate"
+            | "MatchText"
+            | "OptionList"
+            | "OptionGroup"
+            | "OptionItem"
+            | "FooterLine"
+            | "Prompt"
+            | "Toolbar"
+            | "Drawer"
+            | "Split"
+            | "SplitPane"
+            | "SplitHandle"
+            | "KeyCapture"
+            | "Log"
+            | "LogLine"
     )
 }
 
@@ -335,6 +374,19 @@ pub fn dioxus_body(sink: &mut String, component: &Component) {
         "Info" => out.push_str(INFO_DIOXUS),
         "AILabel" => out.push_str(AI_LABEL_DIOXUS),
         "Truncate" => out.push_str(TRUNCATE_DIOXUS),
+        "MatchText" => out.push_str(MATCH_TEXT_DIOXUS),
+        "OptionList" => out.push_str(OPTION_LIST_DIOXUS),
+        "OptionGroup" => out.push_str(OPTION_GROUP_DIOXUS),
+        "OptionItem" => out.push_str(OPTION_ITEM_DIOXUS),
+        "FooterLine" => out.push_str(FOOTER_LINE_DIOXUS),
+        "Drawer" => out.push_str(DRAWER_DIOXUS),
+        "Split" => out.push_str(SPLIT_DIOXUS),
+        "SplitPane" => out.push_str(SPLIT_PANE_DIOXUS),
+        "SplitHandle" => out.push_str(SPLIT_HANDLE_DIOXUS),
+        "KeyCapture" => out.push_str(KEY_CAPTURE_DIOXUS),
+        "Log" => out.push_str(LOG_DIOXUS),
+        "LogLine" => out.push_str(LOG_LINE_DIOXUS),
+        "Prompt" => out.push_str(PROMPT_DIOXUS),
         "Menu" => out.push_str(MENU_DIOXUS),
         "MenuItem" => out.push_str(MENU_ITEM_DIOXUS),
         "Meter" => out.push_str(METER_DIOXUS),
@@ -370,6 +422,7 @@ pub fn dioxus_body(sink: &mut String, component: &Component) {
         "Rating" => out.push_str(RATING_DIOXUS),
         "OtpField" => out.push_str(OTP_FIELD_DIOXUS),
         "Tabs" => out.push_str(TABS_DIOXUS),
+        "Toolbar" => out.push_str(TOOLBAR_DIOXUS),
         "Tab" => out.push_str(TAB_DIOXUS),
         "TabPanel" => out.push_str(TAB_PANEL_DIOXUS),
         "Dialog" => out.push_str(DIALOG_DIOXUS),
@@ -420,6 +473,19 @@ pub fn react_body(sink: &mut String, component: &Component) {
         "Info" => out.push_str(INFO_REACT),
         "AILabel" => out.push_str(AI_LABEL_REACT),
         "Truncate" => out.push_str(TRUNCATE_REACT),
+        "MatchText" => out.push_str(MATCH_TEXT_REACT),
+        "OptionList" => out.push_str(OPTION_LIST_REACT),
+        "OptionGroup" => out.push_str(OPTION_GROUP_REACT),
+        "OptionItem" => out.push_str(OPTION_ITEM_REACT),
+        "FooterLine" => out.push_str(FOOTER_LINE_REACT),
+        "Drawer" => out.push_str(DRAWER_REACT),
+        "Split" => out.push_str(SPLIT_REACT),
+        "SplitPane" => out.push_str(SPLIT_PANE_REACT),
+        "SplitHandle" => out.push_str(SPLIT_HANDLE_REACT),
+        "KeyCapture" => out.push_str(KEY_CAPTURE_REACT),
+        "Log" => out.push_str(LOG_REACT),
+        "LogLine" => out.push_str(LOG_LINE_REACT),
+        "Prompt" => out.push_str(PROMPT_REACT),
         "Menu" => out.push_str(MENU_REACT),
         "MenuItem" => out.push_str(MENU_ITEM_REACT),
         "Meter" => out.push_str(METER_REACT),
@@ -455,6 +521,7 @@ pub fn react_body(sink: &mut String, component: &Component) {
         "Rating" => out.push_str(RATING_REACT),
         "OtpField" => out.push_str(OTP_FIELD_REACT),
         "Tabs" => out.push_str(TABS_REACT),
+        "Toolbar" => out.push_str(TOOLBAR_REACT),
         "Tab" => out.push_str(TAB_REACT),
         "TabPanel" => out.push_str(TAB_PANEL_REACT),
         "Dialog" => out.push_str(DIALOG_REACT),
@@ -3589,6 +3656,1167 @@ const TRUNCATE_REACT: &str = r#"  const lines_ = lines ?? "1";
   );
 "#;
 
+// --- MatchText --------------------------------------------------------------
+
+/// A name, cut into the runs a query matched and the runs it did not.
+///
+/// # Why this is written and not derived
+///
+/// A derived body is one element holding its children. This one reads two
+/// strings and draws a list of elements from them, and the reading is the
+/// component: which word claimed each character, and where one run ends.
+///
+/// # The grammar, and what both halves do with a piece outside it
+///
+/// `hits` is one slot for each word of the query, joined by `|`. A slot is
+/// pieces joined by commas, and a piece is an index or two indices around a
+/// hyphen, the second included. An index is one to nine ASCII digits and
+/// nothing else: no sign, no space. **A piece that is anything else is
+/// skipped**, and a position past the end of the text marks nothing, so a stale
+/// answer draws too little and never throws. The two halves are written to the
+/// same sentence on purpose: Rust's own integer parser takes a leading `+` and
+/// JavaScript's takes `1e3`, and a body that leaned on either would mark
+/// different characters from the same prop.
+///
+/// # A character belongs to the first word that claims it
+///
+/// The matcher lets two words share a character (`NOCTUA.md §12.4`), and the
+/// first word's tone is the one drawn. `Match.claims` in `dist/search-match.js`
+/// answers the same question the same way.
+///
+/// # Three tones, and the third is shared
+///
+/// `data-nd-word` is `1`, `2` or `3`, and `3` is the third word and every later
+/// one. Neighbouring characters of one tone are one `<mark>`, so the fourth
+/// word's run beside the third's is one element.
+///
+/// # A drawing, and not a part of the name
+///
+/// Each run is `role="none"`. A `<mark>` is a `mark` to assistive technology,
+/// so a name with three runs reached a screen reader as six pieces, three of
+/// them announced as highlights, and the matched letters are what the line
+/// under them shows a sighted reader, not words of their own.
+const MATCH_TEXT_DIOXUS: &str = r#"    let root = format!("nd-match-text {class}");
+    let root = root.trim().to_owned();
+
+    // Which word claimed each character, the first to ask keeping it.
+    let chars: Vec<char> = text.chars().collect();
+    let mut owner: Vec<Option<usize>> = vec![None; chars.len()];
+    let index = |digits: &str| {
+        let plain = !digits.is_empty()
+            && digits.len() <= 9
+            && digits.bytes().all(|byte| byte.is_ascii_digit());
+        plain.then(|| digits.parse::<usize>().ok()).flatten()
+    };
+    for (word, slot) in hits.as_deref().unwrap_or_default().split('|').enumerate() {
+        for piece in slot.split(',') {
+            let (first, last) = piece.split_once('-').unwrap_or((piece, piece));
+            let (Some(first), Some(last)) = (index(first), index(last)) else {
+                continue;
+            };
+            for at in first..=last {
+                // Past the end of the text there is nothing to mark, and
+                // nothing after it either.
+                let Some(claimed) = owner.get_mut(at) else {
+                    break;
+                };
+                claimed.get_or_insert(word);
+            }
+        }
+    }
+
+    // The runs: neighbouring characters of one tone, or of none.
+    let mut runs: Vec<(Option<&'static str>, String)> = Vec::new();
+    for (at, character) in chars.iter().enumerate() {
+        let tone = owner[at].map(|word| match word {
+            0 => "1",
+            1 => "2",
+            _ => "3",
+        });
+        match runs.last_mut() {
+            Some((last, run)) if *last == tone => run.push(*character),
+            _ => runs.push((tone, character.to_string())),
+        }
+    }
+
+    rsx! {
+        span { class: "{root}",
+            for (tone , run) in runs {
+                if let Some(tone) = tone {
+                    mark { class: "nd-match", role: "none", "data-nd-word": tone, "{run}" }
+                } else {
+                    "{run}"
+                }
+            }
+        }
+    }
+"#;
+
+/// The same cut, in React. Read it beside `MATCH_TEXT_DIOXUS`.
+const MATCH_TEXT_REACT: &str = r#"  const root = ["nd-match-text", className].filter(Boolean).join(" ");
+
+  // Which word claimed each character, the first to ask keeping it. A spread
+  // counts code points, which is what a position is.
+  const chars = [...(text ?? "")];
+  const owner = new Array(chars.length).fill(null);
+  const index = (digits) => (/^[0-9]{1,9}$/.test(digits) ? Number(digits) : null);
+  (hits ?? "").split("|").forEach((slot, word) => {
+    for (const piece of slot.split(",")) {
+      const dash = piece.indexOf("-");
+      const first = index(dash < 0 ? piece : piece.slice(0, dash));
+      const last = index(dash < 0 ? piece : piece.slice(dash + 1));
+      if (first === null || last === null) continue;
+      // Past the end of the text there is nothing to mark.
+      for (let at = first; at <= last && at < chars.length; at += 1) {
+        if (owner[at] === null) owner[at] = word;
+      }
+    }
+  });
+
+  // The runs: neighbouring characters of one tone, or of none.
+  const runs = [];
+  chars.forEach((character, at) => {
+    const tone = owner[at] === null ? null : owner[at] === 0 ? "1" : owner[at] === 1 ? "2" : "3";
+    const last = runs[runs.length - 1];
+    if (last && last.tone === tone) last.text += character;
+    else runs.push({ tone, text: character });
+  });
+
+  return h(
+    "span",
+    { className: root, ...rest },
+    runs.map((run, at) =>
+      run.tone
+        ? h("mark", { key: at, className: "nd-match", role: "none", "data-nd-word": run.tone }, run.text)
+        : run.text,
+    ),
+  );
+"#;
+
+// --- OptionList, OptionGroup and OptionItem ---------------------------------
+
+/// The list a reader walks with the keyboard and acts on.
+///
+/// # A `<div>` around the listbox
+///
+/// The root holds two things: the `role="listbox"` and the sentence a list
+/// with nothing in it says. A `<ul>` may hold neither a `<p>` nor a `status`,
+/// so the sentence is the listbox's sibling. The stylesheet shows it when no
+/// option is showing, and the `status` is on the page the whole time, so the
+/// sentence arriving in it is announced.
+///
+/// # The name is the id, and it is the caller's hook
+///
+/// A control that keeps the focus writes the list's id in `aria-controls`, and
+/// `dist/option-list.js` finds that control by it. The caller writes the name
+/// on one component and `controls` on the other, so the id is the name itself,
+/// for `Menu`'s reason: a derivation they cannot see is one they will get
+/// wrong.
+///
+/// # `tabindex` is the `focusable` prop
+///
+/// A list that is its own tab stop carries `tabindex="0"` and no option does:
+/// the active option is named by `aria-activedescendant`, which the script
+/// writes. A list another control drives carries none, so a Tab walks past it.
+const OPTION_LIST_DIOXUS: &str = r#"    let root = format!("nd-option-list {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        div {
+            class: "{root}",
+            "data-nd-option-list": "{name}",
+            "data-nd-layout": layout.as_str(),
+            "data-nd-size": size.as_str(),
+            ul {
+                class: "nd-option-list-items",
+                id: "{name}",
+                role: "listbox",
+                "aria-label": "{label}",
+                tabindex: focusable.then_some("0"),
+                {children}
+            }
+            // On the page whether or not there is a sentence in it: a live
+            // region that arrives with its text is one nothing announces.
+            p { class: "nd-option-list-note", role: "status",
+                if let Some(words) = empty_label {
+                    span { class: "nd-option-list-empty", "{words}" }
+                }
+            }
+        }
+    }
+"#;
+
+/// The same list, in React.
+const OPTION_LIST_REACT: &str = r#"  const layout_ = layout ?? "rows";
+  const size_ = size ?? "medium";
+  const root = ["nd-option-list", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      "data-nd-option-list": name,
+      "data-nd-layout": layout_,
+      "data-nd-size": size_,
+      ...rest,
+    },
+    h(
+      "ul",
+      {
+        key: "l",
+        className: "nd-option-list-items",
+        id: name,
+        role: "listbox",
+        "aria-label": label,
+        tabIndex: (focusable ?? true) ? 0 : undefined,
+      },
+      children,
+    ),
+    // See the Dioxus half: the region is there before its sentence is.
+    h(
+      "p",
+      { key: "n", className: "nd-option-list-note", role: "status" },
+      emptyLabel ? h("span", { className: "nd-option-list-empty" }, emptyLabel) : null,
+    ),
+  );
+"#;
+
+/// A named run of options.
+///
+/// `SearchGroup`'s shape, with the roles in the markup: the `<li>` is the
+/// `group` and carries the name, the inner list is `none`, and the words a
+/// sighted reader sees are hidden from the accessible tree so the name is read
+/// once rather than twice.
+const OPTION_GROUP_DIOXUS: &str = r#"    let root = format!("nd-option-group {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        li { class: "{root}", role: "group", "aria-label": "{label}",
+            p { class: "nd-option-group-label", "aria-hidden": "true", "{label}" }
+            ul { class: "nd-option-group-list", role: "none", {children} }
+        }
+    }
+"#;
+
+/// The same group, in React.
+const OPTION_GROUP_REACT: &str = r#"  return h(
+    "li",
+    {
+      className: ["nd-option-group", className].filter(Boolean).join(" "),
+      role: "group",
+      "aria-label": label,
+      ...rest,
+    },
+    h("p", { key: "l", className: "nd-option-group-label", "aria-hidden": "true" }, label),
+    h("ul", { key: "u", className: "nd-option-group-list", role: "none" }, children),
+  );
+"#;
+
+/// One option.
+///
+/// # The key comes first in the markup
+///
+/// An option's accessible name is its content, in order, so the key is read
+/// before the name: *s, Settings*. A list laid out in rows draws the key at the
+/// trailing edge, and the stylesheet does that with `order`, which moves what a
+/// reader sees and leaves what a screen reader hears.
+///
+/// # The name is a `MatchText`, always
+///
+/// With no `hits` it draws the name alone. One element whether or not the list
+/// is filtered means typing the first letter of a query changes what is marked
+/// and never what the row is built from.
+///
+/// # The tick is in the markup only while the option is selected
+///
+/// A list of four hundred commands has no selected row and owes no four
+/// hundred hidden drawings. Selection is the caller's to render, so the tick
+/// arrives with the prop.
+const OPTION_ITEM_DIOXUS: &str = r#"    let root = format!("nd-option-item {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        li {
+            class: "{root}",
+            role: "option",
+            id,
+            "data-nd-value": "{value}",
+            "data-nd-active": active.then_some("true"),
+            "aria-selected": selected.then_some("true"),
+            "aria-disabled": disabled.then_some("true"),
+            if let Some(shortcut) = shortcut {
+                span { class: "nd-option-item-shortcut", "{shortcut}" }
+            }
+            if let Some(icon) = icon {
+                Icon { icon, size: IconSize::Small }
+            }
+            span { class: "nd-option-item-text",
+                MatchText { class: "nd-option-item-label", text: label, hits }
+                if let Some(detail) = detail {
+                    MatchText { class: "nd-option-item-detail", text: detail, hits: detail_hits }
+                }
+            }
+            if selected {
+                // The half of `aria-selected` that is not a colour.
+                span { class: "nd-option-item-mark",
+                    Icon { icon: IconDrawing::CHECK, size: IconSize::Small }
+                }
+            }
+        }
+    }
+"#;
+
+/// The same option, in React.
+const OPTION_ITEM_REACT: &str = r#"  const root = ["nd-option-item", className].filter(Boolean).join(" ");
+
+  return h(
+    "li",
+    {
+      className: root,
+      role: "option",
+      id,
+      "data-nd-value": value,
+      "data-nd-active": active ? "true" : undefined,
+      "aria-selected": selected ? "true" : undefined,
+      "aria-disabled": disabled ? "true" : undefined,
+      ...rest,
+    },
+    shortcut ? h("span", { key: "k", className: "nd-option-item-shortcut" }, shortcut) : null,
+    icon ? h(Icon, { key: "i", icon, size: "small" }) : null,
+    h(
+      "span",
+      { key: "t", className: "nd-option-item-text" },
+      h(MatchText, { key: "l", className: "nd-option-item-label", text: label, hits }),
+      detail
+        ? h(MatchText, {
+            key: "d",
+            className: "nd-option-item-detail",
+            text: detail,
+            hits: detailHits,
+          })
+        : null,
+    ),
+    // See the Dioxus half: the half of `aria-selected` that is not a colour.
+    selected
+      ? h("span", { key: "m", className: "nd-option-item-mark" }, h(Icon, { icon: check, size: "small" }))
+      : null,
+  );
+"#;
+
+// --- FooterLine -------------------------------------------------------------
+
+/// One line of a footer.
+///
+/// `Footer` and `FooterCorner` are derived from their contracts. This one is
+/// written, because its expanding control is a second element with a state of
+/// its own.
+///
+/// # The content has a box of its own
+///
+/// The line is a row of two things: what the caller put in it, and the control
+/// that expands it. The content's box is what is cut at one line, and with
+/// `live` it is the `status`, so a press on the control is never read out as a
+/// change to the line.
+///
+/// # A bare `<button>`, for one attribute
+///
+/// The control says `aria-expanded="false"` while the line is one line tall: a
+/// control that opens something opens it whether or not it is open now.
+/// `Button` writes the attribute only when it is true, so this is the element
+/// itself, as `TreeItem`'s toggle is. Its name is whichever of the two labels
+/// is true now.
+///
+/// # One chevron, turned by the stylesheet
+///
+/// The footer is at the bottom of its window, so a line grows upward and the
+/// glyph points the way it will go: up while the line is one line tall, down
+/// once it has grown. Both bodies draw the one chevron, and the stylesheet
+/// turns it from `aria-expanded`, so the glyph is drawn from the attribute that
+/// says the state and a caller that writes the attributes alone draws it right.
+const FOOTER_LINE_DIOXUS: &str = r#"    let root = format!("nd-footer-line {class}");
+    let root = root.trim().to_owned();
+    let toggle = if expanded {
+        collapse_label
+    } else {
+        expand_label
+    }
+    .unwrap_or_default();
+
+    rsx! {
+        div {
+            class: "{root}",
+            "data-nd-kind": kind.as_str(),
+            "data-nd-expanded": expanded.then_some("true"),
+            div { class: "nd-footer-line-content", role: live.then_some("status"), {children} }
+            if expandable {
+                button {
+                    class: "nd-footer-line-toggle",
+                    r#type: "button",
+                    "aria-expanded": if expanded { "true" } else { "false" },
+                    "aria-label": "{toggle}",
+                    "data-nd-action": action,
+                    // Turned by the stylesheet from `aria-expanded`.
+                    Icon { icon: IconDrawing::CHEVRON_UP, size: IconSize::Small }
+                }
+            }
+        }
+    }
+"#;
+
+/// The same line, in React.
+const FOOTER_LINE_REACT: &str = r#"  const kind_ = kind ?? "modeline";
+  const root = ["nd-footer-line", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      "data-nd-kind": kind_,
+      "data-nd-expanded": expanded ? "true" : undefined,
+      ...rest,
+    },
+    h(
+      "div",
+      { key: "c", className: "nd-footer-line-content", role: live ? "status" : undefined },
+      children,
+    ),
+    expandable
+      ? h(
+          "button",
+          {
+            key: "t",
+            className: "nd-footer-line-toggle",
+            type: "button",
+            "aria-expanded": expanded ? "true" : "false",
+            "aria-label": (expanded ? collapseLabel : expandLabel) ?? "",
+            "data-nd-action": action,
+          },
+          // See the Dioxus half: the stylesheet turns it.
+          h(Icon, { icon: chevronUp, size: "small" }),
+        )
+      : null,
+  );
+"#;
+
+// --- Prompt -----------------------------------------------------------------
+
+/// The line a reader types on, with a block for a cursor.
+///
+/// # Three things in a row
+///
+/// The glyph a prompt starts with, the text, and the send control it ends in
+/// (`NOCTUA.md §12.7`). The glyph is decoration and hidden from a screen
+/// reader, and the send control is a real `Button` that shows only its icon.
+///
+/// # Two boxes in one cell
+///
+/// The textarea and the mirror share a grid cell, textarea first, so the
+/// mirror paints over it and the block covers the letter it stands on. The
+/// mirror ships empty: `dist/prompt.js` fills it, and its header is the
+/// technique. The mirror is `aria-hidden`, so the text is read once.
+///
+/// # `dir="auto"` on both
+///
+/// A reader who types in a script written from the right gets the line laid
+/// out from the right. Both boxes take their direction from the same text, and
+/// the stylesheet gives both `unicode-bidi: plaintext`, so each paragraph takes
+/// its own in both and they agree without either being told.
+///
+/// # The list it drives is named on the textarea
+///
+/// `aria-controls` is what `dist/option-list.js` finds a control by, and
+/// `aria-autocomplete="list"` says what typing does to that list. The role
+/// stays `textbox`: see the contract.
+const PROMPT_DIOXUS: &str = r#"    let root = format!("nd-prompt {class}");
+    let root = root.trim().to_owned();
+    let id = format!("nd-prompt-{name}");
+    let listed = controls.is_some();
+
+    rsx! {
+        div {
+            class: "{root}",
+            "data-nd-prompt": "{name}",
+            "data-nd-disabled": disabled.then_some("true"),
+            "data-nd-readonly": readonly.then_some("true"),
+            span { class: "nd-prompt-glyph", "aria-hidden": "true",
+                Icon { icon: IconDrawing::CHEVRON_RIGHT, size: IconSize::Small }
+            }
+            div { class: "nd-prompt-stack",
+                textarea {
+                    class: "nd-prompt-input",
+                    id: "{id}",
+                    name: "{name}",
+                    rows: "1",
+                    dir: "auto",
+                    autocomplete: "off",
+                    autocapitalize: "off",
+                    spellcheck: "false",
+                    disabled,
+                    readonly,
+                    "aria-label": "{label}",
+                    "aria-controls": controls,
+                    "aria-autocomplete": listed.then_some("list"),
+                    "aria-activedescendant": active_option,
+                    // THE VALUE IS THE CONTENT, as it is in `Textarea`.
+                    {value.unwrap_or_default()}
+                }
+                div { class: "nd-prompt-mirror", dir: "auto", "aria-hidden": "true" }
+            }
+            if let Some(send) = send_label {
+                Button {
+                    class: "nd-prompt-send",
+                    variant: ButtonVariant::Transparent,
+                    tone: ButtonTone::Neutral,
+                    size: ButtonSize::Small,
+                    hide_label: true,
+                    icon: IconDrawing::SEND,
+                    label: send,
+                    action,
+                    disabled: disabled || readonly,
+                }
+            }
+        }
+    }
+"#;
+
+/// The same prompt, in React.
+const PROMPT_REACT: &str = r#"  const root = ["nd-prompt", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      "data-nd-prompt": name,
+      "data-nd-disabled": disabled ? "true" : undefined,
+      "data-nd-readonly": readonly ? "true" : undefined,
+      ...rest,
+    },
+    h(
+      "span",
+      { key: "g", className: "nd-prompt-glyph", "aria-hidden": "true" },
+      h(Icon, { icon: chevronRight, size: "small" }),
+    ),
+    h(
+      "div",
+      { key: "s", className: "nd-prompt-stack" },
+      h("textarea", {
+        key: "x",
+        className: "nd-prompt-input",
+        id: `nd-prompt-${name}`,
+        name,
+        rows: "1",
+        dir: "auto",
+        autoComplete: "off",
+        autoCapitalize: "off",
+        spellCheck: "false",
+        disabled,
+        readOnly: readonly,
+        "aria-label": label,
+        "aria-controls": controls,
+        "aria-autocomplete": controls ? "list" : undefined,
+        "aria-activedescendant": activeOption,
+        // See the Dioxus half: the value is the content.
+        defaultValue: value,
+      }),
+      h("div", { key: "m", className: "nd-prompt-mirror", dir: "auto", "aria-hidden": "true" }),
+    ),
+    sendLabel
+      ? h(Button, {
+          key: "b",
+          className: "nd-prompt-send",
+          variant: "transparent",
+          tone: "neutral",
+          size: "small",
+          hideLabel: true,
+          icon: send,
+          label: sendLabel,
+          action,
+          disabled: Boolean(disabled || readonly),
+        })
+      : null,
+  );
+"#;
+
+// --- Drawer -------------------------------------------------------------------
+
+/// The panel along one edge of a window.
+///
+/// `DrawerRail` is derived from its contract. This one is written, for one
+/// element: the box inside the root.
+///
+/// # Why there are two boxes
+///
+/// A drawer slides, and no engine moves a box between nothing and the height of
+/// its content: there is no number to move toward. A grid track can be moved
+/// between no share and a whole one, so the root is a grid of one track and the
+/// panel is the one thing in it. The panel is what holds the rails and the
+/// content side by side, each of which scrolls what the closing track leaves
+/// no room for.
+///
+/// # What is not written here
+///
+/// No `inert`. A collapsed drawer is hidden by the stylesheet, which takes it
+/// out of the tab order and the accessibility tree with no script.
+/// `dist/drawer.js` writes `inert` beside that for the time the drawer takes to
+/// slide shut, and an attribute both this body and a script wrote would be one
+/// a re-render takes back.
+const DRAWER_DIOXUS: &str = r#"    let root = format!("nd-drawer {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        div {
+            class: "{root}",
+            id,
+            role: "region",
+            "aria-label": "{label}",
+            "data-nd-drawer": "{name}",
+            "data-nd-side": side.as_str(),
+            "data-nd-collapsed": if collapsed { "true" } else { "false" },
+            div { class: "nd-drawer-panel", {children} }
+        }
+    }
+"#;
+
+/// The same panel, in React.
+const DRAWER_REACT: &str = r#"  const root = ["nd-drawer", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      id,
+      role: "region",
+      "aria-label": label,
+      "data-nd-drawer": name,
+      "data-nd-side": side ?? "bottom",
+      "data-nd-collapsed": String(collapsed ?? false),
+      ...rest,
+    },
+    // See the Dioxus half: the one thing in the track that slides.
+    h("div", { className: "nd-drawer-panel" }, children),
+  );
+"#;
+
+// --- Split, SplitPane and SplitHandle -------------------------------------------
+
+/// Two panes that share one box.
+///
+/// # Why there are two boxes
+///
+/// What a narrow split does is asked of the split's own width, by a container
+/// query, and an element that establishes a query container is not its own:
+/// a rule about it would be answered for the container above. So the root is
+/// the container and the track inside it is what the query lays out.
+///
+/// # The share is written twice
+///
+/// `data-nd-value` is what `dist/split.js` reads, and `--nd-split-value` is
+/// what the stylesheet divides the track by. A page with no script draws the
+/// split at its `value` from the second alone.
+const SPLIT_DIOXUS: &str = r#"    let root = format!("nd-split {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        div {
+            class: "{root}",
+            "data-nd-split": "{name}",
+            "data-nd-value": "{value}",
+            "data-nd-min": "{min}",
+            "data-nd-max": "{max}",
+            "data-nd-collapse": collapse.as_str(),
+            style: "--nd-split-value: {value}",
+            div { class: "nd-split-track", {children} }
+        }
+    }
+"#;
+
+/// The same split, in React.
+const SPLIT_REACT: &str = r#"  const value_ = value ?? "50";
+  const root = ["nd-split", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      "data-nd-split": name,
+      "data-nd-value": value_,
+      "data-nd-min": min ?? "20",
+      "data-nd-max": max ?? "80",
+      "data-nd-collapse": collapse ?? "stack",
+      // See the Dioxus half: the share, where the stylesheet reads it.
+      style: { "--nd-split-value": value_ },
+      ...rest,
+    },
+    h("div", { className: "nd-split-track" }, children),
+  );
+"#;
+
+/// One half of a split.
+///
+/// Written for its id, which is two props joined: the split's `name` and the
+/// pane's own `side`. `SplitHandle` joins the same two words for
+/// `aria-controls`, so the pair cannot drift.
+const SPLIT_PANE_DIOXUS: &str = r#"    let root = format!("nd-split-pane {class}");
+    let root = root.trim().to_owned();
+    let id = format!("nd-split-{name}-{}", side.as_str());
+
+    rsx! {
+        div { class: "{root}", id: "{id}", "data-nd-side": side.as_str(), {children} }
+    }
+"#;
+
+/// The same pane, in React.
+const SPLIT_PANE_REACT: &str = r#"  const side_ = side ?? "start";
+  const root = ["nd-split-pane", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    { className: root, id: `nd-split-${name}-${side_}`, "data-nd-side": side_, ...rest },
+    children,
+  );
+"#;
+
+/// The line between two panes.
+///
+/// # What is not written here
+///
+/// No `tabindex` and no `aria-valuenow`. A separator with neither is a line
+/// between two things, which is all the markup can honour. `dist/split.js`
+/// writes both, with the keys and the drag that keep them.
+///
+/// # The line has a box of its own
+///
+/// The handle is as wide as the smallest target and the line in it is a
+/// hairline. The line is an element so that a rule about the handle's state
+/// has something to draw on.
+const SPLIT_HANDLE_DIOXUS: &str = r#"    let root = format!("nd-split-handle {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        div {
+            class: "{root}",
+            role: "separator",
+            // The line stands upright between two panes side by side.
+            "aria-orientation": "vertical",
+            "aria-controls": "nd-split-{name}-start",
+            "aria-label": "{label}",
+            "data-nd-split-handle": "{name}",
+            span { class: "nd-split-handle-line" }
+        }
+    }
+"#;
+
+/// The same line, in React.
+const SPLIT_HANDLE_REACT: &str = r#"  const root = ["nd-split-handle", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      role: "separator",
+      // See the Dioxus half: the line stands upright.
+      "aria-orientation": "vertical",
+      "aria-controls": `nd-split-${name}-start`,
+      "aria-label": label,
+      "data-nd-split-handle": name,
+      ...rest,
+    },
+    h("span", { className: "nd-split-handle-line" }),
+  );
+"#;
+
+// --- KeyCapture ---------------------------------------------------------------
+
+/// A control that records a shortcut, and the keys it holds.
+///
+/// # The keys are labelled here, in both halves, by one table
+///
+/// A chord is written as `nc_schema::keys` writes it, `Control+Alt+KeyK`, and
+/// drawn as the keyboard prints it, `Ctrl+Alt+K`. The labels are that
+/// module's: the modifiers by the keyboard named, a Mac's own names for Enter,
+/// Backspace and Delete, and every other key by its place on a US board.
+/// `dist/key-capture.js` draws a recorded chord from the same table, and
+/// relabels a key that prints a character for the layout in use. The cases in
+/// `spec/components/key_capture.cases.toml` hold the three to one answer.
+///
+/// # Two runs of keys, and the script writes only the second
+///
+/// `.nd-key-capture-keys` is the caller's `value`, drawn here.
+/// `.nd-key-capture-taken` ships empty, and the script draws what it heard in
+/// it, so a re-render never meets an element a script rebuilt. The stylesheet
+/// shows one of the two. The button is named through their parent, so the run
+/// that is not drawn is not read.
+///
+/// # `disabled` is the script's, and `aria-disabled` is the caller's
+///
+/// With the script blocked the button answers nothing, so the markup writes
+/// `disabled` and the script takes it off. The `disabled` prop is
+/// `aria-disabled`, which keeps a refused control in the tab order.
+///
+/// # Two live regions
+///
+/// The refusal is the caller's sentence, in a `status` on the page from the
+/// start. What the script says is a second `status`, visually hidden, because
+/// a region both a caller and a script write into is one a re-render empties.
+const KEY_CAPTURE_DIOXUS: &str = r#"    // The label a keyboard prints on a key, as `nc_schema::keys` gives it.
+    fn label_of<'a>(part: &'a str, keyboard: &str) -> &'a str {
+        match (part, keyboard) {
+            ("Control", "linux" | "windows") => "Ctrl",
+            ("Alt", "mac") => "Option",
+            ("Super", "mac") => "Command",
+            ("Super", "windows") => "Win",
+            ("Enter", "mac") => "Return",
+            ("Backspace", "mac") => "Delete",
+            ("Delete", "mac") => "Forward Delete",
+            ("ArrowUp", _) => "Up",
+            ("ArrowDown", _) => "Down",
+            ("ArrowLeft", _) => "Left",
+            ("ArrowRight", _) => "Right",
+            ("Minus", _) => "-",
+            ("Equal", _) => "=",
+            ("BracketLeft", _) => "[",
+            ("BracketRight", _) => "]",
+            ("Backslash", _) => "\\",
+            ("Semicolon", _) => ";",
+            ("Quote", _) => "'",
+            ("Backquote", _) => "`",
+            ("Comma", _) => ",",
+            ("Period", _) => ".",
+            ("Slash", _) => "/",
+            _ => {
+                let letter = part
+                    .strip_prefix("Key")
+                    .filter(|rest| rest.len() == 1 && rest.bytes().all(|byte| byte.is_ascii_uppercase()));
+                let digit = part
+                    .strip_prefix("Digit")
+                    .filter(|rest| rest.len() == 1 && rest.bytes().all(|byte| byte.is_ascii_digit()));
+                letter.or(digit).unwrap_or(part)
+            }
+        }
+    }
+
+    let root = format!("nd-key-capture {class}");
+    let root = root.trim().to_owned();
+    let id = format!("nd-key-capture-{name}");
+    let held = value.unwrap_or_default();
+    // Each key, whether a `+` goes before it, and the label it is drawn with.
+    let keys: Vec<(bool, String, String)> = held
+        .split('+')
+        .filter(|part| !part.is_empty())
+        .enumerate()
+        .map(|(at, part)| (at > 0, part.to_owned(), label_of(part, keyboard.as_str()).to_owned()))
+        .collect();
+    let refused = refusal.is_some();
+
+    rsx! {
+        div {
+            class: "{root}",
+            "data-nd-key-capture": "{name}",
+            "data-nd-value": "{held}",
+            "data-nd-keyboard": keyboard.as_str(),
+            "data-nd-capture-label": "{capture_label}",
+            "data-nd-empty-label": "{empty_label}",
+            "data-nd-refused": refused.then_some("true"),
+            "data-nd-disabled": disabled.then_some("true"),
+            Label { text: label, for_control: id.clone() }
+            button {
+                class: "nd-key-capture-control",
+                id: "{id}",
+                r#type: "button",
+                // Taken off by the script. See the header.
+                disabled: true,
+                "aria-labelledby": "{id}-label {id}-chord",
+                "aria-describedby": "{id}-refusal",
+                "aria-invalid": refused.then_some("true"),
+                "aria-disabled": disabled.then_some("true"),
+                span { class: "nd-key-capture-chord", id: "{id}-chord",
+                    span { class: "nd-key-capture-keys",
+                        if keys.is_empty() {
+                            span { class: "nd-key-capture-empty", "{empty_label}" }
+                        }
+                        for (joined , code , shown) in keys {
+                            if joined {
+                                "+"
+                            }
+                            kbd {
+                                class: "nd-kbd",
+                                "data-nd-size": "small",
+                                "data-nd-code": "{code}",
+                                "{shown}"
+                            }
+                        }
+                    }
+                    span { class: "nd-key-capture-taken" }
+                }
+            }
+            input { r#type: "hidden", name: "{name}", value: "{held}", disabled }
+            if let Some(clear) = clear_label {
+                // RENDERED HIDDEN, revealed by the script while there is a
+                // shortcut to remove: `Toast`'s arrangement for its dismiss
+                // control, for its reason.
+                button {
+                    class: "nd-key-capture-clear",
+                    r#type: "button",
+                    "aria-label": "{clear}",
+                    hidden: true,
+                    Icon { icon: IconDrawing::CLOSE, size: IconSize::Small }
+                }
+            }
+            p { class: "nd-key-capture-refusal", id: "{id}-refusal", role: "status",
+                if let Some(refusal) = refusal {
+                    "{refusal}"
+                }
+            }
+            span { class: "nd-key-capture-said nd-visually-hidden", role: "status" }
+        }
+    }
+"#;
+
+/// The same control, in React. Read it beside `KEY_CAPTURE_DIOXUS`.
+const KEY_CAPTURE_REACT: &str = r#"  const keyboard_ = keyboard ?? "linux";
+  const held = value ?? "";
+  const id = `nd-key-capture-${name}`;
+  const root = ["nd-key-capture", className].filter(Boolean).join(" ");
+  const refused = refusal != null;
+
+  // The label a keyboard prints on a key, as `nc_schema::keys` gives it. See
+  // the Dioxus half, which is the same table.
+  const mac = keyboard_ === "mac";
+  const PRINTED = new Map([
+    ["ArrowUp", "Up"], ["ArrowDown", "Down"], ["ArrowLeft", "Left"], ["ArrowRight", "Right"],
+    ["Minus", "-"], ["Equal", "="], ["BracketLeft", "["], ["BracketRight", "]"],
+    ["Backslash", "\\"], ["Semicolon", ";"], ["Quote", "'"], ["Backquote", "`"],
+    ["Comma", ","], ["Period", "."], ["Slash", "/"],
+  ]);
+  const MAC = new Map([["Enter", "Return"], ["Backspace", "Delete"], ["Delete", "Forward Delete"]]);
+  const labelOf = (part) => {
+    if (part === "Control") return mac ? part : "Ctrl";
+    if (part === "Alt") return mac ? "Option" : part;
+    if (part === "Super") return mac ? "Command" : keyboard_ === "windows" ? "Win" : part;
+    if (mac && MAC.has(part)) return MAC.get(part);
+    if (/^(Key[A-Z]|Digit[0-9])$/.test(part)) return part.slice(-1);
+    return PRINTED.get(part) ?? part;
+  };
+  const keys = held
+    .split("+")
+    .filter(Boolean)
+    .flatMap((part, at) => [
+      at > 0 ? "+" : null,
+      h("kbd", { key: `k${at}`, className: "nd-kbd", "data-nd-size": "small", "data-nd-code": part }, labelOf(part)),
+    ])
+    .filter((one) => one !== null);
+
+  return h(
+    "div",
+    {
+      className: root,
+      "data-nd-key-capture": name,
+      "data-nd-value": held,
+      "data-nd-keyboard": keyboard_,
+      "data-nd-capture-label": captureLabel,
+      "data-nd-empty-label": emptyLabel,
+      "data-nd-refused": refused ? "true" : undefined,
+      "data-nd-disabled": disabled ? "true" : undefined,
+      ...rest,
+    },
+    h(Label, { key: "l", text: label, forControl: id }),
+    h(
+      "button",
+      {
+        key: "c",
+        className: "nd-key-capture-control",
+        id,
+        type: "button",
+        // See the Dioxus half: taken off by the script.
+        disabled: true,
+        "aria-labelledby": `${id}-label ${id}-chord`,
+        "aria-describedby": `${id}-refusal`,
+        "aria-invalid": refused ? "true" : undefined,
+        "aria-disabled": disabled ? "true" : undefined,
+      },
+      h(
+        "span",
+        { className: "nd-key-capture-chord", id: `${id}-chord` },
+        h(
+          "span",
+          { key: "k", className: "nd-key-capture-keys" },
+          keys.length === 0 ? h("span", { className: "nd-key-capture-empty" }, emptyLabel) : keys,
+        ),
+        h("span", { key: "t", className: "nd-key-capture-taken" }),
+      ),
+    ),
+    h("input", { key: "i", type: "hidden", name, defaultValue: held, disabled }),
+    clearLabel
+      ? h(
+          "button",
+          {
+            key: "x",
+            className: "nd-key-capture-clear",
+            type: "button",
+            "aria-label": clearLabel,
+            // See the Dioxus half: revealed by the script.
+            hidden: true,
+          },
+          h(Icon, { icon: close, size: "small" }),
+        )
+      : null,
+    h("p", { key: "r", className: "nd-key-capture-refusal", id: `${id}-refusal`, role: "status" }, refusal),
+    h("span", { key: "s", className: "nd-key-capture-said nd-visually-hidden", role: "status" }),
+  );
+"#;
+
+// --- Log and LogLine ----------------------------------------------------------
+
+/// Lines as they arrive, in a region that scrolls.
+///
+/// # Two boxes
+///
+/// The root holds the region of lines and the control that goes back to the
+/// newest one. The control is the region's sibling, because a control inside a
+/// `role="log"` would be read as a line.
+///
+/// # The region is a tab stop
+///
+/// A region that scrolls has to scroll from the keyboard, and the engine scrolls
+/// the one that has the focus.
+///
+/// # The lines have a box of their own inside it
+///
+/// `.nd-log-content` is as tall as the lines, so `dist/log.js` can watch its
+/// height. A face that loads late or a window that narrows makes every line
+/// taller with no line added, and a log that follows has to follow that too.
+///
+/// # The resume control ships hidden
+///
+/// `dist/log.js` shows it while following has stopped. With the script blocked
+/// nothing follows, so there is nowhere to resume. `Toast`'s arrangement for its
+/// dismiss control, for its reason.
+const LOG_DIOXUS: &str = r#"    let root = format!("nd-log {class}");
+    let root = root.trim().to_owned();
+    let id = format!("nd-log-{name}");
+
+    rsx! {
+        div {
+            class: "{root}",
+            "data-nd-log": "{name}",
+            "data-nd-follow": if follow { "true" } else { "false" },
+            div {
+                class: "nd-log-lines",
+                id: "{id}",
+                role: "log",
+                "aria-label": "{label}",
+                tabindex: "0",
+                div { class: "nd-log-content", {children} }
+            }
+            if let Some(resume) = resume_label {
+                button {
+                    class: "nd-log-resume",
+                    r#type: "button",
+                    "aria-controls": "{id}",
+                    hidden: true,
+                    Icon { icon: IconDrawing::ARROW_DOWN, size: IconSize::Small }
+                    span { "{resume}" }
+                }
+            }
+        }
+    }
+"#;
+
+/// The same log, in React.
+const LOG_REACT: &str = r#"  const root = ["nd-log", className].filter(Boolean).join(" ");
+  const id = `nd-log-${name}`;
+
+  return h(
+    "div",
+    {
+      className: root,
+      "data-nd-log": name,
+      "data-nd-follow": String(follow ?? true),
+      ...rest,
+    },
+    h(
+      "div",
+      {
+        key: "l",
+        className: "nd-log-lines",
+        id,
+        role: "log",
+        "aria-label": label,
+        tabIndex: "0",
+      },
+      // See the Dioxus half: the box the lines are measured by.
+      h("div", { className: "nd-log-content" }, children),
+    ),
+    resumeLabel
+      ? h(
+          "button",
+          {
+            key: "r",
+            className: "nd-log-resume",
+            type: "button",
+            "aria-controls": id,
+            // See the Dioxus half: shown by the script.
+            hidden: true,
+          },
+          h(Icon, { icon: arrowDown, size: "small" }),
+          h("span", null, resumeLabel),
+        )
+      : null,
+  );
+"#;
+
+/// One line of a log.
+///
+/// # Inline parts, a space between each two
+///
+/// The line is a block and its parts are inline, with a space the markup
+/// writes after each part that is there. A selection across the log copies
+/// one line of text for each line, and a part left out leaves no space.
+///
+/// # The source is a name
+///
+/// It is marked `nd-identifier`, as an affix is: a module or a program, the
+/// same in every language.
+const LOG_LINE_DIOXUS: &str = r#"    let root = format!("nd-log-line {class}");
+    let root = root.trim().to_owned();
+
+    rsx! {
+        div { class: "{root}", "data-nd-tone": tone,
+            if let Some(at) = time {
+                time { class: "nd-log-line-time", "{at}" }
+                " "
+            }
+            if let Some(level) = level {
+                span { class: "nd-log-line-level", "{level}" }
+                " "
+            }
+            if let Some(source) = source {
+                span { class: "nd-log-line-source nd-identifier", "{source}" }
+                " "
+            }
+            span { class: "nd-log-line-text", {children} }
+        }
+    }
+"#;
+
+/// The same line, in React.
+const LOG_LINE_REACT: &str = r#"  const root = ["nd-log-line", className].filter(Boolean).join(" ");
+  // See the Dioxus half: each part that is there, and a space after it.
+  const parts = [];
+  if (time) parts.push(h("time", { key: "t", className: "nd-log-line-time" }, time), " ");
+  if (level) parts.push(h("span", { key: "l", className: "nd-log-line-level" }, level), " ");
+  if (source) {
+    parts.push(h("span", { key: "s", className: "nd-log-line-source nd-identifier" }, source), " ");
+  }
+
+  return h(
+    "div",
+    { className: root, "data-nd-tone": tone, ...rest },
+    ...parts,
+    h("span", { key: "m", className: "nd-log-line-text" }, children),
+  );
+"#;
+
 // --- Menu and MenuItem ------------------------------------------------------
 
 /// The surface a button opens, and the actions on it.
@@ -4523,7 +5751,12 @@ pub fn dioxus_imports(component: &Component) -> String {
         // A field, a fieldset and the one drawing a rating is made of. A tab
         // wants the same drawing at a size it names.
         "Rating" => beside_icon("Field, FieldKind, FieldSize, Icon"),
-        "Tab" => beside_icon("Icon, IconSize"),
+        "Tab" | "FooterLine" | "Log" => beside_icon("Icon, IconSize"),
+        // THE SEND CONTROL IS A `Button`, and the glyph a prompt starts with is
+        // an `Icon`: a prompt is not the place to grow a second of either.
+        "Prompt" => beside_icon("Button, ButtonSize, ButtonTone, ButtonVariant, Icon, IconSize"),
+        // THE ONE LABEL IN THE SYSTEM, and the glyph the remove control draws.
+        "KeyCapture" => beside_icon("Icon, IconSize, Label"),
         // `SelectOption` needs both for a reason worth writing down: the name
         // becomes `data-nd-icon` on the option, and the drawing goes in a
         // `<template>` beside it for the enhanced list to clone.
@@ -4565,6 +5798,10 @@ pub fn dioxus_imports(component: &Component) -> String {
         // hidden and nameless — its name arrives from the tree's own
         // `expand_label` once the script knows which state it is in.
         "TreeItem" => beside_icon("Icon, Tag, TagSize, TagVariant"),
+        // A ROW RENDERS A COMPONENT: its name is a real `MatchText`, so the one
+        // primitive that cuts a name into matched runs is the one every list
+        // draws with (`NOCTUA.md §12.4`).
+        "OptionItem" => beside_icon("Icon, IconSize, MatchText"),
         // IT SHIPS A `Tag` FOR THE SCRIPT TO CLONE. A second place that knows
         // what a tag's markup looks like would drift from the emitter, which
         // is the whole thing this generator exists to prevent — so the picker
@@ -4572,9 +5809,12 @@ pub fn dioxus_imports(component: &Component) -> String {
         // Everything whose body draws one glyph at a size it names: the `i`,
         // a menu row's icon, a bar's dismiss control, and the three floating
         // surfaces whose way out is a close control.
-        "Info" | "MenuItem" | "MessageBar" | "Dialog" | "Popover" | "Toast" => {
-            SIZED_ICON.to_owned()
-        }
+        "Info" | "MenuItem" | "MessageBar" | "Popover" | "Toast" => SIZED_ICON.to_owned(),
+        // THE ANSWERS ARE `Button`s, and the close control and the mark are
+        // drawings: a dialog is not the place to grow a second button.
+        "Dialog" => beside_icon(
+            "Button, ButtonSubmit, ButtonTone, ButtonVariant, Icon, IconSize",
+        ),
         "Field" => LABEL_IMPORT.to_owned(),
         // THE GAP OPENS THE MENU THIS SYSTEM ALREADY HAS. A second surface with
         // its own arrow walk would be a second thing to keep in step with
@@ -4672,8 +5912,8 @@ pub fn react_imports(component: &Component) -> String {
         // splits these across several arms because `IconDrawing` and `IconSize`
         // are imported unevenly there; in JavaScript an icon is an icon.
         "Button" | "Link" | "SegmentedItem" | "Disclosure" | "Search" | "SearchResult"
-        | "Avatar" | "Carousel" | "Info" | "MenuItem" | "MessageBar" | "Tab" | "Dialog"
-        | "Popover" | "Toast" => REACT_ICON.to_owned(),
+        | "Avatar" | "Carousel" | "Info" | "MenuItem" | "MessageBar" | "Tab" | "Popover"
+        | "Toast" | "FooterLine" | "Log" => REACT_ICON.to_owned(),
         // The chip is a `Swatch` and the remove control is a `Button`; see the
         // Dioxus half.
         "Tag" => concat!(
@@ -4693,13 +5933,14 @@ pub fn react_imports(component: &Component) -> String {
             "import { Icon } from \"./icon.js\";\n"
         )
         .to_owned(),
+        "OptionItem" => REACT_MATCH_ICON.to_owned(),
+        // The same label and glyph as the Dioxus half.
+        "KeyCapture" => REACT_LABEL_ICON.to_owned(),
         // The same menu in the other language — see the Dioxus half.
-        "Pagination" => concat!(
-            "import { Menu } from \"./menu.js\";\n",
-            "import { MenuItem } from \"./menu_item.js\";\n"
-        )
-        .to_owned(),
-        "Table" => concat!(
+        "Pagination" => REACT_MENU.to_owned(),
+        // A `Button` and a drawing: a table's own controls, the control a
+        // prompt is sent by, and a dialog's answers.
+        "Table" | "Prompt" | "Dialog" => concat!(
             "import { Button } from \"./button.js\";\n",
             "\n",
             "import { Icon } from \"./icon.js\";\n"
@@ -4809,8 +6050,9 @@ pub fn react_imports(component: &Component) -> String {
 /// through `IconDrawing::parse` and rendered nothing for a name nothing declares;
 /// React handed the string to `Icon`, which throws. One list, so a component
 /// cannot be in two of the three.
-const TYPED_ICONS: [&str; 12] = [
+const TYPED_ICONS: [&str; 13] = [
     "Button",
+    "OptionItem",
     // IT WAS THE LAST ONE HOLDING A NAME. `MenuItem.icon` was a `String` run
     // through `IconDrawing::parse` at render time, so a name nothing declares
     // drew nothing and said nothing — the exact failure the type exists to make
@@ -11731,7 +12973,7 @@ const IMAGE_REACT: &str = r#"  const fit_ = fit ?? "cover";
 /// `data-nd-tone` paints from `dist/tones.css` and nothing else depends on it.
 /// The words, the title and the icon are what carry the meaning (`§8.8.6`),
 /// which is why `icon` is the caller's choice rather than a map from the tone
-/// name: this system has 351 tones and no opinion about what most of them mean.
+/// name: this system has 354 tones and no opinion about what most of them mean.
 ///
 /// # And the icon is a drawing, not a word
 ///
@@ -11740,8 +12982,19 @@ const IMAGE_REACT: &str = r#"  const fit_ = fit ?? "cover";
 /// name nothing declares rendered *nothing* in Dioxus and *threw* in React,
 /// which is the one behaviour `NOCTUA.md §9.3` says the two may not have.
 /// Typed, neither language can be given a name that is not an icon.
+///
+/// # And the time left is said twice, to two different readers
+///
+/// `deadline` renders a `role="timer"` that `dist/message-bar.js` fills every
+/// second. A timer is a live region that does not speak, and it says so with
+/// `aria-live="off"` written out: inside a `role="alert"`, which is atomic, an
+/// implicit value is the one assistive technology honours least. Beside it is
+/// a visually hidden polite region the script writes far less often, so a
+/// screen reader hears the time left without hearing every second of it.
+/// Both ship empty: with no script nothing is counting.
 const MESSAGE_BAR_DIOXUS: &str = r#"    let root = format!("nd-message-bar {class}");
     let root = root.trim().to_owned();
+    let counted = deadline.is_some();
 
     rsx! {
         div {
@@ -11752,6 +13005,9 @@ const MESSAGE_BAR_DIOXUS: &str = r#"    let root = format!("nd-message-bar {clas
             // the role's own value, which is the right one both times.
             "aria-live": live.map(MessageBarLive::as_str),
             "data-nd-tone": tone,
+            "data-nd-presentation": presentation.as_str(),
+            "data-nd-deadline": deadline,
+            "data-nd-countdown-label": countdown_label,
             "data-nd-dismissible": if dismissible { "true" } else { "false" },
 
             if let Some(icon) = icon {
@@ -11770,6 +13026,36 @@ const MESSAGE_BAR_DIOXUS: &str = r#"    let root = format!("nd-message-bar {clas
                     strong { class: "nd-message-bar-title", "{title}" }
                 }
                 div { class: "nd-message-bar-body", {children} }
+                // THE TIME LEFT, AFTER THE MESSAGE IT IS ABOUT. See the header.
+                if counted {
+                    span {
+                        class: "nd-message-bar-countdown",
+                        role: "timer",
+                        "aria-live": "off",
+                        "data-nd-message-bar-countdown": "",
+                        hidden: true,
+                    }
+                    span {
+                        class: "nd-visually-hidden",
+                        "aria-live": "polite",
+                        "aria-atomic": "true",
+                        "data-nd-message-bar-said": "",
+                    }
+                }
+                // WHAT A READER DOES ABOUT IT, LAST AMONG THE WORDS. Visible
+                // from the first paint, because the press is the caller's code
+                // and not this package's script: `Button { action }`'s
+                // arrangement. Inside the text rather than beside it, so a
+                // narrow window wraps it onto a row of its own instead of
+                // squeezing the message beside it.
+                if let Some(words) = action_label {
+                    button {
+                        class: "nd-message-bar-action",
+                        r#type: "button",
+                        "data-nd-action": action,
+                        "{words}"
+                    }
+                }
             }
 
             // IN THE BAR'S ROW, before the dismiss control. The row aligns to
@@ -11798,6 +13084,7 @@ const MESSAGE_BAR_DIOXUS: &str = r#"    let root = format!("nd-message-bar {clas
 /// The same message, in React.
 const MESSAGE_BAR_REACT: &str = r#"  const alert_ = alert ?? false;
   const dismissible_ = dismissible ?? false;
+  const presentation_ = presentation ?? "bar";
   const root = ["nd-message-bar", className].filter(Boolean).join(" ");
 
   return h(
@@ -11809,6 +13096,9 @@ const MESSAGE_BAR_REACT: &str = r#"  const alert_ = alert ?? false;
       role: alert_ ? "alert" : "status",
       "aria-live": live,
       "data-nd-tone": tone,
+      "data-nd-presentation": presentation_,
+      "data-nd-deadline": deadline,
+      "data-nd-countdown-label": countdownLabel,
       "data-nd-dismissible": String(dismissible_),
       ...rest,
     },
@@ -11824,6 +13114,35 @@ const MESSAGE_BAR_REACT: &str = r#"  const alert_ = alert ?? false;
       { key: "t", className: "nd-message-bar-text" },
       title ? h("strong", { key: "h", className: "nd-message-bar-title" }, title) : null,
       h("div", { key: "b", className: "nd-message-bar-body" }, children),
+      // See the Dioxus half: a timer that does not speak, and a polite region
+      // the script writes far less often. Both empty until it counts.
+      deadline
+        ? h("span", {
+            key: "c",
+            className: "nd-message-bar-countdown",
+            role: "timer",
+            "aria-live": "off",
+            "data-nd-message-bar-countdown": "",
+            hidden: true,
+          })
+        : null,
+      deadline
+        ? h("span", {
+            key: "s",
+            className: "nd-visually-hidden",
+            "aria-live": "polite",
+            "aria-atomic": "true",
+            "data-nd-message-bar-said": "",
+          })
+        : null,
+      // See the Dioxus half: the caller's control, last among the words.
+      actionLabel
+        ? h(
+            "button",
+            { key: "a", className: "nd-message-bar-action", type: "button", "data-nd-action": action },
+            actionLabel,
+          )
+        : null,
     ),
     // @ai nd-ai-slot-line,
     dismissible_
@@ -12509,8 +13828,19 @@ const OTP_FIELD_REACT: &str = r#"  const size_ = size ?? "medium";
 /// nothing. A screen reader is told which of the two it is looking at, and
 /// `segmented.toml` already refused `role="tablist"` on the grounds that it
 /// promises panels that change.
+///
+/// # A rail is vertical
+///
+/// `appearance = "rail"` draws a column, so the axis the markup announces is
+/// `vertical` whatever `orientation` says. An axis left to the caller would be
+/// a column whose arrows are Left and Right for whoever forgot the second prop.
 const TABS_DIOXUS: &str = r#"    let root = format!("nd-tabs {class}");
     let root = root.trim().to_owned();
+    let axis = if appearance == TabsAppearance::Rail {
+        TabsOrientation::Vertical
+    } else {
+        orientation
+    };
 
     rsx! {
         div {
@@ -12523,7 +13853,7 @@ const TABS_DIOXUS: &str = r#"    let root = format!("nd-tabs {class}");
             "data-nd-size": size.as_str(),
             "data-nd-fill": fill.as_str(),
             // Announced as well as drawn, and it decides which arrows move.
-            "aria-orientation": orientation.as_str(),
+            "aria-orientation": axis.as_str(),
             // One or the other names the strip once it has a role.
             "aria-label": label,
             "aria-labelledby": labelledby,
@@ -12537,7 +13867,8 @@ const TABS_REACT: &str = r#"  const activation_ = activation ?? "automatic";
   const appearance_ = appearance ?? "underline";
   const size_ = size ?? "medium";
   const fill_ = fill ?? "hug";
-  const orientation_ = orientation ?? "horizontal";
+  // See the Dioxus half: a rail is vertical whatever the caller said.
+  const orientation_ = appearance_ === "rail" ? "vertical" : (orientation ?? "horizontal");
   const root = ["nd-tabs", className].filter(Boolean).join(" ");
 
   return h(
@@ -12553,6 +13884,61 @@ const TABS_REACT: &str = r#"  const activation_ = activation ?? "automatic";
       "aria-orientation": orientation_,
       "aria-label": label,
       "aria-labelledby": labelledby,
+      ...rest,
+    },
+    children,
+  );
+"#;
+
+// --- Toolbar ------------------------------------------------------------------
+
+/// The bar, written for one line: a rail is vertical.
+///
+/// Every attribute here is a prop under its own name, which is what a derived
+/// body writes. The one that is not is `aria-orientation`: `density = "rail"`
+/// draws a column, so the axis the markup announces is `vertical` whatever
+/// `orientation` says. `dist/roving.js` reads that attribute to pick the arrows,
+/// and a rail announced as horizontal would be walked with the wrong pair.
+const TOOLBAR_DIOXUS: &str = r#"    let root = format!("nd-toolbar {class}");
+    let root = root.trim().to_owned();
+    let axis = if density == ToolbarDensity::Rail {
+        ToolbarOrientation::Vertical
+    } else {
+        orientation
+    };
+
+    rsx! {
+        div {
+            class: "{root}",
+            role: "toolbar",
+            "aria-label": label,
+            "aria-labelledby": labelledby,
+            "aria-orientation": axis.as_str(),
+            "data-nd-wrap": if wrap { "true" } else { "false" },
+            "data-nd-density": density.as_str(),
+            "data-nd-glass": if glass { "true" } else { "false" },
+            {children}
+        }
+    }
+"#;
+
+/// The same bar, in React.
+const TOOLBAR_REACT: &str = r#"  const density_ = density ?? "comfortable";
+  // See the Dioxus half: a rail is vertical whatever the caller said.
+  const orientation_ = density_ === "rail" ? "vertical" : (orientation ?? "horizontal");
+  const root = ["nd-toolbar", className].filter(Boolean).join(" ");
+
+  return h(
+    "div",
+    {
+      className: root,
+      role: "toolbar",
+      "aria-label": label,
+      "aria-labelledby": labelledby,
+      "aria-orientation": orientation_,
+      "data-nd-wrap": String(wrap ?? true),
+      "data-nd-density": density_,
+      "data-nd-glass": String(glass ?? false),
       ...rest,
     },
     children,
@@ -12699,16 +14085,48 @@ const TAB_PANEL_REACT: &str = r#"  const root = ["nd-tab-panel", className].filt
 /// `aria-labelledby`. `label` is written only when there is no heading, because
 /// a name a reader can see and a name only a screen reader hears will drift the
 /// moment either is edited.
+///
+/// # And the confirmation is the same surface, asking for an answer
+///
+/// `alert` makes it the WAI-ARIA alert dialog: `role="alertdialog"` on the
+/// surface, described by what is asked, who asks and whether the answer can be
+/// taken back, in that order. The answers are `Button`s that submit a
+/// `<form method="dialog">`, so closing the surface with the answer is the
+/// platform's, and their `value` is what `dist/dialog.js` reports. Where the
+/// focus starts is the script's too: `autofocus` written by React's `autoFocus`
+/// is a `focus()` call on mount rather than an attribute, so the two halves
+/// could not write it alike, and the script puts it on the decline control.
 const DIALOG_DIOXUS: &str = r#"    let root = format!("nd-dialog {class}");
     let root = root.trim().to_owned();
     let id = format!("nd-dialog-{name}");
     let surface_id = format!("{id}-surface");
     let title_id = format!("{id}-title");
     let note_id = format!("{id}-note");
+    let asker_id = format!("{id}-asker");
+    let mark_id = format!("{id}-mark");
     let titled = heading.as_ref().map(|_| title_id.clone());
     let named = if heading.is_some() { None } else { label.clone() };
-    let described = description.as_ref().map(|_| note_id.clone());
+    // WHAT DESCRIBES IT, IN THE ORDER A SCREEN READER READS IT AFTER THE NAME:
+    // what is asked, who asks, and whether the answer can be taken back.
+    let described = [
+        description.as_ref().map(|_| note_id.clone()),
+        requester.as_ref().map(|_| asker_id.clone()),
+        irreversible_label.as_ref().map(|_| mark_id.clone()),
+    ]
+    .into_iter()
+    .flatten()
+    .collect::<Vec<_>>()
+    .join(" ");
+    let described = (!described.is_empty()).then_some(described);
     let head = heading.is_some() || dismissible;
+    let answers = confirm_label.is_some() || decline_label.is_some();
+    // AN ANSWER THAT CANNOT BE TAKEN BACK IS PAINTED AS ONE. The mark says it
+    // in words beside a glyph, so the tone is never the only signal.
+    let confirm_tone = if irreversible_label.is_some() {
+        ButtonTone::Danger
+    } else {
+        ButtonTone::Accent
+    };
 
     rsx! {
         div {
@@ -12717,22 +14135,28 @@ const DIALOG_DIOXUS: &str = r#"    let root = format!("nd-dialog {class}");
             "data-nd-modal": if modal { "true" } else { "false" },
             "data-nd-size": size.as_str(),
             "data-nd-dismissible": if dismissible { "true" } else { "false" },
+            "data-nd-shown": if shown { "true" } else { "false" },
 
             // RENDERED HIDDEN, revealed by `dist/dialog.js`. See the header,
             // and note that the stylesheet holds this box from the first paint
             // so revealing it moves nothing (`NOCTUA.md §9.6`).
-            button {
-                class: "nd-dialog-open",
-                id: "{id}",
-                r#type: "button",
-                "aria-haspopup": "dialog",
+            if let Some(trigger) = trigger_label {
+                button {
+                    class: "nd-dialog-open",
+                    id: "{id}",
+                    r#type: "button",
+                    "aria-haspopup": "dialog",
                     hidden: true,
-                "{trigger_label}"
+                    "{trigger}"
+                }
             }
 
             dialog {
                 class: "nd-dialog-surface",
                 id: "{surface_id}",
+                // The `<dialog>`'s own role, unless the dialog demands an
+                // answer. See the contract.
+                role: alert.then_some("alertdialog"),
                 // One or the other, never both. See the header.
                 "aria-label": named,
                 "aria-labelledby": titled,
@@ -12756,13 +14180,57 @@ const DIALOG_DIOXUS: &str = r#"    let root = format!("nd-dialog {class}");
                         }
                     }
                 }
-                if let Some(description) = description {
-                    p { class: "nd-dialog-note", id: "{note_id}", "{description}" }
-                }
                 // THE SCROLLER, AND IT IS ITS OWN ELEMENT. The surface clips and
                 // carries the radius; this scrolls and carries none. `.nd-panel`
-                // is two elements for exactly this reason.
-                div { class: "nd-dialog-body", {children} }
+                // is two elements for exactly this reason. The description is
+                // its first line, so a short window scrolls it rather than
+                // cutting it off above the answers.
+                div { class: "nd-dialog-body",
+                    if let Some(description) = description {
+                        p { class: "nd-dialog-note", id: "{note_id}", "{description}" }
+                    }
+                    if let Some(who) = requester {
+                        p { class: "nd-dialog-requester", id: "{asker_id}", "{who}" }
+                    }
+                    if let Some(mark) = irreversible_label {
+                        p { class: "nd-dialog-mark", id: "{mark_id}",
+                            // `aria-hidden`: the words say what the glyph says.
+                            span { class: "nd-dialog-mark-icon", "aria-hidden": "true",
+                                Icon { icon: IconDrawing::WARNING, size: IconSize::Small }
+                            }
+                            span { "{mark}" }
+                        }
+                    }
+                    {children}
+                }
+                // THE ANSWERS, OUTSIDE THE SCROLLER, so a short window scrolls
+                // the question and never them. Submit controls of a
+                // `<form method="dialog">`: the platform closes the surface with
+                // the answer as its `returnValue`. The decline control comes
+                // first, which is where the focus starts.
+                if answers {
+                    form { class: "nd-dialog-actions", method: "dialog",
+                        if let Some(no) = decline_label {
+                            Button {
+                                class: "nd-dialog-decline",
+                                label: no,
+                                variant: ButtonVariant::Outline,
+                                tone: ButtonTone::Neutral,
+                                submit: ButtonSubmit::Submit,
+                                value: "decline",
+                            }
+                        }
+                        if let Some(yes) = confirm_label {
+                            Button {
+                                class: "nd-dialog-confirm",
+                                label: yes,
+                                tone: confirm_tone,
+                                submit: ButtonSubmit::Submit,
+                                value: "confirm",
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -12772,11 +14240,20 @@ const DIALOG_DIOXUS: &str = r#"    let root = format!("nd-dialog {class}");
 const DIALOG_REACT: &str = r#"  const modal_ = modal ?? true;
   const size_ = size ?? "medium";
   const dismissible_ = dismissible ?? true;
+  const shown_ = shown ?? false;
   const root = ["nd-dialog", className].filter(Boolean).join(" ");
   const id = `nd-dialog-${name}`;
   const titleId = `${id}-title`;
   const noteId = `${id}-note`;
+  const askerId = `${id}-asker`;
+  const markId = `${id}-mark`;
   const head = Boolean(heading) || dismissible_;
+  // See the Dioxus half: what is asked, who asks, and whether it can be undone.
+  const described =
+    [description ? noteId : null, requester ? askerId : null, irreversibleLabel ? markId : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
+  const answers = Boolean(confirmLabel) || Boolean(declineLabel);
 
   return h(
     "div",
@@ -12786,31 +14263,35 @@ const DIALOG_REACT: &str = r#"  const modal_ = modal ?? true;
       "data-nd-modal": String(modal_),
       "data-nd-size": size_,
       "data-nd-dismissible": String(dismissible_),
+      "data-nd-shown": String(shown_),
       ...rest,
     },
-    h(
-      "button",
-      {
-        key: "o",
-        className: "nd-dialog-open",
-        id,
-        type: "button",
-        "aria-haspopup": "dialog",
-          // See the Dioxus half: revealed by the script.
-        hidden: true,
-      },
-      triggerLabel,
-    ),
+    triggerLabel
+      ? h(
+          "button",
+          {
+            key: "o",
+            className: "nd-dialog-open",
+            id,
+            type: "button",
+            "aria-haspopup": "dialog",
+            // See the Dioxus half: revealed by the script.
+            hidden: true,
+          },
+          triggerLabel,
+        )
+      : null,
     h(
       "dialog",
       {
         key: "s",
         className: "nd-dialog-surface",
         id: `${id}-surface`,
+        role: alert ? "alertdialog" : undefined,
         // See the Dioxus half: one name or the other, never both.
         "aria-label": heading ? undefined : label,
         "aria-labelledby": heading ? titleId : undefined,
-        "aria-describedby": description ? noteId : undefined,
+        "aria-describedby": described,
       },
       head
         ? h(
@@ -12833,8 +14314,56 @@ const DIALOG_REACT: &str = r#"  const modal_ = modal ?? true;
               : null,
           )
         : null,
-      description ? h("p", { key: "n", className: "nd-dialog-note", id: noteId }, description) : null,
-      h("div", { key: "b", className: "nd-dialog-body" }, children),
+      h(
+        "div",
+        { key: "b", className: "nd-dialog-body" },
+        // See the Dioxus half: the description is the scroller's first line.
+        description ? h("p", { key: "n", className: "nd-dialog-note", id: noteId }, description) : null,
+        requester
+          ? h("p", { key: "r", className: "nd-dialog-requester", id: askerId }, requester)
+          : null,
+        irreversibleLabel
+          ? h(
+              "p",
+              { key: "m", className: "nd-dialog-mark", id: markId },
+              h(
+                "span",
+                { key: "i", className: "nd-dialog-mark-icon", "aria-hidden": "true" },
+                h(Icon, { icon: warning, size: "small" }),
+              ),
+              h("span", { key: "w" }, irreversibleLabel),
+            )
+          : null,
+        children,
+      ),
+      // See the Dioxus half: the answers, outside the scroller, decline first.
+      answers
+        ? h(
+            "form",
+            { key: "a", className: "nd-dialog-actions", method: "dialog" },
+            declineLabel
+              ? h(Button, {
+                  key: "d",
+                  className: "nd-dialog-decline",
+                  label: declineLabel,
+                  variant: "outline",
+                  tone: "neutral",
+                  submit: "submit",
+                  value: "decline",
+                })
+              : null,
+            confirmLabel
+              ? h(Button, {
+                  key: "c",
+                  className: "nd-dialog-confirm",
+                  label: confirmLabel,
+                  tone: irreversibleLabel ? "danger" : "accent",
+                  submit: "submit",
+                  value: "confirm",
+                })
+              : null,
+          )
+        : null,
     ),
   );
 "#;

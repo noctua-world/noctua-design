@@ -21,7 +21,8 @@
 //! - `margin: 0` on `h1`–`h4`, `p`, `ul` and `figure`, on top of which each
 //!   component sets its own spacing.
 //! - `[hidden] { display: none !important }`, the one `!important` here.
-//! - a `:focus-visible` ring, which is every component's focus ring.
+//! - a `:focus-visible` ring, which is every component's focus ring, and the
+//!   same ring on `[data-nd-seat-focus]`, which is a second seat's.
 //!
 //! All four are low specificity and a consumer's own rules beat them. They are
 //! written down because they are the price of the components looking right, and
@@ -56,7 +57,7 @@ pub const SOURCE_DIR: &str = "crates/noctua-design-styles/src/";
     clippy::too_many_lines,
     reason = "one line per stylesheet, and the order is the point"
 )]
-pub fn sources() -> [(&'static str, &'static str); 50] {
+pub fn sources() -> [(&'static str, &'static str); 58] {
     [
         (
             "crates/noctua-design-styles/src/base.css",
@@ -258,11 +259,43 @@ pub fn sources() -> [(&'static str, &'static str); 50] {
             "crates/noctua-design-styles/src/toast.css",
             include_str!("toast.css"),
         ),
+        (
+            "crates/noctua-design-styles/src/match-text.css",
+            include_str!("match-text.css"),
+        ),
+        (
+            "crates/noctua-design-styles/src/option-list.css",
+            include_str!("option-list.css"),
+        ),
+        (
+            "crates/noctua-design-styles/src/footer.css",
+            include_str!("footer.css"),
+        ),
+        (
+            "crates/noctua-design-styles/src/prompt.css",
+            include_str!("prompt.css"),
+        ),
+        (
+            "crates/noctua-design-styles/src/drawer.css",
+            include_str!("drawer.css"),
+        ),
+        (
+            "crates/noctua-design-styles/src/split.css",
+            include_str!("split.css"),
+        ),
+        (
+            "crates/noctua-design-styles/src/key-capture.css",
+            include_str!("key-capture.css"),
+        ),
+        (
+            "crates/noctua-design-styles/src/log.css",
+            include_str!("log.css"),
+        ),
     ]
 }
 
 /// How many stylesheets ship.
-pub const COUNT: usize = 50;
+pub const COUNT: usize = 58;
 
 #[cfg(test)]
 mod tests {

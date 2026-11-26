@@ -17,7 +17,7 @@ doc = "The identifier for this row, in the markup. The detail row and the choice
 [prop.tone]
 type = "text"
 attribute = "data-nd-tone"
-doc = "Which of the colour system's tones this row is painted from. Any of the 349 semantic families, so `overdue` is as valid as `danger`, plus this system's own `neutral` and `muted`. A name no family declares fails the build. **Never colour alone.**"
+doc = "Which of the colour system's tones this row is painted from. Any of the 352 semantic families, so `overdue` is as valid as `danger`, plus this system's own `neutral` and `muted`. A name no family declares fails the build. **Never colour alone.**"
 
 [prop.select]
 type = "enum"

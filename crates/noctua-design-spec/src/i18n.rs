@@ -400,7 +400,45 @@ fn pseudo(source: &Locale) -> Locale {
     }
 }
 
+/// The names `Intl.PluralRules` gives a count's form, which a message writes
+/// before each of its forms: `one:…|other:…` (`dist/messages.js`).
+const PLURAL_FORMS: [&str; 6] = ["zero", "one", "two", "few", "many", "other"];
+
+/// A message lengthened and bracketed, form by form where it has forms.
+///
+/// A PLURAL MESSAGE KEEPS THE NAMES OF ITS FORMS. `plural()` picks a form by
+/// the word before its colon, and stretched whole the message named its forms
+/// `oonee` and `ootheer`, so every count drawn in `qps` was drawn as nothing:
+/// an empty run, which the sweep for a missing bracket cannot see. Each form
+/// is bracketed on its own, because each is a whole sentence a reader sees.
 fn stretch(message: &str) -> String {
+    match plural_forms(message) {
+        Some(forms) => forms
+            .iter()
+            .map(|(name, form)| format!("{name}:{}", stretch_form(form)))
+            .collect::<Vec<_>>()
+            .join("|"),
+        None => stretch_form(message),
+    }
+}
+
+/// The forms of a plural message, by name, or nothing for a plain sentence.
+///
+/// Every part has to start with a form's name and a colon. A sentence with a
+/// colon of its own is a sentence, and is stretched whole.
+fn plural_forms(message: &str) -> Option<Vec<(&str, &str)>> {
+    message
+        .split('|')
+        .map(|part| {
+            let (name, form) = part.split_once(':')?;
+            let name = name.trim();
+            PLURAL_FORMS.contains(&name).then_some((name, form))
+        })
+        .collect()
+}
+
+/// One sentence, lengthened and bracketed, its placeholders untouched.
+fn stretch_form(message: &str) -> String {
     let mut out = String::with_capacity(message.len() * 2);
     out.push('⟦');
 
@@ -494,6 +532,16 @@ mod tests {
         assert!(left_over.is_empty(), "{left_over:?}");
         assert_eq!(placeholders("{count} results").len(), 1);
         assert_eq!(placeholders("{a} and {b}").len(), 2);
+    }
+
+    #[test]
+    fn a_plural_message_keeps_the_names_of_its_forms() {
+        assert_eq!(
+            stretch("one:{count} second left|other:{count} seconds left"),
+            "one:⟦{count} seecoond leeft⟧|other:⟦{count} seecoonds leeft⟧"
+        );
+        // A sentence with a colon of its own is not a plural, and is one run.
+        assert_eq!(stretch("Note: done"), "⟦Nootee: doonee⟧");
     }
 
     #[test]

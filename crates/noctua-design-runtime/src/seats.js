@@ -1,0 +1,232 @@
+// Where a second pointer is, and a second keyboard, written onto the page.
+//
+// A SEAT is one pointer with one keyboard (`NOCTUA.md §12.18`). The engine
+// keeps the state of exactly one — `:hover`, `:focus-visible`, `:active` are
+// the system's own seat and nobody else's — so every other seat's state has to
+// be written down, and this is what writes it:
+//
+//   | attribute             | stands for                       | stamped on              |
+//   |-----------------------|----------------------------------|-------------------------|
+//   | `data-nd-seat-hover`  | `:hover`                         | the element and above   |
+//   | `data-nd-seat-focus`  | `:focus-visible`, and `:focus`   | the element alone       |
+//   | `data-nd-seat-active` | `:active`                        | the element and above   |
+//   | `data-nd-seat-drag`   | what that seat is dragging       | the element alone       |
+//
+// "Above" is every ancestor, and the control of a `<label>` among them.
+//
+// The value is the seats in that state there, as ids separated by spaces and
+// sorted, and an element no seat is on carries no attribute at all. The
+// stylesheet asks only whether the attribute is PRESENT: every component rule
+// on a state pseudo-class is also a rule on its attribute, with the same
+// declarations, and `seat_twin` in `xtask/src/gates.rs` refuses a rule that is
+// not. Which seat it is, a host reads from the value.
+//
+// EACH ATTRIBUTE GOES WHERE THE PSEUDO-CLASS IT STANDS FOR WOULD MATCH, because
+// "styled exactly like it" is a claim about every rule and not only the ones on
+// the element itself. `:hover` and `:active` match an element, every ancestor
+// of it, and the control a `<label>` among them names — `.nd-switch:hover >
+// .nd-switch-track` is a rule on the PARENT of what the pointer is over — so
+// those two are stamped up the whole chain. `:focus-visible` matches one
+// element, and its ancestors are reached by `:focus-within`, which matches the
+// focused element as well as everything above it. So that one's twin asks for
+// the attribute on the element or on anything inside it —
+// `:is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus]))` —
+// and nothing is stamped up the chain: that would draw a focus ring round
+// every box between the control and the document.
+//
+// WHAT IT DOES NOT DO: find the seats. How a system delivers a second pointer
+// is the host's to know (`NOCTUA.md §5.12`); the host calls these with the
+// element under it, as often as it moves. Nor does it move the document's
+// focus, fire a `mouseenter`, or open what a hover opens — a second seat's
+// state is drawn here and acted on by whoever owns that seat.
+//
+// A HOST WITH NO JAVASCRIPT OF ITS OWN SAYS IT WITH AN EVENT. `enhanceSeats`
+// listens for `nd-seat`, dispatched on the element and bubbling:
+//
+//   element.dispatchEvent(new CustomEvent("nd-seat", {
+//     bubbles: true,
+//     detail: { seat: "2", state: "hover" },      // hover | focus | active | drag
+//   }));
+//
+// `on: false` in the detail takes that state off the seat, wherever it was, and
+// `on: false` with no `state` takes every state off it — a seat that left.
+//
+// NOTHING IS REMEMBERED HERE. The previous element is found by asking the
+// document which elements carry the seat's id, so markup a host replaced
+// between two calls leaves nothing behind in this module, and two copies of it
+// on one page agree because the page is the only record.
+
+/** The attribute each state is written as. */
+const ATTRIBUTE = {
+  hover: "data-nd-seat-hover",
+  focus: "data-nd-seat-focus",
+  active: "data-nd-seat-active",
+  drag: "data-nd-seat-drag",
+};
+
+/** The states whose pseudo-class matches every ancestor as well. */
+const CHAINED = new Set(["hover", "active"]);
+
+/**
+ * A seat's id, as it is written into an attribute.
+ *
+ * The value is a list separated by spaces, so an id holding one would be read
+ * back as two seats, and an empty one as none.
+ *
+ * A string or a finite number, and nothing else. `String()` makes a word out
+ * of anything — a detail with no `seat` in it would stamp a seat called
+ * "undefined", and the page would show a pointer nobody has.
+ */
+function seatId(seat) {
+  if (typeof seat !== "string" && !(typeof seat === "number" && Number.isFinite(seat))) {
+    throw new TypeError(`a seat id is a string or a number, and got ${seat === null ? "null" : typeof seat}`);
+  }
+  const id = String(seat);
+  if (!/^\S+$/.test(id)) {
+    throw new TypeError(`a seat id is one word with no space in it, and got "${id}"`);
+  }
+  return id;
+}
+
+/** The seats an element carries for one attribute. */
+function seatsOn(element, attribute) {
+  return (element.getAttribute(attribute) ?? "").split(/\s+/).filter(Boolean);
+}
+
+/**
+ * Writes the list back, sorted, or takes the attribute off when it is empty.
+ *
+ * Sorted by code unit rather than by locale: the value is an identifier list a
+ * host compares, and it must not change with the reader's language.
+ */
+function write(element, attribute, ids) {
+  if (ids.length === 0) {
+    element.removeAttribute(attribute);
+    return;
+  }
+  const value = [...new Set(ids)].sort().join(" ");
+  if (element.getAttribute(attribute) !== value) element.setAttribute(attribute, value);
+}
+
+/**
+ * Every element the native pseudo-class would match for a state on `element`.
+ */
+function reach(state, element) {
+  if (!CHAINED.has(state)) return [element];
+  const chain = [];
+  for (let at = element; at; at = at.parentElement) chain.push(at);
+  // A `<label>` under the pointer puts its control under it too, and only the
+  // control: the boxes around the control are not hovered by it.
+  for (const at of [...chain]) {
+    const control = at.localName === "label" ? at.control : null;
+    if (control && !chain.includes(control)) chain.push(control);
+  }
+  return chain;
+}
+
+/** Puts one state of one seat on an element, or on nothing. */
+function place(state, seat, element) {
+  const id = seatId(seat);
+  const attribute = ATTRIBUTE[state];
+  const next = element ? reach(state, element) : [];
+  const quoted = id.replace(/["\\]/g, "\\$&");
+
+  // The page is asked where the seat was, in the document the new element is
+  // in and in this one, which differ only when a host reaches into a frame.
+  const documents = new Set([element?.ownerDocument ?? document, document]);
+  for (const owner of documents) {
+    for (const previous of owner.querySelectorAll(`[${attribute}~="${quoted}"]`)) {
+      if (next.includes(previous)) continue;
+      write(previous, attribute, seatsOn(previous, attribute).filter((other) => other !== id));
+    }
+  }
+  for (const at of next) write(at, attribute, [...seatsOn(at, attribute), id]);
+}
+
+/**
+ * Says which element a seat's pointer is over, or `null` for none.
+ *
+ * The element and everything above it are marked, as `:hover` matches them.
+ */
+export function seatHover(seat, element) {
+  place("hover", seat, element);
+}
+
+/**
+ * Says which element a seat's keyboard is on, or `null` for none.
+ *
+ * It is the twin of `:focus-visible`: call it where a focus ring belongs, and
+ * not for a control a pointer merely pressed.
+ */
+export function seatFocus(seat, element) {
+  place("focus", seat, element);
+}
+
+/** Says which element a seat is pressing, or `null` once it lets go. */
+export function seatPress(seat, element) {
+  place("active", seat, element);
+}
+
+/** Says which element a seat is dragging, or `null` once it drops it. */
+export function seatDrag(seat, element) {
+  place("drag", seat, element);
+}
+
+/** Takes every state off a seat: the seat left, or its window lost it. */
+export function clearSeat(seat) {
+  for (const state of Object.keys(ATTRIBUTE)) place(state, seat, null);
+}
+
+/** Every root this is installed on, so it is installed once. */
+const installed = new WeakMap();
+
+/**
+ * The events already answered, so a nested root does not answer twice.
+ *
+ * Stamping twice writes nothing the second time, so this shows only where an
+ * event is refused: one bad event is one error reported, not one per root.
+ */
+const answered = new WeakSet();
+
+/**
+ * Listens for `nd-seat`, so a host can say all of the above by dispatching.
+ *
+ * The event's target is the element. `detail.seat` is the id, `detail.state`
+ * one of `hover`, `focus`, `active` and `drag`, and `detail.on === false` takes
+ * the state off instead. A detail that names no seat or an unknown state throws
+ * rather than guessing: a typo there would otherwise draw nothing, silently.
+ * Thrown from a listener, it reaches the host as the window's `error` event and
+ * not as an exception out of `dispatchEvent`.
+ */
+export function enhanceSeats(root = document) {
+  if (installed.has(root)) return;
+  const binding = new AbortController();
+  installed.set(root, binding);
+
+  root.addEventListener(
+    "nd-seat",
+    (event) => {
+      if (answered.has(event)) return;
+      answered.add(event);
+      const { seat, state, on = true } = event.detail ?? {};
+      if (state === undefined && on === false) {
+        clearSeat(seat);
+        return;
+      }
+      if (!Object.hasOwn(ATTRIBUTE, state)) {
+        throw new TypeError(`an nd-seat event names the state "${state}", which is not one`);
+      }
+      // Dispatched on the document itself there is no element to be on, which
+      // is the same as taking the state off.
+      const element = on !== false && event.target?.nodeType === Node.ELEMENT_NODE ? event.target : null;
+      place(state, seat, element);
+    },
+    { signal: binding.signal },
+  );
+}
+
+/** Takes the listener back off. What is already stamped stays the host's. */
+export function releaseSeats(root = document) {
+  installed.get(root)?.abort();
+  installed.delete(root);
+}

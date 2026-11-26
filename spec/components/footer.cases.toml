@@ -1,0 +1,43 @@
+# What a `Footer` has to be, in both languages, in a real browser.
+#
+# It ships no script, so every case here is about markup: the role and the
+# name, and the two attributes the stylesheet folds and opens it by. What a
+# folded footer looks like, and what opens it, is asked in
+# `tests/browser/footer.spec.js`.
+
+[[case]]
+name = "it is a named group"
+note = "A `<footer>` is a landmark only where no section is around it, so the role is written and says the same thing wherever the footer stands."
+props = { label = "Window footer" }
+expect = { attrs = { "role" = "group", "aria-label" = "Window footer", "data-nd-visibility" = "always" }, present = [".nd-footer-line[data-nd-kind=modeline]"] }
+
+[[case.child]]
+component = "FooterLine"
+text = "Registries"
+
+[[case]]
+name = "a folded footer says so, and whether it is open"
+note = "The stylesheet folds on `data-nd-visibility` and opens on `data-nd-shown`, so a prop that did not reach the markup would be a prop that does nothing."
+props = { label = "Window footer", visibility = "auto", shown = true }
+expect = { attrs = { "data-nd-visibility" = "auto", "data-nd-shown" = "true" } }
+
+[[case.child]]
+component = "FooterLine"
+text = "Registries"
+
+[[case]]
+name = "a corner at each end carries its side"
+note = "The footer makes room for a corner by the side it names, so a corner with no side would stand over the lines."
+props = { label = "Window footer" }
+expect = { present = [".nd-footer-corner[data-nd-side=start]", ".nd-footer-corner[data-nd-side=end]"] }
+
+[[case.child]]
+component = "FooterCorner"
+
+[[case.child]]
+component = "FooterLine"
+text = "Registries"
+
+[[case.child]]
+component = "FooterCorner"
+props = { side = "end" }
