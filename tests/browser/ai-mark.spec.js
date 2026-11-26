@@ -35,12 +35,23 @@
 
 import { expect, test } from "@playwright/test";
 
-import { LOCALES, PAGE, url, showParts, walker } from "./pages.js";
+import { LOCALES, PAGE, clockStopper, url, showParts, stopClock, walker } from "./pages.js";
 import { outside } from "./pixels.js";
 
 // Every walk in this file declares its tests through this line, so that a
 // report names this file rather than `pages.js` (`walker` says why).
 const walk = walker((title, fn) => test(title, fn));
+
+// BOTH WALKS LOOK TWICE AND COMPARE, so the page stands still between the two
+// looks. `/message-bar/` counts ten seconds down from its load, and the tick
+// from "10 seconds" to "9 seconds" narrows the count by eight pixels a second
+// after the page loads, which on a loaded machine is when the first walk was
+// measuring: "hiding the mark moved something else" with nothing hidden but
+// the mark. `clockStopper` (`pages.js`) is in place before the page's own
+// scripts, and each walk stops the clock once the page is shown.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(clockStopper);
+});
 
 /** Every box under the main column, as integers, marks excluded. */
 const geometry = () =>
@@ -76,6 +87,7 @@ walk(
     await page.goto(url(path, locale));
     await showParts(page);
     if (!(await page.locator(".nd-ai-label").count())) return 0;
+    await stopClock(page);
 
     const before = await page.evaluate(geometry);
     await page.addStyleTag({ content: ".nd-ai-label { visibility: hidden !important; }" });
@@ -101,6 +113,7 @@ walk(
 
     await page.goto(url(path, locale));
     await showParts(page);
+    await stopClock(page);
     const marks = page.locator(".nd-ai-label");
     const count = await marks.count();
 

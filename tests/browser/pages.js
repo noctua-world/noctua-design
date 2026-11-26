@@ -421,6 +421,77 @@ export async function closeTheme(page) {
   }
 }
 
+// --- A page that stands still -------------------------------------------------
+
+/**
+ * Keeps track of every call a page asks to have made later, so that
+ * `stopClock` can take them back. Given to `page.addInitScript`, so it is in
+ * place before any script of the page's own runs.
+ *
+ * AN EXAMPLE MAY KEEP TIME. The toast on `/toast/` counts its seconds down from
+ * the moment the page loads, and a message on `/message-bar/` counts ten: one
+ * redraw a second, and "Restoring it in 10 seconds" is eight pixels wider than
+ * "9 seconds". A test that measures or photographs a page twice and compares
+ * the two counts a tick that lands between them as a difference, and under a
+ * loaded machine the first tick lands right where a test is measuring.
+ * Reduced motion does not stop a timer, and a list of the pages that have one
+ * would be a list that is a page short the day an example starts to count.
+ *
+ * The three ways a page asks to be called back later are wrapped and kept
+ * until `stop`, which takes back every call still waiting and refuses every
+ * one asked for after it. `real` is the engine's own, for a probe that must
+ * still wait for a frame.
+ */
+export function clockStopper() {
+  const real = {
+    setTimeout: window.setTimeout.bind(window),
+    setInterval: window.setInterval.bind(window),
+    requestAnimationFrame: window.requestAnimationFrame.bind(window),
+  };
+  const waiting = { setTimeout: new Set(), setInterval: new Set(), requestAnimationFrame: new Set() };
+  let stopped = false;
+  for (const name of Object.keys(real)) {
+    window[name] = (...args) => {
+      // Zero is the one id no engine hands out, so clearing it clears nothing.
+      if (stopped) return 0;
+      const id = real[name](...args);
+      waiting[name].add(id);
+      return id;
+    };
+  }
+  window.__pageClock = {
+    real,
+    /** How many calls the page still had waiting when it was stopped. */
+    stop() {
+      stopped = true;
+      let taken = 0;
+      for (const id of waiting.setTimeout) window.clearTimeout(id);
+      for (const id of waiting.setInterval) window.clearInterval(id);
+      for (const id of waiting.requestAnimationFrame) window.cancelAnimationFrame(id);
+      for (const ids of Object.values(waiting)) {
+        taken += ids.size;
+        ids.clear();
+      }
+      return taken;
+    },
+    stopped: () => stopped,
+  };
+}
+
+/**
+ * Stops the clock `clockStopper` keeps, after two frames and a task by the
+ * engine's own, so what the page asked for while it loaded has drawn first.
+ */
+export async function stopClock(page) {
+  return page.evaluate(async () => {
+    const { real } = window.__pageClock;
+    await new Promise((done) => {
+      real.requestAnimationFrame(() => real.requestAnimationFrame(() => real.setTimeout(done)));
+    });
+    return window.__pageClock.stop();
+  });
+}
+
 // --- Whole-site walks ---------------------------------------------------------
 
 /**
