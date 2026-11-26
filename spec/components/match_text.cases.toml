@@ -13,6 +13,12 @@ props = { text = "ButtonGroup", hits = "0-2|6-8" }
 expect = { text = "ButtonGroup", present = ["mark.nd-match[data-nd-word='1']", "mark.nd-match[data-nd-word='2']"], hidden = ["[data-nd-word='3']"] }
 
 [[case]]
+name = "a run is a drawing, not a part of the name"
+note = "A `mark` is a role of its own, and a name in three runs reached a screen reader in six pieces. `role=none` keeps the name one text."
+props = { text = "ButtonGroup", hits = "0-2|6-8" }
+expect = { present = ["mark.nd-match[role=none][data-nd-word='1']", "mark.nd-match[role=none][data-nd-word='2']"], hidden = ["mark:not([role=none])"] }
+
+[[case]]
 name = "the third word and every later one share a tone"
 note = "`NOCTUA.md §12.4` gives the third and later words one colour, so a fourth word must not ask for a tone no rule draws."
 props = { text = "ButtonGroup", hits = "0|1|2|3" }

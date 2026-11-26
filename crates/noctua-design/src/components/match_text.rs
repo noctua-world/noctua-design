@@ -12,7 +12,7 @@ use dioxus::prelude::*;
 ///
 /// # Accessibility
 ///
-/// Each run is a real `<mark>`, and the whole name stays in the accessible tree as one text. The first word is underlined solid, the second dashed and every later word dotted, so the three are told apart without colour, as WCAG 1.4.1 asks.
+/// Each run is a `<mark>` with `role="none"`, so the name is one text in the accessible tree. The first word is underlined solid, the second dashed and every later word dotted, so the three are told apart without colour, as WCAG 1.4.1 asks.
 #[component]
 pub fn MatchText(
     /// The whole name, as the list shows it. **Required**. Text and not children, because every position in `hits` is an index into it.
@@ -70,7 +70,7 @@ pub fn MatchText(
         span { class: "{root}",
             for (tone , run) in runs {
                 if let Some(tone) = tone {
-                    mark { class: "nd-match", "data-nd-word": tone, "{run}" }
+                    mark { class: "nd-match", role: "none", "data-nd-word": tone, "{run}" }
                 } else {
                     "{run}"
                 }

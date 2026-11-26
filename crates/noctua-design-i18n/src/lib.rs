@@ -19570,7 +19570,7 @@ impl Locale {
                     "Use match text for a name in a list filtered by typing, to show which characters each word of the query matched. For a highlighted phrase in prose, use `Mark`."
                 }
                 Key::ComponentMatchTextA11yNotes => {
-                    "Each run is a real `<mark>`, and the whole name stays in the accessible tree as one text. The first word is underlined solid, the second dashed and every later word dotted, so the three are told apart without colour, as WCAG 1.4.1 asks."
+                    "Each run is a `<mark>` with `role=\"none\"`, so the name is one text in the accessible tree. The first word is underlined solid, the second dashed and every later word dotted, so the three are told apart without colour, as WCAG 1.4.1 asks."
                 }
                 Key::ComponentMatchTextPropTextDoc => {
                     "The whole name, as the list shows it. **Required**. Text and not children, because every position in `hits` is an index into it."
@@ -27303,7 +27303,7 @@ impl Locale {
                     "Use o texto com casamentos para um nome numa lista filtrada por digitação, para mostrar quais caracteres cada palavra da consulta casou. Para uma frase realçada em prosa, use `Mark`."
                 }
                 Key::ComponentMatchTextA11yNotes => {
-                    "Cada trecho é um `<mark>` de verdade, e o nome fica na árvore de acessibilidade como um só texto. A primeira palavra tem sublinhado contínuo, a segunda tracejado e as seguintes pontilhado. As três se distinguem sem cor, como pede a WCAG 1.4.1."
+                    "Cada trecho é um `<mark>` com `role=\"none\"`, então o nome é um só texto na árvore de acessibilidade. A primeira palavra tem sublinhado contínuo, a segunda tracejado e as seguintes pontilhado. As três se distinguem sem cor, como pede a WCAG 1.4.1."
                 }
                 Key::ComponentMatchTextPropTextDoc => {
                     "O nome inteiro, como a lista o mostra. **Obrigatório**. Texto e não filhos, porque toda posição em `hits` é um índice nele."
@@ -35198,7 +35198,7 @@ impl Locale {
                     "⟦UUsee maatch teext foor aa naamee iin aa liist fiilteereed by typiing, too shoow whiich chaaraacteers eeaach woord oof thee quueery maatcheed. Foor aa hiighliighteed phraasee iin proosee, uusee `Maark`.⟧"
                 }
                 Key::ComponentMatchTextA11yNotes => {
-                    "⟦EEaach ruun iis aa reeaal `<maark>`, aand thee whoolee naamee staays iin thee aacceessiiblee treeee aas oonee teext. Thee fiirst woord iis uundeerliineed sooliid, thee seecoond daasheed aand eeveery laateer woord dootteed, soo thee threeee aaree toold aapaart wiithoouut cooloouur, aas WCAAG 1.4.1 aasks.⟧"
+                    "⟦EEaach ruun iis aa `<maark>` wiith `roolee=\"noonee\"`, soo thee naamee iis oonee teext iin thee aacceessiiblee treeee. Thee fiirst woord iis uundeerliineed sooliid, thee seecoond daasheed aand eeveery laateer woord dootteed, soo thee threeee aaree toold aapaart wiithoouut cooloouur, aas WCAAG 1.4.1 aasks.⟧"
                 }
                 Key::ComponentMatchTextPropTextDoc => {
                     "⟦Thee whoolee naamee, aas thee liist shoows iit. **Reequuiireed**. Teext aand noot chiildreen, beecaauusee eeveery poosiitiioon iin `hiits` iis aan iindeex iintoo iit.⟧"

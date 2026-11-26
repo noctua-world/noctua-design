@@ -1494,7 +1494,7 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         &[Node::Component {
             name: "MatchText",
             props: &[
-                ("hits", Value::Data("0|1|2|3")),
+                ("hits", Value::Data("0-2|6-8")),
                 ("text", Value::Data("ButtonGroup")),
             ],
             children: &[],
@@ -1506,7 +1506,7 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         &[Node::Component {
             name: "MatchText",
             props: &[
-                ("hits", Value::Data("0-10|0-10")),
+                ("hits", Value::Data("0|1|2|3")),
                 ("text", Value::Data("ButtonGroup")),
             ],
             children: &[],
@@ -1518,7 +1518,7 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         &[Node::Component {
             name: "MatchText",
             props: &[
-                ("hits", Value::Data("|6-10")),
+                ("hits", Value::Data("0-10|0-10")),
                 ("text", Value::Data("ButtonGroup")),
             ],
             children: &[],
@@ -1530,7 +1530,7 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         &[Node::Component {
             name: "MatchText",
             props: &[
-                ("hits", Value::Data("+1,1e1, 2,3-,-4,5-6-7,99,0x1")),
+                ("hits", Value::Data("|6-10")),
                 ("text", Value::Data("ButtonGroup")),
             ],
             children: &[],
@@ -1541,7 +1541,10 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         "case-match-text-5",
         &[Node::Component {
             name: "MatchText",
-            props: &[("hits", Value::Data("1-99")), ("text", Value::Data("Tag"))],
+            props: &[
+                ("hits", Value::Data("+1,1e1, 2,3-,-4,5-6-7,99,0x1")),
+                ("text", Value::Data("ButtonGroup")),
+            ],
             children: &[],
         }],
     ),
@@ -1550,13 +1553,22 @@ pub(crate) const CASES: &[(&str, &str, &[Node])] = &[
         "case-match-text-6",
         &[Node::Component {
             name: "MatchText",
-            props: &[("hits", Value::Data("1")), ("text", Value::Data("𐐀b"))],
+            props: &[("hits", Value::Data("1-99")), ("text", Value::Data("Tag"))],
             children: &[],
         }],
     ),
     (
         "MatchText",
         "case-match-text-7",
+        &[Node::Component {
+            name: "MatchText",
+            props: &[("hits", Value::Data("1")), ("text", Value::Data("𐐀b"))],
+            children: &[],
+        }],
+    ),
+    (
+        "MatchText",
+        "case-match-text-8",
         &[Node::Component {
             name: "MatchText",
             props: &[("text", Value::Data("ButtonGroup"))],

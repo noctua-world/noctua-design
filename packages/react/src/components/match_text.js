@@ -46,7 +46,7 @@ export function MatchText({ text, hits, className, ...rest }) {
     { className: root, ...rest },
     runs.map((run, at) =>
       run.tone
-        ? h("mark", { key: at, className: "nd-match", "data-nd-word": run.tone }, run.text)
+        ? h("mark", { key: at, className: "nd-match", role: "none", "data-nd-word": run.tone }, run.text)
         : run.text,
     ),
   );

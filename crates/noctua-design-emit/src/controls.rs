@@ -3689,6 +3689,13 @@ const TRUNCATE_REACT: &str = r#"  const lines_ = lines ?? "1";
 /// `data-nd-word` is `1`, `2` or `3`, and `3` is the third word and every later
 /// one. Neighbouring characters of one tone are one `<mark>`, so the fourth
 /// word's run beside the third's is one element.
+///
+/// # A drawing, and not a part of the name
+///
+/// Each run is `role="none"`. A `<mark>` is a `mark` to assistive technology,
+/// so a name with three runs reached a screen reader as six pieces, three of
+/// them announced as highlights, and the matched letters are what the line
+/// under them shows a sighted reader, not words of their own.
 const MATCH_TEXT_DIOXUS: &str = r#"    let root = format!("nd-match-text {class}");
     let root = root.trim().to_owned();
 
@@ -3736,7 +3743,7 @@ const MATCH_TEXT_DIOXUS: &str = r#"    let root = format!("nd-match-text {class}
         span { class: "{root}",
             for (tone , run) in runs {
                 if let Some(tone) = tone {
-                    mark { class: "nd-match", "data-nd-word": tone, "{run}" }
+                    mark { class: "nd-match", role: "none", "data-nd-word": tone, "{run}" }
                 } else {
                     "{run}"
                 }
@@ -3780,7 +3787,7 @@ const MATCH_TEXT_REACT: &str = r#"  const root = ["nd-match-text", className].fi
     { className: root, ...rest },
     runs.map((run, at) =>
       run.tone
-        ? h("mark", { key: at, className: "nd-match", "data-nd-word": run.tone }, run.text)
+        ? h("mark", { key: at, className: "nd-match", role: "none", "data-nd-word": run.tone }, run.text)
         : run.text,
     ),
   );

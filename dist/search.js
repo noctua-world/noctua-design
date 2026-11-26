@@ -601,11 +601,15 @@ function filterAround(state, query) {
 // `data-nd-hit` STAYS, and it is this file's own: it says *the script put this
 // here*, which is how `clearMarks` takes its marks back out and leaves a
 // caller's own `Mark` or `MatchText` in a label alone.
+//
+// `role="none"`, as `MatchText` writes it: the runs are a drawing over the
+// label, and a `mark` each would read the label out in pieces.
 
 /** One matched run, as the element every list draws it with. */
 function matchMark(tone) {
   const mark = document.createElement("mark");
   mark.className = "nd-match";
+  mark.setAttribute("role", "none");
   mark.dataset.ndHit = "";
   mark.dataset.ndWord = tone;
   return mark;

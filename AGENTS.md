@@ -479,15 +479,17 @@ query word's field, `positions` and `ranges()`; `Match.claims(field)` is that fi
 characters as runs that do not overlap, each naming the first word that claimed it, which is what
 a list reads to tone the first word, the second and every later one differently.
 
-**One element draws a match, and three places write it.** `<mark class="nd-match" data-nd-word>`,
-with `1` for the first word of the query, `2` for the second and `3` for the third and every later
-one, is styled once, in `crates/noctua-design-styles/src/match-text.css`: a tint and a solid line,
+**One element draws a match, and three places write it.** `<mark class="nd-match" role="none"
+data-nd-word>`, with `1` for the first word of the query, `2` for the second and `3` for the third
+and every later one, is styled once, in `crates/noctua-design-styles/src/match-text.css`: a tint and a solid line,
 a dashed line, a dotted line, always in the page's own ink. The line's style is the signal, because
 the palette cannot keep two colours apart for every reader (`NOCTUA.md §8.8.6`), and the ink is the
 page's because the match colour on its own tint is not readable text. `MatchText` writes the
 element from its `hits` prop, in both packages, `OptionItem` renders a `MatchText` for its name and
 for its second line, and `dist/search.js` writes it over a result's label from `Match.claims`. A
-list that marks a match any other way is a second drawing of one thing.
+list that marks a match any other way is a second drawing of one thing. **The runs are a drawing
+and not a part of the name**: `role="none"` keeps a `<mark>` from being a `mark` to assistive
+technology, so the name is one text there, and `Mark` is for a phrase in prose.
 
 **`hits` is the corpus's grammar for one field**: a slot for each word of the query, joined by `|`,
 each holding indices and inclusive ranges joined by commas, and an empty slot for a word that

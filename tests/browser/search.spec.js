@@ -263,6 +263,9 @@ test("each word of the query marks its own letters, in its own tone", async ({ p
   // letters are in the name, so the order is the query's and not the label's.
   await expect(row.locator('mark.nd-match[data-nd-word="1"]')).toHaveText("Gro");
   await expect(row.locator('mark.nd-match[data-nd-word="2"]')).toHaveText("But");
+  // THE RUNS ARE A DRAWING, as `MatchText` draws them: the label is one text
+  // to a screen reader, and no run is announced as a highlight.
+  expect((await row.locator(".nd-search-result-label").ariaSnapshot()).trim()).toBe("- text: ButtonGroup");
 
   await page.goto(url(PAGE.search));
   await showParts(page);

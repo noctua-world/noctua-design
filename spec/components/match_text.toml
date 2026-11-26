@@ -40,5 +40,5 @@ doc = "The matched characters, one slot for each word of the query, joined by `|
 
 [a11y]
 notes = """
-Each run is a real `<mark>`, and the whole name stays in the accessible tree as one text. The first word is underlined solid, the second dashed and every later word dotted, so the three are told apart without colour, as WCAG 1.4.1 asks.
+Each run is a `<mark>` with `role="none"`, so the name is one text in the accessible tree. The first word is underlined solid, the second dashed and every later word dotted, so the three are told apart without colour, as WCAG 1.4.1 asks.
 """

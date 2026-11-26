@@ -126,10 +126,13 @@ test("the whole name is one text to a screen reader", async ({ page }) => {
   await open(page);
   const marked = example(page, 'mark[data-nd-word="3"]').first();
   await expect(marked).toBeVisible();
-  // No element inside it is hidden, labelled or given a role, so what is read
-  // is the name: the runs are a drawing over it.
+  // ASKED OF THE ACCESSIBILITY TREE, which is what a screen reader reads. A
+  // `<mark>` is a `mark` there, so a name drawn in three runs was six pieces,
+  // three of them announced as highlights. The runs are a drawing over the
+  // name, and the name is one text.
   expect(await marked.evaluate((el) => el.textContent)).toBe("ButtonGroup");
-  expect(
-    await marked.evaluate((el) => el.querySelectorAll("[aria-hidden], [aria-label], [role]").length),
-  ).toBe(0);
+  expect((await marked.ariaSnapshot()).trim()).toBe("- text: ButtonGroup");
+  // And no run of any example on the page is a highlight to it.
+  const tree = await page.locator(".nd-example-stage").first().ariaSnapshot();
+  expect(tree, "a matched run reaches the accessibility tree as a mark").not.toMatch(/^\s*- mark/m);
 });
