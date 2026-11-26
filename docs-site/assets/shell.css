@@ -110,6 +110,13 @@
      which is exactly how the settings gear ended up half the size of the
      link beside it. */
   --nd-control-h: var(--noctua-space-12);
+  /* THE HEADER STICKS TO THE TOP OF THE WINDOW, AND THE WINDOW IS TOLD SO.
+     Whatever the engine brings into view (a fragment's target, a control the
+     focus moves to, the option a list's keyboard walked to) stops below the
+     header and not under it. Without it a walk up a list scrolled each option
+     exactly to the top of the window, where the header covered the one sign
+     of where the keyboard was. */
+  scroll-padding-block-start: var(--nd-header-h);
 
 }
 
@@ -1802,7 +1809,9 @@ a {
  * global `margin: 0` reset, and a heading sat against its own paragraph with
  * no seam. */
 .nd-doc-section {
-  scroll-margin-block-start: calc(var(--nd-header-h) + var(--noctua-space-4));
+  /* The header is the window's own scroll padding (`:root`), so a jump to a
+     section adds only the breath above its heading. */
+  scroll-margin-block-start: var(--noctua-space-4);
   display: flex;
   flex-direction: column;
   gap: var(--noctua-space-paragraph);

@@ -1389,7 +1389,10 @@ component on this site is the page.
 the repository, the language, the implementation switch — and the one theme menu behind a palette
 icon, which holds at least the mode (light, dark or system), the accent, the saturation and the
 interface-font toggle (`NOCTUA.md §7.7`). They are icons rather than words, and every one has an
-accessible name.
+accessible name. **It sticks to the top of the window, and the window is told so**: the root's
+`scroll-padding-block-start` is the header's height, so a fragment's target, a control the focus
+moves to and an option a list's keyboard walked to all stop below it, and a section's own scroll
+margin is only the breath above its heading.
 
 **Every page is also audited in a 320 by 240 window**, the desktop interface's smallest
 (`NOCTUA.md §12.19`). There the interface's own components, and the window stand-ins their
