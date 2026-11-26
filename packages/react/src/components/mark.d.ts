@@ -12,5 +12,5 @@ export interface MarkProps {
   children?: ReactNode;
 }
 
-/** Highlight text for what the reader is doing now, such as a search hit. */
+/** Highlight a phrase in running text that matters to what the reader is doing now. */
 export declare function Mark(props: MarkProps): JSX.Element;

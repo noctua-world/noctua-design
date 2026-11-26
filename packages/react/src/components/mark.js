@@ -4,7 +4,7 @@
 //
 // Edits to this file will be overwritten. Change the spec instead.
 
-// Highlight text for what the reader is doing now, such as a search hit.
+// Highlight a phrase in running text that matters to what the reader is doing now.
 //
 // Generated from the same spec as the Dioxus component, so the two
 // cannot declare different props.

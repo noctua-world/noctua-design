@@ -5072,6 +5072,8 @@ pub enum Key {
     ComponentLogLinePropSourceDoc,
     /// `component.log-line.prop.children.doc`
     ComponentLogLinePropChildrenDoc,
+    /// `component.mark.guidance`
+    ComponentMarkGuidance,
     /// `component.mark.a11y-notes`
     ComponentMarkA11yNotes,
     /// `component.mark.prop.children.doc`
@@ -6920,7 +6922,7 @@ pub enum Key {
 
 impl Key {
     /// Every key, in the order the source locale declares them.
-    pub const ALL: [Self; 3398] = [
+    pub const ALL: [Self; 3399] = [
         Self::AppName,
         Self::AppSkip,
         Self::AppRepository,
@@ -9397,6 +9399,7 @@ impl Key {
         Self::ComponentLogLinePropTimeDoc,
         Self::ComponentLogLinePropSourceDoc,
         Self::ComponentLogLinePropChildrenDoc,
+        Self::ComponentMarkGuidance,
         Self::ComponentMarkA11yNotes,
         Self::ComponentMarkPropChildrenDoc,
         Self::ComponentMatchTextGuidance,
@@ -13129,6 +13132,7 @@ impl Key {
             Self::ComponentLogLinePropTimeDoc => "component.log-line.prop.time.doc",
             Self::ComponentLogLinePropSourceDoc => "component.log-line.prop.source.doc",
             Self::ComponentLogLinePropChildrenDoc => "component.log-line.prop.children.doc",
+            Self::ComponentMarkGuidance => "component.mark.guidance",
             Self::ComponentMarkA11yNotes => "component.mark.a11y-notes",
             Self::ComponentMarkPropChildrenDoc => "component.mark.prop.children.doc",
             Self::ComponentMatchTextGuidance => "component.match-text.guidance",
@@ -14796,7 +14800,7 @@ impl Locale {
                     "Show one item of a list, or one term and its description."
                 }
                 Key::ComponentMarkSummary => {
-                    "Highlight text for what the reader is doing now, such as a search hit."
+                    "Highlight a phrase in running text that matters to what the reader is doing now."
                 }
                 Key::ComponentMatchTextSummary => {
                     "Show a name with the characters a query matched marked, one style for each word of the query."
@@ -19555,6 +19559,9 @@ impl Locale {
                 Key::ComponentLogLinePropChildrenDoc => {
                     "The message. Plain text, or a `MatchText` where a filter matched it."
                 }
+                Key::ComponentMarkGuidance => {
+                    "Use a mark for a phrase in prose, such as the words a quoted passage was chosen for. For the characters a query matched in a filtered list, use `MatchText`."
+                }
                 Key::ComponentMarkA11yNotes => {
                     "A highlight that carries meaning needs more than a background colour. Colour alone is invisible to a reader who cannot distinguish it, so this also changes the text weight."
                 }
@@ -22490,7 +22497,7 @@ impl Locale {
                     "Mostre um item de uma lista, ou um termo e a descrição dele."
                 }
                 Key::ComponentMarkSummary => {
-                    "Realce um texto para o que a pessoa está fazendo agora, como um resultado de busca."
+                    "Realce um trecho de um texto corrido que importa para o que a pessoa está fazendo agora."
                 }
                 Key::ComponentMatchTextSummary => {
                     "Mostre um nome com os caracteres casados por uma consulta marcados, um estilo por palavra."
@@ -27285,6 +27292,9 @@ impl Locale {
                 Key::ComponentLogLinePropChildrenDoc => {
                     "A mensagem. Texto simples, ou um `MatchText` onde um filtro a encontrou."
                 }
+                Key::ComponentMarkGuidance => {
+                    "Use uma marca para um trecho de prosa, como as palavras pelas quais uma citação foi escolhida. Para os caracteres que uma busca casou numa lista filtrada, use `MatchText`."
+                }
                 Key::ComponentMarkA11yNotes => {
                     "Um realce que carrega sentido precisa de mais do que uma cor de fundo. A cor sozinha é invisível para quem não a distingue, então isto também muda o peso do texto."
                 }
@@ -30254,7 +30264,7 @@ impl Locale {
                     "⟦Shoow oonee iiteem oof aa liist, oor oonee teerm aand iits deescriiptiioon.⟧"
                 }
                 Key::ComponentMarkSummary => {
-                    "⟦Hiighliight teext foor whaat thee reeaadeer iis dooiing noow, suuch aas aa seeaarch hiit.⟧"
+                    "⟦Hiighliight aa phraasee iin ruunniing teext thaat maatteers too whaat thee reeaadeer iis dooiing noow.⟧"
                 }
                 Key::ComponentMatchTextSummary => {
                     "⟦Shoow aa naamee wiith thee chaaraacteers aa quueery maatcheed maarkeed, oonee stylee foor eeaach woord oof thee quueery.⟧"
@@ -35176,6 +35186,9 @@ impl Locale {
                 }
                 Key::ComponentLogLinePropChildrenDoc => {
                     "⟦Thee meessaagee. Plaaiin teext, oor aa `MaatchTeext` wheeree aa fiilteer maatcheed iit.⟧"
+                }
+                Key::ComponentMarkGuidance => {
+                    "⟦UUsee aa maark foor aa phraasee iin proosee, suuch aas thee woords aa quuooteed paassaagee waas chooseen foor. Foor thee chaaraacteers aa quueery maatcheed iin aa fiilteereed liist, uusee `MaatchTeext`.⟧"
                 }
                 Key::ComponentMarkA11yNotes => {
                     "⟦AA hiighliight thaat caarriiees meeaaniing neeeeds mooree thaan aa baackgroouund cooloouur. Cooloouur aaloonee iis iinviisiiblee too aa reeaadeer whoo caannoot diistiinguuiish iit, soo thiis aalsoo chaangees thee teext weeiight.⟧"

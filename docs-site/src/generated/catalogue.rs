@@ -7992,7 +7992,7 @@ pub(crate) static COMPONENTS: [DocComponent; 105] = [
         summary: Key::ComponentMarkSummary,
         element: "mark",
         class: Some("nd-mark"),
-        guidance: None,
+        guidance: Some(Key::ComponentMarkGuidance),
         specimen: None,
         props: &[DocProp {
             name: "children",

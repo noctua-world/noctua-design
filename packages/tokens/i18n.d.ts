@@ -2484,6 +2484,7 @@ export type MessageKey =
   | "component.log-line.prop.time.doc"
   | "component.log-line.prop.source.doc"
   | "component.log-line.prop.children.doc"
+  | "component.mark.guidance"
   | "component.mark.a11y-notes"
   | "component.mark.prop.children.doc"
   | "component.match-text.guidance"

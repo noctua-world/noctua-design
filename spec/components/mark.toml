@@ -1,10 +1,15 @@
+guidance = """
+Use a mark for a phrase in prose, such as the words a quoted passage was chosen
+for. For the characters a query matched in a filtered list, use `MatchText`.
+"""
+
 [meta]
 name = "Mark"
 element = "mark"
 class = "nd-mark"
 # One of the marks that go inside a sentence, documented with the others.
 page = "inline-text"
-summary = "Highlight text for what the reader is doing now, such as a search hit."
+summary = "Highlight a phrase in running text that matters to what the reader is doing now."
 
 [prop.children]
 type = "children"
