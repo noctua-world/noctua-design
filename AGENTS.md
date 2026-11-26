@@ -941,8 +941,11 @@ it.
 break in it, the end of the upper line and the start of the lower are one offset, and the engine
 draws its caret at the end only when End, a vertical arrow or a press put it there. The script
 keeps what moved the caret last and asks the mirror whether the characters on either side are on
-two lines, and spaces that hang past the edge hold the block at the edge, where the engine keeps
-its caret. Those two are all it measures. **What the block does not follow** is the caret at the
+two lines. A press is read by the draw that sees the caret land, never earlier: the engine moves
+the caret after the focus a press brings, and on a touch screen after the finger lifts, so a press
+into a prompt without the focus is drawn where it landed and not where the caret was. Spaces that
+hang past the edge hold the block at the edge, where the engine keeps its caret. The turn and the
+edge are all it measures. **What the block does not follow** is the caret at the
 boundary of two runs written in opposite directions inside one line: it covers the next character
 in the text, which the engine draws at the far end of the other run. `dist/prompt.js` has the
 detail.

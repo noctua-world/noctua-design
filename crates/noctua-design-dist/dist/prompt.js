@@ -50,6 +50,11 @@
 // takes no room and offers the line nowhere new to turn.
 //
 //   * A press is at the end of the upper line when it was nearer that line.
+//     It is read by the draw that sees the caret land, and not before: the
+//     engine moves the caret after the focus a press brings, and on a touch
+//     screen after the finger has lifted, so a draw before then is of the
+//     offset the caret had. A press that lands where the caret already was is
+//     read by the click that ends it.
 //   * An arrow goes one line up or down from where the block was, so of the
 //     two lines the offset could be on, it is the one next to the old line.
 //   * A key this file does not name, a value written from outside and every
@@ -173,8 +178,8 @@ function buildPrompt(root_) {
     // the top of the line it was drawn on, from the top of the text.
     after: false,
     line: null,
-    // What moved the caret last, as `turned` reads it, and where a press
-    // landed while it has not been drawn yet.
+    // What moved the caret last, as `turned` reads it, and the height of a
+    // press whose caret has not been drawn yet.
     cause: null,
     press: null,
     composing: false,
@@ -197,6 +202,16 @@ function buildPrompt(root_) {
   input.addEventListener("pointerdown", (event) => {
     state.cause = "press";
     state.press = event.clientY;
+  }, { signal });
+  // THE CLICK ENDS A PRESS, wherever the button came up, and by then the
+  // engine has put the caret where the press landed. A press the draws before
+  // it did not see land is read here, and spent. One cancelled, as a touch
+  // that became a scroll is, put the caret nowhere.
+  window.addEventListener("click", () => {
+    if (state.press !== null) draw(state, true);
+  }, { signal, capture: true });
+  input.addEventListener("pointercancel", () => {
+    state.press = null;
   }, { signal });
   input.addEventListener("scroll", () => follow(state), { signal, passive: true });
 
@@ -309,8 +324,11 @@ function follow(state) {
  * and a new span restarts the blink: rebuilt on each of them, the block would
  * never be seen to blink while a reader typed, and rebuilt on none, it would
  * blink out in the middle of a word.
+ *
+ * `ended` is the click that ends a press, which spends the press even where
+ * the offset did not move.
  */
-function draw(state) {
+function draw(state, ended = false) {
   const { input, root } = state;
   const value = input.value;
   const start = input.selectionStart ?? value.length;
@@ -319,7 +337,9 @@ function draw(state) {
   else root.dataset.ndSelecting = "";
 
   // A press can put the caret at the other end of the offset it was at, so a
-  // press is drawn again where the offset did not move.
+  // press is drawn again where the offset did not move. It is spent only by a
+  // draw that sees the caret land: the focus a press brings is heard before
+  // the engine moves the caret, and a draw then is of where it was.
   const moved = value !== state.value || start !== state.start;
   if (moved || state.press !== null) {
     const was = state.line;
@@ -329,7 +349,7 @@ function draw(state) {
     const after = start === end && turned(state, value, start, moved, was);
     if (after) place(state, value, start, true);
     state.after = after;
-    state.press = null;
+    if (moved || ended) state.press = null;
     follow(state);
     state.line = lineOf(state);
     hold(state);

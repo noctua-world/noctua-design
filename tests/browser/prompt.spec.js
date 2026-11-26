@@ -417,11 +417,68 @@ test("where a line turns, the block is at whichever end of it the engine put the
   expect(await offset()).toBe(first);
   await agree(page, "a press at the start of the next line");
 
+  // AND A PRESS THAT BRINGS THE FOCUS, which is how a reader clicks into a
+  // prompt. The engine focuses the textarea as the button goes down and only
+  // then moves the caret, so the focus arrives while the press is still on
+  // its way: drawn then, at the offset the caret had, the press was spent
+  // before it landed. Pressed and let go at once, and held.
+  for (const [where, x, y] of [
+    ["past the end of a line", area.x + area.width - 12, end.caret.top + 4],
+    ["at the start of the next line", area.x + 1, below.caret.top + 4],
+  ]) {
+    for (const held of [0, 150]) {
+      await put(page, text, 0);
+      await input(page).evaluate((el) => el.blur());
+      await settle(page);
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+      if (held > 0) await page.waitForTimeout(held);
+      await page.mouse.up();
+      await settle(page);
+      await expect(input(page)).toBeFocused();
+      expect(await offset()).toBe(first);
+      await agree(page, `a press ${where}, held ${held} ms, into a prompt without the focus`);
+    }
+  }
+
   // A WORD LONGER THAN THE LINE turns between two of its letters.
   await put(page, "x".repeat(80), 0);
   await page.keyboard.press("End");
   await settle(page);
   await agree(page, "End on a word cut by the line");
+});
+
+test.describe("on a touch screen", () => {
+  test.use({ hasTouch: true });
+
+  test("a tap past the end of a line puts the block where the caret landed, after the finger lifted", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
+    await open(page);
+    const text = "the quick brown fox jumps over the lazy dog and keeps going until the line has turned twice";
+    const offset = () => input(page).evaluate((el) => el.selectionStart);
+    await put(page, text, 0);
+    await page.keyboard.press("End");
+    await settle(page);
+    const first = await offset();
+    const end = await agree(page, "End on a line that turned");
+    const area = await input(page).boundingBox();
+    // A TAP MOVES THE CARET AFTER THE FINGER IS UP, so a press read when it
+    // came up, as one from a mouse could be, is read before it has landed.
+    for (const focused of [true, false]) {
+      await put(page, text, 0);
+      if (!focused) await input(page).evaluate((el) => el.blur());
+      // Two taps on one place in quick succession are a double tap, which
+      // selects a word: the second waits that out.
+      await page.waitForTimeout(600);
+      await page.touchscreen.tap(area.x + area.width - 12, end.caret.top + 4);
+      await settle(page);
+      await expect(input(page)).toBeFocused();
+      expect(await input(page).evaluate((el) => [el.selectionStart, el.selectionEnd])).toEqual([first, first]);
+      await agree(page, `a tap past the end of a line, ${focused ? "with" : "without"} the focus`);
+    }
+  });
 });
 
 test("spaces that hang past the edge hold the block at the edge, where the engine's caret is", async ({
