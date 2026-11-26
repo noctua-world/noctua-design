@@ -56,7 +56,7 @@ import { fileURLToPath } from "node:url";
 
 import { expect, test } from "@playwright/test";
 
-import { PAGE, showParts, url, walker } from "./pages.js";
+import { PAGE, clockStopper, showParts, url, walker } from "./pages.js";
 import { differing } from "./pixels.js";
 
 // Every walk in this file declares its tests through this line, so that a
@@ -89,52 +89,13 @@ test.use({
 // seat that drew something else — measured on `/toast/` under a loaded machine,
 // "6 seconds left" in one picture and "5 seconds left" in the other, 61 pixels,
 // on a button whose hover was the same in both — and two screenshots agreeing
-// in a row cannot see a change that comes once a second. Reduced motion does
-// not stop a timer, and a list of the pages that have one would be a list that
-// is a page short the day an example starts to count.
+// in a row cannot see a change that comes once a second.
 //
-// So every page this file opens is given this before any script of its own
-// runs: the three ways a page asks to be called back later, kept track of
-// until `stop`, which takes back every call still waiting and refuses every
-// one asked for after it. The page runs as it likes until `prepare` has what
-// it needs and stands still from then on. `real` is the engine's own, for the
-// probe: waiting for a frame is how it knows that what it opened has arrived.
+// So every page this file opens is given `clockStopper` (`pages.js`) before
+// any script of its own runs. The page runs as it likes until `prepare` has
+// what it needs, and stands still from then on.
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    const real = {
-      setTimeout: window.setTimeout.bind(window),
-      setInterval: window.setInterval.bind(window),
-      requestAnimationFrame: window.requestAnimationFrame.bind(window),
-    };
-    const waiting = { setTimeout: new Set(), setInterval: new Set(), requestAnimationFrame: new Set() };
-    let stopped = false;
-    for (const name of Object.keys(real)) {
-      window[name] = (...args) => {
-        // Zero is the one id no engine hands out, so clearing it clears nothing.
-        if (stopped) return 0;
-        const id = real[name](...args);
-        waiting[name].add(id);
-        return id;
-      };
-    }
-    window.__seatClock = {
-      real,
-      /** How many calls the page still had waiting when it was stopped. */
-      stop() {
-        stopped = true;
-        let taken = 0;
-        for (const id of waiting.setTimeout) window.clearTimeout(id);
-        for (const id of waiting.setInterval) window.clearInterval(id);
-        for (const id of waiting.requestAnimationFrame) window.cancelAnimationFrame(id);
-        for (const ids of Object.values(waiting)) {
-          taken += ids.size;
-          ids.clear();
-        }
-        return taken;
-      },
-      stopped: () => stopped,
-    };
-  });
+  await page.addInitScript(clockStopper);
 });
 
 /**
@@ -461,7 +422,7 @@ async function prepare(page) {
     const chosen = [];
     // The rules `mute` has taken a selector out of, each with its whole list.
     const muted = [];
-    const { real } = window.__seatClock;
+    const { real } = window.__pageClock;
     /** Two frames and a task, by the engine's own clock: the page's is stopped. */
     const frames = () =>
       new Promise((done) => {
@@ -615,11 +576,11 @@ async function prepare(page) {
       rendered,
     };
 
-    // AND FROM HERE THE PAGE STANDS STILL (see `__seatClock`, at the top of
-    // this file). Whatever the page asked for while it loaded is given two
+    // AND FROM HERE THE PAGE STANDS STILL (see `clockStopper`, in
+    // `pages.js`). Whatever the page asked for while it loaded is given two
     // frames to finish first: what is stopped is a page that has drawn itself.
     await frames();
-    window.__seatClock.stop();
+    window.__pageClock.stop();
   });
 }
 
@@ -1138,11 +1099,11 @@ test("a page that keeps time stands still once it is prepared", async ({ page })
       setInterval(() => calls.push("interval")),
       requestAnimationFrame(() => calls.push("frame")),
     ];
-    const { real } = window.__seatClock;
+    const { real } = window.__pageClock;
     await new Promise((done) => {
       real.requestAnimationFrame(() => real.requestAnimationFrame(() => real.setTimeout(done, 50)));
     });
-    return { calls, ids, stopped: window.__seatClock.stopped() };
+    return { calls, ids, stopped: window.__pageClock.stopped() };
   });
   expect(called).toEqual({ calls: [], ids: [0, 0, 0], stopped: true });
 });

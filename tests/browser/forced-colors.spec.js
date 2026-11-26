@@ -12,9 +12,11 @@
 
 import { expect, test } from "@playwright/test";
 
-import { PAGE, showParts, url } from "./pages.js";
+import { PAGE, forceColours, showParts, url } from "./pages.js";
 import { contrast, differing, extremes } from "./pixels.js";
 
+// Asked for before the page loads, as a reader's system would, and again once
+// it is there: the emulation can miss a new document (`forceColours`).
 test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active" });
 });
@@ -30,6 +32,7 @@ test("the active option of a list is told from its neighbour, where the keyboard
   page,
 }) => {
   await page.goto(url(PAGE.optionList));
+  await forceColours(page);
   await showParts(page);
   const root = page.locator('[data-nd-option-list="walk"][data-nd-enhanced]');
   await root.locator(".nd-option-list-items").focus();
@@ -52,6 +55,7 @@ test("the active option of a list is told from its neighbour, where the keyboard
 
 test("the line between two panes is still drawn", async ({ page }) => {
   await page.goto(url(PAGE.split));
+  await forceColours(page);
   await showParts(page);
   const handle = page.locator('[data-nd-split="split-basic"] > .nd-split-track > .nd-split-handle').first();
   await expect(handle).toBeVisible();
@@ -65,6 +69,7 @@ test("the line between two panes is still drawn", async ({ page }) => {
 
 test("the chosen tab of a rail is told from the others", async ({ page }) => {
   await page.goto(url(PAGE.drawer));
+  await forceColours(page);
   await showParts(page);
   const rail = page.locator('.nd-tabs[data-nd-appearance="rail"]').first();
   await expect(rail).toBeVisible();

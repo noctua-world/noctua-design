@@ -9,7 +9,7 @@ format.
 |---|---|
 | Project | `noctua-central`, the `nc-fuzzy` crate |
 | File there | `fuzzy-corpus.tsv`, in the crate's test directory |
-| Taken from | branch `dev`, commit `6d0a8056e09f8333f30683b03f98e141e4b1d76c` |
+| Taken from | branch `dev`, commit `3c0e749fb08400025ebf94b96c12a90d2fc98155` |
 | Checksum | `SHA256SUMS` beside this file, as `sha256sum` writes it |
 | Licence | this repository's own, MIT or Apache-2.0: the file is the same project's, copied here by its author |
 

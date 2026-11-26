@@ -97,23 +97,40 @@ const inner = (locator) =>
   });
 
 /**
- * Stops a drawer partway through whatever it is doing, and says where its box
- * is there.
+ * Turns a drawer and stops it partway, in one task, and says how many
+ * transitions it started and where its box is there.
  *
  * A box read off a clock is a different box on a loaded machine, and one read
  * at a named point of a stopped transition is not. The point is a tenth of the
  * way in time: the drawer's easing covers most of its distance early, so by
  * the middle of its time a drawer is all but where it is going.
+ *
+ * AND IN ONE TASK, because a transition that has finished has nothing left to
+ * stop. Turned in one call and stopped in the next, a drawer on a loaded
+ * machine had slid all the way shut in between, `getAnimations` was empty, and
+ * "partway" read a box of nothing: "the drawer is not partway shut", 0. Asking
+ * for the animations right after the write is what starts them, at their
+ * first instant.
  */
-const partway = (locator) =>
-  locator.evaluate((one) => {
-    for (const each of one.getAnimations()) {
+const turnPartway = (locator, value) =>
+  locator.evaluate((one, next) => {
+    one.setAttribute("data-nd-collapsed", next);
+    const running = one.getAnimations();
+    for (const each of running) {
       each.pause();
       each.currentTime = (Number(each.effect.getComputedTiming().duration) || 0) / 10;
     }
     const at = one.getBoundingClientRect();
-    return { left: at.left, right: at.right, top: at.top, bottom: at.bottom, width: at.width, height: at.height };
-  });
+    return {
+      moving: running.length,
+      left: at.left,
+      right: at.right,
+      top: at.top,
+      bottom: at.bottom,
+      width: at.width,
+      height: at.height,
+    };
+  }, value);
 
 /** Waits until nothing in the drawer is still moving. */
 const settled = (locator) =>
@@ -422,15 +439,14 @@ test("it slides shut and open, and under reduced motion it does neither", async 
   const turn = (value) => whole.evaluate((one, next) => one.setAttribute("data-nd-collapsed", next), value);
   /** How many transitions are running on the drawer. */
   const moving = () => whole.evaluate((one) => one.getAnimations().length);
-  const halfway = async () => (await partway(whole)).height;
   const resume = () => whole.evaluate((one) => one.getAnimations().forEach((each) => each.play()));
   const full = (await box(whole)).height;
   expect(full).toBeGreaterThan(10);
 
-  await turn("true");
-  expect(await moving(), "a drawer shuts with no movement").toBeGreaterThan(0);
+  const shutting = await turnPartway(whole, "true");
+  expect(shutting.moving, "a drawer shuts with no movement").toBeGreaterThan(0);
   // PARTWAY SHUT IT IS PART OF ITS HEIGHT: neither all of it nor none.
-  const closing = await halfway();
+  const closing = shutting.height;
   expect(closing, "a drawer shuts in one step").toBeGreaterThan(1);
   expect(closing, "a drawer shuts in one step").toBeLessThan(full - 1);
   // WHILE IT SLIDES IT IS STILL DRAWN, or it would slide shut empty, and
@@ -442,9 +458,9 @@ test("it slides shut and open, and under reduced motion it does neither", async 
   expect((await box(whole)).height).toBeLessThanOrEqual(0.5);
   expect(await whole.evaluate((one) => getComputedStyle(one).visibility)).toBe("hidden");
 
-  await turn("false");
-  expect(await moving(), "a drawer opens with no movement").toBeGreaterThan(0);
-  const opening = await halfway();
+  const opened = await turnPartway(whole, "false");
+  expect(opened.moving, "a drawer opens with no movement").toBeGreaterThan(0);
+  const opening = opened.height;
   expect(opening, "a drawer opens in one step").toBeGreaterThan(1);
   expect(opening, "a drawer opens in one step").toBeLessThan(full - 1);
   // Drawn from the first frame of the way open, or it would slide open empty.
@@ -585,8 +601,7 @@ test("nothing in a drawer hangs out of it while it slides", async ({ page }) => 
     const frame = windowOf(page, name);
     const one = drawer(page, name);
     const whole = await box(one);
-    await one.evaluate((el) => el.setAttribute("data-nd-collapsed", "true"));
-    const part = await partway(one);
+    const part = await turnPartway(one, "true");
     const across = name === "drawer-start";
     const size = across ? "width" : "height";
     expect(part[size], `${name}: the drawer is not partway shut`).toBeLessThan(whole[size] - 4);

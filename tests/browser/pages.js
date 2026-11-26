@@ -421,6 +421,120 @@ export async function closeTheme(page) {
   }
 }
 
+// --- A page that stands still -------------------------------------------------
+
+/**
+ * Keeps track of every call a page asks to have made later, so that
+ * `stopClock` can take them back. Given to `page.addInitScript`, so it is in
+ * place before any script of the page's own runs.
+ *
+ * AN EXAMPLE MAY KEEP TIME. The toast on `/toast/` counts its seconds down from
+ * the moment the page loads, and a message on `/message-bar/` counts ten: one
+ * redraw a second, and "Restoring it in 10 seconds" is eight pixels wider than
+ * "9 seconds". A test that measures or photographs a page twice and compares
+ * the two counts a tick that lands between them as a difference, and under a
+ * loaded machine the first tick lands right where a test is measuring.
+ * Reduced motion does not stop a timer, and a list of the pages that have one
+ * would be a list that is a page short the day an example starts to count.
+ *
+ * The three ways a page asks to be called back later are wrapped and kept
+ * until `stop`, which takes back every call still waiting and refuses every
+ * one asked for after it. `real` is the engine's own, for a probe that must
+ * still wait for a frame.
+ */
+export function clockStopper() {
+  const real = {
+    setTimeout: window.setTimeout.bind(window),
+    setInterval: window.setInterval.bind(window),
+    requestAnimationFrame: window.requestAnimationFrame.bind(window),
+  };
+  const waiting = { setTimeout: new Set(), setInterval: new Set(), requestAnimationFrame: new Set() };
+  let stopped = false;
+  for (const name of Object.keys(real)) {
+    window[name] = (...args) => {
+      // Zero is the one id no engine hands out, so clearing it clears nothing.
+      if (stopped) return 0;
+      const id = real[name](...args);
+      waiting[name].add(id);
+      return id;
+    };
+  }
+  window.__pageClock = {
+    real,
+    /** How many calls the page still had waiting when it was stopped. */
+    stop() {
+      stopped = true;
+      let taken = 0;
+      for (const id of waiting.setTimeout) window.clearTimeout(id);
+      for (const id of waiting.setInterval) window.clearInterval(id);
+      for (const id of waiting.requestAnimationFrame) window.cancelAnimationFrame(id);
+      for (const ids of Object.values(waiting)) {
+        taken += ids.size;
+        ids.clear();
+      }
+      return taken;
+    },
+    stopped: () => stopped,
+  };
+}
+
+/**
+ * Stops the clock `clockStopper` keeps, after two frames and a task by the
+ * engine's own, so what the page asked for while it loaded has drawn first.
+ */
+export async function stopClock(page) {
+  return page.evaluate(async () => {
+    const { real } = window.__pageClock;
+    await new Promise((done) => {
+      real.requestAnimationFrame(() => real.requestAnimationFrame(() => real.setTimeout(done)));
+    });
+    return window.__pageClock.stop();
+  });
+}
+
+// --- Forced colours -----------------------------------------------------------
+
+/**
+ * Puts the page in front of a reader whose system forces the colours, and
+ * holds that the engine forces them. Called once the page is there, after
+ * every navigation a test under forced colours makes.
+ *
+ * THE EMULATION CAN MISS A NEW DOCUMENT. Asked for before a navigation,
+ * Chromium matches `(forced-colors: active)` in the document it loads and yet
+ * leaves every colour the page's own: the media query's rules apply and the
+ * engine's forcing does not. Measured at eight workers, 4 to 9 of 20 first
+ * loads of `/prompt/` were so, as were up to 4 of 20 loads after another in
+ * the same page, and as many with the site's preloads taken out of the page.
+ * A test then passes on whatever the media query alone changes, and a test
+ * that needs the forcing fails for no fault of the page: the prompt's caret,
+ * which the engine draws only in a colour it forces, was drawn transparent
+ * and never seen. Asked again once the document is there, 20 of 20 were
+ * forced.
+ *
+ * So it is asked again here, and then the forcing is read, by what it does
+ * and not by a colour: forced colours take a box's shadow away. One mark is
+ * given a shadow with `forced-color-adjust` left to the engine, and one with
+ * it set to `none`. Forced, the first loses its shadow and the second keeps
+ * it; not forced, both keep it, and the test stops there rather than pass on
+ * the page's own colours.
+ */
+export async function forceColours(page) {
+  await page.emulateMedia({ forcedColors: "active" });
+  const forced = await page.evaluate(() => {
+    const shadowless = (adjust) => {
+      const mark = document.createElement("i");
+      mark.style.boxShadow = "0 0 0 1px"; // allow-literal: a shadow asked to be taken away, never drawn
+      mark.style.forcedColorAdjust = adjust;
+      document.body.append(mark);
+      const shadow = getComputedStyle(mark).boxShadow;
+      mark.remove();
+      return shadow === "none";
+    };
+    return shadowless("auto") && !shadowless("none");
+  });
+  expect(forced, "the page matches forced colours, and the engine does not force them").toBe(true);
+}
+
 // --- Whole-site walks ---------------------------------------------------------
 
 /**

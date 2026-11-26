@@ -15,6 +15,22 @@
   display: none;
 }
 
+/* A WORD WIDER THAN THE ROW BREAKS, AND THE CHEVRON STAYS ON THE ROW.
+   A flex item is never narrower than its longest word, so a summary holding a
+   long name pushed its chevron past the edge of the window instead of
+   wrapping: `ErrorSummaryItem · 4 examples` at 320px in a face as wide as
+   DejaVu Sans, which scrolled `/error-summary/` sideways by twelve pixels. The
+   words break where they can, and inside a word only where nothing else fits,
+   and the chevron keeps its size. */
+.nd-disclosure-text {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.nd-disclosure-marker {
+  flex-shrink: 0;
+}
+
 /* The chevron turns to point at what it opened. Not a rotation of the whole
    summary: an icon beside a word must not drag the word with it.
 

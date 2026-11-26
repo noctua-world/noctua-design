@@ -213,3 +213,51 @@ test("a Latin page loads no non-Latin face", async ({ page }) => {
   );
   expect(nonLatin, `a Latin-only page fetched ${nonLatin.join(", ")}`).toEqual([]);
 });
+
+// --- The default payload ------------------------------------------------------
+
+test("a first visit is drawn in the site's own faces", async ({ page, context }) => {
+  // `font-display: optional` draws a face only if it is ready by the first
+  // paint and never swaps it in afterwards, so the faces of the default payload
+  // are preloaded by every page. A page that did not preload them was drawn in
+  // the machine's own face for the life of the page on every first visit,
+  // which every test is, in a fresh context, and nothing said so.
+  //
+  // ASKED OF CHROME, which names the face that drew a node and whether the
+  // page supplied it. Not `document.fonts`: a face that loaded after the first
+  // paint reports `loaded` there and still draws nothing under `optional`.
+  await page.goto(url(ANY));
+  await page.evaluate(() => document.fonts.ready);
+  const cdp = await context.newCDPSession(page);
+  await cdp.send("DOM.enable");
+  await cdp.send("CSS.enable");
+  const { root } = await cdp.send("DOM.getDocument", { depth: -1 });
+  for (const selector of ["h1.nd-title", "p.nd-lead"]) {
+    const { nodeId } = await cdp.send("DOM.querySelector", { nodeId: root.nodeId, selector });
+    expect(nodeId, `${selector} is on the page`).toBeTruthy();
+    const { fonts } = await cdp.send("CSS.getPlatformFontsForNode", { nodeId });
+    const drawn = fonts.map((font) => `${font.familyName}${font.isCustomFont ? "" : " (the machine's)"}`);
+    expect(drawn, `${selector} was drawn in a face the page did not supply`).toEqual(["Noto Sans"]); // allow-literal: the family the default payload's file declares — the assertion itself
+  }
+
+  // AND EACH FACE IS FETCHED ONCE, by its preload. A preload at another URL
+  // than its `@font-face` asks for is a second download that draws nothing.
+  const fetched = await page.evaluate(() =>
+    performance
+      .getEntriesByType("resource")
+      .filter((entry) => entry.name.endsWith(".woff2"))
+      .map((entry) => ({ name: new URL(entry.name).pathname, by: entry.initiatorType })),
+  );
+  const preloaded = await page.evaluate(() =>
+    [...document.querySelectorAll('link[rel="preload"][as="font"]')].map(
+      (link) => new URL(link.href).pathname,
+    ),
+  );
+  expect(preloaded.length, "the page preloads no face").toBeGreaterThan(0);
+  for (const face of preloaded) {
+    expect(
+      fetched.filter((entry) => entry.name === face),
+      `${face} was not fetched once, by its preload`,
+    ).toEqual([{ name: face, by: "link" }]);
+  }
+});

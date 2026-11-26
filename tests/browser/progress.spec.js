@@ -6,7 +6,8 @@
 
 import { expect, test } from "@playwright/test";
 
-import { PAGE, url, showParts } from "./pages.js";
+import { LOCALES, PAGE, url, showParts } from "./pages.js";
+import { LINE_WIDTHS, sideBySide } from "./side-by-side.js";
 
 const named = (page, name) => page.locator(`[data-nd-progress="${name}"]`);
 
@@ -83,6 +84,32 @@ test("what is read and what is heard are the same sentence, or there is nothing 
   const heard = await busy.locator("progress").getAttribute("aria-valuetext");
   expect(heard?.trim(), "a busy bar announced nothing at all").toBeTruthy();
 });
+
+// A NAME THAT FITS BESIDE ITS READING IS NOT BROKEN BESIDE IT, the meter's
+// claim on the same line: `Uploading quarterly-report.pdf` took three lines at
+// 1280px when the name was split evenly with the reading.
+for (const locale of LOCALES) {
+  test(`${locale}: a name and a reading that fit side by side are drawn on one line`, async ({
+    page,
+  }) => {
+    await page.goto(url(PAGE.progress, locale));
+    await showParts(page);
+    await page.evaluate(() => document.fonts.ready);
+    let fitted = 0;
+    const broken = [];
+    for (const width of LINE_WIDTHS) {
+      await page.setViewportSize({ width, height: 900 });
+      const found = await sideBySide(page, "progress");
+      fitted += found.fitted;
+      broken.push(...found.broken.map((one) => `${width}px ${one}`));
+    }
+    expect(broken, `${locale}: a name broke where its reading left it room`).toEqual([]);
+    // The floor: a page where no pair fitted would pass on any rule. Few do
+    // here, because most of this page's lines are narrow on purpose: six in
+    // the pseudo-locale, all at the two widest widths, where the names broke.
+    expect(fitted, `${locale}: no name and reading fitted side by side`).toBeGreaterThan(4);
+  });
+}
 
 test("size is a measurement, not a word", async ({ page }) => {
   await page.goto(url(PAGE.progress));

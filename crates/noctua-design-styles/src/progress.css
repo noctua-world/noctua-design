@@ -22,17 +22,38 @@
   inline-size: 100%;
 }
 
+/* THE NAME, THEN THE READING ON THE TRAILING EDGE, AND A LINE TOO NARROW FOR
+   BOTH TAKES TWO. A flex item is never narrower than its longest word, and a
+   reading that could not wrap was never narrower than itself, so a name and a
+   reading wider together than the line pushed the reading, or the assistant's
+   mark after it, past the line's end: the mark seventeen pixels past it at
+   320px in English, and the reading cut off in Portuguese.
+
+   The name and the reading each start from their own width and grow from
+   there, and the reading is set against its trailing edge. So where the two
+   fit side by side they are drawn so, as before the line wrapped: the name on
+   one line at the start, the reading at the end. Where they do not, the line
+   wraps before the name does, and the reading fills a line of its own, still
+   against that edge; only a name or a reading wider than a whole line wraps
+   its own words. A mark that does not fit beside the reading wraps under its
+   end.
+
+   NOT FROM NOTHING. A name grown from a width of zero beside a reading that
+   grows too is given half of what the reading leaves, not the whole of it, so
+   it broke at every width beside a reading mostly empty: `Em cache` in two
+   lines on a line 226px wide. `tests/browser/side-by-side.js` measures it. */
 .nd-meter-line,
 .nd-progress-line {
   display: flex;
-  gap: var(--noctua-space-3);
+  flex-wrap: wrap;
+  gap: var(--noctua-space-1) var(--noctua-space-3);
   align-items: baseline;
-  justify-content: space-between;
   font-size: var(--noctua-size-small);
 }
 
 .nd-meter-label,
 .nd-progress-label {
+  flex: 1 1 auto;
   color: var(--nc-color-fg);
 }
 
@@ -40,9 +61,17 @@
    words beside it move. */
 .nd-meter-value,
 .nd-progress-value {
+  flex: 1 1 auto;
   font-variant-numeric: tabular-nums;
+  text-align: end;
   color: var(--nc-color-fg-muted);
-  white-space: nowrap;
+}
+
+/* No space is left on a line where the name or the reading stands, so the
+   margin only places a mark that wrapped alone. */
+.nd-meter-line > .nd-ai-slot,
+.nd-progress-line > .nd-ai-slot {
+  margin-inline-start: auto;
 }
 
 /* Off the screen, still in the document — the case a removed label fails. */
@@ -66,19 +95,6 @@
 .nd-meter[data-nd-label-hidden="true"] .nd-meter-line,
 .nd-progress[data-nd-label-hidden="true"] .nd-progress-line {
   min-block-size: 0;
-}
-
-/* A THIRD ITEM ON A `space-between` LINE MOVES THE SECOND ONE TO THE MIDDLE.
-   The reading belongs on the trailing edge whether or not an assistant's mark
-   is beside it, so a marked line pushes with a margin instead. */
-.nd-meter-line:has(.nd-ai-label),
-.nd-progress-line:has(.nd-ai-label) {
-  justify-content: flex-start;
-}
-
-.nd-meter-line:has(.nd-ai-label) > .nd-meter-label,
-.nd-progress-line:has(.nd-ai-label) > .nd-progress-label {
-  margin-inline-end: auto;
 }
 
 /* --- The bars themselves --- */

@@ -473,10 +473,11 @@ Record the commit in `assets/vendor/nc-fuzzy/ATTRIBUTION.md`, run `cargo xtask d
 and change the section of `search-match.js` named like the module that changed until every row
 passes. The copy, its record and the matcher land in one commit.
 
-**The mirror gate is `noctua-central`'s.** Its own check is to hold its corpus to the checksum
-recorded here, so a row changed there fails there until this copy is refreshed. That gate arrives
-with the desktop interface (`NOCTUA-PLAN.md`, Stage 16). Until it does, a change there is not
-seen here, and this procedure is all that keeps the two files one.
+**The mirror gate is `noctua-central`'s, and neither gate reads the other repository.** Its own
+`cargo xtask check` pins its corpus by its SHA-256 (`FUZZY_CORPUS_SHA256`), so a row changed there
+fails there until the pin is written again, with a sentence saying to refresh this copy. That pin
+is the line `SHA256SUMS` holds here once the copy is refreshed. CI clones each repository alone, so
+nothing compares the two lines, and this procedure is what keeps the two files one.
 
 **A position is a code point, never a UTF-16 unit.** Every index the matcher returns counts what
 spreading a string counts, so a surface slices `[...text]` and never `text.slice()`. A `Hit` is one
@@ -624,7 +625,9 @@ told by a fill or by a border kept transparent until it arrives is drawn like no
 Such a component names the state again inside `@media (forced-colors: active)`, in the system
 colours forced colours keep (`Canvas`, `CanvasText`, `Highlight`): they are the platform's and
 no colour of this system's, and they are written nowhere else. `tests/browser/forced-colors.spec.js`
-asks it of a list's active option, a split's line and a rail's chosen tab, in pixels.
+asks it of a list's active option, a split's line and a rail's chosen tab, in pixels. Every test
+under forced colours calls `forceColours` (`tests/browser/pages.js`) after each navigation, because
+the emulation can miss the page it loads (see "The platform's silent failures").
 
 **Two places take no twin at all, and the gate refuses both.** `:focus-within` is never written
 inside `:has(`, twinned or bare: `:has()` does not nest, so an engine drops the
@@ -1414,7 +1417,11 @@ draw, a focusable separator and region included, to `--noctua-target-min`.
 **No page may scroll sideways at 320px, and the components bend to that budget.** `Segmented`
 makes an icon-only item square, which is right everywhere except the header, where square items
 push the row past 320px; so the header's bar states the exception — narrower, never shorter,
-because the height keeps every control in the row on one centre line.
+because the height keeps every control in the row on one centre line. **And not in a wider face
+either**: a reader whose preload lost the race to the first paint is drawn in what the machine
+falls back to, so `responsive.spec.js` walks every page at 320px in DejaVu Sans, and asks as
+well that no row in the main column push what it holds past its own end, which a frame cuts off
+rather than scrolls.
 
 **One theme menu, and nothing duplicates it.** The example frame opens the *same component* to
 theme its own stage, on the same floating surface. `position: fixed` is what escapes the frame's
@@ -1692,9 +1699,21 @@ anything.
   runs with a script. Ask again with the script blocked, as `material.spec.js` does.
 - **`ch` is not a character.** It is the advance of `0`, so a fourteen-character word can be wider
   than `14ch`.
+- **A flex item is never narrower than its longest word.** Its automatic minimum is its
+  min-content width, so a row of words beside a marker pushes the marker past the row's end
+  instead of wrapping, the day the words are drawn in a wider face or a longer language. Let the
+  words break (`overflow-wrap: anywhere` lowers that minimum as well) or let the row wrap. **And
+  grow words from their own width, not from zero**: `flex: 1 1 0` beside an item that grows too
+  gets half of what that item leaves rather than its own width first, so a `Meter`'s name broke
+  at every width beside a reading mostly empty. `side-by-side.js` measures that line.
 - **A control whose height is not declared is its font size, line height and padding added up**,
   so two controls side by side agree only by accident, and a screenshot of either one cannot show
   it. Declare the height on the row, and measure the row rather than the control.
+- **Forced colours emulated before a navigation can miss the page it loads.** Chromium then
+  matches `(forced-colors: active)` and forces no colour, in 4 to 9 of 20 loads at eight
+  workers, so a test passes on what the media query alone changes, or fails on a prompt's caret
+  left transparent. Asked again once the page is there, the forcing holds. `forceColours` in
+  `tests/browser/pages.js` asks again and reads that the engine forces.
 
 ## Two rules about proving something
 
