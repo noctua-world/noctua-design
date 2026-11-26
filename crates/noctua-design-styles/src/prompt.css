@@ -58,8 +58,14 @@
   min-inline-size: 0;
   min-block-size: var(--noctua-shell-line);
   /* IT GROWS TO THIS MANY LINES AND THEN SCROLLS. The count is a token with no
-     unit, and a line is whatever this text's line is. */
-  max-block-size: calc(var(--noctua-shell-prompt-max) * 1lh + 2 * var(--noctua-space-1));
+     unit, and a line is whatever this text's line is. AND NEVER PAST A SHARE
+     OF THE WINDOW: eight lines are taller than a footer leaves in the
+     interface's smallest window (`NOCTUA.md §12.19`), and the room is taken
+     from the work above it. */
+  max-block-size: min(
+    calc(var(--noctua-shell-prompt-max) * 1lh + 2 * var(--noctua-space-1)),
+    var(--noctua-shell-prompt-share)
+  );
   margin: 0;
   /* THE LEADING ROOM IS THE RING'S, which is drawn inside this box and would
      otherwise lie across the first letter of every line. THE TRAILING ROOM IS

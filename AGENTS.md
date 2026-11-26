@@ -537,8 +537,9 @@ shadow a colour token, so the spec rejects `nc` as a prefix.
 **A window is measured in the shell tokens, and a target has a floor.** `[shell]` in
 `spec/tokens.toml` holds what an application window is built from: `--noctua-shell-line`, the
 height of one footer line, `--noctua-shell-rail`, the width of an icon rail,
-`--noctua-shell-prompt-max`, a count of lines with no unit, and `--noctua-shell-drawer-max`, a
-percentage of the window. The line and the rail are the small `Button`'s height and the icon-only
+`--noctua-shell-prompt-max`, a count of lines with no unit, `--noctua-shell-prompt-share`, the
+most of the window's height a prompt grows to whatever its count, and `--noctua-shell-drawer-max`,
+a percentage of the window. The line and the rail are the small `Button`'s height and the icon-only
 `Button`'s width, so a control in either fills it, and two tests hold them to the spacing scale
 and to the rules that draw those two boxes. `--noctua-target-min` is the smallest box a pointer is
 asked to hit (WCAG 2.5.8), in `px` because the criterion is: a component that draws a smaller

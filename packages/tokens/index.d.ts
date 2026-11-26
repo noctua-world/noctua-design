@@ -76,6 +76,7 @@ export declare const shell: {
   readonly line: string;
   readonly rail: string;
   readonly promptMax: string;
+  readonly promptShare: string;
   readonly drawerMax: string;
 };
 

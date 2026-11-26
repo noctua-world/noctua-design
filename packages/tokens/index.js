@@ -79,6 +79,7 @@ export const shell = {
   line: "var(--noctua-shell-line)",
   rail: "var(--noctua-shell-rail)",
   promptMax: "var(--noctua-shell-prompt-max)",
+  promptShare: "var(--noctua-shell-prompt-share)",
   drawerMax: "var(--noctua-shell-drawer-max)",
 };
 

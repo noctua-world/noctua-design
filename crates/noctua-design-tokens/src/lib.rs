@@ -181,6 +181,8 @@ pub mod shell {
     pub const RAIL: &str = "var(--noctua-shell-rail)";
     /// `8`.
     pub const PROMPT_MAX: &str = "var(--noctua-shell-prompt-max)";
+    /// `30vh`.
+    pub const PROMPT_SHARE: &str = "var(--noctua-shell-prompt-share)";
     /// `40%`.
     pub const DRAWER_MAX: &str = "var(--noctua-shell-drawer-max)";
 }

@@ -354,6 +354,7 @@ mod tests {
             "--noctua-shell-line: 2rem;",
             "--noctua-shell-rail: 3rem;",
             "--noctua-shell-prompt-max: 8;",
+            "--noctua-shell-prompt-share: 30vh;",
             "--noctua-shell-drawer-max: 40%;",
         ] {
             assert!(css.contains(declaration), "{declaration} is missing");

@@ -255,6 +255,7 @@ mod tests {
             r#"line: "var(--noctua-shell-line)","#,
             r#"rail: "var(--noctua-shell-rail)","#,
             r#"promptMax: "var(--noctua-shell-prompt-max)","#,
+            r#"promptShare: "var(--noctua-shell-prompt-share)","#,
             r#"drawerMax: "var(--noctua-shell-drawer-max)","#,
         ] {
             assert!(js.contains(entry), "{entry} is missing");

@@ -381,6 +381,7 @@ mod tests {
             r#"pub const LINE: &str = "var(--noctua-shell-line)";"#,
             r#"pub const RAIL: &str = "var(--noctua-shell-rail)";"#,
             r#"pub const PROMPT_MAX: &str = "var(--noctua-shell-prompt-max)";"#,
+            r#"pub const PROMPT_SHARE: &str = "var(--noctua-shell-prompt-share)";"#,
             r#"pub const DRAWER_MAX: &str = "var(--noctua-shell-drawer-max)";"#,
         ] {
             assert!(source.contains(constant), "{constant} is missing");

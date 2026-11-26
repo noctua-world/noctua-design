@@ -251,7 +251,7 @@ min = "24px"
 #
 # What an application window is measured in: its footer lines, its icon rails,
 # its prompt and its drawers. Declared here so every window, and every example
-# of one, agrees on the four numbers.
+# of one, agrees on them.
 
 [shell]
 # The height of one footer line: one line of text and the smallest padding
@@ -266,6 +266,11 @@ rail = "3rem"
 # The most lines a prompt grows to before it scrolls. A count, with no unit:
 # the height is this many lines of whatever text the prompt sets.
 prompt-max = "8"
+# The tallest a prompt grows, as a share of the window, whatever its count of
+# lines. Eight lines are most of the interface's smallest window, 240 pixels
+# tall (`NOCTUA.md §12.19`), and a footer that tall leaves the work no room.
+# At this share eight lines still fit a window 720 pixels tall.
+prompt-share = "30vh"
 # The largest share of the window a drawer takes, on the axis it opens along.
 # A percentage, so it resolves against the window and a drawer on a narrow
 # window stays narrow.
