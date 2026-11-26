@@ -109,6 +109,19 @@ jobs:
           node-version: "24"
       - run: pnpm install --frozen-lockfile
 
+      # THE SUITE MEASURES THE MACHINE'S NOTO SANS. The site's faces are
+      # `font-display: optional` and its pages do not preload them, so a fresh
+      # browser context — which every test is — paints before they arrive and
+      # keeps whatever the machine calls "Noto Sans" for the page's lifetime.
+      # A bare runner has none and falls through the stack to DejaVu Sans,
+      # which is wider: four geometry specs failed on it and on nothing else.
+      # Ubuntu's own Noto faces make the runner measure the typeface the site
+      # names, as a developer's machine does.
+      - name: Install the Noto faces the site names
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y fonts-noto-core
+
       # The React example is not committed (`.gitignore` says why), and a site
       # built without it renders no implementation switch — so every spec that
       # holds React's markup against Dioxus's would have nothing to hold.

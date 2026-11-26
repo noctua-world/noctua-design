@@ -97,10 +97,19 @@ before Playwright can say why. Run `pnpm install` first, and bundle the React
 example: without it the specs that hold React against Dioxus skip or fail for
 want of one of the two.
 
-CI runs the same command in its `browser` job, on Linux, with the runner's Chrome,
-split into parts: `NOCTUA_SHARD=2/4` runs the second quarter, and unset it runs the
-whole suite. The site's deploy does not wait for that job, so a flaky spec is
-retried by rerunning its part alone, and the retry republishes nothing.
+**The suite's text is the machine's own Noto Sans, not the site's file.** The faces
+are `font-display: optional` and the pages do not preload them, so every test, which
+opens a fresh browser context, paints before they arrive and keeps the system face
+for the page's lifetime. A machine without Noto installed measures whatever its stack
+falls through to: on Ubuntu, DejaVu Sans, which is wide enough to fail a handful of
+geometry specs that pass with Noto installed. Install Noto before reading a geometry
+failure as a defect.
+
+CI runs the same command in its `browser` job, on Linux, with the runner's Chrome and
+Ubuntu's `fonts-noto-core`, split into parts: `NOCTUA_SHARD=2/4` runs the second
+quarter, and unset it runs the whole suite. The site's deploy does not wait for that
+job, so a flaky spec is retried by rerunning its part alone, and the retry
+republishes nothing.
 
 **Every colour in the suite is read from screenshot pixels** decoded in a canvas,
 never from `getComputedStyle` — the same rule `color_read_from_dom` imposes on the
