@@ -204,6 +204,25 @@ test("the engine's own caret is not drawn beside the block", async ({ page }) =>
   }
 });
 
+test("under forced colours there is one cursor, and it is the engine's", async ({ page }) => {
+  await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
+  await open(page);
+  await put(page, "hello world", 5);
+  // The engine forces a colour onto `caret-color`, so the caret the
+  // stylesheet made transparent is drawn again. The block gives way to it.
+  await expect(block(page), "the block is drawn beside the engine's caret").toBeHidden();
+  // AND THE ONE THERE IS IS DRAWN: a picture that shows the caret differs from
+  // one that hides it, within a whole turn of its blink.
+  const stack = prompt(page).locator(".nd-prompt-stack");
+  const hidden = await stack.screenshot({ caret: "hide" });
+  let seen = 0;
+  for (let turn = 0; seen === 0 && turn < 20; turn += 1) {
+    if (turn > 0) await page.waitForTimeout(70);
+    seen = await differing(page, hidden, await stack.screenshot({ caret: "initial" }));
+  }
+  expect(seen, "under forced colours the prompt has no cursor at all").toBeGreaterThan(0);
+});
+
 test("a block at the end of a full line takes no room, so the line does not turn", async ({ page }) => {
   await open(page);
   const box = input(page);
@@ -351,6 +370,101 @@ test("the block is where the caret is on every line of a wrapped text", async ({
   await put(page, "ab\n", 0);
   expect(await tall(), "an empty last line is not a line of the prompt").toBeCloseTo(two, 1);
   expect(await input(page).evaluate((el) => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1);
+});
+
+test("where a line turns, the block is at whichever end of it the engine put the caret", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await open(page);
+  const text = "the quick brown fox jumps over the lazy dog and keeps going until the line has turned twice";
+  const offset = () => input(page).evaluate((el) => el.selectionStart);
+
+  // END, ON A LINE THAT TURNED WITH NO BREAK IN IT. The offset is the first
+  // letter of the next line, and the engine draws its caret at the end of
+  // this one: the block is there, on this line, and not over that letter.
+  await put(page, text, 0);
+  await page.keyboard.press("End");
+  await settle(page);
+  const first = await offset();
+  expect(text[first - 1], "End stopped before the line turned").not.toBe("\n");
+  const end = await agree(page, "End on a line that turned");
+  // A VERTICAL ARROW KEPT AT THE END OF A LINE stays at the end of the next.
+  await page.keyboard.press("ArrowDown");
+  await settle(page);
+  const down = await agree(page, "the down arrow from the end of a line");
+  expect(down.at.top, "the arrow did not move the block down a line").toBeGreaterThan(end.at.top + 5);
+  await page.keyboard.press("ArrowUp");
+  await settle(page);
+  expect(await offset()).toBe(first);
+  await agree(page, "the up arrow back to the end of the first line");
+
+  // THE SAME OFFSET, REACHED ANY OTHER WAY, IS THE START OF THE LINE BELOW.
+  await put(page, text, 0);
+  await page.keyboard.press("ArrowDown");
+  await settle(page);
+  expect(await offset()).toBe(first);
+  const below = await agree(page, "the down arrow from the start of a line");
+  expect(below.at.top).toBeGreaterThan(end.at.top + 5);
+
+  // A PRESS PAST THE END OF A LINE puts the caret at its end, and a press at
+  // the start of the next puts the same offset there.
+  const area = await input(page).boundingBox();
+  await page.mouse.click(area.x + area.width - 12, end.caret.top + 4);
+  await settle(page);
+  expect(await offset()).toBe(first);
+  await agree(page, "a press past the end of a line");
+  await page.mouse.click(area.x + 1, below.caret.top + 4);
+  await settle(page);
+  expect(await offset()).toBe(first);
+  await agree(page, "a press at the start of the next line");
+
+  // A WORD LONGER THAN THE LINE turns between two of its letters.
+  await put(page, "x".repeat(80), 0);
+  await page.keyboard.press("End");
+  await settle(page);
+  await agree(page, "End on a word cut by the line");
+});
+
+test("spaces that hang past the edge hold the block at the edge, where the engine's caret is", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await open(page);
+  // More spaces than the line has room for, where it turns: they hang past
+  // the edge and the engine keeps its caret at the edge.
+  const text = `abcdefghijklmnopqr${" ".repeat(12)}stuvwxyz`;
+  for (const caret of [22, 25]) {
+    await put(page, text, caret);
+    await agree(page, `caret ${caret} among spaces that hang`);
+  }
+  await put(page, text, 0);
+  await page.keyboard.press("End");
+  await settle(page);
+  await agree(page, "End on a line that ends in spaces that hang");
+});
+
+test("each line of the text takes its own direction, in both boxes", async ({ page }) => {
+  await open(page);
+  // A LINE FROM THE RIGHT, THEN ONE FROM THE LEFT, broken by the reader. The
+  // engine lays each paragraph out in its own direction, and a mirror that
+  // took the first line's for the whole text drew the second one mirrored.
+  const rtlFirst = `${HEBREW}\nhello world`;
+  for (const caret of [12, 16, rtlFirst.length]) {
+    await put(page, rtlFirst, caret);
+    await agree(page, `caret ${caret} on a line from the left under one from the right`);
+  }
+  await put(page, rtlFirst, 2);
+  await agree(page, "caret 2 on the line from the right", "right");
+  // A LINE WITH NO LETTER ON IT runs from the left, whatever is above it.
+  await put(page, `${HEBREW}\n`, HEBREW.length + 1);
+  await agree(page, "an empty line under one from the right");
+  // AND THE OTHER WAY ROUND.
+  const ltrFirst = `hello\n${HEBREW}`;
+  for (const caret of [6, 8]) {
+    await put(page, ltrFirst, caret);
+    await agree(page, `caret ${caret} on a line from the right under one from the left`, "right");
+  }
+  await put(page, ltrFirst, 2);
+  await agree(page, "caret 2 on the line from the left");
 });
 
 test("the two boxes are one box, at every width and in every locale", async ({ page }) => {
@@ -650,6 +764,15 @@ test("the block is filled with the focus, an outline without it, and gone when d
   // AN OUTLINE IS LESS THAN A FILL: the letter under it is the textarea's own
   // and shows through, so fewer pixels differ from the bare letter.
   expect(await differing(page, outline, nothing)).toBeLessThan(await differing(page, filled, nothing));
+
+  // THE FOCUS ON THE SEND CONTROL IS NOT THE FOCUS IN THE TEXT. Typing goes
+  // nowhere near the text from there, and a filled block would say it does.
+  await prompt(page).locator(".nd-prompt-send").focus();
+  await settle(page);
+  expect(
+    await differing(page, outline, await picture(page)),
+    "the block is filled while the focus is on the send control",
+  ).toBe(0);
 
   // READ-ONLY KEEPS THE OUTLINE WITH THE FOCUS IN IT.
   const name = "example-prompt-readonly";

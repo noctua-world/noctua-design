@@ -4118,8 +4118,9 @@ const FOOTER_LINE_REACT: &str = r#"  const kind_ = kind ?? "modeline";
 /// # `dir="auto"` on both
 ///
 /// A reader who types in a script written from the right gets the line laid
-/// out from the right. Both boxes take their direction from the same text, so
-/// they agree without either being told.
+/// out from the right. Both boxes take their direction from the same text, and
+/// the stylesheet gives both `unicode-bidi: plaintext`, so each paragraph takes
+/// its own in both and they agree without either being told.
 ///
 /// # The list it drives is named on the textarea
 ///

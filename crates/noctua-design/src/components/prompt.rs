@@ -15,7 +15,7 @@ use crate::components::{Button, ButtonSize, ButtonTone, ButtonVariant, Icon, Ico
 ///
 /// # Accessibility
 ///
-/// The control is a real `<textarea>` named by `aria-label`. The block is drawn in an `aria-hidden` box. It is filled while the prompt has the focus and an outline while it does not. It does not blink under `prefers-reduced-motion`.
+/// The control is a real `<textarea>` named by `aria-label`. The block is drawn in an `aria-hidden` box. It is filled while the text has the focus and an outline while it does not. It does not blink under `prefers-reduced-motion`.
 #[component]
 pub fn Prompt(
     /// What this prompt is, as a script finds it, and the form field name it is submitted under. The textarea takes the id `nd-prompt-` followed by this name. **Required**.

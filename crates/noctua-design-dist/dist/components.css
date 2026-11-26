@@ -12575,6 +12575,11 @@ because a specimen of a `needs_name` component must not render a
   overflow-wrap: anywhere;
   word-break: normal;
   tab-size: 4;
+  /* EACH PARAGRAPH TAKES ITS OWN DIRECTION, IN BOTH. The engine gives a
+     textarea with `dir="auto"` this value and a `<div>` with it `isolate`,
+     which takes one direction for the whole text: a second line written the
+     other way round would be laid out mirrored in one box and not the other. */
+  unicode-bidi: plaintext;
   /* THE SCROLLBAR'S ROOM IS ALWAYS KEPT, IN BOTH. A bar that arrived with the
      ninth line would narrow the textarea and not the mirror, and every line
      after the first wrap would break in a different place. */
@@ -12625,6 +12630,9 @@ because a specimen of a `needs_name` component must not render a
    caret is and not that it is listening, and the difference is a shape, not a
    shade. The letter under it is the textarea's own, showing through. */
 .nd-prompt-cursor {
+  /* Relative, so `dist/prompt.js` can hold a block on a space that hangs past
+     the line's edge at the edge, where the engine keeps its caret. */
+  position: relative;
   visibility: visible;
   color: transparent;
   outline: var(--noctua-border-hairline) solid var(--nc-color-cursor);
@@ -12639,14 +12647,18 @@ because a specimen of a `needs_name` component must not render a
   margin-inline-end: -1ch;
 }
 
-/* WITH THE FOCUS: FILLED, THE LETTER DRAWN AGAIN IN THE COLOUR MADE FOR IT,
- * AND BLINKING. `step-end` holds each half of the turn, so the block is there
- * or not and never fading. A new block starts the turn again, so it is there
- * while a reader types.
+/* WITH THE FOCUS IN THE TEXT: FILLED, THE LETTER DRAWN AGAIN IN THE COLOUR
+ * MADE FOR IT, AND BLINKING. `step-end` holds each half of the turn, so the
+ * block is there or not and never fading. A new block starts the turn again,
+ * so it is there while a reader types.
+ *
+ * The textarea's own focus, and not the prompt's: with the focus on the send
+ * control, typing goes nowhere near the text, and the block says so. The
+ * mirror follows the textarea, so the state is asked of its sibling.
  *
  * A prompt that cannot be typed in keeps the outline, with the focus or
  * without: a filled, blinking block says *type here*. */
-.nd-prompt:not([data-nd-readonly="true"]):is(:focus-within, [data-nd-seat-focus], :has([data-nd-seat-focus]))
+.nd-prompt:not([data-nd-readonly="true"]) .nd-prompt-input:is(:focus, [data-nd-seat-focus]) + .nd-prompt-mirror
   .nd-prompt-cursor {
   color: var(--nc-color-on-cursor);
   background: var(--nc-color-cursor);
@@ -12663,8 +12675,18 @@ because a specimen of a `needs_name` component must not render a
    (`NOCTUA.md §12.7`). Said outright and not left to the duration: a turn of
    no length does not stop an animation that repeats. */
 @media (prefers-reduced-motion: reduce) {
-  .nd-prompt .nd-prompt-stack .nd-prompt-mirror .nd-prompt-cursor.nd-prompt-cursor {
+  .nd-prompt.nd-prompt .nd-prompt-stack .nd-prompt-input + .nd-prompt-mirror .nd-prompt-cursor.nd-prompt-cursor {
     animation: none;
+  }
+}
+
+/* UNDER FORCED COLOURS THE CARET IS THE ENGINE'S. The engine forces a colour
+   onto `caret-color`, so the caret the rules above made transparent is drawn
+   again, and a block beside it would be a second cursor. The block gives way,
+   as it does to a composition. */
+@media (forced-colors: active) {
+  .nd-prompt .nd-prompt-stack .nd-prompt-mirror .nd-prompt-cursor.nd-prompt-cursor {
+    visibility: hidden;
   }
 }
 

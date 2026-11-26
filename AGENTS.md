@@ -917,33 +917,49 @@ real `<textarea>`, so the selection, an input method's composition, the clipboar
 name a screen reader reads are the platform's (`NOCTUA.md §12.7`). Its caret is transparent, and a
 second box, the mirror, lies over it holding the same text with everything invisible but one
 `<span>` around the cluster the caret stands before. `dist/prompt.js` keeps the two in step and
-its header is the technique. No position is measured: two boxes that lay one text out by one set
-of rules put each character in one place.
+its header is the technique. The layout places the block: two boxes that lay one text out by one
+set of rules put each character in one place.
 
 **Every property that places a character is declared for the two boxes together**, in one rule
 of `crates/noctua-design-styles/src/prompt.css`. A property given to one alone is a cursor that
 drifts off its letter, in the one script nobody on the team reads. Three of them fail silently:
 both boxes keep the scrollbar's room from the first line (`scrollbar-gutter: stable`), or the
-ninth line narrows one of them and every line turns in a different place; both take their
-direction from the text (`dir="auto"`); and the block at the end of a line takes no room in it,
-or the mirror turns a full line the textarea does not.
+ninth line narrows one of them and every line turns in a different place; each paragraph of both
+takes its own direction from its own text (`dir="auto"` and `unicode-bidi: plaintext`, which the
+engine gives a textarea and not a `<div>`); and the block at the end of a line takes no room in
+it, or the mirror turns a full line the textarea does not. A block before no character is pointed
+the way its own paragraph runs, because its room is given back on its inline end.
 
 **The mirror is also how the prompt grows.** The two share a grid cell, so the cell is as tall as
-the mirror's text, up to `--noctua-shell-prompt-max` lines, and then the textarea scrolls and the
-mirror follows it.
+the mirror's text, up to `--noctua-shell-prompt-max` lines and never past
+`--noctua-shell-prompt-share` of the window, and then the textarea scrolls and the mirror follows
+it.
+
+**Two places on a line are one offset, and the script says which.** Where a line turns with no
+break in it, the end of the upper line and the start of the lower are one offset, and the engine
+draws its caret at the end only when End, a vertical arrow or a press put it there. The script
+keeps what moved the caret last and asks the mirror whether the characters on either side are on
+two lines, and spaces that hang past the edge hold the block at the edge, where the engine keeps
+its caret. Those two are all it measures. **What the block does not follow** is the caret at the
+boundary of two runs written in opposite directions inside one line: it covers the next character
+in the text, which the engine draws at the far end of the other run. `dist/prompt.js` has the
+detail.
 
 **The block gives way to what the engine draws better.** A selection and a composition hide it,
 and while an input method composes the engine's own caret is back, because the candidate window
-stands against it. Enter that confirms a composition sends nothing. The block is filled and
-blinking with the focus, an outline without it or in a read-only prompt, and absent in a disabled
-one. It blinks on `--noctua-duration-blink`, and under `prefers-reduced-motion` the stylesheet
+stands against it. Under forced colours the engine forces a colour onto the caret, so the block
+is hidden there and the engine's caret is the one cursor. Enter that confirms a composition sends
+nothing. The block is filled and blinking with the focus in the text, an outline without it, with
+the focus on the send control, or in a read-only prompt, and absent in a disabled one. It blinks on `--noctua-duration-blink`, and under `prefers-reduced-motion` the stylesheet
 says `animation: none`: a repeating animation has no zero-length form.
 
 **It sends nothing itself.** Enter and the send control say `nd-prompt-send`, with the prompt's
 name and text, and the text afterwards is the caller's to set. A value the caller writes is drawn
 like one that was typed, because the script wraps the element's `value`. A prompt that names a
 list in `controls` gets its arrow walk from `dist/option-list.js` and keeps Enter: one key is one
-event, and the caller knows which option is active. **It stays a `textbox` there**: HTML allows a
+event, and the caller knows which option is active. Shift with Enter still breaks the line there.
+The option the keyboard is on is `active_option`, an id, and not `OptionItem`'s `active`, a flag
+on the option itself. **It stays a `textbox` there**: HTML allows a
 `<textarea>` no other role, and a `combobox` is one line.
 
 **Its caret is tested from pixels, with the engine's scrollbars on.** `tests/browser/prompt.spec.js`

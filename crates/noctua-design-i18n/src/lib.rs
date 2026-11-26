@@ -20187,7 +20187,7 @@ impl Locale {
                     "Use a prompt for the line a reader types into an application: a command, a filter, a message. Its cursor is a block. For an answer in a form, use `Textarea`, which has a label, a hint and an error."
                 }
                 Key::ComponentPromptA11yNotes => {
-                    "The control is a real `<textarea>` named by `aria-label`. The block is drawn in an `aria-hidden` box. It is filled while the prompt has the focus and an outline while it does not. It does not blink under `prefers-reduced-motion`."
+                    "The control is a real `<textarea>` named by `aria-label`. The block is drawn in an `aria-hidden` box. It is filled while the text has the focus and an outline while it does not. It does not blink under `prefers-reduced-motion`."
                 }
                 Key::ComponentPromptPropNameDoc => {
                     "What this prompt is, as a script finds it, and the form field name it is submitted under. The textarea takes the id `nd-prompt-` followed by this name. **Required**."
@@ -27933,7 +27933,7 @@ impl Locale {
                     "Use um prompt para a linha em que a pessoa digita num aplicativo: um comando, um filtro, uma mensagem. O cursor dele é um bloco. Para uma resposta num formulário, use `Textarea`, que tem rótulo, dica e erro."
                 }
                 Key::ComponentPromptA11yNotes => {
-                    "O controle é um `<textarea>` de verdade nomeado por `aria-label`. O bloco é desenhado numa caixa com `aria-hidden`. Ele fica preenchido enquanto o prompt tem o foco e vira um contorno quando não tem. Ele não pisca sob `prefers-reduced-motion`."
+                    "O controle é um `<textarea>` de verdade nomeado por `aria-label`. O bloco é desenhado numa caixa com `aria-hidden`. Ele fica preenchido enquanto o texto tem o foco e vira um contorno quando não tem. Ele não pisca sob `prefers-reduced-motion`."
                 }
                 Key::ComponentPromptPropNameDoc => {
                     "O que este prompt é, como um script o encontra, e o nome de campo com que ele é enviado num formulário. O textarea recebe o id `nd-prompt-` seguido deste nome. **Obrigatório**."
@@ -35833,7 +35833,7 @@ impl Locale {
                     "⟦UUsee aa proompt foor thee liinee aa reeaadeer typees iintoo aan aappliicaatiioon: aa coommaand, aa fiilteer, aa meessaagee. IIts cuursoor iis aa bloock. Foor aan aansweer iin aa foorm, uusee `Teextaareeaa`, whiich haas aa laabeel, aa hiint aand aan eerroor.⟧"
                 }
                 Key::ComponentPromptA11yNotes => {
-                    "⟦Thee coontrool iis aa reeaal `<teextaareeaa>` naameed by `aariiaa-laabeel`. Thee bloock iis draawn iin aan `aariiaa-hiiddeen` boox. IIt iis fiilleed whiilee thee proompt haas thee foocuus aand aan oouutliinee whiilee iit dooees noot. IIt dooees noot bliink uundeer `preefeers-reeduuceed-mootiioon`.⟧"
+                    "⟦Thee coontrool iis aa reeaal `<teextaareeaa>` naameed by `aariiaa-laabeel`. Thee bloock iis draawn iin aan `aariiaa-hiiddeen` boox. IIt iis fiilleed whiilee thee teext haas thee foocuus aand aan oouutliinee whiilee iit dooees noot. IIt dooees noot bliink uundeer `preefeers-reeduuceed-mootiioon`.⟧"
                 }
                 Key::ComponentPromptPropNameDoc => {
                     "⟦Whaat thiis proompt iis, aas aa scriipt fiinds iit, aand thee foorm fiieeld naamee iit iis suubmiitteed uundeer. Thee teextaareeaa taakees thee iid `nd-proompt-` foollooweed by thiis naamee. **Reequuiireed**.⟧"
