@@ -12452,6 +12452,13 @@ because a specimen of a `needs_name` component must not render a
   cursor: pointer;
 }
 
+/* THE GLYPH POINTS THE WAY THE LINE WILL GO: up while it is one line tall,
+   and down once it has grown. Both bodies draw one chevron, and this turns it
+   from the attribute that says the state. */
+.nd-footer-line-toggle[aria-expanded="true"] > .nd-icon-glyph {
+  transform: rotate(180deg);
+}
+
 /* The transparent `Button`'s own hover, so the control beside the ones a
    caller puts in a line answers a pointer as they do. The ink changes as well
    as the ground: on the info line the ground alone is a shade nobody sees. */

@@ -91,13 +91,8 @@ pub fn FooterLine(
                     "aria-expanded": if expanded { "true" } else { "false" },
                     "aria-label": "{toggle}",
                     "data-nd-action": action,
-                    // The footer is at the bottom of its window, so a line
-                    // grows upward and the glyph points the way it will go.
-                    if expanded {
-                        Icon { icon: IconDrawing::CHEVRON_DOWN, size: IconSize::Small }
-                    } else {
-                        Icon { icon: IconDrawing::CHEVRON_UP, size: IconSize::Small }
-                    }
+                    // Turned by the stylesheet from `aria-expanded`.
+                    Icon { icon: IconDrawing::CHEVRON_UP, size: IconSize::Small }
                 }
             }
         }

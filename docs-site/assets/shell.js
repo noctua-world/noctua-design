@@ -1679,6 +1679,7 @@ export function enhanceAll(root = document) {
   enhanceCountdowns(root);
   enhanceDialogShows(root);
   enhanceDrawerWindows(root);
+  enhanceLineExpanders(root);
   enhanceTabs(root);
   enhanceLineages(root);
   enhanceModels(root);
@@ -1926,6 +1927,46 @@ function enhanceDrawerWindows(root = document) {
   }
 }
 
+// --- Expanding an example's footer line ---------------------------------------
+//
+// THIS IS APPARATUS, AND IT SHIPS NOWHERE. A `FooterLine` ships no script: its
+// caller turns `expanded`, and the press on the line's control reaches the
+// caller through `action`. On this site the caller is the example, so the page
+// plays its part, as it does for a drawer: a press on the control of a line in
+// an example marked `nd-example-expand` writes what a caller rendering the line
+// again would write. The line's attribute, the control's `aria-expanded`, and
+// the control's name for what a press does next, taken from the two the
+// example carries. The glyph turns with `aria-expanded`, in `footer.css`.
+
+/** Every example whose footer lines the page turns, so a subtree can be released. */
+const lineExpanders = new WeakMap();
+
+function enhanceLineExpanders(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-expand")) {
+    if (lineExpanders.has(stage)) continue;
+    const binding = new AbortController();
+    lineExpanders.set(stage, binding);
+    stage.addEventListener("click", (event) => {
+      const control = event.target.closest?.(".nd-footer-line-toggle");
+      const line = control?.closest(".nd-footer-line");
+      if (!line || !stage.contains(line)) return;
+      const expanded = line.getAttribute("data-nd-expanded") !== "true";
+      if (expanded) line.setAttribute("data-nd-expanded", "true");
+      else line.removeAttribute("data-nd-expanded");
+      control.setAttribute("aria-expanded", String(expanded));
+      const name = stage.getAttribute(expanded ? "data-nd-collapse-label" : "data-nd-expand-label");
+      if (name) control.setAttribute("aria-label", name);
+    }, { signal: binding.signal });
+  }
+}
+
+function releaseLineExpanders(root = document) {
+  for (const stage of root.querySelectorAll(".nd-example-expand")) {
+    lineExpanders.get(stage)?.abort();
+    lineExpanders.delete(stage);
+  }
+}
+
 function releaseDrawerWindows(root = document) {
   for (const stage of root.querySelectorAll(".nd-example-window")) {
     if (stage.dataset.ndEnhanced !== "drawer-window") continue;
@@ -1959,6 +2000,7 @@ export function releaseAll(root = document) {
   releaseModels(root);
   releaseLineages(root);
   releaseTabs(root);
+  releaseLineExpanders(root);
   releaseDrawerWindows(root);
   releaseDialogShows(root);
   releaseCountdowns(root);

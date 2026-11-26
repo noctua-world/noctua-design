@@ -4025,6 +4025,14 @@ const OPTION_ITEM_REACT: &str = r#"  const root = ["nd-option-item", className].
 /// `Button` writes the attribute only when it is true, so this is the element
 /// itself, as `TreeItem`'s toggle is. Its name is whichever of the two labels
 /// is true now.
+///
+/// # One chevron, turned by the stylesheet
+///
+/// The footer is at the bottom of its window, so a line grows upward and the
+/// glyph points the way it will go: up while the line is one line tall, down
+/// once it has grown. Both bodies draw the one chevron, and the stylesheet
+/// turns it from `aria-expanded`, so the glyph is drawn from the attribute that
+/// says the state and a caller that writes the attributes alone draws it right.
 const FOOTER_LINE_DIOXUS: &str = r#"    let root = format!("nd-footer-line {class}");
     let root = root.trim().to_owned();
     let toggle = if expanded {
@@ -4047,13 +4055,8 @@ const FOOTER_LINE_DIOXUS: &str = r#"    let root = format!("nd-footer-line {clas
                     "aria-expanded": if expanded { "true" } else { "false" },
                     "aria-label": "{toggle}",
                     "data-nd-action": action,
-                    // The footer is at the bottom of its window, so a line
-                    // grows upward and the glyph points the way it will go.
-                    if expanded {
-                        Icon { icon: IconDrawing::CHEVRON_DOWN, size: IconSize::Small }
-                    } else {
-                        Icon { icon: IconDrawing::CHEVRON_UP, size: IconSize::Small }
-                    }
+                    // Turned by the stylesheet from `aria-expanded`.
+                    Icon { icon: IconDrawing::CHEVRON_UP, size: IconSize::Small }
                 }
             }
         }
@@ -4088,10 +4091,8 @@ const FOOTER_LINE_REACT: &str = r#"  const kind_ = kind ?? "modeline";
             "aria-label": (expanded ? collapseLabel : expandLabel) ?? "",
             "data-nd-action": action,
           },
-          // See the Dioxus half: the glyph points the way the line will go.
-          expanded
-            ? h(Icon, { icon: chevronDown, size: "small" })
-            : h(Icon, { icon: chevronUp, size: "small" }),
+          // See the Dioxus half: the stylesheet turns it.
+          h(Icon, { icon: chevronUp, size: "small" }),
         )
       : null,
   );

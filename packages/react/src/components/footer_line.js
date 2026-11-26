@@ -12,7 +12,6 @@
 import { createElement as h } from "react";
 
 import { Icon } from "./icon.js";
-import { chevronDown } from "@noctua-world/design-tokens/icons/chevron-down.js";
 import { chevronUp } from "@noctua-world/design-tokens/icons/chevron-up.js";
 export function FooterLine({ kind, expandable, expanded, expandLabel, collapseLabel, action, live, className, children, ...rest }) {
   const kind_ = kind ?? "modeline";
@@ -42,10 +41,8 @@ export function FooterLine({ kind, expandable, expanded, expandLabel, collapseLa
             "aria-label": (expanded ? collapseLabel : expandLabel) ?? "",
             "data-nd-action": action,
           },
-          // See the Dioxus half: the glyph points the way the line will go.
-          expanded
-            ? h(Icon, { icon: chevronDown, size: "small" })
-            : h(Icon, { icon: chevronUp, size: "small" }),
+          // See the Dioxus half: the stylesheet turns it.
+          h(Icon, { icon: chevronUp, size: "small" }),
         )
       : null,
   );

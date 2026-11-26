@@ -340,3 +340,68 @@ test("a ring in a footer is drawn inside the control it is on", async ({ page })
   expect(strays.changed, "the focused control draws no ring at all").toBeGreaterThan(0);
   expect(strays.outside, "the ring is drawn outside its control, where the next line paints over it").toBe(0);
 });
+
+test("on this site the control that expands a line expands it, and says so", async ({ page }) => {
+  // THE PAGE PLAYS THE CALLER. A line ships no script and its caller turns
+  // `expanded`, so `shell.js` writes what a caller rendering the line again
+  // would write. An example whose control does nothing when it is pressed is
+  // a page that offers what it does not deliver. Narrow, so the line has more
+  // in it than one line holds.
+  await page.setViewportSize({ width: 320, height: 800 });
+  await open(page);
+  const line = whole(page).locator('.nd-footer-line[data-nd-kind="info"]');
+  const control = line.locator(".nd-footer-line-toggle");
+  const glyph = control.locator(".nd-icon-glyph");
+  const height = async () => (await line.boundingBox()).height;
+  await line.scrollIntoViewIfNeeded();
+  await expect(control).toHaveAttribute("aria-expanded", "false");
+  const label = await control.getAttribute("aria-label");
+  const short = await height();
+  const turned = () => glyph.evaluate((el) => getComputedStyle(el).transform);
+  const flat = await turned();
+
+  await control.click();
+  await expect(line).toHaveAttribute("data-nd-expanded", "true");
+  await expect(control).toHaveAttribute("aria-expanded", "true");
+  const other = await control.getAttribute("aria-label");
+  expect(other, "the control kept the name for what it has done").not.toBe(label);
+  // THE GLYPH POINTS THE WAY THE LINE WILL GO, turned from the attribute.
+  expect(await turned(), "the glyph still points the way the line grew").not.toBe(flat);
+  expect(await height(), "the line did not grow").toBeGreaterThan(short);
+
+  await control.click();
+  await expect(line).not.toHaveAttribute("data-nd-expanded");
+  await expect(control).toHaveAttribute("aria-expanded", "false");
+  await expect(control).toHaveAttribute("aria-label", label);
+  expect(await turned()).toBe(flat);
+  expect(await height()).toBeCloseTo(short, 1);
+});
+
+test("in the smallest window a prompt that grows leaves the work its room", async ({ page }) => {
+  // THE INTERFACE'S SMALLEST WINDOW (`NOCTUA.md §12.19`). Eight lines of
+  // prompt are most of a window 240 pixels tall, and a footer that tall took
+  // the whole of it: the prompt stops at a share of the window as well as at
+  // its count of lines, and scrolls past it.
+  await page.setViewportSize({ width: 320, height: 240 });
+  await open(page);
+  const footer = whole(page);
+  const text = footer.locator(".nd-prompt-input");
+  await text.focus();
+  for (let lines = 0; lines < 9; lines += 1) {
+    await page.keyboard.type("x");
+    await page.keyboard.press("Shift+Enter");
+  }
+  const share = await token(page, "--noctua-shell-prompt-share");
+  expect(share, "the page declares no share of the window for a prompt").toBeGreaterThan(0);
+  const facts = await footer.evaluate((root) => {
+    const prompt = root.querySelector(".nd-prompt-input");
+    return {
+      footer: root.getBoundingClientRect().height,
+      prompt: prompt.getBoundingClientRect().height,
+      hidden: prompt.scrollHeight - prompt.clientHeight,
+    };
+  });
+  expect(facts.prompt, "the prompt grew past its share of the window").toBeLessThanOrEqual(share + 0.5);
+  expect(facts.hidden, "the prompt stopped growing and does not scroll").toBeGreaterThan(0);
+  expect(facts.footer, "the footer is as tall as the window").toBeLessThan(240 - share);
+});

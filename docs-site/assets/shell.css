@@ -1607,6 +1607,14 @@ a {
   max-inline-size: 100%;
 }
 
+/* A footer the page turns the lines of (`enhanceLineExpanders` in `shell.js`).
+   It takes the stage's width, as the footer it holds would standing there
+   alone, so a line still has a width to be cut at. */
+.nd-example-expand {
+  align-self: stretch;
+  min-inline-size: 0;
+}
+
 /* A WINDOW, FOR WHAT IS MEASURED AGAINST ONE. A `Drawer` opens to a share of
    the box around it, and a `Split` divides the box it is given. A stage is as
    tall as its content, which is no size to take a share of, so these examples

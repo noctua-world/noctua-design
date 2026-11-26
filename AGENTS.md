@@ -894,7 +894,10 @@ drawn inside its control, because the lines touch and each paints over what the 
 hangs out.
 
 **The footer ships no script, and the caller turns every state.** `expanded` and `shown` are
-props, and the control that expands a line reaches the caller through `action`. That control is a
+props, and the control that expands a line reaches the caller through `action`. Its one chevron is
+turned by the stylesheet from `aria-expanded`, so the glyph is drawn from the attribute that says
+the state. On this site the page is the caller and turns a line in an example marked
+`nd-example-expand`, which carries the control's two names (`shell.js`). That control is a
 bare `<button>` because it says `aria-expanded="false"`, which `Button` never writes. It is hidden
 only behind `@media (hover: hover)`, and a pointer on the line or the focus inside it shows it,
 so a touch screen and a keyboard both reach it.
