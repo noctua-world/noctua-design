@@ -165,9 +165,9 @@ const PER_SELECTOR = 2;
  * A PHOTOGRAPH THAT CANNOT FAIL IS NOT A COMPARISON. A rule may change no
  * pixel on the first elements it matches and change some on a later one, and
  * then the two pictures of the first agree with the rule's twin deleted. The
- * test after the sweeps measures that — each selector's rule taken away with
- * the element in the state — and a selector it finds blind on its sample is
- * given a longer one here, until an element shows the rule.
+ * test after the sweeps measures that — each selector taken out of its rule
+ * with the element in the state — and a selector it finds blind on its sample
+ * is given a longer one here, until an element shows the rule.
  */
 const DEEPER = {
   // Declares `z-index: 1` and nothing else: it lifts the focused button over
@@ -1002,9 +1002,9 @@ const BLIND = [
 // pages run in order on one worker and the comparison is made once every page
 // has reported (`walker` in `pages.js`), with each page its own budget.
 //
-// The selectors whose rule, taken away, changed a pixel under the pointer or
-// the keyboard — on any page so far, because the pages run in order and one
-// already shown is not asked again (`sensitivity`).
+// The selectors that, taken out of their rule, changed a pixel under the
+// pointer or the keyboard — on any page so far, because the pages run in order
+// and one already shown is not asked again (`sensitivity`).
 const shown = new Set();
 
 walk(
