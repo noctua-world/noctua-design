@@ -7,8 +7,9 @@
 
 import { expect, test } from "@playwright/test";
 
-import { LOCALES, PAGE, url } from "./pages.js";
+import { LOCALES, PAGE, showParts, url } from "./pages.js";
 import { extremes } from "./pixels.js";
+import { LINE_WIDTHS, sideBySide } from "./side-by-side.js";
 
 const named = (page, name) => page.locator(`[data-nd-meter="${name}"]`);
 
@@ -80,6 +81,32 @@ test("the three bands are three different colours on the screen", async ({ page 
   expect(middle.join()).not.toBe(low.join());
   expect(middle.join()).not.toBe(high.join());
 });
+
+// A NAME THAT FITS BESIDE ITS READING IS NOT BROKEN BESIDE IT. The line wraps
+// so a narrow column can put the reading under the name; a name split evenly
+// with the reading wrapped on a desktop instead, `Em cache` in two lines on a
+// line with room for both. `side-by-side.js` says what is measured.
+for (const locale of LOCALES) {
+  test(`${locale}: a name and a reading that fit side by side are drawn on one line`, async ({
+    page,
+  }) => {
+    await page.goto(url(PAGE.meter, locale));
+    await showParts(page);
+    await page.evaluate(() => document.fonts.ready);
+    let fitted = 0;
+    const broken = [];
+    for (const width of LINE_WIDTHS) {
+      await page.setViewportSize({ width, height: 900 });
+      const found = await sideBySide(page, "meter");
+      fitted += found.fitted;
+      broken.push(...found.broken.map((one) => `${width}px ${one}`));
+    }
+    expect(broken, `${locale}: a name broke where its reading left it room`).toEqual([]);
+    // The floor: a page where no pair fitted would pass on any rule. The
+    // pseudo-locale fits the fewest, twenty-eight over the six widths.
+    expect(fitted, `${locale}: no name and reading fitted side by side`).toBeGreaterThan(20);
+  });
+}
 
 test("a hidden label is off the screen and still in the document", async ({ page }) => {
   await page.goto(url(PAGE.meter));

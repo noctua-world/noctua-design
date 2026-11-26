@@ -29,13 +29,19 @@
    mark after it, past the line's end: the mark seventeen pixels past it at
    320px in English, and the reading cut off in Portuguese.
 
-   The name grows from nothing, so it takes what the line leaves and wraps its
-   own words first, down to its longest. The reading grows too and is set
-   against its trailing edge, so on one line the two read as before, name at
-   the start and reading at the end. Where the reading does not fit beside the
-   name, the line wraps and the reading fills a line of its own, still against
-   that edge, and a reading wider than the whole line wraps its own words
-   there. A mark that does not fit beside the reading wraps under its end. */
+   The name and the reading each start from their own width and grow from
+   there, and the reading is set against its trailing edge. So where the two
+   fit side by side they are drawn so, as before the line wrapped: the name on
+   one line at the start, the reading at the end. Where they do not, the line
+   wraps before the name does, and the reading fills a line of its own, still
+   against that edge; only a name or a reading wider than a whole line wraps
+   its own words. A mark that does not fit beside the reading wraps under its
+   end.
+
+   NOT FROM NOTHING. A name grown from a width of zero beside a reading that
+   grows too is given half of what the reading leaves, not the whole of it, so
+   it broke at every width beside a reading mostly empty: `Em cache` in two
+   lines on a line 226px wide. `tests/browser/side-by-side.js` measures it. */
 .nd-meter-line,
 .nd-progress-line {
   display: flex;
@@ -47,7 +53,7 @@
 
 .nd-meter-label,
 .nd-progress-label {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   color: var(--nc-color-fg);
 }
 

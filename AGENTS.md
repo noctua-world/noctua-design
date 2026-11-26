@@ -1700,7 +1700,10 @@ anything.
 - **A flex item is never narrower than its longest word.** Its automatic minimum is its
   min-content width, so a row of words beside a marker pushes the marker past the row's end
   instead of wrapping, the day the words are drawn in a wider face or a longer language. Let the
-  words break (`overflow-wrap: anywhere` lowers that minimum as well) or let the row wrap.
+  words break (`overflow-wrap: anywhere` lowers that minimum as well) or let the row wrap. **And
+  grow words from their own width, not from zero**: `flex: 1 1 0` beside an item that grows too
+  gets half of what that item leaves rather than its own width first, so a `Meter`'s name broke
+  at every width beside a reading mostly empty. `side-by-side.js` measures that line.
 - **A control whose height is not declared is its font size, line height and padding added up**,
   so two controls side by side agree only by accident, and a screenshot of either one cannot show
   it. Declare the height on the row, and measure the row rather than the control.
