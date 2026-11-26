@@ -12967,8 +12967,11 @@ because a specimen of a `needs_name` component must not render a
   margin: 0;
   padding-block: var(--noctua-space-1);
   padding-inline: var(--noctua-space-3);
-  /* A form control does not take the page's face on its own. */
-  font-family: var(--noctua-font-sans);
+  /* A form control does not take the page's face on its own, so it is told
+     to: the page's face is the interface-font setting's (`NOCTUA.md §7.7`),
+     and a face named here would not follow it. Before the size and the
+     leading, which the shorthand resets. */
+  font: inherit;
   font-size: var(--noctua-size-body);
   line-height: var(--noctua-leading-body);
   color: var(--nc-color-fg);
@@ -13181,7 +13184,10 @@ because a specimen of a `needs_name` component must not render a
   min-block-size: var(--noctua-space-8);
   margin: 0;
   padding-inline: var(--noctua-space-3);
-  font-family: var(--noctua-font-sans);
+  /* The page's face, which follows the interface-font setting
+     (`NOCTUA.md §7.7`): a button does not take it on its own. Before the size
+     and the leading, which the shorthand resets. */
+  font: inherit;
   font-size: var(--noctua-size-small);
   line-height: var(--noctua-leading-body);
   color: var(--nc-color-on-accent);

@@ -304,3 +304,16 @@ test("releasing a log takes back what the script wrote", async ({ page }) => {
   await scrollTo(page, name, 0);
   await expect(log(page, name)).toHaveAttribute("data-nd-paused", "true");
 });
+
+test("the resume control takes the page's face, and follows the interface-font setting", async ({ page }) => {
+  // A FORM CONTROL DOES NOT TAKE THE PAGE'S FACE ON ITS OWN, and one told the
+  // proportional face by name stays proportional when a reader chooses the
+  // monospaced one for the interface (`NOCTUA.md §7.7`).
+  await open(page);
+  await page.evaluate(() => document.documentElement.setAttribute("data-noctua-font", "mono"));
+  const faces = await page.locator(".nd-log-resume").first().evaluate((el) => ({
+    control: getComputedStyle(el).fontFamily,
+    page: getComputedStyle(document.body).fontFamily,
+  }));
+  expect(faces.control, "the control keeps a face of its own").toBe(faces.page);
+});

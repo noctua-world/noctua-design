@@ -96,7 +96,10 @@
   min-block-size: var(--noctua-space-8);
   margin: 0;
   padding-inline: var(--noctua-space-3);
-  font-family: var(--noctua-font-sans);
+  /* The page's face, which follows the interface-font setting
+     (`NOCTUA.md §7.7`): a button does not take it on its own. Before the size
+     and the leading, which the shorthand resets. */
+  font: inherit;
   font-size: var(--noctua-size-small);
   line-height: var(--noctua-leading-body);
   color: var(--nc-color-on-accent);
